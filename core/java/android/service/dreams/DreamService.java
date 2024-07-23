@@ -787,7 +787,6 @@ public class DreamService extends Service implements Window.Callback {
      */
     public void setInteractive(boolean interactive) {
         mInteractive = interactive;
-        updateAccessibilityMessage();
     }
 
     /**
@@ -1641,9 +1640,9 @@ public class DreamService extends Service implements Window.Callback {
         if (mWindow == null) return;
         if (mDreamAccessibility == null) {
             final View rootView = mWindow.getDecorView();
-            mDreamAccessibility = new DreamAccessibility(this, rootView);
+            mDreamAccessibility = new DreamAccessibility(this, rootView, this::wakeUp);
         }
-        mDreamAccessibility.updateAccessibilityConfiguration(isInteractive());
+        mDreamAccessibility.updateAccessibilityConfiguration();
     }
 
     private boolean getWindowFlagValue(int flag, boolean defaultValue) {

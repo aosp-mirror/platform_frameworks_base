@@ -42,6 +42,7 @@ import android.util.Slog;
 import android.util.SparseArray;
 import android.util.TimeUtils;
 import android.util.proto.ProtoOutputStream;
+import android.view.Display;
 import android.view.WindowManager;
 import android.window.ITransitionMetricsReporter;
 import android.window.ITransitionPlayer;
@@ -326,7 +327,6 @@ class TransitionController {
         mCollectingTransition.startCollecting(timeoutMs);
         ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS, "Start collecting in Transition: %s",
                 mCollectingTransition);
-        dispatchLegacyAppTransitionPending();
     }
 
     void registerTransitionPlayer(@Nullable ITransitionPlayer player,
@@ -1347,31 +1347,54 @@ class TransitionController {
         mLegacyListeners.remove(listener);
     }
 
-    void dispatchLegacyAppTransitionPending() {
+    private static boolean shouldDispatchLegacyListener(
+            WindowManagerInternal.AppTransitionListener listener, int displayId) {
+        // INVALID_DISPLAY means that it is a global listener.
+        return listener.mDisplayId == Display.INVALID_DISPLAY || listener.mDisplayId == displayId;
+    }
+
+    void dispatchLegacyAppTransitionPending(int displayId) {
         for (int i = 0; i < mLegacyListeners.size(); ++i) {
-            mLegacyListeners.get(i).onAppTransitionPendingLocked();
+            final WindowManagerInternal.AppTransitionListener listener = mLegacyListeners.get(i);
+            if (shouldDispatchLegacyListener(listener, displayId)) {
+                listener.onAppTransitionPendingLocked();
+            }
         }
     }
 
     void dispatchLegacyAppTransitionStarting(TransitionInfo info, long statusBarTransitionDelay) {
+        final long now = SystemClock.uptimeMillis();
         for (int i = 0; i < mLegacyListeners.size(); ++i) {
-            // TODO(shell-transitions): handle (un)occlude transition.
-            mLegacyListeners.get(i).onAppTransitionStartingLocked(
-                    SystemClock.uptimeMillis() + statusBarTransitionDelay,
-                    AnimationAdapter.STATUS_BAR_TRANSITION_DURATION);
+            final WindowManagerInternal.AppTransitionListener listener = mLegacyListeners.get(i);
+            for (int j = 0; j < info.getRootCount(); ++j) {
+                final int displayId = info.getRoot(j).getDisplayId();
+                if (shouldDispatchLegacyListener(listener, displayId)) {
+                    listener.onAppTransitionStartingLocked(
+                            now + statusBarTransitionDelay,
+                            AnimationAdapter.STATUS_BAR_TRANSITION_DURATION);
+                }
+            }
         }
     }
 
     void dispatchLegacyAppTransitionFinished(ActivityRecord ar) {
         for (int i = 0; i < mLegacyListeners.size(); ++i) {
-            mLegacyListeners.get(i).onAppTransitionFinishedLocked(ar.token);
+            final WindowManagerInternal.AppTransitionListener listener = mLegacyListeners.get(i);
+            if (shouldDispatchLegacyListener(listener, ar.getDisplayId())) {
+                listener.onAppTransitionFinishedLocked(ar.token);
+            }
         }
     }
 
-    void dispatchLegacyAppTransitionCancelled() {
-        for (int i = 0; i < mLegacyListeners.size(); ++i) {
-            mLegacyListeners.get(i).onAppTransitionCancelledLocked(
-                    false /* keyguardGoingAwayCancelled */);
+    void dispatchLegacyAppTransitionCancelled(ArrayList<DisplayContent> targetDisplays) {
+        for (int i = 0; i < targetDisplays.size(); ++i) {
+            final int displayId = targetDisplays.get(i).mDisplayId;
+            for (int j = 0; j < mLegacyListeners.size(); ++j) {
+                final var listener = mLegacyListeners.get(j);
+                if (shouldDispatchLegacyListener(listener, displayId)) {
+                    listener.onAppTransitionCancelledLocked(false /* keyguardGoingAwayCancelled */);
+                }
+            }
         }
     }
 

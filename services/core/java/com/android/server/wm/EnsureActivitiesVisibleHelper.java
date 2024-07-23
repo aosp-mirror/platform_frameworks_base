@@ -240,7 +240,7 @@ class EnsureActivitiesVisibleHelper {
             }
             r.setVisibility(true);
         }
-        if (r != starting) {
+        if (r != starting && mNotifyClients) {
             mTaskFragment.mTaskSupervisor.startSpecificActivity(r, andResume,
                     true /* checkConfig */);
         }

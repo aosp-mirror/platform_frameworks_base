@@ -34,8 +34,11 @@ import com.android.systemui.flags.fakeFeatureFlagsClassic
 import com.android.systemui.keyguard.data.repository.fakeKeyguardRepository
 import com.android.systemui.keyguard.data.repository.keyguardTransitionRepository
 import com.android.systemui.keyguard.data.repository.realKeyguardTransitionRepository
+import com.android.systemui.keyguard.shared.model.DozeStateModel
+import com.android.systemui.keyguard.shared.model.DozeTransitionModel
 import com.android.systemui.keyguard.shared.model.KeyguardState.DREAMING
 import com.android.systemui.keyguard.shared.model.KeyguardState.GLANCEABLE_HUB
+import com.android.systemui.keyguard.shared.model.KeyguardState.GONE
 import com.android.systemui.keyguard.shared.model.KeyguardState.LOCKSCREEN
 import com.android.systemui.keyguard.shared.model.KeyguardState.OCCLUDED
 import com.android.systemui.keyguard.shared.model.TransitionInfo
@@ -46,6 +49,8 @@ import com.android.systemui.keyguard.shared.model.TransitionState.RUNNING
 import com.android.systemui.keyguard.shared.model.TransitionState.STARTED
 import com.android.systemui.keyguard.shared.model.TransitionStep
 import com.android.systemui.kosmos.testScope
+import com.android.systemui.power.domain.interactor.PowerInteractor.Companion.setAwakeForTest
+import com.android.systemui.power.domain.interactor.powerInteractor
 import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -53,6 +58,7 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
@@ -211,8 +217,15 @@ class CommunalSceneTransitionInteractorTest : SysuiTestCase() {
     @Test
     fun transition_from_hub_end_in_dream() =
         testScope.runTest {
+            // Device is dreaming and not dozing.
+            kosmos.powerInteractor.setAwakeForTest()
+            kosmos.fakeKeyguardRepository.setDozeTransitionModel(
+                DozeTransitionModel(from = DozeStateModel.DOZE, to = DozeStateModel.FINISH)
+            )
+            kosmos.fakeKeyguardRepository.setKeyguardOccluded(true)
             kosmos.fakeKeyguardRepository.setDreaming(true)
-            runCurrent()
+            kosmos.fakeKeyguardRepository.setDreamingWithOverlay(true)
+            advanceTimeBy(100L)
 
             sceneTransitions.value = hubToBlank
 
@@ -247,6 +260,100 @@ class CommunalSceneTransitionInteractorTest : SysuiTestCase() {
                     TransitionStep(
                         from = GLANCEABLE_HUB,
                         to = DREAMING,
+                        transitionState = FINISHED,
+                        value = 1f,
+                        ownerName = ownerName,
+                    )
+                )
+        }
+
+    /** Transition from hub to occluded. */
+    @Test
+    fun transition_from_hub_end_in_occluded() =
+        testScope.runTest {
+            kosmos.fakeKeyguardRepository.setKeyguardOccluded(true)
+            runCurrent()
+
+            sceneTransitions.value = hubToBlank
+
+            val currentStep by collectLastValue(keyguardTransitionRepository.transitions)
+
+            assertThat(currentStep)
+                .isEqualTo(
+                    TransitionStep(
+                        from = GLANCEABLE_HUB,
+                        to = OCCLUDED,
+                        transitionState = STARTED,
+                        value = 0f,
+                        ownerName = ownerName,
+                    )
+                )
+
+            progress.emit(0.4f)
+            assertThat(currentStep)
+                .isEqualTo(
+                    TransitionStep(
+                        from = GLANCEABLE_HUB,
+                        to = OCCLUDED,
+                        transitionState = RUNNING,
+                        value = 0.4f,
+                        ownerName = ownerName,
+                    )
+                )
+
+            sceneTransitions.value = Idle(CommunalScenes.Blank)
+            assertThat(currentStep)
+                .isEqualTo(
+                    TransitionStep(
+                        from = GLANCEABLE_HUB,
+                        to = OCCLUDED,
+                        transitionState = FINISHED,
+                        value = 1f,
+                        ownerName = ownerName,
+                    )
+                )
+        }
+
+    /** Transition from hub to gone. */
+    @Test
+    fun transition_from_hub_end_in_gone() =
+        testScope.runTest {
+            kosmos.fakeKeyguardRepository.setKeyguardGoingAway(true)
+            runCurrent()
+
+            sceneTransitions.value = hubToBlank
+
+            val currentStep by collectLastValue(keyguardTransitionRepository.transitions)
+
+            assertThat(currentStep)
+                .isEqualTo(
+                    TransitionStep(
+                        from = GLANCEABLE_HUB,
+                        to = GONE,
+                        transitionState = STARTED,
+                        value = 0f,
+                        ownerName = ownerName,
+                    )
+                )
+
+            progress.emit(0.4f)
+            assertThat(currentStep)
+                .isEqualTo(
+                    TransitionStep(
+                        from = GLANCEABLE_HUB,
+                        to = GONE,
+                        transitionState = RUNNING,
+                        value = 0.4f,
+                        ownerName = ownerName,
+                    )
+                )
+
+            sceneTransitions.value = Idle(CommunalScenes.Blank)
+            assertThat(currentStep)
+                .isEqualTo(
+                    TransitionStep(
+                        from = GLANCEABLE_HUB,
+                        to = GONE,
                         transitionState = FINISHED,
                         value = 1f,
                         ownerName = ownerName,

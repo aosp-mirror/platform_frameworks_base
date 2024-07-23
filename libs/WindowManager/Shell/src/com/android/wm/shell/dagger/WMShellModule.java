@@ -35,6 +35,7 @@ import com.android.wm.shell.RootTaskDisplayAreaOrganizer;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.WindowManagerShellWrapper;
 import com.android.wm.shell.activityembedding.ActivityEmbeddingController;
+import com.android.wm.shell.apptoweb.AppToWebGenericLinksParser;
 import com.android.wm.shell.bubbles.BubbleController;
 import com.android.wm.shell.bubbles.BubbleData;
 import com.android.wm.shell.bubbles.BubbleDataRepository;
@@ -223,7 +224,8 @@ public abstract class WMShellModule {
             Transitions transitions,
             Optional<DesktopTasksController> desktopTasksController,
             RootTaskDisplayAreaOrganizer rootTaskDisplayAreaOrganizer,
-            InteractionJankMonitor interactionJankMonitor) {
+            InteractionJankMonitor interactionJankMonitor,
+            AppToWebGenericLinksParser genericLinksParser) {
         if (DesktopModeStatus.canEnterDesktopMode(context)) {
             return new DesktopModeWindowDecorViewModel(
                     context,
@@ -242,7 +244,8 @@ public abstract class WMShellModule {
                     transitions,
                     desktopTasksController,
                     rootTaskDisplayAreaOrganizer,
-                    interactionJankMonitor);
+                    interactionJankMonitor,
+                    genericLinksParser);
         }
         return new CaptionWindowDecorViewModel(
                 context,
@@ -257,6 +260,15 @@ public abstract class WMShellModule {
                 rootTaskDisplayAreaOrganizer,
                 syncQueue,
                 transitions);
+    }
+
+    @WMSingleton
+    @Provides
+    static AppToWebGenericLinksParser provideGenericLinksParser(
+            Context context,
+            @ShellMainThread ShellExecutor mainExecutor
+    ) {
+        return new AppToWebGenericLinksParser(context, mainExecutor);
     }
 
     //
@@ -534,7 +546,8 @@ public abstract class WMShellModule {
             MultiInstanceHelper multiInstanceHelper,
             @ShellMainThread ShellExecutor mainExecutor,
             Optional<DesktopTasksLimiter> desktopTasksLimiter,
-            Optional<RecentTasksController> recentTasksController) {
+            Optional<RecentTasksController> recentTasksController,
+            InteractionJankMonitor interactionJankMonitor) {
         return new DesktopTasksController(context, shellInit, shellCommandHandler, shellController,
                 displayController, shellTaskOrganizer, syncQueue, rootTaskDisplayAreaOrganizer,
                 dragAndDropController, transitions, keyguardManager, enterDesktopTransitionHandler,
@@ -542,7 +555,8 @@ public abstract class WMShellModule {
                 dragToDesktopTransitionHandler, desktopModeTaskRepository,
                 desktopModeLoggerTransitionObserver, launchAdjacentController,
                 recentsTransitionHandler, multiInstanceHelper,
-                mainExecutor, desktopTasksLimiter, recentTasksController.orElse(null));
+                mainExecutor, desktopTasksLimiter, recentTasksController.orElse(null),
+                interactionJankMonitor);
     }
 
     @WMSingleton
@@ -568,9 +582,10 @@ public abstract class WMShellModule {
             Context context,
             Transitions transitions,
             RootTaskDisplayAreaOrganizer rootTaskDisplayAreaOrganizer,
-            Optional<DesktopTasksLimiter> desktopTasksLimiter) {
+            Optional<DesktopTasksLimiter> desktopTasksLimiter,
+            InteractionJankMonitor interactionJankMonitor) {
         return new DragToDesktopTransitionHandler(context, transitions,
-                rootTaskDisplayAreaOrganizer);
+                rootTaskDisplayAreaOrganizer, interactionJankMonitor);
     }
 
     @WMSingleton

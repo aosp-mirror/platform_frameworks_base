@@ -27,6 +27,7 @@ import android.graphics.BlendModeColorFilter
 import android.graphics.Point
 import android.graphics.PointF
 import android.graphics.Rect
+import android.net.Uri
 import android.view.MotionEvent
 import android.view.SurfaceControl
 import android.view.View
@@ -68,7 +69,7 @@ class HandleMenu(
     private val displayController: DisplayController,
     private val splitScreenController: SplitScreenController,
     private val shouldShowWindowingPill: Boolean,
-    private val shouldShowBrowserPill: Boolean,
+    val openInBrowserLink: Uri?,
     private val captionWidth: Int,
     private val captionHeight: Int,
     captionX: Int
@@ -105,6 +106,9 @@ class HandleMenu(
     // about the menu's coordinates relative to the display as a whole, so we need to maintain
     // those as well.
     private val globalMenuPosition: Point = Point()
+
+    private val shouldShowBrowserPill: Boolean
+        get() = openInBrowserLink != null
 
     init {
         updateHandleMenuPillPositions(captionX)
@@ -495,5 +499,59 @@ class HandleMenu(
     companion object {
         private const val TAG = "HandleMenu"
         private const val SHOULD_SHOW_MORE_ACTIONS_PILL = false
+    }
+}
+
+/** A factory interface to create a [HandleMenu]. */
+interface HandleMenuFactory {
+    fun create(
+        parentDecor: DesktopModeWindowDecoration,
+        layoutResId: Int,
+        onClickListener: View.OnClickListener?,
+        onTouchListener: View.OnTouchListener?,
+        appIconBitmap: Bitmap?,
+        appName: CharSequence?,
+        displayController: DisplayController,
+        splitScreenController: SplitScreenController,
+        shouldShowWindowingPill: Boolean,
+        openInBrowserLink: Uri?,
+        captionWidth: Int,
+        captionHeight: Int,
+        captionX: Int
+    ): HandleMenu
+}
+
+/** A [HandleMenuFactory] implementation that creates a [HandleMenu].  */
+object DefaultHandleMenuFactory : HandleMenuFactory {
+    override fun create(
+        parentDecor: DesktopModeWindowDecoration,
+        layoutResId: Int,
+        onClickListener: View.OnClickListener?,
+        onTouchListener: View.OnTouchListener?,
+        appIconBitmap: Bitmap?,
+        appName: CharSequence?,
+        displayController: DisplayController,
+        splitScreenController: SplitScreenController,
+        shouldShowWindowingPill: Boolean,
+        openInBrowserLink: Uri?,
+        captionWidth: Int,
+        captionHeight: Int,
+        captionX: Int
+    ): HandleMenu {
+        return HandleMenu(
+            parentDecor,
+            layoutResId,
+            onClickListener,
+            onTouchListener,
+            appIconBitmap,
+            appName,
+            displayController,
+            splitScreenController,
+            shouldShowWindowingPill,
+            openInBrowserLink,
+            captionWidth,
+            captionHeight,
+            captionX
+        )
     }
 }

@@ -11075,6 +11075,13 @@ public final class Settings {
         public static final String MANDATORY_BIOMETRICS = "mandatory_biometrics";
 
         /**
+         * Whether or not requirements for mandatory biometrics is satisfied.
+         * @hide
+         */
+        public static final String MANDATORY_BIOMETRICS_REQUIREMENTS_SATISFIED =
+                "mandatory_biometrics_requirements_satisfied";
+
+        /**
          * Whether or not active unlock triggers on wake.
          * @hide
          */

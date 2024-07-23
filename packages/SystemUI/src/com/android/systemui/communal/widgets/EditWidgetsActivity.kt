@@ -41,6 +41,7 @@ import com.android.systemui.communal.shared.model.EditModeState
 import com.android.systemui.communal.ui.compose.CommunalHub
 import com.android.systemui.communal.ui.viewmodel.CommunalEditModeViewModel
 import com.android.systemui.communal.util.WidgetPickerIntentUtils.getWidgetExtraFromIntent
+import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.log.LogBuffer
 import com.android.systemui.log.core.Logger
 import com.android.systemui.log.dagger.CommunalLog
@@ -146,7 +147,8 @@ constructor(
             communalViewModel.canShowEditMode.collect {
                 communalViewModel.changeScene(
                     CommunalScenes.Blank,
-                    CommunalTransitionKeys.ToEditMode
+                    CommunalTransitionKeys.ToEditMode,
+                    KeyguardState.GONE,
                 )
                 // wait till transitioned to Blank scene, then animate in communal content in
                 // edit mode

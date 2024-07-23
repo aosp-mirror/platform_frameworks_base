@@ -7438,8 +7438,7 @@ public class RemoteViews implements Parcelable, Filter {
             // If the user interacts with a visible element it is safe to assume they consent that
             // something is going to start.
             opts.setPendingIntentBackgroundActivityStartMode(
-                    ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOWED);
-            opts.setPendingIntentBackgroundActivityLaunchAllowedByPermission(true);
+                    ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOW_ALWAYS);
             return Pair.create(intent, opts);
         }
     }

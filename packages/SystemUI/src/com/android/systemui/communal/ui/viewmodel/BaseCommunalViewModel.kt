@@ -99,18 +99,6 @@ abstract class BaseCommunalViewModel(
         communalSceneInteractor.setTransitionState(transitionState)
     }
 
-    /**
-     * Called when a widget is added via drag and drop from the widget picker into the communal hub.
-     */
-    open fun onAddWidget(
-        componentName: ComponentName,
-        user: UserHandle,
-        priority: Int,
-        configurator: WidgetConfigurator? = null
-    ) {
-        communalInteractor.addWidget(componentName, user, priority, configurator)
-    }
-
     open fun onOpenEnableWidgetDialog() {}
 
     open fun onOpenEnableWorkProfileDialog() {}
@@ -136,8 +124,20 @@ abstract class BaseCommunalViewModel(
     /** Called as the UI request to dismiss the any displaying popup */
     open fun onHidePopup() {}
 
+    /** Called as the UI requests adding a widget. */
+    open fun onAddWidget(
+        componentName: ComponentName,
+        user: UserHandle,
+        priority: Int,
+        configurator: WidgetConfigurator? = null,
+    ) {}
+
     /** Called as the UI requests deleting a widget. */
-    open fun onDeleteWidget(id: Int) {}
+    open fun onDeleteWidget(
+        id: Int,
+        componentName: ComponentName,
+        priority: Int,
+    ) {}
 
     /**
      * Called as the UI requests reordering widgets.

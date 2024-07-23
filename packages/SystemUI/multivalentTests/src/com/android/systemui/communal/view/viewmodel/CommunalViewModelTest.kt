@@ -16,9 +16,7 @@
 
 package com.android.systemui.communal.view.viewmodel
 
-import android.appwidget.AppWidgetProviderInfo
 import android.content.pm.UserInfo
-import android.os.UserHandle
 import android.platform.test.flag.junit.FlagsParameterization
 import android.provider.Settings
 import android.widget.RemoteViews
@@ -44,7 +42,6 @@ import com.android.systemui.communal.domain.interactor.communalSettingsInteracto
 import com.android.systemui.communal.domain.interactor.communalTutorialInteractor
 import com.android.systemui.communal.domain.model.CommunalContentModel
 import com.android.systemui.communal.shared.model.CommunalScenes
-import com.android.systemui.communal.shared.model.CommunalWidgetContentModel
 import com.android.systemui.communal.ui.viewmodel.CommunalViewModel
 import com.android.systemui.communal.ui.viewmodel.CommunalViewModel.Companion.POPUP_AUTO_HIDE_TIMEOUT_MS
 import com.android.systemui.communal.ui.viewmodel.PopupType
@@ -110,7 +107,6 @@ import platform.test.runner.parameterized.Parameters
 @RunWith(ParameterizedAndroidJunit4::class)
 class CommunalViewModelTest(flags: FlagsParameterization) : SysuiTestCase() {
     @Mock private lateinit var mediaHost: MediaHost
-    @Mock private lateinit var providerInfo: AppWidgetProviderInfo
 
     private val kosmos = testKosmos()
     private val testScope = kosmos.testScope
@@ -153,7 +149,6 @@ class CommunalViewModelTest(flags: FlagsParameterization) : SysuiTestCase() {
             userInfos = listOf(MAIN_USER_INFO),
             selectedUserIndex = 0,
         )
-        whenever(providerInfo.profile).thenReturn(UserHandle(MAIN_USER_INFO.id))
         whenever(mediaHost.visible).thenReturn(true)
 
         kosmos.powerInteractor.setAwakeForTest()
@@ -212,20 +207,8 @@ class CommunalViewModelTest(flags: FlagsParameterization) : SysuiTestCase() {
             tutorialRepository.setTutorialSettingState(Settings.Secure.HUB_MODE_TUTORIAL_COMPLETED)
 
             // Widgets available.
-            val widgets =
-                listOf(
-                    CommunalWidgetContentModel.Available(
-                        appWidgetId = 0,
-                        priority = 30,
-                        providerInfo = providerInfo,
-                    ),
-                    CommunalWidgetContentModel.Available(
-                        appWidgetId = 1,
-                        priority = 20,
-                        providerInfo = providerInfo,
-                    ),
-                )
-            widgetRepository.setCommunalWidgets(widgets)
+            widgetRepository.addWidget(appWidgetId = 0, priority = 30)
+            widgetRepository.addWidget(appWidgetId = 1, priority = 20)
 
             // Smartspace available.
             smartspaceRepository.setTimers(
@@ -314,15 +297,7 @@ class CommunalViewModelTest(flags: FlagsParameterization) : SysuiTestCase() {
         testScope.runTest {
             tutorialRepository.setTutorialSettingState(Settings.Secure.HUB_MODE_TUTORIAL_COMPLETED)
 
-            widgetRepository.setCommunalWidgets(
-                listOf(
-                    CommunalWidgetContentModel.Available(
-                        appWidgetId = 1,
-                        priority = 1,
-                        providerInfo = providerInfo,
-                    )
-                ),
-            )
+            widgetRepository.addWidget(appWidgetId = 1, priority = 1)
             mediaRepository.mediaInactive()
             smartspaceRepository.setTimers(emptyList())
 
@@ -676,20 +651,8 @@ class CommunalViewModelTest(flags: FlagsParameterization) : SysuiTestCase() {
             )
 
             // Widgets available
-            val widgets =
-                listOf(
-                    CommunalWidgetContentModel.Available(
-                        appWidgetId = 0,
-                        priority = 30,
-                        providerInfo = providerInfo,
-                    ),
-                    CommunalWidgetContentModel.Available(
-                        appWidgetId = 1,
-                        priority = 20,
-                        providerInfo = providerInfo,
-                    ),
-                )
-            widgetRepository.setCommunalWidgets(widgets)
+            widgetRepository.addWidget(appWidgetId = 0, priority = 30)
+            widgetRepository.addWidget(appWidgetId = 1, priority = 20)
 
             // Then hub shows widgets and the CTA tile
             assertThat(communalContent).hasSize(3)
@@ -743,20 +706,8 @@ class CommunalViewModelTest(flags: FlagsParameterization) : SysuiTestCase() {
             )
 
             // And widgets available
-            val widgets =
-                listOf(
-                    CommunalWidgetContentModel.Available(
-                        appWidgetId = 0,
-                        priority = 30,
-                        providerInfo = providerInfo,
-                    ),
-                    CommunalWidgetContentModel.Available(
-                        appWidgetId = 1,
-                        priority = 20,
-                        providerInfo = providerInfo,
-                    ),
-                )
-            widgetRepository.setCommunalWidgets(widgets)
+            widgetRepository.addWidget(appWidgetId = 0, priority = 30)
+            widgetRepository.addWidget(appWidgetId = 1, priority = 20)
 
             // Then emits widgets and the CTA tile
             assertThat(communalContent).hasSize(3)

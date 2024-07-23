@@ -18,9 +18,11 @@ package com.android.systemui.communal.ui.viewmodel
 
 import android.appwidget.AppWidgetManager
 import android.appwidget.AppWidgetProviderInfo
+import android.content.ComponentName
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.content.res.Resources
+import android.os.UserHandle
 import android.util.Log
 import androidx.activity.result.ActivityResultLauncher
 import com.android.internal.logging.UiEventLogger
@@ -30,8 +32,10 @@ import com.android.systemui.communal.domain.interactor.CommunalPrefsInteractor
 import com.android.systemui.communal.domain.interactor.CommunalSceneInteractor
 import com.android.systemui.communal.domain.interactor.CommunalSettingsInteractor
 import com.android.systemui.communal.domain.model.CommunalContentModel
+import com.android.systemui.communal.shared.log.CommunalMetricsLogger
 import com.android.systemui.communal.shared.log.CommunalUiEvent
 import com.android.systemui.communal.shared.model.EditModeState
+import com.android.systemui.communal.widgets.WidgetConfigurator
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
@@ -71,6 +75,7 @@ constructor(
     @CommunalLog logBuffer: LogBuffer,
     @Background private val backgroundDispatcher: CoroutineDispatcher,
     private val communalPrefsInteractor: CommunalPrefsInteractor,
+    private val metricsLogger: CommunalMetricsLogger,
 ) : BaseCommunalViewModel(communalSceneInteractor, communalInteractor, mediaHost) {
 
     private val logger = Logger(logBuffer, "CommunalEditModeViewModel")
@@ -112,7 +117,24 @@ constructor(
     override val reorderingWidgets: StateFlow<Boolean>
         get() = _reorderingWidgets
 
-    override fun onDeleteWidget(id: Int) = communalInteractor.deleteWidget(id)
+    override fun onAddWidget(
+        componentName: ComponentName,
+        user: UserHandle,
+        priority: Int,
+        configurator: WidgetConfigurator?
+    ) {
+        communalInteractor.addWidget(componentName, user, priority, configurator)
+        metricsLogger.logAddWidget(componentName.flattenToString(), priority)
+    }
+
+    override fun onDeleteWidget(
+        id: Int,
+        componentName: ComponentName,
+        priority: Int,
+    ) {
+        communalInteractor.deleteWidget(id)
+        metricsLogger.logRemoveWidget(componentName.flattenToString(), priority)
+    }
 
     override fun onReorderWidgets(widgetIdToPriorityMap: Map<Int, Int>) =
         communalInteractor.updateWidgetOrder(widgetIdToPriorityMap)

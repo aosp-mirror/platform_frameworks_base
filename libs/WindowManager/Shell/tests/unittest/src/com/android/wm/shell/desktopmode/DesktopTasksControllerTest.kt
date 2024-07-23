@@ -66,6 +66,7 @@ import com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn
 import com.android.dx.mockito.inline.extended.ExtendedMockito.mockitoSession
 import com.android.dx.mockito.inline.extended.ExtendedMockito.never
 import com.android.dx.mockito.inline.extended.StaticMockitoSession
+import com.android.internal.jank.InteractionJankMonitor
 import com.android.window.flags.Flags
 import com.android.window.flags.Flags.FLAG_ENABLE_DESKTOP_WINDOWING_MODE
 import com.android.wm.shell.MockToken
@@ -166,6 +167,9 @@ class DesktopTasksControllerTest : ShellTestCase() {
   @Mock lateinit var desktopModeLoggerTransitionObserver: DesktopModeLoggerTransitionObserver
   @Mock lateinit var desktopModeVisualIndicator: DesktopModeVisualIndicator
   @Mock lateinit var recentTasksController: RecentTasksController
+  @Mock
+  private lateinit var mockInteractionJankMonitor: InteractionJankMonitor
+  @Mock private lateinit var mockSurface: SurfaceControl
 
   private lateinit var mockitoSession: StaticMockitoSession
   private lateinit var controller: DesktopTasksController
@@ -248,7 +252,8 @@ class DesktopTasksControllerTest : ShellTestCase() {
         multiInstanceHelper,
         shellExecutor,
         Optional.of(desktopTasksLimiter),
-        recentTasksController)
+        recentTasksController,
+        mockInteractionJankMonitor)
   }
 
   @After
@@ -2016,7 +2021,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
     val task = setUpFullscreenTask()
     setUpLandscapeDisplay()
 
-    spyController.onDragPositioningEndThroughStatusBar(PointF(800f, 1280f), task)
+    spyController.onDragPositioningEndThroughStatusBar(PointF(800f, 1280f), task, mockSurface)
     val wct = getLatestDragToDesktopWct()
     assertThat(findBoundsChange(wct, task)).isEqualTo(DEFAULT_LANDSCAPE_BOUNDS)
   }
@@ -2032,7 +2037,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
     val task = setUpFullscreenTask(screenOrientation = SCREEN_ORIENTATION_LANDSCAPE)
     setUpLandscapeDisplay()
 
-    spyController.onDragPositioningEndThroughStatusBar(PointF(800f, 1280f), task)
+    spyController.onDragPositioningEndThroughStatusBar(PointF(800f, 1280f), task, mockSurface)
     val wct = getLatestDragToDesktopWct()
     assertThat(findBoundsChange(wct, task)).isEqualTo(DEFAULT_LANDSCAPE_BOUNDS)
   }
@@ -2049,7 +2054,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
         setUpFullscreenTask(screenOrientation = SCREEN_ORIENTATION_PORTRAIT, shouldLetterbox = true)
     setUpLandscapeDisplay()
 
-    spyController.onDragPositioningEndThroughStatusBar(PointF(800f, 1280f), task)
+    spyController.onDragPositioningEndThroughStatusBar(PointF(800f, 1280f), task, mockSurface)
     val wct = getLatestDragToDesktopWct()
     assertThat(findBoundsChange(wct, task)).isEqualTo(RESIZABLE_PORTRAIT_BOUNDS)
   }
@@ -2066,7 +2071,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
         setUpFullscreenTask(isResizable = false, screenOrientation = SCREEN_ORIENTATION_LANDSCAPE)
     setUpLandscapeDisplay()
 
-    spyController.onDragPositioningEndThroughStatusBar(PointF(800f, 1280f), task)
+    spyController.onDragPositioningEndThroughStatusBar(PointF(800f, 1280f), task, mockSurface)
     val wct = getLatestDragToDesktopWct()
     assertThat(findBoundsChange(wct, task)).isEqualTo(DEFAULT_LANDSCAPE_BOUNDS)
   }
@@ -2086,7 +2091,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
             shouldLetterbox = true)
     setUpLandscapeDisplay()
 
-    spyController.onDragPositioningEndThroughStatusBar(PointF(800f, 1280f), task)
+    spyController.onDragPositioningEndThroughStatusBar(PointF(800f, 1280f), task, mockSurface)
     val wct = getLatestDragToDesktopWct()
     assertThat(findBoundsChange(wct, task)).isEqualTo(UNRESIZABLE_PORTRAIT_BOUNDS)
   }
@@ -2102,7 +2107,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
     val task = setUpFullscreenTask(deviceOrientation = ORIENTATION_PORTRAIT)
     setUpPortraitDisplay()
 
-    spyController.onDragPositioningEndThroughStatusBar(PointF(800f, 1280f), task)
+    spyController.onDragPositioningEndThroughStatusBar(PointF(800f, 1280f), task, mockSurface)
     val wct = getLatestDragToDesktopWct()
     assertThat(findBoundsChange(wct, task)).isEqualTo(DEFAULT_PORTRAIT_BOUNDS)
   }
@@ -2121,7 +2126,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
             screenOrientation = SCREEN_ORIENTATION_PORTRAIT)
     setUpPortraitDisplay()
 
-    spyController.onDragPositioningEndThroughStatusBar(PointF(800f, 1280f), task)
+    spyController.onDragPositioningEndThroughStatusBar(PointF(800f, 1280f), task, mockSurface)
     val wct = getLatestDragToDesktopWct()
     assertThat(findBoundsChange(wct, task)).isEqualTo(DEFAULT_PORTRAIT_BOUNDS)
   }
@@ -2141,7 +2146,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
             shouldLetterbox = true)
     setUpPortraitDisplay()
 
-    spyController.onDragPositioningEndThroughStatusBar(PointF(800f, 1280f), task)
+    spyController.onDragPositioningEndThroughStatusBar(PointF(800f, 1280f), task, mockSurface)
     val wct = getLatestDragToDesktopWct()
     assertThat(findBoundsChange(wct, task)).isEqualTo(RESIZABLE_LANDSCAPE_BOUNDS)
   }
@@ -2161,7 +2166,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
             screenOrientation = SCREEN_ORIENTATION_PORTRAIT)
     setUpPortraitDisplay()
 
-    spyController.onDragPositioningEndThroughStatusBar(PointF(800f, 1280f), task)
+    spyController.onDragPositioningEndThroughStatusBar(PointF(800f, 1280f), task, mockSurface)
     val wct = getLatestDragToDesktopWct()
     assertThat(findBoundsChange(wct, task)).isEqualTo(DEFAULT_PORTRAIT_BOUNDS)
   }
@@ -2182,7 +2187,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
             shouldLetterbox = true)
     setUpPortraitDisplay()
 
-    spyController.onDragPositioningEndThroughStatusBar(PointF(200f, 200f), task)
+    spyController.onDragPositioningEndThroughStatusBar(PointF(200f, 200f), task, mockSurface)
     val wct = getLatestDragToDesktopWct()
     assertThat(findBoundsChange(wct, task)).isEqualTo(UNRESIZABLE_LANDSCAPE_BOUNDS)
   }

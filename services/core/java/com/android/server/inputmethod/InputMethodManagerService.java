@@ -1469,9 +1469,8 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
             mContext.enforceCallingOrSelfPermission(
                     Manifest.permission.INTERACT_ACROSS_USERS_FULL, null);
         }
-        synchronized (ImfLock.class) {
-            return queryDefaultInputMethodForUserIdLocked(userId);
-        }
+        final InputMethodSettings settings = InputMethodSettingsRepository.get(userId);
+        return settings.getMethodMap().get(settings.getSelectedInputMethod());
     }
 
     @BinderThread
@@ -1483,20 +1482,16 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
             mContext.enforceCallingOrSelfPermission(
                     Manifest.permission.INTERACT_ACROSS_USERS_FULL, null);
         }
-        synchronized (ImfLock.class) {
-            final int[] resolvedUserIds = InputMethodUtils.resolveUserId(userId,
-                    mCurrentUserId, null);
-            if (resolvedUserIds.length != 1) {
-                return InputMethodInfoSafeList.empty();
-            }
-            final int callingUid = Binder.getCallingUid();
-            final long ident = Binder.clearCallingIdentity();
-            try {
-                return InputMethodInfoSafeList.create(getInputMethodListLocked(
-                        resolvedUserIds[0], directBootAwareness, callingUid));
-            } finally {
-                Binder.restoreCallingIdentity(ident);
-            }
+        if (!mUserManagerInternal.exists(userId)) {
+            return InputMethodInfoSafeList.empty();
+        }
+        final int callingUid = Binder.getCallingUid();
+        final long ident = Binder.clearCallingIdentity();
+        try {
+            return InputMethodInfoSafeList.create(getInputMethodListInternal(
+                    userId, directBootAwareness, callingUid));
+        } finally {
+            Binder.restoreCallingIdentity(ident);
         }
     }
 
@@ -1508,20 +1503,16 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
             mContext.enforceCallingOrSelfPermission(
                     Manifest.permission.INTERACT_ACROSS_USERS_FULL, null);
         }
-        synchronized (ImfLock.class) {
-            final int[] resolvedUserIds = InputMethodUtils.resolveUserId(userId,
-                    mCurrentUserId, null);
-            if (resolvedUserIds.length != 1) {
-                return InputMethodInfoSafeList.empty();
-            }
-            final int callingUid = Binder.getCallingUid();
-            final long ident = Binder.clearCallingIdentity();
-            try {
-                return InputMethodInfoSafeList.create(
-                        getEnabledInputMethodListLocked(resolvedUserIds[0], callingUid));
-            } finally {
-                Binder.restoreCallingIdentity(ident);
-            }
+        if (!mUserManagerInternal.exists(userId)) {
+            return InputMethodInfoSafeList.empty();
+        }
+        final int callingUid = Binder.getCallingUid();
+        final long ident = Binder.clearCallingIdentity();
+        try {
+            return InputMethodInfoSafeList.create(
+                    getEnabledInputMethodListInternal(userId, callingUid));
+        } finally {
+            Binder.restoreCallingIdentity(ident);
         }
     }
 
@@ -1534,20 +1525,15 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
             mContext.enforceCallingOrSelfPermission(
                     Manifest.permission.INTERACT_ACROSS_USERS_FULL, null);
         }
-        synchronized (ImfLock.class) {
-            final int[] resolvedUserIds = InputMethodUtils.resolveUserId(userId,
-                    mCurrentUserId, null);
-            if (resolvedUserIds.length != 1) {
-                return Collections.emptyList();
-            }
-            final int callingUid = Binder.getCallingUid();
-            final long ident = Binder.clearCallingIdentity();
-            try {
-                return getInputMethodListLocked(
-                        resolvedUserIds[0], directBootAwareness, callingUid);
-            } finally {
-                Binder.restoreCallingIdentity(ident);
-            }
+        if (!mUserManagerInternal.exists(userId)) {
+            return Collections.emptyList();
+        }
+        final int callingUid = Binder.getCallingUid();
+        final long ident = Binder.clearCallingIdentity();
+        try {
+            return getInputMethodListInternal(userId, directBootAwareness, callingUid);
+        } finally {
+            Binder.restoreCallingIdentity(ident);
         }
     }
 
@@ -1559,19 +1545,15 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
             mContext.enforceCallingOrSelfPermission(
                     Manifest.permission.INTERACT_ACROSS_USERS_FULL, null);
         }
-        synchronized (ImfLock.class) {
-            final int[] resolvedUserIds = InputMethodUtils.resolveUserId(userId,
-                    mCurrentUserId, null);
-            if (resolvedUserIds.length != 1) {
-                return Collections.emptyList();
-            }
-            final int callingUid = Binder.getCallingUid();
-            final long ident = Binder.clearCallingIdentity();
-            try {
-                return getEnabledInputMethodListLocked(resolvedUserIds[0], callingUid);
-            } finally {
-                Binder.restoreCallingIdentity(ident);
-            }
+        if (!mUserManagerInternal.exists(userId)) {
+            return Collections.emptyList();
+        }
+        final int callingUid = Binder.getCallingUid();
+        final long ident = Binder.clearCallingIdentity();
+        try {
+            return getEnabledInputMethodListInternal(userId, callingUid);
+        } finally {
+            Binder.restoreCallingIdentity(ident);
         }
     }
 
@@ -1615,8 +1597,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
         return true;
     }
 
-    @GuardedBy("ImfLock.class")
-    private List<InputMethodInfo> getInputMethodListLocked(@UserIdInt int userId,
+    private List<InputMethodInfo> getInputMethodListInternal(@UserIdInt int userId,
             @DirectBootAwareness int directBootAwareness, int callingUid) {
         final InputMethodSettings settings;
         if (directBootAwareness == DirectBootAwareness.AUTO) {
@@ -1635,8 +1616,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
         return methodList;
     }
 
-    @GuardedBy("ImfLock.class")
-    private List<InputMethodInfo> getEnabledInputMethodListLocked(@UserIdInt int userId,
+    private List<InputMethodInfo> getEnabledInputMethodListInternal(@UserIdInt int userId,
             int callingUid) {
         final InputMethodSettings settings = InputMethodSettingsRepository.get(userId);
         final ArrayList<InputMethodInfo> methodList = settings.getEnabledInputMethodList();
@@ -1663,20 +1643,17 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
                     Manifest.permission.INTERACT_ACROSS_USERS_FULL, null);
         }
 
-        synchronized (ImfLock.class) {
-            final int callingUid = Binder.getCallingUid();
-            final long ident = Binder.clearCallingIdentity();
-            try {
-                return getEnabledInputMethodSubtypeListLocked(imiId,
-                        allowsImplicitlyEnabledSubtypes, userId, callingUid);
-            } finally {
-                Binder.restoreCallingIdentity(ident);
-            }
+        final int callingUid = Binder.getCallingUid();
+        final long ident = Binder.clearCallingIdentity();
+        try {
+            return getEnabledInputMethodSubtypeListInternal(imiId,
+                    allowsImplicitlyEnabledSubtypes, userId, callingUid);
+        } finally {
+            Binder.restoreCallingIdentity(ident);
         }
     }
 
-    @GuardedBy("ImfLock.class")
-    private List<InputMethodSubtype> getEnabledInputMethodSubtypeListLocked(String imiId,
+    private List<InputMethodSubtype> getEnabledInputMethodSubtypeListInternal(String imiId,
             boolean allowsImplicitlyEnabledSubtypes, @UserIdInt int userId, int callingUid) {
         final InputMethodSettings settings = InputMethodSettingsRepository.get(userId);
         final InputMethodInfo imi = settings.getMethodMap().get(imiId);
@@ -5712,17 +5689,6 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
         }
     }
 
-    /**
-     * Returns the default {@link InputMethodInfo} for the specific userId.
-     *
-     * @param userId user ID to query
-     */
-    @GuardedBy("ImfLock.class")
-    private InputMethodInfo queryDefaultInputMethodForUserIdLocked(@UserIdInt int userId) {
-        final InputMethodSettings settings = InputMethodSettingsRepository.get(userId);
-        return settings.getMethodMap().get(settings.getSelectedInputMethod());
-    }
-
     @GuardedBy("ImfLock.class")
     private boolean switchToInputMethodLocked(@NonNull String imeId, int subtypeId,
             @UserIdInt int userId) {
@@ -5859,19 +5825,27 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
             mHandler.obtainMessage(MSG_HIDE_ALL_INPUT_METHODS, reason).sendToTarget();
         }
 
+        @ImfLockFree
+        @NonNull
         @Override
         public List<InputMethodInfo> getInputMethodListAsUser(@UserIdInt int userId) {
-            synchronized (ImfLock.class) {
-                return getInputMethodListLocked(userId, DirectBootAwareness.AUTO,
-                        Process.SYSTEM_UID);
-            }
+            return getInputMethodListInternal(userId, DirectBootAwareness.AUTO, Process.SYSTEM_UID);
         }
 
+        @ImfLockFree
+        @NonNull
         @Override
         public List<InputMethodInfo> getEnabledInputMethodListAsUser(@UserIdInt int userId) {
-            synchronized (ImfLock.class) {
-                return getEnabledInputMethodListLocked(userId, Process.SYSTEM_UID);
-            }
+            return getEnabledInputMethodListInternal(userId, Process.SYSTEM_UID);
+        }
+
+        @ImfLockFree
+        @NonNull
+        @Override
+        public List<InputMethodSubtype> getEnabledInputMethodSubtypeListAsUser(
+                String imiId, boolean allowsImplicitlyEnabledSubtypes, @UserIdInt int userId) {
+            return getEnabledInputMethodSubtypeListInternal(imiId, allowsImplicitlyEnabledSubtypes,
+                    userId, Process.SYSTEM_UID);
         }
 
         @Override
@@ -6617,28 +6591,29 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
                     break;
             }
         }
+        final int[] userIds;
         synchronized (ImfLock.class) {
-            final int[] userIds = InputMethodUtils.resolveUserId(userIdToBeResolved,
-                    mCurrentUserId, shellCommand.getErrPrintWriter());
-            try (PrintWriter pr = shellCommand.getOutPrintWriter()) {
-                for (int userId : userIds) {
-                    final List<InputMethodInfo> methods = all
-                            ? getInputMethodListLocked(
-                                    userId, DirectBootAwareness.AUTO, Process.SHELL_UID)
-                            : getEnabledInputMethodListLocked(userId, Process.SHELL_UID);
-                    if (userIds.length > 1) {
-                        pr.print("User #");
-                        pr.print(userId);
+            userIds = InputMethodUtils.resolveUserId(userIdToBeResolved, mCurrentUserId,
+                    shellCommand.getErrPrintWriter());
+        }
+        try (PrintWriter pr = shellCommand.getOutPrintWriter()) {
+            for (int userId : userIds) {
+                final List<InputMethodInfo> methods = all
+                        ? getInputMethodListInternal(
+                                userId, DirectBootAwareness.AUTO, Process.SHELL_UID)
+                        : getEnabledInputMethodListInternal(userId, Process.SHELL_UID);
+                if (userIds.length > 1) {
+                    pr.print("User #");
+                    pr.print(userId);
+                    pr.println(":");
+                }
+                for (InputMethodInfo info : methods) {
+                    if (brief) {
+                        pr.println(info.getId());
+                    } else {
+                        pr.print(info.getId());
                         pr.println(":");
-                    }
-                    for (InputMethodInfo info : methods) {
-                        if (brief) {
-                            pr.println(info.getId());
-                        } else {
-                            pr.print(info.getId());
-                            pr.println(":");
-                            info.dump(pr::println, "  ");
-                        }
+                        info.dump(pr::println, "  ");
                     }
                 }
             }

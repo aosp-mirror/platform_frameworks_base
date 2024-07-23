@@ -31,10 +31,12 @@ import android.app.Application;
 import android.app.WindowConfiguration;
 import android.content.ComponentCallbacks;
 import android.content.Context;
+import android.content.ContextWrapper;
 import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.os.StrictMode;
 import android.util.ArrayMap;
 import android.util.Log;
 
@@ -136,14 +138,23 @@ public class WindowLayoutComponentImpl implements WindowLayoutComponent {
                     || containsConsumer(consumer)) {
                 return;
             }
+            final IllegalArgumentException exception = new IllegalArgumentException(
+                    "Context must be a UI Context with display association, which should be"
+                    + " an Activity, WindowContext or InputMethodService");
             if (!context.isUiContext()) {
-                throw new IllegalArgumentException("Context must be a UI Context, which should be"
-                        + " an Activity, WindowContext or InputMethodService");
+                throw exception;
             }
             if (context.getAssociatedDisplayId() == INVALID_DISPLAY) {
-                Log.w(TAG, "The registered Context is a UI Context but not associated with any"
-                        + " display. This Context may not receive any WindowLayoutInfo update");
+                // This is to identify if #isUiContext of a non-UI Context is overridden.
+                // #isUiContext is more likely to be overridden than #getAssociatedDisplayId
+                // since #isUiContext is a public API.
+                StrictMode.onIncorrectContextUsed("The registered Context is a UI Context "
+                        + "but not associated with any display. "
+                        + "This Context may not receive any WindowLayoutInfo update. "
+                        + dumpAllBaseContextToString(context), exception);
             }
+            Log.d(TAG, "Register WindowLayoutInfoListener on "
+                    + dumpAllBaseContextToString(context));
             mFoldingFeatureProducer.getData((features) -> {
                 WindowLayoutInfo newWindowLayout = getWindowLayoutInfo(context, features);
                 consumer.accept(newWindowLayout);
@@ -160,6 +171,16 @@ public class WindowLayoutComponentImpl implements WindowLayoutComponent {
                 mConfigurationChangeListeners.put(windowContextToken, listener);
             }
         }
+    }
+
+    @NonNull
+    private String dumpAllBaseContextToString(@NonNull Context context) {
+        final StringBuilder builder = new StringBuilder("Context=" + context);
+        while ((context instanceof ContextWrapper wrapper) && wrapper.getBaseContext() != null) {
+            context = wrapper.getBaseContext();
+            builder.append(", of which baseContext=").append(context);
+        }
+        return builder.toString();
     }
 
     @Override
@@ -417,9 +438,19 @@ public class WindowLayoutComponentImpl implements WindowLayoutComponent {
      */
     private boolean shouldReportDisplayFeatures(@NonNull @UiContext Context context) {
         int displayId = context.getAssociatedDisplayId();
+        if (!context.isUiContext() || displayId == INVALID_DISPLAY) {
+            // This could happen if a caller sets MutableContextWrapper's base Context to a non-UI
+            // Context.
+            StrictMode.onIncorrectContextUsed("Context is not a UI Context anymore."
+                    + " Was the base context changed? It's suggested to unregister"
+                    + " the windowLayoutInfo callback before changing the base Context."
+                    + " UI Contexts are Activity, InputMethodService or context created"
+                    + " with createWindowContext. " + dumpAllBaseContextToString(context),
+                    new UnsupportedOperationException("Context is not a UI Context anymore."
+                            + " Was the base context changed?"));
+        }
         if (displayId != DEFAULT_DISPLAY) {
-            // Display features are not supported on secondary displays or the context is not
-            // associated with any display.
+            // Display features are not supported on secondary displays.
             return false;
         }
 
