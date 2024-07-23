@@ -20,6 +20,7 @@ import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.testDispatcher
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.shared.settings.data.repository.secureSettingsRepository
+import com.android.systemui.shared.settings.data.repository.systemSettingsRepository
 
 val Kosmos.notificationSettingsRepository by
     Kosmos.Fixture {
@@ -27,5 +28,6 @@ val Kosmos.notificationSettingsRepository by
             scope = testScope.backgroundScope,
             backgroundDispatcher = testDispatcher,
             secureSettingsRepository = secureSettingsRepository,
+            systemSettingsRepository = systemSettingsRepository,
         )
     }
