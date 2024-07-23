@@ -68,11 +68,4 @@ public class ClientFlags {
     public static boolean fixMisalignedContextMenu() {
         return TextFlags.isFeatureEnabled(Flags.FLAG_FIX_MISALIGNED_CONTEXT_MENU);
     }
-
-    /**
-     * @see Flags#clearFontVariationSettings()
-     */
-    public static boolean clearFontVariationSettings() {
-        return TextFlags.isFeatureEnabled(Flags.FLAG_CLEAR_FONT_VARIATION_SETTINGS);
-    }
 }
