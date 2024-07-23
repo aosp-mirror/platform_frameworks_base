@@ -92,9 +92,12 @@ class StackScrollAlgorithmTest : SysuiTestCase() {
     private fun px(@DimenRes id: Int): Float =
         testableResources.resources.getDimensionPixelSize(id).toFloat()
 
-    private val bigGap = px(R.dimen.notification_section_divider_height)
-    private val smallGap = px(R.dimen.notification_section_divider_height_lockscreen)
+    private val notifSectionDividerGap = px(R.dimen.notification_section_divider_height)
     private val scrimPadding = px(R.dimen.notification_side_paddings)
+    private val baseZ by lazy { ambientState.baseZHeight }
+    private val headsUpZ = px(R.dimen.heads_up_pinned_elevation)
+    private val bigGap = notifSectionDividerGap
+    private val smallGap = px(R.dimen.notification_section_divider_height_lockscreen)
 
     @Before
     fun setUp() {
@@ -219,6 +222,8 @@ class StackScrollAlgorithmTest : SysuiTestCase() {
 
         // Then: HUN is at the headsUpTop
         assertThat(notificationRow.viewState.yTranslation).isEqualTo(headsUpTop)
+        // And: HUN is not elevated
+        assertThat(notificationRow.viewState.zTranslation).isEqualTo(baseZ)
         // And: HUN has its full height
         assertThat(notificationRow.viewState.height).isEqualTo(intrinsicHeight)
     }
@@ -243,6 +248,8 @@ class StackScrollAlgorithmTest : SysuiTestCase() {
 
         // Then: HUN is translated to the headsUpTop
         assertThat(notificationRow.viewState.yTranslation).isEqualTo(headsUpTop)
+        // And: HUN is not elevated
+        assertThat(notificationRow.viewState.zTranslation).isEqualTo(baseZ)
         // And: HUN is clipped to the available space
         // newTranslation = max(150, -25)
         // distToReal = 150 - (-25)
@@ -270,6 +277,8 @@ class StackScrollAlgorithmTest : SysuiTestCase() {
 
         // Then: HUN is translated to the headsUpTop
         assertThat(notificationRow.viewState.yTranslation).isEqualTo(headsUpTop)
+        // And: HUN fully elevated to baseZ + headsUpZ
+        assertThat(notificationRow.viewState.zTranslation).isEqualTo(baseZ + headsUpZ)
         // And: HUN is clipped to its collapsed height
         assertThat(notificationRow.viewState.height).isEqualTo(collapsedHeight)
     }
@@ -294,8 +303,85 @@ class StackScrollAlgorithmTest : SysuiTestCase() {
 
         // Then: HUN is translated to the headsUpTop
         assertThat(notificationRow.viewState.yTranslation).isEqualTo(headsUpTop)
+        // And: HUN is elevated to baseZ + headsUpZ
+        assertThat(notificationRow.viewState.zTranslation).isEqualTo(baseZ + headsUpZ)
         // And: HUN maintained its full height
         assertThat(notificationRow.viewState.height).isEqualTo(intrinsicHunHeight)
+    }
+
+    @Test
+    @EnableSceneContainer
+    fun updateZTranslationForHunInStack_fullOverlap_hunHasFullElevation() {
+        // Given: the overlap equals to the top content padding
+        val contentTop = 280f
+        val contentTopPadding = 20f
+        val viewState =
+            ExpandableViewState().apply {
+                height = 100
+                yTranslation = 200f
+            }
+
+        // When
+        stackScrollAlgorithm.updateZTranslationForHunInStack(
+            /* scrollingContentTop = */ contentTop,
+            /* scrollingContentTopPadding */ contentTopPadding,
+            /* baseZ = */ 0f,
+            /* viewState = */ viewState,
+        )
+
+        // Then: HUN is fully elevated to baseZ + headsUpZ
+        assertThat(viewState.zTranslation).isEqualTo(headsUpZ)
+    }
+
+    @Test
+    @EnableSceneContainer
+    fun updateZTranslationForHunInStack_someOverlap_hunIsPartlyElevated() {
+        // Given: the overlap is bigger than zero, but less than the top content padding
+        val contentTop = 290f
+        val contentTopPadding = 20f
+        val viewState =
+            ExpandableViewState().apply {
+                height = 100
+                yTranslation = 200f
+            }
+
+        // When
+        stackScrollAlgorithm.updateZTranslationForHunInStack(
+            /* scrollingContentTop = */ contentTop,
+            /* scrollingContentTopPadding */ contentTopPadding,
+            /* baseZ = */ 0f,
+            /* viewState = */ viewState,
+        )
+
+        // Then: HUN is partly elevated
+        assertThat(viewState.zTranslation).apply {
+            isGreaterThan(0f)
+            isLessThan(headsUpZ)
+        }
+    }
+
+    @Test
+    @EnableSceneContainer
+    fun updateZTranslationForHunInStack_noOverlap_hunIsNotElevated() {
+        // Given: no overlap between the content and the HUN
+        val contentTop = 300f
+        val contentTopPadding = 20f
+        val viewState =
+            ExpandableViewState().apply {
+                height = 100
+                yTranslation = 200f
+            }
+
+        // When
+        stackScrollAlgorithm.updateZTranslationForHunInStack(
+            /* scrollingContentTop = */ contentTop,
+            /* scrollingContentTopPadding */ contentTopPadding,
+            /* baseZ = */ 0f,
+            /* viewState = */ viewState,
+        )
+
+        // Then: HUN is not elevated
+        assertThat(viewState.zTranslation).isEqualTo(0f)
     }
 
     @Test
@@ -971,6 +1057,7 @@ class StackScrollAlgorithmTest : SysuiTestCase() {
     }
 
     @Test
+    @DisableSceneContainer
     fun shadeOpened_hunFullyOverlapsQqsPanel_hunShouldHaveFullShadow() {
         // Given: shade is opened, yTranslation of HUN is 0,
         // the height of HUN equals to the height of QQS Panel,
@@ -996,6 +1083,7 @@ class StackScrollAlgorithmTest : SysuiTestCase() {
     }
 
     @Test
+    @DisableSceneContainer
     fun shadeOpened_hunPartiallyOverlapsQQS_hunShouldHavePartialShadow() {
         // Given: shade is opened, yTranslation of HUN is greater than 0,
         // the height of HUN is equal to the height of QQS Panel,
@@ -1447,6 +1535,7 @@ class StackScrollAlgorithmTest : SysuiTestCase() {
         }
         stackScrollAlgorithm.setIsExpanded(true)
 
+        whenever(notificationRow.headerVisibleAmount).thenReturn(1.0f)
         whenever(notificationRow.mustStayOnScreen()).thenReturn(true)
         whenever(notificationRow.isHeadsUp).thenReturn(true)
         whenever(notificationRow.collapsedHeight).thenReturn(collapsedHeight)
