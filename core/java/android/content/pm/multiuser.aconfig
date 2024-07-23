@@ -337,3 +337,13 @@ flag {
     purpose: PURPOSE_BUGFIX
   }
 }
+
+flag {
+  name: "private_space_search_illustration_config"
+  namespace: "profile_experiences"
+  description: "Check config to show/hide the private space search illustration and search tile content in Hide Private Space settings page"
+  bug: "346612477"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}
