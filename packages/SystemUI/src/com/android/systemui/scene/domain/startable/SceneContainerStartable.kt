@@ -25,6 +25,7 @@ import com.android.internal.logging.UiEventLogger
 import com.android.systemui.CoreStartable
 import com.android.systemui.authentication.domain.interactor.AuthenticationInteractor
 import com.android.systemui.authentication.shared.model.AuthenticationMethodModel
+import com.android.systemui.bouncer.domain.interactor.AlternateBouncerInteractor
 import com.android.systemui.bouncer.domain.interactor.BouncerInteractor
 import com.android.systemui.bouncer.domain.interactor.SimBouncerInteractor
 import com.android.systemui.bouncer.shared.logging.BouncerUiEvent
@@ -132,6 +133,7 @@ constructor(
     private val keyguardEnabledInteractor: KeyguardEnabledInteractor,
     private val dismissCallbackRegistry: DismissCallbackRegistry,
     private val statusBarStateController: SysuiStatusBarStateController,
+    private val alternateBouncerInteractor: AlternateBouncerInteractor,
 ) : CoreStartable {
     private val centralSurfaces: CentralSurfaces?
         get() = centralSurfacesOptLazy.get().getOrNull()
@@ -152,6 +154,7 @@ constructor(
             handleKeyguardEnabledness()
             notifyKeyguardDismissCallbacks()
             refreshLockscreenEnabled()
+            handleHideAlternateBouncerOnTransitionToGone()
         } else {
             sceneLogger.logFrameworkEnabled(
                 isEnabled = false,
@@ -228,13 +231,16 @@ constructor(
                                 },
                                 headsUpInteractor.isHeadsUpOrAnimatingAway,
                                 occlusionInteractor.invisibleDueToOcclusion,
+                                alternateBouncerInteractor.isVisible,
                             ) {
                                 visibilityForTransitionState,
                                 isHeadsUpOrAnimatingAway,
                                 invisibleDueToOcclusion,
+                                isAlternateBouncerVisible,
                                 ->
                                 when {
                                     isHeadsUpOrAnimatingAway -> true to "showing a HUN"
+                                    isAlternateBouncerVisible -> true to "showing alternate bouncer"
                                     invisibleDueToOcclusion -> false to "invisible due to occlusion"
                                     else -> visibilityForTransitionState
                                 }
@@ -351,7 +357,9 @@ constructor(
                                 )
                         }
                     val isOnLockscreen = renderedScenes.contains(Scenes.Lockscreen)
-                    val isOnBouncer = renderedScenes.contains(Scenes.Bouncer)
+                    val isOnBouncer =
+                        renderedScenes.contains(Scenes.Bouncer) ||
+                            alternateBouncerInteractor.isVisibleState()
                     if (!deviceUnlockStatus.isUnlocked) {
                         return@mapNotNull if (isOnLockscreen || isOnBouncer) {
                             // Already on lockscreen or bouncer, no need to change scenes.
@@ -379,12 +387,13 @@ constructor(
                                     !statusBarStateController.leaveOpenOnKeyguardHide()
                             ) {
                                 Scenes.Gone to
-                                    "device was unlocked in Bouncer scene and shade" +
+                                    "device was unlocked with bouncer showing and shade" +
                                         " didn't need to be left open"
                             } else {
                                 val prevScene = previousScene.value
                                 (prevScene ?: Scenes.Gone) to
-                                    "device was unlocked in Bouncer scene, from sceneKey=$prevScene"
+                                    "device was unlocked with bouncer showing," +
+                                        " from sceneKey=$prevScene"
                             }
                         isOnLockscreen ->
                             // The lockscreen should be dismissed automatically in 2 scenarios:
@@ -774,6 +783,16 @@ constructor(
                 .distinctUntilChanged()
                 .filter { it }
                 .collectLatest { deviceEntryInteractor.refreshLockscreenEnabled() }
+        }
+    }
+
+    private fun handleHideAlternateBouncerOnTransitionToGone() {
+        applicationScope.launch {
+            sceneInteractor.transitionState
+                .map { it.isIdle(Scenes.Gone) }
+                .distinctUntilChanged()
+                .filter { it }
+                .collectLatest { alternateBouncerInteractor.hide() }
         }
     }
 }
