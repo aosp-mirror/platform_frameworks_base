@@ -713,9 +713,7 @@ private class SwipeTransition(
         val hasReachedTargetScene =
             (targetScene == toScene && progress >= 1f) ||
                 (targetScene == fromScene && progress <= 0f)
-        val skipAnimation =
-            hasReachedTargetScene &&
-                currentOverscrollSpec?.transformationSpec?.transformations?.isEmpty() == true
+        val skipAnimation = hasReachedTargetScene && !canOverscroll()
 
         return startOffsetAnimation {
             val animatable = Animatable(dragOffset, OffsetVisibilityThreshold)
@@ -768,12 +766,7 @@ private class SwipeTransition(
 
                                         // Immediately stop this transition if we are bouncing on a
                                         // scene that does not bounce.
-                                        val overscrollSpec = currentOverscrollSpec
-                                        if (
-                                            overscrollSpec != null &&
-                                                overscrollSpec.transformationSpec.transformations
-                                                    .isEmpty()
-                                        ) {
+                                        if (!canOverscroll()) {
                                             snapToScene(targetScene)
                                         }
                                     }
