@@ -398,17 +398,16 @@ public final class ProfcollectForwardingService extends SystemService {
                 if (randomNum >= traceFrequency) {
                     return;
                 }
-                final int traceDelay = 1000;
                 final int traceDuration = 5000;
                 final String traceTag = "camera";
-                BackgroundThread.get().getThreadHandler().postDelayed(() -> {
+                BackgroundThread.get().getThreadHandler().post(() -> {
                     try {
                         mIProfcollect.trace_process(traceTag, "android.hardware.camera.provider",
                                 traceDuration);
                     } catch (RemoteException e) {
                         Log.e(LOG_TAG, "Failed to initiate trace: " + e.getMessage());
                     }
-                }, traceDelay);
+                });
             }
         }, null);
     }
