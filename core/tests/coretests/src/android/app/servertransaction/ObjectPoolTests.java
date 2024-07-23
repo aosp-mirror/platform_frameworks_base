@@ -161,11 +161,6 @@ public class ObjectPoolTests {
     }
 
     @Test
-    public void testRecycleResumeActivityItem() {
-        testRecycle(() -> ResumeActivityItem.obtain(mActivityToken, 3, true, false));
-    }
-
-    @Test
     public void testRecycleStartActivityItem() {
         testRecycle(() -> StartActivityItem.obtain(mActivityToken,
                 new ActivityOptions.SceneTransitionInfo()));

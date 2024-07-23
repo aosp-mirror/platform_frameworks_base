@@ -1635,7 +1635,7 @@ class TaskFragment extends WindowContainer<WindowContainer> {
                 final int topProcessState = mAtmService.mTopProcessState;
                 next.app.setPendingUiCleanAndForceProcessStateUpTo(topProcessState);
                 next.abortAndClearOptionsAnimation();
-                final ResumeActivityItem resumeActivityItem = ResumeActivityItem.obtain(
+                final ResumeActivityItem resumeActivityItem = new ResumeActivityItem(
                         next.token, topProcessState, dc.isNextTransitionForward(),
                         next.shouldSendCompatFakeFocus());
                 mAtmService.getLifecycleManager().scheduleTransactionItem(

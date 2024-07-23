@@ -42,6 +42,7 @@ import java.util.List;
 
 /**
  * Helper class for {@link TransactionExecutor} that contains utils for lifecycle path resolution.
+ *
  * @hide
  */
 public class TransactionExecutorHelper {
@@ -203,7 +204,7 @@ public class TransactionExecutorHelper {
                 lifecycleItem = StopActivityItem.obtain(r.token);
                 break;
             default:
-                lifecycleItem = ResumeActivityItem.obtain(r.token, false /* isForward */,
+                lifecycleItem = new ResumeActivityItem(r.token, false /* isForward */,
                         false /* shouldSendCompatFakeFocus */);
                 break;
         }

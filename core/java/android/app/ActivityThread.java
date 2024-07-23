@@ -4623,7 +4623,7 @@ public final class ActivityThread extends ClientTransactionHandler
 
     private void scheduleResume(ActivityClientRecord r) {
         final ClientTransaction transaction = new ClientTransaction(mAppThread);
-        final ResumeActivityItem resumeActivityItem = ResumeActivityItem.obtain(r.token,
+        final ResumeActivityItem resumeActivityItem = new ResumeActivityItem(r.token,
                 /* isForward */ false, /* shouldSendCompatFakeFocus */ false);
         transaction.addTransactionItem(resumeActivityItem);
         executeTransaction(transaction);

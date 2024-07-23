@@ -942,7 +942,7 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
                 // Set desired final state.
                 final ActivityLifecycleItem lifecycleItem;
                 if (andResume) {
-                    lifecycleItem = ResumeActivityItem.obtain(r.token, isTransitionForward,
+                    lifecycleItem = new ResumeActivityItem(r.token, isTransitionForward,
                             r.shouldSendCompatFakeFocus());
                 } else if (r.isVisibleRequested()) {
                     lifecycleItem = PauseActivityItem.obtain(r.token);
