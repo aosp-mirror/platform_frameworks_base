@@ -1112,7 +1112,7 @@
     <string name="weeks" msgid="3516247214269821391">"週間"</string>
     <string name="year" msgid="5182610307741238982">"年"</string>
     <string name="years" msgid="5797714729103773425">"年"</string>
-    <string name="now_string_shortest" msgid="3684914126941650330">"現在"</string>
+    <string name="now_string_shortest" msgid="3684914126941650330">"今"</string>
     <string name="duration_minutes_shortest" msgid="5744379079540806690">"<xliff:g id="COUNT">%d</xliff:g> 分"</string>
     <string name="duration_hours_shortest" msgid="1477752094141971675">"<xliff:g id="COUNT">%d</xliff:g> 時間"</string>
     <string name="duration_days_shortest" msgid="4083124701676227233">"<xliff:g id="COUNT">%d</xliff:g> 日"</string>
