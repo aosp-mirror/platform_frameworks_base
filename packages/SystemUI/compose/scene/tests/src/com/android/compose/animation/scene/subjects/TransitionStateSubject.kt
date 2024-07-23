@@ -95,6 +95,25 @@ private constructor(
             .of(progressVelocity)
     }
 
+    fun hasPreviewProgress(progress: Float, tolerance: Float = 0f) {
+        check("previewProgress").that(actual.previewProgress).isWithin(tolerance).of(progress)
+    }
+
+    fun hasPreviewProgressVelocity(progressVelocity: Float, tolerance: Float = 0f) {
+        check("previewProgressVelocity")
+            .that(actual.previewProgressVelocity)
+            .isWithin(tolerance)
+            .of(progressVelocity)
+    }
+
+    fun isInPreviewStage() {
+        check("isInPreviewStage").that(actual.isInPreviewStage).isTrue()
+    }
+
+    fun isNotInPreviewStage() {
+        check("isInPreviewStage").that(actual.isInPreviewStage).isFalse()
+    }
+
     fun isInitiatedByUserInput() {
         check("isInitiatedByUserInput").that(actual.isInitiatedByUserInput).isTrue()
     }

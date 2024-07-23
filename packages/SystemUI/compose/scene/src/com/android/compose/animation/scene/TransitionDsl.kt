@@ -54,11 +54,17 @@ interface SceneTransitionsBuilder {
      * If [key] is not `null`, then this transition will only be used if the same key is specified
      * when triggering the transition.
      *
+     * Optionally, define a [preview] animation which will be played during the first stage of the
+     * transition, e.g. during the predictive back gesture. In case your transition should be
+     * reversible with the reverse animation having a preview as well, define a [reversePreview].
+     *
      * @see from
      */
     fun to(
         to: SceneKey,
         key: TransitionKey? = null,
+        preview: (TransitionBuilder.() -> Unit)? = null,
+        reversePreview: (TransitionBuilder.() -> Unit)? = null,
         builder: TransitionBuilder.() -> Unit = {},
     ): TransitionSpec
 
@@ -74,11 +80,17 @@ interface SceneTransitionsBuilder {
      * 2. to == A && from == B, which is then treated in reverse.
      * 3. (from == A && to == null) || (from == null && to == B)
      * 4. (from == B && to == null) || (from == null && to == A), which is then treated in reverse.
+     *
+     * Optionally, define a [preview] animation which will be played during the first stage of the
+     * transition, e.g. during the predictive back gesture. In case your transition should be
+     * reversible with the reverse animation having a preview as well, define a [reversePreview].
      */
     fun from(
         from: SceneKey,
         to: SceneKey? = null,
         key: TransitionKey? = null,
+        preview: (TransitionBuilder.() -> Unit)? = null,
+        reversePreview: (TransitionBuilder.() -> Unit)? = null,
         builder: TransitionBuilder.() -> Unit = {},
     ): TransitionSpec
 
