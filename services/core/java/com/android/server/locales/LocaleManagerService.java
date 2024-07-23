@@ -616,9 +616,10 @@ public class LocaleManagerService extends SystemService {
             LocaleConfig resLocaleConfig = null;
             try {
                 resLocaleConfig = LocaleConfig.fromContextIgnoringOverride(
-                        mContext.createPackageContext(appPackageName, 0));
+                        mContext.createPackageContextAsUser(appPackageName, /* flags= */ 0,
+                                UserHandle.of(userId)));
             } catch (PackageManager.NameNotFoundException e) {
-                Slog.e(TAG, "Unknown package name " + appPackageName);
+                Slog.e(TAG, "Unknown package name " + appPackageName + " for user " + userId);
                 return;
             }
             final File file = getXmlFileNameForUser(appPackageName, userId);

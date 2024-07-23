@@ -244,6 +244,22 @@ public abstract class WindowManagerInternal {
     public static abstract class AppTransitionListener {
 
         /**
+         * The display this listener is interested in. If it is INVALID_DISPLAY, then which display
+         * should be notified depends on the dispatcher.
+         */
+        public final int mDisplayId;
+
+        /** Let transition controller decide which display should receive the callbacks. */
+        public AppTransitionListener() {
+            this(Display.INVALID_DISPLAY);
+        }
+
+        /** It will listen the transition on the given display. */
+        public AppTransitionListener(int displayId) {
+            mDisplayId = displayId;
+        }
+
+        /**
          * Called when an app transition is being setup and about to be executed.
          */
         public void onAppTransitionPendingLocked() {}

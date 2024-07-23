@@ -41,6 +41,7 @@ import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.InflationFlag;
 import com.android.systemui.statusbar.notification.shared.NotificationThrottleHun;
 import com.android.systemui.statusbar.notification.shared.NotificationsHeadsUpRefactor;
+import com.android.systemui.statusbar.phone.ExpandHeadsUpOnInlineReply;
 import com.android.systemui.util.ListenerSet;
 import com.android.systemui.util.concurrency.DelayableExecutor;
 import com.android.systemui.util.settings.GlobalSettings;
@@ -726,6 +727,7 @@ public abstract class BaseHeadsUpManager implements HeadsUpManager {
      * of AvalancheController that take it as param.
      */
     public class HeadsUpEntry implements Comparable<HeadsUpEntry> {
+        public boolean mRemoteInputActivatedAtLeastOnce;
         public boolean mRemoteInputActive;
         public boolean mUserActionMayIndirectlyRemove;
 
@@ -835,6 +837,15 @@ public abstract class BaseHeadsUpManager implements HeadsUpManager {
          */
         public boolean isSticky() {
             if (mEntry == null) return false;
+
+            if (ExpandHeadsUpOnInlineReply.isEnabled()) {
+                // we don't consider pinned and expanded huns as sticky after the remote input
+                // has been activated for them
+                if (!mRemoteInputActive && mRemoteInputActivatedAtLeastOnce) {
+                    return false;
+                }
+            }
+
             return (mEntry.isRowPinned() && mExpanded)
                     || mRemoteInputActive
                     || hasFullScreenIntent(mEntry);

@@ -49,6 +49,9 @@ import android.window.TransitionRequestInfo
 import android.window.WindowContainerTransaction
 import androidx.annotation.BinderThread
 import com.android.internal.annotations.VisibleForTesting
+import com.android.internal.jank.Cuj.CUJ_DESKTOP_MODE_ENTER_APP_HANDLE_DRAG_HOLD
+import com.android.internal.jank.Cuj.CUJ_DESKTOP_MODE_ENTER_APP_HANDLE_DRAG_RELEASE
+import com.android.internal.jank.InteractionJankMonitor
 import com.android.internal.policy.ScreenDecorationsUtils
 import com.android.internal.protolog.ProtoLog
 import com.android.window.flags.Flags
@@ -123,7 +126,8 @@ class DesktopTasksController(
     private val multiInstanceHelper: MultiInstanceHelper,
     @ShellMainThread private val mainExecutor: ShellExecutor,
     private val desktopTasksLimiter: Optional<DesktopTasksLimiter>,
-    private val recentTasksController: RecentTasksController?
+    private val recentTasksController: RecentTasksController?,
+    private val interactionJankMonitor: InteractionJankMonitor
 ) :
     RemoteCallable<DesktopTasksController>,
     Transitions.TransitionHandler,
@@ -378,12 +382,15 @@ class DesktopTasksController(
     fun startDragToDesktop(
         taskInfo: RunningTaskInfo,
         dragToDesktopValueAnimator: MoveToDesktopAnimator,
+        taskSurface: SurfaceControl,
     ) {
         ProtoLog.v(
             WM_SHELL_DESKTOP_MODE,
             "DesktopTasksController: startDragToDesktop taskId=%d",
             taskInfo.taskId
         )
+        interactionJankMonitor.begin(taskSurface, context,
+            CUJ_DESKTOP_MODE_ENTER_APP_HANDLE_DRAG_HOLD)
         dragToDesktopTransitionHandler.startDragToDesktopTransition(
             taskInfo.taskId,
             dragToDesktopValueAnimator
@@ -1340,13 +1347,19 @@ class DesktopTasksController(
     fun onDragPositioningEndThroughStatusBar(
         inputCoordinates: PointF,
         taskInfo: RunningTaskInfo,
+        taskSurface: SurfaceControl,
     ): IndicatorType {
+        // End the drag_hold CUJ interaction.
+        interactionJankMonitor.end(CUJ_DESKTOP_MODE_ENTER_APP_HANDLE_DRAG_HOLD)
         val indicator = getVisualIndicator() ?: return IndicatorType.NO_INDICATOR
         val indicatorType = indicator.updateIndicatorType(inputCoordinates, taskInfo.windowingMode)
         when (indicatorType) {
             IndicatorType.TO_DESKTOP_INDICATOR -> {
                 val displayLayout = displayController.getDisplayLayout(taskInfo.displayId)
                     ?: return IndicatorType.NO_INDICATOR
+                // Start a new jank interaction for the drag release to desktop window animation.
+                interactionJankMonitor.begin(taskSurface, context,
+                    CUJ_DESKTOP_MODE_ENTER_APP_HANDLE_DRAG_RELEASE, "to_desktop")
                 if (Flags.enableWindowingDynamicInitialBounds()) {
                     finalizeDragToDesktop(taskInfo, calculateInitialBounds(displayLayout, taskInfo))
                 } else {

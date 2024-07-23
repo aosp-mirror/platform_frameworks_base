@@ -30,6 +30,9 @@ import android.window.TransitionRequestInfo
 import android.window.WindowContainerToken
 import android.window.WindowContainerTransaction
 import com.android.internal.protolog.ProtoLog
+import com.android.internal.jank.Cuj.CUJ_DESKTOP_MODE_ENTER_APP_HANDLE_DRAG_HOLD
+import com.android.internal.jank.Cuj.CUJ_DESKTOP_MODE_ENTER_APP_HANDLE_DRAG_RELEASE
+import com.android.internal.jank.InteractionJankMonitor
 import com.android.wm.shell.RootTaskDisplayAreaOrganizer
 import com.android.wm.shell.common.split.SplitScreenConstants.SPLIT_POSITION_BOTTOM_OR_RIGHT
 import com.android.wm.shell.common.split.SplitScreenConstants.SPLIT_POSITION_TOP_OR_LEFT
@@ -57,17 +60,20 @@ class DragToDesktopTransitionHandler(
     private val context: Context,
     private val transitions: Transitions,
     private val taskDisplayAreaOrganizer: RootTaskDisplayAreaOrganizer,
-    private val transactionSupplier: Supplier<SurfaceControl.Transaction>
+    private val interactionJankMonitor: InteractionJankMonitor,
+    private val transactionSupplier: Supplier<SurfaceControl.Transaction>,
 ) : TransitionHandler {
 
     constructor(
         context: Context,
         transitions: Transitions,
-        rootTaskDisplayAreaOrganizer: RootTaskDisplayAreaOrganizer
+        rootTaskDisplayAreaOrganizer: RootTaskDisplayAreaOrganizer,
+        interactionJankMonitor: InteractionJankMonitor
     ) : this(
         context,
         transitions,
         rootTaskDisplayAreaOrganizer,
+        interactionJankMonitor,
         Supplier { SurfaceControl.Transaction() }
     )
 
@@ -567,6 +573,8 @@ class DragToDesktopTransitionHandler(
                                 onTaskResizeAnimationListener.onAnimationEnd(state.draggedTaskId)
                                 startTransitionFinishCb.onTransitionFinished(null /* null */)
                                 clearState()
+                                interactionJankMonitor.end(
+                                    CUJ_DESKTOP_MODE_ENTER_APP_HANDLE_DRAG_RELEASE)
                             }
                         }
                     )
@@ -604,6 +612,10 @@ class DragToDesktopTransitionHandler(
                 "DragToDesktop: onTransitionConsumed() start transition aborted"
             )
             state.startAborted = true
+            // Cancel CUJ interaction if the transition is aborted.
+            interactionJankMonitor.cancel(CUJ_DESKTOP_MODE_ENTER_APP_HANDLE_DRAG_HOLD)
+        } else if (state.cancelTransitionToken != transition) {
+            interactionJankMonitor.cancel(CUJ_DESKTOP_MODE_ENTER_APP_HANDLE_DRAG_RELEASE)
         }
     }
 

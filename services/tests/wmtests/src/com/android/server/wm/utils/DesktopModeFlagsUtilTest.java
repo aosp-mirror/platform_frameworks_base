@@ -63,9 +63,6 @@ public class DesktopModeFlagsUtilTest extends WindowTestsBase {
         resetCache();
     }
 
-    private static final String SYSTEM_PROPERTY_OVERRIDE_KEY =
-            "sys.wmshell.desktopmode.dev_toggle_override";
-
     @Test
     @DisableFlags(FLAG_SHOW_DESKTOP_WINDOWING_DEV_OPTION)
     @EnableFlags(FLAG_ENABLE_DESKTOP_WINDOWING_MODE)
@@ -187,110 +184,6 @@ public class DesktopModeFlagsUtilTest extends WindowTestsBase {
 
         // Keep overrides constant through the process
         assertThat(DESKTOP_WINDOWING_MODE.isEnabled(mContext)).isTrue();
-    }
-
-    @Test
-    @EnableFlags(FLAG_SHOW_DESKTOP_WINDOWING_DEV_OPTION)
-    @DisableFlags(FLAG_ENABLE_DESKTOP_WINDOWING_MODE)
-    public void isEnabled_noProperty_overrideOn_featureFlagOff_returnsTrueAndPropertyOn() {
-        System.clearProperty(SYSTEM_PROPERTY_OVERRIDE_KEY);
-        setOverride(OVERRIDE_ON.getSetting());
-
-        assertThat(DESKTOP_WINDOWING_MODE.isEnabled(mContext)).isTrue();
-        // Store System Property if not present
-        assertThat(System.getProperty(SYSTEM_PROPERTY_OVERRIDE_KEY))
-                .isEqualTo(String.valueOf(OVERRIDE_ON.getSetting()));
-    }
-
-    @Test
-    @EnableFlags({FLAG_SHOW_DESKTOP_WINDOWING_DEV_OPTION, FLAG_ENABLE_DESKTOP_WINDOWING_MODE})
-    public void isEnabled_noProperty_overrideUnset_featureFlagOn_returnsTrueAndPropertyUnset() {
-        System.clearProperty(SYSTEM_PROPERTY_OVERRIDE_KEY);
-        setOverride(DesktopModeFlagsUtil.ToggleOverride.OVERRIDE_UNSET.getSetting());
-
-        assertThat(DESKTOP_WINDOWING_MODE.isEnabled(mContext)).isTrue();
-        // Store System Property if not present
-        assertThat(System.getProperty(SYSTEM_PROPERTY_OVERRIDE_KEY))
-                .isEqualTo(String.valueOf(
-                        DesktopModeFlagsUtil.ToggleOverride.OVERRIDE_UNSET.getSetting()));
-    }
-
-    @Test
-    @EnableFlags(FLAG_SHOW_DESKTOP_WINDOWING_DEV_OPTION)
-    @DisableFlags(FLAG_ENABLE_DESKTOP_WINDOWING_MODE)
-    public void isEnabled_noProperty_overrideUnset_featureFlagOff_returnsFalseAndPropertyUnset() {
-        System.clearProperty(SYSTEM_PROPERTY_OVERRIDE_KEY);
-        setOverride(DesktopModeFlagsUtil.ToggleOverride.OVERRIDE_UNSET.getSetting());
-
-        assertThat(DESKTOP_WINDOWING_MODE.isEnabled(mContext)).isFalse();
-        // Store System Property if not present
-        assertThat(System.getProperty(SYSTEM_PROPERTY_OVERRIDE_KEY))
-                .isEqualTo(String.valueOf(
-                        DesktopModeFlagsUtil.ToggleOverride.OVERRIDE_UNSET.getSetting()));
-    }
-
-    @Test
-    @EnableFlags({FLAG_SHOW_DESKTOP_WINDOWING_DEV_OPTION, FLAG_ENABLE_DESKTOP_WINDOWING_MODE})
-    public void isEnabled_propertyNotInt_overrideOff_featureFlagOn_returnsFalseAndPropertyOff() {
-        System.setProperty(SYSTEM_PROPERTY_OVERRIDE_KEY, "abc");
-        setOverride(OVERRIDE_OFF.getSetting());
-
-        assertThat(DESKTOP_WINDOWING_MODE.isEnabled(mContext)).isFalse();
-        // Store System Property if currently invalid
-        assertThat(System.getProperty(SYSTEM_PROPERTY_OVERRIDE_KEY))
-                .isEqualTo(String.valueOf(OVERRIDE_OFF.getSetting()));
-    }
-
-    @Test
-    @EnableFlags({FLAG_SHOW_DESKTOP_WINDOWING_DEV_OPTION, FLAG_ENABLE_DESKTOP_WINDOWING_MODE})
-    public void isEnabled_propertyInvalid_overrideOff_featureFlagOn_returnsFalseAndPropertyOff() {
-        System.setProperty(SYSTEM_PROPERTY_OVERRIDE_KEY, "-2");
-        setOverride(OVERRIDE_OFF.getSetting());
-
-        assertThat(DESKTOP_WINDOWING_MODE.isEnabled(mContext)).isFalse();
-        // Store System Property if currently invalid
-        assertThat(System.getProperty(SYSTEM_PROPERTY_OVERRIDE_KEY))
-                .isEqualTo(String.valueOf(OVERRIDE_OFF.getSetting()));
-    }
-
-    @Test
-    @EnableFlags({FLAG_SHOW_DESKTOP_WINDOWING_DEV_OPTION, FLAG_ENABLE_DESKTOP_WINDOWING_MODE})
-    public void isEnabled_propertyOff_overrideOn_featureFlagOn_returnsFalseAndnoPropertyUpdate() {
-        System.setProperty(SYSTEM_PROPERTY_OVERRIDE_KEY, String.valueOf(
-                OVERRIDE_OFF.getSetting()));
-        setOverride(OVERRIDE_ON.getSetting());
-
-        // Have a consistent override until reboot
-        assertThat(DESKTOP_WINDOWING_MODE.isEnabled(mContext)).isFalse();
-        assertThat(System.getProperty(SYSTEM_PROPERTY_OVERRIDE_KEY))
-                .isEqualTo(String.valueOf(OVERRIDE_OFF.getSetting()));
-    }
-
-    @Test
-    @EnableFlags(FLAG_SHOW_DESKTOP_WINDOWING_DEV_OPTION)
-    @DisableFlags(FLAG_ENABLE_DESKTOP_WINDOWING_MODE)
-    public void isEnabled_propertyOn_overrideOff_featureFlagOff_returnsTrueAndnoPropertyUpdate() {
-        System.setProperty(SYSTEM_PROPERTY_OVERRIDE_KEY, String.valueOf(OVERRIDE_ON.getSetting()));
-        setOverride(OVERRIDE_OFF.getSetting());
-
-        // Have a consistent override until reboot
-        assertThat(DESKTOP_WINDOWING_MODE.isEnabled(mContext)).isTrue();
-        assertThat(System.getProperty(SYSTEM_PROPERTY_OVERRIDE_KEY))
-                .isEqualTo(String.valueOf(OVERRIDE_ON.getSetting()));
-    }
-
-    @Test
-    @EnableFlags({FLAG_SHOW_DESKTOP_WINDOWING_DEV_OPTION, FLAG_ENABLE_DESKTOP_WINDOWING_MODE})
-    public void isEnabled_propertyUnset_overrideOff_featureFlagOn_returnsTrueAndnoPropertyUpdate() {
-        System.setProperty(SYSTEM_PROPERTY_OVERRIDE_KEY,
-                String.valueOf(DesktopModeFlagsUtil.ToggleOverride.OVERRIDE_UNSET.getSetting()));
-        setOverride(OVERRIDE_OFF.getSetting());
-
-        // Have a consistent override until reboot
-        assertThat(DESKTOP_WINDOWING_MODE.isEnabled(mContext)).isTrue();
-        assertThat(System.getProperty(SYSTEM_PROPERTY_OVERRIDE_KEY))
-                .isEqualTo(String.valueOf(
-                        DesktopModeFlagsUtil.ToggleOverride.OVERRIDE_UNSET.getSetting()));
     }
 
     @Test
@@ -452,8 +345,5 @@ public class DesktopModeFlagsUtilTest extends WindowTestsBase {
                 "sCachedToggleOverride");
         cachedToggleOverride.setAccessible(true);
         cachedToggleOverride.set(null, null);
-
-        // Clear override cache stored in System property
-        System.clearProperty(SYSTEM_PROPERTY_OVERRIDE_KEY);
     }
 }

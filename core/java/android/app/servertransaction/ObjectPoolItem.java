@@ -18,12 +18,20 @@ package android.app.servertransaction;
 
 /**
  * Base interface for all lifecycle items that can be put in object pool.
+ *
  * @hide
+ * @deprecated This interface is deprecated. Objects should no longer be pooled.
+ * TODO(b/311089192): Clean up usages of this interface.
  */
+@Deprecated
 public interface ObjectPoolItem {
     /**
      * Clear the contents of the item and putting it to a pool. The implementation should call
      * {@link ObjectPool#recycle(ObjectPoolItem)} passing itself.
+     *
+     * @deprecated This method is deprecated. The object pool is no longer used, so there's
+     * no need to recycle objects.
      */
+    @Deprecated
     void recycle();
 }

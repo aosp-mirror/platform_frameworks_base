@@ -21,10 +21,11 @@ import android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM
 import android.content.res.ColorStateList
 import android.graphics.Color
 import android.graphics.Point
+import android.hardware.input.InputManager
+import android.view.MotionEvent.ACTION_DOWN
 import android.view.SurfaceControl
 import android.view.View
 import android.view.View.OnClickListener
-import android.view.View.OnHoverListener
 import android.view.WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS
 import android.view.WindowManager
 import android.widget.ImageButton
@@ -39,9 +40,8 @@ import com.android.wm.shell.windowdecor.additionalviewcontainer.AdditionalSystem
  */
 internal class AppHandleViewHolder(
     rootView: View,
-    private val onCaptionTouchListener: View.OnTouchListener,
-    private val onCaptionButtonClickListener: OnClickListener,
-    private val onCaptionHoverListener: OnHoverListener,
+    onCaptionTouchListener: View.OnTouchListener,
+    onCaptionButtonClickListener: OnClickListener
 ) : WindowDecorationViewHolder(rootView) {
 
     companion object {
@@ -51,6 +51,7 @@ internal class AppHandleViewHolder(
     private val windowManager = context.getSystemService(WindowManager::class.java)
     private val captionView: View = rootView.requireViewById(R.id.desktop_mode_caption)
     private val captionHandle: ImageButton = rootView.requireViewById(R.id.caption_handle)
+    private val inputManager = context.getSystemService(InputManager::class.java)
 
     // An invisible View that takes up the same coordinates as captionHandle but is layered
     // above the status bar. The purpose of this View is to receive input intended for
@@ -61,7 +62,6 @@ internal class AppHandleViewHolder(
         captionView.setOnTouchListener(onCaptionTouchListener)
         captionHandle.setOnTouchListener(onCaptionTouchListener)
         captionHandle.setOnClickListener(onCaptionButtonClickListener)
-        captionHandle.setOnHoverListener(onCaptionHoverListener)
     }
 
     override fun bindData(
@@ -106,10 +106,19 @@ internal class AppHandleViewHolder(
         // gesture listener that receives events before window. This is to prevent notification
         // shade gesture when we swipe down to enter desktop.
         lp.inputFeatures = WindowManager.LayoutParams.INPUT_FEATURE_SPY
-        view.id = R.id.caption_handle
-        view.setOnClickListener(onCaptionButtonClickListener)
-        view.setOnTouchListener(onCaptionTouchListener)
-        view.setOnHoverListener(onCaptionHoverListener)
+        view.setOnHoverListener { _, event ->
+            captionHandle.onHoverEvent(event)
+        }
+        // Caption handle is located within the status bar region, meaning the
+        // DisplayPolicy will attempt to transfer this input to status bar if it's
+        // a swipe down. Pilfer here to keep the gesture in handle alone.
+        view.setOnTouchListener { v, event ->
+            if (event.actionMasked == ACTION_DOWN) {
+                inputManager.pilferPointers(v.viewRootImpl.inputToken)
+            }
+            captionHandle.dispatchTouchEvent(event)
+            true
+        }
         windowManager.updateViewLayout(view, lp)
     }
 

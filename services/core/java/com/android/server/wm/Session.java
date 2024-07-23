@@ -39,7 +39,6 @@ import static android.view.WindowManager.LayoutParams.isSystemAlertWindowType;
 
 import static com.android.internal.protolog.ProtoLogGroup.WM_SHOW_TRANSACTIONS;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG;
-import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_TASK_POSITIONING;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 
 import android.annotation.NonNull;
@@ -537,27 +536,11 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
 
     @Override
     public boolean startMovingTask(IWindow window, float startX, float startY) {
-        if (DEBUG_TASK_POSITIONING) Slog.d(
-                TAG_WM, "startMovingTask: {" + startX + "," + startY + "}");
-
-        final long ident = Binder.clearCallingIdentity();
-        try {
-            return mService.mTaskPositioningController.startMovingTask(window, startX, startY);
-        } finally {
-            Binder.restoreCallingIdentity(ident);
-        }
+        return false;
     }
 
     @Override
     public void finishMovingTask(IWindow window) {
-        if (DEBUG_TASK_POSITIONING) Slog.d(TAG_WM, "finishMovingTask");
-
-        final long ident = Binder.clearCallingIdentity();
-        try {
-            mService.mTaskPositioningController.finishTaskPositioning(window);
-        } finally {
-            Binder.restoreCallingIdentity(ident);
-        }
     }
 
     @Override

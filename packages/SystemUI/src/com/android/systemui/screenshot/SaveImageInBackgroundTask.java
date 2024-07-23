@@ -49,6 +49,7 @@ import java.util.List;
 import java.util.Random;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
+import java.util.function.Consumer;
 
 /**
  * An AsyncTask that saves an image to the media store in the background.
@@ -59,12 +60,73 @@ class SaveImageInBackgroundTask extends AsyncTask<Void, Void, Void> {
     private static final String SCREENSHOT_ID_TEMPLATE = "Screenshot_%s";
     private static final String SCREENSHOT_SHARE_SUBJECT_TEMPLATE = "Screenshot (%s)";
 
+    /**
+     * POD used in the AsyncTask which saves an image in the background.
+     */
+    static class SaveImageInBackgroundData {
+        public Bitmap image;
+        public Consumer<Uri> finisher;
+        public ActionsReadyListener mActionsReadyListener;
+        public QuickShareActionReadyListener mQuickShareActionsReadyListener;
+        public UserHandle owner;
+        public int displayId;
+
+        void clearImage() {
+            image = null;
+        }
+    }
+
+    /**
+     * Structure returned by the SaveImageInBackgroundTask
+     */
+    public static class SavedImageData {
+        public Uri uri;
+        public List<Notification.Action> smartActions;
+        public Notification.Action quickShareAction;
+        public UserHandle owner;
+        public String subject;  // Title for sharing
+        public Long imageTime; // Time at which screenshot was saved
+
+        /**
+         * Used to reset the return data on error
+         */
+        public void reset() {
+            uri = null;
+            smartActions = null;
+            quickShareAction = null;
+            subject = null;
+            imageTime = null;
+        }
+    }
+
+    /**
+     * Structure returned by the QueryQuickShareInBackgroundTask
+     */
+    static class QuickShareData {
+        public Notification.Action quickShareAction;
+
+        /**
+         * Used to reset the return data on error
+         */
+        public void reset() {
+            quickShareAction = null;
+        }
+    }
+
+    interface ActionsReadyListener {
+        void onActionsReady(SavedImageData imageData);
+    }
+
+    interface QuickShareActionReadyListener {
+        void onActionsReady(QuickShareData quickShareData);
+    }
+
     private final Context mContext;
     private FeatureFlags mFlags;
     private final ScreenshotSmartActions mScreenshotSmartActions;
-    private final ScreenshotController.SaveImageInBackgroundData mParams;
-    private final ScreenshotController.SavedImageData mImageData;
-    private final ScreenshotController.QuickShareData mQuickShareData;
+    private final SaveImageInBackgroundData mParams;
+    private final SavedImageData mImageData;
+    private final QuickShareData mQuickShareData;
 
     private final ScreenshotNotificationSmartActionsProvider mSmartActionsProvider;
     private String mScreenshotId;
@@ -77,15 +139,15 @@ class SaveImageInBackgroundTask extends AsyncTask<Void, Void, Void> {
             FeatureFlags flags,
             ImageExporter exporter,
             ScreenshotSmartActions screenshotSmartActions,
-            ScreenshotController.SaveImageInBackgroundData data,
+            SaveImageInBackgroundData data,
             ScreenshotNotificationSmartActionsProvider
                     screenshotNotificationSmartActionsProvider
     ) {
         mContext = context;
         mFlags = flags;
         mScreenshotSmartActions = screenshotSmartActions;
-        mImageData = new ScreenshotController.SavedImageData();
-        mQuickShareData = new ScreenshotController.QuickShareData();
+        mImageData = new SavedImageData();
+        mQuickShareData = new QuickShareData();
         mImageExporter = exporter;
 
         // Prepare all the output metadata
@@ -195,7 +257,7 @@ class SaveImageInBackgroundTask extends AsyncTask<Void, Void, Void> {
      * Update the listener run when the saving task completes. Used to avoid showing UI for the
      * first screenshot when a second one is taken.
      */
-    void setActionsReadyListener(ScreenshotController.ActionsReadyListener listener) {
+    void setActionsReadyListener(ActionsReadyListener listener) {
         mParams.mActionsReadyListener = listener;
     }
 

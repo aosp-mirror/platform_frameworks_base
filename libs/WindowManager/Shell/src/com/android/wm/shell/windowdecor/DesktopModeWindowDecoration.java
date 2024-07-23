@@ -520,11 +520,7 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
             return new AppHandleViewHolder(
                     mResult.mRootView,
                     mOnCaptionTouchListener,
-                    mOnCaptionButtonClickListener,
-                    (v, event) -> {
-                        updateHoverAndPressStatus(event);
-                        return true;
-                    }
+                    mOnCaptionButtonClickListener
             );
         } else if (mRelayoutParams.mLayoutResId
                 == R.layout.desktop_mode_app_header) {
@@ -589,9 +585,11 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
             controlsElement.mWidthResId = R.dimen.desktop_mode_customizable_caption_margin_end;
             controlsElement.mAlignment = RelayoutParams.OccludingCaptionElement.Alignment.END;
             relayoutParams.mOccludingCaptionElements.add(controlsElement);
-        } else if (isAppHandle) {
+        } else if (isAppHandle && !Flags.enableAdditionalWindowsAboveStatusBar()) {
             // The focused decor (fullscreen/split) does not need to handle input because input in
             // the App Handle is handled by the InputMonitor in DesktopModeWindowDecorViewModel.
+            // Note: This does not apply with the above flag enabled as the status bar input layer
+            // will forward events to the handle directly.
             relayoutParams.mInputFeatures
                     |= WindowManager.LayoutParams.INPUT_FEATURE_NO_INPUT_CHANNEL;
         }

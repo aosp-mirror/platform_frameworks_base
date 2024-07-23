@@ -16,70 +16,39 @@
 
 package android.app.servertransaction;
 
-import com.android.window.flags.Flags;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
-
 /**
  * An object pool that can provide reused objects if available.
+ *
  * @hide
+ * @deprecated This class is deprecated. Directly create new instances of objects instead of
+ * obtaining them from this pool.
+ * TODO(b/311089192): Clean up usages of the pool.
  */
+@Deprecated
 class ObjectPool {
-
-    private static final Object sPoolSync = new Object();
-    private static final Map<Class, ArrayList<? extends ObjectPoolItem>> sPoolMap =
-            new HashMap<>();
-
-    private static final int MAX_POOL_SIZE = 50;
 
     /**
      * Obtain an instance of a specific class from the pool
-     * @param itemClass The class of the object we're looking for.
+     *
+     * @param ignoredItemClass The class of the object we're looking for.
      * @return An instance or null if there is none.
+     * @deprecated This method is deprecated. Directly create new instances of objects instead of
+     * obtaining them from this pool.
      */
-    public static <T extends ObjectPoolItem> T obtain(Class<T> itemClass) {
-        if (Flags.disableObjectPool()) {
-            return null;
-        }
-        synchronized (sPoolSync) {
-            @SuppressWarnings("unchecked")
-            final ArrayList<T> itemPool = (ArrayList<T>) sPoolMap.get(itemClass);
-            if (itemPool != null && !itemPool.isEmpty()) {
-                return itemPool.remove(itemPool.size() - 1);
-            }
-            return null;
-        }
+    @Deprecated
+    public static <T extends ObjectPoolItem> T obtain(Class<T> ignoredItemClass) {
+        return null;
     }
 
     /**
      * Recycle the object to the pool. The object should be properly cleared before this.
-     * @param item The object to recycle.
+     *
+     * @param ignoredItem The object to recycle.
      * @see ObjectPoolItem#recycle()
+     * @deprecated This method is deprecated. The object pool is no longer used, so there's
+     * no need to recycle objects.
      */
-    public static <T extends ObjectPoolItem> void recycle(T item) {
-        if (Flags.disableObjectPool()) {
-            return;
-        }
-        synchronized (sPoolSync) {
-            @SuppressWarnings("unchecked")
-            ArrayList<T> itemPool = (ArrayList<T>) sPoolMap.get(item.getClass());
-            if (itemPool == null) {
-                itemPool = new ArrayList<>();
-                sPoolMap.put(item.getClass(), itemPool);
-            }
-            // Check if the item is already in the pool
-            final int size = itemPool.size();
-            for (int i = 0; i < size; i++) {
-                if (itemPool.get(i) == item) {
-                    throw new IllegalStateException("Trying to recycle already recycled item");
-                }
-            }
-
-            if (size < MAX_POOL_SIZE) {
-                itemPool.add(item);
-            }
-        }
+    @Deprecated
+    public static <T extends ObjectPoolItem> void recycle(T ignoredItem) {
     }
 }
