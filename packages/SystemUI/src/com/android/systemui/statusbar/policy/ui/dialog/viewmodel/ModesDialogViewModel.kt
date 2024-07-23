@@ -66,7 +66,9 @@ constructor(
                         // Mode is enabled -> show if active (so user can toggle off), or if it
                         // can be manually toggled on
                         mode.rule.isEnabled -> mode.isActive || mode.rule.isManualInvocationAllowed
-                        // TODO(b/346519570): Include modes that have not been set up yet.
+                        // Mode was created as disabled, or disabled by the app that owns it ->
+                        // will be shown with a "Set up" text
+                        !mode.rule.isEnabled -> mode.status == ZenMode.Status.DISABLED_BY_OTHER
                         else -> false
                     }
                 }
@@ -86,26 +88,39 @@ constructor(
                         //  "ON: Do Not Disturb, Until Mon 08:09"; see DndTile.
                         contentDescription = "",
                         onClick = {
-                            if (mode.isActive) {
+                            if (!mode.rule.isEnabled) {
+                                openSettings(mode)
+                            } else if (mode.isActive) {
                                 zenModeInteractor.deactivateMode(mode)
                             } else {
-                                // TODO(b/346519570): Handle duration for DND mode.
-                                zenModeInteractor.activateMode(mode)
+                                if (mode.rule.isManualInvocationAllowed) {
+                                    // TODO(b/346519570): Handle duration for DND mode.
+                                    zenModeInteractor.activateMode(mode)
+                                }
                             }
                         },
-                        onLongClick = {
-                            val intent: Intent =
-                                Intent(ACTION_AUTOMATIC_ZEN_RULE_SETTINGS)
-                                    .putExtra(EXTRA_AUTOMATIC_ZEN_RULE_ID, mode.id)
-                            dialogDelegate.launchFromDialog(intent)
-                        }
+                        onLongClick = { openSettings(mode) }
                     )
                 }
             }
             .flowOn(bgDispatcher)
 
+    private fun openSettings(mode: ZenMode) {
+        val intent: Intent =
+            Intent(ACTION_AUTOMATIC_ZEN_RULE_SETTINGS)
+                .putExtra(EXTRA_AUTOMATIC_ZEN_RULE_ID, mode.id)
+
+        dialogDelegate.launchFromDialog(intent)
+    }
+
     private fun getTileSubtext(mode: ZenMode): String {
-        // TODO(b/346519570): Use ZenModeConfig.getDescription for manual DND
+        if (!mode.rule.isEnabled) {
+            return context.resources.getString(R.string.zen_mode_set_up)
+        }
+        if (!mode.rule.isManualInvocationAllowed && !mode.isActive) {
+            return context.resources.getString(R.string.zen_mode_no_manual_invocation)
+        }
+
         val on = context.resources.getString(R.string.zen_mode_on)
         val off = context.resources.getString(R.string.zen_mode_off)
         return mode.rule.triggerDescription ?: if (mode.isActive) on else off
