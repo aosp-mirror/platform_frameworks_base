@@ -1659,11 +1659,12 @@ public class FullScreenMagnificationGestureHandler extends MagnificationGestureH
         }
         float dX = event.getX() - firstPointerDownLocation.x;
         float dY = event.getY() - firstPointerDownLocation.y;
-        if (isAtLeftEdge() && dX > 0) {
+        if (isAtLeftEdge() && isScrollingLeft(dX, dY)) {
             return OVERSCROLL_LEFT_EDGE;
-        } else if (isAtRightEdge() && dX < 0) {
+        } else if (isAtRightEdge() && isScrollingRight(dX, dY)) {
             return OVERSCROLL_RIGHT_EDGE;
-        } else if ((isAtTopEdge() && dY > 0) || (isAtBottomEdge() && dY < 0)) {
+        } else if ((isAtTopEdge() && isScrollingUp(dX, dY))
+                || (isAtBottomEdge() && isScrollingDown(dX, dY))) {
             return OVERSCROLL_VERTICAL_EDGE;
         }
         return OVERSCROLL_NONE;
@@ -1673,16 +1674,32 @@ public class FullScreenMagnificationGestureHandler extends MagnificationGestureH
         return mFullScreenMagnificationController.isAtLeftEdge(mDisplayId, mOverscrollEdgeSlop);
     }
 
+    private static boolean isScrollingLeft(float dX, float dY) {
+        return Math.abs(dX) > Math.abs(dY) && dX > 0;
+    }
+
     private boolean isAtRightEdge() {
         return mFullScreenMagnificationController.isAtRightEdge(mDisplayId, mOverscrollEdgeSlop);
+    }
+
+    private static boolean isScrollingRight(float dX, float dY) {
+        return Math.abs(dX) > Math.abs(dY) && dX < 0;
     }
 
     private boolean isAtTopEdge() {
         return mFullScreenMagnificationController.isAtTopEdge(mDisplayId, mOverscrollEdgeSlop);
     }
 
+    private static boolean isScrollingUp(float dX, float dY) {
+        return Math.abs(dX) < Math.abs(dY) && dY > 0;
+    }
+
     private boolean isAtBottomEdge() {
         return mFullScreenMagnificationController.isAtBottomEdge(mDisplayId, mOverscrollEdgeSlop);
+    }
+
+    private static boolean isScrollingDown(float dX, float dY) {
+        return Math.abs(dX) < Math.abs(dY) && dY < 0;
     }
 
     private boolean pointerValid(PointF pointerDownLocation) {
