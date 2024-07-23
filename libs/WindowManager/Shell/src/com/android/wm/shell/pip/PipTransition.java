@@ -21,6 +21,7 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import static android.util.RotationUtils.deltaRotation;
 import static android.util.RotationUtils.rotateBounds;
+import static android.view.Surface.ROTATION_0;
 import static android.view.Surface.ROTATION_270;
 import static android.view.Surface.ROTATION_90;
 import static android.view.WindowManager.TRANSIT_CHANGE;
@@ -1183,10 +1184,15 @@ public class PipTransition extends PipTransitionController {
                 ? pipTaskInfo.configuration.windowConfiguration.getBounds()
                 : mPipOrganizer.mAppBounds;
 
+        // Populate the final surface control transactions from PipTransitionAnimator,
+        // display cutout insets is handled in the swipe pip to home animator, empty it out here
+        // to avoid flicker.
+        final Rect savedDisplayCutoutInsets = new Rect(pipTaskInfo.displayCutoutInsets);
+        pipTaskInfo.displayCutoutInsets.setEmpty();
         final PipAnimationController.PipTransitionAnimator animator =
                 mPipAnimationController.getAnimator(pipTaskInfo, leash, sourceBounds, sourceBounds,
                         destinationBounds, sourceHintRect, TRANSITION_DIRECTION_TO_PIP,
-                        0 /* startingAngle */, 0 /* rotationDelta */)
+                        0 /* startingAngle */, ROTATION_0 /* rotationDelta */)
                         .setPipTransactionHandler(mTransactionConsumer)
                         .setTransitionDirection(TRANSITION_DIRECTION_TO_PIP);
         // The start state is the end state for swipe-auto-pip.
@@ -1194,6 +1200,7 @@ public class PipTransition extends PipTransitionController {
         animator.applySurfaceControlTransaction(leash, startTransaction,
                 PipAnimationController.FRACTION_END);
         startTransaction.apply();
+        pipTaskInfo.displayCutoutInsets.set(savedDisplayCutoutInsets);
 
         mPipBoundsState.setBounds(destinationBounds);
         final SurfaceControl.Transaction tx = new SurfaceControl.Transaction();
