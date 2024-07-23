@@ -242,6 +242,12 @@ cc_aconfig_library {
     aconfig_declarations: "com.android.text.flags-aconfig",
 }
 
+rust_aconfig_library {
+    name: "libandroid_text_flags_rust",
+    crate_name: "android_text_flags",
+    aconfig_declarations: "com.android.text.flags-aconfig",
+}
+
 // Location
 aconfig_declarations {
     name: "android.location.flags-aconfig",

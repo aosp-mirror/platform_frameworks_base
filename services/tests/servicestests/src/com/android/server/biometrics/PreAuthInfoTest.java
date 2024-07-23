@@ -90,7 +90,8 @@ public class PreAuthInfoTest {
         when(mDevicePolicyManager.getKeyguardDisabledFeatures(any(), anyInt()))
                 .thenReturn(KEYGUARD_DISABLE_FEATURES_NONE);
         when(mSettingObserver.getEnabledForApps(anyInt())).thenReturn(true);
-        when(mSettingObserver.getMandatoryBiometricsEnabledForUser(anyInt())).thenReturn(true);
+        when(mSettingObserver.getMandatoryBiometricsEnabledAndRequirementsSatisfiedForUser(
+                anyInt())).thenReturn(true);
         when(mFaceAuthenticator.hasEnrolledTemplates(anyInt(), any())).thenReturn(true);
         when(mFaceAuthenticator.isHardwareDetected(any())).thenReturn(true);
         when(mFaceAuthenticator.getLockoutModeForUser(anyInt()))

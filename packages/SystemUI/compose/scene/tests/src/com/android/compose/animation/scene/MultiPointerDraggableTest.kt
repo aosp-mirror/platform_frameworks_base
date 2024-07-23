@@ -49,6 +49,21 @@ import org.junit.runner.RunWith
 class MultiPointerDraggableTest {
     @get:Rule val rule = createComposeRule()
 
+    private class SimpleDragController(
+        val onDrag: () -> Unit,
+        val onStop: () -> Unit,
+    ) : DragController {
+        override fun onDrag(delta: Float): Float {
+            onDrag()
+            return delta
+        }
+
+        override fun onStop(velocity: Float, canChangeScene: Boolean): Float {
+            onStop()
+            return velocity
+        }
+    }
+
     @Test
     fun cancellingPointerCallsOnDragStopped() {
         val size = 200f
@@ -70,15 +85,10 @@ class MultiPointerDraggableTest {
                         startDragImmediately = { false },
                         onDragStarted = { _, _, _ ->
                             started = true
-                            object : DragController {
-                                override fun onDrag(delta: Float) {
-                                    dragged = true
-                                }
-
-                                override fun onStop(velocity: Float, canChangeScene: Boolean) {
-                                    stopped = true
-                                }
-                            }
+                            SimpleDragController(
+                                onDrag = { dragged = true },
+                                onStop = { stopped = true },
+                            )
                         },
                     )
             )
@@ -142,15 +152,10 @@ class MultiPointerDraggableTest {
                         startDragImmediately = { true },
                         onDragStarted = { _, _, _ ->
                             started = true
-                            object : DragController {
-                                override fun onDrag(delta: Float) {
-                                    dragged = true
-                                }
-
-                                override fun onStop(velocity: Float, canChangeScene: Boolean) {
-                                    stopped = true
-                                }
-                            }
+                            SimpleDragController(
+                                onDrag = { dragged = true },
+                                onStop = { stopped = true },
+                            )
                         },
                     )
                     .pointerInput(Unit) {
@@ -218,15 +223,10 @@ class MultiPointerDraggableTest {
                         startDragImmediately = { false },
                         onDragStarted = { _, _, _ ->
                             started = true
-                            object : DragController {
-                                override fun onDrag(delta: Float) {
-                                    dragged = true
-                                }
-
-                                override fun onStop(velocity: Float, canChangeScene: Boolean) {
-                                    stopped = true
-                                }
-                            }
+                            SimpleDragController(
+                                onDrag = { dragged = true },
+                                onStop = { stopped = true },
+                            )
                         },
                     )
             ) {
@@ -341,15 +341,10 @@ class MultiPointerDraggableTest {
                         startDragImmediately = { false },
                         onDragStarted = { _, _, _ ->
                             started = true
-                            object : DragController {
-                                override fun onDrag(delta: Float) {
-                                    dragged = true
-                                }
-
-                                override fun onStop(velocity: Float, canChangeScene: Boolean) {
-                                    stopped = true
-                                }
-                            }
+                            SimpleDragController(
+                                onDrag = { dragged = true },
+                                onStop = { stopped = true },
+                            )
                         },
                     )
             ) {
@@ -447,15 +442,10 @@ class MultiPointerDraggableTest {
                         startDragImmediately = { false },
                         onDragStarted = { _, _, _ ->
                             verticalStarted = true
-                            object : DragController {
-                                override fun onDrag(delta: Float) {
-                                    verticalDragged = true
-                                }
-
-                                override fun onStop(velocity: Float, canChangeScene: Boolean) {
-                                    verticalStopped = true
-                                }
-                            }
+                            SimpleDragController(
+                                onDrag = { verticalDragged = true },
+                                onStop = { verticalStopped = true },
+                            )
                         },
                     )
                     .multiPointerDraggable(
@@ -464,15 +454,10 @@ class MultiPointerDraggableTest {
                         startDragImmediately = { false },
                         onDragStarted = { _, _, _ ->
                             horizontalStarted = true
-                            object : DragController {
-                                override fun onDrag(delta: Float) {
-                                    horizontalDragged = true
-                                }
-
-                                override fun onStop(velocity: Float, canChangeScene: Boolean) {
-                                    horizontalStopped = true
-                                }
-                            }
+                            SimpleDragController(
+                                onDrag = { horizontalDragged = true },
+                                onStop = { horizontalStopped = true },
+                            )
                         },
                     )
             )
@@ -567,11 +552,10 @@ class MultiPointerDraggableTest {
                             },
                         onDragStarted = { _, _, _ ->
                             started = true
-                            object : DragController {
-                                override fun onDrag(delta: Float) {}
-
-                                override fun onStop(velocity: Float, canChangeScene: Boolean) {}
-                            }
+                            SimpleDragController(
+                                onDrag = { /* do nothing */ },
+                                onStop = { /* do nothing */ },
+                            )
                         },
                     )
             ) {}

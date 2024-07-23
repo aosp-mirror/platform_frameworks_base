@@ -366,13 +366,8 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
                         Log.e(TAG, "Received invalid input event");
                         return;
                     }
-                    try {
-                        vri.processingBackKey(true);
-                        vri.enqueueInputEvent(keyEvent, null /* receiver */, 0 /* flags */,
-                                true /* processImmediately */);
-                    } finally {
-                        vri.processingBackKey(false);
-                    }
+                    vri.enqueueInputEvent(keyEvent, null /* receiver */, 0 /* flags */,
+                            true /* processImmediately */);
                 });
         }
     };

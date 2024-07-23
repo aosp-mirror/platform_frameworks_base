@@ -52,7 +52,7 @@ constructor(
     @Application private val applicationScope: CoroutineScope,
     private val communalSceneRepository: CommunalSceneRepository,
 ) {
-    val _isLaunchingWidget = MutableStateFlow(false)
+    private val _isLaunchingWidget = MutableStateFlow(false)
 
     /** Whether a widget launch is currently in progress. */
     val isLaunchingWidget: StateFlow<Boolean> = _isLaunchingWidget.asStateFlow()

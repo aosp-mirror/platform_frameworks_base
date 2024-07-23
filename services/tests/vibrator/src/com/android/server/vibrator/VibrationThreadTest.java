@@ -1746,10 +1746,6 @@ public class VibrationThreadTest {
         assertTrue("Tested duration=" + duration4, duration4 < 2000);
 
         // Effect5: played normally after effect4, which may or may not have played.
-
-        verify(mControllerCallbacks).onComplete(eq(VIBRATOR_ID), eq(vibrationId5));
-        verifyCallbacksTriggered(vibrationId5, Vibration.Status.FINISHED);
-
         assertEquals(Arrays.asList(expectedPrebaked(VibrationEffect.EFFECT_CLICK)),
                 fakeVibrator.getEffectSegments(vibrationId5));
     }

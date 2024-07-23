@@ -112,8 +112,8 @@ class PreAuthInfo {
                 == BiometricManager.Authenticators.MANDATORY_BIOMETRICS;
 
         if (dropCredentialFallback(promptInfo.getAuthenticators(),
-                settingObserver.getMandatoryBiometricsEnabledForUser(userId),
-                trustManager)) {
+                settingObserver.getMandatoryBiometricsEnabledAndRequirementsSatisfiedForUser(
+                        userId), trustManager)) {
             promptInfo.setAuthenticators(BiometricManager.Authenticators.BIOMETRIC_STRONG);
             promptInfo.setNegativeButtonText(context.getString(R.string.cancel));
         }

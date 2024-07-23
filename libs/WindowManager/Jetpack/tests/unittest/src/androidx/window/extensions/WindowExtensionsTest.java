@@ -16,7 +16,7 @@
 
 package androidx.window.extensions;
 
-import static androidx.window.extensions.WindowExtensionsImpl.EXTENSIONS_VERSION_CURRENT_PLATFORM;
+import static androidx.window.extensions.WindowExtensionsImpl.getExtensionsVersionCurrentPlatform;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -59,7 +59,8 @@ public class WindowExtensionsTest {
     @Test
     public void testGetVendorApiLevel_extensionsEnabled_matchesCurrentVersion() {
         assumeTrue(WindowManager.hasWindowExtensionsEnabled());
-        assertThat(mVersion).isEqualTo(EXTENSIONS_VERSION_CURRENT_PLATFORM);
+        assumeFalse(((WindowExtensionsImpl) mExtensions).hasLevelOverride());
+        assertThat(mVersion).isEqualTo(getExtensionsVersionCurrentPlatform());
     }
 
     @Test

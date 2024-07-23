@@ -669,12 +669,6 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
                 View v, MotionEvent e) {
             final int id = v.getId();
             if (id == R.id.caption_handle) {
-                if (e.getActionMasked() == MotionEvent.ACTION_DOWN) {
-                    // Caption handle is located within the status bar region, meaning the
-                    // DisplayPolicy will attempt to transfer this input to status bar if it's
-                    // a swipe down. Pilfer here to keep the gesture in handle alone.
-                    mInputManager.pilferPointers(v.getViewRootImpl().getInputToken());
-                }
                 handleCaptionThroughStatusBar(e, decoration);
                 final boolean wasDragging = mIsDragging;
                 updateDragStatus(e.getActionMasked());
@@ -970,7 +964,9 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
                         relevantDecor.updateHoverAndPressStatus(ev);
                         DesktopModeVisualIndicator.IndicatorType resultType =
                                 mDesktopTasksController.onDragPositioningEndThroughStatusBar(
-                                new PointF(ev.getRawX(), ev.getRawY()), relevantDecor.mTaskInfo);
+                                        new PointF(ev.getRawX(), ev.getRawY()),
+                                        relevantDecor.mTaskInfo,
+                                        relevantDecor.mTaskSurface);
                         // If we are entering split select, handle will no longer be visible and
                         // should not be receiving any input.
                         if (resultType == TO_SPLIT_LEFT_INDICATOR
@@ -1010,7 +1006,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
                                     mContext, mDragToDesktopAnimationStartBounds,
                                     relevantDecor.mTaskInfo, relevantDecor.mTaskSurface);
                             mDesktopTasksController.startDragToDesktop(relevantDecor.mTaskInfo,
-                                    mMoveToDesktopAnimator);
+                                    mMoveToDesktopAnimator, relevantDecor.mTaskSurface);
                         }
                     }
                     if (mMoveToDesktopAnimator != null) {

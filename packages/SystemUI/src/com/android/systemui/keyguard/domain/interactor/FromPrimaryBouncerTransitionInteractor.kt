@@ -113,10 +113,9 @@ constructor(
                         (isBouncerShowing, isAwake, isActiveDreamLockscreenHosted, isIdleOnCommunal)
                         ->
                         if (
-                            !maybeStartTransitionToOccludedOrInsecureCamera() &&
-                                !isBouncerShowing &&
-                                isAwake &&
-                                !isActiveDreamLockscreenHosted
+                            !maybeStartTransitionToOccludedOrInsecureCamera { state, reason ->
+                                startTransitionTo(state, ownerReason = reason)
+                            } && !isBouncerShowing && isAwake && !isActiveDreamLockscreenHosted
                         ) {
                             val toState =
                                 if (isIdleOnCommunal) {

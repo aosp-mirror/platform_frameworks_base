@@ -16,9 +16,15 @@
 
 package com.android.systemui.haptics.qs
 
+import android.content.ComponentName
 import android.os.VibrationEffect
 import android.service.quicksettings.Tile
+import android.view.View
 import androidx.annotation.VisibleForTesting
+import com.android.systemui.animation.ActivityTransitionAnimator
+import com.android.systemui.animation.DelegateTransitionAnimatorController
+import com.android.systemui.animation.DialogCuj
+import com.android.systemui.animation.DialogTransitionAnimator
 import com.android.systemui.animation.Expandable
 import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.plugins.qs.QSTile
@@ -58,6 +64,7 @@ constructor(
     /** The [QSTile] and [Expandable] used to perform a long-click and click actions */
     var qsTile: QSTile? = null
     var expandable: Expandable? = null
+        private set
 
     /** Haptic effects */
     private val durations =
@@ -125,8 +132,10 @@ constructor(
     }
 
     fun handleAnimationStart() {
-        vibrate(longPressHint)
-        setState(State.RUNNING_FORWARD)
+        if (state == State.TIMEOUT_WAIT) {
+            vibrate(longPressHint)
+            setState(State.RUNNING_FORWARD)
+        }
     }
 
     /** This function is called both when an animator completes or gets cancelled */
@@ -147,7 +156,10 @@ constructor(
                 setState(getStateForClick())
                 qsTile?.click(expandable)
             }
-            State.RUNNING_BACKWARDS_FROM_CANCEL -> setState(State.IDLE)
+            State.RUNNING_BACKWARDS_FROM_CANCEL -> {
+                callback?.onEffectFinishedReversing()
+                setState(State.IDLE)
+            }
             else -> {}
         }
     }
@@ -222,13 +234,58 @@ constructor(
 
     fun resetState() = setState(State.IDLE)
 
+    fun createExpandableFromView(view: View) {
+        expandable =
+            object : Expandable {
+                override fun activityTransitionController(
+                    launchCujType: Int?,
+                    cookie: ActivityTransitionAnimator.TransitionCookie?,
+                    component: ComponentName?,
+                    returnCujType: Int?,
+                ): ActivityTransitionAnimator.Controller? {
+                    val delegatedController =
+                        ActivityTransitionAnimator.Controller.fromView(
+                            view,
+                            launchCujType,
+                            cookie,
+                            component,
+                            returnCujType,
+                        )
+                    return delegatedController?.let { createTransitionControllerDelegate(it) }
+                }
+
+                override fun dialogTransitionController(
+                    cuj: DialogCuj?,
+                ): DialogTransitionAnimator.Controller? =
+                    DialogTransitionAnimator.Controller.fromView(view, cuj)
+            }
+    }
+
+    @VisibleForTesting
+    fun createTransitionControllerDelegate(
+        controller: ActivityTransitionAnimator.Controller
+    ): DelegateTransitionAnimatorController {
+        val delegated =
+            object : DelegateTransitionAnimatorController(controller) {
+                override fun onTransitionAnimationCancelled(newKeyguardOccludedState: Boolean?) {
+                    if (state == State.LONG_CLICKED) {
+                        setState(State.RUNNING_BACKWARDS_FROM_CANCEL)
+                        callback?.onReverseAnimator(false)
+                    }
+                    delegate.onTransitionAnimationCancelled(newKeyguardOccludedState)
+                }
+            }
+        return delegated
+    }
+
     enum class State {
         IDLE, /* The effect is idle waiting for touch input */
         TIMEOUT_WAIT, /* The effect is waiting for a tap timeout period */
         RUNNING_FORWARD, /* The effect is running normally */
         /* The effect was interrupted by an ACTION_UP and is now running backwards */
         RUNNING_BACKWARDS_FROM_UP,
-        /* The effect was interrupted by an ACTION_CANCEL and is now running backwards */
+        /* The effect was cancelled by an ACTION_CANCEL or a shade collapse and is now running
+        backwards */
         RUNNING_BACKWARDS_FROM_CANCEL,
         CLICKED, /* The effect has ended with a click */
         LONG_CLICKED, /* The effect has ended with a long-click */
@@ -247,7 +304,7 @@ constructor(
         fun onStartAnimator()
 
         /** Reverse the effect animator */
-        fun onReverseAnimator()
+        fun onReverseAnimator(playHaptics: Boolean = true)
 
         /** Cancel the effect animator */
         fun onCancelAnimator()
