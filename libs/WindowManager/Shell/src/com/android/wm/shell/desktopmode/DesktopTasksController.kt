@@ -80,6 +80,7 @@ import com.android.wm.shell.protolog.ShellProtoLogGroup.WM_SHELL_DESKTOP_MODE
 import com.android.wm.shell.recents.RecentTasksController
 import com.android.wm.shell.recents.RecentsTransitionHandler
 import com.android.wm.shell.recents.RecentsTransitionStateListener
+import com.android.wm.shell.shared.desktopmode.DesktopModeFlags
 import com.android.wm.shell.shared.desktopmode.DesktopModeStatus
 import com.android.wm.shell.shared.desktopmode.DesktopModeStatus.DESKTOP_DENSITY_OVERRIDE
 import com.android.wm.shell.shared.desktopmode.DesktopModeStatus.useDesktopOverrideDensity
@@ -348,7 +349,7 @@ class DesktopTasksController(
         wct: WindowContainerTransaction = WindowContainerTransaction(),
         transitionSource: DesktopModeTransitionSource,
     ) {
-        if (Flags.enableDesktopWindowingModalsPolicy()
+        if (DesktopModeFlags.MODALS_POLICY.isEnabled(context)
             && isTopActivityExemptFromDesktopWindowing(context, task)) {
             ProtoLog.w(
                 WM_SHELL_DESKTOP_MODE,
@@ -971,7 +972,7 @@ class DesktopTasksController(
     }
 
     private fun isIncompatibleTask(task: TaskInfo) =
-        Flags.enableDesktopWindowingModalsPolicy()
+        DesktopModeFlags.MODALS_POLICY.isEnabled(context)
                 && isTopActivityExemptFromDesktopWindowing(context, task)
 
     private fun shouldHandleTaskClosing(request: TransitionRequestInfo): Boolean {
