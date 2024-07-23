@@ -53,8 +53,8 @@ import android.os.Parcelable;
 import android.platform.test.annotations.Presubmit;
 import android.util.ArrayMap;
 
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
-import androidx.test.runner.AndroidJUnit4;
 
 import org.junit.Before;
 import org.junit.Rule;
