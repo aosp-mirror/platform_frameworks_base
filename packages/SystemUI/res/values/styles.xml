@@ -1386,9 +1386,13 @@
         <item name="android:textColor">?androidprv:attr/materialColorOnSurfaceVariant</item>
     </style>
 
-    <style name="TextAppearance.InternetDialog.Active"/>
+    <style name="TextAppearance.InternetDialog.Active">
+        <item name="android:textColor">?androidprv:attr/materialColorOnPrimaryContainer</item>
+    </style>
 
-    <style name="TextAppearance.InternetDialog.Secondary.Active"/>
+    <style name="TextAppearance.InternetDialog.Secondary.Active">
+        <item name="android:textColor">?androidprv:attr/materialColorOnPrimaryContainer</item>
+    </style>
 
     <style name="FgsManagerDialogTitle">
         <item name="android:fontFamily">@*android:string/config_bodyFontFamily</item>
@@ -1424,17 +1428,32 @@
         <item name="android:orientation">horizontal</item>
         <item name="android:focusable">true</item>
         <item name="android:clickable">true</item>
+        <item name="android:textColor">?androidprv:attr/materialColorOnSurface</item>
+    </style>
+
+    <style name="BluetoothTileDialog.Device.Active">
+        <item name="android:textColor">?androidprv:attr/materialColorOnPrimaryContainer</item>
     </style>
 
     <style name="BluetoothTileDialog.DeviceName">
         <item name="android:textSize">14sp</item>
         <item name="android:textAppearance">@style/TextAppearance.Dialog.Title</item>
+        <item name="android:textColor">?androidprv:attr/materialColorOnSurface</item>
     </style>
 
     <style name="BluetoothTileDialog.DeviceSummary">
         <item name="android:ellipsize">end</item>
         <item name="android:maxLines">2</item>
         <item name="android:textAppearance">@style/TextAppearance.Dialog.Body.Message</item>
+        <item name="android:textColor">?androidprv:attr/materialColorOnSurfaceVariant</item>
+    </style>
+
+    <style name="BluetoothTileDialog.DeviceName.Active">
+        <item name="android:textColor">?androidprv:attr/materialColorOnPrimaryContainer</item>
+    </style>
+
+    <style name="BluetoothTileDialog.DeviceSummary.Active">
+        <item name="android:textColor">?androidprv:attr/materialColorOnPrimaryContainer</item>
     </style>
 
     <style name="BroadcastDialog">
