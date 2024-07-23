@@ -80,6 +80,7 @@ import com.android.systemui.common.ui.compose.windowinsets.LocalScreenCornerRadi
 import com.android.systemui.compose.modifiers.sysuiResTag
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.media.controls.ui.composable.MediaCarousel
+import com.android.systemui.media.controls.ui.composable.MediaScenePicker
 import com.android.systemui.media.controls.ui.controller.MediaCarouselController
 import com.android.systemui.media.controls.ui.controller.MediaHierarchyManager
 import com.android.systemui.media.controls.ui.view.MediaHost
@@ -360,7 +361,13 @@ private fun SceneScope.SingleShade(
             maxNotifScrimTop.value = quickSettingsPlaceable.height.toFloat()
 
             layout(constraints.maxWidth, constraints.maxHeight) {
-                quickSettingsPlaceable.placeRelative(x = 0, y = 0)
+                val qsZIndex =
+                    if (MediaScenePicker.shouldElevateMedia(layoutState.currentTransition)) {
+                        1f
+                    } else {
+                        0f
+                    }
+                quickSettingsPlaceable.placeRelative(x = 0, y = 0, zIndex = qsZIndex)
                 notificationsPlaceable.placeRelative(x = 0, y = maxNotifScrimTop.value.roundToInt())
             }
         }
