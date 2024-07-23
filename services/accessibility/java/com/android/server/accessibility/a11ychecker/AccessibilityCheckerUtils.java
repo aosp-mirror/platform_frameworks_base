@@ -19,7 +19,6 @@ package com.android.server.accessibility.a11ychecker;
 
 import android.annotation.Nullable;
 import android.content.ComponentName;
-import android.content.Context;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.util.Slog;
@@ -62,6 +61,7 @@ import java.util.stream.Collectors;
 public class AccessibilityCheckerUtils {
 
     private static final String LOG_TAG = "AccessibilityCheckerUtils";
+
     @VisibleForTesting
     // LINT.IfChange
     static final Map<Class<? extends AccessibilityHierarchyCheck>, AccessibilityCheckClass>
@@ -94,29 +94,22 @@ public class AccessibilityCheckerUtils {
     // LINT.ThenChange(/services/accessibility/java/com/android/server/accessibility/a11ychecker/proto/a11ychecker.proto)
 
     static Set<AccessibilityCheckResultReported> processResults(
-            Context context,
-            AccessibilityNodeInfo nodeInfo,
-            List<AccessibilityHierarchyCheckResult> checkResults,
-            @Nullable AccessibilityEvent accessibilityEvent,
-            ComponentName a11yServiceComponentName) {
-        return processResults(nodeInfo, checkResults, accessibilityEvent,
-                context.getPackageManager(), a11yServiceComponentName);
-    }
-
-    @VisibleForTesting
-    static Set<AccessibilityCheckResultReported> processResults(
             AccessibilityNodeInfo nodeInfo,
             List<AccessibilityHierarchyCheckResult> checkResults,
             @Nullable AccessibilityEvent accessibilityEvent,
             PackageManager packageManager,
             ComponentName a11yServiceComponentName) {
         String appPackageName = nodeInfo.getPackageName().toString();
+        String nodePath = AccessibilityNodePathBuilder.createNodePath(nodeInfo);
+        if (nodePath == null) {
+            return Set.of();
+        }
         AccessibilityCheckResultReported.Builder builder;
         try {
             builder = AccessibilityCheckResultReported.newBuilder()
                     .setPackageName(appPackageName)
                     .setAppVersionCode(getAppVersionCode(packageManager, appPackageName))
-                    .setUiElementPath(AccessibilityNodePathBuilder.createNodePath(nodeInfo))
+                    .setUiElementPath(nodePath)
                     .setActivityName(getActivityName(packageManager, accessibilityEvent))
                     .setWindowTitle(getWindowTitle(nodeInfo))
                     .setSourceComponentName(a11yServiceComponentName.flattenToString())
