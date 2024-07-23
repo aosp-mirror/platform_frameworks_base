@@ -38,9 +38,10 @@ import javax.inject.Inject
 class AvalancheController
 @Inject
 constructor(
-    dumpManager: DumpManager,
-    private val uiEventLogger: UiEventLogger,
-    @Background private val bgHandler: Handler
+        dumpManager: DumpManager,
+        private val uiEventLogger: UiEventLogger,
+        private val headsUpManagerLogger: HeadsUpManagerLogger,
+        @Background private val bgHandler: Handler
 ) : Dumpable {
 
     private val tag = "AvalancheController"
@@ -109,32 +110,36 @@ constructor(
     }
 
     /** Run or delay Runnable for given HeadsUpEntry */
-    fun update(entry: HeadsUpEntry?, runnable: Runnable?, label: String) {
+    fun update(entry: HeadsUpEntry?, runnable: Runnable?, caller: String) {
+        val isEnabled = isEnabled()
+        val key = getKey(entry)
+
         if (runnable == null) {
-            log { "Runnable is NULL, stop update." }
+            headsUpManagerLogger.logAvalancheUpdate(caller, isEnabled, key, "Runnable NULL, stop")
             return
         }
-        if (!isEnabled()) {
+        if (!isEnabled) {
+            headsUpManagerLogger.logAvalancheUpdate(caller, isEnabled, key,
+                    "NOT ENABLED, run runnable")
             runnable.run()
             return
         }
-        log { "\n " }
-        val fn = "$label => AvalancheController.update ${getKey(entry)}"
         if (entry == null) {
-            log { "Entry is NULL, stop update." }
+            headsUpManagerLogger.logAvalancheUpdate(caller, isEnabled, key, "Entry NULL, stop")
             return
         }
         if (debug) {
-            debugRunnableLabelMap[runnable] = label
+            debugRunnableLabelMap[runnable] = caller
         }
+        var outcome = ""
         if (isShowing(entry)) {
-            log { "\n$fn => update showing" }
+            outcome = "update showing"
             runnable.run()
         } else if (entry in nextMap) {
-            log { "\n$fn => update next" }
+            outcome = "update next"
             nextMap[entry]?.add(runnable)
         } else if (headsUpEntryShowing == null) {
-            log { "\n$fn => showNow" }
+            outcome = "show now"
             showNow(entry, arrayListOf(runnable))
         } else {
             // Clean up invalid state when entry is in list but not map and vice versa
@@ -156,7 +161,8 @@ constructor(
                 )
             }
         }
-        logState("after $fn")
+        outcome += getStateStr()
+        headsUpManagerLogger.logAvalancheUpdate(caller, isEnabled, key, outcome)
     }
 
     @VisibleForTesting
@@ -169,32 +175,37 @@ constructor(
      * Run or ignore Runnable for given HeadsUpEntry. If entry was never shown, ignore and delete
      * all Runnables associated with that entry.
      */
-    fun delete(entry: HeadsUpEntry?, runnable: Runnable?, label: String) {
+    fun delete(entry: HeadsUpEntry?, runnable: Runnable?, caller: String) {
+        val isEnabled = isEnabled()
+        val key = getKey(entry)
+
         if (runnable == null) {
-            log { "Runnable is NULL, stop delete." }
+            headsUpManagerLogger.logAvalancheDelete(caller, isEnabled, key, "Runnable NULL, stop")
             return
         }
-        if (!isEnabled()) {
+        if (!isEnabled) {
+            headsUpManagerLogger.logAvalancheDelete(caller, isEnabled, key,
+                    "NOT ENABLED, run runnable")
             runnable.run()
             return
         }
-        log { "\n " }
-        val fn = "$label => AvalancheController.delete " + getKey(entry)
         if (entry == null) {
-            log { "$fn => entry NULL, running runnable" }
+            headsUpManagerLogger.logAvalancheDelete(caller, isEnabled, key,
+                    "Entry NULL, run runnable")
             runnable.run()
             return
         }
+        var outcome = ""
         if (entry in nextMap) {
-            log { "$fn => remove from next" }
+            outcome = "remove from next"
             if (entry in nextMap) nextMap.remove(entry)
             if (entry in nextList) nextList.remove(entry)
             uiEventLogger.log(ThrottleEvent.AVALANCHE_THROTTLING_HUN_REMOVED)
         } else if (entry in debugDropSet) {
-            log { "$fn => remove from dropset" }
+            outcome = "remove from dropset"
             debugDropSet.remove(entry)
         } else if (isShowing(entry)) {
-            log { "$fn => remove showing ${getKey(entry)}" }
+            outcome = "remove showing"
             previousHunKey = getKey(headsUpEntryShowing)
             // Show the next HUN before removing this one, so that we don't tell listeners
             // onHeadsUpPinnedModeChanged, which causes
@@ -203,10 +214,10 @@ constructor(
             showNext()
             runnable.run()
         } else {
-            log { "$fn => run runnable for untracked shown ${getKey(entry)}" }
+            outcome = "run runnable for untracked shown"
             runnable.run()
         }
-        logState("after $fn")
+        headsUpManagerLogger.logAvalancheDelete(caller, isEnabled(), getKey(entry), outcome)
     }
 
     /**
@@ -384,23 +395,12 @@ constructor(
     }
 
     private fun getStateStr(): String {
-        return "SHOWING: [${getKey(headsUpEntryShowing)}]" +
-            "\nPREVIOUS: [$previousHunKey]" +
-            "\nNEXT LIST: $nextListStr" +
-            "\nNEXT MAP: $nextMapStr" +
-            "\nDROPPED: $dropSetStr" +
-            "\nENABLED: $enableAtRuntime"
-    }
-
-    private fun logState(reason: String) {
-        log {
-            "\n================================================================================="
-        }
-        log { "STATE $reason" }
-        log { getStateStr() }
-        log {
-            "=================================================================================\n"
-        }
+        return "\navalanche state:" +
+                "\n\tshowing: [${getKey(headsUpEntryShowing)}]" +
+                "\n\tprevious: [$previousHunKey]" +
+                "\n\tnext list: $nextListStr" +
+                "\n\tnext map: $nextMapStr" +
+                "\n\tdropped: $dropSetStr"
     }
 
     private val dropSetStr: String

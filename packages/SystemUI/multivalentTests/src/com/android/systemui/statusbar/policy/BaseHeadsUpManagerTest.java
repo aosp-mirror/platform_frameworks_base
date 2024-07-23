@@ -81,6 +81,7 @@ public class BaseHeadsUpManagerTest extends SysuiTestCase {
     static final int TEST_A11Y_AUTO_DISMISS_TIME = 1_000;
 
     private UiEventLoggerFake mUiEventLoggerFake = new UiEventLoggerFake();
+
     private final HeadsUpManagerLogger mLogger = spy(new HeadsUpManagerLogger(logcatLogBuffer()));
     @Mock private Handler mBgHandler;
     @Mock private DumpManager dumpManager;
@@ -149,7 +150,8 @@ public class BaseHeadsUpManagerTest extends SysuiTestCase {
     @Override
     public void SysuiSetup() throws Exception {
         super.SysuiSetup();
-        mAvalancheController = new AvalancheController(dumpManager, mUiEventLoggerFake, mBgHandler);
+        mAvalancheController = new AvalancheController(dumpManager, mUiEventLoggerFake, mLogger,
+                mBgHandler);
     }
 
     @Test

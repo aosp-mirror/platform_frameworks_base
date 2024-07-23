@@ -179,7 +179,8 @@ class HeadsUpManagerPhoneTest(flags: FlagsParameterization) : BaseHeadsUpManager
         mContext
             .getOrCreateTestableResources()
             .addOverride(R.integer.ambient_notification_extension_time, 500)
-        mAvalancheController = AvalancheController(dumpManager, mUiEventLogger, mBgHandler)
+        mAvalancheController = AvalancheController(dumpManager, mUiEventLogger,
+                mHeadsUpManagerLogger, mBgHandler)
     }
 
     @Test
