@@ -5522,6 +5522,9 @@
   <!-- Whether desktop mode is supported on the current device  -->
   <java-symbol type="bool" name="config_isDesktopModeSupported" />
 
+  <!-- Maximum number of active tasks on a given Desktop Windowing session. Set to 0 for unlimited. -->
+  <java-symbol type="integer" name="config_maxDesktopWindowingActiveTasks"/>
+
   <!-- Frame rate compatibility value for Wallpaper -->
   <java-symbol type="integer" name="config_wallpaperFrameRateCompatibility" />
 
