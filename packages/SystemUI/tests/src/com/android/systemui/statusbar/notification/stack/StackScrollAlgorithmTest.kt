@@ -279,16 +279,23 @@ class StackScrollAlgorithmTest : SysuiTestCase() {
     fun resetViewStates_defaultHun_showingQS_hunTranslatedToHeadsUpTop() {
         // Given: the shade is open and scrolled to the bottom to show the QuickSettings
         val headsUpTop = 2000f
+        val intrinsicHunHeight = 300
         fakeHunInShade(
             headsUpTop = headsUpTop,
             stackTop = 2600f, // stack scrolled below the screen
             stackCutoff = 4000f,
             collapsedHeight = 100,
-            intrinsicHeight = 300
+            intrinsicHeight = intrinsicHunHeight,
         )
         whenever(notificationRow.isAboveShelf).thenReturn(true)
 
-        resetViewStates_hunYTranslationIs(headsUpTop)
+        // When
+        stackScrollAlgorithm.resetViewStates(ambientState, 0)
+
+        // Then: HUN is translated to the headsUpTop
+        assertThat(notificationRow.viewState.yTranslation).isEqualTo(headsUpTop)
+        // And: HUN maintained its full height
+        assertThat(notificationRow.viewState.height).isEqualTo(intrinsicHunHeight)
     }
 
     @Test
@@ -1419,14 +1426,16 @@ class StackScrollAlgorithmTest : SysuiTestCase() {
 
     /** fakes the notification row under test, to be a HUN in a fully opened shade */
     private fun fakeHunInShade(
-        headsUpTop: Float,
         collapsedHeight: Int,
         intrinsicHeight: Int,
+        headsUpTop: Float,
+        headsUpBottom: Float = headsUpTop + intrinsicHeight, // assume all the space available
         stackTop: Float,
         stackCutoff: Float = 2000f,
         fullStackHeight: Float = 3000f
     ) {
         ambientState.headsUpTop = headsUpTop
+        ambientState.headsUpBottom = headsUpBottom
         ambientState.stackTop = stackTop
         ambientState.stackCutoff = stackCutoff
 
