@@ -164,8 +164,6 @@ import android.os.SystemProperties;
 import android.os.Trace;
 import android.os.UEventObserver;
 import android.os.UserHandle;
-import android.os.VibrationAttributes;
-import android.os.VibrationEffect;
 import android.os.Vibrator;
 import android.provider.DeviceConfig;
 import android.provider.MediaStore;
@@ -238,8 +236,6 @@ import com.android.server.policy.keyguard.KeyguardServiceDelegate;
 import com.android.server.policy.keyguard.KeyguardServiceDelegate.DrawnListener;
 import com.android.server.policy.keyguard.KeyguardStateMonitor.StateCallback;
 import com.android.server.statusbar.StatusBarManagerInternal;
-import com.android.server.vibrator.HapticFeedbackVibrationProvider;
-import com.android.server.vibrator.VibratorFrameworkStatsLogger;
 import com.android.server.vr.VrManagerInternal;
 import com.android.server.wallpaper.WallpaperManagerInternal;
 import com.android.server.wm.ActivityTaskManagerInternal;
@@ -462,7 +458,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     PackageManager mPackageManager;
     SideFpsEventHandler mSideFpsEventHandler;
     LockPatternUtils mLockPatternUtils;
-    private HapticFeedbackVibrationProvider mHapticFeedbackVibrationProvider;
     private boolean mHasFeatureAuto;
     private boolean mHasFeatureWatch;
     private boolean mHasFeatureLeanback;
@@ -2388,8 +2383,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         mContext.registerReceiver(mMultiuserReceiver, filter);
 
         mVibrator = (Vibrator) mContext.getSystemService(Context.VIBRATOR_SERVICE);
-        mHapticFeedbackVibrationProvider =
-                new HapticFeedbackVibrationProvider(mContext.getResources(), mVibrator);
 
         mGlobalKeyManager = new GlobalKeyManager(mContext);
 
@@ -5975,10 +5968,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     public void setSafeMode(boolean safeMode) {
         mSafeMode = safeMode;
         if (safeMode) {
-            performHapticFeedback(Process.myUid(), mContext.getOpPackageName(),
+            performHapticFeedback(
                     HapticFeedbackConstants.SAFE_MODE_ENABLED,
-                    "Safe Mode Enabled", HapticFeedbackConstants.FLAG_IGNORE_GLOBAL_SETTING,
-                    0 /* privFlags */);
+                    "Safe Mode Enabled" /* reason */,
+                    HapticFeedbackConstants.FLAG_IGNORE_GLOBAL_SETTING);
         }
     }
 
@@ -6447,33 +6440,18 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 Settings.Global.THEATER_MODE_ON, 0) == 1;
     }
 
-    private boolean performHapticFeedback(int effectId, String reason) {
-        return performHapticFeedback(Process.myUid(), mContext.getOpPackageName(),
-            effectId, reason, 0 /* flags */, 0 /* privFlags */);
+    private void performHapticFeedback(int effectId, String reason) {
+        performHapticFeedback(effectId, reason, 0 /* flags */);
+    }
+
+    private void performHapticFeedback(
+            int effectId, String reason, @HapticFeedbackConstants.Flags int flags) {
+        mVibrator.performHapticFeedback(effectId, reason, flags, 0 /* privFlags */);
     }
 
     @Override
     public boolean isGlobalKey(int keyCode) {
         return mGlobalKeyManager.shouldHandleGlobalKey(keyCode);
-    }
-
-    @Override
-    public boolean performHapticFeedback(int uid, String packageName, int effectId, String reason,
-            int flags, int privFlags) {
-        if (!mVibrator.hasVibrator()) {
-            return false;
-        }
-        VibrationEffect effect =
-                mHapticFeedbackVibrationProvider.getVibrationForHapticFeedback(effectId);
-        if (effect == null) {
-            return false;
-        }
-        VibrationAttributes attrs =
-                mHapticFeedbackVibrationProvider.getVibrationAttributesForHapticFeedback(
-                        effectId, flags, privFlags);
-        VibratorFrameworkStatsLogger.logPerformHapticsFeedbackIfKeyboard(uid, effectId);
-        mVibrator.vibrate(uid, packageName, effect, reason, attrs);
-        return true;
     }
 
 
@@ -6651,7 +6629,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 pw.print(" mLockScreenTimerActive="); pw.println(mLockScreenTimerActive);
         pw.print(prefix); pw.print("mKidsModeEnabled="); pw.println(mKidsModeEnabled);
 
-        mHapticFeedbackVibrationProvider.dump(prefix, pw);
         mGlobalKeyManager.dump(prefix, pw);
         mKeyCombinationManager.dump(prefix, pw);
         mSingleKeyGestureDetector.dump(prefix, pw);

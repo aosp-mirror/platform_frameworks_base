@@ -3,13 +3,6 @@ container: "system"
 
 flag {
     namespace: "haptics"
-    name: "use_vibrator_haptic_feedback"
-    description: "Enables performHapticFeedback to directly use the vibrator service instead of going through the window session"
-    bug: "295459081"
-}
-
-flag {
-    namespace: "haptics"
     name: "haptic_feedback_vibration_oem_customization_enabled"
     description: "Enables OEMs/devices to customize vibrations for haptic feedback"
     # Make read only. This is because the flag is used only once, and this could happen before
