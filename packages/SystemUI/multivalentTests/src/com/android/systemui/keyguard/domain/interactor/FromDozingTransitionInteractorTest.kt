@@ -33,16 +33,21 @@
 package com.android.systemui.keyguard.domain.interactor
 
 import android.os.PowerManager
+import android.platform.test.annotations.DisableFlags
 import android.platform.test.annotations.EnableFlags
+import android.platform.test.flag.junit.FlagsParameterization
 import android.service.dream.dreamManager
-import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.compose.animation.scene.ObservableTransitionState
-import com.android.systemui.Flags
+import com.android.systemui.Flags.FLAG_COMMUNAL_HUB
+import com.android.systemui.Flags.FLAG_COMMUNAL_SCENE_KTF_REFACTOR
+import com.android.systemui.Flags.FLAG_KEYGUARD_WM_STATE_REFACTOR
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.communal.data.repository.FakeCommunalSceneRepository
 import com.android.systemui.communal.data.repository.fakeCommunalSceneRepository
 import com.android.systemui.communal.domain.interactor.setCommunalAvailable
 import com.android.systemui.communal.shared.model.CommunalScenes
+import com.android.systemui.communal.shared.model.CommunalTransitionKeys
 import com.android.systemui.keyguard.data.repository.FakeKeyguardTransitionRepository
 import com.android.systemui.keyguard.data.repository.fakeKeyguardRepository
 import com.android.systemui.keyguard.data.repository.fakeKeyguardTransitionRepository
@@ -51,6 +56,7 @@ import com.android.systemui.keyguard.shared.model.BiometricUnlockMode
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.TransitionState
 import com.android.systemui.keyguard.util.KeyguardTransitionRepositorySpySubject.Companion.assertThat
+import com.android.systemui.kosmos.applicationCoroutineScope
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.power.domain.interactor.PowerInteractor
 import com.android.systemui.power.domain.interactor.PowerInteractor.Companion.setAsleepForTest
@@ -69,15 +75,22 @@ import org.junit.runner.RunWith
 import org.mockito.Mockito.anyBoolean
 import org.mockito.Mockito.reset
 import org.mockito.Mockito.spy
+import org.mockito.kotlin.clearInvocations
+import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
+import platform.test.runner.parameterized.ParameterizedAndroidJunit4
+import platform.test.runner.parameterized.Parameters
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
-@RunWith(AndroidJUnit4::class)
-class FromDozingTransitionInteractorTest : SysuiTestCase() {
+@RunWith(ParameterizedAndroidJunit4::class)
+@EnableFlags(FLAG_COMMUNAL_HUB)
+class FromDozingTransitionInteractorTest(flags: FlagsParameterization?) : SysuiTestCase() {
     private val kosmos =
         testKosmos().apply {
             this.fakeKeyguardTransitionRepository = spy(FakeKeyguardTransitionRepository())
+            this.fakeCommunalSceneRepository =
+                spy(FakeCommunalSceneRepository(applicationScope = applicationCoroutineScope))
         }
 
     private val testScope = kosmos.testScope
@@ -85,6 +98,18 @@ class FromDozingTransitionInteractorTest : SysuiTestCase() {
 
     private lateinit var powerInteractor: PowerInteractor
     private lateinit var transitionRepository: FakeKeyguardTransitionRepository
+
+    companion object {
+        @JvmStatic
+        @Parameters(name = "{0}")
+        fun getParams(): List<FlagsParameterization> {
+            return FlagsParameterization.allCombinationsOf(FLAG_COMMUNAL_SCENE_KTF_REFACTOR)
+        }
+    }
+
+    init {
+        mSetFlagsRule.setFlagsParameterization(flags!!)
+    }
 
     @Before
     fun setup() {
@@ -108,7 +133,7 @@ class FromDozingTransitionInteractorTest : SysuiTestCase() {
     }
 
     @Test
-    @EnableFlags(Flags.FLAG_KEYGUARD_WM_STATE_REFACTOR)
+    @EnableFlags(FLAG_KEYGUARD_WM_STATE_REFACTOR)
     fun testTransitionToLockscreen_onWakeup() =
         testScope.runTest {
             powerInteractor.setAwakeForTest()
@@ -123,7 +148,8 @@ class FromDozingTransitionInteractorTest : SysuiTestCase() {
         }
 
     @Test
-    @EnableFlags(Flags.FLAG_KEYGUARD_WM_STATE_REFACTOR, Flags.FLAG_COMMUNAL_HUB)
+    @EnableFlags(FLAG_KEYGUARD_WM_STATE_REFACTOR)
+    @DisableFlags(FLAG_COMMUNAL_SCENE_KTF_REFACTOR)
     fun testTransitionToLockscreen_onPowerButtonPress_canDream_glanceableHubAvailable() =
         testScope.runTest {
             whenever(kosmos.dreamManager.canStartDreaming(anyBoolean())).thenReturn(true)
@@ -143,7 +169,25 @@ class FromDozingTransitionInteractorTest : SysuiTestCase() {
         }
 
     @Test
-    @EnableFlags(Flags.FLAG_KEYGUARD_WM_STATE_REFACTOR)
+    @EnableFlags(FLAG_KEYGUARD_WM_STATE_REFACTOR, FLAG_COMMUNAL_SCENE_KTF_REFACTOR)
+    fun testTransitionToLockscreen_onPowerButtonPress_canDream_ktfRefactor() =
+        testScope.runTest {
+            whenever(kosmos.dreamManager.canStartDreaming(anyBoolean())).thenReturn(true)
+            kosmos.setCommunalAvailable(true)
+            runCurrent()
+            clearInvocations(kosmos.fakeCommunalSceneRepository)
+
+            powerInteractor.setAwakeForTest(reason = PowerManager.WAKE_REASON_POWER_BUTTON)
+            runCurrent()
+
+            // If dreaming is possible and communal is available, then we should transition to
+            // GLANCEABLE_HUB when waking up due to power button press.
+            verify(kosmos.fakeCommunalSceneRepository)
+                .changeScene(CommunalScenes.Communal, CommunalTransitionKeys.Immediately)
+        }
+
+    @Test
+    @EnableFlags(FLAG_KEYGUARD_WM_STATE_REFACTOR)
     fun testTransitionToLockscreen_onPowerButtonPress_canNotDream_glanceableHubAvailable() =
         testScope.runTest {
             whenever(kosmos.dreamManager.canStartDreaming(anyBoolean())).thenReturn(false)
@@ -163,7 +207,7 @@ class FromDozingTransitionInteractorTest : SysuiTestCase() {
         }
 
     @Test
-    @EnableFlags(Flags.FLAG_KEYGUARD_WM_STATE_REFACTOR)
+    @EnableFlags(FLAG_KEYGUARD_WM_STATE_REFACTOR)
     fun testTransitionToLockscreen_onPowerButtonPress_canNDream_glanceableHubNotAvailable() =
         testScope.runTest {
             whenever(kosmos.dreamManager.canStartDreaming(anyBoolean())).thenReturn(true)
@@ -183,7 +227,8 @@ class FromDozingTransitionInteractorTest : SysuiTestCase() {
         }
 
     @Test
-    @EnableFlags(Flags.FLAG_KEYGUARD_WM_STATE_REFACTOR)
+    @EnableFlags(FLAG_KEYGUARD_WM_STATE_REFACTOR)
+    @DisableFlags(FLAG_COMMUNAL_SCENE_KTF_REFACTOR)
     fun testTransitionToGlanceableHub_onWakeup_ifIdleOnCommunal_noOccludingActivity() =
         testScope.runTest {
             kosmos.fakeCommunalSceneRepository.setTransitionState(
@@ -203,7 +248,7 @@ class FromDozingTransitionInteractorTest : SysuiTestCase() {
         }
 
     @Test
-    @EnableFlags(Flags.FLAG_KEYGUARD_WM_STATE_REFACTOR)
+    @EnableFlags(FLAG_KEYGUARD_WM_STATE_REFACTOR)
     fun testTransitionToOccluded_onWakeup_whenOccludingActivityOnTop() =
         testScope.runTest {
             kosmos.keyguardOcclusionRepository.setShowWhenLockedActivityInfo(true)
@@ -219,7 +264,7 @@ class FromDozingTransitionInteractorTest : SysuiTestCase() {
         }
 
     @Test
-    @EnableFlags(Flags.FLAG_KEYGUARD_WM_STATE_REFACTOR)
+    @EnableFlags(FLAG_KEYGUARD_WM_STATE_REFACTOR)
     fun testTransitionToOccluded_onWakeup_whenOccludingActivityOnTop_evenIfIdleOnCommunal() =
         testScope.runTest {
             kosmos.fakeCommunalSceneRepository.setTransitionState(
@@ -240,7 +285,7 @@ class FromDozingTransitionInteractorTest : SysuiTestCase() {
         }
 
     @Test
-    @EnableFlags(Flags.FLAG_KEYGUARD_WM_STATE_REFACTOR)
+    @EnableFlags(FLAG_KEYGUARD_WM_STATE_REFACTOR)
     @Suppress("ktlint:standard:max-line-length")
     fun testTransitionToOccluded_onWakeUp_ifPowerButtonGestureDetected_fromAod_nonDismissableKeyguard() =
         testScope.runTest {
@@ -254,7 +299,7 @@ class FromDozingTransitionInteractorTest : SysuiTestCase() {
         }
 
     @Test
-    @EnableFlags(Flags.FLAG_KEYGUARD_WM_STATE_REFACTOR)
+    @EnableFlags(FLAG_KEYGUARD_WM_STATE_REFACTOR)
     fun testTransitionToGone_onWakeUp_ifPowerButtonGestureDetected_fromAod_dismissableKeyguard() =
         testScope.runTest {
             kosmos.fakeKeyguardRepository.setKeyguardDismissible(true)
@@ -268,7 +313,7 @@ class FromDozingTransitionInteractorTest : SysuiTestCase() {
         }
 
     @Test
-    @EnableFlags(Flags.FLAG_KEYGUARD_WM_STATE_REFACTOR)
+    @EnableFlags(FLAG_KEYGUARD_WM_STATE_REFACTOR)
     fun testTransitionToGone_onWakeUp_ifPowerButtonGestureDetected_fromGone() =
         testScope.runTest {
             powerInteractor.setAwakeForTest()
@@ -306,7 +351,7 @@ class FromDozingTransitionInteractorTest : SysuiTestCase() {
         }
 
     @Test
-    @EnableFlags(Flags.FLAG_KEYGUARD_WM_STATE_REFACTOR)
+    @EnableFlags(FLAG_KEYGUARD_WM_STATE_REFACTOR)
     @Suppress("ktlint:standard:max-line-length")
     fun testTransitionToOccluded_onWakeUp_ifPowerButtonGestureDetectedAfterFinishedInAod_fromGone() =
         testScope.runTest {
@@ -342,7 +387,7 @@ class FromDozingTransitionInteractorTest : SysuiTestCase() {
         }
 
     @Test
-    @EnableFlags(Flags.FLAG_KEYGUARD_WM_STATE_REFACTOR)
+    @EnableFlags(FLAG_KEYGUARD_WM_STATE_REFACTOR)
     fun testTransitionToOccluded_onWakeUp_ifPowerButtonGestureDetected_fromLockscreen() =
         testScope.runTest {
             powerInteractor.setAwakeForTest()
