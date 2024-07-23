@@ -128,8 +128,26 @@ internal constructor(
         getPairNewDeviceButton(dialog).setOnClickListener {
             bluetoothTileDialogCallback.onPairNewDeviceClicked(it)
         }
-        getAudioSharingButtonView(dialog).setOnClickListener {
-            bluetoothTileDialogCallback.onAudioSharingButtonClicked(it)
+        getAudioSharingButtonView(dialog).apply {
+            setOnClickListener { bluetoothTileDialogCallback.onAudioSharingButtonClicked(it) }
+            accessibilityDelegate =
+                object : AccessibilityDelegate() {
+                    override fun onInitializeAccessibilityNodeInfo(
+                        host: View,
+                        info: AccessibilityNodeInfo
+                    ) {
+                        super.onInitializeAccessibilityNodeInfo(host, info)
+                        info.addAction(
+                            AccessibilityAction(
+                                AccessibilityAction.ACTION_CLICK.id,
+                                context.getString(
+                                    R.string
+                                        .quick_settings_bluetooth_audio_sharing_button_accessibility
+                                )
+                            )
+                        )
+                    }
+                }
         }
         getScrollViewContent(dialog).apply {
             minimumHeight =
