@@ -147,11 +147,12 @@ public class TransactionParcelTests {
 
     @Test
     public void testDestroy() {
-        DestroyActivityItem item = DestroyActivityItem.obtain(mActivityToken, true /* finished */);
+        final DestroyActivityItem item =
+                new DestroyActivityItem(mActivityToken, true /* finished */);
         writeAndPrepareForReading(item);
 
         // Read from parcel and assert
-        DestroyActivityItem result = DestroyActivityItem.CREATOR.createFromParcel(mParcel);
+        final DestroyActivityItem result = DestroyActivityItem.CREATOR.createFromParcel(mParcel);
 
         assertEquals(item.hashCode(), result.hashCode());
         assertEquals(item, result);

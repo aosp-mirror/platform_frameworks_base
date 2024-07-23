@@ -90,11 +90,6 @@ public class ObjectPoolTests {
     }
 
     @Test
-    public void testRecycleDestroyActivityItem() {
-        testRecycle(() -> DestroyActivityItem.obtain(mActivityToken, true));
-    }
-
-    @Test
     public void testRecycleLaunchActivityItem() {
         final IBinder activityToken = new Binder();
         final Intent intent = new Intent("action");
