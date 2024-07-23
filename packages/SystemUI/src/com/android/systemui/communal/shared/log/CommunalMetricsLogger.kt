@@ -16,6 +16,7 @@
 
 package com.android.systemui.communal.shared.log
 
+import android.util.StatsEvent
 import com.android.systemui.communal.dagger.CommunalModule.Companion.LOGGABLE_PREFIXES
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.shared.system.SysUiStatsLog
@@ -55,6 +56,20 @@ constructor(
         )
     }
 
+    /** Logs loggable widgets and the total widget count as a [StatsEvent]. */
+    fun logWidgetsSnapshot(
+        statsEvents: MutableList<StatsEvent>,
+        componentNames: List<String>,
+    ) {
+        val loggableComponentNames = componentNames.filter { it.isLoggable() }.toTypedArray()
+        statsEvents.add(
+            statsLogProxy.buildCommunalHubSnapshotStatsEvent(
+                componentNames = loggableComponentNames,
+                widgetCount = componentNames.size,
+            )
+        )
+    }
+
     /** Whether the component name matches any of the loggable prefixes. */
     private fun String.isLoggable(): Boolean {
         return loggablePrefixes.any { loggablePrefix -> startsWith(loggablePrefix) }
@@ -68,6 +83,12 @@ constructor(
             componentName: String,
             rank: Int,
         )
+
+        /** Builds a [SysUiStatsLog.COMMUNAL_HUB_SNAPSHOT] stats event. */
+        fun buildCommunalHubSnapshotStatsEvent(
+            componentNames: Array<String>,
+            widgetCount: Int,
+        ): StatsEvent
     }
 }
 
@@ -84,6 +105,17 @@ class CommunalStatsLogProxyImpl @Inject constructor() : CommunalMetricsLogger.St
             action,
             componentName,
             rank,
+        )
+    }
+
+    override fun buildCommunalHubSnapshotStatsEvent(
+        componentNames: Array<String>,
+        widgetCount: Int,
+    ): StatsEvent {
+        return SysUiStatsLog.buildStatsEvent(
+            SysUiStatsLog.COMMUNAL_HUB_SNAPSHOT,
+            componentNames,
+            widgetCount,
         )
     }
 }

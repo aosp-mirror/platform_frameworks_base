@@ -16,11 +16,13 @@
 
 package com.android.systemui.communal.log
 
+import android.util.StatsEvent
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.communal.shared.log.CommunalMetricsLogger
 import com.android.systemui.shared.system.SysUiStatsLog
+import com.google.common.truth.Truth.assertThat
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -89,5 +91,29 @@ class CommunalMetricsLoggerTest : SysuiTestCase() {
                 "com.red.package/my_test_widget",
                 2,
             )
+    }
+
+    @Test
+    fun logWidgetsSnapshot_logOnlyLoggableComponents() {
+        val statsEvents = mutableListOf<StatsEvent>()
+        underTest.logWidgetsSnapshot(
+            statsEvents,
+            listOf(
+                "com.blue.package/my_test_widget_1",
+                "com.green.package/my_test_widget_2",
+                "com.red.package/my_test_widget_3",
+                "com.yellow.package/my_test_widget_4",
+            ),
+        )
+        verify(statsLogProxy)
+            .buildCommunalHubSnapshotStatsEvent(
+                componentNames =
+                    arrayOf(
+                        "com.blue.package/my_test_widget_1",
+                        "com.red.package/my_test_widget_3",
+                    ),
+                widgetCount = 4,
+            )
+        assertThat(statsEvents).hasSize(1)
     }
 }
