@@ -115,18 +115,6 @@ private data class MultiPointerDraggableElement(
     }
 }
 
-private val TRAVERSE_KEY = Any()
-
-/** Find the nearest [PointersInfoOwner] ancestor or throw. */
-internal fun DelegatableNode.requireAncestorPointersInfoOwner(): PointersInfoOwner {
-    val ancestorNode =
-        checkNotNull(findNearestAncestor(TRAVERSE_KEY)) {
-            "This should never happen! Couldn't find a MultiPointerDraggableNode. " +
-                "Are we inside an SceneTransitionLayout?"
-        }
-    return ancestorNode as PointersInfoOwner
-}
-
 internal class MultiPointerDraggableNode(
     orientation: Orientation,
     enabled: () -> Boolean,
