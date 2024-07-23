@@ -35,6 +35,7 @@ import android.compat.annotation.UnsupportedAppUsage;
 import android.graphics.fonts.FontVariationAxis;
 import android.os.Build;
 import android.os.LocaleList;
+import android.text.ClientFlags;
 import android.text.GraphicsOperations;
 import android.text.SpannableString;
 import android.text.SpannedString;
@@ -1540,8 +1541,21 @@ public class Paint {
      * @return         typeface
      */
     public Typeface setTypeface(Typeface typeface) {
+        return setTypefaceInternal(typeface, true);
+    }
+
+    private Typeface setTypefaceInternal(Typeface typeface, boolean clearFontVariationSettings) {
         final long typefaceNative = typeface == null ? 0 : typeface.native_instance;
         nSetTypeface(mNativePaint, typefaceNative);
+
+        if (ClientFlags.clearFontVariationSettings()) {
+            if (clearFontVariationSettings && !Objects.equals(mTypeface, typeface)) {
+                // We cannot call setFontVariationSetting with empty string or null because it calls
+                // setTypeface method. To avoid recursive setTypeface call, manually resetting
+                // mFontVariationSettings.
+                mFontVariationSettings = null;
+            }
+        }
         mTypeface = typeface;
         return typeface;
     }
@@ -2037,6 +2051,14 @@ public class Paint {
      * </li>
      * </ul>
      *
+     * Note: This method replaces the Typeface previously set to this instance.
+     * Until API {@link Build.VERSION_CODES.VANILLA_ICE_CREAM}, any caller of
+     * {@link #setTypeface(Typeface)} should call this method with empty settings, then call
+     * {@link #setTypeface(Typeface)}, then call this method with preferred variation settings.
+     * The device API more than {@link Build.VERSION_CODES.VANILLA_ICE_CREAM}, the
+     * {@link #setTypeface(Typeface)} method clears font variation settings. So caller of
+     * {@link #setTypeface(Typeface)} should call this method again for applying variation settings.
+     *
      * @param fontVariationSettings font variation settings. You can pass null or empty string as
      *                              no variation settings.
      *
@@ -2059,8 +2081,8 @@ public class Paint {
 
         if (settings == null || settings.length() == 0) {
             mFontVariationSettings = null;
-            setTypeface(Typeface.createFromTypefaceWithVariation(mTypeface,
-                      Collections.emptyList()));
+            setTypefaceInternal(Typeface.createFromTypefaceWithVariation(mTypeface,
+                      Collections.emptyList()), false);
             return true;
         }
 
@@ -2078,7 +2100,8 @@ public class Paint {
             return false;
         }
         mFontVariationSettings = settings;
-        setTypeface(Typeface.createFromTypefaceWithVariation(targetTypeface, filteredAxes));
+        setTypefaceInternal(Typeface.createFromTypefaceWithVariation(targetTypeface, filteredAxes),
+                false);
         return true;
     }
 

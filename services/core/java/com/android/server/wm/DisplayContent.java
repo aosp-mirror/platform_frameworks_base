@@ -3895,6 +3895,22 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
     }
 
     /**
+     * Returns the focused window of the given Activity if the Activity is focused.
+     */
+    WindowState findFocusedWindow(ActivityRecord activityRecord) {
+        final ActivityRecord tmpApp = mFocusedApp;
+        mTmpWindow = null;
+        try {
+            mFocusedApp = activityRecord;
+            // mFindFocusedWindow will populate mTmpWindow with the new focused window when found.
+            activityRecord.forAllWindows(mFindFocusedWindow, true /* traverseTopToBottom */);
+        } finally {
+            mFocusedApp = tmpApp;
+        }
+        return mTmpWindow;
+    }
+
+    /**
      * Update the focused window and make some adjustments if the focus has changed.
      *
      * @param mode Indicates the situation we are in. Possible modes are:
@@ -6910,6 +6926,10 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
 
         /** Whether {@link #mAnimatingRecents} is going to be the top activity. */
         private boolean mRecentsWillBeTop;
+
+        FixedRotationTransitionListener() {
+            super(DisplayContent.this.mDisplayId);
+        }
 
         /**
          * If the recents activity has a fixed orientation which is different from the current top

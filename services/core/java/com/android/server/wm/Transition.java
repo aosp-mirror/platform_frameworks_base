@@ -745,6 +745,7 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
         if (mController.isAnimating()) {
             dc.enableHighPerfTransition(true);
         }
+        mController.dispatchLegacyAppTransitionPending(dc.mDisplayId);
     }
 
     /**
@@ -1618,7 +1619,7 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
         mController.mTransitionTracer.logAbortedTransition(this);
         // Syncengine abort will call through to onTransactionReady()
         mSyncEngine.abort(mSyncId);
-        mController.dispatchLegacyAppTransitionCancelled();
+        mController.dispatchLegacyAppTransitionCancelled(mTargetDisplays);
         invokeTransitionEndedListeners();
     }
 
@@ -1766,7 +1767,19 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
         }
 
         for (int i = 0; i < mTargets.size(); ++i) {
-            final DisplayArea da = mTargets.get(i).mContainer.asDisplayArea();
+            final WindowContainer<?> wc = mTargets.get(i).mContainer;
+            final WallpaperWindowToken wp = wc.asWallpaperToken();
+            if (wp != null) {
+                // If on a rotation leash, the wallpaper token surface needs to be shown explicitly
+                // because shell only gets the leash and the wallpaper token surface is not allowed
+                // to be changed by non-transition logic until the transition is finished.
+                if (Flags.ensureWallpaperInTransitions() && wp.isVisibleRequested()
+                        && wp.getFixedRotationLeash() != null) {
+                    transaction.show(wp.mSurfaceControl);
+                }
+                continue;
+            }
+            final DisplayArea<?> da = wc.asDisplayArea();
             if (da == null) continue;
             if (da.isVisibleRequested()) {
                 mController.mValidateDisplayVis.remove(da);
@@ -2167,14 +2180,6 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
                         && !showWallpaper && !wallpaper.getDisplayContent().isKeyguardLocked()
                         && !wallpaperIsOwnTarget(wallpaper)) {
                     wallpaper.setVisibleRequested(false);
-                }
-                if (showWallpaper && Flags.ensureWallpaperInTransitions()
-                        && wallpaper.isVisibleRequested()
-                        && getLeashSurface(wallpaper, t) != wallpaper.getSurfaceControl()) {
-                    // If on a rotation leash, we need to explicitly show the wallpaper surface
-                    // because shell only gets the leash and we don't allow non-transition logic
-                    // to touch the surfaces until the transition is over.
-                    t.show(wallpaper.getSurfaceControl());
                 }
             }
         }

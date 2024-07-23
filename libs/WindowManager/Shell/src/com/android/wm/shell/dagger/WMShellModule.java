@@ -534,7 +534,8 @@ public abstract class WMShellModule {
             MultiInstanceHelper multiInstanceHelper,
             @ShellMainThread ShellExecutor mainExecutor,
             Optional<DesktopTasksLimiter> desktopTasksLimiter,
-            Optional<RecentTasksController> recentTasksController) {
+            Optional<RecentTasksController> recentTasksController,
+            InteractionJankMonitor interactionJankMonitor) {
         return new DesktopTasksController(context, shellInit, shellCommandHandler, shellController,
                 displayController, shellTaskOrganizer, syncQueue, rootTaskDisplayAreaOrganizer,
                 dragAndDropController, transitions, keyguardManager, enterDesktopTransitionHandler,
@@ -542,7 +543,8 @@ public abstract class WMShellModule {
                 dragToDesktopTransitionHandler, desktopModeTaskRepository,
                 desktopModeLoggerTransitionObserver, launchAdjacentController,
                 recentsTransitionHandler, multiInstanceHelper,
-                mainExecutor, desktopTasksLimiter, recentTasksController.orElse(null));
+                mainExecutor, desktopTasksLimiter, recentTasksController.orElse(null),
+                interactionJankMonitor);
     }
 
     @WMSingleton
@@ -568,9 +570,10 @@ public abstract class WMShellModule {
             Context context,
             Transitions transitions,
             RootTaskDisplayAreaOrganizer rootTaskDisplayAreaOrganizer,
-            Optional<DesktopTasksLimiter> desktopTasksLimiter) {
+            Optional<DesktopTasksLimiter> desktopTasksLimiter,
+            InteractionJankMonitor interactionJankMonitor) {
         return new DragToDesktopTransitionHandler(context, transitions,
-                rootTaskDisplayAreaOrganizer);
+                rootTaskDisplayAreaOrganizer, interactionJankMonitor);
     }
 
     @WMSingleton

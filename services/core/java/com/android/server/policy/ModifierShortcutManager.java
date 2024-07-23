@@ -16,6 +16,7 @@
 
 package com.android.server.policy;
 
+import android.annotation.Nullable;
 import android.annotation.SuppressLint;
 import android.app.role.RoleManager;
 import android.content.ActivityNotFoundException;
@@ -248,31 +249,7 @@ public class ModifierShortcutManager {
                                 + " className=" + className + " shortcutChar=" + shortcutChar);
                         continue;
                     }
-                    ComponentName componentName = new ComponentName(packageName, className);
-                    try {
-                        mPackageManager.getActivityInfo(componentName,
-                                PackageManager.MATCH_DIRECT_BOOT_AWARE
-                                        | PackageManager.MATCH_DIRECT_BOOT_UNAWARE
-                                        | PackageManager.MATCH_UNINSTALLED_PACKAGES);
-                    } catch (PackageManager.NameNotFoundException e) {
-                        String[] packages = mPackageManager.canonicalToCurrentPackageNames(
-                                new String[] { packageName });
-                        componentName = new ComponentName(packages[0], className);
-                        try {
-                            mPackageManager.getActivityInfo(componentName,
-                                    PackageManager.MATCH_DIRECT_BOOT_AWARE
-                                            | PackageManager.MATCH_DIRECT_BOOT_UNAWARE
-                                            | PackageManager.MATCH_UNINSTALLED_PACKAGES);
-                        } catch (PackageManager.NameNotFoundException e1) {
-                            Log.w(TAG, "Unable to add bookmark: " + packageName
-                                    + "/" + className + " not found.");
-                            continue;
-                        }
-                    }
-
-                    intent = new Intent(Intent.ACTION_MAIN);
-                    intent.addCategory(Intent.CATEGORY_LAUNCHER);
-                    intent.setComponent(componentName);
+                    intent = resolveComponentNameIntent(packageName, className);
                 } else if (categoryName != null) {
                     if (roleName != null) {
                         Log.w(TAG, "Cannot specify role bookmark when category is present for"
@@ -308,6 +285,32 @@ public class ModifierShortcutManager {
         } catch (XmlPullParserException | IOException e) {
             Log.e(TAG, "Got exception parsing bookmarks.", e);
         }
+    }
+
+    @Nullable
+    private Intent resolveComponentNameIntent(String packageName, String className) {
+        int flags = PackageManager.MATCH_DIRECT_BOOT_UNAWARE
+                | PackageManager.MATCH_DIRECT_BOOT_AWARE
+                | PackageManager.MATCH_UNINSTALLED_PACKAGES;
+        ComponentName componentName = new ComponentName(packageName, className);
+        try {
+            mPackageManager.getActivityInfo(componentName, flags);
+        } catch (PackageManager.NameNotFoundException e) {
+            String[] packages = mPackageManager.canonicalToCurrentPackageNames(
+                    new String[] { packageName });
+            componentName = new ComponentName(packages[0], className);
+            try {
+                mPackageManager.getActivityInfo(componentName, flags);
+            } catch (PackageManager.NameNotFoundException e1) {
+                Log.w(TAG, "Unable to add bookmark: " + packageName
+                        + "/" + className + " not found.");
+                return null;
+            }
+        }
+        Intent intent = new Intent(Intent.ACTION_MAIN);
+        intent.addCategory(Intent.CATEGORY_LAUNCHER);
+        intent.setComponent(componentName);
+        return intent;
     }
 
     void registerShortcutKey(long shortcutCode, IShortcutService shortcutService)

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 The Android Open Source Project
+ * Copyright (C) 2024 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,10 +35,7 @@ import android.animation.AnimatorListenerAdapter;
 import android.annotation.MainThread;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.app.ActivityOptions;
-import android.app.ExitTransitionCoordinator;
 import android.app.ICompatCameraControlCallback;
-import android.app.Notification;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -55,7 +52,6 @@ import android.os.UserManager;
 import android.provider.Settings;
 import android.util.DisplayMetrics;
 import android.util.Log;
-import android.util.Pair;
 import android.view.Display;
 import android.view.ScrollCaptureResponse;
 import android.view.View;
@@ -67,7 +63,6 @@ import android.view.WindowManager;
 import android.widget.Toast;
 import android.window.WindowContext;
 
-import com.android.internal.app.ChooserActivity;
 import com.android.internal.logging.UiEventLogger;
 import com.android.internal.policy.PhoneWindow;
 import com.android.settingslib.applications.InterestingConfigChanges;
@@ -89,7 +84,6 @@ import dagger.assisted.AssistedInject;
 
 import kotlin.Unit;
 
-import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
@@ -103,67 +97,6 @@ import javax.inject.Provider;
  */
 public class ScreenshotController implements ScreenshotHandler {
     private static final String TAG = logTag(ScreenshotController.class);
-
-    /**
-     * POD used in the AsyncTask which saves an image in the background.
-     */
-    static class SaveImageInBackgroundData {
-        public Bitmap image;
-        public Consumer<Uri> finisher;
-        public ScreenshotController.ActionsReadyListener mActionsReadyListener;
-        public ScreenshotController.QuickShareActionReadyListener mQuickShareActionsReadyListener;
-        public UserHandle owner;
-        public int displayId;
-
-        void clearImage() {
-            image = null;
-        }
-    }
-
-    /**
-     * Structure returned by the SaveImageInBackgroundTask
-     */
-    public static class SavedImageData {
-        public Uri uri;
-        public List<Notification.Action> smartActions;
-        public Notification.Action quickShareAction;
-        public UserHandle owner;
-        public String subject;  // Title for sharing
-        public Long imageTime; // Time at which screenshot was saved
-
-        /**
-         * Used to reset the return data on error
-         */
-        public void reset() {
-            uri = null;
-            smartActions = null;
-            quickShareAction = null;
-            subject = null;
-            imageTime = null;
-        }
-    }
-
-    /**
-     * Structure returned by the QueryQuickShareInBackgroundTask
-     */
-    static class QuickShareData {
-        public Notification.Action quickShareAction;
-
-        /**
-         * Used to reset the return data on error
-         */
-        public void reset() {
-            quickShareAction = null;
-        }
-    }
-
-    interface ActionsReadyListener {
-        void onActionsReady(ScreenshotController.SavedImageData imageData);
-    }
-
-    interface QuickShareActionReadyListener {
-        void onActionsReady(ScreenshotController.QuickShareData quickShareData);
-    }
 
     public interface TransitionDestination {
         /**
@@ -213,7 +146,6 @@ public class ScreenshotController implements ScreenshotHandler {
     private final ScreenshotNotificationSmartActionsProvider
             mScreenshotNotificationSmartActionsProvider;
     private final TimeoutHandler mScreenshotHandler;
-    private final ActionIntentExecutor mActionIntentExecutor;
     private final UserManager mUserManager;
     private final AssistContentRequester mAssistContentRequester;
     private final ActionExecutor mActionExecutor;
@@ -259,7 +191,6 @@ public class ScreenshotController implements ScreenshotHandler {
             BroadcastDispatcher broadcastDispatcher,
             ScreenshotNotificationSmartActionsProvider screenshotNotificationSmartActionsProvider,
             ScreenshotActionsController.Factory screenshotActionsControllerFactory,
-            ActionIntentExecutor actionIntentExecutor,
             ActionExecutor.Factory actionExecutorFactory,
             UserManager userManager,
             AssistContentRequester assistContentRequester,
@@ -289,7 +220,6 @@ public class ScreenshotController implements ScreenshotHandler {
         final Context displayContext = context.createDisplayContext(display);
         mContext = (WindowContext) displayContext.createWindowContext(TYPE_SCREENSHOT, null);
         mFlags = flags;
-        mActionIntentExecutor = actionIntentExecutor;
         mUserManager = userManager;
         mMessageContainerController = messageContainerController;
         mAssistContentRequester = assistContentRequester;
@@ -765,33 +695,6 @@ public class ScreenshotController implements ScreenshotHandler {
         mScreenshotAnimation.start();
     }
 
-    /**
-     * Supplies the necessary bits for the shared element transition to share sheet.
-     * Note that once called, the action intent to share must be sent immediately after.
-     */
-    private Pair<ActivityOptions, ExitTransitionCoordinator> createWindowTransition() {
-        ExitTransitionCoordinator.ExitTransitionCallbacks callbacks =
-                new ExitTransitionCoordinator.ExitTransitionCallbacks() {
-                    @Override
-                    public boolean isReturnTransitionAllowed() {
-                        return false;
-                    }
-
-                    @Override
-                    public void hideSharedElements() {
-                        finishDismiss();
-                    }
-
-                    @Override
-                    public void onFinish() {
-                    }
-                };
-
-        return ActivityOptions.startSharedElementAnimation(mWindow, callbacks, null,
-                Pair.create(mViewProxy.getScreenshotPreview(),
-                        ChooserActivity.FIRST_IMAGE_PREVIEW_TRANSITION_NAME));
-    }
-
     /** Reset screenshot view and then call onCompleteRunnable */
     private void finishDismiss() {
         Log.d(TAG, "finishDismiss");
@@ -838,11 +741,11 @@ public class ScreenshotController implements ScreenshotHandler {
     private void saveScreenshotInWorkerThread(
             UserHandle owner,
             @NonNull Consumer<Uri> finisher,
-            @Nullable ActionsReadyListener actionsReadyListener,
-            @Nullable QuickShareActionReadyListener
+            @Nullable SaveImageInBackgroundTask.ActionsReadyListener actionsReadyListener,
+            @Nullable SaveImageInBackgroundTask.QuickShareActionReadyListener
                     quickShareActionsReadyListener) {
-        ScreenshotController.SaveImageInBackgroundData
-                data = new ScreenshotController.SaveImageInBackgroundData();
+        SaveImageInBackgroundTask.SaveImageInBackgroundData
+                data = new SaveImageInBackgroundTask.SaveImageInBackgroundData();
         data.image = mScreenBitmap;
         data.finisher = finisher;
         data.mActionsReadyListener = actionsReadyListener;
@@ -881,7 +784,7 @@ public class ScreenshotController implements ScreenshotHandler {
     /**
      * Logs success/failure of the screenshot saving task, and shows an error if it failed.
      */
-    private void logSuccessOnActionsReady(ScreenshotController.SavedImageData imageData) {
+    private void logSuccessOnActionsReady(SaveImageInBackgroundTask.SavedImageData imageData) {
         logScreenshotResultStatus(imageData.uri, imageData.owner);
     }
 

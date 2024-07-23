@@ -47,16 +47,13 @@ public enum DesktopModeFlagsUtil {
             Flags::enableDesktopWindowingWallpaperActivity, /* shouldOverrideByDevOption= */ true);
 
     private static final String TAG = "DesktopModeFlagsUtil";
-    private static final String SYSTEM_PROPERTY_OVERRIDE_KEY =
-            "sys.wmshell.desktopmode.dev_toggle_override";
-
     // Function called to obtain aconfig flag value.
     private final Supplier<Boolean> mFlagFunction;
     // Whether the flag state should be affected by developer option.
     private final boolean mShouldOverrideByDevOption;
 
     // Local cache for toggle override, which is initialized once on its first access. It needs to
-    // be refreshed only on reboots as overridden state takes effect on reboots.
+    // be refreshed only on reboots as overridden state is expected to take effect on reboots.
     private static ToggleOverride sCachedToggleOverride;
 
     DesktopModeFlagsUtil(Supplier<Boolean> flagFunction, boolean shouldOverrideByDevOption) {
@@ -67,9 +64,6 @@ public enum DesktopModeFlagsUtil {
     /**
      * Determines state of flag based on the actual flag and desktop mode developer option
      * overrides.
-     *
-     * Note: this method makes sure that a constant developer toggle overrides is read until
-     * reboot.
      */
     public boolean isEnabled(Context context) {
         if (!Flags.showDesktopWindowingDevOption()
@@ -102,49 +96,15 @@ public enum DesktopModeFlagsUtil {
     }
 
     /**
-     *  Returns {@link ToggleOverride} from a non-persistent system property if present. Otherwise
-     *  initializes the system property by reading Settings.Global.
+     *  Returns {@link ToggleOverride} from Settings.Global set by toggle.
      */
     private ToggleOverride getToggleOverrideFromSystem(Context context) {
-        // A non-persistent System Property is used to store override to ensure it remains
-        // constant till reboot.
-        String overrideProperty = System.getProperty(SYSTEM_PROPERTY_OVERRIDE_KEY, null);
-        ToggleOverride overrideFromSystemProperties = convertToToggleOverride(overrideProperty);
-
-        // If valid system property, return it
-        if (overrideFromSystemProperties != null) {
-            return overrideFromSystemProperties;
-        }
-
-        // Fallback when System Property is not present (just after reboot) or not valid (user
-        // manually changed the value): Read from Settings.Global
         int settingValue = Settings.Global.getInt(
                 context.getContentResolver(),
                 Settings.Global.DEVELOPMENT_OVERRIDE_DESKTOP_MODE_FEATURES,
                 OVERRIDE_UNSET.getSetting()
         );
-        ToggleOverride overrideFromSettingsGlobal =
-                ToggleOverride.fromSetting(settingValue, OVERRIDE_UNSET);
-        // Initialize System Property
-        System.setProperty(SYSTEM_PROPERTY_OVERRIDE_KEY, String.valueOf(settingValue));
-        return overrideFromSettingsGlobal;
-    }
-
-    /**
-     * Converts {@code intString} into {@link ToggleOverride}. Return {@code null} if
-     * {@code intString} does not correspond to a {@link ToggleOverride}.
-     */
-    private static @Nullable ToggleOverride convertToToggleOverride(
-            @Nullable String intString
-    ) {
-        if (intString == null) return null;
-        try {
-            int intValue = Integer.parseInt(intString);
-            return ToggleOverride.fromSetting(intValue, null);
-        } catch (NumberFormatException e) {
-            Log.w(TAG, "Unknown toggleOverride int " + intString);
-            return null;
-        }
+        return ToggleOverride.fromSetting(settingValue, OVERRIDE_UNSET);
     }
 
     /** Override state of desktop mode developer option toggle. */

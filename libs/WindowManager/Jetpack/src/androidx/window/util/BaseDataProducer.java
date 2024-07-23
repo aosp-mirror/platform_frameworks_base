@@ -26,13 +26,12 @@ import java.util.Set;
 import java.util.function.Consumer;
 
 /**
- * Base class that provides the implementation for the callback mechanism of the
- * {@link DataProducer} API.  This class is thread safe for adding, removing, and notifying
- * consumers.
+ * Base class that manages listeners when listening to a piece of data that changes.  This class is
+ * thread safe for adding, removing, and notifying consumers.
  *
- * @param <T> The type of data this producer returns through {@link DataProducer#getData}.
+ * @param <T> The type of data this producer returns through {@link BaseDataProducer#getData}.
  */
-public abstract class BaseDataProducer<T> implements DataProducer<T>,
+public abstract class BaseDataProducer<T> implements
         AcceptOnceConsumer.AcceptOnceProducerCallback<T> {
 
     private final Object mLock = new Object();
@@ -42,12 +41,17 @@ public abstract class BaseDataProducer<T> implements DataProducer<T>,
     private final Set<Consumer<T>> mCallbacksToRemove = new HashSet<>();
 
     /**
+     * Emits the first available data at that point in time.
+     * @param dataConsumer a {@link Consumer} that will receive one value.
+     */
+    public abstract void getData(@NonNull Consumer<T> dataConsumer);
+
+    /**
      * Adds a callback to the set of callbacks listening for data. Data is delivered through
      * {@link BaseDataProducer#notifyDataChanged(Object)}. This method is thread safe. Callers
      * should ensure that callbacks are thread safe.
      * @param callback that will receive data from the producer.
      */
-    @Override
     public final void addDataChangedCallback(@NonNull Consumer<T> callback) {
         synchronized (mLock) {
             mCallbacks.add(callback);
@@ -63,7 +67,6 @@ public abstract class BaseDataProducer<T> implements DataProducer<T>,
      * @param callback that was registered in
      * {@link BaseDataProducer#addDataChangedCallback(Consumer)}.
      */
-    @Override
     public final void removeDataChangedCallback(@NonNull Consumer<T> callback) {
         synchronized (mLock) {
             mCallbacks.remove(callback);
@@ -92,8 +95,8 @@ public abstract class BaseDataProducer<T> implements DataProducer<T>,
 
     /**
      * Called to notify all registered consumers that the data provided
-     * by {@link DataProducer#getData} has changed. Calls to this are thread save but callbacks need
-     * to ensure thread safety.
+     * by {@link BaseDataProducer#getData} has changed. Calls to this are thread save but callbacks
+     * need to ensure thread safety.
      */
     protected void notifyDataChanged(T value) {
         synchronized (mLock) {

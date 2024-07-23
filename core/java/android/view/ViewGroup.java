@@ -2798,9 +2798,10 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                     if (alreadyDispatchedToNewTouchTarget && target == newTouchTarget) {
                         handled = true;
                     } else {
-                        final boolean cancelChild = resetCancelNextUpFlag(target.child)
-                                || intercepted;
-                        if (dispatchTransformedTouchEvent(ev, cancelChild,
+                        final boolean cancelChild =
+                                (target.child != null && resetCancelNextUpFlag(target.child))
+                                        || intercepted;
+                        if (target.child != null && dispatchTransformedTouchEvent(ev, cancelChild,
                                 target.child, target.pointerIdBits)) {
                             handled = true;
                         }
