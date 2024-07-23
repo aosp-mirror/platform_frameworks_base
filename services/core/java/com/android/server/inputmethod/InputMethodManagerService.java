@@ -6318,6 +6318,9 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
             if (Flags.imeSwitcherRevamp()) {
                 p.println("  menuControllerNew:");
                 mMenuControllerNew.dump(p, "  ");
+            } else {
+                p.println("  menuController:");
+                mMenuController.dump(p, "  ");
             }
             p.println("  mCurToken=" + bindingController.getCurToken());
             p.println("  mCurTokenDisplayId=" + bindingController.getCurTokenDisplayId());
