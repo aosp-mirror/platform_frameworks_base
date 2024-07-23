@@ -664,7 +664,7 @@ class DesktopTasksController(
             if (taskBoundsBeforeMaximize != null) {
                 destinationBounds.set(taskBoundsBeforeMaximize)
             } else {
-                if (Flags.enableWindowingDynamicInitialBounds()) {
+                if (DesktopModeFlags.DYNAMIC_INITIAL_BOUNDS.isEnabled(context)) {
                     destinationBounds.set(calculateInitialBounds(displayLayout, taskInfo))
                 } else {
                     destinationBounds.set(getDefaultDesktopTaskBounds(displayLayout))
@@ -1362,7 +1362,7 @@ class DesktopTasksController(
                 // Start a new jank interaction for the drag release to desktop window animation.
                 interactionJankMonitor.begin(taskSurface, context,
                     CUJ_DESKTOP_MODE_ENTER_APP_HANDLE_DRAG_RELEASE, "to_desktop")
-                if (Flags.enableWindowingDynamicInitialBounds()) {
+                if (DesktopModeFlags.DYNAMIC_INITIAL_BOUNDS.isEnabled(context)) {
                     finalizeDragToDesktop(taskInfo, calculateInitialBounds(displayLayout, taskInfo))
                 } else {
                     finalizeDragToDesktop(taskInfo, getDefaultDesktopTaskBounds(displayLayout))
