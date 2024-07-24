@@ -107,7 +107,7 @@ struct ParsedResource {
   Visibility::Level visibility_level = Visibility::Level::kUndefined;
   bool staged_api = false;
   bool allow_new = false;
-  FlagStatus flag_status;
+  FlagStatus flag_status = FlagStatus::NoFlag;
   std::optional<OverlayableItem> overlayable_item;
   std::optional<StagedId> staged_alias;
 
