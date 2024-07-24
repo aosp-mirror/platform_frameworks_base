@@ -174,8 +174,8 @@ public class ClientTransactionItemTest {
 
     @Test
     public void testWindowContextInfoChangeItem_execute() {
-        final WindowContextInfoChangeItem item = WindowContextInfoChangeItem
-                .obtain(mWindowClientToken, mConfiguration, DEFAULT_DISPLAY);
+        final WindowContextInfoChangeItem item = new WindowContextInfoChangeItem(mWindowClientToken,
+                mConfiguration, DEFAULT_DISPLAY);
 
         item.execute(mHandler, mPendingActions);
 
