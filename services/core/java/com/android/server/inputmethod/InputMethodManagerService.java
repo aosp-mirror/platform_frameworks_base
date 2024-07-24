@@ -762,7 +762,6 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
                             .getMethodMap();
 
             synchronized (ImfLock.class) {
-                final boolean isCurrentUser = (userId == mCurrentUserId);
                 final AdditionalSubtypeMap additionalSubtypeMap =
                         AdditionalSubtypeMapRepository.get(userId);
                 final InputMethodSettings settings = InputMethodSettingsRepository.get(userId);
@@ -814,9 +813,6 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
                 final InputMethodSettings newSettings =
                         InputMethodSettings.create(newMethodMap, userId);
                 InputMethodSettingsRepository.put(userId, newSettings);
-                if (!isCurrentUser) {
-                    return;
-                }
                 postInputMethodSettingUpdatedLocked(false /* resetDefaultEnabledIme */, userId);
 
                 boolean changed = false;
