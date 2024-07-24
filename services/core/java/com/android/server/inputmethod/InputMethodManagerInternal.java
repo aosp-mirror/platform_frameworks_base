@@ -90,6 +90,8 @@ public abstract class InputMethodManagerInternal {
      * @param userId the user ID to be queried
      * @return a list of {@link InputMethodInfo}. VR-only IMEs are already excluded
      */
+    @ImfLockFree
+    @NonNull
     public abstract List<InputMethodInfo> getInputMethodListAsUser(@UserIdInt int userId);
 
     /**
@@ -98,6 +100,8 @@ public abstract class InputMethodManagerInternal {
      * @param userId the user ID to be queried
      * @return a list of {@link InputMethodInfo} that are enabled for {@code userId}
      */
+    @ImfLockFree
+    @NonNull
     public abstract List<InputMethodInfo> getEnabledInputMethodListAsUser(@UserIdInt int userId);
 
     /**
@@ -108,6 +112,7 @@ public abstract class InputMethodManagerInternal {
      * @param userId                          the user ID to be queried about
      * @return a list of {@link InputMethodSubtype} that are enabled for {@code userId}
      */
+    @ImfLockFree
     @NonNull
     public abstract List<InputMethodSubtype> getEnabledInputMethodSubtypeListAsUser(
             String imiId, boolean allowsImplicitlyEnabledSubtypes, @UserIdInt int userId);
@@ -314,17 +319,22 @@ public abstract class InputMethodManagerInternal {
                         int originatingDisplayId) {
                 }
 
+                @ImfLockFree
+                @NonNull
                 @Override
                 public List<InputMethodInfo> getInputMethodListAsUser(@UserIdInt int userId) {
                     return Collections.emptyList();
                 }
 
+                @ImfLockFree
+                @NonNull
                 @Override
                 public List<InputMethodInfo> getEnabledInputMethodListAsUser(
                         @UserIdInt int userId) {
                     return Collections.emptyList();
                 }
 
+                @ImfLockFree
                 @NonNull
                 @Override
                 public List<InputMethodSubtype> getEnabledInputMethodSubtypeListAsUser(String imiId,

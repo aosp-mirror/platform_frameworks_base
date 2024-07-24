@@ -3214,7 +3214,7 @@ class Task extends TaskFragment {
         // Once at the root task level, we want to check {@link #isTranslucent(ActivityRecord)}.
         // If true, we want to get the Dimmer from the level above since we don't want to animate
         // the dim with the Task.
-        if (!isRootTask() || (Dimmer.DIMMER_REFACTOR && isTranslucentAndVisible())
+        if (!isRootTask() || isTranslucentAndVisible()
                 || (Flags.getDimmerOnClosing() ? isTranslucentForTransition()
                                                 : isTranslucent(null))) {
             return super.getDimmer();

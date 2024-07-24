@@ -35,6 +35,7 @@ import com.android.systemui.log.logcatLogBuffer
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.scene.data.repository.Idle
 import com.android.systemui.scene.data.repository.setTransition
+import com.android.systemui.scene.domain.interactor.sceneInteractor
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.statusbar.notification.collection.GroupEntryBuilder
 import com.android.systemui.statusbar.notification.collection.NotifPipeline
@@ -627,6 +628,7 @@ class OriginalUnseenKeyguardCoordinatorTest(flags: FlagsParameterization) : Sysu
                 fakeSettings,
                 seenNotificationsInteractor,
                 statusBarStateController,
+                sceneInteractor = kosmos.sceneInteractor,
             )
         keyguardCoordinator.attach(notifPipeline)
         testScope.runTest {

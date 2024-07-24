@@ -16,6 +16,8 @@
 
 package com.android.wm.shell.dagger;
 
+import static com.android.wm.shell.shared.desktopmode.DesktopModeFlags.DESKTOP_WINDOWING_MODE;
+
 import android.annotation.Nullable;
 import android.app.KeyguardManager;
 import android.content.Context;
@@ -30,11 +32,11 @@ import com.android.internal.jank.InteractionJankMonitor;
 import com.android.internal.logging.UiEventLogger;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.launcher3.icons.IconProvider;
-import com.android.window.flags.Flags;
 import com.android.wm.shell.RootTaskDisplayAreaOrganizer;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.WindowManagerShellWrapper;
 import com.android.wm.shell.activityembedding.ActivityEmbeddingController;
+import com.android.wm.shell.apptoweb.AppToWebGenericLinksParser;
 import com.android.wm.shell.bubbles.BubbleController;
 import com.android.wm.shell.bubbles.BubbleData;
 import com.android.wm.shell.bubbles.BubbleDataRepository;
@@ -223,7 +225,8 @@ public abstract class WMShellModule {
             Transitions transitions,
             Optional<DesktopTasksController> desktopTasksController,
             RootTaskDisplayAreaOrganizer rootTaskDisplayAreaOrganizer,
-            InteractionJankMonitor interactionJankMonitor) {
+            InteractionJankMonitor interactionJankMonitor,
+            AppToWebGenericLinksParser genericLinksParser) {
         if (DesktopModeStatus.canEnterDesktopMode(context)) {
             return new DesktopModeWindowDecorViewModel(
                     context,
@@ -242,7 +245,8 @@ public abstract class WMShellModule {
                     transitions,
                     desktopTasksController,
                     rootTaskDisplayAreaOrganizer,
-                    interactionJankMonitor);
+                    interactionJankMonitor,
+                    genericLinksParser);
         }
         return new CaptionWindowDecorViewModel(
                 context,
@@ -257,6 +261,15 @@ public abstract class WMShellModule {
                 rootTaskDisplayAreaOrganizer,
                 syncQueue,
                 transitions);
+    }
+
+    @WMSingleton
+    @Provides
+    static AppToWebGenericLinksParser provideGenericLinksParser(
+            Context context,
+            @ShellMainThread ShellExecutor mainExecutor
+    ) {
+        return new AppToWebGenericLinksParser(context, mainExecutor);
     }
 
     //
@@ -554,13 +567,15 @@ public abstract class WMShellModule {
             Transitions transitions,
             @DynamicOverride DesktopModeTaskRepository desktopModeTaskRepository,
             ShellTaskOrganizer shellTaskOrganizer) {
+        int maxTaskLimit = DesktopModeStatus.getMaxTaskLimit(context);
         if (!DesktopModeStatus.canEnterDesktopMode(context)
-                || !Flags.enableDesktopWindowingTaskLimit()) {
+                || DESKTOP_WINDOWING_MODE.isEnabled(context)
+                || maxTaskLimit <= 0) {
             return Optional.empty();
         }
         return Optional.of(
                 new DesktopTasksLimiter(
-                        transitions, desktopModeTaskRepository, shellTaskOrganizer));
+                        transitions, desktopModeTaskRepository, shellTaskOrganizer, maxTaskLimit));
     }
 
 

@@ -171,7 +171,7 @@
     <string name="accessibility_wallet_button" msgid="1458258783460555507">"Wallet"</string>
     <string name="accessibility_qr_code_scanner_button" msgid="7521277927692910795">"QR कोड स्क्यानर"</string>
     <string name="accessibility_unlock_button" msgid="3613812140816244310">"अनलक गरिएको छ"</string>
-    <string name="accessibility_lock_icon" msgid="661492842417875775">"यन्त्र लक गरिएको छ"</string>
+    <string name="accessibility_lock_icon" msgid="661492842417875775">"डिभाइस लक गरिएको छ"</string>
     <string name="accessibility_scanning_face" msgid="3093828357921541387">"अनुहार स्क्यान गर्दै"</string>
     <string name="accessibility_send_smart_reply" msgid="8885032190442015141">"पठाउनुहोस्"</string>
     <string name="cancel" msgid="1089011503403416730">"रद्द गर्नुहोस्"</string>
@@ -290,8 +290,7 @@
     <string name="start_dreams" msgid="9131802557946276718">"स्क्रिन सेभर"</string>
     <string name="ethernet_label" msgid="2203544727007463351">"Ethernet"</string>
     <string name="quick_settings_dnd_label" msgid="7728690179108024338">"बाधा नपुऱ्याउनुहोस्"</string>
-    <!-- no translation found for quick_settings_modes_label (5407025818652750501) -->
-    <skip />
+    <string name="quick_settings_modes_label" msgid="5407025818652750501">"महत्त्वपूर्ण मोडहरू"</string>
     <string name="quick_settings_bluetooth_label" msgid="7018763367142041481">"ब्लुटुथ"</string>
     <string name="quick_settings_bluetooth_detail_empty_text" msgid="5760239584390514322">"जोडी उपकरणहरू उपलब्ध छैन"</string>
     <string name="quick_settings_bluetooth_tile_subtitle" msgid="212752719010829550">"कुनै डिभाइस कनेक्ट गर्न वा डिस्कनेक्ट गर्न ट्याप गर्नुहोस्"</string>
@@ -427,6 +426,11 @@
     <string name="sensor_privacy_dialog_open_settings" msgid="5635865896053011859">"सेटिङ खोल्नुहोस्"</string>
     <string name="media_seamless_other_device" msgid="4654849800789196737">"अर्को डिभाइड"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"परिदृश्य टगल गर्नुहोस्"</string>
+    <string name="zen_modes_dialog_title" msgid="4159138230418567383">"महत्त्वपूर्ण मोडहरू"</string>
+    <string name="zen_modes_dialog_done" msgid="6654130880256438950">"सम्पन्न भयो"</string>
+    <string name="zen_modes_dialog_settings" msgid="2310248023728936697">"सेटिङ"</string>
+    <string name="zen_mode_on" msgid="9085304934016242591">"अन छ"</string>
+    <string name="zen_mode_off" msgid="1736604456618147306">"अफ छ"</string>
     <string name="zen_priority_introduction" msgid="3159291973383796646">"तपाईंलाई अलार्म, रिमाइन्डर, कार्यक्रम र तपाईंले निर्दिष्ट गर्नुभएका कलरहरू बाहेकका ध्वनि र कम्पनहरूले बाधा पुऱ्याउने छैनन्। तपाईंले अझै सङ्गीत, भिडियो र खेलहरू लगायत आफूले प्ले गर्न छनौट गरेका जुनसुकै कुरा सुन्न सक्नुहुनेछ।"</string>
     <string name="zen_alarms_introduction" msgid="3987266042682300470">"तपाईंलाई अलार्महरू बाहेकका ध्वनि र कम्पनहरूले बाधा पुऱ्याउने छैनन्। तपाईंले अझै सङ्गीत, भिडियो र खेलहरू लगायत आफूले प्ले गर्न छनौट गरेका जुनसुकै कुरा सुन्न सक्नुहुनेछ।"</string>
     <string name="zen_priority_customize_button" msgid="4119213187257195047">" कस्टम बनाउनुहोस्"</string>
@@ -493,6 +497,7 @@
     <string name="accessibility_action_label_place_widget" msgid="1914197458644168978">"चयन गरिएका विजेटका लागि ठाउँ चयन गर्नुहोस्"</string>
     <string name="communal_widget_picker_title" msgid="1953369090475731663">"लक स्क्रिन विजेटहरू"</string>
     <string name="communal_widget_picker_description" msgid="490515450110487871">"तपाईंको ट्याब्लेट लक भएका बेला पनि सबैले लक स्क्रिनमा भएका विजेट हेर्न सक्छन्।"</string>
+    <string name="accessibility_action_label_unselect_widget" msgid="1041811747619468698">"विजेटको चयन रद्द गर्नुहोस्"</string>
     <string name="communal_widgets_disclaimer_title" msgid="1150954395585308868">"लक स्क्रिन विजेटहरू"</string>
     <string name="communal_widgets_disclaimer_text" msgid="1423545475160506349">"विजेट प्रयोग गरी एप खोल्न तपाईंले आफ्नो पहिचान पुष्टि गर्नु पर्ने हुन्छ। साथै, तपाईंको ट्याब्लेट लक भएका बेला पनि सबै जनाले तिनलाई देख्न सक्छन् भन्ने कुरा ख्याल गर्नुहोस्। केही विजेटहरू लक स्क्रिनमा प्रयोग गर्ने उद्देश्यले नबनाइएका हुन सक्छन् र तिनलाई यहाँ हाल्नु सुरक्षित नहुन सक्छ।"</string>
     <string name="communal_widgets_disclaimer_button" msgid="4423059765740780753">"बुझेँ"</string>
@@ -549,8 +554,10 @@
     <string name="media_projection_action_text" msgid="3634906766918186440">"अहिले न"</string>
     <string name="empty_shade_text" msgid="8935967157319717412">"कुनै सूचनाहरू छैनन्"</string>
     <string name="no_unseen_notif_text" msgid="395512586119868682">"कुनै पनि नयाँ सूचना छैन"</string>
-    <string name="adaptive_notification_edu_hun_title" msgid="5720882373252389461">"एड्याप्टिभ नोटिफिकेसन अन छ"</string>
-    <string name="adaptive_notification_edu_hun_text" msgid="4260536236101821273">"तपाईंले छोटो समयमा धेरै नोटिफिकेसन प्राप्त गर्दा तपाईंको डिभाइसले अब दुई मिनेटसम्म भोल्युम र स्क्रिनमा देखिने पप-अपको सङ्ख्या घटाउँछ।"</string>
+    <!-- no translation found for adaptive_notification_edu_hun_title (7790738150177329960) -->
+    <skip />
+    <!-- no translation found for adaptive_notification_edu_hun_text (7743367744129536610) -->
+    <skip />
     <string name="go_to_adaptive_notification_settings" msgid="2423690125178298479">"अफ गर्नुहोस्"</string>
     <string name="unlock_to_see_notif_text" msgid="7439033907167561227">"पुराना सूचनाहरू हेर्न अनलक गर्नुहोस्"</string>
     <string name="quick_settings_disclosure_parental_controls" msgid="2114102871438223600">"यो डिभाइस तपाईंका अभिभावक व्यवस्थापन गर्नुहुन्छ"</string>
@@ -717,8 +724,7 @@
     <string name="notification_alert_title" msgid="3656229781017543655">"डिफल्ट"</string>
     <string name="notification_automatic_title" msgid="3745465364578762652">"स्वचालित"</string>
     <string name="notification_channel_summary_low" msgid="4860617986908931158">"बज्दैन पनि, भाइब्रेट पनि हुँदैन"</string>
-    <!-- no translation found for notification_conversation_summary_low (3855696451919728790) -->
-    <skip />
+    <string name="notification_conversation_summary_low" msgid="3855696451919728790">"नोटिफिकेसन आउँदा भाइब्रेसन वा साउन्ड आउँदैन तर अझै पनि \"वार्तालाप\" खण्डमा देखिन्छ"</string>
     <string name="notification_channel_summary_default" msgid="777294388712200605">"डिभाइसको सेटिङका आधारमा घन्टी बज्न वा भाइब्रेट हुन सक्छ"</string>
     <string name="notification_channel_summary_default_with_bubbles" msgid="3482483084451555344">"डिभाइसको सेटिङका आधारमा घन्टी बज्न वा कम्पन हुन सक्छ। <xliff:g id="APP_NAME">%1$s</xliff:g> मार्फत गरिएका वार्तालापहरू स्वतः बबलमा देखिन्छन्।"</string>
     <string name="notification_channel_summary_automatic" msgid="5813109268050235275">"सिस्टमलाई यो सूचना आउँदा ध्वनि बज्नु पर्छ वा कम्पन हुनु पर्छ भन्ने कुराको निधो गर्न दिनुहोस्"</string>
@@ -1082,7 +1088,7 @@
     <string name="controls_dialog_ok" msgid="2770230012857881822">"थप्नुहोस्"</string>
     <string name="controls_dialog_remove" msgid="3775288002711561936">"हटाउनुहोस्"</string>
     <string name="controls_dialog_message" msgid="342066938390663844">"<xliff:g id="APP">%s</xliff:g> ले सिफारिस गरेको"</string>
-    <string name="controls_tile_locked" msgid="731547768182831938">"यन्त्र लक गरिएको छ"</string>
+    <string name="controls_tile_locked" msgid="731547768182831938">"डिभाइस लक गरिएको छ"</string>
     <string name="controls_settings_show_controls_dialog_title" msgid="3357852503553809554">"लक स्क्रिनमै डिभाइसहरू देखाउने र लक स्क्रिनबाटै ती डिभाइसहरू नियन्त्रण गर्ने हो?"</string>
     <string name="controls_settings_show_controls_dialog_message" msgid="7666211700524587969">"तपाईं आफ्ना बाह्य डिभाइसहरूका कन्ट्रोलहरू लक स्क्रिनमा हाल्न सक्नुहुन्छ।\n\nतपाईंको डिभाइसको एपले तपाईंलाई आफ्नो फोन वा ट्याब्लेट अनलक नगरिकनै केही डिभाइसहरू नियन्त्रण गर्ने अनुमति दिन सक्छ।\n\nतपाईं जुनसुकै बेला सेटिङमा गई यी कुराहरू बदल्न सक्नुहुन्छ।"</string>
     <string name="controls_settings_trivial_controls_dialog_title" msgid="7593188157655036677">"लक स्क्रिनबाटै डिभाइसहरू नियन्त्रण गर्ने हो?"</string>
@@ -1378,6 +1384,17 @@
     <string name="keyboard_backlight_value" msgid="7336398765584393538">"%2$d मध्ये %1$d औँ स्तर"</string>
     <string name="home_controls_dream_label" msgid="6567105701292324257">"होम कन्ट्रोलहरू"</string>
     <string name="home_controls_dream_description" msgid="4644150952104035789">"होम कन्ट्रोललाई तुरुन्तै स्क्रिनसेभरका रूपमा एक्सेस गर्नुहोस्"</string>
-    <!-- no translation found for volume_undo_action (5815519725211877114) -->
-    <skip />
+    <string name="volume_undo_action" msgid="5815519725211877114">"अन्डू गर्नुहोस्"</string>
+    <string name="back_edu_toast_content" msgid="4530314597378982956">"पछाडि जान तिन वटा औँलाले टचप्याडमा बायाँ वा दायाँतिर स्वाइप गर्नुहोस्"</string>
+    <string name="home_edu_toast_content" msgid="3381071147871955415">"होममा जान तिन वटा औँलाले टचप्याडमा माथितिर स्वाइप गर्नुहोस्"</string>
+    <string name="overview_edu_toast_content" msgid="5797030644017804518">"आफूले हालसालै चलाएका एपहरू हेर्न तिन वटा औँलाले टचप्याडमा माथितिर स्वाइप गर्नुहोस् र होल्ड गर्नुहोस्"</string>
+    <string name="all_apps_edu_toast_content" msgid="8807496014667211562">"आफ्ना सबै एपहरू हेर्न आफ्नो किबोर्डमा भएको एक्सन की थिच्नुहोस्"</string>
+    <string name="back_edu_notification_title" msgid="5624780717751357278">"पछाडि जान आफ्नो टचप्याड प्रयोग गर्नुहोस्"</string>
+    <string name="back_edu_notification_content" msgid="2497557451540954068">"तिन वटा औँला प्रयोग गरी बायाँ वा दायाँतिर स्वाइप गर्नुहोस्। थप जेस्चर प्रयोग गर्ने तरिका सिक्न ट्याप गर्नुहोस्।"</string>
+    <string name="home_edu_notification_title" msgid="6097902076909654045">"होममा जान आफ्नो टचप्याड प्रयोग गर्नुहोस्"</string>
+    <string name="home_edu_notification_content" msgid="6631697734535766588">"तिन वटा औँला प्रयोग गरी माथितिर स्वाइप गर्नुहोस्। थप जेस्चर प्रयोग गर्ने तरिका सिक्न ट्याप गर्नुहोस्।"</string>
+    <string name="overview_edu_notification_title" msgid="1265824157319562406">"आफूले हालसालै चलाएका एपहरू हेर्न आफ्नो टचप्याड प्रयोग गर्नुहोस्"</string>
+    <string name="overview_edu_notification_content" msgid="3578204677648432500">"तिन वटा औँला प्रयोग गरी माथितिर स्वाइप गर्नुहोस् र होल्ड गर्नुहोस्। थप जेस्चर प्रयोग गर्ने तरिका सिक्न ट्याप गर्नुहोस्।"</string>
+    <string name="all_apps_edu_notification_title" msgid="372262997265569063">"सबै एपहरू हेर्न आफ्नो किबोर्ड प्रयोग गर्नुहोस्"</string>
+    <string name="all_apps_edu_notification_content" msgid="3255070575694025585">"जुनसुकै बेला एक्सन की थिच्नुहोस्। थप जेस्चर प्रयोग गर्ने तरिका सिक्न ट्याप गर्नुहोस्।"</string>
 </resources>

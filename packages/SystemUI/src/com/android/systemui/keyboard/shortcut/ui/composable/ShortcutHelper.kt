@@ -91,9 +91,13 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.util.fastFirstOrNull
 import androidx.compose.ui.util.fastForEach
 import androidx.compose.ui.util.fastForEachIndexed
 import com.android.compose.ui.graphics.painter.rememberDrawablePainter
@@ -112,6 +116,7 @@ import com.android.systemui.statusbar.phone.CentralSurfaces
 
 @Composable
 fun ShortcutHelper(
+    onSearchQueryChanged: (String) -> Unit,
     onKeyboardSettingsClicked: () -> Unit,
     modifier: Modifier = Modifier,
     shortcutsUiState: ShortcutsUiState,
@@ -119,25 +124,52 @@ fun ShortcutHelper(
 ) {
     when (shortcutsUiState) {
         is ShortcutsUiState.Active -> {
-            if (useSinglePane()) {
-                ShortcutHelperSinglePane(
-                    modifier,
-                    shortcutsUiState.shortcutCategories,
-                    shortcutsUiState.defaultSelectedCategory,
-                    onKeyboardSettingsClicked
-                )
-            } else {
-                ShortcutHelperTwoPane(
-                    modifier,
-                    shortcutsUiState.shortcutCategories,
-                    shortcutsUiState.defaultSelectedCategory,
-                    onKeyboardSettingsClicked
-                )
-            }
+            ActiveShortcutHelper(
+                shortcutsUiState,
+                useSinglePane,
+                onSearchQueryChanged,
+                modifier,
+                onKeyboardSettingsClicked
+            )
         }
-        is ShortcutsUiState.Inactive -> {
+        else -> {
             // No-op for now.
         }
+    }
+}
+
+@Composable
+private fun ActiveShortcutHelper(
+    shortcutsUiState: ShortcutsUiState.Active,
+    useSinglePane: @Composable () -> Boolean,
+    onSearchQueryChanged: (String) -> Unit,
+    modifier: Modifier,
+    onKeyboardSettingsClicked: () -> Unit
+) {
+    var selectedCategoryType by
+        remember(shortcutsUiState.defaultSelectedCategory) {
+            mutableStateOf(shortcutsUiState.defaultSelectedCategory)
+        }
+    if (useSinglePane()) {
+        ShortcutHelperSinglePane(
+            shortcutsUiState.searchQuery,
+            onSearchQueryChanged,
+            shortcutsUiState.shortcutCategories,
+            selectedCategoryType,
+            onCategorySelected = { selectedCategoryType = it },
+            onKeyboardSettingsClicked,
+            modifier,
+        )
+    } else {
+        ShortcutHelperTwoPane(
+            shortcutsUiState.searchQuery,
+            onSearchQueryChanged,
+            modifier,
+            shortcutsUiState.shortcutCategories,
+            selectedCategoryType,
+            onCategorySelected = { selectedCategoryType = it },
+            onKeyboardSettingsClicked
+        )
     }
 }
 
@@ -148,10 +180,13 @@ private fun shouldUseSinglePane() =
 
 @Composable
 private fun ShortcutHelperSinglePane(
-    modifier: Modifier = Modifier,
+    searchQuery: String,
+    onSearchQueryChanged: (String) -> Unit,
     categories: List<ShortcutCategory>,
-    defaultSelectedCategory: ShortcutCategoryType,
+    selectedCategoryType: ShortcutCategoryType?,
+    onCategorySelected: (ShortcutCategoryType?) -> Unit,
     onKeyboardSettingsClicked: () -> Unit,
+    modifier: Modifier = Modifier,
 ) {
     Column(
         modifier =
@@ -162,9 +197,9 @@ private fun ShortcutHelperSinglePane(
     ) {
         TitleBar()
         Spacer(modifier = Modifier.height(6.dp))
-        ShortcutsSearchBar()
+        ShortcutsSearchBar(onSearchQueryChanged)
         Spacer(modifier = Modifier.height(16.dp))
-        CategoriesPanelSinglePane(categories, defaultSelectedCategory)
+        CategoriesPanelSinglePane(searchQuery, categories, selectedCategoryType, onCategorySelected)
         Spacer(modifier = Modifier.weight(1f))
         KeyboardSettings(onClick = onKeyboardSettingsClicked)
     }
@@ -172,16 +207,18 @@ private fun ShortcutHelperSinglePane(
 
 @Composable
 private fun CategoriesPanelSinglePane(
+    searchQuery: String,
     categories: List<ShortcutCategory>,
-    defaultSelectedCategory: ShortcutCategoryType,
+    selectedCategoryType: ShortcutCategoryType?,
+    onCategorySelected: (ShortcutCategoryType?) -> Unit,
 ) {
-    val selectedCategory = categories.firstOrNull { it.type == defaultSelectedCategory }
-    var expandedCategory by remember { mutableStateOf(selectedCategory) }
     Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
         categories.fastForEachIndexed { index, category ->
-            val isExpanded = expandedCategory == category
+            val isExpanded = selectedCategoryType == category.type
             val itemShape =
-                if (index == 0) {
+                if (categories.size == 1) {
+                    ShortcutHelper.Shapes.singlePaneSingleCategory
+                } else if (index == 0) {
                     ShortcutHelper.Shapes.singlePaneFirstCategory
                 } else if (index == categories.lastIndex) {
                     ShortcutHelper.Shapes.singlePaneLastCategory
@@ -189,15 +226,17 @@ private fun CategoriesPanelSinglePane(
                     ShortcutHelper.Shapes.singlePaneCategory
                 }
             CategoryItemSinglePane(
+                searchQuery = searchQuery,
                 category = category,
                 isExpanded = isExpanded,
                 onClick = {
-                    expandedCategory =
+                    onCategorySelected(
                         if (isExpanded) {
                             null
                         } else {
-                            category
+                            category.type
                         }
+                    )
                 },
                 shape = itemShape,
             )
@@ -207,6 +246,7 @@ private fun CategoriesPanelSinglePane(
 
 @Composable
 private fun CategoryItemSinglePane(
+    searchQuery: String,
     category: ShortcutCategory,
     isExpanded: Boolean,
     onClick: () -> Unit,
@@ -222,13 +262,15 @@ private fun CategoryItemSinglePane(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier.fillMaxWidth().heightIn(min = 88.dp).padding(horizontal = 16.dp)
             ) {
-                ShortcutCategoryIcon(category.icon)
+                ShortcutCategoryIcon(modifier = Modifier.size(24.dp), source = category.icon)
                 Spacer(modifier = Modifier.width(16.dp))
                 Text(category.label(LocalContext.current))
                 Spacer(modifier = Modifier.weight(1f))
                 RotatingExpandCollapseIcon(isExpanded)
             }
-            AnimatedVisibility(visible = isExpanded) { ShortcutCategoryDetailsSinglePane(category) }
+            AnimatedVisibility(visible = isExpanded) {
+                ShortcutCategoryDetailsSinglePane(searchQuery, category)
+            }
         }
     }
 }
@@ -253,8 +295,8 @@ private val ShortcutCategory.icon: IconSource
 @Composable
 fun ShortcutCategoryIcon(
     source: IconSource,
-    contentDescription: String? = null,
     modifier: Modifier = Modifier,
+    contentDescription: String? = null,
     tint: Color = LocalContentColor.current
 ) {
     if (source.imageVector != null) {
@@ -326,30 +368,30 @@ private fun RotatingExpandCollapseIcon(isExpanded: Boolean) {
 }
 
 @Composable
-private fun ShortcutCategoryDetailsSinglePane(category: ShortcutCategory) {
+private fun ShortcutCategoryDetailsSinglePane(searchQuery: String, category: ShortcutCategory) {
     Column(Modifier.padding(horizontal = 16.dp)) {
         category.subCategories.fastForEach { subCategory ->
-            ShortcutSubCategorySinglePane(subCategory)
+            ShortcutSubCategorySinglePane(searchQuery, subCategory)
         }
     }
 }
 
 @Composable
-private fun ShortcutSubCategorySinglePane(subCategory: ShortcutSubCategory) {
+private fun ShortcutSubCategorySinglePane(searchQuery: String, subCategory: ShortcutSubCategory) {
     // This @Composable is expected to be in a Column.
     SubCategoryTitle(subCategory.label)
     subCategory.shortcuts.fastForEachIndexed { index, shortcut ->
         if (index > 0) {
             HorizontalDivider()
         }
-        ShortcutSinglePane(shortcut)
+        ShortcutSinglePane(searchQuery, shortcut)
     }
 }
 
 @Composable
-private fun ShortcutSinglePane(shortcut: Shortcut) {
+private fun ShortcutSinglePane(searchQuery: String, shortcut: Shortcut) {
     Column(Modifier.padding(vertical = 24.dp)) {
-        ShortcutDescriptionText(shortcut = shortcut)
+        ShortcutDescriptionText(searchQuery = searchQuery, shortcut = shortcut)
         Spacer(modifier = Modifier.height(12.dp))
         ShortcutKeyCombinations(shortcut = shortcut)
     }
@@ -357,42 +399,49 @@ private fun ShortcutSinglePane(shortcut: Shortcut) {
 
 @Composable
 private fun ShortcutHelperTwoPane(
+    searchQuery: String,
+    onSearchQueryChanged: (String) -> Unit,
     modifier: Modifier = Modifier,
     categories: List<ShortcutCategory>,
-    defaultSelectedCategory: ShortcutCategoryType,
+    selectedCategoryType: ShortcutCategoryType?,
+    onCategorySelected: (ShortcutCategoryType?) -> Unit,
     onKeyboardSettingsClicked: () -> Unit,
 ) {
-    var selectedCategoryType by remember { mutableStateOf(defaultSelectedCategory) }
-    val selectedCategory = categories.first { it.type == selectedCategoryType }
+    val selectedCategory = categories.fastFirstOrNull { it.type == selectedCategoryType }
     Column(modifier = modifier.fillMaxSize().padding(start = 24.dp, end = 24.dp, top = 26.dp)) {
         TitleBar()
         Spacer(modifier = Modifier.height(12.dp))
         Row(Modifier.fillMaxWidth()) {
             StartSidePanel(
+                onSearchQueryChanged = onSearchQueryChanged,
                 modifier = Modifier.fillMaxWidth(fraction = 0.32f),
                 categories = categories,
-                selectedCategory = selectedCategoryType,
-                onCategoryClicked = { selectedCategoryType = it.type },
                 onKeyboardSettingsClicked = onKeyboardSettingsClicked,
+                selectedCategory = selectedCategoryType,
+                onCategoryClicked = { onCategorySelected(it.type) }
             )
             Spacer(modifier = Modifier.width(24.dp))
-            EndSidePanel(Modifier.fillMaxSize(), selectedCategory)
+            EndSidePanel(searchQuery, Modifier.fillMaxSize(), selectedCategory)
         }
     }
 }
 
 @Composable
-private fun EndSidePanel(modifier: Modifier, category: ShortcutCategory) {
+private fun EndSidePanel(searchQuery: String, modifier: Modifier, category: ShortcutCategory?) {
+    if (category == null) {
+        // TODO(b/353953351) - Show a "no results" UI?
+        return
+    }
     LazyColumn(modifier.nestedScroll(rememberNestedScrollInteropConnection())) {
         items(items = category.subCategories, key = { item -> item.label }) {
-            SubCategoryContainerDualPane(it)
+            SubCategoryContainerDualPane(searchQuery, it)
             Spacer(modifier = Modifier.height(8.dp))
         }
     }
 }
 
 @Composable
-private fun SubCategoryContainerDualPane(subCategory: ShortcutSubCategory) {
+private fun SubCategoryContainerDualPane(searchQuery: String, subCategory: ShortcutSubCategory) {
     Surface(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(28.dp),
@@ -405,7 +454,7 @@ private fun SubCategoryContainerDualPane(subCategory: ShortcutSubCategory) {
                 if (index > 0) {
                     HorizontalDivider()
                 }
-                ShortcutViewDualPane(shortcut)
+                ShortcutViewDualPane(searchQuery, shortcut)
             }
         }
     }
@@ -421,7 +470,7 @@ private fun SubCategoryTitle(title: String) {
 }
 
 @Composable
-private fun ShortcutViewDualPane(shortcut: Shortcut) {
+private fun ShortcutViewDualPane(searchQuery: String, shortcut: Shortcut) {
     Row(Modifier.padding(vertical = 16.dp)) {
         Row(
             modifier = Modifier.width(160.dp).align(Alignment.CenterVertically),
@@ -435,6 +484,7 @@ private fun ShortcutViewDualPane(shortcut: Shortcut) {
                 )
             }
             ShortcutDescriptionText(
+                searchQuery = searchQuery,
                 shortcut = shortcut,
             )
         }
@@ -544,27 +594,53 @@ private fun FlowRowScope.ShortcutOrSeparator(spacing: Dp) {
 
 @Composable
 private fun ShortcutDescriptionText(
+    searchQuery: String,
     shortcut: Shortcut,
     modifier: Modifier = Modifier,
 ) {
     Text(
         modifier = modifier,
-        text = shortcut.label,
+        text = textWithHighlightedSearchQuery(shortcut.label, searchQuery),
         style = MaterialTheme.typography.bodyMedium,
         color = MaterialTheme.colorScheme.onSurface,
     )
 }
 
 @Composable
+private fun textWithHighlightedSearchQuery(text: String, searchValue: String) =
+    buildAnnotatedString {
+        val searchIndex = text.lowercase().indexOf(searchValue.trim().lowercase())
+        val postSearchIndex = searchIndex + searchValue.trim().length
+
+        if (searchIndex > 0) {
+            val preSearchText = text.substring(0, searchIndex)
+            append(preSearchText)
+        }
+        if (searchIndex >= 0) {
+            val searchText = text.substring(searchIndex, postSearchIndex)
+            withStyle(style = SpanStyle(background = MaterialTheme.colorScheme.primaryContainer)) {
+                append(searchText)
+            }
+            if (postSearchIndex < text.length) {
+                val postSearchText = text.substring(postSearchIndex)
+                append(postSearchText)
+            }
+        } else {
+            append(text)
+        }
+    }
+
+@Composable
 private fun StartSidePanel(
+    onSearchQueryChanged: (String) -> Unit,
     modifier: Modifier,
     categories: List<ShortcutCategory>,
     onKeyboardSettingsClicked: () -> Unit,
-    selectedCategory: ShortcutCategoryType,
+    selectedCategory: ShortcutCategoryType?,
     onCategoryClicked: (ShortcutCategory) -> Unit,
 ) {
     Column(modifier) {
-        ShortcutsSearchBar()
+        ShortcutsSearchBar(onSearchQueryChanged)
         Spacer(modifier = Modifier.heightIn(16.dp))
         CategoriesPanelTwoPane(categories, selectedCategory, onCategoryClicked)
         Spacer(modifier = Modifier.weight(1f))
@@ -575,7 +651,7 @@ private fun StartSidePanel(
 @Composable
 private fun CategoriesPanelTwoPane(
     categories: List<ShortcutCategory>,
-    selectedCategory: ShortcutCategoryType,
+    selectedCategory: ShortcutCategoryType?,
     onCategoryClicked: (ShortcutCategory) -> Unit
 ) {
     Column {
@@ -643,17 +719,23 @@ private fun TitleBar() {
 
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
-private fun ShortcutsSearchBar() {
-    var query by remember { mutableStateOf("") }
+private fun ShortcutsSearchBar(onQueryChange: (String) -> Unit) {
+    // Using an "internal query" to make sure the SearchBar is immediately updated, otherwise
+    // the cursor moves to the wrong position sometimes, when waiting for the query to come back
+    // from the ViewModel.
+    var queryInternal by remember { mutableStateOf("") }
     val focusRequester = remember { FocusRequester() }
     LaunchedEffect(Unit) { focusRequester.requestFocus() }
     SearchBar(
         modifier = Modifier.fillMaxWidth().focusRequester(focusRequester),
         colors = SearchBarDefaults.colors(containerColor = MaterialTheme.colorScheme.surfaceBright),
-        query = query,
+        query = queryInternal,
         active = false,
         onActiveChange = {},
-        onQueryChange = { query = it },
+        onQueryChange = {
+            queryInternal = it
+            onQueryChange(it)
+        },
         onSearch = {},
         leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
         placeholder = { Text(text = stringResource(R.string.shortcut_helper_search_placeholder)) },
@@ -700,6 +782,10 @@ object ShortcutHelper {
             RoundedCornerShape(
                 bottomStart = Dimensions.SinglePaneCategoryCornerRadius,
                 bottomEnd = Dimensions.SinglePaneCategoryCornerRadius
+            )
+        val singlePaneSingleCategory =
+            RoundedCornerShape(
+                size = Dimensions.SinglePaneCategoryCornerRadius,
             )
         val singlePaneCategory = RectangleShape
     }

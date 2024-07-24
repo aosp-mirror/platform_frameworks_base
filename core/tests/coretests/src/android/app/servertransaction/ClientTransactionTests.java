@@ -23,8 +23,8 @@ import static org.mockito.Mockito.verify;
 import android.app.ClientTransactionHandler;
 import android.platform.test.annotations.Presubmit;
 
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
-import androidx.test.runner.AndroidJUnit4;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -52,7 +52,7 @@ public class ClientTransactionTests {
         final ClientTransactionHandler clientTransactionHandler =
                 mock(ClientTransactionHandler.class);
 
-        final ClientTransaction transaction = ClientTransaction.obtain(null /* client */);
+        final ClientTransaction transaction = new ClientTransaction();
         transaction.addTransactionItem(callback1);
         transaction.addTransactionItem(callback2);
         transaction.addTransactionItem(stateRequest);

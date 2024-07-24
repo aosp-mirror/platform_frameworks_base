@@ -216,8 +216,7 @@ class TaskFragment extends WindowContainer<WindowContainer> {
      */
     int mMinHeight;
 
-    Dimmer mDimmer = Dimmer.DIMMER_REFACTOR
-            ? new SmoothDimmer(this) : new LegacyDimmer(this);
+    Dimmer mDimmer = new Dimmer(this);
 
     /** Apply the dim layer on the embedded TaskFragment. */
     static final int EMBEDDED_DIM_AREA_TASK_FRAGMENT = 0;
@@ -1636,7 +1635,7 @@ class TaskFragment extends WindowContainer<WindowContainer> {
                 final int topProcessState = mAtmService.mTopProcessState;
                 next.app.setPendingUiCleanAndForceProcessStateUpTo(topProcessState);
                 next.abortAndClearOptionsAnimation();
-                final ResumeActivityItem resumeActivityItem = ResumeActivityItem.obtain(
+                final ResumeActivityItem resumeActivityItem = new ResumeActivityItem(
                         next.token, topProcessState, dc.isNextTransitionForward(),
                         next.shouldSendCompatFakeFocus());
                 mAtmService.getLifecycleManager().scheduleTransactionItem(
@@ -2436,7 +2435,7 @@ class TaskFragment extends WindowContainer<WindowContainer> {
                     inOutConfig.smallestScreenWidthDp = (int) (0.5f
                             + Math.min(mTmpFullBounds.width(), mTmpFullBounds.height()) / density);
                 } else if (windowingMode == WINDOWING_MODE_MULTI_WINDOW && mIsEmbedded
-                        && insideParentBounds && !resolvedBounds.equals(parentBounds)) {
+                        && !resolvedBounds.equals(parentBounds)) {
                     // For embedded TFs, the smallest width should be updated. Otherwise, inherit
                     // from the parent task would result in applications loaded wrong resource.
                     inOutConfig.smallestScreenWidthDp =

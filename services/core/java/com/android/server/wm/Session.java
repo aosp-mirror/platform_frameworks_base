@@ -37,6 +37,7 @@ import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
 import static android.view.WindowManager.LayoutParams.isSystemAlertWindowType;
 
+import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_IME;
 import static com.android.internal.protolog.ProtoLogGroup.WM_SHOW_TRANSACTIONS;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
@@ -78,6 +79,7 @@ import android.view.WindowInsets;
 import android.view.WindowInsets.Type.InsetsType;
 import android.view.WindowManager;
 import android.view.WindowRelayoutResult;
+import android.view.inputmethod.ImeTracker;
 import android.window.InputTransferToken;
 import android.window.OnBackInvokedCallbackInfo;
 
@@ -710,13 +712,20 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
     }
 
     @Override
-    public void updateRequestedVisibleTypes(IWindow window, @InsetsType int requestedVisibleTypes) {
+    public void updateRequestedVisibleTypes(IWindow window, @InsetsType int requestedVisibleTypes,
+            @Nullable ImeTracker.Token imeStatsToken) {
         synchronized (mService.mGlobalLock) {
             final WindowState win = mService.windowForClientLocked(this, window,
                     false /* throwOnError */);
             if (win != null) {
+                ImeTracker.forLogging().onProgress(imeStatsToken,
+                        ImeTracker.PHASE_WM_UPDATE_REQUESTED_VISIBLE_TYPES);
                 win.setRequestedVisibleTypes(requestedVisibleTypes);
-                win.getDisplayContent().getInsetsPolicy().onRequestedVisibleTypesChanged(win);
+                win.getDisplayContent().getInsetsPolicy().onRequestedVisibleTypesChanged(win,
+                        imeStatsToken);
+            } else {
+                ImeTracker.forLogging().onFailed(imeStatsToken,
+                        ImeTracker.PHASE_WM_UPDATE_REQUESTED_VISIBLE_TYPES);
             }
         }
     }
@@ -982,6 +991,30 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
                         "setOnBackInvokedCallback(): No window state for package:" + mPackageName);
             } else {
                 windowState.setOnBackInvokedCallbackInfo(callbackInfo);
+            }
+        }
+    }
+
+    @Override
+    public void notifyImeWindowVisibilityChangedFromClient(IWindow window, boolean visible,
+            @NonNull ImeTracker.Token statsToken) {
+        synchronized (mService.mGlobalLock) {
+            // TODO(b/353463205) check if we can use mService.getDefaultDisplayContentLocked()
+            //  instead of window
+            final WindowState win = mService.windowForClientLocked(this, window,
+                    false /* throwOnError */);
+            if (win != null) {
+                final InsetsStateController insetsStateController =
+                        win.getDisplayContent().getInsetsStateController();
+                ProtoLog.d(WM_DEBUG_IME, "notifyImeWindowVisibilityChangedFromClient: %s",
+                        insetsStateController.getImeSourceProvider());
+                ImeTracker.forLogging().onProgress(statsToken,
+                        ImeTracker.PHASE_WM_NOTIFY_IME_VISIBILITY_CHANGED_FROM_CLIENT);
+                insetsStateController.getImeSourceProvider().receiveImeStatsToken(visible,
+                        statsToken);
+            } else {
+                ImeTracker.forLogging().onFailed(statsToken,
+                        ImeTracker.PHASE_WM_NOTIFY_IME_VISIBILITY_CHANGED_FROM_CLIENT);
             }
         }
     }
