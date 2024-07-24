@@ -74,11 +74,13 @@ public class TransactionParcelTests {
     @Test
     public void testConfigurationChange() {
         // Write to parcel
-        ConfigurationChangeItem item = ConfigurationChangeItem.obtain(config(), 1 /* deviceId */);
+        final ConfigurationChangeItem item =
+                new ConfigurationChangeItem(config(), 1 /* deviceId */);
         writeAndPrepareForReading(item);
 
         // Read from parcel and assert
-        ConfigurationChangeItem result = ConfigurationChangeItem.CREATOR.createFromParcel(mParcel);
+        final ConfigurationChangeItem result =
+                ConfigurationChangeItem.CREATOR.createFromParcel(mParcel);
 
         assertEquals(item.hashCode(), result.hashCode());
         assertEquals(item, result);
@@ -122,11 +124,12 @@ public class TransactionParcelTests {
     @Test
     public void testNewIntent() {
         // Write to parcel
-        NewIntentItem item = NewIntentItem.obtain(mActivityToken, referrerIntentList(), false);
+        final NewIntentItem item =
+                new NewIntentItem(mActivityToken, referrerIntentList(), false /* resume */);
         writeAndPrepareForReading(item);
 
         // Read from parcel and assert
-        NewIntentItem result = NewIntentItem.CREATOR.createFromParcel(mParcel);
+        final NewIntentItem result = NewIntentItem.CREATOR.createFromParcel(mParcel);
 
         assertEquals(item.hashCode(), result.hashCode());
         assertEquals(item, result);
@@ -290,8 +293,8 @@ public class TransactionParcelTests {
     @Test
     public void testClientTransaction() {
         // Write to parcel
-        final NewIntentItem callback1 = NewIntentItem.obtain(
-                mActivityToken, new ArrayList<>(), true);
+        final NewIntentItem callback1 =
+                new NewIntentItem(mActivityToken, new ArrayList<>(), true /* resume */);
         final ActivityConfigurationChangeItem callback2 = new ActivityConfigurationChangeItem(
                 mActivityToken, config(), new ActivityWindowInfo());
 
@@ -305,7 +308,7 @@ public class TransactionParcelTests {
         writeAndPrepareForReading(transaction);
 
         // Read from parcel and assert
-        ClientTransaction result = ClientTransaction.CREATOR.createFromParcel(mParcel);
+        final ClientTransaction result = ClientTransaction.CREATOR.createFromParcel(mParcel);
 
         assertEquals(transaction.hashCode(), result.hashCode());
         assertEquals(transaction, result);
