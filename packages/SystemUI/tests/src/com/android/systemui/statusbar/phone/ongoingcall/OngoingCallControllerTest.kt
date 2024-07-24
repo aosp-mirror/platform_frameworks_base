@@ -37,10 +37,8 @@ import com.android.systemui.SysuiTestCase
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.res.R
-import com.android.systemui.statusbar.StatusBarIconView
 import com.android.systemui.statusbar.data.repository.FakeStatusBarModeRepository
 import com.android.systemui.statusbar.gesture.SwipeStatusBarAwayGestureHandler
-import com.android.systemui.statusbar.notification.icon.IconPack
 import com.android.systemui.statusbar.notification.collection.NotificationEntry
 import com.android.systemui.statusbar.notification.collection.NotificationEntryBuilder
 import com.android.systemui.statusbar.notification.collection.notifcollection.CommonNotifCollection
@@ -253,139 +251,6 @@ class OngoingCallControllerTest : SysuiTestCase() {
 
         assertThat(chipView.findViewById<View>(R.id.ongoing_activity_chip_time)?.measuredWidth)
             .isGreaterThan(0)
-    }
-
-    @Test
-    @DisableFlags(FLAG_STATUS_BAR_SCREEN_SHARING_CHIPS)
-    fun onEntryUpdated_notifIconsNotSet_noIconInChip() {
-        val notification = createOngoingCallNotifEntry()
-
-        notifCollectionListener.onEntryUpdated(notification)
-
-        assertThat(chipView.findViewById<View>(R.id.ongoing_activity_chip_icon)).isNull()
-    }
-
-    @Test
-    @DisableFlags(FLAG_STATUS_BAR_SCREEN_SHARING_CHIPS)
-    fun onEntryUpdated_notifIconsSetToNull_noIconInChip() {
-        val notification = createOngoingCallNotifEntry()
-        notification.icons = IconPack.buildEmptyPack(/* fromSource= */ null)
-
-        notifCollectionListener.onEntryUpdated(notification)
-
-        assertThat(chipView.findViewById<View>(R.id.ongoing_activity_chip_icon)).isNull()
-    }
-
-    @Test
-    @DisableFlags(FLAG_STATUS_BAR_SCREEN_SHARING_CHIPS)
-    fun onEntryUpdated_notifIconsIncluded_statusBarChipIconUsed() {
-        val notification = createOngoingCallNotifEntry()
-
-        val statusBarChipIconView =
-            StatusBarIconView(
-                context,
-                /* slot= */ "OngoingCallControllerTest",
-                notification.sbn,
-            )
-        notification.icons =
-            IconPack.buildPack(
-                /* statusBarIcon= */ mock(StatusBarIconView::class.java),
-                statusBarChipIconView,
-                /* shelfIcon= */ mock(StatusBarIconView::class.java),
-                /* aodIcon= */ mock(StatusBarIconView::class.java),
-                /* source= */ null,
-            )
-
-        notifCollectionListener.onEntryUpdated(notification)
-
-        assertThat(chipView.findViewById<View>(R.id.ongoing_activity_chip_icon))
-            .isEqualTo(statusBarChipIconView)
-        assertThat(statusBarChipIconView.contentDescription)
-            .isEqualTo(context.resources.getString(R.string.ongoing_phone_call_content_description))
-    }
-
-    @Test
-    @DisableFlags(FLAG_STATUS_BAR_SCREEN_SHARING_CHIPS)
-    fun onEntryUpdated_newNotifIcon_newIconUsed() {
-        val notification = createOngoingCallNotifEntry()
-
-        val firstStatusBarChipIconView =
-            StatusBarIconView(
-                context,
-                /* slot= */ "OngoingCallControllerTest",
-                notification.sbn,
-            )
-        notification.icons =
-            IconPack.buildPack(
-                /* statusBarIcon= */ mock(StatusBarIconView::class.java),
-                firstStatusBarChipIconView,
-                /* shelfIcon= */ mock(StatusBarIconView::class.java),
-                /* aodIcon= */ mock(StatusBarIconView::class.java),
-                /* source= */ null,
-            )
-        notifCollectionListener.onEntryUpdated(notification)
-
-        assertThat(chipView.findViewById<View>(R.id.ongoing_activity_chip_icon))
-            .isEqualTo(firstStatusBarChipIconView)
-
-        // WHEN the notification is updated with a new icon
-        val secondStatusBarChipIconView =
-            StatusBarIconView(
-                context,
-                /* slot= */ "OngoingCallControllerTestTheSecond",
-                notification.sbn,
-            )
-        notification.icons =
-            IconPack.buildPack(
-                /* statusBarIcon= */ mock(StatusBarIconView::class.java),
-                secondStatusBarChipIconView,
-                /* shelfIcon= */ mock(StatusBarIconView::class.java),
-                /* aodIcon= */ mock(StatusBarIconView::class.java),
-                /* source= */ null,
-            )
-        notifCollectionListener.onEntryUpdated(notification)
-
-        // THEN the new icon is used
-        assertThat(chipView.findViewById<View>(R.id.ongoing_activity_chip_icon))
-            .isEqualTo(secondStatusBarChipIconView)
-    }
-
-    @Test
-    @DisableFlags(FLAG_STATUS_BAR_SCREEN_SHARING_CHIPS)
-    fun chipViewReinflated_iconViewMovedToNewChip() {
-        val notification = createOngoingCallNotifEntry()
-        val statusBarChipIconView =
-            StatusBarIconView(
-                context,
-                /* slot= */ "OngoingCallControllerTest",
-                notification.sbn,
-            )
-        notification.icons =
-            IconPack.buildPack(
-                /* statusBarIcon= */ mock(StatusBarIconView::class.java),
-                statusBarChipIconView,
-                /* shelfIcon= */ mock(StatusBarIconView::class.java),
-                /* aodIcon= */ mock(StatusBarIconView::class.java),
-                /* source= */ null,
-            )
-
-        notifCollectionListener.onEntryUpdated(notification)
-
-        assertThat(chipView.findViewById<View>(R.id.ongoing_activity_chip_icon))
-            .isEqualTo(statusBarChipIconView)
-
-        // WHEN we get a new chip view
-        lateinit var newChipView: View
-        TestableLooper.get(this).runWithLooper {
-            newChipView =
-                LayoutInflater.from(mContext).inflate(R.layout.ongoing_activity_chip, null)
-        }
-        controller.setChipView(newChipView)
-
-        // THEN the icon is detached from the old view and attached to the new one
-        assertThat(chipView.findViewById<View>(R.id.ongoing_activity_chip_icon)).isNull()
-        assertThat(newChipView.findViewById<View>(R.id.ongoing_activity_chip_icon))
-            .isEqualTo(statusBarChipIconView)
     }
 
     /** Regression test for b/194731244. */

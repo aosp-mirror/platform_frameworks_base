@@ -123,8 +123,6 @@ constructor(
             // Construct the status bar icon view.
             val sbIcon = iconBuilder.createIconView(entry)
             sbIcon.scaleType = ImageView.ScaleType.CENTER_INSIDE
-            val sbChipIcon = iconBuilder.createIconView(entry)
-            sbChipIcon.scaleType = ImageView.ScaleType.CENTER_INSIDE
 
             // Construct the shelf icon view.
             val shelfIcon = iconBuilder.createIconView(entry)
@@ -141,17 +139,9 @@ constructor(
 
             try {
                 setIcon(entry, normalIconDescriptor, sbIcon)
-                setIcon(entry, normalIconDescriptor, sbChipIcon)
                 setIcon(entry, sensitiveIconDescriptor, shelfIcon)
                 setIcon(entry, sensitiveIconDescriptor, aodIcon)
-                entry.icons =
-                    IconPack.buildPack(
-                        sbIcon,
-                        sbChipIcon,
-                        shelfIcon,
-                        aodIcon,
-                        entry.icons,
-                    )
+                entry.icons = IconPack.buildPack(sbIcon, shelfIcon, aodIcon, entry.icons)
             } catch (e: InflationException) {
                 entry.icons = IconPack.buildEmptyPack(entry.icons)
                 throw e
