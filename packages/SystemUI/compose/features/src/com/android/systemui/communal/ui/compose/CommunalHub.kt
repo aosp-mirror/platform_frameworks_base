@@ -993,6 +993,11 @@ private fun WidgetContent(
         modifier =
             modifier
                 .then(selectableModifier)
+                .thenIf(!viewModel.isEditMode && !model.inQuietMode) {
+                    Modifier.pointerInput(Unit) {
+                        observeTaps { viewModel.onTapWidget(model.componentName, model.priority) }
+                    }
+                }
                 .thenIf(!viewModel.isEditMode && model.inQuietMode) {
                     Modifier.pointerInput(Unit) {
                         // consume tap to prevent the child view from triggering interactions with

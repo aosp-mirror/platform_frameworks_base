@@ -56,6 +56,19 @@ constructor(
         )
     }
 
+    /** Logs a tap widget event for metrics. No-op if widget is not loggable. */
+    fun logTapWidget(componentName: String, rank: Int) {
+        if (!componentName.isLoggable()) {
+            return
+        }
+
+        statsLogProxy.writeCommunalHubWidgetEventReported(
+            SysUiStatsLog.COMMUNAL_HUB_WIDGET_EVENT_REPORTED__ACTION__TAP,
+            componentName,
+            rank,
+        )
+    }
+
     /** Logs loggable widgets and the total widget count as a [StatsEvent]. */
     fun logWidgetsSnapshot(
         statsEvents: MutableList<StatsEvent>,

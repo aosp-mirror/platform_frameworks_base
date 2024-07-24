@@ -139,6 +139,12 @@ abstract class BaseCommunalViewModel(
         priority: Int,
     ) {}
 
+    /** Called as the UI detects a tap event on the widget. */
+    open fun onTapWidget(
+        componentName: ComponentName,
+        priority: Int,
+    ) {}
+
     /**
      * Called as the UI requests reordering widgets.
      *

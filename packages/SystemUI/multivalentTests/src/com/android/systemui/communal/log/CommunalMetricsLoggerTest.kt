@@ -94,6 +94,30 @@ class CommunalMetricsLoggerTest : SysuiTestCase() {
     }
 
     @Test
+    fun logTapWidget_componentNotLoggable_doNotLog() {
+        underTest.logTapWidget(
+            componentName = "com.yellow.package/my_test_widget",
+            rank = 2,
+        )
+        verify(statsLogProxy, never())
+            .writeCommunalHubWidgetEventReported(anyInt(), any(), anyInt())
+    }
+
+    @Test
+    fun logTapWidget_componentLoggable_logRemoveEvent() {
+        underTest.logTapWidget(
+            componentName = "com.red.package/my_test_widget",
+            rank = 2,
+        )
+        verify(statsLogProxy)
+            .writeCommunalHubWidgetEventReported(
+                SysUiStatsLog.COMMUNAL_HUB_WIDGET_EVENT_REPORTED__ACTION__TAP,
+                "com.red.package/my_test_widget",
+                2,
+            )
+    }
+
+    @Test
     fun logWidgetsSnapshot_logOnlyLoggableComponents() {
         val statsEvents = mutableListOf<StatsEvent>()
         underTest.logWidgetsSnapshot(
