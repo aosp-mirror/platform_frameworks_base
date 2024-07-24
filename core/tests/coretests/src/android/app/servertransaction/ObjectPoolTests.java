@@ -17,7 +17,6 @@
 package android.app.servertransaction;
 
 import static android.app.servertransaction.TestUtils.config;
-import static android.app.servertransaction.TestUtils.mergedConfig;
 import static android.app.servertransaction.TestUtils.referrerIntentList;
 import static android.app.servertransaction.TestUtils.resultInfoList;
 
@@ -128,13 +127,6 @@ public class ObjectPoolTests {
                 .setInitialCallerInfoAccessToken(initialCallerInfoAccessToken)
                 .setActivityWindowInfo(activityWindowInfo)
                 .build());
-    }
-
-    @Test
-    public void testRecycleActivityRelaunchItem() {
-        testRecycle(() -> ActivityRelaunchItem.obtain(mActivityToken,
-                resultInfoList(), referrerIntentList(), 42, mergedConfig(), true,
-                new ActivityWindowInfo()));
     }
 
     @Test
