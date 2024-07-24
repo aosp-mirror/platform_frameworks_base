@@ -103,6 +103,7 @@ import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_ADD_REMOVE;
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_ANIM;
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_APP_TRANSITIONS;
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_BACK_PREVIEW;
+import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_DIMMER;
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_FOCUS;
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_FOCUS_LIGHT;
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_ORIENTATION;
@@ -5195,9 +5196,10 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     }
 
     private void applyDims() {
+        Task task = getTask();
         if (((mAttrs.flags & FLAG_DIM_BEHIND) != 0 || shouldDrawBlurBehind())
                 && mWinAnimator.getShown()
-                && !mHidden && mTransitionController.canApplyDim(getTask())) {
+                && !mHidden && mTransitionController.canApplyDim(task)) {
             // Only show the Dimmer when the following is satisfied:
             // 1. The window has the flag FLAG_DIM_BEHIND or blur behind is requested
             // 2. The WindowToken is not hidden so dims aren't shown when the window is exiting.
@@ -5210,10 +5212,31 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             // If the window is visible from surface flinger perspective (mWinAnimator.getShown())
             // but not window manager visible (!isVisibleNow()), it can still be the parent of the
             // dim, but can not create a new surface or continue a dim alone.
-            if (isVisibleNow()) {
-                getDimmer().adjustAppearance(this, dimAmount, blurRadius);
+            Dimmer dimmer;
+            WindowContainer<?> geometryParent = task;
+            if (Flags.useTasksDimOnly()) {
+                if (task != null) {
+                    geometryParent = task.getDimmerParent();
+                    dimmer = task.mDimmer;
+                } else {
+                    RootDisplayArea displayArea = getRootDisplayArea();
+                    geometryParent = displayArea;
+                    dimmer = displayArea != null ? displayArea.getDimmer() : null;
+                }
+                if (dimmer == null) {
+                    ProtoLog.e(WM_DEBUG_DIMMER, "WindowState %s does not have task or"
+                            + " display area for dimming", this);
+                    return;
+                }
+            } else {
+                dimmer = getDimmer();
             }
-            getDimmer().adjustRelativeLayer(this, -1 /* relativeLayer */);
+
+            if (isVisibleNow()) {
+                dimmer.adjustAppearance(this, dimAmount, blurRadius);
+            }
+            dimmer.adjustPosition(geometryParent,
+                    this /* relativeParent */, -1 /* relativeLayer */);
         }
     }
 
