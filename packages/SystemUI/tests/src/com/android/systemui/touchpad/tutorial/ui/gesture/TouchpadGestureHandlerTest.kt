@@ -32,6 +32,8 @@ import android.view.MotionEvent.TOOL_TYPE_MOUSE
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.touchpad.tutorial.ui.gesture.GestureState.FINISHED
+import com.android.systemui.touchpad.tutorial.ui.gesture.GestureState.NOT_STARTED
 import com.android.systemui.touchpad.tutorial.ui.gesture.TouchpadGesture.BACK
 import com.google.common.truth.Truth.assertThat
 import org.junit.Test
@@ -41,8 +43,8 @@ import org.junit.runner.RunWith
 @RunWith(AndroidJUnit4::class)
 class TouchpadGestureHandlerTest : SysuiTestCase() {
 
-    private var gestureDone = false
-    private val handler = TouchpadGestureHandler(BACK, SWIPE_DISTANCE) { gestureDone = true }
+    private var gestureState = NOT_STARTED
+    private val handler = TouchpadGestureHandler(BACK, SWIPE_DISTANCE) { gestureState = it }
 
     companion object {
         const val SWIPE_DISTANCE = 100
@@ -84,7 +86,7 @@ class TouchpadGestureHandlerTest : SysuiTestCase() {
     fun triggersGestureDoneForThreeFingerGesture() {
         backGestureEvents().forEach { handler.onMotionEvent(it) }
 
-        assertThat(gestureDone).isTrue()
+        assertThat(gestureState).isEqualTo(FINISHED)
     }
 
     private fun backGestureEvents(): List<MotionEvent> {

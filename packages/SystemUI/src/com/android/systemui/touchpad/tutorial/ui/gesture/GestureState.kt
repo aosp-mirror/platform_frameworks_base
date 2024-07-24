@@ -16,17 +16,8 @@
 
 package com.android.systemui.touchpad.tutorial.ui.gesture
 
-enum class TouchpadGesture {
-    BACK,
-    HOME;
-
-    fun toMonitor(
-        swipeDistanceThresholdPx: Int,
-        onStateChanged: (GestureState) -> Unit
-    ): TouchpadGestureMonitor {
-        return when (this) {
-            BACK -> BackGestureMonitor(swipeDistanceThresholdPx, onStateChanged)
-            else -> throw IllegalArgumentException("Not implemented yet")
-        }
-    }
+enum class GestureState {
+    NOT_STARTED,
+    IN_PROGRESS,
+    FINISHED
 }
