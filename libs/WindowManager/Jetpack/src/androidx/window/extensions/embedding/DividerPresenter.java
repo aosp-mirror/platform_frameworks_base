@@ -565,6 +565,7 @@ class DividerPresenter implements View.OnTouchListener {
         return true;
     }
 
+    // Only called by onTouch() and mRenderer is already null-checked.
     @GuardedBy("mLock")
     private void onStartDragging(@NonNull MotionEvent event) {
         mVelocityTracker = VelocityTracker.obtain();
@@ -590,6 +591,7 @@ class DividerPresenter implements View.OnTouchListener {
         });
     }
 
+    // Only called by onTouch() and mRenderer is already null-checked.
     @GuardedBy("mLock")
     private void onDrag(@NonNull MotionEvent event) {
         if (mVelocityTracker != null) {
@@ -660,8 +662,10 @@ class DividerPresenter implements View.OnTouchListener {
 
     @GuardedBy("mLock")
     private void updateDividerPosition(int position) {
-        mRenderer.setDividerPosition(position);
-        mRenderer.updateSurface();
+        if (mRenderer != null) {
+            mRenderer.setDividerPosition(position);
+            mRenderer.updateSurface();
+        }
     }
 
     @GuardedBy("mLock")
@@ -669,7 +673,10 @@ class DividerPresenter implements View.OnTouchListener {
         // Veil visibility change should be applied together with the surface boost transaction in
         // the wct.
         final SurfaceControl.Transaction t = new SurfaceControl.Transaction();
-        mRenderer.hideVeils(t);
+
+        if (mRenderer != null) {
+            mRenderer.hideVeils(t);
+        }
 
         // Callbacks must be executed on the executor to release mLock and prevent deadlocks.
         // mDecorSurfaceOwner may change between here and when the callback is executed,
@@ -684,8 +691,10 @@ class DividerPresenter implements View.OnTouchListener {
                         }
                     });
         });
-        mRenderer.mIsDragging = false;
-        mRenderer.mDragHandle.setPressed(mRenderer.mIsDragging);
+        if (mRenderer != null) {
+            mRenderer.mIsDragging = false;
+            mRenderer.mDragHandle.setPressed(mRenderer.mIsDragging);
+        }
     }
 
     /**
