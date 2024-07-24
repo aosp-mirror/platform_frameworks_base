@@ -3962,6 +3962,10 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
     @Override
     public void showInputMethodPickerFromClient(IInputMethodClient client,
             int auxiliarySubtypeMode) {
+        if (mConcurrentMultiUserModeEnabled) {
+            Slog.w(TAG, "showInputMethodPickerFromClient is not enabled on automotive");
+            return;
+        }
         final int callingUserId = UserHandle.getCallingUserId();
         synchronized (ImfLock.class) {
             if (!canShowInputMethodPickerLocked(client)) {
