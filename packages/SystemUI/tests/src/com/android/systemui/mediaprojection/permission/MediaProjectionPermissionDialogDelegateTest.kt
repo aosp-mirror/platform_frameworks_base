@@ -25,8 +25,6 @@ import android.widget.TextView
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.flags.FeatureFlagsClassic
-import com.android.systemui.flags.Flags
 import com.android.systemui.mediaprojection.MediaProjectionMetricsLogger
 import com.android.systemui.res.R
 import com.android.systemui.statusbar.phone.AlertDialogWithDelegate
@@ -34,10 +32,8 @@ import com.android.systemui.statusbar.phone.SystemUIDialog
 import com.android.systemui.util.mockito.mock
 import junit.framework.Assert.assertEquals
 import org.junit.After
-import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.Mockito.`when` as whenever
 
 @SmallTest
 @RunWith(AndroidJUnit4::class)
@@ -46,18 +42,12 @@ class MediaProjectionPermissionDialogDelegateTest : SysuiTestCase() {
 
     private lateinit var dialog: AlertDialog
 
-    private val flags = mock<FeatureFlagsClassic>()
     private val appName = "Test App"
 
     private val resIdSingleApp = R.string.screen_share_permission_dialog_option_single_app
     private val resIdFullScreen = R.string.screen_share_permission_dialog_option_entire_screen
     private val resIdSingleAppDisabled =
         R.string.media_projection_entry_app_permission_dialog_single_app_disabled
-
-    @Before
-    fun setUp() {
-        whenever(flags.isEnabled(Flags.WM_ENABLE_PARTIAL_SCREEN_SHARING)).thenReturn(true)
-    }
 
     @After
     fun teardown() {

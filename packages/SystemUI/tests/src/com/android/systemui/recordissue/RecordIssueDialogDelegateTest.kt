@@ -177,7 +177,6 @@ class RecordIssueDialogDelegateTest : SysuiTestCase() {
             .thenReturn(false)
         whenever(devicePolicyResolver.isScreenCaptureCompletelyDisabled(any<UserHandle>()))
             .thenReturn(false)
-        whenever(flags.isEnabled(Flags.WM_ENABLE_PARTIAL_SCREEN_SHARING)).thenReturn(true)
         whenever(state.hasUserApprovedScreenRecording).thenReturn(false)
 
         val screenRecordSwitch = dialog.requireViewById<Switch>(R.id.screenrecord_switch)
@@ -200,7 +199,6 @@ class RecordIssueDialogDelegateTest : SysuiTestCase() {
             .thenReturn(false)
         whenever(devicePolicyResolver.isScreenCaptureCompletelyDisabled(any<UserHandle>()))
             .thenReturn(false)
-        whenever(flags.isEnabled(Flags.WM_ENABLE_PARTIAL_SCREEN_SHARING)).thenReturn(false)
 
         val screenRecordSwitch = dialog.requireViewById<Switch>(R.id.screenrecord_switch)
         screenRecordSwitch.isChecked = true
