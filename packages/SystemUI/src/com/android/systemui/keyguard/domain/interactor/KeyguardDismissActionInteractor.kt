@@ -27,6 +27,8 @@ import com.android.systemui.keyguard.shared.model.KeyguardState.ALTERNATE_BOUNCE
 import com.android.systemui.keyguard.shared.model.KeyguardState.GONE
 import com.android.systemui.keyguard.shared.model.KeyguardState.PRIMARY_BOUNCER
 import com.android.systemui.scene.domain.interactor.SceneInteractor
+import com.android.systemui.scene.domain.resolver.NotifShadeSceneFamilyResolver
+import com.android.systemui.scene.domain.resolver.QuickSettingsSceneFamilyResolver
 import com.android.systemui.scene.shared.flag.SceneContainerFlag
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.util.kotlin.Utils.Companion.sampleFilter
@@ -57,6 +59,8 @@ constructor(
     @Application private val applicationScope: CoroutineScope,
     sceneInteractor: SceneInteractor,
     deviceEntryInteractor: DeviceEntryInteractor,
+    quickSettingsSceneFamilyResolver: QuickSettingsSceneFamilyResolver,
+    notifShadeSceneFamilyResolver: NotifShadeSceneFamilyResolver,
 ) {
     val dismissAction: Flow<DismissAction> = repository.dismissAction
 
@@ -96,10 +100,8 @@ constructor(
                 deviceEntryInteractor.isUnlocked,
             ) { scene, isUnlocked ->
                 isUnlocked &&
-                    (scene == Scenes.Shade ||
-                        scene == Scenes.NotificationsShade ||
-                        scene == Scenes.QuickSettings ||
-                        scene == Scenes.QuickSettingsShade)
+                    (quickSettingsSceneFamilyResolver.includesScene(scene) ||
+                        notifShadeSceneFamilyResolver.includesScene(scene))
             }
             .distinctUntilChanged()
     val executeDismissAction: Flow<() -> KeyguardDone> =
