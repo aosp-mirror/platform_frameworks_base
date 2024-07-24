@@ -7,6 +7,7 @@ import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
+import androidx.compose.foundation.focusable
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
@@ -25,6 +26,9 @@ import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.android.compose.animation.scene.Back
@@ -41,6 +45,7 @@ import com.android.compose.animation.scene.SwipeDirection
 import com.android.compose.animation.scene.observableTransitionState
 import com.android.compose.animation.scene.transitions
 import com.android.compose.theme.LocalAndroidColorScheme
+import com.android.internal.R.attr.focusable
 import com.android.systemui.Flags.glanceableHubBackGesture
 import com.android.systemui.communal.shared.model.CommunalBackgroundType
 import com.android.systemui.communal.shared.model.CommunalScenes
@@ -207,6 +212,8 @@ fun CommunalContainer(
                 backgroundType = backgroundType,
                 colors = colors,
                 content = content,
+                viewModel = viewModel,
+                modifier = Modifier.horizontalNestedScrollToScene(),
             )
         }
     }
@@ -222,17 +229,41 @@ private fun SceneScope.CommunalScene(
     backgroundType: CommunalBackgroundType,
     colors: CommunalColors,
     content: CommunalContent,
+    viewModel: CommunalViewModel,
     modifier: Modifier = Modifier,
 ) {
-    Box(modifier = Modifier.element(Communal.Elements.Scrim).fillMaxSize()) {
+    val isFocusable by viewModel.isFocusable.collectAsStateWithLifecycle(initialValue = false)
+
+    Box(
+        modifier =
+            Modifier.element(Communal.Elements.Scrim)
+                .fillMaxSize()
+                .then(
+                    if (isFocusable) {
+                        Modifier.focusable()
+                    } else {
+                        Modifier.semantics { contentDescription = "" }.clearAndSetSemantics {}
+                    }
+                )
+    ) {
         when (backgroundType) {
             CommunalBackgroundType.STATIC -> DefaultBackground(colors = colors)
             CommunalBackgroundType.STATIC_GRADIENT -> StaticLinearGradient()
             CommunalBackgroundType.ANIMATED -> AnimatedLinearGradient()
             CommunalBackgroundType.NONE -> BackgroundTopScrim()
         }
+
+        with(content) {
+            Content(
+                modifier =
+                    modifier.focusable(isFocusable).semantics {
+                        if (!isFocusable) {
+                            contentDescription = ""
+                        }
+                    }
+            )
+        }
     }
-    with(content) { Content(modifier = modifier) }
 }
 
 /** Default background of the hub, a single color */

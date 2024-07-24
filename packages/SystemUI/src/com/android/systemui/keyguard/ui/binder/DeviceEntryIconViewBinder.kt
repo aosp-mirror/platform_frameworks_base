@@ -74,15 +74,26 @@ object DeviceEntryIconViewBinder {
         val bgView = view.bgView
         longPressHandlingView.listener =
             object : LongPressHandlingView.Listener {
-                override fun onLongPressDetected(view: View, x: Int, y: Int, isA11yAction: Boolean) {
-                    if (!isA11yAction && falsingManager.isFalseLongTap(FalsingManager.LOW_PENALTY)) {
+                override fun onLongPressDetected(
+                    view: View,
+                    x: Int,
+                    y: Int,
+                    isA11yAction: Boolean
+                ) {
+                    if (
+                        !isA11yAction && falsingManager.isFalseLongTap(FalsingManager.LOW_PENALTY)
+                    ) {
                         return
                     }
                     vibratorHelper.performHapticFeedback(
                         view,
                         HapticFeedbackConstants.CONFIRM,
                     )
-                    applicationScope.launch { viewModel.onUserInteraction() }
+                    applicationScope.launch {
+                        view.clearFocus()
+                        view.clearAccessibilityFocus()
+                        viewModel.onUserInteraction()
+                    }
                 }
             }
 
@@ -131,7 +142,11 @@ object DeviceEntryIconViewBinder {
                                         view,
                                         HapticFeedbackConstants.CONFIRM,
                                     )
-                                    applicationScope.launch { viewModel.onUserInteraction() }
+                                    applicationScope.launch {
+                                        view.clearFocus()
+                                        view.clearAccessibilityFocus()
+                                        viewModel.onUserInteraction()
+                                    }
                                 }
                             } else {
                                 view.setOnClickListener(null)
