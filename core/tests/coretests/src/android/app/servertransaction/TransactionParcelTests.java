@@ -163,7 +163,7 @@ public class TransactionParcelTests {
         // Write to parcel
         final IBinder activityToken = new Binder();
         final Intent intent = new Intent("action");
-        int ident = 57;
+        final int ident = 57;
         final ActivityInfo activityInfo = new ActivityInfo();
         activityInfo.flags = 42;
         activityInfo.setMaxAspectRatio(2.4f);
@@ -174,7 +174,7 @@ public class TransactionParcelTests {
         final Configuration overrideConfig = new Configuration();
         overrideConfig.assetsSeq = 5;
         final String referrer = "referrer";
-        int procState = 4;
+        final int procState = 4;
         final Bundle bundle = new Bundle();
         bundle.putString("key", "value");
         bundle.putParcelable("data", new ParcelableData(1));
@@ -326,9 +326,7 @@ public class TransactionParcelTests {
      *   android.app.servertransaction.TransactionParcelTests$ParcelableData".
      */
     public static class ParcelableData implements Parcelable {
-        int mValue;
-
-        ParcelableData() {}
+        private final int mValue;
 
         ParcelableData(int value) {
             mValue = value;
@@ -344,12 +342,10 @@ public class TransactionParcelTests {
             dest.writeInt(mValue);
         }
 
-        public static final Creator<ParcelableData> CREATOR = new Creator<ParcelableData>() {
+        public static final Creator<ParcelableData> CREATOR = new Creator<>() {
             @Override
             public ParcelableData createFromParcel(Parcel source) {
-                final ParcelableData data = new ParcelableData();
-                data.mValue = source.readInt();
-                return data;
+                return new ParcelableData(source.readInt());
             }
 
             @Override
