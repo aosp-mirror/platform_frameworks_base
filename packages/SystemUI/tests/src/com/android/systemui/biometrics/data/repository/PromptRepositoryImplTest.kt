@@ -16,7 +16,9 @@
 
 package com.android.systemui.biometrics.data.repository
 
+import android.hardware.biometrics.BiometricManager
 import android.hardware.biometrics.PromptInfo
+import android.hardware.biometrics.PromptVerticalListContentView
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.biometrics.AuthController
@@ -43,6 +45,7 @@ import org.mockito.junit.MockitoJUnit
 
 private const val USER_ID = 9
 private const val CHALLENGE = 90L
+private const val OP_PACKAGE_NAME = "biometric.testapp"
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
@@ -102,7 +105,8 @@ class PromptRepositoryImplTest : SysuiTestCase() {
                     PromptInfo().apply { isConfirmationRequested = case },
                     USER_ID,
                     CHALLENGE,
-                    PromptKind.Biometric()
+                    PromptKind.Biometric(),
+                    OP_PACKAGE_NAME
                 )
 
                 assertThat(isConfirmationRequired).isEqualTo(case)
@@ -120,10 +124,57 @@ class PromptRepositoryImplTest : SysuiTestCase() {
                     PromptInfo().apply { isConfirmationRequested = case },
                     USER_ID,
                     CHALLENGE,
-                    PromptKind.Biometric()
+                    PromptKind.Biometric(),
+                    OP_PACKAGE_NAME
                 )
 
                 assertThat(isConfirmationRequired).isTrue()
+            }
+        }
+
+    @Test
+    fun showBpWithoutIconForCredential_withCustomBp() =
+        testScope.runTest {
+            for (case in
+                listOf(
+                    PromptKind.Biometric(),
+                    PromptKind.Pin,
+                    PromptKind.Password,
+                    PromptKind.Pattern
+                )) {
+                val hasCredentialViewShown = case !is PromptKind.Biometric
+                val promptInfo =
+                    PromptInfo().apply {
+                        authenticators = BiometricManager.Authenticators.DEVICE_CREDENTIAL
+                        contentView = PromptVerticalListContentView.Builder().build()
+                    }
+                repository.setPrompt(promptInfo, USER_ID, CHALLENGE, case, OP_PACKAGE_NAME)
+                repository.setShouldShowBpWithoutIconForCredential(promptInfo)
+
+                assertThat(repository.showBpWithoutIconForCredential.value)
+                    .isEqualTo(!hasCredentialViewShown)
+            }
+        }
+
+    @Test
+    fun showBpWithoutIconForCredential_withDescription() =
+        testScope.runTest {
+            for (case in
+                listOf(
+                    PromptKind.Biometric(),
+                    PromptKind.Pin,
+                    PromptKind.Password,
+                    PromptKind.Pattern
+                )) {
+                val promptInfo =
+                    PromptInfo().apply {
+                        authenticators = BiometricManager.Authenticators.DEVICE_CREDENTIAL
+                        description = "description"
+                    }
+                repository.setPrompt(promptInfo, USER_ID, CHALLENGE, case, OP_PACKAGE_NAME)
+                repository.setShouldShowBpWithoutIconForCredential(promptInfo)
+
+                assertThat(repository.showBpWithoutIconForCredential.value).isFalse()
             }
         }
 
@@ -133,17 +184,19 @@ class PromptRepositoryImplTest : SysuiTestCase() {
             val kind = PromptKind.Pin
             val promptInfo = PromptInfo()
 
-            repository.setPrompt(promptInfo, USER_ID, CHALLENGE, kind)
+            repository.setPrompt(promptInfo, USER_ID, CHALLENGE, kind, OP_PACKAGE_NAME)
 
             assertThat(repository.kind.value).isEqualTo(kind)
             assertThat(repository.userId.value).isEqualTo(USER_ID)
             assertThat(repository.challenge.value).isEqualTo(CHALLENGE)
             assertThat(repository.promptInfo.value).isSameInstanceAs(promptInfo)
+            assertThat(repository.opPackageName.value).isEqualTo(OP_PACKAGE_NAME)
 
             repository.unsetPrompt()
 
             assertThat(repository.promptInfo.value).isNull()
             assertThat(repository.userId.value).isNull()
             assertThat(repository.challenge.value).isNull()
+            assertThat(repository.opPackageName.value).isNull()
         }
 }

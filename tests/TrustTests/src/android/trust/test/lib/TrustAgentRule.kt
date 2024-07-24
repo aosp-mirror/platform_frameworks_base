@@ -20,14 +20,15 @@ import android.app.trust.TrustManager
 import android.content.ComponentName
 import android.content.Context
 import android.trust.BaseTrustAgentService
+import android.trust.test.lib.TrustAgentRule.Companion.invoke
 import android.util.Log
 import androidx.test.core.app.ApplicationProvider.getApplicationContext
 import com.android.internal.widget.LockPatternUtils
 import com.google.common.truth.Truth.assertWithMessage
+import kotlin.reflect.KClass
 import org.junit.rules.TestRule
 import org.junit.runner.Description
 import org.junit.runners.model.Statement
-import kotlin.reflect.KClass
 
 /**
  * Enables a trust agent and causes the system service to bind to it.
@@ -37,7 +38,9 @@ import kotlin.reflect.KClass
  * @constructor Creates the rule. Do not use; instead, use [invoke].
  */
 class TrustAgentRule<T : BaseTrustAgentService>(
-    private val serviceClass: KClass<T>
+    private val serviceClass: KClass<T>,
+    private val startUnlocked: Boolean,
+    private val startEnabled: Boolean,
 ) : TestRule {
     private val context: Context = getApplicationContext()
     private val trustManager = context.getSystemService(TrustManager::class.java) as TrustManager
@@ -48,11 +51,18 @@ class TrustAgentRule<T : BaseTrustAgentService>(
     override fun apply(base: Statement, description: Description) = object : Statement() {
         override fun evaluate() {
             verifyTrustServiceRunning()
-            unlockDeviceWithCredential()
-            enableTrustAgent()
+            if (startUnlocked) {
+                reportSuccessfulUnlock()
+            } else {
+                Log.i(TAG, "Trust manager not starting in unlocked state")
+            }
 
             try {
-                verifyAgentIsRunning()
+                if (startEnabled) {
+                    enableAndVerifyTrustAgentIsRunning()
+                } else {
+                    Log.i(TAG, "Trust agent ${serviceClass.simpleName} not enabled")
+                }
                 base.evaluate()
             } finally {
                 disableTrustAgent()
@@ -64,12 +74,22 @@ class TrustAgentRule<T : BaseTrustAgentService>(
         assertWithMessage("Trust service is not running").that(trustManager).isNotNull()
     }
 
-    private fun unlockDeviceWithCredential() {
-        Log.d(TAG, "Unlocking device with credential")
+    fun reportSuccessfulUnlock() {
+        Log.i(TAG, "Reporting successful unlock")
         trustManager.reportUnlockAttempt(true, context.userId)
     }
 
-    private fun enableTrustAgent() {
+    fun reportFailedUnlock() {
+        Log.i(TAG, "Reporting failed unlock")
+        trustManager.reportUnlockAttempt(false, context.userId)
+    }
+
+    fun enableAndVerifyTrustAgentIsRunning(maxWait: Long = 30000L) {
+        enableTrustAgent()
+        verifyAgentIsRunning(maxWait)
+    }
+
+    fun enableTrustAgent() {
         val componentName = ComponentName(context, serviceClass.java)
         val userId = context.userId
         Log.i(TAG, "Enabling trust agent ${componentName.flattenToString()} for user $userId")
@@ -79,9 +99,15 @@ class TrustAgentRule<T : BaseTrustAgentService>(
         lockPatternUtils.setEnabledTrustAgents(agents, userId)
     }
 
-    private fun verifyAgentIsRunning() {
-        wait("${serviceClass.simpleName} to be running") {
+    fun verifyAgentIsRunning(maxWait: Long = 30000L) {
+        wait("${serviceClass.simpleName} to be running", maxWait) {
             BaseTrustAgentService.instance(serviceClass) != null
+        }
+    }
+
+    fun ensureAgentIsNotRunning(window: Long = 30000L) {
+        ensure("${serviceClass.simpleName} is not running", window) {
+            BaseTrustAgentService.instance(serviceClass) == null
         }
     }
 
@@ -97,13 +123,23 @@ class TrustAgentRule<T : BaseTrustAgentService>(
 
     companion object {
         /**
-         * Creates a new rule for the specified agent class. Example usage:
+         * Creates a new rule for the specified agent class. Starts with the device unlocked and
+         * the trust agent enabled. Example usage:
          * ```
          *   @get:Rule val rule = TrustAgentRule<MyTestAgent>()
          * ```
+         *
+         * Also supports setting different device lock and trust agent enablement states:
+         * ```
+         *   @get:Rule val rule = TrustAgentRule<MyTestAgent>(startUnlocked = false, startEnabled = false)
+         * ```
          */
-        inline operator fun <reified T : BaseTrustAgentService> invoke() =
-            TrustAgentRule(T::class)
+        inline operator fun <reified T : BaseTrustAgentService> invoke(
+            startUnlocked: Boolean = true,
+            startEnabled: Boolean = true,
+        ) =
+            TrustAgentRule(T::class, startUnlocked, startEnabled)
+
 
         private const val TAG = "TrustAgentRule"
     }

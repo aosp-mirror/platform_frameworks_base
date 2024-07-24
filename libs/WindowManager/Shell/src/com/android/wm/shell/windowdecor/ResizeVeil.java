@@ -49,11 +49,13 @@ public class ResizeVeil {
     private final Supplier<SurfaceControl.Builder> mSurfaceControlBuilderSupplier;
     private final Supplier<SurfaceControl.Transaction> mSurfaceControlTransactionSupplier;
     private final Drawable mAppIcon;
+    private ImageView mIconView;
     private SurfaceControl mParentSurface;
     private SurfaceControl mVeilSurface;
     private final RunningTaskInfo mTaskInfo;
     private SurfaceControlViewHost mViewHost;
     private final Display mDisplay;
+    private ValueAnimator mVeilAnimator;
 
     public ResizeVeil(Context context, Drawable appIcon, RunningTaskInfo taskInfo,
             Supplier<SurfaceControl.Builder> surfaceControlBuilderSupplier, Display display,
@@ -97,8 +99,8 @@ public class ResizeVeil {
         mViewHost = new SurfaceControlViewHost(mContext, mDisplay, windowManager, "ResizeVeil");
         mViewHost.setView(v, lp);
 
-        final ImageView appIcon = mViewHost.getView().findViewById(R.id.veil_application_icon);
-        appIcon.setImageDrawable(mAppIcon);
+        mIconView = mViewHost.getView().findViewById(R.id.veil_application_icon);
+        mIconView.setImageDrawable(mAppIcon);
     }
 
     /**
@@ -123,17 +125,35 @@ public class ResizeVeil {
 
         relayout(taskBounds, t);
         if (fadeIn) {
-            final ValueAnimator animator = new ValueAnimator();
-            animator.setFloatValues(0f, 1f);
-            animator.setDuration(RESIZE_ALPHA_DURATION);
-            animator.addUpdateListener(animation -> {
-                t.setAlpha(mVeilSurface, animator.getAnimatedFraction());
+            cancelAnimation();
+            mVeilAnimator = new ValueAnimator();
+            mVeilAnimator.setFloatValues(0f, 1f);
+            mVeilAnimator.setDuration(RESIZE_ALPHA_DURATION);
+            mVeilAnimator.addUpdateListener(animation -> {
+                t.setAlpha(mVeilSurface, mVeilAnimator.getAnimatedFraction());
                 t.apply();
+            });
+            mVeilAnimator.addListener(new AnimatorListenerAdapter() {
+                @Override
+                public void onAnimationEnd(Animator animation) {
+                    t.setAlpha(mVeilSurface, 1);
+                    t.apply();
+                }
+            });
+
+            final ValueAnimator iconAnimator = new ValueAnimator();
+            iconAnimator.setFloatValues(0f, 1f);
+            iconAnimator.setDuration(RESIZE_ALPHA_DURATION);
+            iconAnimator.addUpdateListener(animation -> {
+                mIconView.setAlpha(animation.getAnimatedFraction());
             });
 
             t.show(mVeilSurface)
                     .addTransactionCommittedListener(
-                            mContext.getMainExecutor(), () -> animator.start())
+                            mContext.getMainExecutor(), () -> {
+                                mVeilAnimator.start();
+                                iconAnimator.start();
+                            })
                     .setAlpha(mVeilSurface, 0);
         } else {
             // Show the veil immediately at full opacity.
@@ -172,11 +192,17 @@ public class ResizeVeil {
 
     /**
      * Calls relayout to update task and veil bounds.
+     * Finishes veil fade in if animation is currently running; this is to prevent empty space
+     * being visible behind the transparent veil during a fast resize.
      *
      * @param t a transaction to be applied in sync with the veil draw.
      * @param newBounds bounds to update veil to.
      */
     public void updateResizeVeil(SurfaceControl.Transaction t, Rect newBounds) {
+        if (mVeilAnimator != null && mVeilAnimator.isStarted()) {
+            mVeilAnimator.removeAllUpdateListeners();
+            mVeilAnimator.end();
+        }
         relayout(newBounds, t);
         mViewHost.getView().getViewRootImpl().applyTransactionOnDraw(t);
     }
@@ -185,15 +211,16 @@ public class ResizeVeil {
      * Animate veil's alpha to 0, fading it out.
      */
     public void hideVeil() {
-        final ValueAnimator animator = new ValueAnimator();
-        animator.setFloatValues(1, 0);
-        animator.setDuration(RESIZE_ALPHA_DURATION);
-        animator.addUpdateListener(animation -> {
+        cancelAnimation();
+        mVeilAnimator = new ValueAnimator();
+        mVeilAnimator.setFloatValues(1, 0);
+        mVeilAnimator.setDuration(RESIZE_ALPHA_DURATION);
+        mVeilAnimator.addUpdateListener(animation -> {
             SurfaceControl.Transaction t = mSurfaceControlTransactionSupplier.get();
-            t.setAlpha(mVeilSurface, 1 - animator.getAnimatedFraction());
+            t.setAlpha(mVeilSurface, 1 - mVeilAnimator.getAnimatedFraction());
             t.apply();
         });
-        animator.addListener(new AnimatorListenerAdapter() {
+        mVeilAnimator.addListener(new AnimatorListenerAdapter() {
             @Override
             public void onAnimationEnd(Animator animation) {
                 SurfaceControl.Transaction t = mSurfaceControlTransactionSupplier.get();
@@ -201,7 +228,7 @@ public class ResizeVeil {
                 t.apply();
             }
         });
-        animator.start();
+        mVeilAnimator.start();
     }
 
     @ColorRes
@@ -215,10 +242,20 @@ public class ResizeVeil {
         }
     }
 
+    private void cancelAnimation() {
+        if (mVeilAnimator != null) {
+            mVeilAnimator.removeAllUpdateListeners();
+            mVeilAnimator.cancel();
+        }
+    }
+
     /**
      * Dispose of veil when it is no longer needed, likely on close of its container decor.
      */
     void dispose() {
+        cancelAnimation();
+        mVeilAnimator = null;
+
         if (mViewHost != null) {
             mViewHost.release();
             mViewHost = null;

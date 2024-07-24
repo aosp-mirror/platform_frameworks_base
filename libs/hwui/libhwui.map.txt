@@ -32,6 +32,7 @@ LIBHWUI { # platform-only /* HWUI isn't current a module, so all of these are st
     APaint_createPaint;
     APaint_destroyPaint;
     APaint_setBlendMode;
+    APaint_setImageFilter;
     ARegionIterator_acquireIterator;
     ARegionIterator_releaseIterator;
     ARegionIterator_isComplex;

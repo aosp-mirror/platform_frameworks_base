@@ -42,7 +42,7 @@ class GainmapImage(context: Context, attrs: AttributeSet?) : FrameLayout(context
     private var selectedImage = -1
     private var outputMode = R.id.output_hdr
     private var bitmap: Bitmap? = null
-    private var gainmap: Gainmap? = null
+    private var originalGainmap: Gainmap? = null
     private var gainmapVisualizer: Bitmap? = null
     private lateinit var imageView: SubsamplingScaleImageView
     private lateinit var gainmapMetadataEditor: GainmapMetadataEditor
@@ -65,15 +65,8 @@ class GainmapImage(context: Context, attrs: AttributeSet?) : FrameLayout(context
         findViewById<RadioGroup>(R.id.output_mode)!!.also {
             it.check(outputMode)
             it.setOnCheckedChangeListener { _, checkedId ->
-                val previousMode = outputMode
                 outputMode = checkedId
-                if (previousMode == R.id.output_sdr && checkedId == R.id.output_hdr) {
-                    animateToHdr()
-                } else if (previousMode == R.id.output_hdr && checkedId == R.id.output_sdr) {
-                    animateToSdr()
-                } else {
-                    updateDisplay()
-                }
+                updateDisplay()
             }
         }
 
@@ -120,7 +113,7 @@ class GainmapImage(context: Context, attrs: AttributeSet?) : FrameLayout(context
     }
 
     private fun doDecode(source: ImageDecoder.Source) {
-        gainmap = null
+        originalGainmap = null
         bitmap = ImageDecoder.decodeBitmap(source) { decoder, info, source ->
             decoder.allocator = ImageDecoder.ALLOCATOR_SOFTWARE
         }
@@ -138,9 +131,10 @@ class GainmapImage(context: Context, attrs: AttributeSet?) : FrameLayout(context
             findViewById<TextView>(R.id.error_msg)!!.visibility = View.GONE
             findViewById<RadioGroup>(R.id.output_mode)!!.visibility = View.VISIBLE
 
-            gainmap = bitmap!!.gainmap
-            gainmapMetadataEditor.setGainmap(gainmap)
-            val map = gainmap!!.gainmapContents
+            val gainmap = bitmap!!.gainmap!!
+            originalGainmap = gainmap
+            gainmapMetadataEditor.setGainmap(Gainmap(gainmap, gainmap.gainmapContents))
+            val map = gainmap.gainmapContents
             if (map.config != Bitmap.Config.ALPHA_8) {
                 gainmapVisualizer = map
             } else {
@@ -164,33 +158,17 @@ class GainmapImage(context: Context, attrs: AttributeSet?) : FrameLayout(context
         updateDisplay()
     }
 
-    private fun animateToHdr() {
-        if (bitmap == null || gainmap == null) return
-
-        // TODO: Trigger an animation
-        updateDisplay()
-    }
-
-    private fun animateToSdr() {
-        if (bitmap == null) return
-
-        // TODO: Trigger an animation
-        updateDisplay()
-    }
-
     private fun updateDisplay() {
         if (bitmap == null) return
 
         imageView.setImage(ImageSource.cachedBitmap(when (outputMode) {
             R.id.output_hdr -> {
-                gainmapMetadataEditor.useOriginalMetadata()
-                bitmap!!.gainmap = gainmap
+                bitmap!!.gainmap = originalGainmap
                 bitmap!!
             }
 
             R.id.output_hdr_test -> {
-                gainmapMetadataEditor.useEditMetadata()
-                bitmap!!.gainmap = gainmap
+                bitmap!!.gainmap = gainmapMetadataEditor.editedGainmap()
                 bitmap!!
             }
 

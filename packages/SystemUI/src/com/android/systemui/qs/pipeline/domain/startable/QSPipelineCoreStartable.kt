@@ -18,10 +18,11 @@ package com.android.systemui.qs.pipeline.domain.startable
 
 import com.android.systemui.CoreStartable
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.flags.FeatureFlags
-import com.android.systemui.flags.Flags
+import com.android.systemui.qs.pipeline.domain.interactor.AccessibilityTilesInteractor
 import com.android.systemui.qs.pipeline.domain.interactor.AutoAddInteractor
 import com.android.systemui.qs.pipeline.domain.interactor.CurrentTilesInteractor
+import com.android.systemui.qs.pipeline.domain.interactor.RestoreReconciliationInteractor
+import com.android.systemui.qs.pipeline.shared.QSPipelineFlagsRepository
 import javax.inject.Inject
 
 @SysUISingleton
@@ -29,16 +30,17 @@ class QSPipelineCoreStartable
 @Inject
 constructor(
     private val currentTilesInteractor: CurrentTilesInteractor,
+    private val accessibilityTilesInteractor: AccessibilityTilesInteractor,
     private val autoAddInteractor: AutoAddInteractor,
-    private val featureFlags: FeatureFlags,
+    private val featureFlags: QSPipelineFlagsRepository,
+    private val restoreReconciliationInteractor: RestoreReconciliationInteractor,
 ) : CoreStartable {
 
     override fun start() {
-        if (
-            featureFlags.isEnabled(Flags.QS_PIPELINE_NEW_HOST) &&
-                featureFlags.isEnabled(Flags.QS_PIPELINE_AUTO_ADD)
-        ) {
+        if (featureFlags.pipelineEnabled) {
+            accessibilityTilesInteractor.init(currentTilesInteractor)
             autoAddInteractor.init(currentTilesInteractor)
+            restoreReconciliationInteractor.start()
         }
     }
 }

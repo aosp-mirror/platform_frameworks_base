@@ -17,6 +17,7 @@
 package com.android.server.devicepolicy;
 
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.content.pm.VerifierDeviceIdentity;
 import android.net.wifi.WifiManager;
 import android.os.Build;
@@ -53,16 +54,27 @@ class EnterpriseSpecificIdCalculator {
         TelephonyManager telephonyService = context.getSystemService(TelephonyManager.class);
         Preconditions.checkState(telephonyService != null, "Unable to access telephony service");
         mImei = telephonyService.getImei(0);
-        mMeid = telephonyService.getMeid(0);
+        String meid;
+        try {
+            meid = telephonyService.getMeid(0);
+        } catch (UnsupportedOperationException doesNotSupportCdma) {
+            // Instead of catching the exception, we could check for FEATURE_TELEPHONY_CDMA.
+            // However that runs the risk of changing a device's existing ESID if on these devices
+            // telephonyService.getMeid() actually returns non-null even when the device does not
+            // declare FEATURE_TELEPHONY_CDMA.
+            meid = null;
+        }
+        mMeid = meid;
         mSerialNumber = Build.getSerial();
         WifiManager wifiManager = context.getSystemService(WifiManager.class);
-        Preconditions.checkState(wifiManager != null, "Unable to access WiFi service");
-        final String[] macAddresses = wifiManager.getFactoryMacAddresses();
-        if (macAddresses == null || macAddresses.length == 0) {
-            mMacAddress = "";
-        } else {
-            mMacAddress = macAddresses[0];
+        String macAddress = "";
+        if (context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_WIFI)) {
+            final String[] macAddresses = wifiManager.getFactoryMacAddresses();
+            if (macAddresses != null && macAddresses.length > 0) {
+                macAddress = macAddresses[0];
+            }
         }
+        mMacAddress = macAddress;
     }
 
     private static String getPaddedTruncatedString(String input, int maxLength) {

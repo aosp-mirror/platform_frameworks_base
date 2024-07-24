@@ -27,6 +27,7 @@ import android.util.Printer;
  * {@link android.content.pm.PackageManager#resolveContentProvider(java.lang.String, int)
  * PackageManager.resolveContentProvider()}.
  */
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
 public final class ProviderInfo extends ComponentInfo
         implements Parcelable {
     
@@ -86,6 +87,15 @@ public final class ProviderInfo extends ComponentInfo
      * @hide
      */
     public static final int FLAG_VISIBLE_TO_INSTANT_APP = 0x100000;
+
+    /**
+     * Bit in {@link #flags}: If set, this provider will only be available
+     * for the system user.
+     * Set from the android.R.attr#systemUserOnly attribute.
+     * In Sync with {@link ActivityInfo#FLAG_SYSTEM_USER_ONLY}
+     * @hide
+     */
+    public static final int FLAG_SYSTEM_USER_ONLY = ActivityInfo.FLAG_SYSTEM_USER_ONLY;
 
     /**
      * Bit in {@link #flags}: If set, a single instance of the provider will

@@ -196,7 +196,8 @@ void GnssHal::linkToDeath() {
 
 jboolean GnssHal::setCallback() {
     if (gnssHalAidl != nullptr) {
-        sp<IGnssCallbackAidl> gnssCbIfaceAidl = new GnssCallbackAidl();
+        sp<IGnssCallbackAidl> gnssCbIfaceAidl =
+                new GnssCallbackAidl(gnssHalAidl->getInterfaceVersion());
         auto status = gnssHalAidl->setCallback(gnssCbIfaceAidl);
         if (!checkAidlStatus(status, "IGnssAidl setCallback() failed.")) {
             return JNI_FALSE;

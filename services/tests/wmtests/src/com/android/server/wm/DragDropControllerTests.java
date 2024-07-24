@@ -32,14 +32,18 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mock;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.when;
+import static com.android.server.wm.DragDropController.MSG_UNHANDLED_DROP_LISTENER_TIMEOUT;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import static org.junit.Assume.assumeTrue;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 import android.app.PendingIntent;
@@ -49,19 +53,22 @@ import android.content.Intent;
 import android.content.pm.ShortcutServiceInternal;
 import android.graphics.PixelFormat;
 import android.os.Binder;
+import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
+import android.os.Message;
 import android.os.Parcelable;
+import android.os.RemoteException;
 import android.os.UserHandle;
 import android.platform.test.annotations.Presubmit;
 import android.view.DragEvent;
-import android.view.IWindowSessionCallback;
 import android.view.InputChannel;
 import android.view.SurfaceControl;
 import android.view.SurfaceSession;
 import android.view.View;
 import android.view.WindowManager;
 import android.view.accessibility.AccessibilityManager;
+import android.window.IGlobalDragListener;
 
 import androidx.test.filters.SmallTest;
 
@@ -98,6 +105,7 @@ public class DragDropControllerTests extends WindowTestsBase {
     private static final String TEST_PACKAGE = "com.test.package";
 
     private TestDragDropController mTarget;
+    private WindowProcessController mProcess;
     private WindowState mWindow;
     private IBinder mToken;
 
@@ -137,10 +145,9 @@ public class DragDropControllerTests extends WindowTestsBase {
      * Creates a window state which can be used as a drop target.
      */
     private WindowState createDropTargetWindow(String name, int ownerId) {
-        final ActivityRecord activity = createNonAttachedActivityRecord(mDisplayContent);
-        final Task rootTask = createTask(mDisplayContent);
-        final Task task = createTaskInRootTask(rootTask, ownerId);
-        task.addChild(activity, 0);
+        final Task task = new TaskBuilder(mSupervisor).setUserId(ownerId).build();
+        final ActivityRecord activity = new ActivityBuilder(mAtm).setTask(task)
+                .setUseProcess(mProcess).build();
 
         // Use a new TestIWindow so we don't collect events for other windows
         final WindowState window = createWindow(
@@ -167,10 +174,12 @@ public class DragDropControllerTests extends WindowTestsBase {
     @Before
     public void setUp() throws Exception {
         mTarget = new TestDragDropController(mWm, mWm.mH.getLooper());
+        mProcess = mSystemServicesTestRule.addProcess(TEST_PACKAGE, "testProc",
+                TEST_PID, TEST_UID);
         mWindow = createDropTargetWindow("Drag test window", 0);
         doReturn(mWindow).when(mDisplayContent).getTouchableWinAtPointLocked(0, 0);
-        when(mWm.mInputManager.transferTouchFocus(any(InputChannel.class),
-                any(InputChannel.class), any(boolean.class))).thenReturn(true);
+        when(mWm.mInputManager.startDragAndDrop(any(InputChannel.class),
+                any(InputChannel.class))).thenReturn(true);
 
         mWm.mWindowMap.put(mWindow.mClient.asBinder(), mWindow);
     }
@@ -221,8 +230,6 @@ public class DragDropControllerTests extends WindowTestsBase {
 
     @Test
     public void testPrivateInterceptGlobalDragDropFlagChecksPermission() {
-        spyOn(mWm.mContext);
-
         DisplayPolicy policy = mDisplayContent.getDisplayPolicy();
         WindowManager.LayoutParams attrs = new WindowManager.LayoutParams();
         attrs.privateFlags |= PRIVATE_FLAG_INTERCEPT_GLOBAL_DRAG_AND_DROP;
@@ -323,10 +330,7 @@ public class DragDropControllerTests extends WindowTestsBase {
 
     @Test
     public void testValidateAppActivityArguments() {
-        final Session session = new Session(mWm, new IWindowSessionCallback.Stub() {
-            @Override
-            public void onAnimatorScaleChanged(float scale) {}
-        });
+        final Session session = getTestSession();
         try {
             session.validateAndResolveDragMimeTypeExtras(
                     createClipDataForActivity(mock(PendingIntent.class), null), TEST_UID, TEST_PID,
@@ -364,10 +368,7 @@ public class DragDropControllerTests extends WindowTestsBase {
     public void testValidateAppShortcutArguments() {
         doReturn(PERMISSION_GRANTED).when(mWm.mContext)
                 .checkCallingOrSelfPermission(eq(START_TASKS_FROM_RECENTS));
-        final Session session = new Session(mWm, new IWindowSessionCallback.Stub() {
-            @Override
-            public void onAnimatorScaleChanged(float scale) {}
-        });
+        final Session session = createTestSession(mAtm);
         try {
             session.validateAndResolveDragMimeTypeExtras(
                     createClipDataForShortcut(null, "test_shortcut_id", mock(UserHandle.class)),
@@ -398,10 +399,7 @@ public class DragDropControllerTests extends WindowTestsBase {
     public void testValidateProfileAppShortcutArguments_notCallingUid() {
         doReturn(PERMISSION_GRANTED).when(mWm.mContext)
                 .checkCallingOrSelfPermission(eq(START_TASKS_FROM_RECENTS));
-        final Session session = Mockito.spy(new Session(mWm, new IWindowSessionCallback.Stub() {
-            @Override
-            public void onAnimatorScaleChanged(float scale) {}
-        }));
+        final Session session = createTestSession(mAtm);
         final ShortcutServiceInternal shortcutService = mock(ShortcutServiceInternal.class);
         final Intent[] shortcutIntents = new Intent[1];
         shortcutIntents[0] = new Intent();
@@ -443,10 +441,7 @@ public class DragDropControllerTests extends WindowTestsBase {
     public void testValidateAppTaskArguments() {
         doReturn(PERMISSION_GRANTED).when(mWm.mContext)
                 .checkCallingOrSelfPermission(eq(START_TASKS_FROM_RECENTS));
-        final Session session = new Session(mWm, new IWindowSessionCallback.Stub() {
-            @Override
-            public void onAnimatorScaleChanged(float scale) {}
-        });
+        final Session session = createTestSession(mAtm);
         try {
             final ClipData clipData = new ClipData(
                     new ClipDescription("drag", new String[] { MIMETYPE_APPLICATION_TASK }),
@@ -462,10 +457,7 @@ public class DragDropControllerTests extends WindowTestsBase {
 
     @Test
     public void testValidateFlags() {
-        final Session session = new Session(mWm, new IWindowSessionCallback.Stub() {
-            @Override
-            public void onAnimatorScaleChanged(float scale) {}
-        });
+        final Session session = getTestSession();
         try {
             session.validateDragFlags(View.DRAG_FLAG_REQUEST_SURFACE_FOR_RETURN_ANIMATION);
             fail("Expected failure without permission");
@@ -478,10 +470,7 @@ public class DragDropControllerTests extends WindowTestsBase {
     public void testValidateFlagsWithPermission() {
         doReturn(PERMISSION_GRANTED).when(mWm.mContext)
                 .checkCallingOrSelfPermission(eq(START_TASKS_FROM_RECENTS));
-        final Session session = new Session(mWm, new IWindowSessionCallback.Stub() {
-            @Override
-            public void onAnimatorScaleChanged(float scale) {}
-        });
+        final Session session = createTestSession(mAtm);
         try {
             session.validateDragFlags(View.DRAG_FLAG_REQUEST_SURFACE_FOR_RETURN_ANIMATION);
             // Expected pass
@@ -552,14 +541,123 @@ public class DragDropControllerTests extends WindowTestsBase {
                 });
     }
 
+    @Test
+    public void testUnhandledDragNotCalledForNormalDrags() throws RemoteException {
+        assumeTrue(com.android.window.flags.Flags.delegateUnhandledDrags());
+
+        final IGlobalDragListener listener = mock(IGlobalDragListener.class);
+        doReturn(mock(Binder.class)).when(listener).asBinder();
+        mTarget.setGlobalDragListener(listener);
+        doDragAndDrop(0, ClipData.newPlainText("label", "Test"), 0, 0);
+        verify(listener, times(0)).onUnhandledDrop(any(), any());
+    }
+
+    @Test
+    public void testUnhandledDragReceivesUnhandledDropOverWindow() {
+        assumeTrue(com.android.window.flags.Flags.delegateUnhandledDrags());
+
+        final IGlobalDragListener listener = mock(IGlobalDragListener.class);
+        doReturn(mock(Binder.class)).when(listener).asBinder();
+        mTarget.setGlobalDragListener(listener);
+        final int invalidXY = 100_000;
+        startDrag(View.DRAG_FLAG_GLOBAL | View.DRAG_FLAG_START_INTENT_SENDER_ON_UNHANDLED_DRAG,
+                ClipData.newPlainText("label", "Test"), () -> {
+            // Trigger an unhandled drop and verify the global drag listener was called
+            mTarget.reportDropWindow(mWindow.mInputChannelToken, invalidXY, invalidXY);
+            mTarget.handleMotionEvent(false /* keepHandling */, invalidXY, invalidXY);
+            mTarget.reportDropResult(mWindow.mClient, false);
+            mTarget.onUnhandledDropCallback(true);
+            mToken = null;
+            try {
+                verify(listener, times(1)).onUnhandledDrop(any(), any());
+            } catch (RemoteException e) {
+                fail("Failed to verify unhandled drop: " + e);
+            }
+        });
+    }
+
+    @Test
+    public void testUnhandledDragReceivesUnhandledDropOverNoValidWindow() {
+        assumeTrue(com.android.window.flags.Flags.delegateUnhandledDrags());
+
+        final IGlobalDragListener listener = mock(IGlobalDragListener.class);
+        doReturn(mock(Binder.class)).when(listener).asBinder();
+        mTarget.setGlobalDragListener(listener);
+        final int invalidXY = 100_000;
+        startDrag(View.DRAG_FLAG_GLOBAL | View.DRAG_FLAG_START_INTENT_SENDER_ON_UNHANDLED_DRAG,
+                ClipData.newPlainText("label", "Test"), () -> {
+            // Trigger an unhandled drop and verify the global drag listener was called
+            mTarget.reportDropWindow(mock(IBinder.class), invalidXY, invalidXY);
+            mTarget.handleMotionEvent(false /* keepHandling */, invalidXY, invalidXY);
+            mTarget.onUnhandledDropCallback(true);
+            mToken = null;
+            try {
+                verify(listener, times(1)).onUnhandledDrop(any(), any());
+            } catch (RemoteException e) {
+                fail("Failed to verify unhandled drop: " + e);
+            }
+        });
+    }
+
+    @Test
+    public void testUnhandledDragDoesNotReceiveUnhandledDropWithoutDragFlag() {
+        assumeTrue(com.android.window.flags.Flags.delegateUnhandledDrags());
+
+        final IGlobalDragListener listener = mock(IGlobalDragListener.class);
+        doReturn(mock(Binder.class)).when(listener).asBinder();
+        mTarget.setGlobalDragListener(listener);
+        final int invalidXY = 100_000;
+        startDrag(View.DRAG_FLAG_GLOBAL,
+                ClipData.newPlainText("label", "Test"), () -> {
+                    // Trigger an unhandled drop and verify the global drag listener was not called
+                    mTarget.reportDropWindow(mock(IBinder.class), invalidXY, invalidXY);
+                    mTarget.handleMotionEvent(false /* keepHandling */, invalidXY, invalidXY);
+                    mToken = null;
+                    try {
+                        verify(listener, never()).onUnhandledDrop(any(), any());
+                    } catch (RemoteException e) {
+                        fail("Failed to verify unhandled drop: " + e);
+                    }
+                });
+    }
+
+    @Test
+    public void testUnhandledDragCallbackTimeout() {
+        assumeTrue(com.android.window.flags.Flags.delegateUnhandledDrags());
+
+        final IGlobalDragListener listener = mock(IGlobalDragListener.class);
+        doReturn(mock(Binder.class)).when(listener).asBinder();
+        mTarget.setGlobalDragListener(listener);
+        final int invalidXY = 100_000;
+        startDrag(View.DRAG_FLAG_GLOBAL | View.DRAG_FLAG_START_INTENT_SENDER_ON_UNHANDLED_DRAG,
+                ClipData.newPlainText("label", "Test"), () -> {
+            // Trigger an unhandled drop and verify the global drag listener was called
+            mTarget.reportDropWindow(mock(IBinder.class), invalidXY, invalidXY);
+            mTarget.handleMotionEvent(false /* keepHandling */, invalidXY, invalidXY);
+
+            // Verify that the unhandled drop listener callback timeout has been scheduled
+            final Handler handler = mTarget.getHandler();
+            assertTrue(handler.hasMessages(MSG_UNHANDLED_DROP_LISTENER_TIMEOUT));
+
+            // Force trigger the timeout and verify that it actually cleans up the drag & timeout
+            handler.handleMessage(Message.obtain(handler, MSG_UNHANDLED_DROP_LISTENER_TIMEOUT));
+            assertFalse(handler.hasMessages(MSG_UNHANDLED_DROP_LISTENER_TIMEOUT));
+            assertFalse(mTarget.dragDropActiveLocked());
+            mToken = null;
+        });
+    }
+
     private void doDragAndDrop(int flags, ClipData data, float dropX, float dropY) {
         startDrag(flags, data, () -> {
             mTarget.reportDropWindow(mWindow.mInputChannelToken, dropX, dropY);
-            mTarget.handleMotionEvent(false, dropX, dropY);
+            mTarget.handleMotionEvent(false /* keepHandling */, dropX, dropY);
             mToken = mWindow.mClient.asBinder();
         });
     }
 
+    /**
+     * Starts a drag with the given parameters, calls Runnable `r` after drag is started.
+     */
     private void startDrag(int flag, ClipData data, Runnable r) {
         final SurfaceSession appSession = new SurfaceSession();
         try {
@@ -569,9 +667,10 @@ public class DragDropControllerTests extends WindowTestsBase {
                     .setFormat(PixelFormat.TRANSLUCENT)
                     .build();
 
-            assertTrue(mWm.mInputManager.transferTouchFocus(new InputChannel(),
-                    new InputChannel(), true /* isDragDrop */));
-            mToken = mTarget.performDrag(0, 0, mWindow.mClient, flag, surface, 0, 0, 0, 0, 0, data);
+            assertTrue(mWm.mInputManager.startDragAndDrop(new InputChannel(),
+                    new InputChannel()));
+            mToken = mTarget.performDrag(TEST_PID, 0, mWindow.mClient,
+                    flag, surface, 0, 0, 0, 0, 0, 0, 0, data);
             assertNotNull(mToken);
 
             r.run();
@@ -593,7 +692,7 @@ public class DragDropControllerTests extends WindowTestsBase {
 
     private void startA11yDrag(int flags, ClipData data, Runnable r) {
         mToken = mTarget.performDrag(0, 0, mWindow.mClient,
-                flags | View.DRAG_FLAG_ACCESSIBILITY_ACTION, null, 0, 0, 0, 0, 0, data);
+                flags | View.DRAG_FLAG_ACCESSIBILITY_ACTION, null, 0, 0, 0, 0, 0, 0, 0, data);
         assertNotNull(mToken);
         r.run();
     }

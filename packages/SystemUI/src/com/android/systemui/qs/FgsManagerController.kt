@@ -54,9 +54,9 @@ import com.android.internal.config.sysui.SystemUiDeviceConfigFlags.TASK_MANAGER_
 import com.android.internal.config.sysui.SystemUiDeviceConfigFlags.TASK_MANAGER_SHOW_USER_VISIBLE_JOBS
 import com.android.internal.jank.InteractionJankMonitor
 import com.android.systemui.Dumpable
-import com.android.systemui.R
+import com.android.systemui.res.R
 import com.android.systemui.animation.DialogCuj
-import com.android.systemui.animation.DialogLaunchAnimator
+import com.android.systemui.animation.DialogTransitionAnimator
 import com.android.systemui.animation.Expandable
 import com.android.systemui.broadcast.BroadcastDispatcher
 import com.android.systemui.dagger.SysUISingleton
@@ -146,9 +146,10 @@ class FgsManagerControllerImpl @Inject constructor(
     private val packageManager: PackageManager,
     private val userTracker: UserTracker,
     private val deviceConfigProxy: DeviceConfigProxy,
-    private val dialogLaunchAnimator: DialogLaunchAnimator,
+    private val dialogTransitionAnimator: DialogTransitionAnimator,
     private val broadcastDispatcher: BroadcastDispatcher,
-    private val dumpManager: DumpManager
+    private val dumpManager: DumpManager,
+    private val systemUIDialogFactory: SystemUIDialog.Factory,
 ) : Dumpable, FgsManagerController {
 
     companion object {
@@ -375,7 +376,7 @@ class FgsManagerControllerImpl @Inject constructor(
     override fun showDialog(expandable: Expandable?) {
         synchronized(lock) {
             if (dialog == null) {
-                val dialog = SystemUIDialog(context)
+                val dialog = systemUIDialogFactory.create()
                 dialog.setTitle(R.string.fgs_manager_dialog_title)
                 dialog.setMessage(R.string.fgs_manager_dialog_message)
 
@@ -404,14 +405,14 @@ class FgsManagerControllerImpl @Inject constructor(
 
                 mainExecutor.execute {
                     val controller =
-                        expandable?.dialogLaunchController(
+                        expandable?.dialogTransitionController(
                             DialogCuj(
                                 InteractionJankMonitor.CUJ_SHADE_DIALOG_OPEN,
                                 INTERACTION_JANK_TAG,
                             )
                         )
                     if (controller != null) {
-                        dialogLaunchAnimator.show(dialog, controller)
+                        dialogTransitionAnimator.show(dialog, controller)
                     } else {
                         dialog.show()
                     }
@@ -609,13 +610,14 @@ class FgsManagerControllerImpl @Inject constructor(
                     return newData.size
                 }
 
-                override fun areItemsTheSame(oldItemPosition: Int, newItemPosition: Int):
-                    Boolean {
+                override fun areItemsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
                     return oldData[oldItemPosition] == newData[newItemPosition]
                 }
 
-                override fun areContentsTheSame(oldItemPosition: Int, newItemPosition: Int):
-                    Boolean {
+                override fun areContentsTheSame(
+                    oldItemPosition: Int,
+                    newItemPosition: Int
+                ): Boolean {
                     return oldData[oldItemPosition].stopped == newData[newItemPosition].stopped
                 }
             }).dispatchUpdatesTo(this)

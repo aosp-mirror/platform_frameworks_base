@@ -17,6 +17,9 @@
 package com.android.server;
 
 import static android.Manifest.permission.MODIFY_DAY_NIGHT_MODE;
+import static android.app.UiModeManager.MODE_ATTENTION_THEME_OVERLAY_DAY;
+import static android.app.UiModeManager.MODE_ATTENTION_THEME_OVERLAY_NIGHT;
+import static android.app.UiModeManager.MODE_ATTENTION_THEME_OVERLAY_OFF;
 import static android.app.UiModeManager.MODE_NIGHT_AUTO;
 import static android.app.UiModeManager.MODE_NIGHT_CUSTOM;
 import static android.app.UiModeManager.MODE_NIGHT_CUSTOM_TYPE_BEDTIME;
@@ -32,6 +35,7 @@ import static com.android.server.UiModeManagerService.SUPPORTED_NIGHT_MODE_CUSTO
 
 import static com.google.common.truth.Truth.assertThat;
 
+import static junit.framework.Assert.fail;
 import static junit.framework.TestCase.assertFalse;
 import static junit.framework.TestCase.assertTrue;
 
@@ -65,6 +69,7 @@ import static org.testng.Assert.assertThrows;
 import android.Manifest;
 import android.app.Activity;
 import android.app.AlarmManager;
+import android.app.Flags;
 import android.app.IOnProjectionStateChangedListener;
 import android.app.IUiModeManager;
 import android.content.BroadcastReceiver;
@@ -77,13 +82,18 @@ import android.content.res.Resources;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.IpcDataCache;
 import android.os.PowerManager;
 import android.os.PowerManagerInternal;
 import android.os.PowerSaveState;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.UserHandle;
+import android.os.test.FakePermissionEnforcer;
+import android.platform.test.annotations.EnableFlags;
+import android.platform.test.flag.junit.SetFlagsRule;
 import android.provider.Settings;
+import android.service.dreams.DreamManagerInternal;
 import android.test.mock.MockContentResolver;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
@@ -96,6 +106,7 @@ import com.android.server.wm.WindowManagerInternal;
 
 import org.junit.Before;
 import org.junit.Ignore;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -107,6 +118,7 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.ZoneId;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Consumer;
 
 @RunWith(AndroidTestingRunner.class)
@@ -134,6 +146,9 @@ public class UiModeManagerServiceTest extends UiServiceTestCase {
     private TwilightState mTwilightState;
     @Mock
     PowerManagerInternal mLocalPowerManager;
+
+    @Mock
+    DreamManagerInternal mDreamManagerInternal;
     @Mock
     private PackageManager mPackageManager;
     @Mock
@@ -146,16 +161,32 @@ public class UiModeManagerServiceTest extends UiServiceTestCase {
     private ArgumentCaptor<BroadcastReceiver> mOrderedBroadcastReceiver;
 
     private BroadcastReceiver mScreenOffCallback;
+    private BroadcastReceiver mDreamingStartedCallback;
     private BroadcastReceiver mTimeChangedCallback;
     private BroadcastReceiver mDockStateChangedCallback;
     private AlarmManager.OnAlarmListener mCustomListener;
     private Consumer<PowerSaveState> mPowerSaveConsumer;
     private TwilightListener mTwilightListener;
+    private FakePermissionEnforcer mPermissionEnforcer;
+
+    @Rule
+    public final SetFlagsRule mSetFlagsRule = new SetFlagsRule(
+            SetFlagsRule.DefaultInitValueType.DEVICE_DEFAULT);
+
+
+    @Before
+    public void disableProcessCaches() {
+        IpcDataCache.disableForTestMode();
+    }
 
     @Before
     public void setUp() {
-        when(mContext.checkCallingOrSelfPermission(anyString()))
-                .thenReturn(PackageManager.PERMISSION_GRANTED);
+        // The AIDL stub will use PermissionEnforcer to check permission from the caller.
+        mPermissionEnforcer = new FakePermissionEnforcer();
+        mPermissionEnforcer.grant(Manifest.permission.MODIFY_DAY_NIGHT_MODE);
+        mPermissionEnforcer.grant(Manifest.permission.READ_PROJECTION_STATE);
+        doReturn(mPermissionEnforcer).when(mContext).getSystemService(
+                eq(Context.PERMISSION_ENFORCER_SERVICE));
         doAnswer(inv -> {
             mTwilightListener = (TwilightListener) inv.getArgument(0);
             return null;
@@ -185,6 +216,9 @@ public class UiModeManagerServiceTest extends UiServiceTestCase {
             if (filter.hasAction(Intent.ACTION_SCREEN_OFF)) {
                 mScreenOffCallback = inv.getArgument(0);
             }
+            if (filter.hasAction(Intent.ACTION_DREAMING_STARTED)) {
+                mDreamingStartedCallback = inv.getArgument(0);
+            }
             if (filter.hasAction(Intent.ACTION_DOCK_EVENT)) {
                 mDockStateChangedCallback = inv.getArgument(0);
             }
@@ -208,6 +242,7 @@ public class UiModeManagerServiceTest extends UiServiceTestCase {
         addLocalService(WindowManagerInternal.class, mWindowManager);
         addLocalService(PowerManagerInternal.class, mLocalPowerManager);
         addLocalService(TwilightManager.class, mTwilightManager);
+        addLocalService(DreamManagerInternal.class, mDreamManagerInternal);
 
         mInjector = spy(new TestInjector());
         mUiManagerService = new UiModeManagerService(mContext, /* setupWizardComplete= */ true,
@@ -279,7 +314,7 @@ public class UiModeManagerServiceTest extends UiServiceTestCase {
     }
 
     @Test
-    public void setAutoMode_screenOffRegistered() throws RemoteException {
+    public void setAutoMode_deviceInactiveRegistered() throws RemoteException {
         try {
             mService.setNightMode(MODE_NIGHT_NO);
         } catch (SecurityException e) { /* we should ignore this update config exception*/ }
@@ -289,7 +324,7 @@ public class UiModeManagerServiceTest extends UiServiceTestCase {
 
     @Ignore // b/152719290 - Fails on stage-aosp-master
     @Test
-    public void setAutoMode_screenOffUnRegistered() throws RemoteException {
+    public void setAutoMode_deviceInactiveUnRegistered() throws RemoteException {
         try {
             mService.setNightMode(MODE_NIGHT_AUTO);
         } catch (SecurityException e) { /* we should ignore this update config exception*/ }
@@ -312,8 +347,7 @@ public class UiModeManagerServiceTest extends UiServiceTestCase {
 
     @Test
     public void setNightModeCustomType_noPermission_shouldThrow() throws RemoteException {
-        when(mContext.checkCallingOrSelfPermission(eq(MODIFY_DAY_NIGHT_MODE)))
-                .thenReturn(PackageManager.PERMISSION_DENIED);
+        mPermissionEnforcer.revoke(MODIFY_DAY_NIGHT_MODE);
 
         assertThrows(SecurityException.class,
                 () -> mService.setNightModeCustomType(MODE_NIGHT_CUSTOM_TYPE_BEDTIME));
@@ -753,8 +787,7 @@ public class UiModeManagerServiceTest extends UiServiceTestCase {
     @Test
     public void getNightModeCustomType_permissionNotGranted_shouldThrow()
             throws RemoteException {
-        when(mContext.checkCallingOrSelfPermission(eq(MODIFY_DAY_NIGHT_MODE)))
-                .thenReturn(PackageManager.PERMISSION_DENIED);
+        mPermissionEnforcer.revoke(MODIFY_DAY_NIGHT_MODE);
 
         assertThrows(SecurityException.class, () -> mService.getNightModeCustomType());
     }
@@ -776,7 +809,7 @@ public class UiModeManagerServiceTest extends UiServiceTestCase {
     }
 
     @Test
-    public void customTime_darkThemeOn() throws RemoteException {
+    public void customTime_darkThemeOn_afterScreenOff() throws RemoteException {
         LocalTime now = LocalTime.now();
         mService.setNightMode(MODE_NIGHT_NO);
         mService.setCustomNightModeStart(now.minusHours(1L).toNanoOfDay() / 1000);
@@ -787,13 +820,35 @@ public class UiModeManagerServiceTest extends UiServiceTestCase {
     }
 
     @Test
-    public void customTime_darkThemeOff() throws RemoteException {
+    public void customTime_darkThemeOff_afterScreenOff() throws RemoteException {
         LocalTime now = LocalTime.now();
         mService.setNightMode(MODE_NIGHT_YES);
         mService.setCustomNightModeStart(now.plusHours(1L).toNanoOfDay() / 1000);
         mService.setCustomNightModeEnd(now.minusHours(1L).toNanoOfDay() / 1000);
         mService.setNightMode(MODE_NIGHT_CUSTOM);
         mScreenOffCallback.onReceive(mContext, new Intent(Intent.ACTION_SCREEN_OFF));
+        assertFalse(isNightModeActivated());
+    }
+
+    @Test
+    public void customTime_darkThemeOn_afterDreamingStarted() throws RemoteException {
+        LocalTime now = LocalTime.now();
+        mService.setNightMode(MODE_NIGHT_NO);
+        mService.setCustomNightModeStart(now.minusHours(1L).toNanoOfDay() / 1000);
+        mService.setCustomNightModeEnd(now.plusHours(1L).toNanoOfDay() / 1000);
+        mService.setNightMode(MODE_NIGHT_CUSTOM);
+        mDreamingStartedCallback.onReceive(mContext, new Intent(Intent.ACTION_DREAMING_STARTED));
+        assertTrue(isNightModeActivated());
+    }
+
+    @Test
+    public void customTime_darkThemeOff_afterDreamingStarted() throws RemoteException {
+        LocalTime now = LocalTime.now();
+        mService.setNightMode(MODE_NIGHT_YES);
+        mService.setCustomNightModeStart(now.plusHours(1L).toNanoOfDay() / 1000);
+        mService.setCustomNightModeEnd(now.minusHours(1L).toNanoOfDay() / 1000);
+        mService.setNightMode(MODE_NIGHT_CUSTOM);
+        mDreamingStartedCallback.onReceive(mContext, new Intent(Intent.ACTION_DREAMING_STARTED));
         assertFalse(isNightModeActivated());
     }
 
@@ -1116,8 +1171,7 @@ public class UiModeManagerServiceTest extends UiServiceTestCase {
 
     @Test
     public void addOnProjectionStateChangedListener_enforcesReadProjStatePermission() {
-        doThrow(new SecurityException()).when(mContext).enforceCallingOrSelfPermission(
-                eq(android.Manifest.permission.READ_PROJECTION_STATE), any());
+        mPermissionEnforcer.revoke(android.Manifest.permission.READ_PROJECTION_STATE);
         IOnProjectionStateChangedListener listener = mock(IOnProjectionStateChangedListener.class);
 
         assertThrows(SecurityException.class, () -> mService.addOnProjectionStateChangedListener(
@@ -1141,8 +1195,7 @@ public class UiModeManagerServiceTest extends UiServiceTestCase {
 
     @Test
     public void removeOnProjectionStateChangedListener_enforcesReadProjStatePermission() {
-        doThrow(new SecurityException()).when(mContext).enforceCallingOrSelfPermission(
-                eq(android.Manifest.permission.READ_PROJECTION_STATE), any());
+        mPermissionEnforcer.revoke(android.Manifest.permission.READ_PROJECTION_STATE);
         IOnProjectionStateChangedListener listener = mock(IOnProjectionStateChangedListener.class);
 
         assertThrows(SecurityException.class, () -> mService.removeOnProjectionStateChangedListener(
@@ -1402,6 +1455,51 @@ public class UiModeManagerServiceTest extends UiServiceTestCase {
         triggerDockIntent();
         verifyAndSendResultBroadcast();
         verify(mInjector).startDreamWhenDockedIfAppropriate(mContext);
+    }
+
+    private void testAttentionModeThemeOverlay(boolean modeNight) throws RemoteException {
+        //setup
+        if (modeNight) {
+            mService.setNightMode(MODE_NIGHT_YES);
+            assertTrue(mUiManagerService.getConfiguration().isNightModeActive());
+        } else {
+            mService.setNightMode(MODE_NIGHT_NO);
+            assertFalse(mUiManagerService.getConfiguration().isNightModeActive());
+        }
+
+        // attention modes with expected night modes
+        Map<Integer, Boolean> modes = Map.of(
+                MODE_ATTENTION_THEME_OVERLAY_OFF, modeNight,
+                MODE_ATTENTION_THEME_OVERLAY_DAY, false,
+                MODE_ATTENTION_THEME_OVERLAY_NIGHT, true
+        );
+
+        // test
+        for (int aMode : modes.keySet()) {
+            try {
+                mService.setAttentionModeThemeOverlay(aMode);
+
+                int appliedAMode = mService.getAttentionModeThemeOverlay();
+                boolean nMode = modes.get(aMode);
+
+                assertEquals(aMode, appliedAMode);
+                assertEquals(isNightModeActivated(), nMode);
+            } catch (RemoteException e) {
+                fail("Error communicating with server: " + e.getMessage());
+            }
+        }
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_MODES_API)
+    public void testAttentionModeThemeOverlay_nightModeDisabled() throws RemoteException {
+        testAttentionModeThemeOverlay(false);
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_MODES_API)
+    public void testAttentionModeThemeOverlay_nightModeEnabled() throws RemoteException {
+        testAttentionModeThemeOverlay(true);
     }
 
     private void triggerDockIntent() {

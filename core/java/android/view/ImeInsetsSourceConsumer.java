@@ -21,9 +21,9 @@ import static android.view.ImeInsetsSourceConsumerProto.HAS_PENDING_REQUEST;
 import static android.view.ImeInsetsSourceConsumerProto.INSETS_SOURCE_CONSUMER;
 import static android.view.ImeInsetsSourceConsumerProto.IS_REQUESTED_VISIBLE_AWAITING_CONTROL;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.os.IBinder;
-import android.os.Process;
 import android.os.Trace;
 import android.util.proto.ProtoOutputStream;
 import android.view.SurfaceControl.Transaction;
@@ -70,7 +70,11 @@ public final class ImeInsetsSourceConsumer extends InsetsSourceConsumer {
         if (!isShowRequested()) {
             mIsRequestedVisibleAwaitingControl = false;
             if (!running && !mHasPendingRequest) {
-                notifyHidden(null /* statsToken */);
+                final var statsToken = ImeTracker.forLogging().onStart(ImeTracker.TYPE_HIDE,
+                        ImeTracker.ORIGIN_CLIENT,
+                        SoftInputShowHideReason.HIDE_SOFT_INPUT_ON_ANIMATION_STATE_CHANGED,
+                        mController.getHost().isHandlingPointerEvent() /* fromUser */);
+                notifyHidden(statsToken);
                 removeSurface();
             }
         }
@@ -144,9 +148,17 @@ public final class ImeInsetsSourceConsumer extends InsetsSourceConsumer {
 
     void requestHide(boolean fromIme, @Nullable ImeTracker.Token statsToken) {
         if (!fromIme) {
+            // Create a new token to track the hide request when we have control,
+            // as we use the passed in token for the insets animation already.
+            final var notifyStatsToken = getControl() != null
+                    ? ImeTracker.forLogging().onStart(ImeTracker.TYPE_HIDE,
+                        ImeTracker.ORIGIN_CLIENT,
+                        SoftInputShowHideReason.HIDE_SOFT_INPUT_REQUEST_HIDE_WITH_CONTROL,
+                        mController.getHost().isHandlingPointerEvent() /* fromUser */)
+                    : statsToken;
             // The insets might be controlled by a remote target. Let the server know we are
             // requested to hide.
-            notifyHidden(statsToken);
+            notifyHidden(notifyStatsToken);
         }
         if (mAnimationState == ANIMATION_STATE_SHOW) {
             mHasPendingRequest = true;
@@ -157,20 +169,9 @@ public final class ImeInsetsSourceConsumer extends InsetsSourceConsumer {
      * Notify {@link com.android.server.inputmethod.InputMethodManagerService} that
      * IME insets are hidden.
      *
-     * @param statsToken the token tracking the current IME hide request or {@code null} otherwise.
+     * @param statsToken the token tracking the current IME request or {@code null} otherwise.
      */
-    private void notifyHidden(@Nullable ImeTracker.Token statsToken) {
-        // Create a new stats token to track the hide request when:
-        //  - we do not already have one, or
-        //  - we do already have one, but we have control and use the passed in token
-        //      for the insets animation already.
-        if (statsToken == null || getControl() != null) {
-            statsToken = ImeTracker.forLogging().onRequestHide(null /* component */,
-                    Process.myUid(),
-                    ImeTracker.ORIGIN_CLIENT_HIDE_SOFT_INPUT,
-                    SoftInputShowHideReason.HIDE_SOFT_INPUT_BY_INSETS_API);
-        }
-
+    private void notifyHidden(@NonNull ImeTracker.Token statsToken) {
         ImeTracker.forLogging().onProgress(statsToken,
                 ImeTracker.PHASE_CLIENT_INSETS_CONSUMER_NOTIFY_HIDDEN);
 

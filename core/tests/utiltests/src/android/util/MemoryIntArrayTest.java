@@ -23,11 +23,14 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import android.os.Parcel;
+import android.platform.test.annotations.IgnoreUnderRavenwood;
+import android.platform.test.ravenwood.RavenwoodRule;
 
-import androidx.test.ext.junit.runners.AndroidJUnit4;
+import androidx.test.runner.AndroidJUnit4;
 
 import libcore.io.IoUtils;
 
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -35,13 +38,17 @@ import java.lang.reflect.Field;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
-
-import androidx.test.ext.junit.runners.AndroidJUnit4;
 @RunWith(AndroidJUnit4.class)
+@IgnoreUnderRavenwood(blockedBy = MemoryIntArray.class)
 public class MemoryIntArrayTest {
+    @Rule
+    public final RavenwoodRule mRavenwood = new RavenwoodRule();
+
     static {
-        System.loadLibrary("cutils");
-        System.loadLibrary("memoryintarraytest");
+        if (!RavenwoodRule.isUnderRavenwood()) {
+            System.loadLibrary("cutils");
+            System.loadLibrary("memoryintarraytest");
+        }
     }
 
     @Test
@@ -116,7 +123,7 @@ public class MemoryIntArrayTest {
             parcel.recycle();
 
             assertNotNull("Should marshall file descriptor", secondArray);
-
+            assertEquals("Marshalled size must be three", 3, secondArray.size());
             assertEquals("First element should be 1", 1, secondArray.get(0));
             assertEquals("First element should be 2", 2, secondArray.get(1));
             assertEquals("First element should be 3", 3, secondArray.get(2));

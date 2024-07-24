@@ -18,11 +18,6 @@ package com.android.wm.shell.draganddrop;
 
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
-import static android.content.ClipDescription.EXTRA_PENDING_INTENT;
-import static android.content.ClipDescription.MIMETYPE_APPLICATION_ACTIVITY;
-import static android.content.ClipDescription.MIMETYPE_APPLICATION_SHORTCUT;
-import static android.content.ClipDescription.MIMETYPE_APPLICATION_TASK;
-import static android.content.Intent.EXTRA_USER;
 
 import android.app.ActivityManager;
 import android.app.ActivityTaskManager;
@@ -30,19 +25,13 @@ import android.app.PendingIntent;
 import android.app.WindowConfiguration;
 import android.content.ClipData;
 import android.content.ClipDescription;
-import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
-import android.net.Uri;
-import android.os.UserHandle;
 
-import androidx.annotation.IntDef;
 import androidx.annotation.Nullable;
 
 import com.android.wm.shell.common.DisplayLayout;
 
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
 import java.util.List;
 
 /**
@@ -53,7 +42,18 @@ public class DragSession {
     private final ClipData mInitialDragData;
 
     final DisplayLayout displayLayout;
-    Intent dragData;
+    // The activity info associated with the activity in the appData or the launchableIntent
+    @Nullable
+    ActivityInfo activityInfo;
+    // The intent bundle that includes data about an app-type drag that is started by
+    // Launcher/SysUI.  Only one of appDragData OR launchableIntent will be non-null for a session.
+    @Nullable
+    Intent appData;
+    // A launchable intent that is specified in the ClipData directly.
+    // Only one of appDragData OR launchableIntent will be non-null for a session.
+    @Nullable
+    PendingIntent launchableIntent;
+    // Stores the current running task at the time that the drag was initiated
     ActivityManager.RunningTaskInfo runningTaskInfo;
     @WindowConfiguration.WindowingMode
     int runningTaskWinMode = WINDOWING_MODE_UNDEFINED;
@@ -61,11 +61,19 @@ public class DragSession {
     int runningTaskActType = ACTIVITY_TYPE_STANDARD;
     boolean dragItemSupportsSplitscreen;
 
-    DragSession(Context context, ActivityTaskManager activityTaskManager,
+    DragSession(ActivityTaskManager activityTaskManager,
             DisplayLayout dispLayout, ClipData data) {
         mActivityTaskManager = activityTaskManager;
         mInitialDragData = data;
         displayLayout = dispLayout;
+    }
+
+    /**
+     * Returns the clip description associated with the drag.
+     * @return
+     */
+    ClipDescription getClipDescription() {
+        return mInitialDragData.getDescription();
     }
 
     /**
@@ -81,9 +89,11 @@ public class DragSession {
             runningTaskActType = task.getActivityType();
         }
 
-        final ActivityInfo info = mInitialDragData.getItemAt(0).getActivityInfo();
-        dragItemSupportsSplitscreen = info == null
-                || ActivityInfo.isResizeableMode(info.resizeMode);
-        dragData = mInitialDragData.getItemAt(0).getIntent();
+        activityInfo = mInitialDragData.getItemAt(0).getActivityInfo();
+        // TODO: This should technically check & respect config_supportsNonResizableMultiWindow
+        dragItemSupportsSplitscreen = activityInfo == null
+                || ActivityInfo.isResizeableMode(activityInfo.resizeMode);
+        appData = mInitialDragData.getItemAt(0).getIntent();
+        launchableIntent = DragUtils.getLaunchIntent(mInitialDragData);
     }
 }

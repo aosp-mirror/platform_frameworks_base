@@ -46,6 +46,8 @@ public class SplashScreenExitAnimation implements Animator.AnimatorListener {
     private final int mIconFadeOutDuration;
     private final int mAppRevealDelay;
     private final int mAppRevealDuration;
+    @SplashScreenExitAnimationUtils.ExitAnimationType
+    private final int mAnimationType;
     private final int mAnimationDuration;
     private final float mIconStartAlpha;
     private final float mBrandingStartAlpha;
@@ -91,6 +93,8 @@ public class SplashScreenExitAnimation implements Animator.AnimatorListener {
         }
         mAppRevealDuration = context.getResources().getInteger(
                 R.integer.starting_window_app_reveal_anim_duration);
+        mAnimationType = context.getResources().getInteger(
+                R.integer.starting_window_exit_animation_type);
         mAnimationDuration = Math.max(mIconFadeOutDuration, mAppRevealDelay + mAppRevealDuration);
         mMainWindowShiftLength = mainWindowShiftLength;
         mFinishCallback = handleFinish;
@@ -98,10 +102,10 @@ public class SplashScreenExitAnimation implements Animator.AnimatorListener {
     }
 
     void startAnimations() {
-        SplashScreenExitAnimationUtils.startAnimations(mSplashScreenView, mFirstWindowSurface,
-                mMainWindowShiftLength, mTransactionPool, mFirstWindowFrame, mAnimationDuration,
-                mIconFadeOutDuration, mIconStartAlpha, mBrandingStartAlpha, mAppRevealDelay,
-                mAppRevealDuration, this, mRoundedCornerRadius);
+        SplashScreenExitAnimationUtils.startAnimations(mAnimationType, mSplashScreenView,
+                mFirstWindowSurface, mMainWindowShiftLength, mTransactionPool, mFirstWindowFrame,
+                mAnimationDuration, mIconFadeOutDuration, mIconStartAlpha, mBrandingStartAlpha,
+                mAppRevealDelay, mAppRevealDuration, this, mRoundedCornerRadius);
     }
 
     private void reset() {

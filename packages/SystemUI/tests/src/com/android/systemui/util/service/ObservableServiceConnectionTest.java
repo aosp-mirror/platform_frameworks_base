@@ -200,4 +200,25 @@ public class ObservableServiceConnectionTest extends SysuiTestCase {
         assertThat(connection.bind()).isFalse();
         verify(mContext).unbindService(connection);
     }
+
+    @Test
+    public void testUnbindDoesNotCallUnbindServiceWhenBindThrowsError() {
+        ObservableServiceConnection<Foo> connection = new ObservableServiceConnection<>(mContext,
+                mIntent, mUserTracker, mExecutor, mTransformer);
+        connection.addCallback(mCallback);
+
+        when(mContext.bindServiceAsUser(eq(mIntent), eq(connection), anyInt(),
+                eq(UserHandle.of(MAIN_USER_ID))))
+                .thenThrow(new SecurityException());
+
+        // Verify that bind returns false and we properly unbind.
+        assertThat(connection.bind()).isFalse();
+        verify(mContext).unbindService(connection);
+
+        clearInvocations(mContext);
+
+        // Ensure unbind after the failed bind has no effect.
+        connection.unbind();
+        verify(mContext, never()).unbindService(eq(connection));
+    }
 }

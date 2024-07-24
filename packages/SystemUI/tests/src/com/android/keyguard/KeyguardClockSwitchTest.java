@@ -40,10 +40,11 @@ import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.TextView;
 
-import com.android.systemui.R;
+import com.android.systemui.Flags;
 import com.android.systemui.SysuiTestCase;
-import com.android.systemui.plugins.ClockController;
-import com.android.systemui.plugins.ClockFaceController;
+import com.android.systemui.plugins.clocks.ClockController;
+import com.android.systemui.plugins.clocks.ClockFaceController;
+import com.android.systemui.res.R;
 import com.android.systemui.statusbar.StatusBarState;
 
 import org.junit.Before;
@@ -79,6 +80,8 @@ public class KeyguardClockSwitchTest extends SysuiTestCase {
 
     @Before
     public void setUp() {
+        mSetFlagsRule.disableFlags(Flags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT);
+
         MockitoAnnotations.initMocks(this);
         when(mMockKeyguardSliceView.getContext()).thenReturn(mContext);
         when(mMockKeyguardSliceView.findViewById(R.id.keyguard_status_area))

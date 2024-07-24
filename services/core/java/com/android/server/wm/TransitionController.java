@@ -43,7 +43,6 @@ import android.util.Slog;
 import android.util.SparseArray;
 import android.util.TimeUtils;
 import android.util.proto.ProtoOutputStream;
-import android.view.SurfaceControl;
 import android.view.WindowManager;
 import android.window.ITransitionMetricsReporter;
 import android.window.ITransitionPlayer;
@@ -57,6 +56,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.protolog.ProtoLogGroup;
 import com.android.internal.protolog.common.ProtoLog;
 import com.android.server.FgThread;
+import com.android.window.flags.Flags;
 
 import java.util.ArrayList;
 import java.util.function.Consumer;
@@ -124,6 +124,8 @@ class TransitionController {
     final RemotePlayer mRemotePlayer;
     SnapshotController mSnapshotController;
     TransitionTracer mTransitionTracer;
+
+    private boolean mFullReadyTracking = false;
 
     private final ArrayList<WindowManagerInternal.AppTransitionListener> mLegacyListeners =
             new ArrayList<>();
@@ -255,6 +257,7 @@ class TransitionController {
         mIsWaitingForDisplayEnabled = !wms.mDisplayEnabled;
         registerLegacyListener(wms.mActivityManagerAppTransitionNotifier);
         setSyncEngine(wms.mSyncEngine);
+        mFullReadyTracking = Flags.transitReadyTracking();
     }
 
     @VisibleForTesting
@@ -264,17 +267,19 @@ class TransitionController {
         mSyncEngine.addOnIdleListener(this::tryStartCollectFromQueue);
     }
 
-    private void detachPlayer() {
+    @VisibleForTesting
+    void detachPlayer() {
         if (mTransitionPlayer == null) return;
         // Immediately set to null so that nothing inadvertently starts/queues.
         mTransitionPlayer = null;
-        // Clean-up/finish any playing transitions.
-        for (int i = 0; i < mPlayingTransitions.size(); ++i) {
+        // Clean-up/finish any playing transitions. Backwards since they can remove themselves.
+        for (int i = mPlayingTransitions.size() - 1; i >= 0; --i) {
             mPlayingTransitions.get(i).cleanUpOnFailure();
         }
         mPlayingTransitions.clear();
         // Clean up waiting transitions first since they technically started first.
-        for (int i = 0; i < mWaitingTransitions.size(); ++i) {
+        // Backwards since they can remove themselves.
+        for (int i = mWaitingTransitions.size() - 1; i >= 0; --i) {
             mWaitingTransitions.get(i).abort();
         }
         mWaitingTransitions.clear();
@@ -364,6 +369,14 @@ class TransitionController {
     /** @return {@code true} if using shell-transitions rotation instead of fixed-rotation. */
     boolean useShellTransitionsRotation() {
         return isShellTransitionsEnabled() && SHELL_TRANSITIONS_ROTATION;
+    }
+
+    boolean useFullReadyTracking() {
+        return mFullReadyTracking;
+    }
+
+    void setFullReadyTrackingForTest(boolean enabled) {
+        mFullReadyTracking = enabled;
     }
 
     /**
@@ -466,7 +479,7 @@ class TransitionController {
         return false;
     }
 
-    /** @return {@code true} if wc is in a participant subtree */
+    /** Returns {@code true} if the display contains a running or pending transition. */
     boolean isTransitionOnDisplay(@NonNull DisplayContent dc) {
         if (mCollectingTransition != null && mCollectingTransition.isOnDisplay(dc)) {
             return true;
@@ -484,6 +497,9 @@ class TransitionController {
         if (mCollectingTransition != null && mCollectingTransition.isInTransientHide(task)) {
             return true;
         }
+        for (int i = mWaitingTransitions.size() - 1; i >= 0; --i) {
+            if (mWaitingTransitions.get(i).isInTransientHide(task)) return true;
+        }
         for (int i = mPlayingTransitions.size() - 1; i >= 0; --i) {
             if (mPlayingTransitions.get(i).isInTransientHide(task)) return true;
         }
@@ -493,6 +509,9 @@ class TransitionController {
     boolean isTransientVisible(@NonNull Task task) {
         if (mCollectingTransition != null && mCollectingTransition.isTransientVisible(task)) {
             return true;
+        }
+        for (int i = mWaitingTransitions.size() - 1; i >= 0; --i) {
+            if (mWaitingTransitions.get(i).isTransientVisible(task)) return true;
         }
         for (int i = mPlayingTransitions.size() - 1; i >= 0; --i) {
             if (mPlayingTransitions.get(i).isTransientVisible(task)) return true;
@@ -623,10 +642,15 @@ class TransitionController {
 
     /** Sets the sync method for the display change. */
     private void setDisplaySyncMethod(@NonNull TransitionRequestInfo.DisplayChange displayChange,
-            @NonNull Transition displayTransition, @NonNull DisplayContent displayContent) {
+            @NonNull DisplayContent displayContent) {
         final Rect startBounds = displayChange.getStartAbsBounds();
         final Rect endBounds = displayChange.getEndAbsBounds();
         if (startBounds == null || endBounds == null) return;
+        setDisplaySyncMethod(startBounds, endBounds, displayContent);
+    }
+
+    void setDisplaySyncMethod(@NonNull Rect startBounds, @NonNull Rect endBounds,
+            @NonNull DisplayContent displayContent) {
         final int startWidth = startBounds.width();
         final int startHeight = startBounds.height();
         final int endWidth = endBounds.width();
@@ -674,7 +698,7 @@ class TransitionController {
                     trigger != null ? trigger.asTask() : null, remoteTransition, displayChange);
             if (newTransition != null && displayChange != null && trigger != null
                     && trigger.asDisplayContent() != null) {
-                setDisplaySyncMethod(displayChange, newTransition, trigger.asDisplayContent());
+                setDisplaySyncMethod(displayChange, trigger.asDisplayContent());
             }
         }
         if (trigger != null) {
@@ -712,13 +736,22 @@ class TransitionController {
         try {
             ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS,
                     "Requesting StartTransition: %s", transition);
-            ActivityManager.RunningTaskInfo info = null;
+            ActivityManager.RunningTaskInfo startTaskInfo = null;
+            ActivityManager.RunningTaskInfo pipTaskInfo = null;
             if (startTask != null) {
-                info = new ActivityManager.RunningTaskInfo();
-                startTask.fillTaskInfo(info);
+                startTaskInfo = startTask.getTaskInfo();
             }
-            final TransitionRequestInfo request = new TransitionRequestInfo(
-                    transition.mType, info, remoteTransition, displayChange, transition.getFlags());
+
+            // set the pip task in the request if provided
+            if (transition.getPipActivity() != null) {
+                pipTaskInfo = transition.getPipActivity().getTask().getTaskInfo();
+                transition.setPipActivity(null);
+            }
+
+            final TransitionRequestInfo request = new TransitionRequestInfo(transition.mType,
+                    startTaskInfo, pipTaskInfo, remoteTransition, displayChange,
+                    transition.getFlags(), transition.getSyncId());
+
             transition.mLogger.mRequestTimeNs = SystemClock.elapsedRealtimeNanos();
             transition.mLogger.mRequest = request;
             mTransitionPlayer.requestStartTransition(transition.getToken(), request);
@@ -769,6 +802,12 @@ class TransitionController {
     void recordTaskOrder(@NonNull WindowContainer wc) {
         if (mCollectingTransition == null) return;
         mCollectingTransition.recordTaskOrder(wc);
+    }
+
+    /** @see Transition#hasOrderChanges */
+    boolean hasOrderChanges() {
+        if (mCollectingTransition == null) return false;
+        return mCollectingTransition.hasOrderChanges();
     }
 
     /**
@@ -871,7 +910,7 @@ class TransitionController {
         // It is usually a no-op but make sure that the metric consumer is removed.
         mTransitionMetricsReporter.reportAnimationStart(record.getToken(), 0 /* startTime */);
         // It is a no-op if the transition did not change the display.
-        mAtm.endLaunchPowerMode(POWER_MODE_REASON_CHANGE_DISPLAY);
+        mAtm.endPowerMode(POWER_MODE_REASON_CHANGE_DISPLAY);
         if (!mPlayingTransitions.contains(record)) {
             Slog.e(TAG, "Trying to finish a non-playing transition " + record);
             return;
@@ -951,6 +990,23 @@ class TransitionController {
         mValidateDisplayVis.clear();
     }
 
+    void onVisibleWithoutCollectingTransition(WindowContainer<?> wc, String caller) {
+        final boolean isPlaying = !mPlayingTransitions.isEmpty();
+        Slog.e(TAG, "Set visible without transition " + wc + " playing=" + isPlaying
+                + " caller=" + caller);
+        if (!isPlaying) {
+            WindowContainer.enforceSurfaceVisible(wc);
+            return;
+        }
+        // Update surface visibility after the playing transitions are finished, so the last
+        // visibility won't be replaced by the finish transaction of transition.
+        mStateValidators.add(() -> {
+            if (wc.isVisibleRequested()) {
+                WindowContainer.enforceSurfaceVisible(wc);
+            }
+        });
+    }
+
     /**
      * Called when the transition has a complete set of participants for its operation. In other
      * words, it is when the transition is "ready" but is still waiting for participants to draw.
@@ -997,12 +1053,20 @@ class TransitionController {
             // legacy sync
             mSyncEngine.startSyncSet(queued.mLegacySync);
         }
-        // Post this so that the now-playing transition logic isn't interrupted.
-        mAtm.mH.post(() -> {
-            synchronized (mAtm.mGlobalLock) {
-                queued.mOnStartCollect.onCollectStarted(true /* deferred */);
-            }
-        });
+        if (queued.mTransition != null
+                && queued.mTransition.mType == WindowManager.TRANSIT_SLEEP) {
+            // SLEEP transitions are special in that they don't collect anything (in fact if they
+            // do collect things it can cause problems). So, we need to run it's onCollectStarted
+            // immediately.
+            queued.mOnStartCollect.onCollectStarted(true /* deferred */);
+        } else {
+            // Post this so that the now-playing transition logic isn't interrupted.
+            mAtm.mH.post(() -> {
+                synchronized (mAtm.mGlobalLock) {
+                    queued.mOnStartCollect.onCollectStarted(true /* deferred */);
+                }
+            });
+        }
     }
 
     void moveToPlaying(Transition transition) {
@@ -1151,18 +1215,39 @@ class TransitionController {
         }
     }
 
-    void updateAnimatingState(SurfaceControl.Transaction t) {
+    /** Returns {@code true} if a transition is playing or the collecting transition is started. */
+    boolean isAnimating() {
+        return mAnimatingState;
+    }
+
+    void updateAnimatingState() {
         final boolean animatingState = !mPlayingTransitions.isEmpty()
                     || (mCollectingTransition != null && mCollectingTransition.isStarted());
         if (animatingState && !mAnimatingState) {
-            t.setEarlyWakeupStart();
+            // Note that Transition#start() can be called before adding participants, so the
+            // enableHighPerfTransition(true) is also called in Transition#recordDisplay.
+            for (int i = mAtm.mRootWindowContainer.getChildCount() - 1; i >= 0; i--) {
+                final DisplayContent dc = mAtm.mRootWindowContainer.getChildAt(i);
+                if (mCollectingTransition != null && mCollectingTransition.shouldUsePerfHint(dc)) {
+                    dc.enableHighPerfTransition(true);
+                    continue;
+                }
+                for (int j = mPlayingTransitions.size() - 1; j >= 0; j--) {
+                    if (mPlayingTransitions.get(j).shouldUsePerfHint(dc)) {
+                        dc.enableHighPerfTransition(true);
+                        break;
+                    }
+                }
+            }
             // Usually transitions put quite a load onto the system already (with all the things
             // happening in app), so pause task snapshot persisting to not increase the load.
             mSnapshotController.setPause(true);
             mAnimatingState = true;
             Transition.asyncTraceBegin("animating", 0x41bfaf1 /* hashcode of TAG */);
         } else if (!animatingState && mAnimatingState) {
-            t.setEarlyWakeupEnd();
+            for (int i = mAtm.mRootWindowContainer.getChildCount() - 1; i >= 0; i--) {
+                mAtm.mRootWindowContainer.getChildAt(i).enableHighPerfTransition(false);
+            }
             mAtm.mWindowManager.scheduleAnimationLocked();
             mSnapshotController.setPause(false);
             mAnimatingState = false;
@@ -1178,13 +1263,7 @@ class TransitionController {
         } else if (mPlayingTransitions.isEmpty()) {
             mTransitionPlayerProc.setRunningRemoteAnimation(false);
             mRemotePlayer.clear();
-            return;
         }
-        final IApplicationThread appThread = transition.getRemoteAnimationApp();
-        if (appThread == null || appThread == mTransitionPlayerProc.getThread()) return;
-        final WindowProcessController delegate = mAtm.getProcessController(appThread);
-        if (delegate == null) return;
-        mRemotePlayer.update(delegate, isPlaying, true /* predict */);
     }
 
     /** Called when a transition is aborted. This should only be called by {@link Transition} */
@@ -1388,6 +1467,19 @@ class TransitionController {
         applySync.accept(false /* deferred */);
     }
 
+    /**
+     * Instructs the collecting transition to wait until `condition` is met before it is
+     * considered ready.
+     */
+    void waitFor(@NonNull Transition.ReadyCondition condition) {
+        if (mCollectingTransition == null) {
+            Slog.e(TAG, "No collecting transition available to wait for " + condition);
+            condition.mTracker = Transition.ReadyTracker.NULL_TRACKER;
+            return;
+        }
+        mCollectingTransition.mReadyTracker.add(condition);
+    }
+
     interface OnStartCollect {
         void onCollectStarted(boolean deferred);
     }
@@ -1397,7 +1489,7 @@ class TransitionController {
      * {@link #mTransitionPlayerProc}.
      */
     static class RemotePlayer {
-        private static final long REPORT_RUNNING_GRACE_PERIOD_MS = 100;
+        private static final long REPORT_RUNNING_GRACE_PERIOD_MS = 200;
         @GuardedBy("itself")
         private final ArrayMap<IBinder, DelegateProcess> mDelegateProcesses = new ArrayMap<>();
         private final ActivityTaskManagerService mAtm;
@@ -1489,7 +1581,7 @@ class TransitionController {
      * Beside `mCreateWallTimeMs`, all times are elapsed times and will all be reported relative
      * to when the transition was created.
      */
-    static class Logger {
+    static class Logger implements Runnable {
         long mCreateWallTimeMs;
         long mCreateTimeNs;
         long mRequestTimeNs;
@@ -1505,18 +1597,33 @@ class TransitionController {
         TransitionInfo mInfo;
 
         private String buildOnSendLog() {
-            StringBuilder sb = new StringBuilder("Sent Transition #").append(mSyncId)
-                    .append(" createdAt=").append(TimeUtils.logTimeOfDay(mCreateWallTimeMs));
+            StringBuilder sb = new StringBuilder("Sent Transition (#").append(mSyncId)
+                    .append(") createdAt=").append(TimeUtils.logTimeOfDay(mCreateWallTimeMs));
             if (mRequest != null) {
                 sb.append(" via request=").append(mRequest);
             }
             return sb.toString();
         }
 
+        void logOnSendAsync(Handler handler) {
+            handler.post(this);
+        }
+
+        @Override
+        public void run() {
+            try {
+                logOnSend();
+            } catch (Exception e) {
+                // In case TransitionRequestInfo#toString() accesses window container with race.
+                Slog.w(TAG, "Failed to log transition", e);
+            }
+        }
+
         void logOnSend() {
             ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS_MIN, "%s", buildOnSendLog());
             ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS_MIN, "    startWCT=%s", mStartWCT);
-            ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS_MIN, "    info=%s", mInfo);
+            ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS_MIN, "    info=%s",
+                    mInfo.toString("    " /* prefix */));
         }
 
         private static String toMsString(long nanos) {
@@ -1524,8 +1631,8 @@ class TransitionController {
         }
 
         private String buildOnFinishLog() {
-            StringBuilder sb = new StringBuilder("Finish Transition #").append(mSyncId)
-                    .append(": created at ").append(TimeUtils.logTimeOfDay(mCreateWallTimeMs));
+            StringBuilder sb = new StringBuilder("Finish Transition (#").append(mSyncId)
+                    .append("): created at ").append(TimeUtils.logTimeOfDay(mCreateWallTimeMs));
             sb.append(" collect-started=").append(toMsString(mCollectTimeNs - mCreateTimeNs));
             if (mRequestTimeNs != 0) {
                 sb.append(" request-sent=").append(toMsString(mRequestTimeNs - mCreateTimeNs));

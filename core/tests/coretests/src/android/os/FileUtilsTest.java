@@ -53,21 +53,18 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
-import android.content.Context;
 import android.os.FileUtils.MemoryPipe;
+import android.platform.test.annotations.IgnoreUnderRavenwood;
+import android.platform.test.ravenwood.RavenwoodRule;
 import android.provider.DocumentsContract.Document;
 import android.system.Os;
 import android.util.DataUnit;
 
-import androidx.test.InstrumentationRegistry;
 import androidx.test.runner.AndroidJUnit4;
-
-import com.google.android.collect.Sets;
-
-import libcore.io.Streams;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -79,6 +76,10 @@ import java.io.File;
 import java.io.FileDescriptor;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.nio.file.Files;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Random;
@@ -86,6 +87,9 @@ import java.net.InetSocketAddress;
 
 @RunWith(AndroidJUnit4.class)
 public class FileUtilsTest {
+    @Rule
+    public final RavenwoodRule mRavenwood = new RavenwoodRule();
+
     private static final String TEST_DATA =
             "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
 
@@ -96,17 +100,13 @@ public class FileUtilsTest {
 
     private final int[] DATA_SIZES = { 32, 32_000, 32_000_000 };
 
-    private Context getContext() {
-        return InstrumentationRegistry.getContext();
-    }
-
     @Before
     public void setUp() throws Exception {
-        mDir = getContext().getDir("testing", Context.MODE_PRIVATE);
+        mDir = Files.createTempDirectory("FileUtils").toFile();
         mTestFile = new File(mDir, "test.file");
         mCopyFile = new File(mDir, "copy.file");
 
-        mTarget = getContext().getFilesDir();
+        mTarget = mDir;
         FileUtils.deleteContents(mTarget);
     }
 
@@ -158,6 +158,7 @@ public class FileUtilsTest {
     }
 
     @Test
+    @IgnoreUnderRavenwood(blockedBy = MemoryPipe.class)
     public void testCopy_FileToPipe() throws Exception {
         for (int size : DATA_SIZES) {
             final File src = new File(mTarget, "src");
@@ -178,6 +179,7 @@ public class FileUtilsTest {
     }
 
     @Test
+    @IgnoreUnderRavenwood(blockedBy = MemoryPipe.class)
     public void testCopy_PipeToFile() throws Exception {
         for (int size : DATA_SIZES) {
             final File dest = new File(mTarget, "dest");
@@ -197,6 +199,7 @@ public class FileUtilsTest {
     }
 
     @Test
+    @IgnoreUnderRavenwood(blockedBy = MemoryPipe.class)
     public void testCopy_PipeToPipe() throws Exception {
         for (int size : DATA_SIZES) {
             byte[] expected = new byte[size];
@@ -214,6 +217,7 @@ public class FileUtilsTest {
     }
 
     @Test
+    @IgnoreUnderRavenwood(blockedBy = MemoryPipe.class)
     public void testCopy_ShortPipeToFile() throws Exception {
         byte[] source = new byte[33_000_000];
         new Random().nextBytes(source);
@@ -508,6 +512,7 @@ public class FileUtilsTest {
     }
 
     @Test
+    @IgnoreUnderRavenwood(blockedBy = android.webkit.MimeTypeMap.class)
     public void testBuildUniqueFile_normal() throws Exception {
         assertNameEquals("test.jpg", FileUtils.buildUniqueFile(mTarget, "image/jpeg", "test"));
         assertNameEquals("test.jpg", FileUtils.buildUniqueFile(mTarget, "image/jpeg", "test.jpg"));
@@ -527,6 +532,7 @@ public class FileUtilsTest {
     }
 
     @Test
+    @IgnoreUnderRavenwood(blockedBy = android.webkit.MimeTypeMap.class)
     public void testBuildUniqueFile_unknown() throws Exception {
         assertNameEquals("test",
                 FileUtils.buildUniqueFile(mTarget, "application/octet-stream", "test"));
@@ -540,6 +546,7 @@ public class FileUtilsTest {
     }
 
     @Test
+    @IgnoreUnderRavenwood(blockedBy = android.webkit.MimeTypeMap.class)
     public void testBuildUniqueFile_dir() throws Exception {
         assertNameEquals("test", FileUtils.buildUniqueFile(mTarget, Document.MIME_TYPE_DIR, "test"));
         new File(mTarget, "test").mkdir();
@@ -554,6 +561,7 @@ public class FileUtilsTest {
     }
 
     @Test
+    @IgnoreUnderRavenwood(blockedBy = android.webkit.MimeTypeMap.class)
     public void testBuildUniqueFile_increment() throws Exception {
         assertNameEquals("test.jpg", FileUtils.buildUniqueFile(mTarget, "image/jpeg", "test.jpg"));
         new File(mTarget, "test.jpg").createNewFile();
@@ -573,6 +581,7 @@ public class FileUtilsTest {
     }
 
     @Test
+    @IgnoreUnderRavenwood(blockedBy = android.webkit.MimeTypeMap.class)
     public void testBuildUniqueFile_mimeless() throws Exception {
         assertNameEquals("test.jpg", FileUtils.buildUniqueFile(mTarget, "test.jpg"));
         new File(mTarget, "test.jpg").createNewFile();
@@ -668,6 +677,7 @@ public class FileUtilsTest {
     }
 
     @Test
+    @IgnoreUnderRavenwood(reason = "Requires kernel support")
     public void testTranslateMode() throws Exception {
         assertTranslate("r", O_RDONLY, MODE_READ_ONLY);
 
@@ -687,6 +697,7 @@ public class FileUtilsTest {
     }
 
     @Test
+    @IgnoreUnderRavenwood(reason = "Requires kernel support")
     public void testMalformedTransate_int() throws Exception {
         try {
             // The non-standard Linux access mode 3 should throw
@@ -698,6 +709,7 @@ public class FileUtilsTest {
     }
 
     @Test
+    @IgnoreUnderRavenwood(reason = "Requires kernel support")
     public void testMalformedTransate_string() throws Exception {
         try {
             // The non-standard Linux access mode 3 should throw
@@ -709,6 +721,7 @@ public class FileUtilsTest {
     }
 
     @Test
+    @IgnoreUnderRavenwood(reason = "Requires kernel support")
     public void testTranslateMode_Invalid() throws Exception {
         try {
             translateModeStringToPosix("rwx");
@@ -723,6 +736,7 @@ public class FileUtilsTest {
     }
 
     @Test
+    @IgnoreUnderRavenwood(reason = "Requires kernel support")
     public void testTranslateMode_Access() throws Exception {
         assertEquals(O_RDONLY, translateModeAccessToPosix(F_OK));
         assertEquals(O_RDONLY, translateModeAccessToPosix(R_OK));
@@ -732,6 +746,7 @@ public class FileUtilsTest {
     }
 
     @Test
+    @IgnoreUnderRavenwood(reason = "Requires kernel support")
     public void testConvertToModernFd() throws Exception {
         final String nonce = String.valueOf(System.nanoTime());
 
@@ -804,13 +819,24 @@ public class FileUtilsTest {
     private byte[] readFile(File file) throws Exception {
         try (FileInputStream in = new FileInputStream(file);
                 ByteArrayOutputStream out = new ByteArrayOutputStream()) {
-            Streams.copy(in, out);
+            copy(in, out);
             return out.toByteArray();
         }
     }
 
+    private static int copy(InputStream in, OutputStream out) throws IOException {
+        int total = 0;
+        byte[] buffer = new byte[8192];
+        int c;
+        while ((c = in.read(buffer)) != -1) {
+            total += c;
+            out.write(buffer, 0, c);
+        }
+        return total;
+    }
+
     private void assertDirContents(String... expected) {
-        final HashSet<String> expectedSet = Sets.newHashSet(expected);
+        final HashSet<String> expectedSet = new HashSet<>(Arrays.asList(expected));
         String[] actual = mDir.list();
         if (actual == null) actual = new String[0];
 

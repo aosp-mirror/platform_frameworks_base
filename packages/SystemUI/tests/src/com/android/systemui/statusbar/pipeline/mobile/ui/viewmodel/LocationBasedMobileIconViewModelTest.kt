@@ -16,8 +16,11 @@
 
 package com.android.systemui.statusbar.pipeline.mobile.ui.viewmodel
 
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.flags.FakeFeatureFlagsClassic
+import com.android.systemui.flags.Flags
 import com.android.systemui.log.table.TableLogBuffer
 import com.android.systemui.statusbar.connectivity.MobileIconCarrierIdOverridesFake
 import com.android.systemui.statusbar.pipeline.StatusBarPipelineFlags
@@ -27,7 +30,6 @@ import com.android.systemui.statusbar.pipeline.mobile.data.model.DataConnectionS
 import com.android.systemui.statusbar.pipeline.mobile.data.model.ResolvedNetworkType
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.FakeMobileConnectionRepository
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.FakeMobileConnectionsRepository
-import com.android.systemui.statusbar.pipeline.mobile.data.repository.FakeUserSetupRepository
 import com.android.systemui.statusbar.pipeline.mobile.domain.interactor.MobileIconInteractor
 import com.android.systemui.statusbar.pipeline.mobile.domain.interactor.MobileIconInteractorImpl
 import com.android.systemui.statusbar.pipeline.mobile.domain.interactor.MobileIconsInteractor
@@ -36,6 +38,7 @@ import com.android.systemui.statusbar.pipeline.mobile.domain.model.SignalIconMod
 import com.android.systemui.statusbar.pipeline.mobile.util.FakeMobileMappingsProxy
 import com.android.systemui.statusbar.pipeline.shared.ConnectivityConstants
 import com.android.systemui.statusbar.pipeline.shared.data.repository.FakeConnectivityRepository
+import com.android.systemui.statusbar.policy.data.repository.FakeUserSetupRepository
 import com.android.systemui.util.CarrierConfigTracker
 import com.android.systemui.util.mockito.mock
 import com.google.common.truth.Truth.assertThat
@@ -47,12 +50,14 @@ import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
+import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.MockitoAnnotations
 
 @Suppress("EXPERIMENTAL_IS_NOT_ENABLED")
 @OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
+@RunWith(AndroidJUnit4::class)
 class LocationBasedMobileIconViewModelTest : SysuiTestCase() {
     private lateinit var commonImpl: MobileIconViewModelCommon
     private lateinit var homeIcon: HomeMobileIconViewModel
@@ -65,6 +70,11 @@ class LocationBasedMobileIconViewModelTest : SysuiTestCase() {
     private lateinit var airplaneModeInteractor: AirplaneModeInteractor
 
     private val connectivityRepository = FakeConnectivityRepository()
+    private val flags =
+        FakeFeatureFlagsClassic().also {
+            it.set(Flags.NEW_NETWORK_SLICE_UI, false)
+            it.set(Flags.FILTER_PROVISIONING_NETWORK_SUBSCRIPTIONS, true)
+        }
 
     @Mock private lateinit var statusBarPipelineFlags: StatusBarPipelineFlags
     @Mock private lateinit var constants: ConnectivityConstants
@@ -81,6 +91,7 @@ class LocationBasedMobileIconViewModelTest : SysuiTestCase() {
             AirplaneModeInteractor(
                 FakeAirplaneModeRepository(),
                 FakeConnectivityRepository(),
+                FakeMobileConnectionsRepository(),
             )
         connectionsRepository =
             FakeMobileConnectionsRepository(FakeMobileMappingsProxy(), tableLogBuffer)
@@ -108,6 +119,7 @@ class LocationBasedMobileIconViewModelTest : SysuiTestCase() {
                 FakeUserSetupRepository(),
                 testScope.backgroundScope,
                 context,
+                flags,
             )
 
         interactor =
@@ -133,6 +145,7 @@ class LocationBasedMobileIconViewModelTest : SysuiTestCase() {
                 interactor,
                 airplaneModeInteractor,
                 constants,
+                flags,
                 testScope.backgroundScope,
             )
 
@@ -177,7 +190,7 @@ class LocationBasedMobileIconViewModelTest : SysuiTestCase() {
 
         /** Convenience constructor for these tests */
         fun defaultSignal(level: Int = 1): SignalIconModel {
-            return SignalIconModel(
+            return SignalIconModel.Cellular(
                 level,
                 NUM_LEVELS,
                 showExclamationMark = false,

@@ -20,6 +20,9 @@ import static android.content.pm.PackageManager.ONLY_IF_NO_MATCH_FOUND;
 import static android.content.pm.PackageManager.SKIP_CURRENT_PROFILE;
 import static android.speech.RecognizerIntent.ACTION_RECOGNIZE_SPEECH;
 
+import static com.android.server.pm.CrossProfileIntentFilter.FLAG_ALLOW_CHAINED_RESOLUTION;
+import static com.android.server.pm.CrossProfileIntentFilter.FLAG_IS_PACKAGE_FOR_FILTER;
+
 import android.content.Intent;
 import android.hardware.usb.UsbManager;
 import android.provider.AlarmClock;
@@ -613,6 +616,27 @@ public class DefaultCrossProfileIntentFiltersUtils {
                     .addDataScheme("mmsto")
                     .build();
 
+    private static final DefaultCrossProfileIntentFilter CLONE_TO_PARENT_ACTION_PICK_IMAGES =
+            new DefaultCrossProfileIntentFilter.Builder(
+                    DefaultCrossProfileIntentFilter.Direction.TO_PARENT,
+                    /* flags= */ FLAG_IS_PACKAGE_FOR_FILTER | FLAG_ALLOW_CHAINED_RESOLUTION,
+                    /* letsPersonalDataIntoProfile= */ false)
+                    .addAction(MediaStore.ACTION_PICK_IMAGES)
+                    .addCategory(Intent.CATEGORY_DEFAULT)
+                    .build();
+
+    private static final DefaultCrossProfileIntentFilter
+            CLONE_TO_PARENT_ACTION_PICK_IMAGES_WITH_DATA_TYPES =
+            new DefaultCrossProfileIntentFilter.Builder(
+                    DefaultCrossProfileIntentFilter.Direction.TO_PARENT,
+                    /* flags= */ FLAG_IS_PACKAGE_FOR_FILTER | FLAG_ALLOW_CHAINED_RESOLUTION,
+                    /* letsPersonalDataIntoProfile= */ false)
+                    .addAction(MediaStore.ACTION_PICK_IMAGES)
+                    .addCategory(Intent.CATEGORY_DEFAULT)
+                    .addDataType("image/*")
+                    .addDataType("video/*")
+                    .build();
+
     public static List<DefaultCrossProfileIntentFilter> getDefaultCloneProfileFilters() {
         return Arrays.asList(
                 PARENT_TO_CLONE_SEND_ACTION,
@@ -626,7 +650,80 @@ public class DefaultCrossProfileIntentFiltersUtils {
                 CLONE_TO_PARENT_PICK_INSERT_ACTION,
                 CLONE_TO_PARENT_DIAL_DATA,
                 CLONE_TO_PARENT_SMS_MMS,
-                CLONE_TO_PARENT_PHOTOPICKER_SELECTION
+                CLONE_TO_PARENT_PHOTOPICKER_SELECTION,
+                CLONE_TO_PARENT_ACTION_PICK_IMAGES,
+                CLONE_TO_PARENT_ACTION_PICK_IMAGES_WITH_DATA_TYPES
+        );
+    }
+
+    /** Dial intent with mime type can be handled by either private profile or its parent user. */
+    private static final DefaultCrossProfileIntentFilter DIAL_MIME_PRIVATE_PROFILE =
+            new DefaultCrossProfileIntentFilter.Builder(
+                    DefaultCrossProfileIntentFilter.Direction.TO_PARENT,
+                    ONLY_IF_NO_MATCH_FOUND,
+                    /* letsPersonalDataIntoProfile= */ false)
+                    .addAction(Intent.ACTION_DIAL)
+                    .addAction(Intent.ACTION_VIEW)
+                    .addCategory(Intent.CATEGORY_DEFAULT)
+                    .addCategory(Intent.CATEGORY_BROWSABLE)
+                    .addDataType("vnd.android.cursor.item/phone")
+                    .addDataType("vnd.android.cursor.item/phone_v2")
+                    .addDataType("vnd.android.cursor.item/person")
+                    .addDataType("vnd.android.cursor.dir/calls")
+                    .addDataType("vnd.android.cursor.item/calls")
+                    .build();
+
+    /** Dial intent with data scheme can be handled by either private profile or its parent user. */
+    private static final DefaultCrossProfileIntentFilter DIAL_DATA_PRIVATE_PROFILE =
+            new DefaultCrossProfileIntentFilter.Builder(
+                    DefaultCrossProfileIntentFilter.Direction.TO_PARENT,
+                    ONLY_IF_NO_MATCH_FOUND,
+                    /* letsPersonalDataIntoProfile= */ false)
+                    .addAction(Intent.ACTION_DIAL)
+                    .addAction(Intent.ACTION_VIEW)
+                    .addCategory(Intent.CATEGORY_DEFAULT)
+                    .addCategory(Intent.CATEGORY_BROWSABLE)
+                    .addDataScheme("tel")
+                    .addDataScheme("sip")
+                    .addDataScheme("voicemail")
+                    .build();
+
+    /**
+     * Dial intent with no data scheme or type can be handled by either private profile or its
+     * parent user.
+     */
+    private static final DefaultCrossProfileIntentFilter DIAL_RAW_PRIVATE_PROFILE =
+            new DefaultCrossProfileIntentFilter.Builder(
+                    DefaultCrossProfileIntentFilter.Direction.TO_PARENT,
+                    ONLY_IF_NO_MATCH_FOUND,
+                    /* letsPersonalDataIntoProfile= */ false)
+                    .addAction(Intent.ACTION_DIAL)
+                    .addCategory(Intent.CATEGORY_DEFAULT)
+                    .addCategory(Intent.CATEGORY_BROWSABLE)
+                    .build();
+
+    /** SMS and MMS can be handled by the private profile or by the parent user. */
+    private static final DefaultCrossProfileIntentFilter SMS_MMS_PRIVATE_PROFILE =
+            new DefaultCrossProfileIntentFilter.Builder(
+                    DefaultCrossProfileIntentFilter.Direction.TO_PARENT,
+                    ONLY_IF_NO_MATCH_FOUND,
+                    /* letsPersonalDataIntoProfile= */ false)
+                    .addAction(Intent.ACTION_VIEW)
+                    .addAction(Intent.ACTION_SENDTO)
+                    .addCategory(Intent.CATEGORY_DEFAULT)
+                    .addCategory(Intent.CATEGORY_BROWSABLE)
+                    .addDataScheme("sms")
+                    .addDataScheme("smsto")
+                    .addDataScheme("mms")
+                    .addDataScheme("mmsto")
+                    .build();
+
+    public static List<DefaultCrossProfileIntentFilter> getDefaultPrivateProfileFilters() {
+        return Arrays.asList(
+                DIAL_MIME_PRIVATE_PROFILE,
+                DIAL_DATA_PRIVATE_PROFILE,
+                DIAL_RAW_PRIVATE_PROFILE,
+                SMS_MMS_PRIVATE_PROFILE
         );
     }
 }

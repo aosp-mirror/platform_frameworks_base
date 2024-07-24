@@ -36,7 +36,7 @@ import android.view.ViewTreeObserver;
 
 import androidx.constraintlayout.widget.ConstraintLayout;
 
-import com.android.systemui.R;
+import com.android.systemui.res.R;
 
 /**
  * ConstraintLayout that is draggable when touched in a specific region

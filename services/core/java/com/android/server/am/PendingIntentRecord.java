@@ -67,7 +67,6 @@ public final class PendingIntentRecord extends IIntentSender.Stub {
     @EnabledAfter(targetSdkVersion = Build.VERSION_CODES.TIRAMISU)
     @Overridable
     private static final long DEFAULT_RESCIND_BAL_PRIVILEGES_FROM_PENDING_INTENT_SENDER = 244637991;
-
     public static final int FLAG_ACTIVITY_SENDER = 1 << 0;
     public static final int FLAG_BROADCAST_SENDER = 1 << 1;
     public static final int FLAG_SERVICE_SENDER = 1 << 2;
@@ -407,6 +406,9 @@ public final class PendingIntentRecord extends IIntentSender.Stub {
             String resolvedType, IBinder allowlistToken, IIntentReceiver finishedReceiver,
             String requiredPermission, IBinder resultTo, String resultWho, int requestCode,
             int flagsMask, int flagsValues, Bundle options) {
+        final int callingUid = Binder.getCallingUid();
+        final int callingPid = Binder.getCallingPid();
+
         if (intent != null) intent.setDefusable(true);
         if (options != null) options.setDefusable(true);
 
@@ -459,6 +461,12 @@ public final class PendingIntentRecord extends IIntentSender.Stub {
                                     + key.packageName
                                     + ") because this option is meant for the pending intent "
                                     + "creator");
+                    if (CompatChanges.isChangeEnabled(PendingIntent.PENDING_INTENT_OPTIONS_CHECK,
+                            callingUid)) {
+                        throw new IllegalArgumentException(
+                                "pendingIntentCreatorBackgroundActivityStartMode "
+                                + "must not be set when sending a PendingIntent");
+                    }
                     opts.setPendingIntentCreatorBackgroundActivityStartMode(
                             ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_SYSTEM_DEFINED);
                 }
@@ -494,9 +502,6 @@ public final class PendingIntentRecord extends IIntentSender.Stub {
 
         }
         // We don't hold the controller lock beyond this point as we will be calling into AM and WM.
-
-        final int callingUid = Binder.getCallingUid();
-        final int callingPid = Binder.getCallingPid();
 
         // Only system senders can declare a broadcast to be alarm-originated.  We check
         // this here rather than in the general case handling below to fail before the other

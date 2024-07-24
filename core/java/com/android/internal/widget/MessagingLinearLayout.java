@@ -21,6 +21,8 @@ import android.annotation.Px;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
+import android.os.Build;
+import android.os.Trace;
 import android.util.AttributeSet;
 import android.view.RemotableViewMethod;
 import android.view.View;
@@ -45,6 +47,8 @@ public class MessagingLinearLayout extends ViewGroup {
 
     private int mMaxDisplayedLines = Integer.MAX_VALUE;
 
+    private static final boolean TRACE_ONMEASURE = Build.isDebuggable();
+
     public MessagingLinearLayout(Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
 
@@ -67,6 +71,10 @@ public class MessagingLinearLayout extends ViewGroup {
 
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        if (TRACE_ONMEASURE) {
+            Trace.beginSection("MessagingLinearLayout#onMeasure");
+            trackMeasureSpecs(widthMeasureSpec, heightMeasureSpec);
+        }
         // This is essentially a bottom-up linear layout that only adds children that fit entirely
         // up to a maximum height.
         int targetHeight = MeasureSpec.getSize(heightMeasureSpec);
@@ -177,6 +185,9 @@ public class MessagingLinearLayout extends ViewGroup {
                 resolveSize(Math.max(getSuggestedMinimumWidth(), measuredWidth),
                         widthMeasureSpec),
                 Math.max(getSuggestedMinimumHeight(), totalHeight));
+        if (TRACE_ONMEASURE) {
+            Trace.endSection();
+        }
     }
 
     @Override
@@ -238,6 +249,25 @@ public class MessagingLinearLayout extends ViewGroup {
 
             first = false;
         }
+    }
+
+    private void trackMeasureSpecs(int widthMeasureSpec, int heightMeasureSpec) {
+        if (!TRACE_ONMEASURE) {
+            return;
+        }
+
+        final int availableWidth = MeasureSpec.getSize(widthMeasureSpec);
+        final int widthMode = MeasureSpec.getMode(widthMeasureSpec);
+        final int availableHeight = MeasureSpec.getSize(heightMeasureSpec);
+        final int heightMode = MeasureSpec.getMode(heightMeasureSpec);
+        Trace.setCounter("MessagingLinearLayout#onMeasure_widthMeasureSpecSize",
+                availableWidth);
+        Trace.setCounter("MessagingLinearLayout#onMeasure_widthMeasureSpecMode",
+                widthMode);
+        Trace.setCounter("MessagingLinearLayout#onMeasure_heightMeasureSpecSize",
+                availableHeight);
+        Trace.setCounter("MessagingLinearLayout#onMeasure_heightMeasureSpecMode",
+                heightMode);
     }
 
     @Override

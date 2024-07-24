@@ -18,24 +18,37 @@
 package com.android.systemui.keyguard.data.repository
 
 import android.graphics.Point
-import com.android.systemui.common.shared.model.Position
+import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.keyguard.shared.model.BiometricUnlockModel
 import com.android.systemui.keyguard.shared.model.BiometricUnlockSource
+import com.android.systemui.keyguard.shared.model.DismissAction
 import com.android.systemui.keyguard.shared.model.DozeTransitionModel
-import com.android.systemui.keyguard.shared.model.KeyguardRootViewVisibilityState
-import com.android.systemui.keyguard.shared.model.ScreenModel
-import com.android.systemui.keyguard.shared.model.ScreenState
+import com.android.systemui.keyguard.shared.model.KeyguardDone
 import com.android.systemui.keyguard.shared.model.StatusBarState
-import com.android.systemui.keyguard.shared.model.WakeSleepReason
-import com.android.systemui.keyguard.shared.model.WakefulnessModel
-import com.android.systemui.keyguard.shared.model.WakefulnessState
+import dagger.Binds
+import dagger.Module
+import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
 /** Fake implementation of [KeyguardRepository] */
-class FakeKeyguardRepository : KeyguardRepository {
+@SysUISingleton
+class FakeKeyguardRepository @Inject constructor() : KeyguardRepository {
+    private val _deferKeyguardDone: MutableSharedFlow<KeyguardDone> = MutableSharedFlow()
+    override val keyguardDone: Flow<KeyguardDone> = _deferKeyguardDone
+
+    private val _keyguardDoneAnimationsFinished: MutableSharedFlow<Unit> =
+        MutableSharedFlow(extraBufferCapacity = 1)
+    override val keyguardDoneAnimationsFinished: Flow<Unit> = _keyguardDoneAnimationsFinished
+
+    private val _clockShouldBeCentered = MutableStateFlow<Boolean>(true)
+    override val clockShouldBeCentered: Flow<Boolean> = _clockShouldBeCentered
+
+    private val _dismissAction = MutableStateFlow<DismissAction>(DismissAction.None)
+    override val dismissAction: StateFlow<DismissAction> = _dismissAction
 
     private val _animateBottomAreaDozingTransitions = MutableStateFlow(false)
     override val animateBottomAreaDozingTransitions: StateFlow<Boolean> =
@@ -44,14 +57,11 @@ class FakeKeyguardRepository : KeyguardRepository {
     private val _bottomAreaAlpha = MutableStateFlow(1f)
     override val bottomAreaAlpha: StateFlow<Float> = _bottomAreaAlpha
 
-    private val _clockPosition = MutableStateFlow(Position(0, 0))
-    override val clockPosition: StateFlow<Position> = _clockPosition
-
     private val _isKeyguardShowing = MutableStateFlow(false)
     override val isKeyguardShowing: Flow<Boolean> = _isKeyguardShowing
 
     private val _isKeyguardUnlocked = MutableStateFlow(false)
-    override val isKeyguardUnlocked: StateFlow<Boolean> = _isKeyguardUnlocked.asStateFlow()
+    override val isKeyguardDismissible: StateFlow<Boolean> = _isKeyguardUnlocked.asStateFlow()
 
     private val _isKeyguardOccluded = MutableStateFlow(false)
     override val isKeyguardOccluded: Flow<Boolean> = _isKeyguardOccluded
@@ -66,7 +76,7 @@ class FakeKeyguardRepository : KeyguardRepository {
     override val lastDozeTapToWakePosition = _lastDozeTapToWakePosition.asStateFlow()
 
     private val _isAodAvailable = MutableStateFlow(false)
-    override val isAodAvailable: Flow<Boolean> = _isAodAvailable
+    override val isAodAvailable: StateFlow<Boolean> = _isAodAvailable
 
     private val _isDreaming = MutableStateFlow(false)
     override val isDreaming: Flow<Boolean> = _isDreaming
@@ -81,19 +91,10 @@ class FakeKeyguardRepository : KeyguardRepository {
     override val linearDozeAmount: Flow<Float> = _dozeAmount
 
     private val _statusBarState = MutableStateFlow(StatusBarState.SHADE)
-    override val statusBarState: Flow<StatusBarState> = _statusBarState
+    override val statusBarState: StateFlow<StatusBarState> = _statusBarState
 
     private val _dozeTransitionModel = MutableStateFlow(DozeTransitionModel())
     override val dozeTransitionModel: Flow<DozeTransitionModel> = _dozeTransitionModel
-
-    private val _wakefulnessModel =
-        MutableStateFlow(
-            WakefulnessModel(WakefulnessState.ASLEEP, WakeSleepReason.OTHER, WakeSleepReason.OTHER)
-        )
-    override val wakefulness = _wakefulnessModel
-
-    private val _screenModel = MutableStateFlow(ScreenModel(ScreenState.SCREEN_OFF))
-    override val screenModel = _screenModel
 
     private val _isUdfpsSupported = MutableStateFlow(false)
 
@@ -118,16 +119,14 @@ class FakeKeyguardRepository : KeyguardRepository {
     private val _keyguardAlpha = MutableStateFlow(1f)
     override val keyguardAlpha: StateFlow<Float> = _keyguardAlpha
 
-    private val _keyguardRootViewVisibility =
-        MutableStateFlow(
-            KeyguardRootViewVisibilityState(
-                0,
-                goingToFullShade = false,
-                occlusionTransitionRunning = false
-            )
-        )
-    override val keyguardRootViewVisibility: Flow<KeyguardRootViewVisibilityState> =
-        _keyguardRootViewVisibility.asStateFlow()
+    override val lastRootViewTapPosition: MutableStateFlow<Point?> = MutableStateFlow(null)
+
+    override val ambientIndicationVisible: MutableStateFlow<Boolean> = MutableStateFlow(false)
+
+    private val _isEncryptedOrLockdown = MutableStateFlow(true)
+    override val isEncryptedOrLockdown: Flow<Boolean> = _isEncryptedOrLockdown
+
+    override val topClippingBounds = MutableStateFlow<Int?>(null)
 
     override fun setQuickSettingsVisible(isVisible: Boolean) {
         _isQuickSettingsVisible.value = isVisible
@@ -137,11 +136,6 @@ class FakeKeyguardRepository : KeyguardRepository {
         return _isKeyguardShowing.value
     }
 
-    private var _isBypassEnabled = false
-    override fun isBypassEnabled(): Boolean {
-        return _isBypassEnabled
-    }
-
     override fun setAnimateDozingTransitions(animate: Boolean) {
         _animateBottomAreaDozingTransitions.tryEmit(animate)
     }
@@ -149,10 +143,6 @@ class FakeKeyguardRepository : KeyguardRepository {
     @Deprecated("Deprecated as part of b/278057014")
     override fun setBottomAreaAlpha(alpha: Float) {
         _bottomAreaAlpha.value = alpha
-    }
-
-    override fun setClockPosition(x: Int, y: Int) {
-        _clockPosition.value = Position(x, y)
     }
 
     fun setKeyguardShowing(isShowing: Boolean) {
@@ -167,12 +157,32 @@ class FakeKeyguardRepository : KeyguardRepository {
         _isKeyguardOccluded.value = isOccluded
     }
 
+    fun setKeyguardDismissible(isUnlocked: Boolean) {
+        _isKeyguardUnlocked.value = isUnlocked
+    }
+
     override fun setIsDozing(isDozing: Boolean) {
         _isDozing.value = isDozing
     }
 
     override fun dozeTimeTick() {
         _dozeTimeTick.value = _dozeTimeTick.value + 1
+    }
+
+    override fun setDismissAction(dismissAction: DismissAction) {
+        _dismissAction.value = dismissAction
+    }
+
+    override suspend fun setKeyguardDone(timing: KeyguardDone) {
+        _deferKeyguardDone.emit(timing)
+    }
+
+    override fun keyguardDoneAnimationsFinished() {
+        _keyguardDoneAnimationsFinished.tryEmit(Unit)
+    }
+
+    override fun setClockShouldBeCentered(shouldBeCentered: Boolean) {
+        _clockShouldBeCentered.value = shouldBeCentered
     }
 
     fun dozeTimeTick(millis: Long) {
@@ -183,8 +193,8 @@ class FakeKeyguardRepository : KeyguardRepository {
         _lastDozeTapToWakePosition.value = position
     }
 
-    fun setAodAvailable(isAodAvailable: Boolean) {
-        _isAodAvailable.value = isAodAvailable
+    override fun setAodAvailable(value: Boolean) {
+        _isAodAvailable.value = value
     }
 
     fun setDreaming(isDreaming: Boolean) {
@@ -203,12 +213,8 @@ class FakeKeyguardRepository : KeyguardRepository {
         _dozeAmount.value = dozeAmount
     }
 
-    fun setWakefulnessModel(model: WakefulnessModel) {
-        _wakefulnessModel.value = model
-    }
-
-    fun setBiometricUnlockState(state: BiometricUnlockModel) {
-        _biometricUnlockState.tryEmit(state)
+    override fun setBiometricUnlockState(value: BiometricUnlockModel) {
+        _biometricUnlockState.tryEmit(value)
     }
 
     fun setBiometricUnlockSource(source: BiometricUnlockSource?) {
@@ -231,18 +237,6 @@ class FakeKeyguardRepository : KeyguardRepository {
         _statusBarState.value = state
     }
 
-    fun setKeyguardUnlocked(isUnlocked: Boolean) {
-        _isKeyguardUnlocked.value = isUnlocked
-    }
-
-    fun setBypassEnabled(isEnabled: Boolean) {
-        _isBypassEnabled = isEnabled
-    }
-
-    fun setScreenModel(screenModel: ScreenModel) {
-        _screenModel.value = screenModel
-    }
-
     override fun isUdfpsSupported(): Boolean {
         return _isUdfpsSupported.value
     }
@@ -251,16 +245,12 @@ class FakeKeyguardRepository : KeyguardRepository {
         _keyguardAlpha.value = alpha
     }
 
-    override fun setKeyguardVisibility(
-        statusBarState: Int,
-        goingToFullShade: Boolean,
-        occlusionTransitionRunning: Boolean
-    ) {
-        _keyguardRootViewVisibility.value =
-            KeyguardRootViewVisibilityState(
-                statusBarState,
-                goingToFullShade,
-                occlusionTransitionRunning
-            )
+    fun setIsEncryptedOrLockdown(value: Boolean) {
+        _isEncryptedOrLockdown.value = value
     }
+}
+
+@Module
+interface FakeKeyguardRepositoryModule {
+    @Binds fun bindFake(fake: FakeKeyguardRepository): KeyguardRepository
 }

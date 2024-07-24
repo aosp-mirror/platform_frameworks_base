@@ -19,12 +19,9 @@ package com.android.systemui
 import android.content.Context
 import android.graphics.Path
 import android.graphics.Rect
-import android.graphics.RectF
 import android.hardware.camera2.CameraManager
-import android.util.PathParser
+import com.android.systemui.res.R
 import java.util.concurrent.Executor
-
-import kotlin.math.roundToInt
 
 /**
  * Listens for usage of the Camera and controls the ScreenDecorations transition to show extra
@@ -33,37 +30,81 @@ import kotlin.math.roundToInt
  */
 class CameraAvailabilityListener(
     private val cameraManager: CameraManager,
-    private val cutoutProtectionPath: Path,
-    private val targetCameraId: String,
+    private val cameraProtectionInfoList: List<CameraProtectionInfo>,
     excludedPackages: String,
     private val executor: Executor
 ) {
-    private var cutoutBounds = Rect()
+    private var activeProtectionInfo: CameraProtectionInfo? = null
+    private var openCamera: OpenCameraInfo? = null
+    private val unavailablePhysicalCameras = mutableSetOf<String>()
     private val excludedPackageIds: Set<String>
     private val listeners = mutableListOf<CameraTransitionCallback>()
     private val availabilityCallback: CameraManager.AvailabilityCallback =
-            object : CameraManager.AvailabilityCallback() {
-                override fun onCameraClosed(cameraId: String) {
-                    if (targetCameraId == cameraId) {
-                        notifyCameraInactive()
-                    }
+        object : CameraManager.AvailabilityCallback() {
+            override fun onCameraClosed(logicalCameraId: String) {
+                openCamera = null
+                if (activeProtectionInfo?.logicalCameraId == logicalCameraId) {
+                    notifyCameraInactive()
                 }
+                activeProtectionInfo = null
+            }
 
-                override fun onCameraOpened(cameraId: String, packageId: String) {
-                    if (targetCameraId == cameraId && !isExcluded(packageId)) {
-                        notifyCameraActive()
-                    }
+            override fun onCameraOpened(logicalCameraId: String, packageId: String) {
+                openCamera = OpenCameraInfo(logicalCameraId, packageId)
+                if (isExcluded(packageId)) {
+                    return
                 }
-    }
+                val protectionInfo =
+                    cameraProtectionInfoList.firstOrNull {
+                        logicalCameraId == it.logicalCameraId &&
+                            it.physicalCameraId !in unavailablePhysicalCameras
+                    }
+                if (protectionInfo != null) {
+                    activeProtectionInfo = protectionInfo
+                    notifyCameraActive(protectionInfo)
+                }
+            }
+
+            override fun onPhysicalCameraAvailable(
+                logicalCameraId: String,
+                physicalCameraId: String
+            ) {
+                unavailablePhysicalCameras -= physicalCameraId
+                val openCamera = this@CameraAvailabilityListener.openCamera ?: return
+                if (openCamera.logicalCameraId != logicalCameraId) {
+                    return
+                }
+                if (isExcluded(openCamera.packageId)) {
+                    return
+                }
+                val newActiveInfo =
+                    cameraProtectionInfoList.find {
+                        it.logicalCameraId == logicalCameraId &&
+                            it.physicalCameraId == physicalCameraId
+                    }
+                if (newActiveInfo != null) {
+                    activeProtectionInfo = newActiveInfo
+                    notifyCameraActive(newActiveInfo)
+                }
+            }
+
+            override fun onPhysicalCameraUnavailable(
+                logicalCameraId: String,
+                physicalCameraId: String
+            ) {
+                unavailablePhysicalCameras += physicalCameraId
+                val activeInfo = activeProtectionInfo ?: return
+                if (
+                    activeInfo.logicalCameraId == logicalCameraId &&
+                        activeInfo.physicalCameraId == physicalCameraId
+                ) {
+                    activeProtectionInfo = null
+                    notifyCameraInactive()
+                }
+            }
+        }
 
     init {
-        val computed = RectF()
-        cutoutProtectionPath.computeBounds(computed, false /* unused */)
-        cutoutBounds.set(
-                computed.left.roundToInt(),
-                computed.top.roundToInt(),
-                computed.right.roundToInt(),
-                computed.bottom.roundToInt())
         excludedPackageIds = excludedPackages.split(",").toSet()
     }
 
@@ -100,45 +141,40 @@ class CameraAvailabilityListener(
         cameraManager.unregisterAvailabilityCallback(availabilityCallback)
     }
 
-    private fun notifyCameraActive() {
-        listeners.forEach { it.onApplyCameraProtection(cutoutProtectionPath, cutoutBounds) }
+    private fun notifyCameraActive(info: CameraProtectionInfo) {
+        listeners.forEach {
+            it.onApplyCameraProtection(info.cutoutProtectionPath, info.bounds)
+        }
     }
 
     private fun notifyCameraInactive() {
         listeners.forEach { it.onHideCameraProtection() }
     }
 
-    /**
-     * Callbacks to tell a listener that a relevant camera turned on and off.
-     */
+    /** Callbacks to tell a listener that a relevant camera turned on and off. */
     interface CameraTransitionCallback {
         fun onApplyCameraProtection(protectionPath: Path, bounds: Rect)
+
         fun onHideCameraProtection()
     }
 
     companion object Factory {
-        fun build(context: Context, executor: Executor): CameraAvailabilityListener {
-            val manager = context
-                    .getSystemService(Context.CAMERA_SERVICE) as CameraManager
+        fun build(
+            context: Context,
+            executor: Executor,
+            cameraProtectionLoader: CameraProtectionLoader
+        ): CameraAvailabilityListener {
+            val manager = context.getSystemService(Context.CAMERA_SERVICE) as CameraManager
             val res = context.resources
-            val pathString = res.getString(R.string.config_frontBuiltInDisplayCutoutProtection)
-            val cameraId = res.getString(R.string.config_protectedCameraId)
+            val cameraProtectionInfoList = cameraProtectionLoader.loadCameraProtectionInfoList()
             val excluded = res.getString(R.string.config_cameraProtectionExcludedPackages)
 
-            return CameraAvailabilityListener(
-                    manager, pathFromString(pathString), cameraId, excluded, executor)
-        }
-
-        private fun pathFromString(pathString: String): Path {
-            val spec = pathString.trim()
-            val p: Path
-            try {
-                p = PathParser.createPathFromPathData(spec)
-            } catch (e: Throwable) {
-                throw IllegalArgumentException("Invalid protection path", e)
-            }
-
-            return p
+            return CameraAvailabilityListener(manager, cameraProtectionInfoList, excluded, executor)
         }
     }
+
+    private data class OpenCameraInfo(
+        val logicalCameraId: String,
+        val packageId: String,
+    )
 }

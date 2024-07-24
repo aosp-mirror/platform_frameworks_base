@@ -26,6 +26,7 @@ public interface IProtoLogGroup {
     boolean isEnabled();
 
     /**
+     * @deprecated TODO(b/324128613) remove once we migrate fully to Perfetto
      * is binary logging enabled for the group.
      */
     boolean isLogToProto();

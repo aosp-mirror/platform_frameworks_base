@@ -151,9 +151,19 @@ oneway interface IStatusBar
      * @param hidesStatusBar whether it is being hidden
      */
     void setTopAppHidesStatusBar(boolean hidesStatusBar);
-
+    /**
+     * Add a tile to the Quick Settings Panel to the first item in the QS Panel
+     * @param tile the ComponentName of the {@link android.service.quicksettings.TileService}
+     */
     void addQsTile(in ComponentName tile);
+    /**
+     * Add a tile to the Quick Settings Panel
+     * @param tile the ComponentName of the {@link android.service.quicksettings.TileService}
+     * @param end if true, the tile will be added at the end. If false, at the beginning.
+     */
+    void addQsTileToFrontOrEnd(in ComponentName tile, boolean end);
     void remQsTile(in ComponentName tile);
+    void setQsTiles(in String[] tiles);
     void clickQsTile(in ComponentName tile);
     void handleSystemKey(in KeyEvent key);
 
@@ -284,12 +294,12 @@ oneway interface IStatusBar
     void suppressAmbientDisplay(boolean suppress);
 
     /**
-     * Requests {@link WindowMagnification} to set window magnification connection through
-     * {@link AccessibilityManager#setWindowMagnificationConnection(IWindowMagnificationConnection)}
+     * Requests {@link Magnification} to set magnification connection to SystemUI through
+     * {@link AccessibilityManager#setMagnificationConnection(IMagnificationConnection)}
      *
      * @param connect {@code true} if needs connection, otherwise set the connection to null.
      */
-    void requestWindowMagnificationConnection(boolean connect);
+    void requestMagnificationConnection(boolean connect);
 
     /**
      * Allow for pass-through arguments from `adb shell cmd statusbar <args>`, and write to the
@@ -315,7 +325,14 @@ oneway interface IStatusBar
      */
     void requestTileServiceListeningState(in ComponentName componentName);
 
-    void requestAddTile(in ComponentName componentName, in CharSequence appName, in CharSequence label, in Icon icon, in IAddTileResultCallback callback);
+    void requestAddTile(
+        int callingUid,
+        in ComponentName componentName,
+        in CharSequence appName,
+        in CharSequence label,
+        in Icon icon,
+        in IAddTileResultCallback callback
+    );
     void cancelRequestAddTile(in String packageName);
 
     /** Notifies System UI about an update to the media tap-to-transfer sender state. */
@@ -343,8 +360,12 @@ oneway interface IStatusBar
     /** Shows rear display educational dialog */
     void showRearDisplayDialog(int currentBaseState);
 
-    /** Called when requested to go to fullscreen from the active split app. */
-    void goToFullscreenFromSplit();
+    /**
+     *  Called when requested to go to fullscreen from the focused app.
+     *
+     *  @param displayId the id of the current display.
+     */
+    void moveFocusedTaskToFullscreen(int displayId);
 
     /**
      * Enters stage split from a current running app.
@@ -359,4 +380,10 @@ oneway interface IStatusBar
      * @param packageName of the session for which the output switcher is shown.
      */
     void showMediaOutputSwitcher(String packageName);
+
+    /** Enters desktop mode.
+    *
+    * @param displayId the id of the current display.
+    */
+    void enterDesktop(int displayId);
 }

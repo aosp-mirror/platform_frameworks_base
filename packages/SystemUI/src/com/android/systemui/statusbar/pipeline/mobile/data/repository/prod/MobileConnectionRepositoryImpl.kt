@@ -21,6 +21,11 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.net.ConnectivityManager
+import android.net.ConnectivityManager.NetworkCallback
+import android.net.Network
+import android.net.NetworkCapabilities
+import android.net.NetworkRequest
 import android.telephony.CellSignalStrength.SIGNAL_STRENGTH_NONE_OR_UNKNOWN
 import android.telephony.CellSignalStrengthCdma
 import android.telephony.ServiceState
@@ -41,6 +46,8 @@ import com.android.systemui.broadcast.BroadcastDispatcher
 import com.android.systemui.common.coroutine.ConflatedCallbackFlow.conflatedCallbackFlow
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Background
+import com.android.systemui.flags.FeatureFlagsClassic
+import com.android.systemui.flags.Flags.ROAMING_INDICATOR_VIA_DISPLAY_INFO
 import com.android.systemui.log.table.TableLogBuffer
 import com.android.systemui.statusbar.pipeline.mobile.data.MobileInputLogger
 import com.android.systemui.statusbar.pipeline.mobile.data.model.DataConnectionState.Disconnected
@@ -71,12 +78,14 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.scan
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.withContext
 
 /**
  * A repository implementation for a typical mobile connection (as opposed to a carrier merged
@@ -87,16 +96,18 @@ import kotlinx.coroutines.flow.stateIn
 class MobileConnectionRepositoryImpl(
     override val subId: Int,
     private val context: Context,
-    subscriptionModel: StateFlow<SubscriptionModel?>,
+    subscriptionModel: Flow<SubscriptionModel?>,
     defaultNetworkName: NetworkNameModel,
     networkNameSeparator: String,
+    connectivityManager: ConnectivityManager,
     private val telephonyManager: TelephonyManager,
     systemUiCarrierConfig: SystemUiCarrierConfig,
     broadcastDispatcher: BroadcastDispatcher,
     private val mobileMappingsProxy: MobileMappingsProxy,
-    bgDispatcher: CoroutineDispatcher,
+    private val bgDispatcher: CoroutineDispatcher,
     logger: MobileInputLogger,
     override val tableLogBuffer: TableLogBuffer,
+    flags: FeatureFlagsClassic,
     scope: CoroutineScope,
 ) : MobileConnectionRepository {
     init {
@@ -181,6 +192,7 @@ class MobileConnectionRepositoryImpl(
                 telephonyManager.registerTelephonyCallback(bgDispatcher.asExecutor(), callback)
                 awaitClose { telephonyManager.unregisterTelephonyCallback(callback) }
             }
+            .flowOn(bgDispatcher)
             .scan(initial = initial) { state, event -> state.applyEvent(event) }
             .stateIn(scope = scope, started = SharingStarted.WhileSubscribed(), initial)
     }
@@ -192,9 +204,15 @@ class MobileConnectionRepositoryImpl(
             .stateIn(scope, SharingStarted.WhileSubscribed(), false)
 
     override val isRoaming =
-        callbackEvents
-            .mapNotNull { it.onServiceStateChanged }
-            .map { it.serviceState.roaming }
+        if (flags.isEnabled(ROAMING_INDICATOR_VIA_DISPLAY_INFO)) {
+                callbackEvents
+                    .mapNotNull { it.onDisplayInfoChanged }
+                    .map { it.telephonyDisplayInfo.isRoaming }
+            } else {
+                callbackEvents
+                    .mapNotNull { it.onServiceStateChanged }
+                    .map { it.serviceState.roaming }
+            }
             .stateIn(scope, SharingStarted.WhileSubscribed(), false)
 
     override val operatorAlphaShort =
@@ -207,6 +225,12 @@ class MobileConnectionRepositoryImpl(
         callbackEvents
             .mapNotNull { it.onServiceStateChanged }
             .map { Utils.isInService(it.serviceState) }
+            .stateIn(scope, SharingStarted.WhileSubscribed(), false)
+
+    override val isNonTerrestrial =
+        callbackEvents
+            .mapNotNull { it.onServiceStateChanged }
+            .map { it.serviceState.isUsingNonTerrestrialNetwork }
             .stateIn(scope, SharingStarted.WhileSubscribed(), false)
 
     override val isGsm =
@@ -278,8 +302,10 @@ class MobileConnectionRepositoryImpl(
             }
             .stateIn(scope, SharingStarted.WhileSubscribed(), UnknownNetworkType)
 
+    override val inflateSignalStrength = systemUiCarrierConfig.shouldInflateSignalStrength
+
     override val numberOfLevels =
-        systemUiCarrierConfig.shouldInflateSignalStrength
+        inflateSignalStrength
             .map { shouldInflate ->
                 if (shouldInflate) {
                     DEFAULT_NUM_LEVELS + 1
@@ -307,8 +333,13 @@ class MobileConnectionRepositoryImpl(
     override val cdmaRoaming: StateFlow<Boolean> =
         telephonyPollingEvent
             .mapLatest {
-                val cdmaEri = telephonyManager.cdmaEnhancedRoamingIndicatorDisplayNumber
-                cdmaEri == ERI_ON || cdmaEri == ERI_FLASH
+                try {
+                    val cdmaEri = telephonyManager.cdmaEnhancedRoamingIndicatorDisplayNumber
+                    cdmaEri == ERI_ON || cdmaEri == ERI_FLASH
+                } catch (e: UnsupportedOperationException) {
+                    // Handles the same as a function call failure
+                    false
+                }
             }
             .stateIn(scope, SharingStarted.WhileSubscribed(), false)
 
@@ -329,7 +360,13 @@ class MobileConnectionRepositoryImpl(
             }
             .stateIn(scope, SharingStarted.WhileSubscribed(), telephonyManager.simCarrierId)
 
-    /** BroadcastDispatcher does not handle sticky broadcasts, so we can't use it here */
+    /**
+     * BroadcastDispatcher does not handle sticky broadcasts, so we can't use it here. Note that we
+     * now use the [SharingStarted.Eagerly] strategy, because there have been cases where the sticky
+     * broadcast does not represent the correct state.
+     *
+     * See b/322432056 for context.
+     */
     @SuppressLint("RegisterReceiverViaContext")
     override val networkName: StateFlow<NetworkNameModel> =
         conflatedCallbackFlow {
@@ -358,7 +395,8 @@ class MobileConnectionRepositoryImpl(
 
                 awaitClose { context.unregisterReceiver(receiver) }
             }
-            .stateIn(scope, SharingStarted.WhileSubscribed(), defaultNetworkName)
+            .flowOn(bgDispatcher)
+            .stateIn(scope, SharingStarted.Eagerly, defaultNetworkName)
 
     override val dataEnabled = run {
         val initial = telephonyManager.isDataConnectionAllowed
@@ -368,25 +406,68 @@ class MobileConnectionRepositoryImpl(
             .stateIn(scope, SharingStarted.WhileSubscribed(), initial)
     }
 
+    override suspend fun isInEcmMode(): Boolean =
+        withContext(bgDispatcher) { telephonyManager.emergencyCallbackMode }
+
     /** Typical mobile connections aren't available during airplane mode. */
     override val isAllowedDuringAirplaneMode = MutableStateFlow(false).asStateFlow()
+
+    /**
+     * Currently, a network with NET_CAPABILITY_PRIORITIZE_LATENCY is the only type of network that
+     * we consider to be a "network slice". _PRIORITIZE_BANDWIDTH may be added in the future. Any of
+     * these capabilities that are used here must also be represented in the
+     * self_certified_network_capabilities.xml config file
+     */
+    @SuppressLint("WrongConstant")
+    private val networkSliceRequest =
+        NetworkRequest.Builder()
+            .addCapability(NetworkCapabilities.NET_CAPABILITY_PRIORITIZE_LATENCY)
+            .setSubscriptionIds(setOf(subId))
+            .build()
+
+    @SuppressLint("MissingPermission")
+    override val hasPrioritizedNetworkCapabilities: StateFlow<Boolean> =
+        conflatedCallbackFlow {
+                // Our network callback listens only for this.subId && net_cap_prioritize_latency
+                // therefore our state is a simple mapping of whether or not that network exists
+                val callback =
+                    object : NetworkCallback() {
+                        override fun onAvailable(network: Network) {
+                            logger.logPrioritizedNetworkAvailable(network.netId)
+                            trySend(true)
+                        }
+
+                        override fun onLost(network: Network) {
+                            logger.logPrioritizedNetworkLost(network.netId)
+                            trySend(false)
+                        }
+                    }
+
+                connectivityManager.registerNetworkCallback(networkSliceRequest, callback)
+
+                awaitClose { connectivityManager.unregisterNetworkCallback(callback) }
+            }
+            .flowOn(bgDispatcher)
+            .stateIn(scope, SharingStarted.WhileSubscribed(), false)
 
     class Factory
     @Inject
     constructor(
         private val context: Context,
         private val broadcastDispatcher: BroadcastDispatcher,
+        private val connectivityManager: ConnectivityManager,
         private val telephonyManager: TelephonyManager,
         private val logger: MobileInputLogger,
         private val carrierConfigRepository: CarrierConfigRepository,
         private val mobileMappingsProxy: MobileMappingsProxy,
+        private val flags: FeatureFlagsClassic,
         @Background private val bgDispatcher: CoroutineDispatcher,
         @Application private val scope: CoroutineScope,
     ) {
         fun build(
             subId: Int,
             mobileLogger: TableLogBuffer,
-            subscriptionModel: StateFlow<SubscriptionModel?>,
+            subscriptionModel: Flow<SubscriptionModel?>,
             defaultNetworkName: NetworkNameModel,
             networkNameSeparator: String,
         ): MobileConnectionRepository {
@@ -396,6 +477,7 @@ class MobileConnectionRepositoryImpl(
                 subscriptionModel,
                 defaultNetworkName,
                 networkNameSeparator,
+                connectivityManager,
                 telephonyManager.createForSubscriptionId(subId),
                 carrierConfigRepository.getOrCreateConfigForSubId(subId),
                 broadcastDispatcher,
@@ -403,6 +485,7 @@ class MobileConnectionRepositoryImpl(
                 bgDispatcher,
                 logger,
                 mobileLogger,
+                flags,
                 scope,
             )
         }
@@ -418,11 +501,17 @@ private fun Intent.carrierId(): Int =
  */
 sealed interface CallbackEvent {
     data class OnCarrierNetworkChange(val active: Boolean) : CallbackEvent
+
     data class OnDataActivity(val direction: Int) : CallbackEvent
+
     data class OnDataConnectionStateChanged(val dataState: Int) : CallbackEvent
+
     data class OnDataEnabledChanged(val enabled: Boolean) : CallbackEvent
+
     data class OnDisplayInfoChanged(val telephonyDisplayInfo: TelephonyDisplayInfo) : CallbackEvent
+
     data class OnServiceStateChanged(val serviceState: ServiceState) : CallbackEvent
+
     data class OnSignalStrengthChanged(val signalStrength: SignalStrength) : CallbackEvent
 }
 

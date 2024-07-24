@@ -138,8 +138,10 @@ public class SplitDecorManager extends WindowlessWindowManager {
         mViewHost.setView(rootLayout, lp);
     }
 
-    /** Releases the surfaces for split decor. */
-    public void release(SurfaceControl.Transaction t) {
+    /**
+     * Cancels any currently running animations.
+     */
+    public void cancelRunningAnimations() {
         if (mFadeAnimator != null) {
             if (mFadeAnimator.isRunning()) {
                 mFadeAnimator.cancel();
@@ -152,6 +154,11 @@ public class SplitDecorManager extends WindowlessWindowManager {
             }
             mScreenshotAnimator = null;
         }
+    }
+
+    /** Releases the surfaces for split decor. */
+    public void release(SurfaceControl.Transaction t) {
+        cancelRunningAnimations();
         if (mViewHost != null) {
             mViewHost.release();
             mViewHost = null;
@@ -277,7 +284,7 @@ public class SplitDecorManager extends WindowlessWindowManager {
                 }
 
                 @Override
-                public void onAnimationEnd(@androidx.annotation.NonNull Animator animation) {
+                public void onAnimationEnd(@NonNull Animator animation) {
                     mRunningAnimationCount--;
                     animT.remove(mScreenshot);
                     animT.apply();

@@ -16,11 +16,16 @@
 
 package android.service.voice;
 
+import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.SystemApi;
 import android.os.Parcelable;
+import android.service.voice.flags.Flags;
 
 import com.android.internal.util.DataClass;
+
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 
 /**
  * Represents a result supporting the rejected hotword trigger.
@@ -50,13 +55,19 @@ public final class HotwordRejectedResult implements Parcelable {
     /** High confidence in hotword detector result. */
     public static final int CONFIDENCE_LEVEL_HIGH = 3;
 
+    /** Very high confidence in hotword detector result. **/
+    @FlaggedApi(Flags.FLAG_ALLOW_HOTWORD_BUMP_EGRESS)
+    public static final int CONFIDENCE_LEVEL_VERY_HIGH = 4;
+
     /** @hide */
     @IntDef(prefix = {"CONFIDENCE_LEVEL_"}, value = {
             CONFIDENCE_LEVEL_NONE,
             CONFIDENCE_LEVEL_LOW,
             CONFIDENCE_LEVEL_MEDIUM,
-            CONFIDENCE_LEVEL_HIGH
+            CONFIDENCE_LEVEL_HIGH,
+            CONFIDENCE_LEVEL_VERY_HIGH
     })
+    @Retention(RetentionPolicy.SOURCE)
     @interface HotwordConfidenceLevelValue {
     }
 
@@ -87,9 +98,10 @@ public final class HotwordRejectedResult implements Parcelable {
         CONFIDENCE_LEVEL_NONE,
         CONFIDENCE_LEVEL_LOW,
         CONFIDENCE_LEVEL_MEDIUM,
-        CONFIDENCE_LEVEL_HIGH
+        CONFIDENCE_LEVEL_HIGH,
+        CONFIDENCE_LEVEL_VERY_HIGH
     })
-    @java.lang.annotation.Retention(java.lang.annotation.RetentionPolicy.SOURCE)
+    @Retention(RetentionPolicy.SOURCE)
     @DataClass.Generated.Member
     public @interface ConfidenceLevel {}
 
@@ -105,6 +117,8 @@ public final class HotwordRejectedResult implements Parcelable {
                     return "CONFIDENCE_LEVEL_MEDIUM";
             case CONFIDENCE_LEVEL_HIGH:
                     return "CONFIDENCE_LEVEL_HIGH";
+            case CONFIDENCE_LEVEL_VERY_HIGH:
+                    return "CONFIDENCE_LEVEL_VERY_HIGH";
             default: return Integer.toHexString(value);
         }
     }
@@ -255,10 +269,10 @@ public final class HotwordRejectedResult implements Parcelable {
     }
 
     @DataClass.Generated(
-            time = 1621961370106L,
+            time = 1701990933632L,
             codegenVersion = "1.0.23",
             sourceFile = "frameworks/base/core/java/android/service/voice/HotwordRejectedResult.java",
-            inputSignatures = "public static final  int CONFIDENCE_LEVEL_NONE\npublic static final  int CONFIDENCE_LEVEL_LOW\npublic static final  int CONFIDENCE_LEVEL_MEDIUM\npublic static final  int CONFIDENCE_LEVEL_HIGH\nprivate final @android.service.voice.HotwordRejectedResult.HotwordConfidenceLevelValue int mConfidenceLevel\nprivate static  int defaultConfidenceLevel()\nclass HotwordRejectedResult extends java.lang.Object implements [android.os.Parcelable]\n@com.android.internal.util.DataClass(genConstructor=false, genBuilder=true, genEqualsHashCode=true, genHiddenConstDefs=true, genParcelable=true, genToString=true)")
+            inputSignatures = "public static final  int CONFIDENCE_LEVEL_NONE\npublic static final  int CONFIDENCE_LEVEL_LOW\npublic static final  int CONFIDENCE_LEVEL_MEDIUM\npublic static final  int CONFIDENCE_LEVEL_HIGH\npublic static final @android.annotation.FlaggedApi int CONFIDENCE_LEVEL_VERY_HIGH\nprivate final @android.service.voice.HotwordRejectedResult.HotwordConfidenceLevelValue int mConfidenceLevel\nprivate static  int defaultConfidenceLevel()\nclass HotwordRejectedResult extends java.lang.Object implements [android.os.Parcelable]\n@com.android.internal.util.DataClass(genConstructor=false, genBuilder=true, genEqualsHashCode=true, genHiddenConstDefs=true, genParcelable=true, genToString=true)")
     @Deprecated
     private void __metadata() {}
 

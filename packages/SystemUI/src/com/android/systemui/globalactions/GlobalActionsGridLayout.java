@@ -148,7 +148,7 @@ public class GlobalActionsGridLayout extends GlobalActionsLayout {
     protected float getAnimationDistance() {
         int rows = getListView().getRowCount();
         float gridItemSize = getContext().getResources().getDimension(
-                com.android.systemui.R.dimen.global_actions_grid_item_height);
+                com.android.systemui.res.R.dimen.global_actions_grid_item_height);
         return rows * gridItemSize / 2;
     }
 

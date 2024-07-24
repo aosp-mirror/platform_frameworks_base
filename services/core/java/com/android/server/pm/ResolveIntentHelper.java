@@ -516,6 +516,7 @@ final class ResolveIntentHelper {
             @PackageManager.ResolveInfoFlagsBits long flags, int userId) {
         if (!mUserManager.exists(userId)) return Collections.emptyList();
         final int callingUid = Binder.getCallingUid();
+
         final String instantAppPkgName = computer.getInstantAppPackageName(callingUid);
         flags = computer.updateFlagsForResolve(flags, userId, callingUid, false /*includeInstantApps*/,
                 false /* isImplicitImageCaptureIntentAndNotSetByDpc */);

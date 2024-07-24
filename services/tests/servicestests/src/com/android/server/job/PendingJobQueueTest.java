@@ -28,19 +28,18 @@ import static org.junit.Assert.fail;
 
 import android.app.job.JobInfo;
 import android.content.ComponentName;
-import android.platform.test.annotations.LargeTest;
 import android.util.ArraySet;
 import android.util.Log;
 import android.util.SparseArrayMap;
 import android.util.SparseBooleanArray;
 import android.util.SparseLongArray;
 
+import androidx.test.filters.LargeTest;
+
 import com.android.server.job.controllers.JobStatus;
 
 import org.junit.Test;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Random;
 
 public class PendingJobQueueTest {
@@ -68,7 +67,7 @@ public class PendingJobQueueTest {
 
     @Test
     public void testAdd() {
-        List<JobStatus> jobs = new ArrayList<>();
+        ArraySet<JobStatus> jobs = new ArraySet<>();
         jobs.add(createJobStatus("testAdd", createJobInfo(1), 1));
         jobs.add(createJobStatus("testAdd", createJobInfo(2), 2));
         jobs.add(createJobStatus("testAdd", createJobInfo(3).setExpedited(true), 3));
@@ -77,7 +76,7 @@ public class PendingJobQueueTest {
 
         PendingJobQueue jobQueue = new PendingJobQueue();
         for (int i = 0; i < jobs.size(); ++i) {
-            jobQueue.add(jobs.get(i));
+            jobQueue.add(jobs.valueAt(i));
             assertEquals(i + 1, jobQueue.size());
         }
 
@@ -90,7 +89,7 @@ public class PendingJobQueueTest {
 
     @Test
     public void testAddAll() {
-        List<JobStatus> jobs = new ArrayList<>();
+        ArraySet<JobStatus> jobs = new ArraySet<>();
         jobs.add(createJobStatus("testAddAll", createJobInfo(1), 1));
         jobs.add(createJobStatus("testAddAll", createJobInfo(2), 2));
         jobs.add(createJobStatus("testAddAll", createJobInfo(3).setExpedited(true), 3));
@@ -110,7 +109,7 @@ public class PendingJobQueueTest {
 
     @Test
     public void testClear() {
-        List<JobStatus> jobs = new ArrayList<>();
+        ArraySet<JobStatus> jobs = new ArraySet<>();
         jobs.add(createJobStatus("testClear", createJobInfo(1), 1));
         jobs.add(createJobStatus("testClear", createJobInfo(2), 2));
         jobs.add(createJobStatus("testClear", createJobInfo(3).setExpedited(true), 3));
@@ -179,7 +178,7 @@ public class PendingJobQueueTest {
 
     @Test
     public void testRemove() {
-        List<JobStatus> jobs = new ArrayList<>();
+        ArraySet<JobStatus> jobs = new ArraySet<>();
         jobs.add(createJobStatus("testRemove", createJobInfo(1), 1));
         jobs.add(createJobStatus("testRemove", createJobInfo(2), 2));
         jobs.add(createJobStatus("testRemove", createJobInfo(3).setExpedited(true), 3));
@@ -192,8 +191,8 @@ public class PendingJobQueueTest {
         ArraySet<JobStatus> removed = new ArraySet<>();
         JobStatus job;
         for (int i = 0; i < jobs.size(); ++i) {
-            jobQueue.remove(jobs.get(i));
-            removed.add(jobs.get(i));
+            jobQueue.remove(jobs.valueAt(i));
+            removed.add(jobs.valueAt(i));
 
             assertEquals(jobs.size() - i - 1, jobQueue.size());
 
@@ -209,7 +208,7 @@ public class PendingJobQueueTest {
 
     @Test
     public void testRemove_duringIteration() {
-        List<JobStatus> jobs = new ArrayList<>();
+        ArraySet<JobStatus> jobs = new ArraySet<>();
         jobs.add(createJobStatus("testRemove", createJobInfo(1), 1));
         jobs.add(createJobStatus("testRemove", createJobInfo(2), 2));
         jobs.add(createJobStatus("testRemove", createJobInfo(3).setExpedited(true), 3));
@@ -234,7 +233,7 @@ public class PendingJobQueueTest {
 
     @Test
     public void testRemove_outOfOrder() {
-        List<JobStatus> jobs = new ArrayList<>();
+        ArraySet<JobStatus> jobs = new ArraySet<>();
         JobStatus job1 = createJobStatus("testRemove", createJobInfo(1), 1);
         JobStatus job2 = createJobStatus("testRemove", createJobInfo(2), 1);
         JobStatus job3 = createJobStatus("testRemove", createJobInfo(3).setExpedited(true), 1);
@@ -269,8 +268,8 @@ public class PendingJobQueueTest {
             Log.d(TAG, testJobToString(job));
         }
         for (int i = 0; i < jobs.size(); ++i) {
-            jobQueue.remove(jobs.get(i));
-            removed.add(jobs.get(i));
+            jobQueue.remove(jobs.valueAt(i));
+            removed.add(jobs.valueAt(i));
 
             assertEquals(jobs.size() - i - 1, jobQueue.size());
 
@@ -294,8 +293,8 @@ public class PendingJobQueueTest {
 
         removed.clear();
         for (int i = 0; i < jobs.size(); ++i) {
-            jobQueue.remove(jobs.get(i));
-            removed.add(jobs.get(i));
+            jobQueue.remove(jobs.valueAt(i));
+            removed.add(jobs.valueAt(i));
 
             assertEquals(jobs.size() - i - 1, jobQueue.size());
 
@@ -319,8 +318,8 @@ public class PendingJobQueueTest {
 
         removed.clear();
         for (int i = 0; i < jobs.size(); ++i) {
-            jobQueue.remove(jobs.get(i));
-            removed.add(jobs.get(i));
+            jobQueue.remove(jobs.valueAt(i));
+            removed.add(jobs.valueAt(i));
 
             assertEquals(jobs.size() - i - 1, jobQueue.size());
 

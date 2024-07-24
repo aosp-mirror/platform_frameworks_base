@@ -445,6 +445,19 @@ public class DreamService extends Service implements Window.Callback {
     }
 
     /**
+     * Retrieves the current {@link android.app.Activity} associated with the dream.
+     * This method behaves similarly to calling {@link android.app.Activity#getActivity()}.
+     *
+     * @return The current activity, or null if the dream is not associated with an activity
+     * or not started.
+     *
+     * @hide
+     */
+    public Activity getActivity() {
+        return mActivity;
+    }
+
+    /**
      * Inflates a layout resource and set it to be the content view for this Dream.
      * Behaves similarly to {@link android.app.Activity#setContentView(int)}.
      *
@@ -523,7 +536,9 @@ public class DreamService extends Service implements Window.Callback {
      * @see View#findViewById(int)
      * @see DreamService#requireViewById(int)
      */
-    @Nullable
+    // Strictly speaking this should be marked as @Nullable but the nullability of the return value
+    // is deliberately left unspecified as idiomatically correct code can make assumptions either
+    // way based on local context, e.g. layout specification.
     public <T extends View> T findViewById(@IdRes int id) {
         return getWindow().findViewById(id);
     }

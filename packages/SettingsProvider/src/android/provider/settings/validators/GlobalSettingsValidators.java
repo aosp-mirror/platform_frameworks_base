@@ -171,15 +171,27 @@ public class GlobalSettingsValidators {
         VALIDATORS.put(Global.WIFI_SCAN_THROTTLE_ENABLED, BOOLEAN_VALIDATOR);
         VALIDATORS.put(Global.APP_AUTO_RESTRICTION_ENABLED, BOOLEAN_VALIDATOR);
         VALIDATORS.put(Global.ZEN_DURATION, ANY_INTEGER_VALIDATOR);
+        VALIDATORS.put(Global.REVERSE_CHARGING_AUTO_ON, ANY_INTEGER_VALIDATOR);
         VALIDATORS.put(Global.CHARGING_VIBRATION_ENABLED, BOOLEAN_VALIDATOR);
         VALIDATORS.put(Global.DEVICE_PROVISIONING_MOBILE_DATA_ENABLED, BOOLEAN_VALIDATOR);
         VALIDATORS.put(Global.REQUIRE_PASSWORD_TO_DECRYPT, BOOLEAN_VALIDATOR);
         VALIDATORS.put(Global.DEVICE_DEMO_MODE, BOOLEAN_VALIDATOR);
         VALIDATORS.put(Global.AWARE_ALLOWED, BOOLEAN_VALIDATOR);
+        VALIDATORS.put(Global.POWER_BUTTON_SHORT_PRESS, new InclusiveIntegerRangeValidator(0, 7));
+        VALIDATORS.put(Global.POWER_BUTTON_DOUBLE_PRESS, new InclusiveIntegerRangeValidator(0, 3));
+        VALIDATORS.put(Global.POWER_BUTTON_TRIPLE_PRESS, new InclusiveIntegerRangeValidator(0, 3));
         VALIDATORS.put(Global.POWER_BUTTON_LONG_PRESS, new InclusiveIntegerRangeValidator(0, 5));
         VALIDATORS.put(
                 Global.POWER_BUTTON_VERY_LONG_PRESS, new InclusiveIntegerRangeValidator(0, 1));
         VALIDATORS.put(Global.KEY_CHORD_POWER_VOLUME_UP, new InclusiveIntegerRangeValidator(0, 2));
+        VALIDATORS.put(
+                Global.STEM_PRIMARY_BUTTON_SHORT_PRESS, new InclusiveIntegerRangeValidator(0, 1));
+        VALIDATORS.put(
+                Global.STEM_PRIMARY_BUTTON_DOUBLE_PRESS, new InclusiveIntegerRangeValidator(0, 1));
+        VALIDATORS.put(
+                Global.STEM_PRIMARY_BUTTON_TRIPLE_PRESS, new InclusiveIntegerRangeValidator(0, 1));
+        VALIDATORS.put(
+                Global.STEM_PRIMARY_BUTTON_LONG_PRESS, new InclusiveIntegerRangeValidator(0, 1));
         VALIDATORS.put(Global.CUSTOM_BUGREPORT_HANDLER_APP, ANY_STRING_VALIDATOR);
         VALIDATORS.put(Global.CUSTOM_BUGREPORT_HANDLER_USER, ANY_INTEGER_VALIDATOR);
         VALIDATORS.put(Global.DEVELOPMENT_SETTINGS_ENABLED, BOOLEAN_VALIDATOR);
@@ -197,6 +209,9 @@ public class GlobalSettingsValidators {
         VALIDATORS.put(Global.ADAPTIVE_BATTERY_MANAGEMENT_ENABLED, BOOLEAN_VALIDATOR);
         VALIDATORS.put(Global.POWER_BUTTON_LONG_PRESS_DURATION_MS, NONE_NEGATIVE_LONG_VALIDATOR);
         VALIDATORS.put(Global.STYLUS_EVER_USED, BOOLEAN_VALIDATOR);
+        VALIDATORS.put(Global.MUTE_ALARM_STREAM_WITH_RINGER_MODE, BOOLEAN_VALIDATOR);
+        VALIDATORS.put(
+                Global.MUTE_ALARM_STREAM_WITH_RINGER_MODE_USER_PREFERENCE, BOOLEAN_VALIDATOR);
 
         VALIDATORS.put(Global.Wearable.HAS_PAY_TOKENS, BOOLEAN_VALIDATOR);
         VALIDATORS.put(Global.Wearable.GMS_CHECKIN_TIMEOUT_MIN, ANY_INTEGER_VALIDATOR);
@@ -373,7 +388,7 @@ public class GlobalSettingsValidators {
                 Global.Wearable.WEAR_ACTIVITY_AUTO_RESUME_TIMEOUT_SET_BY_USER,
                 BOOLEAN_VALIDATOR);
         VALIDATORS.put(Global.Wearable.BURN_IN_PROTECTION_ENABLED, BOOLEAN_VALIDATOR);
-        VALIDATORS.put(Global.Wearable.COMBINED_LOCATION_ENABLED, BOOLEAN_VALIDATOR);
+        VALIDATORS.put(Global.Wearable.COMBINED_LOCATION_ENABLE, BOOLEAN_VALIDATOR);
         VALIDATORS.put(Global.Wearable.WRIST_ORIENTATION_MODE,
                        new DiscreteValueValidator(new String[] {"0", "1", "2", "3"}));
         VALIDATORS.put(Global.USER_PREFERRED_REFRESH_RATE, NON_NEGATIVE_FLOAT_VALIDATOR);
@@ -405,7 +420,7 @@ public class GlobalSettingsValidators {
         VALIDATORS.put(Global.Wearable.BEDTIME_MODE, BOOLEAN_VALIDATOR);
         VALIDATORS.put(Global.Wearable.BEDTIME_HARD_MODE, BOOLEAN_VALIDATOR);
         VALIDATORS.put(Global.Wearable.DYNAMIC_COLOR_THEME_ENABLED, BOOLEAN_VALIDATOR);
-	VALIDATORS.put(Global.Wearable.SCREENSHOT_ENABLED, BOOLEAN_VALIDATOR);
+        VALIDATORS.put(Global.Wearable.SCREENSHOT_ENABLED, BOOLEAN_VALIDATOR);
         VALIDATORS.put(Global.Wearable.UPGRADE_DATA_MIGRATION_STATUS,
                        new DiscreteValueValidator(
                         new String[] {
@@ -427,8 +442,16 @@ public class GlobalSettingsValidators {
                         new String[] {
                                 String.valueOf(Global.Wearable.TETHERED_CONFIG_UNKNOWN),
                                 String.valueOf(Global.Wearable.TETHERED_CONFIG_STANDALONE),
-                                String.valueOf(Global.Wearable.TETHERED_CONFIG_TETHERED)
+                                String.valueOf(Global.Wearable.TETHERED_CONFIG_TETHERED),
+                                String.valueOf(Global.Wearable.TETHERED_CONFIG_RESTRICTED)
                         }));
         VALIDATORS.put(Global.Wearable.PHONE_SWITCHING_SUPPORTED, BOOLEAN_VALIDATOR);
+        VALIDATORS.put(Global.Wearable.WEAR_LAUNCHER_UI_MODE, ANY_INTEGER_VALIDATOR);
+        VALIDATORS.put(Global.Wearable.WEAR_POWER_ANOMALY_SERVICE_ENABLED, BOOLEAN_VALIDATOR);
+        VALIDATORS.put(Global.Wearable.CONNECTIVITY_KEEP_DATA_ON, BOOLEAN_VALIDATOR);
+        VALIDATORS.put(Global.Wearable.WRIST_DETECTION_AUTO_LOCKING_ENABLED, BOOLEAN_VALIDATOR);
+        VALIDATORS.put(
+                Global.Wearable.CONSISTENT_NOTIFICATION_BLOCKING_ENABLED, ANY_INTEGER_VALIDATOR);
+        VALIDATORS.put(Global.FORCE_ENABLE_PSS_PROFILING, BOOLEAN_VALIDATOR);
     }
 }

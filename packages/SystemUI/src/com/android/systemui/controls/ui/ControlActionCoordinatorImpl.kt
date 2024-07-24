@@ -36,9 +36,8 @@ import com.android.systemui.broadcast.BroadcastSender
 import com.android.systemui.controls.ControlsMetricsLogger
 import com.android.systemui.controls.settings.ControlsSettingsRepository
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
-import com.android.systemui.flags.FeatureFlags
-import com.android.systemui.flags.Flags.ONE_WAY_HAPTICS_API_MIGRATION
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.statusbar.VibratorHelper
 import com.android.systemui.statusbar.policy.KeyguardStateController
@@ -49,17 +48,16 @@ import javax.inject.Inject
 
 @SysUISingleton
 class ControlActionCoordinatorImpl @Inject constructor(
-        private val context: Context,
-        private val bgExecutor: DelayableExecutor,
-        @Main private val uiExecutor: DelayableExecutor,
-        private val activityStarter: ActivityStarter,
-        private val broadcastSender: BroadcastSender,
-        private val keyguardStateController: KeyguardStateController,
-        private val taskViewFactory: Optional<TaskViewFactory>,
-        private val controlsMetricsLogger: ControlsMetricsLogger,
-        private val vibrator: VibratorHelper,
-        private val controlsSettingsRepository: ControlsSettingsRepository,
-        private val featureFlags: FeatureFlags,
+    private val context: Context,
+    @Background private val bgExecutor: DelayableExecutor,
+    @Main private val uiExecutor: DelayableExecutor,
+    private val activityStarter: ActivityStarter,
+    private val broadcastSender: BroadcastSender,
+    private val keyguardStateController: KeyguardStateController,
+    private val taskViewFactory: Optional<TaskViewFactory>,
+    private val controlsMetricsLogger: ControlsMetricsLogger,
+    private val vibrator: VibratorHelper,
+    private val controlsSettingsRepository: ControlsSettingsRepository,
 ) : ControlActionCoordinator {
     private var dialog: Dialog? = null
     private var pendingAction: Action? = null
@@ -123,17 +121,12 @@ class ControlActionCoordinatorImpl @Inject constructor(
     }
 
     override fun drag(cvh: ControlViewHolder, isEdge: Boolean) {
-        if (featureFlags.isEnabled(ONE_WAY_HAPTICS_API_MIGRATION)) {
-            val constant =
-                if (isEdge)
-                    HapticFeedbackConstants.SEGMENT_TICK
-                else
-                    HapticFeedbackConstants.SEGMENT_FREQUENT_TICK
-            vibrator.performHapticFeedback(cvh.layout, constant)
-        } else {
-            val effect = if (isEdge) Vibrations.rangeEdgeEffect else Vibrations.rangeMiddleEffect
-            vibrate(effect)
-        }
+        val constant =
+            if (isEdge)
+                HapticFeedbackConstants.SEGMENT_TICK
+            else
+                HapticFeedbackConstants.SEGMENT_FREQUENT_TICK
+        vibrator.performHapticFeedback(cvh.layout, constant)
     }
 
     override fun setValue(cvh: ControlViewHolder, templateId: String, newValue: Float) {

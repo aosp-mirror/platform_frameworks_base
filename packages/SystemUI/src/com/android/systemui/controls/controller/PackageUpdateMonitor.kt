@@ -52,7 +52,7 @@ constructor(
     /** Start monitoring for package updates. No-op if already monitoring. */
     fun startMonitoring() {
         if (monitoring.compareAndSet(/* expected */ false, /* new */ true)) {
-            register(context, user, false, bgHandler)
+            register(context, user, bgHandler)
         }
     }
 

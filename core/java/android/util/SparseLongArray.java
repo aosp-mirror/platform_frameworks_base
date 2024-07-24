@@ -19,8 +19,6 @@ package android.util;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.GrowingArrayUtils;
 
-import libcore.util.EmptyArray;
-
 /**
  * SparseLongArrays map integers to longs.  Unlike a normal array of longs,
  * there can be gaps in the indices.  It is intended to be more memory efficient
@@ -42,6 +40,7 @@ import libcore.util.EmptyArray;
  * keys in ascending order, or the values corresponding to the keys in ascending
  * order in the case of <code>valueAt(int)</code>.</p>
  */
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
 public class SparseLongArray implements Cloneable {
     private int[] mKeys;
     private long[] mValues;

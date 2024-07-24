@@ -34,6 +34,7 @@ import java.util.List;
  *
  * @hide
  */
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
 public class TimingsTraceLog {
     // Debug boot time for every step if it's non-user build.
     private static final boolean DEBUG_BOOT_TIME = !Build.IS_USER;

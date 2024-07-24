@@ -21,7 +21,7 @@ import android.content.Intent
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import com.android.systemui.R
+import com.android.systemui.res.R
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.statusbar.notification.dagger.HeaderClickAction
 import com.android.systemui.statusbar.notification.dagger.HeaderText
@@ -95,7 +95,7 @@ class SectionHeaderNodeControllerImpl @Inject constructor(
     }
 
     override fun onViewAdded() {
-        headerView?.isContentVisible = true
+        headerView?.setContentVisibleAnimated(true)
     }
 
     override val view: View

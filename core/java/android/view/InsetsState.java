@@ -37,7 +37,6 @@ import static android.view.WindowManager.LayoutParams.SOFT_INPUT_MASK_ADJUST;
 import static android.view.WindowManager.LayoutParams.TYPE_SYSTEM_ERROR;
 import static android.view.WindowManager.LayoutParams.TYPE_WALLPAPER;
 
-import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.WindowConfiguration.ActivityType;
@@ -48,6 +47,7 @@ import android.os.Parcelable;
 import android.util.SparseArray;
 import android.util.SparseIntArray;
 import android.util.proto.ProtoOutputStream;
+import android.view.InsetsSource.InternalInsetsSide;
 import android.view.WindowInsets.Type;
 import android.view.WindowInsets.Type.InsetsType;
 import android.view.WindowManager.LayoutParams.SoftInputModeFlags;
@@ -55,8 +55,6 @@ import android.view.WindowManager.LayoutParams.SoftInputModeFlags;
 import com.android.internal.annotations.VisibleForTesting;
 
 import java.io.PrintWriter;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
 import java.util.Objects;
 import java.util.StringJoiner;
 
@@ -65,23 +63,6 @@ import java.util.StringJoiner;
  * @hide
  */
 public class InsetsState implements Parcelable {
-
-    @Retention(RetentionPolicy.SOURCE)
-    @IntDef(prefix = "ISIDE", value = {
-            ISIDE_LEFT,
-            ISIDE_TOP,
-            ISIDE_RIGHT,
-            ISIDE_BOTTOM,
-            ISIDE_FLOATING,
-            ISIDE_UNKNOWN
-    })
-    public @interface InternalInsetsSide {}
-    static final int ISIDE_LEFT = 0;
-    static final int ISIDE_TOP = 1;
-    static final int ISIDE_RIGHT = 2;
-    static final int ISIDE_BOTTOM = 3;
-    static final int ISIDE_FLOATING = 4;
-    static final int ISIDE_UNKNOWN = 5;
 
     private final SparseArray<InsetsSource> mSources;
 
@@ -147,6 +128,8 @@ public class InsetsState implements Parcelable {
         final Rect relativeFrameMax = new Rect(frame);
         @InsetsType int forceConsumingTypes = 0;
         @InsetsType int suppressScrimTypes = 0;
+        final Rect[][] typeBoundingRectsMap = new Rect[Type.SIZE][];
+        final Rect[][] typeMaxBoundingRectsMap = new Rect[Type.SIZE][];
         for (int i = mSources.size() - 1; i >= 0; i--) {
             final InsetsSource source = mSources.valueAt(i);
             final @InsetsType int type = source.getType();
@@ -160,7 +143,7 @@ public class InsetsState implements Parcelable {
             }
 
             processSource(source, relativeFrame, false /* ignoreVisibility */, typeInsetsMap,
-                    idSideMap, typeVisibilityMap);
+                    idSideMap, typeVisibilityMap, typeBoundingRectsMap);
 
             // IME won't be reported in max insets as the size depends on the EditorInfo of the IME
             // target.
@@ -173,7 +156,7 @@ public class InsetsState implements Parcelable {
                 }
                 processSource(ignoringVisibilitySource, relativeFrameMax,
                         true /* ignoreVisibility */, typeMaxInsetsMap, null /* idSideMap */,
-                        null /* typeVisibilityMap */);
+                        null /* typeVisibilityMap */, typeMaxBoundingRectsMap);
             }
         }
         final int softInputAdjustMode = legacySoftInputMode & SOFT_INPUT_MASK_ADJUST;
@@ -194,7 +177,8 @@ public class InsetsState implements Parcelable {
                 calculateRelativeRoundedCorners(frame),
                 calculateRelativePrivacyIndicatorBounds(frame),
                 calculateRelativeDisplayShape(frame),
-                compatInsetsTypes, (legacySystemUiFlags & SYSTEM_UI_FLAG_LAYOUT_STABLE) != 0);
+                compatInsetsTypes, (legacySystemUiFlags & SYSTEM_UI_FLAG_LAYOUT_STABLE) != 0,
+                typeBoundingRectsMap, typeMaxBoundingRectsMap, frame.width(), frame.height());
     }
 
     private DisplayCutout calculateRelativeCutout(Rect frame) {
@@ -347,12 +331,13 @@ public class InsetsState implements Parcelable {
 
     private void processSource(InsetsSource source, Rect relativeFrame, boolean ignoreVisibility,
             Insets[] typeInsetsMap, @Nullable @InternalInsetsSide SparseIntArray idSideMap,
-            @Nullable boolean[] typeVisibilityMap) {
+            @Nullable boolean[] typeVisibilityMap, Rect[][] typeBoundingRectsMap) {
         Insets insets = source.calculateInsets(relativeFrame, ignoreVisibility);
+        final Rect[] boundingRects = source.calculateBoundingRects(relativeFrame, ignoreVisibility);
 
         final int type = source.getType();
         processSourceAsPublicType(source, typeInsetsMap, idSideMap, typeVisibilityMap,
-                insets, type);
+                typeBoundingRectsMap, insets, boundingRects, type);
 
         if (type == Type.MANDATORY_SYSTEM_GESTURES) {
             // Mandatory system gestures are also system gestures.
@@ -361,24 +346,25 @@ public class InsetsState implements Parcelable {
             //       ability to set systemGestureInsets() independently from
             //       mandatorySystemGestureInsets() in the Builder.
             processSourceAsPublicType(source, typeInsetsMap, idSideMap, typeVisibilityMap,
-                    insets, Type.SYSTEM_GESTURES);
+                    typeBoundingRectsMap, insets, boundingRects, Type.SYSTEM_GESTURES);
         }
         if (type == Type.CAPTION_BAR) {
             // Caption should also be gesture and tappable elements. This should not be needed when
             // the caption is added from the shell, as the shell can add other types at the same
             // time.
             processSourceAsPublicType(source, typeInsetsMap, idSideMap, typeVisibilityMap,
-                    insets, Type.SYSTEM_GESTURES);
+                    typeBoundingRectsMap, insets, boundingRects, Type.SYSTEM_GESTURES);
             processSourceAsPublicType(source, typeInsetsMap, idSideMap, typeVisibilityMap,
-                    insets, Type.MANDATORY_SYSTEM_GESTURES);
+                    typeBoundingRectsMap, insets, boundingRects, Type.MANDATORY_SYSTEM_GESTURES);
             processSourceAsPublicType(source, typeInsetsMap, idSideMap, typeVisibilityMap,
-                    insets, Type.TAPPABLE_ELEMENT);
+                    typeBoundingRectsMap, insets, boundingRects, Type.TAPPABLE_ELEMENT);
         }
     }
 
     private void processSourceAsPublicType(InsetsSource source, Insets[] typeInsetsMap,
             @InternalInsetsSide @Nullable SparseIntArray idSideMap,
-            @Nullable boolean[] typeVisibilityMap, Insets insets, int type) {
+            @Nullable boolean[] typeVisibilityMap, Rect[][] typeBoundingRectsMap,
+            Insets insets, Rect[] boundingRects, int type) {
         int index = indexOf(type);
 
         // Don't put Insets.NONE into typeInsetsMap. Otherwise, two WindowInsets can be considered
@@ -398,34 +384,27 @@ public class InsetsState implements Parcelable {
         }
 
         if (idSideMap != null) {
-            @InternalInsetsSide int insetSide = getInsetSide(insets);
-            if (insetSide != ISIDE_UNKNOWN) {
+            @InternalInsetsSide int insetSide = InsetsSource.getInsetSide(insets);
+            if (insetSide != InsetsSource.SIDE_UNKNOWN) {
                 idSideMap.put(source.getId(), insetSide);
+            }
+        }
+
+        if (typeBoundingRectsMap != null && boundingRects.length > 0) {
+            final Rect[] existing = typeBoundingRectsMap[index];
+            if (existing == null) {
+                typeBoundingRectsMap[index] = boundingRects;
+            } else {
+                typeBoundingRectsMap[index] = concatenate(existing, boundingRects);
             }
         }
     }
 
-    /**
-     * Retrieves the side for a certain {@code insets}. It is required that only one field l/t/r/b
-     * is set in order that this method returns a meaningful result.
-     */
-    static @InternalInsetsSide int getInsetSide(Insets insets) {
-        if (Insets.NONE.equals(insets)) {
-            return ISIDE_FLOATING;
-        }
-        if (insets.left != 0) {
-            return ISIDE_LEFT;
-        }
-        if (insets.top != 0) {
-            return ISIDE_TOP;
-        }
-        if (insets.right != 0) {
-            return ISIDE_RIGHT;
-        }
-        if (insets.bottom != 0) {
-            return ISIDE_BOTTOM;
-        }
-        return ISIDE_UNKNOWN;
+    private static Rect[] concatenate(Rect[] a, Rect[] b) {
+        final Rect[] c = new Rect[a.length + b.length];
+        System.arraycopy(a, 0, c, 0, a.length);
+        System.arraycopy(b, 0, c, a.length, b.length);
+        return c;
     }
 
     /**

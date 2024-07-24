@@ -27,6 +27,7 @@ import java.util.Arrays;
  * //frameworks/base/core/proto/android/base directory
  * @hide
  */
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
 public class ProtoUtils {
 
     /**

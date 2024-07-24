@@ -1,16 +1,12 @@
-# Bug component: 44214
+# Bug component: 44215
 
-romainguy@google.com
-alanv@google.com
-adamp@google.com
-aurimas@google.com
-nduca@google.com
-sumir@google.com
-ogunwale@google.com
-jjaggi@google.com
-pweaver@google.com
-ryanlwlin@google.com
-danielnorman@google.com
-sallyyuen@google.com
-aarmaly@google.com
-fuego@google.com
+# Android Accessibility Framework owners
+include /services/accessibility/OWNERS
+
+# Android members outside of Accessibility
+adamp@google.com #{LAST_RESORT_SUGGESTION}
+aurimas@google.com #{LAST_RESORT_SUGGESTION}
+jjaggi@google.com #{LAST_RESORT_SUGGESTION}
+ogunwale@google.com #{LAST_RESORT_SUGGESTION}
+romainguy@google.com #{LAST_RESORT_SUGGESTION}
+sumir@google.com #{LAST_RESORT_SUGGESTION}

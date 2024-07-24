@@ -29,12 +29,15 @@ enum class UsageHint {
     Unknown = 0,
     Background = 1,
     Foreground = 2,
+    // Contains foreground (usually text), like a button or chip
+    Container = 3
 };
 
 enum class ColorTransform {
     None,
     Light,
     Dark,
+    Invert
 };
 
 // True if the paint was modified, false otherwise

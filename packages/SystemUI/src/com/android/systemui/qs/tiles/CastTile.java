@@ -38,10 +38,9 @@ import com.android.internal.app.MediaRouteDialogPresenter;
 import com.android.internal.jank.InteractionJankMonitor;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
-import com.android.systemui.R;
-import com.android.systemui.animation.ActivityLaunchAnimator;
+import com.android.systemui.animation.ActivityTransitionAnimator;
 import com.android.systemui.animation.DialogCuj;
-import com.android.systemui.animation.DialogLaunchAnimator;
+import com.android.systemui.animation.DialogTransitionAnimator;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.flags.FeatureFlags;
@@ -53,12 +52,13 @@ import com.android.systemui.qs.QSHost;
 import com.android.systemui.qs.QsEventLogger;
 import com.android.systemui.qs.logging.QSLogger;
 import com.android.systemui.qs.tileimpl.QSTileImpl;
+import com.android.systemui.res.R;
 import com.android.systemui.statusbar.connectivity.NetworkController;
 import com.android.systemui.statusbar.connectivity.SignalCallback;
 import com.android.systemui.statusbar.connectivity.WifiIndicators;
 import com.android.systemui.statusbar.phone.SystemUIDialog;
-import com.android.systemui.statusbar.pipeline.wifi.domain.interactor.WifiInteractor;
-import com.android.systemui.statusbar.pipeline.wifi.shared.model.WifiNetworkModel;
+import com.android.systemui.statusbar.pipeline.shared.data.model.DefaultConnectionModel;
+import com.android.systemui.statusbar.pipeline.shared.data.repository.ConnectivityRepository;
 import com.android.systemui.statusbar.policy.CastController;
 import com.android.systemui.statusbar.policy.CastController.CastDevice;
 import com.android.systemui.statusbar.policy.HotspotController;
@@ -83,12 +83,11 @@ public class CastTile extends QSTileImpl<BooleanState> {
     private final CastController mController;
     private final KeyguardStateController mKeyguard;
     private final NetworkController mNetworkController;
-    private final DialogLaunchAnimator mDialogLaunchAnimator;
+    private final DialogTransitionAnimator mDialogTransitionAnimator;
     private final Callback mCallback = new Callback();
-    private final WifiInteractor mWifiInteractor;
     private final TileJavaAdapter mJavaAdapter;
     private final FeatureFlags mFeatureFlags;
-    private boolean mWifiConnected;
+    private boolean mCastTransportAllowed;
     private boolean mHotspotConnected;
 
     @Inject
@@ -106,8 +105,8 @@ public class CastTile extends QSTileImpl<BooleanState> {
             KeyguardStateController keyguardStateController,
             NetworkController networkController,
             HotspotController hotspotController,
-            DialogLaunchAnimator dialogLaunchAnimator,
-            WifiInteractor wifiInteractor,
+            DialogTransitionAnimator dialogTransitionAnimator,
+            ConnectivityRepository connectivityRepository,
             TileJavaAdapter javaAdapter,
             FeatureFlags featureFlags
     ) {
@@ -116,8 +115,7 @@ public class CastTile extends QSTileImpl<BooleanState> {
         mController = castController;
         mKeyguard = keyguardStateController;
         mNetworkController = networkController;
-        mDialogLaunchAnimator = dialogLaunchAnimator;
-        mWifiInteractor = wifiInteractor;
+        mDialogTransitionAnimator = dialogTransitionAnimator;
         mJavaAdapter = javaAdapter;
         mFeatureFlags = featureFlags;
         mController.observe(this, mCallback);
@@ -125,7 +123,11 @@ public class CastTile extends QSTileImpl<BooleanState> {
         if (!mFeatureFlags.isEnabled(SIGNAL_CALLBACK_DEPRECATION)) {
             mNetworkController.observe(this, mSignalCallback);
         } else {
-            mJavaAdapter.bind(this, mWifiInteractor.getWifiNetwork(), mNetworkModelConsumer);
+            mJavaAdapter.bind(
+                    this,
+                    connectivityRepository.getDefaultConnections(),
+                    mNetworkModelConsumer
+            );
         }
         hotspotController.observe(this, mHotspotCallback);
     }
@@ -220,8 +222,8 @@ public class CastTile extends QSTileImpl<BooleanState> {
                     mContext,
                     ROUTE_TYPE_REMOTE_DISPLAY,
                     v -> {
-                        ActivityLaunchAnimator.Controller controller =
-                                mDialogLaunchAnimator.createActivityLaunchController(v);
+                        ActivityTransitionAnimator.Controller controller =
+                                mDialogTransitionAnimator.createActivityTransitionController(v);
 
                         if (controller == null) {
                             holder.mDialog.dismiss();
@@ -239,7 +241,7 @@ public class CastTile extends QSTileImpl<BooleanState> {
 
             mUiHandler.post(() -> {
                 if (view != null) {
-                    mDialogLaunchAnimator.showFromView(dialog, view,
+                    mDialogTransitionAnimator.showFromView(dialog, view,
                             new DialogCuj(InteractionJankMonitor.CUJ_SHADE_DIALOG_OPEN,
                                     INTERACTION_JANK_TAG));
                 } else {
@@ -282,7 +284,7 @@ public class CastTile extends QSTileImpl<BooleanState> {
         }
         state.icon = ResourceIcon.get(state.value ? R.drawable.ic_cast_connected
                 : R.drawable.ic_cast);
-        if (canCastToWifi() || state.value) {
+        if (canCastToNetwork() || state.value) {
             state.state = state.value ? Tile.STATE_ACTIVE : Tile.STATE_INACTIVE;
             if (!state.value) {
                 state.secondaryLabel = "";
@@ -291,7 +293,7 @@ public class CastTile extends QSTileImpl<BooleanState> {
             state.forceExpandIcon = willPopDialog();
         } else {
             state.state = Tile.STATE_UNAVAILABLE;
-            String noWifi = mContext.getString(R.string.quick_settings_cast_no_wifi);
+            String noWifi = mContext.getString(R.string.quick_settings_cast_no_network);
             state.secondaryLabel = noWifi;
             state.forceExpandIcon = false;
         }
@@ -308,13 +310,13 @@ public class CastTile extends QSTileImpl<BooleanState> {
                 : mContext.getString(R.string.quick_settings_cast_device_default_name);
     }
 
-    private boolean canCastToWifi() {
-        return mWifiConnected || mHotspotConnected;
+    private boolean canCastToNetwork() {
+        return mCastTransportAllowed || mHotspotConnected;
     }
 
-    private void setWifiConnected(boolean connected) {
-        if (connected != mWifiConnected) {
-            mWifiConnected = connected;
+    private void setCastTransportAllowed(boolean connected) {
+        if (connected != mCastTransportAllowed) {
+            mCastTransportAllowed = connected;
             // Hotspot is not connected, so changes here should update
             if (!mHotspotConnected) {
                 refreshState();
@@ -326,14 +328,17 @@ public class CastTile extends QSTileImpl<BooleanState> {
         if (connected != mHotspotConnected) {
             mHotspotConnected = connected;
             // Wifi is not connected, so changes here should update
-            if (!mWifiConnected) {
+            if (!mCastTransportAllowed) {
                 refreshState();
             }
         }
     }
 
-    private final Consumer<WifiNetworkModel> mNetworkModelConsumer = (model) -> {
-        setWifiConnected(model instanceof WifiNetworkModel.Active);
+    private final Consumer<DefaultConnectionModel> mNetworkModelConsumer = (model) -> {
+        boolean isWifiDefault = model.getWifi().isDefault();
+        boolean isEthernetDefault = model.getEthernet().isDefault();
+        boolean hasCellularTransport = model.getMobile().isDefault();
+        setCastTransportAllowed((isWifiDefault || isEthernetDefault) && !hasCellularTransport);
     };
 
     private final SignalCallback mSignalCallback = new SignalCallback() {
@@ -342,7 +347,7 @@ public class CastTile extends QSTileImpl<BooleanState> {
                     // statusIcon.visible has the connected status information
                     boolean enabledAndConnected = indicators.enabled
                             && (indicators.qsIcon != null && indicators.qsIcon.visible);
-                    setWifiConnected(enabledAndConnected);
+                    setCastTransportAllowed(enabledAndConnected);
                 }
             };
 

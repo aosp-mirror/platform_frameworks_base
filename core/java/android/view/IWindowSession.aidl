@@ -36,6 +36,7 @@ import android.view.Surface;
 import android.view.SurfaceControl;
 import android.view.SurfaceControl.Transaction;
 import android.window.ClientWindowFrames;
+import android.window.InputTransferToken;
 import android.window.OnBackInvokedCallbackInfo;
 
 import java.util.List;
@@ -59,8 +60,15 @@ interface IWindowSession {
     int addToDisplayWithoutInputChannel(IWindow window, in WindowManager.LayoutParams attrs,
             in int viewVisibility, in int layerStackId, out InsetsState insetsState,
             out Rect attachedFrame, out float[] sizeCompatScale);
-    @UnsupportedAppUsage
-    void remove(IWindow window);
+
+    /**
+     * Removes a clientToken from WMS, which includes unlinking the input channel.
+     *
+     * @param clientToken The token that should be removed. This will normally be the IWindow token
+     * for a standard window. It can also be the generic clientToken that was used when calling
+     * grantInputChannel
+     */
+    void remove(IBinder clientToken);
 
     /**
      * Change the parameters of a window.  You supply the
@@ -140,13 +148,13 @@ interface IWindowSession {
             int seqId);
 
     @UnsupportedAppUsage
-    boolean performHapticFeedback(int effectId, boolean always);
+    boolean performHapticFeedback(int effectId, boolean always, boolean fromIme);
 
     /**
      * Called by attached views to perform predefined haptic feedback without requiring VIBRATE
      * permission.
      */
-    oneway void performHapticFeedbackAsync(int effectId, boolean always);
+    oneway void performHapticFeedbackAsync(int effectId, boolean always, boolean fromIme);
 
     /**
      * Initiate the drag operation itself
@@ -155,6 +163,8 @@ interface IWindowSession {
      * @param flags See {@code View#startDragAndDrop}
      * @param surface Surface containing drag shadow image
      * @param touchSource See {@code InputDevice#getSource()}
+     * @param touchDeviceId device ID of last touch event
+     * @param pointerId pointer ID of last touch event
      * @param touchX X coordinate of last touch point
      * @param touchY Y coordinate of last touch point
      * @param thumbCenterX X coordinate for the position within the shadow image that should be
@@ -164,9 +174,9 @@ interface IWindowSession {
      * @param data Data transferred by drag and drop
      * @return Token of drag operation which will be passed to cancelDragAndDrop.
      */
-    @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
     IBinder performDrag(IWindow window, int flags, in SurfaceControl surface, int touchSource,
-            float touchX, float touchY, float thumbCenterX, float thumbCenterY, in ClipData data);
+            int touchDeviceId, int touchPointerId, float touchX, float touchY, float thumbCenterX,
+            float thumbCenterY, in ClipData data);
 
     /**
      * Drops the content of the current drag operation for accessibility
@@ -226,7 +236,7 @@ interface IWindowSession {
      */
     oneway void setWallpaperDisplayOffset(IBinder windowToken, int x, int y);
 
-    Bundle sendWallpaperCommand(IBinder window, String action, int x, int y,
+    oneway void sendWallpaperCommand(IBinder window, String action, int x, int y,
             int z, in Bundle extras, boolean sync);
 
     @UnsupportedAppUsage
@@ -284,6 +294,11 @@ interface IWindowSession {
     oneway void reportSystemGestureExclusionChanged(IWindow window, in List<Rect> exclusionRects);
 
     /**
+     * Called when the DecorView gesture interception state has changed.
+     */
+    oneway void reportDecorViewGestureInterceptionChanged(IWindow window, in boolean intercepted);
+
+    /**
      * Called when the keep-clear areas for this window have changed.
      */
     oneway void reportKeepClearAreasChanged(IWindow window, in List<Rect> restricted,
@@ -291,11 +306,14 @@ interface IWindowSession {
 
     /**
     * Request the server to call setInputWindowInfo on a given Surface, and return
-    * an input channel where the client can receive input.
+    * an input channel where the client can receive input. For windows, the clientToken should be
+    * the IWindow binder object. For other requests, the token can be any unique IBinder token to
+    * be used as unique identifier.
     */
-    void grantInputChannel(int displayId, in SurfaceControl surface, in IWindow window,
-            in IBinder hostInputToken, int flags, int privateFlags, int inputFeatures, int type,
-            in IBinder windowToken, in IBinder focusGrantToken, String inputHandleName,
+    void grantInputChannel(int displayId, in SurfaceControl surface, in IBinder clientToken,
+            in @nullable InputTransferToken hostInputTransferToken, int flags, int privateFlags,
+            int inputFeatures, int type, in IBinder windowToken,
+            in InputTransferToken embeddedInputTransferToken, String inputHandleName,
             out InputChannel outInputChannel);
 
     /**
@@ -316,7 +334,8 @@ interface IWindowSession {
      *                     should be transferred back to the host window. If there is no host
      *                     window, the system will try to find a new focus target.
      */
-    void grantEmbeddedWindowFocus(IWindow window, in IBinder inputToken, boolean grantFocus);
+    void grantEmbeddedWindowFocus(IWindow window, in InputTransferToken inputToken,
+            boolean grantFocus);
 
     /**
      * Generates an DisplayHash that can be used to validate whether specific content was on
@@ -351,5 +370,13 @@ interface IWindowSession {
      */
     boolean cancelDraw(IWindow window);
 
-    boolean transferEmbeddedTouchFocusToHost(IWindow embeddedWindow);
+    /**
+     * Moves the focus to the adjacent window if there is one in the given direction. This can only
+     * move the focus to the window in the same leaf task.
+     *
+     * @param fromWindow The calling window that the focus is moved from.
+     * @param direction The {@link android.view.View.FocusDirection} that the new focus should go.
+     * @return {@code true} if the focus changes. Otherwise, {@code false}.
+     */
+    boolean moveFocusToAdjacentWindow(IWindow fromWindow, int direction);
 }

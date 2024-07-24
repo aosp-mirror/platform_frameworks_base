@@ -151,7 +151,9 @@ public class HearingAidAudioRoutingHelper {
     private boolean removePreferredDeviceForStrategies(List<AudioProductStrategy> strategies) {
         boolean status = true;
         for (AudioProductStrategy strategy : strategies) {
-            status &= mAudioManager.removePreferredDeviceForStrategy(strategy);
+            if (mAudioManager.getPreferredDeviceForStrategy(strategy) != null) {
+                status &= mAudioManager.removePreferredDeviceForStrategy(strategy);
+            }
         }
 
         return status;

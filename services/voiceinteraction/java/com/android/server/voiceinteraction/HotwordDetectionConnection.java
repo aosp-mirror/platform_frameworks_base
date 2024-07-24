@@ -63,6 +63,7 @@ import android.service.voice.SoundTriggerFailure;
 import android.service.voice.VisualQueryDetectionService;
 import android.service.voice.VisualQueryDetectionServiceFailure;
 import android.service.voice.VoiceInteractionManagerInternal.HotwordDetectionServiceIdentity;
+import android.service.voice.VoiceInteractionManagerInternal.WearableHotwordDetectionCallback;
 import android.speech.IRecognitionServiceManager;
 import android.util.Slog;
 import android.util.SparseArray;
@@ -71,6 +72,7 @@ import android.view.contentcapture.IContentCaptureManager;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.app.IHotwordRecognitionStatusCallback;
 import com.android.internal.app.IVisualQueryDetectionAttentionListener;
+import com.android.internal.app.IVoiceInteractionAccessibilitySettingsListener;
 import com.android.internal.infra.AndroidFuture;
 import com.android.internal.infra.ServiceConnector;
 import com.android.server.LocalServices;
@@ -146,8 +148,9 @@ final class HotwordDetectionConnection {
     final int mVoiceInteractionServiceUid;
     final ComponentName mHotwordDetectionComponentName;
     final ComponentName mVisualQueryDetectionComponentName;
-    final int mUser;
+    final int mUserId;
     final Context mContext;
+    final AccessibilitySettingsListener mAccessibilitySettingsListener;
     volatile HotwordDetectionServiceIdentity mIdentity;
     //TODO: Consider rename this to SandboxedDetectionIdentity
     private Instant mLastRestartInstant;
@@ -179,6 +182,52 @@ final class HotwordDetectionConnection {
     private final SparseArray<DetectorSession> mDetectorSessions =
             new SparseArray<>();
 
+    /** Listens to changes to voice activation op. */
+    private final AppOpsManager.OnOpChangedListener mOnOpChangedListener =
+            new AppOpsManager.OnOpChangedListener() {
+                @Override
+                public void onOpChanged(String op, String packageName) {
+                    if (op.equals(AppOpsManager.OPSTR_RECEIVE_SANDBOX_TRIGGER_AUDIO)) {
+                        AppOpsManager appOpsManager =
+                                mContext.getSystemService(AppOpsManager.class);
+                        synchronized (mLock) {
+                            int checkOp = appOpsManager.unsafeCheckOpNoThrow(
+                                    AppOpsManager.OPSTR_RECEIVE_SANDBOX_TRIGGER_AUDIO,
+                                    mVoiceInteractorIdentity.uid,
+                                    mVoiceInteractorIdentity.packageName);
+                            // Voice activation app op disabled, safely shutdown hotword detection.
+                            if (checkOp == AppOpsManager.MODE_ERRORED) {
+                                Slog.i(TAG, "Shutdown hotword detection service on voice "
+                                        + "activation op disabled.");
+                                safelyShutdownHotwordDetectionOnVoiceActivationDisabledLocked();
+                            }
+                        }
+                    }
+                }
+            };
+
+    /** Listen to changes of {@link Settings.Secure.VISUAL_QUERY_ACCESSIBILITY_DETECTION_ENABLED}.
+     *
+     * This is registered to the {@link VoiceInteractionManagerServiceImpl} where all settings
+     * listeners are centralized and notified.
+     */
+    private final class AccessibilitySettingsListener extends
+            IVoiceInteractionAccessibilitySettingsListener.Stub {
+        @Override
+        public void onAccessibilityDetectionChanged(boolean enable) {
+            synchronized (mLock) {
+                if (DEBUG) {
+                    Slog.d(TAG, "Update settings change: " + enable);
+                }
+                VisualQueryDetectorSession session = getVisualQueryDetectorSessionLocked();
+                if (session != null) {
+                    session.updateAccessibilityEgressStateLocked(enable);
+                }
+            }
+        }
+    }
+
+
     HotwordDetectionConnection(Object lock, Context context, int voiceInteractionServiceUid,
             Identity voiceInteractorIdentity, ComponentName hotwordDetectionServiceName,
             ComponentName visualQueryDetectionServiceName, int userId,
@@ -190,11 +239,12 @@ final class HotwordDetectionConnection {
         mVoiceInteractorIdentity = voiceInteractorIdentity;
         mHotwordDetectionComponentName = hotwordDetectionServiceName;
         mVisualQueryDetectionComponentName = visualQueryDetectionServiceName;
-        mUser = userId;
+        mUserId = userId;
         mDetectorType = detectorType;
         mRemoteExceptionListener = listener;
         mReStartPeriodSeconds = DeviceConfig.getInt(DeviceConfig.NAMESPACE_VOICE_INTERACTION,
                 KEY_RESTART_PERIOD_IN_SECONDS, 0);
+        mAccessibilitySettingsListener = new AccessibilitySettingsListener();
 
         final Intent hotwordDetectionServiceIntent =
                 new Intent(HotwordDetectionService.SERVICE_INTERFACE);
@@ -216,6 +266,10 @@ final class HotwordDetectionConnection {
 
 
         mLastRestartInstant = Instant.now();
+
+        AppOpsManager appOpsManager = mContext.getSystemService(AppOpsManager.class);
+        appOpsManager.startWatchingMode(AppOpsManager.OP_RECEIVE_SANDBOX_TRIGGER_AUDIO,
+                mVoiceInteractorIdentity.packageName, mOnOpChangedListener);
 
         if (mReStartPeriodSeconds <= 0) {
             mCancellationTaskFuture = null;
@@ -300,7 +354,11 @@ final class HotwordDetectionConnection {
         }
         if (mAudioFlinger != null) {
             mAudioFlinger.unlinkToDeath(mAudioServerDeathRecipient, /* flags= */ 0);
+            mAudioFlinger = null;
         }
+        // Unregister the on op mode changed listener.
+        AppOpsManager appOpsManager = mContext.getSystemService(AppOpsManager.class);
+        appOpsManager.stopWatchingMode(mOnOpChangedListener);
     }
 
     @SuppressWarnings("GuardedBy")
@@ -416,6 +474,25 @@ final class HotwordDetectionConnection {
             return;
         }
         session.startListeningFromExternalSourceLocked(audioStream, audioFormat, options, callback);
+    }
+
+    public void startListeningFromWearableLocked(
+            ParcelFileDescriptor audioStream,
+            AudioFormat audioFormat,
+            PersistableBundle options,
+            WearableHotwordDetectionCallback callback) {
+        if (DEBUG) {
+            Slog.d(TAG, "startListeningFromWearableLocked");
+        }
+        DetectorSession trustedSession = getDspTrustedHotwordDetectorSessionLocked();
+        if (trustedSession == null) {
+            callback.onError(
+                    "Unable to start listening from wearable because the trusted hotword detection"
+                            + " session is not available.");
+            return;
+        }
+        trustedSession.startListeningFromWearableLocked(
+                audioStream, audioFormat, options, callback);
     }
 
     /**
@@ -553,6 +630,51 @@ final class HotwordDetectionConnection {
             removeServiceUidForAudioPolicy(previousIdentity.getIsolatedUid());
         }
     }
+
+    /**
+     * Shutdowns down hotword detection service, swallowing exceptions.
+     *
+     * Called when voice activation app-op has been disabled.
+     */
+    @SuppressWarnings("GuardedBy")
+    void safelyShutdownHotwordDetectionOnVoiceActivationDisabledLocked() {
+        Slog.v(TAG, "safelyShutdownHotwordDetectionOnVoiceActivationDisabled");
+        try {
+            clearDebugHotwordLoggingTimeoutLocked();
+            mRemoteExceptionListener = null;
+            runForEachDetectorSessionLocked((session) -> {
+                if (!(session instanceof VisualQueryDetectorSession)) {
+                    // Inform all detector sessions that they got destroyed due to voice activation
+                    // op being disabled.
+                    session.reportErrorLocked(
+                            new HotwordDetectionServiceFailure(
+                                    HotwordDetectionServiceFailure
+                                            .ERROR_CODE_SHUTDOWN_HDS_ON_VOICE_ACTIVATION_OP_DISABLED,
+                                    "Shutdown hotword detection service on voice "
+                                            + "activation op disabled!"));
+                    session.destroyLocked();
+                }
+            });
+
+            // Remove hotword detection sessions.
+            mDetectorSessions.delete(HotwordDetector.DETECTOR_TYPE_TRUSTED_HOTWORD_DSP);
+            mDetectorSessions.delete(HotwordDetector.DETECTOR_TYPE_TRUSTED_HOTWORD_SOFTWARE);
+
+            mDebugHotwordLogging = false;
+            unbindHotwordDetectionService();
+            if (mCancellationTaskFuture != null) {
+                mCancellationTaskFuture.cancel(/* mayInterruptIfRunning= */ true);
+            }
+            if (mAudioFlinger != null) {
+                mAudioFlinger.unlinkToDeath(mAudioServerDeathRecipient, /* flags= */ 0);
+                mAudioFlinger = null;
+            }
+        } catch (Exception e) {
+            Slog.e(TAG, "Swallowing error while shutting down hotword detection."
+                    + "Error message: " + e.getMessage());
+        }
+    }
+
 
     static final class SoundTriggerCallback extends IRecognitionStatusCallback.Stub {
         private final HotwordDetectionConnection mHotwordDetectionConnection;
@@ -694,7 +816,7 @@ final class HotwordDetectionConnection {
 
         ServiceConnection createLocked() {
             ServiceConnection connection =
-                    new ServiceConnection(mContext, mIntent, mBindingFlags, mUser,
+                    new ServiceConnection(mContext, mIntent, mBindingFlags, mUserId,
                             ISandboxedDetectionService.Stub::asInterface,
                             mRestartCount % MAX_ISOLATED_PROCESS_NUMBER, mDetectionServiceType);
             connection.connect();
@@ -900,7 +1022,7 @@ final class HotwordDetectionConnection {
             session = new DspTrustedHotwordDetectorSession(mRemoteHotwordDetectionService,
                     mLock, mContext, token, callback, mVoiceInteractionServiceUid,
                     mVoiceInteractorIdentity, mScheduledExecutorService, mDebugHotwordLogging,
-                    mRemoteExceptionListener);
+                    mRemoteExceptionListener, mUserId);
         } else if (detectorType == HotwordDetector.DETECTOR_TYPE_VISUAL_QUERY_DETECTOR) {
             if (mRemoteVisualQueryDetectionService == null) {
                 mRemoteVisualQueryDetectionService =
@@ -909,7 +1031,8 @@ final class HotwordDetectionConnection {
             session = new VisualQueryDetectorSession(
                     mRemoteVisualQueryDetectionService, mLock, mContext, token, callback,
                     mVoiceInteractionServiceUid, mVoiceInteractorIdentity,
-                    mScheduledExecutorService, mDebugHotwordLogging, mRemoteExceptionListener);
+                    mScheduledExecutorService, mDebugHotwordLogging, mRemoteExceptionListener,
+                    mUserId);
         } else {
             if (mRemoteHotwordDetectionService == null) {
                 mRemoteHotwordDetectionService =
@@ -918,7 +1041,8 @@ final class HotwordDetectionConnection {
             session = new SoftwareTrustedHotwordDetectorSession(
                     mRemoteHotwordDetectionService, mLock, mContext, token, callback,
                     mVoiceInteractionServiceUid, mVoiceInteractorIdentity,
-                    mScheduledExecutorService, mDebugHotwordLogging, mRemoteExceptionListener);
+                    mScheduledExecutorService, mDebugHotwordLogging,
+                    mRemoteExceptionListener, mUserId);
         }
         mHotwordRecognitionCallback = callback;
         mDetectorSessions.put(detectorType, session);

@@ -155,8 +155,11 @@ public class BouncerSwipeTouchHandler implements DreamTouchHandler {
                         return true;
                     }
 
-                    // Don't set expansion if the user doesn't have a pin/password set.
-                    if (!mLockPatternUtils.isSecure(mUserTracker.getUserId())) {
+                    // If scrolling up and keyguard is not locked, dismiss the dream since there's
+                    // no bouncer to show.
+                    if (e1.getY() > e2.getY()
+                            && !mLockPatternUtils.isSecure(mUserTracker.getUserId())) {
+                        mCentralSurfaces.get().awakenDreams();
                         return true;
                     }
 

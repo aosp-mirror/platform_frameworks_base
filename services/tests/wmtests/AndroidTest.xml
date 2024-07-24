@@ -21,6 +21,7 @@
         <option name="cleanup-apks" value="true" />
         <option name="install-arg" value="-t" />
         <option name="test-file-name" value="WmTests.apk" />
+        <option name="test-file-name" value="OverlayTestApp.apk" />
     </target_preparer>
 
     <option name="test-tag" value="WmTests" />
@@ -29,4 +30,15 @@
         <option name="runner" value="androidx.test.runner.AndroidJUnitRunner" />
         <option name="hidden-api-checks" value="false" />
     </test>
+
+    <target_preparer class="com.android.tradefed.targetprep.RunCommandTargetPreparer">
+        <option name="run-command" value="settings put secure immersive_mode_confirmations confirmed" />
+    </target_preparer>
+
+    <!-- Collect the dumped files for debugging -->
+    <metrics_collector class="com.android.tradefed.device.metric.FilePullerLogCollector">
+        <option name="directory-keys" value="/storage/emulated/0/ScreenshotTests" />
+        <option name="clean-up" value="true" />
+        <option name="collect-on-run-ended-only" value="true" />
+    </metrics_collector>
 </configuration>

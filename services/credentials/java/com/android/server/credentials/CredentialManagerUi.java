@@ -15,6 +15,8 @@
  */
 package com.android.server.credentials;
 
+import static android.credentials.selection.Constants.EXTRA_FINAL_RESPONSE_RECEIVER;
+
 import android.annotation.NonNull;
 import android.app.PendingIntent;
 import android.content.ComponentName;
@@ -22,11 +24,11 @@ import android.content.Context;
 import android.content.Intent;
 import android.credentials.CredentialManager;
 import android.credentials.CredentialProviderInfo;
-import android.credentials.ui.DisabledProviderData;
-import android.credentials.ui.IntentFactory;
-import android.credentials.ui.ProviderData;
-import android.credentials.ui.RequestInfo;
-import android.credentials.ui.UserSelectionDialogResult;
+import android.credentials.selection.DisabledProviderData;
+import android.credentials.selection.IntentFactory;
+import android.credentials.selection.ProviderData;
+import android.credentials.selection.RequestInfo;
+import android.credentials.selection.UserSelectionDialogResult;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -34,7 +36,6 @@ import android.os.Looper;
 import android.os.ResultReceiver;
 import android.os.UserHandle;
 import android.service.credentials.CredentialProviderInfoFactory;
-import android.util.Slog;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -79,20 +80,25 @@ public class CredentialManagerUi {
                 UserSelectionDialogResult selection = UserSelectionDialogResult
                         .fromResultData(resultData);
                 if (selection != null) {
-                    mCallbacks.onUiSelection(selection);
-                } else {
-                    Slog.i(TAG, "No selection found in UI result");
+                    ResultReceiver resultReceiver = resultData.getParcelable(
+                            EXTRA_FINAL_RESPONSE_RECEIVER,
+                            ResultReceiver.class);
+                    mCallbacks.onUiSelection(selection, resultReceiver);
                 }
                 break;
             case UserSelectionDialogResult.RESULT_CODE_DIALOG_USER_CANCELED:
 
                 mStatus = UiStatus.TERMINATED;
-                mCallbacks.onUiCancellation(/* isUserCancellation= */ true);
+                mCallbacks.onUiCancellation(/* isUserCancellation= */ true,
+                        resultData.getParcelable(EXTRA_FINAL_RESPONSE_RECEIVER,
+                                ResultReceiver.class));
                 break;
             case UserSelectionDialogResult.RESULT_CODE_CANCELED_AND_LAUNCHED_SETTINGS:
 
                 mStatus = UiStatus.TERMINATED;
-                mCallbacks.onUiCancellation(/* isUserCancellation= */ false);
+                mCallbacks.onUiCancellation(/* isUserCancellation= */ false,
+                        resultData.getParcelable(EXTRA_FINAL_RESPONSE_RECEIVER,
+                                ResultReceiver.class));
                 break;
             case UserSelectionDialogResult.RESULT_CODE_DATA_PARSING_FAILURE:
                 mStatus = UiStatus.TERMINATED;
@@ -116,10 +122,10 @@ public class CredentialManagerUi {
      */
     public interface CredentialManagerUiCallback {
         /** Called when the user makes a selection. */
-        void onUiSelection(UserSelectionDialogResult selection);
+        void onUiSelection(UserSelectionDialogResult selection, ResultReceiver resultReceiver);
 
         /** Called when the UI is canceled without a successful provider result. */
-        void onUiCancellation(boolean isUserCancellation);
+        void onUiCancellation(boolean isUserCancellation, ResultReceiver resultReceiver);
 
         /** Called when the selector UI fails to come up (mostly due to parsing issue today). */
         void onUiSelectorInvocationFailure();
@@ -146,10 +152,11 @@ public class CredentialManagerUi {
 
     /**
      * Creates a {@link PendingIntent} to be used to invoke the credential manager selector UI,
-     * by the calling app process.
+     * by the calling app process. The bottom-sheet navigates to the default page when the intent
+     * is invoked.
      *
-     * @param requestInfo      the information about the request
-     * @param providerDataList the list of provider data from remote providers
+     * @param requestInfo            the information about the request
+     * @param providerDataList       the list of provider data from remote providers
      */
     public PendingIntent createPendingIntent(
             RequestInfo requestInfo, ArrayList<ProviderData> providerDataList) {
@@ -167,14 +174,33 @@ public class CredentialManagerUi {
                 .map(disabledProvider -> new DisabledProviderData(
                         disabledProvider.getComponentName().flattenToString())).toList();
 
-        Intent intent = IntentFactory.createCredentialSelectorIntent(requestInfo, providerDataList,
-                        new ArrayList<>(disabledProviderDataList), mResultReceiver)
-                .setAction(UUID.randomUUID().toString());
+        Intent intent;
+        intent = IntentFactory.createCredentialSelectorIntent(
+                mContext, requestInfo, providerDataList,
+                new ArrayList<>(disabledProviderDataList), mResultReceiver);
+        intent.setAction(UUID.randomUUID().toString());
         //TODO: Create unique pending intent using request code and cancel any pre-existing pending
         // intents
         return PendingIntent.getActivityAsUser(
                 mContext, /*requestCode=*/0, intent,
-                PendingIntent.FLAG_IMMUTABLE, /*options=*/null,
+                PendingIntent.FLAG_MUTABLE, /*options=*/null,
                 UserHandle.of(mUserId));
+    }
+
+    /**
+     * Creates an {@link Intent} to be used to invoke the credential manager selector UI,
+     * by the calling app process. This intent is invoked from the Autofill flow, when the user
+     * requests to bring up the 'All Options' page of the credential bottom-sheet. When the user
+     * clicks on the pinned entry, the intent will bring up the 'All Options' page of the
+     * bottom-sheet. The provider data list is processed by the credential autofill service for
+     * each autofill id and passed in as extras in the pending intent set as authentication
+     * of the pinned entry.
+     *
+     * @param requestInfo            the information about the request
+     */
+    public Intent createIntentForAutofill(RequestInfo requestInfo) {
+        return IntentFactory.createCredentialSelectorIntentForAutofill(
+                mContext, requestInfo, new ArrayList<>(),
+                mResultReceiver);
     }
 }

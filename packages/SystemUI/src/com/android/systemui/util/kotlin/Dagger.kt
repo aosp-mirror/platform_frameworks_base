@@ -17,6 +17,7 @@
 package com.android.systemui.util.kotlin
 
 import dagger.Lazy
+import java.util.Optional
 import kotlin.reflect.KProperty
 
 /**
@@ -30,3 +31,16 @@ import kotlin.reflect.KProperty
  * ```
  */
 operator fun <T> Lazy<T>.getValue(thisRef: Any?, property: KProperty<*>): T = get()
+
+/**
+ * Extension operator that allows developers to use [java.util.Optional] as a nullable property
+ * delegate:
+ * ```kotlin
+ *    class MyClass @Inject constructor(
+ *      optionalDependency: Optional<Foo>,
+ *    ) {
+ *      val dependency: Foo? by optionalDependency
+ *    }
+ * ```
+ */
+operator fun <T> Optional<T>.getValue(thisRef: Any?, property: KProperty<*>): T? = getOrNull()

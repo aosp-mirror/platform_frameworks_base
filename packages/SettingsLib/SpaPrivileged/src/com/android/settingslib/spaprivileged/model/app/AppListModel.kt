@@ -19,7 +19,6 @@ package com.android.settingslib.spaprivileged.model.app
 import android.content.pm.ApplicationInfo
 import android.icu.text.CollationKey
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.State
 import com.android.settingslib.spa.widget.ui.SpinnerOption
 import com.android.settingslib.spaprivileged.template.app.AppListItem
 import com.android.settingslib.spaprivileged.template.app.AppListItemModel
@@ -89,7 +88,7 @@ interface AppListModel<T : AppRecord> {
      * @return null if no summary should be displayed.
      */
     @Composable
-    fun getSummary(option: Int, record: T): State<String>? = null
+    fun getSummary(option: Int, record: T): (() -> String)? = null
 
     @Composable
     fun AppListItemModel<T>.AppItem() {

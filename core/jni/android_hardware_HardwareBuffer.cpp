@@ -203,10 +203,10 @@ static jlong android_hardware_HardwareBuffer_read(JNIEnv* env, jobject clazz,
     Parcel* parcel = parcelForJavaObject(env, in);
     if (parcel) {
         sp<GraphicBuffer> buffer = new GraphicBuffer();
-        parcel->read(*buffer);
-        return reinterpret_cast<jlong>(new GraphicBufferWrapper(buffer));
+        if (parcel->read(*buffer) == STATUS_OK) {
+            return reinterpret_cast<jlong>(new GraphicBufferWrapper(buffer));
+        }
     }
-
     return NULL;
 }
 

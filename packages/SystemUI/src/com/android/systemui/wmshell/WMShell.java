@@ -33,6 +33,7 @@ import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.inputmethodservice.InputMethodService;
 import android.os.IBinder;
+import android.util.Log;
 import android.view.Display;
 import android.view.KeyEvent;
 
@@ -61,10 +62,12 @@ import com.android.wm.shell.onehanded.OneHandedEventCallback;
 import com.android.wm.shell.onehanded.OneHandedTransitionCallback;
 import com.android.wm.shell.onehanded.OneHandedUiEventLogger;
 import com.android.wm.shell.pip.Pip;
+import com.android.wm.shell.recents.RecentTasks;
 import com.android.wm.shell.splitscreen.SplitScreen;
 import com.android.wm.shell.sysui.ShellInterface;
 
 import java.io.PrintWriter;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.Executor;
@@ -109,6 +112,7 @@ public final class WMShell implements
     private final Optional<SplitScreen> mSplitScreenOptional;
     private final Optional<OneHanded> mOneHandedOptional;
     private final Optional<DesktopMode> mDesktopModeOptional;
+    private final Optional<RecentTasks> mRecentTasksOptional;
 
     private final CommandQueue mCommandQueue;
     private final ConfigurationController mConfigurationController;
@@ -172,6 +176,7 @@ public final class WMShell implements
             Optional<SplitScreen> splitScreenOptional,
             Optional<OneHanded> oneHandedOptional,
             Optional<DesktopMode> desktopMode,
+            Optional<RecentTasks> recentTasks,
             CommandQueue commandQueue,
             ConfigurationController configurationController,
             KeyguardStateController keyguardStateController,
@@ -195,6 +200,7 @@ public final class WMShell implements
         mSplitScreenOptional = splitScreenOptional;
         mOneHandedOptional = oneHandedOptional;
         mDesktopModeOptional = desktopMode;
+        mRecentTasksOptional = recentTasks;
         mWakefulnessLifecycle = wakefulnessLifecycle;
         mUserTracker = userTracker;
         mDisplayTracker = displayTracker;
@@ -220,6 +226,7 @@ public final class WMShell implements
         mSplitScreenOptional.ifPresent(this::initSplitScreen);
         mOneHandedOptional.ifPresent(this::initOneHanded);
         mDesktopModeOptional.ifPresent(this::initDesktopMode);
+        mRecentTasksOptional.ifPresent(this::initRecentTasks);
 
         mNoteTaskInitializer.initialize();
     }
@@ -249,7 +256,7 @@ public final class WMShell implements
         });
         mCommandQueue.addCallback(new CommandQueue.Callbacks() {
             @Override
-            public void goToFullscreenFromSplit() {
+            public void moveFocusedTaskToFullscreen(int displayId) {
                 splitScreen.goToFullscreenFromSplit();
             }
         });
@@ -340,15 +347,33 @@ public final class WMShell implements
         desktopMode.addVisibleTasksListener(
                 new DesktopModeTaskRepository.VisibleTasksListener() {
                     @Override
-                    public void onVisibilityChanged(int displayId, boolean hasFreeformTasks) {
+                    public void onTasksVisibilityChanged(int displayId, int visibleTasksCount) {
                         if (displayId == Display.DEFAULT_DISPLAY) {
                             mSysUiState.setFlag(SYSUI_STATE_FREEFORM_ACTIVE_IN_DESKTOP_MODE,
-                                            hasFreeformTasks)
+                                            visibleTasksCount > 0)
                                     .commitUpdate(mDisplayTracker.getDefaultDisplayId());
                         }
                         // TODO(b/278084491): update sysui state for changes on other displays
                     }
                 }, mSysUiMainExecutor);
+        mCommandQueue.addCallback(new CommandQueue.Callbacks() {
+            @Override
+            public void enterDesktop(int displayId) {
+                desktopMode.enterDesktop(displayId);
+            }
+        });
+        mCommandQueue.addCallback(new CommandQueue.Callbacks() {
+            @Override
+            public void moveFocusedTaskToFullscreen(int displayId) {
+                desktopMode.moveFocusedTaskToFullscreen(displayId);
+            }
+        });
+    }
+
+    @VisibleForTesting
+    void initRecentTasks(RecentTasks recentTasks) {
+        recentTasks.addAnimationStateListener(mSysUiMainExecutor,
+                mCommandQueue::onRecentsAnimationStateChanged);
     }
 
     @Override
@@ -360,6 +385,13 @@ public final class WMShell implements
 
     @Override
     public void dump(PrintWriter pw, String[] args) {
+        Log.d(TAG, "Dumping with args: " + String.join(", ", args));
+
+        // Strip out the SysUI "dependency" arg before sending to WMShell
+        if (args[0].equals("dependency")) {
+            args = Arrays.copyOfRange(args, 1, args.length);
+        }
+
         // Handle commands if provided
         if (mShell.handleCommand(args, pw)) {
             return;

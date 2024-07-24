@@ -419,6 +419,14 @@ public class PowerExemptionManager {
      */
     public static final int REASON_SYSTEM_EXEMPT_APP_OP = 327;
 
+    /**
+     * Granted by {@link com.android.server.pm.PackageArchiver} to the installer responsible
+     * for unarchiving an app.
+     *
+     * @hide
+     */
+    public static final int REASON_PACKAGE_UNARCHIVE = 328;
+
     /** @hide The app requests out-out. */
     public static final int REASON_OPT_OUT_REQUESTED = 1000;
 
@@ -502,6 +510,7 @@ public class PowerExemptionManager {
             REASON_ACTIVE_DEVICE_ADMIN,
             REASON_MEDIA_NOTIFICATION_TRANSFER,
             REASON_PACKAGE_INSTALLER,
+            REASON_PACKAGE_UNARCHIVE,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface ReasonCode {}

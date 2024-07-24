@@ -24,6 +24,7 @@ import android.view.DisplayAddress;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.server.display.DisplayManagerService.SyncRoot;
+import com.android.server.display.utils.DebugUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -39,7 +40,10 @@ import java.util.function.Consumer;
  */
 class DisplayDeviceRepository implements DisplayAdapter.Listener {
     private static final String TAG = "DisplayDeviceRepository";
-    private static final Boolean DEBUG = false;
+
+    // To enable these logs, run:
+    // 'adb shell setprop persist.log.tag.DisplayDeviceRepository DEBUG && adb reboot'
+    private static final boolean DEBUG = DebugUtils.isDebuggable(TAG);
 
     public static final int DISPLAY_DEVICE_EVENT_ADDED = 1;
     public static final int DISPLAY_DEVICE_EVENT_REMOVED = 3;
@@ -125,7 +129,9 @@ class DisplayDeviceRepository implements DisplayAdapter.Listener {
     public DisplayDevice getByAddressLocked(@NonNull DisplayAddress address) {
         for (int i = mDisplayDevices.size() - 1; i >= 0; i--) {
             final DisplayDevice device = mDisplayDevices.get(i);
-            if (address.equals(device.getDisplayDeviceInfoLocked().address)) {
+            final DisplayDeviceInfo info = device.getDisplayDeviceInfoLocked();
+            if (address.equals(info.address)
+                    || DisplayAddress.Physical.isPortMatch(address, info.address)) {
                 return device;
             }
         }

@@ -88,9 +88,18 @@ public class RingtonePlayer implements CoreStartable {
         private final IBinder mToken;
         private final Ringtone mRingtone;
 
-        Client(IBinder token, Ringtone ringtone) {
+        public Client(IBinder token, Uri uri, UserHandle user, AudioAttributes aa) {
+            this(token, uri, user, aa, null);
+        }
+
+        Client(IBinder token, Uri uri, UserHandle user, AudioAttributes aa,
+                @Nullable VolumeShaper.Configuration volumeShaperConfig) {
             mToken = token;
-            mRingtone = ringtone;
+
+            mRingtone = new Ringtone(getContextForUser(user), false);
+            mRingtone.setAudioAttributesField(aa);
+            mRingtone.setUri(uri, volumeShaperConfig);
+            mRingtone.createLocalMediaPlayer();
         }
 
         @Override
@@ -120,28 +129,11 @@ public class RingtonePlayer implements CoreStartable {
             Client client;
             synchronized (mClients) {
                 client = mClients.get(token);
-            }
-            // Don't hold the lock while constructing the ringtone, since it can be slow. The caller
-            // shouldn't call play on the same ringtone from 2 threads, so this shouldn't race and
-            // waste the build.
-            if (client == null) {
-                final UserHandle user = Binder.getCallingUserHandle();
-                Ringtone ringtone = new Ringtone(getContextForUser(user), false);
-                ringtone.setAudioAttributesField(aa);
-                ringtone.setUri(uri, volumeShaperConfig);
-                ringtone.createLocalMediaPlayer();
-                synchronized (mClients) {
-                    client = mClients.get(token);
-                    if (client == null) {
-                        client = new Client(token, ringtone);
-                        token.linkToDeath(client, 0);
-                        mClients.put(token, client);
-                        ringtone = null;  // "owned" by the client now.
-                    }
-                }
-                // Clean up ringtone if it was abandoned (a client already existed).
-                if (ringtone != null) {
-                    ringtone.stop();
+                if (client == null) {
+                    final UserHandle user = Binder.getCallingUserHandle();
+                    client = new Client(token, uri, user, aa, volumeShaperConfig);
+                    token.linkToDeath(client, 0);
+                    mClients.put(token, client);
                 }
             }
             client.mRingtone.setLooping(looping);
@@ -192,7 +184,8 @@ public class RingtonePlayer implements CoreStartable {
         }
 
         @Override
-        public void playAsync(Uri uri, UserHandle user, boolean looping, AudioAttributes aa) {
+        public void playAsync(Uri uri, UserHandle user, boolean looping, AudioAttributes aa,
+                float volume) {
             if (LOGD) Log.d(TAG, "playAsync(uri=" + uri + ", user=" + user + ")");
             if (Binder.getCallingUid() != Process.SYSTEM_UID) {
                 throw new SecurityException("Async playback only available from system UID.");
@@ -200,7 +193,7 @@ public class RingtonePlayer implements CoreStartable {
             if (UserHandle.ALL.equals(user)) {
                 user = UserHandle.SYSTEM;
             }
-            mAsyncPlayer.play(getContextForUser(user), uri, looping, aa);
+            mAsyncPlayer.play(getContextForUser(user), uri, looping, aa, volume);
         }
 
         @Override

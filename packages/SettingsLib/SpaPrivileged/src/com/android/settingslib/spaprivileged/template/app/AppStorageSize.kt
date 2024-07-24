@@ -22,29 +22,30 @@ import android.text.format.Formatter
 import android.util.Log
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
-import androidx.compose.runtime.produceState
+import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.stringResource
-import com.android.settingslib.spaprivileged.R
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.android.settingslib.spaprivileged.framework.common.storageStatsManager
+import com.android.settingslib.spaprivileged.framework.compose.placeholder
 import com.android.settingslib.spaprivileged.model.app.userHandle
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOn
 
 private const val TAG = "AppStorageSize"
 
 @Composable
 fun ApplicationInfo.getStorageSize(): State<String> {
     val context = LocalContext.current
-    return produceState(initialValue = stringResource(R.string.summary_placeholder)) {
-        withContext(Dispatchers.IO) {
+    return remember(this) {
+        flow {
             val sizeBytes = calculateSizeBytes(context)
-            value = if (sizeBytes != null) Formatter.formatFileSize(context, sizeBytes) else ""
-        }
-    }
+            this.emit(if (sizeBytes != null) Formatter.formatFileSize(context, sizeBytes) else "")
+        }.flowOn(Dispatchers.IO)
+    }.collectAsStateWithLifecycle(initialValue = placeholder())
 }
 
-private fun ApplicationInfo.calculateSizeBytes(context: Context): Long? {
+fun ApplicationInfo.calculateSizeBytes(context: Context): Long? {
     val storageStatsManager = context.storageStatsManager
     return try {
         val stats = storageStatsManager.queryStatsForPackage(storageUuid, packageName, userHandle)

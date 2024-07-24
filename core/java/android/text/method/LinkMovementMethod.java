@@ -221,12 +221,20 @@ public class LinkMovementMethod extends ScrollingMovementMethod {
             y += widget.getScrollY();
 
             Layout layout = widget.getLayout();
-            int line = layout.getLineForVertical(y);
-            int off = layout.getOffsetForHorizontal(line, x);
+            ClickableSpan[] links;
+            if (y < 0 || y > layout.getHeight()) {
+                links = null;
+            } else {
+                int line = layout.getLineForVertical(y);
+                if (x < layout.getLineLeft(line) || x > layout.getLineRight(line)) {
+                    links = null;
+                } else {
+                    int off = layout.getOffsetForHorizontal(line, x);
+                    links = buffer.getSpans(off, off, ClickableSpan.class);
+                }
+            }
 
-            ClickableSpan[] links = buffer.getSpans(off, off, ClickableSpan.class);
-
-            if (links.length != 0) {
+            if (links != null && links.length != 0) {
                 ClickableSpan link = links[0];
                 if (action == MotionEvent.ACTION_UP) {
                     if (link instanceof TextLinkSpan) {

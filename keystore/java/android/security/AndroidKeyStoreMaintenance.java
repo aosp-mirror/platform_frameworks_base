@@ -17,7 +17,6 @@
 package android.security;
 
 import android.annotation.NonNull;
-import android.annotation.Nullable;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.ServiceSpecificException;
@@ -112,29 +111,6 @@ public class AndroidKeyStoreMaintenance {
     }
 
     /**
-     * Informs Keystore 2.0 about changing user's password
-     *
-     * @param userId   - Android user id of the user
-     * @param password - a secret derived from the synthetic password provided by the
-     *                 LockSettingsService
-     * @return 0 if successful or a {@code ResponseCode}
-     * @hide
-     */
-    public static int onUserPasswordChanged(int userId, @Nullable byte[] password) {
-        StrictMode.noteDiskWrite();
-        try {
-            getService().onUserPasswordChanged(userId, password);
-            return 0;
-        } catch (ServiceSpecificException e) {
-            Log.e(TAG, "onUserPasswordChanged failed", e);
-            return e.errorCode;
-        } catch (Exception e) {
-            Log.e(TAG, "Can not connect to keystore", e);
-            return SYSTEM_ERROR;
-        }
-    }
-
-    /**
      * Tells Keystore that a user's LSKF is being removed, ie the user's lock screen is changing to
      * Swipe or None.  Keystore uses this notification to delete the user's auth-bound keys.
      *
@@ -171,20 +147,6 @@ public class AndroidKeyStoreMaintenance {
         } catch (Exception e) {
             Log.e(TAG, "Can not connect to keystore", e);
             return SYSTEM_ERROR;
-        }
-    }
-
-    /**
-     * Informs Keystore 2.0 that an off body event was detected.
-     */
-    public static void onDeviceOffBody() {
-        StrictMode.noteDiskWrite();
-        try {
-            getService().onDeviceOffBody();
-        } catch (Exception e) {
-            // TODO This fails open. This is not a regression with respect to keystore1 but it
-            //      should get fixed.
-            Log.e(TAG, "Error while reporting device off body event.", e);
         }
     }
 
@@ -241,6 +203,26 @@ public class AndroidKeyStoreMaintenance {
         } catch (ServiceSpecificException e) {
             throw new KeyStoreException(e.errorCode,
                     "Keystore error while trying to get apps affected by SID.");
+        }
+    }
+
+    /**
+    * Deletes all keys in all KeyMint devices.
+    * Called by RecoverySystem before rebooting to recovery in order to delete all KeyMint keys,
+    * including synthetic password protector keys (used by LockSettingsService), as well as keys
+    * protecting DE and metadata encryption keys (used by vold). This ensures that FBE-encrypted
+    * data is unrecoverable even if the data wipe in recovery is interrupted or skipped.
+    */
+    public static void deleteAllKeys() throws KeyStoreException {
+        StrictMode.noteDiskWrite();
+        try {
+            getService().deleteAllKeys();
+        } catch (RemoteException | NullPointerException e) {
+            throw new KeyStoreException(SYSTEM_ERROR,
+                    "Failure to connect to Keystore while trying to delete all keys.");
+        } catch (ServiceSpecificException e) {
+            throw new KeyStoreException(e.errorCode,
+                    "Keystore error while trying to delete all keys.");
         }
     }
 }

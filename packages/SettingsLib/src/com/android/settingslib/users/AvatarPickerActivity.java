@@ -25,6 +25,7 @@ import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -138,7 +139,8 @@ public class AvatarPickerActivity extends Activity {
     private String getFileAuthority() {
         String authority = getIntent().getStringExtra(EXTRA_FILE_AUTHORITY);
         if (authority == null) {
-            throw new IllegalStateException("File authority must be provided");
+            Log.e(this.getClass().getName(), "File authority must be provided");
+            finish();
         }
         return authority;
     }

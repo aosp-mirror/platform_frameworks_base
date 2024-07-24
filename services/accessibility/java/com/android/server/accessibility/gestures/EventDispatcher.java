@@ -106,11 +106,30 @@ class EventDispatcher {
                 return;
             }
         }
+        final long downTime;
         if (action == MotionEvent.ACTION_DOWN) {
-            event.setDownTime(event.getEventTime());
+            downTime = event.getEventTime();
         } else {
-            event.setDownTime(mState.getLastInjectedDownEventTime());
+            downTime = mState.getLastInjectedDownEventTime();
         }
+
+        // The only way to change device id of the motion event is by re-creating the whole thing
+        final PointerProperties[] properties = new PointerProperties[event.getPointerCount()];
+        final PointerCoords[] coords = new PointerCoords[event.getPointerCount()];
+        for (int i = 0; i < event.getPointerCount(); i++) {
+            final PointerCoords c = new PointerCoords();
+            event.getPointerCoords(i, c);
+            coords[i] = c;
+            final PointerProperties p = new PointerProperties();
+            event.getPointerProperties(i, p);
+            properties[i] = p;
+        }
+        event = MotionEvent.obtain(downTime, event.getEventTime(), event.getAction(),
+                event.getPointerCount(), properties, coords,
+                event.getMetaState(), event.getButtonState(),
+                event.getXPrecision(), event.getYPrecision(), rawEvent.getDeviceId(),
+                event.getEdgeFlags(), rawEvent.getSource(), event.getDisplayId(), event.getFlags(),
+                event.getClassification());
         // If the user is long pressing but the long pressing pointer
         // was not exactly over the accessibility focused item we need
         // to remap the location of that pointer so the user does not

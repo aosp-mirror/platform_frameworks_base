@@ -1300,8 +1300,10 @@ public class ProvisioningManager {
      * @param executor The executor that the callback methods will be called on.
      * @param callback The callback instance being registered.
      * @throws ImsException if the subscription associated with this callback is
-     * valid, but the {@link ImsService the service crashed, for example. See
+     * valid, but the service crashed, for example. See
      * {@link ImsException#getCode()} for a more detailed reason.
+     * @throws UnsupportedOperationException If the device does not have
+     *          {@link PackageManager#FEATURE_TELEPHONY_IMS}.
      */
     @RequiresPermission(Manifest.permission.READ_PRECISE_PHONE_STATE)
     public void registerFeatureProvisioningChangedCallback(
@@ -1327,6 +1329,8 @@ public class ProvisioningManager {
      *
      * @param callback The existing {@link FeatureProvisioningCallback} to be removed.
      * @see #registerFeatureProvisioningChangedCallback(Executor, FeatureProvisioningCallback)
+     * @throws UnsupportedOperationException If the device does not have
+     *          {@link PackageManager#FEATURE_TELEPHONY_IMS}.
      */
     public void unregisterFeatureProvisioningChangedCallback(
             @NonNull FeatureProvisioningCallback callback) {
@@ -1347,6 +1351,8 @@ public class ProvisioningManager {
      * @return an integer value for the provided key, or
      * {@link ImsConfigImplBase#CONFIG_RESULT_UNKNOWN} if the key doesn't exist.
      * @throws IllegalArgumentException if the key provided was invalid.
+     * @throws UnsupportedOperationException If the device does not have
+     *          {@link PackageManager#FEATURE_TELEPHONY_IMS}.
      * @hide
      */
     @SystemApi
@@ -1369,6 +1375,8 @@ public class ProvisioningManager {
      * @return a String value for the provided key, {@code null} if the key doesn't exist, or
      * {@link StringResultError} if there was an error getting the value for the provided key.
      * @throws IllegalArgumentException if the key provided was invalid.
+     * @throws UnsupportedOperationException If the device does not have
+     *          {@link PackageManager#FEATURE_TELEPHONY_IMS}.
      * @hide
      */
     @SystemApi
@@ -1392,6 +1400,8 @@ public class ProvisioningManager {
      * @param key An integer that represents the provisioning key, which is defined by the OEM.
      * @param value a integer value for the provided key.
      * @return the result of setting the configuration value.
+     * @throws UnsupportedOperationException If the device does not have
+     *          {@link PackageManager#FEATURE_TELEPHONY_IMS}.
      * @hide
      *
      * Note: For compatibility purposes, the integer values [0 - 99] used in
@@ -1420,6 +1430,8 @@ public class ProvisioningManager {
      *     should be appropriately namespaced to avoid collision.
      * @param value a String value for the provided key.
      * @return the result of setting the configuration value.
+     * @throws UnsupportedOperationException If the device does not have
+     *          {@link PackageManager#FEATURE_TELEPHONY_IMS}.
      * @hide
      */
     @SystemApi
@@ -1451,6 +1463,9 @@ public class ProvisioningManager {
      *
      * @see CarrierConfigManager.Ims#KEY_MMTEL_REQUIRES_PROVISIONING_BUNDLE
      * @param isProvisioned true if the device is provisioned for UT over IMS, false otherwise.
+     *
+     * @throws UnsupportedOperationException If the device does not have
+     *          {@link PackageManager#FEATURE_TELEPHONY_IMS}.
      */
     @WorkerThread
     @RequiresPermission(Manifest.permission.MODIFY_PHONE_STATE)
@@ -1469,9 +1484,8 @@ public class ProvisioningManager {
     /**
      * Get the provisioning status for the IMS MmTel capability specified.
      *
-     * If provisioning is not required for the queried
-     * {@link MmTelFeature.MmTelCapabilities.MmTelCapability} and
-     * {@link ImsRegistrationImplBase.ImsRegistrationTech} combination specified, this method will
+     * If provisioning is not required for the queried {@code capability} and
+     * {@code tech} combination specified, this method will
      * always return {@code true}.
      *
      * <p> Requires Permission:
@@ -1486,6 +1500,9 @@ public class ProvisioningManager {
      * @return true if the device is provisioned for the capability or does not require
      * provisioning, false if the capability does require provisioning and has not been
      * provisioned yet.
+     *
+     * @throws UnsupportedOperationException If the device does not have
+     *          {@link PackageManager#FEATURE_TELEPHONY_IMS}.
      */
     @WorkerThread
     @RequiresPermission(Manifest.permission.READ_PRECISE_PHONE_STATE)
@@ -1503,13 +1520,16 @@ public class ProvisioningManager {
      * Get the provisioning status for the IMS RCS capability specified.
      *
      * If provisioning is not required for the queried
-     * {@link ImsRcsManager.RcsImsCapabilityFlag} or if the device does not support IMS
+     * {@code capability} or if the device does not support IMS
      * this method will always return {@code true}.
      *
      * @see CarrierConfigManager.Ims#KEY_CARRIER_RCS_PROVISIONING_REQUIRED_BOOL
      * @return true if the device is provisioned for the capability or does not require
      * provisioning, false if the capability does require provisioning and has not been
      * provisioned yet.
+     * @throws UnsupportedOperationException If the device does not have
+     *          {@link PackageManager#FEATURE_TELEPHONY_IMS}.
+     *
      * @deprecated Use {@link #getRcsProvisioningStatusForCapability(int, int)} instead,
      * as this only retrieves provisioning information for
      * {@link ImsRegistrationImplBase#REGISTRATION_TECH_LTE}
@@ -1533,7 +1553,7 @@ public class ProvisioningManager {
      * Get the provisioning status for the IMS RCS capability specified.
      *
      * If provisioning is not required for the queried
-     * {@link ImsRcsManager.RcsImsCapabilityFlag} or if the device does not support IMS
+     * {@code capability} or if the device does not support IMS
      * this method will always return {@code true}.
      *
      * <p> Requires Permission:
@@ -1547,6 +1567,9 @@ public class ProvisioningManager {
      * @return true if the device is provisioned for the capability or does not require
      * provisioning, false if the capability does require provisioning and has not been
      * provisioned yet.
+     *
+     * @throws UnsupportedOperationException If the device does not have
+     *          {@link PackageManager#FEATURE_TELEPHONY_IMS}.
      */
     @WorkerThread
     @RequiresPermission(Manifest.permission.READ_PRECISE_PHONE_STATE)
@@ -1578,6 +1601,9 @@ public class ProvisioningManager {
      * @see CarrierConfigManager#KEY_CARRIER_RCS_PROVISIONING_REQUIRED_BOOL
      * @param isProvisioned true if the device is provisioned for the RCS capability specified,
      *                      false otherwise.
+     * @throws UnsupportedOperationException If the device does not have
+     *          {@link PackageManager#FEATURE_TELEPHONY_IMS}.
+     *
      * @deprecated Use {@link #setRcsProvisioningStatusForCapability(int, int, boolean)} instead,
      * as this method only sets provisioning information for
      * {@link ImsRegistrationImplBase#REGISTRATION_TECH_LTE}
@@ -1616,6 +1642,9 @@ public class ProvisioningManager {
      * @see CarrierConfigManager.Ims#KEY_RCS_REQUIRES_PROVISIONING_BUNDLE
      * @param isProvisioned true if the device is provisioned for the RCS capability specified,
      *                      false otherwise.
+     *
+     * @throws UnsupportedOperationException If the device does not have
+     *          {@link PackageManager#FEATURE_TELEPHONY_IMS}.
      */
     @WorkerThread
     @RequiresPermission(Manifest.permission.MODIFY_PHONE_STATE)
@@ -1645,6 +1674,9 @@ public class ProvisioningManager {
      * @return true if provisioning is required for the MMTEL capability and IMS
      * registration technology specified, false if it is not required or if the device does not
      * support IMS.
+     *
+     * @throws UnsupportedOperationException If the device does not have
+     *          {@link PackageManager#FEATURE_TELEPHONY_IMS}.
      */
     @RequiresPermission(Manifest.permission.READ_PRECISE_PHONE_STATE)
     public boolean isProvisioningRequiredForCapability(
@@ -1673,6 +1705,9 @@ public class ProvisioningManager {
      * @return true if provisioning is required for the RCS capability and IMS
      * registration technology specified, false if it is not required or if the device does not
      * support IMS.
+     *
+     * @throws UnsupportedOperationException If the device does not have
+     *          {@link PackageManager#FEATURE_TELEPHONY_IMS}.
      */
     @RequiresPermission(Manifest.permission.READ_PRECISE_PHONE_STATE)
     public boolean isRcsProvisioningRequiredForCapability(
@@ -1701,10 +1736,14 @@ public class ProvisioningManager {
      * @param config The XML file to be read. ASCII/UTF8 encoded text if not compressed.
      * @param isCompressed The XML file is compressed in gzip format and must be decompressed
      *         before being read.
+     *
+     * @throws UnsupportedOperationException If the device does not have
+     *          {@link PackageManager#FEATURE_TELEPHONY_IMS_SINGLE_REGISTRATION}.
      * @hide
      */
     @SystemApi
     @RequiresPermission(Manifest.permission.MODIFY_PHONE_STATE)
+    @RequiresFeature(PackageManager.FEATURE_TELEPHONY_IMS_SINGLE_REGISTRATION)
     public void notifyRcsAutoConfigurationReceived(@NonNull byte[] config, boolean isCompressed) {
         if (config == null) {
             throw new IllegalArgumentException("Must include a non-null config XML file.");
@@ -1715,7 +1754,6 @@ public class ProvisioningManager {
         } catch (RemoteException e) {
             throw e.rethrowAsRuntimeException();
         }
-
     }
 
     /**
@@ -1788,10 +1826,14 @@ public class ProvisioningManager {
      * When the IMS/RCS service receives the RCS client configuration, it will detect
      * the change in the configuration, and trigger the auto-configuration as needed.
      * @param rcc RCS client configuration {@link RcsClientConfiguration}
+     *
+     * @throws UnsupportedOperationException If the device does not have
+     *          {@link PackageManager#FEATURE_TELEPHONY_IMS_SINGLE_REGISTRATION}.
      * @hide
      */
     @SystemApi
     @RequiresPermission(Manifest.permission.PERFORM_IMS_SINGLE_REGISTRATION)
+    @RequiresFeature(PackageManager.FEATURE_TELEPHONY_IMS_SINGLE_REGISTRATION)
     public void setRcsClientConfiguration(
             @NonNull RcsClientConfiguration rcc) throws ImsException {
         try {
@@ -1827,6 +1869,7 @@ public class ProvisioningManager {
     @RequiresPermission(anyOf = {
             Manifest.permission.READ_PRIVILEGED_PHONE_STATE,
             Manifest.permission.PERFORM_IMS_SINGLE_REGISTRATION})
+    @RequiresFeature(PackageManager.FEATURE_TELEPHONY_IMS_SINGLE_REGISTRATION)
     public boolean isRcsVolteSingleRegistrationCapable() throws ImsException {
         try {
             return getITelephony().isRcsVolteSingleRegistrationCapable(mSubId);
@@ -1871,12 +1914,15 @@ public class ProvisioningManager {
     * params (See {@link #setRcsClientConfiguration}) and re register the
     * callback.
     * See {@link ImsException#getCode()} for a more detailed reason.
+    * @throws UnsupportedOperationException If the device does not have
+    *          {@link PackageManager#FEATURE_TELEPHONY_IMS_SINGLE_REGISTRATION}.
     * @hide
     */
     @SystemApi
     @RequiresPermission(anyOf = {
             Manifest.permission.READ_PRIVILEGED_PHONE_STATE,
             Manifest.permission.PERFORM_IMS_SINGLE_REGISTRATION})
+    @RequiresFeature(PackageManager.FEATURE_TELEPHONY_IMS_SINGLE_REGISTRATION)
     public void registerRcsProvisioningCallback(
             @NonNull @CallbackExecutor Executor executor,
             @NonNull RcsProvisioningCallback callback) throws ImsException {
@@ -1909,12 +1955,15 @@ public class ProvisioningManager {
      * @see #registerRcsProvisioningCallback(Executor, RcsProvisioningCallback)
      * @throws IllegalArgumentException if the subscription associated with
      * this callback is invalid.
+     * @throws UnsupportedOperationException If the device does not have
+     *          {@link PackageManager#FEATURE_TELEPHONY_IMS_SINGLE_REGISTRATION}.
      * @hide
      */
     @SystemApi
     @RequiresPermission(anyOf = {
             Manifest.permission.READ_PRIVILEGED_PHONE_STATE,
             Manifest.permission.PERFORM_IMS_SINGLE_REGISTRATION})
+    @RequiresFeature(PackageManager.FEATURE_TELEPHONY_IMS_SINGLE_REGISTRATION)
     public void unregisterRcsProvisioningCallback(
             @NonNull RcsProvisioningCallback callback) {
         try {
@@ -1936,10 +1985,14 @@ public class ProvisioningManager {
      * {@link RcsProvisioningCallback#onConfigurationReset}, then
      * {@link RcsProvisioningCallback#onConfigurationChanged} when the new
      * RCS configuration is received and notified by {@link #notifyRcsAutoConfigurationReceived}
+     *
+     * @throws UnsupportedOperationException If the device does not have
+     *          {@link PackageManager#FEATURE_TELEPHONY_IMS_SINGLE_REGISTRATION}.
      * @hide
      */
     @SystemApi
     @RequiresPermission(Manifest.permission.PERFORM_IMS_SINGLE_REGISTRATION)
+    @RequiresFeature(PackageManager.FEATURE_TELEPHONY_IMS_SINGLE_REGISTRATION)
     public void triggerRcsReconfiguration() {
         try {
             getITelephony().triggerRcsReconfiguration(mSubId);

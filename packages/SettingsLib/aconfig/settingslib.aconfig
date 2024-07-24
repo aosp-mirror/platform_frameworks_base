@@ -1,0 +1,54 @@
+package: "com.android.settingslib.flags"
+container: "system"
+
+flag {
+    name: "new_status_bar_icons"
+    namespace: "systemui"
+    description: "Enable new status bar system icons"
+    bug: "314812750"
+}
+
+flag {
+    name: "enable_cached_bluetooth_device_dedup"
+    namespace: "bluetooth"
+    description: "Enable dedup in CachedBluetoothDevice"
+    bug: "319197962"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
+   name: "bluetooth_qs_tile_dialog_auto_on_toggle"
+   namespace: "bluetooth"
+   description: "Displays the auto on toggle in the bluetooth QS tile dialog"
+   bug: "316985153"
+}
+
+flag {
+    name: "legacy_le_audio_sharing"
+    namespace: "pixel_cross_device_control"
+    description: "Gates the legacy le audio sharing UI."
+    bug: "322295262"
+}
+
+flag {
+  name: "enable_le_audio_sharing"
+  namespace: "pixel_cross_device_control"
+  description: "Gates whether to enable LE audio sharing"
+  bug: "305620450"
+}
+
+flag {
+  name: "enable_le_audio_qr_code_private_broadcast_sharing"
+  namespace: "pixel_cross_device_control"
+  description: "Gates whether to enable LE audio private broadcast sharing via QR code"
+  bug: "308368124"
+}
+
+flag {
+  name: "enable_hide_exclusively_managed_bluetooth_device"
+  namespace: "dck_framework"
+  description: "Hide exclusively managed Bluetooth devices in BT settings menu."
+  bug: "324475542"
+}

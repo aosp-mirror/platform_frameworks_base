@@ -18,7 +18,7 @@ android_test {
     static_libs: [
         "androidx.test.rules",
         "mockito-target-minus-junit4",
-        "ub-uiautomator",
+        "androidx.test.uiautomator_uiautomator",
         "junit",
     ],
     platform_apis: true,

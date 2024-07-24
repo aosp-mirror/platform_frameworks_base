@@ -16,15 +16,16 @@
 
 package android.app;
 
-import android.annotation.IntDef;
+import static android.app.ActivityOptions.BackgroundActivityStartMode;
+import static android.app.ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOWED;
+import static android.app.ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_DENIED;
+import static android.app.ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_SYSTEM_DEFINED;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SuppressLint;
 import android.annotation.TestApi;
 import android.os.Bundle;
-
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
 
 /**
  * Base class for {@link ActivityOptions} and {@link BroadcastOptions}.
@@ -34,6 +35,7 @@ import java.lang.annotation.RetentionPolicy;
 @TestApi
 // Suppressed since lint is recommending class have a suffix of Params.
 @SuppressLint("UserHandleName")
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
 public class ComponentOptions {
 
     /**
@@ -54,32 +56,6 @@ public class ComponentOptions {
 
     private @Nullable Boolean mPendingIntentBalAllowed = null;
     private boolean mPendingIntentBalAllowedByPermission = false;
-
-    /** @hide */
-    @Retention(RetentionPolicy.SOURCE)
-    @IntDef(prefix = {"MODE_BACKGROUND_ACTIVITY_START_"}, value = {
-            MODE_BACKGROUND_ACTIVITY_START_SYSTEM_DEFINED,
-            MODE_BACKGROUND_ACTIVITY_START_ALLOWED,
-            MODE_BACKGROUND_ACTIVITY_START_DENIED})
-    public @interface BackgroundActivityStartMode {}
-    /**
-     * No explicit value chosen. The system will decide whether to grant privileges.
-     * @hide
-     */
-    @TestApi
-    public static final int MODE_BACKGROUND_ACTIVITY_START_SYSTEM_DEFINED = 0;
-    /**
-     * Allow the {@link PendingIntent} to use the background activity start privileges.
-     * @hide
-     */
-    @TestApi
-    public static final int MODE_BACKGROUND_ACTIVITY_START_ALLOWED = 1;
-    /**
-     * Deny the {@link PendingIntent} to use the background activity start privileges.
-     * @hide
-     */
-    @TestApi
-    public static final int MODE_BACKGROUND_ACTIVITY_START_DENIED = 2;
 
     ComponentOptions() {
     }

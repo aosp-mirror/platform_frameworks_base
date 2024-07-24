@@ -43,6 +43,7 @@ import android.media.IMediaRouterClient;
 import android.media.IMediaRouterService;
 import android.media.MediaRoute2Info;
 import android.media.MediaRouter;
+import android.media.MediaRouter2.ScanningState;
 import android.media.MediaRouterClientState;
 import android.media.RemoteDisplayState;
 import android.media.RemoteDisplayState.RemoteDisplayInfo;
@@ -195,7 +196,8 @@ public final class MediaRouterService extends IMediaRouterService.Stub
 
     // Binder call
     @Override
-    public void registerClientAsUser(IMediaRouterClient client, String packageName, int userId) {
+    public void registerClientAsUser(
+            IMediaRouterClient client, @NonNull String packageName, int userId) {
         final int uid = Binder.getCallingUid();
         if (!validatePackageName(uid, packageName)) {
             throw new SecurityException("packageName must match the calling uid");
@@ -409,12 +411,6 @@ public final class MediaRouterService extends IMediaRouterService.Stub
 
     // Binder call
     @Override
-    public boolean verifyPackageExists(String clientPackageName) {
-        return mService2.verifyPackageExists(clientPackageName);
-    }
-
-    // Binder call
-    @Override
     public List<MediaRoute2Info> getSystemRoutes() {
         return mService2.getSystemRoutes();
     }
@@ -444,6 +440,13 @@ public final class MediaRouterService extends IMediaRouterService.Stub
 
     // Binder call
     @Override
+    public void updateScanningStateWithRouter2(
+            IMediaRouter2 router, @ScanningState int scanningState) {
+        mService2.updateScanningState(router, scanningState);
+    }
+
+    // Binder call
+    @Override
     public void setDiscoveryRequestWithRouter2(IMediaRouter2 router,
             RouteDiscoveryPreference request) {
         mService2.setDiscoveryRequestWithRouter2(router, request);
@@ -466,11 +469,24 @@ public final class MediaRouterService extends IMediaRouterService.Stub
 
     // Binder call
     @Override
-    public void requestCreateSessionWithRouter2(IMediaRouter2 router, int requestId,
-            long managerRequestId, RoutingSessionInfo oldSession,
-            MediaRoute2Info route, Bundle sessionHints) {
-        mService2.requestCreateSessionWithRouter2(router, requestId, managerRequestId,
-                oldSession, route, sessionHints);
+    public void requestCreateSessionWithRouter2(
+            IMediaRouter2 router,
+            int requestId,
+            long managerRequestId,
+            RoutingSessionInfo oldSession,
+            MediaRoute2Info route,
+            Bundle sessionHints,
+            @Nullable UserHandle transferInitiatorUserHandle,
+            @Nullable String transferInitiatorPackageName) {
+        mService2.requestCreateSessionWithRouter2(
+                router,
+                requestId,
+                managerRequestId,
+                oldSession,
+                route,
+                sessionHints,
+                transferInitiatorUserHandle,
+                transferInitiatorPackageName);
     }
 
     // Binder call
@@ -514,8 +530,7 @@ public final class MediaRouterService extends IMediaRouterService.Stub
 
     // Binder call
     @Override
-    public RoutingSessionInfo getSystemSessionInfoForPackage(IMediaRouter2Manager manager,
-            String packageName) {
+    public RoutingSessionInfo getSystemSessionInfoForPackage(@Nullable String packageName) {
         final int uid = Binder.getCallingUid();
         final int userId = UserHandle.getUserHandleForUid(uid).getIdentifier();
         boolean setDeviceRouteSelected = false;
@@ -536,13 +551,27 @@ public final class MediaRouterService extends IMediaRouterService.Stub
     }
 
     // Binder call
+    @RequiresPermission(Manifest.permission.MEDIA_CONTENT_CONTROL)
     @Override
-    public void registerManager(IMediaRouter2Manager manager, String packageName) {
+    public void registerManager(IMediaRouter2Manager manager, String callerPackageName) {
         final int uid = Binder.getCallingUid();
-        if (!validatePackageName(uid, packageName)) {
-            throw new SecurityException("packageName must match the calling uid");
+        if (!validatePackageName(uid, callerPackageName)) {
+            throw new SecurityException("callerPackageName must match the calling uid");
         }
-        mService2.registerManager(manager, packageName);
+        mService2.registerManager(manager, callerPackageName);
+    }
+
+    @Override
+    public void registerProxyRouter(
+            @NonNull IMediaRouter2Manager manager,
+            @NonNull String callerPackageName,
+            @NonNull String targetPackageName,
+            @NonNull UserHandle targetUser) {
+        final int uid = Binder.getCallingUid();
+        if (!validatePackageName(uid, callerPackageName)) {
+            throw new SecurityException("callerPackageName must match the calling uid");
+        }
+        mService2.registerProxyRouter(manager, callerPackageName, targetPackageName, targetUser);
     }
 
     // Binder call
@@ -553,14 +582,9 @@ public final class MediaRouterService extends IMediaRouterService.Stub
 
     // Binder call
     @Override
-    public void startScan(IMediaRouter2Manager manager) {
-        mService2.startScan(manager);
-    }
-
-    // Binder call
-    @Override
-    public void stopScan(IMediaRouter2Manager manager) {
-        mService2.stopScan(manager);
+    public void updateScanningState(
+            IMediaRouter2Manager manager, @ScanningState int scanningState) {
+        mService2.updateScanningState(manager, scanningState);
     }
 
     // Binder call
@@ -572,9 +596,20 @@ public final class MediaRouterService extends IMediaRouterService.Stub
 
     // Binder call
     @Override
-    public void requestCreateSessionWithManager(IMediaRouter2Manager manager,
-            int requestId, RoutingSessionInfo oldSession, MediaRoute2Info route) {
-        mService2.requestCreateSessionWithManager(manager, requestId, oldSession, route);
+    public void requestCreateSessionWithManager(
+            IMediaRouter2Manager manager,
+            int requestId,
+            RoutingSessionInfo oldSession,
+            MediaRoute2Info route,
+            UserHandle transferInitiatorUserHandle,
+            String transferInitiatorPackageName) {
+        mService2.requestCreateSessionWithManager(
+                manager,
+                requestId,
+                oldSession,
+                route,
+                transferInitiatorUserHandle,
+                transferInitiatorPackageName);
     }
 
     // Binder call
@@ -593,9 +628,20 @@ public final class MediaRouterService extends IMediaRouterService.Stub
 
     // Binder call
     @Override
-    public void transferToRouteWithManager(IMediaRouter2Manager manager, int requestId,
-            String sessionId, MediaRoute2Info route) {
-        mService2.transferToRouteWithManager(manager, requestId, sessionId, route);
+    public void transferToRouteWithManager(
+            IMediaRouter2Manager manager,
+            int requestId,
+            String sessionId,
+            MediaRoute2Info route,
+            UserHandle transferInitiatorUserHandle,
+            String transferInitiatorPackageName) {
+        mService2.transferToRouteWithManager(
+                manager,
+                requestId,
+                sessionId,
+                route,
+                transferInitiatorUserHandle,
+                transferInitiatorPackageName);
     }
 
     // Binder call
@@ -693,8 +739,13 @@ public final class MediaRouterService extends IMediaRouterService.Stub
     }
 
     @GuardedBy("mLock")
-    private void registerClientLocked(IMediaRouterClient client,
-            int uid, int pid, String packageName, int userId, boolean trusted) {
+    private void registerClientLocked(
+            IMediaRouterClient client,
+            int uid,
+            int pid,
+            @NonNull String packageName,
+            int userId,
+            boolean trusted) {
         final IBinder binder = client.asBinder();
         ClientRecord clientRecord = mAllClientRecords.get(binder);
         if (clientRecord == null) {
@@ -926,6 +977,10 @@ public final class MediaRouterService extends IMediaRouterService.Stub
         clientRecord.dispose();
     }
 
+    /**
+     * Validates whether the provided package name matches a given uid. Returns false if the package
+     * name is null.
+     */
     private boolean validatePackageName(int uid, String packageName) {
         if (packageName != null) {
             String[] packageNames = mContext.getPackageManager().getPackagesForUid(uid);
@@ -974,8 +1029,13 @@ public final class MediaRouterService extends IMediaRouterService.Stub
         public String mSelectedRouteId;
         public String mGroupId;
 
-        public ClientRecord(UserRecord userRecord, IMediaRouterClient client,
-                int uid, int pid, String packageName, boolean trusted) {
+        ClientRecord(
+                UserRecord userRecord,
+                IMediaRouterClient client,
+                int uid,
+                int pid,
+                @NonNull String packageName,
+                boolean trusted) {
             mUserRecord = userRecord;
             mClient = client;
             mUid = uid;

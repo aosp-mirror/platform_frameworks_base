@@ -22,6 +22,7 @@ import android.content.Context
 import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.View
+import android.view.ViewConfiguration
 import com.android.systemui.shade.TouchLogger
 import kotlin.math.pow
 import kotlin.math.sqrt
@@ -36,11 +37,18 @@ import kotlinx.coroutines.DisposableHandle
 class LongPressHandlingView(
     context: Context,
     attrs: AttributeSet?,
+    private val longPressDuration: () -> Long,
 ) :
     View(
         context,
         attrs,
     ) {
+
+    constructor(
+        context: Context,
+        attrs: AttributeSet?,
+    ) : this(context, attrs, { ViewConfiguration.getLongPressTimeout().toLong() })
+
     interface Listener {
         /** Notifies that a long-press has been detected by the given view. */
         fun onLongPressDetected(
@@ -77,6 +85,7 @@ class LongPressHandlingView(
                 )
             },
             onSingleTapDetected = { listener?.onSingleTapDetected(this@LongPressHandlingView) },
+            longPressDuration = longPressDuration,
         )
     }
 
@@ -89,9 +98,8 @@ class LongPressHandlingView(
     }
 
     @SuppressLint("ClickableViewAccessibility")
-    override fun onTouchEvent(event: MotionEvent): Boolean {
-        super.onTouchEvent(event)
-        return interactionHandler.onTouchEvent(event.toModel())
+    override fun onTouchEvent(event: MotionEvent?): Boolean {
+        return interactionHandler.onTouchEvent(event?.toModel())
     }
 }
 

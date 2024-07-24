@@ -18,6 +18,7 @@ package com.android.server.accessibility;
 
 import static android.accessibilityservice.AccessibilityService.SoftKeyboardController.ENABLE_IME_FAIL_UNKNOWN;
 import static android.accessibilityservice.AccessibilityService.SoftKeyboardController.ENABLE_IME_SUCCESS;
+import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
 
 import static com.android.internal.util.function.pooled.PooledLambda.obtainMessage;
 
@@ -25,31 +26,47 @@ import android.Manifest;
 import android.accessibilityservice.AccessibilityService;
 import android.accessibilityservice.AccessibilityServiceInfo;
 import android.accessibilityservice.AccessibilityTrace;
+import android.accessibilityservice.BrailleDisplayController;
 import android.accessibilityservice.IAccessibilityServiceClient;
+import android.accessibilityservice.IBrailleDisplayController;
 import android.accessibilityservice.TouchInteractionController;
+import android.annotation.NonNull;
+import android.annotation.Nullable;
+import android.annotation.RequiresPermission;
+import android.annotation.SuppressLint;
+import android.annotation.UserIdInt;
 import android.app.PendingIntent;
+import android.bluetooth.BluetoothAdapter;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ParceledListSlice;
+import android.hardware.usb.UsbDevice;
+import android.hardware.usb.UsbManager;
 import android.os.Binder;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
 import android.os.Process;
 import android.os.RemoteException;
+import android.os.Trace;
 import android.os.UserHandle;
 import android.provider.Settings;
+import android.text.TextUtils;
 import android.util.Slog;
 import android.view.Display;
 import android.view.MotionEvent;
 
-
+import com.android.internal.inputmethod.IAccessibilityInputMethodSession;
+import com.android.internal.inputmethod.IAccessibilityInputMethodSessionCallback;
 import com.android.server.inputmethod.InputMethodManagerInternal;
 import com.android.server.wm.ActivityTaskManagerInternal;
 import com.android.server.wm.WindowManagerInternal;
 
 import java.lang.ref.WeakReference;
+import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -60,6 +77,7 @@ import java.util.Set;
  * passed to the service it represents as soon it is bound. It also serves as the
  * connection for the service.
  */
+@SuppressWarnings("MissingPermissionAnnotation")
 class AccessibilityServiceConnection extends AbstractAccessibilityServiceConnection {
     private static final String LOG_TAG = "AccessibilityServiceConnection";
 
@@ -71,13 +89,41 @@ class AccessibilityServiceConnection extends AbstractAccessibilityServiceConnect
      Having the reference be null when being called is a very bad sign, but we check the condition.
     */
     final WeakReference<AccessibilityUserState> mUserStateWeakReference;
+    @UserIdInt
+    final int mUserId;
     final Intent mIntent;
     final ActivityTaskManagerInternal mActivityTaskManagerService;
 
+    private BrailleDisplayConnection mBrailleDisplayConnection;
+    private List<Bundle> mTestBrailleDisplays = null;
+
     private final Handler mMainHandler;
 
-    AccessibilityServiceConnection(AccessibilityUserState userState, Context context,
-            ComponentName componentName,
+    private static final class AccessibilityInputMethodSessionCallback
+            extends IAccessibilityInputMethodSessionCallback.Stub {
+        @UserIdInt
+        private final int mUserId;
+
+        AccessibilityInputMethodSessionCallback(@UserIdInt int userId) {
+            mUserId = userId;
+        }
+
+        @Override
+        public void sessionCreated(IAccessibilityInputMethodSession session, int id) {
+            Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "ASC.sessionCreated");
+            final long ident = Binder.clearCallingIdentity();
+            try {
+                InputMethodManagerInternal.get()
+                        .onSessionForAccessibilityCreated(id, session, mUserId);
+            } finally {
+                Binder.restoreCallingIdentity(ident);
+            }
+            Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
+        }
+    }
+
+    AccessibilityServiceConnection(@Nullable AccessibilityUserState userState,
+            Context context, ComponentName componentName,
             AccessibilityServiceInfo accessibilityServiceInfo, int id, Handler mainHandler,
             Object lock, AccessibilitySecurityPolicy securityPolicy, SystemSupport systemSupport,
             AccessibilityTrace trace, WindowManagerInternal windowManagerInternal,
@@ -87,6 +133,10 @@ class AccessibilityServiceConnection extends AbstractAccessibilityServiceConnect
                 securityPolicy, systemSupport, trace, windowManagerInternal, systemActionPerfomer,
                 awm);
         mUserStateWeakReference = new WeakReference<AccessibilityUserState>(userState);
+        // the user ID doesn't matter when userState is null, because it is null only when this is a
+        // ProxyAccessibilityServiceConnection, for which it never creates an IME session and uses
+        // the user ID.
+        mUserId = userState == null ? UserHandle.USER_NULL : userState.mUserId;
         mIntent = new Intent().setComponent(mComponentName);
         mMainHandler = mainHandler;
         mIntent.putExtra(Intent.EXTRA_CLIENT_LABEL,
@@ -158,16 +208,21 @@ class AccessibilityServiceConnection extends AbstractAccessibilityServiceConnect
                     mSystemSupport.persistComponentNamesToSettingLocked(
                             Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES,
                             userState.getEnabledServicesLocked(), userState.mUserId);
+
+                    mSystemSupport.onClientChangeLocked(false);
                 } finally {
                     Binder.restoreCallingIdentity(identity);
                 }
-                mSystemSupport.onClientChangeLocked(false);
             }
         }
     }
 
     @Override
     public void onServiceConnected(ComponentName componentName, IBinder service) {
+        AccessibilityUserState userState = mUserStateWeakReference.get();
+        if (userState != null && Flags.addWindowTokenWithoutLock()) {
+            addWindowTokensForAllDisplays();
+        }
         synchronized (mLock) {
             if (mService != service) {
                 if (mService != null) {
@@ -183,7 +238,6 @@ class AccessibilityServiceConnection extends AbstractAccessibilityServiceConnect
                 }
             }
             mServiceInterface = IAccessibilityServiceClient.Stub.asInterface(service);
-            AccessibilityUserState userState = mUserStateWeakReference.get();
             if (userState == null) return;
             userState.addServiceLocked(this);
             mSystemSupport.onClientChangeLocked(false);
@@ -285,7 +339,13 @@ class AccessibilityServiceConnection extends AbstractAccessibilityServiceConnect
             }
             final AccessibilityUserState userState = mUserStateWeakReference.get();
             if (userState == null) return false;
-            return userState.setSoftKeyboardModeLocked(showMode, mComponentName);
+
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                return userState.setSoftKeyboardModeLocked(showMode, mComponentName);
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
         }
     }
 
@@ -295,7 +355,12 @@ class AccessibilityServiceConnection extends AbstractAccessibilityServiceConnect
             logTraceSvcConn("getSoftKeyboardShowMode", "");
         }
         final AccessibilityUserState userState = mUserStateWeakReference.get();
-        return (userState != null) ? userState.getSoftKeyboardShowModeLocked() : 0;
+        final long identity = Binder.clearCallingIdentity();
+        try {
+            return (userState != null) ? userState.getSoftKeyboardShowModeLocked() : 0;
+        } finally {
+            Binder.restoreCallingIdentity(identity);
+        }
     }
 
     @Override
@@ -363,8 +428,14 @@ class AccessibilityServiceConnection extends AbstractAccessibilityServiceConnect
             if (!hasRightsToCurrentUserLocked()) {
                 return false;
             }
-            AccessibilityUserState userState = mUserStateWeakReference.get();
-            return (userState != null) && isAccessibilityButtonAvailableLocked(userState);
+
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                AccessibilityUserState userState = mUserStateWeakReference.get();
+                return (userState != null) && isAccessibilityButtonAvailableLocked(userState);
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
         }
     }
 
@@ -389,6 +460,16 @@ class AccessibilityServiceConnection extends AbstractAccessibilityServiceConnect
             resetLocked();
             mSystemSupport.getMagnificationProcessor().resetAllIfNeeded(mId);
             mSystemSupport.onClientChangeLocked(false);
+        }
+    }
+
+    @Override
+    public void resetLocked() {
+        super.resetLocked();
+        if (android.view.accessibility.Flags.brailleDisplayHid()) {
+            if (mBrailleDisplayConnection != null) {
+                mBrailleDisplayConnection.disconnect();
+            }
         }
     }
 
@@ -456,26 +537,32 @@ class AccessibilityServiceConnection extends AbstractAccessibilityServiceConnect
     public void dispatchGesture(int sequence, ParceledListSlice gestureSteps, int displayId) {
         synchronized (mLock) {
             if (mServiceInterface != null && mSecurityPolicy.canPerformGestures(this)) {
-                MotionEventInjector motionEventInjector =
-                        mSystemSupport.getMotionEventInjectorForDisplayLocked(displayId);
-                if (wmTracingEnabled()) {
-                    logTraceWM("isTouchOrFaketouchDevice", "");
-                }
-                if (motionEventInjector != null
-                        && mWindowManagerService.isTouchOrFaketouchDevice()) {
-                    motionEventInjector.injectEvents(
-                            gestureSteps.getList(), mServiceInterface, sequence, displayId);
-                } else {
-                    try {
-                        if (svcClientTracingEnabled()) {
-                            logTraceSvcClient("onPerformGestureResult", sequence + ", false");
-                        }
-                        mServiceInterface.onPerformGestureResult(sequence, false);
-                    } catch (RemoteException re) {
-                        Slog.e(LOG_TAG, "Error sending motion event injection failure to "
-                                + mServiceInterface, re);
+                final long identity = Binder.clearCallingIdentity();
+                try {
+                    MotionEventInjector motionEventInjector =
+                            mSystemSupport.getMotionEventInjectorForDisplayLocked(displayId);
+                    if (wmTracingEnabled()) {
+                        logTraceWM("isTouchOrFaketouchDevice", "");
                     }
+                    if (motionEventInjector != null
+                            && mWindowManagerService.isTouchOrFaketouchDevice()) {
+                        motionEventInjector.injectEvents(
+                                gestureSteps.getList(), mServiceInterface, sequence, displayId);
+                    } else {
+                        try {
+                            if (svcClientTracingEnabled()) {
+                                logTraceSvcClient("onPerformGestureResult", sequence + ", false");
+                            }
+                            mServiceInterface.onPerformGestureResult(sequence, false);
+                        } catch (RemoteException re) {
+                            Slog.e(LOG_TAG, "Error sending motion event injection failure to "
+                                    + mServiceInterface, re);
+                        }
+                    }
+                } finally {
+                    Binder.restoreCallingIdentity(identity);
                 }
+
             }
         }
     }
@@ -501,10 +588,15 @@ class AccessibilityServiceConnection extends AbstractAccessibilityServiceConnect
                 return;
             }
 
-            // Sets the appearance data in the A11yUserState.
-            userState.setFocusAppearanceLocked(strokeWidth, color);
-            // Updates the appearance data in the A11yManager.
-            mSystemSupport.onClientChangeLocked(false);
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                // Sets the appearance data in the A11yUserState.
+                userState.setFocusAppearanceLocked(strokeWidth, color);
+                // Updates the appearance data in the A11yManager.
+                mSystemSupport.onClientChangeLocked(false);
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
         }
     }
 
@@ -524,6 +616,24 @@ class AccessibilityServiceConnection extends AbstractAccessibilityServiceConnect
 
     public boolean requestImeApis() {
         return mRequestImeApis;
+    }
+
+    @Override
+    protected void createImeSessionInternal() {
+        final IAccessibilityServiceClient listener = getServiceInterfaceSafely();
+        if (listener != null) {
+            try {
+                if (svcClientTracingEnabled()) {
+                    logTraceSvcClient("createImeSession", "");
+                }
+                AccessibilityInputMethodSessionCallback
+                        callback = new AccessibilityInputMethodSessionCallback(mUserId);
+                listener.createImeSession(callback);
+            } catch (RemoteException re) {
+                Slog.e(LOG_TAG,
+                        "Error requesting IME session from " + mService, re);
+            }
+        }
     }
 
     private void notifyMotionEventInternal(MotionEvent event) {
@@ -554,5 +664,124 @@ class AccessibilityServiceConnection extends AbstractAccessibilityServiceConnect
                 Slog.e(LOG_TAG, "Error sending motion event to" + mService, re);
             }
         }
+    }
+
+    private void checkAccessibilityAccessLocked() {
+        if (!hasRightsToCurrentUserLocked()
+                || !mSecurityPolicy.checkAccessibilityAccess(this)) {
+            throw new SecurityException("Caller does not have accessibility access");
+        }
+    }
+
+    /**
+     * Sets up a BrailleDisplayConnection interface for the requested Bluetooth-connected
+     * Braille display.
+     *
+     * @param bluetoothAddress The address from
+     *                         {@link android.bluetooth.BluetoothDevice#getAddress()}.
+     */
+    @Override
+    @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
+    public void connectBluetoothBrailleDisplay(
+            @NonNull String bluetoothAddress, @NonNull IBrailleDisplayController controller) {
+        if (!android.view.accessibility.Flags.brailleDisplayHid()) {
+            throw new IllegalStateException("Flag BRAILLE_DISPLAY_HID not enabled");
+        }
+        Objects.requireNonNull(bluetoothAddress);
+        Objects.requireNonNull(controller);
+        mContext.enforceCallingPermission(Manifest.permission.BLUETOOTH_CONNECT,
+                "Missing BLUETOOTH_CONNECT permission");
+        if (!BluetoothAdapter.checkBluetoothAddress(bluetoothAddress)) {
+            throw new IllegalArgumentException(
+                    bluetoothAddress + " is not a valid Bluetooth address");
+        }
+        synchronized (mLock) {
+            checkAccessibilityAccessLocked();
+            if (mBrailleDisplayConnection != null) {
+                throw new IllegalStateException(
+                        "This service already has a connected Braille display");
+            }
+            BrailleDisplayConnection connection = new BrailleDisplayConnection(mLock, this);
+            if (mTestBrailleDisplays != null) {
+                connection.setTestData(mTestBrailleDisplays);
+            }
+            connection.connectLocked(
+                    bluetoothAddress, BrailleDisplayConnection.BUS_BLUETOOTH, controller);
+        }
+    }
+
+    /**
+     * Sets up a BrailleDisplayConnection interface for the requested USB-connected
+     * Braille display.
+     *
+     * <p>The caller package must already have USB permission for this {@link UsbDevice}.
+     */
+    @SuppressLint("MissingPermission") // system_server has the required MANAGE_USB permission
+    @Override
+    @NonNull
+    public void connectUsbBrailleDisplay(@NonNull UsbDevice usbDevice,
+            @NonNull IBrailleDisplayController controller) {
+        if (!android.view.accessibility.Flags.brailleDisplayHid()) {
+            throw new IllegalStateException("Flag BRAILLE_DISPLAY_HID not enabled");
+        }
+        Objects.requireNonNull(usbDevice);
+        Objects.requireNonNull(controller);
+        final UsbManager usbManager = (UsbManager) mContext.getSystemService(Context.USB_SERVICE);
+        final String usbSerialNumber;
+        final int uid = Binder.getCallingUid();
+        final int pid = Binder.getCallingPid();
+        final long identity = Binder.clearCallingIdentity();
+        try {
+            if (usbManager == null || !usbManager.hasPermission(
+                    usbDevice, mComponentName.getPackageName(), /*pid=*/ pid, /*uid=*/ uid)) {
+                throw new SecurityException(
+                        "Caller does not have permission to access this UsbDevice");
+            }
+            usbSerialNumber = usbDevice.getSerialNumber();
+            if (TextUtils.isEmpty(usbSerialNumber)) {
+                // If the UsbDevice does not report a serial number for locating the HIDRAW
+                // node then notify connection error ERROR_BRAILLE_DISPLAY_NOT_FOUND.
+                try {
+                    controller.onConnectionFailed(BrailleDisplayController.BrailleDisplayCallback
+                            .FLAG_ERROR_BRAILLE_DISPLAY_NOT_FOUND);
+                } catch (RemoteException e) {
+                    Slog.e(LOG_TAG, "Error calling onConnectionFailed", e);
+                }
+                return;
+            }
+        } finally {
+            Binder.restoreCallingIdentity(identity);
+        }
+        synchronized (mLock) {
+            checkAccessibilityAccessLocked();
+            if (mBrailleDisplayConnection != null) {
+                throw new IllegalStateException(
+                        "This service already has a connected Braille display");
+            }
+            BrailleDisplayConnection connection = new BrailleDisplayConnection(mLock, this);
+            if (mTestBrailleDisplays != null) {
+                connection.setTestData(mTestBrailleDisplays);
+            }
+            connection.connectLocked(
+                    usbSerialNumber, BrailleDisplayConnection.BUS_USB, controller);
+        }
+    }
+
+    @Override
+    @RequiresPermission(Manifest.permission.MANAGE_ACCESSIBILITY)
+    public void setTestBrailleDisplayData(List<Bundle> brailleDisplays) {
+        // Enforce that this TestApi is only called by trusted (test) callers.
+        mContext.enforceCallingPermission(Manifest.permission.MANAGE_ACCESSIBILITY,
+                "Missing MANAGE_ACCESSIBILITY permission");
+        mTestBrailleDisplays = brailleDisplays;
+    }
+
+    void onBrailleDisplayConnectedLocked(BrailleDisplayConnection connection) {
+        mBrailleDisplayConnection = connection;
+    }
+
+    // Reset state when the BrailleDisplayConnection object disconnects itself.
+    void onBrailleDisplayDisconnectedLocked() {
+        mBrailleDisplayConnection = null;
     }
 }

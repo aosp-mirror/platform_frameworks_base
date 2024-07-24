@@ -19,7 +19,11 @@
      package="com.android.internal.tests">
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
     <uses-permission android:name="android.permission.BIND_WALLPAPER"/>
-    <application>
+    <!-- Allow the test to connect to perfetto trace processor -->
+    <uses-permission android:name="android.permission.INTERNET"/>
+    <application
+        android:requestLegacyExternalStorage="true"
+        android:networkSecurityConfig="@xml/network_security_config">
         <uses-library android:name="android.test.runner"/>
 
         <service android:name="stub.DummyWallpaperService"

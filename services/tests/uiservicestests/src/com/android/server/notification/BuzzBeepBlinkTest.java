@@ -32,6 +32,7 @@ import static junit.framework.Assert.assertTrue;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
+import static org.mockito.ArgumentMatchers.anyFloat;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Matchers.anyInt;
@@ -73,12 +74,12 @@ import android.os.Vibrator;
 import android.provider.Settings;
 import android.service.notification.NotificationListenerService;
 import android.service.notification.StatusBarNotification;
-import android.test.suitebuilder.annotation.SmallTest;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityManager;
 import android.view.accessibility.IAccessibilityManager;
 import android.view.accessibility.IAccessibilityManagerClient;
 
+import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
 import com.android.internal.logging.InstanceIdSequence;
@@ -147,6 +148,7 @@ public class BuzzBeepBlinkTest extends UiServiceTestCase {
     private static final int CUSTOM_LIGHT_ON = 10000;
     private static final int CUSTOM_LIGHT_OFF = 10000;
     private static final int MAX_VIBRATION_DELAY = 1000;
+    private static final float DEFAULT_VOLUME = 1.0f;
 
     @Before
     public void setUp() throws Exception {
@@ -156,6 +158,9 @@ public class BuzzBeepBlinkTest extends UiServiceTestCase {
         when(mAudioManager.isAudioFocusExclusive()).thenReturn(false);
         when(mAudioManager.getRingtonePlayer()).thenReturn(mRingtonePlayer);
         when(mAudioManager.getStreamVolume(anyInt())).thenReturn(10);
+        // consistent with focus not exclusive and volume not muted
+        when(mAudioManager.shouldNotificationSoundPlay(any(AudioAttributes.class)))
+                .thenReturn(true);
         when(mAudioManager.getRingerModeInternal()).thenReturn(AudioManager.RINGER_MODE_NORMAL);
         when(mAudioManager.getFocusRampTimeMs(anyInt(), any(AudioAttributes.class))).thenReturn(50);
         when(mUsageStats.isAlertRateLimited(any())).thenReturn(false);
@@ -397,19 +402,22 @@ public class BuzzBeepBlinkTest extends UiServiceTestCase {
     //
 
     private void verifyNeverBeep() throws RemoteException {
-        verify(mRingtonePlayer, never()).playAsync(any(), any(), anyBoolean(), any());
+        verify(mRingtonePlayer, never()).playAsync(any(), any(), anyBoolean(), any(), anyFloat());
     }
 
     private void verifyBeepUnlooped() throws RemoteException  {
-        verify(mRingtonePlayer, times(1)).playAsync(any(), any(), eq(false), any());
+        verify(mRingtonePlayer, times(1)).playAsync(any(), any(), eq(false), any(),
+                eq(DEFAULT_VOLUME));
     }
 
     private void verifyBeepLooped() throws RemoteException  {
-        verify(mRingtonePlayer, times(1)).playAsync(any(), any(), eq(true), any());
+        verify(mRingtonePlayer, times(1)).playAsync(any(), any(), eq(true), any(),
+                eq(DEFAULT_VOLUME));
     }
 
     private void verifyBeep(int times)  throws RemoteException  {
-        verify(mRingtonePlayer, times(times)).playAsync(any(), any(), anyBoolean(), any());
+        verify(mRingtonePlayer, times(times)).playAsync(any(), any(), anyBoolean(), any(),
+                eq(DEFAULT_VOLUME));
     }
 
     private void verifyNeverStopAudio() throws RemoteException {
@@ -864,6 +872,7 @@ public class BuzzBeepBlinkTest extends UiServiceTestCase {
         // the phone is quiet
         when(mAudioManager.getRingerModeInternal()).thenReturn(AudioManager.RINGER_MODE_VIBRATE);
         when(mAudioManager.getStreamVolume(anyInt())).thenReturn(0);
+        when(mAudioManager.shouldNotificationSoundPlay(any())).thenReturn(false);
 
         mService.buzzBeepBlinkLocked(r);
 
@@ -881,6 +890,8 @@ public class BuzzBeepBlinkTest extends UiServiceTestCase {
         // the phone is quiet
         when(mAudioManager.getRingerModeInternal()).thenReturn(AudioManager.RINGER_MODE_VIBRATE);
         when(mAudioManager.getStreamVolume(anyInt())).thenReturn(1);
+        // all streams at 1 means no muting from audio framework
+        when(mAudioManager.shouldNotificationSoundPlay(any())).thenReturn(true);
 
         mService.buzzBeepBlinkLocked(r);
 
@@ -899,13 +910,14 @@ public class BuzzBeepBlinkTest extends UiServiceTestCase {
         // the phone is quiet
         when(mAudioManager.getRingerModeInternal()).thenReturn(AudioManager.RINGER_MODE_VIBRATE);
         when(mAudioManager.getStreamVolume(anyInt())).thenReturn(0);
+        when(mAudioManager.shouldNotificationSoundPlay(any())).thenReturn(false);
 
         mService.buzzBeepBlinkLocked(r);
 
         verifyDelayedVibrate(
                 mService.getVibratorHelper().createFallbackVibration(/* insistent= */ false));
         verify(mRingtonePlayer, never()).playAsync
-                (anyObject(), anyObject(), anyBoolean(), anyObject());
+                (anyObject(), anyObject(), anyBoolean(), anyObject(), anyFloat());
         assertTrue(r.isInterruptive());
         assertNotEquals(-1, r.getLastAudiblyAlertedMs());
     }
@@ -919,6 +931,7 @@ public class BuzzBeepBlinkTest extends UiServiceTestCase {
         // the phone is quiet
         when(mAudioManager.getStreamVolume(anyInt())).thenReturn(0);
         when(mAudioManager.getRingerModeInternal()).thenReturn(AudioManager.RINGER_MODE_VIBRATE);
+        when(mAudioManager.shouldNotificationSoundPlay(any())).thenReturn(false);
 
         mService.buzzBeepBlinkLocked(r);
 
@@ -1190,6 +1203,7 @@ public class BuzzBeepBlinkTest extends UiServiceTestCase {
         // the phone is quiet
         when(mAudioManager.getStreamVolume(anyInt())).thenReturn(0);
         when(mAudioManager.getRingerModeInternal()).thenReturn(AudioManager.RINGER_MODE_VIBRATE);
+        when(mAudioManager.shouldNotificationSoundPlay(any())).thenReturn(false);
 
         mService.buzzBeepBlinkLocked(r);
         verifyDelayedVibrate(mService.getVibratorHelper().createFallbackVibration(false));
@@ -1918,6 +1932,7 @@ public class BuzzBeepBlinkTest extends UiServiceTestCase {
         NotificationRecord r = getBuzzyBeepyNotification();
         when(mAudioManager.getRingerModeInternal()).thenReturn(AudioManager.RINGER_MODE_SILENT);
         when(mAudioManager.getStreamVolume(anyInt())).thenReturn(0);
+        when(mAudioManager.shouldNotificationSoundPlay(any())).thenReturn(false);
 
         mService.buzzBeepBlinkLocked(r);
 

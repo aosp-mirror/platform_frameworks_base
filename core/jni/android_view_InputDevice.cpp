@@ -14,17 +14,16 @@
  * limitations under the License.
  */
 
-#include <input/Input.h>
+#include "android_view_InputDevice.h"
 
 #include <android_runtime/AndroidRuntime.h>
+#include <com_android_input_flags.h>
+#include <input/Input.h>
 #include <jni.h>
 #include <nativehelper/JNIHelp.h>
-
 #include <nativehelper/ScopedLocalRef.h>
 
-#include "android_view_InputDevice.h"
 #include "android_view_KeyCharacterMap.h"
-
 #include "core_jni_helpers.h"
 
 namespace android {
@@ -34,19 +33,13 @@ static struct {
 
     jmethodID ctor;
     jmethodID addMotionRange;
+    jmethodID setShouldSmoothScroll;
 } gInputDeviceClassInfo;
 
 jobject android_view_InputDevice_create(JNIEnv* env, const InputDeviceInfo& deviceInfo) {
     ScopedLocalRef<jstring> nameObj(env, env->NewStringUTF(deviceInfo.getDisplayName().c_str()));
     if (!nameObj.get()) {
         return NULL;
-    }
-
-    // b/274058082: Pass a copy of the key character map to avoid concurrent
-    // access
-    std::shared_ptr<KeyCharacterMap> map = deviceInfo.getKeyCharacterMap();
-    if (map != nullptr) {
-        map = std::make_shared<KeyCharacterMap>(*map);
     }
 
     ScopedLocalRef<jstring> descriptorObj(env,
@@ -67,9 +60,14 @@ jobject android_view_InputDevice_create(JNIEnv* env, const InputDeviceInfo& devi
                                                                   ? layoutInfo->layoutType.c_str()
                                                                   : NULL));
 
+    std::shared_ptr<KeyCharacterMap> map = deviceInfo.getKeyCharacterMap();
+    std::unique_ptr<KeyCharacterMap> mapCopy;
+    if (map != nullptr) {
+        mapCopy = std::make_unique<KeyCharacterMap>(*map);
+    }
     ScopedLocalRef<jobject> kcmObj(env,
                                    android_view_KeyCharacterMap_create(env, deviceInfo.getId(),
-                                                                       map));
+                                                                       std::move(mapCopy)));
     if (!kcmObj.get()) {
         return NULL;
     }
@@ -105,6 +103,18 @@ jobject android_view_InputDevice_create(JNIEnv* env, const InputDeviceInfo& devi
         }
     }
 
+    if (com::android::input::flags::input_device_view_behavior_api()) {
+        const InputDeviceViewBehavior& viewBehavior = deviceInfo.getViewBehavior();
+        std::optional<bool> defaultSmoothScroll = viewBehavior.shouldSmoothScroll;
+        if (defaultSmoothScroll.has_value()) {
+            env->CallVoidMethod(inputDeviceObj.get(), gInputDeviceClassInfo.setShouldSmoothScroll,
+                                *defaultSmoothScroll);
+            if (env->ExceptionCheck()) {
+                return NULL;
+            }
+        }
+    }
+
     return env->NewLocalRef(inputDeviceObj.get());
 }
 
@@ -120,6 +130,8 @@ int register_android_view_InputDevice(JNIEnv* env)
 
     gInputDeviceClassInfo.addMotionRange =
             GetMethodIDOrDie(env, gInputDeviceClassInfo.clazz, "addMotionRange", "(IIFFFFF)V");
+    gInputDeviceClassInfo.setShouldSmoothScroll =
+            GetMethodIDOrDie(env, gInputDeviceClassInfo.clazz, "setShouldSmoothScroll", "(Z)V");
     return 0;
 }
 

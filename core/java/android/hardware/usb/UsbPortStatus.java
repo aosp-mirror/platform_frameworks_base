@@ -16,19 +16,18 @@
 
 package android.hardware.usb;
 
-import android.Manifest;
 import android.annotation.CheckResult;
+import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
+import android.hardware.usb.flags.Flags;
 import android.os.Parcel;
 import android.os.Parcelable;
 
 import com.android.internal.annotations.Immutable;
 
-import java.lang.StringBuilder;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
@@ -310,6 +309,54 @@ public final class UsbPortStatus implements Parcelable {
     public static final int COMPLIANCE_WARNING_MISSING_RP = 4;
 
     /**
+     * Used to indicate the charging setups on the USB ports are unable to
+     * deliver negotiated power. Introduced in Android V (API level 35)
+     * and client applicantions that target API levels lower than 35 will
+     * receive {@link #COMPLIANCE_WARNING_OTHER} instead.
+     */
+    @FlaggedApi(Flags.FLAG_ENABLE_USB_DATA_COMPLIANCE_WARNING)
+    public static final int COMPLIANCE_WARNING_INPUT_POWER_LIMITED = 5;
+
+    /**
+     * Used to indicate the cable/connector on the USB ports are missing
+     * the required wires on the data pins to make data transfer.
+     * Introduced in Android V (API level 35) and client applicantions that
+     * target API levels lower than 35 will receive
+     * {@link #COMPLIANCE_WARNING_OTHER} instead.
+     */
+    @FlaggedApi(Flags.FLAG_ENABLE_USB_DATA_COMPLIANCE_WARNING)
+    public static final int COMPLIANCE_WARNING_MISSING_DATA_LINES = 6;
+
+    /**
+     * Used to indicate enumeration failures on the USB ports, potentially due to
+     * signal integrity issues or other causes. Introduced in Android V
+     * (API level 35) and client applicantions that target API levels lower
+     * than 35 will receive {@link #COMPLIANCE_WARNING_OTHER} instead.
+     */
+    @FlaggedApi(Flags.FLAG_ENABLE_USB_DATA_COMPLIANCE_WARNING)
+    public static final int COMPLIANCE_WARNING_ENUMERATION_FAIL = 7;
+
+    /**
+     * Used to indicate unexpected data disconnection on the USB ports,
+     * potentially due to signal integrity issues or other causes.
+     * Introduced in Android V (API level 35) and client applicantions that
+     * target API levels lower than 35 will receive
+     * {@link #COMPLIANCE_WARNING_OTHER} instead.
+     */
+    @FlaggedApi(Flags.FLAG_ENABLE_USB_DATA_COMPLIANCE_WARNING)
+    public static final int COMPLIANCE_WARNING_FLAKY_CONNECTION = 8;
+
+    /**
+     * Used to indicate unreliable or slow data transfer on the USB ports,
+     * potentially due to signal integrity issues or other causes.
+     * Introduced in Android V (API level 35) and client applicantions that
+     * target API levels lower than 35 will receive
+     * {@link #COMPLIANCE_WARNING_OTHER} instead.
+     */
+    @FlaggedApi(Flags.FLAG_ENABLE_USB_DATA_COMPLIANCE_WARNING)
+    public static final int COMPLIANCE_WARNING_UNRELIABLE_IO = 9;
+
+    /**
      * Indicates that the Type-C plug orientation cannot be
      * determined because the connected state of the device is unknown.
      */
@@ -372,6 +419,11 @@ public final class UsbPortStatus implements Parcelable {
             COMPLIANCE_WARNING_DEBUG_ACCESSORY,
             COMPLIANCE_WARNING_BC_1_2,
             COMPLIANCE_WARNING_MISSING_RP,
+            COMPLIANCE_WARNING_INPUT_POWER_LIMITED,
+            COMPLIANCE_WARNING_MISSING_DATA_LINES,
+            COMPLIANCE_WARNING_ENUMERATION_FAIL,
+            COMPLIANCE_WARNING_FLAKY_CONNECTION,
+            COMPLIANCE_WARNING_UNRELIABLE_IO,
     })
     @Retention(RetentionPolicy.SOURCE)
     @interface ComplianceWarning{}
@@ -525,6 +577,21 @@ public final class UsbPortStatus implements Parcelable {
     }
 
     /**
+     * This function checks if the port is USB Power Delivery (PD) compliant -
+     * https://www.usb.org/usb-charger-pd. All of the power and data roles must be supported for a
+     * port to be PD compliant.
+     *
+     * @return true if the port is PD compliant.
+     */
+    @FlaggedApi(Flags.FLAG_ENABLE_IS_PD_COMPLIANT_API)
+    public boolean isPdCompliant() {
+        return isRoleCombinationSupported(POWER_ROLE_SINK, DATA_ROLE_DEVICE)
+                && isRoleCombinationSupported(POWER_ROLE_SINK, DATA_ROLE_HOST)
+                && isRoleCombinationSupported(POWER_ROLE_SOURCE, DATA_ROLE_DEVICE)
+                && isRoleCombinationSupported(POWER_ROLE_SOURCE, DATA_ROLE_HOST);
+    }
+
+    /**
      * Get the supported role combinations.
      */
     public int getSupportedRoleCombinations() {
@@ -591,7 +658,7 @@ public final class UsbPortStatus implements Parcelable {
      * @return array including {@link #COMPLIANCE_WARNING_OTHER},
      *         {@link #COMPLIANCE_WARNING_DEBUG_ACCESSORY},
      *         {@link #COMPLIANCE_WARNING_BC_1_2},
-     *         or {@link #COMPLIANCE_WARNING_MISSING_RP}
+     *         {@link #COMPLIANCE_WARNING_MISSING_RP}.
      */
     @CheckResult
     @NonNull

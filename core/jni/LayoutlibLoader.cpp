@@ -362,12 +362,30 @@ static void init_keyboard(JNIEnv* env, const vector<string>& keyboardPaths) {
 
 using namespace android;
 
+// Called right before aborting by LOG_ALWAYS_FATAL. Print the pending exception.
+void abort_handler(const char* abort_message) {
+    ALOGE("About to abort the process...");
+
+    JNIEnv* env = NULL;
+    if (javaVM->GetEnv(reinterpret_cast<void**>(&env), JNI_VERSION_1_6) != JNI_OK) {
+        ALOGE("vm->GetEnv() failed");
+        return;
+    }
+    if (env->ExceptionOccurred() != NULL) {
+        ALOGE("Pending exception:");
+        env->ExceptionDescribe();
+    }
+    ALOGE("Aborting because: %s", abort_message);
+}
+
 JNIEXPORT jint JNI_OnLoad(JavaVM* vm, void*) {
     javaVM = vm;
     JNIEnv* env = nullptr;
     if (vm->GetEnv(reinterpret_cast<void**>(&env), JNI_VERSION_1_6) != JNI_OK) {
         return JNI_ERR;
     }
+
+    __android_log_set_aborter(abort_handler);
 
     init_android_graphics();
 
@@ -416,11 +434,17 @@ JNIEXPORT jint JNI_OnLoad(JavaVM* vm, void*) {
                                                            env->NewStringUTF("icu.data.path"),
                                                            env->NewStringUTF(""));
     const char* path = env->GetStringUTFChars(stringPath, 0);
-    bool icuInitialized = init_icu(path);
-    env->ReleaseStringUTFChars(stringPath, path);
-    if (!icuInitialized) {
-        return JNI_ERR;
+
+    if (strcmp(path, "**n/a**") != 0) {
+        bool icuInitialized = init_icu(path);
+        if (!icuInitialized) {
+            fprintf(stderr, "Failed to initialize ICU\n");
+            return JNI_ERR;
+        }
+    } else {
+        fprintf(stderr, "Skip initializing ICU\n");
     }
+    env->ReleaseStringUTFChars(stringPath, path);
 
     jstring useJniProperty =
             (jstring)env->CallStaticObjectMethod(system, getPropertyMethod,
@@ -449,12 +473,18 @@ JNIEXPORT jint JNI_OnLoad(JavaVM* vm, void*) {
     // Use English locale for number format to ensure correct parsing of floats when using strtof
     setlocale(LC_NUMERIC, "en_US.UTF-8");
 
-    auto keyboardPathsString =
+    auto keyboardPathsJString =
             (jstring)env->CallStaticObjectMethod(system, getPropertyMethod,
                                                  env->NewStringUTF("keyboard_paths"),
                                                  env->NewStringUTF(""));
-    vector<string> keyboardPaths = parseCsv(env, keyboardPathsString);
-    init_keyboard(env, keyboardPaths);
+    const char* keyboardPathsString = env->GetStringUTFChars(keyboardPathsJString, 0);
+    if (strcmp(keyboardPathsString, "**n/a**") != 0) {
+        vector<string> keyboardPaths = parseCsv(env, keyboardPathsJString);
+        init_keyboard(env, keyboardPaths);
+    } else {
+        fprintf(stderr, "Skip initializing keyboard\n");
+    }
+    env->ReleaseStringUTFChars(keyboardPathsJString, keyboardPathsString);
 
     return JNI_VERSION_1_6;
 }

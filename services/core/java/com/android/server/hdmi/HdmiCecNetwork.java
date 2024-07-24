@@ -655,7 +655,11 @@ public class HdmiCecNetwork {
                     .setPortId(physicalAddressToPortId(physicalAddress))
                     .setDeviceType(type)
                     .build();
-            updateCecDevice(updatedDeviceInfo);
+            if (deviceInfo.getPhysicalAddress() != physicalAddress) {
+                addCecDevice(updatedDeviceInfo);
+            } else {
+                updateCecDevice(updatedDeviceInfo);
+            }
         }
     }
 
@@ -865,6 +869,28 @@ public class HdmiCecNetwork {
         initPortInfo();
         clearDeviceList();
         clearLocalDevices();
+    }
+
+    @ServiceThreadOnly
+    void removeUnusedLocalDevices(ArrayList<HdmiCecLocalDevice> allocatedDevices) {
+        ArrayList<Integer> deviceTypesToRemove = new ArrayList<>();
+        for (int i = 0; i < mLocalDevices.size(); i++) {
+            int deviceType = mLocalDevices.keyAt(i);
+            boolean shouldRemoveLocalDevice = allocatedDevices.stream().noneMatch(
+                    localDevice -> localDevice.getDeviceInfo() != null
+                    && localDevice.getDeviceInfo().getDeviceType() == deviceType);
+            if (shouldRemoveLocalDevice) {
+                deviceTypesToRemove.add(deviceType);
+            }
+        }
+        for (Integer deviceType : deviceTypesToRemove) {
+            mLocalDevices.remove(deviceType);
+        }
+    }
+
+    @ServiceThreadOnly
+    void removeLocalDeviceWithType(int deviceType) {
+        mLocalDevices.remove(deviceType);
     }
 
     @ServiceThreadOnly

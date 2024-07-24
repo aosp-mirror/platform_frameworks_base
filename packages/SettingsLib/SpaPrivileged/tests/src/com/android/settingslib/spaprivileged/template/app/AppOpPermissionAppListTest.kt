@@ -20,9 +20,7 @@ import android.app.AppOpsManager
 import android.content.Context
 import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManager
-import androidx.compose.runtime.State
 import androidx.compose.ui.test.junit4.createComposeRule
-import androidx.lifecycle.MutableLiveData
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.android.settingslib.spa.testutils.firstWithTimeoutOrNull
@@ -31,49 +29,38 @@ import com.android.settingslib.spaprivileged.model.app.IAppOpsController
 import com.android.settingslib.spaprivileged.model.app.IPackageManagers
 import com.android.settingslib.spaprivileged.test.R
 import com.google.common.truth.Truth.assertThat
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
-import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.Mock
-import org.mockito.Mockito.any
-import org.mockito.Mockito.anyInt
-import org.mockito.Mockito.anyString
-import org.mockito.Mockito.doNothing
-import org.mockito.Mockito.verify
-import org.mockito.Mockito.`when` as whenever
-import org.mockito.Spy
-import org.mockito.junit.MockitoJUnit
-import org.mockito.junit.MockitoRule
+import org.mockito.kotlin.any
+import org.mockito.kotlin.doNothing
+import org.mockito.kotlin.doReturn
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.spy
+import org.mockito.kotlin.verify
+import org.mockito.kotlin.whenever
 
-@OptIn(ExperimentalCoroutinesApi::class)
 @RunWith(AndroidJUnit4::class)
 class AppOpPermissionAppListTest {
-    @get:Rule val mockito: MockitoRule = MockitoJUnit.rule()
+    @get:Rule
+    val composeTestRule = createComposeRule()
 
-    @get:Rule val composeTestRule = createComposeRule()
+    private val packageManagers = mock<IPackageManagers>()
 
-    @Spy private val context: Context = ApplicationProvider.getApplicationContext()
+    private val appOpsManager = mock<AppOpsManager>()
 
-    @Mock private lateinit var packageManagers: IPackageManagers
-
-    @Mock private lateinit var appOpsManager: AppOpsManager
-
-    @Mock private lateinit var packageManager: PackageManager
-
-    private lateinit var listModel: TestAppOpPermissionAppListModel
-
-    @Before
-    fun setUp() {
-        whenever(context.appOpsManager).thenReturn(appOpsManager)
-        whenever(context.packageManager).thenReturn(packageManager)
-        doNothing().`when`(packageManager)
-                .updatePermissionFlags(anyString(), anyString(), anyInt(), anyInt(), any())
-        listModel = TestAppOpPermissionAppListModel()
+    private val packageManager = mock<PackageManager> {
+        doNothing().whenever(mock).updatePermissionFlags(any(), any(), any(), any(), any())
     }
+
+    private val context: Context = spy(ApplicationProvider.getApplicationContext()) {
+        on { appOpsManager } doReturn appOpsManager
+        on { packageManager } doReturn packageManager
+    }
+
+    private val listModel = TestAppOpPermissionAppListModel()
 
     @Test
     fun transformItem_recordHasCorrectApp() {
@@ -311,9 +298,9 @@ class AppOpPermissionAppListTest {
     }
 
     private fun getIsAllowed(record: AppOpPermissionRecord): Boolean? {
-        lateinit var isAllowedState: State<Boolean?>
+        lateinit var isAllowedState: () -> Boolean?
         composeTestRule.setContent { isAllowedState = listModel.isAllowed(record) }
-        return isAllowedState.value
+        return isAllowedState()
     }
 
     private inner class TestAppOpPermissionAppListModel :
@@ -342,7 +329,7 @@ class AppOpPermissionAppListTest {
 private class FakeAppOpsController(private val fakeMode: Int) : IAppOpsController {
     var setAllowedCalledWith: Boolean? = null
 
-    override val mode = MutableLiveData(fakeMode)
+    override val mode = flowOf(fakeMode)
 
     override fun setAllowed(allowed: Boolean) {
         setAllowedCalledWith = allowed

@@ -21,15 +21,14 @@ import static com.android.internal.os.PowerProfile.POWER_GROUP_DISPLAY_AMBIENT;
 import static com.android.internal.os.PowerProfile.POWER_GROUP_DISPLAY_SCREEN_FULL;
 import static com.android.internal.os.PowerProfile.POWER_GROUP_DISPLAY_SCREEN_ON;
 
-import static com.google.common.truth.Truth.assertThat;
-
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
 import android.annotation.XmlRes;
 import android.content.Context;
 import android.content.res.Resources;
 import android.content.res.XmlResourceParser;
+import android.platform.test.annotations.IgnoreUnderRavenwood;
+import android.platform.test.ravenwood.RavenwoodRule;
 
 import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
@@ -41,6 +40,7 @@ import com.android.internal.util.XmlUtils;
 
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -53,7 +53,10 @@ import org.junit.runner.RunWith;
  */
 @SmallTest
 @RunWith(AndroidJUnit4.class)
+@IgnoreUnderRavenwood(blockedBy = PowerProfile.class)
 public class PowerProfileTest {
+    @Rule
+    public final RavenwoodRule mRavenwood = new RavenwoodRule();
 
     static final String TAG_TEST_MODEM = "test-modem";
     static final String ATTR_NAME = "name";
@@ -71,18 +74,13 @@ public class PowerProfileTest {
     public void testPowerProfile() {
         mProfile.forceInitForTesting(mContext, R.xml.power_profile_test);
 
-        assertEquals(2, mProfile.getNumCpuClusters());
-        assertEquals(4, mProfile.getNumCoresInCpuCluster(0));
-        assertEquals(4, mProfile.getNumCoresInCpuCluster(1));
         assertEquals(5.0, mProfile.getAveragePower(PowerProfile.POWER_CPU_SUSPEND));
         assertEquals(1.11, mProfile.getAveragePower(PowerProfile.POWER_CPU_IDLE));
         assertEquals(2.55, mProfile.getAveragePower(PowerProfile.POWER_CPU_ACTIVE));
-        assertEquals(2.11, mProfile.getAveragePowerForCpuCluster(0));
-        assertEquals(2.22, mProfile.getAveragePowerForCpuCluster(1));
-        assertEquals(3, mProfile.getNumSpeedStepsInCpuCluster(0));
-        assertEquals(30.0, mProfile.getAveragePowerForCpuCore(0, 2));
-        assertEquals(4, mProfile.getNumSpeedStepsInCpuCluster(1));
-        assertEquals(60.0, mProfile.getAveragePowerForCpuCore(1, 3));
+        assertEquals(2.11, mProfile.getAveragePowerForCpuScalingPolicy(0));
+        assertEquals(2.22, mProfile.getAveragePowerForCpuScalingPolicy(3));
+        assertEquals(30.0, mProfile.getAveragePowerForCpuScalingStep(0, 2));
+        assertEquals(60.0, mProfile.getAveragePowerForCpuScalingStep(3, 3));
         assertEquals(3000.0, mProfile.getBatteryCapacity());
         assertEquals(0.5,
                 mProfile.getAveragePowerForOrdinal(POWER_GROUP_DISPLAY_AMBIENT, 0));
@@ -129,6 +127,23 @@ public class PowerProfileTest {
                 PowerProfile.SUBSYSTEM_MODEM | ModemPowerProfile.MODEM_RAT_TYPE_DEFAULT
                         | ModemPowerProfile.MODEM_DRAIN_TYPE_TX
                         | ModemPowerProfile.MODEM_TX_LEVEL_4));
+    }
+    @Test
+    public void testPowerProfile_legacyCpuConfig() {
+        // This power profile has per-cluster data, rather than per-policy
+        mProfile.forceInitForTesting(mContext, R.xml.power_profile_test_cpu_legacy);
+
+        assertEquals(2.11, mProfile.getAveragePowerForCpuScalingPolicy(0));
+        assertEquals(2.22, mProfile.getAveragePowerForCpuScalingPolicy(4));
+        assertEquals(30.0, mProfile.getAveragePowerForCpuScalingStep(0, 2));
+        assertEquals(60.0, mProfile.getAveragePowerForCpuScalingStep(4, 3));
+        assertEquals(3000.0, mProfile.getBatteryCapacity());
+        assertEquals(0.5,
+                mProfile.getAveragePowerForOrdinal(POWER_GROUP_DISPLAY_AMBIENT, 0));
+        assertEquals(100.0,
+                mProfile.getAveragePowerForOrdinal(POWER_GROUP_DISPLAY_SCREEN_ON, 0));
+        assertEquals(800.0,
+                mProfile.getAveragePowerForOrdinal(POWER_GROUP_DISPLAY_SCREEN_FULL, 0));
     }
 
     @Test
@@ -524,65 +539,7 @@ public class PowerProfileTest {
         return null;
     }
 
-    private void assertEquals(int expected, int actual) {
-        Assert.assertEquals(expected, actual);
-    }
-
     private void assertEquals(double expected, double actual) {
         Assert.assertEquals(expected, actual, 0.1);
-    }
-
-
-    @Test
-    public void powerBrackets_specifiedInPowerProfile() {
-        mProfile.forceInitForTesting(mContext, R.xml.power_profile_test_power_brackets);
-        mProfile.initCpuPowerBrackets(8);
-
-        int cpuPowerBracketCount = mProfile.getCpuPowerBracketCount();
-        assertThat(cpuPowerBracketCount).isEqualTo(2);
-        assertThat(new int[]{
-                mProfile.getPowerBracketForCpuCore(0, 0),
-                mProfile.getPowerBracketForCpuCore(1, 0),
-                mProfile.getPowerBracketForCpuCore(1, 1),
-        }).isEqualTo(new int[]{1, 1, 0});
-    }
-
-    @Test
-    public void powerBrackets_automatic() {
-        mProfile.forceInitForTesting(mContext, R.xml.power_profile_test);
-
-        assertThat(mProfile.getCpuPowerBracketCount()).isEqualTo(3);
-        assertThat(mProfile.getCpuPowerBracketDescription(0))
-                .isEqualTo("0/300(10.0)");
-        assertThat(mProfile.getCpuPowerBracketDescription(1))
-                .isEqualTo("0/1000(20.0), 0/2000(30.0), 1/300(25.0)");
-        assertThat(mProfile.getCpuPowerBracketDescription(2))
-                .isEqualTo("1/1000(35.0), 1/2500(50.0), 1/3000(60.0)");
-        assertThat(new int[]{
-                mProfile.getPowerBracketForCpuCore(0, 0),
-                mProfile.getPowerBracketForCpuCore(0, 1),
-                mProfile.getPowerBracketForCpuCore(0, 2),
-                mProfile.getPowerBracketForCpuCore(1, 0),
-                mProfile.getPowerBracketForCpuCore(1, 1),
-                mProfile.getPowerBracketForCpuCore(1, 2),
-                mProfile.getPowerBracketForCpuCore(1, 3),
-        }).isEqualTo(new int[]{0, 1, 1, 1, 2, 2, 2});
-    }
-
-    @Test
-    public void powerBrackets_moreBracketsThanStates() {
-        mProfile.forceInitForTesting(mContext, R.xml.power_profile_test);
-        mProfile.initCpuPowerBrackets(8);
-
-        assertThat(mProfile.getCpuPowerBracketCount()).isEqualTo(7);
-        assertThat(new int[]{
-                mProfile.getPowerBracketForCpuCore(0, 0),
-                mProfile.getPowerBracketForCpuCore(0, 1),
-                mProfile.getPowerBracketForCpuCore(0, 2),
-                mProfile.getPowerBracketForCpuCore(1, 0),
-                mProfile.getPowerBracketForCpuCore(1, 1),
-                mProfile.getPowerBracketForCpuCore(1, 2),
-                mProfile.getPowerBracketForCpuCore(1, 3),
-        }).isEqualTo(new int[]{0, 1, 2, 3, 4, 5, 6});
     }
 }

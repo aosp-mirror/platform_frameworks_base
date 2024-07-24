@@ -21,7 +21,7 @@ import android.content.pm.CrossProfileAppsInternal;
 import com.android.server.SystemService;
 
 public class CrossProfileAppsService extends SystemService {
-    private CrossProfileAppsServiceImpl mServiceImpl;
+    private final CrossProfileAppsServiceImpl mServiceImpl;
 
     public CrossProfileAppsService(Context context) {
         super(context);

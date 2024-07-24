@@ -18,14 +18,17 @@ package android.view;
 
 import static android.Manifest.permission.CONFIGURE_DISPLAY_COLOR_MODE;
 import static android.Manifest.permission.CONTROL_DISPLAY_BRIGHTNESS;
+import static android.hardware.flags.Flags.FLAG_OVERLAYPROPERTIES_CLASS_API;
 
 import android.Manifest;
+import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SuppressLint;
 import android.annotation.TestApi;
+import android.app.ActivityThread;
 import android.app.KeyguardManager;
 import android.app.WindowConfiguration;
 import android.compat.annotation.UnsupportedAppUsage;
@@ -83,6 +86,7 @@ import java.util.function.Consumer;
  * that are currently attached and whether mirroring has been enabled.
  * </p>
  */
+@android.ravenwood.annotation.RavenwoodKeepPartialClass
 public final class Display {
     private static final String TAG = "Display";
     private static final boolean DEBUG = false;
@@ -273,15 +277,14 @@ public final class Display {
     /**
      * Display flag: Indicates that the display should show system decorations.
      * <p>
-     * This flag identifies secondary displays that should show system decorations, such as status
-     * bar, navigation bar, home activity or IME.
+     * This flag identifies secondary displays that should show system decorations, such as
+     * navigation bar, home activity or wallpaper.
      * </p>
      * <p>Note that this flag doesn't work without {@link #FLAG_TRUSTED}</p>
      *
      * @see #getFlags()
      * @hide
      */
-    // TODO (b/114338689): Remove the flag and use IWindowManager#setShouldShowSystemDecors
     public static final int FLAG_SHOULD_SHOW_SYSTEM_DECORATIONS = 1 << 6;
 
     /**
@@ -1208,6 +1211,8 @@ public final class Display {
      * @see #REMOVE_MODE_DESTROY_CONTENT
      */
     // TODO (b/114338689): Remove the method and use IWindowManager#getRemoveContentMode
+    @SuppressLint("UnflaggedApi") // @TestApi without associated feature.
+    @TestApi
     public int getRemoveMode() {
         return mDisplayInfo.removeMode;
     }
@@ -1366,7 +1371,8 @@ public final class Display {
             // form of the larger DISPLAY_CHANGED event
             mGlobal.registerDisplayListener(toRegister, executor,
                     DisplayManager.EVENT_FLAG_HDR_SDR_RATIO_CHANGED
-                            | DisplayManagerGlobal.EVENT_DISPLAY_CHANGED);
+                            | DisplayManagerGlobal.EVENT_DISPLAY_CHANGED,
+                    ActivityThread.currentPackageName());
         }
 
     }
@@ -1466,17 +1472,18 @@ public final class Display {
     }
 
     /**
-     * Returns null if it's virtual display.
-     * @hide
+     * Returns the {@link OverlayProperties} of the display.
      */
-    @Nullable
+    @FlaggedApi(FLAG_OVERLAYPROPERTIES_CLASS_API)
+    @NonNull
     public OverlayProperties getOverlaySupport() {
         synchronized (mLock) {
             updateDisplayInfoLocked();
-            if (mDisplayInfo.type != TYPE_VIRTUAL) {
+            if (mDisplayInfo.type == TYPE_INTERNAL
+                    || mDisplayInfo.type == TYPE_EXTERNAL) {
                 return mGlobal.getOverlaySupport();
             }
-            return null;
+            return OverlayProperties.getDefault();
         }
     }
 
@@ -1994,6 +2001,7 @@ public final class Display {
      * display power state. In SUSPEND states, updates are absolutely forbidden.
      * @hide
      */
+    @android.ravenwood.annotation.RavenwoodKeep
     public static boolean isSuspendedState(int state) {
         return state == STATE_OFF || state == STATE_DOZE_SUSPEND || state == STATE_ON_SUSPEND;
     }
@@ -2003,6 +2011,7 @@ public final class Display {
      * specified display power state.
      * @hide
      */
+    @android.ravenwood.annotation.RavenwoodKeep
     public static boolean isDozeState(int state) {
         return state == STATE_DOZE || state == STATE_DOZE_SUSPEND;
     }
@@ -2012,6 +2021,7 @@ public final class Display {
      * or {@link #STATE_VR}.
      * @hide
      */
+    @android.ravenwood.annotation.RavenwoodKeep
     public static boolean isActiveState(int state) {
         return state == STATE_ON || state == STATE_VR;
     }
@@ -2020,6 +2030,7 @@ public final class Display {
      * Returns true if the display is in an off state such as {@link #STATE_OFF}.
      * @hide
      */
+    @android.ravenwood.annotation.RavenwoodKeep
     public static boolean isOffState(int state) {
         return state == STATE_OFF;
     }
@@ -2029,6 +2040,7 @@ public final class Display {
      * or {@link #STATE_VR} or {@link #STATE_ON_SUSPEND}.
      * @hide
      */
+    @android.ravenwood.annotation.RavenwoodKeep
     public static boolean isOnState(int state) {
         return state == STATE_ON || state == STATE_VR || state == STATE_ON_SUSPEND;
     }
@@ -2075,6 +2087,7 @@ public final class Display {
      *
      * @see Display#getSupportedModes()
      */
+    @android.ravenwood.annotation.RavenwoodKeepWholeClass
     public static final class Mode implements Parcelable {
         /**
          * @hide
@@ -2089,7 +2102,8 @@ public final class Display {
         private final int mModeId;
         private final int mWidth;
         private final int mHeight;
-        private final float mRefreshRate;
+        private final float mPeakRefreshRate;
+        private final float mVsyncRate;
         @NonNull
         private final float[] mAlternativeRefreshRates;
         @NonNull
@@ -2101,7 +2115,15 @@ public final class Display {
          */
         @TestApi
         public Mode(int width, int height, float refreshRate) {
-            this(INVALID_MODE_ID, width, height, refreshRate, new float[0], new int[0]);
+            this(INVALID_MODE_ID, width, height, refreshRate, refreshRate, new float[0],
+                    new int[0]);
+        }
+
+        /**
+         * @hide
+         */
+        public Mode(int width, int height, float refreshRate, float vsyncRate) {
+            this(INVALID_MODE_ID, width, height, refreshRate, vsyncRate, new float[0], new int[0]);
         }
 
         /**
@@ -2109,18 +2131,29 @@ public final class Display {
          */
         @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
         public Mode(int modeId, int width, int height, float refreshRate) {
-            this(modeId, width, height, refreshRate, new float[0], new int[0]);
+            this(modeId, width, height, refreshRate, refreshRate, new float[0], new int[0]);
         }
 
         /**
          * @hide
          */
         public Mode(int modeId, int width, int height, float refreshRate,
+                    float[] alternativeRefreshRates,
+                    @HdrCapabilities.HdrType int[] supportedHdrTypes) {
+            this(modeId, width, height, refreshRate, refreshRate, alternativeRefreshRates,
+                    supportedHdrTypes);
+        }
+
+        /**
+         * @hide
+         */
+        public Mode(int modeId, int width, int height, float refreshRate, float vsyncRate,
                 float[] alternativeRefreshRates, @HdrCapabilities.HdrType int[] supportedHdrTypes) {
             mModeId = modeId;
             mWidth = width;
             mHeight = height;
-            mRefreshRate = refreshRate;
+            mPeakRefreshRate = refreshRate;
+            mVsyncRate = vsyncRate;
             mAlternativeRefreshRates =
                     Arrays.copyOf(alternativeRefreshRates, alternativeRefreshRates.length);
             Arrays.sort(mAlternativeRefreshRates);
@@ -2171,7 +2204,17 @@ public final class Display {
          * Returns the refresh rate in frames per second.
          */
         public float getRefreshRate() {
-            return mRefreshRate;
+            return mPeakRefreshRate;
+        }
+
+        /**
+         * Returns the vsync rate in frames per second.
+         * The physical vsync rate may be higher than the refresh rate, as the refresh rate may be
+         * constrained by the system.
+         * @hide
+         */
+        public float getVsyncRate() {
+            return mVsyncRate;
         }
 
         /**
@@ -2217,7 +2260,7 @@ public final class Display {
         public boolean matches(int width, int height, float refreshRate) {
             return mWidth == width &&
                     mHeight == height &&
-                    Float.floatToIntBits(mRefreshRate) == Float.floatToIntBits(refreshRate);
+                    Float.floatToIntBits(mPeakRefreshRate) == Float.floatToIntBits(refreshRate);
         }
 
         /**
@@ -2230,9 +2273,9 @@ public final class Display {
          *
          * @hide
          */
-        public boolean matchesIfValid(int width, int height, float refreshRate) {
+        public boolean matchesIfValid(int width, int height, float peakRefreshRate) {
             if (!isWidthValid(width) && !isHeightValid(height)
-                    && !isRefreshRateValid(refreshRate)) {
+                    && !isRefreshRateValid(peakRefreshRate)) {
                 return false;
             }
             if (isWidthValid(width) != isHeightValid(height)) {
@@ -2240,8 +2283,9 @@ public final class Display {
             }
             return (!isWidthValid(width) || mWidth == width)
                     && (!isHeightValid(height) || mHeight == height)
-                    && (!isRefreshRateValid(refreshRate)
-                    || Float.floatToIntBits(mRefreshRate) == Float.floatToIntBits(refreshRate));
+                    && (!isRefreshRateValid(peakRefreshRate)
+                    || Float.floatToIntBits(mPeakRefreshRate)
+                            == Float.floatToIntBits(peakRefreshRate));
         }
 
         /**
@@ -2260,7 +2304,7 @@ public final class Display {
          * @hide
          */
         public boolean isRefreshRateSet() {
-            return mRefreshRate != INVALID_DISPLAY_REFRESH_RATE;
+            return mPeakRefreshRate != INVALID_DISPLAY_REFRESH_RATE;
         }
 
         /**
@@ -2281,7 +2325,8 @@ public final class Display {
                 return false;
             }
             Mode that = (Mode) other;
-            return mModeId == that.mModeId && matches(that.mWidth, that.mHeight, that.mRefreshRate)
+            return mModeId == that.mModeId
+                    && matches(that.mWidth, that.mHeight, that.mPeakRefreshRate)
                     && Arrays.equals(mAlternativeRefreshRates, that.mAlternativeRefreshRates)
                     && Arrays.equals(mSupportedHdrTypes, that.mSupportedHdrTypes);
         }
@@ -2292,7 +2337,8 @@ public final class Display {
             hash = hash * 17 + mModeId;
             hash = hash * 17 + mWidth;
             hash = hash * 17 + mHeight;
-            hash = hash * 17 + Float.floatToIntBits(mRefreshRate);
+            hash = hash * 17 + Float.floatToIntBits(mPeakRefreshRate);
+            hash = hash * 17 + Float.floatToIntBits(mVsyncRate);
             hash = hash * 17 + Arrays.hashCode(mAlternativeRefreshRates);
             hash = hash * 17 + Arrays.hashCode(mSupportedHdrTypes);
             return hash;
@@ -2304,7 +2350,8 @@ public final class Display {
                     .append("id=").append(mModeId)
                     .append(", width=").append(mWidth)
                     .append(", height=").append(mHeight)
-                    .append(", fps=").append(mRefreshRate)
+                    .append(", fps=").append(mPeakRefreshRate)
+                    .append(", vsync=").append(mVsyncRate)
                     .append(", alternativeRefreshRates=")
                     .append(Arrays.toString(mAlternativeRefreshRates))
                     .append(", supportedHdrTypes=")
@@ -2319,8 +2366,8 @@ public final class Display {
         }
 
         private Mode(Parcel in) {
-            this(in.readInt(), in.readInt(), in.readInt(), in.readFloat(), in.createFloatArray(),
-                    in.createIntArray());
+            this(in.readInt(), in.readInt(), in.readInt(), in.readFloat(), in.readFloat(),
+                    in.createFloatArray(), in.createIntArray());
         }
 
         @Override
@@ -2328,7 +2375,8 @@ public final class Display {
             out.writeInt(mModeId);
             out.writeInt(mWidth);
             out.writeInt(mHeight);
-            out.writeFloat(mRefreshRate);
+            out.writeFloat(mPeakRefreshRate);
+            out.writeFloat(mVsyncRate);
             out.writeFloatArray(mAlternativeRefreshRates);
             out.writeIntArray(mSupportedHdrTypes);
         }
@@ -2428,6 +2476,7 @@ public final class Display {
      * <p>You can get an instance for a given {@link Display} object with
      * {@link Display#getHdrCapabilities getHdrCapabilities()}.
      */
+    @android.ravenwood.annotation.RavenwoodKeepWholeClass
     public static final class HdrCapabilities implements Parcelable {
         /**
          * Invalid luminance value.
@@ -2654,6 +2703,7 @@ public final class Display {
             if (displayId == getDisplayId()) {
                 float newRatio = getHdrSdrRatio();
                 if (newRatio != mLastReportedRatio) {
+                    mLastReportedRatio = newRatio;
                     mListener.accept(Display.this);
                 }
             }

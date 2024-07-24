@@ -32,6 +32,7 @@ import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.modules.expresslog.Counter;
+import com.android.server.AppSchedulingModuleThread;
 import com.android.server.job.JobSchedulerService;
 import com.android.server.job.StateControllerProto;
 
@@ -392,7 +393,8 @@ public final class TimeController extends StateController {
                 Slog.d(TAG, "Setting " + tag + " for: " + alarmTimeElapsed);
             }
             mAlarmService.set(alarmType, alarmTimeElapsed,
-                    AlarmManager.WINDOW_HEURISTIC, 0, tag, listener, null, ws);
+                    AlarmManager.WINDOW_HEURISTIC, 0, tag, listener,
+                    AppSchedulingModuleThread.getHandler(), ws);
         }
     }
 

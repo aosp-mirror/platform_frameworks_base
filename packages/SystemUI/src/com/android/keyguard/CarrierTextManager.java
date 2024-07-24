@@ -17,9 +17,9 @@
 package com.android.keyguard;
 
 import static com.android.keyguard.logging.CarrierTextManagerLogger.REASON_ACTIVE_DATA_SUB_CHANGED;
-import static com.android.keyguard.logging.CarrierTextManagerLogger.REASON_ON_SIM_STATE_CHANGED;
 import static com.android.keyguard.logging.CarrierTextManagerLogger.REASON_ON_TELEPHONY_CAPABLE;
 import static com.android.keyguard.logging.CarrierTextManagerLogger.REASON_REFRESH_CARRIER_INFO;
+import static com.android.keyguard.logging.CarrierTextManagerLogger.REASON_SIM_ERROR_STATE_CHANGED;
 
 import android.content.Context;
 import android.content.Intent;
@@ -39,10 +39,10 @@ import androidx.annotation.VisibleForTesting;
 
 import com.android.keyguard.logging.CarrierTextManagerLogger;
 import com.android.settingslib.WirelessUtils;
-import com.android.systemui.R;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
+import com.android.systemui.res.R;
 import com.android.systemui.statusbar.pipeline.wifi.data.repository.WifiRepository;
 import com.android.systemui.telephony.TelephonyListenerManager;
 
@@ -123,12 +123,15 @@ public class CarrierTextManager {
                 return;
             }
 
-            mLogger.logUpdateCarrierTextForReason(REASON_ON_SIM_STATE_CHANGED);
+
+            mLogger.logSimStateChangedCallback(subId, slotId, simState);
             if (getStatusForIccState(simState) == CarrierTextManager.StatusMode.SimIoError) {
                 mSimErrorState[slotId] = true;
+                mLogger.logUpdateCarrierTextForReason(REASON_SIM_ERROR_STATE_CHANGED);
                 updateCarrierText();
             } else if (mSimErrorState[slotId]) {
                 mSimErrorState[slotId] = false;
+                mLogger.logUpdateCarrierTextForReason(REASON_SIM_ERROR_STATE_CHANGED);
                 updateCarrierText();
             }
         }
@@ -206,6 +209,9 @@ public class CarrierTextManager {
                 // This will set/remove the listeners appropriately. Note that it will never double
                 // add the listeners.
                 handleSetListening(mCarrierTextCallback);
+                mainExecutor.execute(() -> {
+                    mKeyguardUpdateMonitor.registerCallback(mCallback);
+                });
             }
         });
     }
@@ -273,7 +279,6 @@ public class CarrierTextManager {
             if (mNetworkSupported.get()) {
                 // Keyguard update monitor expects callbacks from main thread
                 mMainExecutor.execute(() -> {
-                    mKeyguardUpdateMonitor.registerCallback(mCallback);
                     mWakefulnessLifecycle.addObserver(mWakefulnessObserver);
                 });
                 mTelephonyListenerManager.addActiveDataSubscriptionIdListener(mPhoneStateListener);
@@ -286,7 +291,6 @@ public class CarrierTextManager {
         } else {
             mCarrierTextCallback = null;
             mMainExecutor.execute(() -> {
-                mKeyguardUpdateMonitor.removeCallback(mCallback);
                 mWakefulnessLifecycle.removeObserver(mWakefulnessObserver);
             });
             mTelephonyListenerManager.removeActiveDataSubscriptionIdListener(mPhoneStateListener);
@@ -610,36 +614,6 @@ public class CarrierTextManager {
             list.add(string);
         }
         return list;
-    }
-
-    private CharSequence getCarrierHelpTextForSimState(int simState,
-            String plmn, String spn) {
-        int carrierHelpTextId = 0;
-        CarrierTextManager.StatusMode status = getStatusForIccState(simState);
-        switch (status) {
-            case NetworkLocked:
-                carrierHelpTextId = R.string.keyguard_instructions_when_pattern_disabled;
-                break;
-
-            case SimMissing:
-                carrierHelpTextId = R.string.keyguard_missing_sim_instructions_long;
-                break;
-
-            case SimPermDisabled:
-                carrierHelpTextId = R.string.keyguard_permanent_disabled_sim_instructions;
-                break;
-
-            case SimMissingLocked:
-                carrierHelpTextId = R.string.keyguard_missing_sim_instructions;
-                break;
-
-            case Normal:
-            case SimLocked:
-            case SimPukLocked:
-                break;
-        }
-
-        return mContext.getText(carrierHelpTextId);
     }
 
     /** Injectable Buildeer for {@#link CarrierTextManager}. */

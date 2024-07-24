@@ -17,23 +17,22 @@
 package com.android.systemui.mediaprojection.taskswitcher
 
 import com.android.systemui.CoreStartable
+import com.android.systemui.Flags.pssTaskSwitcher
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.flags.FeatureFlags
-import com.android.systemui.flags.Flags
 import com.android.systemui.mediaprojection.taskswitcher.ui.TaskSwitcherNotificationCoordinator
+import dagger.Lazy
 import javax.inject.Inject
 
 @SysUISingleton
 class MediaProjectionTaskSwitcherCoreStartable
 @Inject
 constructor(
-    private val notificationCoordinator: TaskSwitcherNotificationCoordinator,
-    private val featureFlags: FeatureFlags,
+    private val notificationCoordinatorLazy: Lazy<TaskSwitcherNotificationCoordinator>,
 ) : CoreStartable {
 
     override fun start() {
-        if (featureFlags.isEnabled(Flags.PARTIAL_SCREEN_SHARING_TASK_SWITCHER)) {
-            notificationCoordinator.start()
+        if (pssTaskSwitcher()) {
+            notificationCoordinatorLazy.get().start()
         }
     }
 }

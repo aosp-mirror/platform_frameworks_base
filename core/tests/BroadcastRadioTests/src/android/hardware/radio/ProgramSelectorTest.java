@@ -124,6 +124,17 @@ public final class ProgramSelectorTest {
     }
 
     @Test
+    public void construct_withNullInSecondaryIdsForSelector() {
+        IllegalArgumentException thrown = assertThrows(IllegalArgumentException.class, () -> {
+            new ProgramSelector(DAB_PROGRAM_TYPE, DAB_DMB_SID_EXT_IDENTIFIER_1,
+                    new ProgramSelector.Identifier[]{null}, /* vendorIds= */ null);
+        });
+
+        assertWithMessage("Exception for null secondary id")
+                .that(thrown).hasMessageThat().contains("secondaryIds list must not contain nulls");
+    }
+
+    @Test
     public void getProgramType() {
         ProgramSelector selector = getFmSelector(/* secondaryIds= */ null, /* vendorIds= */ null);
 
@@ -269,11 +280,11 @@ public final class ProgramSelectorTest {
 
         ProgramSelector selector = ProgramSelector.createAmFmSelector(band, (int) AM_FREQUENCY);
 
-        assertWithMessage("Program type")
+        assertWithMessage("AM program type without subchannel")
                 .that(selector.getProgramType()).isEqualTo(ProgramSelector.PROGRAM_TYPE_AM);
-        assertWithMessage("Primary identifiers")
+        assertWithMessage("AM primary identifiers without subchannel")
                 .that(selector.getPrimaryId()).isEqualTo(primaryIdExpected);
-        assertWithMessage("Secondary identifiers")
+        assertWithMessage("AM secondary identifiers without subchannel")
                 .that(selector.getSecondaryIds()).isEmpty();
     }
 
@@ -285,12 +296,26 @@ public final class ProgramSelectorTest {
         ProgramSelector selector = ProgramSelector.createAmFmSelector(
                 RadioManager.BAND_INVALID, (int) FM_FREQUENCY);
 
-        assertWithMessage("Program type")
+        assertWithMessage("FM program type without band and subchannel")
                 .that(selector.getProgramType()).isEqualTo(ProgramSelector.PROGRAM_TYPE_FM);
-        assertWithMessage("Primary identifiers")
+        assertWithMessage("FM primary identifiers without band and subchannel")
                 .that(selector.getPrimaryId()).isEqualTo(primaryIdExpected);
-        assertWithMessage("Secondary identifiers")
+        assertWithMessage("FM secondary identifiers without band and subchannel")
                 .that(selector.getSecondaryIds()).isEmpty();
+    }
+
+    @Test
+    public void createAmFmSelector_withValidFrequency() {
+        ProgramSelector.Identifier primaryIdExpected = new ProgramSelector.Identifier(
+                ProgramSelector.IDENTIFIER_TYPE_AMFM_FREQUENCY, AM_FREQUENCY);
+
+        ProgramSelector selector = ProgramSelector.createAmFmSelector(RadioManager.BAND_INVALID,
+                (int) AM_FREQUENCY);
+
+        assertWithMessage("AM program type with valid frequency")
+                .that(selector.getProgramType()).isEqualTo(ProgramSelector.PROGRAM_TYPE_AM);
+        assertWithMessage("AM primary identifiers with valid frequency")
+                .that(selector.getPrimaryId()).isEqualTo(primaryIdExpected);
     }
 
     @Test
@@ -307,12 +332,23 @@ public final class ProgramSelectorTest {
         ProgramSelector selector = ProgramSelector.createAmFmSelector(band, (int) AM_FREQUENCY,
                 subChannel);
 
-        assertWithMessage("Program type")
+        assertWithMessage("AM program type with valid frequency and subchannel")
                 .that(selector.getProgramType()).isEqualTo(ProgramSelector.PROGRAM_TYPE_AM);
-        assertWithMessage("Primary identifiers")
+        assertWithMessage("AM primary identifiers with valid frequency and subchannel")
                 .that(selector.getPrimaryId()).isEqualTo(primaryIdExpected);
-        assertWithMessage("Secondary identifiers")
+        assertWithMessage("AM secondary identifiers with valid frequency and subchannel")
                 .that(selector.getSecondaryIds()).isEqualTo(secondaryIdExpected);
+    }
+
+    @Test
+    public void createAmFmSelector_withInvalidBand_throwsIllegalArgumentException() {
+        IllegalArgumentException thrown = assertThrows(IllegalArgumentException.class, () -> {
+            ProgramSelector.createAmFmSelector(/* band= */ 1000, (int) AM_FREQUENCY);
+        });
+
+        assertWithMessage("Exception for using invalid band")
+                .that(thrown).hasMessageThat().contains(
+                        "Unknown band");
     }
 
     @Test
@@ -437,8 +473,8 @@ public final class ProgramSelectorTest {
 
     @Test
     public void writeToParcel_forProgramSelector() {
-        ProgramSelector selectorExpected =
-                getFmSelector(/* secondaryIds= */ null, /* vendorIds= */ null);
+        ProgramSelector selectorExpected = getDabSelector(new ProgramSelector.Identifier[]{
+                DAB_ENSEMBLE_IDENTIFIER, DAB_FREQUENCY_IDENTIFIER}, /* vendorIds= */ null);
         Parcel parcel = Parcel.obtain();
 
         selectorExpected.writeToParcel(parcel, /* flags= */ 0);

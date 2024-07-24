@@ -34,6 +34,7 @@ import com.android.systemui.flags.FakeFeatureFlags
 import com.android.systemui.flags.Flags
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractorFactory
 import com.android.systemui.plugins.ActivityStarter
+import com.android.systemui.process.ProcessWrapperFake
 import com.android.systemui.statusbar.policy.DeviceProvisionedController
 import com.android.systemui.telephony.data.repository.FakeTelephonyRepository
 import com.android.systemui.telephony.domain.interactor.TelephonyInteractor
@@ -42,7 +43,7 @@ import com.android.systemui.user.data.repository.FakeUserRepository
 import com.android.systemui.user.domain.interactor.GuestUserInteractor
 import com.android.systemui.user.domain.interactor.HeadlessSystemUserMode
 import com.android.systemui.user.domain.interactor.RefreshUsersScheduler
-import com.android.systemui.user.domain.interactor.UserInteractor
+import com.android.systemui.user.domain.interactor.UserSwitcherInteractor
 import com.android.systemui.util.mockito.mock
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -233,19 +234,14 @@ class StatusBarUserChipViewModelTest : SysuiTestCase() {
         }
 
     private fun viewModel(): StatusBarUserChipViewModel {
-        val featureFlags =
-            FakeFeatureFlags().apply {
-                set(Flags.FULL_SCREEN_USER_SWITCHER, false)
-                set(Flags.FACE_AUTH_REFACTOR, true)
-            }
+        val featureFlags = FakeFeatureFlags().apply { set(Flags.FULL_SCREEN_USER_SWITCHER, false) }
         runBlocking {
             userRepository.setUserInfos(listOf(USER_0))
             userRepository.setSelectedUserInfo(USER_0)
         }
         return StatusBarUserChipViewModel(
-            context = context,
             interactor =
-                UserInteractor(
+                UserSwitcherInteractor(
                     applicationContext = context,
                     repository = userRepository,
                     activityStarter = activityStarter,
@@ -263,10 +259,13 @@ class StatusBarUserChipViewModelTest : SysuiTestCase() {
                     broadcastDispatcher = fakeBroadcastDispatcher,
                     keyguardUpdateMonitor = keyguardUpdateMonitor,
                     backgroundDispatcher = testDispatcher,
+                    mainDispatcher = testDispatcher,
                     activityManager = activityManager,
                     refreshUsersScheduler = refreshUsersScheduler,
                     guestUserInteractor = guestUserInteractor,
                     uiEventLogger = uiEventLogger,
+                    userRestrictionChecker = mock(),
+                    processWrapper = ProcessWrapperFake()
                 )
         )
     }

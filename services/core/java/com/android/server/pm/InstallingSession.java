@@ -40,6 +40,7 @@ import android.content.pm.PackageInstaller;
 import android.content.pm.PackageManager;
 import android.content.pm.SigningDetails;
 import android.content.pm.parsing.PackageLite;
+import android.content.pm.verify.domain.DomainSet;
 import android.os.Environment;
 import android.os.Trace;
 import android.os.UserHandle;
@@ -51,8 +52,8 @@ import android.util.Slog;
 import com.android.internal.content.F2fsUtils;
 import com.android.internal.content.InstallLocationUtils;
 import com.android.internal.content.NativeLibraryHelper;
+import com.android.internal.pm.parsing.PackageParser2;
 import com.android.internal.util.Preconditions;
-import com.android.server.pm.parsing.PackageParser2;
 
 import libcore.io.IoUtils;
 
@@ -68,7 +69,7 @@ class InstallingSession {
     final MoveInfo mMoveInfo;
     final IPackageInstallObserver2 mObserver;
     int mInstallFlags;
-    int mDevelopmentInstallFlags;
+    final int mDevelopmentInstallFlags;
     @NonNull
     final InstallSource mInstallSource;
     final String mVolumeUuid;
@@ -94,12 +95,12 @@ class InstallingSession {
     private final UserHandle mUser;
     @NonNull
     final PackageManagerService mPm;
-    final InstallPackageHelper mInstallPackageHelper;
-    final RemovePackageHelper mRemovePackageHelper;
     final boolean mIsInherit;
     final int mSessionId;
     final int mRequireUserAction;
     final boolean mApplicationEnabledSettingPersistent;
+    @Nullable
+    final DomainSet mPreVerifiedDomains;
 
     // For move install
     InstallingSession(OriginInfo originInfo, MoveInfo moveInfo, IPackageInstallObserver2 observer,
@@ -108,8 +109,6 @@ class InstallingSession {
             PackageLite packageLite, PackageManagerService pm) {
         mPm = pm;
         mUser = user;
-        mInstallPackageHelper = new InstallPackageHelper(mPm);
-        mRemovePackageHelper = new RemovePackageHelper(mPm);
         mOriginInfo = originInfo;
         mMoveInfo = moveInfo;
         mObserver = observer;
@@ -134,16 +133,15 @@ class InstallingSession {
         mSessionId = -1;
         mRequireUserAction = USER_ACTION_UNSPECIFIED;
         mApplicationEnabledSettingPersistent = false;
+        mPreVerifiedDomains = null;
     }
 
     InstallingSession(int sessionId, File stagedDir, IPackageInstallObserver2 observer,
             PackageInstaller.SessionParams sessionParams, InstallSource installSource,
             UserHandle user, SigningDetails signingDetails, int installerUid,
-            PackageLite packageLite, PackageManagerService pm) {
+            PackageLite packageLite, DomainSet preVerifiedDomains, PackageManagerService pm) {
         mPm = pm;
         mUser = user;
-        mInstallPackageHelper = new InstallPackageHelper(mPm);
-        mRemovePackageHelper = new RemovePackageHelper(mPm);
         mOriginInfo = OriginInfo.fromStagedFile(stagedDir);
         mMoveInfo = null;
         mInstallReason = fixUpInstallReason(
@@ -169,6 +167,7 @@ class InstallingSession {
         mSessionId = sessionId;
         mRequireUserAction = sessionParams.requireUserAction;
         mApplicationEnabledSettingPersistent = sessionParams.applicationEnabledSettingPersistent;
+        mPreVerifiedDomains = preVerifiedDomains;
     }
 
     @Override
@@ -242,7 +241,7 @@ class InstallingSession {
         // state can change within this delay and hence we need to re-verify certain conditions.
         boolean isStaged = (mInstallFlags & INSTALL_STAGED) != 0;
         if (isStaged) {
-            Pair<Integer, String> ret = mInstallPackageHelper.verifyReplacingVersionCode(
+            Pair<Integer, String> ret = mPm.verifyReplacingVersionCode(
                     pkgLite, mRequiredInstalledVersionCode, mInstallFlags);
             mRet = ret.first;
             if (mRet != INSTALL_SUCCEEDED) {
@@ -540,40 +539,39 @@ class InstallingSession {
                 }
             }
         } else {
-            mInstallPackageHelper.installPackagesTraced(installRequests);
+            mPm.installPackagesTraced(installRequests);
 
             for (InstallRequest request : installRequests) {
-                request.onInstallCompleted();
                 doPostInstall(request);
             }
         }
         for (InstallRequest request : installRequests) {
-            mInstallPackageHelper.restoreAndPostInstall(request);
+            mPm.restoreAndPostInstall(request);
         }
     }
 
     private void doPostInstall(InstallRequest request) {
         if (mMoveInfo != null) {
             if (request.getReturnCode() == PackageManager.INSTALL_SUCCEEDED) {
-                mRemovePackageHelper.cleanUpForMoveInstall(mMoveInfo.mFromUuid,
+                mPm.cleanUpForMoveInstall(mMoveInfo.mFromUuid,
                         mMoveInfo.mPackageName, mMoveInfo.mFromCodePath);
             } else {
-                mRemovePackageHelper.cleanUpForMoveInstall(mMoveInfo.mToUuid,
+                mPm.cleanUpForMoveInstall(mMoveInfo.mToUuid,
                         mMoveInfo.mPackageName, mMoveInfo.mFromCodePath);
             }
         } else {
             if (request.getReturnCode() != PackageManager.INSTALL_SUCCEEDED) {
-                mRemovePackageHelper.removeCodePath(request.getCodeFile());
+                mPm.removeCodePath(request.getCodeFile());
             }
         }
     }
 
     private void cleanUpForFailedInstall(InstallRequest request) {
         if (request.isInstallMove()) {
-            mRemovePackageHelper.cleanUpForMoveInstall(request.getMoveToUuid(),
+            mPm.cleanUpForMoveInstall(request.getMoveToUuid(),
                     request.getMovePackageName(), request.getMoveFromCodePath());
         } else {
-            mRemovePackageHelper.removeCodePath(request.getCodeFile());
+            mPm.removeCodePath(request.getCodeFile());
         }
     }
 

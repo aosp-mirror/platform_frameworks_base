@@ -155,8 +155,7 @@ public final class CredentialDescription implements Parcelable {
     }
 
     /**
-     * {@link CredentialDescription#mType} and
-     * {@link CredentialDescription#mSupportedElementKeys} are enough for hashing. Constructor
+     * {@link #getType()} and {@link #getSupportedElementKeys()} are enough for hashing. Constructor
      * enforces {@link CredentialEntry} to have the same type and
      * {@link android.app.slice.Slice} contained by the entry can not be hashed.
      */
@@ -166,8 +165,7 @@ public final class CredentialDescription implements Parcelable {
     }
 
     /**
-     * {@link CredentialDescription#mType} and
-     * {@link CredentialDescription#mSupportedElementKeys} are enough for equality check.
+     * {@link #getType()} and {@link #getSupportedElementKeys()} are enough for equality check.
      */
     @Override
     public boolean equals(Object obj) {

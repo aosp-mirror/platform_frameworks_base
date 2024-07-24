@@ -33,7 +33,7 @@ import android.annotation.NonNull;
 import android.content.ComponentName;
 import android.credentials.CreateCredentialRequest;
 import android.credentials.GetCredentialRequest;
-import android.credentials.ui.UserSelectionDialogResult;
+import android.credentials.selection.UserSelectionDialogResult;
 import android.util.Slog;
 
 import com.android.server.credentials.MetricUtilities;
@@ -247,7 +247,7 @@ public class RequestSessionMetric {
      *
      * @param exceptionBitFinalPhase represents if the final phase provider had an exception
      */
-    private void setHasExceptionFinalPhase(boolean exceptionBitFinalPhase) {
+    public void setHasExceptionFinalPhase(boolean exceptionBitFinalPhase) {
         try {
             mChosenProviderFinalPhaseMetric.setHasException(exceptionBitFinalPhase);
         } catch (Exception e) {

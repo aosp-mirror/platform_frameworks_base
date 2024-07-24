@@ -26,7 +26,7 @@
                 <padding
                     android:left="20dp"
                     android:right="20dp" />
-                <solid android:color="?androidprv:attr/colorSurface" />
+                <solid android:color="?androidprv:attr/materialColorSurfaceContainerHigh" />
             </shape>
         </inset>
     </item>

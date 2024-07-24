@@ -30,6 +30,7 @@ import android.os.Parcelable;
  * Width and height are finite values stored as a floating point representation.
  * </p>
  */
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
 public final class SizeF implements Parcelable {
     /**
      * Create a new immutable SizeF instance.

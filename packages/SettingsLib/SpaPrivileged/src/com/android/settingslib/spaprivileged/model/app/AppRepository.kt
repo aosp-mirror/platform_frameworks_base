@@ -19,15 +19,15 @@ package com.android.settingslib.spaprivileged.model.app
 import android.content.Context
 import android.content.pm.ApplicationInfo
 import android.graphics.drawable.Drawable
+import android.util.IconDrawableFactory
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
 import androidx.compose.runtime.produceState
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.stringResource
-import com.android.settingslib.Utils
 import com.android.settingslib.spa.framework.compose.rememberContext
 import com.android.settingslib.spaprivileged.R
 import com.android.settingslib.spaprivileged.framework.common.userManager
+import com.android.settingslib.spaprivileged.framework.compose.placeholder
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
@@ -41,7 +41,7 @@ interface AppRepository {
     @Composable
     fun produceLabel(app: ApplicationInfo, isClonedAppPage: Boolean = false): State<String> {
         val context = LocalContext.current
-        return produceState(initialValue = stringResource(R.string.summary_placeholder), app) {
+        return produceState(initialValue = placeholder(), app) {
             withContext(Dispatchers.IO) {
                 value = if (isClonedAppPage || isCloneApp(context, app)) {
                     context.getString(R.string.cloned_app_info_label, loadLabel(app))
@@ -66,6 +66,7 @@ interface AppRepository {
 
 internal class AppRepositoryImpl(private val context: Context) : AppRepository {
     private val packageManager = context.packageManager
+    private val iconDrawableFactory = IconDrawableFactory.newInstance(context)
 
     override fun loadLabel(app: ApplicationInfo): String = app.loadLabel(packageManager).toString()
 
@@ -73,7 +74,7 @@ internal class AppRepositoryImpl(private val context: Context) : AppRepository {
     override fun produceIcon(app: ApplicationInfo) =
         produceState<Drawable?>(initialValue = null, app) {
             withContext(Dispatchers.IO) {
-                value = Utils.getBadgedIcon(context, app)
+                value = iconDrawableFactory.getBadgedIcon(app)
             }
         }
 
@@ -83,7 +84,7 @@ internal class AppRepositoryImpl(private val context: Context) : AppRepository {
             withContext(Dispatchers.IO) {
                 value = when {
                     context.userManager.isManagedProfile(app.userId) -> {
-                        context.getString(R.string.category_work)
+                        context.getString(com.android.settingslib.R.string.category_work)
                     }
 
                     else -> null

@@ -33,7 +33,7 @@ import java.util.List;
 /**
  * Maintains all {@link UsbUserSettingsManager} for all users.
  */
-class UsbSettingsManager {
+public class UsbSettingsManager {
     private static final String LOG_TAG = UsbSettingsManager.class.getSimpleName();
     private static final boolean DEBUG = false;
 
@@ -70,7 +70,7 @@ class UsbSettingsManager {
      *
      * @return The settings for the user
      */
-    @NonNull UsbUserSettingsManager getSettingsForUser(@UserIdInt int userId) {
+    public @NonNull UsbUserSettingsManager getSettingsForUser(@UserIdInt int userId) {
         synchronized (mSettingsByUser) {
             UsbUserSettingsManager settings = mSettingsByUser.get(userId);
             if (settings == null) {

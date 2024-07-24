@@ -76,7 +76,6 @@ import android.app.BroadcastOptions;
 import android.app.IStopUserCallback;
 import android.app.IUserSwitchObserver;
 import android.app.KeyguardManager;
-import android.app.admin.DevicePolicyManagerInternal;
 import android.app.usage.UsageEvents;
 import android.appwidget.AppWidgetManagerInternal;
 import android.content.Context;
@@ -98,6 +97,7 @@ import android.os.IProgressListener;
 import android.os.IRemoteCallback;
 import android.os.IUserManager;
 import android.os.Message;
+import android.os.PowerManagerInternal;
 import android.os.PowerWhitelistManager;
 import android.os.Process;
 import android.os.RemoteCallbackList;
@@ -105,6 +105,7 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.os.SystemProperties;
+import android.os.Trace;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.os.storage.IStorageManager;
@@ -126,6 +127,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.policy.IKeyguardDismissCallback;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.FrameworkStatsLog;
+import com.android.internal.util.ObjectUtils;
 import com.android.internal.util.Preconditions;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.server.FactoryResetter;
@@ -146,6 +148,7 @@ import com.android.server.wm.ActivityTaskManagerInternal;
 import com.android.server.wm.WindowManagerService;
 
 import java.io.PrintWriter;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
@@ -261,6 +264,10 @@ class UserController implements Handler.Callback {
     // once target user goes into the foreground. Use mLock when updating
     @GuardedBy("mLock")
     private volatile int mTargetUserId = UserHandle.USER_NULL;
+    // If a user switch request comes during an ongoing user switch, it is postponed to the end of
+    // the current switch, and this variable holds those user ids. Use mLock when updating
+    @GuardedBy("mLock")
+    private final ArrayDeque<Integer> mPendingTargetUserIds = new ArrayDeque<>();
 
     /**
      * Which users have been started, so are allowed to run code.
@@ -291,6 +298,7 @@ class UserController implements Handler.Callback {
 
     /**
      * Mapping from each known user ID to the profile group ID it is associated with.
+     * <p>Users not present in this array have a profile group of NO_PROFILE_GROUP_ID.
      */
     @GuardedBy("mLock")
     private final SparseIntArray mUserProfileGroupIds = new SparseIntArray();
@@ -349,6 +357,8 @@ class UserController implements Handler.Callback {
      * Once total number of unlocked users reach mMaxRunningUsers, least recently used user
      * will be locked.
      */
+    // TODO(b/302662311): Add javadoc changes corresponding to the user property that allows
+    // delayed locking behavior once the private space flag is finalized.
     @GuardedBy("mLock")
     private boolean mDelayUserDataLocking;
 
@@ -358,11 +368,12 @@ class UserController implements Handler.Callback {
     private volatile boolean mAllowUserUnlocking;
 
     /**
-     * Keep track of last active users for mDelayUserDataLocking.
-     * The latest stopped user is placed in front while the least recently stopped user in back.
+     * Keep track of last active users for delayUserDataLocking.
+     * The most recently stopped user with delayed locking is placed in front, while the least
+     * recently stopped user in back.
      */
     @GuardedBy("mLock")
-    private final ArrayList<Integer> mLastActiveUsers = new ArrayList<>();
+    private final ArrayList<Integer> mLastActiveUsersForDelayedLocking = new ArrayList<>();
 
     /**
      * Map of userId to {@link UserCompletedEventType} event flags, indicating which as-yet-
@@ -484,9 +495,7 @@ class UserController implements Handler.Callback {
         mHandler.post(() -> {
             finishUserBoot(uss);
             startProfiles();
-            synchronized (mLock) {
-                stopRunningUsersLU(mMaxRunningUsers);
-            }
+            stopExcessRunningUsers();
         });
     }
 
@@ -510,14 +519,31 @@ class UserController implements Handler.Callback {
         return runningUsers;
     }
 
+    private void stopExcessRunningUsers() {
+        final ArraySet<Integer> exemptedUsers = new ArraySet<>();
+        final List<UserInfo> users = mInjector.getUserManager().getUsers(true);
+        for (int i = 0; i < users.size(); i++) {
+            final int userId = users.get(i).id;
+            if (isAlwaysVisibleUser(userId)) {
+                exemptedUsers.add(userId);
+            }
+        }
+
+        synchronized (mLock) {
+            stopExcessRunningUsersLU(mMaxRunningUsers, exemptedUsers);
+        }
+    }
+
     @GuardedBy("mLock")
-    private void stopRunningUsersLU(int maxRunningUsers) {
+    private void stopExcessRunningUsersLU(int maxRunningUsers, ArraySet<Integer> exemptedUsers) {
         List<Integer> currentlyRunning = getRunningUsersLU();
         Iterator<Integer> iterator = currentlyRunning.iterator();
         while (currentlyRunning.size() > maxRunningUsers && iterator.hasNext()) {
             Integer userId = iterator.next();
-            if (userId == UserHandle.USER_SYSTEM || userId == mCurrentUserId) {
-                // Owner/System user and current user can't be stopped
+            if (userId == UserHandle.USER_SYSTEM
+                    || userId == mCurrentUserId
+                    || exemptedUsers.contains(userId)) {
+                // System and current users can't be stopped, and an exempt user shouldn't be
                 continue;
             }
             // allowDelayedLocking set here as stopping user is done without any explicit request
@@ -595,22 +621,18 @@ class UserController implements Handler.Callback {
             }
         }
 
-        // We need to delay unlocking managed profiles until the parent user
-        // is also unlocked.
-        if (mInjector.getUserManager().isProfile(userId)) {
-            final UserInfo parent = mInjector.getUserManager().getProfileParent(userId);
-            if (parent != null
-                    && isUserRunning(parent.id, ActivityManager.FLAG_AND_UNLOCKED)) {
-                Slogf.d(TAG, "User " + userId + " (parent " + parent.id
-                        + "): attempting unlock because parent is unlocked");
-                maybeUnlockUser(userId);
-            } else {
-                String parentId = (parent == null) ? "<null>" : String.valueOf(parent.id);
-                Slogf.d(TAG, "User " + userId + " (parent " + parentId
-                        + "): delaying unlock because parent is locked");
-            }
-        } else {
+        // We need to delay unlocking profiles until the parent user is also unlocked.
+        final UserInfo parent = mInjector.getUserManager().getProfileParent(userId);
+        if (parent == null) {
+            // Not a profile (or is a parentless profile) so no parent for which to wait.
             maybeUnlockUser(userId);
+        } else if (isUserRunning(parent.id, ActivityManager.FLAG_AND_UNLOCKED)) {
+            Slogf.d(TAG, "User " + userId + " (parent " + parent.id
+                    + "): attempting unlock because parent is unlocked");
+            maybeUnlockUser(userId);
+        } else {
+            Slogf.d(TAG, "User " + userId + " (parent " + parent.id
+                    + "): delaying unlock because parent is locked");
         }
     }
 
@@ -903,13 +925,24 @@ class UserController implements Handler.Callback {
 
     int stopUser(final int userId, final boolean force, boolean allowDelayedLocking,
             final IStopUserCallback stopUserCallback, KeyEvictedCallback keyEvictedCallback) {
-        checkCallingPermission(INTERACT_ACROSS_USERS_FULL, "stopUser");
-        Preconditions.checkArgument(userId >= 0, "Invalid user id %d", userId);
+        TimingsTraceAndSlog t = new TimingsTraceAndSlog();
 
-        enforceShellRestriction(UserManager.DISALLOW_DEBUGGING_FEATURES, userId);
-        synchronized (mLock) {
-            return stopUsersLU(userId, force, allowDelayedLocking, stopUserCallback,
-                    keyEvictedCallback);
+        t.traceBegin("UserController"
+                + (force ? "-force" : "")
+                + (allowDelayedLocking ? "-allowDelayedLocking" : "")
+                + (stopUserCallback != null ? "-withStopUserCallback" : "")
+                + "-" + userId + "-[stopUser]");
+        try {
+            checkCallingPermission(INTERACT_ACROSS_USERS_FULL, "stopUser");
+            Preconditions.checkArgument(userId >= 0, "Invalid user id %d", userId);
+
+            enforceShellRestriction(UserManager.DISALLOW_DEBUGGING_FEATURES, userId);
+            synchronized (mLock) {
+                return stopUsersLU(userId, force, allowDelayedLocking, stopUserCallback,
+                        keyEvictedCallback);
+            }
+        } finally {
+            t.traceEnd();
         }
     }
 
@@ -926,10 +959,10 @@ class UserController implements Handler.Callback {
         if (isCurrentUserLU(userId)) {
             return USER_OP_IS_CURRENT;
         }
+        TimingsTraceAndSlog t = new TimingsTraceAndSlog();
         int[] usersToStop = getUsersToStopLU(userId);
         // If one of related users is system or current, no related users should be stopped
-        for (int i = 0; i < usersToStop.length; i++) {
-            int relatedUserId = usersToStop[i];
+        for (int relatedUserId : usersToStop) {
             if ((UserHandle.USER_SYSTEM == relatedUserId) || isCurrentUserLU(relatedUserId)) {
                 if (DEBUG_MU) {
                     Slogf.i(TAG, "stopUsersLocked cannot stop related user " + relatedUserId);
@@ -938,8 +971,10 @@ class UserController implements Handler.Callback {
                 if (force) {
                     Slogf.i(TAG,
                             "Force stop user " + userId + ". Related users will not be stopped");
+                    t.traceBegin("stopSingleUserLU-force-" + userId + "-[stopUser]");
                     stopSingleUserLU(userId, allowDelayedLocking, stopUserCallback,
                             keyEvictedCallback);
+                    t.traceEnd();
                     return USER_OP_SUCCESS;
                 }
                 return USER_OP_ERROR_RELATED_USERS_CANNOT_STOP;
@@ -947,9 +982,11 @@ class UserController implements Handler.Callback {
         }
         if (DEBUG_MU) Slogf.i(TAG, "stopUsersLocked usersToStop=" + Arrays.toString(usersToStop));
         for (int userIdToStop : usersToStop) {
+            t.traceBegin("stopSingleUserLU-" + userIdToStop + "-[stopUser]");
             stopSingleUserLU(userIdToStop, allowDelayedLocking,
                     userIdToStop == userId ? stopUserCallback : null,
                     userIdToStop == userId ? keyEvictedCallback : null);
+            t.traceEnd();
         }
         return USER_OP_SUCCESS;
     }
@@ -957,17 +994,20 @@ class UserController implements Handler.Callback {
     /**
      * Stops a single User. This can also trigger locking user data out depending on device's
      * config ({@code mDelayUserDataLocking}) and arguments.
-     * User will be unlocked when
-     * - {@code mDelayUserDataLocking} is not set.
-     * - {@code mDelayUserDataLocking} is set and {@code keyEvictedCallback} is non-null.
+     *
+     * In the default configuration for most device and users, users will be locked when stopping.
+     * User will remain unlocked only if all the following are true
+     * <li> {@link #canDelayDataLockingForUser(int)} (based on mDelayUserDataLocking) is true
+     * <li> the parameter {@code allowDelayedLocking} is true
+     * <li> {@code keyEvictedCallback} is null
      * -
      *
      * @param userId User Id to stop and lock the data.
      * @param allowDelayedLocking When set, do not lock user after stopping. Locking can happen
      *                            later when number of unlocked users reaches
      *                            {@code mMaxRunnngUsers}. Note that this is respected only when
-     *                            {@code mDelayUserDataLocking} is set and {@keyEvictedCallback} is
-     *                            null. Otherwise the user will be locked.
+     *                            delayed locking is enabled for this user and {@keyEvictedCallback}
+     *                            is null. Otherwise the user nonetheless will be locked.
      * @param stopUserCallback Callback to notify that user has stopped.
      * @param keyEvictedCallback Callback to notify that user has been unlocked.
      */
@@ -978,20 +1018,21 @@ class UserController implements Handler.Callback {
         Slogf.i(TAG, "stopSingleUserLU userId=" + userId);
         final UserState uss = mStartedUsers.get(userId);
         if (uss == null) {  // User is not started
-            // If mDelayUserDataLocking is set and allowDelayedLocking is not set, we need to lock
-            // the requested user as the client wants to stop and lock the user. On the other hand,
-            // having keyEvictedCallback set will lead into locking user if mDelayUserDataLocking
-            // is set as that means client wants to lock the user immediately.
-            // If mDelayUserDataLocking is not set, the user was already locked when it was stopped
-            // and no further action is necessary.
-            if (mDelayUserDataLocking) {
+            // If canDelayDataLockingForUser() is true and allowDelayedLocking is false, we need
+            // to lock the requested user as the client wants to stop and lock the user. On the
+            // other hand, having keyEvictedCallback set will lead into locking user if
+            // canDelayDataLockingForUser() is true as that means client wants to lock the user
+            // immediately.
+            // If canDelayDataLockingForUser() is false, the user was already locked when it was
+            // stopped and no further action is necessary.
+            if (canDelayDataLockingForUser(userId)) {
                 if (allowDelayedLocking && keyEvictedCallback != null) {
                     Slogf.wtf(TAG, "allowDelayedLocking set with KeyEvictedCallback, ignore it"
                             + " and lock user:" + userId, new RuntimeException());
                     allowDelayedLocking = false;
                 }
                 if (!allowDelayedLocking) {
-                    if (mLastActiveUsers.remove(Integer.valueOf(userId))) {
+                    if (mLastActiveUsersForDelayedLocking.remove(Integer.valueOf(userId))) {
                         // should lock the user, user is already gone
                         final ArrayList<KeyEvictedCallback> keyEvictedCallbacks;
                         if (keyEvictedCallback != null) {
@@ -1029,14 +1070,24 @@ class UserController implements Handler.Callback {
                 && uss.state != UserState.STATE_SHUTDOWN) {
             uss.setState(UserState.STATE_STOPPING);
             UserManagerInternal userManagerInternal = mInjector.getUserManagerInternal();
+            TimingsTraceAndSlog t = new TimingsTraceAndSlog();
+            t.traceBegin("setUserState-STATE_STOPPING-" + userId + "-[stopUser]");
             userManagerInternal.setUserState(userId, uss.state);
+            t.traceEnd();
+            t.traceBegin("unassignUserFromDisplayOnStop-" + userId + "-[stopUser]");
             userManagerInternal.unassignUserFromDisplayOnStop(userId);
+            t.traceEnd();
 
             updateStartedUserArrayLU();
 
             final boolean allowDelayedLockingCopied = allowDelayedLocking;
             Runnable finishUserStoppingAsync = () ->
-                    mHandler.post(() -> finishUserStopping(userId, uss, allowDelayedLockingCopied));
+                    mHandler.post(() -> {
+                        TimingsTraceAndSlog t2 = new TimingsTraceAndSlog();
+                        t2.traceBegin("finishUserStopping-" + userId + "-[stopUser]");
+                        finishUserStopping(userId, uss, allowDelayedLockingCopied);
+                        t2.traceEnd();
+                    });
 
             if (mInjector.getUserManager().isPreCreated(userId)) {
                 finishUserStoppingAsync.run();
@@ -1057,12 +1108,18 @@ class UserController implements Handler.Callback {
                     @Override
                     public void performReceive(Intent intent, int resultCode, String data,
                             Bundle extras, boolean ordered, boolean sticky, int sendingUser) {
+                        asyncTraceEnd("broadcast-ACTION_USER_STOPPING-" + userId + "-[stopUser]",
+                                userId);
                         finishUserStoppingAsync.run();
                     }
                 };
 
+                TimingsTraceAndSlog t2 = new TimingsTraceAndSlog();
+                t2.traceBegin("clearBroadcastQueueForUser-" + userId + "-[stopUser]");
                 // Clear broadcast queue for the user to avoid delivering stale broadcasts
                 mInjector.clearBroadcastQueueForUser(userId);
+                t2.traceEnd();
+                asyncTraceBegin("broadcast-ACTION_USER_STOPPING-" + userId + "-[stopUser]", userId);
                 // Kick things off.
                 mInjector.broadcastIntent(stoppingIntent,
                         null, stoppingReceiver, 0, null, null,
@@ -1093,7 +1150,10 @@ class UserController implements Handler.Callback {
             }
             uss.setState(UserState.STATE_SHUTDOWN);
         }
+        TimingsTraceAndSlog t = new TimingsTraceAndSlog();
+        t.traceBegin("setUserState-STATE_SHUTDOWN-" + userId + "-[stopUser]");
         mInjector.getUserManagerInternal().setUserState(userId, uss.state);
+        t.traceEnd();
 
         mInjector.batteryStatsServiceNoteEvent(
                 BatteryStats.HistoryItem.EVENT_USER_RUNNING_FINISH,
@@ -1101,7 +1161,12 @@ class UserController implements Handler.Callback {
         mInjector.getSystemServiceManager().onUserStopping(userId);
 
         Runnable finishUserStoppedAsync = () ->
-                mHandler.post(() -> finishUserStopped(uss, allowDelayedLocking));
+                mHandler.post(() -> {
+                    TimingsTraceAndSlog t2 = new TimingsTraceAndSlog();
+                    t2.traceBegin("finishUserStopped-" + userId + "-[stopUser]");
+                    finishUserStopped(uss, allowDelayedLocking);
+                    t2.traceEnd();
+                });
         if (mInjector.getUserManager().isPreCreated(userId)) {
             finishUserStoppedAsync.run();
             return;
@@ -1114,9 +1179,11 @@ class UserController implements Handler.Callback {
             @Override
             public void performReceive(Intent intent, int resultCode, String data,
                     Bundle extras, boolean ordered, boolean sticky, int sendingUser) {
+                asyncTraceEnd("broadcast-ACTION_SHUTDOWN-" + userId + "-[stopUser]", userId);
                 finishUserStoppedAsync.run();
             }
         };
+        asyncTraceBegin("broadcast-ACTION_SHUTDOWN-" + userId + "-[stopUser]", userId);
         mInjector.broadcastIntent(shutdownIntent,
                 null, shutdownReceiver, 0, null, null, null,
                 AppOpsManager.OP_NONE,
@@ -1167,6 +1234,7 @@ class UserController implements Handler.Callback {
                 }
             }
         }
+        TimingsTraceAndSlog t = new TimingsTraceAndSlog();
         if (stopped) {
             Slogf.i(TAG, "Removing user state from UserManager.mUserStates for user #" + userId
                     + " as a result of user being stopped");
@@ -1175,20 +1243,33 @@ class UserController implements Handler.Callback {
             mInjector.activityManagerOnUserStopped(userId);
             // Clean up all state and processes associated with the user.
             // Kill all the processes for the user.
+            t.traceBegin("forceStopUser-" + userId + "-[stopUser]");
             forceStopUser(userId, "finish user");
+            t.traceEnd();
         }
 
         for (final IStopUserCallback callback : stopCallbacks) {
             try {
-                if (stopped) callback.userStopped(userId);
-                else callback.userStopAborted(userId);
+                if (stopped) {
+                    t.traceBegin("stopCallbacks.userStopped-" + userId + "-[stopUser]");
+                    callback.userStopped(userId);
+                    t.traceEnd();
+                } else {
+                    t.traceBegin("stopCallbacks.userStopAborted-" + userId + "-[stopUser]");
+                    callback.userStopAborted(userId);
+                    t.traceEnd();
+                }
             } catch (RemoteException ignored) {
             }
         }
 
         if (stopped) {
+            t.traceBegin("systemServiceManagerOnUserStopped-" + userId + "-[stopUser]");
             mInjector.systemServiceManagerOnUserStopped(userId);
+            t.traceEnd();
+            t.traceBegin("taskSupervisorRemoveUser-" + userId + "-[stopUser]");
             mInjector.taskSupervisorRemoveUser(userId);
+            t.traceEnd();
 
             // Remove the user if it is ephemeral.
             if (userInfo.isEphemeral() && !userInfo.preCreated) {
@@ -1270,34 +1351,75 @@ class UserController implements Handler.Callback {
     }
 
     /**
-     * For mDelayUserDataLocking mode, storage once unlocked is kept unlocked.
-     * Total number of unlocked user storage is limited by mMaxRunningUsers.
-     * If there are more unlocked users, evict and lock the least recently stopped user and
-     * lock that user's data. Regardless of the mode, ephemeral user is always locked
-     * immediately.
+     * Returns which user, if any, should be locked when the given user is stopped.
+     *
+     * For typical (non-mDelayUserDataLocking) devices and users, this will be the provided user.
+     *
+     * However, for some devices or users (based on {@link #canDelayDataLockingForUser(int)}),
+     * storage once unlocked is kept unlocked, even after the user is stopped, so the user to be
+     * locked (if any) may differ.
+     *
+     * For mDelayUserDataLocking devices, the total number of unlocked user storage is limited
+     * (currently by mMaxRunningUsers). If there are more unlocked users, evict and lock the least
+     * recently stopped user and lock that user's data.
+     *
+     * Regardless of the mode, ephemeral user is always locked immediately.
      *
      * @return user id to lock. UserHandler.USER_NULL will be returned if no user should be locked.
      */
     @GuardedBy("mLock")
     private int updateUserToLockLU(@UserIdInt int userId, boolean allowDelayedLocking) {
-        int userIdToLock = userId;
-        if (mDelayUserDataLocking && allowDelayedLocking && !getUserInfo(userId).isEphemeral()
-                && !hasUserRestriction(UserManager.DISALLOW_RUN_IN_BACKGROUND, userId)) {
-            mLastActiveUsers.remove((Integer) userId); // arg should be object, not index
-            mLastActiveUsers.add(0, userId);
-            int totalUnlockedUsers = mStartedUsers.size() + mLastActiveUsers.size();
+        if (!canDelayDataLockingForUser(userId)
+                || !allowDelayedLocking
+                || getUserInfo(userId).isEphemeral()
+                || hasUserRestriction(UserManager.DISALLOW_RUN_IN_BACKGROUND, userId)) {
+            return userId;
+        }
+
+        // Once we reach here, we are in a delayed locking scenario.
+        // Now, no user will be locked, unless the device's policy dictates we should based on the
+        // maximum of such users allowed for the device.
+        if (mDelayUserDataLocking) {
+            // arg should be object, not index
+            mLastActiveUsersForDelayedLocking.remove((Integer) userId);
+            mLastActiveUsersForDelayedLocking.add(0, userId);
+            int totalUnlockedUsers = mStartedUsers.size()
+                    + mLastActiveUsersForDelayedLocking.size();
+            // TODO: Decouple the delayed locking flows from mMaxRunningUsers. These users aren't
+            //  running so this calculation shouldn't be based on this parameter. Also note that
+            //  that if these devices ever support background running users (such as profiles), the
+            //  implementation is incorrect since starting such users can cause the max to be
+            //  exceeded.
             if (totalUnlockedUsers > mMaxRunningUsers) { // should lock a user
-                userIdToLock = mLastActiveUsers.get(mLastActiveUsers.size() - 1);
-                mLastActiveUsers.remove(mLastActiveUsers.size() - 1);
-                Slogf.i(TAG, "finishUserStopped, stopping user:" + userId
-                        + " lock user:" + userIdToLock);
-            } else {
-                Slogf.i(TAG, "finishUserStopped, user:" + userId + ", skip locking");
-                // do not lock
-                userIdToLock = UserHandle.USER_NULL;
+                final int userIdToLock = mLastActiveUsersForDelayedLocking.get(
+                        mLastActiveUsersForDelayedLocking.size() - 1);
+                mLastActiveUsersForDelayedLocking
+                        .remove(mLastActiveUsersForDelayedLocking.size() - 1);
+                Slogf.i(TAG, "finishUserStopped: should stop user " + userId
+                        + " but should lock user " + userIdToLock);
+                return userIdToLock;
             }
         }
-        return userIdToLock;
+        Slogf.i(TAG, "finishUserStopped: should stop user " + userId + " but without any locking");
+        return UserHandle.USER_NULL;
+    }
+
+    /**
+     * Returns whether the user can have its CE storage left unlocked, even when it is stopped,
+     * either due to a global device configuration or an individual user's property.
+     */
+    private boolean canDelayDataLockingForUser(@UserIdInt int userIdToLock) {
+        if (allowBiometricUnlockForPrivateProfile()) {
+            final UserProperties userProperties = getUserProperties(userIdToLock);
+            return (mDelayUserDataLocking || (userProperties != null
+                    && userProperties.getAllowStoppingUserWithDelayedLocking()));
+        }
+        return mDelayUserDataLocking;
+    }
+
+    private boolean allowBiometricUnlockForPrivateProfile() {
+        return android.os.Flags.allowPrivateProfile()
+                && android.multiuser.Flags.enableBiometricsToUnlockPrivateSpace();
     }
 
     /**
@@ -1346,7 +1468,7 @@ class UserController implements Handler.Callback {
 
         // Send PROFILE_INACCESSIBLE broadcast if a profile was stopped
         final UserInfo userInfo = getUserInfo(userId);
-        if (userInfo.isProfile()) {
+        if (userInfo != null && userInfo.isProfile()) {
             UserInfo parent = mInjector.getUserManager().getProfileParent(userId);
             if (parent != null) {
                 broadcastProfileAccessibleStateChanged(userId, parent.id,
@@ -1423,10 +1545,8 @@ class UserController implements Handler.Callback {
 
     private boolean shouldStartWithParent(UserInfo user) {
         final UserProperties properties = getUserProperties(user.id);
-        DevicePolicyManagerInternal dpmi =
-                LocalServices.getService(DevicePolicyManagerInternal.class);
         return (properties != null && properties.getStartWithParent())
-                && (!user.isQuietModeEnabled() || dpmi.isKeepProfilesRunningEnabled());
+                && !user.isQuietModeEnabled();
     }
 
     /**
@@ -1693,7 +1813,6 @@ class UserController implements Handler.Callback {
                 boolean userSwitchUiEnabled;
                 synchronized (mLock) {
                     mCurrentUserId = userId;
-                    mTargetUserId = UserHandle.USER_NULL; // reset, mCurrentUserId has caught up
                     userSwitchUiEnabled = mUserSwitchUiEnabled;
                 }
                 mInjector.updateUserConfiguration();
@@ -1816,14 +1935,16 @@ class UserController implements Handler.Callback {
     }
 
     /**
-     * Start user, if its not already running, and bring it to foreground.
+     * Start user, if it's not already running, and bring it to foreground.
      */
     void startUserInForeground(@UserIdInt int targetUserId) {
+        if (android.multiuser.Flags.setPowerModeDuringUserSwitch()) {
+            mInjector.setPerformancePowerMode(true);
+        }
         boolean success = startUser(targetUserId, USER_START_MODE_FOREGROUND);
         if (!success) {
             mInjector.getWindowManager().setSwitchingUser(false);
-            mTargetUserId = UserHandle.USER_NULL;
-            dismissUserSwitchDialog(null);
+            dismissUserSwitchDialog(this::endUserSwitch);
         }
     }
 
@@ -1900,8 +2021,7 @@ class UserController implements Handler.Callback {
             return false;
         }
 
-        // We just unlocked a user, so let's now attempt to unlock any
-        // managed profiles under that user.
+        // We just unlocked a user, so let's now attempt to unlock any profiles under that user.
 
         // First, get list of userIds. Requires mLock, so we cannot make external calls, e.g. to UMS
         int[] userIds;
@@ -1928,28 +2048,36 @@ class UserController implements Handler.Callback {
         EventLog.writeEvent(EventLogTags.UC_SWITCH_USER, targetUserId);
         int currentUserId = getCurrentUserId();
         UserInfo targetUserInfo = getUserInfo(targetUserId);
-        if (targetUserId == currentUserId) {
-            Slogf.i(TAG, "user #" + targetUserId + " is already the current user");
-            return true;
-        }
-        if (targetUserInfo == null) {
-            Slogf.w(TAG, "No user info for user #" + targetUserId);
-            return false;
-        }
-        if (!targetUserInfo.supportsSwitchTo()) {
-            Slogf.w(TAG, "Cannot switch to User #" + targetUserId + ": not supported");
-            return false;
-        }
-        if (FactoryResetter.isFactoryResetting()) {
-            Slogf.w(TAG, "Cannot switch to User #" + targetUserId + ": factory reset in progress");
-            return false;
-        }
         boolean userSwitchUiEnabled;
         synchronized (mLock) {
+            if (targetUserId == currentUserId && mTargetUserId == UserHandle.USER_NULL) {
+                Slogf.i(TAG, "user #" + targetUserId + " is already the current user");
+                return true;
+            }
+            if (targetUserInfo == null) {
+                Slogf.w(TAG, "No user info for user #" + targetUserId);
+                return false;
+            }
+            if (!targetUserInfo.supportsSwitchTo()) {
+                Slogf.w(TAG, "Cannot switch to User #" + targetUserId + ": not supported");
+                return false;
+            }
+            if (FactoryResetter.isFactoryResetting()) {
+                Slogf.w(TAG, "Cannot switch to User #" + targetUserId
+                        + ": factory reset in progress");
+                return false;
+            }
+
             if (!mInitialized) {
                 Slogf.e(TAG, "Cannot switch to User #" + targetUserId
                         + ": UserController not ready yet");
                 return false;
+            }
+            if (mTargetUserId != UserHandle.USER_NULL) {
+                Slogf.w(TAG, "There is already an ongoing user switch to User #" + mTargetUserId
+                        + ". User #" + targetUserId + " will be added to the queue.");
+                mPendingTargetUserIds.offer(targetUserId);
+                return true;
             }
             mTargetUserId = targetUserId;
             userSwitchUiEnabled = mUserSwitchUiEnabled;
@@ -2017,6 +2145,22 @@ class UserController implements Handler.Callback {
         sendUserSwitchBroadcasts(oldUserId, newUserId);
         t.traceEnd();
         t.traceEnd();
+
+        endUserSwitch();
+    }
+
+    private void endUserSwitch() {
+        if (android.multiuser.Flags.setPowerModeDuringUserSwitch()) {
+            mInjector.setPerformancePowerMode(false);
+        }
+        final int nextUserId;
+        synchronized (mLock) {
+            nextUserId = ObjectUtils.getOrElse(mPendingTargetUserIds.poll(), UserHandle.USER_NULL);
+            mTargetUserId = UserHandle.USER_NULL;
+        }
+        if (nextUserId != UserHandle.USER_NULL) {
+            switchUser(nextUserId);
+        }
     }
 
     private void dispatchLockedBootComplete(@UserIdInt int userId) {
@@ -2121,6 +2265,7 @@ class UserController implements Handler.Callback {
                     final IRemoteCallback callback = new IRemoteCallback.Stub() {
                         @Override
                         public void sendResult(Bundle data) throws RemoteException {
+                            asyncTraceEnd("onUserSwitching-" + name, newUserId);
                             synchronized (mLock) {
                                 long delayForObserver = SystemClock.elapsedRealtime()
                                         - dispatchStartedTimeForObserver;
@@ -2138,8 +2283,6 @@ class UserController implements Handler.Callback {
                                             + " ms after dispatchUserSwitch.");
                                 }
 
-                                TimingsTraceAndSlog t2 = new TimingsTraceAndSlog(TAG);
-                                t2.traceBegin("onUserSwitchingReply-" + name);
                                 curWaitingUserSwitchCallbacks.remove(name);
                                 // Continue switching if all callbacks have been notified and
                                 // user switching session is still valid
@@ -2148,13 +2291,11 @@ class UserController implements Handler.Callback {
                                         == mCurWaitingUserSwitchCallbacks)) {
                                     sendContinueUserSwitchLU(uss, oldUserId, newUserId);
                                 }
-                                t2.traceEnd();
                             }
                         }
                     };
-                    t.traceBegin("onUserSwitching-" + name);
+                    asyncTraceBegin("onUserSwitching-" + name, newUserId);
                     mUserSwitchObservers.getBroadcastItem(i).onUserSwitching(newUserId, callback);
-                    t.traceEnd();
                 } catch (RemoteException e) {
                     // Ignore
                 }
@@ -2784,6 +2925,12 @@ class UserController implements Handler.Callback {
         return userId == getCurrentOrTargetUserIdLU();
     }
 
+    /** Returns whether the user is always-visible (such as a communal profile). */
+    private boolean isAlwaysVisibleUser(@UserIdInt int userId) {
+        final UserProperties properties = getUserProperties(userId);
+        return properties != null && properties.getAlwaysVisible();
+    }
+
     int[] getUsers() {
         UserManagerService ums = mInjector.getUserManager();
         return ums != null ? ums.getUserIds() : new int[] { 0 };
@@ -2853,6 +3000,7 @@ class UserController implements Handler.Callback {
         return mInjector.getUserManager().hasUserRestriction(restriction, userId);
     }
 
+    /** Returns whether the two users are in the same profile group. */
     boolean isSameProfileGroup(int callingUserId, int targetUserId) {
         if (callingUserId == targetUserId) {
             return true;
@@ -2900,7 +3048,9 @@ class UserController implements Handler.Callback {
             if (user.profileGroupId == mCurrentUserId) {
                 mCurrentProfileIds = ArrayUtils.appendInt(mCurrentProfileIds, user.id);
             }
-            mUserProfileGroupIds.put(user.id, user.profileGroupId);
+            if (user.profileGroupId != UserInfo.NO_PROFILE_GROUP_ID) {
+                mUserProfileGroupIds.put(user.id, user.profileGroupId);
+            }
         }
     }
 
@@ -2920,8 +3070,8 @@ class UserController implements Handler.Callback {
 
     /**
      * Returns whether the given user requires credential entry at this time. This is used to
-     * intercept activity launches for locked work apps due to work challenge being triggered
-     * or when the profile user is yet to be unlocked.
+     * intercept activity launches for apps corresponding to locked profiles due to separate
+     * challenge being triggered or when the profile user is yet to be unlocked.
      */
     protected boolean shouldConfirmCredentials(@UserIdInt int userId) {
         if (getStartedUserState(userId) == null) {
@@ -3060,7 +3210,7 @@ class UserController implements Handler.Callback {
             pw.println("  mCurrentProfileIds:" + Arrays.toString(mCurrentProfileIds));
             pw.println("  mCurrentUserId:" + mCurrentUserId);
             pw.println("  mTargetUserId:" + mTargetUserId);
-            pw.println("  mLastActiveUsers:" + mLastActiveUsers);
+            pw.println("  mLastActiveUsersForDelayedLocking:" + mLastActiveUsersForDelayedLocking);
             pw.println("  mDelayUserDataLocking:" + mDelayUserDataLocking);
             pw.println("  mAllowUserUnlocking:" + mAllowUserUnlocking);
             pw.println("  shouldStopUserOnSwitch():" + shouldStopUserOnSwitch());
@@ -3290,7 +3440,7 @@ class UserController implements Handler.Callback {
 
     }
 
-    private BroadcastOptions getTemporaryAppAllowlistBroadcastOptions(
+    BroadcastOptions getTemporaryAppAllowlistBroadcastOptions(
             @PowerWhitelistManager.ReasonCode int reasonCode) {
         long duration = 10_000;
         final ActivityManagerInternal amInternal =
@@ -3315,6 +3465,16 @@ class UserController implements Handler.Callback {
             }
         }
         return DEFAULT_USER_SWITCH_TIMEOUT_MS;
+    }
+
+    private static void asyncTraceBegin(String msg, int cookie) {
+        Slogf.d(TAG, "%s - asyncTraceBegin(%d)", msg, cookie);
+        Trace.asyncTraceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, msg, cookie);
+    }
+
+    private static void asyncTraceEnd(String msg, int cookie) {
+        Trace.asyncTraceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER, msg, cookie);
+        Slogf.d(TAG, "%s - asyncTraceEnd(%d)", msg, cookie);
     }
 
     /**
@@ -3382,6 +3542,7 @@ class UserController implements Handler.Callback {
         private final ActivityManagerService mService;
         private UserManagerService mUserManager;
         private UserManagerInternal mUserManagerInternal;
+        private PowerManagerInternal mPowerManagerInternal;
         private Handler mHandler;
         private final Object mUserSwitchingDialogLock = new Object();
         @GuardedBy("mUserSwitchingDialogLock")
@@ -3431,12 +3592,16 @@ class UserController implements Handler.Callback {
                 ordered = false;
             }
 
+            TimingsTraceAndSlog t = new TimingsTraceAndSlog();
             // TODO b/64165549 Verify that mLock is not held before calling AMS methods
             synchronized (mService) {
-                return mService.broadcastIntentLocked(null, null, null, intent, resolvedType,
-                        resultTo, resultCode, resultData, resultExtras, requiredPermissions, null,
-                        null, appOp, bOptions, ordered, sticky, callingPid, callingUid,
-                        realCallingUid, realCallingPid, userId);
+                t.traceBegin("broadcastIntent-" + userId + "-" + intent.getAction());
+                final int result = mService.broadcastIntentLocked(null, null, null, intent,
+                        resolvedType, resultTo, resultCode, resultData, resultExtras,
+                        requiredPermissions, null, null, appOp, bOptions, ordered, sticky,
+                        callingPid, callingUid, realCallingUid, realCallingPid, userId);
+                t.traceEnd();
+                return result;
             }
         }
 
@@ -3479,6 +3644,13 @@ class UserController implements Handler.Callback {
             return mUserManagerInternal;
         }
 
+        PowerManagerInternal getPowerManagerInternal() {
+            if (mPowerManagerInternal == null) {
+                mPowerManagerInternal = LocalServices.getService(PowerManagerInternal.class);
+            }
+            return mPowerManagerInternal;
+        }
+
         KeyguardManager getKeyguardManager() {
             return mService.mContext.getSystemService(KeyguardManager.class);
         }
@@ -3517,7 +3689,7 @@ class UserController implements Handler.Callback {
 
         void activityManagerForceStopPackage(@UserIdInt int userId, String reason) {
             synchronized (mService) {
-                mService.forceStopPackageLocked(null, -1, false, false, true, false, false,
+                mService.forceStopPackageLocked(null, -1, false, false, true, false, false, false,
                         userId, reason);
             }
         };
@@ -3670,6 +3842,12 @@ class UserController implements Handler.Callback {
 
         void onUserStarting(@UserIdInt int userId) {
             getSystemServiceManager().onUserStarting(TimingsTraceAndSlog.newAsyncLog(), userId);
+        }
+
+        void setPerformancePowerMode(boolean enabled) {
+            Slogf.i(TAG, "Setting power mode MODE_FIXED_PERFORMANCE to " + enabled);
+            getPowerManagerInternal().setPowerMode(
+                    PowerManagerInternal.MODE_FIXED_PERFORMANCE, enabled);
         }
 
         void onSystemUserVisibilityChanged(boolean visible) {

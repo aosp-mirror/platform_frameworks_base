@@ -16,17 +16,23 @@
 
 package com.android.systemui.statusbar.pipeline.mobile.data.repository.prod
 
+import android.net.ConnectivityManager
+import android.os.PersistableBundle
 import android.telephony.ServiceState
 import android.telephony.SignalStrength
+import android.telephony.SubscriptionManager.PROFILE_CLASS_UNSET
 import android.telephony.TelephonyCallback
 import android.telephony.TelephonyManager
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
+import com.android.systemui.flags.FakeFeatureFlagsClassic
+import com.android.systemui.flags.Flags.ROAMING_INDICATOR_VIA_DISPLAY_INFO
 import com.android.systemui.log.table.TableLogBuffer
 import com.android.systemui.log.table.TableLogBufferFactory
 import com.android.systemui.statusbar.pipeline.mobile.data.model.NetworkNameModel
 import com.android.systemui.statusbar.pipeline.mobile.data.model.SubscriptionModel
+import com.android.systemui.statusbar.pipeline.mobile.data.model.SystemUiCarrierConfig
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.FakeMobileConnectionRepository
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.MobileConnectionRepository
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.prod.FullMobileConnectionRepository.Companion.COL_EMERGENCY
@@ -66,6 +72,9 @@ import org.mockito.Mockito.verify
 class FullMobileConnectionRepositoryTest : SysuiTestCase() {
     private lateinit var underTest: FullMobileConnectionRepository
 
+    private val flags =
+        FakeFeatureFlagsClassic().also { it.set(ROAMING_INDICATOR_VIA_DISPLAY_INFO, true) }
+
     private val systemClock = FakeSystemClock()
     private val testDispatcher = UnconfinedTestDispatcher()
     private val testScope = TestScope(testDispatcher)
@@ -80,14 +89,19 @@ class FullMobileConnectionRepositoryTest : SysuiTestCase() {
         )
     private val mobileFactory = mock<MobileConnectionRepositoryImpl.Factory>()
     private val carrierMergedFactory = mock<CarrierMergedConnectionRepository.Factory>()
+    private val connectivityManager = mock<ConnectivityManager>()
 
     private val subscriptionModel =
         MutableStateFlow(
             SubscriptionModel(
                 subscriptionId = SUB_ID,
                 carrierName = DEFAULT_NAME,
+                profileClass = PROFILE_CLASS_UNSET,
             )
         )
+
+    // Use a real config, with no overrides
+    private val systemUiCarrierConfig = SystemUiCarrierConfig(SUB_ID, PersistableBundle())
 
     private lateinit var mobileRepo: FakeMobileConnectionRepository
     private lateinit var carrierMergedRepo: FakeMobileConnectionRepository
@@ -678,13 +692,15 @@ class FullMobileConnectionRepositoryTest : SysuiTestCase() {
                 subscriptionModel,
                 DEFAULT_NAME_MODEL,
                 SEP,
+                connectivityManager,
                 telephonyManager,
-                systemUiCarrierConfig = mock(),
+                systemUiCarrierConfig = systemUiCarrierConfig,
                 fakeBroadcastDispatcher,
                 mobileMappingsProxy = mock(),
                 testDispatcher,
                 logger = mock(),
                 tableLogBuffer,
+                flags,
                 testScope.backgroundScope,
             )
         whenever(
@@ -712,6 +728,7 @@ class FullMobileConnectionRepositoryTest : SysuiTestCase() {
                 SUB_ID,
                 tableLogBuffer,
                 telephonyManager,
+                testScope.backgroundScope.coroutineContext,
                 testScope.backgroundScope,
                 wifiRepository,
             )
@@ -734,7 +751,7 @@ class FullMobileConnectionRepositoryTest : SysuiTestCase() {
 
     private companion object {
         const val SUB_ID = 42
-        private val DEFAULT_NAME = "default name"
+        private const val DEFAULT_NAME = "default name"
         private val DEFAULT_NAME_MODEL = NetworkNameModel.Default(DEFAULT_NAME)
         private const val SEP = "-"
         private const val BUFFER_SEPARATOR = "|"

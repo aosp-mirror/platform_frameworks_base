@@ -109,12 +109,6 @@ public:
         drawPoints++;
     }
 
-    int drawImageCount = 0;
-    void onDrawImage2(const SkImage* image, SkScalar dx, SkScalar dy, const SkSamplingOptions&,
-                     const SkPaint* paint) override {
-        drawImageCount++;
-    }
-
     int drawImageRectCount = 0;
     void onDrawImageRect2(const SkImage*, const SkRect&, const SkRect&, const SkSamplingOptions&,
                           const SkPaint*, SkCanvas::SrcRectConstraint) override {

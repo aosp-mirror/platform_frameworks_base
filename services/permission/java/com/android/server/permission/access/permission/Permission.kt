@@ -26,8 +26,7 @@ data class Permission(
     val isReconciled: Boolean,
     val type: Int,
     val appId: Int,
-    @Suppress("ArrayInDataClass")
-    val gids: IntArray = EmptyArray.INT,
+    @Suppress("ArrayInDataClass") val gids: IntArray = EmptyArray.INT,
     val areGidsPerUser: Boolean = false
 ) {
     inline val name: String
@@ -43,8 +42,7 @@ data class Permission(
         get() = type == TYPE_DYNAMIC
 
     inline val protectionLevel: Int
-        @Suppress("DEPRECATION")
-        get() = permissionInfo.protectionLevel
+        @Suppress("DEPRECATION") get() = permissionInfo.protectionLevel
 
     inline val protection: Int
         get() = permissionInfo.protection
@@ -140,9 +138,7 @@ data class Permission(
         get() = permissionInfo.flags.hasBits(PermissionInfo.FLAG_SOFT_RESTRICTED)
 
     inline val isHardOrSoftRestricted: Boolean
-        get() = permissionInfo.flags.hasBits(
-            PermissionInfo.FLAG_HARD_RESTRICTED or PermissionInfo.FLAG_SOFT_RESTRICTED
-        )
+        get() = isHardRestricted || isSoftRestricted
 
     inline val isImmutablyRestricted: Boolean
         get() = permissionInfo.flags.hasBits(PermissionInfo.FLAG_IMMUTABLY_RESTRICTED)
@@ -170,5 +166,13 @@ data class Permission(
         const val TYPE_CONFIG = 1
         // The permission is defined dynamically.
         const val TYPE_DYNAMIC = 2
+
+        fun typeToString(type: Int): String =
+            when (type) {
+                TYPE_MANIFEST -> "TYPE_MANIFEST"
+                TYPE_CONFIG -> "TYPE_CONFIG"
+                TYPE_DYNAMIC -> "TYPE_DYNAMIC"
+                else -> type.toString()
+            }
     }
 }

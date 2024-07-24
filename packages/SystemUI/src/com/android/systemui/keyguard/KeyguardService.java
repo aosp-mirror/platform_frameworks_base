@@ -17,7 +17,6 @@
 package com.android.systemui.keyguard;
 
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
-import static android.view.RemoteAnimationTarget.MODE_CLOSING;
 import static android.view.RemoteAnimationTarget.MODE_OPENING;
 import static android.view.WindowManager.TRANSIT_FLAG_KEYGUARD_APPEARING;
 import static android.view.WindowManager.TRANSIT_FLAG_KEYGUARD_GOING_AWAY;
@@ -34,6 +33,8 @@ import static android.view.WindowManager.TRANSIT_TO_BACK;
 import static android.view.WindowManager.TransitionFlags;
 import static android.view.WindowManager.TransitionOldType;
 import static android.view.WindowManager.TransitionType;
+
+import static com.android.systemui.Flags.refactorGetCurrentUser;
 
 import android.annotation.NonNull;
 import android.app.ActivityManager;
@@ -59,7 +60,6 @@ import android.view.RemoteAnimationAdapter;
 import android.view.RemoteAnimationDefinition;
 import android.view.RemoteAnimationTarget;
 import android.view.SurfaceControl;
-import android.view.WindowManager;
 import android.view.WindowManagerPolicyConstants;
 import android.window.IRemoteTransition;
 import android.window.IRemoteTransitionFinishedCallback;
@@ -75,17 +75,18 @@ import com.android.keyguard.mediator.ScreenOnCoordinator;
 import com.android.systemui.SystemUIApplication;
 import com.android.systemui.dagger.qualifiers.Application;
 import com.android.systemui.flags.FeatureFlags;
-import com.android.systemui.flags.Flags;
 import com.android.systemui.keyguard.ui.binder.KeyguardSurfaceBehindParamsApplier;
 import com.android.systemui.keyguard.ui.binder.KeyguardSurfaceBehindViewBinder;
 import com.android.systemui.keyguard.ui.binder.WindowManagerLockscreenVisibilityViewBinder;
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardSurfaceBehindViewModel;
 import com.android.systemui.keyguard.ui.viewmodel.WindowManagerLockscreenVisibilityViewModel;
+import com.android.systemui.power.domain.interactor.PowerInteractor;
+import com.android.systemui.power.shared.model.ScreenPowerState;
 import com.android.systemui.settings.DisplayTracker;
+import com.android.wm.shell.shared.CounterRotator;
+import com.android.wm.shell.shared.TransitionUtil;
 import com.android.wm.shell.transition.ShellTransitions;
 import com.android.wm.shell.transition.Transitions;
-import com.android.wm.shell.util.CounterRotator;
-import com.android.wm.shell.util.TransitionUtil;
 
 import java.util.ArrayList;
 import java.util.Map;
@@ -105,19 +106,7 @@ public class KeyguardService extends Service {
     private final ScreenOnCoordinator mScreenOnCoordinator;
     private final ShellTransitions mShellTransitions;
     private final DisplayTracker mDisplayTracker;
-
-    private static int newModeToLegacyMode(int newMode) {
-        switch (newMode) {
-            case WindowManager.TRANSIT_OPEN:
-            case WindowManager.TRANSIT_TO_FRONT:
-                return MODE_OPENING;
-            case WindowManager.TRANSIT_CLOSE:
-            case WindowManager.TRANSIT_TO_BACK:
-                return MODE_CLOSING;
-            default:
-                return 2; // MODE_CHANGING
-        }
-    }
+    private final PowerInteractor mPowerInteractor;
 
     private static RemoteAnimationTarget[] wrap(TransitionInfo info, boolean wallpapers,
             SurfaceControl.Transaction t, ArrayMap<SurfaceControl, SurfaceControl> leashMap,
@@ -197,7 +186,7 @@ public class KeyguardService extends Service {
     // Wrap Keyguard going away animation.
     // Note: Also used for wrapping occlude by Dream animation. It works (with some redundancy).
     public static IRemoteTransition wrap(final KeyguardViewMediator keyguardViewMediator,
-        final IRemoteAnimationRunner runner, final boolean lockscreenLiveWallpaperEnabled) {
+            final IRemoteAnimationRunner runner) {
         return new IRemoteTransition.Stub() {
 
             @GuardedBy("mLeashMap")
@@ -231,9 +220,8 @@ public class KeyguardService extends Service {
                     }
                 }
                 initAlphaForAnimationTargets(t, apps);
-                if (lockscreenLiveWallpaperEnabled) {
-                    initAlphaForAnimationTargets(t, wallpapers);
-                }
+                initAlphaForAnimationTargets(t, wallpapers);
+
                 t.apply();
 
                 runner.onAnimationStart(
@@ -250,8 +238,7 @@ public class KeyguardService extends Service {
 
             public void mergeAnimation(IBinder candidateTransition, TransitionInfo candidateInfo,
                     SurfaceControl.Transaction candidateT, IBinder currentTransition,
-                    IRemoteTransitionFinishedCallback candidateFinishCallback)
-                    throws RemoteException {
+                    IRemoteTransitionFinishedCallback candidateFinishCallback) {
                 if ((candidateInfo.getFlags() & TRANSIT_FLAG_KEYGUARD_APPEARING) != 0) {
                     keyguardViewMediator.setPendingLock(true);
                     keyguardViewMediator.cancelKeyguardExitAnimation();
@@ -262,8 +249,13 @@ public class KeyguardService extends Service {
                     runner.onAnimationCancelled();
                     finish(currentTransition);
                 } catch (RemoteException e) {
-                    // nothing, we'll just let it finish on its own I guess.
+                    // Ignore.
                 }
+            }
+
+            @Override
+            public void onTransitionConsumed(IBinder transition, boolean aborted) {
+                // No-op.
             }
 
             private static void initAlphaForAnimationTargets(@NonNull SurfaceControl.Transaction t,
@@ -275,7 +267,7 @@ public class KeyguardService extends Service {
             }
 
             private void finish(IBinder transition) throws RemoteException {
-                IRemoteTransitionFinishedCallback finishCallback = null;
+                final IRemoteTransitionFinishedCallback finishCallback;
                 SurfaceControl.Transaction finishTransaction = null;
 
                 synchronized (mLeashMap) {
@@ -298,18 +290,19 @@ public class KeyguardService extends Service {
     }
 
     @Inject
-    public KeyguardService(KeyguardViewMediator keyguardViewMediator,
-                           KeyguardLifecyclesDispatcher keyguardLifecyclesDispatcher,
-                           ScreenOnCoordinator screenOnCoordinator,
-                           ShellTransitions shellTransitions,
-                           DisplayTracker displayTracker,
-                           WindowManagerLockscreenVisibilityViewModel
-                                   wmLockscreenVisibilityViewModel,
-                           WindowManagerLockscreenVisibilityManager wmLockscreenVisibilityManager,
-                           KeyguardSurfaceBehindViewModel keyguardSurfaceBehindViewModel,
-                           KeyguardSurfaceBehindParamsApplier keyguardSurfaceBehindAnimator,
-                           @Application CoroutineScope scope,
-                           FeatureFlags featureFlags) {
+    public KeyguardService(
+            KeyguardViewMediator keyguardViewMediator,
+            KeyguardLifecyclesDispatcher keyguardLifecyclesDispatcher,
+            ScreenOnCoordinator screenOnCoordinator,
+            ShellTransitions shellTransitions,
+            DisplayTracker displayTracker,
+            WindowManagerLockscreenVisibilityViewModel wmLockscreenVisibilityViewModel,
+            WindowManagerLockscreenVisibilityManager wmLockscreenVisibilityManager,
+            KeyguardSurfaceBehindViewModel keyguardSurfaceBehindViewModel,
+            KeyguardSurfaceBehindParamsApplier keyguardSurfaceBehindAnimator,
+            @Application CoroutineScope scope,
+            FeatureFlags featureFlags,
+            PowerInteractor powerInteractor) {
         super();
         mKeyguardViewMediator = keyguardViewMediator;
         mKeyguardLifecyclesDispatcher = keyguardLifecyclesDispatcher;
@@ -317,8 +310,9 @@ public class KeyguardService extends Service {
         mShellTransitions = shellTransitions;
         mDisplayTracker = displayTracker;
         mFlags = featureFlags;
+        mPowerInteractor = powerInteractor;
 
-        if (mFlags.isEnabled(Flags.KEYGUARD_WM_STATE_REFACTOR)) {
+        if (KeyguardWmStateRefactor.isEnabled()) {
             WindowManagerLockscreenVisibilityViewBinder.bind(
                     wmLockscreenVisibilityViewModel,
                     wmLockscreenVisibilityManager,
@@ -333,7 +327,7 @@ public class KeyguardService extends Service {
 
     @Override
     public void onCreate() {
-        ((SystemUIApplication) getApplication()).startServicesIfNeeded();
+        ((SystemUIApplication) getApplication()).startSystemUserServicesIfNeeded();
 
         if (mShellTransitions == null || !Transitions.ENABLE_SHELL_TRANSITIONS) {
             RemoteAnimationDefinition definition = new RemoteAnimationDefinition();
@@ -451,6 +445,7 @@ public class KeyguardService extends Service {
             checkPermission();
             mKeyguardViewMediator.onStartedGoingToSleep(
                     WindowManagerPolicyConstants.translateSleepReasonToOffReason(pmSleepReason));
+            mPowerInteractor.onStartedGoingToSleep(pmSleepReason);
             mKeyguardLifecyclesDispatcher.dispatch(
                     KeyguardLifecyclesDispatcher.STARTED_GOING_TO_SLEEP, pmSleepReason);
         }
@@ -464,6 +459,7 @@ public class KeyguardService extends Service {
             mKeyguardViewMediator.onFinishedGoingToSleep(
                     WindowManagerPolicyConstants.translateSleepReasonToOffReason(pmSleepReason),
                     cameraGestureTriggered);
+            mPowerInteractor.onFinishedGoingToSleep(cameraGestureTriggered);
             mKeyguardLifecyclesDispatcher.dispatch(
                     KeyguardLifecyclesDispatcher.FINISHED_GOING_TO_SLEEP);
         }
@@ -476,6 +472,7 @@ public class KeyguardService extends Service {
             Trace.beginSection("KeyguardService.mBinder#onStartedWakingUp");
             checkPermission();
             mKeyguardViewMediator.onStartedWakingUp(pmWakeReason, cameraGestureTriggered);
+            mPowerInteractor.onStartedWakingUp(pmWakeReason, cameraGestureTriggered);
             mKeyguardLifecyclesDispatcher.dispatch(
                     KeyguardLifecyclesDispatcher.STARTED_WAKING_UP, pmWakeReason);
             Trace.endSection();
@@ -486,6 +483,7 @@ public class KeyguardService extends Service {
             trace("onFinishedWakingUp");
             Trace.beginSection("KeyguardService.mBinder#onFinishedWakingUp");
             checkPermission();
+            mPowerInteractor.onFinishedWakingUp();
             mKeyguardLifecyclesDispatcher.dispatch(KeyguardLifecyclesDispatcher.FINISHED_WAKING_UP);
             Trace.endSection();
         }
@@ -495,6 +493,7 @@ public class KeyguardService extends Service {
             trace("onScreenTurningOn");
             Trace.beginSection("KeyguardService.mBinder#onScreenTurningOn");
             checkPermission();
+            mPowerInteractor.onScreenPowerStateUpdated(ScreenPowerState.SCREEN_TURNING_ON);
             mKeyguardLifecyclesDispatcher.dispatch(KeyguardLifecyclesDispatcher.SCREEN_TURNING_ON,
                     callback);
 
@@ -530,6 +529,7 @@ public class KeyguardService extends Service {
             trace("onScreenTurnedOn");
             Trace.beginSection("KeyguardService.mBinder#onScreenTurnedOn");
             checkPermission();
+            mPowerInteractor.onScreenPowerStateUpdated(ScreenPowerState.SCREEN_ON);
             mKeyguardLifecyclesDispatcher.dispatch(KeyguardLifecyclesDispatcher.SCREEN_TURNED_ON);
             mScreenOnCoordinator.onScreenTurnedOn();
             Trace.endSection();
@@ -539,6 +539,7 @@ public class KeyguardService extends Service {
         public void onScreenTurningOff() {
             trace("onScreenTurningOff");
             checkPermission();
+            mPowerInteractor.onScreenPowerStateUpdated(ScreenPowerState.SCREEN_TURNING_OFF);
             mKeyguardLifecyclesDispatcher.dispatch(KeyguardLifecyclesDispatcher.SCREEN_TURNING_OFF);
         }
 
@@ -546,6 +547,7 @@ public class KeyguardService extends Service {
         public void onScreenTurnedOff() {
             trace("onScreenTurnedOff");
             checkPermission();
+            mPowerInteractor.onScreenPowerStateUpdated(ScreenPowerState.SCREEN_OFF);
             mKeyguardViewMediator.onScreenTurnedOff();
             mKeyguardLifecyclesDispatcher.dispatch(KeyguardLifecyclesDispatcher.SCREEN_TURNED_OFF);
             mScreenOnCoordinator.onScreenTurnedOff();
@@ -574,6 +576,13 @@ public class KeyguardService extends Service {
             mKeyguardViewMediator.doKeyguardTimeout(options);
         }
 
+        // Binder interface
+        public void showDismissibleKeyguard() {
+            trace("showDismissibleKeyguard");
+            checkPermission();
+            mKeyguardViewMediator.showDismissibleKeyguard();
+        }
+
         @Override // Binder interface
         public void setSwitchingUser(boolean switching) {
             trace("setSwitchingUser switching=" + switching);
@@ -581,11 +590,18 @@ public class KeyguardService extends Service {
             mKeyguardViewMediator.setSwitchingUser(switching);
         }
 
+        /**
+         * @deprecated This binder call is not listened to anymore. Instead the current user is
+         * tracked in SelectedUserInteractor.getSelectedUserId()
+         */
         @Override // Binder interface
+        @Deprecated
         public void setCurrentUser(int userId) {
-            trace("setCurrentUser userId=" + userId);
+            trace("Deprecated/NOT USED: setCurrentUser userId=" + userId);
             checkPermission();
-            mKeyguardViewMediator.setCurrentUser(userId);
+            if (!refactorGetCurrentUser()) {
+                mKeyguardViewMediator.setCurrentUser(userId);
+            }
         }
 
         @Override // Binder interface
@@ -621,7 +637,7 @@ public class KeyguardService extends Service {
         public void dismissKeyguardToLaunch(Intent intentToLaunch) {
             trace("dismissKeyguardToLaunch");
             checkPermission();
-            mKeyguardViewMediator.dismissKeyguardToLaunch(intentToLaunch);
+            Slog.d(TAG, "Ignoring dismissKeyguardToLaunch " + intentToLaunch);
         }
 
         @Override // Binder interface

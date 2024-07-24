@@ -51,4 +51,19 @@
          This configuration will only apply when config_remoteInsetsControllerControlsSystemBars.
          is set to true. -->
     <bool name="config_remoteInsetsControllerSystemBarsCanBeShownByUserAction">false</bool>
+
+    <!--  Do update bouncer constraints (port or land) on rotation.
+      Needed for bouncer refactor to use motion layout, because constraints should only be
+      changed on small screens. Only used when flag "lockscreen.enable_landscape" (b/293252410)
+      is enabled
+
+      True here so bouncers constraints are updated when rotating on small screens -->
+    <bool name="update_bouncer_constraints">true</bool>
+
+    <!-- Only use small clock on lockscreen.
+     False here because large clock used by default, unless otherwise specified -->
+    <bool name="force_small_clock_on_lockscreen">false</bool>
+
+    <!--  True when small screen (<sw600dp) is landscape. -->
+    <bool name="is_small_screen_landscape">false</bool>
 </resources>

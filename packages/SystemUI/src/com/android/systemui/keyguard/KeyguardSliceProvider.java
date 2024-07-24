@@ -48,7 +48,7 @@ import androidx.slice.builders.SliceAction;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.KeyguardUpdateMonitorCallback;
-import com.android.systemui.R;
+import com.android.systemui.res.R;
 import com.android.systemui.SystemUIAppComponentFactoryBase;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
@@ -397,8 +397,10 @@ public class KeyguardSliceProvider extends SliceProvider implements
             IntentFilter filter = new IntentFilter();
             filter.addAction(Intent.ACTION_DATE_CHANGED);
             filter.addAction(Intent.ACTION_LOCALE_CHANGED);
-            getContext().registerReceiver(mIntentReceiver, filter, null /* permission*/,
-                    null /* scheduler */);
+            mBgHandler.post(() -> {
+                getContext().registerReceiver(mIntentReceiver, filter, null /* permission*/,
+                        null /* scheduler */);
+            });
             mKeyguardUpdateMonitor.registerCallback(mKeyguardUpdateMonitorCallback);
             mRegistered = true;
         }

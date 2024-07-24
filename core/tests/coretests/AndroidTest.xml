@@ -20,9 +20,10 @@
     <target_preparer class="com.android.tradefed.targetprep.suite.SuiteApkInstaller">
         <option name="cleanup-apks" value="true" />
         <option name="test-file-name" value="FrameworksCoreTests.apk" />
-        <option name="test-file-name" value="BstatsTestApp.apk" />
         <option name="test-file-name" value="BinderDeathRecipientHelperApp1.apk" />
         <option name="test-file-name" value="BinderDeathRecipientHelperApp2.apk" />
+        <option name="test-file-name" value="BinderProxyCountingTestApp.apk" />
+        <option name="test-file-name" value="BinderProxyCountingTestService.apk" />
     </target_preparer>
 
     <target_preparer class="com.android.tradefed.targetprep.RunCommandTargetPreparer">

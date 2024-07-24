@@ -17,6 +17,8 @@
 package android.util;
 
 import android.annotation.NonNull;
+import android.ravenwood.annotation.RavenwoodKeepWholeClass;
+import android.ravenwood.annotation.RavenwoodReplace;
 
 /**
  * CloseGuard is a mechanism for flagging implicit finalizer cleanup of
@@ -108,15 +110,35 @@ import android.annotation.NonNull;
  * in a method, the call to {@code open} should occur just after
  * resource acquisition.
  */
+@RavenwoodKeepWholeClass
 public final class CloseGuard {
     private final dalvik.system.CloseGuard mImpl;
 
     /**
      * Constructs a new CloseGuard instance.
      * {@link #open(String)} can be used to set up the instance to warn on failure to close.
+     *
+     * @hide
+     */
+    public static CloseGuard get() {
+        return new CloseGuard();
+    }
+
+    /**
+     * Constructs a new CloseGuard instance.
+     * {@link #open(String)} can be used to set up the instance to warn on failure to close.
      */
     public CloseGuard() {
-        mImpl = dalvik.system.CloseGuard.get();
+        mImpl = getImpl();
+    }
+
+    @RavenwoodReplace
+    private dalvik.system.CloseGuard getImpl() {
+        return dalvik.system.CloseGuard.get();
+    }
+
+    private dalvik.system.CloseGuard getImpl$ravenwood() {
+        return null;
     }
 
     /**
@@ -127,12 +149,16 @@ public final class CloseGuard {
      * @throws NullPointerException if closeMethodName is null.
      */
     public void open(@NonNull String closeMethodName) {
-        mImpl.open(closeMethodName);
+        if (mImpl != null) {
+            mImpl.open(closeMethodName);
+        }
     }
 
     /** Marks this CloseGuard instance as closed to avoid warnings on finalization. */
     public void close() {
-        mImpl.close();
+        if (mImpl != null) {
+            mImpl.close();
+        }
     }
 
     /**
@@ -140,6 +166,8 @@ public final class CloseGuard {
      * before finalization.
      */
     public void warnIfOpen() {
-        mImpl.warnIfOpen();
+        if (mImpl != null) {
+            mImpl.warnIfOpen();
+        }
     }
 }

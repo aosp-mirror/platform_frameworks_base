@@ -16,6 +16,7 @@
 
 package android.telephony;
 
+import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -29,6 +30,8 @@ import android.os.Parcelable;
 import android.telephony.AccessNetworkConstants.TransportType;
 import android.telephony.Annotation.NetworkType;
 import android.text.TextUtils;
+
+import com.android.internal.telephony.flags.Flags;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -63,9 +66,9 @@ public final class NetworkRegistrationInfo implements Parcelable {
     /** Unknown / Unspecified domain */
     public static final int DOMAIN_UNKNOWN = 0;
     /** Circuit switched domain */
-    public static final int DOMAIN_CS = android.hardware.radio.V1_5.Domain.CS;
+    public static final int DOMAIN_CS = android.hardware.radio.network.Domain.CS;
     /** Packet switched domain */
-    public static final int DOMAIN_PS = android.hardware.radio.V1_5.Domain.PS;
+    public static final int DOMAIN_PS = android.hardware.radio.network.Domain.PS;
     /** Applicable to both CS and PS Domain */
     public static final int DOMAIN_CS_PS = DOMAIN_CS | DOMAIN_PS;
 
@@ -170,7 +173,7 @@ public final class NetworkRegistrationInfo implements Parcelable {
     @Retention(RetentionPolicy.SOURCE)
     @IntDef(prefix = "SERVICE_TYPE_",
             value = {SERVICE_TYPE_UNKNOWN, SERVICE_TYPE_VOICE, SERVICE_TYPE_DATA, SERVICE_TYPE_SMS,
-                    SERVICE_TYPE_VIDEO, SERVICE_TYPE_EMERGENCY})
+                    SERVICE_TYPE_VIDEO, SERVICE_TYPE_EMERGENCY, SERVICE_TYPE_MMS})
     public @interface ServiceType {}
 
     /**
@@ -203,11 +206,17 @@ public final class NetworkRegistrationInfo implements Parcelable {
      */
     public static final int SERVICE_TYPE_EMERGENCY  = 5;
 
+    /**
+     * MMS service
+     */
+    @FlaggedApi(Flags.FLAG_CARRIER_ENABLED_SATELLITE_FLAG)
+    public static final int SERVICE_TYPE_MMS = 6;
+
     /** @hide  */
     public static final int FIRST_SERVICE_TYPE = SERVICE_TYPE_VOICE;
 
     /** @hide  */
-    public static final int LAST_SERVICE_TYPE = SERVICE_TYPE_EMERGENCY;
+    public static final int LAST_SERVICE_TYPE = SERVICE_TYPE_MMS;
 
     @Domain
     private final int mDomain;
@@ -620,7 +629,7 @@ public final class NetworkRegistrationInfo implements Parcelable {
     }
 
     /**
-     * @return The access network technology {@link NetworkType}.
+     * @return The access network technology network type..
      */
     public @NetworkType int getAccessNetworkTechnology() {
         return mAccessNetworkTechnology;
@@ -640,12 +649,19 @@ public final class NetworkRegistrationInfo implements Parcelable {
     }
 
     /**
-     * @return Reason for denial if the registration state is {@link #REGISTRATION_STATE_DENIED}.
-     * Depending on {@code accessNetworkTechnology}, the values are defined in 3GPP TS 24.008
-     * 10.5.3.6 for UMTS, 3GPP TS 24.301 9.9.3.9 for LTE, and 3GPP2 A.S0001 6.2.2.44 for CDMA
-     * @hide
+     * Get the 3GPP/3GPP2 reason code indicating why registration failed.
+     *
+     * Returns the reason code for non-transient registration failures. Typically this method will
+     * only return the last reason code received during a network selection procedure. The reason
+     * code is system-specific; however, the reason codes for both 3GPP and 3GPP2 systems are
+     * largely equivalent across generations.
+     *
+     * @return registration reject cause if available, otherwise 0. Depending on
+     * {@link #getAccessNetworkTechnology}, the values are defined in 3GPP TS 24.008 10.5.3.6 for
+     * WCDMA/UMTS, 3GPP TS 24.301 9.9.3.9 for LTE/EPS, 3GPP 24.501 Annex A for NR/5GS, or 3GPP2
+     * A.S0001 6.2.2.44 for CDMA.
      */
-    @SystemApi
+    @FlaggedApi(Flags.FLAG_NETWORK_REGISTRATION_INFO_REJECT_CAUSE)
     public int getRejectCause() {
         return mRejectCause;
     }
@@ -696,8 +712,8 @@ public final class NetworkRegistrationInfo implements Parcelable {
      * Get whether the network is a non-terrestrial network.
      *
      * @return {@code true} if network is a non-terrestrial network else {@code false}.
-     * @hide
      */
+    @FlaggedApi(Flags.FLAG_CARRIER_ENABLED_SATELLITE_FLAG)
     public boolean isNonTerrestrialNetwork() {
         return mIsNonTerrestrialNetwork;
     }
@@ -740,6 +756,7 @@ public final class NetworkRegistrationInfo implements Parcelable {
             case SERVICE_TYPE_SMS: return "SMS";
             case SERVICE_TYPE_VIDEO: return "VIDEO";
             case SERVICE_TYPE_EMERGENCY: return "EMERGENCY";
+            case SERVICE_TYPE_MMS: return "MMS";
         }
         return "Unknown service type " + serviceType;
     }
@@ -789,6 +806,18 @@ public final class NetworkRegistrationInfo implements Parcelable {
         }
     }
 
+    /**
+     * Convert isNonTerrestrialNetwork to string
+     *
+     * @param isNonTerrestrialNetwork boolean indicating whether network is a non-terrestrial
+     *                                network
+     * @return string format of isNonTerrestrialNetwork.
+     * @hide
+     */
+    public static String isNonTerrestrialNetworkToString(boolean isNonTerrestrialNetwork) {
+        return isNonTerrestrialNetwork ? "NON-TERRESTRIAL" : "TERRESTRIAL";
+    }
+
     @NonNull
     @Override
     public String toString() {
@@ -814,7 +843,8 @@ public final class NetworkRegistrationInfo implements Parcelable {
                         ? nrStateToString(mNrState) : "****")
                 .append(" rRplmn=").append(mRplmn)
                 .append(" isUsingCarrierAggregation=").append(mIsUsingCarrierAggregation)
-                .append(" isNonTerrestrialNetwork=").append(mIsNonTerrestrialNetwork)
+                .append(" isNonTerrestrialNetwork=").append(
+                        isNonTerrestrialNetworkToString(mIsNonTerrestrialNetwork))
                 .append("}").toString();
     }
 
@@ -1167,8 +1197,8 @@ public final class NetworkRegistrationInfo implements Parcelable {
          * @param isNonTerrestrialNetwork {@code true} if network is a non-terrestrial network
          *                                            else {@code false}.
          * @return The builder.
-         * @hide
          */
+        @FlaggedApi(Flags.FLAG_CARRIER_ENABLED_SATELLITE_FLAG)
         public @NonNull Builder setIsNonTerrestrialNetwork(boolean isNonTerrestrialNetwork) {
             mIsNonTerrestrialNetwork = isNonTerrestrialNetwork;
             return this;

@@ -24,12 +24,14 @@ import static android.content.pm.PermissionInfo.PROTECTION_DANGEROUS;
 import static android.hardware.display.HdrConversionMode.HDR_CONVERSION_PASSTHROUGH;
 import static android.hardware.display.HdrConversionMode.HDR_CONVERSION_UNSUPPORTED;
 import static android.hardware.graphics.common.Hdr.DOLBY_VISION;
+import static android.net.NetworkCapabilities.TRANSPORT_BLUETOOTH;
 import static android.net.NetworkCapabilities.TRANSPORT_CELLULAR;
 import static android.net.NetworkCapabilities.TRANSPORT_ETHERNET;
 import static android.net.NetworkCapabilities.TRANSPORT_WIFI;
 import static android.net.NetworkStats.METERED_YES;
 import static android.net.NetworkTemplate.MATCH_ETHERNET;
 import static android.net.NetworkTemplate.MATCH_MOBILE;
+import static android.net.NetworkTemplate.MATCH_PROXY;
 import static android.net.NetworkTemplate.MATCH_WIFI;
 import static android.net.NetworkTemplate.OEM_MANAGED_ALL;
 import static android.net.NetworkTemplate.OEM_MANAGED_PAID;
@@ -57,6 +59,7 @@ import static com.android.internal.util.FrameworkStatsLog.TIME_ZONE_DETECTOR_STA
 import static com.android.internal.util.FrameworkStatsLog.TIME_ZONE_DETECTOR_STATE__DETECTION_MODE__TELEPHONY;
 import static com.android.internal.util.FrameworkStatsLog.TIME_ZONE_DETECTOR_STATE__DETECTION_MODE__UNKNOWN;
 import static com.android.server.am.MemoryStatUtil.readMemoryStatFromFilesystem;
+import static com.android.server.stats.Flags.addMobileBytesTransferByProcStatePuller;
 import static com.android.server.stats.pull.IonMemoryUtil.readProcessSystemIonHeapSizesFromDebugfs;
 import static com.android.server.stats.pull.IonMemoryUtil.readSystemIonHeapSizeFromDebugfs;
 import static com.android.server.stats.pull.ProcfsMemoryUtil.getProcessCmdlines;
@@ -407,6 +410,15 @@ public class StatsPullAtomService extends SystemService {
     @GuardedBy("mKeystoreLock")
     private IKeystoreMetrics mIKeystoreMetrics;
 
+    private AggregatedMobileDataStatsPuller mAggregatedMobileDataStatsPuller = null;
+
+    /**
+     * Whether or not to enable the new puller with aggregation by process state per uid on a
+     * system server side.
+     */
+    public static final boolean ENABLE_MOBILE_DATA_STATS_AGGREGATED_PULLER =
+                addMobileBytesTransferByProcStatePuller();
+
     // Puller locks
     private final Object mDataBytesTransferLock = new Object();
     private final Object mBluetoothBytesTransferLock = new Object();
@@ -467,6 +479,20 @@ public class StatsPullAtomService extends SystemService {
         mContext = context;
     }
 
+    private final class StatsPullAtomServiceInternalImpl extends StatsPullAtomServiceInternal {
+
+        @Override
+        public void noteUidProcessState(int uid, int state) {
+            if (ENABLE_MOBILE_DATA_STATS_AGGREGATED_PULLER
+                    && mAggregatedMobileDataStatsPuller != null) {
+                final long elapsedRealtime = SystemClock.elapsedRealtime();
+                final long uptime = SystemClock.uptimeMillis();
+                mAggregatedMobileDataStatsPuller.noteUidProcessState(uid, state, elapsedRealtime,
+                        uptime);
+            }
+        }
+    }
+
     private native void initializeNativePullers();
 
     /**
@@ -484,10 +510,16 @@ public class StatsPullAtomService extends SystemService {
             }
             try {
                 switch (atomTag) {
+                    case FrameworkStatsLog.MOBILE_BYTES_TRANSFER_BY_PROC_STATE:
+                        if (ENABLE_MOBILE_DATA_STATS_AGGREGATED_PULLER
+                                && mAggregatedMobileDataStatsPuller != null) {
+                            return mAggregatedMobileDataStatsPuller.pullDataBytesTransfer(data);
+                        }
                     case FrameworkStatsLog.WIFI_BYTES_TRANSFER:
                     case FrameworkStatsLog.WIFI_BYTES_TRANSFER_BY_FG_BG:
                     case FrameworkStatsLog.MOBILE_BYTES_TRANSFER:
                     case FrameworkStatsLog.MOBILE_BYTES_TRANSFER_BY_FG_BG:
+                    case FrameworkStatsLog.PROXY_BYTES_TRANSFER_BY_FG_BG:
                     case FrameworkStatsLog.BYTES_TRANSFER_BY_TAG_AND_METERED:
                     case FrameworkStatsLog.DATA_USAGE_BYTES_TRANSFER:
                     case FrameworkStatsLog.OEM_MANAGED_BYTES_TRANSFER:
@@ -773,7 +805,10 @@ public class StatsPullAtomService extends SystemService {
 
     @Override
     public void onStart() {
-        // no op
+        if (ENABLE_MOBILE_DATA_STATS_AGGREGATED_PULLER) {
+            LocalServices.addService(StatsPullAtomServiceInternal.class,
+                    new StatsPullAtomServiceInternalImpl());
+        }
     }
 
     @Override
@@ -808,6 +843,9 @@ public class StatsPullAtomService extends SystemService {
         mStatsSubscriptionsListener = new StatsSubscriptionsListener(mSubscriptionManager);
         mStorageManager = (StorageManager) mContext.getSystemService(StorageManager.class);
         mNetworkStatsManager = mContext.getSystemService(NetworkStatsManager.class);
+
+        initMobileDataStatsPuller();
+
         // Initialize DiskIO
         mStoragedUidIoStatsReader = new StoragedUidIoStatsReader();
 
@@ -969,25 +1007,49 @@ public class StatsPullAtomService extends SystemService {
         registerCachedAppsHighWatermarkPuller();
     }
 
+    private void initMobileDataStatsPuller() {
+        if (DEBUG) {
+            Slog.d(TAG,
+                    "ENABLE_MOBILE_DATA_STATS_AGGREGATED_PULLER = "
+                            + ENABLE_MOBILE_DATA_STATS_AGGREGATED_PULLER);
+        }
+        if (ENABLE_MOBILE_DATA_STATS_AGGREGATED_PULLER) {
+            mAggregatedMobileDataStatsPuller =
+                    new AggregatedMobileDataStatsPuller(mNetworkStatsManager);
+        }
+    }
+
     private void initAndRegisterNetworkStatsPullers() {
         if (DEBUG) {
             Slog.d(TAG, "Registering NetworkStats pullers with statsd");
         }
+
+        boolean canQueryTypeProxy = canQueryNetworkStatsForTypeProxy();
+
         // Initialize NetworkStats baselines.
-        mNetworkStatsBaselines.addAll(
-                collectNetworkStatsSnapshotForAtom(FrameworkStatsLog.WIFI_BYTES_TRANSFER));
-        mNetworkStatsBaselines.addAll(
-                collectNetworkStatsSnapshotForAtom(FrameworkStatsLog.WIFI_BYTES_TRANSFER_BY_FG_BG));
-        mNetworkStatsBaselines.addAll(
-                collectNetworkStatsSnapshotForAtom(FrameworkStatsLog.MOBILE_BYTES_TRANSFER));
-        mNetworkStatsBaselines.addAll(collectNetworkStatsSnapshotForAtom(
-                FrameworkStatsLog.MOBILE_BYTES_TRANSFER_BY_FG_BG));
-        mNetworkStatsBaselines.addAll(collectNetworkStatsSnapshotForAtom(
-                FrameworkStatsLog.BYTES_TRANSFER_BY_TAG_AND_METERED));
-        mNetworkStatsBaselines.addAll(
-                collectNetworkStatsSnapshotForAtom(FrameworkStatsLog.DATA_USAGE_BYTES_TRANSFER));
-        mNetworkStatsBaselines.addAll(
-                collectNetworkStatsSnapshotForAtom(FrameworkStatsLog.OEM_MANAGED_BYTES_TRANSFER));
+        synchronized (mDataBytesTransferLock) {
+            mNetworkStatsBaselines.addAll(
+                    collectNetworkStatsSnapshotForAtom(FrameworkStatsLog.WIFI_BYTES_TRANSFER));
+            mNetworkStatsBaselines.addAll(
+                    collectNetworkStatsSnapshotForAtom(
+                            FrameworkStatsLog.WIFI_BYTES_TRANSFER_BY_FG_BG));
+            mNetworkStatsBaselines.addAll(
+                    collectNetworkStatsSnapshotForAtom(FrameworkStatsLog.MOBILE_BYTES_TRANSFER));
+            mNetworkStatsBaselines.addAll(collectNetworkStatsSnapshotForAtom(
+                    FrameworkStatsLog.MOBILE_BYTES_TRANSFER_BY_FG_BG));
+            mNetworkStatsBaselines.addAll(collectNetworkStatsSnapshotForAtom(
+                    FrameworkStatsLog.BYTES_TRANSFER_BY_TAG_AND_METERED));
+            mNetworkStatsBaselines.addAll(
+                    collectNetworkStatsSnapshotForAtom(
+                            FrameworkStatsLog.DATA_USAGE_BYTES_TRANSFER));
+            mNetworkStatsBaselines.addAll(
+                    collectNetworkStatsSnapshotForAtom(
+                            FrameworkStatsLog.OEM_MANAGED_BYTES_TRANSFER));
+            if (canQueryTypeProxy) {
+                mNetworkStatsBaselines.addAll(collectNetworkStatsSnapshotForAtom(
+                        FrameworkStatsLog.PROXY_BYTES_TRANSFER_BY_FG_BG));
+            }
+        }
 
         // Listen to subscription changes to record historical subscriptions that activated before
         // pulling, this is used by {@code DATA_USAGE_BYTES_TRANSFER}.
@@ -998,9 +1060,22 @@ public class StatsPullAtomService extends SystemService {
         registerWifiBytesTransferBackground();
         registerMobileBytesTransfer();
         registerMobileBytesTransferBackground();
+        if (ENABLE_MOBILE_DATA_STATS_AGGREGATED_PULLER) {
+            registerMobileBytesTransferByProcState();
+        }
         registerBytesTransferByTagAndMetered();
         registerDataUsageBytesTransfer();
         registerOemManagedBytesTransfer();
+        if (canQueryTypeProxy) {
+            registerProxyBytesTransferBackground();
+        }
+    }
+
+    private void registerMobileBytesTransferByProcState() {
+        final int tagId = FrameworkStatsLog.MOBILE_BYTES_TRANSFER_BY_PROC_STATE;
+        PullAtomMetadata metadata =
+                new PullAtomMetadata.Builder().setAdditiveFields(new int[] {3, 4, 5, 6}).build();
+        mStatsManager.setPullAtomCallback(tagId, metadata, DIRECT_EXECUTOR, mStatsCallbackImpl);
     }
 
     private void initAndRegisterDeferredPullers() {
@@ -1171,6 +1246,18 @@ public class StatsPullAtomService extends SystemService {
                 }
                 break;
             }
+            case FrameworkStatsLog.PROXY_BYTES_TRANSFER_BY_FG_BG: {
+                final NetworkStats stats = getUidNetworkStatsSnapshotForTemplate(
+                        new NetworkTemplate.Builder(MATCH_PROXY).build(),  /*includeTags=*/true);
+                if (stats != null) {
+                    ret.add(new NetworkStatsExt(sliceNetworkStatsByUidTagAndMetered(stats),
+                            new int[]{TRANSPORT_BLUETOOTH},
+                            /*slicedByFgbg=*/true, /*slicedByTag=*/false,
+                            /*slicedByMetered=*/false, TelephonyManager.NETWORK_TYPE_UNKNOWN,
+                            /*subInfo=*/null, OEM_MANAGED_ALL, /*isTypeProxy=*/true));
+                }
+                break;
+            }
             case FrameworkStatsLog.BYTES_TRANSFER_BY_TAG_AND_METERED: {
                 final NetworkStats wifiStats = getUidNetworkStatsSnapshotForTemplate(
                         new NetworkTemplate.Builder(MATCH_WIFI).build(), /*includeTags=*/true);
@@ -1183,7 +1270,7 @@ public class StatsPullAtomService extends SystemService {
                             new int[]{TRANSPORT_WIFI, TRANSPORT_CELLULAR},
                             /*slicedByFgbg=*/false, /*slicedByTag=*/true,
                             /*slicedByMetered=*/true, TelephonyManager.NETWORK_TYPE_UNKNOWN,
-                            /*subInfo=*/null, OEM_MANAGED_ALL));
+                            /*subInfo=*/null, OEM_MANAGED_ALL, /*isTypeProxy=*/false));
                 }
                 break;
             }
@@ -1225,7 +1312,7 @@ public class StatsPullAtomService extends SystemService {
             final NetworkStatsExt diff = new NetworkStatsExt(
                     removeEmptyEntries(item.stats.subtract(baseline.stats)), item.transports,
                     item.slicedByFgbg, item.slicedByTag, item.slicedByMetered, item.ratType,
-                    item.subInfo, item.oemManaged);
+                    item.subInfo, item.oemManaged, item.isTypeProxy);
 
             // If no diff, skip.
             if (!diff.stats.iterator().hasNext()) continue;
@@ -1363,7 +1450,7 @@ public class StatsPullAtomService extends SystemService {
                     ret.add(new NetworkStatsExt(sliceNetworkStatsByUidAndFgbg(stats),
                             new int[]{transport}, /*slicedByFgbg=*/true, /*slicedByTag=*/false,
                             /*slicedByMetered=*/false, TelephonyManager.NETWORK_TYPE_UNKNOWN,
-                            /*subInfo=*/null, oemManaged));
+                            /*subInfo=*/null, oemManaged, /*isTypeProxy=*/false));
                 }
             }
         }
@@ -1389,6 +1476,21 @@ public class StatsPullAtomService extends SystemService {
                 Log.wtf(TAG, "Unexpected transport.");
         }
         return getUidNetworkStatsSnapshotForTemplate(template, /*includeTags=*/false);
+    }
+
+    /**
+     * Check if it is possible to query NetworkStats for TYPE_PROXY. This should only be possible
+     * if the build includes r.android.com/2828315
+     * @return true if querying for TYPE_PROXY is allowed
+     */
+    private static boolean canQueryNetworkStatsForTypeProxy() {
+        try {
+            new NetworkTemplate.Builder(MATCH_PROXY).build();
+            return true;
+        } catch (IllegalArgumentException e) {
+            Slog.w(TAG, "Querying network stats for TYPE_PROXY is not allowed");
+            return false;
+        }
     }
 
     /**
@@ -1450,7 +1552,7 @@ public class StatsPullAtomService extends SystemService {
                 ret.add(new NetworkStatsExt(sliceNetworkStatsByFgbg(stats),
                         new int[]{TRANSPORT_CELLULAR}, /*slicedByFgbg=*/true,
                         /*slicedByTag=*/false, /*slicedByMetered=*/false, ratType, subInfo,
-                        OEM_MANAGED_ALL));
+                        OEM_MANAGED_ALL, /*isTypeProxy=*/false));
             }
         }
         return ret;
@@ -1589,6 +1691,19 @@ public class StatsPullAtomService extends SystemService {
 
     private void registerMobileBytesTransferBackground() {
         int tagId = FrameworkStatsLog.MOBILE_BYTES_TRANSFER_BY_FG_BG;
+        PullAtomMetadata metadata = new PullAtomMetadata.Builder()
+                .setAdditiveFields(new int[]{3, 4, 5, 6})
+                .build();
+        mStatsManager.setPullAtomCallback(
+                tagId,
+                metadata,
+                DIRECT_EXECUTOR,
+                mStatsCallbackImpl
+        );
+    }
+
+    private void registerProxyBytesTransferBackground() {
+        int tagId = FrameworkStatsLog.PROXY_BYTES_TRANSFER_BY_FG_BG;
         PullAtomMetadata metadata = new PullAtomMetadata.Builder()
                 .setAdditiveFields(new int[]{3, 4, 5, 6})
                 .build();
@@ -1743,7 +1858,7 @@ public class StatsPullAtomService extends SystemService {
             String name = ent.getKey();
             KernelWakelockStats.Entry kws = ent.getValue();
             pulledData.add(FrameworkStatsLog.buildStatsEvent(
-                    atomTag, name, kws.mCount, kws.mVersion, kws.mTotalTime));
+                    atomTag, name, kws.count, kws.version, kws.totalTimeUs));
         }
         return StatsManager.PULL_SUCCESS;
     }
@@ -1943,7 +2058,8 @@ public class StatsPullAtomService extends SystemService {
     }
 
     private void registerCpuCyclesPerThreadGroupCluster() {
-        if (KernelCpuBpfTracking.isSupported()) {
+        if (KernelCpuBpfTracking.isSupported()
+                && !com.android.server.power.optimization.Flags.disableSystemServicePowerAttr()) {
             int tagId = FrameworkStatsLog.CPU_CYCLES_PER_THREAD_GROUP_CLUSTER;
             PullAtomMetadata metadata = new PullAtomMetadata.Builder()
                     .setAdditiveFields(new int[]{3, 4})
@@ -1958,6 +2074,10 @@ public class StatsPullAtomService extends SystemService {
     }
 
     int pullCpuCyclesPerThreadGroupCluster(int atomTag, List<StatsEvent> pulledData) {
+        if (com.android.server.power.optimization.Flags.disableSystemServicePowerAttr()) {
+            return StatsManager.PULL_SKIP;
+        }
+
         SystemServiceCpuThreadTimes times = LocalServices.getService(BatteryStatsInternal.class)
                 .getSystemServiceCpuThreadTimes();
         if (times == null) {
@@ -3107,6 +3227,7 @@ public class StatsPullAtomService extends SystemService {
     }
 
     // read high watermark for section
+    @GuardedBy("mProcStatsLock")
     private long readProcStatsHighWaterMark(int atomTag) {
         try {
             File[] files =
@@ -4812,7 +4933,7 @@ public class StatsPullAtomService extends SystemService {
     }
 
     private int pullCachedAppsHighWatermark(int atomTag, List<StatsEvent> pulledData) {
-        pulledData.add(LocalServices.getService(ActivityManagerInternal.class)
+        pulledData.add((StatsEvent) LocalServices.getService(ActivityManagerInternal.class)
                 .getCachedAppsHighWatermarkStats(atomTag, true));
         return StatsManager.PULL_SUCCESS;
     }

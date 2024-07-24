@@ -29,6 +29,7 @@ import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.broadcast.BroadcastDispatcher
 import com.android.systemui.display.domain.interactor.ConnectedDisplayInteractor
+import com.android.systemui.display.domain.interactor.ConnectedDisplayInteractor.PendingDisplay
 import com.android.systemui.display.domain.interactor.ConnectedDisplayInteractor.State
 import com.android.systemui.privacy.PrivacyItemController
 import com.android.systemui.privacy.logging.PrivacyLogger
@@ -194,31 +195,27 @@ class PhoneStatusBarPolicyTest : SysuiTestCase() {
 
     @Test
     fun testAppTransitionFinished_doesNotShowManagedProfileIcon() {
-        whenever(userManager.isManagedProfile(anyInt())).thenReturn(false)
+        whenever(userManager.getUserStatusBarIconResId(anyInt())).thenReturn(0 /* ID_NULL */)
         whenever(keyguardStateController.isShowing).thenReturn(false)
-
         statusBarPolicy.appTransitionFinished(0)
         // The above call posts to bgExecutor and then back to mainExecutor
         executor.advanceClockToLast()
         executor.runAllReady()
         executor.advanceClockToLast()
         executor.runAllReady()
-
         verify(iconController, never()).setIconVisibility(MANAGED_PROFILE_SLOT, true)
     }
 
     @Test
     fun testAppTransitionFinished_showsManagedProfileIcon() {
-        whenever(userManager.isManagedProfile(anyInt())).thenReturn(true)
+        whenever(userManager.getUserStatusBarIconResId(anyInt())).thenReturn(100)
         whenever(keyguardStateController.isShowing).thenReturn(false)
-
         statusBarPolicy.appTransitionFinished(0)
         // The above call posts to bgExecutor and then back to mainExecutor
         executor.advanceClockToLast()
         executor.runAllReady()
         executor.advanceClockToLast()
         executor.runAllReady()
-
         verify(iconController).setIconVisibility(MANAGED_PROFILE_SLOT, true)
     }
 
@@ -320,5 +317,11 @@ class PhoneStatusBarPolicyTest : SysuiTestCase() {
         suspend fun emit(value: State) = flow.emit(value)
         override val connectedDisplayState: Flow<State>
             get() = flow
+        override val connectedDisplayAddition: Flow<Unit>
+            get() = TODO("Not yet implemented")
+        override val pendingDisplay: Flow<PendingDisplay?>
+            get() = TODO("Not yet implemented")
+        override val concurrentDisplaysInProgress: Flow<Boolean>
+            get() = TODO("Not yet implemented")
     }
 }

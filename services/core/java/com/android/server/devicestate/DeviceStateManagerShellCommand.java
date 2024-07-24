@@ -18,6 +18,7 @@ package com.android.server.devicestate;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.hardware.devicestate.DeviceState;
 import android.hardware.devicestate.DeviceStateManager;
 import android.hardware.devicestate.DeviceStateRequest;
 import android.os.Binder;

@@ -1,0 +1,66 @@
+package {
+    // See: http://go/android-license-faq
+    // A large-scale-change added 'default_applicable_licenses' to import
+    // all of the 'license_kinds' from "frameworks_base_license"
+    // to get the below license kinds:
+    //   SPDX-license-identifier-Apache-2.0
+    default_applicable_licenses: ["frameworks_base_license"],
+}
+
+android_test {
+    name: "InputMethodCoreTests",
+
+    srcs: [
+        "src/**/*.java",
+        "src/**/*.kt",
+        "src/**/I*.aidl",
+    ],
+
+    dxflags: ["--core-library"],
+
+    static_libs: [
+        "collector-device-lib-platform",
+        "android-common",
+        "frameworks-core-util-lib",
+        "androidx.core_core",
+        "androidx.core_core-ktx",
+        "androidx.test.ext.junit",
+        "androidx.test.runner",
+        "androidx.test.rules",
+        "flag-junit",
+        "junit-params",
+        "kotlin-test",
+        "mockito-target-minus-junit4",
+        "platform-test-annotations",
+        "platform-compat-test-rules",
+        "truth",
+        "print-test-util-lib",
+        "testng",
+        "device-time-shell-utils",
+        "testables",
+        "flag-junit",
+    ],
+
+    libs: [
+        "android.test.runner",
+        "android.test.base",
+        "android.test.mock",
+        "framework",
+        "ext",
+        "framework-res",
+    ],
+
+    sdk_version: "core_platform",
+    test_suites: [
+        "device-tests",
+        "automotive-tests",
+    ],
+
+    certificate: "platform",
+
+    resource_dirs: ["res"],
+
+    data: [
+        ":com.android.cts.helpers.aosp",
+    ],
+}

@@ -159,7 +159,7 @@ public final class CallAudioState implements Parcelable {
     @Override
     public String toString() {
         String bluetoothDeviceList = supportedBluetoothDevices.stream()
-                .map(BluetoothDevice::getAddress).collect(Collectors.joining(", "));
+                .map(BluetoothDevice::toString).collect(Collectors.joining(", "));
 
         return String.format(Locale.US,
                 "[AudioState isMuted: %b, route: %s, supportedRouteMask: %s, " +
@@ -196,6 +196,16 @@ public final class CallAudioState implements Parcelable {
         } else {
             return supportedRouteMask;
         }
+    }
+
+    /**
+     * @return Bit mask of all routes supported by this call, won't be changed by streaming state.
+     *
+     * @hide
+     */
+    @CallAudioRoute
+    public int getRawSupportedRouteMask() {
+        return supportedRouteMask;
     }
 
     /**

@@ -21,6 +21,7 @@ import static android.accessibilityservice.AccessibilityServiceInfo.FEEDBACK_ALL
 import android.accessibilityservice.AccessibilityServiceInfo;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
+import android.app.admin.flags.Flags;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -42,6 +43,7 @@ import android.view.accessibility.IAccessibilityManager;
 import android.view.inputmethod.InputMethodInfo;
 
 import com.android.internal.R;
+import com.android.internal.telephony.SmsApplication;
 import com.android.server.inputmethod.InputMethodManagerInternal;
 import com.android.server.utils.Slogf;
 
@@ -97,7 +99,7 @@ public final class PersonalAppsSuspensionHelper {
         result.removeAll(getSystemLauncherPackages());
         result.removeAll(getAccessibilityServices());
         result.removeAll(getInputMethodPackages());
-        result.remove(Telephony.Sms.getDefaultSmsPackage(mContext));
+        result.remove(getDefaultSmsPackage());
         result.remove(getSettingsPackageName());
 
         final String[] unsuspendablePackages =
@@ -202,6 +204,17 @@ public final class PersonalAppsSuspensionHelper {
         return resolveInfos != null && !resolveInfos.isEmpty();
     }
 
+    private String getDefaultSmsPackage() {
+        //TODO(b/319449037): Unflag the following change.
+        if (Flags.defaultSmsPersonalAppSuspensionFixEnabled()) {
+            return SmsApplication.getDefaultSmsApplicationAsUser(
+                            mContext, /*updateIfNeeded=*/ false, mContext.getUser())
+                    .getPackageName();
+        } else {
+            return Telephony.Sms.getDefaultSmsPackage(mContext);
+        }
+    }
+
 
     void dump(IndentingPrintWriter pw) {
         pw.println("PersonalAppsSuspensionHelper");
@@ -212,7 +225,7 @@ public final class PersonalAppsSuspensionHelper {
         DevicePolicyManagerService.dumpApps(pw, "accessibility services",
                 getAccessibilityServices());
         DevicePolicyManagerService.dumpApps(pw, "input method packages", getInputMethodPackages());
-        pw.printf("SMS package: %s\n", Telephony.Sms.getDefaultSmsPackage(mContext));
+        pw.printf("SMS package: %s\n", getDefaultSmsPackage());
         pw.printf("Settings package: %s\n", getSettingsPackageName());
         DevicePolicyManagerService.dumpApps(pw, "Packages subject to suspension",
                 getPersonalAppsForSuspension());

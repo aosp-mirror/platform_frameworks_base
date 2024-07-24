@@ -16,6 +16,10 @@
 
 package com.android.server.trust;
 
+import static android.security.Flags.FLAG_SHOULD_TRUST_MANAGER_LISTEN_FOR_PRIMARY_AUTH;
+import static android.security.Flags.shouldTrustManagerListenForPrimaryAuth;
+import static android.service.trust.TrustAgentService.FLAG_GRANT_TRUST_TEMPORARY_AND_RENEWABLE;
+
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.any;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.anyBoolean;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.anyInt;
@@ -26,12 +30,23 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.eq;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mock;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.when;
+import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_NOT_REQUIRED;
+import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_USER_LOCKDOWN;
 
 import static com.google.common.truth.Truth.assertThat;
+
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+
+import static java.util.Collections.singleton;
 
 import android.Manifest;
 import android.annotation.Nullable;
 import android.app.ActivityManager;
+import android.app.ActivityManagerInternal;
+import android.app.AlarmManager;
 import android.app.IActivityManager;
 import android.app.admin.DevicePolicyManager;
 import android.app.trust.ITrustListener;
@@ -55,25 +70,32 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IBinder;
+import android.os.Looper;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.UserHandle;
 import android.os.UserManager;
-import android.platform.test.annotations.RequiresFlagsEnabled;
-import android.platform.test.flag.junit.CheckFlagsRule;
-import android.platform.test.flag.junit.DeviceFlagsValueProvider;
+import android.platform.test.flag.junit.FlagsParameterization;
+import android.platform.test.flag.junit.SetFlagsRule;
 import android.provider.Settings;
-import android.security.Authorization;
-import android.security.authorization.IKeystoreAuthorization;
+import android.security.KeyStoreAuthorization;
+import android.service.trust.GrantTrustResult;
+import android.service.trust.ITrustAgentService;
+import android.service.trust.ITrustAgentServiceCallback;
 import android.service.trust.TrustAgentService;
 import android.testing.TestableContext;
+import android.util.Log;
 import android.view.IWindowManager;
 import android.view.WindowManagerGlobal;
 
 import androidx.test.core.app.ApplicationProvider;
 
+import com.android.internal.infra.AndroidFuture;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.internal.widget.LockPatternUtils.StrongAuthTracker;
+import com.android.internal.widget.LockPatternUtils.StrongAuthTracker.StrongAuthFlags;
+import com.android.internal.widget.LockSettingsInternal;
+import com.android.internal.widget.LockSettingsStateListener;
 import com.android.modules.utils.testing.ExtendedMockitoRule;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
@@ -81,28 +103,41 @@ import com.android.server.SystemServiceManager;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.ArgumentMatcher;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
+import platform.test.runner.parameterized.ParameterizedAndroidJunit4;
+import platform.test.runner.parameterized.Parameters;
+
+@RunWith(ParameterizedAndroidJunit4.class)
 public class TrustManagerServiceTest {
+    @Parameters(name = "{0}")
+    public static List<FlagsParameterization> getParams() {
+        return FlagsParameterization.allCombinationsOf(
+                FLAG_SHOULD_TRUST_MANAGER_LISTEN_FOR_PRIMARY_AUTH);
+    }
 
     @Rule
     public final ExtendedMockitoRule mExtendedMockitoRule = new ExtendedMockitoRule.Builder(this)
             .spyStatic(ActivityManager.class)
-            .spyStatic(Authorization.class)
             .mockStatic(ServiceManager.class)
             .mockStatic(WindowManagerGlobal.class)
             .build();
 
     @Rule
-    public final CheckFlagsRule mCheckFlagsRule = DeviceFlagsValueProvider.createCheckFlagsRule();
+    public final SetFlagsRule mSetFlagsRule;
 
     @Rule
     public final MockContext mMockContext = new MockContext(
@@ -116,26 +151,38 @@ public class TrustManagerServiceTest {
     private static final int PROFILE_USER_ID = 70;
     private static final long[] PARENT_BIOMETRIC_SIDS = new long[] { 600L, 601L };
     private static final long[] PROFILE_BIOMETRIC_SIDS = new long[] { 700L, 701L };
+    private static final long RENEWABLE_TRUST_DURATION = 10000L;
+    private static final String GRANT_TRUST_MESSAGE = "granted";
+    private static final String TAG = "TrustManagerServiceTest";
 
     private final ArrayList<ResolveInfo> mTrustAgentResolveInfoList = new ArrayList<>();
     private final ArrayList<ComponentName> mKnownTrustAgents = new ArrayList<>();
     private final ArrayList<ComponentName> mEnabledTrustAgents = new ArrayList<>();
+    private final Map<ComponentName, ITrustAgentService.Stub> mMockTrustAgents = new HashMap<>();
 
     private @Mock ActivityManager mActivityManager;
+    private @Mock ActivityManagerInternal mActivityManagerInternal;
+    private @Mock AlarmManager mAlarmManager;
     private @Mock BiometricManager mBiometricManager;
     private @Mock DevicePolicyManager mDevicePolicyManager;
     private @Mock FaceManager mFaceManager;
     private @Mock FingerprintManager mFingerprintManager;
-    private @Mock IKeystoreAuthorization mKeystoreAuthorization;
+    private @Mock KeyStoreAuthorization mKeyStoreAuthorization;
     private @Mock LockPatternUtils mLockPatternUtils;
+    private @Mock LockSettingsInternal mLockSettingsInternal;
     private @Mock PackageManager mPackageManager;
     private @Mock UserManager mUserManager;
     private @Mock IWindowManager mWindowManager;
+    private @Mock ITrustListener mTrustListener;
 
     private HandlerThread mHandlerThread;
-    private TrustManagerService.Injector mInjector;
     private TrustManagerService mService;
     private ITrustManager mTrustManager;
+    private ActivityManagerInternal mPreviousActivityManagerInternal;
+
+    public TrustManagerServiceTest(FlagsParameterization flags) {
+        mSetFlagsRule = new SetFlagsRule(SetFlagsRule.DefaultInitValueType.DEVICE_DEFAULT, flags);
+    }
 
     @Before
     public void setUp() throws Exception {
@@ -144,8 +191,6 @@ public class TrustManagerServiceTest {
 
         when(mFaceManager.getSensorProperties()).thenReturn(List.of());
         when(mFingerprintManager.getSensorProperties()).thenReturn(List.of());
-
-        doReturn(mKeystoreAuthorization).when(() -> Authorization.getService());
 
         when(mLockPatternUtils.getDevicePolicyManager()).thenReturn(mDevicePolicyManager);
         when(mLockPatternUtils.isSecure(TEST_USER_ID)).thenReturn(true);
@@ -161,6 +206,9 @@ public class TrustManagerServiceTest {
             mEnabledTrustAgents.addAll((Collection<ComponentName>) invocation.getArgument(0));
             return null;
         }).when(mLockPatternUtils).setEnabledTrustAgents(any(), eq(TEST_USER_ID));
+
+        LocalServices.removeServiceForTest(LockSettingsInternal.class);
+        LocalServices.addService(LockSettingsInternal.class, mLockSettingsInternal);
 
         ArgumentMatcher<Intent> trustAgentIntentMatcher = new ArgumentMatcher<Intent>() {
             @Override
@@ -180,12 +228,18 @@ public class TrustManagerServiceTest {
         when(mWindowManager.isKeyguardLocked()).thenReturn(true);
 
         mMockContext.addMockSystemService(ActivityManager.class, mActivityManager);
+        mMockContext.addMockSystemService(AlarmManager.class, mAlarmManager);
         mMockContext.addMockSystemService(BiometricManager.class, mBiometricManager);
         mMockContext.addMockSystemService(FaceManager.class, mFaceManager);
         mMockContext.addMockSystemService(FingerprintManager.class, mFingerprintManager);
         mMockContext.setMockPackageManager(mPackageManager);
         mMockContext.addMockSystemService(UserManager.class, mUserManager);
         doReturn(mWindowManager).when(() -> WindowManagerGlobal.getWindowManagerService());
+        mPreviousActivityManagerInternal = LocalServices.getService(
+                ActivityManagerInternal.class);
+        LocalServices.removeServiceForTest(ActivityManagerInternal.class);
+        LocalServices.addService(ActivityManagerInternal.class,
+                mActivityManagerInternal);
         LocalServices.addService(SystemServiceManager.class, mock(SystemServiceManager.class));
 
         grantPermission(Manifest.permission.ACCESS_KEYGUARD_SECURE_STORAGE);
@@ -193,8 +247,7 @@ public class TrustManagerServiceTest {
 
         mHandlerThread = new HandlerThread("handler");
         mHandlerThread.start();
-        mInjector = new TrustManagerService.Injector(mLockPatternUtils, mHandlerThread.getLooper());
-        mService = new TrustManagerService(mMockContext, mInjector);
+        mService = new TrustManagerService(mMockContext, new MockInjector(mMockContext));
 
         // Get the ITrustManager from the new TrustManagerService.
         mService.onStart();
@@ -202,12 +255,46 @@ public class TrustManagerServiceTest {
         verify(() -> ServiceManager.addService(eq(Context.TRUST_SERVICE),
                     binderArgumentCaptor.capture(), anyBoolean(), anyInt()));
         mTrustManager = ITrustManager.Stub.asInterface(binderArgumentCaptor.getValue());
+        mTrustManager.registerTrustListener(mTrustListener);
+    }
+
+    private class MockInjector extends TrustManagerService.Injector {
+        MockInjector(Context context) {
+            super(context);
+        }
+
+        @Override
+        LockPatternUtils getLockPatternUtils() {
+            return mLockPatternUtils;
+        }
+
+        @Override
+        KeyStoreAuthorization getKeyStoreAuthorization() {
+            return mKeyStoreAuthorization;
+        }
+
+        @Override
+        AlarmManager getAlarmManager() {
+            return mAlarmManager;
+        }
+
+        @Override
+        Looper getLooper() {
+            return mHandlerThread.getLooper();
+        }
     }
 
     @After
     public void tearDown() {
         LocalServices.removeServiceForTest(SystemServiceManager.class);
-        mHandlerThread.quit();
+        LocalServices.removeServiceForTest(ActivityManagerInternal.class);
+        if (mPreviousActivityManagerInternal != null) {
+            LocalServices.addService(ActivityManagerInternal.class,
+                    mPreviousActivityManagerInternal);
+        }
+        if (mHandlerThread != null) {
+            mHandlerThread.quit();
+        }
     }
 
     @Test
@@ -351,12 +438,10 @@ public class TrustManagerServiceTest {
 
     @Test
     public void reportEnabledTrustAgentsChangedInformsListener() throws RemoteException {
-        final ITrustListener trustListener = mock(ITrustListener.class);
-        mTrustManager.registerTrustListener(trustListener);
         mService.waitForIdle();
         mTrustManager.reportEnabledTrustAgentsChanged(TEST_USER_ID);
         mService.waitForIdle();
-        verify(trustListener).onEnabledTrustAgentsChanged(TEST_USER_ID);
+        verify(mTrustListener).onEnabledTrustAgentsChanged(TEST_USER_ID);
     }
 
     // Tests that when the device is locked for a managed profile with a *unified* challenge, the
@@ -364,21 +449,20 @@ public class TrustManagerServiceTest {
     // user, not the profile.  This matches the authentication that is needed to unlock the device
     // for the profile again.
     @Test
-    @RequiresFlagsEnabled(android.security.Flags.FLAG_FIX_UNLOCKED_DEVICE_REQUIRED_KEYS_V2)
     public void testLockDeviceForManagedProfileWithUnifiedChallenge_usesParentBiometricSids()
             throws Exception {
         setupMocksForProfile(/* unifiedChallenge= */ true);
 
         when(mWindowManager.isKeyguardLocked()).thenReturn(false);
         mTrustManager.reportKeyguardShowingChanged();
-        verify(mKeystoreAuthorization).onDeviceUnlocked(PARENT_USER_ID, null);
-        verify(mKeystoreAuthorization).onDeviceUnlocked(PROFILE_USER_ID, null);
+        verify(mKeyStoreAuthorization).onDeviceUnlocked(PARENT_USER_ID, null);
+        verify(mKeyStoreAuthorization).onDeviceUnlocked(PROFILE_USER_ID, null);
 
         when(mWindowManager.isKeyguardLocked()).thenReturn(true);
         mTrustManager.reportKeyguardShowingChanged();
-        verify(mKeystoreAuthorization)
+        verify(mKeyStoreAuthorization)
                 .onDeviceLocked(eq(PARENT_USER_ID), eq(PARENT_BIOMETRIC_SIDS), eq(false));
-        verify(mKeystoreAuthorization)
+        verify(mKeyStoreAuthorization)
                 .onDeviceLocked(eq(PROFILE_USER_ID), eq(PARENT_BIOMETRIC_SIDS), eq(false));
     }
 
@@ -392,15 +476,193 @@ public class TrustManagerServiceTest {
         setupMocksForProfile(/* unifiedChallenge= */ false);
 
         mTrustManager.setDeviceLockedForUser(PROFILE_USER_ID, false);
-        verify(mKeystoreAuthorization).onDeviceUnlocked(PROFILE_USER_ID, null);
+        verify(mKeyStoreAuthorization).onDeviceUnlocked(PROFILE_USER_ID, null);
 
         mTrustManager.setDeviceLockedForUser(PROFILE_USER_ID, true);
-        verify(mKeystoreAuthorization)
+        verify(mKeyStoreAuthorization)
                 .onDeviceLocked(eq(PROFILE_USER_ID), eq(PROFILE_BIOMETRIC_SIDS), eq(false));
     }
 
     @Test
-    @RequiresFlagsEnabled(android.security.Flags.FLAG_FIX_UNLOCKED_DEVICE_REQUIRED_KEYS_V2)
+    public void testSuccessfulUnlock_bindsTrustAgent() throws Exception {
+        when(mUserManager.getAliveUsers())
+                .thenReturn(List.of(new UserInfo(TEST_USER_ID, "test", UserInfo.FLAG_FULL)));
+        ComponentName trustAgentName =
+                ComponentName.unflattenFromString("com.android/.SystemTrustAgent");
+        ITrustAgentService trustAgentService =
+                setUpTrustAgentWithStrongAuthRequired(
+                        trustAgentName, STRONG_AUTH_REQUIRED_AFTER_USER_LOCKDOWN);
+
+        attemptSuccessfulUnlock(TEST_USER_ID);
+        mService.waitForIdle();
+
+        assertThat(getCallback(trustAgentService)).isNotNull();
+    }
+
+    @Test
+    public void testSuccessfulUnlock_notifiesTrustAgent() throws Exception {
+        ComponentName trustAgentName =
+                ComponentName.unflattenFromString("com.android/.SystemTrustAgent");
+        ITrustAgentService trustAgentService =
+                setUpTrustAgentWithStrongAuthRequired(
+                        trustAgentName, STRONG_AUTH_REQUIRED_AFTER_USER_LOCKDOWN);
+
+        attemptSuccessfulUnlock(TEST_USER_ID);
+        mService.waitForIdle();
+
+        verify(trustAgentService).onUnlockAttempt(/* successful= */ true);
+    }
+
+    @Test
+    public void testSuccessfulUnlock_notifiesTrustListenerOfChangeInManagedTrust()
+            throws Exception {
+        ComponentName trustAgentName =
+                ComponentName.unflattenFromString("com.android/.SystemTrustAgent");
+        setUpTrustAgentWithStrongAuthRequired(trustAgentName, STRONG_AUTH_NOT_REQUIRED);
+        mService.waitForIdle();
+        Mockito.reset(mTrustListener);
+
+        attemptSuccessfulUnlock(TEST_USER_ID);
+        mService.waitForIdle();
+
+        verify(mTrustListener).onTrustManagedChanged(false, TEST_USER_ID);
+    }
+
+    @Test
+    @Ignore("TODO: b/340891566 - Trustagent always refreshes trustable timer for user 0 on unlock")
+    public void testSuccessfulUnlock_refreshesTrustableTimers() throws Exception {
+        ComponentName trustAgentName =
+                ComponentName.unflattenFromString("com.android/.SystemTrustAgent");
+        ITrustAgentService trustAgent =
+                setUpTrustAgentWithStrongAuthRequired(trustAgentName, STRONG_AUTH_NOT_REQUIRED);
+        setUpRenewableTrust(trustAgent);
+
+        attemptSuccessfulUnlock(TEST_USER_ID);
+        mService.waitForIdle();
+
+        // Idle and hard timeout alarms for first renewable trust granted
+        // Idle timeout alarm refresh for second renewable trust granted
+        // Idle and hard timeout alarms refresh for last report
+        verify(mAlarmManager, times(3))
+                .setExact(
+                        eq(AlarmManager.ELAPSED_REALTIME_WAKEUP),
+                        anyLong(),
+                        anyString(),
+                        any(AlarmManager.OnAlarmListener.class),
+                        any(Handler.class));
+    }
+
+    @Test
+    public void testFailedUnlock_doesNotBindTrustAgent() throws Exception {
+        ComponentName trustAgentName =
+                ComponentName.unflattenFromString("com.android/.SystemTrustAgent");
+        ITrustAgentService trustAgentService =
+                setUpTrustAgentWithStrongAuthRequired(
+                        trustAgentName, STRONG_AUTH_REQUIRED_AFTER_USER_LOCKDOWN);
+
+        attemptFailedUnlock(TEST_USER_ID);
+        mService.waitForIdle();
+
+        verify(trustAgentService, never()).setCallback(any());
+    }
+
+    @Test
+    public void testFailedUnlock_notifiesTrustAgent() throws Exception {
+        ComponentName trustAgentName =
+                ComponentName.unflattenFromString("com.android/.SystemTrustAgent");
+        ITrustAgentService trustAgentService =
+                setUpTrustAgentWithStrongAuthRequired(trustAgentName, STRONG_AUTH_NOT_REQUIRED);
+
+        attemptFailedUnlock(TEST_USER_ID);
+        mService.waitForIdle();
+
+        verify(trustAgentService).onUnlockAttempt(/* successful= */ false);
+    }
+
+    @Test
+    public void testFailedUnlock_doesNotNotifyTrustListenerOfChangeInManagedTrust()
+            throws Exception {
+        ComponentName trustAgentName =
+                ComponentName.unflattenFromString("com.android/.SystemTrustAgent");
+        setUpTrustAgentWithStrongAuthRequired(trustAgentName, STRONG_AUTH_NOT_REQUIRED);
+        Mockito.reset(mTrustListener);
+
+        attemptFailedUnlock(TEST_USER_ID);
+        mService.waitForIdle();
+
+        verify(mTrustListener, never()).onTrustManagedChanged(anyBoolean(), anyInt());
+    }
+
+    private void setUpRenewableTrust(ITrustAgentService trustAgent) throws RemoteException {
+        ITrustAgentServiceCallback callback = getCallback(trustAgent);
+        callback.setManagingTrust(true);
+        mService.waitForIdle();
+        attemptSuccessfulUnlock(TEST_USER_ID);
+        mService.waitForIdle();
+        when(mWindowManager.isKeyguardLocked()).thenReturn(false);
+        grantRenewableTrust(callback);
+    }
+
+    private ITrustAgentService setUpTrustAgentWithStrongAuthRequired(
+            ComponentName agentName, @StrongAuthFlags int strongAuthFlags) throws Exception {
+        doReturn(true).when(mUserManager).isUserUnlockingOrUnlocked(TEST_USER_ID);
+        addTrustAgent(agentName, true);
+        mLockPatternUtils.setKnownTrustAgents(singleton(agentName), TEST_USER_ID);
+        mLockPatternUtils.setEnabledTrustAgents(singleton(agentName), TEST_USER_ID);
+        when(mUserManager.isUserUnlockingOrUnlocked(TEST_USER_ID)).thenReturn(true);
+        setupStrongAuthTracker(strongAuthFlags, false);
+        mService.waitForIdle();
+        return getOrCreateMockTrustAgent(agentName);
+    }
+
+    private void attemptSuccessfulUnlock(int userId) throws RemoteException {
+        if (shouldTrustManagerListenForPrimaryAuth()) {
+            ArgumentCaptor<LockSettingsStateListener> captor =
+                    ArgumentCaptor.forClass(LockSettingsStateListener.class);
+            verify(mLockSettingsInternal).registerLockSettingsStateListener(captor.capture());
+            LockSettingsStateListener listener = captor.getValue();
+            listener.onAuthenticationSucceeded(userId);
+        } else {
+            mTrustManager.reportUnlockAttempt(/* successful= */ true, userId);
+        }
+    }
+
+    private void attemptFailedUnlock(int userId) throws RemoteException {
+        if (shouldTrustManagerListenForPrimaryAuth()) {
+            ArgumentCaptor<LockSettingsStateListener> captor =
+                    ArgumentCaptor.forClass(LockSettingsStateListener.class);
+            verify(mLockSettingsInternal).registerLockSettingsStateListener(captor.capture());
+            LockSettingsStateListener listener = captor.getValue();
+            listener.onAuthenticationFailed(userId);
+        } else {
+            mTrustManager.reportUnlockAttempt(/* successful= */ false, userId);
+        }
+    }
+
+    private void grantRenewableTrust(ITrustAgentServiceCallback callback) throws RemoteException {
+        Log.i(TAG, "Granting trust");
+        AndroidFuture<GrantTrustResult> future = new AndroidFuture<>();
+        callback.grantTrust(
+                GRANT_TRUST_MESSAGE,
+                RENEWABLE_TRUST_DURATION,
+                FLAG_GRANT_TRUST_TEMPORARY_AND_RENEWABLE,
+                future);
+        mService.waitForIdle();
+    }
+
+    /**
+     * Retrieve the ITrustAgentServiceCallback attached to a TrustAgentService after it has been
+     * bound to by the TrustManagerService. Will fail if no binding was established.
+     */
+    private ITrustAgentServiceCallback getCallback(ITrustAgentService trustAgentService)
+            throws RemoteException {
+        ArgumentCaptor<ITrustAgentServiceCallback> callbackCaptor =
+                ArgumentCaptor.forClass(ITrustAgentServiceCallback.class);
+        verify(trustAgentService).setCallback(callbackCaptor.capture());
+        return callbackCaptor.getValue();
+    }
+
+    @Test
     public void testKeystoreWeakUnlockEnabled_whenWeakFingerprintIsSetupAndAllowed()
             throws Exception {
         setupStrongAuthTrackerToAllowEverything();
@@ -409,7 +671,6 @@ public class TrustManagerServiceTest {
     }
 
     @Test
-    @RequiresFlagsEnabled(android.security.Flags.FLAG_FIX_UNLOCKED_DEVICE_REQUIRED_KEYS_V2)
     public void testKeystoreWeakUnlockEnabled_whenWeakFaceIsSetupAndAllowed() throws Exception {
         setupStrongAuthTrackerToAllowEverything();
         setupFace(SensorProperties.STRENGTH_WEAK);
@@ -417,7 +678,6 @@ public class TrustManagerServiceTest {
     }
 
     @Test
-    @RequiresFlagsEnabled(android.security.Flags.FLAG_FIX_UNLOCKED_DEVICE_REQUIRED_KEYS_V2)
     public void testKeystoreWeakUnlockEnabled_whenConvenienceFingerprintIsSetupAndAllowed()
             throws Exception {
         setupStrongAuthTrackerToAllowEverything();
@@ -426,7 +686,6 @@ public class TrustManagerServiceTest {
     }
 
     @Test
-    @RequiresFlagsEnabled(android.security.Flags.FLAG_FIX_UNLOCKED_DEVICE_REQUIRED_KEYS_V2)
     public void testKeystoreWeakUnlockEnabled_whenConvenienceFaceIsSetupAndAllowed()
             throws Exception {
         setupStrongAuthTrackerToAllowEverything();
@@ -435,7 +694,6 @@ public class TrustManagerServiceTest {
     }
 
     @Test
-    @RequiresFlagsEnabled(android.security.Flags.FLAG_FIX_UNLOCKED_DEVICE_REQUIRED_KEYS_V2)
     public void testKeystoreWeakUnlockDisabled_whenStrongAuthRequired() throws Exception {
         setupStrongAuthTracker(StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_USER_LOCKDOWN, true);
         setupFace(SensorProperties.STRENGTH_WEAK);
@@ -443,7 +701,6 @@ public class TrustManagerServiceTest {
     }
 
     @Test
-    @RequiresFlagsEnabled(android.security.Flags.FLAG_FIX_UNLOCKED_DEVICE_REQUIRED_KEYS_V2)
     public void testKeystoreWeakUnlockDisabled_whenNonStrongBiometricNotAllowed() throws Exception {
         setupStrongAuthTracker(StrongAuthTracker.STRONG_AUTH_NOT_REQUIRED,
                 /* isNonStrongBiometricAllowed= */ false);
@@ -452,7 +709,6 @@ public class TrustManagerServiceTest {
     }
 
     @Test
-    @RequiresFlagsEnabled(android.security.Flags.FLAG_FIX_UNLOCKED_DEVICE_REQUIRED_KEYS_V2)
     public void testKeystoreWeakUnlockDisabled_whenWeakFingerprintSensorIsPresentButNotEnrolled()
             throws Exception {
         setupStrongAuthTrackerToAllowEverything();
@@ -461,7 +717,6 @@ public class TrustManagerServiceTest {
     }
 
     @Test
-    @RequiresFlagsEnabled(android.security.Flags.FLAG_FIX_UNLOCKED_DEVICE_REQUIRED_KEYS_V2)
     public void testKeystoreWeakUnlockDisabled_whenWeakFaceSensorIsPresentButNotEnrolled()
             throws Exception {
         setupStrongAuthTrackerToAllowEverything();
@@ -470,7 +725,6 @@ public class TrustManagerServiceTest {
     }
 
     @Test
-    @RequiresFlagsEnabled(android.security.Flags.FLAG_FIX_UNLOCKED_DEVICE_REQUIRED_KEYS_V2)
     public void
             testKeystoreWeakUnlockDisabled_whenWeakFingerprintIsSetupButForbiddenByDevicePolicy()
             throws Exception {
@@ -482,7 +736,6 @@ public class TrustManagerServiceTest {
     }
 
     @Test
-    @RequiresFlagsEnabled(android.security.Flags.FLAG_FIX_UNLOCKED_DEVICE_REQUIRED_KEYS_V2)
     public void testKeystoreWeakUnlockDisabled_whenWeakFaceIsSetupButForbiddenByDevicePolicy()
             throws Exception {
         setupStrongAuthTrackerToAllowEverything();
@@ -493,7 +746,6 @@ public class TrustManagerServiceTest {
     }
 
     @Test
-    @RequiresFlagsEnabled(android.security.Flags.FLAG_FIX_UNLOCKED_DEVICE_REQUIRED_KEYS_V2)
     public void testKeystoreWeakUnlockDisabled_whenOnlyStrongFingerprintIsSetup() throws Exception {
         setupStrongAuthTrackerToAllowEverything();
         setupFingerprint(SensorProperties.STRENGTH_STRONG);
@@ -501,7 +753,6 @@ public class TrustManagerServiceTest {
     }
 
     @Test
-    @RequiresFlagsEnabled(android.security.Flags.FLAG_FIX_UNLOCKED_DEVICE_REQUIRED_KEYS_V2)
     public void testKeystoreWeakUnlockDisabled_whenOnlyStrongFaceIsSetup() throws Exception {
         setupStrongAuthTrackerToAllowEverything();
         setupFace(SensorProperties.STRENGTH_STRONG);
@@ -509,7 +760,6 @@ public class TrustManagerServiceTest {
     }
 
     @Test
-    @RequiresFlagsEnabled(android.security.Flags.FLAG_FIX_UNLOCKED_DEVICE_REQUIRED_KEYS_V2)
     public void testKeystoreWeakUnlockDisabled_whenNoBiometricsAreSetup() throws Exception {
         setupStrongAuthTrackerToAllowEverything();
         verifyWeakUnlockDisabled();
@@ -572,11 +822,11 @@ public class TrustManagerServiceTest {
     private void verifyWeakUnlockValue(boolean expectedWeakUnlockEnabled) throws Exception {
         when(mWindowManager.isKeyguardLocked()).thenReturn(false);
         mTrustManager.reportKeyguardShowingChanged();
-        verify(mKeystoreAuthorization).onDeviceUnlocked(TEST_USER_ID, null);
+        verify(mKeyStoreAuthorization).onDeviceUnlocked(TEST_USER_ID, null);
 
         when(mWindowManager.isKeyguardLocked()).thenReturn(true);
         mTrustManager.reportKeyguardShowingChanged();
-        verify(mKeystoreAuthorization).onDeviceLocked(eq(TEST_USER_ID), any(),
+        verify(mKeyStoreAuthorization).onDeviceLocked(eq(TEST_USER_ID), any(),
                 eq(expectedWeakUnlockEnabled));
     }
 
@@ -621,6 +871,20 @@ public class TrustManagerServiceTest {
         ResolveInfo resolveInfo = new ResolveInfo();
         resolveInfo.serviceInfo = serviceInfo;
         mTrustAgentResolveInfoList.add(resolveInfo);
+        ITrustAgentService.Stub mockService = getOrCreateMockTrustAgent(agentComponentName);
+        mMockContext.addMockService(agentComponentName, mockService);
+        mMockTrustAgents.put(agentComponentName, mockService);
+    }
+
+    private ITrustAgentService.Stub getOrCreateMockTrustAgent(ComponentName agentComponentName) {
+        return mMockTrustAgents.computeIfAbsent(
+                agentComponentName,
+                (componentName) -> {
+                    ITrustAgentService.Stub mockTrustAgent = mock(ITrustAgentService.Stub.class);
+                    when(mockTrustAgent.queryLocalInterface(anyString()))
+                            .thenReturn(mockTrustAgent);
+                    return mockTrustAgent;
+                });
     }
 
     private void bootService() {

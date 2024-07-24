@@ -53,6 +53,8 @@ import java.util.zip.ZipOutputStream;
  *
  * @hide
  */
+// Exported to Mainline modules; cannot use annotations
+// @android.ravenwood.annotation.RavenwoodKeepWholeClass
 public class FileRotator {
     private static final String TAG = "FileRotator";
     private static final boolean LOGD = false;

@@ -19,9 +19,9 @@ package com.android.systemui.unfold
 import android.content.ContentResolver
 import android.content.Context
 import android.hardware.devicestate.DeviceStateManager
+import android.os.Trace
 import android.util.Log
 import com.android.internal.util.LatencyTracker
-import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.UiBackground
 import com.android.systemui.keyguard.ScreenLifecycle
 import com.android.systemui.unfold.UnfoldTransitionProgressProvider.TransitionProgressListener
@@ -41,7 +41,7 @@ import javax.inject.Inject
  * For now, the focus is on the time the inner display is visible, but in the future, it is easily
  * possible to monitor the time to go from the inner screen to the outer.
  */
-@SysUISingleton
+@SysUIUnfoldScope
 class UnfoldLatencyTracker
 @Inject
 constructor(
@@ -57,6 +57,7 @@ constructor(
     private var folded: Boolean? = null
     private var isTransitionEnabled: Boolean? = null
     private val foldStateListener = FoldStateListener(context)
+    private var unfoldInProgress = false
     private val isFoldable: Boolean
         get() =
             context.resources
@@ -95,7 +96,7 @@ constructor(
         // the unfold animation (e.g. it could be disabled because of battery saver).
         // When animation is enabled finishing of the tracking will be done in onTransitionStarted.
         if (folded == false && isTransitionEnabled == false) {
-            latencyTracker.onActionEnd(LatencyTracker.ACTION_SWITCH_DISPLAY_UNFOLD)
+            onUnfoldEnded()
 
             if (DEBUG) {
                 Log.d(TAG, "onScreenTurnedOn: ending ACTION_SWITCH_DISPLAY_UNFOLD")
@@ -116,12 +117,28 @@ constructor(
         }
 
         if (folded == false && isTransitionEnabled == true) {
-            latencyTracker.onActionEnd(LatencyTracker.ACTION_SWITCH_DISPLAY_UNFOLD)
+            onUnfoldEnded()
 
             if (DEBUG) {
                 Log.d(TAG, "onTransitionStarted: ending ACTION_SWITCH_DISPLAY_UNFOLD")
             }
         }
+    }
+
+    private fun onUnfoldStarted() {
+        if (unfoldInProgress) return
+        unfoldInProgress = true
+        // As LatencyTracker might be disabled, let's also log a parallel slice to the trace to be
+        // able to debug all cases.
+        latencyTracker.onActionStart(LatencyTracker.ACTION_SWITCH_DISPLAY_UNFOLD)
+        Trace.asyncTraceBegin(Trace.TRACE_TAG_APP, UNFOLD_IN_PROGRESS_TRACE_NAME, /* cookie= */ 0)
+    }
+
+    private fun onUnfoldEnded() {
+        if (!unfoldInProgress) return
+        unfoldInProgress = false
+        latencyTracker.onActionEnd(LatencyTracker.ACTION_SWITCH_DISPLAY_UNFOLD)
+        Trace.endAsyncSection(UNFOLD_IN_PROGRESS_TRACE_NAME, 0)
     }
 
     private fun onFoldEvent(folded: Boolean) {
@@ -139,7 +156,7 @@ constructor(
             // unfolding the device.
             if (oldFolded != null && !folded) {
                 // Unfolding started
-                latencyTracker.onActionStart(LatencyTracker.ACTION_SWITCH_DISPLAY_UNFOLD)
+                onUnfoldStarted()
                 isTransitionEnabled =
                     transitionProgressProvider.isPresent && contentResolver.areAnimationsEnabled()
 
@@ -159,4 +176,5 @@ constructor(
 }
 
 private const val TAG = "UnfoldLatencyTracker"
+private const val UNFOLD_IN_PROGRESS_TRACE_NAME = "Switch displays during unfold"
 private val DEBUG = Compile.IS_DEBUG && Log.isLoggable(TAG, Log.VERBOSE)

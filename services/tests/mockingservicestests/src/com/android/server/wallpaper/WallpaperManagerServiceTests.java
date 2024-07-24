@@ -453,7 +453,7 @@ public class WallpaperManagerServiceTests {
         doAnswer(invocation -> timestamps[0] = SystemClock.elapsedRealtime())
                 .when(sContext).sendBroadcastAsUser(any(), any());
         doAnswer(invocation -> timestamps[1] = SystemClock.elapsedRealtime())
-                .when(mService).notifyWallpaperColorsChanged(wallpaper, FLAG_SYSTEM);
+                .when(mService).notifyWallpaperColorsChanged(wallpaper);
 
         assertNull(wallpaper.wallpaperObserver);
         mService.switchUser(wallpaper.userId, null);
@@ -462,7 +462,7 @@ public class WallpaperManagerServiceTests {
         wallpaper.wallpaperObserver.stopWatching();
 
         spyOn(wallpaper.wallpaperObserver);
-        doReturn(wallpaper).when(wallpaper.wallpaperObserver).dataForEvent(true, false);
+        doReturn(wallpaper).when(wallpaper.wallpaperObserver).dataForEvent(false);
         wallpaper.wallpaperObserver.onEvent(CLOSE_WRITE, WALLPAPER);
 
         // ACTION_WALLPAPER_CHANGED should be invoked before onWallpaperColorsChanged.

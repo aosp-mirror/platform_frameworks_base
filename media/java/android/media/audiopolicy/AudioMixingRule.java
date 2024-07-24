@@ -26,7 +26,10 @@ import android.media.AudioAttributes;
 import android.media.MediaRecorder;
 import android.os.Build;
 import android.os.Parcel;
+import android.os.Parcelable;
 import android.util.Log;
+
+import com.android.internal.annotations.VisibleForTesting;
 
 import java.lang.annotation.Retention;
 import java.util.ArrayList;
@@ -50,7 +53,7 @@ import java.util.Set;
  * </pre>
  */
 @SystemApi
-public class AudioMixingRule {
+public class AudioMixingRule implements Parcelable {
 
     private AudioMixingRule(int mixType, Collection<AudioMixMatchCriterion> criteria,
                             boolean allowPrivilegedMediaPlaybackCapture,
@@ -130,7 +133,7 @@ public class AudioMixingRule {
             RULE_EXCLUSION_MASK | RULE_MATCH_AUDIO_SESSION_ID;
 
     /** @hide */
-    public static final class AudioMixMatchCriterion {
+    public static final class AudioMixMatchCriterion implements Parcelable {
         @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
         final AudioAttributes mAttr;
         @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
@@ -139,16 +142,42 @@ public class AudioMixingRule {
         final int mRule;
 
         /** input parameters must be valid */
-        AudioMixMatchCriterion(AudioAttributes attributes, int rule) {
+        @VisibleForTesting
+        public AudioMixMatchCriterion(AudioAttributes attributes, int rule) {
             mAttr = attributes;
             mIntProp = Integer.MIN_VALUE;
             mRule = rule;
         }
         /** input parameters must be valid */
-        AudioMixMatchCriterion(Integer intProp, int rule) {
+        @VisibleForTesting
+        public AudioMixMatchCriterion(Integer intProp, int rule) {
             mAttr = null;
             mIntProp = intProp.intValue();
             mRule = rule;
+        }
+
+        private AudioMixMatchCriterion(@NonNull Parcel in) {
+            Objects.requireNonNull(in);
+            mRule = in.readInt();
+            final int match_rule = mRule & ~RULE_EXCLUSION_MASK;
+            switch (match_rule) {
+                case RULE_MATCH_ATTRIBUTE_USAGE:
+                case RULE_MATCH_ATTRIBUTE_CAPTURE_PRESET:
+                    mAttr = AudioAttributes.CREATOR.createFromParcel(in);
+                    mIntProp = Integer.MIN_VALUE;
+                    break;
+                case RULE_MATCH_UID:
+                case RULE_MATCH_USERID:
+                case RULE_MATCH_AUDIO_SESSION_ID:
+                    mIntProp = in.readInt();
+                    mAttr = null;
+                    break;
+                default:
+                    // assume there was in int value to read as for now they come in pair
+                    in.readInt();
+                    throw new IllegalArgumentException(
+                            "Illegal rule value " + mRule + " in parcel");
+            }
         }
 
         @Override
@@ -170,7 +199,13 @@ public class AudioMixingRule {
                     && Objects.equals(mAttr, other.mAttr);
         }
 
-        void writeToParcel(Parcel dest) {
+        @Override
+        public int describeContents() {
+            return 0;
+        }
+
+        @Override
+        public void writeToParcel(@NonNull Parcel dest, int flags) {
             dest.writeInt(mRule);
             final int match_rule = mRule & ~RULE_EXCLUSION_MASK;
             switch (match_rule) {
@@ -189,6 +224,22 @@ public class AudioMixingRule {
                     dest.writeInt(-1);
             }
         }
+
+        public static final @NonNull Parcelable.Creator<AudioMixMatchCriterion> CREATOR =
+                new Parcelable.Creator<>() {
+            /**
+             * Rebuilds an AudioMixMatchCriterion previously stored with writeToParcel().
+             *
+             * @param p Parcel object to read the AudioMix from
+             * @return a new AudioMixMatchCriterion created from the data in the parcel
+             */
+            public AudioMixMatchCriterion createFromParcel(Parcel p) {
+                return new AudioMixMatchCriterion(p);
+            }
+            public AudioMixMatchCriterion[] newArray(int size) {
+                return new AudioMixMatchCriterion[size];
+            }
+        };
 
         public AudioAttributes getAudioAttributes() { return mAttr; }
         public int getIntProp() { return mIntProp; }
@@ -605,13 +656,14 @@ public class AudioMixingRule {
                 if (!(property instanceof AudioAttributes)) {
                     throw new IllegalArgumentException("Invalid AudioAttributes argument");
                 }
-                return addRuleInternal((AudioAttributes) property, null, rule);
+                return addRuleInternal(
+                        new AudioMixMatchCriterion((AudioAttributes) property, rule));
             } else {
                 // implies integer match rule
                 if (!(property instanceof Integer)) {
                     throw new IllegalArgumentException("Invalid Integer argument");
                 }
-                return addRuleInternal(null, (Integer) property, rule);
+                return addRuleInternal(new AudioMixMatchCriterion((Integer) property, rule));
             }
         }
 
@@ -636,12 +688,13 @@ public class AudioMixingRule {
          * @return the same Builder instance.
          * @throws IllegalArgumentException
          */
-        private Builder addRuleInternal(AudioAttributes attrToMatch, Integer intProp, int rule)
+        private Builder addRuleInternal(AudioMixMatchCriterion criterion)
                 throws IllegalArgumentException {
             // If mix type is invalid and added rule is valid only for the players / recorders,
             // adjust the mix type accordingly.
             // Otherwise, if the mix type was already deduced or set explicitly, verify the rule
             // is valid for the mix type.
+            final int rule = criterion.mRule;
             if (mTargetMixType == AudioMix.MIX_TYPE_INVALID) {
                 if (isPlayerRule(rule)) {
                     mTargetMixType = AudioMix.MIX_TYPE_PLAYERS;
@@ -655,49 +708,14 @@ public class AudioMixingRule {
             }
             synchronized (mCriteria) {
                 int oppositeRule = rule ^ RULE_EXCLUSION_MASK;
-                if (mCriteria.stream().anyMatch(criterion -> criterion.mRule == oppositeRule)) {
+                if (mCriteria.stream().anyMatch(
+                        otherCriterion -> otherCriterion.mRule == oppositeRule)) {
                     throw new IllegalArgumentException("AudioMixingRule cannot contain RULE_MATCH_*"
                             + " and RULE_EXCLUDE_* for the same dimension.");
                 }
-                int ruleWithoutExclusion = rule & ~RULE_EXCLUSION_MASK;
-                switch (ruleWithoutExclusion) {
-                    case RULE_MATCH_ATTRIBUTE_USAGE:
-                    case RULE_MATCH_ATTRIBUTE_CAPTURE_PRESET:
-                        mCriteria.add(new AudioMixMatchCriterion(attrToMatch, rule));
-                        break;
-                    case RULE_MATCH_UID:
-                    case RULE_MATCH_USERID:
-                    case RULE_MATCH_AUDIO_SESSION_ID:
-                        mCriteria.add(new AudioMixMatchCriterion(intProp, rule));
-                        break;
-                    default:
-                        throw new IllegalStateException("Unreachable code in addRuleInternal()");
-                }
+                mCriteria.add(criterion);
             }
             return this;
-        }
-
-        Builder addRuleFromParcel(Parcel in) throws IllegalArgumentException {
-            final int rule = in.readInt();
-            final int match_rule = rule & ~RULE_EXCLUSION_MASK;
-            AudioAttributes attr = null;
-            Integer intProp = null;
-            switch (match_rule) {
-                case RULE_MATCH_ATTRIBUTE_USAGE:
-                case RULE_MATCH_ATTRIBUTE_CAPTURE_PRESET:
-                    attr =  AudioAttributes.CREATOR.createFromParcel(in);
-                    break;
-                case RULE_MATCH_UID:
-                case RULE_MATCH_USERID:
-                case RULE_MATCH_AUDIO_SESSION_ID:
-                    intProp = new Integer(in.readInt());
-                    break;
-                default:
-                    // assume there was in int value to read as for now they come in pair
-                    in.readInt();
-                    throw new IllegalArgumentException("Illegal rule value " + rule + " in parcel");
-            }
-            return addRuleInternal(attr, intProp, rule);
         }
 
         /**
@@ -717,4 +735,52 @@ public class AudioMixingRule {
                     mVoiceCommunicationCaptureAllowed);
         }
     }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(@NonNull Parcel dest, int flags) {
+        // write opt-out respect
+        dest.writeBoolean(mAllowPrivilegedPlaybackCapture);
+        // write voice communication capture allowed flag
+        dest.writeBoolean(mVoiceCommunicationCaptureAllowed);
+        // write specified mix type
+        dest.writeInt(mTargetMixType);
+        // write mix rules
+        dest.writeInt(mCriteria.size());
+        for (AudioMixingRule.AudioMixMatchCriterion criterion : mCriteria) {
+            criterion.writeToParcel(dest, flags);
+        }
+    }
+
+    public static final @NonNull Parcelable.Creator<AudioMixingRule> CREATOR =
+            new Parcelable.Creator<>() {
+
+        @Override
+        public AudioMixingRule createFromParcel(Parcel source) {
+            AudioMixingRule.Builder ruleBuilder = new AudioMixingRule.Builder();
+            // read opt-out respect
+            ruleBuilder.allowPrivilegedPlaybackCapture(source.readBoolean());
+            // read voice capture allowed flag
+            ruleBuilder.voiceCommunicationCaptureAllowed(source.readBoolean());
+            // read specified mix type
+            ruleBuilder.setTargetMixRole(source.readInt());
+            // read mix rules
+            int nbRules = source.readInt();
+            for (int j = 0; j < nbRules; j++) {
+                // read the matching rules
+                ruleBuilder.addRuleInternal(
+                        AudioMixMatchCriterion.CREATOR.createFromParcel(source));
+            }
+            return ruleBuilder.build();
+        }
+
+        @Override
+        public AudioMixingRule[] newArray(int size) {
+            return new AudioMixingRule[size];
+        }
+    };
 }

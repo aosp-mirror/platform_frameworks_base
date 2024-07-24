@@ -33,7 +33,7 @@ import com.airbnb.lottie.compose.animateLottieCompositionAsState
 import com.airbnb.lottie.compose.rememberLottieComposition
 import com.airbnb.lottie.compose.rememberLottieDynamicProperties
 import com.airbnb.lottie.compose.rememberLottieDynamicProperty
-import com.android.settingslib.spa.R
+import com.android.settingslib.color.R
 
 @Composable
 fun Lottie(

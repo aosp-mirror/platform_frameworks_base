@@ -18,10 +18,8 @@ package com.android.internal.os;
 
 import static org.junit.Assert.assertEquals;
 
-import android.content.Context;
 import android.os.FileUtils;
 
-import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
@@ -41,9 +39,8 @@ public class ProcStatsUtilTest {
     private File mProcDirectory;
 
     @Before
-    public void setUp() {
-        Context context = InstrumentationRegistry.getContext();
-        mProcDirectory = context.getDir("proc", Context.MODE_PRIVATE);
+    public void setUp() throws Exception {
+        mProcDirectory = Files.createTempDirectory("ProcStatsUtilTest").toFile();
     }
 
     @After

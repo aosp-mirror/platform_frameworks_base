@@ -244,11 +244,18 @@ private:
             // This can happen if a BitmapShader is used on multiple canvas', such as a
             // software + hardware canvas, which is otherwise valid as SkShader is "immutable"
             std::lock_guard _lock(mUniformGuard);
-            const float Wunclamped = (sk_float_log(targetHdrSdrRatio) -
-                                      sk_float_log(mGainmapInfo.fDisplayRatioSdr)) /
-                                     (sk_float_log(mGainmapInfo.fDisplayRatioHdr) -
-                                      sk_float_log(mGainmapInfo.fDisplayRatioSdr));
-            const float W = std::max(std::min(Wunclamped, 1.f), 0.f);
+            // Compute the weight parameter that will be used to blend between the images.
+            float W = 0.f;
+            if (targetHdrSdrRatio > mGainmapInfo.fDisplayRatioSdr) {
+                if (targetHdrSdrRatio < mGainmapInfo.fDisplayRatioHdr) {
+                    W = (sk_float_log(targetHdrSdrRatio) -
+                         sk_float_log(mGainmapInfo.fDisplayRatioSdr)) /
+                        (sk_float_log(mGainmapInfo.fDisplayRatioHdr) -
+                         sk_float_log(mGainmapInfo.fDisplayRatioSdr));
+                } else {
+                    W = 1.f;
+                }
+            }
             mBuilder.uniform("W") = W;
             uniforms = mBuilder.uniforms();
         }

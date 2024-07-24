@@ -9,6 +9,7 @@ import com.android.systemui.plugins.qs.QS
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController
 import com.android.systemui.statusbar.phone.ScrimController
 import com.android.systemui.statusbar.policy.FakeConfigurationController
+import com.android.systemui.util.mockito.mock
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -31,7 +32,7 @@ class SplitShadeLockScreenOverScrollerTest : SysuiTestCase() {
 
     @Mock private lateinit var scrimController: ScrimController
     @Mock private lateinit var statusBarStateController: SysuiStatusBarStateController
-    @Mock private lateinit var qS: QS
+    private var qS: QS? = null
     @Mock private lateinit var nsslController: NotificationStackScrollLayoutController
     @Mock private lateinit var dumpManager: DumpManager
 
@@ -40,6 +41,7 @@ class SplitShadeLockScreenOverScrollerTest : SysuiTestCase() {
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
+        qS = mock()
 
         whenever(nsslController.height).thenReturn(1800)
 
@@ -92,7 +94,7 @@ class SplitShadeLockScreenOverScrollerTest : SysuiTestCase() {
         setDragAmount(1000f)
         whenever(statusBarStateController.state).thenReturn(StatusBarState.SHADE)
         setDragAmount(999f)
-        reset(qS, scrimController, nsslController)
+        reset(qS!!, scrimController, nsslController)
 
         setDragAmount(998f)
         setDragAmount(997f)
@@ -100,8 +102,15 @@ class SplitShadeLockScreenOverScrollerTest : SysuiTestCase() {
         verifyNoMoreOverScrollChanges()
     }
 
+    @Test
+    fun qsNull_applyOverscroll_doesNotCrash() {
+        qS = null
+
+        setDragAmount(100f)
+    }
+
     private fun verifyOverScrollPerformed() {
-        verify(qS).setOverScrollAmount(intThat { it > 0 })
+        verify(qS!!).setOverScrollAmount(intThat { it > 0 })
         verify(scrimController).setNotificationsOverScrollAmount(intThat { it > 0 })
         verify(nsslController).setOverScrollAmount(intThat { it > 0 })
     }
@@ -109,7 +118,7 @@ class SplitShadeLockScreenOverScrollerTest : SysuiTestCase() {
     private fun verifyOverScrollResetToZero() {
         // Might be more than once as the animator might have multiple values close to zero that
         // round down to zero.
-        verify(qS, atLeast(1)).setOverScrollAmount(0)
+        verify(qS!!, atLeast(1)).setOverScrollAmount(0)
         verify(scrimController, atLeast(1)).setNotificationsOverScrollAmount(0)
         verify(nsslController, atLeast(1)).setOverScrollAmount(0)
     }

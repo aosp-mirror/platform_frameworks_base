@@ -1,0 +1,52 @@
+package: "android.view.flags"
+container: "system"
+
+flag {
+    name: "enable_surface_native_alloc_registration_ro"
+    namespace: "toolkit"
+    description: "Feature flag for registering surfaces with the VM for faster"
+      " cleanup. Fixed readonly version."
+    bug: "306193257"
+    is_fixed_read_only: true
+}
+
+flag {
+    name: "enable_use_measure_cache_during_force_layout"
+    namespace: "toolkit"
+    description: "Enables using the measure cache during a view force layout from the second "
+      "onMeasure call onwards during the same traversal."
+    bug: "316170253"
+    is_fixed_read_only: true
+}
+
+flag {
+    name: "enable_vector_cursors"
+    namespace: "systemui"
+    description: "Feature flag to enable vector drawables in addition to bitmaps for PointerIcon."
+    bug: "305193969"
+    is_fixed_read_only: true
+}
+
+flag {
+  name: "sensitive_content_app_protection_api"
+  namespace: "permissions"
+  description: "This flag controls the new sensitive content protection API,"
+    " The API will be used by other ui toolkits (i.e. compose, webview, custom virtual views)."
+  bug: "322887144"
+}
+
+flag {
+  name: "sensitive_content_app_protection"
+  namespace: "permissions"
+  description: "This flag controls the sensitive content protection when sharing the screen"
+  bug: "322887144"
+  # Referenced in WM where WM starts before DeviceConfig
+  is_fixed_read_only: true
+}
+
+flag {
+    name: "enable_arrow_icon_on_hover_when_clickable"
+    namespace: "toolkit"
+    description: "Enable default arrow icon when hovering on buttons or clickable widgets."
+    bug: "299269803"
+}

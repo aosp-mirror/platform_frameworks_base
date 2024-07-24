@@ -17,6 +17,7 @@
 package android.view.accessibility;
 
 import static android.accessibilityservice.AccessibilityServiceInfo.FLAG_ENABLE_ACCESSIBILITY_VOLUME;
+import static android.annotation.SystemApi.Client.MODULE_LIBRARIES;
 
 import android.Manifest;
 import android.accessibilityservice.AccessibilityService;
@@ -25,6 +26,7 @@ import android.accessibilityservice.AccessibilityServiceInfo.FeedbackType;
 import android.accessibilityservice.AccessibilityShortcutInfo;
 import android.annotation.CallbackExecutor;
 import android.annotation.ColorInt;
+import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -60,6 +62,7 @@ import android.util.ArrayMap;
 import android.util.Log;
 import android.util.SparseArray;
 import android.view.IWindow;
+import android.view.SurfaceControl;
 import android.view.View;
 import android.view.accessibility.AccessibilityEvent.EventType;
 
@@ -99,30 +102,30 @@ public final class AccessibilityManager {
     private static final String LOG_TAG = "AccessibilityManager";
 
     /** @hide */
-    public static final int STATE_FLAG_ACCESSIBILITY_ENABLED = 0x00000001;
+    public static final int STATE_FLAG_ACCESSIBILITY_ENABLED = 1 /* << 0 */;
 
     /** @hide */
-    public static final int STATE_FLAG_TOUCH_EXPLORATION_ENABLED = 0x00000002;
+    public static final int STATE_FLAG_TOUCH_EXPLORATION_ENABLED = 1 << 1;
 
     /** @hide */
-    public static final int STATE_FLAG_HIGH_TEXT_CONTRAST_ENABLED = 0x00000004;
+    public static final int STATE_FLAG_HIGH_TEXT_CONTRAST_ENABLED = 1 << 2;
 
     /** @hide */
-    public static final int STATE_FLAG_DISPATCH_DOUBLE_TAP = 0x00000008;
+    public static final int STATE_FLAG_DISPATCH_DOUBLE_TAP = 1 << 3;
 
     /** @hide */
-    public static final int STATE_FLAG_REQUEST_MULTI_FINGER_GESTURES = 0x00000010;
+    public static final int STATE_FLAG_REQUEST_MULTI_FINGER_GESTURES = 1 << 4;
 
     /** @hide */
-    public static final int STATE_FLAG_TRACE_A11Y_INTERACTION_CONNECTION_ENABLED = 0x00000100;
+    public static final int STATE_FLAG_TRACE_A11Y_INTERACTION_CONNECTION_ENABLED = 1 << 8;
     /** @hide */
-    public static final int STATE_FLAG_TRACE_A11Y_INTERACTION_CONNECTION_CB_ENABLED = 0x00000200;
+    public static final int STATE_FLAG_TRACE_A11Y_INTERACTION_CONNECTION_CB_ENABLED = 1 << 9;
     /** @hide */
-    public static final int STATE_FLAG_TRACE_A11Y_INTERACTION_CLIENT_ENABLED = 0x00000400;
+    public static final int STATE_FLAG_TRACE_A11Y_INTERACTION_CLIENT_ENABLED = 1 << 10;
     /** @hide */
-    public static final int STATE_FLAG_TRACE_A11Y_SERVICE_ENABLED = 0x00000800;
+    public static final int STATE_FLAG_TRACE_A11Y_SERVICE_ENABLED = 1 << 11;
     /** @hide */
-    public static final int STATE_FLAG_AUDIO_DESCRIPTION_BY_DEFAULT_ENABLED = 0x00001000;
+    public static final int STATE_FLAG_AUDIO_DESCRIPTION_BY_DEFAULT_ENABLED = 1 << 12;
 
     /** @hide */
     public static final int DALTONIZER_DISABLED = -1;
@@ -183,14 +186,29 @@ public final class AccessibilityManager {
 
     /**
      * Annotations for the shortcut type.
+     * <p>Note: Keep in sync with {@link #SHORTCUT_TYPES}.</p>
      * @hide
      */
     @Retention(RetentionPolicy.SOURCE)
     @IntDef(value = {
+            // LINT.IfChange(shortcut_type_intdef)
             ACCESSIBILITY_BUTTON,
             ACCESSIBILITY_SHORTCUT_KEY
+            // LINT.ThenChange(:shortcut_type_array)
     })
     public @interface ShortcutType {}
+
+    /**
+     * Used for iterating through {@link ShortcutType}.
+     * <p>Note: Keep in sync with {@link ShortcutType}.</p>
+     * @hide
+     */
+    public static final int[] SHORTCUT_TYPES = {
+            // LINT.IfChange(shortcut_type_array)
+            ACCESSIBILITY_BUTTON,
+            ACCESSIBILITY_SHORTCUT_KEY,
+            // LINT.ThenChange(:shortcut_type_intdef)
+    };
 
     /**
      * Annotations for content flag of UI.
@@ -848,7 +866,7 @@ public final class AccessibilityManager {
 
         List<AccessibilityServiceInfo> services = null;
         try {
-            services = service.getInstalledAccessibilityServiceList(userId);
+            services = service.getInstalledAccessibilityServiceList(userId).getList();
             if (DEBUG) {
                 Log.i(LOG_TAG, "Installed AccessibilityServices " + services);
             }
@@ -908,6 +926,28 @@ public final class AccessibilityManager {
             return Collections.unmodifiableList(services);
         } else {
             return Collections.emptyList();
+        }
+    }
+
+    /**
+     * Returns whether the user must be shown the AccessibilityService warning dialog
+     * before the AccessibilityService (or any shortcut for the service) can be enabled.
+     * @hide
+     */
+    @RequiresPermission(Manifest.permission.MANAGE_ACCESSIBILITY)
+    public boolean isAccessibilityServiceWarningRequired(@NonNull AccessibilityServiceInfo info) {
+        final IAccessibilityManager service;
+        synchronized (mLock) {
+            service = getServiceLocked();
+            if (service == null) {
+                return true;
+            }
+        }
+        try {
+            return service.isAccessibilityServiceWarningRequired(info);
+        } catch (RemoteException re) {
+            Log.e(LOG_TAG, "Error while checking isAccessibilityServiceWarningRequired: ", re);
+            return true;
         }
     }
 
@@ -1821,13 +1861,13 @@ public final class AccessibilityManager {
 
     /**
      *
-     * Sets an {@link IWindowMagnificationConnection} that manipulates window magnification.
+     * Sets an {@link IMagnificationConnection} that manipulates magnification in SystemUI.
      *
-     * @param connection The connection that manipulates window magnification.
+     * @param connection The connection that manipulates magnification in SystemUI.
      * @hide
      */
-    public void setWindowMagnificationConnection(@Nullable
-            IWindowMagnificationConnection connection) {
+    public void setMagnificationConnection(@Nullable
+            IMagnificationConnection connection) {
         final IAccessibilityManager service;
         synchronized (mLock) {
             service = getServiceLocked();
@@ -1836,9 +1876,9 @@ public final class AccessibilityManager {
             }
         }
         try {
-            service.setWindowMagnificationConnection(connection);
+            service.setMagnificationConnection(connection);
         } catch (RemoteException re) {
-            Log.e(LOG_TAG, "Error setting window magnfication connection", re);
+            Log.e(LOG_TAG, "Error setting magnification connection", re);
         }
     }
 
@@ -2028,10 +2068,10 @@ public final class AccessibilityManager {
     }
 
     /**
-     * Start sequence (infinite) type of flash notification. Use
-     * {@code Context.getOpPackageName()} as the identifier of this flash notification.
+     * Start sequence (infinite) type of flash notification. Use {@code Context} to retrieve the
+     * package name as the identifier of this flash notification.
      * The notification can be cancelled later by calling {@link #stopFlashNotificationSequence}
-     * with same {@code Context.getOpPackageName()}.
+     * with same {@code Context}.
      * If the binder associated with this {@link AccessibilityManager} instance dies then the
      * sequence will stop automatically. It is strongly recommended to call
      * {@link #stopFlashNotificationSequence} within a reasonable amount of time after calling
@@ -2042,6 +2082,9 @@ public final class AccessibilityManager {
      * @return {@code true} if flash notification works properly.
      * @hide
      */
+    @FlaggedApi(Flags.FLAG_FLASH_NOTIFICATION_SYSTEM_API)
+    @TestApi
+    @SystemApi(client = MODULE_LIBRARIES)
     public boolean startFlashNotificationSequence(@NonNull Context context,
             @FlashNotificationReason int reason) {
         final IAccessibilityManager service;
@@ -2062,8 +2105,8 @@ public final class AccessibilityManager {
     }
 
     /**
-     * Stop sequence (infinite) type of flash notification. The flash notification with
-     * {@code Context.getOpPackageName()} as identifier will be stopped if exist.
+     * Stop sequence (infinite) type of flash notification. The flash notification with the
+     * package name retrieved from {@code Context} as identifier will be stopped if exist.
      * It is strongly recommended to call this method within a reasonable amount of time after
      * calling {@link #startFlashNotificationSequence} method.
      *
@@ -2071,6 +2114,9 @@ public final class AccessibilityManager {
      * @return {@code true} if flash notification stops properly.
      * @hide
      */
+    @FlaggedApi(Flags.FLAG_FLASH_NOTIFICATION_SYSTEM_API)
+    @TestApi
+    @SystemApi(client = MODULE_LIBRARIES)
     public boolean stopFlashNotificationSequence(@NonNull Context context) {
         final IAccessibilityManager service;
         synchronized (mLock) {
@@ -2395,6 +2441,55 @@ public final class AccessibilityManager {
         }
         try {
             return service.getWindowTransformationSpec(windowId);
+        } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Attaches a {@link android.view.SurfaceControl} containing an accessibility overlay to the
+     * specified display.
+     *
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.INTERNAL_SYSTEM_WINDOW)
+    public void attachAccessibilityOverlayToDisplay(
+            int displayId, @NonNull SurfaceControl surfaceControl) {
+        final IAccessibilityManager service;
+        synchronized (mLock) {
+            service = getServiceLocked();
+            if (service == null) {
+                return;
+            }
+        }
+        try {
+            service.attachAccessibilityOverlayToDisplay(
+                    displayId, surfaceControl);
+        } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Notifies that the current a11y tiles in QuickSettings Panel has been changed
+     *
+     * @param userId            The userId of the user attempts to change the qs panel.
+     * @param tileComponentNames A list of Accessibility feature's TileServices' component names
+     *                           and the a11y platform tiles' component names
+     * @hide
+     */
+    @RequiresPermission(Manifest.permission.STATUS_BAR_SERVICE)
+    public void notifyQuickSettingsTilesChanged(
+            @UserIdInt int userId, List<ComponentName> tileComponentNames) {
+        final IAccessibilityManager service;
+        synchronized (mLock) {
+            service = getServiceLocked();
+            if (service == null) {
+                return;
+            }
+        }
+        try {
+            service.notifyQuickSettingsTilesChanged(userId, tileComponentNames);
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
         }

@@ -15,6 +15,10 @@
  */
 package com.android.server.devicepolicy;
 
+import static android.app.admin.DevicePolicyManager.CONTENT_PROTECTION_DISABLED;
+import static android.app.admin.DevicePolicyManager.ContentProtectionPolicy;
+
+import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.app.admin.DevicePolicyCache;
 import android.app.admin.DevicePolicyManager;
@@ -70,23 +74,20 @@ public class DevicePolicyCacheImpl extends DevicePolicyCache {
     /** Maps to {@code ActiveAdmin.mAdminCanGrantSensorsPermissions}. */
     private final AtomicBoolean mCanGrantSensorsPermissions = new AtomicBoolean(false);
 
+    @GuardedBy("mLock")
+    private final SparseIntArray mContentProtectionPolicy = new SparseIntArray();
+
     public void onUserRemoved(int userHandle) {
         synchronized (mLock) {
             mPasswordQuality.delete(userHandle);
             mPermissionPolicy.delete(userHandle);
+            mContentProtectionPolicy.delete(userHandle);
         }
     }
 
     @Override
     public boolean isScreenCaptureAllowed(int userHandle) {
-        if (DevicePolicyManagerService.isPolicyEngineForFinanceFlagEnabled()) {
-            return isScreenCaptureAllowedInPolicyEngine(userHandle);
-        } else {
-            synchronized (mLock) {
-                return mScreenCaptureDisallowedUser != UserHandle.USER_ALL
-                        && mScreenCaptureDisallowedUser != userHandle;
-            }
-        }
+        return isScreenCaptureAllowedInPolicyEngine(userHandle);
     }
 
     private boolean isScreenCaptureAllowedInPolicyEngine(int userHandle) {
@@ -150,6 +151,24 @@ public class DevicePolicyCacheImpl extends DevicePolicyCache {
     }
 
     @Override
+    public @ContentProtectionPolicy int getContentProtectionPolicy(@UserIdInt int userId) {
+        synchronized (mLock) {
+            return mContentProtectionPolicy.get(userId, CONTENT_PROTECTION_DISABLED);
+        }
+    }
+
+    /** Update the content protection policy for the given user. */
+    public void setContentProtectionPolicy(@UserIdInt int userId, @Nullable Integer value) {
+        synchronized (mLock) {
+            if (value == null) {
+                mContentProtectionPolicy.delete(userId);
+            } else {
+                mContentProtectionPolicy.put(userId, value);
+            }
+        }
+    }
+
+    @Override
     public boolean canAdminGrantSensorsPermissions() {
         return mCanGrantSensorsPermissions.get();
     }
@@ -182,13 +201,10 @@ public class DevicePolicyCacheImpl extends DevicePolicyCache {
         synchronized (mLock) {
             pw.println("Device policy cache:");
             pw.increaseIndent();
-            if (DevicePolicyManagerService.isPolicyEngineForFinanceFlagEnabled()) {
-                pw.println("Screen capture disallowed users: " + mScreenCaptureDisallowedUsers);
-            } else {
-                pw.println("Screen capture disallowed user: " + mScreenCaptureDisallowedUser);
-            }
+            pw.println("Screen capture disallowed users: " + mScreenCaptureDisallowedUsers);
             pw.println("Password quality: " + mPasswordQuality);
             pw.println("Permission policy: " + mPermissionPolicy);
+            pw.println("Content protection policy: " + mContentProtectionPolicy);
             pw.println("Admin can grant sensors permission: " + mCanGrantSensorsPermissions.get());
             pw.print("Shortcuts overrides: ");
             pw.println(mLauncherShortcutOverrides);

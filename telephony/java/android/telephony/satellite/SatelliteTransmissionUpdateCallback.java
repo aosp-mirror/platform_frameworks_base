@@ -16,7 +16,11 @@
 
 package android.telephony.satellite;
 
+import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
+import android.annotation.SystemApi;
+
+import com.android.internal.telephony.flags.Flags;
 
 /**
  * A callback class for monitoring satellite position update and datagram transfer state change
@@ -24,12 +28,15 @@ import android.annotation.NonNull;
  *
  * @hide
  */
+@SystemApi
+@FlaggedApi(Flags.FLAG_OEM_ENABLED_SATELLITE_FLAG)
 public interface SatelliteTransmissionUpdateCallback {
     /**
      * Called when the satellite position changed.
      *
      * @param pointingInfo The pointing info containing the satellite location.
      */
+    @FlaggedApi(Flags.FLAG_OEM_ENABLED_SATELLITE_FLAG)
     void onSatellitePositionChanged(@NonNull PointingInfo pointingInfo);
 
     /**
@@ -39,9 +46,10 @@ public interface SatelliteTransmissionUpdateCallback {
      * @param sendPendingCount The number of datagrams that are currently being sent.
      * @param errorCode If datagram transfer failed, the reason for failure.
      */
+    @FlaggedApi(Flags.FLAG_OEM_ENABLED_SATELLITE_FLAG)
     void onSendDatagramStateChanged(
             @SatelliteManager.SatelliteDatagramTransferState int state, int sendPendingCount,
-            @SatelliteManager.SatelliteError int errorCode);
+            @SatelliteManager.SatelliteResult int errorCode);
 
     /**
      * Called when satellite datagram receive state changed.
@@ -50,7 +58,8 @@ public interface SatelliteTransmissionUpdateCallback {
      * @param receivePendingCount The number of datagrams that are currently pending to be received.
      * @param errorCode If datagram transfer failed, the reason for failure.
      */
+    @FlaggedApi(Flags.FLAG_OEM_ENABLED_SATELLITE_FLAG)
     void onReceiveDatagramStateChanged(
             @SatelliteManager.SatelliteDatagramTransferState int state, int receivePendingCount,
-            @SatelliteManager.SatelliteError int errorCode);
+            @SatelliteManager.SatelliteResult int errorCode);
 }

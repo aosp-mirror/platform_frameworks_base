@@ -19,7 +19,8 @@ package com.android.server;
 import android.os.ServiceManager;
 import android.os.image.IDynamicSystemService;
 import android.test.AndroidTestCase;
-import android.test.suitebuilder.annotation.LargeTest;
+
+import androidx.test.filters.LargeTest;
 
 public class DynamicSystemServiceTest extends AndroidTestCase {
     private static final String TAG = "DynamicSystemServiceTests";

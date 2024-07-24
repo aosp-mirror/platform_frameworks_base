@@ -24,6 +24,7 @@ import com.android.internal.inputmethod.InputBindResult;
  */
 oneway interface IInputMethodClient {
     void onBindMethod(in InputBindResult res);
+    void onStartInputResult(in InputBindResult res, int startInputSeq);
     void onBindAccessibilityService(in InputBindResult res, int id);
     void onUnbindMethod(int sequence, int unbindReason);
     void onUnbindAccessibilityService(int sequence, int id);
@@ -31,7 +32,6 @@ oneway interface IInputMethodClient {
     void setInteractive(boolean active, boolean fullscreen);
     void scheduleStartInputIfNecessary(boolean fullscreen);
     void reportFullscreenMode(boolean fullscreen);
-    void updateVirtualDisplayToScreenMatrix(int bindSequence, in float[] matrixValues);
     void setImeTraceEnabled(boolean enabled);
     void throwExceptionFromSystem(String message);
 }

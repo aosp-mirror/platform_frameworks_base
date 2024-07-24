@@ -25,7 +25,7 @@ import android.view.View
 import android.view.ViewGroup.LayoutParams.MATCH_PARENT
 import android.view.ViewGroup.LayoutParams.WRAP_CONTENT
 import android.widget.LinearLayout
-import com.android.systemui.R
+import com.android.systemui.res.R
 import com.android.systemui.statusbar.phone.KeyguardIndicationTextView
 
 class KeyguardIndicationArea(
@@ -50,6 +50,15 @@ class KeyguardIndicationArea(
         )
     }
 
+    override fun setAlpha(alpha: Float) {
+        super.setAlpha(alpha)
+
+        if (alpha == 0f) {
+            importantForAccessibility = View.IMPORTANT_FOR_ACCESSIBILITY_NO_HIDE_DESCENDANTS
+        } else {
+            importantForAccessibility = View.IMPORTANT_FOR_ACCESSIBILITY_AUTO
+        }
+    }
     private fun indicationTopRow(): KeyguardIndicationTextView {
         return KeyguardIndicationTextView(context, attrs).apply {
             id = R.id.keyguard_indication_text

@@ -34,11 +34,9 @@ java_defaults {
     },
 }
 
-// Opt-in config for optimizing and shrinking the services target using R8.
-// Enabled via `export SYSTEM_OPTIMIZE_JAVA=true`, or explicitly in Make via the
+// Config to control optimizing and shrinking the services target using R8.
+// Set via `export SYSTEM_OPTIMIZE_JAVA=true|false`, or explicitly in Make via the
 // `SOONG_CONFIG_ANDROID_SYSTEM_OPTIMIZE_JAVA` variable.
-// TODO(b/196084106): Enable optimizations by default after stabilizing and
-// building out retrace infrastructure.
 soong_config_module_type {
     name: "system_optimized_java_defaults",
     module_type: "java_defaults",
@@ -47,7 +45,10 @@ soong_config_module_type {
         "SYSTEM_OPTIMIZE_JAVA",
         "FULL_SYSTEM_OPTIMIZE_JAVA",
     ],
-    properties: ["optimize"],
+    properties: [
+        "optimize",
+        "dxflags",
+    ],
 }
 
 system_optimized_java_defaults {
@@ -80,6 +81,9 @@ system_optimized_java_defaults {
                     // permission subpackage to prune unused jarjar'ed Kotlin dependencies.
                     proguard_flags_files: ["proguard_permission.flags"],
                 },
+                // Explicitly configure R8 to preserve debug info, as this path should
+                // really only allow stripping of permission-specific code and deps.
+                dxflags: ["--debug"],
             },
         },
         // Allow form factors to opt-in full system java optimization
@@ -136,6 +140,7 @@ filegroup {
         ":services.voiceinteraction-sources",
         ":services.wallpapereffectsgeneration-sources",
         ":services.wifi-sources",
+        ":framework-pm-common-shared-srcs",
     ],
     visibility: ["//visibility:private"],
 }
@@ -145,17 +150,49 @@ java_library {
     srcs: ["core/java/com/android/server/utils/Slogf.java"],
 }
 
+soong_config_module_type {
+    name: "art_profile_java_defaults",
+    module_type: "java_defaults",
+    config_namespace: "art_profile",
+    variables: ["services_profile_path"],
+    properties: ["dex_preopt"],
+}
+
+soong_config_string_variable {
+    name: "services_profile_path",
+    values: ["art_wear_profile"],
+}
+
+art_profile_java_defaults {
+    name: "art_profile_java_defaults",
+    soong_config_variables: {
+        services_profile_path: {
+            art_wear_profile: {
+                dex_preopt: {
+                    app_image: true,
+                    profile: "art-wear-profile",
+                },
+            },
+            conditions_default: {
+                dex_preopt: {
+                    app_image: true,
+                    profile: "art-profile",
+                },
+            },
+        },
+    },
+}
+
 // merge all required services into one jar
 // ============================================================
 java_library {
     name: "services",
-    defaults: ["services_java_defaults"],
+    defaults: [
+        "services_java_defaults",
+        "art_profile_java_defaults",
+    ],
     installable: true,
 
-    dex_preopt: {
-        app_image: true,
-        profile: "art-profile",
-    },
     exclude_kotlinc_generated_files: true,
 
     srcs: [":services-main-sources"],
@@ -202,6 +239,7 @@ java_library {
     libs: [
         "android.hidl.manager-V1.0-java",
         "framework-tethering.stubs.module_lib",
+        "keepanno-annotations",
         "service-art.stubs.system_server",
         "service-permission.stubs.system_server",
         "service-rkp.stubs.system_server",
@@ -214,7 +252,11 @@ java_library {
 
     required: [
         "libukey2_jni_shared",
+        "protolog.conf.json.gz",
     ],
+    lint: {
+        baseline_filename: "lint-baseline.xml",
+    },
 
     // Uncomment to enable output of certain warnings (deprecated, unchecked)
     //javacflags: ["-Xlint"],
@@ -242,6 +284,11 @@ filegroup {
 // API stub
 // =============================================================
 
+soong_config_module_type_import {
+    from: "frameworks/base/api/Android.bp",
+    module_types: ["non_updatable_exportable_droidstubs"],
+}
+
 stubs_defaults {
     name: "services-stubs-default",
     installable: false,
@@ -257,10 +304,12 @@ stubs_defaults {
     filter_packages: ["com.android."],
 }
 
-droidstubs {
+non_updatable_exportable_droidstubs {
     name: "services-non-updatable-stubs",
     srcs: [":services-non-updatable-sources"],
-    defaults: ["services-stubs-default"],
+    defaults: [
+        "services-stubs-default",
+    ],
     check_api: {
         current: {
             api_file: "api/current.txt",
@@ -272,19 +321,39 @@ droidstubs {
             baseline_file: "api/lint-baseline.txt",
         },
     },
-    dists: [
-        {
-            targets: ["sdk"],
-            dir: "apistubs/android/system-server/api",
-            dest: "android-non-updatable.txt",
-            tag: ".api.txt",
+    soong_config_variables: {
+        release_hidden_api_exportable_stubs: {
+            dists: [
+                {
+                    targets: ["sdk"],
+                    dir: "apistubs/android/system-server/api",
+                    dest: "android-non-updatable.txt",
+                    tag: ".exportable.api.txt",
+                },
+                {
+                    targets: ["sdk"],
+                    dir: "apistubs/android/system-server/api",
+                    dest: "android-non-updatable-removed.txt",
+                    tag: ".exportable.removed-api.txt",
+                },
+            ],
+            conditions_default: {
+                dists: [
+                    {
+                        targets: ["sdk"],
+                        dir: "apistubs/android/system-server/api",
+                        dest: "android-non-updatable.txt",
+                        tag: ".api.txt",
+                    },
+                    {
+                        targets: ["sdk"],
+                        dir: "apistubs/android/system-server/api",
+                        dest: "android-non-updatable-removed.txt",
+                        tag: ".removed-api.txt",
+                    },
+                ],
+            },
         },
-        {
-            targets: ["sdk"],
-            dir: "apistubs/android/system-server/api",
-            dest: "android-non-updatable-removed.txt",
-            tag: ".removed-api.txt",
-        },
-    ],
+    },
     api_surface: "system-server",
 }

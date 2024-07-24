@@ -20,8 +20,8 @@ import static junit.framework.Assert.assertTrue;
 
 import android.os.Parcel;
 import android.service.notification.NotifyingApp;
-import android.test.suitebuilder.annotation.SmallTest;
 
+import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
 import com.android.server.UiServiceTestCase;

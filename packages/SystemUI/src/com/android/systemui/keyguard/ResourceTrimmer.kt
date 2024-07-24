@@ -30,7 +30,7 @@ import com.android.systemui.flags.Flags
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
 import com.android.systemui.keyguard.shared.model.TransitionState
-import com.android.systemui.keyguard.shared.model.WakefulnessState
+import com.android.systemui.power.domain.interactor.PowerInteractor
 import com.android.systemui.utils.GlobalWindowManager
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
@@ -52,6 +52,7 @@ class ResourceTrimmer
 @Inject
 constructor(
     private val keyguardInteractor: KeyguardInteractor,
+    private val powerInteractor: PowerInteractor,
     private val keyguardTransitionInteractor: KeyguardTransitionInteractor,
     private val globalWindowManager: GlobalWindowManager,
     @Application private val applicationScope: CoroutineScope,
@@ -61,7 +62,7 @@ constructor(
 
     override fun start() {
         Log.d(LOG_TAG, "Resource trimmer registered.")
-        if (featureFlags.isEnabled(Flags.TRIM_RESOURCES_WITH_BACKGROUND_TRIM_AT_LOCK)) {
+        if (com.android.systemui.Flags.trimResourcesWithBackgroundTrimAtLock()) {
             applicationScope.launch(bgDispatcher) {
                 // We need to wait for the AoD transition (and animation) to complete.
                 // This means we're waiting for isDreaming (== implies isDoze) and dozeAmount == 1f
@@ -70,7 +71,7 @@ constructor(
                 val isDozingFully =
                     keyguardInteractor.dozeAmount.map { it == 1f }.distinctUntilChanged()
                 combine(
-                        keyguardInteractor.wakefulnessModel.map { it.state },
+                        powerInteractor.isAsleep,
                         keyguardInteractor.isDreaming,
                         isDozingFully,
                         ::Triple
@@ -106,19 +107,16 @@ constructor(
 
     @WorkerThread
     private fun onWakefulnessUpdated(
-        wakefulness: WakefulnessState,
+        isAsleep: Boolean,
         isDreaming: Boolean,
         isDozingFully: Boolean
     ) {
-        if (!featureFlags.isEnabled(Flags.TRIM_RESOURCES_WITH_BACKGROUND_TRIM_AT_LOCK)) {
+        if (!com.android.systemui.Flags.trimResourcesWithBackgroundTrimAtLock()) {
             return
         }
 
         if (DEBUG) {
-            Log.d(
-                LOG_TAG,
-                "Wakefulness: $wakefulness Dreaming: $isDreaming DozeAmount: $isDozingFully"
-            )
+            Log.d(LOG_TAG, "isAsleep: $isAsleep Dreaming: $isDreaming DozeAmount: $isDozingFully")
         }
         // There are three scenarios:
         // * No dozing and no AoD at all - where we go directly to ASLEEP with isDreaming = false
@@ -127,9 +125,8 @@ constructor(
         //      to 1f
         // * AoD - where we go to ASLEEP with iDreaming = true and dozeAmount slowly increases
         //      to 1f
-        val dozeDisabledAndScreenOff = wakefulness == WakefulnessState.ASLEEP && !isDreaming
-        val dozeEnabledAndDozeAnimationCompleted =
-            wakefulness == WakefulnessState.ASLEEP && isDreaming && isDozingFully
+        val dozeDisabledAndScreenOff = isAsleep && !isDreaming
+        val dozeEnabledAndDozeAnimationCompleted = isAsleep && isDreaming && isDozingFully
         if (dozeDisabledAndScreenOff || dozeEnabledAndDozeAnimationCompleted) {
             Trace.beginSection("ResourceTrimmer#trimMemory")
             Log.d(LOG_TAG, "SysUI asleep, trimming memory.")

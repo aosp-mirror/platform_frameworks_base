@@ -16,6 +16,7 @@
 
 package android.os;
 
+import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.AppGlobals;
@@ -108,6 +109,12 @@ public final class Debug
      */
     private static final String DEFAULT_TRACE_BODY = "dmtrace";
     private static final String DEFAULT_TRACE_EXTENSION = ".trace";
+
+    private static final String[] FRAMEWORK_FEATURES = new String[] {
+        "opengl-tracing",
+        "view-hierarchy",
+        "support_boot_stages",
+    };
 
     /**
      * This class is used to retrieved various statistics about the memory mappings for this
@@ -209,6 +216,7 @@ public final class Debug
         @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
         public boolean hasSwappedOutPss;
 
+        // LINT.IfChange
         /** @hide */
         public static final int HEAP_UNKNOWN = 0;
         /** @hide */
@@ -310,6 +318,7 @@ public final class Debug
         public static final int OTHER_ART_APP = 30;
         /** @hide */
         public static final int OTHER_ART_BOOT = 31;
+        // LINT.ThenChange(/system/memory/libmeminfo/include/meminfo/androidprocheaps.h)
         /** @hide */
         public static final int OTHER_DVK_STAT_ART_START = OTHER_ART_APP - NUM_OTHER_STATS;
         /** @hide */
@@ -1100,6 +1109,17 @@ public final class Debug
      */
     public static String[] getVmFeatureList() {
         return VMDebug.getVmFeatureList();
+    }
+
+    /**
+     * Returns an array of strings that identify Framework features. This is
+     * used by DDMS to determine what sorts of operations the Framework can
+     * perform.
+     *
+     * @hide
+     */
+    public static String[] getFeatureList() {
+        return FRAMEWORK_FEATURES;
     }
 
     /**
@@ -1953,6 +1973,23 @@ public final class Debug
      */
     public static native long getPss(int pid, long[] outUssSwapPssRss, long[] outMemtrack);
 
+    /**
+     * Retrieves the RSS memory used by the process as given by the status file.
+     */
+    @FlaggedApi(Flags.FLAG_REMOVE_APP_PROFILER_PSS_COLLECTION)
+    public static native long getRss();
+
+    /**
+     * Retrieves the RSS memory used by the process as given by the status file. Optionally supply a
+     * long array of up to 4 entries to retrieve the total memtrack reported size, memtrack
+     * graphics, memtrack gl, and memtrack other.
+     *
+     * @return The RSS memory usage, or 0 if retrieval failed (i.e. the PID is gone).
+     * @hide
+     */
+    @FlaggedApi(Flags.FLAG_REMOVE_APP_PROFILER_PSS_COLLECTION)
+    public static native long getRss(int pid, long[] outMemtrack);
+
     /** @hide */
     public static final int MEMINFO_TOTAL = 0;
     /** @hide */
@@ -2684,4 +2721,13 @@ public final class Debug
      * @hide
      */
     public static native boolean isVmapStack();
+
+    /**
+     * Log internal statistics about the allocator.
+     * @return true if the statistics were logged properly, false if not.
+     *
+     * @hide
+     */
+    public static native boolean logAllocatorStats();
+
 }

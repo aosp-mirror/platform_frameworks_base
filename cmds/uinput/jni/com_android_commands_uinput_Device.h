@@ -14,13 +14,14 @@
  * limitations under the License.
  */
 
-#include <memory>
-#include <vector>
-
+#include <android-base/unique_fd.h>
 #include <jni.h>
 #include <linux/input.h>
 
-#include <android-base/unique_fd.h>
+#include <chrono>
+#include <memory>
+#include <vector>
+
 #include "src/com/android/commands/uinput/InputAbsInfo.h"
 
 namespace android {
@@ -46,14 +47,15 @@ private:
 
 class UinputDevice {
 public:
-    static std::unique_ptr<UinputDevice> open(int32_t id, const char* name, int32_t vid,
-                                              int32_t pid, uint16_t bus, uint32_t ff_effects_max,
-                                              const char* port,
+    static std::unique_ptr<UinputDevice> open(int32_t id, const char* name, int32_t vendorId,
+                                              int32_t productId, int32_t versionId, uint16_t bus,
+                                              uint32_t ff_effects_max, const char* port,
                                               std::unique_ptr<DeviceCallback> callback);
 
     virtual ~UinputDevice();
 
-    void injectEvent(uint16_t type, uint16_t code, int32_t value);
+    void injectEvent(std::chrono::microseconds timestamp, uint16_t type, uint16_t code,
+                     int32_t value);
     int handleEvents(int events);
 
 private:

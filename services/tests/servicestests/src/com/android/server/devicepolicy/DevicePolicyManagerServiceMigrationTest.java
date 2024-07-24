@@ -18,7 +18,6 @@ package com.android.server.devicepolicy;
 import static android.os.UserHandle.USER_SYSTEM;
 
 import static com.android.server.devicepolicy.DpmTestUtils.writeInputStreamToFile;
-import static com.android.server.pm.PackageManagerService.PLATFORM_PACKAGE_NAME;
 
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth.assertWithMessage;
@@ -146,6 +145,7 @@ public class DevicePolicyManagerServiceMigrationTest extends DpmTestBase {
 
     @SmallTest
     @Test
+    @Ignore("b/277916462")
     public void testCompMigrationUnAffiliated_skipped() throws Exception {
         prepareAdmin1AsDo();
         prepareAdminAnotherPackageAsPo(COPE_PROFILE_USER_ID);
@@ -217,26 +217,27 @@ public class DevicePolicyManagerServiceMigrationTest extends DpmTestBase {
 
     @SmallTest
     @Test
+    @Ignore("b/277916462")
     public void testCompMigration_keepSuspendedAppsWhenDpcIsRPlus() throws Exception {
         prepareAdmin1AsDo();
         prepareAdmin1AsPo(COPE_PROFILE_USER_ID, Build.VERSION_CODES.R);
 
         // Pretend some packages are suspended.
-        when(getServices().packageManagerInternal.isSuspendingAnyPackages(
-                PLATFORM_PACKAGE_NAME, USER_SYSTEM)).thenReturn(true);
+        when(getServices().packageManagerInternal.isAdminSuspendingAnyPackages(
+                USER_SYSTEM)).thenReturn(true);
 
         final DevicePolicyManagerServiceTestable dpms = bootDpmsUp();
 
         verify(getServices().packageManagerInternal, never())
-                .unsuspendForSuspendingPackage(PLATFORM_PACKAGE_NAME, USER_SYSTEM);
+                .unsuspendAdminSuspendedPackages(USER_SYSTEM);
 
         sendBroadcastWithUser(dpms, Intent.ACTION_USER_STARTED, USER_SYSTEM);
 
         // Verify that actual package suspension state is not modified after user start
         verify(getServices().packageManagerInternal, never())
-                .unsuspendForSuspendingPackage(PLATFORM_PACKAGE_NAME, USER_SYSTEM);
+                .unsuspendAdminSuspendedPackages(USER_SYSTEM);
         verify(getServices().ipackageManager, never()).setPackagesSuspendedAsUser(
-                any(), anyBoolean(), any(), any(), any(), any(), anyInt());
+                any(), anyBoolean(), any(), any(), any(), anyInt(), any(), anyInt(), anyInt());
 
         final DpmMockContext poContext = new DpmMockContext(getServices(), mRealTestContext);
         poContext.binder.callingUid = UserHandle.getUid(COPE_PROFILE_USER_ID, COPE_ADMIN1_APP_ID);
@@ -250,19 +251,20 @@ public class DevicePolicyManagerServiceMigrationTest extends DpmTestBase {
 
     @SmallTest
     @Test
+    @Ignore("b/277916462")
     public void testCompMigration_unsuspendAppsWhenDpcNotRPlus() throws Exception {
         prepareAdmin1AsDo();
         prepareAdmin1AsPo(COPE_PROFILE_USER_ID, Build.VERSION_CODES.Q);
 
         // Pretend some packages are suspended.
-        when(getServices().packageManagerInternal.isSuspendingAnyPackages(
-                PLATFORM_PACKAGE_NAME, USER_SYSTEM)).thenReturn(true);
+        when(getServices().packageManagerInternal.isAdminSuspendingAnyPackages(
+                USER_SYSTEM)).thenReturn(true);
 
         final DevicePolicyManagerServiceTestable dpms = bootDpmsUp();
 
         // Verify that apps get unsuspended.
         verify(getServices().packageManagerInternal)
-                .unsuspendForSuspendingPackage(PLATFORM_PACKAGE_NAME, USER_SYSTEM);
+                .unsuspendAdminSuspendedPackages(USER_SYSTEM);
 
         final DpmMockContext poContext = new DpmMockContext(getServices(), mRealTestContext);
         poContext.binder.callingUid = UserHandle.getUid(COPE_PROFILE_USER_ID, COPE_ADMIN1_APP_ID);

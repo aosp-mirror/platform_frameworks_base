@@ -697,6 +697,19 @@ public final class MediaBrowser {
         });
     }
 
+    private void onDisconnectRequested(ServiceCallbacks callback) {
+        mHandler.post(
+                () -> {
+                    Log.i(TAG, "onDisconnectRequest for " + mServiceComponent);
+
+                    if (!isCurrent(callback, "onDisconnectRequest")) {
+                        return;
+                    }
+                    forceCloseConnection();
+                    mCallback.onDisconnected();
+                });
+    }
+
     /**
      * Return true if {@code callback} is the current ServiceCallbacks. Also logs if it's not.
      */
@@ -879,6 +892,19 @@ public final class MediaBrowser {
          * Invoked when the connection to the media browser failed.
          */
         public void onConnectionFailed() {
+        }
+
+        /**
+         * Invoked after disconnecting by request of the {@link MediaBrowserService}.
+         *
+         * <p>The default implementation of this method calls {@link #onConnectionFailed()}.
+         *
+         * @hide
+         */
+        // TODO: b/185136506 - Consider publishing this API in the next window for API changes, if
+        // the need arises.
+        public void onDisconnected() {
+            onConnectionFailed();
         }
     }
 
@@ -1110,6 +1136,14 @@ public final class MediaBrowser {
             MediaBrowser mediaBrowser = mMediaBrowser.get();
             if (mediaBrowser != null) {
                 mediaBrowser.onLoadChildren(this, parentId, list, options);
+            }
+        }
+
+        @Override
+        public void onDisconnect() {
+            MediaBrowser mediaBrowser = mMediaBrowser.get();
+            if (mediaBrowser != null) {
+                mediaBrowser.onDisconnectRequested(this);
             }
         }
     }

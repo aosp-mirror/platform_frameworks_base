@@ -48,7 +48,7 @@ static struct {
 
 class NativeKeyCharacterMap {
 public:
-    NativeKeyCharacterMap(int32_t deviceId, std::shared_ptr<KeyCharacterMap> map)
+    NativeKeyCharacterMap(int32_t deviceId, std::unique_ptr<KeyCharacterMap> map)
           : mDeviceId(deviceId), mMap(std::move(map)) {}
 
     ~NativeKeyCharacterMap() {
@@ -58,16 +58,18 @@ public:
         return mDeviceId;
     }
 
-    inline const std::shared_ptr<KeyCharacterMap> getMap() const { return mMap; }
+    inline const std::unique_ptr<KeyCharacterMap>& getMap() const {
+        return mMap;
+    }
 
 private:
     int32_t mDeviceId;
-    std::shared_ptr<KeyCharacterMap> mMap;
+    std::unique_ptr<KeyCharacterMap> mMap;
 };
 
 jobject android_view_KeyCharacterMap_create(JNIEnv* env, int32_t deviceId,
-                                            const std::shared_ptr<KeyCharacterMap> kcm) {
-    NativeKeyCharacterMap* nativeMap = new NativeKeyCharacterMap(deviceId, kcm);
+                                            std::unique_ptr<KeyCharacterMap> kcm) {
+    NativeKeyCharacterMap* nativeMap = new NativeKeyCharacterMap(deviceId, std::move(kcm));
     if (!nativeMap) {
         return nullptr;
     }
@@ -76,7 +78,7 @@ jobject android_view_KeyCharacterMap_create(JNIEnv* env, int32_t deviceId,
                           reinterpret_cast<jlong>(nativeMap));
 }
 
-static jobject nativeObtainEmptyKeyCharacterMap(JNIEnv* env, jobject /* clazz */, jint deviceId) {
+static jobject nativeObtainEmptyKeyCharacterMap(JNIEnv* env, /*clazz=*/jobject, jint deviceId) {
     return android_view_KeyCharacterMap_create(env, deviceId, nullptr);
 }
 
@@ -91,7 +93,7 @@ static jlong nativeReadFromParcel(JNIEnv *env, jobject clazz, jobject parcelObj)
         return 0;
     }
 
-    std::shared_ptr<KeyCharacterMap> kcm = nullptr;
+    std::unique_ptr<KeyCharacterMap> kcm;
     // Check if map is a null character map
     if (parcel->readBool()) {
         kcm = KeyCharacterMap::readFromParcel(parcel);
@@ -99,7 +101,7 @@ static jlong nativeReadFromParcel(JNIEnv *env, jobject clazz, jobject parcelObj)
             return 0;
         }
     }
-    NativeKeyCharacterMap* map = new NativeKeyCharacterMap(deviceId, kcm);
+    NativeKeyCharacterMap* map = new NativeKeyCharacterMap(deviceId, std::move(kcm));
     return reinterpret_cast<jlong>(map);
 }
 
@@ -202,7 +204,7 @@ static jobjectArray nativeGetEvents(JNIEnv *env, jobject clazz, jlong ptr,
         jcharArray charsArray) {
     NativeKeyCharacterMap* map = reinterpret_cast<NativeKeyCharacterMap*>(ptr);
     if (!map || !map->getMap()) {
-        return env->NewObjectArray(0 /* size */, gKeyEventClassInfo.clazz, NULL);
+        return env->NewObjectArray(/*size=*/0, gKeyEventClassInfo.clazz, NULL);
     }
     jchar* chars = env->GetCharArrayElements(charsArray, NULL);
     if (!chars) {
@@ -217,10 +219,10 @@ static jobjectArray nativeGetEvents(JNIEnv *env, jobject clazz, jlong ptr,
         result = env->NewObjectArray(jsize(events.size()), gKeyEventClassInfo.clazz, NULL);
         if (result) {
             for (size_t i = 0; i < events.size(); i++) {
-                jobject keyEventObj = android_view_KeyEvent_fromNative(env, events.itemAt(i));
-                if (!keyEventObj) break; // threw OOM exception
-                env->SetObjectArrayElement(result, jsize(i), keyEventObj);
-                env->DeleteLocalRef(keyEventObj);
+                ScopedLocalRef<jobject> keyEventObj =
+                        android_view_KeyEvent_obtainAsCopy(env, events.itemAt(i));
+                if (!keyEventObj.get()) break; // threw OOM exception
+                env->SetObjectArrayElement(result, jsize(i), keyEventObj.get());
             }
         }
     }
@@ -230,14 +232,44 @@ static jobjectArray nativeGetEvents(JNIEnv *env, jobject clazz, jlong ptr,
 }
 
 static jboolean nativeEquals(JNIEnv* env, jobject clazz, jlong ptr1, jlong ptr2) {
-    const std::shared_ptr<KeyCharacterMap>& map1 =
+    const std::unique_ptr<KeyCharacterMap>& map1 =
             (reinterpret_cast<NativeKeyCharacterMap*>(ptr1))->getMap();
-    const std::shared_ptr<KeyCharacterMap>& map2 =
+    const std::unique_ptr<KeyCharacterMap>& map2 =
             (reinterpret_cast<NativeKeyCharacterMap*>(ptr2))->getMap();
     if (map1 == nullptr || map2 == nullptr) {
         return map1 == map2;
     }
     return static_cast<jboolean>(*map1 == *map2);
+}
+
+static void nativeApplyOverlay(JNIEnv* env, jobject clazz, jlong ptr, jstring nameObj,
+        jstring overlayObj) {
+    NativeKeyCharacterMap* map = reinterpret_cast<NativeKeyCharacterMap*>(ptr);
+    if (!map || !map->getMap()) {
+        return;
+    }
+    ScopedUtfChars nameChars(env, nameObj);
+    ScopedUtfChars overlayChars(env, overlayObj);
+    base::Result<std::shared_ptr<KeyCharacterMap>> ret =
+            KeyCharacterMap::loadContents(nameChars.c_str(), overlayChars.c_str(),
+                                          KeyCharacterMap::Format::OVERLAY);
+    if (ret.ok()) {
+        std::shared_ptr<KeyCharacterMap> overlay = *ret;
+        map->getMap()->combine(*overlay);
+    }
+}
+
+static jint nativeGetMappedKey(JNIEnv* env, jobject clazz, jlong ptr, jint scanCode) {
+    NativeKeyCharacterMap* map = reinterpret_cast<NativeKeyCharacterMap*>(ptr);
+    if (!map || !map->getMap()) {
+        return 0;
+    }
+    int32_t outKeyCode;
+    status_t mapKeyRes = map->getMap()->mapKey(scanCode, /*usageCode=*/0, &outKeyCode);
+    if (mapKeyRes != OK) {
+        return 0;
+    }
+    return static_cast<jint>(outKeyCode);
 }
 
 /*
@@ -260,7 +292,9 @@ static const JNINativeMethod g_methods[] = {
         {"nativeObtainEmptyKeyCharacterMap", "(I)Landroid/view/KeyCharacterMap;",
          (void*)nativeObtainEmptyKeyCharacterMap},
         {"nativeEquals", "(JJ)Z", (void*)nativeEquals},
-};
+        {"nativeApplyOverlay", "(JLjava/lang/String;Ljava/lang/String;)V",
+         (void*)nativeApplyOverlay},
+        {"nativeGetMappedKey", "(JI)I", (void*)nativeGetMappedKey}};
 
 int register_android_view_KeyCharacterMap(JNIEnv* env)
 {

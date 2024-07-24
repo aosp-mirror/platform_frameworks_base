@@ -19,15 +19,19 @@ package android.window;
 import android.os.IBinder;
 import android.view.RemoteAnimationDefinition;
 import android.window.ITaskFragmentOrganizer;
+import android.window.RemoteTransition;
 import android.window.WindowContainerTransaction;
 
 /** @hide */
 interface ITaskFragmentOrganizerController {
 
     /**
-     * Registers a TaskFragmentOrganizer to manage TaskFragments.
+     * Registers a TaskFragmentOrganizer to manage TaskFragments. Registering a system
+     * organizer requires MANAGE_ACTIVITY_TASKS permission, and the organizer will have additional
+     * system capabilities.
      */
-    void registerOrganizer(in ITaskFragmentOrganizer organizer);
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(value=android.Manifest.permission.MANAGE_ACTIVITY_TASKS, conditional=true)")
+    void registerOrganizer(in ITaskFragmentOrganizer organizer, in boolean isSystemOrganizer);
 
     /**
      * Unregisters a previously registered TaskFragmentOrganizer.
@@ -62,7 +66,10 @@ interface ITaskFragmentOrganizerController {
 
     /**
      * Requests the server to apply the given {@link WindowContainerTransaction}.
+     *
+     * {@link RemoteTransition} can only be used by a system organizer and
+     * {@code shouldApplyIndependently} must be {@code true}. See {@link registerOrganizer}.
      */
     void applyTransaction(in WindowContainerTransaction wct, int transitionType,
-        boolean shouldApplyIndependently);
+        boolean shouldApplyIndependently, in RemoteTransition remoteTransition);
 }

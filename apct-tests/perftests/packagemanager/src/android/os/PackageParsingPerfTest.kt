@@ -25,9 +25,10 @@ import android.content.res.TypedArray
 import android.perftests.utils.BenchmarkState
 import android.perftests.utils.PerfStatusReporter
 import androidx.test.filters.LargeTest
+import com.android.internal.pm.parsing.pkg.PackageImpl
+import com.android.internal.pm.pkg.parsing.ParsingPackageUtils
 import com.android.internal.util.ConcurrentUtils
-import com.android.server.pm.parsing.pkg.PackageImpl
-import com.android.server.pm.pkg.parsing.ParsingPackageUtils
+import com.android.server.SystemConfig
 import java.io.File
 import java.io.FileOutputStream
 import java.util.concurrent.ArrayBlockingQueue
@@ -214,7 +215,12 @@ public class PackageParsingPerfTest {
                     path,
                     manifestArray,
                     isCoreApp,
+                    this,
                 )
+                override fun getHiddenApiWhitelistedApps() =
+                        SystemConfig.getInstance().hiddenApiWhitelistedApps
+                override fun getInstallConstraintsAllowlist() =
+                        SystemConfig.getInstance().installConstraintsAllowlist
             })
 
         override fun parseImpl(file: File) =

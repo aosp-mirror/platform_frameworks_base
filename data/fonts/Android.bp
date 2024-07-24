@@ -48,14 +48,37 @@ prebuilt_font {
 // Copies the font configuration file into system/etc for the product as fonts.xml.
 // Additional fonts should be installed to /product/fonts/ alongside a corresponding
 // fonts_customiztion.xml in /product/etc/
-prebuilt_etc {
-    name: "fonts.xml",
-    src: "fonts.xml",
+
+soong_config_bool_variable {
+    name: "use_var_font",
 }
 
-prebuilt_etc {
+soong_config_module_type {
+    name: "prebuilt_fonts_xml",
+    module_type: "prebuilt_etc",
+    config_namespace: "noto_sans_cjk_config",
+    bool_variables: ["use_var_font"],
+    properties: ["src"],
+}
+
+prebuilt_fonts_xml {
+    name: "fonts.xml",
+    src: "fonts.xml",
+    soong_config_variables: {
+        use_var_font: {
+            src: "fonts_cjkvf.xml",
+        },
+    },
+}
+
+prebuilt_fonts_xml {
     name: "font_fallback.xml",
     src: "font_fallback.xml",
+    soong_config_variables: {
+        use_var_font: {
+            src: "font_fallback_cjkvf.xml",
+        },
+    },
 }
 
 /////////////////////////////////

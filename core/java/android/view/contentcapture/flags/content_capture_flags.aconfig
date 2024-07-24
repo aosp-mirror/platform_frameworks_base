@@ -1,0 +1,9 @@
+package: "android.view.contentcapture.flags"
+container: "system"
+
+flag {
+    name: "run_on_background_thread_enabled"
+    namespace: "machine_learning"
+    description: "Feature flag for running content capture tasks on background thread"
+    bug: "309411951"
+}

@@ -186,6 +186,11 @@ public abstract class NetworkMetricMonitor implements AutoCloseable {
         // Subclasses MUST override it if they care
     }
 
+    /** Called when LinkProperties or NetworkCapabilities have changed */
+    public void onLinkPropertiesOrCapabilitiesChanged() {
+        // Subclasses MUST override it if they care
+    }
+
     public boolean isValidationFailed() {
         return mIsValidationFailed;
     }
@@ -201,6 +206,11 @@ public abstract class NetworkMetricMonitor implements AutoCloseable {
     @NonNull
     public VcnContext getVcnContext() {
         return mVcnContext;
+    }
+
+    @NonNull
+    public Network getNetwork() {
+        return mNetwork;
     }
 
     // Override methods for AutoCloseable. Subclasses MUST call super when overriding this method
@@ -260,6 +270,11 @@ public abstract class NetworkMetricMonitor implements AutoCloseable {
             Slog.wtf(className, msgWithPrefix);
             LOCAL_LOG.log("[VERBOSE ] " + className + msgWithPrefix);
         }
+    }
+
+    protected static void logE(String className, String msgWithPrefix) {
+        Slog.w(className, msgWithPrefix);
+        LOCAL_LOG.log("[ERROR ] " + className + msgWithPrefix);
     }
 
     protected static void logWtf(String className, String msgWithPrefix) {

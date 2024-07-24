@@ -72,6 +72,7 @@ public class AcquisitionClientTest {
                 mToken, mClientCallback);
         client.start(mSchedulerCallback);
         assertTrue(client.mHalOperationRunning);
+        verify(mClientCallback).getModality();
         verify(mSchedulerCallback).onClientStarted(eq(client));
 
         // Pretend that it got canceled by the user.

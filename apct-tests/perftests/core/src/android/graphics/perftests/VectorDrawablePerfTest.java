@@ -27,8 +27,8 @@ import android.perftests.utils.BenchmarkState;
 import android.perftests.utils.BitmapUtils;
 import android.perftests.utils.PerfStatusReporter;
 import android.perftests.utils.PerfTestActivity;
-import android.test.suitebuilder.annotation.LargeTest;
 
+import androidx.test.filters.LargeTest;
 import androidx.test.rule.ActivityTestRule;
 import androidx.test.runner.AndroidJUnit4;
 

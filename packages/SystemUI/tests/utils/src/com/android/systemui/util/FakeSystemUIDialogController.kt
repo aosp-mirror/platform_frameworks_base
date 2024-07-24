@@ -17,6 +17,7 @@
 
 package com.android.systemui.util
 
+import android.content.Context
 import android.content.DialogInterface
 import com.android.systemui.statusbar.phone.SystemUIDialog
 import com.android.systemui.util.mockito.any
@@ -27,13 +28,15 @@ import org.mockito.Mockito.doAnswer
 import org.mockito.Mockito.verify
 import org.mockito.stubbing.Stubber
 
-class FakeSystemUIDialogController {
+class FakeSystemUIDialogController(context: Context) {
 
     val dialog: SystemUIDialog = mock()
+
 
     private val clickListeners: MutableMap<Int, DialogInterface.OnClickListener> = mutableMapOf()
 
     init {
+        whenever(dialog.context).thenReturn(context)
         saveListener(DialogInterface.BUTTON_POSITIVE)
             .whenever(dialog)
             .setPositiveButton(any(), any())

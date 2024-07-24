@@ -17,19 +17,22 @@
 package com.android.systemui.bouncer.data.repository
 
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.flags.FeatureFlagsClassic
+import com.android.systemui.flags.Flags
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
 
 /** Provides access to bouncer-related application state. */
 @SysUISingleton
-class BouncerRepository @Inject constructor() {
-    private val _message = MutableStateFlow<String?>(null)
+class BouncerRepository
+@Inject
+constructor(
+    private val flags: FeatureFlagsClassic,
+) {
     /** The user-facing message to show in the bouncer. */
-    val message: StateFlow<String?> = _message.asStateFlow()
+    val message = MutableStateFlow<String?>(null)
 
-    fun setMessage(message: String?) {
-        _message.value = message
-    }
+    /** Whether the user switcher should be displayed within the bouncer UI on large screens. */
+    val isUserSwitcherVisible: Boolean
+        get() = flags.isEnabled(Flags.FULL_SCREEN_USER_SWITCHER)
 }

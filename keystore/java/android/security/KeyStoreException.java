@@ -319,7 +319,7 @@ public class KeyStoreException extends Exception {
     /**
      * Returns one of the error codes exported by the class.
      *
-     * @return a public error code, one of the values in {@link PublicErrorCode}.
+     * @return a public error code
      */
     @PublicErrorCode
     public int getNumericErrorCode() {
@@ -679,6 +679,9 @@ public class KeyStoreException extends Exception {
         sErrorCodeToFailureInfo.put(ResponseCode.OUT_OF_KEYS_REQUIRES_SYSTEM_UPGRADE,
                 new PublicErrorInformation(IS_SYSTEM_ERROR | IS_TRANSIENT_ERROR,
                         ERROR_DEVICE_REQUIRES_UPGRADE_FOR_ATTESTATION));
+        sErrorCodeToFailureInfo.put(ResponseCode.GET_ATTESTATION_APPLICATION_ID_FAILED,
+                new PublicErrorInformation(IS_SYSTEM_ERROR | IS_TRANSIENT_ERROR,
+                        ERROR_INTERNAL_SYSTEM_ERROR));
         sErrorCodeToFailureInfo.put(ResponseCode.OUT_OF_KEYS_PENDING_INTERNET_CONNECTIVITY,
                 new PublicErrorInformation(IS_SYSTEM_ERROR | IS_TRANSIENT_ERROR,
                         ERROR_ATTESTATION_KEYS_UNAVAILABLE));

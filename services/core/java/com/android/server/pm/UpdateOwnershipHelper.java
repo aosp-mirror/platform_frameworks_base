@@ -29,9 +29,9 @@ import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Slog;
 
+import com.android.internal.pm.pkg.component.ParsedUsesPermission;
 import com.android.server.pm.parsing.pkg.AndroidPackageUtils;
 import com.android.server.pm.pkg.AndroidPackage;
-import com.android.server.pm.pkg.component.ParsedUsesPermission;
 
 import org.xmlpull.v1.XmlPullParser;
 

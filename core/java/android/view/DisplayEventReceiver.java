@@ -264,6 +264,16 @@ public abstract class DisplayEventReceiver {
     }
 
     /**
+     * Called when a display hotplug event with connection error is received.
+     *
+     * @param timestampNanos The timestamp of the event, in the {@link System#nanoTime()}
+     * timebase.
+     * @param connectionError the hotplug connection error code.
+     */
+    public void onHotplugConnectionError(long timestampNanos, int connectionError) {
+    }
+
+    /**
      * Called when a display mode changed event is received.
      *
      * @param timestampNanos The timestamp of the event, in the {@link System#nanoTime()}
@@ -274,6 +284,16 @@ public abstract class DisplayEventReceiver {
      */
     public void onModeChanged(long timestampNanos, long physicalDisplayId, int modeId,
             long renderPeriod) {
+    }
+
+    /**
+     * Called when a display hdcp levels change event is received.
+     *
+     * @param physicalDisplayId Stable display ID that uniquely describes a (display, port) pair.
+     * @param connectedLevel the new connected HDCP level
+     * @param maxLevel the maximum HDCP level
+     */
+    public void onHdcpLevelsChanged(long physicalDisplayId, int connectedLevel, int maxLevel) {
     }
 
     /**
@@ -345,6 +365,11 @@ public abstract class DisplayEventReceiver {
         onHotplug(timestampNanos, physicalDisplayId, connected);
     }
 
+    @SuppressWarnings("unused")
+    private void dispatchHotplugConnectionError(long timestampNanos, int connectionError) {
+        onHotplugConnectionError(timestampNanos, connectionError);
+    }
+
     // Called from native code.
     @SuppressWarnings("unused")
     private void dispatchModeChanged(long timestampNanos, long physicalDisplayId, int modeId,
@@ -357,6 +382,13 @@ public abstract class DisplayEventReceiver {
     private void dispatchFrameRateOverrides(long timestampNanos, long physicalDisplayId,
             FrameRateOverride[] overrides) {
         onFrameRateOverridesChanged(timestampNanos, physicalDisplayId, overrides);
+    }
+
+    // Called from native code.
+    @SuppressWarnings("unused")
+    private void dispatchHdcpLevelsChanged(long physicalDisplayId, int connectedLevel,
+            int maxLevel) {
+        onHdcpLevelsChanged(physicalDisplayId, connectedLevel, maxLevel);
     }
 
 }

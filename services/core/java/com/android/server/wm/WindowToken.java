@@ -17,7 +17,6 @@
 package com.android.server.wm;
 
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
-import static android.view.WindowManager.LayoutParams.TYPE_NAVIGATION_BAR;
 
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_ADD_REMOVE;
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_APP_TRANSITIONS;
@@ -29,7 +28,6 @@ import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 import static com.android.server.wm.WindowManagerService.UPDATE_FOCUS_NORMAL;
 import static com.android.server.wm.WindowTokenProto.HASH_CODE;
 import static com.android.server.wm.WindowTokenProto.PAUSED;
-import static com.android.server.wm.WindowTokenProto.WAITING_TO_SHOW;
 import static com.android.server.wm.WindowTokenProto.WINDOW_CONTAINER;
 
 import android.annotation.CallSuper;
@@ -91,10 +89,6 @@ class WindowToken extends WindowContainer<WindowState> {
 
     // Is key dispatching paused for this token?
     boolean paused = false;
-
-    // Set to true when this token is in a pending transaction where it
-    // will be shown.
-    boolean waitingToShow;
 
     /** The owner has {@link android.Manifest.permission#MANAGE_APP_TOKENS} */
     final boolean mOwnerCanManageAppTokens;
@@ -570,6 +564,7 @@ class WindowToken extends WindowContainer<WindowState> {
                 && asActivityRecord() != null && isVisible()) {
             // Trigger an activity level rotation transition.
             mTransitionController.requestTransitionIfNeeded(WindowManager.TRANSIT_CHANGE, this);
+            mTransitionController.collectVisibleChange(this);
             mTransitionController.setReady(this);
         }
         final int originalRotation = getWindowConfiguration().getRotation();
@@ -644,9 +639,12 @@ class WindowToken extends WindowContainer<WindowState> {
 
     @Override
     void updateSurfacePosition(SurfaceControl.Transaction t) {
+        final ActivityRecord r = asActivityRecord();
+        if (r != null && r.isConfigurationDispatchPaused()) {
+            return;
+        }
         super.updateSurfacePosition(t);
         if (!mTransitionController.isShellTransitionsEnabled() && isFixedRotationTransforming()) {
-            final ActivityRecord r = asActivityRecord();
             final Task rootTask = r != null ? r.getRootTask() : null;
             // Don't transform the activity in PiP because the PiP task organizer will handle it.
             if (rootTask == null || !rootTask.inPinnedWindowingMode()) {
@@ -702,7 +700,6 @@ class WindowToken extends WindowContainer<WindowState> {
         final long token = proto.start(fieldId);
         super.dumpDebug(proto, WINDOW_CONTAINER, logLevel);
         proto.write(HASH_CODE, System.identityHashCode(this));
-        proto.write(WAITING_TO_SHOW, waitingToShow);
         proto.write(PAUSED, paused);
         proto.end(token);
     }
@@ -716,9 +713,6 @@ class WindowToken extends WindowContainer<WindowState> {
         super.dump(pw, prefix, dumpAll);
         pw.print(prefix); pw.print("windows="); pw.println(mChildren);
         pw.print(prefix); pw.print("windowType="); pw.print(windowType);
-        if (waitingToShow) {
-            pw.print(" waitingToShow=true");
-        }
         pw.println();
         if (hasFixedRotationTransform()) {
             pw.print(prefix);
@@ -744,17 +738,6 @@ class WindowToken extends WindowContainer<WindowState> {
     @Override
     WindowToken asWindowToken() {
         return this;
-    }
-
-    /**
-     * Return whether windows from this token can layer above the
-     * system bars, or in other words extend outside of the "Decor Frame"
-     */
-    boolean canLayerAboveSystemBars() {
-        int layer = getWindowLayerFromType();
-        int navLayer = mWmService.mPolicy.getWindowLayerFromTypeLw(TYPE_NAVIGATION_BAR,
-                mOwnerCanManageAppTokens);
-        return mOwnerCanManageAppTokens && (layer > navLayer);
     }
 
     int getWindowLayerFromType() {

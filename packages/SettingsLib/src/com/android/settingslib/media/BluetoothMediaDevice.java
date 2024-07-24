@@ -19,11 +19,11 @@ import static com.android.settingslib.media.MediaDevice.SelectionBehavior.SELECT
 
 import android.bluetooth.BluetoothClass;
 import android.bluetooth.BluetoothDevice;
+import android.bluetooth.BluetoothHearingAid;
 import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.media.AudioManager;
 import android.media.MediaRoute2Info;
-import android.media.MediaRouter2Manager;
 import android.media.RouteListingPreference;
 
 import com.android.settingslib.R;
@@ -40,15 +40,19 @@ public class BluetoothMediaDevice extends MediaDevice {
     private CachedBluetoothDevice mCachedDevice;
     private final AudioManager mAudioManager;
 
-    BluetoothMediaDevice(Context context, CachedBluetoothDevice device,
-            MediaRouter2Manager routerManager, MediaRoute2Info info, String packageName) {
-        this(context, device, routerManager, info, packageName, null);
+    BluetoothMediaDevice(
+            Context context,
+            CachedBluetoothDevice device,
+            MediaRoute2Info info) {
+        this(context, device, info, null);
     }
 
-    BluetoothMediaDevice(Context context, CachedBluetoothDevice device,
-            MediaRouter2Manager routerManager, MediaRoute2Info info, String packageName,
+    BluetoothMediaDevice(
+            Context context,
+            CachedBluetoothDevice device,
+            MediaRoute2Info info,
             RouteListingPreference.Item item) {
-        super(context, routerManager, info, packageName, item);
+        super(context, info, item);
         mCachedDevice = device;
         mAudioManager = context.getSystemService(AudioManager.class);
         initDeviceRecord();
@@ -64,6 +68,13 @@ public class BluetoothMediaDevice extends MediaDevice {
         return isConnected() || mCachedDevice.isBusy()
                 ? mCachedDevice.getConnectionSummary()
                 : mContext.getString(R.string.bluetooth_disconnected);
+    }
+
+    @Override
+    public CharSequence getSummaryForTv(int lowBatteryColorRes) {
+        return isConnected() || mCachedDevice.isBusy()
+                ? mCachedDevice.getTvConnectionSummary(lowBatteryColorRes)
+                : mContext.getString(R.string.bluetooth_saved_device);
     }
 
     @Override
@@ -88,7 +99,12 @@ public class BluetoothMediaDevice extends MediaDevice {
 
     @Override
     public String getId() {
-        return MediaDeviceUtils.getId(mCachedDevice);
+        if (mCachedDevice.isHearingAidDevice()) {
+            if (mCachedDevice.getHiSyncId() != BluetoothHearingAid.HI_SYNC_ID_INVALID) {
+                return Long.toString(mCachedDevice.getHiSyncId());
+            }
+        }
+        return mCachedDevice.getAddress();
     }
 
     /**

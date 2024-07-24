@@ -16,7 +16,10 @@
 
 package com.android.server.appop;
 
+import android.companion.virtual.VirtualDeviceManager;
 import android.os.RemoteException;
+
+import java.util.Objects;
 
 /**
  * Listener for mode changes, encapsulates methods that should be triggered in the event of a mode
@@ -93,6 +96,20 @@ public abstract class OnOpModeChangedListener {
      */
     public abstract void onOpModeChanged(int op, int uid, String packageName)
             throws RemoteException;
+
+    /**
+     * Method that should be triggered when the app-op's mode is changed.
+     * @param op app-op whose mode-change is being listened to.
+     * @param uid user-is associated with the app-op.
+     * @param packageName package name associated with the app-op.
+     * @param persistentDeviceId device associated with the app-op.
+     */
+    public void onOpModeChanged(int op, int uid, String packageName, String persistentDeviceId)
+            throws RemoteException {
+        if (Objects.equals(persistentDeviceId, VirtualDeviceManager.PERSISTENT_DEVICE_ID_DEFAULT)) {
+            onOpModeChanged(op, uid, packageName);
+        }
+    }
 
     /**
      * Return human readable string representing the listener.

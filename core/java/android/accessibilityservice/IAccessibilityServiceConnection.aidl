@@ -17,10 +17,12 @@
 package android.accessibilityservice;
 
 import android.accessibilityservice.AccessibilityServiceInfo;
+import android.accessibilityservice.IBrailleDisplayController;
 import android.accessibilityservice.MagnificationConfig;
 import android.content.pm.ParceledListSlice;
 import android.graphics.Bitmap;
 import android.graphics.Region;
+import android.hardware.usb.UsbDevice;
 import android.os.Bundle;
 import android.os.RemoteCallback;
 import android.view.MagnificationSpec;
@@ -157,7 +159,15 @@ interface IAccessibilityServiceConnection {
     void setInstalledAndEnabledServices(in List<AccessibilityServiceInfo> infos);
 
     List<AccessibilityServiceInfo> getInstalledAndEnabledServices();
-    void attachAccessibilityOverlayToDisplay(int displayId, in SurfaceControl sc);
+    void attachAccessibilityOverlayToDisplay(int interactionId, int displayId, in SurfaceControl sc, IAccessibilityInteractionConnectionCallback callback);
 
-    void attachAccessibilityOverlayToWindow(int accessibilityWindowId, in SurfaceControl sc);
+    void attachAccessibilityOverlayToWindow(int interactionId, int accessibilityWindowId, in SurfaceControl sc, IAccessibilityInteractionConnectionCallback callback);
+
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)")
+    void connectBluetoothBrailleDisplay(in String bluetoothAddress, in IBrailleDisplayController controller);
+
+    void connectUsbBrailleDisplay(in UsbDevice usbDevice, in IBrailleDisplayController controller);
+
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.MANAGE_ACCESSIBILITY)")
+    void setTestBrailleDisplayData(in List<Bundle> brailleDisplays);
 }

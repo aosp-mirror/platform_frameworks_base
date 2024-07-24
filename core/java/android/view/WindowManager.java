@@ -82,11 +82,14 @@ import static android.view.WindowLayoutParamsProto.Y;
 
 import android.Manifest.permission;
 import android.annotation.CallbackExecutor;
+import android.annotation.FlaggedApi;
+import android.annotation.FloatRange;
 import android.annotation.IntDef;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
+import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.annotation.TestApi;
@@ -106,6 +109,7 @@ import android.graphics.Region;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.os.Looper;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.SystemProperties;
@@ -119,10 +123,16 @@ import android.view.WindowInsets.Side.InsetsSide;
 import android.view.WindowInsets.Type;
 import android.view.WindowInsets.Type.InsetsType;
 import android.view.accessibility.AccessibilityNodeInfo;
+import android.window.InputTransferToken;
 import android.window.TaskFpsCallback;
+import android.window.TrustedPresentationThresholds;
 
+import com.android.window.flags.Flags;
+
+import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -585,6 +595,13 @@ public interface WindowManager extends ViewManager {
     int TRANSIT_FLAG_KEYGUARD_UNOCCLUDING = (1 << 13); // 0x2000
 
     /**
+     * Transition flag: Indicates that there is a physical display switch
+     * TODO(b/316112906) remove after defer_display_updates flag roll out
+     * @hide
+     */
+    int TRANSIT_FLAG_PHYSICAL_DISPLAY_SWITCH = (1 << 14); // 0x4000
+
+    /**
      * @hide
      */
     @IntDef(flag = true, prefix = { "TRANSIT_FLAG_" }, value = {
@@ -601,7 +618,8 @@ public interface WindowManager extends ViewManager {
             TRANSIT_FLAG_INVISIBLE,
             TRANSIT_FLAG_KEYGUARD_APPEARING,
             TRANSIT_FLAG_KEYGUARD_OCCLUDING,
-            TRANSIT_FLAG_KEYGUARD_UNOCCLUDING
+            TRANSIT_FLAG_KEYGUARD_UNOCCLUDING,
+            TRANSIT_FLAG_PHYSICAL_DISPLAY_SWITCH,
     })
     @Retention(RetentionPolicy.SOURCE)
     @interface TransitionFlags {}
@@ -648,30 +666,40 @@ public interface WindowManager extends ViewManager {
             REMOVE_CONTENT_MODE_MOVE_TO_PRIMARY,
             REMOVE_CONTENT_MODE_DESTROY,
     })
+    @Retention(RetentionPolicy.SOURCE)
     @interface RemoveContentMode {}
 
     /**
      * Display IME Policy: The IME should appear on the local display.
+     *
      * @hide
      */
-    @TestApi
+    @SuppressLint("UnflaggedApi")  // promoting from @TestApi.
+    @SystemApi
     int DISPLAY_IME_POLICY_LOCAL = 0;
 
     /**
-     * Display IME Policy: The IME should appear on the fallback display.
+     * Display IME Policy: The IME should appear on a fallback display.
+     *
+     * <p>The fallback display is always {@link Display#DEFAULT_DISPLAY}.</p>
+     *
      * @hide
      */
-    @TestApi
+    @SuppressLint("UnflaggedApi")  // promoting from @TestApi.
+    @SystemApi
     int DISPLAY_IME_POLICY_FALLBACK_DISPLAY = 1;
 
     /**
      * Display IME Policy: The IME should be hidden.
      *
-     * Setting this policy will prevent the IME from making a connection. This
-     * will prevent any IME from receiving metadata about input.
+     * <p>Setting this policy will prevent the IME from making a connection. This
+     * will prevent any IME from receiving metadata about input and this display will effectively
+     * have no IME.</p>
+     *
      * @hide
      */
-    @TestApi
+    @SuppressLint("UnflaggedApi")  // promoting from @TestApi.
+    @SystemApi
     int DISPLAY_IME_POLICY_HIDE = 2;
 
     /**
@@ -682,6 +710,7 @@ public interface WindowManager extends ViewManager {
             DISPLAY_IME_POLICY_FALLBACK_DISPLAY,
             DISPLAY_IME_POLICY_HIDE,
     })
+    @Retention(RetentionPolicy.SOURCE)
     @interface DisplayImePolicy {}
 
     /**
@@ -947,10 +976,8 @@ public interface WindowManager extends ViewManager {
      *     android:value="false"/&gt;
      * &lt;/application&gt;
      * </pre>
-     *
-     * @hide
      */
-    // TODO(b/274924641): Make this public API.
+    @FlaggedApi(Flags.FLAG_APP_COMPAT_PROPERTIES_API)
     String PROPERTY_COMPAT_ALLOW_IGNORING_ORIENTATION_REQUEST_WHEN_LOOP_DETECTED =
             "android.window.PROPERTY_COMPAT_ALLOW_IGNORING_ORIENTATION_REQUEST_WHEN_LOOP_DETECTED";
 
@@ -1237,7 +1264,7 @@ public interface WindowManager extends ViewManager {
      * <p>When this compat override is enabled the min aspect ratio given in the app's manifest can
      * be overridden by the device manufacturer using their discretion to improve display
      * compatibility unless the app's manifest value is higher. This treatment will also apply if
-     * no min aspect ratio value is provided in the manifest. These treatments can apply only in
+     * no min aspect ratio value is provided in the manifest. These treatments can apply either in
      * specific cases (e.g. device is in portrait) or each time the app is displayed on screen.
      *
      * <p>Setting this property to {@code false} informs the system that the app must be
@@ -1254,9 +1281,8 @@ public interface WindowManager extends ViewManager {
      *     android:value="true|false"/&gt;
      * &lt;/application&gt;
      * </pre>
-     * @hide
      */
-    // TODO(b/279428317): Make this public API.
+    @FlaggedApi(Flags.FLAG_APP_COMPAT_PROPERTIES_API)
     String PROPERTY_COMPAT_ALLOW_MIN_ASPECT_RATIO_OVERRIDE =
             "android.window.PROPERTY_COMPAT_ALLOW_MIN_ASPECT_RATIO_OVERRIDE";
 
@@ -1285,9 +1311,8 @@ public interface WindowManager extends ViewManager {
      *     android:value="true|false"/&gt;
      * &lt;/application&gt;
      * </pre>
-     * @hide
      */
-    // TODO(b/280052089): Make this public API.
+    @FlaggedApi(Flags.FLAG_APP_COMPAT_PROPERTIES_API)
     String PROPERTY_COMPAT_ALLOW_RESIZEABLE_ACTIVITY_OVERRIDES =
             "android.window.PROPERTY_COMPAT_ALLOW_RESIZEABLE_ACTIVITY_OVERRIDES";
 
@@ -1337,9 +1362,8 @@ public interface WindowManager extends ViewManager {
      *     android:value="false"/&gt;
      * &lt;/application&gt;
      * </pre>
-     * @hide
      */
-    // TODO(b/294227289): Make this public API
+    @FlaggedApi(Flags.FLAG_APP_COMPAT_PROPERTIES_API)
     String PROPERTY_COMPAT_ALLOW_USER_ASPECT_RATIO_OVERRIDE =
             "android.window.PROPERTY_COMPAT_ALLOW_USER_ASPECT_RATIO_OVERRIDE";
 
@@ -1381,9 +1405,8 @@ public interface WindowManager extends ViewManager {
      *     android:value="false"/&gt;
      * &lt;/application&gt;
      * </pre>
-     * @hide
      */
-    // TODO(b/294227289): Make this public API
+    @FlaggedApi(Flags.FLAG_APP_COMPAT_PROPERTIES_API)
     String PROPERTY_COMPAT_ALLOW_USER_ASPECT_RATIO_FULLSCREEN_OVERRIDE =
             "android.window.PROPERTY_COMPAT_ALLOW_USER_ASPECT_RATIO_FULLSCREEN_OVERRIDE";
 
@@ -1450,6 +1473,34 @@ public interface WindowManager extends ViewManager {
             "android.window.PROPERTY_ACTIVITY_EMBEDDING_ALLOW_SYSTEM_OVERRIDE";
 
     /**
+     * Activity-level {@link android.content.pm.PackageManager.Property PackageManager.Property}
+     * that declares whether this (embedded) activity allows the system to share its state with the
+     * host app when it is embedded in a different process in
+     * {@link android.R.attr#allowUntrustedActivityEmbedding untrusted mode}.
+     *
+     * <p>If this property is "true", the host app may receive event callbacks for the activity
+     * state change, including the reparent event and the component name of the activity, which are
+     * required to restore the embedding state after the embedded activity exits picture-in-picture
+     * mode. This property does not share any of the activity content with the host. Note that, for
+     * {@link android.R.attr#knownActivityEmbeddingCerts trusted embedding}, the reparent event and
+     * the component name are always shared with the host regardless of the value of this property.
+     *
+     * <p>The default value is {@code false}.
+     *
+     * <p><b>Syntax:</b>
+     * <pre>
+     * &lt;activity&gt;
+     *   &lt;property
+     *     android:name="android.window.PROPERTY_ALLOW_UNTRUSTED_ACTIVITY_EMBEDDING_STATE_SHARING"
+     *     android:value="true|false"/&gt;
+     * &lt;/activity&gt;
+     * </pre>
+     */
+    @FlaggedApi(Flags.FLAG_UNTRUSTED_EMBEDDING_STATE_SHARING)
+    String PROPERTY_ALLOW_UNTRUSTED_ACTIVITY_EMBEDDING_STATE_SHARING =
+            "android.window.PROPERTY_ALLOW_UNTRUSTED_ACTIVITY_EMBEDDING_STATE_SHARING";
+
+    /**
      * Application level {@link android.content.pm.PackageManager.Property PackageManager.Property}
      * that an app can specify to inform the system that the app is activity embedding split feature
      * enabled.
@@ -1471,6 +1522,72 @@ public interface WindowManager extends ViewManager {
      */
     String PROPERTY_ACTIVITY_EMBEDDING_SPLITS_ENABLED =
             "android.window.PROPERTY_ACTIVITY_EMBEDDING_SPLITS_ENABLED";
+
+    /**
+     * Activity or Application level {@link android.content.pm.PackageManager.Property
+     * PackageManager.Property} for an app to declare that System UI should be shown for this
+     * app/component to allow it to be launched as multiple instances.  This property only affects
+     * SystemUI behavior and does _not_ affect whether a component can actually be launched into
+     * multiple instances, which is determined by the Activity's {@code launchMode} or the launching
+     * Intent's flags.  If the property is set on the Application, then all components within that
+     * application will use that value unless specified per component.
+     *
+     * The value must be a boolean string.
+     *
+     * <p><b>Syntax:</b>
+     * <pre>
+     * &lt;activity&gt;
+     *   &lt;property
+     *     android:name="android.window.PROPERTY_SUPPORTS_MULTI_INSTANCE_SYSTEM_UI"
+     *     android:value="true|false"/&gt;
+     * &lt;/activity&gt;
+     * </pre>
+     */
+    @FlaggedApi(Flags.FLAG_SUPPORTS_MULTI_INSTANCE_SYSTEM_UI)
+    public static final String PROPERTY_SUPPORTS_MULTI_INSTANCE_SYSTEM_UI =
+            "android.window.PROPERTY_SUPPORTS_MULTI_INSTANCE_SYSTEM_UI";
+
+    /**
+     * Application or Activity level
+     * {@link android.content.pm.PackageManager.Property PackageManager.Property} to provide any
+     * preferences for showing all or specific Activities on small cover displays of foldable
+     * style devices.
+     *
+     * <p>The only supported value for the property is {@link #COMPAT_SMALL_COVER_SCREEN_OPT_IN}.
+     *
+     * <p><b>Syntax:</b>
+     * <pre>
+     * &lt;application&gt;
+     *   &lt;property
+     *     android:name="android.window.PROPERTY_COMPAT_ALLOW_SMALL_COVER_SCREEN"
+     *     android:value=1 <!-- COMPAT_COVER_SCREEN_OPT_IN -->/&gt;
+     * &lt;/application&gt;
+     * </pre>
+     */
+    @FlaggedApi(Flags.FLAG_COVER_DISPLAY_OPT_IN)
+    String PROPERTY_COMPAT_ALLOW_SMALL_COVER_SCREEN =
+            "android.window.PROPERTY_COMPAT_ALLOW_SMALL_COVER_SCREEN";
+
+    /**
+     * Value applicable for the {@link #PROPERTY_COMPAT_ALLOW_SMALL_COVER_SCREEN} property to
+     * provide a signal to the system that an application or its specific activities explicitly
+     * opt into being displayed on small foldable device cover screens that measure at least 1.5
+     * inches for the shorter dimension and at least 2.4 inches for the longer dimension.
+     */
+    @CompatSmallScreenPolicy
+    @FlaggedApi(Flags.FLAG_COVER_DISPLAY_OPT_IN)
+    int COMPAT_SMALL_COVER_SCREEN_OPT_IN = 1;
+
+    /**
+     * @hide
+     */
+    @IntDef({
+            COMPAT_SMALL_COVER_SCREEN_OPT_IN,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    @interface CompatSmallScreenPolicy {}
+
+
 
     /**
      * Request for app's keyboard shortcuts to be retrieved asynchronously.
@@ -1683,7 +1800,7 @@ public interface WindowManager extends ViewManager {
      * orientation (e.g. with {@link android.app.Activity#setRequestedOrientation(int)}). This
      * listener gives application an opportunity to selectively react to device orientation changes.
      * The newly added listener will be called with current proposed rotation. Note that the context
-     * of this window manager instance must be a {@link android.annotation.UiContext}.
+     * of this window manager instance must be a {@code UiContext}.
      *
      * @param executor The executor on which callback method will be invoked.
      * @param listener Called when the proposed rotation for the context is being delivered.
@@ -1691,7 +1808,7 @@ public interface WindowManager extends ViewManager {
      *                 {@link Surface#ROTATION_90}, {@link Surface#ROTATION_180} and
      *                 {@link Surface#ROTATION_270}.
      * @throws UnsupportedOperationException if this method is called on an instance that is not
-     *         associated with a {@link android.annotation.UiContext}.
+     *         associated with a {@code UiContext}.
      */
     default void addProposedRotationListener(@NonNull @CallbackExecutor Executor executor,
             @NonNull IntConsumer listener) {
@@ -1850,6 +1967,8 @@ public interface WindowManager extends ViewManager {
                         to = "PHONE"),
                 @ViewDebug.IntToString(from = TYPE_SYSTEM_ALERT,
                         to = "SYSTEM_ALERT"),
+                @ViewDebug.IntToString(from = TYPE_KEYGUARD,
+                        to = "KEYGUARD"),
                 @ViewDebug.IntToString(from = TYPE_TOAST,
                         to = "TOAST"),
                 @ViewDebug.IntToString(from = TYPE_SYSTEM_OVERLAY,
@@ -1898,6 +2017,8 @@ public interface WindowManager extends ViewManager {
                         to = "PRIVATE_PRESENTATION"),
                 @ViewDebug.IntToString(from = TYPE_VOICE_INTERACTION,
                         to = "VOICE_INTERACTION"),
+                @ViewDebug.IntToString(from = TYPE_ACCESSIBILITY_OVERLAY,
+                        to = "ACCESSIBILITY_OVERLAY"),
                 @ViewDebug.IntToString(from = TYPE_VOICE_INTERACTION_STARTING,
                         to = "VOICE_INTERACTION_STARTING"),
                 @ViewDebug.IntToString(from = TYPE_DOCK_DIVIDER,
@@ -1907,7 +2028,13 @@ public interface WindowManager extends ViewManager {
                 @ViewDebug.IntToString(from = TYPE_SCREENSHOT,
                         to = "SCREENSHOT"),
                 @ViewDebug.IntToString(from = TYPE_APPLICATION_OVERLAY,
-                        to = "APPLICATION_OVERLAY")
+                        to = "APPLICATION_OVERLAY"),
+                @ViewDebug.IntToString(from = TYPE_ACCESSIBILITY_MAGNIFICATION_OVERLAY,
+                        to = "ACCESSIBILITY_MAGNIFICATION_OVERLAY"),
+                @ViewDebug.IntToString(from = TYPE_NOTIFICATION_SHADE,
+                        to = "NOTIFICATION_SHADE"),
+                @ViewDebug.IntToString(from = TYPE_STATUS_BAR_ADDITIONAL,
+                        to = "STATUS_BAR_ADDITIONAL")
         })
         @WindowType
         public int type;
@@ -3103,18 +3230,11 @@ public interface WindowManager extends ViewManager {
         /**
          * Never animate position changes of the window.
          *
-         * @see android.R.attr#Window_windowNoMoveAnimation
+         * @see android.R.styleable#Window_windowNoMoveAnimation
          * {@hide}
          */
         @UnsupportedAppUsage
         public static final int PRIVATE_FLAG_NO_MOVE_ANIMATION = 1 << 6;
-
-        /** Window flag: special flag to limit the size of the window to be
-         * original size ([320x480] x density). Used to create window for applications
-         * running under compatibility mode.
-         *
-         * {@hide} */
-        public static final int PRIVATE_FLAG_COMPATIBLE_WINDOW = 1 << 7;
 
         /** Window flag: a special option intended for system dialogs.  When
          * this flag is set, the window will demand focus unconditionally when
@@ -3137,6 +3257,12 @@ public interface WindowManager extends ViewManager {
          * {@hide}
          */
         public static final int PRIVATE_FLAG_DISABLE_WALLPAPER_TOUCH_EVENTS = 1 << 10;
+
+        /**
+         * Flag to indicate that the window is forcibly to go edge-to-edge.
+         * @hide
+         */
+        public static final int PRIVATE_FLAG_EDGE_TO_EDGE_ENFORCED = 1 << 11;
 
         /**
          * Flag to indicate that the window frame should be the requested frame adding the display
@@ -3236,11 +3362,11 @@ public interface WindowManager extends ViewManager {
         public static final int PRIVATE_FLAG_COLOR_SPACE_AGNOSTIC = 1 << 24;
 
         /**
-         * Flag to request creation of a BLAST (Buffer as LayerState) Layer.
-         * If not specified the client will receive a BufferQueue layer.
+         * Flag to indicate that the window consumes the insets of {@link Type#ime()}. This makes
+         * windows below this window unable to receive visible IME insets.
          * @hide
          */
-        public static final int PRIVATE_FLAG_USE_BLAST = 1 << 25;
+        public static final int PRIVATE_FLAG_CONSUME_IME_INSETS = 1 << 25;
 
         /**
          * Flag to indicate that the window is controlling the appearance of system bars. So we
@@ -3293,9 +3419,8 @@ public interface WindowManager extends ViewManager {
         /**
          * An internal annotation for flags that can be specified to {@link #softInputMode}.
          *
-         * @hide
+         * @removed mistakenly exposed as system-api previously
          */
-        @SystemApi
         @Retention(RetentionPolicy.SOURCE)
         @IntDef(flag = true, prefix = { "SYSTEM_FLAG_" }, value = {
                 SYSTEM_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS,
@@ -3312,10 +3437,10 @@ public interface WindowManager extends ViewManager {
                 SYSTEM_FLAG_SHOW_FOR_ALL_USERS,
                 PRIVATE_FLAG_UNRESTRICTED_GESTURE_EXCLUSION,
                 PRIVATE_FLAG_NO_MOVE_ANIMATION,
-                PRIVATE_FLAG_COMPATIBLE_WINDOW,
                 PRIVATE_FLAG_SYSTEM_ERROR,
                 PRIVATE_FLAG_OPTIMIZE_MEASURE,
                 PRIVATE_FLAG_DISABLE_WALLPAPER_TOUCH_EVENTS,
+                PRIVATE_FLAG_EDGE_TO_EDGE_ENFORCED,
                 PRIVATE_FLAG_LAYOUT_SIZE_EXTENDED_BY_CUTOUT,
                 PRIVATE_FLAG_FORCE_DECOR_VIEW_VISIBILITY,
                 PRIVATE_FLAG_LAYOUT_CHILD_WINDOW_IN_PARENT_FRAME,
@@ -3327,7 +3452,7 @@ public interface WindowManager extends ViewManager {
                 PRIVATE_FLAG_EXCLUDE_FROM_SCREEN_MAGNIFICATION,
                 PRIVATE_FLAG_NOT_MAGNIFIABLE,
                 PRIVATE_FLAG_COLOR_SPACE_AGNOSTIC,
-                PRIVATE_FLAG_USE_BLAST,
+                PRIVATE_FLAG_CONSUME_IME_INSETS,
                 PRIVATE_FLAG_APPEARANCE_CONTROLLED,
                 PRIVATE_FLAG_BEHAVIOR_CONTROLLED,
                 PRIVATE_FLAG_FIT_INSETS_CONTROLLED,
@@ -3336,6 +3461,7 @@ public interface WindowManager extends ViewManager {
                 PRIVATE_FLAG_INTERCEPT_GLOBAL_DRAG_AND_DROP,
                 PRIVATE_FLAG_SYSTEM_APPLICATION_OVERLAY,
         })
+        @Retention(RetentionPolicy.SOURCE)
         public @interface PrivateFlags {}
 
         /**
@@ -3365,10 +3491,6 @@ public interface WindowManager extends ViewManager {
                         equals = PRIVATE_FLAG_NO_MOVE_ANIMATION,
                         name = "NO_MOVE_ANIMATION"),
                 @ViewDebug.FlagToString(
-                        mask = PRIVATE_FLAG_COMPATIBLE_WINDOW,
-                        equals = PRIVATE_FLAG_COMPATIBLE_WINDOW,
-                        name = "COMPATIBLE_WINDOW"),
-                @ViewDebug.FlagToString(
                         mask = PRIVATE_FLAG_SYSTEM_ERROR,
                         equals = PRIVATE_FLAG_SYSTEM_ERROR,
                         name = "SYSTEM_ERROR"),
@@ -3380,6 +3502,10 @@ public interface WindowManager extends ViewManager {
                         mask = PRIVATE_FLAG_DISABLE_WALLPAPER_TOUCH_EVENTS,
                         equals = PRIVATE_FLAG_DISABLE_WALLPAPER_TOUCH_EVENTS,
                         name = "DISABLE_WALLPAPER_TOUCH_EVENTS"),
+                @ViewDebug.FlagToString(
+                        mask = PRIVATE_FLAG_EDGE_TO_EDGE_ENFORCED,
+                        equals = PRIVATE_FLAG_EDGE_TO_EDGE_ENFORCED,
+                        name = "EDGE_TO_EDGE_ENFORCED"),
                 @ViewDebug.FlagToString(
                         mask = PRIVATE_FLAG_LAYOUT_SIZE_EXTENDED_BY_CUTOUT,
                         equals = PRIVATE_FLAG_LAYOUT_SIZE_EXTENDED_BY_CUTOUT,
@@ -3425,9 +3551,9 @@ public interface WindowManager extends ViewManager {
                         equals = PRIVATE_FLAG_COLOR_SPACE_AGNOSTIC,
                         name = "COLOR_SPACE_AGNOSTIC"),
                 @ViewDebug.FlagToString(
-                        mask = PRIVATE_FLAG_USE_BLAST,
-                        equals = PRIVATE_FLAG_USE_BLAST,
-                        name = "USE_BLAST"),
+                        mask = PRIVATE_FLAG_CONSUME_IME_INSETS,
+                        equals = PRIVATE_FLAG_CONSUME_IME_INSETS,
+                        name = "CONSUME_IME_INSETS"),
                 @ViewDebug.FlagToString(
                         mask = PRIVATE_FLAG_APPEARANCE_CONTROLLED,
                         equals = PRIVATE_FLAG_APPEARANCE_CONTROLLED,
@@ -3455,7 +3581,7 @@ public interface WindowManager extends ViewManager {
                 @ViewDebug.FlagToString(
                         mask = PRIVATE_FLAG_SYSTEM_APPLICATION_OVERLAY,
                         equals = PRIVATE_FLAG_SYSTEM_APPLICATION_OVERLAY,
-                        name = "PRIVATE_FLAG_SYSTEM_APPLICATION_OVERLAY")
+                        name = "SYSTEM_APPLICATION_OVERLAY")
         })
         @PrivateFlags
         @TestApi
@@ -3893,6 +4019,7 @@ public interface WindowManager extends ViewManager {
          * This value is ignored if {@link #preferredDisplayModeId} is set.
          * @hide
          */
+        @SuppressLint("UnflaggedApi") // @TestApi without associated feature.
         @TestApi
         public float preferredMinDisplayRefreshRate;
 
@@ -3902,6 +4029,7 @@ public interface WindowManager extends ViewManager {
          * This value is ignored if {@link #preferredDisplayModeId} is set.
          * @hide
          */
+        @SuppressLint("UnflaggedApi") // @TestApi without associated feature.
         @TestApi
         public float preferredMaxDisplayRefreshRate;
 
@@ -4304,6 +4432,17 @@ public interface WindowManager extends ViewManager {
         @ActivityInfo.ColorMode
         private int mColorMode = COLOR_MODE_DEFAULT;
 
+        /** @hide */
+        private float mDesiredHdrHeadroom = 0;
+
+        /**
+         * For variable refresh rate project.
+         */
+        private boolean mFrameRateBoostOnTouch = true;
+        private boolean mIsFrameRatePowerSavingsBalanced = true;
+        private static boolean sToolkitSetFrameRateReadOnlyFlagValue =
+                android.view.flags.Flags.toolkitSetFrameRateReadOnly();
+
         /**
          * Carries the requests about {@link WindowInsetsController.Appearance} and
          * {@link WindowInsetsController.Behavior} to the system windows which can produce insets.
@@ -4516,7 +4655,7 @@ public interface WindowManager extends ViewManager {
          * Set whether animations can be played for position changes on this window. If disabled,
          * the window will move to its new position instantly without animating.
          *
-         * @attr ref android.R.attr#Window_windowNoMoveAnimation
+         * @attr ref android.R.styleable#Window_windowNoMoveAnimation
          */
         public void setCanPlayMoveAnimation(boolean enable) {
             if (enable) {
@@ -4531,7 +4670,7 @@ public interface WindowManager extends ViewManager {
          * This does not guarantee that an animation will be played in all such situations. For
          * example, drag-resizing may move the window but not play an animation.
          *
-         * @attr ref android.R.attr#Window_windowNoMoveAnimation
+         * @attr ref android.R.styleable#Window_windowNoMoveAnimation
          */
         public boolean canPlayMoveAnimation() {
             return (privateFlags & PRIVATE_FLAG_NO_MOVE_ANIMATION) == 0;
@@ -4706,6 +4845,95 @@ public interface WindowManager extends ViewManager {
         }
 
         /**
+         * <p>Sets the desired about of HDR headroom to be used when rendering as a ratio of
+         * targetHdrPeakBrightnessInNits / targetSdrWhitePointInNits. Only applies when
+         * {@link #setColorMode(int)} is {@link ActivityInfo#COLOR_MODE_HDR}</p>
+         *
+         * @see Window#setDesiredHdrHeadroom(float)
+         * @param desiredHeadroom Desired amount of HDR headroom. Must be in the range of 1.0 (SDR)
+         *                        to 10,000.0, or 0.0 to reset to default.
+         */
+        @FlaggedApi(com.android.graphics.hwui.flags.Flags.FLAG_LIMITED_HDR)
+        public void setDesiredHdrHeadroom(
+                @FloatRange(from = 0.0f, to = 10000.0f) float desiredHeadroom) {
+            if (!Float.isFinite(desiredHeadroom)) {
+                throw new IllegalArgumentException("desiredHeadroom must be finite: "
+                        + desiredHeadroom);
+            }
+            if (desiredHeadroom != 0 && (desiredHeadroom < 1.0f || desiredHeadroom > 10000.0f)) {
+                throw new IllegalArgumentException(
+                        "desiredHeadroom must be 0.0 or in the range [1.0, 10000.0f], received: "
+                                + desiredHeadroom);
+            }
+            mDesiredHdrHeadroom = desiredHeadroom;
+        }
+
+        /**
+         * Get the desired amount of HDR headroom as set by {@link #setDesiredHdrHeadroom(float)}
+         * @return The amount of HDR headroom set, or 0 for automatic/default behavior.
+         */
+        @FlaggedApi(com.android.graphics.hwui.flags.Flags.FLAG_LIMITED_HDR)
+        public float getDesiredHdrHeadroom() {
+            return mDesiredHdrHeadroom;
+        }
+
+        /**
+         * Set the value whether we should enable Touch Boost
+         *
+         * @param enabled Whether we should enable Touch Boost
+         */
+        @FlaggedApi(android.view.flags.Flags.FLAG_TOOLKIT_SET_FRAME_RATE_READ_ONLY)
+        public void setFrameRateBoostOnTouchEnabled(boolean enabled) {
+            if (sToolkitSetFrameRateReadOnlyFlagValue) {
+                mFrameRateBoostOnTouch = enabled;
+            }
+        }
+
+        /**
+         * Get the value whether we should enable touch boost as set
+         * by {@link #setFrameRateBoostOnTouchEnabled(boolean)}
+         *
+         * @return A boolean value to indicate whether we should enable touch boost
+         */
+        @FlaggedApi(android.view.flags.Flags.FLAG_TOOLKIT_SET_FRAME_RATE_READ_ONLY)
+        public boolean getFrameRateBoostOnTouchEnabled() {
+            if (sToolkitSetFrameRateReadOnlyFlagValue) {
+                return mFrameRateBoostOnTouch;
+            }
+            return true;
+        }
+
+        /**
+         * Set the value whether frameratepowersavingsbalance is enabled for this Window.
+         * This allows device to adjust refresh rate
+         * as needed and can be useful for power saving.
+         *
+         * @param enabled Whether we should enable frameratepowersavingsbalance.
+         */
+        @FlaggedApi(android.view.flags.Flags.FLAG_TOOLKIT_SET_FRAME_RATE_READ_ONLY)
+        public void setFrameRatePowerSavingsBalanced(boolean enabled) {
+            if (sToolkitSetFrameRateReadOnlyFlagValue) {
+                mIsFrameRatePowerSavingsBalanced = enabled;
+            }
+        }
+
+        /**
+         * Get the value whether frameratepowersavingsbalance is enabled for this Window.
+         * This allows device to adjust refresh rate
+         * as needed and can be useful for power saving.
+         * by {@link #setFrameRatePowerSavingsBalanced(boolean)}
+         *
+         * @return Whether we should enable frameratepowersavingsbalance.
+         */
+        @FlaggedApi(android.view.flags.Flags.FLAG_TOOLKIT_SET_FRAME_RATE_READ_ONLY)
+        public boolean isFrameRatePowerSavingsBalanced() {
+            if (sToolkitSetFrameRateReadOnlyFlagValue) {
+                return mIsFrameRatePowerSavingsBalanced;
+            }
+            return true;
+        }
+
+        /**
          * <p>
          * Blurs the screen behind the window. The effect is similar to that of {@link #dimAmount},
          * but instead of dimmed, the content behind the window will be blurred (or combined with
@@ -4855,6 +5083,11 @@ public interface WindowManager extends ViewManager {
             checkNonRecursiveParams();
             out.writeTypedArray(paramsForRotation, 0 /* parcelableFlags */);
             out.writeInt(mDisplayFlags);
+            out.writeFloat(mDesiredHdrHeadroom);
+            if (sToolkitSetFrameRateReadOnlyFlagValue) {
+                out.writeBoolean(mFrameRateBoostOnTouch);
+                out.writeBoolean(mIsFrameRatePowerSavingsBalanced);
+            }
         }
 
         public static final @android.annotation.NonNull Parcelable.Creator<LayoutParams> CREATOR
@@ -4926,6 +5159,11 @@ public interface WindowManager extends ViewManager {
             forciblyShownTypes = in.readInt();
             paramsForRotation = in.createTypedArray(LayoutParams.CREATOR);
             mDisplayFlags = in.readInt();
+            mDesiredHdrHeadroom = in.readFloat();
+            if (sToolkitSetFrameRateReadOnlyFlagValue) {
+                mFrameRateBoostOnTouch = in.readBoolean();
+                mIsFrameRatePowerSavingsBalanced = in.readBoolean();
+            }
         }
 
         @SuppressWarnings({"PointlessBitwiseExpression"})
@@ -5186,6 +5424,11 @@ public interface WindowManager extends ViewManager {
                 changes |= COLOR_MODE_CHANGED;
             }
 
+            if (mDesiredHdrHeadroom != o.mDesiredHdrHeadroom) {
+                mDesiredHdrHeadroom = o.mDesiredHdrHeadroom;
+                changes |= COLOR_MODE_CHANGED;
+            }
+
             if (preferMinimalPostProcessing != o.preferMinimalPostProcessing) {
                 preferMinimalPostProcessing = o.preferMinimalPostProcessing;
                 changes |= MINIMAL_POST_PROCESSING_PREFERENCE_CHANGED;
@@ -5254,6 +5497,18 @@ public interface WindowManager extends ViewManager {
 
             if (mWallpaperTouchEventsEnabled != o.mWallpaperTouchEventsEnabled) {
                 mWallpaperTouchEventsEnabled = o.mWallpaperTouchEventsEnabled;
+                changes |= LAYOUT_CHANGED;
+            }
+
+            if (sToolkitSetFrameRateReadOnlyFlagValue
+                    && mFrameRateBoostOnTouch != o.mFrameRateBoostOnTouch) {
+                mFrameRateBoostOnTouch = o.mFrameRateBoostOnTouch;
+                changes |= LAYOUT_CHANGED;
+            }
+
+            if (sToolkitSetFrameRateReadOnlyFlagValue
+                    && mIsFrameRatePowerSavingsBalanced != o.mIsFrameRatePowerSavingsBalanced) {
+                mIsFrameRatePowerSavingsBalanced = o.mIsFrameRatePowerSavingsBalanced;
                 changes |= LAYOUT_CHANGED;
             }
 
@@ -5413,6 +5668,9 @@ public interface WindowManager extends ViewManager {
             if (mColorMode != COLOR_MODE_DEFAULT) {
                 sb.append(" colorMode=").append(ActivityInfo.colorModeToString(mColorMode));
             }
+            if (mDesiredHdrHeadroom != 0) {
+                sb.append(" desiredHdrHeadroom=").append(mDesiredHdrHeadroom);
+            }
             if (preferMinimalPostProcessing) {
                 sb.append(" preferMinimalPostProcessing=");
                 sb.append(preferMinimalPostProcessing);
@@ -5475,6 +5733,16 @@ public interface WindowManager extends ViewManager {
                 sb.append(System.lineSeparator());
                 sb.append(prefix).append("  forciblyShownTypes=").append(
                         WindowInsets.Type.toString(forciblyShownTypes));
+            }
+            if (sToolkitSetFrameRateReadOnlyFlagValue && mFrameRateBoostOnTouch) {
+                sb.append(System.lineSeparator());
+                sb.append(prefix).append("  frameRateBoostOnTouch=");
+                sb.append(mFrameRateBoostOnTouch);
+            }
+            if (sToolkitSetFrameRateReadOnlyFlagValue && mIsFrameRatePowerSavingsBalanced) {
+                sb.append(System.lineSeparator());
+                sb.append(prefix).append("  dvrrWindowFrameRateHint=");
+                sb.append(mIsFrameRatePowerSavingsBalanced);
             }
             if (paramsForRotation != null && paramsForRotation.length != 0) {
                 sb.append(System.lineSeparator());
@@ -5798,6 +6066,356 @@ public interface WindowManager extends ViewManager {
      */
     @SystemApi
     default @NonNull List<ComponentName> notifyScreenshotListeners(int displayId) {
+        throw new UnsupportedOperationException();
+    }
+
+    /**
+     * @param displayId The displayId to that should have its content replaced.
+     * @param window The window that should get mirrored and the mirrored content rendered on
+     *               displayId passed in.
+     *
+     * @return Whether it successfully created a mirror SurfaceControl and replaced the display
+     * content with the mirror of the Window.
+     *
+     * @hide
+     */
+    @SuppressLint("UnflaggedApi") // The API is only used for tests.
+    @TestApi
+    @RequiresPermission(permission.ACCESS_SURFACE_FLINGER)
+    default boolean replaceContentOnDisplayWithMirror(int displayId, @NonNull Window window) {
+        throw new UnsupportedOperationException();
+    }
+
+    /**
+     * @param displayId The displayId to that should have its content replaced.
+     * @param sc The SurfaceControl that should get rendered onto the displayId passed in.
+     *
+     * @return Whether it successfully created a mirror SurfaceControl and replaced the display
+     * content with the mirror of the Window.
+     *
+     * @hide
+     */
+    @SuppressLint("UnflaggedApi") // The API is only used for tests.
+    @TestApi
+    @RequiresPermission(permission.ACCESS_SURFACE_FLINGER)
+    default boolean replaceContentOnDisplayWithSc(int displayId, @NonNull SurfaceControl sc) {
+        throw new UnsupportedOperationException();
+    }
+
+    /**
+     * Sets a callback to receive feedback about the presentation of a {@link Window}.
+     * When the {@link Window} is presented according to the passed in
+     * {@link TrustedPresentationThresholds}, it is said to "enter the state", and receives the
+     * callback with {@code true}. When the conditions fall out of thresholds, it is then
+     * said to leave the state and the caller will receive a callback with {@code false}. The
+     * callbacks be sent for every state transition thereafter.
+     * <p>
+     * There are a few simple thresholds:
+     * <ul>
+     *    <li>minAlpha: Lower bound on computed alpha</li>
+     *    <li>minFractionRendered: Lower bounds on fraction of pixels that were rendered</li>
+     *    <li>stabilityThresholdMs: A time that alpha and fraction rendered must remain within
+     *    bounds before we can "enter the state" </li>
+     * </ul>
+     * <p>
+     * The fraction of pixels rendered is a computation based on scale, crop
+     * and occlusion. The calculation may be somewhat counterintuitive, so we
+     * can work through an example. Imagine we have a Window with a 100x100 buffer
+     * which is occluded by (10x100) pixels on the left, and cropped by (100x10) pixels
+     * on the top. Furthermore imagine this Window is scaled by 0.9 in both dimensions.
+     * (c=crop,o=occluded,b=both,x=none)
+     *
+     * <blockquote>
+     * <table>
+     *   <caption></caption>
+     *   <tr><td>b</td><td>c</td><td>c</td><td>c</td></tr>
+     *   <tr><td>o</td><td>x</td><td>x</td><td>x</td></tr>
+     *   <tr><td>o</td><td>x</td><td>x</td><td>x</td></tr>
+     *   <tr><td>o</td><td>x</td><td>x</td><td>x</td></tr>
+     * </table>
+     * </blockquote>
+     *
+     *<p>
+     * We first start by computing fr=xscale*yscale=0.9*0.9=0.81, indicating
+     * that "81%" of the pixels were rendered. This corresponds to what was 100
+     * pixels being displayed in 81 pixels. This is somewhat of an abuse of
+     * language, as the information of merged pixels isn't totally lost, but
+     * we err on the conservative side.
+     * <p>
+     * We then repeat a similar process for the crop and covered regions and
+     * accumulate the results: fr = fr * (fractionNotCropped) * (fractionNotCovered)
+     * So for this example we would get 0.9*0.9*0.9*0.9=0.65...
+     * <p>
+     * Notice that this is not completely accurate, as we have double counted
+     * the region marked as b. However we only wanted a "lower bound" and so it
+     * is ok to err in this direction. Selection of the threshold will ultimately
+     * be somewhat arbitrary, and so there are some somewhat arbitrary decisions in
+     * this API as well.
+     * <p>
+     * @param window     The Window to add the trusted presentation listener for. This can be
+     *                   retrieved from {@link View#getWindowToken()}.
+     * @param thresholds The {@link TrustedPresentationThresholds} that will specify when the to
+     *                   invoke the callback.
+     * @param executor   The {@link Executor} where the callback will be invoked on.
+     * @param listener   The {@link Consumer} that will receive the callbacks
+     *                   when entered or exited trusted presentation per the thresholds.
+     * @see TrustedPresentationThresholds
+     */
+    @FlaggedApi(Flags.FLAG_TRUSTED_PRESENTATION_LISTENER_FOR_WINDOW)
+    default void registerTrustedPresentationListener(@NonNull IBinder window,
+            @NonNull TrustedPresentationThresholds thresholds,  @NonNull Executor executor,
+            @NonNull Consumer<Boolean> listener) {
+        throw new UnsupportedOperationException();
+    }
+
+    /**
+     * Removes a presentation listener associated with a window. If the listener was not previously
+     * registered, the call will be a noop.
+     *
+     * @see WindowManager#registerTrustedPresentationListener(IBinder, TrustedPresentationThresholds, Executor, Consumer)
+     */
+    @FlaggedApi(Flags.FLAG_TRUSTED_PRESENTATION_LISTENER_FOR_WINDOW)
+    default void unregisterTrustedPresentationListener(@NonNull Consumer<Boolean> listener) {
+        throw new UnsupportedOperationException();
+    }
+
+    /**
+     * Registers a {@link SurfaceControlInputReceiver} for a {@link SurfaceControl} that will
+     * receive batched input event. For those events that are batched, the invocation will happen
+     * once per {@link Choreographer} frame, and other input events will be delivered immediately.
+     * This is different from
+     * {@link #registerUnbatchedSurfaceControlInputReceiver(int, InputTransferToken, SurfaceControl,
+     * Looper, SurfaceControlInputReceiver)} in that the input events are received batched. The
+     * caller must invoke {@link #unregisterSurfaceControlInputReceiver(SurfaceControl)} to clean up
+     * the resources when no longer needing to use the {@link SurfaceControlInputReceiver}
+     *
+     * @param displayId              The display that the SurfaceControl will be placed on. Input
+     *                               will only work if SurfaceControl is on that display and that
+     *                               display  was touched.
+     * @param surfaceControl         The SurfaceControl to register the InputChannel for
+     * @param hostInputTransferToken The host token to link the embedded. This is used to handle
+     *                               transferring touch gesture from host to embedded and for ANRs
+     *                               to ensure the host receives the ANR if any issues with
+     *                               touch on the embedded.
+     * @param choreographer          The Choreographer used for batching. This should match the
+     *                               rendering Choreographer.
+     * @param receiver               The SurfaceControlInputReceiver that will receive the input
+     *                               events
+     * @return Returns the {@link InputTransferToken} that can be used to transfer touch gesture
+     * to or from other windows.
+     */
+    @FlaggedApi(Flags.FLAG_SURFACE_CONTROL_INPUT_RECEIVER)
+    @NonNull
+    default InputTransferToken registerBatchedSurfaceControlInputReceiver(int displayId,
+            @NonNull InputTransferToken hostInputTransferToken,
+            @NonNull SurfaceControl surfaceControl, @NonNull Choreographer choreographer,
+            @NonNull SurfaceControlInputReceiver receiver) {
+        throw new UnsupportedOperationException(
+                "registerBatchedSurfaceControlInputReceiver is not implemented");
+    }
+
+    /**
+     * Registers a {@link SurfaceControlInputReceiver} for a {@link SurfaceControl} that will
+     * receive every input event. This is different than calling
+     * {@link #registerBatchedSurfaceControlInputReceiver(int, InputTransferToken, SurfaceControl,
+     * Choreographer, SurfaceControlInputReceiver)} in that the input events are received
+     * unbatched.
+     * The caller must invoke {@link #unregisterSurfaceControlInputReceiver(SurfaceControl)} to
+     * clean up the resources when no longer needing to use the {@link SurfaceControlInputReceiver}
+     *
+     * @param displayId              The display that the SurfaceControl will be placed on. Input
+     *                               will only work if SurfaceControl is on that display and that
+     *                               display  was touched.
+     * @param surfaceControl         The SurfaceControl to register the InputChannel for
+     * @param hostInputTransferToken The host token to link the embedded. This is used to handle
+     *                               transferring touch gesture from host to embedded and for ANRs
+     *                               to ensure the host receives the ANR if any issues with
+     *                               touch on the embedded.
+     * @param looper                 The looper to use when invoking callbacks.
+     * @param receiver               The SurfaceControlInputReceiver that will receive the input
+     *                               events.
+     * @return Returns the {@link InputTransferToken} that can be used to transfer touch gesture
+     * to or from other windows.
+     */
+    @FlaggedApi(Flags.FLAG_SURFACE_CONTROL_INPUT_RECEIVER)
+    @NonNull
+    default InputTransferToken registerUnbatchedSurfaceControlInputReceiver(int displayId,
+            @NonNull InputTransferToken hostInputTransferToken,
+            @NonNull SurfaceControl surfaceControl, @NonNull Looper looper,
+            @NonNull SurfaceControlInputReceiver receiver) {
+        throw new UnsupportedOperationException(
+                "registerUnbatchedSurfaceControlInputReceiver is not implemented");
+    }
+
+    /**
+     * Unregisters and cleans up the registered {@link SurfaceControlInputReceiver} for the
+     * specified token.
+     * <p>
+     * Must be called on the same {@link Looper} thread to which was passed to the
+     * {@link #registerBatchedSurfaceControlInputReceiver(int, InputTransferToken, SurfaceControl,
+     * Choreographer, SurfaceControlInputReceiver)} or
+     * {@link #registerUnbatchedSurfaceControlInputReceiver(int, InputTransferToken, SurfaceControl,
+     * Looper, SurfaceControlInputReceiver)}
+     *
+     * @param surfaceControl The SurfaceControl to remove and unregister the input channel for.
+     */
+    @FlaggedApi(Flags.FLAG_SURFACE_CONTROL_INPUT_RECEIVER)
+    default void unregisterSurfaceControlInputReceiver(@NonNull SurfaceControl surfaceControl) {
+        throw new UnsupportedOperationException(
+                "unregisterSurfaceControlInputReceiver is not implemented");
+    }
+
+    /**
+     * Returns the input client token for the {@link SurfaceControl}. This will only return non
+     * null if the SurfaceControl was registered for input via
+     * {@link #registerBatchedSurfaceControlInputReceiver(int, InputTransferToken, SurfaceControl,
+     * Choreographer, SurfaceControlInputReceiver)} or
+     * {@link #registerUnbatchedSurfaceControlInputReceiver(int, InputTransferToken,
+     * SurfaceControl, Looper, SurfaceControlInputReceiver)}.
+     * <p>
+     * This is helpful for testing to ensure the test waits for the layer to be registered with
+     * SurfaceFlinger and Input before proceeding with the test.
+     *
+     * @hide
+     */
+    @FlaggedApi(Flags.FLAG_SURFACE_CONTROL_INPUT_RECEIVER)
+    @TestApi
+    @Nullable
+    default IBinder getSurfaceControlInputClientToken(@NonNull SurfaceControl surfaceControl) {
+        throw new UnsupportedOperationException(
+                "getSurfaceControlInputClientToken is not implemented");
+    }
+
+    /**
+     * Transfer the currently in progress touch gesture from the transferFromToken to the
+     * transferToToken.
+     * <p><br>
+     * This requires that the fromToken and toToken are associated with each other. The association
+     * can be done different ways, depending on how the embedded window is created.
+     * <ul>
+     * <li>
+     * Creating a {@link SurfaceControlViewHost} and passing the host's
+     * {@link InputTransferToken} for
+     * {@link SurfaceControlViewHost#SurfaceControlViewHost(Context, Display, InputTransferToken)}.
+     * </li>
+     * <li>
+     * Registering a SurfaceControl for input and passing the host's token to either
+     * {@link #registerBatchedSurfaceControlInputReceiver(int, InputTransferToken, SurfaceControl,
+     * Choreographer, SurfaceControlInputReceiver)} or
+     * {@link #registerUnbatchedSurfaceControlInputReceiver(int, InputTransferToken,
+     * SurfaceControl, Looper, SurfaceControlInputReceiver)}.
+     * </li>
+     * </ul>
+     * <p>
+     * The host is likely to be an {@link AttachedSurfaceControl} so the host token can be
+     * retrieved via {@link AttachedSurfaceControl#getInputTransferToken()}.
+     * <p><br>
+     * Only the window currently receiving touch is allowed to transfer the gesture so if the caller
+     * attempts to transfer touch gesture from a token that doesn't have touch, it will fail the
+     * transfer.
+     * <p><br>
+     * When the host wants to transfer touch gesture to the embedded, it can retrieve the embedded
+     * token via {@link SurfaceControlViewHost.SurfacePackage#getInputTransferToken()} or use the
+     * value returned from either
+     * {@link #registerBatchedSurfaceControlInputReceiver(int, InputTransferToken, SurfaceControl,
+     * Choreographer, SurfaceControlInputReceiver)} or
+     * {@link #registerUnbatchedSurfaceControlInputReceiver(int, InputTransferToken, SurfaceControl,
+     * Looper, SurfaceControlInputReceiver)} and pass its own token as the transferFromToken.
+     * <p>
+     * When the embedded wants to transfer touch gesture to the host, it can pass in its own
+     * token as the transferFromToken and use the associated host's {@link InputTransferToken} as
+     * the transferToToken
+     * <p><br>
+     * When the touch is transferred, the window currently receiving touch gets an ACTION_CANCEL
+     * and does not receive any further input events for this gesture.
+     * <p>
+     * The transferred-to window receives an ACTION_DOWN event and then the remainder of the input
+     * events for this gesture. It does not receive any of the previous events of this gesture that
+     * the originating window received.
+     * <p>
+     * The transferTouchGesture API only works for the current gesture. When a new gesture
+     * arrives, input dispatcher will do a new round of hit testing. So, if the host window is
+     * still the first thing that's being touched, then it will receive the new gesture again. It
+     * will again be up to the host to transfer this new gesture to the embedded.
+     *
+     * @param transferFromToken the InputTransferToken for the currently active gesture
+     * @param transferToToken   the InputTransferToken to transfer the gesture to.
+     * @return Whether the touch stream was transferred.
+     * @see android.view.SurfaceControlViewHost.SurfacePackage#getInputTransferToken()
+     * @see AttachedSurfaceControl#getInputTransferToken()
+     */
+    @FlaggedApi(Flags.FLAG_SURFACE_CONTROL_INPUT_RECEIVER)
+    default boolean transferTouchGesture(@NonNull InputTransferToken transferFromToken,
+            @NonNull InputTransferToken transferToToken) {
+        throw new UnsupportedOperationException("transferTouchGesture is not implemented");
+    }
+
+    /**
+     * @hide
+     */
+    default @NonNull IBinder getDefaultToken() {
+        throw new UnsupportedOperationException(
+                "getDefaultToken is not implemented");
+    }
+
+    /** @hide */
+    @Target(ElementType.TYPE_USE)
+    @IntDef(
+            prefix = {"SCREEN_RECORDING_STATE"},
+            value = {SCREEN_RECORDING_STATE_NOT_VISIBLE, SCREEN_RECORDING_STATE_VISIBLE})
+    @Retention(RetentionPolicy.SOURCE)
+    @interface ScreenRecordingState {}
+
+    /** Indicates the app that registered the callback is not visible in screen recording. */
+    @FlaggedApi(com.android.window.flags.Flags.FLAG_SCREEN_RECORDING_CALLBACKS)
+    int SCREEN_RECORDING_STATE_NOT_VISIBLE = 0;
+
+    /** Indicates the app that registered the callback is visible in screen recording. */
+    @FlaggedApi(com.android.window.flags.Flags.FLAG_SCREEN_RECORDING_CALLBACKS)
+    int SCREEN_RECORDING_STATE_VISIBLE = 1;
+
+    /**
+     * Adds a screen recording callback. The callback will be invoked whenever the app becomes
+     * visible in screen recording or was visible in screen recording and becomes invisible in
+     * screen recording.
+     *
+     * <p>An app is considered visible in screen recording if any activities owned by the
+     * registering process's UID are being recorded.
+     *
+     * <p>Example:
+     *
+     * <pre>
+     * windowManager.addScreenRecordingCallback(state -> {
+     *     // handle change in screen recording state
+     * });
+     * </pre>
+     *
+     * @param executor The executor on which callback method will be invoked.
+     * @param callback The callback that will be invoked when screen recording visibility changes.
+     * @return the current screen recording state.
+     * @see #SCREEN_RECORDING_STATE_NOT_VISIBLE
+     * @see #SCREEN_RECORDING_STATE_VISIBLE
+     */
+    @SuppressLint("AndroidFrameworkRequiresPermission")
+    @RequiresPermission(permission.DETECT_SCREEN_RECORDING)
+    @FlaggedApi(com.android.window.flags.Flags.FLAG_SCREEN_RECORDING_CALLBACKS)
+    default @ScreenRecordingState int addScreenRecordingCallback(
+            @NonNull @CallbackExecutor Executor executor,
+            @NonNull Consumer<@ScreenRecordingState Integer> callback) {
+        throw new UnsupportedOperationException();
+    }
+
+    /**
+     * Removes a screen recording callback.
+     *
+     * @param callback The callback to remove.
+     * @see #addScreenRecordingCallback(Executor, Consumer)
+     */
+    @SuppressLint("AndroidFrameworkRequiresPermission")
+    @RequiresPermission(permission.DETECT_SCREEN_RECORDING)
+    @FlaggedApi(com.android.window.flags.Flags.FLAG_SCREEN_RECORDING_CALLBACKS)
+    default void removeScreenRecordingCallback(
+            @NonNull Consumer<@ScreenRecordingState Integer> callback) {
         throw new UnsupportedOperationException();
     }
 }

@@ -248,6 +248,11 @@ public abstract class AbstractContentCapturePerfTestCase {
         return mServiceWatcher.waitOnCreate();
     }
 
+    /** Wait for session paused. */
+    public void waitForSessionPaused() throws InterruptedException {
+        mServiceWatcher.waitSessionPaused();
+    }
+
     @NonNull
     protected ActivityWatcher startWatcher() {
         return mActivitiesWatcher.watch(CustomTestActivity.class);

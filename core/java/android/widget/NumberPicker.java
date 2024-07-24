@@ -1328,8 +1328,8 @@ public class NumberPicker extends LinearLayout {
     private void hideSoftInput() {
         InputMethodManager inputMethodManager =
                 getContext().getSystemService(InputMethodManager.class);
-        if (inputMethodManager != null && inputMethodManager.isActive(mInputText)) {
-            inputMethodManager.hideSoftInputFromWindow(getWindowToken(), 0);
+        if (inputMethodManager != null) {
+            inputMethodManager.hideSoftInputFromView(mInputText, 0);
         }
         if (mHasSelectorWheel) {
             mInputText.setVisibility(View.INVISIBLE);

@@ -46,10 +46,13 @@ import static com.android.server.wm.testing.Assert.assertThrows;
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -63,8 +66,6 @@ import android.os.Binder;
 import android.os.IBinder;
 import android.platform.test.annotations.Presubmit;
 import android.view.SurfaceControl;
-import android.view.View;
-import android.view.WindowManager;
 import android.window.DisplayAreaInfo;
 import android.window.IDisplayAreaOrganizer;
 
@@ -448,17 +449,11 @@ public class DisplayAreaTest extends WindowTestsBase {
     @Test
     public void testGetOrientation() {
         final DisplayArea.Tokens area = new DisplayArea.Tokens(mWm, ABOVE_TASKS, "test");
-        final WindowToken token = createWindowToken(TYPE_APPLICATION_OVERLAY);
-        spyOn(token);
-        doReturn(mock(DisplayContent.class)).when(token).getDisplayContent();
-        doNothing().when(token).setParent(any());
-        final WindowState win = createWindowState(token);
-        spyOn(win);
-        doNothing().when(win).setParent(any());
+        mDisplayContent.addChild(area, POSITION_TOP);
+        final WindowState win = createWindow(null, TYPE_APPLICATION_OVERLAY, "overlay");
         win.mAttrs.screenOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE;
-        token.addChild(win, 0);
-        area.addChild(token);
-
+        win.mToken.reparent(area, POSITION_TOP);
+        spyOn(win);
         doReturn(true).when(win).isVisible();
 
         assertEquals("Visible window can request orientation",
@@ -583,6 +578,7 @@ public class DisplayAreaTest extends WindowTestsBase {
         final IDisplayAreaOrganizer mockDisplayAreaOrganizer = mock(IDisplayAreaOrganizer.class);
         doReturn(mock(IBinder.class)).when(mockDisplayAreaOrganizer).asBinder();
         displayArea.mOrganizer = mockDisplayAreaOrganizer;
+        displayArea.mDisplayAreaAppearedSent = true;
         spyOn(mWm.mAtmService.mWindowOrganizerController.mDisplayAreaOrganizerController);
         mDisplayContent.addChild(displayArea, 0);
 
@@ -687,6 +683,56 @@ public class DisplayAreaTest extends WindowTestsBase {
         assertEquals(parent.getChildAt(0), child);
     }
 
+    @Test
+    public void testSetOrganizer() {
+        final TaskDisplayArea displayArea = createTaskDisplayArea(
+                mDisplayContent, mWm, "NewArea", FEATURE_VENDOR_FIRST);
+
+        assertNull(displayArea.mOrganizer);
+        assertFalse(displayArea.mDisplayAreaAppearedSent);
+
+        final IDisplayAreaOrganizer organizer = mock(IDisplayAreaOrganizer.class);
+        final DisplayAreaOrganizerController controller =
+                mWm.mAtmService.mWindowOrganizerController.mDisplayAreaOrganizerController;
+        spyOn(controller);
+        doNothing().when(controller).onDisplayAreaVanished(any(), any());
+
+        displayArea.setOrganizer(organizer);
+
+        assertEquals(organizer, displayArea.mOrganizer);
+        assertTrue(displayArea.mDisplayAreaAppearedSent);
+        verify(controller).onDisplayAreaAppeared(organizer, displayArea);
+
+        // No duplicated appeared sent.
+        clearInvocations(controller);
+        displayArea.sendDisplayAreaAppeared();
+
+        verify(controller, never()).onDisplayAreaAppeared(any(), any());
+
+        // Sent info changed after appeared.
+        displayArea.sendDisplayAreaInfoChanged();
+
+        verify(controller).onDisplayAreaInfoChanged(organizer, displayArea);
+
+        // Sent info vanished after appeared.
+        displayArea.setOrganizer(null);
+
+        verify(controller).onDisplayAreaVanished(organizer, displayArea);
+        assertNull(displayArea.mOrganizer);
+        assertFalse(displayArea.mDisplayAreaAppearedSent);
+
+        // No callback until appeared sent.
+        clearInvocations(controller);
+
+        displayArea.sendDisplayAreaAppeared();
+        displayArea.sendDisplayAreaInfoChanged();
+        displayArea.sendDisplayAreaVanished(organizer);
+
+        verify(controller, never()).onDisplayAreaAppeared(any(), any());
+        verify(controller, never()).onDisplayAreaInfoChanged(any(), any());
+        verify(controller, never()).onDisplayAreaVanished(any(), any());
+    }
+
     private static class TestDisplayArea<T extends WindowContainer> extends DisplayArea<T> {
         private TestDisplayArea(WindowManagerService wms, Rect bounds, String name) {
             super(wms, ANY, name);
@@ -697,13 +743,6 @@ public class DisplayAreaTest extends WindowTestsBase {
         SurfaceControl.Builder makeChildSurface(WindowContainer child) {
             return new MockSurfaceControlBuilder();
         }
-    }
-
-    private WindowState createWindowState(WindowToken token) {
-        return new WindowState(mWm, mock(Session.class), new TestIWindow(), token,
-                null /* parentWindow */, 0 /* appOp */, new WindowManager.LayoutParams(),
-                View.VISIBLE, 0 /* ownerId */, 0 /* showUserId */,
-                false /* ownerCanAddInternalSystemWindow */);
     }
 
     private WindowToken createWindowToken(int type) {

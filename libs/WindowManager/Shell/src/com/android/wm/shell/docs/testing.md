@@ -5,7 +5,7 @@
 ## Unit tests
 
 New WM Shell unit tests can be added to the
-[Shell/tests/unittest](frameworks/base/libs/WindowManager/Shell/tests/unittest) directory, and can
+[Shell/tests/unittest](/libs/WindowManager/Shell/tests/unittest) directory, and can
 be run via command line using `atest`:
 ```shell
 atest WMShellUnitTests
@@ -25,10 +25,24 @@ Flicker tests are tests that perform actions and make assertions on the state in
 and SurfaceFlinger traces captured during the run.
 
 New WM Shell Flicker tests can be added to the
-[Shell/tests/flicker](frameworks/base/libs/WindowManager/Shell/tests/flicker) directory, and can
-be run via command line using `atest`:
+[Shell/tests/flicker](/libs/WindowManager/Shell/tests/flicker) directory, and can be run via command line using `atest`:
 ```shell
-atest WMShellFlickerTests
+# Bubbles
+atest WMShellFlickerTestsBubbles
+
+# PIP
+atest WMShellFlickerTestsPip1
+atest WMShellFlickerTestsPip2
+atest WMShellFlickerTestsPip3
+atest WMShellFlickerTestsPipApps
+atest WMShellFlickerTestsPipAppsCSuite
+
+# Splitscreen
+atest WMShellFlickerTestsSplitScreenGroup1
+atest WMShellFlickerTestsSplitScreenGroup2
+
+# Other
+atest WMShellFlickerTestsOther
 ```
 
 **Note**: Currently Flicker tests can only be run from the commandline and not via SysUI Studio

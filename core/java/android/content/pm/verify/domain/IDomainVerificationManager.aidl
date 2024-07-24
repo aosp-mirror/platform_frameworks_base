@@ -20,6 +20,8 @@ import android.content.pm.verify.domain.DomainOwner;
 import android.content.pm.verify.domain.DomainSet;
 import android.content.pm.verify.domain.DomainVerificationInfo;
 import android.content.pm.verify.domain.DomainVerificationUserState;
+import android.content.UriRelativeFilterGroup;
+import android.os.Bundle;
 import java.util.List;
 
 /**
@@ -46,4 +48,8 @@ interface IDomainVerificationManager {
 
     int setDomainVerificationUserSelection(String domainSetId, in DomainSet domains,
             boolean enabled, int userId);
+
+    void setUriRelativeFilterGroups(String packageName, in Bundle domainToGroupsBundle);
+
+    Bundle getUriRelativeFilterGroups(String packageName, in List<String> domains);
 }

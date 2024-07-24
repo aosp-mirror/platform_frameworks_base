@@ -22,6 +22,7 @@ import com.android.systemui.bouncer.data.repository.BouncerMessageRepositoryImpl
 import com.android.systemui.bouncer.data.repository.KeyguardBouncerRepository
 import com.android.systemui.bouncer.data.repository.KeyguardBouncerRepositoryImpl
 import com.android.systemui.bouncer.domain.interactor.BouncerMessageAuditLogger
+import com.android.systemui.keyguard.ui.binder.SideFpsProgressBarViewBinder
 import dagger.Binds
 import dagger.Module
 import dagger.multibindings.ClassKey
@@ -30,6 +31,11 @@ import dagger.multibindings.IntoMap
 @Module
 interface KeyguardRepositoryModule {
     @Binds fun keyguardRepository(impl: KeyguardRepositoryImpl): KeyguardRepository
+
+    @Binds
+    @IntoMap
+    @ClassKey(SideFpsProgressBarViewBinder::class)
+    fun bindSideFpsProgressBarViewBinder(viewBinder: SideFpsProgressBarViewBinder): CoreStartable
 
     @Binds
     fun keyguardSurfaceBehindRepository(
@@ -68,4 +74,6 @@ interface KeyguardRepositoryModule {
     fun bind(impl: BouncerMessageAuditLogger): CoreStartable
 
     @Binds fun trustRepository(impl: TrustRepositoryImpl): TrustRepository
+
+    @Binds fun keyguardClockRepository(impl: KeyguardClockRepositoryImpl): KeyguardClockRepository
 }

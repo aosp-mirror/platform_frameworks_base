@@ -860,6 +860,66 @@ public class BackupEligibilityRulesTest {
         assertThat(result).isFalse();
     }
 
+    @Test
+    public void isAppEligibleForRestore_hasBeenLaunched_returnsFalse() {
+        when(mMockPackageManagerInternal.wasPackageEverLaunched(eq(TEST_PACKAGE_NAME), eq(mUserId)))
+                .thenReturn(true);
+        ApplicationInfo applicationInfo = getApplicationInfo(/* appUid */ 0, /* flags */ 0,
+                /* backupAgentName */ null);
+        BackupEligibilityRules backupEligibilityRules = new BackupEligibilityRules(mPackageManager,
+                mMockPackageManagerInternal, mUserId, mContext, BackupDestination.CLOUD,
+                /* skipRestoreForLaunchedApps */ true);
+
+        boolean isEligible = backupEligibilityRules.isAppEligibleForRestore(applicationInfo);
+
+        assertThat(isEligible).isFalse();
+    }
+
+    @Test
+    public void isAppEligibleForRestore_hasNotBeenLaunched_returnsTrue() {
+        when(mMockPackageManagerInternal.wasPackageEverLaunched(eq(TEST_PACKAGE_NAME), eq(mUserId)))
+                .thenReturn(false);
+        ApplicationInfo applicationInfo = getApplicationInfo(/* appUid */ 0, /* flags */ 0,
+                /* backupAgentName */ null);
+        BackupEligibilityRules backupEligibilityRules = new BackupEligibilityRules(mPackageManager,
+                mMockPackageManagerInternal, mUserId, mContext, BackupDestination.CLOUD,
+                /* skipRestoreForLaunchedApps */ false);
+
+        boolean isEligible = backupEligibilityRules.isAppEligibleForRestore(applicationInfo);
+
+        assertThat(isEligible).isTrue();
+    }
+
+    @Test
+    public void isAppEligibleForRestore_launchedButHasBackupAgent_returnsTrue() {
+        when(mMockPackageManagerInternal.wasPackageEverLaunched(eq(TEST_PACKAGE_NAME), eq(mUserId)))
+                .thenReturn(true);
+        ApplicationInfo applicationInfo = getApplicationInfo(/* appUid */ 0, /* flags */ 0,
+                /* backupAgentName */ "BackupAgent");
+        BackupEligibilityRules backupEligibilityRules = new BackupEligibilityRules(mPackageManager,
+                mMockPackageManagerInternal, mUserId, mContext, BackupDestination.CLOUD,
+                /* skipRestoreForLaunchedApps */ false);
+
+        boolean isEligible = backupEligibilityRules.isAppEligibleForRestore(applicationInfo);
+
+        assertThat(isEligible).isTrue();
+    }
+
+    @Test
+    public void isAppEligibleForRestore_doNotSkipRestoreForLaunched_returnsTrue() {
+        when(mMockPackageManagerInternal.wasPackageEverLaunched(eq(TEST_PACKAGE_NAME), eq(mUserId)))
+                .thenReturn(true);
+        ApplicationInfo applicationInfo = getApplicationInfo(/* appUid */ 0, /* flags */ 0,
+                /* backupAgentName */ null);
+        BackupEligibilityRules backupEligibilityRules = new BackupEligibilityRules(mPackageManager,
+                mMockPackageManagerInternal, mUserId, mContext, BackupDestination.CLOUD,
+                /* skipRestoreForLaunchedApps */ false);
+
+        boolean isEligible = backupEligibilityRules.isAppEligibleForRestore(applicationInfo);
+
+        assertThat(isEligible).isTrue();
+    }
+
     private BackupEligibilityRules getBackupEligibilityRules(
             @BackupDestination int backupDestination) {
         return new BackupEligibilityRules(mPackageManager, mMockPackageManagerInternal, mUserId,

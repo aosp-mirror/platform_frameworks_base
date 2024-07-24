@@ -15,16 +15,19 @@
  */
 package android.view;
 
+import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UiThread;
+import android.content.Context;
 import android.graphics.Rect;
 import android.graphics.Region;
 import android.hardware.HardwareBuffer;
+import android.os.Looper;
+import android.window.InputTransferToken;
 import android.window.SurfaceSyncGroup;
 
-import java.util.concurrent.Executor;
-import java.util.function.Consumer;
+import com.android.window.flags.Flags;
 
 /**
  * Provides an interface to the root-Surface of a View Hierarchy or Window. This
@@ -91,6 +94,12 @@ public interface AttachedSurfaceControl {
      * Note, when using ANativeWindow APIs in conjunction with a NativeActivity Surface or
      * SurfaceView Surface, the buffer producer will already have access to the transform hint and
      * no additional work is needed.
+     *
+     * If the root surface is not available, the API will return {@code BUFFER_TRANSFORM_IDENTITY}.
+     * The caller should register a listener to listen for any changes. @see
+     * {@link #addOnBufferTransformHintChangedListener(OnBufferTransformHintChangedListener)}.
+     * Warning: Calling this API in Android 14 (API Level 34) or earlier will crash if the root
+     * surface is not available.
      *
      * @see HardwareBuffer
      */
@@ -172,38 +181,25 @@ public interface AttachedSurfaceControl {
     }
 
     /**
-     * Add a trusted presentation listener on the SurfaceControl associated with this window.
+     * Gets the token used for associating this {@link AttachedSurfaceControl} with an embedded
+     * {@link SurfaceControlViewHost} or {@link SurfaceControl}
      *
-     * @param t          Transaction that the trusted presentation listener is added on. This should
-     *                   be applied by the caller.
-     * @param thresholds The {@link SurfaceControl.TrustedPresentationThresholds} that will specify
-     *                   when the to invoke the callback.
-     * @param executor   The {@link Executor} where the callback will be invoked on.
-     * @param listener   The {@link Consumer} that will receive the callbacks when entered or
-     *                   exited the threshold.
+     * <p>This token should be passed to
+     * {@link SurfaceControlViewHost#SurfaceControlViewHost(Context, Display, InputTransferToken)}
+     * or
+     * {@link WindowManager#registerBatchedSurfaceControlInputReceiver(int, InputTransferToken,
+     * SurfaceControl, Choreographer, SurfaceControlInputReceiver)} or
+     * {@link WindowManager#registerUnbatchedSurfaceControlInputReceiver(int, InputTransferToken,
+     * SurfaceControl, Looper, SurfaceControlInputReceiver)}
      *
-     * @see SurfaceControl.Transaction#setTrustedPresentationCallback(SurfaceControl,
-     * SurfaceControl.TrustedPresentationThresholds, Executor, Consumer)
-     *
-     * @hide b/287076178 un-hide with API bump
+     * @return The {@link InputTransferToken} for the {@link AttachedSurfaceControl}
+     * @throws IllegalStateException if the {@link AttachedSurfaceControl} was created with no
+     * registered input
      */
-    default void addTrustedPresentationCallback(@NonNull SurfaceControl.Transaction t,
-            @NonNull SurfaceControl.TrustedPresentationThresholds thresholds,
-            @NonNull Executor executor, @NonNull Consumer<Boolean> listener) {
-    }
-
-    /**
-     * Remove a trusted presentation listener on the SurfaceControl associated with this window.
-     *
-     * @param t          Transaction that the trusted presentation listener removed on. This should
-     *                   be applied by the caller.
-     * @param listener   The {@link Consumer} that was previously registered with
-     *                   addTrustedPresentationCallback that should be removed.
-     *
-     * @see SurfaceControl.Transaction#clearTrustedPresentationCallback(SurfaceControl)
-     * @hide b/287076178 un-hide with API bump
-     */
-    default void removeTrustedPresentationCallback(@NonNull SurfaceControl.Transaction t,
-            @NonNull Consumer<Boolean> listener) {
+    @NonNull
+    @FlaggedApi(Flags.FLAG_SURFACE_CONTROL_INPUT_RECEIVER)
+    default InputTransferToken getInputTransferToken() {
+        throw new UnsupportedOperationException("The getInputTransferToken needs to be "
+                + "implemented before making this call.");
     }
 }

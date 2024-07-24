@@ -124,9 +124,10 @@ public class NextAlarmControllerImpl extends BroadcastReceiver
     }
 
     private void fireNextAlarmChanged() {
-        int n = mChangeCallbacks.size();
+        ArrayList<NextAlarmChangeCallback> copy = new ArrayList<>(mChangeCallbacks);
+        int n = copy.size();
         for (int i = 0; i < n; i++) {
-            mChangeCallbacks.get(i).onNextAlarmChanged(mNextAlarm);
+            copy.get(i).onNextAlarmChanged(mNextAlarm);
         }
     }
 }

@@ -17,17 +17,20 @@
 package com.android.systemui.bouncer.ui.viewmodel
 
 import android.view.View
+import com.android.systemui.biometrics.shared.SideFpsControllerRefactor
 import com.android.systemui.bouncer.domain.interactor.PrimaryBouncerInteractor
 import com.android.systemui.bouncer.shared.model.BouncerShowMessageModel
 import com.android.systemui.bouncer.ui.BouncerView
 import com.android.systemui.bouncer.ui.BouncerViewDelegate
 import javax.inject.Inject
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.merge
 
 /** Models UI state for the lock screen bouncer; handles user input. */
+@ExperimentalCoroutinesApi
 class KeyguardBouncerViewModel
 @Inject
 constructor(
@@ -59,11 +62,13 @@ constructor(
     val bouncerShowMessage: Flow<BouncerShowMessageModel> = interactor.showMessage
 
     /** Observe whether keyguard is authenticated already. */
-    val keyguardAuthenticated: Flow<Boolean> = interactor.keyguardAuthenticated
+    val keyguardAuthenticated: Flow<Boolean> = interactor.keyguardAuthenticatedBiometrics
 
+    // TODO(b/288175061): remove with Flags.FLAG_SIDEFPS_CONTROLLER_REFACTOR
     /** Observe whether the side fps is showing. */
     val sideFpsShowing: Flow<Boolean> = interactor.sideFpsShowing
 
+    // TODO(b/288175061): remove with Flags.FLAG_SIDEFPS_CONTROLLER_REFACTOR
     /** Observe whether we should update fps is showing. */
     val shouldUpdateSideFps: Flow<Unit> =
         merge(
@@ -87,7 +92,9 @@ constructor(
         interactor.onMessageShown()
     }
 
+    // TODO(b/288175061): remove with Flags.FLAG_SIDEFPS_CONTROLLER_REFACTOR
     fun updateSideFpsVisibility() {
+        SideFpsControllerRefactor.assertInLegacyMode()
         interactor.updateSideFpsVisibility()
     }
 

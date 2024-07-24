@@ -61,6 +61,7 @@ import org.mockito.MockitoSession;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
@@ -91,6 +92,7 @@ public class BatteryControllerTest extends SysuiTestCase {
                 mBroadcastDispatcher,
                 mDemoModeController,
                 mock(DumpManager.class),
+                mock(BatteryControllerLogger.class),
                 new Handler(),
                 new Handler());
         // Can throw if updateEstimate is called on the main thread
@@ -287,6 +289,24 @@ public class BatteryControllerTest extends SysuiTestCase {
         Assert.assertFalse(mBatteryController.isIncompatibleCharging());
     }
 
+    @Test
+    public void callbackRemovedWhileDispatching_doesntCrash() {
+        final AtomicBoolean remove = new AtomicBoolean(false);
+        BatteryStateChangeCallback callback = new BatteryStateChangeCallback() {
+            @Override
+            public void onBatteryLevelChanged(int level, boolean pluggedIn, boolean charging) {
+                if (remove.get()) {
+                    mBatteryController.removeCallback(this);
+                }
+            }
+        };
+        mBatteryController.addCallback(callback);
+        // Add another callback so the iteration continues
+        mBatteryController.addCallback(new BatteryStateChangeCallback() {});
+        remove.set(true);
+        mBatteryController.fireBatteryLevelChanged();
+    }
+
     private void setupIncompatibleCharging() {
         final List<UsbPort> usbPorts = new ArrayList<>();
         usbPorts.add(mUsbPort);
@@ -295,6 +315,6 @@ public class BatteryControllerTest extends SysuiTestCase {
         when(mUsbPort.supportsComplianceWarnings()).thenReturn(true);
         when(mUsbPortStatus.isConnected()).thenReturn(true);
         when(mUsbPortStatus.getComplianceWarnings())
-                .thenReturn(new int[]{UsbPortStatus.COMPLIANCE_WARNING_OTHER});
+                .thenReturn(new int[]{UsbPortStatus.COMPLIANCE_WARNING_DEBUG_ACCESSORY});
     }
 }

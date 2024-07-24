@@ -35,7 +35,7 @@
     <string name="install_for_print_preview" msgid="6366303997385509332">"Installer un lecteur PDF pour voir l\'aperçu"</string>
     <string name="printing_app_crashed" msgid="854477616686566398">"L\'application à l\'origine de l\'impression a planté"</string>
     <string name="generating_print_job" msgid="3119608742651698916">"Génération tâche impression…"</string>
-    <string name="save_as_pdf" msgid="5718454119847596853">"Enregistrer en format PDF"</string>
+    <string name="save_as_pdf" msgid="5718454119847596853">"Enregistrer au format PDF"</string>
     <string name="all_printers" msgid="5018829726861876202">"Toutes les imprimantes…"</string>
     <string name="print_dialog" msgid="32628687461331979">"Boîte de dialogue d\'impression"</string>
     <string name="current_page_template" msgid="5145005201131935302">"<xliff:g id="CURRENT_PAGE">%1$d</xliff:g> sur <xliff:g id="PAGE_COUNT">%2$d</xliff:g>"</string>

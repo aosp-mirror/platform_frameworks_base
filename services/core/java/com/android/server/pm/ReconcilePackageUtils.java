@@ -17,22 +17,29 @@
 package com.android.server.pm;
 
 import static android.content.pm.PackageManager.INSTALL_FAILED_UPDATE_INCOMPATIBLE;
+import static android.content.pm.PackageManager.INSTALL_PARSE_FAILED_BAD_SHARED_USER_ID;
 import static android.content.pm.PackageManager.INSTALL_PARSE_FAILED_INCONSISTENT_CERTIFICATES;
 import static android.content.pm.SigningDetails.CapabilityMergeRule.MERGE_RESTRICTED_CAPABILITY;
 
+import static com.android.server.pm.PackageManagerService.SCAN_AS_APEX;
 import static com.android.server.pm.PackageManagerService.SCAN_BOOTING;
 import static com.android.server.pm.PackageManagerService.SCAN_DONT_KILL_APP;
+import static com.android.server.pm.PackageManagerService.TAG;
 
+import android.content.pm.Flags;
 import android.content.pm.PackageManager;
 import android.content.pm.SharedLibraryInfo;
 import android.content.pm.SigningDetails;
+import android.os.Build;
 import android.os.SystemProperties;
 import android.util.ArrayMap;
 import android.util.Log;
+import android.util.Slog;
 
-import com.android.server.pm.parsing.pkg.ParsedPackage;
+import com.android.internal.pm.parsing.pkg.ParsedPackage;
+import com.android.internal.pm.pkg.parsing.ParsingPackageUtils;
+import com.android.server.SystemConfig;
 import com.android.server.pm.pkg.AndroidPackage;
-import com.android.server.pm.pkg.parsing.ParsingPackageUtils;
 import com.android.server.utils.WatchedLongSparseArray;
 
 import java.util.ArrayList;
@@ -49,12 +56,17 @@ import java.util.Map;
  * as install) led to the request.
  */
 final class ReconcilePackageUtils {
+    // TODO(b/308573259): with allow-list, we should be able to disallow such installs even in
+    // debuggable builds.
+    private static final boolean ALLOW_NON_PRELOADS_SYSTEM_SHAREDUIDS = Build.IS_DEBUGGABLE
+            || !Flags.restrictNonpreloadsSystemShareduids();
+
     public static List<ReconciledPackage> reconcilePackages(
             List<InstallRequest> installRequests,
             Map<String, AndroidPackage> allPackages,
             Map<String, Settings.VersionInfo> versionInfos,
             SharedLibrariesImpl sharedLibraries,
-            KeySetManagerService ksms, Settings settings)
+            KeySetManagerService ksms, Settings settings, SystemConfig systemConfig)
             throws ReconcileFailure {
         final List<ReconciledPackage> result = new ArrayList<>(installRequests.size());
 
@@ -89,6 +101,8 @@ final class ReconcilePackageUtils {
                 }
             }
         }
+
+        final AndroidPackage systemPackage = allPackages.get(KnownPackages.SYSTEM_PACKAGE_NAME);
 
         for (InstallRequest installRequest : installRequests) {
             final String installPackageName = installRequest.getParsedPackage().getPackageName();
@@ -133,6 +147,9 @@ final class ReconcilePackageUtils {
             if (parsedPackage != null) {
                 signingDetails = parsedPackage.getSigningDetails();
             }
+            final boolean isSystemPackage =
+                    ((parseFlags & ParsingPackageUtils.PARSE_IS_SYSTEM_DIR) != 0);
+            final boolean isApex = (scanFlags & SCAN_AS_APEX) != 0;
             SharedUserSetting sharedUserSetting = settings.getSharedUserSettingLPr(
                     signatureCheckPs);
             if (ksms.shouldCheckUpgradeKeySetLocked(
@@ -141,7 +158,7 @@ final class ReconcilePackageUtils {
                     // We just determined the app is signed correctly, so bring
                     // over the latest parsed certs.
                 } else {
-                    if ((parseFlags & ParsingPackageUtils.PARSE_IS_SYSTEM_DIR) == 0) {
+                    if (!isSystemPackage) {
                         throw new ReconcileFailure(INSTALL_FAILED_UPDATE_INCOMPATIBLE,
                                 "Package " + parsedPackage.getPackageName()
                                         + " upgrade keys do not match the previously installed"
@@ -168,9 +185,32 @@ final class ReconcilePackageUtils {
                         removeAppKeySetData = true;
                     }
 
+                    if (!installRequest.isInstallSystem() && !isSystemPackage && !isApex
+                            && signingDetails != null
+                            && systemPackage != null && systemPackage.getSigningDetails() != null
+                            && systemPackage.getSigningDetails().checkCapability(
+                                    signingDetails,
+                                    SigningDetails.CertCapabilities.PERMISSION)) {
+                        Slog.d(TAG, "Non-preload app associated with system signature: "
+                                + signatureCheckPs.getPackageName());
+                        if (sharedUserSetting != null && !ALLOW_NON_PRELOADS_SYSTEM_SHAREDUIDS) {
+                            // Check the allow-list.
+                            var allowList = systemConfig.getPackageToSharedUidAllowList();
+                            var sharedUidName = allowList.get(signatureCheckPs.getPackageName());
+                            if (sharedUidName == null
+                                    || !sharedUserSetting.name.equals(sharedUidName)) {
+                                var msg = "Non-preload app " + signatureCheckPs.getPackageName()
+                                        + " signed with platform signature and joining shared uid: "
+                                        + sharedUserSetting.name;
+                                Slog.e(TAG, msg + ", allowList: " + allowList);
+                                throw new ReconcileFailure(
+                                        INSTALL_PARSE_FAILED_BAD_SHARED_USER_ID, msg);
+                            }
+                        }
+                    }
+
                     // if this is is a sharedUser, check to see if the new package is signed by a
-                    // newer
-                    // signing certificate than the existing one, and if so, copy over the new
+                    // newer signing certificate than the existing one, and if so, copy over the new
                     // details
                     if (sharedUserSetting != null) {
                         // Attempt to merge the existing lineage for the shared SigningDetails with
@@ -203,7 +243,7 @@ final class ReconcilePackageUtils {
                         }
                     }
                 } catch (PackageManagerException e) {
-                    if ((parseFlags & ParsingPackageUtils.PARSE_IS_SYSTEM_DIR) == 0) {
+                    if (!isSystemPackage) {
                         throw new ReconcileFailure(e);
                     }
                     signingDetails = parsedPackage.getSigningDetails();

@@ -11,96 +11,85 @@
     effectively add 300 to the weight, this ensures that 900 is the bold
     paired with the 500 weight, ensuring adequate contrast.
 
-    TODO(rsheeter) update comment; ordering to match 800 to 900 is no longer required
+
+    The font_fallback.xml defines the list of font used by the system.
+
+    `familyset` node:
+      A `familyset` element must be a root node of the font_fallback.xml. No attributes are allowed
+      to `familyset` node.
+      The `familyset` node can contains `family` and `alias` nodes. Any other nodes will be ignored.
+
+    `family` node:
+      A `family` node defines a single font family definition.
+      A font family is a set of fonts for drawing text in various styles such as weight, slant.
+      There are three types of families, default family, named family and locale fallback family.
+
+      The default family is a special family node appeared the first node of the `familyset` node.
+      The default family is used as first priority fallback.
+      Only `name` attribute can be used for default family node. If the `name` attribute is
+      specified, This family will also works as named family.
+
+      The named family is a family that has name attribute. The named family defines a new fallback.
+      For example, if the name attribute is "serif", it creates serif fallback. Developers can
+      access the fallback by using Typeface#create API.
+      The named family can not have attribute other than `name` attribute. The `name` attribute
+      cannot be empty.
+
+      The locale fallback family is a font family that is used for fallback. The fallback family is
+      used when the named family or default family cannot be used. The locale fallback family can
+      have `lang` attribute and `variant` attribute. The `lang` attribute is an optional comma
+      separated BCP-47i language tag. The `variant` is an optional attribute that can be one one
+      `element`, `compact`. If a `variant` attribute is not specified, it is treated as default.
+
+    `alias` node:
+      An `alias` node defines a alias of named family with changing weight offset. An `alias` node
+      can have mandatory `name` and `to` attribute and optional `weight` attribute. This `alias`
+      defines new fallback that has the name of specified `name` attribute. The fallback list is
+      the same to the fallback that of the name specified with `to` attribute. If `weight` attribute
+      is specified, the base weight offset is shifted to the specified value. For example, if the
+      `weight` is 500, the output text is drawn with 500 of weight.
+
+    `font` node:
+      A `font` node defines a single font definition. There are two types of fonts, static font and
+      variable font.
+
+      A static font can have `weight`, `style`, `index` and `postScriptName` attributes. A `weight`
+      is a mandatory attribute that defines the weight of the font. Any number between 0 to 1000 is
+      valid. A `style` is a mandatory attribute that defines the style of the font. A 'style'
+      attribute can be `normal` or `italic`. An `index` is an optional attribute that defines the
+      index of the font collection. If this is not specified, it is treated as 0. If the font file
+      is not a font collection, this attribute is ignored. A `postScriptName` attribute is an
+      optional attribute. A PostScript name is used for identifying target of system font update.
+      If this is not specified, the system assumes the filename is same to PostScript name of the
+      font file. For example, if the font file is "Roboto-Regular.ttf", the system assume the
+      PostScript name of this font is "Roboto-Regular".
+
+      A variable font can be only defined for the variable font file. A variable font can have
+      `axis` child nodes for specifying axis values. A variable font can have all attribute of
+      static font and can have additional `supportedAxes` attribute. A `supportedAxes` attribute
+      is a comma separated supported axis tags. As of Android V, only `wght` and `ital` axes can
+      be specified.
+
+      If `supportedAxes` attribute is not specified, this `font` node works as static font of the
+      single instance of variable font specified with `axis` children.
+
+      If `supportedAxes` attribute is specified, the system dynamically create font instance for the
+      given weight and style value. If `wght` is specified in `supportedAxes` attribute the `weight`
+      attribute and `axis` child that has `wght` tag become optional and ignored because it is
+      determined by system at runtime. Similarly, if `ital` is specified in `supportedAxes`
+      attribute, the `style` attribute and `axis` child that has `ital` tag become optional and
+      ignored.
+
+    `axis` node:
+      An `axis` node defines a font variation value for a tag. An `axis` node can have two mandatory
+      attributes, `tag` and `value`. If the font is variable font and the same tag `axis` node is
+      specified in `supportedAxes` attribute, the style value works like a default instance.
 -->
-<familyset version="23">
+<familyset>
     <!-- first font is default -->
     <family name="sans-serif">
-        <font weight="100" style="normal">Roboto-Regular.ttf
-          <axis tag="ital" stylevalue="0" />
+        <font supportedAxes="wght,ital">Roboto-Regular.ttf
           <axis tag="wdth" stylevalue="100" />
-          <axis tag="wght" stylevalue="100" />
-        </font>
-        <font weight="200" style="normal">Roboto-Regular.ttf
-          <axis tag="ital" stylevalue="0" />
-          <axis tag="wdth" stylevalue="100" />
-          <axis tag="wght" stylevalue="200" />
-        </font>
-        <font weight="300" style="normal">Roboto-Regular.ttf
-          <axis tag="ital" stylevalue="0" />
-          <axis tag="wdth" stylevalue="100" />
-          <axis tag="wght" stylevalue="300" />
-        </font>
-        <font weight="400" style="normal">RobotoStatic-Regular.ttf</font>
-        <font weight="500" style="normal">Roboto-Regular.ttf
-          <axis tag="ital" stylevalue="0" />
-          <axis tag="wdth" stylevalue="100" />
-          <axis tag="wght" stylevalue="500" />
-        </font>
-        <font weight="600" style="normal">Roboto-Regular.ttf
-          <axis tag="ital" stylevalue="0" />
-          <axis tag="wdth" stylevalue="100" />
-          <axis tag="wght" stylevalue="600" />
-        </font>
-        <font weight="700" style="normal">Roboto-Regular.ttf
-          <axis tag="ital" stylevalue="0" />
-          <axis tag="wdth" stylevalue="100" />
-          <axis tag="wght" stylevalue="700" />
-        </font>
-        <font weight="800" style="normal">Roboto-Regular.ttf
-          <axis tag="ital" stylevalue="0" />
-          <axis tag="wdth" stylevalue="100" />
-          <axis tag="wght" stylevalue="800" />
-        </font>
-        <font weight="900" style="normal">Roboto-Regular.ttf
-          <axis tag="ital" stylevalue="0" />
-          <axis tag="wdth" stylevalue="100" />
-          <axis tag="wght" stylevalue="900" />
-        </font>
-        <font weight="100" style="italic">Roboto-Regular.ttf
-          <axis tag="ital" stylevalue="1" />
-          <axis tag="wdth" stylevalue="100" />
-          <axis tag="wght" stylevalue="100" />
-        </font>
-        <font weight="200" style="italic">Roboto-Regular.ttf
-          <axis tag="ital" stylevalue="1" />
-          <axis tag="wdth" stylevalue="100" />
-          <axis tag="wght" stylevalue="200" />
-        </font>
-        <font weight="300" style="italic">Roboto-Regular.ttf
-          <axis tag="ital" stylevalue="1" />
-          <axis tag="wdth" stylevalue="100" />
-          <axis tag="wght" stylevalue="300" />
-        </font>
-        <font weight="400" style="italic">Roboto-Regular.ttf
-          <axis tag="ital" stylevalue="1" />
-          <axis tag="wdth" stylevalue="100" />
-          <axis tag="wght" stylevalue="400" />
-        </font>
-        <font weight="500" style="italic">Roboto-Regular.ttf
-          <axis tag="ital" stylevalue="1" />
-          <axis tag="wdth" stylevalue="100" />
-          <axis tag="wght" stylevalue="500" />
-        </font>
-        <font weight="600" style="italic">Roboto-Regular.ttf
-          <axis tag="ital" stylevalue="1" />
-          <axis tag="wdth" stylevalue="100" />
-          <axis tag="wght" stylevalue="600" />
-        </font>
-        <font weight="700" style="italic">Roboto-Regular.ttf
-          <axis tag="ital" stylevalue="1" />
-          <axis tag="wdth" stylevalue="100" />
-          <axis tag="wght" stylevalue="700" />
-        </font>
-        <font weight="800" style="italic">Roboto-Regular.ttf
-          <axis tag="ital" stylevalue="1" />
-          <axis tag="wdth" stylevalue="100" />
-          <axis tag="wght" stylevalue="800" />
-        </font>
-        <font weight="900" style="italic">Roboto-Regular.ttf
-          <axis tag="ital" stylevalue="1" />
-          <axis tag="wdth" stylevalue="100" />
-          <axis tag="wght" stylevalue="900" />
         </font>
    </family>
 
@@ -116,95 +105,8 @@
     <alias name="verdana" to="sans-serif" />
 
     <family name="sans-serif-condensed">
-      <font weight="100" style="normal">Roboto-Regular.ttf
-        <axis tag="ital" stylevalue="0" />
+      <font supportedAxes="wght,ital">Roboto-Regular.ttf
         <axis tag="wdth" stylevalue="75" />
-        <axis tag="wght" stylevalue="100" />
-      </font>
-      <font weight="200" style="normal">Roboto-Regular.ttf
-        <axis tag="ital" stylevalue="0" />
-        <axis tag="wdth" stylevalue="75" />
-        <axis tag="wght" stylevalue="200" />
-      </font>
-      <font weight="300" style="normal">Roboto-Regular.ttf
-        <axis tag="ital" stylevalue="0" />
-        <axis tag="wdth" stylevalue="75" />
-        <axis tag="wght" stylevalue="300" />
-      </font>
-      <font weight="400" style="normal">Roboto-Regular.ttf
-        <axis tag="ital" stylevalue="0" />
-        <axis tag="wdth" stylevalue="75" />
-        <axis tag="wght" stylevalue="400" />
-      </font>
-      <font weight="500" style="normal">Roboto-Regular.ttf
-        <axis tag="ital" stylevalue="0" />
-        <axis tag="wdth" stylevalue="75" />
-        <axis tag="wght" stylevalue="500" />
-      </font>
-      <font weight="600" style="normal">Roboto-Regular.ttf
-        <axis tag="ital" stylevalue="0" />
-        <axis tag="wdth" stylevalue="75" />
-        <axis tag="wght" stylevalue="600" />
-      </font>
-      <font weight="700" style="normal">Roboto-Regular.ttf
-        <axis tag="ital" stylevalue="0" />
-        <axis tag="wdth" stylevalue="75" />
-        <axis tag="wght" stylevalue="700" />
-      </font>
-      <font weight="800" style="normal">Roboto-Regular.ttf
-        <axis tag="ital" stylevalue="0" />
-        <axis tag="wdth" stylevalue="75" />
-        <axis tag="wght" stylevalue="800" />
-      </font>
-      <font weight="900" style="normal">Roboto-Regular.ttf
-        <axis tag="ital" stylevalue="0" />
-        <axis tag="wdth" stylevalue="75" />
-        <axis tag="wght" stylevalue="900" />
-      </font>
-      <font weight="100" style="italic">Roboto-Regular.ttf
-        <axis tag="ital" stylevalue="1" />
-        <axis tag="wdth" stylevalue="75" />
-        <axis tag="wght" stylevalue="100" />
-      </font>
-      <font weight="200" style="italic">Roboto-Regular.ttf
-        <axis tag="ital" stylevalue="1" />
-        <axis tag="wdth" stylevalue="75" />
-        <axis tag="wght" stylevalue="200" />
-      </font>
-      <font weight="300" style="italic">Roboto-Regular.ttf
-        <axis tag="ital" stylevalue="1" />
-        <axis tag="wdth" stylevalue="75" />
-        <axis tag="wght" stylevalue="300" />
-      </font>
-      <font weight="400" style="italic">Roboto-Regular.ttf
-        <axis tag="ital" stylevalue="1" />
-        <axis tag="wdth" stylevalue="75" />
-        <axis tag="wght" stylevalue="400" />
-      </font>
-      <font weight="500" style="italic">Roboto-Regular.ttf
-        <axis tag="ital" stylevalue="1" />
-        <axis tag="wdth" stylevalue="75" />
-        <axis tag="wght" stylevalue="500" />
-      </font>
-      <font weight="600" style="italic">Roboto-Regular.ttf
-        <axis tag="ital" stylevalue="1" />
-        <axis tag="wdth" stylevalue="75" />
-        <axis tag="wght" stylevalue="600" />
-      </font>
-      <font weight="700" style="italic">Roboto-Regular.ttf
-        <axis tag="ital" stylevalue="1" />
-        <axis tag="wdth" stylevalue="75" />
-        <axis tag="wght" stylevalue="700" />
-      </font>
-      <font weight="800" style="italic">Roboto-Regular.ttf
-        <axis tag="ital" stylevalue="1" />
-        <axis tag="wdth" stylevalue="75" />
-        <axis tag="wght" stylevalue="800" />
-      </font>
-      <font weight="900" style="italic">Roboto-Regular.ttf
-        <axis tag="ital" stylevalue="1" />
-        <axis tag="wdth" stylevalue="75" />
-        <axis tag="wght" stylevalue="900" />
       </font>
     </family>
     <alias name="sans-serif-condensed-light" to="sans-serif-condensed" weight="300" />
@@ -243,12 +145,7 @@
     </family>
 
     <family name="cursive">
-      <font weight="400" style="normal">DancingScript-Regular.ttf
-        <axis tag="wght" stylevalue="400" />
-      </font>
-      <font weight="700" style="normal">DancingScript-Regular.ttf
-        <axis tag="wght" stylevalue="700" />
-      </font>
+      <font supportedAxes="wght">DancingScript-Regular.ttf</font>
     </family>
 
     <family name="sans-serif-smallcaps">
@@ -266,95 +163,8 @@
     <alias name="source-sans-pro-semi-bold" to="source-sans-pro" weight="600"/>
 
     <family name="roboto-flex">
-        <font weight="100" style="normal">RobotoFlex-Regular.ttf
-          <axis tag="slnt" stylevalue="0" />
+        <font supportedAxes="wght">RobotoFlex-Regular.ttf
           <axis tag="wdth" stylevalue="100" />
-          <axis tag="wght" stylevalue="100" />
-        </font>
-        <font weight="200" style="normal">RobotoFlex-Regular.ttf
-          <axis tag="slnt" stylevalue="0" />
-          <axis tag="wdth" stylevalue="100" />
-          <axis tag="wght" stylevalue="200" />
-        </font>
-        <font weight="300" style="normal">RobotoFlex-Regular.ttf
-          <axis tag="slnt" stylevalue="0" />
-          <axis tag="wdth" stylevalue="100" />
-          <axis tag="wght" stylevalue="300" />
-        </font>
-        <font weight="400" style="normal">RobotoFlex-Regular.ttf
-          <axis tag="slnt" stylevalue="0" />
-          <axis tag="wdth" stylevalue="100" />
-          <axis tag="wght" stylevalue="400" />
-        </font>
-        <font weight="500" style="normal">RobotoFlex-Regular.ttf
-          <axis tag="slnt" stylevalue="0" />
-          <axis tag="wdth" stylevalue="100" />
-          <axis tag="wght" stylevalue="500" />
-        </font>
-        <font weight="600" style="normal">RobotoFlex-Regular.ttf
-          <axis tag="slnt" stylevalue="0" />
-          <axis tag="wdth" stylevalue="100" />
-          <axis tag="wght" stylevalue="600" />
-        </font>
-        <font weight="700" style="normal">RobotoFlex-Regular.ttf
-          <axis tag="slnt" stylevalue="0" />
-          <axis tag="wdth" stylevalue="100" />
-          <axis tag="wght" stylevalue="700" />
-        </font>
-        <font weight="800" style="normal">RobotoFlex-Regular.ttf
-          <axis tag="slnt" stylevalue="0" />
-          <axis tag="wdth" stylevalue="100" />
-          <axis tag="wght" stylevalue="800" />
-        </font>
-        <font weight="900" style="normal">RobotoFlex-Regular.ttf
-          <axis tag="slnt" stylevalue="0" />
-          <axis tag="wdth" stylevalue="100" />
-          <axis tag="wght" stylevalue="900" />
-        </font>
-        <font weight="100" style="italic">RobotoFlex-Regular.ttf
-          <axis tag="slnt" stylevalue="-10" />
-          <axis tag="wdth" stylevalue="100" />
-          <axis tag="wght" stylevalue="100" />
-        </font>
-        <font weight="200" style="italic">RobotoFlex-Regular.ttf
-          <axis tag="slnt" stylevalue="-10" />
-          <axis tag="wdth" stylevalue="100" />
-          <axis tag="wght" stylevalue="200" />
-        </font>
-        <font weight="300" style="italic">RobotoFlex-Regular.ttf
-          <axis tag="slnt" stylevalue="-10" />
-          <axis tag="wdth" stylevalue="100" />
-          <axis tag="wght" stylevalue="300" />
-        </font>
-        <font weight="400" style="italic">RobotoFlex-Regular.ttf
-          <axis tag="slnt" stylevalue="-10" />
-          <axis tag="wdth" stylevalue="100" />
-          <axis tag="wght" stylevalue="400" />
-        </font>
-        <font weight="500" style="italic">RobotoFlex-Regular.ttf
-          <axis tag="slnt" stylevalue="-10" />
-          <axis tag="wdth" stylevalue="100" />
-          <axis tag="wght" stylevalue="500" />
-        </font>
-        <font weight="600" style="italic">RobotoFlex-Regular.ttf
-          <axis tag="slnt" stylevalue="-10" />
-          <axis tag="wdth" stylevalue="100" />
-          <axis tag="wght" stylevalue="600" />
-        </font>
-        <font weight="700" style="italic">RobotoFlex-Regular.ttf
-          <axis tag="slnt" stylevalue="-10" />
-          <axis tag="wdth" stylevalue="100" />
-          <axis tag="wght" stylevalue="700" />
-        </font>
-        <font weight="800" style="italic">RobotoFlex-Regular.ttf
-          <axis tag="slnt" stylevalue="-10" />
-          <axis tag="wdth" stylevalue="100" />
-          <axis tag="wght" stylevalue="800" />
-        </font>
-        <font weight="900" style="italic">RobotoFlex-Regular.ttf
-          <axis tag="slnt" stylevalue="-10" />
-          <axis tag="wdth" stylevalue="100" />
-          <axis tag="wght" stylevalue="900" />
         </font>
     </family>
 
@@ -372,37 +182,11 @@
         <font weight="700" style="normal">NotoNaskhArabicUI-Bold.ttf</font>
     </family>
     <family lang="und-Ethi">
-        <font weight="400" style="normal" postScriptName="NotoSansEthiopic-Regular">
+        <font postScriptName="NotoSansEthiopic-Regular" supportedAxes="wght">
             NotoSansEthiopic-VF.ttf
-            <axis tag="wght" stylevalue="400"/>
         </font>
-        <font weight="500" style="normal" postScriptName="NotoSansEthiopic-Regular">
-            NotoSansEthiopic-VF.ttf
-            <axis tag="wght" stylevalue="500"/>
-        </font>
-        <font weight="600" style="normal" postScriptName="NotoSansEthiopic-Regular">
-            NotoSansEthiopic-VF.ttf
-            <axis tag="wght" stylevalue="600"/>
-        </font>
-        <font weight="700" style="normal" postScriptName="NotoSansEthiopic-Regular">
-            NotoSansEthiopic-VF.ttf
-            <axis tag="wght" stylevalue="700"/>
-        </font>
-        <font weight="400" style="normal" fallbackFor="serif"
-              postScriptName="NotoSerifEthiopic-Regular">NotoSerifEthiopic-VF.ttf
-            <axis tag="wght" stylevalue="400"/>
-        </font>
-        <font weight="500" style="normal" fallbackFor="serif"
-              postScriptName="NotoSerifEthiopic-Regular">NotoSerifEthiopic-VF.ttf
-            <axis tag="wght" stylevalue="500"/>
-        </font>
-        <font weight="600" style="normal" fallbackFor="serif"
-              postScriptName="NotoSerifEthiopic-Regular">NotoSerifEthiopic-VF.ttf
-            <axis tag="wght" stylevalue="600"/>
-        </font>
-        <font weight="700" style="normal" fallbackFor="serif"
-              postScriptName="NotoSerifEthiopic-Regular">NotoSerifEthiopic-VF.ttf
-            <axis tag="wght" stylevalue="700"/>
+        <font fallbackFor="serif" postScriptName="NotoSerifEthiopic-Regular" supportedAxes="wght">
+            NotoSerifEthiopic-VF.ttf
         </font>
     </family>
     <family lang="und-Hebr">
@@ -429,123 +213,32 @@
         <font weight="700" style="normal">NotoSansThaiUI-Bold.ttf</font>
     </family>
     <family lang="und-Armn">
-        <font weight="400" style="normal" postScriptName="NotoSansArmenian-Regular">
+        <font postScriptName="NotoSansArmenian-Regular" supportedAxes="wght">
             NotoSansArmenian-VF.ttf
-            <axis tag="wght" stylevalue="400"/>
         </font>
-        <font weight="500" style="normal" postScriptName="NotoSansArmenian-Regular">
-            NotoSansArmenian-VF.ttf
-            <axis tag="wght" stylevalue="500"/>
-        </font>
-        <font weight="600" style="normal" postScriptName="NotoSansArmenian-Regular">
-            NotoSansArmenian-VF.ttf
-            <axis tag="wght" stylevalue="600"/>
-        </font>
-        <font weight="700" style="normal" postScriptName="NotoSansArmenian-Regular">
-            NotoSansArmenian-VF.ttf
-            <axis tag="wght" stylevalue="700"/>
-        </font>
-        <font weight="400" style="normal" fallbackFor="serif"
-              postScriptName="NotoSerifArmenian-Regular">NotoSerifArmenian-VF.ttf
-            <axis tag="wght" stylevalue="400"/>
-        </font>
-        <font weight="500" style="normal" fallbackFor="serif"
-              postScriptName="NotoSerifArmenian-Regular">NotoSerifArmenian-VF.ttf
-            <axis tag="wght" stylevalue="500"/>
-        </font>
-        <font weight="600" style="normal" fallbackFor="serif"
-              postScriptName="NotoSerifArmenian-Regular">NotoSerifArmenian-VF.ttf
-            <axis tag="wght" stylevalue="600"/>
-        </font>
-        <font weight="700" style="normal" fallbackFor="serif"
-              postScriptName="NotoSerifArmenian-Regular">NotoSerifArmenian-VF.ttf
-            <axis tag="wght" stylevalue="700"/>
+        <font fallbackFor="serif" postScriptName="NotoSerifArmenian-Regular" supportedAxes="wght">
+            NotoSerifArmenian-VF.ttf
         </font>
     </family>
     <family lang="und-Geor,und-Geok">
-        <font weight="400" style="normal" postScriptName="NotoSansGeorgian-Regular">
+        <font postScriptName="NotoSansGeorgian-Regular" supportedAxes="wght">
             NotoSansGeorgian-VF.ttf
-            <axis tag="wght" stylevalue="400"/>
         </font>
-        <font weight="500" style="normal" postScriptName="NotoSansGeorgian-Regular">
-            NotoSansGeorgian-VF.ttf
-            <axis tag="wght" stylevalue="500"/>
-        </font>
-        <font weight="600" style="normal" postScriptName="NotoSansGeorgian-Regular">
-            NotoSansGeorgian-VF.ttf
-            <axis tag="wght" stylevalue="600"/>
-        </font>
-        <font weight="700" style="normal" postScriptName="NotoSansGeorgian-Regular">
-            NotoSansGeorgian-VF.ttf
-            <axis tag="wght" stylevalue="700"/>
-        </font>
-        <font weight="400" style="normal" fallbackFor="serif"
-              postScriptName="NotoSerifGeorgian-Regular">NotoSerifGeorgian-VF.ttf
-            <axis tag="wght" stylevalue="400"/>
-        </font>
-        <font weight="500" style="normal" fallbackFor="serif"
-              postScriptName="NotoSerifGeorgian-Regular">NotoSerifGeorgian-VF.ttf
-            <axis tag="wght" stylevalue="500"/>
-        </font>
-        <font weight="600" style="normal" fallbackFor="serif"
-              postScriptName="NotoSerifGeorgian-Regular">NotoSerifGeorgian-VF.ttf
-            <axis tag="wght" stylevalue="600"/>
-        </font>
-        <font weight="700" style="normal" fallbackFor="serif"
-              postScriptName="NotoSerifGeorgian-Regular">NotoSerifGeorgian-VF.ttf
-            <axis tag="wght" stylevalue="700"/>
+        <font fallbackFor="serif" postScriptName="NotoSerifGeorgian-Regular" supportedAxes="wght">
+            NotoSerifGeorgian-VF.ttf
         </font>
     </family>
     <family lang="und-Deva" variant="elegant">
-        <font weight="400" style="normal" postScriptName="NotoSansDevanagari-Regular">
+        <font postScriptName="NotoSansDevanagari-Regular" supportedAxes="wght">
             NotoSansDevanagari-VF.ttf
-            <axis tag="wght" stylevalue="400"/>
         </font>
-        <font weight="500" style="normal" postScriptName="NotoSansDevanagari-Regular">
-            NotoSansDevanagari-VF.ttf
-            <axis tag="wght" stylevalue="500"/>
-        </font>
-        <font weight="600" style="normal" postScriptName="NotoSansDevanagari-Regular">
-            NotoSansDevanagari-VF.ttf
-            <axis tag="wght" stylevalue="600"/>
-        </font>
-        <font weight="700" style="normal" postScriptName="NotoSansDevanagari-Regular">
-            NotoSansDevanagari-VF.ttf
-            <axis tag="wght" stylevalue="700"/>
-        </font>
-        <font weight="400" style="normal" fallbackFor="serif"
-              postScriptName="NotoSerifDevanagari-Regular">NotoSerifDevanagari-VF.ttf
-            <axis tag="wght" stylevalue="400"/>
-        </font>
-        <font weight="500" style="normal" fallbackFor="serif"
-              postScriptName="NotoSerifDevanagari-Regular">NotoSerifDevanagari-VF.ttf
-            <axis tag="wght" stylevalue="500"/>
-        </font>
-        <font weight="600" style="normal" fallbackFor="serif"
-              postScriptName="NotoSerifDevanagari-Regular">NotoSerifDevanagari-VF.ttf
-            <axis tag="wght" stylevalue="600"/>
-        </font>
-        <font weight="700" style="normal" fallbackFor="serif"
-              postScriptName="NotoSerifDevanagari-Regular">NotoSerifDevanagari-VF.ttf
-            <axis tag="wght" stylevalue="700"/>
+        <font fallbackFor="serif" postScriptName="NotoSerifDevanagari-Regular" supportedAxes="wght">
+            NotoSerifDevanagari-VF.ttf
         </font>
     </family>
     <family lang="und-Deva" variant="compact">
-        <font weight="400" style="normal" postScriptName="NotoSansDevanagariUI-Regular">
+        <font postScriptName="NotoSansDevanagariUI-Regular" supportedAxes="wght">
             NotoSansDevanagariUI-VF.ttf
-            <axis tag="wght" stylevalue="400"/>
-        </font>
-        <font weight="500" style="normal" postScriptName="NotoSansDevanagariUI-Regular">
-            NotoSansDevanagariUI-VF.ttf
-            <axis tag="wght" stylevalue="500"/>
-        </font>
-        <font weight="600" style="normal" postScriptName="NotoSansDevanagariUI-Regular">
-            NotoSansDevanagariUI-VF.ttf
-            <axis tag="wght" stylevalue="600"/>
-        </font>
-        <font weight="700" style="normal" postScriptName="NotoSansDevanagariUI-Regular">
-            NotoSansDevanagariUI-VF.ttf
-            <axis tag="wght" stylevalue="700"/>
         </font>
     </family>
 
@@ -557,21 +250,9 @@
             NotoSansGujarati-Regular.ttf
         </font>
         <font weight="700" style="normal">NotoSansGujarati-Bold.ttf</font>
-        <font weight="400" style="normal" fallbackFor="serif"
-              postScriptName="NotoSerifGujarati-Regular">NotoSerifGujarati-VF.ttf
-            <axis tag="wght" stylevalue="400"/>
-        </font>
-        <font weight="500" style="normal" fallbackFor="serif"
-              postScriptName="NotoSerifGujarati-Regular">NotoSerifGujarati-VF.ttf
-            <axis tag="wght" stylevalue="500"/>
-        </font>
-        <font weight="600" style="normal" fallbackFor="serif"
-              postScriptName="NotoSerifGujarati-Regular">NotoSerifGujarati-VF.ttf
-            <axis tag="wght" stylevalue="600"/>
-        </font>
-        <font weight="700" style="normal" fallbackFor="serif"
-              postScriptName="NotoSerifGujarati-Regular">NotoSerifGujarati-VF.ttf
-            <axis tag="wght" stylevalue="700"/>
+        <font style="normal" fallbackFor="serif" postScriptName="NotoSerifGujarati-Regular"
+          supportedAxes="wght">
+          NotoSerifGujarati-VF.ttf
         </font>
     </family>
     <family lang="und-Gujr" variant="compact">
@@ -581,315 +262,81 @@
         <font weight="700" style="normal">NotoSansGujaratiUI-Bold.ttf</font>
     </family>
     <family lang="und-Guru" variant="elegant">
-        <font weight="400" style="normal" postScriptName="NotoSansGurmukhi-Regular">
+        <font postScriptName="NotoSansGurmukhi-Regular" supportedAxes="wght">
             NotoSansGurmukhi-VF.ttf
-            <axis tag="wght" stylevalue="400"/>
         </font>
-        <font weight="500" style="normal" postScriptName="NotoSansGurmukhi-Regular">
-            NotoSansGurmukhi-VF.ttf
-            <axis tag="wght" stylevalue="500"/>
-        </font>
-        <font weight="600" style="normal" postScriptName="NotoSansGurmukhi-Regular">
-            NotoSansGurmukhi-VF.ttf
-            <axis tag="wght" stylevalue="600"/>
-        </font>
-        <font weight="700" style="normal" postScriptName="NotoSansGurmukhi-Regular">
-            NotoSansGurmukhi-VF.ttf
-            <axis tag="wght" stylevalue="700"/>
-        </font>
-        <font weight="400" style="normal" fallbackFor="serif"
-              postScriptName="NotoSerifGurmukhi-Regular">NotoSerifGurmukhi-VF.ttf
-            <axis tag="wght" stylevalue="400"/>
-        </font>
-        <font weight="500" style="normal" fallbackFor="serif"
-              postScriptName="NotoSerifGurmukhi-Regular">NotoSerifGurmukhi-VF.ttf
-            <axis tag="wght" stylevalue="500"/>
-        </font>
-        <font weight="600" style="normal" fallbackFor="serif"
-              postScriptName="NotoSerifGurmukhi-Regular">NotoSerifGurmukhi-VF.ttf
-            <axis tag="wght" stylevalue="600"/>
-        </font>
-        <font weight="700" style="normal" fallbackFor="serif"
-              postScriptName="NotoSerifGurmukhi-Regular">NotoSerifGurmukhi-VF.ttf
-            <axis tag="wght" stylevalue="700"/>
+        <font fallbackFor="serif" postScriptName="NotoSerifGurmukhi-Regular" supportedAxes="wght">
+            NotoSerifGurmukhi-VF.ttf
         </font>
     </family>
     <family lang="und-Guru" variant="compact">
-        <font weight="400" style="normal" postScriptName="NotoSansGurmukhiUI-Regular">
+        <font postScriptName="NotoSansGurmukhiUI-Regular" supportedAxes="wght">
             NotoSansGurmukhiUI-VF.ttf
-            <axis tag="wght" stylevalue="400"/>
-        </font>
-        <font weight="500" style="normal" postScriptName="NotoSansGurmukhiUI-Regular">
-            NotoSansGurmukhiUI-VF.ttf
-            <axis tag="wght" stylevalue="500"/>
-        </font>
-        <font weight="600" style="normal" postScriptName="NotoSansGurmukhiUI-Regular">
-            NotoSansGurmukhiUI-VF.ttf
-            <axis tag="wght" stylevalue="600"/>
-        </font>
-        <font weight="700" style="normal" postScriptName="NotoSansGurmukhiUI-Regular">
-            NotoSansGurmukhiUI-VF.ttf
-            <axis tag="wght" stylevalue="700"/>
         </font>
     </family>
     <family lang="und-Taml" variant="elegant">
-        <font weight="400" style="normal" postScriptName="NotoSansTamil-Regular">
+        <font postScriptName="NotoSansTamil-Regular" supportedAxes="wght">
             NotoSansTamil-VF.ttf
-            <axis tag="wght" stylevalue="400"/>
         </font>
-        <font weight="500" style="normal" postScriptName="NotoSansTamil-Regular">
-            NotoSansTamil-VF.ttf
-            <axis tag="wght" stylevalue="500"/>
-        </font>
-        <font weight="600" style="normal" postScriptName="NotoSansTamil-Regular">
-            NotoSansTamil-VF.ttf
-            <axis tag="wght" stylevalue="600"/>
-        </font>
-        <font weight="700" style="normal" postScriptName="NotoSansTamil-Regular">
-            NotoSansTamil-VF.ttf
-            <axis tag="wght" stylevalue="700"/>
-        </font>
-        <font weight="400" style="normal" fallbackFor="serif"
-              postScriptName="NotoSerifTamil-Regular">NotoSerifTamil-VF.ttf
-            <axis tag="wght" stylevalue="400"/>
-        </font>
-        <font weight="500" style="normal" fallbackFor="serif"
-              postScriptName="NotoSerifTamil-Regular">NotoSerifTamil-VF.ttf
-            <axis tag="wght" stylevalue="500"/>
-        </font>
-        <font weight="600" style="normal" fallbackFor="serif"
-              postScriptName="NotoSerifTamil-Regular">NotoSerifTamil-VF.ttf
-            <axis tag="wght" stylevalue="600"/>
-        </font>
-        <font weight="700" style="normal" fallbackFor="serif"
-              postScriptName="NotoSerifTamil-Regular">NotoSerifTamil-VF.ttf
-            <axis tag="wght" stylevalue="700"/>
+        <font fallbackFor="serif" postScriptName="NotoSerifTamil-Regular" supportedAxes="wght">
+            NotoSerifTamil-VF.ttf
         </font>
     </family>
     <family lang="und-Taml" variant="compact">
-        <font weight="400" style="normal" postScriptName="NotoSansTamilUI-Regular">
+        <font postScriptName="NotoSansTamilUI-Regular" supportedAxes="wght">
             NotoSansTamilUI-VF.ttf
-            <axis tag="wght" stylevalue="400"/>
-        </font>
-        <font weight="500" style="normal" postScriptName="NotoSansTamilUI-Regular">
-            NotoSansTamilUI-VF.ttf
-            <axis tag="wght" stylevalue="500"/>
-        </font>
-        <font weight="600" style="normal" postScriptName="NotoSansTamilUI-Regular">
-            NotoSansTamilUI-VF.ttf
-            <axis tag="wght" stylevalue="600"/>
-        </font>
-        <font weight="700" style="normal" postScriptName="NotoSansTamilUI-Regular">
-            NotoSansTamilUI-VF.ttf
-            <axis tag="wght" stylevalue="700"/>
         </font>
     </family>
     <family lang="und-Mlym" variant="elegant">
-        <font weight="400" style="normal" postScriptName="NotoSansMalayalam-Regular">
+        <font postScriptName="NotoSansMalayalam-Regular" supportedAxes="wght">
             NotoSansMalayalam-VF.ttf
-            <axis tag="wght" stylevalue="400"/>
         </font>
-        <font weight="500" style="normal" postScriptName="NotoSansMalayalam-Regular">
-            NotoSansMalayalam-VF.ttf
-            <axis tag="wght" stylevalue="500"/>
-        </font>
-        <font weight="600" style="normal" postScriptName="NotoSansMalayalam-Regular">
-            NotoSansMalayalam-VF.ttf
-            <axis tag="wght" stylevalue="600"/>
-        </font>
-        <font weight="700" style="normal" postScriptName="NotoSansMalayalam-Regular">
-            NotoSansMalayalam-VF.ttf
-            <axis tag="wght" stylevalue="700"/>
-        </font>
-        <font weight="400" style="normal" fallbackFor="serif"
-              postScriptName="NotoSerifMalayalam-Regular">NotoSerifMalayalam-VF.ttf
-            <axis tag="wght" stylevalue="400"/>
-        </font>
-        <font weight="500" style="normal" fallbackFor="serif"
-              postScriptName="NotoSerifMalayalam-Regular">NotoSerifMalayalam-VF.ttf
-            <axis tag="wght" stylevalue="500"/>
-        </font>
-        <font weight="600" style="normal" fallbackFor="serif"
-              postScriptName="NotoSerifMalayalam-Regular">NotoSerifMalayalam-VF.ttf
-            <axis tag="wght" stylevalue="600"/>
-        </font>
-        <font weight="700" style="normal" fallbackFor="serif"
-              postScriptName="NotoSerifMalayalam-Regular">NotoSerifMalayalam-VF.ttf
-            <axis tag="wght" stylevalue="700"/>
+        <font fallbackFor="serif" postScriptName="NotoSerifMalayalam-Regular" supportedAxes="wght">
+            NotoSerifMalayalam-VF.ttf
         </font>
     </family>
     <family lang="und-Mlym" variant="compact">
-        <font weight="400" style="normal" postScriptName="NotoSansMalayalamUI-Regular">
+        <font postScriptName="NotoSansMalayalamUI-Regular" supportedAxes="wght">
             NotoSansMalayalamUI-VF.ttf
-            <axis tag="wght" stylevalue="400"/>
-        </font>
-        <font weight="500" style="normal" postScriptName="NotoSansMalayalamUI-Regular">
-            NotoSansMalayalamUI-VF.ttf
-            <axis tag="wght" stylevalue="500"/>
-        </font>
-        <font weight="600" style="normal" postScriptName="NotoSansMalayalamUI-Regular">
-            NotoSansMalayalamUI-VF.ttf
-            <axis tag="wght" stylevalue="600"/>
-        </font>
-        <font weight="700" style="normal" postScriptName="NotoSansMalayalamUI-Regular">
-            NotoSansMalayalamUI-VF.ttf
-            <axis tag="wght" stylevalue="700"/>
         </font>
     </family>
     <family lang="und-Beng" variant="elegant">
-        <font weight="400" style="normal" postScriptName="NotoSansBengali-Regular">
+        <font postScriptName="NotoSansBengali-Regular" supportedAxes="wght">
             NotoSansBengali-VF.ttf
-            <axis tag="wght" stylevalue="400"/>
         </font>
-        <font weight="500" style="normal" postScriptName="NotoSansBengali-Regular">
-            NotoSansBengali-VF.ttf
-            <axis tag="wght" stylevalue="500"/>
-        </font>
-        <font weight="600" style="normal" postScriptName="NotoSansBengali-Regular">
-            NotoSansBengali-VF.ttf
-            <axis tag="wght" stylevalue="600"/>
-        </font>
-        <font weight="700" style="normal" postScriptName="NotoSansBengali-Regular">
-            NotoSansBengali-VF.ttf
-            <axis tag="wght" stylevalue="700"/>
-        </font>
-        <font weight="400" style="normal" fallbackFor="serif"
-              postScriptName="NotoSerifBengali-Regular">NotoSerifBengali-VF.ttf
-            <axis tag="wght" stylevalue="400"/>
-        </font>
-        <font weight="500" style="normal" fallbackFor="serif"
-              postScriptName="NotoSerifBengali-Regular">NotoSerifBengali-VF.ttf
-            <axis tag="wght" stylevalue="500"/>
-        </font>
-        <font weight="600" style="normal" fallbackFor="serif"
-              postScriptName="NotoSerifBengali-Regular">NotoSerifBengali-VF.ttf
-            <axis tag="wght" stylevalue="600"/>
-        </font>
-        <font weight="700" style="normal" fallbackFor="serif"
-              postScriptName="NotoSerifBengali-Regular">NotoSerifBengali-VF.ttf
-            <axis tag="wght" stylevalue="700"/>
+        <font fallbackFor="serif" postScriptName="NotoSerifBengali-Regular">
+            NotoSerifBengali-VF.ttf
         </font>
     </family>
     <family lang="und-Beng" variant="compact">
-        <font weight="400" style="normal" postScriptName="NotoSansBengaliUI-Regular">
+        <font postScriptName="NotoSansBengaliUI-Regular" supportedAxes="wght">
             NotoSansBengaliUI-VF.ttf
-            <axis tag="wght" stylevalue="400"/>
-        </font>
-        <font weight="500" style="normal" postScriptName="NotoSansBengaliUI-Regular">
-            NotoSansBengaliUI-VF.ttf
-            <axis tag="wght" stylevalue="500"/>
-        </font>
-        <font weight="600" style="normal" postScriptName="NotoSansBengaliUI-Regular">
-            NotoSansBengaliUI-VF.ttf
-            <axis tag="wght" stylevalue="600"/>
-        </font>
-        <font weight="700" style="normal" postScriptName="NotoSansBengaliUI-Regular">
-            NotoSansBengaliUI-VF.ttf
-            <axis tag="wght" stylevalue="700"/>
         </font>
     </family>
     <family lang="und-Telu" variant="elegant">
-        <font weight="400" style="normal" postScriptName="NotoSansTelugu-Regular">
+        <font postScriptName="NotoSansTelugu-Regular" supportedAxes="wght">
             NotoSansTelugu-VF.ttf
-            <axis tag="wght" stylevalue="400"/>
         </font>
-        <font weight="500" style="normal" postScriptName="NotoSansTelugu-Regular">
-            NotoSansTelugu-VF.ttf
-            <axis tag="wght" stylevalue="500"/>
-        </font>
-        <font weight="600" style="normal" postScriptName="NotoSansTelugu-Regular">
-            NotoSansTelugu-VF.ttf
-            <axis tag="wght" stylevalue="600"/>
-        </font>
-        <font weight="700" style="normal" postScriptName="NotoSansTelugu-Regular">
-            NotoSansTelugu-VF.ttf
-            <axis tag="wght" stylevalue="700"/>
-        </font>
-        <font weight="400" style="normal" fallbackFor="serif"
-              postScriptName="NotoSerifTelugu-Regular">NotoSerifTelugu-VF.ttf
-            <axis tag="wght" stylevalue="400"/>
-        </font>
-        <font weight="500" style="normal" fallbackFor="serif"
-              postScriptName="NotoSerifTelugu-Regular">NotoSerifTelugu-VF.ttf
-            <axis tag="wght" stylevalue="500"/>
-        </font>
-        <font weight="600" style="normal" fallbackFor="serif"
-              postScriptName="NotoSerifTelugu-Regular">NotoSerifTelugu-VF.ttf
-            <axis tag="wght" stylevalue="600"/>
-        </font>
-        <font weight="700" style="normal" fallbackFor="serif"
-              postScriptName="NotoSerifTelugu-Regular">NotoSerifTelugu-VF.ttf
-            <axis tag="wght" stylevalue="700"/>
+        <font fallbackFor="serif" postScriptName="NotoSerifTelugu-Regular" supportedAxes="wght">
+            NotoSerifTelugu-VF.ttf
         </font>
     </family>
     <family lang="und-Telu" variant="compact">
-        <font weight="400" style="normal" postScriptName="NotoSansTeluguUI-Regular">
+        <font postScriptName="NotoSansTeluguUI-Regular" supportedAxes="wght">
             NotoSansTeluguUI-VF.ttf
-            <axis tag="wght" stylevalue="400"/>
-        </font>
-        <font weight="500" style="normal" postScriptName="NotoSansTeluguUI-Regular">
-            NotoSansTeluguUI-VF.ttf
-            <axis tag="wght" stylevalue="500"/>
-        </font>
-        <font weight="600" style="normal" postScriptName="NotoSansTeluguUI-Regular">
-            NotoSansTeluguUI-VF.ttf
-            <axis tag="wght" stylevalue="600"/>
-        </font>
-        <font weight="700" style="normal" postScriptName="NotoSansTeluguUI-Regular">
-            NotoSansTeluguUI-VF.ttf
-            <axis tag="wght" stylevalue="700"/>
         </font>
     </family>
     <family lang="und-Knda" variant="elegant">
-        <font weight="400" style="normal" postScriptName="NotoSansKannada-Regular">
+        <font postScriptName="NotoSansKannada-Regular" supportedAxes="wght">
             NotoSansKannada-VF.ttf
-            <axis tag="wght" stylevalue="400"/>
         </font>
-        <font weight="500" style="normal" postScriptName="NotoSansKannada-Regular">
-            NotoSansKannada-VF.ttf
-            <axis tag="wght" stylevalue="500"/>
-        </font>
-        <font weight="600" style="normal" postScriptName="NotoSansKannada-Regular">
-            NotoSansKannada-VF.ttf
-            <axis tag="wght" stylevalue="600"/>
-        </font>
-        <font weight="700" style="normal" postScriptName="NotoSansKannada-Regular">
-            NotoSansKannada-VF.ttf
-            <axis tag="wght" stylevalue="700"/>
-        </font>
-        <font weight="400" style="normal" fallbackFor="serif"
-              postScriptName="NotoSerifKannada-Regular">NotoSerifKannada-VF.ttf
-            <axis tag="wght" stylevalue="400"/>
-        </font>
-        <font weight="500" style="normal" fallbackFor="serif"
-              postScriptName="NotoSerifKannada-Regular">NotoSerifKannada-VF.ttf
-            <axis tag="wght" stylevalue="500"/>
-        </font>
-        <font weight="600" style="normal" fallbackFor="serif"
-              postScriptName="NotoSerifKannada-Regular">NotoSerifKannada-VF.ttf
-            <axis tag="wght" stylevalue="600"/>
-        </font>
-        <font weight="700" style="normal" fallbackFor="serif"
-              postScriptName="NotoSerifKannada-Regular">NotoSerifKannada-VF.ttf
-            <axis tag="wght" stylevalue="700"/>
+        <font fallbackFor="serif" postScriptName="NotoSerifKannada-Regular" supportedAxes="wght">
+            NotoSerifKannada-VF.ttf
         </font>
     </family>
     <family lang="und-Knda" variant="compact">
-        <font weight="400" style="normal" postScriptName="NotoSansKannadaUI-Regular">
+        <font postScriptName="NotoSansKannadaUI-Regular" supportedAxes="wght">
             NotoSansKannadaUI-VF.ttf
-            <axis tag="wght" stylevalue="400"/>
-        </font>
-        <font weight="500" style="normal" postScriptName="NotoSansKannadaUI-Regular">
-            NotoSansKannadaUI-VF.ttf
-            <axis tag="wght" stylevalue="500"/>
-        </font>
-        <font weight="600" style="normal" postScriptName="NotoSansKannadaUI-Regular">
-            NotoSansKannadaUI-VF.ttf
-            <axis tag="wght" stylevalue="600"/>
-        </font>
-        <font weight="700" style="normal" postScriptName="NotoSansKannadaUI-Regular">
-            NotoSansKannadaUI-VF.ttf
-            <axis tag="wght" stylevalue="700"/>
         </font>
     </family>
     <family lang="und-Orya" variant="elegant">
@@ -904,57 +351,19 @@
         <font weight="700" style="normal">NotoSansOriyaUI-Bold.ttf</font>
     </family>
     <family lang="und-Sinh" variant="elegant">
-        <font weight="400" style="normal" postScriptName="NotoSansSinhala-Regular">
+        <font postScriptName="NotoSansSinhala-Regular" supportedAxes="wght">
             NotoSansSinhala-VF.ttf
-            <axis tag="wght" stylevalue="400"/>
         </font>
-        <font weight="500" style="normal" postScriptName="NotoSansSinhala-Regular">
-            NotoSansSinhala-VF.ttf
-            <axis tag="wght" stylevalue="500"/>
-        </font>
-        <font weight="600" style="normal" postScriptName="NotoSansSinhala-Regular">
-            NotoSansSinhala-VF.ttf
-            <axis tag="wght" stylevalue="600"/>
-        </font>
-        <font weight="700" style="normal" postScriptName="NotoSansSinhala-Regular">
-            NotoSansSinhala-VF.ttf
-            <axis tag="wght" stylevalue="700"/>
-        </font>
-        <font weight="400" style="normal" fallbackFor="serif"
-              postScriptName="NotoSerifSinhala-Regular">NotoSerifSinhala-VF.ttf
-            <axis tag="wght" stylevalue="400"/>
-        </font>
-        <font weight="500" style="normal" fallbackFor="serif"
-              postScriptName="NotoSerifSinhala-Regular">NotoSerifSinhala-VF.ttf
-            <axis tag="wght" stylevalue="500"/>
-        </font>
-        <font weight="600" style="normal" fallbackFor="serif"
-              postScriptName="NotoSerifSinhala-Regular">NotoSerifSinhala-VF.ttf
-            <axis tag="wght" stylevalue="600"/>
-        </font>
-        <font weight="700" style="normal" fallbackFor="serif"
-              postScriptName="NotoSerifSinhala-Regular">NotoSerifSinhala-VF.ttf
-            <axis tag="wght" stylevalue="700"/>
+        <font fallbackFor="serif" postScriptName="NotoSerifSinhala-Regular">
+            NotoSerifSinhala-VF.ttf
         </font>
     </family>
     <family lang="und-Sinh" variant="compact">
-        <font weight="400" style="normal" postScriptName="NotoSansSinhalaUI-Regular">
+        <font postScriptName="NotoSansSinhalaUI-Regular" supportedAxes="wght">
             NotoSansSinhalaUI-VF.ttf
-            <axis tag="wght" stylevalue="400"/>
-        </font>
-        <font weight="500" style="normal" postScriptName="NotoSansSinhalaUI-Regular">
-            NotoSansSinhalaUI-VF.ttf
-            <axis tag="wght" stylevalue="500"/>
-        </font>
-        <font weight="600" style="normal" postScriptName="NotoSansSinhalaUI-Regular">
-            NotoSansSinhalaUI-VF.ttf
-            <axis tag="wght" stylevalue="600"/>
-        </font>
-        <font weight="700" style="normal" postScriptName="NotoSansSinhalaUI-Regular">
-            NotoSansSinhalaUI-VF.ttf
-            <axis tag="wght" stylevalue="700"/>
         </font>
     </family>
+    <!-- TODO: NotoSansKhmer uses non-standard wght value, so cannot use auto-adjustment. -->
     <family lang="und-Khmr" variant="elegant">
         <font weight="100" style="normal" postScriptName="NotoSansKhmer-Regular">
             NotoSansKhmer-VF.ttf
@@ -1051,21 +460,8 @@
         <font weight="400" style="normal">NotoSansAhom-Regular.otf</font>
     </family>
     <family lang="und-Adlm">
-        <font weight="400" style="normal" postScriptName="NotoSansAdlam-Regular">
+        <font postScriptName="NotoSansAdlam-Regular" supportedAxes="wght">
             NotoSansAdlam-VF.ttf
-            <axis tag="wght" stylevalue="400"/>
-        </font>
-        <font weight="500" style="normal" postScriptName="NotoSansAdlam-Regular">
-            NotoSansAdlam-VF.ttf
-            <axis tag="wght" stylevalue="500"/>
-        </font>
-        <font weight="600" style="normal" postScriptName="NotoSansAdlam-Regular">
-            NotoSansAdlam-VF.ttf
-            <axis tag="wght" stylevalue="600"/>
-        </font>
-        <font weight="700" style="normal" postScriptName="NotoSansAdlam-Regular">
-            NotoSansAdlam-VF.ttf
-            <axis tag="wght" stylevalue="700"/>
         </font>
     </family>
     <family lang="und-Avst">
@@ -1352,21 +748,8 @@
         </font>
     </family>
     <family lang="und-Tibt">
-        <font weight="400" style="normal" postScriptName="NotoSerifTibetan-Regular">
+        <font postScriptName="NotoSerifTibetan-Regular" supportedAxes="wght">
             NotoSerifTibetan-VF.ttf
-            <axis tag="wght" stylevalue="400"/>
-        </font>
-        <font weight="500" style="normal" postScriptName="NotoSerifTibetan-Regular">
-            NotoSerifTibetan-VF.ttf
-            <axis tag="wght" stylevalue="500"/>
-        </font>
-        <font weight="600" style="normal" postScriptName="NotoSerifTibetan-Regular">
-            NotoSerifTibetan-VF.ttf
-            <axis tag="wght" stylevalue="600"/>
-        </font>
-        <font weight="700" style="normal" postScriptName="NotoSerifTibetan-Regular">
-            NotoSerifTibetan-VF.ttf
-            <axis tag="wght" stylevalue="700"/>
         </font>
     </family>
     <family lang="und-Tfng">
@@ -1406,6 +789,16 @@
         </font>
         <font weight="400" style="normal" index="0" fallbackFor="serif"
               postScriptName="NotoSerifCJKjp-Regular">NotoSerifCJK-Regular.ttc
+        </font>
+    </family>
+    <family lang="ja">
+        <font weight="400" style="normal">
+            NotoSerifHentaigana-EL.ttf
+            <axis tag="wght" stylevalue="400"/>
+        </font>
+        <font weight="700" style="normal">
+            NotoSerifHentaigana-EL.ttf
+          <axis tag="wght" stylevalue="700"/>
         </font>
     </family>
     <family lang="ko">
@@ -1534,93 +927,28 @@
         <font weight="400" style="normal">NotoSerifDogra-Regular.ttf</font>
     </family>
     <family lang="und-Medf">
-        <font weight="400" style="normal" postScriptName="NotoSansMedefaidrin-Regular">
+        <font postScriptName="NotoSansMedefaidrin-Regular" supportedAxes="wght">
             NotoSansMedefaidrin-VF.ttf
-            <axis tag="wght" stylevalue="400"/>
-        </font>
-        <font weight="500" style="normal" postScriptName="NotoSansMedefaidrin-Regular">
-            NotoSansMedefaidrin-VF.ttf
-            <axis tag="wght" stylevalue="500"/>
-        </font>
-        <font weight="600" style="normal" postScriptName="NotoSansMedefaidrin-Regular">
-            NotoSansMedefaidrin-VF.ttf
-            <axis tag="wght" stylevalue="600"/>
-        </font>
-        <font weight="700" style="normal" postScriptName="NotoSansMedefaidrin-Regular">
-            NotoSansMedefaidrin-VF.ttf
-            <axis tag="wght" stylevalue="700"/>
         </font>
     </family>
-    <family lang="und-Soyo">
-        <font weight="400" style="normal" postScriptName="NotoSansSoyombo-Regular">
+    <family lang="und-Soyo" supportedAxes="wght">
+        <font postScriptName="NotoSansSoyombo-Regular">
             NotoSansSoyombo-VF.ttf
-            <axis tag="wght" stylevalue="400"/>
-        </font>
-        <font weight="500" style="normal" postScriptName="NotoSansSoyombo-Regular">
-            NotoSansSoyombo-VF.ttf
-            <axis tag="wght" stylevalue="500"/>
-        </font>
-        <font weight="600" style="normal" postScriptName="NotoSansSoyombo-Regular">
-            NotoSansSoyombo-VF.ttf
-            <axis tag="wght" stylevalue="600"/>
-        </font>
-        <font weight="700" style="normal" postScriptName="NotoSansSoyombo-Regular">
-            NotoSansSoyombo-VF.ttf
-            <axis tag="wght" stylevalue="700"/>
         </font>
     </family>
-    <family lang="und-Takr">
-        <font weight="400" style="normal" postScriptName="NotoSansTakri-Regular">
+    <family lang="und-Takr" supportedAxes="wght">
+        <font postScriptName="NotoSansTakri-Regular">
             NotoSansTakri-VF.ttf
-            <axis tag="wght" stylevalue="400"/>
-        </font>
-        <font weight="500" style="normal" postScriptName="NotoSansTakri-Regular">
-            NotoSansTakri-VF.ttf
-            <axis tag="wght" stylevalue="500"/>
-        </font>
-        <font weight="600" style="normal" postScriptName="NotoSansTakri-Regular">
-            NotoSansTakri-VF.ttf
-            <axis tag="wght" stylevalue="600"/>
-        </font>
-        <font weight="700" style="normal" postScriptName="NotoSansTakri-Regular">
-            NotoSansTakri-VF.ttf
-            <axis tag="wght" stylevalue="700"/>
         </font>
     </family>
-    <family lang="und-Hmnp">
-        <font weight="400" style="normal" postScriptName="NotoSerifHmongNyiakeng-Regular">
+    <family lang="und-Hmnp" supportedAxes="wght">
+        <font postScriptName="NotoSerifHmongNyiakeng-Regular">
             NotoSerifNyiakengPuachueHmong-VF.ttf
-            <axis tag="wght" stylevalue="400"/>
-        </font>
-        <font weight="500" style="normal" postScriptName="NotoSerifHmongNyiakeng-Regular">
-            NotoSerifNyiakengPuachueHmong-VF.ttf
-            <axis tag="wght" stylevalue="500"/>
-        </font>
-        <font weight="600" style="normal" postScriptName="NotoSerifHmongNyiakeng-Regular">
-            NotoSerifNyiakengPuachueHmong-VF.ttf
-            <axis tag="wght" stylevalue="600"/>
-        </font>
-        <font weight="700" style="normal" postScriptName="NotoSerifHmongNyiakeng-Regular">
-            NotoSerifNyiakengPuachueHmong-VF.ttf
-            <axis tag="wght" stylevalue="700"/>
         </font>
     </family>
-    <family lang="und-Yezi">
-        <font weight="400" style="normal" postScriptName="NotoSerifYezidi-Regular">
+    <family lang="und-Yezi" supportedAxes="wght">
+        <font postScriptName="NotoSerifYezidi-Regular">
             NotoSerifYezidi-VF.ttf
-            <axis tag="wght" stylevalue="400"/>
-        </font>
-        <font weight="500" style="normal" postScriptName="NotoSerifYezidi-Regular">
-            NotoSerifYezidi-VF.ttf
-            <axis tag="wght" stylevalue="500"/>
-        </font>
-        <font weight="600" style="normal" postScriptName="NotoSerifYezidi-Regular">
-            NotoSerifYezidi-VF.ttf
-            <axis tag="wght" stylevalue="600"/>
-        </font>
-        <font weight="700" style="normal" postScriptName="NotoSerifYezidi-Regular">
-            NotoSerifYezidi-VF.ttf
-            <axis tag="wght" stylevalue="700"/>
         </font>
     </family>
 </familyset>

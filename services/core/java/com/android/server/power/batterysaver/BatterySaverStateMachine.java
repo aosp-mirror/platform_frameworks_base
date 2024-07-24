@@ -44,6 +44,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.os.BackgroundThread;
 import com.android.server.EventLogTags;
 import com.android.server.power.BatterySaverStateMachineProto;
+import com.android.server.power.PowerManagerService;
 
 import java.io.PrintWriter;
 import java.time.Duration;
@@ -166,6 +167,9 @@ public class BatterySaverStateMachine {
     /** Config flag to track if battery saver's sticky behaviour is disabled. */
     private final boolean mBatterySaverStickyBehaviourDisabled;
 
+    /** Config flag to track if "Battery Saver turned off" notification is enabled. */
+    private final boolean mBatterySaverTurnedOffNotificationEnabled;
+
     /**
      * Whether or not to end sticky battery saver upon reaching a level specified by
      * {@link #mSettingBatterySaverStickyAutoDisableThreshold}.
@@ -249,8 +253,28 @@ public class BatterySaverStateMachine {
 
         mBatterySaverStickyBehaviourDisabled = mContext.getResources().getBoolean(
                 com.android.internal.R.bool.config_batterySaverStickyBehaviourDisabled);
+        mBatterySaverTurnedOffNotificationEnabled = mContext.getResources().getBoolean(
+                com.android.internal.R.bool.config_batterySaverTurnedOffNotificationEnabled);
         mDynamicPowerSavingsDefaultDisableThreshold = mContext.getResources().getInteger(
                 com.android.internal.R.integer.config_dynamicPowerSavingsDefaultDisableThreshold);
+    }
+
+    /**
+     * Called by {@link PowerManagerService} on system ready, *with no lock held*.
+     */
+    public void systemReady() {
+        mBatterySaverController.systemReady();
+        getBatterySaverPolicy().systemReady();
+    }
+
+    /** @return Battery saver controller. */
+    public BatterySaverController getBatterySaverController() {
+        return mBatterySaverController;
+    }
+
+    /** @return Battery saver policy. */
+    public BatterySaverPolicy getBatterySaverPolicy() {
+        return mBatterySaverController.getBatterySaverPolicy();
     }
 
     /** @return true if the automatic percentage based mode should be used */
@@ -839,6 +863,9 @@ public class BatterySaverStateMachine {
 
     @VisibleForTesting
     void triggerStickyDisabledNotification() {
+        if (!mBatterySaverTurnedOffNotificationEnabled) {
+            return;
+        }
         // The current lock is the PowerManager lock, which sits very low in the service lock
         // hierarchy. We shouldn't call out to NotificationManager with the PowerManager lock.
         runOnBgThread(() -> {
@@ -937,8 +964,7 @@ public class BatterySaverStateMachine {
             ipw.print(mBatterySaverController.isAdaptiveEnabled());
             if (mBatterySaverController.isAdaptiveEnabled()) {
                 ipw.print(" (advertise=");
-                ipw.print(
-                        mBatterySaverController.getBatterySaverPolicy().shouldAdvertiseIsEnabled());
+                ipw.print(getBatterySaverPolicy().shouldAdvertiseIsEnabled());
                 ipw.print(")");
             }
             ipw.decreaseIndent();
@@ -979,6 +1005,8 @@ public class BatterySaverStateMachine {
             ipw.println(mSettingBatterySaverTriggerThreshold);
             ipw.print("mBatterySaverStickyBehaviourDisabled=");
             ipw.println(mBatterySaverStickyBehaviourDisabled);
+            ipw.print("mBatterySaverTurnedOffNotificationEnabled=");
+            ipw.println(mBatterySaverTurnedOffNotificationEnabled);
 
             ipw.print("mDynamicPowerSavingsDefaultDisableThreshold=");
             ipw.println(mDynamicPowerSavingsDefaultDisableThreshold);
@@ -1005,7 +1033,7 @@ public class BatterySaverStateMachine {
             proto.write(BatterySaverStateMachineProto.IS_ADAPTIVE_ENABLED,
                     mBatterySaverController.isAdaptiveEnabled());
             proto.write(BatterySaverStateMachineProto.SHOULD_ADVERTISE_IS_ENABLED,
-                    mBatterySaverController.getBatterySaverPolicy().shouldAdvertiseIsEnabled());
+                    getBatterySaverPolicy().shouldAdvertiseIsEnabled());
 
             proto.write(BatterySaverStateMachineProto.BOOT_COMPLETED, mBootCompleted);
             proto.write(BatterySaverStateMachineProto.SETTINGS_LOADED, mSettingsLoaded);

@@ -1113,6 +1113,10 @@ class SettingsProtoDumpUtil {
         dumpSetting(s, p,
                 Settings.Global.SMART_SUGGESTIONS_IN_NOTIFICATIONS_FLAGS,
                 GlobalSettingsProto.Notification.SMART_SUGGESTIONS_IN_NOTIFICATIONS_FLAGS);
+        dumpSetting(s, p,
+                Settings.Global.DISABLE_SCREEN_SHARE_PROTECTIONS_FOR_APPS_AND_NOTIFICATIONS,
+                GlobalSettingsProto.Notification
+                        .DISABLE_SCREEN_SHARE_PROTECTIONS_FOR_APPS_AND_NOTIFICATIONS);
         p.end(notificationToken);
 
         dumpSetting(s, p,
@@ -1813,6 +1817,9 @@ class SettingsProtoDumpUtil {
                 Settings.Secure.ACCESSIBILITY_BUTTON_TARGETS,
                 SecureSettingsProto.Accessibility.BUTTON_TARGETS);
         dumpSetting(s, p,
+                Settings.Secure.ACCESSIBILITY_QS_TARGETS,
+                SecureSettingsProto.Accessibility.QS_TARGETS);
+        dumpSetting(s, p,
                 Settings.Secure.ACCESSIBILITY_MAGNIFICATION_CAPABILITY,
                 SecureSettingsProto.Accessibility.ACCESSIBILITY_MAGNIFICATION_CAPABILITY);
         dumpSetting(s, p,
@@ -1842,9 +1849,25 @@ class SettingsProtoDumpUtil {
                 SecureSettingsProto.Accessibility
                         .ACCESSIBILITY_MAGNIFICATION_ALWAYS_ON_ENABLED);
         dumpSetting(s, p,
+                Settings.Secure.ACCESSIBILITY_FORCE_INVERT_COLOR_ENABLED,
+                SecureSettingsProto.Accessibility
+                        .ACCESSIBILITY_FORCE_INVERT_COLOR_ENABLED);
+        dumpSetting(s, p,
                 Settings.Secure.ACCESSIBILITY_MAGNIFICATION_JOYSTICK_ENABLED,
                 SecureSettingsProto.Accessibility
                         .ACCESSIBILITY_MAGNIFICATION_JOYSTICK_ENABLED);
+        dumpSetting(s, p,
+                Settings.Secure.ACCESSIBILITY_MAGNIFICATION_TWO_FINGER_TRIPLE_TAP_ENABLED,
+                SecureSettingsProto.Accessibility
+                        .ACCESSIBILITY_MAGNIFICATION_TWO_FINGER_TRIPLE_TAP_ENABLED);
+        dumpSetting(s, p,
+                Settings.Secure.ACCESSIBILITY_PINCH_TO_ZOOM_ANYWHERE_ENABLED,
+                SecureSettingsProto.Accessibility
+                        .ACCESSIBILITY_PINCH_TO_ZOOM_ANYWHERE_ENABLED);
+        dumpSetting(s, p,
+                Settings.Secure.ACCESSIBILITY_SINGLE_FINGER_PANNING_ENABLED,
+                SecureSettingsProto.Accessibility
+                        .ACCESSIBILITY_SINGLE_FINGER_PANNING_ENABLED);
         dumpSetting(s, p,
                 Settings.Secure.HEARING_AID_RINGTONE_ROUTING,
                 SecureSettingsProto.Accessibility.HEARING_AID_RINGTONE_ROUTING);
@@ -1855,8 +1878,8 @@ class SettingsProtoDumpUtil {
                 Settings.Secure.HEARING_AID_MEDIA_ROUTING,
                 SecureSettingsProto.Accessibility.HEARING_AID_MEDIA_ROUTING);
         dumpSetting(s, p,
-                Settings.Secure.HEARING_AID_SYSTEM_SOUNDS_ROUTING,
-                SecureSettingsProto.Accessibility.HEARING_AID_SYSTEM_SOUNDS_ROUTING);
+                Settings.Secure.HEARING_AID_NOTIFICATION_ROUTING,
+                SecureSettingsProto.Accessibility.HEARING_AID_NOTIFICATION_ROUTING);
         dumpSetting(s, p,
                 Settings.Secure.ACCESSIBILITY_FONT_SCALING_HAS_BEEN_CHANGED,
                 SecureSettingsProto.Accessibility.ACCESSIBILITY_FONT_SCALING_HAS_BEEN_CHANGED);
@@ -1932,6 +1955,9 @@ class SettingsProtoDumpUtil {
         dumpSetting(s, p,
                 Settings.Secure.SEARCH_LONG_PRESS_HOME_ENABLED,
                 SecureSettingsProto.Assist.SEARCH_LONG_PRESS_HOME_ENABLED);
+        dumpSetting(s, p,
+                Settings.Secure.VISUAL_QUERY_ACCESSIBILITY_DETECTION_ENABLED,
+                SecureSettingsProto.Assist.VISUAL_QUERY_ACCESSIBILITY_DETECTION_ENABLED);
         p.end(assistToken);
 
         final long assistHandlesToken = p.start(SecureSettingsProto.ASSIST_HANDLES);
@@ -2126,6 +2152,15 @@ class SettingsProtoDumpUtil {
         dumpSetting(s, p,
                 Settings.Secure.ENHANCED_VOICE_PRIVACY_ENABLED,
                 SecureSettingsProto.ENHANCED_VOICE_PRIVACY_ENABLED);
+
+        final long evenDimmerToken = p.start(SecureSettingsProto.EVEN_DIMMER);
+        dumpSetting(s, p,
+                Settings.Secure.EVEN_DIMMER_ACTIVATED,
+                SecureSettingsProto.EvenDimmer.EVEN_DIMMER_ACTIVATED);
+        dumpSetting(s, p,
+                Settings.Secure.EVEN_DIMMER_MIN_NITS,
+                SecureSettingsProto.EvenDimmer.EVEN_DIMMER_MIN_NITS);
+        p.end(evenDimmerToken);
 
         final long gestureToken = p.start(SecureSettingsProto.GESTURE);
         dumpSetting(s, p,
@@ -2577,6 +2612,9 @@ class SettingsProtoDumpUtil {
         p.end(soundsToken);
 
         dumpSetting(s, p,
+                Settings.Secure.STYLUS_POINTER_ICON_ENABLED,
+                SecureSettingsProto.STYLUS_POINTER_ICON_ENABLED);
+        dumpSetting(s, p,
                 Settings.Secure.SWIPE_BOTTOM_TO_NOTIFICATION_ENABLED,
                 SecureSettingsProto.SWIPE_BOTTOM_TO_NOTIFICATION_ENABLED);
         dumpSetting(s, p,
@@ -2982,6 +3020,9 @@ class SettingsProtoDumpUtil {
         dumpSetting(s, p,
                 Settings.System.TOUCHPAD_TAP_TO_CLICK,
                 SystemSettingsProto.Touchpad.TAP_TO_CLICK);
+        dumpSetting(s, p,
+                Settings.System.TOUCHPAD_TAP_DRAGGING,
+                SystemSettingsProto.Touchpad.TAP_DRAGGING);
         p.end(touchpadToken);
 
         dumpSetting(s, p,
@@ -3065,7 +3106,7 @@ class SettingsProtoDumpUtil {
                 Settings.System.APPLY_RAMPING_RINGER,
                 SystemSettingsProto.APPLY_RAMPING_RINGER);
 
-        // Please insert new settings using the same order as in SecureSettingsProto.
+        // Please insert new settings using the same order as in SystemSettingsProto.
 
         // The rest of the settings were moved to Settings.Secure, and are thus excluded here since
         // they're deprecated from Settings.System.
@@ -3103,8 +3144,8 @@ class SettingsProtoDumpUtil {
         // The rest of the settings were moved to Settings.Secure, and are thus excluded here since
         // they're deprecated from Settings.System.
 
-        // Please insert new settings using the same order as in SecureSettingsProto.
+        // Please insert new settings using the same order as in SystemSettingsProto.
         p.end(token);
-        // Please insert new settings using the same order as in SecureSettingsProto.
+        // Please insert new settings using the same order as in SystemSettingsProto.
     }
 }

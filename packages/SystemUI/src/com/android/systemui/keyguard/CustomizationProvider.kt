@@ -30,6 +30,7 @@ import android.net.Uri
 import android.os.Binder
 import android.os.Bundle
 import android.util.Log
+import com.android.app.tracing.coroutines.runBlocking
 import com.android.systemui.SystemUIAppComponentFactoryBase
 import com.android.systemui.SystemUIAppComponentFactoryBase.ContextAvailableCallback
 import com.android.systemui.dagger.qualifiers.Main
@@ -38,7 +39,6 @@ import com.android.systemui.keyguard.ui.preview.KeyguardRemotePreviewManager
 import com.android.systemui.shared.customization.data.content.CustomizationProviderContract as Contract
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.runBlocking
 
 class CustomizationProvider :
     ContentProvider(), SystemUIAppComponentFactoryBase.ContextInitializer {
@@ -132,7 +132,7 @@ class CustomizationProvider :
             throw UnsupportedOperationException()
         }
 
-        return runBlocking(mainDispatcher) { insertSelection(values) }
+        return runBlocking("$TAG#insert", mainDispatcher) { insertSelection(values) }
     }
 
     override fun query(
@@ -142,7 +142,7 @@ class CustomizationProvider :
         selectionArgs: Array<out String>?,
         sortOrder: String?,
     ): Cursor? {
-        return runBlocking(mainDispatcher) {
+        return runBlocking("$TAG#query", mainDispatcher) {
             when (uriMatcher.match(uri)) {
                 MATCH_CODE_ALL_AFFORDANCES -> queryAffordances()
                 MATCH_CODE_ALL_SLOTS -> querySlots()
@@ -172,7 +172,7 @@ class CustomizationProvider :
             throw UnsupportedOperationException()
         }
 
-        return runBlocking(mainDispatcher) { deleteSelection(uri, selectionArgs) }
+        return runBlocking("$TAG#delete", mainDispatcher) { deleteSelection(uri, selectionArgs) }
     }
 
     override fun call(method: String, arg: String?, extras: Bundle?): Bundle? {

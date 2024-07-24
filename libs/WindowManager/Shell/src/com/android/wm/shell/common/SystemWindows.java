@@ -49,6 +49,7 @@ import android.view.WindowManager;
 import android.view.WindowlessWindowManager;
 import android.view.inputmethod.ImeTracker;
 import android.window.ClientWindowFrames;
+import android.window.InputTransferToken;
 
 import com.android.internal.os.IResultReceiver;
 
@@ -196,14 +197,14 @@ public class SystemWindows {
     /**
      * Gets a token associated with the view that can be used to grant the view focus.
      */
-    public IBinder getFocusGrantToken(View view) {
+    public InputTransferToken getFocusGrantToken(View view) {
         SurfaceControlViewHost root = mViewRoots.get(view);
         if (root == null) {
             Slog.e(TAG, "Couldn't get focus grant token since view does not exist in "
                     + "SystemWindow:" + view);
             return null;
         }
-        return root.getFocusGrantToken();
+        return root.getInputTransferToken();
     }
 
     private class PerDisplay {
@@ -322,13 +323,12 @@ public class SystemWindows {
         }
 
         @Override
-        public void remove(android.view.IWindow window) throws RemoteException {
-            super.remove(window);
+        public void remove(IBinder clientToken) throws RemoteException {
+            super.remove(clientToken);
             synchronized(this) {
-                IBinder token = window.asBinder();
-                new SurfaceControl.Transaction().remove(mLeashForWindow.get(token))
+                new SurfaceControl.Transaction().remove(mLeashForWindow.get(clientToken))
                     .apply();
-                mLeashForWindow.remove(token);
+                mLeashForWindow.remove(clientToken);
             }
         }
 

@@ -27,14 +27,15 @@ import android.hardware.biometrics.AuthenticateOptions;
 import android.hardware.biometrics.BiometricAuthenticator;
 import android.hardware.biometrics.BiometricConstants;
 import android.hardware.biometrics.BiometricManager;
-import android.hardware.biometrics.BiometricOverlayConstants;
+import android.hardware.biometrics.BiometricRequestConstants;
 import android.os.IBinder;
 import android.os.RemoteException;
-import android.security.KeyStore;
+import android.security.KeyStoreAuthorization;
 import android.util.EventLog;
 import android.util.Slog;
 
 import com.android.server.biometrics.BiometricsProto;
+import com.android.server.biometrics.Flags;
 import com.android.server.biometrics.Utils;
 import com.android.server.biometrics.log.BiometricContext;
 import com.android.server.biometrics.log.BiometricLogger;
@@ -116,7 +117,24 @@ public abstract class AuthenticationClient<T, O extends AuthenticateOptions>
 
     @LockoutTracker.LockoutMode
     public int handleFailedAttempt(int userId) {
-        return LockoutTracker.LOCKOUT_NONE;
+        if (Flags.deHidl()) {
+            if (mLockoutTracker != null) {
+                mLockoutTracker.addFailedAttemptForUser(getTargetUserId());
+            }
+            @LockoutTracker.LockoutMode final int lockoutMode =
+                    getLockoutTracker().getLockoutModeForUser(userId);
+            final PerformanceTracker performanceTracker =
+                    PerformanceTracker.getInstanceForSensorId(getSensorId());
+            if (lockoutMode == LockoutTracker.LOCKOUT_PERMANENT) {
+                performanceTracker.incrementPermanentLockoutForUser(userId);
+            } else if (lockoutMode == LockoutTracker.LOCKOUT_TIMED) {
+                performanceTracker.incrementTimedLockoutForUser(userId);
+            }
+
+            return lockoutMode;
+        } else {
+            return LockoutTracker.LOCKOUT_NONE;
+        }
     }
 
     protected long getStartTimeMs() {
@@ -237,27 +255,23 @@ public abstract class AuthenticationClient<T, O extends AuthenticateOptions>
 
             // For BP, BiometricService will add the authToken to Keystore.
             if (!isBiometricPrompt() && mIsStrongBiometric) {
-                final int result = KeyStore.getInstance().addAuthToken(byteToken);
-                if (result != KeyStore.NO_ERROR) {
+                final int result = KeyStoreAuthorization.getInstance().addAuthToken(byteToken);
+                if (result != 0) {
                     Slog.d(TAG, "Error adding auth token : " + result);
                 } else {
-                    Slog.d(TAG, "addAuthToken: " + result);
+                    Slog.d(TAG, "addAuthToken succeeded");
                 }
             } else {
                 Slog.d(TAG, "Skipping addAuthToken");
             }
             try {
-                if (listener != null) {
-                    if (!mIsRestricted) {
-                        listener.onAuthenticationSucceeded(getSensorId(), identifier, byteToken,
-                                getTargetUserId(), mIsStrongBiometric);
-                    } else {
-                        listener.onAuthenticationSucceeded(getSensorId(), null /* identifier */,
-                                byteToken,
-                                getTargetUserId(), mIsStrongBiometric);
-                    }
+                if (!mIsRestricted) {
+                    listener.onAuthenticationSucceeded(getSensorId(), identifier, byteToken,
+                            getTargetUserId(), mIsStrongBiometric);
                 } else {
-                    Slog.e(TAG, "Received successful auth, but client was not listening");
+                    listener.onAuthenticationSucceeded(getSensorId(), null /* identifier */,
+                            byteToken,
+                            getTargetUserId(), mIsStrongBiometric);
                 }
             } catch (RemoteException e) {
                 Slog.e(TAG, "Unable to notify listener", e);
@@ -283,11 +297,7 @@ public abstract class AuthenticationClient<T, O extends AuthenticateOptions>
                 }
 
                 try {
-                    if (listener != null) {
-                        listener.onAuthenticationFailed(getSensorId());
-                    } else {
-                        Slog.e(TAG, "Received failed auth, but client was not listening");
-                    }
+                    listener.onAuthenticationFailed(getSensorId());
                 } catch (RemoteException e) {
                     Slog.e(TAG, "Unable to notify listener", e);
                     mCallback.onClientFinished(this, false);
@@ -412,19 +422,19 @@ public abstract class AuthenticationClient<T, O extends AuthenticateOptions>
         return mLockoutTracker;
     }
 
-    protected int getShowOverlayReason() {
+    protected int getRequestReason() {
         if (isKeyguard()) {
-            return BiometricOverlayConstants.REASON_AUTH_KEYGUARD;
+            return BiometricRequestConstants.REASON_AUTH_KEYGUARD;
         } else if (isBiometricPrompt()) {
             // BP reason always takes precedent over settings, since callers from within
             // settings can always invoke BP.
-            return BiometricOverlayConstants.REASON_AUTH_BP;
+            return BiometricRequestConstants.REASON_AUTH_BP;
         } else if (isSettings()) {
             // This is pretty much only for FingerprintManager#authenticate usage from
             // FingerprintSettings.
-            return BiometricOverlayConstants.REASON_AUTH_SETTINGS;
+            return BiometricRequestConstants.REASON_AUTH_SETTINGS;
         } else {
-            return BiometricOverlayConstants.REASON_AUTH_OTHER;
+            return BiometricRequestConstants.REASON_AUTH_OTHER;
         }
     }
 }

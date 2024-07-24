@@ -59,10 +59,6 @@ public class AndroidProtectedConfirmation {
 
     /**
      * Requests keystore call into the confirmationui HAL to display a prompt.
-     * @deprecated Android Protected Confirmation had a low adoption rate among Android device
-     *             makers and developers alike. Given the lack of devices supporting the
-     *             feature, it is deprecated. Developers can use auth-bound Keystore keys
-     *             as a partial replacement.
      *
      * @param listener the binder to use for callbacks.
      * @param promptText the prompt to display.
@@ -72,7 +68,6 @@ public class AndroidProtectedConfirmation {
      * @return one of the {@code CONFIRMATIONUI_*} constants, for
      * example {@code KeyStore.CONFIRMATIONUI_OK}.
      */
-    @Deprecated
     public int presentConfirmationPrompt(IConfirmationCallback listener, String promptText,
                                          byte[] extraData, String locale, int uiOptionsAsFlags) {
         try {
@@ -89,16 +84,11 @@ public class AndroidProtectedConfirmation {
 
     /**
      * Requests keystore call into the confirmationui HAL to cancel displaying a prompt.
-     * @deprecated Android Protected Confirmation had a low adoption rate among Android device
-     *             makers and developers alike. Given the lack of devices supporting the
-     *             feature, it is deprecated. Developers can use auth-bound Keystore keys
-     *             as a partial replacement.
      *
      * @param listener the binder passed to the {@link #presentConfirmationPrompt} method.
      * @return one of the {@code CONFIRMATIONUI_*} constants, for
      * example {@code KeyStore.CONFIRMATIONUI_OK}.
      */
-    @Deprecated
     public int cancelConfirmationPrompt(IConfirmationCallback listener) {
         try {
             getService().cancelPrompt(listener);
@@ -113,14 +103,9 @@ public class AndroidProtectedConfirmation {
 
     /**
      * Requests keystore to check if the confirmationui HAL is available.
-     * @deprecated Android Protected Confirmation had a low adoption rate among Android device
-     *             makers and developers alike. Given the lack of devices supporting the
-     *             feature, it is deprecated. Developers can use auth-bound Keystore keys
-     *             as a partial replacement.
      *
      * @return whether the confirmationUI HAL is available.
      */
-    @Deprecated
     public boolean isConfirmationPromptSupported() {
         try {
             return getService().isSupported();

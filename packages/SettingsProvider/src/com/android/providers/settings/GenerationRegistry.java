@@ -45,7 +45,8 @@ final class GenerationRegistry {
 
     private static final boolean DEBUG = false;
 
-    private final Object mLock;
+    // This lock is not the same lock used in SettingsProvider and SettingsState
+    private final Object mLock = new Object();
 
     // Key -> backingStore mapping
     @GuardedBy("mLock")
@@ -74,8 +75,7 @@ final class GenerationRegistry {
 
     private final int mMaxNumBackingStore;
 
-    GenerationRegistry(Object lock, int maxNumUsers) {
-        mLock = lock;
+    GenerationRegistry(int maxNumUsers) {
         // Add some buffer to maxNumUsers to accommodate corner cases when the actual number of
         // users in the system exceeds the limit
         maxNumUsers = maxNumUsers + 2;
@@ -308,11 +308,8 @@ final class GenerationRegistry {
                 final long token = proto.start(GenerationRegistryProto.BACKING_STORES);
                 final int key = mKeyToBackingStoreMap.keyAt(i);
                 proto.write(BackingStoreProto.KEY, key);
-                try {
-                    proto.write(BackingStoreProto.BACKING_STORE_SIZE,
-                            mKeyToBackingStoreMap.valueAt(i).size());
-                } catch (IOException ignore) {
-                }
+                proto.write(BackingStoreProto.BACKING_STORE_SIZE,
+                        mKeyToBackingStoreMap.valueAt(i).size());
                 proto.write(BackingStoreProto.NUM_CACHED_ENTRIES,
                         mKeyToIndexMapMap.get(key).size());
                 final ArrayMap<String, Integer> indexMap = mKeyToIndexMapMap.get(key);
@@ -357,10 +354,7 @@ final class GenerationRegistry {
                 pw.print("_Backing store for type:"); pw.print(SettingsState.settingTypeToString(
                         SettingsState.getTypeFromKey(key)));
                 pw.print(" user:"); pw.print(SettingsState.getUserIdFromKey(key));
-                try {
-                    pw.print(" size:" + mKeyToBackingStoreMap.valueAt(i).size());
-                } catch (IOException ignore) {
-                }
+                pw.print(" size:" + mKeyToBackingStoreMap.valueAt(i).size());
                 pw.println(" cachedEntries:" + mKeyToIndexMapMap.get(key).size());
                 final ArrayMap<String, Integer> indexMap = mKeyToIndexMapMap.get(key);
                 final MemoryIntArray backingStore = getBackingStoreLocked(key,

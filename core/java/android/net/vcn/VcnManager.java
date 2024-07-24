@@ -20,10 +20,12 @@ import static java.util.Objects.requireNonNull;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.RequiresFeature;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.net.LinkProperties;
 import android.net.NetworkCapabilities;
 import android.os.Binder;
@@ -69,8 +71,13 @@ import java.util.concurrent.Executor;
  * tasks. In Safe Mode, the system will allow underlying cellular networks to be used as default.
  * Additionally, during Safe Mode, the VCN will continue to retry the connections, and will
  * automatically exit Safe Mode if all active tunnels connect successfully.
+ *
+ * <p>Apps targeting Android 15 or newer should check the existence of {@link
+ * PackageManager#FEATURE_TELEPHONY_SUBSCRIPTION} before querying the service. If the feature is
+ * absent, {@link Context#getSystemService} may return null.
  */
 @SystemService(Context.VCN_MANAGEMENT_SERVICE)
+@RequiresFeature(PackageManager.FEATURE_TELEPHONY_SUBSCRIPTION)
 public class VcnManager {
     @NonNull private static final String TAG = VcnManager.class.getSimpleName();
 
@@ -115,6 +122,22 @@ public class VcnManager {
     @NonNull
     public static final String VCN_NETWORK_SELECTION_IPSEC_PACKET_LOSS_PERCENT_THRESHOLD_KEY =
             "vcn_network_selection_ipsec_packet_loss_percent_threshold";
+
+    /**
+     * Key for detecting unusually large increases in IPsec packet sequence numbers.
+     *
+     * <p>If the sequence number increases by more than this value within a second, it may indicate
+     * an intentional leap on the server's downlink. To avoid false positives, the packet loss
+     * detector will suppress loss reporting.
+     *
+     * <p>By default, there's no maximum limit enforced, prioritizing detection of lossy networks.
+     * To reduce false positives, consider setting an appropriate maximum threshold.
+     *
+     * @hide
+     */
+    @NonNull
+    public static final String VCN_NETWORK_SELECTION_MAX_SEQ_NUM_INCREASE_PER_SECOND_KEY =
+            "vcn_network_selection_max_seq_num_increase_per_second";
 
     /**
      * Key for the list of timeouts in minute to stop penalizing an underlying network candidate
@@ -173,6 +196,7 @@ public class VcnManager {
                 VCN_NETWORK_SELECTION_WIFI_EXIT_RSSI_THRESHOLD_KEY,
                 VCN_NETWORK_SELECTION_POLL_IPSEC_STATE_INTERVAL_SECONDS_KEY,
                 VCN_NETWORK_SELECTION_IPSEC_PACKET_LOSS_PERCENT_THRESHOLD_KEY,
+                VCN_NETWORK_SELECTION_MAX_SEQ_NUM_INCREASE_PER_SECOND_KEY,
                 VCN_NETWORK_SELECTION_PENALTY_TIMEOUT_MINUTES_LIST_KEY,
                 VCN_RESTRICTED_TRANSPORTS_INT_ARRAY_KEY,
                 VCN_SAFE_MODE_TIMEOUT_SECONDS_KEY,

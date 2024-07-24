@@ -36,6 +36,7 @@ android_app {
         "services.backup",
         "services.core",
         "services.net",
+        "service-permission.stubs.system_server",
     ],
 
     libs: ["android.net.ipsec.ike.stubs.system"],
@@ -66,5 +67,7 @@ android_robolectric_test {
     instrumentation_for: "BackupFrameworksServicesLib",
 
     upstream: true,
+
+    strict_mode: false,
 
 }

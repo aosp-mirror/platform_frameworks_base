@@ -19,6 +19,7 @@ package android.database;
 /**
  * An exception that indicates there was an error with SQL parsing or execution.
  */
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
 public class SQLException extends RuntimeException {
     public SQLException() {
     }

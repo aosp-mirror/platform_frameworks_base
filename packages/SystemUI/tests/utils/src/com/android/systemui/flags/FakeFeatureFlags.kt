@@ -16,9 +16,22 @@
 
 package com.android.systemui.flags
 
+import dagger.Binds
+import dagger.Module
+import dagger.Provides
 import java.io.PrintWriter
 
-class FakeFeatureFlags : FeatureFlags {
+class FakeFeatureFlagsClassic : FakeFeatureFlags()
+
+@Deprecated(
+    message = "Use FakeFeatureFlagsClassic instead.",
+    replaceWith =
+        ReplaceWith(
+            "FakeFeatureFlagsClassic",
+            "com.android.systemui.flags.FakeFeatureFlagsClassic",
+        ),
+)
+open class FakeFeatureFlags : FeatureFlagsClassic {
     private val booleanFlags = mutableMapOf<String, Boolean>()
     private val stringFlags = mutableMapOf<String, String>()
     private val intFlags = mutableMapOf<String, Int>()
@@ -66,12 +79,11 @@ class FakeFeatureFlags : FeatureFlags {
      * Set the given flag's default value if no other value has been set.
      *
      * REMINDER: You should always test your code with your flag in both configurations, so
-     *  generally you should be setting a particular value.  This method should be reserved for
-     *  situations where the flag needs to be read (e.g. in the class constructor), but its
-     *  value shouldn't affect the actual test cases. In those cases, it's mildly safer to use
-     *  this method than to hard-code `false` or `true` because then at least if you're wrong,
-     *  and the flag value *does* matter, you'll notice when the flag is flipped and tests
-     *  start failing.
+     * generally you should be setting a particular value. This method should be reserved for
+     * situations where the flag needs to be read (e.g. in the class constructor), but its value
+     * shouldn't affect the actual test cases. In those cases, it's mildly safer to use this method
+     * than to hard-code `false` or `true` because then at least if you're wrong, and the flag value
+     * *does* matter, you'll notice when the flag is flipped and tests start failing.
      */
     fun setDefault(flag: BooleanFlag) = booleanFlags.putIfAbsent(flag.name, flag.default)
 
@@ -79,12 +91,11 @@ class FakeFeatureFlags : FeatureFlags {
      * Set the given flag's default value if no other value has been set.
      *
      * REMINDER: You should always test your code with your flag in both configurations, so
-     *  generally you should be setting a particular value.  This method should be reserved for
-     *  situations where the flag needs to be read (e.g. in the class constructor), but its
-     *  value shouldn't affect the actual test cases. In those cases, it's mildly safer to use
-     *  this method than to hard-code `false` or `true` because then at least if you're wrong,
-     *  and the flag value *does* matter, you'll notice when the flag is flipped and tests
-     *  start failing.
+     * generally you should be setting a particular value. This method should be reserved for
+     * situations where the flag needs to be read (e.g. in the class constructor), but its value
+     * shouldn't affect the actual test cases. In those cases, it's mildly safer to use this method
+     * than to hard-code `false` or `true` because then at least if you're wrong, and the flag value
+     * *does* matter, you'll notice when the flag is flipped and tests start failing.
      */
     fun setDefault(flag: SysPropBooleanFlag) = booleanFlags.putIfAbsent(flag.name, flag.default)
 
@@ -123,10 +134,8 @@ class FakeFeatureFlags : FeatureFlags {
     }
 
     override fun removeListener(listener: FlagListenable.Listener) {
-        listenerflagNames.remove(listener)?.let {
-                flagNames -> flagNames.forEach {
-                        id -> flagListeners[id]?.remove(listener)
-                }
+        listenerflagNames.remove(listener)?.let { flagNames ->
+            flagNames.forEach { id -> flagListeners[id]?.remove(listener) }
         }
     }
 
@@ -151,5 +160,22 @@ class FakeFeatureFlags : FeatureFlags {
     private fun requireIntValue(flagName: String): Int {
         return intFlags[flagName]
             ?: error("Flag ${flagName(flagName)} was accessed as int but not specified.")
+    }
+}
+
+@Module(includes = [FakeFeatureFlagsClassicModule.Bindings::class])
+class FakeFeatureFlagsClassicModule(
+    @get:Provides val fakeFeatureFlagsClassic: FakeFeatureFlagsClassic = FakeFeatureFlagsClassic(),
+) {
+
+    constructor(
+        block: FakeFeatureFlagsClassic.() -> Unit
+    ) : this(FakeFeatureFlagsClassic().apply(block))
+
+    @Module
+    interface Bindings {
+        @Binds fun bindFake(fake: FakeFeatureFlagsClassic): FeatureFlagsClassic
+        @Binds fun bindClassic(classic: FeatureFlagsClassic): FeatureFlags
+        @Binds fun bindFakeClassic(fake: FakeFeatureFlagsClassic): FakeFeatureFlags
     }
 }

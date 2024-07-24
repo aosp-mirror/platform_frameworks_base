@@ -20,12 +20,14 @@ import static android.provider.Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_
 import static android.provider.Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW;
 import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
 
+import android.accessibilityservice.AccessibilityServiceInfo;
 import android.annotation.NonNull;
 import android.annotation.UiContext;
 import android.content.ComponentCallbacks;
 import android.content.Context;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
+import android.content.res.Resources;
 import android.graphics.Insets;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
@@ -46,9 +48,11 @@ import android.widget.ImageView;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.graphics.SfVsyncFrameCallbackProvider;
-import com.android.systemui.R;
+import com.android.systemui.res.R;
 
 import java.util.Collections;
+import java.util.Optional;
+import java.util.Set;
 
 /**
  * Shows/hides a {@link android.widget.ImageView} on the screen and changes the values of
@@ -315,10 +319,46 @@ class MagnificationModeSwitch implements MagnificationGestureDetector.OnGestureL
                     DEFAULT_FADE_OUT_ANIMATION_DELAY_MS,
                     AccessibilityManager.FLAG_CONTENT_ICONS
                             | AccessibilityManager.FLAG_CONTENT_CONTROLS);
+            if (shouldAlwaysShowSettings()) {
+                mUiTimeout = -1;
+            }
         }
         // Refresh the time slot of the fade-out task whenever this method is called.
         stopFadeOutAnimation();
-        mImageView.postOnAnimationDelayed(mFadeOutAnimationTask, mUiTimeout);
+        if (mUiTimeout >= 0) {
+            mImageView.postOnAnimationDelayed(mFadeOutAnimationTask, mUiTimeout);
+        }
+    }
+
+    private boolean shouldAlwaysShowSettings() {
+        try {
+            var serviceNamesArray = mContext.getResources().getStringArray(
+                    R.array.services_always_show_magnification_settings);
+            if (serviceNamesArray.length == 0) {
+                return false;
+            }
+            Set serviceNamesSet = Set.of(serviceNamesArray);
+
+            var serviceInfoList = mAccessibilityManager
+                    .getEnabledAccessibilityServiceList(AccessibilityServiceInfo.FEEDBACK_ALL_MASK);
+            for (var serviceInfo : serviceInfoList) {
+                var serviceName = Optional.ofNullable(serviceInfo)
+                        .map(AccessibilityServiceInfo::getResolveInfo)
+                        .map(resolveInfo -> resolveInfo.serviceInfo)
+                        .map(resolvedServiceInfo -> resolvedServiceInfo.name)
+                        .orElse(null);
+                if (serviceName == null) {
+                    continue;
+                }
+
+                if (serviceNamesSet.contains(serviceName)) {
+                    return true;
+                }
+            }
+        } catch (Resources.NotFoundException nfe) {
+            // No-op. Do not crash for not finding resources.
+        }
+        return false;
     }
 
     private void stopFadeOutAnimation() {

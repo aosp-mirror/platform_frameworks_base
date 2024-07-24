@@ -1,0 +1,16 @@
+package: "android.adaptiveauth"
+container: "system"
+
+flag {
+  name: "enable_adaptive_auth"
+  namespace: "biometrics"
+  description: "Feature flag for enabling the new adaptive auth service"
+  bug: "285053096"
+}
+
+flag {
+  name: "report_biometric_auth_attempts"
+  namespace: "biometrics"
+  description: "Control the usage of the biometric auth signal in adaptive auth"
+  bug: "285053096"
+}

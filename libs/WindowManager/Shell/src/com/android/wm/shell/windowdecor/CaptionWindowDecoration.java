@@ -18,9 +18,11 @@ package com.android.wm.shell.windowdecor;
 
 import android.app.ActivityManager.RunningTaskInfo;
 import android.app.WindowConfiguration;
+import android.app.WindowConfiguration.WindowingMode;
 import android.content.Context;
 import android.content.res.ColorStateList;
 import android.graphics.Color;
+import android.graphics.Rect;
 import android.graphics.drawable.GradientDrawable;
 import android.graphics.drawable.VectorDrawable;
 import android.os.Handler;
@@ -33,6 +35,7 @@ import android.window.WindowContainerTransaction;
 import com.android.wm.shell.R;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.common.DisplayController;
+import com.android.wm.shell.common.DisplayLayout;
 import com.android.wm.shell.common.SyncTransactionQueue;
 
 /**
@@ -64,7 +67,8 @@ public class CaptionWindowDecoration extends WindowDecoration<WindowDecorLinearL
             Handler handler,
             Choreographer choreographer,
             SyncTransactionQueue syncQueue) {
-        super(context, displayController, taskOrganizer, taskInfo, taskSurface);
+        super(context, displayController, taskOrganizer, taskInfo, taskSurface,
+                taskInfo.getConfiguration());
 
         mHandler = handler;
         mChoreographer = choreographer;
@@ -82,6 +86,69 @@ public class CaptionWindowDecoration extends WindowDecoration<WindowDecorLinearL
         mDragPositioningCallback = dragPositioningCallback;
     }
 
+    @Override
+    Rect calculateValidDragArea() {
+        final int leftButtonsWidth = loadDimensionPixelSize(mContext.getResources(),
+                R.dimen.caption_left_buttons_width);
+
+        // On a smaller screen, don't require as much empty space on screen, as offscreen
+        // drags will be restricted too much.
+        final int requiredEmptySpaceId = mDisplayController.getDisplayContext(mTaskInfo.displayId)
+                .getResources().getConfiguration().smallestScreenWidthDp >= 600
+                ? R.dimen.freeform_required_visible_empty_space_in_header :
+                R.dimen.small_screen_required_visible_empty_space_in_header;
+        final int requiredEmptySpace = loadDimensionPixelSize(mContext.getResources(),
+                requiredEmptySpaceId);
+
+        final int rightButtonsWidth = loadDimensionPixelSize(mContext.getResources(),
+                R.dimen.caption_right_buttons_width);
+        final int taskWidth = mTaskInfo.configuration.windowConfiguration.getBounds().width();
+        final DisplayLayout layout = mDisplayController.getDisplayLayout(mTaskInfo.displayId);
+        final int displayWidth = layout.width();
+        final Rect stableBounds = new Rect();
+        layout.getStableBounds(stableBounds);
+        return new Rect(
+                determineMinX(leftButtonsWidth, rightButtonsWidth, requiredEmptySpace,
+                        taskWidth),
+                stableBounds.top,
+                determineMaxX(leftButtonsWidth, rightButtonsWidth, requiredEmptySpace, taskWidth,
+                        displayWidth),
+                determineMaxY(requiredEmptySpace, stableBounds));
+    }
+
+
+    /**
+     * Determine the lowest x coordinate of a freeform task. Used for restricting drag inputs.
+     */
+    private int determineMinX(int leftButtonsWidth, int rightButtonsWidth, int requiredEmptySpace,
+            int taskWidth) {
+        // Do not let apps with < 48dp empty header space go off the left edge at all.
+        if (leftButtonsWidth + rightButtonsWidth + requiredEmptySpace > taskWidth) {
+            return 0;
+        }
+        return -taskWidth + requiredEmptySpace + rightButtonsWidth;
+    }
+
+    /**
+     * Determine the highest x coordinate of a freeform task. Used for restricting drag inputs.
+     */
+    private int determineMaxX(int leftButtonsWidth, int rightButtonsWidth, int requiredEmptySpace,
+            int taskWidth, int displayWidth) {
+        // Do not let apps with < 48dp empty header space go off the right edge at all.
+        if (leftButtonsWidth + rightButtonsWidth + requiredEmptySpace > taskWidth) {
+            return displayWidth - taskWidth;
+        }
+        return displayWidth - requiredEmptySpace - leftButtonsWidth;
+    }
+
+    /**
+     * Determine the highest y coordinate of a freeform task. Used for restricting drag inputs.
+     */
+    private int determineMaxY(int requiredEmptySpace, Rect stableBounds) {
+        return stableBounds.bottom - requiredEmptySpace;
+    }
+
+
     void setDragDetector(DragDetector dragDetector) {
         mDragDetector = dragDetector;
         mDragDetector.setTouchSlop(ViewConfiguration.get(mContext).getScaledTouchSlop());
@@ -90,15 +157,21 @@ public class CaptionWindowDecoration extends WindowDecoration<WindowDecorLinearL
     @Override
     void relayout(RunningTaskInfo taskInfo) {
         final SurfaceControl.Transaction t = new SurfaceControl.Transaction();
+        // The crop and position of the task should only be set when a task is fluid resizing. In
+        // all other cases, it is expected that the transition handler positions and crops the task
+        // in order to allow the handler time to animate before the task before the final
+        // position and crop are set.
+        final boolean shouldSetTaskPositionAndCrop = mTaskDragResizer.isResizingOrAnimating();
         // Use |applyStartTransactionOnDraw| so that the transaction (that applies task crop) is
         // synced with the buffer transaction (that draws the View). Both will be shown on screen
         // at the same, whereas applying them independently causes flickering. See b/270202228.
-        relayout(taskInfo, t, t, true /* applyStartTransactionOnDraw */);
+        relayout(taskInfo, t, t, true /* applyStartTransactionOnDraw */,
+                shouldSetTaskPositionAndCrop);
     }
 
     void relayout(RunningTaskInfo taskInfo,
             SurfaceControl.Transaction startT, SurfaceControl.Transaction finishT,
-            boolean applyStartTransactionOnDraw) {
+            boolean applyStartTransactionOnDraw, boolean setTaskCropAndPosition) {
         final int shadowRadiusID = taskInfo.isFocused
                 ? R.dimen.freeform_decor_shadow_focused_thickness
                 : R.dimen.freeform_decor_shadow_unfocused_thickness;
@@ -113,9 +186,11 @@ public class CaptionWindowDecoration extends WindowDecoration<WindowDecorLinearL
         mRelayoutParams.reset();
         mRelayoutParams.mRunningTaskInfo = taskInfo;
         mRelayoutParams.mLayoutResId = R.layout.caption_window_decor;
-        mRelayoutParams.mCaptionHeightId = getCaptionHeightId();
+        mRelayoutParams.mCaptionHeightId = getCaptionHeightId(taskInfo.getWindowingMode());
         mRelayoutParams.mShadowRadiusId = shadowRadiusID;
         mRelayoutParams.mApplyStartTransactionOnDraw = applyStartTransactionOnDraw;
+        mRelayoutParams.mSetTaskPositionAndCrop = setTaskCropAndPosition;
+        mRelayoutParams.mAllowCaptionInputFallthrough = false;
 
         relayout(mRelayoutParams, startT, finishT, wct, oldRootView, mResult);
         // After this line, mTaskInfo is up-to-date and should be used instead of taskInfo
@@ -147,7 +222,8 @@ public class CaptionWindowDecoration extends WindowDecoration<WindowDecorLinearL
                     mDecorationContainerSurface,
                     mDragPositioningCallback,
                     mSurfaceControlBuilderSupplier,
-                    mSurfaceControlTransactionSupplier);
+                    mSurfaceControlTransactionSupplier,
+                    mDisplayController);
         }
 
         final int touchSlop = ViewConfiguration.get(mResult.mRootView.getContext())
@@ -211,6 +287,10 @@ public class CaptionWindowDecoration extends WindowDecoration<WindowDecorLinearL
         closeBackground.setTintList(buttonTintColor);
     }
 
+    boolean isHandlingDragResize() {
+        return mDragResizeListener != null && mDragResizeListener.isHandlingDragResize();
+    }
+
     private void closeDragResizeListener() {
         if (mDragResizeListener == null) {
             return;
@@ -226,7 +306,12 @@ public class CaptionWindowDecoration extends WindowDecoration<WindowDecorLinearL
     }
 
     @Override
-    int getCaptionHeightId() {
+    int getCaptionHeightId(@WindowingMode int windowingMode) {
         return R.dimen.freeform_decor_caption_height;
+    }
+
+    @Override
+    int getCaptionViewId() {
+        return R.id.caption;
     }
 }

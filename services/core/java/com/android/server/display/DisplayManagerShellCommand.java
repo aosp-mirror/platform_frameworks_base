@@ -16,6 +16,13 @@
 
 package com.android.server.display;
 
+import static android.view.Display.TYPE_EXTERNAL;
+import static android.view.Display.TYPE_INTERNAL;
+import static android.view.Display.TYPE_OVERLAY;
+import static android.view.Display.TYPE_UNKNOWN;
+import static android.view.Display.TYPE_VIRTUAL;
+import static android.view.Display.TYPE_WIFI;
+
 import android.content.Context;
 import android.content.Intent;
 import android.hardware.display.DisplayManager;
@@ -23,16 +30,25 @@ import android.os.ShellCommand;
 import android.util.Slog;
 import android.view.Display;
 
+import com.android.server.display.feature.DisplayManagerFlags;
+
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
+import java.util.Locale;
 
 class DisplayManagerShellCommand extends ShellCommand {
     private static final String TAG = "DisplayManagerShellCommand";
+    private static final String NOTIFICATION_TYPES =
+            "on-hotplug-error, on-link-training-failure, on-cable-dp-incapable";
 
     private final DisplayManagerService mService;
+    private final DisplayManagerFlags mFlags;
 
-    DisplayManagerShellCommand(DisplayManagerService service) {
+    DisplayManagerShellCommand(DisplayManagerService service, DisplayManagerFlags flags) {
         mService = service;
+        mFlags = flags;
     }
 
     @Override
@@ -42,6 +58,10 @@ class DisplayManagerShellCommand extends ShellCommand {
         }
         final PrintWriter pw = getOutPrintWriter();
         switch(cmd) {
+            case "show-notification":
+                return showNotification();
+            case "cancel-notifications":
+                return cancelNotifications();
             case "set-brightness":
                 return setBrightness();
             case "reset-brightness-configuration":
@@ -82,6 +102,10 @@ class DisplayManagerShellCommand extends ShellCommand {
                 return setDockedAndIdle();
             case "undock":
                 return unsetDockedAndIdle();
+            case "enable-display":
+                return setDisplayEnabled(true);
+            case "disable-display":
+                return setDisplayEnabled(false);
             default:
                 return handleDefaultCommands(cmd);
         }
@@ -94,6 +118,10 @@ class DisplayManagerShellCommand extends ShellCommand {
         pw.println("  help");
         pw.println("    Print this help text.");
         pw.println();
+        pw.println("  show-notification NOTIFICATION_TYPE");
+        pw.println("    Show notification for one of the following types: " + NOTIFICATION_TYPES);
+        pw.println("  cancel-notifications");
+        pw.println("    Cancel notifications.");
         pw.println("  set-brightness BRIGHTNESS");
         pw.println("    Sets the current brightness to BRIGHTNESS (a number between 0 and 1).");
         pw.println("  reset-brightness-configuration");
@@ -135,26 +163,145 @@ class DisplayManagerShellCommand extends ShellCommand {
         pw.println("    Sets the user disabled HDR types as TYPES");
         pw.println("  get-user-disabled-hdr-types");
         pw.println("    Returns the user disabled HDR types");
-        pw.println("  get-displays [CATEGORY]");
+        pw.println("  get-displays [-c|--category CATEGORY] [-i|--ids-only] [-t|--type TYPE]");
+        pw.println("    [CATEGORY]");
         pw.println("    Returns the current displays. Can specify string category among");
         pw.println("    DisplayManager.DISPLAY_CATEGORY_*; must use the actual string value.");
+        pw.println("    Can choose to print only the ids of the displays. " +  "Can filter by");
+        pw.println("    display types. For example, '--type external'");
         pw.println("  dock");
         pw.println("    Sets brightness to docked + idle screen brightness mode");
         pw.println("  undock");
         pw.println("    Sets brightness to active (normal) screen brightness mode");
+        if (mFlags.isConnectedDisplayManagementEnabled()) {
+            pw.println("  enable-display DISPLAY_ID");
+            pw.println("    Enable the DISPLAY_ID. Only possible if this is a connected display.");
+            pw.println("  disable-display DISPLAY_ID");
+            pw.println("    Disable the DISPLAY_ID. Only possible if this is a connected display.");
+        }
         pw.println();
         Intent.printIntentArgsHelp(pw , "");
     }
 
     private int getDisplays() {
-        String category = getNextArg();
+        String opt = "", requestedType, category = null;
+        PrintWriter out = getOutPrintWriter();
+
+        List<Integer> displayTypeList = new ArrayList<>();
+        boolean showIdsOnly = false, filterByType = false;
+        while ((opt = getNextOption()) != null) {
+            switch (opt) {
+                case "-i":
+                case "--ids-only":
+                    showIdsOnly = true;
+                    break;
+                case "-t":
+                case "--type":
+                    requestedType = getNextArgRequired();
+                    int displayType = getType(requestedType, out);
+                    if (displayType == -1) {
+                        return 1;
+                    }
+                    displayTypeList.add(displayType);
+                    filterByType = true;
+                    break;
+                case "-c":
+                case "--category":
+                    if (category != null) {
+                        out.println("Error: the category has been specified more than one time. "
+                                + "Please select only one category.");
+                        return 1;
+                    }
+                    category = getNextArgRequired();
+                    break;
+                case "":
+                    break;
+                default:
+                    out.println("Error: unknown option '" + opt + "'");
+                    return 1;
+            }
+        }
+
+        String lastCategoryArgument = getNextArg();
+        if (lastCategoryArgument != null) {
+            if (category != null) {
+                out.println("Error: the category has been specified both with the -c option and "
+                        + "the positional argument. Please select only one category.");
+                return 1;
+            }
+            category = lastCategoryArgument;
+        }
+
         DisplayManager dm = mService.getContext().getSystemService(DisplayManager.class);
         Display[] displays = dm.getDisplays(category);
-        PrintWriter out = getOutPrintWriter();
-        out.println("Displays:");
-        for (int i = 0; i < displays.length; i++) {
-            out.println("  " + displays[i]);
+
+        if (filterByType) {
+            displays = Arrays.stream(displays).filter(d -> displayTypeList.contains(d.getType()))
+                    .toArray(Display[]::new);
         }
+
+        if (!showIdsOnly) {
+            out.println("Displays:");
+        }
+        for (int i = 0; i < displays.length; i++) {
+            out.println((showIdsOnly ? displays[i].getDisplayId() : displays[i]));
+        }
+        return 0;
+    }
+
+    private int getType(String type, PrintWriter out) {
+        type = type.toUpperCase(Locale.ENGLISH);
+        switch (type) {
+            case "UNKNOWN":
+                return TYPE_UNKNOWN;
+            case "INTERNAL":
+                return TYPE_INTERNAL;
+            case "EXTERNAL":
+                return TYPE_EXTERNAL;
+            case "WIFI":
+                return TYPE_WIFI;
+            case "OVERLAY":
+                return TYPE_OVERLAY;
+            case "VIRTUAL":
+                return TYPE_VIRTUAL;
+            default:
+                out.println("Error: argument for display type should be "
+                        + "one of 'UNKNOWN', 'INTERNAL', 'EXTERNAL', 'WIFI', 'OVERLAY', 'VIRTUAL', "
+                        + "but got '" + type + "' instead.");
+                return -1;
+        }
+    }
+
+    private int showNotification() {
+        final String notificationType = getNextArg();
+        if (notificationType == null) {
+            getErrPrintWriter().println("Error: no notificationType specified, use one of: "
+                                                + NOTIFICATION_TYPES);
+            return 1;
+        }
+
+        switch(notificationType) {
+            case "on-hotplug-error":
+                mService.getDisplayNotificationManager().onHotplugConnectionError();
+                break;
+            case "on-link-training-failure":
+                mService.getDisplayNotificationManager().onDisplayPortLinkTrainingFailure();
+                break;
+            case "on-cable-dp-incapable":
+                mService.getDisplayNotificationManager().onCableNotCapableDisplayPort();
+                break;
+            default:
+                getErrPrintWriter().println(
+                        "Error: unexpected notification type=" + notificationType + ", use one of: "
+                                + NOTIFICATION_TYPES);
+                return 1;
+        }
+
+        return 0;
+    }
+
+    private int cancelNotifications() {
+        mService.getDisplayNotificationManager().cancelNotifications();
         return 0;
     }
 
@@ -421,6 +568,28 @@ class DisplayManagerShellCommand extends ShellCommand {
 
     private int unsetDockedAndIdle() {
         mService.setDockedAndIdleEnabled(false, Display.DEFAULT_DISPLAY);
+        return 0;
+    }
+
+    private int setDisplayEnabled(boolean enable) {
+        if (!mFlags.isConnectedDisplayManagementEnabled()) {
+            getErrPrintWriter()
+                    .println("Error: external display management is not available on this device.");
+            return 1;
+        }
+        final String displayIdText = getNextArg();
+        if (displayIdText == null) {
+            getErrPrintWriter().println("Error: no displayId specified");
+            return 1;
+        }
+        final int displayId;
+        try {
+            displayId = Integer.parseInt(displayIdText);
+        } catch (NumberFormatException e) {
+            getErrPrintWriter().println("Error: invalid displayId: '" + displayIdText + "'");
+            return 1;
+        }
+        mService.enableConnectedDisplay(displayId, enable);
         return 0;
     }
 }

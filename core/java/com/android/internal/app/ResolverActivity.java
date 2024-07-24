@@ -249,6 +249,7 @@ public class ResolverActivity extends Activity implements
 
     private UserHandle mCloneProfileUserHandle;
     private UserHandle mTabOwnerUserHandleForLaunch;
+    private UserHandle mPrivateProfileUserHandle;
 
     protected final LatencyTracker mLatencyTracker = getLatencyTracker();
 
@@ -441,6 +442,7 @@ public class ResolverActivity extends Activity implements
         mPersonalProfileUserHandle = fetchPersonalProfileUserHandle();
         mWorkProfileUserHandle = fetchWorkProfileUserProfile();
         mCloneProfileUserHandle = fetchCloneProfileUserHandle();
+        mPrivateProfileUserHandle = fetchPrivateProfileUserHandle();
         mTabOwnerUserHandleForLaunch = fetchTabOwnerUserHandleForLaunch();
 
         // The last argument of createResolverListAdapter is whether to do special handling
@@ -648,7 +650,8 @@ public class ResolverActivity extends Activity implements
                 initialIntents,
                 rList,
                 filterLastUsed,
-                /* userHandle */ getPersonalProfileUserHandle());
+                getPersonalProfileUserHandle());
+
         QuietModeManager quietModeManager = createQuietModeManager();
         return new ResolverMultiProfilePagerAdapter(
                 /* context */ this,
@@ -747,6 +750,9 @@ public class ResolverActivity extends Activity implements
     }
 
     protected UserHandle getPersonalProfileUserHandle() {
+        if (privateSpaceEnabled() && isLaunchedAsPrivateProfile()){
+            return mPrivateProfileUserHandle;
+        }
         return mPersonalProfileUserHandle;
     }
     protected @Nullable UserHandle getWorkProfileUserHandle() {
@@ -759,6 +765,10 @@ public class ResolverActivity extends Activity implements
 
     protected UserHandle getTabOwnerUserHandleForLaunch() {
         return mTabOwnerUserHandleForLaunch;
+    }
+
+    protected UserHandle getPrivateProfileUserHandle() {
+        return mPrivateProfileUserHandle;
     }
 
     protected UserHandle fetchPersonalProfileUserHandle() {
@@ -795,12 +805,28 @@ public class ResolverActivity extends Activity implements
         return mCloneProfileUserHandle;
     }
 
+    protected @Nullable UserHandle fetchPrivateProfileUserHandle() {
+        mPrivateProfileUserHandle = null;
+        UserManager userManager = getSystemService(UserManager.class);
+        for (final UserInfo userInfo :
+                userManager.getProfiles(mPersonalProfileUserHandle.getIdentifier())) {
+            if (userInfo.isPrivateProfile()) {
+                mPrivateProfileUserHandle = userInfo.getUserHandle();
+                break;
+            }
+        }
+        return mPrivateProfileUserHandle;
+    }
+
     private UserHandle fetchTabOwnerUserHandleForLaunch() {
-        // If we are in work profile's process, return WorkProfile user as owner, otherwise we
-        // always return PersonalProfile user as owner
-        return UserHandle.of(UserHandle.myUserId()).equals(getWorkProfileUserHandle())
-                ? getWorkProfileUserHandle()
-                : getPersonalProfileUserHandle();
+        // If we are in work or private profile's process, return WorkProfile/PrivateProfile user
+        // as owner, otherwise we always return PersonalProfile user as owner
+        if (UserHandle.of(UserHandle.myUserId()).equals(getWorkProfileUserHandle())) {
+            return getWorkProfileUserHandle();
+        } else if (privateSpaceEnabled() && isLaunchedAsPrivateProfile()) {
+            return getPrivateProfileUserHandle();
+        }
+        return getPersonalProfileUserHandle();
     }
 
     private boolean hasWorkProfile() {
@@ -816,7 +842,15 @@ public class ResolverActivity extends Activity implements
                 && (UserHandle.myUserId() == getCloneProfileUserHandle().getIdentifier());
     }
 
+    protected final boolean isLaunchedAsPrivateProfile() {
+        return getPrivateProfileUserHandle() != null
+                && (UserHandle.myUserId() == getPrivateProfileUserHandle().getIdentifier());
+    }
+
     protected boolean shouldShowTabs() {
+        if (privateSpaceEnabled() && isLaunchedAsPrivateProfile()) {
+            return false;
+        }
         return hasWorkProfile() && ENABLE_TABBED_VIEW;
     }
 
@@ -2617,6 +2651,11 @@ public class ResolverActivity extends Activity implements
             Log.e(TAG, "ResolveInfo with null UserHandle found: " + resolveInfo);
         }
         return resolveInfo.userHandle;
+    }
+
+    private boolean privateSpaceEnabled() {
+        return mIsIntentPicker && android.os.Flags.allowPrivateProfile()
+                && android.multiuser.Flags.allowResolverSheetForPrivateSpace();
     }
 
     /**

@@ -91,6 +91,9 @@ message SensorPrivacyIndividualEnabledSensorProto {
     enum StateType {
         ENABLED = 1;
         DISABLED = 2;
+        AUTO_DRIVER_ASSISTANCE_HELPFUL_APPS = 3;
+        AUTO_DRIVER_ASSISTANCE_REQUIRED_APPS = 4;
+        AUTO_DRIVER_ASSISTANCE_APPS = 5;
     }
 
     // DEPRECATED

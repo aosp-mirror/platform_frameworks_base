@@ -25,6 +25,16 @@ import com.android.app.animation.Interpolators
  * The fraction after which we start fading in when going from a gone widget to a visible one
  */
 private const val GONE_FADE_FRACTION = 0.8f
+/**
+ * The fraction after which we start fading in going from a gone widget to a visible one in guts
+ * animation.
+ */
+private const val GONE_FADE_GUTS_FRACTION = 0.286f
+/**
+ * The fraction before which we fade out when going from a visible widget to a gone one in guts
+ * animation.
+ */
+private const val VISIBLE_FADE_GUTS_FRACTION = 0.355f
 
 /**
  * The amont we're scaling appearing views
@@ -45,6 +55,7 @@ open class TransitionLayoutController {
     private var animationStartState: TransitionViewState? = null
     private var state = TransitionViewState()
     private var animator: ValueAnimator = ValueAnimator.ofFloat(0.0f, 1.0f)
+    private var isGutsAnimation = false
     private var currentHeight: Int = 0
     private var currentWidth: Int = 0
     var sizeChangedListener: ((Int, Int) -> Unit)? = null
@@ -152,15 +163,6 @@ open class TransitionLayoutController {
                 // this looks quite ugly
                 val nowGone: Boolean
                 if (widgetStart.gone) {
-
-                    // Only fade it in at the very end
-                    alphaProgress = MathUtils.map(GONE_FADE_FRACTION, 1.0f, 0.0f, 1.0f, progress)
-                    nowGone = progress < GONE_FADE_FRACTION
-
-                    // Scale it just a little, not all the way
-                    val endScale = widgetEnd.scale
-                    newScale = MathUtils.lerp(GONE_SCALE_AMOUNT * endScale, endScale, progress)
-
                     // don't clip
                     widthProgress = 1.0f
 
@@ -168,25 +170,52 @@ open class TransitionLayoutController {
                     resultMeasureWidth = widgetEnd.measureWidth
                     resultMeasureHeight = widgetEnd.measureHeight
 
-                    // Let's make sure we're centering the view in the gone view instead of having
-                    // the left at 0
-                    resultX = MathUtils.lerp(widgetStart.x - resultMeasureWidth / 2.0f,
-                            widgetEnd.x,
-                            progress)
-                    resultY = MathUtils.lerp(widgetStart.y - resultMeasureHeight / 2.0f,
-                            widgetEnd.y,
-                            progress)
+                    if (isGutsAnimation) {
+                        // if animation is open/close guts, fade in starts early.
+                        alphaProgress = MathUtils.map(
+                            GONE_FADE_GUTS_FRACTION,
+                            1.0f,
+                            0.0f,
+                            1.0f,
+                            progress
+                        )
+                        nowGone = progress < GONE_FADE_GUTS_FRACTION
+
+                        // Do not change scale of widget.
+                        newScale = 1.0f
+
+                        // We do not want any horizontal or vertical movement.
+                        resultX = widgetStart.x
+                        resultY = widgetStart.y
+                    } else {
+                        // Only fade it in at the very end
+                        alphaProgress = MathUtils.map(
+                            GONE_FADE_FRACTION,
+                            1.0f,
+                            0.0f,
+                            1.0f,
+                            progress
+                        )
+                        nowGone = progress < GONE_FADE_FRACTION
+
+                        // Scale it just a little, not all the way
+                        val endScale = widgetEnd.scale
+                        newScale = MathUtils.lerp(GONE_SCALE_AMOUNT * endScale, endScale, progress)
+
+                        // Let's make sure we're centering the view in the gone view instead of
+                        // having the left at 0
+                        resultX = MathUtils.lerp(
+                                widgetStart.x - resultMeasureWidth / 2.0f,
+                                widgetEnd.x,
+                                progress
+                        )
+                        resultY = MathUtils.lerp(
+                                widgetStart.y - resultMeasureHeight / 2.0f,
+                                widgetEnd.y,
+                                progress
+                        )
+                    }
                 } else {
-
-                    // Fadeout in the very beginning
-                    alphaProgress = MathUtils.map(0.0f, 1.0f - GONE_FADE_FRACTION, 0.0f, 1.0f,
-                            progress)
-                    nowGone = progress > 1.0f - GONE_FADE_FRACTION
-
-                    // Scale it just a little, not all the way
-                    val startScale = widgetStart.scale
-                    newScale = MathUtils.lerp(startScale, startScale * GONE_SCALE_AMOUNT, progress)
-
                     // Don't clip
                     widthProgress = 0.0f
 
@@ -194,14 +223,54 @@ open class TransitionLayoutController {
                     resultMeasureWidth = widgetStart.measureWidth
                     resultMeasureHeight = widgetStart.measureHeight
 
-                    // Let's make sure we're centering the view in the gone view instead of having
-                    // the left at 0
-                    resultX = MathUtils.lerp(widgetStart.x,
-                            widgetEnd.x - resultMeasureWidth / 2.0f,
-                            progress)
-                    resultY = MathUtils.lerp(widgetStart.y,
-                            widgetEnd.y - resultMeasureHeight / 2.0f,
-                            progress)
+                    // Fadeout in the very beginning
+                    if (isGutsAnimation) {
+                        alphaProgress = MathUtils.map(
+                            0.0f,
+                            VISIBLE_FADE_GUTS_FRACTION,
+                            0.0f,
+                            1.0f,
+                            progress
+                        )
+                        nowGone = progress > VISIBLE_FADE_GUTS_FRACTION
+
+                        // Do not change scale of widget during open/close guts animation.
+                        newScale = 1.0f
+
+                        // We do not want any horizontal or vertical movement.
+                        resultX = widgetEnd.x
+                        resultY = widgetEnd.y
+                    } else {
+                        alphaProgress = MathUtils.map(
+                            0.0f,
+                            1.0f - GONE_FADE_FRACTION,
+                            0.0f,
+                            1.0f,
+                            progress
+                        )
+                        nowGone = progress > 1.0f - GONE_FADE_FRACTION
+
+                        // Scale it just a little, not all the way
+                        val startScale = widgetStart.scale
+                        newScale = MathUtils.lerp(
+                                startScale,
+                                startScale * GONE_SCALE_AMOUNT,
+                                progress
+                        )
+
+                        // Let's make sure we're centering the view in the gone view instead of
+                        // having the left at 0
+                        resultX = MathUtils.lerp(
+                                widgetStart.x,
+                                widgetEnd.x - resultMeasureWidth / 2.0f,
+                                progress
+                        )
+                        resultY = MathUtils.lerp(
+                                widgetStart.y,
+                                widgetEnd.y - resultMeasureHeight / 2.0f,
+                                progress
+                        )
+                    }
                 }
                 resultWidgetState.gone = nowGone
             } else {
@@ -279,8 +348,10 @@ open class TransitionLayoutController {
         applyImmediately: Boolean,
         animate: Boolean,
         duration: Long = 0,
-        delay: Long = 0
+        delay: Long = 0,
+        isGuts: Boolean,
     ) {
+        isGutsAnimation = isGuts
         val animated = animate && currentState.width != 0
         this.state = state.copy()
         if (applyImmediately || transitionLayout == null) {
@@ -291,6 +362,8 @@ open class TransitionLayoutController {
             animationStartState = currentState.copy()
             animator.duration = duration
             animator.startDelay = delay
+            animator.interpolator =
+                if (isGutsAnimation) Interpolators.LINEAR else Interpolators.FAST_OUT_SLOW_IN
             animator.start()
         } else if (!animator.isRunning) {
             applyStateToLayout(this.state)

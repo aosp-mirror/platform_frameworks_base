@@ -385,7 +385,6 @@ public class VoiceInteractionService extends Service {
                 VoiceInteractionService::onShutdownInternal, VoiceInteractionService.this));
     };
 
-
     private void onShutdownInternal() {
         onShutdown();
         // Stop any active recognitions when shutting down.
@@ -738,7 +737,7 @@ public class VoiceInteractionService extends Service {
             AlwaysOnHotwordDetector dspDetector = new AlwaysOnHotwordDetector(keyphrase, locale,
                     executor, callback, mKeyphraseEnrollmentInfo, mSystemService,
                     getApplicationContext().getApplicationInfo().targetSdkVersion,
-                    supportHotwordDetectionService);
+                    supportHotwordDetectionService, getAttributionTag());
             mActiveDetectors.add(dspDetector);
 
             try {
@@ -899,7 +898,7 @@ public class VoiceInteractionService extends Service {
 
             SoftwareHotwordDetector softwareHotwordDetector =
                     new SoftwareHotwordDetector(mSystemService, /* audioFormat= */ null,
-                            executor, callback);
+                            executor, callback, getAttributionTag());
             mActiveDetectors.add(softwareHotwordDetector);
 
             try {
@@ -973,7 +972,8 @@ public class VoiceInteractionService extends Service {
             }
 
             VisualQueryDetector visualQueryDetector =
-                    new VisualQueryDetector(mSystemService, executor, callback, this);
+                    new VisualQueryDetector(mSystemService, executor, callback, this,
+                            getAttributionTag());
             HotwordDetector visualQueryDetectorInitializationDelegate =
                     visualQueryDetector.getInitializationDelegate();
             mActiveDetectors.add(visualQueryDetectorInitializationDelegate);

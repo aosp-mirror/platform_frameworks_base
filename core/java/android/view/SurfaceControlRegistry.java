@@ -23,7 +23,9 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.content.Context;
+import android.os.Build;
 import android.os.SystemClock;
+import android.os.SystemProperties;
 import android.util.Log;
 
 import com.android.internal.annotations.GuardedBy;
@@ -78,6 +80,11 @@ public class SurfaceControlRegistry {
             for (int i = 0; i < size; i++) {
                 final Map.Entry<SurfaceControl, Long> entry = entries.get(i);
                 final SurfaceControl sc = entry.getKey();
+                if (sc == null) {
+                    // Just skip if the key has since been removed from the weak hash map
+                    continue;
+                }
+
                 final long timeRegistered = entry.getValue();
                 pw.print("  ");
                 pw.print(sc.getName());
@@ -99,6 +106,9 @@ public class SurfaceControlRegistry {
     // Number of surface controls to dump when the max threshold is exceeded
     private static final int DUMP_LIMIT = 256;
 
+    // An instance of a registry that is a no-op
+    private static final SurfaceControlRegistry NO_OP_REGISTRY = new NoOpRegistry();
+
     // Static lock, must be held for all registry operations
     private static final Object sLock = new Object();
 
@@ -107,6 +117,22 @@ public class SurfaceControlRegistry {
 
     // The registry for a given process
     private static volatile SurfaceControlRegistry sProcessRegistry;
+
+    // Whether call stack debugging has been initialized. This is evaluated only once per process
+    // instance when the first SurfaceControl.Transaction object is created
+    static boolean sCallStackDebuggingInitialized;
+
+    // Whether call stack debugging is currently enabled, ie. whether there is a valid match string
+    // for either a specific surface control name or surface control transaction method
+    static boolean sCallStackDebuggingEnabled;
+
+    // The name of the surface control to log stack traces for.  Always non-null if
+    // sCallStackDebuggingEnabled is true.  Can be combined with the match call.
+    private static String sCallStackDebuggingMatchName;
+
+    // The surface control transaction method name to log stack traces for.  Always non-null if
+    // sCallStackDebuggingEnabled is true.  Can be combined with the match name.
+    private static String sCallStackDebuggingMatchCall;
 
     // Mapping of the active SurfaceControls to the elapsed time when they were registered
     @GuardedBy("sLock")
@@ -155,6 +181,12 @@ public class SurfaceControlRegistry {
         }
     }
 
+    @VisibleForTesting
+    public void setCallStackDebuggingParams(String matchName, String matchCall) {
+        sCallStackDebuggingMatchName = matchName.toLowerCase();
+        sCallStackDebuggingMatchCall = matchCall.toLowerCase();
+    }
+
     /**
      * Creates and initializes the registry for all SurfaceControls in this process. The caller must
      * hold the READ_FRAME_BUFFER permission.
@@ -191,11 +223,9 @@ public class SurfaceControlRegistry {
      * createProcessInstance(Context) was previously called from a valid caller.
      * @hide
      */
-    @Nullable
-    @VisibleForTesting
     public static SurfaceControlRegistry getProcessInstance() {
         synchronized (sLock) {
-            return sProcessRegistry;
+            return sProcessRegistry != null ? sProcessRegistry : NO_OP_REGISTRY;
         }
     }
 
@@ -243,6 +273,91 @@ public class SurfaceControlRegistry {
     }
 
     /**
+     * Initializes global call stack debugging if this is a debug build and a filter is specified.
+     * This is a no-op if
+     *
+     * Usage:
+     *   adb shell setprop persist.wm.debug.sc.tx.log_match_call <call or \"\" to unset>
+     *   adb shell setprop persist.wm.debug.sc.tx.log_match_name <name or \"\" to unset>
+     *   adb reboot
+     */
+    final static void initializeCallStackDebugging() {
+        if (sCallStackDebuggingInitialized || !Build.IS_DEBUGGABLE) {
+            // Return early if already initialized or this is not a debug build
+            return;
+        }
+
+        sCallStackDebuggingInitialized = true;
+        sCallStackDebuggingMatchCall =
+                SystemProperties.get("persist.wm.debug.sc.tx.log_match_call", null)
+                        .toLowerCase();
+        sCallStackDebuggingMatchName =
+                SystemProperties.get("persist.wm.debug.sc.tx.log_match_name", null)
+                        .toLowerCase();
+        // Only enable stack debugging if any of the match filters are set
+        sCallStackDebuggingEnabled = (!sCallStackDebuggingMatchCall.isEmpty()
+                || !sCallStackDebuggingMatchName.isEmpty());
+        if (sCallStackDebuggingEnabled) {
+            Log.d(TAG, "Enabling transaction call stack debugging:"
+                    + " matchCall=" + sCallStackDebuggingMatchCall
+                    + " matchName=" + sCallStackDebuggingMatchName);
+        }
+    }
+
+    /**
+     * Dumps the callstack if it matches the global debug properties. Caller should first verify
+     * {@link #sCallStackDebuggingEnabled} is true.
+     *
+     * @param call the name of the call
+     * @param tx (optional) the transaction associated with this call
+     * @param sc the affected surface
+     * @param details additional details to print with the stack track
+     */
+    final void checkCallStackDebugging(@NonNull String call,
+            @Nullable SurfaceControl.Transaction tx, @Nullable SurfaceControl sc,
+            @Nullable String details) {
+        if (!sCallStackDebuggingEnabled) {
+            return;
+        }
+        if (!matchesForCallStackDebugging(sc != null ? sc.getName() : null, call)) {
+            return;
+        }
+        final String txMsg = tx != null ? "tx=" + tx.getId() + " ": "";
+        final String scMsg = sc != null ? " sc=" + sc.getName() + "": "";
+        final String msg = details != null
+                ? call + " (" + txMsg + scMsg + ") " + details
+                : call + " (" + txMsg + scMsg + ")";
+        Log.e(TAG, msg, new Throwable());
+    }
+
+    /**
+     * Tests whether the given surface control name/method call matches the filters set for the
+     * call stack debugging.
+     */
+    @VisibleForTesting
+    public final boolean matchesForCallStackDebugging(@Nullable String name, @NonNull String call) {
+        final boolean matchCall = !sCallStackDebuggingMatchCall.isEmpty();
+        if (matchCall && !sCallStackDebuggingMatchCall.contains(call.toLowerCase())) {
+            // Skip if target call doesn't match requested caller
+            return false;
+        }
+        final boolean matchName = !sCallStackDebuggingMatchName.isEmpty();
+        if (matchName && (name == null
+                || !sCallStackDebuggingMatchName.contains(name.toLowerCase()))) {
+            // Skip if target surface doesn't match requested surface
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * Returns whether call stack debugging is enabled for this process.
+     */
+    final static boolean isCallStackDebuggingEnabled() {
+        return sCallStackDebuggingEnabled;
+    }
+
+    /**
      * Forces the gc and finalizers to run, used prior to dumping to ensure we only dump strongly
      * referenced surface controls.
      */
@@ -267,7 +382,27 @@ public class SurfaceControlRegistry {
         synchronized (sLock) {
             if (sProcessRegistry != null) {
                 sDefaultReporter.onMaxLayersExceeded(sProcessRegistry.mSurfaceControls, limit, pw);
+                pw.println("sCallStackDebuggingInitialized=" + sCallStackDebuggingInitialized);
+                pw.println("sCallStackDebuggingEnabled=" + sCallStackDebuggingEnabled);
+                pw.println("sCallStackDebuggingMatchName=" + sCallStackDebuggingMatchName);
+                pw.println("sCallStackDebuggingMatchCall=" + sCallStackDebuggingMatchCall);
             }
         }
+    }
+
+    /**
+     * A no-op implementation of the registry.
+     */
+    private static class NoOpRegistry extends SurfaceControlRegistry {
+
+        @Override
+        public void setReportingThresholds(int maxLayersReportingThreshold,
+                int resetReportingThreshold, Reporter reporter) {}
+
+        @Override
+        void add(SurfaceControl sc) {}
+
+        @Override
+        void remove(SurfaceControl sc) {}
     }
 }

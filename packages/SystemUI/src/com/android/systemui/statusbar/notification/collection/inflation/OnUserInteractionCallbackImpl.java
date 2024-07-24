@@ -68,7 +68,7 @@ public class OnUserInteractionCallbackImpl implements OnUserInteractionCallback 
     @NonNull
     private DismissedByUserStats getDismissedByUserStats(NotificationEntry entry) {
         int dismissalSurface = NotificationStats.DISMISSAL_SHADE;
-        if (mHeadsUpManager.isAlerting(entry.getKey())) {
+        if (mHeadsUpManager.isHeadsUpEntry(entry.getKey())) {
             dismissalSurface = NotificationStats.DISMISSAL_PEEK;
         } else if (mStatusBarStateController.isDozing()) {
             dismissalSurface = NotificationStats.DISMISSAL_AOD;

@@ -29,6 +29,7 @@ import java.util.Objects;
 /**
  * Wrapper which delegates all calls through to the given {@link XmlPullParser}.
  */
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
 public class XmlPullParserWrapper implements XmlPullParser {
     private final XmlPullParser mWrapped;
 

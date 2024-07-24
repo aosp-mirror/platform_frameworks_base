@@ -36,6 +36,7 @@ import android.os.IBinder;
 import android.os.ResultReceiver;
 import android.util.EventLog;
 import android.util.Slog;
+import android.view.MotionEvent;
 import android.view.inputmethod.ImeTracker;
 import android.view.inputmethod.InputMethod;
 import android.view.inputmethod.InputMethodManager;
@@ -75,7 +76,7 @@ final class DefaultImeVisibilityApplier implements ImeVisibilityApplier {
 
     @GuardedBy("ImfLock.class")
     @Override
-    public void performShowIme(IBinder showInputToken, @Nullable ImeTracker.Token statsToken,
+    public void performShowIme(IBinder showInputToken, @NonNull ImeTracker.Token statsToken,
             @InputMethod.ShowFlags int showFlags, ResultReceiver resultReceiver,
             @SoftInputShowHideReason int reason) {
         final IInputMethodInvoker curMethod = mService.getCurMethodLocked();
@@ -88,7 +89,8 @@ final class DefaultImeVisibilityApplier implements ImeVisibilityApplier {
             // TODO(b/192412909): Check if we can always call onShowHideSoftInputRequested() or not.
             if (curMethod.showSoftInput(showInputToken, statsToken, showFlags, resultReceiver)) {
                 if (DEBUG_IME_VISIBILITY) {
-                    EventLog.writeEvent(IMF_SHOW_IME, statsToken.getTag(),
+                    EventLog.writeEvent(IMF_SHOW_IME,
+                            statsToken != null ? statsToken.getTag() : ImeTracker.TOKEN_NONE,
                             Objects.toString(mService.mCurFocusedWindow),
                             InputMethodDebug.softInputDisplayReasonToString(reason),
                             InputMethodDebug.softInputModeToString(
@@ -102,7 +104,7 @@ final class DefaultImeVisibilityApplier implements ImeVisibilityApplier {
 
     @GuardedBy("ImfLock.class")
     @Override
-    public void performHideIme(IBinder hideInputToken, @Nullable ImeTracker.Token statsToken,
+    public void performHideIme(IBinder hideInputToken, @NonNull ImeTracker.Token statsToken,
             ResultReceiver resultReceiver, @SoftInputShowHideReason int reason) {
         final IInputMethodInvoker curMethod = mService.getCurMethodLocked();
         if (curMethod != null) {
@@ -118,7 +120,8 @@ final class DefaultImeVisibilityApplier implements ImeVisibilityApplier {
             // TODO(b/192412909): Check if we can always call onShowHideSoftInputRequested() or not.
             if (curMethod.hideSoftInput(hideInputToken, statsToken, 0, resultReceiver)) {
                 if (DEBUG_IME_VISIBILITY) {
-                    EventLog.writeEvent(IMF_HIDE_IME, statsToken.getTag(),
+                    EventLog.writeEvent(IMF_HIDE_IME,
+                            statsToken != null ? statsToken.getTag() : ImeTracker.TOKEN_NONE,
                             Objects.toString(mService.mCurFocusedWindow),
                             InputMethodDebug.softInputDisplayReasonToString(reason),
                             InputMethodDebug.softInputModeToString(
@@ -132,14 +135,16 @@ final class DefaultImeVisibilityApplier implements ImeVisibilityApplier {
 
     @GuardedBy("ImfLock.class")
     @Override
-    public void applyImeVisibility(IBinder windowToken, @Nullable ImeTracker.Token statsToken,
+    public void applyImeVisibility(IBinder windowToken, @NonNull ImeTracker.Token statsToken,
             @ImeVisibilityStateComputer.VisibilityState int state) {
-        applyImeVisibility(windowToken, statsToken, state, -1 /* ignore reason */);
+        applyImeVisibility(windowToken, statsToken, state,
+                SoftInputShowHideReason.NOT_SET /* ignore reason */);
     }
 
     @GuardedBy("ImfLock.class")
     void applyImeVisibility(IBinder windowToken, @Nullable ImeTracker.Token statsToken,
-            @ImeVisibilityStateComputer.VisibilityState int state, int reason) {
+            @ImeVisibilityStateComputer.VisibilityState int state,
+            @SoftInputShowHideReason int reason) {
         switch (state) {
             case STATE_SHOW_IME:
                 ImeTracker.forLogging().onProgress(statsToken,
@@ -164,18 +169,20 @@ final class DefaultImeVisibilityApplier implements ImeVisibilityApplier {
                 }
                 break;
             case STATE_HIDE_IME_EXPLICIT:
-                mService.hideCurrentInputLocked(windowToken, statsToken, 0, null, reason);
+                mService.hideCurrentInputLocked(windowToken, statsToken,
+                        0 /* flags */, null /* resultReceiver */, reason);
                 break;
             case STATE_HIDE_IME_NOT_ALWAYS:
                 mService.hideCurrentInputLocked(windowToken, statsToken,
-                        InputMethodManager.HIDE_NOT_ALWAYS, null, reason);
+                        InputMethodManager.HIDE_NOT_ALWAYS, null /* resultReceiver */, reason);
                 break;
             case STATE_SHOW_IME_IMPLICIT:
                 mService.showCurrentInputLocked(windowToken, statsToken,
-                        InputMethodManager.SHOW_IMPLICIT, null, reason);
+                        InputMethodManager.SHOW_IMPLICIT, MotionEvent.TOOL_TYPE_UNKNOWN,
+                        null /* resultReceiver */, reason);
                 break;
             case STATE_SHOW_IME_SNAPSHOT:
-                showImeScreenshot(windowToken, mService.getDisplayIdToShowImeLocked(), null);
+                showImeScreenshot(windowToken, mService.getDisplayIdToShowImeLocked());
                 break;
             case STATE_REMOVE_IME_SNAPSHOT:
                 removeImeScreenshot(mService.getDisplayIdToShowImeLocked());
@@ -187,11 +194,10 @@ final class DefaultImeVisibilityApplier implements ImeVisibilityApplier {
 
     @GuardedBy("ImfLock.class")
     @Override
-    public boolean showImeScreenshot(@NonNull IBinder imeTarget, int displayId,
-            @Nullable ImeTracker.Token statsToken) {
+    public boolean showImeScreenshot(@NonNull IBinder imeTarget, int displayId) {
         if (mImeTargetVisibilityPolicy.showImeScreenshot(imeTarget, displayId)) {
             mService.onShowHideSoftInputRequested(false /* show */, imeTarget,
-                    SHOW_IME_SCREENSHOT_FROM_IMMS, statsToken);
+                    SHOW_IME_SCREENSHOT_FROM_IMMS, null /* statsToken */);
             return true;
         }
         return false;
@@ -202,7 +208,7 @@ final class DefaultImeVisibilityApplier implements ImeVisibilityApplier {
     public boolean removeImeScreenshot(int displayId) {
         if (mImeTargetVisibilityPolicy.removeImeScreenshot(displayId)) {
             mService.onShowHideSoftInputRequested(false /* show */, mService.mCurFocusedWindow,
-                    REMOVE_IME_SCREENSHOT_FROM_IMMS, null);
+                    REMOVE_IME_SCREENSHOT_FROM_IMMS, null /* statsToken */);
             return true;
         }
         return false;

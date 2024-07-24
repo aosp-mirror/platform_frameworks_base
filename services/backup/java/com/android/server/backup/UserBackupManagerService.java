@@ -36,6 +36,7 @@ import static com.android.server.backup.internal.BackupHandler.MSG_RUN_CLEAR;
 import static com.android.server.backup.internal.BackupHandler.MSG_RUN_RESTORE;
 import static com.android.server.backup.internal.BackupHandler.MSG_SCHEDULE_BACKUP_PACKAGE;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.app.ActivityManager;
@@ -518,7 +519,8 @@ public class UserBackupManagerService {
 
     @VisibleForTesting
     UserBackupManagerService(Context context, PackageManager packageManager,
-            LifecycleOperationStorage operationStorage, TransportManager transportManager) {
+            LifecycleOperationStorage operationStorage, TransportManager transportManager,
+            BackupHandler backupHandler, BackupManagerConstants backupManagerConstants) {
         mContext = context;
 
         mUserId = 0;
@@ -526,6 +528,9 @@ public class UserBackupManagerService {
         mPackageManager = packageManager;
         mOperationStorage = operationStorage;
         mTransportManager = transportManager;
+        mFullBackupQueue = new ArrayList<>();
+        mBackupHandler = backupHandler;
+        mConstants = backupManagerConstants;
 
         mBaseStateDir = null;
         mDataDir = null;
@@ -537,9 +542,7 @@ public class UserBackupManagerService {
         mAgentTimeoutParameters = null;
         mActivityManagerInternal = null;
         mAlarmManager = null;
-        mConstants = null;
         mWakelock = null;
-        mBackupHandler = null;
         mBackupPreferences = null;
         mBackupPasswordManager = null;
         mPackageManagerBinder = null;
@@ -991,6 +994,7 @@ public class UserBackupManagerService {
                 /* scheduler */ null);
     }
 
+    @NonNull
     private ArrayList<FullBackupEntry> readFullBackupSchedule() {
         boolean changed = false;
         ArrayList<FullBackupEntry> schedule = null;
@@ -1004,11 +1008,11 @@ public class UserBackupManagerService {
                  DataInputStream in = new DataInputStream(bufStream)) {
                 int version = in.readInt();
                 if (version != SCHEDULE_FILE_VERSION) {
-                    Slog.e(
-                            TAG,
-                            addUserIdToLogMessage(
-                                    mUserId, "Unknown backup schedule version " + version));
-                    return null;
+                    // The file version doesn't match the expected value.
+                    // Since this is within a "try" block, this exception will be treated like
+                    // any other exception, and caught below.
+                    throw new IllegalArgumentException("Unknown backup schedule version "
+                            + version);
                 }
 
                 final int numPackages = in.readInt();

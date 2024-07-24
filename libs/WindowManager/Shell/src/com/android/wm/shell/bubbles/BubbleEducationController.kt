@@ -40,7 +40,13 @@ class BubbleEducationController(private val context: Context) {
 
     /** Whether education view should show for the collapsed stack. */
     fun shouldShowStackEducation(bubble: BubbleViewProvider?): Boolean {
-        val shouldShow = bubble != null &&
+        if (BubbleDebugConfig.neverShowUserEducation(context)) {
+            logDebug("Show stack edu: never")
+            return false
+        }
+
+        val shouldShow =
+            bubble != null &&
                 bubble.isConversationBubble && // show education for conversation bubbles only
                 (!hasSeenStackEducation || BubbleDebugConfig.forceShowUserEducation(context))
         logDebug("Show stack edu: $shouldShow")
@@ -49,7 +55,13 @@ class BubbleEducationController(private val context: Context) {
 
     /** Whether the educational view should show for the expanded view "manage" menu. */
     fun shouldShowManageEducation(bubble: BubbleViewProvider?): Boolean {
-        val shouldShow = bubble != null &&
+        if (BubbleDebugConfig.neverShowUserEducation(context)) {
+            logDebug("Show manage edu: never")
+            return false
+        }
+
+        val shouldShow =
+            bubble != null &&
                 bubble.isConversationBubble && // show education for conversation bubbles only
                 (!hasSeenManageEducation || BubbleDebugConfig.forceShowUserEducation(context))
         logDebug("Show manage edu: $shouldShow")

@@ -37,7 +37,11 @@ import java.util.List;
  */
 @SystemApi
 public final class EuiccRulesAuthTable implements Parcelable {
-    /** Profile policy rule flags */
+    /**
+     * Profile policy rule flags
+     *
+     * @removed mistakenly exposed previously
+     */
     @Retention(RetentionPolicy.SOURCE)
     @IntDef(flag = true, prefix = { "POLICY_RULE_FLAG_" }, value = {
             POLICY_RULE_FLAG_CONSENT_REQUIRED

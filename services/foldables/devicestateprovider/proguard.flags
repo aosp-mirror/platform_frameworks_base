@@ -1,0 +1,1 @@
+-keep,allowoptimization,allowaccessmodification class com.android.server.policy.BookStyleDeviceStatePolicy { *; }

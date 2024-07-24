@@ -16,12 +16,15 @@
 
 #include "MinikinUtils.h"
 
-#include <string>
-
 #include <log/log.h>
-
+#include <minikin/FamilyVariant.h>
 #include <minikin/MeasuredText.h>
 #include <minikin/Measurement.h>
+
+#include <optional>
+#include <string>
+
+#include "FeatureFlags.h"
 #include "Paint.h"
 #include "SkPathMeasure.h"
 #include "Typeface.h"
@@ -43,9 +46,17 @@ minikin::MinikinPaint MinikinUtils::prepareMinikinPaint(const Paint* paint,
     minikinPaint.wordSpacing = paint->getWordSpacing();
     minikinPaint.fontFlags = MinikinFontSkia::packFontFlags(font);
     minikinPaint.localeListId = paint->getMinikinLocaleListId();
-    minikinPaint.familyVariant = paint->getFamilyVariant();
     minikinPaint.fontStyle = resolvedFace->fStyle;
     minikinPaint.fontFeatureSettings = paint->getFontFeatureSettings();
+
+    const std::optional<minikin::FamilyVariant>& familyVariant = paint->getFamilyVariant();
+    if (familyVariant.has_value()) {
+        minikinPaint.familyVariant = familyVariant.value();
+    } else {
+        minikinPaint.familyVariant = text_feature::deprecate_ui_fonts()
+                                             ? minikin::FamilyVariant::ELEGANT
+                                             : minikin::FamilyVariant::DEFAULT;
+    }
     return minikinPaint;
 }
 
@@ -61,10 +72,13 @@ minikin::Layout MinikinUtils::doLayout(const Paint* paint, minikin::Bidi bidiFla
     const minikin::Range contextRange(contextStart, contextStart + contextCount);
     const minikin::StartHyphenEdit startHyphen = paint->getStartHyphenEdit();
     const minikin::EndHyphenEdit endHyphen = paint->getEndHyphenEdit();
+    const minikin::RunFlag minikinRunFlag = text_feature::letter_spacing_justification()
+                                                    ? paint->getRunFlag()
+                                                    : minikin::RunFlag::NONE;
 
     if (mt == nullptr) {
         return minikin::Layout(textBuf.substr(contextRange), range - contextStart, bidiFlags,
-                               minikinPaint, startHyphen, endHyphen);
+                               minikinPaint, startHyphen, endHyphen, minikinRunFlag);
     } else {
         return mt->buildLayout(textBuf, range, contextRange, minikinPaint, startHyphen, endHyphen);
     }
@@ -84,15 +98,19 @@ void MinikinUtils::getBounds(const Paint* paint, minikin::Bidi bidiFlags, const 
 
 float MinikinUtils::measureText(const Paint* paint, minikin::Bidi bidiFlags,
                                 const Typeface* typeface, const uint16_t* buf, size_t start,
-                                size_t count, size_t bufSize, float* advances) {
+                                size_t count, size_t bufSize, float* advances,
+                                minikin::MinikinRect* bounds, uint32_t* clusterCount) {
     minikin::MinikinPaint minikinPaint = prepareMinikinPaint(paint, typeface);
     const minikin::U16StringPiece textBuf(buf, bufSize);
     const minikin::Range range(start, start + count);
     const minikin::StartHyphenEdit startHyphen = paint->getStartHyphenEdit();
     const minikin::EndHyphenEdit endHyphen = paint->getEndHyphenEdit();
+    const minikin::RunFlag minikinRunFlag = text_feature::letter_spacing_justification()
+                                                    ? paint->getRunFlag()
+                                                    : minikin::RunFlag::NONE;
 
     return minikin::Layout::measureText(textBuf, range, bidiFlags, minikinPaint, startHyphen,
-                                        endHyphen, advances);
+                                        endHyphen, advances, bounds, clusterCount, minikinRunFlag);
 }
 
 minikin::MinikinExtent MinikinUtils::getFontExtent(const Paint* paint, minikin::Bidi bidiFlags,

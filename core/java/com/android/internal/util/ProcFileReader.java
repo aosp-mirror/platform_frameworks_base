@@ -32,6 +32,7 @@ import java.nio.charset.StandardCharsets;
  * Currently doesn't support formats based on {@code \0}, tabs.
  * Consecutive spaces are treated as a single delimiter.
  */
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
 public class ProcFileReader implements Closeable {
     private final InputStream mStream;
     private final byte[] mBuffer;
@@ -88,6 +89,12 @@ public class ProcFileReader implements Closeable {
         mTail -= count;
         if (mTail == 0) {
             fillBuf();
+
+            if (mTail > 0 && mBuffer[0] == ' ') {
+                // After filling the buffer, it contains more consecutive
+                // delimiters that need to be skipped.
+                consumeBuf(0);
+            }
         }
     }
 

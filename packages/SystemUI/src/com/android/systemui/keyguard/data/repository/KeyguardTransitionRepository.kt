@@ -25,6 +25,7 @@ import android.util.Log
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.TransitionInfo
+import com.android.systemui.keyguard.shared.model.TransitionModeOnCanceled
 import com.android.systemui.keyguard.shared.model.TransitionState
 import com.android.systemui.keyguard.shared.model.TransitionStep
 import java.util.UUID
@@ -49,7 +50,9 @@ import kotlinx.coroutines.flow.filter
  * this repository.
  *
  * To print all transitions to logcat to help with debugging, run this command:
- * adb shell settings put global systemui/buffer/KeyguardLog VERBOSE
+ * ```
+ * adb shell cmd statusbar echo -b KeyguardLog:VERBOSE
+ * ```
  *
  * This will print all keyguard transitions to logcat with the KeyguardTransitionAuditLogger tag.
  */
@@ -73,11 +76,8 @@ interface KeyguardTransitionRepository {
     /**
      * Begin a transition from one state to another. Transitions are interruptible, and will issue a
      * [TransitionStep] with state = [TransitionState.CANCELED] before beginning the next one.
-     *
-     * When canceled, there are two options: to continue from the current position of the prior
-     * transition, or to reset the position. When [resetIfCanceled] == true, it will do the latter.
      */
-    fun startTransition(info: TransitionInfo, resetIfCanceled: Boolean = false): UUID?
+    fun startTransition(info: TransitionInfo): UUID?
 
     /**
      * Allows manual control of a transition. When calling [startTransition], the consumer must pass
@@ -103,7 +103,7 @@ class KeyguardTransitionRepositoryImpl @Inject constructor() : KeyguardTransitio
     private val _transitions =
         MutableSharedFlow<TransitionStep>(
             replay = 2,
-            extraBufferCapacity = 10,
+            extraBufferCapacity = 20,
             onBufferOverflow = BufferOverflow.DROP_OLDEST,
         )
     override val transitions = _transitions.asSharedFlow().distinctUntilChanged()
@@ -117,7 +117,8 @@ class KeyguardTransitionRepositoryImpl @Inject constructor() : KeyguardTransitio
     private var updateTransitionId: UUID? = null
 
     init {
-        // Seed with transitions signaling a boot into lockscreen state
+        // Seed with transitions signaling a boot into lockscreen state. If updating this, please
+        // also update FakeKeyguardTransitionRepository.
         emitTransition(
             TransitionStep(
                 KeyguardState.OFF,
@@ -138,10 +139,7 @@ class KeyguardTransitionRepositoryImpl @Inject constructor() : KeyguardTransitio
         )
     }
 
-    override fun startTransition(
-        info: TransitionInfo,
-        resetIfCanceled: Boolean,
-    ): UUID? {
+    override fun startTransition(info: TransitionInfo): UUID? {
         if (lastStep.from == info.from && lastStep.to == info.to) {
             Log.i(TAG, "Duplicate call to start the transition, rejecting: $info")
             return null
@@ -149,10 +147,10 @@ class KeyguardTransitionRepositoryImpl @Inject constructor() : KeyguardTransitio
         val startingValue =
             if (lastStep.transitionState != TransitionState.FINISHED) {
                 Log.i(TAG, "Transition still active: $lastStep, canceling")
-                if (resetIfCanceled) {
-                    0f
-                } else {
-                    lastStep.value
+                when (info.modeOnCanceled) {
+                    TransitionModeOnCanceled.LAST_VALUE -> lastStep.value
+                    TransitionModeOnCanceled.RESET -> 0f
+                    TransitionModeOnCanceled.REVERSE -> 1f - lastStep.value
                 }
             } else {
                 0f
@@ -179,9 +177,11 @@ class KeyguardTransitionRepositoryImpl @Inject constructor() : KeyguardTransitio
                     override fun onAnimationStart(animation: Animator) {
                         emitTransition(TransitionStep(info, startingValue, TransitionState.STARTED))
                     }
+
                     override fun onAnimationCancel(animation: Animator) {
                         endAnimation(lastStep.value, TransitionState.CANCELED)
                     }
+
                     override fun onAnimationEnd(animation: Animator) {
                         endAnimation(1f, TransitionState.FINISHED)
                     }
@@ -226,34 +226,27 @@ class KeyguardTransitionRepositoryImpl @Inject constructor() : KeyguardTransitio
     }
 
     private fun emitTransition(nextStep: TransitionStep, isManual: Boolean = false) {
-        trace(nextStep, isManual)
-        val emitted = _transitions.tryEmit(nextStep)
-        if (!emitted) {
-            Log.w(TAG, "Failed to emit next value without suspending")
-        }
+        logAndTrace(nextStep, isManual)
+        _transitions.tryEmit(nextStep)
         lastStep = nextStep
     }
 
-    private fun trace(step: TransitionStep, isManual: Boolean) {
+    private fun logAndTrace(step: TransitionStep, isManual: Boolean) {
         if (step.transitionState == TransitionState.RUNNING) {
             return
         }
-        val traceName =
-            "Transition: ${step.from} -> ${step.to} " +
-                if (isManual) {
-                    "(manual)"
-                } else {
-                    ""
-                }
+        val manualStr = if (isManual) " (manual)" else ""
+        val traceName = "Transition: ${step.from} -> ${step.to}$manualStr"
+
         val traceCookie = traceName.hashCode()
-        if (step.transitionState == TransitionState.STARTED) {
-            Trace.beginAsyncSection(traceName, traceCookie)
-        } else if (
-            step.transitionState == TransitionState.FINISHED ||
-                step.transitionState == TransitionState.CANCELED
-        ) {
-            Trace.endAsyncSection(traceName, traceCookie)
+        when (step.transitionState) {
+            TransitionState.STARTED -> Trace.beginAsyncSection(traceName, traceCookie)
+            TransitionState.FINISHED -> Trace.endAsyncSection(traceName, traceCookie)
+            TransitionState.CANCELED -> Trace.endAsyncSection(traceName, traceCookie)
+            else -> {}
         }
+
+        Log.i(TAG, "${step.transitionState.name} transition: $step$manualStr")
     }
 
     companion object {

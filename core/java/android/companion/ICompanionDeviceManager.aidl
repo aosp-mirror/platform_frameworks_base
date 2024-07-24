@@ -24,8 +24,11 @@ import android.companion.IOnTransportsChangedListener;
 import android.companion.ISystemDataTransferCallback;
 import android.companion.AssociationInfo;
 import android.companion.AssociationRequest;
+import android.companion.ObservingDevicePresenceRequest;
 import android.companion.datatransfer.PermissionSyncRequest;
 import android.content.ComponentName;
+import android.os.ParcelUuid;
+
 
 /**
  * Interface for communication with the core companion device manager service.
@@ -37,6 +40,8 @@ interface ICompanionDeviceManager {
         in String callingPackage, int userId);
 
     List<AssociationInfo> getAssociations(String callingPackage, int userId);
+
+    @EnforcePermission("MANAGE_COMPANION_DEVICES")
     List<AssociationInfo> getAllAssociationsForUser(int userId);
 
     /** @deprecated */
@@ -49,25 +54,28 @@ interface ICompanionDeviceManager {
 
     PendingIntent requestNotificationAccess(in ComponentName component, int userId);
 
-    /** @deprecated */
+    @EnforcePermission("MANAGE_COMPANION_DEVICES")
     boolean isDeviceAssociatedForWifiConnection(in String packageName, in String macAddress,
         int userId);
 
+    @EnforcePermission("REQUEST_OBSERVE_COMPANION_DEVICE_PRESENCE")
     void registerDevicePresenceListenerService(in String deviceAddress, in String callingPackage,
         int userId);
 
+    @EnforcePermission("REQUEST_OBSERVE_COMPANION_DEVICE_PRESENCE")
     void unregisterDevicePresenceListenerService(in String deviceAddress, in String callingPackage,
         int userId);
 
-    /** @deprecated */
     boolean canPairWithoutPrompt(in String packageName, in String deviceMacAddress, int userId);
 
-    /** @deprecated */
+    @EnforcePermission("ASSOCIATE_COMPANION_DEVICES")
     void createAssociation(in String packageName, in String macAddress, int userId,
         in byte[] certificate);
 
+    @EnforcePermission("MANAGE_COMPANION_DEVICES")
     void addOnAssociationsChangedListener(IOnAssociationsChangedListener listener, int userId);
 
+    @EnforcePermission("MANAGE_COMPANION_DEVICES")
     void removeOnAssociationsChangedListener(IOnAssociationsChangedListener listener, int userId);
 
     @EnforcePermission("USE_COMPANION_TRANSPORTS")
@@ -92,11 +100,15 @@ interface ICompanionDeviceManager {
     PendingIntent buildPermissionTransferUserConsentIntent(String callingPackage, int userId,
         int associationId);
 
+    boolean isPermissionTransferUserConsented(String callingPackage, int userId, int associationId);
+
     void startSystemDataTransfer(String packageName, int userId, int associationId,
         in ISystemDataTransferCallback callback);
 
+    @EnforcePermission("DELIVER_COMPANION_MESSAGES")
     void attachSystemDataTransport(String packageName, int userId, int associationId, in ParcelFileDescriptor fd);
 
+    @EnforcePermission("DELIVER_COMPANION_MESSAGES")
     void detachSystemDataTransport(String packageName, int userId, int associationId);
 
     boolean isCompanionApplicationBound(String packageName, int userId);
@@ -113,5 +125,20 @@ interface ICompanionDeviceManager {
 
     PermissionSyncRequest getPermissionSyncRequest(int associationId);
 
+    @EnforcePermission("MANAGE_COMPANION_DEVICES")
     void enableSecureTransport(boolean enabled);
+
+    void setAssociationTag(int associationId, String tag);
+
+    void clearAssociationTag(int associationId);
+
+    byte[] getBackupPayload(int userId);
+
+    void applyRestoredPayload(in byte[] payload, int userId);
+
+    @EnforcePermission("REQUEST_OBSERVE_COMPANION_DEVICE_PRESENCE")
+    void startObservingDevicePresence(in ObservingDevicePresenceRequest request, in String packageName, int userId);
+
+    @EnforcePermission("REQUEST_OBSERVE_COMPANION_DEVICE_PRESENCE")
+    void stopObservingDevicePresence(in ObservingDevicePresenceRequest request, in String packageName, int userId);
 }

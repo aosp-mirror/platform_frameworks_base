@@ -12,6 +12,25 @@
            }
        ],
        "file_patterns": ["permission_manager.cpp"]
+    },
+    {
+       "name": "CtsOsTestCases",
+       "options": [
+           {
+              "include-filter": "android.os.cts.PerformanceHintManagerTest"
+           }
+       ],
+       "file_patterns": ["performance_hint.cpp"]
+    }
+  ],
+  "postsubmit": [
+    {
+      "name": "CtsThermalTestCases",
+       "file_patterns": ["thermal.cpp"]
+    },
+    {
+      "name": "NativeThermalUnitTestCases",
+       "file_patterns": ["thermal.cpp"]
     }
   ]
 }

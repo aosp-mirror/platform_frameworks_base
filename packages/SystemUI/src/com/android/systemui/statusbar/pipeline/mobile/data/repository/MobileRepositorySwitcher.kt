@@ -151,6 +151,9 @@ constructor(
     override val defaultMobileIconGroup: Flow<SignalIcon.MobileIconGroup> =
         activeRepo.flatMapLatest { it.defaultMobileIconGroup }
 
+    override val isAnySimSecure: Flow<Boolean> = activeRepo.flatMapLatest { it.isAnySimSecure }
+    override fun getIsAnySimSecure(): Boolean = activeRepo.value.getIsAnySimSecure()
+
     override val defaultDataSubId: StateFlow<Int> =
         activeRepo
             .flatMapLatest { it.defaultDataSubId }
@@ -185,4 +188,11 @@ constructor(
         }
         return realRepository.getRepoForSubId(subId)
     }
+
+    override suspend fun isInEcmMode(): Boolean =
+        if (isDemoMode.value) {
+            demoMobileConnectionsRepository.isInEcmMode()
+        } else {
+            realRepository.isInEcmMode()
+        }
 }

@@ -16,24 +16,34 @@
 
 package com.android.systemui.statusbar.phone;
 
+import static com.android.systemui.Flags.centralizedStatusBarHeightFix;
 import static com.android.systemui.doze.util.BurnInHelperKt.getBurnInOffset;
 import static com.android.systemui.doze.util.BurnInHelperKt.getBurnInScale;
 import static com.android.systemui.statusbar.notification.NotificationUtils.interpolate;
 
+import android.content.Context;
 import android.content.res.Resources;
 import android.util.MathUtils;
 
 import com.android.app.animation.Interpolators;
 import com.android.keyguard.BouncerPanelExpansionCalculator;
 import com.android.keyguard.KeyguardStatusView;
-import com.android.systemui.R;
+import com.android.systemui.log.LogBuffer;
+import com.android.systemui.log.core.Logger;
+import com.android.systemui.log.dagger.KeyguardClockLog;
+import com.android.systemui.res.R;
+import com.android.systemui.shade.LargeScreenHeaderHelper;
 import com.android.systemui.shade.ShadeViewController;
 import com.android.systemui.statusbar.policy.KeyguardUserSwitcherListView;
+
+import javax.inject.Inject;
 
 /**
  * Utility class to calculate the clock position and top padding of notifications on Keyguard.
  */
 public class KeyguardClockPositionAlgorithm {
+    private static final String TAG = "KeyguardClockPositionAlgorithm";
+    private static final boolean DEBUG = false;
 
     /**
      * Margin between the bottom of the status view and the notification shade.
@@ -147,14 +157,21 @@ public class KeyguardClockPositionAlgorithm {
      */
     private boolean mIsClockTopAligned;
 
-    /**
-     * Refreshes the dimension values.
-     */
-    public void loadDimens(Resources res) {
-        mStatusViewBottomMargin = res.getDimensionPixelSize(
-                R.dimen.keyguard_status_view_bottom_margin);
+    private Logger mLogger;
+
+    @Inject
+    public KeyguardClockPositionAlgorithm(@KeyguardClockLog LogBuffer logBuffer) {
+        mLogger = new Logger(logBuffer, TAG);
+    }
+
+    /** Refreshes the dimension values. */
+    public void loadDimens(Context context, Resources res) {
+        mStatusViewBottomMargin =
+                res.getDimensionPixelSize(R.dimen.keyguard_status_view_bottom_margin);
         mSplitShadeTopNotificationsMargin =
-                res.getDimensionPixelSize(R.dimen.large_screen_shade_header_height);
+                centralizedStatusBarHeightFix()
+                        ? LargeScreenHeaderHelper.getLargeScreenHeaderHeight(context)
+                        : res.getDimensionPixelSize(R.dimen.large_screen_shade_header_height);
         mSplitShadeTargetTopMargin =
                 res.getDimensionPixelSize(R.dimen.keyguard_split_shade_top_margin);
 
@@ -302,10 +319,26 @@ public class KeyguardClockPositionAlgorithm {
         }
 
         float fullyDarkBurnInOffset = burnInPreventionOffsetY(burnInPreventionOffsetY);
-        float clockYDark = clockY
-                + fullyDarkBurnInOffset
-                + shift;
+        float clockYDark = clockY + fullyDarkBurnInOffset + shift;
         mCurrentBurnInOffsetY = MathUtils.lerp(0, fullyDarkBurnInOffset, darkAmount);
+
+        if (DEBUG) {
+            final float finalShift = shift;
+            final float finalBurnInPreventionOffsetY = burnInPreventionOffsetY;
+            mLogger.i(msg -> {
+                final String inputs = "panelExpansion: " + panelExpansion
+                        + " darkAmount: " + darkAmount;
+                final String outputs = "clockY: " + clockY
+                        + " burnInPreventionOffsetY: " + finalBurnInPreventionOffsetY
+                        + " fullyDarkBurnInOffset: " + fullyDarkBurnInOffset
+                        + " shift: " + finalShift
+                        + " mOverStretchAmount: " + mOverStretchAmount
+                        + " mCurrentBurnInOffsetY: " + mCurrentBurnInOffsetY;
+                return inputs + " -> " + outputs;
+            }, msg -> {
+                return kotlin.Unit.INSTANCE;
+            });
+        }
         return (int) (MathUtils.lerp(clockY, clockYDark, darkAmount) + mOverStretchAmount);
     }
 

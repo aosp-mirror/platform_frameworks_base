@@ -16,6 +16,10 @@
 
 package android.widget;
 
+import static android.view.flags.Flags.enableArrowIconOnHoverWhenClickable;
+import static android.view.flags.Flags.FLAG_ENABLE_ARROW_ICON_ON_HOVER_WHEN_CLICKABLE;
+
+import android.annotation.FlaggedApi;
 import android.content.Context;
 import android.util.AttributeSet;
 import android.view.InputDevice;
@@ -23,7 +27,6 @@ import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.PointerIcon;
 import android.widget.RemoteViews.RemoteView;
-
 
 /**
  * A user interface element the user can tap or click to perform an action.
@@ -172,10 +175,16 @@ public class Button extends TextView {
         return Button.class.getName();
     }
 
+    @FlaggedApi(FLAG_ENABLE_ARROW_ICON_ON_HOVER_WHEN_CLICKABLE)
     @Override
     public PointerIcon onResolvePointerIcon(MotionEvent event, int pointerIndex) {
-        if (getPointerIcon() == null && isClickable() && isEnabled()
-                && event.isFromSource(InputDevice.SOURCE_MOUSE)) {
+        // By default the pointer icon is an arrow. More specifically, when the pointer icon is set
+        // to null, it will be an arrow. Therefore, we don't need to change the icon when
+        // enableArrowIconOnHoverWhenClickable() and the pointer icon is a null. We only need to do
+        // that when we want the hand icon for hover.
+        if (!enableArrowIconOnHoverWhenClickable() && getPointerIcon() == null && isClickable()
+                && isEnabled() && event.isFromSource(InputDevice.SOURCE_MOUSE)
+        ) {
             return PointerIcon.getSystemIcon(getContext(), PointerIcon.TYPE_HAND);
         }
         return super.onResolvePointerIcon(event, pointerIndex);

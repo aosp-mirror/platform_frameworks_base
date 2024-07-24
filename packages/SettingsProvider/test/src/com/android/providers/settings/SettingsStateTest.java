@@ -15,9 +15,24 @@
  */
 package com.android.providers.settings;
 
+import static junit.framework.Assert.assertEquals;
+import static junit.framework.Assert.assertFalse;
+import static junit.framework.Assert.assertNull;
+import static junit.framework.Assert.assertTrue;
+import static junit.framework.Assert.fail;
+
+import android.aconfig.Aconfig;
+import android.aconfig.Aconfig.parsed_flag;
+import android.aconfig.Aconfig.parsed_flags;
 import android.os.Looper;
-import android.test.AndroidTestCase;
+import android.platform.test.annotations.RequiresFlagsDisabled;
+import android.platform.test.annotations.RequiresFlagsEnabled;
+import android.platform.test.flag.junit.CheckFlagsRule;
+import android.platform.test.flag.junit.DeviceFlagsValueProvider;
 import android.util.Xml;
+
+import androidx.test.InstrumentationRegistry;
+import androidx.test.runner.AndroidJUnit4;
 
 import com.android.modules.utils.TypedXmlSerializer;
 
@@ -27,8 +42,22 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.PrintStream;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
-public class SettingsStateTest extends AndroidTestCase {
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+
+@RunWith(AndroidJUnit4.class)
+public class SettingsStateTest {
+    @Rule
+    public final CheckFlagsRule mCheckFlagsRule =
+            DeviceFlagsValueProvider.createCheckFlagsRule();
+
     public static final String CRAZY_STRING =
             "\u0000\u0001\u0002\u0003\u0004\u0005\u0006\u0007\u0008\u0009\n\u000b\u000c\r" +
                     "\u000e\u000f\u0010\u0011\u0012\u0013\u0014\u0015\u0016\u0017\u0018\u0019\u001a" +
@@ -51,16 +80,196 @@ public class SettingsStateTest extends AndroidTestCase {
     private static final String SYSTEM_PACKAGE = "android";
     private static final String SETTING_NAME = "test_setting";
 
+    private static final String FLAG_NAME_1 = "namespace123/flag456";
+    private static final String FLAG_NAME_1_STAGED = "staged/namespace123*flag456";
+    private static final String FLAG_NAME_2 = "not_staged/flag101";
+
+    private static final String INVALID_STAGED_FLAG_1 = "stagednamespace*flagName";
+    private static final String INVALID_STAGED_FLAG_2 = "staged/";
+    private static final String INVALID_STAGED_FLAG_3 = "staged/namespace*";
+    private static final String INVALID_STAGED_FLAG_4 = "staged/*flagName";
+
+    private static final String VALID_STAGED_FLAG_1 = "staged/namespace*flagName";
+    private static final String VALID_STAGED_FLAG_1_TRANSFORMED = "namespace/flagName";
+
+    private static final String VALUE1 = "5";
+    private static final String VALUE2 = "6";
+
     private final Object mLock = new Object();
 
     private File mSettingsFile;
 
-    @Override
-    protected void setUp() {
-        mSettingsFile = new File(getContext().getCacheDir(), "setting.xml");
+    @Before
+    public void setUp() {
+        mSettingsFile = new File(InstrumentationRegistry.getContext().getCacheDir(), "setting.xml");
         mSettingsFile.delete();
     }
 
+    @After
+    public void tearDown() throws Exception {
+        if (mSettingsFile != null) {
+            mSettingsFile.delete();
+        }
+    }
+
+    @Test
+    public void testLoadValidAconfigProto() {
+        int configKey = SettingsState.makeKey(SettingsState.SETTINGS_TYPE_CONFIG, 0);
+        Object lock = new Object();
+        SettingsState settingsState = new SettingsState(
+                InstrumentationRegistry.getContext(), lock, mSettingsFile, configKey,
+                SettingsState.MAX_BYTES_PER_APP_PACKAGE_UNLIMITED, Looper.getMainLooper());
+        parsed_flags flags = parsed_flags
+                .newBuilder()
+                .addParsedFlag(parsed_flag
+                    .newBuilder()
+                        .setPackage("com.android.flags")
+                        .setName("flag1")
+                        .setNamespace("test_namespace")
+                        .setDescription("test flag")
+                        .addBug("12345678")
+                        .setState(Aconfig.flag_state.DISABLED)
+                        .setPermission(Aconfig.flag_permission.READ_WRITE))
+                .addParsedFlag(parsed_flag
+                    .newBuilder()
+                        .setPackage("com.android.flags")
+                        .setName("flag2")
+                        .setNamespace("test_namespace")
+                        .setDescription("another test flag")
+                        .addBug("12345678")
+                        .setState(Aconfig.flag_state.ENABLED)
+                        .setPermission(Aconfig.flag_permission.READ_WRITE))
+                .build();
+
+        synchronized (lock) {
+            Map<String, Map<String, String>> defaults = new HashMap<>();
+            settingsState.loadAconfigDefaultValues(flags.toByteArray(), defaults);
+            Map<String, String> namespaceDefaults = defaults.get("test_namespace");
+            assertEquals(2, namespaceDefaults.keySet().size());
+
+            assertEquals("false", namespaceDefaults.get("test_namespace/com.android.flags.flag1"));
+            assertEquals("true", namespaceDefaults.get("test_namespace/com.android.flags.flag2"));
+        }
+    }
+
+    @Test
+    public void testSkipLoadingAconfigFlagWithMissingFields() {
+        int configKey = SettingsState.makeKey(SettingsState.SETTINGS_TYPE_CONFIG, 0);
+        Object lock = new Object();
+        SettingsState settingsState = new SettingsState(
+                InstrumentationRegistry.getContext(), lock, mSettingsFile, configKey,
+                SettingsState.MAX_BYTES_PER_APP_PACKAGE_UNLIMITED, Looper.getMainLooper());
+
+        parsed_flags flags = parsed_flags
+                .newBuilder()
+                .addParsedFlag(parsed_flag
+                    .newBuilder()
+                        .setDescription("test flag")
+                        .addBug("12345678")
+                        .setState(Aconfig.flag_state.DISABLED)
+                        .setPermission(Aconfig.flag_permission.READ_WRITE))
+                .build();
+
+        synchronized (lock) {
+            Map<String, Map<String, String>> defaults = new HashMap<>();
+            settingsState.loadAconfigDefaultValues(flags.toByteArray(), defaults);
+
+            Map<String, String> namespaceDefaults = defaults.get("test_namespace");
+            assertEquals(null, namespaceDefaults);
+        }
+    }
+
+    @Test
+    @RequiresFlagsEnabled(Flags.FLAG_STAGE_ALL_ACONFIG_FLAGS)
+    public void testWritingAconfigFlagStages() {
+        int configKey = SettingsState.makeKey(SettingsState.SETTINGS_TYPE_CONFIG, 0);
+        Object lock = new Object();
+        SettingsState settingsState = new SettingsState(
+                InstrumentationRegistry.getContext(), lock, mSettingsFile, configKey,
+                SettingsState.MAX_BYTES_PER_APP_PACKAGE_UNLIMITED, Looper.getMainLooper());
+        parsed_flags flags = parsed_flags
+                .newBuilder()
+                .addParsedFlag(parsed_flag
+                    .newBuilder()
+                        .setPackage("com.android.flags")
+                        .setName("flag5")
+                        .setNamespace("test_namespace")
+                        .setDescription("test flag")
+                        .addBug("12345678")
+                        .setState(Aconfig.flag_state.DISABLED)
+                        .setPermission(Aconfig.flag_permission.READ_WRITE))
+                .build();
+
+        synchronized (lock) {
+            Map<String, Map<String, String>> defaults = new HashMap<>();
+            settingsState.loadAconfigDefaultValues(flags.toByteArray(), defaults);
+            settingsState.addAconfigDefaultValuesFromMap(defaults);
+
+            settingsState.insertSettingLocked("test_namespace/com.android.flags.flag5",
+                    "true", null, false, "com.android.flags");
+            settingsState.insertSettingLocked("test_namespace/com.android.flags.flag6",
+                    "true", null, false, "com.android.flags");
+
+            assertEquals("true",
+                    settingsState
+                        .getSettingLocked("staged/test_namespace*com.android.flags.flag5")
+                        .getValue());
+            assertEquals(null,
+                    settingsState
+                        .getSettingLocked("test_namespace/com.android.flags.flag5")
+                        .getValue());
+
+            assertEquals(null,
+                    settingsState
+                        .getSettingLocked("staged/test_namespace*com.android.flags.flag6")
+                        .getValue());
+            assertEquals("true",
+                    settingsState
+                        .getSettingLocked("test_namespace/com.android.flags.flag6")
+                        .getValue());
+        }
+    }
+
+    @Test
+    @RequiresFlagsDisabled(Flags.FLAG_LOAD_ACONFIG_DEFAULTS)
+    public void testAddingAconfigMapOnNullIsNoOp() {
+        int configKey = SettingsState.makeKey(SettingsState.SETTINGS_TYPE_CONFIG, 0);
+        Object lock = new Object();
+        SettingsState settingsState = new SettingsState(
+                InstrumentationRegistry.getContext(), lock, mSettingsFile, configKey,
+                SettingsState.MAX_BYTES_PER_APP_PACKAGE_UNLIMITED, Looper.getMainLooper());
+
+        parsed_flags flags = parsed_flags
+                .newBuilder()
+                .addParsedFlag(parsed_flag
+                    .newBuilder()
+                        .setPackage("com.android.flags")
+                        .setName("flag5")
+                        .setNamespace("test_namespace")
+                        .setDescription("test flag")
+                        .addBug("12345678")
+                        .setState(Aconfig.flag_state.DISABLED)
+                        .setPermission(Aconfig.flag_permission.READ_WRITE))
+                .build();
+
+        synchronized (lock) {
+            Map<String, Map<String, String>> defaults = new HashMap<>();
+            settingsState.loadAconfigDefaultValues(flags.toByteArray(), defaults);
+            settingsState.addAconfigDefaultValuesFromMap(defaults);
+
+            assertEquals(null, settingsState.getAconfigDefaultValues());
+        }
+
+    }
+
+    @Test
+    public void testInvalidAconfigProtoDoesNotCrash() {
+        Map<String, Map<String, String>> defaults = new HashMap<>();
+        SettingsState settingsState = getSettingStateObject();
+        settingsState.loadAconfigDefaultValues("invalid protobuf".getBytes(), defaults);
+    }
+
+    @Test
     public void testIsBinary() {
         assertFalse(SettingsState.isBinary(" abc 日本語"));
 
@@ -91,6 +300,7 @@ public class SettingsStateTest extends AndroidTestCase {
     }
 
     /** Make sure we won't pass invalid characters to XML serializer. */
+    @Test
     public void testWriteReadNoCrash() throws Exception {
         ByteArrayOutputStream os = new ByteArrayOutputStream();
 
@@ -133,13 +343,15 @@ public class SettingsStateTest extends AndroidTestCase {
     /**
      * Make sure settings can be written to a file and also can be read.
      */
+    @Test
     public void testReadWrite() {
-        final File file = new File(getContext().getCacheDir(), "setting.xml");
-        file.delete();
         final Object lock = new Object();
 
-        final SettingsState ssWriter = new SettingsState(getContext(), lock, file, 1,
-                SettingsState.MAX_BYTES_PER_APP_PACKAGE_UNLIMITED, Looper.getMainLooper());
+        assertFalse(mSettingsFile.exists());
+        final SettingsState ssWriter =
+                new SettingsState(
+                        InstrumentationRegistry.getContext(), lock, mSettingsFile, 1,
+                        SettingsState.MAX_BYTES_PER_APP_PACKAGE_UNLIMITED, Looper.getMainLooper());
         ssWriter.setVersionLocked(SettingsState.SETTINGS_VERSION_NEW_ENCODING);
 
         ssWriter.insertSettingLocked("k1", "\u0000", null, false, "package");
@@ -147,11 +359,15 @@ public class SettingsStateTest extends AndroidTestCase {
         ssWriter.insertSettingLocked("k3", null, null, false, "p2");
         ssWriter.insertSettingLocked("k4", CRAZY_STRING, null, false, "p3");
         synchronized (lock) {
-            ssWriter.persistSyncLocked();
+            ssWriter.persistSettingsLocked();
         }
+        ssWriter.waitForHandler();
+        assertTrue(mSettingsFile.exists());
+        final SettingsState ssReader =
+                new SettingsState(
+                        InstrumentationRegistry.getContext(), lock, mSettingsFile, 1,
+                        SettingsState.MAX_BYTES_PER_APP_PACKAGE_UNLIMITED, Looper.getMainLooper());
 
-        final SettingsState ssReader = new SettingsState(getContext(), lock, file, 1,
-                SettingsState.MAX_BYTES_PER_APP_PACKAGE_UNLIMITED, Looper.getMainLooper());
         synchronized (lock) {
             assertEquals("\u0000", ssReader.getSettingLocked("k1").getValue());
             assertEquals("abc", ssReader.getSettingLocked("k2").getValue());
@@ -163,11 +379,10 @@ public class SettingsStateTest extends AndroidTestCase {
     /**
      * In version 120, value "null" meant {code NULL}.
      */
+    @Test
     public void testUpgrade() throws Exception {
-        final File file = new File(getContext().getCacheDir(), "setting.xml");
-        file.delete();
         final Object lock = new Object();
-        final PrintStream os = new PrintStream(new FileOutputStream(file));
+        final PrintStream os = new PrintStream(new FileOutputStream(mSettingsFile));
         os.print(
                 "<?xml version='1.0' encoding='UTF-8' standalone='yes' ?>" +
                         "<settings version=\"120\">" +
@@ -177,8 +392,10 @@ public class SettingsStateTest extends AndroidTestCase {
                         "</settings>");
         os.close();
 
-        final SettingsState ss = new SettingsState(getContext(), lock, file, 1,
-                SettingsState.MAX_BYTES_PER_APP_PACKAGE_UNLIMITED, Looper.getMainLooper());
+        final SettingsState ss =
+                new SettingsState(
+                        InstrumentationRegistry.getContext(), lock, mSettingsFile, 1,
+                        SettingsState.MAX_BYTES_PER_APP_PACKAGE_UNLIMITED, Looper.getMainLooper());
         synchronized (lock) {
             SettingsState.Setting s;
             s = ss.getSettingLocked("k0");
@@ -195,36 +412,43 @@ public class SettingsStateTest extends AndroidTestCase {
         }
     }
 
+    @Test
     public void testInitializeSetting_preserveFlagNotSet() {
         SettingsState settingsWriter = getSettingStateObject();
         settingsWriter.insertSettingLocked(SETTING_NAME, "1", null, false, TEST_PACKAGE);
-        settingsWriter.persistSyncLocked();
+        settingsWriter.persistSettingsLocked();
+        settingsWriter.waitForHandler();
 
         SettingsState settingsReader = getSettingStateObject();
         assertFalse(settingsReader.getSettingLocked(SETTING_NAME).isValuePreservedInRestore());
     }
 
+    @Test
     public void testModifySetting_preserveFlagSet() {
         SettingsState settingsWriter = getSettingStateObject();
         settingsWriter.insertSettingLocked(SETTING_NAME, "1", null, false, TEST_PACKAGE);
         settingsWriter.insertSettingLocked(SETTING_NAME, "2", null, false, TEST_PACKAGE);
-        settingsWriter.persistSyncLocked();
+        settingsWriter.persistSettingsLocked();
+        settingsWriter.waitForHandler();
 
         SettingsState settingsReader = getSettingStateObject();
         assertTrue(settingsReader.getSettingLocked(SETTING_NAME).isValuePreservedInRestore());
     }
 
+    @Test
     public void testModifySettingOverrideableByRestore_preserveFlagNotSet() {
         SettingsState settingsWriter = getSettingStateObject();
         settingsWriter.insertSettingLocked(SETTING_NAME, "1", null, false, TEST_PACKAGE);
         settingsWriter.insertSettingLocked(SETTING_NAME, "2", null, false, false, TEST_PACKAGE,
                 /* overrideableByRestore */ true);
-        settingsWriter.persistSyncLocked();
+        settingsWriter.persistSettingsLocked();
+        settingsWriter.waitForHandler();
 
         SettingsState settingsReader = getSettingStateObject();
         assertFalse(settingsReader.getSettingLocked(SETTING_NAME).isValuePreservedInRestore());
     }
 
+    @Test
     public void testModifySettingOverrideableByRestore_preserveFlagAlreadySet_flagValueUnchanged() {
         SettingsState settingsWriter = getSettingStateObject();
         // Init the setting.
@@ -235,12 +459,14 @@ public class SettingsStateTest extends AndroidTestCase {
         // already been set to true.
         settingsWriter.insertSettingLocked(SETTING_NAME, "2", null, false, false, TEST_PACKAGE,
                 /* overrideableByRestore */ true);
-        settingsWriter.persistSyncLocked();
+        settingsWriter.persistSettingsLocked();
+        settingsWriter.waitForHandler();
 
         SettingsState settingsReader = getSettingStateObject();
         assertTrue(settingsReader.getSettingLocked(SETTING_NAME).isValuePreservedInRestore());
     }
 
+    @Test
     public void testResetSetting_preservedFlagIsReset() {
         SettingsState settingsState = getSettingStateObject();
         // Initialize the setting.
@@ -253,6 +479,7 @@ public class SettingsStateTest extends AndroidTestCase {
 
     }
 
+    @Test
     public void testModifySettingBySystemPackage_sameValue_preserveFlagNotSet() {
         SettingsState settingsState = getSettingStateObject();
         // Initialize the setting.
@@ -263,6 +490,7 @@ public class SettingsStateTest extends AndroidTestCase {
         assertFalse(settingsState.getSettingLocked(SETTING_NAME).isValuePreservedInRestore());
     }
 
+    @Test
     public void testModifySettingBySystemPackage_newValue_preserveFlagSet() {
         SettingsState settingsState = getSettingStateObject();
         // Initialize the setting.
@@ -274,12 +502,15 @@ public class SettingsStateTest extends AndroidTestCase {
     }
 
     private SettingsState getSettingStateObject() {
-        SettingsState settingsState = new SettingsState(getContext(), mLock, mSettingsFile, 1,
-                SettingsState.MAX_BYTES_PER_APP_PACKAGE_UNLIMITED, Looper.getMainLooper());
+        SettingsState settingsState =
+                new SettingsState(
+                        InstrumentationRegistry.getContext(), mLock, mSettingsFile, 1,
+                        SettingsState.MAX_BYTES_PER_APP_PACKAGE_UNLIMITED, Looper.getMainLooper());
         settingsState.setVersionLocked(SettingsState.SETTINGS_VERSION_NEW_ENCODING);
         return settingsState;
     }
 
+    @Test
     public void testInsertSetting_memoryUsage() {
         SettingsState settingsState = getSettingStateObject();
         // No exception should be thrown when there is no cap
@@ -287,8 +518,10 @@ public class SettingsStateTest extends AndroidTestCase {
                 null, false, "p1");
         settingsState.deleteSettingLocked(SETTING_NAME);
 
-        settingsState = new SettingsState(getContext(), mLock, mSettingsFile, 1,
-                SettingsState.MAX_BYTES_PER_APP_PACKAGE_LIMITED, Looper.getMainLooper());
+        settingsState =
+                new SettingsState(
+                        InstrumentationRegistry.getContext(), mLock, mSettingsFile, 1,
+                        SettingsState.MAX_BYTES_PER_APP_PACKAGE_LIMITED, Looper.getMainLooper());
         // System package doesn't have memory usage limit
         settingsState.insertSettingLocked(SETTING_NAME, Strings.repeat("A", 20001),
                 null, false, SYSTEM_PACKAGE);
@@ -322,9 +555,12 @@ public class SettingsStateTest extends AndroidTestCase {
         }
     }
 
+    @Test
     public void testMemoryUsagePerPackage() {
-        SettingsState settingsState = new SettingsState(getContext(), mLock, mSettingsFile, 1,
-                SettingsState.MAX_BYTES_PER_APP_PACKAGE_LIMITED, Looper.getMainLooper());
+        SettingsState settingsState =
+                new SettingsState(
+                        InstrumentationRegistry.getContext(), mLock, mSettingsFile, 1,
+                        SettingsState.MAX_BYTES_PER_APP_PACKAGE_LIMITED, Looper.getMainLooper());
 
         // Test inserting one key with default
         final String testKey1 = SETTING_NAME;
@@ -409,9 +645,12 @@ public class SettingsStateTest extends AndroidTestCase {
         assertEquals(expectedMemUsage, settingsState.getMemoryUsage(TEST_PACKAGE));
     }
 
+    @Test
     public void testLargeSettingKey() {
-        SettingsState settingsState = new SettingsState(getContext(), mLock, mSettingsFile, 1,
-                SettingsState.MAX_BYTES_PER_APP_PACKAGE_LIMITED, Looper.getMainLooper());
+        SettingsState settingsState =
+                new SettingsState(
+                        InstrumentationRegistry.getContext(), mLock, mSettingsFile, 1,
+                        SettingsState.MAX_BYTES_PER_APP_PACKAGE_LIMITED, Looper.getMainLooper());
         final String largeKey = Strings.repeat("A", SettingsState.MAX_LENGTH_PER_STRING + 1);
         final String testValue = "testValue";
         synchronized (mLock) {
@@ -432,9 +671,12 @@ public class SettingsStateTest extends AndroidTestCase {
         }
     }
 
+    @Test
     public void testLargeSettingValue() {
-        SettingsState settingsState = new SettingsState(getContext(), mLock, mSettingsFile, 1,
-                SettingsState.MAX_BYTES_PER_APP_PACKAGE_UNLIMITED, Looper.getMainLooper());
+        SettingsState settingsState =
+                new SettingsState(
+                        InstrumentationRegistry.getContext(), mLock, mSettingsFile, 1,
+                        SettingsState.MAX_BYTES_PER_APP_PACKAGE_UNLIMITED, Looper.getMainLooper());
         final String testKey = "testKey";
         final String largeValue = Strings.repeat("A", SettingsState.MAX_LENGTH_PER_STRING + 1);
         synchronized (mLock) {
@@ -452,6 +694,200 @@ public class SettingsStateTest extends AndroidTestCase {
             } catch (IllegalArgumentException ex) {
                 assertTrue(ex.getMessage().contains("The max length allowed for the string is "));
             }
+        }
+    }
+
+    @Test
+    public void testApplyStagedConfigValues() {
+        int configKey = SettingsState.makeKey(SettingsState.SETTINGS_TYPE_CONFIG, 0);
+        Object lock = new Object();
+        SettingsState settingsState = new SettingsState(
+                InstrumentationRegistry.getContext(), lock, mSettingsFile, configKey,
+                SettingsState.MAX_BYTES_PER_APP_PACKAGE_UNLIMITED, Looper.getMainLooper());
+
+        synchronized (lock) {
+            settingsState.insertSettingLocked(
+                    FLAG_NAME_1_STAGED, VALUE1, null, false, TEST_PACKAGE);
+            settingsState.insertSettingLocked(FLAG_NAME_2, VALUE2, null, false, TEST_PACKAGE);
+            settingsState.persistSettingsLocked();
+        }
+        settingsState.waitForHandler();
+
+        synchronized (lock) {
+            assertEquals(VALUE1, settingsState.getSettingLocked(FLAG_NAME_1_STAGED).getValue());
+            assertEquals(VALUE2, settingsState.getSettingLocked(FLAG_NAME_2).getValue());
+        }
+
+        settingsState = new SettingsState(
+                InstrumentationRegistry.getContext(), lock, mSettingsFile, configKey,
+                SettingsState.MAX_BYTES_PER_APP_PACKAGE_UNLIMITED, Looper.getMainLooper());
+
+        synchronized (lock) {
+            assertEquals(VALUE1, settingsState.getSettingLocked(FLAG_NAME_1).getValue());
+            assertEquals(VALUE2, settingsState.getSettingLocked(FLAG_NAME_2).getValue());
+
+            assertEquals(null, settingsState.getSettingLocked(FLAG_NAME_1_STAGED).getValue());
+        }
+    }
+
+    @Test
+    public void testStagingTransformation() {
+        assertEquals(INVALID_STAGED_FLAG_1,
+                SettingsState.createRealFlagName(INVALID_STAGED_FLAG_1));
+        assertEquals(INVALID_STAGED_FLAG_2,
+                SettingsState.createRealFlagName(INVALID_STAGED_FLAG_2));
+        assertEquals(INVALID_STAGED_FLAG_3,
+                SettingsState.createRealFlagName(INVALID_STAGED_FLAG_3));
+        assertEquals(INVALID_STAGED_FLAG_4,
+                SettingsState.createRealFlagName(INVALID_STAGED_FLAG_4));
+
+        assertEquals(VALID_STAGED_FLAG_1_TRANSFORMED,
+                SettingsState.createRealFlagName(VALID_STAGED_FLAG_1));
+    }
+
+    @Test
+    public void testInvalidStagedFlagsUnaffectedByReboot() {
+        int configKey = SettingsState.makeKey(SettingsState.SETTINGS_TYPE_CONFIG, 0);
+        Object lock = new Object();
+        SettingsState settingsState = new SettingsState(
+                InstrumentationRegistry.getContext(), lock, mSettingsFile, configKey,
+                SettingsState.MAX_BYTES_PER_APP_PACKAGE_UNLIMITED, Looper.getMainLooper());
+
+        synchronized (lock) {
+            settingsState.insertSettingLocked(INVALID_STAGED_FLAG_1,
+                    VALUE2, null, false, TEST_PACKAGE);
+            settingsState.persistSettingsLocked();
+        }
+        settingsState.waitForHandler();
+        synchronized (lock) {
+            assertEquals(VALUE2, settingsState.getSettingLocked(INVALID_STAGED_FLAG_1).getValue());
+        }
+
+        settingsState = new SettingsState(
+                InstrumentationRegistry.getContext(), lock, mSettingsFile, configKey,
+                SettingsState.MAX_BYTES_PER_APP_PACKAGE_UNLIMITED, Looper.getMainLooper());
+
+        synchronized (lock) {
+            assertEquals(VALUE2, settingsState.getSettingLocked(INVALID_STAGED_FLAG_1).getValue());
+        }
+    }
+
+    @Test
+    public void testsetSettingsLockedKeepTrunkDefault() throws Exception {
+        final PrintStream os = new PrintStream(new FileOutputStream(mSettingsFile));
+        os.print(
+                "<?xml version='1.0' encoding='UTF-8' standalone='yes' ?>"
+                        + "<settings version=\"120\">"
+                        + "  <setting id=\"0\" name=\"test_namespace/flag0\" "
+                            + "value=\"false\" package=\"com.android.flags\" />"
+                        + "  <setting id=\"1\" name=\"test_namespace/flag1\" "
+                            + "value=\"false\" package=\"com.android.flags\" />"
+                        + "  <setting id=\"2\" name=\"test_namespace/com.android.flags.flag3\" "
+                            + "value=\"false\" package=\"com.android.flags\" />"
+                        + "  <setting id=\"3\" "
+                        + "name=\"test_another_namespace/com.android.another.flags.flag0\" "
+                            + "value=\"false\" package=\"com.android.another.flags\" />"
+                        + "</settings>");
+        os.close();
+
+        int configKey = SettingsState.makeKey(SettingsState.SETTINGS_TYPE_CONFIG, 0);
+
+        SettingsState settingsState = new SettingsState(
+                InstrumentationRegistry.getContext(), mLock, mSettingsFile, configKey,
+                SettingsState.MAX_BYTES_PER_APP_PACKAGE_UNLIMITED, Looper.getMainLooper());
+
+        String prefix = "test_namespace";
+        Map<String, String> keyValues =
+                Map.of("test_namespace/flag0", "true", "test_namespace/flag2", "false");
+        String packageName = "com.android.flags";
+
+        parsed_flags flags = parsed_flags
+                .newBuilder()
+                .addParsedFlag(parsed_flag
+                    .newBuilder()
+                        .setPackage(packageName)
+                        .setName("flag3")
+                        .setNamespace(prefix)
+                        .setDescription("test flag")
+                        .addBug("12345678")
+                        .setState(Aconfig.flag_state.DISABLED)
+                        .setPermission(Aconfig.flag_permission.READ_WRITE))
+                .addParsedFlag(parsed_flag
+                    .newBuilder()
+                        .setPackage("com.android.another.flags")
+                        .setName("flag0")
+                        .setNamespace("test_another_namespace")
+                        .setDescription("test flag")
+                        .addBug("12345678")
+                        .setState(Aconfig.flag_state.DISABLED)
+                        .setPermission(Aconfig.flag_permission.READ_WRITE))
+                .build();
+
+        synchronized (mLock) {
+            settingsState.loadAconfigDefaultValues(
+                    flags.toByteArray(), settingsState.getAconfigDefaultValues());
+            List<String> updates =
+                    settingsState.setSettingsLocked("test_namespace/", keyValues, packageName);
+            assertEquals(3, updates.size());
+
+            SettingsState.Setting s;
+
+            s = settingsState.getSettingLocked("test_namespace/flag0");
+            assertEquals("true", s.getValue());
+
+            s = settingsState.getSettingLocked("test_namespace/flag1");
+            assertNull(s.getValue());
+
+            s = settingsState.getSettingLocked("test_namespace/flag2");
+            assertEquals("false", s.getValue());
+
+            s = settingsState.getSettingLocked("test_namespace/com.android.flags.flag3");
+            assertEquals("false", s.getValue());
+
+            s = settingsState.getSettingLocked(
+                    "test_another_namespace/com.android.another.flags.flag0");
+            assertEquals("false", s.getValue());
+        }
+    }
+
+    @Test
+    public void testsetSettingsLockedNoTrunkDefault() throws Exception {
+        final PrintStream os = new PrintStream(new FileOutputStream(mSettingsFile));
+        os.print(
+                "<?xml version='1.0' encoding='UTF-8' standalone='yes' ?>"
+                        + "<settings version=\"120\">"
+                        + "  <setting id=\"0\" name=\"test_namespace/flag0\" "
+                            + "value=\"false\" package=\"com.android.flags\" />"
+                        + "  <setting id=\"1\" name=\"test_namespace/flag1\" "
+                            + "value=\"false\" package=\"com.android.flags\" />"
+                        + "</settings>");
+        os.close();
+
+        int configKey = SettingsState.makeKey(SettingsState.SETTINGS_TYPE_CONFIG, 0);
+
+        SettingsState settingsState = new SettingsState(
+                InstrumentationRegistry.getContext(), mLock, mSettingsFile, configKey,
+                SettingsState.MAX_BYTES_PER_APP_PACKAGE_UNLIMITED, Looper.getMainLooper());
+
+        Map<String, String> keyValues =
+                Map.of("test_namespace/flag0", "true", "test_namespace/flag2", "false");
+        String packageName = "com.android.flags";
+
+        synchronized (mLock) {
+            List<String> updates =
+                    settingsState.setSettingsLocked("test_namespace/", keyValues, packageName);
+            assertEquals(3, updates.size());
+
+            SettingsState.Setting s;
+
+            s = settingsState.getSettingLocked("test_namespace/flag0");
+            assertEquals("true", s.getValue());
+
+            s = settingsState.getSettingLocked("test_namespace/flag1");
+            assertNull(s.getValue());
+
+            s = settingsState.getSettingLocked("test_namespace/flag2");
+            assertEquals("false", s.getValue());
         }
     }
 }

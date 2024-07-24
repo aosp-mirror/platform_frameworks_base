@@ -312,19 +312,9 @@ public abstract class DevicePolicyManagerInternal {
             int targetUserId);
 
     /**
-     * Returns whether new "turn off work" behavior is enabled via feature flag.
-     */
-    public abstract boolean isKeepProfilesRunningEnabled();
-
-    /**
      * True if either the entire device or the user is organization managed.
      */
     public abstract boolean isUserOrganizationManaged(@UserIdInt int userId);
-
-    /**
-     * Returns the list of packages suspended by admin on a given user.
-     */
-    public abstract Set<String> getPackagesSuspendedByAdmin(@UserIdInt int userId);
 
     /**
      * Returns whether the application exemptions feature flag is enabled.
@@ -343,4 +333,14 @@ public abstract class DevicePolicyManagerInternal {
      */
     public abstract List<EnforcingUser> getUserRestrictionSources(String restriction,
                 @UserIdInt int userId);
+
+    /**
+     * Enforces resolved security logging policy, should only be invoked from device policy engine.
+     */
+    public abstract void enforceSecurityLoggingPolicy(boolean enabled);
+
+    /**
+     * Enforces resolved audit logging policy, should only be invoked from device policy engine.
+     */
+    public abstract void enforceAuditLoggingPolicy(boolean enabled);
 }

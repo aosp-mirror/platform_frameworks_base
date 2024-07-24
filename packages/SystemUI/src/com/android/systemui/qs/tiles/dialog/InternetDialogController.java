@@ -74,15 +74,16 @@ import com.android.settingslib.mobile.MobileMappings;
 import com.android.settingslib.mobile.TelephonyIcons;
 import com.android.settingslib.net.SignalStrengthUtil;
 import com.android.settingslib.wifi.WifiUtils;
-import com.android.systemui.R;
-import com.android.systemui.animation.ActivityLaunchAnimator;
-import com.android.systemui.animation.DialogLaunchAnimator;
+import com.android.settingslib.wifi.dpp.WifiDppIntentHelper;
+import com.android.systemui.animation.ActivityTransitionAnimator;
+import com.android.systemui.animation.DialogTransitionAnimator;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.flags.Flags;
 import com.android.systemui.plugins.ActivityStarter;
+import com.android.systemui.res.R;
 import com.android.systemui.statusbar.connectivity.AccessPointController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.statusbar.policy.LocationController;
@@ -188,9 +189,10 @@ public class InternetDialogController implements AccessPointController.AccessPoi
     private SignalDrawable mSignalDrawable;
     private SignalDrawable mSecondarySignalDrawable; // For the secondary mobile data sub in DSDS
     private LocationController mLocationController;
-    private DialogLaunchAnimator mDialogLaunchAnimator;
+    private DialogTransitionAnimator mDialogTransitionAnimator;
     private boolean mHasWifiEntries;
     private WifiStateWorker mWifiStateWorker;
+    private boolean mHasActiveSubId;
 
     @VisibleForTesting
     static final float TOAST_PARAMS_HORIZONTAL_WEIGHT = 1.0f;
@@ -248,7 +250,7 @@ public class InternetDialogController implements AccessPointController.AccessPoi
             @Background Handler workerHandler,
             CarrierConfigTracker carrierConfigTracker,
             LocationController locationController,
-            DialogLaunchAnimator dialogLaunchAnimator,
+            DialogTransitionAnimator dialogTransitionAnimator,
             WifiStateWorker wifiStateWorker,
             FeatureFlags featureFlags
     ) {
@@ -281,7 +283,7 @@ public class InternetDialogController implements AccessPointController.AccessPoi
         mSignalDrawable = new SignalDrawable(mContext);
         mSecondarySignalDrawable = new SignalDrawable(mContext);
         mLocationController = locationController;
-        mDialogLaunchAnimator = dialogLaunchAnimator;
+        mDialogTransitionAnimator = dialogTransitionAnimator;
         mConnectedWifiInternetMonitor = new ConnectedWifiInternetMonitor();
         mWifiStateWorker = wifiStateWorker;
         mFeatureFlags = featureFlags;
@@ -298,6 +300,7 @@ public class InternetDialogController implements AccessPointController.AccessPoi
                 mExecutor);
         // Listen the subscription changes
         mOnSubscriptionsChangedListener = new InternetOnSubscriptionChangedListener();
+        refreshHasActiveSubId();
         mSubscriptionManager.addOnSubscriptionsChangedListener(mExecutor,
                 mOnSubscriptionsChangedListener);
         mDefaultDataSubId = getDefaultDataSubscriptionId();
@@ -745,8 +748,8 @@ public class InternetDialogController implements AccessPointController.AccessPoi
     }
 
     private void startActivity(Intent intent, View view) {
-        ActivityLaunchAnimator.Controller controller =
-                mDialogLaunchAnimator.createActivityLaunchController(view);
+        ActivityTransitionAnimator.Controller controller =
+                mDialogTransitionAnimator.createActivityTransitionController(view);
 
         if (controller == null && mCallback != null) {
             mCallback.dismissDialog();
@@ -900,18 +903,22 @@ public class InternetDialogController implements AccessPointController.AccessPoi
      * @return whether there is the carrier item in the slice.
      */
     boolean hasActiveSubId() {
-        if (mSubscriptionManager == null) {
-            if (DEBUG) {
-                Log.d(TAG, "SubscriptionManager is null, can not check carrier.");
-            }
+        if (isAirplaneModeEnabled() || mTelephonyManager == null) {
             return false;
         }
 
-        if (isAirplaneModeEnabled() || mTelephonyManager == null
-                || mSubscriptionManager.getActiveSubscriptionIdList().length <= 0) {
-            return false;
+        return mHasActiveSubId;
+    }
+
+    private void refreshHasActiveSubId() {
+        if (mSubscriptionManager == null) {
+            mHasActiveSubId = false;
+            Log.e(TAG, "SubscriptionManager is null, set mHasActiveSubId = false");
+            return;
         }
-        return true;
+
+        mHasActiveSubId = mSubscriptionManager.getActiveSubscriptionIdList().length > 0;
+        Log.i(TAG, "mHasActiveSubId:" + mHasActiveSubId);
     }
 
     /**
@@ -1128,6 +1135,15 @@ public class InternetDialogController implements AccessPointController.AccessPoi
     public void onSettingsActivityTriggered(Intent settingsIntent) {
     }
 
+    @Override
+    public void onWifiScan(boolean isScan) {
+        if (!isWifiEnabled() || isDeviceLocked()) {
+            mCallback.onWifiScan(false);
+            return;
+        }
+        mCallback.onWifiScan(isScan);
+    }
+
     private class InternetTelephonyCallback extends TelephonyCallback implements
             TelephonyCallback.DataConnectionStateListener,
             TelephonyCallback.DisplayInfoListener,
@@ -1194,6 +1210,7 @@ public class InternetDialogController implements AccessPointController.AccessPoi
 
         @Override
         public void onSubscriptionsChanged() {
+            refreshHasActiveSubId();
             updateListener();
         }
     }
@@ -1331,6 +1348,18 @@ public class InternetDialogController implements AccessPointController.AccessPoi
         mDefaultDataSubId = defaultDataSubId;
     }
 
+    boolean mayLaunchShareWifiSettings(WifiEntry wifiEntry) {
+        Intent intent = getConfiguratorQrCodeGeneratorIntentOrNull(wifiEntry);
+        if (intent == null) {
+            return false;
+        }
+        if (mCallback != null) {
+            mCallback.dismissDialog();
+        }
+        mActivityStarter.startActivity(intent, false /* dismissShade */);
+        return true;
+    }
+
     interface InternetDialogCallback {
 
         void onRefreshCarrierInfo();
@@ -1359,6 +1388,8 @@ public class InternetDialogController implements AccessPointController.AccessPoi
 
         void onAccessPointsChanged(@Nullable List<WifiEntry> wifiEntries,
                 @Nullable WifiEntry connectedEntry, boolean hasMoreWifiEntries);
+
+        void onWifiScan(boolean isScan);
     }
 
     void makeOverlayToast(int stringId) {
@@ -1415,5 +1446,18 @@ public class InternetDialogController implements AccessPointController.AccessPoi
                 }
             }
         }, SHORT_DURATION_TIMEOUT);
+    }
+
+    Intent getConfiguratorQrCodeGeneratorIntentOrNull(WifiEntry wifiEntry) {
+        if (!mFeatureFlags.isEnabled(Flags.SHARE_WIFI_QS_BUTTON) || wifiEntry == null
+                || mWifiManager == null || !wifiEntry.canShare()) {
+            return null;
+        }
+        Intent intent = new Intent();
+        intent.setAction(WifiDppIntentHelper.ACTION_CONFIGURATOR_AUTH_QR_CODE_GENERATOR);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        WifiDppIntentHelper.setConfiguratorIntentExtra(intent, mWifiManager,
+                wifiEntry.getWifiConfiguration());
+        return intent;
     }
 }

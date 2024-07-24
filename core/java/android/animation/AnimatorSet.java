@@ -1710,7 +1710,7 @@ public final class AnimatorSet extends Animator implements AnimationHandler.Anim
                     return 1;
                 }
                 // When neither event happens at INFINITE time:
-                return (int) (t1 - t2);
+                return t1 - t2 > 0 ? 1 : -1;
             }
         });
 

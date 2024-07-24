@@ -21,6 +21,7 @@ package com.android.internal.util;
  *
  * @hide
  */
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
 public class IntPair {
     private IntPair() {}
 

@@ -19,6 +19,7 @@
 
 #include <GrDirectContext.h>
 #include <SkMesh.h>
+#include <include/gpu/ganesh/SkMeshGanesh.h>
 #include <jni.h>
 #include <log/log.h>
 
@@ -143,21 +144,34 @@ public:
         }
 
         if (mIsDirty || genId != mGenerationId) {
-            auto vb = SkMesh::MakeVertexBuffer(
-                    context, reinterpret_cast<const void*>(mVertexBufferData.data()),
-                    mVertexBufferData.size());
+            auto vertexData = reinterpret_cast<const void*>(mVertexBufferData.data());
+#ifdef __ANDROID__
+            auto vb = SkMeshes::MakeVertexBuffer(context,
+                                                 vertexData,
+                                                 mVertexBufferData.size());
+#else
+            auto vb = SkMeshes::MakeVertexBuffer(vertexData,
+                                                 mVertexBufferData.size());
+#endif
             auto meshMode = SkMesh::Mode(mMode);
             if (!mIndexBufferData.empty()) {
-                auto ib = SkMesh::MakeIndexBuffer(
-                        context, reinterpret_cast<const void*>(mIndexBufferData.data()),
-                        mIndexBufferData.size());
+                auto indexData = reinterpret_cast<const void*>(mIndexBufferData.data());
+#ifdef __ANDROID__
+                auto ib = SkMeshes::MakeIndexBuffer(context,
+                                                    indexData,
+                                                    mIndexBufferData.size());
+#else
+                auto ib = SkMeshes::MakeIndexBuffer(indexData,
+                                                    mIndexBufferData.size());
+#endif
                 mMesh = SkMesh::MakeIndexed(mMeshSpec, meshMode, vb, mVertexCount, mVertexOffset,
                                             ib, mIndexCount, mIndexOffset, mBuilder->fUniforms,
-                                            mBounds)
+                                            SkSpan<SkRuntimeEffect::ChildPtr>(), mBounds)
                                 .mesh;
             } else {
                 mMesh = SkMesh::Make(mMeshSpec, meshMode, vb, mVertexCount, mVertexOffset,
-                                     mBuilder->fUniforms, mBounds)
+                                     mBuilder->fUniforms, SkSpan<SkRuntimeEffect::ChildPtr>(),
+                                     mBounds)
                                 .mesh;
             }
             mIsDirty = false;

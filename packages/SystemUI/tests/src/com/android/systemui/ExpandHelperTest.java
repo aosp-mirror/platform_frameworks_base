@@ -48,7 +48,7 @@ import org.junit.runner.RunWith;
 public class ExpandHelperTest extends SysuiTestCase {
 
     @Rule
-    public final AnimatorTestRule mAnimatorTestRule = new AnimatorTestRule();
+    public final AnimatorTestRule mAnimatorTestRule = new AnimatorTestRule(this);
 
     private final FakeFeatureFlags mFeatureFlags = new FakeFeatureFlags();
     private ExpandableNotificationRow mRow;

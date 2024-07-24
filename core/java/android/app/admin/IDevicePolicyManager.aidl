@@ -32,6 +32,7 @@ import android.app.admin.SystemUpdatePolicy;
 import android.app.admin.PackagePolicy;
 import android.app.admin.PasswordMetrics;
 import android.app.admin.FactoryResetProtectionPolicy;
+import android.app.admin.IAuditLogEventsCallback;
 import android.app.admin.ManagedProfileProvisioningParams;
 import android.app.admin.FullyManagedDeviceProvisioningParams;
 import android.app.admin.ManagedSubscriptionsPolicy;
@@ -179,6 +180,7 @@ interface IDevicePolicyManager {
 
     boolean setDeviceOwner(in ComponentName who, int userId, boolean setProfileOwnerOnCurrentUserIfNecessary);
     ComponentName getDeviceOwnerComponent(boolean callingUserOnly);
+    ComponentName getDeviceOwnerComponentOnUser(int userId);
     boolean hasDeviceOwner();
     String getDeviceOwnerName();
     void clearDeviceOwner(String packageName);
@@ -391,7 +393,7 @@ interface IDevicePolicyManager {
     boolean getDoNotAskCredentialsOnBoot();
 
     void notifyPendingSystemUpdate(in SystemUpdateInfo info);
-    SystemUpdateInfo getPendingSystemUpdate(in ComponentName admin);
+    SystemUpdateInfo getPendingSystemUpdate(in ComponentName admin, in String callerPackage);
 
     void setPermissionPolicy(in ComponentName admin, in String callerPackage, int policy);
     int  getPermissionPolicy(in ComponentName admin);
@@ -439,6 +441,10 @@ interface IDevicePolicyManager {
     ParceledListSlice retrievePreRebootSecurityLogs(in ComponentName admin, String packageName);
     long forceNetworkLogs();
     long forceSecurityLogs();
+
+    void setAuditLogEnabled(String callerPackage, boolean enabled);
+    boolean isAuditLogEnabled(String callerPackage);
+    void setAuditLogEventsCallback(String callerPackage, in IAuditLogEventsCallback callback);
 
     boolean isUninstallInQueue(String packageName);
     void uninstallPackageWithActiveAdmins(String packageName);
@@ -567,7 +573,6 @@ interface IDevicePolicyManager {
 
     void setUsbDataSignalingEnabled(String callerPackage, boolean enabled);
     boolean isUsbDataSignalingEnabled(String callerPackage);
-    boolean isUsbDataSignalingEnabledForUser(int userId);
     boolean canUsbDataSignalingBeDisabled();
 
     void setMinimumRequiredWifiSecurityLevel(String callerPackageName, int level);
@@ -575,6 +580,8 @@ interface IDevicePolicyManager {
 
     void setWifiSsidPolicy(String callerPackageName, in WifiSsidPolicy policy);
     WifiSsidPolicy getWifiSsidPolicy(String callerPackageName);
+
+    boolean isTheftDetectionTriggered(String callerPackageName);
 
     List<UserHandle> listForegroundAffiliatedUsers();
     void setDrawables(in List<DevicePolicyDrawableResource> drawables);
@@ -604,12 +611,18 @@ interface IDevicePolicyManager {
 
     DevicePolicyState getDevicePolicyState();
 
-    void setOverrideKeepProfilesRunning(boolean enabled);
-
     boolean triggerDevicePolicyEngineMigration(boolean forceMigration);
 
     boolean isDeviceFinanced(String callerPackageName);
     String getFinancedDeviceKioskRoleHolder(String callerPackageName);
 
     void calculateHasIncompatibleAccounts();
+
+    void setContentProtectionPolicy(in ComponentName who, String callerPackageName, int policy);
+    int getContentProtectionPolicy(in ComponentName who, String callerPackageName);
+
+    int[] getSubscriptionIds(String callerPackageName);
+
+    void setMaxPolicyStorageLimit(String packageName, int storageLimit);
+    int getMaxPolicyStorageLimit(String packageName);
 }

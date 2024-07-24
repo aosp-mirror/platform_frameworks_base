@@ -462,6 +462,14 @@ public class FingerprintManager implements BiometricAuthenticator, BiometricFing
          * Invoked when a fingerprint has been detected.
          */
         void onFingerprintDetected(int sensorId, int userId, boolean isStrongBiometric);
+
+        /**
+         * An error has occurred with fingerprint detection.
+         *
+         * This callback signifies that this operation has been completed, and
+         * no more callbacks should be expected.
+         */
+        default void onDetectionError(int errorMsgId) {}
     }
 
     /**
@@ -736,7 +744,8 @@ public class FingerprintManager implements BiometricAuthenticator, BiometricFing
      */
     @RequiresPermission(MANAGE_FINGERPRINT)
     public void enroll(byte [] hardwareAuthToken, CancellationSignal cancel, int userId,
-            EnrollmentCallback callback, @EnrollReason int enrollReason) {
+            EnrollmentCallback callback, @EnrollReason int enrollReason,
+            FingerprintEnrollOptions options) {
         if (userId == UserHandle.USER_CURRENT) {
             userId = getCurrentUserId();
         }
@@ -760,7 +769,7 @@ public class FingerprintManager implements BiometricAuthenticator, BiometricFing
             try {
                 mEnrollmentCallback = callback;
                 final long enrollId = mService.enroll(mToken, hardwareAuthToken, userId,
-                        mServiceReceiver, mContext.getOpPackageName(), enrollReason);
+                        mServiceReceiver, mContext.getOpPackageName(), enrollReason, options);
                 if (cancel != null) {
                     cancel.setOnCancelListener(new OnEnrollCancelListener(enrollId));
                 }
@@ -975,6 +984,7 @@ public class FingerprintManager implements BiometricAuthenticator, BiometricFing
         }
     }
 
+    // TODO(b/288175061): remove with Flags.FLAG_SIDEFPS_CONTROLLER_REFACTOR
     /**
      * @hide
      */
@@ -1484,6 +1494,9 @@ public class FingerprintManager implements BiometricAuthenticator, BiometricFing
                     ? mRemoveTracker.mSingleFingerprint : null;
             mRemovalCallback.onRemovalError(fp, clientErrMsgId,
                     getErrorString(mContext, errMsgId, vendorCode));
+        } else if (mFingerprintDetectionCallback != null) {
+            mFingerprintDetectionCallback.onDetectionError(errMsgId);
+            mFingerprintDetectionCallback = null;
         }
     }
 

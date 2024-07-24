@@ -19,6 +19,7 @@ package com.android.server.autofill;
 import static android.service.autofill.FillEventHistory.Event.NO_SAVE_UI_REASON_NONE;
 import static android.service.autofill.FillEventHistory.Event.UI_TYPE_INLINE;
 import static android.service.autofill.FillRequest.FLAG_MANUAL_REQUEST;
+import static android.service.autofill.FillRequest.FLAG_VIEW_REQUESTS_CREDMAN_SERVICE;
 import static android.view.autofill.AutofillManager.ACTION_START_SESSION;
 import static android.view.autofill.AutofillManager.FLAG_ADD_CLIENT_ENABLED;
 import static android.view.autofill.AutofillManager.FLAG_ADD_CLIENT_ENABLED_FOR_AUGMENTED_AUTOFILL_ONLY;
@@ -32,8 +33,10 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityManagerInternal;
 import android.content.ComponentName;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
+import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
 import android.graphics.Rect;
 import android.metrics.LogMaker;
@@ -250,6 +253,31 @@ final class AutofillManagerServiceImpl
     @Override // from PerUserSystemService
     protected ServiceInfo newServiceInfoLocked(@NonNull ComponentName serviceComponent)
             throws NameNotFoundException {
+        final List<ResolveInfo> resolveInfos =
+                getContext().getPackageManager().queryIntentServicesAsUser(
+                    new Intent(AutofillService.SERVICE_INTERFACE),
+                    // The MATCH_INSTANT flag is added because curret autofill CTS module is
+                    // defined in one apk, which makes the test autofill service installed in a
+                    // instant app when the CTS tests are running in instant app mode.
+                    // TODO: Remove MATCH_INSTANT flag after completing refactoring the CTS module
+                    //       to make the test autofill service a separate apk.
+                    PackageManager.GET_META_DATA | PackageManager.MATCH_INSTANT,
+                    mUserId);
+        boolean serviceHasAutofillIntentFilter = false;
+        for (ResolveInfo resolveInfo : resolveInfos) {
+            final ServiceInfo serviceInfo = resolveInfo.serviceInfo;
+            if (serviceInfo.getComponentName().equals(serviceComponent)) {
+                serviceHasAutofillIntentFilter = true;
+                break;
+            }
+        }
+        if (!serviceHasAutofillIntentFilter) {
+            Slog.w(TAG,
+                    "Autofill service from '" + serviceComponent.getPackageName() + "' does"
+                            + "not have intent filter " + AutofillService.SERVICE_INTERFACE);
+            throw new SecurityException("Service does not declare intent filter "
+                            + AutofillService.SERVICE_INTERFACE);
+        }
         mInfo = new AutofillServiceInfo(getContext(), serviceComponent, mUserId);
         return mInfo.getServiceInfo();
     }
@@ -450,7 +478,7 @@ final class AutofillManagerServiceImpl
 
         final Session.SaveResult saveResult = session.showSaveLocked();
 
-        session.logContextCommitted(saveResult.getNoSaveUiReason(), commitReason);
+        session.logContextCommittedLocked(saveResult.getNoSaveUiReason(), commitReason);
 
         if (saveResult.isLogSaveShown()) {
             session.logSaveUiShown();
@@ -531,15 +559,15 @@ final class AutofillManagerServiceImpl
                 || mSessions.indexOfKey(sessionId) >= 0);
 
         assertCallerLocked(clientActivity, compatMode);
-
-        // It's null when the session is just for augmented autofill
-        final ComponentName serviceComponentName = mInfo == null ? null
+        ComponentName serviceComponentName = mInfo == null ? null
                 : mInfo.getServiceInfo().getComponentName();
+        boolean isPrimaryCredential = (flags & FLAG_VIEW_REQUESTS_CREDMAN_SERVICE) != 0;
+
         final Session newSession = new Session(this, mUi, getContext(), mHandler, mUserId, mLock,
                 sessionId, taskId, clientUid, clientActivityToken, clientCallback, hasCallback,
                 mUiLatencyHistory, mWtfHistory, serviceComponentName,
                 clientActivity, compatMode, bindInstantServiceAllowed, forAugmentedAutofillOnly,
-                flags, mInputMethodManagerInternal);
+                flags, mInputMethodManagerInternal, isPrimaryCredential);
         mSessions.put(newSession.id, newSession);
 
         return newSession;
@@ -1745,6 +1773,10 @@ final class AutofillManagerServiceImpl
         synchronized (mLock) {
             return getRemoteFieldClassificationServiceLocked() != null;
         }
+    }
+
+    public boolean isAutofillCredmanIntegrationEnabled() {
+        return mMaster.isAutofillCredmanIntegrationEnabled();
     }
 
     /**

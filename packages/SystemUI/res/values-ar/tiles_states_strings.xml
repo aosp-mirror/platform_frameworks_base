@@ -89,7 +89,7 @@
   <string-array name="tile_states_color_correction">
     <item msgid="2840507878437297682">"غير متوفّر"</item>
     <item msgid="1909756493418256167">"غير مفعّل"</item>
-    <item msgid="4531508423703413340">"مفعّل"</item>
+    <item msgid="4531508423703413340">"الميزة مفعّلة"</item>
   </string-array>
   <string-array name="tile_states_inversion">
     <item msgid="3638187931191394628">"الميزة غير متاحة"</item>
@@ -125,6 +125,11 @@
     <item msgid="1085836626613341403">"الميزة غير متاحة"</item>
     <item msgid="8259411607272330225">"الميزة غير مفعّلة"</item>
     <item msgid="578444932039713369">"الميزة مفعّلة"</item>
+  </string-array>
+  <string-array name="tile_states_record_issue">
+    <item msgid="1727196795383575383">"غير متوفّر"</item>
+    <item msgid="9061144428113385092">"غير مفعَّل"</item>
+    <item msgid="2984256114867200368">"مفعَّل"</item>
   </string-array>
   <string-array name="tile_states_reverse">
     <item msgid="3574611556622963971">"الميزة غير متاحة"</item>

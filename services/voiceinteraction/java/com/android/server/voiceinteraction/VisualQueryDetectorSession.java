@@ -29,10 +29,13 @@ import android.os.ParcelFileDescriptor;
 import android.os.PersistableBundle;
 import android.os.RemoteException;
 import android.os.SharedMemory;
+import android.provider.Settings;
 import android.service.voice.IDetectorSessionVisualQueryDetectionCallback;
 import android.service.voice.IMicrophoneHotwordDetectionVoiceInteractionCallback;
 import android.service.voice.ISandboxedDetectionService;
 import android.service.voice.IVisualQueryDetectionVoiceInteractionCallback;
+import android.service.voice.VisualQueryAttentionResult;
+import android.service.voice.VisualQueryDetectedResult;
 import android.service.voice.VisualQueryDetectionServiceFailure;
 import android.util.Slog;
 
@@ -58,6 +61,7 @@ final class VisualQueryDetectorSession extends DetectorSession {
     private IVisualQueryDetectionAttentionListener mAttentionListener;
     private boolean mEgressingData;
     private boolean mQueryStreaming;
+    private boolean mEnableAccessibilityDataEgress;
 
     //TODO(b/261783819): Determines actual functionalities, e.g., startRecognition etc.
     VisualQueryDetectorSession(
@@ -66,13 +70,17 @@ final class VisualQueryDetectorSession extends DetectorSession {
             @NonNull IHotwordRecognitionStatusCallback callback, int voiceInteractionServiceUid,
             Identity voiceInteractorIdentity,
             @NonNull ScheduledExecutorService scheduledExecutorService, boolean logging,
-            @NonNull DetectorRemoteExceptionListener listener) {
+            @NonNull DetectorRemoteExceptionListener listener, int userId) {
         super(remoteService, lock, context, token, callback,
                 voiceInteractionServiceUid, voiceInteractorIdentity, scheduledExecutorService,
-                logging, listener);
+                logging, listener, userId);
         mEgressingData = false;
         mQueryStreaming = false;
         mAttentionListener = null;
+        mEnableAccessibilityDataEgress = Settings.Secure.getIntForUser(
+                mContext.getContentResolver(),
+                Settings.Secure.VISUAL_QUERY_ACCESSIBILITY_DETECTION_ENABLED, 0,
+                mUserId) == 1;
         // TODO: handle notify RemoteException to client
     }
 
@@ -104,98 +112,142 @@ final class VisualQueryDetectorSession extends DetectorSession {
                 new IDetectorSessionVisualQueryDetectionCallback.Stub(){
 
             @Override
-            public void onAttentionGained() {
+            public void onAttentionGained(VisualQueryAttentionResult attentionResult) {
                 Slog.v(TAG, "BinderCallback#onAttentionGained");
-                mEgressingData = true;
-                if (mAttentionListener == null) {
-                    return;
-                }
-                try {
-                    mAttentionListener.onAttentionGained();
-                } catch (RemoteException e) {
-                    Slog.e(TAG, "Error delivering attention gained event.", e);
-                    try {
-                        callback.onVisualQueryDetectionServiceFailure(
-                                new VisualQueryDetectionServiceFailure(
-                                        ERROR_CODE_ILLEGAL_ATTENTION_STATE,
-                                        "Attention listener failed to switch to GAINED state."));
-                    } catch (RemoteException ex) {
-                        Slog.v(TAG, "Fail to call onVisualQueryDetectionServiceFailure");
+                synchronized (mLock) {
+                    mEgressingData = true;
+                    if (mAttentionListener == null) {
+                        return;
                     }
-                    return;
+                    try {
+                        mAttentionListener.onAttentionGained(attentionResult);
+                    } catch (RemoteException e) {
+                        Slog.e(TAG, "Error delivering attention gained event.", e);
+                        try {
+                            callback.onVisualQueryDetectionServiceFailure(
+                                    new VisualQueryDetectionServiceFailure(
+                                            ERROR_CODE_ILLEGAL_ATTENTION_STATE,
+                                            "Attention listener fails to switch to GAINED state."));
+                        } catch (RemoteException ex) {
+                            Slog.v(TAG, "Fail to call onVisualQueryDetectionServiceFailure");
+                        }
+                    }
                 }
             }
 
             @Override
-            public void onAttentionLost() {
+            public void onAttentionLost(int interactionIntention) {
                 Slog.v(TAG, "BinderCallback#onAttentionLost");
-                mEgressingData = false;
-                if (mAttentionListener == null) {
-                    return;
-                }
-                try {
-                    mAttentionListener.onAttentionLost();
-                } catch (RemoteException e) {
-                    Slog.e(TAG, "Error delivering attention lost event.", e);
-                    try {
-                        callback.onVisualQueryDetectionServiceFailure(
-                                new VisualQueryDetectionServiceFailure(
-                                        ERROR_CODE_ILLEGAL_ATTENTION_STATE,
-                                        "Attention listener failed to switch to LOST state."));
-                    } catch (RemoteException ex) {
-                        Slog.v(TAG, "Fail to call onVisualQueryDetectionServiceFailure");
+                synchronized (mLock) {
+                    mEgressingData = false;
+                    if (mAttentionListener == null) {
+                        return;
                     }
-                    return;
+                    try {
+                        mAttentionListener.onAttentionLost(interactionIntention);
+                    } catch (RemoteException e) {
+                        Slog.e(TAG, "Error delivering attention lost event.", e);
+                        try {
+                            callback.onVisualQueryDetectionServiceFailure(
+                                    new VisualQueryDetectionServiceFailure(
+                                            ERROR_CODE_ILLEGAL_ATTENTION_STATE,
+                                            "Attention listener fails to switch to LOST state."));
+                        } catch (RemoteException ex) {
+                            Slog.v(TAG, "Fail to call onVisualQueryDetectionServiceFailure");
+                        }
+                    }
                 }
             }
 
             @Override
             public void onQueryDetected(@NonNull String partialQuery) throws RemoteException {
-                Objects.requireNonNull(partialQuery);
                 Slog.v(TAG, "BinderCallback#onQueryDetected");
-                if (!mEgressingData) {
-                    Slog.v(TAG, "Query should not be egressed within the unattention state.");
-                    callback.onVisualQueryDetectionServiceFailure(
-                            new VisualQueryDetectionServiceFailure(
-                                    ERROR_CODE_ILLEGAL_STREAMING_STATE,
-                                    "Cannot stream queries without attention signals."));
-                    return;
+                synchronized (mLock) {
+                    Objects.requireNonNull(partialQuery);
+                    if (!mEgressingData) {
+                        Slog.v(TAG, "Query should not be egressed within the unattention state.");
+                        callback.onVisualQueryDetectionServiceFailure(
+                                new VisualQueryDetectionServiceFailure(
+                                        ERROR_CODE_ILLEGAL_STREAMING_STATE,
+                                        "Cannot stream queries without attention signals."));
+                        return;
+                    }
+                    mQueryStreaming = true;
+                    callback.onQueryDetected(partialQuery);
+                    Slog.i(TAG, "Egressed from visual query detection process.");
                 }
-                mQueryStreaming = true;
-                callback.onQueryDetected(partialQuery);
-                Slog.i(TAG, "Egressed from visual query detection process.");
+            }
+
+            @Override
+            public void onResultDetected(@NonNull VisualQueryDetectedResult partialResult)
+                    throws RemoteException {
+                Slog.v(TAG, "BinderCallback#onResultDetected");
+                synchronized (mLock) {
+                    Objects.requireNonNull(partialResult);
+                    if (!mEgressingData) {
+                        Slog.v(TAG, "Result should not be egressed within the unattention state.");
+                        callback.onVisualQueryDetectionServiceFailure(
+                                new VisualQueryDetectionServiceFailure(
+                                        ERROR_CODE_ILLEGAL_STREAMING_STATE,
+                                        "Cannot stream results without attention signals."));
+                        return;
+                    }
+                    if (!checkDetectedResultDataLocked(partialResult)) {
+                        Slog.v(TAG, "Accessibility data can be egressed only when the "
+                                        + "isAccessibilityDetectionEnabled() is true.");
+                        callback.onVisualQueryDetectionServiceFailure(
+                                new VisualQueryDetectionServiceFailure(
+                                        ERROR_CODE_ILLEGAL_STREAMING_STATE,
+                                        "Cannot stream accessibility data without "
+                                                + "enabling the setting."));
+                        return;
+                    }
+                    mQueryStreaming = true;
+                    callback.onResultDetected(partialResult);
+                    Slog.i(TAG, "Egressed from visual query detection process.");
+                }
             }
 
             @Override
             public void onQueryFinished() throws RemoteException {
                 Slog.v(TAG, "BinderCallback#onQueryFinished");
-                if (!mQueryStreaming) {
-                    Slog.v(TAG, "Query streaming state signal FINISHED is block since there is"
-                            + " no active query being streamed.");
-                    callback.onVisualQueryDetectionServiceFailure(
-                            new VisualQueryDetectionServiceFailure(
-                                    ERROR_CODE_ILLEGAL_STREAMING_STATE,
-                                    "Cannot send FINISHED signal with no query streamed."));
-                    return;
+                synchronized (mLock) {
+                    if (!mQueryStreaming) {
+                        Slog.v(TAG, "Query streaming state signal FINISHED is block since there is"
+                                + " no active query being streamed.");
+                        callback.onVisualQueryDetectionServiceFailure(
+                                new VisualQueryDetectionServiceFailure(
+                                        ERROR_CODE_ILLEGAL_STREAMING_STATE,
+                                        "Cannot send FINISHED signal with no query streamed."));
+                        return;
+                    }
+                    callback.onQueryFinished();
+                    mQueryStreaming = false;
                 }
-                callback.onQueryFinished();
-                mQueryStreaming = false;
             }
 
             @Override
             public void onQueryRejected() throws RemoteException {
                 Slog.v(TAG, "BinderCallback#onQueryRejected");
-                if (!mQueryStreaming) {
-                    Slog.v(TAG, "Query streaming state signal REJECTED is block since there is"
-                            + " no active query being streamed.");
-                    callback.onVisualQueryDetectionServiceFailure(
-                            new VisualQueryDetectionServiceFailure(
-                                    ERROR_CODE_ILLEGAL_STREAMING_STATE,
-                                    "Cannot send REJECTED signal with no query streamed."));
-                    return;
+                synchronized (mLock) {
+                    if (!mQueryStreaming) {
+                        Slog.v(TAG, "Query streaming state signal REJECTED is block since there is"
+                                + " no active query being streamed.");
+                        callback.onVisualQueryDetectionServiceFailure(
+                                new VisualQueryDetectionServiceFailure(
+                                        ERROR_CODE_ILLEGAL_STREAMING_STATE,
+                                        "Cannot send REJECTED signal with no query streamed."));
+                        return;
+                    }
+                    callback.onQueryRejected();
+                    mQueryStreaming = false;
                 }
-                callback.onQueryRejected();
-                mQueryStreaming = false;
+            }
+
+            @SuppressWarnings("GuardedBy")
+            private boolean checkDetectedResultDataLocked(VisualQueryDetectedResult result) {
+                return result.getAccessibilityDetectionData() == null
+                        || mEnableAccessibilityDataEgress;
             }
         };
         return mRemoteDetectionService.run(
@@ -221,6 +273,12 @@ final class VisualQueryDetectorSession extends DetectorSession {
                 + " should not be called from VisualQueryDetectorSession.");
     }
 
+    void updateAccessibilityEgressStateLocked(boolean enable) {
+        if (DEBUG) {
+            Slog.d(TAG, "updateAccessibilityEgressStateLocked");
+        }
+        mEnableAccessibilityDataEgress = enable;
+    }
 
     @SuppressWarnings("GuardedBy")
     public void dumpLocked(String prefix, PrintWriter pw) {

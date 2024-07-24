@@ -42,6 +42,7 @@ constructor(
                     is FromGoneTransitionInteractor -> Log.d(TAG, "Started $it")
                     is FromLockscreenTransitionInteractor -> Log.d(TAG, "Started $it")
                     is FromDreamingTransitionInteractor -> Log.d(TAG, "Started $it")
+                    is FromGlanceableHubTransitionInteractor -> Log.d(TAG, "Started $it")
                     is FromOccludedTransitionInteractor -> Log.d(TAG, "Started $it")
                     is FromDozingTransitionInteractor -> Log.d(TAG, "Started $it")
                     is FromAlternateBouncerTransitionInteractor -> Log.d(TAG, "Started $it")

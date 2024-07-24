@@ -27,6 +27,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.Robolectric;
 import org.robolectric.RobolectricTestRunner;
+import org.robolectric.annotation.LooperMode;
 
 @RunWith(RobolectricTestRunner.class)
 public class AnimatedImageViewTest {
@@ -40,6 +41,7 @@ public class AnimatedImageViewTest {
     }
 
     @Test
+    @LooperMode(LooperMode.Mode.PAUSED)
     public void testAnimation_ViewVisible_AnimationRunning() {
         mAnimatedImageView.setVisibility(View.VISIBLE);
         mAnimatedImageView.setAnimating(true);

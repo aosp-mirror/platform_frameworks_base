@@ -16,9 +16,10 @@
 
 package com.android.mediaframeworktest.unit;
 
-import android.test.suitebuilder.annotation.SmallTest;
 import android.util.Range;
 import android.util.Rational;
+
+import androidx.test.filters.SmallTest;
 
 /**
  * <pre>

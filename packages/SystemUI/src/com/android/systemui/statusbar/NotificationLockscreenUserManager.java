@@ -24,8 +24,6 @@ public interface NotificationLockscreenUserManager {
     String NOTIFICATION_UNLOCKED_BY_WORK_CHALLENGE_ACTION
             = "com.android.systemui.statusbar.work_challenge_unlocked_notification_action";
 
-    boolean shouldAllowLockscreenRemoteInput();
-
     /**
      * @param userId user Id
      * @return true if we re on a secure lock screen
@@ -45,6 +43,13 @@ public interface NotificationLockscreenUserManager {
     int getCurrentUserId();
 
     boolean isCurrentProfile(int userId);
+
+    /**
+     *
+     * @param userId user Id
+     * @return true if user profile is running.
+     */
+    boolean isProfileAvailable(int userId);
 
     /** Adds a listener to be notified when the current user changes. */
     void addUserChangedListener(UserChangedListener listener);

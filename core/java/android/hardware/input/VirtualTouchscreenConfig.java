@@ -23,38 +23,19 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 /**
- * Configurations to create virtual touchscreen.
+ * Configurations to create a virtual touchscreen.
  *
  * @hide
  */
 @SystemApi
-public final class VirtualTouchscreenConfig extends VirtualInputDeviceConfig implements Parcelable {
-
-    /** The touchscreen width. */
-    private final int mWidth;
-    /** The touchscreen height. */
-    private final int mHeight;
+public final class VirtualTouchscreenConfig extends VirtualTouchDeviceConfig implements Parcelable {
 
     private VirtualTouchscreenConfig(@NonNull Builder builder) {
         super(builder);
-        mWidth = builder.mWidth;
-        mHeight = builder.mHeight;
     }
 
     private VirtualTouchscreenConfig(@NonNull Parcel in) {
         super(in);
-        mWidth = in.readInt();
-        mHeight = in.readInt();
-    }
-
-    /** Returns the touchscreen width. */
-    public int getWidth() {
-        return mWidth;
-    }
-
-    /** Returns the touchscreen height. */
-    public int getHeight() {
-        return mHeight;
     }
 
     @Override
@@ -65,13 +46,11 @@ public final class VirtualTouchscreenConfig extends VirtualInputDeviceConfig imp
     @Override
     public void writeToParcel(@NonNull Parcel dest, int flags) {
         super.writeToParcel(dest, flags);
-        dest.writeInt(mWidth);
-        dest.writeInt(mHeight);
     }
 
     @NonNull
     public static final Creator<VirtualTouchscreenConfig> CREATOR =
-            new Creator<VirtualTouchscreenConfig>() {
+            new Creator<>() {
                 @Override
                 public VirtualTouchscreenConfig createFromParcel(Parcel in) {
                     return new VirtualTouchscreenConfig(in);
@@ -86,9 +65,7 @@ public final class VirtualTouchscreenConfig extends VirtualInputDeviceConfig imp
     /**
      * Builder for creating a {@link VirtualTouchscreenConfig}.
      */
-    public static final class Builder extends VirtualInputDeviceConfig.Builder<Builder> {
-        private int mWidth;
-        private int mHeight;
+    public static final class Builder extends VirtualTouchDeviceConfig.Builder<Builder> {
 
         /**
          * Creates a new instance for the given dimensions of the {@link VirtualTouchscreen}.
@@ -102,14 +79,7 @@ public final class VirtualTouchscreenConfig extends VirtualInputDeviceConfig imp
          */
         public Builder(@IntRange(from = 1) int touchscreenWidth,
                 @IntRange(from = 1) int touchscreenHeight) {
-            if (touchscreenHeight <= 0 || touchscreenWidth <= 0) {
-                throw new IllegalArgumentException(
-                        "Cannot create a virtual touchscreen, touchscreen dimensions must be "
-                                + "positive. Got: (" + touchscreenHeight + ", "
-                                + touchscreenWidth + ")");
-            }
-            mHeight = touchscreenHeight;
-            mWidth = touchscreenWidth;
+            super(touchscreenWidth, touchscreenHeight);
         }
 
         /**

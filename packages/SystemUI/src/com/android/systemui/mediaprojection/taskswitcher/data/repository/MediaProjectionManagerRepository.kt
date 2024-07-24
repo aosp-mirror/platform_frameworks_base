@@ -16,6 +16,7 @@
 
 package com.android.systemui.mediaprojection.taskswitcher.data.repository
 
+import android.app.ActivityManager.RunningTaskInfo
 import android.media.projection.MediaProjectionInfo
 import android.media.projection.MediaProjectionManager
 import android.os.Handler
@@ -26,15 +27,19 @@ import com.android.systemui.common.coroutine.ChannelExt.trySendWithFailureLoggin
 import com.android.systemui.common.coroutine.ConflatedCallbackFlow.conflatedCallbackFlow
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
+import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
+import com.android.systemui.mediaprojection.MediaProjectionServiceHelper
 import com.android.systemui.mediaprojection.taskswitcher.data.model.MediaProjectionState
 import javax.inject.Inject
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 @SysUISingleton
 class MediaProjectionManagerRepository
@@ -43,8 +48,20 @@ constructor(
     private val mediaProjectionManager: MediaProjectionManager,
     @Main private val handler: Handler,
     @Application private val applicationScope: CoroutineScope,
+    @Background private val backgroundDispatcher: CoroutineDispatcher,
     private val tasksRepository: TasksRepository,
+    private val mediaProjectionServiceHelper: MediaProjectionServiceHelper,
 ) : MediaProjectionRepository {
+
+    override suspend fun switchProjectedTask(task: RunningTaskInfo) {
+        withContext(backgroundDispatcher) {
+            if (mediaProjectionServiceHelper.updateTaskRecordingSession(task.token)) {
+                Log.d(TAG, "Successfully switched projected task")
+            } else {
+                Log.d(TAG, "Failed to switch projected task")
+            }
+        }
+    }
 
     override val mediaProjectionState: Flow<MediaProjectionState> =
         conflatedCallbackFlow {
@@ -82,7 +99,9 @@ constructor(
         }
         val matchingTask =
             tasksRepository.findRunningTaskFromWindowContainerToken(
-                checkNotNull(session.tokenToRecord)) ?: return MediaProjectionState.EntireScreen
+                checkNotNull(session.tokenToRecord)
+            )
+                ?: return MediaProjectionState.EntireScreen
         return MediaProjectionState.SingleTask(matchingTask)
     }
 

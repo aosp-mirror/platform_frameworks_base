@@ -18,12 +18,15 @@ package com.android.systemui.wmshell;
 
 import static android.app.Notification.FLAG_BUBBLE;
 import static android.app.PendingIntent.FLAG_MUTABLE;
+import static android.provider.Settings.Global.HEADS_UP_NOTIFICATIONS_ENABLED;
+import static android.provider.Settings.Global.HEADS_UP_ON;
 import static android.service.notification.NotificationListenerService.NOTIFICATION_CHANNEL_OR_GROUP_DELETED;
 import static android.service.notification.NotificationListenerService.NOTIFICATION_CHANNEL_OR_GROUP_UPDATED;
 import static android.service.notification.NotificationListenerService.REASON_APP_CANCEL;
 import static android.service.notification.NotificationListenerService.REASON_GROUP_SUMMARY_CANCELED;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
+import static com.android.server.notification.Flags.FLAG_SCREENSHARE_NOTIFICATION_HIDING;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -44,7 +47,10 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
+
+import static kotlinx.coroutines.flow.FlowKt.emptyFlow;
 
 import android.app.ActivityManager;
 import android.app.IActivityManager;
@@ -69,6 +75,8 @@ import android.os.PowerManager;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.os.UserManager;
+import android.platform.test.annotations.DisableFlags;
+import android.platform.test.annotations.EnableFlags;
 import android.service.dreams.IDreamManager;
 import android.service.notification.NotificationListenerService;
 import android.service.notification.ZenModeConfig;
@@ -76,6 +84,7 @@ import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.util.Pair;
 import android.util.SparseArray;
+import android.view.Display;
 import android.view.IWindowManager;
 import android.view.View;
 import android.view.ViewTreeObserver;
@@ -87,27 +96,50 @@ import com.android.internal.colorextraction.ColorExtractor;
 import com.android.internal.logging.UiEventLogger;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.launcher3.icons.BubbleIconFactory;
-import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.biometrics.AuthController;
+import com.android.systemui.bouncer.data.repository.FakeKeyguardBouncerRepository;
 import com.android.systemui.colorextraction.SysuiColorExtractor;
+import com.android.systemui.common.ui.data.repository.FakeConfigurationRepository;
+import com.android.systemui.common.ui.domain.interactor.ConfigurationInteractor;
+import com.android.systemui.deviceentry.domain.interactor.DeviceEntryUdfpsInteractor;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.flags.FakeFeatureFlags;
+import com.android.systemui.flags.FakeFeatureFlagsClassic;
 import com.android.systemui.keyguard.KeyguardViewMediator;
+import com.android.systemui.keyguard.data.repository.FakeCommandQueue;
+import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository;
+import com.android.systemui.keyguard.domain.interactor.FromLockscreenTransitionInteractor;
+import com.android.systemui.keyguard.domain.interactor.FromPrimaryBouncerTransitionInteractor;
+import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor;
+import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor;
+import com.android.systemui.kosmos.KosmosJavaAdapter;
 import com.android.systemui.model.SysUiState;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
+import com.android.systemui.power.domain.interactor.PowerInteractor;
+import com.android.systemui.scene.FakeWindowRootViewComponent;
+import com.android.systemui.scene.data.repository.SceneContainerRepository;
+import com.android.systemui.scene.domain.interactor.SceneInteractor;
+import com.android.systemui.scene.shared.flag.FakeSceneContainerFlags;
+import com.android.systemui.scene.shared.flag.SceneContainerFlags;
+import com.android.systemui.scene.shared.logger.SceneLogger;
 import com.android.systemui.settings.FakeDisplayTracker;
 import com.android.systemui.settings.UserTracker;
+import com.android.systemui.shade.LargeScreenHeaderHelper;
 import com.android.systemui.shade.NotificationShadeWindowControllerImpl;
 import com.android.systemui.shade.NotificationShadeWindowView;
 import com.android.systemui.shade.ShadeController;
-import com.android.systemui.shade.ShadeExpansionStateManager;
 import com.android.systemui.shade.ShadeWindowLogger;
+import com.android.systemui.shade.data.repository.FakeShadeRepository;
+import com.android.systemui.shade.domain.interactor.ShadeInteractor;
+import com.android.systemui.shade.domain.interactor.ShadeInteractorImpl;
+import com.android.systemui.shade.domain.interactor.ShadeInteractorLegacyImpl;
 import com.android.systemui.shared.system.QuickStepContract;
 import com.android.systemui.statusbar.NotificationEntryHelper;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.RankingBuilder;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
+import com.android.systemui.statusbar.disableflags.data.repository.FakeDisableFlagsRepository;
 import com.android.systemui.statusbar.notification.NotifPipelineFlags;
 import com.android.systemui.statusbar.notification.collection.NotifPipeline;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
@@ -115,32 +147,49 @@ import com.android.systemui.statusbar.notification.collection.NotificationEntryB
 import com.android.systemui.statusbar.notification.collection.notifcollection.CommonNotifCollection;
 import com.android.systemui.statusbar.notification.collection.notifcollection.NotifCollectionListener;
 import com.android.systemui.statusbar.notification.collection.render.NotificationVisibilityProvider;
+import com.android.systemui.statusbar.notification.interruption.AvalancheProvider;
 import com.android.systemui.statusbar.notification.interruption.KeyguardNotificationVisibilityProvider;
 import com.android.systemui.statusbar.notification.interruption.NotificationInterruptLogger;
-import com.android.systemui.statusbar.notification.interruption.NotificationInterruptStateProviderWrapper;
+import com.android.systemui.statusbar.notification.interruption.VisualInterruptionDecisionLogger;
+import com.android.systemui.statusbar.notification.interruption.VisualInterruptionDecisionProvider;
+import com.android.systemui.statusbar.notification.interruption.VisualInterruptionDecisionProviderTestUtil;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.NotificationTestHelper;
+import com.android.systemui.statusbar.notification.stack.domain.interactor.SharedNotificationContainerInteractor;
 import com.android.systemui.statusbar.phone.DozeParameters;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.phone.ScreenOffAnimationController;
 import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
+import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
+import com.android.systemui.statusbar.policy.ResourcesSplitShadeStateController;
+import com.android.systemui.statusbar.policy.SensitiveNotificationProtectionController;
 import com.android.systemui.statusbar.policy.ZenModeController;
+import com.android.systemui.statusbar.policy.data.repository.FakeDeviceProvisioningRepository;
+import com.android.systemui.statusbar.policy.data.repository.FakeUserSetupRepository;
+import com.android.systemui.user.domain.interactor.SelectedUserInteractor;
+import com.android.systemui.user.domain.interactor.UserSwitcherInteractor;
+import com.android.systemui.util.FakeEventLog;
+import com.android.systemui.util.settings.FakeGlobalSettings;
+import com.android.systemui.util.time.SystemClock;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.WindowManagerShellWrapper;
 import com.android.wm.shell.bubbles.Bubble;
 import com.android.wm.shell.bubbles.BubbleData;
 import com.android.wm.shell.bubbles.BubbleDataRepository;
+import com.android.wm.shell.bubbles.BubbleEducationController;
 import com.android.wm.shell.bubbles.BubbleEntry;
+import com.android.wm.shell.bubbles.BubbleExpandedViewManager;
 import com.android.wm.shell.bubbles.BubbleLogger;
 import com.android.wm.shell.bubbles.BubbleOverflow;
 import com.android.wm.shell.bubbles.BubbleStackView;
+import com.android.wm.shell.bubbles.BubbleTaskView;
 import com.android.wm.shell.bubbles.BubbleViewInfoTask;
 import com.android.wm.shell.bubbles.BubbleViewProvider;
 import com.android.wm.shell.bubbles.Bubbles;
-import com.android.wm.shell.bubbles.StackEducationViewKt;
+import com.android.wm.shell.bubbles.StackEducationView;
 import com.android.wm.shell.bubbles.properties.BubbleProperties;
 import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.FloatingContentCoordinator;
@@ -153,6 +202,7 @@ import com.android.wm.shell.onehanded.OneHandedController;
 import com.android.wm.shell.sysui.ShellCommandHandler;
 import com.android.wm.shell.sysui.ShellController;
 import com.android.wm.shell.sysui.ShellInit;
+import com.android.wm.shell.taskview.TaskView;
 import com.android.wm.shell.taskview.TaskViewTransitions;
 import com.android.wm.shell.transition.Transitions;
 
@@ -172,6 +222,9 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.Executor;
+
+import kotlinx.coroutines.test.TestScope;
 
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
@@ -210,7 +263,7 @@ public class BubblesTest extends SysuiTestCase {
     @Mock
     private AuthController mAuthController;
     @Mock
-    private ShadeExpansionStateManager mShadeExpansionStateManager;
+    private SensitiveNotificationProtectionController mSensitiveNotificationProtectionController;
 
     private SysUiState mSysUiState;
     private boolean mSysUiStateBubblesExpanded;
@@ -226,6 +279,8 @@ public class BubblesTest extends SysuiTestCase {
     private ArgumentCaptor<BroadcastReceiver> mBroadcastReceiverArgumentCaptor;
     @Captor
     private ArgumentCaptor<KeyguardStateController.Callback> mKeyguardStateControllerCallbackCaptor;
+    @Captor
+    private ArgumentCaptor<Runnable> mSensitiveStateChangedListener;
 
     private BubblesManager mBubblesManager;
     private TestableBubbleController mBubbleController;
@@ -276,6 +331,8 @@ public class BubblesTest extends SysuiTestCase {
     @Mock
     private BubbleLogger mBubbleLogger;
     @Mock
+    private BubbleEducationController mEducationController;
+    @Mock
     private TaskStackListenerImpl mTaskStackListener;
     @Mock
     private KeyguardStateController mKeyguardStateController;
@@ -290,10 +347,23 @@ public class BubblesTest extends SysuiTestCase {
     @Mock
     private ShadeWindowLogger mShadeWindowLogger;
     @Mock
+    private SelectedUserInteractor mSelectedUserInteractor;
+    @Mock
+    private UserTracker mUserTracker;
+    @Mock
     private NotifPipelineFlags mNotifPipelineFlags;
     @Mock
     private Icon mAppBubbleIcon;
+    @Mock
+    private Display mDefaultDisplay;
+    @Mock
+    private SceneContainerFlags mSceneContainerFlags;
+    @Mock
+    private LargeScreenHeaderHelper mLargeScreenHeaderHelper;
 
+    private final KosmosJavaAdapter mKosmos = new KosmosJavaAdapter(this);
+    private final TestScope mTestScope = mKosmos.getTestScope();
+    private ShadeInteractor mShadeInteractor;
     private ShellTaskOrganizer mShellTaskOrganizer;
     private TaskViewTransitions mTaskViewTransitions;
 
@@ -303,12 +373,14 @@ public class BubblesTest extends SysuiTestCase {
 
     private TestableLooper mTestableLooper;
 
-    private FakeDisplayTracker mDisplayTracker = new FakeDisplayTracker(mContext);
+    private final FakeDisplayTracker mDisplayTracker = new FakeDisplayTracker(mContext);
     private final FakeFeatureFlags mFeatureFlags = new FakeFeatureFlags();
 
     private UserHandle mUser0;
 
     private FakeBubbleProperties mBubbleProperties;
+    private FromLockscreenTransitionInteractor mFromLockscreenTransitionInteractor;
+    private FromPrimaryBouncerTransitionInteractor mFromPrimaryBouncerTransitionInteractor;
 
     @Before
     public void setUp() throws Exception {
@@ -329,14 +401,106 @@ public class BubblesTest extends SysuiTestCase {
         when(mColorExtractor.getNeutralColors()).thenReturn(mGradientColors);
         when(mNotificationShadeWindowView.getViewTreeObserver())
                 .thenReturn(mock(ViewTreeObserver.class));
+        when(mWindowManager.getDefaultDisplay()).thenReturn(mDefaultDisplay);
 
-        mNotificationShadeWindowController = new NotificationShadeWindowControllerImpl(mContext,
-                mWindowManager, mActivityManager, mDozeParameters, mStatusBarStateController,
-                mConfigurationController, mKeyguardViewMediator, mKeyguardBypassController,
-                syncExecutor, mColorExtractor, mDumpManager, mKeyguardStateController,
-                mScreenOffAnimationController, mAuthController, mShadeExpansionStateManager,
-                mShadeWindowLogger);
-        mNotificationShadeWindowController.setWindowRootView(mNotificationShadeWindowView);
+
+        FakeDeviceProvisioningRepository deviceProvisioningRepository =
+                new FakeDeviceProvisioningRepository();
+        deviceProvisioningRepository.setDeviceProvisioned(true);
+        FakeKeyguardRepository keyguardRepository = new FakeKeyguardRepository();
+        FakeFeatureFlagsClassic featureFlags = new FakeFeatureFlagsClassic();
+        FakeShadeRepository shadeRepository = new FakeShadeRepository();
+        FakeConfigurationRepository configurationRepository = new FakeConfigurationRepository();
+
+        PowerInteractor powerInteractor = new PowerInteractor(
+                mKosmos.getPowerRepository(),
+                mKosmos.getFalsingCollector(),
+                mock(ScreenOffAnimationController.class),
+                mStatusBarStateController);
+
+        SceneInteractor sceneInteractor = new SceneInteractor(
+                mTestScope.getBackgroundScope(),
+                new SceneContainerRepository(
+                        mTestScope.getBackgroundScope(),
+                        mKosmos.getFakeSceneContainerConfig(),
+                        mKosmos.getSceneDataSource()),
+                mock(SceneLogger.class),
+                mKosmos.getDeviceUnlockedInteractor());
+
+        FakeSceneContainerFlags sceneContainerFlags = new FakeSceneContainerFlags();
+        KeyguardTransitionInteractor keyguardTransitionInteractor =
+                mKosmos.getKeyguardTransitionInteractor();
+        KeyguardInteractor keyguardInteractor = new KeyguardInteractor(
+                keyguardRepository,
+                new FakeCommandQueue(),
+                powerInteractor,
+                sceneContainerFlags,
+                new FakeKeyguardBouncerRepository(),
+                new ConfigurationInteractor(configurationRepository),
+                shadeRepository,
+                keyguardTransitionInteractor,
+                () -> sceneInteractor);
+
+        mFromLockscreenTransitionInteractor = mKosmos.getFromLockscreenTransitionInteractor();
+        mFromPrimaryBouncerTransitionInteractor =
+                mKosmos.getFromPrimaryBouncerTransitionInteractor();
+
+        ResourcesSplitShadeStateController splitShadeStateController =
+                new ResourcesSplitShadeStateController();
+
+        DeviceEntryUdfpsInteractor deviceEntryUdfpsInteractor =
+                mock(DeviceEntryUdfpsInteractor.class);
+        when(deviceEntryUdfpsInteractor.isUdfpsSupported()).thenReturn(emptyFlow());
+
+        mShadeInteractor =
+                new ShadeInteractorImpl(
+                        mTestScope.getBackgroundScope(),
+                        mKosmos.getDeviceProvisioningInteractor(),
+                        new FakeDisableFlagsRepository(),
+                        mDozeParameters,
+                        keyguardRepository,
+                        keyguardTransitionInteractor,
+                        powerInteractor,
+                        new FakeUserSetupRepository(),
+                        mock(UserSwitcherInteractor.class),
+                        new ShadeInteractorLegacyImpl(
+                                mTestScope.getBackgroundScope(), keyguardRepository,
+                                new SharedNotificationContainerInteractor(
+                                        configurationRepository,
+                                        mContext,
+                                        splitShadeStateController,
+                                        keyguardInteractor,
+                                        deviceEntryUdfpsInteractor,
+                                        () -> mLargeScreenHeaderHelper),
+                                shadeRepository
+                        )
+                );
+
+        mNotificationShadeWindowController = new NotificationShadeWindowControllerImpl(
+                mContext,
+                new FakeWindowRootViewComponent.Factory(mNotificationShadeWindowView),
+                mWindowManager,
+                mActivityManager,
+                mDozeParameters,
+                mStatusBarStateController,
+                mConfigurationController,
+                mKeyguardViewMediator,
+                mKeyguardBypassController,
+                syncExecutor,
+                syncExecutor,
+                mColorExtractor,
+                mDumpManager,
+                mKeyguardStateController,
+                mScreenOffAnimationController,
+                mAuthController,
+                () -> mShadeInteractor,
+                mShadeWindowLogger,
+                () -> mSelectedUserInteractor,
+                mUserTracker,
+                mSceneContainerFlags,
+                mKosmos::getCommunalInteractor
+        );
+        mNotificationShadeWindowController.fetchWindowRootView();
         mNotificationShadeWindowController.attach();
 
         mAppBubbleIntent = new Intent(mContext, BubblesTestActivity.class);
@@ -345,7 +509,7 @@ public class BubblesTest extends SysuiTestCase {
         mZenModeConfig.suppressedVisualEffects = 0;
         when(mZenModeController.getConfig()).thenReturn(mZenModeConfig);
 
-        mSysUiState = new SysUiState(mDisplayTracker);
+        mSysUiState = new SysUiState(mDisplayTracker, mKosmos.getSceneContainerPlugin());
         mSysUiState.addCallback(sysUiFlags -> {
             mSysUiStateBubblesManageMenuExpanded =
                     (sysUiFlags
@@ -354,28 +518,40 @@ public class BubblesTest extends SysuiTestCase {
                     (sysUiFlags & QuickStepContract.SYSUI_STATE_BUBBLES_EXPANDED) != 0;
         });
 
-        mPositioner = new TestableBubblePositioner(mContext, mWindowManager);
+        mPositioner = new TestableBubblePositioner(mContext,
+                mContext.getSystemService(WindowManager.class));
         mPositioner.setMaxBubbles(5);
-        mBubbleData = new BubbleData(mContext, mBubbleLogger, mPositioner, syncExecutor);
+        mBubbleData = new BubbleData(mContext, mBubbleLogger, mPositioner, mEducationController,
+                syncExecutor);
 
         when(mUserManager.getProfiles(ActivityManager.getCurrentUser())).thenReturn(
                 Collections.singletonList(mock(UserInfo.class)));
 
-        TestableNotificationInterruptStateProviderImpl interruptionStateProvider =
-                new TestableNotificationInterruptStateProviderImpl(mContext.getContentResolver(),
-                        mock(PowerManager.class),
+        final FakeGlobalSettings fakeGlobalSettings = new FakeGlobalSettings();
+        fakeGlobalSettings.putInt(HEADS_UP_NOTIFICATIONS_ENABLED, HEADS_UP_ON);
+
+        final VisualInterruptionDecisionProvider interruptionDecisionProvider =
+                VisualInterruptionDecisionProviderTestUtil.INSTANCE.createProviderByFlag(
                         mock(AmbientDisplayConfiguration.class),
-                        mock(StatusBarStateController.class),
-                        mock(KeyguardStateController.class),
                         mock(BatteryController.class),
-                        mock(HeadsUpManager.class),
-                        mock(NotificationInterruptLogger.class),
-                        mock(Handler.class),
+                        mock(DeviceProvisionedController.class),
+                        new FakeEventLog(),
                         mock(NotifPipelineFlags.class),
+                        fakeGlobalSettings,
+                        mock(HeadsUpManager.class),
                         mock(KeyguardNotificationVisibilityProvider.class),
+                        mock(KeyguardStateController.class),
+                        mock(Handler.class),
+                        mock(VisualInterruptionDecisionLogger.class),
+                        mock(NotificationInterruptLogger.class),
+                        mock(PowerManager.class),
+                        mock(StatusBarStateController.class),
+                        mock(SystemClock.class),
                         mock(UiEventLogger.class),
-                        mock(UserTracker.class)
-                );
+                        mock(UserTracker.class),
+                        mock(AvalancheProvider.class)
+                        );
+        interruptionDecisionProvider.start();
 
         mShellTaskOrganizer = new ShellTaskOrganizer(mock(ShellInit.class),
                 mock(ShellCommandHandler.class),
@@ -403,10 +579,11 @@ public class BubblesTest extends SysuiTestCase {
                 mPositioner,
                 mock(DisplayController.class),
                 mOneHandedOptional,
-                Optional.of(mock(DragAndDropController.class)),
+                mock(DragAndDropController.class),
                 syncExecutor,
                 mock(Handler.class),
                 mTaskViewTransitions,
+                mTransitions,
                 mock(SyncTransactionQueue.class),
                 mock(IWindowManager.class),
                 mBubbleProperties);
@@ -423,14 +600,16 @@ public class BubblesTest extends SysuiTestCase {
                 mock(INotificationManager.class),
                 mIDreamManager,
                 mVisibilityProvider,
-                new NotificationInterruptStateProviderWrapper(interruptionStateProvider),
+                interruptionDecisionProvider,
                 mZenModeController,
                 mLockscreenUserManager,
+                mSensitiveNotificationProtectionController,
                 mCommonNotifCollection,
                 mNotifPipeline,
                 mSysUiState,
                 mFeatureFlags,
                 mNotifPipelineFlags,
+                syncExecutor,
                 syncExecutor);
         mBubblesManager.addNotifCallback(mNotifCallback);
 
@@ -473,7 +652,7 @@ public class BubblesTest extends SysuiTestCase {
     }
 
     @Test
-    public void dreamingHidesBubbles() throws RemoteException {
+    public void bubblesHiddenWhileDreaming() throws RemoteException {
         mBubbleController.updateBubble(mBubbleEntry);
         assertTrue(mBubbleController.hasBubbles());
         assertThat(mBubbleController.getStackView().getVisibility()).isEqualTo(View.VISIBLE);
@@ -484,7 +663,17 @@ public class BubblesTest extends SysuiTestCase {
                 mKeyguardStateControllerCallbackCaptor.getValue();
         callback.onKeyguardShowingChanged();
 
+        // Dreaming should hide bubbles
         assertThat(mBubbleController.getStackView().getVisibility()).isEqualTo(View.INVISIBLE);
+
+        // Finish dreaming should show bubbles
+        mNotificationShadeWindowController.setDreaming(false);
+        when(mIDreamManager.isDreamingOrInPreview()).thenReturn(false); // dreaming finished
+
+        // Dreaming updates come through mNotificationShadeWindowController
+        mNotificationShadeWindowController.notifyStateChangedCallbacks();
+
+        assertThat(mBubbleController.getStackView().getVisibility()).isEqualTo(View.VISIBLE);
     }
 
     @Test
@@ -495,6 +684,11 @@ public class BubblesTest extends SysuiTestCase {
     @Test
     public void instantiateController_registerConfigChangeListener() {
         verify(mShellController, times(1)).addConfigurationChangeListener(any());
+    }
+
+    @Test
+    public void instantiateController_registerTransitionObserver() {
+        verify(mTransitions).registerObserver(any());
     }
 
     @Test
@@ -1247,12 +1441,14 @@ public class BubblesTest extends SysuiTestCase {
                 .thenReturn(userContext);
 
         BubbleViewInfoTask.BubbleViewInfo info = BubbleViewInfoTask.BubbleViewInfo.populate(context,
-                mBubbleController,
+                BubbleExpandedViewManager.fromBubbleController(mBubbleController),
+                () -> new BubbleTaskView(mock(TaskView.class), mock(Executor.class)),
+                mPositioner,
                 mBubbleController.getStackView(),
                 new BubbleIconFactory(mContext,
-                        mContext.getResources().getDimensionPixelSize(R.dimen.bubble_size),
-                        mContext.getResources().getDimensionPixelSize(R.dimen.bubble_badge_size),
-                        mContext.getResources().getColor(R.color.important_conversation),
+                        mContext.getResources().getDimensionPixelSize(com.android.wm.shell.R.dimen.bubble_size),
+                        mContext.getResources().getDimensionPixelSize(com.android.wm.shell.R.dimen.bubble_badge_size),
+                        mContext.getResources().getColor(com.android.launcher3.icons.R.color.important_conversation),
                         mContext.getResources().getDimensionPixelSize(
                                 com.android.internal.R.dimen.importance_ring_stroke_width)),
                 bubble,
@@ -1452,6 +1648,34 @@ public class BubblesTest extends SysuiTestCase {
                 mFilterArgumentCaptor.capture(), eq(Context.RECEIVER_EXPORTED));
         Intent i = new Intent(Intent.ACTION_CLOSE_SYSTEM_DIALOGS);
         i.putExtra("reason", "gestureNav");
+        mBroadcastReceiverArgumentCaptor.getValue().onReceive(mContext, i);
+        assertStackCollapsed();
+    }
+
+    @Test
+    public void testBroadcastReceiverCloseDialogs_reasonHomeKey() {
+        spyOn(mContext);
+        mBubbleController.updateBubble(mBubbleEntry);
+        mBubbleData.setExpanded(true);
+
+        verify(mContext).registerReceiver(mBroadcastReceiverArgumentCaptor.capture(),
+                mFilterArgumentCaptor.capture(), eq(Context.RECEIVER_EXPORTED));
+        Intent i = new Intent(Intent.ACTION_CLOSE_SYSTEM_DIALOGS);
+        i.putExtra("reason", "homekey");
+        mBroadcastReceiverArgumentCaptor.getValue().onReceive(mContext, i);
+        assertStackCollapsed();
+    }
+
+    @Test
+    public void testBroadcastReceiverCloseDialogs_reasonRecentsKey() {
+        spyOn(mContext);
+        mBubbleController.updateBubble(mBubbleEntry);
+        mBubbleData.setExpanded(true);
+
+        verify(mContext).registerReceiver(mBroadcastReceiverArgumentCaptor.capture(),
+                mFilterArgumentCaptor.capture(), eq(Context.RECEIVER_EXPORTED));
+        Intent i = new Intent(Intent.ACTION_CLOSE_SYSTEM_DIALOGS);
+        i.putExtra("reason", "recentapps");
         mBroadcastReceiverArgumentCaptor.getValue().onReceive(mContext, i);
         assertStackCollapsed();
     }
@@ -1704,7 +1928,7 @@ public class BubblesTest extends SysuiTestCase {
     @Test
     public void testShowStackEdu_isNotConversationBubble() {
         // Setup
-        setPrefBoolean(StackEducationViewKt.PREF_STACK_EDUCATION, false);
+        setPrefBoolean(StackEducationView.PREF_STACK_EDUCATION, false);
         BubbleEntry bubbleEntry = createBubbleEntry(false /* isConversation */);
         mBubbleController.updateBubble(bubbleEntry);
         assertTrue(mBubbleController.hasBubbles());
@@ -1722,7 +1946,7 @@ public class BubblesTest extends SysuiTestCase {
     @Test
     public void testShowStackEdu_isConversationBubble() {
         // Setup
-        setPrefBoolean(StackEducationViewKt.PREF_STACK_EDUCATION, false);
+        setPrefBoolean(StackEducationView.PREF_STACK_EDUCATION, false);
         BubbleEntry bubbleEntry = createBubbleEntry(true /* isConversation */);
         mBubbleController.updateBubble(bubbleEntry);
         assertTrue(mBubbleController.hasBubbles());
@@ -1740,7 +1964,7 @@ public class BubblesTest extends SysuiTestCase {
     @Test
     public void testShowStackEdu_isSeenConversationBubble() {
         // Setup
-        setPrefBoolean(StackEducationViewKt.PREF_STACK_EDUCATION, true);
+        setPrefBoolean(StackEducationView.PREF_STACK_EDUCATION, true);
         BubbleEntry bubbleEntry = createBubbleEntry(true /* isConversation */);
         mBubbleController.updateBubble(bubbleEntry);
         assertTrue(mBubbleController.hasBubbles());
@@ -1848,6 +2072,26 @@ public class BubblesTest extends SysuiTestCase {
                 Bubble.getAppBubbleKeyForApp(mContext.getPackageName(), mUser0));
         assertThat(mBubbleController.isStackExpanded()).isTrue();
         assertThat(mBubbleData.getBubbles().size()).isEqualTo(2);
+    }
+
+    @Test
+    public void testShowOrHideAppBubble_addsFromOverflow() {
+        String appBubbleKey = Bubble.getAppBubbleKeyForApp(mAppBubbleIntent.getPackage(), mUser0);
+        mBubbleController.showOrHideAppBubble(mAppBubbleIntent, mUser0, mAppBubbleIcon);
+
+        // Collapse the stack so we don't need to wait for the dismiss animation in the test
+        mBubbleController.collapseStack();
+
+        // Dismiss the app bubble so it's in the overflow
+        mBubbleController.dismissBubble(appBubbleKey, Bubbles.DISMISS_USER_GESTURE);
+        assertThat(mBubbleData.getOverflowBubbleWithKey(appBubbleKey)).isNotNull();
+
+        // Calling this while collapsed will re-add and expand the app bubble
+        mBubbleController.showOrHideAppBubble(mAppBubbleIntent, mUser0, mAppBubbleIcon);
+        assertThat(mBubbleData.getSelectedBubble().getKey()).isEqualTo(appBubbleKey);
+        assertThat(mBubbleController.isStackExpanded()).isTrue();
+        assertThat(mBubbleData.getBubbles().size()).isEqualTo(1);
+        assertThat(mBubbleData.getOverflowBubbleWithKey(appBubbleKey)).isNull();
     }
 
     @Test
@@ -1970,13 +2214,41 @@ public class BubblesTest extends SysuiTestCase {
 
         FakeBubbleStateListener bubbleStateListener = new FakeBubbleStateListener();
         mBubbleController.registerBubbleStateListener(bubbleStateListener);
-        mBubbleController.expandStackAndSelectBubbleFromLauncher(mBubbleEntry.getKey(), 500, 1000);
+        mBubbleController.expandStackAndSelectBubbleFromLauncher(mBubbleEntry.getKey(),
+                new Rect(500, 1000, 600, 1100));
 
         assertThat(mBubbleController.getLayerView().isExpanded()).isTrue();
 
         mBubbleController.collapseStack();
 
         assertThat(mBubbleController.getLayerView().isExpanded()).isFalse();
+    }
+
+    @DisableFlags(FLAG_SCREENSHARE_NOTIFICATION_HIDING)
+    @Test
+    public void doesNotRegisterSensitiveStateListener() {
+        verifyZeroInteractions(mSensitiveNotificationProtectionController);
+    }
+
+    @EnableFlags(FLAG_SCREENSHARE_NOTIFICATION_HIDING)
+    @Test
+    public void registerSensitiveStateListener() {
+        verify(mSensitiveNotificationProtectionController).registerSensitiveStateListener(any());
+    }
+
+    @EnableFlags(FLAG_SCREENSHARE_NOTIFICATION_HIDING)
+    @Test
+    public void onSensitiveNotificationProtectionStateChanged() {
+        verify(mSensitiveNotificationProtectionController, atLeastOnce())
+                .registerSensitiveStateListener(mSensitiveStateChangedListener.capture());
+
+        when(mSensitiveNotificationProtectionController.isSensitiveStateActive()).thenReturn(true);
+        mSensitiveStateChangedListener.getValue().run();
+        verify(mBubbleController).onSensitiveNotificationProtectionStateChanged(true);
+
+        when(mSensitiveNotificationProtectionController.isSensitiveStateActive()).thenReturn(false);
+        mSensitiveStateChangedListener.getValue().run();
+        verify(mBubbleController).onSensitiveNotificationProtectionStateChanged(false);
     }
 
     /** Creates a bubble using the userId and package. */
@@ -2176,5 +2448,8 @@ public class BubblesTest extends SysuiTestCase {
         public boolean isBubbleBarEnabled() {
             return mIsBubbleBarEnabled;
         }
+
+        @Override
+        public void refresh() {}
     }
 }

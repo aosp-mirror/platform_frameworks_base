@@ -21,15 +21,17 @@ import android.accessibilityservice.AccessibilityServiceInfo;
 import android.accessibilityservice.IAccessibilityServiceConnection;
 import android.accessibilityservice.IAccessibilityServiceClient;
 import android.content.ComponentName;
+import android.content.pm.ParceledListSlice;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.accessibility.IAccessibilityInteractionConnection;
 import android.view.accessibility.IAccessibilityManagerClient;
 import android.view.accessibility.AccessibilityWindowAttributes;
-import android.view.accessibility.IWindowMagnificationConnection;
+import android.view.accessibility.IMagnificationConnection;
 import android.view.InputEvent;
 import android.view.IWindow;
 import android.view.MagnificationSpec;
+import android.view.SurfaceControl;
 
 /**
  * Interface implemented by the AccessibilityManagerService called by
@@ -47,7 +49,7 @@ interface IAccessibilityManager {
 
     boolean removeClient(IAccessibilityManagerClient client, int userId);
 
-    List<AccessibilityServiceInfo> getInstalledAccessibilityServiceList(int userId);
+    ParceledListSlice<AccessibilityServiceInfo> getInstalledAccessibilityServiceList(int userId);
 
     @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
     List<AccessibilityServiceInfo> getEnabledAccessibilityServiceList(int feedbackType, int userId);
@@ -89,7 +91,7 @@ interface IAccessibilityManager {
 
     oneway void registerSystemAction(in RemoteAction action, int actionId);
     oneway void unregisterSystemAction(int actionId);
-    oneway void setWindowMagnificationConnection(in IWindowMagnificationConnection connection);
+    oneway void setMagnificationConnection(in IMagnificationConnection connection);
 
     void associateEmbeddedHierarchy(IBinder host, IBinder embedded);
 
@@ -127,9 +129,18 @@ interface IAccessibilityManager {
     boolean isAccessibilityTargetAllowed(String packageName, int uid, int userId);
     boolean sendRestrictedDialogIntent(String packageName, int uid, int userId);
 
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.MANAGE_ACCESSIBILITY)")
+    boolean isAccessibilityServiceWarningRequired(in AccessibilityServiceInfo info);
+
     parcelable WindowTransformationSpec {
         float[] transformationMatrix;
         MagnificationSpec magnificationSpec;
     }
     WindowTransformationSpec getWindowTransformationSpec(int windowId);
+
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.INTERNAL_SYSTEM_WINDOW)")
+    void attachAccessibilityOverlayToDisplay(int displayId, in SurfaceControl surfaceControl);
+
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.STATUS_BAR_SERVICE)")
+    oneway void notifyQuickSettingsTilesChanged(int userId, in List<ComponentName> tileComponentNames);
 }

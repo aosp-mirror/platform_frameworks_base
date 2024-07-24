@@ -123,4 +123,25 @@ class SeekableSliderEventProducerTest : SysuiTestCase() {
 
             assertEquals(SliderEvent(SliderEventType.STOPPED_TRACKING_TOUCH, 0.5F), latest)
         }
+
+    @Test
+    fun onArrowUp_afterStartTrackingTouch_ArrowUpProduced() = runTest {
+        val latest by collectLastValue(eventFlow)
+
+        eventProducer.onStartTrackingTouch(seekBar)
+        eventProducer.onArrowUp()
+
+        assertEquals(SliderEvent(SliderEventType.ARROW_UP, 0f), latest)
+    }
+
+    @Test
+    fun onArrowUp_afterChangeByProgram_ArrowUpProduced_withProgress() = runTest {
+        val progress = 50
+        val latest by collectLastValue(eventFlow)
+
+        eventProducer.onProgressChanged(seekBar, progress, false)
+        eventProducer.onArrowUp()
+
+        assertEquals(SliderEvent(SliderEventType.ARROW_UP, 0.5f), latest)
+    }
 }

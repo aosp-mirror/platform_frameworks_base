@@ -30,7 +30,7 @@ import android.util.ArraySet
 import android.util.Log
 import android.view.View
 import com.android.internal.logging.UiEventLogger
-import com.android.systemui.R
+import com.android.systemui.res.R
 import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.flags.Flags.NOTIFICATION_INLINE_REPLY_ANIMATION
 import com.android.systemui.statusbar.NotificationRemoteInputManager
@@ -255,7 +255,8 @@ class RemoteInputViewControllerImpl @Inject constructor(
         entry.lastRemoteInputSent = SystemClock.elapsedRealtime()
         entry.mRemoteEditImeAnimatingAway = true
         remoteInputController.addSpinning(entry.key, view.mToken)
-        remoteInputController.removeRemoteInput(entry, view.mToken)
+        remoteInputController.removeRemoteInput(entry, view.mToken,
+               /* reason= */ "RemoteInputViewController#sendRemoteInput")
         remoteInputController.remoteInputSent(entry)
         entry.setHasSentReply()
 

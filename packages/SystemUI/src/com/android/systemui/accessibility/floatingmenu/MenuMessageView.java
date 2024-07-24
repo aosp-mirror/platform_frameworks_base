@@ -26,6 +26,7 @@ import android.content.res.ColorStateList;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Rect;
+import android.text.Layout;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewTreeObserver;
@@ -37,7 +38,7 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 
 import com.android.settingslib.Utils;
-import com.android.systemui.R;
+import com.android.systemui.res.R;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -162,6 +163,7 @@ class MenuMessageView extends LinearLayout implements
         mTextView.setPadding(/* left= */ 0, textPadding, /* right= */ 0, textPadding);
         mTextView.setTextSize(COMPLEX_UNIT_PX, textSize);
         mTextView.setTextColor(textColor);
+        mTextView.setHyphenationFrequency(Layout.HYPHENATION_FREQUENCY_NORMAL);
 
         final ColorStateList colorAccent = Utils.getColorAccent(getContext());
         mUndoButton.setText(res.getString(R.string.accessibility_floating_button_undo));

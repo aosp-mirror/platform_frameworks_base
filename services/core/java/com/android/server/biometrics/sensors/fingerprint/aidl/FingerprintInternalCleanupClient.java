@@ -39,9 +39,10 @@ import java.util.function.Supplier;
  * Fingerprint-specific internal cleanup client supporting the
  * {@link android.hardware.biometrics.fingerprint.IFingerprint} AIDL interface.
  */
-class FingerprintInternalCleanupClient extends InternalCleanupClient<Fingerprint, AidlSession> {
+public class FingerprintInternalCleanupClient
+        extends InternalCleanupClient<Fingerprint, AidlSession> {
 
-    FingerprintInternalCleanupClient(@NonNull Context context,
+    public FingerprintInternalCleanupClient(@NonNull Context context,
             @NonNull Supplier<AidlSession> lazyDaemon,
             int userId, @NonNull String owner, int sensorId,
             @NonNull BiometricLogger logger, @NonNull BiometricContext biometricContext,

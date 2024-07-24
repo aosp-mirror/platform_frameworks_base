@@ -1,0 +1,11 @@
+aconfig_declarations {
+    name: "connectivity_flags",
+    package: "com.android.server.connectivity",
+    container: "system",
+    srcs: ["flags.aconfig"],
+}
+
+java_aconfig_library {
+    name: "connectivity_flags_lib",
+    aconfig_declarations: "connectivity_flags",
+}

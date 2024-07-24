@@ -50,11 +50,11 @@ public class TextLineTest {
         tl.set(paint, line, 0, line.length(), Layout.DIR_LEFT_TO_RIGHT,
                 Layout.DIRS_ALL_LEFT_TO_RIGHT, false /* hasTabs */, null /* tabStops */,
                 0, 0 /* no ellipsis */, false /* useFallbackLinespace */);
-        final float originalWidth = tl.metrics(null);
+        final float originalWidth = tl.metrics(null, null, false, null);
         final float expandedWidth = 2 * originalWidth;
 
-        tl.justify(expandedWidth);
-        final float newWidth = tl.metrics(null);
+        tl.justify(Layout.JUSTIFICATION_MODE_INTER_WORD, expandedWidth);
+        final float newWidth = tl.metrics(null, null, false, null);
         TextLine.recycle(tl);
         return Math.abs(newWidth - expandedWidth) < 0.5;
     }
@@ -128,7 +128,7 @@ public class TextLineTest {
     private void assertMeasurements(final TextLine tl, final int length, boolean trailing,
             final float[] expected) {
         for (int offset = 0; offset <= length; ++offset) {
-            assertEquals(expected[offset], tl.measure(offset, trailing, null), 0.0f);
+            assertEquals(expected[offset], tl.measure(offset, trailing, null, null, null), 0.0f);
         }
 
         final boolean[] trailings = new boolean[length + 1];
@@ -318,7 +318,7 @@ public class TextLineTest {
         tl.set(new TextPaint(), text, 0, text.length(), 1, Layout.DIRS_ALL_LEFT_TO_RIGHT,
                 false /* hasTabs */, null /* tabStops */, 9, 12,
                 false /* useFallbackLineSpacing */);
-        tl.measure(text.length(), false /* trailing */, null /* fmi */);
+        tl.measure(text.length(), false /* trailing */, null /* fmi */, null, null);
 
         assertFalse(span.mIsUsed);
     }
@@ -335,7 +335,7 @@ public class TextLineTest {
         tl.set(new TextPaint(), text, 0, text.length(), 1, Layout.DIRS_ALL_LEFT_TO_RIGHT,
                 false /* hasTabs */, null /* tabStops */, 9, 12,
                 false /* useFallbackLineSpacing */);
-        tl.measure(text.length(), false /* trailing */, null /* fmi */);
+        tl.measure(text.length(), false /* trailing */, null /* fmi */, null, null);
 
         assertTrue(span.mIsUsed);
     }
@@ -352,7 +352,7 @@ public class TextLineTest {
         tl.set(new TextPaint(), text, 0, text.length(), 1, Layout.DIRS_ALL_LEFT_TO_RIGHT,
                 false /* hasTabs */, null /* tabStops */, 9, 12,
                 false /* useFallbackLineSpacing */);
-        tl.measure(text.length(), false /* trailing */, null /* fmi */);
+        tl.measure(text.length(), false /* trailing */, null /* fmi */, null, null);
         assertTrue(span.mIsUsed);
     }
 

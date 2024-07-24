@@ -170,9 +170,9 @@ public class SystemUIToast implements ToastPlugin.Toast {
         }
 
         final View toastView = mLayoutInflater.inflate(
-                    com.android.systemui.R.layout.text_toast, null);
-        final TextView textView = toastView.findViewById(com.android.systemui.R.id.text);
-        final ImageView iconView = toastView.findViewById(com.android.systemui.R.id.icon);
+                    com.android.systemui.res.R.layout.text_toast, null);
+        final TextView textView = toastView.findViewById(com.android.systemui.res.R.id.text);
+        final ImageView iconView = toastView.findViewById(com.android.systemui.res.R.id.icon);
         textView.setText(mText);
 
         ApplicationInfo appInfo = null;
@@ -189,7 +189,7 @@ public class SystemUIToast implements ToastPlugin.Toast {
             textView.setMaxLines(Integer.MAX_VALUE);
 
             // no app icon
-            toastView.findViewById(com.android.systemui.R.id.icon).setVisibility(View.GONE);
+            toastView.findViewById(com.android.systemui.res.R.id.icon).setVisibility(View.GONE);
         } else {
             Drawable icon = getBadgedIcon(mContext, mPackageName, mUserId);
             if (icon == null) {

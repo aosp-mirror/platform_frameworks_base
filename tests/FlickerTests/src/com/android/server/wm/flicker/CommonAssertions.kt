@@ -18,13 +18,15 @@
 
 package com.android.server.wm.flicker
 
-import android.tools.common.PlatformConsts
-import android.tools.common.flicker.subject.region.RegionSubject
-import android.tools.common.traces.component.ComponentNameMatcher
-import android.tools.common.traces.component.IComponentNameMatcher
-import android.tools.common.traces.wm.WindowManagerTrace
-import android.tools.device.flicker.legacy.LegacyFlickerTest
-import android.tools.device.helpers.WindowUtils
+import android.tools.PlatformConsts
+import android.tools.Position
+import android.tools.flicker.legacy.LegacyFlickerTest
+import android.tools.flicker.subject.layers.LayerTraceEntrySubject
+import android.tools.flicker.subject.region.RegionSubject
+import android.tools.helpers.WindowUtils
+import android.tools.traces.component.ComponentNameMatcher
+import android.tools.traces.component.IComponentNameMatcher
+import android.tools.traces.wm.WindowManagerTrace
 
 /**
  * Checks that [ComponentNameMatcher.STATUS_BAR] window is visible and above the app windows in all
@@ -168,14 +170,7 @@ fun LegacyFlickerTest.statusBarLayerIsVisibleAtStartAndEnd() {
  * the SF trace
  */
 fun LegacyFlickerTest.navBarLayerPositionAtStart() {
-    assertLayersStart {
-        val display =
-            this.entry.displays.firstOrNull { !it.isVirtual } ?: error("There is no display!")
-        this.visibleRegion(ComponentNameMatcher.NAV_BAR)
-            .coversExactly(
-                WindowUtils.getNavigationBarPosition(display, scenario.isGesturalNavigation)
-            )
-    }
+    assertLayersStart { assertNavBarPosition(this, scenario.isGesturalNavigation) }
 }
 
 /**
@@ -183,14 +178,39 @@ fun LegacyFlickerTest.navBarLayerPositionAtStart() {
  * the SF trace
  */
 fun LegacyFlickerTest.navBarLayerPositionAtEnd() {
-    assertLayersEnd {
-        val display =
-            this.entry.displays.minByOrNull { it.id }
-                ?: throw RuntimeException("There is no display!")
-        this.visibleRegion(ComponentNameMatcher.NAV_BAR)
-            .coversExactly(
-                WindowUtils.getNavigationBarPosition(display, scenario.isGesturalNavigation)
-            )
+    assertLayersEnd { assertNavBarPosition(this, scenario.isGesturalNavigation) }
+}
+
+private fun assertNavBarPosition(sfState: LayerTraceEntrySubject, isGesturalNavigation: Boolean) {
+    val display =
+        sfState.entry.displays.filterNot { it.isOff }.minByOrNull { it.id }
+            ?: error("There is no display!")
+    val displayArea = display.layerStackSpace
+    val navBarPosition = display.navBarPosition(isGesturalNavigation)
+    val navBarRegion = sfState.visibleRegion(ComponentNameMatcher.NAV_BAR)
+
+    when (navBarPosition) {
+        Position.TOP ->
+            navBarRegion
+                .hasSameTopPosition(displayArea)
+                .hasSameLeftPosition(displayArea)
+                .hasSameRightPosition(displayArea)
+        Position.BOTTOM ->
+            navBarRegion
+                .hasSameBottomPosition(displayArea)
+                .hasSameLeftPosition(displayArea)
+                .hasSameRightPosition(displayArea)
+        Position.LEFT ->
+            navBarRegion
+                .hasSameLeftPosition(displayArea)
+                .hasSameTopPosition(displayArea)
+                .hasSameBottomPosition(displayArea)
+        Position.RIGHT ->
+            navBarRegion
+                .hasSameRightPosition(displayArea)
+                .hasSameTopPosition(displayArea)
+                .hasSameBottomPosition(displayArea)
+        else -> error("Unknown position $navBarPosition")
     }
 }
 
@@ -261,11 +281,10 @@ fun LegacyFlickerTest.snapshotStartingWindowLayerCoversExactlyOnApp(
             val visibleAreas =
                 snapshotLayers
                     .mapNotNull { snapshotLayer -> snapshotLayer.layer.visibleRegion }
-                    .toTypedArray()
-            val snapshotRegion = RegionSubject(visibleAreas, timestamp)
+            val snapshotRegion = RegionSubject(visibleAreas, it.timestamp)
+            val appVisibleRegion = it.visibleRegion(component)
             // Verify the size of snapshotRegion covers appVisibleRegion exactly in animation.
-            if (snapshotRegion.region.isNotEmpty) {
-                val appVisibleRegion = it.visibleRegion(component)
+            if (snapshotRegion.region.isNotEmpty && appVisibleRegion.region.isNotEmpty) {
                 snapshotRegion.coversExactly(appVisibleRegion.region)
             }
         }

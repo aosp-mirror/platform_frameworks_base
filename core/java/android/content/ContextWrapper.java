@@ -17,6 +17,7 @@
 package android.content;
 
 import android.annotation.CallbackExecutor;
+import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
@@ -71,6 +72,7 @@ import java.util.function.IntConsumer;
  * another Context.  Can be subclassed to modify behavior without changing
  * the original Context.
  */
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
 public class ContextWrapper extends Context {
     @UnsupportedAppUsage
     Context mBase;
@@ -650,6 +652,16 @@ public class ContextWrapper extends Context {
                 resultReceiver, scheduler, initialCode, initialData, initialExtras);
     }
 
+    /** @hide */
+    @Override
+    public void sendOrderedBroadcastAsUserMultiplePermissions(Intent intent, UserHandle user,
+            @Nullable String[] receiverPermission, int appOp, @Nullable Bundle options,
+            @Nullable BroadcastReceiver resultReceiver, @Nullable Handler scheduler,
+            int initialCode, @Nullable String initialData, @Nullable Bundle initialExtras) {
+        mBase.sendOrderedBroadcastAsUserMultiplePermissions(intent, user, receiverPermission, appOp,
+                options, resultReceiver, scheduler, initialCode, initialData, initialExtras);
+    }
+
     @Override
     public void sendOrderedBroadcast(@RequiresPermission @NonNull Intent intent,
             @Nullable String receiverPermission, @Nullable String receiverAppOp,
@@ -657,6 +669,17 @@ public class ContextWrapper extends Context {
             int initialCode, @Nullable String initialData, @Nullable Bundle initialExtras) {
         mBase.sendOrderedBroadcast(intent, receiverPermission, receiverAppOp, resultReceiver,
                 scheduler, initialCode, initialData, initialExtras);
+    }
+
+    /** @hide */
+    @Override
+    public void sendOrderedBroadcastMultiplePermissions(
+            @NonNull Intent intent, @NonNull String[] receiverPermissions,
+            @Nullable String receiverAppOp, @Nullable BroadcastReceiver resultReceiver,
+            @Nullable Handler scheduler, int initialCode, @Nullable String initialData,
+            @Nullable Bundle initialExtras, @Nullable Bundle options) {
+        mBase.sendOrderedBroadcastMultiplePermissions(intent, receiverPermissions, receiverAppOp,
+                resultReceiver, scheduler, initialCode, initialData, initialExtras, options);
     }
 
     @Override
@@ -930,7 +953,8 @@ public class ContextWrapper extends Context {
     }
 
     @Override
-    public @Nullable Object getSystemService(String name) {
+    // TODO(b/347269120): Re-add @Nullable
+    public Object getSystemService(String name) {
         return mBase.getSystemService(name);
     }
 
@@ -1000,6 +1024,12 @@ public class ContextWrapper extends Context {
     @Override
     public int checkUriPermission(Uri uri, int pid, int uid, int modeFlags) {
         return mBase.checkUriPermission(uri, pid, uid, modeFlags);
+    }
+
+    @FlaggedApi(android.security.Flags.FLAG_CONTENT_URI_PERMISSION_APIS)
+    @Override
+    public int checkContentUriPermissionFull(@NonNull Uri uri, int pid, int uid, int modeFlags) {
+        return mBase.checkContentUriPermissionFull(uri, pid, uid, modeFlags);
     }
 
     @NonNull
@@ -1430,6 +1460,7 @@ public class ContextWrapper extends Context {
      * @throws IllegalStateException if this method calls before {@link #attachBaseContext(Context)}
      */
     @Override
+    @android.ravenwood.annotation.RavenwoodThrow
     public void registerComponentCallbacks(ComponentCallbacks callback) {
         if (mBase != null) {
             mBase.registerComponentCallbacks(callback);
@@ -1464,6 +1495,7 @@ public class ContextWrapper extends Context {
      * @throws IllegalStateException if this method calls before {@link #attachBaseContext(Context)}
      */
     @Override
+    @android.ravenwood.annotation.RavenwoodThrow
     public void unregisterComponentCallbacks(ComponentCallbacks callback) {
         // It usually means the ComponentCallbacks is registered before this ContextWrapper attaches
         // to a base Context and Application is targeting prior to S-v2. We should unregister the

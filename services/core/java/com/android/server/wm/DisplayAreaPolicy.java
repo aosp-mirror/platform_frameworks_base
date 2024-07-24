@@ -40,6 +40,10 @@ import android.content.res.Resources;
 import android.os.Bundle;
 import android.text.TextUtils;
 
+import com.android.tools.r8.keepanno.annotations.KeepItemKind;
+import com.android.tools.r8.keepanno.annotations.KeepTarget;
+import com.android.tools.r8.keepanno.annotations.UsesReflection;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -179,6 +183,13 @@ public abstract class DisplayAreaPolicy {
         /**
          * Instantiates the device-specific {@link Provider}.
          */
+        @UsesReflection(
+                value = {
+                        @KeepTarget(
+                                kind = KeepItemKind.CLASS_AND_MEMBERS,
+                                instanceOfClassConstantExclusive = Provider.class,
+                                methodName = "<init>")
+                })
         static Provider fromResources(Resources res) {
             String name = res.getString(
                     com.android.internal.R.string.config_deviceSpecificDisplayAreaPolicyProvider);

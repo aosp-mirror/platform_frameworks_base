@@ -26,6 +26,7 @@ import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.annotation.TestApi;
+import android.annotation.UserIdInt;
 import android.app.admin.DevicePolicyManager;
 import android.app.admin.DevicePolicyManager.PasswordComplexity;
 import android.app.admin.PasswordMetrics;
@@ -63,6 +64,8 @@ import com.android.internal.widget.LockscreenCredential;
 import com.android.internal.widget.PasswordValidationError;
 import com.android.internal.widget.VerifyCredentialResponse;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.List;
@@ -234,6 +237,7 @@ public class KeyguardManager {
             PIN,
             PATTERN
     })
+    @Retention(RetentionPolicy.SOURCE)
     @interface LockTypes {}
 
     private final IKeyguardLockedStateListener mIKeyguardLockedStateListener =
@@ -744,7 +748,7 @@ public class KeyguardManager {
      * @see #isKeyguardLocked()
      */
     public boolean isDeviceLocked() {
-        return isDeviceLocked(mContext.getUserId());
+        return isDeviceLocked(mContext.getUserId(), mContext.getDeviceId());
     }
 
     /**
@@ -754,8 +758,17 @@ public class KeyguardManager {
      */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     public boolean isDeviceLocked(int userId) {
+        return isDeviceLocked(userId, mContext.getDeviceId());
+    }
+
+    /**
+     * Per-user per-device version of {@link #isDeviceLocked()}.
+     *
+     * @hide
+     */
+    public boolean isDeviceLocked(@UserIdInt int userId, int deviceId) {
         try {
-            return mTrustManager.isDeviceLocked(userId, mContext.getAssociatedDisplayId());
+            return mTrustManager.isDeviceLocked(userId, deviceId);
         } catch (RemoteException e) {
             return false;
         }
@@ -778,7 +791,7 @@ public class KeyguardManager {
      * @see #isKeyguardSecure()
      */
     public boolean isDeviceSecure() {
-        return isDeviceSecure(mContext.getUserId());
+        return isDeviceSecure(mContext.getUserId(), mContext.getDeviceId());
     }
 
     /**
@@ -788,8 +801,17 @@ public class KeyguardManager {
      */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public boolean isDeviceSecure(int userId) {
+        return isDeviceSecure(userId, mContext.getDeviceId());
+    }
+
+    /**
+     * Per-user per-device version of {@link #isDeviceSecure()}.
+     *
+     * @hide
+     */
+    public boolean isDeviceSecure(@UserIdInt int userId, int deviceId) {
         try {
-            return mTrustManager.isDeviceSecure(userId, mContext.getAssociatedDisplayId());
+            return mTrustManager.isDeviceSecure(userId, deviceId);
         } catch (RemoteException e) {
             return false;
         }
@@ -1010,9 +1032,7 @@ public class KeyguardManager {
             return false;
         }
         boolean success;
-        try {
-            LockscreenCredential credential = createLockscreenCredential(
-                    lockType, password);
+        try (LockscreenCredential credential = createLockscreenCredential(lockType, password)) {
             success = mLockPatternUtils.setLockCredential(
                     credential,
                     /* savedPassword= */ LockscreenCredential.createNone(),
@@ -1191,19 +1211,20 @@ public class KeyguardManager {
     public boolean setLock(@LockTypes int newLockType, @Nullable byte[] newPassword,
             @LockTypes int currentLockType, @Nullable byte[] currentPassword) {
         final int userId = mContext.getUserId();
-        LockscreenCredential currentCredential = createLockscreenCredential(
+        try (LockscreenCredential currentCredential = createLockscreenCredential(
                 currentLockType, currentPassword);
-        LockscreenCredential newCredential = createLockscreenCredential(
-                newLockType, newPassword);
-        PasswordMetrics adminMetrics =
-                mLockPatternUtils.getRequestedPasswordMetrics(mContext.getUserId());
-        List<PasswordValidationError> errors = PasswordMetrics.validateCredential(adminMetrics,
-                DevicePolicyManager.PASSWORD_COMPLEXITY_NONE, newCredential);
-        if (!errors.isEmpty()) {
-            Log.e(TAG, "New credential is not valid: " + errors.get(0));
-            return false;
+                LockscreenCredential newCredential = createLockscreenCredential(
+                        newLockType, newPassword)) {
+            PasswordMetrics adminMetrics =
+                    mLockPatternUtils.getRequestedPasswordMetrics(mContext.getUserId());
+            List<PasswordValidationError> errors = PasswordMetrics.validateCredential(adminMetrics,
+                    DevicePolicyManager.PASSWORD_COMPLEXITY_NONE, newCredential);
+            if (!errors.isEmpty()) {
+                Log.e(TAG, "New credential is not valid: " + errors.get(0));
+                return false;
+            }
+            return mLockPatternUtils.setLockCredential(newCredential, currentCredential, userId);
         }
-        return mLockPatternUtils.setLockCredential(newCredential, currentCredential, userId);
     }
 
     /**
@@ -1222,14 +1243,14 @@ public class KeyguardManager {
             Manifest.permission.ACCESS_KEYGUARD_SECURE_STORAGE
     })
     public boolean checkLock(@LockTypes int lockType, @Nullable byte[] password) {
-        final LockscreenCredential credential = createLockscreenCredential(
-                lockType, password);
-        final VerifyCredentialResponse response = mLockPatternUtils.verifyCredential(
-                credential, mContext.getUserId(), /* flags= */ 0);
-        if (response == null) {
-            return false;
+        try (LockscreenCredential credential = createLockscreenCredential(lockType, password)) {
+            final VerifyCredentialResponse response = mLockPatternUtils.verifyCredential(
+                    credential, mContext.getUserId(), /* flags= */ 0);
+            if (response == null) {
+                return false;
+            }
+            return response.getResponseCode() == VerifyCredentialResponse.RESPONSE_OK;
         }
-        return response.getResponseCode() == VerifyCredentialResponse.RESPONSE_OK;
     }
 
     /** Starts a session to verify lockscreen credentials provided by a remote device.

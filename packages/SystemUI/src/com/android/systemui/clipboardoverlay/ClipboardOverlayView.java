@@ -54,7 +54,7 @@ import android.widget.TextView;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.accessibility.AccessibilityNodeInfoCompat;
 
-import com.android.systemui.R;
+import com.android.systemui.res.R;
 import com.android.systemui.screenshot.DraggableConstraintLayout;
 import com.android.systemui.screenshot.FloatingWindowUtil;
 import com.android.systemui.screenshot.OverlayActionChip;
@@ -143,7 +143,7 @@ public class ClipboardOverlayView extends DraggableConstraintLayout {
         mTextPreview.getViewTreeObserver().addOnPreDrawListener(() -> {
             int availableHeight = mTextPreview.getHeight()
                     - (mTextPreview.getPaddingTop() + mTextPreview.getPaddingBottom());
-            mTextPreview.setMaxLines(availableHeight / mTextPreview.getLineHeight());
+            mTextPreview.setMaxLines(Math.max(availableHeight / mTextPreview.getLineHeight(), 1));
             return true;
         });
         super.onFinishInflate();

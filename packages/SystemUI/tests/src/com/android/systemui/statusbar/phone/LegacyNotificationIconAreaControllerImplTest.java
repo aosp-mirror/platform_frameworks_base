@@ -20,11 +20,13 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.platform.test.annotations.DisableFlags;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 
 import androidx.test.filters.SmallTest;
 
+import com.android.systemui.Flags;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.demomode.DemoModeController;
 import com.android.systemui.flags.FeatureFlags;
@@ -34,6 +36,7 @@ import com.android.systemui.statusbar.NotificationListener;
 import com.android.systemui.statusbar.NotificationMediaManager;
 import com.android.systemui.statusbar.notification.NotificationWakeUpCoordinator;
 import com.android.systemui.statusbar.notification.collection.provider.SectionStyleProvider;
+import com.android.systemui.statusbar.notification.shared.NotificationIconContainerRefactor;
 import com.android.systemui.statusbar.window.StatusBarWindowController;
 import com.android.wm.shell.bubbles.Bubbles;
 
@@ -48,6 +51,7 @@ import java.util.Optional;
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
 @TestableLooper.RunWithLooper
+@DisableFlags(NotificationIconContainerRefactor.FLAG_NAME)
 public class LegacyNotificationIconAreaControllerImplTest extends SysuiTestCase {
 
     @Mock
@@ -115,6 +119,7 @@ public class LegacyNotificationIconAreaControllerImplTest extends SysuiTestCase 
 
     @Test
     public void testAppearResetsTranslation() {
+        mSetFlagsRule.disableFlags(Flags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT);
         mController.setupAodIcons(mAodIcons);
         when(mDozeParameters.shouldControlScreenOff()).thenReturn(false);
         mController.appearAodIcons();

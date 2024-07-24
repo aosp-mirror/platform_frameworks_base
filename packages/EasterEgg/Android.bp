@@ -48,6 +48,8 @@ android_app {
     },
 
     static_libs: [
+        "easter_egg_flags_lib",
+
         "androidx.core_core",
         "androidx.annotation_annotation",
         "androidx.recyclerview_recyclerview",
@@ -71,4 +73,18 @@ android_app {
     manifest: "AndroidManifest.xml",
 
     kotlincflags: ["-Xjvm-default=all"],
+}
+
+java_aconfig_library {
+    name: "easter_egg_flags_lib",
+    aconfig_declarations: "easter_egg_flags",
+}
+
+aconfig_declarations {
+    name: "easter_egg_flags",
+    package: "com.android.egg.flags",
+    container: "system",
+    srcs: [
+        "easter_egg_flags.aconfig",
+    ],
 }

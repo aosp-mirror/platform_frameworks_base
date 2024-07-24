@@ -38,16 +38,16 @@ import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
-import com.android.server.pm.test.service.server.R;
+import com.android.internal.pm.parsing.PackageParserException;
+import com.android.internal.pm.parsing.pkg.ParsedPackage;
+import com.android.internal.pm.pkg.component.ParsedActivityUtils;
+import com.android.internal.pm.pkg.component.ParsedComponent;
+import com.android.internal.pm.pkg.component.ParsedIntentInfo;
+import com.android.internal.pm.pkg.component.ParsedPermission;
+import com.android.internal.pm.pkg.component.ParsedPermissionUtils;
 import com.android.internal.util.ArrayUtils;
-import com.android.server.pm.PackageManagerException;
-import com.android.server.pm.parsing.pkg.ParsedPackage;
 import com.android.server.pm.pkg.AndroidPackage;
-import com.android.server.pm.pkg.component.ParsedActivityUtils;
-import com.android.server.pm.pkg.component.ParsedComponent;
-import com.android.server.pm.pkg.component.ParsedIntentInfo;
-import com.android.server.pm.pkg.component.ParsedPermission;
-import com.android.server.pm.pkg.component.ParsedPermissionUtils;
+import com.android.server.pm.test.service.server.R;
 
 import com.google.common.truth.Expect;
 
@@ -608,7 +608,7 @@ public class PackageParserLegacyCoreTest {
             try {
                 parsePackage(filename, resId, x -> x);
                 expect.withMessage("Expected parsing error %s from %s", result, filename).fail();
-            } catch (PackageManagerException expected) {
+            } catch (PackageParserException expected) {
                 expect.that(expected.error).isEqualTo(result);
             }
         }

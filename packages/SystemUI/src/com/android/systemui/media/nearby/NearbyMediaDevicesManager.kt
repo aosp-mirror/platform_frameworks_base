@@ -18,9 +18,14 @@ package com.android.systemui.media.nearby
 
 import android.media.INearbyMediaDevicesProvider
 import android.media.INearbyMediaDevicesUpdateCallback
-import com.android.systemui.dagger.SysUISingleton
 import android.os.IBinder
+import com.android.systemui.CoreStartable
+import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.statusbar.CommandQueue
+import dagger.Binds
+import dagger.Module
+import dagger.multibindings.ClassKey
+import dagger.multibindings.IntoMap
 import javax.inject.Inject
 
 /**
@@ -30,9 +35,9 @@ import javax.inject.Inject
  */
 @SysUISingleton
 class NearbyMediaDevicesManager @Inject constructor(
-    commandQueue: CommandQueue,
+    private val commandQueue: CommandQueue,
     private val logger: NearbyMediaDevicesLogger
-) {
+) : CoreStartable {
     private var providers: MutableList<INearbyMediaDevicesProvider> = mutableListOf()
     private var activeCallbacks: MutableList<INearbyMediaDevicesUpdateCallback> = mutableListOf()
 
@@ -69,7 +74,7 @@ class NearbyMediaDevicesManager @Inject constructor(
         }
     }
 
-    init {
+    override fun start() {
         commandQueue.addCallback(commandQueueCallbacks)
     }
 
@@ -107,5 +112,13 @@ class NearbyMediaDevicesManager @Inject constructor(
                 }
             }
         }
+    }
+
+    @Module
+    interface StartableModule {
+        @Binds
+        @IntoMap
+        @ClassKey(NearbyMediaDevicesManager::class)
+        fun bindsNearbyMediaDevicesManager(impl: NearbyMediaDevicesManager): CoreStartable
     }
 }

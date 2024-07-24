@@ -38,7 +38,7 @@ import android.util.TypedValue;
 import androidx.test.InstrumentationRegistry;
 
 import com.android.internal.R;
-import com.android.server.LocalServices;
+import com.android.internal.util.test.LocalServiceKeeperRule;
 import com.android.server.display.TestUtils;
 import com.android.server.display.color.ColorDisplayService;
 import com.android.server.display.utils.AmbientFilter;
@@ -47,6 +47,7 @@ import com.android.server.display.utils.AmbientFilterStubber;
 import com.google.common.collect.ImmutableList;
 
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -64,7 +65,9 @@ public final class AmbientLuxTest {
     private static final int AMBIENT_COLOR_TYPE = 20705;
     private static final String AMBIENT_COLOR_TYPE_STR = "colorSensoryDensoryDoc";
     private static final float LOW_LIGHT_AMBIENT_COLOR_TEMPERATURE = 5432.1f;
+    private static final float LOW_LIGHT_AMBIENT_COLOR_TEMPERATURE_STRONG = 5555.5f;
     private static final float HIGH_LIGHT_AMBIENT_COLOR_TEMPERATURE = 3456.7f;
+    private static final float HIGH_LIGHT_AMBIENT_COLOR_TEMPERATURE_STRONG = 3333.3f;
 
     private Handler mHandler = new Handler(Looper.getMainLooper());
     private Sensor mLightSensor;
@@ -78,11 +81,18 @@ public final class AmbientLuxTest {
     @Mock private TypedArray mBiases;
     @Mock private TypedArray mHighLightBrightnesses;
     @Mock private TypedArray mHighLightBiases;
+    @Mock private TypedArray mBrightnessesStrong;
+    @Mock private TypedArray mBiasesStrong;
+    @Mock private TypedArray mHighLightBrightnessesStrong;
+    @Mock private TypedArray mHighLightBiasesStrong;
     @Mock private TypedArray mAmbientColorTemperatures;
     @Mock private TypedArray mDisplayColorTemperatures;
     @Mock private TypedArray mStrongAmbientColorTemperatures;
     @Mock private TypedArray mStrongDisplayColorTemperatures;
     @Mock private ColorDisplayService.ColorDisplayServiceInternal mColorDisplayServiceInternalMock;
+
+    @Rule
+    public LocalServiceKeeperRule mLocalServiceKeeperRule = new LocalServiceKeeperRule();
 
     @Before
     public void setUp() throws Exception {
@@ -108,6 +118,10 @@ public final class AmbientLuxTest {
                 LOW_LIGHT_AMBIENT_COLOR_TEMPERATURE);
         mockResourcesFloat(R.dimen.config_displayWhiteBalanceHighLightAmbientColorTemperature,
                 HIGH_LIGHT_AMBIENT_COLOR_TEMPERATURE);
+        mockResourcesFloat(R.dimen.config_displayWhiteBalanceLowLightAmbientColorTemperatureStrong,
+                LOW_LIGHT_AMBIENT_COLOR_TEMPERATURE_STRONG);
+        mockResourcesFloat(R.dimen.config_displayWhiteBalanceHighLightAmbientColorTemperatureStrong,
+                HIGH_LIGHT_AMBIENT_COLOR_TEMPERATURE_STRONG);
         when(mResourcesSpy.obtainTypedArray(
                 R.array.config_displayWhiteBalanceAmbientColorTemperatures))
                 .thenReturn(mAmbientColorTemperatures);
@@ -133,9 +147,22 @@ public final class AmbientLuxTest {
         when(mResourcesSpy.obtainTypedArray(
                 R.array.config_displayWhiteBalanceHighLightAmbientBiases))
                 .thenReturn(mHighLightBiases);
+        when(mResourcesSpy.obtainTypedArray(
+                R.array.config_displayWhiteBalanceLowLightAmbientBrightnessesStrong))
+                .thenReturn(mBrightnessesStrong);
+        when(mResourcesSpy.obtainTypedArray(
+                R.array.config_displayWhiteBalanceLowLightAmbientBiasesStrong))
+                .thenReturn(mBiasesStrong);
+        when(mResourcesSpy.obtainTypedArray(
+                R.array.config_displayWhiteBalanceHighLightAmbientBrightnessesStrong))
+                .thenReturn(mHighLightBrightnessesStrong);
+        when(mResourcesSpy.obtainTypedArray(
+                R.array.config_displayWhiteBalanceHighLightAmbientBiasesStrong))
+                .thenReturn(mHighLightBiasesStrong);
         mockThrottler();
-        LocalServices.removeServiceForTest(ColorDisplayService.ColorDisplayServiceInternal.class);
-        LocalServices.addService(ColorDisplayService.ColorDisplayServiceInternal.class,
+
+        mLocalServiceKeeperRule.overrideLocalService(
+                ColorDisplayService.ColorDisplayServiceInternal.class,
                 mColorDisplayServiceInternalMock);
     }
 
@@ -388,8 +415,8 @@ public final class AmbientLuxTest {
     public void testStrongMode() {
         final float lowerBrightness = 10.0f;
         final float upperBrightness = 50.0f;
-        setBrightnesses(lowerBrightness, upperBrightness);
-        setBiases(0.0f, 1.0f);
+        setBrightnessesStrong(lowerBrightness, upperBrightness);
+        setBiasesStrong(0.0f, 1.0f);
         final int ambientColorTempLow = 6000;
         final int ambientColorTempHigh = 8000;
         final int displayColorTempLow = 6400;
@@ -413,7 +440,7 @@ public final class AmbientLuxTest {
                 setEstimatedBrightnessAndUpdate(controller,
                         mix(lowerBrightness, upperBrightness, brightnessFraction));
                 assertEquals(controller.mPendingAmbientColorTemperature,
-                        mix(LOW_LIGHT_AMBIENT_COLOR_TEMPERATURE,
+                        mix(LOW_LIGHT_AMBIENT_COLOR_TEMPERATURE_STRONG,
                                 mix(displayColorTempLow, displayColorTempHigh, ambientTempFraction),
                                 brightnessFraction),
                         ALLOWED_ERROR_DELTA);
@@ -458,7 +485,7 @@ public final class AmbientLuxTest {
         assertEquals(-1.0f, controller.mPendingAmbientColorTemperature, 0);
     }
 
-    void mockThrottler() {
+    private void mockThrottler() {
         when(mResourcesSpy.getInteger(
                 R.integer.config_displayWhiteBalanceDecreaseDebounce)).thenReturn(0);
         when(mResourcesSpy.getInteger(
@@ -513,8 +540,16 @@ public final class AmbientLuxTest {
         setFloatArrayResource(mBrightnesses, vals);
     }
 
+    private void setBrightnessesStrong(float... vals) {
+        setFloatArrayResource(mBrightnessesStrong, vals);
+    }
+
     private void setBiases(float... vals) {
         setFloatArrayResource(mBiases, vals);
+    }
+
+    private void setBiasesStrong(float... vals) {
+        setFloatArrayResource(mBiasesStrong, vals);
     }
 
     private void setHighLightBrightnesses(float... vals) {

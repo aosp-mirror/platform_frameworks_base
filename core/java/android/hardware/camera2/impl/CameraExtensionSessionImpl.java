@@ -118,6 +118,7 @@ public final class CameraExtensionSessionImpl extends CameraExtensionSession {
     // In case the client doesn't explicitly enable repeating requests, the framework
     // will do so internally.
     private boolean mInternalRepeatingRequestEnabled = true;
+    private int mExtensionType;
 
     private final Context mContext;
 
@@ -244,7 +245,8 @@ public final class CameraExtensionSessionImpl extends CameraExtensionSession {
                 sessionId,
                 token,
                 extensionChars.getAvailableCaptureRequestKeys(config.getExtension()),
-                extensionChars.getAvailableCaptureResultKeys(config.getExtension()));
+                extensionChars.getAvailableCaptureResultKeys(config.getExtension()),
+                config.getExtension());
 
         session.mStatsAggregator.setClientName(ctx.getOpPackageName());
         session.mStatsAggregator.setExtensionType(config.getExtension());
@@ -266,7 +268,8 @@ public final class CameraExtensionSessionImpl extends CameraExtensionSession {
             int sessionId,
             @NonNull IBinder token,
             @NonNull Set<CaptureRequest.Key> requestKeys,
-            @Nullable Set<CaptureResult.Key> resultKeys) {
+            @Nullable Set<CaptureResult.Key> resultKeys,
+            int extension) {
         mContext = ctx;
         mImageExtender = imageExtender;
         mPreviewExtender = previewExtender;
@@ -289,6 +292,7 @@ public final class CameraExtensionSessionImpl extends CameraExtensionSession {
         mSupportedResultKeys = resultKeys;
         mCaptureResultsSupported = !resultKeys.isEmpty();
         mInterfaceLock = cameraDevice.mInterfaceLock;
+        mExtensionType = extension;
 
         mStatsAggregator = new ExtensionSessionStatsAggregator(mCameraDevice.getId(),
                 /*isAdvanced=*/false);
@@ -357,7 +361,7 @@ public final class CameraExtensionSessionImpl extends CameraExtensionSession {
             mCameraRepeatingSurface = mRepeatingRequestImageReader.getSurface();
         }
         mRepeatingRequestImageCallback = new CameraOutputImageCallback(
-                mRepeatingRequestImageReader);
+                mRepeatingRequestImageReader, true /*pruneOlderBuffers*/);
         mRepeatingRequestImageReader
                 .setOnImageAvailableListener(mRepeatingRequestImageCallback, mHandler);
     }
@@ -398,7 +402,8 @@ public final class CameraExtensionSessionImpl extends CameraExtensionSession {
                         CameraExtensionCharacteristics.PROCESSING_INPUT_FORMAT);
             }
 
-            mBurstCaptureImageCallback = new CameraOutputImageCallback(mBurstCaptureImageReader);
+            mBurstCaptureImageCallback = new CameraOutputImageCallback(mBurstCaptureImageReader,
+                    false /*pruneOlderBuffers*/);
             mBurstCaptureImageReader.setOnImageAvailableListener(mBurstCaptureImageCallback,
                     mHandler);
             mCameraBurstSurface = mBurstCaptureImageReader.getSurface();
@@ -880,9 +885,9 @@ public final class CameraExtensionSessionImpl extends CameraExtensionSession {
             if (mToken != null) {
                 if (mInitialized || (mCaptureSession != null)) {
                     notifyClose = true;
-                    CameraExtensionCharacteristics.releaseSession();
+                    CameraExtensionCharacteristics.releaseSession(mExtensionType);
                 }
-                CameraExtensionCharacteristics.unregisterClient(mContext, mToken);
+                CameraExtensionCharacteristics.unregisterClient(mContext, mToken, mExtensionType);
             }
             mInitialized = false;
             mToken = null;
@@ -999,7 +1004,8 @@ public final class CameraExtensionSessionImpl extends CameraExtensionSession {
                 mStatsAggregator.commit(/*isFinal*/false);
                 try {
                     finishPipelineInitialization();
-                    CameraExtensionCharacteristics.initializeSession(mInitializeHandler);
+                    CameraExtensionCharacteristics.initializeSession(
+                            mInitializeHandler, mExtensionType);
                 } catch (RemoteException e) {
                     Log.e(TAG, "Failed to initialize session! Extension service does"
                             + " not respond!");
@@ -1106,7 +1112,9 @@ public final class CameraExtensionSessionImpl extends CameraExtensionSession {
                 }
 
                 for (Pair<Image, TotalCaptureResult> captureStage : mCaptureStageMap.values()) {
-                    captureStage.first.close();
+                    if (captureStage.first != null) {
+                        captureStage.first.close();
+                    }
                 }
                 mCaptureStageMap.clear();
             }
@@ -1207,6 +1215,7 @@ public final class CameraExtensionSessionImpl extends CameraExtensionSession {
                 if (mImageProcessor != null) {
                     if (mCapturePendingMap.indexOfKey(timestamp) >= 0) {
                         Image img = mCapturePendingMap.get(timestamp).first;
+                        mCapturePendingMap.remove(timestamp);
                         mCaptureStageMap.put(stageId, new Pair<>(img, result));
                         checkAndFireBurstProcessing();
                     } else {
@@ -1303,6 +1312,7 @@ public final class CameraExtensionSessionImpl extends CameraExtensionSession {
                 reader.detachImage(img);
                 if (mCapturePendingMap.indexOfKey(timestamp) >= 0) {
                     Integer stageId = mCapturePendingMap.get(timestamp).second;
+                    mCapturePendingMap.remove(timestamp);
                     Pair<Image, TotalCaptureResult> captureStage =
                             mCaptureStageMap.get(stageId);
                     if (captureStage != null) {
@@ -1402,9 +1412,11 @@ public final class CameraExtensionSessionImpl extends CameraExtensionSession {
         private HashMap<Long, Pair<Image, OnImageAvailableListener>> mImageListenerMap =
                 new HashMap<>();
         private boolean mOutOfBuffers = false;
+        private final boolean mPruneOlderBuffers;
 
-        CameraOutputImageCallback(ImageReader imageReader) {
+        CameraOutputImageCallback(ImageReader imageReader, boolean pruneOlderBuffers) {
             mImageReader = imageReader;
+            mPruneOlderBuffers = pruneOlderBuffers;
         }
 
         @Override
@@ -1447,6 +1459,10 @@ public final class CameraExtensionSessionImpl extends CameraExtensionSession {
                 ArrayList<Long> removedTs = new ArrayList<>();
                 for (long ts : timestamps) {
                     if (ts < timestamp) {
+                        if (!mPruneOlderBuffers) {
+                            Log.w(TAG, "Unexpected older image with ts: " + ts);
+                            continue;
+                        }
                         Log.e(TAG, "Dropped image with ts: " + ts);
                         Pair<Image, OnImageAvailableListener> entry = mImageListenerMap.get(ts);
                         if (entry.second != null) {
@@ -1731,7 +1747,8 @@ public final class CameraExtensionSessionImpl extends CameraExtensionSession {
                                 mCallbacks, result.getSequenceId());
                     }
                     if ((!mSingleCapture) && (mPreviewProcessorType ==
-                            IPreviewExtenderImpl.PROCESSOR_TYPE_REQUEST_UPDATE_ONLY)) {
+                            IPreviewExtenderImpl.PROCESSOR_TYPE_REQUEST_UPDATE_ONLY)
+                            && mInitialized) {
                         CaptureStageImpl captureStage = null;
                         try {
                             captureStage = mPreviewRequestUpdateProcessor.process(
@@ -1754,8 +1771,8 @@ public final class CameraExtensionSessionImpl extends CameraExtensionSession {
                         } else {
                             mRequestUpdatedNeeded = false;
                         }
-                    } else if (mPreviewProcessorType ==
-                            IPreviewExtenderImpl.PROCESSOR_TYPE_IMAGE_PROCESSOR) {
+                    } else if ((mPreviewProcessorType ==
+                            IPreviewExtenderImpl.PROCESSOR_TYPE_IMAGE_PROCESSOR) && mInitialized) {
                         int idx = mPendingResultMap.indexOfKey(timestamp);
 
                         if ((idx >= 0) && (mPendingResultMap.get(timestamp).first == null)) {
@@ -1802,7 +1819,7 @@ public final class CameraExtensionSessionImpl extends CameraExtensionSession {
                     } else {
                         // No special handling for PROCESSOR_TYPE_NONE
                     }
-                    if (notifyClient) {
+                    if (notifyClient && mInitialized) {
                         final long ident = Binder.clearCallingIdentity();
                         try {
                             if (processStatus) {

@@ -75,7 +75,7 @@ class Agent {
     private static final String ALARM_TAG_AFFORDABILITY_CHECK = "*tare.affordability_check*";
 
     private final Object mLock;
-    private final Handler mHandler;
+    private final AgentHandler mHandler;
     private final Analyst mAnalyst;
     private final InternalResourceService mIrs;
     private final Scribe mScribe;
@@ -992,6 +992,7 @@ class Agent {
     void tearDownLocked() {
         mCurrentOngoingEvents.clear();
         mBalanceThresholdAlarmQueue.removeAllAlarms();
+        mHandler.removeAllMessages();
     }
 
     @VisibleForTesting
@@ -1289,6 +1290,11 @@ class Agent {
                 }
                 break;
             }
+        }
+
+        void removeAllMessages() {
+            removeMessages(MSG_CHECK_ALL_AFFORDABILITY);
+            removeMessages(MSG_CHECK_INDIVIDUAL_AFFORDABILITY);
         }
     }
 

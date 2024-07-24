@@ -22,6 +22,7 @@ import static com.android.internal.util.Preconditions.checkArgument;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_AM;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.am.ActivityManagerService.MY_PID;
+import static com.android.server.am.OomAdjusterModernImpl.ProcessRecordNode.NUM_NODE_TYPE;
 
 import static java.util.Objects.requireNonNull;
 
@@ -63,12 +64,15 @@ import com.android.internal.app.procstats.ProcessState;
 import com.android.internal.app.procstats.ProcessStats;
 import com.android.internal.os.Zygote;
 import com.android.server.FgThread;
+import com.android.server.am.OomAdjusterModernImpl.ProcessRecordNode;
 import com.android.server.wm.WindowProcessController;
 import com.android.server.wm.WindowProcessListener;
 
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.function.Consumer;
 
 /**
  * Full information about a particular process that
@@ -397,7 +401,7 @@ class ProcessRecord implements WindowProcessListener {
     /**
      * All about the process state info (proc state, oom adj score) in this process.
      */
-    final ProcessStateRecord mState;
+    ProcessStateRecord mState;
 
     /**
      * All about the state info of the optimizer when the process is cached.
@@ -433,6 +437,11 @@ class ProcessRecord implements WindowProcessListener {
      * Whether or not we should skip the process group creation.
      */
     volatile boolean mSkipProcessGroupCreation;
+
+    final ProcessRecordNode[] mLinkedNodes = new ProcessRecordNode[NUM_NODE_TYPE];
+
+    /** Whether the app was launched from a stopped state and is being unstopped. */
+    volatile boolean mWasForceStopped;
 
     void setStartParams(int startUid, HostingRecord hostingRecord, String seInfo,
             long startUptime, long startElapsedTime) {
@@ -507,8 +516,8 @@ class ProcessRecord implements WindowProcessListener {
         pw.print(prefix); pw.print("pid="); pw.println(mPid);
         pw.print(prefix); pw.print("lastActivityTime=");
         TimeUtils.formatDuration(mLastActivityTime, nowUptime, pw);
-        pw.print(prefix); pw.print("startUptimeTime=");
-        TimeUtils.formatDuration(mStartElapsedTime, nowUptime, pw);
+        pw.print(prefix); pw.print("startUpTime=");
+        TimeUtils.formatDuration(mStartUptime, nowUptime, pw);
         pw.print(prefix); pw.print("startElapsedTime=");
         TimeUtils.formatDuration(mStartElapsedTime, nowElapsedTime, pw);
         pw.println();
@@ -612,6 +621,38 @@ class ProcessRecord implements WindowProcessListener {
         mWindowProcessController = new WindowProcessController(
                 mService.mActivityTaskManager, info, processName, uid, userId, this, this);
         mPkgList.put(_info.packageName, new ProcessStats.ProcessStateHolder(_info.longVersionCode));
+        updateProcessRecordNodes(this);
+    }
+
+    /**
+     * Helper function to let test cases update the pointers.
+     */
+    @VisibleForTesting
+    static void updateProcessRecordNodes(@NonNull ProcessRecord app) {
+        if (app.mService.mConstants.ENABLE_NEW_OOMADJ) {
+            for (int i = 0; i < app.mLinkedNodes.length; i++) {
+                app.mLinkedNodes[i] = new ProcessRecordNode(app);
+            }
+        }
+    }
+
+    /**
+     * Perform cleanups if the process record is going to be discarded in an early
+     * stage of the process lifecycle, specifically when the process has not even
+     * attached itself to the system_server.
+     */
+    @GuardedBy("mService")
+    void doEarlyCleanupIfNecessaryLocked() {
+        if (getThread() == null) {
+            // It's not even attached, make sure we unlink its process nodes.
+            mService.mOomAdjuster.onProcessEndLocked(this);
+        } else {
+            // Let the binder died callback handle the cleanup.
+        }
+    }
+
+    void resetCrashingOnRestart() {
+        mErrorState.setCrashing(false);
     }
 
     @GuardedBy(anyOf = {"mService", "mProcLock"})
@@ -677,6 +718,11 @@ class ProcessRecord implements WindowProcessListener {
     @GuardedBy(anyOf = {"mService", "mProcLock"})
     int getSetProcState() {
         return mState.getSetProcState();
+    }
+
+    @GuardedBy(anyOf = {"mService", "mProcLock"})
+    int getSetCapability() {
+        return mState.getSetCapability();
     }
 
     @GuardedBy({"mService", "mProcLock"})
@@ -1076,11 +1122,6 @@ class ProcessRecord implements WindowProcessListener {
         mInFullBackup = inFullBackup;
     }
 
-    @GuardedBy("mService")
-    public void setCached(boolean cached) {
-        mState.setCached(cached);
-    }
-
     @Override
     @GuardedBy("mService")
     public boolean isCached() {
@@ -1119,6 +1160,7 @@ class ProcessRecord implements WindowProcessListener {
         mState.onCleanupApplicationRecordLSP();
         mServices.onCleanupApplicationRecordLocked();
         mReceivers.onCleanupApplicationRecordLocked();
+        mService.mOomAdjuster.onProcessEndLocked(this);
 
         return mProviders.onCleanupApplicationRecordLocked(allowRestart);
     }
@@ -1364,8 +1406,12 @@ class ProcessRecord implements WindowProcessListener {
 
     void onProcessUnfrozen() {
         mProfile.onProcessUnfrozen();
+        mServices.onProcessUnfrozen();
     }
 
+    void onProcessFrozenCancelled() {
+        mServices.onProcessFrozenCancelled();
+    }
 
     /*
      *  Delete all packages from list except the package indicated in info
@@ -1597,5 +1643,50 @@ class ProcessRecord implements WindowProcessListener {
     @VisibleForTesting
     List<ProcessRecord> getLruProcessList() {
         return mService.mProcessList.getLruProcessesLOSP();
+    }
+
+    public void setWasForceStopped(boolean stopped) {
+        mWasForceStopped = stopped;
+    }
+
+    public boolean wasForceStopped() {
+        return mWasForceStopped;
+    }
+
+    boolean isFreezable() {
+        return mService.mOomAdjuster.mCachedAppOptimizer.useFreezer()
+                && !mOptRecord.isFreezeExempt()
+                && !mOptRecord.shouldNotFreeze()
+                && mState.getCurAdj() >= ProcessList.FREEZER_CUTOFF_ADJ;
+    }
+
+    /**
+     * Traverses all client processes and feed them to consumer.
+     */
+    @GuardedBy("mProcLock")
+    void forEachClient(@NonNull Consumer<ProcessRecord> consumer) {
+        for (int i = mServices.numberOfRunningServices() - 1; i >= 0; i--) {
+            final ServiceRecord s = mServices.getRunningServiceAt(i);
+            final ArrayMap<IBinder, ArrayList<ConnectionRecord>> serviceConnections =
+                    s.getConnections();
+            for (int j = serviceConnections.size() - 1; j >= 0; j--) {
+                final ArrayList<ConnectionRecord> clist = serviceConnections.valueAt(j);
+                for (int k = clist.size() - 1; k >= 0; k--) {
+                    final ConnectionRecord cr = clist.get(k);
+                    if (isSdkSandbox && cr.binding.attributedClient != null) {
+                        consumer.accept(cr.binding.attributedClient);
+                    } else {
+                        consumer.accept(cr.binding.client);
+                    }
+                }
+            }
+        }
+        for (int i = mProviders.numberOfProviders() - 1; i >= 0; i--) {
+            final ContentProviderRecord cpr = mProviders.getProviderAt(i);
+            for (int j = cpr.connections.size() - 1; j >= 0; j--) {
+                final ContentProviderConnection conn = cpr.connections.get(j);
+                consumer.accept(conn.client);
+            }
+        }
     }
 }

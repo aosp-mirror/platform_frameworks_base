@@ -22,9 +22,9 @@ import android.app.admin.DevicePolicyManager
 import android.content.Context
 import android.content.Intent
 import android.util.Log
+import com.android.app.tracing.coroutines.withContext
 import com.android.internal.widget.LockPatternUtils
-import com.android.systemui.R
-import com.android.systemui.animation.DialogLaunchAnimator
+import com.android.systemui.animation.DialogTransitionAnimator
 import com.android.systemui.animation.Expandable
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
@@ -44,22 +44,23 @@ import com.android.systemui.keyguard.shared.model.KeyguardSlotPickerRepresentati
 import com.android.systemui.keyguard.shared.quickaffordance.KeyguardQuickAffordancePosition
 import com.android.systemui.keyguard.shared.quickaffordance.KeyguardQuickAffordancesMetricsLogger
 import com.android.systemui.plugins.ActivityStarter
+import com.android.systemui.res.R
 import com.android.systemui.settings.UserTracker
+import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import com.android.systemui.shared.customization.data.content.CustomizationProviderContract as Contract
 import com.android.systemui.statusbar.phone.SystemUIDialog
 import com.android.systemui.statusbar.policy.KeyguardStateController
-import com.android.systemui.util.TraceUtils.Companion.traceAsync
 import dagger.Lazy
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
-import kotlinx.coroutines.withContext
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @SysUISingleton
@@ -67,13 +68,14 @@ class KeyguardQuickAffordanceInteractor
 @Inject
 constructor(
     private val keyguardInteractor: KeyguardInteractor,
+    private val shadeInteractor: ShadeInteractor,
     private val lockPatternUtils: LockPatternUtils,
     private val keyguardStateController: KeyguardStateController,
     private val userTracker: UserTracker,
     private val activityStarter: ActivityStarter,
     private val featureFlags: FeatureFlags,
     private val repository: Lazy<KeyguardQuickAffordanceRepository>,
-    private val launchAnimator: DialogLaunchAnimator,
+    private val launchAnimator: DialogTransitionAnimator,
     private val logger: KeyguardQuickAffordancesMetricsLogger,
     private val devicePolicyManager: DevicePolicyManager,
     private val dockManager: DockManager,
@@ -101,9 +103,10 @@ constructor(
             quickAffordanceAlwaysVisible(position),
             keyguardInteractor.isDozing,
             keyguardInteractor.isKeyguardShowing,
+            shadeInteractor.anyExpansion.map { it < 1.0f }.distinctUntilChanged(),
             biometricSettingsRepository.isCurrentUserInLockdown,
-        ) { affordance, isDozing, isKeyguardShowing, isUserInLockdown ->
-            if (!isDozing && isKeyguardShowing && !isUserInLockdown) {
+        ) { affordance, isDozing, isKeyguardShowing, isQuickSettingsVisible, isUserInLockdown ->
+            if (!isDozing && isKeyguardShowing && isQuickSettingsVisible && !isUserInLockdown) {
                 affordance
             } else {
                 KeyguardQuickAffordanceModel.Hidden
@@ -118,10 +121,14 @@ constructor(
      * This is useful for experiences like the lock screen preview mode, where the affordances must
      * always be visible.
      */
-    fun quickAffordanceAlwaysVisible(
+    suspend fun quickAffordanceAlwaysVisible(
         position: KeyguardQuickAffordancePosition,
     ): Flow<KeyguardQuickAffordanceModel> {
-        return quickAffordanceInternal(position)
+        return if (isFeatureDisabledByDevicePolicy()) {
+            flowOf(KeyguardQuickAffordanceModel.Hidden)
+        } else {
+            quickAffordanceInternal(position)
+        }
     }
 
     /**
@@ -315,7 +322,7 @@ constructor(
     }
 
     private fun showDialog(dialog: AlertDialog, expandable: Expandable?) {
-        expandable?.dialogLaunchController()?.let { controller ->
+        expandable?.dialogTransitionController()?.let { controller ->
             SystemUIDialog.applyFlags(dialog)
             SystemUIDialog.setShowForAllUsers(dialog, true)
             SystemUIDialog.registerDismissListener(dialog)
@@ -343,13 +350,13 @@ constructor(
             activityStarter.postStartActivityDismissingKeyguard(
                 intent,
                 0 /* delay */,
-                expandable?.activityLaunchController(),
+                expandable?.activityTransitionController(),
             )
         } else {
             activityStarter.startActivity(
                 intent,
                 true /* dismissShade */,
-                expandable?.activityLaunchController(),
+                expandable?.activityTransitionController(),
                 true /* showOverLockscreenWhenLocked */,
             )
         }
@@ -379,10 +386,6 @@ constructor(
 
     suspend fun getPickerFlags(): List<KeyguardPickerFlag> {
         return listOf(
-            KeyguardPickerFlag(
-                name = Contract.FlagsTable.FLAG_NAME_REVAMPED_WALLPAPER_UI,
-                value = featureFlags.isEnabled(Flags.REVAMPED_WALLPAPER_UI),
-            ),
             KeyguardPickerFlag(
                 name = Contract.FlagsTable.FLAG_NAME_CUSTOM_LOCK_SCREEN_QUICK_AFFORDANCES_ENABLED,
                 value =
@@ -421,10 +424,8 @@ constructor(
     }
 
     private suspend fun isFeatureDisabledByDevicePolicy(): Boolean =
-        traceAsync(TAG, "isFeatureDisabledByDevicePolicy") {
-            withContext(backgroundDispatcher) {
-                devicePolicyManager.areKeyguardShortcutsDisabled(userId = userTracker.userId)
-            }
+        withContext("$TAG#isFeatureDisabledByDevicePolicy", backgroundDispatcher) {
+            devicePolicyManager.areKeyguardShortcutsDisabled(userId = userTracker.userId)
         }
 
     companion object {

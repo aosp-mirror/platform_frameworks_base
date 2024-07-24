@@ -35,7 +35,7 @@ private const val TAG = "ScreenDecorationsLog"
  *
  * To enable logcat echoing for an entire buffer:
  * ```
- *   adb shell settings put global systemui/buffer/ScreenDecorationsLog <logLevel>
+ *   adb shell cmd statusbar echo -b ScreenDecorationsLog:<logLevel>
  *
  * ```
  */
@@ -134,31 +134,33 @@ constructor(
     }
 
     fun cameraProtectionShownOrHidden(
+        showAnimationNow: Boolean,
         faceDetectionRunning: Boolean,
         biometricPromptShown: Boolean,
-        requestedState: Boolean,
+        faceAuthenticated: Boolean,
+        isCameraActive: Boolean,
         currentlyShowing: Boolean
     ) {
         logBuffer.log(
             TAG,
             DEBUG,
             {
+                str1 = "$showAnimationNow"
                 bool1 = faceDetectionRunning
                 bool2 = biometricPromptShown
-                bool3 = requestedState
+                str2 = "$faceAuthenticated"
+                bool3 = isCameraActive
                 bool4 = currentlyShowing
             },
             {
-                "isFaceDetectionRunning: $bool1, " +
+                "cameraProtectionShownOrHidden showAnimationNow: $str1, " +
+                    "isFaceDetectionRunning: $bool1, " +
                     "isBiometricPromptShowing: $bool2, " +
-                    "requestedState: $bool3, " +
+                    "faceAuthenticated: $str2, " +
+                    "isCameraActive: $bool3, " +
                     "currentState: $bool4"
             }
         )
-    }
-
-    fun biometricEvent(@CompileTimeConstant info: String) {
-        logBuffer.log(TAG, DEBUG, info)
     }
 
     fun cameraProtectionEvent(@CompileTimeConstant cameraProtectionEvent: String) {

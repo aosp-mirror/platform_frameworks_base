@@ -16,10 +16,12 @@
 
 package android.hardware.camera2;
 
+import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.hardware.camera2.impl.CameraMetadataNative;
+import android.hardware.camera2.impl.ExtensionKey;
 import android.hardware.camera2.impl.PublicKey;
 import android.hardware.camera2.impl.SyntheticKey;
 import android.hardware.camera2.params.OutputConfiguration;
@@ -33,6 +35,8 @@ import android.util.ArraySet;
 import android.util.Log;
 import android.util.SparseArray;
 import android.view.Surface;
+
+import com.android.internal.camera.flags.Flags;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -52,7 +56,8 @@ import java.util.Set;
  * capture.</p>
  *
  * <p>CaptureRequests can be created by using a {@link Builder} instance,
- * obtained by calling {@link CameraDevice#createCaptureRequest}</p>
+ * obtained by calling {@link CameraDevice#createCaptureRequest} or {@link
+ * CameraManager#createCaptureRequest}</p>
  *
  * <p>CaptureRequests are given to {@link CameraCaptureSession#capture} or
  * {@link CameraCaptureSession#setRepeatingRequest} to capture images from a camera.</p>
@@ -79,6 +84,7 @@ import java.util.Set;
  * @see CameraCaptureSession#setRepeatingBurst
  * @see CameraDevice#createCaptureRequest
  * @see CameraDevice#createReprocessCaptureRequest
+ * @see CameraManager#createCaptureRequest
  */
 public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
         implements Parcelable {
@@ -790,8 +796,9 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
      * A builder for capture requests.
      *
      * <p>To obtain a builder instance, use the
-     * {@link CameraDevice#createCaptureRequest} method, which initializes the
-     * request fields to one of the templates defined in {@link CameraDevice}.
+     * {@link CameraDevice#createCaptureRequest} or {@link CameraManager#createCaptureRequest}
+     * method, which initializes the request fields to one of the templates defined in
+     * {@link CameraDevice}.
      *
      * @see CameraDevice#createCaptureRequest
      * @see CameraDevice#TEMPLATE_PREVIEW
@@ -799,6 +806,7 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
      * @see CameraDevice#TEMPLATE_STILL_CAPTURE
      * @see CameraDevice#TEMPLATE_VIDEO_SNAPSHOT
      * @see CameraDevice#TEMPLATE_MANUAL
+     * @see CameraManager#createCaptureRequest
      */
     public final static class Builder {
 
@@ -1477,7 +1485,7 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
      * <p>To start a CaptureSession with a target FPS range different from the
      * capture request template's default value, the application
      * is strongly recommended to call
-     * {@link SessionConfiguration#setSessionParameters }
+     * {@link android.hardware.camera2.params.SessionConfiguration#setSessionParameters }
      * with the target fps range before creating the capture session. The aeTargetFpsRange is
      * typically a session parameter. Specifying it at session creation time helps avoid
      * session reconfiguration delays in cases like 60fps or high speed recording.</p>
@@ -2154,7 +2162,7 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
      * OFF if the recording output is not stabilized, or if there are no output
      * Surface types that can be stabilized.</p>
      * <p>The application is strongly recommended to call
-     * {@link SessionConfiguration#setSessionParameters }
+     * {@link android.hardware.camera2.params.SessionConfiguration#setSessionParameters }
      * with the desired video stabilization mode before creating the capture session.
      * Video stabilization mode is a session parameter on many devices. Specifying
      * it at session creation time helps avoid reconfiguration delay caused by difference
@@ -2655,6 +2663,46 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
     @NonNull
     public static final Key<Integer> FLASH_MODE =
             new Key<Integer>("android.flash.mode", int.class);
+
+    /**
+     * <p>Flash strength level to be used when manual flash control is active.</p>
+     * <p>Flash strength level to use in capture mode i.e. when the applications control
+     * flash with either SINGLE or TORCH mode.</p>
+     * <p>Use android.flash.info.singleStrengthMaxLevel and
+     * android.flash.info.torchStrengthMaxLevel to check whether the device supports
+     * flash strength control or not.
+     * If the values of android.flash.info.singleStrengthMaxLevel and
+     * android.flash.info.torchStrengthMaxLevel are greater than 1,
+     * then the device supports manual flash strength control.</p>
+     * <p>If the {@link CaptureRequest#FLASH_MODE android.flash.mode} <code>==</code> TORCH the value must be &gt;= 1
+     * and &lt;= android.flash.info.torchStrengthMaxLevel.
+     * If the application doesn't set the key and
+     * android.flash.info.torchStrengthMaxLevel &gt; 1,
+     * then the flash will be fired at the default level set by HAL in
+     * android.flash.info.torchStrengthDefaultLevel.
+     * If the {@link CaptureRequest#FLASH_MODE android.flash.mode} <code>==</code> SINGLE, then the value must be &gt;= 1
+     * and &lt;= android.flash.info.singleStrengthMaxLevel.
+     * If the application does not set this key and
+     * android.flash.info.singleStrengthMaxLevel &gt; 1,
+     * then the flash will be fired at the default level set by HAL
+     * in android.flash.info.singleStrengthDefaultLevel.
+     * If {@link CaptureRequest#CONTROL_AE_MODE android.control.aeMode} is set to any of ON_AUTO_FLASH, ON_ALWAYS_FLASH,
+     * ON_AUTO_FLASH_REDEYE, ON_EXTERNAL_FLASH values, then the strengthLevel will be ignored.</p>
+     * <p><b>Range of valid values:</b><br>
+     * <code>[1-android.flash.info.torchStrengthMaxLevel]</code> when the {@link CaptureRequest#FLASH_MODE android.flash.mode} is
+     * set to TORCH;
+     * <code>[1-android.flash.info.singleStrengthMaxLevel]</code> when the {@link CaptureRequest#FLASH_MODE android.flash.mode} is
+     * set to SINGLE</p>
+     * <p>This key is available on all devices.</p>
+     *
+     * @see CaptureRequest#CONTROL_AE_MODE
+     * @see CaptureRequest#FLASH_MODE
+     */
+    @PublicKey
+    @NonNull
+    @FlaggedApi(Flags.FLAG_CAMERA_MANUAL_FLASH_STRENGTH_CONTROL)
+    public static final Key<Integer> FLASH_STRENGTH_LEVEL =
+            new Key<Integer>("android.flash.strengthLevel", int.class);
 
     /**
      * <p>Operational mode for hot pixel correction.</p>
@@ -3359,8 +3407,8 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
             new Key<Long>("android.sensor.exposureTime", long.class);
 
     /**
-     * <p>Duration from start of frame exposure to
-     * start of next frame exposure.</p>
+     * <p>Duration from start of frame readout to
+     * start of next frame readout.</p>
      * <p>The maximum frame rate that can be supported by a camera subsystem is
      * a function of many factors:</p>
      * <ul>
@@ -3421,6 +3469,10 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
      * <p>For more details about stalling, see {@link android.hardware.camera2.params.StreamConfigurationMap#getOutputStallDuration }.</p>
      * <p>This control is only effective if {@link CaptureRequest#CONTROL_AE_MODE android.control.aeMode} or {@link CaptureRequest#CONTROL_MODE android.control.mode} is set to
      * OFF; otherwise the auto-exposure algorithm will override this value.</p>
+     * <p><em>Note:</em> Prior to Android 13, this field was described as measuring the duration from
+     * start of frame exposure to start of next frame exposure, which doesn't reflect the
+     * definition from sensor manufacturer. A mobile sensor defines the frame duration as
+     * intervals between sensor readouts.</p>
      * <p><b>Units</b>: Nanoseconds</p>
      * <p><b>Range of valid values:</b><br>
      * See {@link CameraCharacteristics#SENSOR_INFO_MAX_FRAME_DURATION android.sensor.info.maxFrameDuration}, {@link android.hardware.camera2.params.StreamConfigurationMap }.
@@ -4240,6 +4292,146 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
     @NonNull
     public static final Key<Integer> EXTENSION_STRENGTH =
             new Key<Integer>("android.extension.strength", int.class);
+
+    /**
+     * <p>Used to apply an additional digital zoom factor for the
+     * {@link android.hardware.camera2.CameraExtensionCharacteristics#EXTENSION_EYES_FREE_VIDEOGRAPHY }
+     * extension in {@link android.hardware.camera2.CameraMetadata#EFV_STABILIZATION_MODE_LOCKED } mode.</p>
+     * <p>For the {@link android.hardware.camera2.CameraExtensionCharacteristics#EXTENSION_EYES_FREE_VIDEOGRAPHY }
+     * feature, an additional zoom factor is applied on top of the existing {@link CaptureRequest#CONTROL_ZOOM_RATIO android.control.zoomRatio}.
+     * This additional zoom factor serves as a buffer to provide more flexibility for the
+     * {@link android.hardware.camera2.CameraMetadata#EFV_STABILIZATION_MODE_LOCKED }
+     * mode. If android.efv.paddingZoomFactor is not set, the default will be used.
+     * The effectiveness of the stabilization may be influenced by the amount of padding zoom
+     * applied. A higher padding zoom factor can stabilize the target region more effectively
+     * with greater flexibility but may potentially impact image quality. Conversely, a lower
+     * padding zoom factor may be used to prioritize preserving image quality, albeit with less
+     * leeway in stabilizing the target region. It is recommended to set the
+     * android.efv.paddingZoomFactor to at least 1.5.</p>
+     * <p>If android.efv.autoZoom is enabled, the requested android.efv.paddingZoomFactor will be overridden.
+     * android.efv.maxPaddingZoomFactor can be checked for more details on controlling the
+     * padding zoom factor during android.efv.autoZoom.</p>
+     * <p><b>Range of valid values:</b><br>
+     * android.efv.paddingZoomFactorRange</p>
+     * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
+     *
+     * @see CaptureRequest#CONTROL_ZOOM_RATIO
+     * @hide
+     */
+    @ExtensionKey
+    @FlaggedApi(Flags.FLAG_CONCERT_MODE)
+    public static final Key<Float> EFV_PADDING_ZOOM_FACTOR =
+            new Key<Float>("android.efv.paddingZoomFactor", float.class);
+
+    /**
+     * <p>Used to enable or disable auto zoom for the
+     * {@link android.hardware.camera2.CameraExtensionCharacteristics#EXTENSION_EYES_FREE_VIDEOGRAPHY }
+     * extension in {@link android.hardware.camera2.CameraMetadata#EFV_STABILIZATION_MODE_LOCKED } mode.</p>
+     * <p>Turn on auto zoom to let the
+     * {@link android.hardware.camera2.CameraExtensionCharacteristics#EXTENSION_EYES_FREE_VIDEOGRAPHY }
+     * feature decide at any given point a combination of
+     * {@link CaptureRequest#CONTROL_ZOOM_RATIO android.control.zoomRatio} and android.efv.paddingZoomFactor
+     * to keep the target region in view and stabilized. The combination chosen by the
+     * {@link android.hardware.camera2.CameraExtensionCharacteristics#EXTENSION_EYES_FREE_VIDEOGRAPHY }
+     * will equal the requested {@link CaptureRequest#CONTROL_ZOOM_RATIO android.control.zoomRatio} multiplied with the requested
+     * android.efv.paddingZoomFactor. A limit can be set on the padding zoom if wanting
+     * to control image quality further using android.efv.maxPaddingZoomFactor.</p>
+     * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
+     *
+     * @see CaptureRequest#CONTROL_ZOOM_RATIO
+     * @hide
+     */
+    @ExtensionKey
+    @FlaggedApi(Flags.FLAG_CONCERT_MODE)
+    public static final Key<Boolean> EFV_AUTO_ZOOM =
+            new Key<Boolean>("android.efv.autoZoom", boolean.class);
+
+    /**
+     * <p>Used to limit the android.efv.paddingZoomFactor if
+     * android.efv.autoZoom is enabled for the
+     * {@link android.hardware.camera2.CameraExtensionCharacteristics#EXTENSION_EYES_FREE_VIDEOGRAPHY }
+     * extension in {@link android.hardware.camera2.CameraMetadata#EFV_STABILIZATION_MODE_LOCKED } mode.</p>
+     * <p>If android.efv.autoZoom is enabled, this key can be used to set a limit
+     * on the android.efv.paddingZoomFactor chosen by the
+     * {@link android.hardware.camera2.CameraExtensionCharacteristics#EXTENSION_EYES_FREE_VIDEOGRAPHY }
+     * extension in {@link android.hardware.camera2.CameraMetadata#EFV_STABILIZATION_MODE_LOCKED } mode
+     * to control image quality.</p>
+     * <p><b>Range of valid values:</b><br>
+     * The range of android.efv.paddingZoomFactorRange. Use a value greater than or equal to
+     * the android.efv.paddingZoomFactor to effectively utilize this key.</p>
+     * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
+     * @hide
+     */
+    @ExtensionKey
+    @FlaggedApi(Flags.FLAG_CONCERT_MODE)
+    public static final Key<Float> EFV_MAX_PADDING_ZOOM_FACTOR =
+            new Key<Float>("android.efv.maxPaddingZoomFactor", float.class);
+
+    /**
+     * <p>Set the stabilization mode for the
+     * {@link android.hardware.camera2.CameraExtensionCharacteristics#EXTENSION_EYES_FREE_VIDEOGRAPHY }
+     * extension</p>
+     * <p>The desired stabilization mode. Gimbal stabilization mode provides simple, non-locked
+     * video stabilization. Locked mode uses the
+     * {@link android.hardware.camera2.CameraExtensionCharacteristics#EXTENSION_EYES_FREE_VIDEOGRAPHY }
+     * stabilization feature to fixate on the current region, utilizing it as the target area for
+     * stabilization.</p>
+     * <p><b>Possible values:</b></p>
+     * <ul>
+     *   <li>{@link #EFV_STABILIZATION_MODE_OFF OFF}</li>
+     *   <li>{@link #EFV_STABILIZATION_MODE_GIMBAL GIMBAL}</li>
+     *   <li>{@link #EFV_STABILIZATION_MODE_LOCKED LOCKED}</li>
+     * </ul>
+     *
+     * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
+     * @see #EFV_STABILIZATION_MODE_OFF
+     * @see #EFV_STABILIZATION_MODE_GIMBAL
+     * @see #EFV_STABILIZATION_MODE_LOCKED
+     * @hide
+     */
+    @ExtensionKey
+    @FlaggedApi(Flags.FLAG_CONCERT_MODE)
+    public static final Key<Integer> EFV_STABILIZATION_MODE =
+            new Key<Integer>("android.efv.stabilizationMode", int.class);
+
+    /**
+     * <p>Used to update the target region for the
+     * {@link android.hardware.camera2.CameraExtensionCharacteristics#EXTENSION_EYES_FREE_VIDEOGRAPHY }
+     * extension in {@link android.hardware.camera2.CameraMetadata#EFV_STABILIZATION_MODE_LOCKED } mode.</p>
+     * <p>A android.util.Pair<Integer,Integer> that represents the desired
+     * <Horizontal,Vertical> shift of the current locked view (or target region) in
+     * pixels. Negative values indicate left and upward shifts, while positive values indicate
+     * right and downward shifts in the active array coordinate system.</p>
+     * <p><b>Range of valid values:</b><br>
+     * android.util.Pair<Integer,Integer> represents the
+     * <Horizontal,Vertical> shift. The range for the horizontal shift is
+     * [-max(android.efv.paddingRegion-left), max(android.efv.paddingRegion-right)].
+     * The range for the vertical shift is
+     * [-max(android.efv.paddingRegion-top), max(android.efv.paddingRegion-bottom)]</p>
+     * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
+     * @hide
+     */
+    @ExtensionKey
+    @FlaggedApi(Flags.FLAG_CONCERT_MODE)
+    public static final Key<android.util.Pair<Integer,Integer>> EFV_TRANSLATE_VIEWPORT =
+            new Key<android.util.Pair<Integer,Integer>>("android.efv.translateViewport", new TypeReference<android.util.Pair<Integer,Integer>>() {{ }});
+
+    /**
+     * <p>Representing the desired clockwise rotation
+     * of the target region in degrees for the
+     * {@link android.hardware.camera2.CameraExtensionCharacteristics#EXTENSION_EYES_FREE_VIDEOGRAPHY }
+     * extension in {@link android.hardware.camera2.CameraMetadata#EFV_STABILIZATION_MODE_LOCKED } mode.</p>
+     * <p>Value representing the desired clockwise rotation of the target
+     * region in degrees.</p>
+     * <p><b>Range of valid values:</b><br>
+     * 0 to 360</p>
+     * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
+     * @hide
+     */
+    @ExtensionKey
+    @FlaggedApi(Flags.FLAG_CONCERT_MODE)
+    public static final Key<Float> EFV_ROTATE_VIEWPORT =
+            new Key<Float>("android.efv.rotateViewport", float.class);
 
     /*~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~
      * End generated code

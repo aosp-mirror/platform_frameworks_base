@@ -37,8 +37,11 @@ import android.util.Slog;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.display.DisplayDeviceConfig.ThermalBrightnessThrottlingData;
 import com.android.server.display.DisplayDeviceConfig.ThermalBrightnessThrottlingData.ThrottlingLevel;
+import com.android.server.display.config.SensorData;
 import com.android.server.display.feature.DeviceConfigParameterProvider;
+import com.android.server.display.utils.DebugUtils;
 import com.android.server.display.utils.DeviceConfigParsingUtils;
+import com.android.server.display.utils.SensorUtils;
 
 import java.io.PrintWriter;
 import java.util.HashMap;
@@ -58,8 +61,10 @@ import java.util.function.Function;
 @Deprecated
 class BrightnessThrottler {
     private static final String TAG = "BrightnessThrottler";
-    private static final boolean DEBUG = false;
 
+    // To enable these logs, run:
+    // 'adb shell setprop persist.log.tag.BrightnessThrottler DEBUG && adb reboot'
+    private static final boolean DEBUG = DebugUtils.isDebuggable(TAG);
     private static final int THROTTLING_INVALID = -1;
 
     private final Injector mInjector;
@@ -76,7 +81,7 @@ class BrightnessThrottler {
 
     // Maps the throttling ID to the data. Sourced from DisplayDeviceConfig.
     @NonNull
-    private HashMap<String, ThermalBrightnessThrottlingData> mDdcThermalThrottlingDataMap;
+    private Map<String, ThermalBrightnessThrottlingData> mDdcThermalThrottlingDataMap;
 
     // Current throttling data being used.
     // Null if we do not support throttling.
@@ -93,6 +98,10 @@ class BrightnessThrottler {
 
     // The brightness throttling configuration that should be used.
     private String mThermalBrightnessThrottlingDataId;
+
+    // Temperature Sensor to be monitored for throttling.
+    @NonNull
+    private SensorData mTempSensor;
 
     // This is a collection of brightness throttling data that has been written as overrides from
     // the DeviceConfig. This will always take priority over the display device config data.
@@ -118,17 +127,19 @@ class BrightnessThrottler {
 
     BrightnessThrottler(Handler handler, Runnable throttlingChangeCallback, String uniqueDisplayId,
             String throttlingDataId,
-            @NonNull HashMap<String, ThermalBrightnessThrottlingData>
-                    thermalBrightnessThrottlingDataMap) {
-        this(new Injector(), handler, handler, throttlingChangeCallback,
-                uniqueDisplayId, throttlingDataId, thermalBrightnessThrottlingDataMap);
+            @NonNull DisplayDeviceConfig displayDeviceConfig) {
+        this(new Injector(), handler, handler, throttlingChangeCallback, uniqueDisplayId,
+                throttlingDataId,
+                displayDeviceConfig.getThermalBrightnessThrottlingDataMapByThrottlingId(),
+                displayDeviceConfig.getTempSensor());
     }
 
     @VisibleForTesting
     BrightnessThrottler(Injector injector, Handler handler, Handler deviceConfigHandler,
             Runnable throttlingChangeCallback, String uniqueDisplayId, String throttlingDataId,
-            @NonNull HashMap<String, ThermalBrightnessThrottlingData>
-                    thermalBrightnessThrottlingDataMap) {
+            @NonNull Map<String, ThermalBrightnessThrottlingData>
+                    thermalBrightnessThrottlingDataMap,
+            @NonNull SensorData tempSensor) {
         mInjector = injector;
 
         mHandler = handler;
@@ -144,7 +155,7 @@ class BrightnessThrottler {
         mDdcThermalThrottlingDataMap = thermalBrightnessThrottlingDataMap;
         loadThermalBrightnessThrottlingDataFromDeviceConfig();
         loadThermalBrightnessThrottlingDataFromDisplayDeviceConfig(mDdcThermalThrottlingDataMap,
-                mThermalBrightnessThrottlingDataId, mUniqueDisplayId);
+                tempSensor, mThermalBrightnessThrottlingDataId, mUniqueDisplayId);
     }
 
     boolean deviceSupportsThrottling() {
@@ -177,12 +188,14 @@ class BrightnessThrottler {
     }
 
     void loadThermalBrightnessThrottlingDataFromDisplayDeviceConfig(
-            HashMap<String, ThermalBrightnessThrottlingData> ddcThrottlingDataMap,
+            Map<String, ThermalBrightnessThrottlingData> ddcThrottlingDataMap,
+            SensorData tempSensor,
             String brightnessThrottlingDataId,
             String uniqueDisplayId) {
         mDdcThermalThrottlingDataMap = ddcThrottlingDataMap;
         mThermalBrightnessThrottlingDataId = brightnessThrottlingDataId;
         mUniqueDisplayId = uniqueDisplayId;
+        mTempSensor = tempSensor;
         resetThermalThrottlingData();
     }
 
@@ -307,7 +320,7 @@ class BrightnessThrottler {
         }
 
         if (deviceSupportsThrottling()) {
-            mSkinThermalStatusObserver.startObserving();
+            mSkinThermalStatusObserver.startObserving(mTempSensor);
         }
     }
 
@@ -354,6 +367,7 @@ class BrightnessThrottler {
     private final class SkinThermalStatusObserver extends IThermalEventListener.Stub {
         private final Injector mInjector;
         private final Handler mHandler;
+        private SensorData mObserverTempSensor;
 
         private IThermalService mThermalService;
         private boolean mStarted;
@@ -368,28 +382,51 @@ class BrightnessThrottler {
             if (DEBUG) {
                 Slog.d(TAG, "New thermal throttling status = " + temp.getStatus());
             }
+
+            if (mObserverTempSensor.name != null
+                    && !mObserverTempSensor.name.equals(temp.getName())) {
+                Slog.i(TAG, "Skipping thermal throttling notification as monitored sensor: "
+                            + mObserverTempSensor.name
+                            + " != notified sensor: "
+                            + temp.getName());
+                return;
+            }
             mHandler.post(() -> {
                 final @Temperature.ThrottlingStatus int status = temp.getStatus();
                 thermalStatusChanged(status);
             });
         }
 
-        void startObserving() {
-            if (mStarted) {
+        void startObserving(SensorData tempSensor) {
+            if (!mStarted || mObserverTempSensor == null) {
+                mObserverTempSensor = tempSensor;
+                registerThermalListener();
+                return;
+            }
+
+            String curType = mObserverTempSensor.type;
+            mObserverTempSensor = tempSensor;
+            if (curType.equals(tempSensor.type)) {
                 if (DEBUG) {
                     Slog.d(TAG, "Thermal status observer already started");
                 }
                 return;
             }
+            stopObserving();
+            registerThermalListener();
+        }
+
+        void registerThermalListener() {
             mThermalService = mInjector.getThermalService();
             if (mThermalService == null) {
                 Slog.e(TAG, "Could not observe thermal status. Service not available");
                 return;
             }
+            int temperatureType = SensorUtils.getSensorTemperatureType(mObserverTempSensor);
             try {
                 // We get a callback immediately upon registering so there's no need to query
                 // for the current value.
-                mThermalService.registerThermalEventListenerWithType(this, Temperature.TYPE_SKIN);
+                mThermalService.registerThermalEventListenerWithType(this, temperatureType);
                 mStarted = true;
             } catch (RemoteException e) {
                 Slog.e(TAG, "Failed to register thermal status listener", e);
@@ -415,6 +452,7 @@ class BrightnessThrottler {
         void dump(PrintWriter writer) {
             writer.println("  SkinThermalStatusObserver:");
             writer.println("    mStarted: " + mStarted);
+            writer.println("    mObserverTempSensor: " + mObserverTempSensor);
             if (mThermalService != null) {
                 writer.println("    ThermalService available");
             } else {

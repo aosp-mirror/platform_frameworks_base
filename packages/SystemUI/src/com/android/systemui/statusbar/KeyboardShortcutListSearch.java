@@ -25,12 +25,14 @@ import android.app.AppGlobals;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
+import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.ResolveInfo;
 import android.content.res.Configuration;
-import android.graphics.Bitmap;
-import android.graphics.Canvas;
+import android.graphics.Matrix;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.Icon;
 import android.hardware.input.InputManagerGlobal;
@@ -60,6 +62,7 @@ import android.view.accessibility.AccessibilityNodeInfo;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.FrameLayout;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
@@ -70,7 +73,8 @@ import com.android.internal.app.AssistUtils;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto;
 import com.android.settingslib.Utils;
-import com.android.systemui.R;
+import com.android.systemui.res.R;
+import com.android.systemui.statusbar.phone.CentralSurfaces;
 
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
@@ -114,12 +118,11 @@ public final class KeyboardShortcutListSearch {
     private Button mButtonInput;
     private Button mButtonOpenApps;
     private Button mButtonSpecificApp;
-    private ImageView mEditTextCancel;
+    private CharSequence mCurrentAppPackageName;
     private TextView mNoSearchResults;
 
     private final SparseArray<String> mSpecialCharacterNames = new SparseArray<>();
     private final SparseArray<String> mModifierNames = new SparseArray<>();
-    private final SparseArray<Drawable> mSpecialCharacterDrawables = new SparseArray<>();
     private final SparseArray<Drawable> mModifierDrawables = new SparseArray<>();
     // Ordered list of modifiers that are supported. All values in this array must exist in
     // mModifierNames.
@@ -146,7 +149,7 @@ public final class KeyboardShortcutListSearch {
         } else {
             this.mWindowManager = mContext.getSystemService(WindowManager.class);
         }
-        loadResources(context);
+        loadResources(this.mContext);
         createHardcodedShortcuts();
     }
 
@@ -287,7 +290,7 @@ public final class KeyboardShortcutListSearch {
         mSpecialCharacterNames.put(
                 KeyEvent.KEYCODE_NUM_LOCK, context.getString(R.string.keyboard_key_num_lock));
         mSpecialCharacterNames.put(KeyEvent.KEYCODE_MINUS, "-");
-        mSpecialCharacterNames.put(KeyEvent.KEYCODE_GRAVE, "~");
+        mSpecialCharacterNames.put(KeyEvent.KEYCODE_GRAVE, "`");
         mSpecialCharacterNames.put(KeyEvent.KEYCODE_EQUALS, "=");
 
         mSpecialCharacterNames.put(KeyEvent.KEYCODE_NUMPAD_0,
@@ -349,19 +352,6 @@ public final class KeyboardShortcutListSearch {
         mModifierNames.put(KeyEvent.META_SHIFT_ON, "Shift");
         mModifierNames.put(KeyEvent.META_SYM_ON, "Sym");
         mModifierNames.put(KeyEvent.META_FUNCTION_ON, "Fn");
-
-        mSpecialCharacterDrawables.put(
-                KeyEvent.KEYCODE_DEL, context.getDrawable(R.drawable.ic_ksh_key_backspace));
-        mSpecialCharacterDrawables.put(
-                KeyEvent.KEYCODE_ENTER, context.getDrawable(R.drawable.ic_ksh_key_enter));
-        mSpecialCharacterDrawables.put(
-                KeyEvent.KEYCODE_DPAD_UP, context.getDrawable(R.drawable.ic_ksh_key_up));
-        mSpecialCharacterDrawables.put(
-                KeyEvent.KEYCODE_DPAD_RIGHT, context.getDrawable(R.drawable.ic_ksh_key_right));
-        mSpecialCharacterDrawables.put(
-                KeyEvent.KEYCODE_DPAD_DOWN, context.getDrawable(R.drawable.ic_ksh_key_down));
-        mSpecialCharacterDrawables.put(
-                KeyEvent.KEYCODE_DPAD_LEFT, context.getDrawable(R.drawable.ic_ksh_key_left));
 
         mModifierDrawables.put(
                 KeyEvent.META_META_ON, context.getDrawable(R.drawable.ic_ksh_key_meta));
@@ -427,8 +417,10 @@ public final class KeyboardShortcutListSearch {
         mWindowManager.requestAppKeyboardShortcuts(result -> {
             // Add specific app shortcuts
             if (result.isEmpty()) {
+                mCurrentAppPackageName = null;
                 mKeySearchResultMap.put(SHORTCUT_SPECIFICAPP_INDEX, false);
             } else {
+                mCurrentAppPackageName = result.get(0).getPackageName();
                 mSpecificAppGroup.addAll(reMapToKeyboardShortcutMultiMappingGroup(result));
                 mKeySearchResultMap.put(SHORTCUT_SPECIFICAPP_INDEX, true);
             }
@@ -490,11 +482,30 @@ public final class KeyboardShortcutListSearch {
                         context.getString(R.string.keyboard_shortcut_group_system),
                         new ArrayList<>());
         List<ShortcutKeyGroupMultiMappingInfo> infoList = Arrays.asList(
-                /* Access notification shade: Meta + N */
+                /* Access list of all apps and search (i.e. Search/Launcher): Meta */
                 new ShortcutKeyGroupMultiMappingInfo(
-                        context.getString(R.string.group_system_access_notification_shade),
+                        context.getString(R.string.group_system_access_all_apps_search),
                         Arrays.asList(
-                                Pair.create(KeyEvent.KEYCODE_N, KeyEvent.META_META_ON))),
+                                Pair.create(KeyEvent.KEYCODE_UNKNOWN, KeyEvent.META_META_ON))),
+                /* Access home screen: Meta + H, Meta + Enter */
+                new ShortcutKeyGroupMultiMappingInfo(
+                        context.getString(R.string.group_system_access_home_screen),
+                        Arrays.asList(
+                                Pair.create(KeyEvent.KEYCODE_H, KeyEvent.META_META_ON),
+                                Pair.create(KeyEvent.KEYCODE_ENTER, KeyEvent.META_META_ON))),
+                /* Overview of open apps: Meta + Tab */
+                new ShortcutKeyGroupMultiMappingInfo(
+                        context.getString(R.string.group_system_overview_open_apps),
+                        Arrays.asList(
+                                Pair.create(KeyEvent.KEYCODE_TAB, KeyEvent.META_META_ON))),
+                /* Back: go back to previous state (back button) */
+                /* Meta + Escape, Meta + backspace, Meta + left arrow */
+                new ShortcutKeyGroupMultiMappingInfo(
+                        context.getString(R.string.group_system_go_back),
+                        Arrays.asList(
+                                Pair.create(KeyEvent.KEYCODE_ESCAPE, KeyEvent.META_META_ON),
+                                Pair.create(KeyEvent.KEYCODE_DEL, KeyEvent.META_META_ON),
+                                Pair.create(KeyEvent.KEYCODE_DPAD_LEFT, KeyEvent.META_META_ON))),
                 /* Take a full screenshot: Meta + Ctrl + S */
                 new ShortcutKeyGroupMultiMappingInfo(
                         context.getString(R.string.group_system_full_screenshot),
@@ -507,25 +518,6 @@ public final class KeyboardShortcutListSearch {
                         context.getString(R.string.group_system_access_system_app_shortcuts),
                         Arrays.asList(
                                 Pair.create(KeyEvent.KEYCODE_SLASH, KeyEvent.META_META_ON))),
-                /* Back: go back to previous state (back button) */
-                /* Meta + ~, Meta + backspace, Meta + left arrow */
-                new ShortcutKeyGroupMultiMappingInfo(
-                        context.getString(R.string.group_system_go_back),
-                        Arrays.asList(
-                                Pair.create(KeyEvent.KEYCODE_GRAVE, KeyEvent.META_META_ON),
-                                Pair.create(KeyEvent.KEYCODE_DEL, KeyEvent.META_META_ON),
-                                Pair.create(KeyEvent.KEYCODE_DPAD_LEFT, KeyEvent.META_META_ON))),
-                /* Access home screen: Meta + H, Meta + Enter */
-                new ShortcutKeyGroupMultiMappingInfo(
-                        context.getString(R.string.group_system_access_home_screen),
-                        Arrays.asList(
-                                Pair.create(KeyEvent.KEYCODE_H, KeyEvent.META_META_ON),
-                                Pair.create(KeyEvent.KEYCODE_ENTER, KeyEvent.META_META_ON))),
-                /* Overview of open apps: Meta + Tab */
-                new ShortcutKeyGroupMultiMappingInfo(
-                        context.getString(R.string.group_system_overview_open_apps),
-                        Arrays.asList(
-                                Pair.create(KeyEvent.KEYCODE_TAB, KeyEvent.META_META_ON))),
                 /* Cycle through recent apps (forward): Alt + Tab */
                 new ShortcutKeyGroupMultiMappingInfo(
                         context.getString(R.string.group_system_cycle_forward),
@@ -538,16 +530,23 @@ public final class KeyboardShortcutListSearch {
                                 Pair.create(
                                         KeyEvent.KEYCODE_TAB,
                                         KeyEvent.META_SHIFT_ON | KeyEvent.META_ALT_ON))),
-                /* Access list of all apps and search (i.e. Search/Launcher): Meta */
+                /* Access notification shade: Meta + N */
                 new ShortcutKeyGroupMultiMappingInfo(
-                        context.getString(R.string.group_system_access_all_apps_search),
+                        context.getString(R.string.group_system_access_notification_shade),
                         Arrays.asList(
-                                Pair.create(KeyEvent.KEYCODE_UNKNOWN, KeyEvent.META_META_ON))),
-                /* Hide and (re)show taskbar: Meta + T */
+                                Pair.create(KeyEvent.KEYCODE_N, KeyEvent.META_META_ON))),
+                /*  Lock screen: Meta + L */
                 new ShortcutKeyGroupMultiMappingInfo(
-                        context.getString(R.string.group_system_hide_reshow_taskbar),
+                        context.getString(R.string.group_system_lock_screen),
                         Arrays.asList(
-                                Pair.create(KeyEvent.KEYCODE_T, KeyEvent.META_META_ON))),
+                                Pair.create(KeyEvent.KEYCODE_L, KeyEvent.META_META_ON))),
+                /* Pull up Notes app for quick memo: Meta + Ctrl + N */
+                new ShortcutKeyGroupMultiMappingInfo(
+                        context.getString(R.string.group_system_quick_memo),
+                        Arrays.asList(
+                                Pair.create(
+                                        KeyEvent.KEYCODE_N,
+                                        KeyEvent.META_META_ON | KeyEvent.META_CTRL_ON))),
                 /* Access system settings: Meta + I */
                 new ShortcutKeyGroupMultiMappingInfo(
                         context.getString(R.string.group_system_access_system_settings),
@@ -599,11 +598,17 @@ public final class KeyboardShortcutListSearch {
                         new ArrayList<>());
 
         // System multitasking shortcuts:
+        //    Enter Split screen with current app to RHS: Meta + Ctrl + Right arrow
+        //    Enter Split screen with current app to LHS: Meta + Ctrl + Left arrow
         //    Switch from Split screen to full screen: Meta + Ctrl + Up arrow
         String[] shortcutLabels = {
+                context.getString(R.string.system_multitasking_rhs),
+                context.getString(R.string.system_multitasking_lhs),
                 context.getString(R.string.system_multitasking_full_screen),
         };
         int[] keyCodes = {
+                KeyEvent.KEYCODE_DPAD_RIGHT,
+                KeyEvent.KEYCODE_DPAD_LEFT,
                 KeyEvent.KEYCODE_DPAD_UP,
         };
 
@@ -627,7 +632,7 @@ public final class KeyboardShortcutListSearch {
     private static KeyboardShortcutMultiMappingGroup getMultiMappingInputShortcuts(
             Context context) {
         List<ShortcutMultiMappingInfo> shortcutMultiMappingInfoList = Arrays.asList(
-                /* Switch input language (next language): Ctrl + Space or Meta + Space */
+                /* Switch input language (next language): Ctrl + Space */
                 new ShortcutMultiMappingInfo(
                         context.getString(R.string.input_switch_input_language_next),
                         null,
@@ -636,14 +641,9 @@ public final class KeyboardShortcutListSearch {
                                         context.getString(
                                                 R.string.input_switch_input_language_next),
                                         KeyEvent.KEYCODE_SPACE, KeyEvent.META_CTRL_ON),
-                                        null),
-                                new ShortcutKeyGroup(new KeyboardShortcutInfo(
-                                        context.getString(
-                                                R.string.input_switch_input_language_next),
-                                        KeyEvent.KEYCODE_SPACE, KeyEvent.META_META_ON),
                                         null))),
                 /* Switch input language (previous language): */
-                /* Ctrl + Shift + Space or Meta + Shift + Space */
+                /* Ctrl + Shift + Space */
                 new ShortcutMultiMappingInfo(
                         context.getString(R.string.input_switch_input_language_previous),
                         null,
@@ -653,12 +653,6 @@ public final class KeyboardShortcutListSearch {
                                                 R.string.input_switch_input_language_previous),
                                         KeyEvent.KEYCODE_SPACE,
                                         KeyEvent.META_CTRL_ON | KeyEvent.META_SHIFT_ON),
-                                        null),
-                                new ShortcutKeyGroup(new KeyboardShortcutInfo(
-                                        context.getString(
-                                                R.string.input_switch_input_language_previous),
-                                        KeyEvent.KEYCODE_SPACE,
-                                        KeyEvent.META_META_ON | KeyEvent.META_SHIFT_ON),
                                         null)))
         );
         return new KeyboardShortcutMultiMappingGroup(
@@ -826,11 +820,13 @@ public final class KeyboardShortcutListSearch {
                 new BottomSheetDialog(mContext);
         final View keyboardShortcutsView = inflater.inflate(
                 R.layout.keyboard_shortcuts_search_view, null);
+        LinearLayout shortcutsContainer = keyboardShortcutsView.findViewById(
+                R.id.keyboard_shortcuts_container);
         mNoSearchResults = keyboardShortcutsView.findViewById(R.id.shortcut_search_no_result);
         mKeyboardShortcutsBottomSheetDialog.setContentView(keyboardShortcutsView);
         setButtonsDefaultStatus(keyboardShortcutsView);
-        populateKeyboardShortcutSearchList(
-                keyboardShortcutsView.findViewById(R.id.keyboard_shortcuts_container));
+        populateCurrentAppButton();
+        populateKeyboardShortcutSearchList(shortcutsContainer);
 
         // Workaround for solve issue about dialog not full expanded when landscape.
         FrameLayout bottomSheet = (FrameLayout)
@@ -880,9 +876,14 @@ public final class KeyboardShortcutListSearch {
                     @Override
                     public void afterTextChanged(Editable s) {
                         mQueryString = s.toString();
-                        populateKeyboardShortcutSearchList(
-                                keyboardShortcutsView.findViewById(
-                                        R.id.keyboard_shortcuts_container));
+                        populateKeyboardShortcutSearchList(shortcutsContainer);
+                        if (mNoSearchResults.getVisibility() == View.VISIBLE) {
+                            shortcutsContainer.setAccessibilityPaneTitle(mContext.getString(
+                                    R.string.keyboard_shortcut_search_list_no_result));
+                        } else if (mSearchEditText.getText().length() > 0) {
+                            shortcutsContainer.setAccessibilityPaneTitle(mContext.getString(
+                                    R.string.keyboard_shortcut_a11y_show_search_results));
+                        }
                     }
 
                     @Override
@@ -895,8 +896,9 @@ public final class KeyboardShortcutListSearch {
                         // Do nothing.
                     }
                 });
-        mEditTextCancel = keyboardShortcutsView.findViewById(R.id.keyboard_shortcuts_search_cancel);
-        mEditTextCancel.setOnClickListener(v -> mSearchEditText.setText(null));
+        ImageButton editTextCancel = keyboardShortcutsView.findViewById(
+                R.id.keyboard_shortcuts_search_cancel);
+        editTextCancel.setOnClickListener(v -> mSearchEditText.setText(null));
     }
 
     private void populateKeyboardShortcutSearchList(LinearLayout keyboardShortcutsLayout) {
@@ -1033,16 +1035,32 @@ public final class KeyboardShortcutListSearch {
                             StringDrawableContainer shortcutRepresentation = shortcutKeys.get(k);
                             if (shortcutRepresentation.mDrawable != null) {
                                 ImageView shortcutKeyIconView = (ImageView) inflater.inflate(
-                                        R.layout.keyboard_shortcuts_key_new_icon_view,
+                                        R.layout.keyboard_shortcuts_key_icon_view,
                                         shortcutItemsContainer,
                                         false);
-                                Bitmap bitmap = Bitmap.createBitmap(shortcutKeyIconItemHeightWidth,
-                                        shortcutKeyIconItemHeightWidth, Bitmap.Config.ARGB_8888);
-                                Canvas canvas = new Canvas(bitmap);
-                                shortcutRepresentation.mDrawable.setBounds(0, 0, canvas.getWidth(),
-                                        canvas.getHeight());
-                                shortcutRepresentation.mDrawable.draw(canvas);
-                                shortcutKeyIconView.setImageBitmap(bitmap);
+                                shortcutKeyIconView.setImageDrawable(
+                                        shortcutRepresentation.mDrawable);
+                                // Once the view has been measured, scale and position the icon in
+                                // the center.
+                                shortcutKeyIconView.post(() -> {
+                                    Drawable d = shortcutKeyIconView.getDrawable();
+
+                                    float newSize = mContext.getResources().getDimensionPixelSize(
+                                            R.dimen.ksh_icon_scaled_size);
+                                    int viewWidth = shortcutKeyIconView.getWidth();
+                                    int viewHeight = shortcutKeyIconView.getHeight();
+                                    float scaleFactor = newSize / d.getIntrinsicWidth();
+                                    // Assumes that top/bottom and left/right padding are equal.
+                                    int paddingHorizontal =  shortcutKeyIconView.getPaddingLeft();
+                                    int paddingVertical =  shortcutKeyIconView.getPaddingTop();
+
+                                    Matrix m = new Matrix();
+                                    m.postScale(scaleFactor, scaleFactor);
+                                    m.postTranslate(
+                                            (viewWidth - newSize) / 2 - paddingHorizontal,
+                                            (viewHeight - newSize) / 2 - paddingVertical);
+                                    shortcutKeyIconView.setImageMatrix(m);
+                                });
                                 shortcutKeyIconView.setImportantForAccessibility(
                                         IMPORTANT_FOR_ACCESSIBILITY_YES);
                                 shortcutKeyIconView.setAccessibilityDelegate(
@@ -1051,7 +1069,7 @@ public final class KeyboardShortcutListSearch {
                                 shortcutItemsContainer.addView(shortcutKeyIconView);
                             } else if (shortcutRepresentation.mString != null) {
                                 TextView shortcutKeyTextView = (TextView) inflater.inflate(
-                                        R.layout.keyboard_shortcuts_key_new_view,
+                                        R.layout.keyboard_shortcuts_key_view,
                                         shortcutItemsContainer,
                                         false);
                                 shortcutKeyTextView.setMinimumWidth(shortcutKeyTextItemMinWidth);
@@ -1061,18 +1079,10 @@ public final class KeyboardShortcutListSearch {
                                                 shortcutRepresentation.mString));
                                 shortcutItemsContainer.addView(shortcutKeyTextView);
                             }
-
-                            if (k < shortcutKeysSize - 1) {
-                                TextView shortcutKeyTextView = (TextView) inflater.inflate(
-                                        R.layout.keyboard_shortcuts_key_plus_view,
-                                        shortcutItemsContainer,
-                                        false);
-                                shortcutItemsContainer.addView(shortcutKeyTextView);
-                            }
                         }
                     } else {
                         TextView shortcutKeyTextView = (TextView) inflater.inflate(
-                                R.layout.keyboard_shortcuts_key_new_view,
+                                R.layout.keyboard_shortcuts_key_view,
                                 shortcutItemsContainer,
                                 false);
                         shortcutKeyTextView.setMinimumWidth(shortcutKeyTextItemMinWidth);
@@ -1084,7 +1094,7 @@ public final class KeyboardShortcutListSearch {
 
                     if (p < keyGroupItemsSize - 1) {
                         TextView shortcutKeyTextView = (TextView) inflater.inflate(
-                                R.layout.keyboard_shortcuts_key_vertical_bar_view,
+                                R.layout.keyboard_shortcuts_key_separator_view,
                                 shortcutItemsContainer,
                                 false);
                         shortcutItemsContainer.addView(shortcutKeyTextView);
@@ -1123,9 +1133,6 @@ public final class KeyboardShortcutListSearch {
         Drawable shortcutKeyDrawable = null;
         if (info.getBaseCharacter() > Character.MIN_VALUE) {
             shortcutKeyString = String.valueOf(info.getBaseCharacter());
-        } else if (mSpecialCharacterDrawables.get(info.getKeycode()) != null) {
-            shortcutKeyDrawable = mSpecialCharacterDrawables.get(info.getKeycode());
-            shortcutKeyString = mSpecialCharacterNames.get(info.getKeycode());
         } else if (mSpecialCharacterNames.get(info.getKeycode()) != null) {
             shortcutKeyString = mSpecialCharacterNames.get(info.getKeycode());
         } else {
@@ -1231,34 +1238,76 @@ public final class KeyboardShortcutListSearch {
         mButtonOpenApps = keyboardShortcutsView.findViewById(R.id.shortcut_open_apps);
         mButtonSpecificApp = keyboardShortcutsView.findViewById(R.id.shortcut_specific_app);
 
+        LinearLayout shortcutsContainer = keyboardShortcutsView.findViewById(
+                R.id.keyboard_shortcuts_container);
+
         mButtonSystem.setOnClickListener(v -> {
             setCurrentCategoryIndex(SHORTCUT_SYSTEM_INDEX);
-            populateKeyboardShortcutSearchList(keyboardShortcutsView.findViewById(
-                    R.id.keyboard_shortcuts_container));
+            populateKeyboardShortcutSearchList(shortcutsContainer);
+            shortcutsContainer.setAccessibilityPaneTitle(mContext.getString(
+                    R.string.keyboard_shortcut_a11y_filter_system));
         });
 
         mButtonInput.setOnClickListener(v -> {
             setCurrentCategoryIndex(SHORTCUT_INPUT_INDEX);
-            populateKeyboardShortcutSearchList(keyboardShortcutsView.findViewById(
-                    R.id.keyboard_shortcuts_container));
+            populateKeyboardShortcutSearchList(shortcutsContainer);
+            shortcutsContainer.setAccessibilityPaneTitle(mContext.getString(
+                    R.string.keyboard_shortcut_a11y_filter_input));
         });
 
         mButtonOpenApps.setOnClickListener(v -> {
             setCurrentCategoryIndex(SHORTCUT_OPENAPPS_INDEX);
-            populateKeyboardShortcutSearchList(keyboardShortcutsView.findViewById(
-                    R.id.keyboard_shortcuts_container));
+            populateKeyboardShortcutSearchList(shortcutsContainer);
+            shortcutsContainer.setAccessibilityPaneTitle(mContext.getString(
+                    R.string.keyboard_shortcut_a11y_filter_open_apps));
         });
 
         mButtonSpecificApp.setOnClickListener(v -> {
             setCurrentCategoryIndex(SHORTCUT_SPECIFICAPP_INDEX);
-            populateKeyboardShortcutSearchList(keyboardShortcutsView.findViewById(
-                    R.id.keyboard_shortcuts_container));
+            populateKeyboardShortcutSearchList(shortcutsContainer);
+            shortcutsContainer.setAccessibilityPaneTitle(mContext.getString(
+                    R.string.keyboard_shortcut_a11y_filter_current_app));
         });
 
         mFullButtonList.add(mButtonSystem);
         mFullButtonList.add(mButtonInput);
         mFullButtonList.add(mButtonOpenApps);
         mFullButtonList.add(mButtonSpecificApp);
+    }
+
+    private void resetCurrentAppButton() {
+        if (mButtonSpecificApp == null) {
+            return;
+        }
+        mButtonSpecificApp.setText(
+                mContext.getString(R.string.keyboard_shortcut_search_category_current_app));
+        // TODO(b/325252986): Reset icon once the icon is implemented
+    }
+
+    private void populateCurrentAppButton() {
+        if (mButtonSpecificApp == null) {
+            return;
+        }
+        if (mCurrentAppPackageName != null) {
+            final int userId = mContext.getUserId();
+            try {
+                PackageManager pmUser = CentralSurfaces.getPackageManagerForUser(
+                        mContext,
+                        userId);
+                ApplicationInfo appInfo = pmUser.getApplicationInfoAsUser(
+                        mCurrentAppPackageName.toString(),
+                        0,
+                        userId);
+                // According to the API, we will always get a label
+                mButtonSpecificApp.setText(pmUser.getApplicationLabel(appInfo));
+                // TODO(b/325252986): Show icon once it has been defined
+            } catch (NameNotFoundException e) {
+                Log.e(TAG, "Package name not found", e);
+                resetCurrentAppButton();
+            }
+        } else {
+            resetCurrentAppButton();
+        }
     }
 
     private void setButtonFocusColor(int i, boolean isFocused) {
@@ -1276,12 +1325,12 @@ public final class KeyboardShortcutListSearch {
 
     private int getColorOfTextColorOnAccent() {
         return Utils.getColorAttrDefaultColor(
-                mContext, com.android.internal.R.attr.textColorOnAccent);
+                mContext, com.android.internal.R.attr.materialColorOnPrimary);
     }
 
     private int getColorOfTextColorSecondary() {
         return Utils.getColorAttrDefaultColor(
-                mContext, com.android.internal.R.attr.textColorSecondary);
+                mContext, com.android.internal.R.attr.materialColorOnSurface);
     }
 
     // Create the new data structure for handling the N-to-1 key mapping and other complex case.

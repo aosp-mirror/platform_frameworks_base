@@ -29,6 +29,7 @@ import com.android.internal.widget.LockPatternUtils
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.shade.ShadeController
 import com.android.systemui.statusbar.policy.ConfigurationController
+import com.android.systemui.user.domain.interactor.SelectedUserInteractor
 import com.android.systemui.util.concurrency.FakeExecutor
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.eq
@@ -47,7 +48,6 @@ import org.mockito.MockitoAnnotations
 @RunWith(AndroidTestingRunner::class)
 @TestableLooper.RunWithLooper
 class EmergencyButtonControllerTest : SysuiTestCase() {
-    lateinit var underTest: EmergencyButtonController
     @Mock lateinit var emergencyButton: EmergencyButton
     @Mock lateinit var configurationController: ConfigurationController
     @Mock lateinit var keyguardUpdateMonitor: KeyguardUpdateMonitor
@@ -59,9 +59,13 @@ class EmergencyButtonControllerTest : SysuiTestCase() {
     @Mock lateinit var metricsLogger: MetricsLogger
     @Mock lateinit var lockPatternUtils: LockPatternUtils
     @Mock lateinit var packageManager: PackageManager
+    @Mock lateinit var mSelectedUserInteractor: SelectedUserInteractor
+
     val fakeSystemClock = FakeSystemClock()
     val mainExecutor = FakeExecutor(fakeSystemClock)
     val backgroundExecutor = FakeExecutor(fakeSystemClock)
+
+    lateinit var underTest: EmergencyButtonController
 
     @Before
     fun setup() {
@@ -71,7 +75,6 @@ class EmergencyButtonControllerTest : SysuiTestCase() {
                 emergencyButton,
                 configurationController,
                 keyguardUpdateMonitor,
-                telephonyManager,
                 powerManager,
                 activityTaskManager,
                 shadeController,
@@ -79,7 +82,8 @@ class EmergencyButtonControllerTest : SysuiTestCase() {
                 metricsLogger,
                 lockPatternUtils,
                 mainExecutor,
-                backgroundExecutor
+                backgroundExecutor,
+                mSelectedUserInteractor,
             )
         context.setMockPackageManager(packageManager)
         Mockito.`when`(emergencyButton.context).thenReturn(context)

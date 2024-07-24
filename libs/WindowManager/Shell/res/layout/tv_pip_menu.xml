@@ -49,7 +49,6 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:padding="@dimen/pip_menu_button_start_end_offset"
             android:clipToPadding="false"
             android:alpha="0"
             android:contentDescription="@string/a11y_pip_menu_entered"/>

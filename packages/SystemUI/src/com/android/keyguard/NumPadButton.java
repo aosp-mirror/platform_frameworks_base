@@ -26,11 +26,12 @@ import android.graphics.drawable.GradientDrawable;
 import android.graphics.drawable.VectorDrawable;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
+import android.view.accessibility.AccessibilityNodeInfo;
 
 import androidx.annotation.Nullable;
 
 import com.android.settingslib.Utils;
-import com.android.systemui.R;
+import com.android.systemui.res.R;
 
 /**
  * Similar to the {@link NumPadKey}, but displays an image.
@@ -144,5 +145,11 @@ public class NumPadButton extends AlphaOptimizedImageButton implements NumPadAni
         } else {
             mAnimator = null;
         }
+    }
+
+    @Override
+    public void onInitializeAccessibilityNodeInfo(AccessibilityNodeInfo info) {
+        super.onInitializeAccessibilityNodeInfo(info);
+        info.setTextEntryKey(true);
     }
 }

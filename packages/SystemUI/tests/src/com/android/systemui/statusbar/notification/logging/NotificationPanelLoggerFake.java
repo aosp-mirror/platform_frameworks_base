@@ -34,6 +34,11 @@ public class NotificationPanelLoggerFake implements NotificationPanelLogger {
     }
 
     @Override
+    public void logPanelShown(boolean isLockscreen, Notifications.NotificationList proto) {
+        mCalls.add(new CallRecord(isLockscreen, proto));
+    }
+
+    @Override
     public void logPanelShown(boolean isLockscreen,
             List<NotificationEntry> visibleNotifications) {
         mCalls.add(new CallRecord(isLockscreen,

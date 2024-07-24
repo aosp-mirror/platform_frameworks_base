@@ -396,7 +396,7 @@ public class HdmiCecNetworkTest {
     }
 
     @Test
-    public void cecDevices_tracking_updatesPhysicalAddress() {
+    public void cecDevices_tracking_updatesPhysicalAddress_add() {
         int logicalAddress = Constants.ADDR_PLAYBACK_1;
         int initialPhysicalAddress = 0x1000;
         int updatedPhysicalAddress = 0x2000;
@@ -415,11 +415,12 @@ public class HdmiCecNetworkTest {
         assertThat(cecDeviceInfo.getPhysicalAddress()).isEqualTo(updatedPhysicalAddress);
         assertThat(cecDeviceInfo.getDeviceType()).isEqualTo(type);
 
-        // ADD for physical address first detected
-        // UPDATE for updating device with new physical address
+        // Handle case where PA is changed: Update CEC device information by calling
+        // addCecDevice().
         assertThat(mDeviceEventListenerStatuses).containsExactly(
                 HdmiControlManager.DEVICE_EVENT_ADD_DEVICE,
-                HdmiControlManager.DEVICE_EVENT_UPDATE_DEVICE);
+                HdmiControlManager.DEVICE_EVENT_REMOVE_DEVICE,
+                HdmiControlManager.DEVICE_EVENT_ADD_DEVICE);
     }
 
     @Test

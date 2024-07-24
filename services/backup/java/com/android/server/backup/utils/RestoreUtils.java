@@ -40,6 +40,7 @@ import android.util.Slog;
 import com.android.internal.annotations.GuardedBy;
 import com.android.server.LocalServices;
 import com.android.server.backup.FileMetadata;
+import com.android.server.backup.Flags;
 import com.android.server.backup.restore.RestoreDeleteObserver;
 import com.android.server.backup.restore.RestorePolicy;
 
@@ -93,7 +94,12 @@ public class RestoreUtils {
                 try (Session session = installer.openSession(sessionId)) {
                     try (OutputStream apkStream = session.openWrite(info.packageName, 0,
                             info.size)) {
-                        byte[] buffer = new byte[32 * 1024];
+                        int bufferSize = 32 * 1024; // 32KB
+                        if (Flags.enableMaxSizeWritesToPipes()) {
+                            // Linux pipe capacity (buffer size) is 16 pages where each page is 4KB
+                            bufferSize = 64 * 1024; // 64KB
+                        }
+                        byte[] buffer = new byte[bufferSize];
                         long size = info.size;
                         while (size > 0) {
                             long toRead = (buffer.length < size) ? buffer.length : size;

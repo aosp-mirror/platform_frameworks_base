@@ -1,0 +1,9 @@
+package: "android.service.appprediction.flags"
+container: "system"
+
+flag {
+  name: "service_features_api"
+  namespace: "systemui"
+  description: "Guards the new requestServiceFeatures api"
+  bug: "292565550"
+}

@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package com.android.server.companion.utils;
 
 import static org.junit.Assert.assertFalse;
@@ -33,7 +32,6 @@ import android.testing.AndroidTestingRunner;
 
 import androidx.test.platform.app.InstrumentationRegistry;
 
-import com.android.server.companion.PackageUtils;
 import com.android.server.pm.pkg.AndroidPackage;
 
 import org.junit.Test;
@@ -42,19 +40,15 @@ import org.junit.runner.RunWith;
 @Presubmit
 @RunWith(AndroidTestingRunner.class)
 public class PackageUtilsTest {
-
     private static final String[] ALLOWED_PACKAGE_NAMES = new String[]{
             "allowed_app",
     };
-
     private static final Signature[] ALLOWED_PACKAGE_SIGNATURES = new Signature[]{
             new Signature("001122"),
     };
-
     private static final String[] DISALLOWED_PACKAGE_NAMES = new String[]{
             "disallowed_app",
     };
-
     private static final Signature[] DISALLOWED_PACKAGE_SIGNATURES = new Signature[]{
             new Signature("778899"),
     };
@@ -71,7 +65,6 @@ public class PackageUtilsTest {
                 ALLOWED_PACKAGE_SIGNATURES)).when(res).getStringArray(
                 com.android.internal.R.array.config_companionDeviceCerts);
         doReturn(res).when(context).getResources();
-
         PackageManagerInternal pm = mock(PackageManagerInternal.class);
         AndroidPackage ap = mock(AndroidPackage.class);
         SigningDetails sd = new SigningDetails(
@@ -81,7 +74,6 @@ public class PackageUtilsTest {
                 null);
         doReturn(ap).when(pm).getPackage(ALLOWED_PACKAGE_NAMES[0]);
         doReturn(sd).when(ap).getSigningDetails();
-
         assertTrue(PackageUtils.isPackageAllowlisted(context, pm, ALLOWED_PACKAGE_NAMES[0]));
     }
 
@@ -97,7 +89,6 @@ public class PackageUtilsTest {
                 ALLOWED_PACKAGE_SIGNATURES)).when(res).getStringArray(
                 com.android.internal.R.array.config_companionDeviceCerts);
         doReturn(res).when(context).getResources();
-
         PackageManagerInternal pm = mock(PackageManagerInternal.class);
         AndroidPackage ap = mock(AndroidPackage.class);
         SigningDetails sd = new SigningDetails(
@@ -107,7 +98,6 @@ public class PackageUtilsTest {
                 null);
         doReturn(ap).when(pm).getPackage(DISALLOWED_PACKAGE_NAMES[0]);
         doReturn(sd).when(ap).getSigningDetails();
-
         assertFalse(PackageUtils.isPackageAllowlisted(context, pm, DISALLOWED_PACKAGE_NAMES[0]));
     }
 
@@ -123,7 +113,6 @@ public class PackageUtilsTest {
                 ALLOWED_PACKAGE_SIGNATURES)).when(res).getStringArray(
                 com.android.internal.R.array.config_companionDeviceCerts);
         doReturn(res).when(context).getResources();
-
         PackageManagerInternal pm = mock(PackageManagerInternal.class);
         AndroidPackage ap = mock(AndroidPackage.class);
         SigningDetails sd = new SigningDetails(
@@ -133,7 +122,6 @@ public class PackageUtilsTest {
                 null);
         doReturn(ap).when(pm).getPackage(ALLOWED_PACKAGE_NAMES[0]);
         doReturn(sd).when(ap).getSigningDetails();
-
         assertFalse(PackageUtils.isPackageAllowlisted(context, pm, ALLOWED_PACKAGE_NAMES[0]));
     }
 }

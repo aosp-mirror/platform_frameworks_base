@@ -18,6 +18,7 @@ package android.telephony;
 
 import static android.text.TextUtils.formatSimple;
 
+import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
@@ -39,11 +40,13 @@ import android.os.Parcelable;
 import android.telephony.SubscriptionManager.ProfileClass;
 import android.telephony.SubscriptionManager.SimDisplayNameSource;
 import android.telephony.SubscriptionManager.SubscriptionType;
+import android.telephony.SubscriptionManager.TransferStatus;
 import android.telephony.SubscriptionManager.UsageSetting;
 import android.text.TextUtils;
 import android.util.DisplayMetrics;
 import android.util.Log;
 
+import com.android.internal.telephony.flags.Flags;
 import com.android.internal.telephony.util.TelephonyUtils;
 import com.android.telephony.Rlog;
 
@@ -52,6 +55,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 
 /**
  * A Parcelable class for Subscription Information.
@@ -233,6 +237,11 @@ public class SubscriptionInfo implements Parcelable {
     @UsageSetting
     private final int mUsageSetting;
 
+    /**
+     * Subscription's transfer status
+     */
+    private final int mTransferStatus;
+
     // Below are the fields that do not exist in the database.
 
     /**
@@ -253,6 +262,16 @@ public class SubscriptionInfo implements Parcelable {
      * this opportunistic subscription.
      */
     private final boolean mIsGroupDisabled;
+
+    /**
+     * Whether this subscription is used for communicating with non-terrestrial networks.
+     */
+    private final boolean mIsOnlyNonTerrestrialNetwork;
+
+    /**
+     * The service capabilities (in the form of bitmask combination) the subscription supports.
+     */
+    private final int mServiceCapabilities;
 
     /**
      * @hide
@@ -378,6 +397,9 @@ public class SubscriptionInfo implements Parcelable {
         this.mAreUiccApplicationsEnabled = areUiccApplicationsEnabled;
         this.mPortIndex = portIndex;
         this.mUsageSetting = usageSetting;
+        this.mIsOnlyNonTerrestrialNetwork = false;
+        this.mServiceCapabilities = 0;
+        this.mTransferStatus = 0;
     }
 
     /**
@@ -416,6 +438,9 @@ public class SubscriptionInfo implements Parcelable {
         this.mAreUiccApplicationsEnabled = builder.mAreUiccApplicationsEnabled;
         this.mPortIndex = builder.mPortIndex;
         this.mUsageSetting = builder.mUsageSetting;
+        this.mIsOnlyNonTerrestrialNetwork = builder.mIsOnlyNonTerrestrialNetwork;
+        this.mServiceCapabilities = builder.mServiceCapabilities;
+        this.mTransferStatus = builder.mTransferStatus;
     }
 
     /**
@@ -548,7 +573,7 @@ public class SubscriptionInfo implements Parcelable {
      * Returns the number of this subscription.
      *
      * Starting with API level 30, returns the number of this subscription if the calling app meets
-     * one of the following requirements:
+     * at least one of the following requirements:
      * <ul>
      *     <li>If the calling app's target SDK is API level 29 or lower and the app has been granted
      *     the READ_PHONE_STATE permission.
@@ -559,8 +584,8 @@ public class SubscriptionInfo implements Parcelable {
      *     <li>If the calling app is the default SMS role holder.
      * </ul>
      *
-     * @return the number of this subscription, or an empty string if one of these requirements is
-     * not met
+     * @return the number of this subscription, or an empty string if none of the requirements
+     * are met.
      * @deprecated use {@link SubscriptionManager#getPhoneNumber(int)} instead, which takes a
      *             {@link #getSubscriptionId() subscription ID}.
      */
@@ -862,6 +887,68 @@ public class SubscriptionInfo implements Parcelable {
         return mUsageSetting;
     }
 
+    /**
+     * Check if the subscription is exclusively for non-terrestrial networks.
+     *
+     * @return {@code true} if it is a non-terrestrial network subscription, {@code false}
+     * otherwise.
+     */
+    @FlaggedApi(Flags.FLAG_OEM_ENABLED_SATELLITE_FLAG)
+    public boolean isOnlyNonTerrestrialNetwork() {
+        return mIsOnlyNonTerrestrialNetwork;
+    }
+
+    // TODO(b/316183370): replace @code with @link in javadoc after feature is released
+    /**
+     * Retrieves the service capabilities for the current subscription.
+     *
+     * <p>These capabilities are hint to system components and applications, allowing them to
+     * enhance user experience. For instance, a Dialer application can inform the user that the
+     * current subscription is incapable of making voice calls if the voice service is not
+     * available.
+     *
+     * <p>Correct usage of these service capabilities must also consider the device's overall
+     * service capabilities. For example, even if the subscription supports voice calls, a voice
+     * call might not be feasible on a device that only supports data services. To determine the
+     * device's capabilities for voice and SMS services, refer to
+     * {@code TelephonyManager#isDeviceVoiceCapable()} and
+     * {@code TelephonyManager#isDeviceSmsCapable()}.
+     *
+     * <p>Emergency service availability may not directly correlate with the subscription or
+     * device's general service capabilities. In some cases, emergency calls might be possible
+     * even if the subscription or device does not typically support voice services.
+     *
+     * @return A set of integer representing the subscription's service capabilities,
+     * defined by {@code SubscriptionManager#SERVICE_CAPABILITY_VOICE},
+     * {@code SubscriptionManager#SERVICE_CAPABILITY_SMS}
+     * and {@code SubscriptionManager#SERVICE_CAPABILITY_DATA}.
+     *
+     * @see TelephonyManager#isDeviceVoiceCapable()
+     * @see TelephonyManager#isDeviceSmsCapable()
+     * @see CarrierConfigManager#KEY_CELLULAR_SERVICE_CAPABILITIES_INT_ARRAY
+     * @see SubscriptionManager#SERVICE_CAPABILITY_VOICE
+     * @see SubscriptionManager#SERVICE_CAPABILITY_SMS
+     * @see SubscriptionManager#SERVICE_CAPABILITY_DATA
+     */
+    @NonNull
+    @FlaggedApi(Flags.FLAG_DATA_ONLY_CELLULAR_SERVICE)
+    public @SubscriptionManager.ServiceCapability Set<Integer> getServiceCapabilities() {
+        return SubscriptionManager.getServiceCapabilitiesSet(mServiceCapabilities);
+    }
+
+    /**
+     * Get the transfer status for this subscription.
+     *
+     * @return The transfer status for this subscription.
+     *
+     * @hide
+     */
+    @FlaggedApi(Flags.FLAG_SUPPORT_PSIM_TO_ESIM_CONVERSION)
+    @SystemApi
+    public @TransferStatus int getTransferStatus() {
+        return mTransferStatus;
+    }
+
     @NonNull
     public static final Parcelable.Creator<SubscriptionInfo> CREATOR =
             new Parcelable.Creator<SubscriptionInfo>() {
@@ -898,6 +985,10 @@ public class SubscriptionInfo implements Parcelable {
                             UiccAccessRule.CREATOR))
                     .setUiccApplicationsEnabled(source.readBoolean())
                     .setUsageSetting(source.readInt())
+                    .setOnlyNonTerrestrialNetwork(source.readBoolean())
+                    .setServiceCapabilities(
+                            SubscriptionManager.getServiceCapabilitiesSet(source.readInt()))
+                    .setTransferStatus(source.readInt())
                     .build();
         }
 
@@ -939,6 +1030,9 @@ public class SubscriptionInfo implements Parcelable {
         dest.writeTypedArray(mCarrierConfigAccessRules, flags);
         dest.writeBoolean(mAreUiccApplicationsEnabled);
         dest.writeInt(mUsageSetting);
+        dest.writeBoolean(mIsOnlyNonTerrestrialNetwork);
+        dest.writeInt(mServiceCapabilities);
+        dest.writeInt(mTransferStatus);
     }
 
     @Override
@@ -1001,6 +1095,10 @@ public class SubscriptionInfo implements Parcelable {
                 + " mType=" + SubscriptionManager.subscriptionTypeToString(mType)
                 + " areUiccApplicationsEnabled=" + mAreUiccApplicationsEnabled
                 + " usageSetting=" + SubscriptionManager.usageSettingToString(mUsageSetting)
+                + " isOnlyNonTerrestrialNetwork=" + mIsOnlyNonTerrestrialNetwork
+                + " serviceCapabilities=" + SubscriptionManager.getServiceCapabilitiesSet(
+                mServiceCapabilities).toString()
+                + " transferStatus=" + mTransferStatus
                 + "]";
     }
 
@@ -1025,7 +1123,10 @@ public class SubscriptionInfo implements Parcelable {
                 that.mCardString) && Arrays.equals(mNativeAccessRules,
                 that.mNativeAccessRules) && Arrays.equals(mCarrierConfigAccessRules,
                 that.mCarrierConfigAccessRules) && Objects.equals(mGroupUuid, that.mGroupUuid)
-                && mCountryIso.equals(that.mCountryIso) && mGroupOwner.equals(that.mGroupOwner);
+                && mCountryIso.equals(that.mCountryIso) && mGroupOwner.equals(that.mGroupOwner)
+                && mIsOnlyNonTerrestrialNetwork == that.mIsOnlyNonTerrestrialNetwork
+                && mServiceCapabilities == that.mServiceCapabilities
+                && mTransferStatus == that.mTransferStatus;
     }
 
     @Override
@@ -1034,7 +1135,8 @@ public class SubscriptionInfo implements Parcelable {
                 mDisplayNameSource, mIconTint, mNumber, mDataRoaming, mMcc, mMnc, mIsEmbedded,
                 mCardString, mIsOpportunistic, mGroupUuid, mCountryIso, mCarrierId, mProfileClass,
                 mType, mGroupOwner, mAreUiccApplicationsEnabled, mPortIndex, mUsageSetting, mCardId,
-                mIsGroupDisabled);
+                mIsGroupDisabled, mIsOnlyNonTerrestrialNetwork, mServiceCapabilities,
+                mTransferStatus);
         result = 31 * result + Arrays.hashCode(mEhplmns);
         result = 31 * result + Arrays.hashCode(mHplmns);
         result = 31 * result + Arrays.hashCode(mNativeAccessRules);
@@ -1234,6 +1336,18 @@ public class SubscriptionInfo implements Parcelable {
         private int mUsageSetting = SubscriptionManager.USAGE_SETTING_UNKNOWN;
 
         /**
+         * {@code true} if it is a non-terrestrial network subscription, {@code false} otherwise.
+         */
+        private boolean mIsOnlyNonTerrestrialNetwork = false;
+
+        private int mTransferStatus = 0;
+
+        /**
+         * Service capabilities bitmasks the subscription supports.
+         */
+        private int mServiceCapabilities = 0;
+
+        /**
          * Default constructor.
          */
         public Builder() {
@@ -1275,6 +1389,9 @@ public class SubscriptionInfo implements Parcelable {
             mAreUiccApplicationsEnabled = info.mAreUiccApplicationsEnabled;
             mPortIndex = info.mPortIndex;
             mUsageSetting = info.mUsageSetting;
+            mIsOnlyNonTerrestrialNetwork = info.mIsOnlyNonTerrestrialNetwork;
+            mServiceCapabilities = info.mServiceCapabilities;
+            mTransferStatus = info.mTransferStatus;
         }
 
         /**
@@ -1656,6 +1773,57 @@ public class SubscriptionInfo implements Parcelable {
         @NonNull
         public Builder setUsageSetting(@UsageSetting int usageSetting) {
             mUsageSetting = usageSetting;
+            return this;
+        }
+
+        /**
+         * Set whether the subscription is exclusively used for non-terrestrial networks or not.
+         *
+         * @param isOnlyNonTerrestrialNetwork {@code true} if the subscription is for NTN,
+         * {@code false} otherwise.
+         * @return The builder.
+         */
+        @NonNull
+        public Builder setOnlyNonTerrestrialNetwork(boolean isOnlyNonTerrestrialNetwork) {
+            mIsOnlyNonTerrestrialNetwork = isOnlyNonTerrestrialNetwork;
+            return this;
+        }
+
+        /**
+         * Set the service capabilities that the subscription supports.
+         *
+         * @param capabilities Bitmask combination of SubscriptionManager
+         *                     .SERVICE_CAPABILITY_XXX.
+         * @return The builder.
+         *
+         * @throws IllegalArgumentException when any capability is not supported.
+         */
+        @NonNull
+        @FlaggedApi(Flags.FLAG_DATA_ONLY_CELLULAR_SERVICE)
+        public Builder setServiceCapabilities(
+                @NonNull @SubscriptionManager.ServiceCapability Set<Integer> capabilities) {
+            int combinedCapabilities = 0;
+            for (int capability : capabilities) {
+                if (capability < SubscriptionManager.SERVICE_CAPABILITY_VOICE
+                        || capability > SubscriptionManager.SERVICE_CAPABILITY_MAX) {
+                    throw new IllegalArgumentException(
+                            "Invalid service capability value: " + capability);
+                }
+                combinedCapabilities |= SubscriptionManager.serviceCapabilityToBitmask(capability);
+            }
+            mServiceCapabilities = combinedCapabilities;
+            return this;
+        }
+         /**
+         * Set subscription's transfer status
+         *
+         * @param status Subscription's transfer status
+         * @return The builder.
+         */
+        @FlaggedApi(Flags.FLAG_SUPPORT_PSIM_TO_ESIM_CONVERSION)
+        @NonNull
+        public Builder setTransferStatus(@TransferStatus int status) {
+            mTransferStatus = status;
             return this;
         }
 

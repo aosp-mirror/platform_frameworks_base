@@ -16,6 +16,7 @@
 
 package com.android.protolog.tool
 
+import com.android.internal.protolog.common.LogLevel
 import com.github.javaparser.ast.expr.MethodCallExpr
 
 interface ProtoLogCallVisitor {

@@ -195,16 +195,25 @@ public final class NfcActivityManager extends IAppCallback.Stub
             Bundle extras) {
         boolean isResumed;
         Binder token;
+        int pollTech, listenTech;
         synchronized (NfcActivityManager.this) {
             NfcActivityState state = getActivityState(activity);
             state.readerCallback = callback;
             state.readerModeFlags = flags;
             state.readerModeExtras = extras;
+            pollTech = state.mPollTech;
+            listenTech = state.mListenTech;
             token = state.token;
             isResumed = state.resumed;
         }
         if (isResumed) {
-            setReaderMode(token, flags, extras);
+            if (listenTech != NfcAdapter.FLAG_USE_ALL_TECH
+                    || pollTech != NfcAdapter.FLAG_USE_ALL_TECH) {
+                throw new IllegalStateException(
+                    "Cannot be used when alternative DiscoveryTechnology is set");
+            } else {
+                setReaderMode(token, flags, extras);
+            }
         }
     }
 
@@ -385,15 +394,12 @@ public final class NfcActivityManager extends IAppCallback.Stub
         boolean readerModeFlagsSet;
         synchronized (NfcActivityManager.this) {
             NfcActivityState state = getActivityState(activity);
-            readerModeFlagsSet = state.readerModeFlags != 0;
             state.mListenTech = NfcAdapter.FLAG_USE_ALL_TECH;
             state.mPollTech = NfcAdapter.FLAG_USE_ALL_TECH;
             token = state.token;
             isResumed = state.resumed;
         }
-        if (readerModeFlagsSet) {
-            disableReaderMode(activity);
-        } else if (isResumed) {
+        if (isResumed) {
             changeDiscoveryTech(token, NfcAdapter.FLAG_USE_ALL_TECH, NfcAdapter.FLAG_USE_ALL_TECH);
         }
 

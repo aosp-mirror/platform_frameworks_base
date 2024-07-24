@@ -24,6 +24,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.content.Context;
+import android.hardware.biometrics.AuthenticationStateListener;
 import android.hardware.biometrics.BiometricsProtoEnums;
 import android.hardware.biometrics.IBiometricSensorReceiver;
 import android.hardware.biometrics.IBiometricService;
@@ -36,12 +37,15 @@ import android.hardware.biometrics.face.IFace;
 import android.hardware.biometrics.face.SensorProps;
 import android.hardware.face.Face;
 import android.hardware.face.FaceAuthenticateOptions;
+import android.hardware.face.FaceEnrollOptions;
+import android.hardware.face.FaceSensorConfigurations;
 import android.hardware.face.FaceSensorPropertiesInternal;
 import android.hardware.face.FaceServiceReceiver;
 import android.hardware.face.IFaceAuthenticatorsRegisteredCallback;
 import android.hardware.face.IFaceService;
 import android.hardware.face.IFaceServiceReceiver;
 import android.os.Binder;
+import android.os.Build;
 import android.os.IBinder;
 import android.os.NativeHandle;
 import android.os.RemoteException;
@@ -55,11 +59,14 @@ import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
 import android.view.Surface;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.server.SystemService;
+import com.android.server.biometrics.Flags;
 import com.android.server.biometrics.Utils;
 import com.android.server.biometrics.log.BiometricContext;
+import com.android.server.biometrics.sensors.AuthenticationStateListeners;
 import com.android.server.biometrics.sensors.BiometricStateCallback;
 import com.android.server.biometrics.sensors.ClientMonitorCallbackConverter;
 import com.android.server.biometrics.sensors.LockoutResetDispatcher;
@@ -67,12 +74,16 @@ import com.android.server.biometrics.sensors.LockoutTracker;
 import com.android.server.biometrics.sensors.face.aidl.FaceProvider;
 import com.android.server.biometrics.sensors.face.hidl.Face10;
 
+import com.google.android.collect.Lists;
+
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.function.Function;
+import java.util.function.Supplier;
 
 /**
  * A service to manage multiple clients that want to access the face HAL API.
@@ -83,7 +94,7 @@ public class FaceService extends SystemService {
 
     protected static final String TAG = "FaceService";
 
-    private final FaceServiceWrapper mServiceWrapper;
+    @VisibleForTesting final FaceServiceWrapper mServiceWrapper;
     private final LockoutResetDispatcher mLockoutResetDispatcher;
     private final LockPatternUtils mLockPatternUtils;
     @NonNull
@@ -91,11 +102,23 @@ public class FaceService extends SystemService {
     @NonNull
     private final BiometricStateCallback<ServiceProvider, FaceSensorPropertiesInternal>
             mBiometricStateCallback;
+    @NonNull
+    private final AuthenticationStateListeners mAuthenticationStateListeners;
+    @NonNull
+    private final FaceProviderFunction mFaceProviderFunction;
+    @NonNull private final Function<String, FaceProvider> mFaceProvider;
+    @NonNull
+    private final Supplier<String[]> mAidlInstanceNameSupplier;
+
+    interface FaceProviderFunction {
+        FaceProvider getFaceProvider(Pair<String, SensorProps[]> filteredSensorProps,
+                boolean resetLockoutRequiresChallenge);
+    }
 
     /**
      * Receives the incoming binder calls from FaceManager.
      */
-    private final class FaceServiceWrapper extends IFaceService.Stub {
+    @VisibleForTesting final class FaceServiceWrapper extends IFaceService.Stub {
         @android.annotation.EnforcePermission(android.Manifest.permission.USE_BIOMETRIC_INTERNAL)
         @Override
         public ITestSession createTestSession(int sensorId, @NonNull ITestSessionCallback callback,
@@ -185,7 +208,8 @@ public class FaceService extends SystemService {
         @Override // Binder call
         public long enroll(int userId, final IBinder token, final byte[] hardwareAuthToken,
                 final IFaceServiceReceiver receiver, final String opPackageName,
-                final int[] disabledFeatures, Surface previewSurface, boolean debugConsent) {
+                final int[] disabledFeatures, Surface previewSurface, boolean debugConsent,
+                FaceEnrollOptions options) {
             super.enroll_enforcePermission();
 
             final Pair<Integer, ServiceProvider> provider = mRegistry.getSingleProvider();
@@ -195,7 +219,8 @@ public class FaceService extends SystemService {
             }
 
             return provider.second.scheduleEnroll(provider.first, token, hardwareAuthToken, userId,
-                    receiver, opPackageName, disabledFeatures, previewSurface, debugConsent);
+                    receiver, opPackageName, disabledFeatures, previewSurface, debugConsent,
+                    options);
         }
 
         @android.annotation.EnforcePermission(android.Manifest.permission.USE_BIOMETRIC_INTERNAL)
@@ -639,32 +664,29 @@ public class FaceService extends SystemService {
             provider.second.scheduleGetFeature(provider.first, token, userId, feature,
                     new ClientMonitorCallbackConverter(receiver), opPackageName);
         }
-
-        private List<ServiceProvider> getAidlProviders() {
+        @NonNull
+        private List<ServiceProvider> getHidlProviders(
+                @NonNull List<FaceSensorPropertiesInternal> hidlSensors) {
             final List<ServiceProvider> providers = new ArrayList<>();
 
-            final String[] instances = ServiceManager.getDeclaredInstances(IFace.DESCRIPTOR);
-            if (instances == null || instances.length == 0) {
-                return providers;
+            for (FaceSensorPropertiesInternal hidlSensor : hidlSensors) {
+                providers.add(
+                        Face10.newInstance(getContext(), mBiometricStateCallback,
+                                mAuthenticationStateListeners, hidlSensor,
+                                mLockoutResetDispatcher));
             }
 
+            return providers;
+        }
+
+        @NonNull
+        private List<ServiceProvider> getAidlProviders(@NonNull List<String> instances) {
+            final List<ServiceProvider> providers = new ArrayList<>();
+
             for (String instance : instances) {
-                final String fqName = IFace.DESCRIPTOR + "/" + instance;
-                final IFace face = IFace.Stub.asInterface(
-                        Binder.allowBlocking(ServiceManager.waitForDeclaredService(fqName)));
-                if (face == null) {
-                    Slog.e(TAG, "Unable to get declared service: " + fqName);
-                    continue;
-                }
-                try {
-                    final SensorProps[] props = face.getSensorProps();
-                    final FaceProvider provider = new FaceProvider(getContext(),
-                            mBiometricStateCallback, props, instance, mLockoutResetDispatcher,
-                            BiometricContext.getInstance(getContext()));
-                    providers.add(provider);
-                } catch (RemoteException e) {
-                    Slog.e(TAG, "Remote exception in getSensorProps: " + fqName);
-                }
+                final FaceProvider provider = mFaceProvider.apply(instance);
+                Slog.i(TAG, "Adding AIDL provider: " + instance);
+                providers.add(provider);
             }
 
             return providers;
@@ -676,15 +698,103 @@ public class FaceService extends SystemService {
             super.registerAuthenticators_enforcePermission();
 
             mRegistry.registerAll(() -> {
-                final List<ServiceProvider> providers = new ArrayList<>();
-                for (FaceSensorPropertiesInternal hidlSensor : hidlSensors) {
-                    providers.add(
-                            Face10.newInstance(getContext(), mBiometricStateCallback,
-                                    hidlSensor, mLockoutResetDispatcher));
+                List<String> aidlSensors = new ArrayList<>();
+                final String[] instances = mAidlInstanceNameSupplier.get();
+                if (instances != null) {
+                    aidlSensors.addAll(Lists.newArrayList(instances));
                 }
-                providers.addAll(getAidlProviders());
+
+                final Pair<List<FaceSensorPropertiesInternal>, List<String>>
+                        filteredInstances = filterAvailableHalInstances(hidlSensors, aidlSensors);
+
+                final List<ServiceProvider> providers = new ArrayList<>();
+                providers.addAll(getHidlProviders(filteredInstances.first));
+                providers.addAll(getAidlProviders(filteredInstances.second));
                 return providers;
             });
+        }
+
+        @android.annotation.EnforcePermission(android.Manifest.permission.USE_BIOMETRIC_INTERNAL)
+        public void registerAuthenticatorsLegacy(
+                FaceSensorConfigurations faceSensorConfigurations) {
+            super.registerAuthenticatorsLegacy_enforcePermission();
+
+            if (!faceSensorConfigurations.hasSensorConfigurations()) {
+                Slog.d(TAG, "No face sensors to register.");
+                return;
+            }
+            mRegistry.registerAll(() -> getProviders(faceSensorConfigurations));
+        }
+
+        private List<ServiceProvider> getProviders(
+                FaceSensorConfigurations faceSensorConfigurations) {
+            final List<ServiceProvider> providers = new ArrayList<>();
+            final Pair<String, SensorProps[]> filteredSensorProps =
+                    filterAvailableHalInstances(faceSensorConfigurations);
+            providers.add(mFaceProviderFunction.getFaceProvider(filteredSensorProps,
+                    faceSensorConfigurations.getResetLockoutRequiresChallenge()));
+            return providers;
+        }
+
+        @NonNull
+        private Pair<String, SensorProps[]> filterAvailableHalInstances(
+                FaceSensorConfigurations faceSensorConfigurations) {
+            Pair<String, SensorProps[]> finalSensorPair = faceSensorConfigurations.getSensorPair();
+
+            if (faceSensorConfigurations.isSingleSensorConfigurationPresent()) {
+                return finalSensorPair;
+            }
+
+            final Pair<String, SensorProps[]> virtualSensorProps = faceSensorConfigurations
+                    .getSensorPairForInstance("virtual");
+
+            if (Utils.isVirtualEnabled(getContext())) {
+                if (virtualSensorProps != null) {
+                    return virtualSensorProps;
+                } else {
+                    Slog.e(TAG, "Could not find virtual interface while it is enabled");
+                    return finalSensorPair;
+                }
+            } else {
+                if (virtualSensorProps != null) {
+                    return faceSensorConfigurations.getSensorPairNotForInstance("virtual");
+                }
+            }
+            return finalSensorPair;
+        }
+
+        private Pair<List<FaceSensorPropertiesInternal>, List<String>>
+                filterAvailableHalInstances(
+                @NonNull List<FaceSensorPropertiesInternal> hidlInstances,
+                @NonNull List<String> aidlInstances) {
+            if ((hidlInstances.size() + aidlInstances.size()) <= 1) {
+                return new Pair(hidlInstances, aidlInstances);
+            }
+
+            if (Flags.faceVhalFeature()) {
+                Slog.i(TAG, "Face VHAL feature is on");
+            } else {
+                Slog.i(TAG, "Face VHAL feature is off");
+            }
+
+            final int virtualAt = aidlInstances.indexOf("virtual");
+            if (Flags.faceVhalFeature() && Utils.isVirtualEnabled(getContext())) {
+                if (virtualAt != -1) {
+                    //only virtual instance should be returned
+                    Slog.i(TAG, "virtual hal is used");
+                    return new Pair(new ArrayList<>(), List.of(aidlInstances.get(virtualAt)));
+                } else {
+                    Slog.e(TAG, "Could not find virtual interface while it is enabled");
+                    return new Pair(hidlInstances, aidlInstances);
+                }
+            } else {
+                //remove virtual instance
+                aidlInstances = new ArrayList<>(aidlInstances);
+                if (virtualAt != -1) {
+                    aidlInstances.remove(virtualAt);
+                }
+                return new Pair(hidlInstances, aidlInstances);
+            }
         }
 
         @Override
@@ -698,23 +808,84 @@ public class FaceService extends SystemService {
         public void registerBiometricStateListener(@NonNull IBiometricStateListener listener) {
             mBiometricStateCallback.registerBiometricStateListener(listener);
         }
+
+        @android.annotation.EnforcePermission(android.Manifest.permission.USE_BIOMETRIC_INTERNAL)
+        @Override
+        public void registerAuthenticationStateListener(
+                @NonNull AuthenticationStateListener listener) {
+            super.registerAuthenticationStateListener_enforcePermission();
+
+            mAuthenticationStateListeners.registerAuthenticationStateListener(listener);
+        }
+
+        @android.annotation.EnforcePermission(android.Manifest.permission.USE_BIOMETRIC_INTERNAL)
+        @Override
+        public void unregisterAuthenticationStateListener(
+                @NonNull AuthenticationStateListener listener) {
+            super.unregisterAuthenticationStateListener_enforcePermission();
+
+            mAuthenticationStateListeners.unregisterAuthenticationStateListener(listener);
+        }
     }
 
     public FaceService(Context context) {
+        this(context, null /* faceProviderFunction */, () -> IBiometricService.Stub.asInterface(
+                ServiceManager.getService(Context.BIOMETRIC_SERVICE)), null /* faceProvider */,
+                () -> ServiceManager.getDeclaredInstances(IFace.DESCRIPTOR));
+    }
+
+    @VisibleForTesting FaceService(Context context,
+            FaceProviderFunction faceProviderFunction,
+            Supplier<IBiometricService> biometricServiceSupplier,
+            Function<String, FaceProvider> faceProvider,
+            Supplier<String[]> aidlInstanceNameSupplier) {
         super(context);
         mServiceWrapper = new FaceServiceWrapper();
         mLockoutResetDispatcher = new LockoutResetDispatcher(context);
         mLockPatternUtils = new LockPatternUtils(context);
         mBiometricStateCallback = new BiometricStateCallback<>(UserManager.get(context));
-        mRegistry = new FaceServiceRegistry(mServiceWrapper,
-                () -> IBiometricService.Stub.asInterface(
-                        ServiceManager.getService(Context.BIOMETRIC_SERVICE)));
+        mAuthenticationStateListeners = new AuthenticationStateListeners();
+        mRegistry = new FaceServiceRegistry(mServiceWrapper, biometricServiceSupplier);
         mRegistry.addAllRegisteredCallback(new IFaceAuthenticatorsRegisteredCallback.Stub() {
             @Override
             public void onAllAuthenticatorsRegistered(List<FaceSensorPropertiesInternal> sensors) {
                 mBiometricStateCallback.start(mRegistry.getProviders());
             }
         });
+        mAidlInstanceNameSupplier = aidlInstanceNameSupplier;
+
+        mFaceProvider = faceProvider != null ? faceProvider : (name) -> {
+            final String fqName = IFace.DESCRIPTOR + "/" + name;
+            final IFace face = IFace.Stub.asInterface(
+                    Binder.allowBlocking(ServiceManager.waitForDeclaredService(fqName)));
+            if (face == null) {
+                Slog.e(TAG, "Unable to get declared service: " + fqName);
+                return null;
+            }
+            try {
+                final SensorProps[] props = face.getSensorProps();
+                return new FaceProvider(getContext(),
+                        mBiometricStateCallback, mAuthenticationStateListeners, props, name,
+                        mLockoutResetDispatcher, BiometricContext.getInstance(getContext()),
+                        false /* resetLockoutRequiresChallenge */);
+            } catch (RemoteException e) {
+                Slog.e(TAG, "Remote exception in getSensorProps: " + fqName);
+            }
+
+            return null;
+        };
+
+        if (Flags.deHidl()) {
+            mFaceProviderFunction = faceProviderFunction != null ? faceProviderFunction :
+                    ((filteredSensorProps, resetLockoutRequiresChallenge) -> new FaceProvider(
+                            getContext(), mBiometricStateCallback, mAuthenticationStateListeners,
+                            filteredSensorProps.second,
+                            filteredSensorProps.first, mLockoutResetDispatcher,
+                            BiometricContext.getInstance(getContext()),
+                            resetLockoutRequiresChallenge));
+        } else {
+            mFaceProviderFunction = ((filteredSensorProps, resetLockoutRequiresChallenge) -> null);
+        }
     }
 
     @Override
@@ -749,7 +920,7 @@ public class FaceService extends SystemService {
 
     void syncEnrollmentsNow() {
         Utils.checkPermissionOrShell(getContext(), MANAGE_FACE);
-        if (Utils.isVirtualEnabled(getContext())) {
+        if (Flags.faceVhalFeature() && Utils.isVirtualEnabled(getContext())) {
             Slog.i(TAG, "Sync virtual enrollments");
             final int userId = ActivityManager.getCurrentUser();
             for (ServiceProvider provider : mRegistry.getProviders()) {
@@ -757,6 +928,27 @@ public class FaceService extends SystemService {
                     provider.scheduleInternalCleanup(props.sensorId, userId, null /* callback */,
                             true /* favorHalEnrollments */);
                 }
+            }
+        }
+    }
+
+    /**
+     * This should only be called from FaceShellCommand class.
+     */
+    void sendFaceReEnrollNotification() {
+        Utils.checkPermissionOrShell(getContext(), MANAGE_FACE);
+        if (Build.IS_DEBUGGABLE) {
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                final Pair<Integer, ServiceProvider> provider = mRegistry.getSingleProvider();
+                if (provider != null) {
+                    FaceProvider faceProvider = (FaceProvider) provider.second;
+                    faceProvider.sendFaceReEnrollNotification();
+                } else {
+                    Slog.w(TAG, "Null provider for notification");
+                }
+            } finally {
+                Binder.restoreCallingIdentity(identity);
             }
         }
     }

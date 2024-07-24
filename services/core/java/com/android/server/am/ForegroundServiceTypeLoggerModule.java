@@ -35,6 +35,7 @@ import android.app.ActivityManager.ForegroundServiceApiType;
 import android.app.ForegroundServiceDelegationOptions;
 import android.content.ComponentName;
 import android.content.pm.ServiceInfo;
+import android.os.Trace;
 import android.util.ArrayMap;
 import android.util.IntArray;
 import android.util.LongArray;
@@ -134,6 +135,11 @@ public class ForegroundServiceTypeLoggerModule {
      * call of the right type will also be associated and logged
      */
     public void logForegroundServiceStart(int uid, int pid, ServiceRecord record) {
+        if (record.getComponentName() != null) {
+            final String traceTag = record.getComponentName().flattenToString() + ":" + uid;
+            Trace.asyncTraceForTrackBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, traceTag,
+                    "foregroundService", record.foregroundServiceType);
+        }
         // initialize the UID stack
         UidState uidState = mUids.get(uid);
         if (uidState == null) {
@@ -205,6 +211,11 @@ public class ForegroundServiceTypeLoggerModule {
         // we need to log all the API end events and remove the start events
         // then we remove the FGS from the various stacks
         // and also clean up the start calls stack by UID
+        if (record.getComponentName() != null) {
+            final String traceTag = record.getComponentName().flattenToString() + ":" + uid;
+            Trace.asyncTraceForTrackEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER,
+                    traceTag, record.hashCode());
+        }
         final IntArray apiTypes = convertFgsTypeToApiTypes(record.foregroundServiceType);
         final UidState uidState = mUids.get(uid);
         if (apiTypes.size() == 0) {
@@ -496,7 +507,8 @@ public class ForegroundServiceTypeLoggerModule {
                 r.appInfo.uid,
                 r.shortInstanceName,
                 fgsState, // FGS State
-                r.isFgsAllowedWIU(), // allowWhileInUsePermissionInFgs
+                // TODO: Also log "forStart"
+                r.isFgsAllowedWiu_forCapabilities(), // allowWhileInUsePermissionInFgs
                 r.getFgsAllowStart(), // fgsStartReasonCode
                 r.appInfo.targetSdkVersion,
                 r.mRecentCallingUid,
@@ -507,7 +519,7 @@ public class ForegroundServiceTypeLoggerModule {
                 r.mFgsNotificationShown,
                 0, // durationMs
                 r.mStartForegroundCount,
-                ActivityManagerUtils.hashComponentNameForAtom(r.shortInstanceName),
+                0, // Short instance name -- no longer logging it.
                 r.mFgsHasNotificationPermission,
                 r.foregroundServiceType,
                 0,
@@ -524,12 +536,12 @@ public class ForegroundServiceTypeLoggerModule {
                 ActivityManager.PROCESS_CAPABILITY_NONE,
                 apiDurationBeforeFgsStart,
                 apiDurationAfterFgsEnd,
-                r.mAllowWhileInUsePermissionInFgsReasonNoBinding,
-                r.mAllowWIUInBindService,
-                r.mAllowWIUByBindings,
-                r.mAllowStartForegroundNoBinding,
-                r.mAllowStartInBindService,
-                r.mAllowStartByBindings,
+                r.mAllowWiu_noBinding,
+                r.mAllowWiu_inBindService,
+                r.mAllowWiu_byBindings,
+                r.mAllowStart_noBinding,
+                r.mAllowStart_inBindService,
+                r.mAllowStart_byBindings,
                 FOREGROUND_SERVICE_STATE_CHANGED__FGS_START_API__FGSSTARTAPI_NA,
                 false
         );

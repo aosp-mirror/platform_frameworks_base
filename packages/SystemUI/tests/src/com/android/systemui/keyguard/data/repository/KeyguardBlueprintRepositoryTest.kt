@@ -15,17 +15,25 @@
  *
  */
 
+@file:OptIn(ExperimentalCoroutinesApi::class)
+
 package com.android.systemui.keyguard.data.repository
 
+import android.os.fakeExecutorHandler
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.common.ui.data.repository.ConfigurationRepository
+import com.android.systemui.concurrency.fakeExecutor
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.keyguard.ui.view.layout.blueprints.DefaultKeyguardBlueprint
 import com.android.systemui.keyguard.ui.view.layout.blueprints.DefaultKeyguardBlueprint.Companion.DEFAULT
+import com.android.systemui.kosmos.Kosmos
+import com.android.systemui.kosmos.testScope
+import com.android.systemui.testKosmos
+import com.android.systemui.util.ThreadAssert
 import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
-import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runCurrent
@@ -43,41 +51,30 @@ class KeyguardBlueprintRepositoryTest : SysuiTestCase() {
     private lateinit var underTest: KeyguardBlueprintRepository
     @Mock lateinit var configurationRepository: ConfigurationRepository
     @Mock lateinit var defaultLockscreenBlueprint: DefaultKeyguardBlueprint
-    private val testDispatcher = StandardTestDispatcher()
-    private val testScope = TestScope(testDispatcher)
-    private val configurationFlow = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
+    @Mock lateinit var threadAssert: ThreadAssert
+    private val testScope = TestScope(StandardTestDispatcher())
+    private val kosmos: Kosmos = testKosmos()
 
     @Before
     fun setup() {
         MockitoAnnotations.initMocks(this)
-        whenever(defaultLockscreenBlueprint.id).thenReturn(DEFAULT)
-        whenever(configurationRepository.onAnyConfigurationChange).thenReturn(configurationFlow)
-        underTest =
-            KeyguardBlueprintRepository(
-                configurationRepository,
-                setOf(defaultLockscreenBlueprint),
-                testScope.backgroundScope,
-            )
+        with(kosmos) {
+            whenever(defaultLockscreenBlueprint.id).thenReturn(DEFAULT)
+            underTest =
+                KeyguardBlueprintRepository(
+                    configurationRepository,
+                    setOf(defaultLockscreenBlueprint),
+                    fakeExecutorHandler,
+                    threadAssert,
+                )
+        }
     }
 
     @Test
     fun testApplyBlueprint_DefaultLayout() {
         testScope.runTest {
             val blueprint by collectLastValue(underTest.blueprint)
-            runCurrent()
             underTest.applyBlueprint(defaultLockscreenBlueprint)
-            runCurrent()
-            assertThat(blueprint).isEqualTo(defaultLockscreenBlueprint)
-        }
-    }
-
-    @Test
-    fun testConfigurationChange() {
-        testScope.runTest {
-            val blueprint by collectLastValue(underTest.blueprint)
-            runCurrent()
-            configurationFlow.tryEmit(Unit)
-            runCurrent()
             assertThat(blueprint).isEqualTo(defaultLockscreenBlueprint)
         }
     }
@@ -86,9 +83,7 @@ class KeyguardBlueprintRepositoryTest : SysuiTestCase() {
     fun testRefreshBlueprint() {
         testScope.runTest {
             val blueprint by collectLastValue(underTest.blueprint)
-            runCurrent()
             underTest.refreshBlueprint()
-            runCurrent()
             assertThat(blueprint).isEqualTo(defaultLockscreenBlueprint)
         }
     }
@@ -97,8 +92,25 @@ class KeyguardBlueprintRepositoryTest : SysuiTestCase() {
     fun testTransitionToLayout_validId() {
         assertThat(underTest.applyBlueprint(DEFAULT)).isTrue()
     }
+
     @Test
     fun testTransitionToLayout_invalidId() {
         assertThat(underTest.applyBlueprint("abc")).isFalse()
     }
+
+    @Test
+    fun testTransitionToSameBlueprint_refreshesBlueprint() =
+        with(kosmos) {
+            testScope.runTest {
+                val transition by collectLastValue(underTest.refreshTransition)
+                fakeExecutor.runAllReady()
+                runCurrent()
+
+                underTest.applyBlueprint(defaultLockscreenBlueprint)
+                fakeExecutor.runAllReady()
+                runCurrent()
+
+                assertThat(transition).isNotNull()
+            }
+        }
 }

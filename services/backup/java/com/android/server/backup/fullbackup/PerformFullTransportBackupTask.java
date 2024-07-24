@@ -40,8 +40,8 @@ import android.util.Slog;
 
 import com.android.server.EventLogTags;
 import com.android.server.backup.BackupAgentTimeoutParameters;
-import com.android.server.backup.BackupAndRestoreFeatureFlags;
 import com.android.server.backup.BackupRestoreTask;
+import com.android.server.backup.Flags;
 import com.android.server.backup.FullBackupJob;
 import com.android.server.backup.OperationStorage;
 import com.android.server.backup.OperationStorage.OpState;
@@ -390,8 +390,11 @@ public class PerformFullTransportBackupTask extends FullBackupTask implements Ba
 
             // Set up to send data to the transport
             final int N = mPackages.size();
-            final int chunkSizeInBytes =
-                    BackupAndRestoreFeatureFlags.getFullBackupWriteToTransportBufferSizeBytes();
+            int chunkSizeInBytes = 8 * 1024; // 8KB
+            if (Flags.enableMaxSizeWritesToPipes()) {
+                // Linux pipe capacity (buffer size) is 16 pages where each page is 4KB
+                chunkSizeInBytes = 64 * 1024; // 64KB
+            }
             final byte[] buffer = new byte[chunkSizeInBytes];
             for (int i = 0; i < N; i++) {
                 mBackupRunner = null;

@@ -20,7 +20,6 @@ import android.testing.TestableLooper.RunWithLooper
 import android.view.RemoteAnimationTarget
 import androidx.test.filters.SmallTest
 import com.android.keyguard.KeyguardViewController
-import com.android.systemui.RoboPilotTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.animation.AnimatorTestRule
 import com.android.systemui.keyguard.domain.interactor.KeyguardSurfaceBehindInteractor
@@ -41,11 +40,10 @@ import org.mockito.Mockito.doAnswer
 import org.mockito.MockitoAnnotations
 
 @SmallTest
-@RoboPilotTest
 @RunWithLooper(setAsMainLooper = true)
 @kotlinx.coroutines.ExperimentalCoroutinesApi
 class KeyguardSurfaceBehindParamsApplierTest : SysuiTestCase() {
-    @get:Rule val animatorTestRule = AnimatorTestRule()
+    @get:Rule val animatorTestRule = AnimatorTestRule(this)
 
     private lateinit var underTest: KeyguardSurfaceBehindParamsApplier
     private lateinit var executor: FakeExecutor

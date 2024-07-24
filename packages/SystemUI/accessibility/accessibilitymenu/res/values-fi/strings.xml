@@ -21,7 +21,7 @@
     <string name="previous_button_content_description" msgid="840869171117765966">"Siirry edelliselle näytöllä"</string>
     <string name="next_button_content_description" msgid="6810058269847364406">"Siirry seuraavalle näytölle"</string>
     <string name="accessibility_menu_description" msgid="4458354794093858297">"Saavutettavuusvalikko on suuri näyttövalikko, josta voit ohjata laitettasi. Voit esimerkiksi lukita laitteen, säätää äänenvoimakkuutta ja kirkkautta sekä ottaa kuvakaappauksia."</string>
-    <string name="accessibility_menu_summary" msgid="340071398148208130">"Ohjaa laitetta suurella valikolla"</string>
+    <string name="accessibility_menu_summary" msgid="340071398148208130">"Ohjaa laitetta suuren valikon avulla"</string>
     <string name="accessibility_menu_settings_name" msgid="1716888058785672611">"Saavutettavuusvalikon asetukset"</string>
     <string name="accessibility_menu_large_buttons_title" msgid="8978499601044961736">"Suuret painikkeet"</string>
     <string name="accessibility_menu_large_buttons_summary" msgid="236873938502785311">"Suurenna saavutettavuusvalikon painikkeita"</string>

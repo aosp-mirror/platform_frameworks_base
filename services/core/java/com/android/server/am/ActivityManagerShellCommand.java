@@ -30,6 +30,7 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import static android.app.usage.UsageStatsManager.REASON_MAIN_FORCED_BY_USER;
 import static android.app.usage.UsageStatsManager.REASON_SUB_FORCED_SYSTEM_FLAG_UNDEFINED;
 import static android.content.pm.PackageManager.MATCH_ANY_USER;
+import static android.os.PowerWhitelistManager.TEMPORARY_ALLOWLIST_TYPE_FOREGROUND_SERVICE_ALLOWED;
 import static android.os.Process.INVALID_UID;
 import static android.view.Display.INVALID_DISPLAY;
 import static android.window.DisplayAreaOrganizer.FEATURE_UNDEFINED;
@@ -96,6 +97,7 @@ import android.opengl.GLES10;
 import android.os.Binder;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Debug;
 import android.os.IProgressListener;
 import android.os.ParcelFileDescriptor;
 import android.os.RemoteCallback;
@@ -124,6 +126,9 @@ import com.android.server.LocalServices;
 import com.android.server.am.LowMemDetector.MemFactor;
 import com.android.server.am.nano.Capabilities;
 import com.android.server.am.nano.Capability;
+import com.android.server.am.nano.FrameworkCapability;
+import com.android.server.am.nano.VMCapability;
+import com.android.server.am.nano.VMInfo;
 import com.android.server.compat.PlatformCompat;
 import com.android.server.pm.UserManagerInternal;
 import com.android.server.utils.Slogf;
@@ -170,6 +175,8 @@ final class ActivityManagerShellCommand extends ShellCommand {
     private static final DateTimeFormatter LOG_NAME_TIME_FORMATTER =
             DateTimeFormatter.ofPattern("yyyyMMdd-HHmmss", Locale.ROOT);
 
+    private static final String PROFILER_OUTPUT_VERSION_FLAG = "--profiler-output-version";
+
     // IPC interface to activity manager -- don't need to do additional security checks.
     final IActivityManager mInterface;
     final IActivityTaskManager mTaskInterface;
@@ -195,6 +202,7 @@ final class ActivityManagerShellCommand extends ShellCommand {
     private String mAgent;  // Agent to attach on startup.
     private boolean mAttachAgentDuringBind;  // Whether agent should be attached late.
     private int mClockType; // Whether we need thread cpu / wall clock / both.
+    private int mProfilerOutputVersion; // The version of the profiler output.
     private int mDisplayId;
     private int mTaskDisplayAreaFeatureId;
     private int mWindowingMode;
@@ -205,7 +213,7 @@ final class ActivityManagerShellCommand extends ShellCommand {
     private boolean mAsync;
     private BroadcastOptions mBroadcastOptions;
     private boolean mShowSplashScreen;
-    private boolean mDismissKeyguard;
+    private boolean mDismissKeyguardIfInsecure;
 
     final boolean mDumping;
 
@@ -228,6 +236,9 @@ final class ActivityManagerShellCommand extends ShellCommand {
         final PrintWriter pw = getOutPrintWriter();
         try {
             switch (cmd) {
+                case "help":
+                    onHelp();
+                    return 0;
                 case "start":
                 case "start-activity":
                     return runStartActivity(pw);
@@ -269,6 +280,8 @@ final class ActivityManagerShellCommand extends ShellCommand {
                     return runSetWatchHeap(pw);
                 case "clear-watch-heap":
                     return runClearWatchHeap(pw);
+                case "clear-start-info":
+                    return runClearStartInfo(pw);
                 case "clear-exit-info":
                     return runClearExitInfo(pw);
                 case "bug-report":
@@ -427,6 +440,8 @@ final class ActivityManagerShellCommand extends ShellCommand {
                 return -1;
             }
         }
+        String vmName = System.getProperty("java.vm.name", "?");
+        String vmVersion = System.getProperty("java.vm.version", "?");
 
         if (outputAsProtobuf) {
             Capabilities capabilities = new Capabilities();
@@ -437,6 +452,27 @@ final class ActivityManagerShellCommand extends ShellCommand {
                 capabilities.values[i] = cap;
             }
 
+            String[] vmCapabilities = Debug.getVmFeatureList();
+            capabilities.vmCapabilities = new VMCapability[vmCapabilities.length];
+            for (int i = 0; i < vmCapabilities.length; i++) {
+                VMCapability cap = new VMCapability();
+                cap.name = vmCapabilities[i];
+                capabilities.vmCapabilities[i] = cap;
+            }
+
+            String[] fmCapabilities = Debug.getFeatureList();
+            capabilities.frameworkCapabilities = new FrameworkCapability[fmCapabilities.length];
+            for (int i = 0; i < fmCapabilities.length; i++) {
+                FrameworkCapability cap = new FrameworkCapability();
+                cap.name = fmCapabilities[i];
+                capabilities.frameworkCapabilities[i] = cap;
+            }
+
+            VMInfo vmInfo = new VMInfo();
+            vmInfo.name = vmName;
+            vmInfo.version = vmVersion;
+            capabilities.vmInfo = vmInfo;
+
             try {
                 getRawOutputStream().write(Capabilities.toByteArray(capabilities));
             } catch (IOException e) {
@@ -446,10 +482,18 @@ final class ActivityManagerShellCommand extends ShellCommand {
         } else {
             // Unfortunately we don't have protobuf text format capabilities here.
             // Fallback to line separated list instead for text parser.
-            pw.println("Format: 1");
+            pw.println("Format: 2");
             for (String capability : CAPABILITIES) {
                 pw.println(capability);
             }
+            for (String capability : Debug.getVmFeatureList()) {
+                pw.println("vm:" + capability);
+            }
+            for (String capability : Debug.getFeatureList()) {
+                pw.println("framework:" + capability);
+            }
+            pw.println("vm_name:" + vmName);
+            pw.println("vm_version:" + vmVersion);
         }
         return 0;
     }
@@ -496,6 +540,8 @@ final class ActivityManagerShellCommand extends ShellCommand {
                 } else if (opt.equals("--clock-type")) {
                     String clock_type = getNextArgRequired();
                     mClockType = ProfilerInfo.getClockTypeFromString(clock_type);
+                } else if (opt.equals(PROFILER_OUTPUT_VERSION_FLAG)) {
+                    mProfilerOutputVersion = Integer.parseInt(getNextArgRequired());
                 } else if (opt.equals("--streaming")) {
                     mStreaming = true;
                 } else if (opt.equals("--attach-agent")) {
@@ -547,8 +593,16 @@ final class ActivityManagerShellCommand extends ShellCommand {
                     mAsync = true;
                 } else if (opt.equals("--splashscreen-show-icon")) {
                     mShowSplashScreen = true;
-                } else if (opt.equals("--dismiss-keyguard")) {
-                    mDismissKeyguard = true;
+                } else if (opt.equals("--dismiss-keyguard-if-insecure")
+                        || opt.equals("--dismiss-keyguard")) {
+                    mDismissKeyguardIfInsecure = true;
+                } else if (opt.equals("--allow-fgs-start-reason")) {
+                    final int reasonCode = Integer.parseInt(getNextArgRequired());
+                    mBroadcastOptions = BroadcastOptions.makeBasic();
+                    mBroadcastOptions.setTemporaryAppAllowlist(10_000,
+                            TEMPORARY_ALLOWLIST_TYPE_FOREGROUND_SERVICE_ALLOWED,
+                            reasonCode,
+                            "");
                 } else {
                     return false;
                 }
@@ -653,8 +707,9 @@ final class ActivityManagerShellCommand extends ShellCommand {
                         return 1;
                     }
                 }
-                profilerInfo = new ProfilerInfo(mProfileFile, fd, mSamplingInterval, mAutoStop,
-                        mStreaming, mAgent, mAttachAgentDuringBind, mClockType);
+                profilerInfo =
+                        new ProfilerInfo(mProfileFile, fd, mSamplingInterval, mAutoStop, mStreaming,
+                                mAgent, mAttachAgentDuringBind, mClockType, mProfilerOutputVersion);
             }
 
             pw.println("Starting: " + intent);
@@ -709,11 +764,11 @@ final class ActivityManagerShellCommand extends ShellCommand {
                 }
                 options.setSplashScreenStyle(SplashScreen.SPLASH_SCREEN_STYLE_ICON);
             }
-            if (mDismissKeyguard) {
+            if (mDismissKeyguardIfInsecure) {
                 if (options == null) {
                     options = ActivityOptions.makeBasic();
                 }
-                options.setDismissKeyguard();
+                options.setDismissKeyguardIfInsecure();
             }
             if (mWaitOption) {
                 result = mInternal.startActivityAndWait(null, SHELL_PACKAGE_NAME, null, intent,
@@ -997,6 +1052,7 @@ final class ActivityManagerShellCommand extends ShellCommand {
         mSamplingInterval = 0;
         mStreaming = false;
         mClockType = ProfilerInfo.CLOCK_TYPE_DEFAULT;
+        mProfilerOutputVersion = ProfilerInfo.OUTPUT_VERSION_DEFAULT;
 
         String process = null;
 
@@ -1011,6 +1067,8 @@ final class ActivityManagerShellCommand extends ShellCommand {
                 } else if (opt.equals("--clock-type")) {
                     String clock_type = getNextArgRequired();
                     mClockType = ProfilerInfo.getClockTypeFromString(clock_type);
+                } else if (opt.equals(PROFILER_OUTPUT_VERSION_FLAG)) {
+                    mProfilerOutputVersion = Integer.parseInt(getNextArgRequired());
                 } else if (opt.equals("--streaming")) {
                     mStreaming = true;
                 } else if (opt.equals("--sampling")) {
@@ -1058,7 +1116,7 @@ final class ActivityManagerShellCommand extends ShellCommand {
                 return -1;
             }
             profilerInfo = new ProfilerInfo(profileFile, fd, mSamplingInterval, false, mStreaming,
-                    null, false, mClockType);
+                    null, false, mClockType, mProfilerOutputVersion);
         }
 
         if (!mInterface.profileControl(process, userId, start, profilerInfo, profileType)) {
@@ -1225,6 +1283,7 @@ final class ActivityManagerShellCommand extends ShellCommand {
         final PrintWriter err = getErrPrintWriter();
         boolean managed = true;
         boolean mallocInfo = false;
+        String dumpBitmaps = null;
         int userId = UserHandle.USER_CURRENT;
         boolean runGc = false;
 
@@ -1243,6 +1302,11 @@ final class ActivityManagerShellCommand extends ShellCommand {
             } else if (opt.equals("-m")) {
                 managed = false;
                 mallocInfo = true;
+            } else if (opt.equals("-b")) {
+                dumpBitmaps = getNextArg();
+                if (dumpBitmaps == null) {
+                    dumpBitmaps = "png"; // default to PNG in dumping bitmaps
+                }
             } else {
                 err.println("Error: Unknown option: " + opt);
                 return -1;
@@ -1274,8 +1338,8 @@ final class ActivityManagerShellCommand extends ShellCommand {
             }
         }, null);
 
-        if (!mInterface.dumpHeap(process, userId, managed, mallocInfo, runGc, heapFile, fd,
-                finishCallback)) {
+        if (!mInterface.dumpHeap(process, userId, managed, mallocInfo, runGc, dumpBitmaps,
+                heapFile, fd, finishCallback)) {
             err.println("HEAP DUMP FAILED on process " + process);
             return -1;
         }
@@ -1333,6 +1397,31 @@ final class ActivityManagerShellCommand extends ShellCommand {
     int runClearWatchHeap(PrintWriter pw) throws RemoteException {
         String proc = getNextArgRequired();
         mInterface.setDumpHeapDebugLimit(proc, 0, -1, null);
+        return 0;
+    }
+
+    int runClearStartInfo(PrintWriter pw) throws RemoteException {
+        mInternal.enforceCallingPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS,
+                "runClearStartInfo()");
+        String opt;
+        int userId = UserHandle.USER_CURRENT;
+        String packageName = null;
+        while ((opt = getNextOption()) != null) {
+            if (opt.equals("--user")) {
+                userId = UserHandle.parseUserArg(getNextArgRequired());
+            } else {
+                packageName = opt;
+            }
+        }
+        if (userId == UserHandle.USER_CURRENT) {
+            UserInfo user = mInterface.getCurrentUser();
+            if (user == null) {
+                return -1;
+            }
+            userId = user.id;
+        }
+        mInternal.mProcessList.getAppStartInfoTracker()
+                .clearHistoryProcessStartInfo(packageName, userId);
         return 0;
     }
 
@@ -2207,6 +2296,7 @@ final class ActivityManagerShellCommand extends ShellCommand {
 
         pw.println("Performing idle maintenance...");
         mInterface.sendIdleJobTrigger();
+        mInternal.performIdleMaintenance();
         return 0;
     }
 
@@ -2511,30 +2601,36 @@ final class ActivityManagerShellCommand extends ShellCommand {
         StopUserCallback callback = wait ? new StopUserCallback(userId) : null;
 
         Slogf.d(TAG, "Calling stopUser(%d, %b, %s)", userId, force, callback);
-        int res = mInterface.stopUser(userId, force, callback);
-        if (res != ActivityManager.USER_OP_SUCCESS) {
-            String txt = "";
-            switch (res) {
-                case ActivityManager.USER_OP_IS_CURRENT:
-                    txt = " (Can't stop current user)";
-                    break;
-                case ActivityManager.USER_OP_UNKNOWN_USER:
-                    txt = " (Unknown user " + userId + ")";
-                    break;
-                case ActivityManager.USER_OP_ERROR_IS_SYSTEM:
-                    txt = " (System user cannot be stopped)";
-                    break;
-                case ActivityManager.USER_OP_ERROR_RELATED_USERS_CANNOT_STOP:
-                    txt = " (Can't stop user " + userId
-                            + " - one of its related users can't be stopped)";
-                    break;
+        Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER,
+                "shell_runStopUser-" + userId + "-[stopUser]");
+        try {
+            int res = mInterface.stopUser(userId, force, callback);
+            if (res != ActivityManager.USER_OP_SUCCESS) {
+                String txt = "";
+                switch (res) {
+                    case ActivityManager.USER_OP_IS_CURRENT:
+                        txt = " (Can't stop current user)";
+                        break;
+                    case ActivityManager.USER_OP_UNKNOWN_USER:
+                        txt = " (Unknown user " + userId + ")";
+                        break;
+                    case ActivityManager.USER_OP_ERROR_IS_SYSTEM:
+                        txt = " (System user cannot be stopped)";
+                        break;
+                    case ActivityManager.USER_OP_ERROR_RELATED_USERS_CANNOT_STOP:
+                        txt = " (Can't stop user " + userId
+                                + " - one of its related users can't be stopped)";
+                        break;
+                }
+                getErrPrintWriter().println("Switch failed: " + res + txt);
+                return -1;
+            } else if (callback != null) {
+                callback.waitForFinish();
             }
-            getErrPrintWriter().println("Switch failed: " + res + txt);
-            return -1;
-        } else if (callback != null) {
-            callback.waitForFinish();
+            return 0;
+        } finally {
+            Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
         }
-        return 0;
     }
 
     int runIsUserStopped(PrintWriter pw) {
@@ -3708,6 +3804,11 @@ final class ActivityManagerShellCommand extends ShellCommand {
         }
 
         @Override
+        public void onProcessStarted(int pid, int processUid, int packageUid, String packageName,
+                String processName) {
+        }
+
+        @Override
         public void onForegroundServicesChanged(int pid, int uid, int serviceTypes) {
         }
 
@@ -4075,11 +4176,13 @@ final class ActivityManagerShellCommand extends ShellCommand {
             pw.println("    s[ervices] [COMP_SPEC ...]: service state");
             pw.println("    allowed-associations: current package association restrictions");
             pw.println("    as[sociations]: tracked app associations");
+            pw.println("    start-info [PACKAGE_NAME]: historical process start information");
             pw.println("    exit-info [PACKAGE_NAME]: historical process exit information");
             pw.println("    lmk: stats on low memory killer");
             pw.println("    lru: raw LRU process list");
             pw.println("    binder-proxies: stats on binder objects and IPCs");
             pw.println("    settings: currently applied config settings");
+            pw.println("    timers: the current ANR timer state");
             pw.println("    service [COMP_SPEC]: service client-side state");
             pw.println("    package [PACKAGE_NAME]: all state related to given package");
             pw.println("    all: dump all activities");
@@ -4107,6 +4210,7 @@ final class ActivityManagerShellCommand extends ShellCommand {
             pw.println("      Print this help text.");
             pw.println("  start-activity [-D] [-N] [-W] [-P <FILE>] [--start-profiler <FILE>]");
             pw.println("          [--sampling INTERVAL] [--clock-type <TYPE>] [--streaming]");
+            pw.println("          [" + PROFILER_OUTPUT_VERSION_FLAG + " NUMBER]");
             pw.println("          [-R COUNT] [-S] [--track-allocation]");
             pw.println("          [--user <USER_ID> | current] [--suspend] <INTENT>");
             pw.println("      Start an Activity.  Options are:");
@@ -4122,6 +4226,8 @@ final class ActivityManagerShellCommand extends ShellCommand {
             pw.println("          The default value is dual. (use with --start-profiler)");
             pw.println("      --streaming: stream the profiling output to the specified file");
             pw.println("          (use with --start-profiler)");
+            pw.println("      " + PROFILER_OUTPUT_VERSION_FLAG + " Specify the version of the");
+            pw.println("          profiling output (use with --start-profiler)");
             pw.println("      -P <FILE>: like above, but profiling stops when app goes idle");
             pw.println("      --attach-agent <agent>: attach the given agent before binding");
             pw.println("      --attach-agent-bind <agent>: attach the given agent during binding");
@@ -4213,6 +4319,7 @@ final class ActivityManagerShellCommand extends ShellCommand {
             pw.println("      --dump-file <FILE>: Specify the file the trace should be dumped to.");
             pw.println("  profile start [--user <USER_ID> current]");
             pw.println("          [--clock-type <TYPE>]");
+            pw.println("          [" + PROFILER_OUTPUT_VERSION_FLAG + " VERSION]");
             pw.println("          [--sampling INTERVAL | --streaming] <PROCESS> <FILE>");
             pw.println("      Start profiler on a process.  The given <PROCESS> argument");
             pw.println("        may be either a process name or pid.  Options are:");
@@ -4222,6 +4329,8 @@ final class ActivityManagerShellCommand extends ShellCommand {
             pw.println("      --clock-type <TYPE>: use the specified clock to report timestamps.");
             pw.println("          The type can be one of wall | thread-cpu | dual. The default");
             pw.println("          value is dual.");
+            pw.println("      " + PROFILER_OUTPUT_VERSION_FLAG + "VERSION: specifies the output");
+            pw.println("          format version");
             pw.println("      --sampling INTERVAL: use sample profiling with INTERVAL microseconds");
             pw.println("          between samples.");
             pw.println("      --streaming: stream the profiling output to the specified file.");
@@ -4231,11 +4340,14 @@ final class ActivityManagerShellCommand extends ShellCommand {
             pw.println("      --user <USER_ID> | current: When supplying a process name,");
             pw.println("          specify user of process to profile; uses current user if not");
             pw.println("          specified.");
-            pw.println("  dumpheap [--user <USER_ID> current] [-n] [-g] <PROCESS> <FILE>");
+            pw.println("  dumpheap [--user <USER_ID> current] [-n] [-g] [-b <format>] ");
+            pw.println("           <PROCESS> <FILE>");
             pw.println("      Dump the heap of a process.  The given <PROCESS> argument may");
             pw.println("        be either a process name or pid.  Options are:");
             pw.println("      -n: dump native heap instead of managed heap");
             pw.println("      -g: force GC before dumping the heap");
+            pw.println("      -b <format>: dump contents of bitmaps in the format specified,");
+            pw.println("         which can be \"png\", \"jpg\" or \"webp\".");
             pw.println("      --user <USER_ID> | current: When supplying a process name,");
             pw.println("          specify user of process to dump; uses current user if not specified.");
             pw.println("  set-debug-app [-w] [--persistent] <PACKAGE>");
@@ -4249,6 +4361,8 @@ final class ActivityManagerShellCommand extends ShellCommand {
             pw.println("      above <HEAP-LIMIT> then a heap dump is collected for the user to report.");
             pw.println("  clear-watch-heap");
             pw.println("      Clear the previously set-watch-heap.");
+            pw.println("  clear-start-info [--user <USER_ID> | all | current] [package]");
+            pw.println("      Clear the process start-info for given package");
             pw.println("  clear-exit-info [--user <USER_ID> | all | current] [package]");
             pw.println("      Clear the process exit-info for given package");
             pw.println("  bug-report [--progress | --telephony]");

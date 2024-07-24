@@ -3158,13 +3158,6 @@ public class VpnTest extends VpnTestBase {
         assertEquals(profile, ikev2VpnProfile.toVpnProfile());
     }
 
-    private void assertTransportInfoMatches(NetworkCapabilities nc, int type) {
-        assertNotNull(nc);
-        VpnTransportInfo ti = (VpnTransportInfo) nc.getTransportInfo();
-        assertNotNull(ti);
-        assertEquals(type, ti.getType());
-    }
-
     // Make it public and un-final so as to spy it
     public class TestDeps extends Vpn.Dependencies {
         TestDeps() {}

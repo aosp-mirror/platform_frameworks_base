@@ -22,13 +22,12 @@ import android.os.PowerManager
 import android.testing.AndroidTestingRunner
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.classifier.FalsingCollectorFake
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.keyguard.data.repository.FakeDeviceEntryFaceAuthRepository
 import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.power.data.repository.FakePowerRepository
-import com.android.systemui.power.domain.interactor.PowerInteractor
+import com.android.systemui.power.domain.interactor.PowerInteractorFactory
 import com.android.systemui.statusbar.LockscreenShadeTransitionController
 import com.android.systemui.statusbar.phone.ScreenOffAnimationController
 import com.android.systemui.util.mockito.eq
@@ -56,13 +55,12 @@ class NotificationShelfInteractorTest : SysuiTestCase() {
     private val statusBarStateController: StatusBarStateController = mock()
     private val powerRepository = FakePowerRepository()
     private val powerInteractor =
-        PowerInteractor(
-            powerRepository,
-            keyguardRepository,
-            FalsingCollectorFake(),
-            screenOffAnimationController,
-            statusBarStateController,
-        )
+        PowerInteractorFactory.create(
+                repository = powerRepository,
+                screenOffAnimationController = screenOffAnimationController,
+                statusBarStateController = statusBarStateController,
+            )
+            .powerInteractor
 
     private val keyguardTransitionController: LockscreenShadeTransitionController = mock()
     private val underTest =

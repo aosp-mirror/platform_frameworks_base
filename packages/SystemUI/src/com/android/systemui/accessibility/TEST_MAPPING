@@ -1,0 +1,24 @@
+{
+  "presubmit-large": [
+    {
+      "name": "SystemUITests",
+      "options": [
+        {
+          "include-filter": "com.android.systemui.accessibility"
+        },
+        {
+            "exclude-annotation": "org.junit.Ignore"
+        },
+        {
+            "exclude-annotation": "android.platform.test.annotations.Postsubmit"
+        },
+        {
+            "exclude-annotation": "android.platform.test.annotations.FlakyTest"
+        },
+        {
+            "exclude-annotation": "androidx.test.filters.FlakyTest"
+        }
+      ]
+    }
+  ]
+}

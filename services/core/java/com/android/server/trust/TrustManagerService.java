@@ -16,6 +16,7 @@
 
 package com.android.server.trust;
 
+import static android.security.Flags.shouldTrustManagerListenForPrimaryAuth;
 import static android.service.trust.GrantTrustResult.STATUS_UNLOCKED_BY_GRANT;
 import static android.service.trust.TrustAgentService.FLAG_GRANT_TRUST_TEMPORARY_AND_RENEWABLE;
 
@@ -61,7 +62,7 @@ import android.os.SystemClock;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.Settings;
-import android.security.Authorization;
+import android.security.KeyStoreAuthorization;
 import android.service.trust.GrantTrustResult;
 import android.service.trust.TrustAgentService;
 import android.text.TextUtils;
@@ -73,7 +74,6 @@ import android.util.Slog;
 import android.util.SparseArray;
 import android.util.SparseBooleanArray;
 import android.util.Xml;
-import android.view.Display;
 import android.view.IWindowManager;
 import android.view.WindowManagerGlobal;
 
@@ -83,9 +83,10 @@ import com.android.internal.content.PackageMonitor;
 import com.android.internal.infra.AndroidFuture;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.widget.LockPatternUtils;
+import com.android.internal.widget.LockSettingsInternal;
+import com.android.internal.widget.LockSettingsStateListener;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
-import com.android.server.companion.virtual.VirtualDeviceManagerInternal;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -157,12 +158,13 @@ public class TrustManagerService extends SystemService {
 
     /* package */ final TrustArchive mArchive = new TrustArchive();
     private final Context mContext;
+    private final LockSettingsInternal mLockSettings;
     private final LockPatternUtils mLockPatternUtils;
+    private final KeyStoreAuthorization mKeyStoreAuthorization;
     private final UserManager mUserManager;
     private final ActivityManager mActivityManager;
     private FingerprintManager mFingerprintManager;
     private FaceManager mFaceManager;
-    private VirtualDeviceManagerInternal mVirtualDeviceManager;
 
     private enum TrustState {
         // UNTRUSTED means that TrustManagerService is currently *not* giving permission for the
@@ -192,25 +194,30 @@ public class TrustManagerService extends SystemService {
             new SparseArray<>();
 
     /**
-     * Stores the locked state for users on the device. There are three different type of users
+     * Stores the locked state for users on the device. There are several different types of users
      * which are handled slightly differently:
      * <ul>
-     *  <li> Users with real keyguard
+     *  <li> Users with real keyguard:
      *  These are users who can be switched to ({@link UserInfo#supportsSwitchToByUser()}). Their
      *  locked state is derived by a combination of user secure state, keyguard state, trust agent
      *  decision and biometric authentication result. These are updated via
      *  {@link #refreshDeviceLockedForUser(int)} and result stored in {@link #mDeviceLockedForUser}.
-     *  <li> Managed profiles with unified challenge
-     *  Managed profile with unified challenge always shares the same locked state as their parent,
+     *  <li> Profiles with unified challenge:
+     *  Profiles with a unified challenge always share the same locked state as their parent,
      *  so their locked state is not recorded in  {@link #mDeviceLockedForUser}. Instead,
      *  {@link ITrustManager#isDeviceLocked(int)} always resolves their parent user handle and
      *  queries its locked state instead.
-     *  <li> Managed profiles with separate challenge
-     *  Locked state for profile with separate challenge is determined by other parts of the
-     *  framework (mostly PowerManager) and pushed to TrustManagerService via
-     *  {@link ITrustManager#setDeviceLockedForUser(int, boolean)}. Although in a corner case when
-     *  the profile has a separate but empty challenge, setting its {@link #mDeviceLockedForUser} to
-     *  {@code false} is actually done by {@link #refreshDeviceLockedForUser(int)}.
+     *  <li> Profiles without unified challenge:
+     *  The locked state for profiles that do not have a unified challenge (e.g. they have a
+     *  separate challenge from their parent, or they have no parent at all) is determined by other
+     *  parts of the framework (mostly PowerManager) and pushed to TrustManagerService via
+     *  {@link ITrustManager#setDeviceLockedForUser(int, boolean)}.
+     *  However, in the case where such a profile has an empty challenge, setting its
+     *  {@link #mDeviceLockedForUser} to {@code false} is actually done by
+     *  {@link #refreshDeviceLockedForUser(int)}.
+     *  (This serves as a corner case for managed profiles with a separate but empty challenge. It
+     *  is always currently the case for Communal profiles, for which having a non-empty challenge
+     *  is not currently supported.)
      * </ul>
      * TODO: Rename {@link ITrustManager#setDeviceLockedForUser(int, boolean)} to
      * {@code setDeviceLockedForProfile} to better reflect its purpose. Unifying
@@ -243,6 +250,20 @@ public class TrustManagerService extends SystemService {
 
     private final StrongAuthTracker mStrongAuthTracker;
 
+    // Used to subscribe to device credential auth attempts.
+    private final LockSettingsStateListener mLockSettingsStateListener =
+            new LockSettingsStateListener() {
+                @Override
+                public void onAuthenticationSucceeded(int userId) {
+                    mHandler.obtainMessage(MSG_DISPATCH_UNLOCK_ATTEMPT, 1, userId).sendToTarget();
+                }
+
+                @Override
+                public void onAuthenticationFailed(int userId) {
+                    mHandler.obtainMessage(MSG_DISPATCH_UNLOCK_ATTEMPT, 0, userId).sendToTarget();
+                }
+            };
+
     private boolean mTrustAgentsCanRun = false;
     private int mCurrentUser = UserHandle.USER_SYSTEM;
 
@@ -251,25 +272,31 @@ public class TrustManagerService extends SystemService {
      * cases.
      */
     protected static class Injector {
-        private final LockPatternUtils mLockPatternUtils;
-        private final Looper mLooper;
+        private final Context mContext;
 
-        public Injector(LockPatternUtils lockPatternUtils, Looper looper) {
-            mLockPatternUtils = lockPatternUtils;
-            mLooper = looper;
+        public Injector(Context context) {
+            mContext = context;
         }
 
         LockPatternUtils getLockPatternUtils() {
-            return mLockPatternUtils;
+            return new LockPatternUtils(mContext);
+        }
+
+        KeyStoreAuthorization getKeyStoreAuthorization() {
+            return KeyStoreAuthorization.getInstance();
+        }
+
+        AlarmManager getAlarmManager() {
+            return mContext.getSystemService(AlarmManager.class);
         }
 
         Looper getLooper() {
-            return mLooper;
+            return Looper.myLooper();
         }
     }
 
     public TrustManagerService(Context context) {
-        this(context, new Injector(new LockPatternUtils(context), Looper.myLooper()));
+        this(context, new Injector(context));
     }
 
     protected TrustManagerService(Context context, Injector injector) {
@@ -278,9 +305,11 @@ public class TrustManagerService extends SystemService {
         mHandler = createHandler(injector.getLooper());
         mUserManager = (UserManager) mContext.getSystemService(Context.USER_SERVICE);
         mActivityManager = (ActivityManager) mContext.getSystemService(Context.ACTIVITY_SERVICE);
+        mLockSettings = LocalServices.getService(LockSettingsInternal.class);
         mLockPatternUtils = injector.getLockPatternUtils();
+        mKeyStoreAuthorization = injector.getKeyStoreAuthorization();
         mStrongAuthTracker = new StrongAuthTracker(context, injector.getLooper());
-        mAlarmManager = (AlarmManager) mContext.getSystemService(Context.ALARM_SERVICE);
+        mAlarmManager = injector.getAlarmManager();
     }
 
     @Override
@@ -298,6 +327,9 @@ public class TrustManagerService extends SystemService {
             checkNewAgents();
             mPackageMonitor.register(mContext, mHandler.getLooper(), UserHandle.ALL, true);
             mReceiver.register(mContext);
+            if (shouldTrustManagerListenForPrimaryAuth()) {
+                mLockSettings.registerLockSettingsStateListener(mLockSettingsStateListener);
+            }
             mLockPatternUtils.registerStrongAuthTracker(mStrongAuthTracker);
             mFingerprintManager = mContext.getSystemService(FingerprintManager.class);
             mFaceManager = mContext.getSystemService(FaceManager.class);
@@ -798,7 +830,7 @@ public class TrustManagerService extends SystemService {
 
     /**
      * Update the user's locked state. Only applicable to users with a real keyguard
-     * ({@link UserInfo#supportsSwitchToByUser}) and unsecured managed profiles.
+     * ({@link UserInfo#supportsSwitchToByUser}) and unsecured profiles.
      *
      * If this is called due to an unlock operation set unlockedUser to prevent the lock from
      * being prematurely reset for that user while keyguard is still in the process of going away.
@@ -830,18 +862,17 @@ public class TrustManagerService extends SystemService {
             boolean secure = mLockPatternUtils.isSecure(id);
 
             if (!info.supportsSwitchToByUser()) {
-                if (info.isManagedProfile() && !secure) {
+                if (info.isProfile() && !secure
+                        && !mLockPatternUtils.isProfileWithUnifiedChallenge(id)) {
+                    // Unsecured profiles need to be explicitly set to false.
+                    // However, Unified challenge profiles officially shouldn't have a presence in
+                    // mDeviceLockedForUser at all, since that's not how they're tracked.
                     setDeviceLockedForUser(id, false);
                 }
                 continue;
             }
 
-            final boolean trusted;
-            if (android.security.Flags.fixUnlockedDeviceRequiredKeysV2()) {
-                trusted = getUserTrustStateInner(id) == TrustState.TRUSTED;
-            } else {
-                trusted = aggregateIsTrusted(id);
-            }
+            final boolean trusted = getUserTrustStateInner(id) == TrustState.TRUSTED;
             boolean showingKeyguard = true;
             boolean biometricAuthenticated = false;
             boolean currentUserIsUnlocked = false;
@@ -902,24 +933,20 @@ public class TrustManagerService extends SystemService {
 
     private void notifyKeystoreOfDeviceLockState(int userId, boolean isLocked) {
         if (isLocked) {
-            if (android.security.Flags.fixUnlockedDeviceRequiredKeysV2()) {
-                // A profile with unified challenge is unlockable not by its own biometrics and
-                // trust agents, but rather by those of the parent user.  Therefore, when protecting
-                // the profile's UnlockedDeviceRequired keys, we must use the parent's list of
-                // biometric SIDs and weak unlock methods, not the profile's.
-                int authUserId = mLockPatternUtils.isProfileWithUnifiedChallenge(userId)
-                        ? resolveProfileParent(userId) : userId;
+            // A profile with unified challenge is unlockable not by its own biometrics and
+            // trust agents, but rather by those of the parent user.  Therefore, when protecting
+            // the profile's UnlockedDeviceRequired keys, we must use the parent's list of
+            // biometric SIDs and weak unlock methods, not the profile's.
+            int authUserId = mLockPatternUtils.isProfileWithUnifiedChallenge(userId)
+                    ? resolveProfileParent(userId) : userId;
 
-                Authorization.onDeviceLocked(userId, getBiometricSids(authUserId),
-                        isWeakUnlockMethodEnabled(authUserId));
-            } else {
-                Authorization.onDeviceLocked(userId, getBiometricSids(userId), false);
-            }
+            mKeyStoreAuthorization.onDeviceLocked(userId, getBiometricSids(authUserId),
+                    isWeakUnlockMethodEnabled(authUserId));
         } else {
             // Notify Keystore that the device is now unlocked for the user.  Note that for unlocks
             // with LSKF, this is redundant with the call from LockSettingsService which provides
             // the password.  However, for unlocks with biometric or trust agent, this is required.
-            Authorization.onDeviceUnlocked(userId, /* password= */ null);
+            mKeyStoreAuthorization.onDeviceUnlocked(userId, /* password= */ null);
         }
     }
 
@@ -1602,57 +1629,13 @@ public class TrustManagerService extends SystemService {
             mHandler.obtainMessage(MSG_UNREGISTER_LISTENER, trustListener).sendToTarget();
         }
 
-        /**
-         * @param uid: uid of the calling app (obtained via getCallingUid())
-         * @param displayId: the id of a Display
-         * @return Returns true if both of the following conditions hold -
-         * 1) the uid belongs to an app instead of a system core component; and
-         * 2) either the uid is running on a virtual device or the displayId
-         *    is owned by a virtual device
-         */
-        private boolean isAppOrDisplayOnAnyVirtualDevice(int uid, int displayId) {
-            if (UserHandle.isCore(uid)) {
-                return false;
-            }
-
-            if (mVirtualDeviceManager == null) {
-                mVirtualDeviceManager = LocalServices.getService(
-                        VirtualDeviceManagerInternal.class);
-                if (mVirtualDeviceManager == null) {
-                    // VirtualDeviceManager service may not have been published
-                    return false;
-                }
-            }
-
-            switch (displayId) {
-                case Display.INVALID_DISPLAY:
-                    // There is no Display object associated with the Context of the calling app.
-                    if (mVirtualDeviceManager.isAppRunningOnAnyVirtualDevice(uid)) {
-                        return true;
-                    }
-                    break;
-                case Display.DEFAULT_DISPLAY:
-                    // The DEFAULT_DISPLAY is by definition not virtual.
-                    break;
-                default:
-                    // Other display IDs can belong to logical displays created for other purposes.
-                    if (mVirtualDeviceManager.isDisplayOwnedByAnyVirtualDevice(displayId)) {
-                        return true;
-                    }
-                    break;
-            }
-            return false;
-        }
-
         @Override
-        public boolean isDeviceLocked(int userId, int displayId) throws RemoteException {
-            int uid = getCallingUid();
-            if (isAppOrDisplayOnAnyVirtualDevice(uid, displayId)) {
-                // Virtual displays are considered insecure because they may be used for streaming
-                // to other devices.
+        public boolean isDeviceLocked(int userId, int deviceId) throws RemoteException {
+            if (deviceId != Context.DEVICE_ID_DEFAULT) {
+                // Virtual devices are considered insecure.
                 return false;
             }
-            userId = ActivityManager.handleIncomingUser(getCallingPid(), uid, userId,
+            userId = ActivityManager.handleIncomingUser(getCallingPid(), getCallingUid(), userId,
                     false /* allowAll */, true /* requireFull */, "isDeviceLocked", null);
 
             final long token = Binder.clearCallingIdentity();
@@ -1667,15 +1650,12 @@ public class TrustManagerService extends SystemService {
         }
 
         @Override
-        public boolean isDeviceSecure(int userId, int displayId) throws RemoteException {
-            int uid = getCallingUid();
-            if (isAppOrDisplayOnAnyVirtualDevice(uid, displayId)) {
-                // Virtual displays are considered insecure because they may be used for streaming
-                // to other devices.
+        public boolean isDeviceSecure(int userId, int deviceId) throws RemoteException {
+            if (deviceId != Context.DEVICE_ID_DEFAULT) {
+                // Virtual devices are considered insecure.
                 return false;
             }
-
-            userId = ActivityManager.handleIncomingUser(getCallingPid(), uid, userId,
+            userId = ActivityManager.handleIncomingUser(getCallingPid(), getCallingUid(), userId,
                     false /* allowAll */, true /* requireFull */, "isDeviceSecure", null);
 
             final long token = Binder.clearCallingIdentity();
@@ -1904,6 +1884,7 @@ public class TrustManagerService extends SystemService {
         }
     }
 
+    /** If the userId has a parent, returns that parent's userId. Otherwise userId is returned. */
     private int resolveProfileParent(int userId) {
         final long identity = Binder.clearCallingIdentity();
         try {

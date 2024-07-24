@@ -17,15 +17,7 @@
 #ifndef FRAMEWORKS_BASE_WEBVIEWFUNCTOR_H
 #define FRAMEWORKS_BASE_WEBVIEWFUNCTOR_H
 
-#ifdef __ANDROID__  // Layoutlib does not support surface control
 #include <android/surface_control.h>
-#else
-// To avoid ifdefs around overlay implementation all over the place we typedef these to void *. They
-// won't be used.
-typedef void* ASurfaceControl;
-typedef void* ASurfaceTransaction;
-#endif
-
 #include <cutils/compiler.h>
 #include <private/hwui/DrawGlInfo.h>
 #include <private/hwui/DrawVkInfo.h>

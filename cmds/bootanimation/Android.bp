@@ -74,7 +74,4 @@ cc_library_shared {
         "libGLESv2",
         "libgui",
     ],
-    whole_static_libs: [
-        "libc++fs",
-    ],
 }

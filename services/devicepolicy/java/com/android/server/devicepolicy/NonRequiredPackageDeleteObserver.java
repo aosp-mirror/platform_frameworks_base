@@ -25,7 +25,6 @@ import android.util.Slog;
 
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Awaits the deletion of all the non-required apps.
@@ -33,38 +32,38 @@ import java.util.concurrent.atomic.AtomicInteger;
 final class NonRequiredPackageDeleteObserver extends IPackageDeleteObserver.Stub {
     private static final int PACKAGE_DELETE_TIMEOUT_SEC = 30;
 
-    private final AtomicInteger mPackageCount = new AtomicInteger(/* initialValue= */ 0);
     private final CountDownLatch mLatch;
-    private boolean mSuccess;
+    private boolean mFailed = false;
 
     NonRequiredPackageDeleteObserver(int packageCount) {
         this.mLatch = new CountDownLatch(packageCount);
-        this.mPackageCount.set(packageCount);
     }
 
     @Override
     public void packageDeleted(String packageName, int returnCode) {
         if (returnCode != PackageManager.DELETE_SUCCEEDED) {
             Slog.e(LOG_TAG, "Failed to delete package: " + packageName);
-            mLatch.notifyAll();
-            return;
-        }
-        int currentPackageCount = mPackageCount.decrementAndGet();
-        if (currentPackageCount == 0) {
-            mSuccess = true;
-            Slog.i(LOG_TAG, "All non-required system apps with launcher icon, "
-                    + "and all disallowed apps have been uninstalled.");
+            mFailed = true;
         }
         mLatch.countDown();
     }
 
     public boolean awaitPackagesDeletion() {
         try {
-            mLatch.await(PACKAGE_DELETE_TIMEOUT_SEC, TimeUnit.SECONDS);
+            if (mLatch.await(PACKAGE_DELETE_TIMEOUT_SEC, TimeUnit.SECONDS)) {
+                if (!mFailed) {
+                    Slog.i(LOG_TAG, "All non-required system apps with launcher icon, "
+                            + "and all disallowed apps have been uninstalled.");
+                }
+                return !mFailed;
+            } else {
+                Slog.i(LOG_TAG, "Waiting time elapsed before all package deletion finished");
+                return false;
+            }
         } catch (InterruptedException e) {
             Log.w(LOG_TAG, "Interrupted while waiting for package deletion", e);
             Thread.currentThread().interrupt();
+            return false;
         }
-        return mSuccess;
     }
 }

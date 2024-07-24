@@ -44,7 +44,6 @@ android_test {
         "ShortcutManagerTestUtils",
         "truth",
         "testables",
-        "ub-uiautomator",
         "platformprotosnano",
         "framework-protos",
         "hamcrest-library",
@@ -95,7 +94,7 @@ android_test {
         "libutils",
         "netd_aidl_interface-V5-cpp",
     ],
-
+    compile_multilib: "both",
     dxflags: ["--multi-dex"],
 
     java_resources: [
@@ -105,6 +104,7 @@ android_test {
         ":PackageParserTestApp4",
         ":PackageParserTestApp5",
         ":PackageParserTestApp6",
+        ":PackageParserTestApp7",
     ],
     resource_zips: [":PackageManagerServiceServerTests_apks_as_resources"],
 

@@ -19,10 +19,10 @@ package com.android.systemui.media.dagger;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.log.LogBuffer;
 import com.android.systemui.log.LogBufferFactory;
-import com.android.systemui.media.controls.pipeline.MediaDataManager;
-import com.android.systemui.media.controls.ui.MediaHierarchyManager;
-import com.android.systemui.media.controls.ui.MediaHost;
-import com.android.systemui.media.controls.ui.MediaHostStatesManager;
+import com.android.systemui.media.controls.domain.pipeline.MediaDataManager;
+import com.android.systemui.media.controls.ui.controller.MediaHierarchyManager;
+import com.android.systemui.media.controls.ui.controller.MediaHostStatesManager;
+import com.android.systemui.media.controls.ui.view.MediaHost;
 import com.android.systemui.media.dream.dagger.MediaComplicationComponent;
 import com.android.systemui.media.taptotransfer.MediaTttCommandLineHelper;
 import com.android.systemui.media.taptotransfer.MediaTttFlags;
@@ -46,6 +46,7 @@ public interface MediaModule {
     String QUICK_QS_PANEL = "media_quick_qs_panel";
     String KEYGUARD = "media_keyguard";
     String DREAM = "dream";
+    String COMMUNAL_HUB = "communal_Hub";
 
     /** */
     @Provides
@@ -82,6 +83,16 @@ public interface MediaModule {
     @SysUISingleton
     @Named(DREAM)
     static MediaHost providesDreamMediaHost(MediaHost.MediaHostStateHolder stateHolder,
+            MediaHierarchyManager hierarchyManager, MediaDataManager dataManager,
+            MediaHostStatesManager statesManager) {
+        return new MediaHost(stateHolder, hierarchyManager, dataManager, statesManager);
+    }
+
+    /** */
+    @Provides
+    @SysUISingleton
+    @Named(COMMUNAL_HUB)
+    static MediaHost providesCommunalMediaHost(MediaHost.MediaHostStateHolder stateHolder,
             MediaHierarchyManager hierarchyManager, MediaDataManager dataManager,
             MediaHostStatesManager statesManager) {
         return new MediaHost(stateHolder, hierarchyManager, dataManager, statesManager);

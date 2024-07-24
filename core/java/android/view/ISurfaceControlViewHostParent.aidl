@@ -16,6 +16,7 @@
 
 package android.view;
 
+import android.view.KeyEvent;
 import android.view.WindowManager;
 
 /**
@@ -24,4 +25,6 @@ import android.view.WindowManager;
  */
 oneway interface ISurfaceControlViewHostParent {
     void updateParams(in WindowManager.LayoutParams[] childAttrs);
+    // To forward the back key event from embedded to host app.
+    void forwardBackKeyToParent(in KeyEvent keyEvent);
 }

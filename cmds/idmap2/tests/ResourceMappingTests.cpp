@@ -212,12 +212,12 @@ TEST(ResourceMappingTests, FabricatedOverlay) {
                   .SetResourceValue("integer/int1", Res_value::TYPE_INT_DEC, 2U, "")
                   .SetResourceValue("string/str1", Res_value::TYPE_REFERENCE, 0x7f010000, "")
                   .SetResourceValue("string/str2", Res_value::TYPE_STRING, "foobar", "")
-                  .SetResourceValue("drawable/dr1", fd, "")
+                  .SetResourceValue("drawable/dr1", fd, 0, 8341, "", false)
                   .setFrroPath("/foo/bar/biz.frro")
                   .Build();
 
   ASSERT_TRUE(frro);
-  TemporaryFile tf;
+  TempFrroFile tf;
   std::ofstream out(tf.path);
   ASSERT_TRUE((*frro).ToBinaryStream(out));
   out.close();

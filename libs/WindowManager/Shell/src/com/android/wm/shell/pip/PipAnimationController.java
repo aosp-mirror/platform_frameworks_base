@@ -427,10 +427,10 @@ public class PipAnimationController {
                     new PipContentOverlay.PipSnapshotOverlay(snapshot, sourceRectHint));
         }
 
-        void setAppIconContentOverlay(Context context, Rect bounds, ActivityInfo activityInfo,
-                int appIconSizePx) {
+        void setAppIconContentOverlay(Context context, Rect appBounds, Rect destinationBounds,
+                ActivityInfo activityInfo, int appIconSizePx) {
             reattachContentOverlay(
-                    new PipContentOverlay.PipAppIconOverlay(context, bounds,
+                    new PipContentOverlay.PipAppIconOverlay(context, appBounds, destinationBounds,
                             new IconProvider(context).getIcon(activityInfo), appIconSizePx));
         }
 
@@ -769,7 +769,7 @@ public class PipAnimationController {
                         getSurfaceTransactionHelper().crop(tx, leash, destBounds);
                     }
                     if (mContentOverlay != null) {
-                        mContentOverlay.onAnimationEnd(tx, destBounds);
+                        clearContentOverlay();
                     }
                 }
 

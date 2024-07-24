@@ -25,6 +25,10 @@ import android.util.ArrayMap;
 import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
 
+import com.android.tools.r8.keepanno.annotations.KeepItemKind;
+import com.android.tools.r8.keepanno.annotations.KeepTarget;
+import com.android.tools.r8.keepanno.annotations.UsesReflection;
+
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -41,7 +45,13 @@ public class RankingHelper {
     private final Context mContext;
     private final RankingHandler mRankingHandler;
 
-
+    @UsesReflection(
+            value = {
+                @KeepTarget(
+                        kind = KeepItemKind.CLASS_AND_MEMBERS,
+                        instanceOfClassConstantExclusive = NotificationSignalExtractor.class,
+                        methodName = "<init>")
+            })
     public RankingHelper(Context context, RankingHandler rankingHandler, RankingConfig config,
             ZenModeHelper zenHelper, NotificationUsageStats usageStats, String[] extractorNames) {
         mContext = context;

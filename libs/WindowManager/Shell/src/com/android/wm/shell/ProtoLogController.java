@@ -16,7 +16,10 @@
 
 package com.android.wm.shell;
 
-import com.android.wm.shell.protolog.ShellProtoLogImpl;
+import com.android.internal.protolog.LegacyProtoLogImpl;
+import com.android.internal.protolog.common.ILogger;
+import com.android.internal.protolog.common.IProtoLog;
+import com.android.internal.protolog.common.ProtoLog;
 import com.android.wm.shell.sysui.ShellCommandHandler;
 import com.android.wm.shell.sysui.ShellInit;
 
@@ -24,19 +27,19 @@ import java.io.PrintWriter;
 import java.util.Arrays;
 
 /**
- * Controls the {@link ShellProtoLogImpl} in WMShell via adb shell commands.
+ * Controls the {@link ProtoLog} in WMShell via adb shell commands.
  *
  * Use with {@code adb shell dumpsys activity service SystemUIService WMShell protolog ...}.
  */
 public class ProtoLogController implements ShellCommandHandler.ShellCommandActionHandler {
     private final ShellCommandHandler mShellCommandHandler;
-    private final ShellProtoLogImpl mShellProtoLog;
+    private final IProtoLog mShellProtoLog;
 
     public ProtoLogController(ShellInit shellInit,
             ShellCommandHandler shellCommandHandler) {
         shellInit.addInitCallback(this::onInit, this);
         mShellCommandHandler = shellCommandHandler;
-        mShellProtoLog = ShellProtoLogImpl.getSingleInstance();
+        mShellProtoLog = ProtoLog.getSingleInstance();
     }
 
     void onInit() {
@@ -45,22 +48,35 @@ public class ProtoLogController implements ShellCommandHandler.ShellCommandActio
 
     @Override
     public boolean onShellCommand(String[] args, PrintWriter pw) {
+        final ILogger logger = pw::println;
         switch (args[0]) {
             case "status": {
-                pw.println(mShellProtoLog.getStatus());
+                if (android.tracing.Flags.perfettoProtologTracing()) {
+                    pw.println("(Deprecated) legacy command. Use Perfetto commands instead.");
+                    return false;
+                }
+                ((LegacyProtoLogImpl) mShellProtoLog).getStatus();
                 return true;
             }
             case "start": {
-                mShellProtoLog.startProtoLog(pw);
+                if (android.tracing.Flags.perfettoProtologTracing()) {
+                    pw.println("(Deprecated) legacy command. Use Perfetto commands instead.");
+                    return false;
+                }
+                ((LegacyProtoLogImpl) mShellProtoLog).startProtoLog(pw);
                 return true;
             }
             case "stop": {
-                mShellProtoLog.stopProtoLog(pw, true /* writeToFile */);
+                if (android.tracing.Flags.perfettoProtologTracing()) {
+                    pw.println("(Deprecated) legacy command. Use Perfetto commands instead.");
+                    return false;
+                }
+                ((LegacyProtoLogImpl) mShellProtoLog).stopProtoLog(pw, true);
                 return true;
             }
             case "enable-text": {
                 String[] groups = Arrays.copyOfRange(args, 1, args.length);
-                int result = mShellProtoLog.startTextLogging(groups, pw);
+                int result = mShellProtoLog.startLoggingToLogcat(groups, logger);
                 if (result == 0) {
                     pw.println("Starting logging on groups: " + Arrays.toString(groups));
                     return true;
@@ -69,7 +85,7 @@ public class ProtoLogController implements ShellCommandHandler.ShellCommandActio
             }
             case "disable-text": {
                 String[] groups = Arrays.copyOfRange(args, 1, args.length);
-                int result = mShellProtoLog.stopTextLogging(groups, pw);
+                int result = mShellProtoLog.stopLoggingToLogcat(groups, logger);
                 if (result == 0) {
                     pw.println("Stopping logging on groups: " + Arrays.toString(groups));
                     return true;
@@ -78,19 +94,23 @@ public class ProtoLogController implements ShellCommandHandler.ShellCommandActio
             }
             case "enable": {
                 String[] groups = Arrays.copyOfRange(args, 1, args.length);
-                return mShellProtoLog.startTextLogging(groups, pw) == 0;
+                return mShellProtoLog.startLoggingToLogcat(groups, logger) == 0;
             }
             case "disable": {
                 String[] groups = Arrays.copyOfRange(args, 1, args.length);
-                return mShellProtoLog.stopTextLogging(groups, pw) == 0;
+                return mShellProtoLog.stopLoggingToLogcat(groups, logger) == 0;
             }
             case "save-for-bugreport": {
+                if (android.tracing.Flags.perfettoProtologTracing()) {
+                    pw.println("(Deprecated) legacy command");
+                    return false;
+                }
                 if (!mShellProtoLog.isProtoEnabled()) {
                     pw.println("Logging to proto is not enabled for WMShell.");
                     return false;
                 }
-                mShellProtoLog.stopProtoLog(pw, true /* writeToFile */);
-                mShellProtoLog.startProtoLog(pw);
+                ((LegacyProtoLogImpl) mShellProtoLog).stopProtoLog(pw, true /* writeToFile */);
+                ((LegacyProtoLogImpl) mShellProtoLog).startProtoLog(pw);
                 return true;
             }
             default: {

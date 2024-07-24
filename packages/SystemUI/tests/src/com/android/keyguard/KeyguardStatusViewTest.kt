@@ -6,7 +6,7 @@ import android.testing.TestableLooper.RunWithLooper
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import com.android.systemui.R
+import com.android.systemui.res.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.util.children
 import com.google.common.truth.Truth.assertThat

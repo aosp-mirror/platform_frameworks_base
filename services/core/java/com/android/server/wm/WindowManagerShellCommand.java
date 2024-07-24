@@ -48,7 +48,9 @@ import android.view.IWindowManager;
 import android.view.ViewDebug;
 
 import com.android.internal.os.ByteTransferPipe;
-import com.android.internal.protolog.ProtoLogImpl;
+import com.android.internal.protolog.LegacyProtoLogImpl;
+import com.android.internal.protolog.common.IProtoLog;
+import com.android.internal.protolog.common.ProtoLog;
 import com.android.server.IoThread;
 import com.android.server.wm.LetterboxConfiguration.LetterboxBackgroundType;
 import com.android.server.wm.LetterboxConfiguration.LetterboxHorizontalReachabilityPosition;
@@ -107,11 +109,19 @@ public class WindowManagerShellCommand extends ShellCommand {
                     // trace files can be written.
                     return mInternal.mWindowTracing.onShellCommand(this);
                 case "logging":
-                    int result = ProtoLogImpl.getSingleInstance().onShellCommand(this);
-                    if (result != 0) {
-                        pw.println("Not handled, please use "
-                                + "`adb shell dumpsys activity service SystemUIService WMShell` "
-                                + "if you are looking for ProtoLog in WMShell");
+                    IProtoLog instance = ProtoLog.getSingleInstance();
+                    int result = 0;
+                    if (instance instanceof LegacyProtoLogImpl) {
+                        result = ((LegacyProtoLogImpl) instance).onShellCommand(this);
+                        if (result != 0) {
+                            pw.println("Not handled, please use "
+                                    + "`adb shell dumpsys activity service SystemUIService "
+                                    + "WMShell` if you are looking for ProtoLog in WMShell");
+                        }
+                    } else {
+                        result = -1;
+                        pw.println("Command not supported. "
+                                + "Only supported when using legacy ProtoLog.");
                     }
                     return result;
                 case "user-rotation":
@@ -438,7 +448,8 @@ public class WindowManagerShellCommand extends ShellCommand {
         }
 
         if ("free".equals(lockMode)) {
-            mInternal.thawDisplayRotation(displayId);
+            mInternal.thawDisplayRotation(displayId,
+                    /* caller= */ "WindowManagerShellCommand#free");
             return 0;
         }
 
@@ -451,7 +462,8 @@ public class WindowManagerShellCommand extends ShellCommand {
         try {
             final int rotation =
                     arg != null ? Integer.parseInt(arg) : -1 /* lock to current rotation */;
-            mInternal.freezeDisplayRotation(displayId, rotation);
+            mInternal.freezeDisplayRotation(displayId, rotation,
+                    /* caller= */ "WindowManagerShellCommand#lock");
             return 0;
         } catch (IllegalArgumentException e) {
             getErrPrintWriter().println("Error: " + e.getMessage());
@@ -1433,7 +1445,8 @@ public class WindowManagerShellCommand extends ShellCommand {
         mInterface.setForcedDisplayScalingMode(displayId, DisplayContent.FORCE_SCALING_MODE_AUTO);
 
         // user-rotation
-        mInternal.thawDisplayRotation(displayId);
+        mInternal.thawDisplayRotation(displayId,
+                /* caller= */ "WindowManagerShellCommand#runReset");
 
         // fixed-to-user-rotation
         mInterface.setFixedToUserRotation(displayId, IWindowManager.FIXED_TO_USER_ROTATION_DEFAULT);

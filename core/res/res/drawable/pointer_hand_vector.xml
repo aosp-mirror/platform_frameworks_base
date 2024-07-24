@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?><!--
+  ~ Copyright 2024 The Android Open Source Project
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~      http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportHeight="24"
+    android:viewportWidth="24">
+    <path
+        android:fillColor="#000000"
+        android:pathData="M20.492 15.197v-4.198A1.995 1.995 0 0 0 18.5 9.001c-.413 0-.797.126-1.115.342a1.99 1.99 0 0 0-1.873-1.341c-.411 0-.792.125-1.109.339a1.99 1.99 0 0 0-1.879-1.361c-.363 0-.699.105-.992.275V3.998A1.99 1.99 0 0 0 9.542 2c-1.1 0-1.992.895-1.992 1.998v7.831l-.242-.249a2.2 2.2 0 0 0-3.164 0 2.29 2.29 0 0 0 0 3.183l5.084 5.219q.063.061.13.118l-.001.001A6.54 6.54 0 0 0 13.963 22c3.572 0 6.537-2.903 6.537-6.509q0-.148-.008-.294m-6.529 5.804a5.55 5.55 0 0 1-3.906-1.611 1 1 0 0 1-.117-.106l-5.084-5.219a1.286 1.286 0 0 1 0-1.786 1.21 1.21 0 0 1 1.74 0l1.95 2.002V3.998c0-.552.446-.999.996-.999s.996.447.996.999v7.17l.011-.007a.495.495 0 0 0 .989-.037V8.939a.992.992 0 0 1 1.984.039v.796l-.007 1.386a.5.5 0 0 0 .495.502h.003a.5.5 0 0 0 .498-.497l.006-1.157h.001V10a.997.997 0 1 1 1.991 0v.601l.004.003v1.02q.001.107.042.199a.5.5 0 0 0 .153.187l.031.021a.5.5 0 0 0 .231.083c.014.001.026.008.04.008a.5.5 0 0 0 .498-.5v-.642a.996.996 0 0 1 .993-.98c.55 0 .996.447.996.999v4.199a6 6 0 0 1 .008.293c-.001 3.043-2.509 5.51-5.542 5.51" />
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M19.496 10.999A.997.997 0 0 0 18.5 10a.995.995 0 0 0-.992.98v.644a.5.5 0 0 1-.498.5c-.014 0-.026-.007-.04-.008a.493.493 0 0 1-.457-.491v-1.02l-.004-.003V10c0-.552-.446-.999-.996-.999s-.996.447-.996.999v.008h-.001l-.005 1.003-.001.154a.5.5 0 0 1-.498.497h-.003a.5.5 0 0 1-.495-.502l.001-.159.006-1.227v-.796a.997.997 0 0 0-.996-.999.993.993 0 0 0-.988.96v2.185a.496.496 0 0 1-.989.037l-.011.007v-7.17a.997.997 0 0 0-.996-.999.997.997 0 0 0-.996.999V14.28l-1.95-2.002a1.21 1.21 0 0 0-1.74 0 1.286 1.286 0 0 0 0 1.786l5.084 5.219q.056.057.117.106A5.54 5.54 0 0 0 13.962 21c3.033 0 5.541-2.467 5.541-5.51a6 6 0 0 0-.008-.293z" />
+</vector>

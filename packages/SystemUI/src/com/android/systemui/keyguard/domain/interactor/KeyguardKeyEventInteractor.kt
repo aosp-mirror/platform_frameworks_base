@@ -21,26 +21,29 @@ import android.media.AudioManager
 import android.view.KeyEvent
 import com.android.systemui.back.domain.interactor.BackActionInteractor
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.keyevent.domain.interactor.KeyEventInteractor.Companion.handleAction
+import com.android.systemui.keyevent.domain.interactor.SysUIKeyEventHandler.Companion.handleAction
 import com.android.systemui.media.controls.util.MediaSessionLegacyHelperWrapper
 import com.android.systemui.plugins.statusbar.StatusBarStateController
+import com.android.systemui.power.domain.interactor.PowerInteractor
 import com.android.systemui.shade.ShadeController
 import com.android.systemui.statusbar.StatusBarState
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager
 import javax.inject.Inject
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 
 /** Handles key events arriving when the keyguard is showing or device is dozing. */
+@ExperimentalCoroutinesApi
 @SysUISingleton
 class KeyguardKeyEventInteractor
 @Inject
 constructor(
     private val context: Context,
     private val statusBarStateController: StatusBarStateController,
-    private val keyguardInteractor: KeyguardInteractor,
     private val statusBarKeyguardViewManager: StatusBarKeyguardViewManager,
     private val shadeController: ShadeController,
     private val mediaSessionLegacyHelperWrapper: MediaSessionLegacyHelperWrapper,
     private val backActionInteractor: BackActionInteractor,
+    private val powerInteractor: PowerInteractor,
 ) {
 
     fun dispatchKeyEvent(event: KeyEvent): Boolean {
@@ -52,9 +55,13 @@ constructor(
         }
 
         if (event.handleAction()) {
+            if (KeyEvent.isConfirmKey(event.keyCode)) {
+                if (isDeviceAwake()) {
+                    return collapseShadeLockedOrShowPrimaryBouncer()
+                }
+            }
             when (event.keyCode) {
                 KeyEvent.KEYCODE_MENU -> return dispatchMenuKeyEvent()
-                KeyEvent.KEYCODE_SPACE -> return dispatchSpaceEvent()
             }
         }
         return false
@@ -86,7 +93,7 @@ constructor(
 
     private fun dispatchMenuKeyEvent(): Boolean {
         val shouldUnlockOnMenuPressed =
-            isDeviceInteractive() &&
+            isDeviceAwake() &&
                 (statusBarStateController.state != StatusBarState.SHADE) &&
                 statusBarKeyguardViewManager.shouldDismissOnMenuPressed()
         if (shouldUnlockOnMenuPressed) {
@@ -96,10 +103,17 @@ constructor(
         return false
     }
 
-    private fun dispatchSpaceEvent(): Boolean {
-        if (isDeviceInteractive() && statusBarStateController.state != StatusBarState.SHADE) {
-            shadeController.animateCollapseShadeForced()
-            return true
+    private fun collapseShadeLockedOrShowPrimaryBouncer(): Boolean {
+        when (statusBarStateController.state) {
+            StatusBarState.SHADE -> return false
+            StatusBarState.SHADE_LOCKED -> {
+                shadeController.animateCollapseShadeForced()
+                return true
+            }
+            StatusBarState.KEYGUARD -> {
+                statusBarKeyguardViewManager.showPrimaryBouncer(true)
+                return true
+            }
         }
         return false
     }
@@ -111,7 +125,7 @@ constructor(
         return true
     }
 
-    private fun isDeviceInteractive(): Boolean {
-        return keyguardInteractor.wakefulnessModel.value.isDeviceInteractive()
+    private fun isDeviceAwake(): Boolean {
+        return powerInteractor.detailedWakefulness.value.isAwake()
     }
 }

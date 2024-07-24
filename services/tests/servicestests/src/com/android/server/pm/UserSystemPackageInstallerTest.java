@@ -44,7 +44,6 @@ import android.os.Looper;
 import android.os.SystemProperties;
 import android.os.UserManager;
 import android.platform.test.annotations.Postsubmit;
-import android.support.test.uiautomator.UiDevice;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Log;
@@ -52,11 +51,12 @@ import android.util.Log;
 import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.MediumTest;
 import androidx.test.runner.AndroidJUnit4;
+import androidx.test.uiautomator.UiDevice;
 
+import com.android.internal.pm.parsing.pkg.PackageImpl;
+import com.android.internal.pm.parsing.pkg.ParsedPackage;
 import com.android.server.LocalServices;
 import com.android.server.SystemConfig;
-import com.android.server.pm.parsing.pkg.PackageImpl;
-import com.android.server.pm.parsing.pkg.ParsedPackage;
 import com.android.server.pm.pkg.AndroidPackage;
 
 import org.junit.After;

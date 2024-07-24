@@ -40,8 +40,9 @@ public interface DragPositioningCallback {
      *                 {@code 0} to indicate it's a move
      * @param x x coordinate in window decoration coordinate system where the drag starts
      * @param y y coordinate in window decoration coordinate system where the drag starts
+     * @return the starting task bounds
      */
-    void onDragPositioningStart(@CtrlType int ctrlType, float x, float y);
+    Rect onDragPositioningStart(@CtrlType int ctrlType, float x, float y);
 
     /**
      * Called when the pointer moves during a drag-resize or drag-move.

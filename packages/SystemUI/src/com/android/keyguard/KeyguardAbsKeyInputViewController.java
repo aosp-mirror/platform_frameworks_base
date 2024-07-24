@@ -34,10 +34,11 @@ import com.android.internal.widget.LockscreenCredential;
 import com.android.keyguard.EmergencyButtonController.EmergencyButtonCallback;
 import com.android.keyguard.KeyguardAbsKeyInputView.KeyDownListener;
 import com.android.keyguard.KeyguardSecurityModel.SecurityMode;
-import com.android.systemui.R;
 import com.android.systemui.classifier.FalsingClassifier;
 import com.android.systemui.classifier.FalsingCollector;
 import com.android.systemui.flags.FeatureFlags;
+import com.android.systemui.res.R;
+import com.android.systemui.user.domain.interactor.SelectedUserInteractor;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -80,9 +81,9 @@ public abstract class KeyguardAbsKeyInputViewController<T extends KeyguardAbsKey
             KeyguardMessageAreaController.Factory messageAreaControllerFactory,
             LatencyTracker latencyTracker, FalsingCollector falsingCollector,
             EmergencyButtonController emergencyButtonController,
-            FeatureFlags featureFlags) {
+            FeatureFlags featureFlags, SelectedUserInteractor selectedUserInteractor) {
         super(view, securityMode, keyguardSecurityCallback, emergencyButtonController,
-                messageAreaControllerFactory, featureFlags);
+                messageAreaControllerFactory, featureFlags, selectedUserInteractor);
         mKeyguardUpdateMonitor = keyguardUpdateMonitor;
         mLockPatternUtils = lockPatternUtils;
         mLatencyTracker = latencyTracker;
@@ -104,7 +105,7 @@ public abstract class KeyguardAbsKeyInputViewController<T extends KeyguardAbsKey
         mEmergencyButtonController.setEmergencyButtonCallback(mEmergencyButtonCallback);
         // if the user is currently locked out, enforce it.
         long deadline = mLockPatternUtils.getLockoutAttemptDeadline(
-                KeyguardUpdateMonitor.getCurrentUser());
+                mSelectedUserInteractor.getSelectedUserId());
         if (shouldLockout(deadline)) {
             handleAttemptLockout(deadline);
         }
@@ -175,7 +176,7 @@ public abstract class KeyguardAbsKeyInputViewController<T extends KeyguardAbsKey
     }
 
     void onPasswordChecked(int userId, boolean matched, int timeoutMs, boolean isValidPassword) {
-        boolean dismissKeyguard = KeyguardUpdateMonitor.getCurrentUser() == userId;
+        boolean dismissKeyguard = mSelectedUserInteractor.getSelectedUserId() == userId;
         if (matched) {
             getKeyguardSecurityCallback().reportUnlockAttempt(userId, true, 0);
             if (dismissKeyguard) {
@@ -212,7 +213,7 @@ public abstract class KeyguardAbsKeyInputViewController<T extends KeyguardAbsKey
             mPendingLockCheck.cancel(false);
         }
 
-        final int userId = KeyguardUpdateMonitor.getCurrentUser();
+        final int userId = mSelectedUserInteractor.getSelectedUserId();
         if (password.size() <= MINIMUM_PASSWORD_LENGTH_BEFORE_REPORT) {
             // to avoid accidental lockout, only count attempts that are long enough to be a
             // real password. This may require some tweaking.

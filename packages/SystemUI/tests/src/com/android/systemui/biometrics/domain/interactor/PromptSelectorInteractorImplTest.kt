@@ -25,9 +25,9 @@ import com.android.systemui.SysuiTestCase
 import com.android.systemui.biometrics.Utils
 import com.android.systemui.biometrics.data.repository.FakeFingerprintPropertyRepository
 import com.android.systemui.biometrics.data.repository.FakePromptRepository
-import com.android.systemui.biometrics.domain.model.BiometricModalities
 import com.android.systemui.biometrics.faceSensorPropertiesInternal
 import com.android.systemui.biometrics.fingerprintSensorPropertiesInternal
+import com.android.systemui.biometrics.shared.model.BiometricModalities
 import com.android.systemui.biometrics.shared.model.PromptKind
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.util.mockito.any
@@ -51,6 +51,7 @@ private const val NEGATIVE_TEXT = "escape"
 
 private const val USER_ID = 8
 private const val CHALLENGE = 999L
+private const val OP_PACKAGE_NAME = "biometric.testapp"
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
@@ -113,13 +114,20 @@ class PromptSelectorInteractorImplTest : SysuiTestCase() {
 
         assertThat(currentPrompt).isNull()
 
-        interactor.useBiometricsForAuthentication(info, USER_ID, CHALLENGE, modalities)
+        interactor.useBiometricsForAuthentication(
+            info,
+            USER_ID,
+            CHALLENGE,
+            modalities,
+            OP_PACKAGE_NAME
+        )
 
         assertThat(currentPrompt).isNotNull()
         assertThat(currentPrompt?.title).isEqualTo(TITLE)
         assertThat(currentPrompt?.description).isEqualTo(DESCRIPTION)
         assertThat(currentPrompt?.subtitle).isEqualTo(SUBTITLE)
         assertThat(currentPrompt?.negativeButtonText).isEqualTo(NEGATIVE_TEXT)
+        assertThat(currentPrompt?.opPackageName).isEqualTo(OP_PACKAGE_NAME)
 
         if (allowCredentialFallback) {
             assertThat(credentialKind).isSameInstanceAs(PromptKind.Password)
@@ -139,7 +147,7 @@ class PromptSelectorInteractorImplTest : SysuiTestCase() {
         testScope.runTest { useCredentialAndReset(Utils.CREDENTIAL_PIN) }
 
     @Test
-    fun usePattermCredentialAndReset() =
+    fun usePatternCredentialAndReset() =
         testScope.runTest { useCredentialAndReset(Utils.CREDENTIAL_PATTERN) }
 
     @Test
@@ -167,7 +175,7 @@ class PromptSelectorInteractorImplTest : SysuiTestCase() {
 
         assertThat(currentPrompt).isNull()
 
-        interactor.useCredentialsForAuthentication(info, kind, USER_ID, CHALLENGE)
+        interactor.useCredentialsForAuthentication(info, kind, USER_ID, CHALLENGE, OP_PACKAGE_NAME)
 
         // not using biometrics, should be null with no fallback option
         assertThat(currentPrompt).isNull()

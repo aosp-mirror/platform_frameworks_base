@@ -32,7 +32,7 @@ import org.junit.runner.RunWith
 @RunWithLooper
 class AnimatorTestRuleOrderTest : SysuiTestCase() {
 
-    @get:Rule val animatorTestRule = AnimatorTestRule()
+    @get:Rule val animatorTestRule = AnimatorTestRule(this)
 
     var value1: Float = -1f
     var value2: Float = -1f

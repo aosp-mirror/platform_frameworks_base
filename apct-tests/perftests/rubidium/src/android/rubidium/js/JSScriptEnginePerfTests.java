@@ -44,6 +44,7 @@ import androidx.test.core.app.ApplicationProvider;
 import androidx.test.filters.MediumTest;
 import androidx.test.runner.AndroidJUnit4;
 
+import com.android.adservices.LoggerFactory;
 import com.android.adservices.data.adselection.CustomAudienceSignals;
 import com.android.adservices.service.adselection.AdCounterKeyCopier;
 import com.android.adservices.service.adselection.AdCounterKeyCopierNoOpImpl;
@@ -52,6 +53,7 @@ import com.android.adservices.service.adselection.AdSelectionConfigArgumentUtil;
 import com.android.adservices.service.adselection.AdWithBidArgumentUtil;
 import com.android.adservices.service.adselection.CustomAudienceBiddingSignalsArgumentUtil;
 import com.android.adservices.service.adselection.CustomAudienceScoringSignalsArgumentUtil;
+import com.android.adservices.service.common.NoOpRetryStrategyImpl;
 import com.android.adservices.service.js.IsolateSettings;
 import com.android.adservices.service.js.JSScriptArgument;
 import com.android.adservices.service.js.JSScriptArrayArgument;
@@ -101,9 +103,10 @@ public class JSScriptEnginePerfTests {
     private static final Context sContext = ApplicationProvider.getApplicationContext();
     private static final ExecutorService sExecutorService = Executors.newFixedThreadPool(10);
 
+    private static final LoggerFactory.Logger sLogger = LoggerFactory.getFledgeLogger();
     private static final JSScriptEngine sJSScriptEngine =
             JSScriptEngine.getInstanceForTesting(
-                    sContext, Profiler.createInstance(JSScriptEngine.TAG));
+                    sContext, Profiler.createInstance(JSScriptEngine.TAG), sLogger);
     private static final Clock CLOCK = Clock.fixed(Instant.now(), ZoneOffset.UTC);
     private static final Instant ACTIVATION_TIME = CLOCK.instant();
     private static final Instant EXPIRATION_TIME = CLOCK.instant().plus(Duration.ofDays(1));
@@ -409,7 +412,8 @@ public class JSScriptEnginePerfTests {
                 jsScript,
                 args,
                 functionName,
-                IsolateSettings.forMaxHeapSizeEnforcementDisabled());
+                IsolateSettings.forMaxHeapSizeEnforcementDisabled(),
+                new NoOpRetryStrategyImpl());
         result.addListener(resultLatch::countDown, sExecutorService);
         return result;
     }
@@ -428,7 +432,8 @@ public class JSScriptEnginePerfTests {
                 wasmScript,
                 args,
                 functionName,
-                IsolateSettings.forMaxHeapSizeEnforcementDisabled());
+                IsolateSettings.forMaxHeapSizeEnforcementDisabled(),
+                new NoOpRetryStrategyImpl());
         result.addListener(resultLatch::countDown, sExecutorService);
         return result;
     }

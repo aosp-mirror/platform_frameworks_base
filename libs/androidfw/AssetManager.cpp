@@ -926,8 +926,8 @@ Asset* AssetManager::openAssetFromZipLocked(const ZipFileRO* pZipFile,
 
     //printf("USING Zip '%s'\n", pEntry->getFileName());
 
-    if (!pZipFile->getEntryInfo(entry, &method, &uncompressedLen, NULL, NULL,
-            NULL, NULL))
+    if (!pZipFile->getEntryInfo(entry, &method, &uncompressedLen, nullptr, nullptr,
+            nullptr, nullptr, nullptr))
     {
         ALOGW("getEntryInfo failed\n");
         return NULL;

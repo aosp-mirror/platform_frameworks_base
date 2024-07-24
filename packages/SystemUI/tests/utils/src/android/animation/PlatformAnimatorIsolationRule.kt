@@ -41,7 +41,7 @@ class PlatformAnimatorIsolationRule : TestRule {
         private fun onError() =
             exceptionDeferrer.fail(
                 "Test's animations are not isolated! " +
-                    "Did you forget to add an AnimatorTestRule to your test class?"
+                    "Did you forget to add an AnimatorTestRule as a @Rule?"
             )
 
         fun throwDeferred() = exceptionDeferrer.throwDeferred()

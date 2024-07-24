@@ -35,7 +35,9 @@ import android.util.Log;
 import android.util.proto.ProtoOutputStream;
 import android.view.Choreographer;
 
-import com.android.internal.protolog.ProtoLogImpl;
+import com.android.internal.protolog.LegacyProtoLogImpl;
+import com.android.internal.protolog.common.IProtoLog;
+import com.android.internal.protolog.common.ProtoLog;
 import com.android.internal.util.TraceBuffer;
 
 import java.io.File;
@@ -77,6 +79,8 @@ class WindowTracing {
     private volatile boolean mEnabledLockFree;
     private boolean mScheduled;
 
+    private final IProtoLog mProtoLog;
+
     static WindowTracing createDefaultAndStartLooper(WindowManagerService service,
             Choreographer choreographer) {
         File file = new File(TRACE_FILENAME);
@@ -96,6 +100,7 @@ class WindowTracing {
         mTraceFile = file;
         mBuffer = new TraceBuffer(bufferCapacity);
         setLogLevel(WindowTraceLogLevel.TRIM, null /* pw */);
+        mProtoLog = ProtoLog.getSingleInstance();
     }
 
     void startTrace(@Nullable PrintWriter pw) {
@@ -104,7 +109,6 @@ class WindowTracing {
             return;
         }
         synchronized (mEnabledLock) {
-            ProtoLogImpl.getSingleInstance().startProtoLog(pw);
             logAndPrintln(pw, "Start tracing to " + mTraceFile + ".");
             mBuffer.resetBuffer();
             mEnabled = mEnabledLockFree = true;
@@ -132,7 +136,6 @@ class WindowTracing {
             writeTraceToFileLocked();
             logAndPrintln(pw, "Trace written to " + mTraceFile + ".");
         }
-        ProtoLogImpl.getSingleInstance().stopProtoLog(pw, true);
     }
 
     /**
@@ -152,11 +155,15 @@ class WindowTracing {
             logAndPrintln(pw, "Stop tracing to " + mTraceFile + ". Waiting for traces to flush.");
             writeTraceToFileLocked();
             logAndPrintln(pw, "Trace written to " + mTraceFile + ".");
-            ProtoLogImpl.getSingleInstance().stopProtoLog(pw, true);
+            if (!android.tracing.Flags.perfettoProtologTracing()) {
+                ((LegacyProtoLogImpl) mProtoLog).stopProtoLog(pw, true);
+            }
             logAndPrintln(pw, "Start tracing to " + mTraceFile + ".");
             mBuffer.resetBuffer();
             mEnabled = mEnabledLockFree = true;
-            ProtoLogImpl.getSingleInstance().startProtoLog(pw);
+            if (!android.tracing.Flags.perfettoProtologTracing()) {
+                ((LegacyProtoLogImpl) mProtoLog).startProtoLog(pw);
+            }
         }
     }
 

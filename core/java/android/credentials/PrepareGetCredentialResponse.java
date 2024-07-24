@@ -22,10 +22,11 @@ import android.annotation.CallbackExecutor;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
-import android.app.Activity;
+import android.app.ActivityOptions;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.IntentSender;
+import android.os.Bundle;
 import android.os.CancellationSignal;
 import android.os.OutcomeReceiver;
 import android.util.Log;
@@ -36,15 +37,19 @@ import java.util.concurrent.Executor;
 /**
  * A response object that prefetches user app credentials and provides metadata about them. It can
  * then be used to issue the full credential retrieval flow via the
- * {@link CredentialManager#getCredential(PendingGetCredentialHandle, Activity, CancellationSignal,
+ * {@link CredentialManager#getCredential(Context, PendingGetCredentialHandle, CancellationSignal,
  * Executor, OutcomeReceiver)} method to perform the remaining flows such as consent collection
  * and credential selection, to officially retrieve a credential.
  */
 public final class PrepareGetCredentialResponse {
 
+    private static final Bundle OPTIONS_SENDER_BAL_OPTIN = ActivityOptions.makeBasic()
+            .setPendingIntentBackgroundActivityStartMode(
+                    ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOWED).toBundle();
+
     /**
      * A handle that represents a pending get-credential operation. Pass this handle to {@link
-     * CredentialManager#getCredential(PendingGetCredentialHandle, Activity, CancellationSignal,
+     * CredentialManager#getCredential(Context, PendingGetCredentialHandle, CancellationSignal,
      * Executor, OutcomeReceiver)} to perform the remaining flows to officially retrieve a
      * credential.
      */
@@ -81,7 +86,8 @@ public final class PrepareGetCredentialResponse {
                 @Override
                 public void onPendingIntent(PendingIntent pendingIntent) {
                     try {
-                        context.startIntentSender(pendingIntent.getIntentSender(), null, 0, 0, 0);
+                        context.startIntentSender(pendingIntent.getIntentSender(), null, 0, 0, 0,
+                                OPTIONS_SENDER_BAL_OPTIN);
                     } catch (IntentSender.SendIntentException e) {
                         Log.e(TAG, "startIntentSender() failed for intent for show()", e);
                         executor.execute(() -> callback.onError(
@@ -102,7 +108,8 @@ public final class PrepareGetCredentialResponse {
             });
 
             try {
-                context.startIntentSender(mPendingIntent.getIntentSender(), null, 0, 0, 0);
+                context.startIntentSender(mPendingIntent.getIntentSender(), null, 0, 0, 0,
+                        OPTIONS_SENDER_BAL_OPTIN);
             } catch (IntentSender.SendIntentException e) {
                 Log.e(TAG, "startIntentSender() failed for intent for show()", e);
                 executor.execute(() -> callback.onError(
@@ -144,7 +151,7 @@ public final class PrepareGetCredentialResponse {
 
     /**
      * Returns a handle that represents this pending get-credential operation. Pass this handle to
-     * {@link CredentialManager#getCredential(PendingGetCredentialHandle, Activity,
+     * {@link CredentialManager#getCredential(Context, PendingGetCredentialHandle,
      * CancellationSignal, Executor, OutcomeReceiver)} to perform the remaining flows to officially
      * retrieve a credential.
      */

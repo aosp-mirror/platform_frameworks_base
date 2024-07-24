@@ -16,6 +16,8 @@
 
 package com.android.settingslib;
 
+import static com.google.common.truth.Truth.assertThat;
+
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.RETURNS_DEEP_STUBS;
 import static org.mockito.Mockito.doReturn;
@@ -27,6 +29,7 @@ import static org.mockito.Mockito.when;
 import android.app.admin.DevicePolicyManager;
 import android.app.admin.DevicePolicyResourcesManager;
 import android.content.Context;
+import android.content.Intent;
 import android.view.View;
 import android.widget.TextView;
 
@@ -86,6 +89,19 @@ public class RestrictedPreferenceHelperTest {
     }
 
     @Test
+    public void bindPreference_disabledByEcm_shouldDisplayDisabledSummary() {
+        final TextView summaryView = mock(TextView.class, RETURNS_DEEP_STUBS);
+        when(mViewHolder.itemView.findViewById(android.R.id.summary))
+                .thenReturn(summaryView);
+
+        mHelper.setDisabledByEcm(mock(Intent.class));
+        mHelper.onBindViewHolder(mViewHolder);
+
+        verify(mPreference).setSummary(R.string.disabled_by_app_ops_text);
+        verify(summaryView, never()).setVisibility(View.GONE);
+    }
+
+    @Test
     public void bindPreference_notDisabled_shouldNotHideSummary() {
         final TextView summaryView = mock(TextView.class, RETURNS_DEEP_STUBS);
         when(mViewHolder.itemView.findViewById(android.R.id.summary))
@@ -118,5 +134,27 @@ public class RestrictedPreferenceHelperTest {
         mHelper.setDisabledByAdmin(new RestrictedLockUtils.EnforcedAdmin());
 
         verify(mRestrictedTopLevelPreference, never()).setEnabled(false);
+    }
+
+    /**
+     * Tests if the instance of {@link RestrictedLockUtils.EnforcedAdmin} is received by
+     * {@link RestrictedPreferenceHelper#setDisabledByAdmin(RestrictedLockUtils.EnforcedAdmin)} as a
+     * copy or as a reference.
+     */
+    @Test
+    public void setDisabledByAdmin_disablePreference_receivedEnforcedAdminIsNotAReference() {
+        RestrictedLockUtils.EnforcedAdmin enforcedAdmin =
+                new RestrictedLockUtils.EnforcedAdmin(/* component */ null,
+                        /* enforcedRestriction */ "some_restriction",
+                        /* userHandle */ null);
+
+        mHelper.setDisabledByAdmin(enforcedAdmin);
+
+        // If `setDisabledByAdmin` stored `enforcedAdmin` as a reference, then the following
+        // assignment would be propagated.
+        enforcedAdmin.enforcedRestriction = null;
+        assertThat(mHelper.mEnforcedAdmin.enforcedRestriction).isEqualTo("some_restriction");
+
+        assertThat(mHelper.isDisabledByAdmin()).isTrue();
     }
 }

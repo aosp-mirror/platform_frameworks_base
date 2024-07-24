@@ -16,6 +16,7 @@
 
 package android.hardware.radio;
 
+import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
@@ -61,54 +62,57 @@ import java.util.stream.Stream;
 @SystemApi
 public final class ProgramSelector implements Parcelable {
     /** Invalid program type.
-     * @deprecated use {@link ProgramIdentifier} instead
+     * @deprecated use {@link IdentifierType} instead
      */
     @Deprecated
     public static final int PROGRAM_TYPE_INVALID = 0;
     /** Analog AM radio (with or without RDS).
-     * @deprecated use {@link ProgramIdentifier} instead
+     * @deprecated use {@link IdentifierType} instead
      */
     @Deprecated
     public static final int PROGRAM_TYPE_AM = 1;
     /** analog FM radio (with or without RDS).
-     * @deprecated use {@link ProgramIdentifier} instead
+     * @deprecated use {@link IdentifierType} instead
      */
     @Deprecated
     public static final int PROGRAM_TYPE_FM = 2;
     /** AM HD Radio.
-     * @deprecated use {@link ProgramIdentifier} instead
+     * @deprecated use {@link Identifier} instead
      */
     @Deprecated
     public static final int PROGRAM_TYPE_AM_HD = 3;
     /** FM HD Radio.
-     * @deprecated use {@link ProgramIdentifier} instead
+     * @deprecated use {@link Identifier} instead
      */
     @Deprecated
     public static final int PROGRAM_TYPE_FM_HD = 4;
     /** Digital audio broadcasting.
-     * @deprecated use {@link ProgramIdentifier} instead
+     * @deprecated use {@link Identifier} instead
      */
     @Deprecated
     public static final int PROGRAM_TYPE_DAB = 5;
     /** Digital Radio Mondiale.
-     * @deprecated use {@link ProgramIdentifier} instead
+     * @deprecated use {@link Identifier} instead
      */
     @Deprecated
     public static final int PROGRAM_TYPE_DRMO = 6;
     /** SiriusXM Satellite Radio.
-     * @deprecated use {@link ProgramIdentifier} instead
+     * @deprecated use {@link Identifier} instead
      */
     @Deprecated
     public static final int PROGRAM_TYPE_SXM = 7;
     /** Vendor-specific, not synced across devices.
-     * @deprecated use {@link ProgramIdentifier} instead
+     * @deprecated use {@link Identifier} instead
      */
     @Deprecated
     public static final int PROGRAM_TYPE_VENDOR_START = 1000;
-    /** @deprecated use {@link ProgramIdentifier} instead */
+    /** @deprecated use {@link Identifier} instead */
     @Deprecated
     public static final int PROGRAM_TYPE_VENDOR_END = 1999;
-    /** @deprecated use {@link ProgramIdentifier} instead */
+    /**
+     * @deprecated use {@link Identifier} instead
+     * @removed mistakenly exposed previously
+     */
     @Deprecated
     @IntDef(prefix = { "PROGRAM_TYPE_" }, value = {
         PROGRAM_TYPE_INVALID,
@@ -123,6 +127,86 @@ public final class ProgramSelector implements Parcelable {
     @IntRange(from = PROGRAM_TYPE_VENDOR_START, to = PROGRAM_TYPE_VENDOR_END)
     @Retention(RetentionPolicy.SOURCE)
     public @interface ProgramType {}
+
+    /**
+     * Bitmask for HD radio subchannel 1
+     *
+     * <p>There are at most 8 HD radio subchannels of 1-based om HD radio standard. It is
+     * converted to 0-based index. 0 is the index of main program service (MPS). 1 to 7 are
+     * indexes of additional supplemental program services (SPS).
+     */
+    @FlaggedApi(Flags.FLAG_HD_RADIO_IMPROVED)
+    public static final int SUB_CHANNEL_HD_1 = 1 << 0;
+
+    /**
+     * Bitmask for HD radio subchannel 2
+     *
+     * <p>For further reference, see {@link #SUB_CHANNEL_HD_1}
+     */
+    @FlaggedApi(Flags.FLAG_HD_RADIO_IMPROVED)
+    public static final int SUB_CHANNEL_HD_2 = 1 << 1;
+
+    /**
+     * Bitmask for HD radio subchannel 3
+     *
+     * <p>For further reference, see {@link #SUB_CHANNEL_HD_1}
+     */
+    @FlaggedApi(Flags.FLAG_HD_RADIO_IMPROVED)
+    public static final int SUB_CHANNEL_HD_3 = 1 << 2;
+
+    /**
+     * Bitmask for HD radio subchannel 4
+     *
+     * <p>For further reference, see {@link #SUB_CHANNEL_HD_1}
+     */
+    @FlaggedApi(Flags.FLAG_HD_RADIO_IMPROVED)
+    public static final int SUB_CHANNEL_HD_4 = 1 << 3;
+
+    /**
+     * Bitmask for HD radio subchannel 5
+     *
+     * <p>For further reference, see {@link #SUB_CHANNEL_HD_1}
+     */
+    @FlaggedApi(Flags.FLAG_HD_RADIO_IMPROVED)
+    public static final int SUB_CHANNEL_HD_5 = 1 << 4;
+
+    /**
+     * Bitmask for HD radio subchannel 6
+     *
+     * <p>For further reference, see {@link #SUB_CHANNEL_HD_1}
+     */
+    @FlaggedApi(Flags.FLAG_HD_RADIO_IMPROVED)
+    public static final int SUB_CHANNEL_HD_6 = 1 << 5;
+
+    /**
+     * Bitmask for HD radio subchannel 7
+     *
+     * <p>For further reference, see {@link #SUB_CHANNEL_HD_1}
+     */
+    @FlaggedApi(Flags.FLAG_HD_RADIO_IMPROVED)
+    public static final int SUB_CHANNEL_HD_7 = 1 << 6;
+
+    /**
+     * Bitmask for HD radio subchannel 8
+     *
+     * <p>For further reference, see {@link #SUB_CHANNEL_HD_1}
+     */
+    @FlaggedApi(Flags.FLAG_HD_RADIO_IMPROVED)
+    public static final int SUB_CHANNEL_HD_8 = 1 << 7;
+
+    /** @hide */
+    @IntDef(prefix = { "SUB_CHANNEL_HD_" }, value = {
+            SUB_CHANNEL_HD_1,
+            SUB_CHANNEL_HD_2,
+            SUB_CHANNEL_HD_3,
+            SUB_CHANNEL_HD_4,
+            SUB_CHANNEL_HD_5,
+            SUB_CHANNEL_HD_6,
+            SUB_CHANNEL_HD_7,
+            SUB_CHANNEL_HD_8,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface HdSubChannel {}
 
     public static final int IDENTIFIER_TYPE_INVALID = 0;
     /**
@@ -147,19 +231,15 @@ public final class ProgramSelector implements Parcelable {
      *
      * <p>Consists of (from the LSB):
      * <li>
-     *     <ul>32bit: Station ID number.
-     *     <ul>4bit: HD_SUBCHANNEL.
-     *     <ul>18bit: AMFM_FREQUENCY.
+     *     <ul>32bit: Station ID number.</ul>
+     *     <ul>4bit: HD subchannel, see {@link #SUB_CHANNEL_HD_1}.</ul>
+     *     <ul>18bit: AMFM_FREQUENCY.</ul>
      * </li>
      *
      * <p>While station ID number should be unique globally, it sometimes gets
      * abused by broadcasters (i.e. not being set at all). To ensure local
      * uniqueness, AMFM_FREQUENCY_KHZ was added here. Global uniqueness is
-     * a best-effort - see {@link IDENTIFIER_TYPE_HD_STATION_NAME}.
-     *
-     * <p>HD Radio subchannel is a value in range of 0-7.
-     * This index is 0-based (where 0 is MPS and 1..7 are SPS),
-     * as opposed to HD Radio standard (where it's 1-based).
+     * a best-effort - see {@link #IDENTIFIER_TYPE_HD_STATION_NAME}.
      *
      * <p>The remaining bits should be set to zeros when writing on the chip side
      * and ignored when read.
@@ -191,7 +271,7 @@ public final class ProgramSelector implements Parcelable {
      */
     public static final int IDENTIFIER_TYPE_HD_STATION_NAME = 10004;
     /**
-     * @see {@link IDENTIFIER_TYPE_DAB_SID_EXT}
+     * @see #IDENTIFIER_TYPE_DAB_SID_EXT
      *
      * @deprecated use {@link #IDENTIFIER_TYPE_DAB_DMB_SID_EXT} instead
      */
@@ -202,9 +282,9 @@ public final class ProgramSelector implements Parcelable {
      *
      * <p>Consists of (from the LSB):
      * <li>
-     *     <ul>16bit: SId.
-     *     <ul>8bit: ECC code.
-     *     <ul>4bit: SCIdS.
+     *     <ul>16bit: SId.</ul>
+     *     <ul>8bit: ECC code.</ul>
+     *     <ul>4bit: SCIdS.</ul>
      * </li>
      *
      * <p>SCIdS (Service Component Identifier within the Service) value
@@ -232,24 +312,26 @@ public final class ProgramSelector implements Parcelable {
     public static final int IDENTIFIER_TYPE_DRMO_FREQUENCY = 10;
     /**
      * 1: AM, 2:FM
-     * @deprecated use {@link #IDENTIFIER_TYPE_DRMO_FREQUENCY} instead
      */
-    @Deprecated
     public static final int IDENTIFIER_TYPE_DRMO_MODULATION = 11;
     /**
      * 32bit primary identifier for SiriusXM Satellite Radio.
      */
     public static final int IDENTIFIER_TYPE_SXM_SERVICE_ID = 12;
-    /** 0-999 range */
+    /**
+     * 0-999 range
+     */
     public static final int IDENTIFIER_TYPE_SXM_CHANNEL = 13;
     /**
      * 44bit compound primary identifier for Digital Audio Broadcasting and
      * Digital Multimedia Broadcasting.
      *
      * <p>Consists of (from the LSB):
-     * - 32bit: SId;
-     * - 8bit: ECC code;
-     * - 4bit: SCIdS.
+     * <li>
+     *     <ul>32bit: SId;</ul>
+     *     <ul>8bit: ECC code;</ul>
+     *     <ul>4bit: SCIdS.</ul>
+     * </li>
      *
      * <p>SCIdS (Service Component Identifier within the Service) value
      * of 0 represents the main service, while 1 and above represents
@@ -260,6 +342,36 @@ public final class ProgramSelector implements Parcelable {
      */
     public static final int IDENTIFIER_TYPE_DAB_DMB_SID_EXT = 14;
     /**
+     * 64bit additional identifier for HD Radio representing station location.
+     *
+     * <p>Consists of (from the LSB):
+     * <li>
+     *     <ul>4 bit: Bits 0:3 of altitude</ul>
+     *     <ul>13 bit: Fractional bits of longitude</ul>
+     *     <ul>8 bit: Integer bits of longitude</ul>
+     *     <ul>1 bit: 0 for east and 1 for west for longitude</ul>
+     *     <ul>1 bit: 0, representing longitude</ul>
+     *     <ul>5 bit: pad of zeros separating longitude and latitude</ul>
+     *     <ul>4 bit: Bits 4:7 of altitude</ul>
+     *     <ul>13 bit: Fractional bits of latitude</ul>
+     *     <ul>8 bit: Integer bits of latitude</ul>
+     *     <ul>1 bit: 0 for north and 1 for south for latitude</ul>
+     *     <ul>1 bit: 1, representing latitude</ul>
+     *     <ul>5 bit: pad of zeros</ul>
+     * </li>
+     *
+     * <p>This format is defined in NRSC-5-C document: SY_IDD_1020s.
+     *
+     * <p>Due to Station ID abuse, some
+     * {@link #IDENTIFIER_TYPE_HD_STATION_ID_EXT} identifiers may be not
+     * globally unique. To provide a best-effort solution, the station’s
+     * broadcast antenna containing the latitude and longitude may be
+     * carried as additional identifier and may be used by the tuner hardware
+     * to double-check tuning.
+     */
+    @FlaggedApi(Flags.FLAG_HD_RADIO_IMPROVED)
+    public static final int IDENTIFIER_TYPE_HD_STATION_LOCATION = 15;
+    /**
      * Primary identifier for vendor-specific radio technology.
      * The value format is determined by a vendor.
      *
@@ -269,7 +381,7 @@ public final class ProgramSelector implements Parcelable {
      */
     public static final int IDENTIFIER_TYPE_VENDOR_START = PROGRAM_TYPE_VENDOR_START;
     /**
-     * @see {@link IDENTIFIER_TYPE_VENDOR_START}
+     * @see #IDENTIFIER_TYPE_VENDOR_START
      */
     public static final int IDENTIFIER_TYPE_VENDOR_END = PROGRAM_TYPE_VENDOR_END;
     /**
@@ -282,6 +394,7 @@ public final class ProgramSelector implements Parcelable {
      */
     @Deprecated
     public static final int IDENTIFIER_TYPE_VENDOR_PRIMARY_END = IDENTIFIER_TYPE_VENDOR_END;
+    /** @removed mistakenly exposed previously */
     @IntDef(prefix = { "IDENTIFIER_TYPE_" }, value = {
         IDENTIFIER_TYPE_INVALID,
         IDENTIFIER_TYPE_AMFM_FREQUENCY,
@@ -300,6 +413,7 @@ public final class ProgramSelector implements Parcelable {
         IDENTIFIER_TYPE_SXM_SERVICE_ID,
         IDENTIFIER_TYPE_SXM_CHANNEL,
         IDENTIFIER_TYPE_DAB_DMB_SID_EXT,
+        IDENTIFIER_TYPE_HD_STATION_LOCATION,
     })
     @IntRange(from = IDENTIFIER_TYPE_VENDOR_START, to = IDENTIFIER_TYPE_VENDOR_END)
     @Retention(RetentionPolicy.SOURCE)
@@ -657,7 +771,7 @@ public final class ProgramSelector implements Parcelable {
          * Returns whether this Identifier's type is considered a category when filtering
          * ProgramLists for category entries.
          *
-         * @see {@link ProgramList.Filter#areCategoriesIncluded()}
+         * @see ProgramList.Filter#areCategoriesIncluded
          * @return False if this identifier's type is not tuneable (e.g. DAB ensemble or
          *         vendor-specified type). True otherwise.
          */

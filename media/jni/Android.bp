@@ -18,7 +18,10 @@ license {
 cc_library_shared {
     name: "libmedia_jni",
 
-    defaults: ["libcodec2-internal-defaults"],
+    defaults: [
+        "aconfig_lib_cc_static_link.defaults",
+        "libcodec2-internal-defaults",
+    ],
     min_sdk_version: "",
 
     srcs: [
@@ -76,7 +79,6 @@ cc_library_shared {
         "libcamera_client",
         "libmtp",
         "libpiex",
-        "libprocessgroup",
         "libandroidfw",
         "libhidlallocatorutils",
         "libhidlbase",
@@ -122,6 +124,9 @@ cc_library_shared {
         "-Wunused",
         "-Wunreachable-code",
     ],
+
+    // TODO(b/330503129) Workaround build breakage.
+    lto_O0: true,
 }
 
 cc_library_shared {

@@ -29,30 +29,78 @@ building to check the log state (is enabled) before printing the print format st
 ### Kotlin
 
 Protolog tool does not yet have support for Kotlin code (see [b/168581922](https://b.corp.google.com/issues/168581922)).
-For logging in Kotlin, use the [KtProtoLog](frameworks/base/libs/WindowManager/Shell/src/com/android/wm/shell/util/KtProtoLog.kt)
+For logging in Kotlin, use the [KtProtoLog](/libs/WindowManager/Shell/src/com/android/wm/shell/util/KtProtoLog.kt)
 class which has a similar API to the Java ProtoLog class.
 
 ### Enabling ProtoLog command line logging
-Run these commands to enable protologs for both WM Core and WM Shell to print to logcat.
+Run these commands to enable protologs (in logcat) for WM Core ([list of all core tags](/core/java/com/android/internal/protolog/ProtoLogGroup.java)):
 ```shell
-adb shell wm logging enable-text NEW_FEATURE
-adb shell wm logging disable-text NEW_FEATURE
+adb shell wm logging enable-text TAG
+adb shell wm logging disable-text TAG
+```
+
+And these commands to enable protologs (in logcat) for WM Shell ([list of all shell tags](/libs/WindowManager/Shell/src/com/android/wm/shell/protolog/ShellProtoLogGroup.java)):
+```shell
+adb shell dumpsys activity service SystemUIService WMShell protolog enable-text TAG
+adb shell dumpsys activity service SystemUIService WMShell protolog enable-text TAG
 ```
 
 ## Winscope Tracing
 
 The Winscope tool is extremely useful in determining what is happening on-screen in both
 WindowManager and SurfaceFlinger.  Follow [go/winscope](http://go/winscope-help) to learn how to
-use the tool.
+use the tool.  This trace will contain all the information about the windows/activities/surfaces on
+screen.
 
-In addition, there is limited preliminary support for Winscope tracing componetns in the Shell,
-which involves adding trace fields to [wm_shell_trace.proto](frameworks/base/libs/WindowManager/Shell/proto/wm_shell_trace.proto)
-file and ensure it is updated as a part of `WMShell#writeToProto`.
+## WindowManager/SurfaceFlinger hierarchy dump
 
-Tracing can be started via the shell command (to be added to the Winscope tool as needed):
+A quick way to view the WindowManager hierarchy without a winscope trace is via the wm dumps:
 ```shell
-adb shell cmd statusbar tracing start
-adb shell cmd statusbar tracing stop
+adb shell dumpsys activity containers
+```
+
+Likewise, the SurfaceFlinger hierarchy can be dumped for inspection by running:
+```shell
+adb shell dumpsys SurfaceFlinger
+# Search output for "Layer Hierarchy"
+```
+
+## Tracing global SurfaceControl transaction updates
+
+While Winscope traces are very useful, it sometimes doesn't give you enough information about which
+part of the code is initiating the transaction updates.  In such cases, it can be helpful to get
+stack traces when specific surface transaction calls are made, which is possible by enabling the
+following system properties for example:
+```shell
+# Enabling
+adb shell setprop persist.wm.debug.sc.tx.log_match_call setAlpha  # matches the name of the SurfaceControlTransaction method
+adb shell setprop persist.wm.debug.sc.tx.log_match_name com.android.systemui # matches the name of the surface
+adb reboot
+adb logcat -s "SurfaceControlRegistry"
+
+# Disabling logging
+adb shell setprop persist.wm.debug.sc.tx.log_match_call \"\"
+adb shell setprop persist.wm.debug.sc.tx.log_match_name \"\"
+adb reboot
+```
+
+It is not necessary to set both `log_match_call` and `log_match_name`, but note logs can be quite
+noisy if unfiltered.
+
+## Tracing activity starts in the app process
+
+It's sometimes useful to know when to see a stack trace of when an activity starts in the app code
+(ie. if you are repro'ing a bug related to activity starts). You can enable this system property to
+get this trace:
+```shell
+# Enabling
+adb shell setprop persist.wm.debug.start_activity true
+adb reboot
+adb logcat -s "Instrumentation"
+
+# Disabling
+adb shell setprop persist.wm.debug.start_activity \"\"
+adb reboot
 ```
 
 ## Dumps
@@ -68,6 +116,21 @@ adb shell dumpsys activity service SystemUIService WMShell
 If information should be added to the dump, either:
 - Update `WMShell` if you are dumping SysUI state
 - Inject `ShellCommandHandler` into your Shell class, and add a dump callback
+
+## Shell commands
+
+It can be useful to add additional shell commands to drive and test specific interactions.
+
+To add a new command for your feature, inject a `ShellCommandHandler` into your class and add a
+shell command handler in your controller.
+
+```shell
+# List all available commands
+adb shell dumpsys activity service SystemUIService WMShell help
+
+# Run a specific command
+adb shell dumpsys activity service SystemUIService WMShell <cmd> <args> ...
+```
 
 ## Debugging in Android Studio
 

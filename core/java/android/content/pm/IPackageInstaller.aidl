@@ -16,6 +16,8 @@
 
 package android.content.pm;
 
+import android.app.PendingIntent;
+import android.content.pm.ArchivedPackageParcel;
 import android.content.pm.IPackageDeleteObserver2;
 import android.content.pm.IPackageInstallerCallback;
 import android.content.pm.IPackageInstallerSession;
@@ -24,6 +26,7 @@ import android.content.pm.ParceledListSlice;
 import android.content.pm.VersionedPackage;
 import android.content.IntentSender;
 import android.os.RemoteCallback;
+import android.os.UserHandle;
 
 import android.graphics.Bitmap;
 
@@ -59,6 +62,7 @@ interface IPackageInstaller {
     void installExistingPackage(String packageName, int installFlags, int installReason,
             in IntentSender statusReceiver, int userId, in List<String> whiteListedPermissions);
 
+    @EnforcePermission("INSTALL_PACKAGES")
     void setPermissionsResult(int sessionId, boolean accepted);
 
     void bypassNextStagedInstallerCheck(boolean value);
@@ -74,4 +78,19 @@ interface IPackageInstaller {
     void waitForInstallConstraints(String installerPackageName, in List<String> packageNames,
             in PackageInstaller.InstallConstraints constraints, in IntentSender callback,
             long timeout);
+
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(anyOf={android.Manifest.permission.DELETE_PACKAGES,android.Manifest.permission.REQUEST_DELETE_PACKAGES})")
+    void requestArchive(String packageName, String callerPackageName, int flags, in IntentSender statusReceiver, in UserHandle userHandle);
+
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(anyOf={android.Manifest.permission.INSTALL_PACKAGES,android.Manifest.permission.REQUEST_INSTALL_PACKAGES})")
+    void requestUnarchive(String packageName, String callerPackageName, in IntentSender statusReceiver, in UserHandle userHandle);
+
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.INSTALL_PACKAGES)")
+    void installPackageArchived(in ArchivedPackageParcel archivedPackageParcel,
+            in PackageInstaller.SessionParams params,
+            in IntentSender statusReceiver,
+            String installerPackageName, in UserHandle userHandle);
+
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(anyOf={android.Manifest.permission.INSTALL_PACKAGES,android.Manifest.permission.REQUEST_INSTALL_PACKAGES})")
+    void reportUnarchivalStatus(int unarchiveId, int status, long requiredStorageBytes, in PendingIntent userActionIntent, in UserHandle userHandle);
 }

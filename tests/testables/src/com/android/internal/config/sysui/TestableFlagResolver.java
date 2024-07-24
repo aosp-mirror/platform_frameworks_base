@@ -21,15 +21,39 @@ import java.util.Map;
 
 public class TestableFlagResolver implements SystemUiSystemPropertiesFlags.FlagResolver {
     private Map<String, Boolean> mOverrides = new HashMap<>();
+    private Map<String, Integer> mOverridesInt = new HashMap<>();
+    private Map<String, String> mOverridesString = new HashMap<>();
 
     @Override
     public boolean isEnabled(SystemUiSystemPropertiesFlags.Flag flag) {
         return mOverrides.getOrDefault(flag.mSysPropKey, flag.mDefaultValue);
     }
 
+    @Override
+    public int getIntValue(SystemUiSystemPropertiesFlags.Flag flag) {
+        return mOverridesInt.getOrDefault(flag.mSysPropKey, flag.mDefaultIntValue);
+    }
+
+    @Override
+    public String getStringValue(SystemUiSystemPropertiesFlags.Flag flag) {
+        return mOverridesString.getOrDefault(flag.mSysPropKey, flag.mDefaultStringValue);
+    }
+
     public TestableFlagResolver setFlagOverride(SystemUiSystemPropertiesFlags.Flag flag,
             boolean isEnabled) {
         mOverrides.put(flag.mSysPropKey, isEnabled);
+        return this;
+    }
+
+    public TestableFlagResolver setFlagOverride(SystemUiSystemPropertiesFlags.Flag flag,
+        int value) {
+        mOverridesInt.put(flag.mSysPropKey, value);
+        return this;
+    }
+
+    public TestableFlagResolver setFlagOverride(SystemUiSystemPropertiesFlags.Flag flag,
+        String value) {
+        mOverridesString.put(flag.mSysPropKey, value);
         return this;
     }
 }

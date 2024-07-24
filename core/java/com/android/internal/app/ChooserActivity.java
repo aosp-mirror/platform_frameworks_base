@@ -96,6 +96,7 @@ import android.provider.Downloads;
 import android.provider.OpenableColumns;
 import android.provider.Settings;
 import android.service.chooser.ChooserTarget;
+import android.service.chooser.Flags;
 import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.util.HashedStringCache;
@@ -777,9 +778,9 @@ public class ChooserActivity extends ResolverActivity implements
         return appPredictor;
     }
 
-    private AppPredictor.Callback createAppPredictorCallback(
+    private ResolverAppPredictorCallback createAppPredictorCallback(
             ChooserListAdapter chooserListAdapter) {
-        return resultList -> {
+        return new ResolverAppPredictorCallback(resultList -> {
             if (isFinishing() || isDestroyed()) {
                 return;
             }
@@ -811,7 +812,7 @@ public class ChooserActivity extends ResolverActivity implements
             }
             sendShareShortcutInfoList(shareShortcutInfos, chooserListAdapter, resultList,
                     chooserListAdapter.getUserHandle());
-        };
+        });
     }
 
     static SharedPreferences getPinnedSharedPrefs(Context context) {
@@ -2543,6 +2544,9 @@ public class ChooserActivity extends ResolverActivity implements
 
         @Override
         public boolean isComponentPinned(ComponentName name) {
+            if (Flags.legacyChooserPinningRemoval()) {
+                return false;
+            }
             return mPinnedSharedPrefs.getBoolean(name.flattenToString(), false);
         }
 
@@ -2559,10 +2563,13 @@ public class ChooserActivity extends ResolverActivity implements
             boolean filterLastUsed, UserHandle userHandle) {
         ChooserListAdapter chooserListAdapter = createChooserListAdapter(context, payloadIntents,
                 initialIntents, rList, filterLastUsed, userHandle);
-        AppPredictor.Callback appPredictorCallback = createAppPredictorCallback(chooserListAdapter);
+        ResolverAppPredictorCallback appPredictorCallbackWrapper =
+                createAppPredictorCallback(chooserListAdapter);
+        AppPredictor.Callback appPredictorCallback = appPredictorCallbackWrapper.asCallback();
         AppPredictor appPredictor = setupAppPredictorForUser(userHandle, appPredictorCallback);
         chooserListAdapter.setAppPredictor(appPredictor);
-        chooserListAdapter.setAppPredictorCallback(appPredictorCallback);
+        chooserListAdapter.setAppPredictorCallback(
+                appPredictorCallback, appPredictorCallbackWrapper);
         return new ChooserGridAdapter(chooserListAdapter);
     }
 
@@ -2867,7 +2874,6 @@ public class ChooserActivity extends ResolverActivity implements
     @Override
     public void onListRebuilt(ResolverListAdapter listAdapter, boolean rebuildComplete) {
         setupScrollListener();
-        maybeSetupGlobalLayoutListener();
 
         ChooserListAdapter chooserListAdapter = (ChooserListAdapter) listAdapter;
         if (chooserListAdapter.getUserHandle()
@@ -2965,28 +2971,6 @@ public class ChooserActivity extends ResolverActivity implements
                         }
 
                         elevatedView.setElevation(defaultElevation);
-                    }
-                });
-    }
-
-    private void maybeSetupGlobalLayoutListener() {
-        if (shouldShowTabs()) {
-            return;
-        }
-        final View recyclerView = mChooserMultiProfilePagerAdapter.getActiveAdapterView();
-        recyclerView.getViewTreeObserver()
-                .addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
-                    @Override
-                    public void onGlobalLayout() {
-                        // Fixes an issue were the accessibility border disappears on list creation.
-                        recyclerView.getViewTreeObserver().removeOnGlobalLayoutListener(this);
-                        final TextView titleView = findViewById(R.id.title);
-                        if (titleView != null) {
-                            titleView.setFocusable(true);
-                            titleView.setFocusableInTouchMode(true);
-                            titleView.requestFocus();
-                            titleView.requestAccessibilityFocus();
-                        }
                     }
                 });
     }
@@ -3167,6 +3151,10 @@ public class ChooserActivity extends ResolverActivity implements
     }
 
     private boolean shouldShowTargetDetails(TargetInfo ti) {
+        if (Flags.legacyChooserPinningRemoval()) {
+            // Never show the long press menu if we've removed pinning.
+            return false;
+        }
         ComponentName nearbyShare = getNearbySharingComponent();
         //  Suppress target details for nearby share to hide pin/unpin action
         boolean isNearbyShare = nearbyShare != null && nearbyShare.equals(
