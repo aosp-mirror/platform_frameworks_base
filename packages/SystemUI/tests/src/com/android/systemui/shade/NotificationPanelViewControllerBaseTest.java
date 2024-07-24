@@ -698,7 +698,6 @@ public class NotificationPanelViewControllerBaseTest extends SysuiTestCase {
                 mFalsingManager, new FalsingCollectorFake(),
                 mKeyguardStateController,
                 mStatusBarStateController,
-                mStatusBarWindowStateController,
                 mNotificationShadeWindowController,
                 mDozeLog, mDozeParameters, mCommandQueue, mVibratorHelper,
                 mLatencyTracker, mAccessibilityManager, 0, mUpdateMonitor,
