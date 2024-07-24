@@ -389,6 +389,7 @@ class AvalancheSuppressor(
                 .setTicker(titleStr)
                 .setContentTitle(titleStr)
                 .setContentText(textStr)
+                .setStyle(Notification.BigTextStyle().bigText(textStr))
                 .setSmallIcon(com.android.systemui.res.R.drawable.ic_settings)
                 .setCategory(Notification.CATEGORY_SYSTEM)
                 .setTimeoutAfter(/* one day in ms */ 24 * 60 * 60 * 1000L)
