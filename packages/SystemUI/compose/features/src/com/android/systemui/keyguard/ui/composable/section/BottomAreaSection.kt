@@ -98,7 +98,7 @@ constructor(
     ) {
         MovableElement(
             key = IndicationAreaElementKey,
-            modifier = modifier.shortcutPadding(),
+            modifier = modifier.indicationAreaPadding(),
         ) {
             content {
                 IndicationArea(
@@ -209,6 +209,11 @@ constructor(
                 horizontal = dimensionResource(R.dimen.keyguard_affordance_horizontal_offset)
             )
             .padding(bottom = dimensionResource(R.dimen.keyguard_affordance_vertical_offset))
+    }
+
+    @Composable
+    private fun Modifier.indicationAreaPadding(): Modifier {
+        return this.padding(bottom = dimensionResource(R.dimen.keyguard_indication_margin_bottom))
     }
 }
 

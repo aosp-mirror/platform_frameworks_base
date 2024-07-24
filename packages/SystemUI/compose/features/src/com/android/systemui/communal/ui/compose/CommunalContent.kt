@@ -98,13 +98,7 @@ constructor(
                         bottom = lockIconPlaceable[BlueprintAlignmentLines.LockIcon.Bottom],
                     )
 
-                val bottomAreaPlaceable =
-                    bottomAreaMeasurable.measure(
-                        noMinConstraints.copy(
-                            maxHeight =
-                                (constraints.maxHeight - lockIconBounds.bottom).coerceAtLeast(0)
-                        )
-                    )
+                val bottomAreaPlaceable = bottomAreaMeasurable.measure(noMinConstraints)
 
                 val communalGridPlaceable =
                     communalGridMeasurable.measure(
