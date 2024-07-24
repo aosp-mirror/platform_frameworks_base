@@ -678,12 +678,10 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
                         DirectBootAwareness.AUTO);
                 InputMethodSettingsRepository.put(userId, settings);
 
-                if (mConcurrentMultiUserModeEnabled || userId == mCurrentUserId) {
-                    postInputMethodSettingUpdatedLocked(true /* resetDefaultEnabledIme */, userId);
-                    // If the locale is changed, needs to reset the default ime
-                    resetDefaultImeLocked(mContext, userId);
-                    updateFromSettingsLocked(true, userId);
-                }
+                postInputMethodSettingUpdatedLocked(true /* resetDefaultEnabledIme */, userId);
+                // If the locale is changed, needs to reset the default ime
+                resetDefaultImeLocked(mContext, userId);
+                updateFromSettingsLocked(true, userId);
             }
         }
     }
