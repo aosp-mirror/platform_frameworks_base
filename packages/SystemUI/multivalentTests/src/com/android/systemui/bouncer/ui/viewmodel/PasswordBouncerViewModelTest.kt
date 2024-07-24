@@ -372,6 +372,7 @@ class PasswordBouncerViewModelTest : SysuiTestCase() {
         nonAuxiliarySubtypes: Int,
     ): InputMethodModel {
         return InputMethodModel(
+            userId = UUID.randomUUID().mostSignificantBits.toInt(),
             imeId = UUID.randomUUID().toString(),
             subtypes =
                 List(auxiliarySubtypes + nonAuxiliarySubtypes) {
