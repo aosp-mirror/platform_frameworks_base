@@ -58,7 +58,7 @@ public class CompanionVendorHelperDialogFragment extends DialogFragment {
     private Button mButton;
 
     interface CompanionVendorHelperDialogListener {
-        void onShowHelperDialogFailed();
+        void onShowHelperDialogFailed(CharSequence error);
         void onHelperDialogDismissed();
     }
 
@@ -114,7 +114,7 @@ public class CompanionVendorHelperDialogFragment extends DialogFragment {
             appLabel = getApplicationLabel(getContext(), packageName, userId);
         } catch (PackageManager.NameNotFoundException e) {
             Log.e(TAG, "Package u" + userId + "/" + packageName + " not found.");
-            mListener.onShowHelperDialogFailed();
+            mListener.onShowHelperDialogFailed(e.getMessage());
             return;
         }
 
