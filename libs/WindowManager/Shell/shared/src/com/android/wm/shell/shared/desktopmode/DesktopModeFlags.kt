@@ -35,7 +35,11 @@ enum class DesktopModeFlags(
 ) {
   // All desktop mode related flags will be added here
   DESKTOP_WINDOWING_MODE(Flags::enableDesktopWindowingMode, true),
-  WALLPAPER_ACTIVITY(Flags::enableDesktopWindowingWallpaperActivity, true);
+  WALLPAPER_ACTIVITY(Flags::enableDesktopWindowingWallpaperActivity, true),
+  MODALS_POLICY(Flags::enableDesktopWindowingModalsPolicy, true),
+  THEMED_APP_HEADERS(Flags::enableThemedAppHeaders, true),
+  QUICK_SWITCH(Flags::enableDesktopWindowingQuickSwitch, true),
+  APP_HEADER_WITH_TASK_DENSITY(Flags::enableAppHeaderWithTaskDensity, true);
 
   /**
    * Determines state of flag based on the actual flag and desktop mode developer option overrides.
