@@ -1524,10 +1524,9 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
      * @return true if and only if non-null valid token is specified
      */
     @GuardedBy("ImfLock.class")
-    private boolean calledWithValidTokenLocked(@NonNull IBinder token, @NonNull UserData userData) {
-        if (token == null) {
-            throw new InvalidParameterException("token must not be null.");
-        }
+    private static boolean calledWithValidTokenLocked(@NonNull IBinder token,
+            @NonNull UserData userData) {
+        Objects.requireNonNull(token, "token must not be null");
         final var bindingController = userData.mBindingController;
         if (token != bindingController.getCurToken()) {
             Slog.e(TAG, "Ignoring " + Debug.getCaller() + " due to an invalid token."
@@ -3448,6 +3447,17 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
     }
 
     @BinderThread
+    private void setHandwritingSurfaceNotTouchable(@NonNull IBinder token, boolean notTouchable,
+            @NonNull UserData userData) {
+        synchronized (ImfLock.class) {
+            if (!calledWithValidTokenLocked(token, userData)) {
+                return;
+            }
+            mHwController.setNotTouchable(notTouchable);
+        }
+    }
+
+    @BinderThread
     @Override
     public void reportPerceptibleAsync(IBinder windowToken, boolean perceptible) {
         Binder.withCleanCallingIdentity(() -> {
@@ -4148,7 +4158,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
             if (!calledWithValidTokenLocked(token, userData)) {
                 return;
             }
-            onImeSwitchButtonClickLocked(token, displayId, userData);
+            onImeSwitchButtonClickLocked(displayId, userData);
         }
     }
 
@@ -4160,13 +4170,8 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
         synchronized (ImfLock.class) {
             final int userId = resolveImeUserIdFromDisplayIdLocked(displayId);
             final var userData = getUserData(userId);
-            final var bindingController = userData.mBindingController;
-            final var curToken = bindingController.getCurToken();
-            if (curToken == null) {
-                return;
-            }
 
-            onImeSwitchButtonClickLocked(curToken, displayId, userData);
+            onImeSwitchButtonClickLocked(displayId, userData);
         }
     }
 
@@ -4174,17 +4179,15 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
      * Handles a click on the IME switch button. Depending on the number of enabled IME subtypes,
      * this will either switch to the next IME/subtype, or show the input method picker dialog.
      *
-     * @param token     The token identifying the input method that triggered this.
      * @param displayId The ID of the display where the input method picker dialog should be shown.
      * @param userData  The data of the user for which to switch IMEs or show the picker dialog.
      */
     @GuardedBy("ImfLock.class")
-    private void onImeSwitchButtonClickLocked(@NonNull IBinder token, int displayId,
-            @NonNull UserData userData) {
+    private void onImeSwitchButtonClickLocked(int displayId, @NonNull UserData userData) {
         final int userId = userData.mUserId;
         final var settings = InputMethodSettingsRepository.get(userId);
         if (hasMultipleSubtypesForSwitcher(true /* nonAuxOnly */, settings)) {
-            switchToNextInputMethodLocked(token, false /* onlyCurrentIme */, userData);
+            switchToNextInputMethodLocked(false /* onlyCurrentIme */, userData);
         } else {
             showInputMethodPickerFromSystem(
                     InputMethodManager.SHOW_IM_PICKER_MODE_INCLUDE_AUXILIARY_SUBTYPES, displayId);
@@ -4211,7 +4214,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
                     imi.getPackageName(), callingUid, userId, settings)) {
                 throw getExceptionForUnknownImeId(id);
             }
-            setInputMethodWithSubtypeIdLocked(token, id, NOT_A_SUBTYPE_ID, userId);
+            setInputMethodWithSubtypeIdLocked(id, NOT_A_SUBTYPE_ID, userId);
         }
     }
 
@@ -4230,12 +4233,10 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
                     imi.getPackageName(), callingUid, userId, settings)) {
                 throw getExceptionForUnknownImeId(id);
             }
-            if (subtype != null) {
-                setInputMethodWithSubtypeIdLocked(token, id,
-                        SubtypeUtils.getSubtypeIdFromHashCode(imi, subtype.hashCode()), userId);
-            } else {
-                setInputMethod(token, id, userData);
-            }
+            final int subtypeId = subtype != null
+                    ? SubtypeUtils.getSubtypeIdFromHashCode(imi, subtype.hashCode())
+                    : NOT_A_SUBTYPE_ID;
+            setInputMethodWithSubtypeIdLocked(id, subtypeId, userId);
         }
     }
 
@@ -4314,7 +4315,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
                             + ", from: " + bindingController.getSelectedMethodId() + ", "
                             + subtypeId);
                 }
-                setInputMethodWithSubtypeIdLocked(token, targetLastImiId, subtypeId, userId);
+                setInputMethodWithSubtypeIdLocked(targetLastImiId, subtypeId, userId);
                 return true;
             } else {
                 return false;
@@ -4329,12 +4330,12 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
             if (!calledWithValidTokenLocked(token, userData)) {
                 return false;
             }
-            return switchToNextInputMethodLocked(token, onlyCurrentIme, userData);
+            return switchToNextInputMethodLocked(onlyCurrentIme, userData);
         }
     }
 
     @GuardedBy("ImfLock.class")
-    private boolean switchToNextInputMethodLocked(@Nullable IBinder token, boolean onlyCurrentIme,
+    private boolean switchToNextInputMethodLocked(boolean onlyCurrentIme,
             @NonNull UserData userData) {
         final var bindingController = userData.mBindingController;
         final var currentImi = bindingController.getSelectedMethod();
@@ -4345,8 +4346,8 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
         if (nextSubtype == null) {
             return false;
         }
-        setInputMethodWithSubtypeIdLocked(token, nextSubtype.mImi.getId(),
-                nextSubtype.mSubtypeId, userData.mUserId);
+        setInputMethodWithSubtypeIdLocked(nextSubtype.mImi.getId(), nextSubtype.mSubtypeId,
+                userData.mUserId);
         return true;
     }
 
@@ -4798,14 +4799,10 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
             Slog.d(TAG, "Got the notification of a user action.");
         }
         synchronized (ImfLock.class) {
-            final var bindingController = userData.mBindingController;
-            if (bindingController.getCurToken() != token) {
-                if (DEBUG) {
-                    Slog.d(TAG, "Ignoring the user action notification from IMEs that are no longer"
-                            + " active.");
-                }
+            if (!calledWithValidTokenLocked(token, userData)) {
                 return;
             }
+            final var bindingController = userData.mBindingController;
             final InputMethodInfo imi = bindingController.getSelectedMethod();
             if (imi != null) {
                 userData.mSwitchingController.onUserActionLocked(imi,
@@ -4815,7 +4812,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
     }
 
     @BinderThread
-    private void applyImeVisibility(IBinder token, IBinder windowToken, boolean setVisible,
+    private void applyImeVisibility(@NonNull IBinder token, IBinder windowToken, boolean setVisible,
             @NonNull ImeTracker.Token statsToken, @NonNull UserData userData) {
         try {
             Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "IMMS.applyImeVisibility");
@@ -4841,8 +4838,12 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
     }
 
     @BinderThread
-    private void resetStylusHandwriting(int requestId) {
+    private void resetStylusHandwriting(@NonNull IBinder token, int requestId,
+            @NonNull UserData userData) {
         synchronized (ImfLock.class) {
+            if (!calledWithValidTokenLocked(token, userData)) {
+                return;
+            }
             final OptionalInt curRequest = mHwController.getCurrentRequestId();
             if (!curRequest.isPresent() || curRequest.getAsInt() != requestId) {
                 Slog.w(TAG, "IME requested to finish handwriting with a mismatched requestId: "
@@ -4854,31 +4855,14 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
     }
 
     @GuardedBy("ImfLock.class")
-    private void setInputMethodWithSubtypeIdLocked(IBinder token, String id, int subtypeId,
+    private void setInputMethodWithSubtypeIdLocked(String id, int subtypeId,
             @UserIdInt int userId) {
-        final var bindingController = getInputMethodBindingController(userId);
-        if (token == null) {
-            if (mContext.checkCallingOrSelfPermission(
-                    android.Manifest.permission.WRITE_SECURE_SETTINGS)
-                    != PackageManager.PERMISSION_GRANTED) {
-                throw new SecurityException(
-                        "Using null token requires permission "
-                                + android.Manifest.permission.WRITE_SECURE_SETTINGS);
-            }
-        } else if (bindingController.getCurToken() != token) {
-            Slog.w(TAG, "Ignoring setInputMethod of uid " + Binder.getCallingUid()
-                    + " token: " + token);
-            return;
-        } else {
-            // Called with current IME's token.
-            final InputMethodSettings settings = InputMethodSettingsRepository.get(userId);
-            if (settings.getMethodMap().get(id) != null
-                    && settings.getEnabledInputMethodListWithFilter(
-                            (info) -> info.getId().equals(id)).isEmpty()) {
-                throw new IllegalStateException("Requested IME is not enabled: " + id);
-            }
+        final InputMethodSettings settings = InputMethodSettingsRepository.get(userId);
+        if (settings.getMethodMap().get(id) != null
+                && settings.getEnabledInputMethodListWithFilter(
+                        (info) -> info.getId().equals(id)).isEmpty()) {
+            throw new IllegalStateException("Requested IME is not enabled: " + id);
         }
-
         final long ident = Binder.clearCallingIdentity();
         try {
             setInputMethodLocked(id, subtypeId, userId);
@@ -5284,9 +5268,15 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
     private record HandwritingRequest(int requestId, int pid, @NonNull UserData userData) { }
 
     @BinderThread
-    private void onStylusHandwritingReady(int requestId, int pid, @NonNull UserData userData) {
-        mHandler.obtainMessage(MSG_START_HANDWRITING,
-                new HandwritingRequest(requestId, pid, userData)).sendToTarget();
+    private void onStylusHandwritingReady(@NonNull IBinder token, int requestId, int pid,
+            @NonNull UserData userData) {
+        synchronized (ImfLock.class) {
+            if (!calledWithValidTokenLocked(token, userData)) {
+                return;
+            }
+            mHandler.obtainMessage(MSG_START_HANDWRITING,
+                    new HandwritingRequest(requestId, pid, userData)).sendToTarget();
+        }
     }
 
     private void handleSetInteractive(final boolean interactive) {
@@ -5759,6 +5749,22 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
         return canAccess;
     }
 
+    @BinderThread
+    private void switchKeyboardLayout(@NonNull IBinder token, int direction,
+            @NonNull UserData userData) {
+        synchronized (ImfLock.class) {
+            if (!calledWithValidTokenLocked(token, userData)) {
+                return;
+            }
+            final long ident = Binder.clearCallingIdentity();
+            try {
+                switchKeyboardLayoutLocked(direction, userData);
+            } finally {
+                Binder.restoreCallingIdentity(ident);
+            }
+        }
+    }
+
     @GuardedBy("ImfLock.class")
     private void switchKeyboardLayoutLocked(int direction, @NonNull UserData userData) {
         final int userId = userData.mUserId;
@@ -6094,17 +6100,11 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
     }
 
     @BinderThread
-    private IInputContentUriToken createInputContentUriToken(@Nullable IBinder token,
-            @Nullable Uri contentUri, @Nullable String packageName, @NonNull UserData userData) {
-        if (token == null) {
-            throw new NullPointerException("token");
-        }
-        if (packageName == null) {
-            throw new NullPointerException("packageName");
-        }
-        if (contentUri == null) {
-            throw new NullPointerException("contentUri");
-        }
+    @Nullable
+    private IInputContentUriToken createInputContentUriToken(@NonNull IBinder token,
+            @NonNull Uri contentUri, @NonNull String packageName, @NonNull UserData userData) {
+        Objects.requireNonNull(packageName, "packageName must not be null");
+        Objects.requireNonNull(contentUri, "contentUri must not be null");
         final String contentUriScheme = contentUri.getScheme();
         if (!"content".equals(contentUriScheme)) {
             throw new InvalidParameterException("contentUri must have content scheme");
@@ -6116,9 +6116,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
             if (bindingController.getSelectedMethodId() == null) {
                 return null;
             }
-            if (bindingController.getCurToken() != token) {
-                Slog.e(TAG, "Ignoring createInputContentUriToken mCurToken="
-                        + bindingController.getCurToken() + " token=" + token);
+            if (!calledWithValidTokenLocked(token, userData)) {
                 return null;
             }
             // We cannot simply distinguish a bad IME that reports an arbitrary package name from
@@ -6951,13 +6949,14 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
 
     private static final class InputMethodPrivilegedOperationsImpl
             extends IInputMethodPrivilegedOperations.Stub {
+        @NonNull
         private final InputMethodManagerService mImms;
         @NonNull
         private final IBinder mToken;
         @NonNull
         private final UserData mUserData;
 
-        InputMethodPrivilegedOperationsImpl(InputMethodManagerService imms,
+        InputMethodPrivilegedOperationsImpl(@NonNull InputMethodManagerService imms,
                 @NonNull IBinder token, @NonNull UserData userData) {
             mImms = imms;
             mToken = token;
@@ -6979,7 +6978,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
         @BinderThread
         @Override
         public void setHandwritingSurfaceNotTouchable(boolean notTouchable) {
-            mImms.mHwController.setNotTouchable(notTouchable);
+            mImms.setHandwritingSurfaceNotTouchable(mToken, notTouchable, mUserData);
         }
 
         @BinderThread
@@ -7118,29 +7117,19 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
         @BinderThread
         @Override
         public void onStylusHandwritingReady(int requestId, int pid) {
-            mImms.onStylusHandwritingReady(requestId, pid, mUserData);
+            mImms.onStylusHandwritingReady(mToken, requestId, pid, mUserData);
         }
 
         @BinderThread
         @Override
         public void resetStylusHandwriting(int requestId) {
-            mImms.resetStylusHandwriting(requestId);
+            mImms.resetStylusHandwriting(mToken, requestId, mUserData);
         }
 
         @BinderThread
         @Override
         public void switchKeyboardLayoutAsync(int direction) {
-            synchronized (ImfLock.class) {
-                if (!mImms.calledWithValidTokenLocked(mToken, mUserData)) {
-                    return;
-                }
-                final long ident = Binder.clearCallingIdentity();
-                try {
-                    mImms.switchKeyboardLayoutLocked(direction, mUserData);
-                } finally {
-                    Binder.restoreCallingIdentity(ident);
-                }
-            }
+            mImms.switchKeyboardLayout(mToken, direction, mUserData);
         }
     }
 }
