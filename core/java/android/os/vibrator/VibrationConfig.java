@@ -49,8 +49,22 @@ import java.util.Arrays;
  */
 public class VibrationConfig {
 
+    /**
+     * Hardcoded default scale level gain to be applied between each scale level to define their
+     * scale factor value.
+     *
+     * <p>Default gain defined as 3 dBs.
+     */
+    private static final float DEFAULT_SCALE_LEVEL_GAIN = 1.4f;
+
+    /**
+     * Hardcoded default amplitude to be used when device config is invalid, i.e. not in [1,255].
+     */
+    private static final int DEFAULT_AMPLITUDE = 255;
+
     // TODO(b/191150049): move these to vibrator static config file
     private final float mHapticChannelMaxVibrationAmplitude;
+    private final int mDefaultVibrationAmplitude;
     private final int mRampStepDurationMs;
     private final int mRampDownDurationMs;
     private final int mRequestVibrationParamsTimeoutMs;
@@ -75,8 +89,10 @@ public class VibrationConfig {
 
     /** @hide */
     public VibrationConfig(@Nullable Resources resources) {
+        mDefaultVibrationAmplitude = resources.getInteger(
+                com.android.internal.R.integer.config_defaultVibrationAmplitude);
         mHapticChannelMaxVibrationAmplitude = loadFloat(resources,
-                com.android.internal.R.dimen.config_hapticChannelMaxVibrationAmplitude, 0);
+                com.android.internal.R.dimen.config_hapticChannelMaxVibrationAmplitude);
         mRampDownDurationMs = loadInteger(resources,
                 com.android.internal.R.integer.config_vibrationWaveformRampDownDuration, 0);
         mRampStepDurationMs = loadInteger(resources,
@@ -87,9 +103,9 @@ public class VibrationConfig {
                 com.android.internal.R.array.config_requestVibrationParamsForUsages);
 
         mIgnoreVibrationsOnWirelessCharger = loadBoolean(resources,
-                com.android.internal.R.bool.config_ignoreVibrationsOnWirelessCharger, false);
+                com.android.internal.R.bool.config_ignoreVibrationsOnWirelessCharger);
         mKeyboardVibrationSettingsSupported = loadBoolean(resources,
-                com.android.internal.R.bool.config_keyboardVibrationSettingsSupported, false);
+                com.android.internal.R.bool.config_keyboardVibrationSettingsSupported);
 
         mDefaultAlarmVibrationIntensity = loadDefaultIntensity(resources,
                 com.android.internal.R.integer.config_defaultAlarmVibrationIntensity);
@@ -115,16 +131,16 @@ public class VibrationConfig {
         return value;
     }
 
-    private static float loadFloat(@Nullable Resources res, int resId, float defaultValue) {
-        return res != null ? res.getFloat(resId) : defaultValue;
+    private static float loadFloat(@Nullable Resources res, int resId) {
+        return res != null ? res.getFloat(resId) : 0f;
     }
 
     private static int loadInteger(@Nullable Resources res, int resId, int defaultValue) {
         return res != null ? res.getInteger(resId) : defaultValue;
     }
 
-    private static boolean loadBoolean(@Nullable Resources res, int resId, boolean defaultValue) {
-        return res != null ? res.getBoolean(resId) : defaultValue;
+    private static boolean loadBoolean(@Nullable Resources res, int resId) {
+        return res != null && res.getBoolean(resId);
     }
 
     private static int[] loadIntArray(@Nullable Resources res, int resId) {
@@ -142,6 +158,26 @@ public class VibrationConfig {
             return Float.NaN;
         }
         return mHapticChannelMaxVibrationAmplitude;
+    }
+
+    /**
+     * Return the device default vibration amplitude value to replace the
+     * {@link android.os.VibrationEffect#DEFAULT_AMPLITUDE} constant.
+     */
+    public int getDefaultVibrationAmplitude() {
+        if (mDefaultVibrationAmplitude < 1 || mDefaultVibrationAmplitude > 255) {
+            return DEFAULT_AMPLITUDE;
+        }
+        return mDefaultVibrationAmplitude;
+    }
+
+    /**
+     * Return the device default gain to be applied between scale levels to define the scale factor
+     * for each level.
+     */
+    public float getDefaultVibrationScaleLevelGain() {
+        // TODO(b/356407380): add device config for this
+        return DEFAULT_SCALE_LEVEL_GAIN;
     }
 
     /**
@@ -233,6 +269,7 @@ public class VibrationConfig {
     public String toString() {
         return "VibrationConfig{"
                 + "mIgnoreVibrationsOnWirelessCharger=" + mIgnoreVibrationsOnWirelessCharger
+                + ", mDefaultVibrationAmplitude=" + mDefaultVibrationAmplitude
                 + ", mHapticChannelMaxVibrationAmplitude=" + mHapticChannelMaxVibrationAmplitude
                 + ", mRampStepDurationMs=" + mRampStepDurationMs
                 + ", mRampDownDurationMs=" + mRampDownDurationMs
@@ -258,6 +295,7 @@ public class VibrationConfig {
         pw.println("VibrationConfig:");
         pw.increaseIndent();
         pw.println("ignoreVibrationsOnWirelessCharger = " + mIgnoreVibrationsOnWirelessCharger);
+        pw.println("defaultVibrationAmplitude = " + mDefaultVibrationAmplitude);
         pw.println("hapticChannelMaxAmplitude = " + mHapticChannelMaxVibrationAmplitude);
         pw.println("rampStepDurationMs = " + mRampStepDurationMs);
         pw.println("rampDownDurationMs = " + mRampDownDurationMs);
