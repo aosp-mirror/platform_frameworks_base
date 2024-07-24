@@ -61,20 +61,23 @@ class DesktopModeVisualIndicatorTest : ShellTestCase() {
 
     @Test
     fun testFullscreenRegionCalculation() {
-        val transitionHeight = context.resources.getDimensionPixelSize(
-            R.dimen.desktop_mode_fullscreen_from_desktop_height)
-        val fromFreeformWidth = mContext.resources.getDimensionPixelSize(
-            R.dimen.desktop_mode_fullscreen_from_desktop_width
-        )
         var testRegion = visualIndicator.calculateFullscreenRegion(displayLayout,
             WINDOWING_MODE_FULLSCREEN, CAPTION_HEIGHT)
         assertThat(testRegion.bounds).isEqualTo(Rect(0, -50, 2400, 2 * STABLE_INSETS.top))
         testRegion = visualIndicator.calculateFullscreenRegion(displayLayout,
             WINDOWING_MODE_FREEFORM, CAPTION_HEIGHT)
+
+        val transitionHeight = context.resources.getDimensionPixelSize(
+            R.dimen.desktop_mode_transition_region_thickness)
+        val toFullscreenScale = mContext.resources.getFloat(
+            R.dimen.desktop_mode_fullscreen_region_scale
+        )
+        val toFullscreenWidth = displayLayout.width() * toFullscreenScale
+
         assertThat(testRegion.bounds).isEqualTo(Rect(
-            DISPLAY_BOUNDS.width() / 2 - fromFreeformWidth / 2,
+            (DISPLAY_BOUNDS.width() / 2f - toFullscreenWidth / 2f).toInt(),
             -50,
-            DISPLAY_BOUNDS.width() / 2 + fromFreeformWidth / 2,
+            (DISPLAY_BOUNDS.width() / 2f + toFullscreenWidth / 2f).toInt(),
             transitionHeight))
         testRegion = visualIndicator.calculateFullscreenRegion(displayLayout,
             WINDOWING_MODE_MULTI_WINDOW, CAPTION_HEIGHT)

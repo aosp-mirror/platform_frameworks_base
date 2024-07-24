@@ -105,7 +105,7 @@ public class DesktopModeVisualIndicator {
         // If we are in freeform, we don't want a visible indicator in the "freeform" drag zone.
         IndicatorType result = IndicatorType.NO_INDICATOR;
         final int transitionAreaWidth = mContext.getResources().getDimensionPixelSize(
-                com.android.wm.shell.R.dimen.desktop_mode_transition_area_width);
+                com.android.wm.shell.R.dimen.desktop_mode_transition_region_thickness);
         // Because drags in freeform use task position for indicator calculation, we need to
         // account for the possibility of the task going off the top of the screen by captionHeight
         final int captionHeight = mContext.getResources().getDimensionPixelSize(
@@ -140,18 +140,19 @@ public class DesktopModeVisualIndicator {
         final Region region = new Region();
         int transitionHeight = windowingMode == WINDOWING_MODE_FREEFORM
                 ? mContext.getResources().getDimensionPixelSize(
-                com.android.wm.shell.R.dimen.desktop_mode_fullscreen_from_desktop_height)
+                com.android.wm.shell.R.dimen.desktop_mode_transition_region_thickness)
                 : 2 * layout.stableInsets().top;
-        // A thin, short Rect at the top of the screen.
+        // A Rect at the top of the screen that takes up the center 40%.
         if (windowingMode == WINDOWING_MODE_FREEFORM) {
-            int fromFreeformWidth = mContext.getResources().getDimensionPixelSize(
-                    com.android.wm.shell.R.dimen.desktop_mode_fullscreen_from_desktop_width);
-            region.union(new Rect((layout.width() / 2) - (fromFreeformWidth / 2),
+            final float toFullscreenScale = mContext.getResources().getFloat(
+                    R.dimen.desktop_mode_fullscreen_region_scale);
+            final float toFullscreenWidth = (layout.width() * toFullscreenScale);
+            region.union(new Rect((int) ((layout.width() / 2f) - (toFullscreenWidth / 2f)),
                     -captionHeight,
-                    (layout.width() / 2) + (fromFreeformWidth / 2),
+                    (int) ((layout.width() / 2f) + (toFullscreenWidth / 2f)),
                     transitionHeight));
         }
-        // A screen-wide, shorter Rect if the task is in fullscreen or split.
+        // A screen-wide Rect if the task is in fullscreen or split.
         if (windowingMode == WINDOWING_MODE_FULLSCREEN
                 || windowingMode == WINDOWING_MODE_MULTI_WINDOW) {
             region.union(new Rect(0,
