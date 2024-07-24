@@ -80,6 +80,7 @@ public class BubbleBarHandleView extends View {
                 outline.setPath(mPath);
             }
         });
+        setContentDescription(getResources().getString(R.string.handle_text));
     }
 
     /**

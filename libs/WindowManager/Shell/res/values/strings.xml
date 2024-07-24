@@ -263,7 +263,7 @@
     <!-- Accessibility text for the caption back button [CHAR LIMIT=NONE] -->
     <string name="back_button_text">Back</string>
     <!-- Accessibility text for the caption handle [CHAR LIMIT=NONE] -->
-    <string name="handle_text">Handle</string>
+    <string name="handle_text">App handle</string>
     <!-- Accessibility text for the handle menu app icon [CHAR LIMIT=NONE] -->
     <string name="app_icon_text">App Icon</string>
     <!-- Accessibility text for the handle fullscreen button [CHAR LIMIT=NONE] -->
