@@ -40,7 +40,7 @@ import androidx.test.uiautomator.Until
 import com.android.cts.input.DebugInputRule
 import com.android.cts.input.UinputTouchScreen
 
-import java.util.concurrent.TimeUnit
+import java.time.Duration
 
 import org.junit.After
 import org.junit.Assert.assertEquals
@@ -193,6 +193,6 @@ class AnrTest {
         val flags = " -W -n "
         val startCmd = "am start $flags $PACKAGE_NAME/.UnresponsiveGestureMonitorActivity"
         instrumentation.uiAutomation.executeShellCommand(startCmd)
-        waitForStableWindowGeometry(5L, TimeUnit.SECONDS)
+        waitForStableWindowGeometry(Duration.ofSeconds(5))
     }
 }
