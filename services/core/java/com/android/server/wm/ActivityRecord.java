@@ -10890,12 +10890,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
      * Whether we should send fake focus when the activity is resumed. This is done because some
      * game engines wait to get focus before drawing the content of the app.
      */
-    // TODO(b/263593361): Explore enabling compat fake focus for freeform.
-    // TODO(b/263592337): Explore enabling compat fake focus for fullscreen, e.g. for when
-    // covered with bubbles.
     boolean shouldSendCompatFakeFocus() {
-        return mLetterboxUiController.shouldSendFakeFocus() && inMultiWindowMode()
-                && !inPinnedWindowingMode() && !inFreeformWindowingMode();
+        return mAppCompatController.getAppCompatFocusOverrides().shouldSendFakeFocus();
     }
 
     boolean canCaptureSnapshot() {
