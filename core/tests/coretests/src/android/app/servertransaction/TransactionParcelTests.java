@@ -135,11 +135,11 @@ public class TransactionParcelTests {
     @Test
     public void testActivityResult() {
         // Write to parcel
-        ActivityResultItem item = ActivityResultItem.obtain(mActivityToken, resultInfoList());
+        final ActivityResultItem item = new ActivityResultItem(mActivityToken, resultInfoList());
         writeAndPrepareForReading(item);
 
         // Read from parcel and assert
-        ActivityResultItem result = ActivityResultItem.CREATOR.createFromParcel(mParcel);
+        final ActivityResultItem result = ActivityResultItem.CREATOR.createFromParcel(mParcel);
 
         assertEquals(item.hashCode(), result.hashCode());
         assertEquals(item, result);

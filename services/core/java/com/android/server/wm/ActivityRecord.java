@@ -4994,8 +4994,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             try {
                 final ArrayList<ResultInfo> list = new ArrayList<>();
                 list.add(new ResultInfo(resultWho, requestCode, resultCode, data, callerToken));
-                mAtmService.getLifecycleManager().scheduleTransactionItem(app.getThread(),
-                        ActivityResultItem.obtain(token, list));
+                final ActivityResultItem item = new ActivityResultItem(token, list);
+                mAtmService.getLifecycleManager().scheduleTransactionItem(app.getThread(), item);
                 return;
             } catch (Exception e) {
                 Slog.w(TAG, "Exception thrown sending result to " + this, e);
@@ -5006,9 +5006,9 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         if (forceSendForMediaProjection && attachedToProcess() && isState(STARTED, PAUSING, PAUSED,
                 STOPPING, STOPPED)) {
             // Build result to be returned immediately.
-            final ActivityResultItem activityResultItem = ActivityResultItem.obtain(
-                    token, List.of(new ResultInfo(resultWho, requestCode, resultCode, data,
-                            callerToken)));
+            final List<ResultInfo> infos = List.of(
+                    new ResultInfo(resultWho, requestCode, resultCode, data, callerToken));
+            final ActivityResultItem activityResultItem = new ActivityResultItem(token, infos);
             // When the activity result is delivered, the activity will transition to RESUMED.
             // Since the activity is only resumed so the result can be immediately delivered,
             // return it to its original lifecycle state.
