@@ -17,7 +17,6 @@
 package com.android.systemui.shade.ui.viewmodel
 
 import com.android.systemui.kosmos.Kosmos
-import com.android.systemui.kosmos.applicationCoroutineScope
 import com.android.systemui.media.controls.domain.pipeline.interactor.mediaCarouselInteractor
 import com.android.systemui.qs.footerActionsController
 import com.android.systemui.qs.footerActionsViewModelFactory
@@ -30,7 +29,6 @@ import com.android.systemui.unfold.domain.interactor.unfoldTransitionInteractor
 val Kosmos.shadeSceneViewModel: ShadeSceneViewModel by
     Kosmos.Fixture {
         ShadeSceneViewModel(
-            applicationScope = applicationCoroutineScope,
             shadeHeaderViewModel = shadeHeaderViewModel,
             qsSceneAdapter = qsSceneAdapter,
             brightnessMirrorViewModel = brightnessMirrorViewModel,

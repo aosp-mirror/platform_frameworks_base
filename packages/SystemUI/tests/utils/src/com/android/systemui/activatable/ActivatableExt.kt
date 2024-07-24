@@ -14,17 +14,12 @@
  * limitations under the License.
  */
 
-package com.android.systemui.qs.ui.viewmodel
+package com.android.systemui.activatable
 
-import com.android.systemui.kosmos.Kosmos
-import com.android.systemui.shade.domain.interactor.shadeInteractor
-import com.android.systemui.shade.ui.viewmodel.overlayShadeViewModel
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.test.TestScope
 
-val Kosmos.quickSettingsShadeSceneViewModel: QuickSettingsShadeSceneViewModel by
-    Kosmos.Fixture {
-        QuickSettingsShadeSceneViewModel(
-            shadeInteractor = shadeInteractor,
-            overlayShadeViewModel = overlayShadeViewModel,
-            quickSettingsContainerViewModel = quickSettingsContainerViewModel,
-        )
-    }
+/** Activates [activatable] for the duration of the test. */
+fun Activatable.activateIn(testScope: TestScope) {
+    testScope.backgroundScope.launch { activate() }
+}

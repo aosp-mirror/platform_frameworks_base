@@ -25,7 +25,6 @@ import com.android.compose.animation.scene.SwipeDirection
 import com.android.compose.animation.scene.UserAction
 import com.android.compose.animation.scene.UserActionResult
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.media.controls.domain.pipeline.interactor.MediaCarouselInteractor
 import com.android.systemui.qs.FooterActionsController
 import com.android.systemui.qs.footer.ui.viewmodel.FooterActionsViewModel
@@ -38,20 +37,17 @@ import com.android.systemui.shade.ui.viewmodel.ShadeHeaderViewModel
 import com.android.systemui.statusbar.notification.stack.ui.viewmodel.NotificationsPlaceholderViewModel
 import java.util.concurrent.atomic.AtomicBoolean
 import javax.inject.Inject
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.stateIn
 
 /** Models UI state and handles user input for the quick settings scene. */
 @SysUISingleton
 class QuickSettingsSceneViewModel
 @Inject
 constructor(
-    @Application private val applicationScope: CoroutineScope,
     val brightnessMirrorViewModel: BrightnessMirrorViewModel,
     val shadeHeaderViewModel: ShadeHeaderViewModel,
     val qsSceneAdapter: QSSceneAdapter,
@@ -61,55 +57,35 @@ constructor(
     sceneBackInteractor: SceneBackInteractor,
     val mediaCarouselInteractor: MediaCarouselInteractor,
 ) {
-    private val backScene: StateFlow<SceneKey> =
+    private val backScene: Flow<SceneKey> =
         sceneBackInteractor.backScene
             .filter { it != Scenes.QuickSettings }
             .map { it ?: Scenes.Shade }
-            .stateIn(
-                scope = applicationScope,
-                started = SharingStarted.WhileSubscribed(),
-                initialValue = Scenes.Shade,
-            )
 
-    val destinationScenes: StateFlow<Map<UserAction, UserActionResult>> =
+    val destinationScenes: Flow<Map<UserAction, UserActionResult>> =
         combine(
-                qsSceneAdapter.isCustomizerShowing,
-                backScene,
-                transform = ::destinationScenes,
-            )
-            .stateIn(
-                scope = applicationScope,
-                started = SharingStarted.WhileSubscribed(),
-                initialValue =
-                    destinationScenes(
-                        isCustomizing = qsSceneAdapter.isCustomizerShowing.value,
-                        backScene = backScene.value,
-                    ),
-            )
+            qsSceneAdapter.isCustomizerShowing,
+            backScene,
+        ) { isCustomizing, backScene ->
+            buildMap<UserAction, UserActionResult> {
+                if (isCustomizing) {
+                    // TODO(b/332749288) Empty map so there are no back handlers and back can close
+                    // customizer
 
-    val isMediaVisible: StateFlow<Boolean> = mediaCarouselInteractor.hasAnyMediaOrRecommendation
-
-    private fun destinationScenes(
-        isCustomizing: Boolean,
-        backScene: SceneKey?,
-    ): Map<UserAction, UserActionResult> {
-        return buildMap {
-            if (isCustomizing) {
-                // TODO(b/332749288) Empty map so there are no back handlers and back can close
-                // customizer
-
-                // TODO(b/330200163) Add an Up from Bottom to be able to collapse the shade
-                // while customizing
-            } else {
-                put(Back, UserActionResult(backScene ?: Scenes.Shade))
-                put(Swipe(SwipeDirection.Up), UserActionResult(backScene ?: Scenes.Shade))
-                put(
-                    Swipe(fromSource = Edge.Bottom, direction = SwipeDirection.Up),
-                    UserActionResult(SceneFamilies.Home),
-                )
+                    // TODO(b/330200163) Add an Up from Bottom to be able to collapse the shade
+                    // while customizing
+                } else {
+                    put(Back, UserActionResult(backScene))
+                    put(Swipe(SwipeDirection.Up), UserActionResult(backScene))
+                    put(
+                        Swipe(fromSource = Edge.Bottom, direction = SwipeDirection.Up),
+                        UserActionResult(SceneFamilies.Home),
+                    )
+                }
             }
         }
-    }
+
+    val isMediaVisible: StateFlow<Boolean> = mediaCarouselInteractor.hasAnyMediaOrRecommendation
 
     private val footerActionsControllerInitialized = AtomicBoolean(false)
 

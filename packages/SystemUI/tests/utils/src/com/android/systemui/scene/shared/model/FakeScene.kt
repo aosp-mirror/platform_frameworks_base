@@ -19,16 +19,12 @@ package com.android.systemui.scene.shared.model
 import com.android.compose.animation.scene.SceneKey
 import com.android.compose.animation.scene.UserAction
 import com.android.compose.animation.scene.UserActionResult
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.receiveAsFlow
-import kotlinx.coroutines.flow.stateIn
 
 class FakeScene(
-    val scope: CoroutineScope,
     override val key: SceneKey,
 ) : Scene {
     var isDestinationScenesBeingCollected = false
@@ -40,11 +36,6 @@ class FakeScene(
             .receiveAsFlow()
             .onStart { isDestinationScenesBeingCollected = true }
             .onCompletion { isDestinationScenesBeingCollected = false }
-            .stateIn(
-                scope = scope,
-                started = SharingStarted.WhileSubscribed(),
-                initialValue = emptyMap(),
-            )
 
     suspend fun setDestinationScenes(value: Map<UserAction, UserActionResult>) {
         destinationScenesChannel.send(value)

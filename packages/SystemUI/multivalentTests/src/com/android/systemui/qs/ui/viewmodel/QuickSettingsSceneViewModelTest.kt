@@ -93,7 +93,6 @@ class QuickSettingsSceneViewModelTest : SysuiTestCase() {
         sceneContainerStartable.start()
         underTest =
             QuickSettingsSceneViewModel(
-                applicationScope = testScope.backgroundScope,
                 brightnessMirrorViewModel = kosmos.brightnessMirrorViewModel,
                 shadeHeaderViewModel = kosmos.shadeHeaderViewModel,
                 qsSceneAdapter = qsFlexiglassAdapter,
