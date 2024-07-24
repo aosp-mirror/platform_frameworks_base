@@ -159,9 +159,9 @@ public class EnableZenModeDialog {
                         });
 
         if (mCancelIsNeutral) {
-            builder.setNeutralButton(R.string.cancel, null);
+            builder.setNeutralButton(android.R.string.cancel, null);
         } else {
-            builder.setNegativeButton(R.string.cancel, null);
+            builder.setNegativeButton(android.R.string.cancel, null);
         }
 
         View contentView = getContentView();
