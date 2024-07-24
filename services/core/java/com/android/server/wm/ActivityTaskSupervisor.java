@@ -2801,6 +2801,13 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
                                 targetActivity, activityOptions);
                     }
 
+                    if (callingPid > 0) {
+                        final WindowProcessController wpc = mService.mProcessMap
+                                .getProcess(callingPid);
+                        if (wpc != null) {
+                            targetActivity.updateLaunchSourceType(callingUid, wpc);
+                        }
+                    }
                     mService.getActivityStartController().postStartActivityProcessingForLastStarter(
                             task.getTopNonFinishingActivity(), ActivityManager.START_TASK_TO_FRONT,
                             task.getRootTask());
