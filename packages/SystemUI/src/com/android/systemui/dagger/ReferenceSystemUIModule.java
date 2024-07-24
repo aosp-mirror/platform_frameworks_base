@@ -77,6 +77,7 @@ import com.android.systemui.statusbar.policy.IndividualSensorPrivacyControllerIm
 import com.android.systemui.statusbar.policy.SensorPrivacyController;
 import com.android.systemui.statusbar.policy.SensorPrivacyControllerImpl;
 import com.android.systemui.toast.ToastModule;
+import com.android.systemui.touchpad.tutorial.TouchpadKeyboardTutorialModule;
 import com.android.systemui.unfold.SysUIUnfoldStartableModule;
 import com.android.systemui.unfold.UnfoldTransitionModule;
 import com.android.systemui.util.kotlin.SysUICoroutinesModule;
@@ -141,6 +142,7 @@ import javax.inject.Named;
         SysUIUnfoldStartableModule.class,
         UnfoldTransitionModule.Startables.class,
         ToastModule.class,
+        TouchpadKeyboardTutorialModule.class,
         VolumeModule.class,
         WallpaperModule.class,
         ShortcutHelperModule.class,
