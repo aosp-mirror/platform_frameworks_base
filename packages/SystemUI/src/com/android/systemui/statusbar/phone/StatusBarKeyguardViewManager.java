@@ -802,7 +802,10 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
         hideAlternateBouncer(false);
         if (mKeyguardStateController.isShowing() && !isBouncerShowing()) {
             if (SceneContainerFlag.isEnabled()) {
-                mDeviceEntryInteractorLazy.get().attemptDeviceEntry();
+                mSceneInteractorLazy.get().changeScene(
+                        Scenes.Bouncer,
+                        "primary bouncer requested"
+                );
             } else {
                 mPrimaryBouncerInteractor.show(scrimmed);
             }
