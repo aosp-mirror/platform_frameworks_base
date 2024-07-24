@@ -90,7 +90,7 @@ public class TransactionParcelTests {
         final ActivityWindowInfo activityWindowInfo = new ActivityWindowInfo();
         activityWindowInfo.set(true /* isEmbedded */, new Rect(0, 0, 500, 1000),
                 new Rect(0, 0, 500, 500));
-        ActivityConfigurationChangeItem item = ActivityConfigurationChangeItem.obtain(
+        final ActivityConfigurationChangeItem item = new ActivityConfigurationChangeItem(
                 mActivityToken, config(), activityWindowInfo);
         writeAndPrepareForReading(item);
 
@@ -235,12 +235,12 @@ public class TransactionParcelTests {
     @Test
     public void testPause() {
         // Write to parcel
-        PauseActivityItem item = PauseActivityItem.obtain(mActivityToken, true /* finished */,
+        final PauseActivityItem item = new PauseActivityItem(mActivityToken, true /* finished */,
                 true /* userLeaving */, true /* dontReport */, true /* autoEnteringPip */);
         writeAndPrepareForReading(item);
 
         // Read from parcel and assert
-        PauseActivityItem result = PauseActivityItem.CREATOR.createFromParcel(mParcel);
+        final PauseActivityItem result = PauseActivityItem.CREATOR.createFromParcel(mParcel);
 
         assertEquals(item.hashCode(), result.hashCode());
         assertEquals(item, result);
@@ -263,11 +263,11 @@ public class TransactionParcelTests {
     @Test
     public void testStop() {
         // Write to parcel
-        StopActivityItem item = StopActivityItem.obtain(mActivityToken);
+        final StopActivityItem item = new StopActivityItem(mActivityToken);
         writeAndPrepareForReading(item);
 
         // Read from parcel and assert
-        StopActivityItem result = StopActivityItem.CREATOR.createFromParcel(mParcel);
+        final StopActivityItem result = StopActivityItem.CREATOR.createFromParcel(mParcel);
 
         assertEquals(item.hashCode(), result.hashCode());
         assertEquals(item, result);
@@ -276,12 +276,12 @@ public class TransactionParcelTests {
     @Test
     public void testStart() {
         // Write to parcel
-        StartActivityItem item = StartActivityItem.obtain(mActivityToken,
+        final StartActivityItem item = new StartActivityItem(mActivityToken,
                 new ActivityOptions.SceneTransitionInfo());
         writeAndPrepareForReading(item);
 
         // Read from parcel and assert
-        StartActivityItem result = StartActivityItem.CREATOR.createFromParcel(mParcel);
+        final StartActivityItem result = StartActivityItem.CREATOR.createFromParcel(mParcel);
 
         assertEquals(item.hashCode(), result.hashCode());
         assertEquals(item, result);
@@ -290,11 +290,12 @@ public class TransactionParcelTests {
     @Test
     public void testClientTransaction() {
         // Write to parcel
-        NewIntentItem callback1 = NewIntentItem.obtain(mActivityToken, new ArrayList<>(), true);
-        ActivityConfigurationChangeItem callback2 = ActivityConfigurationChangeItem.obtain(
+        final NewIntentItem callback1 = NewIntentItem.obtain(
+                mActivityToken, new ArrayList<>(), true);
+        final ActivityConfigurationChangeItem callback2 = new ActivityConfigurationChangeItem(
                 mActivityToken, config(), new ActivityWindowInfo());
 
-        StopActivityItem lifecycleRequest = StopActivityItem.obtain(mActivityToken);
+        final StopActivityItem lifecycleRequest = new StopActivityItem(mActivityToken);
 
         final ClientTransaction transaction = new ClientTransaction();
         transaction.addTransactionItem(callback1);

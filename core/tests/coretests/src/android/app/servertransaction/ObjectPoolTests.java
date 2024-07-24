@@ -24,7 +24,6 @@ import static android.app.servertransaction.TestUtils.resultInfoList;
 import static org.junit.Assert.assertNotSame;
 
 import android.annotation.NonNull;
-import android.app.ActivityOptions;
 import android.app.servertransaction.TestUtils.LaunchActivityItemBuilder;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
@@ -72,12 +71,6 @@ public class ObjectPoolTests {
     // 1. Check if two obtained objects from pool are not the same.
     // 2. Check if the state of the object is cleared after recycling.
     // 3. Check if the same object is obtained from pool after recycling.
-
-    @Test
-    public void testRecycleActivityConfigurationChangeItem() {
-        testRecycle(() -> ActivityConfigurationChangeItem.obtain(mActivityToken, config(),
-                new ActivityWindowInfo()));
-    }
 
     @Test
     public void testRecycleActivityResultItem() {
@@ -153,22 +146,6 @@ public class ObjectPoolTests {
     @Test
     public void testRecycleNewIntentItem() {
         testRecycle(() -> NewIntentItem.obtain(mActivityToken, referrerIntentList(), false));
-    }
-
-    @Test
-    public void testRecyclePauseActivityItemItem() {
-        testRecycle(() -> PauseActivityItem.obtain(mActivityToken, true, true, true, true));
-    }
-
-    @Test
-    public void testRecycleStartActivityItem() {
-        testRecycle(() -> StartActivityItem.obtain(mActivityToken,
-                new ActivityOptions.SceneTransitionInfo()));
-    }
-
-    @Test
-    public void testRecycleStopItem() {
-        testRecycle(() -> StopActivityItem.obtain(mActivityToken));
     }
 
     private void testRecycle(@NonNull Supplier<? extends ObjectPoolItem> obtain) {

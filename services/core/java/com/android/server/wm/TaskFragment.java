@@ -1881,9 +1881,9 @@ class TaskFragment extends WindowContainer<WindowContainer> {
             EventLogTags.writeWmPauseActivity(prev.mUserId, System.identityHashCode(prev),
                     prev.shortComponentName, "userLeaving=" + userLeaving, reason);
 
-            mAtmService.getLifecycleManager().scheduleTransactionItem(prev.app.getThread(),
-                    PauseActivityItem.obtain(prev.token, prev.finishing, userLeaving,
-                            pauseImmediately, autoEnteringPip));
+            final PauseActivityItem item = new PauseActivityItem(prev.token, prev.finishing,
+                    userLeaving, pauseImmediately, autoEnteringPip);
+            mAtmService.getLifecycleManager().scheduleTransactionItem(prev.app.getThread(), item);
         } catch (Exception e) {
             // Ignore exception, if process died other code will cleanup.
             Slog.w(TAG, "Exception thrown during pause", e);
