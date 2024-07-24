@@ -3692,6 +3692,11 @@ public class AudioService extends IAudioService.Stub
 
         ensureValidStreamType(streamType);
         final int resolvedStream = sStreamVolumeAlias.get(streamType, /*valueIfKeyNotFound=*/-1);
+        if (resolvedStream == -1) {
+            Log.e(TAG, "adjustSuggestedStreamVolume: no stream vol alias for stream type "
+                    + streamType);
+            return;
+        }
 
         // Play sounds on STREAM_RING only.
         if ((flags & AudioManager.FLAG_PLAY_SOUND) != 0 &&
@@ -3809,6 +3814,10 @@ public class AudioService extends IAudioService.Stub
         // including with regard to silent mode control (e.g the use of STREAM_RING below and in
         // checkForRingerModeChange() in place of STREAM_RING or STREAM_NOTIFICATION)
         int streamTypeAlias = sStreamVolumeAlias.get(streamType, /*valueIfKeyNotFound=*/-1);
+        if (streamTypeAlias == -1) {
+            Log.e(TAG,
+                    "adjustStreamVolume: no stream vol alias for stream type " + streamType);
+        }
 
         VolumeStreamState streamState = getVssForStreamOrDefault(streamTypeAlias);
 
@@ -4077,8 +4086,8 @@ public class AudioService extends IAudioService.Stub
         synchronized (mSettingsLock) {
             synchronized (VolumeStreamState.class) {
                 List<Integer> streamsToMute = new ArrayList<>();
-                for (int stream = 0; stream < mStreamStates.size(); stream++) {
-                    final VolumeStreamState vss = mStreamStates.valueAt(stream);
+                for (int streamIdx = 0; streamIdx < mStreamStates.size(); streamIdx++) {
+                    final VolumeStreamState vss = mStreamStates.valueAt(streamIdx);
                     if (vss != null && streamAlias == sStreamVolumeAlias.get(vss.getStreamType())
                             && vss.isMutable()) {
                         if (!(mCameraSoundForced && (vss.getStreamType()
@@ -4219,6 +4228,10 @@ public class AudioService extends IAudioService.Stub
     /*package*/ void onSetStreamVolume(int streamType, int index, int flags, int device,
             String caller, boolean hasModifyAudioSettings, boolean canChangeMute) {
         final int stream = sStreamVolumeAlias.get(streamType, /*valueIfKeyNotFound=*/-1);
+        if (stream == -1) {
+            Log.e(TAG, "onSetStreamVolume: no stream vol alias for stream type " + stream);
+            return;
+        }
         // setting volume on ui sounds stream type also controls silent mode
         if (((flags & AudioManager.FLAG_ALLOW_RINGER_MODES) != 0) ||
                 (stream == getUiSoundsStreamType())) {
@@ -4868,6 +4881,10 @@ public class AudioService extends IAudioService.Stub
 
         ensureValidStreamType(streamType);
         int streamTypeAlias = sStreamVolumeAlias.get(streamType, /*valueIfKeyNotFound*/-1);
+        if (streamTypeAlias == -1) {
+            Log.e(TAG, "setStreamVolume: no stream vol alias for stream type " + streamType);
+            return;
+        }
         final VolumeStreamState streamState = getVssForStreamOrDefault(streamTypeAlias);
 
         if (!replaceStreamBtSco() && (streamType == AudioManager.STREAM_VOICE_CALL)
@@ -5586,9 +5603,9 @@ public class AudioService extends IAudioService.Stub
             return new ArrayList<>(Arrays.stream(AudioManager.getPublicStreamTypes())
                     .boxed().toList());
         }
-        ArrayList<Integer> res = new ArrayList(1);
-        for (int stream = 0; stream < sStreamVolumeAlias.size(); ++stream) {
-            final int streamAlias = sStreamVolumeAlias.valueAt(stream);
+        ArrayList<Integer> res = new ArrayList<>(1);
+        for (int streamIdx = 0; streamIdx < sStreamVolumeAlias.size(); ++streamIdx) {
+            final int streamAlias = sStreamVolumeAlias.valueAt(streamIdx);
             if (!res.contains(streamAlias)) {
                 res.add(streamAlias);
             }
@@ -6408,6 +6425,10 @@ public class AudioService extends IAudioService.Stub
                 final int device = getDeviceForStream(streamType);
                 final int streamAlias = sStreamVolumeAlias.get(streamType, /*valueIfKeyNotFound=*/
                         -1);
+                if (streamAlias == -1) {
+                    Log.e(TAG,
+                            "onUpdateAudioMode: no stream vol alias for stream type " + streamType);
+                }
 
                 if (DEBUG_MODE) {
                     Log.v(TAG, "onUpdateAudioMode: streamType=" + streamType
@@ -7614,8 +7635,8 @@ public class AudioService extends IAudioService.Stub
                 ? MIN_STREAM_VOLUME[AudioSystem.STREAM_ALARM]
                 : Math.min(idx + 1, MAX_STREAM_VOLUME[AudioSystem.STREAM_ALARM]);
         // update the VolumeStreamState for STREAM_ALARM and its aliases
-        for (int stream = 0; stream < sStreamVolumeAlias.size(); ++stream) {
-            final int streamAlias = sStreamVolumeAlias.valueAt(stream);
+        for (int streamIdx = 0; streamIdx < sStreamVolumeAlias.size(); ++streamIdx) {
+            final int streamAlias = sStreamVolumeAlias.valueAt(streamIdx);
             if (streamAlias == AudioSystem.STREAM_ALARM) {
                 getVssForStreamOrDefault(streamAlias).updateNoPermMinIndex(safeIndex);
             }
@@ -9454,7 +9475,7 @@ public class AudioService extends IAudioService.Stub
         // must be sync'd on mSettingsLock before VolumeStreamState.class
         @GuardedBy("VolumeStreamState.class")
         public void setAllIndexes(VolumeStreamState srcStream, String caller) {
-            if (mStreamType == srcStream.mStreamType) {
+            if (srcStream == null || mStreamType == srcStream.mStreamType) {
                 return;
             }
             int srcStreamType = srcStream.getStreamType();
