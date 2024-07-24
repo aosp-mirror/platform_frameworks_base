@@ -18,23 +18,19 @@ package com.android.systemui.statusbar.notification.collection.coordinator
 
 import com.android.systemui.dump.dumpManager
 import com.android.systemui.kosmos.Kosmos
-import com.android.systemui.kosmos.testDispatcher
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.plugins.statusbar.statusBarStateController
 import com.android.systemui.shade.domain.interactor.shadeInteractor
 import com.android.systemui.statusbar.notification.domain.interactor.seenNotificationsInteractor
 import com.android.systemui.statusbar.notification.stack.domain.interactor.headsUpNotificationInteractor
-import com.android.systemui.util.settings.fakeSettings
 
 var Kosmos.lockScreenMinimalismCoordinator by
     Kosmos.Fixture {
         LockScreenMinimalismCoordinator(
-            bgDispatcher = testDispatcher,
             dumpManager = dumpManager,
             headsUpInteractor = headsUpNotificationInteractor,
             logger = lockScreenMinimalismCoordinatorLogger,
             scope = testScope.backgroundScope,
-            secureSettings = fakeSettings,
             seenNotificationsInteractor = seenNotificationsInteractor,
             statusBarStateController = statusBarStateController,
             shadeInteractor = shadeInteractor,
