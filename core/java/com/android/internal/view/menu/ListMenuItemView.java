@@ -16,13 +16,10 @@
 
 package com.android.internal.view.menu;
 
-import android.app.AppGlobals;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
-import android.text.ClientFlags;
-import android.text.TextFlags;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -35,6 +32,8 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RadioButton;
 import android.widget.TextView;
+
+import com.android.text.flags.Flags;
 
 /**
  * The item view for each item in the ListView-based MenuViews.
@@ -62,8 +61,6 @@ public class ListMenuItemView extends LinearLayout
 
     private int mMenuType;
 
-    private boolean mUseNewContextMenu;
-
     private LayoutInflater mInflater;
 
     private boolean mForceShowIcon;
@@ -90,10 +87,6 @@ public class ListMenuItemView extends LinearLayout
 
         a.recycle();
         b.recycle();
-
-        mUseNewContextMenu = AppGlobals.getIntCoreSetting(
-                TextFlags.KEY_ENABLE_NEW_CONTEXT_MENU,
-                TextFlags.ENABLE_NEW_CONTEXT_MENU_DEFAULT ? 1 : 0) != 0;
     }
 
     public ListMenuItemView(Context context, AttributeSet attrs, int defStyleAttr) {
@@ -291,7 +284,7 @@ public class ListMenuItemView extends LinearLayout
     private void insertIconView() {
         LayoutInflater inflater = getInflater();
         mIconView = (ImageView) inflater.inflate(
-                mUseNewContextMenu && !ClientFlags.fixMisalignedContextMenu()
+                !Flags.fixMisalignedContextMenu()
                         ? com.android.internal.R.layout.list_menu_item_fixed_size_icon :
                         com.android.internal.R.layout.list_menu_item_icon,
                 this, false);
