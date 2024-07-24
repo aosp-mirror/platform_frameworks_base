@@ -5263,6 +5263,8 @@ final public class MediaCodec {
      *           main thread.)
      */
     public void setCallback(@Nullable /* MediaCodec. */ Callback cb, @Nullable Handler handler) {
+        boolean setCallbackStallFlag =
+            GetFlag(() -> android.media.codec.Flags.setCallbackStall());
         if (cb != null) {
             synchronized (mListenerLock) {
                 EventHandler newHandler = getEventHandlerOn(handler, mCallbackHandler);
@@ -5270,7 +5272,7 @@ final public class MediaCodec {
                 // even if we were to extend this to be callable dynamically, it must
                 // be called when codec is flushed, so no messages are pending.
                 if (newHandler != mCallbackHandler) {
-                    if (android.media.codec.Flags.setCallbackStall()) {
+                    if (setCallbackStallFlag) {
                         logAndRun(
                                 "[new handler] removeMessages(SET_CALLBACK)",
                                 () -> {
@@ -5289,7 +5291,7 @@ final public class MediaCodec {
                 }
             }
         } else if (mCallbackHandler != null) {
-            if (android.media.codec.Flags.setCallbackStall()) {
+            if (setCallbackStallFlag) {
                 logAndRun(
                         "[null handler] removeMessages(SET_CALLBACK)",
                         () -> {
