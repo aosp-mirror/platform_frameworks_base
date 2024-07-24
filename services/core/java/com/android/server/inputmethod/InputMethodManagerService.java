@@ -6814,67 +6814,47 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
                     final String nextIme;
                     final List<InputMethodInfo> nextEnabledImes;
                     final InputMethodSettings settings = InputMethodSettingsRepository.get(userId);
-                    if (userId == mCurrentUserId) {
-                        final var userData = getUserData(userId);
-                        if (Flags.refactorInsetsController()) {
-                            if (userData.mImeBindingState != null
-                                    && userData.mImeBindingState.mFocusedWindowClient != null
-                                    && userData.mImeBindingState.mFocusedWindowClient.mClient
-                                    != null) {
-                                userData.mImeBindingState.mFocusedWindowClient.mClient
-                                        .setImeVisibility(false,
-                                        null /* TODO(b329229469) initialize statsToken here? */);
-                            } else {
-                                // TODO(b329229469): ImeTracker?
-                            }
+                    final var userData = getUserData(userId);
+                    if (Flags.refactorInsetsController()) {
+                        if (userData.mImeBindingState != null
+                                && userData.mImeBindingState.mFocusedWindowClient != null
+                                && userData.mImeBindingState.mFocusedWindowClient.mClient
+                                != null) {
+                            userData.mImeBindingState.mFocusedWindowClient.mClient
+                                    .setImeVisibility(false,
+                                    null /* TODO(b329229469) initialize statsToken here? */);
                         } else {
-                            hideCurrentInputLocked(userData.mImeBindingState.mFocusedWindow,
-                                    0 /* flags */,
-                                    SoftInputShowHideReason.HIDE_RESET_SHELL_COMMAND, userId);
+                            // TODO(b329229469): ImeTracker?
                         }
-                        final var bindingController = userData.mBindingController;
-                        bindingController.unbindCurrentMethod();
-
-                        // Enable default IMEs, disable others
-                        var toDisable = settings.getEnabledInputMethodList();
-                        var defaultEnabled = InputMethodInfoUtils.getDefaultEnabledImes(
-                                mContext, settings.getMethodList());
-                        toDisable.removeAll(defaultEnabled);
-                        for (InputMethodInfo info : toDisable) {
-                            setInputMethodEnabledLocked(info.getId(), false, userId);
-                        }
-                        for (InputMethodInfo info : defaultEnabled) {
-                            setInputMethodEnabledLocked(info.getId(), true, userId);
-                        }
-                        // Choose new default IME, reset to none if no IME available.
-                        if (!chooseNewDefaultIMELocked(userId)) {
-                            resetSelectedInputMethodAndSubtypeLocked(null, userId);
-                        }
-                        updateInputMethodsFromSettingsLocked(true /* enabledMayChange */, userId);
-                        InputMethodUtils.setNonSelectedSystemImesDisabledUntilUsed(
-                                getPackageManagerForUser(mContext, settings.getUserId()),
-                                settings.getEnabledInputMethodList());
-                        nextIme = settings.getSelectedInputMethod();
-                        nextEnabledImes = settings.getEnabledInputMethodList();
                     } else {
-                        nextEnabledImes = InputMethodInfoUtils.getDefaultEnabledImes(mContext,
-                                settings.getMethodList());
-                        nextIme = InputMethodInfoUtils.getMostApplicableDefaultIME(
-                                nextEnabledImes).getId();
-
-                        // Reset enabled IMEs.
-                        final String[] nextEnabledImeIds = new String[nextEnabledImes.size()];
-                        for (int i = 0; i < nextEnabledImeIds.length; ++i) {
-                            nextEnabledImeIds[i] = nextEnabledImes.get(i).getId();
-                        }
-                        settings.putEnabledInputMethodsStr(InputMethodUtils.concatEnabledImeIds(
-                                "", nextEnabledImeIds));
-
-                        // Reset selected IME.
-                        settings.putSelectedInputMethod(nextIme);
-                        settings.putSelectedDefaultDeviceInputMethod(null);
-                        settings.putSelectedSubtype(NOT_A_SUBTYPE_ID);
+                        hideCurrentInputLocked(userData.mImeBindingState.mFocusedWindow,
+                                0 /* flags */,
+                                SoftInputShowHideReason.HIDE_RESET_SHELL_COMMAND, userId);
                     }
+                    final var bindingController = userData.mBindingController;
+                    bindingController.unbindCurrentMethod();
+
+                    // Enable default IMEs, disable others
+                    var toDisable = settings.getEnabledInputMethodList();
+                    var defaultEnabled = InputMethodInfoUtils.getDefaultEnabledImes(
+                            mContext, settings.getMethodList());
+                    toDisable.removeAll(defaultEnabled);
+                    for (InputMethodInfo info : toDisable) {
+                        setInputMethodEnabledLocked(info.getId(), false, userId);
+                    }
+                    for (InputMethodInfo info : defaultEnabled) {
+                        setInputMethodEnabledLocked(info.getId(), true, userId);
+                    }
+                    // Choose new default IME, reset to none if no IME available.
+                    if (!chooseNewDefaultIMELocked(userId)) {
+                        resetSelectedInputMethodAndSubtypeLocked(null, userId);
+                    }
+                    updateInputMethodsFromSettingsLocked(true /* enabledMayChange */, userId);
+                    InputMethodUtils.setNonSelectedSystemImesDisabledUntilUsed(
+                            getPackageManagerForUser(mContext, settings.getUserId()),
+                            settings.getEnabledInputMethodList());
+                    nextIme = settings.getSelectedInputMethod();
+                    nextEnabledImes = settings.getEnabledInputMethodList();
                     out.println("Reset current and enabled IMEs for user #" + userId);
                     out.println("  Selected: " + nextIme);
                     nextEnabledImes.forEach(ime -> out.println("   Enabled: " + ime.getId()));
