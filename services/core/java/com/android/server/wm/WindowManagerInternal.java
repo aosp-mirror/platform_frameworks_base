@@ -378,7 +378,7 @@ public abstract class WindowManagerInternal {
                 InputChannel source) {
             return state.register(display)
                 .thenApply(unused ->
-                    service.startDragAndDrop(source, state.getInputChannel()));
+                    service.startDragAndDrop(source.getToken(), state.getInputChannel()));
         }
 
         /**
