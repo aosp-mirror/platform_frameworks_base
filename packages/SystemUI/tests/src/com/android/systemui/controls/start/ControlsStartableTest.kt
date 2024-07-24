@@ -24,19 +24,28 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.content.pm.ApplicationInfo
 import android.content.pm.ServiceInfo
+import android.os.UserHandle
 import android.os.UserManager
 import android.testing.AndroidTestingRunner
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.broadcast.BroadcastDispatcher
+import com.android.systemui.common.data.repository.fakePackageChangeRepository
+import com.android.systemui.common.domain.interactor.packageChangeInteractor
+import com.android.systemui.common.shared.model.PackageChangeModel
 import com.android.systemui.controls.ControlsServiceInfo
 import com.android.systemui.controls.controller.ControlsController
 import com.android.systemui.controls.dagger.ControlsComponent
 import com.android.systemui.controls.management.ControlsListingController
 import com.android.systemui.controls.panels.AuthorizedPanelsRepository
-import com.android.systemui.controls.panels.FakeSelectedComponentRepository
+import com.android.systemui.controls.panels.SelectedComponentRepository
+import com.android.systemui.controls.panels.selectedComponentRepository
 import com.android.systemui.controls.ui.SelectedItem
+import com.android.systemui.kosmos.applicationCoroutineScope
+import com.android.systemui.kosmos.testDispatcher
+import com.android.systemui.kosmos.testScope
 import com.android.systemui.settings.UserTracker
+import com.android.systemui.testKosmos
 import com.android.systemui.util.concurrency.FakeExecutor
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.argumentCaptor
@@ -48,6 +57,9 @@ import com.android.systemui.util.mockito.whenever
 import com.android.systemui.util.time.FakeSystemClock
 import com.google.common.truth.Truth.assertThat
 import java.util.Optional
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.runCurrent
+import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -61,9 +73,12 @@ import org.mockito.Mockito.verifyZeroInteractions
 import org.mockito.Mockito.`when`
 import org.mockito.MockitoAnnotations
 
+@OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
 @RunWith(AndroidTestingRunner::class)
 class ControlsStartableTest : SysuiTestCase() {
+
+    private val kosmos = testKosmos()
 
     @Mock private lateinit var controlsController: ControlsController
     @Mock private lateinit var controlsListingController: ControlsListingController
@@ -72,7 +87,7 @@ class ControlsStartableTest : SysuiTestCase() {
     @Mock private lateinit var userManager: UserManager
     @Mock private lateinit var broadcastDispatcher: BroadcastDispatcher
 
-    private val preferredPanelsRepository = FakeSelectedComponentRepository()
+    private lateinit var preferredPanelsRepository: SelectedComponentRepository
 
     private lateinit var fakeExecutor: FakeExecutor
 
@@ -81,8 +96,10 @@ class ControlsStartableTest : SysuiTestCase() {
         MockitoAnnotations.initMocks(this)
         whenever(authorizedPanelsRepository.getPreferredPackages()).thenReturn(setOf())
         whenever(userManager.isUserUnlocked(anyInt())).thenReturn(true)
+        whenever(userTracker.userHandle).thenReturn(UserHandle.of(1))
 
         fakeExecutor = FakeExecutor(FakeSystemClock())
+        preferredPanelsRepository = kosmos.selectedComponentRepository
     }
 
     @Test
@@ -306,6 +323,100 @@ class ControlsStartableTest : SysuiTestCase() {
         verify(controlsController, never()).setPreferredSelection(any())
     }
 
+    @Test
+    fun testSelectedComponentIsUninstalled() =
+        with(kosmos) {
+            testScope.runTest {
+                val selectedComponent =
+                    SelectedComponentRepository.SelectedComponent(
+                        "panel",
+                        TEST_COMPONENT_PANEL,
+                        isPanel = true
+                    )
+                preferredPanelsRepository.setSelectedComponent(selectedComponent)
+                val activeUser = UserHandle.of(100)
+                whenever(userTracker.userHandle).thenReturn(activeUser)
+
+                createStartable(enabled = true).onBootCompleted()
+                fakeExecutor.runAllReady()
+                runCurrent()
+
+                assertThat(preferredPanelsRepository.getSelectedComponent())
+                    .isEqualTo(selectedComponent)
+                fakePackageChangeRepository.notifyChange(
+                    PackageChangeModel.Uninstalled(
+                        packageName = TEST_PACKAGE_PANEL,
+                        packageUid = UserHandle.getUid(100, 1)
+                    )
+                )
+                runCurrent()
+
+                assertThat(preferredPanelsRepository.getSelectedComponent()).isNull()
+            }
+        }
+
+    @Test
+    fun testSelectedComponentIsChanged() =
+        with(kosmos) {
+            testScope.runTest {
+                val selectedComponent =
+                    SelectedComponentRepository.SelectedComponent(
+                        "panel",
+                        TEST_COMPONENT_PANEL,
+                        isPanel = true
+                    )
+                preferredPanelsRepository.setSelectedComponent(selectedComponent)
+                val activeUser = UserHandle.of(100)
+                whenever(userTracker.userHandle).thenReturn(activeUser)
+
+                createStartable(enabled = true).onBootCompleted()
+                fakeExecutor.runAllReady()
+                runCurrent()
+
+                fakePackageChangeRepository.notifyChange(
+                    PackageChangeModel.Changed(
+                        packageName = TEST_PACKAGE_PANEL,
+                        packageUid = UserHandle.getUid(100, 1)
+                    )
+                )
+                runCurrent()
+
+                assertThat(preferredPanelsRepository.getSelectedComponent())
+                    .isEqualTo(selectedComponent)
+            }
+        }
+
+    @Test
+    fun testOtherPackageIsUninstalled() =
+        with(kosmos) {
+            testScope.runTest {
+                val selectedComponent =
+                    SelectedComponentRepository.SelectedComponent(
+                        "panel",
+                        TEST_COMPONENT_PANEL,
+                        isPanel = true
+                    )
+                preferredPanelsRepository.setSelectedComponent(selectedComponent)
+                val activeUser = UserHandle.of(100)
+                whenever(userTracker.userHandle).thenReturn(activeUser)
+
+                createStartable(enabled = true).onBootCompleted()
+                fakeExecutor.runAllReady()
+                runCurrent()
+
+                fakePackageChangeRepository.notifyChange(
+                    PackageChangeModel.Uninstalled(
+                        packageName = TEST_PACKAGE,
+                        packageUid = UserHandle.getUid(100, 1)
+                    )
+                )
+                runCurrent()
+
+                assertThat(preferredPanelsRepository.getSelectedComponent())
+                    .isEqualTo(selectedComponent)
+            }
+        }
+
     private fun setUpControlsListingControls(listings: List<ControlsServiceInfo>) {
         doAnswer { doReturn(listings).`when`(controlsListingController).getCurrentServices() }
             .`when`(controlsListingController)
@@ -326,11 +437,14 @@ class ControlsStartableTest : SysuiTestCase() {
                 }
             }
         return ControlsStartable(
+            kosmos.applicationCoroutineScope,
+            kosmos.testDispatcher,
             fakeExecutor,
             component,
             userTracker,
             authorizedPanelsRepository,
             preferredPanelsRepository,
+            kosmos.packageChangeInteractor,
             userManager,
             broadcastDispatcher,
         )

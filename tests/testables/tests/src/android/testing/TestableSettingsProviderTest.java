@@ -20,9 +20,9 @@ import android.content.ContentResolver;
 import android.provider.Settings;
 import android.provider.Settings.Global;
 import android.provider.Settings.Secure;
-import android.test.suitebuilder.annotation.SmallTest;
 
 import androidx.test.InstrumentationRegistry;
+import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
 import org.junit.Before;

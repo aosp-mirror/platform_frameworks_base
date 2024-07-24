@@ -225,7 +225,7 @@ interface IActivityTaskManager {
             boolean focused, boolean newSessionId);
     boolean requestAutofillData(in IAssistDataReceiver receiver, in Bundle receiverExtras,
             in IBinder activityToken, int flags);
-    boolean isAssistDataAllowedOnCurrentActivity();
+    boolean isAssistDataAllowed();
     boolean requestAssistDataForTask(in IAssistDataReceiver receiver, int taskId,
             in String callingPackageName, String callingAttributionTag);
 
@@ -236,6 +236,7 @@ interface IActivityTaskManager {
      *              {@link android.view.WindowManagerPolicyConstants#KEYGUARD_GOING_AWAY_FLAG_TO_SHADE}
      *              etc.
      */
+     @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.CONTROL_KEYGUARD)")
     void keyguardGoingAway(int flags);
 
     void suppressResizeConfigChanges(boolean suppress);
@@ -258,19 +259,20 @@ interface IActivityTaskManager {
      * @param taskId the id of the task to retrieve the sAutoapshots for
      * @param isLowResolution if set, if the snapshot needs to be loaded from disk, this will load
      *                          a reduced resolution of it, which is much faster
-     * @param takeSnapshotIfNeeded if set, call {@link #takeTaskSnapshot} to trigger the snapshot
-                                   if no cache exists.
      * @return a graphic buffer representing a screenshot of a task
      */
     android.window.TaskSnapshot getTaskSnapshot(
-            int taskId, boolean isLowResolution, boolean takeSnapshotIfNeeded);
+            int taskId, boolean isLowResolution);
 
     /**
      * Requests for a new snapshot to be taken for the task with the given id, storing it in the
      * task snapshot cache only if requested.
      *
      * @param taskId the id of the task to take a snapshot of
-     * @param updateCache whether to store the new snapshot in the system's task snapshot cache
+     * @param updateCache Whether to store the new snapshot in the system's task snapshot cache.
+     *                    If it is true, the snapshot can be either real content or app-theme mode
+     *                    depending on the attributes of app. Otherwise, the snapshot will be taken
+     *                    with real content.
      * @return a graphic buffer representing a screenshot of a task
      */
     android.window.TaskSnapshot takeTaskSnapshot(int taskId, boolean updateCache);
@@ -326,12 +328,14 @@ interface IActivityTaskManager {
      * A splash screen view has copied.
      */
     void onSplashScreenViewCopyFinished(int taskId,
-            in SplashScreenView.SplashScreenViewParcelable material);
+            in @nullable SplashScreenView.SplashScreenViewParcelable material);
 
     /**
      * When the Picture-in-picture state has changed.
+     * @param pipState the {@link PictureInPictureUiState} is sent to current pip task if there is
+     * any -or- the top most task (state like entering PiP does not require a pinned task).
      */
-    void onPictureInPictureStateChanged(in PictureInPictureUiState pipState);
+    void onPictureInPictureUiStateChanged(in PictureInPictureUiState pipState);
 
     /**
      * Re-attach navbar to the display during a recents transition.

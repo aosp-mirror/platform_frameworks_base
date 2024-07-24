@@ -54,6 +54,8 @@
 #define INT32_MAX ((int32_t)(2147483647))
 #endif
 
+using namespace std::literals;
+
 namespace android {
 
 #if defined(_WIN32)
@@ -237,12 +239,24 @@ void Res_png_9patch::serialize(const Res_png_9patch& patch, const int32_t* xDivs
     fill9patchOffsets(reinterpret_cast<Res_png_9patch*>(outData));
 }
 
-bool IsFabricatedOverlay(const std::string& path) {
-  return IsFabricatedOverlay(path.c_str());
+bool IsFabricatedOverlayName(std::string_view path) {
+  static constexpr auto suffixFrro = ".frro"sv;
+  static constexpr auto suffixIdmap = ".frro@idmap"sv;
+
+  return (path.size() > suffixFrro.size() && path.ends_with(suffixFrro))
+        || (path.size() > suffixIdmap.size() && path.ends_with(suffixIdmap));
 }
 
-bool IsFabricatedOverlay(const char* path) {
-  auto fd = base::unique_fd(base::utf8::open(path, O_RDONLY|O_CLOEXEC));
+bool IsFabricatedOverlay(std::string_view path) {
+  if (!IsFabricatedOverlayName(path)) {
+    return false;
+  }
+  std::string path_copy;
+  if (path[path.size()] != '\0') {
+    path_copy.assign(path);
+    path = path_copy;
+  }
+  auto fd = base::unique_fd(base::utf8::open(path.data(), O_RDONLY|O_CLOEXEC|O_BINARY));
   if (fd < 0) {
     return false;
   }
@@ -447,15 +461,19 @@ Res_png_9patch* Res_png_9patch::deserialize(void* inData)
 // --------------------------------------------------------------------
 // --------------------------------------------------------------------
 
-ResStringPool::ResStringPool()
-    : mError(NO_INIT), mOwnedData(NULL), mHeader(NULL), mCache(NULL)
-{
+ResStringPool::ResStringPool() : mError(NO_INIT), mOwnedData(NULL), mHeader(NULL), mCache(NULL) {
 }
 
-ResStringPool::ResStringPool(const void* data, size_t size, bool copyData)
-    : mError(NO_INIT), mOwnedData(NULL), mHeader(NULL), mCache(NULL)
-{
-    setTo(data, size, copyData);
+ResStringPool::ResStringPool(bool optimize_name_lookups) : ResStringPool() {
+  if (optimize_name_lookups) {
+    mIndexLookupCache.emplace();
+  }
+}
+
+ResStringPool::ResStringPool(const void* data, size_t size, bool copyData,
+                             bool optimize_name_lookups)
+    : ResStringPool(optimize_name_lookups) {
+  setTo(data, size, copyData);
 }
 
 ResStringPool::~ResStringPool()
@@ -683,6 +701,14 @@ status_t ResStringPool::setTo(incfs::map_ptr<void> data, size_t size, bool copyD
         mStylePoolSize = 0;
     }
 
+    if (mIndexLookupCache) {
+      if ((mHeader->flags & ResStringPool_header::UTF8_FLAG) != 0) {
+        mIndexLookupCache->first.reserve(mHeader->stringCount);
+      } else {
+        mIndexLookupCache->second.reserve(mHeader->stringCount);
+      }
+    }
+
     return (mError=NO_ERROR);
 }
 
@@ -707,6 +733,10 @@ void ResStringPool::uninit()
     if (mOwnedData) {
         free(mOwnedData);
         mOwnedData = NULL;
+    }
+    if (mIndexLookupCache) {
+      mIndexLookupCache->first.clear();
+      mIndexLookupCache->second.clear();
     }
 }
 
@@ -824,11 +854,11 @@ base::expected<StringPiece16, NullOrIOError> ResStringPool::stringAt(size_t idx)
 
                 // encLen must be less than 0x7FFF due to encoding.
                 if ((uint32_t)(u8str+*u8len-strings) < mStringPoolSize) {
-                    AutoMutex lock(mDecodeLock);
+                  AutoMutex lock(mCachesLock);
 
-                    if (mCache != NULL && mCache[idx] != NULL) {
-                        return StringPiece16(mCache[idx], *u16len);
-                    }
+                  if (mCache != NULL && mCache[idx] != NULL) {
+                    return StringPiece16(mCache[idx], *u16len);
+                  }
 
                     // Retrieve the actual length of the utf8 string if the
                     // encoded length was truncated
@@ -1093,12 +1123,24 @@ base::expected<size_t, NullOrIOError> ResStringPool::indexOfString(const char16_
             // block, start searching at the back.
             String8 str8(str, strLen);
             const size_t str8Len = str8.size();
+            std::optional<AutoMutex> cacheLock;
+            if (mIndexLookupCache) {
+              cacheLock.emplace(mCachesLock);
+              if (auto it = mIndexLookupCache->first.find(std::string_view(str8));
+                  it != mIndexLookupCache->first.end()) {
+                return it->second;
+              }
+            }
+
             for (int i=mHeader->stringCount-1; i>=0; i--) {
                 const base::expected<StringPiece, NullOrIOError> s = string8At(i);
                 if (UNLIKELY(IsIOError(s))) {
                     return base::unexpected(s.error());
                 }
                 if (s.has_value()) {
+                  if (mIndexLookupCache) {
+                    mIndexLookupCache->first.insert({*s, i});
+                  }
                     if (kDebugStringPoolNoisy) {
                         ALOGI("Looking at %s, i=%d\n", s->data(), i);
                     }
@@ -1151,20 +1193,32 @@ base::expected<size_t, NullOrIOError> ResStringPool::indexOfString(const char16_
             // most often this happens because we want to get IDs for style
             // span tags; since those always appear at the end of the string
             // block, start searching at the back.
+            std::optional<AutoMutex> cacheLock;
+            if (mIndexLookupCache) {
+              cacheLock.emplace(mCachesLock);
+              if (auto it = mIndexLookupCache->second.find({str, strLen});
+                  it != mIndexLookupCache->second.end()) {
+                return it->second;
+              }
+            }
             for (int i=mHeader->stringCount-1; i>=0; i--) {
                 const base::expected<StringPiece16, NullOrIOError> s = stringAt(i);
                 if (UNLIKELY(IsIOError(s))) {
                     return base::unexpected(s.error());
                 }
                 if (kDebugStringPoolNoisy) {
-                    ALOGI("Looking at %s, i=%d\n", String8(s->data(), s->size()).c_str(), i);
+                  ALOGI("Looking16 at %s, i=%d\n", String8(s->data(), s->size()).c_str(), i);
                 }
-                if (s.has_value() && strLen == s->size() &&
-                        strzcmp16(s->data(), s->size(), str, strLen) == 0) {
+                if (s.has_value()) {
+                  if (mIndexLookupCache) {
+                    mIndexLookupCache->second.insert({*s, i});
+                  }
+                  if (strLen == s->size() && strzcmp16(s->data(), s->size(), str, strLen) == 0) {
                     if (kDebugStringPoolNoisy) {
-                        ALOGI("MATCH!");
+                      ALOGI("MATCH16!");
                     }
                     return i;
+                  }
                 }
             }
         }
@@ -1769,13 +1823,21 @@ ResXMLTree::~ResXMLTree()
 
 status_t ResXMLTree::setTo(const void* data, size_t size, bool copyData)
 {
+    const ResChunk_header* chunk = nullptr;
+    const ResChunk_header* lastChunk = nullptr;
+
     uninit();
     mEventCode = START_DOCUMENT;
 
     if (!data || !size) {
         return (mError=BAD_TYPE);
     }
-
+    if (size < sizeof(ResXMLTree_header)) {
+        ALOGW("Bad XML block: total size %d is less than the header size %d\n",
+              int(size), int(sizeof(ResXMLTree_header)));
+        mError = BAD_TYPE;
+        goto done;
+    }
     if (copyData) {
         mOwnedData = malloc(size);
         if (mOwnedData == NULL) {
@@ -1792,9 +1854,15 @@ status_t ResXMLTree::setTo(const void* data, size_t size, bool copyData)
              (int)dtohs(mHeader->header.headerSize),
              (int)dtohl(mHeader->header.size), (int)size);
         mError = BAD_TYPE;
-        restart();
-        return mError;
+        goto done;
     }
+    if (dtohs(mHeader->header.type) != RES_XML_TYPE) {
+        ALOGW("Bad XML block: expected root block type %d, got %d\n",
+            int(RES_XML_TYPE), int(dtohs(mHeader->header.type)));
+        mError = BAD_TYPE;
+        goto done;
+    }
+
     mDataEnd = ((const uint8_t*)mHeader) + mSize;
 
     mStrings.uninit();
@@ -1804,9 +1872,8 @@ status_t ResXMLTree::setTo(const void* data, size_t size, bool copyData)
 
     // First look for a couple interesting chunks: the string block
     // and first XML node.
-    const ResChunk_header* chunk =
-        (const ResChunk_header*)(((const uint8_t*)mHeader) + dtohs(mHeader->header.headerSize));
-    const ResChunk_header* lastChunk = chunk;
+    chunk = (const ResChunk_header*)(((const uint8_t*)mHeader) + dtohs(mHeader->header.headerSize));
+    lastChunk = chunk;
     while (((const uint8_t*)chunk) < (mDataEnd-sizeof(ResChunk_header)) &&
            ((const uint8_t*)chunk) < (mDataEnd-dtohl(chunk->size))) {
         status_t err = validate_chunk(chunk, sizeof(ResChunk_header), mDataEnd, "XML");
@@ -1860,7 +1927,11 @@ status_t ResXMLTree::setTo(const void* data, size_t size, bool copyData)
     mError = mStrings.getError();
 
 done:
-    restart();
+    if (mError) {
+        uninit();
+    } else {
+        restart();
+    }
     return mError;
 }
 
@@ -2548,6 +2619,22 @@ bool ResTable_config::isLocaleBetterThan(const ResTable_config& o,
         return true;
     }
 
+    return false;
+}
+
+bool ResTable_config::isBetterThanBeforeLocale(const ResTable_config& o,
+        const ResTable_config* requested) const {
+    if (requested) {
+        if (imsi || o.imsi) {
+            if ((mcc != o.mcc) && requested->mcc) {
+                return (mcc);
+            }
+
+            if ((mnc != o.mnc) && requested->mnc) {
+                return (mnc);
+            }
+        }
+    }
     return false;
 }
 
@@ -5436,37 +5523,66 @@ bool ResTable::stringToInt(const char16_t* s, size_t len, Res_value* outValue)
     return U16StringToInt(s, len, outValue);
 }
 
-bool ResTable::stringToFloat(const char16_t* s, size_t len, Res_value* outValue)
-{
-    while (len > 0 && isspace16(*s)) {
-        s++;
-        len--;
+template <typename T>
+bool parseFloatingPoint(const char16_t* inBuf, size_t inLen, char* tempBuf,
+                                  const char** outEnd, T& out){
+    while (inLen > 0 && isspace16(*inBuf)) {
+        inBuf++;
+        inLen--;
     }
 
-    if (len <= 0) {
+    if (inLen <= 0) {
         return false;
     }
 
-    char buf[128];
     int i=0;
-    while (len > 0 && *s != 0 && i < 126) {
-        if (*s > 255) {
+    while (inLen > 0 && *inBuf != 0 && i < 126) {
+        if (*inBuf > 255) {
             return false;
         }
-        buf[i++] = *s++;
-        len--;
+        tempBuf[i++] = *inBuf++;
+        inLen--;
     }
 
-    if (len > 0) {
+    if (inLen > 0) {
         return false;
     }
-    if ((buf[0] < '0' || buf[0] > '9') && buf[0] != '.' && buf[0] != '-' && buf[0] != '+') {
+    if ((tempBuf[0] < '0' || tempBuf[0] > '9') && tempBuf[0] != '.' && tempBuf[0] != '-' && tempBuf[0] != '+') {
         return false;
     }
 
-    buf[i] = 0;
-    const char* end;
-    float f = strtof(buf, (char**)&end);
+    tempBuf[i] = 0;
+    if constexpr(std::is_same_v<T, float>) {
+        out = strtof(tempBuf, (char**)outEnd);
+    } else {
+        out = strtod(tempBuf, (char**)outEnd);
+    }
+    return true;
+}
+
+bool ResTable::stringToDouble(const char16_t* s, size_t len, double& d){
+    char buf[128];
+    const char* end = nullptr;
+    if (!parseFloatingPoint(s, len, buf, &end, d)) {
+        return false;
+    }
+
+    while (*end != 0 && isspace((unsigned char)*end)) {
+        end++;
+    }
+
+    return *end == 0;
+}
+
+bool ResTable::stringToFloat(const char16_t* s, size_t len, Res_value* outValue)
+{
+    char buf[128];
+    const char* end = nullptr;
+    float f;
+
+    if (!parseFloatingPoint(s, len, buf, &end, f)) {
+        return false;
+    }
 
     if (*end != 0 && !isspace((unsigned char)*end)) {
         // Might be a unit...
@@ -7217,9 +7333,6 @@ class IdmapTypeMapping {
 public:
     void add(uint32_t targetResId, uint32_t overlayResId) {
         uint8_t targetTypeId = Res_GETTYPE(targetResId);
-        if (mData.find(targetTypeId) == mData.end()) {
-            mData.emplace(targetTypeId, std::set<std::pair<uint32_t, uint32_t>>());
-        }
         auto& entries = mData[targetTypeId];
         entries.insert(std::make_pair(targetResId, overlayResId));
     }

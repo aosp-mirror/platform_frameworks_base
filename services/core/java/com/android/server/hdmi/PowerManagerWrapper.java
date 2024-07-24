@@ -18,7 +18,6 @@ package com.android.server.hdmi;
 
 import android.content.Context;
 import android.os.PowerManager;
-import android.os.PowerManager.WakeLock;
 
 /**
  * Abstraction around {@link PowerManager} to allow faking PowerManager in tests.
@@ -44,7 +43,54 @@ public class PowerManagerWrapper {
         mPowerManager.goToSleep(time, reason, flags);
     }
 
-    WakeLock newWakeLock(int levelAndFlags, String tag) {
-        return mPowerManager.newWakeLock(levelAndFlags, tag);
+    WakeLockWrapper newWakeLock(int levelAndFlags, String tag) {
+        return new DefaultWakeLockWrapper(mPowerManager.newWakeLock(levelAndFlags, tag));
+    }
+
+    /**
+     * "Default" wrapper for {@link PowerManager.WakeLock}, as opposed to a "Fake" wrapper for
+     * testing - see {@link FakePowerManagerWrapper.FakeWakeLockWrapper}.
+     *
+     * Stores an instance of {@link PowerManager.WakeLock} and directly passes method calls to that
+     * instance.
+     */
+    public static class DefaultWakeLockWrapper implements WakeLockWrapper {
+
+        private static final String TAG = "DefaultWakeLockWrapper";
+
+        private final PowerManager.WakeLock mWakeLock;
+
+        private DefaultWakeLockWrapper(PowerManager.WakeLock wakeLock) {
+            mWakeLock = wakeLock;
+        }
+
+        @Override
+        public void acquire(long timeout) {
+            mWakeLock.acquire(timeout);
+        }
+
+        @Override
+        public void acquire() {
+            mWakeLock.acquire();
+        }
+
+        /**
+         * @throws RuntimeException WakeLock can throw this exception if it is not released
+         * successfully.
+         */
+        @Override
+        public void release() throws RuntimeException {
+            mWakeLock.release();
+        }
+
+        @Override
+        public boolean isHeld() {
+            return mWakeLock.isHeld();
+        }
+
+        @Override
+        public void setReferenceCounted(boolean value) {
+            mWakeLock.setReferenceCounted(value);
+        }
     }
 }

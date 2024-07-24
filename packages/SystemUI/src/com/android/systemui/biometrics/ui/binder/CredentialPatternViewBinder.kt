@@ -4,7 +4,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
 import com.android.internal.widget.LockPatternUtils
 import com.android.internal.widget.LockPatternView
-import com.android.systemui.R
+import com.android.systemui.res.R
 import com.android.systemui.biometrics.ui.CredentialPatternView
 import com.android.systemui.biometrics.ui.CredentialView
 import com.android.systemui.biometrics.ui.viewmodel.CredentialViewModel

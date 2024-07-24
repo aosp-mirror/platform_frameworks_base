@@ -1,0 +1,9 @@
+package: "android.app.ondeviceintelligence.flags"
+container: "system"
+
+flag {
+    name: "enable_on_device_intelligence"
+    namespace: "ondeviceintelligence"
+    description: "Make methods on OnDeviceIntelligenceManager available for local inference."
+    bug: "304755128"
+}

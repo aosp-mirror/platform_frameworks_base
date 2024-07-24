@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Copyright (C) 2022 The Android Open Source Project
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~      http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+
+<manifest
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    package="android.companion.multidevices">
+
+  <uses-permission android:name="android.permission.INTERNET" />
+  <uses-permission android:name="android.permission.REQUEST_COMPANION_SELF_MANAGED" />
+  <uses-permission android:name="android.permission.REQUEST_OBSERVE_COMPANION_DEVICE_PRESENCE" />
+  <uses-permission android:name="android.permission.REQUEST_COMPANION_PROFILE_WATCH" />
+  <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+  <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+  <uses-permission android:name="android.permission.BLUETOOTH_ADVERTISE" />
+  <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
+  <uses-permission android:name="android.permission.DELIVER_COMPANION_MESSAGES" />
+
+  <uses-feature android:name="android.hardware.bluetooth" android:required="true"/>
+  <uses-feature android:name="android.software.companion_device_setup" />
+
+  <application>
+    <!-- Add any classes that implement the Snippet interface as meta-data, whose
+         value is a comma-separated string, each section being the package path
+         of a snippet class -->
+    <meta-data
+        android:name="mobly-snippets"
+        android:value="android.companion.multidevices.CompanionDeviceManagerSnippet" />
+  </application>
+
+  <!-- Add an instrumentation tag so that the app can be launched through an
+       instrument command. The runner `com.google.android.mobly.snippet.SnippetRunner`
+       is derived from `AndroidJUnitRunner`, and is required to use the
+       Mobly Snippet Lib. -->
+  <instrumentation
+      android:name="com.google.android.mobly.snippet.SnippetRunner"
+      android:targetPackage="android.companion.multidevices" />
+</manifest>

@@ -16,6 +16,8 @@
 
 package com.android.server.rollback;
 
+import static android.crashrecovery.flags.Flags.deprecateFlagsAndSettingsResets;
+
 import static com.android.server.rollback.RollbackManagerServiceImpl.sendFailure;
 
 import android.Manifest;
@@ -622,8 +624,10 @@ class Rollback {
                 parentSession.addChildSessionId(sessionId);
             }
 
-            // Clear flags.
-            RescueParty.resetDeviceConfigForPackages(packageNames);
+            if (!deprecateFlagsAndSettingsResets()) {
+                // Clear flags.
+                RescueParty.resetDeviceConfigForPackages(packageNames);
+            }
 
             Consumer<Intent> onResult = result -> {
                 mHandler.post(() -> {
@@ -967,7 +971,8 @@ class Rollback {
         for (PackageRollbackInfo pkg : info.getPackages()) {
             ipw.println(pkg.getPackageName()
                     + " " + pkg.getVersionRolledBackFrom().getLongVersionCode()
-                    + " -> " + pkg.getVersionRolledBackTo().getLongVersionCode());
+                    + " -> " + pkg.getVersionRolledBackTo().getLongVersionCode()
+                    + " [" + pkg.getRollbackDataPolicy() + "]");
         }
         ipw.decreaseIndent();
         if (isCommitted()) {

@@ -32,9 +32,9 @@ import android.widget.FrameLayout
 import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.systemui.FaceScanningOverlay
 import com.android.systemui.biometrics.AuthController
+import com.android.systemui.biometrics.data.repository.FacePropertyRepository
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Main
-import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.log.ScreenDecorationsLogger
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import java.util.concurrent.Executor
@@ -42,20 +42,20 @@ import javax.inject.Inject
 
 @SysUISingleton
 class FaceScanningProviderFactory @Inject constructor(
-    private val authController: AuthController,
-    private val context: Context,
-    private val statusBarStateController: StatusBarStateController,
-    private val keyguardUpdateMonitor: KeyguardUpdateMonitor,
-    @Main private val mainExecutor: Executor,
-    private val logger: ScreenDecorationsLogger,
-    private val featureFlags: FeatureFlags,
+        private val authController: AuthController,
+        private val context: Context,
+        private val statusBarStateController: StatusBarStateController,
+        private val keyguardUpdateMonitor: KeyguardUpdateMonitor,
+        @Main private val mainExecutor: Executor,
+        private val logger: ScreenDecorationsLogger,
+        private val facePropertyRepository: FacePropertyRepository,
 ) : DecorProviderFactory() {
     private val display = context.display
     private val displayInfo = DisplayInfo()
 
     override val hasProviders: Boolean
         get() {
-            if (authController.faceSensorLocation == null) {
+            if (facePropertyRepository.sensorLocation.value == null) {
                 return false
             }
 
@@ -88,7 +88,7 @@ class FaceScanningProviderFactory @Inject constructor(
                                         keyguardUpdateMonitor,
                                         mainExecutor,
                                         logger,
-                                        featureFlags,
+                                        facePropertyRepository,
                                 )
                         )
                     }
@@ -97,7 +97,7 @@ class FaceScanningProviderFactory @Inject constructor(
         }
 
     fun canShowFaceScanningAnim(): Boolean {
-        return hasProviders && keyguardUpdateMonitor.isFaceEnrolled
+        return hasProviders && keyguardUpdateMonitor.isFaceEnabledAndEnrolled
     }
 
     fun shouldShowFaceScanningAnim(): Boolean {
@@ -107,15 +107,15 @@ class FaceScanningProviderFactory @Inject constructor(
 }
 
 class FaceScanningOverlayProviderImpl(
-    override val alignedBound: Int,
-    private val authController: AuthController,
-    private val statusBarStateController: StatusBarStateController,
-    private val keyguardUpdateMonitor: KeyguardUpdateMonitor,
-    private val mainExecutor: Executor,
-    private val logger: ScreenDecorationsLogger,
-    private val featureFlags: FeatureFlags,
+        override val alignedBound: Int,
+        private val authController: AuthController,
+        private val statusBarStateController: StatusBarStateController,
+        private val keyguardUpdateMonitor: KeyguardUpdateMonitor,
+        private val mainExecutor: Executor,
+        private val logger: ScreenDecorationsLogger,
+        private val facePropertyRepository: FacePropertyRepository,
 ) : BoundDecorProvider() {
-    override val viewId: Int = com.android.systemui.R.id.face_scanning_anim
+    override val viewId: Int = com.android.systemui.res.R.id.face_scanning_anim
 
     override fun onReloadResAndMeasure(
         view: View,
@@ -148,7 +148,6 @@ class FaceScanningOverlayProviderImpl(
                 mainExecutor,
                 logger,
                 authController,
-                featureFlags
         )
         view.id = viewId
         view.setColor(tintColor)
@@ -167,8 +166,9 @@ class FaceScanningOverlayProviderImpl(
         layoutParams.let { lp ->
             lp.width = ViewGroup.LayoutParams.MATCH_PARENT
             lp.height = ViewGroup.LayoutParams.MATCH_PARENT
-            logger.faceSensorLocation(authController.faceSensorLocation)
-            authController.faceSensorLocation?.y?.let { faceAuthSensorHeight ->
+            logger.faceSensorLocation(facePropertyRepository.sensorLocation.value)
+            facePropertyRepository.sensorLocation.value?.y?.let {
+                faceAuthSensorHeight ->
                 val faceScanningHeight = (faceAuthSensorHeight * 2)
                 when (rotation) {
                     Surface.ROTATION_0, Surface.ROTATION_180 ->

@@ -25,6 +25,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.hardware.camera2.CameraManager;
 import android.os.Handler;
 import android.os.IBinder.DeathRecipient;
 import android.os.Looper;
@@ -49,6 +50,7 @@ import com.android.server.wm.ActivityMetricsLaunchObserver;
 import com.android.server.wm.ActivityMetricsLaunchObserverRegistry;
 import com.android.server.wm.ActivityTaskManagerInternal;
 
+import java.util.Arrays;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
 
@@ -58,10 +60,12 @@ import java.util.concurrent.TimeUnit;
 public final class ProfcollectForwardingService extends SystemService {
     public static final String LOG_TAG = "ProfcollectForwardingService";
 
-    private static final boolean DEBUG = Log.isLoggable(LOG_TAG, Log.DEBUG);
     private static final String INTENT_UPLOAD_PROFILES =
             "com.android.server.profcollect.UPLOAD_PROFILES";
     private static final long BG_PROCESS_INTERVAL = TimeUnit.HOURS.toMillis(4); // every 4 hours.
+
+    private int mUsageSetting;
+    private boolean mUploadEnabled;
 
     private IProfCollectd mIProfcollect;
     private static ProfcollectForwardingService sSelfService;
@@ -78,7 +82,7 @@ public final class ProfcollectForwardingService extends SystemService {
         public void onReceive(Context context, Intent intent) {
             if (INTENT_UPLOAD_PROFILES.equals(intent.getAction())) {
                 Log.d(LOG_TAG, "Received broadcast to pack and upload reports");
-                packAndUploadReport();
+                createAndUploadReport(sSelfService);
             }
         }
     };
@@ -90,6 +94,17 @@ public final class ProfcollectForwardingService extends SystemService {
             throw new AssertionError("only one service instance allowed");
         }
         sSelfService = this;
+
+        // Get "Usage & diagnostics" checkbox status. 1 is for enabled, 0 is for disabled.
+        try {
+            mUsageSetting = Settings.Global.getInt(context.getContentResolver(), "multi_cb");
+        } catch (SettingNotFoundException e) {
+            Log.e(LOG_TAG, "Usage setting not found: " + e.getMessage());
+            mUsageSetting = -1;
+        }
+
+        mUploadEnabled =
+            context.getResources().getBoolean(R.bool.config_profcollectReportUploaderEnabled);
 
         final IntentFilter filter = new IntentFilter();
         filter.addAction(INTENT_UPLOAD_PROFILES);
@@ -106,9 +121,6 @@ public final class ProfcollectForwardingService extends SystemService {
 
     @Override
     public void onStart() {
-        if (DEBUG) {
-            Log.d(LOG_TAG, "Profcollect forwarding service start");
-        }
         connectNativeService();
     }
 
@@ -221,7 +233,6 @@ public final class ProfcollectForwardingService extends SystemService {
          */
         public static void schedule(Context context) {
             JobScheduler js = context.getSystemService(JobScheduler.class);
-
             js.schedule(new JobInfo.Builder(JOB_IDLE_PROCESS, JOB_SERVICE_NAME)
                     .setRequiresDeviceIdle(true)
                     .setRequiresCharging(true)
@@ -232,22 +243,8 @@ public final class ProfcollectForwardingService extends SystemService {
 
         @Override
         public boolean onStartJob(JobParameters params) {
-            if (DEBUG) {
-                Log.d(LOG_TAG, "Starting background process job");
-            }
-
-            BackgroundThread.get().getThreadHandler().post(
-                    () -> {
-                        try {
-                            if (sSelfService.mIProfcollect == null) {
-                                return;
-                            }
-                            sSelfService.mIProfcollect.process();
-                        } catch (RemoteException e) {
-                            Log.e(LOG_TAG, "Failed to process profiles in background: "
-                                    + e.getMessage());
-                        }
-                    });
+            createAndUploadReport(sSelfService);
+            jobFinished(params, false);
             return true;
         }
 
@@ -263,6 +260,7 @@ public final class ProfcollectForwardingService extends SystemService {
         BackgroundThread.get().getThreadHandler().post(
                 () -> {
                     registerAppLaunchObserver();
+                    registerCameraOpenObserver();
                     registerDex2oatObserver();
                     registerOTAObserver();
                 });
@@ -287,12 +285,9 @@ public final class ProfcollectForwardingService extends SystemService {
                 "applaunch_trace_freq", 2);
         int randomNum = ThreadLocalRandom.current().nextInt(100);
         if (randomNum < traceFrequency) {
-            if (DEBUG) {
-                Log.d(LOG_TAG, "Tracing on app launch event: " + packageName);
-            }
             BackgroundThread.get().getThreadHandler().post(() -> {
                 try {
-                    mIProfcollect.trace_once("applaunch");
+                    mIProfcollect.trace_system("applaunch");
                 } catch (RemoteException e) {
                     Log.e(LOG_TAG, "Failed to initiate trace: " + e.getMessage());
                 }
@@ -329,19 +324,14 @@ public final class ProfcollectForwardingService extends SystemService {
                 "dex2oat_trace_freq", 25);
         int randomNum = ThreadLocalRandom.current().nextInt(100);
         if (randomNum < traceFrequency) {
-            if (DEBUG) {
-                Log.d(LOG_TAG, "Tracing on dex2oat event");
-            }
-            BackgroundThread.get().getThreadHandler().post(() -> {
+            // Dex2oat could take a while before it starts. Add a short delay before start tracing.
+            BackgroundThread.get().getThreadHandler().postDelayed(() -> {
                 try {
-                    // Dex2oat could take a while before it starts. Add a short delay before start
-                    // tracing.
-                    Thread.sleep(1000);
-                    mIProfcollect.trace_once("dex2oat");
-                } catch (RemoteException | InterruptedException e) {
+                    mIProfcollect.trace_system("dex2oat");
+                } catch (RemoteException e) {
                     Log.e(LOG_TAG, "Failed to initiate trace: " + e.getMessage());
                 }
-            });
+            }, 1000);
         }
     }
 
@@ -350,13 +340,8 @@ public final class ProfcollectForwardingService extends SystemService {
         updateEngine.bind(new UpdateEngineCallback() {
             @Override
             public void onStatusUpdate(int status, float percent) {
-                if (DEBUG) {
-                    Log.d(LOG_TAG, "Received OTA status update, status: " + status + ", percent: "
-                            + percent);
-                }
-
                 if (status == UpdateEngine.UpdateStatusConstants.UPDATED_NEED_REBOOT) {
-                    packAndUploadReport();
+                    createAndUploadReport(sSelfService);
                 }
             }
 
@@ -367,41 +352,69 @@ public final class ProfcollectForwardingService extends SystemService {
         });
     }
 
-    private void packAndUploadReport() {
-        if (mIProfcollect == null) {
-            return;
-        }
-
-        Context context = getContext();
+    private static void createAndUploadReport(ProfcollectForwardingService pfs) {
         BackgroundThread.get().getThreadHandler().post(() -> {
+            if (pfs.mIProfcollect == null) {
+                return;
+            }
+            String reportName;
             try {
-                int usageSetting = -1;
-                try {
-                    // Get "Usage & diagnostics" checkbox status. 1 is for enabled, 0 is for
-                    // disabled.
-                    usageSetting = Settings.Global.getInt(context.getContentResolver(), "multi_cb");
-                } catch (SettingNotFoundException e) {
-                    Log.i(LOG_TAG, "Usage setting not found: " + e.getMessage());
-                }
+                reportName = pfs.mIProfcollect.report(pfs.mUsageSetting) + ".zip";
+            } catch (RemoteException e) {
+                Log.e(LOG_TAG, "Failed to create report: " + e.getMessage());
+                return;
+            }
+            if (!pfs.mUploadEnabled) {
+                Log.i(LOG_TAG, "Upload is not enabled.");
+                return;
+            }
+            Intent intent = new Intent()
+                    .setPackage("com.android.shell")
+                    .setAction("com.android.shell.action.PROFCOLLECT_UPLOAD")
+                    .putExtra("filename", reportName);
+            pfs.getContext().sendBroadcast(intent);
+        });
+    }
 
-                // Prepare profile report
-                String reportName = mIProfcollect.report(usageSetting) + ".zip";
-
-                if (!context.getResources().getBoolean(
-                        R.bool.config_profcollectReportUploaderEnabled)) {
-                    Log.i(LOG_TAG, "Upload is not enabled.");
+    private void registerCameraOpenObserver() {
+        CameraManager cm = getContext().getSystemService(CameraManager.class);
+        cm.registerAvailabilityCallback(new CameraManager.AvailabilityCallback() {
+            @Override
+            public void onCameraOpened(String cameraId, String packageId) {
+                Log.d(LOG_TAG, "Received camera open event from: " + packageId);
+                // Skip face auth since it triggers way too often.
+                if (packageId.startsWith("client.pid")) {
                     return;
                 }
-
-                // Upload the report
-                Intent intent = new Intent()
-                        .setPackage("com.android.shell")
-                        .setAction("com.android.shell.action.PROFCOLLECT_UPLOAD")
-                        .putExtra("filename", reportName);
-                context.sendBroadcast(intent);
-            } catch (RemoteException e) {
-                Log.e(LOG_TAG, "Failed to upload report: " + e.getMessage());
+                // Additional vendor specific list of apps to skip.
+                String[] cameraSkipPackages =
+                    getContext().getResources().getStringArray(
+                        R.array.config_profcollectOnCameraOpenedSkipPackages);
+                if (Arrays.asList(cameraSkipPackages).contains(packageId)) {
+                    return;
+                }
+                // Sample for a fraction of camera events.
+                final int traceFrequency =
+                        DeviceConfig.getInt(DeviceConfig.NAMESPACE_PROFCOLLECT_NATIVE_BOOT,
+                        "camera_trace_freq", 10);
+                int randomNum = ThreadLocalRandom.current().nextInt(100);
+                if (randomNum >= traceFrequency) {
+                    return;
+                }
+                final int traceDuration = 5000;
+                final String traceTag = "camera";
+                BackgroundThread.get().getThreadHandler().post(() -> {
+                    if (mIProfcollect == null) {
+                        return;
+                    }
+                    try {
+                        mIProfcollect.trace_process(traceTag, "android.hardware.camera.provider",
+                                traceDuration);
+                    } catch (RemoteException e) {
+                        Log.e(LOG_TAG, "Failed to initiate trace: " + e.getMessage());
+                    }
+                });
             }
-        });
+        }, null);
     }
 }

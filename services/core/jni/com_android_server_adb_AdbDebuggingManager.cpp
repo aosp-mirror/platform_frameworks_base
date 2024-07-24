@@ -18,57 +18,21 @@
 
 #define LOG_NDEBUG 0
 
-#include <algorithm>
 #include <condition_variable>
 #include <mutex>
 #include <optional>
-#include <random>
-#include <string>
-#include <vector>
 
 #include <adb/pairing/pairing_server.h>
 #include <android-base/properties.h>
-#include <utils/Log.h>
-
+#include <jni.h>
 #include <nativehelper/JNIHelp.h>
-#include "jni.h"
+#include <nativehelper/utils.h>
+#include <utils/Log.h>
 
 namespace android {
 
 // ----------------------------------------------------------------------------
 namespace {
-
-template <class T, class N>
-class JSmartWrapper {
-public:
-    JSmartWrapper(JNIEnv* env, T* jData) : mEnv(env), mJData(jData) {}
-
-    virtual ~JSmartWrapper() = default;
-
-    const N* data() const { return mRawData; }
-
-    jsize size() const { return mSize; }
-
-protected:
-    N* mRawData = nullptr;
-    JNIEnv* mEnv = nullptr;
-    T* mJData = nullptr;
-    jsize mSize = 0;
-}; // JSmartWrapper
-
-class JStringUTFWrapper : public JSmartWrapper<jstring, const char> {
-public:
-    explicit JStringUTFWrapper(JNIEnv* env, jstring* str) : JSmartWrapper(env, str) {
-        mRawData = env->GetStringUTFChars(*str, NULL);
-        mSize = env->GetStringUTFLength(*str);
-    }
-
-    virtual ~JStringUTFWrapper() {
-        if (data()) {
-            mEnv->ReleaseStringUTFChars(*mJData, mRawData);
-        }
-    }
-}; // JStringUTFWrapper
 
 struct ServerDeleter {
     void operator()(PairingServerCtx* p) { pairing_server_destroy(p); }
@@ -97,19 +61,19 @@ PairingServerPtr sServer;
 std::unique_ptr<PairingResultWaiter> sWaiter;
 } // namespace
 
-static jint native_pairing_start(JNIEnv* env, jobject thiz, jstring guid, jstring password) {
+static jint native_pairing_start(JNIEnv* env, jobject thiz, jstring javaGuid, jstring javaPassword) {
     // Server-side only sends its GUID on success.
-    PeerInfo system_info = {};
-    system_info.type = ADB_DEVICE_GUID;
-    JStringUTFWrapper guidWrapper(env, &guid);
-    memcpy(system_info.data, guidWrapper.data(), guidWrapper.size());
+    PeerInfo system_info = { .type = ADB_DEVICE_GUID };
 
-    JStringUTFWrapper passwordWrapper(env, &password);
+    ScopedUtfChars guid = GET_UTF_OR_RETURN(env, javaGuid);
+    memcpy(system_info.data, guid.c_str(), guid.size());
+
+    ScopedUtfChars password = GET_UTF_OR_RETURN(env, javaPassword);
 
     // Create the pairing server
     sServer = PairingServerPtr(
-            pairing_server_new_no_cert(reinterpret_cast<const uint8_t*>(passwordWrapper.data()),
-                                       passwordWrapper.size(), &system_info, 0));
+            pairing_server_new_no_cert(reinterpret_cast<const uint8_t*>(password.c_str()),
+                                       password.size(), &system_info, 0));
 
     sWaiter.reset(new PairingResultWaiter);
     uint16_t port = pairing_server_start(sServer.get(), sWaiter->ResultCallback, sWaiter.get());
@@ -137,11 +101,16 @@ static jboolean native_pairing_wait(JNIEnv* env, jobject thiz) {
         return JNI_FALSE;
     }
 
-    std::string peer_public_key = reinterpret_cast<char*>(sWaiter->peer_info_.data);
-    // Write to PairingThread's member variables
+    // Create a Java string for the public key.
+    char* peer_public_key = reinterpret_cast<char*>(sWaiter->peer_info_.data);
+    jstring jpublickey = env->NewStringUTF(peer_public_key);
+    if (jpublickey == nullptr) {
+      return JNI_FALSE;
+    }
+
+    // Write to PairingThread.mPublicKey.
     jclass clazz = env->GetObjectClass(thiz);
     jfieldID mPublicKey = env->GetFieldID(clazz, "mPublicKey", "Ljava/lang/String;");
-    jstring jpublickey = env->NewStringUTF(peer_public_key.c_str());
     env->SetObjectField(thiz, mPublicKey, jpublickey);
     return JNI_TRUE;
 }
@@ -157,12 +126,9 @@ static const JNINativeMethod gPairingThreadMethods[] = {
 };
 
 int register_android_server_AdbDebuggingManager(JNIEnv* env) {
-    int res = jniRegisterNativeMethods(env,
-                                       "com/android/server/adb/AdbDebuggingManager$PairingThread",
-                                       gPairingThreadMethods, NELEM(gPairingThreadMethods));
-    (void)res; // Faked use when LOG_NDEBUG.
-    LOG_FATAL_IF(res < 0, "Unable to register native methods.");
-    return 0;
+    return jniRegisterNativeMethods(env,
+                                    "com/android/server/adb/AdbDebuggingManager$PairingThread",
+                                    gPairingThreadMethods, NELEM(gPairingThreadMethods));
 }
 
 } /* namespace android */

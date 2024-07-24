@@ -92,7 +92,7 @@ public:
 class PointerControllerContext {
 public:
     PointerControllerContext(const sp<PointerControllerPolicyInterface>& policy,
-                             const sp<Looper>& looper, const sp<SpriteController>& spriteController,
+                             const sp<Looper>& looper, SpriteController& spriteController,
                              PointerController& controller);
     ~PointerControllerContext();
 
@@ -109,7 +109,7 @@ public:
     void setCallbackController(std::shared_ptr<PointerController> controller);
 
     sp<PointerControllerPolicyInterface> getPolicy();
-    sp<SpriteController> getSpriteController();
+    SpriteController& getSpriteController();
 
     void handleDisplayEvents();
 
@@ -163,7 +163,7 @@ private:
 
     sp<PointerControllerPolicyInterface> mPolicy;
     sp<Looper> mLooper;
-    sp<SpriteController> mSpriteController;
+    SpriteController& mSpriteController;
     sp<MessageHandler> mHandler;
     sp<LooperCallback> mCallback;
 

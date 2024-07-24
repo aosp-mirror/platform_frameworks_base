@@ -71,13 +71,13 @@ class TouchTrackerTest {
         linearTracker.update(touchX, 0f, velocityX, velocityY)
         linearTracker.assertProgress(0f)
 
-        // Restart
-        touchX += 10f
-        linearTracker.update(touchX, 0f, velocityX, velocityY)
-        linearTracker.assertProgress(0f)
-
         // Restarted, but pre-commit
         val restartX = touchX
+        touchX += 10f
+        linearTracker.update(touchX, 0f, velocityX, velocityY)
+        linearTracker.assertProgress((touchX - restartX) / MAX_DISTANCE)
+
+        // continue restart within pre-commit
         touchX += 10f
         linearTracker.update(touchX, 0f, velocityX, velocityY)
         linearTracker.assertProgress((touchX - restartX) / MAX_DISTANCE)
@@ -119,13 +119,13 @@ class TouchTrackerTest {
         linearTracker.update(touchX, 0f, velocityX, velocityY)
         linearTracker.assertProgress(0f)
 
-        // Restart
-        touchX -= 10f
-        linearTracker.update(touchX, 0f, velocityX, velocityY)
-        linearTracker.assertProgress(0f)
-
         // Restarted, but pre-commit
         val restartX = touchX
+        touchX -= 10f
+        linearTracker.update(touchX, 0f, velocityX, velocityY)
+        linearTracker.assertProgress((restartX - touchX) / target)
+
+        // continue restart within pre-commit
         touchX -= 10f
         linearTracker.update(touchX, 0f, velocityX, velocityY)
         linearTracker.assertProgress((restartX - touchX) / target)
@@ -168,6 +168,71 @@ class TouchTrackerTest {
         val nonLinearProgress = nonLinearTouch / NON_LINEAR_DISTANCE
         val nonLinearTarget = MathUtils.lerp(linearTarget, MAX_DISTANCE, nonLinearProgress)
         nonLinearTracker.assertProgress((touchX - INITIAL_X_LEFT_EDGE) / nonLinearTarget)
+    }
+
+    @Test
+    fun restartingGesture_resetsInitialTouchX_leftEdge() {
+        val linearTracker = linearTouchTracker()
+        linearTracker.setGestureStartLocation(INITIAL_X_LEFT_EDGE, 0f, BackEvent.EDGE_LEFT)
+        var touchX = 100f
+        val velocityX = 0f
+        val velocityY = 0f
+
+        // assert that progress is increased when increasing touchX
+        linearTracker.update(touchX, 0f, velocityX, velocityY)
+        linearTracker.assertProgress((touchX - INITIAL_X_LEFT_EDGE) / MAX_DISTANCE)
+
+        // assert that progress is reset to 0 when start location is updated
+        linearTracker.updateStartLocation()
+        linearTracker.assertProgress(0f)
+
+        // assert that progress remains 0 when touchX is decreased
+        touchX -= 50
+        linearTracker.update(touchX, 0f, velocityX, velocityY)
+        linearTracker.assertProgress(0f)
+
+        // assert that progress uses new minimal touchX for progress calculation
+        val newInitialTouchX = touchX
+        touchX += 100
+        linearTracker.update(touchX, 0f, velocityX, velocityY)
+        linearTracker.assertProgress((touchX - newInitialTouchX) / MAX_DISTANCE)
+
+        // assert the same for triggerBack==true
+        linearTracker.triggerBack = true
+        linearTracker.assertProgress((touchX - newInitialTouchX) / MAX_DISTANCE)
+    }
+
+    @Test
+    fun restartingGesture_resetsInitialTouchX_rightEdge() {
+        val linearTracker = linearTouchTracker()
+        linearTracker.setGestureStartLocation(INITIAL_X_RIGHT_EDGE, 0f, BackEvent.EDGE_RIGHT)
+
+        var touchX = INITIAL_X_RIGHT_EDGE - 100f
+        val velocityX = 0f
+        val velocityY = 0f
+
+        // assert that progress is increased when decreasing touchX
+        linearTracker.update(touchX, 0f, velocityX, velocityY)
+        linearTracker.assertProgress((INITIAL_X_RIGHT_EDGE - touchX) / MAX_DISTANCE)
+
+        // assert that progress is reset to 0 when start location is updated
+        linearTracker.updateStartLocation()
+        linearTracker.assertProgress(0f)
+
+        // assert that progress remains 0 when touchX is increased
+        touchX += 50
+        linearTracker.update(touchX, 0f, velocityX, velocityY)
+        linearTracker.assertProgress(0f)
+
+        // assert that progress uses new maximal touchX for progress calculation
+        val newInitialTouchX = touchX
+        touchX -= 100
+        linearTracker.update(touchX, 0f, velocityX, velocityY)
+        linearTracker.assertProgress((newInitialTouchX - touchX) / MAX_DISTANCE)
+
+        // assert the same for triggerBack==true
+        linearTracker.triggerBack = true
+        linearTracker.assertProgress((newInitialTouchX - touchX) / MAX_DISTANCE)
     }
 
     companion object {

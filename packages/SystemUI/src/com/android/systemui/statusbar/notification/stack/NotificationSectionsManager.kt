@@ -19,7 +19,7 @@ import android.annotation.ColorInt
 import android.util.Log
 import android.view.View
 import com.android.internal.annotations.VisibleForTesting
-import com.android.systemui.media.controls.ui.KeyguardMediaController
+import com.android.systemui.media.controls.ui.controller.KeyguardMediaController
 import com.android.systemui.statusbar.notification.NotificationSectionsFeatureManager
 import com.android.systemui.statusbar.notification.SourceType
 import com.android.systemui.statusbar.notification.collection.render.MediaContainerController
@@ -244,10 +244,10 @@ class NotificationSectionsManager @Inject internal constructor(
         }
     }
 
-    fun setHeaderForegroundColor(@ColorInt color: Int) {
-        peopleHeaderView?.setForegroundColor(color)
-        silentHeaderView?.setForegroundColor(color)
-        alertingHeaderView?.setForegroundColor(color)
+    fun setHeaderForegroundColors(@ColorInt onSurface: Int, @ColorInt onSurfaceVariant: Int) {
+        peopleHeaderView?.setForegroundColors(onSurface, onSurfaceVariant)
+        silentHeaderView?.setForegroundColors(onSurface, onSurfaceVariant)
+        alertingHeaderView?.setForegroundColors(onSurface, onSurfaceVariant)
     }
 
     companion object {

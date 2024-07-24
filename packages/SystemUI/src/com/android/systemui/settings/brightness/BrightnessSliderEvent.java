@@ -21,10 +21,10 @@ import com.android.internal.logging.UiEventLogger;
 
 public enum BrightnessSliderEvent implements UiEventLogger.UiEventEnum {
 
-    @UiEvent(doc = "slider started to track touch")
-    SLIDER_STARTED_TRACKING_TOUCH(1472),
-    @UiEvent(doc = "slider stopped tracking touch")
-    SLIDER_STOPPED_TRACKING_TOUCH(1473);
+    @UiEvent(doc = "brightness slider started to track touch")
+    BRIGHTNESS_SLIDER_STARTED_TRACKING_TOUCH(1472),
+    @UiEvent(doc = "brightness slider stopped tracking touch")
+    BRIGHTNESS_SLIDER_STOPPED_TRACKING_TOUCH(1473);
 
     private final int mId;
 

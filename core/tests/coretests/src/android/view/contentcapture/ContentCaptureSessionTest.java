@@ -21,11 +21,18 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.testng.Assert.assertThrows;
 
 import android.compat.testing.PlatformCompatChangeRule;
+import android.content.ComponentName;
 import android.graphics.Insets;
+import android.graphics.Rect;
+import android.os.IBinder;
+import android.util.SparseArray;
 import android.view.View;
 import android.view.ViewStructure;
 import android.view.autofill.AutofillId;
 import android.view.contentcapture.ViewNode.ViewStructureImpl;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import com.google.common.collect.ImmutableMap;
 
@@ -40,6 +47,7 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
+import java.util.ArrayList;
 import java.util.Map;
 
 /**
@@ -195,6 +203,22 @@ public class ContentCaptureSessionTest {
         }
 
         @Override
+        void start(@NonNull IBinder token, @NonNull IBinder shareableActivityToken,
+                @NonNull ComponentName component, int flags) {
+            throw new UnsupportedOperationException("should not have been called");
+        }
+
+        @Override
+        boolean isDisabled() {
+            throw new UnsupportedOperationException("should not have been called");
+        }
+
+        @Override
+        boolean setDisabled(boolean disabled) {
+            throw new UnsupportedOperationException("should not have been called");
+        }
+
+        @Override
         ContentCaptureSession newChild(ContentCaptureContext context) {
             throw new UnsupportedOperationException("should not have been called");
         }
@@ -210,20 +234,20 @@ public class ContentCaptureSessionTest {
         }
 
         @Override
-        void internalNotifyViewAppeared(ViewStructureImpl node) {
+        void internalNotifyViewAppeared(final int sessionId, ViewStructureImpl node) {
             throw new UnsupportedOperationException("should not have been called");
         }
 
         @Override
-        void internalNotifyViewDisappeared(AutofillId id) {}
+        void internalNotifyViewDisappeared(final int sessionId, AutofillId id) {}
 
         @Override
-        void internalNotifyViewTextChanged(AutofillId id, CharSequence text) {
+        void internalNotifyViewTextChanged(final int sessionId, AutofillId id, CharSequence text) {
             throw new UnsupportedOperationException("should not have been called");
         }
 
         @Override
-        public void internalNotifyViewTreeEvent(boolean started) {
+        public void internalNotifyViewTreeEvent(final int sessionId, boolean started) {
             if (started) {
                 mInternalNotifyViewTreeEventStartedCount += 1;
             } else {
@@ -242,7 +266,34 @@ public class ContentCaptureSessionTest {
         }
 
         @Override
-        void internalNotifyViewInsetsChanged(Insets viewInsets) {
+        void internalNotifyChildSessionStarted(int parentSessionId, int childSessionId,
+                @NonNull ContentCaptureContext clientContext) {
+            throw new UnsupportedOperationException("should not have been called");
+        }
+
+        @Override
+        void internalNotifyChildSessionFinished(int parentSessionId, int childSessionId) {
+            throw new UnsupportedOperationException("should not have been called");
+        }
+
+        @Override
+        void internalNotifyContextUpdated(int sessionId, @Nullable ContentCaptureContext context) {
+            throw new UnsupportedOperationException("should not have been called");
+        }
+
+        @Override
+        public void notifyWindowBoundsChanged(int sessionId, @NonNull Rect bounds) {
+            throw new UnsupportedOperationException("should not have been called");
+        }
+
+        @Override
+        public void notifyContentCaptureEvents(
+                @NonNull SparseArray<ArrayList<Object>> contentCaptureEvents) {
+
+        }
+
+        @Override
+        void internalNotifyViewInsetsChanged(final int sessionId, Insets viewInsets) {
             throw new UnsupportedOperationException("should not have been called");
         }
 

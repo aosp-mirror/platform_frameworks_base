@@ -24,6 +24,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
 import android.content.ComponentName;
+import android.graphics.Point;
 import android.graphics.Rect;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
@@ -60,6 +61,9 @@ public class PipBoundsStateTest extends ShellTestCase {
     /** The minimum possible size of the override min size's width or height */
     private static final int OVERRIDABLE_MIN_SIZE = 40;
 
+    /** The margin of error for floating point results. */
+    private static final float MARGIN_OF_ERROR = 0.05f;
+
     private PipBoundsState mPipBoundsState;
     private SizeSpecSource mSizeSpecSource;
     private ComponentName mTestComponentName1;
@@ -88,23 +92,41 @@ public class PipBoundsStateTest extends ShellTestCase {
     }
 
     @Test
+    public void testBoundsScale() {
+        mPipBoundsState.setMaxSize(300, 300);
+        mPipBoundsState.setBounds(new Rect(0, 0, 100, 100));
+
+        final int currentWidth = mPipBoundsState.getBounds().width();
+        final Point maxSize = mPipBoundsState.getMaxSize();
+        final float expectedBoundsScale = Math.min((float) currentWidth / maxSize.x, 1.0f);
+
+        // test for currentWidth < maxWidth
+        assertEquals(expectedBoundsScale, mPipBoundsState.getBoundsScale(), MARGIN_OF_ERROR);
+
+        // reset the bounds to be at the maximum size spec
+        mPipBoundsState.setBounds(new Rect(0, 0, maxSize.x, maxSize.y));
+        assertEquals(1.0f, mPipBoundsState.getBoundsScale(), /* delta */ 0f);
+
+        // reset the bounds to be over the maximum size spec
+        mPipBoundsState.setBounds(new Rect(0, 0, maxSize.x * 2, maxSize.y * 2));
+        assertEquals(1.0f, mPipBoundsState.getBoundsScale(), /* delta */ 0f);
+    }
+
+    @Test
     public void testSetReentryState() {
-        final Size size = new Size(100, 100);
         final float snapFraction = 0.5f;
 
-        mPipBoundsState.saveReentryState(size, snapFraction);
+        mPipBoundsState.saveReentryState(snapFraction);
 
         final PipBoundsState.PipReentryState state = mPipBoundsState.getReentryState();
-        assertEquals(size, state.getSize());
         assertEquals(snapFraction, state.getSnapFraction(), 0.01);
     }
 
     @Test
     public void testClearReentryState() {
-        final Size size = new Size(100, 100);
         final float snapFraction = 0.5f;
 
-        mPipBoundsState.saveReentryState(size, snapFraction);
+        mPipBoundsState.saveReentryState(snapFraction);
         mPipBoundsState.clearReentryState();
 
         assertNull(mPipBoundsState.getReentryState());
@@ -113,20 +135,19 @@ public class PipBoundsStateTest extends ShellTestCase {
     @Test
     public void testSetLastPipComponentName_notChanged_doesNotClearReentryState() {
         mPipBoundsState.setLastPipComponentName(mTestComponentName1);
-        mPipBoundsState.saveReentryState(DEFAULT_SIZE, DEFAULT_SNAP_FRACTION);
+        mPipBoundsState.saveReentryState(DEFAULT_SNAP_FRACTION);
 
         mPipBoundsState.setLastPipComponentName(mTestComponentName1);
 
         final PipBoundsState.PipReentryState state = mPipBoundsState.getReentryState();
         assertNotNull(state);
-        assertEquals(DEFAULT_SIZE, state.getSize());
         assertEquals(DEFAULT_SNAP_FRACTION, state.getSnapFraction(), 0.01);
     }
 
     @Test
     public void testSetLastPipComponentName_changed_clearReentryState() {
         mPipBoundsState.setLastPipComponentName(mTestComponentName1);
-        mPipBoundsState.saveReentryState(DEFAULT_SIZE, DEFAULT_SNAP_FRACTION);
+        mPipBoundsState.saveReentryState(DEFAULT_SNAP_FRACTION);
 
         mPipBoundsState.setLastPipComponentName(mTestComponentName2);
 

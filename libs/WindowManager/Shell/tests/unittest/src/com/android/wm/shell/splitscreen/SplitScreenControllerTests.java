@@ -36,6 +36,7 @@ import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -62,6 +63,7 @@ import com.android.wm.shell.common.DisplayImeController;
 import com.android.wm.shell.common.DisplayInsetsController;
 import com.android.wm.shell.common.DisplayLayout;
 import com.android.wm.shell.common.LaunchAdjacentController;
+import com.android.wm.shell.common.MultiInstanceHelper;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.common.TransactionPool;
@@ -82,6 +84,8 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+
+import java.util.Optional;
 
 /**
  * Tests for {@link SplitScreenController}
@@ -108,6 +112,7 @@ public class SplitScreenControllerTests extends ShellTestCase {
     @Mock LaunchAdjacentController mLaunchAdjacentController;
     @Mock WindowDecorViewModel mWindowDecorViewModel;
     @Mock DesktopTasksController mDesktopTasksController;
+    @Mock MultiInstanceHelper mMultiInstanceHelper;
     @Captor ArgumentCaptor<Intent> mIntentCaptor;
 
     private ShellController mShellController;
@@ -123,8 +128,9 @@ public class SplitScreenControllerTests extends ShellTestCase {
                 mShellCommandHandler, mShellController, mTaskOrganizer, mSyncQueue,
                 mRootTDAOrganizer, mDisplayController, mDisplayImeController,
                 mDisplayInsetsController, mDragAndDropController, mTransitions, mTransactionPool,
-                mIconProvider, mRecentTasks, mLaunchAdjacentController, mWindowDecorViewModel,
-                mDesktopTasksController, mMainExecutor, mStageCoordinator));
+                mIconProvider, Optional.of(mRecentTasks), mLaunchAdjacentController,
+                Optional.of(mWindowDecorViewModel), Optional.of(mDesktopTasksController),
+                mStageCoordinator, mMultiInstanceHelper, mMainExecutor));
     }
 
     @Test
@@ -199,7 +205,7 @@ public class SplitScreenControllerTests extends ShellTestCase {
 
     @Test
     public void startIntent_multiInstancesSupported_appendsMultipleTaskFag() {
-        doReturn(true).when(mSplitScreenController).supportMultiInstancesSplit(any());
+        doReturn(true).when(mMultiInstanceHelper).supportsMultiInstanceSplit(any());
         Intent startIntent = createStartIntent("startActivity");
         PendingIntent pendingIntent =
                 PendingIntent.getActivity(mContext, 0, startIntent, FLAG_IMMUTABLE);
@@ -218,8 +224,7 @@ public class SplitScreenControllerTests extends ShellTestCase {
     }
 
     @Test
-    public void startIntent_multiInstancesSupported_startTaskInBackgroundBeforeSplitActivated() {
-        doReturn(true).when(mSplitScreenController).supportMultiInstancesSplit(any());
+    public void startIntent_multiInstancesNotSupported_startTaskInBackgroundBeforeSplitActivated() {
         doNothing().when(mSplitScreenController).startTask(anyInt(), anyInt(), any());
         Intent startIntent = createStartIntent("startActivity");
         PendingIntent pendingIntent =
@@ -235,13 +240,15 @@ public class SplitScreenControllerTests extends ShellTestCase {
         mSplitScreenController.startIntent(pendingIntent, mContext.getUserId(), null,
                 SPLIT_POSITION_TOP_OR_LEFT, null);
 
-        verify(mSplitScreenController).startTask(anyInt(), eq(SPLIT_POSITION_TOP_OR_LEFT),
+        verify(mStageCoordinator).startTask(anyInt(), eq(SPLIT_POSITION_TOP_OR_LEFT),
                 isNull());
+        verify(mMultiInstanceHelper, never()).supportsMultiInstanceSplit(any());
+        verify(mStageCoordinator, never()).switchSplitPosition(any());
     }
 
     @Test
     public void startIntent_multiInstancesSupported_startTaskInBackgroundAfterSplitActivated() {
-        doReturn(true).when(mSplitScreenController).supportMultiInstancesSplit(any());
+        doReturn(true).when(mMultiInstanceHelper).supportsMultiInstanceSplit(any());
         doNothing().when(mSplitScreenController).startTask(anyInt(), anyInt(), any());
         Intent startIntent = createStartIntent("startActivity");
         PendingIntent pendingIntent =
@@ -258,14 +265,14 @@ public class SplitScreenControllerTests extends ShellTestCase {
 
         mSplitScreenController.startIntent(pendingIntent, mContext.getUserId(), null,
                 SPLIT_POSITION_TOP_OR_LEFT, null);
-
-        verify(mSplitScreenController).startTask(anyInt(), eq(SPLIT_POSITION_TOP_OR_LEFT),
+        verify(mMultiInstanceHelper, never()).supportsMultiInstanceSplit(any());
+        verify(mStageCoordinator).startTask(anyInt(), eq(SPLIT_POSITION_TOP_OR_LEFT),
                 isNull());
     }
 
     @Test
     public void startIntent_multiInstancesNotSupported_switchesPositionAfterSplitActivated() {
-        doReturn(false).when(mSplitScreenController).supportMultiInstancesSplit(any());
+        doReturn(false).when(mMultiInstanceHelper).supportsMultiInstanceSplit(any());
         Intent startIntent = createStartIntent("startActivity");
         PendingIntent pendingIntent =
                 PendingIntent.getActivity(mContext, 0, startIntent, FLAG_IMMUTABLE);
@@ -280,6 +287,15 @@ public class SplitScreenControllerTests extends ShellTestCase {
                 SPLIT_POSITION_TOP_OR_LEFT, null);
 
         verify(mStageCoordinator).switchSplitPosition(anyString());
+    }
+
+    @Test
+    public void testSwitchSplitPosition_checksIsSplitScreenVisible() {
+        final String reason = "test";
+        when(mSplitScreenController.isSplitScreenVisible()).thenReturn(true, false);
+        mSplitScreenController.switchSplitPosition(reason);
+        mSplitScreenController.switchSplitPosition(reason);
+        verify(mStageCoordinator, times(1)).switchSplitPosition(reason);
     }
 
     private Intent createStartIntent(String activityName) {

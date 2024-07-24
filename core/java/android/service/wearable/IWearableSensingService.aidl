@@ -28,10 +28,18 @@ import android.os.SharedMemory;
  * @hide
  */
 oneway interface IWearableSensingService {
+    void provideSecureConnection(in ParcelFileDescriptor parcelFileDescriptor, in RemoteCallback callback);
     void provideDataStream(in ParcelFileDescriptor parcelFileDescriptor, in RemoteCallback callback);
     void provideData(in PersistableBundle data, in SharedMemory sharedMemory, in RemoteCallback callback);
+    void registerDataRequestObserver(int dataType, in RemoteCallback dataRequestCallback, int dataRequestObserverId, in String packageName, in RemoteCallback statusCallback);
+    void unregisterDataRequestObserver(int dataType, int dataRequestObserverId, in String packageName, in RemoteCallback statusCallback);
+    void startHotwordRecognition(in RemoteCallback wearableHotwordCallback, in RemoteCallback statusCallback);
+    void stopHotwordRecognition(in RemoteCallback statusCallback);
+    void onValidatedByHotwordDetectionService();
+    void stopActiveHotwordAudio();
     void startDetection(in AmbientContextEventRequest request, in String packageName,
             in RemoteCallback detectionResultCallback, in RemoteCallback statusCallback);
     void stopDetection(in String packageName);
     void queryServiceStatus(in int[] eventTypes, in String packageName, in RemoteCallback callback);
+    void killProcess();
 }

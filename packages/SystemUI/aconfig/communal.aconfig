@@ -1,0 +1,9 @@
+package: "com.android.systemui"
+container: "system"
+
+flag {
+    name: "communal_hub"
+    namespace: "communal"
+    description: "Enables the communal hub experience"
+    bug: "304584416"
+}

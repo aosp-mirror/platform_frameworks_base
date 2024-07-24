@@ -40,6 +40,13 @@ oneway interface IHotwordRecognitionStatusCallback {
             in SoundTrigger.KeyphraseRecognitionEvent recognitionEvent,
             in HotwordDetectedResult result);
 
+    /**
+     * Called when the keyphrase is detected from audio coming from an external source.
+     *
+     * @param result Successful detection result payload.
+     */
+    void onKeyphraseDetectedFromExternalSource(in HotwordDetectedResult result);
+
    /**
      * Called when a generic sound trigger event is witnessed.
      *

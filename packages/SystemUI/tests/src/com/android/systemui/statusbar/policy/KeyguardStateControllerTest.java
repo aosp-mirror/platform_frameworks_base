@@ -38,6 +38,7 @@ import com.android.systemui.SysuiTestCase;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.keyguard.KeyguardUnlockAnimationController;
+import com.android.systemui.user.domain.interactor.SelectedUserInteractor;
 
 import dagger.Lazy;
 
@@ -67,6 +68,8 @@ public class KeyguardStateControllerTest extends SysuiTestCase {
     @Mock
     private Lazy<KeyguardUnlockAnimationController> mKeyguardUnlockAnimationControllerLazy;
     @Mock
+    private SelectedUserInteractor mSelectedUserInteractor;
+    @Mock
     private KeyguardUpdateMonitorLogger mLogger;
     @Mock
     private FeatureFlags mFeatureFlags;
@@ -84,7 +87,8 @@ public class KeyguardStateControllerTest extends SysuiTestCase {
                 mKeyguardUnlockAnimationControllerLazy,
                 mLogger,
                 mDumpManager,
-                mFeatureFlags);
+                mFeatureFlags,
+                mSelectedUserInteractor);
     }
 
     @Test
@@ -93,20 +97,20 @@ public class KeyguardStateControllerTest extends SysuiTestCase {
     }
 
     @Test
-    public void testFaceAuthEnabledChanged_calledWhenFaceEnrollmentStateChanges() {
+    public void testFaceAuthEnrolleddChanged_calledWhenFaceEnrollmentStateChanges() {
         KeyguardStateController.Callback callback = mock(KeyguardStateController.Callback.class);
 
-        when(mKeyguardUpdateMonitor.isFaceAuthEnabledForUser(anyInt())).thenReturn(false);
+        when(mKeyguardUpdateMonitor.isFaceEnabledAndEnrolled()).thenReturn(false);
         verify(mKeyguardUpdateMonitor).registerCallback(mUpdateCallbackCaptor.capture());
         mKeyguardStateController.addCallback(callback);
-        assertThat(mKeyguardStateController.isFaceAuthEnabled()).isFalse();
+        assertThat(mKeyguardStateController.isFaceEnrolledAndEnabled()).isFalse();
 
-        when(mKeyguardUpdateMonitor.isFaceAuthEnabledForUser(anyInt())).thenReturn(true);
+        when(mKeyguardUpdateMonitor.isFaceEnabledAndEnrolled()).thenReturn(true);
         mUpdateCallbackCaptor.getValue().onBiometricEnrollmentStateChanged(
                 BiometricSourceType.FACE);
 
-        assertThat(mKeyguardStateController.isFaceAuthEnabled()).isTrue();
-        verify(callback).onFaceAuthEnabledChanged();
+        assertThat(mKeyguardStateController.isFaceEnrolledAndEnabled()).isTrue();
+        verify(callback).onFaceEnrolledChanged();
     }
 
     @Test
@@ -145,6 +149,36 @@ public class KeyguardStateControllerTest extends SysuiTestCase {
         // Unless user is authenticated
         when(mKeyguardUpdateMonitor.getUserCanSkipBouncer(anyInt())).thenReturn(true);
         ((KeyguardStateControllerImpl) mKeyguardStateController).update(false /* alwaysUpdate */);
+        assertThat(mKeyguardStateController.canDismissLockScreen()).isTrue();
+    }
+
+    @Test
+    public void testCanSkipLockScreen_updateCalledOnFacesCleared() {
+        verify(mKeyguardUpdateMonitor).registerCallback(mUpdateCallbackCaptor.capture());
+
+        // Cannot skip after there's a password/pin/pattern
+        when(mLockPatternUtils.isSecure(anyInt())).thenReturn(true);
+        ((KeyguardStateControllerImpl) mKeyguardStateController).update(false /* alwaysUpdate */);
+        assertThat(mKeyguardStateController.canDismissLockScreen()).isFalse();
+
+        // Unless user is authenticated
+        when(mKeyguardUpdateMonitor.getUserCanSkipBouncer(anyInt())).thenReturn(true);
+        mUpdateCallbackCaptor.getValue().onFacesCleared();
+        assertThat(mKeyguardStateController.canDismissLockScreen()).isTrue();
+    }
+
+    @Test
+    public void testCanSkipLockScreen_updateCalledOnFingerprintssCleared() {
+        verify(mKeyguardUpdateMonitor).registerCallback(mUpdateCallbackCaptor.capture());
+
+        // Cannot skip after there's a password/pin/pattern
+        when(mLockPatternUtils.isSecure(anyInt())).thenReturn(true);
+        ((KeyguardStateControllerImpl) mKeyguardStateController).update(false /* alwaysUpdate */);
+        assertThat(mKeyguardStateController.canDismissLockScreen()).isFalse();
+
+        // Unless user is authenticated
+        when(mKeyguardUpdateMonitor.getUserCanSkipBouncer(anyInt())).thenReturn(true);
+        mUpdateCallbackCaptor.getValue().onFingerprintsCleared();
         assertThat(mKeyguardStateController.canDismissLockScreen()).isTrue();
     }
 

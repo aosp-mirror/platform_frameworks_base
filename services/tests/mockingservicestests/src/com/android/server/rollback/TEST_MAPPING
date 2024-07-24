@@ -1,7 +1,7 @@
 {
-  "postsubmit": [
+  "presubmit": [
     {
-      "name": "FrameworksMockingServicesTests",
+      "name": "RollbackPackageHealthObserverTests",
       "options": [
         {
           "include-filter": "com.android.server.rollback"

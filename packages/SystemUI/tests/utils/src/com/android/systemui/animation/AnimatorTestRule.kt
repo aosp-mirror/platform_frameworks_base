@@ -26,12 +26,26 @@ import org.junit.runners.model.Statement
  * A rule that wraps both [androidx.core.animation.AnimatorTestRule] and
  * [android.animation.AnimatorTestRule] such that the clocks of the two animation handlers can be
  * advanced together.
+ *
+ * @param test the instance of the test used to look up the TestableLooper.  If a TestableLooper is
+ * found, the time can only be advanced on that thread; otherwise the time must be advanced on the
+ * main thread.
  */
-class AnimatorTestRule : TestRule {
+class AnimatorTestRule(test: Any?) : TestRule {
+    // Create the androidx rule, which initializes start time to SystemClock.uptimeMillis(),
+    // then copy that time to the platform rule so that the two clocks are in sync.
     private val androidxRule = androidx.core.animation.AnimatorTestRule()
-    private val platformRule = android.animation.AnimatorTestRule()
+    private val platformRule = android.animation.AnimatorTestRule(test, androidxRule.startTime)
     private val advanceAndroidXTimeBy =
         Consumer<Long> { timeDelta -> androidxRule.advanceTimeBy(timeDelta) }
+
+    /** Access the mStartTime field; bypassing the restriction of being on a looper thread. */
+    private val androidx.core.animation.AnimatorTestRule.startTime: Long
+        get() =
+            javaClass.getDeclaredField("mStartTime").let { field ->
+                field.isAccessible = true
+                field.getLong(this)
+            }
 
     /**
      * Chain is for simplicity not to force a particular order; order should not matter, because
@@ -55,4 +69,11 @@ class AnimatorTestRule : TestRule {
         //  animation from one to start later than the other.
         platformRule.advanceTimeBy(timeDelta, advanceAndroidXTimeBy)
     }
+
+    /**
+     * Returns the current time in milliseconds tracked by the AnimationHandlers. Note that this is
+     * a different time than the time tracked by {@link SystemClock}.
+     */
+    val currentTime: Long
+        get() = androidxRule.currentTime
 }

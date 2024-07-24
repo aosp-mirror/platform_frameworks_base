@@ -28,10 +28,13 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import static kotlinx.coroutines.test.TestCoroutineDispatchersKt.StandardTestDispatcher;
+
 import android.app.Notification;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.UserHandle;
+import android.platform.test.annotations.DisableFlags;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 
@@ -41,7 +44,12 @@ import com.android.internal.logging.InstanceId;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.statusbar.NotificationVisibility;
 import com.android.systemui.SysuiTestCase;
-import com.android.systemui.shade.ShadeExpansionStateManager;
+import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository;
+import com.android.systemui.kosmos.KosmosJavaAdapter;
+import com.android.systemui.power.domain.interactor.PowerInteractor;
+import com.android.systemui.power.domain.interactor.PowerInteractorFactory;
+import com.android.systemui.scene.data.repository.WindowRootViewVisibilityRepository;
+import com.android.systemui.scene.domain.interactor.WindowRootViewVisibilityInteractor;
 import com.android.systemui.statusbar.NotificationListener;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.StatusBarStateControllerImpl;
@@ -51,10 +59,15 @@ import com.android.systemui.statusbar.notification.collection.NotifPipeline;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.NotificationEntryBuilder;
 import com.android.systemui.statusbar.notification.collection.render.NotificationVisibilityProvider;
+import com.android.systemui.statusbar.notification.data.repository.ActiveNotificationListRepository;
+import com.android.systemui.statusbar.notification.domain.interactor.ActiveNotificationsInteractor;
 import com.android.systemui.statusbar.notification.logging.nano.Notifications;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
+import com.android.systemui.statusbar.notification.shared.NotificationsLiveDataStoreRefactor;
 import com.android.systemui.statusbar.notification.stack.NotificationListContainer;
+import com.android.systemui.statusbar.policy.HeadsUpManager;
 import com.android.systemui.util.concurrency.FakeExecutor;
+import com.android.systemui.util.kotlin.JavaAdapter;
 import com.android.systemui.util.time.FakeSystemClock;
 
 import com.google.android.collect.Lists;
@@ -71,9 +84,12 @@ import java.util.List;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.Executor;
 
+import kotlinx.coroutines.test.TestScope;
+
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
 @TestableLooper.RunWithLooper
+@DisableFlags(NotificationsLiveDataStoreRefactor.FLAG_NAME)
 public class NotificationLoggerTest extends SysuiTestCase {
     private static final String TEST_PACKAGE_NAME = "test";
     private static final int TEST_UID = 0;
@@ -89,7 +105,7 @@ public class NotificationLoggerTest extends SysuiTestCase {
     @Mock private NotificationVisibilityProvider mVisibilityProvider;
     @Mock private NotifPipeline mNotifPipeline;
     @Mock private NotificationListener mListener;
-    @Mock private ShadeExpansionStateManager mShadeExpansionStateManager;
+    @Mock private HeadsUpManager mHeadsUpManager;
 
     private NotificationEntry mEntry;
     private TestableNotificationLogger mLogger;
@@ -97,11 +113,34 @@ public class NotificationLoggerTest extends SysuiTestCase {
     private FakeExecutor mUiBgExecutor = new FakeExecutor(new FakeSystemClock());
     private NotificationPanelLoggerFake mNotificationPanelLoggerFake =
             new NotificationPanelLoggerFake();
+    private final KosmosJavaAdapter mKosmos = new KosmosJavaAdapter(this);
+    private final TestScope mTestScope = mKosmos.getTestScope();
+    private final FakeKeyguardRepository mKeyguardRepository = new FakeKeyguardRepository();
+    private final PowerInteractor mPowerInteractor =
+            PowerInteractorFactory.create().getPowerInteractor();
+    private final ActiveNotificationListRepository mActiveNotificationListRepository =
+            new ActiveNotificationListRepository();
+    private final ActiveNotificationsInteractor mActiveNotificationsInteractor =
+            new ActiveNotificationsInteractor(mActiveNotificationListRepository,
+                    StandardTestDispatcher(null, null));
+    private WindowRootViewVisibilityInteractor mWindowRootViewVisibilityInteractor;
+    private final JavaAdapter mJavaAdapter = new JavaAdapter(mTestScope.getBackgroundScope());
 
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
         when(mNotifLiveDataStore.getActiveNotifList()).thenReturn(mActiveNotifEntries);
+
+        mWindowRootViewVisibilityInteractor = new WindowRootViewVisibilityInteractor(
+                mTestScope.getBackgroundScope(),
+                new WindowRootViewVisibilityRepository(mBarService, mUiBgExecutor),
+                mKeyguardRepository,
+                mHeadsUpManager,
+                mPowerInteractor,
+                mActiveNotificationsInteractor,
+                mKosmos.getFakeSceneContainerFlags(),
+                () -> mKosmos.getSceneInteractor());
+        mWindowRootViewVisibilityInteractor.setIsLockscreenOrShadeVisible(true);
 
         mEntry = new NotificationEntryBuilder()
                 .setPkg(TEST_PACKAGE_NAME)
@@ -120,10 +159,12 @@ public class NotificationLoggerTest extends SysuiTestCase {
                 mVisibilityProvider,
                 mNotifPipeline,
                 mock(StatusBarStateControllerImpl.class),
-                mShadeExpansionStateManager,
+                mWindowRootViewVisibilityInteractor,
+                mJavaAdapter,
                 mBarService,
                 mExpansionStateLogger
         );
+        mLogger.start();
         mLogger.setUpWithContainer(mListContainer);
         verify(mNotifPipeline).addCollectionListener(any());
     }
@@ -183,31 +224,26 @@ public class NotificationLoggerTest extends SysuiTestCase {
         Mockito.reset(mBarService);
 
         setStateAsleep();
-        mLogger.onDozingChanged(false);  // Wake to lockscreen
-        mLogger.onDozingChanged(true);  // And go back to sleep, turning off logging
+
+        setStateAwake();  // Wake to lockscreen
+
+        setStateAsleep();  // And go back to sleep, turning off logging
         mUiBgExecutor.runAllReady();
+
         // The visibility objects are recycled by NotificationLogger, so we can't use specific
         // matchers here.
         verify(mBarService, times(1)).onNotificationVisibilityChanged(any(), any());
     }
 
-    private void setStateAsleep() {
-        mLogger.onShadeExpansionFullyChanged(true);
-        mLogger.onDozingChanged(true);
-        mLogger.onStateChanged(StatusBarState.KEYGUARD);
-    }
-
-    private void setStateAwake() {
-        mLogger.onShadeExpansionFullyChanged(false);
-        mLogger.onDozingChanged(false);
-        mLogger.onStateChanged(StatusBarState.SHADE);
-    }
-
     @Test
-    public void testLogPanelShownOnWake() {
+    public void testLogPanelShownOnWakeToLockscreen() {
         when(mActiveNotifEntries.getValue()).thenReturn(Lists.newArrayList(mEntry));
         setStateAsleep();
-        mLogger.onDozingChanged(false);  // Wake to lockscreen
+
+        // Wake to lockscreen
+        mLogger.onStateChanged(StatusBarState.KEYGUARD);
+        setStateAwake();
+
         assertEquals(1, mNotificationPanelLoggerFake.getCalls().size());
         assertTrue(mNotificationPanelLoggerFake.get(0).isLockscreen);
         assertEquals(1, mNotificationPanelLoggerFake.get(0).list.notifications.length);
@@ -222,9 +258,14 @@ public class NotificationLoggerTest extends SysuiTestCase {
     @Test
     public void testLogPanelShownOnShadePull() {
         when(mActiveNotifEntries.getValue()).thenReturn(Lists.newArrayList(mEntry));
+        // Start as awake, but with the panel not visible
         setStateAwake();
+        mWindowRootViewVisibilityInteractor.setIsLockscreenOrShadeVisible(false);
+
         // Now expand panel
-        mLogger.onShadeExpansionFullyChanged(true);
+        mLogger.onStateChanged(StatusBarState.SHADE);
+        mWindowRootViewVisibilityInteractor.setIsLockscreenOrShadeVisible(true);
+
         assertEquals(1, mNotificationPanelLoggerFake.getCalls().size());
         assertFalse(mNotificationPanelLoggerFake.get(0).isLockscreen);
         assertEquals(1, mNotificationPanelLoggerFake.get(0).list.notifications.length);
@@ -251,11 +292,24 @@ public class NotificationLoggerTest extends SysuiTestCase {
 
         when(mActiveNotifEntries.getValue()).thenReturn(Lists.newArrayList(entry));
         setStateAsleep();
-        mLogger.onDozingChanged(false);  // Wake to lockscreen
+
+        // Wake to lockscreen
+        setStateAwake();
+
         assertEquals(1, mNotificationPanelLoggerFake.getCalls().size());
         assertEquals(1, mNotificationPanelLoggerFake.get(0).list.notifications.length);
         Notifications.Notification n = mNotificationPanelLoggerFake.get(0).list.notifications[0];
         assertEquals(0, n.instanceId);
+    }
+
+    private void setStateAsleep() {
+        PowerInteractor.Companion.setAsleepForTest(mPowerInteractor);
+        mTestScope.getTestScheduler().runCurrent();
+    }
+
+    private void setStateAwake() {
+        PowerInteractor.Companion.setAwakeForTest(mPowerInteractor);
+        mTestScope.getTestScheduler().runCurrent();
     }
 
     private class TestableNotificationLogger extends NotificationLogger {
@@ -266,7 +320,8 @@ public class NotificationLoggerTest extends SysuiTestCase {
                 NotificationVisibilityProvider visibilityProvider,
                 NotifPipeline notifPipeline,
                 StatusBarStateControllerImpl statusBarStateController,
-                ShadeExpansionStateManager shadeExpansionStateManager,
+                WindowRootViewVisibilityInteractor windowRootViewVisibilityInteractor,
+                JavaAdapter javaAdapter,
                 IStatusBarService barService,
                 ExpansionStateLogger expansionStateLogger) {
             super(
@@ -276,7 +331,8 @@ public class NotificationLoggerTest extends SysuiTestCase {
                     visibilityProvider,
                     notifPipeline,
                     statusBarStateController,
-                    shadeExpansionStateManager,
+                    windowRootViewVisibilityInteractor,
+                    javaAdapter,
                     expansionStateLogger,
                     mNotificationPanelLoggerFake
             );

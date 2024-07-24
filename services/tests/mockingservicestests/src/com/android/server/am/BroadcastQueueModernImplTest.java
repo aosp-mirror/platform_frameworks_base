@@ -79,11 +79,9 @@ import androidx.test.filters.SmallTest;
 import androidx.test.platform.app.InstrumentationRegistry;
 
 import com.android.internal.util.FrameworkStatsLog;
-import com.android.modules.utils.testing.ExtendedMockitoRule;
 
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
 import org.mockito.Mock;
 
@@ -112,11 +110,6 @@ public final class BroadcastQueueModernImplTest extends BaseBroadcastQueueTest {
 
     BroadcastProcessQueue mHead;
 
-    @Rule
-    public final ExtendedMockitoRule mExtendedMockitoRule = new ExtendedMockitoRule.Builder(this)
-            .spyStatic(FrameworkStatsLog.class)
-            .build();
-
     @Before
     public void setUp() throws Exception {
         super.setUp();
@@ -133,6 +126,7 @@ public final class BroadcastQueueModernImplTest extends BaseBroadcastQueueTest {
 
         mImpl = new BroadcastQueueModernImpl(mAms, mHandlerThread.getThreadHandler(),
             mConstants, mConstants, mSkipPolicy, emptyHistory);
+        mBroadcastQueues[0] = mImpl;
 
         doReturn(1L).when(mQueue1).getRunnableAt();
         doReturn(2L).when(mQueue2).getRunnableAt();
@@ -1762,6 +1756,7 @@ public final class BroadcastQueueModernImplTest extends BaseBroadcastQueueTest {
     private ProcessRecord makeProcessRecord(ApplicationInfo info) {
         final ProcessRecord r = spy(new ProcessRecord(mAms, info, info.processName, info.uid));
         r.setPid(mNextPid.incrementAndGet());
+        ProcessRecord.updateProcessRecordNodes(r);
         return r;
     }
 

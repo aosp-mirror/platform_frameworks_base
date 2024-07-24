@@ -22,13 +22,13 @@ import static androidx.lifecycle.Lifecycle.Event.ON_RESUME;
 import static androidx.lifecycle.Lifecycle.Event.ON_START;
 import static androidx.lifecycle.Lifecycle.Event.ON_STOP;
 
-import android.annotation.Nullable;
 import android.app.Activity;
 import android.os.Bundle;
 import android.os.PersistableBundle;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import androidx.annotation.Nullable;
 import androidx.fragment.app.FragmentActivity;
 import androidx.lifecycle.LifecycleOwner;
 

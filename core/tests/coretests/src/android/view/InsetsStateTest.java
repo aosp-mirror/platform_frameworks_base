@@ -20,8 +20,8 @@ import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
 import static android.view.InsetsSource.FLAG_FORCE_CONSUMING;
 import static android.view.InsetsSource.ID_IME;
-import static android.view.InsetsState.ISIDE_BOTTOM;
-import static android.view.InsetsState.ISIDE_TOP;
+import static android.view.InsetsSource.SIDE_BOTTOM;
+import static android.view.InsetsSource.SIDE_TOP;
 import static android.view.RoundedCorner.POSITION_BOTTOM_LEFT;
 import static android.view.RoundedCorner.POSITION_BOTTOM_RIGHT;
 import static android.view.RoundedCorner.POSITION_TOP_LEFT;
@@ -63,6 +63,8 @@ import androidx.test.runner.AndroidJUnit4;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import java.util.List;
+
 /**
  * Tests for {@link InsetsState}.
  *
@@ -88,6 +90,8 @@ public class InsetsStateTest {
             null /* owner */, 1 /* index */, navigationBars());
     private static final int ID_BOTTOM_GESTURES = InsetsSource.createId(
             null /* owner */, 0 /* index */, systemGestures());
+    private static final int ID_EXTRA_CAPTION_BAR = InsetsSource.createId(
+            null /* owner */, 2 /* index */, captionBar());
 
     private final InsetsState mState = new InsetsState();
     private final InsetsState mState2 = new InsetsState();
@@ -106,8 +110,8 @@ public class InsetsStateTest {
                 typeSideMap);
         assertEquals(Insets.of(0, 100, 0, 100), insets.getSystemWindowInsets());
         assertEquals(Insets.of(0, 100, 0, 100), insets.getInsets(Type.all()));
-        assertEquals(ISIDE_TOP, typeSideMap.get(ID_STATUS_BAR));
-        assertEquals(ISIDE_BOTTOM, typeSideMap.get(ID_IME));
+        assertEquals(SIDE_TOP, typeSideMap.get(ID_STATUS_BAR));
+        assertEquals(SIDE_BOTTOM, typeSideMap.get(ID_IME));
         assertEquals(Insets.of(0, 100, 0, 0), insets.getInsets(statusBars()));
         assertEquals(Insets.of(0, 0, 0, 100), insets.getInsets(ime()));
     }
@@ -420,9 +424,11 @@ public class InsetsStateTest {
     public void testEquals_visibility() {
         mState.getOrCreateSource(ID_IME, ime())
                 .setFrame(new Rect(0, 0, 100, 100))
+                .setBoundingRects(new Rect[]{ new Rect(0, 0, 10, 10) })
                 .setVisible(true);
         mState2.getOrCreateSource(ID_IME, ime())
-                .setFrame(new Rect(0, 0, 100, 100));
+                .setFrame(new Rect(0, 0, 100, 100))
+                .setBoundingRects(new Rect[]{ new Rect(0, 0, 10, 10) });
         assertNotEqualsAndHashCode();
     }
 
@@ -438,6 +444,30 @@ public class InsetsStateTest {
         mState.setDisplayFrame(new Rect(0, 1, 2, 3));
         mState2.setDisplayFrame(new Rect(0, 1, 2, 3));
         assertEqualsAndHashCode();
+    }
+
+    @Test
+    public void testEquals_sameBoundingRects() {
+        mState.getOrCreateSource(ID_CAPTION_BAR, captionBar())
+                .setFrame(new Rect(0, 0, 100, 100))
+                .setBoundingRects(new Rect[]{ new Rect(0, 0, 10, 10) })
+                .setVisible(true);
+        mState2.getOrCreateSource(ID_CAPTION_BAR, captionBar())
+                .setFrame(new Rect(0, 0, 100, 100))
+                .setBoundingRects(new Rect[]{ new Rect(0, 0, 10, 10) });
+        assertEqualsAndHashCode();
+    }
+
+    @Test
+    public void testEquals_differentBoundingRects() {
+        mState.getOrCreateSource(ID_CAPTION_BAR, captionBar())
+                .setFrame(new Rect(0, 0, 100, 100))
+                .setBoundingRects(new Rect[]{ new Rect(0, 0, 10, 10) })
+                .setVisible(true);
+        mState2.getOrCreateSource(ID_CAPTION_BAR, captionBar())
+                .setFrame(new Rect(0, 0, 100, 100))
+                .setBoundingRects(new Rect[]{ new Rect(0, 0, 20, 20) });
+        assertNotEqualsAndHashCode();
     }
 
     @Test
@@ -733,5 +763,95 @@ public class InsetsStateTest {
         assertEquals(2, onIdNotFoundInState1Called[0]); // 4000 and 5000.
         assertEquals(1, onIdNotFoundInState2Called[0]); // 1000.
         assertEquals(1, onFinishCalled[0]);
+    }
+
+    @Test
+    public void testCalculateBoundingRects() {
+        mState.getOrCreateSource(ID_STATUS_BAR, statusBars())
+                .setFrame(new Rect(0, 0, 1000, 100))
+                .setBoundingRects(null)
+                .setVisible(true);
+        mState.getOrCreateSource(ID_CAPTION_BAR, captionBar())
+                .setFrame(new Rect(0, 0, 1000, 100))
+                .setBoundingRects(new Rect[]{
+                        new Rect(0, 0, 200, 100),
+                        new Rect(800, 0, 1000, 100)
+                })
+                .setVisible(true);
+        SparseIntArray typeSideMap = new SparseIntArray();
+
+        WindowInsets insets = mState.calculateInsets(new Rect(0, 0, 1000, 1000), null, false,
+                SOFT_INPUT_ADJUST_RESIZE, 0, 0, TYPE_APPLICATION, ACTIVITY_TYPE_UNDEFINED,
+                typeSideMap);
+
+        assertEquals(
+                List.of(new Rect(0, 0, 1000, 100)),
+                insets.getBoundingRects(Type.statusBars())
+        );
+        assertEquals(
+                List.of(
+                        new Rect(0, 0, 200, 100),
+                        new Rect(800, 0, 1000, 100)
+                ),
+                insets.getBoundingRects(Type.captionBar())
+        );
+    }
+
+    @Test
+    public void testCalculateBoundingRects_multipleSourcesOfSameType_concatenated() {
+        mState.getOrCreateSource(ID_CAPTION_BAR, captionBar())
+                .setFrame(new Rect(0, 0, 1000, 100))
+                .setBoundingRects(new Rect[]{new Rect(0, 0, 200, 100)})
+                .setVisible(true);
+        mState.getOrCreateSource(ID_EXTRA_CAPTION_BAR, captionBar())
+                .setFrame(new Rect(0, 0, 1000, 100))
+                .setBoundingRects(new Rect[]{new Rect(800, 0, 1000, 100)})
+                .setVisible(true);
+        SparseIntArray typeSideMap = new SparseIntArray();
+
+        WindowInsets insets = mState.calculateInsets(new Rect(0, 0, 1000, 1000), null, false,
+                SOFT_INPUT_ADJUST_RESIZE, 0, 0, TYPE_APPLICATION, ACTIVITY_TYPE_UNDEFINED,
+                typeSideMap);
+
+        final List<Rect> expected = List.of(
+                new Rect(0, 0, 200, 100),
+                new Rect(800, 0, 1000, 100)
+        );
+        final List<Rect> actual = insets.getBoundingRects(captionBar());
+        assertEquals(expected.size(), actual.size());
+
+        // Order does not matter.
+        assertTrue(actual.containsAll(expected));
+    }
+
+    @Test
+    public void testCalculateBoundingRects_captionBar_reportedAsSysGesturesAndTappableElement() {
+        mState.getOrCreateSource(ID_CAPTION_BAR, captionBar())
+                .setFrame(new Rect(0, 0, 1000, 100))
+                .setBoundingRects(new Rect[]{new Rect(0, 0, 200, 100)})
+                .setVisible(true);
+        SparseIntArray typeSideMap = new SparseIntArray();
+
+        WindowInsets insets = mState.calculateInsets(new Rect(0, 0, 1000, 1000), null, false,
+                SOFT_INPUT_ADJUST_RESIZE, 0, 0, TYPE_APPLICATION, ACTIVITY_TYPE_UNDEFINED,
+                typeSideMap);
+
+        assertEquals(
+                List.of(new Rect(0, 0, 200, 100)),
+                insets.getBoundingRects(Type.captionBar())
+        );
+        assertEquals(
+                List.of(new Rect(0, 0, 200, 100)),
+                insets.getBoundingRects(Type.systemGestures())
+        );
+        assertEquals(
+                List.of(new Rect(0, 0, 200, 100)),
+                insets.getBoundingRects(Type.mandatorySystemGestures())
+        );
+        assertEquals(
+                List.of(new Rect(0, 0, 200, 100)),
+                insets.getBoundingRects(Type.tappableElement())
+        );
+
     }
 }

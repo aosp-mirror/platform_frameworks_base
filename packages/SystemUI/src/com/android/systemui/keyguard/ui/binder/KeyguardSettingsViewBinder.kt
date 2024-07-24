@@ -17,29 +17,35 @@
 
 package com.android.systemui.keyguard.ui.binder
 
-import android.content.Intent
+import android.graphics.Rect
 import android.view.View
 import androidx.core.view.isVisible
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
-import com.android.systemui.R
-import com.android.systemui.animation.ActivityLaunchAnimator
-import com.android.systemui.animation.view.LaunchableLinearLayout
+import com.android.systemui.animation.ActivityTransitionAnimator
 import com.android.systemui.common.ui.binder.IconViewBinder
 import com.android.systemui.common.ui.binder.TextViewBinder
+import com.android.systemui.keyguard.ui.viewmodel.KeyguardLongPressViewModel
+import com.android.systemui.keyguard.ui.viewmodel.KeyguardRootViewModel
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardSettingsMenuViewModel
+import com.android.systemui.keyguard.util.WallpaperPickerIntentUtils
+import com.android.systemui.keyguard.util.WallpaperPickerIntentUtils.LAUNCH_SOURCE_KEYGUARD
 import com.android.systemui.lifecycle.repeatWhenAttached
 import com.android.systemui.plugins.ActivityStarter
+import com.android.systemui.res.R
 import com.android.systemui.statusbar.VibratorHelper
 import kotlinx.coroutines.DisposableHandle
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.launch
 
 object KeyguardSettingsViewBinder {
     fun bind(
-        view: LaunchableLinearLayout,
+        view: View,
         viewModel: KeyguardSettingsMenuViewModel,
+        longPressViewModel: KeyguardLongPressViewModel,
+        rootViewModel: KeyguardRootViewModel?,
         vibratorHelper: VibratorHelper,
         activityStarter: ActivityStarter
     ): DisposableHandle {
@@ -53,7 +59,6 @@ object KeyguardSettingsViewBinder {
                                 vibratorHelper.vibrate(KeyguardBottomAreaVibrations.Activated)
                                 view.setOnTouchListener(
                                     KeyguardSettingsButtonOnTouchListener(
-                                        view = view,
                                         viewModel = viewModel,
                                     )
                                 )
@@ -85,6 +90,18 @@ object KeyguardSettingsViewBinder {
                                 }
                         }
                     }
+
+                    launch {
+                        rootViewModel?.lastRootViewTapPosition?.filterNotNull()?.collect { point ->
+                            if (view.isVisible) {
+                                val hitRect = Rect()
+                                view.getHitRect(hitRect)
+                                if (!hitRect.contains(point.x, point.y)) {
+                                    longPressViewModel.onTouchedOutside()
+                                }
+                            }
+                        }
+                    }
                 }
             }
         return disposableHandle
@@ -96,15 +113,9 @@ object KeyguardSettingsViewBinder {
         view: View,
     ) {
         activityStarter.postStartActivityDismissingKeyguard(
-            Intent(Intent.ACTION_SET_WALLPAPER).apply {
-                flags = Intent.FLAG_ACTIVITY_NEW_TASK
-                view.context
-                    .getString(R.string.config_wallpaperPickerPackage)
-                    .takeIf { it.isNotEmpty() }
-                    ?.let { packageName -> setPackage(packageName) }
-            },
+            WallpaperPickerIntentUtils.getIntent(view.context, LAUNCH_SOURCE_KEYGUARD),
             /* delay= */ 0,
-            /* animationController= */ ActivityLaunchAnimator.Controller.fromView(view),
+            /* animationController= */ ActivityTransitionAnimator.Controller.fromView(view),
             /* customMessage= */ view.context.getString(R.string.keyguard_unlock_to_customize_ls)
         )
     }

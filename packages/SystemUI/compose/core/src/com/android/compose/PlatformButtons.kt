@@ -17,6 +17,7 @@
 
 package com.android.compose
 
+import androidx.annotation.DrawableRes
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.RowScope
@@ -24,8 +25,14 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonColors
+import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.android.compose.theme.LocalAndroidColorScheme
 
@@ -34,11 +41,13 @@ fun PlatformButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
+    colors: ButtonColors = filledButtonColors(),
+    verticalPadding: Dp = DefaultPlatformButtonVerticalPadding,
     content: @Composable RowScope.() -> Unit,
 ) {
     androidx.compose.material3.Button(
-        modifier = modifier.padding(vertical = 6.dp).height(36.dp),
-        colors = filledButtonColors(),
+        modifier = modifier.padding(vertical = verticalPadding).height(36.dp),
+        colors = colors,
         contentPadding = ButtonPaddings,
         onClick = onClick,
         enabled = enabled,
@@ -52,13 +61,16 @@ fun PlatformOutlinedButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
+    colors: ButtonColors = outlineButtonColors(),
+    border: BorderStroke? = outlineButtonBorder(),
+    verticalPadding: Dp = DefaultPlatformButtonVerticalPadding,
     content: @Composable RowScope.() -> Unit,
 ) {
     androidx.compose.material3.OutlinedButton(
-        modifier = modifier.padding(vertical = 6.dp).height(36.dp),
+        modifier = modifier.padding(vertical = verticalPadding).height(36.dp),
         enabled = enabled,
-        colors = outlineButtonColors(),
-        border = outlineButtonBorder(),
+        colors = colors,
+        border = border,
         contentPadding = ButtonPaddings,
         onClick = onClick,
     ) {
@@ -71,6 +83,7 @@ fun PlatformTextButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
+    colors: ButtonColors = textButtonColors(),
     content: @Composable RowScope.() -> Unit,
 ) {
     androidx.compose.material3.TextButton(
@@ -78,33 +91,68 @@ fun PlatformTextButton(
         modifier = modifier,
         enabled = enabled,
         content = content,
+        colors = colors,
     )
 }
 
+@Composable
+fun PlatformIconButton(
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    enabled: Boolean = true,
+    colors: IconButtonColors = iconButtonColors(),
+    @DrawableRes iconResource: Int,
+    contentDescription: String?,
+) {
+    IconButton(
+        modifier = modifier,
+        onClick = onClick,
+        enabled = enabled,
+        colors = colors,
+    ) {
+        Icon(
+            painter = painterResource(id = iconResource),
+            contentDescription = contentDescription,
+            tint = colors.contentColor,
+        )
+    }
+}
+
+private val DefaultPlatformButtonVerticalPadding = 6.dp
 private val ButtonPaddings = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
 
 @Composable
 private fun filledButtonColors(): ButtonColors {
-    val colors = LocalAndroidColorScheme.current.deprecated
+    val colors = LocalAndroidColorScheme.current
     return ButtonDefaults.buttonColors(
-        containerColor = colors.colorAccentPrimary,
-        contentColor = colors.textColorOnAccent,
+        containerColor = colors.primary,
+        contentColor = colors.onPrimary,
     )
 }
 
 @Composable
 private fun outlineButtonColors(): ButtonColors {
-    val colors = LocalAndroidColorScheme.current.deprecated
     return ButtonDefaults.outlinedButtonColors(
-        contentColor = colors.textColorPrimary,
+        contentColor = LocalAndroidColorScheme.current.onSurface,
+    )
+}
+
+@Composable
+private fun iconButtonColors(): IconButtonColors {
+    return IconButtonDefaults.filledIconButtonColors(
+        contentColor = LocalAndroidColorScheme.current.onSurface,
     )
 }
 
 @Composable
 private fun outlineButtonBorder(): BorderStroke {
-    val colors = LocalAndroidColorScheme.current.deprecated
     return BorderStroke(
         width = 1.dp,
-        color = colors.colorAccentPrimaryVariant,
+        color = LocalAndroidColorScheme.current.primary,
     )
+}
+
+@Composable
+private fun textButtonColors(): ButtonColors {
+    return ButtonDefaults.textButtonColors(contentColor = LocalAndroidColorScheme.current.primary)
 }

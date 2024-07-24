@@ -4,16 +4,18 @@ import static com.android.settingslib.widget.AdaptiveOutlineDrawable.ICON_TYPE_A
 
 import android.annotation.SuppressLint;
 import android.bluetooth.BluetoothClass;
+import android.bluetooth.BluetoothCsipSetCoordinator;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothProfile;
-import android.bluetooth.BluetoothCsipSetCoordinator;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.media.AudioManager;
 import android.net.Uri;
 import android.provider.DeviceConfig;
 import android.provider.MediaStore;
@@ -23,15 +25,20 @@ import android.util.Pair;
 
 import androidx.annotation.DrawableRes;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.annotation.WorkerThread;
 import androidx.core.graphics.drawable.IconCompat;
 
 import com.android.settingslib.R;
 import com.android.settingslib.widget.AdaptiveIcon;
 import com.android.settingslib.widget.AdaptiveOutlineDrawable;
 
+import com.google.common.collect.ImmutableSet;
+
 import java.io.IOException;
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -45,6 +52,8 @@ public class BluetoothUtils {
     public static final String BT_ADVANCED_HEADER_ENABLED = "bt_advanced_header_enabled";
     private static final int METADATA_FAST_PAIR_CUSTOMIZED_FIELDS = 25;
     private static final String KEY_HEARABLE_CONTROL_SLICE = "HEARABLE_CONTROL_SLICE_WITH_WIDTH";
+    private static final Set<String> EXCLUSIVE_MANAGERS = ImmutableSet.of(
+            "com.google.android.gms.dck");
 
     private static ErrorListener sErrorListener;
 
@@ -115,6 +124,12 @@ public class BluetoothUtils {
             }
         }
 
+        if (cachedDevice.isHearingAidDevice()) {
+            return new Pair<>(getBluetoothDrawable(context,
+                    com.android.internal.R.drawable.ic_bt_hearing_aid),
+                    context.getString(R.string.bluetooth_talkback_hearing_aids));
+        }
+
         List<LocalBluetoothProfile> profiles = cachedDevice.getProfiles();
         int resId = 0;
         for (LocalBluetoothProfile profile : profiles) {
@@ -123,7 +138,8 @@ public class BluetoothUtils {
                 // The device should show hearing aid icon if it contains any hearing aid related
                 // profiles
                 if (profile instanceof HearingAidProfile || profile instanceof HapClientProfile) {
-                    return new Pair<>(getBluetoothDrawable(context, profileResId), null);
+                    return new Pair<>(getBluetoothDrawable(context, profileResId),
+                            context.getString(R.string.bluetooth_talkback_hearing_aids));
                 }
                 if (resId == 0) {
                     resId = profileResId;
@@ -470,6 +486,146 @@ public class BluetoothUtils {
         return extraTagValue(KEY_HEARABLE_CONTROL_SLICE, data);
     }
 
+    /**
+     * Check if the Bluetooth device is an AvailableMediaBluetoothDevice, which means:
+     * 1) currently connected
+     * 2) is Hearing Aid or LE Audio
+     *    OR
+     * 3) connected profile matches currentAudioProfile
+     *
+     * @param cachedDevice the CachedBluetoothDevice
+     * @param audioManager audio manager to get the current audio profile
+     * @return if the device is AvailableMediaBluetoothDevice
+     */
+    @WorkerThread
+    public static boolean isAvailableMediaBluetoothDevice(
+            CachedBluetoothDevice cachedDevice, AudioManager audioManager) {
+        int audioMode = audioManager.getMode();
+        int currentAudioProfile;
+
+        if (audioMode == AudioManager.MODE_RINGTONE
+                || audioMode == AudioManager.MODE_IN_CALL
+                || audioMode == AudioManager.MODE_IN_COMMUNICATION) {
+            // in phone call
+            currentAudioProfile = BluetoothProfile.HEADSET;
+        } else {
+            // without phone call
+            currentAudioProfile = BluetoothProfile.A2DP;
+        }
+
+        boolean isFilterMatched = false;
+        if (isDeviceConnected(cachedDevice)) {
+            // If device is Hearing Aid or LE Audio, it is compatible with HFP and A2DP.
+            // It would show in Available Devices group.
+            if (cachedDevice.isConnectedAshaHearingAidDevice()
+                    || cachedDevice.isConnectedLeAudioDevice()) {
+                Log.d(TAG, "isFilterMatched() device : "
+                        + cachedDevice.getName() + ", the profile is connected.");
+                return true;
+            }
+            // According to the current audio profile type,
+            // this page will show the bluetooth device that have corresponding profile.
+            // For example:
+            // If current audio profile is a2dp, show the bluetooth device that have a2dp profile.
+            // If current audio profile is headset,
+            // show the bluetooth device that have headset profile.
+            switch (currentAudioProfile) {
+                case BluetoothProfile.A2DP:
+                    isFilterMatched = cachedDevice.isConnectedA2dpDevice();
+                    break;
+                case BluetoothProfile.HEADSET:
+                    isFilterMatched = cachedDevice.isConnectedHfpDevice();
+                    break;
+            }
+        }
+        return isFilterMatched;
+    }
+
+    /**
+     * Check if the Bluetooth device is a ConnectedBluetoothDevice, which means:
+     * 1) currently connected
+     * 2) is not Hearing Aid or LE Audio
+     *    AND
+     * 3) connected profile does not match currentAudioProfile
+     *
+     * @param cachedDevice the CachedBluetoothDevice
+     * @param audioManager audio manager to get the current audio profile
+     * @return if the device is AvailableMediaBluetoothDevice
+     */
+    @WorkerThread
+    public static boolean isConnectedBluetoothDevice(
+            CachedBluetoothDevice cachedDevice, AudioManager audioManager) {
+        int audioMode = audioManager.getMode();
+        int currentAudioProfile;
+
+        if (audioMode == AudioManager.MODE_RINGTONE
+                || audioMode == AudioManager.MODE_IN_CALL
+                || audioMode == AudioManager.MODE_IN_COMMUNICATION) {
+            // in phone call
+            currentAudioProfile = BluetoothProfile.HEADSET;
+        } else {
+            // without phone call
+            currentAudioProfile = BluetoothProfile.A2DP;
+        }
+
+        boolean isFilterMatched = false;
+        if (isDeviceConnected(cachedDevice)) {
+            // If device is Hearing Aid or LE Audio, it is compatible with HFP and A2DP.
+            // It would not show in Connected Devices group.
+            if (cachedDevice.isConnectedAshaHearingAidDevice()
+                    || cachedDevice.isConnectedLeAudioDevice()) {
+                return false;
+            }
+            // According to the current audio profile type,
+            // this page will show the bluetooth device that doesn't have corresponding profile.
+            // For example:
+            // If current audio profile is a2dp,
+            // show the bluetooth device that doesn't have a2dp profile.
+            // If current audio profile is headset,
+            // show the bluetooth device that doesn't have headset profile.
+            switch (currentAudioProfile) {
+                case BluetoothProfile.A2DP:
+                    isFilterMatched = !cachedDevice.isConnectedA2dpDevice();
+                    break;
+                case BluetoothProfile.HEADSET:
+                    isFilterMatched = !cachedDevice.isConnectedHfpDevice();
+                    break;
+            }
+        }
+        return isFilterMatched;
+    }
+
+    /**
+     * Check if the Bluetooth device is an active media device
+     *
+     * @param cachedDevice the CachedBluetoothDevice
+     * @return if the Bluetooth device is an active media device
+     */
+    public static boolean isActiveMediaDevice(CachedBluetoothDevice cachedDevice) {
+        return cachedDevice.isActiveDevice(BluetoothProfile.A2DP)
+                || cachedDevice.isActiveDevice(BluetoothProfile.HEADSET)
+                || cachedDevice.isActiveDevice(BluetoothProfile.HEARING_AID)
+                || cachedDevice.isActiveDevice(BluetoothProfile.LE_AUDIO);
+    }
+
+    /**
+     * Check if the Bluetooth device is an active LE Audio device
+     *
+     * @param cachedDevice the CachedBluetoothDevice
+     * @return if the Bluetooth device is an active LE Audio device
+     */
+    public static boolean isActiveLeAudioDevice(CachedBluetoothDevice cachedDevice) {
+        return cachedDevice.isActiveDevice(BluetoothProfile.LE_AUDIO);
+    }
+
+    private static boolean isDeviceConnected(CachedBluetoothDevice cachedDevice) {
+        if (cachedDevice == null) {
+            return false;
+        }
+        final BluetoothDevice device = cachedDevice.getDevice();
+        return device.getBondState() == BluetoothDevice.BOND_BONDED && device.isConnected();
+    }
+
     @SuppressLint("NewApi") // Hidden API made public
     private static boolean doesClassMatch(BluetoothClass btClass, int classId) {
         return btClass.doesClassMatch(classId);
@@ -497,5 +653,67 @@ public class BluetoothUtils {
 
     private static String generateExpressionWithTag(String tag, String value) {
         return getTagStart(tag) + value + getTagEnd(tag);
+    }
+
+    /**
+     * Returns the BluetoothDevice's exclusive manager
+     * ({@link BluetoothDevice.METADATA_EXCLUSIVE_MANAGER} in metadata) if it exists and is in the
+     * given set, otherwise null.
+     */
+    @Nullable
+    private static String getAllowedExclusiveManager(BluetoothDevice bluetoothDevice) {
+        byte[] exclusiveManagerNameBytes = bluetoothDevice.getMetadata(
+                BluetoothDevice.METADATA_EXCLUSIVE_MANAGER);
+        if (exclusiveManagerNameBytes == null) {
+            Log.d(TAG, "Bluetooth device " + bluetoothDevice.getName()
+                    + " doesn't have exclusive manager");
+            return null;
+        }
+        String exclusiveManagerName = new String(exclusiveManagerNameBytes);
+        return getExclusiveManagers().contains(exclusiveManagerName) ? exclusiveManagerName
+                : null;
+    }
+
+    /**
+     * Checks if given package is installed
+     */
+    private static boolean isPackageInstalled(Context context,
+            String packageName) {
+        PackageManager packageManager = context.getPackageManager();
+        try {
+            packageManager.getPackageInfo(packageName, 0);
+            return true;
+        } catch (PackageManager.NameNotFoundException e) {
+            Log.d(TAG, "Package " + packageName + " is not installed");
+        }
+        return false;
+    }
+
+    /**
+     * A BluetoothDevice is exclusively managed if
+     * 1) it has field {@link BluetoothDevice.METADATA_EXCLUSIVE_MANAGER} in metadata.
+     * 2) the exclusive manager app name is in the allowlist.
+     * 3) the exclusive manager app is installed.
+     */
+    public static boolean isExclusivelyManagedBluetoothDevice(@NonNull Context context,
+            @NonNull BluetoothDevice bluetoothDevice) {
+        String exclusiveManagerName = getAllowedExclusiveManager(bluetoothDevice);
+        if (exclusiveManagerName == null) {
+            return false;
+        }
+        if (!isPackageInstalled(context, exclusiveManagerName)) {
+            return false;
+        } else {
+            Log.d(TAG, "Found exclusively managed app " + exclusiveManagerName);
+            return true;
+        }
+    }
+
+    /**
+     * Return the allowlist for exclusive manager names.
+     */
+    @NonNull
+    public static Set<String> getExclusiveManagers() {
+        return EXCLUSIVE_MANAGERS;
     }
 }

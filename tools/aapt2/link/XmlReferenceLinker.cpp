@@ -90,7 +90,8 @@ class XmlVisitor : public xml::PackageAwareVisitor {
         attribute = &attr.compiled_attribute.value().attribute;
       }
 
-      attr.compiled_value = ResourceUtils::TryParseItemForAttribute(attr.value, attribute);
+      attr.compiled_value = ResourceUtils::TryParseItemForAttribute(context_->GetDiagnostics(),
+                                                                    attr.value, attribute);
       if (attr.compiled_value) {
         // With a compiledValue, we must resolve the reference and assign it an ID.
         attr.compiled_value->SetSource(source);

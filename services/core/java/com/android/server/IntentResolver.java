@@ -16,6 +16,8 @@
 
 package com.android.server;
 
+import static android.permission.flags.Flags.ignoreProcessText;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
@@ -94,7 +96,7 @@ public abstract class IntentResolver<F, R extends Object> {
             filter.dump(logPrinter, "  ");
         }
 
-        final int match = filter.match(intent.getAction(), resolvedType, intent.getScheme(),
+        int match = filter.match(intent.getAction(), resolvedType, intent.getScheme(),
                 intent.getData(), intent.getCategories(), TAG);
 
         if (match >= 0) {
@@ -353,6 +355,13 @@ public abstract class IntentResolver<F, R extends Object> {
     public List<R> queryIntentFromList(@NonNull Computer computer, Intent intent,
             String resolvedType, boolean defaultOnly, ArrayList<F[]> listCut, int userId,
             long customFlags) {
+        if (Intent.ACTION_PROCESS_TEXT.equals(intent.getAction()) && ignoreProcessText()) {
+            // This is for an experiment about deprecating PROCESS_TEXT
+            // Note: SettingsProvider isn't ready early in boot and ACTION_PROCESS_TEXT isn't
+            //       queried during boot so we are checking the action before the flag.
+            return Collections.emptyList();
+        }
+
         ArrayList<R> resultList = new ArrayList<R>();
 
         final boolean debug = localLOGV ||
@@ -377,6 +386,13 @@ public abstract class IntentResolver<F, R extends Object> {
 
     protected final List<R> queryIntent(@NonNull PackageDataSnapshot snapshot, Intent intent,
             String resolvedType, boolean defaultOnly, @UserIdInt int userId, long customFlags) {
+        if (Intent.ACTION_PROCESS_TEXT.equals(intent.getAction()) && ignoreProcessText()) {
+            // This is for an experiment about deprecating PROCESS_TEXT
+            // Note: SettingsProvider isn't ready early in boot and ACTION_PROCESS_TEXT isn't
+            //       queried during boot so we are checking the action before the flag.
+            return Collections.emptyList();
+        }
+
         String scheme = intent.getScheme();
 
         ArrayList<R> finalList = new ArrayList<R>();

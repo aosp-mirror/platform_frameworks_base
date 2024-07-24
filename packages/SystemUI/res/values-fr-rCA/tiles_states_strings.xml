@@ -126,6 +126,11 @@
     <item msgid="8259411607272330225">"Désactivé"</item>
     <item msgid="578444932039713369">"Activé"</item>
   </string-array>
+  <string-array name="tile_states_record_issue">
+    <item msgid="1727196795383575383">"Non accessible"</item>
+    <item msgid="9061144428113385092">"Désactivé"</item>
+    <item msgid="2984256114867200368">"Activé"</item>
+  </string-array>
   <string-array name="tile_states_reverse">
     <item msgid="3574611556622963971">"Non disponible"</item>
     <item msgid="8707481475312432575">"Désactivé"</item>
@@ -147,7 +152,7 @@
     <item msgid="8998632451221157987">"Activé"</item>
   </string-array>
   <string-array name="tile_states_controls">
-    <item msgid="8199009425335668294">"Non disponible"</item>
+    <item msgid="8199009425335668294">"Non disponibles"</item>
     <item msgid="4544919905196727508">"Désactivées"</item>
     <item msgid="3422023746567004609">"Activées"</item>
   </string-array>

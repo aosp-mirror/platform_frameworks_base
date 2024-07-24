@@ -20,10 +20,7 @@
 #include <GrDirectContext.h>
 #include <SkBitmap.h>
 #include <cutils/compiler.h>
-#include <private/android/choreographer.h>
 #include <surface_control_private.h>
-#include <thread/ThreadBase.h>
-#include <utils/Looper.h>
 #include <utils/Thread.h>
 
 #include <memory>

@@ -23,11 +23,11 @@ import android.app.PendingIntent
 import android.app.StatusBarManager
 import android.content.Intent
 import android.content.res.Configuration
+import android.graphics.Insets
 import android.os.Bundle
 import android.os.Trace
 import android.os.Trace.TRACE_TAG_APP
 import android.provider.AlarmClock
-import android.util.Pair
 import android.view.DisplayCutout
 import android.view.View
 import android.view.WindowInsets
@@ -38,7 +38,7 @@ import androidx.core.view.doOnLayout
 import com.android.app.animation.Interpolators
 import com.android.settingslib.Utils
 import com.android.systemui.Dumpable
-import com.android.systemui.R
+import com.android.systemui.Flags.centralizedStatusBarHeightFix
 import com.android.systemui.animation.ShadeInterpolation
 import com.android.systemui.battery.BatteryMeterView
 import com.android.systemui.battery.BatteryMeterViewController
@@ -49,6 +49,7 @@ import com.android.systemui.dump.DumpManager
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.qs.ChipVisibilityListener
 import com.android.systemui.qs.HeaderPrivacyIconsController
+import com.android.systemui.res.R
 import com.android.systemui.shade.ShadeHeaderController.Companion.HEADER_TRANSITION_ID
 import com.android.systemui.shade.ShadeHeaderController.Companion.LARGE_SCREEN_HEADER_CONSTRAINT
 import com.android.systemui.shade.ShadeHeaderController.Companion.LARGE_SCREEN_HEADER_TRANSITION_ID
@@ -135,7 +136,8 @@ constructor(
     private val date: TextView = header.requireViewById(R.id.date)
     private val iconContainer: StatusIconContainer = header.requireViewById(R.id.statusIcons)
     private val mShadeCarrierGroup: ShadeCarrierGroup = header.requireViewById(R.id.carrier_group)
-    private val systemIcons: View = header.requireViewById(R.id.shade_header_system_icons)
+    private val systemIconsHoverContainer: View =
+        header.requireViewById(R.id.hover_system_icons_container)
 
     private var roundedCorners = 0
     private var cutout: DisplayCutout? = null
@@ -259,14 +261,18 @@ constructor(
                     header.paddingRight,
                     header.paddingBottom
                 )
-                systemIcons.setPaddingRelative(
+                systemIconsHoverContainer.setPaddingRelative(
                     resources.getDimensionPixelSize(
-                        R.dimen.shade_header_system_icons_padding_start
+                        R.dimen.hover_system_icons_container_padding_start
                     ),
-                    resources.getDimensionPixelSize(R.dimen.shade_header_system_icons_padding_top),
-                    resources.getDimensionPixelSize(R.dimen.shade_header_system_icons_padding_end),
                     resources.getDimensionPixelSize(
-                        R.dimen.shade_header_system_icons_padding_bottom
+                        R.dimen.hover_system_icons_container_padding_top
+                    ),
+                    resources.getDimensionPixelSize(
+                        R.dimen.hover_system_icons_container_padding_end
+                    ),
+                    resources.getDimensionPixelSize(
+                        R.dimen.hover_system_icons_container_padding_bottom
                     )
                 )
             }
@@ -299,7 +305,8 @@ constructor(
 
         iconManager = tintedIconManagerFactory.create(iconContainer, StatusBarLocation.QS)
         iconManager.setTint(
-            Utils.getColorAttrDefaultColor(header.context, android.R.attr.textColorPrimary)
+            Utils.getColorAttrDefaultColor(header.context, android.R.attr.textColorPrimary),
+            Utils.getColorAttrDefaultColor(header.context, android.R.attr.textColorPrimaryInverse),
         )
 
         carrierIconSlots =
@@ -330,8 +337,8 @@ constructor(
         demoModeController.addCallback(demoModeReceiver)
         statusBarIconController.addIconGroup(iconManager)
         nextAlarmController.addCallback(nextAlarmCallback)
-        systemIcons.setOnHoverListener(
-            statusOverlayHoverListenerFactory.createListener(systemIcons)
+        systemIconsHoverContainer.setOnHoverListener(
+            statusOverlayHoverListenerFactory.createListener(systemIconsHoverContainer)
         )
     }
 
@@ -343,7 +350,7 @@ constructor(
         demoModeController.removeCallback(demoModeReceiver)
         statusBarIconController.removeIconGroup(iconManager)
         nextAlarmController.removeCallback(nextAlarmCallback)
-        systemIcons.setOnHoverListener(null)
+        systemIconsHoverContainer.setOnHoverListener(null)
     }
 
     fun disable(state1: Int, state2: Int, animate: Boolean) {
@@ -396,9 +403,9 @@ constructor(
     private fun updateConstraintsForInsets(view: MotionLayout, insets: WindowInsets) {
         val cutout = insets.displayCutout.also { this.cutout = it }
 
-        val sbInsets: Pair<Int, Int> = insetsProvider.getStatusBarContentInsetsForCurrentRotation()
-        val cutoutLeft = sbInsets.first
-        val cutoutRight = sbInsets.second
+        val sbInsets: Insets = insetsProvider.getStatusBarContentInsetsForCurrentRotation()
+        val cutoutLeft = sbInsets.left
+        val cutoutRight = sbInsets.right
         val hasCornerCutout: Boolean = insetsProvider.currentRotationHasCornerCutout()
         updateQQSPaddings()
         // Set these guides as the left/right limits for content that lives in the top row, using
@@ -426,6 +433,9 @@ constructor(
             changes += combinedShadeHeadersConstraintManager.emptyCutoutConstraints()
         }
 
+        if (centralizedStatusBarHeightFix()) {
+            view.setPadding(view.paddingLeft, sbInsets.top, view.paddingRight, view.paddingBottom)
+        }
         view.updateAllConstraints(changes)
         updateBatteryMode()
     }
@@ -479,13 +489,13 @@ constructor(
         if (largeScreenActive) {
             logInstantEvent("Large screen constraints set")
             header.setTransition(LARGE_SCREEN_HEADER_TRANSITION_ID)
-            systemIcons.isClickable = true
-            systemIcons.setOnClickListener { shadeCollapseAction?.run() }
+            systemIconsHoverContainer.isClickable = true
+            systemIconsHoverContainer.setOnClickListener { shadeCollapseAction?.run() }
         } else {
             logInstantEvent("Small screen constraints set")
             header.setTransition(HEADER_TRANSITION_ID)
-            systemIcons.setOnClickListener(null)
-            systemIcons.isClickable = false
+            systemIconsHoverContainer.setOnClickListener(null)
+            systemIconsHoverContainer.isClickable = false
         }
         header.jumpToState(header.startState)
         updatePosition()

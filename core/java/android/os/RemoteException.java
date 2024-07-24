@@ -28,6 +28,7 @@ import android.util.AndroidException;
  *
  * One common subclass is {@link DeadObjectException}.
  */
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
 public class RemoteException extends AndroidException {
     public RemoteException() {
         super();
@@ -66,7 +67,7 @@ public class RemoteException extends AndroidException {
     /**
      * Rethrow this exception when we know it came from the system server. This
      * gives us an opportunity to throw a nice clean
-     * {@link DeadSystemRuntimeException} signal to avoid spamming logs with
+     * {@code DeadSystemRuntimeException} signal to avoid spamming logs with
      * misleading stack traces.
      * <p>
      * Apps making calls into the system server may end up persisting internal

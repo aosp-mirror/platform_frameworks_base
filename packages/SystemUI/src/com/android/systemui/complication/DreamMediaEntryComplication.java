@@ -28,7 +28,7 @@ import com.android.systemui.ActivityIntentHelper;
 import com.android.systemui.complication.dagger.DreamMediaEntryComplicationComponent;
 import com.android.systemui.dreams.DreamOverlayStateController;
 import com.android.systemui.flags.FeatureFlags;
-import com.android.systemui.media.controls.ui.MediaCarouselController;
+import com.android.systemui.media.controls.ui.controller.MediaCarouselController;
 import com.android.systemui.media.dream.MediaDreamComplication;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;

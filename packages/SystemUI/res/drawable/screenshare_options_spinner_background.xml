@@ -26,10 +26,17 @@
         </shape>
     </item>
     <item
-        android:drawable="@drawable/ic_ksh_key_down"
-        android:gravity="end|center_vertical"
-        android:textColor="?androidprv:attr/textColorPrimary"
-        android:width="@dimen/screenrecord_spinner_arrow_size"
-        android:height="@dimen/screenrecord_spinner_arrow_size"
-        android:end="20dp" />
+        android:end="20dp"
+        android:gravity="end|center_vertical">
+        <vector
+            android:width="@dimen/screenrecord_spinner_arrow_size"
+            android:height="@dimen/screenrecord_spinner_arrow_size"
+            android:viewportWidth="24"
+            android:viewportHeight="24"
+            android:tint="?androidprv:attr/colorControlNormal">
+            <path
+                android:fillColor="#FF000000"
+                android:pathData="M7.41 7.84L12 12.42l4.59-4.58L18 9.25l-6 6-6-6z" />
+        </vector>
+    </item>
 </layer-list>

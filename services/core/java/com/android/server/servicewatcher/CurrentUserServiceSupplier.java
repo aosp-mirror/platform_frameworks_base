@@ -36,10 +36,12 @@ import android.content.IntentFilter;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
 import android.content.res.Resources;
+import android.location.flags.Flags;
 import android.os.Bundle;
+import android.os.Process;
 import android.os.UserHandle;
-import android.permission.PermissionManager;
 import android.util.Log;
+import android.util.TypedValue;
 
 import com.android.internal.util.Preconditions;
 import com.android.server.FgThread;
@@ -69,6 +71,10 @@ public final class CurrentUserServiceSupplier extends BroadcastReceiver implemen
 
     private static final String EXTRA_SERVICE_VERSION = "serviceVersion";
     private static final String EXTRA_SERVICE_IS_MULTIUSER = "serviceIsMultiuser";
+
+    // a package value that will never match against any package (we can't use null since this will
+    // match against any package).
+    private static final String NO_MATCH_PACKAGE = "";
 
     private static final Comparator<BoundServiceInfo> sBoundServiceInfoComparator = (o1, o2) -> {
         if (o1 == o2) {
@@ -196,7 +202,19 @@ public final class CurrentUserServiceSupplier extends BroadcastReceiver implemen
         Resources resources = context.getResources();
         boolean enableOverlay = resources.getBoolean(enableOverlayResId);
         if (!enableOverlay) {
-            return resources.getString(nonOverlayPackageResId);
+            if (Flags.fixServiceWatcher()) {
+                // we don't use getText() or similar because it won't return null values
+                TypedValue out = new TypedValue();
+                resources.getValue(nonOverlayPackageResId, out, true);
+                CharSequence explicitPackage = out.coerceToString();
+                if (explicitPackage == null) {
+                    return NO_MATCH_PACKAGE;
+                } else {
+                    return explicitPackage.toString();
+                }
+            } else {
+                return resources.getString(nonOverlayPackageResId);
+            }
         } else {
             return null;
         }
@@ -233,6 +251,10 @@ public final class CurrentUserServiceSupplier extends BroadcastReceiver implemen
 
     @Override
     public boolean hasMatchingService() {
+        if (Flags.fixServiceWatcher() && NO_MATCH_PACKAGE.equals(mIntent.getPackage())) {
+            return false;
+        }
+
         int intentQueryFlags = MATCH_DIRECT_BOOT_AWARE | MATCH_DIRECT_BOOT_UNAWARE;
         if (mMatchSystemAppsOnly) {
             intentQueryFlags |= MATCH_SYSTEM_ONLY;
@@ -268,6 +290,10 @@ public final class CurrentUserServiceSupplier extends BroadcastReceiver implemen
 
     @Override
     public BoundServiceInfo getServiceInfo() {
+        if (Flags.fixServiceWatcher() && NO_MATCH_PACKAGE.equals(mIntent.getPackage())) {
+            return null;
+        }
+
         BoundServiceInfo bestServiceInfo = null;
 
         // only allow services in the correct direct boot state to match
@@ -294,8 +320,8 @@ public final class CurrentUserServiceSupplier extends BroadcastReceiver implemen
             BoundServiceInfo serviceInfo = new BoundServiceInfo(mIntent.getAction(), resolveInfo);
 
             if (mServicePermission != null) {
-                if (PermissionManager.checkPackageNamePermission(mServicePermission,
-                        service.packageName, serviceInfo.getUserId()) != PERMISSION_GRANTED) {
+                if (mContext.checkPermission(mServicePermission, Process.INVALID_PID,
+                        serviceInfo.mUid) != PERMISSION_GRANTED) {
                     Log.d(TAG, serviceInfo.getComponentName().flattenToShortString()
                             + " disqualified due to not holding " + mCallerPermission);
                     continue;

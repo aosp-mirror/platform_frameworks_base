@@ -215,7 +215,7 @@ public class FontFamily {
 
     @CriticalNative
     private static native long nGetFamilyReleaseFunc();
-    // By passing -1 to weigth argument, the weight value is resolved by OS/2 table in the font.
+    // By passing -1 to weight argument, the weight value is resolved by OS/2 table in the font.
     // By passing -1 to italic argument, the italic value is resolved by OS/2 table in the font.
     private static native boolean nAddFont(long builderPtr, ByteBuffer font, int ttcIndex,
             int weight, int isItalic);

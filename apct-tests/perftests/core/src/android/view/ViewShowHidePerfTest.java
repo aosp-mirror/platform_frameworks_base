@@ -18,6 +18,7 @@ package android.view;
 
 import static org.junit.Assert.assertTrue;
 
+import android.app.UiAutomation;
 import android.content.Context;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
@@ -29,8 +30,8 @@ import android.widget.LinearLayout;
 
 import androidx.benchmark.BenchmarkState;
 import androidx.benchmark.junit4.BenchmarkRule;
-import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.LargeTest;
+import androidx.test.platform.app.InstrumentationRegistry;
 import androidx.test.rule.ActivityTestRule;
 
 import org.junit.Rule;
@@ -142,6 +143,10 @@ public class ViewShowHidePerfTest {
     }
 
     private void testParentWithChild(TestCallback callback) throws Throwable {
+        // Make sure that a11y is disabled to prevent the test affected by accessibility events.
+        InstrumentationRegistry.getInstrumentation()
+                .getUiAutomation(UiAutomation.FLAG_DONT_USE_ACCESSIBILITY);
+
         mActivityRule.runOnUiThread(() -> {
             final BenchmarkState state = mBenchmarkRule.getState();
 

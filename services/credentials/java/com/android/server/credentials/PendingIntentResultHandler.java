@@ -22,7 +22,7 @@ import android.credentials.CreateCredentialException;
 import android.credentials.CreateCredentialResponse;
 import android.credentials.GetCredentialException;
 import android.credentials.GetCredentialResponse;
-import android.credentials.ui.ProviderPendingIntentResponse;
+import android.credentials.selection.ProviderPendingIntentResponse;
 import android.service.credentials.BeginGetCredentialResponse;
 import android.service.credentials.CredentialProviderService;
 
@@ -82,7 +82,7 @@ public class PendingIntentResultHandler {
         if (resultData == null) {
             return null;
         }
-        return resultData.getParcelableExtra(
+        return resultData.getSerializableExtra(
                 CredentialProviderService.EXTRA_CREATE_CREDENTIAL_EXCEPTION,
                 CreateCredentialException.class);
     }
@@ -94,7 +94,7 @@ public class PendingIntentResultHandler {
         if (resultData == null) {
             return null;
         }
-        return resultData.getParcelableExtra(
+        return resultData.getSerializableExtra(
                 CredentialProviderService.EXTRA_GET_CREDENTIAL_EXCEPTION,
                 GetCredentialException.class);
     }

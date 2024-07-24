@@ -19,6 +19,7 @@ import android.content.Context
 import android.graphics.Color
 import android.graphics.Rect
 import android.graphics.drawable.ColorDrawable
+import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -32,15 +33,16 @@ import com.android.wm.shell.animation.Interpolators
  * User education view to highlight the manage button that allows a user to configure the settings
  * for the bubble. Shown only the first time a user expands a bubble.
  */
-class ManageEducationView constructor(context: Context, positioner: BubblePositioner)
-    : LinearLayout(context) {
+class ManageEducationView(
+    context: Context,
+    private val positioner: BubblePositioner
+) : LinearLayout(context) {
 
-    private val TAG = if (BubbleDebugConfig.TAG_WITH_CLASS_NAME) "ManageEducationView"
-        else BubbleDebugConfig.TAG_BUBBLES
+    companion object {
+        const val PREF_MANAGED_EDUCATION: String = "HasSeenBubblesManageOnboarding"
+        private const val ANIMATE_DURATION: Long = 200
+    }
 
-    private val ANIMATE_DURATION: Long = 200
-
-    private val positioner: BubblePositioner = positioner
     private val manageView by lazy { requireViewById<ViewGroup>(R.id.manage_education_view) }
     private val manageButton by lazy { requireViewById<Button>(R.id.manage_button) }
     private val gotItButton by lazy { requireViewById<Button>(R.id.got_it) }
@@ -62,7 +64,7 @@ class ManageEducationView constructor(context: Context, positioner: BubblePositi
 
     override fun setLayoutDirection(layoutDirection: Int) {
         super.setLayoutDirection(layoutDirection)
-        setDrawableDirection()
+        setDrawableDirection(layoutDirection == LAYOUT_DIRECTION_LTR)
     }
 
     override fun onFinishInflate() {
@@ -71,8 +73,10 @@ class ManageEducationView constructor(context: Context, positioner: BubblePositi
     }
 
     private fun setButtonColor() {
-        val typedArray = mContext.obtainStyledAttributes(intArrayOf(
-                com.android.internal.R.attr.colorAccentPrimary))
+        val typedArray =
+            mContext.obtainStyledAttributes(
+                intArrayOf(com.android.internal.R.attr.colorAccentPrimary)
+            )
         val buttonColor = typedArray.getColor(0 /* index */, Color.TRANSPARENT)
         typedArray.recycle()
 
@@ -81,11 +85,11 @@ class ManageEducationView constructor(context: Context, positioner: BubblePositi
         gotItButton.setBackgroundDrawable(ColorDrawable(buttonColor))
     }
 
-    private fun setDrawableDirection() {
+    private fun setDrawableDirection(isOnLeft: Boolean) {
         manageView.setBackgroundResource(
-            if (resources.configuration.layoutDirection == View.LAYOUT_DIRECTION_RTL)
-                R.drawable.bubble_stack_user_education_bg_rtl
-            else R.drawable.bubble_stack_user_education_bg)
+            if (isOnLeft) R.drawable.bubble_stack_user_education_bg
+            else R.drawable.bubble_stack_user_education_bg_rtl
+        )
     }
 
     /**
@@ -93,48 +97,31 @@ class ManageEducationView constructor(context: Context, positioner: BubblePositi
      * bubble stack is expanded for the first time.
      *
      * @param expandedView the expandedView the user education is shown on top of.
+     * @param isStackOnLeft the bubble stack position on the screen
      */
-    fun show(expandedView: BubbleExpandedView) {
+    fun show(expandedView: BubbleExpandedView, isStackOnLeft: Boolean) {
         setButtonColor()
         if (visibility == VISIBLE) return
 
         bubbleExpandedView = expandedView
         expandedView.taskView?.setObscuredTouchRect(Rect(positioner.screenRect))
 
-        layoutParams.width = if (positioner.isLargeScreen || positioner.isLandscape)
-            context.resources.getDimensionPixelSize(R.dimen.bubbles_user_education_width)
-        else ViewGroup.LayoutParams.MATCH_PARENT
-
         alpha = 0f
         visibility = View.VISIBLE
         expandedView.getManageButtonBoundsOnScreen(realManageButtonRect)
-        val isRTL = mContext.resources.configuration.layoutDirection == LAYOUT_DIRECTION_RTL
-        if (isRTL) {
-            val rightPadding = positioner.screenRect.right - realManageButtonRect.right -
-                    expandedView.manageButtonMargin
-            manageView.setPadding(manageView.paddingLeft, manageView.paddingTop,
-                    rightPadding, manageView.paddingBottom)
-        } else {
-            manageView.setPadding(realManageButtonRect.left - expandedView.manageButtonMargin,
-            manageView.paddingTop, manageView.paddingRight, manageView.paddingBottom)
-        }
+        layoutManageView(realManageButtonRect, expandedView.manageButtonMargin, isStackOnLeft)
+
         post {
-            manageButton
-                .setOnClickListener {
-                    hide()
-                    expandedView.requireViewById<View>(R.id.manage_button).performClick()
-                }
+            manageButton.setOnClickListener {
+                hide()
+                expandedView.requireViewById<View>(R.id.manage_button).performClick()
+            }
             gotItButton.setOnClickListener { hide() }
             setOnClickListener { hide() }
 
             val offsetViewBounds = Rect()
             manageButton.getDrawingRect(offsetViewBounds)
             manageView.offsetDescendantRectToMyCoords(manageButton, offsetViewBounds)
-            if (isRTL && (positioner.isLargeScreen || positioner.isLandscape)) {
-                translationX = (positioner.screenRect.right - width).toFloat()
-            } else {
-                translationX = 0f
-            }
             translationY = (realManageButtonRect.top - offsetViewBounds.top).toFloat()
             bringToFront()
             animate()
@@ -142,7 +129,80 @@ class ManageEducationView constructor(context: Context, positioner: BubblePositi
                 .setInterpolator(Interpolators.FAST_OUT_SLOW_IN)
                 .alpha(1f)
         }
-        setShouldShow(false)
+        updateManageEducationSeen()
+    }
+
+    /**
+     * On tablet the user education is aligned to the left or to right side depending on where the
+     * stack is positioned when collapsed. On phone the user education follows the layout direction.
+     *
+     * @param manageButtonRect the manage button rect on the screen
+     * @param manageButtonMargin the manage button margin
+     * @param isStackOnLeft the bubble stack position on the screen
+     */
+    private fun layoutManageView(
+        manageButtonRect: Rect,
+        manageButtonMargin: Int,
+        isStackOnLeft: Boolean
+    ) {
+        val isLTR = resources.configuration.layoutDirection == LAYOUT_DIRECTION_LTR
+        val isPinnedLeft = if (positioner.isLargeScreen) isStackOnLeft else isLTR
+        val paddingHorizontal =
+            resources.getDimensionPixelSize(R.dimen.bubble_user_education_padding_horizontal)
+
+        // The user education view background image direction
+        setDrawableDirection(isPinnedLeft)
+
+        // The user education view layout gravity
+        gravity = if (isPinnedLeft) Gravity.LEFT else Gravity.RIGHT
+
+        // The user education view width
+        manageView.layoutParams.width =
+            when {
+                // Left-to-Right direction and the education is on the right side
+                isLTR && !isPinnedLeft ->
+                    positioner.screenRect.right -
+                        (manageButtonRect.left - manageButtonMargin - paddingHorizontal)
+                // Right-to-Left direction and the education is on the left side
+                !isLTR && isPinnedLeft ->
+                    manageButtonRect.right + manageButtonMargin + paddingHorizontal
+                // Large screen and the education position matches the layout direction
+                positioner.isLargeScreen -> ViewGroup.LayoutParams.WRAP_CONTENT
+                // Small screen, landscape orientation
+                positioner.isLandscape ->
+                    resources.getDimensionPixelSize(R.dimen.bubbles_user_education_width)
+                // Otherwise
+                else -> ViewGroup.LayoutParams.MATCH_PARENT
+            }
+
+        // The user education view margin on the opposite side of where it's pinned
+        (manageView.layoutParams as MarginLayoutParams).apply {
+            val edgeMargin =
+                resources.getDimensionPixelSize(R.dimen.bubble_user_education_margin_horizontal)
+            leftMargin = if (isPinnedLeft) 0 else edgeMargin
+            rightMargin = if (isPinnedLeft) edgeMargin else 0
+        }
+
+        // The user education view padding
+        manageView.apply {
+            val paddingLeft =
+                if (isLTR && isPinnedLeft) {
+                    // Offset on the left to align with the manage button
+                    manageButtonRect.left - manageButtonMargin
+                } else {
+                    // Use default padding
+                    paddingHorizontal
+                }
+            val paddingRight =
+                if (!isLTR && !isPinnedLeft) {
+                    // Offset on the right to align with the manage button
+                    positioner.screenRect.right - manageButtonRect.right - manageButtonMargin
+                } else {
+                    // Use default padding
+                    paddingHorizontal
+                }
+            setPadding(paddingLeft, paddingTop, paddingRight, paddingBottom)
+        }
     }
 
     fun hide() {
@@ -159,10 +219,11 @@ class ManageEducationView constructor(context: Context, positioner: BubblePositi
             }
     }
 
-    private fun setShouldShow(shouldShow: Boolean) {
-        context.getSharedPreferences(context.packageName, Context.MODE_PRIVATE)
-                .edit().putBoolean(PREF_MANAGED_EDUCATION, !shouldShow).apply()
+    private fun updateManageEducationSeen() {
+        context
+            .getSharedPreferences(context.packageName, Context.MODE_PRIVATE)
+            .edit()
+            .putBoolean(PREF_MANAGED_EDUCATION, true)
+            .apply()
     }
 }
-
-const val PREF_MANAGED_EDUCATION: String = "HasSeenBubblesManageOnboarding"

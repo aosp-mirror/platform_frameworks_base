@@ -134,6 +134,20 @@ final class PolicyDefinition<V> {
                         permissionName));
     }
 
+    static PolicyDefinition<Boolean> SECURITY_LOGGING = new PolicyDefinition<>(
+            new NoArgsPolicyKey(DevicePolicyIdentifiers.SECURITY_LOGGING_POLICY),
+            TRUE_MORE_RESTRICTIVE,
+            POLICY_FLAG_GLOBAL_ONLY_POLICY,
+            PolicyEnforcerCallbacks::enforceSecurityLogging,
+            new BooleanPolicySerializer());
+
+    static PolicyDefinition<Boolean> AUDIT_LOGGING = new PolicyDefinition<>(
+            new NoArgsPolicyKey(DevicePolicyIdentifiers.AUDIT_LOGGING_POLICY),
+            TRUE_MORE_RESTRICTIVE,
+            POLICY_FLAG_GLOBAL_ONLY_POLICY,
+            PolicyEnforcerCallbacks::enforceAuditLogging,
+            new BooleanPolicySerializer());
+
     static PolicyDefinition<LockTaskPolicy> LOCK_TASK = new PolicyDefinition<>(
             new NoArgsPolicyKey(DevicePolicyIdentifiers.LOCK_TASK_POLICY),
             new TopPriority<>(List.of(
@@ -332,6 +346,21 @@ final class PolicyDefinition<V> {
             PolicyEnforcerCallbacks::setPersonalAppsSuspended,
             new BooleanPolicySerializer());
 
+    static PolicyDefinition<Boolean> USB_DATA_SIGNALING = new PolicyDefinition<>(
+            new NoArgsPolicyKey(DevicePolicyIdentifiers.USB_DATA_SIGNALING_POLICY),
+            // usb data signaling is enabled by default, hence disabling it is more restrictive.
+            FALSE_MORE_RESTRICTIVE,
+            POLICY_FLAG_GLOBAL_ONLY_POLICY,
+            (Boolean value, Context context, Integer userId, PolicyKey policyKey) ->
+                PolicyEnforcerCallbacks.setUsbDataSignalingEnabled(value, context),
+            new BooleanPolicySerializer());
+
+    static PolicyDefinition<Integer> CONTENT_PROTECTION = new PolicyDefinition<>(
+            new NoArgsPolicyKey(DevicePolicyIdentifiers.CONTENT_PROTECTION_POLICY),
+            new MostRecent<>(),
+            POLICY_FLAG_LOCAL_ONLY_POLICY,
+            PolicyEnforcerCallbacks::setContentProtectionPolicy,
+            new IntegerPolicySerializer());
 
     private static final Map<String, PolicyDefinition<?>> POLICY_DEFINITIONS = new HashMap<>();
     private static Map<String, Integer> USER_RESTRICTION_FLAGS = new HashMap<>();
@@ -341,6 +370,10 @@ final class PolicyDefinition<V> {
         POLICY_DEFINITIONS.put(DevicePolicyIdentifiers.AUTO_TIMEZONE_POLICY, AUTO_TIMEZONE);
         POLICY_DEFINITIONS.put(DevicePolicyIdentifiers.PERMISSION_GRANT_POLICY,
                 GENERIC_PERMISSION_GRANT);
+        POLICY_DEFINITIONS.put(DevicePolicyIdentifiers.SECURITY_LOGGING_POLICY,
+                SECURITY_LOGGING);
+        POLICY_DEFINITIONS.put(DevicePolicyIdentifiers.AUDIT_LOGGING_POLICY,
+                AUDIT_LOGGING);
         POLICY_DEFINITIONS.put(DevicePolicyIdentifiers.LOCK_TASK_POLICY, LOCK_TASK);
         POLICY_DEFINITIONS.put(DevicePolicyIdentifiers.USER_CONTROL_DISABLED_PACKAGES_POLICY,
                 USER_CONTROLLED_DISABLED_PACKAGES);
@@ -364,6 +397,10 @@ final class PolicyDefinition<V> {
                 SCREEN_CAPTURE_DISABLED);
         POLICY_DEFINITIONS.put(DevicePolicyIdentifiers.PERSONAL_APPS_SUSPENDED_POLICY,
                 PERSONAL_APPS_SUSPENDED);
+        POLICY_DEFINITIONS.put(DevicePolicyIdentifiers.USB_DATA_SIGNALING_POLICY,
+                USB_DATA_SIGNALING);
+        POLICY_DEFINITIONS.put(DevicePolicyIdentifiers.CONTENT_PROTECTION_POLICY,
+                CONTENT_PROTECTION);
 
         // User Restriction Policies
         USER_RESTRICTION_FLAGS.put(UserManager.DISALLOW_MODIFY_ACCOUNTS, /* flags= */ 0);
@@ -416,6 +453,7 @@ final class PolicyDefinition<V> {
         USER_RESTRICTION_FLAGS.put(UserManager.DISALLOW_ADD_USER, /* flags= */ 0);
         USER_RESTRICTION_FLAGS.put(UserManager.DISALLOW_ADD_MANAGED_PROFILE, /* flags= */ 0);
         USER_RESTRICTION_FLAGS.put(UserManager.DISALLOW_ADD_CLONE_PROFILE, /* flags= */ 0);
+        USER_RESTRICTION_FLAGS.put(UserManager.DISALLOW_ADD_PRIVATE_PROFILE, /* flags= */ 0);
         USER_RESTRICTION_FLAGS.put(UserManager.ENSURE_VERIFY_APPS, POLICY_FLAG_GLOBAL_ONLY_POLICY);
         USER_RESTRICTION_FLAGS.put(UserManager.DISALLOW_CONFIG_CELL_BROADCASTS, /* flags= */ 0);
         USER_RESTRICTION_FLAGS.put(UserManager.DISALLOW_CONFIG_MOBILE_NETWORKS, /* flags= */ 0);
@@ -464,7 +502,11 @@ final class PolicyDefinition<V> {
                 UserManager.DISALLOW_CELLULAR_2G, POLICY_FLAG_GLOBAL_ONLY_POLICY);
         USER_RESTRICTION_FLAGS.put(
                 UserManager.DISALLOW_ULTRA_WIDEBAND_RADIO, POLICY_FLAG_GLOBAL_ONLY_POLICY);
-
+        if (com.android.net.thread.platform.flags.Flags.threadUserRestrictionEnabled()) {
+            USER_RESTRICTION_FLAGS.put(
+                    UserManager.DISALLOW_THREAD_NETWORK, POLICY_FLAG_GLOBAL_ONLY_POLICY);
+        }
+        USER_RESTRICTION_FLAGS.put(UserManager.DISALLOW_ASSIST_CONTENT, /* flags= */ 0);
         for (String key : USER_RESTRICTION_FLAGS.keySet()) {
             createAndAddUserRestrictionPolicyDefinition(key, USER_RESTRICTION_FLAGS.get(key));
         }

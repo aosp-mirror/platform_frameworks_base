@@ -67,10 +67,10 @@ import android.provider.Settings;
 import androidx.test.InstrumentationRegistry;
 
 import com.android.internal.R;
+import com.android.internal.pm.parsing.PackageParser2;
 import com.android.server.compat.PlatformCompat;
 import com.android.server.integrity.engine.RuleEvaluationEngine;
 import com.android.server.integrity.model.IntegrityCheckResult;
-import com.android.server.pm.parsing.PackageParser2;
 import com.android.server.pm.parsing.TestPackageParser2;
 import com.android.server.testutils.TestUtils;
 

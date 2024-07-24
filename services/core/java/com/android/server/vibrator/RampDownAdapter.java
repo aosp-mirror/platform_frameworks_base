@@ -42,7 +42,7 @@ import java.util.List;
  * be used to bring the amplitude down to zero. This ensures that the transition from the last
  * amplitude to zero will be handled by the same vibrate method.
  */
-final class RampDownAdapter implements VibrationEffectAdapters.SegmentsAdapter<VibratorInfo> {
+final class RampDownAdapter implements VibrationSegmentsAdapter {
     private final int mRampDownDuration;
     private final int mStepDuration;
 
@@ -52,8 +52,8 @@ final class RampDownAdapter implements VibrationEffectAdapters.SegmentsAdapter<V
     }
 
     @Override
-    public int apply(List<VibrationEffectSegment> segments, int repeatIndex,
-            VibratorInfo info) {
+    public int adaptToVibrator(VibratorInfo info, List<VibrationEffectSegment> segments,
+            int repeatIndex) {
         if (mRampDownDuration <= 0) {
             // Nothing to do, no ramp down duration configured.
             return repeatIndex;

@@ -13,6 +13,7 @@
 // limitations under the License.
 
 package {
+    default_team: "trendy_team_framework_accessibility",
     // See: http://go/android-license-faq
     // A large-scale-change added 'default_applicable_licenses' to import
     // all of the 'license_kinds' from "frameworks_base_license"
@@ -25,149 +26,150 @@ android_test_helper_app {
     name: "Overlay0",
     aaptflags: [
         "--rename-manifest-package com.android.perftests.overlay0",
-    ]
+    ],
 }
 
 android_test_helper_app {
     name: "Overlay1",
     aaptflags: [
         "--rename-manifest-package com.android.perftests.overlay1",
-    ]
+    ],
 }
 
 android_test_helper_app {
     name: "Overlay2",
     aaptflags: [
         "--rename-manifest-package com.android.perftests.overlay2",
-    ]
+    ],
 }
 
 android_test_helper_app {
     name: "Overlay3",
     aaptflags: [
         "--rename-manifest-package com.android.perftests.overlay3",
-    ]
+    ],
 }
 
 android_test_helper_app {
     name: "Overlay4",
     aaptflags: [
         "--rename-manifest-package com.android.perftests.overlay4",
-    ]
+    ],
 }
 
 android_test_helper_app {
     name: "Overlay5",
     aaptflags: [
         "--rename-manifest-package com.android.perftests.overlay5",
-    ]
+    ],
 }
 
 android_test_helper_app {
     name: "Overlay6",
     aaptflags: [
         "--rename-manifest-package com.android.perftests.overlay6",
-    ]
+    ],
 }
 
 android_test_helper_app {
     name: "Overlay7",
     aaptflags: [
         "--rename-manifest-package com.android.perftests.overlay7",
-    ]
+    ],
 }
+
 android_test_helper_app {
     name: "Overlay8",
     aaptflags: [
         "--rename-manifest-package com.android.perftests.overlay8",
-    ]
+    ],
 }
 
 android_test_helper_app {
     name: "Overlay9",
     aaptflags: [
         "--rename-manifest-package com.android.perftests.overlay9",
-    ]
+    ],
 }
 
 android_test_helper_app {
     name: "LargeOverlay0",
-    resource_dirs : [ "res_large" ],
+    resource_dirs: ["res_large"],
     aaptflags: [
         "--rename-manifest-package com.android.perftests.overlay.large0",
-    ]
+    ],
 }
 
 android_test_helper_app {
     name: "LargeOverlay1",
-    resource_dirs : [ "res_large" ],
+    resource_dirs: ["res_large"],
     aaptflags: [
         "--rename-manifest-package com.android.perftests.overlay.large1",
-    ]
+    ],
 }
 
 android_test_helper_app {
     name: "LargeOverlay2",
-    resource_dirs : [ "res_large" ],
+    resource_dirs: ["res_large"],
     aaptflags: [
         "--rename-manifest-package com.android.perftests.overlay.large2",
-    ]
+    ],
 }
 
 android_test_helper_app {
     name: "LargeOverlay3",
-    resource_dirs : [ "res_large" ],
+    resource_dirs: ["res_large"],
     aaptflags: [
         "--rename-manifest-package com.android.perftests.overlay.large3",
-    ]
+    ],
 }
 
 android_test_helper_app {
     name: "LargeOverlay4",
-    resource_dirs : [ "res_large" ],
+    resource_dirs: ["res_large"],
     aaptflags: [
         "--rename-manifest-package com.android.perftests.overlay.large4",
-    ]
+    ],
 }
 
 android_test_helper_app {
     name: "LargeOverlay5",
-    resource_dirs : [ "res_large" ],
+    resource_dirs: ["res_large"],
     aaptflags: [
         "--rename-manifest-package com.android.perftests.overlay.large5",
-    ]
+    ],
 }
 
 android_test_helper_app {
     name: "LargeOverlay6",
-    resource_dirs : [ "res_large" ],
+    resource_dirs: ["res_large"],
     aaptflags: [
         "--rename-manifest-package com.android.perftests.overlay.large6",
-    ]
+    ],
 }
 
 android_test_helper_app {
     name: "LargeOverlay7",
-    resource_dirs : [ "res_large" ],
+    resource_dirs: ["res_large"],
     aaptflags: [
         "--rename-manifest-package com.android.perftests.overlay.large7",
-    ]
+    ],
 }
 
 android_test_helper_app {
     name: "LargeOverlay8",
-    resource_dirs : [ "res_large" ],
+    resource_dirs: ["res_large"],
     aaptflags: [
         "--rename-manifest-package com.android.perftests.overlay.large8",
-    ]
+    ],
 }
 
 android_test_helper_app {
     name: "LargeOverlay9",
-    resource_dirs : [ "res_large" ],
+    resource_dirs: ["res_large"],
     aaptflags: [
         "--rename-manifest-package com.android.perftests.overlay.large9",
-    ]
+    ],
 }
 
 java_library {

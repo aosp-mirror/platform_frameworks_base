@@ -16,21 +16,27 @@
 
 package com.android.server.policy;
 
+import static android.provider.Settings.Global.STEM_PRIMARY_BUTTON_DOUBLE_PRESS;
+import static android.provider.Settings.Global.STEM_PRIMARY_BUTTON_LONG_PRESS;
+import static android.provider.Settings.Global.STEM_PRIMARY_BUTTON_SHORT_PRESS;
+import static android.provider.Settings.Global.STEM_PRIMARY_BUTTON_TRIPLE_PRESS;
 import static android.view.KeyEvent.KEYCODE_STEM_PRIMARY;
 
-import static com.android.dx.mockito.inline.extended.ExtendedMockito.doAnswer;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
+import static com.android.server.policy.PhoneWindowManager.DOUBLE_PRESS_PRIMARY_SWITCH_RECENT_APP;
+import static com.android.server.policy.PhoneWindowManager.LONG_PRESS_PRIMARY_LAUNCH_VOICE_ASSISTANT;
 import static com.android.server.policy.PhoneWindowManager.SHORT_PRESS_PRIMARY_LAUNCH_ALL_APPS;
+import static com.android.server.policy.PhoneWindowManager.SHORT_PRESS_PRIMARY_LAUNCH_TARGET_ACTIVITY;
+import static com.android.server.policy.PhoneWindowManager.TRIPLE_PRESS_PRIMARY_TOGGLE_ACCESSIBILITY;
 
-import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.ArgumentMatchers.eq;
-
-import android.content.Context;
-import android.content.res.Resources;
+import android.app.ActivityManager.RecentTaskInfo;
+import android.app.ActivityTaskManager.RootTaskInfo;
+import android.content.ComponentName;
+import android.os.RemoteException;
+import android.provider.Settings;
+import android.view.Display;
 
 import org.junit.Test;
-import org.mockito.Mock;
-import org.mockito.Mockito;
 
 /**
  * Test class for stem key gesture.
@@ -39,17 +45,17 @@ import org.mockito.Mockito;
  * atest WmTests:StemKeyGestureTests
  */
 public class StemKeyGestureTests extends ShortcutKeyTestBase {
-    @Mock private Resources mResources;
+
+    private static final String TEST_TARGET_ACTIVITY = "com.android.server.policy/.TestActivity";
 
     /**
      * Stem single key should not launch behavior during set up.
      */
     @Test
     public void stemSingleKey_duringSetup_doNothing() {
-        stemKeySetup(
-                () -> overrideBehavior(
-                        com.android.internal.R.integer.config_shortPressOnStemPrimaryBehavior,
-                        SHORT_PRESS_PRIMARY_LAUNCH_ALL_APPS));
+        overrideBehavior(STEM_PRIMARY_BUTTON_SHORT_PRESS, SHORT_PRESS_PRIMARY_LAUNCH_ALL_APPS);
+        setUpPhoneWindowManager(/* supportSettingsUpdate= */ true);
+        mPhoneWindowManager.overrideShouldEarlyShortPressOnStemPrimary(false);
         mPhoneWindowManager.setKeyguardServiceDelegateIsShowing(false);
         mPhoneWindowManager.overrideIsUserSetupComplete(false);
 
@@ -63,10 +69,10 @@ public class StemKeyGestureTests extends ShortcutKeyTestBase {
      */
     @Test
     public void stemSingleKey_AfterSetup_openAllApp() {
-        stemKeySetup(
-                () -> overrideBehavior(
-                        com.android.internal.R.integer.config_shortPressOnStemPrimaryBehavior,
-                        SHORT_PRESS_PRIMARY_LAUNCH_ALL_APPS));
+        overrideBehavior(STEM_PRIMARY_BUTTON_SHORT_PRESS, SHORT_PRESS_PRIMARY_LAUNCH_ALL_APPS);
+        setUpPhoneWindowManager(/* supportSettingsUpdate= */ true);
+        mPhoneWindowManager.overrideShouldEarlyShortPressOnStemPrimary(false);
+        mPhoneWindowManager.overrideStartActivity();
         mPhoneWindowManager.setKeyguardServiceDelegateIsShowing(false);
         mPhoneWindowManager.overrideIsUserSetupComplete(true);
 
@@ -75,28 +81,217 @@ public class StemKeyGestureTests extends ShortcutKeyTestBase {
         mPhoneWindowManager.assertOpenAllAppView();
     }
 
-    private void stemKeySetup(Runnable behaviorOverrideRunnable) {
-        super.tearDown();
-        setupResourcesMock();
-        behaviorOverrideRunnable.run();
-        super.setUp();
+    /**
+     * Stem single key should not launch behavior during set up.
+     */
+    @Test
+    public void stemSingleKey_launchTargetActivity() {
+        overrideBehavior(
+                STEM_PRIMARY_BUTTON_SHORT_PRESS,
+                SHORT_PRESS_PRIMARY_LAUNCH_TARGET_ACTIVITY);
+        setUpPhoneWindowManager(/* supportSettingsUpdate= */ true);
+        mPhoneWindowManager.overrideShouldEarlyShortPressOnStemPrimary(false);
+        mPhoneWindowManager.overrideStartActivity();
+        mPhoneWindowManager.setKeyguardServiceDelegateIsShowing(false);
+        mPhoneWindowManager.overrideIsUserSetupComplete(true);
+        mPhoneWindowManager.assumeResolveActivityNotNull();
+
+        ComponentName targetComponent = ComponentName.unflattenFromString(TEST_TARGET_ACTIVITY);
+        mPhoneWindowManager.overrideStemPressTargetActivity(targetComponent);
+
+        sendKey(KEYCODE_STEM_PRIMARY);
+
+        mPhoneWindowManager.assertActivityTargetLaunched(targetComponent);
     }
 
-    private void setupResourcesMock() {
-        Resources realResources = mContext.getResources();
+    @Test
+    public void stemSingleKey_launchTargetActivity_whenScreenIsOff() {
+        overrideBehavior(
+                STEM_PRIMARY_BUTTON_SHORT_PRESS,
+                SHORT_PRESS_PRIMARY_LAUNCH_TARGET_ACTIVITY);
+        setUpPhoneWindowManager(/* supportSettingsUpdate= */ true);
+        mPhoneWindowManager.overrideShouldEarlyShortPressOnStemPrimary(false);
+        mPhoneWindowManager.overrideStartActivity();
+        mPhoneWindowManager.setKeyguardServiceDelegateIsShowing(false);
+        mPhoneWindowManager.overrideIsUserSetupComplete(true);
+        mPhoneWindowManager.assumeResolveActivityNotNull();
+        mPhoneWindowManager.overrideDisplayState(Display.STATE_OFF);
+        ComponentName targetComponent = ComponentName.unflattenFromString(TEST_TARGET_ACTIVITY);
+        mPhoneWindowManager.overrideStemPressTargetActivity(targetComponent);
+        mPhoneWindowManager.overrideKeyEventPolicyFlags(0);
 
-        mResources = Mockito.mock(Resources.class);
-        doReturn(mResources).when(mContext).getResources();
+        sendKey(KEYCODE_STEM_PRIMARY);
 
-        doAnswer(invocation -> realResources.getXml((Integer) invocation.getArguments()[0]))
-                .when(mResources).getXml(anyInt());
-        doAnswer(invocation -> realResources.getString((Integer) invocation.getArguments()[0]))
-                .when(mResources).getString(anyInt());
-        doAnswer(invocation -> realResources.getBoolean((Integer) invocation.getArguments()[0]))
-                .when(mResources).getBoolean(anyInt());
+        mPhoneWindowManager.assertActivityTargetLaunched(targetComponent);
     }
 
-    private void overrideBehavior(int resId, int expectedBehavior) {
-        doReturn(expectedBehavior).when(mResources).getInteger(eq(resId));
+    @Test
+    public void stemSingleKey_appHasOverridePermission_consumedByApp_notOpenAllApp() {
+        overrideBehavior(STEM_PRIMARY_BUTTON_SHORT_PRESS, SHORT_PRESS_PRIMARY_LAUNCH_ALL_APPS);
+        setUpPhoneWindowManager(/* supportSettingsUpdate= */ true);
+        mPhoneWindowManager.overrideStartActivity();
+        mPhoneWindowManager.setKeyguardServiceDelegateIsShowing(false);
+        mPhoneWindowManager.overrideIsUserSetupComplete(true);
+        mPhoneWindowManager.overrideFocusedWindowButtonOverridePermission(true);
+
+        setDispatchedKeyHandler(keyEvent -> true);
+
+        sendKey(KEYCODE_STEM_PRIMARY);
+
+        mPhoneWindowManager.assertNotOpenAllAppView();
+    }
+
+    @Test
+    public void stemSingleKey_appHasOverridePermission_notConsumedByApp_openAllApp() {
+        overrideBehavior(STEM_PRIMARY_BUTTON_SHORT_PRESS, SHORT_PRESS_PRIMARY_LAUNCH_ALL_APPS);
+        setUpPhoneWindowManager(/* supportSettingsUpdate= */ true);
+        mPhoneWindowManager.overrideStartActivity();
+        mPhoneWindowManager.setKeyguardServiceDelegateIsShowing(false);
+        mPhoneWindowManager.overrideIsUserSetupComplete(true);
+        mPhoneWindowManager.overrideFocusedWindowButtonOverridePermission(true);
+
+        sendKey(KEYCODE_STEM_PRIMARY);
+
+        mPhoneWindowManager.assertOpenAllAppView();
+    }
+
+    @Test
+    public void stemLongKey_triggerSearchServiceToLaunchAssist() {
+        overrideBehavior(
+                STEM_PRIMARY_BUTTON_LONG_PRESS,
+                LONG_PRESS_PRIMARY_LAUNCH_VOICE_ASSISTANT);
+        setUpPhoneWindowManager(/* supportSettingsUpdate= */ true);
+        mPhoneWindowManager.overrideShouldEarlyShortPressOnStemPrimary(false);
+        mPhoneWindowManager.setupAssistForLaunch();
+        mPhoneWindowManager.overrideIsUserSetupComplete(true);
+
+        sendKey(KEYCODE_STEM_PRIMARY, /* longPress= */ true);
+        mPhoneWindowManager.assertSearchManagerLaunchAssist();
+    }
+
+    @Test
+    public void stemLongKey_whenNoSearchService_triggerStatusBarToStartAssist() {
+        overrideBehavior(
+                STEM_PRIMARY_BUTTON_LONG_PRESS,
+                LONG_PRESS_PRIMARY_LAUNCH_VOICE_ASSISTANT);
+        setUpPhoneWindowManager(/* supportSettingsUpdate= */ true);
+        mPhoneWindowManager.overrideShouldEarlyShortPressOnStemPrimary(false);
+        mPhoneWindowManager.setupAssistForLaunch();
+        mPhoneWindowManager.overrideSearchManager(null);
+        mPhoneWindowManager.overrideStatusBarManagerInternal();
+        mPhoneWindowManager.overrideIsUserSetupComplete(true);
+
+        sendKey(KEYCODE_STEM_PRIMARY, /* longPress= */ true);
+        mPhoneWindowManager.assertStatusBarStartAssist();
+    }
+
+    @Test
+    public void stemDoubleKey_EarlyShortPress_AllAppsThenSwitchToMostRecent()
+            throws RemoteException {
+        overrideBehavior(STEM_PRIMARY_BUTTON_SHORT_PRESS, SHORT_PRESS_PRIMARY_LAUNCH_ALL_APPS);
+        overrideBehavior(STEM_PRIMARY_BUTTON_DOUBLE_PRESS, DOUBLE_PRESS_PRIMARY_SWITCH_RECENT_APP);
+        setUpPhoneWindowManager(/* supportSettingsUpdate= */ true);
+        mPhoneWindowManager.overrideShouldEarlyShortPressOnStemPrimary(true);
+        mPhoneWindowManager.setKeyguardServiceDelegateIsShowing(false);
+        mPhoneWindowManager.overrideIsUserSetupComplete(true);
+        RecentTaskInfo recentTaskInfo = new RecentTaskInfo();
+        int referenceId = 666;
+        recentTaskInfo.persistentId = referenceId;
+        doReturn(recentTaskInfo).when(
+                mPhoneWindowManager.mActivityTaskManagerInternal).getMostRecentTaskFromBackground();
+
+        sendKey(KEYCODE_STEM_PRIMARY);
+        sendKey(KEYCODE_STEM_PRIMARY);
+
+        mPhoneWindowManager.assertOpenAllAppView();
+        mPhoneWindowManager.assertSwitchToTask(referenceId);
+    }
+
+    @Test
+    public void stemTripleKey_EarlyShortPress_AllAppsThenBackToOriginalThenToggleA11y()
+            throws RemoteException {
+        overrideBehavior(STEM_PRIMARY_BUTTON_SHORT_PRESS, SHORT_PRESS_PRIMARY_LAUNCH_ALL_APPS);
+        overrideBehavior(
+                STEM_PRIMARY_BUTTON_TRIPLE_PRESS, TRIPLE_PRESS_PRIMARY_TOGGLE_ACCESSIBILITY);
+        setUpPhoneWindowManager(/* supportSettingsUpdate= */ true);
+        mPhoneWindowManager.overrideShouldEarlyShortPressOnStemPrimary(true);
+        mPhoneWindowManager.overrideTalkbackShortcutGestureEnabled(true);
+        mPhoneWindowManager.setKeyguardServiceDelegateIsShowing(false);
+        mPhoneWindowManager.overrideIsUserSetupComplete(true);
+        RootTaskInfo allAppsTask = new RootTaskInfo();
+        int referenceId = 777;
+        allAppsTask.taskId = referenceId;
+        doReturn(allAppsTask)
+                .when(mPhoneWindowManager.mActivityManagerService)
+                .getFocusedRootTaskInfo();
+
+        mPhoneWindowManager.assertTalkBack(/* expectEnabled= */ false);
+
+        sendKey(KEYCODE_STEM_PRIMARY);
+        sendKey(KEYCODE_STEM_PRIMARY);
+        sendKey(KEYCODE_STEM_PRIMARY);
+
+        mPhoneWindowManager.assertOpenAllAppView();
+        mPhoneWindowManager.assertSwitchToTask(referenceId);
+        mPhoneWindowManager.assertTalkBack(/* expectEnabled= */ true);
+    }
+
+    @Test
+    public void stemMultiKey_NoEarlyPress_NoOpenAllApp() throws RemoteException {
+        overrideBehavior(STEM_PRIMARY_BUTTON_SHORT_PRESS, SHORT_PRESS_PRIMARY_LAUNCH_ALL_APPS);
+        overrideBehavior(STEM_PRIMARY_BUTTON_DOUBLE_PRESS, SHORT_PRESS_PRIMARY_LAUNCH_ALL_APPS);
+        overrideBehavior(
+                STEM_PRIMARY_BUTTON_TRIPLE_PRESS, TRIPLE_PRESS_PRIMARY_TOGGLE_ACCESSIBILITY);
+        setUpPhoneWindowManager(/* supportSettingsUpdate= */ true);
+        mPhoneWindowManager.overrideShouldEarlyShortPressOnStemPrimary(false);
+        mPhoneWindowManager.overrideTalkbackShortcutGestureEnabled(true);
+        mPhoneWindowManager.setKeyguardServiceDelegateIsShowing(false);
+        mPhoneWindowManager.overrideIsUserSetupComplete(true);
+        RecentTaskInfo recentTaskInfo = new RecentTaskInfo();
+        int referenceId = 666;
+        recentTaskInfo.persistentId = referenceId;
+        doReturn(recentTaskInfo).when(
+                mPhoneWindowManager.mActivityTaskManagerInternal).getMostRecentTaskFromBackground();
+
+        sendKey(KEYCODE_STEM_PRIMARY);
+        sendKey(KEYCODE_STEM_PRIMARY);
+        sendKey(KEYCODE_STEM_PRIMARY);
+
+        mPhoneWindowManager.assertNotOpenAllAppView();
+        mPhoneWindowManager.assertTalkBack(/* expectEnabled= */ true);
+
+        sendKey(KEYCODE_STEM_PRIMARY);
+        sendKey(KEYCODE_STEM_PRIMARY);
+
+        mPhoneWindowManager.assertNotOpenAllAppView();
+        mPhoneWindowManager.assertSwitchToTask(referenceId);
+    }
+
+    @Test
+    public void stemDoubleKey_earlyShortPress_firstPressConsumedByApp_switchToMostRecent()
+            throws RemoteException {
+        overrideBehavior(STEM_PRIMARY_BUTTON_DOUBLE_PRESS, SHORT_PRESS_PRIMARY_LAUNCH_ALL_APPS);
+        setUpPhoneWindowManager(/* supportSettingsUpdate= */ true);
+        mPhoneWindowManager.overrideShouldEarlyShortPressOnStemPrimary(true);
+        mPhoneWindowManager.setKeyguardServiceDelegateIsShowing(false);
+        mPhoneWindowManager.overrideIsUserSetupComplete(true);
+        mPhoneWindowManager.overrideFocusedWindowButtonOverridePermission(true);
+        RecentTaskInfo recentTaskInfo = new RecentTaskInfo();
+        int referenceId = 666;
+        recentTaskInfo.persistentId = referenceId;
+        doReturn(recentTaskInfo).when(
+                mPhoneWindowManager.mActivityTaskManagerInternal).getMostRecentTaskFromBackground();
+
+        setDispatchedKeyHandler(keyEvent -> true);
+        sendKey(KEYCODE_STEM_PRIMARY);
+        setDispatchedKeyHandler(keyEvent -> false);
+        sendKey(KEYCODE_STEM_PRIMARY);
+
+        mPhoneWindowManager.assertNotOpenAllAppView();
+        mPhoneWindowManager.assertSwitchToTask(referenceId);
+    }
+
+    private void overrideBehavior(String key, int expectedBehavior) {
+        Settings.Global.putLong(mContext.getContentResolver(), key, expectedBehavior);
     }
 }

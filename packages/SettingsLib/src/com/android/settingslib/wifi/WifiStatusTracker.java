@@ -331,7 +331,8 @@ public class WifiStatusTracker {
                 return;
             } else if (!isDefaultNetwork && mDefaultNetworkCapabilities != null
                     && mDefaultNetworkCapabilities.hasTransport(TRANSPORT_CELLULAR)) {
-                statusLabel = mContext.getString(R.string.wifi_connected_low_quality);
+                statusLabel = mContext.getString(
+                        com.android.wifitrackerlib.R.string.wifi_connected_low_quality);
                 return;
             }
         }

@@ -20,12 +20,6 @@ import static com.android.server.job.JobSchedulerService.sElapsedRealtimeClock;
 
 import android.annotation.NonNull;
 import android.app.job.JobInfo;
-import android.content.BroadcastReceiver;
-import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
-import android.os.BatteryManager;
-import android.os.BatteryManagerInternal;
 import android.os.UserHandle;
 import android.util.ArraySet;
 import android.util.IndentingPrintWriter;
@@ -36,7 +30,6 @@ import android.util.proto.ProtoOutputStream;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.AppSchedulingModuleThread;
-import com.android.server.LocalServices;
 import com.android.server.job.JobSchedulerService;
 import com.android.server.job.StateControllerProto;
 
@@ -60,8 +53,6 @@ public final class BatteryController extends RestrictingController {
     @GuardedBy("mLock")
     private final ArraySet<JobStatus> mTopStartedJobs = new ArraySet<>();
 
-    private final PowerTracker mPowerTracker;
-
     private final FlexibilityController mFlexibilityController;
     /**
      * Helper set to avoid too much GC churn from frequent calls to
@@ -77,8 +68,6 @@ public final class BatteryController extends RestrictingController {
     public BatteryController(JobSchedulerService service,
             FlexibilityController flexibilityController) {
         super(service);
-        mPowerTracker = new PowerTracker();
-        mPowerTracker.startTracking();
         mFlexibilityController = flexibilityController;
     }
 
@@ -91,7 +80,7 @@ public final class BatteryController extends RestrictingController {
             if (taskStatus.hasChargingConstraint()) {
                 if (hasTopExemptionLocked(taskStatus)) {
                     taskStatus.setChargingConstraintSatisfied(nowElapsed,
-                            mPowerTracker.isPowerConnected());
+                            mService.isPowerConnected());
                 } else {
                     taskStatus.setChargingConstraintSatisfied(nowElapsed,
                             mService.isBatteryCharging() && mService.isBatteryNotLow());
@@ -174,7 +163,7 @@ public final class BatteryController extends RestrictingController {
 
     @GuardedBy("mLock")
     private void maybeReportNewChargingStateLocked() {
-        final boolean powerConnected = mPowerTracker.isPowerConnected();
+        final boolean powerConnected = mService.isPowerConnected();
         final boolean stablePower = mService.isBatteryCharging() && mService.isBatteryNotLow();
         final boolean batteryNotLow = mService.isBatteryNotLow();
         if (DEBUG) {
@@ -235,62 +224,6 @@ public final class BatteryController extends RestrictingController {
         mChangedJobs.clear();
     }
 
-    private final class PowerTracker extends BroadcastReceiver {
-        /**
-         * Track whether there is power connected. It doesn't mean the device is charging.
-         * Use {@link JobSchedulerService#isBatteryCharging()} to determine if the device is
-         * charging.
-         */
-        private boolean mPowerConnected;
-
-        PowerTracker() {
-        }
-
-        void startTracking() {
-            IntentFilter filter = new IntentFilter();
-
-            filter.addAction(Intent.ACTION_POWER_CONNECTED);
-            filter.addAction(Intent.ACTION_POWER_DISCONNECTED);
-            mContext.registerReceiver(this, filter);
-
-            // Initialize tracker state.
-            BatteryManagerInternal batteryManagerInternal =
-                    LocalServices.getService(BatteryManagerInternal.class);
-            mPowerConnected = batteryManagerInternal.isPowered(BatteryManager.BATTERY_PLUGGED_ANY);
-        }
-
-        boolean isPowerConnected() {
-            return mPowerConnected;
-        }
-
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            synchronized (mLock) {
-                final String action = intent.getAction();
-
-                if (Intent.ACTION_POWER_CONNECTED.equals(action)) {
-                    if (DEBUG) {
-                        Slog.d(TAG, "Power connected @ " + sElapsedRealtimeClock.millis());
-                    }
-                    if (mPowerConnected) {
-                        return;
-                    }
-                    mPowerConnected = true;
-                } else if (Intent.ACTION_POWER_DISCONNECTED.equals(action)) {
-                    if (DEBUG) {
-                        Slog.d(TAG, "Power disconnected @ " + sElapsedRealtimeClock.millis());
-                    }
-                    if (!mPowerConnected) {
-                        return;
-                    }
-                    mPowerConnected = false;
-                }
-
-                maybeReportNewChargingStateLocked();
-            }
-        }
-    }
-
     @VisibleForTesting
     ArraySet<JobStatus> getTrackedJobs() {
         return mTrackedTasks;
@@ -304,7 +237,6 @@ public final class BatteryController extends RestrictingController {
     @Override
     public void dumpControllerStateLocked(IndentingPrintWriter pw,
             Predicate<JobStatus> predicate) {
-        pw.println("Power connected: " + mPowerTracker.isPowerConnected());
         pw.println("Stable power: " + (mService.isBatteryCharging() && mService.isBatteryNotLow()));
         pw.println("Not low: " + mService.isBatteryNotLow());
 

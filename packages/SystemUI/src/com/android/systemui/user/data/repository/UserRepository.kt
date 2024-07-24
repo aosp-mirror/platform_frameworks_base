@@ -17,21 +17,20 @@
 
 package com.android.systemui.user.data.repository
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.content.pm.UserInfo
 import android.os.UserHandle
 import android.os.UserManager
 import android.provider.Settings
 import androidx.annotation.VisibleForTesting
-import com.android.systemui.R
 import com.android.systemui.common.coroutine.ChannelExt.trySendWithFailureLogging
 import com.android.systemui.common.coroutine.ConflatedCallbackFlow.conflatedCallbackFlow
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
-import com.android.systemui.flags.FeatureFlags
-import com.android.systemui.flags.Flags.FACE_AUTH_REFACTOR
+import com.android.systemui.res.R
 import com.android.systemui.settings.UserTracker
 import com.android.systemui.user.data.model.SelectedUserModel
 import com.android.systemui.user.data.model.SelectionStatus
@@ -49,7 +48,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.filterNotNull
-import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.onStart
@@ -76,9 +74,6 @@ interface UserRepository {
 
     /** [UserInfo] of the currently-selected user. */
     val selectedUserInfo: Flow<UserInfo>
-
-    /** Whether user switching is currently in progress. */
-    val userSwitchingInProgress: Flow<Boolean>
 
     /** User ID of the main user. */
     val mainUserId: Int
@@ -125,7 +120,6 @@ constructor(
     @Background private val backgroundDispatcher: CoroutineDispatcher,
     private val globalSettings: GlobalSettings,
     private val tracker: UserTracker,
-    featureFlags: FeatureFlags,
 ) : UserRepository {
 
     private val _userSwitcherSettings: StateFlow<UserSwitcherSettingsModel> =
@@ -137,7 +131,6 @@ constructor(
                         Settings.Global.ADD_USERS_WHEN_LOCKED,
                         Settings.Global.USER_SWITCHER_ENABLED,
                     ),
-                userId = UserHandle.USER_SYSTEM,
             )
             .onStart { emit(Unit) } // Forces an initial update.
             .map { getSettings() }
@@ -162,10 +155,6 @@ constructor(
     private var _isGuestUserResetting: Boolean = false
     override var isGuestUserResetting: Boolean = _isGuestUserResetting
 
-    private val _isUserSwitchingInProgress = MutableStateFlow(false)
-    override val userSwitchingInProgress: Flow<Boolean>
-        get() = _isUserSwitchingInProgress
-
     override val isGuestUserCreationScheduled = AtomicBoolean()
 
     override val isStatusBarUserChipEnabled: Boolean =
@@ -174,12 +163,6 @@ constructor(
     override var secondaryUserId: Int = UserHandle.USER_NULL
 
     override var isRefreshUsersPaused: Boolean = false
-
-    init {
-        if (featureFlags.isEnabled(FACE_AUTH_REFACTOR)) {
-            observeUserSwitching()
-        }
-    }
 
     override val selectedUser: StateFlow<SelectedUserModel> = run {
         // Some callbacks don't modify the selection status, so maintain the current value.
@@ -227,18 +210,15 @@ constructor(
 
     override val selectedUserInfo: Flow<UserInfo> = selectedUser.map { it.userInfo }
 
+    @SuppressLint("MissingPermission")
     override fun refreshUsers() {
         applicationScope.launch {
-            val result = withContext(backgroundDispatcher) { manager.aliveUsers }
-
-            if (result != null) {
-                _userInfos.value =
-                    result
-                        // Users should be sorted by ascending creation time.
-                        .sortedBy { it.creationTime }
-                        // The guest user is always last, regardless of creation time.
-                        .sortedBy { it.isGuest }
-            }
+            _userInfos.value =
+                withContext(backgroundDispatcher) { manager.aliveUsers }
+                    // Users should be sorted by ascending creation time.
+                    .sortedBy { it.creationTime }
+                    // The guest user is always last, regardless of creation time.
+                    .sortedBy { it.isGuest }
 
             if (mainUserId == UserHandle.USER_NULL) {
                 val mainUser = withContext(backgroundDispatcher) { manager.mainUser }
@@ -259,32 +239,10 @@ constructor(
         return _userSwitcherSettings.value.isUserSwitcherEnabled
     }
 
-    private fun observeUserSwitching() {
-        conflatedCallbackFlow {
-                val callback =
-                    object : UserTracker.Callback {
-                        override fun onUserChanging(newUser: Int, userContext: Context) {
-                            trySendWithFailureLogging(true, TAG, "userSwitching started")
-                        }
-
-                        override fun onUserChanged(newUserId: Int, userContext: Context) {
-                            trySendWithFailureLogging(false, TAG, "userSwitching completed")
-                        }
-                    }
-                tracker.addCallback(callback, mainDispatcher.asExecutor())
-                trySendWithFailureLogging(false, TAG, "initial value defaulting to false")
-                awaitClose { tracker.removeCallback(callback) }
-            }
-            .onEach { _isUserSwitchingInProgress.value = it }
-            // TODO (b/262838215), Make this stateIn and initialize directly in field declaration
-            //  once the flag is launched
-            .launchIn(applicationScope)
-    }
-
     private suspend fun getSettings(): UserSwitcherSettingsModel {
         return withContext(backgroundDispatcher) {
             val isSimpleUserSwitcher =
-                globalSettings.getIntForUser(
+                globalSettings.getInt(
                     SETTING_SIMPLE_USER_SWITCHER,
                     if (
                         appContext.resources.getBoolean(
@@ -295,18 +253,16 @@ constructor(
                     } else {
                         0
                     },
-                    UserHandle.USER_SYSTEM,
                 ) != 0
 
             val isAddUsersFromLockscreen =
-                globalSettings.getIntForUser(
+                globalSettings.getInt(
                     Settings.Global.ADD_USERS_WHEN_LOCKED,
                     0,
-                    UserHandle.USER_SYSTEM,
                 ) != 0
 
             val isUserSwitcherEnabled =
-                globalSettings.getIntForUser(
+                globalSettings.getInt(
                     Settings.Global.USER_SWITCHER_ENABLED,
                     if (
                         appContext.resources.getBoolean(
@@ -317,7 +273,6 @@ constructor(
                     } else {
                         0
                     },
-                    UserHandle.USER_SYSTEM,
                 ) != 0
 
             UserSwitcherSettingsModel(

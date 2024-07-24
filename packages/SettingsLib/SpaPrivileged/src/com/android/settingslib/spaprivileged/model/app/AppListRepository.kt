@@ -19,9 +19,14 @@ package com.android.settingslib.spaprivileged.model.app
 import android.content.Context
 import android.content.Intent
 import android.content.pm.ApplicationInfo
+import android.content.pm.FeatureFlags
+import android.content.pm.FeatureFlagsImpl
+import android.content.pm.Flags
 import android.content.pm.PackageManager
 import android.content.pm.PackageManager.ApplicationInfoFlags
 import android.content.pm.ResolveInfo
+import android.os.SystemProperties
+import android.util.Log
 import com.android.internal.R
 import com.android.settingslib.spaprivileged.framework.common.userManager
 import kotlinx.coroutines.async
@@ -65,42 +70,53 @@ object AppListRepositoryUtil {
         AppListRepositoryImpl(context).getSystemPackageNamesBlocking(userId)
 }
 
-class AppListRepositoryImpl(private val context: Context) : AppListRepository {
+/**
+ * This constructor is visible for tests only in order to override `featureFlags`.
+ */
+class AppListRepositoryImpl(
+    private val context: Context,
+    private val featureFlags: FeatureFlags
+) : AppListRepository {
     private val packageManager = context.packageManager
     private val userManager = context.userManager
+
+    constructor(context: Context) : this(context, FeatureFlagsImpl())
 
     override suspend fun loadApps(
         userId: Int,
         loadInstantApps: Boolean,
         matchAnyUserForAdmin: Boolean,
-    ): List<ApplicationInfo> = coroutineScope {
-        val hiddenSystemModulesDeferred = async {
-            packageManager.getInstalledModules(0)
-                .filter { it.isHidden }
-                .map { it.packageName }
-                .filterNotNull()
-                .toSet()
-        }
-        val hideWhenDisabledPackagesDeferred = async {
-            context.resources.getStringArray(R.array.config_hideWhenDisabled_packageNames)
-        }
-        val installedApplicationsAsUser =
-            getInstalledApplications(userId, matchAnyUserForAdmin)
+    ): List<ApplicationInfo> = try {
+        coroutineScope {
+            val hiddenSystemModulesDeferred = async { packageManager.getHiddenSystemModules() }
+            val hideWhenDisabledPackagesDeferred = async {
+                context.resources.getStringArray(R.array.config_hideWhenDisabled_packageNames)
+            }
+            val installedApplicationsAsUser =
+                getInstalledApplications(userId, matchAnyUserForAdmin)
 
-        val hiddenSystemModules = hiddenSystemModulesDeferred.await()
-        val hideWhenDisabledPackages = hideWhenDisabledPackagesDeferred.await()
-        installedApplicationsAsUser.filter { app ->
-            app.isInAppList(loadInstantApps, hiddenSystemModules, hideWhenDisabledPackages)
+            val hiddenSystemModules = hiddenSystemModulesDeferred.await()
+            val hideWhenDisabledPackages = hideWhenDisabledPackagesDeferred.await()
+            installedApplicationsAsUser.filter { app ->
+                app.isInAppList(loadInstantApps, hiddenSystemModules, hideWhenDisabledPackages)
+            }
         }
+    } catch (e: Exception) {
+        Log.e(TAG, "loadApps failed", e)
+        emptyList()
     }
 
     private suspend fun getInstalledApplications(
         userId: Int,
         matchAnyUserForAdmin: Boolean,
     ): List<ApplicationInfo> {
+        val disabledComponentsFlag = (PackageManager.MATCH_DISABLED_COMPONENTS or
+            PackageManager.MATCH_DISABLED_UNTIL_USED_COMPONENTS).toLong()
+        val archivedPackagesFlag: Long = if (isArchivingEnabled(featureFlags))
+            PackageManager.MATCH_ARCHIVED_PACKAGES else 0L
         val regularFlags = ApplicationInfoFlags.of(
-            (PackageManager.MATCH_DISABLED_COMPONENTS or
-                PackageManager.MATCH_DISABLED_UNTIL_USED_COMPONENTS).toLong()
+            disabledComponentsFlag or
+                archivedPackagesFlag
         )
         return if (!matchAnyUserForAdmin || !userManager.getUserInfo(userId).isAdmin) {
             packageManager.getInstalledApplicationsAsUser(regularFlags, userId)
@@ -133,6 +149,9 @@ class AppListRepositoryImpl(private val context: Context) : AppListRepository {
             }
         }
     }
+
+    private fun isArchivingEnabled(featureFlags: FeatureFlags) =
+            featureFlags.archiving() || SystemProperties.getBoolean("pm.archiving.enabled", false)
 
     override fun showSystemPredicate(
         userIdFlow: Flow<Int>,
@@ -187,7 +206,18 @@ class AppListRepositoryImpl(private val context: Context) : AppListRepository {
     private fun isSystemApp(app: ApplicationInfo, homeOrLauncherPackages: Set<String>): Boolean =
         app.isSystemApp && !app.isUpdatedSystemApp && app.packageName !in homeOrLauncherPackages
 
+    private fun PackageManager.getHiddenSystemModules(): Set<String> {
+        val moduleInfos = getInstalledModules(0).filter { it.isHidden }
+        val hiddenApps = moduleInfos.mapNotNull { it.packageName }.toMutableSet()
+        if (Flags.provideInfoOfApkInApex()) {
+            hiddenApps += moduleInfos.flatMap { it.apkInApexPackageNames }
+        }
+        return hiddenApps
+    }
+
     companion object {
+        private const val TAG = "AppListRepository"
+
         private fun ApplicationInfo.isInAppList(
             showInstantApps: Boolean,
             hiddenSystemModules: Set<String>,

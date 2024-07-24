@@ -60,6 +60,7 @@ public class FontListParser {
     private static final String VARIANT_ELEGANT = "elegant";
 
     // XML constants for Font.
+    public static final String ATTR_SUPPORTED_AXES = "supportedAxes";
     public static final String ATTR_INDEX = "index";
     public static final String ATTR_WEIGHT = "weight";
     public static final String ATTR_POSTSCRIPT_NAME = "postScriptName";
@@ -72,6 +73,10 @@ public class FontListParser {
     // XML constants for FontVariationAxis.
     public static final String ATTR_TAG = "tag";
     public static final String ATTR_STYLEVALUE = "stylevalue";
+
+    // The tag string for variable font type resolution.
+    private static final String TAG_WGHT = "wght";
+    private static final String TAG_ITAL = "ital";
 
     /* Parse fallback list (no names) */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
@@ -122,7 +127,7 @@ public class FontListParser {
             parser.setInput(is, null);
             parser.nextTag();
             return readFamilies(parser, systemFontDir, oemCustomization, updatableFontMap,
-                    lastModifiedDate, configVersion, false /* filter out the non-exising files */);
+                    lastModifiedDate, configVersion, false /* filter out the non-existing files */);
         }
     }
 
@@ -231,7 +236,9 @@ public class FontListParser {
             }
         }
 
-        return new FontConfig(families, filtered, resultNamedFamilies, lastModifiedDate,
+        return new FontConfig(families, filtered, resultNamedFamilies,
+                customization.getLocaleFamilyCustomizations(),
+                lastModifiedDate,
                 configVersion);
     }
 
@@ -247,7 +254,7 @@ public class FontListParser {
      * @param parser An XML parser.
      * @param fontDir a font directory name.
      * @param updatableFontMap a updated font file map.
-     * @param allowNonExistingFile true to allow font file that doesn't exists
+     * @param allowNonExistingFile true to allow font file that doesn't exist.
      * @return a FontFamily instance. null if no font files are available in this FontFamily.
      */
     public static @Nullable FontConfig.FontFamily readFamily(XmlPullParser parser, String fontDir,
@@ -366,6 +373,7 @@ public class FontListParser {
         boolean isItalic = STYLE_ITALIC.equals(parser.getAttributeValue(null, ATTR_STYLE));
         String fallbackFor = parser.getAttributeValue(null, ATTR_FALLBACK_FOR);
         String postScriptName = parser.getAttributeValue(null, ATTR_POSTSCRIPT_NAME);
+        final String supportedAxes = parser.getAttributeValue(null, ATTR_SUPPORTED_AXES);
         StringBuilder filename = new StringBuilder();
         while (keepReading(parser)) {
             if (parser.getEventType() == XmlPullParser.TEXT) {
@@ -380,6 +388,18 @@ public class FontListParser {
             }
         }
         String sanitizedName = FILENAME_WHITESPACE_PATTERN.matcher(filename).replaceAll("");
+
+        int varTypeAxes = 0;
+        if (supportedAxes != null) {
+            for (String tag : supportedAxes.split(",")) {
+                String strippedTag = tag.strip();
+                if (strippedTag.equals(TAG_WGHT)) {
+                    varTypeAxes |= FontConfig.Font.VAR_TYPE_AXES_WGHT;
+                } else if (strippedTag.equals(TAG_ITAL)) {
+                    varTypeAxes |= FontConfig.Font.VAR_TYPE_AXES_ITAL;
+                }
+            }
+        }
 
         if (postScriptName == null) {
             // If post script name was not provided, assume the file name is same to PostScript
@@ -421,7 +441,8 @@ public class FontListParser {
                 ),
                 index,
                 varSettings,
-                fallbackFor);
+                fallbackFor,
+                varTypeAxes);
     }
 
     private static String findUpdatedFontFile(String psName,

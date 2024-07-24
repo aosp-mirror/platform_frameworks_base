@@ -329,22 +329,17 @@ public class PrecomputedText implements Spannable {
         @Override
         public int hashCode() {
             // TODO: implement MinikinPaint::hashCode and use it to keep consistency with equals.
-            int lineBreakStyle = (mLineBreakConfig != null)
-                    ? mLineBreakConfig.getLineBreakStyle() : LineBreakConfig.LINE_BREAK_STYLE_NONE;
             return Objects.hash(mPaint.getTextSize(), mPaint.getTextScaleX(), mPaint.getTextSkewX(),
                     mPaint.getLetterSpacing(), mPaint.getWordSpacing(), mPaint.getFlags(),
                     mPaint.getTextLocales(), mPaint.getTypeface(),
                     mPaint.getFontVariationSettings(), mPaint.isElegantTextHeight(), mTextDir,
-                    mBreakStrategy, mHyphenationFrequency, lineBreakStyle);
+                    mBreakStrategy, mHyphenationFrequency,
+                    LineBreakConfig.getResolvedLineBreakStyle(mLineBreakConfig),
+                    LineBreakConfig.getResolvedLineBreakWordStyle(mLineBreakConfig));
         }
 
         @Override
         public String toString() {
-            int lineBreakStyle = (mLineBreakConfig != null)
-                    ? mLineBreakConfig.getLineBreakStyle() : LineBreakConfig.LINE_BREAK_STYLE_NONE;
-            int lineBreakWordStyle = (mLineBreakConfig != null)
-                    ? mLineBreakConfig.getLineBreakWordStyle()
-                            : LineBreakConfig.LINE_BREAK_WORD_STYLE_NONE;
             return "{"
                 + "textSize=" + mPaint.getTextSize()
                 + ", textScaleX=" + mPaint.getTextScaleX()
@@ -357,8 +352,9 @@ public class PrecomputedText implements Spannable {
                 + ", textDir=" + mTextDir
                 + ", breakStrategy=" + mBreakStrategy
                 + ", hyphenationFrequency=" + mHyphenationFrequency
-                + ", lineBreakStyle=" + lineBreakStyle
-                + ", lineBreakWordStyle=" + lineBreakWordStyle
+                + ", lineBreakStyle=" + LineBreakConfig.getResolvedLineBreakStyle(mLineBreakConfig)
+                + ", lineBreakWordStyle="
+                    + LineBreakConfig.getResolvedLineBreakWordStyle(mLineBreakConfig)
                 + "}";
         }
     };
@@ -438,7 +434,8 @@ public class PrecomputedText implements Spannable {
         }
         if (paraInfo == null) {
             paraInfo = createMeasuredParagraphs(
-                    text, params, 0, text.length(), true /* computeLayout */);
+                    text, params, 0, text.length(), true /* computeLayout */,
+                    true /* computeBounds */);
         }
         return new PrecomputedText(text, 0, text.length(), params, paraInfo);
     }
@@ -460,13 +457,22 @@ public class PrecomputedText implements Spannable {
         } else {
             hyphenationMode = MeasuredText.Builder.HYPHENATION_MODE_NONE;
         }
+        LineBreakConfig config = params.getLineBreakConfig();
+        if (config.getLineBreakWordStyle() == LineBreakConfig.LINE_BREAK_WORD_STYLE_AUTO
+                && pct.getParagraphCount() != 1) {
+            // If the text has multiple paragraph, resolve line break word style auto to none.
+            config = new LineBreakConfig.Builder()
+                    .merge(config)
+                    .setLineBreakWordStyle(LineBreakConfig.LINE_BREAK_WORD_STYLE_NONE)
+                    .build();
+        }
         ArrayList<ParagraphInfo> result = new ArrayList<>();
         for (int i = 0; i < pct.getParagraphCount(); ++i) {
             final int paraStart = pct.getParagraphStart(i);
             final int paraEnd = pct.getParagraphEnd(i);
             result.add(new ParagraphInfo(paraEnd, MeasuredParagraph.buildForStaticLayout(
-                    params.getTextPaint(), params.getLineBreakConfig(), pct, paraStart, paraEnd,
-                    params.getTextDirection(), hyphenationMode, computeLayout,
+                    params.getTextPaint(), config, pct, paraStart, paraEnd,
+                    params.getTextDirection(), hyphenationMode, computeLayout, true,
                     pct.getMeasuredParagraph(i), null /* no recycle */)));
         }
         return result.toArray(new ParagraphInfo[result.size()]);
@@ -475,7 +481,8 @@ public class PrecomputedText implements Spannable {
     /** @hide */
     public static ParagraphInfo[] createMeasuredParagraphs(
             @NonNull CharSequence text, @NonNull Params params,
-            @IntRange(from = 0) int start, @IntRange(from = 0) int end, boolean computeLayout) {
+            @IntRange(from = 0) int start, @IntRange(from = 0) int end, boolean computeLayout,
+            boolean computeBounds) {
         ArrayList<ParagraphInfo> result = new ArrayList<>();
 
         Preconditions.checkNotNull(text);
@@ -491,6 +498,7 @@ public class PrecomputedText implements Spannable {
             hyphenationMode = MeasuredText.Builder.HYPHENATION_MODE_NONE;
         }
 
+        LineBreakConfig config = null;
         int paraEnd = 0;
         for (int paraStart = start; paraStart < end; paraStart = paraEnd) {
             paraEnd = TextUtils.indexOf(text, LINE_FEED, paraStart, end);
@@ -502,9 +510,23 @@ public class PrecomputedText implements Spannable {
                 paraEnd++;  // Includes LINE_FEED(U+000A) to the prev paragraph.
             }
 
+            if (config == null) {
+                config = params.getLineBreakConfig();
+                if (config.getLineBreakWordStyle() == LineBreakConfig.LINE_BREAK_WORD_STYLE_AUTO
+                        && !(paraStart == start && paraEnd == end)) {
+                    // If the text has multiple paragraph, resolve line break word style auto to
+                    // none.
+                    config = new LineBreakConfig.Builder()
+                            .merge(config)
+                            .setLineBreakWordStyle(LineBreakConfig.LINE_BREAK_WORD_STYLE_NONE)
+                            .build();
+                }
+            }
+
             result.add(new ParagraphInfo(paraEnd, MeasuredParagraph.buildForStaticLayout(
-                    params.getTextPaint(), params.getLineBreakConfig(), text, paraStart, paraEnd,
-                    params.getTextDirection(), hyphenationMode, computeLayout, null /* no hint */,
+                    params.getTextPaint(), config, text, paraStart, paraEnd,
+                    params.getTextDirection(), hyphenationMode, computeLayout, computeBounds,
+                    null /* no hint */,
                     null /* no recycle */)));
         }
         return result.toArray(new ParagraphInfo[result.size()]);

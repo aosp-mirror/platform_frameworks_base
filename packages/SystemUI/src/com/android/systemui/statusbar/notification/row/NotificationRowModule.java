@@ -17,26 +17,15 @@
 package com.android.systemui.statusbar.notification.row;
 
 import com.android.systemui.dagger.SysUISingleton;
-import com.android.systemui.flags.FeatureFlags;
-import com.android.systemui.flags.Flags;
 
 import dagger.Binds;
 import dagger.Module;
-import dagger.Provides;
-import dagger.multibindings.ElementsIntoSet;
-
-import java.util.HashSet;
-import java.util.Set;
-
-import javax.inject.Named;
 
 /**
  * Dagger Module containing notification row and view inflation implementations.
  */
 @Module
 public abstract class NotificationRowModule {
-    public static final String NOTIF_REMOTEVIEWS_FACTORIES =
-            "notif_remoteviews_factories";
 
     /**
      * Provides notification row content binder instance.
@@ -54,18 +43,11 @@ public abstract class NotificationRowModule {
     public abstract NotifRemoteViewCache provideNotifRemoteViewCache(
             NotifRemoteViewCacheImpl cacheImpl);
 
-    /** Provides view factories to be inflated in notification content. */
-    @Provides
-    @ElementsIntoSet
-    @Named(NOTIF_REMOTEVIEWS_FACTORIES)
-    static Set<NotifRemoteViewsFactory> provideNotifRemoteViewsFactories(
-            FeatureFlags featureFlags,
-            PrecomputedTextViewFactory precomputedTextViewFactory
-    ) {
-        final Set<NotifRemoteViewsFactory> replacementFactories = new HashSet<>();
-        if (featureFlags.isEnabled(Flags.PRECOMPUTED_TEXT)) {
-            replacementFactories.add(precomputedTextViewFactory);
-        }
-        return replacementFactories;
-    }
+    /**
+     * Provides notification remote view factory container
+     */
+    @Binds
+    @SysUISingleton
+    public abstract NotifRemoteViewsFactoryContainer provideNotifRemoteViewsFactoryContainer(
+            NotifRemoteViewsFactoryContainerImpl containerImpl);
 }

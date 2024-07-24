@@ -43,6 +43,7 @@ import com.android.wm.shell.sysui.ShellCommandHandler;
 import com.android.wm.shell.sysui.ShellController;
 import com.android.wm.shell.sysui.ShellInit;
 import com.android.wm.shell.taskview.TaskViewTransitions;
+import com.android.wm.shell.transition.Transitions;
 
 import java.util.Optional;
 
@@ -70,10 +71,11 @@ public class TestableBubbleController extends BubbleController {
             BubblePositioner positioner,
             DisplayController displayController,
             Optional<OneHandedController> oneHandedOptional,
-            Optional<DragAndDropController> dragAndDropController,
+            DragAndDropController dragAndDropController,
             ShellExecutor shellMainExecutor,
             Handler shellMainHandler,
             TaskViewTransitions taskViewTransitions,
+            Transitions transitions,
             SyncTransactionQueue syncQueue,
             IWindowManager wmService,
             BubbleProperties bubbleProperties) {
@@ -82,7 +84,8 @@ public class TestableBubbleController extends BubbleController {
                 windowManagerShellWrapper, userManager, launcherApps, bubbleLogger,
                 taskStackListener, shellTaskOrganizer, positioner, displayController,
                 oneHandedOptional, dragAndDropController, shellMainExecutor, shellMainHandler,
-                new SyncExecutor(), taskViewTransitions, syncQueue, wmService, bubbleProperties);
+                new SyncExecutor(), taskViewTransitions, transitions,
+                syncQueue, wmService, bubbleProperties);
         setInflateSynchronously(true);
         onInit();
     }

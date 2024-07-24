@@ -16,6 +16,7 @@
 
 package com.android.systemui.recents;
 
+import static android.app.Flags.keyguardPrivateNotifications;
 import static android.content.Intent.ACTION_PACKAGE_ADDED;
 import static android.content.Intent.EXTRA_CHANGED_COMPONENT_NAME_LIST;
 import static android.content.pm.PackageManager.MATCH_SYSTEM_ONLY;
@@ -67,7 +68,6 @@ import android.view.KeyCharacterMap;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.Surface;
-import android.view.SurfaceControl;
 import android.view.accessibility.AccessibilityManager;
 import android.view.inputmethod.InputMethodManager;
 
@@ -81,13 +81,15 @@ import com.android.internal.logging.UiEventLogger;
 import com.android.internal.util.ScreenshotHelper;
 import com.android.internal.util.ScreenshotRequest;
 import com.android.systemui.Dumpable;
+import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.flags.FeatureFlags;
-import com.android.systemui.flags.Flags;
 import com.android.systemui.keyguard.KeyguardUnlockAnimationController;
+import com.android.systemui.keyguard.KeyguardWmStateRefactor;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
+import com.android.systemui.keyguard.ui.view.InWindowLauncherUnlockAnimationManager;
 import com.android.systemui.model.SysUiState;
 import com.android.systemui.navigationbar.NavigationBar;
 import com.android.systemui.navigationbar.NavigationBarController;
@@ -96,15 +98,16 @@ import com.android.systemui.navigationbar.NavigationModeController;
 import com.android.systemui.navigationbar.buttons.KeyButtonView;
 import com.android.systemui.recents.OverviewProxyService.OverviewProxyListener;
 import com.android.systemui.scene.domain.interactor.SceneInteractor;
+import com.android.systemui.scene.shared.flag.SceneContainerFlags;
 import com.android.systemui.settings.DisplayTracker;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.shade.ShadeViewController;
 import com.android.systemui.shared.recents.IOverviewProxy;
 import com.android.systemui.shared.recents.ISystemUiProxy;
 import com.android.systemui.shared.system.QuickStepContract;
+import com.android.systemui.shared.system.smartspace.ISysuiUnlockAnimationController;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.NotificationShadeWindowController;
-import com.android.systemui.statusbar.phone.CentralSurfaces;
 import com.android.systemui.statusbar.phone.StatusBarWindowCallback;
 import com.android.systemui.statusbar.policy.CallbackController;
 import com.android.systemui.unfold.progress.UnfoldTransitionProgressForwarder;
@@ -117,7 +120,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executor;
 import java.util.function.Supplier;
 
@@ -143,13 +145,14 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
 
     private final Context mContext;
     private final FeatureFlags mFeatureFlags;
+    private final SceneContainerFlags mSceneContainerFlags;
     private final Executor mMainExecutor;
     private final ShellInterface mShellInterface;
-    private final Lazy<Optional<CentralSurfaces>> mCentralSurfacesOptionalLazy;
     private final Lazy<ShadeViewController> mShadeViewControllerLazy;
     private SysUiState mSysUiState;
     private final Handler mHandler;
     private final Lazy<NavigationBarController> mNavBarControllerLazy;
+    private final ScreenPinningRequest mScreenPinningRequest;
     private final NotificationShadeWindowController mStatusBarWinController;
     private final Provider<SceneInteractor> mSceneInteractor;
 
@@ -161,18 +164,20 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
     private final ScreenshotHelper mScreenshotHelper;
     private final CommandQueue mCommandQueue;
     private final UserTracker mUserTracker;
-    private final KeyguardUnlockAnimationController mSysuiUnlockAnimationController;
+    private final ISysuiUnlockAnimationController mSysuiUnlockAnimationController;
     private final Optional<UnfoldTransitionProgressForwarder> mUnfoldTransitionProgressForwarder;
     private final UiEventLogger mUiEventLogger;
     private final DisplayTracker mDisplayTracker;
-
     private Region mActiveNavBarRegion;
-    private SurfaceControl mNavigationBarSurface;
+
+    private final BroadcastDispatcher mBroadcastDispatcher;
 
     private IOverviewProxy mOverviewProxy;
     private int mConnectionBackoffAttempts;
     private boolean mBound;
     private boolean mIsEnabled;
+
+    private boolean mIsNonPrimaryUser;
     private int mCurrentBoundedUserId = -1;
     private boolean mInputFocusTransferStarted;
     private float mInputFocusTransferStartY;
@@ -184,9 +189,7 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
         @Override
         public void startScreenPinning(int taskId) {
             verifyCallerAndClearCallingIdentityPostMain("startScreenPinning", () ->
-                    mCentralSurfacesOptionalLazy.get().ifPresent(
-                            statusBar -> statusBar.showScreenPinningRequest(taskId,
-                                    false /* allowCancel */)));
+                    mScreenPinningRequest.showPrompt(taskId, false /* allowCancel */));
         }
 
         @Override
@@ -205,40 +208,38 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
         public void onStatusBarTouchEvent(MotionEvent event) {
             verifyCallerAndClearCallingIdentity("onStatusBarTouchEvent", () -> {
                 // TODO move this logic to message queue
-                mCentralSurfacesOptionalLazy.get().ifPresent(centralSurfaces -> {
-                    if (event.getActionMasked() == ACTION_DOWN) {
-                        mShadeViewControllerLazy.get().startExpandLatencyTracking();
+                if (event.getActionMasked() == ACTION_DOWN) {
+                    mShadeViewControllerLazy.get().startExpandLatencyTracking();
+                }
+                mHandler.post(() -> {
+                    int action = event.getActionMasked();
+                    if (action == ACTION_DOWN) {
+                        mInputFocusTransferStarted = true;
+                        mInputFocusTransferStartY = event.getY();
+                        mInputFocusTransferStartMillis = event.getEventTime();
+
+                        // If scene framework is enabled, set the scene container window to
+                        // visible and let the touch "slip" into that window.
+                        if (mSceneContainerFlags.isEnabled()) {
+                            mSceneInteractor.get().onRemoteUserInteractionStarted("launcher swipe");
+                        } else {
+                            mShadeViewControllerLazy.get().startInputFocusTransfer();
+                        }
                     }
-                    mHandler.post(() -> {
-                        int action = event.getActionMasked();
-                        if (action == ACTION_DOWN) {
-                            mInputFocusTransferStarted = true;
-                            mInputFocusTransferStartY = event.getY();
-                            mInputFocusTransferStartMillis = event.getEventTime();
+                    if (action == ACTION_UP || action == ACTION_CANCEL) {
+                        mInputFocusTransferStarted = false;
 
-                            // If scene framework is enabled, set the scene container window to
-                            // visible and let the touch "slip" into that window.
-                            if (mFeatureFlags.isEnabled(Flags.SCENE_CONTAINER)) {
-                                mSceneInteractor.get().setVisible(true, "swipe down on launcher");
+                        if (!mSceneContainerFlags.isEnabled()) {
+                            float velocity = (event.getY() - mInputFocusTransferStartY)
+                                    / (event.getEventTime() - mInputFocusTransferStartMillis);
+                            if (action == ACTION_CANCEL) {
+                                mShadeViewControllerLazy.get().cancelInputFocusTransfer();
                             } else {
-                                centralSurfaces.onInputFocusTransfer(
-                                        mInputFocusTransferStarted, false /* cancel */,
-                                        0 /* velocity */);
+                                mShadeViewControllerLazy.get().finishInputFocusTransfer(velocity);
                             }
                         }
-                        if (action == ACTION_UP || action == ACTION_CANCEL) {
-                            mInputFocusTransferStarted = false;
-
-                            if (!mFeatureFlags.isEnabled(Flags.SCENE_CONTAINER)) {
-                                float velocity = (event.getY() - mInputFocusTransferStartY)
-                                        / (event.getEventTime() - mInputFocusTransferStartMillis);
-                                centralSurfaces.onInputFocusTransfer(mInputFocusTransferStarted,
-                                        action == ACTION_CANCEL,
-                                        velocity);
-                            }
-                        }
-                        event.recycle();
-                    });
+                    }
+                    event.recycle();
                 });
             });
         }
@@ -246,8 +247,13 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
         @Override
         public void onStatusBarTrackpadEvent(MotionEvent event) {
             verifyCallerAndClearCallingIdentityPostMain("onStatusBarTrackpadEvent", () ->
-                    mCentralSurfacesOptionalLazy.get().ifPresent(centralSurfaces ->
-                            centralSurfaces.onStatusBarTrackpadEvent(event)));
+                    mShadeViewControllerLazy.get().handleExternalTouch(event));
+        }
+
+        @Override
+        public void animateNavBarLongPress(boolean isTouchDown, boolean shrink, long durationMs) {
+            verifyCallerAndClearCallingIdentityPostMain("animateNavBarLongPress", () ->
+                    notifyAnimateNavBarLongPress(isTouchDown, shrink, durationMs));
         }
 
         @Override
@@ -417,6 +423,21 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
         retryConnectionWithBackoff();
     };
 
+    private final BroadcastReceiver mUserEventReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (Objects.equals(intent.getAction(), Intent.ACTION_USER_UNLOCKED)) {
+                if (keyguardPrivateNotifications()) {
+                    // Start the overview connection to the launcher service
+                    // Connect if user hasn't connected yet
+                    if (getProxy() == null) {
+                        startConnectionToCurrentUser();
+                    }
+                }
+            }
+        }
+    };
+
     private final BroadcastReceiver mLauncherStateChangedReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -435,6 +456,9 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
             // Only rebind for TouchInteractionService component from launcher
             ResolveInfo ri = context.getPackageManager()
                     .resolveService(new Intent(ACTION_QUICKSTEP), 0);
+            if (ri == null) {
+                return;
+            }
             String interestingComponent = ri.serviceInfo.name;
             for (String component : compsList) {
                 if (interestingComponent.equals(component)) {
@@ -485,17 +509,12 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
                 Log.e(TAG_OPS, "Failed to call onInitialize()", e);
             }
             dispatchNavButtonBounds();
-            dispatchNavigationBarSurface();
 
             // Force-update the systemui state flags
             updateSystemUiStateFlags();
             notifySystemUiStateFlags(mSysUiState.getFlags());
 
             notifyConnectionChanged();
-            if (mLatchForOnUserChanging != null) {
-                mLatchForOnUserChanging.countDown();
-                mLatchForOnUserChanging = null;
-            }
         }
 
         @Override
@@ -550,14 +569,11 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
         }
     };
 
-    private CountDownLatch mLatchForOnUserChanging;
     private final UserTracker.Callback mUserChangedCallback =
             new UserTracker.Callback() {
                 @Override
-                public void onUserChanging(int newUser, @NonNull Context userContext,
-                        CountDownLatch latch) {
+                public void onUserChanged(int newUser, @NonNull Context userContext) {
                     mConnectionBackoffAttempts = 0;
-                    mLatchForOnUserChanging = latch;
                     internalConnectToCurrentUser("User changed");
                 }
             };
@@ -569,8 +585,8 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
             CommandQueue commandQueue,
             ShellInterface shellInterface,
             Lazy<NavigationBarController> navBarControllerLazy,
-            Lazy<Optional<CentralSurfaces>> centralSurfacesOptionalLazy,
             Lazy<ShadeViewController> shadeViewControllerLazy,
+            ScreenPinningRequest screenPinningRequest,
             NavigationModeController navModeController,
             NotificationShadeWindowController statusBarWinController,
             SysUiState sysUiState,
@@ -580,24 +596,29 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
             UiEventLogger uiEventLogger,
             DisplayTracker displayTracker,
             KeyguardUnlockAnimationController sysuiUnlockAnimationController,
+            InWindowLauncherUnlockAnimationManager inWindowLauncherUnlockAnimationManager,
             AssistUtils assistUtils,
             FeatureFlags featureFlags,
+            SceneContainerFlags sceneContainerFlags,
             DumpManager dumpManager,
-            Optional<UnfoldTransitionProgressForwarder> unfoldTransitionProgressForwarder
+            Optional<UnfoldTransitionProgressForwarder> unfoldTransitionProgressForwarder,
+            BroadcastDispatcher broadcastDispatcher
     ) {
         // b/241601880: This component shouldn't be running for a non-primary user
-        if (!Process.myUserHandle().equals(UserHandle.SYSTEM)) {
-            Log.e(TAG_OPS, "Unexpected initialization for non-primary user", new Throwable());
+        mIsNonPrimaryUser = !Process.myUserHandle().equals(UserHandle.SYSTEM);
+        if (mIsNonPrimaryUser) {
+            Log.wtf(TAG_OPS, "Unexpected initialization for non-primary user", new Throwable());
         }
 
         mContext = context;
         mFeatureFlags = featureFlags;
+        mSceneContainerFlags = sceneContainerFlags;
         mMainExecutor = mainExecutor;
         mShellInterface = shellInterface;
-        mCentralSurfacesOptionalLazy = centralSurfacesOptionalLazy;
         mShadeViewControllerLazy = shadeViewControllerLazy;
         mHandler = new Handler();
         mNavBarControllerLazy = navBarControllerLazy;
+        mScreenPinningRequest = screenPinningRequest;
         mStatusBarWinController = statusBarWinController;
         mSceneInteractor = sceneInteractor;
         mUserTracker = userTracker;
@@ -611,7 +632,13 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
         mUiEventLogger = uiEventLogger;
         mDisplayTracker = displayTracker;
         mUnfoldTransitionProgressForwarder = unfoldTransitionProgressForwarder;
-        mSysuiUnlockAnimationController = sysuiUnlockAnimationController;
+        mBroadcastDispatcher = broadcastDispatcher;
+
+        if (!KeyguardWmStateRefactor.isEnabled()) {
+            mSysuiUnlockAnimationController = sysuiUnlockAnimationController;
+        } else {
+            mSysuiUnlockAnimationController = inWindowLauncherUnlockAnimationManager;
+        }
 
         dumpManager.registerDumpable(getClass().getSimpleName(), this);
 
@@ -625,6 +652,12 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
                 PatternMatcher.PATTERN_LITERAL);
         filter.addAction(Intent.ACTION_PACKAGE_CHANGED);
         mContext.registerReceiver(mLauncherStateChangedReceiver, filter);
+
+        if (keyguardPrivateNotifications()) {
+            mBroadcastDispatcher.registerReceiver(mUserEventReceiver,
+                    new IntentFilter(Intent.ACTION_USER_UNLOCKED),
+                    null /* executor */, UserHandle.ALL);
+        }
 
         // Listen for status bar state changes
         statusBarWinController.registerCallback(mStatusBarWindowCallback);
@@ -666,28 +699,6 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
     public void onVoiceSessionWindowVisibilityChanged(boolean visible) {
         mSysUiState.setFlag(SYSUI_STATE_VOICE_INTERACTION_WINDOW_SHOWING, visible)
                 .commitUpdate(mContext.getDisplayId());
-    }
-
-    /**
-     * Called when the navigation bar surface is created or changed
-     */
-    public void onNavigationBarSurfaceChanged(SurfaceControl navbarSurface) {
-        mNavigationBarSurface = navbarSurface;
-        dispatchNavigationBarSurface();
-    }
-
-    private void dispatchNavigationBarSurface() {
-        try {
-            if (mOverviewProxy != null) {
-                // Catch all for cases where the surface is no longer valid
-                if (mNavigationBarSurface != null && !mNavigationBarSurface.isValid()) {
-                    mNavigationBarSurface = null;
-                }
-                mOverviewProxy.onNavigationBarSurface(mNavigationBarSurface);
-            }
-        } catch (RemoteException e) {
-            Log.e(TAG_OPS, "Failed to notify back action", e);
-        }
     }
 
     private void updateEnabledAndBinding() {
@@ -768,10 +779,8 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
     public void cleanupAfterDeath() {
         if (mInputFocusTransferStarted) {
             mHandler.post(() -> {
-                mCentralSurfacesOptionalLazy.get().ifPresent(centralSurfaces -> {
-                    mInputFocusTransferStarted = false;
-                    centralSurfaces.onInputFocusTransfer(false, true /* cancel */, 0 /* velocity */);
-                });
+                mInputFocusTransferStarted = false;
+                mShadeViewControllerLazy.get().cancelInputFocusTransfer();
             });
         }
         startConnectionToCurrentUser();
@@ -787,6 +796,13 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
     }
 
     private void internalConnectToCurrentUser(String reason) {
+        if (mIsNonPrimaryUser) {
+            // This should not happen, but if any per-user SysUI component has a dependency on OPS,
+            // then this could get triggered
+            Log.w(TAG_OPS, "Skipping connection to overview service due to non-primary user "
+                    + "caller");
+            return;
+        }
         disconnectFromLauncherService(reason);
 
         // If user has not setup yet or already connected, do not try to connect
@@ -920,6 +936,13 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
         }
     }
 
+    private void notifyAnimateNavBarLongPress(boolean isTouchDown, boolean shrink,
+            long durationMs) {
+        for (int i = mConnectionCallbacks.size() - 1; i >= 0; --i) {
+            mConnectionCallbacks.get(i).animateNavBarLongPress(isTouchDown, shrink, durationMs);
+        }
+    }
+
     public void notifyAssistantVisibilityChanged(float visibility) {
         try {
             if (mOverviewProxy != null) {
@@ -1021,6 +1044,19 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
         }
     }
 
+    public void onNavigationBarLumaSamplingEnabled(int displayId, boolean enable) {
+        try {
+            if (mOverviewProxy != null) {
+                mOverviewProxy.onNavigationBarLumaSamplingEnabled(displayId, enable);
+            } else {
+                Log.e(TAG_OPS, "Failed to get overview proxy to enable/disable nav bar luma"
+                        + "sampling");
+            }
+        } catch (RemoteException e) {
+            Log.e(TAG_OPS, "Failed to call onNavigationBarLumaSamplingEnabled()", e);
+        }
+    }
+
     private void updateEnabledState() {
         final int currentUser = mUserTracker.getUserId();
         mIsEnabled = mContext.getPackageManager().resolveServiceAsUser(mQuickStepIntent,
@@ -1046,7 +1082,6 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
         pw.print("  mInputFocusTransferStartY="); pw.println(mInputFocusTransferStartY);
         pw.print("  mInputFocusTransferStartMillis="); pw.println(mInputFocusTransferStartMillis);
         pw.print("  mActiveNavBarRegion="); pw.println(mActiveNavBarRegion);
-        pw.print("  mNavigationBarSurface="); pw.println(mNavigationBarSurface);
         pw.print("  mNavBarMode="); pw.println(mNavBarMode);
         mSysUiState.dump(pw, args);
     }
@@ -1064,6 +1099,7 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
         default void onAssistantGestureCompletion(float velocity) {}
         default void startAssistant(Bundle bundle) {}
         default void setAssistantOverridesRequested(int[] invocationTypes) {}
+        default void animateNavBarLongPress(boolean isTouchDown, boolean shrink, long durationMs) {}
     }
 
     /**

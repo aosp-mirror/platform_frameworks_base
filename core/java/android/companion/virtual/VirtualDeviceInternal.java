@@ -16,13 +16,20 @@
 
 package android.companion.virtual;
 
+import static android.companion.virtual.VirtualDeviceParams.DEVICE_POLICY_CUSTOM;
+import static android.companion.virtual.VirtualDeviceParams.POLICY_TYPE_AUDIO;
+
 import android.annotation.CallbackExecutor;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.RequiresPermission;
 import android.annotation.UserIdInt;
 import android.app.PendingIntent;
 import android.companion.virtual.audio.VirtualAudioDevice;
+import android.companion.virtual.camera.VirtualCamera;
+import android.companion.virtual.camera.VirtualCameraConfig;
 import android.companion.virtual.sensor.VirtualSensor;
+import android.companion.virtualdevice.flags.Flags;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -39,6 +46,8 @@ import android.hardware.input.VirtualMouse;
 import android.hardware.input.VirtualMouseConfig;
 import android.hardware.input.VirtualNavigationTouchpad;
 import android.hardware.input.VirtualNavigationTouchpadConfig;
+import android.hardware.input.VirtualStylus;
+import android.hardware.input.VirtualStylusConfig;
 import android.hardware.input.VirtualTouchscreen;
 import android.hardware.input.VirtualTouchscreenConfig;
 import android.media.AudioManager;
@@ -50,6 +59,7 @@ import android.os.Looper;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.util.ArrayMap;
+import android.view.WindowManager;
 
 import com.android.internal.annotations.GuardedBy;
 
@@ -145,7 +155,7 @@ public class VirtualDeviceInternal {
         mContext = context.getApplicationContext();
         mVirtualDevice = service.createVirtualDevice(
                 new Binder(),
-                mContext.getPackageName(),
+                mContext.getAttributionSource(),
                 associationId,
                 params,
                 mActivityListenerBinder,
@@ -155,6 +165,14 @@ public class VirtualDeviceInternal {
     int getDeviceId() {
         try {
             return mVirtualDevice.getDeviceId();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    @Nullable String getPersistentDeviceId() {
+        try {
+            return mVirtualDevice.getPersistentDeviceId();
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -230,13 +248,38 @@ public class VirtualDeviceInternal {
         }
     }
 
+    void setDevicePolicy(@VirtualDeviceParams.DynamicPolicyType int policyType,
+            @VirtualDeviceParams.DevicePolicy int devicePolicy) {
+        try {
+            mVirtualDevice.setDevicePolicy(policyType, devicePolicy);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    void addActivityPolicyExemption(@NonNull ComponentName componentName) {
+        try {
+            mVirtualDevice.addActivityPolicyExemption(componentName);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    void removeActivityPolicyExemption(@NonNull ComponentName componentName) {
+        try {
+            mVirtualDevice.removeActivityPolicyExemption(componentName);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
     @NonNull
     VirtualDpad createVirtualDpad(@NonNull VirtualDpadConfig config) {
         try {
             final IBinder token = new Binder(
                     "android.hardware.input.VirtualDpad:" + config.getInputDeviceName());
             mVirtualDevice.createVirtualDpad(config, token);
-            return new VirtualDpad(mVirtualDevice, token);
+            return new VirtualDpad(config, mVirtualDevice, token);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -248,7 +291,7 @@ public class VirtualDeviceInternal {
             final IBinder token = new Binder(
                     "android.hardware.input.VirtualKeyboard:" + config.getInputDeviceName());
             mVirtualDevice.createVirtualKeyboard(config, token);
-            return new VirtualKeyboard(mVirtualDevice, token);
+            return new VirtualKeyboard(config, mVirtualDevice, token);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -260,7 +303,7 @@ public class VirtualDeviceInternal {
             final IBinder token = new Binder(
                     "android.hardware.input.VirtualMouse:" + config.getInputDeviceName());
             mVirtualDevice.createVirtualMouse(config, token);
-            return new VirtualMouse(mVirtualDevice, token);
+            return new VirtualMouse(config, mVirtualDevice, token);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -273,7 +316,20 @@ public class VirtualDeviceInternal {
             final IBinder token = new Binder(
                     "android.hardware.input.VirtualTouchscreen:" + config.getInputDeviceName());
             mVirtualDevice.createVirtualTouchscreen(config, token);
-            return new VirtualTouchscreen(mVirtualDevice, token);
+            return new VirtualTouchscreen(config, mVirtualDevice, token);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
+    @NonNull
+    VirtualStylus createVirtualStylus(@NonNull VirtualStylusConfig config) {
+        try {
+            final IBinder token = new Binder(
+                    "android.hardware.input.VirtualStylus:" + config.getInputDeviceName());
+            mVirtualDevice.createVirtualStylus(config, token);
+            return new VirtualStylus(config, mVirtualDevice, token);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -287,7 +343,7 @@ public class VirtualDeviceInternal {
                     "android.hardware.input.VirtualNavigationTouchpad:"
                             + config.getInputDeviceName());
             mVirtualDevice.createVirtualNavigationTouchpad(config, token);
-            return new VirtualNavigationTouchpad(mVirtualDevice, token);
+            return new VirtualNavigationTouchpad(config, mVirtualDevice, token);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -299,16 +355,47 @@ public class VirtualDeviceInternal {
             @Nullable Executor executor,
             @Nullable VirtualAudioDevice.AudioConfigurationChangeCallback callback) {
         if (mVirtualAudioDevice == null) {
-            mVirtualAudioDevice = new VirtualAudioDevice(mContext, mVirtualDevice, display,
-                    executor, callback, () -> mVirtualAudioDevice = null);
+            try {
+                Context context = mContext;
+                if (Flags.deviceAwareRecordAudioPermission()) {
+                    // When using a default policy for audio device-aware RECORD_AUDIO permission
+                    // should not take effect, thus register policies with the default context.
+                    if (mVirtualDevice.getDevicePolicy(POLICY_TYPE_AUDIO) == DEVICE_POLICY_CUSTOM) {
+                        context = mContext.createDeviceContext(getDeviceId());
+                    }
+                }
+                mVirtualAudioDevice = new VirtualAudioDevice(context, mVirtualDevice, display,
+                        executor, callback, () -> mVirtualAudioDevice = null);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
         }
         return mVirtualAudioDevice;
     }
 
+    @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
     @NonNull
+    VirtualCamera createVirtualCamera(@NonNull VirtualCameraConfig config) {
+        try {
+            mVirtualDevice.registerVirtualCamera(config);
+            return new VirtualCamera(mVirtualDevice,
+                            Integer.toString(mVirtualDevice.getVirtualCameraId(config)), config);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
     void setShowPointerIcon(boolean showPointerIcon) {
         try {
             mVirtualDevice.setShowPointerIcon(showPointerIcon);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    void setDisplayImePolicy(int displayId, @WindowManager.DisplayImePolicy int policy) {
+        try {
+            mVirtualDevice.setDisplayImePolicy(displayId, policy);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

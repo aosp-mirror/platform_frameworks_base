@@ -16,8 +16,17 @@
 
 package com.android.server.power;
 
+import static com.android.internal.util.ConcurrentUtils.DIRECT_EXECUTOR;
+import static com.android.internal.util.FrameworkStatsLog.THERMAL_HEADROOM_CALLED__API_STATUS__NO_TEMPERATURE_THRESHOLD;
+import static com.android.internal.util.FrameworkStatsLog.THERMAL_HEADROOM_THRESHOLDS_CALLED__API_STATUS__FEATURE_NOT_SUPPORTED;
+import static com.android.internal.util.FrameworkStatsLog.THERMAL_HEADROOM_THRESHOLDS_CALLED__API_STATUS__HAL_NOT_READY;
+import static com.android.internal.util.FrameworkStatsLog.THERMAL_HEADROOM_THRESHOLDS_CALLED__API_STATUS__SUCCESS;
+import static com.android.internal.util.FrameworkStatsLog.THERMAL_STATUS_CALLED__API_STATUS__HAL_NOT_READY;
+import static com.android.internal.util.FrameworkStatsLog.THERMAL_STATUS_CALLED__API_STATUS__SUCCESS;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.app.StatsManager;
 import android.content.Context;
 import android.hardware.thermal.IThermal;
 import android.hardware.thermal.IThermalChangedCallback;
@@ -28,6 +37,7 @@ import android.hardware.thermal.V1_0.ThermalStatusCode;
 import android.hardware.thermal.V1_1.IThermalCallback;
 import android.os.Binder;
 import android.os.CoolingDevice;
+import android.os.Flags;
 import android.os.Handler;
 import android.os.HwBinder;
 import android.os.IBinder;
@@ -47,11 +57,13 @@ import android.os.Temperature;
 import android.util.ArrayMap;
 import android.util.EventLog;
 import android.util.Slog;
+import android.util.StatsEvent;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.os.BackgroundThread;
 import com.android.internal.util.DumpUtils;
+import com.android.internal.util.FrameworkStatsLog;
 import com.android.server.EventLogTags;
 import com.android.server.FgThread;
 import com.android.server.SystemService;
@@ -121,6 +133,8 @@ public class ThermalManagerService extends SystemService {
     @VisibleForTesting
     final TemperatureWatcher mTemperatureWatcher = new TemperatureWatcher();
 
+    private final Context mContext;
+
     public ThermalManagerService(Context context) {
         this(context, null);
     }
@@ -128,6 +142,7 @@ public class ThermalManagerService extends SystemService {
     @VisibleForTesting
     ThermalManagerService(Context context, @Nullable ThermalHalWrapper halWrapper) {
         super(context);
+        mContext = context;
         mHalWrapper = halWrapper;
         if (halWrapper != null) {
             halWrapper.setCallback(this::onTemperatureChangedCallback);
@@ -144,6 +159,9 @@ public class ThermalManagerService extends SystemService {
     public void onBootPhase(int phase) {
         if (phase == SystemService.PHASE_ACTIVITY_MANAGER_READY) {
             onActivityManagerReady();
+        }
+        if (phase == SystemService.PHASE_BOOT_COMPLETED) {
+            registerStatsCallbacks();
         }
     }
 
@@ -181,7 +199,7 @@ public class ThermalManagerService extends SystemService {
                 onTemperatureChanged(temperatures.get(i), false);
             }
             onTemperatureMapChangedLocked();
-            mTemperatureWatcher.updateSevereThresholds();
+            mTemperatureWatcher.updateThresholds();
             mHalReady.set(true);
         }
     }
@@ -325,6 +343,31 @@ public class ThermalManagerService extends SystemService {
         }
     }
 
+    private void registerStatsCallbacks() {
+        final StatsManager statsManager = mContext.getSystemService(StatsManager.class);
+        if (statsManager != null) {
+            statsManager.setPullAtomCallback(
+                    FrameworkStatsLog.THERMAL_HEADROOM_THRESHOLDS,
+                    null, // use default PullAtomMetadata values
+                    DIRECT_EXECUTOR,
+                    this::onPullAtom);
+        }
+    }
+
+    private int onPullAtom(int atomTag, @NonNull List<StatsEvent> data) {
+        if (atomTag == FrameworkStatsLog.THERMAL_HEADROOM_THRESHOLDS) {
+            final float[] thresholds;
+            synchronized (mTemperatureWatcher.mSamples) {
+                thresholds = Arrays.copyOf(mTemperatureWatcher.mHeadroomThresholds,
+                        mTemperatureWatcher.mHeadroomThresholds.length);
+            }
+            data.add(
+                    FrameworkStatsLog.buildStatsEvent(FrameworkStatsLog.THERMAL_HEADROOM_THRESHOLDS,
+                            thresholds));
+        }
+        return android.app.StatsManager.PULL_SUCCESS;
+    }
+
     @VisibleForTesting
     final IThermalService.Stub mService = new IThermalService.Stub() {
         @Override
@@ -448,6 +491,12 @@ public class ThermalManagerService extends SystemService {
             synchronized (mLock) {
                 final long token = Binder.clearCallingIdentity();
                 try {
+                    FrameworkStatsLog.write(FrameworkStatsLog.THERMAL_STATUS_CALLED,
+                            Binder.getCallingUid(),
+                            mHalReady.get()
+                                    ? THERMAL_STATUS_CALLED__API_STATUS__SUCCESS
+                                    : THERMAL_STATUS_CALLED__API_STATUS__HAL_NOT_READY,
+                            thermalSeverityToStatsdStatus(mStatus));
                     return mStatus;
                 } finally {
                     Binder.restoreCallingIdentity(token);
@@ -492,6 +541,9 @@ public class ThermalManagerService extends SystemService {
         @Override
         public float getThermalHeadroom(int forecastSeconds) {
             if (!mHalReady.get()) {
+                FrameworkStatsLog.write(FrameworkStatsLog.THERMAL_HEADROOM_CALLED, getCallingUid(),
+                            FrameworkStatsLog.THERMAL_HEADROOM_CALLED__API_STATUS__HAL_NOT_READY,
+                            Float.NaN);
                 return Float.NaN;
             }
 
@@ -499,10 +551,36 @@ public class ThermalManagerService extends SystemService {
                 if (DEBUG) {
                     Slog.d(TAG, "Invalid forecastSeconds: " + forecastSeconds);
                 }
+                FrameworkStatsLog.write(FrameworkStatsLog.THERMAL_HEADROOM_CALLED, getCallingUid(),
+                            FrameworkStatsLog.THERMAL_HEADROOM_CALLED__API_STATUS__INVALID_ARGUMENT,
+                            Float.NaN);
                 return Float.NaN;
             }
 
             return mTemperatureWatcher.getForecast(forecastSeconds);
+        }
+
+        @Override
+        public float[] getThermalHeadroomThresholds() {
+            if (!mHalReady.get()) {
+                FrameworkStatsLog.write(FrameworkStatsLog.THERMAL_HEADROOM_THRESHOLDS_CALLED,
+                        Binder.getCallingUid(),
+                        THERMAL_HEADROOM_THRESHOLDS_CALLED__API_STATUS__HAL_NOT_READY);
+                throw new IllegalStateException("Thermal HAL connection is not initialized");
+            }
+            if (!Flags.allowThermalHeadroomThresholds()) {
+                FrameworkStatsLog.write(FrameworkStatsLog.THERMAL_HEADROOM_THRESHOLDS_CALLED,
+                        Binder.getCallingUid(),
+                        THERMAL_HEADROOM_THRESHOLDS_CALLED__API_STATUS__FEATURE_NOT_SUPPORTED);
+                throw new UnsupportedOperationException("Thermal headroom thresholds not enabled");
+            }
+            synchronized (mTemperatureWatcher.mSamples) {
+                FrameworkStatsLog.write(FrameworkStatsLog.THERMAL_HEADROOM_THRESHOLDS_CALLED,
+                        Binder.getCallingUid(),
+                        THERMAL_HEADROOM_THRESHOLDS_CALLED__API_STATUS__SUCCESS);
+                return Arrays.copyOf(mTemperatureWatcher.mHeadroomThresholds,
+                        mTemperatureWatcher.mHeadroomThresholds.length);
+            }
         }
 
         @Override
@@ -528,6 +606,27 @@ public class ThermalManagerService extends SystemService {
         }
 
     };
+
+    private static int thermalSeverityToStatsdStatus(int severity) {
+        switch (severity) {
+            case PowerManager.THERMAL_STATUS_NONE:
+                return FrameworkStatsLog.THERMAL_STATUS_CALLED__STATUS__NONE;
+            case PowerManager.THERMAL_STATUS_LIGHT:
+                return FrameworkStatsLog.THERMAL_STATUS_CALLED__STATUS__LIGHT;
+            case PowerManager.THERMAL_STATUS_MODERATE:
+                return FrameworkStatsLog.THERMAL_STATUS_CALLED__STATUS__MODERATE;
+            case PowerManager.THERMAL_STATUS_SEVERE:
+                return FrameworkStatsLog.THERMAL_STATUS_CALLED__STATUS__SEVERE;
+            case PowerManager.THERMAL_STATUS_CRITICAL:
+                return FrameworkStatsLog.THERMAL_STATUS_CALLED__STATUS__CRITICAL;
+            case PowerManager.THERMAL_STATUS_EMERGENCY:
+                return FrameworkStatsLog.THERMAL_STATUS_CALLED__STATUS__EMERGENCY;
+            case PowerManager.THERMAL_STATUS_SHUTDOWN:
+                return FrameworkStatsLog.THERMAL_STATUS_CALLED__STATUS__SHUTDOWN;
+            default:
+                return FrameworkStatsLog.THERMAL_STATUS_CALLED__STATUS__NONE;
+        }
+    }
 
     private static void dumpItemsLocked(PrintWriter pw, String prefix,
             Collection<?> items) {
@@ -578,6 +677,12 @@ public class ThermalManagerService extends SystemService {
                     pw.println("Temperature static thresholds from HAL:");
                     dumpTemperatureThresholds(pw, "\t",
                             mHalWrapper.getTemperatureThresholds(false, 0));
+                }
+            }
+            if (Flags.allowThermalHeadroomThresholds()) {
+                synchronized (mTemperatureWatcher.mSamples) {
+                    pw.println("Temperature headroom thresholds:");
+                    pw.println(Arrays.toString(mTemperatureWatcher.mHeadroomThresholds));
                 }
             }
         } finally {
@@ -653,6 +758,36 @@ public class ThermalManagerService extends SystemService {
                         break;
                     case "NPU":
                         type = Temperature.TYPE_NPU;
+                        break;
+                    case "TPU":
+                        type = Temperature.TYPE_TPU;
+                        break;
+                    case "DISPLAY":
+                        type = Temperature.TYPE_DISPLAY;
+                        break;
+                    case "MODEM":
+                        type = Temperature.TYPE_MODEM;
+                        break;
+                    case "SOC":
+                        type = Temperature.TYPE_SOC;
+                        break;
+                    case "WIFI":
+                        type = Temperature.TYPE_WIFI;
+                        break;
+                    case "CAMERA":
+                        type = Temperature.TYPE_CAMERA;
+                        break;
+                    case "FLASHLIGHT":
+                        type = Temperature.TYPE_FLASHLIGHT;
+                        break;
+                    case "SPEAKER":
+                        type = Temperature.TYPE_SPEAKER;
+                        break;
+                    case "AMBIENT":
+                        type = Temperature.TYPE_AMBIENT;
+                        break;
+                    case "POGO":
+                        type = Temperature.TYPE_POGO;
                         break;
                     default:
                         pw.println("Invalid temperature type: " + typeName);
@@ -964,7 +1099,14 @@ public class ThermalManagerService extends SystemService {
                         connectToHal();
                     }
                     if (mInstance != null) {
-                        Slog.i(TAG, "Thermal HAL AIDL service connected.");
+                        try {
+                            Slog.i(TAG, "Thermal HAL AIDL service connected with version "
+                                    + mInstance.getInterfaceVersion());
+                        } catch (RemoteException e) {
+                            Slog.e(TAG, "Unable to read interface version from Thermal HAL", e);
+                            connectToHal();
+                            return;
+                        }
                         registerThermalChangedCallback();
                     }
                 }
@@ -1440,26 +1582,61 @@ public class ThermalManagerService extends SystemService {
         ArrayMap<String, Float> mSevereThresholds = new ArrayMap<>();
 
         @GuardedBy("mSamples")
+        float[] mHeadroomThresholds = new float[ThrottlingSeverity.SHUTDOWN + 1];
+        @GuardedBy("mSamples")
         private long mLastForecastCallTimeMillis = 0;
 
         private static final int INACTIVITY_THRESHOLD_MILLIS = 10000;
         @VisibleForTesting
         long mInactivityThresholdMillis = INACTIVITY_THRESHOLD_MILLIS;
 
-        void updateSevereThresholds() {
+        void updateThresholds() {
             synchronized (mSamples) {
                 List<TemperatureThreshold> thresholds =
                         mHalWrapper.getTemperatureThresholds(true, Temperature.TYPE_SKIN);
+                if (Flags.allowThermalHeadroomThresholds()) {
+                    Arrays.fill(mHeadroomThresholds, Float.NaN);
+                }
                 for (int t = 0; t < thresholds.size(); ++t) {
                     TemperatureThreshold threshold = thresholds.get(t);
                     if (threshold.hotThrottlingThresholds.length <= ThrottlingSeverity.SEVERE) {
                         continue;
                     }
-                    float temperature =
+                    float severeThreshold =
                             threshold.hotThrottlingThresholds[ThrottlingSeverity.SEVERE];
-                    if (!Float.isNaN(temperature)) {
-                        mSevereThresholds.put(threshold.name,
-                                threshold.hotThrottlingThresholds[ThrottlingSeverity.SEVERE]);
+                    if (!Float.isNaN(severeThreshold)) {
+                        mSevereThresholds.put(threshold.name, severeThreshold);
+                        if (Flags.allowThermalHeadroomThresholds()) {
+                            for (int severity = ThrottlingSeverity.LIGHT;
+                                    severity <= ThrottlingSeverity.SHUTDOWN; severity++) {
+                                if (severity != ThrottlingSeverity.SEVERE
+                                        && threshold.hotThrottlingThresholds.length > severity) {
+                                    updateHeadroomThreshold(severity,
+                                            threshold.hotThrottlingThresholds[severity],
+                                            severeThreshold);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        // For an older device with multiple SKIN sensors, we will set a severity's headroom
+        // threshold based on the minimum value of all as a workaround.
+        void updateHeadroomThreshold(int severity, float threshold, float severeThreshold) {
+            if (!Float.isNaN(threshold)) {
+                synchronized (mSamples) {
+                    if (severity == ThrottlingSeverity.SEVERE) {
+                        mHeadroomThresholds[severity] = 1.0f;
+                        return;
+                    }
+                    float headroom = normalizeTemperature(threshold, severeThreshold);
+                    if (Float.isNaN(mHeadroomThresholds[severity])) {
+                        mHeadroomThresholds[severity] = headroom;
+                    } else {
+                        float lastHeadroom = mHeadroomThresholds[severity];
+                        mHeadroomThresholds[severity] = Math.min(lastHeadroom, headroom);
                     }
                 }
             }
@@ -1541,15 +1718,13 @@ public class ThermalManagerService extends SystemService {
         private static final float DEGREES_BETWEEN_ZERO_AND_ONE = 30.0f;
 
         @VisibleForTesting
-        float normalizeTemperature(float temperature, float severeThreshold) {
-            synchronized (mSamples) {
-                float zeroNormalized = severeThreshold - DEGREES_BETWEEN_ZERO_AND_ONE;
-                if (temperature <= zeroNormalized) {
-                    return 0.0f;
-                }
-                float delta = temperature - zeroNormalized;
-                return delta / DEGREES_BETWEEN_ZERO_AND_ONE;
+        static float normalizeTemperature(float temperature, float severeThreshold) {
+            float zeroNormalized = severeThreshold - DEGREES_BETWEEN_ZERO_AND_ONE;
+            if (temperature <= zeroNormalized) {
+                return 0.0f;
             }
+            float delta = temperature - zeroNormalized;
+            return delta / DEGREES_BETWEEN_ZERO_AND_ONE;
         }
 
         private static final int MINIMUM_SAMPLE_COUNT = 3;
@@ -1565,6 +1740,10 @@ public class ThermalManagerService extends SystemService {
                 // to sample, return early
                 if (mSamples.isEmpty()) {
                     Slog.e(TAG, "No temperature samples found");
+                    FrameworkStatsLog.write(FrameworkStatsLog.THERMAL_HEADROOM_CALLED,
+                            Binder.getCallingUid(),
+                            FrameworkStatsLog.THERMAL_HEADROOM_CALLED__API_STATUS__NO_TEMPERATURE,
+                            Float.NaN);
                     return Float.NaN;
                 }
 
@@ -1572,16 +1751,22 @@ public class ThermalManagerService extends SystemService {
                 // so return early
                 if (mSevereThresholds.isEmpty()) {
                     Slog.e(TAG, "No temperature thresholds found");
+                    FrameworkStatsLog.write(FrameworkStatsLog.THERMAL_HEADROOM_CALLED,
+                            Binder.getCallingUid(),
+                            THERMAL_HEADROOM_CALLED__API_STATUS__NO_TEMPERATURE_THRESHOLD,
+                            Float.NaN);
                     return Float.NaN;
                 }
 
                 float maxNormalized = Float.NaN;
+                int noThresholdSampleCount = 0;
                 for (Map.Entry<String, ArrayList<Sample>> entry : mSamples.entrySet()) {
                     String name = entry.getKey();
                     ArrayList<Sample> samples = entry.getValue();
 
                     Float threshold = mSevereThresholds.get(name);
                     if (threshold == null) {
+                        noThresholdSampleCount++;
                         Slog.e(TAG, "No threshold found for " + name);
                         continue;
                     }
@@ -1604,7 +1789,17 @@ public class ThermalManagerService extends SystemService {
                         maxNormalized = normalized;
                     }
                 }
-
+                if (noThresholdSampleCount == mSamples.size()) {
+                    FrameworkStatsLog.write(FrameworkStatsLog.THERMAL_HEADROOM_CALLED,
+                            Binder.getCallingUid(),
+                            THERMAL_HEADROOM_CALLED__API_STATUS__NO_TEMPERATURE_THRESHOLD,
+                            Float.NaN);
+                } else {
+                    FrameworkStatsLog.write(FrameworkStatsLog.THERMAL_HEADROOM_CALLED,
+                            Binder.getCallingUid(),
+                            FrameworkStatsLog.THERMAL_HEADROOM_CALLED__API_STATUS__SUCCESS,
+                            maxNormalized);
+                }
                 return maxNormalized;
             }
         }

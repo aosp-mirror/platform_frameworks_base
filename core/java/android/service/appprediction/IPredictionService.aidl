@@ -22,6 +22,7 @@ import android.app.prediction.AppPredictionContext;
 import android.app.prediction.AppPredictionSessionId;
 import android.app.prediction.IPredictionCallback;
 import android.content.pm.ParceledListSlice;
+import android.os.IRemoteCallback;
 
 /**
  * Interface from the system to a prediction service.
@@ -50,4 +51,6 @@ oneway interface IPredictionService {
     void requestPredictionUpdate(in AppPredictionSessionId sessionId);
 
     void onDestroyPredictionSession(in AppPredictionSessionId sessionId);
+
+    void requestServiceFeatures(in AppPredictionSessionId sessionId, in IRemoteCallback callback);
 }

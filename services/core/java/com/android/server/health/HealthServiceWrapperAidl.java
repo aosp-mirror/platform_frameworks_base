@@ -16,6 +16,8 @@
 
 package com.android.server.health;
 
+import static android.os.Flags.batteryPartStatusApi;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.hardware.health.BatteryHealthData;
@@ -150,6 +152,18 @@ class HealthServiceWrapperAidl extends HealthServiceWrapper {
                     healthData = service.getBatteryHealthData();
                     prop.setLong(healthData.batteryStateOfHealth);
                     break;
+                case BatteryManager.BATTERY_PROPERTY_SERIAL_NUMBER:
+                    if (batteryPartStatusApi()) {
+                        healthData = service.getBatteryHealthData();
+                        prop.setString(healthData.batterySerialNumber);
+                    }
+                    break;
+                case BatteryManager.BATTERY_PROPERTY_PART_STATUS:
+                    if (batteryPartStatusApi()) {
+                        healthData = service.getBatteryHealthData();
+                        prop.setLong(healthData.batteryPartStatus);
+                    }
+                    break;
             }
         } catch (UnsupportedOperationException e) {
             // Leave prop untouched.
@@ -195,6 +209,16 @@ class HealthServiceWrapperAidl extends HealthServiceWrapper {
             return service.getHealthInfo();
         } catch (UnsupportedOperationException | ServiceSpecificException ex) {
             return null;
+        }
+    }
+
+    public void setChargingPolicy(int policy) throws RemoteException {
+        IHealth service = mLastService.get();
+        if (service == null) return;
+        try {
+            service.setChargingPolicy(policy);
+        } catch (UnsupportedOperationException | ServiceSpecificException ex) {
+            return;
         }
     }
 

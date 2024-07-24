@@ -412,6 +412,19 @@ public class RequiresPermissionCheckerTest {
                         "      context.sendBroadcast(intent);",
                         "    }",
                         "  }",
+                        "  public void exampleWithChainedMethod(Context context) {",
+                        "    Intent intent = new Intent(FooManager.ACTION_RED)",
+                        "            .putExtra(\"foo\", 42);",
+                        "    context.sendBroadcast(intent, FooManager.PERMISSION_RED);",
+                        "    context.sendBroadcastWithMultiplePermissions(intent,",
+                        "        new String[] { FooManager.PERMISSION_RED });",
+                        "  }",
+                        "  public void exampleWithAsUser(Context context) {",
+                        "    Intent intent = new Intent(FooManager.ACTION_RED);",
+                        "    context.sendBroadcastAsUser(intent, 42, FooManager.PERMISSION_RED);",
+                        "    context.sendBroadcastAsUserMultiplePermissions(intent, 42,",
+                        "        new String[] { FooManager.PERMISSION_RED });",
+                        "  }",
                         "}")
                 .doTest();
     }
@@ -438,4 +451,43 @@ public class RequiresPermissionCheckerTest {
                         "}")
                 .doTest();
     }
+
+    @Test
+    public void testEnforce() {
+        compilationHelper
+                .addSourceFile("/android/annotation/EnforcePermission.java")
+                .addSourceFile("/android/content/Context.java")
+                .addSourceFile("/android/foo/IBarService.java")
+                .addSourceFile("/android/os/IInterface.java")
+                .addSourceLines("BarService.java",
+                        "import android.annotation.EnforcePermission;",
+                        "import android.foo.IBarService;",
+                        "class BarService extends IBarService.Stub {",
+                        "  @Override",
+                        "  @EnforcePermission(\"INTERNET\")",
+                        "  public void bar() {",
+                        "    bar_enforcePermission();",
+                        "  }",
+                        "}")
+                .addSourceLines("BarManager.java",
+                        "import android.annotation.RequiresPermission;",
+                        "class BarManager {",
+                        "  BarService mService;",
+                        "  @RequiresPermission(\"INTERNET\")",
+                        "  public void callBar() {",
+                        "    mService.bar();",
+                        "  }",
+                        "  @RequiresPermission(\"NONE\")",
+                        "  public void callBarDifferent() {",
+                        "    // BUG: Diagnostic contains:",
+                        "    mService.bar();",
+                        "  }",
+                        "  public void callBarMissing() {",
+                        "    // BUG: Diagnostic contains:",
+                        "    mService.bar();",
+                        "  }",
+                        "}")
+                .doTest();
+    }
+
 }

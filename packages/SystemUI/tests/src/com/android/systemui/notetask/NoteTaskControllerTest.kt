@@ -45,7 +45,6 @@ import android.provider.Settings
 import androidx.test.ext.truth.content.IntentSubject.assertThat
 import androidx.test.filters.SmallTest
 import androidx.test.runner.AndroidJUnit4
-import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.notetask.NoteTaskController.Companion.EXTRA_SHORTCUT_BADGE_OVERRIDE_PACKAGE
 import com.android.systemui.notetask.NoteTaskController.Companion.SHORTCUT_ID
@@ -56,6 +55,7 @@ import com.android.systemui.notetask.NoteTaskEntryPoint.TAIL_BUTTON
 import com.android.systemui.notetask.NoteTaskEntryPoint.WIDGET_PICKER_SHORTCUT
 import com.android.systemui.notetask.shortcut.CreateNoteTaskShortcutActivity
 import com.android.systemui.notetask.shortcut.LaunchNoteTaskActivity
+import com.android.systemui.res.R
 import com.android.systemui.settings.FakeUserTracker
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.argumentCaptor
@@ -69,9 +69,11 @@ import com.android.wm.shell.bubbles.Bubble
 import com.android.wm.shell.bubbles.Bubbles
 import com.google.common.truth.Truth.assertThat
 import java.util.Optional
+import kotlin.test.assertNotNull
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.test.runCurrent
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -160,6 +162,7 @@ internal class NoteTaskControllerTest : SysuiTestCase() {
             noteTaskBubblesController =
                 FakeNoteTaskBubbleController(context, testDispatcher, Optional.ofNullable(bubbles)),
             applicationScope = testScope,
+            bgCoroutineContext = testScope.backgroundScope.coroutineContext
         )
 
     // region onBubbleExpandChanged
@@ -672,7 +675,7 @@ internal class NoteTaskControllerTest : SysuiTestCase() {
             extras().bool(EXTRA_USE_STYLUS_MODE).isTrue()
         }
         iconCaptor.value?.let { icon ->
-            assertThat(icon).isNotNull()
+            assertNotNull(icon)
             assertThat(icon.resId).isEqualTo(R.drawable.ic_note_task_shortcut_widget)
         }
     }
@@ -704,12 +707,12 @@ internal class NoteTaskControllerTest : SysuiTestCase() {
     fun updateNoteTaskAsUser_sameUser_shouldUpdateShortcuts() {
         val user = UserHandle.CURRENT
         val controller = spy(createNoteTaskController())
-        doNothing().whenever(controller).updateNoteTaskAsUserInternal(any())
+        doNothing().whenever(controller).launchUpdateNoteTaskAsUser(any())
         whenever(controller.getCurrentRunningUser()).thenReturn(user)
 
         controller.updateNoteTaskAsUser(user)
 
-        verify(controller).updateNoteTaskAsUserInternal(user)
+        verify(controller).launchUpdateNoteTaskAsUser(user)
         verify(context, never()).startServiceAsUser(any(), any())
     }
 
@@ -717,12 +720,12 @@ internal class NoteTaskControllerTest : SysuiTestCase() {
     fun updateNoteTaskAsUser_differentUser_shouldUpdateShortcutsInUserProcess() {
         val user = UserHandle.CURRENT
         val controller = spy(createNoteTaskController(isEnabled = true))
-        doNothing().whenever(controller).updateNoteTaskAsUserInternal(any())
+        doNothing().whenever(controller).launchUpdateNoteTaskAsUser(any())
         whenever(controller.getCurrentRunningUser()).thenReturn(UserHandle.SYSTEM)
 
         controller.updateNoteTaskAsUser(user)
 
-        verify(controller, never()).updateNoteTaskAsUserInternal(any())
+        verify(controller, never()).launchUpdateNoteTaskAsUser(any())
         val intent = withArgCaptor { verify(context).startServiceAsUser(capture(), eq(user)) }
         assertThat(intent).hasComponentClass(NoteTaskControllerUpdateService::class.java)
     }
@@ -732,7 +735,8 @@ internal class NoteTaskControllerTest : SysuiTestCase() {
     @Test
     fun updateNoteTaskAsUserInternal_withNotesRole_withShortcuts_shouldUpdateShortcuts() {
         createNoteTaskController(isEnabled = true)
-            .updateNoteTaskAsUserInternal(userTracker.userHandle)
+            .launchUpdateNoteTaskAsUser(userTracker.userHandle)
+        testScope.runCurrent()
 
         val actualComponent = argumentCaptor<ComponentName>()
         verify(context.packageManager)
@@ -767,7 +771,8 @@ internal class NoteTaskControllerTest : SysuiTestCase() {
             .thenReturn(emptyList())
 
         createNoteTaskController(isEnabled = true)
-            .updateNoteTaskAsUserInternal(userTracker.userHandle)
+            .launchUpdateNoteTaskAsUser(userTracker.userHandle)
+        testScope.runCurrent()
 
         val argument = argumentCaptor<ComponentName>()
         verify(context.packageManager)
@@ -786,7 +791,8 @@ internal class NoteTaskControllerTest : SysuiTestCase() {
     @Test
     fun updateNoteTaskAsUserInternal_flagDisabled_shouldDisableShortcuts() {
         createNoteTaskController(isEnabled = false)
-            .updateNoteTaskAsUserInternal(userTracker.userHandle)
+            .launchUpdateNoteTaskAsUser(userTracker.userHandle)
+        testScope.runCurrent()
 
         val argument = argumentCaptor<ComponentName>()
         verify(context.packageManager)

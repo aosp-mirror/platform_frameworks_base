@@ -30,6 +30,8 @@ import java.io.InvalidObjectException;
  * <p>Contains a pair of {@code int}s representing the numerator and denominator of a
  * Rational number. </p>
  */
+// Exported to Mainline modules; cannot use annotations
+// @android.ravenwood.annotation.RavenwoodKeepWholeClass
 public final class Rational extends Number implements Comparable<Rational> {
     /**
      * Constant for the <em>Not-a-Number (NaN)</em> value of the {@code Rational} type.

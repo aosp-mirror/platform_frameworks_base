@@ -70,6 +70,7 @@ import android.graphics.Canvas;
 import android.graphics.RectF;
 import android.graphics.drawable.AdaptiveIconDrawable;
 import android.graphics.drawable.Icon;
+import android.multiuser.Flags;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Build;
@@ -77,6 +78,7 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.os.FileUtils;
 import android.os.Handler;
+import android.os.HandlerThread;
 import android.os.IBinder;
 import android.os.LocaleList;
 import android.os.Looper;
@@ -113,7 +115,6 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.config.sysui.SystemUiDeviceConfigFlags;
 import com.android.internal.infra.AndroidFuture;
 import com.android.internal.logging.MetricsLogger;
-import com.android.internal.os.BackgroundThread;
 import com.android.internal.util.CollectionUtils;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.Preconditions;
@@ -296,24 +297,26 @@ public class ShortcutService extends IShortcutService.Stub {
     private final Object mNonPersistentUsersLock = new Object();
     private final Object mWtfLock = new Object();
 
-    private static List<ResolveInfo> EMPTY_RESOLVE_INFO = new ArrayList<>(0);
+    private static final List<ResolveInfo> EMPTY_RESOLVE_INFO = new ArrayList<>(0);
 
     // Temporarily reverted to anonymous inner class form due to: b/32554459
-    private static Predicate<ResolveInfo> ACTIVITY_NOT_EXPORTED = new Predicate<ResolveInfo>() {
-        public boolean test(ResolveInfo ri) {
-            return !ri.activityInfo.exported;
-        }
-    };
+    private static final Predicate<ResolveInfo> ACTIVITY_NOT_EXPORTED =
+            new Predicate<ResolveInfo>() {
+                public boolean test(ResolveInfo ri) {
+                    return !ri.activityInfo.exported;
+                }
+            };
 
-    private static Predicate<ResolveInfo> ACTIVITY_NOT_INSTALLED = (ri) ->
+    private static final Predicate<ResolveInfo> ACTIVITY_NOT_INSTALLED = (ri) ->
             !isInstalled(ri.activityInfo);
 
     // Temporarily reverted to anonymous inner class form due to: b/32554459
-    private static Predicate<PackageInfo> PACKAGE_NOT_INSTALLED = new Predicate<PackageInfo>() {
-        public boolean test(PackageInfo pi) {
-            return !isInstalled(pi);
-        }
-    };
+    private static final Predicate<PackageInfo> PACKAGE_NOT_INSTALLED =
+            new Predicate<PackageInfo>() {
+                public boolean test(PackageInfo pi) {
+                    return !isInstalled(pi);
+                }
+            };
 
     private final Handler mHandler;
 
@@ -369,7 +372,7 @@ public class ShortcutService extends IShortcutService.Stub {
     private CompressFormat mIconPersistFormat;
     private int mIconPersistQuality;
 
-    private int mSaveDelayMillis;
+    int mSaveDelayMillis;
 
     private final IPackageManager mIPackageManager;
     private final PackageManagerInternal mPackageManagerInternal;
@@ -483,7 +486,14 @@ public class ShortcutService extends IShortcutService.Stub {
     }
 
     public ShortcutService(Context context) {
-        this(context, BackgroundThread.get().getLooper(), /*onyForPackgeManagerApis*/ false);
+        this(context, getBgLooper(), /*onyForPackgeManagerApis*/ false);
+    }
+
+    private static Looper getBgLooper() {
+        final HandlerThread handlerThread = new HandlerThread("shortcut",
+                android.os.Process.THREAD_PRIORITY_BACKGROUND);
+        handlerThread.start();
+        return handlerThread.getLooper();
     }
 
     @VisibleForTesting
@@ -510,7 +520,7 @@ public class ShortcutService extends IShortcutService.Stub {
         mShortcutRequestPinProcessor = new ShortcutRequestPinProcessor(this, mLock);
         mShortcutDumpFiles = new ShortcutDumpFiles(this);
         mIsAppSearchEnabled = DeviceConfig.getBoolean(NAMESPACE_SYSTEMUI,
-                SystemUiDeviceConfigFlags.SHORTCUT_APPSEARCH_INTEGRATION, true)
+                SystemUiDeviceConfigFlags.SHORTCUT_APPSEARCH_INTEGRATION, false)
                 && !injectIsLowRamDevice();
 
         if (onlyForPackageManagerApis) {
@@ -1369,7 +1379,7 @@ public class ShortcutService extends IShortcutService.Stub {
     ShortcutNonPersistentUser getNonPersistentUserLocked(@UserIdInt int userId) {
         ShortcutNonPersistentUser ret = mShortcutNonPersistentUsers.get(userId);
         if (ret == null) {
-            ret = new ShortcutNonPersistentUser(this, userId);
+            ret = new ShortcutNonPersistentUser(userId);
             mShortcutNonPersistentUsers.put(userId, ret);
         }
         return ret;
@@ -2282,7 +2292,7 @@ public class ShortcutService extends IShortcutService.Stub {
 
         packageShortcutsChanged(ps, changedShortcuts, removedShortcuts);
 
-        reportShortcutUsedInternal(packageName, shortcut.getId(), userId);
+        ps.reportShortcutUsed(mUsageStatsManagerInternal, shortcut.getId());
 
         verifyStates();
     }
@@ -2686,25 +2696,17 @@ public class ShortcutService extends IShortcutService.Stub {
             Slog.d(TAG, String.format("reportShortcutUsed: Shortcut %s package %s used on user %d",
                     shortcutId, packageName, userId));
         }
+        final ShortcutPackage ps;
         synchronized (mLock) {
             throwIfUserLockedL(userId);
-            final ShortcutPackage ps = getPackageShortcutsForPublisherLocked(packageName, userId);
+            ps = getPackageShortcutsForPublisherLocked(packageName, userId);
             if (ps.findShortcutById(shortcutId) == null) {
                 Log.w(TAG, String.format("reportShortcutUsed: package %s doesn't have shortcut %s",
                         packageName, shortcutId));
                 return;
             }
         }
-        reportShortcutUsedInternal(packageName, shortcutId, userId);
-    }
-
-    private void reportShortcutUsedInternal(String packageName, String shortcutId, int userId) {
-        final long token = injectClearCallingIdentity();
-        try {
-            mUsageStatsManagerInternal.reportShortcutUsage(packageName, shortcutId, userId);
-        } finally {
-            injectRestoreCallingIdentity(token);
-        }
+        ps.reportShortcutUsed(mUsageStatsManagerInternal, shortcutId);
     }
 
     @Override
@@ -2827,6 +2829,26 @@ public class ShortcutService extends IShortcutService.Stub {
                 return false;
             }
         }
+    }
+
+    @VisibleForTesting
+    boolean areShortcutsSupportedOnHomeScreen(@UserIdInt int userId) {
+        if (!android.os.Flags.allowPrivateProfile() || !Flags.disablePrivateSpaceItemsOnHome()) {
+            return true;
+        }
+        final long start = getStatStartTime();
+        final long token = injectClearCallingIdentity();
+        boolean isSupported;
+        try {
+            synchronized (mLock) {
+                isSupported = !mUserManagerInternal.getUserProperties(userId)
+                        .areItemsRestrictedOnHomeScreen();
+            }
+        } finally {
+            injectRestoreCallingIdentity(token);
+            logDurationStat(Stats.GET_DEFAULT_LAUNCHER, start);
+        }
+        return isSupported;
     }
 
     @Nullable
@@ -3657,6 +3679,10 @@ public class ShortcutService extends IShortcutService.Stub {
                 @NonNull String callingPackage, int callingPid, int callingUid) {
             return ShortcutService.this.hasShortcutHostPermission(callingPackage, launcherUserId,
                     callingPid, callingUid);
+        }
+
+        public boolean areShortcutsSupportedOnHomeScreen(@UserIdInt int userId) {
+            return ShortcutService.this.areShortcutsSupportedOnHomeScreen(userId);
         }
 
         @Override
@@ -4656,8 +4682,8 @@ public class ShortcutService extends IShortcutService.Stub {
         private boolean mDumpFiles = false;
 
         private boolean mDumpDetails = true;
-        private List<Pattern> mPackagePatterns = new ArrayList<>();
-        private List<Integer> mUsers = new ArrayList<>();
+        private final List<Pattern> mPackagePatterns = new ArrayList<>();
+        private final List<Integer> mUsers = new ArrayList<>();
 
         void addPackageRegex(String regex) {
             mPackagePatterns.add(Pattern.compile(regex));
@@ -5193,13 +5219,11 @@ public class ShortcutService extends IShortcutService.Stub {
     }
 
     // Injection point.
-    @VisibleForTesting
     long injectClearCallingIdentity() {
         return Binder.clearCallingIdentity();
     }
 
     // Injection point.
-    @VisibleForTesting
     void injectRestoreCallingIdentity(long token) {
         Binder.restoreCallingIdentity(token);
     }

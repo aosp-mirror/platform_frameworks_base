@@ -21,10 +21,12 @@ import static android.view.KeyEvent.KEYCODE_VOLUME_UP;
 import static com.android.server.policy.PhoneWindowManager.LONG_PRESS_POWER_ASSISTANT;
 import static com.android.server.policy.PhoneWindowManager.LONG_PRESS_POWER_GLOBAL_ACTIONS;
 import static com.android.server.policy.PhoneWindowManager.SHORT_PRESS_POWER_DREAM_OR_SLEEP;
+import static com.android.server.policy.PhoneWindowManager.SHORT_PRESS_POWER_GO_TO_SLEEP;
 
 import android.provider.Settings;
 import android.view.Display;
 
+import org.junit.Before;
 import org.junit.Test;
 
 /**
@@ -34,11 +36,17 @@ import org.junit.Test;
  *  atest WmTests:PowerKeyGestureTests
  */
 public class PowerKeyGestureTests extends ShortcutKeyTestBase {
+    @Before
+    public void setUp() {
+        setUpPhoneWindowManager();
+    }
+
     /**
      * Power single press to turn screen on/off.
      */
     @Test
     public void testPowerSinglePress() {
+        mPhoneWindowManager.overrideShortPressOnPower(SHORT_PRESS_POWER_GO_TO_SLEEP);
         sendKey(KEYCODE_POWER);
         mPhoneWindowManager.assertPowerSleep();
 
@@ -104,7 +112,7 @@ public class PowerKeyGestureTests extends ShortcutKeyTestBase {
         // Show assistant.
         mPhoneWindowManager.overrideLongPressOnPower(LONG_PRESS_POWER_ASSISTANT);
         sendKey(KEYCODE_POWER, true);
-        mPhoneWindowManager.assertAssistLaunch();
+        mPhoneWindowManager.assertSearchManagerLaunchAssist();
 
         // Show global actions.
         mPhoneWindowManager.overrideLongPressOnPower(LONG_PRESS_POWER_GLOBAL_ACTIONS);

@@ -52,6 +52,8 @@ import android.util.Slog;
 
 import com.android.internal.annotations.GuardedBy;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -738,6 +740,7 @@ public class UsbManager {
             FUNCTION_NCM,
             FUNCTION_UVC,
     })
+    @Retention(RetentionPolicy.SOURCE)
     public @interface UsbFunctionMode {}
 
     /** @hide */
@@ -748,6 +751,7 @@ public class UsbManager {
             GADGET_HAL_V1_2,
             GADGET_HAL_V2_0,
     })
+    @Retention(RetentionPolicy.SOURCE)
     public @interface UsbGadgetHalVersion {}
 
     /** @hide */
@@ -759,6 +763,7 @@ public class UsbManager {
             USB_HAL_V1_3,
             USB_HAL_V2_0,
     })
+    @Retention(RetentionPolicy.SOURCE)
     public @interface UsbHalVersion {}
 
     /**
@@ -1463,6 +1468,21 @@ public class UsbManager {
     UsbPortStatus getPortStatus(UsbPort port) {
         try {
             return mService.getPortStatus(port.getId());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Checks if the given port supports mode change. Should only be called by
+     * {@link UsbPort#isModeChangeSupported}.
+     *
+     * @hide
+     */
+    @RequiresPermission(Manifest.permission.MANAGE_USB)
+    boolean isModeChangeSupported(UsbPort port) {
+        try {
+            return mService.isModeChangeSupported(port.getId());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

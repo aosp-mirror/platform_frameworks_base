@@ -21,13 +21,17 @@ import android.graphics.Rect
 import android.os.LocaleList
 import android.view.View.LAYOUT_DIRECTION_RTL
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.statusbar.policy.ConfigurationController
+import com.android.systemui.statusbar.policy.ConfigurationController.ConfigurationListener
 import javax.inject.Inject
 
 @SysUISingleton
-class ConfigurationControllerImpl @Inject constructor(context: Context) : ConfigurationController {
+class ConfigurationControllerImpl @Inject constructor(
+        @Application context: Context,
+        ) : ConfigurationController {
 
-    private val listeners: MutableList<ConfigurationController.ConfigurationListener> = ArrayList()
+    private val listeners: MutableList<ConfigurationListener> = ArrayList()
     private val lastConfig = Configuration()
     private var density: Int = 0
     private var smallestScreenWidth: Int = 0
@@ -55,7 +59,10 @@ class ConfigurationControllerImpl @Inject constructor(context: Context) : Config
     }
 
     override fun notifyThemeChanged() {
-        val listeners = ArrayList(listeners)
+        // Avoid concurrent modification exception
+        val listeners = synchronized(this.listeners) {
+           ArrayList(this.listeners)
+        }
 
         listeners.filterForEach({ this.listeners.contains(it) }) {
             it.onThemeChanged()
@@ -64,8 +71,9 @@ class ConfigurationControllerImpl @Inject constructor(context: Context) : Config
 
     override fun onConfigurationChanged(newConfig: Configuration) {
         // Avoid concurrent modification exception
-        val listeners = ArrayList(listeners)
-
+        val listeners = synchronized(this.listeners) {
+           ArrayList(this.listeners)
+        }
         listeners.filterForEach({ this.listeners.contains(it) }) {
             it.onConfigChanged(newConfig)
         }
@@ -143,19 +151,30 @@ class ConfigurationControllerImpl @Inject constructor(context: Context) : Config
         }
     }
 
-
-
-    override fun addCallback(listener: ConfigurationController.ConfigurationListener) {
-        listeners.add(listener)
+    override fun addCallback(listener: ConfigurationListener) {
+        synchronized(listeners) {
+            listeners.add(listener)
+        }
         listener.onDensityOrFontScaleChanged()
     }
 
-    override fun removeCallback(listener: ConfigurationController.ConfigurationListener) {
-        listeners.remove(listener)
+    override fun removeCallback(listener: ConfigurationListener) {
+        synchronized(listeners) {
+            listeners.remove(listener)
+        }
     }
 
     override fun isLayoutRtl(): Boolean {
         return layoutDirection == LAYOUT_DIRECTION_RTL
+    }
+
+    override fun getNightModeName(): String {
+        return when (uiMode and Configuration.UI_MODE_NIGHT_MASK) {
+            Configuration.UI_MODE_NIGHT_YES -> "night"
+            Configuration.UI_MODE_NIGHT_NO -> "day"
+            Configuration.UI_MODE_NIGHT_UNDEFINED -> "undefined"
+            else -> "err"
+        }
     }
 }
 

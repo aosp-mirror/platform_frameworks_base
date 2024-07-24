@@ -9,6 +9,14 @@
       ]
     },
     {
+      "name": "CtsPackageManagerIncrementalStatsHostTestCases",
+      "options": [
+        {
+          "exclude-annotation": "androidx.test.filters.LargeTest"
+        }
+      ]
+    },
+    {
       "name": "CtsIncrementalInstallHostTestCases"
     },
     {
@@ -20,13 +28,13 @@
     {
       "name": "CtsInstalledLoadingProgressHostTests"
     }
-  ],
+   ],
   "presubmit-large": [
     {
-      "name": "CtsContentTestCases",
+      "name": "CtsPackageManagerTestCases",
       "options": [
         {
-          "include-filter": "android.content.pm.cts.PackageManagerShellCommandTest"
+          "include-filter": "android.content.pm.cts.PackageManagerShellCommandInstallTest"
         },
         {
           "include-filter": "android.content.pm.cts.PackageManagerShellCommandIncrementalTest"
@@ -40,6 +48,16 @@
   "kernel-presubmit": [
     {
       "name": "CtsIncrementalInstallHostTestCases"
+    }
+  ],
+  "postsubmit": [
+    {
+      "name": "CtsPackageManagerIncrementalStatsHostTestCases",
+      "options": [
+        {
+          "include-annotation": "androidx.test.filters.LargeTest"
+        }
+      ]
     }
   ]
 }

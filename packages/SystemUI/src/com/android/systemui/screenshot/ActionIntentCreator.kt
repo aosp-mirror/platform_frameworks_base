@@ -23,7 +23,7 @@ import android.content.ContentProvider
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
-import com.android.systemui.R
+import com.android.systemui.res.R
 
 object ActionIntentCreator {
     /** @return a chooser intent to share the given URI. */

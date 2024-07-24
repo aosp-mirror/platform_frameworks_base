@@ -16,6 +16,7 @@
 
 package android.media.projection;
 
+import android.app.ActivityOptions.LaunchCookie;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.UserHandle;
@@ -26,15 +27,18 @@ import java.util.Objects;
 public final class MediaProjectionInfo implements Parcelable {
     private final String mPackageName;
     private final UserHandle mUserHandle;
+    private final LaunchCookie mLaunchCookie;
 
-    public MediaProjectionInfo(String packageName, UserHandle handle) {
+    public MediaProjectionInfo(String packageName, UserHandle handle, LaunchCookie launchCookie) {
         mPackageName = packageName;
         mUserHandle = handle;
+        mLaunchCookie = launchCookie;
     }
 
     public MediaProjectionInfo(Parcel in) {
         mPackageName = in.readString();
         mUserHandle = UserHandle.readFromParcel(in);
+        mLaunchCookie = LaunchCookie.readFromParcel(in);
     }
 
     public String getPackageName() {
@@ -45,12 +49,16 @@ public final class MediaProjectionInfo implements Parcelable {
         return mUserHandle;
     }
 
+    public LaunchCookie getLaunchCookie() {
+        return mLaunchCookie;
+    }
+
     @Override
     public boolean equals(Object o) {
-        if (o instanceof MediaProjectionInfo) {
-            final MediaProjectionInfo other = (MediaProjectionInfo) o;
+        if (o instanceof MediaProjectionInfo other) {
             return Objects.equals(other.mPackageName, mPackageName)
-                    && Objects.equals(other.mUserHandle, mUserHandle);
+                    && Objects.equals(other.mUserHandle, mUserHandle)
+                    && Objects.equals(other.mLaunchCookie, mLaunchCookie);
         }
         return false;
     }
@@ -64,7 +72,8 @@ public final class MediaProjectionInfo implements Parcelable {
     public String toString() {
         return "MediaProjectionInfo{mPackageName="
             + mPackageName + ", mUserHandle="
-            + mUserHandle + "}";
+            + mUserHandle + ", mLaunchCookie="
+            + mLaunchCookie + "}";
     }
 
     @Override
@@ -76,6 +85,7 @@ public final class MediaProjectionInfo implements Parcelable {
     public void writeToParcel(Parcel out, int flags) {
         out.writeString(mPackageName);
         UserHandle.writeToParcel(mUserHandle, out);
+        LaunchCookie.writeToParcel(mLaunchCookie, out);
     }
 
     public static final @android.annotation.NonNull Parcelable.Creator<MediaProjectionInfo> CREATOR =

@@ -43,10 +43,10 @@ class FakeFeatureFlagsTest : SysuiTestCase() {
     fun accessingUnspecifiedFlags_throwsException() {
         val flags: FeatureFlags = FakeFeatureFlags()
         try {
-            assertThat(flags.isEnabled(Flags.TEAMFOOD)).isFalse()
+            assertThat(flags.isEnabled(Flags.NULL_FLAG)).isFalse()
             fail("Expected an exception when accessing an unspecified flag.")
         } catch (ex: IllegalStateException) {
-            assertThat(ex.message).contains("UNKNOWN(teamfood)")
+            assertThat(ex.message).contains("UNKNOWN(null_flag)")
         }
         try {
             assertThat(flags.isEnabled(unreleasedFlag)).isFalse()

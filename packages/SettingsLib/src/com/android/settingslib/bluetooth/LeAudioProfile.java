@@ -3,17 +3,17 @@
 */
 
 /* Licensed under the Apache License, Version 2.0 (the "License");
-* you may not use this file except in compliance with the License.
-* You may obtain a copy of the License at
-*
-*     http://www.apache.org/licenses/LICENSE-2.0
-*
-* Unless required by applicable law or agreed to in writing, software
-* distributed under the License is distributed on an "AS IS" BASIS,
-* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-* See the License for the specific language governing permissions and
-* limitations under the License.
-*/
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 package com.android.settingslib.bluetooth;
 
@@ -21,27 +21,23 @@ import static android.bluetooth.BluetoothAdapter.ACTIVE_DEVICE_ALL;
 import static android.bluetooth.BluetoothProfile.CONNECTION_POLICY_ALLOWED;
 import static android.bluetooth.BluetoothProfile.CONNECTION_POLICY_FORBIDDEN;
 
-import android.annotation.Nullable;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothClass;
-import android.bluetooth.BluetoothCodecConfig;
-import android.bluetooth.BluetoothCodecStatus;
+import android.bluetooth.BluetoothCsipSetCoordinator;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothLeAudio;
 import android.bluetooth.BluetoothProfile;
-import android.bluetooth.BluetoothUuid;
 import android.content.Context;
 import android.os.Build;
-import android.os.ParcelUuid;
 import android.util.Log;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 
-import com.android.internal.annotations.VisibleForTesting;
 import com.android.settingslib.R;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 public class LeAudioProfile implements LocalBluetoothProfile {
@@ -63,13 +59,12 @@ public class LeAudioProfile implements LocalBluetoothProfile {
     private static final int ORDINAL = 1;
 
     // These callbacks run on the main thread.
-    private final class LeAudioServiceListener
-            implements BluetoothProfile.ServiceListener {
+    private final class LeAudioServiceListener implements BluetoothProfile.ServiceListener {
 
         @RequiresApi(Build.VERSION_CODES.S)
         public void onServiceConnected(int profile, BluetoothProfile proxy) {
             if (DEBUG) {
-                Log.d(TAG,"Bluetooth service connected");
+                Log.d(TAG, "Bluetooth service connected");
             }
             mService = (BluetoothLeAudio) proxy;
             // We just bound to the service, so refresh the UI for any connected LeAudio devices.
@@ -84,18 +79,19 @@ public class LeAudioProfile implements LocalBluetoothProfile {
                     }
                     device = mDeviceManager.addDevice(nextDevice);
                 }
-                device.onProfileStateChanged(LeAudioProfile.this,
-                        BluetoothProfile.STATE_CONNECTED);
+                device.onProfileStateChanged(LeAudioProfile.this, BluetoothProfile.STATE_CONNECTED);
                 device.refresh();
             }
 
+            // Check current list of CachedDevices to see if any are hearing aid devices.
+            mDeviceManager.updateHearingAidsDevices();
             mProfileManager.callServiceConnectedListeners();
             mIsProfileReady = true;
         }
 
         public void onServiceDisconnected(int profile) {
             if (DEBUG) {
-                 Log.d(TAG,"Bluetooth service disconnected");
+                Log.d(TAG, "Bluetooth service disconnected");
             }
             mProfileManager.callServiceDisconnectedListeners();
             mIsProfileReady = false;
@@ -111,7 +107,9 @@ public class LeAudioProfile implements LocalBluetoothProfile {
         return BluetoothProfile.LE_AUDIO;
     }
 
-    LeAudioProfile(Context context, CachedBluetoothDeviceManager deviceManager,
+    LeAudioProfile(
+            Context context,
+            CachedBluetoothDeviceManager deviceManager,
             LocalBluetoothProfileManager profileManager) {
         mContext = context;
         mDeviceManager = deviceManager;
@@ -119,8 +117,7 @@ public class LeAudioProfile implements LocalBluetoothProfile {
 
         mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
         mBluetoothAdapter.getProfileProxy(
-                context, new LeAudioServiceListener(),
-                BluetoothProfile.LE_AUDIO);
+                context, new LeAudioServiceListener(), BluetoothProfile.LE_AUDIO);
     }
 
     public boolean accessProfileEnabled() {
@@ -132,18 +129,34 @@ public class LeAudioProfile implements LocalBluetoothProfile {
     }
 
     public List<BluetoothDevice> getConnectedDevices() {
+        return getDevicesByStates(
+                new int[] {
+                    BluetoothProfile.STATE_CONNECTED,
+                    BluetoothProfile.STATE_CONNECTING,
+                    BluetoothProfile.STATE_DISCONNECTING
+                });
+    }
+
+    public List<BluetoothDevice> getConnectableDevices() {
+        return getDevicesByStates(
+                new int[] {
+                    BluetoothProfile.STATE_DISCONNECTED,
+                    BluetoothProfile.STATE_CONNECTED,
+                    BluetoothProfile.STATE_CONNECTING,
+                    BluetoothProfile.STATE_DISCONNECTING
+                });
+    }
+
+    private List<BluetoothDevice> getDevicesByStates(int[] states) {
         if (mService == null) {
-            return new ArrayList<BluetoothDevice>(0);
+            return new ArrayList<>(0);
         }
-        return mService.getDevicesMatchingConnectionStates(
-              new int[] {BluetoothProfile.STATE_CONNECTED,
-                         BluetoothProfile.STATE_CONNECTING,
-                         BluetoothProfile.STATE_DISCONNECTING});
+        return mService.getDevicesMatchingConnectionStates(states);
     }
 
     /*
-    * @hide
-    */
+     * @hide
+     */
     public boolean connect(BluetoothDevice device) {
         if (mService == null) {
             return false;
@@ -152,8 +165,8 @@ public class LeAudioProfile implements LocalBluetoothProfile {
     }
 
     /*
-    * @hide
-    */
+     * @hide
+     */
     public boolean disconnect(BluetoothDevice device) {
         if (mService == null) {
             return false;
@@ -166,6 +179,14 @@ public class LeAudioProfile implements LocalBluetoothProfile {
             return BluetoothProfile.STATE_DISCONNECTED;
         }
         return mService.getConnectionState(device);
+    }
+
+    /** Get group id for {@link BluetoothDevice}. */
+    public int getGroupId(@NonNull BluetoothDevice device) {
+        if (mService == null) {
+            return BluetoothCsipSetCoordinator.GROUP_ID_INVALID;
+        }
+        return mService.getGroupId(device);
     }
 
     public boolean setActiveDevice(BluetoothDevice device) {
@@ -187,29 +208,28 @@ public class LeAudioProfile implements LocalBluetoothProfile {
     /**
      * Get Lead device for the group.
      *
-     * Lead device is the device that can be used as an active device in the system.
-     * Active devices points to the Audio Device for the Le Audio group.
-     * This method returns the Lead devices for the connected LE Audio
-     * group and this device should be used in the setActiveDevice() method by other parts
-     * of the system, which wants to set to active a particular Le Audio group.
+     * <p>Lead device is the device that can be used as an active device in the system. Active
+     * devices points to the Audio Device for the Le Audio group. This method returns the Lead
+     * devices for the connected LE Audio group and this device should be used in the
+     * setActiveDevice() method by other parts of the system, which wants to set to active a
+     * particular Le Audio group.
      *
-     * Note: getActiveDevice() returns the Lead device for the currently active LE Audio group.
+     * <p>Note: getActiveDevice() returns the Lead device for the currently active LE Audio group.
      * Note: When Lead device gets disconnected while Le Audio group is active and has more devices
-     * in the group, then Lead device will not change. If Lead device gets disconnected, for the
-     * Le Audio group which is not active, a new Lead device will be chosen
+     * in the group, then Lead device will not change. If Lead device gets disconnected, for the Le
+     * Audio group which is not active, a new Lead device will be chosen
      *
      * @param groupId The group id.
      * @return group lead device.
-     *
      * @hide
      */
     @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     public @Nullable BluetoothDevice getConnectedGroupLeadDevice(int groupId) {
         if (DEBUG) {
-            Log.d(TAG,"getConnectedGroupLeadDevice");
+            Log.d(TAG, "getConnectedGroupLeadDevice");
         }
         if (mService == null) {
-            Log.e(TAG,"No service.");
+            Log.e(TAG, "No service.");
             return null;
         }
         return mService.getConnectedGroupLeadDevice(groupId);
@@ -233,19 +253,19 @@ public class LeAudioProfile implements LocalBluetoothProfile {
 
     @Override
     public boolean setEnabled(BluetoothDevice device, boolean enabled) {
-        boolean isEnabled = false;
+        boolean isSuccessful = false;
         if (mService == null || device == null) {
             return false;
         }
         if (enabled) {
             if (mService.getConnectionPolicy(device) < CONNECTION_POLICY_ALLOWED) {
-                isEnabled = mService.setConnectionPolicy(device, CONNECTION_POLICY_ALLOWED);
+                isSuccessful = mService.setConnectionPolicy(device, CONNECTION_POLICY_ALLOWED);
             }
         } else {
-            isEnabled = mService.setConnectionPolicy(device, CONNECTION_POLICY_FORBIDDEN);
+            isSuccessful = mService.setConnectionPolicy(device, CONNECTION_POLICY_FORBIDDEN);
         }
 
-        return isEnabled;
+        return isSuccessful;
     }
 
     public String toString() {
@@ -304,10 +324,10 @@ public class LeAudioProfile implements LocalBluetoothProfile {
         }
         if (mService != null) {
             try {
-                BluetoothAdapter.getDefaultAdapter().closeProfileProxy(BluetoothProfile.LE_AUDIO,
-                        mService);
+                BluetoothAdapter.getDefaultAdapter()
+                        .closeProfileProxy(BluetoothProfile.LE_AUDIO, mService);
                 mService = null;
-            }catch (Throwable t) {
+            } catch (Throwable t) {
                 Log.w(TAG, "Error cleaning up LeAudio proxy", t);
             }
         }

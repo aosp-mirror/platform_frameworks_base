@@ -19,7 +19,6 @@ package com.android.settingslib.spa.widget.scaffold
 import android.content.Context
 import androidx.appcompat.R
 import androidx.compose.runtime.SideEffect
-import androidx.compose.runtime.State
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
@@ -60,7 +59,7 @@ class SearchScaffoldTest {
     fun initialState_searchQueryIsEmpty() {
         val searchQuery = setContent()
 
-        assertThat(searchQuery.value).isEqualTo("")
+        assertThat(searchQuery()).isEqualTo("")
     }
 
     @Test
@@ -72,7 +71,7 @@ class SearchScaffoldTest {
         composeTestRule.onNodeWithText(TITLE).assertDoesNotExist()
         onSearchHint().assertIsDisplayed()
         onClearButton().assertDoesNotExist()
-        assertThat(searchQuery.value).isEqualTo("")
+        assertThat(searchQuery()).isEqualTo("")
     }
 
     @Test
@@ -87,7 +86,7 @@ class SearchScaffoldTest {
         composeTestRule.onNodeWithText(TITLE).assertIsDisplayed()
         onSearchHint().assertDoesNotExist()
         onClearButton().assertDoesNotExist()
-        assertThat(searchQuery.value).isEqualTo("")
+        assertThat(searchQuery()).isEqualTo("")
     }
 
     @Test
@@ -98,7 +97,7 @@ class SearchScaffoldTest {
         onSearchHint().performTextInput(QUERY)
 
         onClearButton().assertIsDisplayed()
-        assertThat(searchQuery.value).isEqualTo(QUERY)
+        assertThat(searchQuery()).isEqualTo(QUERY)
     }
 
     @Test
@@ -110,11 +109,11 @@ class SearchScaffoldTest {
         onClearButton().performClick()
 
         onClearButton().assertDoesNotExist()
-        assertThat(searchQuery.value).isEqualTo("")
+        assertThat(searchQuery()).isEqualTo("")
     }
 
-    private fun setContent(): State<String> {
-        lateinit var actualSearchQuery: State<String>
+    private fun setContent(): () -> String {
+        lateinit var actualSearchQuery: () -> String
         composeTestRule.setContent {
             SearchScaffold(title = TITLE) { _, searchQuery ->
                 SideEffect {

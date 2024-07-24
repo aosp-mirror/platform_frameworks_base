@@ -19,5 +19,5 @@ package com.android.internal.app;
 // Iterface to observe op active changes
 oneway interface IAppOpsActiveCallback {
     void opActiveChanged(int op, int uid, String packageName, String attributionTag,
-            boolean active, int attributionFlags, int attributionChainId);
+            int virtualDeviceId, boolean active, int attributionFlags, int attributionChainId);
 }

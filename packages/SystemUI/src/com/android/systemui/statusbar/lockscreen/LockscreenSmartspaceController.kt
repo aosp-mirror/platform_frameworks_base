@@ -39,7 +39,6 @@ import android.view.ViewGroup
 import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.settingslib.Utils
 import com.android.systemui.Dumpable
-import com.android.systemui.R
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
@@ -52,8 +51,9 @@ import com.android.systemui.plugins.BcSmartspaceDataPlugin
 import com.android.systemui.plugins.BcSmartspaceDataPlugin.SmartspaceTargetListener
 import com.android.systemui.plugins.BcSmartspaceDataPlugin.SmartspaceView
 import com.android.systemui.plugins.FalsingManager
-import com.android.systemui.plugins.WeatherData
+import com.android.systemui.plugins.clocks.WeatherData
 import com.android.systemui.plugins.statusbar.StatusBarStateController
+import com.android.systemui.res.R
 import com.android.systemui.settings.UserTracker
 import com.android.systemui.shared.regionsampling.RegionSampler
 import com.android.systemui.smartspace.dagger.SmartspaceModule.Companion.DATE_SMARTSPACE_DATA_PLUGIN
@@ -61,15 +61,20 @@ import com.android.systemui.smartspace.dagger.SmartspaceModule.Companion.WEATHER
 import com.android.systemui.statusbar.phone.KeyguardBypassController
 import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.statusbar.policy.DeviceProvisionedController
+import com.android.systemui.util.asIndenting
 import com.android.systemui.util.concurrency.Execution
+import com.android.systemui.util.printCollection
 import com.android.systemui.util.settings.SecureSettings
 import com.android.systemui.util.time.SystemClock
 import java.io.PrintWriter
 import java.time.Instant
+import java.util.Deque
+import java.util.LinkedList
 import java.util.Optional
 import java.util.concurrent.Executor
 import javax.inject.Inject
 import javax.inject.Named
+
 
 /** Controller for managing the smartspace view on the lockscreen */
 @SysUISingleton
@@ -78,7 +83,7 @@ class LockscreenSmartspaceController
 constructor(
         private val context: Context,
         private val featureFlags: FeatureFlags,
-        private val smartspaceManager: SmartspaceManager,
+        private val smartspaceManager: SmartspaceManager?,
         private val activityStarter: ActivityStarter,
         private val falsingManager: FalsingManager,
         private val systemClock: SystemClock,
@@ -104,6 +109,8 @@ constructor(
 ) : Dumpable {
     companion object {
         private const val TAG = "LockscreenSmartspaceController"
+
+        private const val MAX_RECENT_SMARTSPACE_DATA_FOR_DUMP = 5
     }
 
     private var session: SmartspaceSession? = null
@@ -111,6 +118,9 @@ constructor(
     private val weatherPlugin: BcSmartspaceDataPlugin? = optionalWeatherPlugin.orElse(null)
     private val plugin: BcSmartspaceDataPlugin? = optionalPlugin.orElse(null)
     private val configPlugin: BcSmartspaceConfigPlugin? = optionalConfigPlugin.orElse(null)
+
+    // This stores recently received Smartspace pushes to be included in dumpsys.
+    private val recentSmartspaceData: Deque<List<SmartspaceTarget>> = LinkedList()
 
     // Smartspace can be used on multiple displays, such as when the user casts their screen
     private var smartspaceViews = mutableSetOf<SmartspaceView>()
@@ -171,6 +181,7 @@ constructor(
 
         // The weather data plugin takes unfiltered targets and performs the filtering internally.
         weatherPlugin?.onTargetsAvailable(targets)
+
         val now = Instant.ofEpochMilli(systemClock.currentTimeMillis())
         val weatherTarget = targets.find { t ->
             t.featureType == SmartspaceTarget.FEATURE_WEATHER &&
@@ -199,6 +210,14 @@ constructor(
         }
 
         val filteredTargets = targets.filter(::filterSmartspaceTarget)
+
+        synchronized(recentSmartspaceData) {
+            recentSmartspaceData.offerLast(filteredTargets)
+            if (recentSmartspaceData.size > MAX_RECENT_SMARTSPACE_DATA_FOR_DUMP) {
+                recentSmartspaceData.pollFirst()
+            }
+        }
+
         plugin?.onTargetsAvailable(filteredTargets)
     }
 
@@ -267,8 +286,7 @@ constructor(
     fun isDateWeatherDecoupled(): Boolean {
         execution.assertIsMainThread()
 
-        return featureFlags.isEnabled(Flags.SMARTSPACE_DATE_WEATHER_DECOUPLED) &&
-                datePlugin != null && weatherPlugin != null
+        return datePlugin != null && weatherPlugin != null
     }
 
     fun isWeatherEnabled(): Boolean {
@@ -395,6 +413,7 @@ constructor(
     }
 
     private fun connectSession() {
+        if (smartspaceManager == null) return
         if (datePlugin == null && weatherPlugin == null && plugin == null) return
         if (session != null || smartspaceViews.isEmpty()) {
             return
@@ -498,8 +517,8 @@ constructor(
     }
 
     private fun filterSmartspaceTarget(t: SmartspaceTarget): Boolean {
-        if (isDateWeatherDecoupled()) {
-            return t.featureType != SmartspaceTarget.FEATURE_WEATHER
+        if (isDateWeatherDecoupled() && t.featureType == SmartspaceTarget.FEATURE_WEATHER) {
+            return false
         }
         if (!showNotifications) {
             return t.featureType == SmartspaceTarget.FEATURE_WEATHER
@@ -587,9 +606,25 @@ constructor(
     }
 
     override fun dump(pw: PrintWriter, args: Array<out String>) {
-        pw.println("Region Samplers: ${regionSamplers.size}")
-        regionSamplers.map { (_, sampler) ->
-            sampler.dump(pw)
+        pw.asIndenting().run {
+            printCollection("Region Samplers", regionSamplers.values) {
+                it.dump(this)
+            }
+        }
+
+        pw.println("Recent BC Smartspace Targets (most recent first)")
+        synchronized(recentSmartspaceData) {
+            if (recentSmartspaceData.size === 0) {
+                pw.println("   No data\n")
+                return
+            }
+            recentSmartspaceData.descendingIterator().forEachRemaining { smartspaceTargets ->
+                pw.println("   Number of targets: ${smartspaceTargets.size}")
+                for (target in smartspaceTargets) {
+                    pw.println("      $target")
+                }
+                pw.println()
+            }
         }
     }
 }

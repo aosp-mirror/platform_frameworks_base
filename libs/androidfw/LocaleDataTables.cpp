@@ -2451,10 +2451,10 @@ const struct {
     const char script[4];
     const std::unordered_map<uint32_t, uint32_t>* map;
 } SCRIPT_PARENTS[] = {
+    {{'L', 'a', 't', 'n'}, &LATN_PARENTS},
     {{'A', 'r', 'a', 'b'}, &ARAB_PARENTS},
     {{'D', 'e', 'v', 'a'}, &DEVA_PARENTS},
     {{'H', 'a', 'n', 't'}, &HANT_PARENTS},
-    {{'L', 'a', 't', 'n'}, &LATN_PARENTS},
     {{'~', '~', '~', 'B'}, &___B_PARENTS},
 };
 

@@ -61,7 +61,8 @@ static jobject android_view_MotionPredictor_nativePredict(JNIEnv* env, jclass cl
     MotionPredictor* predictor = reinterpret_cast<MotionPredictor*>(ptr);
     return android_view_MotionEvent_obtainFromNative(env,
                                                      predictor->predict(static_cast<nsecs_t>(
-                                                             predictionTimeNanos)));
+                                                             predictionTimeNanos)))
+            .release();
 }
 
 static jboolean android_view_MotionPredictor_nativeIsPredictionAvailable(JNIEnv* env, jclass clazz,

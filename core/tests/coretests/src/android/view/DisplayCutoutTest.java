@@ -16,6 +16,8 @@
 
 package android.view;
 
+import static android.view.DisplayCutout.BOUNDS_POSITION_BOTTOM;
+import static android.view.DisplayCutout.BOUNDS_POSITION_TOP;
 import static android.view.DisplayCutout.NO_CUTOUT;
 import static android.view.DisplayCutout.extractBoundsFromList;
 import static android.view.DisplayCutout.fromSpec;
@@ -180,7 +182,7 @@ public class DisplayCutoutTest {
         final int displayHeight = 400;
         final float density = 1f;
         final DisplayCutout cutout = fromSpec(cutoutSpecString, displayWidth, displayHeight,
-                density, Insets.NONE);
+                density, Insets.NONE, null);
         assertThat(cutout.getCutoutPath(), notNullValue());
     }
 
@@ -191,9 +193,9 @@ public class DisplayCutoutTest {
         final int displayHeight = 400;
         final float density = 1f;
         final Path first = fromSpec(cutoutSpecString, displayWidth, displayHeight,
-                density, Insets.NONE).getCutoutPath();
+                density, Insets.NONE, null).getCutoutPath();
         final Path second = fromSpec(cutoutSpecString, displayWidth, displayHeight,
-                density, Insets.NONE).getCutoutPath();
+                density, Insets.NONE, null).getCutoutPath();
         assertThat(first, equalTo(second));
     }
 
@@ -203,9 +205,9 @@ public class DisplayCutoutTest {
         final int displayHeight = 400;
         final float density = 1f;
         final Path first = fromSpec("L1,0 L1,1 L0,1 z", displayWidth, displayHeight,
-                density, Insets.NONE).getCutoutPath();
+                density, Insets.NONE, null).getCutoutPath();
         final Path second = fromSpec("L2,0 L2,2 L0,2 z", displayWidth, displayHeight,
-                density, Insets.NONE).getCutoutPath();
+                density, Insets.NONE, null).getCutoutPath();
         assertThat(first, not(equalTo(second)));
     }
 
@@ -216,7 +218,7 @@ public class DisplayCutoutTest {
         final int displayHeight = 400;
         final float density = 1f;
         final DisplayCutout cutout = fromSpec(cutoutSpecString, displayWidth, displayHeight,
-                density, Insets.NONE);
+                density, Insets.NONE, null);
         assertThat(displayWidth, equalTo(cutout.getCutoutPathParserInfo().getDisplayWidth()));
         assertThat(displayHeight, equalTo(cutout.getCutoutPathParserInfo().getDisplayHeight()));
         assertThat(density, equalTo(cutout.getCutoutPathParserInfo().getDensity()));
@@ -360,63 +362,64 @@ public class DisplayCutoutTest {
     @Test
     public void fromSpec_caches() {
         Insets waterfallInsets = Insets.of(0, 20, 0, 20);
-        DisplayCutout cached = fromSpec("L1,0 L1,1 L0,1 z", 200, 400, 1f, waterfallInsets);
+        DisplayCutout cached = fromSpec("L1,0 L1,1 L0,1 z", 200, 400, 1f, waterfallInsets, null);
         assertThat(
-                fromSpec("L1,0 L1,1 L0,1 z", 200, 400, 1f, waterfallInsets),
+                fromSpec("L1,0 L1,1 L0,1 z", 200, 400, 1f, waterfallInsets, null),
                 sameInstance(cached));
     }
 
     @Test
     public void fromSpec_wontCacheIfSpecChanges() {
-        DisplayCutout cached = fromSpec("L1,0 L1000,1000 L0,1 z", 200, 400, 1f, Insets.NONE);
+        DisplayCutout cached = fromSpec("L1,0 L1000,1000 L0,1 z", 200, 400, 1f, Insets.NONE, null);
         assertThat(
-                fromSpec("L1,0 L1,1 L0,1 z", 200, 400, 1f, Insets.NONE),
+                fromSpec("L1,0 L1,1 L0,1 z", 200, 400, 1f, Insets.NONE, null),
                 not(sameInstance(cached)));
     }
 
     @Test
     public void fromSpec_wontCacheIfScreenWidthChanges() {
-        DisplayCutout cached = fromSpec("L1,0 L1,1 L0,1 z", 2000, 400, 1f, Insets.NONE);
+        DisplayCutout cached = fromSpec("L1,0 L1,1 L0,1 z", 2000, 400, 1f, Insets.NONE, null);
         assertThat(
-                fromSpec("L1,0 L1,1 L0,1 z", 200, 400, 1f, Insets.NONE),
+                fromSpec("L1,0 L1,1 L0,1 z", 200, 400, 1f, Insets.NONE, null),
                 not(sameInstance(cached)));
     }
 
     @Test
     public void fromSpec_wontCacheIfScreenHeightChanges() {
-        DisplayCutout cached = fromSpec("L1,0 L1,1 L0,1 z", 200, 4000, 1f, Insets.NONE);
+        DisplayCutout cached = fromSpec("L1,0 L1,1 L0,1 z", 200, 4000, 1f, Insets.NONE, null);
         assertThat(
-                fromSpec("L1,0 L1,1 L0,1 z", 200, 400, 1f, Insets.NONE),
+                fromSpec("L1,0 L1,1 L0,1 z", 200, 400, 1f, Insets.NONE, null),
                 not(sameInstance(cached)));
     }
 
     @Test
     public void fromSpec_wontCacheIfDensityChanges() {
-        DisplayCutout cached = fromSpec("L1,0 L1,1 L0,1 z", 200, 400, 2f, Insets.NONE);
+        DisplayCutout cached = fromSpec("L1,0 L1,1 L0,1 z", 200, 400, 2f, Insets.NONE, null);
         assertThat(
-                fromSpec("L1,0 L1,1 L0,1 z", 200, 400, 1f, Insets.NONE),
+                fromSpec("L1,0 L1,1 L0,1 z", 200, 400, 1f, Insets.NONE, null),
                 not(sameInstance(cached)));
     }
 
     @Test
     public void fromSpec_wontCacheIfWaterfallInsetsChange() {
         Insets waterfallInsets = Insets.of(0, 20, 0, 20);
-        DisplayCutout cached = fromSpec("L1,0 L1,1 L0,1 z", 200, 400, 2f, Insets.NONE);
+        DisplayCutout cached = fromSpec("L1,0 L1,1 L0,1 z", 200, 400, 2f, Insets.NONE, null);
         assertThat(
-                fromSpec("L1,0 L1,1 L0,1 z", 200, 400, 2f, waterfallInsets),
+                fromSpec("L1,0 L1,1 L0,1 z", 200, 400, 2f, waterfallInsets, null),
                 not(sameInstance(cached)));
     }
 
     @Test
     public void fromSpec_setsSafeInsets_top() {
-        DisplayCutout cutout = fromSpec("M -50,0 v 20 h 100 v -20 z", 200, 400, 2f, Insets.NONE);
+        DisplayCutout cutout = fromSpec("M -50,0 v 20 h 100 v -20 z", 200, 400, 2f,
+                Insets.NONE, null);
         assertThat(cutout.getSafeInsets(), equalTo(new Rect(0, 20, 0, 0)));
     }
 
     @Test
     public void fromSpec_setsSafeInsets_top_and_bottom() {
         DisplayCutout cutout = fromSpec("M -50,0 v 20 h 100 v -20 z"
-                + "@bottom M -50,0 v -10,0 h 100 v 20 z", 200, 400, 2f, Insets.NONE);
+                + "@bottom M -50,0 v -10,0 h 100 v 20 z", 200, 400, 2f, Insets.NONE, null);
         assertThat(cutout.getSafeInsets(), equalTo(new Rect(0, 20, 0, 10)));
         assertThat(cutout.getBoundingRectsAll(), equalTo(new Rect[]{
                 ZERO_RECT, new Rect(50, 0, 150, 20),
@@ -426,33 +429,35 @@ public class DisplayCutoutTest {
 
     @Test
     public void fromSpec_setsSafeInsets_waterfallTopBottom() {
-        DisplayCutout cutout = fromSpec("", 200, 400, 2f, Insets.of(0, 30, 0, 30));
+        DisplayCutout cutout = fromSpec("", 200, 400, 2f, Insets.of(0, 30, 0, 30), null);
         assertThat(cutout.getSafeInsets(), equalTo(new Rect(0, 30, 0, 30)));
     }
 
     @Test
     public void fromSpec_setsSafeInsets_waterfallLeftRight() {
-        DisplayCutout cutout = fromSpec("", 200, 400, 2f, Insets.of(30, 0, 30, 0));
+        DisplayCutout cutout = fromSpec("", 200, 400, 2f, Insets.of(30, 0, 30, 0), null);
         assertThat(cutout.getSafeInsets(), equalTo(new Rect(30, 0, 30, 0)));
     }
 
     @Test
     public void fromSpec_setsSafeInsets_waterfall_allEdges() {
-        DisplayCutout cutout = fromSpec("", 200, 400, 2f, Insets.of(30, 30, 30, 30));
+        DisplayCutout cutout = fromSpec("", 200, 400, 2f, Insets.of(30, 30, 30, 30), null);
         assertThat(cutout.getSafeInsets(), equalTo(new Rect(30, 30, 30, 30)));
     }
 
     @Test
     public void fromSpec_setsSafeInsets_cutoutTopBottom_waterfallTopBottom() {
         DisplayCutout cutout = fromSpec("M -50,0 v 20 h 100 v -20 z"
-                + "@bottom M -50,0 v -20,0 h 100 v 20 z", 200, 400, 2f, Insets.of(0, 30, 0, 30));
+                + "@bottom M -50,0 v -20,0 h 100 v 20 z", 200, 400, 2f,
+                Insets.of(0, 30, 0, 30), null);
         assertThat(cutout.getSafeInsets(), equalTo(new Rect(0, 30, 0, 30)));
     }
 
     @Test
     public void fromSpec_setsSafeInsets_cutoutTopBottom_waterfallLeftRight() {
         DisplayCutout cutout = fromSpec("M -50,0 v 20 h 100 v -20 z"
-                + "@bottom M -50,0 v -20,0 h 100 v 20 z", 200, 400, 2f, Insets.of(30, 0, 30, 0));
+                + "@bottom M -50,0 v -20,0 h 100 v 20 z", 200, 400, 2f,
+                    Insets.of(30, 0, 30, 0), null);
         assertThat(cutout.getSafeInsets(), equalTo(new Rect(30, 20, 30, 20)));
     }
 
@@ -568,7 +573,84 @@ public class DisplayCutoutTest {
         DisplayCutout rotated = cutout.getRotated(displayH, displayW, ROTATION_90, ROTATION_180);
         assertEquals(expected, rotated);
     }
+    @Test
+    public void testGetRotatedCutoutWithOverride_top_rot0() {
+        int displayW = 500, displayH = 1000;
+        final int[] sideOverrides = new int[] {BOUNDS_POSITION_TOP, BOUNDS_POSITION_BOTTOM,
+                BOUNDS_POSITION_BOTTOM, BOUNDS_POSITION_TOP};
+        DisplayCutout expected = new DisplayCutout(Insets.of(20, 100, 20, 0),
+                ZERO_RECT, new Rect(50, 0, 75, 100), ZERO_RECT, ZERO_RECT,
+                Insets.of(20, 0, 20, 0), null, sideOverrides);
+        DisplayCutout cutout = new DisplayCutout(Insets.of(20, 100, 20, 0),
+                ZERO_RECT, new Rect(50, 0, 75, 100), ZERO_RECT, ZERO_RECT,
+                Insets.of(20, 0, 20, 0), null, sideOverrides);
+        DisplayCutout rotated = cutout.getRotated(displayW, displayH, ROTATION_0, ROTATION_0);
+        assertEquals(expected, rotated);
+    }
 
+    @Test
+    public void testGetRotatedCutoutWithOverride_top_rot90() {
+        int displayW = 500, displayH = 1000;
+        final int[] sideOverrides = new int[] {BOUNDS_POSITION_TOP, BOUNDS_POSITION_BOTTOM,
+                BOUNDS_POSITION_BOTTOM, BOUNDS_POSITION_TOP};
+        DisplayCutout expected = new DisplayCutout(Insets.of(0, 20, 0, 75),
+                ZERO_RECT, ZERO_RECT, ZERO_RECT, new Rect(0, displayW - 75, 100, displayW - 50),
+                Insets.of(0, 20, 0, 20), createParserInfo(ROTATION_90), sideOverrides);
+        DisplayCutout cutout = new DisplayCutout(Insets.of(20, 100, 20, 0),
+                ZERO_RECT, new Rect(50, 0, 75, 100), ZERO_RECT, ZERO_RECT,
+                Insets.of(20, 0, 20, 0), null, sideOverrides);
+        DisplayCutout rotated = cutout.getRotated(displayW, displayH, ROTATION_0, ROTATION_90);
+        assertEquals(expected, rotated);
+    }
+
+    @Test
+    public void testGetRotatedCutoutWithOverride_top_rot180() {
+        int displayW = 500, displayH = 1000;
+        final int[] sideOverrides = new int[] {BOUNDS_POSITION_TOP, BOUNDS_POSITION_BOTTOM,
+                BOUNDS_POSITION_BOTTOM, BOUNDS_POSITION_TOP};
+        DisplayCutout expected = new DisplayCutout(Insets.of(20, 0, 20, 100),
+                ZERO_RECT, ZERO_RECT, ZERO_RECT,
+                new Rect(displayW - 75, displayH - 100, displayW - 50, displayH - 0),
+                Insets.of(20, 0, 20, 0), createParserInfo(ROTATION_180), sideOverrides);
+        DisplayCutout cutout = new DisplayCutout(Insets.of(20, 100, 20, 0),
+                ZERO_RECT, new Rect(50, 0, 75, 100), ZERO_RECT, ZERO_RECT,
+                Insets.of(20, 0, 20, 0), null, sideOverrides);
+        DisplayCutout rotated = cutout.getRotated(displayW, displayH, ROTATION_0, ROTATION_180);
+        assertEquals(expected, rotated);
+    }
+
+    @Test
+    public void testGetRotatedCutoutWithOverride_top_rot270() {
+        int displayW = 500, displayH = 1000;
+        final int[] sideOverrides = new int[] {BOUNDS_POSITION_TOP, BOUNDS_POSITION_BOTTOM,
+                BOUNDS_POSITION_BOTTOM, BOUNDS_POSITION_TOP};
+        DisplayCutout expected = new DisplayCutout(Insets.of(0, 75, 0, 20),
+                ZERO_RECT, new Rect(displayH - 100, 50, displayH - 0, 75), ZERO_RECT, ZERO_RECT,
+                Insets.of(0, 20, 0, 20), createParserInfo(ROTATION_270), sideOverrides);
+        DisplayCutout cutout = new DisplayCutout(Insets.of(20, 100, 20, 0),
+                ZERO_RECT, new Rect(50, 0, 75, 100), ZERO_RECT, ZERO_RECT,
+                Insets.of(20, 0, 20, 0), null, sideOverrides);
+        DisplayCutout rotated = cutout.getRotated(displayW, displayH, ROTATION_0, ROTATION_270);
+        assertEquals(expected, rotated);
+    }
+
+    @Test
+    public void testGetRotatedCutoutWithOverride_top_rot90to180() {
+        int displayW = 500, displayH = 1000;
+        final int[] sideOverrides = new int[] {BOUNDS_POSITION_TOP, BOUNDS_POSITION_BOTTOM,
+                BOUNDS_POSITION_BOTTOM, BOUNDS_POSITION_TOP};
+        DisplayCutout expected = new DisplayCutout(Insets.of(20, 0, 20, 100),
+                ZERO_RECT, ZERO_RECT, ZERO_RECT,
+                new Rect(displayW - 75, displayH - 100, displayW - 50, displayH - 0),
+                Insets.of(20, 0, 20, 0), createParserInfo(ROTATION_180),
+                sideOverrides);
+        DisplayCutout cutout = new DisplayCutout(Insets.of(0, 20, 0, 75),
+                ZERO_RECT, ZERO_RECT, ZERO_RECT, new Rect(0, displayW - 75, 100, displayW - 50),
+                Insets.of(0, 20, 0, 20), null, sideOverrides);
+        // starting from 90, so the start displayW/H are swapped:
+        DisplayCutout rotated = cutout.getRotated(displayH, displayW, ROTATION_90, ROTATION_180);
+        assertEquals(expected, rotated);
+    }
     private static DisplayCutout createCutoutTop() {
         return createCutoutWithInsets(0, 100, 0, 0);
     }

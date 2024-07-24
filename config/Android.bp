@@ -29,7 +29,20 @@ license {
     ],
 }
 
+prebuilt_etc {
+    name: "preloaded-classes",
+    src: "preloaded-classes",
+    filename: "preloaded-classes",
+    no_full_install: true,
+}
+
 filegroup {
     name: "preloaded-classes-denylist",
     srcs: ["preloaded-classes-denylist"],
+}
+
+prebuilt_etc {
+    name: "dirty-image-objects",
+    src: "dirty-image-objects",
+    filename: "dirty-image-objects",
 }

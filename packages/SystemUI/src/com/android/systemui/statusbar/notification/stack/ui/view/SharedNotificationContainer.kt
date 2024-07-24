@@ -19,6 +19,7 @@ package com.android.systemui.statusbar.notification.stack.ui.view
 import android.content.Context
 import android.util.AttributeSet
 import android.view.View
+import androidx.constraintlayout.core.widgets.Optimizer
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.constraintlayout.widget.ConstraintSet.BOTTOM
@@ -27,7 +28,7 @@ import androidx.constraintlayout.widget.ConstraintSet.PARENT_ID
 import androidx.constraintlayout.widget.ConstraintSet.START
 import androidx.constraintlayout.widget.ConstraintSet.TOP
 import androidx.constraintlayout.widget.ConstraintSet.VERTICAL
-import com.android.systemui.R
+import com.android.systemui.res.R
 
 /**
  * Container for the stack scroller, so that the bounds can be externally specified, such as from
@@ -45,6 +46,7 @@ class SharedNotificationContainer(
     private val baseConstraintSet = ConstraintSet()
 
     init {
+        optimizationLevel = optimizationLevel or Optimizer.OPTIMIZATION_GRAPH
         baseConstraintSet.apply {
             create(R.id.nssl_guideline, VERTICAL)
             setGuidelinePercent(R.id.nssl_guideline, 0.5f)
@@ -74,14 +76,10 @@ class SharedNotificationContainer(
             }
         val nsslId = R.id.notification_stack_scroller
         constraintSet.apply {
-            connect(nsslId, START, startConstraintId, START)
-            connect(nsslId, END, PARENT_ID, END)
-            connect(nsslId, BOTTOM, PARENT_ID, BOTTOM)
-            connect(nsslId, TOP, PARENT_ID, TOP)
-            setMargin(nsslId, START, marginStart)
-            setMargin(nsslId, END, marginEnd)
-            setMargin(nsslId, TOP, marginTop)
-            setMargin(nsslId, BOTTOM, marginBottom)
+            connect(nsslId, START, startConstraintId, START, marginStart)
+            connect(nsslId, END, PARENT_ID, END, marginEnd)
+            connect(nsslId, BOTTOM, PARENT_ID, BOTTOM, marginBottom)
+            connect(nsslId, TOP, PARENT_ID, TOP, marginTop)
         }
         constraintSet.applyTo(this)
     }

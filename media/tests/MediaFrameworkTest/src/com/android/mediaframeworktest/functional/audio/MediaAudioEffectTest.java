@@ -16,28 +16,26 @@
 
 package com.android.mediaframeworktest.functional.audio;
 
-import com.android.mediaframeworktest.MediaFrameworkTest;
-import com.android.mediaframeworktest.MediaNames;
-import android.content.res.AssetFileDescriptor;
-import android.media.audiofx.AudioEffect;
 import android.media.AudioFormat;
 import android.media.AudioManager;
-import android.media.AudioTrack;
 import android.media.AudioRecord;
-import android.media.audiofx.EnvironmentalReverb;
-import android.media.audiofx.Equalizer;
+import android.media.AudioTrack;
 import android.media.MediaPlayer;
 import android.media.MediaRecorder;
-
+import android.media.audiofx.AudioEffect;
+import android.media.audiofx.EnvironmentalReverb;
+import android.media.audiofx.Equalizer;
 import android.os.Looper;
-import android.test.suitebuilder.annotation.LargeTest;
-import android.test.suitebuilder.annotation.MediumTest;
-import android.test.suitebuilder.annotation.Suppress;
 import android.test.ActivityInstrumentationTestCase2;
 import android.util.Log;
 
-import java.nio.ByteOrder;
+import androidx.test.filters.LargeTest;
+
+import com.android.mediaframeworktest.MediaFrameworkTest;
+import com.android.mediaframeworktest.MediaNames;
+
 import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.util.UUID;
 
 /**

@@ -203,7 +203,7 @@ public class AsyncProcessStartTest {
             return null;
         }).when(thread).bindApplication(
                 any(), any(),
-                any(), any(),
+                any(), any(), anyBoolean(),
                 any(), any(),
                 any(), any(),
                 any(),
@@ -221,6 +221,7 @@ public class AsyncProcessStartTest {
         r.setStartUid(myUid());
         r.setHostingRecord(new HostingRecord(HostingRecord.HOSTING_TYPE_BROADCAST));
         r.makeActive(thread, mAms.mProcessStats);
+        ProcessRecord.updateProcessRecordNodes(r);
         doNothing().when(r).killLocked(any(), any(), anyInt(), anyInt(), anyBoolean(),
                 anyBoolean());
 
@@ -264,7 +265,7 @@ public class AsyncProcessStartTest {
                 /* expectedStartSeq */ 0, /* procAttached */ false);
 
         app.getThread().bindApplication(PACKAGE, appInfo,
-                null, null,
+                null, null, false,
                 null,
                 null,
                 null, null,
@@ -280,7 +281,9 @@ public class AsyncProcessStartTest {
                 0, 0);
 
         // Sleep until timeout should have triggered
-        SystemClock.sleep(ActivityManagerService.PROC_START_TIMEOUT + 1000);
+        if (wedge) {
+            SystemClock.sleep(ActivityManagerService.PROC_START_TIMEOUT + 1000);
+        }
 
         return app;
     }

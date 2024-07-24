@@ -28,7 +28,7 @@ package android.test.mock {
     method @Deprecated public void removeOnPermissionsChangeListener(android.content.pm.PackageManager.OnPermissionsChangedListener);
     method @Deprecated public void revokeRuntimePermission(String, String, android.os.UserHandle);
     method @Deprecated public boolean setDefaultBrowserPackageNameAsUser(String, int);
-    method public String[] setPackagesSuspended(String[], boolean, android.os.PersistableBundle, android.os.PersistableBundle, String);
+    method @Deprecated public String[] setPackagesSuspended(String[], boolean, android.os.PersistableBundle, android.os.PersistableBundle, String);
     method @Deprecated public void setUpdateAvailable(String, boolean);
     method @Deprecated public boolean updateIntentVerificationStatusAsUser(String, int, int);
     method @Deprecated public void updatePermissionFlags(String, String, int, int, android.os.UserHandle);

@@ -17,15 +17,42 @@
 
 package com.android.systemui.biometrics.data.repository
 
-import kotlinx.coroutines.flow.Flow
+import android.graphics.Point
+import com.android.systemui.biometrics.shared.model.LockoutMode
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 
 class FakeFacePropertyRepository : FacePropertyRepository {
     private val faceSensorInfo = MutableStateFlow<FaceSensorInfo?>(null)
-    override val sensorInfo: Flow<FaceSensorInfo?>
+    override val sensorInfo: StateFlow<FaceSensorInfo?>
         get() = faceSensorInfo
+
+    private val lockoutModesForUser = mutableMapOf<Int, LockoutMode>()
+
+    private val faceSensorLocation = MutableStateFlow<Point?>(null)
+    override val sensorLocation: StateFlow<Point?>
+        get() = faceSensorLocation
+
+    private val currentCameraInfo = MutableStateFlow<CameraInfo?>(null)
+    override val cameraInfo: StateFlow<CameraInfo?>
+        get() = currentCameraInfo
+
+    fun setLockoutMode(userId: Int, mode: LockoutMode) {
+        lockoutModesForUser[userId] = mode
+    }
+    override suspend fun getLockoutMode(userId: Int): LockoutMode {
+        return lockoutModesForUser[userId]!!
+    }
 
     fun setSensorInfo(value: FaceSensorInfo?) {
         faceSensorInfo.value = value
+    }
+
+    fun setSensorLocation(value: Point?) {
+        faceSensorLocation.value = value
+    }
+
+    fun setCameraIno(value: CameraInfo?) {
+        currentCameraInfo.value = value
     }
 }

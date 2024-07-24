@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-#undef LOG_TAG
-#define LOG_TAG "Bitmap"
 #include <log/log.h>
 
 #include "android/graphics/bitmap.h"

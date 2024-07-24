@@ -42,7 +42,7 @@ class KeyguardTransitionRunner(
     private var frameCount = 1L
     private var frames = MutableStateFlow(Pair<Long, FrameCallback?>(0L, null))
     private var job: Job? = null
-    private var isTerminated = false
+    @Volatile private var isTerminated = false
 
     /**
      * For transitions being directed by an animator. Will control the number of frames being

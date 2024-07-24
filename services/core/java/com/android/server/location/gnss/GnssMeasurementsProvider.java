@@ -18,12 +18,14 @@ package com.android.server.location.gnss;
 
 import static android.app.AppOpsManager.OP_MONITOR_HIGH_POWER_LOCATION;
 
+import static com.android.server.location.eventlog.LocationEventLog.EVENT_LOG;
 import static com.android.server.location.gnss.GnssManagerService.D;
 import static com.android.server.location.gnss.GnssManagerService.TAG;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.AppOpsManager;
+import android.location.GnssMeasurement;
 import android.location.GnssMeasurementRequest;
 import android.location.GnssMeasurementsEvent;
 import android.location.IGnssMeasurementsListener;
@@ -32,6 +34,7 @@ import android.os.IBinder;
 import android.stats.location.LocationStatsEnums;
 import android.util.Log;
 
+import com.android.internal.annotations.GuardedBy;
 import com.android.server.location.gnss.GnssConfiguration.HalInterfaceVersion;
 import com.android.server.location.gnss.hal.GnssNative;
 import com.android.server.location.injector.AppOpsHelper;
@@ -39,6 +42,8 @@ import com.android.server.location.injector.Injector;
 import com.android.server.location.injector.LocationUsageLogger;
 import com.android.server.location.injector.SettingsHelper;
 
+import java.io.FileDescriptor;
+import java.io.PrintWriter;
 import java.util.Collection;
 
 /**
@@ -62,9 +67,15 @@ public final class GnssMeasurementsProvider extends
         @Override
         protected void onRegister() {
             super.onRegister();
-
+            EVENT_LOG.logGnssMeasurementClientRegistered(getIdentity(), getRequest());
             executeOperation(listener -> listener.onStatusChanged(
                     GnssMeasurementsEvent.Callback.STATUS_READY));
+        }
+
+        @Override
+        protected void onUnregister() {
+            EVENT_LOG.logGnssMeasurementClientUnregistered(getIdentity());
+            super.onUnregister();
         }
 
         @Nullable
@@ -83,6 +94,9 @@ public final class GnssMeasurementsProvider extends
     private final AppOpsHelper mAppOpsHelper;
     private final LocationUsageLogger mLogger;
     private final GnssNative mGnssNative;
+
+    @GuardedBy("mMultiplexerLock")
+    private GnssMeasurementsEvent mLastGnssMeasurementsEvent;
 
     public GnssMeasurementsProvider(Injector injector, GnssNative gnssNative) {
         super(injector);
@@ -250,10 +264,53 @@ public final class GnssMeasurementsProvider extends
         deliverToListeners(registration -> {
             if (mAppOpsHelper.noteOpNoThrow(AppOpsManager.OP_FINE_LOCATION,
                     registration.getIdentity())) {
+                EVENT_LOG.logGnssMeasurementsDelivered(event.getMeasurements().size(),
+                        registration.getIdentity());
                 return listener -> listener.onGnssMeasurementsReceived(event);
             } else {
                 return null;
             }
         });
+        synchronized (mMultiplexerLock) {
+            mLastGnssMeasurementsEvent = event;
+        }
+    }
+
+    @Override
+    public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+        super.dump(fd, pw, args);
+        pw.print("last measurements=");
+        pw.println(getLastMeasurementEventSummary());
+    }
+
+    /**
+     * Returns a string of GnssMeasurementsEvent summary including received time, satellite count
+     * and average baseband C/No.
+     */
+    private String getLastMeasurementEventSummary() {
+        synchronized (mMultiplexerLock) {
+            if (mLastGnssMeasurementsEvent == null) {
+                return null;
+            }
+            StringBuilder builder = new StringBuilder("[");
+            builder.append("elapsedRealtimeNs=").append(
+                    mLastGnssMeasurementsEvent.getClock().getElapsedRealtimeNanos());
+            builder.append(" measurementCount=").append(
+                    mLastGnssMeasurementsEvent.getMeasurements().size());
+
+            float sumBasebandCn0 = 0;
+            int countBasebandCn0 = 0;
+            for (GnssMeasurement measurement : mLastGnssMeasurementsEvent.getMeasurements()) {
+                if (measurement.hasBasebandCn0DbHz()) {
+                    sumBasebandCn0 += measurement.getBasebandCn0DbHz();
+                    countBasebandCn0++;
+                }
+            }
+            if (countBasebandCn0 > 0) {
+                builder.append(" avgBasebandCn0=").append(sumBasebandCn0 / countBasebandCn0);
+            }
+            builder.append("]");
+            return builder.toString();
+        }
     }
 }

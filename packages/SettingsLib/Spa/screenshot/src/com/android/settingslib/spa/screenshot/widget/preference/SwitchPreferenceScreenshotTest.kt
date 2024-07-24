@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 The Android Open Source Project
+ * Copyright (C) 2023 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,36 +14,37 @@
  * limitations under the License.
  */
 
-package com.android.settingslib.spa.screenshot
+package com.android.settingslib.spa.screenshot.widget.preference
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.AirplanemodeActive
 import androidx.compose.runtime.Composable
-import com.android.settingslib.spa.framework.compose.stateOf
+import com.android.settingslib.spa.screenshot.util.settingsScreenshotTestRule
 import com.android.settingslib.spa.widget.preference.SwitchPreference
 import com.android.settingslib.spa.widget.preference.SwitchPreferenceModel
 import com.android.settingslib.spa.widget.ui.SettingsIcon
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.junit.runners.Parameterized
+import platform.test.runner.parameterized.ParameterizedAndroidJunit4
+import platform.test.runner.parameterized.Parameters
 import platform.test.screenshot.DeviceEmulationSpec
+import platform.test.screenshot.PhoneAndTabletMinimal
 
 /** A screenshot test for ExampleFeature. */
-@RunWith(Parameterized::class)
+@RunWith(ParameterizedAndroidJunit4::class)
 class SwitchPreferenceScreenshotTest(emulationSpec: DeviceEmulationSpec) {
     companion object {
-        @Parameterized.Parameters(name = "{0}")
+        @Parameters(name = "{0}")
         @JvmStatic
         fun getTestSpecs() = DeviceEmulationSpec.PhoneAndTabletMinimal
     }
 
     @get:Rule
     val screenshotRule =
-        SettingsScreenshotTestRule(
+        settingsScreenshotTestRule(
             emulationSpec,
-            "frameworks/base/packages/SettingsLib/Spa/screenshot/assets"
         )
 
     @Test
@@ -63,7 +64,7 @@ class SwitchPreferenceScreenshotTest(emulationSpec: DeviceEmulationSpec) {
 private fun SampleSwitchPreference() {
     SwitchPreference(object : SwitchPreferenceModel {
         override val title = "SwitchPreference"
-        override val checked = stateOf(false)
+        override val checked = { false }
         override val onCheckedChange = null
     })
 }
@@ -72,8 +73,8 @@ private fun SampleSwitchPreference() {
 private fun SampleSwitchPreferenceWithSummary() {
     SwitchPreference(object : SwitchPreferenceModel {
         override val title = "SwitchPreference"
-        override val summary = stateOf("With summary")
-        override val checked = stateOf(true)
+        override val summary = { "With summary" }
+        override val checked = { true }
         override val onCheckedChange = null
     })
 }
@@ -82,9 +83,9 @@ private fun SampleSwitchPreferenceWithSummary() {
 private fun SampleNotChangeableSwitchPreference() {
     SwitchPreference(object : SwitchPreferenceModel {
         override val title = "SwitchPreference"
-        override val summary = stateOf("Not changeable")
-        override val changeable = stateOf(false)
-        override val checked = stateOf(true)
+        override val summary = { "Not changeable" }
+        override val changeable = { false }
+        override val checked = { true }
         override val onCheckedChange = null
     })
 }
@@ -93,7 +94,7 @@ private fun SampleNotChangeableSwitchPreference() {
 private fun SampleSwitchPreferenceWithIcon() {
     SwitchPreference(object : SwitchPreferenceModel {
         override val title = "SwitchPreference"
-        override val checked = stateOf(true)
+        override val checked = { true }
         override val onCheckedChange = null
         override val icon = @Composable {
             SettingsIcon(imageVector = Icons.Outlined.AirplanemodeActive)

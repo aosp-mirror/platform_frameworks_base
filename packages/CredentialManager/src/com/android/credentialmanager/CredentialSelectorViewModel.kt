@@ -28,13 +28,12 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
-import com.android.credentialmanager.common.BaseEntry
+import com.android.credentialmanager.model.EntryInfo
 import com.android.credentialmanager.common.Constants
 import com.android.credentialmanager.common.DialogState
 import com.android.credentialmanager.common.ProviderActivityResult
 import com.android.credentialmanager.common.ProviderActivityState
 import com.android.credentialmanager.createflow.ActiveEntry
-import com.android.credentialmanager.createflow.isFlowAutoSelectable
 import com.android.credentialmanager.createflow.CreateCredentialUiState
 import com.android.credentialmanager.createflow.CreateScreenState
 import com.android.credentialmanager.getflow.GetCredentialUiState
@@ -47,7 +46,7 @@ import com.android.internal.logging.UiEventLogger.UiEventEnum
 data class UiState(
     val createCredentialUiState: CreateCredentialUiState?,
     val getCredentialUiState: GetCredentialUiState?,
-    val selectedEntry: BaseEntry? = null,
+    val selectedEntry: EntryInfo? = null,
     val providerActivityState: ProviderActivityState = ProviderActivityState.NOT_APPLICABLE,
     val dialogState: DialogState = DialogState.ACTIVE,
     // True if the UI has one and only one auto selectable entry. Its provider activity will be
@@ -63,7 +62,6 @@ data class CancelUiRequestState(
 
 class CredentialSelectorViewModel(
     private var credManRepo: CredentialManagerRepo,
-    private val userConfigRepo: UserConfigRepo,
 ) : ViewModel() {
     var uiState by mutableStateOf(credManRepo.initState())
         private set
@@ -72,7 +70,7 @@ class CredentialSelectorViewModel(
 
     init {
         uiMetrics.logNormal(LifecycleEvent.CREDMAN_ACTIVITY_INIT,
-            credManRepo.requestInfo?.appPackageName)
+            credManRepo.requestInfo?.packageName)
     }
 
     /**************************************************************************/
@@ -107,7 +105,7 @@ class CredentialSelectorViewModel(
         if (this.credManRepo.requestInfo?.token != credManRepo.requestInfo?.token) {
             this.uiMetrics.resetInstanceId()
             this.uiMetrics.logNormal(LifecycleEvent.CREDMAN_ACTIVITY_NEW_REQUEST,
-                credManRepo.requestInfo?.appPackageName)
+                credManRepo.requestInfo?.packageName)
         }
     }
 
@@ -115,12 +113,13 @@ class CredentialSelectorViewModel(
         launcher: ManagedActivityResultLauncher<IntentSenderRequest, ActivityResult>
     ) {
         val entry = uiState.selectedEntry
-        if (entry != null && entry.pendingIntent != null) {
+        val pendingIntent = entry?.pendingIntent
+        if (pendingIntent != null) {
             Log.d(Constants.LOG_TAG, "Launching provider activity")
             uiState = uiState.copy(providerActivityState = ProviderActivityState.PENDING)
             val entryIntent = entry.fillInIntent
             entryIntent?.putExtra(Constants.IS_AUTO_SELECTED_KEY, uiState.isAutoSelectFlow)
-            val intentSenderRequest = IntentSenderRequest.Builder(entry.pendingIntent)
+            val intentSenderRequest = IntentSenderRequest.Builder(pendingIntent)
                 .setFillInIntent(entryIntent).build()
             try {
                 launcher.launch(intentSenderRequest)
@@ -188,7 +187,7 @@ class CredentialSelectorViewModel(
     private fun onInternalError() {
         Log.w(Constants.LOG_TAG, "UI closed due to illegal internal state")
         this.uiMetrics.logNormal(LifecycleEvent.CREDMAN_ACTIVITY_INTERNAL_ERROR,
-            credManRepo.requestInfo?.appPackageName)
+            credManRepo.requestInfo?.packageName)
         credManRepo.onParsingFailureCancel()
         uiState = uiState.copy(dialogState = DialogState.COMPLETE)
     }
@@ -201,7 +200,7 @@ class CredentialSelectorViewModel(
     /**************************************************************************/
     /*****                      Get Flow Callbacks                        *****/
     /**************************************************************************/
-    fun getFlowOnEntrySelected(entry: BaseEntry) {
+    fun getFlowOnEntrySelected(entry: EntryInfo) {
         Log.d(Constants.LOG_TAG, "credential selected: {provider=${entry.providerId}" +
             ", key=${entry.entryKey}, subkey=${entry.entrySubkey}}")
         uiState = if (entry.pendingIntent != null) {
@@ -265,42 +264,6 @@ class CredentialSelectorViewModel(
     /**************************************************************************/
     /*****                     Create Flow Callbacks                      *****/
     /**************************************************************************/
-    fun createFlowOnConfirmIntro() {
-        userConfigRepo.setIsPasskeyFirstUse(false)
-        val prevUiState = uiState.createCredentialUiState
-        if (prevUiState == null) {
-            Log.d(Constants.LOG_TAG, "Encountered unexpected null create ui state")
-            onInternalError()
-            return
-        }
-        val newScreenState = CreateFlowUtils.toCreateScreenState(
-            createOptionSize = prevUiState.sortedCreateOptionsPairs.size,
-            isOnPasskeyIntroStateAlready = true,
-            requestDisplayInfo = prevUiState.requestDisplayInfo,
-            remoteEntry = prevUiState.remoteEntry,
-            isPasskeyFirstUse = true,
-        )
-        if (newScreenState == null) {
-            Log.d(Constants.LOG_TAG, "Unexpected: couldn't resolve new screen state")
-            onInternalError()
-            return
-        }
-        val newCreateCredentialUiState = prevUiState.copy(
-            currentScreenState = newScreenState,
-        )
-        val isFlowAutoSelectable = isFlowAutoSelectable(newCreateCredentialUiState)
-        uiState = uiState.copy(
-            createCredentialUiState = newCreateCredentialUiState,
-            isAutoSelectFlow = isFlowAutoSelectable,
-            providerActivityState =
-            if (isFlowAutoSelectable) ProviderActivityState.READY_TO_LAUNCH
-            else ProviderActivityState.NOT_APPLICABLE,
-            selectedEntry =
-            if (isFlowAutoSelectable) newCreateCredentialUiState.activeEntry?.activeEntryInfo
-            else null,
-        )
-    }
-
     fun createFlowOnMoreOptionsSelectedOnCreationSelection() {
         uiState = uiState.copy(
             createCredentialUiState = uiState.createCredentialUiState?.copy(
@@ -313,14 +276,6 @@ class CredentialSelectorViewModel(
         uiState = uiState.copy(
             createCredentialUiState = uiState.createCredentialUiState?.copy(
                 currentScreenState = CreateScreenState.CREATION_OPTION_SELECTION,
-            )
-        )
-    }
-
-    fun createFlowOnBackPasskeyIntroButtonSelected() {
-        uiState = uiState.copy(
-            createCredentialUiState = uiState.createCredentialUiState?.copy(
-                currentScreenState = CreateScreenState.PASSKEY_INTRO,
             )
         )
     }
@@ -347,14 +302,6 @@ class CredentialSelectorViewModel(
         uiState = uiState.copy(dialogState = DialogState.CANCELED_FOR_SETTINGS)
     }
 
-    fun createFlowOnLearnMore() {
-        uiState = uiState.copy(
-            createCredentialUiState = uiState.createCredentialUiState?.copy(
-                currentScreenState = CreateScreenState.MORE_ABOUT_PASSKEYS_INTRO,
-            )
-        )
-    }
-
     fun createFlowOnUseOnceSelected() {
         uiState = uiState.copy(
             createCredentialUiState = uiState.createCredentialUiState?.copy(
@@ -363,7 +310,7 @@ class CredentialSelectorViewModel(
         )
     }
 
-    fun createFlowOnEntrySelected(selectedEntry: BaseEntry) {
+    fun createFlowOnEntrySelected(selectedEntry: EntryInfo) {
         val providerId = selectedEntry.providerId
         val entryKey = selectedEntry.entryKey
         val entrySubkey = selectedEntry.entrySubkey
@@ -398,6 +345,6 @@ class CredentialSelectorViewModel(
 
     @Composable
     fun logUiEvent(uiEventEnum: UiEventEnum) {
-        this.uiMetrics.log(uiEventEnum, credManRepo.requestInfo?.appPackageName)
+        this.uiMetrics.log(uiEventEnum, credManRepo.requestInfo?.packageName)
     }
 }

@@ -18,10 +18,13 @@ package android.hardware.input;
 
 import android.annotation.NonNull;
 import android.annotation.RequiresPermission;
+import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
+import android.annotation.TestApi;
 import android.companion.virtual.IVirtualDevice;
 import android.os.IBinder;
 import android.os.RemoteException;
+import android.util.Log;
 import android.view.KeyEvent;
 
 /**
@@ -39,8 +42,9 @@ public class VirtualKeyboard extends VirtualInputDevice {
     private final int mUnsupportedKeyCode = KeyEvent.KEYCODE_DPAD_CENTER;
 
     /** @hide */
-    public VirtualKeyboard(IVirtualDevice virtualDevice, IBinder token) {
-        super(virtualDevice, token);
+    public VirtualKeyboard(VirtualKeyboardConfig config,
+            IVirtualDevice virtualDevice, IBinder token) {
+        super(config, virtualDevice, token);
     }
 
     /**
@@ -56,9 +60,23 @@ public class VirtualKeyboard extends VirtualInputDevice {
                     "Unsupported key code " + event.getKeyCode()
                         + " sent to a VirtualKeyboard input device.");
             }
-            mVirtualDevice.sendKeyEvent(mToken, event);
+            if (!mVirtualDevice.sendKeyEvent(mToken, event)) {
+                Log.w(TAG, "Failed to send key event to virtual keyboard "
+                        + mConfig.getInputDeviceName());
+            }
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
+    }
+
+    /**
+     * @return The id of the {@link android.view.InputDevice} corresponding to this keyboard.
+     * @hide
+     */
+    @SuppressLint("UnflaggedApi") // @TestApi without associated feature.
+    @TestApi
+    @Override
+    public int getInputDeviceId() {
+        return super.getInputDeviceId();
     }
 }

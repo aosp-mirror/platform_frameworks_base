@@ -48,15 +48,15 @@ public class BitmapsAlphaActivity extends Activity {
         BitmapsView(Context c) {
             super(c);
 
-            Log.d("OpenGLRenderer", "Loading sunset1, default options");
+            Log.d("HWUI", "Loading sunset1, default options");
             mBitmap1 = BitmapFactory.decodeResource(c.getResources(), R.drawable.sunset1);
-            Log.d("OpenGLRenderer", "Loading sunset2, default options");
+            Log.d("HWUI", "Loading sunset2, default options");
             mBitmap2 = BitmapFactory.decodeResource(c.getResources(), R.drawable.sunset2);
-            Log.d("OpenGLRenderer", "Loading sunset3, forcing ARGB-8888");
+            Log.d("HWUI", "Loading sunset3, forcing ARGB-8888");
             BitmapFactory.Options opts = new BitmapFactory.Options();
             opts.inPreferredConfig = Bitmap.Config.ARGB_8888;
             mBitmap3 = BitmapFactory.decodeResource(c.getResources(), R.drawable.sunset3, opts);
-            Log.d("OpenGLRenderer", "    has bitmap alpha? " + mBitmap3.hasAlpha());
+            Log.d("HWUI", "    has bitmap alpha? " + mBitmap3.hasAlpha());
 
             mBitmapPaint = new Paint();
         }
@@ -65,7 +65,7 @@ public class BitmapsAlphaActivity extends Activity {
         protected void onDraw(Canvas canvas) {
             super.onDraw(canvas);
             
-            Log.d("OpenGLRenderer", "================= Draw");
+            Log.d("HWUI", "================= Draw");
 
             canvas.translate(120.0f, 50.0f);
             canvas.drawBitmap(mBitmap1, 0.0f, 0.0f, mBitmapPaint);

@@ -15,10 +15,10 @@
  */
 package com.android.systemui.biometrics
 
-import com.android.internal.annotations.VisibleForTesting
+import com.android.systemui.biometrics.domain.interactor.UdfpsOverlayInteractor
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.plugins.statusbar.StatusBarStateController
-import com.android.systemui.shade.ShadeExpansionStateManager
+import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import com.android.systemui.statusbar.phone.SystemUIDialogManager
 
 /**
@@ -27,25 +27,21 @@ import com.android.systemui.statusbar.phone.SystemUIDialogManager
 class UdfpsBpViewController(
     view: UdfpsBpView,
     statusBarStateController: StatusBarStateController,
-    shadeExpansionStateManager: ShadeExpansionStateManager,
+    shadeInteractor: ShadeInteractor,
     systemUIDialogManager: SystemUIDialogManager,
-    dumpManager: DumpManager
+    dumpManager: DumpManager,
+    udfpsOverlayInteractor: UdfpsOverlayInteractor,
 ) : UdfpsAnimationViewController<UdfpsBpView>(
     view,
     statusBarStateController,
-    shadeExpansionStateManager,
+    shadeInteractor,
     systemUIDialogManager,
-    dumpManager
+    dumpManager,
+    udfpsOverlayInteractor,
 ) {
     override val tag = "UdfpsBpViewController"
 
     override fun shouldPauseAuth(): Boolean {
-        // Do not auth while notification shade is being dragged
-        return notificationShadeTracking
-    }
-
-    @VisibleForTesting
-    public override fun onViewAttached() {
-        super.onViewAttached()
+        return false
     }
 }

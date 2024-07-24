@@ -23,6 +23,7 @@ import static android.app.admin.DevicePolicyResources.Drawables.WORK_PROFILE_ICO
 import static android.app.admin.DevicePolicyResources.UNDEFINED;
 import static android.graphics.drawable.Icon.TYPE_URI;
 import static android.graphics.drawable.Icon.TYPE_URI_ADAPTIVE_BITMAP;
+import static android.app.Flags.evenlyDividedCallStyleActionLayout;
 
 import static java.util.Objects.requireNonNull;
 
@@ -31,6 +32,7 @@ import android.annotation.ColorRes;
 import android.annotation.DimenRes;
 import android.annotation.Dimension;
 import android.annotation.DrawableRes;
+import android.annotation.FlaggedApi;
 import android.annotation.IdRes;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
@@ -44,6 +46,9 @@ import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.app.admin.DevicePolicyManager;
+import android.app.compat.CompatChanges;
+import android.compat.annotation.ChangeId;
+import android.compat.annotation.EnabledSince;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.Intent;
@@ -75,6 +80,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.SystemClock;
 import android.os.SystemProperties;
+import android.os.Trace;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.Settings;
@@ -296,6 +302,15 @@ public class Notification implements Parcelable
     public static final String EXTRA_REMOTE_INPUT_DRAFT = "android.remoteInputDraft";
 
     /**
+     * The call to WearableExtender#setBackground(Bitmap) will have no effect and the passed
+     * Bitmap will not be retained in memory.
+     */
+    @ChangeId
+    @EnabledSince(targetSdkVersion = Build.VERSION_CODES.VANILLA_ICE_CREAM)
+    @VisibleForTesting
+    static final long WEARABLE_EXTENDER_BACKGROUND_BLOCKED = 270551184L;
+
+    /**
      * A timestamp related to this notification, in milliseconds since the epoch.
      *
      * Default value: {@link System#currentTimeMillis() Now}.
@@ -362,7 +377,7 @@ public class Notification implements Parcelable
      * that you take care of task management as described in the
      * <a href="{@docRoot}guide/topics/fundamentals/tasks-and-back-stack.html">Tasks and Back
      * Stack</a> document.  In particular, make sure to read the
-     * <a href="{@docRoot}/training/notify-user/navigation">Start
+     * <a href="{@docRoot}training/notify-user/navigation">Start
      * an Activity from a Notification</a> page for the correct ways to launch an application from a
      * notification.
      */
@@ -732,6 +747,16 @@ public class Notification implements Parcelable
     @TestApi
     public static final int FLAG_USER_INITIATED_JOB = 0x00008000;
 
+    /**
+     * Bit to be bitwise-ored into the {@link #flags} field that should be
+     * set if this notification has been lifetime extended due to a direct reply.
+     *
+     * This flag is for internal use only; applications cannot set this flag directly.
+     * @hide
+     */
+    @FlaggedApi(Flags.FLAG_LIFETIME_EXTENSION_REFACTOR)
+    public static final int FLAG_LIFETIME_EXTENDED_BY_DIRECT_REPLY = 0x00010000;
+
     private static final List<Class<? extends Style>> PLATFORM_STYLE_CLASSES = Arrays.asList(
             BigTextStyle.class, BigPictureStyle.class, InboxStyle.class, MediaStyle.class,
             DecoratedCustomViewStyle.class, DecoratedMediaCustomViewStyle.class,
@@ -911,6 +936,7 @@ public class Notification implements Parcelable
             VISIBILITY_SECRET,
             NotificationManager.VISIBILITY_NO_OVERRIDE
     })
+    @Retention(RetentionPolicy.SOURCE)
     public @interface NotificationVisibilityOverride{};
 
     /**
@@ -1035,6 +1061,12 @@ public class Notification implements Parcelable
      * Notification category: missed call.
      */
     public static final String CATEGORY_MISSED_CALL = "missed_call";
+
+    /**
+     * Notification category: voicemail.
+     */
+    @FlaggedApi(Flags.FLAG_CATEGORY_VOICEMAIL)
+    public static final String CATEGORY_VOICEMAIL = "voicemail";
 
     /**
      * One of the predefined notification categories (see the <code>CATEGORY_*</code> constants)
@@ -1502,13 +1534,13 @@ public class Notification implements Parcelable
 
     /**
      * {@link #extras} key: the color used as a hint for the Answer action button of a
-     * {@link android.app.Notification.CallStyle} notification. This extra is a {@link ColorInt}.
+     * {@link android.app.Notification.CallStyle} notification. This extra is a {@code ColorInt}.
      */
     public static final String EXTRA_ANSWER_COLOR = "android.answerColor";
 
     /**
      * {@link #extras} key: the color used as a hint for the Decline or Hang Up action button of a
-     * {@link android.app.Notification.CallStyle} notification. This extra is a {@link ColorInt}.
+     * {@link android.app.Notification.CallStyle} notification. This extra is a {@code ColorInt}.
      */
     public static final String EXTRA_DECLINE_COLOR = "android.declineColor";
 
@@ -1628,6 +1660,14 @@ public class Notification implements Parcelable
      */
     public static final int GROUP_ALERT_CHILDREN = 2;
 
+    /**
+     * Constant for the {@link Builder#setGroup(String) group key} that is added to notifications
+     * that are not already grouped when {@link Builder#setSilent()} is used.
+     *
+     * @hide
+     */
+    public static final String GROUP_KEY_SILENT = "silent";
+
     private int mGroupAlertBehavior = GROUP_ALERT_ALL;
 
     /**
@@ -1684,7 +1724,7 @@ public class Notification implements Parcelable
         private static final String EXTRA_DATA_ONLY_INPUTS = "android.extra.DATA_ONLY_INPUTS";
 
         /**
-         * {@link }: No semantic action defined.
+         * No semantic action defined.
          */
         public static final int SEMANTIC_ACTION_NONE = 0;
 
@@ -2173,6 +2213,9 @@ public class Notification implements Parcelable
 
         private void visitUris(@NonNull Consumer<Uri> visitor) {
             visitIconUri(visitor, getIcon());
+            if (actionIntent != null) {
+                actionIntent.visitUris(visitor);
+            }
         }
 
         @Override
@@ -2866,6 +2909,21 @@ public class Notification implements Parcelable
             }
         }
 
+        // allPendingIntents should contain all associated intents after parcelling, but it may also
+        // contain intents added by the app to extras for their own purposes. We only care about
+        // checking the intents known and used by system_server, to avoid the confused deputy issue.
+        List<PendingIntent> pendingIntents = Arrays.asList(contentIntent, deleteIntent,
+                fullScreenIntent);
+        for (PendingIntent intent : pendingIntents) {
+            if (intent != null) {
+                intent.visitUris(visitor);
+            }
+        }
+
+        if (mBubbleMetadata != null) {
+            mBubbleMetadata.visitUris(visitor);
+        }
+
         if (extras != null) {
             visitIconUri(visitor, extras.getParcelable(EXTRA_LARGE_ICON_BIG, Icon.class));
             visitIconUri(visitor, extras.getParcelable(EXTRA_PICTURE_ICON, Icon.class));
@@ -2937,15 +2995,72 @@ public class Notification implements Parcelable
                 callPerson.visitUris(visitor);
             }
             visitIconUri(visitor, extras.getParcelable(EXTRA_VERIFICATION_ICON, Icon.class));
-        }
 
-        if (mBubbleMetadata != null) {
-            visitIconUri(visitor, mBubbleMetadata.getIcon());
-        }
+            // Extras for MediaStyle.
+            PendingIntent deviceIntent = extras.getParcelable(EXTRA_MEDIA_REMOTE_INTENT,
+                    PendingIntent.class);
+            if (deviceIntent != null) {
+                deviceIntent.visitUris(visitor);
+            }
 
-        if (extras != null && extras.containsKey(WearableExtender.EXTRA_WEARABLE_EXTENSIONS)) {
-            WearableExtender extender = new WearableExtender(this);
-            extender.visitUris(visitor);
+            if (extras.containsKey(WearableExtender.EXTRA_WEARABLE_EXTENSIONS)) {
+                WearableExtender extender = new WearableExtender(this);
+                extender.visitUris(visitor);
+            }
+
+            if (extras.containsKey(TvExtender.EXTRA_TV_EXTENDER)) {
+                TvExtender extender = new TvExtender(this);
+                extender.visitUris(visitor);
+            }
+
+            if (extras.containsKey(CarExtender.EXTRA_CAR_EXTENDER)) {
+                CarExtender extender = new CarExtender(this);
+                extender.visitUris(visitor);
+            }
+        }
+    }
+
+    /**
+     * @hide
+     */
+    public String loadHeaderAppName(Context context) {
+        Trace.beginSection("Notification#loadHeaderAppName");
+
+        try {
+            CharSequence name = null;
+            // Check if there is a non-empty substitute app name and return that.
+            if (extras.containsKey(EXTRA_SUBSTITUTE_APP_NAME)) {
+                name = extras.getString(EXTRA_SUBSTITUTE_APP_NAME);
+                if (!TextUtils.isEmpty(name)) {
+                    return name.toString();
+                }
+            }
+            // If not, try getting the app info from extras.
+            if (context == null) {
+                return null;
+            }
+            final PackageManager pm = context.getPackageManager();
+            if (TextUtils.isEmpty(name)) {
+                if (extras.containsKey(EXTRA_BUILDER_APPLICATION_INFO)) {
+                    final ApplicationInfo info = extras.getParcelable(
+                            EXTRA_BUILDER_APPLICATION_INFO,
+                            ApplicationInfo.class);
+                    if (info != null) {
+                        name = pm.getApplicationLabel(info);
+                    }
+                }
+            }
+            // If that's still empty, use the one from the context directly.
+            if (TextUtils.isEmpty(name)) {
+                name = pm.getApplicationLabel(context.getApplicationInfo());
+            }
+            // If there's still nothing, ¯\_(ツ)_/¯
+            if (TextUtils.isEmpty(name)) {
+                return null;
+            }
+            return name.toString();
+        } finally {
+            Trace.endSection();
         }
     }
 
@@ -3471,15 +3586,12 @@ public class Notification implements Parcelable
      * Sets the token used for background operations for the pending intents associated with this
      * notification.
      *
-     * This token is automatically set during deserialization for you, you usually won't need to
-     * call this unless you want to change the existing token, if any.
-     *
      * @hide
      */
-    public void clearAllowlistToken() {
-        mAllowlistToken = null;
+    public void overrideAllowlistToken(IBinder token) {
+        mAllowlistToken = token;
         if (publicVersion != null) {
-            publicVersion.clearAllowlistToken();
+            publicVersion.overrideAllowlistToken(token);
         }
     }
 
@@ -4289,6 +4401,35 @@ public class Notification implements Parcelable
         }
 
         /**
+         * If {@code true}, silences this instance of the notification, regardless of the sounds or
+         * vibrations set on the notification or notification channel. If {@code false}, then the
+         * normal sound and vibration logic applies.
+         *
+         * @hide
+         */
+        public @NonNull Builder setSilent(boolean silent) {
+            if (!silent) {
+                return this;
+            }
+            if (mN.isGroupSummary()) {
+                setGroupAlertBehavior(GROUP_ALERT_CHILDREN);
+            } else {
+                setGroupAlertBehavior(GROUP_ALERT_SUMMARY);
+            }
+
+            setVibrate(null);
+            setSound(null);
+            mN.defaults &= ~DEFAULT_SOUND;
+            mN.defaults &= ~DEFAULT_VIBRATE;
+            setDefaults(mN.defaults);
+
+            if (TextUtils.isEmpty(mN.mGroupKey)) {
+                setGroup(GROUP_KEY_SILENT);
+            }
+            return this;
+        }
+
+        /**
          * Set the first line of text in the platform notification template.
          */
         @NonNull
@@ -4551,13 +4692,24 @@ public class Notification implements Parcelable
          * to turn it off and use a normal notification, as this can be extremely
          * disruptive.
          *
-         * <p>
-         * The system UI may choose to display a heads-up notification, instead of
-         * launching this intent, while the user is using the device.
-         * </p>
          * <p>Apps targeting {@link Build.VERSION_CODES#Q} and above will have to request
          * a permission ({@link android.Manifest.permission#USE_FULL_SCREEN_INTENT}) in order to
-         * use full screen intents.</p>
+         * use full screen intents. </p>
+         * <p>
+         * Prior to {@link Build.VERSION_CODES#TIRAMISU}, the system may display a
+         * heads up notification (which may display on screen longer than other heads up
+         * notifications), instead of launching the intent, while the user is using the device.
+         * From {@link Build.VERSION_CODES#TIRAMISU},
+         * the system UI will display a heads up notification, instead of launching this intent,
+         * while the user is using the device. This notification will display with emphasized
+         * action buttons. If the posting app holds
+         * {@link android.Manifest.permission#USE_FULL_SCREEN_INTENT}, then the heads
+         * up notification will appear persistently until the user dismisses or snoozes it, or
+         * the app cancels it. If the posting app does not hold
+         * {@link android.Manifest.permission#USE_FULL_SCREEN_INTENT}, then the notification will
+         * appear as heads up notification even when the screen is locked or turned off, and this
+         * notification will only be persistent for 60 seconds.
+         * </p>
          * <p>
          * To be launched as a full screen intent, the notification must also be posted to a
          * channel with importance level set to IMPORTANCE_HIGH or higher.
@@ -5395,6 +5547,15 @@ public class Notification implements Parcelable
             return mColors;
         }
 
+        /**
+         * @param isHeader If the notification is a notification header
+         * @return An instance of mColors after resolving the palette
+         */
+        private Colors getColors(boolean isHeader) {
+            mColors.resolvePalette(mContext, mN.color, !isHeader && mN.isColorized(), mInNightMode);
+            return mColors;
+        }
+
         private void updateBackgroundColor(RemoteViews contentView,
                 StandardTemplateParams p) {
             if (isBackgroundColorized(p)) {
@@ -5557,8 +5718,10 @@ public class Notification implements Parcelable
             contentView.setInt(R.id.expand_button, "setDefaultPillColor", pillColor);
             // Use different highlighted colors for conversations' unread count
             if (p.mHighlightExpander) {
-                pillColor = Colors.flattenAlpha(getColors(p).getTertiaryAccentColor(), bgColor);
-                textColor = Colors.flattenAlpha(getColors(p).getOnAccentTextColor(), pillColor);
+                pillColor = Colors.flattenAlpha(
+                        getColors(p).getTertiaryFixedDimAccentColor(), bgColor);
+                textColor = Colors.flattenAlpha(
+                        getColors(p).getOnTertiaryFixedAccentTextColor(), pillColor);
             }
             contentView.setInt(R.id.expand_button, "setHighlightTextColor", textColor);
             contentView.setInt(R.id.expand_button, "setHighlightPillColor", pillColor);
@@ -5651,34 +5814,7 @@ public class Notification implements Parcelable
          */
         @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
         public String loadHeaderAppName() {
-            CharSequence name = null;
-            final PackageManager pm = mContext.getPackageManager();
-            if (mN.extras.containsKey(EXTRA_SUBSTITUTE_APP_NAME)) {
-                // only system packages which lump together a bunch of unrelated stuff
-                // may substitute a different name to make the purpose of the
-                // notification more clear. the correct package label should always
-                // be accessible via SystemUI.
-                final String pkg = mContext.getPackageName();
-                final String subName = mN.extras.getString(EXTRA_SUBSTITUTE_APP_NAME);
-                if (PackageManager.PERMISSION_GRANTED == pm.checkPermission(
-                        android.Manifest.permission.SUBSTITUTE_NOTIFICATION_APP_NAME, pkg)) {
-                    name = subName;
-                } else {
-                    Log.w(TAG, "warning: pkg "
-                            + pkg + " attempting to substitute app name '" + subName
-                            + "' without holding perm "
-                            + android.Manifest.permission.SUBSTITUTE_NOTIFICATION_APP_NAME);
-                }
-            }
-            if (TextUtils.isEmpty(name)) {
-                name = pm.getApplicationLabel(mContext.getApplicationInfo());
-            }
-            if (TextUtils.isEmpty(name)) {
-                // still nothing?
-                return null;
-            }
-
-            return String.valueOf(name);
+            return mN.loadHeaderAppName(mContext);
         }
 
         /**
@@ -5837,6 +5973,12 @@ public class Notification implements Parcelable
                 // there is enough space to do so (and fall back to the left edge if not).
                 big.setInt(R.id.actions, "setCollapsibleIndentDimen",
                         R.dimen.call_notification_collapsible_indent);
+                if (evenlyDividedCallStyleActionLayout()) {
+                    if (CallStyle.DEBUG_NEW_ACTION_LAYOUT) {
+                        Log.d(TAG, "setting evenly divided mode on action list");
+                    }
+                    big.setBoolean(R.id.actions, "setEvenlyDividedMode", true);
+                }
             }
             big.setBoolean(R.id.actions, "setEmphasizedMode", emphasizedMode);
             if (numActions > 0 && !p.mHideActions) {
@@ -6312,7 +6454,15 @@ public class Notification implements Parcelable
                     // Remove full-length color spans and ensure text contrast with the button fill.
                     title = ContrastColorUtil.ensureColorSpanContrast(title, buttonFillColor);
                 }
-                button.setTextViewText(R.id.action0, ensureColorSpanContrast(title, p));
+                final CharSequence label = ensureColorSpanContrast(title, p);
+                if (p.mCallStyleActions && evenlyDividedCallStyleActionLayout()) {
+                    if (CallStyle.DEBUG_NEW_ACTION_LAYOUT) {
+                        Log.d(TAG, "new action layout enabled, gluing instead of setting text");
+                    }
+                    button.setCharSequence(R.id.action0, "glueLabel", label);
+                } else {
+                    button.setTextViewText(R.id.action0, label);
+                }
                 int textColor = ContrastColorUtil.resolvePrimaryColor(mContext,
                         buttonFillColor, mInNightMode);
                 if (tombstone) {
@@ -6329,7 +6479,14 @@ public class Notification implements Parcelable
                 button.setColorStateList(R.id.action0, "setButtonBackground",
                         ColorStateList.valueOf(buttonFillColor));
                 if (p.mCallStyleActions) {
-                    button.setImageViewIcon(R.id.action0, action.getIcon());
+                    if (evenlyDividedCallStyleActionLayout()) {
+                        if (CallStyle.DEBUG_NEW_ACTION_LAYOUT) {
+                            Log.d(TAG, "new action layout enabled, gluing instead of setting icon");
+                        }
+                        button.setIcon(R.id.action0, "glueIcon", action.getIcon());
+                    } else {
+                        button.setImageViewIcon(R.id.action0, action.getIcon());
+                    }
                     boolean priority = action.getExtras().getBoolean(CallStyle.KEY_ACTION_PRIORITY);
                     button.setBoolean(R.id.action0, "setIsPriority", priority);
                     int minWidthDimen =
@@ -6524,6 +6681,23 @@ public class Notification implements Parcelable
             return getColors(p).getContrastColor();
         }
 
+        /**
+         * Gets the foreground color of the small icon.  If the notification is colorized, this
+         * is the primary text color, otherwise it's the contrast-adjusted app-provided color.
+         * @hide
+         */
+        public @ColorInt int getSmallIconColor(boolean isHeader) {
+            return getColors(/* isHeader = */ isHeader).getContrastColor();
+        }
+
+        /**
+         * Gets the background color of the notification.
+         * @hide
+         */
+        public @ColorInt int getBackgroundColor(boolean isHeader) {
+            return getColors(/* isHeader = */ isHeader).getBackgroundColor();
+        }
+
         /** @return the theme's accent color for colored UI elements. */
         private @ColorInt int getPrimaryAccentColor(StandardTemplateParams p) {
             return getColors(p).getPrimaryAccentColor();
@@ -6556,23 +6730,29 @@ public class Notification implements Parcelable
          */
         @NonNull
         public static Notification.Builder recoverBuilder(Context context, Notification n) {
-            // Re-create notification context so we can access app resources.
-            ApplicationInfo applicationInfo = n.extras.getParcelable(
-                    EXTRA_BUILDER_APPLICATION_INFO, ApplicationInfo.class);
-            Context builderContext;
-            if (applicationInfo != null) {
-                try {
-                    builderContext = context.createApplicationContext(applicationInfo,
-                            Context.CONTEXT_RESTRICTED);
-                } catch (NameNotFoundException e) {
-                    Log.e(TAG, "ApplicationInfo " + applicationInfo + " not found");
-                    builderContext = context;  // try with our context
-                }
-            } else {
-                builderContext = context; // try with given context
-            }
+            Trace.beginSection("Notification.Builder#recoverBuilder");
 
-            return new Builder(builderContext, n);
+            try {
+                // Re-create notification context so we can access app resources.
+                ApplicationInfo applicationInfo = n.extras.getParcelable(
+                        EXTRA_BUILDER_APPLICATION_INFO, ApplicationInfo.class);
+                Context builderContext;
+                if (applicationInfo != null) {
+                    try {
+                        builderContext = context.createApplicationContext(applicationInfo,
+                                Context.CONTEXT_RESTRICTED);
+                    } catch (NameNotFoundException e) {
+                        Log.e(TAG, "ApplicationInfo " + applicationInfo + " not found");
+                        builderContext = context;  // try with our context
+                    }
+                } else {
+                    builderContext = context; // try with given context
+                }
+
+                return new Builder(builderContext, n);
+            } finally {
+                Trace.endSection();
+            }
         }
 
         /**
@@ -7634,10 +7814,14 @@ public class Notification implements Parcelable
             }
             extras.putBoolean(EXTRA_SHOW_BIG_PICTURE_WHEN_COLLAPSED, mShowBigPictureWhenCollapsed);
 
-            // If the icon contains a bitmap, use the old extra so that listeners which look for
-            // that extra can still find the picture.  Don't include the new extra in that case,
-            // to avoid duplicating data.
-            if (mPictureIcon != null && mPictureIcon.getType() == Icon.TYPE_BITMAP) {
+            if (mPictureIcon == null) {
+                extras.remove(EXTRA_PICTURE_ICON);
+                extras.remove(EXTRA_PICTURE);
+            } else if (mPictureIcon.getType() == Icon.TYPE_BITMAP) {
+                // If the icon contains a bitmap, use the old extra so that listeners which look
+                // for that extra can still find the picture. Don't include the new extra in
+                // that case, to avoid duplicating data. Leave the unused extra set to null to avoid
+                // crashing apps that came to expect it to be present but null.
                 extras.putParcelable(EXTRA_PICTURE, mPictureIcon.getBitmap());
                 extras.putParcelable(EXTRA_PICTURE_ICON, null);
             } else {
@@ -7872,7 +8056,7 @@ public class Notification implements Parcelable
      * (via {@link Notification.Builder#setShortcutId(String)}) are displayed in a dedicated
      * conversation section in the shade above non-conversation alerting and silence notifications.
      * To be a valid conversation shortcut, the shortcut must be a
-     * {@link ShortcutInfo#setLongLived()} dynamic or cached sharing shortcut.
+     * {@link ShortcutInfo.Builder#setLongLived(boolean)} dynamic or cached sharing shortcut.
      *
      * <p>
      * This class is a "rebuilder": It attaches to a Builder object and modifies its behavior.
@@ -8435,6 +8619,8 @@ public class Notification implements Parcelable
             boolean isImportantConversation = mConversationType == CONVERSATION_TYPE_IMPORTANT;
             boolean isHeaderless = !isConversationLayout && isCollapsed;
 
+            //TODO (b/217799515): ensure mConversationTitle always returns the correct
+            // conversationTitle, probably set mConversationTitle = conversationTitle after this
             CharSequence conversationTitle = !TextUtils.isEmpty(super.mBigContentTitle)
                     ? super.mBigContentTitle
                     : mConversationTitle;
@@ -8807,9 +8993,11 @@ public class Notification implements Parcelable
             }
 
             /**
+             * Converts the message into a {@link Bundle}. To extract the message back,
+             * check {@link #getMessageFromBundle()}
              * @hide
              */
-            @VisibleForTesting
+            @NonNull
             public Bundle toBundle() {
                 Bundle bundle = new Bundle();
                 if (mText != null) {
@@ -9432,6 +9620,10 @@ public class Notification implements Parcelable
      * </pre>
      */
     public static class CallStyle extends Style {
+        /**
+         * @hide
+         */
+        public static final boolean DEBUG_NEW_ACTION_LAYOUT = true;
 
         /**
          * @hide
@@ -10310,16 +10502,6 @@ public class Notification implements Parcelable
         }
 
         /**
-         * @deprecated use {@link #getIntent()} instead.
-         * @removed Removed from the R SDK but was never publicly stable.
-         */
-        @Nullable
-        @Deprecated
-        public PendingIntent getBubbleIntent() {
-            return mPendingIntent;
-        }
-
-        /**
          * @return the pending intent to send when the bubble is dismissed by a user, if one exists.
          */
         @Nullable
@@ -10334,16 +10516,6 @@ public class Notification implements Parcelable
         @SuppressLint("InvalidNullConversion")
         @Nullable
         public Icon getIcon() {
-            return mIcon;
-        }
-
-        /**
-         * @deprecated use {@link #getIcon()} instead.
-         * @removed Removed from the R SDK but was never publicly stable.
-         */
-        @Nullable
-        @Deprecated
-        public Icon getBubbleIcon() {
             return mIcon;
         }
 
@@ -10511,6 +10683,16 @@ public class Notification implements Parcelable
             }
         }
 
+        private void visitUris(@NonNull Consumer<Uri> visitor) {
+            visitIconUri(visitor, getIcon());
+            if (mPendingIntent != null) {
+                mPendingIntent.visitUris(visitor);
+            }
+            if (mDeleteIntent != null) {
+                mDeleteIntent.visitUris(visitor);
+            }
+        }
+
         /**
          * Builder to construct a {@link BubbleMetadata} object.
          */
@@ -10601,48 +10783,6 @@ public class Notification implements Parcelable
                 }
                 mPendingIntent = intent;
                 mIcon = icon;
-            }
-
-            /**
-             * @deprecated use {@link Builder#Builder(String)} instead.
-             * @removed Removed from the R SDK but was never publicly stable.
-             */
-            @NonNull
-            @Deprecated
-            public BubbleMetadata.Builder createShortcutBubble(@NonNull String shortcutId) {
-                if (!TextUtils.isEmpty(shortcutId)) {
-                    // If shortcut id is set, we don't use these if they were previously set.
-                    mPendingIntent = null;
-                    mIcon = null;
-                }
-                mShortcutId = shortcutId;
-                return this;
-            }
-
-            /**
-             * @deprecated use {@link Builder#Builder(PendingIntent, Icon)} instead.
-             * @removed Removed from the R SDK but was never publicly stable.
-             */
-            @NonNull
-            @Deprecated
-            public BubbleMetadata.Builder createIntentBubble(@NonNull PendingIntent intent,
-                    @NonNull Icon icon) {
-                if (intent == null) {
-                    throw new IllegalArgumentException("Bubble requires non-null pending intent");
-                }
-                if (icon == null) {
-                    throw new IllegalArgumentException("Bubbles require non-null icon");
-                }
-                if (icon.getType() != TYPE_URI_ADAPTIVE_BITMAP
-                        && icon.getType() != TYPE_URI) {
-                    Log.w(TAG, "Bubbles work best with icons of TYPE_URI or "
-                            + "TYPE_URI_ADAPTIVE_BITMAP. "
-                            + "In the future, using an icon of this type will be required.");
-                }
-                mShortcutId = null;
-                mPendingIntent = intent;
-                mIcon = icon;
-                return this;
             }
 
             /**
@@ -11107,9 +11247,20 @@ public class Notification implements Parcelable
                 wearableBundle.putParcelableArray(KEY_PAGES, mPages.toArray(
                         new Notification[mPages.size()]));
             }
+
             if (mBackground != null) {
-                wearableBundle.putParcelable(KEY_BACKGROUND, mBackground);
+                // Keeping WearableExtender backgrounds in memory despite them being deprecated has
+                // added noticeable increase in system server and system ui memory usage. After
+                // target VERSION_CODE#VANILLA_ICE_CREAM the background will not be populated
+                // anymore.
+                if (CompatChanges.isChangeEnabled(WEARABLE_EXTENDER_BACKGROUND_BLOCKED)) {
+                    Log.d(TAG, "Use of background in WearableExtenders has been deprecated and "
+                            + "will not be populated anymore.");
+                } else {
+                    wearableBundle.putParcelable(KEY_BACKGROUND, mBackground);
+                }
             }
+
             if (mContentIcon != 0) {
                 wearableBundle.putInt(KEY_CONTENT_ICON, mContentIcon);
             }
@@ -11328,12 +11479,21 @@ public class Notification implements Parcelable
          *
          * @param background the background bitmap
          * @return this object for method chaining
-         * @see android.app.Notification.WearableExtender#getBackground
-         * @deprecated Background images are no longer supported.
+         * @removed Not functional since {@link Build.VERSION_CODES#VANILLA_ICE_CREAM}.
+         *          The wearable background is not used by wearables anymore and uses up
+         *          unnecessary memory.
          */
         @Deprecated
         public WearableExtender setBackground(Bitmap background) {
-            mBackground = background;
+            // Keeping WearableExtender backgrounds in memory despite them being deprecated has
+            // added noticeable increase in system server and system ui memory usage. After
+            // target VERSION_CODE#VANILLA_ICE_CREAM the background will not be populated anymore.
+            if (CompatChanges.isChangeEnabled(WEARABLE_EXTENDER_BACKGROUND_BLOCKED)) {
+                Log.d(TAG, "Use of background in WearableExtenders has been deprecated and "
+                        + "will not be populated anymore.");
+            } else {
+                mBackground = background;
+            }
             return this;
         }
 
@@ -11343,11 +11503,13 @@ public class Notification implements Parcelable
          * will work with any notification style.
          *
          * @return the background image
-         * @see android.app.Notification.WearableExtender#setBackground
-         * @deprecated Background images are no longer supported.
+         * @removed Not functional since {@link Build.VERSION_CODES#VANILLA_ICE_CREAM}. The
+         *          wearable background is not used by wearables anymore and uses up
+         *          unnecessary memory.
          */
         @Deprecated
         public Bitmap getBackground() {
+            Log.w(TAG, "Use of background in WearableExtender has been removed, returning null.");
             return mBackground;
         }
 
@@ -11729,6 +11891,9 @@ public class Notification implements Parcelable
         }
 
         private void visitUris(@NonNull Consumer<Uri> visitor) {
+            if (mDisplayIntent != null) {
+                mDisplayIntent.visitUris(visitor);
+            }
             for (Action action : mActions) {
                 action.visitUris(visitor);
             }
@@ -11881,10 +12046,17 @@ public class Notification implements Parcelable
 
         /**
          * Returns the unread conversation conveyed by this notification.
+         *
          * @see #setUnreadConversation(UnreadConversation)
          */
         public UnreadConversation getUnreadConversation() {
             return mUnreadConversation;
+        }
+
+        private void visitUris(@NonNull Consumer<Uri> visitor) {
+            if (mUnreadConversation != null) {
+                mUnreadConversation.visitUris(visitor);
+            }
         }
 
         /**
@@ -12038,7 +12210,16 @@ public class Notification implements Parcelable
                         onRead,
                         participants, b.getLong(KEY_TIMESTAMP));
             }
-        };
+
+            private void visitUris(@NonNull Consumer<Uri> visitor) {
+                if (mReadPendingIntent != null) {
+                    mReadPendingIntent.visitUris(visitor);
+                }
+                if (mReplyPendingIntent != null) {
+                    mReplyPendingIntent.visitUris(visitor);
+                }
+            }
+        }
 
         /**
          * Builder class for {@link CarExtender.UnreadConversation} objects.
@@ -12158,10 +12339,8 @@ public class Notification implements Parcelable
      * <p>TV extensions can be accessed on an existing notification by using the
      * {@code TvExtender(Notification)} constructor, and then using the {@code get} methods
      * to access values.
-     *
-     * @hide
      */
-    @SystemApi
+    @FlaggedApi(Flags.FLAG_API_TVEXTENDER)
     public static final class TvExtender implements Extender {
         private static final String TAG = "TvExtender";
 
@@ -12193,7 +12372,7 @@ public class Notification implements Parcelable
          *
          * @param notif The notification from which to copy options.
          */
-        public TvExtender(Notification notif) {
+        public TvExtender(@NonNull Notification notif) {
             Bundle bundle = notif.extras == null ?
                 null : notif.extras.getBundle(EXTRA_TV_EXTENDER);
             if (bundle != null) {
@@ -12211,7 +12390,8 @@ public class Notification implements Parcelable
          * method of {@link Notification.Builder}.
          */
         @Override
-        public Notification.Builder extend(Notification.Builder builder) {
+        @NonNull
+        public Notification.Builder extend(@NonNull Notification.Builder builder) {
             Bundle bundle = new Bundle();
 
             bundle.putInt(EXTRA_FLAGS, mFlags);
@@ -12230,7 +12410,7 @@ public class Notification implements Parcelable
         }
 
         /**
-         * Returns true if this notification should be shown on TV. This method return true
+         * Returns true if this notification should be shown on TV. This method returns true
          * if the notification was extended with a TvExtender.
          */
         public boolean isAvailableOnTv() {
@@ -12240,8 +12420,11 @@ public class Notification implements Parcelable
         /**
          * Specifies the channel the notification should be delivered on when shown on TV.
          * It can be different from the channel that the notification is delivered to when
-         * posting on a non-TV device.
+         * posting on a non-TV device. Prefer to use {@link setChannelId(String)}.
+         *
+         * @hide
          */
+        @SystemApi
         public TvExtender setChannel(String channelId) {
             mChannelId = channelId;
             return this;
@@ -12251,14 +12434,21 @@ public class Notification implements Parcelable
          * Specifies the channel the notification should be delivered on when shown on TV.
          * It can be different from the channel that the notification is delivered to when
          * posting on a non-TV device.
+         *
+         * @return this object for method chaining
          */
-        public TvExtender setChannelId(String channelId) {
+        @NonNull
+        public TvExtender setChannelId(@Nullable String channelId) {
             mChannelId = channelId;
             return this;
         }
 
-        /** @removed */
+        /**
+         * @removed
+         * @hide
+         */
         @Deprecated
+        @SystemApi
         public String getChannel() {
             return mChannelId;
         }
@@ -12266,6 +12456,7 @@ public class Notification implements Parcelable
         /**
          * Returns the id of the channel this notification posts to on TV.
          */
+        @Nullable
         public String getChannelId() {
             return mChannelId;
         }
@@ -12274,8 +12465,12 @@ public class Notification implements Parcelable
          * Supplies a {@link PendingIntent} to be sent when the notification is selected on TV.
          * If provided, it is used instead of the content intent specified
          * at the level of Notification.
+         *
+         * @param intent the {@link PendingIntent} for the associated notification content
+         * @return this object for method chaining
          */
-        public TvExtender setContentIntent(PendingIntent intent) {
+        @NonNull
+        public TvExtender setContentIntent(@Nullable PendingIntent intent) {
             mContentIntent = intent;
             return this;
         }
@@ -12284,8 +12479,9 @@ public class Notification implements Parcelable
          * Returns the TV-specific content intent.  If this method returns null, the
          * main content intent on the notification should be used.
          *
-         * @see {@link Notification#contentIntent}
+         * @see Notification#contentIntent
          */
+        @Nullable
         public PendingIntent getContentIntent() {
             return mContentIntent;
         }
@@ -12294,8 +12490,12 @@ public class Notification implements Parcelable
          * Supplies a {@link PendingIntent} to send when the notification is cleared explicitly
          * by the user on TV.  If provided, it is used instead of the delete intent specified
          * at the level of Notification.
+         *
+         * @param intent the {@link PendingIntent} for the associated notification deletion
+         * @return this object for method chaining
          */
-        public TvExtender setDeleteIntent(PendingIntent intent) {
+        @NonNull
+        public TvExtender setDeleteIntent(@Nullable PendingIntent intent) {
             mDeleteIntent = intent;
             return this;
         }
@@ -12304,8 +12504,9 @@ public class Notification implements Parcelable
          * Returns the TV-specific delete intent.  If this method returns null, the
          * main delete intent on the notification should be used.
          *
-         * @see {@link Notification#deleteIntent}
+         * @see Notification#deleteIntent
          */
+        @Nullable
         public PendingIntent getDeleteIntent() {
             return mDeleteIntent;
         }
@@ -12313,7 +12514,11 @@ public class Notification implements Parcelable
         /**
          * Specifies whether this notification should suppress showing a message over top of apps
          * outside of the launcher.
+         *
+         * @param suppress whether the notification should suppress showing over apps.
+         * @return this object for method chaining
          */
+        @NonNull
         public TvExtender setSuppressShowOverApps(boolean suppress) {
             mSuppressShowOverApps = suppress;
             return this;
@@ -12322,9 +12527,29 @@ public class Notification implements Parcelable
         /**
          * Returns true if this notification should not show messages over top of apps
          * outside of the launcher.
+         *
+         * @hide
          */
+        @SystemApi
         public boolean getSuppressShowOverApps() {
             return mSuppressShowOverApps;
+        }
+
+        /**
+         * Returns true if this notification should not show messages over top of apps
+         * outside of the launcher.
+         */
+        public boolean isSuppressShowOverApps() {
+            return mSuppressShowOverApps;
+        }
+
+        private void visitUris(@NonNull Consumer<Uri> visitor) {
+            if (mContentIntent != null) {
+                mContentIntent.visitUris(visitor);
+            }
+            if (mDeleteIntent != null) {
+                mDeleteIntent.visitUris(visitor);
+            }
         }
     }
 
@@ -12718,7 +12943,10 @@ public class Notification implements Parcelable
         private int mPrimaryAccentColor = COLOR_INVALID;
         private int mSecondaryAccentColor = COLOR_INVALID;
         private int mTertiaryAccentColor = COLOR_INVALID;
-        private int mOnAccentTextColor = COLOR_INVALID;
+        private int mOnTertiaryAccentTextColor = COLOR_INVALID;
+        private int mTertiaryFixedDimAccentColor = COLOR_INVALID;
+        private int mOnTertiaryFixedAccentTextColor = COLOR_INVALID;
+
         private int mErrorColor = COLOR_INVALID;
         private int mContrastColor = COLOR_INVALID;
         private int mRippleAlpha = 0x33;
@@ -12776,7 +13004,7 @@ public class Notification implements Parcelable
 
             if (isColorized) {
                 if (rawColor == COLOR_DEFAULT) {
-                    int[] attrs = {R.attr.colorAccentSecondary};
+                    int[] attrs = {R.attr.materialColorSecondary};
                     try (TypedArray ta = obtainDayNightAttributes(ctx, attrs)) {
                         mBackgroundColor = getColor(ta, 0, Color.WHITE);
                     }
@@ -12793,18 +13021,22 @@ public class Notification implements Parcelable
                 mPrimaryAccentColor = mPrimaryTextColor;
                 mSecondaryAccentColor = mSecondaryTextColor;
                 mTertiaryAccentColor = flattenAlpha(mPrimaryTextColor, mBackgroundColor);
-                mOnAccentTextColor = mBackgroundColor;
+                mOnTertiaryAccentTextColor = mBackgroundColor;
+                mTertiaryFixedDimAccentColor = mTertiaryAccentColor;
+                mOnTertiaryFixedAccentTextColor = mOnTertiaryAccentTextColor;
                 mErrorColor = mPrimaryTextColor;
                 mRippleAlpha = 0x33;
             } else {
                 int[] attrs = {
-                        R.attr.colorSurface,
-                        R.attr.textColorPrimary,
-                        R.attr.textColorSecondary,
-                        R.attr.colorAccent,
-                        R.attr.colorAccentSecondary,
-                        R.attr.colorAccentTertiary,
-                        R.attr.textColorOnAccent,
+                        R.attr.materialColorSurfaceContainerHigh,
+                        R.attr.materialColorOnSurface,
+                        R.attr.materialColorOnSurfaceVariant,
+                        R.attr.materialColorPrimary,
+                        R.attr.materialColorSecondary,
+                        R.attr.materialColorTertiary,
+                        R.attr.materialColorOnTertiary,
+                        R.attr.materialColorTertiaryFixedDim,
+                        R.attr.materialColorOnTertiaryFixed,
                         R.attr.colorError,
                         R.attr.colorControlHighlight
                 };
@@ -12815,9 +13047,11 @@ public class Notification implements Parcelable
                     mPrimaryAccentColor = getColor(ta, 3, COLOR_INVALID);
                     mSecondaryAccentColor = getColor(ta, 4, COLOR_INVALID);
                     mTertiaryAccentColor = getColor(ta, 5, COLOR_INVALID);
-                    mOnAccentTextColor = getColor(ta, 6, COLOR_INVALID);
-                    mErrorColor = getColor(ta, 7, COLOR_INVALID);
-                    mRippleAlpha = Color.alpha(getColor(ta, 8, 0x33ffffff));
+                    mOnTertiaryAccentTextColor = getColor(ta, 6, COLOR_INVALID);
+                    mTertiaryFixedDimAccentColor = getColor(ta, 7, COLOR_INVALID);
+                    mOnTertiaryFixedAccentTextColor = getColor(ta, 8, COLOR_INVALID);
+                    mErrorColor = getColor(ta, 9, COLOR_INVALID);
+                    mRippleAlpha = Color.alpha(getColor(ta, 10, 0x33ffffff));
                 }
                 mContrastColor = calculateContrastColor(ctx, rawColor, mPrimaryAccentColor,
                         mBackgroundColor, nightMode);
@@ -12840,10 +13074,18 @@ public class Notification implements Parcelable
                 if (mTertiaryAccentColor == COLOR_INVALID) {
                     mTertiaryAccentColor = mContrastColor;
                 }
-                if (mOnAccentTextColor == COLOR_INVALID) {
-                    mOnAccentTextColor = ColorUtils.setAlphaComponent(
+                if (mOnTertiaryAccentTextColor == COLOR_INVALID) {
+                    mOnTertiaryAccentTextColor = ColorUtils.setAlphaComponent(
                             ContrastColorUtil.resolvePrimaryColor(
                                     ctx, mTertiaryAccentColor, nightMode), 0xFF);
+                }
+                if (mTertiaryFixedDimAccentColor == COLOR_INVALID) {
+                    mTertiaryFixedDimAccentColor = mContrastColor;
+                }
+                if (mOnTertiaryFixedAccentTextColor == COLOR_INVALID) {
+                    mOnTertiaryFixedAccentTextColor = ColorUtils.setAlphaComponent(
+                            ContrastColorUtil.resolvePrimaryColor(
+                                    ctx, mTertiaryFixedDimAccentColor, nightMode), 0xFF);
                 }
                 if (mErrorColor == COLOR_INVALID) {
                     mErrorColor = mPrimaryTextColor;
@@ -12914,8 +13156,18 @@ public class Notification implements Parcelable
         }
 
         /** @return the theme's text color to be used on the tertiary accent color. */
-        public @ColorInt int getOnAccentTextColor() {
-            return mOnAccentTextColor;
+        public @ColorInt int getOnTertiaryAccentTextColor() {
+            return mOnTertiaryAccentTextColor;
+        }
+
+        /** @return the theme's tertiary fixed dim accent color for colored UI elements. */
+        public @ColorInt int getTertiaryFixedDimAccentColor() {
+            return mTertiaryFixedDimAccentColor;
+        }
+
+        /** @return the theme's text color to be used on the tertiary fixed accent color. */
+        public @ColorInt int getOnTertiaryFixedAccentTextColor() {
+            return mOnTertiaryFixedAccentTextColor;
         }
 
         /**

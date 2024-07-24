@@ -50,6 +50,7 @@ public class DeviceVolumeBehaviorTest {
     private AudioSystemAdapter mAudioSystem;
     private SystemServerAdapter mSystemServer;
     private SettingsAdapter mSettingsAdapter;
+    private AudioVolumeGroupHelperBase mAudioVolumeGroupHelper;
     private TestLooper mTestLooper;
     private AudioPolicyFacade mAudioPolicyMock = mock(AudioPolicyFacade.class);
 
@@ -71,8 +72,10 @@ public class DeviceVolumeBehaviorTest {
         mAudioSystem = new NoOpAudioSystemAdapter();
         mSystemServer = new NoOpSystemServerAdapter();
         mSettingsAdapter = new NoOpSettingsAdapter();
+        mAudioVolumeGroupHelper = new AudioVolumeGroupHelperBase();
         mAudioService = new AudioService(mContext, mAudioSystem, mSystemServer,
-                mSettingsAdapter, mAudioPolicyMock, mTestLooper.getLooper());
+                mSettingsAdapter, mAudioVolumeGroupHelper, mAudioPolicyMock,
+                mTestLooper.getLooper());
         mTestLooper.dispatchAll();
     }
 

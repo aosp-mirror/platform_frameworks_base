@@ -23,6 +23,7 @@ import static android.window.TaskConstants.TASK_CHILD_LAYER_LETTERBOX_BACKGROUND
 import android.graphics.Color;
 import android.graphics.Point;
 import android.graphics.Rect;
+import android.os.Handler;
 import android.os.IBinder;
 import android.os.InputConfig;
 import android.view.GestureDetector;
@@ -36,7 +37,10 @@ import android.view.WindowManager;
 
 import com.android.server.UiThread;
 
+import java.util.function.BooleanSupplier;
+import java.util.function.DoubleSupplier;
 import java.util.function.IntConsumer;
+import java.util.function.IntSupplier;
 import java.util.function.Supplier;
 
 /**
@@ -45,17 +49,17 @@ import java.util.function.Supplier;
  */
 public class Letterbox {
 
-    private static final Rect EMPTY_RECT = new Rect();
+    static final Rect EMPTY_RECT = new Rect();
     private static final Point ZERO_POINT = new Point(0, 0);
 
     private final Supplier<SurfaceControl.Builder> mSurfaceControlFactory;
     private final Supplier<SurfaceControl.Transaction> mTransactionFactory;
-    private final Supplier<Boolean> mAreCornersRounded;
+    private final BooleanSupplier mAreCornersRounded;
     private final Supplier<Color> mColorSupplier;
     // Parameters for "blurred wallpaper" letterbox background.
-    private final Supplier<Boolean> mHasWallpaperBackgroundSupplier;
-    private final Supplier<Integer> mBlurRadiusSupplier;
-    private final Supplier<Float> mDarkScrimAlphaSupplier;
+    private final BooleanSupplier mHasWallpaperBackgroundSupplier;
+    private final IntSupplier mBlurRadiusSupplier;
+    private final DoubleSupplier mDarkScrimAlphaSupplier;
     private final Supplier<SurfaceControl> mParentSurfaceSupplier;
 
     private final Rect mOuter = new Rect();
@@ -82,11 +86,11 @@ public class Letterbox {
      */
     public Letterbox(Supplier<SurfaceControl.Builder> surfaceControlFactory,
             Supplier<SurfaceControl.Transaction> transactionFactory,
-            Supplier<Boolean> areCornersRounded,
+            BooleanSupplier areCornersRounded,
             Supplier<Color> colorSupplier,
-            Supplier<Boolean> hasWallpaperBackgroundSupplier,
-            Supplier<Integer> blurRadiusSupplier,
-            Supplier<Float> darkScrimAlphaSupplier,
+            BooleanSupplier hasWallpaperBackgroundSupplier,
+            IntSupplier blurRadiusSupplier,
+            DoubleSupplier darkScrimAlphaSupplier,
             IntConsumer doubleTapCallbackX,
             IntConsumer doubleTapCallbackY,
             Supplier<SurfaceControl> parentSurface) {
@@ -247,7 +251,7 @@ public class Letterbox {
      * Returns {@code true} when using {@link #mFullWindowSurface} instead of {@link mSurfaces}.
      */
     private boolean useFullWindowSurface() {
-        return mAreCornersRounded.get() || mHasWallpaperBackgroundSupplier.get();
+        return mAreCornersRounded.getAsBoolean() || mHasWallpaperBackgroundSupplier.getAsBoolean();
     }
 
     private final class TapEventReceiver extends InputEventReceiver {
@@ -255,11 +259,12 @@ public class Letterbox {
         private final GestureDetector mDoubleTapDetector;
         private final DoubleTapListener mDoubleTapListener;
 
-        TapEventReceiver(InputChannel inputChannel, WindowManagerService wmService) {
-            super(inputChannel, UiThread.getHandler().getLooper());
+        TapEventReceiver(InputChannel inputChannel, WindowManagerService wmService,
+                Handler uiHandler) {
+            super(inputChannel, uiHandler.getLooper());
             mDoubleTapListener = new DoubleTapListener(wmService);
-            mDoubleTapDetector = new GestureDetector(
-                    wmService.mContext, mDoubleTapListener, UiThread.getHandler());
+            mDoubleTapDetector = new GestureDetector(wmService.mContext, mDoubleTapListener,
+                    uiHandler);
         }
 
         @Override
@@ -291,19 +296,21 @@ public class Letterbox {
         }
     }
 
-    private final class InputInterceptor {
+    private final class InputInterceptor implements Runnable {
 
         private final InputChannel mClientChannel;
         private final InputWindowHandle mWindowHandle;
         private final InputEventReceiver mInputEventReceiver;
         private final WindowManagerService mWmService;
         private final IBinder mToken;
+        private final Handler mHandler;
 
         InputInterceptor(String namePrefix, WindowState win) {
             mWmService = win.mWmService;
+            mHandler = UiThread.getHandler();
             final String name = namePrefix + (win.mActivityRecord != null ? win.mActivityRecord : win);
             mClientChannel = mWmService.mInputManager.createInputChannel(name);
-            mInputEventReceiver = new TapEventReceiver(mClientChannel, mWmService);
+            mInputEventReceiver = new TapEventReceiver(mClientChannel, mWmService, mHandler);
 
             mToken = mClientChannel.getToken();
 
@@ -332,10 +339,16 @@ public class Letterbox {
             mWindowHandle.touchableRegion.translate(-frame.left, -frame.top);
         }
 
-        void dispose() {
-            mWmService.mInputManager.removeInputChannel(mToken);
+        @Override
+        public void run() {
             mInputEventReceiver.dispose();
             mClientChannel.dispose();
+        }
+
+        void dispose() {
+            mWmService.mInputManager.removeInputChannel(mToken);
+            // Perform dispose on the same thread that dispatches input event
+            mHandler.post(this);
         }
     }
 
@@ -424,7 +437,7 @@ public class Letterbox {
                         mSurfaceFrameRelative.height());
                 t.reparent(mSurface, mParentSurface);
 
-                mHasWallpaperBackground = mHasWallpaperBackgroundSupplier.get();
+                mHasWallpaperBackground = mHasWallpaperBackgroundSupplier.getAsBoolean();
                 updateAlphaAndBlur(t);
 
                 t.show(mSurface);
@@ -445,17 +458,17 @@ public class Letterbox {
                 t.setBackgroundBlurRadius(mSurface, 0);
                 return;
             }
-            final float alpha = mDarkScrimAlphaSupplier.get();
+            final float alpha = (float) mDarkScrimAlphaSupplier.getAsDouble();
             t.setAlpha(mSurface, alpha);
 
             // Translucent dark scrim can be shown without blur.
-            if (mBlurRadiusSupplier.get() <= 0) {
+            if (mBlurRadiusSupplier.getAsInt() <= 0) {
                 // Removing pre-exesting blur
                 t.setBackgroundBlurRadius(mSurface, 0);
                 return;
             }
 
-            t.setBackgroundBlurRadius(mSurface, mBlurRadiusSupplier.get());
+            t.setBackgroundBlurRadius(mSurface, mBlurRadiusSupplier.getAsInt());
         }
 
         private float[] getRgbColorArray() {
@@ -472,7 +485,7 @@ public class Letterbox {
                     // and mParentSurface may never be updated in applySurfaceChanges but this
                     // doesn't mean that update is needed.
                     || !mSurfaceFrameRelative.isEmpty()
-                    && (mHasWallpaperBackgroundSupplier.get() != mHasWallpaperBackground
+                    && (mHasWallpaperBackgroundSupplier.getAsBoolean() != mHasWallpaperBackground
                     || !mColorSupplier.get().equals(mColor)
                     || mParentSurfaceSupplier.get() != mParentSurface);
         }

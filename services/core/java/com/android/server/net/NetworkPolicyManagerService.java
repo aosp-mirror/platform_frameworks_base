@@ -28,6 +28,7 @@ import static android.Manifest.permission.READ_PHONE_STATE;
 import static android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE;
 import static android.app.ActivityManager.PROCESS_CAPABILITY_POWER_RESTRICTED_NETWORK;
 import static android.app.ActivityManager.PROCESS_CAPABILITY_USER_RESTRICTED_NETWORK;
+import static android.app.ActivityManager.PROCESS_STATE_LAST_ACTIVITY;
 import static android.app.ActivityManager.PROCESS_STATE_UNKNOWN;
 import static android.app.ActivityManager.isProcStateConsideredInteraction;
 import static android.app.ActivityManager.printCapabilitiesSummary;
@@ -60,6 +61,9 @@ import static android.net.ConnectivityManager.CONNECTIVITY_ACTION;
 import static android.net.ConnectivityManager.FIREWALL_CHAIN_BACKGROUND;
 import static android.net.ConnectivityManager.FIREWALL_CHAIN_DOZABLE;
 import static android.net.ConnectivityManager.FIREWALL_CHAIN_LOW_POWER_STANDBY;
+import static android.net.ConnectivityManager.FIREWALL_CHAIN_METERED_ALLOW;
+import static android.net.ConnectivityManager.FIREWALL_CHAIN_METERED_DENY_ADMIN;
+import static android.net.ConnectivityManager.FIREWALL_CHAIN_METERED_DENY_USER;
 import static android.net.ConnectivityManager.FIREWALL_CHAIN_POWERSAVE;
 import static android.net.ConnectivityManager.FIREWALL_CHAIN_RESTRICTED;
 import static android.net.ConnectivityManager.FIREWALL_CHAIN_STANDBY;
@@ -150,6 +154,7 @@ import static org.xmlpull.v1.XmlPullParser.END_TAG;
 import static org.xmlpull.v1.XmlPullParser.START_TAG;
 
 import android.Manifest;
+import android.annotation.EnforcePermission;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -513,6 +518,18 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
      */
     private boolean mBackgroundNetworkRestricted;
 
+    /**
+     * Whether or not metered firewall chains should be used for uid policy controlling access to
+     * metered networks.
+     */
+    private boolean mUseMeteredFirewallChains;
+
+    /**
+     * Whether or not sensitive process states and non-sensitive process-states have different
+     * delays before network is blocked after transitioning to background.
+     */
+    private boolean mUseDifferentDelaysForBackgroundChain;
+
     // See main javadoc for instructions on how to use these locks.
     final Object mUidRulesFirstLock = new Object();
     final Object mNetworkPoliciesSecondLock = new Object();
@@ -542,9 +559,42 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
      * {@link NetworkPolicyManager#BACKGROUND_THRESHOLD_STATE} will lose network access.
      * The delay is meant to prevent churn due to quick process-state changes.
      * Note that there is no delay while granting network access.
+     *
+     * This is only used when the flag {@link #mUseDifferentDelaysForBackgroundChain} is disabled.
      */
     @VisibleForTesting
     long mBackgroundRestrictionDelayMs = TimeUnit.SECONDS.toMillis(5);
+
+    /**
+     * Short delay after which a uid going into a process state having priority equal to
+     * {@link NetworkPolicyManager#BACKGROUND_THRESHOLD_STATE} or lower will lose network access.
+     *
+     * This will apply to apps that should be fine with losing network access immediately.
+     * It is only meant as a debounce to prevent churn due to quick process-state changes.
+     * Note that there is no delay while granting network access.
+     *
+     * This is only used when the flag {@link #mUseDifferentDelaysForBackgroundChain} is enabled.
+     */
+    @VisibleForTesting
+    long mBackgroundRestrictionShortDelayMs = TimeUnit.SECONDS.toMillis(2);
+
+    /**
+     * Long delay after which a uid going into a process state having priority equal to
+     * {@link NetworkPolicyManager#BACKGROUND_THRESHOLD_STATE} or lower will lose network access.
+     *
+     * Unlike {@link #mBackgroundRestrictionShortDelayMs}, this is meant to be applied to apps
+     * in sensitive proc-states like {@link ActivityManager#PROCESS_STATE_TOP_SLEEPING} and
+     * {@link ActivityManager#PROCESS_STATE_LAST_ACTIVITY}, where the user may switch to this app
+     * before this period and any latency in granting network access before resuming app activities
+     * may degrade experience.
+     *
+     * This is only used when the flag {@link #mUseDifferentDelaysForBackgroundChain} is enabled.
+     */
+    @VisibleForTesting
+    long mBackgroundRestrictionLongDelayMs = TimeUnit.SECONDS.toMillis(20);
+
+    @GuardedBy("mUidRulesFirstLock")
+    private long mNextProcessBackgroundUidsTime = Long.MAX_VALUE;
 
     /** Defined network policies. */
     @GuardedBy("mNetworkPoliciesSecondLock")
@@ -996,6 +1046,9 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             mAppStandby = LocalServices.getService(AppStandbyInternal.class);
             mActivityManagerInternal = LocalServices.getService(ActivityManagerInternal.class);
 
+            mUseMeteredFirewallChains = Flags.useMeteredFirewallChains();
+            mUseDifferentDelaysForBackgroundChain = Flags.useDifferentDelaysForBackgroundChain();
+
             synchronized (mUidRulesFirstLock) {
                 synchronized (mNetworkPoliciesSecondLock) {
                     updatePowerSaveAllowlistUL();
@@ -1213,16 +1266,14 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                 return false;
             }
             final int previousProcState = previousInfo.procState;
-            if (mBackgroundNetworkRestricted && (previousProcState >= BACKGROUND_THRESHOLD_STATE)
-                    != (newProcState >= BACKGROUND_THRESHOLD_STATE)) {
-                // Proc-state change crossed BACKGROUND_THRESHOLD_STATE: Network rules for the
-                // BACKGROUND chain may change.
-                return true;
-            }
             if ((previousProcState <= TOP_THRESHOLD_STATE)
-                    != (newProcState <= TOP_THRESHOLD_STATE)) {
-                // Proc-state change crossed TOP_THRESHOLD_STATE: Network rules for the
-                // LOW_POWER_STANDBY chain may change.
+                    || (newProcState <= TOP_THRESHOLD_STATE)) {
+                // If the proc-state change crossed TOP_THRESHOLD_STATE, network rules for the
+                // LOW_POWER_STANDBY chain may change, so we need to evaluate the transition.
+                // In addition, we always process changes when the new process state is
+                // TOP_THRESHOLD_STATE or below, to avoid situations where the TOP app ends up
+                // waiting for NPMS to finish processing newProcStateSeq, even when it was
+                // redundant (b/327303931).
                 return true;
             }
             if ((previousProcState <= FOREGROUND_THRESHOLD_STATE)
@@ -1230,6 +1281,22 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                 // Proc-state change crossed FOREGROUND_THRESHOLD_STATE: Network rules for many
                 // different chains may change.
                 return true;
+            }
+            if (mBackgroundNetworkRestricted) {
+                if ((previousProcState >= BACKGROUND_THRESHOLD_STATE)
+                    != (newProcState >= BACKGROUND_THRESHOLD_STATE)) {
+                    // Proc-state change crossed BACKGROUND_THRESHOLD_STATE: The network rules will
+                    // need to be re-evaluated for the background chain.
+                    return true;
+                }
+                if (mUseDifferentDelaysForBackgroundChain
+                        && newProcState >= BACKGROUND_THRESHOLD_STATE
+                        && getBackgroundTransitioningDelay(newProcState)
+                        < getBackgroundTransitioningDelay(previousProcState)) {
+                    // The old and new proc-state both are in the blocked state but the background
+                    // transition delay is reduced, so we may have to update the rules sooner.
+                    return true;
+                }
             }
             final int networkCapabilities = PROCESS_CAPABILITY_POWER_RESTRICTED_NETWORK
                     | PROCESS_CAPABILITY_USER_RESTRICTED_NETWORK;
@@ -1251,7 +1318,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                 if (isUidStateChangeRelevant(callbackInfo, procState, procStateSeq, capability)) {
                     callbackInfo.update(uid, procState, procStateSeq, capability);
                     if (!callbackInfo.isPending) {
-                        mUidEventHandler.obtainMessage(UID_MSG_STATE_CHANGED, callbackInfo)
+                        mUidEventHandler.obtainMessage(UID_MSG_STATE_CHANGED, uid, 0)
                                 .sendToTarget();
                         callbackInfo.isPending = true;
                     }
@@ -1263,7 +1330,6 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             synchronized (mUidStateCallbackInfos) {
                 mUidStateCallbackInfos.remove(uid);
             }
-            // TODO: b/327058756 - Remove any pending UID_MSG_STATE_CHANGED on the handler.
             mUidEventHandler.obtainMessage(UID_MSG_GONE, uid, 0).sendToTarget();
         }
     };
@@ -3004,9 +3070,10 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         }
     }
 
+    @EnforcePermission(MANAGE_NETWORK_POLICY)
     @Override
     public void setUidPolicy(int uid, int policy) {
-        mContext.enforceCallingOrSelfPermission(MANAGE_NETWORK_POLICY, TAG);
+        setUidPolicy_enforcePermission();
 
         if (!UserHandle.isApp(uid)) {
             throw new IllegalArgumentException("cannot apply policy to UID " + uid);
@@ -3025,9 +3092,10 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         }
     }
 
+    @EnforcePermission(MANAGE_NETWORK_POLICY)
     @Override
     public void addUidPolicy(int uid, int policy) {
-        mContext.enforceCallingOrSelfPermission(MANAGE_NETWORK_POLICY, TAG);
+        addUidPolicy_enforcePermission();
 
         if (!UserHandle.isApp(uid)) {
             throw new IllegalArgumentException("cannot apply policy to UID " + uid);
@@ -3043,9 +3111,10 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         }
     }
 
+    @EnforcePermission(MANAGE_NETWORK_POLICY)
     @Override
     public void removeUidPolicy(int uid, int policy) {
-        mContext.enforceCallingOrSelfPermission(MANAGE_NETWORK_POLICY, TAG);
+        removeUidPolicy_enforcePermission();
 
         if (!UserHandle.isApp(uid)) {
             throw new IllegalArgumentException("cannot apply policy to UID " + uid);
@@ -3110,18 +3179,20 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         }
     }
 
+    @EnforcePermission(MANAGE_NETWORK_POLICY)
     @Override
     public int getUidPolicy(int uid) {
-        mContext.enforceCallingOrSelfPermission(MANAGE_NETWORK_POLICY, TAG);
+        getUidPolicy_enforcePermission();
 
         synchronized (mUidRulesFirstLock) {
             return mUidPolicy.get(uid, POLICY_NONE);
         }
     }
 
+    @EnforcePermission(MANAGE_NETWORK_POLICY)
     @Override
     public int[] getUidsWithPolicy(int policy) {
-        mContext.enforceCallingOrSelfPermission(MANAGE_NETWORK_POLICY, TAG);
+        getUidsWithPolicy_enforcePermission();
 
         int[] uids = new int[0];
         synchronized (mUidRulesFirstLock) {
@@ -3217,9 +3288,10 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         mListeners.unregister(listener);
     }
 
+    @EnforcePermission(MANAGE_NETWORK_POLICY)
     @Override
     public void setNetworkPolicies(NetworkPolicy[] policies) {
-        mContext.enforceCallingOrSelfPermission(MANAGE_NETWORK_POLICY, TAG);
+        setNetworkPolicies_enforcePermission();
 
         final long token = Binder.clearCallingIdentity();
         try {
@@ -3240,9 +3312,10 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         setNetworkPolicies(policies);
     }
 
+    @EnforcePermission(MANAGE_NETWORK_POLICY)
     @Override
     public NetworkPolicy[] getNetworkPolicies(String callingPackage) {
-        mContext.enforceCallingOrSelfPermission(MANAGE_NETWORK_POLICY, TAG);
+        getNetworkPolicies_enforcePermission();
         try {
             mContext.enforceCallingOrSelfPermission(READ_PRIVILEGED_PHONE_STATE, TAG);
             // SKIP checking run-time OP_READ_PHONE_STATE since caller or self has PRIVILEGED
@@ -3338,9 +3411,10 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         return template;
     }
 
+    @EnforcePermission(MANAGE_NETWORK_POLICY)
     @Override
     public void snoozeLimit(NetworkTemplate template) {
-        mContext.enforceCallingOrSelfPermission(MANAGE_NETWORK_POLICY, TAG);
+        snoozeLimit_enforcePermission();
 
         final long token = Binder.clearCallingIdentity();
         try {
@@ -3448,9 +3522,10 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                 .sendToTarget();
     }
 
+    @EnforcePermission(ACCESS_NETWORK_STATE)
     @Override
     public int getRestrictBackgroundByCaller() {
-        mContext.enforceCallingOrSelfPermission(ACCESS_NETWORK_STATE, TAG);
+        getRestrictBackgroundByCaller_enforcePermission();
         return getRestrictBackgroundStatusInternal(Binder.getCallingUid());
     }
 
@@ -3483,18 +3558,20 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         }
     }
 
+    @EnforcePermission(MANAGE_NETWORK_POLICY)
     @Override
     public boolean getRestrictBackground() {
-        mContext.enforceCallingOrSelfPermission(MANAGE_NETWORK_POLICY, TAG);
+        getRestrictBackground_enforcePermission();
 
         synchronized (mUidRulesFirstLock) {
             return mRestrictBackground;
         }
     }
 
+    @EnforcePermission(MANAGE_NETWORK_POLICY)
     @Override
     public void setDeviceIdleMode(boolean enabled) {
-        mContext.enforceCallingOrSelfPermission(MANAGE_NETWORK_POLICY, TAG);
+        setDeviceIdleMode_enforcePermission();
         Trace.traceBegin(Trace.TRACE_TAG_NETWORK, "setDeviceIdleMode");
         try {
             synchronized (mUidRulesFirstLock) {
@@ -3519,9 +3596,10 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         }
     }
 
+    @EnforcePermission(MANAGE_NETWORK_POLICY)
     @Override
     public void setWifiMeteredOverride(String networkId, int meteredOverride) {
-        mContext.enforceCallingOrSelfPermission(MANAGE_NETWORK_POLICY, TAG);
+        setWifiMeteredOverride_enforcePermission();
         final long token = Binder.clearCallingIdentity();
         try {
             final WifiManager wm = mContext.getSystemService(WifiManager.class);
@@ -4014,8 +4092,12 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
 
                 fout.println();
                 fout.println("Flags:");
-                fout.println("Network blocked for TOP_SLEEPING and above: "
+                fout.println(Flags.FLAG_NETWORK_BLOCKED_FOR_TOP_SLEEPING_AND_ABOVE + ": "
                         + mBackgroundNetworkRestricted);
+                fout.println(Flags.FLAG_USE_METERED_FIREWALL_CHAINS + ": "
+                        + mUseMeteredFirewallChains);
+                fout.println(Flags.FLAG_USE_DIFFERENT_DELAYS_FOR_BACKGROUND_CHAIN + ": "
+                        + mUseDifferentDelaysForBackgroundChain);
 
                 fout.println();
                 fout.println("mRestrictBackgroundLowPowerMode: " + mRestrictBackgroundLowPowerMode);
@@ -4036,7 +4118,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                 fout.increaseIndent();
                 for (int i = 0; i < mSubscriptionPlans.size(); i++) {
                     final int subId = mSubscriptionPlans.keyAt(i);
-                    fout.println("Subscriber ID " + subId + ":");
+                    fout.println("Subscription ID " + subId + ":");
                     fout.increaseIndent();
                     final SubscriptionPlan[] plans = mSubscriptionPlans.valueAt(i);
                     if (!ArrayUtils.isEmpty(plans)) {
@@ -4159,20 +4241,34 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                     fout.decreaseIndent();
                 }
 
-                size = mBackgroundTransitioningUids.size();
-                if (size > 0) {
-                    final long nowUptime = SystemClock.uptimeMillis();
-                    fout.println("Uids transitioning to background:");
-                    fout.increaseIndent();
-                    for (int i = 0; i < size; i++) {
-                        fout.print("UID=");
-                        fout.print(mBackgroundTransitioningUids.keyAt(i));
-                        fout.print(", ");
-                        TimeUtils.formatDuration(mBackgroundTransitioningUids.valueAt(i), nowUptime,
-                                fout);
+                if (mBackgroundNetworkRestricted) {
+                    fout.println();
+                    if (mUseDifferentDelaysForBackgroundChain) {
+                        fout.print("Background restrictions short delay: ");
+                        TimeUtils.formatDuration(mBackgroundRestrictionShortDelayMs, fout);
+                        fout.println();
+
+                        fout.print("Background restrictions long delay: ");
+                        TimeUtils.formatDuration(mBackgroundRestrictionLongDelayMs, fout);
                         fout.println();
                     }
-                    fout.decreaseIndent();
+
+                    size = mBackgroundTransitioningUids.size();
+                    if (size > 0) {
+                        final long nowUptime = SystemClock.uptimeMillis();
+                        fout.println("Uids transitioning to background:");
+                        fout.increaseIndent();
+                        for (int i = 0; i < size; i++) {
+                            fout.print("UID=");
+                            fout.print(mBackgroundTransitioningUids.keyAt(i));
+                            fout.print(", ");
+                            TimeUtils.formatDuration(mBackgroundTransitioningUids.valueAt(i),
+                                    nowUptime, fout);
+                            fout.println();
+                        }
+                        fout.decreaseIndent();
+                    }
+                    fout.println();
                 }
 
                 final SparseBooleanArray knownUids = new SparseBooleanArray();
@@ -4210,6 +4306,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                 }
                 fout.decreaseIndent();
 
+                fout.println();
                 fout.println("Admin restricted uids for metered data:");
                 fout.increaseIndent();
                 size = mMeteredRestrictedUids.size();
@@ -4219,6 +4316,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                 }
                 fout.decreaseIndent();
 
+                fout.println();
                 fout.println("Network to interfaces:");
                 fout.increaseIndent();
                 for (int i = 0; i < mNetworkToIfaces.size(); ++i) {
@@ -4226,6 +4324,10 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                     fout.println(key + ": " + mNetworkToIfaces.get(key));
                 }
                 fout.decreaseIndent();
+
+                fout.println();
+                fout.print("Active notifications: ");
+                fout.println(mActiveNotifs);
 
                 fout.println();
                 mStatLogger.dump(fout);
@@ -4302,6 +4404,15 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                 || isProcStateAllowedNetworkWhileBackground(mUidState.get(uid));
     }
 
+    private long getBackgroundTransitioningDelay(int procState) {
+        if (mUseDifferentDelaysForBackgroundChain) {
+            return procState <= PROCESS_STATE_LAST_ACTIVITY ? mBackgroundRestrictionLongDelayMs
+                    : mBackgroundRestrictionShortDelayMs;
+        } else {
+            return mBackgroundRestrictionDelayMs;
+        }
+    }
+
     /**
      * Process state of UID changed; if needed, will trigger
      * {@link #updateRulesForDataUsageRestrictionsUL(int)} and
@@ -4310,7 +4421,9 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     @GuardedBy("mUidRulesFirstLock")
     private boolean updateUidStateUL(int uid, int procState, long procStateSeq,
             @ProcessCapability int capability) {
-        Trace.traceBegin(Trace.TRACE_TAG_NETWORK, "updateUidStateUL");
+        Trace.traceBegin(Trace.TRACE_TAG_NETWORK, "updateUidStateUL: " + uid + "/"
+                + ActivityManager.procStateToString(procState) + "/" + procStateSeq + "/"
+                + ActivityManager.getCapabilitiesSummary(capability));
         try {
             final UidState oldUidState = mUidState.get(uid);
             if (oldUidState != null && procStateSeq < oldUidState.procStateSeq) {
@@ -4350,19 +4463,41 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                         mBackgroundTransitioningUids.delete(uid);
                         updateRuleForBackgroundUL(uid);
                         updatePowerRestrictionRules = true;
-                    } else if (wasAllowed && !isAllowed) {
+                    } else if (!isAllowed) {
+                        final int transitionIdx = mBackgroundTransitioningUids.indexOfKey(uid);
                         final long completionTimeMs = SystemClock.uptimeMillis()
-                                + mBackgroundRestrictionDelayMs;
-                        if (mBackgroundTransitioningUids.indexOfKey(uid) < 0) {
-                            // This is just a defensive check in case the upstream code ever makes
-                            // multiple calls for the same process state change.
-                            mBackgroundTransitioningUids.put(uid, completionTimeMs);
+                                + getBackgroundTransitioningDelay(procState);
+                        boolean completionTimeUpdated = false;
+                        if (wasAllowed) {
+                            // Rules need to transition from allowed to blocked after the respective
+                            // delay.
+                            if (transitionIdx < 0) {
+                                // This is just a defensive check in case the upstream code ever
+                                // makes multiple calls for the same process state change.
+                                mBackgroundTransitioningUids.put(uid, completionTimeMs);
+                                completionTimeUpdated = true;
+                            }
+                        } else if (mUseDifferentDelaysForBackgroundChain) {
+                            // wasAllowed was false, but the transition delay may have reduced.
+                            // Currently, this can happen when the uid transitions from
+                            // LAST_ACTIVITY to CACHED_ACTIVITY, for example.
+                            if (transitionIdx >= 0
+                                    && completionTimeMs < mBackgroundTransitioningUids.valueAt(
+                                    transitionIdx)) {
+                                mBackgroundTransitioningUids.setValueAt(transitionIdx,
+                                        completionTimeMs);
+                                completionTimeUpdated = true;
+                            }
                         }
-                        if (!mHandler.hasMessages(MSG_PROCESS_BACKGROUND_TRANSITIONING_UIDS)) {
-                            // Many uids may be in this "transitioning" state at the same time, so
-                            // using one message at a time to avoid congestion in the MessageQueue.
+                        if (completionTimeUpdated
+                                && completionTimeMs < mNextProcessBackgroundUidsTime) {
+                            // Many uids may be in this "transitioning" state at the same time,
+                            // so we always keep one message to process transition completion at
+                            // the earliest time.
+                            mHandler.removeMessages(MSG_PROCESS_BACKGROUND_TRANSITIONING_UIDS);
                             mHandler.sendEmptyMessageAtTime(
                                     MSG_PROCESS_BACKGROUND_TRANSITIONING_UIDS, completionTimeMs);
+                            mNextProcessBackgroundUidsTime = completionTimeMs;
                         }
                     }
                 }
@@ -5349,23 +5484,44 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             postUidRulesChangedMsg(uid, uidRules);
         }
 
-        // Note that the conditionals below are for avoiding unnecessary calls to netd.
-        // TODO: Measure the performance for doing a no-op call to netd so that we can
-        // remove the conditionals to simplify the logic below. We can also further reduce
-        // some calls to netd if they turn out to be costly.
-        final int denylistReasons = BLOCKED_METERED_REASON_ADMIN_DISABLED
-                | BLOCKED_METERED_REASON_USER_RESTRICTED;
-        if ((oldEffectiveBlockedReasons & denylistReasons) != BLOCKED_REASON_NONE
-                || (newEffectiveBlockedReasons & denylistReasons) != BLOCKED_REASON_NONE) {
-            setMeteredNetworkDenylist(uid,
-                    (newEffectiveBlockedReasons & denylistReasons) != BLOCKED_REASON_NONE);
-        }
-        final int allowlistReasons = ALLOWED_METERED_REASON_FOREGROUND
-                | ALLOWED_METERED_REASON_USER_EXEMPTED;
-        if ((oldAllowedReasons & allowlistReasons) != ALLOWED_REASON_NONE
-                || (newAllowedReasons & allowlistReasons) != ALLOWED_REASON_NONE) {
-            setMeteredNetworkAllowlist(uid,
-                    (newAllowedReasons & allowlistReasons) != ALLOWED_REASON_NONE);
+        if (mUseMeteredFirewallChains) {
+            if ((newEffectiveBlockedReasons & BLOCKED_METERED_REASON_ADMIN_DISABLED)
+                    != BLOCKED_REASON_NONE) {
+                setUidFirewallRuleUL(FIREWALL_CHAIN_METERED_DENY_ADMIN, uid, FIREWALL_RULE_DENY);
+            } else {
+                setUidFirewallRuleUL(FIREWALL_CHAIN_METERED_DENY_ADMIN, uid, FIREWALL_RULE_DEFAULT);
+            }
+            if ((newEffectiveBlockedReasons & BLOCKED_METERED_REASON_USER_RESTRICTED)
+                    != BLOCKED_REASON_NONE) {
+                setUidFirewallRuleUL(FIREWALL_CHAIN_METERED_DENY_USER, uid, FIREWALL_RULE_DENY);
+            } else {
+                setUidFirewallRuleUL(FIREWALL_CHAIN_METERED_DENY_USER, uid, FIREWALL_RULE_DEFAULT);
+            }
+            if ((newAllowedReasons & (ALLOWED_METERED_REASON_FOREGROUND
+                    | ALLOWED_METERED_REASON_USER_EXEMPTED)) != ALLOWED_REASON_NONE) {
+                setUidFirewallRuleUL(FIREWALL_CHAIN_METERED_ALLOW, uid, FIREWALL_RULE_ALLOW);
+            } else {
+                setUidFirewallRuleUL(FIREWALL_CHAIN_METERED_ALLOW, uid, FIREWALL_RULE_DEFAULT);
+            }
+        } else {
+            // Note that the conditionals below are for avoiding unnecessary calls to netd.
+            // TODO: Measure the performance for doing a no-op call to netd so that we can
+            // remove the conditionals to simplify the logic below. We can also further reduce
+            // some calls to netd if they turn out to be costly.
+            final int denylistReasons = BLOCKED_METERED_REASON_ADMIN_DISABLED
+                    | BLOCKED_METERED_REASON_USER_RESTRICTED;
+            if ((oldEffectiveBlockedReasons & denylistReasons) != BLOCKED_REASON_NONE
+                    || (newEffectiveBlockedReasons & denylistReasons) != BLOCKED_REASON_NONE) {
+                setMeteredNetworkDenylist(uid,
+                        (newEffectiveBlockedReasons & denylistReasons) != BLOCKED_REASON_NONE);
+            }
+            final int allowlistReasons = ALLOWED_METERED_REASON_FOREGROUND
+                    | ALLOWED_METERED_REASON_USER_EXEMPTED;
+            if ((oldAllowedReasons & allowlistReasons) != ALLOWED_REASON_NONE
+                    || (newAllowedReasons & allowlistReasons) != ALLOWED_REASON_NONE) {
+                setMeteredNetworkAllowlist(uid,
+                        (newAllowedReasons & allowlistReasons) != ALLOWED_REASON_NONE);
+            }
         }
     }
 
@@ -5692,10 +5848,11 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                             updateRuleForBackgroundUL(uid);
                             updateRulesForPowerRestrictionsUL(uid, false);
                         }
-                    }
-                    if (nextCheckTime < Long.MAX_VALUE) {
-                        mHandler.sendEmptyMessageAtTime(MSG_PROCESS_BACKGROUND_TRANSITIONING_UIDS,
-                                nextCheckTime);
+                        mNextProcessBackgroundUidsTime = nextCheckTime;
+                        if (nextCheckTime < Long.MAX_VALUE) {
+                            mHandler.sendEmptyMessageAtTime(
+                                    MSG_PROCESS_BACKGROUND_TRANSITIONING_UIDS, nextCheckTime);
+                        }
                     }
                     return true;
                 }
@@ -5851,13 +6008,13 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     private final Handler.Callback mUidEventHandlerCallback = new Handler.Callback() {
         @Override
         public boolean handleMessage(Message msg) {
+            final int uid = msg.arg1;
             switch (msg.what) {
                 case UID_MSG_STATE_CHANGED: {
-                    handleUidChanged((UidStateCallbackInfo) msg.obj);
+                    handleUidChanged(uid);
                     return true;
                 }
                 case UID_MSG_GONE: {
-                    final int uid = msg.arg1;
                     handleUidGone(uid);
                     return true;
                 }
@@ -5868,23 +6025,27 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         }
     };
 
-    void handleUidChanged(@NonNull UidStateCallbackInfo uidStateCallbackInfo) {
+    void handleUidChanged(int uid) {
         Trace.traceBegin(Trace.TRACE_TAG_NETWORK, "onUidStateChanged");
         try {
-            boolean updated;
-            final int uid;
             final int procState;
             final long procStateSeq;
             final int capability;
-            synchronized (mUidRulesFirstLock) {
-                synchronized (mUidStateCallbackInfos) {
-                    uid = uidStateCallbackInfo.uid;
-                    procState = uidStateCallbackInfo.procState;
-                    procStateSeq = uidStateCallbackInfo.procStateSeq;
-                    capability = uidStateCallbackInfo.capability;
-                    uidStateCallbackInfo.isPending = false;
+            synchronized (mUidStateCallbackInfos) {
+                final UidStateCallbackInfo uidStateCallbackInfo = mUidStateCallbackInfos.get(uid);
+                if (uidStateCallbackInfo == null) {
+                    // This can happen if UidObserver#onUidGone gets called before we reach
+                    // here. In this case, there is no point in processing this change as this
+                    // will immediately be followed by a call to handleUidGone anyway.
+                    return;
                 }
-
+                procState = uidStateCallbackInfo.procState;
+                procStateSeq = uidStateCallbackInfo.procStateSeq;
+                capability = uidStateCallbackInfo.capability;
+                uidStateCallbackInfo.isPending = false;
+            }
+            final boolean updated;
+            synchronized (mUidRulesFirstLock) {
                 // We received a uid state change callback, add it to the history so that it
                 // will be useful for debugging.
                 mLogger.uidStateChanged(uid, procState, procStateSeq, capability);
@@ -5907,6 +6068,14 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     void handleUidGone(int uid) {
         Trace.traceBegin(Trace.TRACE_TAG_NETWORK, "onUidGone");
         try {
+            synchronized (mUidStateCallbackInfos) {
+                if (mUidStateCallbackInfos.contains(uid)) {
+                    // This can happen if UidObserver#onUidStateChanged gets called before we
+                    // reach here. In this case, there is no point in processing this change as this
+                    // will immediately be followed by a call to handleUidChanged anyway.
+                    return;
+                }
+            }
             final boolean updated;
             synchronized (mUidRulesFirstLock) {
                 updated = removeUidStateUL(uid);
@@ -6113,6 +6282,8 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             } else if (chain == FIREWALL_CHAIN_BACKGROUND) {
                 mUidFirewallBackgroundRules.put(uid, rule);
             }
+            // Note that we do not need keep a separate cache of uid rules for chains that we do
+            // not call #setUidFirewallRulesUL for.
 
             try {
                 mNetworkManager.setFirewallUidRule(chain, uid, rule);
@@ -6170,10 +6341,19 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                     FIREWALL_RULE_DEFAULT);
             mNetworkManager.setFirewallUidRule(FIREWALL_CHAIN_BACKGROUND, uid,
                     FIREWALL_RULE_DEFAULT);
-            mNetworkManager.setUidOnMeteredNetworkAllowlist(uid, false);
-            mLogger.meteredAllowlistChanged(uid, false);
-            mNetworkManager.setUidOnMeteredNetworkDenylist(uid, false);
-            mLogger.meteredDenylistChanged(uid, false);
+            if (mUseMeteredFirewallChains) {
+                mNetworkManager.setFirewallUidRule(FIREWALL_CHAIN_METERED_DENY_ADMIN, uid,
+                        FIREWALL_RULE_DEFAULT);
+                mNetworkManager.setFirewallUidRule(FIREWALL_CHAIN_METERED_DENY_USER, uid,
+                        FIREWALL_RULE_DEFAULT);
+                mNetworkManager.setFirewallUidRule(FIREWALL_CHAIN_METERED_ALLOW, uid,
+                        FIREWALL_RULE_DEFAULT);
+            } else {
+                mNetworkManager.setUidOnMeteredNetworkAllowlist(uid, false);
+                mLogger.meteredAllowlistChanged(uid, false);
+                mNetworkManager.setUidOnMeteredNetworkDenylist(uid, false);
+                mLogger.meteredDenylistChanged(uid, false);
+            }
         } catch (IllegalStateException e) {
             Log.wtf(TAG, "problem resetting firewall uid rules for " + uid, e);
         } catch (RemoteException e) {
@@ -6291,9 +6471,10 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         }
     }
 
+    @EnforcePermission(NETWORK_SETTINGS)
     @Override
     public void factoryReset(String subscriber) {
-        mContext.enforceCallingOrSelfPermission(NETWORK_SETTINGS, TAG);
+        factoryReset_enforcePermission();
 
         if (mUserManager.hasUserRestriction(UserManager.DISALLOW_NETWORK_RESET)) {
             return;
@@ -6352,9 +6533,10 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         return blockedReasons != BLOCKED_REASON_NONE;
     }
 
+    @EnforcePermission(OBSERVE_NETWORK_POLICY)
     @Override
     public boolean isUidRestrictedOnMeteredNetworks(int uid) {
-        mContext.enforceCallingOrSelfPermission(OBSERVE_NETWORK_POLICY, TAG);
+        isUidRestrictedOnMeteredNetworks_enforcePermission();
         synchronized (mUidBlockedState) {
             final UidBlockedState uidBlockedState = mUidBlockedState.get(uid);
             int blockedReasons = uidBlockedState == null
@@ -6945,7 +7127,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
          * Build unique tag that identifies an active {@link NetworkPolicy}
          * notification of a specific type, like {@link #TYPE_LIMIT}.
          */
-        private String buildNotificationTag(NetworkPolicy policy, int type) {
+        private static String buildNotificationTag(NetworkPolicy policy, int type) {
             return TAG + ":" + policy.template.hashCode() + ":" + type;
         }
 
@@ -6955,6 +7137,11 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
 
         public int getId() {
             return mId;
+        }
+
+        @Override
+        public String toString() {
+            return mTag;
         }
     }
 }

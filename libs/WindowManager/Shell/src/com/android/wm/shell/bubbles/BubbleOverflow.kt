@@ -27,7 +27,9 @@ import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.InsetDrawable
 import android.util.PathParser
 import android.view.LayoutInflater
+import android.view.View.VISIBLE
 import android.widget.FrameLayout
+import androidx.core.content.ContextCompat
 import com.android.launcher3.icons.BubbleIconFactory
 import com.android.wm.shell.R
 import com.android.wm.shell.bubbles.bar.BubbleBarExpandedView
@@ -54,13 +56,32 @@ class BubbleOverflow(private val context: Context, private val positioner: Bubbl
     }
 
     /** Call before use and again if cleanUpExpandedState was called. */
-    fun initialize(controller: BubbleController, forBubbleBar: Boolean) {
-        if (forBubbleBar) {
-            createBubbleBarExpandedView().initialize(controller, true /* isOverflow */)
-        } else {
-            createExpandedView()
-                .initialize(controller, controller.stackView, true /* isOverflow */)
-        }
+    fun initialize(
+        expandedViewManager: BubbleExpandedViewManager,
+        stackView: BubbleStackView,
+        positioner: BubblePositioner
+    ) {
+        createExpandedView()
+                .initialize(
+                        expandedViewManager,
+                    stackView,
+                    positioner,
+                    /* isOverflow= */ true,
+                    /* bubbleTaskView= */ null
+                )
+    }
+
+    fun initializeForBubbleBar(
+        expandedViewManager: BubbleExpandedViewManager,
+        positioner: BubblePositioner
+    ) {
+        createBubbleBarExpandedView()
+            .initialize(
+                expandedViewManager,
+                positioner,
+                /* isOverflow= */ true,
+                /* bubbleTaskView= */ null
+            )
     }
 
     fun cleanUpExpandedState() {
@@ -112,7 +133,10 @@ class BubbleOverflow(private val context: Context, private val positioner: Bubbl
                 context,
                 res.getDimensionPixelSize(R.dimen.bubble_size),
                 res.getDimensionPixelSize(R.dimen.bubble_badge_size),
-                res.getColor(R.color.important_conversation),
+                ContextCompat.getColor(
+                    context,
+                    com.android.launcher3.icons.R.color.important_conversation
+                ),
                 res.getDimensionPixelSize(com.android.internal.R.dimen.importance_ring_stroke_width)
             )
 
@@ -156,7 +180,9 @@ class BubbleOverflow(private val context: Context, private val positioner: Bubbl
 
     fun setShowDot(show: Boolean) {
         showDot = show
-        overflowBtn?.updateDotVisibility(true /* animate */)
+        if (overflowBtn?.visibility == VISIBLE) {
+            overflowBtn?.updateDotVisibility(true /* animate */)
+        }
     }
 
     /** Creates the expanded view for bubbles showing in the stack view. */

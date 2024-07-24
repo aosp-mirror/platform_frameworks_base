@@ -38,7 +38,6 @@ import android.graphics.PointF;
 import android.hardware.SensorPrivacyManager;
 import android.hardware.SensorPrivacyManager.Sensors;
 import android.hardware.SensorPrivacyManagerInternal;
-import android.hardware.display.DisplayManager;
 import android.hardware.display.DisplayManagerInternal;
 import android.hardware.display.DisplayViewport;
 import android.hardware.input.HostUsiVersion;
@@ -48,12 +47,14 @@ import android.hardware.input.IInputDevicesChangedListener;
 import android.hardware.input.IInputManager;
 import android.hardware.input.IInputSensorEventListener;
 import android.hardware.input.IKeyboardBacklightListener;
+import android.hardware.input.IStickyModifierStateListener;
 import android.hardware.input.ITabletModeChangedListener;
 import android.hardware.input.InputDeviceIdentifier;
 import android.hardware.input.InputManager;
 import android.hardware.input.InputSensorInfo;
 import android.hardware.input.InputSettings;
 import android.hardware.input.KeyboardLayout;
+import android.hardware.input.KeyboardLayoutSelectionResult;
 import android.hardware.input.TouchCalibration;
 import android.hardware.lights.Light;
 import android.hardware.lights.LightState;
@@ -63,7 +64,6 @@ import android.os.CombinedVibration;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.IBinder;
-import android.os.IInputConstants;
 import android.os.IVibratorStateListener;
 import android.os.InputEventInjectionResult;
 import android.os.InputEventInjectionSync;
@@ -95,6 +95,7 @@ import android.view.InputChannel;
 import android.view.InputDevice;
 import android.view.InputEvent;
 import android.view.InputMonitor;
+import android.view.KeyCharacterMap;
 import android.view.KeyEvent;
 import android.view.PointerIcon;
 import android.view.Surface;
@@ -116,6 +117,7 @@ import com.android.server.DisplayThread;
 import com.android.server.LocalServices;
 import com.android.server.Watchdog;
 import com.android.server.input.InputManagerInternal.LidSwitchCallback;
+import com.android.server.input.debug.FocusEventDebugView;
 import com.android.server.inputmethod.InputMethodManagerInternal;
 import com.android.server.policy.WindowManagerPolicy;
 
@@ -167,9 +169,6 @@ public class InputManagerService extends IInputManager.Stub
     private DisplayManagerInternal mDisplayManagerInternal;
 
     private InputMethodManagerInternal mInputMethodManagerInternal;
-
-    // Context cache used for loading pointer resources.
-    private Context mPointerIconDisplayContext;
 
     private final File mDoubleTouchGestureEnableFile;
 
@@ -293,6 +292,8 @@ public class InputManagerService extends IInputManager.Stub
     @GuardedBy("mAdditionalDisplayInputPropertiesLock")
     private final AdditionalDisplayInputProperties mCurrentDisplayProperties =
             new AdditionalDisplayInputProperties();
+    // TODO(b/293587049): Pointer Icon Refactor: There can be more than one pointer icon
+    // visible at once. Update this to support multi-pointer use cases.
     @GuardedBy("mAdditionalDisplayInputPropertiesLock")
     private int mPointerIconType = PointerIcon.TYPE_NOT_SPECIFIED;
     @GuardedBy("mAdditionalDisplayInputPropertiesLock")
@@ -315,8 +316,14 @@ public class InputManagerService extends IInputManager.Stub
     // Manages Keyboard backlight
     private final KeyboardBacklightControllerInterface mKeyboardBacklightController;
 
+    // Manages Sticky modifier state
+    private final StickyModifierStateController mStickyModifierStateController;
+
     // Manages Keyboard modifier keys remapping
     private final KeyRemapper mKeyRemapper;
+
+    // Manages loading PointerIcons
+    private final PointerIconCache mPointerIconCache;
 
     // Maximum number of milliseconds to wait for input event injection.
     private static final int INJECTION_TIMEOUT_MILLIS = 30 * 1000;
@@ -401,6 +408,8 @@ public class InputManagerService extends IInputManager.Stub
     @GuardedBy("mFocusEventDebugViewLock")
     @Nullable
     private FocusEventDebugView mFocusEventDebugView;
+    private boolean mShowKeyPresses = false;
+    private boolean mShowRotaryInput = false;
 
     /** Point of injection for test dependencies. */
     @VisibleForTesting
@@ -458,7 +467,9 @@ public class InputManagerService extends IInputManager.Stub
                 ? new KeyboardBacklightController(mContext, mNative, mDataStore,
                         injector.getLooper(), injector.getUEventManager())
                 : new KeyboardBacklightControllerInterface() {};
+        mStickyModifierStateController = new StickyModifierStateController();
         mKeyRemapper = new KeyRemapper(mContext, mNative, mDataStore, injector.getLooper());
+        mPointerIconCache = new PointerIconCache(mContext, mNative);
 
         mUseDevInputEventForAudioJack =
                 mContext.getResources().getBoolean(R.bool.config_useDevInputEventForAudioJack);
@@ -572,10 +583,7 @@ public class InputManagerService extends IInputManager.Stub
         mBatteryController.systemRunning();
         mKeyboardBacklightController.systemRunning();
         mKeyRemapper.systemRunning();
-
-        mNative.setStylusPointerIconEnabled(
-                Objects.requireNonNull(mContext.getSystemService(InputManager.class))
-                        .isStylusPointerIconEnabled());
+        mPointerIconCache.systemRunning();
     }
 
     private void reloadDeviceAliases() {
@@ -680,13 +688,21 @@ public class InputManagerService extends IInputManager.Stub
         return mNative.getKeyCodeForKeyLocation(deviceId, locationKeyCode);
     }
 
+    @Override // Binder call
+    public KeyCharacterMap getKeyCharacterMap(@NonNull String layoutDescriptor) {
+        Objects.requireNonNull(layoutDescriptor, "layoutDescriptor must not be null");
+        return mKeyboardLayoutManager.getKeyCharacterMap(layoutDescriptor);
+    }
+
     /**
      * Transfer the current touch gesture to the provided window.
      *
      * @param destChannelToken The token of the window or input channel that should receive the
      * gesture
      * @return True if the transfer succeeded, false if there was no active touch gesture happening
+     * @deprecated Use {@link #transferTouchGesture(IBinder, IBinder)}
      */
+    @Deprecated
     public boolean transferTouch(IBinder destChannelToken, int displayId) {
         // TODO(b/162194035): Replace this with a SPY window
         Objects.requireNonNull(destChannelToken, "destChannelToken must not be null");
@@ -1229,9 +1245,9 @@ public class InputManagerService extends IInputManager.Stub
     }
 
     @Override // Binder call
-    public String getKeyboardLayoutForInputDevice(InputDeviceIdentifier identifier,
-            @UserIdInt int userId, @NonNull InputMethodInfo imeInfo,
-            @Nullable InputMethodSubtype imeSubtype) {
+    public KeyboardLayoutSelectionResult getKeyboardLayoutForInputDevice(
+            InputDeviceIdentifier identifier, @UserIdInt int userId,
+            @NonNull InputMethodInfo imeInfo, @Nullable InputMethodSubtype imeSubtype) {
         return mKeyboardLayoutManager.getKeyboardLayoutForInputDevice(identifier, userId,
                 imeInfo, imeSubtype);
     }
@@ -1269,13 +1285,10 @@ public class InputManagerService extends IInputManager.Stub
 
     /** Clean up input window handles of the given display. */
     public void onDisplayRemoved(int displayId) {
-        if (mPointerIconDisplayContext != null
-                && mPointerIconDisplayContext.getDisplay().getDisplayId() == displayId) {
-            mPointerIconDisplayContext = null;
-        }
-
         updateAdditionalDisplayInputProperties(displayId, AdditionalDisplayInputProperties::reset);
 
+        // TODO(b/320763728): Rely on WindowInfosListener to determine when a display has been
+        //  removed in InputDispatcher instead of this callback.
         mNative.displayRemoved(displayId);
     }
 
@@ -1295,43 +1308,44 @@ public class InputManagerService extends IInputManager.Stub
     }
 
     /**
-     * Atomically transfers touch focus from one window to another as identified by
-     * their input channels.  It is possible for multiple windows to have
-     * touch focus if they support split touch dispatch
-     * {@link android.view.WindowManager.LayoutParams#FLAG_SPLIT_TOUCH} but this
-     * method only transfers touch focus of the specified window without affecting
-     * other windows that may also have touch focus at the same time.
-     * @param fromChannel The channel of a window that currently has touch focus.
-     * @param toChannel The channel of the window that should receive touch focus in
-     * place of the first.
-     * @param isDragDrop True if transfer touch focus for drag and drop.
-     * @return True if the transfer was successful.  False if the window with the
-     * specified channel did not actually have touch focus at the time of the request.
+     * Start drag and drop.
+     *
+     * @param fromChannel The input channel that is currently receiving a touch gesture that should
+     *                    be turned into the drag pointer.
+     * @param dragAndDropChannel The input channel associated with the system drag window.
+     * @return true if drag and drop was successfully started, false otherwise.
      */
-    public boolean transferTouchFocus(@NonNull InputChannel fromChannel,
-            @NonNull InputChannel toChannel, boolean isDragDrop) {
-        return mNative.transferTouchFocus(fromChannel.getToken(), toChannel.getToken(),
-                isDragDrop);
+    public boolean startDragAndDrop(@NonNull InputChannel fromChannel,
+            @NonNull InputChannel dragAndDropChannel) {
+        return mNative.transferTouchGesture(fromChannel.getToken(), dragAndDropChannel.getToken(),
+                true /* isDragDrop */);
     }
 
     /**
-     * Atomically transfers touch focus from one window to another as identified by
-     * their input channels.  It is possible for multiple windows to have
-     * touch focus if they support split touch dispatch
-     * {@link android.view.WindowManager.LayoutParams#FLAG_SPLIT_TOUCH} but this
-     * method only transfers touch focus of the specified window without affecting
-     * other windows that may also have touch focus at the same time.
-     * @param fromChannelToken The channel token of a window that currently has touch focus.
-     * @param toChannelToken The channel token of the window that should receive touch focus in
-     * place of the first.
-     * @return True if the transfer was successful.  False if the window with the
-     * specified channel did not actually have touch focus at the time of the request.
+     * Atomically transfers an active touch gesture from one window to another, as identified by
+     * their input channels.
+     *
+     * <p>Only the touch gesture that is currently being dispatched to a window associated with
+     * {@code fromChannelToken} will be effected. That window will no longer receive
+     * the touch gesture (i.e. it will receive {@link android.view.MotionEvent#ACTION_CANCEL}).
+     * A window associated with the {@code toChannelToken} will receive the rest of the gesture
+     * (i.e. beginning with {@link android.view.MotionEvent#ACTION_DOWN} or
+     * {@link android.view.MotionEvent#ACTION_POINTER_DOWN}).
+     *
+     * <p>Transferring touch gestures will have no impact on focused windows. If the {@code
+     * toChannelToken} window is focusable, this will not bring focus to that window.
+     *
+     * @param fromChannelToken The channel token of a window that has an active touch gesture.
+     * @param toChannelToken The channel token of the window that should receive the gesture in
+     *   place of the first.
+     * @return True if the transfer was successful. False if the specified windows don't exist, or
+     *   if the source window is not actively receiving a touch gesture at the time of the request.
      */
-    public boolean transferTouchFocus(@NonNull IBinder fromChannelToken,
+    public boolean transferTouchGesture(@NonNull IBinder fromChannelToken,
             @NonNull IBinder toChannelToken) {
         Objects.requireNonNull(fromChannelToken);
         Objects.requireNonNull(toChannelToken);
-        return mNative.transferTouchFocus(fromChannelToken, toChannelToken,
+        return mNative.transferTouchGesture(fromChannelToken, toChannelToken,
                 false /* isDragDrop */);
     }
 
@@ -1360,9 +1374,9 @@ public class InputManagerService extends IInputManager.Stub
         mNative.setPointerSpeed(speed);
     }
 
-    private void setPointerAcceleration(float acceleration, int displayId) {
+    private void setMousePointerAccelerationEnabled(boolean enabled, int displayId) {
         updateAdditionalDisplayInputProperties(displayId,
-                properties -> properties.pointerAcceleration = acceleration);
+                properties -> properties.mousePointerAccelerationEnabled = enabled);
     }
 
     private void setPointerIconVisible(boolean visible, int displayId) {
@@ -1397,6 +1411,10 @@ public class InputManagerService extends IInputManager.Stub
     }
 
     private boolean setVirtualMousePointerDisplayIdBlocking(int overrideDisplayId) {
+        if (com.android.input.flags.Flags.enablePointerChoreographer()) {
+            throw new IllegalStateException(
+                    "This must not be used when PointerChoreographer is enabled");
+        }
         final boolean isRemovingOverride = overrideDisplayId == Display.INVALID_DISPLAY;
 
         // Take care to not make calls to window manager while holding internal locks.
@@ -1435,6 +1453,10 @@ public class InputManagerService extends IInputManager.Stub
     }
 
     private int getVirtualMousePointerDisplayId() {
+        if (com.android.input.flags.Flags.enablePointerChoreographer()) {
+            throw new IllegalStateException(
+                    "This must not be used when PointerChoreographer is enabled");
+        }
         synchronized (mAdditionalDisplayInputPropertiesLock) {
             return mOverriddenPointerDisplayId;
         }
@@ -1748,6 +1770,19 @@ public class InputManagerService extends IInputManager.Stub
             if (!mCurrentDisplayProperties.pointerIconVisible) return;
 
             mNative.setCustomPointerIcon(mPointerIcon);
+        }
+    }
+
+    // Binder call
+    @Override
+    public boolean setPointerIcon(PointerIcon icon, int displayId, int deviceId, int pointerId,
+            IBinder inputToken) {
+        Objects.requireNonNull(icon);
+        synchronized (mAdditionalDisplayInputPropertiesLock) {
+            mPointerIconType = icon.getType();
+            mPointerIcon = mPointerIconType == PointerIcon.TYPE_CUSTOM ? icon : null;
+
+            return mNative.setPointerIcon(icon, displayId, deviceId, pointerId, inputToken);
         }
     }
 
@@ -2234,7 +2269,8 @@ public class InputManagerService extends IInputManager.Stub
                             + mAdditionalDisplayInputProperties.keyAt(i));
                     final AdditionalDisplayInputProperties properties =
                             mAdditionalDisplayInputProperties.valueAt(i);
-                    pw.println("pointerAcceleration: " + properties.pointerAcceleration);
+                    pw.println("mousePointerAccelerationEnabled: "
+                            + properties.mousePointerAccelerationEnabled);
                     pw.println("pointerIconVisible: " + properties.pointerIconVisible);
                 }
                 pw.decreaseIndent();
@@ -2302,6 +2338,7 @@ public class InputManagerService extends IInputManager.Stub
         synchronized (mInputMonitors) { /* Test if blocked by input monitor lock. */ }
         synchronized (mAdditionalDisplayInputPropertiesLock) { /* Test if blocked by props lock */ }
         mBatteryController.monitor();
+        mPointerIconCache.monitor();
         mNative.monitor();
     }
 
@@ -2492,7 +2529,7 @@ public class InputManagerService extends IInputManager.Stub
     private int interceptKeyBeforeQueueing(KeyEvent event, int policyFlags) {
         synchronized (mFocusEventDebugViewLock) {
             if (mFocusEventDebugView != null) {
-                mFocusEventDebugView.reportEvent(event);
+                mFocusEventDebugView.reportKeyEvent(event);
             }
         }
         return mWindowManagerCallbacks.interceptKeyBeforeQueueing(event, policyFlags);
@@ -2501,9 +2538,9 @@ public class InputManagerService extends IInputManager.Stub
     // Native callback.
     @SuppressWarnings("unused")
     private int interceptMotionBeforeQueueingNonInteractive(int displayId,
-            long whenNanos, int policyFlags) {
+            int source, int action, long whenNanos, int policyFlags) {
         return mWindowManagerCallbacks.interceptMotionBeforeQueueingNonInteractive(
-                displayId, whenNanos, policyFlags);
+                displayId, source, action, whenNanos, policyFlags);
     }
 
     // Native callback.
@@ -2664,18 +2701,6 @@ public class InputManagerService extends IInputManager.Stub
 
     // Native callback.
     @SuppressWarnings("unused")
-    private int getKeyRepeatTimeout() {
-        return ViewConfiguration.getKeyRepeatTimeout();
-    }
-
-    // Native callback.
-    @SuppressWarnings("unused")
-    private int getKeyRepeatDelay() {
-        return ViewConfiguration.getKeyRepeatDelay();
-    }
-
-    // Native callback.
-    @SuppressWarnings("unused")
     private int getHoverTapTimeout() {
         return ViewConfiguration.getHoverTapTimeout();
     }
@@ -2706,8 +2731,8 @@ public class InputManagerService extends IInputManager.Stub
 
     // Native callback.
     @SuppressWarnings("unused")
-    private PointerIcon getPointerIcon(int displayId) {
-        return PointerIcon.getDefaultIcon(getContextForPointerIcon(displayId));
+    private @NonNull PointerIcon getLoadedPointerIcon(int displayId, int type) {
+        return mPointerIconCache.getLoadedPointerIcon(displayId, type);
     }
 
     // Native callback.
@@ -2720,49 +2745,14 @@ public class InputManagerService extends IInputManager.Stub
         return sc.mNativeObject;
     }
 
-    @NonNull
-    private Context getContextForPointerIcon(int displayId) {
-        if (mPointerIconDisplayContext != null
-                && mPointerIconDisplayContext.getDisplay().getDisplayId() == displayId) {
-            return mPointerIconDisplayContext;
-        }
-
-        // Create and cache context for non-default display.
-        mPointerIconDisplayContext = getContextForDisplay(displayId);
-
-        // Fall back to default display if the requested displayId does not exist.
-        if (mPointerIconDisplayContext == null) {
-            mPointerIconDisplayContext = getContextForDisplay(Display.DEFAULT_DISPLAY);
-        }
-        return mPointerIconDisplayContext;
-    }
-
-    @Nullable
-    private Context getContextForDisplay(int displayId) {
-        if (displayId == Display.INVALID_DISPLAY) {
-            return null;
-        }
-        if (mContext.getDisplay().getDisplayId() == displayId) {
-            return mContext;
-        }
-
-        final DisplayManager displayManager = Objects.requireNonNull(
-                mContext.getSystemService(DisplayManager.class));
-        final Display display = displayManager.getDisplay(displayId);
-        if (display == null) {
-            return null;
-        }
-
-        return mContext.createDisplayContext(display);
-    }
-
     // Native callback.
     @SuppressWarnings("unused")
-    private String[] getKeyboardLayoutOverlay(InputDeviceIdentifier identifier) {
+    private String[] getKeyboardLayoutOverlay(InputDeviceIdentifier identifier, String languageTag,
+            String layoutType) {
         if (!mSystemReady) {
             return null;
         }
-        return mKeyboardLayoutManager.getKeyboardLayoutOverlay(identifier);
+        return mKeyboardLayoutManager.getKeyboardLayoutOverlay(identifier, languageTag, layoutType);
     }
 
     @EnforcePermission(Manifest.permission.REMAP_MODIFIER_KEYS)
@@ -2814,6 +2804,33 @@ public class InputManagerService extends IInputManager.Stub
         mHandler.obtainMessage(MSG_POINTER_DISPLAY_ID_CHANGED,
                 new PointerDisplayIdChangedArgs(pointerDisplayId, xPosition,
                         yPosition)).sendToTarget();
+    }
+
+    @Override
+    @EnforcePermission(Manifest.permission.MONITOR_STICKY_MODIFIER_STATE)
+    public void registerStickyModifierStateListener(
+            @NonNull IStickyModifierStateListener listener) {
+        super.registerStickyModifierStateListener_enforcePermission();
+        Objects.requireNonNull(listener);
+        mStickyModifierStateController.registerStickyModifierStateListener(listener,
+                Binder.getCallingPid());
+    }
+
+    @Override
+    @EnforcePermission(Manifest.permission.MONITOR_STICKY_MODIFIER_STATE)
+    public void unregisterStickyModifierStateListener(
+            @NonNull IStickyModifierStateListener listener) {
+        super.unregisterStickyModifierStateListener_enforcePermission();
+        Objects.requireNonNull(listener);
+        mStickyModifierStateController.unregisterStickyModifierStateListener(listener,
+                Binder.getCallingPid());
+    }
+
+    // Native callback
+    @SuppressWarnings("unused")
+    void notifyStickyModifierStateChanged(int modifierState, int lockedModifierState) {
+        mStickyModifierStateController.notifyStickyModifierStateChanged(modifierState,
+                lockedModifierState);
     }
 
     // Native callback.
@@ -2890,8 +2907,8 @@ public class InputManagerService extends IInputManager.Stub
          * processing when the device is in a non-interactive state since these events are normally
          * dropped.
          */
-        int interceptMotionBeforeQueueingNonInteractive(int displayId, long whenNanos,
-                int policyFlags);
+        int interceptMotionBeforeQueueingNonInteractive(int displayId, int source, int action,
+                long whenNanos, int policyFlags);
 
         /**
          * This callback is invoked just before the key is about to be sent to an application.
@@ -3220,9 +3237,9 @@ public class InputManagerService extends IInputManager.Stub
         }
 
         @Override
-        public boolean transferTouchFocus(@NonNull IBinder fromChannelToken,
+        public boolean transferTouchGesture(@NonNull IBinder fromChannelToken,
                 @NonNull IBinder toChannelToken) {
-            return InputManagerService.this.transferTouchFocus(fromChannelToken, toChannelToken);
+            return InputManagerService.this.transferTouchGesture(fromChannelToken, toChannelToken);
         }
 
         @Override
@@ -3237,8 +3254,8 @@ public class InputManagerService extends IInputManager.Stub
         }
 
         @Override
-        public PointF getCursorPosition() {
-            final float[] p = mNative.getMouseCursorPosition();
+        public PointF getCursorPosition(int displayId) {
+            final float[] p = mNative.getMouseCursorPosition(displayId);
             if (p == null || p.length != 2) {
                 throw new IllegalStateException("Failed to get mouse cursor position");
             }
@@ -3246,8 +3263,8 @@ public class InputManagerService extends IInputManager.Stub
         }
 
         @Override
-        public void setPointerAcceleration(float acceleration, int displayId) {
-            InputManagerService.this.setPointerAcceleration(acceleration, displayId);
+        public void setMousePointerAccelerationEnabled(boolean enabled, int displayId) {
+            InputManagerService.this.setMousePointerAccelerationEnabled(enabled, displayId);
         }
 
         @Override
@@ -3339,11 +3356,15 @@ public class InputManagerService extends IInputManager.Stub
     private static class AdditionalDisplayInputProperties {
 
         static final boolean DEFAULT_POINTER_ICON_VISIBLE = true;
-        static final float DEFAULT_POINTER_ACCELERATION =
-                (float) IInputConstants.DEFAULT_POINTER_ACCELERATION;
+        static final boolean DEFAULT_MOUSE_POINTER_ACCELERATION_ENABLED = true;
 
-        // The pointer acceleration for this display.
-        public float pointerAcceleration;
+        /**
+         * Whether to enable mouse pointer acceleration on this display. Note that this only affects
+         * pointer movements from mice (that is, pointing devices which send relative motions,
+         * including trackballs and pointing sticks), not from other pointer devices such as
+         * touchpads and styluses.
+         */
+        public boolean mousePointerAccelerationEnabled;
 
         // Whether the pointer icon should be visible or hidden on this display.
         public boolean pointerIconVisible;
@@ -3353,12 +3374,12 @@ public class InputManagerService extends IInputManager.Stub
         }
 
         public boolean allDefaults() {
-            return Float.compare(pointerAcceleration, DEFAULT_POINTER_ACCELERATION) == 0
+            return mousePointerAccelerationEnabled == DEFAULT_MOUSE_POINTER_ACCELERATION_ENABLED
                     && pointerIconVisible == DEFAULT_POINTER_ICON_VISIBLE;
         }
 
         public void reset() {
-            pointerAcceleration = DEFAULT_POINTER_ACCELERATION;
+            mousePointerAccelerationEnabled = DEFAULT_MOUSE_POINTER_ACCELERATION_ENABLED;
             pointerIconVisible = DEFAULT_POINTER_ICON_VISIBLE;
         }
     }
@@ -3376,6 +3397,10 @@ public class InputManagerService extends IInputManager.Stub
     private void applyAdditionalDisplayInputPropertiesLocked(
             AdditionalDisplayInputProperties properties) {
         // Handle changes to each of the individual properties.
+        // TODO(b/293587049): This approach for updating pointer display properties is only for when
+        //  PointerChoreographer is disabled. Remove this logic when PointerChoreographer is
+        //  permanently enabled.
+
         if (properties.pointerIconVisible != mCurrentDisplayProperties.pointerIconVisible) {
             mCurrentDisplayProperties.pointerIconVisible = properties.pointerIconVisible;
             if (properties.pointerIconVisible) {
@@ -3390,9 +3415,10 @@ public class InputManagerService extends IInputManager.Stub
             }
         }
 
-        if (properties.pointerAcceleration != mCurrentDisplayProperties.pointerAcceleration) {
-            mCurrentDisplayProperties.pointerAcceleration = properties.pointerAcceleration;
-            mNative.setPointerAcceleration(properties.pointerAcceleration);
+        if (properties.mousePointerAccelerationEnabled
+                != mCurrentDisplayProperties.mousePointerAccelerationEnabled) {
+            mCurrentDisplayProperties.mousePointerAccelerationEnabled =
+                    properties.mousePointerAccelerationEnabled;
         }
     }
 
@@ -3405,7 +3431,16 @@ public class InputManagerService extends IInputManager.Stub
                 properties = new AdditionalDisplayInputProperties();
                 mAdditionalDisplayInputProperties.put(displayId, properties);
             }
+            final boolean oldPointerIconVisible = properties.pointerIconVisible;
+            final boolean oldMouseAccelerationEnabled = properties.mousePointerAccelerationEnabled;
             updater.accept(properties);
+            if (oldPointerIconVisible != properties.pointerIconVisible) {
+                mNative.setPointerIconVisibility(displayId, properties.pointerIconVisible);
+            }
+            if (oldMouseAccelerationEnabled != properties.mousePointerAccelerationEnabled) {
+                mNative.setMousePointerAccelerationEnabled(displayId,
+                        properties.mousePointerAccelerationEnabled);
+            }
             if (properties.allDefaults()) {
                 mAdditionalDisplayInputProperties.remove(displayId);
             }
@@ -3423,14 +3458,45 @@ public class InputManagerService extends IInputManager.Stub
         mWindowManagerCallbacks.notifyPointerLocationChanged(enabled);
     }
 
-    void updateFocusEventDebugViewEnabled(boolean enabled) {
+    void updateShowKeyPresses(boolean enabled) {
+        if (mShowKeyPresses == enabled) {
+            return;
+        }
+
+        mShowKeyPresses = enabled;
+        updateFocusEventDebugViewEnabled();
+
+        synchronized (mFocusEventDebugViewLock) {
+            if (mFocusEventDebugView != null) {
+                mFocusEventDebugView.updateShowKeyPresses(enabled);
+            }
+        }
+    }
+
+    void updateShowRotaryInput(boolean enabled) {
+        if (mShowRotaryInput == enabled) {
+            return;
+        }
+
+        mShowRotaryInput = enabled;
+        updateFocusEventDebugViewEnabled();
+
+        synchronized (mFocusEventDebugViewLock) {
+            if (mFocusEventDebugView != null) {
+                mFocusEventDebugView.updateShowRotaryInput(enabled);
+            }
+        }
+    }
+
+    private void updateFocusEventDebugViewEnabled() {
+        boolean enabled = mShowKeyPresses || mShowRotaryInput;
         FocusEventDebugView view;
         synchronized (mFocusEventDebugViewLock) {
             if (enabled == (mFocusEventDebugView != null)) {
                 return;
             }
             if (enabled) {
-                mFocusEventDebugView = new FocusEventDebugView(mContext);
+                mFocusEventDebugView = new FocusEventDebugView(mContext, this);
                 view = mFocusEventDebugView;
             } else {
                 view = mFocusEventDebugView;
@@ -3460,6 +3526,31 @@ public class InputManagerService extends IInputManager.Stub
         lp.setTitle("FocusEventDebugView - display " + mContext.getDisplayId());
         lp.inputFeatures |= WindowManager.LayoutParams.INPUT_FEATURE_NO_INPUT_CHANNEL;
         wm.addView(view, lp);
+    }
+
+    /**
+     * Sets Accessibility bounce keys threshold in milliseconds.
+     */
+    public void setAccessibilityBounceKeysThreshold(int thresholdTimeMs) {
+        mNative.setAccessibilityBounceKeysThreshold(thresholdTimeMs);
+    }
+
+    /**
+     * Sets Accessibility slow keys threshold in milliseconds.
+     */
+    public void setAccessibilitySlowKeysThreshold(int thresholdTimeMs) {
+        mNative.setAccessibilitySlowKeysThreshold(thresholdTimeMs);
+    }
+
+    /**
+     * Sets whether Accessibility sticky keys is enabled.
+     */
+    public void setAccessibilityStickyKeysEnabled(boolean enabled) {
+        mNative.setAccessibilityStickyKeysEnabled(enabled);
+    }
+
+    void setUseLargePointerIcons(boolean useLargeIcons) {
+        mPointerIconCache.setUseLargePointerIcons(useLargeIcons);
     }
 
     interface KeyboardBacklightControllerInterface {

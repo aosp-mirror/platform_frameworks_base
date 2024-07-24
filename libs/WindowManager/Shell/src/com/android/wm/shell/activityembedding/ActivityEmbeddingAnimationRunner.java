@@ -20,6 +20,7 @@ import static android.view.WindowManager.TRANSIT_CHANGE;
 import static android.view.WindowManager.TRANSIT_CLOSE;
 import static android.view.WindowManagerPolicyConstants.TYPE_LAYER_OFFSET;
 import static android.window.TransitionInfo.FLAG_IS_BEHIND_STARTING_WINDOW;
+import static android.window.TransitionInfo.FLAG_TRANSLUCENT;
 
 import static com.android.wm.shell.activityembedding.ActivityEmbeddingAnimationSpec.createShowSnapshotForClosingAnimation;
 import static com.android.wm.shell.transition.TransitionAnimationHelper.addBackgroundToTransition;
@@ -45,7 +46,7 @@ import androidx.annotation.Nullable;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.wm.shell.activityembedding.ActivityEmbeddingAnimationAdapter.SnapshotAdapter;
 import com.android.wm.shell.common.ScreenshotUtils;
-import com.android.wm.shell.util.TransitionUtil;
+import com.android.wm.shell.shared.TransitionUtil;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -255,8 +256,13 @@ class ActivityEmbeddingAnimationRunner {
         int offsetLayer = TYPE_LAYER_OFFSET;
         final List<ActivityEmbeddingAnimationAdapter> adapters = new ArrayList<>();
         for (TransitionInfo.Change change : openingChanges) {
+            final Animation animation =
+                    animationProvider.get(info, change, openingWholeScreenBounds);
+            if (animation.getDuration() == 0) {
+                continue;
+            }
             final ActivityEmbeddingAnimationAdapter adapter = createOpenCloseAnimationAdapter(
-                    info, change, animationProvider, openingWholeScreenBounds);
+                    info, change, animation, openingWholeScreenBounds);
             if (isOpening) {
                 adapter.overrideLayer(offsetLayer++);
             }
@@ -275,8 +281,13 @@ class ActivityEmbeddingAnimationRunner {
                     adapters.add(snapshotAdapter);
                 }
             }
+            final Animation animation =
+                    animationProvider.get(info, change, closingWholeScreenBounds);
+            if (animation.getDuration() == 0) {
+                continue;
+            }
             final ActivityEmbeddingAnimationAdapter adapter = createOpenCloseAnimationAdapter(
-                    info, change, animationProvider, closingWholeScreenBounds);
+                    info, change, animation, closingWholeScreenBounds);
             if (!isOpening) {
                 adapter.overrideLayer(offsetLayer++);
             }
@@ -320,6 +331,11 @@ class ActivityEmbeddingAnimationRunner {
             if (!animation.hasExtension()) {
                 continue;
             }
+            if (adapter.mChange.hasFlags(FLAG_TRANSLUCENT)
+                    && adapter.mChange.getActivityComponent() != null) {
+                // Skip edge extension for translucent activity.
+                continue;
+            }
             final TransitionInfo.Change change = adapter.mChange;
             if (TransitionUtil.isOpeningType(adapter.mChange.getMode())) {
                 // Need to screenshot after startTransaction is applied otherwise activity
@@ -353,8 +369,7 @@ class ActivityEmbeddingAnimationRunner {
     @NonNull
     private ActivityEmbeddingAnimationAdapter createOpenCloseAnimationAdapter(
             @NonNull TransitionInfo info, @NonNull TransitionInfo.Change change,
-            @NonNull AnimationProvider animationProvider, @NonNull Rect wholeAnimationBounds) {
-        final Animation animation = animationProvider.get(info, change, wholeAnimationBounds);
+            @NonNull Animation animation, @NonNull Rect wholeAnimationBounds) {
         return new ActivityEmbeddingAnimationAdapter(animation, change, change.getLeash(),
                 wholeAnimationBounds, TransitionUtil.getRootFor(change, info));
     }

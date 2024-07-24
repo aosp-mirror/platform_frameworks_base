@@ -26,6 +26,7 @@ import android.content.res.Configuration;
 import android.util.Range;
 import android.view.WindowManager;
 
+import com.android.internal.accessibility.common.MagnificationConstants;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.graphics.SfVsyncFrameCallbackProvider;
 import com.android.systemui.util.settings.SecureSettings;
@@ -34,13 +35,14 @@ import com.android.systemui.util.settings.SecureSettings;
  * A class to control {@link WindowMagnificationSettings} and receive settings panel callbacks by
  * {@link WindowMagnificationSettingsCallback}.
  * The settings panel callbacks will be delegated through
- * {@link MagnificationSettingsController.Callback} to {@link WindowMagnification}.
+ * {@link MagnificationSettingsController.Callback} to {@link Magnification}.
  */
 
 public class MagnificationSettingsController implements ComponentCallbacks {
 
     // It should be consistent with the value defined in WindowMagnificationGestureHandler.
-    private static final Range<Float> A11Y_ACTION_SCALE_RANGE = new Range<>(1.0f, 8.0f);
+    private static final Range<Float> A11Y_ACTION_SCALE_RANGE =
+        new Range<>(1.0f, MagnificationConstants.SCALE_MAX_VALUE);
 
     private final Context mContext;
 
@@ -73,7 +75,7 @@ public class MagnificationSettingsController implements ComponentCallbacks {
                 context.getDisplay(),
                 WindowManager.LayoutParams.TYPE_NAVIGATION_BAR_PANEL,
                 null);
-        mContext.setTheme(com.android.systemui.R.style.Theme_SystemUI);
+        mContext.setTheme(com.android.systemui.res.R.style.Theme_SystemUI);
         mDisplayId = mContext.getDisplayId();
         mConfiguration = new Configuration(mContext.getResources().getConfiguration());
         mSettingsControllerCallback = settingsControllerCallback;

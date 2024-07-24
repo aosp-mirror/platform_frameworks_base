@@ -20,7 +20,7 @@ import android.graphics.Rect
 import android.util.AttributeSet
 import android.view.View
 import android.view.ViewGroup
-import com.android.systemui.R
+import com.android.systemui.res.R
 
 /**
  * View corresponding with udfps_fpm_empty_view.xml

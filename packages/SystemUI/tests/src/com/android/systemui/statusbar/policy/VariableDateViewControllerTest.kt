@@ -19,28 +19,31 @@ package com.android.systemui.statusbar.policy
 import android.os.Handler
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
+import android.view.View
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.broadcast.BroadcastDispatcher
+import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.capture
 import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.time.FakeSystemClock
 import com.google.common.truth.Truth.assertThat
+import kotlinx.coroutines.flow.MutableStateFlow
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.ArgumentCaptor
 import org.mockito.Captor
 import org.mockito.Mock
-import org.mockito.Mockito.`when`
 import org.mockito.Mockito.anyString
 import org.mockito.Mockito.verify
+import org.mockito.Mockito.`when`
 import org.mockito.MockitoAnnotations
 import java.util.Date
 
 @RunWith(AndroidTestingRunner::class)
-@TestableLooper.RunWithLooper
+@TestableLooper.RunWithLooper(setAsMainLooper = true)
 @SmallTest
 class VariableDateViewControllerTest : SysuiTestCase() {
 
@@ -55,8 +58,12 @@ class VariableDateViewControllerTest : SysuiTestCase() {
     private lateinit var broadcastDispatcher: BroadcastDispatcher
     @Mock
     private lateinit var view: VariableDateView
+    @Mock
+    private lateinit var shadeInteractor: ShadeInteractor
     @Captor
     private lateinit var onMeasureListenerCaptor: ArgumentCaptor<VariableDateView.OnMeasureListener>
+
+    private val qsExpansion = MutableStateFlow(0F)
 
     private var lastText: String? = null
 
@@ -77,6 +84,8 @@ class VariableDateViewControllerTest : SysuiTestCase() {
         systemClock = FakeSystemClock()
         systemClock.setCurrentTimeMillis(TIME_STAMP)
 
+        `when`(shadeInteractor.qsExpansion).thenReturn(qsExpansion)
+
         `when`(view.longerPattern).thenReturn(LONG_PATTERN)
         `when`(view.shorterPattern).thenReturn(SHORT_PATTERN)
         `when`(view.handler).thenReturn(testableHandler)
@@ -86,6 +95,7 @@ class VariableDateViewControllerTest : SysuiTestCase() {
             Unit
         }
         `when`(view.isAttachedToWindow).thenReturn(true)
+        `when`(view.viewTreeObserver).thenReturn(mock())
 
         val date = Date(TIME_STAMP)
         longText = getTextForFormat(date, getFormatFromPattern(LONG_PATTERN))
@@ -98,11 +108,12 @@ class VariableDateViewControllerTest : SysuiTestCase() {
         }
 
         controller = VariableDateViewController(
-                systemClock,
-                broadcastDispatcher,
-                mock(),
-                testableHandler,
-                view
+            systemClock,
+            broadcastDispatcher,
+            shadeInteractor,
+            mock(),
+            testableHandler,
+            view
         )
 
         controller.init()
@@ -123,7 +134,7 @@ class VariableDateViewControllerTest : SysuiTestCase() {
 
     @Test
     fun testLotsOfSpaceUseLongText() {
-        onMeasureListenerCaptor.value.onMeasureAction(10000)
+        onMeasureListenerCaptor.value.onMeasureAction(10000, View.MeasureSpec.EXACTLY)
 
         testableLooper.processAllMessages()
         assertThat(lastText).isEqualTo(longText)
@@ -131,7 +142,7 @@ class VariableDateViewControllerTest : SysuiTestCase() {
 
     @Test
     fun testSmallSpaceUseEmpty() {
-        onMeasureListenerCaptor.value.onMeasureAction(1)
+        onMeasureListenerCaptor.value.onMeasureAction(1, View.MeasureSpec.EXACTLY)
         testableLooper.processAllMessages()
 
         assertThat(lastText).isEmpty()
@@ -141,7 +152,7 @@ class VariableDateViewControllerTest : SysuiTestCase() {
     fun testSpaceInBetweenUseShortText() {
         val average = ((getTextLength(longText) + getTextLength(shortText)) / 2).toInt()
 
-        onMeasureListenerCaptor.value.onMeasureAction(average)
+        onMeasureListenerCaptor.value.onMeasureAction(average, View.MeasureSpec.EXACTLY)
         testableLooper.processAllMessages()
 
         assertThat(lastText).isEqualTo(shortText)
@@ -149,10 +160,10 @@ class VariableDateViewControllerTest : SysuiTestCase() {
 
     @Test
     fun testSwitchBackToLonger() {
-        onMeasureListenerCaptor.value.onMeasureAction(1)
+        onMeasureListenerCaptor.value.onMeasureAction(1, View.MeasureSpec.EXACTLY)
         testableLooper.processAllMessages()
 
-        onMeasureListenerCaptor.value.onMeasureAction(10000)
+        onMeasureListenerCaptor.value.onMeasureAction(10000, View.MeasureSpec.EXACTLY)
         testableLooper.processAllMessages()
 
         assertThat(lastText).isEqualTo(longText)
@@ -163,11 +174,41 @@ class VariableDateViewControllerTest : SysuiTestCase() {
         `when`(view.freezeSwitching).thenReturn(true)
 
         val average = ((getTextLength(longText) + getTextLength(shortText)) / 2).toInt()
-        onMeasureListenerCaptor.value.onMeasureAction(average)
+        onMeasureListenerCaptor.value.onMeasureAction(average, View.MeasureSpec.EXACTLY)
         testableLooper.processAllMessages()
         assertThat(lastText).isEqualTo(longText)
 
-        onMeasureListenerCaptor.value.onMeasureAction(1)
+        onMeasureListenerCaptor.value.onMeasureAction(1, View.MeasureSpec.EXACTLY)
+        testableLooper.processAllMessages()
+        assertThat(lastText).isEqualTo(longText)
+    }
+
+    @Test
+    fun testQsExpansionTrue_ignoreAtMostMeasureRequests() {
+        qsExpansion.value = 0f
+
+        onMeasureListenerCaptor.value.onMeasureAction(
+                getTextLength(shortText).toInt(),
+                View.MeasureSpec.EXACTLY
+            )
+        testableLooper.processAllMessages()
+
+        onMeasureListenerCaptor.value.onMeasureAction(10000, View.MeasureSpec.AT_MOST)
+        testableLooper.processAllMessages()
+        assertThat(lastText).isEqualTo(shortText)
+    }
+
+    @Test
+    fun testQsExpansionFalse_acceptAtMostMeasureRequests() {
+        qsExpansion.value = 1f
+
+        onMeasureListenerCaptor.value.onMeasureAction(
+                getTextLength(shortText).toInt(),
+                View.MeasureSpec.EXACTLY
+        )
+        testableLooper.processAllMessages()
+
+        onMeasureListenerCaptor.value.onMeasureAction(10000, View.MeasureSpec.AT_MOST)
         testableLooper.processAllMessages()
         assertThat(lastText).isEqualTo(longText)
     }

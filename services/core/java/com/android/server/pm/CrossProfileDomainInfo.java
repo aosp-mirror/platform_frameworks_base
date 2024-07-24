@@ -22,10 +22,10 @@ import android.os.UserHandle;
 
 public final class CrossProfileDomainInfo {
     /* ResolveInfo for IntentForwarderActivity to send the intent to the other profile */
-    ResolveInfo mResolveInfo;
+    final ResolveInfo mResolveInfo;
     int mHighestApprovalLevel;
     @UserIdInt
-    int mTargetUserId = UserHandle.USER_CURRENT; // default as current user
+    final int mTargetUserId;
 
     CrossProfileDomainInfo(ResolveInfo resolveInfo, int highestApprovalLevel, @UserIdInt
             int targetUserId) {
@@ -37,6 +37,7 @@ public final class CrossProfileDomainInfo {
     CrossProfileDomainInfo(ResolveInfo resolveInfo, int highestApprovalLevel) {
         this.mResolveInfo = resolveInfo;
         this.mHighestApprovalLevel = highestApprovalLevel;
+        this.mTargetUserId = UserHandle.USER_CURRENT; // default as current user
     }
 
     @Override

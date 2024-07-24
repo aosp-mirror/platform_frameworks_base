@@ -86,13 +86,13 @@ class FontScaleConverterTest {
     }
 
     private fun createTable(vararg pairs: Pair<Float, Float>) =
-        FontScaleConverter(
+        FontScaleConverterImpl(
             pairs.map { it.first }.toFloatArray(),
             pairs.map { it.second }.toFloatArray()
         )
 
     private fun verifyConversionBothWays(
-        table: FontScaleConverter,
+        table: FontScaleConverterImpl,
         expectedDp: Float,
         spToConvert: Float
     ) {

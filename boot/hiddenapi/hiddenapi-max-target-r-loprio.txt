@@ -19,7 +19,6 @@ Landroid/Manifest$permission;->READ_FRAME_BUFFER:Ljava/lang/String;
 Landroid/media/IVolumeController$Stub;->asInterface(Landroid/os/IBinder;)Landroid/media/IVolumeController;
 Landroid/net/INetworkPolicyListener$Stub;-><init>()V
 Landroid/net/sip/ISipSession$Stub;->asInterface(Landroid/os/IBinder;)Landroid/net/sip/ISipSession;
-Landroid/nfc/INfcAdapter$Stub;->TRANSACTION_enable:I
 Landroid/os/IPowerManager$Stub;->TRANSACTION_acquireWakeLock:I
 Landroid/os/IPowerManager$Stub;->TRANSACTION_goToSleep:I
 Landroid/service/euicc/IEuiccService$Stub;-><init>()V

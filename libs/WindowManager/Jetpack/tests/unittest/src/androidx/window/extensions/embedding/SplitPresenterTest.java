@@ -235,6 +235,19 @@ public class SplitPresenterTest {
     }
 
     @Test
+    public void testSetTaskFragmentDimOnTask() {
+        final TaskFragmentContainer container = mController.newContainer(mActivity, TASK_ID);
+
+        mPresenter.setTaskFragmentDimOnTask(mTransaction, container.getTaskFragmentToken(), true);
+        verify(mTransaction).addTaskFragmentOperation(eq(container.getTaskFragmentToken()), any());
+
+        // No request to set the same adjacent TaskFragments.
+        clearInvocations(mTransaction);
+        mPresenter.setTaskFragmentDimOnTask(mTransaction, container.getTaskFragmentToken(), true);
+        verify(mTransaction, never()).addTaskFragmentOperation(any(), any());
+    }
+
+    @Test
     public void testUpdateAnimationParams() {
         final TaskFragmentContainer container = mController.newContainer(mActivity, TASK_ID);
 

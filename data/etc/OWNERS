@@ -1,6 +1,5 @@
 include /PACKAGE_MANAGER_OWNERS
 
-alanstokes@google.com
 cbrubaker@google.com
 hackbod@android.com
 hackbod@google.com
@@ -12,3 +11,4 @@ yamasani@google.com
 
 per-file preinstalled-packages* = file:/MULTIUSER_OWNERS
 per-file services.core.protolog.json =  file:/services/core/java/com/android/server/wm/OWNERS
+per-file core.protolog.pb = file:/services/core/java/com/android/server/wm/OWNERS

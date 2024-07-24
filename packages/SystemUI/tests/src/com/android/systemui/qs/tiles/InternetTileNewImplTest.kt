@@ -22,7 +22,7 @@ import android.testing.TestableLooper
 import android.testing.TestableLooper.RunWithLooper
 import androidx.test.filters.SmallTest
 import com.android.internal.logging.MetricsLogger
-import com.android.systemui.R
+import com.android.systemui.res.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.classifier.FalsingManagerFake
 import com.android.systemui.plugins.ActivityStarter
@@ -30,7 +30,7 @@ import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.qs.QSHost
 import com.android.systemui.qs.QsEventLogger
 import com.android.systemui.qs.logging.QSLogger
-import com.android.systemui.qs.tiles.dialog.InternetDialogFactory
+import com.android.systemui.qs.tiles.dialog.InternetDialogManager
 import com.android.systemui.statusbar.connectivity.AccessPointController
 import com.android.systemui.statusbar.pipeline.airplane.data.repository.FakeAirplaneModeRepository
 import com.android.systemui.statusbar.pipeline.ethernet.domain.EthernetInteractor
@@ -83,7 +83,7 @@ class InternetTileNewImplTest : SysuiTestCase() {
     @Mock private lateinit var sbStateController: StatusBarStateController
     @Mock private lateinit var activityStarter: ActivityStarter
     @Mock private lateinit var logger: QSLogger
-    @Mock private lateinit var dialogFactory: InternetDialogFactory
+    @Mock private lateinit var dialogManager: InternetDialogManager
     @Mock private lateinit var accessPointController: AccessPointController
 
     @Before
@@ -118,7 +118,7 @@ class InternetTileNewImplTest : SysuiTestCase() {
                 activityStarter,
                 logger,
                 viewModel,
-                dialogFactory,
+                dialogManager,
                 accessPointController
             )
 

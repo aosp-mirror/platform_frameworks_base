@@ -28,11 +28,13 @@ import static org.mockito.Mockito.verify;
 import android.graphics.Rect;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
+import android.testing.TestableResources;
 import android.view.MotionEvent;
 import android.view.ViewConfiguration;
 
 import androidx.test.filters.SmallTest;
 
+import com.android.wm.shell.R;
 import com.android.wm.shell.ShellTestCase;
 import com.android.wm.shell.common.FloatingContentCoordinator;
 import com.android.wm.shell.common.ShellExecutor;
@@ -52,6 +54,8 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+
+import java.util.Optional;
 
 /**
  * Unit tests against {@link PipResizeGestureHandler}
@@ -98,6 +102,9 @@ public class PipResizeGestureHandlerTest extends ShellTestCase {
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
+        final TestableResources res = mContext.getOrCreateTestableResources();
+        res.addOverride(R.bool.config_pipEnablePinchResize, true);
+
         mPipDisplayLayoutState = new PipDisplayLayoutState(mContext);
         mSizeSpecSource = new PhoneSizeSpecSource(mContext, mPipDisplayLayoutState);
         mPipBoundsState = new PipBoundsState(mContext, mSizeSpecSource, mPipDisplayLayoutState);
@@ -109,15 +116,16 @@ public class PipResizeGestureHandlerTest extends ShellTestCase {
                 mSizeSpecSource);
         final PipMotionHelper motionHelper = new PipMotionHelper(mContext, mPipBoundsState,
                 mPipTaskOrganizer, mPhonePipMenuController, pipSnapAlgorithm,
-                mMockPipTransitionController, mFloatingContentCoordinator);
+                mMockPipTransitionController, mFloatingContentCoordinator,
+                Optional.empty() /* pipPerfHintControllerOptional */);
 
         mPipTouchState = new PipTouchState(ViewConfiguration.get(mContext),
                 () -> {}, () -> {}, mMainExecutor);
         mPipResizeGestureHandler = new PipResizeGestureHandler(mContext, pipBoundsAlgorithm,
                 mPipBoundsState, motionHelper, mPipTouchState, mPipTaskOrganizer,
                 mPipDismissTargetHandler,
-                (Rect bounds) -> new Rect(), () -> {}, mPipUiEventLogger, mPhonePipMenuController,
-                mMainExecutor) {
+                () -> {}, mPipUiEventLogger, mPhonePipMenuController,
+                mMainExecutor, null /* pipPerfHintController */) {
             @Override
             public void pilferPointers() {
                 // Overridden just to avoid calling into InputMonitor.

@@ -22,6 +22,8 @@ import android.provider.DeviceConfig;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.IndentingPrintWriter;
 
+import java.util.Optional;
+
 /**
  * TextClassifier specific settings.
  *
@@ -36,43 +38,35 @@ import com.android.internal.util.IndentingPrintWriter;
  */
 // TODO: Rename to TextClassifierSettings.
 public final class TextClassificationConstants {
-    /**
-     * Whether the smart linkify feature is enabled.
-     */
+    /** Whether the smart linkify feature is enabled. */
     private static final String SMART_LINKIFY_ENABLED = "smart_linkify_enabled";
-    /**
-     * Whether SystemTextClassifier is enabled.
-     */
+
+    /** Whether SystemTextClassifier is enabled. */
     static final String SYSTEM_TEXT_CLASSIFIER_ENABLED = "system_textclassifier_enabled";
-    /**
-     * Whether TextClassifierImpl is enabled.
-     */
+
+    /** Whether TextClassifierImpl is enabled. */
     @VisibleForTesting
     static final String LOCAL_TEXT_CLASSIFIER_ENABLED = "local_textclassifier_enabled";
-    /**
-     * Enable smart selection without a visible UI changes.
-     */
+
+    /** Enable smart selection without a visible UI changes. */
     private static final String MODEL_DARK_LAUNCH_ENABLED = "model_dark_launch_enabled";
-    /**
-     * Whether the smart selection feature is enabled.
-     */
+
+    /** Whether the smart selection feature is enabled. */
     private static final String SMART_SELECTION_ENABLED = "smart_selection_enabled";
-    /**
-     * Whether the smart text share feature is enabled.
-     */
+
+    /** Whether the smart text share feature is enabled. */
     private static final String SMART_TEXT_SHARE_ENABLED = "smart_text_share_enabled";
-    /**
-     * Whether animation for smart selection is enabled.
-     */
-    private static final String SMART_SELECT_ANIMATION_ENABLED =
-            "smart_select_animation_enabled";
-    /**
-     * Max length of text that generateLinks can accept.
-     */
+
+    /** Whether animation for smart selection is enabled. */
+    private static final String SMART_SELECT_ANIMATION_ENABLED = "smart_select_animation_enabled";
+
+    /** Max length of text that generateLinks can accept. */
     @VisibleForTesting
     static final String GENERATE_LINKS_MAX_TEXT_LENGTH = "generate_links_max_text_length";
+
     /**
      * The TextClassifierService which would like to use. Example of setting the package:
+     *
      * <pre>
      * adb shell cmd device_config put textclassifier textclassifier_service_package_override \
      *      com.android.textclassifier
@@ -83,8 +77,8 @@ public final class TextClassificationConstants {
             "textclassifier_service_package_override";
 
     /**
-     * The timeout value in seconds used by {@link SystemTextClassifier} for each TextClassifier
-     * API calls.
+     * The timeout value in seconds used by {@link SystemTextClassifier} for each TextClassifier API
+     * calls.
      */
     @VisibleForTesting
     static final String SYSTEM_TEXT_CLASSIFIER_API_TIMEOUT_IN_SECOND =
@@ -109,64 +103,143 @@ public final class TextClassificationConstants {
     private static final long SYSTEM_TEXT_CLASSIFIER_API_TIMEOUT_IN_SECOND_DEFAULT = 60;
     private static final int SMART_SELECTION_TRIM_DELTA_DEFAULT = 120;
 
+    private static final Object sLock = new Object();
+    private static volatile boolean sMemoizedValuesInitialized;
+    private static boolean sLocalTextClassifierEnabled;
+    private static boolean sSystemTextClassifierEnabled;
+    private static boolean sModelDarkLaunchEnabled;
+    private static boolean sSmartSelectionEnabled;
+    private static boolean sSmartTextShareEnabled;
+    private static boolean sSmartLinkifyEnabled;
+    private static boolean sSmartSelectAnimationEnabled;
+    private static int sGenerateLinksMaxTextLength;
+    private static long sSystemTextClassifierApiTimeoutInSecond;
+    private static int sSmartSelectionTrimDelta;
+
+    /**
+     * For DeviceConfig values where we don't care if they change at runtime, fetch them once and
+     * memoize their values.
+     */
+    private static void ensureMemoizedValues() {
+        if (sMemoizedValuesInitialized) {
+            return;
+        }
+        synchronized (sLock) {
+            if (sMemoizedValuesInitialized) {
+                return;
+            }
+
+            // Read all namespace properties so we get a single snapshot (values
+            // fetched aren't updated in the interim).
+            DeviceConfig.Properties properties =
+                    DeviceConfig.getProperties(DeviceConfig.NAMESPACE_TEXTCLASSIFIER);
+            sLocalTextClassifierEnabled =
+                    properties.getBoolean(
+                            LOCAL_TEXT_CLASSIFIER_ENABLED,
+                            LOCAL_TEXT_CLASSIFIER_ENABLED_DEFAULT);
+            sModelDarkLaunchEnabled =
+                    properties.getBoolean(
+                            MODEL_DARK_LAUNCH_ENABLED,
+                            MODEL_DARK_LAUNCH_ENABLED_DEFAULT);
+            sSmartSelectionEnabled =
+                    properties.getBoolean(
+                            SMART_SELECTION_ENABLED,
+                            SMART_SELECTION_ENABLED_DEFAULT);
+            sSmartTextShareEnabled =
+                    properties.getBoolean(
+                            SMART_TEXT_SHARE_ENABLED,
+                            SMART_TEXT_SHARE_ENABLED_DEFAULT);
+            sSmartLinkifyEnabled =
+                    properties.getBoolean(
+                            SMART_LINKIFY_ENABLED,
+                            SMART_LINKIFY_ENABLED_DEFAULT);
+            sSmartSelectAnimationEnabled =
+                    properties.getBoolean(
+                            SMART_SELECT_ANIMATION_ENABLED,
+                            SMART_SELECT_ANIMATION_ENABLED_DEFAULT);
+            sGenerateLinksMaxTextLength =
+                    properties.getInt(
+                            GENERATE_LINKS_MAX_TEXT_LENGTH,
+                            GENERATE_LINKS_MAX_TEXT_LENGTH_DEFAULT);
+            sSystemTextClassifierApiTimeoutInSecond =
+                    properties.getLong(
+                            SYSTEM_TEXT_CLASSIFIER_API_TIMEOUT_IN_SECOND,
+                            SYSTEM_TEXT_CLASSIFIER_API_TIMEOUT_IN_SECOND_DEFAULT);
+            sSmartSelectionTrimDelta =
+                    properties.getInt(
+                            SMART_SELECTION_TRIM_DELTA,
+                            SMART_SELECTION_TRIM_DELTA_DEFAULT);
+
+            sMemoizedValuesInitialized = true;
+        }
+    }
+
+    @VisibleForTesting
+    public static void resetMemoizedValues() {
+      sMemoizedValuesInitialized = false;
+    }
+
     @Nullable
     public String getTextClassifierServicePackageOverride() {
-        return DeviceConfig.getString(DeviceConfig.NAMESPACE_TEXTCLASSIFIER,
+        // Don't memoize this value because we want to be able to receive config
+        // updates at runtime.
+        return DeviceConfig.getString(
+                DeviceConfig.NAMESPACE_TEXTCLASSIFIER,
                 TEXT_CLASSIFIER_SERVICE_PACKAGE_OVERRIDE,
                 DEFAULT_TEXT_CLASSIFIER_SERVICE_PACKAGE_OVERRIDE);
     }
 
     public boolean isLocalTextClassifierEnabled() {
-        return DeviceConfig.getBoolean(DeviceConfig.NAMESPACE_TEXTCLASSIFIER,
-                LOCAL_TEXT_CLASSIFIER_ENABLED, LOCAL_TEXT_CLASSIFIER_ENABLED_DEFAULT);
+        ensureMemoizedValues();
+        return sLocalTextClassifierEnabled;
     }
 
     public boolean isSystemTextClassifierEnabled() {
+        // Don't memoize this value because we want to be able to receive config
+        // updates at runtime.
         return DeviceConfig.getBoolean(DeviceConfig.NAMESPACE_TEXTCLASSIFIER,
                 SYSTEM_TEXT_CLASSIFIER_ENABLED,
                 SYSTEM_TEXT_CLASSIFIER_ENABLED_DEFAULT);
     }
 
     public boolean isModelDarkLaunchEnabled() {
-        return DeviceConfig.getBoolean(DeviceConfig.NAMESPACE_TEXTCLASSIFIER,
-                MODEL_DARK_LAUNCH_ENABLED, MODEL_DARK_LAUNCH_ENABLED_DEFAULT);
+        ensureMemoizedValues();
+        return sModelDarkLaunchEnabled;
     }
 
     public boolean isSmartSelectionEnabled() {
-        return DeviceConfig.getBoolean(DeviceConfig.NAMESPACE_TEXTCLASSIFIER,
-                SMART_SELECTION_ENABLED, SMART_SELECTION_ENABLED_DEFAULT);
+        ensureMemoizedValues();
+        return sSmartSelectionEnabled;
     }
 
     public boolean isSmartTextShareEnabled() {
-        return DeviceConfig.getBoolean(DeviceConfig.NAMESPACE_TEXTCLASSIFIER,
-                SMART_TEXT_SHARE_ENABLED, SMART_TEXT_SHARE_ENABLED_DEFAULT);
+        ensureMemoizedValues();
+        return sSmartTextShareEnabled;
     }
 
     public boolean isSmartLinkifyEnabled() {
-        return DeviceConfig.getBoolean(DeviceConfig.NAMESPACE_TEXTCLASSIFIER, SMART_LINKIFY_ENABLED,
-                SMART_LINKIFY_ENABLED_DEFAULT);
+        ensureMemoizedValues();
+        return sSmartLinkifyEnabled;
     }
 
     public boolean isSmartSelectionAnimationEnabled() {
-        return DeviceConfig.getBoolean(DeviceConfig.NAMESPACE_TEXTCLASSIFIER,
-                SMART_SELECT_ANIMATION_ENABLED, SMART_SELECT_ANIMATION_ENABLED_DEFAULT);
+        ensureMemoizedValues();
+        return sSmartSelectAnimationEnabled;
     }
 
     public int getGenerateLinksMaxTextLength() {
-        return DeviceConfig.getInt(DeviceConfig.NAMESPACE_TEXTCLASSIFIER,
-                GENERATE_LINKS_MAX_TEXT_LENGTH, GENERATE_LINKS_MAX_TEXT_LENGTH_DEFAULT);
+        ensureMemoizedValues();
+        return sGenerateLinksMaxTextLength;
     }
 
     public long getSystemTextClassifierApiTimeoutInSecond() {
-        return DeviceConfig.getLong(DeviceConfig.NAMESPACE_TEXTCLASSIFIER,
-                SYSTEM_TEXT_CLASSIFIER_API_TIMEOUT_IN_SECOND,
-                SYSTEM_TEXT_CLASSIFIER_API_TIMEOUT_IN_SECOND_DEFAULT);
+        ensureMemoizedValues();
+        return sSystemTextClassifierApiTimeoutInSecond;
     }
 
     public int getSmartSelectionTrimDelta() {
-        return DeviceConfig.getInt(DeviceConfig.NAMESPACE_TEXTCLASSIFIER,
-                SMART_SELECTION_TRIM_DELTA,
-                SMART_SELECTION_TRIM_DELTA_DEFAULT);
+        ensureMemoizedValues();
+        return sSmartSelectionTrimDelta;
     }
 
     void dump(IndentingPrintWriter pw) {
@@ -180,10 +253,14 @@ public final class TextClassificationConstants {
         pw.print(SMART_SELECTION_ENABLED, isSmartSelectionEnabled()).println();
         pw.print(SMART_TEXT_SHARE_ENABLED, isSmartTextShareEnabled()).println();
         pw.print(SYSTEM_TEXT_CLASSIFIER_ENABLED, isSystemTextClassifierEnabled()).println();
-        pw.print(TEXT_CLASSIFIER_SERVICE_PACKAGE_OVERRIDE,
-                getTextClassifierServicePackageOverride()).println();
-        pw.print(SYSTEM_TEXT_CLASSIFIER_API_TIMEOUT_IN_SECOND,
-                getSystemTextClassifierApiTimeoutInSecond()).println();
+        pw.print(
+                        TEXT_CLASSIFIER_SERVICE_PACKAGE_OVERRIDE,
+                        getTextClassifierServicePackageOverride())
+                .println();
+        pw.print(
+                        SYSTEM_TEXT_CLASSIFIER_API_TIMEOUT_IN_SECOND,
+                        getSystemTextClassifierApiTimeoutInSecond())
+                .println();
         pw.print(SMART_SELECTION_TRIM_DELTA, getSmartSelectionTrimDelta()).println();
         pw.decreaseIndent();
     }

@@ -261,7 +261,7 @@ public class FaceAuthenticateOptions implements AuthenticateOptions, Parcelable 
      * The reason for this operation when requested by the system (sysui),
      * otherwise AUTHENTICATE_REASON_UNKNOWN.
      *
-     * See frameworks/base/packages/SystemUI/src/com/android/keyguard/FaceAuthReason.kt
+     * See packages/SystemUI/src/com/android/systemui/deviceentry/shared/FaceAuthReason.kt
      * for more details about each reason.
      */
     @DataClass.Generated.Member
@@ -524,7 +524,7 @@ public class FaceAuthenticateOptions implements AuthenticateOptions, Parcelable 
          * The reason for this operation when requested by the system (sysui),
          * otherwise AUTHENTICATE_REASON_UNKNOWN.
          *
-         * See frameworks/base/packages/SystemUI/src/com/android/keyguard/FaceAuthReason.kt
+         * See packages/SystemUI/src/com/android/systemui/deviceentry/shared/FaceAuthReason.kt
          * for more details about each reason.
          */
         @DataClass.Generated.Member

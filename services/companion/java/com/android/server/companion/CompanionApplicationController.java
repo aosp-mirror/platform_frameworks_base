@@ -16,15 +16,21 @@
 
 package com.android.server.companion;
 
+import static android.companion.AssociationRequest.DEVICE_PROFILE_AUTOMOTIVE_PROJECTION;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SuppressLint;
 import android.annotation.UserIdInt;
 import android.companion.AssociationInfo;
 import android.companion.CompanionDeviceService;
+import android.companion.DevicePresenceEvent;
 import android.content.ComponentName;
 import android.content.Context;
+import android.hardware.power.Mode;
 import android.os.Handler;
+import android.os.ParcelUuid;
+import android.os.PowerManagerInternal;
 import android.util.Log;
 import android.util.Slog;
 import android.util.SparseArray;
@@ -32,6 +38,9 @@ import android.util.SparseArray;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.infra.PerUser;
 import com.android.server.companion.presence.CompanionDevicePresenceMonitor;
+import com.android.server.companion.presence.ObservableUuid;
+import com.android.server.companion.presence.ObservableUuidStore;
+import com.android.server.companion.utils.PackageUtils;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -44,8 +53,10 @@ import java.util.Map;
  * Manages communication with companion applications via
  * {@link android.companion.ICompanionDeviceService} interface, including "connecting" (binding) to
  * the services, maintaining the connection (the binding), and invoking callback methods such as
- * {@link CompanionDeviceService#onDeviceAppeared(AssociationInfo)} and
- * {@link CompanionDeviceService#onDeviceDisappeared(AssociationInfo)} in the application process.
+ * {@link CompanionDeviceService#onDeviceAppeared(AssociationInfo)},
+ * {@link CompanionDeviceService#onDeviceDisappeared(AssociationInfo)} and
+ * {@link CompanionDeviceService#onDevicePresenceEvent(DevicePresenceEvent)} in the
+ * application process.
  *
  * <p>
  * The following is the list of the APIs provided by {@link CompanionApplicationController} (to be
@@ -53,8 +64,7 @@ import java.util.Map;
  * <ul>
  * <li> {@link #bindCompanionApplication(int, String, boolean)}
  * <li> {@link #unbindCompanionApplication(int, String)}
- * <li> {@link #notifyCompanionApplicationDeviceAppeared(AssociationInfo)}
- * <li> {@link #notifyCompanionApplicationDeviceDisappeared(AssociationInfo)}
+ * <li> {@link #notifyCompanionDevicePresenceEvent(AssociationInfo, int)}
  * <li> {@link #isCompanionApplicationBound(int, String)}
  * <li> {@link #isRebindingCompanionApplicationScheduled(int, String)}
  * </ul>
@@ -72,8 +82,11 @@ public class CompanionApplicationController {
 
     private final @NonNull Context mContext;
     private final @NonNull AssociationStore mAssociationStore;
+    private final @NonNull ObservableUuidStore mObservableUuidStore;
     private final @NonNull CompanionDevicePresenceMonitor mDevicePresenceMonitor;
     private final @NonNull CompanionServicesRegister mCompanionServicesRegister;
+
+    private final PowerManagerInternal mPowerManagerInternal;
 
     @GuardedBy("mBoundCompanionApplications")
     private final @NonNull AndroidPackageMap<List<CompanionDeviceServiceConnector>>
@@ -82,10 +95,14 @@ public class CompanionApplicationController {
     private final @NonNull AndroidPackageMap<Boolean> mScheduledForRebindingCompanionApplications;
 
     CompanionApplicationController(Context context, AssociationStore associationStore,
-            CompanionDevicePresenceMonitor companionDevicePresenceMonitor) {
+            ObservableUuidStore observableUuidStore,
+            CompanionDevicePresenceMonitor companionDevicePresenceMonitor,
+            PowerManagerInternal powerManagerInternal) {
         mContext = context;
         mAssociationStore = associationStore;
+        mObservableUuidStore =  observableUuidStore;
         mDevicePresenceMonitor = companionDevicePresenceMonitor;
+        mPowerManagerInternal = powerManagerInternal;
         mCompanionServicesRegister = new CompanionServicesRegister();
         mBoundCompanionApplications = new AndroidPackageMap<>();
         mScheduledForRebindingCompanionApplications = new AndroidPackageMap<>();
@@ -237,22 +254,25 @@ public class CompanionApplicationController {
         serviceConnector.connect();
     }
 
-    void notifyCompanionApplicationDeviceAppeared(AssociationInfo association) {
+    /**
+     * Notify the app that the device appeared.
+     *
+     * @deprecated use {@link #notifyCompanionDevicePresenceEvent(AssociationInfo, int)} instead
+     */
+    @Deprecated
+    public void notifyCompanionApplicationDeviceAppeared(AssociationInfo association) {
         final int userId = association.getUserId();
         final String packageName = association.getPackageName();
-        if (DEBUG) {
-            Log.i(TAG, "notifyDevice_Appeared() id=" + association.getId() + " u" + userId
+
+        Slog.i(TAG, "notifyDevice_Appeared() id=" + association.getId() + " u" + userId
                     + "/" + packageName);
-        }
 
         final CompanionDeviceServiceConnector primaryServiceConnector =
                 getPrimaryServiceConnector(userId, packageName);
         if (primaryServiceConnector == null) {
-            if (DEBUG) {
-                Log.e(TAG, "notify_CompanionApplicationDevice_Appeared(): "
+            Slog.e(TAG, "notify_CompanionApplicationDevice_Appeared(): "
                         + "u" + userId + "/" + packageName + " is NOT bound.");
-                Log.d(TAG, "Stacktrace", new Throwable());
-            }
+            Slog.e(TAG, "Stacktrace", new Throwable());
             return;
         }
 
@@ -262,22 +282,25 @@ public class CompanionApplicationController {
         primaryServiceConnector.postOnDeviceAppeared(association);
     }
 
-    void notifyCompanionApplicationDeviceDisappeared(AssociationInfo association) {
+    /**
+     * Notify the app that the device disappeared.
+     *
+     * @deprecated use {@link #notifyCompanionDevicePresenceEvent(AssociationInfo, int)} instead
+     */
+    @Deprecated
+    public void notifyCompanionApplicationDeviceDisappeared(AssociationInfo association) {
         final int userId = association.getUserId();
         final String packageName = association.getPackageName();
-        if (DEBUG) {
-            Log.i(TAG, "notifyDevice_Disappeared() id=" + association.getId() + " u" + userId
-                    + "/" + packageName);
-        }
+
+        Slog.i(TAG, "notifyDevice_Disappeared() id=" + association.getId() + " u" + userId
+                + "/" + packageName);
 
         final CompanionDeviceServiceConnector primaryServiceConnector =
                 getPrimaryServiceConnector(userId, packageName);
         if (primaryServiceConnector == null) {
-            if (DEBUG) {
-                Log.e(TAG, "notify_CompanionApplicationDevice_Disappeared(): "
+            Slog.e(TAG, "notify_CompanionApplicationDevice_Disappeared(): "
                         + "u" + userId + "/" + packageName + " is NOT bound.");
-                Log.d(TAG, "Stacktrace", new Throwable());
-            }
+            Slog.e(TAG, "Stacktrace", new Throwable());
             return;
         }
 
@@ -285,6 +308,58 @@ public class CompanionApplicationController {
                 + packageName + "] associationId=[" + association.getId() + "]");
 
         primaryServiceConnector.postOnDeviceDisappeared(association);
+    }
+
+    /**
+     * Notify the app that the device appeared.
+     */
+    public void notifyCompanionDevicePresenceEvent(AssociationInfo association, int event) {
+        final int userId = association.getUserId();
+        final String packageName = association.getPackageName();
+        final CompanionDeviceServiceConnector primaryServiceConnector =
+                getPrimaryServiceConnector(userId, packageName);
+        final DevicePresenceEvent devicePresenceEvent =
+                new DevicePresenceEvent(association.getId(), event, null);
+
+        if (primaryServiceConnector == null) {
+            Slog.e(TAG, "notifyCompanionApplicationDevicePresenceEvent(): "
+                        + "u" + userId + "/" + packageName
+                        + " event=[ " + event  + " ] is NOT bound.");
+            Slog.e(TAG, "Stacktrace", new Throwable());
+            return;
+        }
+
+        Slog.i(TAG, "Calling onDevicePresenceEvent() to userId=[" + userId + "] package=["
+                + packageName + "] associationId=[" + association.getId()
+                + "] event=[" + event + "]");
+
+        primaryServiceConnector.postOnDevicePresenceEvent(devicePresenceEvent);
+    }
+
+    /**
+     * Notify the app that the device disappeared.
+     */
+    public void notifyUuidDevicePresenceEvent(ObservableUuid uuid, int event) {
+        final int userId = uuid.getUserId();
+        final ParcelUuid parcelUuid = uuid.getUuid();
+        final String packageName = uuid.getPackageName();
+        final CompanionDeviceServiceConnector primaryServiceConnector =
+                getPrimaryServiceConnector(userId, packageName);
+        final DevicePresenceEvent devicePresenceEvent =
+                new DevicePresenceEvent(DevicePresenceEvent.NO_ASSOCIATION, event, parcelUuid);
+
+        if (primaryServiceConnector == null) {
+            Slog.e(TAG, "notifyApplicationDevicePresenceChanged(): "
+                    + "u" + userId + "/" + packageName
+                    + " event=[ " + event  + " ] is NOT bound.");
+            Slog.e(TAG, "Stacktrace", new Throwable());
+            return;
+        }
+
+        Slog.i(TAG, "Calling onDevicePresenceEvent() to userId=[" + userId + "] package=["
+                + packageName + "]" + "event= [" + event + "]");
+
+        primaryServiceConnector.postOnDevicePresenceEvent(devicePresenceEvent);
     }
 
     void dump(@NonNull PrintWriter out) {
@@ -318,9 +393,21 @@ public class CompanionApplicationController {
         boolean isPrimary = serviceConnector.isPrimary();
         Slog.i(TAG, "onBinderDied() u" + userId + "/" + packageName + " isPrimary: " + isPrimary);
 
-        // First: Only mark not BOUND for primary service.
-        synchronized (mBoundCompanionApplications) {
-            if (serviceConnector.isPrimary()) {
+        // First, disable hint mode for Auto profile and mark not BOUND for primary service ONLY.
+        if (isPrimary) {
+            final List<AssociationInfo> associations =
+                    mAssociationStore.getAssociationsForPackage(userId, packageName);
+
+            for (AssociationInfo association : associations) {
+                final String deviceProfile = association.getDeviceProfile();
+                if (DEVICE_PROFILE_AUTOMOTIVE_PROJECTION.equals(deviceProfile)) {
+                    Slog.i(TAG, "Disable hint mode for device profile: " + deviceProfile);
+                    mPowerManagerInternal.setPowerMode(Mode.AUTOMOTIVE_PROJECTION, false);
+                    break;
+                }
+            }
+
+            synchronized (mBoundCompanionApplications) {
                 mBoundCompanionApplications.removePackage(userId, packageName);
             }
         }
@@ -349,6 +436,9 @@ public class CompanionApplicationController {
         // Make sure to clean up the state for all the associations
         // that associate with this package.
         boolean shouldScheduleRebind = false;
+        boolean shouldScheduleRebindForUuid = false;
+        final List<ObservableUuid> uuids =
+                mObservableUuidStore.getObservableUuidsForPackage(userId, packageName);
 
         for (AssociationInfo ai :
                 mAssociationStore.getAssociationsForPackage(userId, packageName)) {
@@ -370,7 +460,14 @@ public class CompanionApplicationController {
             }
         }
 
-        return stillAssociated && shouldScheduleRebind;
+        for (ObservableUuid uuid : uuids) {
+            if (mDevicePresenceMonitor.isDeviceUuidPresent(uuid.getUuid())) {
+                shouldScheduleRebindForUuid = true;
+                break;
+            }
+        }
+
+        return (stillAssociated && shouldScheduleRebind) || shouldScheduleRebindForUuid;
     }
 
     private class CompanionServicesRegister extends PerUser<Map<String, List<ComponentName>>> {

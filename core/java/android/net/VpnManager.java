@@ -717,4 +717,81 @@ public class VpnManager {
             throw e.rethrowFromSystemServer();
         }
     }
+
+    /**
+     * Get the vpn profile owned by the calling uid with the given name from the vpn database.
+     *
+     * <p>Note this method should not be used for platform VPN profiles. </p>
+     *
+     * @param name The name of the profile to retrieve.
+     * @return the unstructured blob for the matching vpn profile.
+     * Returns null if no profile with a matching name was found.
+     * @hide
+     */
+    @Nullable
+    public byte[] getFromVpnProfileStore(@NonNull String name) {
+        try {
+            return mService.getFromVpnProfileStore(name);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Put the given vpn profile owned by the calling uid with the given name into the vpn database.
+     * Existing profiles with the same name will be replaced.
+     *
+     * <p>Note this method should not be used for platform VPN profiles.
+     * To update a platform VPN, use provisionVpnProfile() instead. </p>
+     *
+     * @param name The name of the profile to put.
+     * @param blob The profile.
+     * @return true if the profile was successfully added. False otherwise.
+     * @hide
+     */
+    public boolean putIntoVpnProfileStore(@NonNull String name, @NonNull byte[] blob) {
+        try {
+            return mService.putIntoVpnProfileStore(name, blob);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Removes the vpn profile owned by the calling uid with the given name from the vpn database.
+     *
+     * <p>Note this method should not be used for platform VPN profiles.
+     * To remove a platform VPN, use deleteVpnProfile() instead.</p>
+     *
+     * @param name The name of the profile to be removed.
+     * @return true if a profile was removed. False if no profile with a matching name was found.
+     * @hide
+     */
+    public boolean removeFromVpnProfileStore(@NonNull String name) {
+        try {
+            return mService.removeFromVpnProfileStore(name);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Returns a list of the name suffixes of the vpn profiles owned by the calling uid in the vpn
+     * database matching the given prefix, sorted in ascending order.
+     *
+     * <p>Note this method should not be used for platform VPN profiles. </p>
+     *
+     * @param prefix The prefix to match.
+     * @return an array of strings representing the name suffixes stored in the profile database
+     * matching the given prefix. The return value may be empty but never null.
+     * @hide
+     */
+    @NonNull
+    public String[] listFromVpnProfileStore(@NonNull String prefix) {
+        try {
+            return mService.listFromVpnProfileStore(prefix);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
 }

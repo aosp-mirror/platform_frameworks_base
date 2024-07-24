@@ -18,13 +18,18 @@
 package com.android.systemui.keyguard.data.repository
 
 import com.android.internal.widget.LockPatternUtils
+import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.keyguard.shared.model.AuthenticationFlags
+import dagger.Binds
+import dagger.Module
+import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
 
-class FakeBiometricSettingsRepository : BiometricSettingsRepository {
+@SysUISingleton
+class FakeBiometricSettingsRepository @Inject constructor() : BiometricSettingsRepository {
     private val _isFingerprintEnrolledAndEnabled = MutableStateFlow(false)
     override val isFingerprintEnrolledAndEnabled: StateFlow<Boolean>
         get() = _isFingerprintEnrolledAndEnabled
@@ -34,7 +39,7 @@ class FakeBiometricSettingsRepository : BiometricSettingsRepository {
         get() = _isFingerprintAuthCurrentlyAllowed
 
     private val _isFaceAuthEnrolledAndEnabled = MutableStateFlow(false)
-    override val isFaceAuthEnrolledAndEnabled: Flow<Boolean>
+    override val isFaceAuthEnrolledAndEnabled: StateFlow<Boolean>
         get() = _isFaceAuthEnrolledAndEnabled
 
     private val _isFaceAuthCurrentlyAllowed = MutableStateFlow(false)
@@ -42,7 +47,7 @@ class FakeBiometricSettingsRepository : BiometricSettingsRepository {
         get() = _isFaceAuthCurrentlyAllowed
 
     private val _isFaceAuthSupportedInCurrentPosture = MutableStateFlow(false)
-    override val isFaceAuthSupportedInCurrentPosture: Flow<Boolean>
+    override val isFaceAuthSupportedInCurrentPosture: StateFlow<Boolean>
         get() = _isFaceAuthSupportedInCurrentPosture
 
     override val isCurrentUserInLockdown: Flow<Boolean>
@@ -96,4 +101,9 @@ class FakeBiometricSettingsRepository : BiometricSettingsRepository {
             )
         }
     }
+}
+
+@Module
+interface FakeBiometricSettingsRepositoryModule {
+    @Binds fun bindFake(fake: FakeBiometricSettingsRepository): BiometricSettingsRepository
 }

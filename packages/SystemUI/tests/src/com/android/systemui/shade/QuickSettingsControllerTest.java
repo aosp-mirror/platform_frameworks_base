@@ -41,7 +41,7 @@ import android.view.MotionEvent;
 
 import androidx.test.filters.SmallTest;
 
-import com.android.systemui.R;
+import com.android.systemui.res.R;
 import com.android.systemui.plugins.qs.QS;
 
 import org.junit.Test;
@@ -285,6 +285,20 @@ public class QuickSettingsControllerTest extends QuickSettingsControllerBaseTest
     }
 
     @Test
+    public void updateQsState_fullscreenTrue() {
+        mQsController.setExpanded(true);
+        mQsController.updateQsState();
+        assertThat(mShadeRepository.getLegacyQsFullscreen().getValue()).isTrue();
+    }
+
+    @Test
+    public void updateQsState_fullscreenFalse() {
+        mQsController.setExpanded(false);
+        mQsController.updateQsState();
+        assertThat(mShadeRepository.getLegacyQsFullscreen().getValue()).isFalse();
+    }
+
+    @Test
     public void shadeExpanded_onKeyguard() {
         mStatusBarStateController.setState(KEYGUARD);
         // set maxQsExpansion in NPVC
@@ -396,6 +410,12 @@ public class QuickSettingsControllerTest extends QuickSettingsControllerBaseTest
                 .thenReturn(cutoffScale);
         assertThat(mQsController.calculateBottomCornerRadius(0.0f))
                 .isEqualTo(mQsController.getScrimCornerRadius());
+    }
+
+    @Test
+    public void disallowTouches_nullQs_false() {
+        mQsController.setQs(null);
+        assertThat(mQsController.disallowTouches()).isFalse();
     }
 
     private void lockScreen() {

@@ -16,32 +16,27 @@
 
 package com.android.credentialmanager.createflow
 
-import android.app.PendingIntent
-import android.content.Intent
 import android.graphics.drawable.Drawable
-import com.android.credentialmanager.common.BaseEntry
-import com.android.credentialmanager.common.CredentialType
-import java.time.Instant
+import com.android.credentialmanager.model.EntryInfo
+import com.android.credentialmanager.model.CredentialType
+import com.android.credentialmanager.model.creation.CreateOptionInfo
+import com.android.credentialmanager.model.creation.RemoteInfo
 
 data class CreateCredentialUiState(
-  val enabledProviders: List<EnabledProviderInfo>,
-  val disabledProviders: List<DisabledProviderInfo>? = null,
-  val currentScreenState: CreateScreenState,
-  val requestDisplayInfo: RequestDisplayInfo,
-  val sortedCreateOptionsPairs: List<Pair<CreateOptionInfo, EnabledProviderInfo>>,
-  val activeEntry: ActiveEntry? = null,
-  val remoteEntry: RemoteInfo? = null,
-  val foundCandidateFromUserDefaultProvider: Boolean,
+    val enabledProviders: List<EnabledProviderInfo>,
+    val disabledProviders: List<DisabledProviderInfo>? = null,
+    val currentScreenState: CreateScreenState,
+    val requestDisplayInfo: RequestDisplayInfo,
+    val sortedCreateOptionsPairs: List<Pair<CreateOptionInfo, EnabledProviderInfo>>,
+    val activeEntry: ActiveEntry? = null,
+    val remoteEntry: RemoteInfo? = null,
+    val foundCandidateFromUserDefaultProvider: Boolean,
 )
 
 internal fun isFlowAutoSelectable(
     uiState: CreateCredentialUiState
 ): Boolean {
   return uiState.requestDisplayInfo.isAutoSelectRequest &&
-      // Even if the flow is auto selectable, still allow passkey intro screen to show once if
-      // applicable.
-      uiState.currentScreenState != CreateScreenState.PASSKEY_INTRO &&
-      uiState.currentScreenState != CreateScreenState.MORE_ABOUT_PASSKEYS_INTRO &&
       uiState.sortedCreateOptionsPairs.size == 1 &&
       uiState.activeEntry?.activeEntryInfo?.let {
         it is CreateOptionInfo && it.allowAutoSelect
@@ -75,44 +70,6 @@ class DisabledProviderInfo(
   displayName: String,
 ) : ProviderInfo(icon, id, displayName)
 
-class CreateOptionInfo(
-    providerId: String,
-    entryKey: String,
-    entrySubkey: String,
-    pendingIntent: PendingIntent?,
-    fillInIntent: Intent?,
-    val userProviderDisplayName: String,
-    val profileIcon: Drawable?,
-    val passwordCount: Int?,
-    val passkeyCount: Int?,
-    val totalCredentialCount: Int?,
-    val lastUsedTime: Instant,
-    val footerDescription: String?,
-    val allowAutoSelect: Boolean,
-) : BaseEntry(
-    providerId,
-    entryKey,
-    entrySubkey,
-    pendingIntent,
-    fillInIntent,
-    shouldTerminateUiUponSuccessfulProviderResult = true,
-)
-
-class RemoteInfo(
-  providerId: String,
-  entryKey: String,
-  entrySubkey: String,
-  pendingIntent: PendingIntent?,
-  fillInIntent: Intent?,
-) : BaseEntry(
-    providerId,
-    entryKey,
-    entrySubkey,
-    pendingIntent,
-    fillInIntent,
-    shouldTerminateUiUponSuccessfulProviderResult = true,
-)
-
 data class RequestDisplayInfo(
   val title: String,
   val subtitle: String?,
@@ -131,14 +88,12 @@ data class RequestDisplayInfo(
  * user selects a different entry on the more option page.
  */
 data class ActiveEntry (
-  val activeProvider: EnabledProviderInfo,
-  val activeEntryInfo: BaseEntry,
+    val activeProvider: EnabledProviderInfo,
+    val activeEntryInfo: EntryInfo,
 )
 
 /** The name of the current screen. */
 enum class CreateScreenState {
-  PASSKEY_INTRO,
-  MORE_ABOUT_PASSKEYS_INTRO,
   CREATION_OPTION_SELECTION,
   MORE_OPTIONS_SELECTION,
   DEFAULT_PROVIDER_CONFIRMATION,

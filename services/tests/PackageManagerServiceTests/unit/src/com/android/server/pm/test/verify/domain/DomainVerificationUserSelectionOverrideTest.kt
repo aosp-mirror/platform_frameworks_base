@@ -26,24 +26,22 @@ import android.os.PatternMatcher
 import android.os.Process
 import android.util.ArraySet
 import android.util.SparseArray
-import com.android.server.pm.parsing.pkg.AndroidPackageInternal
-import com.android.server.pm.pkg.AndroidPackage
+import com.android.internal.pm.parsing.pkg.AndroidPackageInternal
+import com.android.internal.pm.pkg.component.ParsedActivityImpl
+import com.android.internal.pm.pkg.component.ParsedIntentInfoImpl
 import com.android.server.pm.pkg.PackageStateInternal
 import com.android.server.pm.pkg.PackageUserStateInternal
-import com.android.server.pm.pkg.component.ParsedActivityImpl
-import com.android.server.pm.pkg.component.ParsedIntentInfoImpl
 import com.android.server.pm.verify.domain.DomainVerificationService
 import com.android.server.testutils.mockThrowOnUnmocked
 import com.android.server.testutils.whenever
 import com.google.common.truth.Truth.assertThat
+import java.util.UUID
 import org.junit.Test
 import org.mockito.ArgumentMatchers.any
 import org.mockito.ArgumentMatchers.anyInt
 import org.mockito.ArgumentMatchers.anyLong
 import org.mockito.ArgumentMatchers.anyString
 import org.mockito.Mockito.doReturn
-
-import java.util.UUID
 
 class DomainVerificationUserStateOverrideTest {
 
@@ -99,8 +97,8 @@ class DomainVerificationUserStateOverrideTest {
                     }
                 }
             })
-            addPackage(pkg1)
-            addPackage(pkg2)
+            addPackage(pkg1, null)
+            addPackage(pkg2, null)
 
             // Starting state for all tests is to have domain 1 enabled for the first package
             setDomainVerificationUserSelection(UUID_ONE, setOf(DOMAIN_ONE), true, USER_ID)

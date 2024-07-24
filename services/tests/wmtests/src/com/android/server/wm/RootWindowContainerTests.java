@@ -76,7 +76,6 @@ import android.graphics.Rect;
 import android.os.PowerManager;
 import android.os.UserHandle;
 import android.platform.test.annotations.Presubmit;
-import android.util.MergedConfiguration;
 import android.util.Pair;
 
 import androidx.test.filters.MediumTest;
@@ -317,6 +316,31 @@ public class RootWindowContainerTests extends WindowTestsBase {
         assertTrue(firstActivity.mRequestForceTransition);
     }
 
+    @Test
+    public void testMultipleActivitiesTaskEnterPip() {
+        // Enable shell transition because the order of setting windowing mode is different.
+        registerTestTransitionPlayer();
+        final ActivityRecord transientActivity = new ActivityBuilder(mAtm)
+                .setCreateTask(true).build();
+        final ActivityRecord activity1 = new ActivityBuilder(mAtm).setCreateTask(true).build();
+        final ActivityRecord activity2 = new ActivityBuilder(mAtm)
+                .setTask(activity1.getTask()).build();
+        activity2.setState(RESUMED, "test");
+
+        // Assume the top activity switches to a transient-launch, e.g. recents.
+        transientActivity.setState(RESUMED, "test");
+        transientActivity.getTask().moveToFront("test");
+
+        mRootWindowContainer.moveActivityToPinnedRootTask(activity2,
+                null /* launchIntoPipHostActivity */, "test");
+        assertEquals("Created PiP task must not change focus", transientActivity.getTask(),
+                mRootWindowContainer.getTopDisplayFocusedRootTask());
+        final Task newPipTask = activity2.getTask();
+        assertEquals(newPipTask, mDisplayContent.getDefaultTaskDisplayArea().getRootPinnedTask());
+        assertNotEquals(newPipTask, activity1.getTask());
+        assertFalse("Created PiP task must not be in recents", newPipTask.inRecents);
+    }
+
     /**
      * When there is only one activity in the Task, and the activity is requesting to enter PIP, the
      * whole Task should enter PIP.
@@ -337,6 +361,8 @@ public class RootWindowContainerTests extends WindowTestsBase {
         // Ensure a task has moved over.
         ensureTaskPlacement(task, activity);
         assertTrue(task.inPinnedWindowingMode());
+        assertFalse("Entering PiP activity must not affect SysUiFlags",
+                activity.canAffectSystemUiFlags());
 
         // The activity with fixed orientation should not apply letterbox when entering PiP.
         final int requestedOrientation = task.getConfiguration().orientation
@@ -518,8 +544,7 @@ public class RootWindowContainerTests extends WindowTestsBase {
         assertNotEquals(activity.getConfiguration().orientation, rotatedConfig.orientation);
         // Assume the activity was shown in different orientation. For example, the top activity is
         // landscape and the portrait lockscreen is shown.
-        activity.setLastReportedConfiguration(
-                new MergedConfiguration(mAtm.getGlobalConfiguration(), rotatedConfig));
+        activity.setLastReportedConfiguration(mAtm.getGlobalConfiguration(), rotatedConfig);
         activity.setState(STOPPED, "sleep");
 
         display.setIsSleeping(true);
@@ -549,10 +574,12 @@ public class RootWindowContainerTests extends WindowTestsBase {
 
         // Let's pretend that the app has crashed.
         firstActivity.app.setThread(null);
-        mRootWindowContainer.finishTopCrashedActivities(firstActivity.app, "test");
+        final Task finishedTask = mRootWindowContainer.finishTopCrashedActivities(
+                firstActivity.app, "test");
 
         // Verify that the root task was removed.
         assertEquals(originalRootTaskCount, defaultTaskDisplayArea.getRootTaskCount());
+        assertEquals(rootTask, finishedTask);
     }
 
     /**
@@ -809,7 +836,7 @@ public class RootWindowContainerTests extends WindowTestsBase {
                         .setSystemDecorations(true).build();
 
         doReturn(true).when(mRootWindowContainer)
-                .ensureVisibilityAndConfig(any(), anyInt(), anyBoolean(), anyBoolean());
+                .ensureVisibilityAndConfig(any(), anyInt(), anyBoolean());
         doReturn(true).when(mRootWindowContainer).canStartHomeOnDisplayArea(any(), any(),
                 anyBoolean());
 

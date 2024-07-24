@@ -17,7 +17,7 @@
 package android.os;
 
 import static android.Manifest.permission.PACKAGE_USAGE_STATS;
-import static android.Manifest.permission.READ_LOGS;
+import static android.Manifest.permission.READ_DROPBOX_DATA;
 
 import android.annotation.BytesLong;
 import android.annotation.CurrentTimeMillisLong;
@@ -81,9 +81,10 @@ public class DropBoxManager {
 
     /**
      * Broadcast Action: This is broadcast when a new entry is added in the dropbox.
-     * You must hold the {@link android.Manifest.permission#READ_LOGS} permission
-     * in order to receive this broadcast. This broadcast can be rate limited for low priority
-     * entries
+     * For apps targeting 35 and later, For apps targeting Android versions lower
+     * than 35, you must hold
+     * {@link android.Manifest.permission#READ_LOGS}.
+     * This broadcast can be rate limited for low priority entries
      *
      * <p class="note">This is a protected intent that can only be sent
      * by the system.
@@ -382,12 +383,14 @@ public class DropBoxManager {
     /**
      * Gets the next entry from the drop box <em>after</em> the specified time.
      * You must always call {@link Entry#close()} on the return value!
+     * {@link android.Manifest.permission#READ_LOGS} permission is
+     * required for apps targeting Android versions lower than 35.
      *
      * @param tag of entry to look for, null for all tags
      * @param msec time of the last entry seen
      * @return the next entry, or null if there are no more entries
      */
-    @RequiresPermission(allOf = { READ_LOGS, PACKAGE_USAGE_STATS })
+    @RequiresPermission(allOf = { READ_DROPBOX_DATA, PACKAGE_USAGE_STATS })
     public @Nullable Entry getNextEntry(String tag, long msec) {
         try {
             return mService.getNextEntryWithAttribution(tag, msec, mContext.getOpPackageName(),

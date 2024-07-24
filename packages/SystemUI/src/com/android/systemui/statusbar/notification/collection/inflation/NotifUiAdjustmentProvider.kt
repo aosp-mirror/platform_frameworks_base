@@ -29,6 +29,7 @@ import com.android.systemui.statusbar.NotificationLockscreenUserManager
 import com.android.systemui.statusbar.notification.collection.GroupEntry
 import com.android.systemui.statusbar.notification.collection.NotificationEntry
 import com.android.systemui.statusbar.notification.collection.provider.SectionStyleProvider
+import com.android.systemui.statusbar.notification.collection.render.GroupMembershipManager
 import com.android.systemui.util.ListenerSet
 import com.android.systemui.util.settings.SecureSettings
 import javax.inject.Inject
@@ -43,7 +44,8 @@ class NotifUiAdjustmentProvider @Inject constructor(
     private val secureSettings: SecureSettings,
     private val lockscreenUserManager: NotificationLockscreenUserManager,
     private val sectionStyleProvider: SectionStyleProvider,
-    private val userTracker: UserTracker
+    private val userTracker: UserTracker,
+    private val groupMembershipManager: GroupMembershipManager,
 ) {
     private val dirtyListeners = ListenerSet<Runnable>()
     private var isSnoozeSettingsEnabled = false
@@ -121,5 +123,7 @@ class NotifUiAdjustmentProvider @Inject constructor(
         isSnoozeEnabled = isSnoozeSettingsEnabled && !entry.isCanceled,
         isMinimized = isEntryMinimized(entry),
         needsRedaction = lockscreenUserManager.needsRedaction(entry),
+        isChildInGroup = entry.sbn.isAppOrSystemGroupChild,
+        isGroupSummary = entry.sbn.isAppOrSystemGroupSummary,
     )
 }

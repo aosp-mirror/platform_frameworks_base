@@ -25,14 +25,14 @@ import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.proto.ProtoOutputStream;
 
+import com.android.internal.pm.pkg.component.ComponentMutateUtils;
+import com.android.internal.pm.pkg.component.ParsedProcess;
+import com.android.internal.pm.pkg.component.ParsedProcessImpl;
 import com.android.internal.util.ArrayUtils;
 import com.android.server.pm.permission.LegacyPermissionState;
 import com.android.server.pm.pkg.AndroidPackage;
 import com.android.server.pm.pkg.PackageStateInternal;
 import com.android.server.pm.pkg.SharedUserApi;
-import com.android.server.pm.pkg.component.ComponentMutateUtils;
-import com.android.server.pm.pkg.component.ParsedProcess;
-import com.android.server.pm.pkg.component.ParsedProcessImpl;
 import com.android.server.utils.SnapshotCache;
 import com.android.server.utils.Watchable;
 import com.android.server.utils.WatchedArraySet;

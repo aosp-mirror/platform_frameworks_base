@@ -14,6 +14,7 @@
 
 package com.android.systemui.statusbar.phone;
 
+import static com.android.systemui.statusbar.phone.StatusBarIconHolder.TYPE_BINDABLE;
 import static com.android.systemui.statusbar.phone.StatusBarIconHolder.TYPE_ICON;
 import static com.android.systemui.statusbar.phone.StatusBarIconHolder.TYPE_MOBILE_NEW;
 import static com.android.systemui.statusbar.phone.StatusBarIconHolder.TYPE_WIFI_NEW;
@@ -31,20 +32,22 @@ import android.widget.LinearLayout.LayoutParams;
 import androidx.annotation.VisibleForTesting;
 
 import com.android.internal.statusbar.StatusBarIcon;
-import com.android.systemui.R;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.demomode.DemoModeCommandReceiver;
 import com.android.systemui.plugins.DarkIconDispatcher;
 import com.android.systemui.plugins.DarkIconDispatcher.DarkReceiver;
+import com.android.systemui.res.R;
 import com.android.systemui.statusbar.BaseStatusBarFrameLayout;
 import com.android.systemui.statusbar.StatusBarIconView;
 import com.android.systemui.statusbar.StatusIconDisplayable;
 import com.android.systemui.statusbar.connectivity.ui.MobileContextProvider;
+import com.android.systemui.statusbar.phone.StatusBarIconHolder.BindableIconHolder;
 import com.android.systemui.statusbar.phone.StatusBarSignalPolicy.CallIndicatorIconState;
 import com.android.systemui.statusbar.pipeline.mobile.ui.MobileUiAdapter;
 import com.android.systemui.statusbar.pipeline.mobile.ui.binder.MobileIconsBinder;
 import com.android.systemui.statusbar.pipeline.mobile.ui.view.ModernStatusBarMobileView;
 import com.android.systemui.statusbar.pipeline.mobile.ui.viewmodel.MobileIconsViewModel;
+import com.android.systemui.statusbar.pipeline.shared.ui.view.ModernStatusBarView;
 import com.android.systemui.statusbar.pipeline.wifi.ui.WifiUiAdapter;
 import com.android.systemui.statusbar.pipeline.wifi.ui.view.ModernStatusBarWifiView;
 import com.android.systemui.statusbar.pipeline.wifi.ui.viewmodel.LocationBasedWifiViewModel;
@@ -81,11 +84,7 @@ public interface StatusBarIconController {
     /** Removes an icon that had come from an active tile service. */
     void removeIconForTile(String slot);
 
-    /**
-     * Adds or updates an icon for the given slot for **internal system icons**.
-     *
-     * TODO(b/265307726): Re-name this to `setInternalIcon`.
-     */
+    /** Adds or updates an icon for the given slot for **internal system icons**. */
     void setIcon(String slot, int resourceId, CharSequence contentDescription);
 
     /**
@@ -126,11 +125,6 @@ public interface StatusBarIconController {
      * TAG_PRIMARY to refer to the first icon at a given slot.
      */
     void removeIcon(String slot, int tag);
-
-    /**
-     * TODO(b/265307726): Re-name this to `removeAllIconsForInternalSlot`.
-     */
-    void removeAllIconsForSlot(String slot);
 
     // TODO: See if we can rename this tunable name.
     String ICON_HIDE_LIST = "icon_blacklist";
@@ -257,7 +251,10 @@ public interface StatusBarIconController {
      *
      */
     class TintedIconManager extends IconManager {
+        // The main tint, used as the foreground in non layer drawables
         private int mColor;
+        // To be used as the main tint in drawables that wish to have a layer
+        private int mForegroundColor;
 
         public TintedIconManager(
                 ViewGroup group,
@@ -277,26 +274,41 @@ public interface StatusBarIconController {
         protected void onIconAdded(int index, String slot, boolean blocked,
                 StatusBarIconHolder holder) {
             StatusIconDisplayable view = addHolder(index, slot, blocked, holder);
-            view.setStaticDrawableColor(mColor);
+            view.setStaticDrawableColor(mColor, mForegroundColor);
             view.setDecorColor(mColor);
         }
 
-        public void setTint(int color) {
-            mColor = color;
+        /**
+         * Most icons are a single layer, and tintColor will be used as the tint in those cases.
+         * For icons that have a background, foregroundColor becomes the contrasting tint used
+         * for the foreground.
+         *
+         * @param tintColor the main tint to use for the icons in the group
+         * @param foregroundColor used as the main tint for layer-ish drawables where tintColor is
+         *                        being used as the background
+         */
+        public void setTint(int tintColor, int foregroundColor) {
+            mColor = tintColor;
+            mForegroundColor = foregroundColor;
+
             for (int i = 0; i < mGroup.getChildCount(); i++) {
                 View child = mGroup.getChildAt(i);
                 if (child instanceof StatusIconDisplayable) {
                     StatusIconDisplayable icon = (StatusIconDisplayable) child;
-                    icon.setStaticDrawableColor(mColor);
+                    icon.setStaticDrawableColor(mColor, mForegroundColor);
                     icon.setDecorColor(mColor);
                 }
+            }
+
+            if (mDemoStatusIcons != null) {
+                mDemoStatusIcons.setColor(tintColor, foregroundColor);
             }
         }
 
         @Override
         protected DemoStatusIcons createDemoStatusIcons() {
             DemoStatusIcons icons = super.createDemoStatusIcons();
-            icons.setColor(mColor);
+            icons.setColor(mColor, mForegroundColor);
             return icons;
         }
 
@@ -423,6 +435,10 @@ public interface StatusBarIconController {
 
                 case TYPE_MOBILE_NEW:
                     return addNewMobileIcon(index, slot, holder.getTag());
+
+                case TYPE_BINDABLE:
+                    // Safe cast, since only BindableIconHolders can set this tag on themselves
+                    return addBindableIcon((BindableIconHolder) holder, index);
             }
 
             return null;
@@ -433,6 +449,18 @@ public interface StatusBarIconController {
                 StatusBarIcon icon) {
             StatusBarIconView view = onCreateStatusBarIconView(slot, blocked);
             view.set(icon);
+            mGroup.addView(view, index, onCreateLayoutParams());
+            return view;
+        }
+
+        /**
+         * ModernStatusBarViews can be created and bound, and thus do not need to update their
+         *  drawable by sending multiple calls to setIcon. Instead, by using a bindable
+         * icon view, we can simply create the icon when requested and allow the
+         * ViewBinder to control its visual state.
+         */
+        protected StatusIconDisplayable addBindableIcon(BindableIconHolder holder, int index) {
+            ModernStatusBarView view = holder.getInitializer().createAndBind(mContext);
             mGroup.addView(view, index, onCreateLayoutParams());
             return view;
         }
@@ -521,6 +549,7 @@ public interface StatusBarIconController {
                     return;
                 case TYPE_MOBILE_NEW:
                 case TYPE_WIFI_NEW:
+                case TYPE_BINDABLE:
                     // Nothing, the new icons update themselves
                     return;
                 default:

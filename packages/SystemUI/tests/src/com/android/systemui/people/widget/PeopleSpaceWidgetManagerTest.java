@@ -101,7 +101,7 @@ import android.text.TextUtils;
 import androidx.preference.PreferenceManager;
 import androidx.test.filters.SmallTest;
 
-import com.android.systemui.R;
+import com.android.systemui.res.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.people.PeopleBackupFollowUpJob;
 import com.android.systemui.people.PeopleSpaceUtils;

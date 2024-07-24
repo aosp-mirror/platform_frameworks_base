@@ -16,10 +16,14 @@
 
 package android.content.pm;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -46,6 +50,13 @@ public final class ModuleInfo implements Parcelable {
     /** Whether or not this module is hidden from the user. */
     private boolean mHidden;
 
+    /**
+     * The list of the package names of all APK-in-APEX apps in the module, or
+     * null if there are none.
+     */
+    @Nullable
+    private List<String> mApkInApexPackageNames;
+
     // TODO: Decide whether we need an additional metadata bundle to support out of band
     // updates to ModuleInfo.
     //
@@ -61,6 +72,9 @@ public final class ModuleInfo implements Parcelable {
         mPackageName = orig.mPackageName;
         mHidden = orig.mHidden;
         mApexModuleName = orig.mApexModuleName;
+        if (orig.mApkInApexPackageNames != null) {
+            mApkInApexPackageNames = List.copyOf(orig.mApkInApexPackageNames);
+        }
     }
 
     /** @hide Sets the public name of this module. */
@@ -107,6 +121,22 @@ public final class ModuleInfo implements Parcelable {
         return mApexModuleName;
     }
 
+    /** @hide Set the list of the package names of all APK-in-APEX apps in this module. */
+    public ModuleInfo setApkInApexPackageNames(@NonNull Collection<String> apkInApexPackageNames) {
+        Objects.requireNonNull(apkInApexPackageNames);
+        mApkInApexPackageNames = List.copyOf(apkInApexPackageNames);
+        return this;
+    }
+
+    /** @hide Get the list of the package names of all APK-in-APEX apps in the module. */
+    @NonNull
+    public Collection<String> getApkInApexPackageNames() {
+        if (mApkInApexPackageNames == null) {
+            return Collections.emptyList();
+        }
+        return mApkInApexPackageNames;
+    }
+
     /** Returns a string representation of this object. */
     public String toString() {
         return "ModuleInfo{"
@@ -125,6 +155,7 @@ public final class ModuleInfo implements Parcelable {
         hashCode = 31 * hashCode + Objects.hashCode(mName);
         hashCode = 31 * hashCode + Objects.hashCode(mPackageName);
         hashCode = 31 * hashCode + Objects.hashCode(mApexModuleName);
+        hashCode = 31 * hashCode + Objects.hashCode(mApkInApexPackageNames);
         hashCode = 31 * hashCode + Boolean.hashCode(mHidden);
         return hashCode;
     }
@@ -138,6 +169,7 @@ public final class ModuleInfo implements Parcelable {
         return Objects.equals(mName, other.mName)
                 && Objects.equals(mPackageName, other.mPackageName)
                 && Objects.equals(mApexModuleName, other.mApexModuleName)
+                && Objects.equals(mApkInApexPackageNames, other.mApkInApexPackageNames)
                 && mHidden == other.mHidden;
     }
 
@@ -147,6 +179,8 @@ public final class ModuleInfo implements Parcelable {
         dest.writeString(mPackageName);
         dest.writeBoolean(mHidden);
         dest.writeString(mApexModuleName);
+        // Parcel#writeStringList handles null case, we can use it directly
+        dest.writeStringList(mApkInApexPackageNames);
     }
 
     private ModuleInfo(Parcel source) {
@@ -154,6 +188,7 @@ public final class ModuleInfo implements Parcelable {
         mPackageName = source.readString();
         mHidden = source.readBoolean();
         mApexModuleName = source.readString();
+        mApkInApexPackageNames = source.createStringArrayList();
     }
 
     public static final @android.annotation.NonNull Parcelable.Creator<ModuleInfo> CREATOR =

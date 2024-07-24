@@ -16,6 +16,8 @@
 
 package com.android.server.biometrics.sensors;
 
+import static com.android.systemui.shared.Flags.FLAG_SIDEFPS_CONTROLLER_REFACTOR;
+
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -23,10 +25,11 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import android.hardware.biometrics.BiometricOverlayConstants;
+import android.hardware.biometrics.BiometricRequestConstants;
 import android.hardware.fingerprint.ISidefpsController;
 import android.hardware.fingerprint.IUdfpsOverlayController;
 import android.platform.test.annotations.Presubmit;
+import android.platform.test.flag.junit.SetFlagsRule;
 
 import androidx.test.filters.SmallTest;
 
@@ -43,6 +46,7 @@ import java.util.List;
 @Presubmit
 @SmallTest
 public class SensorOverlaysTest {
+    @Rule public final SetFlagsRule mSetFlagsRule = new SetFlagsRule();
 
     private static final int SENSOR_ID = 11;
     private static final long REQUEST_ID = 8;
@@ -55,6 +59,7 @@ public class SensorOverlaysTest {
 
     @Before
     public void setup() {
+        mSetFlagsRule.disableFlags(FLAG_SIDEFPS_CONTROLLER_REFACTOR);
         when(mAcquisitionClient.getRequestId()).thenReturn(REQUEST_ID);
         when(mAcquisitionClient.hasRequestId()).thenReturn(true);
     }
@@ -97,7 +102,7 @@ public class SensorOverlaysTest {
     private void testShow(IUdfpsOverlayController udfps, ISidefpsController sidefps)
             throws Exception {
         final SensorOverlays sensorOverlays = new SensorOverlays(udfps, sidefps);
-        final int reason = BiometricOverlayConstants.REASON_UNKNOWN;
+        final int reason = BiometricRequestConstants.REASON_UNKNOWN;
         sensorOverlays.show(SENSOR_ID, reason, mAcquisitionClient);
 
         if (udfps != null) {

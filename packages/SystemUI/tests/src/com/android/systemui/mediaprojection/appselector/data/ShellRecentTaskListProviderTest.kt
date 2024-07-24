@@ -11,7 +11,7 @@ import com.android.systemui.util.mockito.whenever
 import com.android.wm.shell.recents.RecentTasks
 import com.android.wm.shell.util.GroupedRecentTaskInfo
 import com.google.common.truth.Truth.assertThat
-import java.util.*
+import java.util.Optional
 import java.util.function.Consumer
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
@@ -52,12 +52,7 @@ class ShellRecentTaskListProviderTest : SysuiTestCase() {
 
         val result = runBlocking { recentTaskListProvider.loadRecentTasks() }
 
-        assertThat(result)
-            .containsExactly(
-                createRecentTask(taskId = 1),
-                createRecentTask(taskId = 2),
-                createRecentTask(taskId = 3),
-            )
+        assertThat(result.map { it.taskId }).containsExactly(1, 2, 3).inOrder()
     }
 
     @Test
@@ -66,8 +61,7 @@ class ShellRecentTaskListProviderTest : SysuiTestCase() {
 
         val result = runBlocking { recentTaskListProvider.loadRecentTasks() }
 
-        assertThat(result)
-            .containsExactly(createRecentTask(taskId = 1), createRecentTask(taskId = 2))
+        assertThat(result.map { it.taskId }).containsExactly(1, 2).inOrder()
     }
 
     @Test
@@ -81,15 +75,76 @@ class ShellRecentTaskListProviderTest : SysuiTestCase() {
 
         val result = runBlocking { recentTaskListProvider.loadRecentTasks() }
 
-        assertThat(result)
-            .containsExactly(
-                createRecentTask(taskId = 1),
-                createRecentTask(taskId = 2),
-                createRecentTask(taskId = 3),
-                createRecentTask(taskId = 4),
-                createRecentTask(taskId = 5),
-                createRecentTask(taskId = 6),
-            )
+        assertThat(result.map { it.taskId }).containsExactly(1, 2, 3, 4, 5, 6).inOrder()
+    }
+
+    @Test
+    fun loadRecentTasks_singleTask_returnsTaskAsNotForeground() {
+        givenRecentTasks(
+            createSingleTask(taskId = 1, isVisible = true),
+        )
+
+        val result = runBlocking { recentTaskListProvider.loadRecentTasks() }
+
+        assertThat(result[0].isForegroundTask).isFalse()
+    }
+
+    @Test
+    fun loadRecentTasks_multipleTasks_returnsSecondVisibleTaskAsForegroundTask() {
+        givenRecentTasks(
+            createSingleTask(taskId = 1),
+            createSingleTask(taskId = 2, isVisible = true),
+            createSingleTask(taskId = 3),
+        )
+
+        val result = runBlocking { recentTaskListProvider.loadRecentTasks() }
+
+        assertThat(result.map { it.isForegroundTask }).containsExactly(false, true, false).inOrder()
+    }
+
+    @Test
+    fun loadRecentTasks_multipleTasks_returnsSecondInvisibleTaskAsNotForegroundTask() {
+        givenRecentTasks(
+            createSingleTask(taskId = 1),
+            createSingleTask(taskId = 2, isVisible = false),
+            createSingleTask(taskId = 3),
+        )
+
+        val result = runBlocking { recentTaskListProvider.loadRecentTasks() }
+
+        assertThat(result.map { it.isForegroundTask })
+            .containsExactly(false, false, false)
+            .inOrder()
+    }
+
+    @Test
+    fun loadRecentTasks_secondTaskIsGroupedAndVisible_marksBothGroupedTasksAsForeground() {
+        givenRecentTasks(
+            createSingleTask(taskId = 1),
+            createTaskPair(taskId1 = 2, taskId2 = 3, isVisible = true),
+            createSingleTask(taskId = 4),
+        )
+
+        val result = runBlocking { recentTaskListProvider.loadRecentTasks() }
+
+        assertThat(result.map { it.isForegroundTask })
+            .containsExactly(false, true, true, false)
+            .inOrder()
+    }
+
+    @Test
+    fun loadRecentTasks_secondTaskIsGroupedAndInvisible_marksBothGroupedTasksAsNotForeground() {
+        givenRecentTasks(
+            createSingleTask(taskId = 1),
+            createTaskPair(taskId1 = 2, taskId2 = 3, isVisible = false),
+            createSingleTask(taskId = 4),
+        )
+
+        val result = runBlocking { recentTaskListProvider.loadRecentTasks() }
+
+        assertThat(result.map { it.isForegroundTask })
+            .containsExactly(false, false, false, false)
+            .inOrder()
     }
 
     @Suppress("UNCHECKED_CAST")
@@ -103,17 +158,31 @@ class ShellRecentTaskListProviderTest : SysuiTestCase() {
     private fun createRecentTask(taskId: Int): RecentTask =
         RecentTask(
             taskId = taskId,
+            displayId = 0,
             userId = 0,
             topActivityComponent = null,
             baseIntentComponent = null,
-            colorBackground = null
+            colorBackground = null,
+            isForegroundTask = false,
         )
 
-    private fun createSingleTask(taskId: Int): GroupedRecentTaskInfo =
-        GroupedRecentTaskInfo.forSingleTask(createTaskInfo(taskId))
+    private fun createSingleTask(taskId: Int, isVisible: Boolean = false): GroupedRecentTaskInfo =
+        GroupedRecentTaskInfo.forSingleTask(createTaskInfo(taskId, isVisible))
 
-    private fun createTaskPair(taskId1: Int, taskId2: Int): GroupedRecentTaskInfo =
-        GroupedRecentTaskInfo.forSplitTasks(createTaskInfo(taskId1), createTaskInfo(taskId2), null)
+    private fun createTaskPair(
+        taskId1: Int,
+        taskId2: Int,
+        isVisible: Boolean = false
+    ): GroupedRecentTaskInfo =
+        GroupedRecentTaskInfo.forSplitTasks(
+            createTaskInfo(taskId1, isVisible),
+            createTaskInfo(taskId2, isVisible),
+            null
+        )
 
-    private fun createTaskInfo(taskId: Int) = RecentTaskInfo().apply { this.taskId = taskId }
+    private fun createTaskInfo(taskId: Int, isVisible: Boolean = false) =
+        RecentTaskInfo().apply {
+            this.taskId = taskId
+            this.isVisible = isVisible
+        }
 }

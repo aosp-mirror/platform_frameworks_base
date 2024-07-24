@@ -520,6 +520,13 @@ public class WebChromeClient {
      * To cancel the request, call <code>filePathCallback.onReceiveValue(null)</code> and
      * return {@code true}.
      *
+     * <p class="note"><b>Note:</b> WebView does not enforce any restrictions on
+     * the chosen file(s). WebView can access all files that your app can access.
+     * In case the file(s) are chosen through an untrusted source such as a third-party
+     * app, it is your own app's responsibility to check what the returned Uris
+     * refer to before calling the <code>filePathCallback</code>. See
+     * {@link #createIntent} and {@link #parseResult} for more details.</p>
+     *
      * @param webView The WebView instance that is initiating the request.
      * @param filePathCallback Invoke this callback to supply the list of paths to files to upload,
      *                         or {@code null} to cancel. Must only be called if the
@@ -555,6 +562,15 @@ public class WebChromeClient {
         /**
          * Parse the result returned by the file picker activity. This method should be used with
          * {@link #createIntent}. Refer to {@link #createIntent} for how to use it.
+         *
+         * <p class="note"><b>Note:</b> The intent returned by the file picker activity
+         * should be treated as untrusted. A third-party app handling the implicit
+         * intent created by {@link #createIntent} might return Uris that the third-party
+         * app itself does not have access to, such as your own app's sensitive data files.
+         * WebView does not enforce any restrictions on the returned Uris. It is the
+         * app's responsibility to ensure that the untrusted source (such as a third-party
+         * app) has access the Uris it has returned and that the Uris are not pointing
+         * to any sensitive data files.</p>
          *
          * @param resultCode the integer result code returned by the file picker activity.
          * @param data the intent returned by the file picker activity.
@@ -617,6 +633,12 @@ public class WebChromeClient {
          *   <li>Send the result using filePathCallback of {@link
          *   WebChromeClient#onShowFileChooser}</li>
          * </ol>
+         *
+         * <p class="note"><b>Note:</b> The created intent may be handled by
+         * third-party applications on device. The received result must be treated
+         * as untrusted as it can contain Uris pointing to your own app's sensitive
+         * data files. Your app should check the resultant Uris in {@link #parseResult}
+         * before calling the <code>filePathCallback</code>.</p>
          *
          * @return an Intent that supports basic file chooser sources.
          */

@@ -16,6 +16,7 @@
 
 package android.telephony;
 
+import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -43,6 +44,7 @@ import com.android.i18n.phonenumbers.NumberParseException;
 import com.android.i18n.phonenumbers.PhoneNumberUtil;
 import com.android.i18n.phonenumbers.PhoneNumberUtil.PhoneNumberFormat;
 import com.android.i18n.phonenumbers.Phonenumber.PhoneNumber;
+import com.android.internal.telephony.flags.Flags;
 import com.android.telephony.Rlog;
 
 import java.lang.annotation.Retention;
@@ -110,6 +112,14 @@ public class PhoneNumberUtils {
 
     private static final String BCD_EF_ADN_EXTENDED = "*#,N;";
     private static final String BCD_CALLED_PARTY_EXTENDED = "*#abc";
+
+    private static final String PREFIX_WPS = "*272";
+
+    // WPS prefix when CLIR is being activated for the call.
+    private static final String PREFIX_WPS_CLIR_ACTIVATE = "*31#*272";
+
+    // WPS prefix when CLIR is being deactivated for the call.
+    private static final String PREFIX_WPS_CLIR_DEACTIVATE = "#31#*272";
 
     /*
      * global-phone-number = ["+"] 1*( DIGIT / written-sep )
@@ -2942,5 +2952,17 @@ public class PhoneNumberUtils {
         } else {
             return false;
         }
+    }
+
+    /**
+     * Check if the number is for Wireless Priority Service call.
+     * @param number  The phone number used for WPS call.
+     * @return {@code true} if number matches WPS pattern and {@code false} otherwise.
+     */
+    @FlaggedApi(Flags.FLAG_ENABLE_WPS_CHECK_API_FLAG)
+    public static boolean isWpsCallNumber(@NonNull String number) {
+        return (number != null) && (number.startsWith(PREFIX_WPS)
+                || number.startsWith(PREFIX_WPS_CLIR_ACTIVATE)
+                || number.startsWith(PREFIX_WPS_CLIR_DEACTIVATE));
     }
 }

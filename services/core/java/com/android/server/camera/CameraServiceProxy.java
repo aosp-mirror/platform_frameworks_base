@@ -78,6 +78,7 @@ import android.view.WindowManagerGlobal;
 import com.android.framework.protobuf.nano.MessageNano;
 import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.camera.flags.Flags;
 import com.android.internal.util.FrameworkStatsLog;
 import com.android.server.LocalServices;
 import com.android.server.ServiceThread;
@@ -240,6 +241,8 @@ public class CameraServiceProxy extends SystemService
         public List<CameraStreamStats> mStreamStats;
         public String mUserTag;
         public int mVideoStabilizationMode;
+        public boolean mUsedUltraWide;
+        public boolean mUsedZoomOverride;
         public final long mLogId;
         public final int mSessionIndex;
 
@@ -267,7 +270,8 @@ public class CameraServiceProxy extends SystemService
         public void markCompleted(int internalReconfigure, long requestCount,
                 long resultErrorCount, boolean deviceError,
                 List<CameraStreamStats>  streamStats, String userTag,
-                int videoStabilizationMode, CameraExtensionSessionStats extStats) {
+                int videoStabilizationMode, boolean usedUltraWide,
+                boolean usedZoomOverride, CameraExtensionSessionStats extStats) {
             if (mCompleted) {
                 return;
             }
@@ -280,6 +284,8 @@ public class CameraServiceProxy extends SystemService
             mStreamStats = streamStats;
             mUserTag = userTag;
             mVideoStabilizationMode = videoStabilizationMode;
+            mUsedUltraWide = usedUltraWide;
+            mUsedZoomOverride = usedZoomOverride;
             mExtSessionStats = extStats;
             if (CameraServiceProxy.DEBUG) {
                 Slog.v(TAG, "A camera facing " + cameraFacingToString(mCameraFacing) +
@@ -869,6 +875,13 @@ public class CameraServiceProxy extends SystemService
                 streamCount = e.mStreamStats.size();
             }
             if (CameraServiceProxy.DEBUG) {
+                String ultrawideDebug = Flags.logUltrawideUsage()
+                        ? ", wideAngleUsage " + e.mUsedUltraWide
+                        : "";
+                String zoomOverrideDebug = Flags.logZoomOverrideUsage()
+                        ? ", zoomOverrideUsage " + e.mUsedZoomOverride
+                        : "";
+
                 Slog.v(TAG, "CAMERA_ACTION_EVENT: action " + e.mAction
                         + " clientName " + e.mClientName
                         + ", duration " + e.getDuration()
@@ -885,6 +898,8 @@ public class CameraServiceProxy extends SystemService
                         + ", streamCount is " + streamCount
                         + ", userTag is " + e.mUserTag
                         + ", videoStabilizationMode " + e.mVideoStabilizationMode
+                        + ultrawideDebug
+                        + zoomOverrideDebug
                         + ", logId " + e.mLogId
                         + ", sessionIndex " + e.mSessionIndex
                         + ", mExtSessionStats {type " + extensionType
@@ -948,8 +963,10 @@ public class CameraServiceProxy extends SystemService
                     MessageNano.toByteArray(streamProtos[2]),
                     MessageNano.toByteArray(streamProtos[3]),
                     MessageNano.toByteArray(streamProtos[4]),
-                    e.mUserTag, e.mVideoStabilizationMode, e.mLogId, e.mSessionIndex,
-                    extensionType, extensionIsAdvanced);
+                    e.mUserTag, e.mVideoStabilizationMode,
+                    e.mLogId, e.mSessionIndex,
+                    extensionType, extensionIsAdvanced, e.mUsedUltraWide,
+                    e.mUsedZoomOverride);
         }
     }
 
@@ -1003,12 +1020,24 @@ public class CameraServiceProxy extends SystemService
         }
     }
 
+    private boolean isAutomotive() {
+        return mContext.getPackageManager().hasSystemFeature(PackageManager.FEATURE_AUTOMOTIVE);
+    }
+
     private Set<Integer> getEnabledUserHandles(int currentUserHandle) {
         int[] userProfiles = mUserManager.getEnabledProfileIds(currentUserHandle);
         Set<Integer> handles = new ArraySet<>(userProfiles.length);
 
         for (int id : userProfiles) {
             handles.add(id);
+        }
+
+        if (Flags.cameraHsumPermission()) {
+            // If the device is running in headless system user mode then allow
+            // User 0 to access camera only for automotive form factor.
+            if (UserManager.isHeadlessSystemUserMode() && isAutomotive()) {
+                handles.add(UserHandle.USER_SYSTEM);
+            }
         }
 
         return handles;
@@ -1138,6 +1167,9 @@ public class CameraServiceProxy extends SystemService
         List<CameraStreamStats> streamStats = cameraState.getStreamStats();
         String userTag = cameraState.getUserTag();
         int videoStabilizationMode = cameraState.getVideoStabilizationMode();
+        boolean usedUltraWide = Flags.logUltrawideUsage() ? cameraState.getUsedUltraWide() : false;
+        boolean usedZoomOverride =
+                Flags.logZoomOverrideUsage() ? cameraState.getUsedZoomOverride() : false;
         long logId = cameraState.getLogId();
         int sessionIdx = cameraState.getSessionIndex();
         CameraExtensionSessionStats extSessionStats = cameraState.getExtensionSessionStats();
@@ -1195,8 +1227,8 @@ public class CameraServiceProxy extends SystemService
                         Slog.w(TAG, "Camera " + cameraId + " was already marked as active");
                         oldEvent.markCompleted(/*internalReconfigure*/0, /*requestCount*/0,
                                 /*resultErrorCount*/0, /*deviceError*/false, streamStats,
-                                /*userTag*/"", /*videoStabilizationMode*/-1,
-                                new CameraExtensionSessionStats());
+                                /*userTag*/"", /*videoStabilizationMode*/-1, /*usedUltraWide*/false,
+                                /*usedZoomOverride*/false, new CameraExtensionSessionStats());
                         mCameraUsageHistory.add(oldEvent);
                     }
                     break;
@@ -1207,7 +1239,8 @@ public class CameraServiceProxy extends SystemService
 
                         doneEvent.markCompleted(internalReconfigureCount, requestCount,
                                 resultErrorCount, deviceError, streamStats, userTag,
-                                videoStabilizationMode, extSessionStats);
+                                videoStabilizationMode, usedUltraWide, usedZoomOverride,
+                                extSessionStats);
                         mCameraUsageHistory.add(doneEvent);
                         // Do not double count device error
                         deviceError = false;
@@ -1263,7 +1296,7 @@ public class CameraServiceProxy extends SystemService
             return;
         }
         if (DEBUG) Slog.v(TAG, "Setting NFC reader mode. enablePolling: " + enablePolling);
-        nfcAdapter.setReaderMode(enablePolling);
+        nfcAdapter.setReaderModePollingEnabled(enablePolling);
     }
 
     private static int[] toArray(Collection<Integer> c) {

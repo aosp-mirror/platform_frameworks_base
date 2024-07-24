@@ -18,24 +18,32 @@ package com.android.server.companion.virtual;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.companion.virtual.IVirtualDevice;
 import android.companion.virtual.sensor.IVirtualSensorCallback;
 import android.companion.virtual.sensor.VirtualSensor;
 import android.companion.virtual.sensor.VirtualSensorConfig;
 import android.companion.virtual.sensor.VirtualSensorEvent;
+import android.content.AttributionSource;
 import android.hardware.SensorDirectChannel;
+import android.os.Binder;
 import android.os.IBinder;
 import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 import android.os.SharedMemory;
 import android.util.ArrayMap;
 import android.util.Slog;
+import android.util.SparseArray;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.modules.expresslog.Counter;
 import com.android.server.LocalServices;
 import com.android.server.sensors.SensorManagerInternal;
 
 import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -54,46 +62,68 @@ public class SensorController {
 
     private final Object mLock = new Object();
     private final int mVirtualDeviceId;
+
     @GuardedBy("mLock")
     private final ArrayMap<IBinder, SensorDescriptor> mSensorDescriptors = new ArrayMap<>();
 
+    // This device's sensors, keyed by sensor handle.
+    @GuardedBy("mLock")
+    private SparseArray<VirtualSensor> mVirtualSensors = new SparseArray<>();
+    @GuardedBy("mLock")
+    private List<VirtualSensor> mVirtualSensorList = null;
+
+    @NonNull
+    private final AttributionSource mAttributionSource;
     @NonNull
     private final SensorManagerInternal.RuntimeSensorCallback mRuntimeSensorCallback;
     private final SensorManagerInternal mSensorManagerInternal;
     private final VirtualDeviceManagerInternal mVdmInternal;
 
-    public SensorController(int virtualDeviceId,
-            @Nullable IVirtualSensorCallback virtualSensorCallback) {
+    public SensorController(@NonNull IVirtualDevice virtualDevice, int virtualDeviceId,
+            @NonNull AttributionSource attributionSource,
+            @Nullable IVirtualSensorCallback virtualSensorCallback,
+            @NonNull List<VirtualSensorConfig> sensors) {
         mVirtualDeviceId = virtualDeviceId;
+        mAttributionSource = attributionSource;
         mRuntimeSensorCallback = new RuntimeSensorCallbackWrapper(virtualSensorCallback);
         mSensorManagerInternal = LocalServices.getService(SensorManagerInternal.class);
         mVdmInternal = LocalServices.getService(VirtualDeviceManagerInternal.class);
+        createSensors(virtualDevice, sensors);
     }
 
     void close() {
         synchronized (mLock) {
             mSensorDescriptors.values().forEach(
-                    descriptor -> mSensorManagerInternal.removeRuntimeSensor(
-                            descriptor.getHandle()));
+                    descriptor -> mSensorManagerInternal.removeRuntimeSensor(descriptor.mHandle));
             mSensorDescriptors.clear();
+            mVirtualSensors.clear();
+            mVirtualSensorList = null;
         }
     }
 
-    int createSensor(@NonNull IBinder sensorToken, @NonNull VirtualSensorConfig config) {
-        Objects.requireNonNull(sensorToken);
-        Objects.requireNonNull(config);
+    private void createSensors(@NonNull IVirtualDevice virtualDevice,
+            @NonNull List<VirtualSensorConfig> configs) {
+        Objects.requireNonNull(virtualDevice);
+        final long token = Binder.clearCallingIdentity();
         try {
-            return createSensorInternal(sensorToken, config);
+            for (VirtualSensorConfig config : configs) {
+                createSensorInternal(virtualDevice, config);
+            }
         } catch (SensorCreationException e) {
-            throw new RuntimeException(
-                    "Failed to create virtual sensor '" + config.getName() + "'.", e);
+            throw new RuntimeException("Failed to create virtual sensor", e);
+        } finally {
+            Binder.restoreCallingIdentity(token);
         }
     }
 
-    private int createSensorInternal(IBinder sensorToken, VirtualSensorConfig config)
+    private void createSensorInternal(@NonNull IVirtualDevice virtualDevice,
+            @NonNull VirtualSensorConfig config)
             throws SensorCreationException {
+        Objects.requireNonNull(config);
         if (config.getType() <= 0) {
-            throw new SensorCreationException("Received an invalid virtual sensor type.");
+            throw new SensorCreationException(
+                    "Received an invalid virtual sensor type (config name '" + config.getName()
+                            + "').");
         }
         final int handle = mSensorManagerInternal.createRuntimeSensor(mVirtualDeviceId,
                 config.getType(), config.getName(),
@@ -101,15 +131,25 @@ public class SensorController {
                 config.getResolution(), config.getPower(), config.getMinDelay(),
                 config.getMaxDelay(), config.getFlags(), mRuntimeSensorCallback);
         if (handle <= 0) {
-            throw new SensorCreationException("Received an invalid virtual sensor handle.");
+            throw new SensorCreationException(
+                    "Received an invalid virtual sensor handle '" + config.getName() + "'.");
         }
 
+        SensorDescriptor sensorDescriptor = new SensorDescriptor(
+                handle, config.getType(), config.getName());
+        final IBinder sensorToken =
+                new Binder("android.hardware.sensor.VirtualSensor:" + config.getName());
+        VirtualSensor sensor = new VirtualSensor(handle, config.getType(), config.getName(),
+                virtualDevice, sensorToken);
         synchronized (mLock) {
-            SensorDescriptor sensorDescriptor = new SensorDescriptor(
-                    handle, config.getType(), config.getName());
             mSensorDescriptors.put(sensorToken, sensorDescriptor);
+            mVirtualSensors.put(handle, sensor);
         }
-        return handle;
+        if (android.companion.virtualdevice.flags.Flags.metricsCollection()) {
+            Counter.logIncrementWithUid(
+                    "virtual_devices.value_virtual_sensors_created_count",
+                    mAttributionSource.getUid());
+        }
     }
 
     boolean sendSensorEvent(@NonNull IBinder token, @NonNull VirtualSensorEvent event) {
@@ -126,17 +166,25 @@ public class SensorController {
         }
     }
 
-    void unregisterSensor(@NonNull IBinder token) {
-        Objects.requireNonNull(token);
+    @Nullable
+    VirtualSensor getSensorByHandle(int handle) {
         synchronized (mLock) {
-            final SensorDescriptor sensorDescriptor = mSensorDescriptors.remove(token);
-            if (sensorDescriptor == null) {
-                throw new IllegalArgumentException("Could not unregister sensor for given token");
-            }
-            mSensorManagerInternal.removeRuntimeSensor(sensorDescriptor.getHandle());
+            return mVirtualSensors.get(handle);
         }
     }
 
+    List<VirtualSensor> getSensorList() {
+        synchronized (mLock) {
+            if (mVirtualSensorList == null) {
+                mVirtualSensorList = new ArrayList<>(mVirtualSensors.size());
+                for (int i = 0; i < mVirtualSensors.size(); ++i) {
+                    mVirtualSensorList.add(mVirtualSensors.valueAt(i));
+                }
+                mVirtualSensorList = Collections.unmodifiableList(mVirtualSensorList);
+            }
+            return mVirtualSensorList;
+        }
+    }
 
     void dump(@NonNull PrintWriter fout) {
         fout.println("    SensorController: ");
@@ -285,9 +333,6 @@ public class SensorController {
     private static class SensorCreationException extends Exception {
         SensorCreationException(String message) {
             super(message);
-        }
-        SensorCreationException(String message, Exception cause) {
-            super(message, cause);
         }
     }
 }

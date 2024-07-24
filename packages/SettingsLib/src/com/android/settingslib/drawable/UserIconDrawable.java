@@ -22,7 +22,6 @@ import static android.app.admin.DevicePolicyResources.Drawables.WORK_PROFILE_USE
 
 import android.annotation.ColorInt;
 import android.annotation.DrawableRes;
-import android.annotation.NonNull;
 import android.app.admin.DevicePolicyManager;
 import android.content.Context;
 import android.content.res.ColorStateList;
@@ -45,6 +44,7 @@ import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.UserHandle;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
 import androidx.annotation.VisibleForTesting;
 

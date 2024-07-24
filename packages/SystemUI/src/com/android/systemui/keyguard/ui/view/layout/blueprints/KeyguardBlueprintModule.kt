@@ -17,9 +17,13 @@
 
 package com.android.systemui.keyguard.ui.view.layout.blueprints
 
-import com.android.systemui.keyguard.data.repository.KeyguardBlueprint
+import com.android.systemui.keyguard.domain.interactor.KeyguardBlueprintInteractor.Companion.SPLIT_SHADE_WEATHER_CLOCK_BLUEPRINT_ID
+import com.android.systemui.keyguard.domain.interactor.KeyguardBlueprintInteractor.Companion.WEATHER_CLOCK_BLUEPRINT_ID
+import com.android.systemui.keyguard.shared.model.KeyguardBlueprint
+import com.android.systemui.keyguard.shared.model.KeyguardSection
 import dagger.Binds
 import dagger.Module
+import dagger.Provides
 import dagger.multibindings.IntoSet
 
 @Module
@@ -32,7 +36,35 @@ abstract class KeyguardBlueprintModule {
 
     @Binds
     @IntoSet
+    abstract fun bindSplitShadeBlueprint(
+        splitShadeBlueprint: SplitShadeKeyguardBlueprint
+    ): KeyguardBlueprint
+
+    @Binds
+    @IntoSet
     abstract fun bindShortcutsBesideUdfpsLockscreenBlueprint(
         shortcutsBesideUdfpsLockscreenBlueprint: ShortcutsBesideUdfpsKeyguardBlueprint
     ): KeyguardBlueprint
+
+    companion object {
+        /** This is a place holder for weather clock in compose. */
+        @Provides
+        @IntoSet
+        fun bindWeatherClockBlueprintPlaceHolder(): KeyguardBlueprint {
+            return object : KeyguardBlueprint {
+                override val id: String = WEATHER_CLOCK_BLUEPRINT_ID
+                override val sections: List<KeyguardSection> = listOf()
+            }
+        }
+
+        /** This is a place holder for weather clock in compose. */
+        @Provides
+        @IntoSet
+        fun bindSplitShadeWeatherClockBlueprintPlaceHolder(): KeyguardBlueprint {
+            return object : KeyguardBlueprint {
+                override val id: String = SPLIT_SHADE_WEATHER_CLOCK_BLUEPRINT_ID
+                override val sections: List<KeyguardSection> = listOf()
+            }
+        }
+    }
 }

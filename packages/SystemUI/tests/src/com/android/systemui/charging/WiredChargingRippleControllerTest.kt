@@ -24,7 +24,7 @@ import android.view.WindowManager
 import android.view.WindowMetrics
 import androidx.test.filters.SmallTest
 import com.android.internal.logging.UiEventLogger
-import com.android.systemui.R
+import com.android.systemui.res.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.flags.Flags

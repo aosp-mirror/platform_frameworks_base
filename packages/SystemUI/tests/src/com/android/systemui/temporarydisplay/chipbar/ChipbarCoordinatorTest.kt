@@ -21,7 +21,6 @@ import android.os.VibrationAttributes
 import android.os.VibrationEffect
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
-import android.view.HapticFeedbackConstants
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
@@ -33,7 +32,6 @@ import androidx.core.animation.doOnCancel
 import androidx.test.filters.SmallTest
 import com.android.internal.logging.InstanceId
 import com.android.internal.logging.testing.UiEventLoggerFake
-import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.classifier.FalsingCollector
 import com.android.systemui.common.shared.model.ContentDescription
@@ -42,9 +40,8 @@ import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.common.shared.model.Text
 import com.android.systemui.common.shared.model.TintedIcon
 import com.android.systemui.dump.DumpManager
-import com.android.systemui.flags.FakeFeatureFlags
-import com.android.systemui.flags.Flags.ONE_WAY_HAPTICS_API_MIGRATION
 import com.android.systemui.plugins.FalsingManager
+import com.android.systemui.res.R
 import com.android.systemui.statusbar.VibratorHelper
 import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.temporarydisplay.TemporaryViewUiEvent
@@ -94,7 +91,6 @@ class ChipbarCoordinatorTest : SysuiTestCase() {
     private lateinit var fakeExecutor: FakeExecutor
     private lateinit var uiEventLoggerFake: UiEventLoggerFake
     private lateinit var uiEventLogger: TemporaryViewUiEventLogger
-    private val featureFlags = FakeFeatureFlags()
 
     @Before
     fun setUp() {
@@ -131,10 +127,8 @@ class ChipbarCoordinatorTest : SysuiTestCase() {
                 fakeWakeLockBuilder,
                 fakeClock,
                 uiEventLogger,
-                featureFlags
             )
         underTest.start()
-        featureFlags.set(ONE_WAY_HAPTICS_API_MIGRATION, false)
     }
 
     @Test
@@ -494,23 +488,6 @@ class ChipbarCoordinatorTest : SysuiTestCase() {
             )
     }
 
-    @Test
-    fun displayView_oneWayHapticsEnabled_usesPerformHapticFeedback() {
-        featureFlags.set(ONE_WAY_HAPTICS_API_MIGRATION, true)
-        val constant: Int = HapticFeedbackConstants.CONFIRM
-        underTest.displayView(
-            createChipbarInfo(
-                Icon.Resource(R.id.check_box, null),
-                Text.Loaded("text"),
-                endItem = null,
-                vibrationEffect = null,
-                vibrationConstant = constant
-            )
-        )
-
-        verify(vibratorHelper).performHapticFeedback(any(), eq(constant))
-    }
-
     /** Regression test for b/266119467. */
     @Test
     fun displayView_animationFailure_viewsStillBecomeVisible() {
@@ -729,14 +706,12 @@ class ChipbarCoordinatorTest : SysuiTestCase() {
         endItem: ChipbarEndItem?,
         vibrationEffect: VibrationEffect? = null,
         allowSwipeToDismiss: Boolean = false,
-        vibrationConstant: Int = HapticFeedbackConstants.NO_HAPTICS,
     ): ChipbarInfo {
         return ChipbarInfo(
             TintedIcon(startIcon, tint = null),
             text,
             endItem,
             vibrationEffect,
-            vibrationConstant,
             allowSwipeToDismiss,
             windowTitle = WINDOW_TITLE,
             wakeReason = WAKE_REASON,

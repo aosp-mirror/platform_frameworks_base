@@ -27,7 +27,6 @@ import android.app.ActivityManager;
 import android.app.Notification;
 import android.content.Context;
 import android.content.pm.ActivityInfo;
-import android.content.pm.ApplicationInfo;
 import android.content.res.ColorStateList;
 import android.content.res.Configuration;
 import android.content.res.Resources;
@@ -51,15 +50,18 @@ import android.view.ViewGroup;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.animation.Interpolator;
 
+import androidx.annotation.Nullable;
 import androidx.core.graphics.ColorUtils;
 
 import com.android.app.animation.Interpolators;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.statusbar.StatusBarIcon;
 import com.android.internal.util.ContrastColorUtil;
-import com.android.systemui.R;
-import com.android.systemui.statusbar.notification.NotificationIconDozeHelper;
+import com.android.systemui.res.R;
+import com.android.systemui.statusbar.notification.NotificationContentDescription;
+import com.android.systemui.statusbar.notification.NotificationDozeHelper;
 import com.android.systemui.statusbar.notification.NotificationUtils;
+import com.android.systemui.statusbar.notification.shared.NotificationIconContainerRefactor;
 import com.android.systemui.util.drawable.DrawableSize;
 
 import java.lang.annotation.Retention;
@@ -163,7 +165,6 @@ public class StatusBarIconView extends AnimatedImageView implements StatusIconDi
     private int mDrawableColor;
     private int mIconColor;
     private int mDecorColor;
-    private float mDozeAmount;
     private ValueAnimator mColorAnimator;
     private int mCurrentSetColor = NO_COLOR;
     private int mAnimationStartColor = NO_COLOR;
@@ -173,7 +174,6 @@ public class StatusBarIconView extends AnimatedImageView implements StatusIconDi
                 animation.getAnimatedFraction());
         setColorInternal(newColor);
     };
-    private final NotificationIconDozeHelper mDozer;
     private int mContrastedDrawableColor;
     private int mCachedContrastBackgroundColor = NO_COLOR;
     private float[] mMatrix;
@@ -183,6 +183,8 @@ public class StatusBarIconView extends AnimatedImageView implements StatusIconDi
     private Runnable mOnDismissListener;
     private boolean mIncreasedSize;
     private boolean mShowsConversation;
+    private float mDozeAmount;
+    private final NotificationDozeHelper mDozer;
 
     public StatusBarIconView(Context context, String slot, StatusBarNotification sbn) {
         this(context, slot, sbn, false);
@@ -191,7 +193,7 @@ public class StatusBarIconView extends AnimatedImageView implements StatusIconDi
     public StatusBarIconView(Context context, String slot, StatusBarNotification sbn,
             boolean blocked) {
         super(context);
-        mDozer = new NotificationIconDozeHelper(context);
+        mDozer = new NotificationDozeHelper();
         mBlocked = blocked;
         mSlot = slot;
         mNumberPain = new Paint();
@@ -321,9 +323,14 @@ public class StatusBarIconView extends AnimatedImageView implements StatusIconDi
      * Update the icon dimens and drawable with current resources
      */
     public void updateIconDimens() {
-        reloadDimens();
-        updateDrawable();
-        maybeUpdateIconScaleDimens();
+        Trace.beginSection("StatusBarIconView#updateIconDimens");
+        try {
+            reloadDimens();
+            updateDrawable();
+            maybeUpdateIconScaleDimens();
+        } finally {
+            Trace.endSection();
+        }
     }
 
     private void reloadDimens() {
@@ -348,9 +355,22 @@ public class StatusBarIconView extends AnimatedImageView implements StatusIconDi
     }
 
     public void setNotification(StatusBarNotification notification) {
-        mNotification = notification;
+        CharSequence contentDescription = null;
         if (notification != null) {
-            setContentDescription(notification.getNotification());
+            contentDescription = NotificationContentDescription
+                    .contentDescForNotification(mContext, notification.getNotification());
+        }
+        setNotification(notification, contentDescription);
+    }
+
+    /**
+     * Sets the notification with a pre-set content description.
+     */
+    public void setNotification(@Nullable StatusBarNotification notification,
+            @Nullable CharSequence notificationContentDescription) {
+        mNotification = notification;
+        if (!TextUtils.isEmpty(notificationContentDescription)) {
+            setContentDescription(notificationContentDescription);
         }
         maybeUpdateIconScaleDimens();
     }
@@ -619,21 +639,16 @@ public class StatusBarIconView extends AnimatedImageView implements StatusIconDi
         mNumberBackground.setBounds(w-dw, h-dh, w, h);
     }
 
-    private void setContentDescription(Notification notification) {
-        if (notification != null) {
-            String d = contentDescForNotification(mContext, notification);
-            if (!TextUtils.isEmpty(d)) {
-                setContentDescription(d);
-            }
-        }
-    }
-
     @Override
     public String toString() {
         return "StatusBarIconView("
                 + "slot='" + mSlot + "' alpha=" + getAlpha() + " icon=" + mIcon
                 + " visibleState=" + getVisibleStateString(getVisibleState())
                 + " iconColor=#" + Integer.toHexString(mIconColor)
+                + " staticDrawableColor=#" + Integer.toHexString(mDrawableColor)
+                + " decorColor=#" + Integer.toHexString(mDecorColor)
+                + " animationStartColor=#" + Integer.toHexString(mAnimationStartColor)
+                + " currentSetColor=#" + Integer.toHexString(mCurrentSetColor)
                 + " notification=" + mNotification + ')';
     }
 
@@ -643,35 +658,6 @@ public class StatusBarIconView extends AnimatedImageView implements StatusIconDi
 
     public String getSlot() {
         return mSlot;
-    }
-
-
-    public static String contentDescForNotification(Context c, Notification n) {
-        String appName = "";
-        try {
-            Notification.Builder builder = Notification.Builder.recoverBuilder(c, n);
-            appName = builder.loadHeaderAppName();
-        } catch (RuntimeException e) {
-            Log.e(TAG, "Unable to recover builder", e);
-            // Trying to get the app name from the app info instead.
-            ApplicationInfo appInfo = n.extras.getParcelable(
-                    Notification.EXTRA_BUILDER_APPLICATION_INFO, ApplicationInfo.class);
-            if (appInfo != null) {
-                appName = String.valueOf(appInfo.loadLabel(c.getPackageManager()));
-            }
-        }
-
-        CharSequence title = n.extras.getCharSequence(Notification.EXTRA_TITLE);
-        CharSequence text = n.extras.getCharSequence(Notification.EXTRA_TEXT);
-        CharSequence ticker = n.tickerText;
-
-        // Some apps just put the app name into the title
-        CharSequence titleOrText = TextUtils.equals(title, appName) ? text : title;
-
-        CharSequence desc = !TextUtils.isEmpty(titleOrText) ? titleOrText
-                : !TextUtils.isEmpty(ticker) ? ticker : "";
-
-        return c.getString(R.string.accessibility_desc_notification_icon, appName, desc);
     }
 
     /**
@@ -711,7 +697,6 @@ public class StatusBarIconView extends AnimatedImageView implements StatusIconDi
         setColorInternal(color);
         updateContrastedStaticColor();
         mIconColor = color;
-        mDozer.setColor(color);
     }
 
     private void setColorInternal(int color) {
@@ -958,13 +943,28 @@ public class StatusBarIconView extends AnimatedImageView implements StatusIconDi
         return mDotAppearAmount;
     }
 
-    public void setDozing(boolean dozing, boolean fade, long delay) {
+    public void setDozing(boolean dozing, boolean animate, long delay) {
+        setDozing(dozing, animate, delay, /* onChildCompleted= */ null);
+    }
+
+    public void setTintAlpha(float tintAlpha) {
+        if (NotificationIconContainerRefactor.isUnexpectedlyInLegacyMode()) return;
+        setDozeAmount(tintAlpha);
+    }
+
+    private void setDozeAmount(float dozeAmount) {
+        mDozeAmount = dozeAmount;
+        updateDecorColor();
+        updateIconColor();
+    }
+
+    public void setDozing(boolean dozing, boolean animate, long delay,
+            @Nullable Runnable endRunnable) {
+        NotificationIconContainerRefactor.assertInLegacyMode();
         mDozer.setDozing(f -> {
-            mDozeAmount = f;
-            updateDecorColor();
-            updateIconColor();
+            setDozeAmount(f);
             updateAllowAnimation();
-        }, dozing, fade, delay, this);
+        }, dozing, animate, delay, this, endRunnable);
     }
 
     private void updateAllowAnimation() {

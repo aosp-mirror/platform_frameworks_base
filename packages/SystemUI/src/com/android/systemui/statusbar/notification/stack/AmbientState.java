@@ -26,9 +26,9 @@ import android.util.MathUtils;
 import androidx.annotation.VisibleForTesting;
 
 import com.android.systemui.Dumpable;
-import com.android.systemui.R;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dump.DumpManager;
+import com.android.systemui.res.R;
 import com.android.systemui.shade.transition.LargeScreenShadeInterpolator;
 import com.android.systemui.statusbar.NotificationShelf;
 import com.android.systemui.statusbar.StatusBarState;
@@ -86,7 +86,6 @@ public class AmbientState implements Dumpable {
     private boolean mExpansionChanging;
     private boolean mIsSmallScreen;
     private boolean mPulsing;
-    private boolean mUnlockHintRunning;
     private float mHideAmount;
     private boolean mAppearing;
     private float mPulseHeight = MAX_PULSE_HEIGHT;
@@ -122,6 +121,7 @@ public class AmbientState implements Dumpable {
     private float mAppearFraction;
     private float mOverExpansion;
     private int mStackTopMargin;
+    private boolean mUseSplitShade;
 
     /** Distance of top of notifications panel from top of screen. */
     private float mStackY = 0;
@@ -229,6 +229,20 @@ public class AmbientState implements Dumpable {
     }
 
     /**
+     * @param useSplitShade True if we are showing split shade.
+     */
+    public void setUseSplitShade(boolean useSplitShade) {
+        mUseSplitShade = useSplitShade;
+    }
+
+    /**
+     * @return True if we are showing split shade.
+     */
+    public boolean getUseSplitShade() {
+        return mUseSplitShade;
+    }
+
+    /**
      * @return Fraction of shade expansion.
      */
     public float getExpansionFraction() {
@@ -249,8 +263,8 @@ public class AmbientState implements Dumpable {
         return mStackHeight;
     }
 
-    /** Tracks the state from AlertingNotificationManager#hasNotifications() */
-    private boolean mHasAlertEntries;
+    /** Tracks the state from HeadsUpManager#hasNotifications() */
+    private boolean mHasHeadsUpEntries;
 
     @Inject
     public AmbientState(
@@ -549,7 +563,7 @@ public class AmbientState implements Dumpable {
     }
 
     public boolean hasPulsingNotifications() {
-        return mPulsing && mHasAlertEntries;
+        return mPulsing && mHasHeadsUpEntries;
     }
 
     public void setPulsing(boolean hasPulsing) {
@@ -564,7 +578,7 @@ public class AmbientState implements Dumpable {
     }
 
     public boolean isPulsing(NotificationEntry entry) {
-        return mPulsing && entry.isAlerting();
+        return mPulsing && entry.isHeadsUpEntry();
     }
 
     public void setPulsingRow(ExpandableNotificationRow row) {
@@ -590,14 +604,6 @@ public class AmbientState implements Dumpable {
 
     public void setSmallScreen(boolean smallScreen) {
         mIsSmallScreen = smallScreen;
-    }
-
-    public void setUnlockHintRunning(boolean unlockHintRunning) {
-        mUnlockHintRunning = unlockHintRunning;
-    }
-
-    public boolean isUnlockHintRunning() {
-        return mUnlockHintRunning;
     }
 
     /**
@@ -710,8 +716,8 @@ public class AmbientState implements Dumpable {
         return mAppearFraction;
     }
 
-    public void setHasAlertEntries(boolean hasAlertEntries) {
-        mHasAlertEntries = hasAlertEntries;
+    public void setHasHeadsUpEntries(boolean hasHeadsUpEntries) {
+        mHasHeadsUpEntries = hasHeadsUpEntries;
     }
 
     public void setStackTopMargin(int stackTopMargin) {
@@ -770,7 +776,6 @@ public class AmbientState implements Dumpable {
         pw.println("mPulseHeight=" + mPulseHeight);
         pw.println("mTrackedHeadsUpRow.key=" + logKey(mTrackedHeadsUpRow));
         pw.println("mMaxHeadsUpTranslation=" + mMaxHeadsUpTranslation);
-        pw.println("mUnlockHintRunning=" + mUnlockHintRunning);
         pw.println("mDozeAmount=" + mDozeAmount);
         pw.println("mDozing=" + mDozing);
         pw.println("mFractionToShade=" + mFractionToShade);

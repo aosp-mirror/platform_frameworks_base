@@ -27,6 +27,7 @@
 #include "Diagnostics.h"
 #include "android-base/stringprintf.h"
 #include "android-base/utf8.h"
+#include "androidfw/FileStream.h"
 #include "androidfw/IDiagnostics.h"
 #include "androidfw/StringPiece.h"
 #include "cmd/ApkInfo.h"
@@ -37,7 +38,6 @@
 #include "cmd/Dump.h"
 #include "cmd/Link.h"
 #include "cmd/Optimize.h"
-#include "io/FileStream.h"
 #include "trace/TraceBuffer.h"
 #include "util/Files.h"
 #include "util/Util.h"
@@ -99,7 +99,7 @@ class MainCommand : public Command {
  */
 class DaemonCommand : public Command {
  public:
-  explicit DaemonCommand(io::FileOutputStream* out, android::IDiagnostics* diagnostics)
+  explicit DaemonCommand(android::FileOutputStream* out, android::IDiagnostics* diagnostics)
       : Command("daemon", "m"), out_(out), diagnostics_(diagnostics) {
     SetDescription("Runs aapt in daemon mode. Each subsequent line is a single parameter to the\n"
         "command. The end of an invocation is signaled by providing an empty line.");
@@ -147,7 +147,7 @@ class DaemonCommand : public Command {
   }
 
  private:
-  io::FileOutputStream* out_;
+  android::FileOutputStream* out_;
   android::IDiagnostics* diagnostics_;
   std::optional<std::string> trace_folder_;
 };
@@ -167,7 +167,7 @@ int MainImpl(int argc, char** argv) {
 
   // Use a smaller buffer so that there is less latency for printing to stdout.
   constexpr size_t kStdOutBufferSize = 1024u;
-  aapt::io::FileOutputStream fout(STDOUT_FILENO, kStdOutBufferSize);
+  android::FileOutputStream fout(STDOUT_FILENO, kStdOutBufferSize);
   aapt::text::Printer printer(&fout);
 
   aapt::StdErrDiagnostics diagnostics;

@@ -24,33 +24,33 @@
 #include "utils/Log.h"
 
 namespace android {
-static void nativeUpdateSmallAreaDetection(JNIEnv* env, jclass clazz, jintArray juids,
+static void nativeUpdateSmallAreaDetection(JNIEnv* env, jclass clazz, jintArray jappIds,
                                            jfloatArray jthresholds) {
-    if (juids == nullptr || jthresholds == nullptr) return;
+    if (jappIds == nullptr || jthresholds == nullptr) return;
 
-    ScopedIntArrayRO uids(env, juids);
+    ScopedIntArrayRO appIds(env, jappIds);
     ScopedFloatArrayRO thresholds(env, jthresholds);
 
-    if (uids.size() != thresholds.size()) {
-        ALOGE("uids size exceeds thresholds size!");
+    if (appIds.size() != thresholds.size()) {
+        ALOGE("appIds size exceeds thresholds size!");
         return;
     }
 
-    std::vector<int32_t> uidVector;
+    std::vector<int32_t> appIdVector;
     std::vector<float> thresholdVector;
-    size_t size = uids.size();
-    uidVector.reserve(size);
+    size_t size = appIds.size();
+    appIdVector.reserve(size);
     thresholdVector.reserve(size);
     for (int i = 0; i < size; i++) {
-        uidVector.push_back(static_cast<int32_t>(uids[i]));
+        appIdVector.push_back(static_cast<int32_t>(appIds[i]));
         thresholdVector.push_back(static_cast<float>(thresholds[i]));
     }
-    SurfaceComposerClient::updateSmallAreaDetection(uidVector, thresholdVector);
+    SurfaceComposerClient::updateSmallAreaDetection(appIdVector, thresholdVector);
 }
 
-static void nativeSetSmallAreaDetectionThreshold(JNIEnv* env, jclass clazz, jint uid,
+static void nativeSetSmallAreaDetectionThreshold(JNIEnv* env, jclass clazz, jint appId,
                                                  jfloat threshold) {
-    SurfaceComposerClient::setSmallAreaDetectionThreshold(uid, threshold);
+    SurfaceComposerClient::setSmallAreaDetectionThreshold(appId, threshold);
 }
 
 static const JNINativeMethod gMethods[] = {

@@ -1,0 +1,82 @@
+# Copyright 2024 The Android Open Source Project
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+# Key Layout file for Google Reference RCU Remote with customizable button.
+#
+
+key 116   TV_POWER      WAKE
+key 217   ASSIST        WAKE
+key 423   MACRO_1       WAKE
+
+key 103   DPAD_UP
+key 108   DPAD_DOWN
+key 105   DPAD_LEFT
+key 106   DPAD_RIGHT
+key 353   DPAD_CENTER
+
+key 158   BACK
+key 172   HOME          WAKE
+
+key 113   VOLUME_MUTE
+key 114   VOLUME_DOWN
+key 115   VOLUME_UP
+
+key 2     1
+key 3     2
+key 4     3
+key 5     4
+key 6     5
+key 7     6
+key 8     7
+key 9     8
+key 10    9
+key 11    0
+
+# custom keys
+key usage 0x000c01BB    TV_INPUT
+
+key usage 0x000c0185    TV_TELETEXT
+key usage 0x000c0061    CAPTIONS
+
+key usage 0x000c01BD    INFO
+key usage 0x000c0037    PERIOD
+
+key usage 0x000c0069    PROG_RED
+key usage 0x000c006A    PROG_GREEN
+key usage 0x000c006C    PROG_YELLOW
+key usage 0x000c006B    PROG_BLUE
+key usage 0x000c00B4    MEDIA_SKIP_BACKWARD
+key usage 0x000c00CD    MEDIA_PLAY_PAUSE
+key usage 0x000c00B2    MEDIA_RECORD
+key usage 0x000c00B3    MEDIA_SKIP_FORWARD
+
+key usage 0x000c022A    BOOKMARK
+key usage 0x000c01A2    ALL_APPS
+key usage 0x000c019C    PROFILE_SWITCH
+
+key usage 0x000c0096    SETTINGS
+key usage 0x000c009F    NOTIFICATION
+
+key usage 0x000c008D    GUIDE
+key usage 0x000c0089    TV
+
+key usage 0x000c0187    FEATURED_APP_1    WAKE #FreeTv
+
+key usage 0x000c009C    CHANNEL_UP
+key usage 0x000c009D    CHANNEL_DOWN
+
+key usage 0x000c0077    BUTTON_3     WAKE #YouTube
+key usage 0x000c0078    BUTTON_4     WAKE #Netflix
+key usage 0x000c0079    BUTTON_6     WAKE
+key usage 0x000c007A    BUTTON_7     WAKE

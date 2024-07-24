@@ -16,6 +16,7 @@
 
 package com.android.server.wm;
 
+import static android.view.Display.TYPE_VIRTUAL;
 import static android.view.WindowManager.DISPLAY_IME_POLICY_FALLBACK_DISPLAY;
 import static android.view.WindowManager.DISPLAY_IME_POLICY_LOCAL;
 import static android.view.WindowManager.REMOVE_CONTENT_MODE_UNDEFINED;
@@ -28,6 +29,8 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.WindowConfiguration;
 import android.os.Environment;
+import android.util.ArrayMap;
+import android.util.ArraySet;
 import android.util.AtomicFile;
 import android.util.Slog;
 import android.util.Xml;
@@ -49,7 +52,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -86,7 +88,9 @@ class DisplayWindowSettingsProvider implements SettingsProvider {
         void finishWrite(OutputStream os, boolean success);
     }
 
+    @NonNull
     private ReadableSettings mBaseSettings;
+    @NonNull
     private final WritableSettings mOverrideSettings;
 
     DisplayWindowSettingsProvider() {
@@ -155,6 +159,21 @@ class DisplayWindowSettingsProvider implements SettingsProvider {
         mOverrideSettings.updateSettingsEntry(info, overrides);
     }
 
+    @Override
+    public void onDisplayRemoved(@NonNull DisplayInfo info) {
+        mOverrideSettings.onDisplayRemoved(info);
+    }
+
+    @Override
+    public void clearDisplaySettings(@NonNull DisplayInfo info) {
+        mOverrideSettings.clearDisplaySettings(info);
+    }
+
+    @VisibleForTesting
+    int getOverrideSettingsSize() {
+        return mOverrideSettings.mSettings.size();
+    }
+
     /**
      * Class that allows reading {@link SettingsEntry entries} from a
      * {@link ReadableSettingsStorage}.
@@ -168,14 +187,15 @@ class DisplayWindowSettingsProvider implements SettingsProvider {
          */
         @DisplayIdentifierType
         protected int mIdentifierType;
-        protected final Map<String, SettingsEntry> mSettings = new HashMap<>();
+        @NonNull
+        protected final ArrayMap<String, SettingsEntry> mSettings = new ArrayMap<>();
 
-        ReadableSettings(ReadableSettingsStorage settingsStorage) {
+        ReadableSettings(@NonNull ReadableSettingsStorage settingsStorage) {
             loadSettings(settingsStorage);
         }
 
         @Nullable
-        final SettingsEntry getSettingsEntry(DisplayInfo info) {
+        final SettingsEntry getSettingsEntry(@NonNull DisplayInfo info) {
             final String identifier = getIdentifier(info);
             SettingsEntry settings;
             // Try to get corresponding settings using preferred identifier for the current config.
@@ -193,7 +213,8 @@ class DisplayWindowSettingsProvider implements SettingsProvider {
         }
 
         /** Gets the identifier of choice for the current config. */
-        protected final String getIdentifier(DisplayInfo displayInfo) {
+        @NonNull
+        protected final String getIdentifier(@NonNull DisplayInfo displayInfo) {
             if (mIdentifierType == IDENTIFIER_PORT && displayInfo.address != null) {
                 // Config suggests using port as identifier for physical displays.
                 if (displayInfo.address instanceof DisplayAddress.Physical) {
@@ -203,7 +224,7 @@ class DisplayWindowSettingsProvider implements SettingsProvider {
             return displayInfo.uniqueId;
         }
 
-        private void loadSettings(ReadableSettingsStorage settingsStorage) {
+        private void loadSettings(@NonNull ReadableSettingsStorage settingsStorage) {
             FileData fileData = readSettings(settingsStorage);
             if (fileData != null) {
                 mIdentifierType = fileData.mIdentifierType;
@@ -217,15 +238,18 @@ class DisplayWindowSettingsProvider implements SettingsProvider {
      * {@link WritableSettingsStorage}.
      */
     private static final class WritableSettings extends ReadableSettings {
+        @NonNull
         private final WritableSettingsStorage mSettingsStorage;
+        @NonNull
+        private final ArraySet<String> mVirtualDisplayIdentifiers = new ArraySet<>();
 
-        WritableSettings(WritableSettingsStorage settingsStorage) {
+        WritableSettings(@NonNull WritableSettingsStorage settingsStorage) {
             super(settingsStorage);
             mSettingsStorage = settingsStorage;
         }
 
         @NonNull
-        SettingsEntry getOrCreateSettingsEntry(DisplayInfo info) {
+        SettingsEntry getOrCreateSettingsEntry(@NonNull DisplayInfo info) {
             final String identifier = getIdentifier(info);
             SettingsEntry settings;
             // Try to get corresponding settings using preferred identifier for the current config.
@@ -243,21 +267,53 @@ class DisplayWindowSettingsProvider implements SettingsProvider {
 
             settings = new SettingsEntry();
             mSettings.put(identifier, settings);
+            if (info.type == TYPE_VIRTUAL) {
+                // Keep track of virtual display. We don't want to write virtual display settings to
+                // file.
+                mVirtualDisplayIdentifiers.add(identifier);
+            }
             return settings;
         }
 
-        void updateSettingsEntry(DisplayInfo info, SettingsEntry settings) {
+        void updateSettingsEntry(@NonNull DisplayInfo info, @NonNull SettingsEntry settings) {
             final SettingsEntry overrideSettings = getOrCreateSettingsEntry(info);
             final boolean changed = overrideSettings.setTo(settings);
-            if (changed) {
+            if (changed && info.type != TYPE_VIRTUAL) {
                 writeSettings();
             }
         }
 
+        void onDisplayRemoved(@NonNull DisplayInfo info) {
+            final String identifier = getIdentifier(info);
+            if (!mSettings.containsKey(identifier)) {
+                return;
+            }
+            if (mVirtualDisplayIdentifiers.remove(identifier)
+                    || mSettings.get(identifier).isEmpty()) {
+                // Don't keep track of virtual display or empty settings to avoid growing the cached
+                // map.
+                mSettings.remove(identifier);
+            }
+        }
+
+        void clearDisplaySettings(@NonNull DisplayInfo info) {
+            final String identifier = getIdentifier(info);
+            mSettings.remove(identifier);
+            mVirtualDisplayIdentifiers.remove(identifier);
+        }
+
         private void writeSettings() {
-            FileData fileData = new FileData();
+            final FileData fileData = new FileData();
             fileData.mIdentifierType = mIdentifierType;
-            fileData.mSettings.putAll(mSettings);
+            final int size = mSettings.size();
+            for (int i = 0; i < size; i++) {
+                final String identifier = mSettings.keyAt(i);
+                if (mVirtualDisplayIdentifiers.contains(identifier)) {
+                    // Do not write virtual display settings to file.
+                    continue;
+                }
+                fileData.mSettings.put(identifier, mSettings.get(identifier));
+            }
             DisplayWindowSettingsProvider.writeSettings(mSettingsStorage, fileData);
         }
     }
@@ -283,7 +339,7 @@ class DisplayWindowSettingsProvider implements SettingsProvider {
     }
 
     @Nullable
-    private static FileData readSettings(ReadableSettingsStorage storage) {
+    private static FileData readSettings(@NonNull ReadableSettingsStorage storage) {
         InputStream stream;
         try {
             stream = storage.openRead();
@@ -348,13 +404,14 @@ class DisplayWindowSettingsProvider implements SettingsProvider {
         return fileData;
     }
 
-    private static int getIntAttribute(TypedXmlPullParser parser, String name, int defaultValue) {
+    private static int getIntAttribute(@NonNull TypedXmlPullParser parser, @NonNull String name,
+            int defaultValue) {
         return parser.getAttributeInt(null, name, defaultValue);
     }
 
     @Nullable
-    private static Integer getIntegerAttribute(TypedXmlPullParser parser, String name,
-            @Nullable Integer defaultValue) {
+    private static Integer getIntegerAttribute(@NonNull TypedXmlPullParser parser,
+            @NonNull String name, @Nullable Integer defaultValue) {
         try {
             return parser.getAttributeInt(null, name);
         } catch (Exception ignored) {
@@ -363,8 +420,8 @@ class DisplayWindowSettingsProvider implements SettingsProvider {
     }
 
     @Nullable
-    private static Boolean getBooleanAttribute(TypedXmlPullParser parser, String name,
-            @Nullable Boolean defaultValue) {
+    private static Boolean getBooleanAttribute(@NonNull TypedXmlPullParser parser,
+            @NonNull String name, @Nullable Boolean defaultValue) {
         try {
             return parser.getAttributeBoolean(null, name);
         } catch (Exception ignored) {
@@ -372,7 +429,7 @@ class DisplayWindowSettingsProvider implements SettingsProvider {
         }
     }
 
-    private static void readDisplay(TypedXmlPullParser parser, FileData fileData)
+    private static void readDisplay(@NonNull TypedXmlPullParser parser, @NonNull FileData fileData)
             throws NumberFormatException, XmlPullParserException, IOException {
         String name = parser.getAttributeValue(null, "name");
         if (name != null) {
@@ -420,7 +477,7 @@ class DisplayWindowSettingsProvider implements SettingsProvider {
         XmlUtils.skipCurrentTag(parser);
     }
 
-    private static void readConfig(TypedXmlPullParser parser, FileData fileData)
+    private static void readConfig(@NonNull TypedXmlPullParser parser, @NonNull FileData fileData)
             throws NumberFormatException,
             XmlPullParserException, IOException {
         fileData.mIdentifierType = getIntAttribute(parser, "identifier",
@@ -428,7 +485,8 @@ class DisplayWindowSettingsProvider implements SettingsProvider {
         XmlUtils.skipCurrentTag(parser);
     }
 
-    private static void writeSettings(WritableSettingsStorage storage, FileData data) {
+    private static void writeSettings(@NonNull WritableSettingsStorage storage,
+            @NonNull FileData data) {
         OutputStream stream;
         try {
             stream = storage.startWrite();
@@ -525,7 +583,8 @@ class DisplayWindowSettingsProvider implements SettingsProvider {
 
     private static final class FileData {
         int mIdentifierType;
-        final Map<String, SettingsEntry> mSettings = new HashMap<>();
+        @NonNull
+        final Map<String, SettingsEntry> mSettings = new ArrayMap<>();
 
         @Override
         public String toString() {
@@ -537,6 +596,7 @@ class DisplayWindowSettingsProvider implements SettingsProvider {
     }
 
     private static final class AtomicFileStorage implements WritableSettingsStorage {
+        @NonNull
         private final AtomicFile mAtomicFile;
 
         AtomicFileStorage(@NonNull AtomicFile atomicFile) {

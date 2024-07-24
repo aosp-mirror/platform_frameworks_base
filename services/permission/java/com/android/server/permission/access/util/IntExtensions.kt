@@ -21,3 +21,19 @@ fun Int.hasAnyBit(bits: Int): Boolean = this and bits != 0
 fun Int.hasBits(bits: Int): Boolean = this and bits == bits
 
 infix fun Int.andInv(other: Int): Int = this and other.inv()
+
+inline fun Int.flagsToString(flagToString: (Int) -> String): String {
+    var flags = this
+    return buildString {
+        append("[")
+        while (flags != 0) {
+            val flag = 1 shl flags.countTrailingZeroBits()
+            flags = flags andInv flag
+            append(flagToString(flag))
+            if (flags != 0) {
+                append('|')
+            }
+        }
+        append("]")
+    }
+}

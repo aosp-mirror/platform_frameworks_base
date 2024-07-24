@@ -36,6 +36,7 @@ import dalvik.annotation.optimization.FastNative;
  * href="{@docRoot}tools/debugging/systrace.html">Analyzing Display and Performance
  * with Systrace</a>.
  */
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
 public final class Trace {
     /*
      * Writes trace events to the kernel trace buffer.  These trace events can be
@@ -123,9 +124,25 @@ public final class Trace {
 
     @UnsupportedAppUsage
     @CriticalNative
+    @android.ravenwood.annotation.RavenwoodReplace
     private static native long nativeGetEnabledTags();
+    @android.ravenwood.annotation.RavenwoodReplace
     private static native void nativeSetAppTracingAllowed(boolean allowed);
+    @android.ravenwood.annotation.RavenwoodReplace
     private static native void nativeSetTracingEnabled(boolean allowed);
+
+    private static long nativeGetEnabledTags$ravenwood() {
+        // Tracing currently completely disabled under Ravenwood
+        return 0;
+    }
+
+    private static void nativeSetAppTracingAllowed$ravenwood(boolean allowed) {
+        // Tracing currently completely disabled under Ravenwood
+    }
+
+    private static void nativeSetTracingEnabled$ravenwood(boolean allowed) {
+        // Tracing currently completely disabled under Ravenwood
+    }
 
     @FastNative
     private static native void nativeTraceCounter(long tag, String name, long value);
@@ -444,7 +461,8 @@ public final class Trace {
      * these characters they will be replaced with a space character in the trace.
      *
      * @param sectionName The name of the code section to appear in the trace.  This may be at
-     * most 127 Unicode code units long.
+     *                    most 127 Unicode code units long.
+     * @throws IllegalArgumentException if {@code sectionName} is too long.
      */
     public static void beginSection(@NonNull String sectionName) {
         if (isTagEnabled(TRACE_TAG_APP)) {

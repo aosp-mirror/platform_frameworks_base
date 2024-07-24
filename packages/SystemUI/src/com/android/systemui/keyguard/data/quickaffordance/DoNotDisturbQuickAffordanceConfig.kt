@@ -27,7 +27,7 @@ import android.provider.Settings.Secure.ZEN_DURATION_PROMPT
 import android.service.notification.ZenModeConfig
 import com.android.settingslib.notification.EnableZenModeDialog
 import com.android.settingslib.notification.ZenModeDialogMetricsLogger
-import com.android.systemui.R
+import com.android.systemui.res.R
 import com.android.systemui.animation.Expandable
 import com.android.systemui.common.coroutine.ChannelExt.trySendWithFailureLogging
 import com.android.systemui.common.coroutine.ConflatedCallbackFlow.conflatedCallbackFlow

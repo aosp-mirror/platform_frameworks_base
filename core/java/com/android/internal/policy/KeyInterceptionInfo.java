@@ -26,10 +26,12 @@ public class KeyInterceptionInfo {
     public final int layoutParamsPrivateFlags;
     // Debug friendly name to help identify the window
     public final String windowTitle;
+    public final int windowOwnerUid;
 
-    public KeyInterceptionInfo(int type, int flags, String title) {
+    public KeyInterceptionInfo(int type, int flags, String title, int uid) {
         layoutParamsType = type;
         layoutParamsPrivateFlags = flags;
         windowTitle = title;
+        windowOwnerUid = uid;
     }
 }

@@ -22,21 +22,28 @@ import static junit.framework.Assert.assertNull;
 
 import android.content.ContentResolver;
 import android.os.Bundle;
+import android.platform.test.flag.junit.CheckFlagsRule;
+import android.platform.test.flag.junit.DeviceFlagsValueProvider;
 import android.provider.Settings;
 
 import androidx.test.InstrumentationRegistry;
 import androidx.test.runner.AndroidJUnit4;
 
+import com.google.common.io.CharStreams;
+
 import libcore.io.Streams;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 
 /**
  * Tests for {@link DeviceConfigService}.
@@ -49,6 +56,10 @@ public class DeviceConfigServiceTest {
 
     private ContentResolver mContentResolver;
 
+    @Rule
+    public final CheckFlagsRule mCheckFlagsRule =
+            DeviceFlagsValueProvider.createCheckFlagsRule();
+
     @Before
     public void setUp() {
         mContentResolver = InstrumentationRegistry.getContext().getContentResolver();
@@ -57,6 +68,24 @@ public class DeviceConfigServiceTest {
     @After
     public void cleanUp() {
         deleteFromContentProvider(mContentResolver, sNamespace, sKey);
+    }
+
+    /**
+     * Test that overrides are readable and can be cleared.
+     */
+    @Test
+    public void testOverride() throws IOException {
+        final String newValue = "value2";
+
+        executeShellCommand("device_config put " + sNamespace + " " + sKey + " " + sValue);
+        executeShellCommand("device_config override " + sNamespace + " " + sKey + " " + newValue);
+
+        String result = readShellCommandOutput("device_config get " + sNamespace + " " + sKey);
+        assertEquals(newValue + "\n", result);
+
+        executeShellCommand("device_config clear_override " + sNamespace + " " + sKey);
+        result = readShellCommandOutput("device_config get " + sNamespace + " " + sKey);
+        assertEquals(sValue + "\n", result);
     }
 
     @Test
@@ -163,6 +192,12 @@ public class DeviceConfigServiceTest {
         InputStream is = new FileInputStream(InstrumentationRegistry.getInstrumentation()
                 .getUiAutomation().executeShellCommand(command).getFileDescriptor());
         Streams.readFully(is);
+    }
+
+    private static String readShellCommandOutput(String command) throws IOException {
+        InputStream is = new FileInputStream(InstrumentationRegistry.getInstrumentation()
+                .getUiAutomation().executeShellCommand(command).getFileDescriptor());
+        return CharStreams.toString(new InputStreamReader(is, StandardCharsets.UTF_8));
     }
 
     private static void putWithContentProvider(ContentResolver resolver, String namespace,

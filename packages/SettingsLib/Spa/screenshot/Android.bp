@@ -18,8 +18,17 @@ package {
     default_applicable_licenses: ["frameworks_base_license"],
 }
 
+filegroup {
+    name: "SpaScreenshotTestRNGFiles",
+    srcs: [
+        "src/**/*.java",
+        "src/**/*.kt",
+    ],
+}
+
 android_test {
     name: "SpaScreenshotTests",
+    use_resource_processor: true,
     test_suites: ["device-tests"],
 
     asset_dirs: ["assets"],
@@ -35,6 +44,7 @@ android_test {
         "androidx.test.ext.junit",
         "androidx.test.runner",
         "mockito-target-minus-junit4",
+        "platform-parametric-runner-lib",
         "platform-screenshot-diff-core",
     ],
     kotlincflags: ["-Xjvm-default=all"],

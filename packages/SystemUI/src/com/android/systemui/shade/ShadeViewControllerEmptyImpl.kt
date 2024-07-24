@@ -19,15 +19,15 @@ package com.android.systemui.shade
 import android.view.MotionEvent
 import android.view.ViewGroup
 import android.view.ViewTreeObserver
+import com.android.systemui.shade.domain.interactor.ShadeBackActionInteractor
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow
 import com.android.systemui.statusbar.phone.HeadsUpAppearanceController
 import java.util.function.Consumer
 import javax.inject.Inject
 
 /** Empty implementation of ShadeViewController for variants with no shade. */
-class ShadeViewControllerEmptyImpl @Inject constructor() : ShadeViewController {
-    override fun expand(animate: Boolean) {}
-    override fun expandToQs() {}
+class ShadeViewControllerEmptyImpl @Inject constructor() :
+    ShadeViewController, ShadeBackActionInteractor, ShadeLockscreenInteractor {
     override fun expandToNotifications() {}
     override val isExpandingOrCollapsing: Boolean = false
     override val isExpanded: Boolean = false
@@ -35,7 +35,6 @@ class ShadeViewControllerEmptyImpl @Inject constructor() : ShadeViewController {
     override val isShadeFullyExpanded: Boolean = false
     override fun collapse(delayed: Boolean, speedUpFactor: Float) {}
     override fun collapse(animate: Boolean, delayed: Boolean, speedUpFactor: Float) {}
-    override fun collapseWithDuration(animationDuration: Int) {}
     override fun instantCollapse() {}
     override fun animateCollapseQs(fullyCollapse: Boolean) {}
     override fun canBeCollapsed(): Boolean = false
@@ -53,12 +52,11 @@ class ShadeViewControllerEmptyImpl @Inject constructor() : ShadeViewController {
     override fun dozeTimeTick() {}
     override fun resetViews(animate: Boolean) {}
     override val barState: Int = 0
-    override fun applyLaunchAnimationProgress(linearProgress: Float) {}
     override fun closeUserSwitcherIfOpen(): Boolean {
         return false
     }
     override fun onBackPressed() {}
-    override fun setIsLaunchAnimationRunning(running: Boolean) {}
+    override fun onBackProgressed(progressFraction: Float) {}
     override fun setAlpha(alpha: Int, animate: Boolean) {}
     override fun setAlphaChangeAnimationEndAction(r: Runnable) {}
     override fun setPulsing(pulsing: Boolean) {}
@@ -68,11 +66,7 @@ class ShadeViewControllerEmptyImpl @Inject constructor() : ShadeViewController {
     override fun updateTouchableRegion() {}
     override fun addOnGlobalLayoutListener(listener: ViewTreeObserver.OnGlobalLayoutListener) {}
     override fun removeOnGlobalLayoutListener(listener: ViewTreeObserver.OnGlobalLayoutListener) {}
-    override fun postToView(action: Runnable): Boolean {
-        return false
-    }
     override fun transitionToExpandedShade(delay: Long) {}
-    override val isUnlockHintRunning: Boolean = false
 
     override fun resetViewGroupFade() {}
     override fun setKeyguardTransitionProgress(keyguardAlpha: Float, keyguardTranslationY: Int) {}
@@ -85,7 +79,9 @@ class ShadeViewControllerEmptyImpl @Inject constructor() : ShadeViewController {
     override fun handleExternalTouch(event: MotionEvent): Boolean {
         return false
     }
-    override fun startTrackingExpansionFromStatusBar() {}
+    override fun startInputFocusTransfer() {}
+    override fun cancelInputFocusTransfer() {}
+    override fun finishInputFocusTransfer(velocity: Float) {}
     override fun performHapticFeedback(constant: Int) {}
 
     override val shadeHeadsUpTracker = ShadeHeadsUpTrackerEmptyImpl()

@@ -28,7 +28,9 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.app.PropertyInvalidatedCache;
+import android.content.Context;
 import android.graphics.Point;
+import android.os.IBinder;
 import android.util.SparseArray;
 import android.view.Display;
 import android.view.DisplayInfo;
@@ -40,7 +42,6 @@ import androidx.test.filters.SmallTest;
 import com.android.server.display.layout.Layout;
 
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.InputStream;
@@ -56,6 +57,9 @@ public class LogicalDisplayTest {
 
     private LogicalDisplay mLogicalDisplay;
     private DisplayDevice mDisplayDevice;
+    private DisplayAdapter mDisplayAdapter;
+    private Context mContext;
+    private IBinder mDisplayToken;
     private DisplayDeviceRepository mDeviceRepo;
     private final DisplayDeviceInfo mDisplayDeviceInfo = new DisplayDeviceInfo();
 
@@ -64,6 +68,9 @@ public class LogicalDisplayTest {
         // Share classloader to allow package private access.
         System.setProperty("dexmaker.share_classloader", "true");
         mDisplayDevice = mock(DisplayDevice.class);
+        mDisplayAdapter = mock(DisplayAdapter.class);
+        mContext = mock(Context.class);
+        mDisplayToken = mock(IBinder.class);
         mLogicalDisplay = new LogicalDisplay(DISPLAY_ID, LAYER_STACK, mDisplayDevice);
 
         mDisplayDeviceInfo.copyFrom(new DisplayDeviceInfo());
@@ -131,33 +138,43 @@ public class LogicalDisplayTest {
         assertEquals(expectedPosition, mLogicalDisplay.getDisplayPosition());
     }
 
-    // TODO: b/288880734 - fix test after display tests migration
     @Test
-    @Ignore
     public void testDisplayInputFlags() {
+        DisplayDevice displayDevice = new DisplayDevice(mDisplayAdapter, mDisplayToken,
+                "unique_display_id", mContext) {
+            @Override
+            public boolean hasStableUniqueId() {
+                return false;
+            }
+
+            @Override
+            public DisplayDeviceInfo getDisplayDeviceInfoLocked() {
+                return mDisplayDeviceInfo;
+            }
+        };
         SurfaceControl.Transaction t = mock(SurfaceControl.Transaction.class);
-        mLogicalDisplay.configureDisplayLocked(t, mDisplayDevice, false);
+        mLogicalDisplay.configureDisplayLocked(t, displayDevice, false);
         verify(t).setDisplayFlags(any(), eq(SurfaceControl.DISPLAY_RECEIVES_INPUT));
         reset(t);
 
         mDisplayDeviceInfo.touch = DisplayDeviceInfo.TOUCH_NONE;
-        mLogicalDisplay.configureDisplayLocked(t, mDisplayDevice, false);
+        mLogicalDisplay.configureDisplayLocked(t, displayDevice, false);
         verify(t).setDisplayFlags(any(), eq(0));
         reset(t);
 
         mDisplayDeviceInfo.touch = DisplayDeviceInfo.TOUCH_VIRTUAL;
-        mLogicalDisplay.configureDisplayLocked(t, mDisplayDevice, false);
+        mLogicalDisplay.configureDisplayLocked(t, displayDevice, false);
         verify(t).setDisplayFlags(any(), eq(SurfaceControl.DISPLAY_RECEIVES_INPUT));
         reset(t);
 
         mLogicalDisplay.setEnabledLocked(false);
-        mLogicalDisplay.configureDisplayLocked(t, mDisplayDevice, false);
+        mLogicalDisplay.configureDisplayLocked(t, displayDevice, false);
         verify(t).setDisplayFlags(any(), eq(0));
         reset(t);
 
         mLogicalDisplay.setEnabledLocked(true);
         mDisplayDeviceInfo.touch = DisplayDeviceInfo.TOUCH_EXTERNAL;
-        mLogicalDisplay.configureDisplayLocked(t, mDisplayDevice, false);
+        mLogicalDisplay.configureDisplayLocked(t, displayDevice, false);
         verify(t).setDisplayFlags(any(), eq(SurfaceControl.DISPLAY_RECEIVES_INPUT));
         reset(t);
     }

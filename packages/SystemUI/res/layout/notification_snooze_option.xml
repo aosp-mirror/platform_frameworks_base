@@ -16,10 +16,11 @@
 -->
 <TextView
         xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:androidprv="http://schemas.android.com/apk/prv/res/android"
         android:layout_width="match_parent"
         android:layout_height="@*android:dimen/notification_headerless_min_height"
         android:layout_marginStart="@*android:dimen/notification_content_margin_end"
         android:layout_marginEnd="@*android:dimen/notification_content_margin_end"
         android:gravity="center_vertical"
         android:textSize="14sp"
-        android:textColor="?android:attr/textColorSecondary"/>
+        android:textColor="?androidprv:attr/materialColorOnSurfaceVariant"/>

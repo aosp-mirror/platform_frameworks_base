@@ -39,6 +39,7 @@ import android.util.AttributeSet;
 import android.util.Pair;
 import android.util.Slog;
 
+import com.android.internal.pm.pkg.component.flags.Flags;
 import com.android.internal.util.ArrayUtils;
 
 import libcore.io.IoUtils;
@@ -73,7 +74,7 @@ public class ApkLiteParseUtils {
     // Constants copied from services.jar side since they're not accessible
     private static final String ANDROID_RES_NAMESPACE =
             "http://schemas.android.com/apk/res/android";
-    private static final int DEFAULT_MIN_SDK_VERSION = 1;
+    public static final int DEFAULT_MIN_SDK_VERSION = 1;
     private static final int DEFAULT_TARGET_SDK_VERSION = 0;
     public static final String ANDROID_MANIFEST_FILENAME = "AndroidManifest.xml";
     private static final int PARSE_IS_SYSTEM_DIR = 1 << 4;
@@ -89,6 +90,8 @@ public class ApkLiteParseUtils {
     private static final String TAG_SDK_LIBRARY = "sdk-library";
     private static final int SDK_VERSION = Build.VERSION.SDK_INT;
     private static final String[] SDK_CODENAMES = Build.VERSION.ACTIVE_CODENAMES;
+    private static final String TAG_PROCESSES = "processes";
+    private static final String TAG_PROCESS = "process";
 
     /**
      * Parse only lightweight details about the package at the given location.
@@ -424,6 +427,7 @@ public class ApkLiteParseUtils {
                 0);
         int revisionCode = parser.getAttributeIntValue(ANDROID_RES_NAMESPACE, "revisionCode", 0);
         boolean coreApp = parser.getAttributeBooleanValue(null, "coreApp", false);
+        boolean updatableSystem = parser.getAttributeBooleanValue(null, "updatableSystem", true);
         boolean isolatedSplits = parser.getAttributeBooleanValue(ANDROID_RES_NAMESPACE,
                 "isolatedSplits", false);
         boolean isFeatureSplit = parser.getAttributeBooleanValue(ANDROID_RES_NAMESPACE,
@@ -431,6 +435,7 @@ public class ApkLiteParseUtils {
         boolean isSplitRequired = parser.getAttributeBooleanValue(ANDROID_RES_NAMESPACE,
                 "isSplitRequired", false);
         String configForSplit = parser.getAttributeValue(null, "configForSplit");
+        String emergencyInstaller = parser.getAttributeValue(null, "emergencyInstaller");
 
         int targetSdkVersion = DEFAULT_TARGET_SDK_VERSION;
         int minSdkVersion = DEFAULT_MIN_SDK_VERSION;
@@ -484,6 +489,7 @@ public class ApkLiteParseUtils {
                         "extractNativeLibs", true);
                 useEmbeddedDex = parser.getAttributeBooleanValue(ANDROID_RES_NAMESPACE,
                         "useEmbeddedDex", false);
+
                 rollbackDataPolicy = parser.getAttributeIntValue(ANDROID_RES_NAMESPACE,
                         "rollbackDataPolicy", 0);
                 String permission = parser.getAttributeValue(ANDROID_RES_NAMESPACE,
@@ -504,14 +510,40 @@ public class ApkLiteParseUtils {
                         continue;
                     }
 
-                    if (TAG_PROFILEABLE.equals(parser.getName())) {
-                        profilableByShell = parser.getAttributeBooleanValue(ANDROID_RES_NAMESPACE,
-                                "shell", profilableByShell);
-                    } else if (TAG_RECEIVER.equals(parser.getName())) {
-                        hasDeviceAdminReceiver |= isDeviceAdminReceiver(
-                                parser, hasBindDeviceAdminPermission);
-                    } else if (TAG_SDK_LIBRARY.equals(parser.getName())) {
-                        isSdkLibrary = true;
+                    switch (parser.getName()) {
+                        case TAG_PROFILEABLE:
+                            profilableByShell = parser.getAttributeBooleanValue(
+                                    ANDROID_RES_NAMESPACE, "shell", profilableByShell);
+                            break;
+                        case TAG_RECEIVER:
+                            hasDeviceAdminReceiver |= isDeviceAdminReceiver(parser,
+                                    hasBindDeviceAdminPermission);
+                            break;
+                        case TAG_SDK_LIBRARY:
+                            isSdkLibrary = true;
+                            break;
+                        case TAG_PROCESSES:
+                            final int processesDepth = parser.getDepth();
+                            int processesType;
+                            while ((processesType = parser.next()) != XmlPullParser.END_DOCUMENT
+                                    && (processesType != XmlPullParser.END_TAG
+                                    || parser.getDepth() > processesDepth)) {
+                                if (processesType == XmlPullParser.END_TAG
+                                        || processesType == XmlPullParser.TEXT) {
+                                    continue;
+                                }
+
+                                if (parser.getDepth() != processesDepth + 1) {
+                                    // Search only under <processes>.
+                                    continue;
+                                }
+
+                                if (parser.getName().equals(TAG_PROCESS)
+                                        && Flags.enablePerProcessUseEmbeddedDexAttr()) {
+                                    useEmbeddedDex |= parser.getAttributeBooleanValue(
+                                            ANDROID_RES_NAMESPACE, "useEmbeddedDex", false);
+                                }
+                            }
                     }
                 }
             } else if (TAG_OVERLAY.equals(parser.getName())) {
@@ -613,7 +645,7 @@ public class ApkLiteParseUtils {
                         overlayIsStatic, overlayPriority, requiredSystemPropertyName,
                         requiredSystemPropertyValue, minSdkVersion, targetSdkVersion,
                         rollbackDataPolicy, requiredSplitTypes.first, requiredSplitTypes.second,
-                        hasDeviceAdminReceiver, isSdkLibrary));
+                        hasDeviceAdminReceiver, isSdkLibrary, updatableSystem, emergencyInstaller));
     }
 
     private static boolean isDeviceAdminReceiver(

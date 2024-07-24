@@ -433,6 +433,12 @@ public class Scribe {
         }
     }
 
+    /** Returns the {@link String#intern() interned} String if it's not null. */
+    @Nullable
+    private static String intern(@Nullable String val) {
+        return val == null ? null : val.intern();
+    }
+
     /**
      * @param parser Xml parser at the beginning of a "<ledger/>" tag. The next "parser.next()" call
      *               will take the parser into the body of the ledger tag.
@@ -448,7 +454,7 @@ public class Scribe {
         final List<Ledger.Transaction> transactions = new ArrayList<>();
         final List<Ledger.RewardBucket> rewardBuckets = new ArrayList<>();
 
-        pkgName = parser.getAttributeValue(null, XML_ATTR_PACKAGE_NAME);
+        pkgName = intern(parser.getAttributeValue(null, XML_ATTR_PACKAGE_NAME));
         curBalance = parser.getAttributeLong(null, XML_ATTR_CURRENT_BALANCE);
 
         final boolean isInstalled = validPackages.contains(pkgName);
@@ -487,7 +493,7 @@ public class Scribe {
                         }
                         continue;
                     }
-                    final String tag = parser.getAttributeValue(null, XML_ATTR_TAG);
+                    final String tag = intern(parser.getAttributeValue(null, XML_ATTR_TAG));
                     final long startTime = parser.getAttributeLong(null, XML_ATTR_START_TIME);
                     final int eventId = parser.getAttributeInt(null, XML_ATTR_EVENT_ID);
                     final long delta = parser.getAttributeLong(null, XML_ATTR_DELTA);

@@ -29,7 +29,6 @@ import androidx.annotation.Nullable;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
-import com.android.systemui.R;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.plugins.ActivityStarter;
@@ -38,9 +37,10 @@ import com.android.systemui.plugins.qs.QSTile.BooleanState;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.qs.QSHost;
 import com.android.systemui.qs.QsEventLogger;
-import com.android.systemui.qs.SettingObserver;
+import com.android.systemui.qs.UserSettingObserver;
 import com.android.systemui.qs.logging.QSLogger;
 import com.android.systemui.qs.tileimpl.QSTileImpl;
+import com.android.systemui.res.R;
 import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.util.settings.SecureSettings;
 
@@ -53,7 +53,7 @@ public class BatterySaverTile extends QSTileImpl<BooleanState> implements
 
     private final BatteryController mBatteryController;
     @VisibleForTesting
-    protected final SettingObserver mSetting;
+    protected final UserSettingObserver mSetting;
 
     private int mLevel;
     private boolean mPowerSave;
@@ -79,7 +79,7 @@ public class BatterySaverTile extends QSTileImpl<BooleanState> implements
         mBatteryController = batteryController;
         mBatteryController.observe(getLifecycle(), this);
         int currentUser = host.getUserContext().getUserId();
-        mSetting = new SettingObserver(
+        mSetting = new UserSettingObserver(
                 secureSettings,
                 mHandler,
                 Secure.LOW_POWER_WARNING_ACKNOWLEDGED,

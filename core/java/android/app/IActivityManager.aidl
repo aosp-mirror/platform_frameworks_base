@@ -17,7 +17,6 @@
 package android.app;
 
 import android.app.ActivityManager;
-import android.app.ActivityManager.PendingIntentInfo;
 import android.app.ActivityTaskManager;
 import android.app.ApplicationStartInfo;
 import android.app.ApplicationErrorReport;
@@ -116,6 +115,7 @@ interface IActivityManager {
      * @throws RemoteException
      * @return Returns A binder token identifying the UidObserver registration.
      */
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.PACKAGE_USAGE_STATS)")
     IBinder registerUidObserverForUids(in IUidObserver observer, int which, int cutpoint,
             String callingPackage, in int[] uids);
 
@@ -274,6 +274,7 @@ interface IActivityManager {
     int getProcessLimit();
     int checkUriPermission(in Uri uri, int pid, int uid, int mode, int userId,
             in IBinder callerToken);
+    int checkContentUriPermissionFull(in Uri uri, int pid, int uid, int mode, int userId);
     int[] checkUriPermissions(in List<Uri> uris, int pid, int uid, int mode, int userId,
                 in IBinder callerToken);
     void grantUriPermission(in IApplicationThread caller, in String targetPkg, in Uri uri,
@@ -292,7 +293,8 @@ interface IActivityManager {
     @UnsupportedAppUsage
     ParceledListSlice getRecentTasks(int maxNum, int flags, int userId);
     @UnsupportedAppUsage
-    oneway void serviceDoneExecuting(in IBinder token, int type, int startId, int res);
+    oneway void serviceDoneExecuting(in IBinder token, int type, int startId, int res,
+            in Intent intent);
     /** @deprecated  Use {@link #getIntentSenderWithFeature} instead */
     @UnsupportedAppUsage(maxTargetSdk=29, publicAlternatives="Use {@link PendingIntent#getIntentSender()} instead")
     IIntentSender getIntentSender(int type, in String packageName, in IBinder token,
@@ -392,7 +394,7 @@ interface IActivityManager {
     oneway void getMimeTypeFilterAsync(in Uri uri, int userId, in RemoteCallback resultCallback);
     // Cause the specified process to dump the specified heap.
     boolean dumpHeap(in String process, int userId, boolean managed, boolean mallocInfo,
-            boolean runGc, in String path, in ParcelFileDescriptor fd,
+            boolean runGc, in String dumpBitmaps, in String path, in ParcelFileDescriptor fd,
             in RemoteCallback finishCallback);
     @UnsupportedAppUsage
     boolean isUserRunning(int userid, int flags);
@@ -550,6 +552,17 @@ interface IActivityManager {
     @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
     boolean isTopOfTask(in IBinder token);
     void bootAnimationComplete();
+
+    /**
+     * Used by {@link com.android.systemui.theme.ThemeOverlayController} to notify when color
+     * palette is ready.
+     *
+     * @param userId The ID of the user where ThemeOverlayController is ready.
+     *
+     * @throws RemoteException
+     */
+    void setThemeOverlayReady(int userId);
+
     @UnsupportedAppUsage
     void registerTaskStackListener(in ITaskStackListener listener);
     void unregisterTaskStackListener(in ITaskStackListener listener);
@@ -715,7 +728,7 @@ interface IActivityManager {
      * @param listener    A listener to for the callback upon completion of startup data collection.
      * @param userId      The userId in the multi-user environment.
      */
-    void setApplicationStartInfoCompleteListener(IApplicationStartInfoCompleteListener listener,
+    void addApplicationStartInfoCompleteListener(IApplicationStartInfoCompleteListener listener,
             int userId);
 
 
@@ -724,7 +737,21 @@ interface IActivityManager {
      *
      * @param userId      The userId in the multi-user environment.
      */
-    void removeApplicationStartInfoCompleteListener(int userId);
+    void removeApplicationStartInfoCompleteListener(IApplicationStartInfoCompleteListener listener,
+            int userId);
+
+
+    /**
+     * Adds a timestamp of the moment called to the calling apps most recent
+     * {@link ApplicationStartInfo}.
+     *
+     *
+     * @param key         Unique key for timestamp.
+     * @param timestampNs Clock monotonic time in nanoseconds of event to be
+     *                    recorded.
+     * @param userId      The userId in the multi-user environment.
+     */
+    void addStartInfoTimestamp(int key, long timestampNs, int userId);
 
     /**
      * Return a list of {@link ApplicationExitInfo} records.
@@ -918,10 +945,25 @@ interface IActivityManager {
 
     /** Returns if the service is a short-service is still "alive" and past the timeout. */
     boolean shouldServiceTimeOut(in ComponentName className, in IBinder token);
+    /** Returns if the service has a time-limit restricted type and is past the time limit. */
+    boolean hasServiceTimeLimitExceeded(in ComponentName className, in IBinder token);
 
     void registerUidFrozenStateChangedCallback(in IUidFrozenStateChangedCallback callback);
     @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.PACKAGE_USAGE_STATS)")
     void unregisterUidFrozenStateChangedCallback(in IUidFrozenStateChangedCallback callback);
     @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.PACKAGE_USAGE_STATS)")
     int[] getUidFrozenState(in int[] uids);
+
+    int checkPermissionForDevice(in String permission, int pid, int uid, int deviceId);
+
+    /**
+     * Notify AMS about binder transactions to frozen apps.
+     *
+     * @param debugPid The binder transaction sender
+     * @param code The binder transaction code
+     * @param flags The binder transaction flags
+     * @param err The binder transaction error
+     */
+    oneway void frozenBinderTransactionDetected(int debugPid, int code, int flags, int err);
+    int getBindingUidProcessState(int uid, in String callingPackage);
 }

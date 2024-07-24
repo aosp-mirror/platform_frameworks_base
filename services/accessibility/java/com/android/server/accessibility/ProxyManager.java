@@ -29,11 +29,14 @@ import android.companion.virtual.VirtualDeviceManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.hardware.display.DisplayManager;
+import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
+import android.util.ArraySet;
 import android.util.IntArray;
+import android.util.Log;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.SparseIntArray;
@@ -42,6 +45,7 @@ import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityManager;
 import android.view.accessibility.IAccessibilityManagerClient;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.IntPair;
 import com.android.server.LocalServices;
 import com.android.server.companion.virtual.VirtualDeviceManagerInternal;
@@ -64,8 +68,8 @@ import java.util.function.Consumer;
  * TODO(241117292): Remove or cut down during simultaneous user refactoring.
  */
 public class ProxyManager {
-    private static final boolean DEBUG = false;
     private static final String LOG_TAG = "ProxyManager";
+    private static final boolean DEBUG = Log.isLoggable(LOG_TAG, Log.DEBUG) && Build.IS_DEBUGGABLE;
 
     // Names used to populate ComponentName and ResolveInfo in connection.mA11yServiceInfo and in
     // the infos of connection.setInstalledAndEnabledServices
@@ -95,6 +99,11 @@ public class ProxyManager {
     private VirtualDeviceManagerInternal mLocalVdm;
 
     private final SystemSupport mSystemSupport;
+
+    private VirtualDeviceManagerInternal.AppsOnVirtualDeviceListener
+            mAppsOnVirtualDeviceListener;
+
+    private VirtualDeviceManager.VirtualDeviceListener mVirtualDeviceListener;
 
     /**
      * Callbacks into AccessibilityManagerService.
@@ -174,6 +183,19 @@ public class ProxyManager {
 
         synchronized (mLock) {
             mProxyA11yServiceConnections.put(displayId, connection);
+            if (Flags.proxyUseAppsOnVirtualDeviceListener()) {
+                if (mAppsOnVirtualDeviceListener == null) {
+                    mAppsOnVirtualDeviceListener = allRunningUids ->
+                            notifyProxyOfRunningAppsChange(allRunningUids);
+                    final VirtualDeviceManagerInternal localVdm = getLocalVdm();
+                    if (localVdm != null) {
+                        localVdm.registerAppsOnVirtualDeviceListener(mAppsOnVirtualDeviceListener);
+                    }
+                }
+            }
+            if (mProxyA11yServiceConnections.size() == 1) {
+                registerVirtualDeviceListener();
+            }
         }
 
         // If the client dies, make sure to remove the connection.
@@ -193,6 +215,31 @@ public class ProxyManager {
             }
         });
         connection.initializeServiceInterface(client);
+    }
+
+    private void registerVirtualDeviceListener() {
+        VirtualDeviceManager vdm = mContext.getSystemService(VirtualDeviceManager.class);
+        if (vdm == null || !android.companion.virtual.flags.Flags.vdmPublicApis()) {
+            return;
+        }
+        if (mVirtualDeviceListener == null) {
+            mVirtualDeviceListener = new VirtualDeviceManager.VirtualDeviceListener() {
+                @Override
+                public void onVirtualDeviceClosed(int deviceId) {
+                    clearConnections(deviceId);
+                }
+            };
+        }
+
+        vdm.registerVirtualDeviceListener(mContext.getMainExecutor(), mVirtualDeviceListener);
+    }
+
+    private void unregisterVirtualDeviceListener() {
+        VirtualDeviceManager vdm = mContext.getSystemService(VirtualDeviceManager.class);
+        if (vdm == null || !android.companion.virtual.flags.Flags.vdmPublicApis()) {
+            return;
+        }
+        vdm.unregisterVirtualDeviceListener(mVirtualDeviceListener);
     }
 
     /**
@@ -243,6 +290,9 @@ public class ProxyManager {
                 deviceId = mProxyA11yServiceConnections.get(displayId).getDeviceId();
                 mProxyA11yServiceConnections.remove(displayId);
                 removedFromConnections = true;
+                if (mProxyA11yServiceConnections.size() == 0) {
+                    unregisterVirtualDeviceListener();
+                }
             }
         }
 
@@ -276,11 +326,21 @@ public class ProxyManager {
                         }
                     }
                 });
-        // If there isn't an existing proxy for the device id, reset clients. Resetting
+        // If there isn't an existing proxy for the device id, reset app clients. Resetting
         // will usually happen, since in most cases there will only be one proxy for a
         // device.
         if (!isProxyedDeviceId(deviceId)) {
             synchronized (mLock) {
+                if (Flags.proxyUseAppsOnVirtualDeviceListener()) {
+                    if (mProxyA11yServiceConnections.size() == 0) {
+                        final VirtualDeviceManagerInternal localVdm = getLocalVdm();
+                        if (localVdm != null && mAppsOnVirtualDeviceListener != null) {
+                            localVdm.unregisterAppsOnVirtualDeviceListener(
+                                    mAppsOnVirtualDeviceListener);
+                            mAppsOnVirtualDeviceListener = null;
+                        }
+                    }
+                }
                 mSystemSupport.removeDeviceIdLocked(deviceId);
                 mLastStates.delete(deviceId);
             }
@@ -307,7 +367,7 @@ public class ProxyManager {
      * Returns {@code true} if {@code deviceId} is being proxy-ed.
      */
     public boolean isProxyedDeviceId(int deviceId) {
-        if (deviceId == DEVICE_ID_DEFAULT && deviceId == DEVICE_ID_INVALID) {
+        if (deviceId == DEVICE_ID_DEFAULT || deviceId == DEVICE_ID_INVALID) {
             return false;
         }
         boolean isTrackingDeviceId;
@@ -379,8 +439,8 @@ public class ProxyManager {
      */
     public int getStateLocked(int deviceId) {
         int clientState = 0;
-        final boolean automationRunning = mUiAutomationManager.isUiAutomationRunningLocked();
-        if (automationRunning) {
+        final boolean uiAutomationCanIntrospect = mUiAutomationManager.canIntrospect();
+        if (uiAutomationCanIntrospect) {
             clientState |= AccessibilityManager.STATE_FLAG_ACCESSIBILITY_ENABLED;
         }
         for (int i = 0; i < mProxyA11yServiceConnections.size(); i++) {
@@ -566,7 +626,7 @@ public class ProxyManager {
      * This is similar to onUserStateChangeLocked and onClientChangeLocked, but does not require an
      * A11yUserState and only checks proxy-relevant settings.
      */
-    public void onProxyChanged(int deviceId) {
+    private void onProxyChanged(int deviceId, boolean forceUpdate) {
         if (DEBUG) {
             Slog.v(LOG_TAG, "onProxyChanged called for deviceId: " + deviceId);
         }
@@ -584,7 +644,7 @@ public class ProxyManager {
             // Calls A11yManager#setRelevantEventTypes (test these)
             updateRelevantEventTypesLocked(deviceId);
             // Calls A11yManager#setState
-            scheduleUpdateProxyClientsIfNeededLocked(deviceId);
+            scheduleUpdateProxyClientsIfNeededLocked(deviceId, forceUpdate);
             //Calls A11yManager#notifyServicesStateChanged(timeout)
             scheduleNotifyProxyClientsOfServicesStateChangeLocked(deviceId);
             // Calls A11yManager#setFocusAppearance
@@ -594,16 +654,25 @@ public class ProxyManager {
     }
 
     /**
+     * Handles proxy changes, but does not force an update of app clients.
+     */
+    public void onProxyChanged(int deviceId) {
+        onProxyChanged(deviceId, false);
+    }
+
+    /**
      * Updates the states of the app AccessibilityManagers.
      */
-    private void scheduleUpdateProxyClientsIfNeededLocked(int deviceId) {
+    private void scheduleUpdateProxyClientsIfNeededLocked(int deviceId, boolean forceUpdate) {
         final int proxyState = getStateLocked(deviceId);
         if (DEBUG) {
             Slog.v(LOG_TAG, "State for device id " + deviceId + " is " + proxyState);
             Slog.v(LOG_TAG, "Last state for device id " + deviceId + " is "
                     + getLastSentStateLocked(deviceId));
+            Slog.v(LOG_TAG, "force update: " + forceUpdate);
         }
-        if ((getLastSentStateLocked(deviceId)) != proxyState) {
+        if ((getLastSentStateLocked(deviceId)) != proxyState
+                || (Flags.proxyUseAppsOnVirtualDeviceListener() && forceUpdate)) {
             setLastStateLocked(deviceId, proxyState);
             mMainHandler.post(() -> {
                 synchronized (mLock) {
@@ -792,7 +861,7 @@ public class ProxyManager {
     }
 
     /**
-     * Updates the device ids of IAccessibilityManagerClients if needed.
+     * Updates the device ids of IAccessibilityManagerClients if needed after a proxy change.
      */
     private void updateDeviceIdsIfNeededLocked(int deviceId,
             @NonNull RemoteCallbackList<IAccessibilityManagerClient> clients) {
@@ -804,13 +873,66 @@ public class ProxyManager {
         for (int i = 0; i < clients.getRegisteredCallbackCount(); i++) {
             final AccessibilityManagerService.Client client =
                     ((AccessibilityManagerService.Client) clients.getRegisteredCallbackCookie(i));
-            if (deviceId != DEVICE_ID_DEFAULT && deviceId != DEVICE_ID_INVALID
-                    && localVdm.getDeviceIdsForUid(client.mUid).contains(deviceId)) {
-                if (DEBUG) {
-                    Slog.v(LOG_TAG, "Packages moved to device id " + deviceId + " are "
-                            + Arrays.toString(client.mPackageNames));
+            if (Flags.proxyUseAppsOnVirtualDeviceListener()) {
+                if (deviceId == DEVICE_ID_DEFAULT || deviceId == DEVICE_ID_INVALID) {
+                    continue;
                 }
-                client.mDeviceId = deviceId;
+                boolean uidBelongsToDevice =
+                        localVdm.getDeviceIdsForUid(client.mUid).contains(deviceId);
+                if (client.mDeviceId != deviceId && uidBelongsToDevice) {
+                    if (DEBUG) {
+                        Slog.v(LOG_TAG, "Packages moved to device id " + deviceId + " are "
+                                + Arrays.toString(client.mPackageNames));
+                    }
+                    client.mDeviceId = deviceId;
+                } else if (client.mDeviceId == deviceId && !uidBelongsToDevice) {
+                    client.mDeviceId = DEVICE_ID_DEFAULT;
+                    if (DEBUG) {
+                        Slog.v(LOG_TAG, "Packages moved to the default device from device id "
+                                + deviceId + " are " + Arrays.toString(client.mPackageNames));
+                    }
+                }
+            } else {
+                if (deviceId != DEVICE_ID_DEFAULT && deviceId != DEVICE_ID_INVALID
+                    && localVdm.getDeviceIdsForUid(client.mUid).contains(deviceId)) {
+                    if (DEBUG) {
+                        Slog.v(LOG_TAG, "Packages moved to device id " + deviceId + " are "
+                                + Arrays.toString(client.mPackageNames));
+                    }
+                    client.mDeviceId = deviceId;
+                }
+            }
+        }
+    }
+
+    @VisibleForTesting
+    void notifyProxyOfRunningAppsChange(Set<Integer> allRunningUids) {
+        if (DEBUG) {
+            Slog.v(LOG_TAG, "notifyProxyOfRunningAppsChange: " + allRunningUids);
+        }
+        synchronized (mLock) {
+            if (mProxyA11yServiceConnections.size() == 0) {
+                return;
+            }
+            final VirtualDeviceManagerInternal localVdm = getLocalVdm();
+            if  (localVdm == null) {
+                return;
+            }
+            final ArraySet<Integer> deviceIdsToUpdate = new ArraySet<>();
+            for (int i = 0; i < mProxyA11yServiceConnections.size(); i++) {
+                final ProxyAccessibilityServiceConnection proxy =
+                        mProxyA11yServiceConnections.valueAt(i);
+                if (proxy != null) {
+                    final int proxyDeviceId = proxy.getDeviceId();
+                    for (Integer uid : allRunningUids) {
+                        if (localVdm.getDeviceIdsForUid(uid).contains(proxyDeviceId)) {
+                            deviceIdsToUpdate.add(proxyDeviceId);
+                        }
+                    }
+                }
+            }
+            for (Integer proxyDeviceId : deviceIdsToUpdate) {
+                onProxyChanged(proxyDeviceId, true);
             }
         }
     }
@@ -841,6 +963,11 @@ public class ProxyManager {
             mLocalVdm =  LocalServices.getService(VirtualDeviceManagerInternal.class);
         }
         return mLocalVdm;
+    }
+
+    @VisibleForTesting
+    void setLocalVirtualDeviceManager(VirtualDeviceManagerInternal localVdm) {
+        mLocalVdm = localVdm;
     }
 
     /**

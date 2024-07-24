@@ -39,7 +39,7 @@ import androidx.annotation.VisibleForTesting;
 import com.android.keyguard.CarrierTextManager;
 import com.android.settingslib.AccessibilityContentDescriptions;
 import com.android.settingslib.mobile.TelephonyIcons;
-import com.android.systemui.R;
+import com.android.systemui.res.R;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
@@ -345,9 +345,7 @@ public class ShadeCarrierGroupController {
             }
         }
 
-        if (mStatusBarPipelineFlags.useNewShadeCarrierGroupMobileIcons()) {
-            Log.d(TAG, "ignoring old pipeline callback because new mobile icon is enabled");
-        } else {
+        if (!mStatusBarPipelineFlags.useNewShadeCarrierGroupMobileIcons()) {
             for (int i = 0; i < SIM_SLOTS; i++) {
                 mCarrierGroups[i].updateState(mInfos[i], singleCarrier);
             }

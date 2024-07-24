@@ -5,12 +5,12 @@ import android.content.Intent
 import android.provider.Settings
 import android.view.LayoutInflater
 import com.android.internal.logging.UiEventLogger
-import com.android.systemui.R
-import com.android.systemui.animation.DialogLaunchAnimator
+import com.android.systemui.animation.DialogTransitionAnimator
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.qs.QSUserSwitcherEvent
 import com.android.systemui.qs.tiles.UserDetailView
+import com.android.systemui.res.R
 import com.android.systemui.statusbar.phone.SystemUIDialog
 
 /**
@@ -23,7 +23,7 @@ class UserSwitchDialog(
     uiEventLogger: UiEventLogger,
     falsingManager: FalsingManager,
     activityStarter: ActivityStarter,
-    dialogLaunchAnimator: DialogLaunchAnimator,
+    dialogTransitionAnimator: DialogTransitionAnimator,
 ) : SystemUIDialog(context) {
     init {
         setShowForAllUsers(true)
@@ -38,7 +38,7 @@ class UserSwitchDialog(
                 if (!falsingManager.isFalseTap(FalsingManager.LOW_PENALTY)) {
                     uiEventLogger.log(QSUserSwitcherEvent.QS_USER_MORE_SETTINGS)
                     val controller =
-                        dialogLaunchAnimator.createActivityLaunchController(
+                        dialogTransitionAnimator.createActivityTransitionController(
                             getButton(BUTTON_NEUTRAL)
                         )
 
@@ -60,7 +60,7 @@ class UserSwitchDialog(
         setView(gridFrame)
 
         adapter.linkToViewGroup(gridFrame.findViewById(R.id.grid))
-        adapter.injectDialogShower(DialogShowerImpl(this, dialogLaunchAnimator))
+        adapter.injectDialogShower(DialogShowerImpl(this, dialogTransitionAnimator))
     }
 
     companion object {

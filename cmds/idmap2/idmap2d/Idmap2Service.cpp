@@ -59,7 +59,7 @@ using PolicyBitmask = android::ResTable_overlayable_policy_header::PolicyBitmask
 
 namespace {
 
-constexpr const char* kFrameworkPath = "/system/framework/framework-res.apk";
+constexpr std::string_view kFrameworkPath = "/system/framework/framework-res.apk";
 
 Status ok() {
   return Status::ok();
@@ -207,23 +207,47 @@ Status Idmap2Service::createIdmap(const std::string& target_path, const std::str
 
 idmap2::Result<Idmap2Service::TargetResourceContainerPtr> Idmap2Service::GetTargetContainer(
     const std::string& target_path) {
-  if (target_path == kFrameworkPath) {
-    if (framework_apk_cache_ == nullptr) {
-      // Initialize the framework APK cache.
-      auto target = TargetResourceContainer::FromPath(target_path);
-      if (!target) {
-        return target.GetError();
+  const bool is_framework = target_path == kFrameworkPath;
+  bool use_cache;
+  struct stat st = {};
+  if (is_framework || !::stat(target_path.c_str(), &st)) {
+    use_cache = true;
+  } else {
+    LOG(WARNING) << "failed to stat target path '" << target_path << "' for the cache";
+    use_cache = false;
+  }
+
+  if (use_cache) {
+    std::lock_guard lock(container_cache_mutex_);
+    if (auto cache_it = container_cache_.find(target_path); cache_it != container_cache_.end()) {
+      const auto& item = cache_it->second;
+      if (is_framework ||
+        (item.dev == st.st_dev && item.inode == st.st_ino && item.size == st.st_size
+          && item.mtime.tv_sec == st.st_mtim.tv_sec && item.mtime.tv_nsec == st.st_mtim.tv_nsec)) {
+        return {item.apk.get()};
       }
-      framework_apk_cache_ = std::move(*target);
+      container_cache_.erase(cache_it);
     }
-    return {framework_apk_cache_.get()};
   }
 
   auto target = TargetResourceContainer::FromPath(target_path);
   if (!target) {
     return target.GetError();
   }
-  return {std::move(*target)};
+  if (!use_cache) {
+    return {std::move(*target)};
+  }
+
+  const auto res = target->get();
+  std::lock_guard lock(container_cache_mutex_);
+  container_cache_.emplace(target_path, CachedContainer {
+    .dev = dev_t(st.st_dev),
+    .inode = ino_t(st.st_ino),
+    .size = st.st_size,
+    .mtime = st.st_mtim,
+    .apk = std::move(*target)
+  });
+  return {res};
 }
 
 Status Idmap2Service::createFabricatedOverlay(
@@ -241,7 +265,9 @@ Status Idmap2Service::createFabricatedOverlay(
             res.configuration.value_or(std::string()));
     } else if (res.binaryData.has_value()) {
       builder.SetResourceValue(res.resourceName, res.binaryData->get(),
-            res.configuration.value_or(std::string()));
+                               res.binaryDataOffset, res.binaryDataSize,
+                               res.configuration.value_or(std::string()),
+                               res.isNinePatch);
     } else {
       builder.SetResourceValue(res.resourceName, res.dataType, res.data,
             res.configuration.value_or(std::string()));
@@ -257,7 +283,7 @@ Status Idmap2Service::createFabricatedOverlay(
     const std::string random_suffix = RandomStringForPath(kSuffixLength);
     file_name = StringPrintf("%s-%s-%s.frro", overlay.packageName.c_str(),
                              overlay.overlayName.c_str(), random_suffix.c_str());
-    path = StringPrintf("%s/%s", kIdmapCacheDir, file_name.c_str());
+    path = StringPrintf("%s/%s", kIdmapCacheDir.data(), file_name.c_str());
 
     // Invoking std::filesystem::exists with a file name greater than 255 characters will cause this
     // process to abort since the name exceeds the maximum file name size.

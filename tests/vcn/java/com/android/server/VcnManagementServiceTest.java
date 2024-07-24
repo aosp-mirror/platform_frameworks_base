@@ -70,6 +70,7 @@ import android.net.Network;
 import android.net.NetworkCapabilities;
 import android.net.NetworkRequest;
 import android.net.Uri;
+import android.net.vcn.Flags;
 import android.net.vcn.IVcnStatusCallback;
 import android.net.vcn.IVcnUnderlyingNetworkPolicyListener;
 import android.net.vcn.VcnConfig;
@@ -82,7 +83,9 @@ import android.os.ParcelUuid;
 import android.os.PersistableBundle;
 import android.os.Process;
 import android.os.UserHandle;
+import android.os.UserManager;
 import android.os.test.TestLooper;
+import android.platform.test.flag.junit.SetFlagsRule;
 import android.telephony.SubscriptionInfo;
 import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyManager;
@@ -101,6 +104,7 @@ import com.android.server.vcn.util.PersistableBundleUtils;
 import com.android.server.vcn.util.PersistableBundleUtils.PersistableBundleWrapper;
 
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -118,6 +122,8 @@ import java.util.UUID;
 @RunWith(AndroidJUnit4.class)
 @SmallTest
 public class VcnManagementServiceTest {
+    @Rule public final SetFlagsRule mSetFlagsRule = new SetFlagsRule();
+
     private static final String CONTEXT_ATTRIBUTION_TAG = "VCN";
     private static final String TEST_PACKAGE_NAME =
             VcnManagementServiceTest.class.getPackage().getName();
@@ -129,7 +135,12 @@ public class VcnManagementServiceTest {
     private static final ParcelUuid TEST_UUID_3 = new ParcelUuid(new UUID(2, 2));
     private static final VcnConfig TEST_VCN_CONFIG;
     private static final VcnConfig TEST_VCN_CONFIG_PKG_2;
-    private static final int TEST_UID = Process.FIRST_APPLICATION_UID;
+
+    private static final int TEST_UID = 1010000; // A non-system user
+    private static final UserHandle TEST_USER_HANDLE = UserHandle.getUserHandleForUid(TEST_UID);
+    private static final UserHandle TEST_USER_HANDLE_OTHER =
+            UserHandle.of(TEST_USER_HANDLE.getIdentifier() + 1);
+
     private static final String TEST_IFACE_NAME = "TEST_IFACE";
     private static final String TEST_IFACE_NAME_2 = "TEST_IFACE2";
     private static final LinkProperties TEST_LP_1 = new LinkProperties();
@@ -187,6 +198,7 @@ public class VcnManagementServiceTest {
     private final TelephonyManager mTelMgr = mock(TelephonyManager.class);
     private final SubscriptionManager mSubMgr = mock(SubscriptionManager.class);
     private final AppOpsManager mAppOpsMgr = mock(AppOpsManager.class);
+    private final UserManager mUserManager = mock(UserManager.class);
     private final VcnContext mVcnContext = mock(VcnContext.class);
     private final PersistableBundleUtils.LockingReadWriteHelper mConfigReadWriteHelper =
             mock(PersistableBundleUtils.LockingReadWriteHelper.class);
@@ -218,6 +230,9 @@ public class VcnManagementServiceTest {
                 Context.TELEPHONY_SUBSCRIPTION_SERVICE,
                 SubscriptionManager.class);
         setupSystemService(mMockContext, mAppOpsMgr, Context.APP_OPS_SERVICE, AppOpsManager.class);
+        setupSystemService(mMockContext, mUserManager, Context.USER_SERVICE, UserManager.class);
+
+        doReturn(TEST_USER_HANDLE).when(mUserManager).getMainUser();
 
         doReturn(TEST_PACKAGE_NAME).when(mMockContext).getOpPackageName();
 
@@ -267,6 +282,8 @@ public class VcnManagementServiceTest {
 
     @Before
     public void setUp() {
+        mSetFlagsRule.enableFlags(Flags.FLAG_ENFORCE_MAIN_USER);
+
         doNothing()
                 .when(mMockContext)
                 .enforceCallingOrSelfPermission(
@@ -717,10 +734,8 @@ public class VcnManagementServiceTest {
     }
 
     @Test
-    public void testSetVcnConfigRequiresSystemUser() throws Exception {
-        doReturn(UserHandle.getUid(UserHandle.MIN_SECONDARY_USER_ID, TEST_UID))
-                .when(mMockDeps)
-                .getBinderCallingUid();
+    public void testSetVcnConfigRequiresMainUser() throws Exception {
+        doReturn(TEST_USER_HANDLE_OTHER).when(mUserManager).getMainUser();
 
         try {
             mVcnMgmtSvc.setVcnConfig(TEST_UUID_1, TEST_VCN_CONFIG, TEST_PACKAGE_NAME);
@@ -832,10 +847,8 @@ public class VcnManagementServiceTest {
     }
 
     @Test
-    public void testClearVcnConfigRequiresSystemUser() throws Exception {
-        doReturn(UserHandle.getUid(UserHandle.MIN_SECONDARY_USER_ID, TEST_UID))
-                .when(mMockDeps)
-                .getBinderCallingUid();
+    public void testClearVcnConfigRequiresMainUser() throws Exception {
+        doReturn(TEST_USER_HANDLE_OTHER).when(mUserManager).getMainUser();
 
         try {
             mVcnMgmtSvc.clearVcnConfig(TEST_UUID_1, TEST_PACKAGE_NAME);
@@ -921,10 +934,8 @@ public class VcnManagementServiceTest {
     }
 
     @Test
-    public void testGetConfiguredSubscriptionGroupsRequiresSystemUser() throws Exception {
-        doReturn(UserHandle.getUid(UserHandle.MIN_SECONDARY_USER_ID, TEST_UID))
-                .when(mMockDeps)
-                .getBinderCallingUid();
+    public void testGetConfiguredSubscriptionGroupsRequiresMainUser() throws Exception {
+        doReturn(TEST_USER_HANDLE_OTHER).when(mUserManager).getMainUser();
 
         try {
             mVcnMgmtSvc.getConfiguredSubscriptionGroups(TEST_PACKAGE_NAME);

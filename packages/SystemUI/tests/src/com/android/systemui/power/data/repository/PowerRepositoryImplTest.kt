@@ -193,6 +193,39 @@ class PowerRepositoryImplTest : SysuiTestCase() {
         assertThat(reasonCaptor.value).contains(context.applicationContext.packageName)
     }
 
+    @Test
+    fun userActivity_notifiesPowerManager() {
+        systemClock.setUptimeMillis(345000)
+
+        underTest.userTouch()
+
+        val flagsCaptor = argumentCaptor<Int>()
+        verify(manager)
+            .userActivity(
+                eq(345000L),
+                eq(PowerManager.USER_ACTIVITY_EVENT_TOUCH),
+                capture(flagsCaptor)
+            )
+        assertThat(flagsCaptor.value).isNotEqualTo(PowerManager.USER_ACTIVITY_FLAG_NO_CHANGE_LIGHTS)
+        assertThat(flagsCaptor.value).isNotEqualTo(PowerManager.USER_ACTIVITY_FLAG_INDIRECT)
+    }
+
+    @Test
+    fun userActivity_notifiesPowerManager_noChangeLightsTrue() {
+        systemClock.setUptimeMillis(345000)
+
+        underTest.userTouch(noChangeLights = true)
+
+        val flagsCaptor = argumentCaptor<Int>()
+        verify(manager)
+            .userActivity(
+                eq(345000L),
+                eq(PowerManager.USER_ACTIVITY_EVENT_TOUCH),
+                capture(flagsCaptor)
+            )
+        assertThat(flagsCaptor.value).isEqualTo(PowerManager.USER_ACTIVITY_FLAG_NO_CHANGE_LIGHTS)
+    }
+
     private fun verifyRegistered() {
         // We must verify with all arguments, even those that are optional because they have default
         // values because Mockito is forcing us to. Once we can use mockito-kotlin, we should be

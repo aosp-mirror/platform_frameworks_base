@@ -29,7 +29,7 @@ import android.window.TransitionInfo;
 
 import androidx.annotation.NonNull;
 
-import com.android.wm.shell.util.TransitionUtil;
+import com.android.wm.shell.shared.TransitionUtil;
 
 /**
  * Wrapper to handle the ActivityEmbedding animation update in one
@@ -136,6 +136,7 @@ class ActivityEmbeddingAnimationAdapter {
 
     /** Called on frame update. */
     final void onAnimationUpdate(@NonNull SurfaceControl.Transaction t, long currentPlayTime) {
+        mTransformation.clear();
         // Extract the transformation to the current time.
         mAnimation.getTransformation(Math.min(currentPlayTime, mAnimation.getDuration()),
                 mTransformation);

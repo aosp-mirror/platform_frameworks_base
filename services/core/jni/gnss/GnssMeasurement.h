@@ -41,6 +41,7 @@ public:
             const std::unique_ptr<GnssMeasurementCallback>& callback,
             const android::hardware::gnss::IGnssMeasurementInterface::Options& options) = 0;
     virtual jboolean close() = 0;
+    virtual int getInterfaceVersion() = 0;
 };
 
 class GnssMeasurement : public GnssMeasurementInterface {
@@ -50,6 +51,9 @@ public:
             const std::unique_ptr<GnssMeasurementCallback>& callback,
             const android::hardware::gnss::IGnssMeasurementInterface::Options& options) override;
     jboolean close() override;
+    int getInterfaceVersion() override {
+        return mIGnssMeasurement->getInterfaceVersion();
+    }
 
 private:
     const sp<android::hardware::gnss::IGnssMeasurementInterface> mIGnssMeasurement;
@@ -63,6 +67,9 @@ public:
             const std::unique_ptr<GnssMeasurementCallback>& callback,
             const android::hardware::gnss::IGnssMeasurementInterface::Options& options) override;
     jboolean close() override;
+    int getInterfaceVersion() override {
+        return 0;
+    }
 
 private:
     const sp<android::hardware::gnss::V1_0::IGnssMeasurement> mIGnssMeasurement_V1_0;

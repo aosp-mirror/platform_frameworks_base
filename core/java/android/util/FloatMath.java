@@ -30,6 +30,7 @@ package android.util;
  * @deprecated Use {@link java.lang.Math} instead.
  */
 @Deprecated
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
 public class FloatMath {
 
     /** Prevents instantiation. */

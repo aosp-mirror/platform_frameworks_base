@@ -18,7 +18,7 @@ package com.android.systemui.keyguard.ui.viewmodel
 
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.keyguard.domain.interactor.FromGoneTransitionInteractor.Companion.TO_DREAMING_DURATION
-import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
+import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.ui.KeyguardTransitionAnimationFlow
 import javax.inject.Inject
 import kotlin.time.Duration.Companion.milliseconds
@@ -32,18 +32,19 @@ import kotlinx.coroutines.flow.Flow
 class GoneToDreamingLockscreenHostedTransitionViewModel
 @Inject
 constructor(
-    interactor: KeyguardTransitionInteractor,
+    animationFlow: KeyguardTransitionAnimationFlow,
 ) {
 
     private val transitionAnimation =
-        KeyguardTransitionAnimationFlow(
-            transitionDuration = TO_DREAMING_DURATION,
-            transitionFlow = interactor.goneToDreamingLockscreenHostedTransition,
+        animationFlow.setup(
+            duration = TO_DREAMING_DURATION,
+            from = KeyguardState.GONE,
+            to = KeyguardState.DREAMING_LOCKSCREEN_HOSTED,
         )
 
     /** Lockscreen views alpha - hide immediately */
     val lockscreenAlpha: Flow<Float> =
-        transitionAnimation.createFlow(
+        transitionAnimation.sharedFlow(
             duration = 1.milliseconds,
             onStep = { 0f },
         )

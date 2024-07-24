@@ -160,6 +160,9 @@ final class HdmiCecController {
     // This variable is used for testing, in order to delay the logical address allocation.
     private long mLogicalAddressAllocationDelay = 0;
 
+    // This variable is used for testing, in order to delay polling devices.
+    private long mPollDevicesDelay = 0;
+
     // Private constructor.  Use HdmiCecController.create().
     private HdmiCecController(
             HdmiControlService service, NativeWrapper nativeWrapper, HdmiCecAtomWriter atomWriter) {
@@ -347,7 +350,7 @@ final class HdmiCecController {
      * {@link HdmiCecNetwork} only.
      *
      * @return CEC physical address of the device. The range of success address
-     *         is between 0x0000 and 0xFFFF. If failed it returns -1
+     *         is between 0x0000 and 0xFFFE. If failed it returns INVALID_PHYSICAL_ADDRESS.
      */
     @ServiceThreadOnly
     int getPhysicalAddress() {
@@ -463,6 +466,14 @@ final class HdmiCecController {
     }
 
     /**
+     * This method is used for testing, in order to delay polling devices.
+     */
+    @VisibleForTesting
+    void setPollDevicesDelay(long delay) {
+        mPollDevicesDelay = delay;
+    }
+
+    /**
      * Returns true if the language code is well-formed.
      */
     @VisibleForTesting static boolean isLanguage(String language) {
@@ -523,7 +534,10 @@ final class HdmiCecController {
         // Extract polling candidates. No need to poll against local devices.
         List<Integer> pollingCandidates = pickPollCandidates(pickStrategy);
         ArrayList<Integer> allocated = new ArrayList<>();
-        runDevicePolling(sourceAddress, pollingCandidates, retryCount, callback, allocated);
+        mControlHandler.postDelayed(
+                () -> runDevicePolling(
+                        sourceAddress, pollingCandidates, retryCount, callback, allocated),
+                mPollDevicesDelay);
     }
 
     private List<Integer> pickPollCandidates(int pickStrategy) {
@@ -1299,7 +1313,7 @@ final class HdmiCecController {
                     hdmiPortInfo[i] = new HdmiPortInfo.Builder(
                             portInfo.portId,
                             portInfo.type,
-                            portInfo.physicalAddress)
+                            Short.toUnsignedInt(portInfo.physicalAddress))
                             .setCecSupported(portInfo.cecSupported)
                             .setMhlSupported(false)
                             .setArcSupported(portInfo.arcSupported)
@@ -1496,7 +1510,7 @@ final class HdmiCecController {
                     hdmiPortInfo[i] = new HdmiPortInfo.Builder(
                             portInfo.portId,
                             portInfo.type,
-                            portInfo.physicalAddress)
+                            Short.toUnsignedInt(portInfo.physicalAddress))
                             .setCecSupported(portInfo.cecSupported)
                             .setMhlSupported(false)
                             .setArcSupported(portInfo.arcSupported)

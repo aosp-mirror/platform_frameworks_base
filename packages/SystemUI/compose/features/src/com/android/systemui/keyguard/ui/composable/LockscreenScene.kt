@@ -14,31 +14,31 @@
  * limitations under the License.
  */
 
-@file:OptIn(ExperimentalCoroutinesApi::class)
-
 package com.android.systemui.keyguard.ui.composable
 
-import android.view.View
-import android.view.ViewGroup
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.viewinterop.AndroidView
+import com.android.compose.animation.scene.Edge
+import com.android.compose.animation.scene.SceneKey
 import com.android.compose.animation.scene.SceneScope
-import com.android.systemui.R
+import com.android.compose.animation.scene.Swipe
+import com.android.compose.animation.scene.SwipeDirection
+import com.android.compose.animation.scene.UserAction
+import com.android.compose.animation.scene.UserActionResult
+import com.android.compose.animation.scene.animateSceneFloatAsState
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
-import com.android.systemui.keyguard.qualifiers.KeyguardRootView
 import com.android.systemui.keyguard.ui.viewmodel.LockscreenSceneViewModel
-import com.android.systemui.scene.shared.model.Direction
-import com.android.systemui.scene.shared.model.SceneKey
-import com.android.systemui.scene.shared.model.SceneModel
-import com.android.systemui.scene.shared.model.UserAction
+import com.android.systemui.qs.ui.composable.QuickSettings
+import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.scene.ui.composable.ComposableScene
+import dagger.Lazy
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 
@@ -48,18 +48,22 @@ class LockscreenScene
 @Inject
 constructor(
     @Application private val applicationScope: CoroutineScope,
-    private val viewModel: LockscreenSceneViewModel,
-    @KeyguardRootView private val viewProvider: () -> @JvmSuppressWildcards View,
+    viewModel: LockscreenSceneViewModel,
+    private val lockscreenContent: Lazy<LockscreenContent>,
 ) : ComposableScene {
-    override val key = SceneKey.Lockscreen
+    override val key = Scenes.Lockscreen
 
-    override fun destinationScenes(): StateFlow<Map<UserAction, SceneModel>> =
-        viewModel.upDestinationSceneKey
-            .map { pageKey -> destinationScenes(up = pageKey) }
+    override val destinationScenes: StateFlow<Map<UserAction, UserActionResult>> =
+        combine(viewModel.upDestinationSceneKey, viewModel.leftDestinationSceneKey, ::Pair)
+            .map { (upKey, leftKey) -> destinationScenes(up = upKey, left = leftKey) }
             .stateIn(
                 scope = applicationScope,
                 started = SharingStarted.Eagerly,
-                initialValue = destinationScenes(up = null)
+                initialValue =
+                    destinationScenes(
+                        up = viewModel.upDestinationSceneKey.value,
+                        left = viewModel.leftDestinationSceneKey.value,
+                    )
             )
 
     @Composable
@@ -67,41 +71,38 @@ constructor(
         modifier: Modifier,
     ) {
         LockscreenScene(
-            viewModel = viewModel,
-            viewProvider = viewProvider,
+            lockscreenContent = lockscreenContent,
             modifier = modifier,
         )
     }
 
     private fun destinationScenes(
         up: SceneKey?,
-    ): Map<UserAction, SceneModel> {
+        left: SceneKey?,
+    ): Map<UserAction, UserActionResult> {
         return buildMap {
-            up?.let { this[UserAction.Swipe(Direction.UP)] = SceneModel(up) }
-            this[UserAction.Swipe(Direction.DOWN)] = SceneModel(SceneKey.Shade)
+            up?.let { this[Swipe(SwipeDirection.Up)] = UserActionResult(up) }
+            left?.let { this[Swipe(SwipeDirection.Left)] = UserActionResult(left) }
+            this[Swipe(fromSource = Edge.Top, direction = SwipeDirection.Down)] =
+                UserActionResult(Scenes.QuickSettings)
+            this[Swipe(direction = SwipeDirection.Down)] = UserActionResult(Scenes.Shade)
         }
     }
 }
 
 @Composable
-private fun LockscreenScene(
-    viewModel: LockscreenSceneViewModel,
-    viewProvider: () -> View,
+private fun SceneScope.LockscreenScene(
+    lockscreenContent: Lazy<LockscreenContent>,
     modifier: Modifier = Modifier,
 ) {
-    AndroidView(
-        factory = { _ ->
-            val keyguardRootView = viewProvider()
-            // Remove the KeyguardRootView from any parent it might already have in legacy code just
-            // in case (a view can't have two parents).
-            (keyguardRootView.parent as? ViewGroup)?.removeView(keyguardRootView)
-            keyguardRootView
-        },
-        update = { keyguardRootView ->
-            keyguardRootView.requireViewById<View>(R.id.lock_icon_view).setOnClickListener {
-                viewModel.onLockButtonClicked()
-            }
-        },
-        modifier = modifier,
+    animateSceneFloatAsState(
+        value = QuickSettings.SharedValues.SquishinessValues.LockscreenSceneStarting,
+        key = QuickSettings.SharedValues.TilesSquishiness,
     )
+
+    lockscreenContent
+        .get()
+        .Content(
+            modifier = modifier.fillMaxSize(),
+        )
 }

@@ -47,6 +47,17 @@ public class WatchedSparseSetArray<T> extends WatchableImpl implements Snappable
     }
 
     /**
+     * Create a new WatchedSparseSetArray from an existing SparseSetArray without copying.
+     * <p>
+     * Use with caution: Callers must ensure that no reference to {@code sparseSetArray} exists
+     * anywhere else in the system. If such a reference does exist, then changes to the storage via
+     * that reference will not be noticed by the new WatchedSpareSetArray.
+     */
+    public WatchedSparseSetArray(@NonNull SparseSetArray<T> sparseSetArray) {
+        mStorage = sparseSetArray;
+    }
+
+    /**
      * Return the underlying storage.  This breaks the wrapper but is necessary when
      * passing the array to distant methods.
      */
@@ -140,6 +151,20 @@ public class WatchedSparseSetArray<T> extends WatchableImpl implements Snappable
      */
     public T valueAt(int intIndex, int valueIndex) {
         return (T) mStorage.valueAt(intIndex, valueIndex);
+    }
+
+    /**
+     * Copy from another SparseSetArray.
+     */
+    public void copyFrom(@NonNull SparseSetArray<T> c) {
+        clear();
+        final int end = c.size();
+        for (int i = 0; i < end; i++) {
+            final int key = c.keyAt(i);
+            final ArraySet<T> set = c.get(key);
+            mStorage.addAll(key, set);
+        }
+        onChanged();
     }
 
     @NonNull

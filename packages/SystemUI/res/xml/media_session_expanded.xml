@@ -48,16 +48,27 @@
         app:layout_constraintBottom_toBottomOf="@+id/album_art" />
 
     <Constraint
+        android:id="@+id/loading_effect_view"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/qs_media_session_height_expanded"
+        app:layout_constraintStart_toStartOf="@+id/album_art"
+        app:layout_constraintEnd_toEndOf="@+id/album_art"
+        app:layout_constraintTop_toTopOf="@+id/album_art"
+        app:layout_constraintBottom_toBottomOf="@+id/album_art" />
+
+    <Constraint
         android:id="@+id/header_title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="@dimen/qs_media_padding"
         android:layout_marginEnd="@dimen/qs_media_padding"
         app:layout_constraintEnd_toStartOf="@id/actionPlayPause"
+        app:layout_constraintTop_toBottomOf="@id/media_seamless"
         app:layout_constrainedWidth="true"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintBottom_toTopOf="@id/header_artist"
-        app:layout_constraintHorizontal_bias="0" />
+        app:layout_constraintHorizontal_bias="0"
+        app:layout_constraintVertical_bias="1" />
 
     <Constraint
         android:id="@+id/media_explicit_indicator"

@@ -32,6 +32,7 @@ import java.lang.annotation.RetentionPolicy;
  *
  * @hide
  */
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
 public class ProtoStream {
 
     /**

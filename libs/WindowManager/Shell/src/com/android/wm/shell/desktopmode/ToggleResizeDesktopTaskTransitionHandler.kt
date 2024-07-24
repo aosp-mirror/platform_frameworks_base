@@ -21,7 +21,6 @@ import android.animation.RectEvaluator
 import android.animation.ValueAnimator
 import android.graphics.Rect
 import android.os.IBinder
-import android.util.SparseArray
 import android.view.SurfaceControl
 import android.view.WindowManager.TRANSIT_CHANGE
 import android.window.TransitionInfo
@@ -30,7 +29,7 @@ import android.window.WindowContainerTransaction
 import androidx.core.animation.addListener
 import com.android.wm.shell.transition.Transitions
 import com.android.wm.shell.transition.Transitions.TRANSIT_DESKTOP_MODE_TOGGLE_RESIZE
-import com.android.wm.shell.windowdecor.DesktopModeWindowDecoration
+import com.android.wm.shell.windowdecor.OnTaskResizeAnimationListener
 import java.util.function.Supplier
 
 /** Handles the animation of quick resizing of desktop tasks. */
@@ -40,7 +39,7 @@ class ToggleResizeDesktopTaskTransitionHandler(
 ) : Transitions.TransitionHandler {
 
     private val rectEvaluator = RectEvaluator(Rect())
-    private val taskToDecorationMap = SparseArray<DesktopModeWindowDecoration>()
+    private lateinit var onTaskResizeAnimationListener: OnTaskResizeAnimationListener
 
     private var boundsAnimator: Animator? = null
 
@@ -49,15 +48,12 @@ class ToggleResizeDesktopTaskTransitionHandler(
     ) : this(transitions, Supplier { SurfaceControl.Transaction() })
 
     /** Starts a quick resize transition. */
-    fun startTransition(
-        wct: WindowContainerTransaction,
-        taskId: Int,
-        windowDecoration: DesktopModeWindowDecoration
-    ) {
-        // Pause relayout until the transition animation finishes.
-        windowDecoration.incrementRelayoutBlock()
+    fun startTransition(wct: WindowContainerTransaction) {
         transitions.startTransition(TRANSIT_DESKTOP_MODE_TOGGLE_RESIZE, wct, this)
-        taskToDecorationMap.put(taskId, windowDecoration)
+    }
+
+    fun setOnTaskResizeAnimationListener(listener: OnTaskResizeAnimationListener) {
+        onTaskResizeAnimationListener = listener
     }
 
     override fun startAnimation(
@@ -72,9 +68,6 @@ class ToggleResizeDesktopTaskTransitionHandler(
         val taskId = checkNotNull(change.taskInfo).taskId
         val startBounds = change.startAbsBounds
         val endBounds = change.endAbsBounds
-        val windowDecor =
-            taskToDecorationMap.removeReturnOld(taskId)
-                ?: throw IllegalStateException("Window decoration not found for task $taskId")
 
         val tx = transactionSupplier.get()
         boundsAnimator?.cancel()
@@ -92,7 +85,11 @@ class ToggleResizeDesktopTaskTransitionHandler(
                                 )
                                 .setWindowCrop(leash, startBounds.width(), startBounds.height())
                                 .show(leash)
-                            windowDecor.showResizeVeil(startTransaction, startBounds)
+                            onTaskResizeAnimationListener.onAnimationStart(
+                                    taskId,
+                                    startTransaction,
+                                    startBounds
+                            )
                         },
                         onEnd = {
                             finishTransaction
@@ -103,7 +100,7 @@ class ToggleResizeDesktopTaskTransitionHandler(
                                 )
                                 .setWindowCrop(leash, endBounds.width(), endBounds.height())
                                 .show(leash)
-                            windowDecor.hideResizeVeil()
+                            onTaskResizeAnimationListener.onAnimationEnd(taskId)
                             finishCallback.onTransitionFinished(null)
                             boundsAnimator = null
                         }
@@ -113,7 +110,7 @@ class ToggleResizeDesktopTaskTransitionHandler(
                         tx.setPosition(leash, rect.left.toFloat(), rect.top.toFloat())
                             .setWindowCrop(leash, rect.width(), rect.height())
                             .show(leash)
-                        windowDecor.updateResizeVeil(tx, rect)
+                        onTaskResizeAnimationListener.onBoundsChange(taskId, tx, rect)
                     }
                     start()
                 }

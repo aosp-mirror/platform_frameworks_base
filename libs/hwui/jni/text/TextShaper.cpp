@@ -14,9 +14,6 @@
  * limitations under the License.
  */
 
-#undef LOG_TAG
-#define LOG_TAG "TextShaper"
-
 #include "graphics_jni_helpers.h"
 #include <nativehelper/ScopedStringChars.h>
 #include <nativehelper/ScopedPrimitiveArray.h>
@@ -62,7 +59,7 @@ static jlong shapeTextRun(const uint16_t* text, int textSize, int start, int cou
         const minikin::Font* font = layout.getFont(i);
         if (seenFonts.find(font) != seenFonts.end()) continue;
         minikin::MinikinExtent extent = {};
-        font->typeface()->GetFontExtent(&extent, minikinPaint, layout.getFakery(i));
+        layout.typeface(i)->GetFontExtent(&extent, minikinPaint, layout.getFakery(i));
         overallAscent = std::min(overallAscent, extent.ascent);
         overallDescent = std::max(overallDescent, extent.descent);
     }
@@ -148,6 +145,30 @@ static jfloat TextShaper_Result_getY(CRITICAL_JNI_PARAMS_COMMA jlong ptr, jint i
 }
 
 // CriticalNative
+static jboolean TextShaper_Result_getFakeBold(CRITICAL_JNI_PARAMS_COMMA jlong ptr, jint i) {
+    const LayoutWrapper* layout = reinterpret_cast<LayoutWrapper*>(ptr);
+    return layout->layout.getFakery(i).isFakeBold();
+}
+
+// CriticalNative
+static jboolean TextShaper_Result_getFakeItalic(CRITICAL_JNI_PARAMS_COMMA jlong ptr, jint i) {
+    const LayoutWrapper* layout = reinterpret_cast<LayoutWrapper*>(ptr);
+    return layout->layout.getFakery(i).isFakeItalic();
+}
+
+// CriticalNative
+static jfloat TextShaper_Result_getWeightOverride(CRITICAL_JNI_PARAMS_COMMA jlong ptr, jint i) {
+    const LayoutWrapper* layout = reinterpret_cast<LayoutWrapper*>(ptr);
+    return layout->layout.getFakery(i).wghtAdjustment();
+}
+
+// CriticalNative
+static jfloat TextShaper_Result_getItalicOverride(CRITICAL_JNI_PARAMS_COMMA jlong ptr, jint i) {
+    const LayoutWrapper* layout = reinterpret_cast<LayoutWrapper*>(ptr);
+    return layout->layout.getFakery(i).italAdjustment();
+}
+
+// CriticalNative
 static jlong TextShaper_Result_getFont(CRITICAL_JNI_PARAMS_COMMA jlong ptr, jint i) {
     const LayoutWrapper* layout = reinterpret_cast<LayoutWrapper*>(ptr);
     std::shared_ptr<minikin::Font> fontRef = layout->layout.getFontRef(i);
@@ -185,15 +206,19 @@ static const JNINativeMethod gMethods[] = {
 };
 
 static const JNINativeMethod gResultMethods[] = {
-    { "nGetGlyphCount", "(J)I", (void*)TextShaper_Result_getGlyphCount },
-    { "nGetTotalAdvance", "(J)F", (void*)TextShaper_Result_getTotalAdvance },
-    { "nGetAscent", "(J)F", (void*)TextShaper_Result_getAscent },
-    { "nGetDescent", "(J)F", (void*)TextShaper_Result_getDescent },
-    { "nGetGlyphId", "(JI)I", (void*)TextShaper_Result_getGlyphId },
-    { "nGetX", "(JI)F", (void*)TextShaper_Result_getX },
-    { "nGetY", "(JI)F", (void*)TextShaper_Result_getY },
-    { "nGetFont", "(JI)J", (void*)TextShaper_Result_getFont },
-    { "nReleaseFunc", "()J", (void*)TextShaper_Result_nReleaseFunc },
+        {"nGetGlyphCount", "(J)I", (void*)TextShaper_Result_getGlyphCount},
+        {"nGetTotalAdvance", "(J)F", (void*)TextShaper_Result_getTotalAdvance},
+        {"nGetAscent", "(J)F", (void*)TextShaper_Result_getAscent},
+        {"nGetDescent", "(J)F", (void*)TextShaper_Result_getDescent},
+        {"nGetGlyphId", "(JI)I", (void*)TextShaper_Result_getGlyphId},
+        {"nGetX", "(JI)F", (void*)TextShaper_Result_getX},
+        {"nGetY", "(JI)F", (void*)TextShaper_Result_getY},
+        {"nGetFont", "(JI)J", (void*)TextShaper_Result_getFont},
+        {"nGetFakeBold", "(JI)Z", (void*)TextShaper_Result_getFakeBold},
+        {"nGetFakeItalic", "(JI)Z", (void*)TextShaper_Result_getFakeItalic},
+        {"nGetWeightOverride", "(JI)F", (void*)TextShaper_Result_getWeightOverride},
+        {"nGetItalicOverride", "(JI)F", (void*)TextShaper_Result_getItalicOverride},
+        {"nReleaseFunc", "()J", (void*)TextShaper_Result_nReleaseFunc},
 };
 
 int register_android_graphics_text_TextShaper(JNIEnv* env) {

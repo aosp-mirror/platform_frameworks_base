@@ -27,3 +27,27 @@ genrule {
         targets: ["droidcore"],
     },
 }
+
+prebuilt_usr_keylayout {
+    name: "keylayout_data",
+    srcs: [
+        "*.kl",
+    ],
+    no_full_install: true,
+}
+
+prebuilt_usr_keychars {
+    name: "keychars_data",
+    srcs: [
+        "*.kcm",
+    ],
+    no_full_install: true,
+}
+
+prebuilt_usr_idc {
+    name: "idc_data",
+    srcs: [
+        "*.idc",
+    ],
+    no_full_install: true,
+}

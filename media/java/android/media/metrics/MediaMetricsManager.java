@@ -193,4 +193,18 @@ public final class MediaMetricsManager {
             throw e.rethrowFromSystemServer();
         }
     }
+
+    /**
+     * Reports the event of an editing session ending.
+     *
+     * @hide
+     */
+    public void reportEditingEndedEvent(
+            @NonNull String sessionId, EditingEndedEvent editingEndedEvent) {
+        try {
+            mService.reportEditingEndedEvent(sessionId, editingEndedEvent, mUserId);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
 }

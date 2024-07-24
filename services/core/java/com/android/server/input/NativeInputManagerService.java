@@ -16,6 +16,7 @@
 
 package com.android.server.input;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.hardware.display.DisplayViewport;
 import android.hardware.input.InputSensorInfo;
@@ -28,7 +29,6 @@ import android.view.InputChannel;
 import android.view.InputEvent;
 import android.view.PointerIcon;
 import android.view.VerifiedInputEvent;
-import android.view.ViewConfiguration;
 
 import java.util.List;
 
@@ -108,26 +108,32 @@ interface NativeInputManagerService {
 
     void setFocusedDisplay(int displayId);
 
-    boolean transferTouchFocus(IBinder fromChannelToken, IBinder toChannelToken,
+    void setMinTimeBetweenUserActivityPokes(long millis);
+
+    boolean transferTouchGesture(IBinder fromChannelToken, IBinder toChannelToken,
             boolean isDragDrop);
 
     /**
      * Transfer the current touch gesture to the window identified by 'destChannelToken' positioned
      * on display with id 'displayId'.
+     * @deprecated Use {@link #transferTouchGesture(IBinder, IBinder, boolean)}
      */
+    @Deprecated
     boolean transferTouch(IBinder destChannelToken, int displayId);
 
     int getMousePointerSpeed();
 
     void setPointerSpeed(int speed);
 
-    void setPointerAcceleration(float acceleration);
+    void setMousePointerAccelerationEnabled(int displayId, boolean enabled);
 
     void setTouchpadPointerSpeed(int speed);
 
     void setTouchpadNaturalScrollingEnabled(boolean enabled);
 
     void setTouchpadTapToClickEnabled(boolean enabled);
+
+    void setTouchpadTapDraggingEnabled(boolean enabled);
 
     void setTouchpadRightClickZoneEnabled(boolean enabled);
 
@@ -187,7 +193,12 @@ interface NativeInputManagerService {
 
     void reloadPointerIcons();
 
-    void setCustomPointerIcon(PointerIcon icon);
+    void setCustomPointerIcon(@NonNull PointerIcon icon);
+
+    boolean setPointerIcon(@NonNull PointerIcon icon, int displayId, int deviceId, int pointerId,
+            @NonNull IBinder inputToken);
+
+    void setPointerIconVisibility(int displayId, boolean visible);
 
     void requestPointerCapture(IBinder windowToken, boolean enabled);
 
@@ -204,6 +215,8 @@ interface NativeInputManagerService {
     void setDisplayEligibilityForPointerCapture(int displayId, boolean enabled);
 
     void setMotionClassifierEnabled(boolean enabled);
+
+    void setKeyRepeatConfiguration(int timeoutMs, int delayMs);
 
     InputSensorInfo[] getSensorList(int deviceId);
 
@@ -226,14 +239,15 @@ interface NativeInputManagerService {
     void setStylusButtonMotionEventsEnabled(boolean enabled);
 
     /**
-     * Get the current position of the mouse cursor.
+     * Get the current position of the mouse cursor on the given display.
      *
-     * If the mouse cursor is not currently shown, the coordinate values will be NaN-s.
+     * If the mouse cursor is not currently shown, the coordinate values will be NaN-s. Use
+     * {@link android.view.Display#INVALID_DISPLAY} to get the position of the default mouse cursor.
      *
      * NOTE: This will grab the PointerController's lock, so we must be careful about calling this
      * from the InputReader or Display threads, which may result in a deadlock.
      */
-    float[] getMouseCursorPosition();
+    float[] getMouseCursorPosition(int displayId);
 
     /** Set whether showing a pointer icon for styluses is enabled. */
     void setStylusPointerIconEnabled(boolean enabled);
@@ -245,13 +259,19 @@ interface NativeInputManagerService {
     void sysfsNodeChanged(String sysfsNodePath);
 
     /**
-     * Notify there is a change in any of the key gesture timeouts, such as the key
-     * repeat timeout or key repeat delay.
-     *
-     * @see ViewConfiguration#getKeyRepeatTimeout()
-     * @see ViewConfiguration#getKeyRepeatDelay()
+     * Notify if Accessibility bounce keys threshold is changed from InputSettings.
      */
-    void notifyKeyGestureTimeoutsChanged();
+    void setAccessibilityBounceKeysThreshold(int thresholdTimeMs);
+
+    /**
+     * Notify if Accessibility slow keys threshold is changed from InputSettings.
+     */
+    void setAccessibilitySlowKeysThreshold(int thresholdTimeMs);
+
+    /**
+     * Notify if Accessibility sticky keys is enabled/disabled from InputSettings.
+     */
+    void setAccessibilityStickyKeysEnabled(boolean enabled);
 
     /** The native implementation of InputManagerService methods. */
     class NativeImpl implements NativeInputManagerService {
@@ -338,10 +358,14 @@ interface NativeInputManagerService {
         public native void setFocusedDisplay(int displayId);
 
         @Override
-        public native boolean transferTouchFocus(IBinder fromChannelToken, IBinder toChannelToken,
+        public native void setMinTimeBetweenUserActivityPokes(long millis);
+
+        @Override
+        public native boolean transferTouchGesture(IBinder fromChannelToken, IBinder toChannelToken,
                 boolean isDragDrop);
 
         @Override
+        @Deprecated
         public native boolean transferTouch(IBinder destChannelToken, int displayId);
 
         @Override
@@ -351,7 +375,7 @@ interface NativeInputManagerService {
         public native void setPointerSpeed(int speed);
 
         @Override
-        public native void setPointerAcceleration(float acceleration);
+        public native void setMousePointerAccelerationEnabled(int displayId, boolean enabled);
 
         @Override
         public native void setTouchpadPointerSpeed(int speed);
@@ -361,6 +385,9 @@ interface NativeInputManagerService {
 
         @Override
         public native void setTouchpadTapToClickEnabled(boolean enabled);
+
+        @Override
+        public native void setTouchpadTapDraggingEnabled(boolean enabled);
 
         @Override
         public native void setTouchpadRightClickZoneEnabled(boolean enabled);
@@ -447,6 +474,13 @@ interface NativeInputManagerService {
         public native void setCustomPointerIcon(PointerIcon icon);
 
         @Override
+        public native boolean setPointerIcon(PointerIcon icon, int displayId, int deviceId,
+                int pointerId, IBinder inputToken);
+
+        @Override
+        public native void setPointerIconVisibility(int displayId, boolean visible);
+
+        @Override
         public native void requestPointerCapture(IBinder windowToken, boolean enabled);
 
         @Override
@@ -469,6 +503,9 @@ interface NativeInputManagerService {
 
         @Override
         public native void setMotionClassifierEnabled(boolean enabled);
+
+        @Override
+        public native void setKeyRepeatConfiguration(int timeoutMs, int delayMs);
 
         @Override
         public native InputSensorInfo[] getSensorList(int deviceId);
@@ -496,7 +533,7 @@ interface NativeInputManagerService {
         public native void setStylusButtonMotionEventsEnabled(boolean enabled);
 
         @Override
-        public native float[] getMouseCursorPosition();
+        public native float[] getMouseCursorPosition(int displayId);
 
         @Override
         public native void setStylusPointerIconEnabled(boolean enabled);
@@ -505,6 +542,12 @@ interface NativeInputManagerService {
         public native void sysfsNodeChanged(String sysfsNodePath);
 
         @Override
-        public native void notifyKeyGestureTimeoutsChanged();
+        public native void setAccessibilityBounceKeysThreshold(int thresholdTimeMs);
+
+        @Override
+        public native void setAccessibilitySlowKeysThreshold(int thresholdTimeMs);
+
+        @Override
+        public native void setAccessibilityStickyKeysEnabled(boolean enabled);
     }
 }

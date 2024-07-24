@@ -38,7 +38,6 @@ import static com.android.server.wm.DisplayRotationReversionController.REVERSION
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.StringRes;
-import android.app.servertransaction.ClientTransaction;
 import android.app.servertransaction.RefreshCallbackItem;
 import android.app.servertransaction.ResumeActivityItem;
 import android.content.pm.ActivityInfo.ScreenOrientation;
@@ -226,13 +225,12 @@ final class DisplayRotationCompatPolicy {
             ProtoLog.v(WM_DEBUG_STATES,
                     "Refreshing activity for camera compatibility treatment, "
                             + "activityRecord=%s", activity);
-            final ClientTransaction transaction = ClientTransaction.obtain(
-                    activity.app.getThread(), activity.token);
-            transaction.addCallback(
-                    RefreshCallbackItem.obtain(cycleThroughStop ? ON_STOP : ON_PAUSE));
-            transaction.setLifecycleStateRequest(ResumeActivityItem.obtain(
-                    /* isForward */ false, /* shouldSendCompatFakeFocus */ false));
-            activity.mAtmService.getLifecycleManager().scheduleTransaction(transaction);
+            final RefreshCallbackItem refreshCallbackItem = RefreshCallbackItem.obtain(
+                    activity.token, cycleThroughStop ? ON_STOP : ON_PAUSE);
+            final ResumeActivityItem resumeActivityItem = ResumeActivityItem.obtain(
+                    activity.token, /* isForward */ false, /* shouldSendCompatFakeFocus */ false);
+            activity.mAtmService.getLifecycleManager().scheduleTransactionAndLifecycleItems(
+                    activity.app.getThread(), refreshCallbackItem, resumeActivityItem);
             mHandler.postDelayed(
                     () -> onActivityRefreshed(activity),
                     REFRESH_CALLBACK_TIMEOUT_MS);

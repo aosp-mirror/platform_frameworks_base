@@ -18,11 +18,10 @@ package com.android.settingslib.spa.framework.util
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.State
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.filterNotNull
 
-/** A StateFlow holder which value could be set or sync from [State]. */
+/** A StateFlow holder which value could be set or sync from callback. */
 class StateFlowBridge<T> {
     private val stateFlow = MutableStateFlow<T?>(null)
     val flow = stateFlow.filterNotNull()
@@ -34,9 +33,10 @@ class StateFlowBridge<T> {
     }
 
     @Composable
-    fun Sync(state: State<T>) {
-        LaunchedEffect(state.value) {
-            stateFlow.value = state.value
+    fun Sync(callback: () -> T) {
+        val value = callback()
+        LaunchedEffect(value) {
+            stateFlow.value = value
         }
     }
 }

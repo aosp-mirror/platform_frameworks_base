@@ -39,6 +39,8 @@ import android.widget.ImageView;
 import androidx.preference.PreferenceViewHolder;
 import androidx.test.core.app.ApplicationProvider;
 
+import com.android.settingslib.widget.preference.illustration.R;
+
 import com.airbnb.lottie.LottieAnimationView;
 
 import org.junit.Before;
@@ -48,6 +50,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.robolectric.Robolectric;
 import org.robolectric.RobolectricTestRunner;
+
 
 @RunWith(RobolectricTestRunner.class)
 public class IllustrationPreferenceTest {

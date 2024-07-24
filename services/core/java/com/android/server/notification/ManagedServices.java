@@ -16,6 +16,7 @@
 
 package com.android.server.notification;
 
+import static android.app.Flags.FLAG_LIFETIME_EXTENSION_REFACTOR;
 import static android.content.Context.BIND_ALLOW_WHITELIST_MANAGEMENT;
 import static android.content.Context.BIND_AUTO_CREATE;
 import static android.content.Context.BIND_FOREGROUND_SERVICE;
@@ -24,8 +25,10 @@ import static android.os.UserHandle.USER_ALL;
 import static android.os.UserHandle.USER_SYSTEM;
 import static android.service.notification.NotificationListenerService.META_DATA_DEFAULT_AUTOBIND;
 
+import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
 import android.app.ActivityManager;
+import android.app.ActivityOptions;
 import android.app.PendingIntent;
 import android.app.admin.DevicePolicyManager;
 import android.content.ComponentName;
@@ -939,6 +942,23 @@ abstract public class ManagedServices {
         return false;
     }
 
+    protected boolean isPackageOrComponentAllowedWithPermission(ComponentName component,
+            int userId) {
+        if (!(isPackageOrComponentAllowed(component.flattenToString(), userId)
+                || isPackageOrComponentAllowed(component.getPackageName(), userId))) {
+            return false;
+        }
+        return componentHasBindPermission(component, userId);
+    }
+
+    private boolean componentHasBindPermission(ComponentName component, int userId) {
+        ServiceInfo info = getServiceInfo(component, userId);
+        if (info == null) {
+            return false;
+        }
+        return mConfig.bindPermission.equals(info.permission);
+    }
+
     boolean isPackageOrComponentUserSet(String pkgOrComponent, int userId) {
         synchronized (mApproved) {
             ArraySet<String> services = mUserSetServices.get(userId);
@@ -1000,6 +1020,7 @@ abstract public class ManagedServices {
                     for (int uid : uidList) {
                         if (isPackageAllowed(pkgName, UserHandle.getUserId(uid))) {
                             anyServicesInvolved = true;
+                            trimApprovedListsForInvalidServices(pkgName, UserHandle.getUserId(uid));
                         }
                     }
                 }
@@ -1020,7 +1041,7 @@ abstract public class ManagedServices {
         synchronized (mSnoozing) {
             mSnoozing.remove(user);
         }
-        rebindServices(true, user);
+        unbindUserServices(user);
     }
 
     public void onUserSwitched(int user) {
@@ -1132,8 +1153,7 @@ abstract public class ManagedServices {
 
         synchronized (mMutex) {
             if (enabled) {
-                if (isPackageOrComponentAllowed(component.flattenToString(), userId)
-                        || isPackageOrComponentAllowed(component.getPackageName(), userId)) {
+                if (isPackageOrComponentAllowedWithPermission(component, userId)) {
                     registerServiceLocked(component, userId);
                 } else {
                     Slog.d(TAG, component + " no longer has permission to be bound");
@@ -1248,8 +1268,50 @@ abstract public class ManagedServices {
                     }
                 }
             }
+            // Remove uninstalled components from user-set list
+            final ArraySet<String> userSet = mUserSetServices.get(uninstalledUserId);
+            if (userSet != null) {
+                int numServices = userSet.size();
+                for (int i = numServices - 1; i >= 0; i--) {
+                    String pkgOrComponent = userSet.valueAt(i);
+                    if (TextUtils.equals(pkg, getPackageName(pkgOrComponent))) {
+                        userSet.removeAt(i);
+                        if (DEBUG) {
+                            Slog.v(TAG, "Removing " + pkgOrComponent
+                                    + " from user-set list; uninstalled");
+                        }
+                    }
+                }
+            }
         }
         return removed;
+    }
+
+    private void trimApprovedListsForInvalidServices(String packageName, int userId) {
+        synchronized (mApproved) {
+            final ArrayMap<Boolean, ArraySet<String>> approvedByType = mApproved.get(userId);
+            if (approvedByType == null) {
+                return;
+            }
+            for (int i = 0; i < approvedByType.size(); i++) {
+                final ArraySet<String> approved = approvedByType.valueAt(i);
+                for (int j = approved.size() - 1; j >= 0; j--) {
+                    final String approvedPackageOrComponent = approved.valueAt(j);
+                    if (TextUtils.equals(getPackageName(approvedPackageOrComponent), packageName)) {
+                        final ComponentName component = ComponentName.unflattenFromString(
+                                approvedPackageOrComponent);
+                        if (component != null && !componentHasBindPermission(component, userId)) {
+                            approved.removeAt(j);
+                            if (DEBUG) {
+                                Slog.v(TAG, "Removing " + approvedPackageOrComponent
+                                        + " from approved list; no bind permission found "
+                                        + mConfig.bindPermission);
+                            }
+                        }
+                    }
+                }
+            }
+        }
     }
 
     protected String getPackageName(String packageOrComponent) {
@@ -1407,12 +1469,24 @@ abstract public class ManagedServices {
     void unbindOtherUserServices(int currentUser) {
         TimingsTraceAndSlog t = new TimingsTraceAndSlog();
         t.traceBegin("ManagedServices.unbindOtherUserServices_current" + currentUser);
-        final SparseArray<Set<ComponentName>> componentsToUnbind = new SparseArray<>();
+        unbindServicesImpl(currentUser, true /* allExceptUser */);
+        t.traceEnd();
+    }
 
+    void unbindUserServices(int user) {
+        TimingsTraceAndSlog t = new TimingsTraceAndSlog();
+        t.traceBegin("ManagedServices.unbindUserServices" + user);
+        unbindServicesImpl(user, false /* allExceptUser */);
+        t.traceEnd();
+    }
+
+    void unbindServicesImpl(int user, boolean allExceptUser) {
+        final SparseArray<Set<ComponentName>> componentsToUnbind = new SparseArray<>();
         synchronized (mMutex) {
             final Set<ManagedServiceInfo> removableBoundServices = getRemovableConnectedServices();
             for (ManagedServiceInfo info : removableBoundServices) {
-                if (info.userid != currentUser) {
+                if ((allExceptUser && (info.userid != user))
+                        || (!allExceptUser && (info.userid == user))) {
                     Set<ComponentName> toUnbind =
                             componentsToUnbind.get(info.userid, new ArraySet<>());
                     toUnbind.add(info.component);
@@ -1421,7 +1495,6 @@ abstract public class ManagedServices {
             }
         }
         unbindFromServices(componentsToUnbind);
-        t.traceEnd();
     }
 
     protected void unbindFromServices(SparseArray<Set<ComponentName>> componentsToUnbind) {
@@ -1490,8 +1563,7 @@ abstract public class ManagedServices {
     void reregisterService(final ComponentName cn, final int userId) {
         // If rebinding a package that died, ensure it still has permission
         // after the rebind delay
-        if (isPackageOrComponentAllowed(cn.getPackageName(), userId)
-                || isPackageOrComponentAllowed(cn.flattenToString(), userId)) {
+        if (isPackageOrComponentAllowedWithPermission(cn, userId)) {
             registerService(cn, userId);
         }
     }
@@ -1542,8 +1614,11 @@ abstract public class ManagedServices {
 
         intent.putExtra(Intent.EXTRA_CLIENT_LABEL, mConfig.clientLabel);
 
+        final ActivityOptions activityOptions = ActivityOptions.makeBasic();
+        activityOptions.setIgnorePendingIntentCreatorForegroundState(true);
         final PendingIntent pendingIntent = PendingIntent.getActivity(
-            mContext, 0, new Intent(mConfig.settingsAction), PendingIntent.FLAG_IMMUTABLE);
+                mContext, 0, new Intent(mConfig.settingsAction), PendingIntent.FLAG_IMMUTABLE,
+                activityOptions.toBundle());
         intent.putExtra(Intent.EXTRA_CLIENT_INTENT, pendingIntent);
 
         ApplicationInfo appInfo = null;
@@ -1772,6 +1847,8 @@ abstract public class ManagedServices {
         public ComponentName component;
         public int userid;
         public boolean isSystem;
+        @FlaggedApi(FLAG_LIFETIME_EXTENSION_REFACTOR)
+        public boolean isSystemUi;
         public ServiceConnection connection;
         public int targetSdkVersion;
         public Pair<ComponentName, Integer> mKey;
@@ -1804,6 +1881,11 @@ abstract public class ManagedServices {
 
         public boolean isSystem() {
             return isSystem;
+        }
+
+        @FlaggedApi(FLAG_LIFETIME_EXTENSION_REFACTOR)
+        public boolean isSystemUi() {
+            return isSystemUi;
         }
 
         @Override

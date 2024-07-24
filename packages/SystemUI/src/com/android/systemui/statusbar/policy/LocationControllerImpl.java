@@ -40,6 +40,7 @@ import android.os.UserManager;
 import android.provider.DeviceConfig;
 import android.provider.Settings;
 
+import androidx.annotation.GuardedBy;
 import androidx.annotation.NonNull;
 import androidx.annotation.VisibleForTesting;
 
@@ -355,12 +356,15 @@ public class LocationControllerImpl extends BroadcastReceiver implements Locatio
         updateActiveLocationRequests();
     }
 
+    // IMPORTANT: This handler guarantees that any operations on the list of callbacks is
+    // sequential, so no concurrent exceptions
     private final class H extends Handler {
         private static final int MSG_LOCATION_SETTINGS_CHANGED = 1;
         private static final int MSG_LOCATION_ACTIVE_CHANGED = 2;
         private static final int MSG_ADD_CALLBACK = 3;
         private static final int MSG_REMOVE_CALLBACK = 4;
 
+        @GuardedBy("mSettingsChangeCallbacks")
         private final ArrayList<LocationChangeCallback> mSettingsChangeCallbacks =
                 new ArrayList<>();
 
@@ -378,10 +382,14 @@ public class LocationControllerImpl extends BroadcastReceiver implements Locatio
                     locationActiveChanged();
                     break;
                 case MSG_ADD_CALLBACK:
-                    mSettingsChangeCallbacks.add((LocationChangeCallback) msg.obj);
+                    synchronized (mSettingsChangeCallbacks) {
+                        mSettingsChangeCallbacks.add((LocationChangeCallback) msg.obj);
+                    }
                     break;
                 case MSG_REMOVE_CALLBACK:
-                    mSettingsChangeCallbacks.remove((LocationChangeCallback) msg.obj);
+                    synchronized (mSettingsChangeCallbacks) {
+                        mSettingsChangeCallbacks.remove((LocationChangeCallback) msg.obj);
+                    }
                     break;
 
             }

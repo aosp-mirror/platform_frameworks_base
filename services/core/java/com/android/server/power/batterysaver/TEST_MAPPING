@@ -4,7 +4,8 @@
       "name": "CtsLocationCoarseTestCases"
     },
     {
-      "name": "CtsLocationFineTestCases"
+      "name": "CtsLocationFineTestCases",
+      "options": []
     },
     {
       "name": "CtsLocationNoneTestCases"

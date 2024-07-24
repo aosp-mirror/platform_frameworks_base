@@ -22,9 +22,9 @@ import android.net.wifi.WifiConfiguration.GroupCipher;
 import android.net.wifi.WifiConfiguration.PairwiseCipher;
 import android.net.wifi.WifiConfiguration.Protocol;
 import android.net.wifi.WifiInfo;
-import android.net.wifi.WifiManager;
 import android.os.Bundle;
-import android.test.suitebuilder.annotation.LargeTest;
+
+import androidx.test.filters.LargeTest;
 
 import com.android.connectivitymanagertest.ConnectivityManagerTestBase;
 import com.android.connectivitymanagertest.WifiAssociationTestRunner;

@@ -22,6 +22,8 @@ import static android.app.admin.DevicePolicyManager.PASSWORD_QUALITY_NUMERIC;
 import static android.app.admin.DevicePolicyManager.PASSWORD_QUALITY_NUMERIC_COMPLEX;
 import static android.app.admin.DevicePolicyManager.PASSWORD_QUALITY_SOMETHING;
 import static android.app.admin.DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED;
+import static android.security.Flags.reportPrimaryAuthAttempts;
+import static android.security.Flags.shouldTrustManagerListenForPrimaryAuth;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
@@ -333,11 +335,17 @@ public class LockPatternUtils {
 
     @UnsupportedAppUsage
     public LockPatternUtils(Context context) {
+        this(context, null);
+    }
+
+    @VisibleForTesting
+    public LockPatternUtils(Context context, ILockSettings lockSettings) {
         mContext = context;
         mContentResolver = context.getContentResolver();
 
         Looper looper = Looper.myLooper();
         mHandler = looper != null ? new Handler(looper) : null;
+        mLockSettingsService = lockSettings;
     }
 
     @UnsupportedAppUsage
@@ -408,7 +416,9 @@ public class LockPatternUtils {
             return;
         }
         getDevicePolicyManager().reportFailedPasswordAttempt(userId);
-        getTrustManager().reportUnlockAttempt(false /* authenticated */, userId);
+        if (!reportPrimaryAuthAttempts() || !shouldTrustManagerListenForPrimaryAuth()) {
+            getTrustManager().reportUnlockAttempt(/* authenticated= */ false, userId);
+        }
     }
 
     @UnsupportedAppUsage
@@ -417,7 +427,9 @@ public class LockPatternUtils {
             return;
         }
         getDevicePolicyManager().reportSuccessfulPasswordAttempt(userId);
-        getTrustManager().reportUnlockAttempt(true /* authenticated */, userId);
+        if (!reportPrimaryAuthAttempts() || !shouldTrustManagerListenForPrimaryAuth()) {
+            getTrustManager().reportUnlockAttempt(/* authenticated= */ true, userId);
+        }
     }
 
     public void reportPasswordLockout(int timeoutMs, int userId) {
@@ -440,6 +452,21 @@ public class LockPatternUtils {
         }
         return getDevicePolicyManager().getMaximumFailedPasswordsForWipe(
                 null /* componentName */, userId);
+    }
+
+    /**
+     * Save the current password data to the repair mode file.
+     *
+     * @return true if success or false otherwise.
+     */
+    public boolean writeRepairModeCredential(int userId) {
+        throwIfCalledOnMainThread();
+        try {
+            return getLockSettings().writeRepairModeCredential(userId);
+        } catch (RemoteException re) {
+            Log.e(TAG, "Failed to write repair mode credential", re);
+            return false;
+        }
     }
 
     /**
@@ -1384,8 +1411,8 @@ public class LockPatternUtils {
     }
 
     public boolean isUserInLockdown(int userId) {
-        return getStrongAuthForUser(userId)
-                == StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_USER_LOCKDOWN;
+        return (getStrongAuthForUser(userId)
+                & StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_USER_LOCKDOWN) != 0;
     }
 
     private static class WrappedCallback extends ICheckCredentialProgressCallback.Stub {
@@ -1609,7 +1636,8 @@ public class LockPatternUtils {
                         STRONG_AUTH_REQUIRED_AFTER_TIMEOUT,
                         STRONG_AUTH_REQUIRED_AFTER_USER_LOCKDOWN,
                         STRONG_AUTH_REQUIRED_AFTER_NON_STRONG_BIOMETRICS_TIMEOUT,
-                        SOME_AUTH_REQUIRED_AFTER_TRUSTAGENT_EXPIRED})
+                        SOME_AUTH_REQUIRED_AFTER_TRUSTAGENT_EXPIRED,
+                        SOME_AUTH_REQUIRED_AFTER_ADAPTIVE_AUTH_REQUEST})
         @Retention(RetentionPolicy.SOURCE)
         public @interface StrongAuthFlags {}
 
@@ -1635,7 +1663,8 @@ public class LockPatternUtils {
 
         /**
          * Strong authentication is required because the user has been locked out after too many
-         * attempts.
+         * attempts using primary auth methods (i.e. PIN/pattern/password) from the lock screen,
+         * Android Settings, and BiometricPrompt where user authentication is required.
          */
         public static final int STRONG_AUTH_REQUIRED_AFTER_LOCKOUT = 0x8;
 
@@ -1668,12 +1697,23 @@ public class LockPatternUtils {
         public static final int SOME_AUTH_REQUIRED_AFTER_TRUSTAGENT_EXPIRED = 0x100;
 
         /**
+         * Some authentication is required because adaptive auth has requested to lock device due to
+         * repeated failed primary auth (i.e. PIN/pattern/password) or biometric auth attempts which
+         * can come from Android Settings or BiometricPrompt where user authentication is required,
+         * in addition to from the lock screen. When a risk is determined, adaptive auth will
+         * proactively prompt the lock screen and will require users to re-enter the device with
+         * either primary auth or biometric auth (if not prohibited by other flags).
+         */
+        public static final int SOME_AUTH_REQUIRED_AFTER_ADAPTIVE_AUTH_REQUEST = 0x200;
+
+        /**
          * Strong auth flags that do not prevent biometric methods from being accepted as auth.
          * If any other flags are set, biometric authentication is disabled.
          */
         private static final int ALLOWING_BIOMETRIC = STRONG_AUTH_NOT_REQUIRED
                 | SOME_AUTH_REQUIRED_AFTER_USER_REQUEST
-                | SOME_AUTH_REQUIRED_AFTER_TRUSTAGENT_EXPIRED;
+                | SOME_AUTH_REQUIRED_AFTER_TRUSTAGENT_EXPIRED
+                | SOME_AUTH_REQUIRED_AFTER_ADAPTIVE_AUTH_REQUEST;
 
         private final SparseIntArray mStrongAuthRequiredForUser = new SparseIntArray();
         private final H mHandler;

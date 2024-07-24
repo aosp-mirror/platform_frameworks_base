@@ -834,6 +834,33 @@ public class RemoteViewsTest {
     }
 
     @Test
+    public void visitUris_intents() {
+        RemoteViews views = new RemoteViews(mPackage, R.layout.remote_views_test);
+
+        Uri fillIntentUri = Uri.parse("content://intent/fill");
+        views.setOnCheckedChangeResponse(
+                R.id.layout,
+                RemoteViews.RemoteResponse.fromFillInIntent(new Intent("action", fillIntentUri)));
+
+        Uri pendingIntentUri = Uri.parse("content://intent/pending");
+        PendingIntent pendingIntent = getPendingIntentWithUri(pendingIntentUri);
+        views.setOnClickResponse(
+                R.id.layout,
+                RemoteViews.RemoteResponse.fromPendingIntent(pendingIntent));
+
+        Consumer<Uri> visitor = (Consumer<Uri>) spy(Consumer.class);
+        views.visitUris(visitor);
+        verify(visitor, times(1)).accept(eq(fillIntentUri));
+        verify(visitor, times(1)).accept(eq(pendingIntentUri));
+    }
+
+    private PendingIntent getPendingIntentWithUri(Uri uri) {
+        return PendingIntent.getActivity(mContext, 0,
+                new Intent("action", uri),
+                PendingIntent.FLAG_IMMUTABLE);
+    }
+
+    @Test
     public void layoutInflaterFactory_nothingSet_returnsNull() {
         final RemoteViews rv = new RemoteViews(mPackage, R.layout.remote_views_test);
         assertNull(rv.getLayoutInflaterFactory());

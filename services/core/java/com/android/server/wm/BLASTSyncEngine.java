@@ -95,6 +95,7 @@ class BLASTSyncEngine {
 
     interface TransactionReadyListener {
         void onTransactionReady(int mSyncId, SurfaceControl.Transaction transaction);
+        default void onTransactionCommitTimeout() {}
     }
 
     /**
@@ -249,6 +250,7 @@ class BLASTSyncEngine {
                            " commit callback. Application ANR likely to follow.");
                     Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
                     synchronized (mWm.mGlobalLock) {
+                        mListener.onTransactionCommitTimeout();
                         onCommitted(merged.mNativeObject != 0
                                 ? merged : mWm.mTransactionFactory.get());
                     }
@@ -376,8 +378,23 @@ class BLASTSyncEngine {
                 if (!wc.isSyncFinished(this)) {
                     allFinished = false;
                     Slog.i(TAG, "Unfinished container: " + wc);
+                    wc.forAllActivities(a -> {
+                        if (a.isVisibleRequested()) {
+                            if (a.isRelaunching()) {
+                                Slog.i(TAG, "  " + a + " is relaunching");
+                            }
+                            a.forAllWindows(w -> {
+                                Slog.i(TAG, "  " + w + " " + w.mWinAnimator.drawStateToString());
+                            }, true /* traverseTopToBottom */);
+                        } else if (a.mDisplayContent != null && !a.mDisplayContent
+                                .mUnknownAppVisibilityController.allResolved()) {
+                            Slog.i(TAG, "  UnknownAppVisibility: " + a.mDisplayContent
+                                    .mUnknownAppVisibilityController.getDebugMessage());
+                        }
+                    });
                 }
             }
+
             for (int i = mDependencies.size() - 1; i >= 0; --i) {
                 allFinished = false;
                 Slog.i(TAG, "Unfinished dependency: " + mDependencies.get(i).mSyncId);

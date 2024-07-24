@@ -17,12 +17,23 @@
 
 package android.os;
 
-import junit.framework.TestCase;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
-public class ProcessTest extends TestCase {
+import android.platform.test.annotations.IgnoreUnderRavenwood;
+import android.platform.test.ravenwood.RavenwoodRule;
+
+import org.junit.Rule;
+import org.junit.Test;
+
+@IgnoreUnderRavenwood(blockedBy = Process.class)
+public class ProcessTest {
+    @Rule
+    public final RavenwoodRule mRavenwood = new RavenwoodRule();
 
     private static final int BAD_PID = 0;
 
+    @Test
     public void testProcessGetUidFromName() throws Exception {
         assertEquals(android.os.Process.SYSTEM_UID, Process.getUidForName("system"));
         assertEquals(Process.BLUETOOTH_UID, Process.getUidForName("bluetooth"));
@@ -36,6 +47,7 @@ public class ProcessTest extends TestCase {
                 Process.getUidForName("u3_a100"));
     }
 
+    @Test
     public void testProcessGetUidFromNameFailure() throws Exception {
         // Failure cases
         assertEquals(-1, Process.getUidForName("u2a_foo"));
@@ -51,6 +63,7 @@ public class ProcessTest extends TestCase {
      * Tests getUidForPid() by ensuring that it returns the correct value when the process queried
      * doesn't exist.
      */
+    @Test
     public void testGetUidForPidInvalidPid() {
         assertEquals(-1, Process.getUidForPid(BAD_PID));
     }
@@ -59,6 +72,7 @@ public class ProcessTest extends TestCase {
      * Tests getParentPid() by ensuring that it returns the correct value when the process queried
      * doesn't exist.
      */
+    @Test
     public void testGetParentPidInvalidPid() {
         assertEquals(-1, Process.getParentPid(BAD_PID));
     }
@@ -67,11 +81,13 @@ public class ProcessTest extends TestCase {
      * Tests getThreadGroupLeader() by ensuring that it returns the correct value when the
      * thread queried doesn't exist.
      */
+    @Test
     public void testGetThreadGroupLeaderInvalidTid() {
         // This function takes a TID instead of a PID but BAD_PID should also be a bad TID.
         assertEquals(-1, Process.getThreadGroupLeader(BAD_PID));
     }
 
+    @Test
     public void testGetAdvertisedMem() {
         assertTrue(Process.getAdvertisedMem() > 0);
         assertTrue(Process.getTotalMemory() <= Process.getAdvertisedMem());

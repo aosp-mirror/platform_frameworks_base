@@ -16,51 +16,78 @@
 
 package android.platform.coverage
 
+import com.android.tools.metalava.model.CallableItem
+import com.android.tools.metalava.model.ClassItem
+import com.android.tools.metalava.model.Item
 import com.android.tools.metalava.model.text.ApiFile
 import java.io.File
 import java.io.FileWriter
 
 /** Usage: extract-flagged-apis <api text file> <output .pb file> */
 fun main(args: Array<String>) {
-    var cb = ApiFile.parseApi(listOf(File(args[0])))
-    var builder = FlagApiMap.newBuilder()
+    val cb = ApiFile.parseApi(listOf(File(args[0])))
+    val builder = FlagApiMap.newBuilder()
     for (pkg in cb.getPackages().packages) {
-        var packageName = pkg.qualifiedName()
-        pkg.allClasses()
-            .filter { it.methods().size > 0 }
-            .forEach {
-                for (method in it.methods()) {
-                    val flagValue =
-                        method.modifiers
-                            .findAnnotation("android.annotation.FlaggedApi")
-                            ?.findAttribute("value")
-                            ?.value
-                            ?.value()
-                    if (flagValue != null && flagValue is String) {
-                        var api =
-                            JavaMethod.newBuilder()
-                                .setPackageName(packageName)
-                                .setClassName(it.fullName())
-                                .setMethodName(method.name())
-                        for (param in method.parameters()) {
-                            api.addParameters(param.type().toTypeString())
-                        }
-                        if (builder.containsFlagToApi(flagValue)) {
-                            var updatedApis =
-                                builder
-                                    .getFlagToApiOrThrow(flagValue)
-                                    .toBuilder()
-                                    .addJavaMethods(api)
-                                    .build()
-                            builder.putFlagToApi(flagValue, updatedApis)
-                        } else {
-                            var apis = FlaggedApis.newBuilder().addJavaMethods(api).build()
-                            builder.putFlagToApi(flagValue, apis)
-                        }
-                    }
-                }
-            }
+        val packageName = pkg.qualifiedName()
+        pkg.allClasses().forEach {
+            extractFlaggedApisFromClass(it, it.methods(), packageName, builder)
+            extractFlaggedApisFromClass(it, it.constructors(), packageName, builder)
+        }
     }
     val flagApiMap = builder.build()
     FileWriter(args[1]).use { it.write(flagApiMap.toString()) }
+}
+
+fun extractFlaggedApisFromClass(
+    classItem: ClassItem,
+    callables: List<CallableItem>,
+    packageName: String,
+    builder: FlagApiMap.Builder
+) {
+    if (callables.isEmpty()) return
+    val classFlag = getClassFlag(classItem)
+    for (callable in callables) {
+        val callableFlag = getFlagAnnotation(callable) ?: classFlag
+        val api =
+            JavaMethod.newBuilder()
+                .setPackageName(packageName)
+                .setClassName(classItem.fullName())
+                .setMethodName(callable.name())
+        for (param in callable.parameters()) {
+            api.addParameters(param.type().toTypeString())
+        }
+        if (callableFlag != null) {
+            addFlaggedApi(builder, api, callableFlag)
+        }
+    }
+}
+
+fun addFlaggedApi(builder: FlagApiMap.Builder, api: JavaMethod.Builder, flag: String) {
+    if (builder.containsFlagToApi(flag)) {
+        val updatedApis = builder.getFlagToApiOrThrow(flag).toBuilder().addJavaMethods(api).build()
+        builder.putFlagToApi(flag, updatedApis)
+    } else {
+        val apis = FlaggedApis.newBuilder().addJavaMethods(api).build()
+        builder.putFlagToApi(flag, apis)
+    }
+}
+
+fun getClassFlag(classItem: ClassItem): String? {
+    var classFlag = getFlagAnnotation(classItem)
+    var cur = classItem
+    // If a class is not a nested class, use its @FlaggedApi annotation value.
+    // Otherwise, use the flag value of the closest outer class that is annotated by @FlaggedApi.
+    while (classFlag == null) {
+        cur = cur.containingClass() ?: break
+        classFlag = getFlagAnnotation(cur)
+    }
+    return classFlag
+}
+
+fun getFlagAnnotation(item: Item): String? {
+    return item.modifiers
+        .findAnnotation("android.annotation.FlaggedApi")
+        ?.findAttribute("value")
+        ?.value
+        ?.value() as? String
 }

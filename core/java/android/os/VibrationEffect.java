@@ -28,7 +28,6 @@ import android.content.Context;
 import android.hardware.vibrator.V1_0.EffectStrength;
 import android.hardware.vibrator.V1_3.Effect;
 import android.net.Uri;
-import android.os.Vibrator;
 import android.os.vibrator.PrebakedSegment;
 import android.os.vibrator.PrimitiveSegment;
 import android.os.vibrator.RampSegment;
@@ -44,7 +43,9 @@ import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
 import java.util.Objects;
+import java.util.StringJoiner;
 
 /**
  * A VibrationEffect describes a haptic effect to be performed by a {@link Vibrator}.
@@ -231,11 +232,11 @@ public abstract class VibrationEffect implements Parcelable {
      * Computes a legacy vibration pattern (i.e. a pattern with duration values for "off/on"
      * vibration components) that is equivalent to this VibrationEffect.
      *
-     * <p>All non-repeating effects created with {@link #createWaveform(int[], int)} are convertible
-     * into an equivalent vibration pattern with this method. It is not guaranteed that an effect
-     * created with other means becomes converted into an equivalent legacy vibration pattern, even
-     * if it has an equivalent vibration pattern. If this method is unable to create an equivalent
-     * vibration pattern for such effects, it will return {@code null}.
+     * <p>All non-repeating effects created with {@link #createWaveform(long[], int)} are
+     * convertible into an equivalent vibration pattern with this method. It is not guaranteed that
+     * an effect created with other means becomes converted into an equivalent legacy vibration
+     * pattern, even if it has an equivalent vibration pattern. If this method is unable to create
+     * an equivalent vibration pattern for such effects, it will return {@code null}.
      *
      * <p>Note that a valid equivalent long[] pattern cannot be created for an effect that has any
      * form of repeating behavior, regardless of how the effect was created. For repeating effects,
@@ -244,7 +245,7 @@ public abstract class VibrationEffect implements Parcelable {
      * @return a long array representing a vibration pattern equivalent to the VibrationEffect, if
      *               the method successfully derived a vibration pattern equivalent to the effect
      *               (this will always be the case if the effect was created via
-     *               {@link #createWaveform(int[], int)} and is non-repeating). Otherwise, returns
+     *               {@link #createWaveform(long[], int)} and is non-repeating). Otherwise, returns
      *               {@code null}.
      * @hide
      */
@@ -334,7 +335,7 @@ public abstract class VibrationEffect implements Parcelable {
      */
     @TestApi
     public static VibrationEffect get(int effectId) {
-        return get(effectId, true);
+        return get(effectId, PrebakedSegment.DEFAULT_SHOULD_FALLBACK);
     }
 
     /**
@@ -353,7 +354,7 @@ public abstract class VibrationEffect implements Parcelable {
      *
      * @param effectId The ID of the effect to perform:
      *                 {@link #EFFECT_CLICK}, {@link #EFFECT_DOUBLE_CLICK}, {@link #EFFECT_TICK}
-     * @param fallback Whether to fallback to a generic pattern if a hardware specific
+     * @param fallback Whether to fall back to a generic pattern if a hardware specific
      *                 implementation doesn't exist.
      *
      * @return The desired effect.
@@ -362,7 +363,7 @@ public abstract class VibrationEffect implements Parcelable {
     @TestApi
     public static VibrationEffect get(int effectId, boolean fallback) {
         VibrationEffect effect = new Composed(
-                new PrebakedSegment(effectId, fallback, EffectStrength.MEDIUM));
+                new PrebakedSegment(effectId, fallback, PrebakedSegment.DEFAULT_STRENGTH));
         effect.validate();
         return effect;
     }
@@ -516,14 +517,14 @@ public abstract class VibrationEffect implements Parcelable {
     public abstract long getDuration();
 
     /**
-     * Checks if a given {@link Vibrator} can play this effect as intended.
+     * Checks if a vibrator with a given {@link VibratorInfo} can play this effect as intended.
      *
-     * <p>See @link Vibrator#areVibrationFeaturesSupported(VibrationEffect)} for more information
-     * about what counts as supported by a vibrator, and what counts as not.
+     * <p>See {@link VibratorInfo#areVibrationFeaturesSupported(VibrationEffect)} for more
+     * information about what counts as supported by a vibrator, and what counts as not.
      *
      * @hide
      */
-    public abstract boolean areVibrationFeaturesSupported(@NonNull Vibrator vibrator);
+    public abstract boolean areVibrationFeaturesSupported(@NonNull VibratorInfo vibratorInfo);
 
     /**
      * Returns true if this effect could represent a touch haptic feedback.
@@ -564,25 +565,40 @@ public abstract class VibrationEffect implements Parcelable {
     public abstract <T extends VibrationEffect> T scale(float scaleFactor);
 
     /**
-     * Applies given effect strength to prebaked effects represented by one of
-     * VibrationEffect.EFFECT_*.
+     * Ensures that the effect is repeating indefinitely or not. This is a lossy operation and
+     * should only be applied once to an original effect - it shouldn't be applied to the
+     * result of this method.
      *
-     * @param effectStrength new effect strength to be applied, one of
-     *                       VibrationEffect.EFFECT_STRENGTH_*.
-     * @return this if there is no change to this effect, or a copy of this effect with applied
-     * effect strength otherwise.
+     * <p>Non-repeating effects will be made repeating by looping the entire effect with the
+     * specified delay between each loop. The delay is added irrespective of whether the effect
+     * already has a delay at the beginning or end.
+     *
+     * <p>Repeating effects will be left with their native repeating portion if it should be
+     * repeating, and otherwise the loop index is removed, so that the entire effect plays once.
+     *
+     * @param wantRepeating Whether the effect is required to be repeating or not.
+     * @param loopDelayMs The milliseconds to pause between loops, if repeating is to be added to
+     *                    the effect. Ignored if {@code repeating==false} or the effect is already
+     *                    repeating itself. No delay is added if <= 0.
+     * @return this if the effect already satisfies the repeating requirement, or a copy of this
+     *         adjusted to repeat or not repeat as appropriate.
      * @hide
      */
-    public <T extends VibrationEffect> T applyEffectStrength(int effectStrength) {
-        return (T) this;
-    }
+    @NonNull
+    public abstract VibrationEffect applyRepeatingIndefinitely(
+            boolean wantRepeating, int loopDelayMs);
 
     /**
      * Scale given vibration intensity by the given factor.
      *
+     * <p> This scale is not necessarily linear and may apply a gamma correction to the scale
+     * factor before using it.
+     *
      * @param intensity   relative intensity of the effect, must be between 0 and 1
      * @param scaleFactor scale factor to be applied to the intensity. Values within [0,1) will
      *                    scale down the intensity, values larger than 1 will scale up
+     * @return the scaled intensity which will be values within [0, 1].
+     *
      * @hide
      */
     public static float scale(float intensity, float scaleFactor) {
@@ -611,6 +627,27 @@ public abstract class VibrationEffect implements Parcelable {
 
         return MathUtils.constrain(a * fx, 0f, 1f);
     }
+
+    /**
+     * Performs a linear scaling on the given vibration intensity by the given factor.
+     *
+     * @param intensity relative intensity of the effect, must be between 0 and 1.
+     * @param scaleFactor scale factor to be applied to the intensity. Values within [0,1) will
+     *                    scale down the intensity, values larger than 1 will scale up.
+     * @return the scaled intensity which will be values within [0, 1].
+     *
+     * @hide
+     */
+    public static float scaleLinearly(float intensity, float scaleFactor) {
+        return MathUtils.constrain(intensity * scaleFactor, 0f, 1f);
+    }
+
+    /**
+     * Returns a compact version of the {@link #toString()} result for debugging purposes.
+     *
+     * @hide
+     */
+    public abstract String toDebugString();
 
     /** @hide */
     public static String effectIdToString(int effectId) {
@@ -649,6 +686,22 @@ public abstract class VibrationEffect implements Parcelable {
     }
 
     /**
+     * Transforms a {@link VibrationEffect} using a generic parameter.
+     *
+     * <p>This can be used for scaling effects based on user settings or adapting them to the
+     * capabilities of a specific device vibrator.
+     *
+     * @param <ParamT> The type of parameter to be used on the effect by this transformation
+     * @hide
+     */
+    public interface Transformation<ParamT> {
+
+        /** Transforms given effect by applying the given parameter. */
+        @NonNull
+        VibrationEffect transform(@NonNull VibrationEffect effect, @NonNull ParamT param);
+    }
+
+    /**
      * Implementation of {@link VibrationEffect} described by a composition of one or more
      * {@link VibrationEffectSegment}, with an optional index to represent repeating effects.
      *
@@ -660,7 +713,9 @@ public abstract class VibrationEffect implements Parcelable {
         private final int mRepeatIndex;
 
         Composed(@NonNull Parcel in) {
-            this(in.readArrayList(VibrationEffectSegment.class.getClassLoader(), android.os.vibrator.VibrationEffectSegment.class), in.readInt());
+            this(in.readArrayList(
+                    VibrationEffectSegment.class.getClassLoader(), VibrationEffectSegment.class),
+                    in.readInt());
         }
 
         Composed(@NonNull VibrationEffectSegment segment) {
@@ -769,9 +824,9 @@ public abstract class VibrationEffect implements Parcelable {
 
         /** @hide */
         @Override
-        public boolean areVibrationFeaturesSupported(@NonNull Vibrator vibrator) {
+        public boolean areVibrationFeaturesSupported(@NonNull VibratorInfo vibratorInfo) {
             for (VibrationEffectSegment segment : mSegments) {
-                if (!segment.areVibrationFeaturesSupported(vibrator)) {
+                if (!segment.areVibrationFeaturesSupported(vibratorInfo)) {
                     return false;
                 }
             }
@@ -845,22 +900,32 @@ public abstract class VibrationEffect implements Parcelable {
         /** @hide */
         @NonNull
         @Override
-        public Composed applyEffectStrength(int effectStrength) {
-            int segmentCount = mSegments.size();
-            ArrayList<VibrationEffectSegment> scaledSegments = new ArrayList<>(segmentCount);
-            for (int i = 0; i < segmentCount; i++) {
-                scaledSegments.add(mSegments.get(i).applyEffectStrength(effectStrength));
-            }
-            if (scaledSegments.equals(mSegments)) {
+        public Composed applyRepeatingIndefinitely(boolean wantRepeating, int loopDelayMs) {
+            boolean isRepeating = mRepeatIndex >= 0;
+            if (isRepeating == wantRepeating) {
                 return this;
+            } else if (!wantRepeating) {
+                return new Composed(mSegments, -1);
+            } else if (loopDelayMs <= 0) {
+                // Loop with no delay: repeat at index zero.
+                return new Composed(mSegments, 0);
+            } else {
+                // Append a delay and loop. It doesn't matter that there's a delay on the
+                // end because the looping is always indefinite until cancelled.
+                ArrayList<VibrationEffectSegment> loopingSegments =
+                        new ArrayList<>(mSegments.size() + 1);
+                loopingSegments.addAll(mSegments);
+                loopingSegments.add(
+                        new StepSegment(/* amplitude= */ 0, /* frequencyHz= */ 0, loopDelayMs));
+                return new Composed(loopingSegments, 0);
             }
-            Composed scaled = new Composed(scaledSegments, mRepeatIndex);
-            scaled.validate();
-            return scaled;
         }
 
         @Override
         public boolean equals(@Nullable Object o) {
+            if (this == o) {
+                return true;
+            }
             if (!(o instanceof Composed)) {
                 return false;
             }
@@ -878,6 +943,23 @@ public abstract class VibrationEffect implements Parcelable {
             return "Composed{segments=" + mSegments
                     + ", repeat=" + mRepeatIndex
                     + "}";
+        }
+
+        /** @hide */
+        @Override
+        public String toDebugString() {
+            if (mSegments.size() == 1 && mRepeatIndex < 0) {
+                // Simplify effect string, use the single segment to represent it.
+                return mSegments.get(0).toDebugString();
+            }
+            StringJoiner sj = new StringJoiner(",", "[", "]");
+            for (int i = 0; i < mSegments.size(); i++) {
+                sj.add(mSegments.get(i).toDebugString());
+            }
+            if (mRepeatIndex >= 0) {
+                return String.format(Locale.ROOT, "%s, repeat=%d", sj, mRepeatIndex);
+            }
+            return sj.toString();
         }
 
         @Override
@@ -908,7 +990,7 @@ public abstract class VibrationEffect implements Parcelable {
         /**
          * Casts a provided {@link VibrationEffectSegment} to a {@link StepSegment} and returns it,
          * only if it can possibly be a segment for an effect created via
-         * {@link #createWaveform(int[], int)}. Otherwise, returns {@code null}.
+         * {@link #createWaveform(long[], int)}. Otherwise, returns {@code null}.
          */
         @Nullable
         private static StepSegment castToValidStepSegmentForOffOnTimingsOrNull(
@@ -1120,7 +1202,7 @@ public abstract class VibrationEffect implements Parcelable {
          */
         @NonNull
         public Composition addPrimitive(@PrimitiveType int primitiveId) {
-            return addPrimitive(primitiveId, /*scale*/ 1.0f, /*delay*/ 0);
+            return addPrimitive(primitiveId, PrimitiveSegment.DEFAULT_SCALE);
         }
 
         /**
@@ -1135,7 +1217,7 @@ public abstract class VibrationEffect implements Parcelable {
         @NonNull
         public Composition addPrimitive(@PrimitiveType int primitiveId,
                 @FloatRange(from = 0f, to = 1f) float scale) {
-            return addPrimitive(primitiveId, scale, /*delay*/ 0);
+            return addPrimitive(primitiveId, scale, PrimitiveSegment.DEFAULT_DELAY_MILLIS);
         }
 
         /**
@@ -1150,8 +1232,7 @@ public abstract class VibrationEffect implements Parcelable {
         @NonNull
         public Composition addPrimitive(@PrimitiveType int primitiveId,
                 @FloatRange(from = 0f, to = 1f) float scale, @IntRange(from = 0) int delay) {
-            PrimitiveSegment primitive = new PrimitiveSegment(primitiveId, scale,
-                    delay);
+            PrimitiveSegment primitive = new PrimitiveSegment(primitiveId, scale, delay);
             primitive.validate();
             return addSegment(primitive);
         }
@@ -1206,23 +1287,23 @@ public abstract class VibrationEffect implements Parcelable {
         public static String primitiveToString(@PrimitiveType int id) {
             switch (id) {
                 case PRIMITIVE_NOOP:
-                    return "PRIMITIVE_NOOP";
+                    return "NOOP";
                 case PRIMITIVE_CLICK:
-                    return "PRIMITIVE_CLICK";
+                    return "CLICK";
                 case PRIMITIVE_THUD:
-                    return "PRIMITIVE_THUD";
+                    return "THUD";
                 case PRIMITIVE_SPIN:
-                    return "PRIMITIVE_SPIN";
+                    return "SPIN";
                 case PRIMITIVE_QUICK_RISE:
-                    return "PRIMITIVE_QUICK_RISE";
+                    return "QUICK_RISE";
                 case PRIMITIVE_SLOW_RISE:
-                    return "PRIMITIVE_SLOW_RISE";
+                    return "SLOW_RISE";
                 case PRIMITIVE_QUICK_FALL:
-                    return "PRIMITIVE_QUICK_FALL";
+                    return "QUICK_FALL";
                 case PRIMITIVE_TICK:
-                    return "PRIMITIVE_TICK";
+                    return "TICK";
                 case PRIMITIVE_LOW_TICK:
-                    return "PRIMITIVE_LOW_TICK";
+                    return "LOW_TICK";
                 default:
                     return Integer.toString(id);
             }

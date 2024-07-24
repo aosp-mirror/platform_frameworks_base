@@ -23,17 +23,26 @@ import android.testing.TestableLooper
 import android.view.View
 import android.view.ViewGroup
 import android.view.WindowManagerPolicyConstants.EXTRA_FROM_BRIGHTNESS_KEY
+import androidx.test.filters.FlakyTest
 import androidx.test.filters.SmallTest
 import androidx.test.rule.ActivityTestRule
-import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.activity.SingleActivityFactory
+import com.android.systemui.res.R
+import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import com.android.systemui.statusbar.policy.AccessibilityManagerWrapper
 import com.android.systemui.util.concurrency.DelayableExecutor
 import com.android.systemui.util.concurrency.FakeExecutor
 import com.android.systemui.util.mockito.any
+import com.android.systemui.util.mockito.whenever
 import com.android.systemui.util.time.FakeSystemClock
 import com.google.common.truth.Truth.assertThat
+import kotlin.time.Duration.Companion.milliseconds
+import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.takeWhile
+import kotlinx.coroutines.flow.timeout
+import kotlinx.coroutines.test.runTest
 import org.junit.After
 import org.junit.Before
 import org.junit.Rule
@@ -55,6 +64,7 @@ class BrightnessDialogTest : SysuiTestCase() {
     @Mock private lateinit var brightnessControllerFactory: BrightnessController.Factory
     @Mock private lateinit var brightnessController: BrightnessController
     @Mock private lateinit var accessibilityMgr: AccessibilityManagerWrapper
+    @Mock private lateinit var shadeInteractor: ShadeInteractor
 
     private val clock = FakeSystemClock()
     private val mainExecutor = FakeExecutor(clock)
@@ -68,7 +78,8 @@ class BrightnessDialogTest : SysuiTestCase() {
                     brightnessSliderControllerFactory,
                     brightnessControllerFactory,
                     mainExecutor,
-                    accessibilityMgr
+                    accessibilityMgr,
+                    shadeInteractor
                 )
             },
             /* initialTouchMode= */ false,
@@ -82,6 +93,7 @@ class BrightnessDialogTest : SysuiTestCase() {
             .thenReturn(brightnessSliderController)
         `when`(brightnessSliderController.rootView).thenReturn(View(context))
         `when`(brightnessControllerFactory.create(any())).thenReturn(brightnessController)
+        whenever(shadeInteractor.isQsExpanded).thenReturn(MutableStateFlow(false))
     }
 
     @After
@@ -171,16 +183,45 @@ class BrightnessDialogTest : SysuiTestCase() {
         assertThat(activityRule.activity.isFinishing()).isFalse()
     }
 
+    @OptIn(FlowPreview::class)
+    @FlakyTest(bugId = 326186573)
+    @Test
+    fun testFinishOnQSExpanded() = runTest {
+        val isQSExpanded = MutableStateFlow(false)
+        `when`(shadeInteractor.isQsExpanded).thenReturn(isQSExpanded)
+        activityRule.launchActivity(Intent(Intent.ACTION_SHOW_BRIGHTNESS_DIALOG))
+
+        assertThat(activityRule.activity.isFinishing()).isFalse()
+
+        isQSExpanded.value = true
+        // Observe the activity's state until is it finishing or the timeout is reached, whatever
+        // comes first. This fixes the flakiness seen when using advanceUntilIdle().
+        activityRule.activity.finishing.timeout(100.milliseconds).takeWhile { !it }.collect {}
+        assertThat(activityRule.activity.isFinishing()).isTrue()
+    }
+
     class TestDialog(
         brightnessSliderControllerFactory: BrightnessSliderController.Factory,
         brightnessControllerFactory: BrightnessController.Factory,
         mainExecutor: DelayableExecutor,
-        accessibilityMgr: AccessibilityManagerWrapper
+        accessibilityMgr: AccessibilityManagerWrapper,
+        shadeInteractor: ShadeInteractor
     ) :
         BrightnessDialog(
             brightnessSliderControllerFactory,
             brightnessControllerFactory,
             mainExecutor,
-            accessibilityMgr
-        )
+            accessibilityMgr,
+            shadeInteractor
+        ) {
+        var finishing = MutableStateFlow(false)
+
+        override fun isFinishing(): Boolean {
+            return finishing.value
+        }
+
+        override fun requestFinish() {
+            finishing.value = true
+        }
+    }
 }

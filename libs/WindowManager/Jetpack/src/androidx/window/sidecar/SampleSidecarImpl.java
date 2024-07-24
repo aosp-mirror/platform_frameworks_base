@@ -17,6 +17,7 @@
 package androidx.window.sidecar;
 
 import static android.view.Display.DEFAULT_DISPLAY;
+
 import static androidx.window.util.ExtensionHelper.rotateRectToDisplayRotation;
 import static androidx.window.util.ExtensionHelper.transformToWindowSpaceRect;
 
@@ -25,6 +26,7 @@ import android.app.ActivityThread;
 import android.app.Application;
 import android.content.Context;
 import android.graphics.Rect;
+import android.hardware.devicestate.DeviceStateManager;
 import android.os.Bundle;
 import android.os.IBinder;
 
@@ -49,10 +51,11 @@ class SampleSidecarImpl extends StubSidecar {
     SampleSidecarImpl(Context context) {
         ((Application) context.getApplicationContext())
                 .registerActivityLifecycleCallbacks(new NotifyOnConfigurationChanged());
-        BaseDataProducer<String> settingsFeatureProducer = new RawFoldingFeatureProducer(context);
+        RawFoldingFeatureProducer settingsFeatureProducer = new RawFoldingFeatureProducer(context);
         BaseDataProducer<List<CommonFoldingFeature>> foldingFeatureProducer =
                 new DeviceStateManagerFoldingFeatureProducer(context,
-                        settingsFeatureProducer);
+                        settingsFeatureProducer,
+                        context.getSystemService(DeviceStateManager.class));
 
         foldingFeatureProducer.addDataChangedCallback(this::onDisplayFeaturesChanged);
     }

@@ -16,11 +16,14 @@
 
 package com.android.wm.shell.splitscreen;
 
+import static com.android.wm.shell.protolog.ShellProtoLogGroup.WM_SHELL_SPLIT_SCREEN;
+
 import android.content.Context;
 import android.view.SurfaceSession;
 import android.window.WindowContainerToken;
 import android.window.WindowContainerTransaction;
 
+import com.android.internal.protolog.common.ProtoLog;
 import com.android.launcher3.icons.IconProvider;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.common.SyncTransactionQueue;
@@ -50,6 +53,8 @@ class MainStage extends StageTaskListener {
 
     void activate(WindowContainerTransaction wct, boolean includingTopTask) {
         if (mIsActive) return;
+        ProtoLog.d(WM_SHELL_SPLIT_SCREEN, "activate: main stage includingTopTask=%b",
+                includingTopTask);
 
         if (includingTopTask) {
             reparentTopTask(wct);
@@ -64,6 +69,8 @@ class MainStage extends StageTaskListener {
 
     void deactivate(WindowContainerTransaction wct, boolean toTop) {
         if (!mIsActive) return;
+        ProtoLog.d(WM_SHELL_SPLIT_SCREEN, "deactivate: main stage toTop=%b rootTaskInfo=%s",
+                toTop, mRootTaskInfo);
         mIsActive = false;
 
         if (mRootTaskInfo == null) return;

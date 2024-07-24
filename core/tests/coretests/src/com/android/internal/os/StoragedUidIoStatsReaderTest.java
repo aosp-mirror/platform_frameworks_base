@@ -18,17 +18,17 @@ package com.android.internal.os;
 
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.Mockito.verifyZeroInteractions;
 
-import android.content.Context;
 import android.os.FileUtils;
+import android.platform.test.annotations.DisabledOnRavenwood;
+import android.platform.test.ravenwood.RavenwoodRule;
 
-import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -47,8 +47,9 @@ import java.nio.file.Files;
 @SmallTest
 @RunWith(AndroidJUnit4.class)
 public class StoragedUidIoStatsReaderTest {
+    @Rule
+    public RavenwoodRule mRavenwood = new RavenwoodRule.Builder().build();
 
-    private File mRoot;
     private File mTestDir;
     private File mTestFile;
     // private Random mRand = new Random();
@@ -57,15 +58,10 @@ public class StoragedUidIoStatsReaderTest {
     @Mock
     private StoragedUidIoStatsReader.Callback mCallback;
 
-    private Context getContext() {
-        return InstrumentationRegistry.getContext();
-    }
-
     @Before
-    public void setUp() {
+    public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
-        mTestDir = getContext().getDir("test", Context.MODE_PRIVATE);
-        mRoot = getContext().getFilesDir();
+        mTestDir = Files.createTempDirectory("StoragedUidIoStatsReaderTest").toFile();
         mTestFile = new File(mTestDir, "test.file");
         mStoragedUidIoStatsReader = new StoragedUidIoStatsReader(mTestFile.getAbsolutePath());
     }
@@ -73,9 +69,7 @@ public class StoragedUidIoStatsReaderTest {
     @After
     public void tearDown() throws Exception {
         FileUtils.deleteContents(mTestDir);
-        FileUtils.deleteContents(mRoot);
     }
-
 
     /**
      * Tests that reading will never call the callback.
@@ -83,14 +77,14 @@ public class StoragedUidIoStatsReaderTest {
     @Test
     public void testReadNonexistentFile() throws Exception {
         mStoragedUidIoStatsReader.readAbsolute(mCallback);
-        verifyZeroInteractions(mCallback);
-
+        verifyNoMoreInteractions(mCallback);
     }
 
     /**
      * Tests that reading a file with 3 uids works as expected.
      */
     @Test
+    @DisabledOnRavenwood(reason = "b/324433654 -- depends on unsupported classes")
     public void testReadExpected() throws Exception {
         BufferedWriter bufferedWriter = Files.newBufferedWriter(mTestFile.toPath());
         int[] uids = {0, 100, 200};
@@ -128,6 +122,7 @@ public class StoragedUidIoStatsReaderTest {
      * Tests that a line with less than 11 items is passed over.
      */
     @Test
+    @DisabledOnRavenwood(reason = "b/324433654 -- depends on unsupported classes")
     public void testLineDoesNotElevenEntries() throws Exception {
         BufferedWriter bufferedWriter = Files.newBufferedWriter(mTestFile.toPath());
 
@@ -151,6 +146,7 @@ public class StoragedUidIoStatsReaderTest {
      * Tests that a line that is malformed is passed over.
      */
     @Test
+    @DisabledOnRavenwood(reason = "b/324433654 -- depends on unsupported classes")
     public void testLineIsMalformed() throws Exception {
         BufferedWriter bufferedWriter = Files.newBufferedWriter(mTestFile.toPath());
 

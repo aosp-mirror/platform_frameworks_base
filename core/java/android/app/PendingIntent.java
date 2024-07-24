@@ -44,6 +44,8 @@ import android.content.IntentSender;
 import android.content.pm.PackageManager.ResolveInfoFlagsBits;
 import android.content.pm.ParceledListSlice;
 import android.content.pm.ResolveInfo;
+import android.net.Uri;
+import android.os.Binder;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -69,6 +71,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.Executor;
+import java.util.function.Consumer;
 
 /**
  * A description of an Intent and target action to perform with it.  Instances
@@ -176,6 +179,14 @@ public final class PendingIntent implements Parcelable {
     @Overridable
     public static final long BLOCK_MUTABLE_IMPLICIT_PENDING_INTENT = 236704164L;
 
+    /**
+     * Validate options passed in as bundle.
+     * @hide
+     */
+    @ChangeId
+    @EnabledAfter(targetSdkVersion = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
+    public static final long PENDING_INTENT_OPTIONS_CHECK = 320664730L;
+
     /** @hide */
     @IntDef(flag = true,
             value = {
@@ -264,7 +275,7 @@ public final class PendingIntent implements Parcelable {
      * be mutable by default, unless {@link #FLAG_IMMUTABLE} is set. Starting
      * with {@link android.os.Build.VERSION_CODES#S}, it will be required to
      * explicitly specify the mutability of PendingIntents on creation with
-     * either (@link #FLAG_IMMUTABLE} or {@link #FLAG_MUTABLE}. It is strongly
+     * either {@link #FLAG_IMMUTABLE} or {@link #FLAG_MUTABLE}. It is strongly
      * recommended to use {@link #FLAG_IMMUTABLE} when creating a
      * PendingIntent. {@link #FLAG_MUTABLE} should only be used when some
      * functionality relies on modifying the underlying intent, e.g. any
@@ -1458,6 +1469,21 @@ public final class PendingIntent implements Parcelable {
         sb.append(mTarget.asBinder());
         sb.append('}');
         return sb.toString();
+    }
+
+    /**
+     * See {@link Intent#visitUris(Consumer)}.
+     *
+     * @hide
+     */
+    public void visitUris(@NonNull Consumer<Uri> visitor) {
+        if (android.app.Flags.visitRiskyUris()) {
+            Intent intent = Binder.withCleanCallingIdentity(this::getIntent);
+
+            if (intent != null) {
+                intent.visitUris(visitor);
+            }
+        }
     }
 
     /** @hide */

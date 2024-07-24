@@ -73,6 +73,7 @@ static struct bindernative_offsets_t
     jclass mClass;
     jmethodID mExecTransact;
     jmethodID mGetInterfaceDescriptor;
+    jmethodID mTransactionCallback;
 
     // Object state.
     jfieldID mObject;
@@ -87,6 +88,7 @@ static struct binderinternal_offsets_t
     jclass mClass;
     jmethodID mForceGc;
     jmethodID mProxyLimitCallback;
+    jmethodID mProxyWarningCallback;
 
 } gBinderInternalOffsets;
 
@@ -1173,6 +1175,8 @@ static int int_register_android_os_Binder(JNIEnv* env)
     gBinderOffsets.mExecTransact = GetMethodIDOrDie(env, clazz, "execTransact", "(IJJI)Z");
     gBinderOffsets.mGetInterfaceDescriptor = GetMethodIDOrDie(env, clazz, "getInterfaceDescriptor",
         "()Ljava/lang/String;");
+    gBinderOffsets.mTransactionCallback =
+            GetStaticMethodIDOrDie(env, clazz, "transactionCallback", "(IIII)V");
     gBinderOffsets.mObject = GetFieldIDOrDie(env, clazz, "mObject", "J");
 
     return RegisterMethodsOrDie(
@@ -1237,7 +1241,7 @@ static void android_os_BinderInternal_handleGc(JNIEnv* env, jobject clazz)
     gCollectedAtRefs = gNumLocalRefsCreated + gNumDeathRefsCreated;
 }
 
-static void android_os_BinderInternal_proxyLimitcallback(int uid)
+static void android_os_BinderInternal_proxyLimitCallback(int uid)
 {
     JNIEnv *env = AndroidRuntime::getJNIEnv();
     env->CallStaticVoidMethod(gBinderInternalOffsets.mClass,
@@ -1248,6 +1252,20 @@ static void android_os_BinderInternal_proxyLimitcallback(int uid)
         ScopedLocalRef<jthrowable> excep(env, env->ExceptionOccurred());
         binder_report_exception(env, excep.get(),
                                 "*** Uncaught exception in binderProxyLimitCallbackFromNative");
+    }
+}
+
+static void android_os_BinderInternal_proxyWarningCallback(int uid)
+{
+    JNIEnv *env = AndroidRuntime::getJNIEnv();
+    env->CallStaticVoidMethod(gBinderInternalOffsets.mClass,
+                              gBinderInternalOffsets.mProxyWarningCallback,
+                              uid);
+
+    if (env->ExceptionCheck()) {
+        ScopedLocalRef<jthrowable> excep(env, env->ExceptionOccurred());
+        binder_report_exception(env, excep.get(),
+                                "*** Uncaught exception in binderProxyWarningCallbackFromNative");
     }
 }
 
@@ -1275,9 +1293,10 @@ static jint android_os_BinderInternal_getBinderProxyCount(JNIEnv* env, jobject c
 }
 
 static void android_os_BinderInternal_setBinderProxyCountWatermarks(JNIEnv* env, jobject clazz,
-                                                                    jint high, jint low)
+                                                                    jint high, jint low,
+                                                                    jint warning)
 {
-    BpBinder::setBinderProxyCountWatermarks(high, low);
+    BpBinder::setBinderProxyCountWatermarks(high, low, warning);
 }
 
 // ----------------------------------------------------------------------------
@@ -1292,7 +1311,7 @@ static const JNINativeMethod gBinderInternalMethods[] = {
     { "nSetBinderProxyCountEnabled", "(Z)V", (void*)android_os_BinderInternal_setBinderProxyCountEnabled },
     { "nGetBinderProxyPerUidCounts", "()Landroid/util/SparseIntArray;", (void*)android_os_BinderInternal_getBinderProxyPerUidCounts },
     { "nGetBinderProxyCount", "(I)I", (void*)android_os_BinderInternal_getBinderProxyCount },
-    { "nSetBinderProxyCountWatermarks", "(II)V", (void*)android_os_BinderInternal_setBinderProxyCountWatermarks}
+    { "nSetBinderProxyCountWatermarks", "(III)V", (void*)android_os_BinderInternal_setBinderProxyCountWatermarks}
 };
 
 const char* const kBinderInternalPathName = "com/android/internal/os/BinderInternal";
@@ -1304,6 +1323,8 @@ static int int_register_android_os_BinderInternal(JNIEnv* env)
     gBinderInternalOffsets.mClass = MakeGlobalRefOrDie(env, clazz);
     gBinderInternalOffsets.mForceGc = GetStaticMethodIDOrDie(env, clazz, "forceBinderGc", "()V");
     gBinderInternalOffsets.mProxyLimitCallback = GetStaticMethodIDOrDie(env, clazz, "binderProxyLimitCallbackFromNative", "(I)V");
+    gBinderInternalOffsets.mProxyWarningCallback =
+        GetStaticMethodIDOrDie(env, clazz, "binderProxyWarningCallbackFromNative", "(I)V");
 
     jclass SparseIntArrayClass = FindClassOrDie(env, "android/util/SparseIntArray");
     gSparseIntArrayOffsets.classObject = MakeGlobalRefOrDie(env, SparseIntArrayClass);
@@ -1312,7 +1333,8 @@ static int int_register_android_os_BinderInternal(JNIEnv* env)
     gSparseIntArrayOffsets.put = GetMethodIDOrDie(env, gSparseIntArrayOffsets.classObject, "put",
                                                    "(II)V");
 
-    BpBinder::setLimitCallback(android_os_BinderInternal_proxyLimitcallback);
+    BpBinder::setBinderProxyCountEventCallback(android_os_BinderInternal_proxyLimitCallback,
+                                               android_os_BinderInternal_proxyWarningCallback);
 
     return RegisterMethodsOrDie(
         env, kBinderInternalPathName,
@@ -1387,7 +1409,12 @@ static jboolean android_os_BinderProxy_transact(JNIEnv* env, jobject obj,
 
     if (err == NO_ERROR) {
         return JNI_TRUE;
-    } else if (err == UNKNOWN_TRANSACTION) {
+    }
+
+    env->CallStaticVoidMethod(gBinderOffsets.mClass, gBinderOffsets.mTransactionCallback, getpid(),
+                              code, flags, err);
+
+    if (err == UNKNOWN_TRANSACTION) {
         return JNI_FALSE;
     }
 

@@ -22,6 +22,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 
@@ -81,8 +82,8 @@ public final class KeyboardLayout implements Parcelable, Comparable<KeyboardLayo
         DVORAK(4, LAYOUT_TYPE_DVORAK),
         COLEMAK(5, LAYOUT_TYPE_COLEMAK),
         WORKMAN(6, LAYOUT_TYPE_WORKMAN),
-        TURKISH_F(7, LAYOUT_TYPE_TURKISH_F),
-        TURKISH_Q(8, LAYOUT_TYPE_TURKISH_Q),
+        TURKISH_Q(7, LAYOUT_TYPE_TURKISH_Q),
+        TURKISH_F(8, LAYOUT_TYPE_TURKISH_F),
         EXTENDED(9, LAYOUT_TYPE_EXTENDED);
 
         private final int mValue;
@@ -228,6 +229,33 @@ public final class KeyboardLayout implements Parcelable, Comparable<KeyboardLayo
      */
     public int getProductId() {
         return mProductId;
+    }
+
+    /**
+     * Returns if the Keyboard layout follows the ANSI Physical key layout.
+     */
+    public boolean isAnsiLayout() {
+        for (int i = 0; i < mLocales.size(); i++) {
+            Locale locale = mLocales.get(i);
+            if (locale != null && locale.getCountry().equalsIgnoreCase("us")
+                    && mLayoutType != LayoutType.EXTENDED) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Returns if the Keyboard layout follows the JIS Physical key layout.
+     */
+    public boolean isJisLayout() {
+        for (int i = 0; i < mLocales.size(); i++) {
+            Locale locale = mLocales.get(i);
+            if (locale != null && locale.getCountry().equalsIgnoreCase("jp")) {
+                return true;
+            }
+        }
+        return false;
     }
 
     @Override

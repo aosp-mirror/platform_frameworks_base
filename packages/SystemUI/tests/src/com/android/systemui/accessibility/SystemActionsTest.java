@@ -26,11 +26,15 @@ import static org.mockito.Mockito.when;
 
 import android.hardware.input.InputManager;
 import android.os.RemoteException;
+import android.platform.test.annotations.RequiresFlagsEnabled;
+import android.platform.test.flag.junit.CheckFlagsRule;
+import android.platform.test.flag.junit.DeviceFlagsValueProvider;
 import android.telecom.TelecomManager;
 import android.telephony.TelephonyManager;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.view.KeyEvent;
+import android.view.accessibility.Flags;
 
 import androidx.test.filters.SmallTest;
 
@@ -41,11 +45,10 @@ import com.android.systemui.settings.UserTracker;
 import com.android.systemui.shade.ShadeController;
 import com.android.systemui.shade.ShadeViewController;
 import com.android.systemui.statusbar.NotificationShadeWindowController;
-import com.android.systemui.statusbar.phone.CentralSurfaces;
-
-import dagger.Lazy;
+import com.android.systemui.statusbar.policy.KeyguardStateController;
 
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -64,11 +67,11 @@ public class SystemActionsTest extends SysuiTestCase {
     @Mock
     private NotificationShadeWindowController mNotificationShadeController;
     @Mock
+    private KeyguardStateController mKeyguardStateController;
+    @Mock
     private ShadeController mShadeController;
     @Mock
     private ShadeViewController mShadeViewController;
-    @Mock
-    private Lazy<Optional<CentralSurfaces>> mCentralSurfacesOptionalLazy;
     @Mock
     private Optional<Recents> mRecentsOptional;
     @Mock
@@ -79,14 +82,23 @@ public class SystemActionsTest extends SysuiTestCase {
 
     private SystemActions mSystemActions;
 
+    @Rule
+    public final CheckFlagsRule mCheckFlagsRule = DeviceFlagsValueProvider.createCheckFlagsRule();
+
     @Before
     public void setUp() throws RemoteException {
         MockitoAnnotations.initMocks(this);
         mContext.addMockSystemService(TelecomManager.class, mTelecomManager);
         mContext.addMockSystemService(InputManager.class, mInputManager);
-        mSystemActions = new SystemActions(mContext, mUserTracker, mNotificationShadeController,
-                mShadeController, () -> mShadeViewController, mCentralSurfacesOptionalLazy,
-                mRecentsOptional, mDisplayTracker);
+        mSystemActions = new SystemActions(
+                mContext,
+                mUserTracker,
+                mNotificationShadeController,
+                mKeyguardStateController,
+                mShadeController,
+                () -> mShadeViewController,
+                mRecentsOptional,
+                mDisplayTracker);
     }
 
     @Test
@@ -126,5 +138,41 @@ public class SystemActionsTest extends SysuiTestCase {
         mSystemActions.handleHeadsetHook();
 
         verify(mTelecomManager).endCall();
+    }
+
+    @Test
+    @RequiresFlagsEnabled(Flags.FLAG_GLOBAL_ACTION_MENU)
+    public void handleMenu_injectsKeyEvents() {
+        final List<KeyEvent> keyEvents = new ArrayList<>();
+        doAnswer(invocation -> {
+            keyEvents.add(new KeyEvent(invocation.getArgument(0)));
+            return null;
+        }).when(mInputManager).injectInputEvent(any(), anyInt());
+
+        mSystemActions.handleMenu();
+
+        assertThat(keyEvents.size()).isEqualTo(2);
+        assertThat(keyEvents.get(0).getKeyCode()).isEqualTo(KeyEvent.KEYCODE_MENU);
+        assertThat(keyEvents.get(0).getAction()).isEqualTo(KeyEvent.ACTION_DOWN);
+        assertThat(keyEvents.get(1).getKeyCode()).isEqualTo(KeyEvent.KEYCODE_MENU);
+        assertThat(keyEvents.get(1).getAction()).isEqualTo(KeyEvent.ACTION_UP);
+    }
+
+    @Test
+    @RequiresFlagsEnabled(Flags.FLAG_GLOBAL_ACTION_MEDIA_PLAY_PAUSE)
+    public void handleMediaPlayPause_injectsKeyEvents() {
+        final List<KeyEvent> keyEvents = new ArrayList<>();
+        doAnswer(invocation -> {
+            keyEvents.add(new KeyEvent(invocation.getArgument(0)));
+            return null;
+        }).when(mInputManager).injectInputEvent(any(), anyInt());
+
+        mSystemActions.handleMediaPlayPause();
+
+        assertThat(keyEvents.size()).isEqualTo(2);
+        assertThat(keyEvents.get(0).getKeyCode()).isEqualTo(KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE);
+        assertThat(keyEvents.get(0).getAction()).isEqualTo(KeyEvent.ACTION_DOWN);
+        assertThat(keyEvents.get(1).getKeyCode()).isEqualTo(KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE);
+        assertThat(keyEvents.get(1).getAction()).isEqualTo(KeyEvent.ACTION_UP);
     }
 }

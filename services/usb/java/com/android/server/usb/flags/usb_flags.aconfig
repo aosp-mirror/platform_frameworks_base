@@ -1,0 +1,9 @@
+package: "com.android.server.usb.flags"
+container: "system"
+
+flag {
+    name: "allow_restriction_of_overlay_activities"
+    namespace: "usb"
+    description: "This flag controls the restriction of usb overlay activities"
+    bug: "307231174"
+}

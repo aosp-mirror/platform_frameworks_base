@@ -17,6 +17,8 @@
 package com.android.server.display;
 
 import static com.android.server.display.DisplayDeviceInfo.TOUCH_NONE;
+import static com.android.server.wm.utils.DisplayInfoOverrides.WM_OVERRIDE_FIELDS;
+import static com.android.server.wm.utils.DisplayInfoOverrides.copyDisplayInfoFields;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -33,6 +35,7 @@ import android.view.SurfaceControl;
 
 import com.android.server.display.layout.Layout;
 import com.android.server.display.mode.DisplayModeDirector;
+import com.android.server.wm.utils.DisplayInfoOverrides;
 import com.android.server.wm.utils.InsetUtils;
 
 import java.io.PrintWriter;
@@ -137,6 +140,9 @@ final class LogicalDisplay {
     private final Rect mTempLayerStackRect = new Rect();
     private final Rect mTempDisplayRect = new Rect();
 
+    /** A session token that controls the offloading operations of this logical display. */
+    private DisplayOffloadSessionImpl mDisplayOffloadSession;
+
     /**
      * Name of a display group to which the display is assigned.
      */
@@ -187,13 +193,18 @@ final class LogicalDisplay {
     private SurfaceControl.RefreshRateRange mLayoutLimitedRefreshRate;
 
     /**
+     * The ID of the power throttling data that should be used.
+     */
+    private String mPowerThrottlingDataId;
+
+    /**
      * RefreshRateRange limitation for @Temperature.ThrottlingStatus
      */
     @NonNull
     private SparseArray<SurfaceControl.RefreshRateRange> mThermalRefreshRateThrottling =
             new SparseArray<>();
 
-    public LogicalDisplay(int displayId, int layerStack, DisplayDevice primaryDisplayDevice) {
+    LogicalDisplay(int displayId, int layerStack, DisplayDevice primaryDisplayDevice) {
         mDisplayId = displayId;
         mLayerStack = layerStack;
         mPrimaryDisplayDevice = primaryDisplayDevice;
@@ -202,6 +213,7 @@ final class LogicalDisplay {
         mIsEnabled = true;
         mIsInTransition = false;
         mThermalBrightnessThrottlingDataId = DisplayDeviceConfig.DEFAULT_ID;
+        mPowerThrottlingDataId = DisplayDeviceConfig.DEFAULT_ID;
         mBaseDisplayInfo.thermalBrightnessThrottlingDataId = mThermalBrightnessThrottlingDataId;
     }
 
@@ -243,24 +255,8 @@ final class LogicalDisplay {
     public DisplayInfo getDisplayInfoLocked() {
         if (mInfo.get() == null) {
             DisplayInfo info = new DisplayInfo();
-            info.copyFrom(mBaseDisplayInfo);
-            if (mOverrideDisplayInfo != null) {
-                info.appWidth = mOverrideDisplayInfo.appWidth;
-                info.appHeight = mOverrideDisplayInfo.appHeight;
-                info.smallestNominalAppWidth = mOverrideDisplayInfo.smallestNominalAppWidth;
-                info.smallestNominalAppHeight = mOverrideDisplayInfo.smallestNominalAppHeight;
-                info.largestNominalAppWidth = mOverrideDisplayInfo.largestNominalAppWidth;
-                info.largestNominalAppHeight = mOverrideDisplayInfo.largestNominalAppHeight;
-                info.logicalWidth = mOverrideDisplayInfo.logicalWidth;
-                info.logicalHeight = mOverrideDisplayInfo.logicalHeight;
-                info.physicalXDpi = mOverrideDisplayInfo.physicalXDpi;
-                info.physicalYDpi = mOverrideDisplayInfo.physicalYDpi;
-                info.rotation = mOverrideDisplayInfo.rotation;
-                info.displayCutout = mOverrideDisplayInfo.displayCutout;
-                info.logicalDensityDpi = mOverrideDisplayInfo.logicalDensityDpi;
-                info.roundedCorners = mOverrideDisplayInfo.roundedCorners;
-                info.displayShape = mOverrideDisplayInfo.displayShape;
-            }
+            copyDisplayInfoFields(info, mBaseDisplayInfo, mOverrideDisplayInfo,
+                    WM_OVERRIDE_FIELDS);
             mInfo.set(info);
         }
         return mInfo.get();
@@ -470,6 +466,7 @@ final class LogicalDisplay {
             mBaseDisplayInfo.modeId = deviceInfo.modeId;
             mBaseDisplayInfo.renderFrameRate = deviceInfo.renderFrameRate;
             mBaseDisplayInfo.defaultModeId = deviceInfo.defaultModeId;
+            mBaseDisplayInfo.userPreferredModeId = deviceInfo.userPreferredModeId;
             mBaseDisplayInfo.supportedModes = Arrays.copyOf(
                     deviceInfo.supportedModes, deviceInfo.supportedModes.length);
             mBaseDisplayInfo.colorMode = deviceInfo.colorMode;
@@ -872,7 +869,10 @@ final class LogicalDisplay {
      * @param enabled True if enabled, false otherwise.
      */
     public void setEnabledLocked(boolean enabled) {
-        mIsEnabled = enabled;
+        if (enabled != mIsEnabled) {
+            mDirty = true;
+            mIsEnabled = enabled;
+        }
     }
 
     /**
@@ -901,6 +901,25 @@ final class LogicalDisplay {
             mThermalBrightnessThrottlingDataId = brightnessThrottlingDataId;
             mDirty = true;
         }
+    }
+
+    /**
+     * @param powerThrottlingDataId The ID of the brightness throttling data that this
+     *                                  display should use.
+     */
+    public void setPowerThrottlingDataIdLocked(String powerThrottlingDataId) {
+        if (!Objects.equals(powerThrottlingDataId, mPowerThrottlingDataId)) {
+            mPowerThrottlingDataId = powerThrottlingDataId;
+            mDirty = true;
+        }
+    }
+
+    /**
+     * Returns powerThrottlingDataId which is the ID of the brightness
+     * throttling data that this display should use.
+     */
+    public String getPowerThrottlingDataIdLocked() {
+        return mPowerThrottlingDataId;
     }
 
     /**
@@ -937,6 +956,14 @@ final class LogicalDisplay {
         return mDisplayGroupName;
     }
 
+    public void setDisplayOffloadSessionLocked(DisplayOffloadSessionImpl session) {
+        mDisplayOffloadSession = session;
+    }
+
+    public DisplayOffloadSessionImpl getDisplayOffloadSessionLocked() {
+        return mDisplayOffloadSession;
+    }
+
     public void dumpLocked(PrintWriter pw) {
         pw.println("mDisplayId=" + mDisplayId);
         pw.println("mIsEnabled=" + mIsEnabled);
@@ -960,6 +987,7 @@ final class LogicalDisplay {
         pw.println("mLeadDisplayId=" + mLeadDisplayId);
         pw.println("mLayoutLimitedRefreshRate=" + mLayoutLimitedRefreshRate);
         pw.println("mThermalRefreshRateThrottling=" + mThermalRefreshRateThrottling);
+        pw.println("mPowerThrottlingDataId=" + mPowerThrottlingDataId);
     }
 
     @Override

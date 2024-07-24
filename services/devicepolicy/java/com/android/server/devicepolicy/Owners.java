@@ -616,6 +616,32 @@ class Owners {
         }
     }
 
+    void markSecurityLoggingMigrated() {
+        synchronized (mData) {
+            mData.mSecurityLoggingMigrated = true;
+            mData.writeDeviceOwner();
+        }
+    }
+
+    void markPostUpgradeMigration() {
+        synchronized (mData) {
+            mData.mPoliciesMigratedPostUpdate = true;
+            mData.writeDeviceOwner();
+        }
+    }
+
+    boolean isSecurityLoggingMigrated() {
+        synchronized (mData) {
+            return mData.mSecurityLoggingMigrated;
+        }
+    }
+
+    boolean isMigratedPostUpdate() {
+        synchronized (mData) {
+            return mData.mPoliciesMigratedPostUpdate;
+        }
+    }
+
     @GuardedBy("mData")
     void pushToAppOpsLocked() {
         if (!mSystemReady) {

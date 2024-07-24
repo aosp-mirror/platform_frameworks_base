@@ -30,10 +30,12 @@ import android.compat.annotation.ChangeId;
 import android.compat.annotation.EnabledAfter;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.os.Build;
+import android.os.IBinder;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.Trace;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -61,66 +63,70 @@ public class ActivityResultItem extends ActivityTransactionItem {
     }
 
     @Override
-    public void execute(ClientTransactionHandler client, ActivityClientRecord r,
-            PendingTransactionActions pendingActions) {
+    public void execute(@NonNull ClientTransactionHandler client, @NonNull ActivityClientRecord r,
+            @NonNull PendingTransactionActions pendingActions) {
         Trace.traceBegin(TRACE_TAG_ACTIVITY_MANAGER, "activityDeliverResult");
         client.handleSendResult(r, mResultInfoList, "ACTIVITY_RESULT");
         Trace.traceEnd(TRACE_TAG_ACTIVITY_MANAGER);
     }
-
 
     // ObjectPoolItem implementation
 
     private ActivityResultItem() {}
 
     /** Obtain an instance initialized with provided params. */
-    public static ActivityResultItem obtain(List<ResultInfo> resultInfoList) {
+    @NonNull
+    public static ActivityResultItem obtain(@NonNull IBinder activityToken,
+            @NonNull List<ResultInfo> resultInfoList) {
         ActivityResultItem instance = ObjectPool.obtain(ActivityResultItem.class);
         if (instance == null) {
             instance = new ActivityResultItem();
         }
-        instance.mResultInfoList = resultInfoList;
+        instance.setActivityToken(activityToken);
+        instance.mResultInfoList = new ArrayList<>(resultInfoList);
 
         return instance;
     }
 
     @Override
     public void recycle() {
+        super.recycle();
         mResultInfoList = null;
         ObjectPool.recycle(this);
     }
-
 
     // Parcelable implementation
 
     /** Write to Parcel. */
     @Override
-    public void writeToParcel(Parcel dest, int flags) {
+    public void writeToParcel(@NonNull Parcel dest, int flags) {
+        super.writeToParcel(dest, flags);
         dest.writeTypedList(mResultInfoList, flags);
     }
 
     /** Read from Parcel. */
-    private ActivityResultItem(Parcel in) {
+    private ActivityResultItem(@NonNull Parcel in) {
+        super(in);
         mResultInfoList = in.createTypedArrayList(ResultInfo.CREATOR);
     }
 
     public static final @NonNull Parcelable.Creator<ActivityResultItem> CREATOR =
-            new Parcelable.Creator<ActivityResultItem>() {
-        public ActivityResultItem createFromParcel(Parcel in) {
-            return new ActivityResultItem(in);
-        }
+            new Parcelable.Creator<>() {
+                public ActivityResultItem createFromParcel(@NonNull Parcel in) {
+                    return new ActivityResultItem(in);
+                }
 
-        public ActivityResultItem[] newArray(int size) {
-            return new ActivityResultItem[size];
-        }
-    };
+                public ActivityResultItem[] newArray(int size) {
+                    return new ActivityResultItem[size];
+                }
+            };
 
     @Override
     public boolean equals(@Nullable Object o) {
         if (this == o) {
             return true;
         }
-        if (o == null || getClass() != o.getClass()) {
+        if (!super.equals(o)) {
             return false;
         }
         final ActivityResultItem other = (ActivityResultItem) o;
@@ -129,11 +135,15 @@ public class ActivityResultItem extends ActivityTransactionItem {
 
     @Override
     public int hashCode() {
-        return mResultInfoList.hashCode();
+        int result = 17;
+        result = 31 * result + super.hashCode();
+        result = 31 * result + Objects.hashCode(mResultInfoList);
+        return result;
     }
 
     @Override
     public String toString() {
-        return "ActivityResultItem{resultInfoList=" + mResultInfoList + "}";
+        return "ActivityResultItem{" + super.toString()
+                + ",resultInfoList=" + mResultInfoList + "}";
     }
 }

@@ -16,21 +16,11 @@
 
 package com.android.systemui.qs
 
-import android.content.Context
 import com.android.systemui.plugins.qs.QSFactory
 import com.android.systemui.plugins.qs.QSTile
-import com.android.systemui.plugins.qs.QSTileView
 
 class FakeQSFactory(private val tileCreator: (String) -> QSTile?) : QSFactory {
     override fun createTile(tileSpec: String): QSTile? {
-        return tileCreator(tileSpec)
-    }
-
-    override fun createTileView(
-        context: Context?,
-        tile: QSTile?,
-        collapsedView: Boolean
-    ): QSTileView {
-        throw NotImplementedError("Not implemented")
+        return tileCreator(tileSpec)?.also { it.tileSpec = tileSpec }
     }
 }

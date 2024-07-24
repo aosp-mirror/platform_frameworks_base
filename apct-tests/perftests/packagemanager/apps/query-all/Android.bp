@@ -13,6 +13,7 @@
 // limitations under the License.
 
 package {
+    default_team: "trendy_team_input_framework",
     // See: http://go/android-license-faq
     // A large-scale-change added 'default_applicable_licenses' to import
     // all of the 'license_kinds' from "frameworks_base_license"
@@ -25,299 +26,348 @@ android_test_helper_app {
     name: "QueriesAll0",
     aaptflags: [
         "--rename-manifest-package com.android.perftests.appenumeration0",
-    ]
+    ],
 }
+
 android_test_helper_app {
     name: "QueriesAll1",
     aaptflags: [
         "--rename-manifest-package com.android.perftests.appenumeration1",
-    ]
+    ],
 }
+
 android_test_helper_app {
     name: "QueriesAll2",
     aaptflags: [
         "--rename-manifest-package com.android.perftests.appenumeration2",
-    ]
+    ],
 }
+
 android_test_helper_app {
     name: "QueriesAll3",
     aaptflags: [
         "--rename-manifest-package com.android.perftests.appenumeration3",
-    ]
+    ],
 }
+
 android_test_helper_app {
     name: "QueriesAll4",
     aaptflags: [
         "--rename-manifest-package com.android.perftests.appenumeration4",
-    ]
+    ],
 }
+
 android_test_helper_app {
     name: "QueriesAll5",
     aaptflags: [
         "--rename-manifest-package com.android.perftests.appenumeration5",
-    ]
+    ],
 }
+
 android_test_helper_app {
     name: "QueriesAll6",
     aaptflags: [
         "--rename-manifest-package com.android.perftests.appenumeration6",
-    ]
+    ],
 }
+
 android_test_helper_app {
     name: "QueriesAll7",
     aaptflags: [
         "--rename-manifest-package com.android.perftests.appenumeration7",
-    ]
+    ],
 }
+
 android_test_helper_app {
     name: "QueriesAll8",
     aaptflags: [
         "--rename-manifest-package com.android.perftests.appenumeration8",
-    ]
+    ],
 }
+
 android_test_helper_app {
     name: "QueriesAll9",
     aaptflags: [
         "--rename-manifest-package com.android.perftests.appenumeration9",
-    ]
+    ],
 }
+
 android_test_helper_app {
     name: "QueriesAll10",
     aaptflags: [
         "--rename-manifest-package com.android.perftests.appenumeration10",
-    ]
+    ],
 }
+
 android_test_helper_app {
     name: "QueriesAll11",
     aaptflags: [
         "--rename-manifest-package com.android.perftests.appenumeration11",
-    ]
+    ],
 }
+
 android_test_helper_app {
     name: "QueriesAll12",
     aaptflags: [
         "--rename-manifest-package com.android.perftests.appenumeration12",
-    ]
+    ],
 }
+
 android_test_helper_app {
     name: "QueriesAll13",
     aaptflags: [
         "--rename-manifest-package com.android.perftests.appenumeration13",
-    ]
+    ],
 }
+
 android_test_helper_app {
     name: "QueriesAll14",
     aaptflags: [
         "--rename-manifest-package com.android.perftests.appenumeration14",
-    ]
+    ],
 }
+
 android_test_helper_app {
     name: "QueriesAll15",
     aaptflags: [
         "--rename-manifest-package com.android.perftests.appenumeration15",
-    ]
+    ],
 }
+
 android_test_helper_app {
     name: "QueriesAll16",
     aaptflags: [
         "--rename-manifest-package com.android.perftests.appenumeration16",
-    ]
+    ],
 }
+
 android_test_helper_app {
     name: "QueriesAll17",
     aaptflags: [
         "--rename-manifest-package com.android.perftests.appenumeration17",
-    ]
+    ],
 }
+
 android_test_helper_app {
     name: "QueriesAll18",
     aaptflags: [
         "--rename-manifest-package com.android.perftests.appenumeration18",
-    ]
+    ],
 }
+
 android_test_helper_app {
     name: "QueriesAll19",
     aaptflags: [
         "--rename-manifest-package com.android.perftests.appenumeration19",
-    ]
+    ],
 }
+
 android_test_helper_app {
     name: "QueriesAll20",
     aaptflags: [
         "--rename-manifest-package com.android.perftests.appenumeration20",
-    ]
+    ],
 }
+
 android_test_helper_app {
     name: "QueriesAll21",
     aaptflags: [
         "--rename-manifest-package com.android.perftests.appenumeration21",
-    ]
+    ],
 }
+
 android_test_helper_app {
     name: "QueriesAll22",
     aaptflags: [
         "--rename-manifest-package com.android.perftests.appenumeration22",
-    ]
+    ],
 }
+
 android_test_helper_app {
     name: "QueriesAll23",
     aaptflags: [
         "--rename-manifest-package com.android.perftests.appenumeration23",
-    ]
+    ],
 }
+
 android_test_helper_app {
     name: "QueriesAll24",
     aaptflags: [
         "--rename-manifest-package com.android.perftests.appenumeration24",
-    ]
+    ],
 }
+
 android_test_helper_app {
     name: "QueriesAll25",
     aaptflags: [
         "--rename-manifest-package com.android.perftests.appenumeration25",
-    ]
+    ],
 }
+
 android_test_helper_app {
     name: "QueriesAll26",
     aaptflags: [
         "--rename-manifest-package com.android.perftests.appenumeration26",
-    ]
+    ],
 }
+
 android_test_helper_app {
     name: "QueriesAll27",
     aaptflags: [
         "--rename-manifest-package com.android.perftests.appenumeration27",
-    ]
+    ],
 }
+
 android_test_helper_app {
     name: "QueriesAll28",
     aaptflags: [
         "--rename-manifest-package com.android.perftests.appenumeration28",
-    ]
+    ],
 }
+
 android_test_helper_app {
     name: "QueriesAll29",
     aaptflags: [
         "--rename-manifest-package com.android.perftests.appenumeration29",
-    ]
+    ],
 }
+
 android_test_helper_app {
     name: "QueriesAll30",
     aaptflags: [
         "--rename-manifest-package com.android.perftests.appenumeration30",
-    ]
+    ],
 }
+
 android_test_helper_app {
     name: "QueriesAll31",
     aaptflags: [
         "--rename-manifest-package com.android.perftests.appenumeration31",
-    ]
+    ],
 }
+
 android_test_helper_app {
     name: "QueriesAll32",
     aaptflags: [
         "--rename-manifest-package com.android.perftests.appenumeration32",
-    ]
+    ],
 }
+
 android_test_helper_app {
     name: "QueriesAll33",
     aaptflags: [
         "--rename-manifest-package com.android.perftests.appenumeration33",
-    ]
+    ],
 }
+
 android_test_helper_app {
     name: "QueriesAll34",
     aaptflags: [
         "--rename-manifest-package com.android.perftests.appenumeration34",
-    ]
+    ],
 }
+
 android_test_helper_app {
     name: "QueriesAll35",
     aaptflags: [
         "--rename-manifest-package com.android.perftests.appenumeration35",
-    ]
+    ],
 }
+
 android_test_helper_app {
     name: "QueriesAll36",
     aaptflags: [
         "--rename-manifest-package com.android.perftests.appenumeration36",
-    ]
+    ],
 }
+
 android_test_helper_app {
     name: "QueriesAll37",
     aaptflags: [
         "--rename-manifest-package com.android.perftests.appenumeration37",
-    ]
+    ],
 }
+
 android_test_helper_app {
     name: "QueriesAll38",
     aaptflags: [
         "--rename-manifest-package com.android.perftests.appenumeration38",
-    ]
+    ],
 }
+
 android_test_helper_app {
     name: "QueriesAll39",
     aaptflags: [
         "--rename-manifest-package com.android.perftests.appenumeration39",
-    ]
+    ],
 }
+
 android_test_helper_app {
     name: "QueriesAll40",
     aaptflags: [
         "--rename-manifest-package com.android.perftests.appenumeration40",
-    ]
+    ],
 }
+
 android_test_helper_app {
     name: "QueriesAll41",
     aaptflags: [
         "--rename-manifest-package com.android.perftests.appenumeration41",
-    ]
+    ],
 }
+
 android_test_helper_app {
     name: "QueriesAll42",
     aaptflags: [
         "--rename-manifest-package com.android.perftests.appenumeration42",
-    ]
+    ],
 }
+
 android_test_helper_app {
     name: "QueriesAll43",
     aaptflags: [
         "--rename-manifest-package com.android.perftests.appenumeration43",
-    ]
+    ],
 }
+
 android_test_helper_app {
     name: "QueriesAll44",
     aaptflags: [
         "--rename-manifest-package com.android.perftests.appenumeration44",
-    ]
+    ],
 }
+
 android_test_helper_app {
     name: "QueriesAll45",
     aaptflags: [
         "--rename-manifest-package com.android.perftests.appenumeration45",
-    ]
+    ],
 }
+
 android_test_helper_app {
     name: "QueriesAll46",
     aaptflags: [
         "--rename-manifest-package com.android.perftests.appenumeration46",
-    ]
+    ],
 }
+
 android_test_helper_app {
     name: "QueriesAll47",
     aaptflags: [
         "--rename-manifest-package com.android.perftests.appenumeration47",
-    ]
+    ],
 }
+
 android_test_helper_app {
     name: "QueriesAll48",
     aaptflags: [
         "--rename-manifest-package com.android.perftests.appenumeration48",
-    ]
+    ],
 }
+
 android_test_helper_app {
     name: "QueriesAll49",
     aaptflags: [
         "--rename-manifest-package com.android.perftests.appenumeration49",
-    ]
+    ],
 }

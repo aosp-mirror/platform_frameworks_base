@@ -20,25 +20,26 @@ package com.android.systemui.controls.ui
 import android.app.Dialog
 import android.content.Context
 import android.content.DialogInterface
-import com.android.systemui.R
+import com.android.systemui.res.R
 import com.android.systemui.statusbar.phone.SystemUIDialog
 import java.util.function.Consumer
 import javax.inject.Inject
 
-class ControlsDialogsFactory(private val internalDialogFactory: (Context) -> SystemUIDialog) {
+class ControlsDialogsFactory @Inject constructor(
+        private val dialogFactory: SystemUIDialog.Factory
+) {
 
-    @Inject constructor() : this({ SystemUIDialog(it) })
 
     fun createRemoveAppDialog(
-        context: Context,
-        appName: CharSequence,
-        response: Consumer<Boolean>
+            context: Context,
+            appName: CharSequence,
+            response: Consumer<Boolean>
     ): Dialog {
         val listener =
             DialogInterface.OnClickListener { _, which ->
                 response.accept(which == DialogInterface.BUTTON_POSITIVE)
             }
-        return internalDialogFactory(context).apply {
+        return dialogFactory.create(context).apply {
             setTitle(context.getString(R.string.controls_panel_remove_app_authorization, appName))
             setCanceledOnTouchOutside(true)
             setOnCancelListener { response.accept(false) }

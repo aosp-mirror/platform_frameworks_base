@@ -1,6 +1,3 @@
-#undef LOG_TAG
-#define LOG_TAG "GraphicsJNI"
-
 #include <assert.h>
 #include <unistd.h>
 
@@ -249,6 +246,9 @@ static jfieldID gFontMetricsInt_ascent;
 static jfieldID gFontMetricsInt_descent;
 static jfieldID gFontMetricsInt_bottom;
 static jfieldID gFontMetricsInt_leading;
+
+static jclass gRunInfo_class;
+static jfieldID gRunInfo_clusterCount;
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -512,6 +512,10 @@ int GraphicsJNI::set_metrics_int(JNIEnv* env, jobject metrics, const SkFontMetri
         env->SetIntField(metrics, gFontMetricsInt_leading, leading);
     }
     return descent - ascent + leading;
+}
+
+void GraphicsJNI::set_cluster_count_to_run_info(JNIEnv* env, jobject runInfo, jint clusterCount) {
+    env->SetIntField(runInfo, gRunInfo_clusterCount, clusterCount);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////
@@ -836,6 +840,11 @@ int register_android_graphics_Graphics(JNIEnv* env)
     gFontMetricsInt_descent = GetFieldIDOrDie(env, gFontMetricsInt_class, "descent", "I");
     gFontMetricsInt_bottom = GetFieldIDOrDie(env, gFontMetricsInt_class, "bottom", "I");
     gFontMetricsInt_leading = GetFieldIDOrDie(env, gFontMetricsInt_class, "leading", "I");
+
+    gRunInfo_class = FindClassOrDie(env, "android/graphics/Paint$RunInfo");
+    gRunInfo_class = MakeGlobalRefOrDie(env, gRunInfo_class);
+
+    gRunInfo_clusterCount = GetFieldIDOrDie(env, gRunInfo_class, "mClusterCount", "I");
 
     return 0;
 }

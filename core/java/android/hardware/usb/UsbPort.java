@@ -52,6 +52,11 @@ import static android.hardware.usb.UsbPortStatus.COMPLIANCE_WARNING_DEBUG_ACCESS
 import static android.hardware.usb.UsbPortStatus.COMPLIANCE_WARNING_BC_1_2;
 import static android.hardware.usb.UsbPortStatus.COMPLIANCE_WARNING_MISSING_RP;
 import static android.hardware.usb.UsbPortStatus.COMPLIANCE_WARNING_OTHER;
+import static android.hardware.usb.UsbPortStatus.COMPLIANCE_WARNING_INPUT_POWER_LIMITED;
+import static android.hardware.usb.UsbPortStatus.COMPLIANCE_WARNING_MISSING_DATA_LINES;
+import static android.hardware.usb.UsbPortStatus.COMPLIANCE_WARNING_ENUMERATION_FAIL;
+import static android.hardware.usb.UsbPortStatus.COMPLIANCE_WARNING_FLAKY_CONNECTION;
+import static android.hardware.usb.UsbPortStatus.COMPLIANCE_WARNING_UNRELIABLE_IO;
 import static android.hardware.usb.DisplayPortAltModeInfo.DISPLAYPORT_ALT_MODE_STATUS_UNKNOWN;
 import static android.hardware.usb.DisplayPortAltModeInfo.DISPLAYPORT_ALT_MODE_STATUS_NOT_CAPABLE;
 import static android.hardware.usb.DisplayPortAltModeInfo.DISPLAYPORT_ALT_MODE_STATUS_CAPABLE_DISABLED;
@@ -60,11 +65,14 @@ import static android.hardware.usb.DisplayPortAltModeInfo.DISPLAYPORT_ALT_MODE_S
 import android.Manifest;
 import android.annotation.CallbackExecutor;
 import android.annotation.CheckResult;
+import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
+import android.annotation.TestApi;
+import android.hardware.usb.flags.Flags;
 import android.hardware.usb.UsbOperationInternal;
 import android.hardware.usb.V1_0.Constants;
 import android.os.Binder;
@@ -367,6 +375,19 @@ public final class UsbPort {
     @RequiresPermission(Manifest.permission.MANAGE_USB)
     public @Nullable UsbPortStatus getStatus() {
         return mUsbManager.getPortStatus(this);
+    }
+
+    /**
+     * Returns whether this USB port supports mode change
+     *
+     * @return true if mode change is supported.
+     * @hide
+     */
+    @TestApi
+    @RequiresPermission(Manifest.permission.MANAGE_USB)
+    @FlaggedApi(Flags.FLAG_ENABLE_IS_MODE_CHANGE_SUPPORTED_API)
+    public boolean isModeChangeSupported() {
+        return mUsbManager.isModeChangeSupported(this);
     }
 
     /**
@@ -788,6 +809,21 @@ public final class UsbPort {
                         break;
                     case UsbPortStatus.COMPLIANCE_WARNING_MISSING_RP:
                         complianceWarningString.append("missing rp, ");
+                        break;
+                    case UsbPortStatus.COMPLIANCE_WARNING_INPUT_POWER_LIMITED:
+                        complianceWarningString.append("input power limited, ");
+                        break;
+                    case UsbPortStatus.COMPLIANCE_WARNING_MISSING_DATA_LINES:
+                        complianceWarningString.append("missing data lines, ");
+                        break;
+                    case UsbPortStatus.COMPLIANCE_WARNING_ENUMERATION_FAIL:
+                        complianceWarningString.append("enumeration fail, ");
+                        break;
+                    case UsbPortStatus.COMPLIANCE_WARNING_FLAKY_CONNECTION:
+                        complianceWarningString.append("flaky connection, ");
+                        break;
+                    case UsbPortStatus.COMPLIANCE_WARNING_UNRELIABLE_IO:
+                        complianceWarningString.append("unreliable io, ");
                         break;
                     default:
                         complianceWarningString.append(String.format("Unknown(%d), ", warning));

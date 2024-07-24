@@ -86,6 +86,8 @@ public class ScrimView extends View {
     public ScrimView(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
 
+        setFocusable(false);
+        setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_NO);
         mDrawable = new ScrimDrawable();
         mDrawable.setCallback(this);
         mColors = new ColorExtractor.GradientColors();

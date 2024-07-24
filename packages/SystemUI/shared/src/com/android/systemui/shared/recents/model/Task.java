@@ -216,7 +216,6 @@ public class Task {
     @Nullable public Drawable icon;
     @Nullable public ThumbnailData thumbnail;
     @ViewDebug.ExportedProperty(category="recents")
-    @Deprecated
     public String title;
     @ViewDebug.ExportedProperty(category="recents")
     public String titleDescription;

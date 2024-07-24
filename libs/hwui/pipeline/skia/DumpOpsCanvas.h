@@ -90,11 +90,6 @@ protected:
         mOutput << mIdent << "drawTextBlob" << std::endl;
     }
 
-    void onDrawImage2(const SkImage*, SkScalar dx, SkScalar dy, const SkSamplingOptions&,
-                      const SkPaint*) override {
-        mOutput << mIdent << "drawImage" << std::endl;
-    }
-
     void onDrawImageRect2(const SkImage*, const SkRect&, const SkRect&, const SkSamplingOptions&,
                           const SkPaint*, SrcRectConstraint) override {
         mOutput << mIdent << "drawImageRect" << std::endl;

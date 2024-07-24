@@ -52,12 +52,13 @@ public class BackAnimationBackground {
 
     /**
      * Ensures the back animation background color layer is present.
+     *
      * @param startRect The start bounds of the closing target.
      * @param color The background color.
      * @param transaction The animation transaction.
      */
-    void ensureBackground(Rect startRect, int color,
-            @NonNull SurfaceControl.Transaction transaction) {
+    public void ensureBackground(
+            Rect startRect, int color, @NonNull SurfaceControl.Transaction transaction) {
         if (mBackgroundSurface != null) {
             return;
         }
@@ -81,7 +82,12 @@ public class BackAnimationBackground {
         mIsRequestingStatusBarAppearance = false;
     }
 
-    void removeBackground(@NonNull SurfaceControl.Transaction transaction) {
+    /**
+     * Remove the back animation background.
+     *
+     * @param transaction The animation transaction.
+     */
+    public void removeBackground(@NonNull SurfaceControl.Transaction transaction) {
         if (mBackgroundSurface == null) {
             return;
         }
@@ -93,11 +99,21 @@ public class BackAnimationBackground {
         mIsRequestingStatusBarAppearance = false;
     }
 
+    /**
+     * Attach a {@link StatusBarCustomizer} instance to allow status bar animate with back progress.
+     *
+     * @param customizer The {@link StatusBarCustomizer} to be used.
+     */
     void setStatusBarCustomizer(StatusBarCustomizer customizer) {
         mCustomizer = customizer;
     }
 
-    void onBackProgressed(float progress) {
+    /**
+     * Update back animation background with for the progress.
+     *
+     * @param progress Progress value from {@link android.window.BackProgressAnimator}
+     */
+    public void onBackProgressed(float progress) {
         if (mCustomizer == null || mStartBounds.isEmpty()) {
             return;
         }
@@ -114,7 +130,14 @@ public class BackAnimationBackground {
                     mStartBounds);
             mCustomizer.customizeStatusBarAppearance(region);
         } else {
-            mCustomizer.customizeStatusBarAppearance(null);
+            resetStatusBarCustomization();
         }
+    }
+
+    /**
+     * Resets the statusbar customization
+     */
+    public void resetStatusBarCustomization() {
+        mCustomizer.customizeStatusBarAppearance(null);
     }
 }

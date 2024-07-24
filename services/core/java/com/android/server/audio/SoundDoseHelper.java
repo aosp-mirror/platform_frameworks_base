@@ -18,6 +18,7 @@ package com.android.server.audio;
 
 import static android.media.AudioManager.AUDIO_DEVICE_CATEGORY_HEADPHONES;
 import static android.media.AudioManager.AUDIO_DEVICE_CATEGORY_UNKNOWN;
+import static android.media.AudioManager.STREAM_MUSIC;
 
 import static com.android.server.audio.AudioService.MAX_STREAM_VOLUME;
 import static com.android.server.audio.AudioService.MIN_STREAM_VOLUME;
@@ -31,6 +32,8 @@ import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.media.AudioAttributes;
+import android.media.AudioDeviceAttributes;
 import android.media.AudioManager;
 import android.media.AudioSystem;
 import android.media.ISoundDose;
@@ -59,6 +62,7 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -115,6 +119,9 @@ public class SoundDoseHelper {
     /*package*/ static final int MSG_PERSIST_CSD_VALUES = SAFE_MEDIA_VOLUME_MSG_START + 5;
     /*package*/ static final int MSG_CSD_UPDATE_ATTENUATION = SAFE_MEDIA_VOLUME_MSG_START + 6;
 
+    /*package*/ static final int MSG_LOWER_VOLUME_TO_RS1 = SAFE_MEDIA_VOLUME_MSG_START + 7;
+
+
     private static final int UNSAFE_VOLUME_MUSIC_ACTIVE_MS_MAX = (20 * 3600 * 1000); // 20 hours
 
     private static final int MOMENTARY_EXPOSURE_TIMEOUT_MS = (20 * 3600 * 1000); // 20 hours
@@ -140,6 +147,15 @@ public class SoundDoseHelper {
     private static final long GLOBAL_TIME_OFFSET_UNINITIALIZED = -1;
 
     private static final int SAFE_MEDIA_VOLUME_UNINITIALIZED = -1;
+
+    // see {@link #recordToPersistedString(SoundDoseRecord)}
+    // this is computed conservatively to accommodate the legacy persisting of SoundDoseRecords in
+    // which we materialized more decimal values.
+    // TODO: adjust value after soaking in
+    private static final int MAX_RECORDS_STRING_LENGTH = 50;
+    private static final int MAX_SETTINGS_LENGTH = 32768;
+    private static final int MAX_NUMBER_OF_CACHED_RECORDS =
+            MAX_SETTINGS_LENGTH / MAX_RECORDS_STRING_LENGTH;
 
     private final EventLogger mLogger = new EventLogger(AudioService.LOG_NB_EVENTS_SOUND_DOSE,
             "CSD updates");
@@ -188,6 +204,8 @@ public class SoundDoseHelper {
     @NonNull private final ISafeHearingVolumeController mVolumeController;
 
     private final AtomicBoolean mEnableCsd = new AtomicBoolean(false);
+
+    private final AtomicBoolean mForceCsdProperty = new AtomicBoolean(false);
 
     private final Object mCsdAsAFeatureLock = new Object();
 
@@ -375,9 +393,21 @@ public class SoundDoseHelper {
         }
     }
 
+    private boolean updateCsdForTestApi() {
+        if (mForceCsdProperty.get() != SystemProperties.getBoolean(
+                SYSTEM_PROPERTY_SAFEMEDIA_CSD_FORCE, false)) {
+            updateCsdEnabled("SystemPropertiesChangeCallback");
+        }
+
+        return mEnableCsd.get();
+    }
+
     float getCsd() {
         if (!mEnableCsd.get()) {
-            return -1.f;
+            // since this will only be called by a test api enable csd if system property is set
+            if (!updateCsdForTestApi()) {
+                return -1.f;
+            }
         }
 
         final ISoundDose soundDose = mSoundDose.get();
@@ -396,7 +426,10 @@ public class SoundDoseHelper {
 
     void setCsd(float csd) {
         if (!mEnableCsd.get()) {
-            return;
+            // since this will only be called by a test api enable csd if system property is set
+            if (!updateCsdForTestApi()) {
+                return;
+            }
         }
 
         SoundDoseRecord[] doseRecordsArray;
@@ -430,7 +463,10 @@ public class SoundDoseHelper {
 
     void resetCsdTimeouts() {
         if (!mEnableCsd.get()) {
-            return;
+            // since this will only be called by a test api enable csd if system property is set
+            if (!updateCsdForTestApi()) {
+                return;
+            }
         }
 
         synchronized (mCsdStateLock) {
@@ -440,7 +476,10 @@ public class SoundDoseHelper {
 
     void forceUseFrameworkMel(boolean useFrameworkMel) {
         if (!mEnableCsd.get()) {
-            return;
+            // since this will only be called by a test api enable csd if system property is set
+            if (!updateCsdForTestApi()) {
+                return;
+            }
         }
 
         final ISoundDose soundDose = mSoundDose.get();
@@ -458,7 +497,10 @@ public class SoundDoseHelper {
 
     void forceComputeCsdOnAllDevices(boolean computeCsdOnAllDevices) {
         if (!mEnableCsd.get()) {
-            return;
+            // since this will only be called by a test api enable csd if system property is set
+            if (!updateCsdForTestApi()) {
+                return;
+            }
         }
 
         final ISoundDose soundDose = mSoundDose.get();
@@ -488,7 +530,7 @@ public class SoundDoseHelper {
         try {
             return soundDose.isSoundDoseHalSupported();
         } catch (RemoteException e) {
-            Log.e(TAG, "Exception while forcing CSD computation on all devices", e);
+            Log.e(TAG, "Exception while querying the csd enabled status", e);
         }
         return false;
     }
@@ -544,7 +586,7 @@ public class SoundDoseHelper {
             audioDeviceCategory.csdCompatible = isHeadphone;
             soundDose.setAudioDeviceCategory(audioDeviceCategory);
         } catch (RemoteException e) {
-            Log.e(TAG, "Exception while forcing the internal MEL computation", e);
+            Log.e(TAG, "Exception while setting the audio device category", e);
         }
     }
 
@@ -748,7 +790,7 @@ public class SoundDoseHelper {
         return mSafeMediaVolumeDevices.get(device, SAFE_MEDIA_VOLUME_UNINITIALIZED) >= 0;
     }
 
-    /*package*/ void invalidatPendingVolumeCommand() {
+    /*package*/ void invalidatePendingVolumeCommand() {
         synchronized (mSafeMediaVolumeStateLock) {
             mPendingVolumeCommand = null;
         }
@@ -781,6 +823,9 @@ public class SoundDoseHelper {
 
                 updateDoseAttenuation(streamState.getIndex(device), device,
                         streamState.getStreamType(), isAbsoluteVolume);
+                break;
+            case MSG_LOWER_VOLUME_TO_RS1:
+                onLowerVolumeToRs1();
                 break;
             default:
                 Log.e(TAG, "Unexpected msg to handle: " + msg.what);
@@ -858,7 +903,7 @@ public class SoundDoseHelper {
             if (AudioService.mStreamVolumeAlias[streamType] == AudioSystem.STREAM_MUSIC
                     && safeDevicesContains(device)) {
                 soundDose.updateAttenuation(
-                        AudioSystem.getStreamVolumeDB(AudioSystem.STREAM_MUSIC,
+                        -AudioSystem.getStreamVolumeDB(AudioSystem.STREAM_MUSIC,
                                 (newIndex + 5) / 10,
                                 device), device);
             }
@@ -888,13 +933,13 @@ public class SoundDoseHelper {
         Log.v(TAG, "Initializing sound dose");
 
         try {
-            if (mCachedAudioDeviceCategories.size() > 0) {
+            if (!mCachedAudioDeviceCategories.isEmpty()) {
                 soundDose.initCachedAudioDeviceCategories(mCachedAudioDeviceCategories.toArray(
                         new ISoundDose.AudioDeviceCategory[0]));
                 mCachedAudioDeviceCategories.clear();
             }
         } catch (RemoteException e) {
-            Log.e(TAG, "Exception while forcing the internal MEL computation", e);
+            Log.e(TAG, "Exception while initializing the cached audio device categories", e);
         }
 
         synchronized (mCsdAsAFeatureLock) {
@@ -922,6 +967,7 @@ public class SoundDoseHelper {
                         mGlobalTimeOffsetInSecs);
                 if (records != null) {
                     mDoseRecords.addAll(records);
+                    sanitizeDoseRecords_l();
                 }
             }
         }
@@ -991,19 +1037,20 @@ public class SoundDoseHelper {
     }
 
     private void updateCsdEnabled(String caller) {
-        boolean csdForce = SystemProperties.getBoolean(SYSTEM_PROPERTY_SAFEMEDIA_CSD_FORCE, false);
+        mForceCsdProperty.set(SystemProperties.getBoolean(SYSTEM_PROPERTY_SAFEMEDIA_CSD_FORCE,
+                false));
         // we are using the MCC overlaid legacy flag used for the safe volume enablement
         // to determine whether the MCC enforces any safe hearing standard.
         boolean mccEnforcedSafeMedia = mContext.getResources().getBoolean(
                 com.android.internal.R.bool.config_safe_media_volume_enabled);
         boolean csdEnable = mContext.getResources().getBoolean(
                 R.bool.config_safe_sound_dosage_enabled);
-        boolean newEnabledCsd = (mccEnforcedSafeMedia && csdEnable) || csdForce;
+        boolean newEnabledCsd = (mccEnforcedSafeMedia && csdEnable) || mForceCsdProperty.get();
 
         synchronized (mCsdAsAFeatureLock) {
             if (!mccEnforcedSafeMedia && csdEnable) {
                 mIsCsdAsAFeatureAvailable = true;
-                newEnabledCsd = mIsCsdAsAFeatureEnabled || csdForce;
+                newEnabledCsd = mIsCsdAsAFeatureEnabled || mForceCsdProperty.get();
                 Log.v(TAG, caller + ": CSD as a feature is not enforced and enabled: "
                         + newEnabledCsd);
             } else {
@@ -1140,15 +1187,33 @@ public class SoundDoseHelper {
                                 && r.duration == record.duration)) {
                     Log.w(TAG, "Could not find cached record to remove: " + record);
                 }
-            } else {
+            } else if (record.value > 0) {
                 mDoseRecords.add(record);
             }
         }
+
+        sanitizeDoseRecords_l();
 
         mAudioHandler.sendMessageAtTime(mAudioHandler.obtainMessage(MSG_PERSIST_CSD_VALUES,
                 /* arg1= */0, /* arg2= */0, /* obj= */null), /* delay= */0);
 
         mLogger.enqueue(SoundDoseEvent.getDoseUpdateEvent(currentCsd, totalDuration));
+    }
+
+    @GuardedBy("mCsdStateLock")
+    private void sanitizeDoseRecords_l() {
+        if (mDoseRecords.size() > MAX_NUMBER_OF_CACHED_RECORDS) {
+            int nrToRemove = mDoseRecords.size() - MAX_NUMBER_OF_CACHED_RECORDS;
+            Log.w(TAG,
+                    "Removing " + nrToRemove + " records from the total of " + mDoseRecords.size());
+            // Remove older elements to fit into persisted settings max length
+            Iterator<SoundDoseRecord> recordIterator = mDoseRecords.iterator();
+            while (recordIterator.hasNext() && nrToRemove > 0) {
+                recordIterator.next();
+                recordIterator.remove();
+                --nrToRemove;
+            }
+        }
     }
 
     @SuppressWarnings("GuardedBy")  // avoid limitation with intra-procedural analysis of lambdas
@@ -1177,8 +1242,8 @@ public class SoundDoseHelper {
             long globalTimeOffsetInSecs) {
         return convertToGlobalTime(record.timestamp, globalTimeOffsetInSecs)
                 + PERSIST_CSD_RECORD_FIELD_SEPARATOR + record.duration
-                + PERSIST_CSD_RECORD_FIELD_SEPARATOR + record.value
-                + PERSIST_CSD_RECORD_FIELD_SEPARATOR + record.averageMel;
+                + PERSIST_CSD_RECORD_FIELD_SEPARATOR + String.format("%.3f", record.value)
+                + PERSIST_CSD_RECORD_FIELD_SEPARATOR + String.format("%.3f", record.averageMel);
     }
 
     private static long convertToGlobalTime(long bootTimeInSecs, long globalTimeOffsetInSecs) {
@@ -1243,6 +1308,26 @@ public class SoundDoseHelper {
         }
 
         return value;
+    }
+
+    /** Called when handling MSG_LOWER_VOLUME_TO_RS1 */
+    private void onLowerVolumeToRs1() {
+        mLogger.enqueue(SoundDoseEvent.getLowerVolumeToRs1Event());
+        final ArrayList<AudioDeviceAttributes> devices = mAudioService.getDevicesForAttributesInt(
+                new AudioAttributes.Builder().setUsage(AudioAttributes.USAGE_MEDIA).build(), true);
+        final int nativeDeviceType;
+        final AudioDeviceAttributes ada;
+        if (!devices.isEmpty()) {
+            ada = devices.get(0);
+            nativeDeviceType = ada.getInternalType();
+        } else {
+            nativeDeviceType = AudioSystem.DEVICE_OUT_USB_HEADSET;
+            ada = new AudioDeviceAttributes(AudioSystem.DEVICE_OUT_USB_HEADSET, "");
+        }
+        final int index = safeMediaVolumeIndex(nativeDeviceType);
+        mAudioService.setStreamVolumeWithAttributionInt(STREAM_MUSIC, index / 10, /*flags*/ 0, ada,
+                mContext.getOpPackageName(), /*attributionTag=*/null,
+                true /*canChangeMuteAndUpdateController*/);
     }
 
     // StreamVolumeCommand contains the information needed to defer the process of

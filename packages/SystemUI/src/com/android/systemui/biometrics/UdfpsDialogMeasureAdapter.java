@@ -35,7 +35,7 @@ import android.view.WindowMetrics;
 import android.widget.FrameLayout;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.systemui.R;
+import com.android.systemui.res.R;
 
 /**
  * Adapter that remeasures an auth dialog view to ensure that it matches the location of a physical
@@ -131,25 +131,29 @@ public class UdfpsDialogMeasureAdapter {
                 icon.measure(
                         MeasureSpec.makeMeasureSpec(sensorDiameter, MeasureSpec.AT_MOST),
                         MeasureSpec.makeMeasureSpec(sensorDiameter, MeasureSpec.AT_MOST));
-            } else if (child.getId() == R.id.space_above_icon) {
+            } else if (child.getId() == R.id.space_above_icon
+                    || child.getId() == R.id.space_above_content
+                    || child.getId() == R.id.button_bar) {
                 child.measure(
                         MeasureSpec.makeMeasureSpec(width, MeasureSpec.EXACTLY),
                         MeasureSpec.makeMeasureSpec(
                                 child.getLayoutParams().height, MeasureSpec.EXACTLY));
-            } else if (child.getId() == R.id.button_bar) {
-                child.measure(
-                        MeasureSpec.makeMeasureSpec(width, MeasureSpec.EXACTLY),
-                        MeasureSpec.makeMeasureSpec(child.getLayoutParams().height,
-                                MeasureSpec.EXACTLY));
             } else if (child.getId() == R.id.space_below_icon) {
                 // Set the spacer height so the fingerprint icon is on the physical sensor area
                 final int clampedSpacerHeight = Math.max(mBottomSpacerHeight, 0);
                 child.measure(
                         MeasureSpec.makeMeasureSpec(width, MeasureSpec.EXACTLY),
                         MeasureSpec.makeMeasureSpec(clampedSpacerHeight, MeasureSpec.EXACTLY));
-            } else if (child.getId() == R.id.description) {
+            } else if (child.getId() == R.id.description
+                    || child.getId() == R.id.customized_view_container) {
                 //skip description view and compute later
                 continue;
+            } else if (child.getId() == R.id.logo) {
+                child.measure(
+                        MeasureSpec.makeMeasureSpec(child.getLayoutParams().width,
+                                MeasureSpec.EXACTLY),
+                        MeasureSpec.makeMeasureSpec(child.getLayoutParams().height,
+                                MeasureSpec.EXACTLY));
             } else {
                 child.measure(
                         MeasureSpec.makeMeasureSpec(width, MeasureSpec.EXACTLY),
@@ -161,27 +165,28 @@ public class UdfpsDialogMeasureAdapter {
             }
         }
 
-        //re-calculate the height of description
+        //re-calculate the height of body content
         View description = mView.findViewById(R.id.description);
+        View contentView = mView.findViewById(R.id.customized_view_container);
         if (description != null && description.getVisibility() != View.GONE) {
             totalHeight += measureDescription(description, displayHeight, width, totalHeight);
+        } else if (contentView != null && contentView.getVisibility() != View.GONE) {
+            totalHeight += measureDescription(contentView, displayHeight, width, totalHeight);
         }
 
         return new AuthDialog.LayoutParams(width, totalHeight);
     }
 
-    private int measureDescription(View description, int displayHeight, int currWidth,
+    private int measureDescription(View bodyContent, int displayHeight, int currWidth,
                                    int currHeight) {
-        //description view should be measured in AuthBiometricFingerprintView#onMeasureInternal
-        //so we could getMeasuredHeight in onMeasureInternalPortrait directly.
-        int newHeight = description.getMeasuredHeight() + currHeight;
+        int newHeight = bodyContent.getMeasuredHeight() + currHeight;
         int limit = (int) (displayHeight * 0.75);
         if (newHeight > limit) {
-            description.measure(
+            bodyContent.measure(
                     MeasureSpec.makeMeasureSpec(currWidth, MeasureSpec.EXACTLY),
                     MeasureSpec.makeMeasureSpec(limit - currHeight, MeasureSpec.EXACTLY));
         }
-        return description.getMeasuredHeight();
+        return bodyContent.getMeasuredHeight();
     }
 
     @NonNull

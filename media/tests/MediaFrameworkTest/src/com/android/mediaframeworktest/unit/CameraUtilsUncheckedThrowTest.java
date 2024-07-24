@@ -18,7 +18,8 @@ package com.android.mediaframeworktest.unit;
 
 import android.hardware.camera2.CameraAccessException;
 import android.hardware.camera2.utils.UncheckedThrow;
-import android.test.suitebuilder.annotation.SmallTest;
+
+import androidx.test.filters.SmallTest;
 
 import junit.framework.Assert;
 

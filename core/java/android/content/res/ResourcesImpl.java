@@ -27,6 +27,8 @@ import android.annotation.PluralsRes;
 import android.annotation.RawRes;
 import android.annotation.StyleRes;
 import android.annotation.StyleableRes;
+import android.app.LocaleConfig;
+import android.app.ResourcesManager;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ActivityInfo.Config;
@@ -198,7 +200,7 @@ public class ResourcesImpl {
         mMetrics.setToDefaults();
         mDisplayAdjustments = displayAdjustments;
         mConfiguration.setToDefaults();
-        updateConfiguration(config, metrics, displayAdjustments.getCompatibilityInfo());
+        updateConfigurationImpl(config, metrics, displayAdjustments.getCompatibilityInfo(), true);
     }
 
     public DisplayAdjustments getDisplayAdjustments() {
@@ -271,14 +273,27 @@ public class ResourcesImpl {
         throw new NotFoundException("String resource name " + name);
     }
 
+    private static boolean isIntLike(@NonNull String s) {
+        if (s.isEmpty() || s.length() > 10) return false;
+        for (int i = 0, size = s.length(); i < size; i++) {
+            final char c = s.charAt(i);
+            if (c < '0' || c > '9') {
+                return false;
+            }
+        }
+        return true;
+    }
+
     int getIdentifier(String name, String defType, String defPackage) {
         if (name == null) {
             throw new NullPointerException("name is null");
         }
-        try {
-            return Integer.parseInt(name);
-        } catch (Exception e) {
-            // Ignore
+        if (isIntLike(name)) {
+            try {
+                return Integer.parseInt(name);
+            } catch (Exception e) {
+                // Ignore
+            }
         }
         return mAssets.getResourceIdentifier(name, defType, defPackage);
     }
@@ -387,7 +402,12 @@ public class ResourcesImpl {
     }
 
     public void updateConfiguration(Configuration config, DisplayMetrics metrics,
-                                    CompatibilityInfo compat) {
+            CompatibilityInfo compat) {
+        updateConfigurationImpl(config, metrics, compat, false);
+    }
+
+    private void updateConfigurationImpl(Configuration config, DisplayMetrics metrics,
+                                    CompatibilityInfo compat, boolean forceAssetsRefresh) {
         Trace.traceBegin(Trace.TRACE_TAG_RESOURCES, "ResourcesImpl#updateConfiguration");
         try {
             synchronized (mAccessLock) {
@@ -424,26 +444,60 @@ public class ResourcesImpl {
                     mConfiguration.setLocales(locales);
                 }
 
+                String[] selectedLocales = null;
+                String defaultLocale = null;
+                LocaleConfig lc = ResourcesManager.getInstance().getLocaleConfig();
                 if ((configChanges & ActivityInfo.CONFIG_LOCALE) != 0) {
                     if (locales.size() > 1) {
-                        // The LocaleList has changed. We must query the AssetManager's available
-                        // Locales and figure out the best matching Locale in the new LocaleList.
-                        String[] availableLocales = mAssets.getNonSystemLocales();
-                        if (LocaleList.isPseudoLocalesOnly(availableLocales)) {
-                            // No app defined locales, so grab the system locales.
-                            availableLocales = mAssets.getLocales();
+                        if (Flags.defaultLocale() && (lc.getDefaultLocale() != null)) {
+                            Locale[] intersection =
+                                    locales.getIntersection(lc.getSupportedLocales());
+                            mConfiguration.setLocales(new LocaleList(intersection));
+                            selectedLocales = new String[intersection.length];
+                            for (int i = 0; i < intersection.length; i++) {
+                                selectedLocales[i] =
+                                        adjustLanguageTag(intersection[i].toLanguageTag());
+                            }
+                            defaultLocale =
+                                    adjustLanguageTag(lc.getDefaultLocale().toLanguageTag());
+                        } else {
+                            String[] availableLocales;
+                            // The LocaleList has changed. We must query the AssetManager's
+                            // available Locales and figure out the best matching Locale in the new
+                            // LocaleList.
+                            availableLocales = mAssets.getNonSystemLocales();
                             if (LocaleList.isPseudoLocalesOnly(availableLocales)) {
-                                availableLocales = null;
+                                // No app defined locales, so grab the system locales.
+                                availableLocales = mAssets.getLocales();
+                                if (LocaleList.isPseudoLocalesOnly(availableLocales)) {
+                                    availableLocales = null;
+                                }
                             }
-                        }
 
-                        if (availableLocales != null) {
-                            final Locale bestLocale = locales.getFirstMatchWithEnglishSupported(
-                                    availableLocales);
-                            if (bestLocale != null && bestLocale != locales.get(0)) {
-                                mConfiguration.setLocales(new LocaleList(bestLocale, locales));
+                            if (availableLocales != null) {
+                                final Locale bestLocale = locales.getFirstMatchWithEnglishSupported(
+                                        availableLocales);
+                                if (bestLocale != null) {
+                                    selectedLocales = new String[]{
+                                            adjustLanguageTag(bestLocale.toLanguageTag())};
+                                    if (!bestLocale.equals(locales.get(0))) {
+                                        mConfiguration.setLocales(
+                                                new LocaleList(bestLocale, locales));
+                                    }
+                                }
                             }
                         }
+                    }
+                }
+                if (selectedLocales == null) {
+                    if (Flags.defaultLocale() && (lc.getDefaultLocale() != null)) {
+                        selectedLocales = new String[locales.size()];
+                        for (int i = 0; i < locales.size(); i++) {
+                            selectedLocales[i] = adjustLanguageTag(locales.get(i).toLanguageTag());
+                        }
+                    } else {
+                        selectedLocales = new String[]{
+                                adjustLanguageTag(locales.get(0).toLanguageTag())};
                     }
                 }
 
@@ -479,8 +533,9 @@ public class ResourcesImpl {
                     keyboardHidden = mConfiguration.keyboardHidden;
                 }
 
-                mAssets.setConfiguration(mConfiguration.mcc, mConfiguration.mnc,
-                        adjustLanguageTag(mConfiguration.getLocales().get(0).toLanguageTag()),
+                mAssets.setConfigurationInternal(mConfiguration.mcc, mConfiguration.mnc,
+                        defaultLocale,
+                        selectedLocales,
                         mConfiguration.orientation,
                         mConfiguration.touchscreen,
                         mConfiguration.densityDpi, mConfiguration.keyboard,
@@ -489,7 +544,7 @@ public class ResourcesImpl {
                         mConfiguration.screenWidthDp, mConfiguration.screenHeightDp,
                         mConfiguration.screenLayout, mConfiguration.uiMode,
                         mConfiguration.colorMode, mConfiguration.getGrammaticalGender(),
-                        Build.VERSION.RESOURCES_SDK_INT);
+                        Build.VERSION.RESOURCES_SDK_INT, forceAssetsRefresh);
 
                 if (DEBUG_CONFIG) {
                     Slog.i(TAG, "**** Updating config of " + this + ": final config is "

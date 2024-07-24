@@ -16,6 +16,7 @@
 
 package android.telephony;
 
+import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -35,6 +36,7 @@ import android.telephony.NetworkRegistrationInfo.Domain;
 import android.telephony.NetworkRegistrationInfo.NRState;
 import android.text.TextUtils;
 
+import com.android.internal.telephony.flags.Flags;
 import com.android.telephony.Rlog;
 
 import java.lang.annotation.Retention;
@@ -61,6 +63,7 @@ import java.util.stream.Collectors;
  * For historical reasons this class is not declared as final; however,
  * it should be treated as though it were final.
  */
+@android.ravenwood.annotation.RavenwoodKeepPartialClass
 public class ServiceState implements Parcelable {
 
     static final String LOG_TAG = "PHONE";
@@ -1138,6 +1141,7 @@ public class ServiceState implements Parcelable {
      *
      * @hide
      */
+    @android.ravenwood.annotation.RavenwoodKeep
     public static @NonNull String frequencyRangeToString(@FrequencyRange int range) {
         switch (range) {
             case FREQUENCY_RANGE_UNKNOWN: return "UNKNOWN";
@@ -2255,8 +2259,8 @@ public class ServiceState implements Parcelable {
      * Get whether device is connected to a non-terrestrial network.
      *
      * @return {@code true} if device is connected to a non-terrestrial network else {@code false}.
-     * @hide
      */
+    @FlaggedApi(Flags.FLAG_CARRIER_ENABLED_SATELLITE_FLAG)
     public boolean isUsingNonTerrestrialNetwork() {
         synchronized (mNetworkRegistrationInfos) {
             for (NetworkRegistrationInfo nri : mNetworkRegistrationInfos) {

@@ -33,6 +33,7 @@ import com.android.systemui.dump.DumpHandler;
 import com.android.systemui.dump.LogBufferEulogizer;
 import com.android.systemui.dump.LogBufferFreezer;
 import com.android.systemui.dump.SystemUIAuxiliaryDumpService;
+import com.android.systemui.res.R;
 import com.android.systemui.shared.system.UncaughtExceptionPreHandlerManager;
 import com.android.systemui.statusbar.policy.BatteryStateNotifier;
 
@@ -76,7 +77,7 @@ public class SystemUIService extends Service {
         super.onCreate();
 
         // Start all of SystemUI
-        ((SystemUIApplication) getApplication()).startServicesIfNeeded();
+        ((SystemUIApplication) getApplication()).startSystemUserServicesIfNeeded();
 
         // Finish initializing dump logic
         mLogBufferFreezer.attach(mBroadcastDispatcher);
@@ -98,9 +99,10 @@ public class SystemUIService extends Service {
         if (Build.IS_DEBUGGABLE) {
             // b/71353150 - looking for leaked binder proxies
             BinderInternal.nSetBinderProxyCountEnabled(true);
-            BinderInternal.nSetBinderProxyCountWatermarks(1000,900);
+            BinderInternal.nSetBinderProxyCountWatermarks(
+                    /* high= */ 1000, /* low= */ 900, /* warning= */ 950);
             BinderInternal.setBinderProxyCountCallback(
-                    new BinderInternal.BinderProxyLimitListener() {
+                    new BinderInternal.BinderProxyCountEventListener() {
                         @Override
                         public void onLimitReached(int uid) {
                             Slog.w(SystemUIApplication.TAG,

@@ -16,6 +16,8 @@
 
 package com.android.settingslib.applications;
 
+import static android.content.pm.Flags.FLAG_PROVIDE_INFO_OF_APK_IN_APEX;
+
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.junit.Assert.fail;
@@ -24,12 +26,16 @@ import static org.mockito.Mockito.mock;
 
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageInfo;
 import android.graphics.drawable.Drawable;
+import android.os.Environment;
+import android.platform.test.flag.junit.SetFlagsRule;
 
 import com.android.settingslib.Utils;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -39,6 +45,8 @@ import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
 import org.robolectric.annotation.Implementation;
 import org.robolectric.annotation.Implements;
+import org.robolectric.shadow.api.Shadow;
+import org.robolectric.shadows.ShadowPackageManager;
 
 import java.io.File;
 import java.lang.reflect.Field;
@@ -60,6 +68,10 @@ public class AppUtilsTest {
     private ApplicationInfo mAppInfo;
     private ApplicationsState.AppEntry mAppEntry;
     private ArrayList<ApplicationsState.AppEntry> mAppEntries;
+    private ShadowPackageManager mShadowPackageManager;
+
+    @Rule
+    public final SetFlagsRule mSetFlagsRule = new SetFlagsRule();
 
     @Before
     public void setUp() {
@@ -70,6 +82,7 @@ public class AppUtilsTest {
         mAppEntry = createAppEntry(mAppInfo, /* id= */ 1);
         mAppEntries = new ArrayList<>(Arrays.asList(mAppEntry));
         doReturn(mIcon).when(mIcon).mutate();
+        mShadowPackageManager = Shadow.extract(mContext.getPackageManager());
     }
 
     @After
@@ -149,6 +162,32 @@ public class AppUtilsTest {
         appEntry.info = new ApplicationInfo();
 
         assertThat(AppUtils.isAppInstalled(appEntry)).isFalse();
+    }
+
+    @Test
+    public void isMainlineModule_hasApexPackageName_shouldCheckByPackageInfo() {
+        mSetFlagsRule.enableFlags(FLAG_PROVIDE_INFO_OF_APK_IN_APEX);
+        PackageInfo packageInfo = new PackageInfo();
+        packageInfo.packageName = APP_PACKAGE_NAME;
+        packageInfo.setApexPackageName("com.test.apex.package");
+        mShadowPackageManager.installPackage(packageInfo);
+
+        assertThat(
+                AppUtils.isMainlineModule(mContext.getPackageManager(), APP_PACKAGE_NAME)).isTrue();
+    }
+
+    @Test
+    public void isMainlineModule_noApexPackageName_shouldCheckBySourceDirPath() {
+        mSetFlagsRule.disableFlags(FLAG_PROVIDE_INFO_OF_APK_IN_APEX);
+        ApplicationInfo applicationInfo = new ApplicationInfo();
+        applicationInfo.sourceDir = Environment.getApexDirectory().getAbsolutePath();
+        PackageInfo packageInfo = new PackageInfo();
+        packageInfo.packageName = APP_PACKAGE_NAME;
+        packageInfo.applicationInfo = applicationInfo;
+        mShadowPackageManager.installPackage(packageInfo);
+
+        assertThat(
+                AppUtils.isMainlineModule(mContext.getPackageManager(), APP_PACKAGE_NAME)).isTrue();
     }
 
     private ApplicationsState.AppEntry createAppEntry(ApplicationInfo appInfo, int id) {

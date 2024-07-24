@@ -27,12 +27,13 @@ import android.os.SystemProperties;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.AtomicFile;
+import android.util.LongSparseArray;
 import android.util.Slog;
 import android.util.SparseArray;
-import android.util.TimeSparseArray;
 import android.util.TimeUtils;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.IndentingPrintWriter;
 
@@ -118,8 +119,8 @@ public class UsageStatsDatabase {
 
     private final Object mLock = new Object();
     private final File[] mIntervalDirs;
-    @VisibleForTesting
-    final TimeSparseArray<AtomicFile>[] mSortedStatFiles;
+    @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
+    final LongSparseArray<AtomicFile>[] mSortedStatFiles;
     private final UnixCalendar mCal;
     private final File mVersionFile;
     private final File mBackupsDir;
@@ -136,6 +137,7 @@ public class UsageStatsDatabase {
     // The obfuscated packages to tokens mappings file
     private final File mPackageMappingsFile;
     // Holds all of the data related to the obfuscated packages and their token mappings.
+    @GuardedBy("mLock")
     final PackagesTokenData mPackagesTokenData = new PackagesTokenData();
 
     /**
@@ -156,7 +158,7 @@ public class UsageStatsDatabase {
         mVersionFile = new File(dir, "version");
         mBackupsDir = new File(dir, "backups");
         mUpdateBreadcrumb = new File(dir, "breadcrumb");
-        mSortedStatFiles = new TimeSparseArray[mIntervalDirs.length];
+        mSortedStatFiles = new LongSparseArray[mIntervalDirs.length];
         mPackageMappingsFile = new File(dir, "mappings");
         mCal = new UnixCalendar(0);
     }
@@ -179,11 +181,16 @@ public class UsageStatsDatabase {
             }
 
             checkVersionAndBuildLocked();
-            indexFilesLocked();
+            // Perform a pruning of older files if there was an upgrade, otherwise do indexing.
+            if (mUpgradePerformed) {
+                prune(currentTimeMillis); // prune performs an indexing when done
+            } else {
+                indexFilesLocked();
+            }
 
             // Delete files that are in the future.
-            for (TimeSparseArray<AtomicFile> files : mSortedStatFiles) {
-                final int startIndex = files.closestIndexOnOrAfter(currentTimeMillis);
+            for (LongSparseArray<AtomicFile> files : mSortedStatFiles) {
+                final int startIndex = files.firstIndexOnOrAfter(currentTimeMillis);
                 if (startIndex < 0) {
                     continue;
                 }
@@ -217,7 +224,7 @@ public class UsageStatsDatabase {
      */
     public boolean checkinDailyFiles(CheckinAction checkinAction) {
         synchronized (mLock) {
-            final TimeSparseArray<AtomicFile> files =
+            final LongSparseArray<AtomicFile> files =
                     mSortedStatFiles[UsageStatsManager.INTERVAL_DAILY];
             final int fileCount = files.size();
 
@@ -238,7 +245,7 @@ public class UsageStatsDatabase {
             try {
                 for (int i = start; i < fileCount - 1; i++) {
                     final IntervalStats stats = new IntervalStats();
-                    readLocked(files.valueAt(i), stats);
+                    readLocked(files.valueAt(i), stats, false);
                     if (!checkinAction.checkin(stats)) {
                         return false;
                     }
@@ -288,7 +295,7 @@ public class UsageStatsDatabase {
         // Index the available usage stat files on disk.
         for (int i = 0; i < mSortedStatFiles.length; i++) {
             if (mSortedStatFiles[i] == null) {
-                mSortedStatFiles[i] = new TimeSparseArray<>();
+                mSortedStatFiles[i] = new LongSparseArray<>();
             } else {
                 mSortedStatFiles[i].clear();
             }
@@ -537,7 +544,8 @@ public class UsageStatsDatabase {
                     }
                     try {
                         IntervalStats stats = new IntervalStats();
-                        readLocked(new AtomicFile(files[j]), stats, version, mPackagesTokenData);
+                        readLocked(new AtomicFile(files[j]), stats, version, mPackagesTokenData,
+                                false);
                         // Upgrade to version 5+.
                         // Future version upgrades should add additional logic here to upgrade.
                         if (mCurrentVersion >= 5) {
@@ -597,7 +605,8 @@ public class UsageStatsDatabase {
                     try {
                         final IntervalStats stats = new IntervalStats();
                         final AtomicFile atomicFile = new AtomicFile(files[j]);
-                        if (!readLocked(atomicFile, stats, mCurrentVersion, mPackagesTokenData)) {
+                        if (!readLocked(atomicFile, stats, mCurrentVersion, mPackagesTokenData,
+                                false)) {
                             continue; // no data was omitted when read so no need to rewrite
                         }
                         // Any data related to packages that have been removed would have failed
@@ -643,7 +652,7 @@ public class UsageStatsDatabase {
                     try {
                         final IntervalStats stats = new IntervalStats();
                         final AtomicFile atomicFile = new AtomicFile(files[j]);
-                        readLocked(atomicFile, stats, mCurrentVersion, mPackagesTokenData);
+                        readLocked(atomicFile, stats, mCurrentVersion, mPackagesTokenData, false);
                         if (!pruneStats(installedPackages, stats)) {
                             continue; // no stats were pruned so no need to rewrite
                         }
@@ -696,7 +705,7 @@ public class UsageStatsDatabase {
             int filesDeleted = 0;
             int filesMoved = 0;
 
-            for (TimeSparseArray<AtomicFile> files : mSortedStatFiles) {
+            for (LongSparseArray<AtomicFile> files : mSortedStatFiles) {
                 final int fileCount = files.size();
                 for (int i = 0; i < fileCount; i++) {
                     final AtomicFile file = files.valueAt(i);
@@ -750,7 +759,7 @@ public class UsageStatsDatabase {
             try {
                 final AtomicFile f = mSortedStatFiles[intervalType].valueAt(fileCount - 1);
                 IntervalStats stats = new IntervalStats();
-                readLocked(f, stats);
+                readLocked(f, stats, false);
                 return stats;
             } catch (Exception e) {
                 Slog.e(TAG, "Failed to read usage stats file", e);
@@ -764,27 +773,30 @@ public class UsageStatsDatabase {
      * all of the stats at once has an amortized cost for future calls.
      */
     void filterStats(IntervalStats stats) {
-        if (mPackagesTokenData.removedPackagesMap.isEmpty()) {
-            return;
-        }
-        final ArrayMap<String, Long> removedPackagesMap = mPackagesTokenData.removedPackagesMap;
-
-        // filter out package usage stats
-        final int removedPackagesSize = removedPackagesMap.size();
-        for (int i = 0; i < removedPackagesSize; i++) {
-            final String removedPackage = removedPackagesMap.keyAt(i);
-            final UsageStats usageStats = stats.packageStats.get(removedPackage);
-            if (usageStats != null && usageStats.mEndTimeStamp < removedPackagesMap.valueAt(i)) {
-                stats.packageStats.remove(removedPackage);
+        synchronized (mLock) {
+            if (mPackagesTokenData.removedPackagesMap.isEmpty()) {
+                return;
             }
-        }
+            final ArrayMap<String, Long> removedPackagesMap = mPackagesTokenData.removedPackagesMap;
 
-        // filter out events
-        for (int i = stats.events.size() - 1; i >= 0; i--) {
-            final UsageEvents.Event event = stats.events.get(i);
-            final Long timeRemoved = removedPackagesMap.get(event.mPackage);
-            if (timeRemoved != null && timeRemoved > event.mTimeStamp) {
-                stats.events.remove(i);
+            // filter out package usage stats
+            final int removedPackagesSize = removedPackagesMap.size();
+            for (int i = 0; i < removedPackagesSize; i++) {
+                final String removedPackage = removedPackagesMap.keyAt(i);
+                final UsageStats usageStats = stats.packageStats.get(removedPackage);
+                if (usageStats != null &&
+                        usageStats.mEndTimeStamp < removedPackagesMap.valueAt(i)) {
+                    stats.packageStats.remove(removedPackage);
+                }
+            }
+
+            // filter out events
+            for (int i = stats.events.size() - 1; i >= 0; i--) {
+                final UsageEvents.Event event = stats.events.get(i);
+                final Long timeRemoved = removedPackagesMap.get(event.mPackage);
+                if (timeRemoved != null && timeRemoved > event.mTimeStamp) {
+                    stats.events.remove(i);
+                }
             }
         }
     }
@@ -816,7 +828,7 @@ public class UsageStatsDatabase {
      */
     @Nullable
     public <T> List<T> queryUsageStats(int intervalType, long beginTime, long endTime,
-            StatCombiner<T> combiner) {
+            StatCombiner<T> combiner, boolean skipEvents) {
         // mIntervalDirs is final. Accessing its size without holding the lock should be fine.
         if (intervalType < 0 || intervalType >= mIntervalDirs.length) {
             throw new IllegalArgumentException("Bad interval type " + intervalType);
@@ -830,9 +842,9 @@ public class UsageStatsDatabase {
         }
 
         synchronized (mLock) {
-            final TimeSparseArray<AtomicFile> intervalStats = mSortedStatFiles[intervalType];
+            final LongSparseArray<AtomicFile> intervalStats = mSortedStatFiles[intervalType];
 
-            int endIndex = intervalStats.closestIndexOnOrBefore(endTime);
+            int endIndex = intervalStats.lastIndexOnOrBefore(endTime);
             if (endIndex < 0) {
                 // All the stats start after this range ends, so nothing matches.
                 if (DEBUG) {
@@ -853,7 +865,7 @@ public class UsageStatsDatabase {
                 }
             }
 
-            int startIndex = intervalStats.closestIndexOnOrBefore(beginTime);
+            int startIndex = intervalStats.lastIndexOnOrBefore(beginTime);
             if (startIndex < 0) {
                 // All the stats available have timestamps after beginTime, which means they all
                 // match.
@@ -870,7 +882,7 @@ public class UsageStatsDatabase {
                 }
 
                 try {
-                    readLocked(f, stats);
+                    readLocked(f, stats, skipEvents);
                     if (beginTime < stats.endTime
                             && !combiner.combine(stats, false, results)) {
                         break;
@@ -895,7 +907,7 @@ public class UsageStatsDatabase {
             int bestBucket = -1;
             long smallestDiff = Long.MAX_VALUE;
             for (int i = mSortedStatFiles.length - 1; i >= 0; i--) {
-                final int index = mSortedStatFiles[i].closestIndexOnOrBefore(beginTimeStamp);
+                final int index = mSortedStatFiles[i].lastIndexOnOrBefore(beginTimeStamp);
                 int size = mSortedStatFiles[i].size();
                 if (index >= 0 && index < size) {
                     // We have some results here, check if they are better than our current match.
@@ -915,26 +927,31 @@ public class UsageStatsDatabase {
      */
     public void prune(final long currentTimeMillis) {
         synchronized (mLock) {
+            // prune all files older than 2 years in the yearly directory
             mCal.setTimeInMillis(currentTimeMillis);
-            mCal.addYears(-3);
+            mCal.addYears(-2);
             pruneFilesOlderThan(mIntervalDirs[UsageStatsManager.INTERVAL_YEARLY],
                     mCal.getTimeInMillis());
 
+            // prune all files older than 6 months in the monthly directory
             mCal.setTimeInMillis(currentTimeMillis);
             mCal.addMonths(-6);
             pruneFilesOlderThan(mIntervalDirs[UsageStatsManager.INTERVAL_MONTHLY],
                     mCal.getTimeInMillis());
 
+            // prune all files older than 4 weeks in the weekly directory
             mCal.setTimeInMillis(currentTimeMillis);
             mCal.addWeeks(-4);
             pruneFilesOlderThan(mIntervalDirs[UsageStatsManager.INTERVAL_WEEKLY],
                     mCal.getTimeInMillis());
 
+            // prune all files older than 10 days in the weekly directory
             mCal.setTimeInMillis(currentTimeMillis);
             mCal.addDays(-10);
             pruneFilesOlderThan(mIntervalDirs[UsageStatsManager.INTERVAL_DAILY],
                     mCal.getTimeInMillis());
 
+            // prune chooser counts for all usage stats older than the defined period
             mCal.setTimeInMillis(currentTimeMillis);
             mCal.addDays(-SELECTION_LOG_RETENTION_LEN);
             for (int i = 0; i < mIntervalDirs.length; ++i) {
@@ -980,7 +997,7 @@ public class UsageStatsDatabase {
                     try {
                         final AtomicFile af = new AtomicFile(f);
                         final IntervalStats stats = new IntervalStats();
-                        readLocked(af, stats);
+                        readLocked(af, stats, false);
                         final int pkgCount = stats.packageStats.size();
                         for (int i = 0; i < pkgCount; i++) {
                             UsageStats pkgStats = stats.packageStats.valueAt(i);
@@ -1004,7 +1021,7 @@ public class UsageStatsDatabase {
     private static long parseBeginTime(File file) throws IOException {
         String name = file.getName();
 
-        // Parse out the digits from the the front of the file name
+        // Parse out the digits from the front of the file name
         for (int i = 0; i < name.length(); i++) {
             final char c = name.charAt(i);
             if (c < '0' || c > '9') {
@@ -1082,13 +1099,13 @@ public class UsageStatsDatabase {
      * method. It is up to the caller to ensure that this is the desired behavior - if not, the
      * caller should ensure that the data in the reused object is being cleared.
      */
-    private void readLocked(AtomicFile file, IntervalStats statsOut)
+    private void readLocked(AtomicFile file, IntervalStats statsOut, boolean skipEvents)
             throws IOException, RuntimeException {
         if (mCurrentVersion <= 3) {
             Slog.wtf(TAG, "Reading UsageStats as XML; current database version: "
                     + mCurrentVersion);
         }
-        readLocked(file, statsOut, mCurrentVersion, mPackagesTokenData);
+        readLocked(file, statsOut, mCurrentVersion, mPackagesTokenData, skipEvents);
     }
 
     /**
@@ -1099,13 +1116,14 @@ public class UsageStatsDatabase {
      * caller should ensure that the data in the reused object is being cleared.
      */
     private static boolean readLocked(AtomicFile file, IntervalStats statsOut, int version,
-            PackagesTokenData packagesTokenData) throws IOException, RuntimeException {
+            PackagesTokenData packagesTokenData, boolean skipEvents)
+            throws IOException, RuntimeException {
         boolean dataOmitted = false;
         try {
             FileInputStream in = file.openRead();
             try {
                 statsOut.beginTime = parseBeginTime(file);
-                dataOmitted = readLocked(in, statsOut, version, packagesTokenData);
+                dataOmitted = readLocked(in, statsOut, version, packagesTokenData, skipEvents);
                 statsOut.lastTimeSaved = file.getLastModifiedTime();
             } finally {
                 try {
@@ -1129,7 +1147,7 @@ public class UsageStatsDatabase {
      * caller should ensure that the data in the reused object is being cleared.
      */
     private static boolean readLocked(InputStream in, IntervalStats statsOut, int version,
-            PackagesTokenData packagesTokenData) throws RuntimeException {
+            PackagesTokenData packagesTokenData, boolean skipEvents) throws RuntimeException {
         boolean dataOmitted = false;
         switch (version) {
             case 1:
@@ -1151,7 +1169,7 @@ public class UsageStatsDatabase {
                 break;
             case 5:
                 try {
-                    UsageStatsProtoV2.read(in, statsOut);
+                    UsageStatsProtoV2.read(in, statsOut, skipEvents);
                 } catch (Exception e) {
                     Slog.e(TAG, "Unable to read interval stats from proto.", e);
                 }
@@ -1213,12 +1231,14 @@ public class UsageStatsDatabase {
     }
 
     void obfuscateCurrentStats(IntervalStats[] currentStats) {
-        if (mCurrentVersion < 5) {
-            return;
-        }
-        for (int i = 0; i < currentStats.length; i++) {
-            final IntervalStats stats = currentStats[i];
-            stats.obfuscateData(mPackagesTokenData);
+        synchronized (mLock) {
+            if (mCurrentVersion < 5) {
+                return;
+            }
+            for (int i = 0; i < currentStats.length; i++) {
+                final IntervalStats stats = currentStats[i];
+                stats.obfuscateData(mPackagesTokenData);
+            }
         }
     }
 
@@ -1426,7 +1446,7 @@ public class UsageStatsDatabase {
             throws IOException {
         IntervalStats stats = new IntervalStats();
         try {
-            readLocked(statsFile, stats);
+            readLocked(statsFile, stats, false);
         } catch (IOException e) {
             Slog.e(TAG, "Failed to read usage stats file", e);
             out.writeInt(0);
@@ -1471,7 +1491,7 @@ public class UsageStatsDatabase {
         IntervalStats stats = new IntervalStats();
         try {
             stats.beginTime = in.readLong();
-            readLocked(in, stats, version, mPackagesTokenData);
+            readLocked(in, stats, version, mPackagesTokenData, false);
         } catch (Exception e) {
             Slog.d(TAG, "DeSerializing IntervalStats Failed", e);
             stats = null;
@@ -1514,7 +1534,7 @@ public class UsageStatsDatabase {
             pw.println("Database Summary:");
             pw.increaseIndent();
             for (int i = 0; i < mSortedStatFiles.length; i++) {
-                final TimeSparseArray<AtomicFile> files = mSortedStatFiles[i];
+                final LongSparseArray<AtomicFile> files = mSortedStatFiles[i];
                 final int size = files.size();
                 pw.print(UserUsageStatsService.intervalToString(i));
                 pw.print(" stats files: ");
@@ -1569,7 +1589,7 @@ public class UsageStatsDatabase {
         synchronized (mLock) {
             final IntervalStats stats = new IntervalStats();
             try {
-                readLocked(mSortedStatFiles[interval].get(fileName, null), stats);
+                readLocked(mSortedStatFiles[interval].get(fileName, null), stats, false);
                 return stats;
             } catch (Exception e) {
                 return null;

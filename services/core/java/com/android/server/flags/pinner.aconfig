@@ -1,0 +1,9 @@
+package: "com.android.server.flags"
+container: "system"
+
+flag {
+    name: "pin_webview"
+    namespace: "system_performance"
+    description: "This flag controls if webview should be pinned in memory."
+    bug: "307594624"
+}

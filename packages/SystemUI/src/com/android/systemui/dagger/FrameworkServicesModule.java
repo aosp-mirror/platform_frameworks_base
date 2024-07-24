@@ -25,6 +25,7 @@ import android.app.AppOpsManager;
 import android.app.IActivityManager;
 import android.app.IActivityTaskManager;
 import android.app.INotificationManager;
+import android.app.IUriGrantsManager;
 import android.app.IWallpaperManager;
 import android.app.KeyguardManager;
 import android.app.NotificationManager;
@@ -40,6 +41,7 @@ import android.app.smartspace.SmartspaceManager;
 import android.app.trust.TrustManager;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothManager;
+import android.companion.virtual.VirtualDeviceManager;
 import android.content.ClipboardManager;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -66,6 +68,7 @@ import android.hardware.input.InputManager;
 import android.media.AudioManager;
 import android.media.IAudioService;
 import android.media.MediaRouter2Manager;
+import android.media.projection.IMediaProjectionManager;
 import android.media.projection.MediaProjectionManager;
 import android.media.session.MediaSessionManager;
 import android.net.ConnectivityManager;
@@ -88,6 +91,7 @@ import android.telecom.TelecomManager;
 import android.telephony.CarrierConfigManager;
 import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyManager;
+import android.telephony.satellite.SatelliteManager;
 import android.view.Choreographer;
 import android.view.CrossWindowBlurListeners;
 import android.view.IWindowManager;
@@ -230,6 +234,12 @@ public class FrameworkServicesModule {
     @Singleton
     static DisplayManager provideDisplayManager(Context context) {
         return context.getSystemService(DisplayManager.class);
+    }
+
+    @Provides
+    @Singleton
+    static VirtualDeviceManager provideVirtualDeviceManager(Context context) {
+        return context.getSystemService(VirtualDeviceManager.class);
     }
 
     @Provides
@@ -413,6 +423,13 @@ public class FrameworkServicesModule {
     }
 
     @Provides
+    @Singleton
+    static IMediaProjectionManager provideIMediaProjectionManager() {
+        return IMediaProjectionManager.Stub.asInterface(
+                ServiceManager.getService(Context.MEDIA_PROJECTION_SERVICE));
+    }
+
+    @Provides
     static MediaRouter2Manager provideMediaRouter2Manager(Context context) {
         return MediaRouter2Manager.getInstance(context);
     }
@@ -539,7 +556,7 @@ public class FrameworkServicesModule {
     @Provides
     @Singleton
     static SubscriptionManager provideSubscriptionManager(Context context) {
-        return context.getSystemService(SubscriptionManager.class);
+        return context.getSystemService(SubscriptionManager.class).createForAllUserProfiles();
     }
 
     @Provides
@@ -647,6 +664,7 @@ public class FrameworkServicesModule {
 
     @Provides
     @Singleton
+    @Nullable
     static SmartspaceManager provideSmartspaceManager(Context context) {
         return context.getSystemService(SmartspaceManager.class);
     }
@@ -686,5 +704,19 @@ public class FrameworkServicesModule {
     @Singleton
     static StatusBarManager provideStatusBarManager(Context context) {
         return context.getSystemService(StatusBarManager.class);
+    }
+
+    @Provides
+    @Singleton
+    static IUriGrantsManager provideIUriGrantsManager() {
+        return IUriGrantsManager.Stub.asInterface(
+                ServiceManager.getService(Context.URI_GRANTS_SERVICE)
+        );
+    }
+
+    @Provides
+    @Singleton
+    static Optional<SatelliteManager> provideSatelliteManager(Context context) {
+        return Optional.ofNullable(context.getSystemService(SatelliteManager.class));
     }
 }

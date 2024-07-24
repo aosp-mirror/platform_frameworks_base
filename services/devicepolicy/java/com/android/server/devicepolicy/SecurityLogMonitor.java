@@ -20,18 +20,27 @@ import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static java.util.concurrent.TimeUnit.NANOSECONDS;
 
 import android.app.admin.DeviceAdminReceiver;
+import android.app.admin.IAuditLogEventsCallback;
 import android.app.admin.SecurityLog;
 import android.app.admin.SecurityLog.SecurityEvent;
+import android.app.admin.flags.Flags;
+import android.os.Handler;
+import android.os.IBinder;
 import android.os.Process;
+import android.os.RemoteException;
 import android.os.SystemClock;
 import android.util.Log;
 import android.util.Slog;
+import android.util.SparseArray;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.server.utils.Slogf;
 
 import java.io.IOException;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
@@ -53,15 +62,11 @@ class SecurityLogMonitor implements Runnable {
 
     private int mEnabledUser;
 
-    SecurityLogMonitor(DevicePolicyManagerService service) {
-        this(service, 0 /* id */);
-    }
-
-    @VisibleForTesting
-    SecurityLogMonitor(DevicePolicyManagerService service, long id) {
+    SecurityLogMonitor(DevicePolicyManagerService service, Handler handler) {
         mService = service;
-        mId = id;
+        mId = 0;
         mLastForceNanos = System.nanoTime();
+        mHandler = handler;
     }
 
     private static final boolean DEBUG = false;  // STOPSHIP if true.
@@ -101,6 +106,10 @@ class SecurityLogMonitor implements Runnable {
     /** Minimum time between forced fetch attempts. */
     private static final long FORCE_FETCH_THROTTLE_NS = TimeUnit.SECONDS.toNanos(10);
 
+    /**
+     * Monitor thread is not null iff SecurityLogMonitor is running, i.e. started and not stopped.
+     * Pausing doesn't change it.
+     */
     @GuardedBy("mLock")
     private Thread mMonitorThread = null;
     @GuardedBy("mLock")
@@ -113,6 +122,9 @@ class SecurityLogMonitor implements Runnable {
     // Whether we have already logged the fact that log buffer reached 90%, to avoid dupes.
     @GuardedBy("mLock")
     private boolean mCriticalLevelLogged = false;
+
+    private boolean mLegacyLogEnabled;
+    private boolean mAuditLogEnabled;
 
     /**
      * Last events fetched from log to check for overlap between batches. We can leave it empty if
@@ -139,6 +151,40 @@ class SecurityLogMonitor implements Runnable {
     private long mLastForceNanos = 0;
 
     /**
+     * Handler shared with DPMS.
+     */
+    private final Handler mHandler;
+
+    /**
+     * Oldest events get purged from audit log buffer if total number exceeds this value.
+     */
+    private static final int MAX_AUDIT_LOG_EVENTS = 10000;
+    /**
+     * Events older than this get purged from audit log buffer.
+     */
+    private static final long MAX_AUDIT_LOG_EVENT_AGE_NS = TimeUnit.HOURS.toNanos(8);
+
+    /**
+     * Audit log callbacks keyed by UID. The code should maintain the following invariant: all
+     * callbacks in this map have received (or are scheduled to receive) all events in
+     * mAuditLogEventsBuffer. To ensure this, before a callback is put into this map, it must be
+     * scheduled to receive all the events in the buffer, and conversely, before a new chunk of
+     * events is added to the buffer, it must be scheduled to be sent to all callbacks already in
+     * this list. All scheduling should happen on mHandler, so that they aren't reordered, and
+     * while holding the lock. This ensures that no callback misses an event or receives a duplicate
+     * or out of order events.
+     */
+    @GuardedBy("mLock")
+    private final SparseArray<IAuditLogEventsCallback> mAuditLogCallbacks = new SparseArray<>();
+
+    /**
+     * Audit log event buffer. It is shrunk automatically whenever either there are too many events
+     * or the oldest one is too old.
+     */
+    @GuardedBy("mLock")
+    private final ArrayDeque<SecurityEvent> mAuditLogEventBuffer = new ArrayDeque<>();
+
+    /**
      * Start security logging.
      *
      * @param enabledUser which user logging is enabled on, or USER_ALL to enable logging for all
@@ -147,19 +193,13 @@ class SecurityLogMonitor implements Runnable {
     void start(int enabledUser) {
         Slog.i(TAG, "Starting security logging for user " + enabledUser);
         mEnabledUser = enabledUser;
-        SecurityLog.writeEvent(SecurityLog.TAG_LOGGING_STARTED);
         mLock.lock();
         try {
             if (mMonitorThread == null) {
-                mPendingLogs = new ArrayList<>();
-                mCriticalLevelLogged = false;
-                mId = 0;
-                mAllowedToRetrieve = false;
-                mNextAllowedRetrievalTimeMillis = -1;
-                mPaused = false;
-
-                mMonitorThread = new Thread(this);
-                mMonitorThread.start();
+                resetLegacyBufferLocked();
+                startMonitorThreadLocked();
+            } else {
+                Slog.i(TAG, "Security log monitor thread is already running");
             }
         } finally {
             mLock.unlock();
@@ -168,27 +208,80 @@ class SecurityLogMonitor implements Runnable {
 
     void stop() {
         Slog.i(TAG, "Stopping security logging.");
-        SecurityLog.writeEvent(SecurityLog.TAG_LOGGING_STOPPED);
         mLock.lock();
         try {
             if (mMonitorThread != null) {
-                mMonitorThread.interrupt();
-                try {
-                    mMonitorThread.join(TimeUnit.SECONDS.toMillis(5));
-                } catch (InterruptedException e) {
-                    Log.e(TAG, "Interrupted while waiting for thread to stop", e);
-                }
-                // Reset state and clear buffer
-                mPendingLogs = new ArrayList<>();
-                mId = 0;
-                mAllowedToRetrieve = false;
-                mNextAllowedRetrievalTimeMillis = -1;
-                mPaused = false;
-                mMonitorThread = null;
+                stopMonitorThreadLocked();
+                resetLegacyBufferLocked();
             }
         } finally {
             mLock.unlock();
         }
+    }
+
+    void setLoggingParams(int enabledUser, boolean legacyLogEnabled, boolean auditLogEnabled) {
+        Slogf.i(TAG, "Setting logging params, user = %d -> %d, legacy: %b -> %b, audit %b -> %b",
+                mEnabledUser, enabledUser, mLegacyLogEnabled, legacyLogEnabled, mAuditLogEnabled,
+                auditLogEnabled);
+        mLock.lock();
+        try {
+            mEnabledUser = enabledUser;
+            if (mMonitorThread == null && (legacyLogEnabled || auditLogEnabled)) {
+                startMonitorThreadLocked();
+            } else if (mMonitorThread != null && !legacyLogEnabled && !auditLogEnabled) {
+                stopMonitorThreadLocked();
+            }
+
+            if (mLegacyLogEnabled != legacyLogEnabled) {
+                resetLegacyBufferLocked();
+                mLegacyLogEnabled = legacyLogEnabled;
+            }
+
+            if (mAuditLogEnabled != auditLogEnabled) {
+                resetAuditBufferLocked();
+                mAuditLogEnabled = auditLogEnabled;
+            }
+        } finally {
+            mLock.unlock();
+        }
+
+    }
+
+    @GuardedBy("mLock")
+    private void startMonitorThreadLocked() {
+        mId = 0;
+        mPaused = false;
+        mMonitorThread = new Thread(this);
+        mMonitorThread.start();
+        SecurityLog.writeEvent(SecurityLog.TAG_LOGGING_STARTED);
+        Slog.i(TAG, "Security log monitor thread started");
+    }
+
+    @GuardedBy("mLock")
+    private void stopMonitorThreadLocked() {
+        mMonitorThread.interrupt();
+        try {
+            mMonitorThread.join(TimeUnit.SECONDS.toMillis(5));
+        } catch (InterruptedException e) {
+            Log.e(TAG, "Interrupted while waiting for thread to stop", e);
+        }
+        mMonitorThread = null;
+        SecurityLog.writeEvent(SecurityLog.TAG_LOGGING_STOPPED);
+    }
+
+    @GuardedBy("mLock")
+    private void resetLegacyBufferLocked() {
+        mPendingLogs = new ArrayList<>();
+        mCriticalLevelLogged = false;
+        mAllowedToRetrieve = false;
+        mNextAllowedRetrievalTimeMillis = -1;
+        Slog.i(TAG, "Legacy buffer reset.");
+    }
+
+    @GuardedBy("mLock")
+    private void resetAuditBufferLocked() {
+        mAuditLogEventBuffer.clear();
+        mAuditLogCallbacks.clear();
     }
 
     /**
@@ -330,8 +423,7 @@ class SecurityLogMonitor implements Runnable {
      */
     @GuardedBy("mLock")
     private void mergeBatchLocked(final ArrayList<SecurityEvent> newLogs) {
-        // Reserve capacity so that copying doesn't occur.
-        mPendingLogs.ensureCapacity(mPendingLogs.size() + newLogs.size());
+        List<SecurityEvent> dedupedLogs = new ArrayList<>();
         // Run through the first events of the batch to check if there is an overlap with previous
         // batch and if so, skip overlapping events. Events are sorted by timestamp, so we can
         // compare it in linear time by advancing two pointers, one for each batch.
@@ -350,8 +442,7 @@ class SecurityLogMonitor implements Runnable {
             if (lastNanos > currentNanos) {
                 // New event older than the last we've seen so far, must be due to reordering.
                 if (DEBUG) Slog.d(TAG, "New event in the overlap: " + currentNanos);
-                assignLogId(curEvent);
-                mPendingLogs.add(curEvent);
+                dedupedLogs.add(curEvent);
                 curPos++;
             } else if (lastNanos < currentNanos) {
                 if (DEBUG) Slog.d(TAG, "Event disappeared from the overlap: " + lastNanos);
@@ -363,8 +454,7 @@ class SecurityLogMonitor implements Runnable {
                     if (DEBUG) Slog.d(TAG, "Skipped dup event with timestamp: " + lastNanos);
                 } else {
                     // Wow, what a coincidence, or probably the clock is too coarse.
-                    assignLogId(curEvent);
-                    mPendingLogs.add(curEvent);
+                    dedupedLogs.add(curEvent);
                     if (DEBUG) Slog.d(TAG, "Event timestamp collision: " + lastNanos);
                 }
                 lastPos++;
@@ -372,12 +462,24 @@ class SecurityLogMonitor implements Runnable {
             }
         }
         // Assign an id to the new logs, after the overlap with mLastEvents.
-        List<SecurityEvent> idLogs = newLogs.subList(curPos, newLogs.size());
-        for (SecurityEvent event : idLogs) {
+        dedupedLogs.addAll(newLogs.subList(curPos, newLogs.size()));
+        for (SecurityEvent event : dedupedLogs) {
             assignLogId(event);
         }
+
+        if (!Flags.securityLogV2Enabled() || mLegacyLogEnabled) {
+            addToLegacyBufferLocked(dedupedLogs);
+        }
+
+        if (Flags.securityLogV2Enabled() && mAuditLogEnabled) {
+            addAuditLogEventsLocked(dedupedLogs);
+        }
+    }
+
+    @GuardedBy("mLock")
+    private void addToLegacyBufferLocked(List<SecurityEvent> dedupedLogs) {
         // Save the rest of the new batch.
-        mPendingLogs.addAll(idLogs);
+        mPendingLogs.addAll(dedupedLogs);
 
         checkCriticalLevel();
 
@@ -445,7 +547,10 @@ class SecurityLogMonitor implements Runnable {
 
                 saveLastEvents(newLogs);
                 newLogs.clear();
-                notifyDeviceOwnerOrProfileOwnerIfNeeded(force);
+
+                if (!Flags.securityLogV2Enabled() || mLegacyLogEnabled) {
+                    notifyDeviceOwnerOrProfileOwnerIfNeeded(force);
+                }
             } catch (IOException e) {
                 Log.e(TAG, "Failed to read security log", e);
             } catch (InterruptedException e) {
@@ -522,6 +627,119 @@ class SecurityLogMonitor implements Runnable {
                 mForceSemaphore.release();
             }
             return 0;
+        }
+    }
+
+    public void setAuditLogEventsCallback(int uid, IAuditLogEventsCallback callback) {
+        mLock.lock();
+        try {
+            if (callback == null) {
+                mAuditLogCallbacks.remove(uid);
+                Slogf.i(TAG, "Cleared audit log callback for UID %d", uid);
+                return;
+            }
+            // Create a copy while holding the lock, so that that new events are not added
+            // resulting in duplicates.
+            final List<SecurityEvent> events = new ArrayList<>(mAuditLogEventBuffer);
+            scheduleSendAuditLogs(uid, callback, events);
+            mAuditLogCallbacks.append(uid, callback);
+        } finally {
+            mLock.unlock();
+        }
+        Slogf.i(TAG, "Set audit log callback for UID %d", uid);
+    }
+
+    @GuardedBy("mLock")
+    private void addAuditLogEventsLocked(List<SecurityEvent> events) {
+        if (mPaused) {
+            // TODO: maybe we need to stash the logs in some temp buffer wile paused so that
+            // they can be accessed after affiliation is fixed.
+            return;
+        }
+        if (!events.isEmpty()) {
+            for (int i = 0; i < mAuditLogCallbacks.size(); i++) {
+                final int uid = mAuditLogCallbacks.keyAt(i);
+                scheduleSendAuditLogs(uid, mAuditLogCallbacks.valueAt(i), events);
+            }
+        }
+        if (DEBUG) {
+            Slogf.d(TAG, "Adding audit %d events to % already present in the buffer",
+                    events.size(), mAuditLogEventBuffer.size());
+        }
+        mAuditLogEventBuffer.addAll(events);
+        trimAuditLogBufferLocked();
+        if (DEBUG) {
+            Slogf.d(TAG, "Audit event buffer size after trimming: %d",
+                    mAuditLogEventBuffer.size());
+        }
+    }
+
+    @GuardedBy("mLock")
+    private void trimAuditLogBufferLocked() {
+        long nowNanos = TimeUnit.MILLISECONDS.toNanos(System.currentTimeMillis());
+
+        final Iterator<SecurityEvent> iterator = mAuditLogEventBuffer.iterator();
+        while (iterator.hasNext()) {
+            final SecurityEvent event = iterator.next();
+            if (mAuditLogEventBuffer.size() <= MAX_AUDIT_LOG_EVENTS
+                    && nowNanos - event.getTimeNanos() <= MAX_AUDIT_LOG_EVENT_AGE_NS) {
+                break;
+            }
+
+            iterator.remove();
+        }
+    }
+
+    private void scheduleSendAuditLogs(
+            int uid, IAuditLogEventsCallback callback, List<SecurityEvent> events) {
+        if (DEBUG) {
+            Slogf.d(TAG, "Scheduling to send %d audit log events to UID %d", events.size(), uid);
+        }
+        mHandler.post(() -> sendAuditLogs(uid, callback, events));
+    }
+
+    private void sendAuditLogs(
+            int uid, IAuditLogEventsCallback callback, List<SecurityEvent> events) {
+        try {
+            final int size = events.size();
+            if (DEBUG) {
+                Slogf.d(TAG, "Sending %d audit log events to UID %d", size, uid);
+            }
+            callback.onNewAuditLogEvents(events);
+            if (DEBUG) {
+                Slogf.d(TAG, "Sent %d audit log events to UID %d", size, uid);
+            }
+        } catch (RemoteException e) {
+            Slogf.e(TAG, e, "Failed to invoke audit log callback for UID %d", uid);
+            removeAuditLogEventsCallbackIfDead(uid, callback);
+        }
+    }
+
+    private void removeAuditLogEventsCallbackIfDead(int uid, IAuditLogEventsCallback callback) {
+        final IBinder binder = callback.asBinder();
+        if (binder.isBinderAlive()) {
+            Slog.i(TAG, "Callback binder is still alive, not removing.");
+            return;
+        }
+
+        mLock.lock();
+        try {
+            int index = mAuditLogCallbacks.indexOfKey(uid);
+            if (index < 0) {
+                Slogf.i(TAG, "Callback not registered for UID %d, nothing to remove", uid);
+                return;
+            }
+
+            final IBinder storedBinder = mAuditLogCallbacks.valueAt(index).asBinder();
+            if (!storedBinder.equals(binder)) {
+                Slogf.i(TAG, "Callback is already replaced for UID %d, not removing", uid);
+                return;
+            }
+
+            Slogf.i(TAG, "Removing callback for UID %d", uid);
+            mAuditLogCallbacks.removeAt(index);
+        } finally {
+            mLock.unlock();
         }
     }
 }

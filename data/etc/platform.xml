@@ -322,13 +322,15 @@
     <library name="android.hidl.manager-V1.0-java"
             file="/system/framework/android.hidl.manager-V1.0-java.jar" />
 
-    <!-- These are the standard packages that are white-listed to always have internet
+    <!-- These are the standard packages that are allowed to always have internet
          access while in power save mode, even if they aren't in the foreground. -->
     <allow-in-power-save package="com.android.providers.downloads" />
+    <allow-in-power-save package="com.android.rkpdapp" />
 
-    <!-- These are the standard packages that are white-listed to always have internet
+    <!-- These are the standard packages that are allowed to always have internet
          access while in data mode, even if they aren't in the foreground. -->
     <allow-in-data-usage-save package="com.android.providers.downloads" />
+    <allow-in-data-usage-save package="com.android.rkpdapp" />
 
     <!-- This is a core platform component that needs to freely run in the background -->
     <allow-in-power-save package="com.android.cellbroadcastreceiver.module" />
@@ -338,7 +340,7 @@
     <!-- Emergency app needs to run in the background to reliably provide safety features -->
     <allow-in-power-save package="com.android.emergency" />
 
-    <!-- Whitelist system providers -->
+    <!-- Allow system providers -->
     <!-- Calendar provider needs alarms while in idle -->
     <allow-in-power-save package="com.android.providers.calendar" />
     <allow-in-power-save-except-idle package="com.android.providers.contacts" />
@@ -351,7 +353,9 @@
     <!-- Allow IMS service entitlement app to schedule jobs to run when app in background. -->
     <allow-in-power-save-except-idle package="com.android.imsserviceentitlement" />
 
-    <!-- Allow device lock controller app to schedule jobs and alarms when app in background,
-        otherwise, it may not be able to enforce provision for managed devices. -->
+    <!-- Allow device lock controller app to schedule jobs and alarms, and have network access
+         when app in background; otherwise, it may not be able to enforce provision for managed
+         devices. -->
     <allow-in-power-save package="com.android.devicelockcontroller" />
+    <allow-in-data-usage-save package="com.android.devicelockcontroller" />
 </permissions>

@@ -33,6 +33,7 @@ import android.app.appsearch.SearchResult;
 import android.app.appsearch.SearchResults;
 import android.app.appsearch.SearchSpec;
 import android.app.appsearch.SetSchemaRequest;
+import android.app.usage.UsageStatsManagerInternal;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -47,10 +48,10 @@ import android.graphics.drawable.Icon;
 import android.os.Binder;
 import android.os.PersistableBundle;
 import android.os.StrictMode;
+import android.os.SystemClock;
 import android.text.format.Formatter;
 import android.util.ArrayMap;
 import android.util.ArraySet;
-import android.util.AtomicFile;
 import android.util.Log;
 import android.util.Slog;
 import android.util.Xml;
@@ -69,8 +70,6 @@ import com.android.server.pm.ShortcutService.DumpFilter;
 import com.android.server.pm.ShortcutService.ShortcutOperation;
 import com.android.server.pm.ShortcutService.Stats;
 
-import libcore.io.IoUtils;
-
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.xmlpull.v1.XmlPullParser;
@@ -78,7 +77,6 @@ import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -196,6 +194,9 @@ class ShortcutPackage extends ShortcutPackageItem {
     private long mLastKnownForegroundElapsedTime;
 
     @GuardedBy("mLock")
+    private long mLastReportedTime;
+
+    @GuardedBy("mLock")
     private boolean mIsAppSearchSchemaUpToDate;
 
     private ShortcutPackage(ShortcutUser shortcutUser,
@@ -239,7 +240,7 @@ class ShortcutPackage extends ShortcutPackageItem {
 
     @Override
     protected boolean canRestoreAnyVersion() {
-        return false;
+        return true;
     }
 
     @Override
@@ -1677,6 +1678,26 @@ class ShortcutPackage extends ShortcutPackageItem {
         return condition[0];
     }
 
+    void reportShortcutUsed(@NonNull final UsageStatsManagerInternal usageStatsManagerInternal,
+            @NonNull final String shortcutId) {
+        synchronized (mLock) {
+            final long currentTS = SystemClock.elapsedRealtime();
+            final ShortcutService s = mShortcutUser.mService;
+            if (currentTS - mLastReportedTime > s.mSaveDelayMillis) {
+                mLastReportedTime = currentTS;
+            } else {
+                return;
+            }
+            final long token = s.injectClearCallingIdentity();
+            try {
+                usageStatsManagerInternal.reportShortcutUsage(getPackageName(), shortcutId,
+                        getPackageUserId());
+            } finally {
+                s.injectRestoreCallingIdentity(token);
+            }
+        }
+    }
+
     public void dump(@NonNull PrintWriter pw, @NonNull String prefix, DumpFilter filter) {
         pw.println();
 
@@ -1969,45 +1990,41 @@ class ShortcutPackage extends ShortcutPackageItem {
 
     public static ShortcutPackage loadFromFile(ShortcutService s, ShortcutUser shortcutUser,
             File path, boolean fromBackup) {
+        try (ResilientAtomicFile file = getResilientFile(path)) {
+            FileInputStream in = null;
+            try {
+                in = file.openRead();
+                if (in == null) {
+                    Slog.d(TAG, "Not found " + path);
+                    return null;
+                }
 
-        final AtomicFile file = new AtomicFile(path);
-        final FileInputStream in;
-        try {
-            in = file.openRead();
-        } catch (FileNotFoundException e) {
-            if (ShortcutService.DEBUG) {
-                Slog.d(TAG, "Not found " + path);
+                ShortcutPackage ret = null;
+                TypedXmlPullParser parser = Xml.resolvePullParser(in);
+
+                int type;
+                while ((type = parser.next()) != XmlPullParser.END_DOCUMENT) {
+                    if (type != XmlPullParser.START_TAG) {
+                        continue;
+                    }
+                    final int depth = parser.getDepth();
+
+                    final String tag = parser.getName();
+                    if (ShortcutService.DEBUG_LOAD || ShortcutService.DEBUG_REBOOT) {
+                        Slog.d(TAG, String.format("depth=%d type=%d name=%s", depth, type, tag));
+                    }
+                    if ((depth == 1) && TAG_ROOT.equals(tag)) {
+                        ret = loadFromXml(s, shortcutUser, parser, fromBackup);
+                        continue;
+                    }
+                    ShortcutService.throwForInvalidTag(depth, tag);
+                }
+                return ret;
+            } catch (Exception e) {
+                Slog.e(TAG, "Failed to read file " + file.getBaseFile(), e);
+                file.failRead(in, e);
+                return loadFromFile(s, shortcutUser, path, fromBackup);
             }
-            return null;
-        }
-
-        try {
-            ShortcutPackage ret = null;
-            TypedXmlPullParser parser = Xml.resolvePullParser(in);
-
-            int type;
-            while ((type = parser.next()) != XmlPullParser.END_DOCUMENT) {
-                if (type != XmlPullParser.START_TAG) {
-                    continue;
-                }
-                final int depth = parser.getDepth();
-
-                final String tag = parser.getName();
-                if (ShortcutService.DEBUG_LOAD || ShortcutService.DEBUG_REBOOT) {
-                    Slog.d(TAG, String.format("depth=%d type=%d name=%s", depth, type, tag));
-                }
-                if ((depth == 1) && TAG_ROOT.equals(tag)) {
-                    ret = loadFromXml(s, shortcutUser, parser, fromBackup);
-                    continue;
-                }
-                ShortcutService.throwForInvalidTag(depth, tag);
-            }
-            return ret;
-        } catch (IOException | XmlPullParserException e) {
-            Slog.e(TAG, "Failed to read file " + file.getBaseFile(), e);
-            return null;
-        } finally {
-            IoUtils.closeQuietly(in);
         }
     }
 

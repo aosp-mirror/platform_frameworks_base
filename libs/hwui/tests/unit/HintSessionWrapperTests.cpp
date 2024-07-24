@@ -23,9 +23,11 @@
 #include <chrono>
 
 #include "Properties.h"
+#include "tests/common/TestUtils.h"
 
 using namespace testing;
 using namespace std::chrono_literals;
+using namespace android::uirenderer::renderthread;
 
 APerformanceHintManager* managerPtr = reinterpret_cast<APerformanceHintManager*>(123);
 APerformanceHintSession* sessionPtr = reinterpret_cast<APerformanceHintSession*>(456);
@@ -42,6 +44,9 @@ public:
 protected:
     std::shared_ptr<HintSessionWrapper> mWrapper;
 
+    std::promise<int> blockDestroyCallUntil;
+    std::promise<int> waitForDestroyFinished;
+
     class MockHintSessionBinding : public HintSessionWrapper::HintSessionBinding {
     public:
         void init() override;
@@ -53,16 +58,28 @@ protected:
         MOCK_METHOD(void, fakeUpdateTargetWorkDuration, (APerformanceHintSession*, int64_t));
         MOCK_METHOD(void, fakeReportActualWorkDuration, (APerformanceHintSession*, int64_t));
         MOCK_METHOD(void, fakeSendHint, (APerformanceHintSession*, int32_t));
+        // Needs to be on the binding so it can be accessed from static methods
+        std::promise<int> allowCreationToFinish;
     };
 
     // Must be static so it can have function pointers we can point to with static methods
     static std::shared_ptr<MockHintSessionBinding> sMockBinding;
+
+    static void allowCreationToFinish() { sMockBinding->allowCreationToFinish.set_value(1); }
+    void allowDelayedDestructionToStart() { blockDestroyCallUntil.set_value(1); }
+    void waitForDelayedDestructionToFinish() { waitForDestroyFinished.get_future().wait(); }
 
     // Must be static so we can point to them as normal fn pointers with HintSessionBinding
     static APerformanceHintManager* stubGetManager() { return sMockBinding->fakeGetManager(); };
     static APerformanceHintSession* stubCreateSession(APerformanceHintManager* manager,
                                                       const int32_t* ids, size_t idsSize,
                                                       int64_t initialTarget) {
+        return sMockBinding->fakeCreateSession(manager, ids, idsSize, initialTarget);
+    }
+    static APerformanceHintSession* stubManagedCreateSession(APerformanceHintManager* manager,
+                                                             const int32_t* ids, size_t idsSize,
+                                                             int64_t initialTarget) {
+        sMockBinding->allowCreationToFinish.get_future().wait();
         return sMockBinding->fakeCreateSession(manager, ids, idsSize, initialTarget);
     }
     static APerformanceHintSession* stubSlowCreateSession(APerformanceHintManager* manager,
@@ -85,7 +102,21 @@ protected:
     static void stubSendHint(APerformanceHintSession* session, int32_t hintId) {
         sMockBinding->fakeSendHint(session, hintId);
     };
-    void waitForWrapperReady() { mWrapper->mHintSessionFuture.wait(); }
+    void waitForWrapperReady() {
+        if (mWrapper->mHintSessionFuture.has_value()) {
+            mWrapper->mHintSessionFuture->wait();
+        }
+    }
+    void scheduleDelayedDestroyManaged() {
+        TestUtils::runOnRenderThread([&](renderthread::RenderThread& rt) {
+            // Guaranteed to be scheduled first, allows destruction to start
+            rt.queue().postDelayed(0_ms, [&] { blockDestroyCallUntil.get_future().wait(); });
+            // Guaranteed to be scheduled second, destroys the session
+            mWrapper->delayedDestroy(rt, 1_ms, mWrapper);
+            // This is guaranteed to be queued after the destroy, signals that destruction is done
+            rt.queue().postDelayed(1_ms, [&] { waitForDestroyFinished.set_value(1); });
+        });
+    }
 };
 
 std::shared_ptr<HintSessionWrapperTests::MockHintSessionBinding>
@@ -113,6 +144,7 @@ void HintSessionWrapperTests::MockHintSessionBinding::init() {
 }
 
 void HintSessionWrapperTests::TearDown() {
+    // Ensure that anything running on RT is completely finished
     mWrapper = nullptr;
     sMockBinding = nullptr;
 }
@@ -122,6 +154,7 @@ TEST_F(HintSessionWrapperTests, destructorClosesBackgroundSession) {
     sMockBinding->createSession = stubSlowCreateSession;
     mWrapper->init();
     mWrapper = nullptr;
+    Mock::VerifyAndClearExpectations(sMockBinding.get());
 }
 
 TEST_F(HintSessionWrapperTests, sessionInitializesCorrectly) {
@@ -146,6 +179,164 @@ TEST_F(HintSessionWrapperTests, loadResetHintsSendCorrectly) {
     mWrapper->init();
     waitForWrapperReady();
     mWrapper->sendLoadResetHint();
+}
+
+TEST_F(HintSessionWrapperTests, delayedDeletionWorksCorrectlyAndOnlyClosesOnce) {
+    EXPECT_CALL(*sMockBinding, fakeCloseSession(sessionPtr)).Times(1);
+    mWrapper->init();
+    waitForWrapperReady();
+    // Init a second time just to ensure the wrapper grabs the promise value
+    mWrapper->init();
+
+    EXPECT_EQ(mWrapper->alive(), true);
+
+    // Schedule delayed destruction, allow it to run, and check when it's done
+    scheduleDelayedDestroyManaged();
+    allowDelayedDestructionToStart();
+    waitForDelayedDestructionToFinish();
+
+    // Ensure it closed within the timeframe of the test
+    Mock::VerifyAndClearExpectations(sMockBinding.get());
+    EXPECT_EQ(mWrapper->alive(), false);
+    // If we then delete the wrapper, it shouldn't close the session again
+    EXPECT_CALL(*sMockBinding, fakeCloseSession(_)).Times(0);
+    mWrapper = nullptr;
+}
+
+TEST_F(HintSessionWrapperTests, delayedDeletionResolvesBeforeAsyncCreationFinishes) {
+    // Here we test whether queueing delayedDestroy works while creation is still happening, if
+    // creation happens after
+    EXPECT_CALL(*sMockBinding, fakeCloseSession(sessionPtr)).Times(1);
+    sMockBinding->createSession = &stubManagedCreateSession;
+
+    // Start creating the session and destroying it at the same time
+    mWrapper->init();
+    scheduleDelayedDestroyManaged();
+
+    // Allow destruction to happen first
+    allowDelayedDestructionToStart();
+
+    // Make sure destruction has had time to happen
+    std::this_thread::sleep_for(50ms);
+
+    // Then, allow creation to finish after delayed destroy runs
+    allowCreationToFinish();
+
+    // Wait for destruction to finish
+    waitForDelayedDestructionToFinish();
+
+    // Ensure it closed within the timeframe of the test
+    Mock::VerifyAndClearExpectations(sMockBinding.get());
+    EXPECT_EQ(mWrapper->alive(), false);
+}
+
+TEST_F(HintSessionWrapperTests, delayedDeletionResolvesAfterAsyncCreationFinishes) {
+    // Here we test whether queueing delayedDestroy works while creation is still happening, if
+    // creation happens before
+    EXPECT_CALL(*sMockBinding, fakeCloseSession(sessionPtr)).Times(1);
+    sMockBinding->createSession = &stubManagedCreateSession;
+
+    // Start creating the session and destroying it at the same time
+    mWrapper->init();
+    scheduleDelayedDestroyManaged();
+
+    // Allow creation to happen first
+    allowCreationToFinish();
+
+    // Make sure creation has had time to happen
+    waitForWrapperReady();
+
+    // Then allow destruction to happen after creation is done
+    allowDelayedDestructionToStart();
+
+    // Wait for it to finish
+    waitForDelayedDestructionToFinish();
+
+    // Ensure it closed within the timeframe of the test
+    Mock::VerifyAndClearExpectations(sMockBinding.get());
+    EXPECT_EQ(mWrapper->alive(), false);
+}
+
+TEST_F(HintSessionWrapperTests, delayedDeletionDoesNotKillReusedSession) {
+    EXPECT_CALL(*sMockBinding, fakeCloseSession(sessionPtr)).Times(0);
+    EXPECT_CALL(*sMockBinding, fakeReportActualWorkDuration(sessionPtr, 5_ms)).Times(1);
+
+    mWrapper->init();
+    waitForWrapperReady();
+    // Init a second time just to grab the wrapper from the promise
+    mWrapper->init();
+    EXPECT_EQ(mWrapper->alive(), true);
+
+    // First schedule the deletion
+    scheduleDelayedDestroyManaged();
+
+    // Then, report an actual duration
+    mWrapper->reportActualWorkDuration(5_ms);
+
+    // Then, run the delayed deletion after sending the update
+    allowDelayedDestructionToStart();
+    waitForDelayedDestructionToFinish();
+
+    // Ensure it didn't close within the timeframe of the test
+    Mock::VerifyAndClearExpectations(sMockBinding.get());
+    EXPECT_EQ(mWrapper->alive(), true);
+}
+
+TEST_F(HintSessionWrapperTests, loadUpDoesNotResetDeletionTimer) {
+    EXPECT_CALL(*sMockBinding, fakeCloseSession(sessionPtr)).Times(1);
+    EXPECT_CALL(*sMockBinding,
+                fakeSendHint(sessionPtr, static_cast<int32_t>(SessionHint::CPU_LOAD_UP)))
+            .Times(1);
+
+    mWrapper->init();
+    waitForWrapperReady();
+    // Init a second time just to grab the wrapper from the promise
+    mWrapper->init();
+    EXPECT_EQ(mWrapper->alive(), true);
+
+    // First schedule the deletion
+    scheduleDelayedDestroyManaged();
+
+    // Then, send a load_up hint
+    mWrapper->sendLoadIncreaseHint();
+
+    // Then, run the delayed deletion after sending the update
+    allowDelayedDestructionToStart();
+    waitForDelayedDestructionToFinish();
+
+    // Ensure it closed within the timeframe of the test
+    Mock::VerifyAndClearExpectations(sMockBinding.get());
+    EXPECT_EQ(mWrapper->alive(), false);
+}
+
+TEST_F(HintSessionWrapperTests, manualSessionDestroyPlaysNiceWithDelayedDestruct) {
+    EXPECT_CALL(*sMockBinding, fakeCloseSession(sessionPtr)).Times(1);
+
+    mWrapper->init();
+    waitForWrapperReady();
+    // Init a second time just to grab the wrapper from the promise
+    mWrapper->init();
+    EXPECT_EQ(mWrapper->alive(), true);
+
+    // First schedule the deletion
+    scheduleDelayedDestroyManaged();
+
+    // Then, kill the session
+    mWrapper->destroy();
+
+    // Verify it died
+    Mock::VerifyAndClearExpectations(sMockBinding.get());
+    EXPECT_EQ(mWrapper->alive(), false);
+
+    EXPECT_CALL(*sMockBinding, fakeCloseSession(sessionPtr)).Times(0);
+
+    // Then, run the delayed deletion after manually killing the session
+    allowDelayedDestructionToStart();
+    waitForDelayedDestructionToFinish();
+
+    // Ensure it didn't close again and is still dead
+    Mock::VerifyAndClearExpectations(sMockBinding.get());
+    EXPECT_EQ(mWrapper->alive(), false);
 }
 
 }  // namespace android::uirenderer::renderthread

@@ -177,6 +177,10 @@ public class PackageManagerBackupAgent extends BackupAgent {
         return mHasMetadata;
     }
 
+    public int getSourceSdk() {
+        return mStoredSdkVersion;
+    }
+
     public Metadata getRestoredMetadata(String packageName) {
         if (mRestoredSignatures == null) {
             Slog.w(TAG, "getRestoredMetadata() before metadata read!");

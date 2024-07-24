@@ -16,7 +16,15 @@
 
 package com.android.internal.util;
 
-import android.test.AndroidTestCase;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
+import androidx.test.runner.AndroidJUnit4;
+
+import org.junit.Test;
+import org.junit.runner.RunWith;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -28,8 +36,10 @@ import java.nio.file.Files;
 /**
  * Tests for {@link ProcFileReader}.
  */
-public class ProcFileReaderTest extends AndroidTestCase {
+@RunWith(AndroidJUnit4.class)
+public class ProcFileReaderTest {
 
+    @Test
     public void testEmpty() throws Exception {
         final ProcFileReader reader = buildReader("");
 
@@ -43,6 +53,7 @@ public class ProcFileReaderTest extends AndroidTestCase {
         assertFalse(reader.hasMoreData());
     }
 
+    @Test
     public void testSingleString() throws Exception {
         final ProcFileReader reader = buildReader("a\nb\nc\n");
 
@@ -59,6 +70,7 @@ public class ProcFileReaderTest extends AndroidTestCase {
         assertFalse(reader.hasMoreData());
     }
 
+    @Test
     public void testMixedNumbersSkip() throws Exception {
         final ProcFileReader reader = buildReader("1 2 3\n4 abc_def 5 6 7 8 9\n10\n");
 
@@ -79,6 +91,7 @@ public class ProcFileReaderTest extends AndroidTestCase {
         assertFalse(reader.hasMoreData());
     }
 
+    @Test
     public void testBufferSize() throws Exception {
         // read numbers using very small buffer size, exercising fillBuf()
         final ProcFileReader reader = buildReader("1 21 3 41 5 61 7 81 9 10\n", 3);
@@ -97,6 +110,7 @@ public class ProcFileReaderTest extends AndroidTestCase {
         assertFalse(reader.hasMoreData());
     }
 
+    @Test
     public void testBlankLines() throws Exception {
         final ProcFileReader reader = buildReader("1\n\n2\n\n3\n");
 
@@ -117,6 +131,7 @@ public class ProcFileReaderTest extends AndroidTestCase {
         assertFalse(reader.hasMoreData());
     }
 
+    @Test
     public void testMinMax() throws Exception {
         final ProcFileReader reader = buildReader(
                 "1 -1024 9223372036854775807 -9223372036854775808\n");
@@ -129,6 +144,7 @@ public class ProcFileReaderTest extends AndroidTestCase {
         assertFalse(reader.hasMoreData());
     }
 
+    @Test
     public void testDelimiterNeverFound() throws Exception {
         final ProcFileReader reader = buildReader("teststringwithoutdelimiters");
 
@@ -141,6 +157,7 @@ public class ProcFileReaderTest extends AndroidTestCase {
         }
     }
 
+    @Test
     public void testLargerThanBuffer() throws Exception {
         // try finishing line larger than buffer
         final ProcFileReader reader = buildReader("1 teststringlongerthanbuffer\n", 4);
@@ -155,6 +172,7 @@ public class ProcFileReaderTest extends AndroidTestCase {
         }
     }
 
+    @Test
     public void testOptionalLongs() throws Exception {
         final ProcFileReader reader = buildReader("123 456\n789\n");
 
@@ -169,6 +187,7 @@ public class ProcFileReaderTest extends AndroidTestCase {
         assertEquals(-1L, reader.nextOptionalLong(-1L));
     }
 
+    @Test
     public void testInvalidLongs() throws Exception {
         final ProcFileReader reader = buildReader("12: 34\n56 78@#\n");
 
@@ -183,6 +202,7 @@ public class ProcFileReaderTest extends AndroidTestCase {
         assertFalse(reader.hasMoreData());
     }
 
+    @Test
     public void testConsecutiveDelimiters() throws Exception {
         final ProcFileReader reader = buildReader("1 2  3   4     5\n");
 
@@ -195,6 +215,47 @@ public class ProcFileReaderTest extends AndroidTestCase {
         assertFalse(reader.hasMoreData());
     }
 
+    @Test
+    public void testBufferSizeWithConsecutiveDelimiters() throws Exception {
+        // Read numbers using very small buffer size, exercising fillBuf()
+        // Include more consecutive delimiters than the buffer size.
+        final ProcFileReader reader =
+                buildReader("1   21  3  41           5  61  7  81 9   10\n", 3);
+
+        assertEquals(1, reader.nextInt());
+        assertEquals(21, reader.nextInt());
+        assertEquals(3, reader.nextInt());
+        assertEquals(41, reader.nextInt());
+        assertEquals(5, reader.nextInt());
+        assertEquals(61, reader.nextInt());
+        assertEquals(7, reader.nextInt());
+        assertEquals(81, reader.nextInt());
+        assertEquals(9, reader.nextInt());
+        assertEquals(10, reader.nextInt());
+        reader.finishLine();
+        assertFalse(reader.hasMoreData());
+    }
+
+    @Test
+    public void testBufferSizeWithConsecutiveDelimitersAndMultipleLines() throws Exception {
+        final ProcFileReader reader =
+                buildReader("1 21  41    \n    5  7     81   \n    9 10     \n", 3);
+
+        assertEquals(1, reader.nextInt());
+        assertEquals(21, reader.nextInt());
+        assertEquals(41, reader.nextInt());
+        reader.finishLine();
+        assertEquals(5, reader.nextInt());
+        assertEquals(7, reader.nextInt());
+        assertEquals(81, reader.nextInt());
+        reader.finishLine();
+        assertEquals(9, reader.nextInt());
+        assertEquals(10, reader.nextInt());
+        reader.finishLine();
+        assertFalse(reader.hasMoreData());
+    }
+
+    @Test
     public void testIgnore() throws Exception {
         final ProcFileReader reader = buildReader("a b c\n");
 
@@ -209,6 +270,7 @@ public class ProcFileReaderTest extends AndroidTestCase {
         assertFalse(reader.hasMoreData());
     }
 
+    @Test
     public void testRewind() throws Exception {
         final ProcFileReader reader = buildReader("abc\n");
 
@@ -224,7 +286,7 @@ public class ProcFileReaderTest extends AndroidTestCase {
         assertFalse(reader.hasMoreData());
     }
 
-
+    @Test
     public void testRewindFileInputStream() throws Exception {
         File tempFile = File.createTempFile("procfile", null, null);
         Files.write(tempFile.toPath(), "abc\n".getBytes(StandardCharsets.US_ASCII));

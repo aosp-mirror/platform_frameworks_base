@@ -20,6 +20,7 @@ import static android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_MANIFEST;
 import static android.os.Trace.TRACE_TAG_ACTIVITY_MANAGER;
 import static android.text.TextUtils.formatSimple;
 
+import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -1160,5 +1161,39 @@ public abstract class Service extends ContextWrapper implements ComponentCallbac
      * the service started.
      */
     public void onTimeout(int startId) {
+    }
+
+    /** @hide */
+    public final void callOnTimeLimitExceeded(int startId, @ForegroundServiceType int fgsType) {
+        // Note, because all the service callbacks (and other similar callbacks, e.g. activity
+        // callbacks) are delivered using the main handler, it's possible the service is already
+        // stopped when before this method is called, so we do a double check here.
+        if (mToken == null) {
+            Log.w(TAG, "Service already destroyed, skipping onTimeLimitExceeded()");
+            return;
+        }
+        try {
+            if (!mActivityManager.hasServiceTimeLimitExceeded(
+                    new ComponentName(this, mClassName), mToken)) {
+                Log.w(TAG, "Service no longer relevant, skipping onTimeLimitExceeded()");
+                return;
+            }
+        } catch (RemoteException ex) {
+        }
+        if (Flags.introduceNewServiceOntimeoutCallback()) {
+            onTimeout(startId, fgsType);
+        }
+    }
+
+    /**
+     * Callback called when a particular foreground service type has timed out.
+     *
+     * @param startId the startId passed to {@link #onStartCommand(Intent, int, int)} when
+     *                the service started.
+     * @param fgsType the {@link ServiceInfo.ForegroundServiceType foreground service type} which
+     *                caused the timeout.
+     */
+    @FlaggedApi(Flags.FLAG_INTRODUCE_NEW_SERVICE_ONTIMEOUT_CALLBACK)
+    public void onTimeout(int startId, @ForegroundServiceType int fgsType) {
     }
 }

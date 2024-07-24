@@ -25,6 +25,7 @@ import java.io.Closeable;
  *
  * This class implements a primitive reference counting scheme for database objects.
  */
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
 public abstract class SQLiteClosable implements Closeable {
     @UnsupportedAppUsage
     private int mReferenceCount = 1;

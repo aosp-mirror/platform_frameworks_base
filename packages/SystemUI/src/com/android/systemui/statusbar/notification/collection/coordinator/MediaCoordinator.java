@@ -16,13 +16,16 @@
 
 package com.android.systemui.statusbar.notification.collection.coordinator;
 
-import static com.android.systemui.media.controls.pipeline.MediaDataManagerKt.isMediaNotification;
+import static com.android.systemui.media.controls.domain.pipeline.MediaDataManagerKt.isMediaNotification;
 
 import android.os.RemoteException;
 import android.service.notification.StatusBarNotification;
 import android.util.ArrayMap;
 
+import androidx.annotation.NonNull;
+
 import com.android.internal.statusbar.IStatusBarService;
+import com.android.systemui.Flags;
 import com.android.systemui.media.controls.util.MediaFeatureFlag;
 import com.android.systemui.statusbar.notification.InflationException;
 import com.android.systemui.statusbar.notification.collection.NotifPipeline;
@@ -53,32 +56,13 @@ public class MediaCoordinator implements Coordinator {
 
     private final NotifFilter mMediaFilter = new NotifFilter(TAG) {
         @Override
-        public boolean shouldFilterOut(NotificationEntry entry, long now) {
+        public boolean shouldFilterOut(@NonNull NotificationEntry entry, long now) {
             if (!mIsMediaFeatureEnabled || !isMediaNotification(entry.getSbn())) {
                 return false;
             }
 
-            switch (mIconsState.getOrDefault(entry, STATE_ICONS_UNINFLATED)) {
-                case STATE_ICONS_UNINFLATED:
-                    try {
-                        mIconManager.createIcons(entry);
-                        mIconsState.put(entry, STATE_ICONS_INFLATED);
-                    } catch (InflationException e) {
-                        reportInflationError(entry, e);
-                        mIconsState.put(entry, STATE_ICONS_ERROR);
-                    }
-                    break;
-                case STATE_ICONS_INFLATED:
-                    try {
-                        mIconManager.updateIcons(entry);
-                    } catch (InflationException e) {
-                        reportInflationError(entry, e);
-                        mIconsState.put(entry, STATE_ICONS_ERROR);
-                    }
-                    break;
-                case STATE_ICONS_ERROR:
-                    // do nothing
-                    break;
+            if (!Flags.notificationsBackgroundMediaIcons()) {
+                inflateOrUpdateIcons(entry);
             }
 
             return true;
@@ -87,23 +71,66 @@ public class MediaCoordinator implements Coordinator {
 
     private final NotifCollectionListener mCollectionListener = new NotifCollectionListener() {
         @Override
-        public void onEntryInit(NotificationEntry entry) {
-            mIconsState.put(entry, STATE_ICONS_UNINFLATED);
-        }
-
-        @Override
-        public void onEntryUpdated(NotificationEntry entry) {
-            if (mIconsState.getOrDefault(entry, STATE_ICONS_UNINFLATED) == STATE_ICONS_ERROR) {
-                // The update may have fixed the inflation error, so give it another chance.
+        public void onEntryInit(@NonNull NotificationEntry entry) {
+            // We default to STATE_ICONS_UNINFLATED anyway, so there's no need to initialize it.
+            if (!Flags.notificationsBackgroundMediaIcons()) {
                 mIconsState.put(entry, STATE_ICONS_UNINFLATED);
             }
         }
 
         @Override
-        public void onEntryCleanUp(NotificationEntry entry) {
+        public void onEntryAdded(@NonNull NotificationEntry entry) {
+            if (Flags.notificationsBackgroundMediaIcons()) {
+                if (isMediaNotification(entry.getSbn())) {
+                    inflateOrUpdateIcons(entry);
+                }
+            }
+        }
+
+        @Override
+        public void onEntryUpdated(@NonNull NotificationEntry entry) {
+            if (mIconsState.getOrDefault(entry, STATE_ICONS_UNINFLATED) == STATE_ICONS_ERROR) {
+                // The update may have fixed the inflation error, so give it another chance.
+                mIconsState.put(entry, STATE_ICONS_UNINFLATED);
+            }
+
+            if (Flags.notificationsBackgroundMediaIcons()) {
+                if (isMediaNotification(entry.getSbn())) {
+                    inflateOrUpdateIcons(entry);
+                }
+            }
+        }
+
+        @Override
+        public void onEntryCleanUp(@NonNull NotificationEntry entry) {
             mIconsState.remove(entry);
         }
     };
+
+    private void inflateOrUpdateIcons(NotificationEntry entry) {
+        switch (mIconsState.getOrDefault(entry, STATE_ICONS_UNINFLATED)) {
+            case STATE_ICONS_UNINFLATED:
+                try {
+                    mIconManager.createIcons(entry);
+                    mIconsState.put(entry, STATE_ICONS_INFLATED);
+                } catch (InflationException e) {
+                    reportInflationError(entry, e);
+                    mIconsState.put(entry, STATE_ICONS_ERROR);
+                }
+                break;
+            case STATE_ICONS_INFLATED:
+                try {
+                    mIconManager.updateIcons(entry);
+                } catch (InflationException e) {
+                    reportInflationError(entry, e);
+                    mIconsState.put(entry, STATE_ICONS_ERROR);
+                }
+                break;
+            case STATE_ICONS_ERROR:
+                // do nothing
+                break;
+        }
+    }
 
     private void reportInflationError(NotificationEntry entry, Exception e) {
         // This is the same logic as in PreparationCoordinator; it doesn't handle media

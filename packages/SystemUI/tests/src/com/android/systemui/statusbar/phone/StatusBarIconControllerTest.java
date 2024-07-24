@@ -43,6 +43,7 @@ import com.android.systemui.statusbar.connectivity.ui.MobileContextProvider;
 import com.android.systemui.statusbar.phone.StatusBarIconController.DarkIconManager;
 import com.android.systemui.statusbar.phone.StatusBarIconController.IconManager;
 import com.android.systemui.statusbar.pipeline.StatusBarPipelineFlags;
+import com.android.systemui.statusbar.pipeline.icons.shared.BindableIconsRegistry;
 import com.android.systemui.statusbar.pipeline.mobile.ui.MobileUiAdapter;
 import com.android.systemui.statusbar.pipeline.mobile.ui.viewmodel.MobileIconsViewModel;
 import com.android.systemui.statusbar.pipeline.wifi.ui.WifiUiAdapter;
@@ -108,41 +109,14 @@ public class StatusBarIconControllerTest extends LeakCheckedTest {
                 mock(TunerService.class),
                 mock(DumpManager.class),
                 mock(StatusBarIconList.class),
-                flags
+                flags,
+                mock(BindableIconsRegistry.class)
         );
 
         iconController.addIconGroup(manager);
 
         // WHEN a request to remove a new icon is sent
         iconController.removeIcon("test_icon", 0);
-
-        // THEN it is not removed for those icons
-        verify(manager, never()).onRemoveIcon(anyInt());
-    }
-
-    @Test
-    public void testRemoveAllIconsForSlot_ignoredForNewPipeline() {
-        IconManager manager = mock(IconManager.class);
-
-        // GIVEN the new pipeline is on
-        StatusBarPipelineFlags flags = mock(StatusBarPipelineFlags.class);
-        when(flags.isIconControlledByFlags("test_icon")).thenReturn(true);
-
-        StatusBarIconController iconController = new StatusBarIconControllerImpl(
-                mContext,
-                mock(CommandQueue.class),
-                mock(DemoModeController.class),
-                mock(ConfigurationController.class),
-                mock(TunerService.class),
-                mock(DumpManager.class),
-                mock(StatusBarIconList.class),
-                flags
-        );
-
-        iconController.addIconGroup(manager);
-
-        // WHEN a request to remove a new icon is sent
-        iconController.removeAllIconsForSlot("test_icon");
 
         // THEN it is not removed for those icons
         verify(manager, never()).onRemoveIcon(anyInt());

@@ -1,0 +1,65 @@
+package {
+    default_team: "trendy_team_haptics_framework",
+    // See: http://go/android-license-faq
+    // A large-scale-change added 'default_applicable_licenses' to import
+    // all of the 'license_kinds' from "frameworks_base_license"
+    // to get the below license kinds:
+    //   SPDX-license-identifier-Apache-2.0
+    default_applicable_licenses: ["frameworks_base_license"],
+}
+
+android_test {
+    name: "FrameworksVibratorServicesTests",
+
+    srcs: [
+        "src/**/*.java",
+    ],
+
+    libs: [
+        "android.hardware.vibrator-V2-java",
+        "android.test.mock",
+        "android.test.base",
+        "android.test.runner",
+    ],
+
+    static_libs: [
+        "androidx.test.core",
+        "androidx.test.ext.truth",
+        "androidx.test.runner",
+        "androidx.test.rules",
+        "androidx.test.ext.junit",
+        "flag-junit",
+        "frameworks-base-testutils",
+        "frameworks-services-vibrator-testutils",
+        "junit",
+        "mockito-target-inline-minus-junit4",
+        "platform-test-annotations",
+        "service-permission.stubs.system_server",
+        "services.core",
+        "flag-junit",
+    ],
+    jni_libs: ["libdexmakerjvmtiagent"],
+    platform_apis: true,
+    certificate: "platform",
+    dxflags: ["--multi-dex"],
+
+    test_suites: [
+        "device-tests",
+        "automotive-tests",
+    ],
+
+    optimize: {
+        enabled: false,
+    },
+}
+
+java_library {
+    name: "frameworks-services-vibrator-testutils",
+    visibility: [":__subpackages__"],
+    srcs: [
+        "utils/**/*.java",
+    ],
+    static_libs: [
+        "services.core",
+    ],
+}

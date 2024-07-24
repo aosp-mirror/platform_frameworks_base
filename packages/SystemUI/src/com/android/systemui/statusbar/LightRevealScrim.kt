@@ -18,6 +18,7 @@ import android.view.MotionEvent
 import android.view.View
 import android.view.animation.PathInterpolator
 import com.android.app.animation.Interpolators
+import com.android.keyguard.logging.ScrimLogger
 import com.android.systemui.shade.TouchLogger
 import com.android.systemui.statusbar.LightRevealEffect.Companion.getPercentPastThreshold
 import com.android.systemui.util.getColorWithAlpha
@@ -89,7 +90,7 @@ object LiftReveal : LightRevealEffect {
     }
 }
 
-class LinearLightRevealEffect(private val isVertical: Boolean) : LightRevealEffect {
+data class LinearLightRevealEffect(private val isVertical: Boolean) : LightRevealEffect {
 
     // Interpolator that reveals >80% of the content at 0.5 progress, makes revealing faster
     private val interpolator =
@@ -155,7 +156,55 @@ class LinearLightRevealEffect(private val isVertical: Boolean) : LightRevealEffe
     }
 }
 
-class CircleReveal(
+data class LinearSideLightRevealEffect(private val isVertical: Boolean) : LightRevealEffect {
+
+    override fun setRevealAmountOnScrim(amount: Float, scrim: LightRevealScrim) {
+        scrim.interpolatedRevealAmount = amount
+        scrim.startColorAlpha =
+            getPercentPastThreshold(1 - amount, threshold = 1 - START_COLOR_REVEAL_PERCENTAGE)
+        scrim.revealGradientEndColorAlpha =
+            1f -
+                getPercentPastThreshold(
+                    amount,
+                    threshold = REVEAL_GRADIENT_END_COLOR_ALPHA_START_PERCENTAGE
+                )
+
+        val gradientBoundsAmount = lerp(GRADIENT_START_BOUNDS_PERCENTAGE, 1f, amount)
+        if (isVertical) {
+            scrim.setRevealGradientBounds(
+                left = -(scrim.viewWidth) * gradientBoundsAmount,
+                top = -(scrim.viewHeight) * gradientBoundsAmount,
+                right = (scrim.viewWidth) * gradientBoundsAmount,
+                bottom = (scrim.viewHeight) + (scrim.viewHeight) * gradientBoundsAmount
+            )
+        } else {
+            scrim.setRevealGradientBounds(
+                left = -(scrim.viewWidth) * gradientBoundsAmount,
+                top = -(scrim.viewHeight) * gradientBoundsAmount,
+                right = (scrim.viewWidth) + (scrim.viewWidth) * gradientBoundsAmount,
+                bottom = (scrim.viewHeight) * gradientBoundsAmount
+            )
+        }
+    }
+
+    private companion object {
+        // From which percentage we should start the gradient reveal width
+        // E.g. if 0 - starts with 0px width, 0.6f - starts with 60% width
+        private const val GRADIENT_START_BOUNDS_PERCENTAGE: Float = 1f
+
+        // When to start changing alpha color of the gradient scrim
+        // E.g. if 0.6f - starts fading the gradient away at 60% and becomes completely
+        // transparent at 100%
+        private const val REVEAL_GRADIENT_END_COLOR_ALPHA_START_PERCENTAGE: Float = 1f
+
+        // When to finish displaying start color fill that reveals the content
+        // E.g. if 0.6f - the content won't be visible at 0% and it will gradually
+        // reduce the alpha until 60% (at this point the color fill is invisible)
+        private const val START_COLOR_REVEAL_PERCENTAGE: Float = 1f
+    }
+}
+
+data class CircleReveal(
     /** X-value of the circle center of the reveal. */
     val centerX: Int,
     /** Y-value of the circle center of the reveal. */
@@ -181,7 +230,7 @@ class CircleReveal(
     }
 }
 
-class PowerButtonReveal(
+data class PowerButtonReveal(
     /** Approximate Y-value of the center of the power button on the physical device. */
     val powerButtonY: Float
 ) : LightRevealEffect {
@@ -252,8 +301,12 @@ constructor(
     initialHeight: Int? = null
 ) : View(context, attrs) {
 
+    private val logString = this::class.simpleName!! + "@" + hashCode()
+
     /** Listener that is called if the scrim's opaqueness changes */
-    lateinit var isScrimOpaqueChangedListener: Consumer<Boolean>
+    var isScrimOpaqueChangedListener: Consumer<Boolean>? = null
+
+    var scrimLogger: ScrimLogger? = null
 
     /**
      * How much of the underlying views are revealed, in percent. 0 means they will be completely
@@ -263,12 +316,14 @@ constructor(
         set(value) {
             if (field != value) {
                 field = value
-
+                if (value <= 0.0f || value >= 1.0f) {
+                    scrimLogger?.d(TAG, "revealAmount", "$value on $logString")
+                }
                 revealEffect.setRevealAmountOnScrim(value, this)
                 updateScrimOpaque()
                 Trace.traceCounter(
                     Trace.TRACE_TAG_APP,
-                    "light_reveal_amount",
+                    "light_reveal_amount $logString",
                     (field * 100).toInt()
                 )
                 invalidate()
@@ -285,6 +340,7 @@ constructor(
                 field = value
 
                 revealEffect.setRevealAmountOnScrim(revealAmount, this)
+                scrimLogger?.d(TAG, "revealEffect", "$value on $logString")
                 invalidate()
             }
         }
@@ -301,6 +357,7 @@ constructor(
      */
     internal var viewWidth: Int = initialWidth ?: 0
         private set
+
     internal var viewHeight: Int = initialHeight ?: 0
         private set
 
@@ -342,7 +399,8 @@ constructor(
         private set(value) {
             if (field != value) {
                 field = value
-                isScrimOpaqueChangedListener.accept(field)
+                isScrimOpaqueChangedListener?.accept(field)
+                scrimLogger?.d(TAG, "isScrimOpaque", "$value on $logString")
             }
         }
 
@@ -360,11 +418,13 @@ constructor(
 
     override fun setAlpha(alpha: Float) {
         super.setAlpha(alpha)
+        scrimLogger?.d(TAG, "alpha", "$alpha on $logString")
         updateScrimOpaque()
     }
 
     override fun setVisibility(visibility: Int) {
         super.setVisibility(visibility)
+        scrimLogger?.d(TAG, "visibility", "$visibility on $logString")
         updateScrimOpaque()
     }
 
@@ -424,11 +484,7 @@ constructor(
     }
 
     override fun onDraw(canvas: Canvas) {
-        if (
-            revealGradientWidth <= 0 ||
-            revealGradientHeight <= 0 ||
-            revealAmount == 0f
-        ) {
+        if (revealGradientWidth <= 0 || revealGradientHeight <= 0 || revealAmount == 0f) {
             if (revealAmount < 1f) {
                 canvas.drawColor(revealGradientEndColor)
             }

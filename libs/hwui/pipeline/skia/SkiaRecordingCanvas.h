@@ -105,6 +105,8 @@ private:
 
     void handleMutableImages(Bitmap& bitmap, DrawImagePayload& payload);
 
+    void onFilterPaint(Paint& paint) override;
+
     using INHERITED = SkiaCanvas;
 };
 

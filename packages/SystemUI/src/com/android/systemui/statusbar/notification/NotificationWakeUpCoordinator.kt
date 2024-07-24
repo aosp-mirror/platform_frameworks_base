@@ -20,9 +20,9 @@ import android.util.FloatProperty
 import android.view.animation.Interpolator
 import androidx.annotation.VisibleForTesting
 import androidx.core.animation.ObjectAnimator
-import com.android.systemui.Dumpable
 import com.android.app.animation.Interpolators
 import com.android.app.animation.InterpolatorsAndroidX
+import com.android.systemui.Dumpable
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.plugins.statusbar.StatusBarStateController
@@ -31,6 +31,8 @@ import com.android.systemui.shade.ShadeExpansionListener
 import com.android.systemui.shade.ShadeViewController
 import com.android.systemui.statusbar.StatusBarState
 import com.android.systemui.statusbar.notification.collection.NotificationEntry
+import com.android.systemui.statusbar.notification.domain.interactor.NotificationsKeyguardInteractor
+import com.android.systemui.statusbar.notification.shared.NotificationIconContainerRefactor
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController
 import com.android.systemui.statusbar.notification.stack.StackStateAnimator
 import com.android.systemui.statusbar.phone.DozeParameters
@@ -57,6 +59,7 @@ constructor(
     private val dozeParameters: DozeParameters,
     private val screenOffAnimationController: ScreenOffAnimationController,
     private val logger: NotificationWakeUpCoordinatorLogger,
+    private val notifsKeyguardInteractor: NotificationsKeyguardInteractor,
 ) :
     OnHeadsUpChangedListener,
     StatusBarStateController.StateListener,
@@ -143,6 +146,7 @@ constructor(
                 for (listener in wakeUpListeners) {
                     listener.onFullyHiddenChanged(value)
                 }
+                notifsKeyguardInteractor.setNotificationsFullyHidden(value)
             }
         }
 
@@ -206,8 +210,16 @@ constructor(
             val nowExpanding = isPulseExpanding()
             val changed = nowExpanding != pulseExpanding
             pulseExpanding = nowExpanding
-            for (listener in wakeUpListeners) {
-                listener.onPulseExpansionChanged(changed)
+            if (!NotificationIconContainerRefactor.isEnabled) {
+                for (listener in wakeUpListeners) {
+                    listener.onPulseExpansionAmountChanged(changed)
+                }
+            }
+            if (changed) {
+                for (listener in wakeUpListeners) {
+                    listener.onPulseExpandingChanged(pulseExpanding)
+                }
+                notifsKeyguardInteractor.setPulseExpanding(pulseExpanding)
             }
         }
     }
@@ -374,6 +386,7 @@ constructor(
         }
     }
 
+    @Deprecated("As part of b/301915812")
     private fun scheduleDelayedDozeAmountAnimation() {
         val alreadyRunning = delayedDozeAmountAnimator != null
         logger.logStartDelayedDozeAmountAnimation(alreadyRunning)
@@ -620,13 +633,20 @@ constructor(
          *
          * @param expandingChanged if the user has started or stopped expanding
          */
-        fun onPulseExpansionChanged(expandingChanged: Boolean) {}
+        @Deprecated(
+            message = "Use onPulseExpandedChanged instead.",
+            replaceWith = ReplaceWith("onPulseExpandedChanged"),
+        )
+        fun onPulseExpansionAmountChanged(expandingChanged: Boolean) {}
 
         /**
          * Called when the animator started by [scheduleDelayedDozeAmountAnimation] begins running
          * after the start delay, or after it ends/is cancelled.
          */
         fun onDelayedDozeAmountAnimationRunning(running: Boolean) {}
+
+        /** Called whenever a pulse has started or stopped expanding. */
+        fun onPulseExpandingChanged(isPulseExpanding: Boolean) {}
     }
 
     companion object {

@@ -32,6 +32,7 @@ import static android.content.pm.PackageManager.MATCH_DIRECT_BOOT_AWARE;
 import static android.content.pm.PackageManager.MATCH_DIRECT_BOOT_UNAWARE;
 import static android.content.pm.PackageManager.MATCH_UNINSTALLED_PACKAGES;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
+import static android.os.IInstalld.IFsveritySetupAuthToken;
 import static android.os.ParcelFileDescriptor.MODE_READ_WRITE;
 import static android.os.storage.OnObbStateChangeListener.ERROR_ALREADY_MOUNTED;
 import static android.os.storage.OnObbStateChangeListener.ERROR_COULD_NOT_MOUNT;
@@ -47,6 +48,7 @@ import static com.android.internal.util.XmlUtils.writeStringAttribute;
 import static org.xmlpull.v1.XmlPullParser.END_DOCUMENT;
 import static org.xmlpull.v1.XmlPullParser.START_TAG;
 
+import android.annotation.EnforcePermission;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
@@ -145,7 +147,6 @@ import com.android.internal.os.FuseUnavailableMountException;
 import com.android.internal.os.SomeArgs;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.DumpUtils;
-import com.android.internal.util.HexDump;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.Preconditions;
 import com.android.modules.utils.TypedXmlPullParser;
@@ -212,6 +213,12 @@ class StorageManagerService extends IStorageManager.Stub
     // How long we wait to reset storage, if we failed to call onMount on the
     // external storage service.
     public static final int FAILED_MOUNT_RESET_TIMEOUT_SECONDS = 10;
+
+    /** Extended timeout for the system server watchdog. */
+    private static final int SLOW_OPERATION_WATCHDOG_TIMEOUT_MS = 20 * 1000;
+
+    /** Extended timeout for the system server watchdog for vold#partition operation. */
+    private static final int PARTITION_OPERATION_WATCHDOG_TIMEOUT_MS = 3 * 60 * 1000;
 
     @GuardedBy("mLock")
     private final Set<Integer> mFuseMountedUser = new ArraySet<>();
@@ -1069,6 +1076,7 @@ class StorageManagerService extends IStorageManager.Stub
             final UserManager userManager = mContext.getSystemService(UserManager.class);
             final List<UserInfo> users = userManager.getUsers();
 
+            extendWatchdogTimeout("#onReset might be slow");
             mStorageSessionController.onReset(mVold, () -> {
                 mHandler.removeCallbacksAndMessages(null);
             });
@@ -1228,9 +1236,16 @@ class StorageManagerService extends IStorageManager.Stub
         }
     }
 
+    private void extendWatchdogTimeout(String reason) {
+        Watchdog w = Watchdog.getInstance();
+        w.pauseWatchingMonitorsFor(SLOW_OPERATION_WATCHDOG_TIMEOUT_MS, reason);
+        w.pauseWatchingCurrentThreadFor(SLOW_OPERATION_WATCHDOG_TIMEOUT_MS, reason);
+    }
+
     private void onUserStopped(int userId) {
         Slog.d(TAG, "onUserStopped " + userId);
 
+        extendWatchdogTimeout("#onUserStopped might be slow");
         try {
             mVold.onUserStopped(userId);
             mStoraged.onUserStopped(userId);
@@ -1313,6 +1328,7 @@ class StorageManagerService extends IStorageManager.Stub
                 unlockedUsers.add(userId);
             }
         }
+        extendWatchdogTimeout("#onUserStopped might be slow");
         for (Integer userId : unlockedUsers) {
             try {
                 mVold.onUserStopped(userId);
@@ -2143,7 +2159,7 @@ class StorageManagerService extends IStorageManager.Stub
                 }
             };
             // TODO(b/149391976): Use different handler?
-            monitor.register(mContext, user, true, mHandler);
+            monitor.register(mContext, user, mHandler);
             mPackageMonitorsForUser.put(userId, monitor);
         } else {
             Slog.w(TAG, "PackageMonitor is already registered for: " + userId);
@@ -2332,6 +2348,7 @@ class StorageManagerService extends IStorageManager.Stub
         try {
             // TODO(b/135341433): Remove cautious logging when FUSE is stable
             Slog.i(TAG, "Mounting volume " + vol);
+            extendWatchdogTimeout("#mount might be slow");
             mVold.mount(vol.id, vol.mountFlags, vol.mountUserId, new IVoldMountCallback.Stub() {
                 @Override
                 public boolean onVolumeChecking(FileDescriptor fd, String path,
@@ -2457,10 +2474,11 @@ class StorageManagerService extends IStorageManager.Stub
     @android.annotation.EnforcePermission(android.Manifest.permission.MOUNT_FORMAT_FILESYSTEMS)
     @Override
     public void partitionPublic(String diskId) {
-
         super.partitionPublic_enforcePermission();
 
         final CountDownLatch latch = findOrCreateDiskScanLatch(diskId);
+
+        extendWatchdogTimeout("#partition might be slow");
         try {
             mVold.partition(diskId, IVold.PARTITION_TYPE_PUBLIC, -1);
             waitForLatch(latch, "partitionPublic", 3 * DateUtils.MINUTE_IN_MILLIS);
@@ -2477,6 +2495,8 @@ class StorageManagerService extends IStorageManager.Stub
         enforceAdminUser();
 
         final CountDownLatch latch = findOrCreateDiskScanLatch(diskId);
+
+        extendWatchdogTimeout("#partition might be slow");
         try {
             mVold.partition(diskId, IVold.PARTITION_TYPE_PRIVATE, -1);
             waitForLatch(latch, "partitionPrivate", 3 * DateUtils.MINUTE_IN_MILLIS);
@@ -2493,6 +2513,8 @@ class StorageManagerService extends IStorageManager.Stub
         enforceAdminUser();
 
         final CountDownLatch latch = findOrCreateDiskScanLatch(diskId);
+
+        extendWatchdogTimeout("#partition might be slow");
         try {
             mVold.partition(diskId, IVold.PARTITION_TYPE_MIXED, ratio);
             waitForLatch(latch, "partitionMixed", 3 * DateUtils.MINUTE_IN_MILLIS);
@@ -3249,7 +3271,7 @@ class StorageManagerService extends IStorageManager.Stub
             throws RemoteException {
         super.setCeStorageProtection_enforcePermission();
 
-        mVold.setCeStorageProtection(userId, HexDump.toHexString(secret));
+        mVold.setCeStorageProtection(userId, secret);
     }
 
     /* Only for use by LockSettingsService */
@@ -3259,7 +3281,7 @@ class StorageManagerService extends IStorageManager.Stub
         super.unlockCeStorage_enforcePermission();
 
         if (StorageManager.isFileEncrypted()) {
-            mVold.unlockCeStorage(userId, HexDump.toHexString(secret));
+            mVold.unlockCeStorage(userId, secret);
         }
         synchronized (mLock) {
             mCeUnlockedUsers.append(userId);
@@ -3575,6 +3597,13 @@ class StorageManagerService extends IStorageManager.Stub
         return mInternalStorageSize;
     }
 
+    @EnforcePermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
+    @Override
+    public int getInternalStorageRemainingLifetime() throws RemoteException {
+        super.getInternalStorageRemainingLifetime_enforcePermission();
+        return mVold.getStorageRemainingLifetime();
+    }
+
     /**
      * Enforces that the caller is the {@link ExternalStorageService}
      *
@@ -3600,6 +3629,7 @@ class StorageManagerService extends IStorageManager.Stub
 
         @Override
         public ParcelFileDescriptor open() throws AppFuseMountException {
+            extendWatchdogTimeout("#open might be slow");
             try {
                 final FileDescriptor fd = mVold.mountAppFuse(uid, mountId);
                 mMounted = true;
@@ -3612,6 +3642,7 @@ class StorageManagerService extends IStorageManager.Stub
         @Override
         public ParcelFileDescriptor openFile(int mountId, int fileId, int flags)
                 throws AppFuseMountException {
+            extendWatchdogTimeout("#openFile might be slow");
             try {
                 return new ParcelFileDescriptor(
                         mVold.openAppFuseFile(uid, mountId, fileId, flags));
@@ -3622,8 +3653,28 @@ class StorageManagerService extends IStorageManager.Stub
 
         @Override
         public void close() throws Exception {
+            extendWatchdogTimeout("#close might be slow");
             if (mMounted) {
-                mVold.unmountAppFuse(uid, mountId);
+                BackgroundThread.getHandler().post(() -> {
+                    try {
+                        // We need to run the unmount on a separate thread to
+                        // prevent a possible deadlock, where:
+                        // 1. AppFuseThread (this thread) tries to call into vold
+                        // 2. the vold lock is held by another thread, which called:
+                        //    mVold.openAppFuseFile()
+                        //    as part of that call, vold calls open() on the
+                        //    underlying file, which is a call that needs to be
+                        //    handled by the AppFuseThread, which is stuck waiting
+                        //    for the vold lock (see 1.)
+                        // It is safe to do the unmount asynchronously, because the mount
+                        // path we use is never reused during the current boot cycle;
+                        // see mNextAppFuseName. Also,we have anyway stopped serving
+                        // requests at this point.
+                        mVold.unmountAppFuse(uid, mountId);
+                    } catch (RemoteException e) {
+                        throw e.rethrowAsRuntimeException();
+                    }
+                });
                 mMounted = false;
             }
         }
@@ -4685,7 +4736,7 @@ class StorageManagerService extends IStorageManager.Stub
                 pw.print(") total size: ");
                 pw.print(pair.second);
                 pw.print(" (");
-                pw.print(DataUnit.MEBIBYTES.toBytes(pair.second));
+                pw.print(pair.second / DataUnit.MEBIBYTES.toBytes(1L));
                 pw.println(" MiB)");
             }
 
@@ -4995,5 +5046,24 @@ class StorageManagerService extends IStorageManager.Stub
             }
         }
 
+        @Override
+        public IFsveritySetupAuthToken createFsveritySetupAuthToken(ParcelFileDescriptor authFd,
+                int uid) throws IOException {
+            try {
+                return mInstaller.createFsveritySetupAuthToken(authFd, uid);
+            } catch (Installer.InstallerException e) {
+                throw new IOException(e);
+            }
+        }
+
+        @Override
+        public int enableFsverity(IFsveritySetupAuthToken authToken, String filePath,
+                String packageName) throws IOException {
+            try {
+                return mInstaller.enableFsverity(authToken, filePath, packageName);
+            } catch (Installer.InstallerException e) {
+                throw new IOException(e);
+            }
+        }
     }
 }

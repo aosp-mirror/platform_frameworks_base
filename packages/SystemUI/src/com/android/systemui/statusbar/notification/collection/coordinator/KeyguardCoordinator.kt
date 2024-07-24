@@ -37,7 +37,7 @@ import com.android.systemui.statusbar.notification.collection.coordinator.dagger
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifFilter
 import com.android.systemui.statusbar.notification.collection.notifcollection.NotifCollectionListener
 import com.android.systemui.statusbar.notification.collection.provider.SectionHeaderVisibilityProvider
-import com.android.systemui.statusbar.notification.collection.provider.SeenNotificationsProviderImpl
+import com.android.systemui.statusbar.notification.domain.interactor.SeenNotificationsInteractor
 import com.android.systemui.statusbar.notification.interruption.KeyguardNotificationVisibilityProvider
 import com.android.systemui.statusbar.policy.HeadsUpManager
 import com.android.systemui.statusbar.policy.headsUpEvents
@@ -85,7 +85,7 @@ constructor(
     @Application private val scope: CoroutineScope,
     private val sectionHeaderVisibilityProvider: SectionHeaderVisibilityProvider,
     private val secureSettings: SecureSettings,
-    private val seenNotifsProvider: SeenNotificationsProviderImpl,
+    private val seenNotificationsInteractor: SeenNotificationsInteractor,
     private val statusBarStateController: StatusBarStateController,
 ) : Coordinator, Dumpable {
 
@@ -351,7 +351,7 @@ constructor(
 
             override fun onCleanup() {
                 logger.logProviderHasFilteredOutSeenNotifs(hasFilteredAnyNotifs)
-                seenNotifsProvider.hasFilteredOutSeenNotifications = hasFilteredAnyNotifs
+                seenNotificationsInteractor.setHasFilteredOutSeenNotifications(hasFilteredAnyNotifs)
                 hasFilteredAnyNotifs = false
             }
         }
@@ -388,8 +388,8 @@ constructor(
     override fun dump(pw: PrintWriter, args: Array<out String>) =
         with(pw.asIndenting()) {
             println(
-                "seenNotifsProvider.hasFilteredOutSeenNotifications=" +
-                    seenNotifsProvider.hasFilteredOutSeenNotifications
+                "notificationListInteractor.hasFilteredOutSeenNotifications.value=" +
+                    seenNotificationsInteractor.hasFilteredOutSeenNotifications.value
             )
             println("unseen notifications:")
             indentIfPossible {

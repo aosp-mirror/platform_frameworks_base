@@ -27,7 +27,7 @@ message ProtoLogMessage {
     option (.android.msg_privacy).dest = DEST_LOCAL;
 
     /* log statement identifier, created from message string and log level. */
-    optional sfixed32 message_hash = 1;
+    optional sfixed32 message_hash_legacy = 1 [deprecated = true];
     /* log time, relative to the elapsed system time clock. */
     optional fixed64 elapsed_realtime_nanos = 2;
     /* string parameters passed to the log call. */
@@ -38,6 +38,9 @@ message ProtoLogMessage {
     repeated double double_params = 5 [packed=true];
     /* boolean parameters passed to the log call. */
     repeated bool boolean_params = 6 [packed=true];
+
+    /* log statement identifier, created from message string and log level. */
+    optional sfixed64 message_hash = 7;
 }
 
 /* represents a log file containing ProtoLog log entries.

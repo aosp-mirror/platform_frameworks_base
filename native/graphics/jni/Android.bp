@@ -23,6 +23,9 @@ package {
 
 cc_library_shared {
     name: "libjnigraphics",
+    defaults: [
+        "bug_24465209_workaround",
+    ],
 
     cflags: [
         "-Wall",
@@ -47,13 +50,6 @@ cc_library_shared {
 
     static_libs: ["libarect"],
 
-    arch: {
-        arm: {
-            // TODO: This is to work around b/24465209. Remove after root cause is fixed
-            pack_relocations: false,
-            ldflags: ["-Wl,--hash-style=both"],
-        },
-    },
     host_supported: true,
     target: {
         android: {
@@ -111,6 +107,7 @@ cc_defaults {
             "allocator_may_return_null = 1",
         ],
     },
+    dictionary: "fuzz/imagedecoder_fuzzer.dict",
     host_supported: true,
 }
 

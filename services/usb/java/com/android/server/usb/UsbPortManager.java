@@ -319,6 +319,16 @@ public class UsbPortManager implements IBinder.DeathRecipient {
     }
 
     /**
+     * Returns true if the provided port supports changing its mode.
+     */
+    public boolean isModeChangeSupported(String portId) {
+        synchronized (mLock) {
+            final PortInfo portInfo = mPorts.get(portId);
+            return portInfo != null ? portInfo.mCanChangeMode : false;
+        }
+    }
+
+    /**
      * Enables/disables contaminant detection.
      *
      * @param portId port identifier.
@@ -1230,6 +1240,26 @@ public class UsbPortManager implements IBinder.DeathRecipient {
                 case UsbPortStatus.COMPLIANCE_WARNING_MISSING_RP:
                     complianceWarningsProto.add(FrameworkStatsLog
                         .USB_COMPLIANCE_WARNINGS_REPORTED__COMPLIANCE_WARNINGS__COMPLIANCE_WARNING_MISSING_RP);
+                    continue;
+                case UsbPortStatus.COMPLIANCE_WARNING_INPUT_POWER_LIMITED:
+                    complianceWarningsProto.add(FrameworkStatsLog
+                        .USB_COMPLIANCE_WARNINGS_REPORTED__COMPLIANCE_WARNINGS__COMPLIANCE_WARNING_INPUT_POWER_LIMITED);
+                    continue;
+                case UsbPortStatus.COMPLIANCE_WARNING_MISSING_DATA_LINES:
+                    complianceWarningsProto.add(FrameworkStatsLog
+                        .USB_COMPLIANCE_WARNINGS_REPORTED__COMPLIANCE_WARNINGS__COMPLIANCE_WARNING_MISSING_DATA_LINES);
+                    continue;
+                case UsbPortStatus.COMPLIANCE_WARNING_ENUMERATION_FAIL:
+                    complianceWarningsProto.add(FrameworkStatsLog
+                        .USB_COMPLIANCE_WARNINGS_REPORTED__COMPLIANCE_WARNINGS__COMPLIANCE_WARNING_ENUMERATION_FAIL);
+                    continue;
+                case UsbPortStatus.COMPLIANCE_WARNING_FLAKY_CONNECTION:
+                    complianceWarningsProto.add(FrameworkStatsLog
+                        .USB_COMPLIANCE_WARNINGS_REPORTED__COMPLIANCE_WARNINGS__COMPLIANCE_WARNING_FLAKY_CONNECTION);
+                    continue;
+                case UsbPortStatus.COMPLIANCE_WARNING_UNRELIABLE_IO:
+                    complianceWarningsProto.add(FrameworkStatsLog
+                        .USB_COMPLIANCE_WARNINGS_REPORTED__COMPLIANCE_WARNINGS__COMPLIANCE_WARNING_UNRELIABLE_IO);
                     continue;
             }
         }

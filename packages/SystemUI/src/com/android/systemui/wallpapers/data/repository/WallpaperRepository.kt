@@ -24,7 +24,7 @@ import android.content.IntentFilter
 import android.os.UserHandle
 import com.android.systemui.broadcast.BroadcastDispatcher
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.dagger.qualifiers.Application
+import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.user.data.model.SelectedUserModel
 import com.android.systemui.user.data.model.SelectionStatus
 import com.android.systemui.user.data.repository.UserRepository
@@ -54,7 +54,7 @@ interface WallpaperRepository {
 class WallpaperRepositoryImpl
 @Inject
 constructor(
-    @Application scope: CoroutineScope,
+    @Background scope: CoroutineScope,
     broadcastDispatcher: BroadcastDispatcher,
     userRepository: UserRepository,
     private val wallpaperManager: WallpaperManager,

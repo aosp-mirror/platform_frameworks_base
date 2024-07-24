@@ -59,7 +59,19 @@ message CriticalEventProto {
     AppNotResponding anr = 4;
     JavaCrash java_crash = 5;
     NativeCrash native_crash = 6;
+    SystemServerStarted system_server_started = 7;
+    InstallPackages install_packages = 8;
+    ExcessiveBinderCalls excessive_binder_calls = 9;
   }
+
+  message ExcessiveBinderCalls {
+    // The uid sending many calls.
+    optional int32 uid = 1;
+  }
+
+  message InstallPackages {}
+
+  message SystemServerStarted {}
 
   message Watchdog {
     // The watchdog subject.

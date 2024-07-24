@@ -32,6 +32,7 @@ import android.app.Instrumentation;
 import android.app.PendingIntent;
 import android.app.RemoteAction;
 import android.content.Intent;
+import android.content.pm.ParceledListSlice;
 import android.graphics.drawable.Icon;
 import android.os.UserHandle;
 
@@ -135,7 +136,7 @@ public class AccessibilityManagerTest {
 
         // configure the mock service behavior
         when(mMockService.getInstalledAccessibilityServiceList(anyInt()))
-                .thenReturn(expectedServices);
+                .thenReturn(new ParceledListSlice<>(expectedServices));
 
         // invoke the method under test
         AccessibilityManager manager = createManager(true);
@@ -207,14 +208,14 @@ public class AccessibilityManagerTest {
     }
 
     @Test
-    public void testSetWindowMagnificationConnection() throws Exception {
+    public void testSetMagnificationConnection() throws Exception {
         AccessibilityManager manager = createManager(WITH_A11Y_ENABLED);
-        IWindowMagnificationConnection connection = Mockito.mock(
-                IWindowMagnificationConnection.class);
+        IMagnificationConnection connection = Mockito.mock(
+                IMagnificationConnection.class);
 
-        manager.setWindowMagnificationConnection(connection);
+        manager.setMagnificationConnection(connection);
 
-        verify(mMockService).setWindowMagnificationConnection(connection);
+        verify(mMockService).setMagnificationConnection(connection);
     }
 
     @Test

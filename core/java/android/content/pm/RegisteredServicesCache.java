@@ -834,4 +834,11 @@ public abstract class RegisteredServicesCache<V> {
 
     public abstract V parseServiceAttributes(Resources res,
             String packageName, AttributeSet attrs);
+
+    @VisibleForTesting
+    public void unregisterReceivers() {
+        mContext.unregisterReceiver(mPackageReceiver);
+        mContext.unregisterReceiver(mExternalReceiver);
+        mContext.unregisterReceiver(mUserRemovedReceiver);
+    }
 }

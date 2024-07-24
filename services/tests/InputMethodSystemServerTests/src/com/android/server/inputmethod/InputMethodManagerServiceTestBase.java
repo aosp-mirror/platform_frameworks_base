@@ -19,6 +19,7 @@ package com.android.server.inputmethod;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doNothing;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mockitoSession;
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.spy;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -26,6 +27,7 @@ import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.notNull;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -35,7 +37,6 @@ import android.app.ActivityManagerInternal;
 import android.content.Context;
 import android.content.pm.PackageManagerInternal;
 import android.content.res.Configuration;
-import android.hardware.display.DisplayManagerInternal;
 import android.hardware.input.IInputManager;
 import android.hardware.input.InputManagerGlobal;
 import android.os.Binder;
@@ -94,14 +95,12 @@ public class InputMethodManagerServiceTestBase {
                     null,
                     "0",
                     0,
-                    null,
                     false);
 
     @Mock protected WindowManagerInternal mMockWindowManagerInternal;
     @Mock protected ActivityManagerInternal mMockActivityManagerInternal;
     @Mock protected PackageManagerInternal mMockPackageManagerInternal;
     @Mock protected InputManagerInternal mMockInputManagerInternal;
-    @Mock protected DisplayManagerInternal mMockDisplayManagerInternal;
     @Mock protected UserManagerInternal mMockUserManagerInternal;
     @Mock protected InputMethodBindingController mMockInputMethodBindingController;
     @Mock protected IInputMethodClient mMockInputMethodClient;
@@ -125,6 +124,7 @@ public class InputMethodManagerServiceTestBase {
     protected InputMethodManagerService mInputMethodManagerService;
     protected ServiceThread mServiceThread;
     protected boolean mIsLargeScreen;
+    private InputManagerGlobal.TestSession mInputManagerGlobalSession;
 
     @BeforeClass
     public static void setupClass() {
@@ -145,8 +145,7 @@ public class InputMethodManagerServiceTestBase {
                         .mockStatic(SystemServerInitThreadPool.class)
                         .startMocking();
 
-        mContext = InstrumentationRegistry.getInstrumentation().getContext();
-        spyOn(mContext);
+        mContext = spy(InstrumentationRegistry.getInstrumentation().getContext());
 
         mTargetSdkVersion = mContext.getApplicationInfo().targetSdkVersion;
         mIsLargeScreen = mContext.getResources().getConfiguration()
@@ -164,8 +163,6 @@ public class InputMethodManagerServiceTestBase {
                 .when(() -> LocalServices.getService(PackageManagerInternal.class));
         doReturn(mMockInputManagerInternal)
                 .when(() -> LocalServices.getService(InputManagerInternal.class));
-        doReturn(mMockDisplayManagerInternal)
-                .when(() -> LocalServices.getService(DisplayManagerInternal.class));
         doReturn(mMockUserManagerInternal)
                 .when(() -> LocalServices.getService(UserManagerInternal.class));
         doReturn(mMockImeTargetVisibilityPolicy)
@@ -186,7 +183,7 @@ public class InputMethodManagerServiceTestBase {
 
         // Injecting and mocked InputMethodBindingController and InputMethod.
         mMockInputMethodInvoker = IInputMethodInvoker.create(mMockInputMethod);
-        InputManagerGlobal.resetInstance(mMockIInputManager);
+        mInputManagerGlobalSession = InputManagerGlobal.createTestSession(mMockIInputManager);
         synchronized (ImfLock.class) {
             when(mMockInputMethodBindingController.getCurMethod())
                     .thenReturn(mMockInputMethodInvoker);
@@ -262,6 +259,10 @@ public class InputMethodManagerServiceTestBase {
         if (mMockingSession != null) {
             mMockingSession.finishMocking();
         }
+
+        if (mInputManagerGlobalSession != null) {
+            mInputManagerGlobalSession.close();
+        }
         LocalServices.removeServiceForTest(InputMethodManagerInternal.class);
     }
 
@@ -277,8 +278,9 @@ public class InputMethodManagerServiceTestBase {
                     .setCurrentMethodVisible();
         }
         verify(mMockInputMethod, times(showSoftInput ? 1 : 0))
-                .showSoftInput(any(), any(),
-                        showFlags != NO_VERIFY_SHOW_FLAGS ? eq(showFlags) : anyInt(), any());
+                .showSoftInput(any() /* showInputToken */ , notNull() /* statsToken */,
+                        showFlags != NO_VERIFY_SHOW_FLAGS ? eq(showFlags) : anyInt() /* flags*/,
+                        any() /* resultReceiver */);
     }
 
     protected void verifyHideSoftInput(boolean setNotVisible, boolean hideSoftInput)
@@ -288,6 +290,7 @@ public class InputMethodManagerServiceTestBase {
                     .setCurrentMethodNotVisible();
         }
         verify(mMockInputMethod, times(hideSoftInput ? 1 : 0))
-                .hideSoftInput(any(), any(), anyInt(), any());
+                .hideSoftInput(any() /* hideInputToken */, notNull() /* statsToken */,
+                        anyInt() /* flags */, any() /* resultReceiver */);
     }
 }

@@ -32,8 +32,8 @@ interface ModernStatusBarViewBinding {
     /** Notifies that the visibility state has changed. */
     fun onVisibilityStateChanged(@StatusBarIconView.VisibleState state: Int)
 
-    /** Notifies that the icon tint has been updated. */
-    fun onIconTintChanged(newTint: Int)
+    /** Notifies that the icon tint has been updated. Includes a contrast for layered drawables */
+    fun onIconTintChanged(newTint: Int, contrastTint: Int)
 
     /** Notifies that the decor tint has been updated (used only for the dot). */
     fun onDecorTintChanged(newTint: Int)

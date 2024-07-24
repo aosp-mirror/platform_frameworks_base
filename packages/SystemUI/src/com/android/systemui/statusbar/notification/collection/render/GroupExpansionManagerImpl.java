@@ -16,13 +16,13 @@
 
 package com.android.systemui.statusbar.notification.collection.render;
 
+import android.util.Log;
+
 import androidx.annotation.NonNull;
 
 import com.android.systemui.Dumpable;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dump.DumpManager;
-import com.android.systemui.flags.FeatureFlags;
-import com.android.systemui.flags.Flags;
 import com.android.systemui.statusbar.notification.collection.GroupEntry;
 import com.android.systemui.statusbar.notification.collection.ListEntry;
 import com.android.systemui.statusbar.notification.collection.NotifPipeline;
@@ -42,6 +42,8 @@ import javax.inject.Inject;
  */
 @SysUISingleton
 public class GroupExpansionManagerImpl implements GroupExpansionManager, Dumpable {
+    private static final String TAG = "GroupExpansionaManagerImpl";
+
     private final DumpManager mDumpManager;
     private final GroupMembershipManager mGroupMembershipManager;
     private final Set<OnGroupExpansionChangeListener> mOnGroupChangeListeners = new HashSet<>();
@@ -50,30 +52,36 @@ public class GroupExpansionManagerImpl implements GroupExpansionManager, Dumpabl
      * Set of summary keys whose groups are expanded.
      * NOTE: This should not be modified without notifying listeners, so prefer using
      * {@code setGroupExpanded} when making changes.
-      */
+     */
     private final Set<NotificationEntry> mExpandedGroups = new HashSet<>();
-
-    private final FeatureFlags mFeatureFlags;
 
     @Inject
     public GroupExpansionManagerImpl(DumpManager dumpManager,
-            GroupMembershipManager groupMembershipManager, FeatureFlags featureFlags) {
+            GroupMembershipManager groupMembershipManager) {
         mDumpManager = dumpManager;
         mGroupMembershipManager = groupMembershipManager;
-        mFeatureFlags = featureFlags;
     }
 
     /**
      * Cleanup entries from mExpandedGroups that no longer exist in the pipeline.
      */
     private final OnBeforeRenderListListener mNotifTracker = (entries) -> {
+        if (mExpandedGroups.isEmpty()) {
+            return; // nothing to do
+        }
+
         final Set<NotificationEntry> renderingSummaries = new HashSet<>();
         for (ListEntry entry : entries) {
             if (entry instanceof GroupEntry) {
                 renderingSummaries.add(entry.getRepresentativeEntry());
             }
         }
-        mExpandedGroups.removeIf(expandedGroup -> !renderingSummaries.contains(expandedGroup));
+
+        // If a group is in mExpandedGroups but not in the pipeline entries, collapse it.
+        final var groupsToRemove = setDifference(mExpandedGroups, renderingSummaries);
+        for (NotificationEntry entry : groupsToRemove) {
+            setGroupExpanded(entry, false);
+        }
     };
 
     public void attach(NotifPipeline pipeline) {
@@ -93,7 +101,17 @@ public class GroupExpansionManagerImpl implements GroupExpansionManager, Dumpabl
 
     @Override
     public void setGroupExpanded(NotificationEntry entry, boolean expanded) {
-        final NotificationEntry groupSummary = mGroupMembershipManager.getGroupSummary(entry);
+        NotificationEntry groupSummary = mGroupMembershipManager.getGroupSummary(entry);
+        if (entry.getParent() == null) {
+            if (expanded) {
+                Log.wtf(TAG, "Cannot expand group that is not attached");
+            } else {
+                // The entry is no longer attached, but we still want to make sure we don't have
+                // a stale expansion state.
+                groupSummary = entry;
+            }
+        }
+
         boolean changed;
         if (expanded) {
             changed = mExpandedGroups.add(groupSummary);
@@ -102,7 +120,7 @@ public class GroupExpansionManagerImpl implements GroupExpansionManager, Dumpabl
         }
 
         // Only notify listeners if something changed.
-        if (!mFeatureFlags.isEnabled(Flags.NOTIFICATION_GROUP_EXPANSION_CHANGE) || changed) {
+        if (changed) {
             sendOnGroupExpandedChange(entry, expanded);
         }
     }
@@ -133,5 +151,28 @@ public class GroupExpansionManagerImpl implements GroupExpansionManager, Dumpabl
         for (OnGroupExpansionChangeListener listener : mOnGroupChangeListeners) {
             listener.onGroupExpansionChange(entry.getRow(), expanded);
         }
+    }
+
+    /**
+     * Utility method to compute the difference between two sets of NotificationEntry. Unfortunately
+     * {@code Sets.difference} from Guava is not available in this codebase.
+     */
+    @NonNull
+    private Set<NotificationEntry> setDifference(Set<NotificationEntry> set1,
+            Set<NotificationEntry> set2) {
+        if (set1 == null || set1.isEmpty()) {
+            return new HashSet<>();
+        }
+        if (set2 == null || set2.isEmpty()) {
+            return new HashSet<>(set1);
+        }
+
+        final Set<NotificationEntry> difference = new HashSet<>();
+        for (NotificationEntry e : set1) {
+            if (!set2.contains(e)) {
+                difference.add(e);
+            }
+        }
+        return difference;
     }
 }

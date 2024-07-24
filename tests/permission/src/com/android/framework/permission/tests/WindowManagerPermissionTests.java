@@ -23,8 +23,9 @@ import android.os.Binder;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.UserHandle;
-import android.test.suitebuilder.annotation.SmallTest;
 import android.view.IWindowManager;
+
+import androidx.test.filters.SmallTest;
 
 import junit.framework.TestCase;
 
@@ -124,7 +125,7 @@ public class WindowManagerPermissionTests extends TestCase {
     @SmallTest
     public void testSET_ORIENTATION() {
         try {
-            mWm.freezeRotation(-1);
+            mWm.freezeRotation(/* rotation= */ -1, /* caller= */ "WindowManagerPermissionTests");
             fail("IWindowManager.freezeRotation did not throw SecurityException as"
                     + " expected");
         } catch (SecurityException e) {
@@ -134,7 +135,7 @@ public class WindowManagerPermissionTests extends TestCase {
         }
 
         try {
-            mWm.thawRotation();
+            mWm.thawRotation(/* called= */ "WindowManagerPermissionTests");
             fail("IWindowManager.thawRotation did not throw SecurityException as"
                     + " expected");
         } catch (SecurityException e) {

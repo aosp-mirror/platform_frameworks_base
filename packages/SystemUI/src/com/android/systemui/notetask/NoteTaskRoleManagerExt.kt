@@ -24,7 +24,7 @@ import android.content.pm.ShortcutInfo
 import android.graphics.drawable.Icon
 import android.os.PersistableBundle
 import android.os.UserHandle
-import com.android.systemui.R
+import com.android.systemui.res.R
 import com.android.systemui.notetask.shortcut.LaunchNoteTaskActivity
 
 /** Extension functions for [RoleManager] used **internally** by note task. */

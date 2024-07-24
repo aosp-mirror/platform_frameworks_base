@@ -17,6 +17,7 @@ import com.android.internal.jank.InteractionJankMonitor.CUJ_SCREEN_OFF
 import com.android.internal.jank.InteractionJankMonitor.CUJ_SCREEN_OFF_SHOW_AOD
 import com.android.systemui.DejankUtils
 import com.android.app.animation.Interpolators
+import com.android.systemui.Flags.migrateClocksToBlueprint
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.keyguard.KeyguardViewMediator
 import com.android.systemui.keyguard.WakefulnessLifecycle
@@ -31,7 +32,7 @@ import com.android.systemui.statusbar.notification.PropertyAnimator
 import com.android.systemui.statusbar.notification.stack.AnimationProperties
 import com.android.systemui.statusbar.notification.stack.StackStateAnimator
 import com.android.systemui.statusbar.policy.KeyguardStateController
-import com.android.systemui.util.TraceUtils
+import com.android.app.tracing.namedRunnable
 import com.android.systemui.util.settings.GlobalSettings
 import javax.inject.Inject
 
@@ -65,7 +66,7 @@ class UnlockedScreenOffAnimationController @Inject constructor(
     private val notifShadeWindowControllerLazy: dagger.Lazy<NotificationShadeWindowController>,
     private val interactionJankMonitor: InteractionJankMonitor,
     private val powerManager: PowerManager,
-    private val handler: Handler = Handler()
+    private val handler: Handler = Handler(),
 ) : WakefulnessLifecycle.Observer, ScreenOffAnimation {
     private lateinit var centralSurfaces: CentralSurfaces
     private lateinit var shadeViewController: ShadeViewController
@@ -124,7 +125,7 @@ class UnlockedScreenOffAnimationController @Inject constructor(
     }
 
     // FrameCallback used to delay starting the light reveal animation until the next frame
-    private val startLightRevealCallback = TraceUtils.namedRunnable("startLightReveal") {
+    private val startLightRevealCallback = namedRunnable("startLightReveal") {
         lightRevealAnimationPlaying = true
         lightRevealAnimator.start()
     }
@@ -285,7 +286,11 @@ class UnlockedScreenOffAnimationController @Inject constructor(
                 // up, with unpredictable consequences.
                 if (!powerManager.isInteractive(Display.DEFAULT_DISPLAY) &&
                         shouldAnimateInKeyguard) {
-                    aodUiAnimationPlaying = true
+                    if (!migrateClocksToBlueprint()) {
+                        // Tracking this state should no longer be relevant, as the isInteractive
+                        // check covers it
+                        aodUiAnimationPlaying = true
+                    }
 
                     // Show AOD. That'll cause the KeyguardVisibilityHelper to call
                     // #animateInKeyguard.

@@ -23,10 +23,11 @@ import android.credentials.ClearCredentialStateException;
 import android.credentials.ClearCredentialStateRequest;
 import android.credentials.CredentialProviderInfo;
 import android.credentials.IClearCredentialStateCallback;
-import android.credentials.ui.ProviderData;
-import android.credentials.ui.RequestInfo;
+import android.credentials.selection.ProviderData;
+import android.credentials.selection.RequestInfo;
 import android.os.CancellationSignal;
 import android.os.RemoteException;
+import android.os.ResultReceiver;
 import android.service.credentials.CallingAppInfo;
 import android.util.Slog;
 
@@ -50,7 +51,8 @@ public final class ClearRequestSession extends RequestSession<ClearCredentialSta
             long startedTimestamp) {
         super(context, sessionCallback, lock, userId, callingUid, request, callback,
                 RequestInfo.TYPE_UNDEFINED,
-                callingAppInfo, enabledProviders, cancellationSignal, startedTimestamp);
+                callingAppInfo, enabledProviders, cancellationSignal, startedTimestamp,
+                /*shouldBindClientToDeath=*/ true);
     }
 
     /**
@@ -148,7 +150,7 @@ public final class ClearRequestSession extends RequestSession<ClearCredentialSta
     }
 
     @Override
-    public void onUiCancellation(boolean isUserCancellation) {
+    public void onUiCancellation(boolean isUserCancellation, ResultReceiver resultReceiver) {
         // Not needed since UI is not involved
     }
 

@@ -39,9 +39,9 @@ import androidx.annotation.VisibleForTesting;
 
 import com.android.internal.logging.UiEventLogger;
 import com.android.internal.widget.RemeasuringLinearLayout;
-import com.android.systemui.R;
 import com.android.systemui.plugins.qs.QSTile;
 import com.android.systemui.qs.logging.QSLogger;
+import com.android.systemui.res.R;
 import com.android.systemui.settings.brightness.BrightnessSliderController;
 import com.android.systemui.tuner.TunerService;
 import com.android.systemui.tuner.TunerService.Tunable;
@@ -110,6 +110,8 @@ public class QSPanel extends LinearLayout implements Tunable {
      */
     private boolean mCanCollapse = true;
 
+    private boolean mSceneContainerEnabled;
+
     public QSPanel(Context context, AttributeSet attrs) {
         super(context, attrs);
         mUsingMediaPlayer = useQsMediaPlayer(context);
@@ -153,6 +155,13 @@ public class QSPanel extends LinearLayout implements Tunable {
         }
     }
 
+    void setSceneContainerEnabled(boolean enabled) {
+        mSceneContainerEnabled = enabled;
+        if (mSceneContainerEnabled) {
+            updatePadding();
+        }
+    }
+
     protected void setHorizontalContentContainerClipping() {
         mHorizontalContentContainer.setClipChildren(true);
         mHorizontalContentContainer.setClipToPadding(false);
@@ -180,6 +189,7 @@ public class QSPanel extends LinearLayout implements Tunable {
     public void setBrightnessView(@NonNull View view) {
         if (mBrightnessView != null) {
             removeView(mBrightnessView);
+            mChildrenLayoutTop.remove(mBrightnessView);
             mMovableContentStartIndex--;
         }
         addView(view, 0);
@@ -375,9 +385,9 @@ public class QSPanel extends LinearLayout implements Tunable {
         int paddingTop = res.getDimensionPixelSize(R.dimen.qs_panel_padding_top);
         int paddingBottom = res.getDimensionPixelSize(R.dimen.qs_panel_padding_bottom);
         setPaddingRelative(getPaddingStart(),
-                paddingTop,
+                mSceneContainerEnabled ? 0 : paddingTop,
                 getPaddingEnd(),
-                paddingBottom);
+                mSceneContainerEnabled ? 0 : paddingBottom);
     }
 
     void addOnConfigurationChangedListener(OnConfigurationChangedListener listener) {

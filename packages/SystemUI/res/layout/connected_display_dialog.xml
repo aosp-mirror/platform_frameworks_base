@@ -1,0 +1,83 @@
+<!--
+  Copyright (C) 2023 The Android Open Source Project
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+  -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:androidprv="http://schemas.android.com/apk/prv/res/android"
+    android:id="@+id/cd_bottom_sheet"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:gravity="center_horizontal"
+    android:orientation="vertical"
+    android:paddingHorizontal="@dimen/dialog_side_padding"
+    android:paddingTop="@dimen/dialog_top_padding"
+    android:background="@drawable/connected_display_dialog_bg"
+    android:paddingBottom="@dimen/dialog_bottom_padding">
+
+    <ImageView
+        android:id="@+id/connected_display_dialog_icon"
+        android:layout_width="@dimen/connected_display_dialog_logo_size"
+        android:layout_height="@dimen/connected_display_dialog_logo_size"
+        android:background="@drawable/circular_background"
+        android:backgroundTint="?androidprv:attr/materialColorSecondary"
+        android:importantForAccessibility="no"
+        android:padding="6dp"
+        android:src="@drawable/stat_sys_connected_display"
+        android:tint="?androidprv:attr/materialColorOnSecondary" />
+
+    <TextView
+        android:id="@+id/connected_display_dialog_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:gravity="center"
+        android:text="@string/connected_display_dialog_start_mirroring"
+        android:textAppearance="@style/TextAppearance.Dialog.Title" />
+
+    <TextView
+        android:id="@+id/dual_display_warning"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:visibility="gone"
+        android:layout_marginTop="16dp"
+        android:text="@string/connected_display_dialog_dual_display_stop_warning"
+        android:textAppearance="@style/TextAppearance.Dialog.Body" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/cancel"
+            style="@style/Widget.Dialog.Button.BorderButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/dismiss_dialog" />
+
+        <Space
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1" />
+
+        <Button
+            android:id="@+id/enable_display"
+            style="@style/Widget.Dialog.Button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/mirror_display" />
+    </LinearLayout>
+</LinearLayout>

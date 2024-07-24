@@ -31,6 +31,7 @@
 #include "DrawFrameTask.h"
 #include "SwapBehavior.h"
 #include "hwui/Bitmap.h"
+#include "utils/ForceDark.h"
 
 class SkBitmap;
 class SkPicture;
@@ -142,7 +143,7 @@ public:
 
     void addFrameMetricsObserver(FrameMetricsObserver* observer);
     void removeFrameMetricsObserver(FrameMetricsObserver* observer);
-    void setForceDark(bool enable);
+    void setForceDark(ForceDarkType type);
 
     static void copySurfaceInto(ANativeWindow* window, std::shared_ptr<CopyRequest>&& request);
     static void prepareToDraw(Bitmap& bitmap);

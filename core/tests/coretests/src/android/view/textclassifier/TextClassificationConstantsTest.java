@@ -23,14 +23,21 @@ import android.provider.DeviceConfig;
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import java.util.function.Consumer;
+import java.util.function.Predicate;
 
 @SmallTest
 @RunWith(AndroidJUnit4.class)
 public class TextClassificationConstantsTest {
+
+    @Before
+    public void setup() {
+        TextClassificationConstants.resetMemoizedValues();
+    }
 
     @Test
     public void booleanSettings() {
@@ -68,6 +75,13 @@ public class TextClassificationConstantsTest {
                         .isEqualTo(1));
     }
 
+    @Test
+    public void runtimeMutableSettings() {
+        assertOverride(
+                TextClassificationConstants.SYSTEM_TEXT_CLASSIFIER_ENABLED,
+                settings -> settings.isSystemTextClassifierEnabled());
+    }
+
     private static void assertSettings(
             String key, String value, Consumer<TextClassificationConstants> settingsConsumer) {
         final String originalValue =
@@ -76,6 +90,21 @@ public class TextClassificationConstantsTest {
         try {
             setDeviceConfig(key, value);
             settingsConsumer.accept(settings);
+        } finally {
+            setDeviceConfig(key, originalValue);
+        }
+    }
+
+    private static void assertOverride(
+            String key, Predicate<TextClassificationConstants> settingsPredicate) {
+        final String originalValue =
+                DeviceConfig.getProperty(DeviceConfig.NAMESPACE_TEXTCLASSIFIER, key);
+        TextClassificationConstants settings = new TextClassificationConstants();
+        try {
+            setDeviceConfig(key, "true");
+            assertThat(settingsPredicate.test(settings)).isTrue();
+            setDeviceConfig(key, "false");
+            assertThat(settingsPredicate.test(settings)).isFalse();
         } finally {
             setDeviceConfig(key, originalValue);
         }

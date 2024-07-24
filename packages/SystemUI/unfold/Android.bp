@@ -24,6 +24,7 @@ package {
 
 android_library {
     name: "SystemUIUnfoldLib",
+    use_resource_processor: true,
     srcs: [
         "src/**/*.java",
         "src/**/*.kt",
@@ -39,7 +40,4 @@ android_library {
     sdk_version: "current",
     min_sdk_version: "current",
     plugins: ["dagger2-compiler"],
-    lint: {
-        baseline_filename: "lint-baseline.xml",
-    },
 }

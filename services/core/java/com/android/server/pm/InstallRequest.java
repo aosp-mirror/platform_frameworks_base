@@ -16,6 +16,7 @@
 
 package com.android.server.pm;
 
+import static android.content.pm.Flags.improveInstallFreeze;
 import static android.content.pm.PackageInstaller.SessionParams.USER_ACTION_UNSPECIFIED;
 import static android.content.pm.PackageManager.INSTALL_REASON_UNKNOWN;
 import static android.content.pm.PackageManager.INSTALL_SCENARIO_DEFAULT;
@@ -24,6 +25,7 @@ import static android.os.Process.INVALID_UID;
 
 import static com.android.server.art.model.DexoptResult.DexContainerFileDexoptResult;
 import static com.android.server.art.model.DexoptResult.PackageDexoptResult;
+import static com.android.server.pm.PackageManagerService.EMPTY_INT_ARRAY;
 import static com.android.server.pm.PackageManagerService.SCAN_AS_INSTANT_APP;
 import static com.android.server.pm.PackageManagerService.TAG;
 
@@ -31,13 +33,15 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.apex.ApexInfo;
 import android.app.AppOpsManager;
+import android.content.pm.ArchivedPackageParcel;
 import android.content.pm.DataLoaderType;
-import android.content.pm.Flags;
 import android.content.pm.IPackageInstallObserver2;
 import android.content.pm.PackageInstaller;
 import android.content.pm.PackageManager;
 import android.content.pm.SharedLibraryInfo;
 import android.content.pm.SigningDetails;
+import android.content.pm.parsing.PackageLite;
+import android.content.pm.verify.domain.DomainSet;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Process;
@@ -46,12 +50,13 @@ import android.util.ArrayMap;
 import android.util.ExceptionUtils;
 import android.util.Slog;
 
+import com.android.internal.pm.parsing.pkg.ParsedPackage;
+import com.android.internal.pm.pkg.parsing.ParsingPackageUtils;
+import com.android.internal.util.ArrayUtils;
 import com.android.server.art.model.DexoptResult;
-import com.android.server.pm.parsing.pkg.ParsedPackage;
 import com.android.server.pm.pkg.AndroidPackage;
 import com.android.server.pm.pkg.PackageState;
 import com.android.server.pm.pkg.PackageStateInternal;
-import com.android.server.pm.pkg.parsing.ParsingPackageUtils;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -73,11 +78,13 @@ final class InstallRequest {
     private int mParseFlags;
     private boolean mReplace;
 
-    @Nullable /* The original Package if it is being replaced, otherwise {@code null} */
-    private AndroidPackage mExistingPackage;
+    @Nullable /* The original package's name if it is being replaced, otherwise {@code null} */
+    private String mExistingPackageName;
     /** parsed package to be scanned */
     @Nullable
     private ParsedPackage mParsedPackage;
+    @Nullable
+    private ArchivedPackageParcel mArchivedPackage;
     private boolean mClearCodeCache;
     private boolean mSystem;
     @Nullable
@@ -97,6 +104,8 @@ final class InstallRequest {
     private int[] mNewUsers;
     @Nullable
     private AndroidPackage mPkg;
+    @Nullable
+    private PackageLite mPackageLite;
     private int mReturnCode;
     private int mInternalErrorCode;
     @Nullable
@@ -135,7 +144,19 @@ final class InstallRequest {
     private int mDexoptStatus;
 
     @NonNull
-    private ArrayList<String> mWarnings = new ArrayList<>();
+    private int[] mFirstTimeBroadcastUserIds = EMPTY_INT_ARRAY;
+    @NonNull
+    private int[] mFirstTimeBroadcastInstantUserIds = EMPTY_INT_ARRAY;
+    @NonNull
+    private int[] mUpdateBroadcastUserIds = EMPTY_INT_ARRAY;
+    @NonNull
+    private int[] mUpdateBroadcastInstantUserIds = EMPTY_INT_ARRAY;
+
+    @NonNull
+    private final ArrayList<String> mWarnings = new ArrayList<>();
+
+    @Nullable
+    private DomainSet mPreVerifiedDomains;
 
     // New install
     InstallRequest(InstallingSession params) {
@@ -149,10 +170,12 @@ final class InstallRequest {
                 params.mInstallReason, params.mInstallScenario, params.mForceQueryableOverride,
                 params.mDataLoaderType, params.mPackageSource,
                 params.mApplicationEnabledSettingPersistent);
+        mPackageLite = params.mPackageLite;
         mPackageMetrics = new PackageMetrics(this);
         mIsInstallInherit = params.mIsInherit;
         mSessionId = params.mSessionId;
         mRequireUserAction = params.mRequireUserAction;
+        mPreVerifiedDomains = params.mPreVerifiedDomains;
     }
 
     // Install existing package as user
@@ -172,7 +195,7 @@ final class InstallRequest {
 
     // addForInit
     InstallRequest(ParsedPackage parsedPackage, int parseFlags, int scanFlags,
-            @Nullable UserHandle user, ScanResult scanResult) {
+            @Nullable UserHandle user, ScanResult scanResult, PackageSetting disabledPs) {
         if (user != null) {
             mUserId = user.getIdentifier();
         } else {
@@ -181,12 +204,14 @@ final class InstallRequest {
         }
         mInstallArgs = null;
         mParsedPackage = parsedPackage;
+        mArchivedPackage = null;
         mParseFlags = parseFlags;
         mScanFlags = scanFlags;
         mScanResult = scanResult;
         mPackageMetrics = null; // No logging from this code path
         mSessionId = -1;
         mRequireUserAction = USER_ACTION_UNSPECIFIED;
+        mDisabledPs = disabledPs;
     }
 
     @Nullable
@@ -273,13 +298,13 @@ final class InstallRequest {
     @Nullable
     public File getOldCodeFile() {
         return (mRemovedInfo != null && mRemovedInfo.mArgs != null)
-                ? mRemovedInfo.mArgs.mCodeFile : null;
+                ? mRemovedInfo.mArgs.getCodeFile() : null;
     }
 
     @Nullable
     public String[] getOldInstructionSet() {
         return (mRemovedInfo != null && mRemovedInfo.mArgs != null)
-                ? mRemovedInfo.mArgs.mInstructionSets : null;
+                ? mRemovedInfo.mArgs.getInstructionSets() : null;
     }
 
     public UserHandle getUser() {
@@ -313,6 +338,11 @@ final class InstallRequest {
     }
 
     @Nullable
+    public PackageLite getPackageLite() {
+        return mPackageLite;
+    }
+
+    @Nullable
     public String getTraceMethod() {
         return mInstallArgs == null ? null : mInstallArgs.mTraceMethod;
     }
@@ -323,6 +353,10 @@ final class InstallRequest {
 
     public boolean isUpdate() {
         return mRemovedInfo != null && mRemovedInfo.mRemovedPackage != null;
+    }
+
+    public boolean isArchived() {
+        return PackageInstallerSession.isArchivedInstallation(getInstallFlags());
     }
 
     @Nullable
@@ -408,11 +442,6 @@ final class InstallRequest {
     }
 
     @Nullable
-    public AndroidPackage getExistingPackage() {
-        return mExistingPackage;
-    }
-
-    @Nullable
     public List<String> getAllowlistedRestrictedPermissions() {
         return mInstallArgs == null ? null : mInstallArgs.mAllowlistedRestrictedPermissions;
     }
@@ -436,6 +465,9 @@ final class InstallRequest {
         return mParsedPackage;
     }
 
+    @Nullable
+    public ArchivedPackageParcel getArchivedPackage() { return mArchivedPackage; }
+
     @ParsingPackageUtils.ParseFlags
     public int getParseFlags() {
         return mParseFlags;
@@ -448,10 +480,7 @@ final class InstallRequest {
 
     @Nullable
     public String getExistingPackageName() {
-        if (mExistingPackage != null) {
-            return mExistingPackage.getPackageName();
-        }
-        return null;
+        return mExistingPackageName;
     }
 
     @Nullable
@@ -511,6 +540,12 @@ final class InstallRequest {
     public PackageSetting getScanRequestPackageSetting() {
         assertScanResultExists();
         return mScanResult.mRequest.mPkgSetting;
+    }
+
+    @Nullable
+    public PackageSetting getScanRequestDisabledPackageSetting() {
+        assertScanResultExists();
+        return mScanResult.mRequest.mDisabledPkgSetting;
     }
 
     @Nullable
@@ -622,6 +657,25 @@ final class InstallRequest {
         return mDexoptStatus;
     }
 
+    public boolean isAllNewUsers() {
+        return mOrigUsers == null || mOrigUsers.length == 0;
+    }
+    public int[] getFirstTimeBroadcastUserIds() {
+        return mFirstTimeBroadcastUserIds;
+    }
+
+    public int[] getFirstTimeBroadcastInstantUserIds() {
+        return mFirstTimeBroadcastInstantUserIds;
+    }
+
+    public int[] getUpdateBroadcastUserIds() {
+        return mUpdateBroadcastUserIds;
+    }
+
+    public int[] getUpdateBroadcastInstantUserIds() {
+        return mUpdateBroadcastInstantUserIds;
+    }
+
     @NonNull
     public ArrayList<String> getWarnings() {
         return mWarnings;
@@ -635,6 +689,14 @@ final class InstallRequest {
         if (mFreezer != null) {
             mFreezer.close();
         }
+    }
+
+    public void setPostInstallRunnable(Runnable runnable) {
+        mPostInstallRunnable = runnable;
+    }
+
+    public boolean hasPostInstallRunnable() {
+        return mPostInstallRunnable != null;
     }
 
     public void runPostInstallRunnable() {
@@ -698,6 +760,7 @@ final class InstallRequest {
 
     public void setNewUsers(int[] newUsers) {
         mNewUsers = newUsers;
+        populateBroadcastUsers();
     }
 
     public void setOriginPackage(String originPackage) {
@@ -729,14 +792,17 @@ final class InstallRequest {
     }
 
     public void setPrepareResult(boolean replace, int scanFlags,
-            int parseFlags, AndroidPackage existingPackage,
-            ParsedPackage packageToScan, boolean clearCodeCache, boolean system,
+            int parseFlags, PackageState existingPackageState,
+            ParsedPackage packageToScan, ArchivedPackageParcel archivedPackage,
+            boolean clearCodeCache, boolean system,
             PackageSetting originalPs, PackageSetting disabledPs) {
         mReplace = replace;
         mScanFlags = scanFlags;
         mParseFlags = parseFlags;
-        mExistingPackage = existingPackage;
+        mExistingPackageName =
+                existingPackageState != null ? existingPackageState.getPackageName() : null;
         mParsedPackage = packageToScan;
+        mArchivedPackage = archivedPackage;
         mClearCodeCache = clearCodeCache;
         mSystem = system;
         mOriginalPs = originalPs;
@@ -765,8 +831,67 @@ final class InstallRequest {
 
     public void setRemovedAppId(int appId) {
         if (mRemovedInfo != null) {
-            mRemovedInfo.mRemovedAppId = appId;
+            mRemovedInfo.mUid = appId;
+            mRemovedInfo.mIsAppIdRemoved = true;
         }
+    }
+
+    /**
+     *  Determine the set of users who are adding this package for the first time (aka "new" users)
+     *  vs. those who are seeing an update (aka "update" users). The lists can be calculated as soon
+     *  as the "new" users are set.
+     */
+    private void populateBroadcastUsers() {
+        assertScanResultExists();
+        mFirstTimeBroadcastUserIds = EMPTY_INT_ARRAY;
+        mFirstTimeBroadcastInstantUserIds = EMPTY_INT_ARRAY;
+        mUpdateBroadcastUserIds = EMPTY_INT_ARRAY;
+        mUpdateBroadcastInstantUserIds = EMPTY_INT_ARRAY;
+
+        final boolean allNewUsers = isAllNewUsers();
+        if (allNewUsers) {
+            // App was not currently installed on any user
+            for (int newUser : mNewUsers) {
+                final boolean isInstantApp =
+                        mScanResult.mPkgSetting.getUserStateOrDefault(newUser).isInstantApp();
+                if (isInstantApp) {
+                    mFirstTimeBroadcastInstantUserIds =
+                            ArrayUtils.appendInt(mFirstTimeBroadcastInstantUserIds, newUser);
+                } else {
+                    mFirstTimeBroadcastUserIds =
+                            ArrayUtils.appendInt(mFirstTimeBroadcastUserIds, newUser);
+                }
+            }
+            return;
+        }
+        // App was already installed on some users, but is new to some other users
+        for (int newUser : mNewUsers) {
+            boolean isFirstTimeUser = !ArrayUtils.contains(mOrigUsers, newUser);
+            final boolean isInstantApp =
+                    mScanResult.mPkgSetting.getUserStateOrDefault(newUser).isInstantApp();
+            if (isFirstTimeUser) {
+                if (isInstantApp) {
+                    mFirstTimeBroadcastInstantUserIds =
+                            ArrayUtils.appendInt(mFirstTimeBroadcastInstantUserIds, newUser);
+                } else {
+                    mFirstTimeBroadcastUserIds =
+                            ArrayUtils.appendInt(mFirstTimeBroadcastUserIds, newUser);
+                }
+            } else {
+                if (isInstantApp) {
+                    mUpdateBroadcastInstantUserIds =
+                            ArrayUtils.appendInt(mUpdateBroadcastInstantUserIds, newUser);
+                } else {
+                    mUpdateBroadcastUserIds =
+                            ArrayUtils.appendInt(mUpdateBroadcastUserIds, newUser);
+                }
+            }
+        }
+    }
+
+    @Nullable
+    public DomainSet getPreVerifiedDomains() {
+        return mPreVerifiedDomains;
     }
 
     public void addWarning(@NonNull String warning) {
@@ -825,7 +950,7 @@ final class InstallRequest {
         // Only report external profile warnings when installing from adb. The goal is to warn app
         // developers if they have provided bad external profiles, so it's not beneficial to report
         // those warnings in the normal app install workflow.
-        if (isInstallFromAdb() && Flags.useArtServiceV2()) {
+        if (isInstallFromAdb()) {
             var externalProfileErrors = new LinkedHashSet<String>();
             for (PackageDexoptResult packageResult : dexoptResult.getPackageDexoptResults()) {
                 for (DexContainerFileDexoptResult fileResult :
@@ -860,6 +985,18 @@ final class InstallRequest {
             if (mPackageMetrics != null) {
                 mPackageMetrics.onInstallSucceed();
             }
+        }
+    }
+
+    public void onFreezeStarted() {
+        if (mPackageMetrics != null && improveInstallFreeze()) {
+            mPackageMetrics.onStepStarted(PackageMetrics.STEP_FREEZE_INSTALL);
+        }
+    }
+
+    public void onFreezeCompleted() {
+        if (mPackageMetrics != null && improveInstallFreeze()) {
+            mPackageMetrics.onStepFinished(PackageMetrics.STEP_FREEZE_INSTALL);
         }
     }
 }

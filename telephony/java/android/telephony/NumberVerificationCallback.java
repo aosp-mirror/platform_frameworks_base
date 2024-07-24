@@ -20,6 +20,9 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.SystemApi;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+
 /**
  * A callback for number verification. After a request for number verification is received,
  * the system will call {@link #onCallReceived(String)} if a phone call was received from a number
@@ -34,6 +37,7 @@ public interface NumberVerificationCallback {
             REASON_TOO_MANY_CALLS, REASON_CONCURRENT_REQUESTS, REASON_IN_ECBM,
             REASON_IN_EMERGENCY_CALL},
             prefix = {"REASON_"})
+    @Retention(RetentionPolicy.SOURCE)
     @interface NumberVerificationFailureReason {}
 
     /**

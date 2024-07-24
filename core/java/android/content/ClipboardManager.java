@@ -50,6 +50,7 @@ import java.util.Objects;
  * </div>
  */
 @SystemService(Context.CLIPBOARD_SERVICE)
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
 public class ClipboardManager extends android.text.ClipboardManager {
 
     /**
@@ -143,6 +144,7 @@ public class ClipboardManager extends android.text.ClipboardManager {
      */
     @SystemApi
     @RequiresPermission(Manifest.permission.MANAGE_CLIPBOARD_ACCESS_NOTIFICATION)
+    @android.ravenwood.annotation.RavenwoodThrow
     public boolean areClipboardAccessNotificationsEnabled() {
         try {
             return mService.areClipboardAccessNotificationsEnabledForUser(mContext.getUserId());
@@ -159,6 +161,7 @@ public class ClipboardManager extends android.text.ClipboardManager {
      */
     @SystemApi
     @RequiresPermission(Manifest.permission.MANAGE_CLIPBOARD_ACCESS_NOTIFICATION)
+    @android.ravenwood.annotation.RavenwoodThrow
     public void setClipboardAccessNotificationsEnabled(boolean enable) {
         try {
             mService.setClipboardAccessNotificationsEnabledForUser(enable, mContext.getUserId());

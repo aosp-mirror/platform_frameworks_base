@@ -440,8 +440,8 @@ static void BuildNonFinalizedSDK(const std::string& apk_path, const std::string&
       R"(<resources>
           <public type="attr" name="finalized_res" id="0x01010001"/>
 
-          <!-- S staged attributes (support staged resources in the same type id) -->
-          <staging-public-group type="attr" first-id="0x01010050">
+          <!-- S staged attributes (Not support staged resources in the same type id) -->
+          <staging-public-group type="attr" first-id="0x01fc0050">
             <public name="staged_s_res" />
           </staging-public-group>
 
@@ -479,8 +479,8 @@ static void BuildFinalizedSDK(const std::string& apk_path, const std::string& ja
           <public type="attr" name="staged_s2_res" id="0x01010003"/>
           <public type="string" name="staged_s_string" id="0x01020000"/>
 
-          <!-- S staged attributes (support staged resources in the same type id) -->
-          <staging-public-group-final type="attr" first-id="0x01010050">
+          <!-- S staged attributes (Not support staged resources in the same type id) -->
+          <staging-public-group-final type="attr" first-id="0x01fc0050">
             <public name="staged_s_res" />
           </staging-public-group-final>
 
@@ -550,7 +550,7 @@ TEST_F(LinkTest, StagedAndroidApi) {
   EXPECT_THAT(android_r_contents, HasSubstr("public static final int finalized_res=0x01010001;"));
   EXPECT_THAT(
       android_r_contents,
-      HasSubstr("public static final int staged_s_res; static { staged_s_res=0x01010050; }"));
+      HasSubstr("public static final int staged_s_res; static { staged_s_res=0x01fc0050; }"));
   EXPECT_THAT(
       android_r_contents,
       HasSubstr("public static final int staged_s_string; static { staged_s_string=0x01fd0080; }"));
@@ -582,7 +582,7 @@ TEST_F(LinkTest, StagedAndroidApi) {
 
   result = am.GetResourceId("android:attr/staged_s_res");
   ASSERT_TRUE(result.has_value());
-  EXPECT_THAT(*result, Eq(0x01010050));
+  EXPECT_THAT(*result, Eq(0x01fc0050));
 
   result = am.GetResourceId("android:string/staged_s_string");
   ASSERT_TRUE(result.has_value());

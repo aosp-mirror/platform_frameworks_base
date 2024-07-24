@@ -198,14 +198,14 @@ class TaskPositioningController {
                 // resizing/scrolling are not sent to the app. 'win' is the main window
                 // of the app, it may not have focus since there might be other windows
                 // on top (eg. a dialog window).
-                WindowState transferFocusFromWin = win;
+                WindowState transferTouchFromWin = win;
                 if (displayContent.mCurrentFocus != null && displayContent.mCurrentFocus != win
                         && displayContent.mCurrentFocus.mActivityRecord == win.mActivityRecord) {
-                    transferFocusFromWin = displayContent.mCurrentFocus;
+                    transferTouchFromWin = displayContent.mCurrentFocus;
                 }
-                if (!mService.mInputManager.transferTouchFocus(
-                        transferFocusFromWin.mInputChannel, mTaskPositioner.mClientChannel,
-                        false /* isDragDrop */)) {
+                if (!mService.mInputManager.transferTouchGesture(
+                        transferTouchFromWin.mInputChannel.getToken(),
+                        mTaskPositioner.mClientChannel.getToken())) {
                     Slog.e(TAG_WM, "startPositioningLocked: Unable to transfer touch focus");
                     cleanUpTaskPositioner();
                     return false;

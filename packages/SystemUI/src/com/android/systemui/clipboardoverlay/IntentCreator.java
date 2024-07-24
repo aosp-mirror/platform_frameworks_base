@@ -24,7 +24,7 @@ import android.content.Intent;
 import android.net.Uri;
 import android.text.TextUtils;
 
-import com.android.systemui.R;
+import com.android.systemui.res.R;
 
 class IntentCreator {
     private static final String EXTRA_EDIT_SOURCE = "edit_source";

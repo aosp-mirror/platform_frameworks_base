@@ -116,6 +116,14 @@ public class ConfirmUserCreationActivity extends AlertActivity
         if (cantCreateUser) {
             setResult(UserManager.USER_CREATION_FAILED_NOT_PERMITTED);
             return null;
+        } else if (!(isUserPropertyWithinLimit(mUserName, UserManager.MAX_USER_NAME_LENGTH)
+                && isUserPropertyWithinLimit(mAccountName, UserManager.MAX_ACCOUNT_STRING_LENGTH)
+                && isUserPropertyWithinLimit(mAccountType, UserManager.MAX_ACCOUNT_STRING_LENGTH))
+                || (mAccountOptions != null && !mAccountOptions.isBundleContentsWithinLengthLimit(
+                UserManager.MAX_ACCOUNT_OPTIONS_LENGTH))) {
+            setResult(UserManager.USER_CREATION_FAILED_NOT_PERMITTED);
+            Log.i(TAG, "User properties must not exceed their character limits");
+            return null;
         } else if (cantCreateAnyMoreUsers) {
             setResult(UserManager.USER_CREATION_FAILED_NO_MORE_USERS);
             return null;
@@ -143,5 +151,9 @@ public class ConfirmUserCreationActivity extends AlertActivity
             setResult(RESULT_OK);
         }
         finish();
+    }
+
+    private boolean isUserPropertyWithinLimit(String property, int limit) {
+        return property == null || property.length() <= limit;
     }
 }

@@ -16,7 +16,9 @@
 
 package com.android.server;
 
+import static android.os.Flags.batteryServiceSupportCurrentAdbCommand;
 import static android.os.Flags.stateOfHealthPublic;
+
 import static com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import static com.android.server.health.Utils.copyV1Battery;
 
@@ -79,6 +81,7 @@ import java.io.PrintWriter;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.NoSuchElementException;
+import java.util.concurrent.CopyOnWriteArraySet;
 
 /**
  * <p>BatteryService monitors the charging status, and charge level of the device
@@ -155,6 +158,12 @@ public final class BatteryService extends SystemService {
     private int mLastChargeCounter;
     private int mLastBatteryCycleCount;
     private int mLastCharingState;
+    /**
+     * The last seen charging policy. This requires the
+     * {@link android.Manifest.permission#BATTERY_STATS} permission and should therefore not be
+     * included in the ACTION_BATTERY_CHANGED intent extras.
+     */
+    private int mLastChargingPolicy;
 
     private int mSequence = 1;
 
@@ -166,6 +175,7 @@ public final class BatteryService extends SystemService {
     private int mLowBatteryCloseWarningLevel;
     private int mBatteryNearlyFullLevel;
     private int mShutdownBatteryTemperature;
+    private boolean mShutdownIfNoPower;
 
     private static String sSystemUiPackage;
 
@@ -193,6 +203,9 @@ public final class BatteryService extends SystemService {
     private BatteryPropertiesRegistrar mBatteryPropertiesRegistrar;
     private ArrayDeque<Bundle> mBatteryLevelsEventQueue;
     private long mLastBatteryLevelChangedSentMs;
+
+    private final CopyOnWriteArraySet<BatteryManagerInternal.ChargingPolicyChangeListener>
+            mChargingPolicyChangeListeners = new CopyOnWriteArraySet<>();
 
     private Bundle mBatteryChangedOptions = BroadcastOptions.makeBasic()
             .setDeliveryGroupPolicy(BroadcastOptions.DELIVERY_GROUP_POLICY_MOST_RECENT)
@@ -230,6 +243,8 @@ public final class BatteryService extends SystemService {
                 com.android.internal.R.integer.config_lowBatteryCloseWarningBump);
         mShutdownBatteryTemperature = mContext.getResources().getInteger(
                 com.android.internal.R.integer.config_shutdownBatteryTemperature);
+        mShutdownIfNoPower = mContext.getResources().getBoolean(
+                com.android.internal.R.bool.config_shutdownIfNoPower);
         sSystemUiPackage = mContext.getResources().getString(
                 com.android.internal.R.string.config_systemUi);
 
@@ -391,6 +406,9 @@ public final class BatteryService extends SystemService {
         if (mHealthInfo.batteryCapacityLevel != BatteryCapacityLevel.UNSUPPORTED) {
             return (mHealthInfo.batteryCapacityLevel == BatteryCapacityLevel.CRITICAL);
         }
+        if (!mShutdownIfNoPower) {
+            return false;
+        }
         if (mHealthInfo.batteryLevel > 0) {
             return false;
         }
@@ -518,6 +536,11 @@ public final class BatteryService extends SystemService {
 
         shutdownIfNoPowerLocked();
         shutdownIfOverTempLocked();
+
+        if (force || mHealthInfo.chargingPolicy != mLastChargingPolicy) {
+            mLastChargingPolicy = mHealthInfo.chargingPolicy;
+            mHandler.post(this::notifyChargingPolicyChanged);
+        }
 
         if (force
                 || (mHealthInfo.batteryStatus != mLastBatteryStatus
@@ -819,6 +842,17 @@ public final class BatteryService extends SystemService {
         mLastBatteryLevelChangedSentMs = SystemClock.elapsedRealtime();
     }
 
+    private void notifyChargingPolicyChanged() {
+        final int newPolicy;
+        synchronized (mLock) {
+            newPolicy = mLastChargingPolicy;
+        }
+        for (BatteryManagerInternal.ChargingPolicyChangeListener listener
+                : mChargingPolicyChangeListeners) {
+            listener.onChargingPolicyChanged(newPolicy);
+        }
+    }
+
     // TODO: Current code doesn't work since "--unplugged" flag in BSS was purposefully removed.
     private void logBatteryStatsLocked() {
         IBinder batteryInfoService = ServiceManager.getService(BatteryStats.SERVICE_NAME);
@@ -920,9 +954,12 @@ public final class BatteryService extends SystemService {
         pw.println("Battery service (battery) commands:");
         pw.println("  help");
         pw.println("    Print this help text.");
-        pw.println("  get [-f] [ac|usb|wireless|dock|status|level|temp|present|counter|invalid]");
-        pw.println("  set [-f] "
-                + "[ac|usb|wireless|dock|status|level|temp|present|counter|invalid] <value>");
+        String getSetOptions = "ac|usb|wireless|dock|status|level|temp|present|counter|invalid";
+        if (batteryServiceSupportCurrentAdbCommand()) {
+            getSetOptions += "|current_now|current_average";
+        }
+        pw.println("  get [-f] [" + getSetOptions + "]");
+        pw.println("  set [-f] [" + getSetOptions + "] <value>");
         pw.println("    Force a battery property value, freezing battery state.");
         pw.println("    -f: force a battery change broadcast be sent, prints new sequence.");
         pw.println("  unplug [-f]");
@@ -963,6 +1000,7 @@ public final class BatteryService extends SystemService {
                 unplugBattery(/* forceUpdate= */ (opts & OPTION_FORCE_UPDATE) != 0, pw);
             } break;
             case "get": {
+                final int opts = parseOptions(shell);
                 final String key = shell.getNextArg();
                 if (key == null) {
                     pw.println("No property specified");
@@ -993,6 +1031,22 @@ public final class BatteryService extends SystemService {
                         break;
                     case "counter":
                         pw.println(mHealthInfo.batteryChargeCounterUah);
+                        break;
+                    case "current_now":
+                        if (batteryServiceSupportCurrentAdbCommand()) {
+                            if ((opts & OPTION_FORCE_UPDATE) != 0) {
+                                updateHealthInfo();
+                            }
+                            pw.println(mHealthInfo.batteryCurrentMicroamps);
+                        }
+                        break;
+                    case "current_average":
+                        if (batteryServiceSupportCurrentAdbCommand()) {
+                            if ((opts & OPTION_FORCE_UPDATE) != 0) {
+                                updateHealthInfo();
+                            }
+                            pw.println(mHealthInfo.batteryCurrentAverageMicroamps);
+                        }
                         break;
                     case "temp":
                         pw.println(mHealthInfo.batteryTemperatureTenthsCelsius);
@@ -1051,6 +1105,16 @@ public final class BatteryService extends SystemService {
                         case "counter":
                             mHealthInfo.batteryChargeCounterUah = Integer.parseInt(value);
                             break;
+                        case "current_now":
+                            if (batteryServiceSupportCurrentAdbCommand()) {
+                                mHealthInfo.batteryCurrentMicroamps = Integer.parseInt(value);
+                            }
+                            break;
+                        case "current_average":
+                            if (batteryServiceSupportCurrentAdbCommand()) {
+                                mHealthInfo.batteryCurrentAverageMicroamps =
+                                        Integer.parseInt(value);
+                            }
                         case "temp":
                             mHealthInfo.batteryTemperatureTenthsCelsius = Integer.parseInt(value);
                             break;
@@ -1092,6 +1156,14 @@ public final class BatteryService extends SystemService {
                 return shell.handleDefaultCommands(cmd);
         }
         return 0;
+    }
+
+    private void updateHealthInfo() {
+        try {
+            mHealthServiceWrapper.scheduleUpdate();
+        } catch (RemoteException e) {
+            Slog.e(TAG, "Unable to update health service data.", e);
+        }
     }
 
     private void setChargerAcOnline(boolean online, boolean forceUpdate) {
@@ -1174,6 +1246,8 @@ public final class BatteryService extends SystemService {
                 pw.println("  voltage: " + mHealthInfo.batteryVoltageMillivolts);
                 pw.println("  temperature: " + mHealthInfo.batteryTemperatureTenthsCelsius);
                 pw.println("  technology: " + mHealthInfo.batteryTechnology);
+                pw.println("  Charging state: " + mHealthInfo.chargingState);
+                pw.println("  Charging policy: " + mHealthInfo.chargingPolicy);
             } else {
                 Shell shell = new Shell();
                 shell.exec(mBinderService, null, fd, null, args, null, new ResultReceiver(null));
@@ -1341,6 +1415,8 @@ public final class BatteryService extends SystemService {
                 case BatteryManager.BATTERY_PROPERTY_MANUFACTURING_DATE:
                 case BatteryManager.BATTERY_PROPERTY_FIRST_USAGE_DATE:
                 case BatteryManager.BATTERY_PROPERTY_CHARGING_POLICY:
+                case BatteryManager.BATTERY_PROPERTY_SERIAL_NUMBER:
+                case BatteryManager.BATTERY_PROPERTY_PART_STATUS:
                     mContext.enforceCallingPermission(
                             android.Manifest.permission.BATTERY_STATS, null);
                     break;
@@ -1400,6 +1476,19 @@ public final class BatteryService extends SystemService {
         public boolean getBatteryLevelLow() {
             synchronized (mLock) {
                 return mBatteryLevelLow;
+            }
+        }
+
+        @Override
+        public void registerChargingPolicyChangeListener(
+                BatteryManagerInternal.ChargingPolicyChangeListener listener) {
+            mChargingPolicyChangeListeners.add(listener);
+        }
+
+        @Override
+        public int getChargingPolicy() {
+            synchronized (mLock) {
+                return mLastChargingPolicy;
             }
         }
 

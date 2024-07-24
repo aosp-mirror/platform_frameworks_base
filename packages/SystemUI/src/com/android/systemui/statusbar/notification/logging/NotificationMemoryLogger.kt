@@ -21,12 +21,12 @@ import android.app.StatsManager
 import android.util.Log
 import android.util.StatsEvent
 import androidx.annotation.VisibleForTesting
+import com.android.app.tracing.traceSection
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.shared.system.SysUiStatsLog
 import com.android.systemui.statusbar.notification.collection.NotifPipeline
-import com.android.systemui.util.traceSection
 import java.lang.Exception
 import java.util.concurrent.Executor
 import javax.inject.Inject
@@ -142,7 +142,7 @@ constructor(
 
     private fun getAllNotificationsOnMainThread() =
         runBlocking(mainDispatcher) {
-            traceSection("NML#getNotifications") { notificationPipeline.allNotifs }
+            traceSection("NML#getNotifications") { notificationPipeline.allNotifs.toList() }
         }
 }
 

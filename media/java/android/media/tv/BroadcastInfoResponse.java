@@ -71,6 +71,8 @@ public abstract class BroadcastInfoResponse implements Parcelable {
                             return CommandResponse.createFromParcelBody(source);
                         case TvInputManager.BROADCAST_INFO_TYPE_TIMELINE:
                             return TimelineResponse.createFromParcelBody(source);
+                        case TvInputManager.BROADCAST_INFO_TYPE_SIGNALING_DATA:
+                            return SignalingDataResponse.createFromParcelBody(source);
                         default:
                             throw new IllegalStateException(
                                     "Unexpected broadcast info response type (value "

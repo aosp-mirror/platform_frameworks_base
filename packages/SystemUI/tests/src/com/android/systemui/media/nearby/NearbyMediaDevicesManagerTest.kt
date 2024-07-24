@@ -33,6 +33,7 @@ class NearbyMediaDevicesManagerTest : SysuiTestCase() {
     fun setUp() {
         MockitoAnnotations.initMocks(this)
         manager = NearbyMediaDevicesManager(commandQueue, logger)
+        manager.start()
 
         val callbackCaptor = ArgumentCaptor.forClass(CommandQueue.Callbacks::class.java)
         verify(commandQueue).addCallback(callbackCaptor.capture())

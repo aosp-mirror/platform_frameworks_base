@@ -99,7 +99,7 @@ public class AudioDescriptor implements Parcelable {
      * When encapsulation is required, only playback with {@link android.media.AudioTrack} API is
      * supported. But playback with {@link android.media.MediaPlayer} is not.
      * When an encapsulation type is required, the {@link AudioFormat} encoding selected when
-     * creating the {@link AudioTrack} must match the encapsulation type, e.g
+     * creating the {@link AudioTrack} must match the encapsulation type, e.g.
      * AudioFormat#ENCODING_IEC61937 for AudioProfile.AUDIO_ENCAPSULATION_TYPE_IEC61937.
      *
      * @return an integer representing the encapsulation type

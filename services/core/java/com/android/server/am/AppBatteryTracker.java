@@ -58,6 +58,7 @@ import android.os.BatteryUsageStats;
 import android.os.BatteryUsageStatsQuery;
 import android.os.PowerExemptionManager;
 import android.os.PowerExemptionManager.ReasonCode;
+import android.os.Process;
 import android.os.SystemClock;
 import android.os.UidBatteryConsumer;
 import android.os.UserHandle;
@@ -81,6 +82,7 @@ import com.android.server.am.AppRestrictionController.TrackerType;
 import com.android.server.am.AppRestrictionController.UidBatteryUsageProvider;
 import com.android.server.pm.UserManagerInternal;
 
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.lang.reflect.Constructor;
 import java.util.Arrays;
@@ -570,8 +572,22 @@ final class AppBatteryTracker extends BaseAppStateTracker<AppBatteryPolicy>
             builder = new BatteryUsageStatsQuery.Builder()
                     .includeProcessStateData()
                     .aggregateSnapshots(lastUidBatteryUsageStartTs, curStart);
-            updateBatteryUsageStatsOnceInternal(0, buf, builder, userIds, batteryStatsInternal);
+            final BatteryUsageStats statsCommit =
+                    updateBatteryUsageStatsOnceInternal(0,
+                            buf,
+                            builder,
+                            userIds,
+                            batteryStatsInternal);
             curDuration += curStart - lastUidBatteryUsageStartTs;
+            try {
+                if (statsCommit != null) {
+                    statsCommit.close();
+                } else {
+                    Slog.w(TAG, "Stat was null");
+                }
+            } catch (IOException e) {
+                Slog.w(TAG, "Failed to close a stat");
+            }
         }
         if (needUpdateUidBatteryUsageInWindow && curDuration >= windowSize) {
             // If we do have long enough data for the window, save it.
@@ -647,8 +663,18 @@ final class AppBatteryTracker extends BaseAppStateTracker<AppBatteryPolicy>
                 }
             }
         }
+        try {
+            if (stats != null) {
+                stats.close();
+            } else {
+                Slog.w(TAG, "Stat was null");
+            }
+        } catch (IOException e) {
+            Slog.w(TAG, "Failed to close a stat");
+        }
     }
 
+    // The BatteryUsageStats object MUST BE CLOSED when finished using
     private BatteryUsageStats updateBatteryUsageStatsOnceInternal(long expectedDuration,
             SparseArray<BatteryUsage> buf, BatteryUsageStatsQuery.Builder builder,
             ArraySet<UserHandle> userIds, BatteryStatsInternal batteryStatsInternal) {
@@ -661,7 +687,20 @@ final class AppBatteryTracker extends BaseAppStateTracker<AppBatteryPolicy>
             // Shouldn't happen unless in test.
             return null;
         }
+        // We need the first stat in the list, so we should
+        // close out the others.
         final BatteryUsageStats stats = statsList.get(0);
+        for (int i = 1; i < statsList.size(); i++) {
+            try {
+                if (statsList.get(i) != null) {
+                    statsList.get(i).close();
+                } else {
+                    Slog.w(TAG, "Stat was null");
+                }
+            } catch (IOException e) {
+                Slog.w(TAG, "Failed to close a stat in BatteryUsageStats List");
+            }
+        }
         final List<UidBatteryConsumer> uidConsumers = stats.getUidBatteryConsumers();
         if (uidConsumers != null) {
             final long start = stats.getStatsStartTimestamp();
@@ -1975,15 +2014,15 @@ final class AppBatteryTracker extends BaseAppStateTracker<AppBatteryPolicy>
             if (!mBgCurrentDrainHighThresholdByBgLocation) {
                 return false;
             }
-            final AppRestrictionController controller = mTracker.mAppRestrictionController;
-            if (mInjector.getPermissionManagerServiceInternal().checkUidPermission(
-                    uid, ACCESS_BACKGROUND_LOCATION) == PERMISSION_GRANTED) {
+            if (mTracker.mContext.checkPermission(ACCESS_BACKGROUND_LOCATION,
+                    Process.INVALID_PID, uid) == PERMISSION_GRANTED) {
                 return true;
             }
             if (!mBgCurrentDrainEventDurationBasedThresholdEnabled) {
                 return false;
             }
             final long since = Math.max(0, now - window);
+            final AppRestrictionController controller = mTracker.mAppRestrictionController;
             final long locationDuration = controller.getForegroundServiceTotalDurationsSince(
                     uid, since, now, ServiceInfo.FOREGROUND_SERVICE_TYPE_LOCATION);
             return locationDuration >= mBgCurrentDrainLocationMinDuration;

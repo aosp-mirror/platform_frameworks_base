@@ -25,7 +25,9 @@ import static android.view.WindowManager.TRANSIT_TO_BACK;
 import static android.view.WindowManager.TRANSIT_TO_FRONT;
 
 import android.os.Trace;
+import android.util.ArrayMap;
 import android.view.WindowManager;
+import android.window.TaskSnapshot;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -79,13 +81,15 @@ class SnapshotController {
         if (!isTransitionOpen && !isTransitionClose && type < TRANSIT_FIRST_CUSTOM) {
             return;
         }
+        ActivitiesByTask activityTargets = null;
         for (int i = changeInfos.size() - 1; i >= 0; --i) {
             Transition.ChangeInfo info = changeInfos.get(i);
             // Intentionally skip record snapshot for changes originated from PiP.
             if (info.mWindowingMode == WINDOWING_MODE_PINNED) continue;
-            if (info.mContainer.asTask() != null && !info.mContainer.isVisibleRequested()) {
-                mTaskSnapshotController.recordSnapshot(info.mContainer.asTask(),
-                        false /* allowSnapshotHome */);
+            if (info.mContainer.isActivityTypeHome()) continue;
+            final Task task = info.mContainer.asTask();
+            if (task != null && !task.mCreatedByOrganizer && !task.isVisibleRequested()) {
+                mTaskSnapshotController.recordSnapshot(task, info);
             }
             // Won't need to capture activity snapshot in close transition.
             if (isTransitionClose) {
@@ -96,10 +100,67 @@ class SnapshotController {
                 final TaskFragment tf = info.mContainer.asTaskFragment();
                 final ActivityRecord ar = tf != null ? tf.getTopMostActivity()
                         : info.mContainer.asActivityRecord();
-                final boolean taskVis = ar != null && ar.getTask().isVisibleRequested();
-                if (ar != null && !ar.isVisibleRequested() && taskVis) {
-                    mActivitySnapshotController.recordSnapshot(ar);
+                if (ar != null && ar.getTask().isVisibleRequested()) {
+                    if (activityTargets == null) {
+                        activityTargets = new ActivitiesByTask();
+                    }
+                    activityTargets.put(ar);
                 }
+            }
+        }
+        if (activityTargets != null) {
+            activityTargets.recordSnapshot(mActivitySnapshotController);
+        }
+    }
+
+    private static class ActivitiesByTask {
+        final ArrayMap<Task, OpenCloseActivities> mActivitiesMap = new ArrayMap<>();
+
+        void put(ActivityRecord ar) {
+            OpenCloseActivities activities = mActivitiesMap.get(ar.getTask());
+            if (activities == null) {
+                activities = new OpenCloseActivities();
+                mActivitiesMap.put(ar.getTask(), activities);
+            }
+            activities.add(ar);
+        }
+
+        void recordSnapshot(ActivitySnapshotController controller) {
+            for (int i = mActivitiesMap.size() - 1; i >= 0; i--) {
+                final OpenCloseActivities pair = mActivitiesMap.valueAt(i);
+                pair.recordSnapshot(controller);
+            }
+        }
+
+        static class OpenCloseActivities {
+            final ArrayList<ActivityRecord> mOpenActivities = new ArrayList<>();
+            final ArrayList<ActivityRecord> mCloseActivities = new ArrayList<>();
+
+            void add(ActivityRecord ar) {
+                if (ar.isVisibleRequested()) {
+                    mOpenActivities.add(ar);
+                } else {
+                    mCloseActivities.add(ar);
+                }
+            }
+
+            boolean allOpensOptInOnBackInvoked() {
+                if (mOpenActivities.isEmpty()) {
+                    return false;
+                }
+                for (int i = mOpenActivities.size() - 1; i >= 0; --i) {
+                    if (!mOpenActivities.get(i).mOptInOnBackInvoked) {
+                        return false;
+                    }
+                }
+                return true;
+            }
+
+            void recordSnapshot(ActivitySnapshotController controller) {
+                if (!allOpensOptInOnBackInvoked() || mCloseActivities.isEmpty()) {
+                    return;
+                }
+                controller.recordSnapshot(mCloseActivities);
             }
         }
     }
@@ -125,6 +186,18 @@ class SnapshotController {
         }
         mActivitySnapshotController.handleTransitionFinish(windows);
         mActivitySnapshotController.endSnapshotProcess();
+        // Remove task snapshot if it is visible at the end of transition.
+        for (int i = changeInfos.size() - 1; i >= 0; --i) {
+            final WindowContainer wc = changeInfos.get(i).mContainer;
+            final Task task = wc.asTask();
+            if (task != null && wc.isVisibleRequested()) {
+                final TaskSnapshot snapshot = mTaskSnapshotController.getSnapshot(task.mTaskId,
+                        task.mUserId, false /* restoreFromDisk */, false /* isLowResolution */);
+                if (snapshot != null) {
+                    mTaskSnapshotController.removeAndDeleteSnapshot(task.mTaskId, task.mUserId);
+                }
+            }
+        }
         Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
     }
 
@@ -138,5 +211,6 @@ class SnapshotController {
     void dump(PrintWriter pw, String prefix) {
         mTaskSnapshotController.dump(pw, prefix);
         mActivitySnapshotController.dump(pw, prefix);
+        mSnapshotPersistQueue.dump(pw, prefix);
     }
 }

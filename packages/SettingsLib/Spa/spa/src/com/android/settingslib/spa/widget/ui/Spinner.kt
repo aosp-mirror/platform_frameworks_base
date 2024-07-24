@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 The Android Open Source Project
+ * Copyright (C) 2023 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,6 +39,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.role
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import com.android.settingslib.spa.framework.theme.SettingsDimension
 import com.android.settingslib.spa.framework.theme.SettingsTheme
@@ -68,6 +71,7 @@ fun Spinner(options: List<SpinnerOption>, selectedId: Int?, setId: (id: Int) -> 
     ) {
         val contentPadding = PaddingValues(horizontal = SettingsDimension.itemPaddingEnd)
         Button(
+            modifier = Modifier.semantics { role = Role.DropdownList },
             onClick = { expanded = true },
             colors = ButtonDefaults.buttonColors(
                 containerColor = SettingsTheme.colorScheme.spinnerHeaderContainer,
@@ -76,13 +80,7 @@ fun Spinner(options: List<SpinnerOption>, selectedId: Int?, setId: (id: Int) -> 
             contentPadding = contentPadding,
         ) {
             SpinnerText(options.find { it.id == selectedId })
-            Icon(
-                imageVector = when {
-                    expanded -> Icons.Outlined.ExpandLess
-                    else -> Icons.Outlined.ExpandMore
-                },
-                contentDescription = null,
-            )
+            ExpandIcon(expanded)
         }
         DropdownMenu(
             expanded = expanded,
@@ -107,6 +105,17 @@ fun Spinner(options: List<SpinnerOption>, selectedId: Int?, setId: (id: Int) -> 
             }
         }
     }
+}
+
+@Composable
+internal fun ExpandIcon(expanded: Boolean) {
+    Icon(
+        imageVector = when {
+            expanded -> Icons.Outlined.ExpandLess
+            else -> Icons.Outlined.ExpandMore
+        },
+        contentDescription = null,
+    )
 }
 
 @Composable

@@ -35,6 +35,7 @@ public class LockSettingsStorageTestable extends LockSettingsStorage {
     public final File mStorageDir;
     public PersistentDataBlockManagerInternal mPersistentDataBlockManager;
     private byte[] mPersistentData;
+    private boolean mIsFactoryResetProtectionActive = false;
 
     public LockSettingsStorageTestable(Context context, File storageDir) {
         super(context);
@@ -61,6 +62,10 @@ public class LockSettingsStorageTestable extends LockSettingsStorage {
                 return mPersistentData;
             }
         }).when(mPersistentDataBlockManager).getFrpCredentialHandle();
+    }
+
+    void setTestFactoryResetProtectionState(boolean active) {
+        mIsFactoryResetProtectionActive = active;
     }
 
     @Override
@@ -100,5 +105,10 @@ public class LockSettingsStorageTestable extends LockSettingsStorage {
         File mappedPath = new File(mStorageDir, origPath.toString());
         mappedPath.getParentFile().mkdirs();
         return mappedPath;
+    }
+
+    @Override
+    public boolean isFactoryResetProtectionActive() {
+        return mIsFactoryResetProtectionActive;
     }
 }

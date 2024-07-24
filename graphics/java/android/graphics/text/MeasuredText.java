@@ -29,11 +29,13 @@ import android.util.Log;
 import com.android.internal.util.Preconditions;
 
 import dalvik.annotation.optimization.CriticalNative;
+import dalvik.annotation.optimization.NeverInline;
 
 import libcore.util.NativeAllocationRegistry;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.Locale;
 import java.util.Objects;
 
 /**
@@ -60,17 +62,19 @@ public class MeasuredText {
     private final long mNativePtr;
     private final boolean mComputeHyphenation;
     private final boolean mComputeLayout;
+    private final boolean mComputeBounds;
     @NonNull private final char[] mChars;
     private final int mTop;
     private final int mBottom;
 
     // Use builder instead.
     private MeasuredText(long ptr, @NonNull char[] chars, boolean computeHyphenation,
-            boolean computeLayout, int top, int bottom) {
+            boolean computeLayout, boolean computeBounds, int top, int bottom) {
         mNativePtr = ptr;
         mChars = chars;
         mComputeHyphenation = computeHyphenation;
         mComputeLayout = computeLayout;
+        mComputeBounds = computeBounds;
         mTop = top;
         mBottom = bottom;
     }
@@ -83,6 +87,30 @@ public class MeasuredText {
         return mChars;
     }
 
+    private void rangeCheck(int start, int end) {
+        if (start < 0 || start > end || end > mChars.length) {
+            throwRangeError(start, end);
+        }
+    }
+
+    @NeverInline
+    private void throwRangeError(int start, int end) {
+        throw new IllegalArgumentException(String.format(Locale.US,
+            "start(%d) end(%d) length(%d) out of bounds", start, end, mChars.length));
+    }
+
+    private void offsetCheck(int offset) {
+        if (offset < 0 || offset >= mChars.length) {
+            throwOffsetError(offset);
+        }
+    }
+
+    @NeverInline
+    private void throwOffsetError(int offset) {
+        throw new IllegalArgumentException(String.format(Locale.US,
+            "offset (%d) length(%d) out of bounds", offset, mChars.length));
+    }
+
     /**
      * Returns the width of a given range.
      *
@@ -91,12 +119,7 @@ public class MeasuredText {
      */
     public @FloatRange(from = 0.0) @Px float getWidth(
             @IntRange(from = 0) int start, @IntRange(from = 0) int end) {
-        Preconditions.checkArgument(0 <= start && start <= mChars.length,
-                "start(%d) must be 0 <= start <= %d", start, mChars.length);
-        Preconditions.checkArgument(0 <= end && end <= mChars.length,
-                "end(%d) must be 0 <= end <= %d", end, mChars.length);
-        Preconditions.checkArgument(start <= end,
-                "start(%d) is larger than end(%d)", start, end);
+        rangeCheck(start, end);
         return nGetWidth(mNativePtr, start, end);
     }
 
@@ -118,12 +141,7 @@ public class MeasuredText {
      */
     public void getBounds(@IntRange(from = 0) int start, @IntRange(from = 0) int end,
             @NonNull Rect rect) {
-        Preconditions.checkArgument(0 <= start && start <= mChars.length,
-                "start(%d) must be 0 <= start <= %d", start, mChars.length);
-        Preconditions.checkArgument(0 <= end && end <= mChars.length,
-                "end(%d) must be 0 <= end <= %d", end, mChars.length);
-        Preconditions.checkArgument(start <= end,
-                "start(%d) is larger than end(%d)", start, end);
+        rangeCheck(start, end);
         Preconditions.checkNotNull(rect);
         nGetBounds(mNativePtr, mChars, start, end, rect);
     }
@@ -137,12 +155,7 @@ public class MeasuredText {
      */
     public void getFontMetricsInt(@IntRange(from = 0) int start, @IntRange(from = 0) int end,
             @NonNull Paint.FontMetricsInt outMetrics) {
-        Preconditions.checkArgument(0 <= start && start <= mChars.length,
-                "start(%d) must be 0 <= start <= %d", start, mChars.length);
-        Preconditions.checkArgument(0 <= end && end <= mChars.length,
-                "end(%d) must be 0 <= end <= %d", end, mChars.length);
-        Preconditions.checkArgument(start <= end,
-                "start(%d) is larger than end(%d)", start, end);
+        rangeCheck(start, end);
         Objects.requireNonNull(outMetrics);
 
         long packed = nGetExtent(mNativePtr, mChars, start, end);
@@ -158,8 +171,7 @@ public class MeasuredText {
      * @param offset an offset of the character.
      */
     public @FloatRange(from = 0.0f) @Px float getCharWidthAt(@IntRange(from = 0) int offset) {
-        Preconditions.checkArgument(0 <= offset && offset < mChars.length,
-                "offset(%d) is larger than text length %d" + offset, mChars.length);
+        offsetCheck(offset);
         return nGetCharWidthAt(mNativePtr, offset);
     }
 
@@ -217,6 +229,7 @@ public class MeasuredText {
         private final @NonNull char[] mText;
         private boolean mComputeHyphenation = false;
         private boolean mComputeLayout = true;
+        private boolean mComputeBounds = true;
         private boolean mFastHyphenation = false;
         private int mCurrentOffset = 0;
         private @Nullable MeasuredText mHintMt = null;
@@ -266,6 +279,10 @@ public class MeasuredText {
          * offset is zero. After the style is applied the internal offset is moved to {@code offset
          * + length}, and next call will start from this new position.
          *
+         * <p>
+         * {@link Paint#TEXT_RUN_FLAG_RIGHT_EDGE} and {@link Paint#TEXT_RUN_FLAG_LEFT_EDGE} are
+         * ignored and treated as both of them are set.
+         *
          * @param paint a paint
          * @param length a length to be applied with a given paint, can not exceed the length of the
          *               text
@@ -296,11 +313,11 @@ public class MeasuredText {
             Preconditions.checkArgument(length > 0, "length can not be negative");
             final int end = mCurrentOffset + length;
             Preconditions.checkArgument(end <= mText.length, "Style exceeds the text length");
-            int lbStyle = (lineBreakConfig != null) ? lineBreakConfig.getLineBreakStyle() :
-                    LineBreakConfig.LINE_BREAK_STYLE_NONE;
-            int lbWordStyle = (lineBreakConfig != null) ? lineBreakConfig.getLineBreakWordStyle() :
-                    LineBreakConfig.LINE_BREAK_WORD_STYLE_NONE;
-            nAddStyleRun(mNativePtr, paint.getNativeInstance(), lbStyle, lbWordStyle,
+            int lbStyle = LineBreakConfig.getResolvedLineBreakStyle(lineBreakConfig);
+            int lbWordStyle = LineBreakConfig.getResolvedLineBreakWordStyle(lineBreakConfig);
+            boolean hyphenation = LineBreakConfig.getResolvedHyphenation(lineBreakConfig)
+                    == LineBreakConfig.HYPHENATION_ENABLED;
+            nAddStyleRun(mNativePtr, paint.getNativeInstance(), lbStyle, lbWordStyle, hyphenation,
                     mCurrentOffset, end, isRtl);
             mCurrentOffset = end;
 
@@ -436,6 +453,20 @@ public class MeasuredText {
         }
 
         /**
+         * Hidden API that tells native to calculate bounding box as well.
+         * Different from {@link #setComputeLayout(boolean)}, the result bounding box is not stored
+         * into MeasuredText instance. Just warm up the global word cache entry.
+         *
+         * @hide
+         * @param computeBounds
+         * @return
+         */
+        public @NonNull Builder setComputeBounds(boolean computeBounds) {
+            mComputeBounds = computeBounds;
+            return this;
+        }
+
+        /**
          * Creates a MeasuredText.
          *
          * Once you called build() method, you can't reuse the Builder class again.
@@ -455,9 +486,9 @@ public class MeasuredText {
             try {
                 long hintPtr = (mHintMt == null) ? 0 : mHintMt.getNativePtr();
                 long ptr = nBuildMeasuredText(mNativePtr, hintPtr, mText, mComputeHyphenation,
-                        mComputeLayout, mFastHyphenation);
+                        mComputeLayout, mComputeBounds, mFastHyphenation);
                 final MeasuredText res = new MeasuredText(ptr, mText, mComputeHyphenation,
-                        mComputeLayout, mTop, mBottom);
+                        mComputeLayout, mComputeBounds, mTop, mBottom);
                 sRegistry.registerNativeAllocation(res, ptr);
                 return res;
             } finally {
@@ -495,6 +526,7 @@ public class MeasuredText {
                                                 /* Non Zero */ long paintPtr,
                                                 int lineBreakStyle,
                                                 int lineBreakWordStyle,
+                                                boolean hyphenation,
                                                 @IntRange(from = 0) int start,
                                                 @IntRange(from = 0) int end,
                                                 boolean isRtl);
@@ -519,6 +551,7 @@ public class MeasuredText {
                 @NonNull char[] text,
                 boolean computeHyphenation,
                 boolean computeLayout,
+                boolean computeBounds,
                 boolean fastHyphenationMode);
 
         private static native void nFreeBuilder(/* Non Zero */ long nativeBuilderPtr);

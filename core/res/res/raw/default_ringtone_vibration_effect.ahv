@@ -1,0 +1,47 @@
+<?xml version='1.0' encoding='utf-8' standalone='no' ?>
+
+<!--
+**
+** Copyright 2023, The Android Open Source Project
+**
+** Licensed under the Apache License, Version 2.0 (the "License")
+** you may not use this file except in compliance with the License.
+** You may obtain a copy of the License at
+**
+**     http://www.apache.org/licenses/LICENSE-2.0
+**
+** Unless required by applicable law or agreed to in writing, software
+** distributed under the License is distributed on an "AS IS" BASIS,
+** WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+** See the License for the specific language governing permissions and
+** limitations under the License.
+*/
+-->
+
+<vibration-effect>
+    <waveform-effect>
+        <waveform-entry amplitude="0" durationMs="0" />
+        <waveform-entry amplitude="255" durationMs="12" />
+        <waveform-entry amplitude="0" durationMs="250" />
+        <waveform-entry amplitude="255" durationMs="12" />
+        <waveform-entry amplitude="0" durationMs="500" />
+        <repeating>
+            <waveform-entry amplitude="77" durationMs="50" />
+            <waveform-entry amplitude="77" durationMs="50" />
+            <waveform-entry amplitude="78" durationMs="50" />
+            <waveform-entry amplitude="79" durationMs="50" />
+            <waveform-entry amplitude="81" durationMs="50" />
+            <waveform-entry amplitude="84" durationMs="50" />
+            <waveform-entry amplitude="87" durationMs="50" />
+            <waveform-entry amplitude="93" durationMs="50" />
+            <waveform-entry amplitude="101" durationMs="50" />
+            <waveform-entry amplitude="114" durationMs="50" />
+            <waveform-entry amplitude="133" durationMs="50" />
+            <waveform-entry amplitude="162" durationMs="50" />
+            <waveform-entry amplitude="205" durationMs="50" />
+            <waveform-entry amplitude="255" durationMs="50" />
+            <waveform-entry amplitude="255" durationMs="300" />
+            <waveform-entry amplitude="0" durationMs="1000" />
+        </repeating>
+    </waveform-effect>
+</vibration-effect>

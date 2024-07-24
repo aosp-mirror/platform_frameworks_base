@@ -45,10 +45,8 @@
             ]
         },
         {
-            "name":"CarrierAppIntegrationTestCases"
-        },
-        {
-            "name":"ApkVerityTest"
+            "name":"CarrierAppIntegrationTestCases",
+            "keywords": ["internal"]
         },
         {
             "name":"CtsSilentUpdateHostTestCases"
@@ -97,9 +95,40 @@
                     "include-filter":"android.incrementalinstall.cts.IncrementalFeatureTest"
                 }
             ]
+        },
+        {
+            "name":"CtsPackageManagerHostTestCases",
+            "options":[
+                {
+                    "include-annotation":"android.platform.test.annotations.Presubmit"
+                },
+                {
+                    "exclude-annotation":"android.platform.test.annotations.Postsubmit"
+                },
+                {
+                    "exclude-annotation":"androidx.test.filters.FlakyTest"
+                },
+                {
+                    "exclude-annotation":"org.junit.Ignore"
+                }
+            ]
         }
     ],
     "presubmit-large":[
+        {
+            "name":"CtsPackageManagerTestCases",
+            "options":[
+                {
+                    "exclude-annotation":"androidx.test.filters.FlakyTest"
+                },
+                {
+                    "exclude-annotation":"org.junit.Ignore"
+                },
+                {
+                    "exclude-filter": "android.content.pm.cts.PackageManagerShellCommandMultiUserTest"
+                }
+            ]
+        },
         {
             "name":"CtsUsesNativeLibraryTest",
             "options":[
@@ -121,40 +150,9 @@
                     "exclude-annotation":"org.junit.Ignore"
                 }
             ]
-        },
-        {
-            "name":"CtsAppSecurityHostTestCases",
-            "options":[
-                {
-                    "include-annotation":"android.platform.test.annotations.Presubmit"
-                },
-                {
-                    "exclude-annotation":"android.platform.test.annotations.Postsubmit"
-                },
-                {
-                    "exclude-annotation":"androidx.test.filters.FlakyTest"
-                },
-                {
-                    "exclude-annotation":"org.junit.Ignore"
-                }
-            ]
         }
     ],
     "postsubmit":[
-        {
-            "name":"CtsContentTestCases",
-            "options":[
-                {
-                    "exclude-annotation":"androidx.test.filters.FlakyTest"
-                },
-                {
-                    "exclude-annotation":"org.junit.Ignore"
-                },
-                {
-                    "include-filter":"android.content.pm.cts"
-                }
-            ]
-        },
         {
             "name":"CtsAppSecurityHostTestCases",
             "options":[
@@ -165,6 +163,14 @@
         },
         {
             "name":"CtsInstallHostTestCases"
+        },
+        {
+            "name": "CtsPackageManagerTestCases",
+            "options": [
+                {
+                    "include-filter": "android.content.pm.cts.PackageManagerShellCommandMultiUserTest"
+                }
+            ]
         }
     ]
 }

@@ -23,4 +23,9 @@
         <option name="test-timeout" value="600s" />
         <option name="runner" value="androidx.test.runner.AndroidJUnitRunner" />
     </test>
+    <object class="com.android.tradefed.testtype.suite.module.TestFailureModuleController"
+            type="module_controller">
+        <!-- Take screenshot upon test failure -->
+        <option name="screenshot-on-failure" value="true" />
+     </object>
 </configuration>

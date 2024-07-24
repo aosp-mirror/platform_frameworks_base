@@ -34,6 +34,7 @@ import static org.junit.Assert.assertTrue;
 import android.platform.test.annotations.Presubmit;
 import android.view.InputChannel;
 
+import androidx.test.filters.FlakyTest;
 import androidx.test.filters.SmallTest;
 
 import org.junit.Before;
@@ -60,10 +61,7 @@ public class TaskPositioningControllerTests extends WindowTestsBase {
         assertNotNull(mWm.mTaskPositioningController);
         mTarget = mWm.mTaskPositioningController;
 
-        when(mWm.mInputManager.transferTouchFocus(
-                any(InputChannel.class),
-                any(InputChannel.class),
-                any(boolean.class))).thenReturn(true);
+        when(mWm.mInputManager.transferTouchGesture(any(), any())).thenReturn(true);
 
         mWindow = createWindow(null, TYPE_BASE_APPLICATION, "window");
         mWindow.getTask().setResizeMode(RESIZE_MODE_RESIZEABLE);
@@ -72,6 +70,7 @@ public class TaskPositioningControllerTests extends WindowTestsBase {
         doReturn(mock(InputMonitor.class)).when(mDisplayContent).getInputMonitor();
     }
 
+    @FlakyTest(bugId = 291067614)
     @Test
     public void testStartAndFinishPositioning() {
         assertFalse(mTarget.isPositioningLocked());

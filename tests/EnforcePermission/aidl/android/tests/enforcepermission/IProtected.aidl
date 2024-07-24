@@ -31,4 +31,31 @@ interface IProtected {
 
     @EnforcePermission("INTERNET")
     void ProtectedByInternetAndReadSyncSettingsImplicitly();
+
+    @EnforcePermission("TURN_SCREEN_ON")
+    void ProtectedByTurnScreenOn();
+
+    @EnforcePermission("READ_CONTACTS")
+    void ProtectedByReadContacts();
+
+    @EnforcePermission("READ_CALENDAR")
+    void ProtectedByReadCalendar();
+
+    @EnforcePermission(allOf={"INTERNET", "VIBRATE"})
+    void ProtectedByInternetAndVibrate();
+
+    @EnforcePermission(allOf={"INTERNET", "READ_SYNC_SETTINGS"})
+    void ProtectedByInternetAndReadSyncSettings();
+
+    @EnforcePermission(anyOf={"ACCESS_WIFI_STATE", "VIBRATE"})
+    void ProtectedByAccessWifiStateOrVibrate();
+
+    @EnforcePermission(anyOf={"INTERNET", "VIBRATE"})
+    void ProtectedByInternetOrVibrate();
+
+    @RequiresNoPermission
+    void NotProtected();
+
+    @PermissionManuallyEnforced
+    void ManuallyProtected();
 }

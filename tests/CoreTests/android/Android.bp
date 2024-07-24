@@ -16,5 +16,8 @@ android_test {
         "android.test.base.stubs",
     ],
     sdk_version: "current",
-    static_libs: ["junit"],
+    static_libs: [
+        "junit",
+        "androidx.test.rules",
+    ],
 }

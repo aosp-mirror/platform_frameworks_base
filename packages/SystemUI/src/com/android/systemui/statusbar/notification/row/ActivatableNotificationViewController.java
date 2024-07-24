@@ -80,11 +80,7 @@ public class ActivatableNotificationViewController
 
             if (ev.getAction() == MotionEvent.ACTION_UP) {
                 // If this is a false tap, capture the even so it doesn't result in a click.
-                boolean falseTap = mFalsingManager.isFalseTap(FalsingManager.LOW_PENALTY);
-                if (!falseTap && v instanceof ActivatableNotificationView) {
-                    ((ActivatableNotificationView) v).onTap();
-                }
-                return falseTap;
+                return mFalsingManager.isFalseTap(FalsingManager.LOW_PENALTY);
             }
             return result;
         }

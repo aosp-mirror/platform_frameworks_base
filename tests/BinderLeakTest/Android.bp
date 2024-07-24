@@ -24,6 +24,9 @@ java_defaults {
         "androidx.test.rules",
         "androidx.test.runner",
     ],
+    test_suites: [
+        "general-tests",
+    ],
 }
 
 // Built with target_sdk_version: current

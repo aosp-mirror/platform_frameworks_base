@@ -41,12 +41,15 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.annotation.Nullable;
 import android.graphics.Region;
 import android.os.IBinder;
 import android.os.LocaleList;
 import android.os.RemoteException;
 import android.os.UserHandle;
-import android.text.TextUtils;
+import android.platform.test.annotations.RequiresFlagsDisabled;
+import android.platform.test.flag.junit.CheckFlagsRule;
+import android.platform.test.flag.junit.DeviceFlagsValueProvider;
 import android.util.SparseArray;
 import android.view.Display;
 import android.view.IWindow;
@@ -67,6 +70,7 @@ import org.hamcrest.Description;
 import org.hamcrest.TypeSafeMatcher;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
@@ -77,9 +81,16 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+// This test verifies deprecated codepath. Probably changing this file means
+// AccessibilityWindowManagerWithAccessibilityWindowTest also needs to be updated.
+// LINT.IfChange
+
 /**
- * Tests for the AccessibilityWindowManager
+ * Tests for the AccessibilityWindowManager with Flags.FLAG_COMPUTE_WINDOW_CHANGES_ON_A11Y enabled.
+ * TODO(b/322444245): Merge with AccessibilityWindowManagerWithAccessibilityWindowTest
+ *  after completing the flag migration.
  */
+@RequiresFlagsDisabled(Flags.FLAG_COMPUTE_WINDOW_CHANGES_ON_A11Y)
 public class AccessibilityWindowManagerTest {
     private static final String PACKAGE_NAME = "com.android.server.accessibility";
     private static final boolean FORCE_SEND = true;
@@ -131,6 +142,9 @@ public class AccessibilityWindowManagerTest {
     @Mock private IBinder mMockHostToken;
     @Mock private IBinder mMockEmbeddedToken;
     @Mock private IBinder mMockInvalidToken;
+
+    @Rule
+    public final CheckFlagsRule mCheckFlagsRule = DeviceFlagsValueProvider.createCheckFlagsRule();
 
     @Before
     public void setUp() throws RemoteException {
@@ -452,7 +466,9 @@ public class AccessibilityWindowManagerTest {
                 false, mockHostToken, USER_SYSTEM_ID);
         final int embeddedWindowId = addAccessibilityInteractionConnection(Display.DEFAULT_DISPLAY,
                 false, mockEmbeddedToken, USER_SYSTEM_ID);
+
         mA11yWindowManager.associateEmbeddedHierarchyLocked(mockHostToken, mockEmbeddedToken);
+
         final int resolvedWindowId = mA11yWindowManager.resolveParentWindowIdLocked(
                 embeddedWindowId);
         assertEquals(hostWindowId, resolvedWindowId);
@@ -467,10 +483,13 @@ public class AccessibilityWindowManagerTest {
                 false, mockHostToken, USER_SYSTEM_ID);
         final int embeddedWindowId = addAccessibilityInteractionConnection(Display.DEFAULT_DISPLAY,
                 false, mockEmbeddedToken, USER_SYSTEM_ID);
+
         mA11yWindowManager.associateEmbeddedHierarchyLocked(mockHostToken, mockEmbeddedToken);
         mA11yWindowManager.disassociateEmbeddedHierarchyLocked(mockEmbeddedToken);
+
         final int resolvedWindowId = mA11yWindowManager.resolveParentWindowIdLocked(
                 embeddedWindowId);
+        assertNotEquals(hostWindowId, resolvedWindowId);
         assertEquals(embeddedWindowId, resolvedWindowId);
     }
 
@@ -893,13 +912,13 @@ public class AccessibilityWindowManagerTest {
 
     @Test
     public void getTokenLocked_windowIsRegistered_shouldReturnToken() {
-        final IBinder token = mA11yWindowManager.getTokenLocked(HOST_WINDOW_ID);
+        final IBinder token = mA11yWindowManager.getLeashTokenLocked(HOST_WINDOW_ID);
         assertEquals(token, mMockHostToken);
     }
 
     @Test
     public void getTokenLocked_windowIsNotRegistered_shouldReturnNull() {
-        final IBinder token = mA11yWindowManager.getTokenLocked(OTHER_WINDOW_ID);
+        final IBinder token = mA11yWindowManager.getLeashTokenLocked(OTHER_WINDOW_ID);
         assertNull(token);
     }
 
@@ -917,7 +936,7 @@ public class AccessibilityWindowManagerTest {
 
         final AccessibilityWindowInfo a11yWindow = mA11yWindowManager.findA11yWindowInfoByIdLocked(
                 windowId);
-        assertTrue(TextUtils.equals(layoutParams.accessibilityTitle, a11yWindow.getTitle()));
+        assertEquals(toString(layoutParams.accessibilityTitle), toString(a11yWindow.getTitle()));
     }
 
     @Test
@@ -1057,7 +1076,7 @@ public class AccessibilityWindowManagerTest {
         when(mockWindowToken.asBinder()).thenReturn(mockWindowBinder);
         when(mMockA11ySecurityPolicy.isCallerInteractingAcrossUsers(userId))
                 .thenReturn(bGlobal);
-        when(mMockWindowManagerInternal.getDisplayIdForWindow(mockWindowToken.asBinder()))
+        when(mMockWindowManagerInternal.getDisplayIdForWindow(mockWindowBinder))
                 .thenReturn(displayId);
 
         int windowId = mA11yWindowManager.addAccessibilityInteractionConnection(
@@ -1077,7 +1096,7 @@ public class AccessibilityWindowManagerTest {
         when(mockWindowToken.asBinder()).thenReturn(mockWindowBinder);
         when(mMockA11ySecurityPolicy.isCallerInteractingAcrossUsers(userId))
                 .thenReturn(bGlobal);
-        when(mMockWindowManagerInternal.getDisplayIdForWindow(mockWindowToken.asBinder()))
+        when(mMockWindowManagerInternal.getDisplayIdForWindow(mockWindowBinder))
                 .thenReturn(displayId);
 
         int windowId = mA11yWindowManager.addAccessibilityInteractionConnection(
@@ -1146,6 +1165,11 @@ public class AccessibilityWindowManagerTest {
             // Changes the top focused display and window.
             setTopFocusedWindowAndDisplay(changeFocusedDisplayId, newFocusedWindowIndex);
         }
+    }
+
+    @Nullable
+    private static String toString(@Nullable CharSequence cs) {
+        return cs == null ? null : cs.toString();
     }
 
     static class DisplayIdMatcher extends TypeSafeMatcher<AccessibilityEvent> {
@@ -1217,3 +1241,4 @@ public class AccessibilityWindowManagerTest {
         }
     }
 }
+// LINT.ThenChange(/services/tests/servicestests/src/com/android/server/accessibility/AccessibilityWindowManagerWithAccessibilityWindowTest.java)

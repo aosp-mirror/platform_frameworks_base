@@ -370,9 +370,9 @@ TEST(ShaderCacheTest, testCacheValidation) {
 }
 
 using namespace android::uirenderer;
-RENDERTHREAD_SKIA_PIPELINE_TEST(ShaderCacheTest, testOnVkFrameFlushed) {
+RENDERTHREAD_TEST(ShaderCacheTest, testOnVkFrameFlushed) {
     if (Properties::getRenderPipelineType() != RenderPipelineType::SkiaVulkan) {
-        // RENDERTHREAD_SKIA_PIPELINE_TEST declares both SkiaVK and SkiaGL variants.
+        // RENDERTHREAD_TEST declares both SkiaVK and SkiaGL variants.
         GTEST_SKIP() << "This test is only applicable to RenderPipelineType::SkiaVulkan";
     }
     if (!folderExist(getExternalStorageFolder())) {

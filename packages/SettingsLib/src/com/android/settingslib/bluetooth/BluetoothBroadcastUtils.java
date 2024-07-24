@@ -43,5 +43,5 @@ public final class BluetoothBroadcastUtils {
     /**
      * Bluetooth scheme.
      */
-    public static final String SCHEME_BT_BROADCAST_METADATA = "BT:";
+    public static final String SCHEME_BT_BROADCAST_METADATA = "BLUETOOTH:UUID:184F;";
 }

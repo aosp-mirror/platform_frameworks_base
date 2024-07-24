@@ -20,12 +20,12 @@ import static android.view.EventLogTags.IMF_IME_REMOTE_ANIM_CANCEL;
 import static android.view.EventLogTags.IMF_IME_REMOTE_ANIM_END;
 import static android.view.EventLogTags.IMF_IME_REMOTE_ANIM_START;
 import static android.view.inputmethod.ImeTracker.DEBUG_IME_VISIBILITY;
-import static android.view.inputmethod.ImeTracker.TOKEN_NONE;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
 import android.annotation.IntDef;
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.ComponentName;
 import android.content.res.Configuration;
@@ -51,6 +51,7 @@ import android.view.inputmethod.InputMethodManagerGlobal;
 
 import androidx.annotation.VisibleForTesting;
 
+import com.android.internal.inputmethod.SoftInputShowHideReason;
 import com.android.wm.shell.sysui.ShellInit;
 
 import java.util.ArrayList;
@@ -122,7 +123,8 @@ public class DisplayImeController implements DisplayController.OnDisplaysChanged
         }
         if (mDisplayController.getDisplayLayout(displayId).rotation()
                 != pd.mRotation && isImeShowing(displayId)) {
-            pd.startAnimation(true, false /* forceRestart */, null /* statsToken */);
+            pd.startAnimation(true, false /* forceRestart */,
+                    SoftInputShowHideReason.DISPLAY_CONFIGURATION_CHANGED);
         }
     }
 
@@ -257,7 +259,8 @@ public class DisplayImeController implements DisplayController.OnDisplaysChanged
             mInsetsState.set(insetsState, true /* copySources */);
             if (mImeShowing && !Objects.equals(oldFrame, newFrame) && newSourceVisible) {
                 if (DEBUG) Slog.d(TAG, "insetsChanged when IME showing, restart animation");
-                startAnimation(mImeShowing, true /* forceRestart */, null /* statsToken */);
+                startAnimation(mImeShowing, true /* forceRestart */,
+                        SoftInputShowHideReason.DISPLAY_INSETS_CHANGED);
             }
         }
 
@@ -291,7 +294,8 @@ public class DisplayImeController implements DisplayController.OnDisplaysChanged
                     final boolean positionChanged =
                             !imeSourceControl.getSurfacePosition().equals(lastSurfacePosition);
                     if (positionChanged) {
-                        startAnimation(mImeShowing, true /* forceRestart */, null /* statsToken */);
+                        startAnimation(mImeShowing, true /* forceRestart */,
+                                SoftInputShowHideReason.DISPLAY_CONTROLS_CHANGED);
                     }
                 } else {
                     if (!haveSameLeash(mImeSourceControl, imeSourceControl)) {
@@ -384,7 +388,20 @@ public class DisplayImeController implements DisplayController.OnDisplaysChanged
         }
 
         private void startAnimation(final boolean show, final boolean forceRestart,
-                @Nullable ImeTracker.Token statsToken) {
+                @SoftInputShowHideReason int reason) {
+            final var imeSource = mInsetsState.peekSource(InsetsSource.ID_IME);
+            if (imeSource == null || mImeSourceControl == null) {
+                return;
+            }
+            final var statsToken = ImeTracker.forLogging().onStart(
+                    show ? ImeTracker.TYPE_SHOW : ImeTracker.TYPE_HIDE, ImeTracker.ORIGIN_WM_SHELL,
+                    reason, false /* fromUser */);
+
+            startAnimation(show, forceRestart, statsToken);
+        }
+
+        private void startAnimation(final boolean show, final boolean forceRestart,
+                @NonNull final ImeTracker.Token statsToken) {
             final InsetsSource imeSource = mInsetsState.peekSource(InsetsSource.ID_IME);
             if (imeSource == null || mImeSourceControl == null) {
                 ImeTracker.forLogging().onFailed(statsToken, ImeTracker.PHASE_WM_ANIMATION_CREATE);
@@ -458,7 +475,7 @@ public class DisplayImeController implements DisplayController.OnDisplaysChanged
             ImeTracker.forLogging().onProgress(statsToken, ImeTracker.PHASE_WM_ANIMATION_CREATE);
             mAnimation.addListener(new AnimatorListenerAdapter() {
                 private boolean mCancelled = false;
-                @Nullable
+                @NonNull
                 private final ImeTracker.Token mStatsToken = statsToken;
 
                 @Override
@@ -484,7 +501,7 @@ public class DisplayImeController implements DisplayController.OnDisplaysChanged
                     }
                     if (DEBUG_IME_VISIBILITY) {
                         EventLog.writeEvent(IMF_IME_REMOTE_ANIM_START,
-                                statsToken != null ? statsToken.getTag() : TOKEN_NONE,
+                                mStatsToken != null ? mStatsToken.getTag() : ImeTracker.TOKEN_NONE,
                                 mDisplayId, mAnimationDirection, alpha, startY , endY,
                                 Objects.toString(mImeSourceControl.getLeash()),
                                 Objects.toString(mImeSourceControl.getInsetsHint()),
@@ -500,7 +517,8 @@ public class DisplayImeController implements DisplayController.OnDisplaysChanged
                     mCancelled = true;
                     if (DEBUG_IME_VISIBILITY) {
                         EventLog.writeEvent(IMF_IME_REMOTE_ANIM_CANCEL,
-                                statsToken != null ? statsToken.getTag() : TOKEN_NONE, mDisplayId,
+                                mStatsToken != null ? mStatsToken.getTag() : ImeTracker.TOKEN_NONE,
+                                mDisplayId,
                                 Objects.toString(mImeSourceControl.getInsetsHint()));
                     }
                 }
@@ -528,7 +546,7 @@ public class DisplayImeController implements DisplayController.OnDisplaysChanged
                     }
                     if (DEBUG_IME_VISIBILITY) {
                         EventLog.writeEvent(IMF_IME_REMOTE_ANIM_END,
-                                statsToken != null ? statsToken.getTag() : TOKEN_NONE,
+                                mStatsToken != null ? mStatsToken.getTag() : ImeTracker.TOKEN_NONE,
                                 mDisplayId, mAnimationDirection, endY,
                                 Objects.toString(mImeSourceControl.getLeash()),
                                 Objects.toString(mImeSourceControl.getInsetsHint()),

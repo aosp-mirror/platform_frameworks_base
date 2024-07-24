@@ -28,7 +28,7 @@ import androidx.annotation.CallSuper;
 import androidx.annotation.Nullable;
 
 import com.android.internal.jank.InteractionJankMonitor;
-import com.android.systemui.R;
+import com.android.systemui.res.R;
 
 /**
  * A Base class for all Keyguard password/pattern/pin related inputs.
@@ -62,6 +62,13 @@ public abstract class KeyguardInputView extends LinearLayout {
 
     boolean startDisappearAnimation(Runnable finishRunnable) {
         return false;
+    }
+
+    /** Updates the keyguard view's constraints (single or split constraints).
+     *  Split constraints are only used for small landscape screens.
+     *  Only called when flag LANDSCAPE_ENABLE_LOCKSCREEN is enabled. */
+    protected void updateConstraints(boolean useSplitBouncer) {
+        //Unless overridden, never update constrains (keeping default portrait constraints)
     }
 
     protected AnimatorListenerAdapter getAnimationListener(int cuj) {

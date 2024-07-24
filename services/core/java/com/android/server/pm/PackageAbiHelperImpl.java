@@ -27,11 +27,14 @@ import static com.android.internal.content.NativeLibraryHelper.LIB_DIR_NAME;
 import static com.android.server.pm.InstructionSets.getPreferredInstructionSet;
 import static com.android.server.pm.InstructionSets.getPrimaryInstructionSet;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.content.pm.Flags;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Environment;
 import android.os.FileUtils;
+import android.os.SystemProperties;
 import android.os.Trace;
 import android.text.TextUtils;
 import android.util.ArraySet;
@@ -50,8 +53,15 @@ import libcore.io.IoUtils;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 final class PackageAbiHelperImpl implements PackageAbiHelper {
+
+    @Nullable
+    private static String[] sNativelySupported32BitAbis = null;
+    @Nullable
+    private static String[] sNativelySupported64BitAbis = null;
 
     private static String calculateBundledApkRoot(final String codePathString) {
         final File codePath = new File(codePathString);
@@ -122,12 +132,19 @@ final class PackageAbiHelperImpl implements PackageAbiHelper {
         }
     }
 
-    private static void maybeThrowExceptionForMultiArchCopy(String message, int copyRet) throws
-            PackageManagerException {
+    private static void maybeThrowExceptionForMultiArchCopy(String message, int copyRet,
+            boolean forceMatch) throws PackageManagerException {
         if (copyRet < 0) {
             if (copyRet != PackageManager.NO_NATIVE_LIBRARIES
                     && copyRet != PackageManager.INSTALL_FAILED_NO_MATCHING_ABIS) {
                 throw new PackageManagerException(copyRet, message);
+            }
+
+            if (forceMatch && copyRet == PackageManager.INSTALL_FAILED_NO_MATCHING_ABIS) {
+                throw new PackageManagerException(
+                        PackageManager.INSTALL_FAILED_MULTI_ARCH_NOT_MATCH_ALL_NATIVE_ABIS,
+                        "The multiArch app's native libs don't support all the natively"
+                                + " supported ABIs of the device.");
             }
         }
     }
@@ -296,7 +313,40 @@ final class PackageAbiHelperImpl implements PackageAbiHelper {
         return new Abis(primaryCpuAbi, secondaryCpuAbi);
     }
 
+    @NonNull
+    private static String[] getNativelySupportedAbis(@NonNull String[] supportedAbis) {
+        List<String> nativelySupportedAbis = new ArrayList<>();
+        for (int i = 0; i < supportedAbis.length; i++) {
+            final String currentAbi = supportedAbis[i];
+            // In presence of a native bridge this means the Abi is emulated.
+            final String currentIsa = VMRuntime.getInstructionSet(currentAbi);
+            if (TextUtils.isEmpty(SystemProperties.get("ro.dalvik.vm.isa." + currentIsa))) {
+                nativelySupportedAbis.add(currentAbi);
+            }
+        }
+        return nativelySupportedAbis.toArray(new String[0]);
+    }
+
+    private static String[] getNativelySupported32BitAbis() {
+        if (sNativelySupported32BitAbis != null) {
+            return sNativelySupported32BitAbis;
+        }
+
+        sNativelySupported32BitAbis = getNativelySupportedAbis(Build.SUPPORTED_32_BIT_ABIS);
+        return sNativelySupported32BitAbis;
+    }
+
+    private static String[] getNativelySupported64BitAbis() {
+        if (sNativelySupported64BitAbis != null) {
+            return sNativelySupported64BitAbis;
+        }
+
+        sNativelySupported64BitAbis = getNativelySupportedAbis(Build.SUPPORTED_64_BIT_ABIS);
+        return sNativelySupported64BitAbis;
+    }
+
     @Override
+    @SuppressWarnings("AndroidFrameworkCompatChange") // the check is before the apk is installed
     public Pair<Abis, NativeLibraryPaths> derivePackageAbi(AndroidPackage pkg, boolean isSystemApp,
             boolean isUpdatedSystemApp, String cpuAbiOverride, File appLib32InstallDir)
             throws PackageManagerException {
@@ -334,18 +384,33 @@ final class PackageAbiHelperImpl implements PackageAbiHelper {
             primaryCpuAbi = null;
             secondaryCpuAbi = null;
             if (pkg.isMultiArch()) {
+                // Force the match for these cases
+                // 1. pkg.getTargetSdkVersion >= Build.VERSION_CODES.VANILLA_ICE_CREAM
+                // 2. cpuAbiOverride is null. If it is non-null, it is set via shell for testing
+                final boolean forceMatch = Flags.forceMultiArchNativeLibsMatch()
+                        && pkg.getTargetSdkVersion() >= Build.VERSION_CODES.VANILLA_ICE_CREAM
+                        && cpuAbiOverride == null;
+
+                String[] supported32BitAbis = forceMatch ? getNativelySupported32BitAbis()
+                        : Build.SUPPORTED_32_BIT_ABIS;
+                String[] supported64BitAbis = forceMatch ? getNativelySupported64BitAbis()
+                        : Build.SUPPORTED_64_BIT_ABIS;
+
+                final boolean systemSupports32BitAbi = supported32BitAbis.length > 0;
+                final boolean systemSupports64BitAbi = supported64BitAbis.length > 0;
+
                 int abi32 = PackageManager.NO_NATIVE_LIBRARIES;
                 int abi64 = PackageManager.NO_NATIVE_LIBRARIES;
-                if (Build.SUPPORTED_32_BIT_ABIS.length > 0) {
+                if (systemSupports32BitAbi) {
                     if (extractLibs) {
                         Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "copyNativeBinaries");
                         abi32 = NativeLibraryHelper.copyNativeBinariesForSupportedAbi(handle,
-                                nativeLibraryRoot, Build.SUPPORTED_32_BIT_ABIS,
+                                nativeLibraryRoot, supported32BitAbis,
                                 useIsaSpecificSubdirs, onIncremental);
                     } else {
                         Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "findSupportedAbi");
                         abi32 = NativeLibraryHelper.findSupportedAbi(
-                                handle, Build.SUPPORTED_32_BIT_ABIS);
+                                handle, supported32BitAbis);
                     }
                     Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
                 }
@@ -357,24 +422,26 @@ final class PackageAbiHelperImpl implements PackageAbiHelper {
                 }
 
                 maybeThrowExceptionForMultiArchCopy(
-                        "Error unpackaging 32 bit native libs for multiarch app.", abi32);
+                        "Error unpackaging 32 bit native libs for multiarch app.", abi32,
+                        forceMatch && systemSupports32BitAbi);
 
-                if (Build.SUPPORTED_64_BIT_ABIS.length > 0) {
+                if (systemSupports64BitAbi) {
                     if (extractLibs) {
                         Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "copyNativeBinaries");
                         abi64 = NativeLibraryHelper.copyNativeBinariesForSupportedAbi(handle,
-                                nativeLibraryRoot, Build.SUPPORTED_64_BIT_ABIS,
+                                nativeLibraryRoot, supported64BitAbis,
                                 useIsaSpecificSubdirs, onIncremental);
                     } else {
                         Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "findSupportedAbi");
                         abi64 = NativeLibraryHelper.findSupportedAbi(
-                                handle, Build.SUPPORTED_64_BIT_ABIS);
+                                handle, supported64BitAbis);
                     }
                     Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
                 }
 
                 maybeThrowExceptionForMultiArchCopy(
-                        "Error unpackaging 64 bit native libs for multiarch app.", abi64);
+                        "Error unpackaging 64 bit native libs for multiarch app.", abi64,
+                        forceMatch && systemSupports64BitAbi);
 
                 if (abi64 >= 0) {
                     // Shared library native libs should be in the APK zip aligned
@@ -382,11 +449,11 @@ final class PackageAbiHelperImpl implements PackageAbiHelper {
                         throw new PackageManagerException(INSTALL_FAILED_INTERNAL_ERROR,
                                 "Shared library native lib extraction not supported");
                     }
-                    primaryCpuAbi = Build.SUPPORTED_64_BIT_ABIS[abi64];
+                    primaryCpuAbi = supported64BitAbis[abi64];
                 }
 
                 if (abi32 >= 0) {
-                    final String abi = Build.SUPPORTED_32_BIT_ABIS[abi32];
+                    final String abi = supported32BitAbis[abi32];
                     if (abi64 >= 0) {
                         if (pkg.is32BitAbiPreferred()) {
                             secondaryCpuAbi = primaryCpuAbi;

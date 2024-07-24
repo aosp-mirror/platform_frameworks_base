@@ -74,6 +74,7 @@ import com.android.wm.shell.common.split.SplitLayout;
 import com.android.wm.shell.splitscreen.SplitScreen.SplitScreenListener;
 import com.android.wm.shell.sysui.ShellController;
 import com.android.wm.shell.sysui.ShellInit;
+import com.android.wm.shell.transition.HomeTransitionObserver;
 import com.android.wm.shell.transition.Transitions;
 
 import org.junit.Before;
@@ -139,7 +140,7 @@ public class StageCoordinatorTests extends ShellTestCase {
         when(mSplitLayout.getBounds1()).thenReturn(mBounds1);
         when(mSplitLayout.getBounds2()).thenReturn(mBounds2);
         when(mSplitLayout.getRootBounds()).thenReturn(mRootBounds);
-        when(mSplitLayout.isLandscape()).thenReturn(false);
+        when(mSplitLayout.isLeftRightSplit()).thenReturn(false);
         when(mSplitLayout.applyTaskChanges(any(), any(), any())).thenReturn(true);
         when(mSplitLayout.getDividerLeash()).thenReturn(mDividerLeash);
 
@@ -373,7 +374,7 @@ public class StageCoordinatorTests extends ShellTestCase {
         ShellInit shellInit = new ShellInit(mMainExecutor);
         final Transitions t = new Transitions(mContext, shellInit, mock(ShellController.class),
                 mTaskOrganizer, mTransactionPool, mock(DisplayController.class), mMainExecutor,
-                mMainHandler, mAnimExecutor);
+                mMainHandler, mAnimExecutor, mock(HomeTransitionObserver.class));
         shellInit.init();
         return t;
     }

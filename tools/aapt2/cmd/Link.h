@@ -332,9 +332,15 @@ class LinkCommand : public Command {
     AddOptionalSwitch("-v", "Enables verbose logging.", &verbose_);
     AddOptionalFlagList("--feature-flags",
                         "Specify the values of feature flags. The pairs in the argument\n"
-                        "are separated by ',' and the name is separated from the value by '='.\n"
-                        "Example: \"flag1=true,flag2=false,flag3=\" (flag3 has no given value).",
+                        "are separated by ',' the name is separated from the value by '='.\n"
+                        "The name can have a suffix of ':ro' to indicate it is read only."
+                        "Example: \"flag1=true,flag2:ro=false,flag3=\" (flag3 has no given value).",
                         &feature_flags_args_);
+    AddOptionalSwitch("--non-updatable-system",
+                      "Mark the app as a non-updatable system app. This inserts\n"
+                      "updatableSystem=\"false\" to the root manifest node, overwriting any\n"
+                      "existing attribute. This is ignored if the manifest has a versionCode.",
+                      &options_.manifest_fixer_options.non_updatable_system);
   }
 
   int Action(const std::vector<std::string>& args) override;

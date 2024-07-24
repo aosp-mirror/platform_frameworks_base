@@ -16,7 +16,10 @@
 
 package android.appwidget;
 
+import static android.appwidget.flags.Flags.remoteAdapterConversion;
+
 import android.annotation.BroadcastBehavior;
+import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresFeature;
@@ -28,6 +31,7 @@ import android.annotation.UiThread;
 import android.annotation.UserIdInt;
 import android.app.IServiceConnection;
 import android.app.PendingIntent;
+import android.appwidget.flags.Flags;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ComponentName;
 import android.content.Context;
@@ -52,6 +56,7 @@ import android.widget.RemoteViews;
 
 import com.android.internal.appwidget.IAppWidgetService;
 import com.android.internal.os.BackgroundThread;
+import com.android.internal.util.FunctionalUtils;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -557,16 +562,40 @@ public class AppWidgetManager {
                             }
                         }).toArray(ComponentName[]::new));
             } catch (Exception e) {
-                Log.e(TAG, "Nofity service of inheritance info", e);
+                Log.e(TAG, "Notify service of inheritance info", e);
             }
         });
     }
 
-    private boolean isPostingTaskToBackground(@Nullable RemoteViews views) {
-        return Looper.myLooper() == Looper.getMainLooper()
-                && RemoteViews.isAdapterConversionEnabled()
+    private void tryAdapterConversion(
+            FunctionalUtils.RemoteExceptionIgnoringConsumer<RemoteViews> action,
+            RemoteViews original, String failureMsg) {
+        if (remoteAdapterConversion()
                 && (mHasPostedLegacyLists = mHasPostedLegacyLists
-                        || (views != null && views.hasLegacyLists()));
+                        || (original != null && original.hasLegacyLists()))) {
+            final RemoteViews viewsCopy = new RemoteViews(original);
+            Runnable updateWidgetWithTask = () -> {
+                try {
+                    viewsCopy.collectAllIntents().get();
+                    action.acceptOrThrow(viewsCopy);
+                } catch (Exception e) {
+                    Log.e(TAG, failureMsg, e);
+                }
+            };
+
+            if (Looper.getMainLooper() == Looper.myLooper()) {
+                createUpdateExecutorIfNull().execute(updateWidgetWithTask);
+                return;
+            }
+
+            updateWidgetWithTask.run();
+        } else {
+            try {
+                action.acceptOrThrow(original);
+            } catch (RemoteException re) {
+                throw re.rethrowFromSystemServer();
+            }
+        }
     }
 
     /**
@@ -593,23 +622,8 @@ public class AppWidgetManager {
             return;
         }
 
-        if (isPostingTaskToBackground(views)) {
-            createUpdateExecutorIfNull().execute(() -> {
-                try {
-                    mService.updateAppWidgetIds(mPackageName, appWidgetIds, views);
-                } catch (RemoteException e) {
-                    Log.e(TAG, "Error updating app widget views in background", e);
-                }
-            });
-
-            return;
-        }
-
-        try {
-            mService.updateAppWidgetIds(mPackageName, appWidgetIds, views);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
+        tryAdapterConversion(view -> mService.updateAppWidgetIds(mPackageName, appWidgetIds,
+                view), views, "Error updating app widget views in background");
     }
 
     /**
@@ -714,23 +728,9 @@ public class AppWidgetManager {
             return;
         }
 
-        if (isPostingTaskToBackground(views)) {
-            createUpdateExecutorIfNull().execute(() -> {
-                try {
-                    mService.partiallyUpdateAppWidgetIds(mPackageName, appWidgetIds, views);
-                } catch (RemoteException e) {
-                    Log.e(TAG, "Error partially updating app widget views in background", e);
-                }
-            });
-
-            return;
-        }
-
-        try {
-            mService.partiallyUpdateAppWidgetIds(mPackageName, appWidgetIds, views);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
+        tryAdapterConversion(view -> mService.partiallyUpdateAppWidgetIds(mPackageName,
+                appWidgetIds, view), views,
+                "Error partially updating app widget views in background");
     }
 
     /**
@@ -782,23 +782,8 @@ public class AppWidgetManager {
             return;
         }
 
-        if (isPostingTaskToBackground(views)) {
-            createUpdateExecutorIfNull().execute(() -> {
-                try {
-                    mService.updateAppWidgetProvider(provider, views);
-                } catch (RemoteException e) {
-                    Log.e(TAG, "Error updating app widget view using provider in background", e);
-                }
-            });
-
-            return;
-        }
-
-        try {
-            mService.updateAppWidgetProvider(provider, views);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
+        tryAdapterConversion(view -> mService.updateAppWidgetProvider(provider, view), views,
+                "Error updating app widget view using provider in background");
     }
 
     /**
@@ -843,22 +828,20 @@ public class AppWidgetManager {
             return;
         }
 
-        if (!RemoteViews.isAdapterConversionEnabled()) {
+        if (remoteAdapterConversion()) {
+            if (Looper.myLooper() == Looper.getMainLooper()) {
+                mHasPostedLegacyLists = true;
+                createUpdateExecutorIfNull().execute(() -> notifyCollectionWidgetChange(
+                        appWidgetIds, viewId));
+            } else {
+                notifyCollectionWidgetChange(appWidgetIds, viewId);
+            }
+        } else {
             try {
                 mService.notifyAppWidgetViewDataChanged(mPackageName, appWidgetIds, viewId);
             } catch (RemoteException re) {
                 throw re.rethrowFromSystemServer();
             }
-
-            return;
-        }
-
-        if (Looper.myLooper() == Looper.getMainLooper()) {
-            mHasPostedLegacyLists = true;
-            createUpdateExecutorIfNull().execute(() -> notifyCollectionWidgetChange(appWidgetIds,
-                    viewId));
-        } else {
-            notifyCollectionWidgetChange(appWidgetIds, viewId);
         }
     }
 
@@ -1411,6 +1394,89 @@ public class AppWidgetManager {
             throw e.rethrowFromSystemServer();
         }
     }
+
+    /**
+     * Set a preview for this widget. This preview will be used instead of the provider's {@link
+     * AppWidgetProviderInfo#previewLayout previewLayout} or {@link
+     * AppWidgetProviderInfo#previewImage previewImage} for previewing the widget in the widget
+     * picker and pin app widget flow.
+     *
+     * @param provider The {@link ComponentName} for the {@link android.content.BroadcastReceiver
+     *    BroadcastReceiver} provider for the AppWidget you intend to provide a preview for.
+     * @param widgetCategories The categories that this preview should be used for. This can be a
+     *    single category or combination of categories. If multiple categories are specified,
+     *    then this preview will be used for each of those categories. For example, if you
+     *    set a preview for WIDGET_CATEGORY_HOME_SCREEN | WIDGET_CATEGORY_KEYGUARD, the preview will
+     *    be used when picking widgets for the home screen and keyguard.
+     *
+     *    <p>Note: You should only use the widget categories that the provider supports, as defined
+     *    in {@link AppWidgetProviderInfo#widgetCategory}.
+     * @param preview This preview will be used for previewing the provider when picking widgets for
+     *    the selected categories.
+     *
+     * @see AppWidgetProviderInfo#WIDGET_CATEGORY_HOME_SCREEN
+     * @see AppWidgetProviderInfo#WIDGET_CATEGORY_KEYGUARD
+     * @see AppWidgetProviderInfo#WIDGET_CATEGORY_SEARCHBOX
+     */
+    @FlaggedApi(Flags.FLAG_GENERATED_PREVIEWS)
+    public void setWidgetPreview(@NonNull ComponentName provider,
+            @AppWidgetProviderInfo.CategoryFlags int widgetCategories,
+            @NonNull RemoteViews preview) {
+        try {
+            mService.setWidgetPreview(provider, widgetCategories, preview);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Get the RemoteViews previews for this widget.
+     *
+     * @param provider The {@link ComponentName} for the {@link android.content.BroadcastReceiver
+     *    BroadcastReceiver} provider for the AppWidget you intend to get a preview for.
+     * @param profile The profile in which the provider resides. Passing null is equivalent
+     *        to querying for only the calling user.
+     * @param widgetCategory The widget category for which you want to display previews. This should
+     *    be a single category. If a combination of categories is provided, this function will
+     *    return a preview that matches at least one of the categories.
+     *
+     * @return The widget preview for the selected category, if available.
+     * @see AppWidgetProviderInfo#generatedPreviewCategories
+     */
+    @Nullable
+    @FlaggedApi(Flags.FLAG_GENERATED_PREVIEWS)
+    public RemoteViews getWidgetPreview(@NonNull ComponentName provider,
+            @Nullable UserHandle profile, @AppWidgetProviderInfo.CategoryFlags int widgetCategory) {
+        try {
+            if (profile == null) {
+                profile = mContext.getUser();
+            }
+            return mService.getWidgetPreview(mPackageName, provider, profile.getIdentifier(),
+                    widgetCategory);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Remove this provider's preview for the specified widget categories. If the provider does not
+     * have a preview for the specified widget category, this is a no-op.
+     *
+     * @param provider The AppWidgetProvider to remove previews for.
+     * @param widgetCategories The categories of the preview to remove. For example, removing the
+     *    preview for WIDGET_CATEGORY_HOME_SCREEN | WIDGET_CATEGORY_KEYGUARD will remove the
+     *    previews for both categories.
+     */
+    @FlaggedApi(Flags.FLAG_GENERATED_PREVIEWS)
+    public void removeWidgetPreview(@NonNull ComponentName provider,
+            @AppWidgetProviderInfo.CategoryFlags int widgetCategories) {
+        try {
+            mService.removeWidgetPreview(provider, widgetCategories);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
 
     @UiThread
     private static @NonNull Executor createUpdateExecutorIfNull() {

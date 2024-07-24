@@ -125,11 +125,15 @@ public class PipBoundsAlgorithm {
     public Rect getEntryDestinationBoundsIgnoringKeepClearAreas() {
         final PipBoundsState.PipReentryState reentryState = mPipBoundsState.getReentryState();
 
-        final Rect destinationBounds = reentryState != null
-                ? getDefaultBounds(reentryState.getSnapFraction(), reentryState.getSize())
-                : getDefaultBounds();
+        final Rect destinationBounds = getDefaultBounds();
+        if (reentryState != null) {
+            final Size scaledBounds = new Size(
+                    Math.round(mPipBoundsState.getMaxSize().x * reentryState.getBoundsScale()),
+                    Math.round(mPipBoundsState.getMaxSize().y * reentryState.getBoundsScale()));
+            destinationBounds.set(getDefaultBounds(reentryState.getSnapFraction(), scaledBounds));
+        }
 
-        final boolean useCurrentSize = reentryState != null && reentryState.getSize() != null;
+        final boolean useCurrentSize = reentryState != null;
         Rect aspectRatioBounds = transformBoundsToAspectRatioIfValid(destinationBounds,
                 mPipBoundsState.getAspectRatio(), false /* useCurrentMinEdgeSize */,
                 useCurrentSize);

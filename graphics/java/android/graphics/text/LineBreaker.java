@@ -16,12 +16,17 @@
 
 package android.graphics.text;
 
+import static com.android.text.flags.Flags.FLAG_USE_BOUNDS_FOR_WIDTH;
+import static com.android.text.flags.Flags.FLAG_LETTER_SPACING_JUSTIFICATION;
+
+import android.annotation.FlaggedApi;
 import android.annotation.FloatRange;
 import android.annotation.IntDef;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.Px;
+import android.text.Layout;
 
 import dalvik.annotation.optimization.CriticalNative;
 import dalvik.annotation.optimization.FastNative;
@@ -159,7 +164,8 @@ public class LineBreaker {
     /** @hide */
     @IntDef(prefix = { "JUSTIFICATION_MODE_" }, value = {
             JUSTIFICATION_MODE_NONE,
-            JUSTIFICATION_MODE_INTER_WORD
+            JUSTIFICATION_MODE_INTER_WORD,
+            JUSTIFICATION_MODE_INTER_CHARACTER,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface JustificationMode {}
@@ -175,6 +181,12 @@ public class LineBreaker {
     public static final int JUSTIFICATION_MODE_INTER_WORD = 1;
 
     /**
+     * Value for justification mode indicating the text is justified by stretching letter spacing.
+     */
+    @FlaggedApi(FLAG_LETTER_SPACING_JUSTIFICATION)
+    public static final int JUSTIFICATION_MODE_INTER_CHARACTER = 2;
+
+    /**
      * Helper class for creating a {@link LineBreaker}.
      */
     public static final class Builder {
@@ -182,6 +194,7 @@ public class LineBreaker {
         private @HyphenationFrequency int mHyphenationFrequency = HYPHENATION_FREQUENCY_NONE;
         private @JustificationMode int mJustificationMode = JUSTIFICATION_MODE_NONE;
         private @Nullable int[] mIndents = null;
+        private boolean mUseBoundsForWidth = false;
 
         /**
          * Set break strategy.
@@ -231,13 +244,35 @@ public class LineBreaker {
         }
 
         /**
+         * Set true for using width of bounding box as a source of automatic line breaking.
+         *
+         * If this value is false, the automatic line breaking uses total amount of advances as text
+         * widths. By setting true, it uses joined all glyph bound's width as a width of the text.
+         *
+         * If the font has glyphs that have negative bearing X or its xMax is greater than advance,
+         * the glyph clipping can happen because the drawing area may be bigger. By setting this to
+         * true, the line breaker will break line based on bounding box, so clipping can be
+         * prevented.
+         *
+         * @param useBoundsForWidth True for using bounding box, false for advances.
+         * @return this builder instance
+         * @see Layout#getUseBoundsForWidth()
+         * @see android.text.StaticLayout.Builder#setUseBoundsForWidth(boolean)
+         */
+        @FlaggedApi(FLAG_USE_BOUNDS_FOR_WIDTH)
+        public @NonNull Builder setUseBoundsForWidth(boolean useBoundsForWidth) {
+            mUseBoundsForWidth = useBoundsForWidth;
+            return this;
+        }
+
+        /**
          * Build a new LineBreaker with given parameters.
          *
          * You can reuse the Builder instance even after calling this method.
          */
         public @NonNull LineBreaker build() {
             return new LineBreaker(mBreakStrategy, mHyphenationFrequency, mJustificationMode,
-                    mIndents);
+                    mIndents, mUseBoundsForWidth);
         }
     }
 
@@ -341,8 +376,8 @@ public class LineBreaker {
      * @see LineBreaker#computeLineBreaks
      */
     public static class Result {
-        // Following two contstant must be synced with minikin's line breaker.
-        // TODO(nona): Remove these constatns by introducing native methods.
+        // Following two constants must be synced with minikin's line breaker.
+        // TODO(nona): Remove these constants by introducing native methods.
         private static final int TAB_MASK = 0x20000000;
         private static final int HYPHEN_MASK = 0xFF;
         private static final int START_HYPHEN_MASK = 0x18;  // 0b11000
@@ -456,9 +491,9 @@ public class LineBreaker {
      */
     private LineBreaker(@BreakStrategy int breakStrategy,
             @HyphenationFrequency int hyphenationFrequency, @JustificationMode int justify,
-            @Nullable int[] indents) {
+            @Nullable int[] indents, boolean useBoundsForWidth) {
         mNativePtr = nInit(breakStrategy, hyphenationFrequency,
-                justify == JUSTIFICATION_MODE_INTER_WORD, indents);
+                justify == JUSTIFICATION_MODE_INTER_WORD, indents, useBoundsForWidth);
         sRegistry.registerNativeAllocation(this, mNativePtr);
     }
 
@@ -493,7 +528,7 @@ public class LineBreaker {
     @FastNative
     private static native long nInit(@BreakStrategy int breakStrategy,
             @HyphenationFrequency int hyphenationFrequency, boolean isJustified,
-            @Nullable int[] indents);
+            @Nullable int[] indents, boolean useBoundsForWidth);
 
     @CriticalNative
     private static native long nGetReleaseFunc();
