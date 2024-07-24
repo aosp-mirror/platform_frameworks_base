@@ -27,6 +27,7 @@ import com.android.internal.logging.MetricsLogger
 import com.android.systemui.animation.Expandable
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
+import com.android.systemui.flags.RefactorFlagUtils.isUnexpectedlyInLegacyMode
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.plugins.qs.QSTile.BooleanState
@@ -79,6 +80,8 @@ constructor(
     private val config = qsTileConfigProvider.getConfig(TILE_SPEC)
 
     init {
+        /* Check if */ isUnexpectedlyInLegacyMode(Flags.modesUi(), Flags.FLAG_MODES_UI)
+
         lifecycle.coroutineScope.launch {
             lifecycle.repeatOnLifecycle(Lifecycle.State.RESUMED) {
                 dataInteractor.tileData().collect { refreshState(it) }
@@ -114,6 +117,6 @@ constructor(
     }
 
     companion object {
-        const val TILE_SPEC = "modes"
+        const val TILE_SPEC = "dnd"
     }
 }
