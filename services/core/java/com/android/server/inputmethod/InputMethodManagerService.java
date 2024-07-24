@@ -271,7 +271,6 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
 
     private static final int MSG_HARD_KEYBOARD_SWITCH_CHANGED = 4000;
 
-    private static final int MSG_SYSTEM_UNLOCK_USER = 5000;
     private static final int MSG_DISPATCH_ON_INPUT_METHOD_LIST_UPDATED = 5010;
 
     private static final int MSG_NOTIFY_IME_UID_TO_AUDIO_SERVICE = 7000;
@@ -1034,10 +1033,24 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
 
         @Override
         public void onUserUnlocking(@NonNull TargetUser user) {
-            // Called on ActivityManager thread.
-            SecureSettingsWrapper.onUserUnlocking(user.getUserIdentifier());
-            mService.mHandler.obtainMessage(MSG_SYSTEM_UNLOCK_USER, user.getUserIdentifier(), 0)
-                    .sendToTarget();
+            // Called on ActivityManager thread. Do not block the calling thread.
+            final int userId = user.getUserIdentifier();
+            SecureSettingsWrapper.onUserUnlocking(userId);
+            mService.mIoHandler.post(() -> {
+                final var settings = queryInputMethodServicesInternal(mService.mContext, userId,
+                        AdditionalSubtypeMapRepository.get(userId), DirectBootAwareness.AUTO);
+                InputMethodSettingsRepository.put(userId, settings);
+                synchronized (ImfLock.class) {
+                    if (!mService.mSystemReady) {
+                        return;
+                    }
+                    // We need to rebuild IMEs.
+                    mService.postInputMethodSettingUpdatedLocked(false /* resetDefaultEnabledIme */,
+                            userId);
+                    mService.updateInputMethodsFromSettingsLocked(true /* enabledChanged */,
+                            userId);
+                }
+            });
         }
 
         @Override
@@ -1085,23 +1098,6 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
                     Slog.d(TAG, "Complete initialization for user=" + userId);
                 }
             });
-        }
-    }
-
-    void onUnlockUser(@UserIdInt int userId) {
-        synchronized (ImfLock.class) {
-            if (DEBUG) {
-                Slog.d(TAG, "onUnlockUser: userId=" + userId + " curUserId=" + mCurrentUserId);
-            }
-            if (!mSystemReady) {
-                return;
-            }
-            final InputMethodSettings newSettings = queryInputMethodServicesInternal(mContext,
-                    userId, AdditionalSubtypeMapRepository.get(userId), DirectBootAwareness.AUTO);
-            InputMethodSettingsRepository.put(userId, newSettings);
-            // We need to rebuild IMEs.
-            postInputMethodSettingUpdatedLocked(false /* resetDefaultEnabledIme */, userId);
-            updateInputMethodsFromSettingsLocked(true /* enabledChanged */, userId);
         }
     }
 
@@ -5145,11 +5141,6 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
                     sendOnNavButtonFlagsChangedToAllImesLocked();
                 }
                 return true;
-            case MSG_SYSTEM_UNLOCK_USER: {
-                final int userId = msg.arg1;
-                onUnlockUser(userId);
-                return true;
-            }
             case MSG_DISPATCH_ON_INPUT_METHOD_LIST_UPDATED: {
                 final int userId = msg.arg1;
                 final List<InputMethodInfo> imes = (List<InputMethodInfo>) msg.obj;
