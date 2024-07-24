@@ -64,7 +64,7 @@ public class SecurityLabelsTest {
                             Paths.get(SECURITY_LABELS_HR_PATH, ALL_FIELDS_VALID_FILE_NAME));
             ele.removeAttribute(optField);
             SecurityLabels securityLabels = new SecurityLabelsFactory().createFromHrElement(ele);
-            securityLabels.toOdDomElement(TestUtils.document());
+            var unused = securityLabels.toOdDomElement(TestUtils.document());
         }
         for (String optField : OPTIONAL_FIELD_NAMES_OD) {
             var ele =
@@ -72,7 +72,7 @@ public class SecurityLabelsTest {
                             Paths.get(SECURITY_LABELS_OD_PATH, ALL_FIELDS_VALID_FILE_NAME));
             TestUtils.removeOdChildEleWithName(ele, optField);
             SecurityLabels securityLabels = new SecurityLabelsFactory().createFromOdElement(ele);
-            securityLabels.toHrDomElement(TestUtils.document());
+            var unused = securityLabels.toHrDomElement(TestUtils.document());
         }
     }
 
