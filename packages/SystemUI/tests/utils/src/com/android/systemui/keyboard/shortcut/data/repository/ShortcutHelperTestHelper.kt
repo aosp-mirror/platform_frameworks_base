@@ -95,7 +95,7 @@ class ShortcutHelperTestHelper(
     }
 
     fun toggle(deviceId: Int) {
-        fakeInputManager.addPhysicalKeyboard(deviceId)
+        fakeInputManager.addPhysicalKeyboardIfNotPresent(deviceId)
         fakeCommandQueue.doForEachCallback { it.toggleKeyboardShortcutsMenu(deviceId) }
     }
 

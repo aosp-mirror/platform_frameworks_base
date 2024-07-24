@@ -16,6 +16,9 @@
 
 package com.android.systemui.keyboard.shortcut.ui.viewmodel
 
+import android.view.KeyEvent
+import android.view.KeyboardShortcutGroup
+import android.view.KeyboardShortcutInfo
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
@@ -23,7 +26,12 @@ import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.coroutines.collectValues
 import com.android.systemui.keyboard.shortcut.data.source.FakeKeyboardShortcutGroupsSource
 import com.android.systemui.keyboard.shortcut.data.source.TestShortcuts
+import com.android.systemui.keyboard.shortcut.shared.model.ShortcutCategory
 import com.android.systemui.keyboard.shortcut.shared.model.ShortcutCategoryType.CurrentApp
+import com.android.systemui.keyboard.shortcut.shared.model.ShortcutCategoryType.MultiTasking
+import com.android.systemui.keyboard.shortcut.shared.model.ShortcutCategoryType.System
+import com.android.systemui.keyboard.shortcut.shared.model.ShortcutSubCategory
+import com.android.systemui.keyboard.shortcut.shared.model.shortcut
 import com.android.systemui.keyboard.shortcut.shortcutHelperAppCategoriesShortcutsSource
 import com.android.systemui.keyboard.shortcut.shortcutHelperCurrentAppShortcutsSource
 import com.android.systemui.keyboard.shortcut.shortcutHelperInputShortcutsSource
@@ -231,4 +239,126 @@ class ShortcutHelperViewModelTest : SysuiTestCase() {
             assertThat(activeUiState.defaultSelectedCategory)
                 .isEqualTo(CurrentApp(TestShortcuts.currentAppPackageName))
         }
+
+    @Test
+    fun shortcutsUiState_userTypedQuery_filtersMatchingShortcutLabels() =
+        testScope.runTest {
+            fakeSystemSource.setGroups(
+                groupWithShortcutLabels("first Foo shortcut1", "first bar shortcut1"),
+                groupWithShortcutLabels("second foO shortcut2", "second bar shortcut2"),
+            )
+            fakeMultiTaskingSource.setGroups(
+                groupWithShortcutLabels("third FoO shortcut1", "third bar shortcut1")
+            )
+            val uiState by collectLastValue(viewModel.shortcutsUiState)
+
+            testHelper.showFromActivity()
+            viewModel.onSearchQueryChanged("foo")
+
+            val activeUiState = uiState as ShortcutsUiState.Active
+            assertThat(activeUiState.shortcutCategories)
+                .containsExactly(
+                    ShortcutCategory(
+                        System,
+                        subCategoryWithShortcutLabels("first Foo shortcut1"),
+                        subCategoryWithShortcutLabels("second foO shortcut2")
+                    ),
+                    ShortcutCategory(
+                        MultiTasking,
+                        subCategoryWithShortcutLabels("third FoO shortcut1")
+                    )
+                )
+        }
+
+    @Test
+    fun shortcutsUiState_userTypedQuery_noMatch_returnsEmptyList() =
+        testScope.runTest {
+            fakeSystemSource.setGroups(
+                groupWithShortcutLabels("first Foo shortcut1", "first bar shortcut1"),
+                groupWithShortcutLabels("second foO shortcut2", "second bar shortcut2"),
+            )
+            fakeMultiTaskingSource.setGroups(
+                groupWithShortcutLabels("third FoO shortcut1", "third bar shortcut1")
+            )
+            val uiState by collectLastValue(viewModel.shortcutsUiState)
+
+            testHelper.showFromActivity()
+            viewModel.onSearchQueryChanged("unmatched query")
+
+            val activeUiState = uiState as ShortcutsUiState.Active
+            assertThat(activeUiState.shortcutCategories).isEmpty()
+        }
+
+    @Test
+    fun shortcutsUiState_userTypedQuery_noMatch_returnsNullDefaultSelectedCategory() =
+        testScope.runTest {
+            fakeSystemSource.setGroups(
+                groupWithShortcutLabels("first Foo shortcut1", "first bar shortcut1"),
+                groupWithShortcutLabels("second foO shortcut2", "second bar shortcut2"),
+            )
+            fakeMultiTaskingSource.setGroups(
+                groupWithShortcutLabels("third FoO shortcut1", "third bar shortcut1")
+            )
+            val uiState by collectLastValue(viewModel.shortcutsUiState)
+
+            testHelper.showFromActivity()
+            viewModel.onSearchQueryChanged("unmatched query")
+
+            val activeUiState = uiState as ShortcutsUiState.Active
+            assertThat(activeUiState.defaultSelectedCategory).isNull()
+        }
+
+    @Test
+    fun shortcutsUiState_userTypedQuery_changesDefaultSelectedCategoryToFirstMatchingCategory() =
+        testScope.runTest {
+            fakeSystemSource.setGroups(groupWithShortcutLabels("first shortcut"))
+            fakeMultiTaskingSource.setGroups(groupWithShortcutLabels("second shortcut"))
+            val uiState by collectLastValue(viewModel.shortcutsUiState)
+
+            testHelper.showFromActivity()
+            viewModel.onSearchQueryChanged("second")
+
+            val activeUiState = uiState as ShortcutsUiState.Active
+            assertThat(activeUiState.defaultSelectedCategory).isEqualTo(MultiTasking)
+        }
+
+    @Test
+    fun shortcutsUiState_userTypedQuery_multipleCategoriesMatch_currentAppIsDefaultSelected() =
+        testScope.runTest {
+            fakeSystemSource.setGroups(groupWithShortcutLabels("first shortcut"))
+            fakeMultiTaskingSource.setGroups(groupWithShortcutLabels("second shortcut"))
+            fakeCurrentAppsSource.setGroups(groupWithShortcutLabels("third shortcut"))
+            val uiState by collectLastValue(viewModel.shortcutsUiState)
+
+            testHelper.showFromActivity()
+            viewModel.onSearchQueryChanged("shortcut")
+
+            val activeUiState = uiState as ShortcutsUiState.Active
+            assertThat(activeUiState.defaultSelectedCategory).isInstanceOf(CurrentApp::class.java)
+        }
+
+    private fun groupWithShortcutLabels(vararg shortcutLabels: String) =
+        KeyboardShortcutGroup(SIMPLE_GROUP_LABEL, shortcutLabels.map { simpleShortcutInfo(it) })
+            .apply { packageName = "test.package.name" }
+
+    private fun simpleShortcutInfo(label: String) =
+        KeyboardShortcutInfo(label, KeyEvent.KEYCODE_A, KeyEvent.META_CTRL_ON)
+
+    private fun subCategoryWithShortcutLabels(vararg shortcutLabels: String) =
+        ShortcutSubCategory(
+            label = SIMPLE_GROUP_LABEL,
+            shortcuts = shortcutLabels.map { simpleShortcut(it) },
+        )
+
+    private fun simpleShortcut(label: String) =
+        shortcut(label) {
+            command {
+                key("Ctrl")
+                key("A")
+            }
+        }
+
+    companion object {
+        private const val SIMPLE_GROUP_LABEL = "simple group"
+    }
 }

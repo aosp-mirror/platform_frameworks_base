@@ -23,9 +23,9 @@ import android.view.WindowManager
 import android.window.TransitionInfo
 import android.window.WindowContainerTransaction
 import com.android.internal.protolog.ProtoLog
-import com.android.window.flags.Flags.enableDesktopWindowingWallpaperActivity
 import com.android.wm.shell.ShellTaskOrganizer
 import com.android.wm.shell.protolog.ShellProtoLogGroup.WM_SHELL_DESKTOP_MODE
+import com.android.wm.shell.shared.desktopmode.DesktopModeFlags.WALLPAPER_ACTIVITY
 import com.android.wm.shell.shared.desktopmode.DesktopModeStatus
 import com.android.wm.shell.sysui.ShellInit
 import com.android.wm.shell.transition.Transitions
@@ -36,7 +36,7 @@ import com.android.wm.shell.transition.Transitions
  * mode and other transitions that originate both within and outside shell.
  */
 class DesktopTasksTransitionObserver(
-    context: Context,
+    private val context: Context,
     private val desktopModeTaskRepository: DesktopModeTaskRepository,
     private val transitions: Transitions,
     private val shellTaskOrganizer: ShellTaskOrganizer,
@@ -79,7 +79,7 @@ class DesktopTasksTransitionObserver(
     }
 
     private fun updateWallpaperToken(info: TransitionInfo) {
-        if (!enableDesktopWindowingWallpaperActivity()) {
+        if (!WALLPAPER_ACTIVITY.isEnabled(context)) {
             return
         }
         info.changes.forEach { change ->

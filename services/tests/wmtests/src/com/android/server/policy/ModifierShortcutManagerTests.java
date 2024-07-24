@@ -39,6 +39,7 @@ import android.content.res.Resources;
 import android.content.res.XmlResourceParser;
 import android.os.Handler;
 import android.os.Looper;
+import android.os.UserHandle;
 import android.view.KeyEvent;
 import android.view.KeyboardShortcutGroup;
 import android.view.KeyboardShortcutInfo;
@@ -77,6 +78,7 @@ public class ModifierShortcutManagerTests {
         XmlResourceParser testBookmarks = mResources.getXml(
                 com.android.frameworks.wmtests.R.xml.bookmarks);
 
+        doReturn(mContext).when(mContext).createContextAsUser(anyObject(), anyInt());
         when(mContext.getResources()).thenReturn(mResources);
         when(mContext.getPackageManager()).thenReturn(mPackageManager);
         when(mResources.getXml(R.xml.bookmarks)).thenReturn(testBookmarks);
@@ -98,7 +100,8 @@ public class ModifierShortcutManagerTests {
                 .canonicalToCurrentPackageNames(aryEq(new String[] { "com.test2" }));
 
 
-        mModifierShortcutManager = new ModifierShortcutManager(mContext, mHandler);
+        mModifierShortcutManager = new ModifierShortcutManager(
+                mContext, mHandler, UserHandle.SYSTEM);
     }
 
     @Test

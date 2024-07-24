@@ -570,8 +570,10 @@ android_library {
         "jsr305",
         "jsr330",
         "lottie",
+        "lottie_compose",
         "LowLightDreamLib",
         "TraceurCommon",
+        "Traceur-res",
         "//frameworks/libs/systemui:motion_tool_lib",
         "notification_flags_lib",
         "PlatformComposeCore",
@@ -727,6 +729,7 @@ android_library {
         "truth",
         "monet",
         "libmonet",
+        "lottie_compose",
         "dagger2",
         "jsr330",
         "WindowManager-Shell",
@@ -747,6 +750,7 @@ android_library {
         "androidx.compose.animation_animation-graphics",
         "androidx.lifecycle_lifecycle-viewmodel-compose",
         "TraceurCommon",
+        "Traceur-res",
     ],
 }
 

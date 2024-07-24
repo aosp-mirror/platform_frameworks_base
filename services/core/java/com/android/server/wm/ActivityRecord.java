@@ -4078,8 +4078,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
             try {
                 if (DEBUG_SWITCH) Slog.i(TAG_SWITCH, "Destroying: " + this);
-                mAtmService.getLifecycleManager().scheduleTransactionItem(app.getThread(),
-                        DestroyActivityItem.obtain(token, finishing));
+                final DestroyActivityItem item = new DestroyActivityItem(token, finishing);
+                mAtmService.getLifecycleManager().scheduleTransactionItem(app.getThread(), item);
             } catch (Exception e) {
                 // We can just ignore exceptions here...  if the process has crashed, our death
                 // notification will clean things up.
@@ -9997,7 +9997,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                     preserveWindow, getActivityWindowInfo());
             final ActivityLifecycleItem lifecycleItem;
             if (andResume) {
-                lifecycleItem = ResumeActivityItem.obtain(token, isTransitionForward(),
+                lifecycleItem = new ResumeActivityItem(token, isTransitionForward(),
                         shouldSendCompatFakeFocus());
             } else {
                 lifecycleItem = PauseActivityItem.obtain(token);

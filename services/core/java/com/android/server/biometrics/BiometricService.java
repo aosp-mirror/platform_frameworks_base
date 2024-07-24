@@ -269,6 +269,7 @@ public class BiometricService extends SystemService {
 
         private final ContentResolver mContentResolver;
         private final List<BiometricService.EnabledOnKeyguardCallback> mCallbacks;
+        private final UserManager mUserManager;
 
         private final Map<Integer, Boolean> mBiometricEnabledOnKeyguard = new HashMap<>();
         private final Map<Integer, Boolean> mBiometricEnabledForApps = new HashMap<>();
@@ -291,6 +292,7 @@ public class BiometricService extends SystemService {
             super(handler);
             mContentResolver = context.getContentResolver();
             mCallbacks = callbacks;
+            mUserManager = context.getSystemService(UserManager.class);
 
             final boolean hasFingerprint = context.getPackageManager()
                     .hasSystemFeature(PackageManager.FEATURE_FINGERPRINT);
@@ -301,14 +303,6 @@ public class BiometricService extends SystemService {
             mUseLegacyFaceOnlySettings =
                     Build.VERSION.DEVICE_INITIAL_SDK_INT <= Build.VERSION_CODES.Q
                     && hasFace && !hasFingerprint;
-            mMandatoryBiometricsEnabled.put(context.getUserId(), Settings.Secure.getIntForUser(
-                    mContentResolver, Settings.Secure.MANDATORY_BIOMETRICS,
-                    DEFAULT_MANDATORY_BIOMETRICS_STATUS ? 1 : 0, context.getUserId()) != 0);
-            mMandatoryBiometricsRequirementsSatisfied.put(context.getUserId(),
-                    Settings.Secure.getIntForUser(mContentResolver,
-                            Settings.Secure.MANDATORY_BIOMETRICS_REQUIREMENTS_SATISFIED,
-                            DEFAULT_MANDATORY_BIOMETRICS_REQUIREMENTS_SATISFIED_STATUS ? 1 : 0,
-                            context.getUserId()) != 0);
 
             addBiometricListenersForMandatoryBiometrics(context);
             updateContentObserver();
@@ -391,18 +385,9 @@ public class BiometricService extends SystemService {
                         DEFAULT_APP_ENABLED ? 1 : 0 /* default */,
                         userId) != 0);
             } else if (MANDATORY_BIOMETRICS_ENABLED.equals(uri)) {
-                mMandatoryBiometricsEnabled.put(userId, Settings.Secure.getIntForUser(
-                        mContentResolver,
-                        Settings.Secure.MANDATORY_BIOMETRICS,
-                        DEFAULT_MANDATORY_BIOMETRICS_STATUS ? 1 : 0 /* default */,
-                        userId) != 0);
+                updateMandatoryBiometricsForAllProfiles();
             } else if (MANDATORY_BIOMETRICS_REQUIREMENTS_SATISFIED.equals(uri)) {
-                mMandatoryBiometricsRequirementsSatisfied.put(userId, Settings.Secure.getIntForUser(
-                        mContentResolver,
-                        Settings.Secure.MANDATORY_BIOMETRICS_REQUIREMENTS_SATISFIED,
-                        DEFAULT_MANDATORY_BIOMETRICS_REQUIREMENTS_SATISFIED_STATUS
-                                ? 1 : 0 /* default */,
-                        userId) != 0);
+                updateMandatoryBiometricsRequirementsForAllProfiles();
             }
         }
 
@@ -445,6 +430,12 @@ public class BiometricService extends SystemService {
         }
 
         public boolean getMandatoryBiometricsEnabledAndRequirementsSatisfiedForUser(int userId) {
+            if (!mMandatoryBiometricsEnabled.containsKey(userId)) {
+                updateMandatoryBiometricsForAllProfiles();
+            }
+            if (!mMandatoryBiometricsRequirementsSatisfied.containsKey(userId)) {
+                updateMandatoryBiometricsRequirementsForAllProfiles();
+            }
             return mMandatoryBiometricsEnabled.getOrDefault(userId,
                     DEFAULT_MANDATORY_BIOMETRICS_STATUS)
                     && mMandatoryBiometricsRequirementsSatisfied.getOrDefault(userId,
@@ -461,6 +452,28 @@ public class BiometricService extends SystemService {
                 callbacks.get(i).notify(
                         mBiometricEnabledOnKeyguard.getOrDefault(userId, DEFAULT_KEYGUARD_ENABLED),
                         userId);
+            }
+        }
+
+        private void updateMandatoryBiometricsForAllProfiles() {
+            final int mainUserId = mUserManager.getMainUser().getIdentifier();
+            for (UserHandle userHandle: mUserManager.getUserProfiles()) {
+                mMandatoryBiometricsEnabled.put(userHandle.getIdentifier(),
+                        Settings.Secure.getIntForUser(
+                                mContentResolver, Settings.Secure.MANDATORY_BIOMETRICS,
+                                DEFAULT_MANDATORY_BIOMETRICS_STATUS ? 1 : 0,
+                                mainUserId) != 0);
+            }
+        }
+
+        private void updateMandatoryBiometricsRequirementsForAllProfiles() {
+            final int mainUserId = mUserManager.getMainUser().getIdentifier();
+            for (UserHandle userHandle: mUserManager.getUserProfiles()) {
+                mMandatoryBiometricsRequirementsSatisfied.put(userHandle.getIdentifier(),
+                        Settings.Secure.getIntForUser(mContentResolver,
+                                Settings.Secure.MANDATORY_BIOMETRICS_REQUIREMENTS_SATISFIED,
+                                DEFAULT_MANDATORY_BIOMETRICS_REQUIREMENTS_SATISFIED_STATUS ? 1 : 0,
+                                mainUserId) != 0);
             }
         }
 

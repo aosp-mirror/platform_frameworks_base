@@ -426,6 +426,13 @@
     <string name="sensor_privacy_dialog_open_settings" msgid="5635865896053011859">"Buksan ang Mga Setting"</string>
     <string name="media_seamless_other_device" msgid="4654849800789196737">"Iba pang device"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"I-toggle ang Overview"</string>
+    <string name="zen_modes_dialog_title" msgid="4159138230418567383">"Mga priyoridad na mode"</string>
+    <string name="zen_modes_dialog_done" msgid="6654130880256438950">"Tapos na"</string>
+    <string name="zen_modes_dialog_settings" msgid="2310248023728936697">"Mga Setting"</string>
+    <!-- no translation found for zen_mode_on (9085304934016242591) -->
+    <skip />
+    <!-- no translation found for zen_mode_off (1736604456618147306) -->
+    <skip />
     <string name="zen_priority_introduction" msgid="3159291973383796646">"Hindi ka maiistorbo ng mga tunog at pag-vibrate, maliban mula sa mga alarm, paalala, event, at tumatawag na tutukuyin mo. Maririnig mo pa rin ang kahit na anong piliin mong i-play kabilang ang mga musika, video, at laro."</string>
     <string name="zen_alarms_introduction" msgid="3987266042682300470">"Hindi ka maiistorbo ng mga tunog at pag-vibrate, maliban sa mga alarm. Maririnig mo pa rin ang anumang pipiliin mong i-play kabilang ang mga musika, video, at laro."</string>
     <string name="zen_priority_customize_button" msgid="4119213187257195047">"I-customize"</string>
@@ -492,6 +499,8 @@
     <string name="accessibility_action_label_place_widget" msgid="1914197458644168978">"ilagay ang napiling widget"</string>
     <string name="communal_widget_picker_title" msgid="1953369090475731663">"Mga widget ng lock screen"</string>
     <string name="communal_widget_picker_description" msgid="490515450110487871">"Makikita ng sinuman ang mga widget sa lock screen, kahit naka-lock ang tablet."</string>
+    <!-- no translation found for accessibility_action_label_unselect_widget (1041811747619468698) -->
+    <skip />
     <string name="communal_widgets_disclaimer_title" msgid="1150954395585308868">"Mga widget ng lock screen"</string>
     <string name="communal_widgets_disclaimer_text" msgid="1423545475160506349">"Para magbukas ng app gamit ang isang widget, kakailanganin mong i-verify na ikaw iyan. Bukod pa rito, tandaang puwedeng tingnan ng kahit na sino ang mga ito, kahit na naka-lock ang iyong tablet. Posibleng hindi para sa iyong lock screen ang ilang widget at posibleng hindi ligtas ang mga ito na idagdag dito."</string>
     <string name="communal_widgets_disclaimer_button" msgid="4423059765740780753">"OK"</string>
@@ -548,8 +557,10 @@
     <string name="media_projection_action_text" msgid="3634906766918186440">"Magsimula ngayon"</string>
     <string name="empty_shade_text" msgid="8935967157319717412">"Walang mga notification"</string>
     <string name="no_unseen_notif_text" msgid="395512586119868682">"Walang bagong notification"</string>
-    <string name="adaptive_notification_edu_hun_title" msgid="5720882373252389461">"On ang adaptive notifications"</string>
-    <string name="adaptive_notification_edu_hun_text" msgid="4260536236101821273">"Hinihinaan ng device ang volume at binabawasan nito ang pop-ups nang hanggang 2 minuto kapag nakatanggap ng maraming notification sa maikling oras."</string>
+    <!-- no translation found for adaptive_notification_edu_hun_title (7790738150177329960) -->
+    <skip />
+    <!-- no translation found for adaptive_notification_edu_hun_text (7743367744129536610) -->
+    <skip />
     <string name="go_to_adaptive_notification_settings" msgid="2423690125178298479">"I-off"</string>
     <string name="unlock_to_see_notif_text" msgid="7439033907167561227">"I-unlock para makita ang mga mas lumang notification"</string>
     <string name="quick_settings_disclosure_parental_controls" msgid="2114102871438223600">"Pinapamahalaan ng magulang mo itong device"</string>
@@ -716,8 +727,7 @@
     <string name="notification_alert_title" msgid="3656229781017543655">"Default"</string>
     <string name="notification_automatic_title" msgid="3745465364578762652">"Awtomatiko"</string>
     <string name="notification_channel_summary_low" msgid="4860617986908931158">"Walang tunog o pag-vibrate"</string>
-    <!-- no translation found for notification_conversation_summary_low (3855696451919728790) -->
-    <skip />
+    <string name="notification_conversation_summary_low" msgid="3855696451919728790">"Walang tunog o pag-vibrate, pero lumalabas pa rin sa seksyon ng pag-uusap"</string>
     <string name="notification_channel_summary_default" msgid="777294388712200605">"Puwedeng mag-ring o mag-vibrate batay sa mga setting ng device"</string>
     <string name="notification_channel_summary_default_with_bubbles" msgid="3482483084451555344">"Puwedeng mag-ring o mag-vibrate batay sa mga setting ng device. Mga pag-uusap mula sa <xliff:g id="APP_NAME">%1$s</xliff:g> bubble bilang default."</string>
     <string name="notification_channel_summary_automatic" msgid="5813109268050235275">"Ipatukoy sa system kung dapat gumawa ng tunog o pag-vibrate ang notification na ito"</string>
@@ -1357,8 +1367,7 @@
     <string name="shortcutHelper_category_split_screen" msgid="1159669813444812244">"Split screen"</string>
     <string name="shortcut_helper_category_input" msgid="8674018654124839566">"Input"</string>
     <string name="shortcut_helper_category_app_shortcuts" msgid="8010249408308587117">"Mga shortcut ng app"</string>
-    <!-- no translation found for shortcut_helper_category_current_app_shortcuts (4017840565974573628) -->
-    <skip />
+    <string name="shortcut_helper_category_current_app_shortcuts" msgid="4017840565974573628">"Kasalukuyang App"</string>
     <string name="shortcut_helper_category_a11y" msgid="6314444792641773464">"Accessibility"</string>
     <string name="shortcut_helper_title" msgid="8567500639300970049">"Mga keyboard shortcut"</string>
     <string name="shortcut_helper_search_placeholder" msgid="5488547526269871819">"Mga shortcut ng paghahanap"</string>
@@ -1379,4 +1388,28 @@
     <string name="home_controls_dream_label" msgid="6567105701292324257">"Mga Home Control"</string>
     <string name="home_controls_dream_description" msgid="4644150952104035789">"Mabilis i-access ang home control bilang screensaver"</string>
     <string name="volume_undo_action" msgid="5815519725211877114">"I-undo"</string>
+    <!-- no translation found for back_edu_toast_content (4530314597378982956) -->
+    <skip />
+    <!-- no translation found for home_edu_toast_content (3381071147871955415) -->
+    <skip />
+    <!-- no translation found for overview_edu_toast_content (5797030644017804518) -->
+    <skip />
+    <!-- no translation found for all_apps_edu_toast_content (8807496014667211562) -->
+    <skip />
+    <!-- no translation found for back_edu_notification_title (5624780717751357278) -->
+    <skip />
+    <!-- no translation found for back_edu_notification_content (2497557451540954068) -->
+    <skip />
+    <!-- no translation found for home_edu_notification_title (6097902076909654045) -->
+    <skip />
+    <!-- no translation found for home_edu_notification_content (6631697734535766588) -->
+    <skip />
+    <!-- no translation found for overview_edu_notification_title (1265824157319562406) -->
+    <skip />
+    <!-- no translation found for overview_edu_notification_content (3578204677648432500) -->
+    <skip />
+    <!-- no translation found for all_apps_edu_notification_title (372262997265569063) -->
+    <skip />
+    <!-- no translation found for all_apps_edu_notification_content (3255070575694025585) -->
+    <skip />
 </resources>

@@ -25,6 +25,7 @@ import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_DIMMER;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 
+import android.annotation.NonNull;
 import android.util.Log;
 import android.util.proto.ProtoOutputStream;
 import android.view.SurfaceControl;
@@ -46,13 +47,13 @@ public class DimmerAnimationHelper {
     static class Change {
         private float mAlpha = -1f;
         private int mBlurRadius = -1;
-        private WindowContainer mDimmingContainer = null;
+        private WindowContainer<?> mDimmingContainer = null;
         private int mRelativeLayer = -1;
         private static final float EPSILON = 0.0001f;
 
         Change() {}
 
-        Change(Change other) {
+        Change(@NonNull Change other) {
             mAlpha = other.mAlpha;
             mBlurRadius = other.mBlurRadius;
             mDimmingContainer = other.mDimmingContainer;
@@ -60,15 +61,15 @@ public class DimmerAnimationHelper {
         }
 
         // Same alpha and blur
-        boolean hasSameVisualProperties(Change other) {
+        boolean hasSameVisualProperties(@NonNull Change other) {
             return Math.abs(mAlpha - other.mAlpha) < EPSILON && mBlurRadius == other.mBlurRadius;
         }
 
-        boolean hasSameDimmingContainer(Change other) {
+        boolean hasSameDimmingContainer(@NonNull Change other) {
             return mDimmingContainer != null && mDimmingContainer == other.mDimmingContainer;
         }
 
-        void inheritPropertiesFromAnimation(AnimationSpec anim) {
+        void inheritPropertiesFromAnimation(@NonNull AnimationSpec anim) {
             mAlpha = anim.mCurrentAlpha;
             mBlurRadius = anim.mCurrentBlur;
         }
@@ -97,7 +98,7 @@ public class DimmerAnimationHelper {
     }
 
     // Sets a requested change without applying it immediately
-    void setRequestedRelativeParent(WindowContainer relativeParent, int relativeLayer) {
+    void setRequestedRelativeParent(@NonNull WindowContainer<?> relativeParent, int relativeLayer) {
         mRequestedProperties.mDimmingContainer = relativeParent;
         mRequestedProperties.mRelativeLayer = relativeLayer;
     }
@@ -114,7 +115,7 @@ public class DimmerAnimationHelper {
      * {@link Change#setRequestedRelativeParent(WindowContainer, int)}, or
      * {@link Change#setRequestedAppearance(float, int)}
      */
-    void applyChanges(SurfaceControl.Transaction t, SmoothDimmer.DimState dim) {
+    void applyChanges(@NonNull SurfaceControl.Transaction t, @NonNull Dimmer.DimState dim) {
         if (mRequestedProperties.mDimmingContainer == null) {
             Log.e(TAG, this + " does not have a dimming container. Have you forgotten to "
                     + "call adjustRelativeLayer?");
@@ -160,7 +161,7 @@ public class DimmerAnimationHelper {
     }
 
     private void startAnimation(
-            SurfaceControl.Transaction t, SmoothDimmer.DimState dim) {
+            @NonNull SurfaceControl.Transaction t, @NonNull Dimmer.DimState dim) {
         ProtoLog.v(WM_DEBUG_DIMMER, "Starting animation on %s", dim);
         mAlphaAnimationSpec = getRequestedAnimationSpec();
         mLocalAnimationAdapter = mAnimationAdapterFactory.get(mAlphaAnimationSpec,
@@ -186,7 +187,7 @@ public class DimmerAnimationHelper {
         return mAlphaAnimationSpec != null;
     }
 
-    void stopCurrentAnimation(SurfaceControl surface) {
+    void stopCurrentAnimation(@NonNull SurfaceControl surface) {
         if (mLocalAnimationAdapter != null && isAnimating()) {
             // Save the current animation progress and cancel the animation
             mCurrentProperties.inheritPropertiesFromAnimation(mAlphaAnimationSpec);
@@ -196,6 +197,7 @@ public class DimmerAnimationHelper {
         }
     }
 
+    @NonNull
     private AnimationSpec getRequestedAnimationSpec() {
         final float startAlpha = Math.max(mCurrentProperties.mAlpha, 0f);
         final int startBlur = Math.max(mCurrentProperties.mBlurRadius, 0);
@@ -214,8 +216,8 @@ public class DimmerAnimationHelper {
     /**
      * Change the relative parent of this dim layer
      */
-    void relativeReparent(SurfaceControl dimLayer, SurfaceControl relativeParent,
-                          int relativePosition, SurfaceControl.Transaction t) {
+    void relativeReparent(@NonNull SurfaceControl dimLayer, @NonNull SurfaceControl relativeParent,
+                          int relativePosition, @NonNull SurfaceControl.Transaction t) {
         try {
             t.setRelativeLayer(dimLayer, relativeParent, relativePosition);
         } catch (NullPointerException e) {
@@ -223,7 +225,8 @@ public class DimmerAnimationHelper {
         }
     }
 
-    void setAlphaBlur(SurfaceControl sc, float alpha, int blur, SurfaceControl.Transaction t) {
+    void setAlphaBlur(@NonNull SurfaceControl sc, float alpha, int blur,
+                      @NonNull SurfaceControl.Transaction t) {
         try {
             t.setAlpha(sc, alpha);
             t.setBackgroundBlurRadius(sc, blur);
@@ -232,7 +235,7 @@ public class DimmerAnimationHelper {
         }
     }
 
-    private long getDimDuration(WindowContainer container) {
+    private long getDimDuration(@NonNull WindowContainer<?> container) {
         // Use the same duration as the animation on the WindowContainer
         AnimationAdapter animationAdapter = container.mSurfaceAnimator.getAnimation();
         final float durationScale = container.mWmService.getTransitionAnimationScaleLocked();
@@ -282,7 +285,8 @@ public class DimmerAnimationHelper {
         }
 
         @Override
-        public void apply(SurfaceControl.Transaction t, SurfaceControl sc, long currentPlayTime) {
+        public void apply(@NonNull SurfaceControl.Transaction t, @NonNull SurfaceControl sc,
+                          long currentPlayTime) {
             if (!mStarted) {
                 // The first frame would end up in the sync transaction, and since this could be
                 // applied after the animation transaction, we avoid putting visible changes here.
