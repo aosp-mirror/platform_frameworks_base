@@ -128,7 +128,7 @@ constructor(
                 Box(
                     modifier =
                         Modifier.fillMaxSize()
-                            .background(LocalAndroidColorScheme.current.onSecondaryFixed),
+                            .background(LocalAndroidColorScheme.current.surfaceDim),
                 ) {
                     CommunalHub(
                         viewModel = communalViewModel,
