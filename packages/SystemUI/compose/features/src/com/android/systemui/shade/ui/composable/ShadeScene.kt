@@ -60,6 +60,7 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.zIndex
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.android.compose.animation.scene.ElementKey
 import com.android.compose.animation.scene.LowestZIndexScenePicker
@@ -81,6 +82,7 @@ import com.android.systemui.compose.modifiers.sysuiResTag
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.media.controls.ui.composable.MediaCarousel
 import com.android.systemui.media.controls.ui.composable.MediaScenePicker
+import com.android.systemui.media.controls.ui.composable.shouldElevateMedia
 import com.android.systemui.media.controls.ui.controller.MediaCarouselController
 import com.android.systemui.media.controls.ui.controller.MediaHierarchyManager
 import com.android.systemui.media.controls.ui.view.MediaHost
@@ -362,7 +364,7 @@ private fun SceneScope.SingleShade(
 
             layout(constraints.maxWidth, constraints.maxHeight) {
                 val qsZIndex =
-                    if (MediaScenePicker.shouldElevateMedia(layoutState.currentTransition)) {
+                    if (MediaScenePicker.shouldElevateMedia(layoutState)) {
                         1f
                     } else {
                         0f
@@ -471,17 +473,20 @@ private fun SceneScope.SplitShade(
 
     val brightnessMirrorShowingModifier = Modifier.graphicsLayer { alpha = contentAlpha }
 
-    Box(
-        modifier =
-            modifier
-                .fillMaxSize()
-                .element(Shade.Elements.BackgroundScrim)
-                // Cannot set the alpha of the whole element to 0, because the mirror should be
-                // in the QS column.
-                .background(
-                    colorResource(R.color.shade_scrim_background_dark).copy(alpha = contentAlpha)
-                )
-    ) {
+    Box {
+        Box(
+            modifier =
+                modifier
+                    .fillMaxSize()
+                    .element(Shade.Elements.BackgroundScrim)
+                    // Cannot set the alpha of the whole element to 0, because the mirror should be
+                    // in the QS column.
+                    .background(
+                        colorResource(R.color.shade_scrim_background_dark)
+                            .copy(alpha = contentAlpha)
+                    )
+        )
+
         Column(
             modifier = Modifier.fillMaxSize(),
         ) {
@@ -541,11 +546,15 @@ private fun SceneScope.SplitShade(
                                     squishiness = { tileSquishiness },
                                 )
                             }
-
                             MediaCarousel(
                                 isVisible = isMediaVisible,
                                 mediaHost = mediaHost,
-                                modifier = Modifier.fillMaxWidth(),
+                                modifier =
+                                    Modifier.fillMaxWidth().thenIf(
+                                        MediaScenePicker.shouldElevateMedia(layoutState)
+                                    ) {
+                                        Modifier.zIndex(1f)
+                                    },
                                 carouselController = mediaCarouselController,
                             )
                         }
