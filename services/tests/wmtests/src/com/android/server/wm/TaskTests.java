@@ -390,6 +390,15 @@ public class TaskTests extends WindowTestsBase {
         rootTask.ensureActivitiesVisible(null /* starting */);
         assertTrue(activity1.isVisible());
         assertTrue(activity2.isVisible());
+
+        // If notifyClients is false, it should only update the state without starting the client.
+        activity1.setVisible(false);
+        activity1.setVisibleRequested(false);
+        activity1.detachFromProcess();
+        rootTask.ensureActivitiesVisible(null /* starting */, false /* notifyClients */);
+        verify(mSupervisor, never()).startSpecificActivity(eq(activity1),
+                anyBoolean() /* andResume */, anyBoolean() /* checkConfig */);
+        assertTrue(activity1.isVisibleRequested());
     }
 
     @Test

@@ -852,6 +852,8 @@ public abstract class BaseHeadsUpManager implements HeadsUpManager {
         }
 
         public boolean isStickyForSomeTime() {
+            if (mEntry == null) return false;
+
             return mEntry.isStickyAndNotDemoted();
         }
 

@@ -18,6 +18,8 @@ package android.app.servertransaction;
 
 import static com.android.internal.annotations.VisibleForTesting.Visibility.PACKAGE;
 
+import static java.util.Objects.requireNonNull;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ClientTransactionHandler;
@@ -30,7 +32,6 @@ import android.os.Parcelable;
 import android.os.RemoteException;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.window.flags.Flags;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -46,7 +47,7 @@ import java.util.Objects;
  * @see ActivityLifecycleItem
  * @hide
  */
-public class ClientTransaction implements Parcelable, ObjectPoolItem {
+public class ClientTransaction implements Parcelable {
 
     /**
      * List of transaction items that should be executed in order. Including both
@@ -76,10 +77,39 @@ public class ClientTransaction implements Parcelable, ObjectPoolItem {
     @Nullable
     private IBinder mActivityToken;
 
-    /** Target client. */
-    private IApplicationThread mClient;
+    /**
+     * The target client.
+     * <p>
+     * This field is null only if the object is:
+     * - Read from a Parcel on the client side.
+     * - Constructed for testing purposes.
+     * <p>
+     * When created directly on the server, this field represents the server's connection to the
+     * target client's application thread. It is omitted during parceling and not sent to the
+     * client. On the client side, this field becomes unnecessary.
+     */
+    @Nullable
+    private final IApplicationThread mClient;
 
-    /** Get the target client of the transaction. */
+    @VisibleForTesting
+    public ClientTransaction() {
+        mClient = null;
+    }
+
+    public ClientTransaction(@NonNull IApplicationThread client) {
+        mClient = requireNonNull(client);
+    }
+
+    /**
+     * Gets the target client associated with this transaction.
+     * <p>
+     * This method is intended for server-side use only. Calling it from the client side
+     * will always return {@code null}.
+     *
+     * @return the {@link IApplicationThread} representing the target client, or {@code null} if
+     * called from the client side.
+     * @see #mClient
+     */
     public IApplicationThread getClient() {
         return mClient;
     }
@@ -211,51 +241,18 @@ public class ClientTransaction implements Parcelable, ObjectPoolItem {
         mClient.scheduleTransaction(this);
     }
 
-
-    // ObjectPoolItem implementation
-
-    private ClientTransaction() {}
-
-    /** Obtains an instance initialized with provided params. */
-    @NonNull
-    public static ClientTransaction obtain(@Nullable IApplicationThread client) {
-        ClientTransaction instance = ObjectPool.obtain(ClientTransaction.class);
-        if (instance == null) {
-            instance = new ClientTransaction();
-        }
-        instance.mClient = client;
-
-        return instance;
-    }
-
-    @Override
-    public void recycle() {
-        if (Flags.disableObjectPool()) {
-            return;
-        }
-        int size = mTransactionItems.size();
-        for (int i = 0; i < size; i++) {
-            mTransactionItems.get(i).recycle();
-        }
-        mTransactionItems.clear();
-        mActivityCallbacks = null;
-        mLifecycleStateRequest = null;
-        mClient = null;
-        mActivityToken = null;
-        ObjectPool.recycle(this);
-    }
-
     // Parcelable implementation
 
-    /** Write to Parcel. */
+    /** Writes to Parcel. */
     @SuppressWarnings("AndroidFrameworkEfficientParcelable") // Item class is not final.
     @Override
     public void writeToParcel(@NonNull Parcel dest, int flags) {
         dest.writeParcelableList(mTransactionItems, flags);
     }
 
-    /** Read from Parcel. */
+    /** Reads from Parcel. */
     private ClientTransaction(@NonNull Parcel in) {
+        mClient = null;  // This field is unnecessary on the client side.
         in.readParcelableList(mTransactionItems, getClass().getClassLoader(),
                 ClientTransactionItem.class);
 

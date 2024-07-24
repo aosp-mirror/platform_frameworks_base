@@ -3784,7 +3784,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
         markRedrawForSyncReported();
         getProcess().scheduleClientTransactionItem(
-                WindowStateResizeItem.obtain(mClient, mLastReportedFrames, reportDraw,
+                new WindowStateResizeItem(mClient, mLastReportedFrames, reportDraw,
                         mLastReportedConfiguration, mLastReportedInsetsState, forceRelayout,
                         alwaysConsumeSystemBars, displayId,
                         syncWithBuffers ? mSyncSeqId : -1, isDragResizing,
@@ -3854,7 +3854,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         fillInsetsState(mLastReportedInsetsState, false /* copySources */);
         fillInsetsSourceControls(mLastReportedActiveControls, false /* copyControls */);
         if (Flags.insetsControlChangedItem()) {
-            getProcess().scheduleClientTransactionItem(WindowStateInsetsControlChangeItem.obtain(
+            getProcess().scheduleClientTransactionItem(new WindowStateInsetsControlChangeItem(
                     mClient, mLastReportedInsetsState, mLastReportedActiveControls));
         } else {
             try {
@@ -5196,7 +5196,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
     private void applyDims() {
         if (((mAttrs.flags & FLAG_DIM_BEHIND) != 0 || shouldDrawBlurBehind())
-                && (Dimmer.DIMMER_REFACTOR ? mWinAnimator.getShown() : isVisibleNow())
+                && mWinAnimator.getShown()
                 && !mHidden && mTransitionController.canApplyDim(getTask())) {
             // Only show the Dimmer when the following is satisfied:
             // 1. The window has the flag FLAG_DIM_BEHIND or blur behind is requested
@@ -5277,17 +5277,12 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     void prepareSurfaces() {
         mIsDimming = false;
         if (mHasSurface) {
-            if (!Dimmer.DIMMER_REFACTOR) {
-                applyDims();
-            }
             updateSurfacePositionNonOrganized();
             // Send information to SurfaceFlinger about the priority of the current window.
             updateFrameRateSelectionPriorityIfNeeded();
             updateScaleIfNeeded();
             mWinAnimator.prepareSurfaceLocked(getSyncTransaction());
-            if (Dimmer.DIMMER_REFACTOR) {
-                applyDims();
-            }
+            applyDims();
         }
         super.prepareSurfaces();
     }

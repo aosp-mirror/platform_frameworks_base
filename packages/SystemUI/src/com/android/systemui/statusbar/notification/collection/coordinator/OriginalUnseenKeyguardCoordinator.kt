@@ -28,6 +28,8 @@ import com.android.systemui.keyguard.data.repository.KeyguardRepository
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.plugins.statusbar.StatusBarStateController
+import com.android.systemui.scene.domain.interactor.SceneInteractor
+import com.android.systemui.scene.shared.flag.SceneContainerFlag
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.statusbar.expansionChanges
 import com.android.systemui.statusbar.notification.collection.NotifPipeline
@@ -87,6 +89,7 @@ constructor(
     private val secureSettings: SecureSettings,
     private val seenNotificationsInteractor: SeenNotificationsInteractor,
     private val statusBarStateController: StatusBarStateController,
+    private val sceneInteractor: SceneInteractor,
 ) : Coordinator, Dumpable {
 
     private val unseenNotifications = mutableSetOf<NotificationEntry>()
@@ -106,12 +109,15 @@ constructor(
         // Whether or not keyguard is visible (or occluded).
         @Suppress("DEPRECATION")
         val isKeyguardPresentFlow: Flow<Boolean> =
-            keyguardTransitionInteractor
-                .transitionValue(
-                    scene = Scenes.Gone,
-                    stateWithoutSceneContainer = KeyguardState.GONE,
-                )
-                .map { it == 0f }
+            if (SceneContainerFlag.isEnabled) {
+                    sceneInteractor.transitionState.map {
+                        !it.isTransitioning(to = Scenes.Gone) && !it.isIdle(Scenes.Gone)
+                    }
+                } else {
+                    keyguardTransitionInteractor.transitions.map { step ->
+                        step.to != KeyguardState.GONE
+                    }
+                }
                 .distinctUntilChanged()
                 .onEach { trackingUnseen -> logger.logTrackingUnseen(trackingUnseen) }
 

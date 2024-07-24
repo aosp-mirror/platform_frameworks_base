@@ -80,14 +80,6 @@ flag {
 }
 
 flag {
-  name: "introduce_smoother_dimmer"
-  namespace: "windowing_frontend"
-  description: "Refactor dim to fix flickers"
-  bug: "295291019"
-  is_fixed_read_only: true
-}
-
-flag {
   name: "transit_ready_tracking"
   namespace: "windowing_frontend"
   description: "Enable accurate transition readiness tracking"

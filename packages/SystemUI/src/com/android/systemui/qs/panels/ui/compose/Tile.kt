@@ -294,9 +294,9 @@ fun DefaultEditTileGrid(
     onRemoveTile: (TileSpec) -> Unit,
     onResize: (TileSpec, Boolean) -> Unit,
 ) {
-    val currentListState = rememberEditListState(tiles)
+    val (currentTiles, otherTiles) = tiles.partition { it.isCurrent }
+    val currentListState = rememberEditListState(currentTiles)
     val dragAndDropState = rememberDragAndDropState(currentListState)
-    val (currentTiles, otherTiles) = currentListState.tiles.partition { it.isCurrent }
 
     val addTileToEnd: (TileSpec) -> Unit by rememberUpdatedState {
         onAddTile(it, CurrentTilesInteractor.POSITION_AT_END)
@@ -329,7 +329,7 @@ fun DefaultEditTileGrid(
             }
 
             CurrentTilesGrid(
-                currentTiles,
+                currentListState.tiles,
                 columns,
                 tilePadding,
                 isIconOnly,
@@ -480,16 +480,13 @@ private fun AvailableTileGrid(
     onClick: (TileSpec) -> Unit,
     dragAndDropState: DragAndDropState,
 ) {
-    val (otherTilesStock, otherTilesCustom) =
-        tiles.filter { !dragAndDropState.isMoving(it.tileSpec) }.partition { it.appName == null }
+    val (otherTilesStock, otherTilesCustom) = tiles.partition { it.appName == null }
     val availableTileHeight = tileHeight(true)
     val availableGridHeight = gridHeight(tiles.size, availableTileHeight, columns, tilePadding)
 
     // Available tiles
     TileLazyGrid(
-        modifier =
-            Modifier.height(availableGridHeight)
-                .dragAndDropTileList(dragAndDropState, { false }, { _, _ -> }),
+        modifier = Modifier.height(availableGridHeight),
         columns = GridCells.Fixed(columns)
     ) {
         editTiles(
@@ -594,7 +591,7 @@ fun LazyGridScope.editTiles(
                         }
                         .dragAndDropTile(dragAndDropState, viewModel.tileSpec, acceptDrops, onDrop)
                         .dragAndDropTileSource(
-                            viewModel.tileSpec,
+                            viewModel,
                             onClick,
                             onDoubleTap,
                             dragAndDropState,

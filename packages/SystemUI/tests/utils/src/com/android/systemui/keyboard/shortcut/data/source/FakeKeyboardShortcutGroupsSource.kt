@@ -24,6 +24,10 @@ class FakeKeyboardShortcutGroupsSource : KeyboardShortcutGroupsSource {
 
     override suspend fun shortcutGroups(deviceId: Int): List<KeyboardShortcutGroup> = groups
 
+    fun setGroups(vararg groups: KeyboardShortcutGroup) {
+        this.groups = groups.asList()
+    }
+
     fun setGroups(groups: List<KeyboardShortcutGroup>) {
         this.groups = groups
     }

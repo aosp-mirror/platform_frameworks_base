@@ -16,14 +16,13 @@
 
 package com.android.systemui.communal.view.viewmodel
 
-import android.appwidget.AppWidgetProviderInfo
 import android.content.ActivityNotFoundException
+import android.content.ComponentName
 import android.content.Intent
 import android.content.pm.ActivityInfo
 import android.content.pm.PackageManager
 import android.content.pm.ResolveInfo
 import android.content.pm.UserInfo
-import android.os.UserHandle
 import android.provider.Settings
 import android.widget.RemoteViews
 import androidx.activity.result.ActivityResultLauncher
@@ -47,8 +46,8 @@ import com.android.systemui.communal.domain.interactor.communalPrefsInteractor
 import com.android.systemui.communal.domain.interactor.communalSceneInteractor
 import com.android.systemui.communal.domain.interactor.communalSettingsInteractor
 import com.android.systemui.communal.domain.model.CommunalContentModel
+import com.android.systemui.communal.shared.log.CommunalMetricsLogger
 import com.android.systemui.communal.shared.log.CommunalUiEvent
-import com.android.systemui.communal.shared.model.CommunalWidgetContentModel
 import com.android.systemui.communal.shared.model.EditModeState
 import com.android.systemui.communal.ui.viewmodel.CommunalEditModeViewModel
 import com.android.systemui.coroutines.collectLastValue
@@ -86,9 +85,9 @@ import org.mockito.kotlin.spy
 class CommunalEditModeViewModelTest : SysuiTestCase() {
     @Mock private lateinit var mediaHost: MediaHost
     @Mock private lateinit var uiEventLogger: UiEventLogger
-    @Mock private lateinit var providerInfo: AppWidgetProviderInfo
     @Mock private lateinit var packageManager: PackageManager
     @Mock private lateinit var activityResultLauncher: ActivityResultLauncher<Intent>
+    @Mock private lateinit var metricsLogger: CommunalMetricsLogger
 
     private val kosmos = testKosmos()
     private val testScope = kosmos.testScope
@@ -120,7 +119,6 @@ class CommunalEditModeViewModelTest : SysuiTestCase() {
             selectedUserIndex = 0,
         )
         kosmos.fakeFeatureFlagsClassic.set(Flags.COMMUNAL_SERVICE_ENABLED, true)
-        whenever(providerInfo.profile).thenReturn(UserHandle(MAIN_USER_INFO.id))
 
         underTest =
             CommunalEditModeViewModel(
@@ -133,6 +131,7 @@ class CommunalEditModeViewModelTest : SysuiTestCase() {
                 logcatLogBuffer("CommunalEditModeViewModelTest"),
                 kosmos.testDispatcher,
                 kosmos.communalPrefsInteractor,
+                metricsLogger,
             )
     }
 
@@ -142,20 +141,8 @@ class CommunalEditModeViewModelTest : SysuiTestCase() {
             tutorialRepository.setTutorialSettingState(Settings.Secure.HUB_MODE_TUTORIAL_COMPLETED)
 
             // Widgets available.
-            val widgets =
-                listOf(
-                    CommunalWidgetContentModel.Available(
-                        appWidgetId = 0,
-                        priority = 30,
-                        providerInfo = providerInfo,
-                    ),
-                    CommunalWidgetContentModel.Available(
-                        appWidgetId = 1,
-                        priority = 20,
-                        providerInfo = providerInfo,
-                    ),
-                )
-            widgetRepository.setCommunalWidgets(widgets)
+            widgetRepository.addWidget(appWidgetId = 0, priority = 30)
+            widgetRepository.addWidget(appWidgetId = 1, priority = 20)
 
             // Smartspace available.
             smartspaceRepository.setTimers(
@@ -216,20 +203,8 @@ class CommunalEditModeViewModelTest : SysuiTestCase() {
             tutorialRepository.setTutorialSettingState(Settings.Secure.HUB_MODE_TUTORIAL_COMPLETED)
 
             // Widgets available.
-            val widgets =
-                listOf(
-                    CommunalWidgetContentModel.Available(
-                        appWidgetId = 0,
-                        priority = 30,
-                        providerInfo = providerInfo,
-                    ),
-                    CommunalWidgetContentModel.Available(
-                        appWidgetId = 1,
-                        priority = 20,
-                        providerInfo = providerInfo,
-                    ),
-                )
-            widgetRepository.setCommunalWidgets(widgets)
+            widgetRepository.addWidget(appWidgetId = 0, priority = 30)
+            widgetRepository.addWidget(appWidgetId = 1, priority = 20)
 
             val communalContent by collectLastValue(underTest.communalContent)
 
@@ -240,14 +215,18 @@ class CommunalEditModeViewModelTest : SysuiTestCase() {
             assertThat(communalContent?.get(1))
                 .isInstanceOf(CommunalContentModel.WidgetContent::class.java)
 
-            underTest.onDeleteWidget(widgets.get(0).appWidgetId)
+            underTest.onDeleteWidget(
+                id = 0,
+                componentName = ComponentName("test_package", "test_class"),
+                priority = 30,
+            )
 
             // Only one widget and CTA tile remain.
             assertThat(communalContent?.size).isEqualTo(1)
             val item = communalContent?.get(0)
             val appWidgetId =
                 if (item is CommunalContentModel.WidgetContent) item.appWidgetId else null
-            assertThat(appWidgetId).isEqualTo(widgets.get(1).appWidgetId)
+            assertThat(appWidgetId).isEqualTo(1)
         }
 
     @Test

@@ -189,6 +189,19 @@ sealed interface TransitionState {
         /** The current velocity of [progress], in progress units. */
         abstract val progressVelocity: Float
 
+        /**
+         * The progress of the preview transition. This is usually in the `[0; 1]` range, but it can
+         * also be less than `0` or greater than `1` when using transitions with a spring
+         * AnimationSpec or when flinging quickly during a swipe gesture.
+         */
+        open val previewProgress: Float = 0f
+
+        /** The current velocity of [previewProgress], in progress units. */
+        open val previewProgressVelocity: Float = 0f
+
+        /** Whether the transition is currently in the preview stage */
+        open val isInPreviewStage: Boolean = false
+
         /** Whether the transition was triggered by user input rather than being programmatic. */
         abstract val isInitiatedByUserInput: Boolean
 
@@ -203,6 +216,7 @@ sealed interface TransitionState {
          * [started][MutableSceneTransitionLayoutStateImpl.startTransition].
          */
         internal var transformationSpec: TransformationSpecImpl = TransformationSpec.Empty
+        internal var previewTransformationSpec: TransformationSpecImpl? = null
         private var fromOverscrollSpec: OverscrollSpecImpl? = null
         private var toOverscrollSpec: OverscrollSpecImpl? = null
 
@@ -437,6 +451,10 @@ internal class MutableSceneTransitionLayoutStateImpl(
             transitions
                 .transitionSpec(fromScene, toScene, key = transition.key)
                 .transformationSpec()
+        transition.previewTransformationSpec =
+            transitions
+                .transitionSpec(fromScene, toScene, key = transition.key)
+                .previewTransformationSpec()
         if (orientation != null) {
             transition.updateOverscrollSpecs(
                 fromSpec = transitions.overscrollSpec(fromScene, orientation),
