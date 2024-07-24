@@ -18,10 +18,6 @@ package com.android.systemui.animation
 
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.testCase
-import com.android.systemui.util.mockito.mock
-
-val Kosmos.mockActivityTransitionAnimatorController by
-    Kosmos.Fixture { mock<ActivityTransitionAnimator.Controller>() }
 
 val Kosmos.activityTransitionAnimator by
     Kosmos.Fixture {

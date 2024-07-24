@@ -27,6 +27,7 @@ import androidx.test.filters.SmallTest
 import com.android.internal.logging.MetricsLogger
 import com.android.settingslib.notification.data.repository.FakeZenModeRepository
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.animation.DialogTransitionAnimator
 import com.android.systemui.classifier.FalsingManagerFake
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.plugins.statusbar.StatusBarStateController
@@ -46,6 +47,7 @@ import com.android.systemui.util.mockito.any
 import com.android.systemui.util.settings.FakeSettings
 import com.android.systemui.util.settings.SecureSettings
 import com.google.common.truth.Truth.assertThat
+import kotlin.coroutines.EmptyCoroutineContext
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
@@ -79,6 +81,8 @@ class ModesTileTest : SysuiTestCase() {
     @Mock private lateinit var uiEventLogger: QsEventLogger
 
     @Mock private lateinit var qsTileConfigProvider: QSTileConfigProvider
+
+    @Mock private lateinit var dialogTransitionAnimator: DialogTransitionAnimator
 
     @Mock private lateinit var dialogDelegate: ModesDialogDelegate
 
@@ -127,7 +131,9 @@ class ModesTileTest : SysuiTestCase() {
 
         userActionInteractor =
             ModesTileUserActionInteractor(
+                EmptyCoroutineContext,
                 inputHandler,
+                dialogTransitionAnimator,
                 dialogDelegate,
             )
 
