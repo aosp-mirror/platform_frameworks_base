@@ -20,6 +20,7 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.platform.test.flag.junit.SetFlagsRule.DefaultInitValueType.DEVICE_DEFAULT;
 import static android.view.InsetsSource.FLAG_FORCE_CONSUMING;
+import static android.view.InsetsSource.FLAG_FORCE_CONSUMING_OPAQUE_CAPTION_BAR;
 import static android.view.WindowInsets.Type.captionBar;
 import static android.view.WindowInsets.Type.mandatorySystemGestures;
 import static android.view.WindowInsets.Type.statusBars;
@@ -56,7 +57,6 @@ import android.content.res.Resources;
 import android.graphics.Color;
 import android.graphics.Point;
 import android.graphics.Rect;
-import android.platform.test.annotations.EnableFlags;
 import android.platform.test.flag.junit.SetFlagsRule;
 import android.testing.AndroidTestingRunner;
 import android.util.DisplayMetrics;
@@ -75,7 +75,6 @@ import android.window.WindowContainerTransaction;
 import androidx.test.filters.SmallTest;
 
 import com.android.dx.mockito.inline.extended.StaticMockitoSession;
-import com.android.window.flags.Flags;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.ShellTestCase;
 import com.android.wm.shell.TestRunningTaskInfoBuilder;
@@ -781,8 +780,7 @@ public class WindowDecorationTests extends ShellTestCase {
     }
 
     @Test
-    @EnableFlags(Flags.FLAG_ENABLE_CAPTION_COMPAT_INSET_FORCE_CONSUMPTION)
-    public void testRelayout_captionInsetForceConsume() {
+    public void testRelayout_captionInsetSourceFlags() {
         final Display defaultDisplay = mock(Display.class);
         doReturn(defaultDisplay).when(mMockDisplayController)
                 .getDisplay(Display.DEFAULT_DISPLAY);
@@ -794,11 +792,14 @@ public class WindowDecorationTests extends ShellTestCase {
         final ActivityManager.RunningTaskInfo taskInfo =
                 builder.setToken(token).setBounds(new Rect(0, 0, 1000, 1000)).build();
         final TestWindowDecoration windowDecor = createWindowDecoration(taskInfo);
+        mRelayoutParams.mInsetSourceFlags =
+                FLAG_FORCE_CONSUMING | FLAG_FORCE_CONSUMING_OPAQUE_CAPTION_BAR;
         windowDecor.relayout(taskInfo);
 
-        // Caption inset source should be force-consuming.
+        // Caption inset source should add params' flags.
         verify(mMockWindowContainerTransaction).addInsetsSource(eq(token), any(),
-                eq(0) /* index */, eq(captionBar()), any(), any(), eq(FLAG_FORCE_CONSUMING));
+                eq(0) /* index */, eq(captionBar()), any(), any(),
+                eq(FLAG_FORCE_CONSUMING | FLAG_FORCE_CONSUMING_OPAQUE_CAPTION_BAR));
     }
 
     @Test
