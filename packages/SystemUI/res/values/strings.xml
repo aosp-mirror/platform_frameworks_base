@@ -1109,6 +1109,14 @@
     <!-- Priority modes: label for a mode that cannot be manually turned on [CHAR LIMIT=35] -->
     <string name="zen_mode_no_manual_invocation">Manage in settings</string>
 
+    <string name="zen_mode_active_modes">
+        {count, plural,
+            =0 {No active modes}
+            =1 {{mode} is active}
+            other {# modes are active}
+        }
+    </string>
+
     <!-- Zen mode: Priority only introduction message on first use -->
     <string name="zen_priority_introduction">You won\'t be disturbed by sounds and vibrations, except from alarms, reminders, events, and callers you specify. You\'ll still hear anything you choose to play including music, videos, and games.</string>
 
