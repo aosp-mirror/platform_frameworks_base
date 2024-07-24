@@ -372,6 +372,7 @@ public class BubbleExpandedView extends LinearLayout {
         //   ==> activity view
         //   ==> manage button
         bringChildToFront(mManageButton);
+        setManageClickListener();
 
         applyThemeAttrs();
 
@@ -502,6 +503,7 @@ public class BubbleExpandedView extends LinearLayout {
                 R.layout.bubble_manage_button, this /* parent */, false /* attach */);
         addView(mManageButton);
         mManageButton.setVisibility(visibility);
+        setManageClickListener();
         post(() -> {
             int touchAreaHeight =
                     getResources().getDimensionPixelSize(
@@ -646,9 +648,8 @@ public class BubbleExpandedView extends LinearLayout {
         }
     }
 
-    // TODO: Could listener be passed when we pass StackView / can we avoid setting this like this
-    void setManageClickListener(OnClickListener manageClickListener) {
-        mManageButton.setOnClickListener(manageClickListener);
+    private void setManageClickListener() {
+        mManageButton.setOnClickListener(v -> mStackView.onManageBubbleClicked());
     }
 
     /**

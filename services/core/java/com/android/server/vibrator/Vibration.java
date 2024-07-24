@@ -393,13 +393,14 @@ abstract class Vibration {
 
         private void dumpEffect(
                 ProtoOutputStream proto, long fieldId, VibrationEffect effect) {
-            final long token = proto.start(fieldId);
-            VibrationEffect.Composed composed = (VibrationEffect.Composed) effect;
-            for (VibrationEffectSegment segment : composed.getSegments()) {
-                dumpEffect(proto, VibrationEffectProto.SEGMENTS, segment);
+            if (effect instanceof VibrationEffect.Composed composed) {
+                final long token = proto.start(fieldId);
+                for (VibrationEffectSegment segment : composed.getSegments()) {
+                    dumpEffect(proto, VibrationEffectProto.SEGMENTS, segment);
+                }
+                proto.write(VibrationEffectProto.REPEAT, composed.getRepeatIndex());
+                proto.end(token);
             }
-            proto.write(VibrationEffectProto.REPEAT, composed.getRepeatIndex());
-            proto.end(token);
         }
 
         private void dumpEffect(ProtoOutputStream proto, long fieldId,

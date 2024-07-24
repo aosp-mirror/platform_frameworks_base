@@ -16,6 +16,9 @@
 
 package com.android.server.wm;
 
+import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
+import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
+import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.content.pm.ActivityInfo.RESIZE_MODE_RESIZEABLE;
 import static android.content.pm.ActivityInfo.RESIZE_MODE_UNRESIZEABLE;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
@@ -188,6 +191,27 @@ class AppCompatActivityRobot {
 
     void setTopActivityAsEmbedded(boolean embedded) {
         doReturn(embedded).when(mActivityStack.top()).isEmbedded();
+    }
+
+    void setTopActivityInMultiWindowMode(boolean multiWindowMode) {
+        doReturn(multiWindowMode).when(mActivityStack.top()).inMultiWindowMode();
+        if (multiWindowMode) {
+            doReturn(WINDOWING_MODE_MULTI_WINDOW).when(mActivityStack.top()).getWindowingMode();
+        }
+    }
+
+    void setTopActivityInPinnedWindowingMode(boolean pinnedWindowingMode) {
+        doReturn(pinnedWindowingMode).when(mActivityStack.top()).inPinnedWindowingMode();
+        if (pinnedWindowingMode) {
+            doReturn(WINDOWING_MODE_PINNED).when(mActivityStack.top()).getWindowingMode();
+        }
+    }
+
+    void setTopActivityInFreeformWindowingMode(boolean freeformWindowingMode) {
+        doReturn(freeformWindowingMode).when(mActivityStack.top()).inFreeformWindowingMode();
+        if (freeformWindowingMode) {
+            doReturn(WINDOWING_MODE_FREEFORM).when(mActivityStack.top()).getWindowingMode();
+        }
     }
 
     void destroyTopActivity() {
@@ -401,9 +425,11 @@ class AppCompatActivityRobot {
     private void pushActivity(@NonNull ActivityRecord activity) {
         mActivityStack.push(activity);
         spyOn(activity);
+        // TODO (b/351763164): Use these spyOn calls only when necessary.
         spyOn(activity.mAppCompatController.getTransparentPolicy());
         spyOn(activity.mAppCompatController.getAppCompatAspectRatioOverrides());
         spyOn(activity.mAppCompatController.getAppCompatAspectRatioPolicy());
+        spyOn(activity.mAppCompatController.getAppCompatFocusOverrides());
         spyOn(activity.mLetterboxUiController);
     }
 

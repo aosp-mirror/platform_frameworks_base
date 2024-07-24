@@ -19,7 +19,6 @@ package com.android.wm.shell.windowdecor;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.content.res.Configuration.DENSITY_DPI_UNDEFINED;
-import static android.view.InsetsSource.FLAG_FORCE_CONSUMING;
 import static android.view.WindowInsets.Type.captionBar;
 import static android.view.WindowInsets.Type.mandatorySystemGestures;
 import static android.view.WindowInsets.Type.statusBars;
@@ -54,7 +53,6 @@ import android.window.WindowContainerToken;
 import android.window.WindowContainerTransaction;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.window.flags.Flags;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.shared.desktopmode.DesktopModeStatus;
@@ -375,7 +373,8 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
         }
 
         final WindowDecorationInsets newInsets = new WindowDecorationInsets(
-                mTaskInfo.token, mOwner, captionInsetsRect, boundingRects);
+                mTaskInfo.token, mOwner, captionInsetsRect, boundingRects,
+                params.mInsetSourceFlags);
         if (!newInsets.equals(mWindowDecorationInsets)) {
             // Add or update this caption as an insets source.
             mWindowDecorationInsets = newInsets;
@@ -660,7 +659,7 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
         final int captionHeight = loadDimensionPixelSize(mContext.getResources(), captionHeightId);
         final Rect captionInsets = new Rect(0, 0, 0, captionHeight);
         final WindowDecorationInsets newInsets = new WindowDecorationInsets(mTaskInfo.token,
-                mOwner, captionInsets, null /* boundingRets */);
+                mOwner, captionInsets, null /* boundingRets */, 0 /* flags */);
         if (!newInsets.equals(mWindowDecorationInsets)) {
             mWindowDecorationInsets = newInsets;
             mWindowDecorationInsets.addOrUpdate(wct);
@@ -674,6 +673,7 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
         int mCaptionWidthId;
         final List<OccludingCaptionElement> mOccludingCaptionElements = new ArrayList<>();
         int mInputFeatures;
+        @InsetsSource.Flags int mInsetSourceFlags;
 
         int mShadowRadiusId;
         int mCornerRadius;
@@ -689,6 +689,7 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
             mCaptionWidthId = Resources.ID_NULL;
             mOccludingCaptionElements.clear();
             mInputFeatures = 0;
+            mInsetSourceFlags = 0;
 
             mShadowRadiusId = Resources.ID_NULL;
             mCornerRadius = 0;
@@ -753,20 +754,20 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
         private final Binder mOwner;
         private final Rect mFrame;
         private final Rect[] mBoundingRects;
+        private final @InsetsSource.Flags int mFlags;
 
         private WindowDecorationInsets(WindowContainerToken token, Binder owner, Rect frame,
-                Rect[] boundingRects) {
+                Rect[] boundingRects, @InsetsSource.Flags int flags) {
             mToken = token;
             mOwner = owner;
             mFrame = frame;
             mBoundingRects = boundingRects;
+            mFlags = flags;
         }
 
         void addOrUpdate(WindowContainerTransaction wct) {
-            final @InsetsSource.Flags int captionSourceFlags =
-                    Flags.enableCaptionCompatInsetForceConsumption() ? FLAG_FORCE_CONSUMING : 0;
             wct.addInsetsSource(mToken, mOwner, INDEX, captionBar(), mFrame, mBoundingRects,
-                    captionSourceFlags);
+                    mFlags);
             wct.addInsetsSource(mToken, mOwner, INDEX, mandatorySystemGestures(), mFrame,
                     mBoundingRects, 0 /* flags */);
         }
@@ -782,12 +783,13 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
             if (!(o instanceof WindowDecoration.WindowDecorationInsets that)) return false;
             return Objects.equals(mToken, that.mToken) && Objects.equals(mOwner,
                     that.mOwner) && Objects.equals(mFrame, that.mFrame)
-                    && Objects.deepEquals(mBoundingRects, that.mBoundingRects);
+                    && Objects.deepEquals(mBoundingRects, that.mBoundingRects)
+                    && mFlags == that.mFlags;
         }
 
         @Override
         public int hashCode() {
-            return Objects.hash(mToken, mOwner, mFrame, Arrays.hashCode(mBoundingRects));
+            return Objects.hash(mToken, mOwner, mFrame, Arrays.hashCode(mBoundingRects), mFlags);
         }
     }
 }

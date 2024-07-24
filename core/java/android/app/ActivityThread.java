@@ -3818,8 +3818,7 @@ public final class ActivityThread extends ClientTransactionHandler
         final ArrayList<ResultInfo> list = new ArrayList<>();
         list.add(new ResultInfo(id, requestCode, resultCode, data, activityToken));
         final ClientTransaction clientTransaction = new ClientTransaction(mAppThread);
-        final ActivityResultItem activityResultItem = ActivityResultItem.obtain(
-                activityToken, list);
+        final ActivityResultItem activityResultItem = new ActivityResultItem(activityToken, list);
         clientTransaction.addTransactionItem(activityResultItem);
         try {
             mAppThread.scheduleTransaction(clientTransaction);
@@ -4614,7 +4613,7 @@ public final class ActivityThread extends ClientTransactionHandler
 
     private void schedulePauseWithUserLeavingHint(ActivityClientRecord r) {
         final ClientTransaction transaction = new ClientTransaction(mAppThread);
-        final PauseActivityItem pauseActivityItem = PauseActivityItem.obtain(r.token,
+        final PauseActivityItem pauseActivityItem = new PauseActivityItem(r.token,
                 r.activity.isFinishing(), /* userLeaving */ true,
                 /* dontReport */ false, /* autoEnteringPip */ false);
         transaction.addTransactionItem(pauseActivityItem);
@@ -4623,7 +4622,7 @@ public final class ActivityThread extends ClientTransactionHandler
 
     private void scheduleResume(ActivityClientRecord r) {
         final ClientTransaction transaction = new ClientTransaction(mAppThread);
-        final ResumeActivityItem resumeActivityItem = ResumeActivityItem.obtain(r.token,
+        final ResumeActivityItem resumeActivityItem = new ResumeActivityItem(r.token,
                 /* isForward */ false, /* shouldSendCompatFakeFocus */ false);
         transaction.addTransactionItem(resumeActivityItem);
         executeTransaction(transaction);
@@ -6239,7 +6238,7 @@ public final class ActivityThread extends ClientTransactionHandler
                 r.createdConfig != null
                         ? r.createdConfig : mConfigurationController.getConfiguration(),
                 r.overrideConfig);
-        final ActivityRelaunchItem activityRelaunchItem = ActivityRelaunchItem.obtain(
+        final ActivityRelaunchItem activityRelaunchItem = new ActivityRelaunchItem(
                 r.token, null /* pendingResults */, null /* pendingIntents */,
                 0 /* configChanges */, mergedConfiguration, r.mPreserveWindow,
                 r.getActivityWindowInfo());

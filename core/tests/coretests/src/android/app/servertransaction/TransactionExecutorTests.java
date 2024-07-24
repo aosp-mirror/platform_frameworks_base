@@ -525,10 +525,6 @@ public class TransactionExecutorTests {
         }
 
         @Override
-        public void recycle() {
-        }
-
-        @Override
         public void writeToParcel(@NonNull Parcel dest, int flags) {
         }
 

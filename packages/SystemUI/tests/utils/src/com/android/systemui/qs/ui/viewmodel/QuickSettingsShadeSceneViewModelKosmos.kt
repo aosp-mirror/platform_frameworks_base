@@ -17,7 +17,6 @@
 package com.android.systemui.qs.ui.viewmodel
 
 import com.android.systemui.kosmos.Kosmos
-import com.android.systemui.kosmos.applicationCoroutineScope
 import com.android.systemui.shade.domain.interactor.shadeInteractor
 import com.android.systemui.shade.ui.viewmodel.overlayShadeViewModel
 
@@ -27,6 +26,5 @@ val Kosmos.quickSettingsShadeSceneViewModel: QuickSettingsShadeSceneViewModel by
             shadeInteractor = shadeInteractor,
             overlayShadeViewModel = overlayShadeViewModel,
             quickSettingsContainerViewModel = quickSettingsContainerViewModel,
-            applicationScope = applicationCoroutineScope,
         )
     }

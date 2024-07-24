@@ -409,6 +409,7 @@ package android {
     field @FlaggedApi("android.app.ondeviceintelligence.flags.enable_on_device_intelligence") public static final String USE_ON_DEVICE_INTELLIGENCE = "android.permission.USE_ON_DEVICE_INTELLIGENCE";
     field public static final String USE_RESERVED_DISK = "android.permission.USE_RESERVED_DISK";
     field public static final String UWB_PRIVILEGED = "android.permission.UWB_PRIVILEGED";
+    field @FlaggedApi("android.os.vibrator.vendor_vibration_effects") public static final String VIBRATE_VENDOR_EFFECTS = "android.permission.VIBRATE_VENDOR_EFFECTS";
     field public static final String WHITELIST_AUTO_REVOKE_PERMISSIONS = "android.permission.WHITELIST_AUTO_REVOKE_PERMISSIONS";
     field public static final String WHITELIST_RESTRICTED_PERMISSIONS = "android.permission.WHITELIST_RESTRICTED_PERMISSIONS";
     field public static final String WIFI_ACCESS_COEX_UNSAFE_CHANNELS = "android.permission.WIFI_ACCESS_COEX_UNSAFE_CHANNELS";
@@ -11352,6 +11353,10 @@ package android.os {
     method public int getUserRestrictionSource();
     method public void writeToParcel(android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.os.UserManager.EnforcingUser> CREATOR;
+  }
+
+  public abstract class VibrationEffect implements android.os.Parcelable {
+    method @FlaggedApi("android.os.vibrator.vendor_vibration_effects") @NonNull @RequiresPermission(android.Manifest.permission.VIBRATE_VENDOR_EFFECTS) public static android.os.VibrationEffect createVendorEffect(@NonNull android.os.PersistableBundle);
   }
 
   public abstract class Vibrator {

@@ -28,7 +28,13 @@ import android.view.SurfaceControl;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.protolog.ProtoLog;
+import com.android.window.flags.Flags;
 
+
+/**
+ * Utility class for use by a WindowContainer implementation to add "DimLayer" support, that is
+ * black layers of varying opacity at various Z-levels which create the effect of a Dim.
+ */
 class Dimmer {
 
     /**
@@ -122,8 +128,10 @@ class Dimmer {
         /**
          * Set the parameters to prepare the dim to be relative parented to the dimming container
          */
-        void prepareReparent(@NonNull WindowContainer<?> relativeParent, int relativeLayer) {
+        void prepareReparent(@NonNull WindowContainer<?> geometryParent,
+                @NonNull WindowContainer<?> relativeParent, int relativeLayer) {
             mAnimationHelper.setRequestedRelativeParent(relativeParent, relativeLayer);
+            mAnimationHelper.setRequestedGeometryParent(geometryParent);
         }
 
         /**
@@ -138,7 +146,8 @@ class Dimmer {
          * Whether anyone is currently requesting the dim
          */
         boolean isDimming() {
-            return mLastRequestedDimContainer != null;
+            return mLastRequestedDimContainer != null
+                    && (mHostContainer.isVisibleRequested() || !Flags.useTasksDimOnly());
         }
 
         private SurfaceControl makeDimLayer() {
@@ -208,13 +217,15 @@ class Dimmer {
      * the child of the host should call adjustRelativeLayer and {@link Dimmer#adjustAppearance} to
      * continue dimming. Indeed, this method won't be able to keep dimming or get a new DimState
      * without also adjusting the appearance.
+     * @param geometryParent    The container that defines the geometry of the dim
      * @param dimmingContainer      The container which to dim above. Should be a child of the host.
      * @param relativeLayer  The position of the dim wrt the container
      */
-    public void adjustRelativeLayer(@NonNull WindowContainer<?> dimmingContainer,
+    public void adjustPosition(@NonNull WindowContainer<?> geometryParent,
+                                    @NonNull WindowContainer<?> dimmingContainer,
                                     int relativeLayer) {
         if (mDimState != null) {
-            mDimState.prepareReparent(dimmingContainer, relativeLayer);
+            mDimState.prepareReparent(geometryParent, dimmingContainer, relativeLayer);
         }
     }
 
@@ -236,7 +247,9 @@ class Dimmer {
             return false;
         } else {
             // Someone is dimming, show the requested changes
-            mDimState.adjustSurfaceLayout(t);
+            if (!Flags.useTasksDimOnly()) {
+                mDimState.adjustSurfaceLayout(t);
+            }
             final WindowState ws = mDimState.mLastRequestedDimContainer.asWindowState();
             if (!mDimState.mIsVisible && ws != null && ws.mActivityRecord != null
                     && ws.mActivityRecord.mStartingData != null) {
@@ -263,6 +276,7 @@ class Dimmer {
         return mDimState != null ? mDimState.mDimSurface : null;
     }
 
+    @Deprecated
     Rect getDimBounds() {
         return mDimState != null ? mDimState.mDimBounds : null;
     }

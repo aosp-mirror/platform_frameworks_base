@@ -330,8 +330,8 @@ class WindowContextListenerController {
             mLastReportedConfig.setTo(config);
             mLastReportedDisplay = displayId;
 
-            mWpc.scheduleClientTransactionItem(WindowContextInfoChangeItem.obtain(
-                    mClientToken, config, displayId));
+            mWpc.scheduleClientTransactionItem(
+                    new WindowContextInfoChangeItem(mClientToken, config, displayId));
             mHasPendingConfiguration = false;
         }
 
@@ -356,7 +356,7 @@ class WindowContextListenerController {
                 }
             }
             mDeathRecipient.unlinkToDeath();
-            mWpc.scheduleClientTransactionItem(WindowContextWindowRemovalItem.obtain(mClientToken));
+            mWpc.scheduleClientTransactionItem(new WindowContextWindowRemovalItem(mClientToken));
             unregister();
         }
 

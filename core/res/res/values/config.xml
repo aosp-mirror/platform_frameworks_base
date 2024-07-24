@@ -7096,4 +7096,8 @@
 
     <!-- Whether to enable usb state update via udc sysfs. -->
     <bool name="config_enableUdcSysfsUsbStateUpdate">false</bool>
+
+    <!-- Whether to enable the private space search illustration and search tile content in "Hide Private Space" settings page.
+         OEM/Partner can explicitly opt to hide the illustration and search tile content. -->
+    <bool name="config_enableSearchTileHideIllustrationInPrivateSpace">true</bool>
 </resources>

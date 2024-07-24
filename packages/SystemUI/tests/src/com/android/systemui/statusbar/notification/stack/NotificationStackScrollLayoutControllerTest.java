@@ -91,7 +91,6 @@ import com.android.systemui.statusbar.notification.collection.render.GroupExpans
 import com.android.systemui.statusbar.notification.collection.render.NotifStats;
 import com.android.systemui.statusbar.notification.collection.render.NotificationVisibilityProvider;
 import com.android.systemui.statusbar.notification.collection.render.SectionHeaderController;
-import com.android.systemui.statusbar.notification.data.repository.ActiveNotificationListRepository;
 import com.android.systemui.statusbar.notification.domain.interactor.SeenNotificationsInteractor;
 import com.android.systemui.statusbar.notification.footer.shared.FooterViewRefactor;
 import com.android.systemui.statusbar.notification.init.NotificationsController;
@@ -188,12 +187,8 @@ public class NotificationStackScrollLayoutControllerTest extends SysuiTestCase {
     @Captor
     private ArgumentCaptor<StatusBarStateController.StateListener> mStateListenerArgumentCaptor;
 
-
-    private final ActiveNotificationListRepository mActiveNotificationsRepository =
-            new ActiveNotificationListRepository();
-
     private final SeenNotificationsInteractor mSeenNotificationsInteractor =
-            new SeenNotificationsInteractor(mActiveNotificationsRepository);
+            mKosmos.getSeenNotificationsInteractor();
 
     private NotificationStackScrollLayoutController mController;
 
