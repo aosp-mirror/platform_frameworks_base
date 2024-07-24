@@ -1355,8 +1355,7 @@ public class InputManagerService extends IInputManager.Stub
             int patternRepeatIndex = -1;
             int amplitudeCount = -1;
 
-            if (effect instanceof VibrationEffect.Composed) {
-                VibrationEffect.Composed composed = (VibrationEffect.Composed) effect;
+            if (effect instanceof VibrationEffect.Composed composed) {
                 int segmentCount = composed.getSegments().size();
                 pattern = new long[segmentCount];
                 amplitudes = new int[segmentCount];
@@ -1381,6 +1380,8 @@ public class InputManagerService extends IInputManager.Stub
                     }
                     pattern[amplitudeCount++] = segment.getDuration();
                 }
+            } else {
+                Slog.w(TAG, "Input devices don't support effect " + effect);
             }
 
             if (amplitudeCount < 0) {
