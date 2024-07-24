@@ -17,11 +17,15 @@
 package com.android.systemui.statusbar.policy.ui.dialog.viewmodel
 
 import android.content.Context
+import android.content.Intent
+import android.provider.Settings.ACTION_AUTOMATIC_ZEN_RULE_SETTINGS
+import android.provider.Settings.EXTRA_AUTOMATIC_ZEN_RULE_ID
 import com.android.settingslib.notification.modes.ZenMode
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.res.R
 import com.android.systemui.statusbar.policy.domain.interactor.ZenModeInteractor
+import com.android.systemui.statusbar.policy.ui.dialog.ModesDialogDelegate
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.Flow
@@ -39,6 +43,7 @@ constructor(
     val context: Context,
     zenModeInteractor: ZenModeInteractor,
     @Background val bgDispatcher: CoroutineDispatcher,
+    private val dialogDelegate: ModesDialogDelegate,
 ) {
     // Modes that should be displayed in the dialog
     // TODO(b/346519570): Include modes that have not been set up yet.
@@ -71,7 +76,10 @@ constructor(
                             }
                         },
                         onLongClick = {
-                            // TODO(b/346519570): Open settings page for mode.
+                            val intent: Intent =
+                                Intent(ACTION_AUTOMATIC_ZEN_RULE_SETTINGS)
+                                    .putExtra(EXTRA_AUTOMATIC_ZEN_RULE_ID, mode.id)
+                            dialogDelegate.launchFromDialog(intent)
                         }
                     )
                 }
