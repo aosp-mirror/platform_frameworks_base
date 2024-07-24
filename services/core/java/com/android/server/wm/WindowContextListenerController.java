@@ -356,7 +356,7 @@ class WindowContextListenerController {
                 }
             }
             mDeathRecipient.unlinkToDeath();
-            mWpc.scheduleClientTransactionItem(WindowContextWindowRemovalItem.obtain(mClientToken));
+            mWpc.scheduleClientTransactionItem(new WindowContextWindowRemovalItem(mClientToken));
             unregister();
         }
 
