@@ -42,6 +42,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.focusable
+import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -112,6 +113,11 @@ import androidx.compose.ui.graphics.ColorMatrix
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
+import androidx.compose.ui.input.nestedscroll.NestedScrollSource
+import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.input.pointer.changedToUp
+import androidx.compose.ui.input.pointer.changedToUpIgnoreConsumed
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.LayoutCoordinates
 import androidx.compose.ui.layout.boundsInWindow
@@ -138,6 +144,7 @@ import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.times
+import androidx.compose.ui.util.fastAll
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.window.layout.WindowMetricsCalculator
@@ -204,13 +211,51 @@ fun CommunalHub(
         ScrollOnUpdatedLiveContentEffect(communalContent, gridState)
     }
 
+    val nestedScrollConnection = remember {
+        object : NestedScrollConnection {
+            override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
+                // Begin tracking nested scrolling
+                viewModel.onNestedScrolling()
+                return super.onPreScroll(available, source)
+            }
+        }
+    }
+
     Box(
         modifier =
             modifier
                 .semantics { testTagsAsResourceId = true }
                 .testTag(COMMUNAL_HUB_TEST_TAG)
                 .fillMaxSize()
+                .nestedScroll(nestedScrollConnection)
                 .pointerInput(gridState, contentOffset, contentListState) {
+                    awaitPointerEventScope {
+                        while (true) {
+                            var event = awaitFirstDown(requireUnconsumed = false)
+                            // Reset touch on first event.
+                            viewModel.onResetTouchState()
+
+                            // Process down event in case it's consumed immediately
+                            if (event.isConsumed) {
+                                viewModel.onHubTouchConsumed()
+                            }
+
+                            do {
+                                var event = awaitPointerEvent()
+                                for (change in event.changes) {
+                                    if (change.isConsumed) {
+                                        // Signal touch consumption on any consumed event.
+                                        viewModel.onHubTouchConsumed()
+                                    }
+                                }
+                            } while (
+                                !event.changes.fastAll {
+                                    it.changedToUp() || it.changedToUpIgnoreConsumed()
+                                }
+                            )
+                        }
+                    }
+
                     // If not in edit mode, don't allow selecting items.
                     if (!viewModel.isEditMode) return@pointerInput
                     observeTaps { offset ->
