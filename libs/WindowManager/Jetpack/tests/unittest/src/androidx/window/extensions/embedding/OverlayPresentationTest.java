@@ -269,7 +269,7 @@ public class OverlayPresentationTest {
     }
 
     @Test
-    public void testCreateOrUpdateOverlay_visibleOverlayInTask_dismissOverlay() {
+    public void testCreateOrUpdateOverlay_topOverlayInTask_dismissOverlay() {
         createExistingOverlayContainers();
 
         final TaskFragmentContainer overlayContainer =
@@ -400,13 +400,13 @@ public class OverlayPresentationTest {
     }
 
     private void createExistingOverlayContainers() {
-        createExistingOverlayContainers(true /* visible */);
+        createExistingOverlayContainers(true /* isOnTop */);
     }
 
-    private void createExistingOverlayContainers(boolean visible) {
-        mOverlayContainer1 = createTestOverlayContainer(TASK_ID, "test1", visible,
+    private void createExistingOverlayContainers(boolean isOnTop) {
+        mOverlayContainer1 = createTestOverlayContainer(TASK_ID, "test1", isOnTop,
                 true /* associatedLaunchingActivity */, mActivity);
-        mOverlayContainer2 = createTestOverlayContainer(TASK_ID + 1, "test2", visible);
+        mOverlayContainer2 = createTestOverlayContainer(TASK_ID + 1, "test2", isOnTop);
         List<TaskFragmentContainer> overlayContainers = mSplitController
                 .getAllNonFinishingOverlayContainers();
         assertThat(overlayContainers).containsExactly(mOverlayContainer1, mOverlayContainer2);
@@ -1004,10 +1004,10 @@ public class OverlayPresentationTest {
     /** Creates a mock TaskFragment that has been registered and appeared in the organizer. */
     @NonNull
     private TaskFragmentContainer createMockTaskFragmentContainer(
-            @NonNull Activity activity, boolean isVisible) {
+            @NonNull Activity activity, boolean isOnTop) {
         final TaskFragmentContainer container = createTfContainer(mSplitController,
                 activity.getTaskId(), activity);
-        setupTaskFragmentInfo(container, activity, isVisible);
+        setupTaskFragmentInfo(container, activity, isOnTop);
         return container;
     }
 
@@ -1019,8 +1019,8 @@ public class OverlayPresentationTest {
 
     @NonNull
     private TaskFragmentContainer createTestOverlayContainer(int taskId, @NonNull String tag,
-            boolean isVisible) {
-        return createTestOverlayContainer(taskId, tag, isVisible,
+            boolean isOnTop) {
+        return createTestOverlayContainer(taskId, tag, isOnTop,
                 true /* associateLaunchingActivity */);
     }
 
@@ -1033,7 +1033,7 @@ public class OverlayPresentationTest {
 
     @NonNull
     private TaskFragmentContainer createTestOverlayContainer(int taskId, @NonNull String tag,
-            boolean isVisible, boolean associateLaunchingActivity,
+            boolean isOnTop, boolean associateLaunchingActivity,
             @Nullable Activity launchingActivity) {
         final Activity activity = launchingActivity != null
                 ? launchingActivity : createMockActivity();
@@ -1044,14 +1044,15 @@ public class OverlayPresentationTest {
                         .setLaunchOptions(Bundle.EMPTY)
                         .setAssociatedActivity(associateLaunchingActivity ? activity : null)
                         .build();
-        setupTaskFragmentInfo(overlayContainer, createMockActivity(), isVisible);
+        setupTaskFragmentInfo(overlayContainer, createMockActivity(), isOnTop);
         return overlayContainer;
     }
 
     private void setupTaskFragmentInfo(@NonNull TaskFragmentContainer container,
                                        @NonNull Activity activity,
-                                       boolean isVisible) {
-        final TaskFragmentInfo info = createMockTaskFragmentInfo(container, activity, isVisible);
+                                       boolean isOnTop) {
+        final TaskFragmentInfo info = createMockTaskFragmentInfo(container, activity, isOnTop,
+                isOnTop);
         container.setInfo(mTransaction, info);
         mSplitPresenter.mFragmentInfos.put(container.getTaskFragmentToken(), info);
     }
