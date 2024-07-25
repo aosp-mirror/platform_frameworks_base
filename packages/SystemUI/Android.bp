@@ -640,6 +640,15 @@ filegroup {
 }
 
 filegroup {
+    name: "SystemUI-robotest-utils",
+    srcs: [
+        "tests/robolectric/src/com/android/systemui/testutils/**/*.kt",
+        "tests/robolectric/src/com/android/systemui/testutils/**/*.java",
+    ],
+    path: "tests/robolectric/src/com/android/systemui/testutils",
+}
+
+filegroup {
     name: "SystemUI-tests-multivalent",
     srcs: [
         "multivalentTests/src/**/*.kt",
