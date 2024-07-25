@@ -37,6 +37,7 @@ import android.content.ContextWrapper;
 import android.content.pm.PackageManagerInternal;
 import android.os.ExternalVibrationScale;
 import android.os.Handler;
+import android.os.PersistableBundle;
 import android.os.PowerManagerInternal;
 import android.os.UserHandle;
 import android.os.VibrationAttributes;
@@ -232,6 +233,34 @@ public class VibrationScalerTest {
     }
 
     @Test
+    @RequiresFlagsEnabled(android.os.vibrator.Flags.FLAG_VENDOR_VIBRATION_EFFECTS)
+    public void scale_withVendorEffect_setsEffectStrengthBasedOnSettings() {
+        setDefaultIntensity(USAGE_NOTIFICATION, VIBRATION_INTENSITY_LOW);
+        setUserSetting(Settings.System.NOTIFICATION_VIBRATION_INTENSITY, VIBRATION_INTENSITY_HIGH);
+        PersistableBundle vendorData = new PersistableBundle();
+        vendorData.putString("key", "value");
+        VibrationEffect effect = VibrationEffect.createVendorEffect(vendorData);
+
+        VibrationEffect.VendorEffect scaled =
+                (VibrationEffect.VendorEffect) mVibrationScaler.scale(effect, USAGE_NOTIFICATION);
+        assertEquals(scaled.getEffectStrength(), VibrationEffect.EFFECT_STRENGTH_STRONG);
+
+        setUserSetting(Settings.System.NOTIFICATION_VIBRATION_INTENSITY,
+                VIBRATION_INTENSITY_MEDIUM);
+        scaled = (VibrationEffect.VendorEffect) mVibrationScaler.scale(effect, USAGE_NOTIFICATION);
+        assertEquals(scaled.getEffectStrength(), VibrationEffect.EFFECT_STRENGTH_MEDIUM);
+
+        setUserSetting(Settings.System.NOTIFICATION_VIBRATION_INTENSITY, VIBRATION_INTENSITY_LOW);
+        scaled = (VibrationEffect.VendorEffect) mVibrationScaler.scale(effect, USAGE_NOTIFICATION);
+        assertEquals(scaled.getEffectStrength(), VibrationEffect.EFFECT_STRENGTH_LIGHT);
+
+        setUserSetting(Settings.System.NOTIFICATION_VIBRATION_INTENSITY, VIBRATION_INTENSITY_OFF);
+        scaled = (VibrationEffect.VendorEffect) mVibrationScaler.scale(effect, USAGE_NOTIFICATION);
+        // Vibration setting being bypassed will use default setting.
+        assertEquals(scaled.getEffectStrength(), VibrationEffect.EFFECT_STRENGTH_LIGHT);
+    }
+
+    @Test
     public void scale_withOneShotAndWaveform_resolvesAmplitude() {
         // No scale, default amplitude still resolved
         setDefaultIntensity(USAGE_RINGTONE, VIBRATION_INTENSITY_LOW);
@@ -363,6 +392,30 @@ public class VibrationScalerTest {
                 USAGE_NOTIFICATION));
         // Notification scales up.
         assertTrue(scaled.getAmplitude() > 0.5);
+    }
+
+    @Test
+    @RequiresFlagsEnabled({
+            android.os.vibrator.Flags.FLAG_ADAPTIVE_HAPTICS_ENABLED,
+            android.os.vibrator.Flags.FLAG_VENDOR_VIBRATION_EFFECTS,
+    })
+    public void scale_adaptiveHapticsOnVendorEffect_setsLinearScaleParameter() {
+        setDefaultIntensity(USAGE_RINGTONE, VIBRATION_INTENSITY_HIGH);
+
+        mVibrationScaler.updateAdaptiveHapticsScale(USAGE_RINGTONE, 0.5f);
+
+        PersistableBundle vendorData = new PersistableBundle();
+        vendorData.putInt("key", 1);
+        VibrationEffect effect = VibrationEffect.createVendorEffect(vendorData);
+
+        VibrationEffect.VendorEffect scaled =
+                (VibrationEffect.VendorEffect) mVibrationScaler.scale(effect, USAGE_RINGTONE);
+        assertEquals(scaled.getLinearScale(), 0.5f);
+
+        mVibrationScaler.removeAdaptiveHapticsScale(USAGE_RINGTONE);
+
+        scaled = (VibrationEffect.VendorEffect) mVibrationScaler.scale(effect, USAGE_RINGTONE);
+        assertEquals(scaled.getLinearScale(), 1.0f);
     }
 
     private void setDefaultIntensity(@VibrationAttributes.Usage int usage,

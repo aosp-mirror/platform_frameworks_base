@@ -43,8 +43,7 @@ public enum DesktopModeFlagsUtil {
     // All desktop mode related flags to be overridden by developer option toggle will be added here
     DESKTOP_WINDOWING_MODE(
             Flags::enableDesktopWindowingMode, /* shouldOverrideByDevOption= */ true),
-    WALLPAPER_ACTIVITY(
-            Flags::enableDesktopWindowingWallpaperActivity, /* shouldOverrideByDevOption= */ true);
+    DYNAMIC_INITIAL_BOUNDS(Flags::enableWindowingDynamicInitialBounds, true);
 
     private static final String TAG = "DesktopModeFlagsUtil";
     // Function called to obtain aconfig flag value.

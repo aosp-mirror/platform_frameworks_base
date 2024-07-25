@@ -27,6 +27,7 @@ import static com.android.server.wm.AppCompatUtils.computeAspectRatio;
 import static com.android.server.wm.LaunchParamsUtil.applyLayoutGravity;
 import static com.android.server.wm.LaunchParamsUtil.calculateLayoutBounds;
 
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityOptions;
@@ -41,7 +42,7 @@ import android.view.Gravity;
 
 import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.window.flags.Flags;
+import com.android.server.wm.utils.DesktopModeFlagsUtil;
 
 import java.util.function.Consumer;
 
@@ -106,7 +107,7 @@ public final class DesktopModeBoundsCalculator {
         final TaskDisplayArea displayArea = task.getDisplayArea();
         final Rect screenBounds = displayArea.getBounds();
         final Size idealSize = calculateIdealSize(screenBounds, DESKTOP_MODE_INITIAL_BOUNDS_SCALE);
-        if (!Flags.enableWindowingDynamicInitialBounds()) {
+        if (!DesktopModeFlagsUtil.DYNAMIC_INITIAL_BOUNDS.isEnabled(activity.mWmService.mContext)) {
             return centerInScreen(idealSize, screenBounds);
         }
         // TODO(b/353457301): Replace with app compat aspect ratio method when refactoring complete.

@@ -117,22 +117,6 @@ final class LetterboxUiController {
     }
 
     /**
-     * Whether sending compat fake focus for split screen resumed activities is enabled. Needed
-     * because some game engines wait to get focus before drawing the content of the app which isn't
-     * guaranteed by default in multi-window modes.
-     *
-     * <p>This treatment is enabled when the following conditions are met:
-     * <ul>
-     *     <li>Flag gating the treatment is enabled
-     *     <li>Component property is NOT set to false
-     *     <li>Component property is set to true or per-app override is enabled
-     * </ul>
-     */
-    boolean shouldSendFakeFocus() {
-        return getAppCompatOverrides().shouldSendFakeFocus();
-    }
-
-    /**
      * Whether we should apply the force resize per-app override. When this override is applied it
      * forces the packages it is applied to to be resizable. It won't change whether the app can be
      * put into multi-windowing mode, but allow the app to resize without going into size-compat

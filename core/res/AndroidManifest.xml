@@ -2611,6 +2611,14 @@
     <permission android:name="android.permission.VIBRATE_SYSTEM_CONSTANTS"
         android:protectionLevel="signature" />
 
+    <!-- @SystemApi Allows access to perform vendor effects in the vibrator.
+         <p>Protection level: signature
+         @FlaggedApi("android.os.vibrator.vendor_vibration_effects")
+         @hide
+    -->
+    <permission android:name="android.permission.VIBRATE_VENDOR_EFFECTS"
+        android:protectionLevel="signature|privileged" />
+
     <!-- @SystemApi Allows access to the vibrator state.
          <p>Protection level: signature
          @hide

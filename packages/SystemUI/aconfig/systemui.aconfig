@@ -1244,3 +1244,12 @@ flag {
         purpose: PURPOSE_BUGFIX
    }
 }
+flag {
+   name: "classic_flags_multi_user"
+   namespace: "systemui"
+   description: "Make the classic feature flag loading multi user aware."
+   bug: "345443431"
+   metadata {
+        purpose: PURPOSE_BUGFIX
+   }
+}

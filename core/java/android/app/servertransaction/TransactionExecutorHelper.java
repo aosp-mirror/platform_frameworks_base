@@ -55,7 +55,7 @@ public class TransactionExecutorHelper {
     // Temp holder for lifecycle path.
     // No direct transition between two states should take more than one complete cycle of 6 states.
     @ActivityLifecycleItem.LifecycleState
-    private IntArray mLifecycleSequence = new IntArray(6);
+    private final IntArray mLifecycleSequence = new IntArray(6 /* initialCapacity */);
 
     /**
      * Calculate the path through main lifecycle states for an activity and fill
@@ -198,10 +198,10 @@ public class TransactionExecutorHelper {
                 // Fall through to return the PAUSE item to ensure the activity is properly
                 // resumed while relaunching.
             case ON_PAUSE:
-                lifecycleItem = PauseActivityItem.obtain(r.token);
+                lifecycleItem = new PauseActivityItem(r.token);
                 break;
             case ON_STOP:
-                lifecycleItem = StopActivityItem.obtain(r.token);
+                lifecycleItem = new StopActivityItem(r.token);
                 break;
             default:
                 lifecycleItem = new ResumeActivityItem(r.token, false /* isForward */,

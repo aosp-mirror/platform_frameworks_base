@@ -19,6 +19,7 @@ package android.view;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.util.SequenceUtils.getInitSeq;
 import static android.view.InsetsSource.FLAG_FORCE_CONSUMING;
+import static android.view.InsetsSource.FLAG_FORCE_CONSUMING_OPAQUE_CAPTION_BAR;
 import static android.view.InsetsSource.FLAG_INSETS_ROUNDED_CORNER;
 import static android.view.InsetsStateProto.DISPLAY_CUTOUT;
 import static android.view.InsetsStateProto.DISPLAY_FRAME;
@@ -54,6 +55,7 @@ import android.view.WindowInsets.Type.InsetsType;
 import android.view.WindowManager.LayoutParams.SoftInputModeFlags;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.window.flags.Flags;
 
 import java.io.PrintWriter;
 import java.util.Objects;
@@ -131,18 +133,25 @@ public class InsetsState implements Parcelable {
         final Rect relativeFrame = new Rect(frame);
         final Rect relativeFrameMax = new Rect(frame);
         @InsetsType int forceConsumingTypes = 0;
+        boolean forceConsumingOpaqueCaptionBar = false;
         @InsetsType int suppressScrimTypes = 0;
         final Rect[][] typeBoundingRectsMap = new Rect[Type.SIZE][];
         final Rect[][] typeMaxBoundingRectsMap = new Rect[Type.SIZE][];
         for (int i = mSources.size() - 1; i >= 0; i--) {
             final InsetsSource source = mSources.valueAt(i);
             final @InsetsType int type = source.getType();
+            final @InsetsSource.Flags int flags = source.getFlags();
 
-            if ((source.getFlags() & InsetsSource.FLAG_FORCE_CONSUMING) != 0) {
+            if ((flags & InsetsSource.FLAG_FORCE_CONSUMING) != 0) {
                 forceConsumingTypes |= type;
             }
 
-            if ((source.getFlags() & InsetsSource.FLAG_SUPPRESS_SCRIM) != 0) {
+            if (Flags.enableCaptionCompatInsetForceConsumptionAlways()
+                    && (flags & FLAG_FORCE_CONSUMING_OPAQUE_CAPTION_BAR) != 0) {
+                forceConsumingOpaqueCaptionBar = true;
+            }
+
+            if ((flags & InsetsSource.FLAG_SUPPRESS_SCRIM) != 0) {
                 suppressScrimTypes |= type;
             }
 
@@ -177,7 +186,8 @@ public class InsetsState implements Parcelable {
         }
 
         return new WindowInsets(typeInsetsMap, typeMaxInsetsMap, typeVisibilityMap, isScreenRound,
-                forceConsumingTypes, suppressScrimTypes, calculateRelativeCutout(frame),
+                forceConsumingTypes, forceConsumingOpaqueCaptionBar, suppressScrimTypes,
+                calculateRelativeCutout(frame),
                 calculateRelativeRoundedCorners(frame),
                 calculateRelativePrivacyIndicatorBounds(frame),
                 calculateRelativeDisplayShape(frame),

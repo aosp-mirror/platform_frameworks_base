@@ -690,7 +690,9 @@ bool ResourceParser::ParseResource(xml::XmlPullParser* parser,
         resource_format = item_iter->second.format;
       }
 
-      if (!ParseItem(parser, out_resource, resource_format)) {
+      // Don't bother parsing the item if it is behind a disabled flag
+      if (out_resource->flag_status != FlagStatus::Disabled &&
+          !ParseItem(parser, out_resource, resource_format)) {
         return false;
       }
       return true;

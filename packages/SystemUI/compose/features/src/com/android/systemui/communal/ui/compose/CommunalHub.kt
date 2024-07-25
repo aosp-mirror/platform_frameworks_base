@@ -791,7 +791,7 @@ private fun ToolbarButton(
             onClick = onClick,
             colors =
                 ButtonDefaults.outlinedButtonColors(
-                    contentColor = colors.primary,
+                    contentColor = colors.onPrimaryContainer,
                 ),
             border = BorderStroke(width = 2.0.dp, color = colors.primary),
             contentPadding = Dimensions.ButtonPadding,
@@ -855,7 +855,7 @@ private fun CommunalContent(
 /** Creates an empty card used to highlight a particular spot on the grid. */
 @Composable
 fun HighlightedItem(modifier: Modifier = Modifier, alpha: Float = 1.0f) {
-    val brush = SolidColor(LocalAndroidColorScheme.current.primaryFixed)
+    val brush = SolidColor(LocalAndroidColorScheme.current.primary)
     Box(
         modifier =
             // drawBehind lets us draw outside the bounds of the widgets so that we don't need to
@@ -993,6 +993,11 @@ private fun WidgetContent(
         modifier =
             modifier
                 .then(selectableModifier)
+                .thenIf(!viewModel.isEditMode && !model.inQuietMode) {
+                    Modifier.pointerInput(Unit) {
+                        observeTaps { viewModel.onTapWidget(model.componentName, model.priority) }
+                    }
+                }
                 .thenIf(!viewModel.isEditMode && model.inQuietMode) {
                     Modifier.pointerInput(Unit) {
                         // consume tap to prevent the child view from triggering interactions with

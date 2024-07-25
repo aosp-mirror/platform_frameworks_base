@@ -58,12 +58,6 @@ public abstract class ActivityLifecycleItem extends ActivityTransactionItem {
         super(activityToken);
     }
 
-    // TODO(b/311089192): Remove this method once no subclasses obtain from the object pool.
-    @Deprecated
-    ActivityLifecycleItem() {
-        super();
-    }
-
     // Parcelable implementation
 
     /** Reads from Parcel. */

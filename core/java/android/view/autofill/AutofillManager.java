@@ -874,6 +874,13 @@ public final class AutofillManager {
         @Nullable View autofillClientFindViewByAccessibilityIdTraversal(int viewId, int windowId);
 
         /**
+         * Finds all the autofillable views on the screen.
+         *
+         * @return The list of views that are autofillable.
+         */
+        List<View> autofillClientFindAutofillableViewsByTraversal();
+
+        /**
          * Runs the specified action on the UI thread.
          */
         void autofillClientRunOnUiThread(Runnable action);
@@ -1495,6 +1502,37 @@ public final class AutofillManager {
             flags |= FLAG_VIEW_NOT_FOCUSED;
         }
         notifyViewEntered(view, virtualId, absBounds, flags);
+    }
+
+    /**
+     * Called to know whether authentication was pending.
+     * @hide
+     */
+    public boolean isAuthenticationPending() {
+        return mState == STATE_PENDING_AUTHENTICATION;
+    }
+
+    /**
+     * Called to check if we should retry fill.
+     * Useful for knowing whether to attempt refill after relayout.
+     *
+     * @hide
+     */
+    public boolean shouldRetryFill() {
+        // TODO: Implement in follow-up cl
+        return false;
+    }
+
+    /**
+     * Called when a potential relayout may have occurred.
+     *
+     * @return whether refill was done. True if refill was done partially or fully.
+     * @hide
+     */
+    public boolean attemptRefill() {
+        Log.i(TAG, "Attempting refill");
+        // TODO: Implement in follow-up cl
+        return false;
     }
 
     /**

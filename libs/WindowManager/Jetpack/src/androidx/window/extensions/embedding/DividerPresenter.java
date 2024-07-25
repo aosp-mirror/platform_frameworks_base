@@ -1090,13 +1090,14 @@ class DividerPresenter implements View.OnTouchListener {
         @NonNull
         private final SurfaceControl mDividerSurface;
         @NonNull
+        private final SurfaceControl mDividerLineSurface;
+        @NonNull
         private final WindowlessWindowManager mWindowlessWindowManager;
         @NonNull
         private final SurfaceControlViewHost mViewHost;
         @NonNull
         private final FrameLayout mDividerLayout;
-        @NonNull
-        private final View mDividerLine;
+        @Nullable
         private View mDragHandle;
         @NonNull
         private final View.OnTouchListener mListener;
@@ -1115,7 +1116,10 @@ class DividerPresenter implements View.OnTouchListener {
             mProperties = properties;
             mListener = listener;
 
-            mDividerSurface = createChildSurface("DividerSurface", true /* visible */);
+            mDividerSurface = createChildSurface(
+                    mProperties.mDecorSurface, "DividerSurface", true /* visible */);
+            mDividerLineSurface = createChildSurface(
+                    mDividerSurface, "DividerLineSurface", true /* visible */);
             mWindowlessWindowManager = new WindowlessWindowManager(
                     mProperties.mConfiguration,
                     mDividerSurface,
@@ -1127,7 +1131,6 @@ class DividerPresenter implements View.OnTouchListener {
                     context, displayManager.getDisplay(mProperties.mDisplayId),
                     mWindowlessWindowManager, "DividerContainer");
             mDividerLayout = new FrameLayout(context);
-            mDividerLine = new View(context);
 
             update();
         }
@@ -1220,6 +1223,7 @@ class DividerPresenter implements View.OnTouchListener {
                 dividerSurfacePosition = mDividerPosition;
             }
 
+            // Update the divider surface position relative to the decor surface
             if (mProperties.mIsVerticalSplit) {
                 t.setPosition(mDividerSurface, dividerSurfacePosition, 0.0f);
                 t.setWindowCrop(mDividerSurface, mDividerSurfaceWidthPx, taskBounds.height());
@@ -1228,10 +1232,24 @@ class DividerPresenter implements View.OnTouchListener {
                 t.setWindowCrop(mDividerSurface, taskBounds.width(), mDividerSurfaceWidthPx);
             }
 
-            // Update divider line position in the surface
+            // Update divider line surface position relative to the divider surface
             final int offset = mDividerPosition - dividerSurfacePosition;
-            mDividerLine.setX(mProperties.mIsVerticalSplit ? offset : 0);
-            mDividerLine.setY(mProperties.mIsVerticalSplit ? 0 : offset);
+            if (mProperties.mIsVerticalSplit) {
+                t.setPosition(mDividerLineSurface, offset, 0);
+                t.setWindowCrop(mDividerLineSurface,
+                        mProperties.mDividerWidthPx, taskBounds.height());
+            } else {
+                t.setPosition(mDividerLineSurface, 0, offset);
+                t.setWindowCrop(mDividerLineSurface,
+                        taskBounds.width(), mProperties.mDividerWidthPx);
+            }
+
+            // Update divider line surface visibility and color.
+            // If a container is fully expanded, the divider line is invisible unless dragging.
+            final boolean isDividerLineVisible = !mProperties.mIsDraggableExpandType || mIsDragging;
+            t.setVisibility(mDividerLineSurface, isDividerLineVisible);
+            t.setColor(mDividerLineSurface, colorToFloatArray(
+                    Color.valueOf(mProperties.mDividerAttributes.getDividerColor())));
 
             if (mIsDragging) {
                 updateVeils(t);
@@ -1277,21 +1295,6 @@ class DividerPresenter implements View.OnTouchListener {
          */
         private void updateDivider(@NonNull SurfaceControl.Transaction t) {
             mDividerLayout.removeAllViews();
-            mDividerLayout.addView(mDividerLine);
-            if (mProperties.mIsDraggableExpandType && !mIsDragging) {
-                // If a container is fully expanded, the divider overlays on the expanded container.
-                mDividerLine.setBackgroundColor(Color.TRANSPARENT);
-            } else {
-                mDividerLine.setBackgroundColor(mProperties.mDividerAttributes.getDividerColor());
-            }
-            final Rect taskBounds = mProperties.mConfiguration.windowConfiguration.getBounds();
-            mDividerLine.setLayoutParams(
-                    mProperties.mIsVerticalSplit
-                            ? new FrameLayout.LayoutParams(
-                                    mProperties.mDividerWidthPx, taskBounds.height())
-                            : new FrameLayout.LayoutParams(
-                                    taskBounds.width(), mProperties.mDividerWidthPx)
-            );
             if (mProperties.mDividerAttributes.getDividerType()
                     == DividerAttributes.DIVIDER_TYPE_DRAGGABLE) {
                 createVeils();
@@ -1345,10 +1348,11 @@ class DividerPresenter implements View.OnTouchListener {
         }
 
         @NonNull
-        private SurfaceControl createChildSurface(@NonNull String name, boolean visible) {
+        private SurfaceControl createChildSurface(
+                @NonNull SurfaceControl parent, @NonNull String name, boolean visible) {
             final Rect bounds = mProperties.mConfiguration.windowConfiguration.getBounds();
             return new SurfaceControl.Builder()
-                    .setParent(mProperties.mDecorSurface)
+                    .setParent(parent)
                     .setName(name)
                     .setHidden(!visible)
                     .setCallsite("DividerManager.createChildSurface")
@@ -1359,10 +1363,12 @@ class DividerPresenter implements View.OnTouchListener {
 
         private void createVeils() {
             if (mPrimaryVeil == null) {
-                mPrimaryVeil = createChildSurface("DividerPrimaryVeil", false /* visible */);
+                mPrimaryVeil = createChildSurface(
+                        mProperties.mDecorSurface, "DividerPrimaryVeil", false /* visible */);
             }
             if (mSecondaryVeil == null) {
-                mSecondaryVeil = createChildSurface("DividerSecondaryVeil", false /* visible */);
+                mSecondaryVeil = createChildSurface(
+                        mProperties.mDecorSurface, "DividerSecondaryVeil", false /* visible */);
             }
         }
 

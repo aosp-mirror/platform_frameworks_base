@@ -56,6 +56,7 @@ import com.android.systemui.ambient.touch.TouchMonitor;
 import com.android.systemui.ambient.touch.dagger.AmbientTouchComponent;
 import com.android.systemui.ambient.touch.scrim.ScrimManager;
 import com.android.systemui.communal.domain.interactor.CommunalInteractor;
+import com.android.systemui.communal.shared.log.CommunalUiEvent;
 import com.android.systemui.communal.shared.model.CommunalScenes;
 import com.android.systemui.complication.Complication;
 import com.android.systemui.complication.dagger.ComplicationComponent;
@@ -407,6 +408,7 @@ public class DreamOverlayService extends android.service.dreams.DreamOverlayServ
 
     @Override
     public void onWakeRequested() {
+        mUiEventLogger.log(CommunalUiEvent.DREAM_TO_COMMUNAL_HUB_DREAM_AWAKE_START);
         mCommunalInteractor.changeScene(CommunalScenes.Communal, null);
     }
 
