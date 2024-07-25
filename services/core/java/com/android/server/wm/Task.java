@@ -3007,17 +3007,9 @@ class Task extends TaskFragment {
         return r.getTask().mTaskId != taskId && r.token != notTop && r.canBeTopRunning();
     }
 
-    WindowState getTopFullscreenMainWindow(boolean includeStartingApp) {
-        final WindowState[] candidate = new WindowState[1];
-        getActivity((r) -> {
-            final WindowState win = r.findMainWindow(includeStartingApp);
-            if (win != null && win.mAttrs.isFullscreen()) {
-                candidate[0] = win;
-                return true;
-            }
-            return false;
-        });
-        return candidate[0];
+    @Nullable
+    WindowState getTopFullscreenMainWindow() {
+        return getWindow(w -> w.mAttrs.type == TYPE_BASE_APPLICATION && w.mAttrs.isFullscreen());
     }
 
     /**
@@ -3593,8 +3585,7 @@ class Task extends TaskFragment {
         // starting window because persisted configuration does not effect to Task.
         info.taskInfo.configuration.setTo(activity.getConfiguration());
         if (!Flags.drawSnapshotAspectRatioMatch()) {
-            final WindowState mainWindow =
-                    getTopFullscreenMainWindow(false /* includeStartingApp */);
+            final WindowState mainWindow = getTopFullscreenMainWindow();
             if (mainWindow != null) {
                 info.topOpaqueWindowInsetsState =
                         mainWindow.getInsetsStateWithVisibilityOverride();
