@@ -945,12 +945,14 @@ public final class ProcessList {
                             try {
                                 switch (inputData.readInt()) {
                                     case LMK_PROCKILL:
-                                        if (receivedLen != 12) {
+                                        if (receivedLen != 16) {
                                             return false;
                                         }
                                         final int pid = inputData.readInt();
                                         final int uid = inputData.readInt();
-                                        mAppExitInfoTracker.scheduleNoteLmkdProcKilled(pid, uid);
+                                        final int rssKb = inputData.readInt();
+                                        mAppExitInfoTracker.scheduleNoteLmkdProcKilled(pid, uid,
+                                                rssKb);
                                         return true;
                                     case LMK_KILL_OCCURRED:
                                         if (receivedLen
