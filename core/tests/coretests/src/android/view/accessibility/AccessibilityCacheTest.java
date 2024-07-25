@@ -1053,6 +1053,28 @@ public class AccessibilityCacheTest {
         assertFalse(mAccessibilityCache.isNodeInCache(childInfo));
     }
 
+    @Test
+    public void getEventSourceClassName_windowStateChangedThenRemoved() {
+        final String sourceActivityClassName = "com.example.SomeActivity";
+        final AccessibilityEvent windowStateChangedEvent = new AccessibilityEvent(
+                AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED);
+        final View mockView = getMockViewWithA11yAndWindowIds(PARENT_VIEW_ID, WINDOW_ID_1);
+        windowStateChangedEvent.setSource(mockView);
+        windowStateChangedEvent.setClassName(sourceActivityClassName);
+
+        mAccessibilityCache.onAccessibilityEvent(windowStateChangedEvent);
+        assertEquals(mAccessibilityCache.getEventSourceClassName(WINDOW_ID_1),
+                sourceActivityClassName);
+
+        final AccessibilityEvent windowRemovedEvent = new AccessibilityEvent(
+                AccessibilityEvent.TYPE_WINDOWS_CHANGED);
+        windowRemovedEvent.setWindowChanges(AccessibilityEvent.WINDOWS_CHANGE_REMOVED);
+        windowRemovedEvent.setSource(mockView);
+
+        mAccessibilityCache.onAccessibilityEvent(windowRemovedEvent);
+        assertNull(mAccessibilityCache.getEventSourceClassName(WINDOW_ID_1));
+    }
+
     private AccessibilityWindowInfo obtainAccessibilityWindowInfo(int windowId, int layer) {
         AccessibilityWindowInfo windowInfo = AccessibilityWindowInfo.obtain();
         windowInfo.setId(windowId);
