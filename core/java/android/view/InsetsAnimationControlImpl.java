@@ -35,8 +35,8 @@ import static android.view.InsetsController.LAYOUT_INSETS_DURING_ANIMATION_SHOWN
 import static android.view.InsetsController.LayoutInsetsDuringAnimation;
 import static android.view.InsetsSource.ID_IME;
 import static android.view.InsetsSource.SIDE_BOTTOM;
-import static android.view.InsetsSource.SIDE_NONE;
 import static android.view.InsetsSource.SIDE_LEFT;
+import static android.view.InsetsSource.SIDE_NONE;
 import static android.view.InsetsSource.SIDE_RIGHT;
 import static android.view.InsetsSource.SIDE_TOP;
 import static android.view.WindowInsets.Type.ime;
@@ -100,6 +100,8 @@ public class InsetsAnimationControlImpl implements InternalInsetsAnimationContro
     private @InsetsType int mControllingTypes;
     private final InsetsAnimationControlCallbacks mController;
     private final WindowInsetsAnimation mAnimation;
+    private final long mDurationMs;
+    private final Interpolator mInterpolator;
     /** @see WindowInsetsAnimationController#hasZeroInsetsIme */
     private final boolean mHasZeroInsetsIme;
     private final CompatibilityInfo.Translator mTranslator;
@@ -120,8 +122,8 @@ public class InsetsAnimationControlImpl implements InternalInsetsAnimationContro
     @VisibleForTesting
     public InsetsAnimationControlImpl(SparseArray<InsetsSourceControl> controls,
             @Nullable Rect frame, InsetsState state, WindowInsetsAnimationControlListener listener,
-            @InsetsType int types, InsetsAnimationControlCallbacks controller, long durationMs,
-            Interpolator interpolator, @AnimationType int animationType,
+            @InsetsType int types, InsetsAnimationControlCallbacks controller,
+            InsetsAnimationSpec insetsAnimationSpec, @AnimationType int animationType,
             @LayoutInsetsDuringAnimation int layoutInsetsDuringAnimation,
             CompatibilityInfo.Translator translator, @Nullable ImeTracker.Token statsToken) {
         mControls = controls;
@@ -155,8 +157,10 @@ public class InsetsAnimationControlImpl implements InternalInsetsAnimationContro
         }
         mPendingInsets = mCurrentInsets;
 
-        mAnimation = new WindowInsetsAnimation(mTypes, interpolator,
-                durationMs);
+        mDurationMs = insetsAnimationSpec.getDurationMs(mHasZeroInsetsIme);
+        mInterpolator = insetsAnimationSpec.getInsetsInterpolator(mHasZeroInsetsIme);
+
+        mAnimation = new WindowInsetsAnimation(mTypes, mInterpolator, mDurationMs);
         mAnimation.setAlpha(getCurrentAlpha());
         mAnimationType = animationType;
         mLayoutInsetsDuringAnimation = layoutInsetsDuringAnimation;
@@ -183,6 +187,16 @@ public class InsetsAnimationControlImpl implements InternalInsetsAnimationContro
     @Override
     public boolean hasZeroInsetsIme() {
         return mHasZeroInsetsIme;
+    }
+
+    @Override
+    public long getDurationMs() {
+        return mDurationMs;
+    }
+
+    @Override
+    public Interpolator getInsetsInterpolator() {
+        return mInterpolator;
     }
 
     @Override
