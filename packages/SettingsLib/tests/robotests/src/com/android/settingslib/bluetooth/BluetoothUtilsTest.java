@@ -589,7 +589,8 @@ public class BluetoothUtilsTest {
 
     @Test
     public void getSecondaryDeviceForBroadcast_errorState_returnNull() {
-        assertThat(BluetoothUtils.getSecondaryDeviceForBroadcast(mContext, mLocalBluetoothManager))
+        assertThat(BluetoothUtils.getSecondaryDeviceForBroadcast(mContext.getContentResolver(),
+                mLocalBluetoothManager))
                 .isNull();
     }
 
@@ -608,7 +609,8 @@ public class BluetoothUtilsTest {
         when(mAssistant.getAllSources(mBluetoothDevice)).thenReturn(ImmutableList.of(state));
         when(mAssistant.getAllConnectedDevices()).thenReturn(ImmutableList.of(mBluetoothDevice));
 
-        assertThat(BluetoothUtils.getSecondaryDeviceForBroadcast(mContext, mLocalBluetoothManager))
+        assertThat(BluetoothUtils.getSecondaryDeviceForBroadcast(mContext.getContentResolver(),
+                mLocalBluetoothManager))
                 .isNull();
     }
 
@@ -637,7 +639,8 @@ public class BluetoothUtilsTest {
         when(mAssistant.getAllConnectedDevices())
                 .thenReturn(ImmutableList.of(mBluetoothDevice, bluetoothDevice));
 
-        assertThat(BluetoothUtils.getSecondaryDeviceForBroadcast(mContext, mLocalBluetoothManager))
+        assertThat(BluetoothUtils.getSecondaryDeviceForBroadcast(mContext.getContentResolver(),
+                mLocalBluetoothManager))
                 .isEqualTo(mCachedBluetoothDevice);
     }
 }
