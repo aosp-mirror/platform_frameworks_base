@@ -18,6 +18,7 @@ package com.android.systemui.qs.tiles.impl.modes.ui
 
 import android.content.res.Resources
 import android.icu.text.MessageFormat
+import android.widget.Button
 import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.qs.tiles.base.interactor.QSTileDataToStateMapper
@@ -62,6 +63,7 @@ constructor(
                     QSTileState.UserAction.LONG_CLICK,
                 )
             sideViewIcon = QSTileState.SideViewIcon.Chevron
+            expandedAccessibilityClass = Button::class
         }
 
     private fun getModesStatus(data: ModesTileModel, resources: Resources): String {
