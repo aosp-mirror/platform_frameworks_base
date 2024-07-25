@@ -198,14 +198,6 @@ class KeyguardController {
             setWakeTransitionReady();
             return;
         }
-        EventLogTags.writeWmSetKeyguardShown(
-                displayId,
-                keyguardShowing ? 1 : 0,
-                aodShowing ? 1 : 0,
-                state.mKeyguardGoingAway ? 1 : 0,
-                state.mOccluded ? 1 : 0,
-                "setKeyguardShown");
-
         // Update the task snapshot if the screen will not be turned off. To make sure that the
         // unlocking animation can animate consistent content. The conditions are:
         // - Either AOD or keyguard changes to be showing. So if the states change individually,
@@ -224,6 +216,7 @@ class KeyguardController {
 
         state.mKeyguardShowing = keyguardShowing;
         state.mAodShowing = aodShowing;
+        state.writeEventLog("setKeyguardShown");
 
         if (keyguardChanged) {
             // Irrelevant to AOD.
@@ -284,13 +277,7 @@ class KeyguardController {
         mService.deferWindowLayout();
         state.mKeyguardGoingAway = true;
         try {
-            EventLogTags.writeWmSetKeyguardShown(
-                    displayId,
-                    state.mKeyguardShowing ? 1 : 0,
-                    state.mAodShowing ? 1 : 0,
-                    1 /* keyguardGoingAway */,
-                    state.mOccluded ? 1 : 0,
-                    "keyguardGoingAway");
+            state.writeEventLog("keyguardGoingAway");
             final int transitFlags = convertTransitFlags(flags);
             final DisplayContent dc = mRootWindowContainer.getDefaultDisplay();
             dc.prepareAppTransition(TRANSIT_KEYGUARD_GOING_AWAY, transitFlags);
@@ -646,6 +633,16 @@ class KeyguardController {
             mSleepTokenAcquirer.release(mDisplayId);
         }
 
+        void writeEventLog(String reason) {
+            EventLogTags.writeWmSetKeyguardShown(
+                    mDisplayId,
+                    mKeyguardShowing ? 1 : 0,
+                    mAodShowing ? 1 : 0,
+                    mKeyguardGoingAway ? 1 : 0,
+                    mOccluded ? 1 : 0,
+                    reason);
+        }
+
         /**
          * Updates keyguard status if the top task could be visible. The top task may occlude
          * keyguard, request to dismiss keyguard or make insecure keyguard go away based on its
@@ -716,18 +713,11 @@ class KeyguardController {
 
             boolean hasChange = false;
             if (lastOccluded != mOccluded) {
-                if (mDisplayId == DEFAULT_DISPLAY) {
-                    EventLogTags.writeWmSetKeyguardShown(
-                            mDisplayId,
-                            mKeyguardShowing ? 1 : 0,
-                            mAodShowing ? 1 : 0,
-                            mKeyguardGoingAway ? 1 : 0,
-                            mOccluded ? 1 : 0,
-                            "updateVisibility");
-                }
+                writeEventLog("updateVisibility");
                 controller.handleOccludedChanged(mDisplayId, mTopOccludesActivity);
                 hasChange = true;
             } else if (!lastKeyguardGoingAway && mKeyguardGoingAway) {
+                writeEventLog("dismissIfInsecure");
                 controller.handleKeyguardGoingAwayChanged(display);
                 hasChange = true;
             }
