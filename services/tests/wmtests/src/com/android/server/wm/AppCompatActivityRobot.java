@@ -440,6 +440,7 @@ class AppCompatActivityRobot {
         spyOn(activity.mAppCompatController.getAppCompatAspectRatioOverrides());
         spyOn(activity.mAppCompatController.getAppCompatAspectRatioPolicy());
         spyOn(activity.mAppCompatController.getAppCompatFocusOverrides());
+        spyOn(activity.mAppCompatController.getAppCompatResizeOverrides());
         spyOn(activity.mLetterboxUiController);
     }
 
