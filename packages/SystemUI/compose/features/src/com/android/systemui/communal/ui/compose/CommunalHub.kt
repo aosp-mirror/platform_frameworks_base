@@ -52,6 +52,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -127,6 +128,7 @@ import androidx.compose.ui.layout.positionInWindow
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
@@ -209,6 +211,11 @@ fun CommunalHub(
 
     ObserveScrollEffect(gridState, viewModel)
 
+    val context = LocalContext.current
+    val windowMetrics = WindowMetricsCalculator.getOrCreate().computeCurrentWindowMetrics(context)
+    val screenWidth = windowMetrics.bounds.width()
+    val layoutDirection = LocalLayoutDirection.current
+
     if (!viewModel.isEditMode) {
         ScrollOnUpdatedLiveContentEffect(communalContent, gridState)
     }
@@ -230,7 +237,7 @@ fun CommunalHub(
                 .testTag(COMMUNAL_HUB_TEST_TAG)
                 .fillMaxSize()
                 .nestedScroll(nestedScrollConnection)
-                .pointerInput(gridState, contentOffset, contentListState) {
+                .pointerInput(layoutDirection, gridState, contentOffset, contentListState) {
                     awaitPointerEventScope {
                         while (true) {
                             var event = awaitFirstDown(requireUnconsumed = false)
@@ -261,7 +268,13 @@ fun CommunalHub(
                     // If not in edit mode, don't allow selecting items.
                     if (!viewModel.isEditMode) return@pointerInput
                     observeTaps { offset ->
-                        val adjustedOffset = offset - contentOffset
+                        // if RTL, flip offset direction from Left side to Right
+                        val adjustedOffset =
+                            Offset(
+                                if (layoutDirection == LayoutDirection.Rtl) screenWidth - offset.x
+                                else offset.x,
+                                offset.y
+                            ) - contentOffset
                         val index = firstIndexAtOffset(gridState, adjustedOffset)
                         val key = index?.let { keyAtIndexIfEditable(contentListState.list, index) }
                         viewModel.setSelectedKey(key)
@@ -279,7 +292,12 @@ fun CommunalHub(
                             // offset.
                             val adjustedOffset =
                                 gridCoordinates?.let {
-                                    offset - it.positionInWindow() - contentOffset
+                                    Offset(
+                                        if (layoutDirection == LayoutDirection.Rtl)
+                                            screenWidth - offset.x
+                                        else offset.x,
+                                        offset.y
+                                    ) - it.positionInWindow() - contentOffset
                                 }
                             val index = adjustedOffset?.let { firstIndexAtOffset(gridState, it) }
                             val key = index?.let { keyAtIndexIfEditable(communalContent, index) }
@@ -330,6 +348,7 @@ fun CommunalHub(
                             viewModel = viewModel,
                             contentPadding = contentPadding,
                             contentOffset = contentOffset,
+                            screenWidth = screenWidth,
                             setGridCoordinates = { gridCoordinates = it },
                             updateDragPositionForRemove = { offset ->
                                 isPointerWithinEnabledRemoveButton(
@@ -535,6 +554,7 @@ private fun BoxScope.CommunalHubLazyGrid(
     viewModel: BaseCommunalViewModel,
     contentPadding: PaddingValues,
     selectedKey: State<String?>,
+    screenWidth: Int,
     contentOffset: Offset,
     gridState: LazyGridState,
     contentListState: ContentListState,
@@ -557,7 +577,15 @@ private fun BoxScope.CommunalHubLazyGrid(
                 updateDragPositionForRemove = updateDragPositionForRemove
             )
         gridModifier =
-            gridModifier.fillMaxSize().dragContainer(dragDropState, contentOffset, viewModel)
+            gridModifier
+                .fillMaxSize()
+                .dragContainer(
+                    dragDropState,
+                    LocalLayoutDirection.current,
+                    screenWidth,
+                    contentOffset,
+                    viewModel
+                )
         // for widgets dropped from other activities
         val dragAndDropTargetState =
             rememberDragAndDropTargetState(
@@ -1371,7 +1399,7 @@ private fun gridContentPadding(isEditMode: Boolean, toolbarSize: IntSize?): Padd
 private fun beforeContentPadding(paddingValues: PaddingValues): ContentPaddingInPx {
     return with(LocalDensity.current) {
         ContentPaddingInPx(
-            start = paddingValues.calculateLeftPadding(LayoutDirection.Ltr).toPx(),
+            start = paddingValues.calculateStartPadding(LocalLayoutDirection.current).toPx(),
             top = paddingValues.calculateTopPadding().toPx()
         )
     }

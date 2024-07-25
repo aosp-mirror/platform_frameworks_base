@@ -23,6 +23,9 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.graphics.Rect;
+import android.graphics.Region;
+import android.util.LayoutDirection;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
 
@@ -68,10 +71,12 @@ public class CommunalTouchHandlerTest extends SysuiTestCase {
         AtomicReference reference = new AtomicReference<>(null);
         when(mLifecycle.getInternalScopeRef()).thenReturn(reference);
         when(mLifecycle.getCurrentState()).thenReturn(Lifecycle.State.CREATED);
+
         mTouchHandler = new CommunalTouchHandler(
                 Optional.of(mCentralSurfaces),
                 INITIATION_WIDTH,
                 mKosmos.getCommunalInteractor(),
+                mKosmos.getConfigurationInteractor(),
                 mLifecycle
                 );
     }
@@ -126,5 +131,27 @@ public class CommunalTouchHandlerTest extends SysuiTestCase {
         assertThat(gestureListenerArgumentCaptor.getValue()
                 .onScroll(motionEvent1, motionEvent2, 1, 1))
                 .isTrue();
+    }
+
+    @Test
+    public void testTouchInitiationArea() {
+        final int right = 80;
+        final int bottom = 100;
+        final Rect bounds = new Rect(0, 0, right, bottom);
+
+        {
+            final Region region = new Region();
+            mTouchHandler.mLayoutDirectionCallback.accept(LayoutDirection.LTR);
+            mTouchHandler.getTouchInitiationRegion(bounds, region, null);
+            assertThat(region.getBounds()).isEqualTo(
+                    new Rect(right - INITIATION_WIDTH, 0, right, bottom));
+        }
+
+        {
+            final Region region = new Region();
+            mTouchHandler.mLayoutDirectionCallback.accept(LayoutDirection.RTL);
+            mTouchHandler.getTouchInitiationRegion(bounds, region, null);
+            assertThat(region.getBounds()).isEqualTo(new Rect(0, 0, INITIATION_WIDTH, bottom));
+        }
     }
 }
