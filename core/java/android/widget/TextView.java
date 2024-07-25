@@ -105,7 +105,6 @@ import android.os.SystemClock;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.text.BoringLayout;
-import android.text.ClientFlags;
 import android.text.DynamicLayout;
 import android.text.Editable;
 import android.text.GetChars;
@@ -1659,7 +1658,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
         if (!hasUseBoundForWidthValue) {
             if (CompatChanges.isChangeEnabled(USE_BOUNDS_FOR_WIDTH)) {
-                mUseBoundsForWidth = ClientFlags.useBoundsForWidth();
+                mUseBoundsForWidth = Flags.useBoundsForWidth();
             } else {
                 mUseBoundsForWidth = false;
             }
@@ -9732,7 +9731,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 break;
 
             case KeyEvent.KEYCODE_ESCAPE:
-                if (com.android.text.flags.Flags.escapeClearsFocus() && event.hasNoModifiers()) {
+                if (Flags.escapeClearsFocus() && event.hasNoModifiers()) {
                     if (mEditor != null && mEditor.getTextActionMode() != null) {
                         stopTextActionMode();
                         return KEY_EVENT_HANDLED;

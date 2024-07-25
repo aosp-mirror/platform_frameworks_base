@@ -16,12 +16,16 @@
 
 package com.android.compose.animation.scene
 
+import androidx.annotation.VisibleForTesting
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.gestures.awaitHorizontalTouchSlopOrCancellation
 import androidx.compose.foundation.gestures.awaitVerticalTouchSlopOrCancellation
 import androidx.compose.runtime.Stable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
+import androidx.compose.ui.input.nestedscroll.NestedScrollDispatcher
+import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.pointer.AwaitPointerEventScope
 import androidx.compose.ui.input.pointer.PointerEvent
 import androidx.compose.ui.input.pointer.PointerEventPass
@@ -36,13 +40,11 @@ import androidx.compose.ui.input.pointer.positionChangeIgnoreConsumed
 import androidx.compose.ui.input.pointer.util.VelocityTracker
 import androidx.compose.ui.input.pointer.util.addPointerInputChange
 import androidx.compose.ui.node.CompositionLocalConsumerModifierNode
-import androidx.compose.ui.node.DelegatableNode
 import androidx.compose.ui.node.DelegatingNode
 import androidx.compose.ui.node.ModifierNodeElement
 import androidx.compose.ui.node.ObserverModifierNode
 import androidx.compose.ui.node.PointerInputModifierNode
 import androidx.compose.ui.node.currentValueOf
-import androidx.compose.ui.node.findNearestAncestor
 import androidx.compose.ui.node.observeReads
 import androidx.compose.ui.platform.LocalViewConfiguration
 import androidx.compose.ui.unit.IntSize
@@ -51,6 +53,7 @@ import androidx.compose.ui.util.fastAll
 import androidx.compose.ui.util.fastAny
 import androidx.compose.ui.util.fastFirstOrNull
 import androidx.compose.ui.util.fastSumBy
+import com.android.compose.ui.util.SpaceVectorConverter
 import kotlin.coroutines.cancellation.CancellationException
 import kotlin.math.sign
 import kotlinx.coroutines.coroutineScope
@@ -71,6 +74,7 @@ import kotlinx.coroutines.launch
  * dragged) and a second pointer is down and dragged. This is an implementation detail that might
  * change in the future.
  */
+@VisibleForTesting
 @Stable
 internal fun Modifier.multiPointerDraggable(
     orientation: Orientation,
@@ -78,6 +82,7 @@ internal fun Modifier.multiPointerDraggable(
     startDragImmediately: (startedPosition: Offset) -> Boolean,
     onDragStarted: (startedPosition: Offset, overSlop: Float, pointersDown: Int) -> DragController,
     swipeDetector: SwipeDetector = DefaultSwipeDetector,
+    dispatcher: NestedScrollDispatcher,
 ): Modifier =
     this.then(
         MultiPointerDraggableElement(
@@ -86,6 +91,7 @@ internal fun Modifier.multiPointerDraggable(
             startDragImmediately,
             onDragStarted,
             swipeDetector,
+            dispatcher,
         )
     )
 
@@ -96,6 +102,7 @@ private data class MultiPointerDraggableElement(
     private val onDragStarted:
         (startedPosition: Offset, overSlop: Float, pointersDown: Int) -> DragController,
     private val swipeDetector: SwipeDetector,
+    private val dispatcher: NestedScrollDispatcher,
 ) : ModifierNodeElement<MultiPointerDraggableNode>() {
     override fun create(): MultiPointerDraggableNode =
         MultiPointerDraggableNode(
@@ -104,6 +111,7 @@ private data class MultiPointerDraggableElement(
             startDragImmediately = startDragImmediately,
             onDragStarted = onDragStarted,
             swipeDetector = swipeDetector,
+            dispatcher = dispatcher,
         )
 
     override fun update(node: MultiPointerDraggableNode) {
@@ -122,11 +130,13 @@ internal class MultiPointerDraggableNode(
     var onDragStarted:
         (startedPosition: Offset, overSlop: Float, pointersDown: Int) -> DragController,
     var swipeDetector: SwipeDetector = DefaultSwipeDetector,
+    private val dispatcher: NestedScrollDispatcher,
 ) :
     DelegatingNode(),
     PointerInputModifierNode,
     CompositionLocalConsumerModifierNode,
-    ObserverModifierNode {
+    ObserverModifierNode,
+    SpaceVectorConverter {
     private val pointerInputHandler: suspend PointerInputScope.() -> Unit = { pointerInput() }
     private val delegate = delegate(SuspendingPointerInputModifierNode(pointerInputHandler))
     private val velocityTracker = VelocityTracker()
@@ -141,26 +151,22 @@ internal class MultiPointerDraggableNode(
             }
         }
 
-    private var _toFloat = orientation.toFunctionOffsetToFloat()
+    private var converter = SpaceVectorConverter(orientation)
 
-    private fun Offset.toFloat(): Float = _toFloat(this)
+    override fun Offset.toFloat(): Float = with(converter) { this@toFloat.toFloat() }
 
-    private fun Orientation.toFunctionOffsetToFloat(): (Offset) -> Float =
-        when (this) {
-            Orientation.Vertical -> {
-                { it.y }
-            }
-            Orientation.Horizontal -> {
-                { it.x }
-            }
-        }
+    override fun Velocity.toFloat(): Float = with(converter) { this@toFloat.toFloat() }
+
+    override fun Float.toOffset(): Offset = with(converter) { this@toOffset.toOffset() }
+
+    override fun Float.toVelocity(): Velocity = with(converter) { this@toVelocity.toVelocity() }
 
     var orientation: Orientation = orientation
         set(value) {
             // Reset the pointer input whenever orientation changed.
             if (value != field) {
                 field = value
-                _toFloat = field.toFunctionOffsetToFloat()
+                converter = SpaceVectorConverter(value)
                 delegate.resetPointerInputHandler()
             }
         }
@@ -240,28 +246,32 @@ internal class MultiPointerDraggableNode(
                                 },
                                 onDrag = { controller, change, amount ->
                                     velocityTracker.addPointerInputChange(change)
-                                    controller.onDrag(amount)
+                                    dispatchScrollEvents(
+                                        availableOnPreScroll = amount,
+                                        onScroll = { controller.onDrag(it) },
+                                        source = NestedScrollSource.UserInput,
+                                    )
                                 },
                                 onDragEnd = { controller ->
-                                    val viewConfiguration = currentValueOf(LocalViewConfiguration)
-                                    val maxVelocity =
-                                        viewConfiguration.maximumFlingVelocity.let {
-                                            Velocity(it, it)
-                                        }
-                                    val velocity = velocityTracker.calculateVelocity(maxVelocity)
-                                    controller.onStop(
-                                        velocity =
-                                            when (orientation) {
-                                                Orientation.Horizontal -> velocity.x
-                                                Orientation.Vertical -> velocity.y
-                                            },
-                                        canChangeScene = true,
+                                    startFlingGesture(
+                                        initialVelocity =
+                                            currentValueOf(LocalViewConfiguration)
+                                                .maximumFlingVelocity
+                                                .let {
+                                                    val maxVelocity = Velocity(it, it)
+                                                    velocityTracker.calculateVelocity(maxVelocity)
+                                                }
+                                                .toFloat(),
+                                        onFling = { controller.onStop(it, canChangeScene = true) }
                                     )
                                 },
                                 onDragCancel = { controller ->
-                                    controller.onStop(velocity = 0f, canChangeScene = true)
+                                    startFlingGesture(
+                                        initialVelocity = 0f,
+                                        onFling = { controller.onStop(it, canChangeScene = true) }
+                                    )
                                 },
-                                swipeDetector = swipeDetector
+                                swipeDetector = swipeDetector,
                             )
                         } catch (exception: CancellationException) {
                             // If the coroutine scope is active, we can just restart the drag cycle.
@@ -273,6 +283,101 @@ internal class MultiPointerDraggableNode(
                 }
             }
         }
+    }
+
+    /**
+     * Start a fling gesture in another CoroutineScope, this is to ensure that even when the pointer
+     * input scope is reset we will continue any coroutine scope that we started from these methods
+     * while the pointer input scope was active.
+     *
+     * Note: Inspired by [androidx.compose.foundation.gestures.ScrollableNode.onDragStopped]
+     */
+    private fun startFlingGesture(initialVelocity: Float, onFling: (velocity: Float) -> Float) {
+        // Note: [AwaitPointerEventScope] is annotated as @RestrictsSuspension, we need another
+        // CoroutineScope to run the fling gestures.
+        // We do not need to cancel this [Job], the source will take care of emitting an
+        // [onPostFling] before starting a new gesture.
+        dispatcher.coroutineScope.launch {
+            dispatchFlingEvents(availableOnPreFling = initialVelocity, onFling = onFling)
+        }
+    }
+
+    /**
+     * Use the nested scroll system to fire scroll events. This allows us to consume events from our
+     * ancestors during the pre-scroll and post-scroll phases.
+     *
+     * @param availableOnPreScroll amount available before the scroll, this can be partially
+     *   consumed by our ancestors.
+     * @param onScroll function that returns the amount consumed during a scroll given the amount
+     *   available after the [NestedScrollConnection.onPreScroll].
+     * @param source the source of the scroll event
+     * @return Total offset consumed.
+     */
+    private inline fun dispatchScrollEvents(
+        availableOnPreScroll: Float,
+        onScroll: (delta: Float) -> Float,
+        source: NestedScrollSource,
+    ): Float {
+        // PreScroll phase
+        val consumedByPreScroll =
+            dispatcher
+                .dispatchPreScroll(
+                    available = availableOnPreScroll.toOffset(),
+                    source = source,
+                )
+                .toFloat()
+
+        // Scroll phase
+        val availableOnScroll = availableOnPreScroll - consumedByPreScroll
+        val consumedBySelfScroll = onScroll(availableOnScroll)
+
+        // PostScroll phase
+        val availableOnPostScroll = availableOnScroll - consumedBySelfScroll
+        val consumedByPostScroll =
+            dispatcher
+                .dispatchPostScroll(
+                    consumed = consumedBySelfScroll.toOffset(),
+                    available = availableOnPostScroll.toOffset(),
+                    source = source,
+                )
+                .toFloat()
+
+        return consumedByPreScroll + consumedBySelfScroll + consumedByPostScroll
+    }
+
+    /**
+     * Use the nested scroll system to fire fling events. This allows us to consume events from our
+     * ancestors during the pre-fling and post-fling phases.
+     *
+     * @param availableOnPreFling velocity available before the fling, this can be partially
+     *   consumed by our ancestors.
+     * @param onFling function that returns the velocity consumed during the fling given the
+     *   velocity available after the [NestedScrollConnection.onPreFling].
+     * @return Total velocity consumed.
+     */
+    private suspend inline fun dispatchFlingEvents(
+        availableOnPreFling: Float,
+        onFling: (velocity: Float) -> Float,
+    ): Float {
+        // PreFling phase
+        val consumedByPreFling =
+            dispatcher.dispatchPreFling(available = availableOnPreFling.toVelocity()).toFloat()
+
+        // Fling phase
+        val availableOnFling = availableOnPreFling - consumedByPreFling
+        val consumedBySelfFling = onFling(availableOnFling)
+
+        // PostFling phase
+        val availableOnPostFling = availableOnFling - consumedBySelfFling
+        val consumedByPostFling =
+            dispatcher
+                .dispatchPostFling(
+                    consumed = consumedBySelfFling.toVelocity(),
+                    available = availableOnPostFling.toVelocity(),
+                )
+                .toFloat()
+
+        return consumedByPreFling + consumedBySelfFling + consumedByPostFling
     }
 
     /**

@@ -298,6 +298,10 @@ public class ZenMode implements Parcelable {
         return mIsManualDnd;
     }
 
+    public boolean isEnabled() {
+        return mRule.isEnabled();
+    }
+
     public boolean isActive() {
         return mStatus == Status.ENABLED_AND_ACTIVE;
     }

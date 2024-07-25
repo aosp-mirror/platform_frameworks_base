@@ -18,11 +18,7 @@ package com.android.server.wm;
 
 import static android.content.pm.ActivityInfo.FORCE_NON_RESIZE_APP;
 import static android.content.pm.ActivityInfo.FORCE_RESIZE_APP;
-import static android.content.pm.ActivityInfo.OVERRIDE_USE_DISPLAY_LANDSCAPE_NATURAL_ORIENTATION;
-import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
-import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
 import static android.view.InsetsSource.FLAG_INSETS_ROUNDED_CORNER;
-import static android.view.WindowManager.PROPERTY_COMPAT_ALLOW_DISPLAY_ORIENTATION_OVERRIDE;
 import static android.view.WindowManager.PROPERTY_COMPAT_ALLOW_RESIZEABLE_ACTIVITY_OVERRIDES;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
@@ -309,56 +305,6 @@ public class LetterboxUiControllerTest extends WindowTestsBase {
         return mainWindow;
     }
 
-    // shouldUseDisplayLandscapeNaturalOrientation
-
-    @Test
-    @EnableCompatChanges({OVERRIDE_USE_DISPLAY_LANDSCAPE_NATURAL_ORIENTATION})
-    public void testShouldUseDisplayLandscapeNaturalOrientation_override_returnsTrue() {
-        prepareActivityThatShouldUseDisplayLandscapeNaturalOrientation();
-        assertTrue(mController.shouldUseDisplayLandscapeNaturalOrientation());
-    }
-
-    @Test
-    @EnableCompatChanges({OVERRIDE_USE_DISPLAY_LANDSCAPE_NATURAL_ORIENTATION})
-    public void testShouldUseDisplayLandscapeNaturalOrientation_overrideAndFalseProperty_returnsFalse()
-            throws Exception {
-        mockThatProperty(PROPERTY_COMPAT_ALLOW_DISPLAY_ORIENTATION_OVERRIDE, /* value */ false);
-
-        mController = new LetterboxUiController(mWm, mActivity);
-
-        prepareActivityThatShouldUseDisplayLandscapeNaturalOrientation();
-        assertFalse(mController.shouldUseDisplayLandscapeNaturalOrientation());
-    }
-
-    @Test
-    @EnableCompatChanges({OVERRIDE_USE_DISPLAY_LANDSCAPE_NATURAL_ORIENTATION})
-    public void testShouldUseDisplayLandscapeNaturalOrientation_portraitNaturalOrientation_returnsFalse() {
-        prepareActivityThatShouldUseDisplayLandscapeNaturalOrientation();
-        doReturn(ORIENTATION_PORTRAIT).when(mDisplayContent).getNaturalOrientation();
-
-        assertFalse(mController.shouldUseDisplayLandscapeNaturalOrientation());
-    }
-
-    @Test
-    @EnableCompatChanges({OVERRIDE_USE_DISPLAY_LANDSCAPE_NATURAL_ORIENTATION})
-    public void testShouldUseDisplayLandscapeNaturalOrientation_disabledIgnoreOrientationRequest_returnsFalse() {
-        prepareActivityThatShouldUseDisplayLandscapeNaturalOrientation();
-        mDisplayContent.setIgnoreOrientationRequest(false);
-
-        assertFalse(mController.shouldUseDisplayLandscapeNaturalOrientation());
-    }
-
-    @Test
-    @EnableCompatChanges({OVERRIDE_USE_DISPLAY_LANDSCAPE_NATURAL_ORIENTATION})
-    public void testShouldUseDisplayLandscapeNaturalOrientation_inMultiWindowMode_returnsFalse() {
-        prepareActivityThatShouldUseDisplayLandscapeNaturalOrientation();
-
-        spyOn(mTask);
-        doReturn(true).when(mTask).inMultiWindowMode();
-
-        assertFalse(mController.shouldUseDisplayLandscapeNaturalOrientation());
-    }
-
     @Test
     @EnableCompatChanges({FORCE_RESIZE_APP})
     public void testshouldOverrideForceResizeApp_overrideEnabled_returnsTrue() {
@@ -610,12 +556,6 @@ public class LetterboxUiControllerTest extends WindowTestsBase {
         PackageManager pm = mWm.mContext.getPackageManager();
         spyOn(pm);
         doReturn(property).when(pm).getProperty(eq(propertyName), anyString());
-    }
-
-    private void prepareActivityThatShouldUseDisplayLandscapeNaturalOrientation() {
-        spyOn(mDisplayContent);
-        doReturn(ORIENTATION_LANDSCAPE).when(mDisplayContent).getNaturalOrientation();
-        mDisplayContent.setIgnoreOrientationRequest(true);
     }
 
     private ActivityRecord setUpActivityWithComponent() {

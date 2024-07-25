@@ -86,7 +86,8 @@ class AppCompatOrientationPolicy {
             return SCREEN_ORIENTATION_PORTRAIT;
         }
 
-        if (mAppCompatOverrides.isAllowOrientationOverrideOptOut()) {
+        if (mAppCompatOverrides.getAppCompatOrientationOverrides()
+                .isAllowOrientationOverrideOptOut()) {
             return candidate;
         }
 

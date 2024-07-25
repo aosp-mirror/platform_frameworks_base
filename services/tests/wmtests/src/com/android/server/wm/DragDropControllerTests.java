@@ -152,8 +152,8 @@ public class DragDropControllerTests extends WindowTestsBase {
         // Use a new TestIWindow so we don't collect events for other windows
         final WindowState window = createWindow(
                 null, TYPE_BASE_APPLICATION, activity, name, ownerId, false, new TestIWindow());
-        window.mInputChannel = new InputChannel();
-        window.mInputChannelToken = window.mInputChannel.getToken();
+        InputChannel channel = new InputChannel();
+        window.openInputChannel(channel);
         window.mHasSurface = true;
         mWm.mWindowMap.put(window.mClient.asBinder(), window);
         mWm.mInputToWindowMap.put(window.mInputChannelToken, window);
@@ -178,7 +178,7 @@ public class DragDropControllerTests extends WindowTestsBase {
                 TEST_PID, TEST_UID);
         mWindow = createDropTargetWindow("Drag test window", 0);
         doReturn(mWindow).when(mDisplayContent).getTouchableWinAtPointLocked(0, 0);
-        when(mWm.mInputManager.startDragAndDrop(any(InputChannel.class),
+        when(mWm.mInputManager.startDragAndDrop(any(IBinder.class),
                 any(InputChannel.class))).thenReturn(true);
 
         mWm.mWindowMap.put(mWindow.mClient.asBinder(), mWindow);
@@ -707,8 +707,7 @@ public class DragDropControllerTests extends WindowTestsBase {
                     .setFormat(PixelFormat.TRANSLUCENT)
                     .build();
 
-            assertTrue(mWm.mInputManager.startDragAndDrop(new InputChannel(),
-                    new InputChannel()));
+            assertTrue(mWm.mInputManager.startDragAndDrop(new Binder(), new InputChannel()));
             mToken = mTarget.performDrag(TEST_PID, 0, mWindow.mClient,
                     flag, surface, 0, 0, 0, 0, 0, 0, 0, data);
             assertNotNull(mToken);

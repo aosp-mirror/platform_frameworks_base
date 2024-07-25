@@ -31,6 +31,7 @@ import android.net.Uri
 import android.view.MotionEvent
 import android.view.SurfaceControl
 import android.view.View
+import android.view.WindowManager
 import android.widget.Button
 import android.widget.ImageButton
 import android.widget.ImageView
@@ -140,7 +141,9 @@ class HandleMenu(
                     x = x,
                     y = y,
                     width = menuWidth,
-                    height = menuHeight
+                    height = menuHeight,
+                    flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or
+                        WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH
                 )
             } else {
                 parentDecor.addWindow(

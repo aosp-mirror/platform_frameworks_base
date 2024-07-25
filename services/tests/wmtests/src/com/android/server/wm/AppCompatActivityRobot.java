@@ -126,6 +126,10 @@ class AppCompatActivityRobot {
                 .isCameraActive(any(ActivityRecord.class), anyBoolean());
     }
 
+    void setDisplayNaturalOrientation(@Configuration.Orientation int naturalOrientation) {
+        doReturn(naturalOrientation).when(mDisplayContent).getNaturalOrientation();
+    }
+
     @NonNull
     ActivityRecord top() {
         return mActivityStack.top();
@@ -189,6 +193,11 @@ class AppCompatActivityRobot {
         mDisplayContent.setIgnoreOrientationRequest(enabled);
     }
 
+    void setTopTaskInMultiWindowMode(boolean inMultiWindowMode) {
+        doReturn(inMultiWindowMode).when(mTaskStack.top())
+                .inMultiWindowMode();
+    }
+
     void setTopActivityAsEmbedded(boolean embedded) {
         doReturn(embedded).when(mActivityStack.top()).isEmbedded();
     }
@@ -225,20 +234,21 @@ class AppCompatActivityRobot {
     void createNewDisplay() {
         mDisplayContent = new TestDisplayContent.Builder(mAtm, mDisplayWidth, mDisplayHeight)
                 .build();
+        spyOn(mDisplayContent);
         spyOnAppCompatCameraPolicy();
     }
 
     void createNewTask() {
         final Task newTask = new WindowTestsBase.TaskBuilder(mSupervisor)
                 .setDisplay(mDisplayContent).build();
-        mTaskStack.push(newTask);
+        pushTask(newTask);
     }
 
     void createNewTaskWithBaseActivity() {
         final Task newTask = new WindowTestsBase.TaskBuilder(mSupervisor)
                 .setCreateActivity(true)
                 .setDisplay(mDisplayContent).build();
-        mTaskStack.push(newTask);
+        pushTask(newTask);
         pushActivity(newTask.getTopNonFinishingActivity());
     }
 
@@ -431,6 +441,11 @@ class AppCompatActivityRobot {
         spyOn(activity.mAppCompatController.getAppCompatAspectRatioPolicy());
         spyOn(activity.mAppCompatController.getAppCompatFocusOverrides());
         spyOn(activity.mLetterboxUiController);
+    }
+
+    private void pushTask(@NonNull Task task) {
+        spyOn(task);
+        mTaskStack.push(task);
     }
 
     private void spyOnAppCompatCameraPolicy() {

@@ -32,11 +32,13 @@
 
 package com.android.systemui.keyguard.domain.interactor
 
+import android.platform.test.annotations.DisableFlags
 import android.platform.test.annotations.EnableFlags
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.compose.animation.scene.ObservableTransitionState
 import com.android.systemui.Flags
+import com.android.systemui.Flags.FLAG_COMMUNAL_SCENE_KTF_REFACTOR
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.communal.data.repository.fakeCommunalSceneRepository
 import com.android.systemui.communal.shared.model.CommunalScenes
@@ -108,6 +110,7 @@ class FromOccludedTransitionInteractorTest : SysuiTestCase() {
 
     @Test
     @EnableFlags(Flags.FLAG_KEYGUARD_WM_STATE_REFACTOR)
+    @DisableFlags(FLAG_COMMUNAL_SCENE_KTF_REFACTOR)
     fun testShowWhenLockedActivity_noLongerOnTop_transitionsToGlanceableHub_ifIdleOnCommunal() =
         testScope.runTest {
             kosmos.fakeCommunalSceneRepository.setTransitionState(

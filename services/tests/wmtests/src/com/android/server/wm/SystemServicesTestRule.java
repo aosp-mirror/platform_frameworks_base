@@ -77,6 +77,7 @@ import android.view.InputChannel;
 import android.view.SurfaceControl;
 
 import com.android.dx.mockito.inline.extended.StaticMockitoSession;
+import com.android.internal.os.BackgroundThread;
 import com.android.server.AnimationThread;
 import com.android.server.DisplayThread;
 import com.android.server.LocalServices;
@@ -553,6 +554,9 @@ public class SystemServicesTestRule implements TestRule {
         // This is a different handler object than the wm.mAnimationHandler above.
         waitHandlerIdle(AnimationThread.getHandler());
         waitHandlerIdle(SurfaceAnimationThread.getHandler());
+        // Some binder calls are posted to BackgroundThread.getHandler(), we should wait for them
+        // to finish to run next test.
+        waitHandlerIdle(BackgroundThread.getHandler());
     }
 
     static void waitHandlerIdle(Handler handler) {

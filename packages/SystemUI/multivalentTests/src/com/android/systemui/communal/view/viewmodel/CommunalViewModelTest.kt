@@ -756,6 +756,17 @@ class CommunalViewModelTest(flags: FlagsParameterization) : SysuiTestCase() {
         verify(metricsLogger).logTapWidget("test_pkg/test_cls", rank = 10)
     }
 
+    @Test
+    fun glanceableTouchAvailable_availableWhenNestedScrollingWithoutConsumption() =
+        testScope.runTest {
+            val touchAvailable by collectLastValue(underTest.glanceableTouchAvailable)
+            assertThat(touchAvailable).isTrue()
+            underTest.onHubTouchConsumed()
+            assertThat(touchAvailable).isFalse()
+            underTest.onNestedScrolling()
+            assertThat(touchAvailable).isTrue()
+        }
+
     private suspend fun setIsMainUser(isMainUser: Boolean) {
         val user = if (isMainUser) MAIN_USER_INFO else SECONDARY_USER_INFO
         with(userRepository) {

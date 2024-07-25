@@ -22,6 +22,7 @@ import static android.content.res.Configuration.DENSITY_DPI_UNDEFINED;
 import static android.view.WindowInsets.Type.captionBar;
 import static android.view.WindowInsets.Type.mandatorySystemGestures;
 import static android.view.WindowInsets.Type.statusBars;
+import static android.view.WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
 
 import android.annotation.NonNull;
@@ -634,7 +635,8 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
                 .show(windowSurfaceControl);
         final WindowManager.LayoutParams lp =
                 new WindowManager.LayoutParams(width, height, TYPE_APPLICATION,
-                        WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
+                        WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
+                        | FLAG_WATCH_OUTSIDE_TOUCH,
                         PixelFormat.TRANSPARENT);
         lp.setTitle("Additional window of Task=" + mTaskInfo.taskId);
         lp.setTrustedOverlay();

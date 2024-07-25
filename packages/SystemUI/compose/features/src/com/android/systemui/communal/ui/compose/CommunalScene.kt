@@ -48,7 +48,7 @@ constructor(
     override val destinationScenes: Flow<Map<UserAction, UserActionResult>> =
         MutableStateFlow<Map<UserAction, UserActionResult>>(
                 mapOf(
-                    Swipe(SwipeDirection.Right) to UserActionResult(Scenes.Lockscreen),
+                    Swipe(SwipeDirection.End) to UserActionResult(Scenes.Lockscreen),
                 )
             )
             .asStateFlow()

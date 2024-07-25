@@ -36,6 +36,7 @@ import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_ATM;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.AppCompatConfiguration.LETTERBOX_POSITION_MULTIPLIER_CENTER;
 import static com.android.server.wm.AppCompatConfiguration.MIN_FIXED_ORIENTATION_LETTERBOX_ASPECT_RATIO;
+import static com.android.server.wm.AppCompatUtils.isChangeEnabled;
 
 import android.annotation.NonNull;
 import android.content.pm.PackageManager;
@@ -115,7 +116,7 @@ class AppCompatAspectRatioOverrides {
      */
     boolean shouldOverrideMinAspectRatio() {
         return mAllowMinAspectRatioOverrideOptProp.shouldEnableWithOptInOverrideAndOptOutProperty(
-                isCompatChangeEnabled(OVERRIDE_MIN_ASPECT_RATIO));
+                isChangeEnabled(mActivityRecord, OVERRIDE_MIN_ASPECT_RATIO));
     }
 
     /**
@@ -154,7 +155,7 @@ class AppCompatAspectRatioOverrides {
     }
 
     boolean isSystemOverrideToFullscreenEnabled() {
-        return isCompatChangeEnabled(OVERRIDE_ANY_ORIENTATION_TO_USER)
+        return isChangeEnabled(mActivityRecord, OVERRIDE_ANY_ORIENTATION_TO_USER)
                 && !mAllowOrientationOverrideOptProp.isFalse()
                 && (mUserAspectRatioState.mUserAspectRatio == USER_MIN_ASPECT_RATIO_UNSET
                 || mUserAspectRatioState.mUserAspectRatio == USER_MIN_ASPECT_RATIO_FULLSCREEN);
@@ -300,10 +301,6 @@ class AppCompatAspectRatioOverrides {
         // The min aspect ratio override set by user
         @PackageManager.UserMinAspectRatio
         private int mUserAspectRatio = USER_MIN_ASPECT_RATIO_UNSET;
-    }
-
-    private boolean isCompatChangeEnabled(long overrideChangeId) {
-        return mActivityRecord.info.isChangeEnabled(overrideChangeId);
     }
 
     private Resources getResources() {

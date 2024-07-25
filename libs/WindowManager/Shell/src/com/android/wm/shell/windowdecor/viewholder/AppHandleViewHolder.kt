@@ -97,7 +97,8 @@ internal class AppHandleViewHolder(
                                           handleHeight: Int) {
         if (!Flags.enableAdditionalWindowsAboveStatusBar()) return
         statusBarInputLayer = AdditionalSystemViewContainer(context, taskInfo.taskId,
-            handlePosition.x, handlePosition.y, handleWidth, handleHeight)
+            handlePosition.x, handlePosition.y, handleWidth, handleHeight,
+            WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE)
         val view = statusBarInputLayer?.view
         val lp = view?.layoutParams as WindowManager.LayoutParams
         lp.title = "Handle Input Layer of task " + taskInfo.taskId

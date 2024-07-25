@@ -151,9 +151,10 @@ public class ExternalDisplayStatsServiceTest {
     }
 
     @Test
-    public void testDisplayInteractivityChanges(
+    public void testDisplayInteractivityChangesWhileMirroring(
             @TestParameter final boolean isExternalDisplayUsedForAudio) {
         mExternalDisplayStatsService.onDisplayConnected(mMockedLogicalDisplay);
+        mExternalDisplayStatsService.onDisplayAdded(EXTERNAL_DISPLAY_ID);
         mHandler.flush();
         assertThat(mInteractivityReceiver).isNotNull();
 
@@ -180,9 +181,35 @@ public class ExternalDisplayStatsServiceTest {
         mInteractivityReceiver.onReceive(null, null);
         assertThat(mExternalDisplayStatsService.isInteractiveExternalDisplays()).isTrue();
         verify(mMockedInjector).writeLog(FrameworkStatsLog.EXTERNAL_DISPLAY_STATE_CHANGED,
-                FrameworkStatsLog.EXTERNAL_DISPLAY_STATE_CHANGED__STATE__CONNECTED,
+                FrameworkStatsLog.EXTERNAL_DISPLAY_STATE_CHANGED__STATE__MIRRORING,
                 /*numberOfDisplays=*/ 1,
                 isExternalDisplayUsedForAudio);
+    }
+
+    @Test
+    public void testDisplayInteractivityChangesWhileConnected() {
+        mExternalDisplayStatsService.onDisplayConnected(mMockedLogicalDisplay);
+        mHandler.flush();
+        assertThat(mInteractivityReceiver).isNotNull();
+        clearInvocations(mMockedInjector);
+
+        // Default is 'interactive', so no log should be written.
+        mInteractivityReceiver.onReceive(null, null);
+        assertThat(mExternalDisplayStatsService.isInteractiveExternalDisplays()).isTrue();
+        verify(mMockedInjector, never()).writeLog(anyInt(), anyInt(), anyInt(), anyBoolean());
+
+        // Change to non-interactive should not produce log
+        when(mMockedInjector.isInteractive(eq(EXTERNAL_DISPLAY_ID))).thenReturn(false);
+        mInteractivityReceiver.onReceive(null, null);
+        assertThat(mExternalDisplayStatsService.isInteractiveExternalDisplays()).isFalse();
+        verify(mMockedInjector, never()).writeLog(anyInt(), anyInt(), anyInt(), anyBoolean());
+        clearInvocations(mMockedInjector);
+
+        // Change back to interactive should not produce log
+        when(mMockedInjector.isInteractive(eq(EXTERNAL_DISPLAY_ID))).thenReturn(true);
+        mInteractivityReceiver.onReceive(null, null);
+        assertThat(mExternalDisplayStatsService.isInteractiveExternalDisplays()).isTrue();
+        verify(mMockedInjector, never()).writeLog(anyInt(), anyInt(), anyInt(), anyBoolean());
     }
 
     @Test
