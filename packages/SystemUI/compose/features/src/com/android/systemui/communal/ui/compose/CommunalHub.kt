@@ -216,7 +216,9 @@ fun CommunalHub(
     val screenWidth = windowMetrics.bounds.width()
     val layoutDirection = LocalLayoutDirection.current
 
-    if (!viewModel.isEditMode) {
+    if (viewModel.isEditMode) {
+        ScrollOnNewWidgetAddedEffect(communalContent, gridState)
+    } else {
         ScrollOnUpdatedLiveContentEffect(communalContent, gridState)
     }
 
@@ -543,6 +545,36 @@ private fun ScrollOnUpdatedLiveContentEffect(
             // Launching with a scope to prevent the job from being canceled in the case of a
             // recomposition during scrolling
             coroutineScope.launch { gridState.animateScrollToItem(indexOfFirstUpdatedContent) }
+        }
+    }
+}
+
+/** Observes communal content and scrolls to a newly added widget if any. */
+@Composable
+private fun ScrollOnNewWidgetAddedEffect(
+    communalContent: List<CommunalContentModel>,
+    gridState: LazyGridState,
+) {
+    val coroutineScope = rememberCoroutineScope()
+    val widgetKeys = remember { mutableListOf<String>() }
+
+    LaunchedEffect(communalContent) {
+        val oldWidgetKeys = widgetKeys.toList()
+        widgetKeys.clear()
+        widgetKeys.addAll(communalContent.filter { it.isWidgetContent() }.map { it.key })
+
+        // Do nothing if there is no new widget
+        val indexOfFirstNewWidget = widgetKeys.indexOfFirst { !oldWidgetKeys.contains(it) }
+        if (indexOfFirstNewWidget < 0) {
+            return@LaunchedEffect
+        }
+
+        // Scroll if the new widget is not visible
+        val lastVisibleItemIndex = gridState.layoutInfo.visibleItemsInfo.lastOrNull()?.index
+        if (lastVisibleItemIndex != null && indexOfFirstNewWidget > lastVisibleItemIndex) {
+            // Launching with a scope to prevent the job from being canceled in the case of a
+            // recomposition during scrolling
+            coroutineScope.launch { gridState.animateScrollToItem(indexOfFirstNewWidget) }
         }
     }
 }
