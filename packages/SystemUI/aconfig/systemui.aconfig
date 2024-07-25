@@ -1210,6 +1210,9 @@ flag {
   namespace: "systemui"
   description: "Enables fullscreen vertical swiping in hub mode to bring up and down the bouncer and shade"
   bug: "340177049"
+  metadata {
+      purpose: PURPOSE_BUGFIX
+  }
 }
 
 flag {
