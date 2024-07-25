@@ -416,8 +416,9 @@ class KeyguardController {
         }
 
         final TransitionController tc = mRootWindowContainer.mTransitionController;
+        final KeyguardDisplayState state = getDisplayState(displayId);
 
-        final boolean occluded = getDisplayState(displayId).mOccluded;
+        final boolean occluded = state.mOccluded;
         final boolean performTransition = isKeyguardLocked(displayId);
         final boolean executeTransition = performTransition && !tc.isCollecting();
 
@@ -461,7 +462,7 @@ class KeyguardController {
     /**
      * Called when keyguard going away state changed.
      */
-    private void handleKeyguardGoingAwayChanged(DisplayContent dc) {
+    private void handleDismissInsecureKeyguard(DisplayContent dc) {
         mService.deferWindowLayout();
         try {
             dc.prepareAppTransition(TRANSIT_KEYGUARD_GOING_AWAY, 0 /* transitFlags */);
@@ -705,16 +706,16 @@ class KeyguardController {
             }
 
             boolean hasChange = false;
-            if (lastOccluded != mOccluded) {
-                writeEventLog("updateVisibility");
+            if (!lastKeyguardGoingAway && mKeyguardGoingAway) {
+                writeEventLog("dismissIfInsecure");
+                controller.handleDismissInsecureKeyguard(display);
+                hasChange = true;
+            } else if (lastOccluded != mOccluded) {
                 controller.handleOccludedChanged(mDisplayId, mTopOccludesActivity);
                 hasChange = true;
-            } else if (!lastKeyguardGoingAway && mKeyguardGoingAway) {
-                writeEventLog("dismissIfInsecure");
-                controller.handleKeyguardGoingAwayChanged(display);
-                hasChange = true;
             }
-            // Collect the participates for shell transition, so that transition won't happen too
+
+            // Collect the participants for shell transition, so that transition won't happen too
             // early since the transition was set ready.
             if (hasChange && top != null && (mOccluded || mKeyguardGoingAway)) {
                 display.mTransitionController.collect(top);
