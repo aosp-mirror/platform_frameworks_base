@@ -908,6 +908,10 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
                     mIsMaximizeMenuHovered = hovered;
                     onMaximizeHoverStateChanged();
                     return null;
+                },
+                () -> {
+                    closeMaximizeMenu();
+                    return null;
                 }
         );
     }
@@ -1118,8 +1122,13 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
             handle.performClick();
         }
         if (isHandleMenuActive()) {
-            mHandleMenu.checkMotionEvent(ev);
-            closeHandleMenuIfNeeded(ev);
+            // If the whole handle menu can be touched directly, rely on FLAG_WATCH_OUTSIDE_TOUCH.
+            // This is for the case that some of the handle menu is underneath the status bar.
+            if (isAppHandle(mWindowDecorViewHolder)
+                    && !Flags.enableAdditionalWindowsAboveStatusBar()) {
+                mHandleMenu.checkMotionEvent(ev);
+                closeHandleMenuIfNeeded(ev);
+            }
         }
     }
 
