@@ -49,14 +49,16 @@ object MediaScenePicker : ElementScenePicker {
             transition.isTransitioningBetween(Scenes.Lockscreen, Scenes.Communal) -> {
                 Scenes.Lockscreen
             }
-
-            // TODO: 345467290 - update with the actual scene picking
             transition.isTransitioningBetween(Scenes.QuickSettings, Scenes.Shade) -> {
                 Scenes.QuickSettings
             }
-
-            // TODO: 340216785 - update with the actual scene picking
-            else -> pickSingleSceneIn(scenes, transition, element)
+            else -> {
+                when {
+                    scenes.contains(transition.toScene) -> transition.toScene
+                    scenes.contains(transition.fromScene) -> transition.fromScene
+                    else -> null
+                }
+            }
         }
     }
 
