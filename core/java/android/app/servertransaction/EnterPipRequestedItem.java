@@ -24,9 +24,14 @@ import android.os.Parcel;
 
 /**
  * Request an activity to enter picture-in-picture mode.
+ *
  * @hide
  */
 public final class EnterPipRequestedItem extends ActivityTransactionItem {
+
+    public EnterPipRequestedItem(@NonNull IBinder activityToken) {
+        super(activityToken);
+    }
 
     @Override
     public void execute(@NonNull ClientTransactionHandler client, @NonNull ActivityClientRecord r,
@@ -34,29 +39,9 @@ public final class EnterPipRequestedItem extends ActivityTransactionItem {
         client.handlePictureInPictureRequested(r);
     }
 
-    // ObjectPoolItem implementation
-
-    private EnterPipRequestedItem() {}
-
-    /** Obtain an instance initialized with provided params. */
-    @NonNull
-    public static EnterPipRequestedItem obtain(@NonNull IBinder activityToken) {
-        EnterPipRequestedItem instance = ObjectPool.obtain(EnterPipRequestedItem.class);
-        if (instance == null) {
-            instance = new EnterPipRequestedItem();
-        }
-        instance.setActivityToken(activityToken);
-        return instance;
-    }
-
-    @Override
-    public void recycle() {
-        super.recycle();
-        ObjectPool.recycle(this);
-    }
-
     // Parcelable implementation
 
+    /** Reads from Parcel. */
     private EnterPipRequestedItem(@NonNull Parcel in) {
         super(in);
     }

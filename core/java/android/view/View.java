@@ -11004,6 +11004,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             ? afm.isAutofillable(this) : false;
     }
 
+    /**
+     * Returns whether the view is autofillable.
+     *
+     * @return whether the view is autofillable, and should send out autofill request to provider.
+     */
     private boolean isAutofillable() {
         if (DBG) {
             Log.d(VIEW_LOG_TAG, "isAutofillable() entered.");
@@ -27631,6 +27636,23 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         return null;
     }
 
+
+    /**
+     * Performs the traversal to find views that are autofillable.
+     * Autofillable views are added to the provided list.
+     *
+     * <strong>Note:</strong>This method does not stop at the root namespace
+     * boundary.
+     *
+     * @param autofillableViews The output list of autofillable Views.
+     * @hide
+     */
+    public void findAutofillableViewsByTraversal(@NonNull List<View> autofillableViews) {
+        if (isAutofillable()) {
+            autofillableViews.add(this);
+        }
+    }
+
     /**
      * Look for a child view with the given tag.  If this view has the given
      * tag, return this view.
@@ -30597,6 +30619,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         }
     }
 
+    // Note that if the function returns true, it indicates aapt did not generate this id.
+    // However false value does not indicate that aapt did generated this id.
     private static boolean isViewIdGenerated(int id) {
         return (id & 0xFF000000) == 0 && (id & 0x00FFFFFF) != 0;
     }

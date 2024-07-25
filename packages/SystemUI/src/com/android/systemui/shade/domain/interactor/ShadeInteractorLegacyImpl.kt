@@ -16,6 +16,7 @@
 
 package com.android.systemui.shade.domain.interactor
 
+import com.android.app.tracing.FlowTracing.traceAsCounter
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.keyguard.data.repository.KeyguardRepository
@@ -74,6 +75,7 @@ constructor(
                 }
             }
             .distinctUntilChanged()
+            .traceAsCounter("panel_expansion") { (it * 100f).toInt() }
             .stateIn(scope, SharingStarted.Eagerly, 0f)
 
     override val qsExpansion: StateFlow<Float> = repository.qsExpansion

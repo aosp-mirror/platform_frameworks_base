@@ -52,6 +52,8 @@ public final class BrightnessEvent {
     private String mPhysicalDisplayId;
     private String mPhysicalDisplayName;
     private int mDisplayState;
+    @Display.StateReason
+    private int mDisplayStateReason;
     private int mDisplayPolicy;
     private long mTime;
     private float mLux;
@@ -96,6 +98,7 @@ public final class BrightnessEvent {
         mPhysicalDisplayId = that.getPhysicalDisplayId();
         mPhysicalDisplayName = that.getPhysicalDisplayName();
         mDisplayState = that.mDisplayState;
+        mDisplayStateReason = that.mDisplayStateReason;
         mDisplayPolicy = that.mDisplayPolicy;
         mTime = that.getTime();
         // Lux values
@@ -133,6 +136,7 @@ public final class BrightnessEvent {
         mPhysicalDisplayId = "";
         mPhysicalDisplayName = "";
         mDisplayState = Display.STATE_UNKNOWN;
+        mDisplayStateReason = Display.STATE_REASON_UNKNOWN;
         mDisplayPolicy = POLICY_OFF;
         // Lux values
         mLux = INVALID_LUX;
@@ -176,6 +180,7 @@ public final class BrightnessEvent {
                 && mPhysicalDisplayId.equals(that.mPhysicalDisplayId)
                 && mPhysicalDisplayName.equals(that.mPhysicalDisplayName)
                 && mDisplayState == that.mDisplayState
+                && mDisplayStateReason == that.mDisplayStateReason
                 && mDisplayPolicy == that.mDisplayPolicy
                 && Float.floatToRawIntBits(mLux) == Float.floatToRawIntBits(that.mLux)
                 && Float.floatToRawIntBits(mPreThresholdLux)
@@ -221,6 +226,7 @@ public final class BrightnessEvent {
                 + ", reason=" + mReason.toString(mAdjustmentFlags)
                 + ", strat=" + mDisplayBrightnessStrategyName
                 + ", state=" + Display.stateToString(mDisplayState)
+                + ", stateReason=" + Display.stateReasonToString(mDisplayStateReason)
                 + ", policy=" + policyToString(mDisplayPolicy)
                 + ", flags=" + flagsToString()
                 // Autobrightness
@@ -291,6 +297,10 @@ public final class BrightnessEvent {
 
     public void setDisplayState(int state) {
         mDisplayState = state;
+    }
+
+    public void setDisplayStateReason(@Display.StateReason int reason) {
+        mDisplayStateReason = reason;
     }
 
     public void setDisplayPolicy(int policy) {

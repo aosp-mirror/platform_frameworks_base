@@ -540,6 +540,11 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
             Slog.e(TAG, "token must not be null");
             return null;
         }
+        if (effect.hasVendorEffects()
+                && !hasPermission(android.Manifest.permission.VIBRATE_VENDOR_EFFECTS)) {
+            Slog.w(TAG, "vibrate; no permission for vendor effects");
+            return null;
+        }
         enforceUpdateAppOpsStatsPermission(uid);
         if (!isEffectValid(effect)) {
             return null;
@@ -1304,12 +1309,13 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
     }
 
     private void fillVibrationFallbacks(HalVibration vib, VibrationEffect effect) {
-        VibrationEffect.Composed composed = (VibrationEffect.Composed) effect;
+        if (!(effect instanceof VibrationEffect.Composed composed)) {
+            return;
+        }
         int segmentCount = composed.getSegments().size();
         for (int i = 0; i < segmentCount; i++) {
             VibrationEffectSegment segment = composed.getSegments().get(i);
-            if (segment instanceof PrebakedSegment) {
-                PrebakedSegment prebaked = (PrebakedSegment) segment;
+            if (segment instanceof PrebakedSegment prebaked) {
                 VibrationEffect fallback = mVibrationSettings.getFallbackEffect(
                         prebaked.getEffectId());
                 if (prebaked.shouldFallback() && fallback != null) {
@@ -1392,12 +1398,11 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
 
     @Nullable
     private static PrebakedSegment extractPrebakedSegment(VibrationEffect effect) {
-        if (effect instanceof VibrationEffect.Composed) {
-            VibrationEffect.Composed composed = (VibrationEffect.Composed) effect;
+        if (effect instanceof VibrationEffect.Composed composed) {
             if (composed.getSegments().size() == 1) {
                 VibrationEffectSegment segment = composed.getSegments().get(0);
-                if (segment instanceof PrebakedSegment) {
-                    return (PrebakedSegment) segment;
+                if (segment instanceof PrebakedSegment prebaked) {
+                    return prebaked;
                 }
             }
         }

@@ -49,27 +49,10 @@ import java.util.Objects;
 public abstract class ActivityTransactionItem extends ClientTransactionItem {
 
     /** Target client activity. */
-    // TODO(b/311089192): Mark this with @NonNull and final.
-    private IBinder mActivityToken;
+    @NonNull
+    private final IBinder mActivityToken;
 
     public ActivityTransactionItem(@NonNull IBinder activityToken) {
-        mActivityToken = requireNonNull(activityToken);
-    }
-
-    // TODO(b/311089192): Remove this method once no subclasses obtain from the object pool.
-    @Deprecated
-    ActivityTransactionItem() {
-    }
-
-    /**
-     * Sets the activity token after the instance is obtained from the object pool.
-     *
-     * @deprecated This method is deprecated. The object pool is no longer used.
-     *     Instead, directly create a new object with the activity token.
-     * TODO(b/311089192): Remove this method once no subclasses obtain from the object pool.
-     */
-    @Deprecated
-    void setActivityToken(@NonNull IBinder activityToken) {
         mActivityToken = requireNonNull(activityToken);
     }
 

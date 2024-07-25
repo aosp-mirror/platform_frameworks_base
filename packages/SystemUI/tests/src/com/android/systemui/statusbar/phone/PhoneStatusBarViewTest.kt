@@ -334,6 +334,7 @@ class PhoneStatusBarViewTest : SysuiTestCase() {
             /* typeVisibilityMap = */ booleanArrayOf(),
             /* isRound = */ false,
             /* forceConsumingTypes = */ 0,
+            /* forceConsumingCaptionBar = */ false,
             /* suppressScrimTypes = */ 0,
             /* displayCutout = */ DisplayCutout.NO_CUTOUT,
             /* roundedCorners = */ RoundedCorners.NO_ROUNDED_CORNERS,

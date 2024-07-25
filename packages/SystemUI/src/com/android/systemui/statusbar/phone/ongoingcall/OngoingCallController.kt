@@ -24,8 +24,12 @@ import android.app.PendingIntent
 import android.app.UidObserver
 import android.content.Context
 import android.view.View
+import android.view.ViewGroup
+import android.widget.FrameLayout
+import androidx.annotation.IdRes
 import androidx.annotation.VisibleForTesting
 import com.android.internal.jank.InteractionJankMonitor
+import com.android.settingslib.Utils
 import com.android.systemui.CoreStartable
 import com.android.systemui.Dumpable
 import com.android.systemui.Flags
@@ -38,6 +42,7 @@ import com.android.systemui.log.LogBuffer
 import com.android.systemui.log.core.LogLevel
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.res.R
+import com.android.systemui.statusbar.StatusBarIconView
 import com.android.systemui.statusbar.chips.ui.view.ChipBackgroundContainer
 import com.android.systemui.statusbar.chips.ui.view.ChipChronometer
 import com.android.systemui.statusbar.data.repository.StatusBarModeRepositoryStore
@@ -115,6 +120,7 @@ constructor(
                                 Notification.EXTRA_CALL_TYPE,
                                 -1
                             ) == CALL_TYPE_ONGOING,
+                            entry.icons.statusBarChipIcon,
                             statusBarSwipedAway = callNotificationInfo?.statusBarSwipedAway ?: false
                         )
                     if (newOngoingCallInfo == callNotificationInfo) {
@@ -176,8 +182,7 @@ constructor(
     fun setChipView(chipView: View) {
         tearDownChipView()
         this.chipView = chipView
-        val backgroundView: ChipBackgroundContainer? =
-            chipView.findViewById(R.id.ongoing_activity_chip_background)
+        val backgroundView: ChipBackgroundContainer? = chipView.getBackgroundView()
         backgroundView?.maxHeightFetcher = { statusBarWindowController.statusBarHeight }
         if (hasOngoingCall()) {
             updateChip()
@@ -247,6 +252,8 @@ constructor(
                     timeView.setShouldHideText(true)
                     timeView.stop()
                 }
+
+                updateChipIcon(currentCallNotificationInfo, currentChipView)
                 updateChipClickListener()
             }
 
@@ -270,6 +277,38 @@ constructor(
         }
     }
 
+    private fun updateChipIcon(callInfo: CallNotificationInfo, currentChipView: View) {
+        val backgroundView = currentChipView.getBackgroundView() ?: return
+        backgroundView.removeView(currentChipView.getIconView())
+
+        val iconView = callInfo.iconView ?: return
+        with(iconView) {
+            id = ICON_ID
+            imageTintList = Utils.getColorAttr(context, android.R.attr.colorPrimary)
+            // TODO(b/354930838): Update the content description to not include "phone".
+            contentDescription =
+                context.resources.getString(R.string.ongoing_phone_call_content_description)
+        }
+
+        val currentParent = iconView.parent as? ViewGroup
+        // If we're reinflating the view, we may need to detach the icon view from the
+        // old chip before we reattach it to the new one.
+        // See also: NotificationIconContainerViewBinder#bindIcons.
+        if (currentParent != null && currentParent != backgroundView) {
+            currentParent.removeView(iconView)
+            currentParent.removeTransientView(iconView)
+        }
+        backgroundView.addView(iconView, /* index= */ 0, generateIconLayoutParams())
+    }
+
+    private fun generateIconLayoutParams(): FrameLayout.LayoutParams {
+        return FrameLayout.LayoutParams(iconSize, iconSize)
+    }
+
+    private val iconSize: Int
+        get() =
+            context.resources.getDimensionPixelSize(R.dimen.ongoing_activity_chip_notif_icon_size)
+
     private fun updateChipClickListener() {
         if (Flags.statusBarScreenSharingChips()) {
             return
@@ -279,8 +318,7 @@ constructor(
             return
         }
         val currentChipView = chipView
-        val backgroundView =
-            currentChipView?.findViewById<View>(R.id.ongoing_activity_chip_background)
+        val backgroundView = currentChipView?.getBackgroundView()
         val intent = callNotificationInfo?.intent
         if (currentChipView != null && backgroundView != null && intent != null) {
             currentChipView.setOnClickListener {
@@ -332,6 +370,14 @@ constructor(
         return this.findViewById(R.id.ongoing_activity_chip_time)
     }
 
+    private fun View.getBackgroundView(): ChipBackgroundContainer? {
+        return this.findViewById(R.id.ongoing_activity_chip_background)
+    }
+
+    private fun View.getIconView(): View? {
+        return this.findViewById(ICON_ID)
+    }
+
     /**
      * If there's an active ongoing call, then we will force the status bar to always show, even if
      * the user is in immersive mode. However, we also want to give users the ability to swipe away
@@ -359,6 +405,8 @@ constructor(
         val uid: Int,
         /** True if the call is currently ongoing (as opposed to incoming, screening, etc.). */
         val isOngoing: Boolean,
+        /** The view that contains the icon to display in the chip. */
+        val iconView: StatusBarIconView?,
         /** True if the user has swiped away the status bar while in this phone call. */
         val statusBarSwipedAway: Boolean
     ) {
@@ -463,6 +511,10 @@ constructor(
                 mainExecutor.execute { sendStateChangeEvent() }
             }
         }
+    }
+
+    companion object {
+        @IdRes private val ICON_ID = R.id.ongoing_activity_chip_icon
     }
 }
 

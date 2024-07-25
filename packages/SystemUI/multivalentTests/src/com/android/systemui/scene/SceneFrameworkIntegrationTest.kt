@@ -143,7 +143,6 @@ class SceneFrameworkIntegrationTest : SysuiTestCase() {
 
     private val lockscreenSceneViewModel by lazy {
         LockscreenSceneViewModel(
-            applicationScope = testScope.backgroundScope,
             deviceEntryInteractor = deviceEntryInteractor,
             communalInteractor = communalInteractor,
             touchHandling =

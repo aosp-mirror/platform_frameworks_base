@@ -18,17 +18,12 @@ package com.android.server.wm;
 
 import static android.content.pm.ActivityInfo.FORCE_NON_RESIZE_APP;
 import static android.content.pm.ActivityInfo.FORCE_RESIZE_APP;
-import static android.content.pm.ActivityInfo.OVERRIDE_ENABLE_COMPAT_FAKE_FOCUS;
 import static android.content.pm.ActivityInfo.OVERRIDE_RESPECT_REQUESTED_ORIENTATION;
 import static android.content.pm.ActivityInfo.OVERRIDE_USE_DISPLAY_LANDSCAPE_NATURAL_ORIENTATION;
 import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
 import static android.view.WindowManager.PROPERTY_COMPAT_ALLOW_DISPLAY_ORIENTATION_OVERRIDE;
 import static android.view.WindowManager.PROPERTY_COMPAT_ALLOW_ORIENTATION_OVERRIDE;
 import static android.view.WindowManager.PROPERTY_COMPAT_ALLOW_RESIZEABLE_ACTIVITY_OVERRIDES;
-import static android.view.WindowManager.PROPERTY_COMPAT_ENABLE_FAKE_FOCUS;
-
-import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_ATM;
-import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_WITH_CLASS_NAME;
 
 import android.annotation.NonNull;
 
@@ -39,16 +34,9 @@ import com.android.server.wm.utils.OptPropFactory;
  */
 public class AppCompatOverrides {
 
-    private static final String TAG = TAG_WITH_CLASS_NAME ? "AppCompatOverrides" : TAG_ATM;
-
-    @NonNull
-    private final AppCompatConfiguration mAppCompatConfiguration;
-
     @NonNull
     private final ActivityRecord mActivityRecord;
 
-    @NonNull
-    private final OptPropFactory.OptProp mFakeFocusOptProp;
     @NonNull
     private final OptPropFactory.OptProp mAllowOrientationOverrideOptProp;
     @NonNull
@@ -61,26 +49,25 @@ public class AppCompatOverrides {
     private final AppCompatCameraOverrides mAppCompatCameraOverrides;
     @NonNull
     private final AppCompatAspectRatioOverrides mAppCompatAspectRatioOverrides;
+    @NonNull
+    private final AppCompatFocusOverrides mAppCompatFocusOverrides;
 
     AppCompatOverrides(@NonNull ActivityRecord activityRecord,
             @NonNull AppCompatConfiguration appCompatConfiguration,
             @NonNull OptPropFactory optPropBuilder) {
-        mAppCompatConfiguration = appCompatConfiguration;
         mActivityRecord = activityRecord;
 
         mAppCompatCameraOverrides = new AppCompatCameraOverrides(mActivityRecord,
-                mAppCompatConfiguration, optPropBuilder);
+                appCompatConfiguration, optPropBuilder);
         mAppCompatOrientationOverrides = new AppCompatOrientationOverrides(mActivityRecord,
-                mAppCompatConfiguration, optPropBuilder, mAppCompatCameraOverrides);
+                appCompatConfiguration, optPropBuilder, mAppCompatCameraOverrides);
         // TODO(b/341903757) Remove BooleanSuppliers after fixing dependency with reachability.
         mAppCompatAspectRatioOverrides = new AppCompatAspectRatioOverrides(activityRecord,
-                mAppCompatConfiguration, optPropBuilder,
+                appCompatConfiguration, optPropBuilder,
                 activityRecord.mLetterboxUiController::isDisplayFullScreenAndInPosture,
                 activityRecord.mLetterboxUiController::getHorizontalPositionMultiplier);
-
-        mFakeFocusOptProp = optPropBuilder.create(PROPERTY_COMPAT_ENABLE_FAKE_FOCUS,
-                mAppCompatConfiguration::isCompatFakeFocusEnabled);
-
+        mAppCompatFocusOverrides = new AppCompatFocusOverrides(mActivityRecord,
+                appCompatConfiguration, optPropBuilder);
 
         mAllowOrientationOverrideOptProp = optPropBuilder.create(
                 PROPERTY_COMPAT_ALLOW_ORIENTATION_OVERRIDE);
@@ -114,21 +101,9 @@ public class AppCompatOverrides {
         return mAppCompatAspectRatioOverrides;
     }
 
-    /**
-     * Whether sending compat fake focus for split screen resumed activities is enabled. Needed
-     * because some game engines wait to get focus before drawing the content of the app which isn't
-     * guaranteed by default in multi-window modes.
-     *
-     * <p>This treatment is enabled when the following conditions are met:
-     * <ul>
-     *     <li>Flag gating the treatment is enabled
-     *     <li>Component property is NOT set to false
-     *     <li>Component property is set to true or per-app override is enabled
-     * </ul>
-     */
-    boolean shouldSendFakeFocus() {
-        return mFakeFocusOptProp.shouldEnableWithOverrideAndProperty(
-                isCompatChangeEnabled(OVERRIDE_ENABLE_COMPAT_FAKE_FOCUS));
+    @NonNull
+    AppCompatFocusOverrides getAppCompatFocusOverrides() {
+        return mAppCompatFocusOverrides;
     }
 
     boolean isAllowOrientationOverrideOptOut() {

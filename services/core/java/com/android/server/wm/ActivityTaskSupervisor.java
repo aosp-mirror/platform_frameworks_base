@@ -929,7 +929,7 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
                 final boolean isTransitionForward = r.isTransitionForward();
                 final IBinder fragmentToken = r.getTaskFragment().getFragmentToken();
                 final int deviceId = getDeviceIdForDisplayId(r.getDisplayId());
-                final LaunchActivityItem launchActivityItem = LaunchActivityItem.obtain(r.token,
+                final LaunchActivityItem launchActivityItem = new LaunchActivityItem(r.token,
                         r.intent, System.identityHashCode(r), r.info,
                         procConfig, overrideConfig, deviceId,
                         r.getFilteredReferrer(r.launchedFromPackage), task.voiceInteractor,
@@ -945,9 +945,9 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
                     lifecycleItem = new ResumeActivityItem(r.token, isTransitionForward,
                             r.shouldSendCompatFakeFocus());
                 } else if (r.isVisibleRequested()) {
-                    lifecycleItem = PauseActivityItem.obtain(r.token);
+                    lifecycleItem = new PauseActivityItem(r.token);
                 } else {
-                    lifecycleItem = StopActivityItem.obtain(r.token);
+                    lifecycleItem = new StopActivityItem(r.token);
                 }
 
                 // Schedule transaction.
