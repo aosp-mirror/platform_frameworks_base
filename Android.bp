@@ -398,6 +398,7 @@ java_defaults {
     ],
     sdk_version: "core_platform",
     static_libs: [
+        "aconfig_storage_reader_java",
         "android.hardware.common.fmq-V1-java",
         "bouncycastle-repackaged-unbundled",
         "com.android.sysprop.foldlockbehavior",
