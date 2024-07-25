@@ -20,6 +20,7 @@ import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.runtime.Stable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.input.nestedscroll.NestedScrollDispatcher
 import androidx.compose.ui.input.nestedscroll.nestedScrollModifierNode
 import androidx.compose.ui.input.pointer.PointerEvent
 import androidx.compose.ui.input.pointer.PointerEventPass
@@ -57,6 +58,7 @@ private class SwipeToSceneNode(
     draggableHandler: DraggableHandlerImpl,
     swipeDetector: SwipeDetector,
 ) : DelegatingNode(), PointerInputModifierNode {
+    private val dispatcher = NestedScrollDispatcher()
     private val multiPointerDraggableNode =
         delegate(
             MultiPointerDraggableNode(
@@ -65,6 +67,7 @@ private class SwipeToSceneNode(
                 startDragImmediately = ::startDragImmediately,
                 onDragStarted = draggableHandler::onDragStarted,
                 swipeDetector = swipeDetector,
+                dispatcher = dispatcher,
             )
         )
 
@@ -93,7 +96,7 @@ private class SwipeToSceneNode(
         )
 
     init {
-        delegate(nestedScrollModifierNode(nestedScrollHandlerImpl.connection, dispatcher = null))
+        delegate(nestedScrollModifierNode(nestedScrollHandlerImpl.connection, dispatcher))
         delegate(ScrollBehaviorOwnerNode(draggableHandler.nestedScrollKey, nestedScrollHandlerImpl))
     }
 
