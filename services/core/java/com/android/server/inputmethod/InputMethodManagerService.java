@@ -372,7 +372,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
     @GuardedBy("ImfLock.class")
     @MultiUserUnawareField
     @NonNull
-    private final ImeVisibilityStateComputer mVisibilityStateComputer;
+    final ImeVisibilityStateComputer mVisibilityStateComputer;
 
     @GuardedBy("ImfLock.class")
     @SharedByAllUsersField
@@ -1807,16 +1807,6 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
     }
 
     @GuardedBy("ImfLock.class")
-    void clearInputShownLocked() {
-        mVisibilityStateComputer.setInputShown(false);
-    }
-
-    @GuardedBy("ImfLock.class")
-    private boolean isInputShownLocked() {
-        return mVisibilityStateComputer.isInputShown();
-    }
-
-    @GuardedBy("ImfLock.class")
     private boolean isShowRequestedForCurrentWindow(@UserIdInt int userId) {
         final var userData = getUserData(userId);
         // TODO(b/349904272): Make mVisibilityStateComputer multi-user aware
@@ -3051,7 +3041,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
         try {
             if (DEBUG) Slog.v(TAG, "Client requesting input be shown");
             if (Flags.refactorInsetsController()) {
-                boolean wasVisible = isInputShownLocked();
+                boolean wasVisible = mVisibilityStateComputer.isInputShown();
                 if (userData.mImeBindingState != null
                         && userData.mImeBindingState.mFocusedWindowClient != null
                         && userData.mImeBindingState.mFocusedWindowClient.mClient != null) {
@@ -3488,7 +3478,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
         final int callingUserId = UserHandle.getUserId(uid);
         final int userId = resolveImeUserIdLocked(callingUserId);
         if (!canInteractWithImeLocked(uid, client, "hideSoftInput", statsToken, userId)) {
-            if (isInputShownLocked()) {
+            if (mVisibilityStateComputer.isInputShown()) {
                 ImeTracker.forLogging().onFailed(
                         statsToken, ImeTracker.PHASE_SERVER_CLIENT_FOCUSED);
             } else {
@@ -3506,7 +3496,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
                 if (userData.mImeBindingState != null
                         && userData.mImeBindingState.mFocusedWindowClient != null
                         && userData.mImeBindingState.mFocusedWindowClient.mClient != null) {
-                    boolean wasVisible = isInputShownLocked();
+                    boolean wasVisible = mVisibilityStateComputer.isInputShown();
                     // TODO add windowToken to interface
                     userData.mImeBindingState.mFocusedWindowClient.mClient
                             .setImeVisibility(false, statsToken);
@@ -3568,7 +3558,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
         // TODO(b/246309664): Clean up IMMS#mImeWindowVis
         IInputMethodInvoker curMethod = bindingController.getCurMethod();
         final boolean shouldHideSoftInput = curMethod != null
-                && (isInputShownLocked()
+                && (mVisibilityStateComputer.isInputShown()
                 || (bindingController.getImeWindowVis() & InputMethodService.IME_ACTIVE) != 0);
 
         mVisibilityStateComputer.requestImeVisibility(windowToken, false);
@@ -4974,7 +4964,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
                         // implemented so that auxiliary subtypes will be excluded when the soft
                         // keyboard is invisible.
                         synchronized (ImfLock.class) {
-                            showAuxSubtypes = isInputShownLocked();
+                            showAuxSubtypes = mVisibilityStateComputer.isInputShown();
                         }
                         break;
                     case InputMethodManager.SHOW_IM_PICKER_MODE_INCLUDE_AUXILIARY_SUBTYPES:
