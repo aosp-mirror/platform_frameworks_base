@@ -17,7 +17,11 @@
 package android.companion.virtual;
 
 import static android.companion.virtual.VirtualDeviceParams.DEVICE_POLICY_CUSTOM;
+import static android.companion.virtual.VirtualDeviceParams.POLICY_TYPE_ACTIVITY;
 import static android.companion.virtual.VirtualDeviceParams.POLICY_TYPE_AUDIO;
+import static android.companion.virtual.VirtualDeviceParams.POLICY_TYPE_BLOCKED_ACTIVITY_BEHAVIOR;
+import static android.companion.virtual.VirtualDeviceParams.POLICY_TYPE_CLIPBOARD;
+import static android.companion.virtual.VirtualDeviceParams.POLICY_TYPE_RECENTS;
 
 import android.annotation.CallbackExecutor;
 import android.annotation.NonNull;
@@ -282,6 +286,16 @@ public class VirtualDeviceInternal {
 
     void setDevicePolicy(@VirtualDeviceParams.DynamicPolicyType int policyType,
             @VirtualDeviceParams.DevicePolicy int devicePolicy) {
+        switch (policyType) {
+            case POLICY_TYPE_RECENTS:
+            case POLICY_TYPE_CLIPBOARD:
+            case POLICY_TYPE_ACTIVITY:
+            case POLICY_TYPE_BLOCKED_ACTIVITY_BEHAVIOR:
+                break;
+            default:
+                throw new IllegalArgumentException("Device policy " + policyType
+                        + " cannot be changed at runtime. ");
+        }
         try {
             mVirtualDevice.setDevicePolicy(policyType, devicePolicy);
         } catch (RemoteException e) {
@@ -300,6 +314,42 @@ public class VirtualDeviceInternal {
     void removeActivityPolicyExemption(@NonNull ComponentName componentName) {
         try {
             mVirtualDevice.removeActivityPolicyExemption(componentName);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    void setDevicePolicyForDisplay(int displayId,
+            @VirtualDeviceParams.DynamicDisplayPolicyType int policyType,
+            @VirtualDeviceParams.DevicePolicy int devicePolicy) {
+        switch (policyType) {
+            case POLICY_TYPE_RECENTS:
+            case POLICY_TYPE_ACTIVITY:
+                break;
+            default:
+                throw new IllegalArgumentException("Device policy " + policyType
+                        + " cannot be changed for a specific display. ");
+        }
+
+        try {
+            mVirtualDevice.setDevicePolicyForDisplay(displayId, policyType, devicePolicy);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    void addActivityPolicyExemptionForDisplay(int displayId, @NonNull ComponentName componentName) {
+        try {
+            mVirtualDevice.addActivityPolicyExemptionForDisplay(displayId, componentName);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    void removeActivityPolicyExemptionForDisplay(int displayId,
+            @NonNull ComponentName componentName) {
+        try {
+            mVirtualDevice.removeActivityPolicyExemptionForDisplay(displayId, componentName);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
