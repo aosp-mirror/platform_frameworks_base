@@ -18,6 +18,8 @@
 
 package com.android.systemui.statusbar.policy.ui.dialog.viewmodel
 
+import android.content.Intent
+import android.provider.Settings
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.settingslib.notification.modes.TestModeBuilder
@@ -27,6 +29,7 @@ import com.android.systemui.kosmos.testDispatcher
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.statusbar.policy.data.repository.fakeZenModeRepository
 import com.android.systemui.statusbar.policy.domain.interactor.zenModeInteractor
+import com.android.systemui.statusbar.policy.ui.dialog.mockModesDialogDelegate
 import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -34,16 +37,21 @@ import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.Mockito.clearInvocations
+import org.mockito.kotlin.argumentCaptor
+import org.mockito.kotlin.verify
 
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 class ModesDialogViewModelTest : SysuiTestCase() {
     private val kosmos = testKosmos()
     private val testScope = kosmos.testScope
-    val repository = kosmos.fakeZenModeRepository
-    val interactor = kosmos.zenModeInteractor
+    private val repository = kosmos.fakeZenModeRepository
+    private val interactor = kosmos.zenModeInteractor
+    private val mockDialogDelegate = kosmos.mockModesDialogDelegate
 
-    val underTest = ModesDialogViewModel(context, interactor, kosmos.testDispatcher)
+    private val underTest =
+        ModesDialogViewModel(context, interactor, kosmos.testDispatcher, mockDialogDelegate)
 
     @Test
     fun tiles_filtersOutDisabledModes() =
@@ -64,7 +72,8 @@ class ModesDialogViewModelTest : SysuiTestCase() {
                         .setEnabled(false)
                         .setManualInvocationAllowed(true)
                         .build(),
-                ))
+                )
+            )
             runCurrent()
 
             assertThat(tiles?.size).isEqualTo(2)
@@ -108,7 +117,8 @@ class ModesDialogViewModelTest : SysuiTestCase() {
                         .setActive(false)
                         .setManualInvocationAllowed(false)
                         .build(),
-                ))
+                )
+            )
             runCurrent()
 
             assertThat(tiles?.size).isEqualTo(3)
@@ -160,5 +170,57 @@ class ModesDialogViewModelTest : SysuiTestCase() {
             runCurrent()
 
             assertThat(tiles?.first()?.enabled).isFalse()
+        }
+
+    @Test
+    fun onLongClick_launchesIntent() =
+        testScope.runTest {
+            val tiles by collectLastValue(underTest.tiles)
+            val intentCaptor = argumentCaptor<Intent>()
+
+            val modeId = "id"
+            repository.addModes(
+                listOf(
+                    TestModeBuilder()
+                        .setId(modeId)
+                        .setId("A")
+                        .setActive(true)
+                        .setManualInvocationAllowed(true)
+                        .build(),
+                    TestModeBuilder()
+                        .setId(modeId)
+                        .setId("B")
+                        .setActive(false)
+                        .setManualInvocationAllowed(true)
+                        .build(),
+                )
+            )
+            runCurrent()
+
+            assertThat(tiles?.size).isEqualTo(2)
+
+            // Trigger onLongClick for A
+            tiles?.first()?.onLongClick?.let { it() }
+            runCurrent()
+
+            // Check that it launched the correct intent
+            verify(mockDialogDelegate).launchFromDialog(intentCaptor.capture())
+            var intent = intentCaptor.lastValue
+            assertThat(intent.action).isEqualTo(Settings.ACTION_AUTOMATIC_ZEN_RULE_SETTINGS)
+            assertThat(intent.extras?.getString(Settings.EXTRA_AUTOMATIC_ZEN_RULE_ID))
+                .isEqualTo("A")
+
+            clearInvocations(mockDialogDelegate)
+
+            // Trigger onLongClick for B
+            tiles?.last()?.onLongClick?.let { it() }
+            runCurrent()
+
+            // Check that it launched the correct intent
+            verify(mockDialogDelegate).launchFromDialog(intentCaptor.capture())
+            intent = intentCaptor.lastValue
+            assertThat(intent.action).isEqualTo(Settings.ACTION_AUTOMATIC_ZEN_RULE_SETTINGS)
+            assertThat(intent.extras?.getString(Settings.EXTRA_AUTOMATIC_ZEN_RULE_ID))
+                .isEqualTo("B")
         }
 }

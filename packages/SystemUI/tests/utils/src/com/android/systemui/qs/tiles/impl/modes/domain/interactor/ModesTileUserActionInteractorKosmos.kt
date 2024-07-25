@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 The Android Open Source Project
+ * Copyright (C) 2024 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,20 +14,17 @@
  * limitations under the License.
  */
 
-package com.android.systemui.animation
+package com.android.systemui.qs.tiles.impl.modes.domain.interactor
 
 import com.android.systemui.kosmos.Kosmos
-import com.android.systemui.kosmos.testCase
-import com.android.systemui.util.mockito.mock
+import com.android.systemui.qs.tiles.base.actions.qsTileIntentUserInputHandler
+import com.android.systemui.statusbar.policy.ui.dialog.modesDialogDelegate
+import javax.inject.Provider
 
-val Kosmos.mockActivityTransitionAnimatorController by
-    Kosmos.Fixture { mock<ActivityTransitionAnimator.Controller>() }
-
-val Kosmos.activityTransitionAnimator by
+val Kosmos.modesTileUserActionInteractor: ModesTileUserActionInteractor by
     Kosmos.Fixture {
-        ActivityTransitionAnimator(
-            // The main thread is checked in a bunch of places inside the different transitions
-            // animators, so we have to pass the real main executor here.
-            mainExecutor = testCase.context.mainExecutor,
+        ModesTileUserActionInteractor(
+            qsTileIntentUserInputHandler,
+            Provider { modesDialogDelegate }.get(),
         )
     }
