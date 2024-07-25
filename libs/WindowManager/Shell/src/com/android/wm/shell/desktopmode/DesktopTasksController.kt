@@ -255,7 +255,7 @@ class DesktopTasksController(
 
     /** Gets number of visible tasks in [displayId]. */
     fun visibleTaskCount(displayId: Int): Int =
-        desktopModeTaskRepository.visibleTaskCount(displayId)
+        desktopModeTaskRepository.getVisibleTaskCount(displayId)
 
     /** Returns true if any tasks are visible in Desktop Mode. */
     fun isDesktopModeShowing(displayId: Int): Boolean = visibleTaskCount(displayId) > 0
@@ -446,14 +446,7 @@ class DesktopTasksController(
         if (desktopModeTaskRepository.isOnlyVisibleNonClosingTask(taskId)) {
             removeWallpaperActivity(wct)
         }
-        if (!desktopModeTaskRepository.addClosingTask(displayId, taskId)) {
-            // Could happen if the task hasn't been removed from closing list after it disappeared
-            ProtoLog.w(
-                WM_SHELL_DESKTOP_MODE,
-                "DesktopTasksController: the task with taskId=%d is already closing!",
-                taskId
-            )
-        }
+        desktopModeTaskRepository.addClosingTask(displayId, taskId)
     }
 
     /** Move a task with given `taskId` to fullscreen */
@@ -794,7 +787,7 @@ class DesktopTasksController(
         }
 
         val nonMinimizedTasksOrderedFrontToBack =
-            desktopModeTaskRepository.getActiveNonMinimizedTasksOrderedFrontToBack(displayId)
+            desktopModeTaskRepository.getActiveNonMinimizedOrderedTasks(displayId)
         // If we're adding a new Task we might need to minimize an old one
         val taskToMinimize: RunningTaskInfo? =
             if (newTaskIdInFront != null && desktopTasksLimiter.isPresent) {
@@ -812,7 +805,7 @@ class DesktopTasksController(
             .filter { taskId -> taskId != taskToMinimize?.taskId }
             .mapNotNull { taskId -> shellTaskOrganizer.getRunningTaskInfo(taskId) }
             .reversed() // Start from the back so the front task is brought forward last
-            .forEach { task -> wct.reorder(task.token, true /* onTop */) }
+            .forEach { task -> wct.reorder(task.token, /* onTop= */ true) }
         return taskToMinimize
     }
 
@@ -820,7 +813,7 @@ class DesktopTasksController(
         shellTaskOrganizer
             .getRunningTasks(context.displayId)
             .firstOrNull { task -> task.activityType == ACTIVITY_TYPE_HOME }
-            ?.let { homeTask -> wct.reorder(homeTask.getToken(), toTop /* onTop */) }
+            ?.let { homeTask -> wct.reorder(homeTask.getToken(), /* onTop= */ toTop) }
     }
 
     private fun addWallpaperActivity(wct: WindowContainerTransaction) {
@@ -1069,14 +1062,7 @@ class DesktopTasksController(
             // Remove wallpaper activity when the last active task is removed
             removeWallpaperActivity(wct)
         }
-        if (!desktopModeTaskRepository.addClosingTask(task.displayId, task.taskId)) {
-            // Could happen if the task hasn't been removed from closing list after it disappeared
-            ProtoLog.w(
-                WM_SHELL_DESKTOP_MODE,
-                "DesktopTasksController: the task with taskId=%d is already closing!",
-                task.taskId
-            )
-        }
+        desktopModeTaskRepository.addClosingTask(task.displayId, task.taskId)
         // If a CLOSE or TO_BACK is triggered on a desktop task, remove the task.
         if (Flags.enableDesktopWindowingBackNavigation() &&
             desktopModeTaskRepository.isVisibleTask(task.taskId)) {
