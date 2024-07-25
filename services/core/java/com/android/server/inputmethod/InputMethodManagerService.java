@@ -1063,8 +1063,8 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
 
                 for (int userId : userIds) {
                     Slog.d(TAG, "Start initialization for user=" + userId);
-                    final var additionalSubtypeMap =
-                            AdditionalSubtypeMapRepository.ensureInitializedAndGet(userId);
+                    AdditionalSubtypeMapRepository.initializeIfNecessary(userId);
+                    final var additionalSubtypeMap = AdditionalSubtypeMapRepository.get(userId);
                     final var settings = InputMethodManagerService.queryInputMethodServicesInternal(
                             context, userId, additionalSubtypeMap,
                             DirectBootAwareness.AUTO).getMethodMap();
