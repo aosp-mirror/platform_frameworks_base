@@ -4523,8 +4523,9 @@ public class AlarmManagerService extends SystemService {
                             final int[] userIds =
                                     mUserWakeupStore.getUserIdsToWakeup(nowELAPSED);
                             for (int i = 0; i < userIds.length; i++) {
-                                if (!mActivityManagerInternal.startUserInBackground(
-                                        userIds[i])) {
+                                if (mActivityManagerInternal.isUserRunning(userIds[i], 0)
+                                        || !mActivityManagerInternal.startUserInBackground(
+                                                userIds[i])) {
                                     mUserWakeupStore.removeUserWakeup(userIds[i]);
                                 }
                             }
