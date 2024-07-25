@@ -1812,8 +1812,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
     }
 
     @GuardedBy("ImfLock.class")
-    @Override
-    public boolean isInputShownLocked() {
+    private boolean isInputShownLocked() {
         return mVisibilityStateComputer.isInputShown();
     }
 
@@ -3004,52 +3003,75 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
         }
     }
 
+    @GuardedBy("ImfLock.class")
+    private void sendResultReceiverFailureLocked(@Nullable ResultReceiver resultReceiver) {
+        final boolean isInputShown = mVisibilityStateComputer.isInputShown();
+        resultReceiver.send(isInputShown
+                ? InputMethodManager.RESULT_UNCHANGED_SHOWN
+                : InputMethodManager.RESULT_UNCHANGED_HIDDEN, null);
+    }
+
     @Override
     public boolean showSoftInput(IInputMethodClient client, IBinder windowToken,
             @NonNull ImeTracker.Token statsToken, @InputMethodManager.ShowFlags int flags,
             int lastClickToolType, ResultReceiver resultReceiver,
             @SoftInputShowHideReason int reason) {
         Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "IMMS.showSoftInput");
-        final int uid = Binder.getCallingUid();
-        final int callingUserId = UserHandle.getUserId(uid);
         ImeTracing.getInstance().triggerManagerServiceDump(
                 "InputMethodManagerService#showSoftInput", mDumper);
         synchronized (ImfLock.class) {
-            final int userId = resolveImeUserIdLocked(callingUserId);
-            if (!canInteractWithImeLocked(uid, client, "showSoftInput", statsToken,
-                    userId)) {
-                ImeTracker.forLogging().onFailed(
-                        statsToken, ImeTracker.PHASE_SERVER_CLIENT_FOCUSED);
-                Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
-                return false;
+            final boolean result = showSoftInputLocked(client, windowToken, statsToken, flags,
+                    lastClickToolType, resultReceiver, reason);
+            // When ZeroJankProxy is enabled, the app has already received "true" as the return
+            // value, and expect "resultReceiver" to be notified later. See b/327751155.
+            if (!result && Flags.useZeroJankProxy()) {
+                sendResultReceiverFailureLocked(resultReceiver);
             }
-            final var userData = getUserData(userId);
-            final long ident = Binder.clearCallingIdentity();
-            try {
-                if (DEBUG) Slog.v(TAG, "Client requesting input be shown");
-                if (Flags.refactorInsetsController()) {
-                    boolean wasVisible = isInputShownLocked();
-                    if (userData.mImeBindingState != null
-                            && userData.mImeBindingState.mFocusedWindowClient != null
-                            && userData.mImeBindingState.mFocusedWindowClient.mClient != null) {
-                        userData.mImeBindingState.mFocusedWindowClient.mClient
-                                .setImeVisibility(true, statsToken);
-                        if (resultReceiver != null) {
-                            resultReceiver.send(
-                                    wasVisible ? InputMethodManager.RESULT_UNCHANGED_SHOWN
-                                            : InputMethodManager.RESULT_SHOWN, null);
-                        }
-                        return true;
+            return result;  // ignored when ZeroJankProxy is enabled.
+        }
+    }
+
+    @GuardedBy("ImfLock.class")
+    private boolean showSoftInputLocked(IInputMethodClient client, IBinder windowToken,
+            @NonNull ImeTracker.Token statsToken, @InputMethodManager.ShowFlags int flags,
+            int lastClickToolType, ResultReceiver resultReceiver,
+            @SoftInputShowHideReason int reason) {
+        final int uid = Binder.getCallingUid();
+        final int callingUserId = UserHandle.getUserId(uid);
+        final int userId = resolveImeUserIdLocked(callingUserId);
+        if (!canInteractWithImeLocked(uid, client, "showSoftInput", statsToken,
+                userId)) {
+            ImeTracker.forLogging().onFailed(
+                    statsToken, ImeTracker.PHASE_SERVER_CLIENT_FOCUSED);
+            Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
+            return false;
+        }
+        final var userData = getUserData(userId);
+        final long ident = Binder.clearCallingIdentity();
+        try {
+            if (DEBUG) Slog.v(TAG, "Client requesting input be shown");
+            if (Flags.refactorInsetsController()) {
+                boolean wasVisible = isInputShownLocked();
+                if (userData.mImeBindingState != null
+                        && userData.mImeBindingState.mFocusedWindowClient != null
+                        && userData.mImeBindingState.mFocusedWindowClient.mClient != null) {
+                    userData.mImeBindingState.mFocusedWindowClient.mClient
+                            .setImeVisibility(true, statsToken);
+                    if (resultReceiver != null) {
+                        resultReceiver.send(
+                                wasVisible ? InputMethodManager.RESULT_UNCHANGED_SHOWN
+                                        : InputMethodManager.RESULT_SHOWN, null);
                     }
-                    return false;
-                } else {
-                    return showCurrentInputLocked(windowToken, statsToken, flags, lastClickToolType,
-                            resultReceiver, reason, userId);
+                    return true;
                 }
-            } finally {
-                Binder.restoreCallingIdentity(ident);
-                Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
+                return false;
+            } else {
+                return showCurrentInputLocked(windowToken, statsToken, flags, lastClickToolType,
+                        resultReceiver, reason, userId);
             }
+        } finally {
+            Binder.restoreCallingIdentity(ident);
+            Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
         }
     }
 
@@ -3444,50 +3466,64 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
     public boolean hideSoftInput(IInputMethodClient client, IBinder windowToken,
             @NonNull ImeTracker.Token statsToken, @InputMethodManager.HideFlags int flags,
             ResultReceiver resultReceiver, @SoftInputShowHideReason int reason) {
-        final int uid = Binder.getCallingUid();
-        final int callingUserId = UserHandle.getUserId(uid);
         ImeTracing.getInstance().triggerManagerServiceDump(
                 "InputMethodManagerService#hideSoftInput", mDumper);
         synchronized (ImfLock.class) {
-            final int userId = resolveImeUserIdLocked(callingUserId);
-            if (!canInteractWithImeLocked(uid, client, "hideSoftInput", statsToken, userId)) {
-                if (isInputShownLocked()) {
-                    ImeTracker.forLogging().onFailed(
-                            statsToken, ImeTracker.PHASE_SERVER_CLIENT_FOCUSED);
-                } else {
-                    ImeTracker.forLogging().onCancelled(statsToken,
-                            ImeTracker.PHASE_SERVER_CLIENT_FOCUSED);
+            final boolean result = hideSoftInputLocked(client, windowToken, statsToken, flags,
+                    resultReceiver, reason);
+            // When ZeroJankProxy is enabled, the app has already received "true" as the return
+            // value, and expect "resultReceiver" to be notified later. See b/327751155.
+            if (!result && Flags.useZeroJankProxy()) {
+                sendResultReceiverFailureLocked(resultReceiver);
+            }
+            return result;  // ignored when ZeroJankProxy is enabled.
+        }
+    }
+
+    @GuardedBy("ImfLock.class")
+    private boolean hideSoftInputLocked(IInputMethodClient client, IBinder windowToken,
+            @NonNull ImeTracker.Token statsToken, @InputMethodManager.HideFlags int flags,
+            ResultReceiver resultReceiver, @SoftInputShowHideReason int reason) {
+        final int uid = Binder.getCallingUid();
+        final int callingUserId = UserHandle.getUserId(uid);
+        final int userId = resolveImeUserIdLocked(callingUserId);
+        if (!canInteractWithImeLocked(uid, client, "hideSoftInput", statsToken, userId)) {
+            if (isInputShownLocked()) {
+                ImeTracker.forLogging().onFailed(
+                        statsToken, ImeTracker.PHASE_SERVER_CLIENT_FOCUSED);
+            } else {
+                ImeTracker.forLogging().onCancelled(statsToken,
+                        ImeTracker.PHASE_SERVER_CLIENT_FOCUSED);
+            }
+            return false;
+        }
+        final var userData = getUserData(userId);
+        final long ident = Binder.clearCallingIdentity();
+        try {
+            Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "IMMS.hideSoftInput");
+            if (DEBUG) Slog.v(TAG, "Client requesting input be hidden");
+            if (Flags.refactorInsetsController()) {
+                if (userData.mImeBindingState != null
+                        && userData.mImeBindingState.mFocusedWindowClient != null
+                        && userData.mImeBindingState.mFocusedWindowClient.mClient != null) {
+                    boolean wasVisible = isInputShownLocked();
+                    // TODO add windowToken to interface
+                    userData.mImeBindingState.mFocusedWindowClient.mClient
+                            .setImeVisibility(false, statsToken);
+                    if (resultReceiver != null) {
+                        resultReceiver.send(wasVisible ? InputMethodManager.RESULT_HIDDEN
+                                : InputMethodManager.RESULT_UNCHANGED_HIDDEN, null);
+                    }
+                    return true;
                 }
                 return false;
+            } else {
+                return InputMethodManagerService.this.hideCurrentInputLocked(
+                        windowToken, statsToken, flags, resultReceiver, reason, userId);
             }
-            final var userData = getUserData(userId);
-            final long ident = Binder.clearCallingIdentity();
-            try {
-                Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "IMMS.hideSoftInput");
-                if (DEBUG) Slog.v(TAG, "Client requesting input be hidden");
-                if (Flags.refactorInsetsController()) {
-                    if (userData.mImeBindingState != null
-                            && userData.mImeBindingState.mFocusedWindowClient != null
-                            && userData.mImeBindingState.mFocusedWindowClient.mClient != null) {
-                        boolean wasVisible = isInputShownLocked();
-                        // TODO add windowToken to interface
-                        userData.mImeBindingState.mFocusedWindowClient.mClient
-                                .setImeVisibility(false, statsToken);
-                        if (resultReceiver != null) {
-                            resultReceiver.send(wasVisible ? InputMethodManager.RESULT_HIDDEN
-                                    : InputMethodManager.RESULT_UNCHANGED_HIDDEN, null);
-                        }
-                        return true;
-                    }
-                    return false;
-                } else {
-                    return InputMethodManagerService.this.hideCurrentInputLocked(windowToken,
-                            statsToken, flags, resultReceiver, reason, userId);
-                }
-            } finally {
-                Binder.restoreCallingIdentity(ident);
-                Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
-            }
+        } finally {
+            Binder.restoreCallingIdentity(ident);
+            Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
         }
     }
 
