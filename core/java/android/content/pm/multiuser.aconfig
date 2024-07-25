@@ -190,6 +190,18 @@ flag {
   }
 }
 
+flag {
+    name: "cache_user_serial_number_read_only"
+    namespace: "multiuser"
+    description: "Optimise user serial number retrieval. Read only flag, so that it can be used before the flags are initialized."
+    bug: "353134536"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+  }
+  is_fixed_read_only: true
+}
+
+
 # This flag guards the private space feature and all its implementations excluding the APIs. APIs are guarded by android.os.Flags.allow_private_profile.
 flag {
     name: "enable_private_space_features"
