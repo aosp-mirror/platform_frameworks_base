@@ -271,10 +271,14 @@ public abstract class SysuiTestCase {
     }
 
     protected void waitForIdleSync() {
-        if (mHandler == null) {
-            mHandler = new Handler(Looper.getMainLooper());
+        if (isRobolectricTest()) {
+            mRealInstrumentation.waitForIdleSync();
+        } else {
+            if (mHandler == null) {
+                mHandler = new Handler(Looper.getMainLooper());
+            }
+            waitForIdleSync(mHandler);
         }
-        waitForIdleSync(mHandler);
     }
 
     protected void waitForUiOffloadThread() {
