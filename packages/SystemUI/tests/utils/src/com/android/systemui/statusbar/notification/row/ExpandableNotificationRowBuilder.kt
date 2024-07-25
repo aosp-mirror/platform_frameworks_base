@@ -319,9 +319,14 @@ class ExpandableNotificationRowBuilder(
         // NOTE: This flag is read when the ExpandableNotificationRow is inflated, so it needs to be
         //  set, but we do not want to override an existing value that is needed by a specific test.
 
+        val rowFuture: SettableFuture<ExpandableNotificationRow> = SettableFuture.create()
         val rowInflaterTask =
             RowInflaterTask(mFakeSystemClock, Mockito.mock(RowInflaterTaskLogger::class.java))
-        val row = rowInflaterTask.inflateSynchronously(context, null, entry)
+        rowInflaterTask.inflate(context, null, entry, MoreExecutors.directExecutor()) { inflatedRow
+            ->
+            rowFuture.set(inflatedRow)
+        }
+        val row = rowFuture.get(1, TimeUnit.SECONDS)
 
         entry.row = row
         mIconManager.createIcons(entry)
