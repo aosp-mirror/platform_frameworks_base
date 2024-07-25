@@ -3813,13 +3813,13 @@ final class InstallPackageHelper {
                 // This also has the (beneficial) side effect where if a package disappears from an
                 // APEX, leaving only a /data copy, it will lose its apexModuleName.
                 //
-                // This must be done before scanSystemPackageLI as that will throw in the case of a
+                // This must be done before scanPackageForInitLI as that will throw in the case of a
                 // system -> data package.
                 disabledPkgSetting.setApexModuleName(activeApexInfo.apexModuleName);
             }
         }
 
-        final Pair<ScanResult, Boolean> scanResultPair = scanSystemPackageLI(
+        final Pair<ScanResult, Boolean> scanResultPair = scanPackageForInitLI(
                 parsedPackage, parseFlags, scanFlags, user);
         final ScanResult scanResult = scanResultPair.first;
         boolean shouldHideSystemApp = scanResultPair.second;
@@ -4054,7 +4054,7 @@ final class InstallPackageHelper {
         }
     }
 
-    private Pair<ScanResult, Boolean> scanSystemPackageLI(ParsedPackage parsedPackage,
+    private Pair<ScanResult, Boolean> scanPackageForInitLI(ParsedPackage parsedPackage,
             @ParsingPackageUtils.ParseFlags int parseFlags,
             @PackageManagerService.ScanFlags int scanFlags,
             @Nullable UserHandle user) throws PackageManagerException {
@@ -4167,7 +4167,7 @@ final class InstallPackageHelper {
                         ParsingPackageUtils.getSigningDetails(input, parsedPackage,
                                 false /*skipVerify*/);
                 if (result.isError()) {
-                    throw new PrepareFailure("Failed collect during scanSystemPackageLI",
+                    throw new PrepareFailure("Failed collect during scanPackageForInitLI",
                             result.getException());
                 }
                 disabledPkgSetting.setSigningDetails(result.getResult());
