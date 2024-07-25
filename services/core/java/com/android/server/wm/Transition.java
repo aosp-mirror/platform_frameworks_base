@@ -2193,6 +2193,11 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
                         && !wallpaperIsOwnTarget(wallpaper)) {
                     wallpaper.setVisibleRequested(false);
                 }
+                if (showWallpaper && wallpaper.isVisibleRequested()) {
+                    for (int j = wallpaper.mChildren.size() - 1; j >= 0; --j) {
+                        wallpaper.mChildren.get(j).mWinAnimator.prepareSurfaceLocked(t);
+                    }
+                }
             }
         }
     }
