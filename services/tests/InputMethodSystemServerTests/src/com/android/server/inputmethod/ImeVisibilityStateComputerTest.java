@@ -251,7 +251,7 @@ public class ImeVisibilityStateComputerTest extends InputMethodManagerServiceTes
         synchronized (ImfLock.class) {
             // Assume the last IME targeted window has requested IME visible
             final IBinder lastImeTargetWindowToken = new Binder();
-            mInputMethodManagerService.mLastImeTargetWindow = lastImeTargetWindowToken;
+            mComputer.setLastImeTargetWindow(lastImeTargetWindowToken);
             mComputer.requestImeVisibility(lastImeTargetWindowToken, true);
             final ImeTargetWindowState lastState = mComputer.getWindowStateOrNull(
                     lastImeTargetWindowToken);

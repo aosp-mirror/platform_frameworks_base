@@ -39,6 +39,7 @@ import android.accessibilityservice.AccessibilityService;
 import android.annotation.AnyThread;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.content.res.Configuration;
 import android.os.Binder;
@@ -127,6 +128,15 @@ public final class ImeVisibilityStateComputer {
     /** The window token of the current visible IME input target. */
     @GuardedBy("ImfLock.class")
     private IBinder mCurVisibleImeInputTarget;
+
+    /**
+     * The last window token that we confirmed that IME started talking to.  This is always updated
+     * upon reports from the input method.  If the window state is already changed before the report
+     * is handled, this field just keeps the last value.
+     */
+    @GuardedBy("ImfLock.class")
+    @Nullable
+    private IBinder mLastImeTargetWindow;
 
     /** Represent the invalid IME visibility state */
     public static final int STATE_INVALID = -1;
@@ -479,8 +489,7 @@ public final class ImeVisibilityStateComputer {
                 break;
             case WindowManager.LayoutParams.SOFT_INPUT_STATE_UNCHANGED:
                 // Do nothing but preserving the last IME requested visibility state.
-                final ImeTargetWindowState lastState =
-                        getWindowStateOrNull(mService.mLastImeTargetWindow);
+                final ImeTargetWindowState lastState = getWindowStateOrNull(mLastImeTargetWindow);
                 if (lastState != null) {
                     state.setRequestedImeVisible(lastState.mRequestedImeVisible);
                 }
@@ -632,6 +641,17 @@ public final class ImeVisibilityStateComputer {
     }
 
     @GuardedBy("ImfLock.class")
+    @Nullable
+    IBinder getLastImeTargetWindow() {
+        return mLastImeTargetWindow;
+    }
+
+    @GuardedBy("ImfLock.class")
+    void setLastImeTargetWindow(@Nullable IBinder imeTargetWindow) {
+        mLastImeTargetWindow = imeTargetWindow;
+    }
+
+    @GuardedBy("ImfLock.class")
     void dumpDebug(ProtoOutputStream proto, long fieldId) {
         proto.write(SHOW_EXPLICITLY_REQUESTED, mRequestedShowExplicitly);
         proto.write(SHOW_FORCED, mShowForced);
@@ -647,6 +667,7 @@ public final class ImeVisibilityStateComputer {
                 + " mShowForced=" + mShowForced);
         p.println(prefix + "mImeHiddenByDisplayPolicy=" + mPolicy.isImeHiddenByDisplayPolicy());
         p.println(prefix + "mInputShown=" + mInputShown);
+        p.println(prefix + "mLastImeTargetWindow=" + mLastImeTargetWindow);
     }
 
     /**

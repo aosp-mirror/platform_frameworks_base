@@ -495,14 +495,6 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
     }
 
     /**
-     * The last window token that we confirmed that IME started talking to.  This is always updated
-     * upon reports from the input method.  If the window state is already changed before the report
-     * is handled, this field just keeps the last value.
-     */
-    @MultiUserUnawareField
-    IBinder mLastImeTargetWindow;
-
-    /**
      * Map of window perceptible states indexed by their associated window tokens.
      *
      * The value {@code true} indicates that IME has not been mostly hidden via
@@ -2740,7 +2732,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
             if (targetWindow != null) {
                 mWindowManagerInternal.updateInputMethodTargetWindow(token, targetWindow);
             }
-            mLastImeTargetWindow = targetWindow;
+            mVisibilityStateComputer.setLastImeTargetWindow(targetWindow);
         }
     }
 
@@ -4629,8 +4621,8 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
             proto.write(CUR_SEQ, bindingController.getSequenceNumber());
             proto.write(CUR_CLIENT, Objects.toString(userData.mCurClient));
             userData.mImeBindingState.dumpDebug(proto, mWindowManagerInternal);
-            proto.write(LAST_IME_TARGET_WINDOW_NAME,
-                    mWindowManagerInternal.getWindowName(mLastImeTargetWindow));
+            proto.write(LAST_IME_TARGET_WINDOW_NAME, mWindowManagerInternal.getWindowName(
+                    mVisibilityStateComputer.getLastImeTargetWindow()));
             proto.write(CUR_FOCUSED_WINDOW_SOFT_INPUT_MODE, InputMethodDebug.softInputModeToString(
                     userData.mImeBindingState.mFocusedWindowSoftInputMode));
             if (userData.mCurEditorInfo != null) {
@@ -4804,8 +4796,8 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
                                     .setImeVisibility(false, statsToken);
                         }
                     } else {
-                        hideCurrentInputLocked(mLastImeTargetWindow, statsToken, flags,
-                                null /* resultReceiver */, reason, userId);
+                        hideCurrentInputLocked(mVisibilityStateComputer.getLastImeTargetWindow(),
+                                statsToken, flags, null /* resultReceiver */, reason, userId);
                     }
                 } finally {
                     Binder.restoreCallingIdentity(ident);
@@ -4843,9 +4835,9 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
                                     .setImeVisibility(true, statsToken);
                         }
                     } else {
-                        showCurrentInputLocked(mLastImeTargetWindow, statsToken, flags,
-                                MotionEvent.TOOL_TYPE_UNKNOWN, null /* resultReceiver */, reason,
-                                userId);
+                        showCurrentInputLocked(mVisibilityStateComputer.getLastImeTargetWindow(),
+                                statsToken, flags, MotionEvent.TOOL_TYPE_UNKNOWN,
+                                null /* resultReceiver */, reason, userId);
                     }
                 } finally {
                     Binder.restoreCallingIdentity(ident);
@@ -5869,7 +5861,8 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
                 // Hide the IME method menu only when the IME surface parent is changed by the
                 // input target changed, in case seeing the dialog dismiss flickering during
                 // the next focused window starting the input connection.
-                if (mLastImeTargetWindow != userData.mImeBindingState.mFocusedWindow) {
+                if (mVisibilityStateComputer.getLastImeTargetWindow()
+                        != userData.mImeBindingState.mFocusedWindow) {
                     if (Flags.imeSwitcherRevamp()) {
                         final var bindingController = getInputMethodBindingController(userId);
                         mMenuControllerNew.hide(bindingController.getCurTokenDisplayId(), userId);
