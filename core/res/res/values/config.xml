@@ -4976,7 +4976,7 @@
     <!-- URI for camera shutter sound -->
     <string translatable="false" name="config_cameraShutterSound">/product/media/audio/ui/camera_click.ogg</string>
 
-    <!-- URI for default ringtone sound file to be used for silent ringer vibration -->
+    <!-- @deprecated This configuration is no longer used. -->
     <string translatable="false" name="config_defaultRingtoneVibrationSound"></string>
 
     <!-- Default number of notifications from the same app before they are automatically grouped by the OS -->
