@@ -1260,8 +1260,8 @@ public class InputManagerService extends IInputManager.Stub
      * @return true if drag and drop was successfully started, false otherwise.
      */
     public boolean startDragAndDrop(@NonNull IBinder fromChannelToken,
-            @NonNull InputChannel dragAndDropChannel) {
-        return mNative.transferTouchGesture(fromChannelToken, dragAndDropChannel.getToken(),
+            @NonNull IBinder dragAndDropChannelToken) {
+        return mNative.transferTouchGesture(fromChannelToken, dragAndDropChannelToken,
                 true /* isDragDrop */);
     }
 
