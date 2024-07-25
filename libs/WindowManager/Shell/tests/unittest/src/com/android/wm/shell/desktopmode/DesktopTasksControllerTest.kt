@@ -71,6 +71,7 @@ import com.android.internal.jank.InteractionJankMonitor
 import com.android.window.flags.Flags
 import com.android.window.flags.Flags.FLAG_ENABLE_DESKTOP_WINDOWING_MODE
 import com.android.wm.shell.MockToken
+import com.android.wm.shell.R
 import com.android.wm.shell.RootTaskDisplayAreaOrganizer
 import com.android.wm.shell.ShellTaskOrganizer
 import com.android.wm.shell.ShellTestCase
@@ -714,6 +715,27 @@ class DesktopTasksControllerTest : ShellTestCase() {
     displayLayout.getStableBoundsForDesktopMode(stableBounds)
 
     addFreeformTaskAtPosition(DesktopTaskPosition.TopRight, stableBounds)
+
+    val task = setUpFullscreenTask()
+    val wct = WindowContainerTransaction()
+    controller.addMoveToDesktopChanges(wct, task)
+
+    val finalBounds = findBoundsChange(wct, task)
+    assertThat(stableBounds.getDesktopTaskPosition(finalBounds!!))
+      .isEqualTo(DesktopTaskPosition.Center)
+  }
+
+  @Test
+  @EnableFlags(Flags.FLAG_ENABLE_CASCADING_WINDOWS)
+  fun addMoveToDesktopChanges_defaultToCenterIfFree() {
+    setUpLandscapeDisplay()
+    val stableBounds = Rect()
+    displayLayout.getStableBoundsForDesktopMode(stableBounds)
+
+    val minTouchTarget = context.resources.getDimensionPixelSize(
+      R.dimen.freeform_required_visible_empty_space_in_header)
+    addFreeformTaskAtPosition(DesktopTaskPosition.Center, stableBounds,
+      Rect(0, 0, 1600, 1200), Point(0, minTouchTarget + 1))
 
     val task = setUpFullscreenTask()
     val wct = WindowContainerTransaction()
@@ -2544,11 +2566,12 @@ class DesktopTasksControllerTest : ShellTestCase() {
   private fun addFreeformTaskAtPosition(
     pos: DesktopTaskPosition,
     stableBounds: Rect,
-    bounds: Rect = DEFAULT_LANDSCAPE_BOUNDS
+    bounds: Rect = DEFAULT_LANDSCAPE_BOUNDS,
+    offsetPos: Point = Point(0, 0)
   ): RunningTaskInfo {
     val offset = pos.getTopLeftCoordinates(stableBounds, bounds)
     val prevTaskBounds = Rect(bounds)
-    prevTaskBounds.offsetTo(offset.x, offset.y)
+    prevTaskBounds.offsetTo(offset.x + offsetPos.x, offset.y + offsetPos.y)
     return setUpFreeformTask(bounds = prevTaskBounds)
   }
 
