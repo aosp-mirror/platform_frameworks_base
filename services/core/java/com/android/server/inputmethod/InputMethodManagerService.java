@@ -4791,24 +4791,21 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
     private void hideMySoftInputLocked(@NonNull ImeTracker.Token statsToken,
             @InputMethodManager.HideFlags int flags, @SoftInputShowHideReason int reason,
             @NonNull UserData userData) {
+        final int userId = userData.mUserId;
+        Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "IMMS.hideMySoftInputLocked");
+        final long ident = Binder.clearCallingIdentity();
         try {
-            Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "IMMS.hideMySoftInputLocked");
-            final int userId = userData.mUserId;
-            final long ident = Binder.clearCallingIdentity();
-            try {
-                if (Flags.refactorInsetsController()) {
-                    userData.mCurClient.mClient.setImeVisibility(false, statsToken);
-                    // TODO we will loose the flags here
-                    setImeVisibilityOnFocusedWindowClient(false, userData, statsToken);
-                } else {
-                    final var visibilityStateComputer = userData.mVisibilityStateComputer;
-                    hideCurrentInputLocked(visibilityStateComputer.getLastImeTargetWindow(),
-                            statsToken, flags, null /* resultReceiver */, reason, userId);
-                }
-            } finally {
-                Binder.restoreCallingIdentity(ident);
+            if (Flags.refactorInsetsController()) {
+                userData.mCurClient.mClient.setImeVisibility(false, statsToken);
+                // TODO we will loose the flags here
+                setImeVisibilityOnFocusedWindowClient(false, userData, statsToken);
+            } else {
+                final var visibilityStateComputer = userData.mVisibilityStateComputer;
+                hideCurrentInputLocked(visibilityStateComputer.getLastImeTargetWindow(),
+                        statsToken, flags, null /* resultReceiver */, reason, userId);
             }
         } finally {
+            Binder.restoreCallingIdentity(ident);
             Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
         }
     }
@@ -4818,24 +4815,21 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
     private void showMySoftInputLocked(@NonNull ImeTracker.Token statsToken,
             @InputMethodManager.ShowFlags int flags, @SoftInputShowHideReason int reason,
             @NonNull UserData userData) {
+        final int userId = userData.mUserId;
+        Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "IMMS.showMySoftInputLocked");
+        final long ident = Binder.clearCallingIdentity();
         try {
-            Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "IMMS.showMySoftInputLocked");
-            final int userId = userData.mUserId;
-            final long ident = Binder.clearCallingIdentity();
-            try {
-                if (Flags.refactorInsetsController()) {
-                    userData.mCurClient.mClient.setImeVisibility(true, statsToken);
-                    setImeVisibilityOnFocusedWindowClient(true, userData, statsToken);
-                } else {
-                    final var visibilityStateComputer = userData.mVisibilityStateComputer;
-                    showCurrentInputLocked(visibilityStateComputer.getLastImeTargetWindow(),
-                            statsToken, flags, MotionEvent.TOOL_TYPE_UNKNOWN,
-                            null /* resultReceiver */, reason, userId);
-                }
-            } finally {
-                Binder.restoreCallingIdentity(ident);
+            if (Flags.refactorInsetsController()) {
+                userData.mCurClient.mClient.setImeVisibility(true, statsToken);
+                setImeVisibilityOnFocusedWindowClient(true, userData, statsToken);
+            } else {
+                final var visibilityStateComputer = userData.mVisibilityStateComputer;
+                showCurrentInputLocked(visibilityStateComputer.getLastImeTargetWindow(),
+                        statsToken, flags, MotionEvent.TOOL_TYPE_UNKNOWN,
+                        null /* resultReceiver */, reason, userId);
             }
         } finally {
+            Binder.restoreCallingIdentity(ident);
             Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
         }
     }
