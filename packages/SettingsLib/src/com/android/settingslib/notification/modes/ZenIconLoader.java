@@ -35,7 +35,6 @@ import android.util.LruCache;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.VisibleForTesting;
-import androidx.appcompat.content.res.AppCompatResources;
 
 import com.google.common.util.concurrent.FluentFuture;
 import com.google.common.util.concurrent.Futures;
@@ -104,7 +103,7 @@ public class ZenIconLoader {
                 return context.getDrawable(iconResId);
             } else {
                 Context appContext = context.createPackageContext(pkg, 0);
-                Drawable appDrawable = AppCompatResources.getDrawable(appContext, iconResId);
+                Drawable appDrawable = appContext.getDrawable(iconResId);
                 return getMonochromeIconIfPresent(appDrawable);
             }
         })).catching(Exception.class, ex -> {
