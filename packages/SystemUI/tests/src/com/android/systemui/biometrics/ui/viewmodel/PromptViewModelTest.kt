@@ -44,7 +44,6 @@ import android.view.MotionEvent
 import android.view.Surface
 import androidx.test.filters.SmallTest
 import com.android.app.activityTaskManager
-import com.android.systemui.Flags.FLAG_BP_TALKBACK
 import com.android.systemui.Flags.FLAG_CONSTRAINT_BP
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.biometrics.AuthController
@@ -1356,7 +1355,6 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
     }
 
     @Test
-    @EnableFlags(FLAG_BP_TALKBACK)
     fun hint_for_talkback_guidance() = runGenericTest {
         val hint by collectLastValue(kosmos.promptViewModel.accessibilityHint)
 
@@ -1379,7 +1377,6 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
     }
 
     @Test
-    @EnableFlags(FLAG_BP_TALKBACK)
     fun no_hint_for_talkback_guidance_after_auth() = runGenericTest {
         val hint by collectLastValue(kosmos.promptViewModel.accessibilityHint)
 

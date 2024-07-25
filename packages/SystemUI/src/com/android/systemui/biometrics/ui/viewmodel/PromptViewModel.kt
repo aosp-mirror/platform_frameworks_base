@@ -36,7 +36,6 @@ import android.util.RotationUtils
 import android.view.HapticFeedbackConstants
 import android.view.MotionEvent
 import com.android.launcher3.icons.IconProvider
-import com.android.systemui.Flags.bpTalkback
 import com.android.systemui.Flags.constraintBp
 import com.android.systemui.biometrics.UdfpsUtils
 import com.android.systemui.biometrics.Utils
@@ -916,10 +915,9 @@ constructor(
         touchExplorationEnabled: Boolean,
     ): Boolean {
         if (
-            bpTalkback() &&
-                modalities.first().hasUdfps &&
-                touchExplorationEnabled &&
-                !isAuthenticated.first().isAuthenticated
+            modalities.first().hasUdfps &&
+            touchExplorationEnabled &&
+            !isAuthenticated.first().isAuthenticated
         ) {
             // TODO(b/315184924): Remove uses of UdfpsUtils
             val scaledTouch =
