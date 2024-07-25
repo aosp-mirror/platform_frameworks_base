@@ -944,7 +944,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
             // TODO(b/196206770): Disallow I/O on this thread. Currently it's needed for loading
             // additional subtypes in switchUserOnHandlerLocked().
             final ServiceThread thread = new ServiceThread(HANDLER_THREAD_NAME,
-                    Process.THREAD_PRIORITY_FOREGROUND, true /* allowIo */);
+                    Process.THREAD_PRIORITY_FOREGROUND, false /* allowIo */);
             thread.start();
 
             final ServiceThread ioThread = new ServiceThread(PACKAGE_MONITOR_THREAD_NAME,
