@@ -2312,6 +2312,9 @@
     <!-- Flag indicating current media Output Switcher version. -->
     <integer name="config_mediaOutputSwitchDialogVersion">1</integer>
 
+    <!-- Flag indicating whether MEDIA_CONTENT_CONTROL enables scanning with the screen off. -->
+    <bool name="config_mediaContentControlEnablesFullScan">true</bool>
+
     <!-- Flag indicating that an outbound call must have a call capable phone account
          that has declared it can process the call's handle. -->
     <bool name="config_requireCallCapableAccountForHandle">false</bool>
