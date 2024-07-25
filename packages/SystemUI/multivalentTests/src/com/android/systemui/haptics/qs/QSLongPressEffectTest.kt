@@ -25,6 +25,7 @@ import com.android.systemui.SysuiTestCase
 import com.android.systemui.animation.ActivityTransitionAnimator
 import com.android.systemui.haptics.vibratorHelper
 import com.android.systemui.kosmos.testScope
+import com.android.systemui.log.core.FakeLogBuffer
 import com.android.systemui.qs.qsTileFactory
 import com.android.systemui.statusbar.policy.keyguardStateController
 import com.android.systemui.testKosmos
@@ -72,6 +73,7 @@ class QSLongPressEffectTest : SysuiTestCase() {
             QSLongPressEffect(
                 vibratorHelper,
                 kosmos.keyguardStateController,
+                FakeLogBuffer.Factory.create(),
             )
         longPressEffect.callback = callback
         longPressEffect.qsTile = qsTile
