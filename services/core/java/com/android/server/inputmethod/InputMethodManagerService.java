@@ -4862,14 +4862,13 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
         return mVisibilityApplier;
     }
 
-    void onApplyImeVisibilityFromComputer(IBinder windowToken, @NonNull ImeTracker.Token statsToken,
-            @NonNull ImeVisibilityResult result) {
-        synchronized (ImfLock.class) {
-            // TODO(b/305849394): Infer userId from windowToken
-            final int userId = mCurrentUserId;
-            mVisibilityApplier.applyImeVisibility(windowToken, statsToken, result.getState(),
-                    result.getReason(), userId);
-        }
+    @GuardedBy("ImfLock.class")
+    void onApplyImeVisibilityFromComputerLocked(IBinder windowToken,
+            @NonNull ImeTracker.Token statsToken, @NonNull ImeVisibilityResult result) {
+        // TODO(b/305849394): Infer userId from windowToken
+        final int userId = mCurrentUserId;
+        mVisibilityApplier.applyImeVisibility(windowToken, statsToken, result.getState(),
+                result.getReason(), userId);
     }
 
     @GuardedBy("ImfLock.class")
