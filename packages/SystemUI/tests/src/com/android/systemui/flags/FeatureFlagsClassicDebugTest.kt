@@ -68,7 +68,7 @@ class FeatureFlagsClassicDebugTest : SysuiTestCase() {
     @Mock private lateinit var systemProperties: SystemPropertiesHelper
     @Mock private lateinit var resources: Resources
     @Mock private lateinit var restarter: Restarter
-    private val userTracker = FakeUserTracker()
+    private lateinit var userTracker: FakeUserTracker
     private val flagMap = mutableMapOf<String, Flag<*>>()
     private lateinit var broadcastReceiver: BroadcastReceiver
     private lateinit var clearCacheAction: Consumer<String>
@@ -82,6 +82,9 @@ class FeatureFlagsClassicDebugTest : SysuiTestCase() {
         MockitoAnnotations.initMocks(this)
         flagMap.put(teamfoodableFlagA.name, teamfoodableFlagA)
         flagMap.put(releasedFlagB.name, releasedFlagB)
+
+        userTracker = FakeUserTracker(onCreateCurrentUserContext = { mockContext })
+
         mFeatureFlagsClassicDebug =
             FeatureFlagsClassicDebug(
                 flagManager,
