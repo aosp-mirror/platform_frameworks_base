@@ -258,7 +258,6 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
     private static final int MSG_HIDE_ALL_INPUT_METHODS = 1035;
     private static final int MSG_REMOVE_IME_SURFACE = 1060;
     private static final int MSG_REMOVE_IME_SURFACE_FROM_WINDOW = 1061;
-    private static final int MSG_UPDATE_IME_WINDOW_STATUS = 1070;
 
     private static final int MSG_RESET_HANDWRITING = 1090;
     private static final int MSG_START_HANDWRITING = 1100;
@@ -2744,16 +2743,15 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
         }
     }
 
-    private void updateImeWindowStatus(boolean disableImeIcon) {
-        synchronized (ImfLock.class) {
-            // TODO(b/350386877): Propagate userId from the caller.
-            final int userId = mCurrentUserId;
-            if (disableImeIcon) {
-                final var bindingController = getInputMethodBindingController(userId);
-                updateSystemUiLocked(0, bindingController.getBackDisposition(), userId);
-            } else {
-                updateSystemUiLocked(userId);
-            }
+    @GuardedBy("ImfLock.class")
+    private void updateImeWindowStatusLocked(boolean disableImeIcon, int displayId) {
+        // TODO(b/350386877): Propagate userId from displayId.
+        final int userId = mCurrentUserId;
+        if (disableImeIcon) {
+            final var bindingController = getInputMethodBindingController(userId);
+            updateSystemUiLocked(0, bindingController.getBackDisposition(), userId);
+        } else {
+            updateSystemUiLocked(userId);
         }
     }
 
@@ -5056,10 +5054,6 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
                 }
                 return true;
             }
-            case MSG_UPDATE_IME_WINDOW_STATUS: {
-                updateImeWindowStatus(msg.arg1 == 1);
-                return true;
-            }
 
             // ---------------------------------------------------------
 
@@ -5889,8 +5883,11 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
         @ImfLockFree
         @Override
         public void updateImeWindowStatus(boolean disableImeIcon, int displayId) {
-            mHandler.obtainMessage(MSG_UPDATE_IME_WINDOW_STATUS, disableImeIcon ? 1 : 0, 0)
-                    .sendToTarget();
+            mHandler.post(() -> {
+                synchronized (ImfLock.class) {
+                    updateImeWindowStatusLocked(disableImeIcon, displayId);
+                }
+            });
         }
 
         @Override
