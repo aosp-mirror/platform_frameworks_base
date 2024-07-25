@@ -20,7 +20,7 @@ import static com.android.server.wm.utils.DesktopModeFlagsUtil.DESKTOP_WINDOWING
 import static com.android.server.wm.utils.DesktopModeFlagsUtil.ToggleOverride.OVERRIDE_OFF;
 import static com.android.server.wm.utils.DesktopModeFlagsUtil.ToggleOverride.OVERRIDE_ON;
 import static com.android.window.flags.Flags.FLAG_ENABLE_DESKTOP_WINDOWING_MODE;
-import static com.android.window.flags.Flags.FLAG_ENABLE_DESKTOP_WINDOWING_WALLPAPER_ACTIVITY;
+import static com.android.window.flags.Flags.FLAG_ENABLE_WINDOWING_DYNAMIC_INITIAL_BOUNDS;
 import static com.android.window.flags.Flags.FLAG_SHOW_DESKTOP_WINDOWING_DEV_OPTION;
 
 import static com.google.common.truth.Truth.assertThat;
@@ -188,145 +188,145 @@ public class DesktopModeFlagsUtilTest extends WindowTestsBase {
 
     @Test
     @EnableFlags({FLAG_SHOW_DESKTOP_WINDOWING_DEV_OPTION, FLAG_ENABLE_DESKTOP_WINDOWING_MODE,
-            FLAG_ENABLE_DESKTOP_WINDOWING_WALLPAPER_ACTIVITY})
+            FLAG_ENABLE_WINDOWING_DYNAMIC_INITIAL_BOUNDS})
     public void isEnabled_dwFlagOn_overrideUnset_featureFlagOn_returnsTrue() {
         setOverride(DesktopModeFlagsUtil.ToggleOverride.OVERRIDE_UNSET.getSetting());
 
         // For unset overrides, follow flag
-        assertThat(DesktopModeFlagsUtil.WALLPAPER_ACTIVITY.isEnabled(mContext)).isTrue();
+        assertThat(DesktopModeFlagsUtil.DYNAMIC_INITIAL_BOUNDS.isEnabled(mContext)).isTrue();
     }
 
     @Test
     @EnableFlags({FLAG_SHOW_DESKTOP_WINDOWING_DEV_OPTION, FLAG_ENABLE_DESKTOP_WINDOWING_MODE})
-    @DisableFlags(FLAG_ENABLE_DESKTOP_WINDOWING_WALLPAPER_ACTIVITY)
+    @DisableFlags(FLAG_ENABLE_WINDOWING_DYNAMIC_INITIAL_BOUNDS)
     public void isEnabled_dwFlagOn_overrideUnset_featureFlagOff_returnsFalse() {
         setOverride(DesktopModeFlagsUtil.ToggleOverride.OVERRIDE_UNSET.getSetting());
         // For unset overrides, follow flag
-        assertThat(DesktopModeFlagsUtil.WALLPAPER_ACTIVITY.isEnabled(mContext)).isFalse();
+        assertThat(DesktopModeFlagsUtil.DYNAMIC_INITIAL_BOUNDS.isEnabled(mContext)).isFalse();
     }
 
     @Test
     @EnableFlags({
             FLAG_SHOW_DESKTOP_WINDOWING_DEV_OPTION,
             FLAG_ENABLE_DESKTOP_WINDOWING_MODE,
-            FLAG_ENABLE_DESKTOP_WINDOWING_WALLPAPER_ACTIVITY
+            FLAG_ENABLE_WINDOWING_DYNAMIC_INITIAL_BOUNDS
     })
     public void isEnabled_dwFlagOn_overrideOn_featureFlagOn_returnsTrue() {
         setOverride(OVERRIDE_ON.getSetting());
 
         // When toggle override matches its default state (dw flag), don't override flags
-        assertThat(DesktopModeFlagsUtil.WALLPAPER_ACTIVITY.isEnabled(mContext)).isTrue();
+        assertThat(DesktopModeFlagsUtil.DYNAMIC_INITIAL_BOUNDS.isEnabled(mContext)).isTrue();
     }
 
     @Test
     @EnableFlags({FLAG_SHOW_DESKTOP_WINDOWING_DEV_OPTION, FLAG_ENABLE_DESKTOP_WINDOWING_MODE})
-    @DisableFlags(FLAG_ENABLE_DESKTOP_WINDOWING_WALLPAPER_ACTIVITY)
+    @DisableFlags(FLAG_ENABLE_WINDOWING_DYNAMIC_INITIAL_BOUNDS)
     public void isEnabled_dwFlagOn_overrideOn_featureFlagOff_returnsFalse() {
         setOverride(OVERRIDE_ON.getSetting());
 
         // When toggle override matches its default state (dw flag), don't override flags
-        assertThat(DesktopModeFlagsUtil.WALLPAPER_ACTIVITY.isEnabled(mContext)).isFalse();
+        assertThat(DesktopModeFlagsUtil.DYNAMIC_INITIAL_BOUNDS.isEnabled(mContext)).isFalse();
     }
 
     @Test
     @EnableFlags({
             FLAG_SHOW_DESKTOP_WINDOWING_DEV_OPTION,
             FLAG_ENABLE_DESKTOP_WINDOWING_MODE,
-            FLAG_ENABLE_DESKTOP_WINDOWING_WALLPAPER_ACTIVITY
+            FLAG_ENABLE_WINDOWING_DYNAMIC_INITIAL_BOUNDS
     })
     public void isEnabled_dwFlagOn_overrideOff_featureFlagOn_returnsFalse() {
         setOverride(OVERRIDE_OFF.getSetting());
 
         // Follow override if they exist, and is not equal to default toggle state (dw flag)
-        assertThat(DesktopModeFlagsUtil.WALLPAPER_ACTIVITY.isEnabled(mContext)).isFalse();
+        assertThat(DesktopModeFlagsUtil.DYNAMIC_INITIAL_BOUNDS.isEnabled(mContext)).isFalse();
     }
 
     @Test
     @EnableFlags({FLAG_SHOW_DESKTOP_WINDOWING_DEV_OPTION, FLAG_ENABLE_DESKTOP_WINDOWING_MODE})
-    @DisableFlags(FLAG_ENABLE_DESKTOP_WINDOWING_WALLPAPER_ACTIVITY)
+    @DisableFlags(FLAG_ENABLE_WINDOWING_DYNAMIC_INITIAL_BOUNDS)
     public void isEnabled_dwFlagOn_overrideOff_featureFlagOff_returnsFalse() {
         setOverride(OVERRIDE_OFF.getSetting());
 
         // Follow override if they exist, and is not equal to default toggle state (dw flag)
-        assertThat(DesktopModeFlagsUtil.WALLPAPER_ACTIVITY.isEnabled(mContext)).isFalse();
+        assertThat(DesktopModeFlagsUtil.DYNAMIC_INITIAL_BOUNDS.isEnabled(mContext)).isFalse();
     }
 
     @Test
     @EnableFlags({
             FLAG_SHOW_DESKTOP_WINDOWING_DEV_OPTION,
-            FLAG_ENABLE_DESKTOP_WINDOWING_WALLPAPER_ACTIVITY
+            FLAG_ENABLE_WINDOWING_DYNAMIC_INITIAL_BOUNDS
     })
     @DisableFlags(FLAG_ENABLE_DESKTOP_WINDOWING_MODE)
     public void isEnabled_dwFlagOff_overrideUnset_featureFlagOn_returnsTrue() {
         setOverride(DesktopModeFlagsUtil.ToggleOverride.OVERRIDE_UNSET.getSetting());
 
         // For unset overrides, follow flag
-        assertThat(DesktopModeFlagsUtil.WALLPAPER_ACTIVITY.isEnabled(mContext)).isTrue();
+        assertThat(DesktopModeFlagsUtil.DYNAMIC_INITIAL_BOUNDS.isEnabled(mContext)).isTrue();
     }
 
     @Test
     @EnableFlags(FLAG_SHOW_DESKTOP_WINDOWING_DEV_OPTION)
     @DisableFlags({
             FLAG_ENABLE_DESKTOP_WINDOWING_MODE,
-            FLAG_ENABLE_DESKTOP_WINDOWING_WALLPAPER_ACTIVITY
+            FLAG_ENABLE_WINDOWING_DYNAMIC_INITIAL_BOUNDS
     })
     public void isEnabled_dwFlagOff_overrideUnset_featureFlagOff_returnsFalse() {
         setOverride(DesktopModeFlagsUtil.ToggleOverride.OVERRIDE_UNSET.getSetting());
 
         // For unset overrides, follow flag
-        assertThat(DesktopModeFlagsUtil.WALLPAPER_ACTIVITY.isEnabled(mContext)).isFalse();
+        assertThat(DesktopModeFlagsUtil.DYNAMIC_INITIAL_BOUNDS.isEnabled(mContext)).isFalse();
     }
 
     @Test
     @EnableFlags({
             FLAG_SHOW_DESKTOP_WINDOWING_DEV_OPTION,
-            FLAG_ENABLE_DESKTOP_WINDOWING_WALLPAPER_ACTIVITY
+            FLAG_ENABLE_WINDOWING_DYNAMIC_INITIAL_BOUNDS
     })
     @DisableFlags(FLAG_ENABLE_DESKTOP_WINDOWING_MODE)
     public void isEnabled_dwFlagOff_overrideOn_featureFlagOn_returnsTrue() {
         setOverride(OVERRIDE_ON.getSetting());
 
         // Follow override if they exist, and is not equal to default toggle state (dw flag)
-        assertThat(DesktopModeFlagsUtil.WALLPAPER_ACTIVITY.isEnabled(mContext)).isTrue();
+        assertThat(DesktopModeFlagsUtil.DYNAMIC_INITIAL_BOUNDS.isEnabled(mContext)).isTrue();
     }
 
     @Test
     @EnableFlags(FLAG_SHOW_DESKTOP_WINDOWING_DEV_OPTION)
     @DisableFlags({
             FLAG_ENABLE_DESKTOP_WINDOWING_MODE,
-            FLAG_ENABLE_DESKTOP_WINDOWING_WALLPAPER_ACTIVITY
+            FLAG_ENABLE_WINDOWING_DYNAMIC_INITIAL_BOUNDS
     })
     public void isEnabled_dwFlagOff_overrideOn_featureFlagOff_returnTrue() {
         setOverride(OVERRIDE_ON.getSetting());
 
         // Follow override if they exist, and is not equal to default toggle state (dw flag)
-        assertThat(DesktopModeFlagsUtil.WALLPAPER_ACTIVITY.isEnabled(mContext)).isTrue();
+        assertThat(DesktopModeFlagsUtil.DYNAMIC_INITIAL_BOUNDS.isEnabled(mContext)).isTrue();
     }
 
     @Test
     @EnableFlags({
             FLAG_SHOW_DESKTOP_WINDOWING_DEV_OPTION,
-            FLAG_ENABLE_DESKTOP_WINDOWING_WALLPAPER_ACTIVITY
+            FLAG_ENABLE_WINDOWING_DYNAMIC_INITIAL_BOUNDS
     })
     @DisableFlags(FLAG_ENABLE_DESKTOP_WINDOWING_MODE)
     public void isEnabled_dwFlagOff_overrideOff_featureFlagOn_returnsTrue() {
         setOverride(OVERRIDE_OFF.getSetting());
 
         // When toggle override matches its default state (dw flag), don't override flags
-        assertThat(DesktopModeFlagsUtil.WALLPAPER_ACTIVITY.isEnabled(mContext)).isTrue();
+        assertThat(DesktopModeFlagsUtil.DYNAMIC_INITIAL_BOUNDS.isEnabled(mContext)).isTrue();
     }
 
     @Test
     @EnableFlags(FLAG_SHOW_DESKTOP_WINDOWING_DEV_OPTION)
     @DisableFlags({
             FLAG_ENABLE_DESKTOP_WINDOWING_MODE,
-            FLAG_ENABLE_DESKTOP_WINDOWING_WALLPAPER_ACTIVITY
+            FLAG_ENABLE_WINDOWING_DYNAMIC_INITIAL_BOUNDS
     })
     public void isEnabled_dwFlagOff_overrideOff_featureFlagOff_returnsFalse() {
         setOverride(OVERRIDE_OFF.getSetting());
 
         // When toggle override matches its default state (dw flag), don't override flags
-        assertThat(DesktopModeFlagsUtil.WALLPAPER_ACTIVITY.isEnabled(mContext)).isFalse();
+        assertThat(DesktopModeFlagsUtil.DYNAMIC_INITIAL_BOUNDS.isEnabled(mContext)).isFalse();
     }
 
     private void setOverride(Integer setting) {

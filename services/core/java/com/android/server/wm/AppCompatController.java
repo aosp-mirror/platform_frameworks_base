@@ -94,4 +94,9 @@ class AppCompatController {
         }
         return null;
     }
+
+    @NonNull
+    AppCompatFocusOverrides getAppCompatFocusOverrides() {
+        return mAppCompatOverrides.getAppCompatFocusOverrides();
+    }
 }

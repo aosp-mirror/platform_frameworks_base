@@ -20,7 +20,6 @@ import static android.app.ActivityTaskManager.INVALID_TASK_ID;
 import static android.content.pm.PackageManager.FEATURE_PC;
 
 import static com.android.window.flags.Flags.enableDesktopWindowingTaskbarRunningApps;
-import static com.android.window.flags.Flags.enableTaskStackObserverInShell;
 import static com.android.wm.shell.sysui.ShellSharedConstants.KEY_EXTRA_SHELL_RECENT_TASKS;
 
 import android.app.ActivityManager;
@@ -55,6 +54,7 @@ import com.android.wm.shell.desktopmode.DesktopModeTaskRepository;
 import com.android.wm.shell.protolog.ShellProtoLogGroup;
 import com.android.wm.shell.shared.annotations.ExternalThread;
 import com.android.wm.shell.shared.annotations.ShellMainThread;
+import com.android.wm.shell.shared.desktopmode.DesktopModeFlags;
 import com.android.wm.shell.shared.desktopmode.DesktopModeStatus;
 import com.android.wm.shell.sysui.ShellCommandHandler;
 import com.android.wm.shell.sysui.ShellController;
@@ -351,7 +351,7 @@ public class RecentTasksController implements TaskStackListenerCallback,
 
     private void notifyTaskMovedToFront(ActivityManager.RunningTaskInfo taskInfo) {
         if (mListener == null
-                || !enableTaskStackObserverInShell()
+                || !DesktopModeFlags.TASK_STACK_OBSERVER_IN_SHELL.isEnabled(mContext)
                 || taskInfo.realActivity == null) {
             return;
         }

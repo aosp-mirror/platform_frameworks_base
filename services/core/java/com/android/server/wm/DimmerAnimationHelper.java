@@ -26,6 +26,7 @@ import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.util.Log;
 import android.util.proto.ProtoOutputStream;
 import android.view.SurfaceControl;
@@ -48,6 +49,7 @@ public class DimmerAnimationHelper {
         private float mAlpha = -1f;
         private int mBlurRadius = -1;
         private WindowContainer<?> mDimmingContainer = null;
+        private WindowContainer<?> mGeometryParent = null;
         private int mRelativeLayer = -1;
         private static final float EPSILON = 0.0001f;
 
@@ -103,6 +105,11 @@ public class DimmerAnimationHelper {
         mRequestedProperties.mRelativeLayer = relativeLayer;
     }
 
+    // Sets the requested layer to reparent the dim to without applying it immediately
+    void setRequestedGeometryParent(WindowContainer<?> geometryParent) {
+        mRequestedProperties.mGeometryParent = geometryParent;
+    }
+
     // Sets a requested change without applying it immediately
     void setRequestedAppearance(float alpha, int blurRadius) {
         mRequestedProperties.mAlpha = alpha;
@@ -129,7 +136,9 @@ public class DimmerAnimationHelper {
         }
 
         dim.ensureVisible(t);
-        relativeReparent(dim.mDimSurface,
+        reparent(dim.mDimSurface,
+                mRequestedProperties.mGeometryParent != mCurrentProperties.mGeometryParent
+                        ? mRequestedProperties.mGeometryParent.getSurfaceControl() : null,
                 mRequestedProperties.mDimmingContainer.getSurfaceControl(),
                 mRequestedProperties.mRelativeLayer, t);
 
@@ -214,11 +223,17 @@ public class DimmerAnimationHelper {
     }
 
     /**
-     * Change the relative parent of this dim layer
+     * Change the geometry and relative parent of this dim layer
      */
-    void relativeReparent(@NonNull SurfaceControl dimLayer, @NonNull SurfaceControl relativeParent,
-                          int relativePosition, @NonNull SurfaceControl.Transaction t) {
+    void reparent(@NonNull SurfaceControl dimLayer,
+                  @Nullable SurfaceControl newGeometryParent,
+                  @NonNull SurfaceControl relativeParent,
+                  int relativePosition,
+                  @NonNull SurfaceControl.Transaction t) {
         try {
+            if (newGeometryParent != null) {
+                t.reparent(dimLayer, newGeometryParent);
+            }
             t.setRelativeLayer(dimLayer, relativeParent, relativePosition);
         } catch (NullPointerException e) {
             Log.w(TAG, "Tried to change parent of dim " + dimLayer + " after remove", e);

@@ -84,8 +84,8 @@ class ActivityRefresher {
         ProtoLog.v(WM_DEBUG_STATES,
                 "Refreshing activity for freeform camera compatibility treatment, "
                         + "activityRecord=%s", activity);
-        final RefreshCallbackItem refreshCallbackItem = RefreshCallbackItem.obtain(
-                activity.token, cycleThroughStop ? ON_STOP : ON_PAUSE);
+        final RefreshCallbackItem refreshCallbackItem =
+                new RefreshCallbackItem(activity.token, cycleThroughStop ? ON_STOP : ON_PAUSE);
         final ResumeActivityItem resumeActivityItem = new ResumeActivityItem(
                 activity.token, /* isForward */ false, /* shouldSendCompatFakeFocus */ false);
         try {

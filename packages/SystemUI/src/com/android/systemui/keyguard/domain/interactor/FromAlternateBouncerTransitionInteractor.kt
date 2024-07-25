@@ -26,7 +26,6 @@ import com.android.systemui.keyguard.KeyguardWmStateRefactor
 import com.android.systemui.keyguard.data.repository.KeyguardTransitionRepository
 import com.android.systemui.keyguard.shared.model.Edge
 import com.android.systemui.keyguard.shared.model.KeyguardState
-import com.android.systemui.keyguard.shared.model.TransitionStep
 import com.android.systemui.power.domain.interactor.PowerInteractor
 import com.android.systemui.scene.shared.flag.SceneContainerFlag
 import com.android.systemui.scene.shared.model.Scenes
@@ -91,12 +90,12 @@ constructor(
                 edgeWithoutSceneContainer =
                     Edge.create(from = KeyguardState.ALTERNATE_BOUNCER, to = KeyguardState.GONE)
             )
-            .map<TransitionStep, Boolean?> {
+            .map {
                 // The alt bouncer is pretty fast to hide, so start the surface behind animation
                 // around 30%.
                 it.value > 0.3f
             }
-            .onStart {
+            .onStart<Boolean?> {
                 // Default to null ("don't care, use a reasonable default").
                 emit(null)
             }
@@ -145,6 +144,7 @@ constructor(
                             }
                         } else {
                             if (isIdleOnCommunal) {
+                                if (SceneContainerFlag.isEnabled) return@collect
                                 KeyguardState.GLANCEABLE_HUB
                             } else if (isOccluded) {
                                 KeyguardState.OCCLUDED
@@ -158,7 +158,6 @@ constructor(
     }
 
     private fun listenForAlternateBouncerToGone() {
-        // TODO(b/336576536): Check if adaptation for scene framework is needed
         if (SceneContainerFlag.isEnabled) return
         if (KeyguardWmStateRefactor.isEnabled) {
             // Handled via #dismissAlternateBouncer.
@@ -170,9 +169,9 @@ constructor(
                     keyguardInteractor.isKeyguardGoingAway.filter { it }.map {}, // map to Unit
                     keyguardInteractor.isKeyguardOccluded.flatMapLatest { keyguardOccluded ->
                         if (keyguardOccluded) {
-                            primaryBouncerInteractor.keyguardAuthenticatedBiometricsHandled.drop(
-                                1
-                            ) // drop the initial state
+                            primaryBouncerInteractor.keyguardAuthenticatedBiometricsHandled
+                                // drop the initial state
+                                .drop(1)
                         } else {
                             emptyFlow()
                         }
@@ -184,7 +183,6 @@ constructor(
     }
 
     private fun listenForAlternateBouncerToPrimaryBouncer() {
-        // TODO(b/336576536): Check if adaptation for scene framework is needed
         if (SceneContainerFlag.isEnabled) return
         scope.launch {
             keyguardInteractor.primaryBouncerShowing

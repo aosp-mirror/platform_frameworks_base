@@ -2577,6 +2577,16 @@ package android.os {
   public static final class VibrationEffect.Composition.UnreachableAfterRepeatingIndefinitelyException extends java.lang.IllegalStateException {
   }
 
+  @FlaggedApi("android.os.vibrator.vendor_vibration_effects") public static final class VibrationEffect.VendorEffect extends android.os.VibrationEffect {
+    method @Nullable public long[] computeCreateWaveformOffOnTimingsOrNull();
+    method public long getDuration();
+    method public int getEffectStrength();
+    method public float getLinearScale();
+    method @NonNull public android.os.PersistableBundle getVendorData();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.os.VibrationEffect.VendorEffect> CREATOR;
+  }
+
   public static class VibrationEffect.VibrationParameter {
     method @NonNull public static android.os.VibrationEffect.VibrationParameter targetAmplitude(@FloatRange(from=0, to=1) float);
     method @NonNull public static android.os.VibrationEffect.VibrationParameter targetFrequency(@FloatRange(from=1) float);

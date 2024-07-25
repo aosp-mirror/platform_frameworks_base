@@ -142,6 +142,7 @@ private fun GestureTutorialContent(
             )
             Spacer(modifier = Modifier.width(76.dp))
             TutorialAnimation(
+                gestureDone,
                 screenColors.animationProperties,
                 modifier = Modifier.weight(1f).padding(top = 8.dp)
             )
@@ -173,14 +174,18 @@ fun TutorialDescription(
 }
 
 @Composable
-fun TutorialAnimation(animationProperties: LottieDynamicProperties, modifier: Modifier = Modifier) {
+fun TutorialAnimation(
+    gestureDone: Boolean,
+    animationProperties: LottieDynamicProperties,
+    modifier: Modifier = Modifier
+) {
     Column(modifier = modifier.fillMaxWidth()) {
-        val composition by
-            rememberLottieComposition(LottieCompositionSpec.RawRes(R.raw.trackpad_back_edu))
+        val resId = if (gestureDone) R.raw.trackpad_back_success else R.raw.trackpad_back_edu
+        val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(resId))
         val progress by
             animateLottieCompositionAsState(
                 composition,
-                iterations = LottieConstants.IterateForever
+                iterations = if (gestureDone) 1 else LottieConstants.IterateForever
             )
         LottieAnimation(
             composition = composition,

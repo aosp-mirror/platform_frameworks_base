@@ -33,6 +33,8 @@ import com.android.systemui.scene.data.repository.Idle
 import com.android.systemui.scene.data.repository.Transition
 import com.android.systemui.scene.data.repository.setSceneTransition
 import com.android.systemui.scene.domain.interactor.sceneInteractor
+import com.android.systemui.scene.domain.resolver.notifShadeSceneFamilyResolver
+import com.android.systemui.scene.domain.resolver.quickSettingsSceneFamilyResolver
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
@@ -78,6 +80,8 @@ class KeyguardDismissActionInteractorTest : SysuiTestCase() {
                 applicationScope = testScope.backgroundScope,
                 sceneInteractor = kosmos.sceneInteractor,
                 deviceEntryInteractor = kosmos.deviceEntryInteractor,
+                quickSettingsSceneFamilyResolver = kosmos.quickSettingsSceneFamilyResolver,
+                notifShadeSceneFamilyResolver = kosmos.notifShadeSceneFamilyResolver,
             )
     }
 

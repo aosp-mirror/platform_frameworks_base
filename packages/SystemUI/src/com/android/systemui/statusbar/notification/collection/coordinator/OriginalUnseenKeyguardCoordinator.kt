@@ -17,12 +17,9 @@
 package com.android.systemui.statusbar.notification.collection.coordinator
 
 import android.annotation.SuppressLint
-import android.os.UserHandle
-import android.provider.Settings
 import androidx.annotation.VisibleForTesting
 import com.android.systemui.Dumpable
 import com.android.systemui.dagger.qualifiers.Application
-import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.keyguard.data.repository.KeyguardRepository
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
@@ -43,12 +40,9 @@ import com.android.systemui.statusbar.policy.HeadsUpManager
 import com.android.systemui.statusbar.policy.headsUpEvents
 import com.android.systemui.util.asIndenting
 import com.android.systemui.util.indentIfPossible
-import com.android.systemui.util.settings.SecureSettings
-import com.android.systemui.util.settings.SettingsProxyExt.observerFlow
 import java.io.PrintWriter
 import javax.inject.Inject
 import kotlin.time.Duration.Companion.seconds
-import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.coroutineScope
@@ -56,13 +50,10 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.conflate
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.yield
 
@@ -79,14 +70,12 @@ import kotlinx.coroutines.yield
 class OriginalUnseenKeyguardCoordinator
 @Inject
 constructor(
-    @Background private val bgDispatcher: CoroutineDispatcher,
     private val dumpManager: DumpManager,
     private val headsUpManager: HeadsUpManager,
     private val keyguardRepository: KeyguardRepository,
     private val keyguardTransitionInteractor: KeyguardTransitionInteractor,
     private val logger: KeyguardCoordinatorLogger,
     @Application private val scope: CoroutineScope,
-    private val secureSettings: SecureSettings,
     private val seenNotificationsInteractor: SeenNotificationsInteractor,
     private val statusBarStateController: StatusBarStateController,
     private val sceneInteractor: SceneInteractor,
@@ -268,29 +257,7 @@ constructor(
             // TODO(b/330387368): should this really just be turned off? If so, hide the setting.
             return flowOf(false)
         }
-        return secureSettings
-            // emit whenever the setting has changed
-            .observerFlow(
-                UserHandle.USER_ALL,
-                Settings.Secure.LOCK_SCREEN_SHOW_ONLY_UNSEEN_NOTIFICATIONS,
-            )
-            // perform a query immediately
-            .onStart { emit(Unit) }
-            // for each change, lookup the new value
-            .map {
-                secureSettings.getIntForUser(
-                    name = Settings.Secure.LOCK_SCREEN_SHOW_ONLY_UNSEEN_NOTIFICATIONS,
-                    def = 0,
-                    userHandle = UserHandle.USER_CURRENT,
-                ) == 1
-            }
-            // don't emit anything if nothing has changed
-            .distinctUntilChanged()
-            // perform lookups on the bg thread pool
-            .flowOn(bgDispatcher)
-            // only track the most recent emission, if events are happening faster than they can be
-            // consumed
-            .conflate()
+        return seenNotificationsInteractor.isLockScreenShowOnlyUnseenNotificationsEnabled()
     }
 
     private suspend fun trackUnseenFilterSettingChanges() {

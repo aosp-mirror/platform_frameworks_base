@@ -362,6 +362,7 @@ class KeyguardTransitionScenariosTest(flags: FlagsParameterization?) : SysuiTest
         }
 
     @Test
+    @DisableSceneContainer
     fun dreamingLockscreenHostedToLockscreen() =
         testScope.runTest {
             // GIVEN a device dreaming with the lockscreen hosted dream and not dozing
@@ -449,6 +450,7 @@ class KeyguardTransitionScenariosTest(flags: FlagsParameterization?) : SysuiTest
         }
 
     @Test
+    @DisableSceneContainer
     fun dreamingLockscreenHostedToDozing() =
         testScope.runTest {
             // GIVEN a device is dreaming with lockscreen hosted dream
@@ -480,6 +482,7 @@ class KeyguardTransitionScenariosTest(flags: FlagsParameterization?) : SysuiTest
         }
 
     @Test
+    @DisableSceneContainer
     fun dreamingLockscreenHostedToOccluded() =
         testScope.runTest {
             // GIVEN device is dreaming with lockscreen hosted dream and not occluded
@@ -977,6 +980,7 @@ class KeyguardTransitionScenariosTest(flags: FlagsParameterization?) : SysuiTest
         }
 
     @Test
+    @DisableSceneContainer
     fun alternateBouncerToGlanceableHub() =
         testScope.runTest {
             // GIVEN the device is idle on the glanceable hub

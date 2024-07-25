@@ -437,7 +437,7 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
             final ConfigurationChangeItem configurationChangeItem;
             synchronized (mLastReportedConfiguration) {
                 onConfigurationChangePreScheduled(mLastReportedConfiguration);
-                configurationChangeItem = ConfigurationChangeItem.obtain(
+                configurationChangeItem = new ConfigurationChangeItem(
                         mLastReportedConfiguration, mLastTopActivityDeviceId);
             }
             // Schedule immediately to make sure the app component (e.g. receiver, service) can get
@@ -1721,8 +1721,8 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
         }
 
         onConfigurationChangePreScheduled(config);
-        scheduleClientTransactionItem(thread, ConfigurationChangeItem.obtain(
-                config, mLastTopActivityDeviceId));
+        scheduleClientTransactionItem(
+                thread, new ConfigurationChangeItem(config, mLastTopActivityDeviceId));
     }
 
     private void onConfigurationChangePreScheduled(@NonNull Configuration config) {

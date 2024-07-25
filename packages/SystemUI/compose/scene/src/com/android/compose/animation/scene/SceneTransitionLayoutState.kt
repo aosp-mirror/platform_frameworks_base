@@ -233,6 +233,12 @@ sealed interface TransitionState {
                 }
             }
 
+        /** Returns if the [progress] value of this transition can go beyond range `[0; 1]` */
+        fun canOverscroll(): Boolean {
+            val overscrollSpec = currentOverscrollSpec ?: return true
+            return overscrollSpec.transformationSpec.transformations.isNotEmpty()
+        }
+
         /**
          * An animatable that animates from 1f to 0f. This will be used to nicely animate the sudden
          * jump of values when this transitions interrupts another one.

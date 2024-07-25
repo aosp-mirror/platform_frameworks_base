@@ -46,6 +46,7 @@ import com.android.wm.shell.compatui.CompatUIController.CompatUIHintsState;
 import com.android.wm.shell.compatui.api.CompatUIEvent;
 import com.android.wm.shell.compatui.impl.CompatUIEvents.CameraControlStateUpdated;
 import com.android.wm.shell.compatui.impl.CompatUIEvents.SizeCompatRestartButtonAppeared;
+import com.android.wm.shell.shared.desktopmode.DesktopModeFlags;
 
 import java.util.function.Consumer;
 
@@ -94,7 +95,7 @@ class CompatUIWindowManager extends CompatUIWindowManagerAbstract {
         mCallback = callback;
         mHasSizeCompat = taskInfo.appCompatTaskInfo.topActivityInSizeCompat;
         if (DESKTOP_WINDOWING_MODE.isEnabled(mContext)
-                && Flags.enableWindowingDynamicInitialBounds()) {
+                && DesktopModeFlags.THEMED_APP_HEADERS.isEnabled(context)) {
             // Don't show the SCM button for freeform tasks
             mHasSizeCompat &= !taskInfo.isFreeform();
         }
@@ -154,7 +155,7 @@ class CompatUIWindowManager extends CompatUIWindowManagerAbstract {
         final int prevCameraCompatControlState = mCameraCompatControlState;
         mHasSizeCompat = taskInfo.appCompatTaskInfo.topActivityInSizeCompat;
         if (DESKTOP_WINDOWING_MODE.isEnabled(mContext)
-                && Flags.enableWindowingDynamicInitialBounds()) {
+                && DesktopModeFlags.DYNAMIC_INITIAL_BOUNDS.isEnabled(mContext)) {
             // Don't show the SCM button for freeform tasks
             mHasSizeCompat &= !taskInfo.isFreeform();
         }

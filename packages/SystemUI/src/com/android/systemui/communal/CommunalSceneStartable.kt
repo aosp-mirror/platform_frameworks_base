@@ -26,6 +26,7 @@ import com.android.systemui.communal.domain.interactor.CommunalSceneInteractor
 import com.android.systemui.communal.domain.interactor.CommunalSettingsInteractor
 import com.android.systemui.communal.shared.model.CommunalScenes
 import com.android.systemui.communal.shared.model.CommunalTransitionKeys
+import com.android.systemui.communal.shared.model.EditModeState
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Background
@@ -103,11 +104,14 @@ constructor(
                 .mapLatest(::determineSceneAfterTransition)
                 .filterNotNull()
                 .onEach { (nextScene, nextTransition) ->
-                    if (!communalSceneInteractor.isLaunchingWidget.value) {
-                        // When launching a widget, we don't want to animate the scene change or the
-                        // Communal Hub will reveal the wallpaper even though it shouldn't. Instead
-                        // we snap to the new scene as part of the launch animation, once the
-                        // activity launch is done, so we don't change scene here.
+                    // When launching a widget, we don't want to animate the scene change or the
+                    // Communal Hub will reveal the wallpaper even though it shouldn't. Instead we
+                    // snap to the new scene as part of the launch animation, once the activity
+                    // launch is done, so we don't change scene here.
+                    val delaySceneTransition =
+                        communalSceneInteractor.editModeState.value == EditModeState.STARTING ||
+                            communalSceneInteractor.isLaunchingWidget.value
+                    if (!delaySceneTransition) {
                         communalSceneInteractor.changeScene(nextScene, nextTransition)
                     }
                 }

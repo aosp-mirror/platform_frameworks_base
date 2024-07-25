@@ -18,14 +18,12 @@ package com.android.server.wm;
 
 import static android.content.pm.ActivityInfo.FORCE_NON_RESIZE_APP;
 import static android.content.pm.ActivityInfo.FORCE_RESIZE_APP;
-import static android.content.pm.ActivityInfo.OVERRIDE_ENABLE_COMPAT_FAKE_FOCUS;
 import static android.content.pm.ActivityInfo.OVERRIDE_USE_DISPLAY_LANDSCAPE_NATURAL_ORIENTATION;
 import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
 import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
 import static android.view.InsetsSource.FLAG_INSETS_ROUNDED_CORNER;
 import static android.view.WindowManager.PROPERTY_COMPAT_ALLOW_DISPLAY_ORIENTATION_OVERRIDE;
 import static android.view.WindowManager.PROPERTY_COMPAT_ALLOW_RESIZEABLE_ACTIVITY_OVERRIDES;
-import static android.view.WindowManager.PROPERTY_COMPAT_ENABLE_FAKE_FOCUS;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.eq;
@@ -359,72 +357,6 @@ public class LetterboxUiControllerTest extends WindowTestsBase {
         doReturn(true).when(mTask).inMultiWindowMode();
 
         assertFalse(mController.shouldUseDisplayLandscapeNaturalOrientation());
-    }
-
-    @Test
-    @EnableCompatChanges({OVERRIDE_ENABLE_COMPAT_FAKE_FOCUS})
-    public void testShouldSendFakeFocus_overrideEnabled_returnsTrue() {
-        doReturn(true).when(mAppCompatConfiguration).isCompatFakeFocusEnabled();
-
-        mController = new LetterboxUiController(mWm, mActivity);
-
-        assertTrue(mController.shouldSendFakeFocus());
-    }
-
-    @Test
-    @DisableCompatChanges({OVERRIDE_ENABLE_COMPAT_FAKE_FOCUS})
-    public void testShouldSendFakeFocus_overrideDisabled_returnsFalse() {
-        doReturn(true).when(mAppCompatConfiguration).isCompatFakeFocusEnabled();
-
-        mController = new LetterboxUiController(mWm, mActivity);
-
-        assertFalse(mController.shouldSendFakeFocus());
-    }
-
-    @Test
-    @EnableCompatChanges({OVERRIDE_ENABLE_COMPAT_FAKE_FOCUS})
-    public void testIsCompatFakeFocusEnabled_propertyDisabledAndOverrideEnabled_fakeFocusDisabled()
-            throws Exception {
-        doReturn(true).when(mAppCompatConfiguration).isCompatFakeFocusEnabled();
-        mockThatProperty(PROPERTY_COMPAT_ENABLE_FAKE_FOCUS, /* value */ false);
-
-        mController = new LetterboxUiController(mWm, mActivity);
-
-        assertFalse(mController.shouldSendFakeFocus());
-    }
-
-    @Test
-    @DisableCompatChanges({OVERRIDE_ENABLE_COMPAT_FAKE_FOCUS})
-    public void testIsCompatFakeFocusEnabled_propertyEnabled_noOverride_fakeFocusEnabled()
-            throws Exception {
-        doReturn(true).when(mAppCompatConfiguration).isCompatFakeFocusEnabled();
-        mockThatProperty(PROPERTY_COMPAT_ENABLE_FAKE_FOCUS, /* value */ true);
-
-        mController = new LetterboxUiController(mWm, mActivity);
-
-        assertTrue(mController.shouldSendFakeFocus());
-    }
-
-    @Test
-    public void testIsCompatFakeFocusEnabled_propertyDisabled_fakeFocusDisabled()
-            throws Exception {
-        doReturn(true).when(mAppCompatConfiguration).isCompatFakeFocusEnabled();
-        mockThatProperty(PROPERTY_COMPAT_ENABLE_FAKE_FOCUS, /* value */ false);
-
-        mController = new LetterboxUiController(mWm, mActivity);
-
-        assertFalse(mController.shouldSendFakeFocus());
-    }
-
-    @Test
-    public void testIsCompatFakeFocusEnabled_propertyEnabled_fakeFocusEnabled()
-            throws Exception {
-        doReturn(true).when(mAppCompatConfiguration).isCompatFakeFocusEnabled();
-        mockThatProperty(PROPERTY_COMPAT_ENABLE_FAKE_FOCUS, /* value */ true);
-
-        mController = new LetterboxUiController(mWm, mActivity);
-
-        assertTrue(mController.shouldSendFakeFocus());
     }
 
     @Test

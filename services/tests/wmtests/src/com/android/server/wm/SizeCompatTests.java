@@ -19,7 +19,6 @@ package com.android.server.wm;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
-import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.content.pm.ActivityInfo.OVERRIDE_MIN_ASPECT_RATIO_LARGE_VALUE;
 import static android.content.pm.ActivityInfo.RESIZE_MODE_RESIZEABLE;
 import static android.content.pm.ActivityInfo.RESIZE_MODE_UNRESIZEABLE;
@@ -4807,52 +4806,6 @@ public class SizeCompatTests extends WindowTestsBase {
 
         assertFitted();
         assertEquals(newDensity, mActivity.getConfiguration().densityDpi);
-    }
-
-    @Test
-    public void testShouldSendFakeFocus_compatFakeFocusEnabled() {
-        final ActivityRecord activity = new ActivityBuilder(mAtm)
-                .setCreateTask(true)
-                .setOnTop(true)
-                // Set the component to be that of the test class in order to enable compat changes
-                .setComponent(ComponentName.createRelative(mContext,
-                        com.android.server.wm.SizeCompatTests.class.getName()))
-                .build();
-        final Task task = activity.getTask();
-        spyOn(activity.mLetterboxUiController);
-        doReturn(true).when(activity.mLetterboxUiController).shouldSendFakeFocus();
-
-        task.setWindowingMode(WINDOWING_MODE_MULTI_WINDOW);
-        assertTrue(activity.shouldSendCompatFakeFocus());
-
-        task.setWindowingMode(WINDOWING_MODE_PINNED);
-        assertFalse(activity.shouldSendCompatFakeFocus());
-
-        task.setWindowingMode(WINDOWING_MODE_FREEFORM);
-        assertFalse(activity.shouldSendCompatFakeFocus());
-    }
-
-    @Test
-    public void testShouldSendFakeFocus_compatFakeFocusDisabled() {
-        final ActivityRecord activity = new ActivityBuilder(mAtm)
-                .setCreateTask(true)
-                .setOnTop(true)
-                // Set the component to be that of the test class in order to enable compat changes
-                .setComponent(ComponentName.createRelative(mContext,
-                        com.android.server.wm.SizeCompatTests.class.getName()))
-                .build();
-        final Task task = activity.getTask();
-        spyOn(activity.mLetterboxUiController);
-        doReturn(false).when(activity.mLetterboxUiController).shouldSendFakeFocus();
-
-        task.setWindowingMode(WINDOWING_MODE_MULTI_WINDOW);
-        assertFalse(activity.shouldSendCompatFakeFocus());
-
-        task.setWindowingMode(WINDOWING_MODE_PINNED);
-        assertFalse(activity.shouldSendCompatFakeFocus());
-
-        task.setWindowingMode(WINDOWING_MODE_FREEFORM);
-        assertFalse(activity.shouldSendCompatFakeFocus());
     }
 
     private void setUpAllowThinLetterboxed(boolean thinLetterboxAllowed) {

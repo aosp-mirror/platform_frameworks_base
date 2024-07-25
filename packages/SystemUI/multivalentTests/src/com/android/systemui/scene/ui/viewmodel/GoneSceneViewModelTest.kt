@@ -53,7 +53,6 @@ class GoneSceneViewModelTest : SysuiTestCase() {
     fun setUp() {
         underTest =
             GoneSceneViewModel(
-                applicationScope = testScope.backgroundScope,
                 shadeInteractor = kosmos.shadeInteractor,
             )
     }
