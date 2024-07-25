@@ -1046,10 +1046,8 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
             SecureSettingsWrapper.onUserStarting(userId);
             mService.mIoHandler.post(() -> {
                 synchronized (ImfLock.class) {
-                    if (mService.mConcurrentMultiUserModeEnabled) {
-                        if (mService.mCurrentUserId != userId && mService.mSystemReady) {
-                            mService.initializeVisibleBackgroundUserLocked(userId);
-                        }
+                    if (mService.mSystemReady) {
+                        mService.onUserReadyLocked(userId);
                     }
                 }
             });
@@ -1386,28 +1384,30 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
                         UserHandle.ALL, broadcastFilterForAllUsers, null, null,
                         Context.RECEIVER_EXPORTED);
 
-                final String defaultImiId = SecureSettingsWrapper.getString(
-                        Settings.Secure.DEFAULT_INPUT_METHOD, null, currentUserId);
-                final boolean imeSelectedOnBoot = !TextUtils.isEmpty(defaultImiId);
-                final var settings = InputMethodSettingsRepository.get(currentUserId);
-                postInputMethodSettingUpdatedLocked(
-                        !imeSelectedOnBoot /* resetDefaultEnabledIme */, currentUserId);
-                updateFromSettingsLocked(true, currentUserId);
-                InputMethodUtils.setNonSelectedSystemImesDisabledUntilUsed(
-                        getPackageManagerForUser(mContext, currentUserId),
-                        settings.getEnabledInputMethodList());
-
                 AdditionalSubtypeMapRepository.startWriterThread();
 
-                if (mConcurrentMultiUserModeEnabled) {
-                    for (int userId : mUserManagerInternal.getUserIds()) {
-                        if (userId != mCurrentUserId) {
-                            initializeVisibleBackgroundUserLocked(userId);
-                        }
-                    }
+                for (int userId : mUserManagerInternal.getUserIds()) {
+                    onUserReadyLocked(userId);
                 }
             }
         }
+    }
+
+    @GuardedBy("ImfLock.class")
+    void onUserReadyLocked(@UserIdInt int userId) {
+        if (!mUserManagerInternal.isUserRunning(userId)) {
+            return;
+        }
+
+        final String defaultImiId = SecureSettingsWrapper.getString(
+                Settings.Secure.DEFAULT_INPUT_METHOD, null, userId);
+        final boolean imeSelectedOnBoot = !TextUtils.isEmpty(defaultImiId);
+        final var settings = InputMethodSettingsRepository.get(userId);
+        postInputMethodSettingUpdatedLocked(!imeSelectedOnBoot /* resetDefaultEnabledIme */,
+                userId);
+        updateFromSettingsLocked(true, userId);
+        InputMethodUtils.setNonSelectedSystemImesDisabledUntilUsed(
+                getPackageManagerForUser(mContext, userId), settings.getEnabledInputMethodList());
     }
 
     void registerImeRequestedChangedListener() {
@@ -2824,60 +2824,6 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
         if (!Flags.imeSwitcherRevamp()) {
             mMenuController.updateKeyboardFromSettingsLocked();
         }
-    }
-
-    /**
-     * This initialization logic is used when and only when {@link #mConcurrentMultiUserModeEnabled}
-     * is set to {@code true}.
-     *
-     * <p>There remain several yet-to-be-implemented features. For the canonical and desired
-     * behaviors always refer to single-user code paths such as
-     * {@link #updateInputMethodsFromSettingsLocked(boolean, int)}.</p>
-     *
-     * <p>Here are examples of missing features.</p>
-     * <ul>
-     *     <li>Profiles are not supported.</li>
-     *     <li>
-     *         {@link PackageManager#COMPONENT_ENABLED_STATE_DISABLED_UNTIL_USED} is not updated.
-     *     </li>
-     *     <li>{@link InputMethodBindingController#getDeviceIdToShowIme()} is ignored.</li>
-     *     <li>and so on.</li>
-     * </ul>
-     */
-    @GuardedBy("ImfLock.class")
-    void initializeVisibleBackgroundUserLocked(@UserIdInt int userId) {
-        final var settings = InputMethodSettingsRepository.get(userId);
-
-        // Until we figure out what makes most sense, we enable all the pre-installed IMEs in
-        // concurrent multi-user IME mode.
-        String enabledImeIdsStr = settings.getEnabledInputMethodsStr();
-        for (var imi : settings.getMethodList()) {
-            if (!imi.isSystem()) {
-                continue;
-            }
-            enabledImeIdsStr = InputMethodUtils.concatEnabledImeIds(enabledImeIdsStr, imi.getId());
-        }
-        if (!TextUtils.equals(settings.getEnabledInputMethodsStr(), enabledImeIdsStr)) {
-            settings.putEnabledInputMethodsStr(enabledImeIdsStr);
-        }
-
-        // Also update the currently-selected IME.
-        String id = settings.getSelectedInputMethod();
-        if (TextUtils.isEmpty(id)) {
-            final InputMethodInfo imi = InputMethodInfoUtils.getMostApplicableDefaultIME(
-                    settings.getEnabledInputMethodList());
-            if (imi != null) {
-                id = imi.getId();
-                settings.putSelectedInputMethod(id);
-            }
-        }
-        final var userData = getUserData(userId);
-        final var bindingController = userData.mBindingController;
-        bindingController.setSelectedMethodId(id);
-
-        // Also re-initialize controllers.
-        userData.mSwitchingController.resetCircularListLocked(mContext, settings);
-        userData.mHardwareKeyboardShortcutController.update(settings);
     }
 
     @GuardedBy("ImfLock.class")
