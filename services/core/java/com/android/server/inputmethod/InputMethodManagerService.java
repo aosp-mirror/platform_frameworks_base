@@ -338,6 +338,35 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
         return mConcurrentMultiUserModeEnabled ? callingProcessUserId : mCurrentUserId;
     }
 
+    /**
+     * Figures out the target IME user ID associated with the given {@code displayId}.
+     *
+     * @param displayId the display ID to be queried about
+     * @return User ID to be used for this {@code displayId}.
+     */
+    @GuardedBy("ImfLock.class")
+    @UserIdInt
+    private int resolveImeUserIdFromDisplayIdLocked(int displayId) {
+        return mConcurrentMultiUserModeEnabled
+                ? mUserManagerInternal.getUserAssignedToDisplay(displayId) : mCurrentUserId;
+    }
+
+    /**
+     * Figures out the target IME user ID associated with the given {@code windowToken}.
+     *
+     * @param windowToken the Window token to be queried about
+     * @return User ID to be used for this {@code displayId}.
+     */
+    @GuardedBy("ImfLock.class")
+    @UserIdInt
+    private int resolveImeUserIdFromWindowLocked(@NonNull IBinder windowToken) {
+        if (mConcurrentMultiUserModeEnabled) {
+            final int displayId = mWindowManagerInternal.getDisplayIdForWindow(windowToken);
+            return mUserManagerInternal.getUserAssignedToDisplay(displayId);
+        }
+        return mCurrentUserId;
+    }
+
     final Context mContext;
     final Resources mRes;
     private final Handler mHandler;
@@ -2745,8 +2774,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
 
     @GuardedBy("ImfLock.class")
     private void updateImeWindowStatusLocked(boolean disableImeIcon, int displayId) {
-        // TODO(b/350386877): Propagate userId from displayId.
-        final int userId = mCurrentUserId;
+        final int userId = resolveImeUserIdFromDisplayIdLocked(displayId);
         if (disableImeIcon) {
             final var bindingController = getInputMethodBindingController(userId);
             updateSystemUiLocked(0, bindingController.getBackDisposition(), userId);
@@ -3057,8 +3085,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
         ImeTracing.getInstance().triggerManagerServiceDump(
                 "InputMethodManagerService#showSoftInput", mDumper);
         synchronized (ImfLock.class) {
-            // TODO(b/305849394): Infer userId from windowToken
-            final int userId = mCurrentUserId;
+            final int userId = resolveImeUserIdFromWindowLocked(windowToken);
             final long ident = Binder.clearCallingIdentity();
             try {
                 if (DEBUG) Slog.v(TAG, "Client requesting input be shown");
@@ -3078,8 +3105,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
         ImeTracing.getInstance().triggerManagerServiceDump(
                 "InputMethodManagerService#hideSoftInput", mDumper);
         synchronized (ImfLock.class) {
-            // TODO(b/305849394): Infer userId from windowToken
-            final int userId = mCurrentUserId;
+            final int userId = resolveImeUserIdFromWindowLocked(windowToken);
             final long ident = Binder.clearCallingIdentity();
             try {
                 if (DEBUG) Slog.v(TAG, "Client requesting input be hidden");
@@ -3341,14 +3367,14 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
             Objects.requireNonNull(windowToken, "windowToken must not be null");
             synchronized (ImfLock.class) {
                 Boolean windowPerceptible = mFocusedWindowPerceptible.get(windowToken);
-                final int userId = mCurrentUserId;
+                final int userId = resolveImeUserIdFromWindowLocked(windowToken);
                 final var userData = getUserData(userId);
                 if (userData.mImeBindingState.mFocusedWindow != windowToken
                         || (windowPerceptible != null && windowPerceptible == perceptible)) {
                     return;
                 }
                 mFocusedWindowPerceptible.put(windowToken, windowPerceptible);
-                updateSystemUiLocked(mCurrentUserId);
+                updateSystemUiLocked(userId);
             }
         });
     }
@@ -4018,7 +4044,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
     @Override
     public void onImeSwitchButtonClickFromSystem(int displayId) {
         synchronized (ImfLock.class) {
-            final int userId = mCurrentUserId;
+            final int userId = resolveImeUserIdFromDisplayIdLocked(displayId);
             final var userData = getUserData(userId);
             final var bindingController = userData.mBindingController;
             final var curToken = bindingController.getCurToken();
@@ -4863,8 +4889,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
     @GuardedBy("ImfLock.class")
     void onApplyImeVisibilityFromComputerLocked(IBinder windowToken,
             @NonNull ImeTracker.Token statsToken, @NonNull ImeVisibilityResult result) {
-        // TODO(b/305849394): Infer userId from windowToken
-        final int userId = mCurrentUserId;
+        final int userId = resolveImeUserIdFromWindowLocked(windowToken);
         mVisibilityApplier.applyImeVisibility(windowToken, statsToken, result.getState(),
                 result.getReason(), userId);
     }
@@ -5040,8 +5065,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
             case MSG_REMOVE_IME_SURFACE_FROM_WINDOW: {
                 IBinder windowToken = (IBinder) msg.obj;
                 synchronized (ImfLock.class) {
-                    // TODO(b/305849394): Infer userId from windowToken.
-                    final int userId = mCurrentUserId;
+                    final int userId = resolveImeUserIdFromWindowLocked(windowToken);
                     final var userData = getUserData(userId);
                     try {
                         if (windowToken == userData.mImeBindingState.mFocusedWindow
@@ -5841,8 +5865,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
         @Override
         public void reportImeControl(@Nullable IBinder windowToken) {
             synchronized (ImfLock.class) {
-                // TODO(b/305849394): Need to infer userId or get userId from callers.
-                final int userId = mCurrentUserId;
+                final int userId = resolveImeUserIdFromWindowLocked(windowToken);
                 final var userData = getUserData(userId);
                 if (userData.mImeBindingState.mFocusedWindow != windowToken) {
                     // A perceptible value was set for the focused window, but it is no longer in
@@ -5857,8 +5880,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
         @Override
         public void onImeParentChanged(int displayId) {
             synchronized (ImfLock.class) {
-                // TODO(b/305849394): Need to infer userId or get userId from callers.
-                final int userId = mCurrentUserId;
+                final int userId = resolveImeUserIdFromDisplayIdLocked(displayId);
                 final var userData = getUserData(userId);
                 // Hide the IME method menu only when the IME surface parent is changed by the
                 // input target changed, in case seeing the dialog dismiss flickering during
@@ -5985,8 +6007,8 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
         public void onSwitchKeyboardLayoutShortcut(int direction, int displayId,
                 IBinder targetWindowToken) {
             synchronized (ImfLock.class) {
-                // TODO(b/305849394): Infer userId from displayId
-                switchKeyboardLayoutLocked(direction, getUserData(mCurrentUserId));
+                final int userId = resolveImeUserIdFromDisplayIdLocked(displayId);
+                switchKeyboardLayoutLocked(direction, getUserData(userId));
             }
         }
     }
