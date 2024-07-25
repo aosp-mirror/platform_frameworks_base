@@ -3023,8 +3023,8 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
                 Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
                 return false;
             }
-            final long ident = Binder.clearCallingIdentity();
             final var userData = getUserData(userId);
+            final long ident = Binder.clearCallingIdentity();
             try {
                 if (DEBUG) Slog.v(TAG, "Client requesting input be shown");
                 if (Flags.refactorInsetsController()) {
@@ -3460,8 +3460,8 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
                 }
                 return false;
             }
-            final long ident = Binder.clearCallingIdentity();
             final var userData = getUserData(userId);
+            final long ident = Binder.clearCallingIdentity();
             try {
                 Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "IMMS.hideSoftInput");
                 if (DEBUG) Slog.v(TAG, "Client requesting input be hidden");
