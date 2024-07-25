@@ -819,8 +819,12 @@ class DesktopTasksController(
         // Check if we should skip handling this transition
         var reason = ""
         val triggerTask = request.triggerTask
+        var shouldHandleMidRecentsFreeformLaunch =
+            recentsAnimationRunning && isFreeformRelaunch(triggerTask, request)
         val shouldHandleRequest =
             when {
+                // Handle freeform relaunch during recents animation
+                shouldHandleMidRecentsFreeformLaunch -> true
                 recentsAnimationRunning -> {
                     reason = "recents animation is running"
                     false
@@ -860,6 +864,8 @@ class DesktopTasksController(
         val result =
             triggerTask?.let { task ->
                 when {
+                    // Check if freeform task launch during recents should be handled
+                    shouldHandleMidRecentsFreeformLaunch -> handleMidRecentsFreeformTaskLaunch(task)
                     // Check if the closing task needs to be handled
                     TransitionUtil.isClosingType(request.type) -> handleTaskClosing(task)
                     // Check if the top task shouldn't be allowed to enter desktop mode
@@ -892,6 +898,12 @@ class DesktopTasksController(
             .filter { it.taskInfo?.windowingMode == WINDOWING_MODE_FREEFORM }
             .forEach { finishTransaction.setCornerRadius(it.leash, cornerRadius) }
     }
+
+    /** Returns whether an existing desktop task is being relaunched in freeform or not. */
+    private fun isFreeformRelaunch(triggerTask: RunningTaskInfo?, request: TransitionRequestInfo) =
+        (triggerTask != null && triggerTask.windowingMode == WINDOWING_MODE_FREEFORM
+                && TransitionUtil.isOpeningType(request.type)
+                && taskRepository.isActiveTask(triggerTask.taskId))
 
     private fun isIncompatibleTask(task: TaskInfo) =
         DesktopModeFlags.MODALS_POLICY.isEnabled(context)
@@ -955,6 +967,21 @@ class DesktopTasksController(
                 transitions.startTransition(TRANSIT_OPEN, wct, null)
             }
         }
+    }
+
+    /**
+     * Handles the case where a freeform task is launched from recents.
+     *
+     * This is a special case where we want to launch the task in fullscreen instead of freeform.
+     */
+    private fun handleMidRecentsFreeformTaskLaunch(
+        task: RunningTaskInfo
+    ): WindowContainerTransaction? {
+        logV("DesktopTasksController: handleMidRecentsFreeformTaskLaunch")
+        val wct = WindowContainerTransaction()
+        addMoveToFullscreenChanges(wct, task)
+        wct.reorder(task.token, true)
+        return wct
     }
 
     private fun handleFreeformTaskLaunch(
