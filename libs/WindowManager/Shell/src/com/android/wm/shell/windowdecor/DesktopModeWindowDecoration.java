@@ -738,7 +738,11 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
                 return;
             }
             final PackageManager pm = mContext.getApplicationContext().getPackageManager();
-            final ActivityInfo activityInfo = pm.getActivityInfo(baseActivity, 0 /* flags */);
+            final ActivityInfo activityInfo = pm.getActivityInfo(baseActivity,
+                    // Include uninstalled apps. Despite its name, adding this flag is a workaround
+                    // to #getActivityInfo throwing a NameNotFoundException for installed packages
+                    // when HSUM is enabled. See b/354884302.
+                    PackageManager.MATCH_UNINSTALLED_PACKAGES);
             final IconProvider provider = new IconProvider(mContext);
             final Drawable appIconDrawable = provider.getIcon(activityInfo);
             final BaseIconFactory headerIconFactory = createIconFactory(mContext,
