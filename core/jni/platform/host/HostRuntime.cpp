@@ -359,6 +359,17 @@ void AndroidRuntime::onStarted() {
 
 void AndroidRuntime::start(const char* className, const Vector<String8>& options, bool zygote) {
     JNIEnv* env = AndroidRuntime::getJNIEnv();
+
+    jstring propertyString =
+            (jstring)env->CallStaticObjectMethod(systemClass, getPropertyId,
+                                                 env->NewStringUTF("method_binding_format"),
+                                                 env->NewStringUTF(""));
+    const char* propertyChars = env->GetStringUTFChars(propertyString, 0);
+    auto method_binding_format = string(propertyChars);
+    env->ReleaseStringUTFChars(propertyString, propertyChars);
+
+    setJniMethodFormat(method_binding_format);
+
     // Register native functions.
     if (startReg(env) < 0) {
         ALOGE("Unable to register all android native methods\n");
