@@ -476,14 +476,26 @@ public class BluetoothUtils {
     }
 
     /**
+     * Gets string metadata from Fast Pair customized fields.
+     *
+     * @param bluetoothDevice the BluetoothDevice to get metadata
+     * @return the string metadata
+     */
+    @Nullable
+    public static String getFastPairCustomizedField(
+            @Nullable BluetoothDevice bluetoothDevice, @NonNull String key) {
+        String data = getStringMetaData(bluetoothDevice, METADATA_FAST_PAIR_CUSTOMIZED_FIELDS);
+        return extraTagValue(key, data);
+    }
+
+    /**
      * Get URI Bluetooth metadata for extra control
      *
      * @param bluetoothDevice the BluetoothDevice to get metadata
      * @return the URI metadata
      */
     public static String getControlUriMetaData(BluetoothDevice bluetoothDevice) {
-        String data = getStringMetaData(bluetoothDevice, METADATA_FAST_PAIR_CUSTOMIZED_FIELDS);
-        return extraTagValue(KEY_HEARABLE_CONTROL_SLICE, data);
+        return getFastPairCustomizedField(bluetoothDevice, KEY_HEARABLE_CONTROL_SLICE);
     }
 
     /**
