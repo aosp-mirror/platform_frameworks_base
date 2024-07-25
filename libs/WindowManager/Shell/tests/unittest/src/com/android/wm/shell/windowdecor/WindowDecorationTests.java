@@ -865,6 +865,7 @@ public class WindowDecorationTests extends ShellTestCase {
         final TestWindowDecoration windowDecor = createWindowDecoration(
                 new TestRunningTaskInfoBuilder().build());
         mRelayoutParams.mApplyStartTransactionOnDraw = true;
+        mRelayoutResult.mRootView = mMockView;
 
         windowDecor.updateViewHost(mRelayoutParams, mMockSurfaceControlStartT, mRelayoutResult);
 
@@ -876,6 +877,7 @@ public class WindowDecorationTests extends ShellTestCase {
         final TestWindowDecoration windowDecor = createWindowDecoration(
                 new TestRunningTaskInfoBuilder().build());
         mRelayoutParams.mApplyStartTransactionOnDraw = true;
+        mRelayoutResult.mRootView = mMockView;
 
         assertThrows(IllegalArgumentException.class,
                 () -> windowDecor.updateViewHost(
@@ -887,6 +889,7 @@ public class WindowDecorationTests extends ShellTestCase {
         final TestWindowDecoration windowDecor = createWindowDecoration(
                 new TestRunningTaskInfoBuilder().build());
         mRelayoutParams.mApplyStartTransactionOnDraw = false;
+        mRelayoutResult.mRootView = mMockView;
 
         windowDecor.updateViewHost(mRelayoutParams, null /* onDrawTransaction */, mRelayoutResult);
     }
