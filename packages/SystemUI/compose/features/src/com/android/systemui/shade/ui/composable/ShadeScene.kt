@@ -85,6 +85,7 @@ import com.android.systemui.media.controls.ui.controller.MediaCarouselController
 import com.android.systemui.media.controls.ui.controller.MediaHierarchyManager
 import com.android.systemui.media.controls.ui.view.MediaHost
 import com.android.systemui.media.controls.ui.view.MediaHostState
+import com.android.systemui.media.dagger.MediaModule.QS_PANEL
 import com.android.systemui.media.dagger.MediaModule.QUICK_QS_PANEL
 import com.android.systemui.notifications.ui.composable.NotificationScrollingStack
 import com.android.systemui.notifications.ui.composable.NotificationStackCutoffGuideline
@@ -148,7 +149,8 @@ constructor(
     private val batteryMeterViewControllerFactory: BatteryMeterViewController.Factory,
     private val statusBarIconController: StatusBarIconController,
     private val mediaCarouselController: MediaCarouselController,
-    @Named(QUICK_QS_PANEL) private val mediaHost: MediaHost,
+    @Named(QUICK_QS_PANEL) private val qqsMediaHost: MediaHost,
+    @Named(QS_PANEL) private val qsMediaHost: MediaHost,
 ) : ComposableScene {
 
     override val key = Scenes.Shade
@@ -172,15 +174,20 @@ constructor(
             createBatteryMeterViewController = batteryMeterViewControllerFactory::create,
             statusBarIconController = statusBarIconController,
             mediaCarouselController = mediaCarouselController,
-            mediaHost = mediaHost,
+            qqsMediaHost = qqsMediaHost,
+            qsMediaHost = qsMediaHost,
             modifier = modifier,
             shadeSession = shadeSession,
         )
 
     init {
-        mediaHost.expansion = MediaHostState.EXPANDED
-        mediaHost.showsOnlyActiveMedia = true
-        mediaHost.init(MediaHierarchyManager.LOCATION_QQS)
+        qqsMediaHost.expansion = MediaHostState.EXPANDED
+        qqsMediaHost.showsOnlyActiveMedia = true
+        qqsMediaHost.init(MediaHierarchyManager.LOCATION_QQS)
+
+        qsMediaHost.expansion = MediaHostState.EXPANDED
+        qsMediaHost.showsOnlyActiveMedia = false
+        qsMediaHost.init(MediaHierarchyManager.LOCATION_QS)
     }
 }
 
@@ -193,7 +200,8 @@ private fun SceneScope.ShadeScene(
     createBatteryMeterViewController: (ViewGroup, StatusBarLocation) -> BatteryMeterViewController,
     statusBarIconController: StatusBarIconController,
     mediaCarouselController: MediaCarouselController,
-    mediaHost: MediaHost,
+    qqsMediaHost: MediaHost,
+    qsMediaHost: MediaHost,
     modifier: Modifier = Modifier,
     shadeSession: SaveableSession,
 ) {
@@ -208,7 +216,7 @@ private fun SceneScope.ShadeScene(
                 createBatteryMeterViewController = createBatteryMeterViewController,
                 statusBarIconController = statusBarIconController,
                 mediaCarouselController = mediaCarouselController,
-                mediaHost = mediaHost,
+                mediaHost = qqsMediaHost,
                 modifier = modifier,
                 shadeSession = shadeSession,
             )
@@ -221,7 +229,7 @@ private fun SceneScope.ShadeScene(
                 createBatteryMeterViewController = createBatteryMeterViewController,
                 statusBarIconController = statusBarIconController,
                 mediaCarouselController = mediaCarouselController,
-                mediaHost = mediaHost,
+                mediaHost = qsMediaHost,
                 modifier = modifier,
                 shadeSession = shadeSession,
             )
