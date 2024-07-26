@@ -27,21 +27,22 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.util.fastLastOrNull
+import com.android.compose.animation.scene.content.Content
 
 @Composable
 internal fun Element(
     layoutImpl: SceneTransitionLayoutImpl,
-    scene: Scene,
+    sceneOrOverlay: Content,
     key: ElementKey,
     modifier: Modifier,
     content: @Composable ElementScope<ElementContentScope>.() -> Unit,
 ) {
-    Box(modifier.element(layoutImpl, scene, key)) {
-        val sceneScope = scene.scope
+    Box(modifier.element(layoutImpl, sceneOrOverlay, key)) {
+        val contentScope = sceneOrOverlay.scope
         val boxScope = this
         val elementScope =
-            remember(layoutImpl, key, scene, sceneScope, boxScope) {
-                ElementScopeImpl(layoutImpl, key, scene, sceneScope, boxScope)
+            remember(layoutImpl, key, sceneOrOverlay, contentScope, boxScope) {
+                ElementScopeImpl(layoutImpl, key, sceneOrOverlay, contentScope, boxScope)
             }
 
         content(elementScope)
@@ -51,17 +52,17 @@ internal fun Element(
 @Composable
 internal fun MovableElement(
     layoutImpl: SceneTransitionLayoutImpl,
-    scene: Scene,
+    sceneOrOverlay: Content,
     key: ElementKey,
     modifier: Modifier,
     content: @Composable ElementScope<MovableElementContentScope>.() -> Unit,
 ) {
-    Box(modifier.element(layoutImpl, scene, key)) {
-        val sceneScope = scene.scope
+    Box(modifier.element(layoutImpl, sceneOrOverlay, key)) {
+        val contentScope = sceneOrOverlay.scope
         val boxScope = this
         val elementScope =
-            remember(layoutImpl, key, scene, sceneScope, boxScope) {
-                MovableElementScopeImpl(layoutImpl, key, scene, sceneScope, boxScope)
+            remember(layoutImpl, key, sceneOrOverlay, contentScope, boxScope) {
+                MovableElementScopeImpl(layoutImpl, key, sceneOrOverlay, contentScope, boxScope)
             }
 
         content(elementScope)
@@ -71,7 +72,7 @@ internal fun MovableElement(
 private abstract class BaseElementScope<ContentScope>(
     private val layoutImpl: SceneTransitionLayoutImpl,
     private val element: ElementKey,
-    private val scene: Scene,
+    private val sceneOrOverlay: Content,
 ) : ElementScope<ContentScope> {
     @Composable
     override fun <T> animateElementValueAsState(
@@ -82,7 +83,7 @@ private abstract class BaseElementScope<ContentScope>(
     ): AnimatedState<T> {
         return animateSharedValueAsState(
             layoutImpl,
-            scene.key,
+            sceneOrOverlay.key,
             element,
             key,
             value,
@@ -95,12 +96,12 @@ private abstract class BaseElementScope<ContentScope>(
 private class ElementScopeImpl(
     layoutImpl: SceneTransitionLayoutImpl,
     element: ElementKey,
-    scene: Scene,
-    private val sceneScope: SceneScope,
+    content: Content,
+    private val delegateContentScope: ContentScope,
     private val boxScope: BoxScope,
-) : BaseElementScope<ElementContentScope>(layoutImpl, element, scene) {
+) : BaseElementScope<ElementContentScope>(layoutImpl, element, content) {
     private val contentScope =
-        object : ElementContentScope, SceneScope by sceneScope, BoxScope by boxScope {}
+        object : ElementContentScope, ContentScope by delegateContentScope, BoxScope by boxScope {}
 
     @Composable
     override fun content(content: @Composable ElementContentScope.() -> Unit) {
@@ -111,12 +112,15 @@ private class ElementScopeImpl(
 private class MovableElementScopeImpl(
     private val layoutImpl: SceneTransitionLayoutImpl,
     private val element: ElementKey,
-    private val scene: Scene,
-    private val sceneScope: BaseSceneScope,
+    private val content: Content,
+    private val baseContentScope: BaseContentScope,
     private val boxScope: BoxScope,
-) : BaseElementScope<MovableElementContentScope>(layoutImpl, element, scene) {
+) : BaseElementScope<MovableElementContentScope>(layoutImpl, element, content) {
     private val contentScope =
-        object : MovableElementContentScope, BaseSceneScope by sceneScope, BoxScope by boxScope {}
+        object :
+            MovableElementContentScope,
+            BaseContentScope by baseContentScope,
+            BoxScope by boxScope {}
 
     @Composable
     override fun content(content: @Composable MovableElementContentScope.() -> Unit) {
@@ -126,9 +130,10 @@ private class MovableElementScopeImpl(
         // during the transition.
         // TODO(b/317026105): Use derivedStateOf only if the scene picker reads the progress in its
         // logic.
+        val contentKey = this@MovableElementScopeImpl.content.key
         val shouldComposeMovableElement by
-            remember(layoutImpl, scene.key, element) {
-                derivedStateOf { shouldComposeMovableElement(layoutImpl, scene.key, element) }
+            remember(layoutImpl, contentKey, element) {
+                derivedStateOf { shouldComposeMovableElement(layoutImpl, contentKey, element) }
             }
 
         if (shouldComposeMovableElement) {
@@ -152,7 +157,7 @@ private class MovableElementScopeImpl(
                 val size =
                     placeholderContentSize(
                         layoutImpl,
-                        scene.key,
+                        contentKey,
                         layoutImpl.elements.getValue(element),
                     )
                 layout(size.width, size.height) {}
@@ -163,7 +168,7 @@ private class MovableElementScopeImpl(
 
 private fun shouldComposeMovableElement(
     layoutImpl: SceneTransitionLayoutImpl,
-    scene: SceneKey,
+    content: ContentKey,
     element: ElementKey,
 ): Boolean {
     val transitions = layoutImpl.state.currentTransitions
@@ -171,7 +176,7 @@ private fun shouldComposeMovableElement(
         // If we are idle, there is only one [scene] that is composed so we can compose our
         // movable content here. We still check that [scene] is equal to the current idle scene, to
         // make sure we only compose it there.
-        return layoutImpl.state.transitionState.currentScene == scene
+        return layoutImpl.state.transitionState.currentScene == content
     }
 
     // The current transition for this element is the last transition in which either fromScene or
@@ -189,7 +194,7 @@ private fun shouldComposeMovableElement(
     // Always compose movable elements in the scene picked by their scene picker.
     return shouldPlaceOrComposeSharedElement(
         layoutImpl,
-        scene,
+        content,
         element,
         transition,
     )
@@ -201,12 +206,12 @@ private fun shouldComposeMovableElement(
  */
 private fun placeholderContentSize(
     layoutImpl: SceneTransitionLayoutImpl,
-    scene: SceneKey,
+    content: ContentKey,
     element: Element,
 ): IntSize {
     // If the content of the movable element was already composed in this scene before, use that
     // target size.
-    val targetValueInScene = element.sceneStates.getValue(scene).targetSize
+    val targetValueInScene = element.stateByContent.getValue(content).targetSize
     if (targetValueInScene != Element.SizeUnspecified) {
         return targetValueInScene
     }
@@ -219,8 +224,9 @@ private fun placeholderContentSize(
     // doesn't change between scenes.
     // TODO(b/317026105): Provide a way to give a hint size/content for cases where this is not
     // true.
-    val otherScene = if (transition.fromScene == scene) transition.toScene else transition.fromScene
-    val targetValueInOtherScene = element.sceneStates[otherScene]?.targetSize
+    val otherScene =
+        if (transition.fromScene == content) transition.toScene else transition.fromScene
+    val targetValueInOtherScene = element.stateByContent[otherScene]?.targetSize
     if (targetValueInOtherScene != null && targetValueInOtherScene != Element.SizeUnspecified) {
         return targetValueInOtherScene
     }

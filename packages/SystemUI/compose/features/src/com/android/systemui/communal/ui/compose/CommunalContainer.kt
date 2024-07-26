@@ -28,6 +28,7 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.android.compose.animation.scene.Back
+import com.android.compose.animation.scene.ContentKey
 import com.android.compose.animation.scene.Edge
 import com.android.compose.animation.scene.ElementKey
 import com.android.compose.animation.scene.ElementMatcher
@@ -65,7 +66,7 @@ object Communal {
 }
 
 object AllElements : ElementMatcher {
-    override fun matches(key: ElementKey, scene: SceneKey) = true
+    override fun matches(key: ElementKey, content: ContentKey) = true
 }
 
 private object TransitionDuration {

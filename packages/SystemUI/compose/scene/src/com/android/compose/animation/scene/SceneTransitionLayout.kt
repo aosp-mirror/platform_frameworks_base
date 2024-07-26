@@ -34,7 +34,6 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.LayoutDirection
-import com.android.compose.animation.scene.UserAction.Resolved
 
 /**
  * [SceneTransitionLayout] is a container that automatically animates its content whenever its state
@@ -85,7 +84,7 @@ interface SceneTransitionLayoutScope {
     fun scene(
         key: SceneKey,
         userActions: Map<UserAction, UserActionResult> = emptyMap(),
-        content: @Composable SceneScope.() -> Unit,
+        content: @Composable ContentScope.() -> Unit,
     )
 }
 
@@ -118,25 +117,25 @@ interface ElementStateScope {
 
 @Stable
 @ElementDsl
-interface BaseSceneScope : ElementStateScope {
-    /** The key of this scene. */
-    val sceneKey: SceneKey
+interface BaseContentScope : ElementStateScope {
+    /** The key of this content. */
+    val contentKey: ContentKey
 
-    /** The state of the [SceneTransitionLayout] in which this scene is contained. */
+    /** The state of the [SceneTransitionLayout] in which this content is contained. */
     val layoutState: SceneTransitionLayoutState
 
     /**
      * Tag an element identified by [key].
      *
      * Tagging an element will allow you to reference that element when defining transitions, so
-     * that the element can be transformed and animated when the scene transitions in or out.
+     * that the element can be transformed and animated when the content transitions in or out.
      *
-     * Additionally, this [key] will be used to detect elements that are shared between scenes to
+     * Additionally, this [key] will be used to detect elements that are shared between contents to
      * automatically interpolate their size and offset. If you need to animate shared element values
-     * (i.e. values associated to this element that change depending on which scene it is composed
+     * (i.e. values associated to this element that change depending on which content it is composed
      * in), use [Element] instead.
      *
-     * Note that shared elements tagged using this function will be duplicated in each scene they
+     * Note that shared elements tagged using this function will be duplicated in each content they
      * are part of, so any **internal** state (e.g. state created using `remember {
      * mutableStateOf(...) }`) will be lost. If you need to preserve internal state, you should use
      * [MovableElement] instead.
@@ -150,7 +149,7 @@ interface BaseSceneScope : ElementStateScope {
      * Create an element identified by [key].
      *
      * Similar to [element], this creates an element that will be automatically shared when present
-     * in multiple scenes and that can be transformed during transitions, the same way that
+     * in multiple contents and that can be transformed during transitions, the same way that
      * [element] does.
      *
      * The only difference with [element] is that the provided [ElementScope] allows you to
@@ -177,7 +176,7 @@ interface BaseSceneScope : ElementStateScope {
      * Create a *movable* element identified by [key].
      *
      * Similar to [Element], this creates an element that will be automatically shared when present
-     * in multiple scenes and that can be transformed during transitions, and you can also use the
+     * in multiple contents and that can be transformed during transitions, and you can also use the
      * provided [ElementScope] to [animate element values][ElementScope.animateElementValueAsState].
      *
      * The important difference with [element] and [Element] is that this element
@@ -232,24 +231,26 @@ interface BaseSceneScope : ElementStateScope {
     fun Modifier.noResizeDuringTransitions(): Modifier
 }
 
+typealias SceneScope = ContentScope
+
 @Stable
 @ElementDsl
-interface SceneScope : BaseSceneScope {
+interface ContentScope : BaseContentScope {
     /**
-     * Animate some value at the scene level.
+     * Animate some value at the content level.
      *
      * @param value the value of this shared value in the current scene.
      * @param key the key of this shared value.
      * @param type the [SharedValueType] of this animated value.
      * @param canOverflow whether this value can overflow past the values it is interpolated
      *   between, for instance because the transition is animated using a bouncy spring.
-     * @see animateSceneIntAsState
-     * @see animateSceneFloatAsState
-     * @see animateSceneDpAsState
-     * @see animateSceneColorAsState
+     * @see animateContentIntAsState
+     * @see animateContentFloatAsState
+     * @see animateContentDpAsState
+     * @see animateContentColorAsState
      */
     @Composable
-    fun <T> animateSceneValueAsState(
+    fun <T> animateContentValueAsState(
         value: T,
         key: ValueKey,
         type: SharedValueType<T, *>,
@@ -259,7 +260,7 @@ interface SceneScope : BaseSceneScope {
 
 /**
  * The type of a shared value animated using [ElementScope.animateElementValueAsState] or
- * [SceneScope.animateSceneValueAsState].
+ * [ContentScope.animateContentValueAsState].
  */
 @Stable
 interface SharedValueType<T, Delta> {
@@ -321,8 +322,9 @@ interface ElementScope<ContentScope> {
  * The exact same scope as [androidx.compose.foundation.layout.BoxScope].
  *
  * We can't reuse BoxScope directly because of the @LayoutScopeMarker annotation on it, which would
- * prevent us from calling Modifier.element() and other methods of [SceneScope] inside any Box {} in
- * the [content][ElementScope.content] of a [SceneScope.Element] or a [SceneScope.MovableElement].
+ * prevent us from calling Modifier.element() and other methods of [ContentScope] inside any Box {}
+ * in the [content][ElementScope.content] of a [ContentScope.Element] or a
+ * [ContentScope.MovableElement].
  */
 @Stable
 @ElementDsl
@@ -335,16 +337,16 @@ interface ElementBoxScope {
 }
 
 /** The scope for "normal" (not movable) elements. */
-@Stable @ElementDsl interface ElementContentScope : SceneScope, ElementBoxScope
+@Stable @ElementDsl interface ElementContentScope : ContentScope, ElementBoxScope
 
 /**
  * The scope for the content of movable elements.
  *
- * Note that it extends [BaseSceneScope] and not [SceneScope] because movable elements should not
- * call [SceneScope.animateSceneValueAsState], given that their content is not composed in all
- * scenes.
+ * Note that it extends [BaseContentScope] and not [ContentScope] because movable elements should
+ * not call [ContentScope.animateContentValueAsState], given that their content is not composed in
+ * all scenes.
  */
-@Stable @ElementDsl interface MovableElementContentScope : BaseSceneScope, ElementBoxScope
+@Stable @ElementDsl interface MovableElementContentScope : BaseContentScope, ElementBoxScope
 
 /** An action performed by the user. */
 sealed class UserAction {
