@@ -60,7 +60,6 @@ import com.android.systemui.kosmos.testScope
 import com.android.systemui.res.R
 import com.android.systemui.shade.mockLargeScreenHeaderHelper
 import com.android.systemui.shade.shadeTestUtil
-import com.android.systemui.statusbar.notification.NotificationUtils.interpolate
 import com.android.systemui.statusbar.notification.stack.domain.interactor.sharedNotificationContainerInteractor
 import com.android.systemui.testKosmos
 import com.android.systemui.util.mockito.any
@@ -590,6 +589,43 @@ class SharedNotificationContainerViewModelTest(flags: FlagsParameterization) : S
         }
 
     @Test
+    @DisableSceneContainer
+    fun boundsDoNotChangeWhileLockscreenToAodTransitionIsActive() =
+        testScope.runTest {
+            val bounds by collectLastValue(underTest.bounds)
+
+            // Start on lockscreen
+            showLockscreen()
+
+            keyguardInteractor.setNotificationContainerBounds(
+                NotificationContainerBounds(top = 1f, bottom = 1f)
+            )
+            assertThat(bounds).isEqualTo(NotificationContainerBounds(top = 1f, bottom = 1f))
+
+            // Begin transition to AOD
+            keyguardTransitionRepository.sendTransitionStep(
+                TransitionStep(LOCKSCREEN, AOD, 0f, TransitionState.STARTED)
+            )
+            runCurrent()
+            keyguardTransitionRepository.sendTransitionStep(
+                TransitionStep(LOCKSCREEN, AOD, 0.5f, TransitionState.RUNNING)
+            )
+
+            // Attempt to update bounds
+            keyguardInteractor.setNotificationContainerBounds(
+                NotificationContainerBounds(top = 5f, bottom = 5f)
+            )
+            // Bounds should not have moved
+            assertThat(bounds).isEqualTo(NotificationContainerBounds(top = 1f, bottom = 1f))
+
+            // Transition is over, now move
+            keyguardTransitionRepository.sendTransitionStep(
+                TransitionStep(LOCKSCREEN, AOD, 1f, TransitionState.FINISHED)
+            )
+            assertThat(bounds).isEqualTo(NotificationContainerBounds(top = 5f, bottom = 5f))
+        }
+
+    @Test
     @DisableFlags(FLAG_CENTRALIZED_STATUS_BAR_HEIGHT_FIX)
     @DisableSceneContainer
     fun boundsOnLockscreenInSplitShade_refactorFlagOff_usesLargeHeaderResource() =
@@ -820,54 +856,6 @@ class SharedNotificationContainerViewModelTest(flags: FlagsParameterization) : S
 
     @Test
     @DisableSceneContainer
-    fun updateBounds_fromKeyguardRoot() =
-        testScope.runTest {
-            val startProgress = 0f
-            val startStep = TransitionStep(LOCKSCREEN, AOD, startProgress, TransitionState.STARTED)
-            val boundsChangingProgress = 0.2f
-            val boundsChangingStep =
-                TransitionStep(LOCKSCREEN, AOD, boundsChangingProgress, TransitionState.RUNNING)
-            val boundsInterpolatingProgress = 0.6f
-            val boundsInterpolatingStep =
-                TransitionStep(
-                    LOCKSCREEN,
-                    AOD,
-                    boundsInterpolatingProgress,
-                    TransitionState.RUNNING
-                )
-            val finishProgress = 1.0f
-            val finishStep =
-                TransitionStep(LOCKSCREEN, AOD, finishProgress, TransitionState.FINISHED)
-
-            val bounds by collectLastValue(underTest.bounds)
-            val top = 123f
-            val bottom = 456f
-
-            kosmos.fakeKeyguardTransitionRepository.sendTransitionStep(startStep)
-            runCurrent()
-            kosmos.fakeKeyguardTransitionRepository.sendTransitionStep(boundsChangingStep)
-            runCurrent()
-            keyguardRootViewModel.onNotificationContainerBoundsChanged(top, bottom)
-
-            kosmos.fakeKeyguardTransitionRepository.sendTransitionStep(boundsInterpolatingStep)
-            runCurrent()
-            val adjustedProgress =
-                (boundsInterpolatingProgress - boundsChangingProgress) /
-                    (1 - boundsChangingProgress)
-            val interpolatedTop = interpolate(0f, top, adjustedProgress)
-            val interpolatedBottom = interpolate(0f, bottom, adjustedProgress)
-            assertThat(bounds)
-                .isEqualTo(
-                    NotificationContainerBounds(top = interpolatedTop, bottom = interpolatedBottom)
-                )
-
-            kosmos.fakeKeyguardTransitionRepository.sendTransitionStep(finishStep)
-            runCurrent()
-            assertThat(bounds).isEqualTo(NotificationContainerBounds(top = top, bottom = bottom))
-        }
-
-    @Test
-    @DisableSceneContainer
     fun updateBounds_fromGone_withoutTransitions() =
         testScope.runTest {
             // Start step is already at 1.0
@@ -878,9 +866,9 @@ class SharedNotificationContainerViewModelTest(flags: FlagsParameterization) : S
             val top = 123f
             val bottom = 456f
 
-            kosmos.fakeKeyguardTransitionRepository.sendTransitionStep(runningStep)
+            keyguardTransitionRepository.sendTransitionStep(runningStep)
             runCurrent()
-            kosmos.fakeKeyguardTransitionRepository.sendTransitionStep(finishStep)
+            keyguardTransitionRepository.sendTransitionStep(finishStep)
             runCurrent()
             keyguardRootViewModel.onNotificationContainerBoundsChanged(top, bottom)
             runCurrent()

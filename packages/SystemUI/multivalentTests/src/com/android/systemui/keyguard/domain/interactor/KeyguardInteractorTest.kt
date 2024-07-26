@@ -32,7 +32,7 @@ import com.android.systemui.flags.EnableSceneContainer
 import com.android.systemui.keyguard.data.repository.fakeCommandQueue
 import com.android.systemui.keyguard.data.repository.fakeKeyguardRepository
 import com.android.systemui.keyguard.data.repository.fakeKeyguardTransitionRepository
-import com.android.systemui.keyguard.shared.model.CameraLaunchSourceModel
+import com.android.systemui.keyguard.shared.model.CameraLaunchType
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.StatusBarState
 import com.android.systemui.keyguard.shared.model.TransitionState
@@ -47,7 +47,6 @@ import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
@@ -87,31 +86,17 @@ class KeyguardInteractorTest : SysuiTestCase() {
             val cameraLaunchSource = collectLastValue(flow)
             runCurrent()
 
-            commandQueue.doForEachCallback {
-                it.onCameraLaunchGestureDetected(StatusBarManager.CAMERA_LAUNCH_SOURCE_WIGGLE)
-            }
-            assertThat(cameraLaunchSource()).isEqualTo(CameraLaunchSourceModel.WIGGLE)
+            underTest.onCameraLaunchDetected(StatusBarManager.CAMERA_LAUNCH_SOURCE_POWER_DOUBLE_TAP)
+            assertThat(cameraLaunchSource()!!.type).isEqualTo(CameraLaunchType.POWER_DOUBLE_TAP)
 
-            commandQueue.doForEachCallback {
-                it.onCameraLaunchGestureDetected(
-                    StatusBarManager.CAMERA_LAUNCH_SOURCE_POWER_DOUBLE_TAP
-                )
-            }
-            assertThat(cameraLaunchSource()).isEqualTo(CameraLaunchSourceModel.POWER_DOUBLE_TAP)
+            underTest.onCameraLaunchDetected(StatusBarManager.CAMERA_LAUNCH_SOURCE_WIGGLE)
+            assertThat(cameraLaunchSource()!!.type).isEqualTo(CameraLaunchType.WIGGLE)
 
-            commandQueue.doForEachCallback {
-                it.onCameraLaunchGestureDetected(StatusBarManager.CAMERA_LAUNCH_SOURCE_LIFT_TRIGGER)
-            }
-            assertThat(cameraLaunchSource()).isEqualTo(CameraLaunchSourceModel.LIFT_TRIGGER)
+            underTest.onCameraLaunchDetected(StatusBarManager.CAMERA_LAUNCH_SOURCE_LIFT_TRIGGER)
+            assertThat(cameraLaunchSource()!!.type).isEqualTo(CameraLaunchType.LIFT_TRIGGER)
 
-            commandQueue.doForEachCallback {
-                it.onCameraLaunchGestureDetected(
-                    StatusBarManager.CAMERA_LAUNCH_SOURCE_QUICK_AFFORDANCE
-                )
-            }
-            assertThat(cameraLaunchSource()).isEqualTo(CameraLaunchSourceModel.QUICK_AFFORDANCE)
-
-            flow.onCompletion { assertThat(commandQueue.callbackCount()).isEqualTo(0) }
+            underTest.onCameraLaunchDetected(StatusBarManager.CAMERA_LAUNCH_SOURCE_QUICK_AFFORDANCE)
+            assertThat(cameraLaunchSource()!!.type).isEqualTo(CameraLaunchType.QUICK_AFFORDANCE)
         }
 
     @Test
@@ -121,11 +106,7 @@ class KeyguardInteractorTest : SysuiTestCase() {
             val secureCameraActive = collectLastValue(underTest.isSecureCameraActive)
             runCurrent()
 
-            commandQueue.doForEachCallback {
-                it.onCameraLaunchGestureDetected(
-                    StatusBarManager.CAMERA_LAUNCH_SOURCE_POWER_DOUBLE_TAP
-                )
-            }
+            underTest.onCameraLaunchDetected(StatusBarManager.CAMERA_LAUNCH_SOURCE_POWER_DOUBLE_TAP)
 
             assertThat(secureCameraActive()).isTrue()
 
@@ -146,11 +127,7 @@ class KeyguardInteractorTest : SysuiTestCase() {
             val secureCameraActive = collectLastValue(underTest.isSecureCameraActive)
             runCurrent()
 
-            commandQueue.doForEachCallback {
-                it.onCameraLaunchGestureDetected(
-                    StatusBarManager.CAMERA_LAUNCH_SOURCE_POWER_DOUBLE_TAP
-                )
-            }
+            underTest.onCameraLaunchDetected(StatusBarManager.CAMERA_LAUNCH_SOURCE_POWER_DOUBLE_TAP)
             assertThat(secureCameraActive()).isTrue()
 
             // Keyguard is showing and not occluded

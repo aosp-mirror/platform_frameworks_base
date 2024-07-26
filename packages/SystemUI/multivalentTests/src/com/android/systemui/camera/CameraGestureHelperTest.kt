@@ -18,6 +18,7 @@ package com.android.systemui.camera
 
 import android.app.ActivityManager
 import android.app.IActivityTaskManager
+import android.app.admin.DevicePolicyManager
 import android.content.ComponentName
 import android.content.ContentResolver
 import android.content.Intent
@@ -29,82 +30,73 @@ import androidx.test.filters.SmallTest
 import com.android.systemui.ActivityIntentHelper
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.plugins.ActivityStarter
+import com.android.systemui.statusbar.NotificationLockscreenUserManager
 import com.android.systemui.statusbar.StatusBarState
-import com.android.systemui.statusbar.phone.CentralSurfaces
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager
 import com.android.systemui.statusbar.policy.KeyguardStateController
 import com.android.systemui.user.domain.interactor.SelectedUserInteractor
 import com.android.systemui.util.mockito.KotlinArgumentCaptor
+import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.eq
 import com.android.systemui.util.mockito.mock
+import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
 import com.google.common.util.concurrent.MoreExecutors
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.ArgumentMatchers.isNull
 import org.mockito.Mock
-import org.mockito.Mockito.any
 import org.mockito.Mockito.anyInt
 import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
-import org.mockito.Mockito.`when` as whenever
 
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 class CameraGestureHelperTest : SysuiTestCase() {
 
-    @Mock
-    lateinit var centralSurfaces: CentralSurfaces
-    @Mock
-    lateinit var statusBarKeyguardViewManager: StatusBarKeyguardViewManager
-    @Mock
-    lateinit var keyguardStateController: KeyguardStateController
-    @Mock
-    lateinit var packageManager: PackageManager
-    @Mock
-    lateinit var activityManager: ActivityManager
-    @Mock
-    lateinit var activityStarter: ActivityStarter
-    @Mock
-    lateinit var activityIntentHelper: ActivityIntentHelper
-    @Mock
-    lateinit var activityTaskManager: IActivityTaskManager
-    @Mock
-    lateinit var cameraIntents: CameraIntentsWrapper
-    @Mock
-    lateinit var contentResolver: ContentResolver
-    @Mock
-    lateinit var mSelectedUserInteractor: SelectedUserInteractor
+    @Mock lateinit var statusBarKeyguardViewManager: StatusBarKeyguardViewManager
+    @Mock lateinit var keyguardStateController: KeyguardStateController
+    @Mock lateinit var packageManager: PackageManager
+    @Mock lateinit var activityManager: ActivityManager
+    @Mock lateinit var activityStarter: ActivityStarter
+    @Mock lateinit var activityIntentHelper: ActivityIntentHelper
+    @Mock lateinit var activityTaskManager: IActivityTaskManager
+    @Mock lateinit var cameraIntents: CameraIntentsWrapper
+    @Mock lateinit var contentResolver: ContentResolver
+    @Mock lateinit var mSelectedUserInteractor: SelectedUserInteractor
+    @Mock lateinit var devicePolicyManager: DevicePolicyManager
+    @Mock lateinit var lockscreenUserManager: NotificationLockscreenUserManager
 
     private lateinit var underTest: CameraGestureHelper
 
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
-        whenever(cameraIntents.getSecureCameraIntent(anyInt())).thenReturn(
-            Intent(CameraIntents.DEFAULT_SECURE_CAMERA_INTENT_ACTION)
-        )
-        whenever(cameraIntents.getInsecureCameraIntent(anyInt())).thenReturn(
-            Intent(CameraIntents.DEFAULT_INSECURE_CAMERA_INTENT_ACTION)
-        )
+        whenever(cameraIntents.getSecureCameraIntent(any()))
+            .thenReturn(Intent(CameraIntents.DEFAULT_SECURE_CAMERA_INTENT_ACTION))
+        whenever(cameraIntents.getInsecureCameraIntent(any()))
+            .thenReturn(Intent(CameraIntents.DEFAULT_INSECURE_CAMERA_INTENT_ACTION))
 
         prepare()
 
-        underTest = CameraGestureHelper(
-            context = mock(),
-            centralSurfaces = centralSurfaces,
-            keyguardStateController = keyguardStateController,
-            statusBarKeyguardViewManager = statusBarKeyguardViewManager,
-            packageManager = packageManager,
-            activityManager = activityManager,
-            activityStarter = activityStarter,
-            activityIntentHelper = activityIntentHelper,
-            activityTaskManager = activityTaskManager,
-            cameraIntents = cameraIntents,
-            contentResolver = contentResolver,
-            uiExecutor = MoreExecutors.directExecutor(),
-            selectedUserInteractor = mSelectedUserInteractor,
-        )
+        underTest =
+            CameraGestureHelper(
+                context = mock(),
+                keyguardStateController = keyguardStateController,
+                statusBarKeyguardViewManager = statusBarKeyguardViewManager,
+                packageManager = packageManager,
+                activityManager = activityManager,
+                activityStarter = activityStarter,
+                activityIntentHelper = activityIntentHelper,
+                activityTaskManager = activityTaskManager,
+                cameraIntents = cameraIntents,
+                contentResolver = contentResolver,
+                uiExecutor = MoreExecutors.directExecutor(),
+                selectedUserInteractor = mSelectedUserInteractor,
+                devicePolicyManager = devicePolicyManager,
+                lockscreenUserManager = lockscreenUserManager,
+            )
     }
 
     /**
@@ -116,13 +108,13 @@ class CameraGestureHelperTest : SysuiTestCase() {
      * @param isCameraAllowedByAdmin Whether the device administrator allows use of the camera app
      * @param installedCameraAppCount The number of installed camera apps on the device
      * @param isUsingSecureScreenLockOption Whether the user-controlled setting for Screen Lock is
-     * set with a "secure" option that requires the user to provide some secret/credentials to be
-     * able to unlock the device, for example "Face Unlock", "PIN", or "Password". Examples of
-     * non-secure options are "None" and "Swipe"
+     *   set with a "secure" option that requires the user to provide some secret/credentials to be
+     *   able to unlock the device, for example "Face Unlock", "PIN", or "Password". Examples of
+     *   non-secure options are "None" and "Swipe"
      * @param isCameraActivityRunningOnTop Whether the camera activity is running at the top of the
-     * most recent/current task of activities
+     *   most recent/current task of activities
      * @param isTaskListEmpty Whether there are no active activity tasks at all. Note that this is
-     * treated as `false` if [isCameraActivityRunningOnTop] is set to `true`
+     *   treated as `false` if [isCameraActivityRunningOnTop] is set to `true`
      */
     private fun prepare(
         isCameraAllowedByAdmin: Boolean = true,
@@ -131,7 +123,13 @@ class CameraGestureHelperTest : SysuiTestCase() {
         isCameraActivityRunningOnTop: Boolean = false,
         isTaskListEmpty: Boolean = false,
     ) {
-        whenever(centralSurfaces.isCameraAllowedByAdmin).thenReturn(isCameraAllowedByAdmin)
+        whenever(lockscreenUserManager.getCurrentUserId()).thenReturn(1)
+        if (isCameraAllowedByAdmin) {
+            whenever(devicePolicyManager.getCameraDisabled(isNull(), any())).thenReturn(false)
+            whenever(keyguardStateController.isMethodSecure).thenReturn(false)
+        } else {
+            whenever(devicePolicyManager.getCameraDisabled(isNull(), any())).thenReturn(true)
+        }
 
         whenever(activityIntentHelper.wouldLaunchResolverActivity(any(), anyInt()))
             .thenReturn(installedCameraAppCount > 1)
@@ -141,30 +139,26 @@ class CameraGestureHelperTest : SysuiTestCase() {
             .thenReturn(!isUsingSecureScreenLockOption)
 
         if (installedCameraAppCount >= 1) {
-            val resolveInfo = ResolveInfo().apply {
-                this.activityInfo = ActivityInfo().apply {
-                    packageName = CAMERA_APP_PACKAGE_NAME
+            val resolveInfo =
+                ResolveInfo().apply {
+                    this.activityInfo =
+                        ActivityInfo().apply { packageName = CAMERA_APP_PACKAGE_NAME }
                 }
-            }
-            whenever(packageManager.resolveActivityAsUser(any(), anyInt(), anyInt())).thenReturn(
-                resolveInfo
-            )
+            whenever(packageManager.resolveActivityAsUser(any(), anyInt(), anyInt()))
+                .thenReturn(resolveInfo)
         } else {
-            whenever(packageManager.resolveActivityAsUser(any(), anyInt(), anyInt())).thenReturn(
-                null
-            )
+            whenever(packageManager.resolveActivityAsUser(any(), anyInt(), anyInt()))
+                .thenReturn(null)
         }
 
         when {
             isCameraActivityRunningOnTop -> {
-                val runningTaskInfo = ActivityManager.RunningTaskInfo().apply {
-                    topActivity = ComponentName(CAMERA_APP_PACKAGE_NAME, "cameraActivity")
-                }
-                whenever(activityManager.getRunningTasks(anyInt())).thenReturn(
-                    listOf(
-                        runningTaskInfo
-                    )
-                )
+                val runningTaskInfo =
+                    ActivityManager.RunningTaskInfo().apply {
+                        topActivity = ComponentName(CAMERA_APP_PACKAGE_NAME, "cameraActivity")
+                    }
+                whenever(activityManager.getRunningTasks(anyInt()))
+                    .thenReturn(listOf(runningTaskInfo))
             }
             isTaskListEmpty -> {
                 whenever(activityManager.getRunningTasks(anyInt())).thenReturn(emptyList())
@@ -289,28 +283,28 @@ class CameraGestureHelperTest : SysuiTestCase() {
     ) {
         val intentCaptor = KotlinArgumentCaptor(Intent::class.java)
         if (isSecure && !moreThanOneCameraAppInstalled) {
-            verify(activityTaskManager).startActivityAsUser(
-                any(),
-                any(),
-                any(),
-                intentCaptor.capture(),
-                any(),
-                any(),
-                any(),
-                anyInt(),
-                anyInt(),
-                any(),
-                any(),
-                anyInt()
-            )
+            verify(activityTaskManager)
+                .startActivityAsUser(
+                    isNull(),
+                    isNull(),
+                    isNull(),
+                    intentCaptor.capture(),
+                    isNull(),
+                    isNull(),
+                    isNull(),
+                    anyInt(),
+                    anyInt(),
+                    isNull(),
+                    any(),
+                    anyInt()
+                )
         } else {
             verify(activityStarter).startActivity(intentCaptor.capture(), eq(false))
         }
         val intent = intentCaptor.value
 
         assertThat(CameraIntents.isSecureCameraIntent(intent)).isEqualTo(isSecure)
-        assertThat(intent.getIntExtra(CameraIntents.EXTRA_LAUNCH_SOURCE, -1))
-            .isEqualTo(source)
+        assertThat(intent.getIntExtra(CameraIntents.EXTRA_LAUNCH_SOURCE, -1)).isEqualTo(source)
     }
 
     companion object {
