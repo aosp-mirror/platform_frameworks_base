@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package androidx.window.util;
+package androidx.window.common;
 
 import androidx.annotation.GuardedBy;
 import androidx.annotation.NonNull;
