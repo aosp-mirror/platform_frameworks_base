@@ -28,6 +28,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
+import androidx.compose.ui.input.nestedscroll.NestedScrollDispatcher
+import androidx.compose.ui.input.nestedscroll.NestedScrollSource
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.input.pointer.AwaitPointerEventScope
 import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.PointerInputChange
@@ -37,6 +41,7 @@ import androidx.compose.ui.platform.LocalViewConfiguration
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performTouchInput
+import androidx.compose.ui.unit.Velocity
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.coroutineScope
@@ -49,17 +54,22 @@ import org.junit.runner.RunWith
 class MultiPointerDraggableTest {
     @get:Rule val rule = createComposeRule()
 
+    private val emptyConnection = object : NestedScrollConnection {}
+    private val defaultDispatcher = NestedScrollDispatcher()
+
+    private fun Modifier.nestedScrollDispatcher() = nestedScroll(emptyConnection, defaultDispatcher)
+
     private class SimpleDragController(
-        val onDrag: () -> Unit,
-        val onStop: () -> Unit,
+        val onDrag: (delta: Float) -> Unit,
+        val onStop: (velocity: Float) -> Unit,
     ) : DragController {
         override fun onDrag(delta: Float): Float {
-            onDrag()
+            onDrag.invoke(delta)
             return delta
         }
 
         override fun onStop(velocity: Float, canChangeScene: Boolean): Float {
-            onStop()
+            onStop.invoke(velocity)
             return velocity
         }
     }
@@ -79,6 +89,7 @@ class MultiPointerDraggableTest {
             touchSlop = LocalViewConfiguration.current.touchSlop
             Box(
                 Modifier.size(with(LocalDensity.current) { Size(size, size).toDpSize() })
+                    .nestedScrollDispatcher()
                     .multiPointerDraggable(
                         orientation = Orientation.Vertical,
                         enabled = { enabled },
@@ -90,6 +101,7 @@ class MultiPointerDraggableTest {
                                 onStop = { stopped = true },
                             )
                         },
+                        dispatcher = defaultDispatcher,
                     )
             )
         }
@@ -145,6 +157,7 @@ class MultiPointerDraggableTest {
             touchSlop = LocalViewConfiguration.current.touchSlop
             Box(
                 Modifier.size(with(LocalDensity.current) { Size(size, size).toDpSize() })
+                    .nestedScrollDispatcher()
                     .multiPointerDraggable(
                         orientation = Orientation.Vertical,
                         enabled = { true },
@@ -157,6 +170,7 @@ class MultiPointerDraggableTest {
                                 onStop = { stopped = true },
                             )
                         },
+                        dispatcher = defaultDispatcher,
                     )
                     .pointerInput(Unit) {
                         coroutineScope {
@@ -217,6 +231,7 @@ class MultiPointerDraggableTest {
             touchSlop = LocalViewConfiguration.current.touchSlop
             Box(
                 Modifier.size(with(LocalDensity.current) { Size(size, size).toDpSize() })
+                    .nestedScrollDispatcher()
                     .multiPointerDraggable(
                         orientation = Orientation.Vertical,
                         enabled = { true },
@@ -228,6 +243,7 @@ class MultiPointerDraggableTest {
                                 onStop = { stopped = true },
                             )
                         },
+                        dispatcher = defaultDispatcher,
                     )
             ) {
                 if (hasScrollable) {
@@ -335,6 +351,7 @@ class MultiPointerDraggableTest {
             touchSlop = LocalViewConfiguration.current.touchSlop
             Box(
                 Modifier.size(with(LocalDensity.current) { Size(size, size).toDpSize() })
+                    .nestedScrollDispatcher()
                     .multiPointerDraggable(
                         orientation = Orientation.Vertical,
                         enabled = { true },
@@ -346,6 +363,7 @@ class MultiPointerDraggableTest {
                                 onStop = { stopped = true },
                             )
                         },
+                        dispatcher = defaultDispatcher,
                     )
             ) {
                 Box(
@@ -436,6 +454,7 @@ class MultiPointerDraggableTest {
             touchSlop = LocalViewConfiguration.current.touchSlop
             Box(
                 Modifier.size(with(LocalDensity.current) { Size(size, size).toDpSize() })
+                    .nestedScrollDispatcher()
                     .multiPointerDraggable(
                         orientation = Orientation.Vertical,
                         enabled = { true },
@@ -447,6 +466,7 @@ class MultiPointerDraggableTest {
                                 onStop = { verticalStopped = true },
                             )
                         },
+                        dispatcher = defaultDispatcher,
                     )
                     .multiPointerDraggable(
                         orientation = Orientation.Horizontal,
@@ -459,6 +479,7 @@ class MultiPointerDraggableTest {
                                 onStop = { horizontalStopped = true },
                             )
                         },
+                        dispatcher = defaultDispatcher,
                     )
             )
         }
@@ -539,6 +560,7 @@ class MultiPointerDraggableTest {
             touchSlop = LocalViewConfiguration.current.touchSlop
             Box(
                 Modifier.size(with(LocalDensity.current) { Size(size, size).toDpSize() })
+                    .nestedScrollDispatcher()
                     .multiPointerDraggable(
                         orientation = Orientation.Vertical,
                         enabled = { true },
@@ -557,6 +579,7 @@ class MultiPointerDraggableTest {
                                 onStop = { /* do nothing */ },
                             )
                         },
+                        dispatcher = defaultDispatcher,
                     )
             ) {}
         }
@@ -586,5 +609,114 @@ class MultiPointerDraggableTest {
         assertThat(capturedChange).isNull()
 
         assertThat(started).isTrue()
+    }
+
+    @Test
+    fun multiPointerNestedScrollDispatcher() {
+        val size = 200f
+        val middle = Offset(size / 2f, size / 2f)
+        var touchSlop = 0f
+
+        var consumedOnPreScroll = 0f
+
+        var availableOnPreScroll = Float.MIN_VALUE
+        var availableOnPostScroll = Float.MIN_VALUE
+        var availableOnPreFling = Float.MIN_VALUE
+        var availableOnPostFling = Float.MIN_VALUE
+
+        var consumedOnDrag = 0f
+        var consumedOnDragStop = 0f
+
+        val connection =
+            object : NestedScrollConnection {
+                override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
+                    availableOnPreScroll = available.y
+                    return Offset(0f, consumedOnPreScroll)
+                }
+
+                override fun onPostScroll(
+                    consumed: Offset,
+                    available: Offset,
+                    source: NestedScrollSource
+                ): Offset {
+                    availableOnPostScroll = available.y
+                    return Offset.Zero
+                }
+
+                override suspend fun onPreFling(available: Velocity): Velocity {
+                    availableOnPreFling = available.y
+                    return Velocity.Zero
+                }
+
+                override suspend fun onPostFling(
+                    consumed: Velocity,
+                    available: Velocity
+                ): Velocity {
+                    availableOnPostFling = available.y
+                    return Velocity.Zero
+                }
+            }
+
+        rule.setContent {
+            touchSlop = LocalViewConfiguration.current.touchSlop
+            Box(
+                Modifier.size(with(LocalDensity.current) { Size(size, size).toDpSize() })
+                    .nestedScroll(connection)
+                    .nestedScrollDispatcher()
+                    .multiPointerDraggable(
+                        orientation = Orientation.Vertical,
+                        enabled = { true },
+                        startDragImmediately = { false },
+                        onDragStarted = { _, _, _ ->
+                            SimpleDragController(
+                                onDrag = { consumedOnDrag = it },
+                                onStop = { consumedOnDragStop = it },
+                            )
+                        },
+                        dispatcher = defaultDispatcher,
+                    )
+            )
+        }
+
+        fun startDrag() {
+            rule.onRoot().performTouchInput {
+                down(middle)
+                moveBy(Offset(0f, touchSlop))
+            }
+        }
+
+        fun continueDrag() {
+            rule.onRoot().performTouchInput { moveBy(Offset(0f, touchSlop)) }
+        }
+
+        fun stopDrag() {
+            rule.onRoot().performTouchInput { up() }
+        }
+
+        startDrag()
+
+        continueDrag()
+        assertThat(availableOnPreScroll).isEqualTo(touchSlop)
+        assertThat(consumedOnDrag).isEqualTo(touchSlop)
+        assertThat(availableOnPostScroll).isEqualTo(0f)
+
+        // Parent node consumes half of the gesture
+        consumedOnPreScroll = touchSlop / 2f
+        continueDrag()
+        assertThat(availableOnPreScroll).isEqualTo(touchSlop)
+        assertThat(consumedOnDrag).isEqualTo(touchSlop / 2f)
+        assertThat(availableOnPostScroll).isEqualTo(0f)
+
+        // Parent node consumes the gesture
+        consumedOnPreScroll = touchSlop
+        continueDrag()
+        assertThat(availableOnPreScroll).isEqualTo(touchSlop)
+        assertThat(consumedOnDrag).isEqualTo(0f)
+        assertThat(availableOnPostScroll).isEqualTo(0f)
+
+        // Parent node can intercept the velocity on stop
+        stopDrag()
+        assertThat(availableOnPreFling).isEqualTo(consumedOnDragStop)
+        assertThat(availableOnPostFling).isEqualTo(0f)
     }
 }

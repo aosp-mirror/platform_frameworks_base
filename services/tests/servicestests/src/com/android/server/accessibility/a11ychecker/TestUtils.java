@@ -16,6 +16,7 @@
 
 package com.android.server.accessibility.a11ychecker;
 
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.anyInt;
 import static org.mockito.Mockito.when;
 
@@ -26,6 +27,7 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.view.accessibility.AccessibilityEvent;
 
+import org.mockito.AdditionalMatchers;
 import org.mockito.Mockito;
 
 public class TestUtils {
@@ -46,8 +48,11 @@ public class TestUtils {
         ComponentName testActivityComponentName = new ComponentName(TEST_APP_PACKAGE_NAME,
                 QUALIFIED_TEST_ACTIVITY_NAME);
 
-        when(mockPackageManager.getActivityInfo(testActivityComponentName, 0))
+        when(mockPackageManager.getActivityInfo(eq(testActivityComponentName), eq(0)))
                 .thenReturn(testActivityInfo);
+        when(mockPackageManager.getActivityInfo(
+                AdditionalMatchers.not(eq(testActivityComponentName)), eq(0)))
+                .thenThrow(PackageManager.NameNotFoundException.class);
         when(mockPackageManager.getPackageInfo(TEST_APP_PACKAGE_NAME, 0))
                 .thenReturn(createPackageInfo(TEST_APP_PACKAGE_NAME, TEST_APP_VERSION_CODE,
                         testActivityInfo));

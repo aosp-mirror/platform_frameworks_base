@@ -197,6 +197,10 @@ public final class VirtualMouseButtonEvent implements Parcelable {
          * obtained from {@link SystemClock#uptimeMillis()} (with nanosecond precision instead of
          * millisecond), but can be different depending on the use case.
          * This field is optional and can be omitted.
+         * <p>
+         * If this field is unset, then the time at which this event is sent to the framework would
+         * be considered as the event time (even though
+         * {@link VirtualMouseButtonEvent#getEventTimeNanos()}) would return {@code 0L}).
          *
          * @return this builder, to allow for chaining of calls
          * @see InputEvent#getEventTime()

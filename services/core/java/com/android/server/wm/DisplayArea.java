@@ -267,7 +267,8 @@ public class DisplayArea<T extends WindowContainer> extends WindowContainer<T> {
                 // between fullscreen and PiP would work well. Checking TaskFragment rather than
                 // Task to ensure that Activity Embedding is excluded.
                 && activity.getTaskFragment().getWindowingMode() == WINDOWING_MODE_FULLSCREEN
-                && activity.mLetterboxUiController.isOverrideRespectRequestedOrientationEnabled();
+                && activity.mAppCompatController.getAppCompatOrientationOverrides()
+                    .isOverrideRespectRequestedOrientationEnabled();
     }
 
     boolean getIgnoreOrientationRequest() {

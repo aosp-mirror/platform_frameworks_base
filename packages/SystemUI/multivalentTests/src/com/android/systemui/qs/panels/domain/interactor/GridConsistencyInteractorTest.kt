@@ -23,8 +23,8 @@ import com.android.systemui.kosmos.testScope
 import com.android.systemui.qs.panels.data.repository.DefaultLargeTilesRepository
 import com.android.systemui.qs.panels.data.repository.defaultLargeTilesRepository
 import com.android.systemui.qs.panels.data.repository.gridLayoutTypeRepository
+import com.android.systemui.qs.panels.shared.model.GridLayoutType
 import com.android.systemui.qs.panels.shared.model.InfiniteGridLayoutType
-import com.android.systemui.qs.panels.shared.model.PartitionedGridLayoutType
 import com.android.systemui.qs.pipeline.data.repository.tileSpecRepository
 import com.android.systemui.qs.pipeline.domain.interactor.currentTilesInteractor
 import com.android.systemui.qs.pipeline.shared.TileSpec
@@ -42,6 +42,8 @@ import org.junit.runner.RunWith
 @RunWith(AndroidJUnit4::class)
 class GridConsistencyInteractorTest : SysuiTestCase() {
 
+    data object NoopGridLayoutType : GridLayoutType
+
     private val kosmos =
         testKosmos().apply {
             defaultLargeTilesRepository =
@@ -54,6 +56,11 @@ class GridConsistencyInteractorTest : SysuiTestCase() {
                             TileSpec.create("largeD"),
                         )
                 }
+            gridConsistencyInteractorsMap =
+                mapOf(
+                    Pair(NoopGridLayoutType, noopGridConsistencyInteractor),
+                    Pair(InfiniteGridLayoutType, infiniteGridConsistencyInteractor)
+                )
         }
 
     private val underTest = with(kosmos) { gridConsistencyInteractor }
@@ -71,7 +78,7 @@ class GridConsistencyInteractorTest : SysuiTestCase() {
         with(kosmos) {
             testScope.runTest {
                 // Using the no-op grid consistency interactor
-                gridLayoutTypeRepository.setLayout(PartitionedGridLayoutType)
+                gridLayoutTypeRepository.setLayout(NoopGridLayoutType)
 
                 // Setting an invalid layout with holes
                 // [ Large A ] [ sa ]

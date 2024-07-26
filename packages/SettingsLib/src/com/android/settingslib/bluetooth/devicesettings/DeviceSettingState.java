@@ -21,6 +21,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import java.util.Objects;
 
@@ -161,5 +162,17 @@ public class DeviceSettingState implements Parcelable {
     @NonNull
     public Bundle getExtras() {
         return mExtras;
+    }
+
+    @Override
+    public boolean equals(@Nullable Object obj) {
+        if (!(obj instanceof DeviceSettingState other)) return false;
+        return mSettingId == other.mSettingId
+                && Objects.equals(mPreferenceState, other.mPreferenceState);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(mSettingId, mPreferenceState);
     }
 }

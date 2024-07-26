@@ -2939,8 +2939,9 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
 
         if (!handlesOrientationChangeFromDescendant(orientation)) {
             ActivityRecord topActivity = topRunningActivity(/* considerKeyguardState= */ true);
-            if (topActivity != null && topActivity.mLetterboxUiController
-                    .shouldUseDisplayLandscapeNaturalOrientation()) {
+            if (topActivity != null && topActivity.mAppCompatController
+                    .getAppCompatOrientationOverrides()
+                        .shouldUseDisplayLandscapeNaturalOrientation()) {
                 ProtoLog.v(WM_DEBUG_ORIENTATION,
                         "Display id=%d is ignoring orientation request for %d, return %d"
                         + " following a per-app override for %s",

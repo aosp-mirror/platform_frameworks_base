@@ -21,64 +21,68 @@ import android.provider.Settings
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.animation.DialogTransitionAnimator
-import com.android.systemui.qs.tiles.base.actions.FakeQSTileIntentUserInputHandler
+import com.android.systemui.animation.Expandable
 import com.android.systemui.qs.tiles.base.actions.QSTileIntentUserInputHandlerSubject
+import com.android.systemui.qs.tiles.base.actions.qsTileIntentUserInputHandler
 import com.android.systemui.qs.tiles.base.interactor.QSTileInputTestKtx
 import com.android.systemui.qs.tiles.impl.modes.domain.model.ModesTileModel
-import com.android.systemui.statusbar.phone.SystemUIDialog
-import com.android.systemui.statusbar.policy.ui.dialog.ModesDialogDelegate
-import com.google.common.truth.Truth
-import kotlin.coroutines.EmptyCoroutineContext
+import com.android.systemui.statusbar.policy.ui.dialog.mockModesDialogDelegate
+import com.android.systemui.testKosmos
+import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.test.runTest
-import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.Mock
-import org.mockito.MockitoAnnotations
+import org.mockito.kotlin.eq
+import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
-import org.mockito.kotlin.whenever
 
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 @EnableFlags(android.app.Flags.FLAG_MODES_UI)
 class ModesTileUserActionInteractorTest : SysuiTestCase() {
-    private val inputHandler = FakeQSTileIntentUserInputHandler()
+    private val kosmos = testKosmos()
+    private val inputHandler = kosmos.qsTileIntentUserInputHandler
+    private val mockDialogDelegate = kosmos.mockModesDialogDelegate
 
-    @Mock private lateinit var dialogTransitionAnimator: DialogTransitionAnimator
-    @Mock private lateinit var dialogDelegate: ModesDialogDelegate
-    @Mock private lateinit var mockDialog: SystemUIDialog
+    private val underTest =
+        ModesTileUserActionInteractor(
+            inputHandler,
+            mockDialogDelegate,
+        )
 
-    private lateinit var underTest: ModesTileUserActionInteractor
+    @Test
+    fun handleClick_active() = runTest {
+        val expandable = mock<Expandable>()
+        underTest.handleInput(
+            QSTileInputTestKtx.click(data = ModesTileModel(true), expandable = expandable))
 
-    @Before
-    fun setup() {
-        MockitoAnnotations.initMocks(this)
-
-        whenever(dialogDelegate.createDialog()).thenReturn(mockDialog)
-
-        underTest =
-            ModesTileUserActionInteractor(
-                EmptyCoroutineContext,
-                inputHandler,
-                dialogTransitionAnimator,
-                dialogDelegate,
-            )
+        verify(mockDialogDelegate).showDialog(eq(expandable))
     }
 
     @Test
-    fun handleClick() = runTest {
-        underTest.handleInput(QSTileInputTestKtx.click(ModesTileModel(false)))
+    fun handleClick_inactive() = runTest {
+        val expandable = mock<Expandable>()
+        underTest.handleInput(
+            QSTileInputTestKtx.click(data = ModesTileModel(false), expandable = expandable))
 
-        verify(mockDialog).show()
+        verify(mockDialogDelegate).showDialog(eq(expandable))
     }
 
     @Test
-    fun handleLongClick() = runTest {
+    fun handleLongClick_active() = runTest {
+        underTest.handleInput(QSTileInputTestKtx.longClick(ModesTileModel(true)))
+
+        QSTileIntentUserInputHandlerSubject.assertThat(inputHandler).handledOneIntentInput {
+            assertThat(it.intent.action).isEqualTo(Settings.ACTION_ZEN_MODE_SETTINGS)
+        }
+    }
+
+    @Test
+    fun handleLongClick_inactive() = runTest {
         underTest.handleInput(QSTileInputTestKtx.longClick(ModesTileModel(false)))
 
         QSTileIntentUserInputHandlerSubject.assertThat(inputHandler).handledOneIntentInput {
-            Truth.assertThat(it.intent.action).isEqualTo(Settings.ACTION_ZEN_MODE_SETTINGS)
+            assertThat(it.intent.action).isEqualTo(Settings.ACTION_ZEN_MODE_SETTINGS)
         }
     }
 }

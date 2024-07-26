@@ -738,7 +738,11 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
                 return;
             }
             final PackageManager pm = mContext.getApplicationContext().getPackageManager();
-            final ActivityInfo activityInfo = pm.getActivityInfo(baseActivity, 0 /* flags */);
+            final ActivityInfo activityInfo = pm.getActivityInfo(baseActivity,
+                    // Include uninstalled apps. Despite its name, adding this flag is a workaround
+                    // to #getActivityInfo throwing a NameNotFoundException for installed packages
+                    // when HSUM is enabled. See b/354884302.
+                    PackageManager.MATCH_UNINSTALLED_PACKAGES);
             final IconProvider provider = new IconProvider(mContext);
             final Drawable appIconDrawable = provider.getIcon(activityInfo);
             final BaseIconFactory headerIconFactory = createIconFactory(mContext,
@@ -903,6 +907,10 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
                 hovered -> {
                     mIsMaximizeMenuHovered = hovered;
                     onMaximizeHoverStateChanged();
+                    return null;
+                },
+                () -> {
+                    closeMaximizeMenu();
                     return null;
                 }
         );
@@ -1114,8 +1122,13 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
             handle.performClick();
         }
         if (isHandleMenuActive()) {
-            mHandleMenu.checkMotionEvent(ev);
-            closeHandleMenuIfNeeded(ev);
+            // If the whole handle menu can be touched directly, rely on FLAG_WATCH_OUTSIDE_TOUCH.
+            // This is for the case that some of the handle menu is underneath the status bar.
+            if (isAppHandle(mWindowDecorViewHolder)
+                    && !Flags.enableAdditionalWindowsAboveStatusBar()) {
+                mHandleMenu.checkMotionEvent(ev);
+                closeHandleMenuIfNeeded(ev);
+            }
         }
     }
 

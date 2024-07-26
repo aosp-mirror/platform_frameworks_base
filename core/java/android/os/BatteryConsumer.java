@@ -66,6 +66,7 @@ public abstract class BatteryConsumer {
             POWER_COMPONENT_WAKELOCK,
             POWER_COMPONENT_MEMORY,
             POWER_COMPONENT_PHONE,
+            POWER_COMPONENT_AMBIENT_DISPLAY,
             POWER_COMPONENT_IDLE,
             POWER_COMPONENT_REATTRIBUTED_TO_OTHER_CONSUMERS,
     })
