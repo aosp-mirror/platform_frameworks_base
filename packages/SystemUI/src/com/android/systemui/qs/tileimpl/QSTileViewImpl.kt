@@ -586,6 +586,15 @@ constructor(
                     )
                 )
             )
+        } else {
+            if (isLongClickable) {
+                info.addAction(
+                    AccessibilityNodeInfo.AccessibilityAction(
+                        AccessibilityNodeInfo.AccessibilityAction.ACTION_LONG_CLICK.id,
+                        resources.getString(R.string.accessibility_long_click_tile)
+                    )
+                )
+            }
         }
         if (!TextUtils.isEmpty(accessibilityClass)) {
             info.className =
@@ -597,14 +606,6 @@ constructor(
             if (Switch::class.java.name == accessibilityClass) {
                 info.isChecked = tileState
                 info.isCheckable = true
-                if (isLongClickable) {
-                    info.addAction(
-                        AccessibilityNodeInfo.AccessibilityAction(
-                            AccessibilityNodeInfo.AccessibilityAction.ACTION_LONG_CLICK.id,
-                            resources.getString(R.string.accessibility_long_click_tile)
-                        )
-                    )
-                }
             }
         }
         if (position != INVALID) {
