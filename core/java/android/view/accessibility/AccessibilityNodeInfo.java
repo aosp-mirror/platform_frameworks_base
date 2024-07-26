@@ -982,6 +982,7 @@ public class AccessibilityNodeInfo implements Parcelable {
     private long mParentNodeId = UNDEFINED_NODE_ID;
     private long mLabelForId = UNDEFINED_NODE_ID;
     private long mLabeledById = UNDEFINED_NODE_ID;
+    private LongArray mLabeledByIds;
     private long mTraversalBefore = UNDEFINED_NODE_ID;
     private long mTraversalAfter = UNDEFINED_NODE_ID;
 
@@ -3599,6 +3600,133 @@ public class AccessibilityNodeInfo implements Parcelable {
     }
 
     /**
+     * Adds the view which serves as the label of the view represented by
+     * this info for accessibility purposes. When multiple labels are
+     * added, the content from each label is combined in the order that
+     * they are added.
+     * <p>
+     * If visible text can be used to describe or give meaning to this UI,
+     * this method is preferred. For example, a TextView before an EditText
+     * in the UI usually specifies what information is contained in the
+     * EditText. Hence, the EditText is labeled by the TextView.
+     * </p>
+     *
+     * @param label A view that labels this node's source.
+     */
+    @FlaggedApi(Flags.FLAG_SUPPORT_MULTIPLE_LABELEDBY)
+    public void addLabeledBy(@NonNull View label) {
+        addLabeledBy(label, AccessibilityNodeProvider.HOST_VIEW_ID);
+    }
+
+    /**
+     * Adds the view which serves as the label of the view represented by
+     * this info for accessibility purposes. If <code>virtualDescendantId</code>
+     * is {@link View#NO_ID} the root is set as the label. When multiple
+     * labels are added, the content from each label is combined in the order
+     * that they are added.
+     * <p>
+     * A virtual descendant is an imaginary View that is reported as a part of the view
+     * hierarchy for accessibility purposes. This enables custom views that draw complex
+     * content to report themselves as a tree of virtual views, thus conveying their
+     * logical structure.
+     * </p>
+     * <p>
+     * If visible text can be used to describe or give meaning to this UI,
+     * this method is preferred. For example, a TextView before an EditText
+     * in the UI usually specifies what information is contained in the
+     * EditText. Hence, the EditText is labeled by the TextView.
+     * </p>
+     * <p>
+     *   <strong>Note:</strong> Cannot be called from an
+     *   {@link android.accessibilityservice.AccessibilityService}.
+     *   This class is made immutable before being delivered to an AccessibilityService.
+     * </p>
+     *
+     * @param root A root whose virtual descendant labels this node's source.
+     * @param virtualDescendantId The id of the virtual descendant.
+     */
+    @FlaggedApi(Flags.FLAG_SUPPORT_MULTIPLE_LABELEDBY)
+    public void addLabeledBy(@NonNull View root, int virtualDescendantId) {
+        enforceNotSealed();
+        Preconditions.checkNotNull(root, "%s must not be null", root);
+        if (mLabeledByIds == null) {
+            mLabeledByIds = new LongArray();
+        }
+        mLabeledById = makeNodeId(root.getAccessibilityViewId(), virtualDescendantId);
+        mLabeledByIds.add(mLabeledById);
+    }
+
+    /**
+     * Gets the list of node infos which serve as the labels of the view represented by
+     * this info for accessibility purposes.
+     *
+     * @return The list of labels in the order that they were added.
+     */
+    @FlaggedApi(Flags.FLAG_SUPPORT_MULTIPLE_LABELEDBY)
+    public @NonNull List<AccessibilityNodeInfo> getLabeledByList() {
+        enforceSealed();
+        List<AccessibilityNodeInfo> labels = new ArrayList<>();
+        if (mLabeledByIds == null) {
+            return labels;
+        }
+        for (int i = 0; i < mLabeledByIds.size(); i++) {
+            labels.add(getNodeForAccessibilityId(mConnectionId, mWindowId, mLabeledByIds.get(i)));
+        }
+        return labels;
+    }
+
+    /**
+     * Removes a label. If the label was not previously added to the node,
+     * calling this method has no effect.
+     * <p>
+     * <strong>Note:</strong> Cannot be called from an
+     * {@link android.accessibilityservice.AccessibilityService}.
+     * This class is made immutable before being delivered to an AccessibilityService.
+     * </p>
+     *
+     * @param label The node which serves as this node's label.
+     * @return true if the label was present
+     * @see #addLabeledBy(View)
+     */
+    @FlaggedApi(Flags.FLAG_SUPPORT_MULTIPLE_LABELEDBY)
+    public boolean removeLabeledBy(@NonNull View label) {
+        return removeLabeledBy(label, AccessibilityNodeProvider.HOST_VIEW_ID);
+    }
+
+    /**
+     * Removes a label which is a virtual descendant of the given
+     * <code>root</code>. If <code>virtualDescendantId</code> is
+     * {@link View#NO_ID} the root is set as the label. If the label
+     * was not previously added to the node, calling this method has
+     * no effect.
+     *
+     * @param root The root of the virtual subtree.
+     * @param virtualDescendantId The id of the virtual node which serves as this node's label.
+     * @return true if the label was present
+     * @see #addLabeledBy(View, int)
+     */
+    @FlaggedApi(Flags.FLAG_SUPPORT_MULTIPLE_LABELEDBY)
+    public boolean removeLabeledBy(@NonNull View root, int virtualDescendantId) {
+        enforceNotSealed();
+        final LongArray labeledByIds = mLabeledByIds;
+        if (labeledByIds == null) {
+            return false;
+        }
+        final int rootAccessibilityViewId =
+                (root != null) ? root.getAccessibilityViewId() : UNDEFINED_ITEM_ID;
+        final long labeledById = makeNodeId(rootAccessibilityViewId, virtualDescendantId);
+        if (mLabeledById == labeledById) {
+            mLabeledById = UNDEFINED_NODE_ID;
+        }
+        final int index = labeledByIds.indexOf(labeledById);
+        if (index < 0) {
+            return false;
+        }
+        labeledByIds.remove(index);
+        return true;
+    }
+
+    /**
      * Sets the view which serves as the label of the view represented by
      * this info for accessibility purposes.
      *
@@ -3631,7 +3759,17 @@ public class AccessibilityNodeInfo implements Parcelable {
         enforceNotSealed();
         final int rootAccessibilityViewId = (root != null)
                 ? root.getAccessibilityViewId() : UNDEFINED_ITEM_ID;
+        if (Flags.supportMultipleLabeledby()) {
+            if (mLabeledByIds == null) {
+                mLabeledByIds = new LongArray();
+            } else {
+                mLabeledByIds.clear();
+            }
+        }
         mLabeledById = makeNodeId(rootAccessibilityViewId, virtualDescendantId);
+        if (Flags.supportMultipleLabeledby()) {
+            mLabeledByIds.add(mLabeledById);
+        }
     }
 
     /**
@@ -4242,6 +4380,10 @@ public class AccessibilityNodeInfo implements Parcelable {
         fieldIndex++;
         if (mLabeledById != DEFAULT.mLabeledById) nonDefaultFields |= bitAt(fieldIndex);
         fieldIndex++;
+        if (!LongArray.elementsEqual(mLabeledByIds, DEFAULT.mLabeledByIds)) {
+            nonDefaultFields |= bitAt(fieldIndex);
+        }
+        fieldIndex++;
         if (mTraversalBefore != DEFAULT.mTraversalBefore) nonDefaultFields |= bitAt(fieldIndex);
         fieldIndex++;
         if (mTraversalAfter != DEFAULT.mTraversalAfter) nonDefaultFields |= bitAt(fieldIndex);
@@ -4383,6 +4525,18 @@ public class AccessibilityNodeInfo implements Parcelable {
         if (isBitSet(nonDefaultFields, fieldIndex++)) parcel.writeLong(mParentNodeId);
         if (isBitSet(nonDefaultFields, fieldIndex++)) parcel.writeLong(mLabelForId);
         if (isBitSet(nonDefaultFields, fieldIndex++)) parcel.writeLong(mLabeledById);
+        if (isBitSet(nonDefaultFields, fieldIndex++)) {
+            final LongArray labeledByIds = mLabeledByIds;
+            if (labeledByIds == null) {
+                parcel.writeInt(0);
+            } else {
+                final int labeledByIdsSize = labeledByIds.size();
+                parcel.writeInt(labeledByIdsSize);
+                for (int i = 0; i < labeledByIdsSize; i++) {
+                    parcel.writeLong(labeledByIds.get(i));
+                }
+            }
+        }
         if (isBitSet(nonDefaultFields, fieldIndex++)) parcel.writeLong(mTraversalBefore);
         if (isBitSet(nonDefaultFields, fieldIndex++)) parcel.writeLong(mTraversalAfter);
         if (isBitSet(nonDefaultFields, fieldIndex++)) {
@@ -4550,6 +4704,7 @@ public class AccessibilityNodeInfo implements Parcelable {
         mParentNodeId = other.mParentNodeId;
         mLabelForId = other.mLabelForId;
         mLabeledById = other.mLabeledById;
+        mLabeledByIds = other.mLabeledByIds;
         mTraversalBefore = other.mTraversalBefore;
         mTraversalAfter = other.mTraversalAfter;
         mMinDurationBetweenContentChanges = other.mMinDurationBetweenContentChanges;
@@ -4656,6 +4811,18 @@ public class AccessibilityNodeInfo implements Parcelable {
         if (isBitSet(nonDefaultFields, fieldIndex++)) mParentNodeId = parcel.readLong();
         if (isBitSet(nonDefaultFields, fieldIndex++)) mLabelForId = parcel.readLong();
         if (isBitSet(nonDefaultFields, fieldIndex++)) mLabeledById = parcel.readLong();
+        if (isBitSet(nonDefaultFields, fieldIndex++)) {
+            final int labeledByIdsSize = parcel.readInt();
+            if (labeledByIdsSize <= 0) {
+                mLabeledByIds = null;
+            } else {
+                mLabeledByIds = new LongArray(labeledByIdsSize);
+                for (int i = 0; i < labeledByIdsSize; i++) {
+                    final long labeledById = parcel.readLong();
+                    mLabeledByIds.add(labeledById);
+                }
+            }
+        }
         if (isBitSet(nonDefaultFields, fieldIndex++)) mTraversalBefore = parcel.readLong();
         if (isBitSet(nonDefaultFields, fieldIndex++)) mTraversalAfter = parcel.readLong();
         if (isBitSet(nonDefaultFields, fieldIndex++)) {
