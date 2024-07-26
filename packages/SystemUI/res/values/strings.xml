@@ -3214,9 +3214,6 @@
 
     <!-- Provider Model: Default title of the mobile network in the mobile layout. [CHAR LIMIT=50] -->
     <string name="mobile_data_settings_title">Mobile data</string>
-    <!-- Provider Model: Summary text separator for preferences including a short description
-         (eg. "Connected / 5G"). [CHAR LIMIT=50] -->
-    <string name="preference_summary_default_combination"><xliff:g id="state" example="Connected">%1$s</xliff:g> / <xliff:g id="networkMode" example="LTE">%2$s</xliff:g></string>
     <!-- Provider Model:
          Summary indicating that a SIM has an active mobile data connection [CHAR LIMIT=50] -->
     <string name="mobile_data_connection_active">Connected</string>
