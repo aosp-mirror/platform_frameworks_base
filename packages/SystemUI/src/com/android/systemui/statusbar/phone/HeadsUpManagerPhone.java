@@ -389,10 +389,13 @@ public class HeadsUpManagerPhone extends BaseHeadsUpManager implements
     //  OnReorderingAllowedListener:
 
     private final OnReorderingAllowedListener mOnReorderingAllowedListener = () -> {
-        mAnimationStateHandler.setHeadsUpGoingAwayAnimationsAllowed(false);
         if (NotificationThrottleHun.isEnabled()) {
             mAvalancheController.setEnableAtRuntime(true);
+            if (mEntriesToRemoveWhenReorderingAllowed.isEmpty()) {
+                return;
+            }
         }
+        mAnimationStateHandler.setHeadsUpGoingAwayAnimationsAllowed(false);
         for (NotificationEntry entry : mEntriesToRemoveWhenReorderingAllowed) {
             if (isHeadsUpEntry(entry.getKey())) {
                 // Maybe the heads-up was removed already
