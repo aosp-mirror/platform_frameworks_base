@@ -2290,7 +2290,7 @@ class Task extends TaskFragment {
         // Apply crop to root tasks only and clear the crops of the descendant tasks.
         int width = 0;
         int height = 0;
-        if (isRootTask()) {
+        if (isRootTask() && !mTransitionController.mIsWaitingForDisplayEnabled) {
             final Rect taskBounds = getBounds();
             width = taskBounds.width();
             height = taskBounds.height();
