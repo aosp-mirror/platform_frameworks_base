@@ -3413,6 +3413,7 @@ class Task extends TaskFragment {
         info.isSleeping = shouldSleepActivities();
         info.isTopActivityTransparent = top != null && !top.fillsParent();
         info.isTopActivityStyleFloating = top != null && top.isStyleFloating();
+        info.lastNonFullscreenBounds = topTask.mLastNonFullscreenBounds;
         appCompatTaskInfo.topActivityLetterboxVerticalPosition = TaskInfo.PROPERTY_VALUE_UNSET;
         appCompatTaskInfo.topActivityLetterboxHorizontalPosition = TaskInfo.PROPERTY_VALUE_UNSET;
         appCompatTaskInfo.topActivityLetterboxWidth = TaskInfo.PROPERTY_VALUE_UNSET;
