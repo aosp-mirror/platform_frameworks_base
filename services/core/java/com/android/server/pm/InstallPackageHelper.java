@@ -3264,6 +3264,7 @@ final class InstallPackageHelper {
     /**
      * Tries to restore the disabled system package after an update has been deleted.
      */
+    @GuardedBy("mPm.mInstallLock")
     public void restoreDisabledSystemPackageLIF(DeletePackageAction action,
             @NonNull int[] allUserHandles, boolean writeSettings) throws SystemDeleteException {
         final PackageSetting deletedPs = action.mDeletingPs;
@@ -3282,10 +3283,21 @@ final class InstallPackageHelper {
         }
         // Install the system package
         if (DEBUG_REMOVE) Slog.d(TAG, "Re-installing system package: " + disabledPs);
-        try (PackageManagerTracedLock installLock = mPm.mInstallLock.acquireLock()) {
+        try {
             final int[] origUsers = outInfo == null ? null : outInfo.mOrigUsers;
-            installPackageFromSystemLIF(disabledPs.getPathString(), allUserHandles,
-                    origUsers, writeSettings);
+            try (PackageManagerTracedLock installLock = mPm.mInstallLock.acquireLock()) {
+                installPackageFromSystemLIF(disabledPs.getPathString(), allUserHandles,
+                        origUsers, writeSettings);
+            }
+            if (origUsers != null) {
+                mPm.commitPackageStateMutation(null, mutator -> {
+                    for (int userId : origUsers) {
+                        mutator.forPackage(disabledPs.getPackageName())
+                                .userState(userId)
+                                .setOverlayPaths(deletedPs.getOverlayPaths(userId));
+                    }
+                });
+            }
         } catch (PackageManagerException e) {
             Slog.w(TAG, "Failed to restore system package:" + deletedPs.getPackageName() + ": "
                     + e.getMessage());
