@@ -189,6 +189,7 @@ cc_test_host {
         "integration-tests/CommandTests/**/*",
         "integration-tests/ConvertTest/**/*",
         "integration-tests/DumpTest/**/*",
+        ":resource-flagging-test-app-apk",
     ],
 }
 
