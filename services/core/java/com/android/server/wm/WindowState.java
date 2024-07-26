@@ -638,7 +638,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     /**
      * Only populated if flag REMOVE_INPUT_CHANNEL_FROM_WINDOWSTATE is disabled.
      */
-    InputChannel mInputChannel;
+    private InputChannel mInputChannel;
 
     /**
      * The token will be assigned to {@link InputWindowHandle#token} if this window can receive

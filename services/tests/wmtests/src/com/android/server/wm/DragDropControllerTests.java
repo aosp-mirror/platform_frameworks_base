@@ -156,7 +156,6 @@ public class DragDropControllerTests extends WindowTestsBase {
         window.openInputChannel(channel);
         window.mHasSurface = true;
         mWm.mWindowMap.put(window.mClient.asBinder(), window);
-        mWm.mInputToWindowMap.put(window.mInputChannelToken, window);
         return window;
     }
 
