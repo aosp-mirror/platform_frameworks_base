@@ -403,7 +403,7 @@ class DesktopTasksController(
      * The second part of the animated drag to desktop transition, called after
      * [startDragToDesktop].
      */
-    private fun finalizeDragToDesktop(taskInfo: RunningTaskInfo, freeformBounds: Rect) {
+    private fun finalizeDragToDesktop(taskInfo: RunningTaskInfo) {
         ProtoLog.v(
             WM_SHELL_DESKTOP_MODE,
             "DesktopTasksController: finalizeDragToDesktop taskId=%d",
@@ -415,7 +415,6 @@ class DesktopTasksController(
         val taskToMinimize =
             bringDesktopAppsToFrontBeforeShowingNewTask(taskInfo.displayId, wct, taskInfo.taskId)
         addMoveToDesktopChanges(wct, taskInfo)
-        wct.setBounds(taskInfo.token, freeformBounds)
         val transition = dragToDesktopTransitionHandler.finishDragToDesktopTransition(wct)
         transition?.let { addPendingMinimizeTransition(it, taskToMinimize) }
     }
@@ -1071,10 +1070,12 @@ class DesktopTasksController(
         return if (wct.isEmpty) null else wct
     }
 
-    private fun addMoveToDesktopChanges(
+    @VisibleForTesting
+    fun addMoveToDesktopChanges(
         wct: WindowContainerTransaction,
         taskInfo: RunningTaskInfo
     ) {
+        val displayLayout = displayController.getDisplayLayout(taskInfo.displayId) ?: return
         val tdaInfo = rootTaskDisplayAreaOrganizer.getDisplayAreaInfo(taskInfo.displayId)!!
         val tdaWindowingMode = tdaInfo.configuration.windowConfiguration.windowingMode
         val targetWindowingMode =
@@ -1084,6 +1085,28 @@ class DesktopTasksController(
             } else {
                 WINDOWING_MODE_FREEFORM
             }
+        val initialBounds = if (DesktopModeFlags.DYNAMIC_INITIAL_BOUNDS.isEnabled(context)) {
+            calculateInitialBounds(displayLayout, taskInfo)
+        } else {
+            getDefaultDesktopTaskBounds(displayLayout)
+        }
+
+        if (DesktopModeFlags.CASCADING_WINDOWS.isEnabled(context)) {
+            val stableBounds = Rect()
+            displayLayout.getStableBoundsForDesktopMode(stableBounds)
+
+            val activeTasks = desktopModeTaskRepository
+                .getActiveNonMinimizedOrderedTasks(taskInfo.displayId)
+            activeTasks.firstOrNull()?.let { activeTask ->
+                shellTaskOrganizer.getRunningTaskInfo(activeTask)?.let {
+                    cascadeWindow(stableBounds,
+                        it.configuration.windowConfiguration.bounds, initialBounds)
+                }
+            }
+        }
+        if (canChangeTaskPosition(taskInfo)) {
+            wct.setBounds(taskInfo.token, initialBounds)
+        }
         wct.setWindowingMode(taskInfo.token, targetWindowingMode)
         wct.reorder(taskInfo.token, true /* onTop */)
         if (useDesktopOverrideDensity()) {
@@ -1343,16 +1366,10 @@ class DesktopTasksController(
         val indicatorType = indicator.updateIndicatorType(inputCoordinates, taskInfo.windowingMode)
         when (indicatorType) {
             IndicatorType.TO_DESKTOP_INDICATOR -> {
-                val displayLayout = displayController.getDisplayLayout(taskInfo.displayId)
-                    ?: return IndicatorType.NO_INDICATOR
                 // Start a new jank interaction for the drag release to desktop window animation.
                 interactionJankMonitor.begin(taskSurface, context,
                     CUJ_DESKTOP_MODE_ENTER_APP_HANDLE_DRAG_RELEASE, "to_desktop")
-                if (DesktopModeFlags.DYNAMIC_INITIAL_BOUNDS.isEnabled(context)) {
-                    finalizeDragToDesktop(taskInfo, calculateInitialBounds(displayLayout, taskInfo))
-                } else {
-                    finalizeDragToDesktop(taskInfo, getDefaultDesktopTaskBounds(displayLayout))
-                }
+                finalizeDragToDesktop(taskInfo)
             }
             IndicatorType.NO_INDICATOR,
             IndicatorType.TO_FULLSCREEN_INDICATOR -> {
