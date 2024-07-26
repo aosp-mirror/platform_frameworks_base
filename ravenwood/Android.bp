@@ -330,6 +330,11 @@ android_ravenwood_libgroup {
         "services.core.ravenwood-jarjar",
         "services.fakes.ravenwood-jarjar",
 
+        // ICU
+        "core-icu4j-for-host.ravenwood",
+        "icu4j-icudata-jarjar",
+        "icu4j-icutzdata-jarjar",
+
         // Provide runtime versions of utils linked in below
         "junit",
         "truth",
