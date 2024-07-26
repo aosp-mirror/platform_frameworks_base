@@ -18,13 +18,13 @@ package com.android.server.accessibility.a11ychecker;
 
 import static com.android.server.accessibility.Flags.FLAG_ENABLE_A11Y_CHECKER_LOGGING;
 import static com.android.server.accessibility.a11ychecker.AccessibilityCheckerConstants.MIN_DURATION_BETWEEN_CHECKS;
+import static com.android.server.accessibility.a11ychecker.TestUtils.QUALIFIED_TEST_ACTIVITY_NAME;
 import static com.android.server.accessibility.a11ychecker.TestUtils.TEST_A11Y_SERVICE_CLASS_NAME;
 import static com.android.server.accessibility.a11ychecker.TestUtils.TEST_A11Y_SERVICE_SOURCE_PACKAGE_NAME;
 import static com.android.server.accessibility.a11ychecker.TestUtils.TEST_ACTIVITY_NAME;
 import static com.android.server.accessibility.a11ychecker.TestUtils.TEST_DEFAULT_BROWSER;
 import static com.android.server.accessibility.a11ychecker.TestUtils.createAtom;
 import static com.android.server.accessibility.a11ychecker.TestUtils.getMockPackageManagerWithInstalledApps;
-import static com.android.server.accessibility.a11ychecker.TestUtils.getTestAccessibilityEvent;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -114,7 +114,7 @@ public class AccessibilityCheckerManagerTest {
 
         Set<A11yCheckerProto.AccessibilityCheckResultReported> results =
                 mAccessibilityCheckerManager.maybeRunA11yChecker(
-                        List.of(mockNodeInfo1, mockNodeInfo2), getTestAccessibilityEvent(),
+                        List.of(mockNodeInfo1, mockNodeInfo2), QUALIFIED_TEST_ACTIVITY_NAME,
                         new ComponentName(TEST_A11Y_SERVICE_SOURCE_PACKAGE_NAME,
                                 TEST_A11Y_SERVICE_CLASS_NAME), /*userId=*/ 0);
 
@@ -139,7 +139,7 @@ public class AccessibilityCheckerManagerTest {
 
         Set<A11yCheckerProto.AccessibilityCheckResultReported> results =
                 mAccessibilityCheckerManager.maybeRunA11yChecker(
-                        List.of(mockNodeInfo), getTestAccessibilityEvent(),
+                        List.of(mockNodeInfo), QUALIFIED_TEST_ACTIVITY_NAME,
                         new ComponentName(TEST_A11Y_SERVICE_SOURCE_PACKAGE_NAME,
                                 TEST_A11Y_SERVICE_CLASS_NAME), /*userId=*/ 0);
 
@@ -160,7 +160,7 @@ public class AccessibilityCheckerManagerTest {
 
         Set<A11yCheckerProto.AccessibilityCheckResultReported> results =
                 mAccessibilityCheckerManager.maybeRunA11yChecker(
-                        List.of(mockNodeInfo, mockNodeInfoDuplicate), getTestAccessibilityEvent(),
+                        List.of(mockNodeInfo, mockNodeInfoDuplicate), QUALIFIED_TEST_ACTIVITY_NAME,
                         new ComponentName(TEST_A11Y_SERVICE_SOURCE_PACKAGE_NAME,
                                 TEST_A11Y_SERVICE_CLASS_NAME), /*userId=*/ 0);
 

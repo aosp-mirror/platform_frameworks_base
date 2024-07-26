@@ -5373,7 +5373,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             // change then delay the position update until it has redrawn to avoid any flickers.
             final boolean isLetterboxedAndRelaunching = activityRecord != null
                     && activityRecord.areBoundsLetterboxed()
-                    && activityRecord.mLetterboxUiController
+                    && activityRecord.mAppCompatController.getAppCompatOrientationOverrides()
                         .getIsRelaunchingAfterRequestedOrientationChanged();
             if (surfaceResizedWithoutMoveAnimation || isLetterboxedAndRelaunching) {
                 applyWithNextDraw(mSetSurfacePositionConsumer);

@@ -601,6 +601,13 @@ flag {
 }
 
 flag {
+    name: "screenshot_ui_controller_refactor"
+    namespace: "systemui"
+    description: "Simplify and refactor ScreenshotController"
+    bug: "354711957"
+}
+
+flag {
    name: "run_fingerprint_detect_on_dismissible_keyguard"
    namespace: "systemui"
    description: "Run fingerprint detect instead of authenticate if the keyguard is dismissible."
@@ -1203,6 +1210,13 @@ flag {
   namespace: "systemui"
   description: "Enables MSDL feedback in SysUI surfaces."
   bug: "352600066"
+}
+
+flag {
+  name: "hubmode_fullscreen_vertical_swipe"
+  namespace: "systemui"
+  description: "Enables fullscreen vertical swiping in hub mode to bring up and down the bouncer and shade"
+  bug: "340177049"
 }
 
 flag {

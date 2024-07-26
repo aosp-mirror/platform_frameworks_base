@@ -26,7 +26,6 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.util.Slog;
-import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -60,6 +59,7 @@ public final class AccessibilityCheckerManager {
     private final Set<AccessibilityHierarchyCheck> mHierarchyChecks;
     private final ATFHierarchyBuilder mATFHierarchyBuilder;
     private final Set<AccessibilityCheckResultReported> mCachedResults = new HashSet<>();
+
     @VisibleForTesting
     final A11yCheckerTimer mTimer = new A11yCheckerTimer();
 
@@ -86,10 +86,8 @@ public final class AccessibilityCheckerManager {
      */
     @RequiresPermission(allOf = {android.Manifest.permission.INTERACT_ACROSS_USERS_FULL})
     public Set<AccessibilityCheckResultReported> maybeRunA11yChecker(
-            List<AccessibilityNodeInfo> nodes,
-            @Nullable AccessibilityEvent accessibilityEvent,
-            ComponentName sourceComponentName,
-            @UserIdInt int userId) {
+            List<AccessibilityNodeInfo> nodes, @Nullable String sourceEventClassName,
+            ComponentName a11yServiceComponentName, @UserIdInt int userId) {
         if (!shouldRunA11yChecker()) {
             return Set.of();
         }
@@ -108,14 +106,13 @@ public final class AccessibilityCheckerManager {
                 List<AccessibilityHierarchyCheckResult> checkResults = runChecksOnNode(nodeInfo);
                 Set<AccessibilityCheckResultReported> filteredResults =
                         AccessibilityCheckerUtils.processResults(nodeInfo, checkResults,
-                                accessibilityEvent, mPackageManager, sourceComponentName);
+                                sourceEventClassName, mPackageManager, a11yServiceComponentName);
                 allResults.addAll(filteredResults);
             }
             mCachedResults.addAll(allResults);
         } catch (RuntimeException e) {
             Slog.e(LOG_TAG, "An unknown error occurred while running a11y checker.", e);
         }
-
         return allResults;
     }
 

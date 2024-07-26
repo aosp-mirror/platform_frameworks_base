@@ -21,6 +21,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import java.util.Objects;
 
@@ -133,5 +134,16 @@ public class DeviceInfo implements Parcelable {
     @NonNull
     public Bundle getExtras() {
         return mExtras;
+    }
+
+    @Override
+    public boolean equals(@Nullable Object obj) {
+        if (!(obj instanceof DeviceInfo other)) return false;
+        return Objects.equals(mBluetoothAddress, other.getBluetoothAddress());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(mBluetoothAddress);
     }
 }

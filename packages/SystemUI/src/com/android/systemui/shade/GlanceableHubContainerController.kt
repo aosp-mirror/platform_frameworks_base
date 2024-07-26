@@ -39,6 +39,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import com.android.compose.theme.PlatformTheme
 import com.android.internal.annotations.VisibleForTesting
+import com.android.systemui.Flags
 import com.android.systemui.Flags.glanceableHubBackGesture
 import com.android.systemui.ambient.touch.TouchMonitor
 import com.android.systemui.ambient.touch.dagger.AmbientTouchComponent
@@ -130,13 +131,6 @@ constructor(
      * notification shade/bouncer.
      */
     private var touchMonitor: TouchMonitor? = null
-
-    /**
-     * The width of the area in which a right edge swipe can open the hub, in pixels. Read from
-     * resources when [initView] is called.
-     */
-    // TODO(b/320786721): support RTL layouts
-    private var rightEdgeSwipeRegionWidth: Int = 0
 
     /**
      * True if we are currently tracking a touch intercepted by the hub, either because the hub is
@@ -264,11 +258,6 @@ constructor(
 
         communalContainerView = containerView
 
-        rightEdgeSwipeRegionWidth =
-            containerView.resources.getDimensionPixelSize(
-                R.dimen.communal_right_edge_swipe_region_width
-            )
-
         val topEdgeSwipeRegionWidth =
             containerView.resources.getDimensionPixelSize(
                 R.dimen.communal_top_edge_swipe_region_height
@@ -285,7 +274,7 @@ constructor(
             // Run when the touch handling lifecycle is RESUMED, meaning the hub is visible and not
             // occluded.
             lifecycleRegistry.repeatOnLifecycle(Lifecycle.State.RESUMED) {
-                // Avoid adding exclusion to right/left edges to allow back gestures.
+                // Avoid adding exclusion to end/start edges to allow back gestures.
                 val insets =
                     if (glanceableHubBackGesture()) {
                         containerView.rootWindowInsets.getInsets(WindowInsets.Type.systemGestures())
@@ -293,25 +282,38 @@ constructor(
                         Insets.NONE
                     }
 
-                containerView.systemGestureExclusionRects =
-                    listOf(
-                        // Only allow swipe up to bouncer and swipe down to shade in the very
-                        // top/bottom to avoid conflicting with widgets in the hub grid.
-                        Rect(
-                            insets.left,
-                            topEdgeSwipeRegionWidth,
-                            containerView.right - insets.right,
-                            containerView.bottom - bottomEdgeSwipeRegionWidth
-                        ),
-                        // Disable back gestures on the left side of the screen, to avoid
-                        // conflicting with scene transitions.
-                        Rect(
-                            0,
-                            0,
-                            insets.right,
-                            containerView.bottom,
-                        )
+                val ltr = containerView.layoutDirection == View.LAYOUT_DIRECTION_LTR
+
+                val backGestureInset =
+                    Rect(
+                        if (ltr) 0 else insets.left,
+                        0,
+                        if (ltr) insets.right else containerView.right,
+                        containerView.bottom,
                     )
+
+                containerView.systemGestureExclusionRects =
+                    if (Flags.hubmodeFullscreenVerticalSwipe()) {
+                        listOf(
+                            // Disable back gestures on the left side of the screen, to avoid
+                            // conflicting with scene transitions.
+                            backGestureInset
+                        )
+                    } else {
+                        listOf(
+                            // Only allow swipe up to bouncer and swipe down to shade in the very
+                            // top/bottom to avoid conflicting with widgets in the hub grid.
+                            Rect(
+                                insets.left,
+                                topEdgeSwipeRegionWidth,
+                                containerView.right - insets.right,
+                                containerView.bottom - bottomEdgeSwipeRegionWidth
+                            ),
+                            // Disable back gestures on the left side of the screen, to avoid
+                            // conflicting with scene transitions.
+                            backGestureInset
+                        )
+                    }
             }
         }
 

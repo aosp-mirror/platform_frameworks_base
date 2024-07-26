@@ -345,7 +345,10 @@ public abstract class VibrationEffect implements Parcelable {
     @FlaggedApi(FLAG_VENDOR_VIBRATION_EFFECTS)
     @RequiresPermission(android.Manifest.permission.VIBRATE_VENDOR_EFFECTS)
     public static VibrationEffect createVendorEffect(@NonNull PersistableBundle effect) {
-        return new VendorEffect(effect, VendorEffect.DEFAULT_STRENGTH, VendorEffect.DEFAULT_SCALE);
+        VibrationEffect vendorEffect = new VendorEffect(effect, VendorEffect.DEFAULT_STRENGTH,
+                VendorEffect.DEFAULT_SCALE);
+        vendorEffect.validate();
+        return vendorEffect;
     }
 
     /**
@@ -1204,9 +1207,7 @@ public abstract class VibrationEffect implements Parcelable {
             }
             return mEffectStrength == other.mEffectStrength
                     && (Float.compare(mLinearScale, other.mLinearScale) == 0)
-                    // Make sure it calls unparcel for both before calling BaseBundle.kindofEquals.
-                    && mVendorData.size() == other.mVendorData.size()
-                    && BaseBundle.kindofEquals(mVendorData, other.mVendorData);
+                    && isPersistableBundleEquals(mVendorData, other.mVendorData);
         }
 
         @Override
@@ -1241,6 +1242,55 @@ public abstract class VibrationEffect implements Parcelable {
             out.writePersistableBundle(mVendorData);
             out.writeInt(mEffectStrength);
             out.writeFloat(mLinearScale);
+        }
+
+        /**
+         * Compares two {@link PersistableBundle} objects are equals.
+         */
+        private static boolean isPersistableBundleEquals(
+                PersistableBundle first, PersistableBundle second) {
+            if (first == second) {
+                return true;
+            }
+            if (first == null || second == null || first.size() != second.size()) {
+                return false;
+            }
+            for (String key : first.keySet()) {
+                if (!isPersistableBundleSupportedValueEquals(first.get(key), second.get(key))) {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        /**
+         * Compares two values which type is supported by {@link PersistableBundle}.
+         *
+         * <p>If the type isn't supported. The equality is done by {@link Object#equals(Object)}.
+         */
+        private static boolean isPersistableBundleSupportedValueEquals(
+                Object first, Object second) {
+            if (first == second) {
+                return true;
+            } else if (first == null || second == null
+                    || !first.getClass().equals(second.getClass())) {
+                return false;
+            } else if (first instanceof PersistableBundle) {
+                return isPersistableBundleEquals(
+                        (PersistableBundle) first, (PersistableBundle) second);
+            } else if (first instanceof int[]) {
+                return Arrays.equals((int[]) first, (int[]) second);
+            } else if (first instanceof long[]) {
+                return Arrays.equals((long[]) first, (long[]) second);
+            } else if (first instanceof double[]) {
+                return Arrays.equals((double[]) first, (double[]) second);
+            } else if (first instanceof boolean[]) {
+                return Arrays.equals((boolean[]) first, (boolean[]) second);
+            } else if (first instanceof String[]) {
+                return Arrays.equals((String[]) first, (String[]) second);
+            } else {
+                return Objects.equals(first, second);
+            }
         }
 
         @NonNull

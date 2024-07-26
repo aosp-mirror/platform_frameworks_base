@@ -30,6 +30,7 @@ import static android.view.MotionEvent.ACTION_CANCEL;
 import static android.view.MotionEvent.ACTION_HOVER_ENTER;
 import static android.view.MotionEvent.ACTION_HOVER_EXIT;
 import static android.view.MotionEvent.ACTION_MOVE;
+import static android.view.MotionEvent.ACTION_OUTSIDE;
 import static android.view.MotionEvent.ACTION_UP;
 import static android.view.WindowInsets.Type.statusBars;
 
@@ -502,8 +503,6 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
                 if (!decoration.isHandleMenuActive()) {
                     moveTaskToFront(decoration.mTaskInfo);
                     decoration.createHandleMenu(mSplitScreenController);
-                } else {
-                    decoration.closeHandleMenu();
                 }
             } else if (id == R.id.desktop_button) {
                 final WindowContainerTransaction wct = new WindowContainerTransaction();
@@ -549,6 +548,17 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
         @Override
         public boolean onTouch(View v, MotionEvent e) {
             final int id = v.getId();
+            final DesktopModeWindowDecoration decoration = mWindowDecorByTaskId.get(mTaskId);
+            if (e.getActionMasked() == ACTION_OUTSIDE) {
+                if (id == R.id.handle_menu) {
+                    // Close handle menu on outside touch if menu is directly touchable; if not,
+                    // it will be handled by handleEventOutsideCaption.
+                    if (decoration.mTaskInfo.isFreeform()
+                            || Flags.enableAdditionalWindowsAboveStatusBar()) {
+                        decoration.closeHandleMenu();
+                    }
+                }
+            }
             if ((e.getSource() & SOURCE_TOUCHSCREEN) == SOURCE_TOUCHSCREEN) {
                 mTouchscreenInUse = e.getActionMasked() != ACTION_UP
                         && e.getActionMasked() != ACTION_CANCEL;
@@ -558,7 +568,6 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
                     && id != R.id.maximize_window) {
                 return false;
             }
-            final DesktopModeWindowDecoration decoration = mWindowDecorByTaskId.get(mTaskId);
             moveTaskToFront(decoration.mTaskInfo);
 
             final int actionMasked = e.getActionMasked();
@@ -587,7 +596,6 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
                 mShouldPilferCaptionEvents = !(downInCustomizableCaptionRegion
                         && downInExclusionRegion && isTransparentCaption) && !isResizeEvent;
             }
-
             if (!mShouldPilferCaptionEvents) {
                 // The event will be handled by a window below or pilfered by resize handler.
                 return false;
@@ -600,9 +608,6 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
             if (isUpOrCancel) {
                 // Gesture is finished, reset state.
                 mShouldPilferCaptionEvents = false;
-            }
-            if (!mHasLongClicked && id != R.id.maximize_window) {
-                decoration.closeMaximizeMenuIfNeeded(e);
             }
             return mDragDetector.onMotionEvent(v, e);
         }
@@ -896,10 +901,6 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
      *
      * @param relevantDecor the window decoration of the focused task's caption. This method only
      *                      handles motion events outside this caption's bounds.
-     * TODO(b/349135068): Outside-touch detection no longer works with the
-     *  enableAdditionalWindowsAboveStatusBar flag enabled. This
-     *  will be fixed once we can add FLAG_WATCH_OUTSIDE_TOUCH to relevant menus,
-     *  at which point, all EventReceivers and external touch logic should be removed.
      */
     private void handleEventOutsideCaption(MotionEvent ev,
             DesktopModeWindowDecoration relevantDecor) {
@@ -910,9 +911,8 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
         relevantDecor.updateHoverAndPressStatus(ev);
         final int action = ev.getActionMasked();
         if (action == MotionEvent.ACTION_UP || action == MotionEvent.ACTION_CANCEL) {
-            if (!mTransitionDragActive) {
+            if (!mTransitionDragActive && !Flags.enableAdditionalWindowsAboveStatusBar()) {
                 relevantDecor.closeHandleMenuIfNeeded(ev);
-                relevantDecor.closeMaximizeMenuIfNeeded(ev);
             }
         }
     }
@@ -1249,7 +1249,6 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
             decoration.setAnimatingTaskResize(false);
         }
     }
-
 
     private class DragStartListenerImpl
             implements DragPositioningCallbackUtility.DragStartListener {

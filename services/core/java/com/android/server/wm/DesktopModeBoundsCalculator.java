@@ -27,7 +27,6 @@ import static com.android.server.wm.AppCompatUtils.computeAspectRatio;
 import static com.android.server.wm.LaunchParamsUtil.applyLayoutGravity;
 import static com.android.server.wm.LaunchParamsUtil.calculateLayoutBounds;
 
-
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityOptions;

@@ -163,15 +163,14 @@ class PowerComponentAggregatedPowerStats {
         }
     }
 
-    void setDeviceStats(@AggregatedPowerStatsConfig.TrackedState int[] states, long[] values) {
+    void setDeviceStats(int[] states, long[] values) {
         if (mDeviceStats == null) {
             createDeviceStats(0);
         }
         mDeviceStats.setStats(states, values);
     }
 
-    void setUidStats(int uid, @AggregatedPowerStatsConfig.TrackedState int[] states,
-            long[] values) {
+    void setUidStats(int uid, int[] states, long[] values) {
         UidStats uidStats = getUidStats(uid);
         uidStats.stats.setStats(states, values);
     }

@@ -26,7 +26,7 @@ import static org.xmlpull.v1.XmlPullParser.TEXT;
 
 import android.os.PersistableBundle;
 
-import androidx.test.runner.AndroidJUnit4;
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 
 import com.android.internal.util.XmlUtils;
 import com.android.modules.utils.TypedXmlPullParser;

@@ -42,10 +42,10 @@ import org.mockito.Mockito.verifyNoMoreInteractions
 @SmallTest
 class TakeScreenshotExecutorTest : SysuiTestCase() {
 
-    private val controller = mock<ScreenshotController>()
+    private val controller = mock<LegacyScreenshotController>()
     private val notificationsController0 = mock<ScreenshotNotificationsController>()
     private val notificationsController1 = mock<ScreenshotNotificationsController>()
-    private val controllerFactory = mock<ScreenshotController.Factory>()
+    private val controllerFactory = mock<InteractiveScreenshotHandler.Factory>()
     private val callback = mock<TakeScreenshotService.RequestCallback>()
     private val notificationControllerFactory = mock<ScreenshotNotificationsController.Factory>()
 
@@ -287,7 +287,7 @@ class TakeScreenshotExecutorTest : SysuiTestCase() {
     fun onCloseSystemDialogsReceived_controllerHasPendingTransitions() =
         testScope.runTest {
             setDisplays(display(TYPE_INTERNAL, id = 0), display(TYPE_EXTERNAL, id = 1))
-            whenever(controller.isPendingSharedTransition).thenReturn(true)
+            whenever(controller.isPendingSharedTransition()).thenReturn(true)
             val onSaved = { _: Uri? -> }
             screenshotExecutor.executeScreenshots(createScreenshotRequest(), onSaved, callback)
 

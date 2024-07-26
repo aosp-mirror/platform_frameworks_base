@@ -38,10 +38,11 @@ import java.util.concurrent.locks.ReentrantLock;
 final class AdditionalSubtypeMapRepository {
     private static final String TAG = "AdditionalSubtypeMapRepository";
 
-    // TODO(b/352594784): Should we user other lock primitives?
-    @GuardedBy("sPerUserMap")
+    private static final Object sMutationLock = new Object();
+
     @NonNull
-    private static final SparseArray<AdditionalSubtypeMap> sPerUserMap = new SparseArray<>();
+    private static volatile ImmutableSparseArray<AdditionalSubtypeMap> sPerUserMap =
+            ImmutableSparseArray.empty();
 
     record WriteTask(@UserIdInt int userId, @NonNull AdditionalSubtypeMap subtypeMap,
                      @NonNull InputMethodMap inputMethodMap) {
@@ -198,7 +199,7 @@ final class AdditionalSubtypeMapRepository {
     /**
      * Returns {@link AdditionalSubtypeMap} for the given user.
      *
-     * <p>This method is expected be called after {@link #ensureInitializedAndGet(int)}. Otherwise
+     * <p>This method is expected be called after {@link #initializeIfNecessary(int)}. Otherwise
      * {@link AdditionalSubtypeMap#EMPTY_MAP} will be returned.</p>
      *
      * @param userId the user to be queried about
@@ -207,10 +208,7 @@ final class AdditionalSubtypeMapRepository {
     @AnyThread
     @NonNull
     static AdditionalSubtypeMap get(@UserIdInt int userId) {
-        final AdditionalSubtypeMap map;
-        synchronized (sPerUserMap) {
-            map = sPerUserMap.get(userId);
-        }
+        final AdditionalSubtypeMap map = sPerUserMap.get(userId);
         if (map == null) {
             Slog.e(TAG, "get(userId=" + userId + ") is called before loadInitialDataAndGet()."
                     + " Returning an empty map");
@@ -220,28 +218,24 @@ final class AdditionalSubtypeMapRepository {
     }
 
     /**
-     * Ensures that {@link AdditionalSubtypeMap} is initialized for the given user. Load it from
-     * the persistent storage if {@link #putAndSave(int, AdditionalSubtypeMap, InputMethodMap)} has
-     * not been called yet.
+     * Ensures that {@link AdditionalSubtypeMap} is initialized for the given user.
      *
      * @param userId the user to be initialized
-     * @return {@link AdditionalSubtypeMap} that is associated with the given user. If
-     *         {@link #putAndSave(int, AdditionalSubtypeMap, InputMethodMap)} is already called
-     *         then the given {@link AdditionalSubtypeMap}.
      */
     @AnyThread
     @NonNull
-    static AdditionalSubtypeMap ensureInitializedAndGet(@UserIdInt int userId) {
-        final var map = AdditionalSubtypeUtils.load(userId);
-        synchronized (sPerUserMap) {
-            final AdditionalSubtypeMap previous = sPerUserMap.get(userId);
-            // If putAndSave() has already been called, then use it.
-            if (previous != null) {
-                return previous;
-            }
-            sPerUserMap.put(userId, map);
+    static void initializeIfNecessary(@UserIdInt int userId) {
+        if (sPerUserMap.contains(userId)) {
+            // Fast-pass. If putAndSave() is already called, then do nothing.
+            return;
         }
-        return map;
+        final var map = AdditionalSubtypeUtils.load(userId);
+        synchronized (sMutationLock) {
+            // Check the condition again.
+            if (!sPerUserMap.contains(userId)) {
+                sPerUserMap = sPerUserMap.cloneWithPutOrSelf(userId, map);
+            }
+        }
     }
 
     /**
@@ -255,12 +249,8 @@ final class AdditionalSubtypeMapRepository {
     @AnyThread
     static void putAndSave(@UserIdInt int userId, @NonNull AdditionalSubtypeMap map,
             @NonNull InputMethodMap inputMethodMap) {
-        synchronized (sPerUserMap) {
-            final AdditionalSubtypeMap previous = sPerUserMap.get(userId);
-            if (previous == map) {
-                return;
-            }
-            sPerUserMap.put(userId, map);
+        synchronized (sMutationLock) {
+            sPerUserMap = sPerUserMap.cloneWithPutOrSelf(userId, map);
             sWriter.scheduleWriteTask(userId, map, inputMethodMap);
         }
     }
@@ -277,9 +267,9 @@ final class AdditionalSubtypeMapRepository {
 
     @AnyThread
     static void remove(@UserIdInt int userId) {
-        synchronized (sPerUserMap) {
+        synchronized (sMutationLock) {
             sWriter.onUserRemoved(userId);
-            sPerUserMap.remove(userId);
+            sPerUserMap = sPerUserMap.cloneWithRemoveOrSelf(userId);
         }
     }
 }

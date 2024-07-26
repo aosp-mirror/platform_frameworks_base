@@ -19,21 +19,18 @@ package com.android.settingslib.volume.data.repository
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothCsipSetCoordinator
 import android.bluetooth.BluetoothDevice
-import android.bluetooth.BluetoothLeBroadcast
-import android.bluetooth.BluetoothLeBroadcastMetadata
 import android.bluetooth.BluetoothProfile
 import android.bluetooth.BluetoothVolumeControl
 import android.content.ContentResolver
-import android.content.Context
 import android.database.ContentObserver
 import android.provider.Settings
 import androidx.annotation.IntRange
 import com.android.internal.util.ConcurrentUtils
 import com.android.settingslib.bluetooth.BluetoothUtils
 import com.android.settingslib.bluetooth.LocalBluetoothManager
+import com.android.settingslib.bluetooth.onBroadcastStartedOrStopped
 import com.android.settingslib.bluetooth.onProfileConnectionStateChanged
 import com.android.settingslib.bluetooth.onSourceConnectedOrRemoved
-import com.android.settingslib.flags.Flags
 import com.android.settingslib.volume.data.repository.AudioSharingRepository.Companion.AUDIO_SHARING_VOLUME_MAX
 import com.android.settingslib.volume.data.repository.AudioSharingRepository.Companion.AUDIO_SHARING_VOLUME_MIN
 import kotlin.coroutines.CoroutineContext
@@ -41,10 +38,10 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.callbackFlow
-import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.flatMapLatest
@@ -85,63 +82,18 @@ interface AudioSharingRepository {
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class AudioSharingRepositoryImpl(
-    private val context: Context,
     private val contentResolver: ContentResolver,
-    private val btManager: LocalBluetoothManager?,
+    private val btManager: LocalBluetoothManager,
     private val coroutineScope: CoroutineScope,
     private val backgroundCoroutineContext: CoroutineContext,
 ) : AudioSharingRepository {
     override val inAudioSharing: Flow<Boolean> =
-        if (Flags.enableLeAudioSharing()) {
-            btManager?.profileManager?.leAudioBroadcastProfile?.let { leBroadcast ->
-                callbackFlow {
-                        val listener =
-                            object : BluetoothLeBroadcast.Callback {
-                                override fun onBroadcastStarted(reason: Int, broadcastId: Int) {
-                                    launch { send(isBroadcasting()) }
-                                }
-
-                                override fun onBroadcastStartFailed(reason: Int) {
-                                    launch { send(isBroadcasting()) }
-                                }
-
-                                override fun onBroadcastStopped(reason: Int, broadcastId: Int) {
-                                    launch { send(isBroadcasting()) }
-                                }
-
-                                override fun onBroadcastStopFailed(reason: Int) {
-                                    launch { send(isBroadcasting()) }
-                                }
-
-                                override fun onPlaybackStarted(reason: Int, broadcastId: Int) {}
-
-                                override fun onPlaybackStopped(reason: Int, broadcastId: Int) {}
-
-                                override fun onBroadcastUpdated(reason: Int, broadcastId: Int) {}
-
-                                override fun onBroadcastUpdateFailed(
-                                    reason: Int,
-                                    broadcastId: Int
-                                ) {}
-
-                                override fun onBroadcastMetadataChanged(
-                                    broadcastId: Int,
-                                    metadata: BluetoothLeBroadcastMetadata
-                                ) {}
-                            }
-
-                        leBroadcast.registerServiceCallBack(
-                            ConcurrentUtils.DIRECT_EXECUTOR,
-                            listener,
-                        )
-                        awaitClose { leBroadcast.unregisterServiceCallBack(listener) }
-                    }
-                    .onStart { emit(isBroadcasting()) }
-                    .flowOn(backgroundCoroutineContext)
-            } ?: flowOf(false)
-        } else {
-            flowOf(false)
-        }
+        btManager.profileManager.leAudioBroadcastProfile?.let { broadcast ->
+            broadcast.onBroadcastStartedOrStopped
+                .map { isBroadcasting() }
+                .onStart { emit(isBroadcasting()) }
+                .flowOn(backgroundCoroutineContext)
+        } ?: flowOf(false)
 
     private val primaryChange: Flow<Unit> = callbackFlow {
         val callback =
@@ -158,34 +110,24 @@ class AudioSharingRepositoryImpl(
     }
 
     override val secondaryGroupId: StateFlow<Int> =
-        if (Flags.volumeDialogAudioSharingFix()) {
-                merge(
-                        btManager
-                            ?.profileManager
-                            ?.leAudioBroadcastAssistantProfile
-                            ?.onSourceConnectedOrRemoved
-                            ?.map { getSecondaryGroupId() } ?: emptyFlow(),
-                        btManager
-                            ?.eventManager
-                            ?.onProfileConnectionStateChanged
-                            ?.filter { profileConnection ->
-                                profileConnection.state == BluetoothAdapter.STATE_DISCONNECTED &&
-                                    profileConnection.bluetoothProfile ==
-                                        BluetoothProfile.LE_AUDIO_BROADCAST_ASSISTANT
-                            }
-                            ?.map { getSecondaryGroupId() } ?: emptyFlow(),
-                        primaryChange.map { getSecondaryGroupId() })
-                    .onStart { emit(getSecondaryGroupId()) }
-                    .distinctUntilChanged()
-                    .flowOn(backgroundCoroutineContext)
-            } else {
-                emptyFlow()
-            }
+        merge(
+                btManager.profileManager.leAudioBroadcastAssistantProfile
+                    ?.onSourceConnectedOrRemoved
+                    ?.map { getSecondaryGroupId() } ?: emptyFlow(),
+                btManager.eventManager.onProfileConnectionStateChanged
+                    .filter { profileConnection ->
+                        profileConnection.state == BluetoothAdapter.STATE_DISCONNECTED &&
+                            profileConnection.bluetoothProfile ==
+                                BluetoothProfile.LE_AUDIO_BROADCAST_ASSISTANT
+                    }
+                    .map { getSecondaryGroupId() },
+                primaryChange.map { getSecondaryGroupId() })
+            .onStart { emit(getSecondaryGroupId()) }
+            .flowOn(backgroundCoroutineContext)
             .stateIn(coroutineScope, SharingStarted.WhileSubscribed(), getSecondaryGroupId())
 
     override val volumeMap: StateFlow<GroupIdToVolumes> =
-        if (Flags.volumeDialogAudioSharingFix()) {
-            btManager?.profileManager?.volumeControlProfile?.let { volumeControl ->
+        (btManager.profileManager.volumeControlProfile?.let { volumeControl ->
                 inAudioSharing.flatMapLatest { isSharing ->
                     if (isSharing) {
                         callbackFlow {
@@ -210,50 +152,53 @@ class AudioSharingRepositoryImpl(
                             .runningFold(emptyMap<Int, Int>()) { acc, value ->
                                 val groupId =
                                     BluetoothUtils.getGroupId(
-                                        btManager.cachedDeviceManager?.findDevice(value.first))
+                                        btManager.cachedDeviceManager.findDevice(value.first))
                                 if (groupId != BluetoothCsipSetCoordinator.GROUP_ID_INVALID) {
                                     acc + Pair(groupId, value.second)
                                 } else {
                                     acc
                                 }
                             }
-                            .distinctUntilChanged()
                             .flowOn(backgroundCoroutineContext)
                     } else {
                         emptyFlow()
                     }
                 }
-            } ?: emptyFlow()
-        } else {
-            emptyFlow()
-        }
-        .stateIn(coroutineScope, SharingStarted.WhileSubscribed(), emptyMap())
+            } ?: emptyFlow())
+            .stateIn(coroutineScope, SharingStarted.WhileSubscribed(), emptyMap())
 
     override suspend fun setSecondaryVolume(
         @IntRange(from = AUDIO_SHARING_VOLUME_MIN.toLong(), to = AUDIO_SHARING_VOLUME_MAX.toLong())
         volume: Int
     ) {
         withContext(backgroundCoroutineContext) {
-            if (Flags.volumeDialogAudioSharingFix()) {
-                btManager?.profileManager?.volumeControlProfile?.let {
-                    // Find secondary headset and set volume.
-                    val cachedDevice =
-                        BluetoothUtils.getSecondaryDeviceForBroadcast(context, btManager)
-                    if (cachedDevice != null) {
-                        it.setDeviceVolume(cachedDevice.device, volume, /* isGroupOp= */ true)
-                    }
+            btManager.profileManager.volumeControlProfile?.let {
+                // Find secondary headset and set volume.
+                val cachedDevice =
+                    BluetoothUtils.getSecondaryDeviceForBroadcast(contentResolver, btManager)
+                if (cachedDevice != null) {
+                    it.setDeviceVolume(cachedDevice.device, volume, /* isGroupOp= */ true)
                 }
             }
         }
     }
 
-    private fun isBroadcasting(): Boolean {
-        return Flags.enableLeAudioSharing() &&
-            (btManager?.profileManager?.leAudioBroadcastProfile?.isEnabled(null) ?: false)
-    }
+    private fun isBroadcasting(): Boolean =
+        btManager.profileManager.leAudioBroadcastProfile?.isEnabled(null) ?: false
 
-    private fun getSecondaryGroupId(): Int {
-        return BluetoothUtils.getGroupId(
-            BluetoothUtils.getSecondaryDeviceForBroadcast(context, btManager))
-    }
+    private fun getSecondaryGroupId(): Int =
+        BluetoothUtils.getGroupId(
+            BluetoothUtils.getSecondaryDeviceForBroadcast(contentResolver, btManager))
+}
+
+class AudioSharingRepositoryEmptyImpl : AudioSharingRepository {
+    override val inAudioSharing: Flow<Boolean> = flowOf(false)
+    override val secondaryGroupId: StateFlow<Int> =
+        MutableStateFlow(BluetoothCsipSetCoordinator.GROUP_ID_INVALID)
+    override val volumeMap: StateFlow<GroupIdToVolumes> = MutableStateFlow(emptyMap())
+
+    override suspend fun setSecondaryVolume(
+        @IntRange(from = AUDIO_SHARING_VOLUME_MIN.toLong(), to = AUDIO_SHARING_VOLUME_MAX.toLong())
+        volume: Int
+    ) {}
 }

@@ -7100,4 +7100,8 @@
     <!-- Whether to enable the private space search illustration and search tile content in "Hide Private Space" settings page.
          OEM/Partner can explicitly opt to hide the illustration and search tile content. -->
     <bool name="config_enableSearchTileHideIllustrationInPrivateSpace">true</bool>
+
+    <!-- The maximum number of call log entries for each sim card that can be stored in the call log
+         provider on the device. -->
+    <integer name="config_maximumCallLogEntriesPerSim">500</integer>
 </resources>

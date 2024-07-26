@@ -258,6 +258,7 @@ filegroup {
         "tests/src/**/systemui/statusbar/policy/LocationControllerImplTest.java",
         "tests/src/**/systemui/statusbar/policy/RemoteInputViewTest.java",
         "tests/src/**/systemui/statusbar/policy/SmartReplyViewTest.java",
+        "tests/src/**/systemui/statusbar/policy/ui/dialog/ModesDialogDelegateTest.kt",
         "tests/src/**/systemui/statusbar/StatusBarStateControllerImplTest.kt",
         "tests/src/**/systemui/theme/ThemeOverlayApplierTest.java",
         "tests/src/**/systemui/touch/TouchInsetManagerTest.java",

@@ -65,10 +65,10 @@ class DesktopTasksLimiter (
         }
 
         override fun onTransitionReady(
-                transition: IBinder,
-                info: TransitionInfo,
-                startTransaction: SurfaceControl.Transaction,
-                finishTransaction: SurfaceControl.Transaction
+            transition: IBinder,
+            info: TransitionInfo,
+            startTransaction: SurfaceControl.Transaction,
+            finishTransaction: SurfaceControl.Transaction
         ) {
             val taskToMinimize = mPendingTransitionTokensAndTasks.remove(transition) ?: return
 
@@ -129,8 +129,7 @@ class DesktopTasksLimiter (
         }
 
         fun removeLeftoverMinimizedTasks(displayId: Int, wct: WindowContainerTransaction) {
-            if (taskRepository
-                .getActiveNonMinimizedTasksOrderedFrontToBack(displayId).isNotEmpty()) {
+            if (taskRepository.getActiveNonMinimizedOrderedTasks(displayId).isNotEmpty()) {
                 return
             }
             val remainingMinimizedTasks = taskRepository.getMinimizedTasks(displayId)
@@ -178,7 +177,7 @@ class DesktopTasksLimiter (
                 "DesktopTasksLimiter: addMinimizeBackTaskChangesIfNeeded, newFrontTask=%d",
                 newFrontTaskInfo.taskId)
         val newTaskListOrderedFrontToBack = createOrderedTaskListWithGivenTaskInFront(
-                taskRepository.getActiveNonMinimizedTasksOrderedFrontToBack(displayId),
+                taskRepository.getActiveNonMinimizedOrderedTasks(displayId),
                 newFrontTaskInfo.taskId)
         val taskToMinimize = getTaskToMinimizeIfNeeded(newTaskListOrderedFrontToBack)
         if (taskToMinimize != null) {
@@ -242,7 +241,5 @@ class DesktopTasksLimiter (
     }
 
     @VisibleForTesting
-    fun getTransitionObserver(): TransitionObserver {
-        return minimizeTransitionObserver
-    }
+    fun getTransitionObserver(): TransitionObserver = minimizeTransitionObserver
 }

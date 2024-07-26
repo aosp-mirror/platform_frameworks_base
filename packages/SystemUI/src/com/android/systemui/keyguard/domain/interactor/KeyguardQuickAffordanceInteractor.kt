@@ -25,6 +25,7 @@ import android.util.Log
 import com.android.app.tracing.coroutines.withContext
 import com.android.compose.animation.scene.ObservableTransitionState
 import com.android.internal.widget.LockPatternUtils
+import com.android.keyguard.logging.KeyguardQuickAffordancesLogger
 import com.android.systemui.animation.DialogTransitionAnimator
 import com.android.systemui.animation.Expandable
 import com.android.systemui.dagger.SysUISingleton
@@ -80,7 +81,8 @@ constructor(
     private val featureFlags: FeatureFlags,
     private val repository: Lazy<KeyguardQuickAffordanceRepository>,
     private val launchAnimator: DialogTransitionAnimator,
-    private val logger: KeyguardQuickAffordancesMetricsLogger,
+    private val logger: KeyguardQuickAffordancesLogger,
+    private val metricsLogger: KeyguardQuickAffordancesMetricsLogger,
     private val devicePolicyManager: DevicePolicyManager,
     private val dockManager: DockManager,
     private val biometricSettingsRepository: BiometricSettingsRepository,
@@ -171,7 +173,8 @@ constructor(
             Log.e(TAG, "Affordance config with key of \"$configKey\" not found!")
             return
         }
-        logger.logOnShortcutTriggered(slotId, configKey)
+        logger.logQuickAffordanceTriggered(decodedSlotId, decodedConfigKey)
+        metricsLogger.logOnShortcutTriggered(slotId, configKey)
 
         when (val result = config.onTriggered(expandable)) {
             is KeyguardQuickAffordanceConfig.OnTriggeredResult.StartActivity ->
@@ -223,7 +226,8 @@ constructor(
                 affordanceIds = selections,
             )
 
-        logger.logOnShortcutSelected(slotId, affordanceId)
+        logger.logQuickAffordanceSelected(slotId, affordanceId)
+        metricsLogger.logOnShortcutSelected(slotId, affordanceId)
         return true
     }
 

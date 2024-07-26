@@ -1730,15 +1730,9 @@
 
     <!-- Ongoing activity chip -->
     <dimen name="ongoing_activity_chip_side_padding">12dp</dimen>
-    <!-- The start padding to use on the activity chip if the icon comes from the notification's smallIcon field (the small notif icons embed their own padding, so the chip itself can have less padding) -->
-    <dimen name="ongoing_activity_chip_side_padding_with_notif_icon">6dp</dimen>
     <dimen name="ongoing_activity_chip_icon_size">16dp</dimen>
-    <!-- The size to use for the icon in the ongoing activity chip if the icon comes from the notification's smallIcon field -->
-    <dimen name="ongoing_activity_chip_notif_icon_size">22dp</dimen>
-
     <!-- The padding between the icon and the text. -->
     <dimen name="ongoing_activity_chip_icon_text_padding">4dp</dimen>
-    <dimen name="ongoing_activity_chip_text_end_padding_with_notif_icon">6dp</dimen>
     <dimen name="ongoing_activity_chip_corner_radius">28dp</dimen>
 
     <!-- Status bar user chip -->

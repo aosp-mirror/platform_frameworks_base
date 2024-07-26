@@ -29,9 +29,12 @@ import com.android.systemui.communal.shared.model.EditModeState
 import com.android.systemui.communal.widgets.WidgetConfigurator
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.media.controls.ui.view.MediaHost
+import com.android.systemui.util.kotlin.BooleanFlowOperators.anyOf
+import com.android.systemui.util.kotlin.BooleanFlowOperators.not
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.flowOf
 
 /** The base view model for the communal hub. */
@@ -56,6 +59,26 @@ abstract class BaseCommunalViewModel(
     /** The key of the currently selected item, or null if no item selected. */
     val selectedKey: StateFlow<String?>
         get() = _selectedKey
+
+    private val _isTouchConsumed: MutableStateFlow<Boolean> = MutableStateFlow(false)
+
+    /** Whether an element inside the lazy grid is actively consuming touches */
+    val isTouchConsumed: Flow<Boolean> = _isTouchConsumed.asStateFlow()
+
+    private val _isNestedScrolling: MutableStateFlow<Boolean> = MutableStateFlow(false)
+
+    /** Whether the lazy grid is reporting scrolling within itself */
+    val isNestedScrolling: Flow<Boolean> = _isNestedScrolling.asStateFlow()
+
+    /**
+     * Whether touch is available to be consumed by a touch handler. Touch is available during
+     * nested scrolling as lazy grid reports this for all scroll directions that it detects. In the
+     * case that there is consumed scrolling on a nested element, such as an AndroidView, no nested
+     * scrolling will be reported. It is up to the flow consumer to determine whether the nested
+     * scroll can be applied. In the communal case, this would be identifying the scroll as
+     * vertical, which the lazy horizontal grid does not handle.
+     */
+    val glanceableTouchAvailable: Flow<Boolean> = anyOf(not(isTouchConsumed), isNestedScrolling)
 
     /** Accessibility delegate to be set on CommunalAppWidgetHostView. */
     open val widgetAccessibilityDelegate: View.AccessibilityDelegate? = null
@@ -199,5 +222,29 @@ abstract class BaseCommunalViewModel(
     /** Set the key of the currently selected item */
     fun setSelectedKey(key: String?) {
         _selectedKey.value = key
+    }
+
+    /** Invoked once touches inside the lazy grid are consumed */
+    fun onHubTouchConsumed() {
+        if (_isTouchConsumed.value) {
+            return
+        }
+
+        _isTouchConsumed.value = true
+    }
+
+    /** Invoked when nested scrolling begins on the lazy grid */
+    fun onNestedScrolling() {
+        if (_isNestedScrolling.value) {
+            return
+        }
+
+        _isNestedScrolling.value = true
+    }
+
+    /** Resets nested scroll and touch consumption state */
+    fun onResetTouchState() {
+        _isTouchConsumed.value = false
+        _isNestedScrolling.value = false
     }
 }

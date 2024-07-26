@@ -19,15 +19,13 @@ package com.android.server.inputmethod;
 import android.annotation.AnyThread;
 import android.annotation.NonNull;
 import android.annotation.UserIdInt;
-import android.util.SparseArray;
-
-import com.android.internal.annotations.GuardedBy;
 
 final class InputMethodSettingsRepository {
-    // TODO(b/352594784): Should we user other lock primitives?
-    @GuardedBy("sPerUserMap")
+    private static final Object sMutationLock = new Object();
+
     @NonNull
-    private static final SparseArray<InputMethodSettings> sPerUserMap = new SparseArray<>();
+    private static volatile ImmutableSparseArray<InputMethodSettings> sPerUserMap =
+            ImmutableSparseArray.empty();
 
     /**
      * Not intended to be instantiated.
@@ -38,10 +36,7 @@ final class InputMethodSettingsRepository {
     @NonNull
     @AnyThread
     static InputMethodSettings get(@UserIdInt int userId) {
-        final InputMethodSettings obj;
-        synchronized (sPerUserMap) {
-            obj = sPerUserMap.get(userId);
-        }
+        final InputMethodSettings obj = sPerUserMap.get(userId);
         if (obj != null) {
             return obj;
         }
@@ -50,15 +45,15 @@ final class InputMethodSettingsRepository {
 
     @AnyThread
     static void put(@UserIdInt int userId, @NonNull InputMethodSettings obj) {
-        synchronized (sPerUserMap) {
-            sPerUserMap.put(userId, obj);
+        synchronized (sMutationLock) {
+            sPerUserMap = sPerUserMap.cloneWithPutOrSelf(userId, obj);
         }
     }
 
     @AnyThread
     static void remove(@UserIdInt int userId) {
-        synchronized (sPerUserMap) {
-            sPerUserMap.remove(userId);
+        synchronized (sMutationLock) {
+            sPerUserMap = sPerUserMap.cloneWithRemoveOrSelf(userId);
         }
     }
 }
