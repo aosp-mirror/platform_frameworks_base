@@ -360,13 +360,18 @@ void AndroidRuntime::onStarted() {
 void AndroidRuntime::start(const char* className, const Vector<String8>& options, bool zygote) {
     JNIEnv* env = AndroidRuntime::getJNIEnv();
 
-    jstring propertyString =
-            (jstring)env->CallStaticObjectMethod(systemClass, getPropertyId,
+    jclass system = FindClassOrDie(env, "java/lang/System");
+    jmethodID getPropertyMethod =
+            GetStaticMethodIDOrDie(env, system, "getProperty",
+                                   "(Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;");
+
+    auto methodBindingJString =
+            (jstring)env->CallStaticObjectMethod(system, getPropertyMethod,
                                                  env->NewStringUTF("method_binding_format"),
                                                  env->NewStringUTF(""));
-    const char* propertyChars = env->GetStringUTFChars(propertyString, 0);
-    auto method_binding_format = string(propertyChars);
-    env->ReleaseStringUTFChars(propertyString, propertyChars);
+    const char* methodBindingChars = env->GetStringUTFChars(methodBindingJString, 0);
+    auto method_binding_format = string(methodBindingChars);
+    env->ReleaseStringUTFChars(methodBindingJString, methodBindingChars);
 
     setJniMethodFormat(method_binding_format);
 
