@@ -16,6 +16,8 @@
 
 package com.android.settingslib.notification.modes;
 
+import static android.app.AutomaticZenRule.TYPE_SCHEDULE_CALENDAR;
+import static android.app.AutomaticZenRule.TYPE_SCHEDULE_TIME;
 import static android.app.NotificationManager.INTERRUPTION_FILTER_ALL;
 import static android.app.NotificationManager.INTERRUPTION_FILTER_PRIORITY;
 import static android.service.notification.SystemZenRules.getTriggerDescriptionForScheduleEvent;
@@ -296,6 +298,17 @@ public class ZenMode implements Parcelable {
 
     public boolean isManualDnd() {
         return mIsManualDnd;
+    }
+
+    /**
+     * A <em>custom manual</em> mode is a mode created by the user, and not yet assigned an
+     * automatic trigger condition (neither time schedule nor a calendar).
+     */
+    public boolean isCustomManual() {
+        return isSystemOwned()
+                && getType() != TYPE_SCHEDULE_TIME
+                && getType() != TYPE_SCHEDULE_CALENDAR
+                && !isManualDnd();
     }
 
     public boolean isEnabled() {
