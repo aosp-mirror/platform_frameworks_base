@@ -1099,7 +1099,7 @@ class DesktopTasksController(
                 .getActiveNonMinimizedOrderedTasks(taskInfo.displayId)
             activeTasks.firstOrNull()?.let { activeTask ->
                 shellTaskOrganizer.getRunningTaskInfo(activeTask)?.let {
-                    cascadeWindow(stableBounds,
+                    cascadeWindow(context.resources, stableBounds,
                         it.configuration.windowConfiguration.bounds, initialBounds)
                 }
             }

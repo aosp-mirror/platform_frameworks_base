@@ -17,6 +17,7 @@
 package com.android.wm.shell.desktopmode
 
 import android.app.TaskInfo
+import android.content.res.Resources
 import android.graphics.Point
 import android.graphics.Rect
 import android.view.Gravity
@@ -26,6 +27,7 @@ import com.android.wm.shell.desktopmode.DesktopTaskPosition.BottomRight
 import com.android.wm.shell.desktopmode.DesktopTaskPosition.Center
 import com.android.wm.shell.desktopmode.DesktopTaskPosition.TopLeft
 import com.android.wm.shell.desktopmode.DesktopTaskPosition.TopRight
+import com.android.wm.shell.R
 
 /**
  * The position of a task window in desktop mode.
@@ -122,9 +124,28 @@ fun Rect.getDesktopTaskPosition(bounds: Rect): DesktopTaskPosition {
     }
 }
 
-internal fun cascadeWindow(frame: Rect, prev: Rect, dest: Rect) {
+internal fun cascadeWindow(res: Resources, frame: Rect, prev: Rect, dest: Rect) {
+    val candidateBounds = Rect(dest)
     val lastPos = frame.getDesktopTaskPosition(prev)
-    val candidatePos = lastPos.next()
-    val destCoord = candidatePos.getTopLeftCoordinates(frame, dest)
+    var destCoord = Center.getTopLeftCoordinates(frame, candidateBounds)
+    candidateBounds.offsetTo(destCoord.x, destCoord.y)
+    // If the default center position is not free or if last focused window is not at the
+    // center, get the next cascading window position.
+    if (!prevBoundsMovedAboveThreshold(res, prev, candidateBounds) || Center != lastPos) {
+        val nextCascadingPos = lastPos.next()
+        destCoord = nextCascadingPos.getTopLeftCoordinates(frame, dest)
+    }
     dest.offsetTo(destCoord.x, destCoord.y)
+}
+
+internal fun prevBoundsMovedAboveThreshold(res: Resources, prev: Rect, newBounds: Rect): Boolean {
+    // This is the required minimum dp for a task to be touchable.
+    val moveThresholdPx = res.getDimensionPixelSize(
+        R.dimen.freeform_required_visible_empty_space_in_header)
+    val leftFar = newBounds.left - prev.left > moveThresholdPx
+    val topFar = newBounds.top - prev.top > moveThresholdPx
+    val rightFar = prev.right - newBounds.right > moveThresholdPx
+    val bottomFar = prev.bottom - newBounds.bottom > moveThresholdPx
+
+    return leftFar || topFar || rightFar || bottomFar
 }
