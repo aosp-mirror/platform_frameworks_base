@@ -826,10 +826,10 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
             ActivityManager.RunningTaskInfo taskInfo,
             MaximizeMenuFactory maximizeMenuFactory) {
         final DesktopModeWindowDecoration windowDecor = new DesktopModeWindowDecoration(mContext,
-                mMockDisplayController, mMockSplitScreenController, mMockShellTaskOrganizer,
-                taskInfo, mMockSurfaceControl, mMockHandler, mBgExecutor, mMockChoreographer,
-                mMockSyncQueue, mMockRootTaskDisplayAreaOrganizer, mMockGenericLinksParser,
-                SurfaceControl.Builder::new, mMockTransactionSupplier,
+                mContext, mMockDisplayController, mMockSplitScreenController,
+                mMockShellTaskOrganizer, taskInfo, mMockSurfaceControl, mMockHandler, mBgExecutor,
+                mMockChoreographer, mMockSyncQueue, mMockRootTaskDisplayAreaOrganizer,
+                mMockGenericLinksParser, SurfaceControl.Builder::new, mMockTransactionSupplier,
                 WindowContainerTransaction::new, SurfaceControl::new,
                 mMockSurfaceControlViewHostFactory, maximizeMenuFactory, mMockHandleMenuFactory);
         windowDecor.setCaptionListeners(mMockTouchEventListener, mMockTouchEventListener,

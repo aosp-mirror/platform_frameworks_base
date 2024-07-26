@@ -103,6 +103,8 @@ import org.mockito.kotlin.whenever
 import org.mockito.quality.Strictness
 import java.util.Optional
 import java.util.function.Supplier
+import junit.framework.Assert.assertFalse
+import junit.framework.Assert.assertTrue
 
 /**
  * Tests of [DesktopModeWindowDecorViewModel]
@@ -206,25 +208,13 @@ class DesktopModeWindowDecorViewModelTests : ShellTestCase() {
         val decoration = setUpMockDecorationForTask(task)
 
         onTaskOpening(task, taskSurface)
+        assertTrue(windowDecorByTaskIdSpy.contains(task.taskId))
 
         task.setWindowingMode(WINDOWING_MODE_UNDEFINED)
         task.setActivityType(ACTIVITY_TYPE_UNDEFINED)
         onTaskChanging(task, taskSurface)
 
-        verify(mockDesktopModeWindowDecorFactory).create(
-                mContext,
-                mockDisplayController,
-                mockSplitScreenController,
-                mockTaskOrganizer,
-                task,
-                taskSurface,
-                mockMainHandler,
-                bgExecutor,
-                mockMainChoreographer,
-                mockSyncQueue,
-                mockRootTaskDisplayAreaOrganizer,
-                mockGenericLinksParser
-        )
+        assertFalse(windowDecorByTaskIdSpy.contains(task.taskId))
         verify(decoration).close()
     }
 
@@ -238,38 +228,12 @@ class DesktopModeWindowDecorViewModelTests : ShellTestCase() {
         setUpMockDecorationForTask(task)
 
         onTaskChanging(task, taskSurface)
-        verify(mockDesktopModeWindowDecorFactory, never()).create(
-                mContext,
-                mockDisplayController,
-                mockSplitScreenController,
-                mockTaskOrganizer,
-                task,
-                taskSurface,
-                mockMainHandler,
-                bgExecutor,
-                mockMainChoreographer,
-                mockSyncQueue,
-                mockRootTaskDisplayAreaOrganizer,
-                mockGenericLinksParser
-        )
+        assertFalse(windowDecorByTaskIdSpy.contains(task.taskId))
 
         task.setWindowingMode(WINDOWING_MODE_FREEFORM)
         task.setActivityType(ACTIVITY_TYPE_STANDARD)
         onTaskChanging(task, taskSurface)
-        verify(mockDesktopModeWindowDecorFactory, times(1)).create(
-                mContext,
-                mockDisplayController,
-                mockSplitScreenController,
-                mockTaskOrganizer,
-                task,
-                taskSurface,
-                mockMainHandler,
-                bgExecutor,
-                mockMainChoreographer,
-                mockSyncQueue,
-                mockRootTaskDisplayAreaOrganizer,
-                mockGenericLinksParser
-        )
+        assertTrue(windowDecorByTaskIdSpy.contains(task.taskId))
     }
 
     @Test
@@ -364,9 +328,7 @@ class DesktopModeWindowDecorViewModelTests : ShellTestCase() {
         task.setWindowingMode(ACTIVITY_TYPE_UNDEFINED)
         onTaskChanging(task)
 
-        verify(mockDesktopModeWindowDecorFactory, never())
-                .create(any(), any(), any(), any(), eq(task), any(), any(), any(), any(), any(),
-                    any(), any())
+        assertFalse(windowDecorByTaskIdSpy.contains(task.taskId))
     }
 
     @Test
@@ -386,9 +348,7 @@ class DesktopModeWindowDecorViewModelTests : ShellTestCase() {
             setUpMockDecorationsForTasks(task)
 
             onTaskOpening(task)
-            verify(mockDesktopModeWindowDecorFactory)
-                    .create(any(), any(), any(), any(), eq(task), any(), any(), any(), any(),
-                        any(), any(), any())
+            assertTrue(windowDecorByTaskIdSpy.contains(task.taskId))
         } finally {
             mockitoSession.finishMocking()
         }
@@ -404,9 +364,7 @@ class DesktopModeWindowDecorViewModelTests : ShellTestCase() {
         }
         onTaskOpening(task)
 
-        verify(mockDesktopModeWindowDecorFactory, never())
-                .create(any(), any(), any(), any(), eq(task), any(), any(), any(), any(), any(),
-                    any(), any())
+        assertFalse(windowDecorByTaskIdSpy.contains(task.taskId))
     }
 
     @Test
@@ -422,9 +380,7 @@ class DesktopModeWindowDecorViewModelTests : ShellTestCase() {
 
         onTaskOpening(task)
 
-        verify(mockDesktopModeWindowDecorFactory, never())
-                .create(any(), any(), any(), any(), eq(task), any(), any(), any(), any(), any(),
-                    any(), any())
+        assertFalse(windowDecorByTaskIdSpy.contains(task.taskId))
     }
 
     @Test
@@ -520,9 +476,7 @@ class DesktopModeWindowDecorViewModelTests : ShellTestCase() {
             doReturn(false).`when` { DesktopModeStatus.isDesktopModeSupported(any()) }
 
             onTaskOpening(task)
-            verify(mockDesktopModeWindowDecorFactory, never())
-                .create(any(), any(), any(), any(), eq(task), any(), any(), any(), any(), any(),
-                    any(), any())
+            assertFalse(windowDecorByTaskIdSpy.contains(task.taskId))
         } finally {
             mockitoSession.finishMocking()
         }
@@ -545,9 +499,7 @@ class DesktopModeWindowDecorViewModelTests : ShellTestCase() {
             setUpMockDecorationsForTasks(task)
 
             onTaskOpening(task)
-            verify(mockDesktopModeWindowDecorFactory)
-                .create(any(), any(), any(), any(), eq(task), any(), any(), any(), any(), any(),
-                    any(), any())
+            assertTrue(windowDecorByTaskIdSpy.contains(task.taskId))
         } finally {
             mockitoSession.finishMocking()
         }
@@ -569,9 +521,7 @@ class DesktopModeWindowDecorViewModelTests : ShellTestCase() {
             setUpMockDecorationsForTasks(task)
 
             onTaskOpening(task)
-            verify(mockDesktopModeWindowDecorFactory)
-                .create(any(), any(), any(), any(), eq(task), any(), any(), any(), any(), any(),
-                    any(), any())
+            assertTrue(windowDecorByTaskIdSpy.contains(task.taskId))
         } finally {
             mockitoSession.finishMocking()
         }
@@ -693,7 +643,7 @@ class DesktopModeWindowDecorViewModelTests : ShellTestCase() {
             @WindowConfiguration.WindowingMode windowingMode: Int,
             activityType: Int = ACTIVITY_TYPE_STANDARD,
             focused: Boolean = true,
-            activityInfo: ActivityInfo = ActivityInfo()
+            activityInfo: ActivityInfo = ActivityInfo(),
     ): RunningTaskInfo {
         return TestRunningTaskInfoBuilder()
                 .setDisplayId(displayId)
@@ -709,8 +659,8 @@ class DesktopModeWindowDecorViewModelTests : ShellTestCase() {
     private fun setUpMockDecorationForTask(task: RunningTaskInfo): DesktopModeWindowDecoration {
         val decoration = mock(DesktopModeWindowDecoration::class.java)
         whenever(
-            mockDesktopModeWindowDecorFactory.create(any(), any(), any(), any(), eq(task), any(),
-                any(), any(), any(), any(), any(), any())
+            mockDesktopModeWindowDecorFactory.create(any(), any(), any(), any(), any(), eq(task),
+                any(), any(), any(), any(), any(), any(), any())
         ).thenReturn(decoration)
         decoration.mTaskInfo = task
         whenever(decoration.isFocused).thenReturn(task.isFocused)
