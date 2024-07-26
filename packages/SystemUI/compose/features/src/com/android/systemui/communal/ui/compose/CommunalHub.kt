@@ -221,7 +221,7 @@ fun CommunalHub(
     val layoutDirection = LocalLayoutDirection.current
 
     if (viewModel.isEditMode) {
-        ScrollOnNewWidgetAddedEffect(communalContent, gridState)
+        ObserveNewWidgetAddedEffect(communalContent, gridState, viewModel)
     } else {
         ScrollOnUpdatedLiveContentEffect(communalContent, gridState)
     }
@@ -553,25 +553,45 @@ private fun ScrollOnUpdatedLiveContentEffect(
     }
 }
 
-/** Observes communal content and scrolls to a newly added widget if any. */
+/**
+ * Observes communal content and determines whether a new widget has been added, upon which case:
+ * - Announce for accessibility
+ * - Scroll if the new widget is not visible
+ */
 @Composable
-private fun ScrollOnNewWidgetAddedEffect(
+private fun ObserveNewWidgetAddedEffect(
     communalContent: List<CommunalContentModel>,
     gridState: LazyGridState,
+    viewModel: BaseCommunalViewModel,
 ) {
     val coroutineScope = rememberCoroutineScope()
     val widgetKeys = remember { mutableListOf<String>() }
+    var communalContentPending by remember { mutableStateOf(true) }
 
     LaunchedEffect(communalContent) {
+        // Do nothing until any communal content comes in
+        if (communalContentPending && communalContent.isEmpty()) {
+            return@LaunchedEffect
+        }
+
         val oldWidgetKeys = widgetKeys.toList()
+        val widgets = communalContent.filterIsInstance<CommunalContentModel.WidgetContent.Widget>()
         widgetKeys.clear()
-        widgetKeys.addAll(communalContent.filter { it.isWidgetContent() }.map { it.key })
+        widgetKeys.addAll(widgets.map { it.key })
+
+        // Do nothing on first communal content since we don't have a delta
+        if (communalContentPending) {
+            communalContentPending = false
+            return@LaunchedEffect
+        }
 
         // Do nothing if there is no new widget
         val indexOfFirstNewWidget = widgetKeys.indexOfFirst { !oldWidgetKeys.contains(it) }
         if (indexOfFirstNewWidget < 0) {
             return@LaunchedEffect
         }
+
+        viewModel.onNewWidgetAdded(widgets[indexOfFirstNewWidget].providerInfo)
 
         // Scroll if the new widget is not visible
         val lastVisibleItemIndex = gridState.layoutInfo.visibleItemsInfo.lastOrNull()?.index
