@@ -1862,7 +1862,7 @@ class BackNavigationController {
         return isSnapshotCompatible(snapshot, visibleOpenActivities) ? snapshot : null;
     }
 
-    static boolean isSnapshotCompatible(@NonNull TaskSnapshot snapshot,
+    static boolean isSnapshotCompatible(@Nullable TaskSnapshot snapshot,
             @NonNull ActivityRecord[] visibleOpenActivities) {
         if (snapshot == null) {
             return false;
@@ -1871,6 +1871,12 @@ class BackNavigationController {
         for (int i = visibleOpenActivities.length - 1; i >= 0; --i) {
             final ActivityRecord ar = visibleOpenActivities[i];
             if (!ar.isSnapshotOrientationCompatible(snapshot)) {
+                return false;
+            }
+            final int appNightMode = ar.getConfiguration().uiMode
+                    & Configuration.UI_MODE_NIGHT_MASK;
+            final int snapshotNightMode = snapshot.getUiMode() & Configuration.UI_MODE_NIGHT_MASK;
+            if (appNightMode != snapshotNightMode) {
                 return false;
             }
             oneComponentMatch |= ar.isSnapshotComponentCompatible(snapshot);
