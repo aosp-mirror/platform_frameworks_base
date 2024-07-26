@@ -227,7 +227,6 @@ public final class ImeVisibilityStateComputer {
                                 ? overlayWindowToken : null;
                 synchronized (ImfLock.class) {
                     mCurVisibleImeLayeringOverlay = overlay;
-
                 }
             }
 
@@ -577,7 +576,6 @@ public final class ImeVisibilityStateComputer {
     }
 
     @GuardedBy("ImfLock.class")
-    @VisibleForTesting
     ImeVisibilityResult onInteractiveChanged(IBinder windowToken, boolean interactive) {
         final ImeTargetWindowState state = getWindowStateOrNull(windowToken);
         if (state != null && state.isRequestedImeVisible() && mInputShown && !interactive) {
