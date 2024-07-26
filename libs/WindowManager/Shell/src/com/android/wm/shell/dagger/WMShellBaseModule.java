@@ -147,7 +147,11 @@ import java.util.Optional;
  * dependencies that are device/form factor SystemUI implementation specific should go into their
  * respective modules (ie. {@link WMShellModule} for handheld, {@link TvWMShellModule} for tv, etc.)
  */
-@Module(includes = WMShellConcurrencyModule.class)
+@Module(
+        includes = {
+                WMShellConcurrencyModule.class,
+                WMShellCoroutinesModule.class
+        })
 public abstract class WMShellBaseModule {
 
     //

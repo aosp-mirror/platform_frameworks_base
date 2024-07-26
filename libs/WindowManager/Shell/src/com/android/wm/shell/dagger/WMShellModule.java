@@ -72,6 +72,7 @@ import com.android.wm.shell.desktopmode.ExitDesktopTaskTransitionHandler;
 import com.android.wm.shell.desktopmode.ReturnToDragStartAnimator;
 import com.android.wm.shell.desktopmode.SpringDragToDesktopTransitionHandler;
 import com.android.wm.shell.desktopmode.ToggleResizeDesktopTaskTransitionHandler;
+import com.android.wm.shell.desktopmode.education.AppHandleEducationController;
 import com.android.wm.shell.desktopmode.education.AppHandleEducationFilter;
 import com.android.wm.shell.desktopmode.education.data.AppHandleEducationDatastoreRepository;
 import com.android.wm.shell.draganddrop.DragAndDropController;
@@ -116,6 +117,8 @@ import dagger.Binds;
 import dagger.Lazy;
 import dagger.Module;
 import dagger.Provides;
+
+import kotlinx.coroutines.CoroutineScope;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -722,6 +725,17 @@ public abstract class WMShellModule {
         return new AppHandleEducationFilter(context, appHandleEducationDatastoreRepository);
     }
 
+    @WMSingleton
+    @Provides
+    static AppHandleEducationController provideAppHandleEducationController(
+            AppHandleEducationFilter appHandleEducationFilter,
+            ShellTaskOrganizer shellTaskOrganizer,
+            AppHandleEducationDatastoreRepository appHandleEducationDatastoreRepository,
+            @ShellMainThread CoroutineScope applicationScope) {
+        return new AppHandleEducationController(appHandleEducationFilter,
+                shellTaskOrganizer, appHandleEducationDatastoreRepository, applicationScope);
+    }
+
     //
     // Drag and drop
     //
@@ -763,7 +777,8 @@ public abstract class WMShellModule {
     @Provides
     static Object provideIndependentShellComponentsToCreate(
             DragAndDropController dragAndDropController,
-            Optional<DesktopTasksTransitionObserver> desktopTasksTransitionObserverOptional
+            Optional<DesktopTasksTransitionObserver> desktopTasksTransitionObserverOptional,
+            AppHandleEducationController appHandleEducationController
     ) {
         return new Object();
     }
