@@ -326,15 +326,12 @@ public abstract class HostApduService extends Service {
                 }
                 break;
                 case MSG_POLLING_LOOP:
-                    ArrayList<Bundle> frames =
-                            msg.getData().getParcelableArrayList(KEY_POLLING_LOOP_FRAMES_BUNDLE,
-                            Bundle.class);
-                    ArrayList<PollingFrame> pollingFrames =
-                            new ArrayList<PollingFrame>(frames.size());
-                    for (Bundle frame : frames) {
-                        pollingFrames.add(new PollingFrame(frame));
+                    if (android.nfc.Flags.nfcReadPollingLoop()) {
+                        ArrayList<PollingFrame> pollingFrames =
+                                msg.getData().getParcelableArrayList(
+                                    KEY_POLLING_LOOP_FRAMES_BUNDLE, PollingFrame.class);
+                        processPollingFrames(pollingFrames);
                     }
-                    processPollingFrames(pollingFrames);
                     break;
             default:
                 super.handleMessage(msg);

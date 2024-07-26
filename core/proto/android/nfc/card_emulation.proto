@@ -59,6 +59,7 @@ message PreferredServicesProto {
     optional .android.content.ComponentNameProto foreground_requested = 5;
     optional .android.content.ComponentNameProto settings_default = 6;
     optional bool prefer_foreground = 7;
+    optional .android.content.ComponentNameProto wallet_role_holder_payment_service = 8;
 }
 
 // Debugging information for com.android.nfc.cardemulation.EnabledNfcFServices
