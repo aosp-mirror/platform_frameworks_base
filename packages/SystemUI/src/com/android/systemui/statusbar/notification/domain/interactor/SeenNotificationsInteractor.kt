@@ -109,7 +109,7 @@ constructor(
             .map {
                 secureSettings.getIntForUser(
                     name = Settings.Secure.LOCK_SCREEN_SHOW_ONLY_UNSEEN_NOTIFICATIONS,
-                    def = 0,
+                    default = 0,
                     userHandle = UserHandle.USER_CURRENT,
                 ) == 1
             }
