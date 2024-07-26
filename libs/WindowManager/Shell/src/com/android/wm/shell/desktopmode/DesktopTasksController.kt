@@ -639,16 +639,23 @@ class DesktopTasksController(
     /**
      * Quick-resize to the right or left half of the stable bounds.
      *
+     * @param taskInfo current task that is being snap-resized via dragging or maximize menu button
+     * @param currentDragBounds current position of the task leash being dragged (or current task
+     *                          bounds if being snapped resize via maximize menu button)
      * @param position the portion of the screen (RIGHT or LEFT) we want to snap the task to.
      */
-    fun snapToHalfScreen(taskInfo: RunningTaskInfo, position: SnapPosition) {
+    fun snapToHalfScreen(
+        taskInfo: RunningTaskInfo,
+        currentDragBounds: Rect,
+        position: SnapPosition
+    ) {
         val destinationBounds = getSnapBounds(taskInfo, position)
 
         if (destinationBounds == taskInfo.configuration.windowConfiguration.bounds) return
 
         val wct = WindowContainerTransaction().setBounds(taskInfo.token, destinationBounds)
         if (Transitions.ENABLE_SHELL_TRANSITIONS) {
-            toggleResizeDesktopTaskTransitionHandler.startTransition(wct)
+            toggleResizeDesktopTaskTransitionHandler.startTransition(wct, currentDragBounds)
         } else {
             shellTaskOrganizer.applyTransaction(wct)
         }
@@ -1239,7 +1246,7 @@ class DesktopTasksController(
         taskSurface: SurfaceControl,
         inputX: Float,
         taskTop: Float
-    ): DesktopModeVisualIndicator.IndicatorType {
+    ): IndicatorType {
         // If the visual indicator does not exist, create it.
         val indicator =
             visualIndicator
@@ -1262,13 +1269,15 @@ class DesktopTasksController(
      * @param taskInfo the task being dragged.
      * @param position position of surface when drag ends.
      * @param inputCoordinate the coordinates of the motion event
-     * @param taskBounds the updated bounds of the task being dragged.
+     * @param currentDragBounds the current bounds of where the visible task is (might be actual
+     *                          task bounds or just task leash)
+     * @param validDragArea the bounds of where the task can be dragged within the display.
      */
     fun onDragPositioningEnd(
         taskInfo: RunningTaskInfo,
         position: Point,
         inputCoordinate: PointF,
-        taskBounds: Rect,
+        currentDragBounds: Rect,
         validDragArea: Rect
     ) {
         if (taskInfo.configuration.windowConfiguration.windowingMode != WINDOWING_MODE_FREEFORM) {
@@ -1278,41 +1287,40 @@ class DesktopTasksController(
         val indicator = visualIndicator ?: return
         val indicatorType =
             indicator.updateIndicatorType(
-                PointF(inputCoordinate.x, taskBounds.top.toFloat()),
+                PointF(inputCoordinate.x, currentDragBounds.top.toFloat()),
                 taskInfo.windowingMode
             )
         when (indicatorType) {
-            DesktopModeVisualIndicator.IndicatorType.TO_FULLSCREEN_INDICATOR -> {
+            IndicatorType.TO_FULLSCREEN_INDICATOR -> {
                 moveToFullscreenWithAnimation(
                     taskInfo,
                     position,
                     DesktopModeTransitionSource.TASK_DRAG
                 )
             }
-            DesktopModeVisualIndicator.IndicatorType.TO_SPLIT_LEFT_INDICATOR -> {
+            IndicatorType.TO_SPLIT_LEFT_INDICATOR -> {
                 releaseVisualIndicator()
-                snapToHalfScreen(taskInfo, SnapPosition.LEFT)
+                snapToHalfScreen(taskInfo, currentDragBounds, SnapPosition.LEFT)
             }
-            DesktopModeVisualIndicator.IndicatorType.TO_SPLIT_RIGHT_INDICATOR -> {
+            IndicatorType.TO_SPLIT_RIGHT_INDICATOR -> {
                 releaseVisualIndicator()
-                snapToHalfScreen(taskInfo, SnapPosition.RIGHT)
+                snapToHalfScreen(taskInfo, currentDragBounds, SnapPosition.RIGHT)
             }
-            DesktopModeVisualIndicator.IndicatorType.NO_INDICATOR -> {
-                // If task bounds are outside valid drag area, snap them inward and perform a
-                // transaction to set bounds.
-                if (
-                    DragPositioningCallbackUtility.snapTaskBoundsIfNecessary(
-                        taskBounds,
-                        validDragArea
-                    )
-                ) {
-                    val wct = WindowContainerTransaction()
-                    wct.setBounds(taskInfo.token, taskBounds)
-                    transitions.startTransition(TRANSIT_CHANGE, wct, null)
-                }
+            IndicatorType.NO_INDICATOR -> {
+                // If task bounds are outside valid drag area, snap them inward
+                DragPositioningCallbackUtility.snapTaskBoundsIfNecessary(
+                    currentDragBounds,
+                    validDragArea
+                )
+
+                // Update task bounds so that the task position will match the position of its leash
+                val wct = WindowContainerTransaction()
+                wct.setBounds(taskInfo.token, currentDragBounds)
+                transitions.startTransition(TRANSIT_CHANGE, wct, null)
+
                 releaseVisualIndicator()
             }
-            DesktopModeVisualIndicator.IndicatorType.TO_DESKTOP_INDICATOR -> {
+            IndicatorType.TO_DESKTOP_INDICATOR -> {
                 throw IllegalArgumentException(
                     "Should not be receiving TO_DESKTOP_INDICATOR for " + "a freeform task."
                 )
