@@ -344,6 +344,15 @@ public abstract class BaseHeadsUpManager implements HeadsUpManager {
     }
 
     protected boolean hasFullScreenIntent(@NonNull NotificationEntry entry) {
+        if (entry == null) {
+            return false;
+        }
+        if (entry.getSbn() == null) {
+            return false;
+        }
+        if (entry.getSbn().getNotification() == null) {
+            return false;
+        }
         return entry.getSbn().getNotification().fullScreenIntent != null;
     }
 
