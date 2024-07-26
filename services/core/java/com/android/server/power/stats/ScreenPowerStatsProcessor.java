@@ -119,6 +119,7 @@ public class ScreenPowerStatsProcessor extends PowerStatsProcessor {
         if (!uids.isEmpty()) {
             computeUidPowerEstimates(stats, uids);
         }
+        mPlan.resetIntermediates();
     }
 
     private void computeDevicePowerEstimates(PowerComponentAggregatedPowerStats stats) {
