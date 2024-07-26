@@ -16,6 +16,7 @@
 
 package com.android.systemui.communal.view.viewmodel
 
+import android.appwidget.AppWidgetProviderInfo
 import android.content.ActivityNotFoundException
 import android.content.ComponentName
 import android.content.Intent
@@ -24,6 +25,9 @@ import android.content.pm.PackageManager
 import android.content.pm.ResolveInfo
 import android.content.pm.UserInfo
 import android.provider.Settings
+import android.view.accessibility.AccessibilityEvent
+import android.view.accessibility.AccessibilityManager
+import android.view.accessibility.accessibilityManager
 import android.widget.RemoteViews
 import androidx.activity.result.ActivityResultLauncher
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -42,7 +46,6 @@ import com.android.systemui.communal.data.repository.fakeCommunalWidgetRepositor
 import com.android.systemui.communal.domain.interactor.CommunalInteractor
 import com.android.systemui.communal.domain.interactor.CommunalSceneInteractor
 import com.android.systemui.communal.domain.interactor.communalInteractor
-import com.android.systemui.communal.domain.interactor.communalPrefsInteractor
 import com.android.systemui.communal.domain.interactor.communalSceneInteractor
 import com.android.systemui.communal.domain.interactor.communalSettingsInteractor
 import com.android.systemui.communal.domain.model.CommunalContentModel
@@ -61,8 +64,6 @@ import com.android.systemui.media.controls.ui.view.MediaHost
 import com.android.systemui.settings.fakeUserTracker
 import com.android.systemui.testKosmos
 import com.android.systemui.user.data.repository.fakeUserRepository
-import com.android.systemui.util.mockito.any
-import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.runTest
@@ -77,8 +78,12 @@ import org.mockito.Mockito
 import org.mockito.Mockito.never
 import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
+import org.mockito.kotlin.any
+import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.eq
+import org.mockito.kotlin.mock
 import org.mockito.kotlin.spy
+import org.mockito.kotlin.whenever
 
 @SmallTest
 @RunWith(AndroidJUnit4::class)
@@ -98,6 +103,7 @@ class CommunalEditModeViewModelTest : SysuiTestCase() {
     private lateinit var mediaRepository: FakeCommunalMediaRepository
     private lateinit var communalSceneInteractor: CommunalSceneInteractor
     private lateinit var communalInteractor: CommunalInteractor
+    private lateinit var accessibilityManager: AccessibilityManager
 
     private val testableResources = context.orCreateTestableResources
 
@@ -119,6 +125,7 @@ class CommunalEditModeViewModelTest : SysuiTestCase() {
             selectedUserIndex = 0,
         )
         kosmos.fakeFeatureFlagsClassic.set(Flags.COMMUNAL_SERVICE_ENABLED, true)
+        accessibilityManager = kosmos.accessibilityManager
 
         underTest =
             CommunalEditModeViewModel(
@@ -130,8 +137,10 @@ class CommunalEditModeViewModelTest : SysuiTestCase() {
                 uiEventLogger,
                 logcatLogBuffer("CommunalEditModeViewModelTest"),
                 kosmos.testDispatcher,
-                kosmos.communalPrefsInteractor,
                 metricsLogger,
+                context,
+                accessibilityManager,
+                packageManager,
             )
     }
 
@@ -354,6 +363,37 @@ class CommunalEditModeViewModelTest : SysuiTestCase() {
         underTest.cleanupEditModeState()
 
         verify(communalInteractor).setScrollPosition(eq(index), eq(offset))
+    }
+
+    @Test
+    fun onNewWidgetAdded_accessibilityDisabled_doNothing() {
+        whenever(accessibilityManager.isEnabled).thenReturn(false)
+
+        val provider =
+            mock<AppWidgetProviderInfo> {
+                on { loadLabel(packageManager) }.thenReturn("Test Clock")
+            }
+        underTest.onNewWidgetAdded(provider)
+
+        verify(accessibilityManager, never()).sendAccessibilityEvent(any())
+    }
+
+    @Test
+    fun onNewWidgetAdded_accessibilityEnabled_sendAccessibilityAnnouncement() {
+        whenever(accessibilityManager.isEnabled).thenReturn(true)
+
+        val provider =
+            mock<AppWidgetProviderInfo> {
+                on { loadLabel(packageManager) }.thenReturn("Test Clock")
+            }
+        underTest.onNewWidgetAdded(provider)
+
+        val captor = argumentCaptor<AccessibilityEvent>()
+        verify(accessibilityManager).sendAccessibilityEvent(captor.capture())
+
+        val event = captor.firstValue
+        assertThat(event.eventType).isEqualTo(AccessibilityEvent.TYPE_ANNOUNCEMENT)
+        assertThat(event.contentDescription).isEqualTo("Test Clock widget added to lock screen")
     }
 
     private companion object {

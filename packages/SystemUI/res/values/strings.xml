@@ -1217,6 +1217,9 @@
     <!-- Label for accessibility action that shows widgets on lock screen on click. [CHAR LIMIT=NONE] -->
     <string name="accessibility_action_open_communal_hub">Widgets on lock screen</string>
 
+    <!-- Label for an accessibility announcement when a widget has been added to the lock screen. [CHAR LIMIT=NONE] -->
+    <string name="accessibility_announcement_communal_widget_added"><xliff:g id="widget_name" example="Calendar month view">%1$s</xliff:g> widget added to lock screen</string>
+
     <!-- Indicator on keyguard to start the communal tutorial. [CHAR LIMIT=100] -->
     <string name="communal_tutorial_indicator_text">Swipe left to start the communal tutorial</string>
 
