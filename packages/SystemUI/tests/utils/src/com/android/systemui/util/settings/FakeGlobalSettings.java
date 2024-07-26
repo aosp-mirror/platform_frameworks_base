@@ -46,7 +46,6 @@ public class FakeGlobalSettings implements GlobalSettings {
         mDispatcher = dispatcher;
     }
 
-    @NonNull
     @Override
     public ContentResolver getContentResolver() {
         throw new UnsupportedOperationException(
@@ -54,7 +53,6 @@ public class FakeGlobalSettings implements GlobalSettings {
                         + "GlobalSettings.registerContentObserver helpful instead.");
     }
 
-    @NonNull
     @Override
     public CoroutineDispatcher getBackgroundDispatcher() {
         return mDispatcher;
@@ -62,7 +60,7 @@ public class FakeGlobalSettings implements GlobalSettings {
 
     @Override
     public void registerContentObserverSync(Uri uri, boolean notifyDescendants,
-            @NonNull ContentObserver settingsObserver) {
+            ContentObserver settingsObserver) {
         List<ContentObserver> observers;
         mContentObserversAllUsers.putIfAbsent(uri.toString(), new ArrayList<>());
         observers = mContentObserversAllUsers.get(uri.toString());
@@ -70,26 +68,25 @@ public class FakeGlobalSettings implements GlobalSettings {
     }
 
     @Override
-    public void unregisterContentObserverSync(@NonNull ContentObserver settingsObserver) {
+    public void unregisterContentObserverSync(ContentObserver settingsObserver) {
         for (Map.Entry<String, List<ContentObserver>> entry :
                 mContentObserversAllUsers.entrySet()) {
             entry.getValue().remove(settingsObserver);
         }
     }
 
-    @NonNull
     @Override
-    public Uri getUriFor(@NonNull String name) {
+    public Uri getUriFor(String name) {
         return Uri.withAppendedPath(CONTENT_URI, name);
     }
 
     @Override
-    public String getString(@NonNull String name) {
+    public String getString(String name) {
         return mValues.get(getUriFor(name).toString());
     }
 
     @Override
-    public boolean putString(@NonNull String name, @NonNull String value) {
+    public boolean putString(String name, String value) {
         return putString(name, value, null, false);
     }
 

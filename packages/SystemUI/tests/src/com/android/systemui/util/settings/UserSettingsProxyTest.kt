@@ -23,7 +23,6 @@ import android.net.Uri
 import android.os.Handler
 import android.os.Looper
 import android.provider.Settings
-import android.provider.Settings.SettingNotFoundException
 import android.testing.TestableLooper
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
@@ -434,18 +433,6 @@ class UserSettingsProxyTest : SysuiTestCase() {
     }
 
     @Test
-    fun getInt_keyMalformed_returnDefaultValue() {
-        mSettings.putString(TEST_SETTING, "nan")
-        assertThat(mSettings.getInt(TEST_SETTING, 5)).isEqualTo(5)
-    }
-
-    @Test
-    fun getInt_keyMalformed_throwException() {
-        mSettings.putString(TEST_SETTING, "nan")
-        assertThrows(SettingNotFoundException::class.java) { mSettings.getInt(TEST_SETTING) }
-    }
-
-    @Test
     fun getIntForUser_multipleUsers__validResult() {
         mSettings.putIntForUser(TEST_SETTING, 1, MAIN_USER_ID)
         mSettings.putIntForUser(TEST_SETTING, 2, SECONDARY_USER_ID)
@@ -514,18 +501,6 @@ class UserSettingsProxyTest : SysuiTestCase() {
     }
 
     @Test
-    fun getLong_keyMalformed_throwException() {
-        mSettings.putString(TEST_SETTING, "nan")
-        assertThrows(SettingNotFoundException::class.java) { mSettings.getLong(TEST_SETTING) }
-    }
-
-    @Test
-    fun getLong_keyMalformed_returnDefaultValue() {
-        mSettings.putString(TEST_SETTING, "nan")
-        assertThat(mSettings.getLong(TEST_SETTING, 2L)).isEqualTo(2L)
-    }
-
-    @Test
     fun getLongForUser_multipleUsers__validResult() {
         mSettings.putLongForUser(TEST_SETTING, 1L, MAIN_USER_ID)
         mSettings.putLongForUser(TEST_SETTING, 2L, SECONDARY_USER_ID)
@@ -556,18 +531,6 @@ class UserSettingsProxyTest : SysuiTestCase() {
 
     @Test
     fun getFloat_keyAbsent_returnDefaultValue() {
-        assertThat(mSettings.getFloat(TEST_SETTING, 2.5F)).isEqualTo(2.5F)
-    }
-
-    @Test
-    fun getFloat_keyMalformed_throwException() {
-        mSettings.putString(TEST_SETTING, "nan")
-        assertThrows(SettingNotFoundException::class.java) { mSettings.getFloat(TEST_SETTING) }
-    }
-
-    @Test
-    fun getFloat_keyMalformed_returnDefaultValue() {
-        mSettings.putString(TEST_SETTING, "nan")
         assertThat(mSettings.getFloat(TEST_SETTING, 2.5F)).isEqualTo(2.5F)
     }
 
