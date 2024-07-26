@@ -19,12 +19,10 @@
 
 package com.android.systemui.statusbar.notification.stack.ui.viewmodel
 
-import android.platform.test.annotations.DisableFlags
 import android.platform.test.annotations.EnableFlags
 import android.platform.test.flag.junit.FlagsParameterization
 import androidx.test.filters.SmallTest
 import com.android.compose.animation.scene.ObservableTransitionState
-import com.android.systemui.Flags.FLAG_CENTRALIZED_STATUS_BAR_HEIGHT_FIX
 import com.android.systemui.Flags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.bouncer.data.repository.keyguardBouncerRepository
@@ -38,8 +36,8 @@ import com.android.systemui.flags.BrokenWithSceneContainer
 import com.android.systemui.flags.DisableSceneContainer
 import com.android.systemui.flags.EnableSceneContainer
 import com.android.systemui.flags.Flags
-import com.android.systemui.flags.andSceneContainer
 import com.android.systemui.flags.fakeFeatureFlagsClassic
+import com.android.systemui.flags.parameterizeSceneContainerFlag
 import com.android.systemui.keyguard.data.repository.fakeKeyguardRepository
 import com.android.systemui.keyguard.data.repository.fakeKeyguardTransitionRepository
 import com.android.systemui.keyguard.domain.interactor.keyguardInteractor
@@ -89,10 +87,7 @@ class SharedNotificationContainerViewModelTest(flags: FlagsParameterization) : S
         @JvmStatic
         @Parameters(name = "{0}")
         fun getParams(): List<FlagsParameterization> {
-            return FlagsParameterization.allCombinationsOf(
-                    FLAG_CENTRALIZED_STATUS_BAR_HEIGHT_FIX,
-                )
-                .andSceneContainer()
+            return parameterizeSceneContainerFlag()
         }
     }
 
@@ -177,25 +172,6 @@ class SharedNotificationContainerViewModelTest(flags: FlagsParameterization) : S
         }
 
     @Test
-    @DisableFlags(FLAG_CENTRALIZED_STATUS_BAR_HEIGHT_FIX)
-    fun validatePaddingTopInSplitShade_refactorFlagOff_usesLargeHeaderResource() =
-        testScope.runTest {
-            whenever(largeScreenHeaderHelper.getLargeScreenHeaderHeight()).thenReturn(5)
-            overrideResource(R.bool.config_use_split_notification_shade, true)
-            overrideResource(R.bool.config_use_large_screen_shade_header, true)
-            overrideResource(R.dimen.large_screen_shade_header_height, 10)
-            overrideResource(R.dimen.keyguard_split_shade_top_margin, 50)
-
-            val paddingTop by collectLastValue(underTest.paddingTopDimen)
-
-            configurationRepository.onAnyConfigurationChange()
-
-            // Should directly use the header height (flagged off value)
-            assertThat(paddingTop).isEqualTo(10)
-        }
-
-    @Test
-    @EnableFlags(FLAG_CENTRALIZED_STATUS_BAR_HEIGHT_FIX)
     fun validatePaddingTopInSplitShade_refactorFlagOn_usesLargeHeaderHelper() =
         testScope.runTest {
             whenever(largeScreenHeaderHelper.getLargeScreenHeaderHeight()).thenReturn(5)
@@ -267,49 +243,8 @@ class SharedNotificationContainerViewModelTest(flags: FlagsParameterization) : S
         }
 
     @Test
-    @DisableFlags(FLAG_CENTRALIZED_STATUS_BAR_HEIGHT_FIX)
     @DisableSceneContainer
-    fun validateMarginTopWithLargeScreenHeader_refactorFlagOff_usesResource() =
-        testScope.runTest {
-            val headerResourceHeight = 50
-            val headerHelperHeight = 100
-            whenever(largeScreenHeaderHelper.getLargeScreenHeaderHeight())
-                .thenReturn(headerHelperHeight)
-            overrideResource(R.bool.config_use_large_screen_shade_header, true)
-            overrideResource(R.dimen.large_screen_shade_header_height, headerResourceHeight)
-            overrideResource(R.dimen.notification_panel_margin_top, 0)
-
-            val dimens by collectLastValue(underTest.configurationBasedDimensions)
-
-            configurationRepository.onAnyConfigurationChange()
-
-            assertThat(dimens!!.marginTop).isEqualTo(headerResourceHeight)
-        }
-
-    @Test
-    @DisableFlags(FLAG_CENTRALIZED_STATUS_BAR_HEIGHT_FIX)
-    @EnableSceneContainer
-    fun validateMarginTopWithLargeScreenHeader_refactorFlagOff_sceneContainerFlagOn_stillZero() =
-        testScope.runTest {
-            val headerResourceHeight = 50
-            val headerHelperHeight = 100
-            whenever(largeScreenHeaderHelper.getLargeScreenHeaderHeight())
-                .thenReturn(headerHelperHeight)
-            overrideResource(R.bool.config_use_large_screen_shade_header, true)
-            overrideResource(R.dimen.large_screen_shade_header_height, headerResourceHeight)
-            overrideResource(R.dimen.notification_panel_margin_top, 0)
-
-            val dimens by collectLastValue(underTest.configurationBasedDimensions)
-
-            configurationRepository.onAnyConfigurationChange()
-
-            assertThat(dimens!!.marginTop).isEqualTo(0)
-        }
-
-    @Test
-    @DisableSceneContainer
-    @EnableFlags(FLAG_CENTRALIZED_STATUS_BAR_HEIGHT_FIX)
-    fun validateMarginTopWithLargeScreenHeader_refactorFlagOn_usesHelper() =
+    fun validateMarginTopWithLargeScreenHeader_usesHelper() =
         testScope.runTest {
             val headerResourceHeight = 50
             val headerHelperHeight = 100
@@ -328,7 +263,6 @@ class SharedNotificationContainerViewModelTest(flags: FlagsParameterization) : S
 
     @Test
     @EnableSceneContainer
-    @EnableFlags(FLAG_CENTRALIZED_STATUS_BAR_HEIGHT_FIX)
     fun validateMarginTopWithLargeScreenHeader_sceneContainerFlagOn_stillZero() =
         testScope.runTest {
             val headerResourceHeight = 50
@@ -626,44 +560,8 @@ class SharedNotificationContainerViewModelTest(flags: FlagsParameterization) : S
         }
 
     @Test
-    @DisableFlags(FLAG_CENTRALIZED_STATUS_BAR_HEIGHT_FIX)
     @DisableSceneContainer
-    fun boundsOnLockscreenInSplitShade_refactorFlagOff_usesLargeHeaderResource() =
-        testScope.runTest {
-            val bounds by collectLastValue(underTest.bounds)
-
-            // When in split shade
-            whenever(largeScreenHeaderHelper.getLargeScreenHeaderHeight()).thenReturn(5)
-            overrideResource(R.bool.config_use_split_notification_shade, true)
-            overrideResource(R.bool.config_use_large_screen_shade_header, true)
-            overrideResource(R.dimen.large_screen_shade_header_height, 10)
-            overrideResource(R.dimen.keyguard_split_shade_top_margin, 50)
-
-            configurationRepository.onAnyConfigurationChange()
-            runCurrent()
-
-            // Start on lockscreen
-            showLockscreen()
-
-            keyguardInteractor.setNotificationContainerBounds(
-                NotificationContainerBounds(top = 1f, bottom = 52f)
-            )
-            runCurrent()
-
-            // Top should be equal to bounds (1) - padding adjustment (10)
-            assertThat(bounds)
-                .isEqualTo(
-                    NotificationContainerBounds(
-                        top = -9f,
-                        bottom = 2f,
-                    )
-                )
-        }
-
-    @Test
-    @EnableFlags(FLAG_CENTRALIZED_STATUS_BAR_HEIGHT_FIX)
-    @DisableSceneContainer
-    fun boundsOnLockscreenInSplitShade_refactorFlagOn_usesLargeHeaderHelper() =
+    fun boundsOnLockscreenInSplitShade_usesLargeHeaderHelper() =
         testScope.runTest {
             val bounds by collectLastValue(underTest.bounds)
 
