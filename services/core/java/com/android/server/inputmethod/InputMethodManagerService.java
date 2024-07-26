@@ -474,6 +474,9 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
         IInputMethodSession mSession;
         InputChannel mChannel;
 
+        @UserIdInt
+        final int mUserId;
+
         @Override
         public String toString() {
             return "SessionState{uid=" + mClient.mUid + " pid=" + mClient.mPid
@@ -482,15 +485,17 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
                     + " session=" + Integer.toHexString(
                     System.identityHashCode(mSession))
                     + " channel=" + mChannel
+                    + " userId=" + mUserId
                     + "}";
         }
 
         SessionState(ClientState client, IInputMethodInvoker method,
-                IInputMethodSession session, InputChannel channel) {
+                IInputMethodSession session, InputChannel channel, @UserIdInt int userId) {
             mClient = client;
             mMethod = method;
             mSession = session;
             mChannel = channel;
+            mUserId = userId;
         }
     }
 
@@ -2349,7 +2354,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
                     if (userData.mCurClient != null) {
                         clearClientSessionLocked(userData.mCurClient);
                         userData.mCurClient.mCurSession = new SessionState(
-                                userData.mCurClient, method, session, channel);
+                                userData.mCurClient, method, session, channel, userId);
                         InputBindResult res = attachNewInputLocked(
                                 StartInputReason.SESSION_CREATED_BY_IME, true, userId);
                         attachNewAccessibilityLocked(StartInputReason.SESSION_CREATED_BY_IME, true,
@@ -2490,9 +2495,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
                     sessionState.mSession.finishSession();
                 } catch (RemoteException e) {
                     Slog.w(TAG, "Session failed to close due to remote exception", e);
-                    // TODO(b/350386877): Propagate userId from the caller or infer it from
-                    //  sessionState
-                    final int userId = mCurrentUserId;
+                    final int userId = sessionState.mUserId;
                     final var bindingController = getInputMethodBindingController(userId);
                     updateSystemUiLocked(0 /* vis */, bindingController.getBackDisposition(),
                             userId);
