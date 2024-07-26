@@ -26,9 +26,7 @@ import android.os.UserHandle;
 import android.util.Pair;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.VisibleForTesting;
 
-import com.android.systemui.settings.FakeUserTracker;
 import com.android.systemui.settings.UserTracker;
 
 import kotlinx.coroutines.CoroutineDispatcher;
@@ -44,7 +42,6 @@ public class FakeSettings implements SecureSettings, SystemSettings {
             new HashMap<>();
     private final Map<String, List<ContentObserver>> mContentObserversAllUsers = new HashMap<>();
     private final CoroutineDispatcher mDispatcher;
-    private final UserTracker mUserTracker;
 
     public static final Uri CONTENT_URI = Uri.parse("content://settings/fake");
     @UserIdInt
@@ -57,55 +54,42 @@ public class FakeSettings implements SecureSettings, SystemSettings {
     @Deprecated
     public FakeSettings() {
         mDispatcher = StandardTestDispatcher(/* scheduler = */ null, /* name = */ null);
-        mUserTracker = new FakeUserTracker();
     }
 
     public FakeSettings(CoroutineDispatcher dispatcher) {
         mDispatcher = dispatcher;
-        mUserTracker = new FakeUserTracker();
     }
 
-    public FakeSettings(CoroutineDispatcher dispatcher, UserTracker userTracker) {
-        mDispatcher = dispatcher;
-        mUserTracker = userTracker;
-    }
-
-    @VisibleForTesting
-    FakeSettings(String initialKey, String initialValue) {
-        this();
+    public FakeSettings(String initialKey, String initialValue) {
+        mDispatcher = StandardTestDispatcher(/* scheduler = */ null, /* name = */ null);
         putString(initialKey, initialValue);
     }
 
-    @VisibleForTesting
-    FakeSettings(Map<String, String> initialValues) {
-        this();
+    public FakeSettings(Map<String, String> initialValues) {
+        mDispatcher = StandardTestDispatcher(/* scheduler = */ null, /* name = */ null);
         for (Map.Entry<String, String> kv : initialValues.entrySet()) {
             putString(kv.getKey(), kv.getValue());
         }
     }
 
     @Override
-    @NonNull
     public ContentResolver getContentResolver() {
-        throw new UnsupportedOperationException(
-                "FakeSettings.getContentResolver is not implemented");
+        return null;
     }
 
-    @NonNull
     @Override
     public UserTracker getUserTracker() {
-        return mUserTracker;
+        return null;
     }
 
-    @NonNull
     @Override
     public CoroutineDispatcher getBackgroundDispatcher() {
         return mDispatcher;
     }
 
     @Override
-    public void registerContentObserverForUserSync(@NonNull Uri uri, boolean notifyDescendants,
-            @NonNull ContentObserver settingsObserver, int userHandle) {
+    public void registerContentObserverForUserSync(Uri uri, boolean notifyDescendants,
+            ContentObserver settingsObserver, int userHandle) {
         List<ContentObserver> observers;
         if (userHandle == UserHandle.USER_ALL) {
             mContentObserversAllUsers.putIfAbsent(uri.toString(), new ArrayList<>());
@@ -119,18 +103,19 @@ public class FakeSettings implements SecureSettings, SystemSettings {
     }
 
     @Override
-    public void unregisterContentObserverSync(@NonNull ContentObserver settingsObserver) {
-        for (List<ContentObserver> observers : mContentObservers.values()) {
+    public void unregisterContentObserverSync(ContentObserver settingsObserver) {
+        for (SettingsKey key : mContentObservers.keySet()) {
+            List<ContentObserver> observers = mContentObservers.get(key);
             observers.remove(settingsObserver);
         }
-        for (List<ContentObserver> observers : mContentObserversAllUsers.values()) {
+        for (String key : mContentObserversAllUsers.keySet()) {
+            List<ContentObserver> observers = mContentObserversAllUsers.get(key);
             observers.remove(settingsObserver);
         }
     }
 
-    @NonNull
     @Override
-    public Uri getUriFor(@NonNull String name) {
+    public Uri getUriFor(String name) {
         return Uri.withAppendedPath(CONTENT_URI, name);
     }
 
@@ -144,34 +129,33 @@ public class FakeSettings implements SecureSettings, SystemSettings {
     }
 
     @Override
-    public String getString(@NonNull String name) {
+    public String getString(String name) {
         return getStringForUser(name, getUserId());
     }
 
     @Override
-    public String getStringForUser(@NonNull String name, int userHandle) {
+    public String getStringForUser(String name, int userHandle) {
         return mValues.get(new SettingsKey(userHandle, getUriFor(name).toString()));
     }
 
     @Override
-    public boolean putString(@NonNull String name, @NonNull String value,
-            boolean overrideableByRestore) {
+    public boolean putString(String name, String value, boolean overrideableByRestore) {
         return putStringForUser(name, value, null, false, getUserId(), overrideableByRestore);
     }
 
     @Override
-    public boolean putString(@NonNull String name, @NonNull String value) {
+    public boolean putString(String name, String value) {
         return putString(name, value, false);
     }
 
     @Override
-    public boolean putStringForUser(@NonNull String name, @NonNull String value, int userHandle) {
+    public boolean putStringForUser(String name, String value, int userHandle) {
         return putStringForUser(name, value, null, false, userHandle, false);
     }
 
     @Override
-    public boolean putStringForUser(@NonNull String name, @NonNull String value, String tag,
-            boolean makeDefault, int userHandle, boolean overrideableByRestore) {
+    public boolean putStringForUser(String name, String value, String tag, boolean makeDefault,
+            int userHandle, boolean overrideableByRestore) {
         SettingsKey key = new SettingsKey(userHandle, getUriFor(name).toString());
         mValues.put(key, value);
 
@@ -187,8 +171,7 @@ public class FakeSettings implements SecureSettings, SystemSettings {
     }
 
     @Override
-    public boolean putString(@NonNull String name, @NonNull String value, @NonNull String tag,
-            boolean makeDefault) {
+    public boolean putString(@NonNull String name, String value, String tag, boolean makeDefault) {
         return putString(name, value);
     }
 

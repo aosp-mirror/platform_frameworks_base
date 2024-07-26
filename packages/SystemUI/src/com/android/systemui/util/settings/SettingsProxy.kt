@@ -336,7 +336,7 @@ interface SettingsProxy {
      * @param name to look up in the table
      * @return the corresponding value, or null if not present
      */
-    fun getString(name: String): String?
+    fun getString(name: String): String
 
     /**
      * Store a name/value pair into the database.
@@ -385,15 +385,15 @@ interface SettingsProxy {
      * an integer.
      *
      * @param name The name of the setting to retrieve.
-     * @param default Value to return if the setting is not defined.
-     * @return The setting's current value, or default if it is not defined or not a valid integer.
+     * @param def Value to return if the setting is not defined.
+     * @return The setting's current value, or 'def' if it is not defined or not a valid integer.
      */
-    fun getInt(name: String, default: Int): Int {
+    fun getInt(name: String, def: Int): Int {
         val v = getString(name)
         return try {
-            v?.toInt() ?: default
+            v.toInt()
         } catch (e: NumberFormatException) {
-            default
+            def
         }
     }
 
@@ -412,7 +412,7 @@ interface SettingsProxy {
      */
     @Throws(SettingNotFoundException::class)
     fun getInt(name: String): Int {
-        val v = getString(name) ?: throw SettingNotFoundException(name)
+        val v = getString(name)
         return try {
             v.toInt()
         } catch (e: NumberFormatException) {
@@ -441,11 +441,11 @@ interface SettingsProxy {
      * boolean.
      *
      * @param name The name of the setting to retrieve.
-     * @param default Value to return if the setting is not defined.
-     * @return The setting's current value, or default if it is not defined or not a valid boolean.
+     * @param def Value to return if the setting is not defined.
+     * @return The setting's current value, or 'def' if it is not defined or not a valid boolean.
      */
-    fun getBool(name: String, default: Boolean): Boolean {
-        return getInt(name, if (default) 1 else 0) != 0
+    fun getBool(name: String, def: Boolean): Boolean {
+        return getInt(name, if (def) 1 else 0) != 0
     }
 
     /**
@@ -579,12 +579,13 @@ interface SettingsProxy {
     companion object {
         /** Convert a string to a long, or uses a default if the string is malformed or null */
         @JvmStatic
-        fun parseLongOrUseDefault(valString: String?, default: Long): Long {
-            val value: Long =
+        fun parseLongOrUseDefault(valString: String, def: Long): Long {
+            val value: Long
+            value =
                 try {
-                    valString?.toLong() ?: default
+                    valString.toLong()
                 } catch (e: NumberFormatException) {
-                    default
+                    def
                 }
             return value
         }
