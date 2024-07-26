@@ -50,6 +50,11 @@ public class FakeSettings implements SecureSettings, SystemSettings {
     @UserIdInt
     private int mUserId = UserHandle.USER_CURRENT;
 
+    /**
+     * @deprecated Please use FakeSettings(testDispatcher) to provide the same dispatcher used
+     * by main test scope.
+     */
+    @Deprecated
     public FakeSettings() {
         mDispatcher = StandardTestDispatcher(/* scheduler = */ null, /* name = */ null);
         mUserTracker = new FakeUserTracker();

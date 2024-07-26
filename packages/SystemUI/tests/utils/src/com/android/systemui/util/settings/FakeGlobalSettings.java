@@ -38,6 +38,11 @@ public class FakeGlobalSettings implements GlobalSettings {
 
     public static final Uri CONTENT_URI = Uri.parse("content://settings/fake_global");
 
+    /**
+     * @deprecated Please use FakeGlobalSettings(testDispatcher) to provide the same dispatcher used
+     * by main test scope.
+     */
+    @Deprecated
     public FakeGlobalSettings() {
         mDispatcher = StandardTestDispatcher(/* scheduler = */ null, /* name = */ null);
     }
