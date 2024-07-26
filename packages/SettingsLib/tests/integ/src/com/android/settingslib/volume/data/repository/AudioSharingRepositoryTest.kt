@@ -131,6 +131,10 @@ class AudioSharingRepositoryTest {
         `when`(deviceManager.findDevice(device2)).thenReturn(cachedDevice2)
         `when`(receiveState.bisSyncState).thenReturn(arrayListOf(TEST_RECEIVE_STATE_CONTENT))
         `when`(assistant.getAllSources(any())).thenReturn(listOf(receiveState))
+        Settings.Secure.putInt(
+            contentResolver,
+            BluetoothUtils.getPrimaryGroupIdUriForBroadcast(),
+            TEST_GROUP_ID_INVALID)
         underTest =
             AudioSharingRepositoryImpl(
                 contentResolver,
@@ -152,6 +156,22 @@ class AudioSharingRepositoryTest {
             runCurrent()
 
             Truth.assertThat(states).containsExactly(true, false, true)
+        }
+    }
+
+    @Test
+    fun primaryGroupIdChange_emitValues() {
+        testScope.runTest {
+            val groupIds = mutableListOf<Int?>()
+            underTest.primaryGroupId.onEach { groupIds.add(it) }.launchIn(backgroundScope)
+            runCurrent()
+            triggerContentObserverChange()
+            runCurrent()
+
+            Truth.assertThat(groupIds)
+                .containsExactly(
+                    TEST_GROUP_ID_INVALID,
+                    TEST_GROUP_ID2)
         }
     }
 
@@ -217,7 +237,7 @@ class AudioSharingRepositoryTest {
     fun setSecondaryVolume_setValue() {
         testScope.runTest {
             Settings.Secure.putInt(
-                context.contentResolver,
+                contentResolver,
                 BluetoothUtils.getPrimaryGroupIdUriForBroadcast(),
                 TEST_GROUP_ID2)
             `when`(assistant.allConnectedDevices).thenReturn(listOf(device1, device2))
@@ -248,7 +268,7 @@ class AudioSharingRepositoryTest {
     private fun triggerSourceAdded() {
         verify(assistant).registerServiceCallBack(any(), assistantCallbackCaptor.capture())
         Settings.Secure.putInt(
-            context.contentResolver,
+            contentResolver,
             BluetoothUtils.getPrimaryGroupIdUriForBroadcast(),
             TEST_GROUP_ID1)
         `when`(assistant.allConnectedDevices).thenReturn(listOf(device1, device2))
@@ -259,7 +279,7 @@ class AudioSharingRepositoryTest {
         verify(assistant).registerServiceCallBack(any(), assistantCallbackCaptor.capture())
         `when`(assistant.allConnectedDevices).thenReturn(listOf(device1))
         Settings.Secure.putInt(
-            context.contentResolver,
+            contentResolver,
             BluetoothUtils.getPrimaryGroupIdUriForBroadcast(),
             TEST_GROUP_ID1)
         assistantCallbackCaptor.value.sourceRemoved(device2)
@@ -269,7 +289,7 @@ class AudioSharingRepositoryTest {
         verify(eventManager).registerCallback(btCallbackCaptor.capture())
         `when`(assistant.allConnectedDevices).thenReturn(listOf(device1))
         Settings.Secure.putInt(
-            context.contentResolver,
+            contentResolver,
             BluetoothUtils.getPrimaryGroupIdUriForBroadcast(),
             TEST_GROUP_ID1)
         btCallbackCaptor.value.onProfileConnectionStateChanged(cachedDevice2, state, profile)
@@ -283,7 +303,7 @@ class AudioSharingRepositoryTest {
                 contentObserverCaptor.capture())
         `when`(assistant.allConnectedDevices).thenReturn(listOf(device1, device2))
         Settings.Secure.putInt(
-            context.contentResolver,
+            contentResolver,
             BluetoothUtils.getPrimaryGroupIdUriForBroadcast(),
             TEST_GROUP_ID2)
         contentObserverCaptor.value.primaryChanged()
