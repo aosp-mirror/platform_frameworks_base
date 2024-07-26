@@ -60,7 +60,6 @@ import android.view.WindowManager;
 import com.android.internal.policy.IKeyguardDismissCallback;
 import com.android.server.inputmethod.InputMethodManagerInternal;
 import com.android.server.policy.WindowManagerPolicy;
-import com.android.window.flags.Flags;
 
 import java.io.PrintWriter;
 
@@ -232,19 +231,13 @@ class KeyguardController {
                 state.mDismissalRequested = false;
             }
             if (goingAwayRemoved
-                    || (Flags.keyguardAppearTransition() && keyguardShowing
-                            && !Display.isOffState(dc.getDisplayInfo().state))) {
+                    || (keyguardShowing && !Display.isOffState(dc.getDisplayInfo().state))) {
                 // Keyguard decided to show or stopped going away. Send a transition to animate back
                 // to the locked state before holding the sleep token again
-                final DisplayContent transitionDc = Flags.keyguardAppearTransition()
-                        ? dc
-                        : mRootWindowContainer.getDefaultDisplay();
-                transitionDc.requestTransitionAndLegacyPrepare(
+                dc.requestTransitionAndLegacyPrepare(
                         TRANSIT_TO_FRONT, TRANSIT_FLAG_KEYGUARD_APPEARING);
-                if (Flags.keyguardAppearTransition()) {
-                    dc.mWallpaperController.adjustWallpaperWindows();
-                }
-                transitionDc.executeAppTransition();
+                dc.mWallpaperController.adjustWallpaperWindows();
+                dc.executeAppTransition();
             }
         }
 
