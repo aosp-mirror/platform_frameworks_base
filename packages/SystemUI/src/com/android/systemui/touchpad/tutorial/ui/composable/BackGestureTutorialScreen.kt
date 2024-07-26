@@ -21,7 +21,9 @@ import android.graphics.PorterDuff
 import android.graphics.PorterDuffColorFilter
 import androidx.activity.compose.BackHandler
 import androidx.annotation.StringRes
-import androidx.compose.foundation.background
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -40,6 +42,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.input.pointer.pointerInteropFilter
@@ -63,6 +66,7 @@ import com.android.systemui.touchpad.tutorial.ui.gesture.TouchpadGestureHandler
 
 data class TutorialScreenColors(
     val backgroundColor: Color,
+    val successBackgroundColor: Color,
     val titleColor: Color,
     val animationProperties: LottieDynamicProperties
 )
@@ -100,6 +104,7 @@ private fun rememberScreenColors(): TutorialScreenColors {
     val onTertiaryFixed = LocalAndroidColorScheme.current.onTertiaryFixed
     val onTertiaryFixedVariant = LocalAndroidColorScheme.current.onTertiaryFixedVariant
     val tertiaryFixedDim = LocalAndroidColorScheme.current.tertiaryFixedDim
+    val surfaceContainer = MaterialTheme.colorScheme.surfaceContainer
     val dynamicProperties =
         rememberLottieDynamicProperties(
             rememberColorFilterProperty(".tertiaryFixedDim", tertiaryFixedDim),
@@ -108,9 +113,10 @@ private fun rememberScreenColors(): TutorialScreenColors {
             rememberColorFilterProperty(".onTertiaryFixedVariant", onTertiaryFixedVariant)
         )
     val screenColors =
-        remember(onTertiaryFixed, tertiaryFixedDim, dynamicProperties) {
+        remember(onTertiaryFixed, surfaceContainer, tertiaryFixedDim, dynamicProperties) {
             TutorialScreenColors(
                 backgroundColor = onTertiaryFixed,
+                successBackgroundColor = surfaceContainer,
                 titleColor = tertiaryFixedDim,
                 animationProperties = dynamicProperties,
             )
@@ -124,11 +130,19 @@ private fun GestureTutorialContent(
     onDoneButtonClicked: () -> Unit,
     screenColors: TutorialScreenColors
 ) {
+    val animatedColor by
+        animateColorAsState(
+            targetValue =
+                if (gestureDone) screenColors.successBackgroundColor
+                else screenColors.backgroundColor,
+            animationSpec = tween(durationMillis = 150, easing = LinearEasing),
+            label = "backgroundColor"
+        )
     Column(
         verticalArrangement = Arrangement.Center,
         modifier =
             Modifier.fillMaxSize()
-                .background(color = screenColors.backgroundColor)
+                .drawBehind { drawRect(animatedColor) }
                 .padding(start = 48.dp, top = 124.dp, end = 48.dp, bottom = 48.dp)
     ) {
         Row(modifier = Modifier.fillMaxWidth().weight(1f)) {

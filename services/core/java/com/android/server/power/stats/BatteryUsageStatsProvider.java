@@ -110,8 +110,13 @@ public class BatteryUsageStatsProvider {
                 if (!mPowerStatsExporterEnabled.get(BatteryConsumer.POWER_COMPONENT_VIDEO)) {
                     mPowerCalculators.add(new VideoPowerCalculator(mPowerProfile));
                 }
-                mPowerCalculators.add(new ScreenPowerCalculator(mPowerProfile));
-                mPowerCalculators.add(new AmbientDisplayPowerCalculator(mPowerProfile));
+                if (!mPowerStatsExporterEnabled.get(BatteryConsumer.POWER_COMPONENT_SCREEN)) {
+                    mPowerCalculators.add(new ScreenPowerCalculator(mPowerProfile));
+                }
+                if (!mPowerStatsExporterEnabled.get(
+                        BatteryConsumer.POWER_COMPONENT_AMBIENT_DISPLAY)) {
+                    mPowerCalculators.add(new AmbientDisplayPowerCalculator(mPowerProfile));
+                }
                 mPowerCalculators.add(new IdlePowerCalculator(mPowerProfile));
                 if (!mPowerStatsExporterEnabled.get(BatteryConsumer.POWER_COMPONENT_ANY)) {
                     mPowerCalculators.add(new CustomEnergyConsumerPowerCalculator(mPowerProfile));

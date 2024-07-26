@@ -105,8 +105,6 @@ constructor(
     }
 
     companion object {
-        // TODO(b/354930838): Use the icon from the call notification instead of hard-coding the
-        // icon to always be a phone.
         private val phoneIcon =
             Icon.Resource(
                 com.android.internal.R.drawable.ic_phone,

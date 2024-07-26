@@ -14,11 +14,21 @@
  * limitations under the License.
  */
 
-package com.android.systemui.qs.panels.domain.interactor
+package com.android.systemui.statusbar.policy.ui.dialog.viewmodel
 
+import android.content.mockedContext
 import com.android.systemui.kosmos.Kosmos
-import com.android.systemui.qs.panels.ui.compose.PartitionedGridLayout
-import com.android.systemui.qs.panels.ui.viewmodel.partitionedGridViewModel
+import com.android.systemui.kosmos.testDispatcher
+import com.android.systemui.statusbar.policy.domain.interactor.zenModeInteractor
+import com.android.systemui.statusbar.policy.ui.dialog.modesDialogDelegate
+import javax.inject.Provider
 
-val Kosmos.partitionedGridLayout by
-    Kosmos.Fixture { PartitionedGridLayout(partitionedGridViewModel) }
+val Kosmos.modesDialogViewModel: ModesDialogViewModel by
+    Kosmos.Fixture {
+        ModesDialogViewModel(
+            mockedContext,
+            zenModeInteractor,
+            testDispatcher,
+            Provider { modesDialogDelegate }.get(),
+        )
+    }

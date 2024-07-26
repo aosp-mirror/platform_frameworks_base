@@ -228,7 +228,7 @@ class SaveImageInBackgroundTaskTest : SysuiTestCase() {
             )
         val quickSharePendingIntent =
             quickShareAction.actionIntent.intent.extras!!.getParcelable(
-                ScreenshotController.EXTRA_ACTION_INTENT,
+                SmartActionsReceiver.EXTRA_ACTION_INTENT,
                 PendingIntent::class.java
             )
 
@@ -266,7 +266,7 @@ class SaveImageInBackgroundTaskTest : SysuiTestCase() {
         assertEquals(
             immutablePendingIntent,
             quickShareAction.actionIntent.intent.extras!!.getParcelable(
-                ScreenshotController.EXTRA_ACTION_INTENT,
+                SmartActionsReceiver.EXTRA_ACTION_INTENT,
                 PendingIntent::class.java
             )
         )

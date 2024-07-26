@@ -1603,7 +1603,7 @@ public class VibratorManagerServiceTest {
     @Test
     @RequiresFlagsEnabled(android.os.vibrator.Flags.FLAG_VENDOR_VIBRATION_EFFECTS)
     public void vibrate_vendorEffectsWithPermission_successful() throws Exception {
-        // Deny permission to vibrate with vendor effects
+        // Grant permission to vibrate with vendor effects
         grantPermission(android.Manifest.permission.VIBRATE_VENDOR_EFFECTS);
         mockVibrators(1);
         FakeVibratorControllerProvider fakeVibrator = mVibratorProviders.get(1);
@@ -1767,6 +1767,9 @@ public class VibratorManagerServiceTest {
     })
     public void vibrate_withIntensitySettingsAndAdaptiveHaptics_appliesSettingsToVendorEffects()
             throws Exception {
+        // Grant permission to vibrate with vendor effects
+        grantPermission(android.Manifest.permission.VIBRATE_VENDOR_EFFECTS);
+
         setUserSetting(Settings.System.NOTIFICATION_VIBRATION_INTENSITY,
                 Vibrator.VIBRATION_INTENSITY_LOW);
 
@@ -1789,7 +1792,7 @@ public class VibratorManagerServiceTest {
 
         assertThat(fakeVibrator.getAllVendorEffects()).hasSize(1);
         VibrationEffect.VendorEffect scaled = fakeVibrator.getAllVendorEffects().get(0);
-        assertThat(scaled.getEffectStrength()).isEqualTo(VibrationEffect.EFFECT_STRENGTH_STRONG);
+        assertThat(scaled.getEffectStrength()).isEqualTo(VibrationEffect.EFFECT_STRENGTH_LIGHT);
         assertThat(scaled.getLinearScale()).isEqualTo(0.4f);
     }
 

@@ -16,11 +16,13 @@
 
 package com.android.server.accessibility.a11ychecker;
 
+import static com.android.server.accessibility.a11ychecker.TestUtils.QUALIFIED_TEST_ACTIVITY_NAME;
 import static com.android.server.accessibility.a11ychecker.TestUtils.TEST_A11Y_SERVICE_CLASS_NAME;
 import static com.android.server.accessibility.a11ychecker.TestUtils.TEST_A11Y_SERVICE_SOURCE_PACKAGE_NAME;
+import static com.android.server.accessibility.a11ychecker.TestUtils.TEST_ACTIVITY_NAME;
+import static com.android.server.accessibility.a11ychecker.TestUtils.TEST_APP_PACKAGE_NAME;
 import static com.android.server.accessibility.a11ychecker.TestUtils.createAtom;
 import static com.android.server.accessibility.a11ychecker.TestUtils.getMockPackageManagerWithInstalledApps;
-import static com.android.server.accessibility.a11ychecker.TestUtils.getTestAccessibilityEvent;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -28,7 +30,6 @@ import static org.mockito.Mockito.when;
 
 import android.content.ComponentName;
 import android.content.pm.PackageManager;
-import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
 
 import androidx.test.runner.AndroidJUnit4;
@@ -138,11 +139,15 @@ public class AccessibilityCheckerUtilsTest {
     }
 
     @Test
-    public void getActivityName_hasWindowStateChangedEvent_returnsActivityName() {
-        AccessibilityEvent accessibilityEvent = getTestAccessibilityEvent();
-
+    public void getActivityName_hasValidActivityClassName_returnsActivityName() {
         assertThat(AccessibilityCheckerUtils.getActivityName(mMockPackageManager,
-                accessibilityEvent)).isEqualTo("MainActivity");
+                TEST_APP_PACKAGE_NAME, QUALIFIED_TEST_ACTIVITY_NAME)).isEqualTo(TEST_ACTIVITY_NAME);
+    }
+
+    @Test
+    public void getActivityName_hasInvalidActivityClassName_returnsActivityName() {
+        assertThat(AccessibilityCheckerUtils.getActivityName(mMockPackageManager,
+                TEST_APP_PACKAGE_NAME, "com.NonActivityClass")).isEmpty();
     }
 
     // Makes sure the AccessibilityHierarchyCheck class to enum mapping is up to date with the

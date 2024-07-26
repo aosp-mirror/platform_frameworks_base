@@ -516,7 +516,7 @@ public abstract class Vibrator {
      */
     @RequiresPermission(android.Manifest.permission.VIBRATE)
     public void vibrate(@NonNull VibrationEffect vibe,
-            @NonNull VibrationAttributes attributes, @NonNull String reason) {
+            @NonNull VibrationAttributes attributes, String reason) {
         vibrate(Process.myUid(), mPackageName, vibe, reason, attributes);
     }
 

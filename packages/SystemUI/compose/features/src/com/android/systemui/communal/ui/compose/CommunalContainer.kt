@@ -88,12 +88,12 @@ val sceneTransitions = transitions {
     }
     to(CommunalScenes.Communal) {
         spec = tween(durationMillis = 1000)
-        translate(Communal.Elements.Grid, Edge.Right)
+        translate(Communal.Elements.Grid, Edge.End)
         timestampRange(startMillis = 167, endMillis = 334) { fade(AllElements) }
     }
     to(CommunalScenes.Blank) {
         spec = tween(durationMillis = 1000)
-        translate(Communal.Elements.Grid, Edge.Right)
+        translate(Communal.Elements.Grid, Edge.End)
         timestampRange(endMillis = 167) {
             fade(Communal.Elements.Grid)
             fade(Communal.Elements.IndicationArea)
@@ -186,9 +186,7 @@ fun CommunalContainer(
         scene(
             CommunalScenes.Blank,
             userActions =
-                mapOf(
-                    Swipe(SwipeDirection.Left, fromSource = Edge.Right) to CommunalScenes.Communal
-                )
+                mapOf(Swipe(SwipeDirection.Start, fromSource = Edge.End) to CommunalScenes.Communal)
         ) {
             // This scene shows nothing only allowing for transitions to the communal scene.
             Box(modifier = Modifier.fillMaxSize())
@@ -197,11 +195,11 @@ fun CommunalContainer(
         val userActions =
             if (glanceableHubBackGesture()) {
                 mapOf(
-                    Swipe(SwipeDirection.Right) to CommunalScenes.Blank,
+                    Swipe(SwipeDirection.End) to CommunalScenes.Blank,
                     Back to CommunalScenes.Blank,
                 )
             } else {
-                mapOf(Swipe(SwipeDirection.Right) to CommunalScenes.Blank)
+                mapOf(Swipe(SwipeDirection.End) to CommunalScenes.Blank)
             }
 
         scene(CommunalScenes.Communal, userActions = userActions) {

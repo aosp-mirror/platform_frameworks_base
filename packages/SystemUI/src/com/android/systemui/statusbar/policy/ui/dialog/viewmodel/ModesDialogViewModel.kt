@@ -17,16 +17,21 @@
 package com.android.systemui.statusbar.policy.ui.dialog.viewmodel
 
 import android.content.Context
+import android.content.Intent
+import android.provider.Settings.ACTION_AUTOMATIC_ZEN_RULE_SETTINGS
+import android.provider.Settings.EXTRA_AUTOMATIC_ZEN_RULE_ID
 import com.android.settingslib.notification.modes.ZenMode
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.res.R
 import com.android.systemui.statusbar.policy.domain.interactor.ZenModeInteractor
+import com.android.systemui.statusbar.policy.ui.dialog.ModesDialogDelegate
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.scan
 
 /**
  * Viewmodel for the priority ("zen") modes dialog that can be opened from quick settings. It allows
@@ -39,15 +44,35 @@ constructor(
     val context: Context,
     zenModeInteractor: ZenModeInteractor,
     @Background val bgDispatcher: CoroutineDispatcher,
+    private val dialogDelegate: ModesDialogDelegate,
 ) {
     // Modes that should be displayed in the dialog
-    // TODO(b/346519570): Include modes that have not been set up yet.
     private val visibleModes: Flow<List<ZenMode>> =
-        zenModeInteractor.modes.map {
-            it.filter { mode ->
-                mode.rule.isEnabled && (mode.isActive || mode.rule.isManualInvocationAllowed)
+        zenModeInteractor.modes
+            // While this is being collected (or in other words, while the dialog is open), we don't
+            // want a mode to disappear from the list if, for instance, the user deactivates it,
+            // since that can be confusing (similar to how we have visual stability for
+            // notifications while the shade is open).
+            // This ensures new modes are added to the list, and updates to modes already in the
+            // list are registered correctly.
+            .scan(listOf()) { prev, modes ->
+                val prevIds = prev.map { it.id }.toSet()
+
+                modes.filter { mode ->
+                    when {
+                        // Mode appeared previously -> keep it even if otherwise we may have
+                        // filtered it
+                        mode.id in prevIds -> true
+                        // Mode is enabled -> show if active (so user can toggle off), or if it
+                        // can be manually toggled on
+                        mode.rule.isEnabled -> mode.isActive || mode.rule.isManualInvocationAllowed
+                        // Mode was created as disabled, or disabled by the app that owns it ->
+                        // will be shown with a "Set up" text
+                        !mode.rule.isEnabled -> mode.status == ZenMode.Status.DISABLED_BY_OTHER
+                        else -> false
+                    }
+                }
             }
-        }
 
     val tiles: Flow<List<ModeTileViewModel>> =
         visibleModes
@@ -63,23 +88,39 @@ constructor(
                         //  "ON: Do Not Disturb, Until Mon 08:09"; see DndTile.
                         contentDescription = "",
                         onClick = {
-                            if (mode.isActive) {
+                            if (!mode.rule.isEnabled) {
+                                openSettings(mode)
+                            } else if (mode.isActive) {
                                 zenModeInteractor.deactivateMode(mode)
                             } else {
-                                // TODO(b/346519570): Handle duration for DND mode.
-                                zenModeInteractor.activateMode(mode)
+                                if (mode.rule.isManualInvocationAllowed) {
+                                    // TODO(b/346519570): Handle duration for DND mode.
+                                    zenModeInteractor.activateMode(mode)
+                                }
                             }
                         },
-                        onLongClick = {
-                            // TODO(b/346519570): Open settings page for mode.
-                        }
+                        onLongClick = { openSettings(mode) }
                     )
                 }
             }
             .flowOn(bgDispatcher)
 
+    private fun openSettings(mode: ZenMode) {
+        val intent: Intent =
+            Intent(ACTION_AUTOMATIC_ZEN_RULE_SETTINGS)
+                .putExtra(EXTRA_AUTOMATIC_ZEN_RULE_ID, mode.id)
+
+        dialogDelegate.launchFromDialog(intent)
+    }
+
     private fun getTileSubtext(mode: ZenMode): String {
-        // TODO(b/346519570): Use ZenModeConfig.getDescription for manual DND
+        if (!mode.rule.isEnabled) {
+            return context.resources.getString(R.string.zen_mode_set_up)
+        }
+        if (!mode.rule.isManualInvocationAllowed && !mode.isActive) {
+            return context.resources.getString(R.string.zen_mode_no_manual_invocation)
+        }
+
         val on = context.resources.getString(R.string.zen_mode_on)
         val off = context.resources.getString(R.string.zen_mode_off)
         return mode.rule.triggerDescription ?: if (mode.isActive) on else off

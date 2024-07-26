@@ -4616,6 +4616,9 @@ public class AccountManagerService
                     opPackageName,
                     visibleAccountTypes,
                     includeUserManagedNotVisible);
+        } catch (SQLiteException e) {
+            Log.w(TAG, "Could not get accounts for user " + userId, e);
+            return new Account[]{};
         } finally {
             restoreCallingIdentity(identityToken);
         }
@@ -4703,12 +4706,17 @@ public class AccountManagerService
 
     public Account[] getSharedAccountsAsUser(int userId) {
         userId = handleIncomingUser(userId);
-        UserAccounts accounts = getUserAccounts(userId);
-        synchronized (accounts.dbLock) {
-            List<Account> accountList = accounts.accountsDb.getSharedAccounts();
-            Account[] accountArray = new Account[accountList.size()];
-            accountList.toArray(accountArray);
-            return accountArray;
+        try {
+            UserAccounts accounts = getUserAccounts(userId);
+            synchronized (accounts.dbLock) {
+                List<Account> accountList = accounts.accountsDb.getSharedAccounts();
+                Account[] accountArray = new Account[accountList.size()];
+                accountList.toArray(accountArray);
+                return accountArray;
+            }
+        } catch (SQLiteException e) {
+            Log.w(TAG, "Could not get shared accounts for user " + userId, e);
+            return new Account[]{};
         }
     }
 

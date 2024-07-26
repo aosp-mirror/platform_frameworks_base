@@ -384,16 +384,7 @@ private fun ShortcutSubCategorySinglePane(searchQuery: String, subCategory: Shor
         if (index > 0) {
             HorizontalDivider()
         }
-        ShortcutSinglePane(searchQuery, shortcut)
-    }
-}
-
-@Composable
-private fun ShortcutSinglePane(searchQuery: String, shortcut: Shortcut) {
-    Column(Modifier.padding(vertical = 24.dp)) {
-        ShortcutDescriptionText(searchQuery = searchQuery, shortcut = shortcut)
-        Spacer(modifier = Modifier.height(12.dp))
-        ShortcutKeyCombinations(shortcut = shortcut)
+        ShortcutView(Modifier.padding(vertical = 24.dp), searchQuery, shortcut)
     }
 }
 
@@ -421,7 +412,7 @@ private fun ShortcutHelperTwoPane(
                 onCategoryClicked = { onCategorySelected(it.type) }
             )
             Spacer(modifier = Modifier.width(24.dp))
-            EndSidePanel(searchQuery, Modifier.fillMaxSize(), selectedCategory)
+            EndSidePanel(searchQuery, Modifier.fillMaxSize().padding(top = 8.dp), selectedCategory)
         }
     }
 }
@@ -447,14 +438,14 @@ private fun SubCategoryContainerDualPane(searchQuery: String, subCategory: Short
         shape = RoundedCornerShape(28.dp),
         color = MaterialTheme.colorScheme.surfaceBright
     ) {
-        Column(Modifier.padding(horizontal = 32.dp, vertical = 24.dp)) {
+        Column(Modifier.padding(24.dp)) {
             SubCategoryTitle(subCategory.label)
-            Spacer(Modifier.height(24.dp))
+            Spacer(Modifier.height(8.dp))
             subCategory.shortcuts.fastForEachIndexed { index, shortcut ->
                 if (index > 0) {
                     HorizontalDivider()
                 }
-                ShortcutViewDualPane(searchQuery, shortcut)
+                ShortcutView(Modifier.padding(vertical = 16.dp), searchQuery, shortcut)
             }
         }
     }
@@ -470,17 +461,17 @@ private fun SubCategoryTitle(title: String) {
 }
 
 @Composable
-private fun ShortcutViewDualPane(searchQuery: String, shortcut: Shortcut) {
-    Row(Modifier.padding(vertical = 16.dp)) {
+private fun ShortcutView(modifier: Modifier, searchQuery: String, shortcut: Shortcut) {
+    Row(modifier) {
         Row(
-            modifier = Modifier.width(160.dp).align(Alignment.CenterVertically),
+            modifier = Modifier.width(128.dp).align(Alignment.CenterVertically),
             horizontalArrangement = Arrangement.spacedBy(16.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             if (shortcut.icon != null) {
                 ShortcutIcon(
                     shortcut.icon,
-                    modifier = Modifier.size(36.dp),
+                    modifier = Modifier.size(24.dp),
                 )
             }
             ShortcutDescriptionText(
@@ -520,7 +511,11 @@ private fun ShortcutKeyCombinations(
     modifier: Modifier = Modifier,
     shortcut: Shortcut,
 ) {
-    FlowRow(modifier = modifier, verticalArrangement = Arrangement.spacedBy(8.dp)) {
+    FlowRow(
+        modifier = modifier,
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+        horizontalArrangement = Arrangement.End
+    ) {
         shortcut.commands.forEachIndexed { index, command ->
             if (index > 0) {
                 ShortcutOrSeparator(spacing = 16.dp)
@@ -641,7 +636,7 @@ private fun StartSidePanel(
 ) {
     Column(modifier) {
         ShortcutsSearchBar(onSearchQueryChanged)
-        Spacer(modifier = Modifier.heightIn(16.dp))
+        Spacer(modifier = Modifier.heightIn(8.dp))
         CategoriesPanelTwoPane(categories, selectedCategory, onCategoryClicked)
         Spacer(modifier = Modifier.weight(1f))
         KeyboardSettings(onKeyboardSettingsClicked)
@@ -678,7 +673,7 @@ private fun CategoryItemTwoPane(
     Surface(
         selected = selected,
         onClick = onClick,
-        modifier = Modifier.semantics { role = Role.Tab }.heightIn(min = 72.dp).fillMaxWidth(),
+        modifier = Modifier.semantics { role = Role.Tab }.heightIn(min = 64.dp).fillMaxWidth(),
         shape = RoundedCornerShape(28.dp),
         color = colors.containerColor(selected).value,
     ) {

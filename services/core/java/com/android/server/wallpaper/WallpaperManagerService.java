@@ -3844,6 +3844,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
             pw.print("  mPadding="); pw.println(wpSize.mPadding);
         });
         pw.print("  mCropHint="); pw.println(wallpaper.cropHint);
+        if (multiCrop()) pw.print("  mCropHints="); pw.println(wallpaper.mCropHints);
         pw.print("  mName=");  pw.println(wallpaper.name);
         pw.print("  mAllowBackup="); pw.println(wallpaper.allowBackup);
         pw.print("  mWallpaperComponent="); pw.println(wallpaper.wallpaperComponent);
