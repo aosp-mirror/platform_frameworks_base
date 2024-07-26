@@ -588,22 +588,43 @@ import javax.xml.datatype.DatatypeConfigurationException;
  *         <minorVersion>0</minorVersion>
  *     </usiVersion>
  *     <evenDimmer enabled="true">
- *       <transitionPoint>0.1</transitionPoint>
- *
- *       <nits>0.2</nits>
- *       <nits>2.0</nits>
- *       <nits>500.0</nits>
- *       <nits>1000.0</nits>
- *
- *       <backlight>0</backlight>
- *       <backlight>0.0001</backlight>
- *       <backlight>0.5</backlight>
- *       <backlight>1.0</backlight>
- *
- *       <brightness>0</brightness>
- *       <brightness>0.1</brightness>
- *       <brightness>0.5</brightness>
- *       <brightness>1.0</brightness>
+ *         <transitionPoint>0.1</transitionPoint>
+ *         <brightnessMapping>
+ *             <brightnessPoint>
+ *                 <nits>0.2</nits>
+ *                 <backlight>0</backlight>
+ *                 <brightness>0</brightness>
+ *                 </brightnessPoint>
+ *             <brightnessPoint>
+ *                 <nits>2.0</nits>
+ *                 <backlight>0.01</backlight>
+ *                 <brightness>0.002</brightness>
+ *             </brightnessPoint>
+ *             <brightnessPoint>
+ *                 <nits>500.0</nits>
+ *                 <backlight>0.5</backlight>
+ *                 <brightness>0.5</brightness>
+ *             </brightnessPoint>
+ *             <brightnessPoint>
+ *                 <nits>1000</nits>
+ *                 <backlight>1.0</backlight>
+ *                 <brightness>1.0</brightness>
+ *             </brightnessPoint>
+ *         </brightnessMapping>
+ *         <luxToMinimumNitsMap>
+ *             <point>
+ *                 <value>10</value>
+ *                 <nits>0.3</nits>
+ *             </point>
+ *             <point>
+ *                 <value>50</value>
+ *                 <nits>0.7</nits>
+ *             </point>
+ *             <point>
+ *                 <value>100</value>
+ *                 <nits>1.0</nits>
+ *             </point>
+ *         </luxToMinimumNitsMap>
  *     </evenDimmer>
  *     <screenBrightnessCapForWearBedtimeMode>0.1</screenBrightnessCapForWearBedtimeMode>
  *     <idleScreenRefreshRateTimeout>

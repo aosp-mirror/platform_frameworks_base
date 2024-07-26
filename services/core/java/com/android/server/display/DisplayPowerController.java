@@ -702,6 +702,17 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
     private void handleOnSwitchUser(@UserIdInt int newUserId, int userSerial, float newBrightness) {
         Slog.i(mTag, "Switching user newUserId=" + newUserId + " userSerial=" + userSerial
                 + " newBrightness=" + newBrightness);
+
+        if (mAutomaticBrightnessController != null) {
+            int autoBrightnessPreset = Settings.System.getIntForUser(mContext.getContentResolver(),
+                    Settings.System.SCREEN_BRIGHTNESS_FOR_ALS,
+                    Settings.System.SCREEN_BRIGHTNESS_AUTOMATIC_NORMAL,
+                    UserHandle.USER_CURRENT);
+            if (autoBrightnessPreset != mAutomaticBrightnessController.getPreset()) {
+                setUpAutoBrightness(mContext, mHandler);
+            }
+        }
+
         handleBrightnessModeChange();
         if (mBrightnessTracker != null) {
             mBrightnessTracker.onSwitchUser(newUserId);
@@ -714,6 +725,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         if (mAutomaticBrightnessController != null) {
             mAutomaticBrightnessController.resetShortTermModel();
         }
+        mBrightnessClamperController.onUserSwitch();
         sendUpdatePowerState();
     }
 
@@ -1009,7 +1021,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         if (mFlags.areAutoBrightnessModesEnabled()) {
             mContext.getContentResolver().registerContentObserver(
                     Settings.System.getUriFor(Settings.System.SCREEN_BRIGHTNESS_FOR_ALS),
-                    /* notifyForDescendants= */ false, mSettingsObserver, UserHandle.USER_CURRENT);
+                    /* notifyForDescendants= */ false, mSettingsObserver, UserHandle.USER_ALL);
         }
         handleBrightnessModeChange();
     }
