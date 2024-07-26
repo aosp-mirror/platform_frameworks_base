@@ -426,7 +426,7 @@ public abstract class BaseHeadsUpManager implements HeadsUpManager {
             onEntryRemoved(finalHeadsUpEntry);
             // TODO(b/328390331) move accessibility events to the view layer
             entry.sendAccessibilityEvent(AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED);
-            if (NotificationsHeadsUpRefactor.isEnabled()) {
+            if (NotificationThrottleHun.isEnabled()) {
                 finalHeadsUpEntry.cancelAutoRemovalCallbacks("removeEntry");
             } else {
                 finalHeadsUpEntry.reset();
@@ -743,7 +743,7 @@ public abstract class BaseHeadsUpManager implements HeadsUpManager {
         @Nullable private Runnable mCancelRemoveRunnable;
 
         public HeadsUpEntry() {
-            NotificationsHeadsUpRefactor.assertInLegacyMode();
+            NotificationThrottleHun.assertInLegacyMode();
         }
 
         public HeadsUpEntry(NotificationEntry entry) {
@@ -754,7 +754,7 @@ public abstract class BaseHeadsUpManager implements HeadsUpManager {
 
         /** Attach a NotificationEntry. */
         public void setEntry(@NonNull final NotificationEntry entry) {
-            NotificationsHeadsUpRefactor.assertInLegacyMode();
+            NotificationThrottleHun.assertInLegacyMode();
             setEntry(entry, createRemoveRunnable(entry));
         }
 
@@ -934,7 +934,7 @@ public abstract class BaseHeadsUpManager implements HeadsUpManager {
         }
 
         public void reset() {
-            NotificationsHeadsUpRefactor.assertInLegacyMode();
+            NotificationThrottleHun.assertInLegacyMode();
             cancelAutoRemovalCallbacks("reset()");
             mEntry = null;
             mRemoveRunnable = null;
