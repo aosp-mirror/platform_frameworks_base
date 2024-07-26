@@ -57,8 +57,14 @@ class ServiceManagerProxy implements IServiceManager {
         return mRemote;
     }
 
+    // TODO(b/355394904): This function has been deprecated, please use getService2 instead.
     @UnsupportedAppUsage
-    public Service getService(String name) throws RemoteException {
+    public IBinder getService(String name) throws RemoteException {
+        // Same as checkService (old versions of servicemanager had both methods).
+        return checkService(name).getBinder();
+    }
+
+    public Service getService2(String name) throws RemoteException {
         // Same as checkService (old versions of servicemanager had both methods).
         return checkService(name);
     }
