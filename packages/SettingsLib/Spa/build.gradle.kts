@@ -29,7 +29,7 @@ val androidTop: String = File(rootDir, "../../../../..").canonicalPath
 
 allprojects {
     extra["androidTop"] = androidTop
-    extra["jetpackComposeVersion"] = "1.7.0-beta02"
+    extra["jetpackComposeVersion"] = "1.7.0-beta05"
 }
 
 subprojects {

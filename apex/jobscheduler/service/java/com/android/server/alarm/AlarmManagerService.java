@@ -116,10 +116,10 @@ import android.os.ServiceManager;
 import android.os.ShellCallback;
 import android.os.ShellCommand;
 import android.os.SystemClock;
-import android.os.SystemProperties;
 import android.os.ThreadLocalWorkSource;
 import android.os.Trace;
 import android.os.UserHandle;
+import android.os.UserManager;
 import android.os.WorkSource;
 import android.provider.DeviceConfig;
 import android.provider.Settings;
@@ -178,9 +178,6 @@ import java.io.PrintWriter;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.text.SimpleDateFormat;
-import java.time.Instant;
-import java.time.zone.ZoneOffsetTransition;
-import java.time.zone.ZoneRules;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -192,7 +189,6 @@ import java.util.Set;
 import java.util.TimeZone;
 import java.util.TreeSet;
 import java.util.concurrent.ThreadLocalRandom;
-import java.util.concurrent.TimeUnit;
 import java.util.function.Predicate;
 
 /**
@@ -231,13 +227,6 @@ public class AlarmManagerService extends SystemService {
     static final int NEVER_INDEX = 4;
 
     private static final long TEMPORARY_QUOTA_DURATION = INTERVAL_DAY;
-
-    // System properties read on some device configurations to initialize time properly and
-    // perform DST transitions at the bootloader level.
-    private static final String TIMEOFFSET_PROPERTY = "persist.sys.time.offset";
-    private static final String DST_TRANSITION_PROPERTY = "persist.sys.time.dst_transition";
-    private static final String DST_OFFSET_PROPERTY = "persist.sys.time.dst_offset";
-
 
     private final Intent mBackgroundIntent
             = new Intent().addFlags(Intent.FLAG_FROM_BACKGROUND);
@@ -1794,7 +1783,8 @@ public class AlarmManagerService extends SystemService {
         mActivityManagerInternal = LocalServices.getService(ActivityManagerInternal.class);
 
         mUseFrozenStateToDropListenerAlarms = Flags.useFrozenStateToDropListenerAlarms();
-        mStartUserBeforeScheduledAlarms = Flags.startUserBeforeScheduledAlarms();
+        mStartUserBeforeScheduledAlarms = Flags.startUserBeforeScheduledAlarms()
+                && UserManager.supportsMultipleUsers();
         if (mStartUserBeforeScheduledAlarms) {
             mUserWakeupStore = new UserWakeupStore();
             mUserWakeupStore.init();
@@ -2125,22 +2115,6 @@ public class AlarmManagerService extends SystemService {
             // "GMT" if the ID is unrecognized). The parameter ID is used here rather than
             // newZone.getId(). It will be rejected if it is invalid.
             timeZoneWasChanged = SystemTimeZone.setTimeZoneId(tzId, confidence, logInfo);
-
-            final int gmtOffset = newZone.getOffset(mInjector.getCurrentTimeMillis());
-            SystemProperties.set(TIMEOFFSET_PROPERTY, String.valueOf(gmtOffset));
-
-            final ZoneRules rules = newZone.toZoneId().getRules();
-            final ZoneOffsetTransition transition = rules.nextTransition(Instant.now());
-            if (null != transition) {
-                // Get the offset between the time after the DST transition and before.
-                final long transitionOffset = TimeUnit.SECONDS.toMillis((
-                        transition.getOffsetAfter().getTotalSeconds()
-                        - transition.getOffsetBefore().getTotalSeconds()));
-                // Time when the next DST transition is programmed.
-                final long nextTransition = TimeUnit.SECONDS.toMillis(transition.toEpochSecond());
-                SystemProperties.set(DST_TRANSITION_PROPERTY, String.valueOf(nextTransition));
-                SystemProperties.set(DST_OFFSET_PROPERTY, String.valueOf(transitionOffset));
-            }
         }
 
         // Clear the default time zone in the system server process. This forces the next call
@@ -3015,7 +2989,7 @@ public class AlarmManagerService extends SystemService {
                     mUseFrozenStateToDropListenerAlarms);
             pw.println();
             pw.print(Flags.FLAG_START_USER_BEFORE_SCHEDULED_ALARMS,
-                    mStartUserBeforeScheduledAlarms);
+                    Flags.startUserBeforeScheduledAlarms());
             pw.decreaseIndent();
             pw.println();
             pw.println();

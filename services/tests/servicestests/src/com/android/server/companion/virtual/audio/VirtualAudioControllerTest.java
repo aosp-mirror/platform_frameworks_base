@@ -87,7 +87,6 @@ public class VirtualAudioControllerTest {
                         /* crossTaskNavigationExemptions= */ new ArraySet<>(),
                         /* permissionDialogComponent */ null,
                         /* activityListener= */ null,
-                        /* pipBlockedCallback= */ null,
                         /* activityBlockedCallback= */ null,
                         /* secureWindowCallback= */ null,
                         /* intentListenerCallback= */ null,

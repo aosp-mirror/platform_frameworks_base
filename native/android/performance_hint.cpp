@@ -244,6 +244,12 @@ int APerformanceHintSession::updateTargetWorkDuration(int64_t targetDurationNano
         ALOGE("%s: targetDurationNanos must be positive", __FUNCTION__);
         return EINVAL;
     }
+    {
+        std::scoped_lock lock(sHintMutex);
+        if (mTargetDurationNanos == targetDurationNanos) {
+            return 0;
+        }
+    }
     ndk::ScopedAStatus ret = mHintSession->updateTargetWorkDuration(targetDurationNanos);
     if (!ret.isOk()) {
         ALOGE("%s: HintSession updateTargetWorkDuration failed: %s", __FUNCTION__,

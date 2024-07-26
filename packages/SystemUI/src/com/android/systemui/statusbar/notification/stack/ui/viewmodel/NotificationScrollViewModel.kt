@@ -70,10 +70,10 @@ constructor(
             ) { shadeExpansion, shadeMode, qsExpansion, transitionState, quickSettingsScene ->
                 when (transitionState) {
                     is ObservableTransitionState.Idle -> {
-                        if (transitionState.currentScene == Scenes.Lockscreen) {
-                            1f
-                        } else {
-                            shadeExpansion
+                        when (transitionState.currentScene) {
+                            Scenes.Lockscreen,
+                            Scenes.QuickSettings -> 1f
+                            else -> shadeExpansion
                         }
                     }
                     is ObservableTransitionState.Transition -> {
@@ -112,14 +112,22 @@ constructor(
     private operator fun SceneKey.contains(scene: SceneKey) =
         sceneInteractor.isSceneInFamily(scene, this)
 
+    private val qsAllowsClipping: Flow<Boolean> =
+        combine(shadeInteractor.shadeMode, shadeInteractor.qsExpansion) { shadeMode, qsExpansion ->
+                qsExpansion < 0.5f || shadeMode != ShadeMode.Single
+            }
+            .distinctUntilChanged()
+
     /** The bounds of the notification stack in the current scene. */
     private val shadeScrimClipping: Flow<ShadeScrimClipping?> =
         combine(
+                qsAllowsClipping,
                 stackAppearanceInteractor.shadeScrimBounds,
                 stackAppearanceInteractor.shadeScrimRounding,
-            ) { bounds, rounding ->
-                bounds?.let { ShadeScrimClipping(it, rounding) }
+            ) { qsAllowsClipping, bounds, rounding ->
+                bounds?.takeIf { qsAllowsClipping }?.let { ShadeScrimClipping(it, rounding) }
             }
+            .distinctUntilChanged()
             .dumpWhileCollecting("stackClipping")
 
     fun shadeScrimShape(
@@ -162,9 +170,13 @@ constructor(
         stackAppearanceInteractor::setCurrentGestureOverscroll
 
     /** Whether the notification stack is scrollable or not. */
-    val isScrollable: Flow<Boolean> = sceneInteractor.currentScene.map {
-        sceneInteractor.isSceneInFamily(it, SceneFamilies.NotifShade) || it == Scenes.Lockscreen
-    }.dumpWhileCollecting("isScrollable")
+    val isScrollable: Flow<Boolean> =
+        sceneInteractor.currentScene
+            .map {
+                sceneInteractor.isSceneInFamily(it, SceneFamilies.NotifShade) ||
+                    it == Scenes.Lockscreen
+            }
+            .dumpWhileCollecting("isScrollable")
 
     /** Whether the notification stack is displayed in doze mode. */
     val isDozing: Flow<Boolean> by lazy {

@@ -135,9 +135,10 @@ public class AudioDeviceInventory {
      * AdiDeviceState in the {@link AudioDeviceInventory#mDeviceInventory} list.
      * @param deviceState the device to update
      */
-    void addOrUpdateDeviceSAStateInInventory(AdiDeviceState deviceState) {
+    void addOrUpdateDeviceSAStateInInventory(AdiDeviceState deviceState, boolean syncInventory) {
         synchronized (mDeviceInventoryLock) {
-            mDeviceInventory.merge(deviceState.getDeviceId(), deviceState, (oldState, newState) -> {
+            mDeviceInventory.merge(deviceState.getDeviceId(), deviceState,
+                    (oldState, newState) -> {
                 oldState.setHasHeadTracker(newState.hasHeadTracker());
                 oldState.setHeadTrackerEnabled(newState.isHeadTrackerEnabled());
                 oldState.setSAEnabled(newState.isSAEnabled());
@@ -145,7 +146,9 @@ public class AudioDeviceInventory {
             });
             checkDeviceInventorySize_l();
         }
-        mDeviceBroker.postSynchronizeAdiDevicesInInventory(deviceState);
+        if (syncInventory) {
+            mDeviceBroker.postSynchronizeAdiDevicesInInventory(deviceState);
+        }
     }
 
     /**
@@ -196,7 +199,8 @@ public class AudioDeviceInventory {
      * AdiDeviceState in the {@link AudioDeviceInventory#mDeviceInventory} list.
      * @param deviceState the device to update
      */
-    void addOrUpdateAudioDeviceCategoryInInventory(AdiDeviceState deviceState) {
+    void addOrUpdateAudioDeviceCategoryInInventory(
+            AdiDeviceState deviceState, boolean syncInventory) {
         AtomicBoolean updatedCategory = new AtomicBoolean(false);
         synchronized (mDeviceInventoryLock) {
             if (automaticBtDeviceType()) {
@@ -218,7 +222,9 @@ public class AudioDeviceInventory {
         if (updatedCategory.get()) {
             mDeviceBroker.postUpdatedAdiDeviceState(deviceState, false /*initSA*/);
         }
-        mDeviceBroker.postSynchronizeAdiDevicesInInventory(deviceState);
+        if (syncInventory) {
+            mDeviceBroker.postSynchronizeAdiDevicesInInventory(deviceState);
+        }
     }
 
     void addAudioDeviceWithCategoryInInventoryIfNeeded(@NonNull String address,
@@ -235,14 +241,14 @@ public class AudioDeviceInventory {
         boolean bleCategoryFound = false;
         AdiDeviceState deviceState = findBtDeviceStateForAddress(address, DEVICE_OUT_BLE_HEADSET);
         if (deviceState != null) {
-            addOrUpdateAudioDeviceCategoryInInventory(deviceState);
+            addOrUpdateAudioDeviceCategoryInInventory(deviceState, true /*syncInventory*/);
             btCategory = deviceState.getAudioDeviceCategory();
             bleCategoryFound = true;
         }
 
         deviceState = findBtDeviceStateForAddress(address, DEVICE_OUT_BLUETOOTH_A2DP);
         if (deviceState != null) {
-            addOrUpdateAudioDeviceCategoryInInventory(deviceState);
+            addOrUpdateAudioDeviceCategoryInInventory(deviceState, true /*syncInventory*/);
             int a2dpCategory = deviceState.getAudioDeviceCategory();
             if (bleCategoryFound && a2dpCategory != btCategory) {
                 Log.w(TAG, "Found different audio device category for A2DP and BLE profiles with "
@@ -269,20 +275,40 @@ public class AudioDeviceInventory {
     }
 
     /**
-     * synchronize AdiDeviceState for LE devices in the same group
+     * Synchronize AdiDeviceState for LE devices in the same group
+     * or BT classic devices with the same address.
+     * @param updatedDevice the device state to synchronize or null.
+     * Called with null once after the device inventory and spatializer helper
+     * have been initialized to resync all devices.
      */
     void onSynchronizeAdiDevicesInInventory(AdiDeviceState updatedDevice) {
         synchronized (mDevicesLock) {
             synchronized (mDeviceInventoryLock) {
-                boolean found = false;
-                found |= synchronizeBleDeviceInInventory(updatedDevice);
-                if (automaticBtDeviceType()) {
-                    found |= synchronizeDeviceProfilesInInventory(updatedDevice);
-                }
-                if (found) {
-                    mDeviceBroker.postPersistAudioDeviceSettings();
+                if (updatedDevice != null) {
+                    onSynchronizeAdiDeviceInInventory_l(updatedDevice);
+                } else {
+                    for (AdiDeviceState ads : mDeviceInventory.values()) {
+                        onSynchronizeAdiDeviceInInventory_l(ads);
+                    }
                 }
             }
+        }
+    }
+
+    /**
+     * Synchronize AdiDeviceState for LE devices in the same group
+     * or BT classic devices with the same address.
+     * @param updatedDevice the device state to synchronize.
+     */
+    @GuardedBy({"mDevicesLock", "mDeviceInventoryLock"})
+    void onSynchronizeAdiDeviceInInventory_l(AdiDeviceState updatedDevice) {
+        boolean found = false;
+        found |= synchronizeBleDeviceInInventory(updatedDevice);
+        if (automaticBtDeviceType()) {
+            found |= synchronizeDeviceProfilesInInventory(updatedDevice);
+        }
+        if (found) {
+            mDeviceBroker.postPersistAudioDeviceSettings();
         }
     }
 
@@ -595,6 +621,9 @@ public class AudioDeviceInventory {
             mDeviceName = TextUtils.emptyIfNull(deviceName);
             mDeviceAddress = TextUtils.emptyIfNull(address);
             mDeviceIdentityAddress = TextUtils.emptyIfNull(identityAddress);
+            if (mDeviceIdentityAddress.isEmpty()) {
+                mDeviceIdentityAddress = mDeviceAddress;
+            }
             mDeviceCodecFormat = codecFormat;
             mGroupId = groupId;
             mPeerDeviceAddress = TextUtils.emptyIfNull(peerAddress);
@@ -1728,6 +1757,15 @@ public class AudioDeviceInventory {
             if (AudioService.DEBUG_DEVICES) {
                 Slog.i(TAG, "deviceInfo:" + di + " is(already)Connected:" + isConnected);
             }
+            // Do not report an error in case of redundant connect or disconnect request
+            // as this can cause a state mismatch between BtHelper and AudioDeviceInventory
+            if (connect == isConnected) {
+                Log.i(TAG, "handleDeviceConnection() deviceInfo=" + di + " is already "
+                        + (connect ? "" : "dis") + "connected");
+                mmi.set(MediaMetrics.Property.STATE, connect
+                        ? MediaMetrics.Value.CONNECT : MediaMetrics.Value.DISCONNECT).record();
+                return true;
+            }
             if (connect && !isConnected) {
                 final int res;
                 if (isForTesting) {
@@ -2499,7 +2537,7 @@ public class AudioDeviceInventory {
             mDeviceBroker.setBluetoothA2dpOnInt(true, false /*fromA2dp*/, eventSource);
 
             AudioDeviceAttributes ada = new AudioDeviceAttributes(device, address, name);
-            final int res = AudioSystem.setDeviceConnectionState(ada,
+            final int res = mAudioSystem.setDeviceConnectionState(ada,
                     AudioSystem.DEVICE_STATE_AVAILABLE, codec);
             if (res != AudioSystem.AUDIO_STATUS_OK) {
                 AudioService.sDeviceLogger.enqueue(new EventLogger.StringEvent(
@@ -2519,23 +2557,27 @@ public class AudioDeviceInventory {
                     new DeviceInfo(device, name, address,
                             btInfo.mDevice.getIdentityAddress(), codec,
                             groupId, peerAddress, peerIdentityAddress));
-            mDeviceBroker.postAccessoryPlugMediaUnmute(device);
-            setCurrentAudioRouteNameIfPossible(name, /*fromA2dp=*/false);
+            if (btInfo.mIsLeOutput) {
+                mDeviceBroker.postAccessoryPlugMediaUnmute(device);
+                setCurrentAudioRouteNameIfPossible(name, /*fromA2dp=*/false);
+            }
             addAudioDeviceInInventoryIfNeeded(device, address, peerAddress,
                     BtHelper.getBtDeviceCategory(address), /*userDefined=*/false);
         }
 
-        if (streamType == AudioSystem.STREAM_DEFAULT) {
-            // No need to update volume for input devices
-            return;
-        }
+        if (btInfo.mIsLeOutput) {
+            if (streamType == AudioSystem.STREAM_DEFAULT) {
+                // No need to update volume for input devices
+                return;
+            }
 
-        final int leAudioVolIndex = (volumeIndex == -1)
-                ? mDeviceBroker.getVssVolumeForDevice(streamType, device)
-                : volumeIndex;
-        final int maxIndex = mDeviceBroker.getMaxVssVolumeForStream(streamType);
-        mDeviceBroker.postSetLeAudioVolumeIndex(leAudioVolIndex, maxIndex, streamType);
-        mDeviceBroker.postApplyVolumeOnDevice(streamType, device, "makeLeAudioDeviceAvailable");
+            final int leAudioVolIndex = (volumeIndex == -1)
+                    ? mDeviceBroker.getVssVolumeForDevice(streamType, device)
+                    : volumeIndex;
+            final int maxIndex = mDeviceBroker.getMaxVssVolumeForStream(streamType);
+            mDeviceBroker.postSetLeAudioVolumeIndex(leAudioVolIndex, maxIndex, streamType);
+            mDeviceBroker.postApplyVolumeOnDevice(streamType, device, "makeLeAudioDeviceAvailable");
+        }
 
         updateBluetoothPreferredModes_l(btInfo.mDevice /*connectedDevice*/);
     }
@@ -2546,7 +2588,7 @@ public class AudioDeviceInventory {
         AudioDeviceAttributes ada = null;
         if (device != AudioSystem.DEVICE_NONE) {
             ada = new AudioDeviceAttributes(device, address);
-            final int res = AudioSystem.setDeviceConnectionState(ada,
+            final int res = mAudioSystem.setDeviceConnectionState(ada,
                     AudioSystem.DEVICE_STATE_UNAVAILABLE,
                     codec);
 
@@ -2951,8 +2993,8 @@ public class AudioDeviceInventory {
             // Note if the device is not compatible with spatialization mode or the device
             // type is not canonical, it will be ignored in {@link SpatializerHelper}.
             if (devState != null) {
-                addOrUpdateDeviceSAStateInInventory(devState);
-                addOrUpdateAudioDeviceCategoryInInventory(devState);
+                addOrUpdateDeviceSAStateInInventory(devState, false /*syncInventory*/);
+                addOrUpdateAudioDeviceCategoryInInventory(devState, false /*syncInventory*/);
             }
         }
     }

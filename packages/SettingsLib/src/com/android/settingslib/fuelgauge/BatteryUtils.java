@@ -25,6 +25,7 @@ import android.os.SystemProperties;
 import android.os.UserManager;
 import android.provider.Settings;
 import android.util.ArraySet;
+import android.util.Log;
 import android.view.accessibility.AccessibilityManager;
 
 import androidx.annotation.Nullable;
@@ -33,6 +34,7 @@ import androidx.annotation.VisibleForTesting;
 import java.util.List;
 
 public final class BatteryUtils {
+    private static final String TAG = "BatteryUtils";
 
     /** The key to get the time to full from Settings.Global */
     public static final String GLOBAL_TIME_TO_FULL_MILLIS = "time_to_full_millis";
@@ -81,6 +83,24 @@ public final class BatteryUtils {
     public static boolean isWorkProfile(Context context) {
         final UserManager userManager = context.getSystemService(UserManager.class);
         return userManager.isManagedProfile() && !userManager.isSystemUser();
+    }
+
+    /** Returns true if current user is a private profile user. */
+    public static boolean isPrivateProfile(Context context) {
+        final UserManager userManager = context.getSystemService(UserManager.class);
+        return userManager.isPrivateProfile();
+    }
+
+    /** Returns true if current user is an additional profile user. */
+    public static boolean isAdditionalProfile(Context context) {
+        if (isWorkProfile(context)) {
+            Log.d(TAG, "Current user is a work profile user.");
+            return true;
+        } else if (isPrivateProfile(context)) {
+            Log.d(TAG, "Current user is a private profile user.");
+            return true;
+        }
+        return false;
     }
 
     private static Boolean sChargingStringV2Enabled = null;

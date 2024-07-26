@@ -544,11 +544,10 @@ public final class DreamManagerService extends SystemService {
 
     private void startDozingInternal(IBinder token, int screenState,
             @Display.StateReason int reason, int screenBrightness) {
-        if (DEBUG) {
-            Slog.d(TAG, "Dream requested to start dozing: " + token
-                    + ", screenState=" + screenState
-                    + ", screenBrightness=" + screenBrightness);
-        }
+        Slog.d(TAG, "Dream requested to start dozing: " + token
+                + ", screenState=" + Display.stateToString(screenState)
+                + ", reason=" + Display.stateReasonToString(reason)
+                + ", screenBrightness=" + screenBrightness);
 
         synchronized (mLock) {
             if (mCurrentDream != null && mCurrentDream.token == token && mCurrentDream.canDoze) {
@@ -1079,7 +1078,39 @@ public final class DreamManagerService extends SystemService {
         }
 
         @Override // Binder call
+        public void finishSelfOneway(IBinder token, boolean immediate) {
+            // Requires no permission, called by Dream from an arbitrary process.
+            if (token == null) {
+                throw new IllegalArgumentException("token must not be null");
+            }
+
+            final long ident = Binder.clearCallingIdentity();
+            try {
+                finishSelfInternal(token, immediate);
+            } finally {
+                Binder.restoreCallingIdentity(ident);
+            }
+        }
+
+        @Override // Binder call
         public void startDozing(
+                IBinder token, int screenState, @Display.StateReason int reason,
+                int screenBrightness) {
+            // Requires no permission, called by Dream from an arbitrary process.
+            if (token == null) {
+                throw new IllegalArgumentException("token must not be null");
+            }
+
+            final long ident = Binder.clearCallingIdentity();
+            try {
+                startDozingInternal(token, screenState, reason, screenBrightness);
+            } finally {
+                Binder.restoreCallingIdentity(ident);
+            }
+        }
+
+        @Override // Binder call
+        public void startDozingOneway(
                 IBinder token, int screenState, @Display.StateReason int reason,
                 int screenBrightness) {
             // Requires no permission, called by Dream from an arbitrary process.

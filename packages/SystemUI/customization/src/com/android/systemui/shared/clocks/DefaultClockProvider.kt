@@ -15,13 +15,13 @@ package com.android.systemui.shared.clocks
 
 import android.content.Context
 import android.content.res.Resources
-import android.graphics.drawable.Drawable
 import android.view.LayoutInflater
 import com.android.systemui.customization.R
 import com.android.systemui.plugins.clocks.ClockController
 import com.android.systemui.plugins.clocks.ClockId
 import com.android.systemui.plugins.clocks.ClockMessageBuffers
 import com.android.systemui.plugins.clocks.ClockMetadata
+import com.android.systemui.plugins.clocks.ClockPickerConfig
 import com.android.systemui.plugins.clocks.ClockProvider
 import com.android.systemui.plugins.clocks.ClockSettings
 
@@ -60,12 +60,17 @@ class DefaultClockProvider(
         )
     }
 
-    override fun getClockThumbnail(id: ClockId): Drawable? {
+    override fun getClockPickerConfig(id: ClockId): ClockPickerConfig {
         if (id != DEFAULT_CLOCK_ID) {
             throw IllegalArgumentException("$id is unsupported by $TAG")
         }
 
-        // TODO: Update placeholder to actual resource
-        return resources.getDrawable(R.drawable.clock_default_thumbnail, null)
+        return ClockPickerConfig(
+            DEFAULT_CLOCK_ID,
+            resources.getString(R.string.clock_default_name),
+            resources.getString(R.string.clock_default_description),
+            // TODO(b/352049256): Update placeholder to actual resource
+            resources.getDrawable(R.drawable.clock_default_thumbnail, null),
+        )
     }
 }

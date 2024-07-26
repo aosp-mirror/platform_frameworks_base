@@ -31,9 +31,6 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.util.SparseIntArray;
 
-import androidx.window.util.AcceptOnceConsumer;
-import androidx.window.util.BaseDataProducer;
-
 import com.android.internal.R;
 
 import java.util.ArrayList;
@@ -44,7 +41,7 @@ import java.util.Optional;
 import java.util.function.Consumer;
 
 /**
- * An implementation of {@link androidx.window.util.BaseDataProducer} that returns
+ * An implementation of {@link BaseDataProducer} that returns
  * the device's posture by mapping the state returned from {@link DeviceStateManager} to
  * values provided in the resources' config at {@link R.array#config_device_state_postures}.
  */

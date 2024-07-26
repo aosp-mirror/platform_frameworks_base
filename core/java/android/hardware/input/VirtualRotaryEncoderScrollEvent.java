@@ -69,8 +69,13 @@ public final class VirtualRotaryEncoderScrollEvent implements Parcelable {
     }
 
     /**
-     * Returns the scroll amount, normalized from -1.0 to 1.0, inclusive. Positive values
-     * indicate scrolling forward (e.g. down in a vertical list); negative values, backward.
+     * Returns the scroll amount, normalized from -1.0 to 1.0, inclusive.
+     * <p>
+     * Positive values indicate scrolling forward (e.g. down in a vertical list); negative values,
+     * backward.
+     * <p>
+     * Values of 1.0 or -1.0 represent the maximum supported scroll.
+     * </p>
      */
     public @FloatRange(from = -1.0f, to = 1.0f) float getScrollAmount() {
         return mScrollAmount;
@@ -91,7 +96,7 @@ public final class VirtualRotaryEncoderScrollEvent implements Parcelable {
      */
     public static final class Builder {
 
-        private float mScrollAmount;
+        @FloatRange(from = -1.0f, to = 1.0f) private float mScrollAmount = 0.0f;
         private long mEventTimeNanos = 0L;
 
         /**
@@ -102,9 +107,14 @@ public final class VirtualRotaryEncoderScrollEvent implements Parcelable {
         }
 
         /**
-         * Sets the scroll amount, normalized from -1.0 to 1.0, inclusive. Positive values
-         * indicate scrolling forward (e.g. down in a vertical list); negative values, backward.
-         *
+         * Sets the scroll amount, normalized from -1.0 to 1.0, inclusive. By default, the scroll
+         * amount is 0, which results in no scroll.
+         * <p>
+         * Positive values indicate scrolling forward (e.g. down in a vertical list); negative
+         * values, backward.
+         * <p>
+         * Values of 1.0 or -1.0 represent the maximum supported scroll.
+         * </p>
          * @return this builder, to allow for chaining of calls
          */
         public @NonNull Builder setScrollAmount(
@@ -119,6 +129,10 @@ public final class VirtualRotaryEncoderScrollEvent implements Parcelable {
          * obtained from {@link SystemClock#uptimeMillis()} (with nanosecond precision instead of
          * millisecond), but can be different depending on the use case.
          * This field is optional and can be omitted.
+         * <p>
+         * If this field is unset, then the time at which this event is sent to the framework would
+         * be considered as the event time (even though
+         * {@link VirtualRotaryEncoderScrollEvent#getEventTimeNanos()}) would return {@code 0L}).
          *
          * @return this builder, to allow for chaining of calls
          * @see InputEvent#getEventTime()

@@ -462,7 +462,9 @@ public final class AutoFillUI {
 
                         @Override
                         public void onShown() {
-                            mCallback.onShown(UI_TYPE_DIALOG, response.getDatasets().size());
+                            if (mCallback != null) {
+                                mCallback.onShown(UI_TYPE_DIALOG, response.getDatasets().size());
+                            }
                         }
 
                         @Override
@@ -511,7 +513,9 @@ public final class AutoFillUI {
 
                         @Override
                         public void startIntentSender(IntentSender intentSender) {
-                            mCallback.startIntentSenderAndFinishSession(intentSender);
+                            if (mCallback != null) {
+                                mCallback.startIntentSenderAndFinishSession(intentSender);
+                            }
                         }
 
                         private void log(int type) {

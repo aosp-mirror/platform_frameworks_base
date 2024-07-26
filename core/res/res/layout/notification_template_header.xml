@@ -62,7 +62,7 @@
         android:layout_height="match_parent"
         android:layout_alignParentStart="true"
         android:layout_centerVertical="true"
-        android:layout_toStartOf="@id/expand_button"
+        android:layout_toStartOf="@id/notification_buttons_column"
         android:layout_alignWithParentIfMissing="true"
         android:clipChildren="false"
         android:gravity="center_vertical"

@@ -182,6 +182,9 @@ java_library {
 // want to verify they're unbundled.  The "impl" library above is what
 // ships inside the Ravenwood environment to actually drive any API
 // access to implementation details.
+// This library needs to be statically linked to mainline tests as well,
+// which need to be able to run on multiple API levels, so we can't use
+// test APIs in this module.
 java_library {
     name: "ravenwood-junit",
     srcs: [
@@ -189,7 +192,7 @@ java_library {
         "junit-stub-src/**/*.java",
         "junit-flag-src/**/*.java",
     ],
-    sdk_version: "test_current",
+    sdk_version: "module_current",
     static_libs: [
         "ravenwood-runtime-common",
         "ravenwood-runtime-common-device",
@@ -274,12 +277,14 @@ sh_test_host {
     src: "scripts/ravenwood-stats-checker.sh",
     test_suites: ["general-tests"],
     data: [
-        ":framework-minus-apex.ravenwood.stats",
-        ":framework-minus-apex.ravenwood.apis",
-        ":framework-minus-apex.ravenwood.keep_all",
-        ":services.core.ravenwood.stats",
-        ":services.core.ravenwood.apis",
-        ":services.core.ravenwood.keep_all",
+        ":framework-minus-apex.ravenwood-base{hoststubgen_framework-minus-apex_stats.csv}",
+        ":framework-minus-apex.ravenwood-base{hoststubgen_framework-minus-apex_apis.csv}",
+        ":framework-minus-apex.ravenwood-base{hoststubgen_framework-minus-apex_keep_all.txt}",
+        ":framework-minus-apex.ravenwood-base{hoststubgen_framework-minus-apex_dump.txt}",
+        ":services.core.ravenwood-base{hoststubgen_services.core_stats.csv}",
+        ":services.core.ravenwood-base{hoststubgen_services.core_apis.csv}",
+        ":services.core.ravenwood-base{hoststubgen_services.core_keep_all.txt}",
+        ":services.core.ravenwood-base{hoststubgen_services.core_dump.txt}",
     ],
 }
 
@@ -324,6 +329,11 @@ android_ravenwood_libgroup {
         "hoststubgen-helper-runtime.ravenwood",
         "services.core.ravenwood-jarjar",
         "services.fakes.ravenwood-jarjar",
+
+        // ICU
+        "core-icu4j-for-host.ravenwood",
+        "icu4j-icudata-jarjar",
+        "icu4j-icutzdata-jarjar",
 
         // Provide runtime versions of utils linked in below
         "junit",

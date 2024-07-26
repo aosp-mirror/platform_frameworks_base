@@ -138,6 +138,9 @@ final class IInputMethodManagerImpl extends IInputMethodManager.Stub {
         @PermissionVerified(Manifest.permission.TEST_INPUT_METHOD)
         boolean isInputMethodPickerShownForTest();
 
+        @PermissionVerified(Manifest.permission.WRITE_SECURE_SETTINGS)
+        void onImeSwitchButtonClickFromSystem(int displayId);
+
         InputMethodSubtype getCurrentInputMethodSubtype(@UserIdInt int userId);
 
         void setAdditionalInputMethodSubtypes(String imiId, InputMethodSubtype[] subtypes,
@@ -151,7 +154,7 @@ final class IInputMethodManagerImpl extends IInputMethodManager.Stub {
         void reportPerceptibleAsync(IBinder windowToken, boolean perceptible);
 
         @PermissionVerified(Manifest.permission.INTERNAL_SYSTEM_WINDOW)
-        void removeImeSurface();
+        void removeImeSurface(int displayId);
 
         void removeImeSurfaceFromWindowAsync(IBinder windowToken);
 
@@ -344,6 +347,14 @@ final class IInputMethodManagerImpl extends IInputMethodManager.Stub {
         return mCallback.isInputMethodPickerShownForTest();
     }
 
+    @EnforcePermission(Manifest.permission.WRITE_SECURE_SETTINGS)
+    @Override
+    public void onImeSwitchButtonClickFromSystem(int displayId) {
+        super.onImeSwitchButtonClickFromSystem_enforcePermission();
+
+        mCallback.onImeSwitchButtonClickFromSystem(displayId);
+    }
+
     @Override
     public InputMethodSubtype getCurrentInputMethodSubtype(@UserIdInt int userId) {
         return mCallback.getCurrentInputMethodSubtype(userId);
@@ -373,10 +384,10 @@ final class IInputMethodManagerImpl extends IInputMethodManager.Stub {
 
     @EnforcePermission(Manifest.permission.INTERNAL_SYSTEM_WINDOW)
     @Override
-    public void removeImeSurface() {
+    public void removeImeSurface(int displayId) {
         super.removeImeSurface_enforcePermission();
 
-        mCallback.removeImeSurface();
+        mCallback.removeImeSurface(displayId);
     }
 
     @Override

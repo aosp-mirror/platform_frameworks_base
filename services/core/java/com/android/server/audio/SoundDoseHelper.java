@@ -633,7 +633,7 @@ public class SoundDoseHelper {
     }
 
     /*package*/ void enforceSafeMediaVolume(String caller) {
-        AudioService.VolumeStreamState streamState = mAudioService.getVssVolumeForStream(
+        AudioService.VolumeStreamState streamState = mAudioService.getVssForStreamOrDefault(
                 AudioSystem.STREAM_MUSIC);
 
         for (int i = 0; i < mSafeMediaVolumeDevices.size(); ++i)  {
@@ -643,9 +643,9 @@ public class SoundDoseHelper {
             if (index > safeIndex) {
                 streamState.setIndex(safeIndex, deviceType, caller,
                         true /*hasModifyAudioSettings*/);
-                mAudioHandler.sendMessageAtTime(
+                mAudioHandler.sendMessage(
                         mAudioHandler.obtainMessage(MSG_SET_DEVICE_VOLUME, deviceType,
-                                /*arg2=*/0, streamState), /*delay=*/0);
+                                /*arg2=*/0, streamState));
             }
         }
     }
@@ -665,7 +665,7 @@ public class SoundDoseHelper {
     @GuardedBy("mSafeMediaVolumeStateLock")
     private boolean checkSafeMediaVolume_l(int streamType, int index, int device) {
         return (mSafeMediaVolumeState == SAFE_MEDIA_VOLUME_ACTIVE)
-                    && (AudioService.mStreamVolumeAlias[streamType] == AudioSystem.STREAM_MUSIC)
+                    && (AudioService.sStreamVolumeAlias.get(streamType) == AudioSystem.STREAM_MUSIC)
                     && safeDevicesContains(device)
                     && (index > safeMediaVolumeIndex(device));
     }
@@ -686,8 +686,11 @@ public class SoundDoseHelper {
     /*package*/ void disableSafeMediaVolume(String callingPackage) {
         synchronized (mSafeMediaVolumeStateLock) {
             final long identity = Binder.clearCallingIdentity();
-            setSafeMediaVolumeEnabled(false, callingPackage);
-            Binder.restoreCallingIdentity(identity);
+            try {
+                setSafeMediaVolumeEnabled(false, callingPackage);
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
 
             if (mPendingVolumeCommand != null) {
                 mAudioService.onSetStreamVolume(mPendingVolumeCommand.mStreamType,
@@ -701,6 +704,7 @@ public class SoundDoseHelper {
         }
     }
 
+    @SuppressWarnings("AndroidFrameworkRequiresPermission")
     /*package*/ void scheduleMusicActiveCheck() {
         synchronized (mSafeMediaVolumeStateLock) {
             cancelMusicActiveCheck();
@@ -904,7 +908,7 @@ public class SoundDoseHelper {
                 return;
             }
 
-            if (AudioService.mStreamVolumeAlias[streamType] == AudioSystem.STREAM_MUSIC
+            if (AudioService.sStreamVolumeAlias.get(streamType) == AudioSystem.STREAM_MUSIC
                     && safeDevicesContains(device)) {
                 float attenuationDb = -AudioSystem.getStreamVolumeDB(AudioSystem.STREAM_MUSIC,
                         (newIndex + 5) / 10, device);
@@ -1035,10 +1039,9 @@ public class SoundDoseHelper {
             mSafeMediaVolumeState = SAFE_MEDIA_VOLUME_DISABLED;
         }
 
-        mAudioHandler.sendMessageAtTime(
+        mAudioHandler.sendMessage(
                 mAudioHandler.obtainMessage(MSG_PERSIST_SAFE_VOLUME_STATE,
-                        persistedState, /*arg2=*/0,
-                        /*obj=*/null), /*delay=*/0);
+                        persistedState, /*arg2=*/0, /*obj=*/null));
     }
 
     private void updateCsdEnabled(String caller) {
@@ -1199,8 +1202,8 @@ public class SoundDoseHelper {
 
         sanitizeDoseRecords_l();
 
-        mAudioHandler.sendMessageAtTime(mAudioHandler.obtainMessage(MSG_PERSIST_CSD_VALUES,
-                /* arg1= */0, /* arg2= */0, /* obj= */null), /* delay= */0);
+        mAudioHandler.sendMessage(mAudioHandler.obtainMessage(MSG_PERSIST_CSD_VALUES,
+                /* arg1= */0, /* arg2= */0, /* obj= */null));
 
         mLogger.enqueue(SoundDoseEvent.getDoseUpdateEvent(currentCsd, totalDuration));
     }
@@ -1316,6 +1319,7 @@ public class SoundDoseHelper {
     }
 
     /** Called when handling MSG_LOWER_VOLUME_TO_RS1 */
+    @SuppressWarnings("AndroidFrameworkRequiresPermission")
     private void onLowerVolumeToRs1() {
         final ArrayList<AudioDeviceAttributes> devices = mAudioService.getDevicesForAttributesInt(
                 new AudioAttributes.Builder().setUsage(
@@ -1360,9 +1364,9 @@ public class SoundDoseHelper {
 
         @Override
         public String toString() {
-            return new StringBuilder().append("{streamType=").append(mStreamType).append(",index=")
-                    .append(mIndex).append(",flags=").append(mFlags).append(",device=")
-                    .append(mDevice).append('}').toString();
+            return "{streamType=" + mStreamType
+                    + ",index=" + mIndex + ",flags=" + mFlags
+                    + ",device=" + mDevice + "}";
         }
     }
 }

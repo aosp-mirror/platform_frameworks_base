@@ -21,18 +21,18 @@ import static android.content.Intent.ACTION_VIEW;
 import static android.content.Intent.CAPTURE_CONTENT_FOR_NOTE_FAILED;
 import static android.content.Intent.CATEGORY_LAUNCHER;
 
-import static com.google.common.util.concurrent.Futures.withTimeout;
-
 import static java.util.concurrent.Executors.newSingleThreadScheduledExecutor;
 
 import android.app.ActivityTaskManager.RootTaskInfo;
 import android.app.IActivityTaskManager;
+import android.app.TaskInfo;
 import android.app.WindowConfiguration;
 import android.app.assist.AssistContent;
 import android.content.ClipData;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
 import android.graphics.Bitmap;
 import android.graphics.HardwareRenderer;
 import android.graphics.RecordingCanvas;
@@ -40,7 +40,6 @@ import android.graphics.Rect;
 import android.graphics.RenderNode;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
-import android.os.RemoteException;
 import android.os.UserHandle;
 import android.util.Log;
 import android.view.Display;
@@ -54,6 +53,7 @@ import androidx.lifecycle.ViewModelProvider;
 
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
+import com.android.systemui.log.DebugLogger;
 import com.android.systemui.screenshot.AssistContentRequester;
 import com.android.systemui.screenshot.ImageExporter;
 
@@ -92,7 +92,8 @@ final class AppClipsViewModel extends ViewModel {
     private final MutableLiveData<Bitmap> mScreenshotLiveData;
     private final MutableLiveData<Uri> mResultLiveData;
     private final MutableLiveData<Integer> mErrorLiveData;
-    private final MutableLiveData<ClipData> mBacklinksLiveData;
+    private final MutableLiveData<List<InternalBacklinksData>> mBacklinksLiveData;
+    final MutableLiveData<InternalBacklinksData> mSelectedBacklinksLiveData;
 
     private AppClipsViewModel(AppClipsCrossProcessHelper appClipsCrossProcessHelper,
             ImageExporter imageExporter, IActivityTaskManager atmService,
@@ -110,6 +111,7 @@ final class AppClipsViewModel extends ViewModel {
         mResultLiveData = new MutableLiveData<>();
         mErrorLiveData = new MutableLiveData<>();
         mBacklinksLiveData = new MutableLiveData<>();
+        mSelectedBacklinksLiveData = new MutableLiveData<>();
     }
 
     /**
@@ -133,33 +135,36 @@ final class AppClipsViewModel extends ViewModel {
     /**
      * Triggers the Backlinks flow which:
      * <ul>
-     *     <li>Evaluates the task to query.
-     *     <li>Requests {@link AssistContent} from that task.
-     *     <li>Transforms the {@link AssistContent} into {@link ClipData} for Backlinks.
-     *     <li>The {@link ClipData} is reported to activity via {@link #getBacklinksLiveData()}.
+     *     <li>Evaluates the tasks to query.
+     *     <li>Requests {@link AssistContent} from all valid tasks.
+     *     <li>Transforms {@link AssistContent} into {@link InternalBacklinksData} for Backlinks.
+     *     <li>The {@link InternalBacklinksData}s are reported to activity via
+     *     {@link #getBacklinksLiveData()}.
      * </ul>
      *
      * @param taskIdsToIgnore id of the tasks to ignore when querying for {@link AssistContent}
      * @param displayId       id of the display to query tasks for Backlinks data
      */
     void triggerBacklinks(Set<Integer> taskIdsToIgnore, int displayId) {
-        mBgExecutor.execute(() -> {
-            ListenableFuture<ClipData> backlinksData = getBacklinksData(taskIdsToIgnore, displayId);
-            Futures.addCallback(backlinksData, new FutureCallback<>() {
-                @Override
-                public void onSuccess(@Nullable ClipData result) {
-                    if (result != null) {
-                        mBacklinksLiveData.setValue(result);
-                    }
+        DebugLogger.INSTANCE.logcatMessage(this, () -> "Backlinks triggered");
+        ListenableFuture<List<InternalBacklinksData>> backlinksData = getAllAvailableBacklinks(
+                taskIdsToIgnore, displayId);
+        Futures.addCallback(backlinksData, new FutureCallback<>() {
+            @Override
+            public void onSuccess(@Nullable List<InternalBacklinksData> result) {
+                if (result != null && !result.isEmpty()) {
+                    // Set the list of backlinks before setting the selected backlink as this is
+                    // required when updating the backlink data text view.
+                    mBacklinksLiveData.setValue(result);
+                    mSelectedBacklinksLiveData.setValue(result.get(0));
                 }
+            }
 
-                @Override
-                public void onFailure(Throwable t) {
-                    Log.e(TAG, "Error querying for Backlinks data", t);
-                }
-            }, mMainExecutor);
-
-        });
+            @Override
+            public void onFailure(Throwable t) {
+                Log.e(TAG, "Error querying for Backlinks data", t);
+            }
+        }, mMainExecutor);
     }
 
     /** Returns a {@link LiveData} that holds the captured screenshot. */
@@ -180,8 +185,11 @@ final class AppClipsViewModel extends ViewModel {
         return mErrorLiveData;
     }
 
-    /** Returns a {@link LiveData} that holds the Backlinks data in {@link ClipData}. */
-    LiveData<ClipData> getBacklinksLiveData() {
+    /**
+     * Returns a {@link LiveData} that holds all the available Backlinks data and the currently
+     * selected index for displaying the Backlinks in the UI.
+     */
+    LiveData<List<InternalBacklinksData>> getBacklinksLiveData() {
         return mBacklinksLiveData;
     }
 
@@ -226,26 +234,62 @@ final class AppClipsViewModel extends ViewModel {
         return HardwareRenderer.createHardwareBitmap(output, bounds.width(), bounds.height());
     }
 
-    private ListenableFuture<ClipData> getBacklinksData(Set<Integer> taskIdsToIgnore,
-            int displayId) {
-        return getAllRootTaskInfosOnDisplay(displayId)
-                .stream()
-                .filter(taskInfo -> shouldIncludeTask(taskInfo, taskIdsToIgnore))
-                .findFirst()
-                .map(this::getBacklinksDataForTaskId)
-                .orElse(Futures.immediateFuture(null));
+    private ListenableFuture<List<InternalBacklinksData>> getAllAvailableBacklinks(
+            Set<Integer> taskIdsToIgnore, int displayId) {
+        ListenableFuture<List<TaskInfo>> allTasksOnDisplayFuture = getAllTasksOnDisplay(displayId);
+
+        ListenableFuture<List<ListenableFuture<InternalBacklinksData>>> backlinksNestedListFuture =
+                Futures.transform(allTasksOnDisplayFuture, allTasksOnDisplay ->
+                        allTasksOnDisplay
+                                .stream()
+                                .filter(taskInfo -> shouldIncludeTask(taskInfo, taskIdsToIgnore))
+                                .map(this::getBacklinksDataForTaskInfo)
+                                .toList(),
+                        mBgExecutor);
+
+        return Futures.transformAsync(backlinksNestedListFuture, Futures::allAsList, mBgExecutor);
     }
 
-    private List<RootTaskInfo> getAllRootTaskInfosOnDisplay(int displayId) {
-        try {
-            return mAtmService.getAllRootTaskInfosOnDisplay(displayId);
-        } catch (RemoteException e) {
-            Log.e(TAG, String.format("Error while querying for tasks on display %d", displayId), e);
-            return Collections.emptyList();
-        }
+    /**
+     * Returns all tasks on a given display after querying {@link IActivityTaskManager} from the
+     * {@link #mBgExecutor}.
+     */
+    private ListenableFuture<List<TaskInfo>> getAllTasksOnDisplay(int displayId) {
+        SettableFuture<List<TaskInfo>> recentTasksFuture = SettableFuture.create();
+        mBgExecutor.execute(() -> {
+            try {
+                // Directly call into ActivityTaskManagerService instead of going through WMShell
+                // because WMShell is only available in the main SysUI process and App Clips runs
+                // in its own separate process as it deals with bitmaps.
+                List<TaskInfo> allTasksOnDisplay = mAtmService.getTasks(
+                                /* maxNum= */ Integer.MAX_VALUE,
+                                // PIP tasks are not visible in recents. So _not_ filtering for
+                                // tasks that are only visible in recents.
+                                /* filterOnlyVisibleRecents= */ false,
+                                /* keepIntentExtra= */ false,
+                                displayId)
+                        .stream()
+                        .map(runningTaskInfo -> (TaskInfo) runningTaskInfo)
+                        .toList();
+                recentTasksFuture.set(allTasksOnDisplay);
+            } catch (Exception e) {
+                Log.e(TAG, String.format("Error getting all tasks on displayId %d", displayId), e);
+                recentTasksFuture.set(Collections.emptyList());
+            }
+        });
+
+        return withTimeout(recentTasksFuture);
     }
 
-    private boolean shouldIncludeTask(RootTaskInfo taskInfo, Set<Integer> taskIdsToIgnore) {
+    /**
+     * Returns whether the app represented by the provided {@link TaskInfo} should be included for
+     * querying for {@link AssistContent}.
+     */
+    private boolean shouldIncludeTask(TaskInfo taskInfo, Set<Integer> taskIdsToIgnore) {
+        DebugLogger.INSTANCE.logcatMessage(this,
+                () -> String.format("shouldIncludeTask taskId %d; topActivity %s", taskInfo.taskId,
+                        taskInfo.topActivity));
+
         // Only consider tasks that shouldn't be ignored, are visible, running, and have a launcher
         // icon. Furthermore, types such as launcher/home/dock/assistant are ignored.
         return !taskIdsToIgnore.contains(taskInfo.taskId)
@@ -254,26 +298,46 @@ final class AppClipsViewModel extends ViewModel {
                 && taskInfo.numActivities > 0
                 && taskInfo.topActivity != null
                 && taskInfo.topActivityInfo != null
-                && taskInfo.childTaskIds.length > 0
                 && taskInfo.getActivityType() == WindowConfiguration.ACTIVITY_TYPE_STANDARD
                 && canAppStartThroughLauncher(taskInfo.topActivity.getPackageName());
     }
 
+    /**
+     * Returns whether the app represented by the provided {@code packageName} can be launched
+     * through the all apps tray by a user.
+     */
     private boolean canAppStartThroughLauncher(String packageName) {
+        // Use Intent.resolveActivity API to check if the intent resolves as that is what Android
+        // uses internally when apps use Context.startActivity.
         return getMainLauncherIntentForPackage(packageName).resolveActivity(mPackageManager)
                 != null;
     }
 
-    private ListenableFuture<ClipData> getBacklinksDataForTaskId(RootTaskInfo taskInfo) {
-        SettableFuture<ClipData> backlinksData = SettableFuture.create();
+    /**
+     * Returns an {@link InternalBacklinksData} that represents the Backlink data internally, which
+     * is captured by querying the system using {@link TaskInfo#taskId}.
+     */
+    private ListenableFuture<InternalBacklinksData> getBacklinksDataForTaskInfo(
+            TaskInfo taskInfo) {
+        DebugLogger.INSTANCE.logcatMessage(this,
+                () -> String.format("getBacklinksDataForTaskId for taskId %d; topActivity %s",
+                        taskInfo.taskId, taskInfo.topActivity));
+
+        SettableFuture<InternalBacklinksData> backlinksData = SettableFuture.create();
         int taskId = taskInfo.taskId;
         mAssistContentRequester.requestAssistContent(taskId, assistContent ->
                 backlinksData.set(getBacklinksDataFromAssistContent(taskInfo, assistContent)));
-        return withTimeout(backlinksData, 5L, TimeUnit.SECONDS, newSingleThreadScheduledExecutor());
+        return withTimeout(backlinksData);
+    }
+
+    /** Returns the same {@link ListenableFuture} but with a 5 {@link TimeUnit#SECONDS} timeout. */
+    private static <V> ListenableFuture<V> withTimeout(ListenableFuture<V> future) {
+        return Futures.withTimeout(future, 5L, TimeUnit.SECONDS,
+                newSingleThreadScheduledExecutor());
     }
 
     /**
-     * A utility method to get {@link ClipData} to use for Backlinks functionality from
+     * A utility method to get {@link InternalBacklinksData} to use for Backlinks functionality from
      * {@link AssistContent} received from the app whose screenshot is taken.
      *
      * <p>There are multiple ways an app can provide deep-linkable data via {@link AssistContent}
@@ -289,35 +353,54 @@ final class AppClipsViewModel extends ViewModel {
      *
      * @param taskInfo {@link RootTaskInfo} of the task which provided the {@link AssistContent}.
      * @param content the {@link AssistContent} to map into Backlinks {@link ClipData}.
-     * @return {@link ClipData} that represents the Backlinks data.
+     * @return {@link InternalBacklinksData} that represents the Backlinks data along with app icon.
      */
-    private ClipData getBacklinksDataFromAssistContent(RootTaskInfo taskInfo,
+    private InternalBacklinksData getBacklinksDataFromAssistContent(TaskInfo taskInfo,
             @Nullable AssistContent content) {
+        DebugLogger.INSTANCE.logcatMessage(this,
+                () -> String.format("getBacklinksDataFromAssistContent taskId %d; topActivity %s",
+                        taskInfo.taskId, taskInfo.topActivity));
+
         String appName = getAppNameOfTask(taskInfo);
         String packageName = taskInfo.topActivity.getPackageName();
-        ClipData fallback = ClipData.newIntent(appName,
+        Drawable appIcon = taskInfo.topActivityInfo.loadIcon(mPackageManager);
+        ClipData mainLauncherIntent = ClipData.newIntent(appName,
                 getMainLauncherIntentForPackage(packageName));
+        InternalBacklinksData fallback = new InternalBacklinksData(mainLauncherIntent, appIcon);
         if (content == null) {
             return fallback;
         }
 
         // First preference is given to app provided uri.
         if (content.isAppProvidedWebUri()) {
+            DebugLogger.INSTANCE.logcatMessage(this,
+                    () -> "getBacklinksDataFromAssistContent: app has provided a uri");
+
             Uri uri = content.getWebUri();
             Intent backlinksIntent = new Intent(ACTION_VIEW).setData(uri);
             if (doesIntentResolveToSamePackage(backlinksIntent, packageName)) {
-                return ClipData.newRawUri(appName, uri);
+                DebugLogger.INSTANCE.logcatMessage(this,
+                        () -> "getBacklinksDataFromAssistContent: using app provided uri");
+                return new InternalBacklinksData(ClipData.newRawUri(appName, uri), appIcon);
             }
         }
 
         // Second preference is given to app provided, hopefully deep-linking, intent.
         if (content.isAppProvidedIntent()) {
+            DebugLogger.INSTANCE.logcatMessage(this,
+                    () -> "getBacklinksDataFromAssistContent: app has provided an intent");
+
             Intent backlinksIntent = content.getIntent();
             if (doesIntentResolveToSamePackage(backlinksIntent, packageName)) {
-                return ClipData.newIntent(appName, backlinksIntent);
+                DebugLogger.INSTANCE.logcatMessage(this,
+                        () -> "getBacklinksDataFromAssistContent: using app provided intent");
+                return new InternalBacklinksData(ClipData.newIntent(appName, backlinksIntent),
+                        appIcon);
             }
         }
 
+        DebugLogger.INSTANCE.logcatMessage(this,
+                () -> "getBacklinksDataFromAssistContent: using fallback");
         return fallback;
     }
 
@@ -331,14 +414,23 @@ final class AppClipsViewModel extends ViewModel {
         return resolvedComponent.getPackageName().equals(requiredPackageName);
     }
 
-    private String getAppNameOfTask(RootTaskInfo taskInfo) {
+    private String getAppNameOfTask(TaskInfo taskInfo) {
         return taskInfo.topActivityInfo.loadLabel(mPackageManager).toString();
     }
 
-    private Intent getMainLauncherIntentForPackage(String packageName) {
-        return new Intent(ACTION_MAIN)
-                .addCategory(CATEGORY_LAUNCHER)
-                .setPackage(packageName);
+    private Intent getMainLauncherIntentForPackage(String pkgName) {
+        Intent intent = new Intent(ACTION_MAIN).addCategory(CATEGORY_LAUNCHER).setPackage(pkgName);
+
+        // Not all apps use DEFAULT_CATEGORY for their main launcher activity so the exact component
+        // needs to be queried and set on the Intent in order for note-taking apps to be able to
+        // start this intent. When starting an activity with an implicit intent, Android adds the
+        // DEFAULT_CATEGORY flag otherwise it fails to resolve the intent.
+        ResolveInfo resolvedActivity = mPackageManager.resolveActivity(intent, /* flags= */ 0);
+        if (resolvedActivity != null) {
+            intent.setComponent(resolvedActivity.getComponentInfo().getComponentName());
+        }
+
+        return intent;
     }
 
     /** Helper factory to help with injecting {@link AppClipsViewModel}. */

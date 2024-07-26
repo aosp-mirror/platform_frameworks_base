@@ -50,6 +50,7 @@ import androidx.core.view.isInvisible
 import com.android.internal.policy.SystemBarUtils
 import com.android.keyguard.ClockEventController
 import com.android.keyguard.KeyguardClockSwitch
+import com.android.keyguard.logging.KeyguardQuickAffordancesLogger
 import com.android.systemui.animation.view.LaunchableImageView
 import com.android.systemui.biometrics.domain.interactor.UdfpsOverlayInteractor
 import com.android.systemui.broadcast.BroadcastDispatcher
@@ -147,6 +148,7 @@ constructor(
     private val defaultShortcutsSection: DefaultShortcutsSection,
     private val keyguardClockInteractor: KeyguardClockInteractor,
     private val keyguardClockViewModel: KeyguardClockViewModel,
+    private val quickAffordancesLogger: KeyguardQuickAffordancesLogger,
 ) {
     val hostToken: IBinder? = bundle.getBinder(KEY_HOST_TOKEN)
     private val width: Int = bundle.getInt(KEY_VIEW_WIDTH)
@@ -197,8 +199,7 @@ constructor(
                 initiallySelectedSlotId =
                     bundle.getString(
                         KeyguardPreviewConstants.KEY_INITIALLY_SELECTED_SLOT_ID,
-                    )
-                        ?: KeyguardQuickAffordanceSlots.SLOT_ID_BOTTOM_START,
+                    ) ?: KeyguardQuickAffordanceSlots.SLOT_ID_BOTTOM_START,
                 shouldHighlightSelectedAffordance = shouldHighlightSelectedAffordance,
             )
         } else {
@@ -230,8 +231,7 @@ constructor(
             val previewContext =
                 display?.let {
                     ContextThemeWrapper(context.createDisplayContext(it), context.getTheme())
-                }
-                    ?: context
+                } ?: context
 
             val rootView = FrameLayout(previewContext)
 
@@ -318,8 +318,8 @@ constructor(
      */
     private fun setUpSmartspace(previewContext: Context, parentView: ViewGroup) {
         if (
-            !lockscreenSmartspaceController.isEnabled() ||
-                !lockscreenSmartspaceController.isDateWeatherDecoupled()
+            !lockscreenSmartspaceController.isEnabled ||
+                !lockscreenSmartspaceController.isDateWeatherDecoupled
         ) {
             return
         }
@@ -396,6 +396,7 @@ constructor(
                     null, // device entry haptics not required for preview mode
                     null, // falsing manager not required for preview mode
                     null, // keyguard view mediator is not required for preview mode
+                    mainDispatcher,
                 )
         }
         rootView.addView(
@@ -463,6 +464,7 @@ constructor(
                     alpha = flowOf(1f),
                     falsingManager = falsingManager,
                     vibratorHelper = vibratorHelper,
+                    logger = quickAffordancesLogger,
                 ) { message ->
                     indicationController.showTransientIndication(message)
                 }
@@ -477,6 +479,7 @@ constructor(
                     alpha = flowOf(1f),
                     falsingManager = falsingManager,
                     vibratorHelper = vibratorHelper,
+                    logger = quickAffordancesLogger,
                 ) { message ->
                     indicationController.showTransientIndication(message)
                 }
@@ -654,6 +657,7 @@ constructor(
             clockController.clock = clock
         }
     }
+
     private fun onClockChanged() {
         if (MigrateClocksToBlueprint.isEnabled) {
             return

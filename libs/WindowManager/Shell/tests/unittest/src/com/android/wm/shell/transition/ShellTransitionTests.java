@@ -79,7 +79,6 @@ import android.util.Pair;
 import android.view.IRecentsAnimationRunner;
 import android.view.Surface;
 import android.view.SurfaceControl;
-import android.view.WindowManager;
 import android.window.IRemoteTransition;
 import android.window.IRemoteTransitionFinishedCallback;
 import android.window.IWindowContainerToken;
@@ -440,6 +439,27 @@ public class ShellTransitionTests extends ShellTestCase {
         final TransitionInfo openAct = new TransitionInfoBuilder(TRANSIT_OPEN)
                 .addChange(TRANSIT_OPEN, cmpt).build();
         assertTrue(filter.matches(openAct));
+    }
+
+    @Test
+    public void testTransitionFilterAnimOverride() {
+        TransitionFilter filter = new TransitionFilter();
+        filter.mRequirements =
+                new TransitionFilter.Requirement[]{new TransitionFilter.Requirement()};
+        filter.mRequirements[0].mCustomAnimation = true;
+        filter.mRequirements[0].mModes = new int[]{TRANSIT_OPEN, TRANSIT_TO_FRONT};
+
+        final RunningTaskInfo taskInf = createTaskInfo(1);
+        final TransitionInfo openTask = new TransitionInfoBuilder(TRANSIT_OPEN)
+                .addChange(TRANSIT_OPEN, taskInf).build();
+        assertFalse(filter.matches(openTask));
+
+        final TransitionInfo.AnimationOptions overOpts =
+                TransitionInfo.AnimationOptions.makeCustomAnimOptions("pakname", 0, 0, 0, true);
+        final TransitionInfo openTaskOpts = new TransitionInfoBuilder(TRANSIT_OPEN)
+                .addChange(TRANSIT_OPEN, taskInf).build();
+        openTaskOpts.getChanges().get(0).setAnimationOptions(overOpts);
+        assertTrue(filter.matches(openTaskOpts));
     }
 
     @Test
@@ -1192,8 +1212,7 @@ public class ShellTransitionTests extends ShellTestCase {
                         mMainHandler, mAnimExecutor, mock(HomeTransitionObserver.class));
         final RecentsTransitionHandler recentsHandler =
                 new RecentsTransitionHandler(shellInit, transitions,
-                        mock(RecentTasksController.class), mock(HomeTransitionObserver.class),
-                        () -> mock(SurfaceControl.Transaction.class));
+                        mock(RecentTasksController.class), mock(HomeTransitionObserver.class));
         transitions.replaceDefaultHandlerForTest(mDefaultHandler);
         shellInit.init();
 
@@ -1615,43 +1634,6 @@ public class ShellTransitionTests extends ShellTestCase {
                 eq(R.styleable.WindowAnimation_activityCloseEnterAnimation), anyBoolean());
     }
 
-    class ChangeBuilder {
-        final TransitionInfo.Change mChange;
-
-        ChangeBuilder(@WindowManager.TransitionType int mode) {
-            mChange = new TransitionInfo.Change(null /* token */, createMockSurface(true));
-            mChange.setMode(mode);
-        }
-
-        ChangeBuilder setFlags(@TransitionInfo.ChangeFlags int flags) {
-            mChange.setFlags(flags);
-            return this;
-        }
-
-        ChangeBuilder setTask(RunningTaskInfo taskInfo) {
-            mChange.setTaskInfo(taskInfo);
-            return this;
-        }
-
-        ChangeBuilder setRotate(int anim) {
-            return setRotate(Surface.ROTATION_90, anim);
-        }
-
-        ChangeBuilder setRotate() {
-            return setRotate(ROTATION_ANIMATION_UNSPECIFIED);
-        }
-
-        ChangeBuilder setRotate(@Surface.Rotation int target, int anim) {
-            mChange.setRotation(Surface.ROTATION_0, target);
-            mChange.setRotationAnimation(anim);
-            return this;
-        }
-
-        TransitionInfo.Change build() {
-            return mChange;
-        }
-    }
-
     class TestTransitionHandler implements Transitions.TransitionHandler {
         ArrayList<Pair<IBinder, Transitions.TransitionFinishCallback>> mFinishes =
                 new ArrayList<>();
@@ -1738,12 +1720,6 @@ public class ShellTransitionTests extends ShellTestCase {
     private static TransitionInfo createTransitionInfo() {
         return new TransitionInfoBuilder(TRANSIT_OPEN)
                 .addChange(TRANSIT_OPEN).addChange(TRANSIT_CLOSE).build();
-    }
-
-    private static SurfaceControl createMockSurface(boolean valid) {
-        SurfaceControl sc = mock(SurfaceControl.class);
-        doReturn(valid).when(sc).isValid();
-        return sc;
     }
 
     private static RunningTaskInfo createTaskInfo(int taskId, int windowingMode, int activityType) {

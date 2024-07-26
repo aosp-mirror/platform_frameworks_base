@@ -36,4 +36,18 @@ class FakeCommunalMediaRepository : CommunalMediaRepository {
     fun mediaInactive() {
         _mediaModel.value = CommunalMediaModel.INACTIVE
     }
+
+    private var isListening = false
+
+    override fun startListening() {
+        isListening = true
+    }
+
+    override fun stopListening() {
+        isListening = false
+    }
+
+    fun isListening(): Boolean {
+        return isListening
+    }
 }

@@ -36,7 +36,7 @@ import androidx.annotation.BinderThread;
 import androidx.annotation.Nullable;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.protolog.common.ProtoLog;
+import com.android.internal.protolog.ProtoLog;
 import com.android.internal.util.Preconditions;
 import com.android.wm.shell.R;
 import com.android.wm.shell.ShellTaskOrganizer;
@@ -44,6 +44,7 @@ import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.DisplayInsetsController;
 import com.android.wm.shell.common.DisplayLayout;
 import com.android.wm.shell.common.ExternalInterfaceBinder;
+import com.android.wm.shell.common.ImeListener;
 import com.android.wm.shell.common.RemoteCallable;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.SingleInstanceRemoteListener;
@@ -55,6 +56,7 @@ import com.android.wm.shell.common.pip.PipBoundsAlgorithm;
 import com.android.wm.shell.common.pip.PipBoundsState;
 import com.android.wm.shell.common.pip.PipDisplayLayoutState;
 import com.android.wm.shell.common.pip.PipUtils;
+import com.android.wm.shell.pip.Pip;
 import com.android.wm.shell.protolog.ShellProtoLogGroup;
 import com.android.wm.shell.sysui.ConfigurationChangeListener;
 import com.android.wm.shell.sysui.ShellCommandHandler;
@@ -62,6 +64,7 @@ import com.android.wm.shell.sysui.ShellController;
 import com.android.wm.shell.sysui.ShellInit;
 
 import java.io.PrintWriter;
+import java.util.function.Consumer;
 
 /**
  * Manages the picture-in-picture (PIP) UI and states for Phones.
@@ -86,6 +89,8 @@ public class PipController implements ConfigurationChangeListener,
     private final ShellTaskOrganizer mShellTaskOrganizer;
     private final PipTransitionState mPipTransitionState;
     private final ShellExecutor mMainExecutor;
+    private final PipImpl mImpl;
+    private Consumer<Boolean> mOnIsInPipStateChangedListener;
 
     // Wrapper for making Binder calls into PiP animation listener hosted in launcher's Recents.
     private PipAnimationListener mPipRecentsAnimationListener;
@@ -140,6 +145,7 @@ public class PipController implements ConfigurationChangeListener,
         mPipTransitionState = pipTransitionState;
         mPipTransitionState.addPipTransitionStateChangedListener(this);
         mMainExecutor = mainExecutor;
+        mImpl = new PipImpl();
 
         if (PipUtils.isPip2ExperimentEnabled()) {
             shellInit.addInitCallback(this::onInit, this);
@@ -174,6 +180,10 @@ public class PipController implements ConfigurationChangeListener,
                 pipTransitionState, mainExecutor);
     }
 
+    public PipImpl getPipImpl() {
+        return mImpl;
+    }
+
     private void onInit() {
         mShellCommandHandler.addDumpCallback(this::dump, this);
         // Ensure that we have the display info in case we get calls to update the bounds before the
@@ -190,6 +200,11 @@ public class PipController implements ConfigurationChangeListener,
                         onDisplayChanged(mDisplayController
                                         .getDisplayLayout(mPipDisplayLayoutState.getDisplayId()));
                     }
+                });
+        mDisplayInsetsController.addInsetsChangedListener(mPipDisplayLayoutState.getDisplayId(),
+                new ImeListener(mDisplayController, mPipDisplayLayoutState.getDisplayId()) {
+                    @Override
+                    public void onImeVisibilityChanged(boolean imeVisible, int imeHeight) {}
                 });
 
         // Allow other outside processes to bind to PiP controller using the key below.
@@ -310,22 +325,29 @@ public class PipController implements ConfigurationChangeListener,
     @Override
     public void onPipTransitionStateChanged(@PipTransitionState.TransitionState int oldState,
             @PipTransitionState.TransitionState int newState, @Nullable Bundle extra) {
-        if (newState == PipTransitionState.SWIPING_TO_PIP) {
-            Preconditions.checkState(extra != null,
-                    "No extra bundle for " + mPipTransitionState);
+        switch (newState) {
+            case PipTransitionState.SWIPING_TO_PIP:
+                Preconditions.checkState(extra != null,
+                        "No extra bundle for " + mPipTransitionState);
 
-            SurfaceControl overlay = extra.getParcelable(
-                    SWIPE_TO_PIP_OVERLAY, SurfaceControl.class);
-            Rect appBounds = extra.getParcelable(
-                    SWIPE_TO_PIP_APP_BOUNDS, Rect.class);
+                SurfaceControl overlay = extra.getParcelable(
+                        SWIPE_TO_PIP_OVERLAY, SurfaceControl.class);
+                Rect appBounds = extra.getParcelable(
+                        SWIPE_TO_PIP_APP_BOUNDS, Rect.class);
 
-            Preconditions.checkState(appBounds != null,
-                    "App bounds can't be null for " + mPipTransitionState);
-            mPipTransitionState.setSwipePipToHomeState(overlay, appBounds);
-        } else if (newState == PipTransitionState.ENTERED_PIP) {
-            if (mPipTransitionState.isInSwipePipToHomeTransition()) {
-                mPipTransitionState.resetSwipePipToHomeState();
-            }
+                Preconditions.checkState(appBounds != null,
+                        "App bounds can't be null for " + mPipTransitionState);
+                mPipTransitionState.setSwipePipToHomeState(overlay, appBounds);
+                break;
+            case PipTransitionState.ENTERED_PIP:
+                if (mPipTransitionState.isInSwipePipToHomeTransition()) {
+                    mPipTransitionState.resetSwipePipToHomeState();
+                }
+                mOnIsInPipStateChangedListener.accept(true /* inPip */);
+                break;
+            case PipTransitionState.EXITED_PIP:
+                mOnIsInPipStateChangedListener.accept(false /* inPip */);
+                break;
         }
     }
 
@@ -352,6 +374,49 @@ public class PipController implements ConfigurationChangeListener,
         mPipBoundsAlgorithm.dump(pw, innerPrefix);
         mPipBoundsState.dump(pw, innerPrefix);
         mPipDisplayLayoutState.dump(pw, innerPrefix);
+        mPipTransitionState.dump(pw, innerPrefix);
+    }
+
+    private void setOnIsInPipStateChangedListener(Consumer<Boolean> callback) {
+        mOnIsInPipStateChangedListener = callback;
+        if (mOnIsInPipStateChangedListener != null) {
+            callback.accept(mPipTransitionState.isInPip());
+        }
+    }
+
+    /**
+     * The interface for calls from outside the Shell, within the host process.
+     */
+    public class PipImpl implements Pip {
+        @Override
+        public void expandPip() {}
+
+        @Override
+        public void onSystemUiStateChanged(boolean isSysUiStateValid, long flag) {}
+
+        @Override
+        public void setOnIsInPipStateChangedListener(Consumer<Boolean> callback) {
+            mMainExecutor.execute(() -> {
+                PipController.this.setOnIsInPipStateChangedListener(callback);
+            });
+        }
+
+        @Override
+        public void addPipExclusionBoundsChangeListener(Consumer<Rect> listener) {
+            mMainExecutor.execute(() -> {
+                mPipBoundsState.addPipExclusionBoundsChangeCallback(listener);
+            });
+        }
+
+        @Override
+        public void removePipExclusionBoundsChangeListener(Consumer<Rect> listener) {
+            mMainExecutor.execute(() -> {
+                mPipBoundsState.removePipExclusionBoundsChangeCallback(listener);
+            });
+        }
+
+        @Override
+        public void showPictureInPictureMenu() {}
     }
 
     /**

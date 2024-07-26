@@ -469,6 +469,7 @@ class MenuViewLayer extends FrameLayout implements
 
     private void onSpringAnimationsEndAction() {
         if (mShouldShowDockTooltip) {
+            mEduTooltipView.ifPresent(this::removeTooltip);
             mEduTooltipView = Optional.of(new MenuEduTooltipView(mContext, mMenuViewAppearance));
             mEduTooltipView.ifPresent(view -> addTooltipView(view,
                     getContext().getText(R.string.accessibility_floating_button_docking_tooltip),
@@ -514,7 +515,7 @@ class MenuViewLayer extends FrameLayout implements
         List<ResolveInfo> activities = packageManager.queryIntentActivities(intent,
                 PackageManager.ResolveInfoFlags.of(PackageManager.MATCH_DEFAULT_ONLY));
         if (!activities.isEmpty()) {
-            mContext.startActivity(intent);
+            mContext.startActivityAsUser(intent, UserHandle.CURRENT);
             mStatusBarManager.collapsePanels();
         }
     }

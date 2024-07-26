@@ -424,4 +424,11 @@
     <bool name="config_dropboxmanager_persistent_logging_enabled">false</bool>
     <java-symbol type="bool" name="config_dropboxmanager_persistent_logging_enabled" />
 
+    <!-- Telephony satellite gateway class name for handling carrier roaming to satellite is using ESOS messaging. -->
+    <string name="config_satellite_carrier_roaming_esos_provisioned_class" translatable="false"></string>
+    <java-symbol type="string" name="config_satellite_carrier_roaming_esos_provisioned_class" />
+
+    <!-- Telephony satellite gateway intent for handling carrier roaming to satellite is using ESOS messaging. -->
+    <string name="config_satellite_carrier_roaming_esos_provisioned_intent_action" translatable="false"></string>
+    <java-symbol type="string" name="config_satellite_carrier_roaming_esos_provisioned_intent_action" />
 </resources>

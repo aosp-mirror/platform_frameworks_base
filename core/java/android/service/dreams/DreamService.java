@@ -19,6 +19,7 @@ package android.service.dreams;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.service.dreams.Flags.dreamHandlesConfirmKeys;
 import static android.service.dreams.Flags.dreamHandlesBeingObscured;
+import static android.service.dreams.Flags.startAndStopDozingInBackground;
 
 import android.annotation.FlaggedApi;
 import android.annotation.IdRes;
@@ -265,9 +266,9 @@ public class DreamService extends Service implements Window.Callback {
     private boolean mDozing;
     private boolean mWindowless;
     private boolean mPreviewMode;
-    private int mDozeScreenState = Display.STATE_UNKNOWN;
-    private @Display.StateReason int mDozeScreenStateReason = Display.STATE_REASON_UNKNOWN;
-    private int mDozeScreenBrightness = PowerManager.BRIGHTNESS_DEFAULT;
+    private volatile int mDozeScreenState = Display.STATE_UNKNOWN;
+    private volatile @Display.StateReason int mDozeScreenStateReason = Display.STATE_REASON_UNKNOWN;
+    private volatile int mDozeScreenBrightness = PowerManager.BRIGHTNESS_DEFAULT;
 
     private boolean mDebug = false;
 
@@ -741,7 +742,9 @@ public class DreamService extends Service implements Window.Callback {
      * @see View#findViewById(int)
      * @see DreamService#requireViewById(int)
      */
-    /* TODO(b/347672184): Re-add @Nullable */
+    // Strictly speaking this should be marked as @Nullable but the nullability of the return value
+    // is deliberately left unspecified as idiomatically correct code can make assumptions either
+    // way based on local context, e.g. layout specification.
     public <T extends View> T findViewById(@IdRes int id) {
         return getWindow().findViewById(id);
     }
@@ -784,7 +787,6 @@ public class DreamService extends Service implements Window.Callback {
      */
     public void setInteractive(boolean interactive) {
         mInteractive = interactive;
-        updateAccessibilityMessage();
     }
 
     /**
@@ -923,9 +925,16 @@ public class DreamService extends Service implements Window.Callback {
 
         if (mDozing) {
             try {
-                mDreamManager.startDozing(
+                if (startAndStopDozingInBackground()) {
+                    mDreamManager.startDozingOneway(
                         mDreamToken, mDozeScreenState, mDozeScreenStateReason,
                         mDozeScreenBrightness);
+                } else {
+                    mDreamManager.startDozing(
+                            mDreamToken, mDozeScreenState, mDozeScreenStateReason,
+                            mDozeScreenBrightness);
+                }
+
             } catch (RemoteException ex) {
                 // system server died
             }
@@ -1250,7 +1259,11 @@ public class DreamService extends Service implements Window.Callback {
         try {
             // finishSelf will unbind the dream controller from the dream service. This will
             // trigger DreamService.this.onDestroy and DreamService.this will die.
-            mDreamManager.finishSelf(mDreamToken, true /*immediate*/);
+            if (startAndStopDozingInBackground()) {
+                mDreamManager.finishSelfOneway(mDreamToken, true /*immediate*/);
+            } else {
+                mDreamManager.finishSelf(mDreamToken, true /*immediate*/);
+            }
         } catch (RemoteException ex) {
             // system server died
         }
@@ -1393,7 +1406,8 @@ public class DreamService extends Service implements Window.Callback {
                         convertToComponentName(
                                 rawMetadata.getString(
                                         com.android.internal.R.styleable.Dream_settingsActivity),
-                                serviceInfo),
+                                serviceInfo,
+                                packageManager),
                         rawMetadata.getDrawable(
                                 com.android.internal.R.styleable.Dream_previewImage),
                         rawMetadata.getBoolean(R.styleable.Dream_showClockAndComplications,
@@ -1408,26 +1422,38 @@ public class DreamService extends Service implements Window.Callback {
     }
 
     @Nullable
-    private static ComponentName convertToComponentName(@Nullable String flattenedString,
-            ServiceInfo serviceInfo) {
+    private static ComponentName convertToComponentName(
+            @Nullable String flattenedString,
+            ServiceInfo serviceInfo,
+            PackageManager packageManager) {
         if (flattenedString == null) {
             return null;
         }
 
-        if (!flattenedString.contains("/")) {
-            return new ComponentName(serviceInfo.packageName, flattenedString);
+        final ComponentName cn =
+                flattenedString.contains("/")
+                        ? ComponentName.unflattenFromString(flattenedString)
+                        : new ComponentName(serviceInfo.packageName, flattenedString);
+
+        if (cn == null) {
+            return null;
         }
 
         // Ensure that the component is from the same package as the dream service. If not,
         // treat the component as invalid and return null instead.
-        final ComponentName cn = ComponentName.unflattenFromString(flattenedString);
-        if (cn == null) return null;
         if (!cn.getPackageName().equals(serviceInfo.packageName)) {
             Log.w(TAG,
                     "Inconsistent package name in component: " + cn.getPackageName()
                             + ", should be: " + serviceInfo.packageName);
             return null;
         }
+
+        // Ensure that the activity exists. If not, treat the component as invalid and return null.
+        if (new Intent().setComponent(cn).resolveActivityInfo(packageManager, 0) == null) {
+            Log.w(TAG, "Dream settings activity not found: " + cn);
+            return null;
+        }
+
         return cn;
     }
 
@@ -1614,9 +1640,9 @@ public class DreamService extends Service implements Window.Callback {
         if (mWindow == null) return;
         if (mDreamAccessibility == null) {
             final View rootView = mWindow.getDecorView();
-            mDreamAccessibility = new DreamAccessibility(this, rootView);
+            mDreamAccessibility = new DreamAccessibility(this, rootView, this::wakeUp);
         }
-        mDreamAccessibility.updateAccessibilityConfiguration(isInteractive());
+        mDreamAccessibility.updateAccessibilityConfiguration();
     }
 
     private boolean getWindowFlagValue(int flag, boolean defaultValue) {

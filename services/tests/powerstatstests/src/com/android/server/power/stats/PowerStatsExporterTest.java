@@ -19,7 +19,6 @@ package com.android.server.power.stats;
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth.assertWithMessage;
 
-import static org.junit.Assert.assertThrows;
 import static org.mockito.Mockito.mock;
 
 import android.os.AggregateBatteryConsumer;
@@ -131,9 +130,20 @@ public class PowerStatsExporterTest {
 
     @Test
     public void breakdownByProcState_fullRange() throws Exception {
+        breakdownByProcState_fullRange(false, false);
+    }
+
+    @Test
+    public void breakdownByProcStateScreenAndPower_fullRange() throws Exception {
+        breakdownByProcState_fullRange(true, true);
+    }
+
+    private void breakdownByProcState_fullRange(boolean includeScreenStateData,
+            boolean includePowerStateData) throws Exception {
         BatteryUsageStats.Builder builder = new BatteryUsageStats.Builder(
                 new String[]{"cu570m"}, /* includePowerModels */ false,
-                /* includeProcessStateData */ true, /* powerThreshold */ 0);
+                /* includeProcessStateData */ true, includeScreenStateData,
+                includePowerStateData, /* powerThreshold */ 0);
         exportAggregatedPowerStats(builder, 1000, 10000);
 
         BatteryUsageStats actual = builder.build();
@@ -177,7 +187,7 @@ public class PowerStatsExporterTest {
     public void breakdownByProcState_subRange() throws Exception {
         BatteryUsageStats.Builder builder = new BatteryUsageStats.Builder(
                 new String[]{"cu570m"}, /* includePowerModels */ false,
-                /* includeProcessStateData */ true, /* powerThreshold */ 0);
+                /* includeProcessStateData */ true, true, true, /* powerThreshold */ 0);
         exportAggregatedPowerStats(builder, 3700, 6700);
 
         BatteryUsageStats actual = builder.build();
@@ -209,7 +219,7 @@ public class PowerStatsExporterTest {
     public void combinedProcessStates() throws Exception {
         BatteryUsageStats.Builder builder = new BatteryUsageStats.Builder(
                 new String[]{"cu570m"}, /* includePowerModels */ false,
-                /* includeProcessStateData */ false, /* powerThreshold */ 0);
+                /* includeProcessStateData */ false, true, true, /* powerThreshold */ 0);
         exportAggregatedPowerStats(builder, 1000, 10000);
 
         BatteryUsageStats actual = builder.build();
@@ -229,13 +239,13 @@ public class PowerStatsExporterTest {
         UidBatteryConsumer uidScope = actual.getUidBatteryConsumers().stream()
                 .filter(us -> us.getUid() == APP_UID1).findFirst().orElse(null);
         // There shouldn't be any per-procstate data
-        assertThrows(
-                IllegalArgumentException.class,
-                () -> uidScope.getConsumedPower(new BatteryConsumer.Dimensions(
+        for (int procState = 0; procState < BatteryConsumer.PROCESS_STATE_COUNT; procState++) {
+            if (procState != BatteryConsumer.PROCESS_STATE_UNSPECIFIED) {
+                assertThat(uidScope.getConsumedPower(new BatteryConsumer.Dimensions(
                         BatteryConsumer.POWER_COMPONENT_CPU,
-                        BatteryConsumer.PROCESS_STATE_FOREGROUND)));
-
-
+                        BatteryConsumer.PROCESS_STATE_FOREGROUND))).isEqualTo(0);
+            }
+        }
         actual.close();
     }
 

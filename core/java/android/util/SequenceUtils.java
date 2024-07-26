@@ -25,8 +25,8 @@ package android.util;
  * {@link #getInitSeq}.
  * 2. Whenever a newer info needs to be sent to the client side, the system server should first
  * update its seq with {@link #getNextSeq}, then send the new info with the new seq to the client.
- * 3. On the client side, when receiving a new info, it should only consume it if it is newer than
- * the last received info seq by checking {@link #isIncomingSeqNewer}.
+ * 3. On the client side, when receiving a new info, it should only consume it if it is not stale by
+ * checking {@link #isIncomingSeqStale}.
  *
  * @hide
  */
@@ -36,15 +36,22 @@ public final class SequenceUtils {
     }
 
     /**
-     * Returns {@code true} if the incomingSeq is newer than the curSeq.
+     * Returns {@code true} if the incomingSeq is stale, which means the client should not consume
+     * it.
      */
-    public static boolean isIncomingSeqNewer(int curSeq, int incomingSeq) {
+    public static boolean isIncomingSeqStale(int curSeq, int incomingSeq) {
+        if (curSeq == getInitSeq()) {
+            // curSeq can be set to the initial seq in the following cases:
+            // 1. The client process/field is newly created/recreated.
+            // 2. The field is not managed by the system server, such as WindowlessWindowManager.
+            // The client should always consume the incoming in these cases.
+            return false;
+        }
         // Convert to long for comparison.
         final long diff = (long) incomingSeq - curSeq;
-        // If there has been a sufficiently large jump, assume the sequence has wrapped around.
-        // For example, when the last seq is MAX_VALUE, the incoming seq will be MIN_VALUE + 1.
-        // diff = MIN_VALUE + 1 - MAX_VALUE. It is smaller than 0, but should be treated as newer.
-        return diff > 0 || diff < Integer.MIN_VALUE;
+        // When diff is 0, allow client to consume.
+        // When there has been a sufficiently large jump, assume the sequence has wrapped around.
+        return (diff < 0 && diff > Integer.MIN_VALUE) || diff > Integer.MAX_VALUE;
     }
 
     /** Returns the initial seq. */

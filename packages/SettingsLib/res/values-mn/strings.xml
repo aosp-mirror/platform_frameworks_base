@@ -408,18 +408,12 @@
     <string name="enable_gpu_debug_layers_summary" msgid="4921521407377170481">"Дебаг хийх аппад GPU дебаг хийх давхарга ачаалахыг зөвшөөрөх"</string>
     <string name="enable_verbose_vendor_logging" msgid="1196698788267682072">"Нийлүүлэгчийн дэлгэрэнгүй логийг идэвхжүүлэх"</string>
     <string name="enable_verbose_vendor_logging_summary" msgid="5426292185780393708">"Төхөөрөмжийн тодорхойлсон нийлүүлэгчийн нэвтрэх үеийн алдааны нэмэлт мэдээг оруулах бөгөөд энэ нь хувийн мэдээлэл агуулж, батарейг илүү ашиглах болон/эсвэл хадгалах сан илүү ашиглаж болзошгүй."</string>
-    <!-- no translation found for enable_verbose_vendor_logging_checkbox (3864578373293835530) -->
-    <skip />
-    <!-- no translation found for verbose_vendor_logging_notification_title (6811217272559843592) -->
-    <skip />
-    <!-- no translation found for verbose_vendor_logging_notification_summary (5226524769774370942) -->
-    <skip />
-    <!-- no translation found for verbose_vendor_logging_notification_action (1190831050259046071) -->
-    <skip />
-    <!-- no translation found for verbose_vendor_logging_preference_summary_will_disable (6175431593394522553) -->
-    <skip />
-    <!-- no translation found for verbose_vendor_logging_preference_summary_on (9017757242481762036) -->
-    <skip />
+    <string name="enable_verbose_vendor_logging_checkbox" msgid="3864578373293835530">"Нэг хоногийн дараа идэвхгүй болгох"</string>
+    <string name="verbose_vendor_logging_notification_title" msgid="6811217272559843592">"Нийлүүлэгчийн нуршсан дэлгэрэнгүй байдлын лог дууссан"</string>
+    <string name="verbose_vendor_logging_notification_summary" msgid="5226524769774370942">"Нэг хоногийн турш идэвхжүүлсэн"</string>
+    <string name="verbose_vendor_logging_notification_action" msgid="1190831050259046071">"Дахин нэг хоногийн турш идэвхжүүлэх"</string>
+    <string name="verbose_vendor_logging_preference_summary_will_disable" msgid="6175431593394522553">"Нэг хоногийн дараа идэвхгүй болгоно"</string>
+    <string name="verbose_vendor_logging_preference_summary_on" msgid="9017757242481762036">"Тодорхойгүй хугацаанд идэвхжүүлсэн"</string>
     <string name="window_animation_scale_title" msgid="5236381298376812508">"Цонхны анимацийн масштаб"</string>
     <string name="transition_animation_scale_title" msgid="1278477690695439337">"Шилжилтийн анимацийн масштаб"</string>
     <string name="animator_duration_scale_title" msgid="7082913931326085176">"Анимацийн хугацааны масштаб"</string>
@@ -436,8 +430,8 @@
     <string name="force_allow_on_external_summary" msgid="8525425782530728238">"Манифест утгыг нь үл хамааран дурын апп-г гадаад санах ойд бичих боломжтой болгодог"</string>
     <string name="force_resizable_activities" msgid="7143612144399959606">"Үйл ажиллагааны хэмжээг өөрчилж болохуйц болгох"</string>
     <string name="force_resizable_activities_summary" msgid="2490382056981583062">"Тодорхойлогч файлын утгыг үл хамааран, бүх үйл ажиллагааны хэмжээг олон цонхонд өөрчилж болохуйц болгоно уу."</string>
-    <string name="enable_freeform_support" msgid="7599125687603914253">"Чөлөөт хэлбэрийн цонхыг идэвхжүүлэх"</string>
-    <string name="enable_freeform_support_summary" msgid="1822862728719276331">"Туршилтын чөлөөт хэлбэрийн цонхны дэмжлэгийг идэвхжүүлнэ үү."</string>
+    <string name="enable_freeform_support" msgid="8409932201445109106">"Чөлөөт хэлбэрийн цонхыг идэвхжүүлэх (уламжлалт)"</string>
+    <string name="enable_freeform_support_summary" msgid="2242481082356957934">"Туршилтын чөлөөт хэлбэрийн уламжлалт цонхны дэмжлэгийг идэвхжүүлнэ үү."</string>
     <string name="local_backup_password_title" msgid="4631017948933578709">"Компьютерын нөөцлөлтийн нууц үг"</string>
     <string name="local_backup_password_summary_none" msgid="7646898032616361714">"Компьютерын бүрэн нөөцлөлт одоогоор хамгаалалтгүй байна"</string>
     <string name="local_backup_password_summary_change" msgid="1707357670383995567">"Компьютерийн бүтэн нөөцлөлтийн нууц үгийг өөрчлөх, устгах бол дарна уу"</string>

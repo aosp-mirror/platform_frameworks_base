@@ -144,8 +144,10 @@ class ActivityEmbeddingAnimationRunner {
             // ending states.
             prepareForJumpCut(info, startTransaction);
         } else {
-            addEdgeExtensionIfNeeded(startTransaction, finishTransaction,
-                    postStartTransactionCallbacks, adapters);
+            if (!com.android.graphics.libgui.flags.Flags.edgeExtensionShader()) {
+                addEdgeExtensionIfNeeded(startTransaction, finishTransaction,
+                        postStartTransactionCallbacks, adapters);
+            }
             addBackgroundColorIfNeeded(info, startTransaction, finishTransaction, adapters);
             for (ActivityEmbeddingAnimationAdapter adapter : adapters) {
                 duration = Math.max(duration, adapter.getDurationHint());
@@ -265,7 +267,10 @@ class ActivityEmbeddingAnimationRunner {
         for (TransitionInfo.Change change : openingChanges) {
             final Animation animation =
                     animationProvider.get(info, change, openingWholeScreenBounds);
-            if (animation.getDuration() == 0) {
+            if (shouldUseJumpCutForAnimation(animation)) {
+                if (Flags.activityEmbeddingAnimationCustomizationFlag()) {
+                    return new ArrayList<>();
+                }
                 continue;
             }
             final ActivityEmbeddingAnimationAdapter adapter = createOpenCloseAnimationAdapter(
@@ -290,7 +295,10 @@ class ActivityEmbeddingAnimationRunner {
             }
             final Animation animation =
                     animationProvider.get(info, change, closingWholeScreenBounds);
-            if (animation.getDuration() == 0) {
+            if (shouldUseJumpCutForAnimation(animation)) {
+                if (Flags.activityEmbeddingAnimationCustomizationFlag()) {
+                    return new ArrayList<>();
+                }
                 continue;
             }
             final ActivityEmbeddingAnimationAdapter adapter = createOpenCloseAnimationAdapter(
@@ -335,7 +343,7 @@ class ActivityEmbeddingAnimationRunner {
             @NonNull List<ActivityEmbeddingAnimationAdapter> adapters) {
         for (ActivityEmbeddingAnimationAdapter adapter : adapters) {
             final Animation animation = adapter.mAnimation;
-            if (!animation.hasExtension()) {
+            if (animation.getExtensionEdges() == 0) {
                 continue;
             }
             if (adapter.mChange.hasFlags(FLAG_TRANSLUCENT)
@@ -444,8 +452,16 @@ class ActivityEmbeddingAnimationRunner {
             calculateParentBounds(change, boundsAnimationChange, parentBounds);
             // There are two animations in the array. The first one is for the start leash
             // (snapshot), and the second one is for the end leash (TaskFragment).
-            final Animation[] animations = mAnimationSpec.createChangeBoundsChangeAnimations(change,
-                    parentBounds);
+            final Animation[] animations =
+                    mAnimationSpec.createChangeBoundsChangeAnimations(info, change, parentBounds);
+            // Jump cut if either animation has zero for duration.
+            if (Flags.activityEmbeddingAnimationCustomizationFlag()) {
+                for (Animation animation : animations) {
+                    if (shouldUseJumpCutForAnimation(animation)) {
+                        return new ArrayList<>();
+                    }
+                }
+            }
             // Keep track as we might need to add background color for the animation.
             // Although there may be multiple change animation, record one of them is sufficient
             // because the background color will be added to the root leash for the whole animation.
@@ -492,11 +508,18 @@ class ActivityEmbeddingAnimationRunner {
                 // window without bounds change.
                 animation = ActivityEmbeddingAnimationSpec.createNoopAnimation(change);
             } else if (TransitionUtil.isClosingType(change.getMode())) {
-                animation = mAnimationSpec.createChangeBoundsCloseAnimation(change, parentBounds);
+                animation =
+                        mAnimationSpec.createChangeBoundsCloseAnimation(info, change, parentBounds);
                 shouldShowBackgroundColor = false;
             } else {
-                animation = mAnimationSpec.createChangeBoundsOpenAnimation(change, parentBounds);
+                animation =
+                        mAnimationSpec.createChangeBoundsOpenAnimation(info, change, parentBounds);
                 shouldShowBackgroundColor = false;
+            }
+            if (Flags.activityEmbeddingAnimationCustomizationFlag()) {
+                if (shouldUseJumpCutForAnimation(animation)) {
+                    return new ArrayList<>();
+                }
             }
             adapters.add(new ActivityEmbeddingAnimationAdapter(animation, change,
                     TransitionUtil.getRootFor(change, info)));
@@ -638,6 +661,12 @@ class ActivityEmbeddingAnimationRunner {
             return false;
         }
         return true;
+    }
+
+    /** Whether or not to use jump cut based on the animation. */
+    @VisibleForTesting
+    static boolean shouldUseJumpCutForAnimation(@NonNull Animation animation) {
+        return animation.getDuration() == 0;
     }
 
     /** Updates the changes to end states in {@code startTransaction} for jump cut animation. */

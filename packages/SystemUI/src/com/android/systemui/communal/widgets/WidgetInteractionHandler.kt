@@ -22,6 +22,7 @@ import android.content.Intent
 import android.view.View
 import android.widget.RemoteViews
 import com.android.systemui.animation.ActivityTransitionAnimator
+import com.android.systemui.communal.domain.interactor.CommunalSceneInteractor
 import com.android.systemui.communal.util.InteractionHandlerDelegate
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.plugins.ActivityStarter
@@ -32,19 +33,21 @@ class WidgetInteractionHandler
 @Inject
 constructor(
     private val activityStarter: ActivityStarter,
+    private val communalSceneInteractor: CommunalSceneInteractor
 ) : RemoteViews.InteractionHandler {
 
-    private val delegate = InteractionHandlerDelegate(
-        findViewToAnimate = { view -> view is CommunalAppWidgetHostView },
-        intentStarter = this::startIntent,
-    )
+    private val delegate =
+        InteractionHandlerDelegate(
+            communalSceneInteractor,
+            findViewToAnimate = { view -> view is CommunalAppWidgetHostView },
+            intentStarter = this::startIntent,
+        )
 
     override fun onInteraction(
         view: View,
         pendingIntent: PendingIntent,
         response: RemoteViews.RemoteResponse
     ): Boolean = delegate.onInteraction(view, pendingIntent, response)
-
 
     private fun startIntent(
         pendingIntent: PendingIntent,
@@ -59,6 +62,8 @@ constructor(
             controller,
             fillInIntent,
             extraOptions.toBundle(),
+            // TODO(b/325110448): UX to provide copy
+            /* customMessage = */ null,
         )
         return true
     }

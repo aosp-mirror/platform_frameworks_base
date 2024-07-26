@@ -35,7 +35,7 @@ import android.view.InputApplicationHandle;
 import android.view.InputChannel;
 import android.window.InputTransferToken;
 
-import com.android.internal.protolog.common.ProtoLog;
+import com.android.internal.protolog.ProtoLog;
 import com.android.server.input.InputManagerService;
 
 /**

@@ -127,7 +127,7 @@ import android.window.RemoteTransition;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.HeavyWeightSwitcherActivity;
 import com.android.internal.app.IVoiceInteractor;
-import com.android.internal.protolog.common.ProtoLog;
+import com.android.internal.protolog.ProtoLog;
 import com.android.server.am.PendingIntentRecord;
 import com.android.server.pm.InstantAppResolver;
 import com.android.server.pm.PackageArchiver;
@@ -1792,6 +1792,9 @@ class ActivityStarter {
                 if (activity != null && activity.getTask() != targetTask) {
                     activity.destroyIfPossible("Removes redundant singleInstance");
                 }
+            }
+            if (mLastStartActivityRecord != null) {
+                targetTaskTop.mLaunchSourceType = mLastStartActivityRecord.mLaunchSourceType;
             }
             targetTaskTop.mTransitionController.collect(targetTaskTop);
             recordTransientLaunchIfNeeded(targetTaskTop);

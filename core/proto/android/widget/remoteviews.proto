@@ -21,6 +21,7 @@ option java_multiple_files = true;
 package android.widget;
 
 import "frameworks/base/core/proto/android/privacy.proto";
+import "frameworks/base/core/proto/android/content/res/color_state_list.proto";
 
 /**
  * An android.widget.RemoteViews object. This is used by RemoteViews.createPreviewFromProto
@@ -51,6 +52,43 @@ message RemoteViewsProto {
     optional RemoteViewsProto landscape_remoteviews = 11;
     optional bool is_root = 12;
     optional bool has_draw_instructions = 13;
+    repeated bytes bitmap_cache = 14;
+    optional RemoteCollectionCache remote_collection_cache = 15;
+
+    message RemoteCollectionCache {
+        message Entry {
+            optional int64 id = 1;
+            optional string uri = 2;
+            optional RemoteCollectionItems items = 3;
+        }
+
+        repeated Entry entries = 1;
+    }
+
+    message RemoteCollectionItems {
+        repeated int64 ids = 1 [packed = true];
+        repeated RemoteViewsProto views = 2;
+        optional bool has_stable_ids = 3;
+        optional int32 view_type_count = 4;
+        optional bool attached = 5;
+    }
+
+    /**
+     * An android.graphics.drawable Icon.
+     */
+    message Icon {
+        option (android.msg_privacy).dest = DEST_AUTOMATIC;
+        optional int32 blend_mode = 1;
+        optional android.content.res.ColorStateListProto tint_list = 2;
+        oneof icon {
+            bytes bitmap = 3;
+            string resource = 4;
+            bytes data = 5;
+            string uri = 6;
+            string uri_adaptive_bitmap = 7;
+            bytes adaptive_bitmap = 8;
+        };
+    }
 }
 
 

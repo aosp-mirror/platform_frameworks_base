@@ -45,6 +45,7 @@ import androidx.lifecycle.LifecycleService;
 import androidx.lifecycle.ServiceLifecycleDispatcher;
 import androidx.lifecycle.ViewModelStore;
 
+import com.android.app.viewcapture.ViewCaptureAwareWindowManager;
 import com.android.dream.lowlight.dagger.LowLightDreamModule;
 import com.android.internal.logging.UiEvent;
 import com.android.internal.logging.UiEventLogger;
@@ -55,6 +56,7 @@ import com.android.systemui.ambient.touch.TouchMonitor;
 import com.android.systemui.ambient.touch.dagger.AmbientTouchComponent;
 import com.android.systemui.ambient.touch.scrim.ScrimManager;
 import com.android.systemui.communal.domain.interactor.CommunalInteractor;
+import com.android.systemui.communal.shared.log.CommunalUiEvent;
 import com.android.systemui.communal.shared.model.CommunalScenes;
 import com.android.systemui.complication.Complication;
 import com.android.systemui.complication.dagger.ComplicationComponent;
@@ -97,7 +99,7 @@ public class DreamOverlayService extends android.service.dreams.DreamOverlayServ
     @Nullable
     private final ComponentName mHomeControlPanelDreamComponent;
     private final UiEventLogger mUiEventLogger;
-    private final WindowManager mWindowManager;
+    private final ViewCaptureAwareWindowManager mWindowManager;
     private final String mWindowTitle;
 
     // A reference to the {@link Window} used to hold the dream overlay.
@@ -244,7 +246,7 @@ public class DreamOverlayService extends android.service.dreams.DreamOverlayServ
             Context context,
             DreamOverlayLifecycleOwner lifecycleOwner,
             @Main DelayableExecutor executor,
-            WindowManager windowManager,
+            ViewCaptureAwareWindowManager viewCaptureAwareWindowManager,
             ComplicationComponent.Factory complicationComponentFactory,
             com.android.systemui.dreams.complication.dagger.ComplicationComponent.Factory
                     dreamComplicationComponentFactory,
@@ -267,7 +269,7 @@ public class DreamOverlayService extends android.service.dreams.DreamOverlayServ
         super(executor);
         mContext = context;
         mExecutor = executor;
-        mWindowManager = windowManager;
+        mWindowManager = viewCaptureAwareWindowManager;
         mKeyguardUpdateMonitor = keyguardUpdateMonitor;
         mScrimManager = scrimManager;
         mLowLightDreamComponent = lowLightDreamComponent;
@@ -406,6 +408,7 @@ public class DreamOverlayService extends android.service.dreams.DreamOverlayServ
 
     @Override
     public void onWakeRequested() {
+        mUiEventLogger.log(CommunalUiEvent.DREAM_TO_COMMUNAL_HUB_DREAM_AWAKE_START);
         mCommunalInteractor.changeScene(CommunalScenes.Communal, null);
     }
 

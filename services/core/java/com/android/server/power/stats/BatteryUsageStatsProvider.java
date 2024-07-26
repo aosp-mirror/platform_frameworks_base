@@ -110,8 +110,13 @@ public class BatteryUsageStatsProvider {
                 if (!mPowerStatsExporterEnabled.get(BatteryConsumer.POWER_COMPONENT_VIDEO)) {
                     mPowerCalculators.add(new VideoPowerCalculator(mPowerProfile));
                 }
-                mPowerCalculators.add(new ScreenPowerCalculator(mPowerProfile));
-                mPowerCalculators.add(new AmbientDisplayPowerCalculator(mPowerProfile));
+                if (!mPowerStatsExporterEnabled.get(BatteryConsumer.POWER_COMPONENT_SCREEN)) {
+                    mPowerCalculators.add(new ScreenPowerCalculator(mPowerProfile));
+                }
+                if (!mPowerStatsExporterEnabled.get(
+                        BatteryConsumer.POWER_COMPONENT_AMBIENT_DISPLAY)) {
+                    mPowerCalculators.add(new AmbientDisplayPowerCalculator(mPowerProfile));
+                }
                 mPowerCalculators.add(new IdlePowerCalculator(mPowerProfile));
                 if (!mPowerStatsExporterEnabled.get(BatteryConsumer.POWER_COMPONENT_ANY)) {
                     mPowerCalculators.add(new CustomEnergyConsumerPowerCalculator(mPowerProfile));
@@ -201,7 +206,8 @@ public class BatteryUsageStatsProvider {
 
             batteryUsageStatsBuilder = new BatteryUsageStats.Builder(
                     stats.getCustomEnergyConsumerNames(), includePowerModels,
-                    includeProcessStateData, minConsumedPowerThreshold);
+                    includeProcessStateData, query.isScreenStateDataNeeded(),
+                    query.isPowerStateDataNeeded(), minConsumedPowerThreshold);
 
             // TODO(b/188068523): use a monotonic clock to ensure resilience of order and duration
             // of batteryUsageStats sessions to wall-clock adjustments
@@ -348,6 +354,7 @@ public class BatteryUsageStatsProvider {
         final String[] customEnergyConsumerNames = stats.getCustomEnergyConsumerNames();
         final BatteryUsageStats.Builder builder = new BatteryUsageStats.Builder(
                 customEnergyConsumerNames, includePowerModels, includeProcessStateData,
+                query.isScreenStateDataNeeded(), query.isPowerStateDataNeeded(),
                 minConsumedPowerThreshold);
         if (mPowerStatsStore == null) {
             Log.e(TAG, "PowerStatsStore is unavailable");
@@ -408,7 +415,6 @@ public class BatteryUsageStatsProvider {
                             + " does not include process state data");
                     continue;
                 }
-
                 builder.add(snapshot);
             }
         }

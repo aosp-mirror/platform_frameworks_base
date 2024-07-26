@@ -533,6 +533,9 @@
     <!-- If this is true, key chords can be used to take a screenshot on the device. -->
     <bool name="config_enableScreenshotChord">true</bool>
 
+    <!-- If this is true, accessibility events on notifications are sent. -->
+    <bool name="config_enableNotificationAccessibilityEvents">true</bool>
+
     <!-- If this is true, allow wake from theater mode when plugged in or unplugged. -->
     <bool name="config_allowTheaterModeWakeFromUnplug">false</bool>
     <!-- If this is true, allow wake from theater mode from gesture. -->
@@ -4133,8 +4136,8 @@
          and should depend on the touch feedback intensity user setting -->
     <item name="config_keyboardHapticFeedbackFixedAmplitude" format="float" type="dimen">-1</item>
 
-    <!-- The default value for keyboard vibration toggle in settings. -->
-    <bool name="config_defaultKeyboardVibrationEnabled">true</bool>
+    <!-- Indicating if keyboard vibration settings supported or not. -->
+    <bool name="config_keyboardVibrationSettingsSupported">false</bool>
 
     <!-- If the device should still vibrate even in low power mode, for certain priority vibrations
      (e.g. accessibility, alarms). This is mainly for Wear devices that don't have speakers. -->
@@ -7066,6 +7069,9 @@
     <!-- Whether desktop mode is supported on the current device  -->
     <bool name="config_isDesktopModeSupported">false</bool>
 
+    <!-- Maximum number of active tasks on a given Desktop Windowing session. Set to 0 for unlimited. -->
+    <integer name="config_maxDesktopWindowingActiveTasks">0</integer>
+
     <!-- Frame rate compatibility value for Wallpaper
          FRAME_RATE_COMPATIBILITY_MIN (102) is used by default for lower power consumption -->
     <integer name="config_wallpaperFrameRateCompatibility">102</integer>
@@ -7087,4 +7093,15 @@
     <!-- Whether to show GAIA education screen during account login of private space setup.
          OEM/Partner can explicitly opt to disable the screen. -->
     <bool name="config_enableGaiaEducationInPrivateSpace">true</bool>
+
+    <!-- Whether to enable usb state update via udc sysfs. -->
+    <bool name="config_enableUdcSysfsUsbStateUpdate">false</bool>
+
+    <!-- Whether to enable the private space search illustration and search tile content in "Hide Private Space" settings page.
+         OEM/Partner can explicitly opt to hide the illustration and search tile content. -->
+    <bool name="config_enableSearchTileHideIllustrationInPrivateSpace">true</bool>
+
+    <!-- The maximum number of call log entries for each sim card that can be stored in the call log
+         provider on the device. -->
+    <integer name="config_maximumCallLogEntriesPerSim">500</integer>
 </resources>

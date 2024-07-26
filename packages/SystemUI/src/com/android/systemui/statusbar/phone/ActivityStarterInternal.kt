@@ -42,6 +42,7 @@ interface ActivityStarterInternal {
         skipLockscreenChecks: Boolean = false,
         fillInIntent: Intent? = null,
         extraOptions: Bundle? = null,
+        customMessage: String? = null,
     )
 
     /** Starts an activity after dismissing keyguard. */

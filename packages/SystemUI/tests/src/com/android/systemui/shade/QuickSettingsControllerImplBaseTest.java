@@ -44,7 +44,6 @@ import com.android.systemui.deviceentry.domain.interactor.DeviceEntryUdfpsIntera
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.fragments.FragmentHostManager;
-import com.android.systemui.keyguard.data.repository.FakeCommandQueue;
 import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository;
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor;
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor;
@@ -190,7 +189,6 @@ public class QuickSettingsControllerImplBaseTest extends SysuiTestCase {
                 mKosmos.getKeyguardTransitionInteractor();
         KeyguardInteractor keyguardInteractor = new KeyguardInteractor(
                 mKeyguardRepository,
-                new FakeCommandQueue(),
                 powerInteractor,
                 new FakeKeyguardBouncerRepository(),
                 new ConfigurationInteractor(configurationRepository),

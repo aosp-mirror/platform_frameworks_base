@@ -18,6 +18,9 @@ package android.hardware.input
 
 import android.view.InputDevice
 import android.view.KeyCharacterMap
+import android.view.KeyCharacterMap.VIRTUAL_KEYBOARD
+import android.view.KeyEvent
+import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
 import org.mockito.ArgumentMatchers.anyInt
@@ -25,7 +28,24 @@ import org.mockito.invocation.InvocationOnMock
 
 class FakeInputManager {
 
-    private val devices = mutableMapOf<Int, InputDevice>()
+    private val keyCharacterMap = KeyCharacterMap.load(VIRTUAL_KEYBOARD)
+
+    private val virtualKeyboard =
+        InputDevice.Builder()
+            .setId(VIRTUAL_KEYBOARD)
+            .setKeyboardType(InputDevice.KEYBOARD_TYPE_ALPHABETIC)
+            .setSources(InputDevice.SOURCE_KEYBOARD)
+            .setEnabled(true)
+            .setKeyCharacterMap(keyCharacterMap)
+            .build()
+
+    private val devices = mutableMapOf<Int, InputDevice>(VIRTUAL_KEYBOARD to virtualKeyboard)
+    private val allKeyCodes = (0..KeyEvent.MAX_KEYCODE)
+    private val supportedKeyCodesByDeviceId =
+        mutableMapOf(
+            // Mark all keys supported by default
+            VIRTUAL_KEYBOARD to allKeyCodes.toMutableSet()
+        )
 
     val inputManager =
         mock<InputManager> {
@@ -49,15 +69,29 @@ class FakeInputManager {
             whenever(enableInputDevice(anyInt())).thenAnswer { invocation ->
                 setDeviceEnabled(invocation, enabled = true)
             }
+            whenever(deviceHasKeys(any(), any())).thenAnswer { invocation ->
+                val deviceId = invocation.arguments[0] as Int
+                val keyCodes = invocation.arguments[1] as IntArray
+                val supportedKeyCodes = supportedKeyCodesByDeviceId[deviceId]!!
+                return@thenAnswer keyCodes.map { supportedKeyCodes.contains(it) }.toBooleanArray()
+            }
         }
+
+    fun addPhysicalKeyboardIfNotPresent(deviceId: Int, enabled: Boolean = true) {
+        if (devices.containsKey(deviceId)) {
+            return
+        }
+        addPhysicalKeyboard(deviceId, enabled)
+    }
 
     fun addPhysicalKeyboard(id: Int, enabled: Boolean = true) {
         check(id > 0) { "Physical keyboard ids have to be > 0" }
         addKeyboard(id, enabled)
     }
 
-    fun addVirtualKeyboard(enabled: Boolean = true) {
-        addKeyboard(id = KeyCharacterMap.VIRTUAL_KEYBOARD, enabled)
+    fun removeKeysFromKeyboard(deviceId: Int, vararg keyCodes: Int) {
+        addPhysicalKeyboardIfNotPresent(deviceId)
+        supportedKeyCodesByDeviceId[deviceId]!!.removeAll(keyCodes.asList())
     }
 
     private fun addKeyboard(id: Int, enabled: Boolean = true) {
@@ -67,7 +101,9 @@ class FakeInputManager {
                 .setKeyboardType(InputDevice.KEYBOARD_TYPE_ALPHABETIC)
                 .setSources(InputDevice.SOURCE_KEYBOARD)
                 .setEnabled(enabled)
+                .setKeyCharacterMap(keyCharacterMap)
                 .build()
+        supportedKeyCodesByDeviceId[id] = allKeyCodes.toMutableSet()
     }
 
     private fun InputDevice.copy(

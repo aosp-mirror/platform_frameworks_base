@@ -24,6 +24,7 @@ import android.hardware.fingerprint.FingerprintManager
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.biometrics.FaceHelpMessageDebouncer
 import com.android.systemui.biometrics.data.repository.fingerprintPropertyRepository
 import com.android.systemui.biometrics.domain.faceHelpMessageDeferral
 import com.android.systemui.biometrics.shared.model.FingerprintSensorType
@@ -45,6 +46,7 @@ import com.android.systemui.testKosmos
 import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -264,11 +266,20 @@ class BiometricMessageInteractorTest : SysuiTestCase() {
             biometricSettingsRepository.setIsFaceAuthEnrolledAndEnabled(true)
             biometricSettingsRepository.setIsFingerprintAuthEnrolledAndEnabled(false)
 
-            // WHEN authentication status help
+            // WHEN authentication status help past debouncer
             faceAuthRepository.setAuthenticationStatus(
                 HelpFaceAuthenticationStatus(
                     msg = "Move left",
                     msgId = FACE_ACQUIRED_TOO_RIGHT,
+                    createdAt = 0L,
+                )
+            )
+            runCurrent()
+            faceAuthRepository.setAuthenticationStatus(
+                HelpFaceAuthenticationStatus(
+                    msg = "Move left",
+                    msgId = FACE_ACQUIRED_TOO_RIGHT,
+                    createdAt = FaceHelpMessageDebouncer.DEFAULT_WINDOW_MS,
                 )
             )
 

@@ -32,7 +32,7 @@ import android.view.View;
 import android.view.ViewRootImpl;
 import android.view.WindowManagerGlobal;
 
-import com.android.internal.protolog.common.ProtoLog;
+import com.android.internal.protolog.ProtoLog;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.SystemWindows;
 import com.android.wm.shell.common.pip.PipBoundsState;

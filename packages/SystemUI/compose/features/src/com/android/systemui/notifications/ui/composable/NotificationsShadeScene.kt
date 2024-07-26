@@ -44,7 +44,7 @@ import com.android.systemui.statusbar.phone.ui.TintedIconManager
 import dagger.Lazy
 import java.util.Optional
 import javax.inject.Inject
-import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.Flow
 
 @SysUISingleton
 class NotificationsShadeScene
@@ -64,7 +64,7 @@ constructor(
 
     override val key = Scenes.NotificationsShade
 
-    override val destinationScenes: StateFlow<Map<UserAction, UserActionResult>> =
+    override val destinationScenes: Flow<Map<UserAction, UserActionResult>> =
         sceneViewModel.destinationScenes
 
     @Composable

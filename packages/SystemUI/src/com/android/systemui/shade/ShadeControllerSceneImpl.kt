@@ -76,7 +76,7 @@ constructor(
         scope.launch {
             shadeInteractor.isAnyExpanded.collect {
                 if (!it) {
-                    runPostCollapseActions()
+                    withContext(mainDispatcher) { runPostCollapseActions() }
                 }
             }
         }
@@ -119,7 +119,7 @@ constructor(
             if (delayed) {
                 scope.launch {
                     delay(125)
-                    animateCollapseShadeInternal()
+                    withContext(mainDispatcher) { animateCollapseShadeInternal() }
                 }
             } else {
                 animateCollapseShadeInternal()

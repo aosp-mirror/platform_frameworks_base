@@ -115,7 +115,7 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
     private final SendButtonTextWatcher mTextWatcher;
     private final TextView.OnEditorActionListener mEditorActionHandler;
     private final ArrayList<Runnable> mOnSendListeners = new ArrayList<>();
-    private final ArrayList<Consumer<Boolean>> mOnVisibilityChangedListeners = new ArrayList<>();
+    private Consumer<Boolean> mOnVisibilityChangedListener = null;
     private final ArrayList<OnFocusChangeListener> mEditTextFocusChangeListeners =
             new ArrayList<>();
 
@@ -733,24 +733,17 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
      * {@link #getVisibility()} would return {@link View#VISIBLE}, and {@code false} it would return
      * any other value.
      */
-    public void addOnVisibilityChangedListener(Consumer<Boolean> listener) {
-        mOnVisibilityChangedListeners.add(listener);
-    }
-
-    /**
-     * Unregister a listener previously registered via
-     * {@link #addOnVisibilityChangedListener(Consumer)}.
-     */
-    public void removeOnVisibilityChangedListener(Consumer<Boolean> listener) {
-        mOnVisibilityChangedListeners.remove(listener);
+    public void setOnVisibilityChangedListener(Consumer<Boolean> listener) {
+        mOnVisibilityChangedListener = listener;
     }
 
     @Override
     protected void onVisibilityChanged(View changedView, int visibility) {
         super.onVisibilityChanged(changedView, visibility);
         if (changedView == this) {
-            for (Consumer<Boolean> listener : new ArrayList<>(mOnVisibilityChangedListeners)) {
-                listener.accept(visibility == VISIBLE);
+            final Consumer<Boolean> visibilityChangedListener = mOnVisibilityChangedListener;
+            if (visibilityChangedListener != null) {
+                visibilityChangedListener.accept(visibility == VISIBLE);
             }
             // Hide soft-keyboard when the input view became invisible
             // (i.e. The notification shade collapsed by pressing the home key)

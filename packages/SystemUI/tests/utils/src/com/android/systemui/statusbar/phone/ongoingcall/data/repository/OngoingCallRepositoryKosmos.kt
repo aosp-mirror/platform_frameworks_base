@@ -17,6 +17,7 @@
 package com.android.systemui.statusbar.phone.ongoingcall.data.repository
 
 import com.android.systemui.kosmos.Kosmos
+import com.android.systemui.log.logcatLogBuffer
 
 val Kosmos.ongoingCallRepository: OngoingCallRepository by
-    Kosmos.Fixture { OngoingCallRepository() }
+    Kosmos.Fixture { OngoingCallRepository(logcatLogBuffer("OngoingCallRepositoryKosmos")) }

@@ -25,6 +25,8 @@ import org.w3c.dom.NodeList;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 public class XmlUtils {
@@ -70,6 +72,8 @@ public class XmlUtils {
     public static final String HR_ATTR_ADS_FINGERPRINTING = "adsFingerprinting";
     public static final String HR_ATTR_SECURITY_FINGERPRINTING = "securityFingerprinting";
     public static final String HR_ATTR_PRIVACY_POLICY = "privacyPolicy";
+    public static final String HR_ATTR_DEVELOPER_ID = "developerId";
+    public static final String HR_ATTR_APPLICATION_ID = "applicationId";
     public static final String HR_ATTR_SECURITY_ENDPOINTS = "securityEndpoints";
     public static final String HR_TAG_FIRST_PARTY_ENDPOINTS = "first-party-endpoints";
     public static final String HR_TAG_SERVICE_PROVIDER_ENDPOINTS = "service-provider-endpoints";
@@ -102,10 +106,12 @@ public class XmlUtils {
     public static final String OD_NAME_CONTAINS_ADS = "contains_ads";
     public static final String OD_NAME_OBEY_APS = "obey_aps";
     public static final String OD_NAME_APS_COMPLIANT = "aps_compliant";
+    public static final String OD_NAME_DEVELOPER_ID = "developer_id";
+    public static final String OD_NAME_APPLICATION_ID = "application_id";
     public static final String OD_NAME_ADS_FINGERPRINTING = "ads_fingerprinting";
     public static final String OD_NAME_SECURITY_FINGERPRINTING = "security_fingerprinting";
     public static final String OD_NAME_PRIVACY_POLICY = "privacy_policy";
-    public static final String OD_NAME_SECURITY_ENDPOINT = "security_endpoints";
+    public static final String OD_NAME_SECURITY_ENDPOINTS = "security_endpoints";
     public static final String OD_NAME_FIRST_PARTY_ENDPOINTS = "first_party_endpoints";
     public static final String OD_NAME_SERVICE_PROVIDER_ENDPOINTS = "service_provider_endpoints";
     public static final String OD_NAME_CATEGORY = "category";
@@ -135,6 +141,15 @@ public class XmlUtils {
         return elements.stream()
                 .filter(e -> e.getTagName().equals(tagName))
                 .collect(Collectors.toList());
+    }
+
+    /**
+     * Gets the single {@link Element} within {@param parentEle} and having the {@param tagName}.
+     */
+    public static Element getSingleChildElement(
+            Node parentEle, String tagName, Set<String> requiredStrings)
+            throws MalformedXmlException {
+        return getSingleChildElement(parentEle, tagName, requiredStrings.contains(tagName));
     }
 
     /**
@@ -287,17 +302,34 @@ public class XmlUtils {
     }
 
     /** Gets a pipeline-split attribute. */
+    public static List<String> getPipelineSplitAttr(
+            Element ele, String attrName, Set<String> requiredNames) throws MalformedXmlException {
+        return getPipelineSplitAttr(ele, attrName, requiredNames.contains(attrName));
+    }
+
+    /** Gets a pipeline-split attribute. */
     public static List<String> getPipelineSplitAttr(Element ele, String attrName, boolean required)
             throws MalformedXmlException {
         List<String> list =
                 Arrays.stream(ele.getAttribute(attrName).split("\\|")).collect(Collectors.toList());
-        if ((list.isEmpty() || list.get(0).isEmpty()) && required) {
-            throw new MalformedXmlException(
-                    String.format(
-                            "Delimited string %s was required but missing, in %s.",
-                            attrName, ele.getTagName()));
+        if ((list.isEmpty() || list.get(0).isEmpty())) {
+            if (required) {
+                throw new MalformedXmlException(
+                        String.format(
+                                "Delimited string %s was required but missing, in %s.",
+                                attrName, ele.getTagName()));
+            }
+            return null;
         }
         return list;
+    }
+
+    /**
+     * Gets the single {@link Element} within {@param parentEle} and having the {@param tagName}.
+     */
+    public static Boolean getBoolAttr(Element ele, String attrName, Set<String> requiredStrings)
+            throws MalformedXmlException {
+        return getBoolAttr(ele, attrName, requiredStrings.contains(attrName));
     }
 
     /** Gets a Boolean attribute. */
@@ -311,6 +343,12 @@ public class XmlUtils {
                             attrName, ele.getTagName()));
         }
         return b;
+    }
+
+    /** Gets a Boolean attribute. */
+    public static Boolean getOdBoolEle(Element ele, String nameName, Set<String> requiredNames)
+            throws MalformedXmlException {
+        return getOdBoolEle(ele, nameName, requiredNames.contains(nameName));
     }
 
     /** Gets a Boolean attribute. */
@@ -376,6 +414,12 @@ public class XmlUtils {
     }
 
     /** Gets an on-device String attribute. */
+    public static String getOdStringEle(Element ele, String nameName, Set<String> requiredNames)
+            throws MalformedXmlException {
+        return getOdStringEle(ele, nameName, requiredNames.contains(nameName));
+    }
+
+    /** Gets an on-device String attribute. */
     public static String getOdStringEle(Element ele, String nameName, boolean required)
             throws MalformedXmlException {
         List<Element> eles =
@@ -404,6 +448,13 @@ public class XmlUtils {
     }
 
     /** Gets a OD Pbundle Element attribute with the specified name. */
+    public static Element getOdPbundleWithName(
+            Element ele, String nameName, Set<String> requiredStrings)
+            throws MalformedXmlException {
+        return getOdPbundleWithName(ele, nameName, requiredStrings.contains(nameName));
+    }
+
+    /** Gets a OD Pbundle Element attribute with the specified name. */
     public static Element getOdPbundleWithName(Element ele, String nameName, boolean required)
             throws MalformedXmlException {
         List<Element> eles =
@@ -423,6 +474,14 @@ public class XmlUtils {
             return null;
         }
         return eles.get(0);
+    }
+
+    /**
+     * Gets the single {@link Element} within {@param parentEle} and having the {@param tagName}.
+     */
+    public static String getStringAttr(Element ele, String attrName, Set<String> requiredStrings)
+            throws MalformedXmlException {
+        return getStringAttr(ele, attrName, requiredStrings.contains(attrName));
     }
 
     /** Gets a required String attribute. */
@@ -476,6 +535,13 @@ public class XmlUtils {
 
     /** Gets human-readable style String array. */
     public static List<String> getHrItemsAsStrings(
+            Element parent, String elementName, Set<String> requiredNames)
+            throws MalformedXmlException {
+        return getHrItemsAsStrings(parent, elementName, requiredNames.contains(elementName));
+    }
+
+    /** Gets human-readable style String array. */
+    public static List<String> getHrItemsAsStrings(
             Element parent, String elementName, boolean required) throws MalformedXmlException {
 
         List<Element> arrayEles = XmlUtils.getChildrenByTagName(parent, elementName);
@@ -498,6 +564,12 @@ public class XmlUtils {
             strs.add(itemEle.getTextContent());
         }
         return strs;
+    }
+
+    /** Gets on-device style String array. */
+    public static List<String> getOdStringArray(
+            Element ele, String nameName, Set<String> requiredNames) throws MalformedXmlException {
+        return getOdStringArray(ele, nameName, requiredNames.contains(nameName));
     }
 
     /** Gets on-device style String array. */
@@ -530,11 +602,100 @@ public class XmlUtils {
         return strs;
     }
 
+    /** Throws if extraneous child elements detected */
+    public static void throwIfExtraneousChildrenHr(Element ele, Set<String> expectedChildNames)
+            throws MalformedXmlException {
+        var childEles = XmlUtils.asElementList(ele.getChildNodes());
+        List<Element> extraneousEles =
+                childEles.stream()
+                        .filter(e -> !expectedChildNames.contains(e.getTagName()))
+                        .collect(Collectors.toList());
+        if (!extraneousEles.isEmpty()) {
+            throw new MalformedXmlException(
+                    String.format(
+                            "Unexpected element(s) %s in %s.",
+                            extraneousEles.stream()
+                                    .map(Element::getTagName)
+                                    .collect(Collectors.joining(",")),
+                            ele.getTagName()));
+        }
+    }
+
+    /** Throws if extraneous child elements detected */
+    public static void throwIfExtraneousChildrenOd(Element ele, Set<String> expectedChildNames)
+            throws MalformedXmlException {
+        var allChildElements = XmlUtils.asElementList(ele.getChildNodes());
+        List<Element> extraneousEles =
+                allChildElements.stream()
+                        .filter(
+                                e ->
+                                        !e.getAttribute(XmlUtils.OD_ATTR_NAME).isEmpty()
+                                                && !expectedChildNames.contains(
+                                                        e.getAttribute(XmlUtils.OD_ATTR_NAME)))
+                        .collect(Collectors.toList());
+        if (!extraneousEles.isEmpty()) {
+            throw new MalformedXmlException(
+                    String.format(
+                            "Unexpected element(s) in %s: %s",
+                            ele.getTagName(),
+                            extraneousEles.stream()
+                                    .map(
+                                            e ->
+                                                    String.format(
+                                                            "%s name=%s",
+                                                            e.getTagName(),
+                                                            e.getAttribute(XmlUtils.OD_ATTR_NAME)))
+                                    .collect(Collectors.joining(","))));
+        }
+    }
+
+    /** Throws if extraneous attributes detected */
+    public static void throwIfExtraneousAttributes(Element ele, Set<String> expectedAttrNames)
+            throws MalformedXmlException {
+        var attrs = ele.getAttributes();
+        List<String> attrNames = new ArrayList<>();
+        for (int i = 0; i < attrs.getLength(); i++) {
+            attrNames.add(attrs.item(i).getNodeName());
+        }
+        List<String> extraneousAttrs =
+                attrNames.stream()
+                        .filter(s -> !expectedAttrNames.contains(s))
+                        .collect(Collectors.toList());
+        if (!extraneousAttrs.isEmpty()) {
+            throw new MalformedXmlException(
+                    String.format(
+                            "Unexpected attr(s) %s in %s.",
+                            String.join(",", extraneousAttrs), ele.getTagName()));
+        }
+    }
+
     /**
      * Utility method for making a List from one element, to support easier refactoring if needed.
      * For example, List.of() doesn't support null elements.
      */
     public static List<Element> listOf(Element e) {
         return Arrays.asList(e);
+    }
+
+    /**
+     * Gets the most recent version of fields in the mapping. This way when a new version is
+     * released, we only need to update the mappings that were modified. The rest will fall back to
+     * the most recent previous version.
+     */
+    public static Set<String> getMostRecentVersion(
+            Map<Long, Set<String>> versionToFieldsMapping, long version)
+            throws MalformedXmlException {
+        long bestVersion = 0;
+        Set<String> bestSet = null;
+        for (Map.Entry<Long, Set<String>> entry : versionToFieldsMapping.entrySet()) {
+            if (entry.getKey() > bestVersion && entry.getKey() <= version) {
+                bestVersion = entry.getKey();
+                bestSet = entry.getValue();
+            }
+        }
+        if (bestSet == null) {
+            throw new MalformedXmlException("Unexpected version: " + version);
+        }
+        return bestSet;
     }
 }

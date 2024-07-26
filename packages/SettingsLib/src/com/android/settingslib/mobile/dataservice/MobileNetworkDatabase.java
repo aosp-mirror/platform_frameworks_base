@@ -19,14 +19,13 @@ package com.android.settingslib.mobile.dataservice;
 import android.content.Context;
 import android.util.Log;
 
-import java.util.List;
-import java.util.Objects;
-
 import androidx.lifecycle.LiveData;
 import androidx.room.Database;
 import androidx.room.Room;
 import androidx.room.RoomDatabase;
-import androidx.sqlite.db.SupportSQLiteDatabase;
+
+import java.util.List;
+import java.util.Objects;
 
 @Database(entities = {SubscriptionInfoEntity.class, UiccInfoEntity.class,
         MobileNetworkInfoEntity.class}, exportSchema = false, version = 1)
@@ -129,13 +128,6 @@ public abstract class MobileNetworkDatabase extends RoomDatabase {
      */
     public LiveData<List<UiccInfoEntity>> queryAllUiccInfo() {
         return mUiccInfoDao().queryAllUiccInfos();
-    }
-
-    /**
-     * Query the UICC info by the subscription ID from the UiccInfoEntity table.
-     */
-    public LiveData<UiccInfoEntity> queryUiccInfoById(String id) {
-        return mUiccInfoDao().queryUiccInfoById(id);
     }
 
     /**

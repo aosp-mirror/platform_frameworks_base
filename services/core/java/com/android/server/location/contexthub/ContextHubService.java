@@ -81,7 +81,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.PriorityQueue;
-import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
@@ -162,8 +161,8 @@ public class ContextHubService extends IContextHubService.Stub {
             new PriorityQueue<>(
                     Comparator.comparingLong(ReliableMessageRecord::getTimestamp));
 
-    // The test mode manager that manages behaviors during test mode.
-    private final TestModeManager mTestModeManager = new TestModeManager();
+    // The test mode manager that manages behaviors during test mode
+    private final ContextHubTestModeManager mTestModeManager = new ContextHubTestModeManager();
 
     // The period of the recurring time
     private static final int PERIOD_METRIC_QUERY_DAYS = 1;
@@ -226,17 +225,20 @@ public class ContextHubService extends IContextHubService.Stub {
         @Override
         public void handleNanoappMessage(short hostEndpointId, NanoAppMessage message,
                 List<String> nanoappPermissions, List<String> messagePermissions) {
-            if (Flags.reliableMessageImplementation()
+            // Only process the message normally if not using test mode manager or if
+            // the test mode manager call returned false as this indicates it did not
+            // process the message.
+            boolean useTestModeManager = Flags.reliableMessageImplementation()
                     && Flags.reliableMessageTestModeBehavior()
-                    && mIsTestModeEnabled.get()
-                    && mTestModeManager.handleNanoappMessage(mContextHubId, hostEndpointId,
-                            message, nanoappPermissions, messagePermissions)) {
-                // The TestModeManager handled the nanoapp message, so return here.
-                return;
+                    && mIsTestModeEnabled.get();
+            if (!useTestModeManager
+                    || !mTestModeManager.handleNanoappMessage(() -> {
+                        handleClientMessageCallback(mContextHubId, hostEndpointId,
+                                message, nanoappPermissions, messagePermissions);
+                    }, message)) {
+                handleClientMessageCallback(mContextHubId, hostEndpointId,
+                        message, nanoappPermissions, messagePermissions);
             }
-
-            handleClientMessageCallback(mContextHubId, hostEndpointId, message,
-                    nanoappPermissions, messagePermissions);
         }
 
         @Override
@@ -261,8 +263,6 @@ public class ContextHubService extends IContextHubService.Stub {
      * Records a reliable message from a nanoapp for duplicate detection.
      */
     private static class ReliableMessageRecord {
-        public static final int TIMEOUT_NS = 1000000000;
-
         public int mContextHubId;
         public long mTimestamp;
         public int mMessageSequenceNumber;
@@ -297,56 +297,11 @@ public class ContextHubService extends IContextHubService.Stub {
         }
 
         public boolean isExpired() {
-            return mTimestamp + TIMEOUT_NS < SystemClock.elapsedRealtimeNanos();
-        }
-    }
-
-    /**
-     * A class to manage behaviors during test mode. This is used for testing.
-     */
-    private class TestModeManager {
-        /**
-         * Probability (in percent) of duplicating a message.
-         */
-        private static final int MESSAGE_DUPLICATION_PROBABILITY_PERCENT = 50;
-
-        /**
-         * The number of total messages to send when the duplicate event happens.
-         */
-        private static final int NUM_MESSAGES_TO_DUPLICATE = 3;
-
-        /**
-         * A probability percent for a certain event.
-         */
-        private static final int MAX_PROBABILITY_PERCENT = 100;
-
-        private final Random mRandom = new Random();
-
-        /**
-         * @return whether the message was handled
-         * @see ContextHubServiceCallback#handleNanoappMessage
-         */
-        public boolean handleNanoappMessage(int contextHubId,
-                short hostEndpointId, NanoAppMessage message,
-                List<String> nanoappPermissions, List<String> messagePermissions) {
-            if (!message.isReliable()) {
-                return false;
-            }
-
-            if (Flags.reliableMessageDuplicateDetectionService()
-                    && mRandom.nextInt(MAX_PROBABILITY_PERCENT)
-                    < MESSAGE_DUPLICATION_PROBABILITY_PERCENT) {
-                Log.i(TAG, "[TEST MODE] Duplicating message ("
-                        + NUM_MESSAGES_TO_DUPLICATE
-                        + " sends) with message sequence number: "
-                        + message.getMessageSequenceNumber());
-                for (int i = 0; i < NUM_MESSAGES_TO_DUPLICATE; ++i) {
-                    handleClientMessageCallback(contextHubId, hostEndpointId,
-                            message, nanoappPermissions, messagePermissions);
-                }
-                return true;
-            }
-            return false;
+            return mTimestamp
+                            + ContextHubTransactionManager
+                                    .RELIABLE_MESSAGE_DUPLICATE_DETECTION_TIMEOUT
+                                    .toNanos()
+                    < SystemClock.elapsedRealtimeNanos();
         }
     }
 
@@ -381,8 +336,14 @@ public class ContextHubService extends IContextHubService.Stub {
         return new IContextHubClientCallback.Stub() {
             private void finishCallback() {
                 try {
-                    IContextHubClient client = mDefaultClientMap.get(contextHubId);
-                    client.callbackFinished();
+                    if (mDefaultClientMap != null && mDefaultClientMap.containsKey(contextHubId)) {
+                        IContextHubClient client = mDefaultClientMap.get(contextHubId);
+                        client.callbackFinished();
+                    } else {
+                        Log.e(TAG, "Default client not found for hub (ID = " + contextHubId + "): "
+                                + mDefaultClientMap == null ? "map was null"
+                                                            : "map did not contain the hub");
+                    }
                 } catch (RemoteException e) {
                     Log.e(
                             TAG,
@@ -1135,6 +1096,8 @@ public class ContextHubService extends IContextHubService.Stub {
      * @param messageDeliveryStatus     The message delivery status to deliver.
      */
     private void handleMessageDeliveryStatusCallback(MessageDeliveryStatus messageDeliveryStatus) {
+        ContextHubEventLogger.getInstance().logReliableMessageToNanoappStatus(
+                messageDeliveryStatus.messageSequenceNumber, messageDeliveryStatus.errorCode);
         mTransactionManager.onMessageDeliveryResponse(messageDeliveryStatus.messageSequenceNumber,
                 messageDeliveryStatus.errorCode == ErrorCode.OK);
     }

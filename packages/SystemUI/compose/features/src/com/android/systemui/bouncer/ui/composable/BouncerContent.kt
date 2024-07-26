@@ -83,6 +83,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.android.compose.PlatformButton
 import com.android.compose.animation.Easings
 import com.android.compose.animation.scene.ElementKey
+import com.android.compose.animation.scene.MutableSceneTransitionLayoutState
 import com.android.compose.animation.scene.SceneKey
 import com.android.compose.animation.scene.SceneScope
 import com.android.compose.animation.scene.SceneTransitionLayout
@@ -516,13 +517,22 @@ private fun FoldAware(
     val currentSceneKey =
         if (isSplitAroundTheFold) SceneKeys.SplitSceneKey else SceneKeys.ContiguousSceneKey
 
-    SceneTransitionLayout(
-        currentScene = currentSceneKey,
-        onChangeScene = {},
-        transitions = SceneTransitions,
-        modifier = modifier,
-        enableInterruptions = false,
-    ) {
+    val state = remember {
+        MutableSceneTransitionLayoutState(
+            currentSceneKey,
+            SceneTransitions,
+            enableInterruptions = false,
+        )
+    }
+
+    // Update state whenever currentSceneKey has changed.
+    LaunchedEffect(state, currentSceneKey) {
+        if (currentSceneKey != state.transitionState.currentScene) {
+            state.setTargetScene(currentSceneKey, coroutineScope = this)
+        }
+    }
+
+    SceneTransitionLayout(state, modifier = modifier) {
         scene(SceneKeys.ContiguousSceneKey) {
             FoldableScene(
                 aboveFold = aboveFold,

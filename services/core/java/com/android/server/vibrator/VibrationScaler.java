@@ -25,14 +25,12 @@ import android.os.VibrationEffect;
 import android.os.Vibrator;
 import android.os.vibrator.Flags;
 import android.os.vibrator.PrebakedSegment;
-import android.os.vibrator.VibrationEffectSegment;
 import android.util.IndentingPrintWriter;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.proto.ProtoOutputStream;
 
 import java.io.PrintWriter;
-import java.util.ArrayList;
 import java.util.Locale;
 
 /** Controls vibration scaling. */
@@ -136,12 +134,6 @@ final class VibrationScaler {
      */
     @NonNull
     public VibrationEffect scale(@NonNull VibrationEffect effect, int usageHint) {
-        if (!(effect instanceof VibrationEffect.Composed)) {
-            // This only scales composed vibration effects.
-            Slog.wtf(TAG, "Error scaling unsupported vibration effect: " + effect);
-            return effect;
-        }
-
         int newEffectStrength = getEffectStrength(usageHint);
         ScaleLevel scaleLevel = mScaleLevels.get(getScaleLevel(usageHint));
         float adaptiveScale = getAdaptiveHapticsScale(usageHint);
@@ -154,26 +146,10 @@ final class VibrationScaler {
             scaleLevel = SCALE_LEVEL_NONE;
         }
 
-        VibrationEffect.Composed composedEffect = (VibrationEffect.Composed) effect;
-        ArrayList<VibrationEffectSegment> segments =
-                new ArrayList<>(composedEffect.getSegments());
-        int segmentCount = segments.size();
-        for (int i = 0; i < segmentCount; i++) {
-            segments.set(i,
-                    segments.get(i).resolve(mDefaultVibrationAmplitude)
-                            .applyEffectStrength(newEffectStrength)
-                            .scale(scaleLevel.factor)
-                            .scaleLinearly(adaptiveScale));
-        }
-        if (segments.equals(composedEffect.getSegments())) {
-            // No segment was updated, return original effect.
-            return effect;
-        }
-        VibrationEffect.Composed scaled =
-                new VibrationEffect.Composed(segments, composedEffect.getRepeatIndex());
-        // Make sure we validate what was scaled, since we're using the constructor directly
-        scaled.validate();
-        return scaled;
+        return effect.resolve(mDefaultVibrationAmplitude)
+                .applyEffectStrength(newEffectStrength)
+                .scale(scaleLevel.factor)
+                .scaleLinearly(adaptiveScale);
     }
 
     /**

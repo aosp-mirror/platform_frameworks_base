@@ -38,7 +38,6 @@ import com.android.systemui.plugins.clocks.ClockFaceConfig
 import com.android.systemui.plugins.clocks.ClockFaceController
 import com.android.systemui.res.R
 import com.android.systemui.shade.data.repository.shadeRepository
-import com.android.systemui.shade.shared.model.ShadeMode
 import com.android.systemui.statusbar.ui.fakeSystemBarUtilsProxy
 import com.android.systemui.testKosmos
 import com.android.systemui.util.mockito.whenever
@@ -88,7 +87,7 @@ class KeyguardClockViewModelTest(flags: FlagsParameterization) : SysuiTestCase()
             val currentClockLayout by collectLastValue(underTest.currentClockLayout)
 
             with(kosmos) {
-                shadeRepository.setShadeMode(ShadeMode.Split)
+                shadeRepository.setShadeLayoutWide(true)
                 keyguardRepository.setClockShouldBeCentered(true)
                 keyguardClockRepository.setClockSize(ClockSize.LARGE)
             }
@@ -103,7 +102,7 @@ class KeyguardClockViewModelTest(flags: FlagsParameterization) : SysuiTestCase()
             val currentClockLayout by collectLastValue(underTest.currentClockLayout)
 
             with(kosmos) {
-                shadeRepository.setShadeMode(ShadeMode.Split)
+                shadeRepository.setShadeLayoutWide(true)
                 keyguardRepository.setClockShouldBeCentered(false)
                 keyguardClockRepository.setClockSize(ClockSize.LARGE)
             }
@@ -118,7 +117,7 @@ class KeyguardClockViewModelTest(flags: FlagsParameterization) : SysuiTestCase()
             val currentClockLayout by collectLastValue(underTest.currentClockLayout)
 
             with(kosmos) {
-                shadeRepository.setShadeMode(ShadeMode.Split)
+                shadeRepository.setShadeLayoutWide(true)
                 keyguardRepository.setClockShouldBeCentered(false)
                 keyguardClockRepository.setClockSize(ClockSize.SMALL)
             }
@@ -133,7 +132,7 @@ class KeyguardClockViewModelTest(flags: FlagsParameterization) : SysuiTestCase()
             val currentClockLayout by collectLastValue(underTest.currentClockLayout)
 
             with(kosmos) {
-                shadeRepository.setShadeMode(ShadeMode.Single)
+                shadeRepository.setShadeLayoutWide(false)
                 keyguardClockRepository.setClockSize(ClockSize.SMALL)
             }
 
@@ -146,7 +145,7 @@ class KeyguardClockViewModelTest(flags: FlagsParameterization) : SysuiTestCase()
             val currentClockLayout by collectLastValue(underTest.currentClockLayout)
 
             with(kosmos) {
-                shadeRepository.setShadeMode(ShadeMode.Single)
+                shadeRepository.setShadeLayoutWide(false)
                 keyguardClockRepository.setClockSize(ClockSize.LARGE)
             }
 
@@ -234,7 +233,7 @@ class KeyguardClockViewModelTest(flags: FlagsParameterization) : SysuiTestCase()
     fun testSmallClockTop_splitShade_composeLockscreenOn() =
         testScope.runTest {
             with(kosmos) {
-                shadeRepository.setShadeMode(ShadeMode.Split)
+                shadeRepository.setShadeLayoutWide(true)
                 fakeSystemBarUtilsProxy.fakeKeyguardStatusBarHeight = KEYGUARD_STATUS_BAR_HEIGHT
             }
 
@@ -249,7 +248,7 @@ class KeyguardClockViewModelTest(flags: FlagsParameterization) : SysuiTestCase()
     fun testSmallClockTop_splitShade_composeLockscreenOff() =
         testScope.runTest {
             with(kosmos) {
-                shadeRepository.setShadeMode(ShadeMode.Split)
+                shadeRepository.setShadeLayoutWide(true)
                 fakeSystemBarUtilsProxy.fakeKeyguardStatusBarHeight = KEYGUARD_STATUS_BAR_HEIGHT
             }
 
@@ -262,7 +261,7 @@ class KeyguardClockViewModelTest(flags: FlagsParameterization) : SysuiTestCase()
     fun testSmallClockTop_nonSplitShade_composeLockscreenOn() =
         testScope.runTest {
             with(kosmos) {
-                shadeRepository.setShadeMode(ShadeMode.Single)
+                shadeRepository.setShadeLayoutWide(false)
                 fakeSystemBarUtilsProxy.fakeKeyguardStatusBarHeight = KEYGUARD_STATUS_BAR_HEIGHT
             }
 
@@ -275,7 +274,7 @@ class KeyguardClockViewModelTest(flags: FlagsParameterization) : SysuiTestCase()
     fun testSmallClockTop_nonSplitShade_composeLockscreenOff() =
         testScope.runTest {
             with(kosmos) {
-                shadeRepository.setShadeMode(ShadeMode.Single)
+                shadeRepository.setShadeLayoutWide(false)
                 fakeSystemBarUtilsProxy.fakeKeyguardStatusBarHeight = KEYGUARD_STATUS_BAR_HEIGHT
             }
 

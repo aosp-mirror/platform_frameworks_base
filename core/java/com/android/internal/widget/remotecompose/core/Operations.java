@@ -19,6 +19,7 @@ import com.android.internal.widget.remotecompose.core.operations.BitmapData;
 import com.android.internal.widget.remotecompose.core.operations.ClickArea;
 import com.android.internal.widget.remotecompose.core.operations.ClipPath;
 import com.android.internal.widget.remotecompose.core.operations.ClipRect;
+import com.android.internal.widget.remotecompose.core.operations.ColorConstant;
 import com.android.internal.widget.remotecompose.core.operations.ColorExpression;
 import com.android.internal.widget.remotecompose.core.operations.DrawArc;
 import com.android.internal.widget.remotecompose.core.operations.DrawBitmap;
@@ -42,6 +43,7 @@ import com.android.internal.widget.remotecompose.core.operations.MatrixSave;
 import com.android.internal.widget.remotecompose.core.operations.MatrixScale;
 import com.android.internal.widget.remotecompose.core.operations.MatrixSkew;
 import com.android.internal.widget.remotecompose.core.operations.MatrixTranslate;
+import com.android.internal.widget.remotecompose.core.operations.NamedVariable;
 import com.android.internal.widget.remotecompose.core.operations.PaintData;
 import com.android.internal.widget.remotecompose.core.operations.PathData;
 import com.android.internal.widget.remotecompose.core.operations.RootContentBehavior;
@@ -105,6 +107,8 @@ public class Operations {
     public static final int COLOR_EXPRESSIONS = 134;
     public static final int TEXT_FROM_FLOAT = 135;
     public static final int TEXT_MERGE = 136;
+    public static final int NAMED_VARIABLE = 137;
+    public static final int COLOR_CONSTANT = 138;
 
     /////////////////////////////////////////======================
     public static IntMap<CompanionOperation> map = new IntMap<>();
@@ -147,7 +151,8 @@ public class Operations {
         map.put(COLOR_EXPRESSIONS, ColorExpression.COMPANION);
         map.put(TEXT_FROM_FLOAT, TextFromFloat.COMPANION);
         map.put(TEXT_MERGE, TextMerge.COMPANION);
-
+        map.put(NAMED_VARIABLE, NamedVariable.COMPANION);
+        map.put(COLOR_CONSTANT, ColorConstant.COMPANION);
     }
 
 }

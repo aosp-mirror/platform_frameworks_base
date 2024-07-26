@@ -37,6 +37,7 @@ import androidx.activity.setViewTreeOnBackPressedDispatcherOwner
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
 import com.android.app.animation.Interpolators
+import com.android.app.tracing.coroutines.launch
 import com.android.internal.jank.InteractionJankMonitor
 import com.android.internal.jank.InteractionJankMonitor.CUJ_SCREEN_OFF_SHOW_AOD
 import com.android.systemui.Flags.newAodTransition
@@ -80,6 +81,7 @@ import com.android.systemui.util.ui.isAnimating
 import com.android.systemui.util.ui.stopAnimating
 import com.android.systemui.util.ui.value
 import kotlin.math.min
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.DisposableHandle
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.coroutineScope
@@ -110,6 +112,7 @@ object KeyguardRootViewBinder {
         vibratorHelper: VibratorHelper?,
         falsingManager: FalsingManager?,
         keyguardViewMediator: KeyguardViewMediator?,
+        mainImmediateDispatcher: CoroutineDispatcher,
     ): DisposableHandle {
         val disposables = DisposableHandles()
         val childViews = mutableMapOf<Int, View>()
@@ -128,6 +131,30 @@ object KeyguardRootViewBinder {
 
         val burnInParams = MutableStateFlow(BurnInParameters())
         val viewState = ViewStateAccessor(alpha = { view.alpha })
+
+        disposables +=
+            view.repeatWhenAttached(mainImmediateDispatcher) {
+                repeatOnLifecycle(Lifecycle.State.CREATED) {
+                    if (MigrateClocksToBlueprint.isEnabled) {
+                        launch("$TAG#topClippingBounds") {
+                            val clipBounds = Rect()
+                            viewModel.topClippingBounds.collect { clipTop ->
+                                if (clipTop == null) {
+                                    view.setClipBounds(null)
+                                } else {
+                                    clipBounds.apply {
+                                        top = clipTop
+                                        left = view.getLeft()
+                                        right = view.getRight()
+                                        bottom = view.getBottom()
+                                    }
+                                    view.setClipBounds(clipBounds)
+                                }
+                            }
+                        }
+                    }
+                }
+            }
         disposables +=
             view.repeatWhenAttached {
                 repeatOnLifecycle(Lifecycle.State.CREATED) {
@@ -192,23 +219,6 @@ object KeyguardRootViewBinder {
                         }
 
                         launch {
-                            val clipBounds = Rect()
-                            viewModel.topClippingBounds.collect { clipTop ->
-                                if (clipTop == null) {
-                                    view.setClipBounds(null)
-                                } else {
-                                    clipBounds.apply {
-                                        top = clipTop
-                                        left = view.getLeft()
-                                        right = view.getRight()
-                                        bottom = view.getBottom()
-                                    }
-                                    view.setClipBounds(clipBounds)
-                                }
-                            }
-                        }
-
-                        launch {
                             viewModel.lockscreenStateAlpha(viewState).collect { alpha ->
                                 childViews[statusViewId]?.alpha = alpha
                             }
@@ -262,6 +272,23 @@ object KeyguardRootViewBinder {
                                     childViews[largeClockId]?.let {
                                         it.scaleX = scaleViewModel.scale
                                         it.scaleY = scaleViewModel.scale
+                                    }
+                                }
+                            }
+                        }
+
+                        launch {
+                            blueprintViewModel.currentTransition.collect { currentTransition ->
+                                // When blueprint/clock transitions end (null), make sure NSSL is in
+                                // the right place
+                                if (currentTransition == null) {
+                                    childViews[nsslPlaceholderId]?.let { notificationListPlaceholder
+                                        ->
+                                        viewModel.onNotificationContainerBoundsChanged(
+                                            notificationListPlaceholder.top.toFloat(),
+                                            notificationListPlaceholder.bottom.toFloat(),
+                                            animate = true,
+                                        )
                                     }
                                 }
                             }

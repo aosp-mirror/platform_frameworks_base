@@ -103,6 +103,7 @@
     <string name="screenshot_detected_template" msgid="7940376642921719915">"<xliff:g id="APPNAME">%1$s</xliff:g> hat diesen Screenshot erkannt."</string>
     <string name="screenshot_detected_multiple_template" msgid="7644827792093819241">"<xliff:g id="APPNAME">%1$s</xliff:g> und andere geöffnete Apps haben diesen Screenshot erkannt."</string>
     <string name="app_clips_save_add_to_note" msgid="3460200751278069445">"Zu Notiz hinzufügen"</string>
+    <string name="backlinks_include_link" msgid="4562093591148248158">"Link einschließen"</string>
     <string name="screenrecord_title" msgid="4257171601439507792">"Bildschirmaufzeichnung"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"Bildschirmaufzeichnung…"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Fortlaufende Benachrichtigung für eine Bildschirmaufzeichnung"</string>
@@ -125,29 +126,27 @@
     <string name="screenrecord_save_text" msgid="3008973099800840163">"Zum Ansehen tippen"</string>
     <string name="screenrecord_save_error" msgid="5862648532560118815">"Fehler beim Speichern der Bildschirmaufzeichnung"</string>
     <string name="screenrecord_start_error" msgid="2200660692479682368">"Fehler beim Start der Bildschirmaufzeichnung"</string>
-    <!-- no translation found for screenrecord_stop_dialog_title (2685522129492260887) -->
-    <skip />
-    <!-- no translation found for screenrecord_stop_dialog_message (1926783607059442889) -->
-    <skip />
-    <string name="screenrecord_stop_dialog_message_specific_app" msgid="5285148796772616326">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; wird dann nicht mehr aufgezeichnet"</string>
-    <!-- no translation found for screenrecord_stop_dialog_button (2883812564938194350) -->
-    <skip />
-    <!-- no translation found for share_to_app_stop_dialog_title (9212915050910250438) -->
-    <skip />
-    <!-- no translation found for share_to_app_stop_dialog_message (3181723638915877339) -->
-    <skip />
-    <string name="share_to_app_stop_dialog_message_specific_app" msgid="124371406810544777">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; wird dann nicht mehr geteilt"</string>
-    <!-- no translation found for share_to_app_stop_dialog_button (6334056916284230217) -->
-    <skip />
-    <!-- no translation found for cast_to_other_device_stop_dialog_title (1910372600290258193) -->
-    <skip />
-    <!-- no translation found for cast_to_other_device_stop_dialog_message (1502520537030715412) -->
-    <skip />
-    <string name="cast_to_other_device_stop_dialog_message_specific_app" msgid="4891536209254041850">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; wird dann nicht mehr übertragen"</string>
-    <!-- no translation found for cast_to_other_device_stop_dialog_button (6420183747435521834) -->
-    <skip />
-    <!-- no translation found for close_dialog_button (4749497706540104133) -->
-    <skip />
+    <string name="screenrecord_stop_dialog_title" msgid="8716193661764511095">"Aufzeichnung beenden?"</string>
+    <string name="screenrecord_stop_dialog_message" msgid="6262768207331626817">"Du zeichnest momentan deinen gesamten Bildschirm auf"</string>
+    <string name="screenrecord_stop_dialog_message_specific_app" msgid="5995770227684523244">"Du zeichnest momentan Inhalte der <xliff:g id="APP_NAME">%1$s</xliff:g> auf"</string>
+    <string name="screenrecord_stop_dialog_button" msgid="2883812564938194350">"Aufnahme beenden"</string>
+    <string name="share_to_app_chip_accessibility_label" msgid="4210256229976947065">"Bildschirm wird geteilt"</string>
+    <string name="share_to_app_stop_dialog_title" msgid="9212915050910250438">"Bildschirmfreigabe beenden?"</string>
+    <string name="share_to_app_stop_dialog_message_entire_screen_with_host_app" msgid="522823522115375414">"Du teilst momentan deinen gesamten Bildschirm mit der <xliff:g id="HOST_APP_NAME">%1$s</xliff:g>"</string>
+    <string name="share_to_app_stop_dialog_message_entire_screen" msgid="5090115386271179270">"Du teilst momentan deinen gesamten Bildschirm mit einer App"</string>
+    <string name="share_to_app_stop_dialog_message_single_app_specific" msgid="5923772039347985172">"Du teilst momentan Inhalte der <xliff:g id="APP_BEING_SHARED_NAME">%1$s</xliff:g>"</string>
+    <string name="share_to_app_stop_dialog_message_single_app_generic" msgid="6681016774654578261">"Du teilst momentan Inhalte einer App"</string>
+    <string name="share_to_app_stop_dialog_button" msgid="6334056916284230217">"Freigabe beenden"</string>
+    <string name="cast_screen_to_other_device_chip_accessibility_label" msgid="4687917476203009885">"Bildschirm wird übertragen"</string>
+    <string name="cast_to_other_device_stop_dialog_title" msgid="7836517190930357326">"Übertragung abbrechen?"</string>
+    <string name="cast_to_other_device_stop_dialog_message_entire_screen_with_device" msgid="1474703115926205251">"Du überträgst momentan deinen gesamten Bildschirm auf das Gerät „<xliff:g id="DEVICE_NAME">%1$s</xliff:g>“"</string>
+    <string name="cast_to_other_device_stop_dialog_message_entire_screen" msgid="8419219169553867625">"Du überträgst momentan deinen gesamten Bildschirm auf ein Gerät in der Nähe"</string>
+    <string name="cast_to_other_device_stop_dialog_message_specific_app_with_device" msgid="2715934698604085519">"Du überträgst momentan Inhalte der <xliff:g id="APP_BEING_SHARED_NAME">%1$s</xliff:g> auf das Gerät „<xliff:g id="DEVICE_NAME">%2$s</xliff:g>“"</string>
+    <string name="cast_to_other_device_stop_dialog_message_specific_app" msgid="8616103075630934513">"Du überträgst momentan Inhalte der <xliff:g id="APP_BEING_SHARED_NAME">%1$s</xliff:g> auf ein Gerät in der Nähe"</string>
+    <string name="cast_to_other_device_stop_dialog_message_generic_with_device" msgid="9213582497852420203">"Du überträgst momentan Inhalte auf das Gerät „<xliff:g id="DEVICE_NAME">%1$s</xliff:g>“"</string>
+    <string name="cast_to_other_device_stop_dialog_message_generic" msgid="4100272100480415076">"Du überträgst momentan Inhalte auf ein Gerät in der Nähe"</string>
+    <string name="cast_to_other_device_stop_dialog_button" msgid="6420183747435521834">"Streaming beenden"</string>
+    <string name="close_dialog_button" msgid="4749497706540104133">"Schließen"</string>
     <string name="issuerecord_title" msgid="286627115110121849">"Problem aufzeichnen"</string>
     <string name="issuerecord_background_processing_label" msgid="1666840264959336876">"Aufzeichnung wird verarbeitet"</string>
     <string name="issuerecord_channel_description" msgid="6142326363431474632">"Benachrichtigung über laufende Aufzeichnung eines Problems"</string>
@@ -158,8 +157,7 @@
     <string name="issuerecord_save_error" msgid="6913040083446722726">"Fehler beim Speichern der Aufzeichnung des Problems"</string>
     <string name="issuerecord_start_error" msgid="3402782952722871190">"Fehler beim Starten der Aufzeichnung des Problems"</string>
     <string name="immersive_cling_title" msgid="8372056499315585941">"Vollbildmodus wird aktiviert"</string>
-    <!-- no translation found for immersive_cling_description (2717426731830851921) -->
-    <skip />
+    <string name="immersive_cling_description" msgid="2717426731830851921">"Wenn du den Modus verlassen möchtest, wische vom oberen Displayrand nach unten"</string>
     <string name="immersive_cling_positive" msgid="3076681691468978568">"Ok"</string>
     <string name="accessibility_back" msgid="6530104400086152611">"Zurück"</string>
     <string name="accessibility_home" msgid="5430449841237966217">"Startbildschirm"</string>
@@ -192,6 +190,7 @@
     <string name="biometric_dialog_tap_confirm_with_face_alt_1" msgid="439152621640507113">"Gerät mit dem Gesicht entsperrt. Tippe, um fortzufahren."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_2" msgid="8586608186457385108">"Gesicht erkannt. Tippe, um fortzufahren."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_3" msgid="2192670471930606539">"Gesicht erkannt. Tippe zum Fortfahren auf das Symbol „Entsperren“."</string>
+    <string name="biometric_dialog_tap_confirm_with_face_sfps" msgid="2499213248903257928">"Per Gesichtserkennung entsperrt. Tippe, um fortzufahren."</string>
     <string name="biometric_dialog_authenticated" msgid="7337147327545272484">"Authentifiziert"</string>
     <string name="biometric_dialog_cancel_authentication" msgid="981316588773442637">"Authentifizierung abbrechen"</string>
     <string name="biometric_dialog_content_view_more_options_button" msgid="2663810393874865475">"Weitere Optionen"</string>
@@ -291,6 +290,7 @@
     <string name="start_dreams" msgid="9131802557946276718">"Bildschirmschoner"</string>
     <string name="ethernet_label" msgid="2203544727007463351">"Ethernet"</string>
     <string name="quick_settings_dnd_label" msgid="7728690179108024338">"Bitte nicht stören"</string>
+    <string name="quick_settings_modes_label" msgid="5407025818652750501">"Prioritätsmodi"</string>
     <string name="quick_settings_bluetooth_label" msgid="7018763367142041481">"Bluetooth"</string>
     <string name="quick_settings_bluetooth_detail_empty_text" msgid="5760239584390514322">"Keine gekoppelten Geräte verfügbar"</string>
     <string name="quick_settings_bluetooth_tile_subtitle" msgid="212752719010829550">"Zum Verbinden oder Trennen eines Geräts tippen"</string>
@@ -302,8 +302,7 @@
     <string name="quick_settings_bluetooth_device_saved" msgid="7549938728928069477">"Gespeichert"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_disconnect" msgid="415980329093277342">"Verknüpfung aufheben"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_activate" msgid="3724301751036877403">"aktivieren"</string>
-    <!-- no translation found for turn_on_bluetooth_auto_tomorrow (3345758139235739006) -->
-    <skip />
+    <string name="turn_on_bluetooth_auto_tomorrow" msgid="3345758139235739006">"Morgen automatisch aktivieren"</string>
     <string name="turn_on_bluetooth_auto_info_disabled" msgid="682984290339848844">"Funktionen wie „Quick Share“ und „Mein Gerät finden“ verwenden Bluetooth"</string>
     <string name="turn_on_bluetooth_auto_info_enabled" msgid="7440944034584560279">"Bluetooth wird morgen früh aktiviert"</string>
     <string name="quick_settings_bluetooth_audio_sharing_button" msgid="7545274861795853838">"Audioinhalte freigeben"</string>
@@ -427,6 +426,13 @@
     <string name="sensor_privacy_dialog_open_settings" msgid="5635865896053011859">"Einstellungen öffnen"</string>
     <string name="media_seamless_other_device" msgid="4654849800789196737">"Sonstiges Gerät"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"Übersicht ein-/ausblenden"</string>
+    <string name="zen_modes_dialog_title" msgid="4159138230418567383">"Prioritätsmodi"</string>
+    <string name="zen_modes_dialog_done" msgid="6654130880256438950">"Fertig"</string>
+    <string name="zen_modes_dialog_settings" msgid="2310248023728936697">"Einstellungen"</string>
+    <!-- no translation found for zen_mode_on (9085304934016242591) -->
+    <skip />
+    <!-- no translation found for zen_mode_off (1736604456618147306) -->
+    <skip />
     <string name="zen_priority_introduction" msgid="3159291973383796646">"Klingeltöne und die Vibration werden deaktiviert, außer für Weckrufe, Erinnerungen, Termine sowie Anrufe von zuvor von dir festgelegten Personen. Du hörst jedoch weiterhin Sound, wenn du dir Musik anhörst, Videos ansiehst oder Spiele spielst."</string>
     <string name="zen_alarms_introduction" msgid="3987266042682300470">"Klingeltöne und die Vibration werden deaktiviert, außer für Weckrufe. Du hörst jedoch weiterhin Sound, wenn du dir Musik anhörst, Videos ansiehst oder Spiele spielst."</string>
     <string name="zen_priority_customize_button" msgid="4119213187257195047">"Anpassen"</string>
@@ -472,6 +478,7 @@
     <string name="cta_label_to_open_widget_picker" msgid="3874946756976360699">"Weitere Widgets hinzufügen"</string>
     <string name="popup_on_dismiss_cta_tile_text" msgid="8292501780996070019">"Lange drücken, um Widgets anzupassen"</string>
     <string name="button_to_configure_widgets_text" msgid="4191862850185256901">"Widgets anpassen"</string>
+    <string name="unlock_reason_to_customize_widgets" msgid="5011909432460546033">"Entsperren, um Widgets zu personalisieren"</string>
     <string name="icon_description_for_disabled_widget" msgid="4693151565003206943">"App-Symbol für deaktiviertes Widget"</string>
     <string name="icon_description_for_pending_widget" msgid="8413816401868001755">"App-Symbol für ein Widget, das gerade installiert wird"</string>
     <string name="edit_widget" msgid="9030848101135393954">"Widget bearbeiten"</string>
@@ -490,12 +497,13 @@
     <string name="accessibility_action_label_select_widget" msgid="8897281501387398191">"Widget auswählen"</string>
     <string name="accessibility_action_label_remove_widget" msgid="3373779447448758070">"Widget entfernen"</string>
     <string name="accessibility_action_label_place_widget" msgid="1914197458644168978">"ausgewähltes Widget in den Bearbeitungsmodus versetzen"</string>
-    <!-- no translation found for communal_widgets_disclaimer_title (1150954395585308868) -->
+    <string name="communal_widget_picker_title" msgid="1953369090475731663">"Sperrbildschirm-Widgets"</string>
+    <string name="communal_widget_picker_description" msgid="490515450110487871">"Jeder kann Widgets auf deinem Sperrbildschirm sehen, auch bei gesperrtem Tablet."</string>
+    <!-- no translation found for accessibility_action_label_unselect_widget (1041811747619468698) -->
     <skip />
-    <!-- no translation found for communal_widgets_disclaimer_text (1423545475160506349) -->
-    <skip />
-    <!-- no translation found for communal_widgets_disclaimer_button (4423059765740780753) -->
-    <skip />
+    <string name="communal_widgets_disclaimer_title" msgid="1150954395585308868">"Sperrbildschirm-Widgets"</string>
+    <string name="communal_widgets_disclaimer_text" msgid="1423545475160506349">"Wenn du eine App mit einem Widget öffnen möchtest, musst du deine Identität bestätigen. Beachte auch, dass jeder die Widgets sehen kann, auch wenn dein Tablet gesperrt ist. Einige Widgets sind möglicherweise nicht für den Sperrbildschirm vorgesehen, sodass es unsicher sein kann, sie hier hinzuzufügen."</string>
+    <string name="communal_widgets_disclaimer_button" msgid="4423059765740780753">"Ok"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"Nutzer wechseln"</string>
     <string name="accessibility_multi_user_list_switcher" msgid="8574105376229857407">"Pull-down-Menü"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Alle Apps und Daten in dieser Sitzung werden gelöscht."</string>
@@ -549,12 +557,11 @@
     <string name="media_projection_action_text" msgid="3634906766918186440">"Jetzt starten"</string>
     <string name="empty_shade_text" msgid="8935967157319717412">"Keine Benachrichtigungen"</string>
     <string name="no_unseen_notif_text" msgid="395512586119868682">"Keine neuen Benachrichtigungen"</string>
-    <!-- no translation found for adaptive_notification_edu_hun_title (5720882373252389461) -->
+    <!-- no translation found for adaptive_notification_edu_hun_title (7790738150177329960) -->
     <skip />
-    <!-- no translation found for adaptive_notification_edu_hun_text (4260536236101821273) -->
+    <!-- no translation found for adaptive_notification_edu_hun_text (7743367744129536610) -->
     <skip />
-    <!-- no translation found for go_to_adaptive_notification_settings (2423690125178298479) -->
-    <skip />
+    <string name="go_to_adaptive_notification_settings" msgid="2423690125178298479">"Deaktivieren"</string>
     <string name="unlock_to_see_notif_text" msgid="7439033907167561227">"Für ältere Benachrichtigungen entsperren"</string>
     <string name="quick_settings_disclosure_parental_controls" msgid="2114102871438223600">"Dieses Gerät wird von deinen Eltern verwaltet"</string>
     <string name="quick_settings_disclosure_management_monitoring" msgid="8231336875820702180">"Deine Organisation verwaltet dieses Gerät und kann den Netzwerkverkehr überwachen"</string>
@@ -617,11 +624,11 @@
     <string name="csd_button_keep_listening" product="default" msgid="4093794049149286784">"Weiterhören"</string>
     <string name="csd_button_lower_volume" product="default" msgid="5347210412376264579">"Leiser stellen"</string>
     <string name="screen_pinning_title" msgid="9058007390337841305">"App ist auf dem Bildschirm fixiert"</string>
-    <string name="screen_pinning_description" msgid="8699395373875667743">"Die App bleibt so lange auf dem Bildschirm fixiert, bis du die Fixierung aufhebst. Berühre und halte dazu \"Zurück\" und \"Übersicht\"."</string>
-    <string name="screen_pinning_description_recents_invisible" msgid="4564466648700390037">"Die App bleibt so lange auf dem Bildschirm fixiert, bis du die Fixierung aufhebst. Berühre und halte dazu \"Zurück\" und \"Startbildschirm\"."</string>
+    <string name="screen_pinning_description" msgid="8699395373875667743">"Die App bleibt so lange auf dem Bildschirm fixiert, bis du die Fixierung aufhebst. Halte dazu \"Zurück\" und \"Übersicht\" gedrückt."</string>
+    <string name="screen_pinning_description_recents_invisible" msgid="4564466648700390037">"Die App bleibt so lange auf dem Bildschirm fixiert, bis du die Fixierung aufhebst. Halte dazu \"Zurück\" und \"Startbildschirm\" gedrückt."</string>
     <string name="screen_pinning_description_gestural" msgid="7246323931831232068">"Die App bleibt so lange auf dem Bildschirm angepinnt, bis du die Fixierung aufhebst. Wische dazu nach oben und halte den Bildschirm gedrückt."</string>
-    <string name="screen_pinning_description_accessible" msgid="7386449191953535332">"Die App bleibt so lange auf dem Bildschirm fixiert, bis du die Fixierung aufhebst. Berühre und halte dazu \"Übersicht\"."</string>
-    <string name="screen_pinning_description_recents_invisible_accessible" msgid="2857071808674481986">"Die App bleibt so lange auf dem Bildschirm fixiert, bis du die Fixierung aufhebst. Berühre und halte dazu \"Startbildschirm\"."</string>
+    <string name="screen_pinning_description_accessible" msgid="7386449191953535332">"Die App bleibt so lange auf dem Bildschirm fixiert, bis du die Fixierung aufhebst. Halte dazu \"Übersicht\" gedrückt."</string>
+    <string name="screen_pinning_description_recents_invisible_accessible" msgid="2857071808674481986">"Die App bleibt so lange auf dem Bildschirm fixiert, bis du die Fixierung aufhebst. Halte dazu \"Startbildschirm\" gedrückt."</string>
     <string name="screen_pinning_exposes_personal_data" msgid="8189852022981524789">"Möglicherweise kann auf personenbezogene Daten (Kontakte, E-Mails usw.) zugegriffen werden."</string>
     <string name="screen_pinning_can_open_other_apps" msgid="7529756813231421455">"Die fixierte App kann ggf. andere Apps öffnen."</string>
     <string name="screen_pinning_toast" msgid="8177286912533744328">"Zum Aufheben der Fixierung dieser App \"Zurück\" und \"Übersicht\" halten"</string>
@@ -720,7 +727,7 @@
     <string name="notification_alert_title" msgid="3656229781017543655">"Standard"</string>
     <string name="notification_automatic_title" msgid="3745465364578762652">"Automatisch"</string>
     <string name="notification_channel_summary_low" msgid="4860617986908931158">"Kein Ton und keine Vibration"</string>
-    <string name="notification_conversation_summary_low" msgid="1734433426085468009">"Kein Ton und keine Vibration, erscheint weiter unten im Bereich „Unterhaltungen“"</string>
+    <string name="notification_conversation_summary_low" msgid="3855696451919728790">"Weder Ton noch Vibration, erscheint aber dennoch im Bereich „Unterhaltungen“"</string>
     <string name="notification_channel_summary_default" msgid="777294388712200605">"Kann je nach Geräteeinstellungen klingeln oder vibrieren"</string>
     <string name="notification_channel_summary_default_with_bubbles" msgid="3482483084451555344">"Kann je nach Geräteeinstellungen klingeln oder vibrieren. Unterhaltungen von <xliff:g id="APP_NAME">%1$s</xliff:g> werden standardmäßig als Bubble angezeigt."</string>
     <string name="notification_channel_summary_automatic" msgid="5813109268050235275">"Das System entscheiden lassen, ob bei dieser Benachrichtigung ein Ton oder eine Vibration ausgegeben wird"</string>
@@ -777,6 +784,7 @@
     <string name="keyboard_key_page_up" msgid="173914303254199845">"Nach oben"</string>
     <string name="keyboard_key_page_down" msgid="9035902490071829731">"Nach unten"</string>
     <string name="keyboard_key_forward_del" msgid="5325501825762733459">"Entf"</string>
+    <string name="keyboard_key_esc" msgid="6230365950511411322">"Esc"</string>
     <string name="keyboard_key_move_home" msgid="3496502501803911971">"Pos1"</string>
     <string name="keyboard_key_move_end" msgid="99190401463834854">"Ende"</string>
     <string name="keyboard_key_insert" msgid="4621692715704410493">"Einfg"</string>
@@ -827,7 +835,7 @@
     <string name="keyboard_shortcut_group_input" msgid="6888282716546625610">"Eingabe"</string>
     <string name="input_switch_input_language_next" msgid="3782155659868227855">"Zur nächsten Sprache wechseln"</string>
     <string name="input_switch_input_language_previous" msgid="6043341362202336623">"Zur vorherigen Sprache wechseln"</string>
-    <string name="input_access_emoji" msgid="8105642858900406351">"Auf Emoji zugreifen"</string>
+    <string name="input_access_emoji" msgid="8105642858900406351">"Auf Emojis zugreifen"</string>
     <string name="input_access_voice_typing" msgid="7291201476395326141">"Auf Spracheingabe zugreifen"</string>
     <string name="keyboard_shortcut_group_applications" msgid="7386239431100651266">"Apps"</string>
     <string name="keyboard_shortcut_group_applications_assist" msgid="6772492350416591448">"Assistant"</string>
@@ -1296,7 +1304,7 @@
     <string name="home_quick_affordance_unavailable_configure_the_app" msgid="604424593994493281">"• Mindestens ein Gerät oder Gerätesteuerfeld ist verfügbar"</string>
     <string name="notes_app_quick_affordance_unavailable_explanation" msgid="4796955161600178530">"Wähle eine Standard-App für Notizen aus, die du für die Verknüpfung verwenden möchtest"</string>
     <string name="keyguard_affordance_enablement_dialog_notes_app_action" msgid="6821710209675089470">"App wählen"</string>
-    <string name="keyguard_affordance_press_too_short" msgid="8145437175134998864">"Verknüpfung berühren &amp; halten"</string>
+    <string name="keyguard_affordance_press_too_short" msgid="8145437175134998864">"Verknüpfung gedrückt halten"</string>
     <string name="rear_display_bottom_sheet_cancel" msgid="3461468855493357248">"Abbrechen"</string>
     <string name="rear_display_bottom_sheet_confirm" msgid="1507591562761552899">"Jetzt umdrehen"</string>
     <string name="rear_display_folded_bottom_sheet_title" msgid="3930008746560711990">"Smartphone auffalten"</string>
@@ -1352,33 +1360,56 @@
     <string name="privacy_dialog_active_app_usage_2" msgid="2770926061339921767">"Verwendet von <xliff:g id="APP_NAME">%1$s</xliff:g> (<xliff:g id="ATTRIBUTION_LABEL">%2$s</xliff:g> • <xliff:g id="PROXY_LABEL">%3$s</xliff:g>)"</string>
     <string name="privacy_dialog_recent_app_usage_2" msgid="2874689735085367167">"Kürzlich von <xliff:g id="APP_NAME">%1$s</xliff:g> verwendet (<xliff:g id="ATTRIBUTION_LABEL">%2$s</xliff:g> • <xliff:g id="PROXY_LABEL">%3$s</xliff:g>)"</string>
     <string name="shortcut_helper_category_system" msgid="462110876978937359">"System"</string>
+    <string name="shortcut_helper_category_system_controls" msgid="3153344561395751020">"System­steuerelemente"</string>
+    <string name="shortcut_helper_category_system_apps" msgid="6001757545472556810">"System-Apps"</string>
     <string name="shortcut_helper_category_multitasking" msgid="7413381961404090136">"Multitasking"</string>
+    <string name="shortcutHelper_category_recent_apps" msgid="7918731953612377145">"Zuletzt aktive Apps"</string>
+    <string name="shortcutHelper_category_split_screen" msgid="1159669813444812244">"Splitscreen"</string>
     <string name="shortcut_helper_category_input" msgid="8674018654124839566">"Eingabe"</string>
     <string name="shortcut_helper_category_app_shortcuts" msgid="8010249408308587117">"App-Verknüpfungen"</string>
+    <string name="shortcut_helper_category_current_app_shortcuts" msgid="4017840565974573628">"Aktuelle App"</string>
     <string name="shortcut_helper_category_a11y" msgid="6314444792641773464">"Bedienungshilfen"</string>
     <string name="shortcut_helper_title" msgid="8567500639300970049">"Tastenkürzel"</string>
     <string name="shortcut_helper_search_placeholder" msgid="5488547526269871819">"Tastenkürzel suchen"</string>
     <string name="shortcut_helper_content_description_collapse_icon" msgid="8028015738431664954">"Symbol „Minimieren“"</string>
     <string name="shortcut_helper_content_description_expand_icon" msgid="1084435697860417390">"Symbol „Maximieren“"</string>
     <string name="shortcut_helper_key_combinations_or_separator" msgid="7082902112102125540">"oder"</string>
-    <!-- no translation found for touchpad_tutorial_back_gesture_button (2746834288077265946) -->
-    <skip />
-    <!-- no translation found for touchpad_tutorial_home_gesture_button (7640544867625955304) -->
-    <skip />
-    <!-- no translation found for touchpad_tutorial_action_key_button (3220074511852927267) -->
-    <skip />
-    <!-- no translation found for touchpad_tutorial_done_button (176168488821755503) -->
-    <skip />
-    <!-- no translation found for touchpad_back_gesture_action_title (7199067250654332735) -->
-    <skip />
-    <!-- no translation found for touchpad_back_gesture_guidance (4222430588599527272) -->
-    <skip />
-    <!-- no translation found for touchpad_back_gesture_animation_content_description (2646107450922379918) -->
-    <skip />
-    <!-- no translation found for touchpad_back_gesture_screen_animation_content_description (4036267494237748710) -->
-    <skip />
+    <string name="touchpad_tutorial_back_gesture_button" msgid="2746834288077265946">"Touch-Geste „Zurück“"</string>
+    <string name="touchpad_tutorial_home_gesture_button" msgid="7640544867625955304">"Touch-Geste „Startbildschirm“"</string>
+    <string name="touchpad_tutorial_action_key_button" msgid="3220074511852927267">"Aktionstaste"</string>
+    <string name="touchpad_tutorial_done_button" msgid="176168488821755503">"Fertig"</string>
+    <string name="touchpad_tutorial_gesture_done" msgid="4784438360736821255">"Gut gemacht!"</string>
+    <string name="touchpad_back_gesture_action_title" msgid="7199067250654332735">"Zurück"</string>
+    <string name="touchpad_back_gesture_guidance" msgid="4222430588599527272">"Wenn du zurückgehen möchtest, wische an einer beliebigen Stelle des Touchpads mit drei Fingern nach links oder rechts."</string>
+    <string name="touchpad_back_gesture_animation_content_description" msgid="2646107450922379918">"Touchpad mit drei Fingern, die sich nach links und rechts bewegen"</string>
+    <string name="touchpad_back_gesture_screen_animation_content_description" msgid="4036267494237748710">"Bildschirm zeigt eine Animation der Touch-Geste „Zurück“"</string>
     <string name="keyboard_backlight_dialog_title" msgid="8273102932345564724">"Tastaturbeleuchtung"</string>
     <string name="keyboard_backlight_value" msgid="7336398765584393538">"Level %1$d von %2$d"</string>
     <string name="home_controls_dream_label" msgid="6567105701292324257">"Smart-Home-Steuerung"</string>
     <string name="home_controls_dream_description" msgid="4644150952104035789">"Smart-Home-Steuerung als Bildschirmschoner nutzen"</string>
+    <string name="volume_undo_action" msgid="5815519725211877114">"Rückgängig machen"</string>
+    <!-- no translation found for back_edu_toast_content (4530314597378982956) -->
+    <skip />
+    <!-- no translation found for home_edu_toast_content (3381071147871955415) -->
+    <skip />
+    <!-- no translation found for overview_edu_toast_content (5797030644017804518) -->
+    <skip />
+    <!-- no translation found for all_apps_edu_toast_content (8807496014667211562) -->
+    <skip />
+    <!-- no translation found for back_edu_notification_title (5624780717751357278) -->
+    <skip />
+    <!-- no translation found for back_edu_notification_content (2497557451540954068) -->
+    <skip />
+    <!-- no translation found for home_edu_notification_title (6097902076909654045) -->
+    <skip />
+    <!-- no translation found for home_edu_notification_content (6631697734535766588) -->
+    <skip />
+    <!-- no translation found for overview_edu_notification_title (1265824157319562406) -->
+    <skip />
+    <!-- no translation found for overview_edu_notification_content (3578204677648432500) -->
+    <skip />
+    <!-- no translation found for all_apps_edu_notification_title (372262997265569063) -->
+    <skip />
+    <!-- no translation found for all_apps_edu_notification_content (3255070575694025585) -->
+    <skip />
 </resources>

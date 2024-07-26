@@ -41,10 +41,13 @@ import java.util.Objects;
 
 /**
  * Activity result delivery callback.
+ *
  * @hide
  */
 public class ActivityResultItem extends ActivityTransactionItem {
 
+    // TODO(b/170729553): Mark this with @NonNull and final once @UnsupportedAppUsage removed.
+    //  We cannot do it now to avoid app compatibility regression.
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     private List<ResultInfo> mResultInfoList;
 
@@ -55,6 +58,12 @@ public class ActivityResultItem extends ActivityTransactionItem {
     @ChangeId
     @EnabledAfter(targetSdkVersion = Build.VERSION_CODES.S)
     public static final long CALL_ACTIVITY_RESULT_BEFORE_RESUME = 78294732L;
+
+    public ActivityResultItem(@NonNull IBinder activityToken,
+            @NonNull List<ResultInfo> resultInfoList) {
+        super(activityToken);
+        mResultInfoList = new ArrayList<>(resultInfoList);
+    }
 
     @Override
     public int getPostExecutionState() {
@@ -70,43 +79,19 @@ public class ActivityResultItem extends ActivityTransactionItem {
         Trace.traceEnd(TRACE_TAG_ACTIVITY_MANAGER);
     }
 
-    // ObjectPoolItem implementation
-
-    private ActivityResultItem() {}
-
-    /** Obtain an instance initialized with provided params. */
-    @NonNull
-    public static ActivityResultItem obtain(@NonNull IBinder activityToken,
-            @NonNull List<ResultInfo> resultInfoList) {
-        ActivityResultItem instance = ObjectPool.obtain(ActivityResultItem.class);
-        if (instance == null) {
-            instance = new ActivityResultItem();
-        }
-        instance.setActivityToken(activityToken);
-        instance.mResultInfoList = new ArrayList<>(resultInfoList);
-
-        return instance;
-    }
-
-    @Override
-    public void recycle() {
-        super.recycle();
-        mResultInfoList = null;
-        ObjectPool.recycle(this);
-    }
-
     // Parcelable implementation
 
-    /** Write to Parcel. */
+    /** Writes to Parcel. */
     @Override
     public void writeToParcel(@NonNull Parcel dest, int flags) {
         super.writeToParcel(dest, flags);
         dest.writeTypedList(mResultInfoList, flags);
     }
 
-    /** Read from Parcel. */
+    /** Reads from Parcel. */
     private ActivityResultItem(@NonNull Parcel in) {
         super(in);
+        // TODO(b/170729553): Wrap with requireNonNull once @UnsupportedAppUsage removed.
         mResultInfoList = in.createTypedArrayList(ResultInfo.CREATOR);
     }
 

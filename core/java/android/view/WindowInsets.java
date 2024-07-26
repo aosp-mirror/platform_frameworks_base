@@ -97,6 +97,7 @@ public final class WindowInsets {
     private final int mFrameHeight;
 
     private final @InsetsType int mForceConsumingTypes;
+    private final boolean mForceConsumingOpaqueCaptionBar;
     private final @InsetsType int mSuppressScrimTypes;
     private final boolean mSystemWindowInsetsConsumed;
     private final boolean mStableInsetsConsumed;
@@ -123,7 +124,7 @@ public final class WindowInsets {
 
     static {
         CONSUMED = new WindowInsets(createCompatTypeMap(null), createCompatTypeMap(null),
-                createCompatVisibilityMap(createCompatTypeMap(null)), false, 0, 0, null,
+                createCompatVisibilityMap(createCompatTypeMap(null)), false, 0, false, 0, null,
                 null, null, null, systemBars(), false, null, null, 0, 0);
     }
 
@@ -144,6 +145,7 @@ public final class WindowInsets {
             boolean[] typeVisibilityMap,
             boolean isRound,
             @InsetsType int forceConsumingTypes,
+            boolean forceConsumingOpaqueCaptionBar,
             @InsetsType int suppressScrimTypes,
             DisplayCutout displayCutout,
             RoundedCorners roundedCorners,
@@ -166,6 +168,7 @@ public final class WindowInsets {
         mTypeVisibilityMap = typeVisibilityMap;
         mIsRound = isRound;
         mForceConsumingTypes = forceConsumingTypes;
+        mForceConsumingOpaqueCaptionBar = forceConsumingOpaqueCaptionBar;
         mSuppressScrimTypes = suppressScrimTypes;
         mCompatInsetsTypes = compatInsetsTypes;
         mCompatIgnoreVisibility = compatIgnoreVisibility;
@@ -196,7 +199,9 @@ public final class WindowInsets {
         this(src.mSystemWindowInsetsConsumed ? null : src.mTypeInsetsMap,
                 src.mStableInsetsConsumed ? null : src.mTypeMaxInsetsMap,
                 src.mTypeVisibilityMap, src.mIsRound,
-                src.mForceConsumingTypes, src.mSuppressScrimTypes,
+                src.mForceConsumingTypes,
+                src.mForceConsumingOpaqueCaptionBar,
+                src.mSuppressScrimTypes,
                 displayCutoutCopyConstructorArgument(src),
                 src.mRoundedCorners,
                 src.mPrivacyIndicatorBounds,
@@ -257,7 +262,7 @@ public final class WindowInsets {
     /** @hide */
     @UnsupportedAppUsage
     public WindowInsets(Rect systemWindowInsets) {
-        this(createCompatTypeMap(systemWindowInsets), null, new boolean[SIZE], false, 0, 0,
+        this(createCompatTypeMap(systemWindowInsets), null, new boolean[SIZE], false, 0, false, 0,
                 null, null, null, null, systemBars(), false /* compatIgnoreVisibility */,
                 new Rect[SIZE][], null, 0, 0);
     }
@@ -675,10 +680,10 @@ public final class WindowInsets {
         return new WindowInsets(mSystemWindowInsetsConsumed ? null : mTypeInsetsMap,
                 mStableInsetsConsumed ? null : mTypeMaxInsetsMap,
                 mTypeVisibilityMap,
-                mIsRound, mForceConsumingTypes, mSuppressScrimTypes,
-                null /* displayCutout */, mRoundedCorners, mPrivacyIndicatorBounds, mDisplayShape,
-                mCompatInsetsTypes, mCompatIgnoreVisibility,
-                mSystemWindowInsetsConsumed ? null : mTypeBoundingRectsMap,
+                mIsRound, mForceConsumingTypes, mForceConsumingOpaqueCaptionBar,
+                mSuppressScrimTypes, null /* displayCutout */, mRoundedCorners,
+                mPrivacyIndicatorBounds, mDisplayShape, mCompatInsetsTypes,
+                mCompatIgnoreVisibility, mSystemWindowInsetsConsumed ? null : mTypeBoundingRectsMap,
                 mStableInsetsConsumed ? null : mTypeMaxBoundingRectsMap,
                 mFrameWidth, mFrameHeight);
     }
@@ -729,7 +734,8 @@ public final class WindowInsets {
     public WindowInsets consumeSystemWindowInsets() {
         return new WindowInsets(null, null,
                 mTypeVisibilityMap,
-                mIsRound, mForceConsumingTypes, mSuppressScrimTypes,
+                mIsRound, mForceConsumingTypes, mForceConsumingOpaqueCaptionBar,
+                mSuppressScrimTypes,
                 // If the system window insets types contain displayCutout, we should also consume
                 // it.
                 (mCompatInsetsTypes & displayCutout()) != 0
@@ -1024,6 +1030,13 @@ public final class WindowInsets {
     /**
      * @hide
      */
+    public boolean isForceConsumingOpaqueCaptionBar() {
+        return mForceConsumingOpaqueCaptionBar;
+    }
+
+    /**
+     * @hide
+     */
     public @InsetsType int getSuppressScrimTypes() {
         return mSuppressScrimTypes;
     }
@@ -1057,6 +1070,8 @@ public final class WindowInsets {
         result.append(mDisplayShape != null ? "displayShape=" + mDisplayShape : "");
         result.append("\n    ");
         result.append("forceConsumingTypes=" + Type.toString(mForceConsumingTypes));
+        result.append("\n    ");
+        result.append("forceConsumingOpaqueCaptionBar=" + mForceConsumingOpaqueCaptionBar);
         result.append("\n    ");
         result.append("suppressScrimTypes=" + Type.toString(mSuppressScrimTypes));
         result.append("\n    ");
@@ -1180,7 +1195,8 @@ public final class WindowInsets {
                         ? null
                         : insetInsets(mTypeMaxInsetsMap, left, top, right, bottom),
                 mTypeVisibilityMap,
-                mIsRound, mForceConsumingTypes, mSuppressScrimTypes,
+                mIsRound, mForceConsumingTypes, mForceConsumingOpaqueCaptionBar,
+                mSuppressScrimTypes,
                 mDisplayCutoutConsumed
                         ? null
                         : mDisplayCutout == null
@@ -1214,6 +1230,7 @@ public final class WindowInsets {
 
         return mIsRound == that.mIsRound
                 && mForceConsumingTypes == that.mForceConsumingTypes
+                && mForceConsumingOpaqueCaptionBar == that.mForceConsumingOpaqueCaptionBar
                 && mSuppressScrimTypes == that.mSuppressScrimTypes
                 && mSystemWindowInsetsConsumed == that.mSystemWindowInsetsConsumed
                 && mStableInsetsConsumed == that.mStableInsetsConsumed
@@ -1235,9 +1252,9 @@ public final class WindowInsets {
     public int hashCode() {
         return Objects.hash(Arrays.hashCode(mTypeInsetsMap), Arrays.hashCode(mTypeMaxInsetsMap),
                 Arrays.hashCode(mTypeVisibilityMap), mIsRound, mDisplayCutout, mRoundedCorners,
-                mForceConsumingTypes, mSuppressScrimTypes, mSystemWindowInsetsConsumed,
-                mStableInsetsConsumed, mDisplayCutoutConsumed, mPrivacyIndicatorBounds,
-                mDisplayShape, Arrays.deepHashCode(mTypeBoundingRectsMap),
+                mForceConsumingTypes, mForceConsumingOpaqueCaptionBar, mSuppressScrimTypes,
+                mSystemWindowInsetsConsumed, mStableInsetsConsumed, mDisplayCutoutConsumed,
+                mPrivacyIndicatorBounds, mDisplayShape, Arrays.deepHashCode(mTypeBoundingRectsMap),
                 Arrays.deepHashCode(mTypeMaxBoundingRectsMap), mFrameWidth, mFrameHeight);
     }
 
@@ -1367,6 +1384,7 @@ public final class WindowInsets {
 
         private boolean mIsRound;
         private @InsetsType int mForceConsumingTypes;
+        private boolean mForceConsumingOpaqueCaptionBar;
         private @InsetsType int mSuppressScrimTypes;
 
         private PrivacyIndicatorBounds mPrivacyIndicatorBounds = new PrivacyIndicatorBounds();
@@ -1399,6 +1417,7 @@ public final class WindowInsets {
             mRoundedCorners = insets.mRoundedCorners;
             mIsRound = insets.mIsRound;
             mForceConsumingTypes = insets.mForceConsumingTypes;
+            mForceConsumingOpaqueCaptionBar = insets.mForceConsumingOpaqueCaptionBar;
             mSuppressScrimTypes = insets.mSuppressScrimTypes;
             mPrivacyIndicatorBounds = insets.mPrivacyIndicatorBounds;
             mDisplayShape = insets.mDisplayShape;
@@ -1687,6 +1706,13 @@ public final class WindowInsets {
 
         /** @hide */
         @NonNull
+        public Builder setForceConsumingOpaqueCaptionBar(boolean forceConsumingOpaqueCaptionBar) {
+            mForceConsumingOpaqueCaptionBar = forceConsumingOpaqueCaptionBar;
+            return this;
+        }
+
+        /** @hide */
+        @NonNull
         public Builder setSuppressScrimTypes(@InsetsType int suppressScrimTypes) {
             mSuppressScrimTypes = suppressScrimTypes;
             return this;
@@ -1708,6 +1734,7 @@ public final class WindowInsets {
                 }
                 mTypeBoundingRectsMap[indexOf(i)] = rects.toArray(new Rect[0]);
             }
+            mSystemInsetsConsumed = false;
             return this;
         }
 
@@ -1736,6 +1763,7 @@ public final class WindowInsets {
                 }
                 mTypeMaxBoundingRectsMap[indexOf(i)] = rects.toArray(new Rect[0]);
             }
+            mStableInsetsConsumed = false;
             return this;
         }
 
@@ -1763,9 +1791,9 @@ public final class WindowInsets {
         public WindowInsets build() {
             return new WindowInsets(mSystemInsetsConsumed ? null : mTypeInsetsMap,
                     mStableInsetsConsumed ? null : mTypeMaxInsetsMap, mTypeVisibilityMap,
-                    mIsRound, mForceConsumingTypes, mSuppressScrimTypes, mDisplayCutout,
-                    mRoundedCorners, mPrivacyIndicatorBounds, mDisplayShape, systemBars(),
-                    false /* compatIgnoreVisibility */,
+                    mIsRound, mForceConsumingTypes, mForceConsumingOpaqueCaptionBar,
+                    mSuppressScrimTypes, mDisplayCutout, mRoundedCorners, mPrivacyIndicatorBounds,
+                    mDisplayShape, systemBars(), false /* compatIgnoreVisibility */,
                     mSystemInsetsConsumed ? null : mTypeBoundingRectsMap,
                     mStableInsetsConsumed ? null : mTypeMaxBoundingRectsMap,
                     mFrameWidth, mFrameHeight);

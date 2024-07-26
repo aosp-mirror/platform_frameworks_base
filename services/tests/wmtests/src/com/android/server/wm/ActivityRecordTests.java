@@ -116,7 +116,6 @@ import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.when;
 
 import android.app.ActivityOptions;
 import android.app.AppOpsManager;
@@ -524,9 +523,8 @@ public class ActivityRecordTests extends WindowTestsBase {
         assertEquals(newConfig.uiMode, activityConfig.uiMode);
 
         // The configuration change is still sent to the activity, even if it doesn't relaunch.
-        final ActivityConfigurationChangeItem expected =
-                ActivityConfigurationChangeItem.obtain(activity.token, activityConfig,
-                        activity.getActivityWindowInfo());
+        final ActivityConfigurationChangeItem expected = new ActivityConfigurationChangeItem(
+                activity.token, activityConfig, activity.getActivityWindowInfo());
         verify(mClientLifecycleManager).scheduleTransactionItem(
                 eq(activity.app.getThread()), eq(expected));
     }
@@ -597,9 +595,8 @@ public class ActivityRecordTests extends WindowTestsBase {
 
         final Configuration currentConfig = activity.getConfiguration();
         assertEquals(expectedOrientation, currentConfig.orientation);
-        final ActivityConfigurationChangeItem expected =
-                ActivityConfigurationChangeItem.obtain(activity.token, currentConfig,
-                        activity.getActivityWindowInfo());
+        final ActivityConfigurationChangeItem expected = new ActivityConfigurationChangeItem(
+                activity.token, currentConfig, activity.getActivityWindowInfo());
         verify(mClientLifecycleManager).scheduleTransactionItem(activity.app.getThread(), expected);
         verify(displayRotation).onSetRequestedOrientation();
     }
@@ -685,7 +682,8 @@ public class ActivityRecordTests extends WindowTestsBase {
 
         // Asserts fixed orientation request is not ignored, and the orientation is changed.
         assertNotEquals(activityCurOrientation, activity.getConfiguration().orientation);
-        assertTrue(activity.isLetterboxedForFixedOrientationAndAspectRatio());
+        assertTrue(activity.mAppCompatController.getAppCompatAspectRatioPolicy()
+                .isLetterboxedForFixedOrientationAndAspectRatio());
     }
 
     @Test
@@ -718,7 +716,8 @@ public class ActivityRecordTests extends WindowTestsBase {
 
         // Relaunching the app should still respect the orientation request.
         assertEquals(ORIENTATION_PORTRAIT, activity.getConfiguration().orientation);
-        assertTrue(activity.isLetterboxedForFixedOrientationAndAspectRatio());
+        assertTrue(activity.mAppCompatController.getAppCompatAspectRatioPolicy()
+                .isLetterboxedForFixedOrientationAndAspectRatio());
     }
 
     @Test
@@ -816,9 +815,8 @@ public class ActivityRecordTests extends WindowTestsBase {
 
             activity.ensureActivityConfiguration(true /* ignoreVisibility */);
 
-            final ActivityConfigurationChangeItem expected =
-                    ActivityConfigurationChangeItem.obtain(activity.token,
-                            activity.getConfiguration(), activity.getActivityWindowInfo());
+            final ActivityConfigurationChangeItem expected = new ActivityConfigurationChangeItem(
+                    activity.token, activity.getConfiguration(), activity.getActivityWindowInfo());
             verify(mClientLifecycleManager).scheduleTransactionItem(
                     activity.app.getThread(), expected);
         } finally {
@@ -2482,10 +2480,10 @@ public class ActivityRecordTests extends WindowTestsBase {
         assertTrue(activity.mChildren.contains(win4));
 
         // The starting window should be on-top of all other windows.
-        assertEquals(startingWin, activity.mChildren.peekLast());
+        assertEquals(startingWin, activity.getTopChild());
 
         // The base application window should be below all other windows.
-        assertEquals(baseWin, activity.mChildren.peekFirst());
+        assertEquals(baseWin, activity.getBottomChild());
         activity.removeImmediately();
     }
 
@@ -2954,7 +2952,8 @@ public class ActivityRecordTests extends WindowTestsBase {
 
     @Test
     public void testStartingWindowInTaskFragment() {
-        final ActivityRecord activity1 = new ActivityBuilder(mAtm).setCreateTask(true).build();
+        final ActivityRecord activity1 = new ActivityBuilder(mAtm).setCreateTask(true)
+                .setVisible(false).build();
         final WindowState startingWindow = createWindowState(
                 new WindowManager.LayoutParams(TYPE_APPLICATION_STARTING), activity1);
         activity1.addWindow(startingWindow);
@@ -3006,6 +3005,28 @@ public class ActivityRecordTests extends WindowTestsBase {
         activity1.onFirstWindowDrawn(activityWindow);
         activity2.onFirstWindowDrawn(activityWindow);
         assertNull(activity1.mStartingWindow);
+        assertNull(task.mSharedStartingData);
+    }
+
+    @Test
+    public void testStartingWindowInTaskFragmentWithVisibleTask() {
+        final ActivityRecord activity1 = new ActivityBuilder(mAtm).setCreateTask(true).build();
+        final Task task = activity1.getTask();
+        final Rect taskBounds = task.getBounds();
+        final Rect tfBounds = new Rect(taskBounds.left, taskBounds.top,
+                taskBounds.left + taskBounds.width() / 2, taskBounds.bottom);
+        final TaskFragment taskFragment = new TaskFragmentBuilder(mAtm).setParentTask(task)
+                .setBounds(tfBounds).build();
+
+        final ActivityRecord activity2 = new ActivityBuilder(mAtm).build();
+        final WindowState startingWindow = createWindowState(
+                new WindowManager.LayoutParams(TYPE_APPLICATION_STARTING), activity1);
+        taskFragment.addChild(activity2);
+        activity2.addWindow(startingWindow);
+        activity2.mStartingData = mock(StartingData.class);
+        activity2.attachStartingWindow(startingWindow);
+
+        assertNull(activity2.mStartingData.mAssociatedTask);
         assertNull(task.mSharedStartingData);
     }
 
@@ -3330,7 +3351,8 @@ public class ActivityRecordTests extends WindowTestsBase {
 
         // app1 requests IME visible.
         app1.setRequestedVisibleTypes(ime(), ime());
-        mDisplayContent.getInsetsStateController().onRequestedVisibleTypesChanged(app1);
+        mDisplayContent.getInsetsStateController().onRequestedVisibleTypesChanged(app1,
+                null /* statsToken */);
 
         // Verify app1's IME insets is visible and app2's IME insets frozen flag set.
         assertTrue(app1.getInsetsState().peekSource(ID_IME).isVisible());
@@ -3401,7 +3423,7 @@ public class ActivityRecordTests extends WindowTestsBase {
         assertFalse(activity2.mImeInsetsFrozenUntilStartInput);
 
         app1.setRequestedVisibleTypes(ime());
-        controller.onRequestedVisibleTypesChanged(app1);
+        controller.onRequestedVisibleTypesChanged(app1, null /* statsToken */);
 
         // Expect all activities in split-screen will get IME insets visible state
         assertTrue(app1.getInsetsState().peekSource(ID_IME).isVisible());
@@ -3505,23 +3527,6 @@ public class ActivityRecordTests extends WindowTestsBase {
                 /* transformationApplied */ true, /* callback */ null);
 
         assertEquals(activity.getCameraCompatControlState(), CAMERA_COMPAT_CONTROL_HIDDEN);
-    }
-
-    @Test
-    public void testIsCameraActive() {
-        final WindowState app = createWindow(null, TYPE_APPLICATION, "app");
-        final DisplayRotationCompatPolicy displayRotationCompatPolicy = mock(
-                DisplayRotationCompatPolicy.class);
-        when(mDisplayContent.getDisplayRotationCompatPolicy()).thenReturn(
-                displayRotationCompatPolicy);
-
-        when(displayRotationCompatPolicy.isCameraActive(any(ActivityRecord.class),
-                anyBoolean())).thenReturn(false);
-        assertFalse(app.mActivityRecord.isCameraActive());
-
-        when(displayRotationCompatPolicy.isCameraActive(any(ActivityRecord.class),
-                anyBoolean())).thenReturn(true);
-        assertTrue(app.mActivityRecord.isCameraActive());
     }
 
     @Test

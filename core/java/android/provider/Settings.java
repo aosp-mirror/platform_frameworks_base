@@ -1403,6 +1403,19 @@ public final class Settings {
             "android.settings.QUICK_LAUNCH_SETTINGS";
 
     /**
+     * Activity Action: Showing settings to manage adaptive notifications.
+     * <p>
+     * Input: Nothing.
+     * <p>
+     * Output: Nothing.
+     *
+     * @hide
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_MANAGE_ADAPTIVE_NOTIFICATIONS =
+            "android.settings.MANAGE_ADAPTIVE_NOTIFICATIONS";
+
+    /**
      * Activity Action: Show settings to manage installed applications.
      * <p>
      * In some cases, a matching Activity may not exist, so ensure you
@@ -2617,7 +2630,7 @@ public final class Settings {
     /**
      * Activity Action: Show screen that let user select its Autofill Service.
      * <p>
-     * Input: Intent's data URI set with an application name, using the
+     * Input: Intent's data URI set with an application package name, using the
      * "package" schema (like "package:com.my.app").
      *
      * <p>
@@ -2637,7 +2650,7 @@ public final class Settings {
     /**
      * Activity Action: Show screen that let user enable a Credential Manager provider.
      * <p>
-     * Input: Intent's data URI set with an application name, using the
+     * Input: Intent's data URI set with an application package name, using the
      * "package" schema (like "package:com.my.app").
      *
      * <p>
@@ -6165,6 +6178,15 @@ public final class Settings {
         public static final String POINTER_FILL_STYLE = "pointer_fill_style";
 
         /**
+         * Pointer stroke style, specified by
+         * {@link android.view.PointerIcon.PointerIconVectorStyleStroke} constants.
+         *
+         * @hide
+         */
+        @Readable
+        public static final String POINTER_STROKE_STYLE = "pointer_stroke_style";
+
+        /**
          * Whether lock-to-app will be triggered by long-press on recents.
          * @hide
          */
@@ -6367,6 +6389,7 @@ public final class Settings {
             PRIVATE_SETTINGS.add(SIP_ASK_ME_EACH_TIME);
             PRIVATE_SETTINGS.add(POINTER_SPEED);
             PRIVATE_SETTINGS.add(POINTER_FILL_STYLE);
+            PRIVATE_SETTINGS.add(POINTER_STROKE_STYLE);
             PRIVATE_SETTINGS.add(POINTER_SCALE);
             PRIVATE_SETTINGS.add(LOCK_TO_APP_ENABLED);
             PRIVATE_SETTINGS.add(EGG_MODE);
@@ -11052,6 +11075,13 @@ public final class Settings {
         public static final String MANDATORY_BIOMETRICS = "mandatory_biometrics";
 
         /**
+         * Whether or not requirements for mandatory biometrics is satisfied.
+         * @hide
+         */
+        public static final String MANDATORY_BIOMETRICS_REQUIREMENTS_SATISFIED =
+                "mandatory_biometrics_requirements_satisfied";
+
+        /**
          * Whether or not active unlock triggers on wake.
          * @hide
          */
@@ -12301,6 +12331,18 @@ public final class Settings {
                 "accessibility_force_invert_color_enabled";
 
         /**
+         * Whether to enable mouse keys for Physical Keyboard accessibility.
+         *
+         * If set to true, key presses (of the mouse keys) on
+         * physical keyboard will control mouse pointer on the display.
+         *
+         * @hide
+         */
+        @Readable
+        public static final String ACCESSIBILITY_MOUSE_KEYS_ENABLED =
+                "accessibility_mouse_keys_enabled";
+
+        /**
          * Whether the Adaptive connectivity option is enabled.
          *
          * @hide
@@ -13383,7 +13425,19 @@ public final class Settings {
                 = "enable_freeform_support";
 
         /**
-         * Whether to enable experimental desktop mode on secondary displays.
+         * Whether to override the availability of the desktop mode on the main display of the
+         * device. If on, users can make move an app to the desktop, allowing a freeform windowing
+         * experience.
+         * @hide
+         */
+        @Readable
+        public static final String DEVELOPMENT_OVERRIDE_DESKTOP_MODE_FEATURES =
+                "override_desktop_mode_features";
+
+        /**
+         * Whether to enable the legacy freeform support on secondary displays. If enabled, the
+         * SECONDARY_HOME of the launcher is started on any secondary display, allowing for a
+         * desktop experience.
          * @hide
          */
         @Readable
@@ -20094,7 +20148,7 @@ public final class Settings {
              * (0 = false, 1 = true)
              * @hide
              */
-            @Readable(maxTargetSdk = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
+            @Readable
             public static final String REDUCE_MOTION = "reduce_motion";
 
             /**

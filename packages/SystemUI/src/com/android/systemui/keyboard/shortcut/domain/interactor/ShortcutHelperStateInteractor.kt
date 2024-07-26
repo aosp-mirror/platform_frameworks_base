@@ -26,6 +26,7 @@ import com.android.systemui.shared.system.QuickStepContract
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
 @SysUISingleton
@@ -38,7 +39,7 @@ constructor(
     private val repository: ShortcutHelperStateRepository
 ) {
 
-    val state: Flow<ShortcutHelperState> = repository.state
+    val state: Flow<ShortcutHelperState> = repository.state.asStateFlow()
 
     fun onViewClosed() {
         repository.hide()

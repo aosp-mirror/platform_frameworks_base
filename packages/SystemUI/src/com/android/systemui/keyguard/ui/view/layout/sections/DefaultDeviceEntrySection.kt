@@ -49,6 +49,7 @@ import com.android.systemui.statusbar.VibratorHelper
 import dagger.Lazy
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.DisposableHandle
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 
 /** Includes the device entry icon. */
@@ -70,6 +71,7 @@ constructor(
     private val vibratorHelper: Lazy<VibratorHelper>,
 ) : KeyguardSection() {
     private val deviceEntryIconViewId = R.id.device_entry_icon_view
+    private var disposableHandle: DisposableHandle? = null
 
     override fun addViews(constraintLayout: ConstraintLayout) {
         if (
@@ -97,15 +99,17 @@ constructor(
     override fun bindData(constraintLayout: ConstraintLayout) {
         if (DeviceEntryUdfpsRefactor.isEnabled) {
             constraintLayout.findViewById<DeviceEntryIconView?>(deviceEntryIconViewId)?.let {
-                DeviceEntryIconViewBinder.bind(
-                    applicationScope,
-                    it,
-                    deviceEntryIconViewModel.get(),
-                    deviceEntryForegroundViewModel.get(),
-                    deviceEntryBackgroundViewModel.get(),
-                    falsingManager.get(),
-                    vibratorHelper.get(),
-                )
+                disposableHandle?.dispose()
+                disposableHandle =
+                    DeviceEntryIconViewBinder.bind(
+                        applicationScope,
+                        it,
+                        deviceEntryIconViewModel.get(),
+                        deviceEntryForegroundViewModel.get(),
+                        deviceEntryBackgroundViewModel.get(),
+                        falsingManager.get(),
+                        vibratorHelper.get(),
+                    )
             }
         } else {
             constraintLayout.findViewById<LockIconView?>(R.id.lock_icon_view)?.let {
@@ -178,6 +182,7 @@ constructor(
     override fun removeViews(constraintLayout: ConstraintLayout) {
         if (DeviceEntryUdfpsRefactor.isEnabled) {
             constraintLayout.removeView(deviceEntryIconViewId)
+            disposableHandle?.dispose()
         } else {
             constraintLayout.removeView(R.id.lock_icon_view)
         }

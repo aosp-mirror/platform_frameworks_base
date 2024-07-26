@@ -22,7 +22,6 @@ import com.android.settingslib.volume.data.repository.AudioRepository
 import com.android.settingslib.volume.shared.model.AudioStream
 import com.android.settingslib.volume.shared.model.AudioStreamModel
 import com.android.settingslib.volume.shared.model.RingerMode
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -61,7 +60,7 @@ class FakeAudioRepository : AudioRepository {
             )
         }
 
-    override fun getAudioStream(audioStream: AudioStream): Flow<AudioStreamModel> =
+    override fun getAudioStream(audioStream: AudioStream): StateFlow<AudioStreamModel> =
         getAudioStreamModelState(audioStream).asStateFlow()
 
     override suspend fun setVolume(audioStream: AudioStream, volume: Int) {

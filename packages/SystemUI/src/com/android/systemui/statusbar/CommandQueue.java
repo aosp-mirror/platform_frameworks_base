@@ -51,6 +51,7 @@ import android.os.ParcelFileDescriptor;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.UserHandle;
+import android.os.UserManager;
 import android.util.Pair;
 import android.util.SparseArray;
 import android.view.KeyEvent;
@@ -200,6 +201,7 @@ public class CommandQueue extends IStatusBar.Stub implements
      * event.
      */
     private int mLastUpdatedImeDisplayId = INVALID_DISPLAY;
+    private final Context mContext;
     private final DisplayTracker mDisplayTracker;
     private final @Nullable CommandRegistry mRegistry;
     private final @Nullable DumpHandler mDumpHandler;
@@ -571,6 +573,7 @@ public class CommandQueue extends IStatusBar.Stub implements
             DumpHandler dumpHandler,
             Lazy<PowerInteractor> powerInteractor
     ) {
+        mContext = context;
         mDisplayTracker = displayTracker;
         mRegistry = registry;
         mDumpHandler = dumpHandler;
@@ -1209,7 +1212,12 @@ public class CommandQueue extends IStatusBar.Stub implements
             boolean showImeSwitcher) {
         if (displayId == INVALID_DISPLAY) return;
 
-        if (mLastUpdatedImeDisplayId != displayId
+        boolean isConcurrentMultiUserModeEnabled = UserManager.isVisibleBackgroundUsersEnabled()
+                && mContext.getResources().getBoolean(android.R.bool.config_perDisplayFocusEnabled)
+                && android.view.inputmethod.Flags.concurrentInputMethods();
+
+        if (!isConcurrentMultiUserModeEnabled
+                && mLastUpdatedImeDisplayId != displayId
                 && mLastUpdatedImeDisplayId != INVALID_DISPLAY) {
             // Set previous NavBar's IME window status as invisible when IME
             // window switched to another display for single-session IME case.

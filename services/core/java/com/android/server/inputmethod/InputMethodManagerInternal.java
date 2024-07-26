@@ -16,6 +16,8 @@
 
 package com.android.server.inputmethod;
 
+import static com.android.server.inputmethod.InputMethodUtils.NOT_A_SUBTYPE_ID;
+
 import static java.lang.annotation.RetentionPolicy.SOURCE;
 
 import android.annotation.NonNull;
@@ -25,6 +27,7 @@ import android.inputmethodservice.InputMethodService;
 import android.os.IBinder;
 import android.view.inputmethod.InlineSuggestionsRequest;
 import android.view.inputmethod.InputMethodInfo;
+import android.view.inputmethod.InputMethodSubtype;
 
 import com.android.internal.inputmethod.IAccessibilityInputMethodSession;
 import com.android.internal.inputmethod.InlineSuggestionsRequestCallback;
@@ -87,6 +90,8 @@ public abstract class InputMethodManagerInternal {
      * @param userId the user ID to be queried
      * @return a list of {@link InputMethodInfo}. VR-only IMEs are already excluded
      */
+    @ImfLockFree
+    @NonNull
     public abstract List<InputMethodInfo> getInputMethodListAsUser(@UserIdInt int userId);
 
     /**
@@ -95,7 +100,22 @@ public abstract class InputMethodManagerInternal {
      * @param userId the user ID to be queried
      * @return a list of {@link InputMethodInfo} that are enabled for {@code userId}
      */
+    @ImfLockFree
+    @NonNull
     public abstract List<InputMethodInfo> getEnabledInputMethodListAsUser(@UserIdInt int userId);
+
+    /**
+     * Returns the list of installed input methods that are enabled for the specified user.
+     *
+     * @param imiId                           IME ID to be queried about
+     * @param allowsImplicitlyEnabledSubtypes {@code true} to return the implicitly enabled subtypes
+     * @param userId                          the user ID to be queried about
+     * @return a list of {@link InputMethodSubtype} that are enabled for {@code userId}
+     */
+    @ImfLockFree
+    @NonNull
+    public abstract List<InputMethodSubtype> getEnabledInputMethodSubtypeListAsUser(
+            String imiId, boolean allowsImplicitlyEnabledSubtypes, @UserIdInt int userId);
 
     /**
      * Called by the Autofill Frameworks to request an {@link InlineSuggestionsRequest} from
@@ -110,7 +130,7 @@ public abstract class InputMethodManagerInternal {
             InlineSuggestionsRequestInfo requestInfo, InlineSuggestionsRequestCallback cb);
 
     /**
-     * Force switch to the enabled input method by {@code imeId} for current user. If the input
+     * Force switch to the enabled input method by {@code imeId} for the current user. If the input
      * method with {@code imeId} is not enabled or not installed, do nothing.
      *
      * @param imeId  the input method ID to be switched to
@@ -119,7 +139,25 @@ public abstract class InputMethodManagerInternal {
      * method by {@code imeId}; {@code false} the input method with {@code imeId} is not available
      * to be switched.
      */
-    public abstract boolean switchToInputMethod(String imeId, @UserIdInt int userId);
+    public boolean switchToInputMethod(@NonNull String imeId, @UserIdInt int userId) {
+        return switchToInputMethod(imeId, NOT_A_SUBTYPE_ID, userId);
+    }
+
+    /**
+     * Force switch to the enabled input method by {@code imeId} for the current user. If the input
+     * method with {@code imeId} is not enabled or not installed, do nothing. If {@code subtypeId}
+     * is also supplied (not {@link InputMethodUtils#NOT_A_SUBTYPE_ID}) and valid, also switches to
+     * it, otherwise the system decides the most sensible default subtype to use.
+     *
+     * @param imeId the input method ID to be switched to
+     * @param subtypeId the input method subtype ID to be switched to
+     * @param userId the user ID to be queried
+     * @return {@code true} if the current input method was successfully switched to the input
+     * method by {@code imeId}; {@code false} the input method with {@code imeId} is not available
+     * to be switched.
+     */
+    public abstract boolean switchToInputMethod(@NonNull String imeId, int subtypeId,
+            @UserIdInt int userId);
 
     /**
      * Force enable or disable the input method associated with {@code imeId} for given user. If
@@ -211,6 +249,15 @@ public abstract class InputMethodManagerInternal {
     public abstract void updateImeWindowStatus(boolean disableImeIcon, int displayId);
 
     /**
+     * Updates and reports whether the IME switcher button should be shown, regardless whether
+     * SystemUI or the IME is responsible for drawing it and the corresponding navigation bar.
+     *
+     * @param displayId the display for which to update the IME switcher button visibility.
+     * @param userId    the user for which to update the IME switcher button visibility.
+     */
+    public abstract void updateShouldShowImeSwitcher(int displayId, @UserIdInt int userId);
+
+    /**
      * Finish stylus handwriting by calling {@link InputMethodService#finishStylusHandwriting()} if
      * there is an ongoing handwriting session.
      */
@@ -272,14 +319,26 @@ public abstract class InputMethodManagerInternal {
                         int originatingDisplayId) {
                 }
 
+                @ImfLockFree
+                @NonNull
                 @Override
                 public List<InputMethodInfo> getInputMethodListAsUser(@UserIdInt int userId) {
                     return Collections.emptyList();
                 }
 
+                @ImfLockFree
+                @NonNull
                 @Override
                 public List<InputMethodInfo> getEnabledInputMethodListAsUser(
                         @UserIdInt int userId) {
+                    return Collections.emptyList();
+                }
+
+                @ImfLockFree
+                @NonNull
+                @Override
+                public List<InputMethodSubtype> getEnabledInputMethodSubtypeListAsUser(String imiId,
+                        boolean allowsImplicitlyEnabledSubtypes, int userId) {
                     return Collections.emptyList();
                 }
 
@@ -290,7 +349,8 @@ public abstract class InputMethodManagerInternal {
                 }
 
                 @Override
-                public boolean switchToInputMethod(String imeId, @UserIdInt int userId) {
+                public boolean switchToInputMethod(@NonNull String imeId, int subtypeId,
+                        @UserIdInt int userId) {
                     return false;
                 }
 
@@ -332,6 +392,10 @@ public abstract class InputMethodManagerInternal {
                 @ImfLockFree
                 @Override
                 public void updateImeWindowStatus(boolean disableImeIcon, int displayId) {
+                }
+
+                @Override
+                public void updateShouldShowImeSwitcher(int displayId, @UserIdInt int userId) {
                 }
 
                 @Override

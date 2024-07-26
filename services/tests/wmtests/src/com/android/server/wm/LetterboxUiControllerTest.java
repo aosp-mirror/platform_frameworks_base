@@ -16,36 +16,12 @@
 
 package com.android.server.wm;
 
-import static android.content.pm.ActivityInfo.FORCE_NON_RESIZE_APP;
-import static android.content.pm.ActivityInfo.FORCE_RESIZE_APP;
-import static android.content.pm.ActivityInfo.OVERRIDE_CAMERA_COMPAT_DISABLE_FORCE_ROTATION;
-import static android.content.pm.ActivityInfo.OVERRIDE_CAMERA_COMPAT_DISABLE_FREEFORM_WINDOWING_TREATMENT;
-import static android.content.pm.ActivityInfo.OVERRIDE_CAMERA_COMPAT_DISABLE_REFRESH;
-import static android.content.pm.ActivityInfo.OVERRIDE_CAMERA_COMPAT_ENABLE_REFRESH_VIA_PAUSE;
-import static android.content.pm.ActivityInfo.OVERRIDE_ENABLE_COMPAT_FAKE_FOCUS;
-import static android.content.pm.ActivityInfo.OVERRIDE_MIN_ASPECT_RATIO;
-import static android.content.pm.ActivityInfo.OVERRIDE_MIN_ASPECT_RATIO_ONLY_FOR_CAMERA;
-import static android.content.pm.ActivityInfo.OVERRIDE_USE_DISPLAY_LANDSCAPE_NATURAL_ORIENTATION;
-import static android.content.pm.PackageManager.USER_MIN_ASPECT_RATIO_3_2;
-import static android.content.pm.PackageManager.USER_MIN_ASPECT_RATIO_FULLSCREEN;
-import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
-import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
 import static android.view.InsetsSource.FLAG_INSETS_ROUNDED_CORNER;
-import static android.view.WindowManager.PROPERTY_CAMERA_COMPAT_ALLOW_FORCE_ROTATION;
-import static android.view.WindowManager.PROPERTY_CAMERA_COMPAT_ALLOW_REFRESH;
-import static android.view.WindowManager.PROPERTY_CAMERA_COMPAT_ENABLE_REFRESH_VIA_PAUSE;
-import static android.view.WindowManager.PROPERTY_COMPAT_ALLOW_DISPLAY_ORIENTATION_OVERRIDE;
-import static android.view.WindowManager.PROPERTY_COMPAT_ALLOW_MIN_ASPECT_RATIO_OVERRIDE;
-import static android.view.WindowManager.PROPERTY_COMPAT_ALLOW_RESIZEABLE_ACTIVITY_OVERRIDES;
-import static android.view.WindowManager.PROPERTY_COMPAT_ALLOW_USER_ASPECT_RATIO_FULLSCREEN_OVERRIDE;
-import static android.view.WindowManager.PROPERTY_COMPAT_ALLOW_USER_ASPECT_RATIO_OVERRIDE;
-import static android.view.WindowManager.PROPERTY_COMPAT_ENABLE_FAKE_FOCUS;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.eq;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mock;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
-import static com.android.window.flags.Flags.FLAG_CAMERA_COMPAT_FOR_FREEFORM;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -53,17 +29,12 @@ import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.clearInvocations;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.annotation.Nullable;
 import android.compat.testing.PlatformCompatChangeRule;
 import android.content.ComponentName;
-import android.content.pm.PackageManager;
-import android.content.pm.PackageManager.Property;
 import android.content.res.Resources;
 import android.graphics.Rect;
 import android.platform.test.annotations.DisableFlags;
@@ -80,9 +51,6 @@ import androidx.test.filters.SmallTest;
 
 import com.android.internal.R;
 import com.android.window.flags.Flags;
-
-import libcore.junit.util.compat.CoreCompatChangeRule.DisableCompatChanges;
-import libcore.junit.util.compat.CoreCompatChangeRule.EnableCompatChanges;
 
 import org.junit.Before;
 import org.junit.Rule;
@@ -116,212 +84,17 @@ public class LetterboxUiControllerTest extends WindowTestsBase {
     private Task mTask;
     private DisplayContent mDisplayContent;
     private LetterboxUiController mController;
-    private LetterboxConfiguration mLetterboxConfiguration;
+    private AppCompatConfiguration mAppCompatConfiguration;
     private final Rect mLetterboxedPortraitTaskBounds = new Rect();
 
     @Before
     public void setUp() throws Exception {
         mActivity = setUpActivityWithComponent();
 
-        mLetterboxConfiguration = mWm.mLetterboxConfiguration;
-        spyOn(mLetterboxConfiguration);
+        mAppCompatConfiguration = mWm.mAppCompatConfiguration;
+        spyOn(mAppCompatConfiguration);
 
         mController = new LetterboxUiController(mWm, mActivity);
-    }
-
-    // shouldRefreshActivityForCameraCompat
-
-    @Test
-    public void testShouldRefreshActivityForCameraCompat_flagIsDisabled_returnsFalse() {
-        doReturn(false).when(mLetterboxConfiguration)
-                .isCameraCompatTreatmentEnabled();
-
-        assertFalse(mController.shouldRefreshActivityForCameraCompat());
-    }
-
-    @Test
-    @EnableCompatChanges({OVERRIDE_CAMERA_COMPAT_DISABLE_REFRESH})
-    public void testShouldRefreshActivityForCameraCompat_overrideEnabled_returnsFalse() {
-        doReturn(true).when(mLetterboxConfiguration)
-                .isCameraCompatTreatmentEnabled();
-
-        assertFalse(mController.shouldRefreshActivityForCameraCompat());
-    }
-
-    @Test
-    @EnableCompatChanges({OVERRIDE_CAMERA_COMPAT_DISABLE_REFRESH})
-    public void testShouldRefreshActivityForCameraCompat_propertyIsTrueAndOverride_returnsFalse()
-            throws Exception {
-        doReturn(true).when(mLetterboxConfiguration)
-                .isCameraCompatTreatmentEnabled();
-        mockThatProperty(PROPERTY_CAMERA_COMPAT_ALLOW_REFRESH, /* value */ true);
-
-        mController = new LetterboxUiController(mWm, mActivity);
-
-        assertFalse(mController.shouldRefreshActivityForCameraCompat());
-    }
-
-    @Test
-    public void testShouldRefreshActivityForCameraCompat_propertyIsFalse_returnsFalse()
-            throws Exception {
-        doReturn(true).when(mLetterboxConfiguration)
-                .isCameraCompatTreatmentEnabled();
-        mockThatProperty(PROPERTY_CAMERA_COMPAT_ALLOW_REFRESH, /* value */ false);
-
-        mController = new LetterboxUiController(mWm, mActivity);
-
-        assertFalse(mController.shouldRefreshActivityForCameraCompat());
-    }
-
-    @Test
-    public void testShouldRefreshActivityForCameraCompat_propertyIsTrue_returnsTrue()
-            throws Exception {
-        doReturn(true).when(mLetterboxConfiguration)
-                .isCameraCompatTreatmentEnabled();
-        mockThatProperty(PROPERTY_CAMERA_COMPAT_ALLOW_REFRESH, /* value */ true);
-
-        mController = new LetterboxUiController(mWm, mActivity);
-
-        assertTrue(mController.shouldRefreshActivityForCameraCompat());
-    }
-
-    // shouldRefreshActivityViaPauseForCameraCompat
-
-    @Test
-    @EnableCompatChanges({OVERRIDE_CAMERA_COMPAT_ENABLE_REFRESH_VIA_PAUSE})
-    public void testShouldRefreshActivityViaPauseForCameraCompat_flagIsDisabled_returnsFalse() {
-        doReturn(false).when(mLetterboxConfiguration)
-                .isCameraCompatTreatmentEnabled();
-
-        assertFalse(mController.shouldRefreshActivityViaPauseForCameraCompat());
-    }
-
-    @Test
-    @EnableCompatChanges({OVERRIDE_CAMERA_COMPAT_ENABLE_REFRESH_VIA_PAUSE})
-    public void testShouldRefreshActivityViaPauseForCameraCompat_overrideEnabled_returnsTrue() {
-        doReturn(true).when(mLetterboxConfiguration)
-                .isCameraCompatTreatmentEnabled();
-
-        assertTrue(mController.shouldRefreshActivityViaPauseForCameraCompat());
-    }
-
-    @Test
-    @EnableCompatChanges({OVERRIDE_CAMERA_COMPAT_ENABLE_REFRESH_VIA_PAUSE})
-    public void testShouldRefreshActivityViaPauseForCameraCompat_propertyIsFalseAndOverride_returnFalse()
-            throws Exception {
-        doReturn(true).when(mLetterboxConfiguration)
-                .isCameraCompatTreatmentEnabled();
-        mockThatProperty(PROPERTY_CAMERA_COMPAT_ENABLE_REFRESH_VIA_PAUSE, /* value */ false);
-
-        mController = new LetterboxUiController(mWm, mActivity);
-
-        assertFalse(mController.shouldRefreshActivityViaPauseForCameraCompat());
-    }
-
-    @Test
-    public void testShouldRefreshActivityViaPauseForCameraCompat_propertyIsTrue_returnsTrue()
-            throws Exception {
-        doReturn(true).when(mLetterboxConfiguration)
-                .isCameraCompatTreatmentEnabled();
-        mockThatProperty(PROPERTY_CAMERA_COMPAT_ENABLE_REFRESH_VIA_PAUSE, /* value */ true);
-
-        mController = new LetterboxUiController(mWm, mActivity);
-
-        assertTrue(mController.shouldRefreshActivityViaPauseForCameraCompat());
-    }
-
-    // shouldForceRotateForCameraCompat
-
-    @Test
-    public void testShouldForceRotateForCameraCompat_flagIsDisabled_returnsFalse() {
-        doReturn(false).when(mLetterboxConfiguration)
-                .isCameraCompatTreatmentEnabled();
-
-        assertFalse(mController.shouldForceRotateForCameraCompat());
-    }
-
-    @Test
-    @EnableCompatChanges({OVERRIDE_CAMERA_COMPAT_DISABLE_FORCE_ROTATION})
-    public void testShouldForceRotateForCameraCompat_overrideEnabled_returnsFalse() {
-        doReturn(true).when(mLetterboxConfiguration)
-                .isCameraCompatTreatmentEnabled();
-
-        assertFalse(mController.shouldForceRotateForCameraCompat());
-    }
-
-    @Test
-    @EnableCompatChanges({OVERRIDE_CAMERA_COMPAT_DISABLE_FORCE_ROTATION})
-    public void testShouldForceRotateForCameraCompat_propertyIsTrueAndOverride_returnsFalse()
-            throws Exception {
-        doReturn(true).when(mLetterboxConfiguration)
-                .isCameraCompatTreatmentEnabled();
-        mockThatProperty(PROPERTY_CAMERA_COMPAT_ALLOW_FORCE_ROTATION, /* value */ true);
-
-        mController = new LetterboxUiController(mWm, mActivity);
-
-        assertFalse(mController.shouldForceRotateForCameraCompat());
-    }
-
-    @Test
-    public void testShouldForceRotateForCameraCompat_propertyIsFalse_returnsFalse()
-            throws Exception {
-        doReturn(true).when(mLetterboxConfiguration)
-                .isCameraCompatTreatmentEnabled();
-        mockThatProperty(PROPERTY_CAMERA_COMPAT_ALLOW_FORCE_ROTATION, /* value */ false);
-
-        mController = new LetterboxUiController(mWm, mActivity);
-
-        assertFalse(mController.shouldForceRotateForCameraCompat());
-    }
-
-    @Test
-    public void testShouldForceRotateForCameraCompat_propertyIsTrue_returnsTrue()
-            throws Exception {
-        doReturn(true).when(mLetterboxConfiguration)
-                .isCameraCompatTreatmentEnabled();
-        mockThatProperty(PROPERTY_CAMERA_COMPAT_ALLOW_FORCE_ROTATION, /* value */ true);
-
-        mController = new LetterboxUiController(mWm, mActivity);
-
-        assertTrue(mController.shouldForceRotateForCameraCompat());
-    }
-
-    // shouldApplyFreeformTreatmentForCameraCompat
-
-    @Test
-    public void testShouldApplyCameraCompatFreeformTreatment_flagIsDisabled_returnsFalse() {
-        mSetFlagsRule.disableFlags(FLAG_CAMERA_COMPAT_FOR_FREEFORM);
-
-        assertFalse(mController.shouldApplyFreeformTreatmentForCameraCompat());
-    }
-
-    @Test
-    @EnableCompatChanges({OVERRIDE_CAMERA_COMPAT_DISABLE_FREEFORM_WINDOWING_TREATMENT})
-    public void testShouldApplyCameraCompatFreeformTreatment_overrideEnabled_returnsFalse() {
-        mSetFlagsRule.enableFlags(FLAG_CAMERA_COMPAT_FOR_FREEFORM);
-
-        assertFalse(mController.shouldApplyFreeformTreatmentForCameraCompat());
-    }
-
-    @Test
-    @EnableCompatChanges({OVERRIDE_CAMERA_COMPAT_DISABLE_FREEFORM_WINDOWING_TREATMENT})
-    public void testShouldApplyCameraCompatFreeformTreatment_disabledByOverride_returnsFalse()
-            throws Exception {
-        mSetFlagsRule.enableFlags(FLAG_CAMERA_COMPAT_FOR_FREEFORM);
-
-        mController = new LetterboxUiController(mWm, mActivity);
-
-        assertFalse(mController.shouldApplyFreeformTreatmentForCameraCompat());
-    }
-
-    @Test
-    public void testShouldApplyCameraCompatFreeformTreatment_notDisabledByOverride_returnsTrue()
-            throws Exception {
-        mSetFlagsRule.enableFlags(FLAG_CAMERA_COMPAT_FOR_FREEFORM);
-
-        mController = new LetterboxUiController(mWm, mActivity);
-
-        assertTrue(mController.shouldApplyFreeformTreatmentForCameraCompat());
     }
 
     @Test
@@ -441,7 +214,7 @@ public class LetterboxUiControllerTest extends WindowTestsBase {
                     /*centerX=*/ 1, /*centerY=*/ 1)
         );
         insets.setRoundedCorners(roundedCorners);
-        mLetterboxConfiguration.setLetterboxActivityCornersRadius(-1);
+        mAppCompatConfiguration.setLetterboxActivityCornersRadius(-1);
 
         assertEquals(expectedRadius, mController.getRoundedCornersRadius(mainWindow));
     }
@@ -454,7 +227,7 @@ public class LetterboxUiControllerTest extends WindowTestsBase {
 
         final WindowState mainWindow = mockForGetCropBoundsAndRoundedCorners(/*taskbar=*/ null);
         mainWindow.mInvGlobalScale = invGlobalScale;
-        mLetterboxConfiguration.setLetterboxActivityCornersRadius(configurationRadius);
+        mAppCompatConfiguration.setLetterboxActivityCornersRadius(configurationRadius);
 
         doReturn(true).when(mActivity).isInLetterboxAnimation();
         assertEquals(expectedRadius, mController.getRoundedCornersRadius(mainWindow));
@@ -475,7 +248,7 @@ public class LetterboxUiControllerTest extends WindowTestsBase {
         final int configurationRadius = 15;
 
         final WindowState mainWindow = mockForGetCropBoundsAndRoundedCorners(/*taskbar=*/ null);
-        mLetterboxConfiguration.setLetterboxActivityCornersRadius(configurationRadius);
+        mAppCompatConfiguration.setLetterboxActivityCornersRadius(configurationRadius);
 
         mainWindow.mInvGlobalScale = -1f;
         assertEquals(configurationRadius, mController.getRoundedCornersRadius(mainWindow));
@@ -496,6 +269,7 @@ public class LetterboxUiControllerTest extends WindowTestsBase {
         mainWindow.mInvGlobalScale = 1f;
         spyOn(resources);
         spyOn(mActivity);
+        spyOn(mActivity.mAppCompatController.getAppCompatAspectRatioPolicy());
 
         if (taskbar != null) {
             taskbar.setVisible(true);
@@ -504,14 +278,15 @@ public class LetterboxUiControllerTest extends WindowTestsBase {
         doReturn(mLetterboxedPortraitTaskBounds).when(mActivity).getBounds();
         doReturn(false).when(mActivity).isInLetterboxAnimation();
         doReturn(true).when(mActivity).isVisible();
-        doReturn(true).when(mActivity).isLetterboxedForFixedOrientationAndAspectRatio();
+        doReturn(true).when(mActivity.mAppCompatController
+                .getAppCompatAspectRatioPolicy()).isLetterboxedForFixedOrientationAndAspectRatio();
         doReturn(insets).when(mainWindow).getInsetsState();
         doReturn(attrs).when(mainWindow).getAttrs();
         doReturn(true).when(mainWindow).isDrawn();
         doReturn(true).when(mainWindow).isOnScreen();
         doReturn(false).when(mainWindow).isLetterboxedForDisplayCutout();
         doReturn(true).when(mainWindow).areAppWindowBoundsLetterboxed();
-        doReturn(true).when(mLetterboxConfiguration).isLetterboxActivityCornersRounded();
+        doReturn(true).when(mAppCompatConfiguration).isLetterboxActivityCornersRounded();
         doReturn(TASKBAR_EXPANDED_HEIGHT).when(resources).getDimensionPixelSize(
                 R.dimen.taskbar_frame_height);
 
@@ -521,553 +296,17 @@ public class LetterboxUiControllerTest extends WindowTestsBase {
         return mainWindow;
     }
 
-    // shouldApplyUser...Override
-    @Test
-    public void testShouldApplyUserFullscreenOverride_trueProperty_returnsFalse() throws Exception {
-        mockThatProperty(PROPERTY_COMPAT_ALLOW_USER_ASPECT_RATIO_FULLSCREEN_OVERRIDE,
-                /* value */ true);
-
-        mController = new LetterboxUiController(mWm, mActivity);
-        doReturn(false).when(mLetterboxConfiguration).isUserAppAspectRatioFullscreenEnabled();
-
-        assertFalse(mController.shouldApplyUserFullscreenOverride());
-    }
-
-    @Test
-    public void testShouldApplyUserFullscreenOverride_falseFullscreenProperty_returnsFalse()
-            throws Exception {
-        prepareActivityThatShouldApplyUserFullscreenOverride();
-        mockThatProperty(PROPERTY_COMPAT_ALLOW_USER_ASPECT_RATIO_FULLSCREEN_OVERRIDE,
-                /* value */ false);
-
-        mController = new LetterboxUiController(mWm, mActivity);
-
-        assertFalse(mController.shouldApplyUserFullscreenOverride());
-    }
-
-    @Test
-    public void testShouldApplyUserFullscreenOverride_falseSettingsProperty_returnsFalse()
-            throws Exception {
-        prepareActivityThatShouldApplyUserFullscreenOverride();
-        mockThatProperty(PROPERTY_COMPAT_ALLOW_USER_ASPECT_RATIO_OVERRIDE, /* value */ false);
-
-        mController = new LetterboxUiController(mWm, mActivity);
-
-        assertFalse(mController.shouldApplyUserFullscreenOverride());
-    }
-
-    @Test
-    public void testShouldApplyUserFullscreenOverride_returnsTrue() {
-        prepareActivityThatShouldApplyUserFullscreenOverride();
-
-        assertTrue(mController.shouldApplyUserFullscreenOverride());
-    }
-
-    @Test
-    public void testShouldEnableUserAspectRatioSettings_falseProperty_returnsFalse()
-            throws Exception {
-        prepareActivityThatShouldApplyUserMinAspectRatioOverride();
-        mockThatProperty(PROPERTY_COMPAT_ALLOW_USER_ASPECT_RATIO_OVERRIDE, /* value */ false);
-
-        mActivity = setUpActivityWithComponent();
-        mController = new LetterboxUiController(mWm, mActivity);
-
-        assertFalse(mController.shouldEnableUserAspectRatioSettings());
-    }
-
-    @Test
-    public void testShouldEnableUserAspectRatioSettings_trueProperty_returnsTrue()
-            throws Exception {
-        prepareActivityThatShouldApplyUserMinAspectRatioOverride();
-        mockThatProperty(PROPERTY_COMPAT_ALLOW_USER_ASPECT_RATIO_OVERRIDE, /* value */ true);
-
-        mController = new LetterboxUiController(mWm, mActivity);
-
-        assertTrue(mController.shouldEnableUserAspectRatioSettings());
-    }
-
-    @Test
-    public void testShouldEnableUserAspectRatioSettings_noIgnoreOrientation_returnsFalse()
-            throws Exception {
-        prepareActivityForShouldApplyUserMinAspectRatioOverride(/* orientationRequest */ false);
-        mockThatProperty(PROPERTY_COMPAT_ALLOW_USER_ASPECT_RATIO_OVERRIDE, /* value */ true);
-
-        mController = new LetterboxUiController(mWm, mActivity);
-
-        assertFalse(mController.shouldEnableUserAspectRatioSettings());
-    }
-
-    @Test
-    public void testShouldApplyUserMinAspectRatioOverride_falseProperty_returnsFalse()
-            throws Exception {
-        prepareActivityThatShouldApplyUserMinAspectRatioOverride();
-        mockThatProperty(PROPERTY_COMPAT_ALLOW_USER_ASPECT_RATIO_OVERRIDE, /* value */ false);
-
-        mController = new LetterboxUiController(mWm, mActivity);
-
-        assertFalse(mController.shouldApplyUserMinAspectRatioOverride());
-    }
-
-    @Test
-    public void testShouldApplyUserMinAspectRatioOverride_trueProperty_returnsFalse()
-            throws Exception {
-        doReturn(false).when(mLetterboxConfiguration).isUserAppAspectRatioSettingsEnabled();
-        mockThatProperty(PROPERTY_COMPAT_ALLOW_USER_ASPECT_RATIO_OVERRIDE, /* value */ true);
-
-        mController = new LetterboxUiController(mWm, mActivity);
-
-        assertFalse(mController.shouldApplyUserMinAspectRatioOverride());
-    }
-
-    @Test
-    public void testShouldApplyUserMinAspectRatioOverride_disabledIgnoreOrientationRequest() {
-        prepareActivityThatShouldApplyUserMinAspectRatioOverride();
-        mDisplayContent.setIgnoreOrientationRequest(false);
-
-        assertFalse(mController.shouldApplyUserMinAspectRatioOverride());
-    }
-
-    @Test
-    public void testShouldApplyUserMinAspectRatioOverride_returnsTrue() {
-        prepareActivityThatShouldApplyUserMinAspectRatioOverride();
-
-        assertTrue(mController.shouldApplyUserMinAspectRatioOverride());
-    }
-
-    @Test
-    public void testShouldApplyUserMinAspectRatioOverride_noIgnoreOrientation_returnsFalse() {
-        prepareActivityForShouldApplyUserMinAspectRatioOverride(/* orientationRequest */ false);
-
-        assertFalse(mController.shouldApplyUserMinAspectRatioOverride());
-    }
-
-    @Test
-    public void testRecomputeConfigurationForCameraCompatIfNeeded() {
-        spyOn(mController);
-        doReturn(false).when(mController).isOverrideOrientationOnlyForCameraEnabled();
-        doReturn(false).when(mController).isCameraCompatSplitScreenAspectRatioAllowed();
-        doReturn(false).when(mController).shouldOverrideMinAspectRatioForCamera();
-        clearInvocations(mActivity);
-
-        mController.recomputeConfigurationForCameraCompatIfNeeded();
-
-        verify(mActivity, never()).recomputeConfiguration();
-
-        // isOverrideOrientationOnlyForCameraEnabled
-        doReturn(true).when(mController).isOverrideOrientationOnlyForCameraEnabled();
-        clearInvocations(mActivity);
-        mController.recomputeConfigurationForCameraCompatIfNeeded();
-        verify(mActivity).recomputeConfiguration();
-
-        // isCameraCompatSplitScreenAspectRatioAllowed
-        doReturn(false).when(mController).isOverrideOrientationOnlyForCameraEnabled();
-        doReturn(true).when(mController).isCameraCompatSplitScreenAspectRatioAllowed();
-        clearInvocations(mActivity);
-        mController.recomputeConfigurationForCameraCompatIfNeeded();
-        verify(mActivity).recomputeConfiguration();
-
-        // shouldOverrideMinAspectRatioForCamera
-        doReturn(false).when(mController).isCameraCompatSplitScreenAspectRatioAllowed();
-        doReturn(true).when(mController).shouldOverrideMinAspectRatioForCamera();
-        clearInvocations(mActivity);
-        mController.recomputeConfigurationForCameraCompatIfNeeded();
-        verify(mActivity).recomputeConfiguration();
-    }
-
-    private void prepareActivityForShouldApplyUserMinAspectRatioOverride(
-            boolean orientationRequest) {
-        spyOn(mController);
-        doReturn(orientationRequest).when(
-                mLetterboxConfiguration).isUserAppAspectRatioSettingsEnabled();
-        mDisplayContent.setIgnoreOrientationRequest(true);
-        doReturn(USER_MIN_ASPECT_RATIO_3_2).when(mController).getUserMinAspectRatioOverrideCode();
-    }
-
-    private void prepareActivityThatShouldApplyUserMinAspectRatioOverride() {
-        prepareActivityForShouldApplyUserMinAspectRatioOverride(/* orientationRequest */ true);
-    }
-
-    private void prepareActivityThatShouldApplyUserFullscreenOverride() {
-        spyOn(mController);
-        doReturn(true).when(mLetterboxConfiguration).isUserAppAspectRatioFullscreenEnabled();
-        mDisplayContent.setIgnoreOrientationRequest(true);
-        doReturn(USER_MIN_ASPECT_RATIO_FULLSCREEN).when(mController)
-                .getUserMinAspectRatioOverrideCode();
-    }
-
-    // shouldUseDisplayLandscapeNaturalOrientation
-
-    @Test
-    @EnableCompatChanges({OVERRIDE_USE_DISPLAY_LANDSCAPE_NATURAL_ORIENTATION})
-    public void testShouldUseDisplayLandscapeNaturalOrientation_override_returnsTrue() {
-        prepareActivityThatShouldUseDisplayLandscapeNaturalOrientation();
-        assertTrue(mController.shouldUseDisplayLandscapeNaturalOrientation());
-    }
-
-    @Test
-    @EnableCompatChanges({OVERRIDE_USE_DISPLAY_LANDSCAPE_NATURAL_ORIENTATION})
-    public void testShouldUseDisplayLandscapeNaturalOrientation_overrideAndFalseProperty_returnsFalse()
-            throws Exception {
-        mockThatProperty(PROPERTY_COMPAT_ALLOW_DISPLAY_ORIENTATION_OVERRIDE, /* value */ false);
-
-        mController = new LetterboxUiController(mWm, mActivity);
-
-        prepareActivityThatShouldUseDisplayLandscapeNaturalOrientation();
-        assertFalse(mController.shouldUseDisplayLandscapeNaturalOrientation());
-    }
-
-    @Test
-    @EnableCompatChanges({OVERRIDE_USE_DISPLAY_LANDSCAPE_NATURAL_ORIENTATION})
-    public void testShouldUseDisplayLandscapeNaturalOrientation_portraitNaturalOrientation_returnsFalse() {
-        prepareActivityThatShouldUseDisplayLandscapeNaturalOrientation();
-        doReturn(ORIENTATION_PORTRAIT).when(mDisplayContent).getNaturalOrientation();
-
-        assertFalse(mController.shouldUseDisplayLandscapeNaturalOrientation());
-    }
-
-    @Test
-    @EnableCompatChanges({OVERRIDE_USE_DISPLAY_LANDSCAPE_NATURAL_ORIENTATION})
-    public void testShouldUseDisplayLandscapeNaturalOrientation_disabledIgnoreOrientationRequest_returnsFalse() {
-        prepareActivityThatShouldUseDisplayLandscapeNaturalOrientation();
-        mDisplayContent.setIgnoreOrientationRequest(false);
-
-        assertFalse(mController.shouldUseDisplayLandscapeNaturalOrientation());
-    }
-
-    @Test
-    @EnableCompatChanges({OVERRIDE_USE_DISPLAY_LANDSCAPE_NATURAL_ORIENTATION})
-    public void testShouldUseDisplayLandscapeNaturalOrientation_inMultiWindowMode_returnsFalse() {
-        prepareActivityThatShouldUseDisplayLandscapeNaturalOrientation();
-
-        spyOn(mTask);
-        doReturn(true).when(mTask).inMultiWindowMode();
-
-        assertFalse(mController.shouldUseDisplayLandscapeNaturalOrientation());
-    }
-
-    @Test
-    @EnableCompatChanges({OVERRIDE_ENABLE_COMPAT_FAKE_FOCUS})
-    public void testShouldSendFakeFocus_overrideEnabled_returnsTrue() {
-        doReturn(true).when(mLetterboxConfiguration).isCompatFakeFocusEnabled();
-
-        mController = new LetterboxUiController(mWm, mActivity);
-
-        assertTrue(mController.shouldSendFakeFocus());
-    }
-
-    @Test
-    @DisableCompatChanges({OVERRIDE_ENABLE_COMPAT_FAKE_FOCUS})
-    public void testShouldSendFakeFocus_overrideDisabled_returnsFalse() {
-        doReturn(true).when(mLetterboxConfiguration).isCompatFakeFocusEnabled();
-
-        mController = new LetterboxUiController(mWm, mActivity);
-
-        assertFalse(mController.shouldSendFakeFocus());
-    }
-
-    @Test
-    @EnableCompatChanges({OVERRIDE_ENABLE_COMPAT_FAKE_FOCUS})
-    public void testIsCompatFakeFocusEnabled_propertyDisabledAndOverrideEnabled_fakeFocusDisabled()
-            throws Exception {
-        doReturn(true).when(mLetterboxConfiguration).isCompatFakeFocusEnabled();
-        mockThatProperty(PROPERTY_COMPAT_ENABLE_FAKE_FOCUS, /* value */ false);
-
-        mController = new LetterboxUiController(mWm, mActivity);
-
-        assertFalse(mController.shouldSendFakeFocus());
-    }
-
-    @Test
-    @DisableCompatChanges({OVERRIDE_ENABLE_COMPAT_FAKE_FOCUS})
-    public void testIsCompatFakeFocusEnabled_propertyEnabled_noOverride_fakeFocusEnabled()
-            throws Exception {
-        doReturn(true).when(mLetterboxConfiguration).isCompatFakeFocusEnabled();
-        mockThatProperty(PROPERTY_COMPAT_ENABLE_FAKE_FOCUS, /* value */ true);
-
-        mController = new LetterboxUiController(mWm, mActivity);
-
-        assertTrue(mController.shouldSendFakeFocus());
-    }
-
-    @Test
-    public void testIsCompatFakeFocusEnabled_propertyDisabled_fakeFocusDisabled()
-            throws Exception {
-        doReturn(true).when(mLetterboxConfiguration).isCompatFakeFocusEnabled();
-        mockThatProperty(PROPERTY_COMPAT_ENABLE_FAKE_FOCUS, /* value */ false);
-
-        mController = new LetterboxUiController(mWm, mActivity);
-
-        assertFalse(mController.shouldSendFakeFocus());
-    }
-
-    @Test
-    public void testIsCompatFakeFocusEnabled_propertyEnabled_fakeFocusEnabled()
-            throws Exception {
-        doReturn(true).when(mLetterboxConfiguration).isCompatFakeFocusEnabled();
-        mockThatProperty(PROPERTY_COMPAT_ENABLE_FAKE_FOCUS, /* value */ true);
-
-        mController = new LetterboxUiController(mWm, mActivity);
-
-        assertTrue(mController.shouldSendFakeFocus());
-    }
-
-    @Test
-    @EnableCompatChanges({OVERRIDE_MIN_ASPECT_RATIO})
-    public void testshouldOverrideMinAspectRatio_overrideEnabled_returnsTrue() {
-        mController = new LetterboxUiController(mWm, mActivity);
-
-        assertTrue(mController.shouldOverrideMinAspectRatio());
-    }
-
-    @Test
-    @EnableCompatChanges({OVERRIDE_MIN_ASPECT_RATIO})
-    public void testshouldOverrideMinAspectRatio_propertyTrue_overrideEnabled_returnsTrue()
-            throws Exception {
-        mockThatProperty(PROPERTY_COMPAT_ALLOW_MIN_ASPECT_RATIO_OVERRIDE, /* value */ true);
-        mController = new LetterboxUiController(mWm, mActivity);
-
-        assertTrue(mController.shouldOverrideMinAspectRatio());
-    }
-
-    @Test
-    @DisableCompatChanges({OVERRIDE_MIN_ASPECT_RATIO})
-    public void testshouldOverrideMinAspectRatio_propertyTrue_overrideDisabled_returnsFalse()
-            throws Exception {
-        mockThatProperty(PROPERTY_COMPAT_ALLOW_MIN_ASPECT_RATIO_OVERRIDE, /* value */ true);
-        mController = new LetterboxUiController(mWm, mActivity);
-
-        assertFalse(mController.shouldOverrideMinAspectRatio());
-    }
-
-    @Test
-    @DisableCompatChanges({OVERRIDE_MIN_ASPECT_RATIO})
-    public void testshouldOverrideMinAspectRatio_overrideDisabled_returnsFalse() {
-        mController = new LetterboxUiController(mWm, mActivity);
-
-        assertFalse(mController.shouldOverrideMinAspectRatio());
-    }
-
-    @Test
-    @EnableCompatChanges({OVERRIDE_MIN_ASPECT_RATIO})
-    public void testshouldOverrideMinAspectRatio_propertyFalse_overrideEnabled_returnsFalse()
-            throws Exception {
-        mockThatProperty(PROPERTY_COMPAT_ALLOW_MIN_ASPECT_RATIO_OVERRIDE, /* value */ false);
-
-        mActivity = setUpActivityWithComponent();
-        mController = new LetterboxUiController(mWm, mActivity);
-
-        assertFalse(mController.shouldOverrideMinAspectRatio());
-    }
-
-    @Test
-    @DisableCompatChanges({OVERRIDE_MIN_ASPECT_RATIO})
-    public void testshouldOverrideMinAspectRatio_propertyFalse_noOverride_returnsFalse()
-            throws Exception {
-        mockThatProperty(PROPERTY_COMPAT_ALLOW_MIN_ASPECT_RATIO_OVERRIDE, /* value */ false);
-        mController = new LetterboxUiController(mWm, mActivity);
-
-        assertFalse(mController.shouldOverrideMinAspectRatio());
-    }
-
-    @Test
-    @EnableCompatChanges({OVERRIDE_MIN_ASPECT_RATIO_ONLY_FOR_CAMERA})
-    public void shouldOverrideMinAspectRatioForCamera_overrideEnabled_returnsTrue() {
-        doReturn(true).when(mActivity).isCameraActive();
-        mController = new LetterboxUiController(mWm, mActivity);
-
-        assertTrue(mController.shouldOverrideMinAspectRatioForCamera());
-    }
-
-    @Test
-    @EnableCompatChanges({OVERRIDE_MIN_ASPECT_RATIO_ONLY_FOR_CAMERA})
-    public void shouldOverrideMinAspectRatioForCamera_propertyTrue_overrideEnabled_returnsTrue()
-            throws Exception {
-        doReturn(true).when(mActivity).isCameraActive();
-        mockThatProperty(PROPERTY_COMPAT_ALLOW_MIN_ASPECT_RATIO_OVERRIDE, /* value */ true);
-        mController = new LetterboxUiController(mWm, mActivity);
-
-        assertTrue(mController.shouldOverrideMinAspectRatioForCamera());
-    }
-
-    @Test
-    @EnableCompatChanges({OVERRIDE_MIN_ASPECT_RATIO_ONLY_FOR_CAMERA})
-    public void shouldOverrideMinAspectRatioForCamera_propertyTrue_overrideEnabled_returnsFalse()
-            throws Exception {
-        doReturn(false).when(mActivity).isCameraActive();
-        mockThatProperty(PROPERTY_COMPAT_ALLOW_MIN_ASPECT_RATIO_OVERRIDE, /* value */ true);
-        mController = new LetterboxUiController(mWm, mActivity);
-
-        assertFalse(mController.shouldOverrideMinAspectRatioForCamera());
-    }
-
-    @Test
-    @DisableCompatChanges({OVERRIDE_MIN_ASPECT_RATIO_ONLY_FOR_CAMERA})
-    public void shouldOverrideMinAspectRatioForCamera_propertyTrue_overrideDisabled_returnsFalse()
-            throws Exception {
-        doReturn(true).when(mActivity).isCameraActive();
-        mockThatProperty(PROPERTY_COMPAT_ALLOW_MIN_ASPECT_RATIO_OVERRIDE, /* value */ true);
-        mController = new LetterboxUiController(mWm, mActivity);
-
-        assertFalse(mController.shouldOverrideMinAspectRatioForCamera());
-    }
-
-    @Test
-    @DisableCompatChanges({OVERRIDE_MIN_ASPECT_RATIO_ONLY_FOR_CAMERA})
-    public void shouldOverrideMinAspectRatioForCamera_overrideDisabled_returnsFalse() {
-        doReturn(true).when(mActivity).isCameraActive();
-        mController = new LetterboxUiController(mWm, mActivity);
-
-        assertFalse(mController.shouldOverrideMinAspectRatioForCamera());
-    }
-
-    @Test
-    @EnableCompatChanges({OVERRIDE_MIN_ASPECT_RATIO_ONLY_FOR_CAMERA})
-    public void shouldOverrideMinAspectRatioForCamera_propertyFalse_overrideEnabled_returnsFalse()
-            throws Exception {
-        mockThatProperty(PROPERTY_COMPAT_ALLOW_MIN_ASPECT_RATIO_OVERRIDE, /* value */ false);
-        mController = new LetterboxUiController(mWm, mActivity);
-
-        assertFalse(mController.shouldOverrideMinAspectRatioForCamera());
-    }
-
-    @Test
-    @DisableCompatChanges({OVERRIDE_MIN_ASPECT_RATIO_ONLY_FOR_CAMERA})
-    public void shouldOverrideMinAspectRatioForCamera_propertyFalse_noOverride_returnsFalse()
-            throws Exception {
-        mockThatProperty(PROPERTY_COMPAT_ALLOW_MIN_ASPECT_RATIO_OVERRIDE, /* value */ false);
-        doReturn(true).when(mActivity).isCameraActive();
-        mController = new LetterboxUiController(mWm, mActivity);
-
-        assertFalse(mController.shouldOverrideMinAspectRatioForCamera());
-    }
-
-    @Test
-    @EnableCompatChanges({FORCE_RESIZE_APP})
-    public void testshouldOverrideForceResizeApp_overrideEnabled_returnsTrue() {
-        mController = new LetterboxUiController(mWm, mActivity);
-
-        assertTrue(mController.shouldOverrideForceResizeApp());
-    }
-
-    @Test
-    @EnableCompatChanges({FORCE_RESIZE_APP})
-    public void testshouldOverrideForceResizeApp_propertyTrue_overrideEnabled_returnsTrue()
-            throws Exception {
-        mockThatProperty(PROPERTY_COMPAT_ALLOW_RESIZEABLE_ACTIVITY_OVERRIDES, /* value */ true);
-        mController = new LetterboxUiController(mWm, mActivity);
-
-        assertTrue(mController.shouldOverrideForceResizeApp());
-    }
-
-    @Test
-    @DisableCompatChanges({FORCE_RESIZE_APP})
-    public void testshouldOverrideForceResizeApp_propertyTrue_overrideDisabled_returnsFalse()
-            throws Exception {
-        mockThatProperty(PROPERTY_COMPAT_ALLOW_RESIZEABLE_ACTIVITY_OVERRIDES, /* value */ true);
-        mController = new LetterboxUiController(mWm, mActivity);
-
-        assertFalse(mController.shouldOverrideForceResizeApp());
-    }
-
-    @Test
-    @DisableCompatChanges({FORCE_RESIZE_APP})
-    public void testshouldOverrideForceResizeApp_overrideDisabled_returnsFalse() {
-        mController = new LetterboxUiController(mWm, mActivity);
-
-        assertFalse(mController.shouldOverrideForceResizeApp());
-    }
-
-    @Test
-    @EnableCompatChanges({FORCE_RESIZE_APP})
-    public void testshouldOverrideForceResizeApp_propertyFalse_overrideEnabled_returnsFalse()
-            throws Exception {
-        mockThatProperty(PROPERTY_COMPAT_ALLOW_RESIZEABLE_ACTIVITY_OVERRIDES, /* value */ false);
-
-        mActivity = setUpActivityWithComponent();
-        mController = new LetterboxUiController(mWm, mActivity);
-
-        assertFalse(mController.shouldOverrideForceResizeApp());
-    }
-
-    @Test
-    @DisableCompatChanges({FORCE_RESIZE_APP})
-    public void testshouldOverrideForceResizeApp_propertyFalse_noOverride_returnsFalse()
-            throws Exception {
-        mockThatProperty(PROPERTY_COMPAT_ALLOW_RESIZEABLE_ACTIVITY_OVERRIDES, /* value */ false);
-        mController = new LetterboxUiController(mWm, mActivity);
-
-        assertFalse(mController.shouldOverrideForceResizeApp());
-    }
-
-    @Test
-    @EnableCompatChanges({FORCE_NON_RESIZE_APP})
-    public void testshouldOverrideForceNonResizeApp_overrideEnabled_returnsTrue() {
-        mController = new LetterboxUiController(mWm, mActivity);
-
-        assertTrue(mController.shouldOverrideForceNonResizeApp());
-    }
-
-    @Test
-    @EnableCompatChanges({FORCE_NON_RESIZE_APP})
-    public void testshouldOverrideForceNonResizeApp_propertyTrue_overrideEnabled_returnsTrue()
-            throws Exception {
-        mockThatProperty(PROPERTY_COMPAT_ALLOW_RESIZEABLE_ACTIVITY_OVERRIDES, /* value */ true);
-        mController = new LetterboxUiController(mWm, mActivity);
-
-        assertTrue(mController.shouldOverrideForceNonResizeApp());
-    }
-
-    @Test
-    @DisableCompatChanges({FORCE_NON_RESIZE_APP})
-    public void testshouldOverrideForceNonResizeApp_propertyTrue_overrideDisabled_returnsFalse()
-            throws Exception {
-        mockThatProperty(PROPERTY_COMPAT_ALLOW_RESIZEABLE_ACTIVITY_OVERRIDES, /* value */ true);
-        mController = new LetterboxUiController(mWm, mActivity);
-
-        assertFalse(mController.shouldOverrideForceNonResizeApp());
-    }
-
-    @Test
-    @DisableCompatChanges({FORCE_NON_RESIZE_APP})
-    public void testshouldOverrideForceNonResizeApp_overrideDisabled_returnsFalse() {
-        mController = new LetterboxUiController(mWm, mActivity);
-
-        assertFalse(mController.shouldOverrideForceNonResizeApp());
-    }
-
-    @Test
-    @EnableCompatChanges({FORCE_NON_RESIZE_APP})
-    public void testshouldOverrideForceNonResizeApp_propertyFalse_overrideEnabled_returnsFalse()
-            throws Exception {
-        mockThatProperty(PROPERTY_COMPAT_ALLOW_RESIZEABLE_ACTIVITY_OVERRIDES, /* value */ false);
-
-        mActivity = setUpActivityWithComponent();
-        mController = new LetterboxUiController(mWm, mActivity);
-
-        assertFalse(mController.shouldOverrideForceNonResizeApp());
-    }
-
-    @Test
-    @DisableCompatChanges({FORCE_NON_RESIZE_APP})
-    public void testshouldOverrideForceNonResizeApp_propertyFalse_noOverride_returnsFalse()
-            throws Exception {
-        mockThatProperty(PROPERTY_COMPAT_ALLOW_RESIZEABLE_ACTIVITY_OVERRIDES, /* value */ false);
-        mController = new LetterboxUiController(mWm, mActivity);
-
-        assertFalse(mController.shouldOverrideForceNonResizeApp());
-    }
-
     @Test
     public void testgetFixedOrientationLetterboxAspectRatio_splitScreenAspectEnabled() {
-        doReturn(true).when(mActivity.mWmService.mLetterboxConfiguration)
+        doReturn(true).when(mActivity.mWmService.mAppCompatConfiguration)
                 .isCameraCompatTreatmentEnabled();
-        doReturn(true).when(mActivity.mWmService.mLetterboxConfiguration)
+        doReturn(true).when(mActivity.mWmService.mAppCompatConfiguration)
                 .isCameraCompatTreatmentEnabledAtBuildTime();
-        doReturn(true).when(mActivity.mWmService.mLetterboxConfiguration)
+        doReturn(true).when(mActivity.mWmService.mAppCompatConfiguration)
                 .isCameraCompatSplitScreenAspectRatioEnabled();
-        doReturn(false).when(mActivity.mWmService.mLetterboxConfiguration)
+        doReturn(false).when(mActivity.mWmService.mAppCompatConfiguration)
                 .getIsDisplayAspectRatioEnabledForFixedOrientationLetterbox();
-        doReturn(1.5f).when(mActivity.mWmService.mLetterboxConfiguration)
+        doReturn(1.5f).when(mActivity.mWmService.mAppCompatConfiguration)
                 .getFixedOrientationLetterboxAspectRatio();
 
         // Recreate DisplayContent with DisplayRotationCompatPolicy
@@ -1077,25 +316,27 @@ public class LetterboxUiControllerTest extends WindowTestsBase {
         assertEquals(1.5f, mController.getFixedOrientationLetterboxAspectRatio(
                 mActivity.getParent().getConfiguration()), /* delta */ 0.01);
 
-        spyOn(mDisplayContent.mDisplayRotationCompatPolicy);
-        doReturn(true).when(mDisplayContent.mDisplayRotationCompatPolicy)
+        spyOn(mDisplayContent.mAppCompatCameraPolicy);
+        doReturn(true).when(mDisplayContent.mAppCompatCameraPolicy)
                 .isTreatmentEnabledForActivity(eq(mActivity));
 
-        assertEquals(mController.getSplitScreenAspectRatio(),
-                mController.getFixedOrientationLetterboxAspectRatio(
+        final AppCompatAspectRatioOverrides aspectRatioOverrides =
+                mActivity.mAppCompatController.getAppCompatAspectRatioOverrides();
+        assertEquals(aspectRatioOverrides.getSplitScreenAspectRatio(),
+                aspectRatioOverrides.getFixedOrientationLetterboxAspectRatio(
                         mActivity.getParent().getConfiguration()), /* delta */  0.01);
     }
 
     @Test
     public void testIsVerticalThinLetterboxed() {
         // Vertical thin letterbox disabled
-        doReturn(-1).when(mActivity.mWmService.mLetterboxConfiguration)
+        doReturn(-1).when(mActivity.mWmService.mAppCompatConfiguration)
                 .getThinLetterboxHeightPx();
         assertFalse(mController.isVerticalThinLetterboxed());
         // Define a Task 100x100
         final Task task = mock(Task.class);
         doReturn(new Rect(0, 0, 100, 100)).when(task).getBounds();
-        doReturn(10).when(mActivity.mWmService.mLetterboxConfiguration)
+        doReturn(10).when(mActivity.mWmService.mAppCompatConfiguration)
                 .getThinLetterboxHeightPx();
 
         // Vertical thin letterbox disabled without Task
@@ -1120,13 +361,13 @@ public class LetterboxUiControllerTest extends WindowTestsBase {
     @Test
     public void testIsHorizontalThinLetterboxed() {
         // Horizontal thin letterbox disabled
-        doReturn(-1).when(mActivity.mWmService.mLetterboxConfiguration)
+        doReturn(-1).when(mActivity.mWmService.mAppCompatConfiguration)
                 .getThinLetterboxWidthPx();
         assertFalse(mController.isHorizontalThinLetterboxed());
         // Define a Task 100x100
         final Task task = mock(Task.class);
         doReturn(new Rect(0, 0, 100, 100)).when(task).getBounds();
-        doReturn(10).when(mActivity.mWmService.mLetterboxConfiguration)
+        doReturn(10).when(mActivity.mWmService.mAppCompatConfiguration)
                 .getThinLetterboxWidthPx();
 
         // Vertical thin letterbox disabled without Task
@@ -1181,21 +422,7 @@ public class LetterboxUiControllerTest extends WindowTestsBase {
     @Test
     public void testIsLetterboxEducationEnabled() {
         mController.isLetterboxEducationEnabled();
-        verify(mLetterboxConfiguration).getIsEducationEnabled();
-    }
-
-    private void mockThatProperty(String propertyName, boolean value) throws Exception {
-        Property property = new Property(propertyName, /* value */ value, /* packageName */ "",
-                /* className */ "");
-        PackageManager pm = mWm.mContext.getPackageManager();
-        spyOn(pm);
-        doReturn(property).when(pm).getProperty(eq(propertyName), anyString());
-    }
-
-    private void prepareActivityThatShouldUseDisplayLandscapeNaturalOrientation() {
-        spyOn(mDisplayContent);
-        doReturn(ORIENTATION_LANDSCAPE).when(mDisplayContent).getNaturalOrientation();
-        mDisplayContent.setIgnoreOrientationRequest(true);
+        verify(mAppCompatConfiguration).getIsEducationEnabled();
     }
 
     private ActivityRecord setUpActivityWithComponent() {
@@ -1209,6 +436,7 @@ public class LetterboxUiControllerTest extends WindowTestsBase {
                 .setComponent(ComponentName.createRelative(mContext,
                         com.android.server.wm.LetterboxUiControllerTest.class.getName()))
                 .build();
+        spyOn(activity.mAppCompatController.getAppCompatCameraOverrides());
         return activity;
     }
 }
