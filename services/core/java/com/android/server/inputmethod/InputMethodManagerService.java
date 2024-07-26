@@ -5044,10 +5044,11 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
 
             // ---------------------------------------------------------
 
-            case MSG_HIDE_ALL_INPUT_METHODS:
+            case MSG_HIDE_ALL_INPUT_METHODS: {
+                @SoftInputShowHideReason final int reason = msg.arg1;
+                final int originatingDisplayId = msg.arg2;
                 synchronized (ImfLock.class) {
-                    // TODO(b/305849394): Needs to figure out what to do where for background users.
-                    final int userId = mCurrentUserId;
+                    final int userId = resolveImeUserIdFromDisplayIdLocked(originatingDisplayId);
                     final var userData = getUserData(userId);
                     if (Flags.refactorInsetsController()) {
                         if (userData.mImeBindingState != null
@@ -5055,15 +5056,16 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
                                 && userData.mImeBindingState.mFocusedWindowClient.mClient != null) {
                             userData.mImeBindingState.mFocusedWindowClient.mClient
                                     .setImeVisibility(false,
-                                    null /* TODO(b329229469) check statsToken */);
+                                            null /* TODO(b329229469) check statsToken */);
                         }
                     } else {
-                        @SoftInputShowHideReason final int reason = (int) msg.obj;
+
                         hideCurrentInputLocked(userData.mImeBindingState.mFocusedWindow,
                                 0 /* flags */, reason, userId);
                     }
                 }
                 return true;
+            }
             case MSG_REMOVE_IME_SURFACE: {
                 synchronized (ImfLock.class) {
                     // TODO(b/305849394): Needs to figure out what to do where for background users.
@@ -5781,7 +5783,8 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
         public void hideAllInputMethods(@SoftInputShowHideReason int reason,
                 int originatingDisplayId) {
             mHandler.removeMessages(MSG_HIDE_ALL_INPUT_METHODS);
-            mHandler.obtainMessage(MSG_HIDE_ALL_INPUT_METHODS, reason).sendToTarget();
+            mHandler.obtainMessage(MSG_HIDE_ALL_INPUT_METHODS, reason, originatingDisplayId)
+                    .sendToTarget();
         }
 
         @ImfLockFree
