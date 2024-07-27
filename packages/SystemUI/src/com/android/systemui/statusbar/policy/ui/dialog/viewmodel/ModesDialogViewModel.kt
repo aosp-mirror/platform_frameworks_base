@@ -84,9 +84,6 @@ constructor(
                         text = mode.rule.name,
                         subtext = getTileSubtext(mode),
                         enabled = mode.isActive,
-                        // TODO(b/346519570): This should be some combination of the above, e.g.
-                        //  "ON: Do Not Disturb, Until Mon 08:09"; see DndTile.
-                        contentDescription = "",
                         onClick = {
                             if (!mode.rule.isEnabled) {
                                 openSettings(mode)

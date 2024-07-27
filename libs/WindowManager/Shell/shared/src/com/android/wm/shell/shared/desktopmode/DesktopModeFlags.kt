@@ -35,6 +35,7 @@ enum class DesktopModeFlags(
 ) {
   // All desktop mode related flags will be added here
   DESKTOP_WINDOWING_MODE(Flags::enableDesktopWindowingMode, true),
+  CASCADING_WINDOWS(Flags::enableCascadingWindows, true),
   WALLPAPER_ACTIVITY(Flags::enableDesktopWindowingWallpaperActivity, true),
   MODALS_POLICY(Flags::enableDesktopWindowingModalsPolicy, true),
   THEMED_APP_HEADERS(Flags::enableThemedAppHeaders, true),

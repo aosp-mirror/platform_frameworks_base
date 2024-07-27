@@ -42,8 +42,8 @@ import android.util.SparseArray;
 import android.view.Display;
 import android.view.View;
 
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.LargeTest;
-import androidx.test.runner.AndroidJUnit4;
 
 import com.google.common.base.Throwables;
 

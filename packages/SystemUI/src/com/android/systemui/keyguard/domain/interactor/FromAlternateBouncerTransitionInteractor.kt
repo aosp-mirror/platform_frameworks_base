@@ -198,7 +198,12 @@ constructor(
             interpolator = Interpolators.LINEAR
             duration =
                 when (toState) {
+                    KeyguardState.AOD -> TO_AOD_DURATION
+                    KeyguardState.DOZING -> TO_DOZING_DURATION
                     KeyguardState.GONE -> TO_GONE_DURATION
+                    KeyguardState.LOCKSCREEN -> TO_LOCKSCREEN_DURATION
+                    KeyguardState.OCCLUDED -> TO_OCCLUDED_DURATION
+                    KeyguardState.PRIMARY_BOUNCER -> TO_PRIMARY_BOUNCER_DURATION
                     else -> TRANSITION_DURATION_MS
                 }.inWholeMilliseconds
         }
@@ -211,10 +216,11 @@ constructor(
     companion object {
         const val TAG = "FromAlternateBouncerTransitionInteractor"
         val TRANSITION_DURATION_MS = 300.milliseconds
-        val TO_GONE_DURATION = 500.milliseconds
         val TO_AOD_DURATION = TRANSITION_DURATION_MS
-        val TO_PRIMARY_BOUNCER_DURATION = TRANSITION_DURATION_MS
         val TO_DOZING_DURATION = TRANSITION_DURATION_MS
+        val TO_GONE_DURATION = 500.milliseconds
+        val TO_LOCKSCREEN_DURATION = 300.milliseconds
         val TO_OCCLUDED_DURATION = TRANSITION_DURATION_MS
+        val TO_PRIMARY_BOUNCER_DURATION = TRANSITION_DURATION_MS
     }
 }

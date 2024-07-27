@@ -5360,6 +5360,8 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
             saveTriggerId = null;
         }
 
+        boolean hasAuthentication = (response.getAuthentication() != null);
+
         // Must also track that are part of datasets, otherwise the FillUI won't be hidden when
         // they go away (if they're not savable).
 
@@ -5379,6 +5381,9 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                         }
                     }
                 }
+                if (dataset.getAuthentication() != null) {
+                    hasAuthentication = true;
+                }
             }
         }
 
@@ -5390,7 +5395,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                         + " hasSaveInfo: " + (saveInfo != null));
             }
             mClient.setTrackedViews(id, toArray(trackedViews), mSaveOnAllViewsInvisible,
-                    saveOnFinish, toArray(fillableIds), saveTriggerId);
+                    saveOnFinish, toArray(fillableIds), saveTriggerId, hasAuthentication);
         } catch (RemoteException e) {
             Slog.w(TAG, "Cannot set tracked ids", e);
         }
@@ -5400,7 +5405,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
      * Sets the state of views that failed to autofill.
      */
     @GuardedBy("mLock")
-    void setAutofillFailureLocked(@NonNull List<AutofillId> ids) {
+    void setAutofillFailureLocked(@NonNull List<AutofillId> ids, boolean isRefill) {
         if (sVerbose && !ids.isEmpty()) {
             Slog.v(TAG, "Total views that failed to populate: " + ids.size());
         }
@@ -5418,7 +5423,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                 Slog.v(TAG, "Changed state of " + id + " to " + viewState.getStateAsString());
             }
         }
-        mPresentationStatsEventLogger.maybeSetViewFillFailureCounts(ids.size());
+        mPresentationStatsEventLogger.maybeSetViewFillFailureCounts(ids, isRefill);
     }
 
     /**
@@ -5433,6 +5438,23 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
             id.setSessionId(this.id);
         }
         mPresentationStatsEventLogger.maybeAddSuccessId(id);
+    }
+
+    /**
+     * Sets the state of views that failed to autofill.
+     */
+    void setNotifyNotExpiringResponseDuringAuth() {
+        synchronized (mLock) {
+            mPresentationStatsEventLogger.maybeSetNotifyNotExpiringResponseDuringAuth();
+        }
+    }
+    /**
+     * Sets the state of views that failed to autofill.
+     */
+    void setLogViewEnteredIgnoredDuringAuth() {
+        synchronized (mLock) {
+            mPresentationStatsEventLogger.notifyViewEnteredIgnoredDuringAuthCount();
+        }
     }
 
     @GuardedBy("mLock")
@@ -6663,6 +6685,11 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                 Slog.w(TAG, "Error autofilling activity: " + e);
             }
         }
+    }
+
+    @GuardedBy("mLock")
+    public void setAutofillIdsAttemptedForRefillLocked(@NonNull List<AutofillId> ids) {
+        mPresentationStatsEventLogger.maybeUpdateViewFillablesForRefillAttempt(ids);
     }
 
     private AutoFillUI getUiForShowing() {

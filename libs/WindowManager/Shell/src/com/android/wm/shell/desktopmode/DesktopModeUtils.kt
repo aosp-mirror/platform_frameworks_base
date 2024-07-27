@@ -52,8 +52,10 @@ fun calculateInitialBounds(
     val idealSize = calculateIdealSize(screenBounds, scale)
     // If no top activity exists, apps fullscreen bounds and aspect ratio cannot be calculated.
     // Instead default to the desired initial bounds.
+    val stableBounds = Rect()
+    displayLayout.getStableBoundsForDesktopMode(stableBounds)
     val topActivityInfo =
-        taskInfo.topActivityInfo ?: return positionInScreen(idealSize, screenBounds)
+        taskInfo.topActivityInfo ?: return positionInScreen(idealSize, stableBounds)
 
     val initialSize: Size =
         when (taskInfo.configuration.orientation) {
@@ -100,7 +102,7 @@ fun calculateInitialBounds(
             }
         }
 
-    return positionInScreen(initialSize, screenBounds)
+    return positionInScreen(initialSize, stableBounds)
 }
 
 /**
@@ -163,17 +165,11 @@ private fun calculateIdealSize(screenBounds: Rect, scale: Float): Size {
 }
 
 /** Adjusts bounds to be positioned in the middle of the screen. */
-private fun positionInScreen(desiredSize: Size, screenBounds: Rect): Rect {
-    // TODO(b/325240051): Position apps with bottom heavy offset
-    val heightOffset = (screenBounds.height() - desiredSize.height) / 2
-    val widthOffset = (screenBounds.width() - desiredSize.width) / 2
-    return Rect(
-        widthOffset,
-        heightOffset,
-        desiredSize.width + widthOffset,
-        desiredSize.height + heightOffset
-    )
-}
+private fun positionInScreen(desiredSize: Size, stableBounds: Rect): Rect =
+    Rect(0, 0, desiredSize.width, desiredSize.height).apply {
+        val offset = DesktopTaskPosition.Center.getTopLeftCoordinates(stableBounds, this)
+        offsetTo(offset.x, offset.y)
+    }
 
 /**
  * Adjusts bounds to be positioned in the middle of the area provided, not necessarily the

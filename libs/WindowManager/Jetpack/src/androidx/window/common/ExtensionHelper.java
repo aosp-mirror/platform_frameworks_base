@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package androidx.window.util;
+package androidx.window.common;
 
 import static android.view.Surface.ROTATION_270;
 import static android.view.Surface.ROTATION_90;

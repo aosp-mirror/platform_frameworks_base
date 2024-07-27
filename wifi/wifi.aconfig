@@ -35,3 +35,14 @@ flag {
         purpose: PURPOSE_BUGFIX
     }
 }
+
+flag {
+    name: "hotspot_network_connecting_state_for_details_page"
+    namespace: "wifi"
+    description: "Update getConnectedState in HotspotNetworkEntry so that details page displays correctly."
+    bug: "321096462"
+    is_fixed_read_only: true
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
