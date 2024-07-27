@@ -95,7 +95,8 @@ constructor(
     private constructor(
         val decision: DecisionImpl,
         override val uiEventId: UiEventEnum? = null,
-        override val eventLogData: EventLogData? = null
+        override val eventLogData: EventLogData? = null,
+        val isSpammy: Boolean = false,
     ) : Loggable {
         companion object {
             val unsuppressed =
@@ -113,7 +114,8 @@ constructor(
                 LoggableDecision(
                     DecisionImpl(shouldInterrupt = false, logReason = suppressor.reason),
                     uiEventId = suppressor.uiEventId,
-                    eventLogData = suppressor.eventLogData
+                    eventLogData = suppressor.eventLogData,
+                    isSpammy = suppressor.isSpammy,
                 )
         }
     }
@@ -287,7 +289,9 @@ constructor(
         entry: NotificationEntry,
         loggableDecision: LoggableDecision
     ) {
-        logger.logDecision(type.name, entry, loggableDecision.decision)
+        if (!loggableDecision.isSpammy || logger.spew) {
+            logger.logDecision(type.name, entry, loggableDecision.decision)
+        }
         logEvents(entry, loggableDecision)
     }
 

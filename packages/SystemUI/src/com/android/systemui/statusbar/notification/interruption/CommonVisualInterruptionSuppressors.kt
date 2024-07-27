@@ -234,7 +234,7 @@ class HunJustLaunchedFsiSuppressor :
 }
 
 class BubbleNotAllowedSuppressor :
-    VisualInterruptionFilter(types = setOf(BUBBLE), reason = "cannot bubble") {
+    VisualInterruptionFilter(types = setOf(BUBBLE), reason = "cannot bubble", isSpammy = true) {
     override fun shouldSuppress(entry: NotificationEntry) = !entry.canBubble()
 }
 
