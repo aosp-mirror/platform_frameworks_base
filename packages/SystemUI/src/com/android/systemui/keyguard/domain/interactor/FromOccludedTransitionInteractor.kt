@@ -18,8 +18,12 @@ package com.android.systemui.keyguard.domain.interactor
 
 import android.animation.ValueAnimator
 import com.android.app.animation.Interpolators
+import com.android.systemui.Flags.communalSceneKtfRefactor
 import com.android.systemui.Flags.restartDreamOnUnocclude
 import com.android.systemui.communal.domain.interactor.CommunalInteractor
+import com.android.systemui.communal.domain.interactor.CommunalSceneInteractor
+import com.android.systemui.communal.shared.model.CommunalScenes
+import com.android.systemui.communal.shared.model.CommunalTransitionKeys
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
@@ -49,6 +53,7 @@ constructor(
     keyguardInteractor: KeyguardInteractor,
     powerInteractor: PowerInteractor,
     private val communalInteractor: CommunalInteractor,
+    private val communalSceneInteractor: CommunalSceneInteractor,
     keyguardOcclusionInteractor: KeyguardOcclusionInteractor,
 ) :
     TransitionInteractor(
@@ -138,17 +143,21 @@ constructor(
         if (restartDreamOnUnocclude() && dreamFromOccluded) {
             startTransitionTo(KeyguardState.DREAMING)
         } else if (isIdleOnCommunal || showCommunalFromOccluded) {
-            // TODO(b/336576536): Check if adaptation for scene framework is needed
             if (SceneContainerFlag.isEnabled) return
-            startTransitionTo(KeyguardState.GLANCEABLE_HUB)
+            if (communalSceneKtfRefactor()) {
+                communalSceneInteractor.changeScene(
+                    CommunalScenes.Communal,
+                    CommunalTransitionKeys.SimpleFade
+                )
+            } else {
+                startTransitionTo(KeyguardState.GLANCEABLE_HUB)
+            }
         } else {
             startTransitionTo(KeyguardState.LOCKSCREEN)
         }
     }
 
     private fun listenForOccludedToGone() {
-        // TODO(b/336576536): Check if adaptation for scene framework is needed
-        if (SceneContainerFlag.isEnabled) return
         if (KeyguardWmStateRefactor.isEnabled) {
             // We don't think OCCLUDED to GONE is possible. You should always have to go via a
             // *_BOUNCER state to end up GONE. Launching an activity over a dismissable keyguard
@@ -156,7 +165,8 @@ constructor(
             // If we're wrong - sorry, add it back here.
             return
         }
-
+        // TODO(b/353545202): Adaptation for scene framework is needed
+        if (SceneContainerFlag.isEnabled) return
         scope.launch {
             keyguardInteractor.isKeyguardOccluded
                 .sample(keyguardInteractor.isKeyguardShowing, ::Pair)

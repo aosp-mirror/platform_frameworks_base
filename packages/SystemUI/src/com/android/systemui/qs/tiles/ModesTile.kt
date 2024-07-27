@@ -23,13 +23,15 @@ import android.os.Looper
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.coroutineScope
 import androidx.lifecycle.repeatOnLifecycle
+import com.android.internal.R.attr.contentDescription
 import com.android.internal.logging.MetricsLogger
 import com.android.systemui.animation.Expandable
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
+import com.android.systemui.flags.RefactorFlagUtils.isUnexpectedlyInLegacyMode
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.plugins.FalsingManager
-import com.android.systemui.plugins.qs.QSTile.BooleanState
+import com.android.systemui.plugins.qs.QSTile
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.qs.QSHost
 import com.android.systemui.qs.QsEventLogger
@@ -63,7 +65,7 @@ constructor(
     private val tileMapper: ModesTileMapper,
     private val userActionInteractor: ModesTileUserActionInteractor,
 ) :
-    QSTileImpl<BooleanState>(
+    QSTileImpl<QSTile.State>(
         host,
         uiEventLogger,
         backgroundLooper,
@@ -79,6 +81,8 @@ constructor(
     private val config = qsTileConfigProvider.getConfig(TILE_SPEC)
 
     init {
+        /* Check if */ isUnexpectedlyInLegacyMode(Flags.modesUi(), Flags.FLAG_MODES_UI)
+
         lifecycle.coroutineScope.launch {
             lifecycle.repeatOnLifecycle(Lifecycle.State.RESUMED) {
                 dataInteractor.tileData().collect { refreshState(it) }
@@ -90,7 +94,7 @@ constructor(
 
     override fun getTileLabel(): CharSequence = tileState.label
 
-    override fun newTileState() = BooleanState()
+    override fun newTileState() = QSTile.State()
 
     override fun handleClick(expandable: Expandable?) = runBlocking {
         userActionInteractor.handleClick(expandable)
@@ -98,22 +102,22 @@ constructor(
 
     override fun getLongClickIntent(): Intent = userActionInteractor.longClickIntent
 
-    override fun handleUpdateState(booleanState: BooleanState?, arg: Any?) {
+    override fun handleUpdateState(state: QSTile.State?, arg: Any?) {
         if (arg is ModesTileModel) {
             tileState = tileMapper.map(config, arg)
 
-            booleanState?.apply {
-                state = tileState.activationState.legacyState
+            state?.apply {
+                this.state = tileState.activationState.legacyState
                 icon = ResourceIcon.get(tileState.iconRes ?: R.drawable.qs_dnd_icon_off)
                 label = tileLabel
                 secondaryLabel = tileState.secondaryLabel
                 contentDescription = tileState.contentDescription
-                forceExpandIcon = true
+                expandedAccessibilityClassName = tileState.expandedAccessibilityClassName
             }
         }
     }
 
     companion object {
-        const val TILE_SPEC = "modes"
+        const val TILE_SPEC = "dnd"
     }
 }

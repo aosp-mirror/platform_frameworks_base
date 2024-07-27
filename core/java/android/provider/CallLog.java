@@ -28,6 +28,7 @@ import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 import android.annotation.UserHandleAware;
 import android.compat.annotation.UnsupportedAppUsage;
+import android.content.ComponentName;
 import android.content.ContentProvider;
 import android.content.ContentResolver;
 import android.content.ContentValues;
@@ -1624,6 +1625,19 @@ public class CallLog {
                 "is_call_log_phone_account_migration_pending";
 
         /**
+         * The default maximum number of call log entries stored in the call log provider for each
+         * {@link PhoneAccountHandle}.
+         */
+        private static final int DEFAULT_MAX_CALL_LOG_SIZE = 500;
+
+        /**
+         * Expected component name of Telephony phone accounts.
+         */
+        private static final ComponentName TELEPHONY_COMPONENT_NAME =
+                new ComponentName("com.android.phone",
+                        "com.android.services.telephony.TelephonyConnectionService");
+
+        /**
          * Adds a call to the call log.
          *
          * @param ci the CallerInfo object to get the target contact from.  Can be null
@@ -2084,25 +2098,35 @@ public class CallLog {
                 }
 
                 int numDeleted;
-                if (values.containsKey(PHONE_ACCOUNT_ID)
-                        && !TextUtils.isEmpty(values.getAsString(PHONE_ACCOUNT_ID))
-                        && values.containsKey(PHONE_ACCOUNT_COMPONENT_NAME)
-                        && !TextUtils.isEmpty(values.getAsString(PHONE_ACCOUNT_COMPONENT_NAME))) {
+                final String phoneAccountId =
+                        values.containsKey(PHONE_ACCOUNT_ID)
+                                ? values.getAsString(PHONE_ACCOUNT_ID) : null;
+                final String phoneAccountComponentName =
+                        values.containsKey(PHONE_ACCOUNT_COMPONENT_NAME)
+                                ? values.getAsString(PHONE_ACCOUNT_COMPONENT_NAME) : null;
+                int maxCallLogSize = DEFAULT_MAX_CALL_LOG_SIZE;
+                if (!TextUtils.isEmpty(phoneAccountId)
+                        && !TextUtils.isEmpty(phoneAccountComponentName)) {
+                    if (android.provider.Flags.allowConfigMaximumCallLogEntriesPerSim()
+                            && TELEPHONY_COMPONENT_NAME
+                                    .flattenToString().equals(phoneAccountComponentName)) {
+                        maxCallLogSize = context.getResources().getInteger(
+                                com.android.internal.R.integer.config_maximumCallLogEntriesPerSim);
+                    }
                     // Only purge entries for the same phone account.
                     numDeleted = resolver.delete(uri, "_id IN "
                             + "(SELECT _id FROM calls"
                             + " WHERE " + PHONE_ACCOUNT_COMPONENT_NAME + " = ?"
                             + " AND " + PHONE_ACCOUNT_ID + " = ?"
                             + " ORDER BY " + DEFAULT_SORT_ORDER
-                            + " LIMIT -1 OFFSET 500)", new String[] {
-                            values.getAsString(PHONE_ACCOUNT_COMPONENT_NAME),
-                            values.getAsString(PHONE_ACCOUNT_ID)
-                    });
+                            + " LIMIT -1 OFFSET " + maxCallLogSize + ")",
+                            new String[] { phoneAccountComponentName, phoneAccountId }
+                    );
                 } else {
                     // No valid phone account specified, so default to the old behavior.
                     numDeleted = resolver.delete(uri, "_id IN "
                             + "(SELECT _id FROM calls ORDER BY " + DEFAULT_SORT_ORDER
-                            + " LIMIT -1 OFFSET 500)", null);
+                            + " LIMIT -1 OFFSET " + maxCallLogSize + ")", null);
                 }
                 Log.i(LOG_TAG, "addEntry: cleaned up " + numDeleted + " old entries");
 

@@ -23,6 +23,7 @@ import com.android.systemui.keyguard.domain.interactor.KeyguardDismissActionInte
 import com.android.systemui.log.core.LogLevel
 import com.android.systemui.scene.shared.flag.SceneContainerFlag
 import com.android.systemui.util.kotlin.sample
+import dagger.Lazy
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -34,7 +35,7 @@ import kotlinx.coroutines.launch
 class KeyguardDismissActionBinder
 @Inject
 constructor(
-    private val interactor: KeyguardDismissActionInteractor,
+    private val interactorLazy: Lazy<KeyguardDismissActionInteractor>,
     @Application private val scope: CoroutineScope,
     private val keyguardLogger: KeyguardLogger,
 ) : CoreStartable {
@@ -44,6 +45,7 @@ constructor(
             return
         }
 
+        val interactor = interactorLazy.get()
         scope.launch {
             interactor.executeDismissAction.collect {
                 log("executeDismissAction")

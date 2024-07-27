@@ -482,7 +482,7 @@
             android:exported="true"
             android:theme="@style/Theme.AppCompat.NoActionBar">
             <intent-filter>
-                <action android:name="com.android.systemui.action.TOUCHPAD_TUTORIAL"/>
+                <action android:name="com.android.systemui.action.TOUCHPAD_KEYBOARD_TUTORIAL"/>
                 <category android:name="android.intent.category.DEFAULT"/>
             </intent-filter>
         </activity>

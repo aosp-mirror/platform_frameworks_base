@@ -18,9 +18,11 @@ package com.android.systemui.shared.notifications.data.repository
 
 import android.provider.Settings
 import com.android.systemui.shared.settings.data.repository.SecureSettingsRepository
+import com.android.systemui.shared.settings.data.repository.SystemSettingsRepository
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flowOn
@@ -33,6 +35,7 @@ class NotificationSettingsRepository(
     private val scope: CoroutineScope,
     private val backgroundDispatcher: CoroutineDispatcher,
     private val secureSettingsRepository: SecureSettingsRepository,
+    private val systemSettingsRepository: SystemSettingsRepository,
 ) {
     val isNotificationHistoryEnabled: Flow<Boolean> =
         secureSettingsRepository
@@ -60,4 +63,15 @@ class NotificationSettingsRepository(
             )
         }
     }
+
+    val isCooldownEnabled: StateFlow<Boolean> =
+        systemSettingsRepository
+            .intSetting(name = Settings.System.NOTIFICATION_COOLDOWN_ENABLED)
+            .map { it == 1 }
+            .flowOn(backgroundDispatcher)
+            .stateIn(
+                scope = scope,
+                started = SharingStarted.Eagerly,
+                initialValue = false,
+            )
 }

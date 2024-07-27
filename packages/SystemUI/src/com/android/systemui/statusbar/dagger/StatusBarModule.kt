@@ -17,12 +17,17 @@
 package com.android.systemui.statusbar.dagger
 
 import com.android.systemui.CoreStartable
+import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.log.LogBuffer
+import com.android.systemui.log.LogBufferFactory
 import com.android.systemui.statusbar.data.StatusBarDataLayerModule
 import com.android.systemui.statusbar.phone.LightBarController
 import com.android.systemui.statusbar.phone.ongoingcall.OngoingCallController
+import com.android.systemui.statusbar.phone.ongoingcall.OngoingCallLog
 import com.android.systemui.statusbar.ui.SystemBarUtilsProxyImpl
 import dagger.Binds
 import dagger.Module
+import dagger.Provides
 import dagger.multibindings.ClassKey
 import dagger.multibindings.IntoMap
 
@@ -45,4 +50,13 @@ abstract class StatusBarModule {
     @IntoMap
     @ClassKey(LightBarController::class)
     abstract fun bindLightBarController(impl: LightBarController): CoreStartable
+
+    companion object {
+        @Provides
+        @SysUISingleton
+        @OngoingCallLog
+        fun provideOngoingCallLogBuffer(factory: LogBufferFactory): LogBuffer {
+            return factory.create("OngoingCall", 75)
+        }
+    }
 }

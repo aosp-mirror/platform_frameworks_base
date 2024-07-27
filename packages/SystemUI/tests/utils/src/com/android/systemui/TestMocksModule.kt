@@ -33,6 +33,7 @@ import com.android.keyguard.KeyguardViewController
 import com.android.systemui.animation.DialogTransitionAnimator
 import com.android.systemui.biometrics.AuthController
 import com.android.systemui.bouncer.domain.interactor.PrimaryBouncerInteractor
+import com.android.systemui.camera.CameraGestureHelper
 import com.android.systemui.communal.domain.interactor.CommunalInteractor
 import com.android.systemui.communal.domain.interactor.CommunalSceneInteractor
 import com.android.systemui.communal.domain.interactor.CommunalSettingsInteractor
@@ -143,6 +144,7 @@ data class TestMocksModule(
     @get:Provides val primaryBouncerInteractor: PrimaryBouncerInteractor = mock(),
     @get:Provides val keyguardStateController: KeyguardStateController = mock(),
     @get:Provides val globalSettings: GlobalSettings = mock(),
+    @get:Provides val cameraGestureHelper: CameraGestureHelper = mock(),
 
     // log buffers
     @get:[Provides BroadcastDispatcherLog]

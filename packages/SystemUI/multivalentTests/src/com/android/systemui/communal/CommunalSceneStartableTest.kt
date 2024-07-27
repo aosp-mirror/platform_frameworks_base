@@ -16,17 +16,20 @@
 
 package com.android.systemui.communal
 
+import android.platform.test.annotations.DisableFlags
 import android.platform.test.annotations.EnableFlags
 import android.provider.Settings
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.Flags.FLAG_COMMUNAL_HUB
+import com.android.systemui.Flags.FLAG_COMMUNAL_SCENE_KTF_REFACTOR
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.communal.domain.interactor.communalInteractor
 import com.android.systemui.communal.domain.interactor.communalSceneInteractor
 import com.android.systemui.communal.domain.interactor.communalSettingsInteractor
 import com.android.systemui.communal.domain.interactor.setCommunalAvailable
 import com.android.systemui.communal.shared.model.CommunalScenes
+import com.android.systemui.communal.shared.model.EditModeState
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.dock.dockManager
 import com.android.systemui.dock.fakeDockManager
@@ -103,6 +106,28 @@ class CommunalSceneStartableTest : SysuiTestCase() {
     }
 
     @Test
+    @DisableFlags(FLAG_COMMUNAL_SCENE_KTF_REFACTOR)
+    fun keyguardGoesAway_whenLaunchingEditMode_doNotForceBlankScene() =
+        with(kosmos) {
+            testScope.runTest {
+                val scene by collectLastValue(communalSceneInteractor.currentScene)
+
+                communalSceneInteractor.changeScene(CommunalScenes.Communal)
+                assertThat(scene).isEqualTo(CommunalScenes.Communal)
+
+                communalSceneInteractor.setEditModeState(EditModeState.STARTING)
+                fakeKeyguardTransitionRepository.sendTransitionSteps(
+                    from = KeyguardState.PRIMARY_BOUNCER,
+                    to = KeyguardState.GONE,
+                    testScope = this
+                )
+
+                assertThat(scene).isEqualTo(CommunalScenes.Communal)
+            }
+        }
+
+    @Test
+    @DisableFlags(FLAG_COMMUNAL_SCENE_KTF_REFACTOR)
     fun keyguardGoesAway_whenLaunchingWidget_doNotForceBlankScene() =
         with(kosmos) {
             testScope.runTest {
@@ -123,6 +148,7 @@ class CommunalSceneStartableTest : SysuiTestCase() {
         }
 
     @Test
+    @DisableFlags(FLAG_COMMUNAL_SCENE_KTF_REFACTOR)
     fun keyguardGoesAway_whenNotLaunchingWidget_forceBlankScene() =
         with(kosmos) {
             testScope.runTest {
@@ -143,6 +169,7 @@ class CommunalSceneStartableTest : SysuiTestCase() {
         }
 
     @Test
+    @DisableFlags(FLAG_COMMUNAL_SCENE_KTF_REFACTOR)
     fun keyguardGoesAway_whenInEditMode_doesNotChangeScene() =
         with(kosmos) {
             testScope.runTest {
@@ -180,6 +207,7 @@ class CommunalSceneStartableTest : SysuiTestCase() {
         }
 
     @Test
+    @DisableFlags(FLAG_COMMUNAL_SCENE_KTF_REFACTOR)
     fun occluded_forceBlankScene() =
         with(kosmos) {
             testScope.runTest {
@@ -199,6 +227,7 @@ class CommunalSceneStartableTest : SysuiTestCase() {
         }
 
     @Test
+    @DisableFlags(FLAG_COMMUNAL_SCENE_KTF_REFACTOR)
     fun occluded_doesNotForceBlankSceneIfLaunchingActivityOverLockscreen() =
         with(kosmos) {
             testScope.runTest {
@@ -218,6 +247,7 @@ class CommunalSceneStartableTest : SysuiTestCase() {
         }
 
     @Test
+    @DisableFlags(FLAG_COMMUNAL_SCENE_KTF_REFACTOR)
     fun deviceDocked_doesNotForceCommunalIfTransitioningFromCommunal() =
         with(kosmos) {
             testScope.runTest {
@@ -235,6 +265,7 @@ class CommunalSceneStartableTest : SysuiTestCase() {
         }
 
     @Test
+    @DisableFlags(FLAG_COMMUNAL_SCENE_KTF_REFACTOR)
     fun deviceAsleep_forceBlankSceneAfterTimeout() =
         with(kosmos) {
             testScope.runTest {
@@ -256,6 +287,7 @@ class CommunalSceneStartableTest : SysuiTestCase() {
         }
 
     @Test
+    @DisableFlags(FLAG_COMMUNAL_SCENE_KTF_REFACTOR)
     fun deviceAsleep_wakesUpBeforeTimeout_noChangeInScene() =
         with(kosmos) {
             testScope.runTest {
@@ -483,6 +515,7 @@ class CommunalSceneStartableTest : SysuiTestCase() {
         }
 
     @Test
+    @DisableFlags(FLAG_COMMUNAL_SCENE_KTF_REFACTOR)
     fun transitionFromDozingToGlanceableHub_forcesCommunal() =
         with(kosmos) {
             testScope.runTest {

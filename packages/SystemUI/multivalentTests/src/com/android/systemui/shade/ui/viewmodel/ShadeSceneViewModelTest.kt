@@ -25,6 +25,7 @@ import com.android.compose.animation.scene.SceneKey
 import com.android.compose.animation.scene.Swipe
 import com.android.compose.animation.scene.SwipeDirection
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.activatable.activateIn
 import com.android.systemui.authentication.data.repository.fakeAuthenticationRepository
 import com.android.systemui.authentication.shared.model.AuthenticationMethodModel
 import com.android.systemui.common.ui.data.repository.fakeConfigurationRepository
@@ -59,6 +60,7 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
+import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 
@@ -77,6 +79,11 @@ class ShadeSceneViewModelTest : SysuiTestCase() {
     private val qsSceneAdapter by lazy { kosmos.fakeQSSceneAdapter }
 
     private val underTest: ShadeSceneViewModel by lazy { kosmos.shadeSceneViewModel }
+
+    @Before
+    fun setUp() {
+        underTest.activateIn(testScope)
+    }
 
     @Test
     fun upTransitionSceneKey_deviceLocked_lockScreen() =

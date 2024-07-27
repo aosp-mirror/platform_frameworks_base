@@ -426,6 +426,11 @@
     <string name="sensor_privacy_dialog_open_settings" msgid="5635865896053011859">"ಸೆಟ್ಟಿಂಗ್‌ಗಳನ್ನು ತೆರೆಯಿರಿ"</string>
     <string name="media_seamless_other_device" msgid="4654849800789196737">"ಅನ್ಯ ಸಾಧನ"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"ಟಾಗಲ್ ನ ಅವಲೋಕನ"</string>
+    <string name="zen_modes_dialog_title" msgid="4159138230418567383">"ಆದ್ಯತೆಯ ಮೋಡ್‌ಗಳು"</string>
+    <string name="zen_modes_dialog_done" msgid="6654130880256438950">"ಮುಗಿದಿದೆ"</string>
+    <string name="zen_modes_dialog_settings" msgid="2310248023728936697">"ಸೆಟ್ಟಿಂಗ್‌ಗಳು"</string>
+    <string name="zen_mode_on" msgid="9085304934016242591">"ಆನ್ ಆಗಿದೆ"</string>
+    <string name="zen_mode_off" msgid="1736604456618147306">"ಆಫ್ ಆಗಿದೆ"</string>
     <string name="zen_priority_introduction" msgid="3159291973383796646">"ಅಲಾರಾಂಗಳು, ಜ್ಞಾಪನೆಗಳು, ಈವೆಂಟ್‌ಗಳು ಹಾಗೂ ನೀವು ಸೂಚಿಸಿರುವ ಕರೆದಾರರನ್ನು ಹೊರತುಪಡಿಸಿ ಬೇರಾವುದೇ ಸದ್ದುಗಳು ಅಥವಾ ವೈಬ್ರೇಶನ್‌ಗಳು ನಿಮಗೆ ತೊಂದರೆ ನೀಡುವುದಿಲ್ಲ. ಹಾಗಿದ್ದರೂ, ನೀವು ಪ್ಲೇ ಮಾಡುವ ಸಂಗೀತ, ವೀಡಿಯೊಗಳು ಮತ್ತು ಆಟಗಳ ಆಡಿಯೊವನ್ನು ನೀವು ಕೇಳಿಸಿಕೊಳ್ಳುತ್ತೀರಿ."</string>
     <string name="zen_alarms_introduction" msgid="3987266042682300470">"ಅಲಾರಾಂಗಳನ್ನು ಹೊರತುಪಡಿಸಿ, ಬೇರಾವುದೇ ಸದ್ದುಗಳು ಅಥವಾ ವೈಬ್ರೇಶನ್‌ಗಳು ನಿಮಗೆ ತೊಂದರೆ ನೀಡುವುದಿಲ್ಲ. ಹಾಗಿದ್ದರೂ, ನೀವು ಪ್ಲೇ ಮಾಡುವ ಸಂಗೀತ, ವೀಡಿಯೊಗಳು ಮತ್ತು ಆಟಗಳ ಆಡಿಯೊವನ್ನು ಕೇಳಿಸಿಕೊಳ್ಳುತ್ತೀರಿ."</string>
     <string name="zen_priority_customize_button" msgid="4119213187257195047">"ಕಸ್ಟಮೈಸ್ ಮಾಡು"</string>
@@ -492,6 +497,7 @@
     <string name="accessibility_action_label_place_widget" msgid="1914197458644168978">"ಆಯ್ಕೆಮಾಡಿದ ವಿಜೆಟ್ ಅನ್ನು ಇರಿಸಿ"</string>
     <string name="communal_widget_picker_title" msgid="1953369090475731663">"ಲಾಕ್ ಸ್ಕ್ರೀನ್ ವಿಜೆಟ್‌ಗಳು"</string>
     <string name="communal_widget_picker_description" msgid="490515450110487871">"ನಿಮ್ಮ ಟ್ಯಾಬ್ಲೆಟ್ ಲಾಕ್ ಆಗಿದ್ದರೂ ಸಹ ಯಾರಾದರೂ ನಿಮ್ಮ ಲಾಕ್ ಸ್ಕ್ರೀನ್‌ನಲ್ಲಿ ವಿಜೆಟ್‌ಗಳನ್ನು ವೀಕ್ಷಿಸಬಹುದು."</string>
+    <string name="accessibility_action_label_unselect_widget" msgid="1041811747619468698">"ವಿಜೆಟ್ ಅನ್ನು ಆಯ್ಕೆ ಮಾಡಬೇಡಿ"</string>
     <string name="communal_widgets_disclaimer_title" msgid="1150954395585308868">"ಲಾಕ್ ಸ್ಕ್ರೀನ್ ವಿಜೆಟ್‌ಗಳು"</string>
     <string name="communal_widgets_disclaimer_text" msgid="1423545475160506349">"ವಿಜೆಟ್ ಅನ್ನು ಬಳಸಿಕೊಂಡು ಆ್ಯಪ್ ತೆರೆಯಲು, ಇದು ನೀವೇ ಎಂದು ನೀವು ದೃಢೀಕರಿಸಬೇಕಾಗುತ್ತದೆ. ಅಲ್ಲದೆ, ನಿಮ್ಮ ಟ್ಯಾಬ್ಲೆಟ್ ಲಾಕ್ ಆಗಿದ್ದರೂ ಸಹ ಯಾರಾದರೂ ಅವುಗಳನ್ನು ವೀಕ್ಷಿಸಬಹುದು ಎಂಬುದನ್ನು ನೆನಪಿನಲ್ಲಿಡಿ. ಕೆಲವು ವಿಜೆಟ್‌ಗಳು ನಿಮ್ಮ ಲಾಕ್ ಸ್ಕ್ರೀನ್‌ಗಾಗಿ ಉದ್ದೇಶಿಸದೇ ಇರಬಹುದು ಮತ್ತು ಇಲ್ಲಿ ಸೇರಿಸುವುದು ಸುರಕ್ಷಿತವಲ್ಲದಿರಬಹುದು."</string>
     <string name="communal_widgets_disclaimer_button" msgid="4423059765740780753">"ಅರ್ಥವಾಯಿತು"</string>
@@ -548,8 +554,10 @@
     <string name="media_projection_action_text" msgid="3634906766918186440">"ಈಗ ಪ್ರಾರಂಭಿಸಿ"</string>
     <string name="empty_shade_text" msgid="8935967157319717412">"ಯಾವುದೇ ಅಧಿಸೂಚನೆಗಳಿಲ್ಲ"</string>
     <string name="no_unseen_notif_text" msgid="395512586119868682">"ಯಾವುದೇ ಹೊಸ ಅಧಿಸೂಚನೆಗಳಿಲ್ಲ"</string>
-    <string name="adaptive_notification_edu_hun_title" msgid="5720882373252389461">"ಅಡಾಪ್ಟಿವ್ ನೋಟಿಫಿಕೇಶನ್ ಆನ್ ಇದೆ"</string>
-    <string name="adaptive_notification_edu_hun_text" msgid="4260536236101821273">"ಅಲ್ಪಾವಧಿಯಲ್ಲಿ ಹಲವು ನೋಟಿಫಿಕೇಶನ್ ಬಂದಾಗ 2 ನಿಮಿಷದವರೆಗೆ ಸಾಧನವು ಈಗ ವಾಲ್ಯೂಮ್ ಕಡಿಮೆ ಮಾಡುತ್ತದೆ ಹಾಗೂ ಸ್ಕ್ರೀನ್ ಮೇಲಿನ ಪಾಪ್-ಅಪ್ ಕಡಿಮೆ ಮಾಡುತ್ತದೆ."</string>
+    <!-- no translation found for adaptive_notification_edu_hun_title (7790738150177329960) -->
+    <skip />
+    <!-- no translation found for adaptive_notification_edu_hun_text (7743367744129536610) -->
+    <skip />
     <string name="go_to_adaptive_notification_settings" msgid="2423690125178298479">"ಆಫ್ ಮಾಡಿ"</string>
     <string name="unlock_to_see_notif_text" msgid="7439033907167561227">"ಹಳೆಯ ಅಧಿಸೂಚನೆಗಳನ್ನು ನೋಡಲು ಅನ್‌ಲಾಕ್ ಮಾಡಿ"</string>
     <string name="quick_settings_disclosure_parental_controls" msgid="2114102871438223600">"ಈ ಸಾಧನವನ್ನು ನಿಮ್ಮ ಪೋಷಕರು ನಿರ್ವಹಿಸುತ್ತಿದ್ದಾರೆ"</string>
@@ -716,8 +724,7 @@
     <string name="notification_alert_title" msgid="3656229781017543655">"ಡೀಫಾಲ್ಟ್"</string>
     <string name="notification_automatic_title" msgid="3745465364578762652">"ಸ್ವಯಂಚಾಲಿತ"</string>
     <string name="notification_channel_summary_low" msgid="4860617986908931158">"ಯಾವುದೇ ಧ್ವನಿ ಅಥವಾ ವೈಬ್ರೇಷನ್‌ ಆಗುವುದಿಲ್ಲ"</string>
-    <!-- no translation found for notification_conversation_summary_low (3855696451919728790) -->
-    <skip />
+    <string name="notification_conversation_summary_low" msgid="3855696451919728790">"ಯಾವುದೇ ಸೌಂಡ್ ಅಥವಾ ವೈಬ್ರೇಷನ್‌ ಇಲ್ಲ, ಆದರೆ ಇದು ಇನ್ನೂ ಸಂಭಾಷಣೆಗಳ ವಿಭಾಗದಲ್ಲಿ ತೋರಿಸುತ್ತದೆ"</string>
     <string name="notification_channel_summary_default" msgid="777294388712200605">"ಸೆಟ್ಟಿಂಗ್‌ಗಳನ್ನು ಆಧರಿಸಿ ಸಾಧನ ರಿಂಗ್ ಅಥವಾ ವೈಬ್ರೇಟ್ ಆಗುತ್ತದೆ"</string>
     <string name="notification_channel_summary_default_with_bubbles" msgid="3482483084451555344">"ಸೆಟ್ಟಿಂಗ್‌ಗಳನ್ನು ಆಧರಿಸಿ ಫೋನ್ ರಿಂಗ್ ಅಥವಾ ವೈಬ್ರೇಟ್ ಆಗುತ್ತದೆ. ಡಿಫಾಲ್ಟ್ ಆಗಿ, <xliff:g id="APP_NAME">%1$s</xliff:g> ಬಬಲ್ ಸಂಭಾಷಣೆಗಳು."</string>
     <string name="notification_channel_summary_automatic" msgid="5813109268050235275">"ಈ ಅಧಿಸೂಚನೆಯು ಶಬ್ದ ಮಾಡಬೇಕೇ ಅಥವಾ ವೈಬ್ರೇಟ್ ಮಾಡಬೇಕೇ ಎಂಬುದನ್ನು ನಿರ್ಧರಿಸುವ ಅವಕಾಶವನ್ನು ಸಿಸ್ಟಂಗೆ ನೀಡಿ"</string>
@@ -1378,4 +1385,16 @@
     <string name="home_controls_dream_label" msgid="6567105701292324257">"ಮನೆ ನಿಯಂತ್ರಣಗಳು"</string>
     <string name="home_controls_dream_description" msgid="4644150952104035789">"ಮನೆ ನಿಯಂತ್ರಣವನ್ನು ಸ್ಕ್ರೀನ್‌ಸೇವರ್‌ನಂತೆ ಬೇಗ ಆ್ಯಕ್ಸೆಸ್ ಮಾಡಿ"</string>
     <string name="volume_undo_action" msgid="5815519725211877114">"ರದ್ದುಗೊಳಿಸಿ"</string>
+    <string name="back_edu_toast_content" msgid="4530314597378982956">"ಹಿಂತಿರುಗಲು, ಟಚ್‌ಪ್ಯಾಡ್‌ನಲ್ಲಿ ಮೂರು ಬೆರಳುಗಳಿಂದ ಎಡಕ್ಕೆ ಅಥವಾ ಬಲಕ್ಕೆ ಸ್ವೈಪ್ ಮಾಡಿ"</string>
+    <string name="home_edu_toast_content" msgid="3381071147871955415">"ಹೋಮ್‌ಗೆ ಹೋಗಲು, ಟಚ್‌ಪ್ಯಾಡ್‌ನಲ್ಲಿ ಮೂರು ಬೆರಳುಗಳಿಂದ ಮೇಲಕ್ಕೆ ಸ್ವೈಪ್ ಮಾಡಿ"</string>
+    <string name="overview_edu_toast_content" msgid="5797030644017804518">"ಇತ್ತೀಚಿನ ಆ್ಯಪ್‌ಗಳನ್ನು ನೋಡಲು, ಟಚ್‌ಪ್ಯಾಡ್‌ನಲ್ಲಿ ಮೂರು ಬೆರಳುಗಳಿಂದ ಮೇಲಕ್ಕೆ ಸ್ವೈಪ್ ಮಾಡಿ ಹಾಗೂ ಹೋಲ್ಡ್ ಮಾಡಿ"</string>
+    <string name="all_apps_edu_toast_content" msgid="8807496014667211562">"ನಿಮ್ಮ ಎಲ್ಲಾ ಆ್ಯಪ್‌ಗಳನ್ನು ವೀಕ್ಷಿಸಲು, ನಿಮ್ಮ ಕೀಬೋರ್ಡ್‌ನಲ್ಲಿರುವ ಆ್ಯಕ್ಷನ್‌ ಕೀಯನ್ನು ಒತ್ತಿರಿ"</string>
+    <string name="back_edu_notification_title" msgid="5624780717751357278">"ಹಿಂತಿರುಗಲು ನಿಮ್ಮ ಟಚ್‌ಪ್ಯಾಡ್ ಅನ್ನು ಬಳಸಿ"</string>
+    <string name="back_edu_notification_content" msgid="2497557451540954068">"ಮೂರು ಬೆರಳುಗಳಿಂದ ಎಡಕ್ಕೆ ಅಥವಾ ಬಲಕ್ಕೆ ಸ್ವೈಪ್ ಮಾಡಿ. ಇನ್ನಷ್ಟು ಗೆಸ್ಚರ್‌ಗಳನ್ನು ತಿಳಿಯಲು ಟ್ಯಾಪ್ ಮಾಡಿ."</string>
+    <string name="home_edu_notification_title" msgid="6097902076909654045">"ಹೋಮ್‌ಗೆ ಹೋಗಲು ನಿಮ್ಮ ಟಚ್‌ಪ್ಯಾಡ್ ಅನ್ನು ಬಳಸಿ"</string>
+    <string name="home_edu_notification_content" msgid="6631697734535766588">"ಮೂರು ಬೆರಳುಗಳಿಂದ ಮೇಲಕ್ಕೆ ಸ್ವೈಪ್ ಮಾಡಿ. ಇನ್ನಷ್ಟು ಗೆಸ್ಚರ್‌ಗಳನ್ನು ತಿಳಿಯಲು ಟ್ಯಾಪ್ ಮಾಡಿ."</string>
+    <string name="overview_edu_notification_title" msgid="1265824157319562406">"ಇತ್ತೀಚಿನ ಆ್ಯಪ್‌ಗಳನ್ನು ವೀಕ್ಷಿಸಲು ನಿಮ್ಮ ಟಚ್‌ಪ್ಯಾಡ್ ಅನ್ನು ಬಳಸಿ"</string>
+    <string name="overview_edu_notification_content" msgid="3578204677648432500">"ಮೂರು ಬೆರಳುಗಳಿಂದ ಮೇಲಕ್ಕೆ ಸ್ವೈಪ್ ಮಾಡಿ ಹಾಗೂ ಹೋಲ್ಡ್ ಮಾಡಿ. ಇನ್ನಷ್ಟು ಗೆಸ್ಚರ್‌ಗಳನ್ನು ತಿಳಿಯಲು ಟ್ಯಾಪ್ ಮಾಡಿ."</string>
+    <string name="all_apps_edu_notification_title" msgid="372262997265569063">"ಎಲ್ಲಾ ಆ್ಯಪ್‌ಗಳನ್ನು ವೀಕ್ಷಿಸಲು ನಿಮ್ಮ ಕೀಬೋರ್ಡ್ ಅನ್ನು ಬಳಸಿ"</string>
+    <string name="all_apps_edu_notification_content" msgid="3255070575694025585">"ಯಾವಾಗ ಬೇಕಾದರೂ ಆ್ಯಕ್ಷನ್‌ ಕೀಯನ್ನು ಒತ್ತಿರಿ. ಇನ್ನಷ್ಟು ಗೆಸ್ಚರ್‌ಗಳನ್ನು ತಿಳಿಯಲು ಟ್ಯಾಪ್ ಮಾಡಿ."</string>
 </resources>

@@ -37,6 +37,7 @@ import com.android.systemui.deviceentry.shared.DeviceEntryUdfpsRefactor
 import com.android.systemui.deviceentry.ui.binder.UdfpsAccessibilityOverlayBinder
 import com.android.systemui.deviceentry.ui.view.UdfpsAccessibilityOverlay
 import com.android.systemui.deviceentry.ui.viewmodel.AlternateBouncerUdfpsAccessibilityOverlayViewModel
+import com.android.systemui.keyguard.DismissCallbackRegistry
 import com.android.systemui.keyguard.ui.view.DeviceEntryIconView
 import com.android.systemui.keyguard.ui.viewmodel.AlternateBouncerDependencies
 import com.android.systemui.keyguard.ui.viewmodel.AlternateBouncerUdfpsIconViewModel
@@ -66,6 +67,7 @@ constructor(
     private val alternateBouncerDependencies: Lazy<AlternateBouncerDependencies>,
     private val windowManager: Lazy<WindowManager>,
     private val layoutInflater: Lazy<LayoutInflater>,
+    private val dismissCallbackRegistry: DismissCallbackRegistry,
 ) : CoreStartable {
     private val layoutParams: WindowManager.LayoutParams
         get() =
@@ -162,6 +164,7 @@ constructor(
 
             fun onBackRequested() {
                 alternateBouncerDependencies.get().viewModel.hideAlternateBouncer()
+                dismissCallbackRegistry.notifyDismissCancelled()
             }
         }
 

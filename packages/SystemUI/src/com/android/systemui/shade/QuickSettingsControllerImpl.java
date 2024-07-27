@@ -789,6 +789,9 @@ public class QuickSettingsControllerImpl implements QuickSettingsController, Dum
 
     /** update Qs height state */
     void setExpansionHeight(float height) {
+        if (mExpansionHeight == height) {
+            return;
+        }
         int maxHeight = getMaxExpansionHeight();
         height = Math.min(Math.max(
                 height, getMinExpansionHeight()), maxHeight);

@@ -183,6 +183,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
 
     private Object mLastWindowFreezeSource = null;
     private float mScreenBrightnessOverride = PowerManager.BRIGHTNESS_INVALID_FLOAT;
+    private CharSequence mScreenBrightnessOverrideTag;
     private long mUserActivityTimeout = -1;
     private boolean mUpdateRotation = false;
     // Only set while traversing the default display based on its content.
@@ -770,6 +771,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
         }
 
         mScreenBrightnessOverride = PowerManager.BRIGHTNESS_INVALID_FLOAT;
+        mScreenBrightnessOverrideTag = null;
         mUserActivityTimeout = -1;
         mObscureApplicationContentOnSecondaryDisplays = false;
         mSustainedPerformanceModeCurrent = false;
@@ -881,11 +883,15 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
             final float brightnessOverride = mScreenBrightnessOverride < PowerManager.BRIGHTNESS_MIN
                     || mScreenBrightnessOverride > PowerManager.BRIGHTNESS_MAX
                     ? PowerManager.BRIGHTNESS_INVALID_FLOAT : mScreenBrightnessOverride;
+            CharSequence overrideTag = null;
+            if (brightnessOverride != PowerManager.BRIGHTNESS_INVALID_FLOAT) {
+                overrideTag = mScreenBrightnessOverrideTag;
+            }
             int brightnessFloatAsIntBits = Float.floatToIntBits(brightnessOverride);
             // Post these on a handler such that we don't call into power manager service while
             // holding the window manager lock to avoid lock contention with power manager lock.
             mHandler.obtainMessage(SET_SCREEN_BRIGHTNESS_OVERRIDE, brightnessFloatAsIntBits,
-                    0).sendToTarget();
+                    0, overrideTag).sendToTarget();
             mHandler.obtainMessage(SET_USER_ACTIVITY_TIMEOUT, mUserActivityTimeout).sendToTarget();
         }
 
@@ -1040,6 +1046,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
             if (!syswin && w.mAttrs.screenBrightness >= 0
                     && Float.isNaN(mScreenBrightnessOverride)) {
                 mScreenBrightnessOverride = w.mAttrs.screenBrightness;
+                mScreenBrightnessOverrideTag = w.getWindowTag();
             }
 
             // This function assumes that the contents of the default display are processed first
@@ -1112,7 +1119,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
             switch (msg.what) {
                 case SET_SCREEN_BRIGHTNESS_OVERRIDE:
                     mWmService.mPowerManagerInternal.setScreenBrightnessOverrideFromWindowManager(
-                            Float.intBitsToFloat(msg.arg1));
+                            Float.intBitsToFloat(msg.arg1), (CharSequence) msg.obj);
                     break;
                 case SET_USER_ACTIVITY_TIMEOUT:
                     mWmService.mPowerManagerInternal.

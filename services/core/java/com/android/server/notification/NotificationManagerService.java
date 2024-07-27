@@ -1315,10 +1315,24 @@ public class NotificationManagerService extends SystemService {
                         nv.rank, nv.count);
 
                 StatusBarNotification sbn = r.getSbn();
-                cancelNotification(callingUid, callingPid, sbn.getPackageName(), sbn.getTag(),
-                        sbn.getId(), FLAG_AUTO_CANCEL,
-                        FLAG_FOREGROUND_SERVICE | FLAG_USER_INITIATED_JOB | FLAG_BUBBLE,
-                        false, r.getUserId(), REASON_CLICK, nv.rank, nv.count, null);
+                // Notifications should be cancelled on click if they have been lifetime extended,
+                // regardless of presence or absence of FLAG_AUTO_CANCEL.
+                if (lifetimeExtensionRefactor()
+                        && (sbn.getNotification().flags
+                        & FLAG_LIFETIME_EXTENDED_BY_DIRECT_REPLY) != 0) {
+                    cancelNotification(callingUid, callingPid, sbn.getPackageName(), sbn.getTag(),
+                            sbn.getId(), FLAG_LIFETIME_EXTENDED_BY_DIRECT_REPLY,
+                            FLAG_FOREGROUND_SERVICE | FLAG_USER_INITIATED_JOB
+                                    | FLAG_BUBBLE,
+                            false, r.getUserId(), REASON_CLICK, nv.rank, nv.count, null);
+
+                } else {
+                    // Otherwise, only FLAG_AUTO_CANCEL notifications should be canceled on click.
+                    cancelNotification(callingUid, callingPid, sbn.getPackageName(), sbn.getTag(),
+                            sbn.getId(), FLAG_AUTO_CANCEL,
+                            FLAG_FOREGROUND_SERVICE | FLAG_USER_INITIATED_JOB | FLAG_BUBBLE,
+                            false, r.getUserId(), REASON_CLICK, nv.rank, nv.count, null);
+                }
                 nv.recycle();
                 reportUserInteraction(r);
                 mAssistants.notifyAssistantNotificationClicked(r);

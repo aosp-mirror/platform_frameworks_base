@@ -28,11 +28,15 @@ class FakeContextualEducationRepository(private val clock: Clock) : ContextualEd
     private val userGestureMap = mutableMapOf<Int, GestureEduModel>()
     private val _gestureEduModels = MutableStateFlow(GestureEduModel())
     private val gestureEduModelsFlow = _gestureEduModels.asStateFlow()
+    private var currentUser: Int = 0
 
     override fun setUser(userId: Int) {
         if (!userGestureMap.contains(userId)) {
             userGestureMap[userId] = GestureEduModel()
         }
+        // save data of current user to the map
+        userGestureMap[currentUser] = _gestureEduModels.value
+        // switch to data of new user
         _gestureEduModels.value = userGestureMap[userId]!!
     }
 
@@ -41,13 +45,15 @@ class FakeContextualEducationRepository(private val clock: Clock) : ContextualEd
     }
 
     override suspend fun incrementSignalCount(gestureType: GestureType) {
+        val originalModel = _gestureEduModels.value
         _gestureEduModels.value =
-            GestureEduModel(
+            originalModel.copy(
                 signalCount = _gestureEduModels.value.signalCount + 1,
             )
     }
 
     override suspend fun updateShortcutTriggerTime(gestureType: GestureType) {
-        _gestureEduModels.value = GestureEduModel(lastShortcutTriggeredTime = clock.instant())
+        val originalModel = _gestureEduModels.value
+        _gestureEduModels.value = originalModel.copy(lastShortcutTriggeredTime = clock.instant())
     }
 }

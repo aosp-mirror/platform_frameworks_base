@@ -23,10 +23,7 @@ import android.app.StatusBarManager
 import android.graphics.Point
 import android.util.MathUtils
 import com.android.app.animation.Interpolators
-import com.android.app.tracing.FlowTracing.tracedAwaitClose
-import com.android.app.tracing.FlowTracing.tracedConflatedCallbackFlow
 import com.android.systemui.bouncer.data.repository.KeyguardBouncerRepository
-import com.android.systemui.common.coroutine.ChannelExt.trySendWithFailureLogging
 import com.android.systemui.common.shared.model.NotificationContainerBounds
 import com.android.systemui.common.ui.domain.interactor.ConfigurationInteractor
 import com.android.systemui.dagger.SysUISingleton
@@ -35,9 +32,11 @@ import com.android.systemui.keyguard.MigrateClocksToBlueprint
 import com.android.systemui.keyguard.data.repository.KeyguardRepository
 import com.android.systemui.keyguard.shared.model.BiometricUnlockModel
 import com.android.systemui.keyguard.shared.model.CameraLaunchSourceModel
+import com.android.systemui.keyguard.shared.model.CameraLaunchType
 import com.android.systemui.keyguard.shared.model.DozeStateModel
 import com.android.systemui.keyguard.shared.model.DozeStateModel.Companion.isDozeOff
 import com.android.systemui.keyguard.shared.model.DozeTransitionModel
+import com.android.systemui.keyguard.shared.model.Edge
 import com.android.systemui.keyguard.shared.model.KeyguardState.AOD
 import com.android.systemui.keyguard.shared.model.KeyguardState.GONE
 import com.android.systemui.keyguard.shared.model.KeyguardState.LOCKSCREEN
@@ -48,11 +47,8 @@ import com.android.systemui.scene.domain.interactor.SceneInteractor
 import com.android.systemui.scene.shared.flag.SceneContainerFlag
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.shade.data.repository.ShadeRepository
-import com.android.systemui.statusbar.CommandQueue
-import com.android.systemui.statusbar.notification.NotificationUtils.interpolate
 import com.android.systemui.statusbar.notification.stack.domain.interactor.SharedNotificationContainerInteractor
 import com.android.systemui.util.kotlin.Utils.Companion.sample as sampleCombine
-import com.android.systemui.util.kotlin.pairwise
 import com.android.systemui.util.kotlin.sample
 import javax.inject.Inject
 import javax.inject.Provider
@@ -69,9 +65,7 @@ import kotlinx.coroutines.flow.combineTransform
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.merge
@@ -87,7 +81,6 @@ class KeyguardInteractor
 @Inject
 constructor(
     private val repository: KeyguardRepository,
-    private val commandQueue: CommandQueue,
     powerInteractor: PowerInteractor,
     bouncerRepository: KeyguardBouncerRepository,
     configurationInteractor: ConfigurationInteractor,
@@ -102,55 +95,34 @@ constructor(
     // TODO(b/296118689): move to a repository
     private val _notificationPlaceholderBounds = MutableStateFlow(NotificationContainerBounds())
 
-    // When going to AOD, we interpolate bounds when receiving the new bounds
-    // When going back to LS, we'll apply new bounds directly
-    private val _nonSplitShadeNotifciationPlaceholderBounds =
-        _notificationPlaceholderBounds.pairwise().flatMapLatest { (oldBounds, newBounds) ->
-            val lastChangeStep = keyguardTransitionInteractor.transitionState.first()
-            if (lastChangeStep.to == AOD) {
-                keyguardTransitionInteractor.transitionState.map { step ->
-                    val startingProgress = lastChangeStep.value
-                    val progress = step.value
-                    if (step.to == AOD && progress >= startingProgress && startingProgress < 1f) {
-                        val adjustedProgress =
-                            ((progress - startingProgress) / (1F - startingProgress)).coerceIn(
-                                0F,
-                                1F
-                            )
-                        val top = interpolate(oldBounds.top, newBounds.top, adjustedProgress)
-                        val bottom =
-                            interpolate(
-                                oldBounds.bottom,
-                                newBounds.bottom,
-                                adjustedProgress.coerceIn(0F, 1F)
-                            )
-                        NotificationContainerBounds(top = top, bottom = bottom)
-                    } else {
-                        newBounds
-                    }
-                }
-            } else {
-                flow { emit(newBounds) }
-            }
-        }
-
     /** Bounds of the notification container. */
     val notificationContainerBounds: StateFlow<NotificationContainerBounds> by lazy {
         SceneContainerFlag.assertInLegacyMode()
-        combine(
+        combineTransform(
                 _notificationPlaceholderBounds,
-                _nonSplitShadeNotifciationPlaceholderBounds,
                 sharedNotificationContainerInteractor.get().configurationBasedDimensions,
-            ) { bounds, nonSplitShadeBounds: NotificationContainerBounds, cfg ->
+                keyguardTransitionInteractor.isInTransition(
+                    edge = Edge.create(from = LOCKSCREEN, to = AOD)
+                ),
+            ) { bounds, cfg, isTransitioningToAod ->
+                if (isTransitioningToAod) {
+                    // Keep bounds stable during this transition, to prevent cases like smartspace
+                    // popping in and adjusting the bounds. A prime example would be media playing,
+                    // which then updates smartspace on transition to AOD
+                    return@combineTransform
+                }
+
                 // We offset the placeholder bounds by the configured top margin to account for
                 // legacy placement behavior within notifications for splitshade.
-                if (MigrateClocksToBlueprint.isEnabled) {
-                    if (cfg.useSplitShade) {
-                        bounds.copy(bottom = bounds.bottom - cfg.keyguardSplitShadeTopMargin)
-                    } else {
-                        nonSplitShadeBounds
-                    }
-                } else bounds
+                emit(
+                    if (MigrateClocksToBlueprint.isEnabled) {
+                        if (cfg.useSplitShade) {
+                            bounds.copy(bottom = bounds.bottom - cfg.keyguardSplitShadeTopMargin)
+                        } else {
+                            bounds
+                        }
+                    } else bounds
+                )
             }
             .stateIn(
                 scope = applicationScope,
@@ -198,22 +170,7 @@ constructor(
 
     /** Event for when the camera gesture is detected */
     val onCameraLaunchDetected: Flow<CameraLaunchSourceModel> =
-        tracedConflatedCallbackFlow("KeyguardInteractor#onCameraLaunchDetected") {
-            val callback =
-                object : CommandQueue.Callbacks {
-                    override fun onCameraLaunchGestureDetected(source: Int) {
-                        trySendWithFailureLogging(
-                            cameraLaunchSourceIntToModel(source),
-                            TAG,
-                            "updated onCameraLaunchGestureDetected"
-                        )
-                    }
-                }
-
-            commandQueue.addCallback(callback)
-
-            tracedAwaitClose("onCameraLaunchDetected") { commandQueue.removeCallback(callback) }
-        }
+        repository.onCameraLaunchDetected.filter { it.type != CameraLaunchType.IGNORE }
 
     /**
      * Dozing and dreaming have overlapping events. If the doze state remains in FINISH, it means
@@ -310,7 +267,7 @@ constructor(
                 when {
                     isKeyguardVisible -> false
                     isPrimaryBouncerShowing -> false
-                    else -> cameraLaunchEvent == CameraLaunchSourceModel.POWER_DOUBLE_TAP
+                    else -> cameraLaunchEvent.type == CameraLaunchType.POWER_DOUBLE_TAP
                 }
             }
             .onStart { emit(false) }
@@ -440,16 +397,15 @@ constructor(
         return repository.isKeyguardShowing()
     }
 
-    private fun cameraLaunchSourceIntToModel(value: Int): CameraLaunchSourceModel {
+    private fun cameraLaunchSourceIntToType(value: Int): CameraLaunchType {
         return when (value) {
-            StatusBarManager.CAMERA_LAUNCH_SOURCE_WIGGLE -> CameraLaunchSourceModel.WIGGLE
+            StatusBarManager.CAMERA_LAUNCH_SOURCE_WIGGLE -> CameraLaunchType.WIGGLE
             StatusBarManager.CAMERA_LAUNCH_SOURCE_POWER_DOUBLE_TAP ->
-                CameraLaunchSourceModel.POWER_DOUBLE_TAP
-            StatusBarManager.CAMERA_LAUNCH_SOURCE_LIFT_TRIGGER ->
-                CameraLaunchSourceModel.LIFT_TRIGGER
+                CameraLaunchType.POWER_DOUBLE_TAP
+            StatusBarManager.CAMERA_LAUNCH_SOURCE_LIFT_TRIGGER -> CameraLaunchType.LIFT_TRIGGER
             StatusBarManager.CAMERA_LAUNCH_SOURCE_QUICK_AFFORDANCE ->
-                CameraLaunchSourceModel.QUICK_AFFORDANCE
-            else -> throw IllegalArgumentException("Invalid CameraLaunchSourceModel value: $value")
+                CameraLaunchType.QUICK_AFFORDANCE
+            else -> throw IllegalArgumentException("Invalid CameraLaunchType value: $value")
         }
     }
 
@@ -506,6 +462,11 @@ constructor(
     /** Temporary shim, until [KeyguardWmStateRefactor] is enabled */
     fun dismissKeyguard() {
         fromLockscreenTransitionInteractor.get().dismissKeyguard()
+    }
+
+    fun onCameraLaunchDetected(source: Int) {
+        repository.onCameraLaunchDetected.value =
+            CameraLaunchSourceModel(type = cameraLaunchSourceIntToType(source))
     }
 
     companion object {

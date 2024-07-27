@@ -247,6 +247,7 @@ constructor(
         lp.height = ViewGroup.LayoutParams.MATCH_PARENT
         lp.width = ViewGroup.LayoutParams.MATCH_PARENT
         bgView.layoutParams = lp
+        bgView.alpha = 0f
     }
 
     fun getIconState(icon: IconType, aod: Boolean): IntArray {

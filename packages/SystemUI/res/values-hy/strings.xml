@@ -290,8 +290,7 @@
     <string name="start_dreams" msgid="9131802557946276718">"Էկրանապահ"</string>
     <string name="ethernet_label" msgid="2203544727007463351">"Ethernet"</string>
     <string name="quick_settings_dnd_label" msgid="7728690179108024338">"Չանհանգստացնել"</string>
-    <!-- no translation found for quick_settings_modes_label (5407025818652750501) -->
-    <skip />
+    <string name="quick_settings_modes_label" msgid="5407025818652750501">"Կարևոր ռեժիմներ"</string>
     <string name="quick_settings_bluetooth_label" msgid="7018763367142041481">"Bluetooth"</string>
     <string name="quick_settings_bluetooth_detail_empty_text" msgid="5760239584390514322">"Զուգակցված սարքեր չկան"</string>
     <string name="quick_settings_bluetooth_tile_subtitle" msgid="212752719010829550">"Հպեք՝ սարք միացնելու կամ անջատելու համար"</string>
@@ -427,6 +426,13 @@
     <string name="sensor_privacy_dialog_open_settings" msgid="5635865896053011859">"Բացել կարգավորումները"</string>
     <string name="media_seamless_other_device" msgid="4654849800789196737">"Այլ սարք"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"Միացնել/անջատել համատեսքը"</string>
+    <string name="zen_modes_dialog_title" msgid="4159138230418567383">"Կարևոր ռեժիմներ"</string>
+    <string name="zen_modes_dialog_done" msgid="6654130880256438950">"Պատրաստ է"</string>
+    <string name="zen_modes_dialog_settings" msgid="2310248023728936697">"Կարգավորումներ"</string>
+    <!-- no translation found for zen_mode_on (9085304934016242591) -->
+    <skip />
+    <!-- no translation found for zen_mode_off (1736604456618147306) -->
+    <skip />
     <string name="zen_priority_introduction" msgid="3159291973383796646">"Ձայները և թրթռոցները չեն անհանգստացնի ձեզ, բացի ձեր կողմից նշված զարթուցիչները, հիշեցումները, միջոցառումների ծանուցումները և զանգերը։ Դուք կլսեք ձեր ընտրածի նվագարկումը, այդ թվում՝ երաժշտություն, տեսանյութեր և խաղեր:"</string>
     <string name="zen_alarms_introduction" msgid="3987266042682300470">"Ձայները և թրթռոցները, բացի զարթուցիչներից, չեն անհանգստացնի ձեզ: Դուք կլսեք ձեր ընտրածի նվագարկումը, այդ թվում՝ երաժշտություն, տեսանյութեր և խաղեր:"</string>
     <string name="zen_priority_customize_button" msgid="4119213187257195047">"Հարմարեցնել"</string>
@@ -493,6 +499,8 @@
     <string name="accessibility_action_label_place_widget" msgid="1914197458644168978">"տեղադրել ընտրված վիջեթը"</string>
     <string name="communal_widget_picker_title" msgid="1953369090475731663">"Կողպէկրանի վիջեթներ"</string>
     <string name="communal_widget_picker_description" msgid="490515450110487871">"Բոլորը կարող են դիտել ձեր կողպէկրանի վիջեթները, նույնիսկ եթե պլանշետը կողպված է"</string>
+    <!-- no translation found for accessibility_action_label_unselect_widget (1041811747619468698) -->
+    <skip />
     <string name="communal_widgets_disclaimer_title" msgid="1150954395585308868">"Կողպէկրանի վիջեթներ"</string>
     <string name="communal_widgets_disclaimer_text" msgid="1423545475160506349">"Վիջեթի միջոցով հավելված բացելու համար դուք պետք է հաստատեք ձեր ինքնությունը։ Նաև նկատի ունեցեք, որ ցանկացած ոք կարող է դիտել վիջեթները, նույնիսկ երբ ձեր պլանշետը կողպված է։ Որոշ վիջեթներ կարող են նախատեսված չլինել ձեր կողպէկրանի համար, և այստեղ դրանց ավելացնելը կարող է վտանգավոր լինել։"</string>
     <string name="communal_widgets_disclaimer_button" msgid="4423059765740780753">"Եղավ"</string>
@@ -549,8 +557,10 @@
     <string name="media_projection_action_text" msgid="3634906766918186440">"Սկսել հիմա"</string>
     <string name="empty_shade_text" msgid="8935967157319717412">"Ծանուցումներ չկան"</string>
     <string name="no_unseen_notif_text" msgid="395512586119868682">"Նոր ծանուցումներ չկան"</string>
-    <string name="adaptive_notification_edu_hun_title" msgid="5720882373252389461">"Հարմարվող ծանուցումները միացված են"</string>
-    <string name="adaptive_notification_edu_hun_text" msgid="4260536236101821273">"Եթե կարճ ժամանակամիջոցում շատ ծանուցումներ ստանաք, ձայնը և ելնող պատուհանների թիվը կնվազեցվի մինչև երկու րոպեով։"</string>
+    <!-- no translation found for adaptive_notification_edu_hun_title (7790738150177329960) -->
+    <skip />
+    <!-- no translation found for adaptive_notification_edu_hun_text (7743367744129536610) -->
+    <skip />
     <string name="go_to_adaptive_notification_settings" msgid="2423690125178298479">"Անջատել"</string>
     <string name="unlock_to_see_notif_text" msgid="7439033907167561227">"Ապակողպեք՝ տեսնելու հին ծանուցումները"</string>
     <string name="quick_settings_disclosure_parental_controls" msgid="2114102871438223600">"Այս սարքը կառավարում է ձեր ծնողը"</string>
@@ -717,8 +727,7 @@
     <string name="notification_alert_title" msgid="3656229781017543655">"Կանխադրված"</string>
     <string name="notification_automatic_title" msgid="3745465364578762652">"Ավտոմատ"</string>
     <string name="notification_channel_summary_low" msgid="4860617986908931158">"Առանց ձայնի կամ թրթռոցի"</string>
-    <!-- no translation found for notification_conversation_summary_low (3855696451919728790) -->
-    <skip />
+    <string name="notification_conversation_summary_low" msgid="3855696451919728790">"Ձայն կամ թրթռոց չկա, սակայն դեռ հայտնվում է զրույցների բաժնում"</string>
     <string name="notification_channel_summary_default" msgid="777294388712200605">"Կարող է զնգալ կամ թրթռալ՝ կախված սարքի կարգավորումներից"</string>
     <string name="notification_channel_summary_default_with_bubbles" msgid="3482483084451555344">"Կարող է զնգալ կամ թրթռալ՝ կախված սարքի կարգավորումներից։ <xliff:g id="APP_NAME">%1$s</xliff:g>-ի զրույցներն ըստ կանխադրման հայտնվում են ամպիկների տեսքով։"</string>
     <string name="notification_channel_summary_automatic" msgid="5813109268050235275">"Թող համակարգն ավտոմատ որոշի՝ արդյոք այս ծանուցումը ձայնով, թե թրթռոցով է պետք մատուցել"</string>
@@ -1358,8 +1367,7 @@
     <string name="shortcutHelper_category_split_screen" msgid="1159669813444812244">"Տրոհված էկրան"</string>
     <string name="shortcut_helper_category_input" msgid="8674018654124839566">"Ներածում"</string>
     <string name="shortcut_helper_category_app_shortcuts" msgid="8010249408308587117">"Հավելվածի դյուրանցումներ"</string>
-    <!-- no translation found for shortcut_helper_category_current_app_shortcuts (4017840565974573628) -->
-    <skip />
+    <string name="shortcut_helper_category_current_app_shortcuts" msgid="4017840565974573628">"Այս հավելվածը"</string>
     <string name="shortcut_helper_category_a11y" msgid="6314444792641773464">"Հատուկ գործառույթներ"</string>
     <string name="shortcut_helper_title" msgid="8567500639300970049">"Ստեղնային դյուրանցումներ"</string>
     <string name="shortcut_helper_search_placeholder" msgid="5488547526269871819">"Դյուրանցումների որոնում"</string>
@@ -1379,6 +1387,29 @@
     <string name="keyboard_backlight_value" msgid="7336398765584393538">"%1$d՝ %2$d-ից"</string>
     <string name="home_controls_dream_label" msgid="6567105701292324257">"Տան կառավարման տարրեր"</string>
     <string name="home_controls_dream_description" msgid="4644150952104035789">"Տան կառավարման տարրերը դարձրեք էկրանապահ"</string>
-    <!-- no translation found for volume_undo_action (5815519725211877114) -->
+    <string name="volume_undo_action" msgid="5815519725211877114">"Հետարկել"</string>
+    <!-- no translation found for back_edu_toast_content (4530314597378982956) -->
+    <skip />
+    <!-- no translation found for home_edu_toast_content (3381071147871955415) -->
+    <skip />
+    <!-- no translation found for overview_edu_toast_content (5797030644017804518) -->
+    <skip />
+    <!-- no translation found for all_apps_edu_toast_content (8807496014667211562) -->
+    <skip />
+    <!-- no translation found for back_edu_notification_title (5624780717751357278) -->
+    <skip />
+    <!-- no translation found for back_edu_notification_content (2497557451540954068) -->
+    <skip />
+    <!-- no translation found for home_edu_notification_title (6097902076909654045) -->
+    <skip />
+    <!-- no translation found for home_edu_notification_content (6631697734535766588) -->
+    <skip />
+    <!-- no translation found for overview_edu_notification_title (1265824157319562406) -->
+    <skip />
+    <!-- no translation found for overview_edu_notification_content (3578204677648432500) -->
+    <skip />
+    <!-- no translation found for all_apps_edu_notification_title (372262997265569063) -->
+    <skip />
+    <!-- no translation found for all_apps_edu_notification_content (3255070575694025585) -->
     <skip />
 </resources>

@@ -40,6 +40,7 @@ import android.view.InsetsSourceControl;
 import android.view.InsetsState;
 import android.view.WindowInsets;
 import android.view.WindowInsets.Type.InsetsType;
+import android.view.inputmethod.ImeTracker;
 
 import com.android.internal.protolog.ProtoLog;
 import com.android.server.inputmethod.InputMethodManagerInternal;
@@ -216,10 +217,14 @@ class InsetsStateController {
         }
     }
 
-    void onRequestedVisibleTypesChanged(InsetsControlTarget caller) {
+    void onRequestedVisibleTypesChanged(InsetsControlTarget caller,
+            @Nullable ImeTracker.Token statsToken) {
         boolean changed = false;
         for (int i = mProviders.size() - 1; i >= 0; i--) {
-            changed |= mProviders.valueAt(i).updateClientVisibility(caller);
+            final InsetsSourceProvider provider = mProviders.valueAt(i);
+            final boolean isImeProvider = provider.getSource().getType() == WindowInsets.Type.ime();
+            changed |= provider.updateClientVisibility(caller,
+                    isImeProvider ? statsToken : null);
         }
         if (!android.view.inputmethod.Flags.refactorInsetsController()) {
             if (changed) {
@@ -310,7 +315,9 @@ class InsetsStateController {
             // aborted.
             provider.updateFakeControlTarget(target);
         } else {
-            provider.updateControlForTarget(target, false /* force */);
+            // TODO(b/329229469) if the IME controlTarget changes, any pending requests should fail
+            provider.updateControlForTarget(target, false /* force */,
+                    null /* TODO(b/329229469) check if needed here */);
 
             // Get control target again in case the provider didn't accept the one we passed to it.
             target = provider.getControlTarget();
@@ -394,7 +401,9 @@ class InsetsStateController {
             // to the clients, so that the clients can change the current visibilities to the
             // requested visibilities with animations.
             for (int i = newControlTargets.size() - 1; i >= 0; i--) {
-                onRequestedVisibleTypesChanged(newControlTargets.valueAt(i));
+                // TODO(b/353463205) the statsToken shouldn't be null as it is used later in the
+                //  IME provider. Check if we have to create a new request here
+                onRequestedVisibleTypesChanged(newControlTargets.valueAt(i), null /* statsToken */);
             }
             newControlTargets.clear();
             if (!android.view.inputmethod.Flags.refactorInsetsController()) {

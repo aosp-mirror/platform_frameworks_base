@@ -1428,6 +1428,7 @@
     <string name="share_remote_bugreport_action" msgid="7630880678785123682">"공유"</string>
     <string name="decline_remote_bugreport_action" msgid="4040894777519784346">"거부"</string>
     <string name="select_input_method" msgid="3971267998568587025">"입력 방법 선택"</string>
+    <string name="input_method_language_settings" msgid="8069089418056819437">"언어 설정"</string>
     <string name="show_ime" msgid="6406112007347443383">"물리적 키보드가 활성 상태인 경우 화면에 켜 둠"</string>
     <string name="hardware" msgid="3611039921284836033">"터치 키보드 사용"</string>
     <string name="select_keyboard_layout_notification_title" msgid="5823199895322205589">"<xliff:g id="DEVICE_NAME">%s</xliff:g> 설정"</string>
@@ -2436,23 +2437,14 @@
     <string name="bg_user_sound_notification_title_alarm" msgid="5251678483393143527">"<xliff:g id="USER_NAME">%s</xliff:g>님의 알람"</string>
     <string name="bg_user_sound_notification_button_switch_user" msgid="3091969648572788946">"사용자 전환"</string>
     <string name="bg_user_sound_notification_button_mute" msgid="4942158515665615243">"음소거"</string>
-    <string name="bg_user_sound_notification_message" msgid="8613881975316976673">"탭하여 소리 음소거"</string>
-    <!-- no translation found for keyboard_shortcut_group_applications_browser (6535007304687100909) -->
-    <skip />
-    <!-- no translation found for keyboard_shortcut_group_applications_contacts (2750702518068326356) -->
-    <skip />
-    <!-- no translation found for keyboard_shortcut_group_applications_email (4229037666415353683) -->
-    <skip />
-    <!-- no translation found for keyboard_shortcut_group_applications_sms (3523799286376321137) -->
-    <skip />
-    <!-- no translation found for keyboard_shortcut_group_applications_music (2051507523525651067) -->
-    <skip />
-    <!-- no translation found for keyboard_shortcut_group_applications_calendar (3571770335653387606) -->
-    <skip />
-    <!-- no translation found for keyboard_shortcut_group_applications_calculator (6753209559716091507) -->
-    <skip />
-    <!-- no translation found for keyboard_shortcut_group_applications_maps (7950000659522589471) -->
-    <skip />
-    <!-- no translation found for keyboard_shortcut_group_applications (3010389163951364798) -->
-    <skip />
+    <string name="bg_user_sound_notification_message" msgid="8613881975316976673">"탭하여 음소거"</string>
+    <string name="keyboard_shortcut_group_applications_browser" msgid="6535007304687100909">"브라우저"</string>
+    <string name="keyboard_shortcut_group_applications_contacts" msgid="2750702518068326356">"연락처"</string>
+    <string name="keyboard_shortcut_group_applications_email" msgid="4229037666415353683">"이메일"</string>
+    <string name="keyboard_shortcut_group_applications_sms" msgid="3523799286376321137">"SMS"</string>
+    <string name="keyboard_shortcut_group_applications_music" msgid="2051507523525651067">"음악"</string>
+    <string name="keyboard_shortcut_group_applications_calendar" msgid="3571770335653387606">"캘린더"</string>
+    <string name="keyboard_shortcut_group_applications_calculator" msgid="6753209559716091507">"계산기"</string>
+    <string name="keyboard_shortcut_group_applications_maps" msgid="7950000659522589471">"지도"</string>
+    <string name="keyboard_shortcut_group_applications" msgid="3010389163951364798">"애플리케이션"</string>
 </resources>

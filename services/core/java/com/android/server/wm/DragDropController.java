@@ -16,7 +16,6 @@
 
 package com.android.server.wm;
 
-import static android.content.ClipDescription.EXTRA_HIDE_DRAG_SOURCE_TASK_ID;
 import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
 import static android.view.View.DRAG_FLAG_GLOBAL;
 import static android.view.View.DRAG_FLAG_GLOBAL_SAME_APPLICATION;
@@ -228,7 +227,7 @@ class DragDropController {
                         final Display display = displayContent.getDisplay();
                         touchFocusTransferredFuture = mCallback.get().registerInputChannel(
                                 mDragState, display, mService.mInputManager,
-                                callingWin.mInputChannel);
+                                callingWin.mInputChannelToken);
                     } else {
                         // Skip surface logic for a drag triggered by an AccessibilityAction
                         mDragState.broadcastDragStartedLocked(touchX, touchY);

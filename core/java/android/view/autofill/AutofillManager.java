@@ -114,6 +114,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -774,6 +775,13 @@ public final class AutofillManager {
     // dataset in responses. Used to avoid request pre-fill request again and again.
     private final ArraySet<AutofillId> mAllTrackedViews = new ArraySet<>();
 
+    // Whether we need to re-attempt fill again. Needed for case of relayout.
+    private boolean mFillReAttemptNeeded = false;
+
+    private Map<Integer, AutofillId> mFingerprintToViewMap = new ArrayMap<>();
+
+    private AutofillStateFingerprint mAutofillStateFingerprint;
+
     /** @hide */
     public interface AutofillClient {
         /**
@@ -874,6 +882,13 @@ public final class AutofillManager {
         @Nullable View autofillClientFindViewByAccessibilityIdTraversal(int viewId, int windowId);
 
         /**
+         * Finds all the autofillable views on the screen.
+         *
+         * @return The list of views that are autofillable.
+         */
+        List<View> autofillClientFindAutofillableViewsByTraversal();
+
+        /**
          * Runs the specified action on the UI thread.
          */
         void autofillClientRunOnUiThread(Runnable action);
@@ -902,6 +917,11 @@ public final class AutofillManager {
          * @return An ID that is unique in the activity.
          */
         @Nullable AutofillId autofillClientGetNextAutofillId();
+
+        /**
+         * @return Whether the activity is resumed or not.
+         */
+        boolean isActivityResumed();
     }
 
     /**
@@ -912,6 +932,7 @@ public final class AutofillManager {
         mService = service;
         mOptions = context.getAutofillOptions();
         mIsFillRequested = new AtomicBoolean(false);
+        mAutofillStateFingerprint = AutofillStateFingerprint.createInstance();
 
         mIsFillDialogEnabled = AutofillFeatureFlags.isFillDialogEnabled();
         mFillDialogEnabledHints = AutofillFeatureFlags.getFillDialogEnabledHints();
@@ -1350,6 +1371,20 @@ public final class AutofillManager {
             mOnInvisibleCalled = true;
 
             if (isExpiredResponse) {
+                if (mRelayoutFix && isAuthenticationPending()) {
+                    Log.i(TAG, "onInvisibleForAutofill(): Ignoring expiringResponse due to pending"
+                            + " authentication");
+                    try {
+                        mService.notifyNotExpiringResponseDuringAuth(
+                                mSessionId, mContext.getUserId());
+                    } catch (RemoteException e) {
+                        // The failure could be a consequence of something going wrong on the
+                        // server side. Do nothing here since it's just logging, but it's
+                        // possible follow-up actions may fail.
+                    }
+                    return;
+                }
+                Log.i(TAG, "onInvisibleForAutofill(): expiringResponse");
                 // Notify service the response has expired.
                 updateSessionLocked(/* id= */ null, /* bounds= */ null, /* value= */ null,
                         ACTION_RESPONSE_EXPIRED, /* flags= */ 0);
@@ -1495,6 +1530,57 @@ public final class AutofillManager {
             flags |= FLAG_VIEW_NOT_FOCUSED;
         }
         notifyViewEntered(view, virtualId, absBounds, flags);
+    }
+
+    /**
+     * Called to know whether authentication was pending.
+     * @hide
+     */
+    public boolean isAuthenticationPending() {
+        return mState == STATE_PENDING_AUTHENTICATION;
+    }
+
+    /**
+     * Called to log notify view entered was ignored due to pending auth
+     * @hide
+     */
+    public void notifyViewEnteredIgnoredDuringAuthCount() {
+        try {
+            mService.notifyViewEnteredIgnoredDuringAuthCount(mSessionId, mContext.getUserId());
+        } catch (RemoteException e) {
+            // The failure could be a consequence of something going wrong on the
+            // server side. Do nothing here since it's just logging, but it's
+            // possible follow-up actions may fail.
+        }
+    }
+
+    /**
+     * Called to check if we should retry fill.
+     * Useful for knowing whether to attempt refill after relayout.
+     *
+     * @hide
+     */
+    public boolean shouldRetryFill() {
+        synchronized (mLock) {
+            return isAuthenticationPending() && mFillReAttemptNeeded;
+        }
+    }
+
+    /**
+     * Called when a potential relayout may have occurred.
+     *
+     * @return whether refill was done. True if refill was done partially or fully.
+     * @hide
+     */
+    public boolean attemptRefill() {
+        Log.i(TAG, "Attempting refill");
+        // Find active autofillable views. Compute their fingerprints
+        List<View> autofillableViews =
+                getClient().autofillClientFindAutofillableViewsByTraversal();
+        if (sDebug) {
+            Log.d(TAG, "Autofillable views count:" + autofillableViews.size());
+        }
+        return mAutofillStateFingerprint.attemptRefill(autofillableViews, this);
     }
 
     /**
@@ -2455,17 +2541,19 @@ public final class AutofillManager {
 
     /** @hide */
     public void onAuthenticationResult(int authenticationId, Intent data, View focusView) {
+        if (sVerbose) {
+            Log.v(TAG, "onAuthenticationResult(): authId= " + authenticationId + ", data=" + data);
+        }
         if (!hasAutofillFeature()) {
+            if (sVerbose) {
+                Log.v(TAG, "onAuthenticationResult(): autofill not enabled");
+            }
             return;
         }
         // TODO: the result code is being ignored, so this method is not reliably
         // handling the cases where it's not RESULT_OK: it works fine if the service does not
         // set the EXTRA_AUTHENTICATION_RESULT extra, but it could cause weird results if the
         // service set the extra and returned RESULT_CANCELED...
-
-        if (sDebug) {
-            Log.d(TAG, "onAuthenticationResult(): id= " + authenticationId + ", data=" + data);
-        }
 
         synchronized (mLock) {
             if (!isActiveLocked()) {
@@ -2623,6 +2711,7 @@ public final class AutofillManager {
             mSessionId = receiver.getIntResult();
             if (mSessionId != NO_SESSION) {
                 mState = STATE_ACTIVE;
+                mAutofillStateFingerprint.setSessionId(mSessionId);
             }
             final int extraFlags = receiver.getOptionalExtraIntResult(0);
             if ((extraFlags & RECEIVER_FLAG_SESSION_FOR_AUGMENTED_AUTOFILL_ONLY) != 0) {
@@ -2684,6 +2773,9 @@ public final class AutofillManager {
         if (resetEnteredIds) {
             mEnteredIds = null;
         }
+        mFillReAttemptNeeded = false;
+        mFingerprintToViewMap.clear();
+        mAutofillStateFingerprint = AutofillStateFingerprint.createInstance();
     }
 
     @GuardedBy("mLock")
@@ -2946,8 +3038,12 @@ public final class AutofillManager {
             Intent fillInIntent, boolean authenticateInline) {
         synchronized (mLock) {
             if (sessionId == mSessionId) {
-                if (mRelayoutFixDeprecated) {
+                if (mRelayoutFixDeprecated || mRelayoutFix) {
                     mState = STATE_PENDING_AUTHENTICATION;
+                    if (sVerbose) {
+                        Log.v(TAG, "entering STATE_PENDING_AUTHENTICATION : mRelayoutFix:"
+                                + mRelayoutFix);
+                    }
                 }
                 final AutofillClient client = getClient();
                 if (client != null) {
@@ -3153,16 +3249,55 @@ public final class AutofillManager {
 
     @GuardedBy("mLock")
     private void handleFailedIdsLocked(@NonNull ArrayList<AutofillId> failedIds) {
+        handleFailedIdsLocked(failedIds, null, false, false);
+    }
+
+    @GuardedBy("mLock")
+    private void handleFailedIdsLocked(@NonNull ArrayList<AutofillId> failedIds,
+            ArrayList<AutofillValue> failedAutofillValues, boolean hideHighlight,
+            boolean isRefill) {
         if (!failedIds.isEmpty() && sVerbose) {
             Log.v(TAG, "autofill(): total failed views: " + failedIds);
         }
+
+        if (mRelayoutFix && !failedIds.isEmpty()) {
+            // Activity isn't in resumed state, so it's very possible that relayout could've
+            // occurred, so wait for it to declare proper failure. It's a temporary failure at the
+            // moment. We'll try again later when the activity is resumed.
+
+            // The above doesn't seem to be the correct way. Look for pending auth cases.
+            // TODO(b/238252288): Check whether there was any auth done at all
+            mFillReAttemptNeeded = true;
+            mAutofillStateFingerprint.storeFailedIdsAndValues(
+                    failedIds, failedAutofillValues, hideHighlight);
+        }
         try {
-            mService.setAutofillFailure(mSessionId, failedIds, mContext.getUserId());
+            mService.setAutofillFailure(mSessionId, failedIds, isRefill, mContext.getUserId());
         } catch (RemoteException e) {
             // In theory, we could ignore this error since it's not a big deal, but
             // in reality, we rather crash the app anyways, as the failure could be
             // a consequence of something going wrong on the server side...
             throw e.rethrowFromSystemServer();
+        }
+        if (mRelayoutFix && !failedIds.isEmpty()) {
+            if (!getClient().isActivityResumed()) {
+                if (sVerbose) {
+                    Log.v(TAG, "handleFailedIdsLocked(): failed id's exist, but activity not"
+                            + " resumed");
+                }
+            } else {
+                if (isRefill) {
+                    Log.i(TAG, "handleFailedIdsLocked(): Attempted refill, but failed");
+                } else {
+                    // activity has been resumed, try to re-fill
+                    // getClient().isActivityResumed() && !failedIds.isEmpty() && !isRefill
+                    // TODO(b/238252288): Do better state management, and only trigger the following
+                    //  if there was auth previously.
+                    Log.i(TAG, "handleFailedIdsLocked(): Attempting refill");
+                    attemptRefill();
+                    mFillReAttemptNeeded = false;
+                }
+            }
         }
     }
 
@@ -3178,13 +3313,46 @@ public final class AutofillManager {
                 return;
             }
 
-            final int itemCount = ids.size();
-            int numApplied = 0;
-            ArrayMap<View, SparseArray<AutofillValue>> virtualValues = null;
             final View[] views = client.autofillClientFindViewsByAutofillIdTraversal(
                     Helper.toArray(ids));
 
+            autofill(views, ids, values, hideHighlight, false);
+        }
+    }
+
+    void autofill(View[] views, List<AutofillId> ids, List<AutofillValue> values,
+            boolean hideHighlight, boolean isRefill) {
+        if (sVerbose) {
+            Log.v(TAG, "autofill() ids:" + ids + " isRefill:" + isRefill);
+        }
+        synchronized (mLock) {
+            final AutofillClient client = getClient();
+            if (client == null) {
+                return;
+            }
+
+            if (ids == null) {
+                Log.i(TAG, "autofill(): No id's to fill");
+                return;
+            }
+
+            if (mRelayoutFix && isRefill) {
+                try {
+                    mService.setAutofillIdsAttemptedForRefill(
+                            mSessionId, ids, mContext.getUserId());
+                } catch (RemoteException e) {
+                    // The failure could be a consequence of something going wrong on the
+                    // server side. Do nothing here since it's just logging, but it's
+                    // possible follow-up actions may fail.
+                }
+            }
+
+            final int itemCount = ids.size();
+            int numApplied = 0;
+            ArrayMap<View, SparseArray<AutofillValue>> virtualValues = null;
+
             ArrayList<AutofillId> failedIds = new ArrayList<>();
+            ArrayList<AutofillValue> failedAutofillValues = new ArrayList<>();
 
             if (mLastAutofilledData == null) {
                 mLastAutofilledData = new ParcelableMap(itemCount);
@@ -3199,7 +3367,9 @@ public final class AutofillManager {
                     // the service; this is fine, but we need to update the view status in the
                     // server side so it can be triggered again.
                     Log.d(TAG, "autofill(): no View with id " + id);
+                    // Possible relayout scenario
                     failedIds.add(id);
+                    failedAutofillValues.add(value);
                     continue;
                 }
                 // Mark the view as to be autofilled with 'value'
@@ -3230,7 +3400,8 @@ public final class AutofillManager {
                 }
             }
 
-            handleFailedIdsLocked(failedIds);
+            handleFailedIdsLocked(
+                    failedIds, failedAutofillValues, hideHighlight, isRefill);
 
             if (virtualValues != null) {
                 for (int i = 0; i < virtualValues.size(); i++) {
@@ -3284,7 +3455,7 @@ public final class AutofillManager {
     private void reportAutofillContentFailure(AutofillId id) {
         try {
             mService.setAutofillFailure(mSessionId, Collections.singletonList(id),
-                    mContext.getUserId());
+                    false /* isRefill */, mContext.getUserId());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -3311,20 +3482,22 @@ public final class AutofillManager {
     }
 
     /**
-     *  Set the tracked views.
+     * Set the tracked views.
      *
-     * @param trackedIds The views to be tracked.
+     * @param trackedIds              The views to be tracked.
      * @param saveOnAllViewsInvisible Finish the session once all tracked views are invisible.
-     * @param saveOnFinish Finish the session once the activity is finished.
-     * @param fillableIds Views that might anchor FillUI.
-     * @param saveTriggerId View that when clicked triggers commit().
+     * @param saveOnFinish            Finish the session once the activity is finished.
+     * @param fillableIds             Views that might anchor FillUI.
+     * @param saveTriggerId           View that when clicked triggers commit().
      */
     private void setTrackedViews(int sessionId, @Nullable AutofillId[] trackedIds,
             boolean saveOnAllViewsInvisible, boolean saveOnFinish,
-            @Nullable AutofillId[] fillableIds, @Nullable AutofillId saveTriggerId) {
+            @Nullable AutofillId[] fillableIds, @Nullable AutofillId saveTriggerId,
+            boolean shouldGrabViewFingerprints) {
         if (saveTriggerId != null) {
             saveTriggerId.resetSessionId();
         }
+        final ArraySet<AutofillId> allFillableIds = new ArraySet<>();
         synchronized (mLock) {
             if (sVerbose) {
                 Log.v(TAG, "setTrackedViews(): sessionId=" + sessionId
@@ -3334,6 +3507,7 @@ public final class AutofillManager {
                         + ", fillableIds=" + Arrays.toString(fillableIds)
                         + ", saveTrigerId=" + saveTriggerId
                         + ", mFillableIds=" + mFillableIds
+                        + ", shouldGrabViewFingerprints=" + shouldGrabViewFingerprints
                         + ", mEnabled=" + mEnabled
                         + ", mSessionId=" + mSessionId);
             }
@@ -3367,7 +3541,6 @@ public final class AutofillManager {
                     trackedIds = null;
                 }
 
-                final ArraySet<AutofillId> allFillableIds = new ArraySet<>();
                 if (mFillableIds != null) {
                     allFillableIds.addAll(mFillableIds);
                 }
@@ -3385,6 +3558,12 @@ public final class AutofillManager {
                 } else {
                     mTrackedViews = null;
                 }
+            }
+            if (mRelayoutFix && shouldGrabViewFingerprints) {
+                // For all the views: tracked and others, calculate fingerprints and store them.
+                mAutofillStateFingerprint.setUseRelativePosition(mRelativePositionForRelayout);
+                mAutofillStateFingerprint.storeStatePriorToAuthentication(
+                        getClient(), allFillableIds);
             }
         }
     }
@@ -3807,7 +3986,7 @@ public final class AutofillManager {
 
     @GuardedBy("mLock")
     private boolean isPendingAuthenticationLocked() {
-        return mRelayoutFixDeprecated && mState == STATE_PENDING_AUTHENTICATION;
+        return (mRelayoutFixDeprecated || mRelayoutFix) && mState == STATE_PENDING_AUTHENTICATION;
     }
 
     @GuardedBy("mLock")
@@ -3820,7 +3999,7 @@ public final class AutofillManager {
         return mState == STATE_FINISHED;
     }
 
-    private void post(Runnable runnable) {
+    void post(Runnable runnable) {
         final AutofillClient client = getClient();
         if (client == null) {
             if (sVerbose) Log.v(TAG, "ignoring post() because client is null");
@@ -4662,11 +4841,11 @@ public final class AutofillManager {
         @Override
         public void setTrackedViews(int sessionId, AutofillId[] ids,
                 boolean saveOnAllViewsInvisible, boolean saveOnFinish, AutofillId[] fillableIds,
-                AutofillId saveTriggerId) {
+                AutofillId saveTriggerId, boolean shouldGrabViewFingerprints) {
             final AutofillManager afm = mAfm.get();
             if (afm != null) {
                 afm.post(() -> afm.setTrackedViews(sessionId, ids, saveOnAllViewsInvisible,
-                        saveOnFinish, fillableIds, saveTriggerId));
+                        saveOnFinish, fillableIds, saveTriggerId, shouldGrabViewFingerprints));
             }
         }
 

@@ -736,7 +736,8 @@ public class InternetDialogController implements AccessPointController.AccessPoi
         // Set network description for the carrier network when connecting to the carrier network
         // under the airplane mode ON.
         if (activeNetworkIsCellular() || isCarrierNetworkActive()) {
-            summary = context.getString(R.string.preference_summary_default_combination,
+            summary = context.getString(
+                    com.android.settingslib.R.string.preference_summary_default_combination,
                     context.getString(
                             isForDds // if nonDds is active, explains Dds status as poor connection
                                     ? (isOnNonDds ? R.string.mobile_data_poor_connection

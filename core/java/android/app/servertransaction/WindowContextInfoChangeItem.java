@@ -30,44 +30,27 @@ import java.util.Objects;
 
 /**
  * {@link android.window.WindowContext} configuration change message.
+ *
  * @hide
  */
 public class WindowContextInfoChangeItem extends ClientTransactionItem {
 
-    @Nullable
-    private IBinder mClientToken;
-    @Nullable
-    private WindowContextInfo mInfo;
+    @NonNull
+    private final IBinder mClientToken;
+
+    @NonNull
+    private final WindowContextInfo mInfo;
+
+    public WindowContextInfoChangeItem(
+            @NonNull IBinder clientToken, @NonNull Configuration config, int displayId) {
+        mClientToken = requireNonNull(clientToken);
+        mInfo = new WindowContextInfo(new Configuration(config), displayId);
+    }
 
     @Override
     public void execute(@NonNull ClientTransactionHandler client,
             @NonNull PendingTransactionActions pendingActions) {
         client.handleWindowContextInfoChanged(mClientToken, mInfo);
-    }
-
-    // ObjectPoolItem implementation
-
-    private WindowContextInfoChangeItem() {}
-
-    /** Obtains an instance initialized with provided params. */
-    public static WindowContextInfoChangeItem obtain(
-            @NonNull IBinder clientToken, @NonNull Configuration config, int displayId) {
-        WindowContextInfoChangeItem instance =
-                ObjectPool.obtain(WindowContextInfoChangeItem.class);
-        if (instance == null) {
-            instance = new WindowContextInfoChangeItem();
-        }
-        instance.mClientToken = requireNonNull(clientToken);
-        instance.mInfo = new WindowContextInfo(new Configuration(config), displayId);
-
-        return instance;
-    }
-
-    @Override
-    public void recycle() {
-        mClientToken = null;
-        mInfo = null;
-        ObjectPool.recycle(this);
     }
 
     // Parcelable implementation
@@ -82,7 +65,7 @@ public class WindowContextInfoChangeItem extends ClientTransactionItem {
     /** Reads from Parcel. */
     private WindowContextInfoChangeItem(@NonNull Parcel in) {
         mClientToken = in.readStrongBinder();
-        mInfo = in.readTypedObject(WindowContextInfo.CREATOR);
+        mInfo = requireNonNull(in.readTypedObject(WindowContextInfo.CREATOR));
     }
 
     public static final @NonNull Creator<WindowContextInfoChangeItem> CREATOR =

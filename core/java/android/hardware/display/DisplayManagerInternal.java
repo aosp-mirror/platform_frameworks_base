@@ -37,6 +37,7 @@ import android.window.ScreenCapture;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -470,6 +471,9 @@ public abstract class DisplayManagerInternal {
         // Set to PowerManager.BRIGHTNESS_INVALID if there's no override.
         public float screenBrightnessOverride;
 
+        // Tag used to identify the app window requesting the brightness override.
+        public CharSequence screenBrightnessOverrideTag;
+
         // An override of the screen auto-brightness adjustment factor in the range -1 (dimmer) to
         // 1 (brighter). Set to Float.NaN if there's no override.
         public float screenAutoBrightnessAdjustmentOverride;
@@ -524,6 +528,7 @@ public abstract class DisplayManagerInternal {
             policy = other.policy;
             useProximitySensor = other.useProximitySensor;
             screenBrightnessOverride = other.screenBrightnessOverride;
+            screenBrightnessOverrideTag = other.screenBrightnessOverrideTag;
             screenAutoBrightnessAdjustmentOverride = other.screenAutoBrightnessAdjustmentOverride;
             screenLowPowerBrightnessFactor = other.screenLowPowerBrightnessFactor;
             blockScreenOn = other.blockScreenOn;
@@ -544,8 +549,9 @@ public abstract class DisplayManagerInternal {
             return other != null
                     && policy == other.policy
                     && useProximitySensor == other.useProximitySensor
-                    && floatEquals(screenBrightnessOverride,
-                            other.screenBrightnessOverride)
+                    && floatEquals(screenBrightnessOverride, other.screenBrightnessOverride)
+                    && Objects.equals(screenBrightnessOverrideTag,
+                            other.screenBrightnessOverrideTag)
                     && floatEquals(screenAutoBrightnessAdjustmentOverride,
                             other.screenAutoBrightnessAdjustmentOverride)
                     && screenLowPowerBrightnessFactor

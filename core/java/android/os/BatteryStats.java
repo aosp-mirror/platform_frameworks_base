@@ -2491,7 +2491,7 @@ public abstract class BatteryStats {
     public static final int SCREEN_BRIGHTNESS_LIGHT = 3;
     public static final int SCREEN_BRIGHTNESS_BRIGHT = 4;
 
-    static final String[] SCREEN_BRIGHTNESS_NAMES = {
+    public static final String[] SCREEN_BRIGHTNESS_NAMES = {
         "dark", "dim", "medium", "light", "bright"
     };
 

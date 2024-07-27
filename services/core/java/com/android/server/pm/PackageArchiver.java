@@ -869,18 +869,25 @@ public class PackageArchiver {
     private int createDraftSession(String packageName, String installerPackage,
             String callerPackageName,
             IntentSender statusReceiver, int userId) throws IOException {
+        Computer snapshot = mPm.snapshotComputer();
         PackageInstaller.SessionParams sessionParams = new PackageInstaller.SessionParams(
                 PackageInstaller.SessionParams.MODE_FULL_INSTALL);
         sessionParams.setAppPackageName(packageName);
         sessionParams.setAppLabel(
                 mContext.getString(com.android.internal.R.string.unarchival_session_app_label));
-        sessionParams.setAppIcon(
-                getArchivedAppIcon(packageName, UserHandle.of(userId), callerPackageName));
+        // The draft session's app icon is based on the current launcher's icon overlay appops mode
+        String launcherPackageName = getCurrentLauncherPackageName(userId);
+        int launcherUid = launcherPackageName != null
+                ? snapshot.getPackageUid(launcherPackageName, 0, userId)
+                : Process.SYSTEM_UID;
+        sessionParams.setAppIcon(getArchivedAppIcon(packageName, UserHandle.of(userId),
+                isOverlayEnabled(launcherUid,
+                        launcherPackageName == null ? callerPackageName : launcherPackageName)));
         // To make sure SessionInfo::isUnarchival returns true for draft sessions,
         // INSTALL_UNARCHIVE is also set.
         sessionParams.installFlags = (INSTALL_UNARCHIVE_DRAFT | INSTALL_UNARCHIVE);
 
-        int installerUid = mPm.snapshotComputer().getPackageUid(installerPackage, 0, userId);
+        int installerUid = snapshot.getPackageUid(installerPackage, 0, userId);
         // Handles case of repeated unarchival calls for the same package.
         int existingSessionId = mPm.mInstallerService.getExistingDraftSessionId(installerUid,
                 sessionParams,
@@ -926,12 +933,27 @@ public class PackageArchiver {
     /**
      * Returns the icon of an archived app. This is the icon of the main activity of the app.
      *
-     * <p> The icon is returned without any treatment/overlay. In the rare case the app had multiple
-     * launcher activities, only one of the icons is returned arbitrarily.
+     * <p> In the rare case the app had multiple launcher activities, only one of the icons is
+     * returned arbitrarily.
+     *
+     * <p> By default, the icon will be overlay'd with a cloud icon on top. A launcher app can
+     * disable the cloud overlay via the
+     * {@link LauncherApps.ArchiveCompatibilityParams#setEnableIconOverlay(boolean)} API.
+     * The default launcher's cloud overlay mode determines the cloud overlay status returned by
+     * any other callers. That is, if the current launcher has the cloud overlay disabled, any other
+     * app that fetches the app icon will also get an icon that has the cloud overlay disabled.
+     * This is to prevent style mismatch caused by icons that are fetched by different callers.
      */
     @Nullable
     public Bitmap getArchivedAppIcon(@NonNull String packageName, @NonNull UserHandle user,
             String callingPackageName) {
+        return getArchivedAppIcon(packageName, user,
+                isOverlayEnabled(Binder.getCallingUid(), callingPackageName));
+    }
+
+    @Nullable
+    private Bitmap getArchivedAppIcon(@NonNull String packageName, @NonNull UserHandle user,
+            boolean isOverlayEnabled) {
         Objects.requireNonNull(packageName);
         Objects.requireNonNull(user);
 
@@ -955,12 +977,17 @@ public class PackageArchiver {
         // In the rare case the archived app defined more than two launcher activities, we choose
         // the first one arbitrarily.
         Bitmap icon = decodeIcon(archiveState.getActivityInfos().get(0));
-        if (icon != null && getAppOpsManager().checkOp(
-                AppOpsManager.OP_ARCHIVE_ICON_OVERLAY, callingUid, callingPackageName)
-                == MODE_ALLOWED) {
+
+        if (icon != null && isOverlayEnabled) {
             icon = includeCloudOverlay(icon);
         }
         return icon;
+    }
+
+    private boolean isOverlayEnabled(int callingUid, String packageName) {
+        return getAppOpsManager().checkOp(
+                AppOpsManager.OP_ARCHIVE_ICON_OVERLAY, callingUid, packageName)
+                == MODE_ALLOWED;
     }
 
     /**

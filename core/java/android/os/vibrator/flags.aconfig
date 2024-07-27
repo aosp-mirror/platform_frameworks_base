@@ -53,3 +53,24 @@ flag {
         purpose: PURPOSE_FEATURE
     }
 }
+
+flag {
+    namespace: "haptics"
+    name: "vendor_vibration_effects"
+    is_exported: true
+    description: "Enabled System APIs for vendor-defined vibration effects"
+    bug: "345454923"
+    metadata {
+        purpose: PURPOSE_FEATURE
+    }
+}
+
+flag {
+    namespace: "haptics"
+    name: "throttle_vibration_params_requests"
+    description: "Control the frequency of vibration params requests to prevent overloading the vendor service"
+    bug: "355320860"
+    metadata {
+      purpose: PURPOSE_BUGFIX
+    }
+}

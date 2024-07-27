@@ -64,6 +64,7 @@ import com.android.wm.shell.ShellTaskOrganizer
 import com.android.wm.shell.ShellTestCase
 import com.android.wm.shell.TestRunningTaskInfoBuilder
 import com.android.wm.shell.TestShellExecutor
+import com.android.wm.shell.apptoweb.AppToWebGenericLinksParser
 import com.android.wm.shell.common.DisplayController
 import com.android.wm.shell.common.DisplayInsetsController
 import com.android.wm.shell.common.DisplayLayout
@@ -140,6 +141,7 @@ class DesktopModeWindowDecorViewModelTests : ShellTestCase() {
     @Mock private lateinit var mockShellCommandHandler: ShellCommandHandler
     @Mock private lateinit var mockWindowManager: IWindowManager
     @Mock private lateinit var mockInteractionJankMonitor: InteractionJankMonitor
+    @Mock private lateinit var mockGenericLinksParser: AppToWebGenericLinksParser
     private val bgExecutor = TestShellExecutor()
 
     private val transactionFactory = Supplier<SurfaceControl.Transaction> {
@@ -171,11 +173,13 @@ class DesktopModeWindowDecorViewModelTests : ShellTestCase() {
                 mockSyncQueue,
                 mockTransitions,
                 Optional.of(mockDesktopTasksController),
+                mockGenericLinksParser,
                 mockDesktopModeWindowDecorFactory,
                 mockInputMonitorFactory,
                 transactionFactory,
                 mockRootTaskDisplayAreaOrganizer,
-            windowDecorByTaskIdSpy, mockInteractionJankMonitor
+                windowDecorByTaskIdSpy,
+                mockInteractionJankMonitor
         )
         desktopModeWindowDecorViewModel.setSplitScreenController(mockSplitScreenController)
         whenever(mockDisplayController.getDisplayLayout(any())).thenReturn(mockDisplayLayout)
@@ -218,7 +222,8 @@ class DesktopModeWindowDecorViewModelTests : ShellTestCase() {
                 bgExecutor,
                 mockMainChoreographer,
                 mockSyncQueue,
-                mockRootTaskDisplayAreaOrganizer
+                mockRootTaskDisplayAreaOrganizer,
+                mockGenericLinksParser
         )
         verify(decoration).close()
     }
@@ -244,7 +249,8 @@ class DesktopModeWindowDecorViewModelTests : ShellTestCase() {
                 bgExecutor,
                 mockMainChoreographer,
                 mockSyncQueue,
-                mockRootTaskDisplayAreaOrganizer
+                mockRootTaskDisplayAreaOrganizer,
+                mockGenericLinksParser
         )
 
         task.setWindowingMode(WINDOWING_MODE_FREEFORM)
@@ -261,7 +267,8 @@ class DesktopModeWindowDecorViewModelTests : ShellTestCase() {
                 bgExecutor,
                 mockMainChoreographer,
                 mockSyncQueue,
-                mockRootTaskDisplayAreaOrganizer
+                mockRootTaskDisplayAreaOrganizer,
+                mockGenericLinksParser
         )
     }
 
@@ -359,7 +366,7 @@ class DesktopModeWindowDecorViewModelTests : ShellTestCase() {
 
         verify(mockDesktopModeWindowDecorFactory, never())
                 .create(any(), any(), any(), any(), eq(task), any(), any(), any(), any(), any(),
-                    any())
+                    any(), any())
     }
 
     @Test
@@ -381,7 +388,7 @@ class DesktopModeWindowDecorViewModelTests : ShellTestCase() {
             onTaskOpening(task)
             verify(mockDesktopModeWindowDecorFactory)
                     .create(any(), any(), any(), any(), eq(task), any(), any(), any(), any(),
-                        any(), any())
+                        any(), any(), any())
         } finally {
             mockitoSession.finishMocking()
         }
@@ -399,7 +406,7 @@ class DesktopModeWindowDecorViewModelTests : ShellTestCase() {
 
         verify(mockDesktopModeWindowDecorFactory, never())
                 .create(any(), any(), any(), any(), eq(task), any(), any(), any(), any(), any(),
-                    any())
+                    any(), any())
     }
 
     @Test
@@ -416,7 +423,7 @@ class DesktopModeWindowDecorViewModelTests : ShellTestCase() {
         onTaskOpening(task)
 
         verify(mockDesktopModeWindowDecorFactory, never())
-                .create(any(), any(), any(), any(), eq(task), any(), any(), any(), any(),
+                .create(any(), any(), any(), any(), eq(task), any(), any(), any(), any(), any(),
                     any(), any())
     }
 
@@ -515,7 +522,7 @@ class DesktopModeWindowDecorViewModelTests : ShellTestCase() {
             onTaskOpening(task)
             verify(mockDesktopModeWindowDecorFactory, never())
                 .create(any(), any(), any(), any(), eq(task), any(), any(), any(), any(), any(),
-                    any())
+                    any(), any())
         } finally {
             mockitoSession.finishMocking()
         }
@@ -540,7 +547,7 @@ class DesktopModeWindowDecorViewModelTests : ShellTestCase() {
             onTaskOpening(task)
             verify(mockDesktopModeWindowDecorFactory)
                 .create(any(), any(), any(), any(), eq(task), any(), any(), any(), any(), any(),
-                    any())
+                    any(), any())
         } finally {
             mockitoSession.finishMocking()
         }
@@ -564,7 +571,7 @@ class DesktopModeWindowDecorViewModelTests : ShellTestCase() {
             onTaskOpening(task)
             verify(mockDesktopModeWindowDecorFactory)
                 .create(any(), any(), any(), any(), eq(task), any(), any(), any(), any(), any(),
-                any())
+                    any(), any())
         } finally {
             mockitoSession.finishMocking()
         }
@@ -702,8 +709,8 @@ class DesktopModeWindowDecorViewModelTests : ShellTestCase() {
     private fun setUpMockDecorationForTask(task: RunningTaskInfo): DesktopModeWindowDecoration {
         val decoration = mock(DesktopModeWindowDecoration::class.java)
         whenever(
-            mockDesktopModeWindowDecorFactory.create(
-                any(), any(), any(), any(), eq(task), any(), any(), any(), any(), any(), any())
+            mockDesktopModeWindowDecorFactory.create(any(), any(), any(), any(), eq(task), any(),
+                any(), any(), any(), any(), any(), any())
         ).thenReturn(decoration)
         decoration.mTaskInfo = task
         whenever(decoration.isFocused).thenReturn(task.isFocused)

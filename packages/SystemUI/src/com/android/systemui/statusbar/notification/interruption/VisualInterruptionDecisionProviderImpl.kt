@@ -29,6 +29,7 @@ import com.android.internal.logging.UiEventLogger.UiEventEnum
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.settings.UserTracker
+import com.android.systemui.shared.notifications.domain.interactor.NotificationSettingsInteractor
 import com.android.systemui.statusbar.notification.collection.NotificationEntry
 import com.android.systemui.statusbar.notification.interruption.VisualInterruptionDecisionProvider.Decision
 import com.android.systemui.statusbar.notification.interruption.VisualInterruptionDecisionProvider.FullScreenIntentDecision
@@ -72,7 +73,8 @@ constructor(
     private val packageManager: PackageManager,
     private val bubbles: Optional<Bubbles>,
     private val context: Context,
-    private val notificationManager: NotificationManager
+    private val notificationManager: NotificationManager,
+    private val settingsInteractor: NotificationSettingsInteractor
 ) : VisualInterruptionDecisionProvider {
 
     init {
@@ -183,8 +185,8 @@ constructor(
 
         if (NotificationAvalancheSuppression.isEnabled) {
             addFilter(
-                AvalancheSuppressor(avalancheProvider, systemClock, systemSettings, packageManager,
-                        uiEventLogger, context, notificationManager)
+                AvalancheSuppressor(avalancheProvider, systemClock, settingsInteractor,
+                    packageManager, uiEventLogger, context, notificationManager)
             )
             avalancheProvider.register()
         }

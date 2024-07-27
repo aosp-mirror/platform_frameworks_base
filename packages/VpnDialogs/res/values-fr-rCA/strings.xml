@@ -24,7 +24,7 @@
     <string name="duration" msgid="3584782459928719435">"Durée :"</string>
     <string name="data_transmitted" msgid="7988167672982199061">"Date d\'envoi :"</string>
     <string name="data_received" msgid="4062776929376067820">"Reçu le :"</string>
-    <string name="data_value_format" msgid="2192466557826897580">"<xliff:g id="NUMBER_0">%1$s</xliff:g> octets / <xliff:g id="NUMBER_1">%2$s</xliff:g> paquets"</string>
+    <string name="data_value_format" msgid="2192466557826897580">"<xliff:g id="NUMBER_0">%1$s</xliff:g> octets/<xliff:g id="NUMBER_1">%2$s</xliff:g> paquets"</string>
     <string name="always_on_disconnected_title" msgid="1906740176262776166">"Impossible de se connecter au RPV permanent"</string>
     <string name="always_on_disconnected_message" msgid="555634519845992917">"<xliff:g id="VPN_APP_0">%1$s</xliff:g> est configuré pour rester connecté en permanence, mais n\'arrive pas à se connecter en ce moment. Votre téléphone utilisera un réseau public jusqu\'à ce qu\'il puisse se reconnecter à <xliff:g id="VPN_APP_1">%1$s</xliff:g>."</string>
     <string name="always_on_disconnected_message_lockdown" msgid="4232225539869452120">"<xliff:g id="VPN_APP">%1$s</xliff:g> est configuré pour rester connecté en permanence, mais n\'arrive pas à se connecter en ce moment. Vous n\'aurez pas de connexion jusqu\'à ce que le RPV arrive à se reconnecter."</string>

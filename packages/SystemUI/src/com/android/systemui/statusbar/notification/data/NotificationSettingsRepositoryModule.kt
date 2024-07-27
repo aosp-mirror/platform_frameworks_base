@@ -19,14 +19,16 @@ package com.android.systemui.statusbar.notification.data
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.settings.SecureSettingsRepositoryModule
+import com.android.systemui.settings.SystemSettingsRepositoryModule
 import com.android.systemui.shared.notifications.data.repository.NotificationSettingsRepository
 import com.android.systemui.shared.settings.data.repository.SecureSettingsRepository
+import com.android.systemui.shared.settings.data.repository.SystemSettingsRepository
 import dagger.Module
 import dagger.Provides
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 
-@Module(includes = [SecureSettingsRepositoryModule::class])
+@Module(includes = [SecureSettingsRepositoryModule::class, SystemSettingsRepositoryModule::class])
 object NotificationSettingsRepositoryModule {
     @Provides
     @SysUISingleton
@@ -34,10 +36,12 @@ object NotificationSettingsRepositoryModule {
         @Background backgroundScope: CoroutineScope,
         @Background backgroundDispatcher: CoroutineDispatcher,
         secureSettingsRepository: SecureSettingsRepository,
+        systemSettingsRepository: SystemSettingsRepository,
     ): NotificationSettingsRepository =
         NotificationSettingsRepository(
             backgroundScope,
             backgroundDispatcher,
-            secureSettingsRepository
+            secureSettingsRepository,
+            systemSettingsRepository
         )
 }

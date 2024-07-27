@@ -16,6 +16,7 @@
 
 package com.android.systemui.power.domain.interactor
 
+import com.android.systemui.camera.cameraGestureHelper
 import com.android.systemui.classifier.falsingCollector
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.plugins.statusbar.statusBarStateController
@@ -29,5 +30,6 @@ val Kosmos.powerInteractor by
             falsingCollector = falsingCollector,
             screenOffAnimationController = screenOffAnimationController,
             statusBarStateController = statusBarStateController,
+            cameraGestureHelper = { cameraGestureHelper },
         )
     }

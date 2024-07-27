@@ -163,6 +163,7 @@ android_app {
         "android.net.platform.flags-aconfig",
         "com.android.window.flags.window-aconfig",
         "android.permission.flags-aconfig",
+        "android.os.flags-aconfig",
     ],
 }
 

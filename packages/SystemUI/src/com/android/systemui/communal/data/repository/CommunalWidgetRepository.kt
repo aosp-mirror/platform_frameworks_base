@@ -398,16 +398,13 @@ constructor(
             )
         }
 
-        val session =
-            installSessions.firstOrNull {
-                it.packageName ==
-                    ComponentName.unflattenFromString(entry.componentName)?.packageName
-            }
-        return if (session != null) {
+        val componentName = ComponentName.unflattenFromString(entry.componentName)
+        val session = installSessions.firstOrNull { it.packageName == componentName?.packageName }
+        return if (componentName != null && session != null) {
             CommunalWidgetContentModel.Pending(
                 appWidgetId = entry.appWidgetId,
                 priority = entry.priority,
-                packageName = session.packageName,
+                componentName = componentName,
                 icon = session.icon,
                 user = session.user,
             )

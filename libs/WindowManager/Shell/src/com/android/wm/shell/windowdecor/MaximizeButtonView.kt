@@ -31,8 +31,8 @@ import android.widget.ProgressBar
 import androidx.core.animation.doOnEnd
 import androidx.core.animation.doOnStart
 import androidx.core.content.ContextCompat
-import com.android.window.flags.Flags
 import com.android.wm.shell.R
+import com.android.wm.shell.shared.desktopmode.DesktopModeFlags
 
 private const val OPEN_MAXIMIZE_MENU_DELAY_ON_HOVER_MS = 350
 private const val MAX_DRAWABLE_ALPHA = 255
@@ -108,7 +108,7 @@ class MaximizeButtonView(
         baseForegroundColor: Int? = null,
         rippleDrawable: RippleDrawable? = null
     ) {
-        if (Flags.enableThemedAppHeaders()) {
+        if (DesktopModeFlags.THEMED_APP_HEADERS.isEnabled(context)) {
             requireNotNull(iconForegroundColor) { "Icon foreground color must be non-null" }
             requireNotNull(baseForegroundColor) { "Base foreground color must be non-null" }
             requireNotNull(rippleDrawable) { "Ripple drawable must be non-null" }

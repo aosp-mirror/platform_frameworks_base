@@ -60,6 +60,7 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.zIndex
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.android.compose.animation.scene.ElementKey
 import com.android.compose.animation.scene.LowestZIndexScenePicker
@@ -80,10 +81,13 @@ import com.android.systemui.common.ui.compose.windowinsets.LocalScreenCornerRadi
 import com.android.systemui.compose.modifiers.sysuiResTag
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.media.controls.ui.composable.MediaCarousel
+import com.android.systemui.media.controls.ui.composable.MediaScenePicker
+import com.android.systemui.media.controls.ui.composable.shouldElevateMedia
 import com.android.systemui.media.controls.ui.controller.MediaCarouselController
 import com.android.systemui.media.controls.ui.controller.MediaHierarchyManager
 import com.android.systemui.media.controls.ui.view.MediaHost
 import com.android.systemui.media.controls.ui.view.MediaHostState
+import com.android.systemui.media.dagger.MediaModule.QS_PANEL
 import com.android.systemui.media.dagger.MediaModule.QUICK_QS_PANEL
 import com.android.systemui.notifications.ui.composable.NotificationScrollingStack
 import com.android.systemui.notifications.ui.composable.NotificationStackCutoffGuideline
@@ -108,7 +112,7 @@ import dagger.Lazy
 import javax.inject.Inject
 import javax.inject.Named
 import kotlin.math.roundToInt
-import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.Flow
 
 object Shade {
     object Elements {
@@ -147,12 +151,17 @@ constructor(
     private val batteryMeterViewControllerFactory: BatteryMeterViewController.Factory,
     private val statusBarIconController: StatusBarIconController,
     private val mediaCarouselController: MediaCarouselController,
-    @Named(QUICK_QS_PANEL) private val mediaHost: MediaHost,
+    @Named(QUICK_QS_PANEL) private val qqsMediaHost: MediaHost,
+    @Named(QS_PANEL) private val qsMediaHost: MediaHost,
 ) : ComposableScene {
 
     override val key = Scenes.Shade
 
-    override val destinationScenes: StateFlow<Map<UserAction, UserActionResult>> =
+    override suspend fun activate() {
+        viewModel.activate()
+    }
+
+    override val destinationScenes: Flow<Map<UserAction, UserActionResult>> =
         viewModel.destinationScenes
 
     @Composable
@@ -167,15 +176,20 @@ constructor(
             createBatteryMeterViewController = batteryMeterViewControllerFactory::create,
             statusBarIconController = statusBarIconController,
             mediaCarouselController = mediaCarouselController,
-            mediaHost = mediaHost,
+            qqsMediaHost = qqsMediaHost,
+            qsMediaHost = qsMediaHost,
             modifier = modifier,
             shadeSession = shadeSession,
         )
 
     init {
-        mediaHost.expansion = MediaHostState.EXPANDED
-        mediaHost.showsOnlyActiveMedia = true
-        mediaHost.init(MediaHierarchyManager.LOCATION_QQS)
+        qqsMediaHost.expansion = MediaHostState.EXPANDED
+        qqsMediaHost.showsOnlyActiveMedia = true
+        qqsMediaHost.init(MediaHierarchyManager.LOCATION_QQS)
+
+        qsMediaHost.expansion = MediaHostState.EXPANDED
+        qsMediaHost.showsOnlyActiveMedia = false
+        qsMediaHost.init(MediaHierarchyManager.LOCATION_QS)
     }
 }
 
@@ -188,7 +202,8 @@ private fun SceneScope.ShadeScene(
     createBatteryMeterViewController: (ViewGroup, StatusBarLocation) -> BatteryMeterViewController,
     statusBarIconController: StatusBarIconController,
     mediaCarouselController: MediaCarouselController,
-    mediaHost: MediaHost,
+    qqsMediaHost: MediaHost,
+    qsMediaHost: MediaHost,
     modifier: Modifier = Modifier,
     shadeSession: SaveableSession,
 ) {
@@ -203,7 +218,7 @@ private fun SceneScope.ShadeScene(
                 createBatteryMeterViewController = createBatteryMeterViewController,
                 statusBarIconController = statusBarIconController,
                 mediaCarouselController = mediaCarouselController,
-                mediaHost = mediaHost,
+                mediaHost = qqsMediaHost,
                 modifier = modifier,
                 shadeSession = shadeSession,
             )
@@ -216,7 +231,7 @@ private fun SceneScope.ShadeScene(
                 createBatteryMeterViewController = createBatteryMeterViewController,
                 statusBarIconController = statusBarIconController,
                 mediaCarouselController = mediaCarouselController,
-                mediaHost = mediaHost,
+                mediaHost = qsMediaHost,
                 modifier = modifier,
                 shadeSession = shadeSession,
             )
@@ -360,7 +375,13 @@ private fun SceneScope.SingleShade(
             maxNotifScrimTop.value = quickSettingsPlaceable.height.toFloat()
 
             layout(constraints.maxWidth, constraints.maxHeight) {
-                quickSettingsPlaceable.placeRelative(x = 0, y = 0)
+                val qsZIndex =
+                    if (MediaScenePicker.shouldElevateMedia(layoutState)) {
+                        1f
+                    } else {
+                        0f
+                    }
+                quickSettingsPlaceable.placeRelative(x = 0, y = 0, zIndex = qsZIndex)
                 notificationsPlaceable.placeRelative(x = 0, y = maxNotifScrimTop.value.roundToInt())
             }
         }
@@ -464,17 +485,20 @@ private fun SceneScope.SplitShade(
 
     val brightnessMirrorShowingModifier = Modifier.graphicsLayer { alpha = contentAlpha }
 
-    Box(
-        modifier =
-            modifier
-                .fillMaxSize()
-                .element(Shade.Elements.BackgroundScrim)
-                // Cannot set the alpha of the whole element to 0, because the mirror should be
-                // in the QS column.
-                .background(
-                    colorResource(R.color.shade_scrim_background_dark).copy(alpha = contentAlpha)
-                )
-    ) {
+    Box {
+        Box(
+            modifier =
+                modifier
+                    .fillMaxSize()
+                    .element(Shade.Elements.BackgroundScrim)
+                    // Cannot set the alpha of the whole element to 0, because the mirror should be
+                    // in the QS column.
+                    .background(
+                        colorResource(R.color.shade_scrim_background_dark)
+                            .copy(alpha = contentAlpha)
+                    )
+        )
+
         Column(
             modifier = Modifier.fillMaxSize(),
         ) {
@@ -534,11 +558,15 @@ private fun SceneScope.SplitShade(
                                     squishiness = { tileSquishiness },
                                 )
                             }
-
                             MediaCarousel(
                                 isVisible = isMediaVisible,
                                 mediaHost = mediaHost,
-                                modifier = Modifier.fillMaxWidth(),
+                                modifier =
+                                    Modifier.fillMaxWidth().thenIf(
+                                        MediaScenePicker.shouldElevateMedia(layoutState)
+                                    ) {
+                                        Modifier.zIndex(1f)
+                                    },
                                 carouselController = mediaCarouselController,
                             )
                         }

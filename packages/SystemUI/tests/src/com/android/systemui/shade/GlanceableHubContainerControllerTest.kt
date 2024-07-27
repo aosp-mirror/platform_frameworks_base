@@ -429,6 +429,7 @@ class GlanceableHubContainerControllerTest : SysuiTestCase() {
     fun gestureExclusionZone_setAfterInit() =
         with(kosmos) {
             testScope.runTest {
+                whenever(containerView.layoutDirection).thenReturn(View.LAYOUT_DIRECTION_LTR)
                 goToScene(CommunalScenes.Communal)
 
                 assertThat(containerView.systemGestureExclusionRects)
@@ -450,10 +451,37 @@ class GlanceableHubContainerControllerTest : SysuiTestCase() {
         }
 
     @Test
+    @DisableFlags(FLAG_GLANCEABLE_HUB_BACK_GESTURE)
+    fun gestureExclusionZone_setAfterInit_rtl() =
+        with(kosmos) {
+            testScope.runTest {
+                whenever(containerView.layoutDirection).thenReturn(View.LAYOUT_DIRECTION_RTL)
+                goToScene(CommunalScenes.Communal)
+
+                assertThat(containerView.systemGestureExclusionRects)
+                    .containsExactly(
+                        Rect(
+                            /* left= */ 0,
+                            /* top= */ TOP_SWIPE_REGION_WIDTH,
+                            /* right= */ CONTAINER_WIDTH,
+                            /* bottom= */ CONTAINER_HEIGHT - BOTTOM_SWIPE_REGION_WIDTH
+                        ),
+                        Rect(
+                            /* left= */ 0,
+                            /* top= */ 0,
+                            /* right= */ CONTAINER_WIDTH,
+                            /* bottom= */ CONTAINER_HEIGHT
+                        )
+                    )
+            }
+        }
+
+    @Test
     @EnableFlags(FLAG_GLANCEABLE_HUB_BACK_GESTURE)
     fun gestureExclusionZone_setAfterInit_backGestureEnabled() =
         with(kosmos) {
             testScope.runTest {
+                whenever(containerView.layoutDirection).thenReturn(View.LAYOUT_DIRECTION_LTR)
                 goToScene(CommunalScenes.Communal)
 
                 assertThat(containerView.systemGestureExclusionRects)
@@ -468,6 +496,32 @@ class GlanceableHubContainerControllerTest : SysuiTestCase() {
                             /* left= */ 0,
                             /* top= */ 0,
                             /* right= */ FAKE_INSETS.right,
+                            /* bottom= */ CONTAINER_HEIGHT
+                        )
+                    )
+            }
+        }
+
+    @Test
+    @EnableFlags(FLAG_GLANCEABLE_HUB_BACK_GESTURE)
+    fun gestureExclusionZone_setAfterInit_backGestureEnabled_rtl() =
+        with(kosmos) {
+            testScope.runTest {
+                whenever(containerView.layoutDirection).thenReturn(View.LAYOUT_DIRECTION_RTL)
+                goToScene(CommunalScenes.Communal)
+
+                assertThat(containerView.systemGestureExclusionRects)
+                    .containsExactly(
+                        Rect(
+                            /* left= */ FAKE_INSETS.left,
+                            /* top= */ TOP_SWIPE_REGION_WIDTH,
+                            /* right= */ CONTAINER_WIDTH - FAKE_INSETS.right,
+                            /* bottom= */ CONTAINER_HEIGHT - BOTTOM_SWIPE_REGION_WIDTH
+                        ),
+                        Rect(
+                            /* left= */ FAKE_INSETS.left,
+                            /* top= */ 0,
+                            /* right= */ CONTAINER_WIDTH,
                             /* bottom= */ CONTAINER_HEIGHT
                         )
                     )

@@ -29,7 +29,7 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
-import org.mockito.kotlin.any
+import org.mockito.kotlin.argThat
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
@@ -66,6 +66,8 @@ class AdditionalSystemViewContainerTest : ShellTestCase() {
 
     @Test
     fun testReleaseView_ViewRemoved() {
+        val flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or
+                WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH
         viewContainer = AdditionalSystemViewContainer(
             mockContext,
             TASK_ID,
@@ -73,9 +75,15 @@ class AdditionalSystemViewContainerTest : ShellTestCase() {
             Y,
             WIDTH,
             HEIGHT,
+            flags,
             R.layout.desktop_mode_window_decor_handle_menu
         )
-        verify(mockWindowManager).addView(eq(mockView), any())
+        verify(mockWindowManager).addView(
+            eq(mockView),
+            argThat {
+                lp -> (lp as WindowManager.LayoutParams).flags == flags
+            }
+        )
         viewContainer.releaseView()
         verify(mockWindowManager).removeViewImmediate(mockView)
     }

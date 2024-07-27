@@ -974,6 +974,11 @@ public class InputMethodService extends AbstractInputMethodService {
                                 : InputMethodManager.RESULT_UNCHANGED_HIDDEN), null);
             }
             Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
+            if (android.view.inputmethod.Flags.refactorInsetsController()) {
+                // The hide request first finishes the animation and then proceeds to the server
+                // side, finally reaching here, marking this the end state.
+                ImeTracker.forLogging().onHidden(statsToken);
+            }
         }
 
         /**
@@ -3104,6 +3109,13 @@ public class InputMethodService extends AbstractInputMethodService {
 
         ImeTracker.forLogging().onProgress(statsToken, ImeTracker.PHASE_IME_SHOW_WINDOW);
 
+        if (android.view.inputmethod.Flags.refactorInsetsController()) {
+            // The ImeInsetsSourceProvider need the statsToken when dispatching the control
+            // (whenever the IME has drawn and its window is visible). Therefore, sending the
+            // statsToken here first.
+            notifyPreImeWindowVisibilityChanged(true /* visible */, statsToken);
+        }
+
         ImeTracing.getInstance().triggerServiceDump("InputMethodService#showWindow", mDumper,
                 null /* icProto */);
         Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "IMS.showWindow");
@@ -3127,7 +3139,9 @@ public class InputMethodService extends AbstractInputMethodService {
         if (DEBUG) Log.v(TAG, "showWindow: draw decorView!");
         mWindow.show();
         mDecorViewWasVisible = true;
-        applyVisibilityInInsetsConsumerIfNecessary(true /* setVisible */, statsToken);
+        if (!android.view.inputmethod.Flags.refactorInsetsController()) {
+            applyVisibilityInInsetsConsumerIfNecessary(true /* setVisible */, statsToken);
+        }
         cancelImeSurfaceRemoval();
         mInShowWindow = false;
         Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
@@ -3238,6 +3252,20 @@ public class InputMethodService extends AbstractInputMethodService {
                 ? mCurShowInputToken : mCurHideInputToken, setVisible, statsToken);
     }
 
+    /**
+     * Notifies the ImeInsetsSourceProvider before the IME visibility changes.
+     *
+     * @param visible {@code true} if it became visible, {@code false} otherwise.
+     * @param statsToken the token tracking the current IME request.
+     */
+    private void notifyPreImeWindowVisibilityChanged(boolean visible,
+            @NonNull ImeTracker.Token statsToken) {
+        final var viewRootImpl = getWindow().getWindow().getDecorView().getViewRootImpl();
+        if (viewRootImpl != null) {
+            viewRootImpl.notifyImeVisibilityChanged(visible, statsToken);
+        }
+    }
+
     private void finishViews(boolean finishingInput) {
         if (mInputViewStarted) {
             if (DEBUG) Log.v(TAG, "CALL: onFinishInputView");
@@ -3279,7 +3307,13 @@ public class InputMethodService extends AbstractInputMethodService {
         ImeTracing.getInstance().triggerServiceDump("InputMethodService#hideWindow", mDumper,
                 null /* icProto */);
         setImeWindowStatus(0, mBackDisposition);
-        applyVisibilityInInsetsConsumerIfNecessary(false /* setVisible */, statsToken);
+        if (android.view.inputmethod.Flags.refactorInsetsController()) {
+            // The ImeInsetsSourceProvider need the statsToken when dispatching the control. We
+            // send the token here, so that another request in the provider can be cancelled.
+            notifyPreImeWindowVisibilityChanged(false /* visible */, statsToken);
+        } else {
+            applyVisibilityInInsetsConsumerIfNecessary(false /* setVisible */, statsToken);
+        }
         mWindowVisible = false;
         finishViews(false /* finishingInput */);
         if (mDecorViewVisible) {

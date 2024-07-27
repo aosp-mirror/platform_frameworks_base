@@ -46,13 +46,17 @@ import android.os.Bundle;
 import android.os.ResultReceiver;
 import android.util.Log;
 import android.view.View;
+import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.ImageView;
+import android.widget.ListPopupWindow;
 import android.widget.TextView;
 
 import androidx.activity.ComponentActivity;
 import androidx.annotation.Nullable;
+import androidx.appcompat.content.res.AppCompatResources;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
@@ -67,6 +71,7 @@ import com.android.systemui.res.R;
 import com.android.systemui.screenshot.scroll.CropView;
 import com.android.systemui.settings.UserTracker;
 
+import java.util.List;
 import java.util.Set;
 
 import javax.inject.Inject;
@@ -92,6 +97,7 @@ public class AppClipsActivity extends ComponentActivity {
 
     private static final String TAG = AppClipsActivity.class.getSimpleName();
     private static final ApplicationInfoFlags APPLICATION_INFO_FLAGS = ApplicationInfoFlags.of(0);
+    private static final int DRAWABLE_END = 2;
 
     private final AppClipsViewModel.Factory mViewModelFactory;
     private final PackageManager mPackageManager;
@@ -192,6 +198,7 @@ public class AppClipsActivity extends ComponentActivity {
         mViewModel.getResultLiveData().observe(this, this::setResultThenFinish);
         mViewModel.getErrorLiveData().observe(this, this::setErrorThenFinish);
         mViewModel.getBacklinksLiveData().observe(this, this::setBacklinksData);
+        mViewModel.mSelectedBacklinksLiveData.observe(this, this::updateBacklinksTextView);
 
         if (savedInstanceState == null) {
             int displayId = getDisplayId();
@@ -305,8 +312,8 @@ public class AppClipsActivity extends ComponentActivity {
 
         if (mBacklinksIncludeDataCheckBox.getVisibility() == View.VISIBLE
                 && mBacklinksIncludeDataCheckBox.isChecked()
-                && mViewModel.getBacklinksLiveData().getValue() != null) {
-            ClipData backlinksData = mViewModel.getBacklinksLiveData().getValue().getClipData();
+                && mViewModel.mSelectedBacklinksLiveData.getValue() != null) {
+            ClipData backlinksData = mViewModel.mSelectedBacklinksLiveData.getValue().getClipData();
             data.putParcelable(EXTRA_CLIP_DATA, backlinksData);
 
             DebugLogger.INSTANCE.logcatMessage(this,
@@ -330,18 +337,80 @@ public class AppClipsActivity extends ComponentActivity {
         finish();
     }
 
-    private void setBacklinksData(InternalBacklinksData backlinksData) {
+    private void setBacklinksData(List<InternalBacklinksData> backlinksData) {
         mBacklinksIncludeDataCheckBox.setVisibility(View.VISIBLE);
         mBacklinksDataTextView.setVisibility(
                 mBacklinksIncludeDataCheckBox.isChecked() ? View.VISIBLE : View.GONE);
 
-        mBacklinksDataTextView.setText(backlinksData.getClipData().getDescription().getLabel());
+        // Set up the dropdown when multiple backlinks are available.
+        if (backlinksData.size() > 1) {
+            setUpListPopupWindow(backlinksData, mBacklinksDataTextView);
+        }
+    }
 
+    private void setUpListPopupWindow(List<InternalBacklinksData> backlinksData, View anchor) {
+        ListPopupWindow listPopupWindow = new ListPopupWindow(this);
+        listPopupWindow.setAnchorView(anchor);
+        listPopupWindow.setOverlapAnchor(true);
+        listPopupWindow.setBackgroundDrawable(
+                AppCompatResources.getDrawable(this, R.drawable.backlinks_rounded_rectangle));
+        listPopupWindow.setOnItemClickListener((parent, view, position, id) -> {
+            mViewModel.mSelectedBacklinksLiveData.setValue(backlinksData.get(position));
+            listPopupWindow.dismiss();
+        });
+
+        ArrayAdapter<InternalBacklinksData> adapter = new ArrayAdapter<>(this,
+                R.layout.app_clips_backlinks_drop_down_entry) {
+            @Override
+            public View getView(int position, @Nullable View convertView, ViewGroup parent) {
+                TextView itemView = (TextView) super.getView(position, convertView, parent);
+                InternalBacklinksData data = backlinksData.get(position);
+                itemView.setText(data.getClipData().getDescription().getLabel());
+
+                Drawable icon = data.getAppIcon();
+                icon.setBounds(createBacklinksTextViewDrawableBounds());
+                itemView.setCompoundDrawablesRelative(/* start= */ icon, /* top= */ null,
+                        /* end= */ null, /* bottom= */ null);
+
+                return itemView;
+            }
+        };
+        adapter.addAll(backlinksData);
+        listPopupWindow.setAdapter(adapter);
+
+        mBacklinksDataTextView.setOnClickListener(unused -> listPopupWindow.show());
+    }
+
+    /**
+     * Updates the {@link #mBacklinksDataTextView} with the currently selected
+     * {@link InternalBacklinksData}. The {@link AppClipsViewModel#getBacklinksLiveData()} is
+     * expected to be already set when this method is called.
+     */
+    private void updateBacklinksTextView(InternalBacklinksData backlinksData) {
+        mBacklinksDataTextView.setText(backlinksData.getClipData().getDescription().getLabel());
         Drawable appIcon = backlinksData.getAppIcon();
-        int size = getResources().getDimensionPixelSize(R.dimen.appclips_backlinks_icon_size);
-        appIcon.setBounds(/* left= */ 0, /* top= */ 0, /* right= */ size, /* bottom= */ size);
+        Rect compoundDrawableBounds = createBacklinksTextViewDrawableBounds();
+        appIcon.setBounds(compoundDrawableBounds);
+
+        // Try to reuse the dropdown down arrow icon if available, will be null if never set.
+        Drawable dropDownIcon = mBacklinksDataTextView.getCompoundDrawablesRelative()[DRAWABLE_END];
+        if (mViewModel.getBacklinksLiveData().getValue().size() > 1 && dropDownIcon == null) {
+            // Set up the dropdown down arrow drawable only if it is required.
+            dropDownIcon = AppCompatResources.getDrawable(this, R.drawable.arrow_pointing_down);
+            dropDownIcon.setBounds(compoundDrawableBounds);
+            dropDownIcon.setTint(Utils.getColorAttr(this,
+                    android.R.attr.textColorSecondary).getDefaultColor());
+        }
+
         mBacklinksDataTextView.setCompoundDrawablesRelative(/* start= */ appIcon, /* top= */
-                null, /* end= */ null, /* bottom= */ null);
+                null, /* end= */ dropDownIcon, /* bottom= */ null);
+    }
+
+    private Rect createBacklinksTextViewDrawableBounds() {
+        int size = getResources().getDimensionPixelSize(R.dimen.appclips_backlinks_icon_size);
+        Rect bounds = new Rect();
+        bounds.set(/* left= */ 0, /* top= */ 0, /* right= */ size, /* bottom= */ size);
+        return bounds;
     }
 
     private void setError(int errorCode) {

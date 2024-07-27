@@ -26,6 +26,7 @@ import androidx.constraintlayout.widget.ConstraintSet.LEFT
 import androidx.constraintlayout.widget.ConstraintSet.PARENT_ID
 import androidx.constraintlayout.widget.ConstraintSet.RIGHT
 import androidx.constraintlayout.widget.ConstraintSet.VISIBILITY_MODE_IGNORE
+import com.android.keyguard.logging.KeyguardQuickAffordancesLogger
 import com.android.systemui.animation.view.LaunchableImageView
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.keyguard.KeyguardBottomAreaRefactor
@@ -52,6 +53,7 @@ constructor(
     private val indicationController: KeyguardIndicationController,
     private val vibratorHelper: VibratorHelper,
     private val keyguardBlueprintInteractor: Lazy<KeyguardBlueprintInteractor>,
+    private val shortcutsLogger: KeyguardQuickAffordancesLogger,
 ) : BaseShortcutSection() {
 
     // Amount to increase the bottom margin by to avoid colliding with inset
@@ -86,6 +88,7 @@ constructor(
                     keyguardQuickAffordancesCombinedViewModel.transitionAlpha,
                     falsingManager,
                     vibratorHelper,
+                    shortcutsLogger,
                 ) {
                     indicationController.showTransientIndication(it)
                 }
@@ -96,6 +99,7 @@ constructor(
                     keyguardQuickAffordancesCombinedViewModel.transitionAlpha,
                     falsingManager,
                     vibratorHelper,
+                    shortcutsLogger,
                 ) {
                     indicationController.showTransientIndication(it)
                 }

@@ -292,15 +292,6 @@ object Flags {
     val WM_ENABLE_SHELL_TRANSITIONS =
         sysPropBooleanFlag("persist.wm.debug.shell_transit", default = true)
 
-    // TODO(b/254513207): Tracking Bug
-    @Keep
-    @JvmField
-    val WM_ENABLE_PARTIAL_SCREEN_SHARING =
-        releasedFlag(
-            name = "enable_record_task_content",
-            namespace = DeviceConfig.NAMESPACE_WINDOW_MANAGER,
-        )
-
     // TODO(b/256873975): Tracking Bug
     @JvmField
     @Keep

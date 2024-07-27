@@ -117,7 +117,7 @@ public class HeadsUpManagerPhone extends BaseHeadsUpManager implements
 
         @Override
         public HeadsUpEntryPhone acquire() {
-            NotificationsHeadsUpRefactor.assertInLegacyMode();
+            NotificationThrottleHun.assertInLegacyMode();
             if (!mPoolObjects.isEmpty()) {
                 return mPoolObjects.pop();
             }
@@ -126,7 +126,7 @@ public class HeadsUpManagerPhone extends BaseHeadsUpManager implements
 
         @Override
         public boolean release(@NonNull HeadsUpEntryPhone instance) {
-            NotificationsHeadsUpRefactor.assertInLegacyMode();
+            NotificationThrottleHun.assertInLegacyMode();
             mPoolObjects.push(instance);
             return true;
         }
@@ -308,6 +308,9 @@ public class HeadsUpManagerPhone extends BaseHeadsUpManager implements
         HeadsUpEntryPhone headsUpEntry = getHeadsUpEntryPhone(entry.getKey());
         if (headsUpEntry != null && headsUpEntry.mRemoteInputActive != remoteInputActive) {
             headsUpEntry.mRemoteInputActive = remoteInputActive;
+            if (ExpandHeadsUpOnInlineReply.isEnabled() && remoteInputActive) {
+                headsUpEntry.mRemoteInputActivatedAtLeastOnce = true;
+            }
             if (remoteInputActive) {
                 headsUpEntry.cancelAutoRemovalCallbacks("setRemoteInputActive(true)");
             } else {
@@ -386,10 +389,13 @@ public class HeadsUpManagerPhone extends BaseHeadsUpManager implements
     //  OnReorderingAllowedListener:
 
     private final OnReorderingAllowedListener mOnReorderingAllowedListener = () -> {
-        mAnimationStateHandler.setHeadsUpGoingAwayAnimationsAllowed(false);
         if (NotificationThrottleHun.isEnabled()) {
             mAvalancheController.setEnableAtRuntime(true);
+            if (mEntriesToRemoveWhenReorderingAllowed.isEmpty()) {
+                return;
+            }
         }
+        mAnimationStateHandler.setHeadsUpGoingAwayAnimationsAllowed(false);
         for (NotificationEntry entry : mEntriesToRemoveWhenReorderingAllowed) {
             if (isHeadsUpEntry(entry.getKey())) {
                 // Maybe the heads-up was removed already
@@ -422,7 +428,7 @@ public class HeadsUpManagerPhone extends BaseHeadsUpManager implements
     @NonNull
     @Override
     protected HeadsUpEntry createHeadsUpEntry(NotificationEntry entry) {
-        if (NotificationsHeadsUpRefactor.isEnabled()) {
+        if (NotificationThrottleHun.isEnabled()) {
             return new HeadsUpEntryPhone(entry);
         } else {
             HeadsUpEntryPhone headsUpEntry = mEntryPool.acquire();
@@ -448,7 +454,7 @@ public class HeadsUpManagerPhone extends BaseHeadsUpManager implements
     @Override
     protected void onEntryRemoved(HeadsUpEntry headsUpEntry) {
         super.onEntryRemoved(headsUpEntry);
-        if (!NotificationsHeadsUpRefactor.isEnabled()) {
+        if (!NotificationThrottleHun.isEnabled()) {
             mEntryPool.release((HeadsUpEntryPhone) headsUpEntry);
         }
         updateTopHeadsUpFlow();
