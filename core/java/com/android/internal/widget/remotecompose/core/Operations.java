@@ -37,6 +37,7 @@ import com.android.internal.widget.remotecompose.core.operations.DrawTweenPath;
 import com.android.internal.widget.remotecompose.core.operations.FloatConstant;
 import com.android.internal.widget.remotecompose.core.operations.FloatExpression;
 import com.android.internal.widget.remotecompose.core.operations.Header;
+import com.android.internal.widget.remotecompose.core.operations.IntegerExpression;
 import com.android.internal.widget.remotecompose.core.operations.MatrixRestore;
 import com.android.internal.widget.remotecompose.core.operations.MatrixRotate;
 import com.android.internal.widget.remotecompose.core.operations.MatrixSave;
@@ -54,6 +55,8 @@ import com.android.internal.widget.remotecompose.core.operations.TextFromFloat;
 import com.android.internal.widget.remotecompose.core.operations.TextMerge;
 import com.android.internal.widget.remotecompose.core.operations.Theme;
 import com.android.internal.widget.remotecompose.core.operations.utilities.IntMap;
+import com.android.internal.widget.remotecompose.core.types.BooleanConstant;
+import com.android.internal.widget.remotecompose.core.types.IntegerConstant;
 
 /**
  * List of operations supported in a RemoteCompose document
@@ -109,6 +112,9 @@ public class Operations {
     public static final int TEXT_MERGE = 136;
     public static final int NAMED_VARIABLE = 137;
     public static final int COLOR_CONSTANT = 138;
+    public static final int DATA_INT = 140;
+    public static final int DATA_BOOLEAN = 143;
+    public static final int INTEGER_EXPRESSION = 144;
 
     /////////////////////////////////////////======================
     public static IntMap<CompanionOperation> map = new IntMap<>();
@@ -153,6 +159,9 @@ public class Operations {
         map.put(TEXT_MERGE, TextMerge.COMPANION);
         map.put(NAMED_VARIABLE, NamedVariable.COMPANION);
         map.put(COLOR_CONSTANT, ColorConstant.COMPANION);
+        map.put(DATA_INT, IntegerConstant.COMPANION);
+        map.put(INTEGER_EXPRESSION, IntegerExpression.COMPANION);
+        map.put(DATA_BOOLEAN, BooleanConstant.COMPANION);
     }
 
 }

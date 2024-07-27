@@ -27,7 +27,9 @@ import static com.android.systemui.util.kotlin.JavaAdapterKt.collectFlow;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.ActivityInfo;
 import android.graphics.drawable.ColorDrawable;
+import android.service.dreams.DreamActivity;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
@@ -63,6 +65,7 @@ import com.android.systemui.complication.dagger.ComplicationComponent;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dreams.dagger.DreamOverlayComponent;
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor;
+import com.android.systemui.navigationbar.gestural.domain.GestureInteractor;
 import com.android.systemui.shade.ShadeExpansionChangeEvent;
 import com.android.systemui.touch.TouchInsetManager;
 import com.android.systemui.util.concurrency.DelayableExecutor;
@@ -134,6 +137,8 @@ public class DreamOverlayService extends android.service.dreams.DreamOverlayServ
             mDreamComplicationComponent;
 
     private final DreamOverlayComponent mDreamOverlayComponent;
+
+    private ComponentName mCurrentBlockedGestureDreamActivityComponent;
 
     /**
      * This {@link LifecycleRegistry} controls when dream overlay functionality, like touch
@@ -222,6 +227,8 @@ public class DreamOverlayService extends android.service.dreams.DreamOverlayServ
 
     private final DreamOverlayStateController mStateController;
 
+    private final GestureInteractor mGestureInteractor;
+
     @VisibleForTesting
     public enum DreamOverlayEvent implements UiEventLogger.UiEventEnum {
         @UiEvent(doc = "The dream overlay has entered start.")
@@ -265,6 +272,7 @@ public class DreamOverlayService extends android.service.dreams.DreamOverlayServ
             ComponentName homeControlPanelDreamComponent,
             DreamOverlayCallbackController dreamOverlayCallbackController,
             KeyguardInteractor keyguardInteractor,
+            GestureInteractor gestureInteractor,
             @Named(DREAM_OVERLAY_WINDOW_TITLE) String windowTitle) {
         super(executor);
         mContext = context;
@@ -281,6 +289,7 @@ public class DreamOverlayService extends android.service.dreams.DreamOverlayServ
         mWindowTitle = windowTitle;
         mCommunalInteractor = communalInteractor;
         mSystemDialogsCloser = systemDialogsCloser;
+        mGestureInteractor = gestureInteractor;
 
         final ViewModelStore viewModelStore = new ViewModelStore();
         final Complication.Host host =
@@ -391,6 +400,7 @@ public class DreamOverlayService extends android.service.dreams.DreamOverlayServ
         mStarted = true;
 
         updateRedirectWakeup();
+        updateBlockedGestureDreamActivityComponent();
     }
 
     private void updateRedirectWakeup() {
@@ -399,6 +409,18 @@ public class DreamOverlayService extends android.service.dreams.DreamOverlayServ
         }
 
         redirectWake(mCommunalAvailable && !glanceableHubAllowKeyguardWhenDreaming());
+    }
+
+    private void updateBlockedGestureDreamActivityComponent() {
+        // TODO(b/343815446): We should not be crafting this ActivityInfo ourselves. It should be
+        // in a common place, Such as DreamActivity itself.
+        final ActivityInfo info = new ActivityInfo();
+        info.name = DreamActivity.class.getName();
+        info.packageName = getDreamComponent().getPackageName();
+        mCurrentBlockedGestureDreamActivityComponent = info.getComponentName();
+
+        mGestureInteractor.addGestureBlockedActivity(mCurrentBlockedGestureDreamActivityComponent,
+                GestureInteractor.Scope.Global);
     }
 
     @Override
@@ -472,6 +494,7 @@ public class DreamOverlayService extends android.service.dreams.DreamOverlayServ
      *                     into the dream window.
      */
     private boolean addOverlayWindowLocked(WindowManager.LayoutParams layoutParams) {
+
         mWindow = new PhoneWindow(mContext);
         // Default to SystemUI name for TalkBack.
         mWindow.setTitle(mWindowTitle);
@@ -554,6 +577,14 @@ public class DreamOverlayService extends android.service.dreams.DreamOverlayServ
         }
 
         mWindow = null;
+
+        // Always unregister the any set DreamActivity from being blocked from gestures.
+        if (mCurrentBlockedGestureDreamActivityComponent != null) {
+            mGestureInteractor.removeGestureBlockedActivity(
+                    mCurrentBlockedGestureDreamActivityComponent, GestureInteractor.Scope.Global);
+            mCurrentBlockedGestureDreamActivityComponent = null;
+        }
+
         mStarted = false;
     }
 }

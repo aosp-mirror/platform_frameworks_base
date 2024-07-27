@@ -152,6 +152,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.unit.times
 import androidx.compose.ui.util.fastAll
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.compose.ui.viewinterop.NoOpUpdate
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.window.layout.WindowMetricsCalculator
 import com.android.compose.animation.Easings.Emphasized
@@ -159,6 +160,7 @@ import com.android.compose.modifiers.thenIf
 import com.android.compose.theme.LocalAndroidColorScheme
 import com.android.compose.ui.graphics.painter.rememberDrawablePainter
 import com.android.internal.R.dimen.system_app_widget_background_radius
+import com.android.systemui.Flags.communalTimerFlickerFix
 import com.android.systemui.communal.domain.model.CommunalContentModel
 import com.android.systemui.communal.shared.model.CommunalContentSize
 import com.android.systemui.communal.shared.model.CommunalScenes
@@ -1356,9 +1358,15 @@ private fun SmartspaceContent(
         factory = { context ->
             SmartspaceAppWidgetHostView(context).apply {
                 interactionHandler?.let { setInteractionHandler(it) }
-                updateAppWidget(model.remoteViews)
+                if (!communalTimerFlickerFix()) {
+                    updateAppWidget(model.remoteViews)
+                }
             }
         },
+        update =
+            if (communalTimerFlickerFix()) {
+                { view: SmartspaceAppWidgetHostView -> view.updateAppWidget(model.remoteViews) }
+            } else NoOpUpdate,
         // For reusing composition in lazy lists.
         onReset = {},
     )

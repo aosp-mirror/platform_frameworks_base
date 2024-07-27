@@ -3077,7 +3077,7 @@ public abstract class BatteryStats {
     public static final String[] HISTORY_EVENT_NAMES = new String[] {
             "null", "proc", "fg", "top", "sync", "wake_lock_in", "job", "user", "userfg", "conn",
             "active", "pkginst", "pkgunin", "alarm", "stats", "pkginactive", "pkgactive",
-            "tmpwhitelist", "screenwake", "wakeupap", "longwake", "est_capacity", "state"
+            "tmpwhitelist", "screenwake", "wakeupap", "longwake", "state"
     };
 
     public static final String[] HISTORY_EVENT_CHECKIN_NAMES = new String[] {
