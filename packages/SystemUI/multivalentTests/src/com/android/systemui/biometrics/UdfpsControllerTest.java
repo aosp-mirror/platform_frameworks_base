@@ -65,12 +65,12 @@ import android.view.Surface;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewRootImpl;
-import android.view.WindowManager;
 import android.view.accessibility.AccessibilityManager;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
+import com.android.app.viewcapture.ViewCaptureAwareWindowManager;
 import com.android.internal.logging.InstanceIdSequence;
 import com.android.internal.util.LatencyTracker;
 import com.android.keyguard.KeyguardUpdateMonitor;
@@ -87,6 +87,7 @@ import com.android.systemui.biometrics.ui.viewmodel.DefaultUdfpsTouchOverlayView
 import com.android.systemui.biometrics.ui.viewmodel.DeviceEntryUdfpsTouchOverlayViewModel;
 import com.android.systemui.bouncer.domain.interactor.AlternateBouncerInteractor;
 import com.android.systemui.bouncer.domain.interactor.PrimaryBouncerInteractor;
+import com.android.systemui.camera.CameraGestureHelper;
 import com.android.systemui.classifier.FalsingCollector;
 import com.android.systemui.deviceentry.domain.interactor.DeviceEntryFaceAuthInteractor;
 import com.android.systemui.dump.DumpManager;
@@ -117,6 +118,8 @@ import com.android.systemui.util.time.FakeSystemClock;
 import com.android.systemui.util.time.SystemClock;
 
 import dagger.Lazy;
+
+import javax.inject.Provider;
 
 import kotlinx.coroutines.CoroutineScope;
 
@@ -152,7 +155,7 @@ public class UdfpsControllerTest extends SysuiTestCase {
     @Mock
     private FingerprintManager mFingerprintManager;
     @Mock
-    private WindowManager mWindowManager;
+    private ViewCaptureAwareWindowManager mWindowManager;
     @Mock
     private StatusBarStateController mStatusBarStateController;
     @Mock
@@ -261,6 +264,8 @@ public class UdfpsControllerTest extends SysuiTestCase {
     private Lazy<DeviceEntryUdfpsTouchOverlayViewModel> mDeviceEntryUdfpsTouchOverlayViewModel;
     @Mock
     private Lazy<DefaultUdfpsTouchOverlayViewModel> mDefaultUdfpsTouchOverlayViewModel;
+    @Mock
+    private Provider<CameraGestureHelper> mCameraGestureHelper;
 
     @Before
     public void setUp() {
@@ -269,7 +274,8 @@ public class UdfpsControllerTest extends SysuiTestCase {
                 mPowerRepository,
                 mock(FalsingCollector.class),
                 mock(ScreenOffAnimationController.class),
-                mStatusBarStateController
+                mStatusBarStateController,
+                mCameraGestureHelper
         );
         mPowerRepository.updateWakefulness(
                 WakefulnessState.AWAKE,

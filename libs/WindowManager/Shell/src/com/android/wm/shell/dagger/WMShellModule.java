@@ -569,7 +569,7 @@ public abstract class WMShellModule {
             ShellTaskOrganizer shellTaskOrganizer) {
         int maxTaskLimit = DesktopModeStatus.getMaxTaskLimit(context);
         if (!DesktopModeStatus.canEnterDesktopMode(context)
-                || DESKTOP_WINDOWING_MODE.isEnabled(context)
+                || !DESKTOP_WINDOWING_MODE.isEnabled(context)
                 || maxTaskLimit <= 0) {
             return Optional.empty();
         }

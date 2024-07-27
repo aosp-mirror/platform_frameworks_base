@@ -54,7 +54,11 @@ class ModesTileUserActionInteractorTest : SysuiTestCase() {
     fun handleClick_active() = runTest {
         val expandable = mock<Expandable>()
         underTest.handleInput(
-            QSTileInputTestKtx.click(data = ModesTileModel(true), expandable = expandable))
+            QSTileInputTestKtx.click(
+                data = ModesTileModel(true, listOf("DND")),
+                expandable = expandable
+            )
+        )
 
         verify(mockDialogDelegate).showDialog(eq(expandable))
     }
@@ -63,14 +67,18 @@ class ModesTileUserActionInteractorTest : SysuiTestCase() {
     fun handleClick_inactive() = runTest {
         val expandable = mock<Expandable>()
         underTest.handleInput(
-            QSTileInputTestKtx.click(data = ModesTileModel(false), expandable = expandable))
+            QSTileInputTestKtx.click(
+                data = ModesTileModel(false, emptyList()),
+                expandable = expandable
+            )
+        )
 
         verify(mockDialogDelegate).showDialog(eq(expandable))
     }
 
     @Test
     fun handleLongClick_active() = runTest {
-        underTest.handleInput(QSTileInputTestKtx.longClick(ModesTileModel(true)))
+        underTest.handleInput(QSTileInputTestKtx.longClick(ModesTileModel(true, listOf("DND"))))
 
         QSTileIntentUserInputHandlerSubject.assertThat(inputHandler).handledOneIntentInput {
             assertThat(it.intent.action).isEqualTo(Settings.ACTION_ZEN_MODE_SETTINGS)
@@ -79,7 +87,7 @@ class ModesTileUserActionInteractorTest : SysuiTestCase() {
 
     @Test
     fun handleLongClick_inactive() = runTest {
-        underTest.handleInput(QSTileInputTestKtx.longClick(ModesTileModel(false)))
+        underTest.handleInput(QSTileInputTestKtx.longClick(ModesTileModel(false, emptyList())))
 
         QSTileIntentUserInputHandlerSubject.assertThat(inputHandler).handledOneIntentInput {
             assertThat(it.intent.action).isEqualTo(Settings.ACTION_ZEN_MODE_SETTINGS)

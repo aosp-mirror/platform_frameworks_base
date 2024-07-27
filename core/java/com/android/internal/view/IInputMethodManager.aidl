@@ -171,7 +171,7 @@ interface IInputMethodManager {
     @EnforcePermission("INTERNAL_SYSTEM_WINDOW")
     @JavaPassthrough(annotation="@android.annotation.RequiresPermission(value = "
             + "android.Manifest.permission.INTERNAL_SYSTEM_WINDOW)")
-    void removeImeSurface();
+    void removeImeSurface(int displayId);
 
     /** Remove the IME surface. Requires passing the currently focused window. */
     oneway void removeImeSurfaceFromWindowAsync(in IBinder windowToken);

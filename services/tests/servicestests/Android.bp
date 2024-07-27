@@ -78,7 +78,6 @@ android_test {
         // TODO: remove once Android migrates to JUnit 4.12,
         // which provides assertThrows
         "testng",
-        "truth",
         "junit",
         "junit-params",
         "ActivityContext",

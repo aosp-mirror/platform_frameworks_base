@@ -60,7 +60,6 @@ import android.view.WindowManager;
 import com.android.internal.policy.IKeyguardDismissCallback;
 import com.android.server.inputmethod.InputMethodManagerInternal;
 import com.android.server.policy.WindowManagerPolicy;
-import com.android.window.flags.Flags;
 
 import java.io.PrintWriter;
 
@@ -198,14 +197,6 @@ class KeyguardController {
             setWakeTransitionReady();
             return;
         }
-        EventLogTags.writeWmSetKeyguardShown(
-                displayId,
-                keyguardShowing ? 1 : 0,
-                aodShowing ? 1 : 0,
-                state.mKeyguardGoingAway ? 1 : 0,
-                state.mOccluded ? 1 : 0,
-                "setKeyguardShown");
-
         // Update the task snapshot if the screen will not be turned off. To make sure that the
         // unlocking animation can animate consistent content. The conditions are:
         // - Either AOD or keyguard changes to be showing. So if the states change individually,
@@ -224,6 +215,7 @@ class KeyguardController {
 
         state.mKeyguardShowing = keyguardShowing;
         state.mAodShowing = aodShowing;
+        state.writeEventLog("setKeyguardShown");
 
         if (keyguardChanged) {
             // Irrelevant to AOD.
@@ -232,19 +224,13 @@ class KeyguardController {
                 state.mDismissalRequested = false;
             }
             if (goingAwayRemoved
-                    || (Flags.keyguardAppearTransition() && keyguardShowing
-                            && !Display.isOffState(dc.getDisplayInfo().state))) {
+                    || (keyguardShowing && !Display.isOffState(dc.getDisplayInfo().state))) {
                 // Keyguard decided to show or stopped going away. Send a transition to animate back
                 // to the locked state before holding the sleep token again
-                final DisplayContent transitionDc = Flags.keyguardAppearTransition()
-                        ? dc
-                        : mRootWindowContainer.getDefaultDisplay();
-                transitionDc.requestTransitionAndLegacyPrepare(
+                dc.requestTransitionAndLegacyPrepare(
                         TRANSIT_TO_FRONT, TRANSIT_FLAG_KEYGUARD_APPEARING);
-                if (Flags.keyguardAppearTransition()) {
-                    dc.mWallpaperController.adjustWallpaperWindows();
-                }
-                transitionDc.executeAppTransition();
+                dc.mWallpaperController.adjustWallpaperWindows();
+                dc.executeAppTransition();
             }
         }
 
@@ -284,13 +270,7 @@ class KeyguardController {
         mService.deferWindowLayout();
         state.mKeyguardGoingAway = true;
         try {
-            EventLogTags.writeWmSetKeyguardShown(
-                    displayId,
-                    state.mKeyguardShowing ? 1 : 0,
-                    state.mAodShowing ? 1 : 0,
-                    1 /* keyguardGoingAway */,
-                    state.mOccluded ? 1 : 0,
-                    "keyguardGoingAway");
+            state.writeEventLog("keyguardGoingAway");
             final int transitFlags = convertTransitFlags(flags);
             final DisplayContent dc = mRootWindowContainer.getDefaultDisplay();
             dc.prepareAppTransition(TRANSIT_KEYGUARD_GOING_AWAY, transitFlags);
@@ -436,8 +416,9 @@ class KeyguardController {
         }
 
         final TransitionController tc = mRootWindowContainer.mTransitionController;
+        final KeyguardDisplayState state = getDisplayState(displayId);
 
-        final boolean occluded = getDisplayState(displayId).mOccluded;
+        final boolean occluded = state.mOccluded;
         final boolean performTransition = isKeyguardLocked(displayId);
         final boolean executeTransition = performTransition && !tc.isCollecting();
 
@@ -481,7 +462,7 @@ class KeyguardController {
     /**
      * Called when keyguard going away state changed.
      */
-    private void handleKeyguardGoingAwayChanged(DisplayContent dc) {
+    private void handleDismissInsecureKeyguard(DisplayContent dc) {
         mService.deferWindowLayout();
         try {
             dc.prepareAppTransition(TRANSIT_KEYGUARD_GOING_AWAY, 0 /* transitFlags */);
@@ -646,6 +627,16 @@ class KeyguardController {
             mSleepTokenAcquirer.release(mDisplayId);
         }
 
+        void writeEventLog(String reason) {
+            EventLogTags.writeWmSetKeyguardShown(
+                    mDisplayId,
+                    mKeyguardShowing ? 1 : 0,
+                    mAodShowing ? 1 : 0,
+                    mKeyguardGoingAway ? 1 : 0,
+                    mOccluded ? 1 : 0,
+                    reason);
+        }
+
         /**
          * Updates keyguard status if the top task could be visible. The top task may occlude
          * keyguard, request to dismiss keyguard or make insecure keyguard go away based on its
@@ -715,23 +706,16 @@ class KeyguardController {
             }
 
             boolean hasChange = false;
-            if (lastOccluded != mOccluded) {
-                if (mDisplayId == DEFAULT_DISPLAY) {
-                    EventLogTags.writeWmSetKeyguardShown(
-                            mDisplayId,
-                            mKeyguardShowing ? 1 : 0,
-                            mAodShowing ? 1 : 0,
-                            mKeyguardGoingAway ? 1 : 0,
-                            mOccluded ? 1 : 0,
-                            "updateVisibility");
-                }
+            if (!lastKeyguardGoingAway && mKeyguardGoingAway) {
+                writeEventLog("dismissIfInsecure");
+                controller.handleDismissInsecureKeyguard(display);
+                hasChange = true;
+            } else if (lastOccluded != mOccluded) {
                 controller.handleOccludedChanged(mDisplayId, mTopOccludesActivity);
                 hasChange = true;
-            } else if (!lastKeyguardGoingAway && mKeyguardGoingAway) {
-                controller.handleKeyguardGoingAwayChanged(display);
-                hasChange = true;
             }
-            // Collect the participates for shell transition, so that transition won't happen too
+
+            // Collect the participants for shell transition, so that transition won't happen too
             // early since the transition was set ready.
             if (hasChange && top != null && (mOccluded || mKeyguardGoingAway)) {
                 display.mTransitionController.collect(top);

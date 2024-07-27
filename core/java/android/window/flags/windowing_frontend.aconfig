@@ -158,17 +158,6 @@ flag {
 }
 
 flag {
-  name: "keyguard_appear_transition"
-  namespace: "windowing_frontend"
-  description: "Add transition when keyguard appears"
-  bug: "327970608"
-  is_fixed_read_only: true
-  metadata {
-      purpose: PURPOSE_BUGFIX
-  }
-}
-
-flag {
   name: "get_dimmer_on_closing"
   namespace: "windowing_frontend"
   description: "Change check for when to ignore a closing task's dim"

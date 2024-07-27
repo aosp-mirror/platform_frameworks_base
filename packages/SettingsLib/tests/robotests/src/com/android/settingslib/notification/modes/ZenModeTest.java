@@ -27,6 +27,7 @@ import android.app.AutomaticZenRule;
 import android.net.Uri;
 import android.os.Parcel;
 import android.service.notification.Condition;
+import android.service.notification.SystemZenRules;
 import android.service.notification.ZenModeConfig;
 import android.service.notification.ZenPolicy;
 
@@ -106,6 +107,61 @@ public class ZenModeTest {
 
         ZenMode mode = new ZenMode("id", azr, configZenRule);
         assertThat(mode.getStatus()).isEqualTo(ZenMode.Status.DISABLED_BY_OTHER);
+    }
+
+    @Test
+    public void isCustomManual_customManualMode() {
+        AutomaticZenRule rule = new AutomaticZenRule.Builder("Mode", Uri.parse("x"))
+                .setPackage(SystemZenRules.PACKAGE_ANDROID)
+                .setType(AutomaticZenRule.TYPE_OTHER)
+                .build();
+        ZenMode mode = new ZenMode("id", rule, zenConfigRuleFor(rule, false));
+
+        assertThat(mode.isCustomManual()).isTrue();
+    }
+
+    @Test
+    public void isCustomManual_scheduleTime_false() {
+        AutomaticZenRule rule = new AutomaticZenRule.Builder("Mode", Uri.parse("x"))
+                .setPackage(SystemZenRules.PACKAGE_ANDROID)
+                .setType(AutomaticZenRule.TYPE_SCHEDULE_TIME)
+                .build();
+        ZenMode mode = new ZenMode("id", rule, zenConfigRuleFor(rule, false));
+
+        assertThat(mode.isCustomManual()).isFalse();
+    }
+
+    @Test
+    public void isCustomManual_scheduleCalendar_false() {
+        AutomaticZenRule rule = new AutomaticZenRule.Builder("Mode", Uri.parse("x"))
+                .setPackage(SystemZenRules.PACKAGE_ANDROID)
+                .setType(AutomaticZenRule.TYPE_SCHEDULE_CALENDAR)
+                .build();
+        ZenMode mode = new ZenMode("id", rule, zenConfigRuleFor(rule, false));
+
+        assertThat(mode.isCustomManual()).isFalse();
+    }
+
+    @Test
+    public void isCustomManual_appProvidedMode_false() {
+        AutomaticZenRule rule = new AutomaticZenRule.Builder("Mode", Uri.parse("x"))
+                .setPackage("com.some.package")
+                .setType(AutomaticZenRule.TYPE_OTHER)
+                .build();
+        ZenMode mode = new ZenMode("id", rule, zenConfigRuleFor(rule, false));
+
+        assertThat(mode.isCustomManual()).isFalse();
+    }
+
+    @Test
+    public void isCustomManual_manualDnd_false() {
+        AutomaticZenRule dndRule = new AutomaticZenRule.Builder("Mode", Uri.parse("x"))
+                .setPackage(SystemZenRules.PACKAGE_ANDROID)
+                .setType(AutomaticZenRule.TYPE_OTHER)
+                .build();
+        ZenMode mode = ZenMode.manualDndMode(dndRule, false);
+
+        assertThat(mode.isCustomManual()).isFalse();
     }
 
     @Test

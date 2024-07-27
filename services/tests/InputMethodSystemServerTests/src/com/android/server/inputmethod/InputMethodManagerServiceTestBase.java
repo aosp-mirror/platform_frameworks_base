@@ -348,7 +348,7 @@ public class InputMethodManagerServiceTestBase {
             ClientState cs = mInputMethodManagerService.getClientStateLocked(client);
             cs.mCurSession = new InputMethodManagerService.SessionState(cs,
                     mMockInputMethodInvoker, mMockInputMethodSession, mock(
-                    InputChannel.class));
+                    InputChannel.class), mCallingUserId);
         }
     }
 }
