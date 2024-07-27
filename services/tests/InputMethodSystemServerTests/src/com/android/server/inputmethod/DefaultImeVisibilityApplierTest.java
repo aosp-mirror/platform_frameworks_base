@@ -70,14 +70,11 @@ import org.junit.runner.RunWith;
 public class DefaultImeVisibilityApplierTest extends InputMethodManagerServiceTestBase {
     private DefaultImeVisibilityApplier mVisibilityApplier;
 
-    private int mUserId = 0;
-
     @Before
     public void setUp() throws RemoteException {
         super.setUp();
         synchronized (ImfLock.class) {
             mVisibilityApplier = mInputMethodManagerService.getVisibilityApplierLocked();
-            mUserId = mInputMethodManagerService.getCurrentImeUserIdLocked();
             mInputMethodManagerService.setAttachedClientForTesting(requireNonNull(
                     mInputMethodManagerService.getClientStateLocked(mMockInputMethodClient)));
         }
@@ -248,7 +245,7 @@ public class DefaultImeVisibilityApplierTest extends InputMethodManagerServiceTe
                 mMockRemoteInputConnection /* inputConnection */,
                 mMockRemoteAccessibilityInputConnection /* remoteAccessibilityInputConnection */,
                 mTargetSdkVersion /* unverifiedTargetSdkVersion */,
-                mCallingUserId /* userId */,
+                mUserId /* userId */,
                 mMockImeOnBackInvokedDispatcher /* imeDispatcher */);
     }
 }
