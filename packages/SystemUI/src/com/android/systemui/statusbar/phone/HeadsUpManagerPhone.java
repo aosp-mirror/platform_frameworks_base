@@ -117,7 +117,7 @@ public class HeadsUpManagerPhone extends BaseHeadsUpManager implements
 
         @Override
         public HeadsUpEntryPhone acquire() {
-            NotificationsHeadsUpRefactor.assertInLegacyMode();
+            NotificationThrottleHun.assertInLegacyMode();
             if (!mPoolObjects.isEmpty()) {
                 return mPoolObjects.pop();
             }
@@ -126,7 +126,7 @@ public class HeadsUpManagerPhone extends BaseHeadsUpManager implements
 
         @Override
         public boolean release(@NonNull HeadsUpEntryPhone instance) {
-            NotificationsHeadsUpRefactor.assertInLegacyMode();
+            NotificationThrottleHun.assertInLegacyMode();
             mPoolObjects.push(instance);
             return true;
         }
@@ -428,7 +428,7 @@ public class HeadsUpManagerPhone extends BaseHeadsUpManager implements
     @NonNull
     @Override
     protected HeadsUpEntry createHeadsUpEntry(NotificationEntry entry) {
-        if (NotificationsHeadsUpRefactor.isEnabled()) {
+        if (NotificationThrottleHun.isEnabled()) {
             return new HeadsUpEntryPhone(entry);
         } else {
             HeadsUpEntryPhone headsUpEntry = mEntryPool.acquire();
@@ -454,7 +454,7 @@ public class HeadsUpManagerPhone extends BaseHeadsUpManager implements
     @Override
     protected void onEntryRemoved(HeadsUpEntry headsUpEntry) {
         super.onEntryRemoved(headsUpEntry);
-        if (!NotificationsHeadsUpRefactor.isEnabled()) {
+        if (!NotificationThrottleHun.isEnabled()) {
             mEntryPool.release((HeadsUpEntryPhone) headsUpEntry);
         }
         updateTopHeadsUpFlow();
