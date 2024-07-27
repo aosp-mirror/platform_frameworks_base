@@ -1346,7 +1346,11 @@ public class DreamService extends Service implements Window.Callback {
                     Slog.w(mTag, "WakeUp was called before the dream was attached.");
                 } else {
                     try {
-                        mDreamManager.finishSelf(mDreamToken, false /*immediate*/);
+                        if (startAndStopDozingInBackground()) {
+                            mDreamManager.finishSelfOneway(mDreamToken, false /*immediate*/);
+                        } else {
+                            mDreamManager.finishSelf(mDreamToken, false /*immediate*/);
+                        }
                     } catch (RemoteException ex) {
                         // system server died
                     }
@@ -1497,7 +1501,11 @@ public class DreamService extends Service implements Window.Callback {
         if (mFinished || mWaking) {
             Slog.w(mTag, "attach() called after dream already finished");
             try {
-                mDreamManager.finishSelf(dreamToken, true /*immediate*/);
+                if (startAndStopDozingInBackground()) {
+                    mDreamManager.finishSelfOneway(dreamToken, true /*immediate*/);
+                } else {
+                    mDreamManager.finishSelf(dreamToken, true /*immediate*/);
+                }
             } catch (RemoteException ex) {
                 // system server died
             }
