@@ -257,8 +257,8 @@ public abstract class PowerStatsProcessor {
             for (int i = deviceStateEstimations.size() - 1; i >= 0; i--) {
                 deviceStateEstimations.get(i).intermediates = null;
             }
-            for (int i = deviceStateEstimations.size() - 1; i >= 0; i--) {
-                deviceStateEstimations.get(i).intermediates = null;
+            for (int i = combinedDeviceStateEstimations.size() - 1; i >= 0; i--) {
+                combinedDeviceStateEstimations.get(i).intermediates = null;
             }
             for (int i = uidStateEstimates.size() - 1; i >= 0; i--) {
                 UidStateEstimate uidStateEstimate = uidStateEstimates.get(i);
