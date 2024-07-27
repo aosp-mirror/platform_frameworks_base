@@ -312,7 +312,7 @@
     <string name="foreground_service_tap_for_details" msgid="9078123626015586751">"በባትሪ እና ውሂብ አጠቃቀም ላይ ዝርዝሮችን ለማግኘት መታ ያድርጉ"</string>
     <string name="foreground_service_multiple_separator" msgid="5002287361849863168">"<xliff:g id="LEFT_SIDE">%1$s</xliff:g>፣ <xliff:g id="RIGHT_SIDE">%2$s</xliff:g>"</string>
     <string name="safeMode" msgid="8974401416068943888">"የሚያስተማምን ሁነታ"</string>
-    <string name="android_system_label" msgid="5974767339591067210">"Android ስርዓት"</string>
+    <string name="android_system_label" msgid="5974767339591067210">"Android ሥርዓት"</string>
     <string name="user_owner_label" msgid="8628726904184471211">"ወደ የግል መገለጫ ቀይር"</string>
     <string name="managed_profile_label" msgid="7316778766973512382">"ወደ የስራ መገለጫ ቀይር"</string>
     <string name="user_owner_app_label" msgid="1553595155465750298">"ወደ የግል <xliff:g id="APP_NAME">%1$s</xliff:g> ቀይር"</string>
@@ -1428,6 +1428,7 @@
     <string name="share_remote_bugreport_action" msgid="7630880678785123682">"አጋራ"</string>
     <string name="decline_remote_bugreport_action" msgid="4040894777519784346">"አትቀበል"</string>
     <string name="select_input_method" msgid="3971267998568587025">"የግቤት ስልት ምረጥ"</string>
+    <string name="input_method_language_settings" msgid="8069089418056819437">"የቋንቋ ቅንብሮች"</string>
     <string name="show_ime" msgid="6406112007347443383">"አካላዊ የቁልፍ ሰሌዳ ገቢር ሆኖ ሳለ በማያ ገፅ ላይ አቆየው"</string>
     <string name="hardware" msgid="3611039921284836033">"የማያ ገጽ ላይ የቁልፍ ሰሌዳ ይጠቀሙ"</string>
     <string name="select_keyboard_layout_notification_title" msgid="5823199895322205589">"<xliff:g id="DEVICE_NAME">%s</xliff:g>ን ያዋቅሩ"</string>
@@ -2437,22 +2438,13 @@
     <string name="bg_user_sound_notification_button_switch_user" msgid="3091969648572788946">"ተጠቃሚ ቀይር"</string>
     <string name="bg_user_sound_notification_button_mute" msgid="4942158515665615243">"ድምፀ-ከል አድርግ"</string>
     <string name="bg_user_sound_notification_message" msgid="8613881975316976673">"ድምፀ-ከል አድርግ ለማድረግ መታ ያድርጉ"</string>
-    <!-- no translation found for keyboard_shortcut_group_applications_browser (6535007304687100909) -->
-    <skip />
-    <!-- no translation found for keyboard_shortcut_group_applications_contacts (2750702518068326356) -->
-    <skip />
-    <!-- no translation found for keyboard_shortcut_group_applications_email (4229037666415353683) -->
-    <skip />
-    <!-- no translation found for keyboard_shortcut_group_applications_sms (3523799286376321137) -->
-    <skip />
-    <!-- no translation found for keyboard_shortcut_group_applications_music (2051507523525651067) -->
-    <skip />
-    <!-- no translation found for keyboard_shortcut_group_applications_calendar (3571770335653387606) -->
-    <skip />
-    <!-- no translation found for keyboard_shortcut_group_applications_calculator (6753209559716091507) -->
-    <skip />
-    <!-- no translation found for keyboard_shortcut_group_applications_maps (7950000659522589471) -->
-    <skip />
-    <!-- no translation found for keyboard_shortcut_group_applications (3010389163951364798) -->
-    <skip />
+    <string name="keyboard_shortcut_group_applications_browser" msgid="6535007304687100909">"አሳሽ"</string>
+    <string name="keyboard_shortcut_group_applications_contacts" msgid="2750702518068326356">"ዕውቂያዎች"</string>
+    <string name="keyboard_shortcut_group_applications_email" msgid="4229037666415353683">"ኢሜይል"</string>
+    <string name="keyboard_shortcut_group_applications_sms" msgid="3523799286376321137">"ኤስኤምኤስ"</string>
+    <string name="keyboard_shortcut_group_applications_music" msgid="2051507523525651067">"ሙዚቃ"</string>
+    <string name="keyboard_shortcut_group_applications_calendar" msgid="3571770335653387606">"ቀን መቁጠሪያ"</string>
+    <string name="keyboard_shortcut_group_applications_calculator" msgid="6753209559716091507">"ሒሳብ ማስያ"</string>
+    <string name="keyboard_shortcut_group_applications_maps" msgid="7950000659522589471">"ካርታዎች"</string>
+    <string name="keyboard_shortcut_group_applications" msgid="3010389163951364798">"መተግበሪያዎች"</string>
 </resources>

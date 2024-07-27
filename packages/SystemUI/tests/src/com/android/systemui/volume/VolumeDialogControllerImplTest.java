@@ -252,7 +252,6 @@ public class VolumeDialogControllerImplTest extends SysuiTestCase {
     }
 
     @Test
-    @EnableFlags(Flags.FLAG_VOLUME_DIALOG_AUDIO_SHARING_FIX)
     public void handleAudioSharingStreamVolumeChanges_updateState() {
         ArgumentCaptor<VolumeDialogController.State> stateCaptor =
                 ArgumentCaptor.forClass(VolumeDialogController.State.class);

@@ -35,6 +35,7 @@ class AdditionalSystemViewContainer(
     y: Int,
     width: Int,
     height: Int,
+    flags: Int,
     layoutId: Int? = null
 ) : AdditionalViewContainer() {
     override val view: View
@@ -49,7 +50,7 @@ class AdditionalSystemViewContainer(
         val lp = WindowManager.LayoutParams(
             width, height, x, y,
             WindowManager.LayoutParams.TYPE_STATUS_BAR_ADDITIONAL,
-            WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
+            flags,
             PixelFormat.TRANSPARENT
         ).apply {
             title = "Additional view container of Task=$taskId"

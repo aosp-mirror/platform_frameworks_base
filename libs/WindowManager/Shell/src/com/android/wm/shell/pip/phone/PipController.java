@@ -646,9 +646,9 @@ public class PipController implements PipTransitionController.PipTransitionCallb
                 });
 
         mTabletopModeController.registerOnTabletopModeChangedListener((isInTabletopMode) -> {
-            final String tag = "tabletop-mode";
             if (!isInTabletopMode) {
-                mPipBoundsState.removeNamedUnrestrictedKeepClearArea(tag);
+                mPipBoundsState.setNamedUnrestrictedKeepClearArea(
+                        PipBoundsState.NAMED_KCA_TABLETOP_MODE, null);
                 return;
             }
 
@@ -657,14 +657,16 @@ public class PipController implements PipTransitionController.PipTransitionCallb
             if (mTabletopModeController.getPreferredHalfInTabletopMode()
                     == TabletopModeController.PREFERRED_TABLETOP_HALF_TOP) {
                 // Prefer top, avoid the bottom half of the display.
-                mPipBoundsState.addNamedUnrestrictedKeepClearArea(tag, new Rect(
-                        displayBounds.left, displayBounds.centerY(),
-                        displayBounds.right, displayBounds.bottom));
+                mPipBoundsState.setNamedUnrestrictedKeepClearArea(
+                        PipBoundsState.NAMED_KCA_TABLETOP_MODE, new Rect(
+                                displayBounds.left, displayBounds.centerY(),
+                                displayBounds.right, displayBounds.bottom));
             } else {
                 // Prefer bottom, avoid the top half of the display.
-                mPipBoundsState.addNamedUnrestrictedKeepClearArea(tag, new Rect(
-                        displayBounds.left, displayBounds.top,
-                        displayBounds.right, displayBounds.centerY()));
+                mPipBoundsState.setNamedUnrestrictedKeepClearArea(
+                        PipBoundsState.NAMED_KCA_TABLETOP_MODE, new Rect(
+                                displayBounds.left, displayBounds.top,
+                                displayBounds.right, displayBounds.centerY()));
             }
 
             // Try to move the PiP window if we have entered PiP mode.
@@ -916,10 +918,12 @@ public class PipController implements PipTransitionController.PipTransitionCallb
                     0, mPipBoundsState.getDisplayBounds().bottom - height,
                     mPipBoundsState.getDisplayBounds().right,
                     mPipBoundsState.getDisplayBounds().bottom);
-            mPipBoundsState.addNamedUnrestrictedKeepClearArea(LAUNCHER_KEEP_CLEAR_AREA_TAG, rect);
+            mPipBoundsState.setNamedUnrestrictedKeepClearArea(
+                    PipBoundsState.NAMED_KCA_LAUNCHER_SHELF, rect);
             updatePipPositionForKeepClearAreas();
         } else {
-            mPipBoundsState.removeNamedUnrestrictedKeepClearArea(LAUNCHER_KEEP_CLEAR_AREA_TAG);
+            mPipBoundsState.setNamedUnrestrictedKeepClearArea(
+                    PipBoundsState.NAMED_KCA_LAUNCHER_SHELF, null);
             // postpone moving in response to hide of Launcher in case there's another change
             mMainExecutor.removeCallbacks(mMovePipInResponseToKeepClearAreasChangeCallback);
             mMainExecutor.executeDelayed(
@@ -968,8 +972,8 @@ public class PipController implements PipTransitionController.PipTransitionCallb
             int launcherRotation, Rect hotseatKeepClearArea) {
         // preemptively add the keep clear area for Hotseat, so that it is taken into account
         // when calculating the entry destination bounds of PiP window
-        mPipBoundsState.addNamedUnrestrictedKeepClearArea(LAUNCHER_KEEP_CLEAR_AREA_TAG,
-                hotseatKeepClearArea);
+        mPipBoundsState.setNamedUnrestrictedKeepClearArea(
+                PipBoundsState.NAMED_KCA_LAUNCHER_SHELF, hotseatKeepClearArea);
         onDisplayRotationChangedNotInPip(mContext, launcherRotation);
         // cache current min/max size
         Point minSize = mPipBoundsState.getMinSize();

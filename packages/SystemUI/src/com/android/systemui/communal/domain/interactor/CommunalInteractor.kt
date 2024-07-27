@@ -433,6 +433,7 @@ constructor(
                     is CommunalWidgetContentModel.Available -> {
                         WidgetContent.Widget(
                             appWidgetId = widget.appWidgetId,
+                            priority = widget.priority,
                             providerInfo = widget.providerInfo,
                             appWidgetHost = appWidgetHost,
                             inQuietMode = isQuietModeEnabled(widget.providerInfo.profile)
@@ -441,7 +442,8 @@ constructor(
                     is CommunalWidgetContentModel.Pending -> {
                         WidgetContent.PendingWidget(
                             appWidgetId = widget.appWidgetId,
-                            packageName = widget.packageName,
+                            priority = widget.priority,
+                            componentName = widget.componentName,
                             icon = widget.icon,
                         )
                     }

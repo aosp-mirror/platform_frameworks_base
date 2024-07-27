@@ -29,7 +29,7 @@ object GroupHunAnimationFix {
     val token: FlagToken
         get() = FlagToken(FLAG_NAME, isEnabled)
 
-    /** Are sections sorted by time? */
+    /** Return whether the fix is enabled */
     @JvmStatic
     inline val isEnabled
         get() = Flags.notificationGroupHunRemovalAnimationFix()

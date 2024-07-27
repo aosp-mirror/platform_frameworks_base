@@ -56,6 +56,9 @@ import java.util.concurrent.atomic.AtomicInteger;
 
     public static final Duration RELIABLE_MESSAGE_TIMEOUT = Duration.ofSeconds(1);
 
+    public static final Duration RELIABLE_MESSAGE_DUPLICATE_DETECTION_TIMEOUT =
+            RELIABLE_MESSAGE_TIMEOUT.multipliedBy(3);
+
     private static final int MAX_PENDING_REQUESTS = 10000;
 
     private static final int RELIABLE_MESSAGE_MAX_NUM_RETRY = 3;

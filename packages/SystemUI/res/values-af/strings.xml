@@ -126,45 +126,27 @@
     <string name="screenrecord_save_text" msgid="3008973099800840163">"Tik om te bekyk"</string>
     <string name="screenrecord_save_error" msgid="5862648532560118815">"Kon nie skermopname stoor nie"</string>
     <string name="screenrecord_start_error" msgid="2200660692479682368">"Kon nie skermopname begin nie"</string>
-    <!-- no translation found for screenrecord_stop_dialog_title (8716193661764511095) -->
-    <skip />
-    <!-- no translation found for screenrecord_stop_dialog_message (6262768207331626817) -->
-    <skip />
-    <!-- no translation found for screenrecord_stop_dialog_message_specific_app (5995770227684523244) -->
-    <skip />
-    <!-- no translation found for screenrecord_stop_dialog_button (2883812564938194350) -->
-    <skip />
+    <string name="screenrecord_stop_dialog_title" msgid="8716193661764511095">"Stop opname?"</string>
+    <string name="screenrecord_stop_dialog_message" msgid="6262768207331626817">"Jy neem tans jou hele skerm op"</string>
+    <string name="screenrecord_stop_dialog_message_specific_app" msgid="5995770227684523244">"Jy neem tans <xliff:g id="APP_NAME">%1$s</xliff:g> op"</string>
+    <string name="screenrecord_stop_dialog_button" msgid="2883812564938194350">"Stop opname"</string>
     <string name="share_to_app_chip_accessibility_label" msgid="4210256229976947065">"Deel tans skerm"</string>
-    <!-- no translation found for share_to_app_stop_dialog_title (9212915050910250438) -->
-    <skip />
-    <!-- no translation found for share_to_app_stop_dialog_message_entire_screen_with_host_app (522823522115375414) -->
-    <skip />
-    <!-- no translation found for share_to_app_stop_dialog_message_entire_screen (5090115386271179270) -->
-    <skip />
-    <!-- no translation found for share_to_app_stop_dialog_message_single_app_specific (5923772039347985172) -->
-    <skip />
-    <!-- no translation found for share_to_app_stop_dialog_message_single_app_generic (6681016774654578261) -->
-    <skip />
-    <!-- no translation found for share_to_app_stop_dialog_button (6334056916284230217) -->
-    <skip />
+    <string name="share_to_app_stop_dialog_title" msgid="9212915050910250438">"Hou op om skerm te deel?"</string>
+    <string name="share_to_app_stop_dialog_message_entire_screen_with_host_app" msgid="522823522115375414">"Jy deel tans jou hele skerm met <xliff:g id="HOST_APP_NAME">%1$s</xliff:g>"</string>
+    <string name="share_to_app_stop_dialog_message_entire_screen" msgid="5090115386271179270">"Jy deel tans jou hele skerm met ’n app"</string>
+    <string name="share_to_app_stop_dialog_message_single_app_specific" msgid="5923772039347985172">"Jy deel tans <xliff:g id="APP_BEING_SHARED_NAME">%1$s</xliff:g>"</string>
+    <string name="share_to_app_stop_dialog_message_single_app_generic" msgid="6681016774654578261">"Jy deel tans ’n app"</string>
+    <string name="share_to_app_stop_dialog_button" msgid="6334056916284230217">"Hou op deel"</string>
     <string name="cast_screen_to_other_device_chip_accessibility_label" msgid="4687917476203009885">"Skerm word tans uitgesaai"</string>
     <string name="cast_to_other_device_stop_dialog_title" msgid="7836517190930357326">"Hou op uitsaai?"</string>
-    <!-- no translation found for cast_to_other_device_stop_dialog_message_entire_screen_with_device (1474703115926205251) -->
-    <skip />
-    <!-- no translation found for cast_to_other_device_stop_dialog_message_entire_screen (8419219169553867625) -->
-    <skip />
-    <!-- no translation found for cast_to_other_device_stop_dialog_message_specific_app_with_device (2715934698604085519) -->
-    <skip />
-    <!-- no translation found for cast_to_other_device_stop_dialog_message_specific_app (8616103075630934513) -->
-    <skip />
-    <!-- no translation found for cast_to_other_device_stop_dialog_message_generic_with_device (9213582497852420203) -->
-    <skip />
-    <!-- no translation found for cast_to_other_device_stop_dialog_message_generic (4100272100480415076) -->
-    <skip />
-    <!-- no translation found for cast_to_other_device_stop_dialog_button (6420183747435521834) -->
-    <skip />
-    <!-- no translation found for close_dialog_button (4749497706540104133) -->
-    <skip />
+    <string name="cast_to_other_device_stop_dialog_message_entire_screen_with_device" msgid="1474703115926205251">"Jy saai tans jou hele skerm uit na <xliff:g id="DEVICE_NAME">%1$s</xliff:g>"</string>
+    <string name="cast_to_other_device_stop_dialog_message_entire_screen" msgid="8419219169553867625">"Jy saai tans jou hele skerm uit na ’n toestel in die omtrek"</string>
+    <string name="cast_to_other_device_stop_dialog_message_specific_app_with_device" msgid="2715934698604085519">"Jy saai tans <xliff:g id="APP_BEING_SHARED_NAME">%1$s</xliff:g> uit na <xliff:g id="DEVICE_NAME">%2$s</xliff:g>"</string>
+    <string name="cast_to_other_device_stop_dialog_message_specific_app" msgid="8616103075630934513">"Jy saai tans <xliff:g id="APP_BEING_SHARED_NAME">%1$s</xliff:g> uit na ’n toestel in die omtrek"</string>
+    <string name="cast_to_other_device_stop_dialog_message_generic_with_device" msgid="9213582497852420203">"Jy saai tans uit na <xliff:g id="DEVICE_NAME">%1$s</xliff:g>"</string>
+    <string name="cast_to_other_device_stop_dialog_message_generic" msgid="4100272100480415076">"Jy saai tans uit na ’n toestel in die omtrek"</string>
+    <string name="cast_to_other_device_stop_dialog_button" msgid="6420183747435521834">"Hou op uitsaai"</string>
+    <string name="close_dialog_button" msgid="4749497706540104133">"Maak toe"</string>
     <string name="issuerecord_title" msgid="286627115110121849">"Kwessieopnemer"</string>
     <string name="issuerecord_background_processing_label" msgid="1666840264959336876">"Verwerk tans kwessieopname"</string>
     <string name="issuerecord_channel_description" msgid="6142326363431474632">"Deurlopende kennisgewing vir ’n kwessieversamelingsessie"</string>
@@ -175,8 +157,7 @@
     <string name="issuerecord_save_error" msgid="6913040083446722726">"Kon nie kwessieopname stoor nie"</string>
     <string name="issuerecord_start_error" msgid="3402782952722871190">"Kon nie kwessieopname begin nie"</string>
     <string name="immersive_cling_title" msgid="8372056499315585941">"Bekyk tans volskerm"</string>
-    <!-- no translation found for immersive_cling_description (2717426731830851921) -->
-    <skip />
+    <string name="immersive_cling_description" msgid="2717426731830851921">"Swiep van die bokant van jou skerm af ondertoe om uit te gaan"</string>
     <string name="immersive_cling_positive" msgid="3076681691468978568">"Het dit"</string>
     <string name="accessibility_back" msgid="6530104400086152611">"Terug"</string>
     <string name="accessibility_home" msgid="5430449841237966217">"Tuis"</string>
@@ -309,8 +290,7 @@
     <string name="start_dreams" msgid="9131802557946276718">"Sluimerskerm"</string>
     <string name="ethernet_label" msgid="2203544727007463351">"Ethernet"</string>
     <string name="quick_settings_dnd_label" msgid="7728690179108024338">"Moenie Steur Nie"</string>
-    <!-- no translation found for quick_settings_modes_label (5407025818652750501) -->
-    <skip />
+    <string name="quick_settings_modes_label" msgid="5407025818652750501">"Prioriteitmodusse"</string>
     <string name="quick_settings_bluetooth_label" msgid="7018763367142041481">"Bluetooth"</string>
     <string name="quick_settings_bluetooth_detail_empty_text" msgid="5760239584390514322">"Geen saamgebinde toestelle beskikbaar nie"</string>
     <string name="quick_settings_bluetooth_tile_subtitle" msgid="212752719010829550">"Tik om ’n toestel te koppel of ontkoppel"</string>
@@ -322,8 +302,7 @@
     <string name="quick_settings_bluetooth_device_saved" msgid="7549938728928069477">"Gestoor"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_disconnect" msgid="415980329093277342">"ontkoppel"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_activate" msgid="3724301751036877403">"aktiveer"</string>
-    <!-- no translation found for turn_on_bluetooth_auto_tomorrow (3345758139235739006) -->
-    <skip />
+    <string name="turn_on_bluetooth_auto_tomorrow" msgid="3345758139235739006">"Skakel dit môre outomaties aan"</string>
     <string name="turn_on_bluetooth_auto_info_disabled" msgid="682984290339848844">"Kenmerke soos Kitsdeel en Kry My Toestel gebruik Bluetooth"</string>
     <string name="turn_on_bluetooth_auto_info_enabled" msgid="7440944034584560279">"Bluetooth sal môreoggend aanskakel"</string>
     <string name="quick_settings_bluetooth_audio_sharing_button" msgid="7545274861795853838">"Deel oudio"</string>
@@ -447,6 +426,13 @@
     <string name="sensor_privacy_dialog_open_settings" msgid="5635865896053011859">"Maak Instellings oop"</string>
     <string name="media_seamless_other_device" msgid="4654849800789196737">"Ander toestel"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"Wissel oorsig"</string>
+    <string name="zen_modes_dialog_title" msgid="4159138230418567383">"Prioriteitmodusse"</string>
+    <string name="zen_modes_dialog_done" msgid="6654130880256438950">"Klaar"</string>
+    <string name="zen_modes_dialog_settings" msgid="2310248023728936697">"Instellings"</string>
+    <!-- no translation found for zen_mode_on (9085304934016242591) -->
+    <skip />
+    <!-- no translation found for zen_mode_off (1736604456618147306) -->
+    <skip />
     <string name="zen_priority_introduction" msgid="3159291973383796646">"Jy sal nie deur geluide en vibrasies gepla word nie, behalwe deur wekkers, herinneringe, geleenthede en bellers wat jy spesifiseer. Jy sal steeds enigiets hoor wat jy kies om te speel, insluitend musiek, video\'s en speletjies."</string>
     <string name="zen_alarms_introduction" msgid="3987266042682300470">"Jy sal nie deur geluide en vibrasies gepla word nie, behalwe deur wekkers. Jy sal steeds enigiets hoor wat jy kies om te speel, insluitend musiek, video\'s en speletjies."</string>
     <string name="zen_priority_customize_button" msgid="4119213187257195047">"Pasmaak"</string>
@@ -511,16 +497,13 @@
     <string name="accessibility_action_label_select_widget" msgid="8897281501387398191">"kies legstuk"</string>
     <string name="accessibility_action_label_remove_widget" msgid="3373779447448758070">"verwyder legstuk"</string>
     <string name="accessibility_action_label_place_widget" msgid="1914197458644168978">"plaas gekose legstuk"</string>
-    <!-- no translation found for communal_widget_picker_title (1953369090475731663) -->
+    <string name="communal_widget_picker_title" msgid="1953369090475731663">"Sluitskermlegstukke"</string>
+    <string name="communal_widget_picker_description" msgid="490515450110487871">"Enigiemand kan legstukke op jou sluitskerm sien, selfs al is jou tablet gesluit."</string>
+    <!-- no translation found for accessibility_action_label_unselect_widget (1041811747619468698) -->
     <skip />
-    <!-- no translation found for communal_widget_picker_description (490515450110487871) -->
-    <skip />
-    <!-- no translation found for communal_widgets_disclaimer_title (1150954395585308868) -->
-    <skip />
-    <!-- no translation found for communal_widgets_disclaimer_text (1423545475160506349) -->
-    <skip />
-    <!-- no translation found for communal_widgets_disclaimer_button (4423059765740780753) -->
-    <skip />
+    <string name="communal_widgets_disclaimer_title" msgid="1150954395585308868">"Sluitskermlegstukke"</string>
+    <string name="communal_widgets_disclaimer_text" msgid="1423545475160506349">"Om ’n app met ’n legstuk oop te maak, sal jy moet verifieer dat dit jy is. Hou ook in gedagte dat enigeen dit kan bekyk, selfs wanneer jou tablet gesluit is. Sommige legstukke is moontlik nie vir jou sluitskerm bedoel nie en dit kan onveilig wees om dit hier by te voeg."</string>
+    <string name="communal_widgets_disclaimer_button" msgid="4423059765740780753">"Het dit"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"Wissel gebruiker"</string>
     <string name="accessibility_multi_user_list_switcher" msgid="8574105376229857407">"aftrekkieslys"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Alle programme en data in hierdie sessie sal uitgevee word."</string>
@@ -574,8 +557,10 @@
     <string name="media_projection_action_text" msgid="3634906766918186440">"Begin nou"</string>
     <string name="empty_shade_text" msgid="8935967157319717412">"Geen kennisgewings nie"</string>
     <string name="no_unseen_notif_text" msgid="395512586119868682">"Geen nuwe kennisgewings nie"</string>
-    <string name="adaptive_notification_edu_hun_title" msgid="5720882373252389461">"Aanpasbare kennisgewings is aan"</string>
-    <string name="adaptive_notification_edu_hun_text" msgid="4260536236101821273">"Jou toestel verlaag nou die volume en verminder opspringers op die skerm vir tot twee minute wanneer jy baie kennisgewings in ’n kort tydperk ontvang."</string>
+    <!-- no translation found for adaptive_notification_edu_hun_title (7790738150177329960) -->
+    <skip />
+    <!-- no translation found for adaptive_notification_edu_hun_text (7743367744129536610) -->
+    <skip />
     <string name="go_to_adaptive_notification_settings" msgid="2423690125178298479">"Skakel af"</string>
     <string name="unlock_to_see_notif_text" msgid="7439033907167561227">"Ontsluit om ouer kennisgewings te sien"</string>
     <string name="quick_settings_disclosure_parental_controls" msgid="2114102871438223600">"Hierdie toestel word deur jou ouer bestuur"</string>
@@ -742,8 +727,7 @@
     <string name="notification_alert_title" msgid="3656229781017543655">"Verstek"</string>
     <string name="notification_automatic_title" msgid="3745465364578762652">"Outomaties"</string>
     <string name="notification_channel_summary_low" msgid="4860617986908931158">"Geen klank of vibrasie nie"</string>
-    <!-- no translation found for notification_conversation_summary_low (3855696451919728790) -->
-    <skip />
+    <string name="notification_conversation_summary_low" msgid="3855696451919728790">"Geen klank of vibrasie nie, maar verskyn steeds in die gesprekafdeling"</string>
     <string name="notification_channel_summary_default" msgid="777294388712200605">"Kan lui of vibreer op grond van toestelinstellings"</string>
     <string name="notification_channel_summary_default_with_bubbles" msgid="3482483084451555344">"Kan lui of vibreer op grond van toestelinstellings. Gesprekke van <xliff:g id="APP_NAME">%1$s</xliff:g> af verskyn by verstek in ’n borrel."</string>
     <string name="notification_channel_summary_automatic" msgid="5813109268050235275">"Laat die stelsel bepaal of hierdie kennisgewing \'n klank moet maak of vibreer"</string>
@@ -800,8 +784,7 @@
     <string name="keyboard_key_page_up" msgid="173914303254199845">"Page Up"</string>
     <string name="keyboard_key_page_down" msgid="9035902490071829731">"Page Down"</string>
     <string name="keyboard_key_forward_del" msgid="5325501825762733459">"Delete"</string>
-    <!-- no translation found for keyboard_key_esc (6230365950511411322) -->
-    <skip />
+    <string name="keyboard_key_esc" msgid="6230365950511411322">"Esc"</string>
     <string name="keyboard_key_move_home" msgid="3496502501803911971">"Home"</string>
     <string name="keyboard_key_move_end" msgid="99190401463834854">"End"</string>
     <string name="keyboard_key_insert" msgid="4621692715704410493">"Insert"</string>
@@ -1384,22 +1367,17 @@
     <string name="shortcutHelper_category_split_screen" msgid="1159669813444812244">"Verdeelde skerm"</string>
     <string name="shortcut_helper_category_input" msgid="8674018654124839566">"Invoer"</string>
     <string name="shortcut_helper_category_app_shortcuts" msgid="8010249408308587117">"Appkortpaaie"</string>
-    <!-- no translation found for shortcut_helper_category_current_app_shortcuts (4017840565974573628) -->
-    <skip />
+    <string name="shortcut_helper_category_current_app_shortcuts" msgid="4017840565974573628">"Huidige app"</string>
     <string name="shortcut_helper_category_a11y" msgid="6314444792641773464">"Toeganklikheid"</string>
     <string name="shortcut_helper_title" msgid="8567500639300970049">"Kortpadsleutels"</string>
     <string name="shortcut_helper_search_placeholder" msgid="5488547526269871819">"Soekkortpaaie"</string>
     <string name="shortcut_helper_content_description_collapse_icon" msgid="8028015738431664954">"Vou ikoon in"</string>
     <string name="shortcut_helper_content_description_expand_icon" msgid="1084435697860417390">"Vou ikoon uit"</string>
     <string name="shortcut_helper_key_combinations_or_separator" msgid="7082902112102125540">"of"</string>
-    <!-- no translation found for touchpad_tutorial_back_gesture_button (2746834288077265946) -->
-    <skip />
-    <!-- no translation found for touchpad_tutorial_home_gesture_button (7640544867625955304) -->
-    <skip />
-    <!-- no translation found for touchpad_tutorial_action_key_button (3220074511852927267) -->
-    <skip />
-    <!-- no translation found for touchpad_tutorial_done_button (176168488821755503) -->
-    <skip />
+    <string name="touchpad_tutorial_back_gesture_button" msgid="2746834288077265946">"Teruggebaar"</string>
+    <string name="touchpad_tutorial_home_gesture_button" msgid="7640544867625955304">"Tuisgebaar"</string>
+    <string name="touchpad_tutorial_action_key_button" msgid="3220074511852927267">"Handelingsleutel"</string>
+    <string name="touchpad_tutorial_done_button" msgid="176168488821755503">"Klaar"</string>
     <string name="touchpad_tutorial_gesture_done" msgid="4784438360736821255">"Uitstekende werk!"</string>
     <string name="touchpad_back_gesture_action_title" msgid="7199067250654332735">"Gaan terug"</string>
     <string name="touchpad_back_gesture_guidance" msgid="4222430588599527272">"Swiep enige plek op die raakpaneel links of regs met drie vingers om terug te gaan."</string>
@@ -1409,6 +1387,29 @@
     <string name="keyboard_backlight_value" msgid="7336398765584393538">"Vlak %1$d van %2$d"</string>
     <string name="home_controls_dream_label" msgid="6567105701292324257">"Huiskontroles"</string>
     <string name="home_controls_dream_description" msgid="4644150952104035789">"Kry vinnig toegang tot jou huiskontroles as ’n sluimerskerm"</string>
-    <!-- no translation found for volume_undo_action (5815519725211877114) -->
+    <string name="volume_undo_action" msgid="5815519725211877114">"Ontdoen"</string>
+    <!-- no translation found for back_edu_toast_content (4530314597378982956) -->
+    <skip />
+    <!-- no translation found for home_edu_toast_content (3381071147871955415) -->
+    <skip />
+    <!-- no translation found for overview_edu_toast_content (5797030644017804518) -->
+    <skip />
+    <!-- no translation found for all_apps_edu_toast_content (8807496014667211562) -->
+    <skip />
+    <!-- no translation found for back_edu_notification_title (5624780717751357278) -->
+    <skip />
+    <!-- no translation found for back_edu_notification_content (2497557451540954068) -->
+    <skip />
+    <!-- no translation found for home_edu_notification_title (6097902076909654045) -->
+    <skip />
+    <!-- no translation found for home_edu_notification_content (6631697734535766588) -->
+    <skip />
+    <!-- no translation found for overview_edu_notification_title (1265824157319562406) -->
+    <skip />
+    <!-- no translation found for overview_edu_notification_content (3578204677648432500) -->
+    <skip />
+    <!-- no translation found for all_apps_edu_notification_title (372262997265569063) -->
+    <skip />
+    <!-- no translation found for all_apps_edu_notification_content (3255070575694025585) -->
     <skip />
 </resources>

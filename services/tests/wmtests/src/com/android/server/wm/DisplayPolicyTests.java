@@ -554,7 +554,7 @@ public class DisplayPolicyTests extends WindowTestsBase {
         final DisplayPolicy displayPolicy = mDisplayContent.getDisplayPolicy();
         displayPolicy.addWindowLw(mNavBarWindow, mNavBarWindow.mAttrs);
         final InsetsSourceProvider navBarProvider = mNavBarWindow.getControllableInsetProvider();
-        navBarProvider.updateControlForTarget(mAppWindow, false);
+        navBarProvider.updateControlForTarget(mAppWindow, false, null /* statsToken */);
         navBarProvider.getSource().setVisible(false);
 
         displayPolicy.setCanSystemBarsBeShownByUser(false);
@@ -579,7 +579,7 @@ public class DisplayPolicyTests extends WindowTestsBase {
         final DisplayPolicy displayPolicy = mDisplayContent.getDisplayPolicy();
         displayPolicy.addWindowLw(mNavBarWindow, mNavBarWindow.mAttrs);
         final InsetsSourceProvider navBarProvider = mNavBarWindow.getControllableInsetProvider();
-        navBarProvider.updateControlForTarget(win, false);
+        navBarProvider.updateControlForTarget(win, false, null /* statsToken */);
         navBarProvider.getSource().setVisible(false);
 
         displayPolicy.setCanSystemBarsBeShownByUser(true);

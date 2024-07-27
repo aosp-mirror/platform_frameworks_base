@@ -1428,6 +1428,7 @@
     <string name="share_remote_bugreport_action" msgid="7630880678785123682">"ចែករំលែក"</string>
     <string name="decline_remote_bugreport_action" msgid="4040894777519784346">"បដិសេធ"</string>
     <string name="select_input_method" msgid="3971267998568587025">"ជ្រើស​វិធីសាស្ត្រ​បញ្ចូល"</string>
+    <string name="input_method_language_settings" msgid="8069089418056819437">"ការកំណត់​ភាសា"</string>
     <string name="show_ime" msgid="6406112007347443383">"ទុកវានៅលើអេក្រង់ខណៈពេលក្តារចុចពិតប្រាកដកំពុងសកម្ម"</string>
     <string name="hardware" msgid="3611039921284836033">"ប្រើក្ដារចុច​លើអេក្រង់"</string>
     <string name="select_keyboard_layout_notification_title" msgid="5823199895322205589">"កំណត់រចនាសម្ព័ន្ធ <xliff:g id="DEVICE_NAME">%s</xliff:g>"</string>
@@ -2437,22 +2438,13 @@
     <string name="bg_user_sound_notification_button_switch_user" msgid="3091969648572788946">"ប្ដូរអ្នកប្រើប្រាស់"</string>
     <string name="bg_user_sound_notification_button_mute" msgid="4942158515665615243">"បិទសំឡេង"</string>
     <string name="bg_user_sound_notification_message" msgid="8613881975316976673">"ចុចដើម្បីបិទសំឡេង"</string>
-    <!-- no translation found for keyboard_shortcut_group_applications_browser (6535007304687100909) -->
-    <skip />
-    <!-- no translation found for keyboard_shortcut_group_applications_contacts (2750702518068326356) -->
-    <skip />
-    <!-- no translation found for keyboard_shortcut_group_applications_email (4229037666415353683) -->
-    <skip />
-    <!-- no translation found for keyboard_shortcut_group_applications_sms (3523799286376321137) -->
-    <skip />
-    <!-- no translation found for keyboard_shortcut_group_applications_music (2051507523525651067) -->
-    <skip />
-    <!-- no translation found for keyboard_shortcut_group_applications_calendar (3571770335653387606) -->
-    <skip />
-    <!-- no translation found for keyboard_shortcut_group_applications_calculator (6753209559716091507) -->
-    <skip />
-    <!-- no translation found for keyboard_shortcut_group_applications_maps (7950000659522589471) -->
-    <skip />
-    <!-- no translation found for keyboard_shortcut_group_applications (3010389163951364798) -->
-    <skip />
+    <string name="keyboard_shortcut_group_applications_browser" msgid="6535007304687100909">"កម្មវិធី​រុករក​តាម​អ៊ីនធឺណិត"</string>
+    <string name="keyboard_shortcut_group_applications_contacts" msgid="2750702518068326356">"ទំនាក់ទំនង"</string>
+    <string name="keyboard_shortcut_group_applications_email" msgid="4229037666415353683">"អ៊ីមែល"</string>
+    <string name="keyboard_shortcut_group_applications_sms" msgid="3523799286376321137">"SMS"</string>
+    <string name="keyboard_shortcut_group_applications_music" msgid="2051507523525651067">"តន្ត្រី"</string>
+    <string name="keyboard_shortcut_group_applications_calendar" msgid="3571770335653387606">"ប្រតិទិន"</string>
+    <string name="keyboard_shortcut_group_applications_calculator" msgid="6753209559716091507">"ម៉ាស៊ីនគិតលេខ"</string>
+    <string name="keyboard_shortcut_group_applications_maps" msgid="7950000659522589471">"ផែនទី"</string>
+    <string name="keyboard_shortcut_group_applications" msgid="3010389163951364798">"កម្មវិធី"</string>
 </resources>

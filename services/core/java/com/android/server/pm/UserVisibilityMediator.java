@@ -579,11 +579,11 @@ public final class UserVisibilityMediator implements Dumpable {
                         + " to user %d on start", userId, displayId, userAssignedToDisplay);
                 return false;
             }
-            // Then if was assigned extra
-            userAssignedToDisplay = mExtraDisplaysAssignedToUsers.get(userId, USER_NULL);
+            // Then if the display was assigned before
+            userAssignedToDisplay = mExtraDisplaysAssignedToUsers.get(displayId, USER_NULL);
             if (userAssignedToDisplay != USER_NULL) {
                 Slogf.w(TAG, "assignUserToExtraDisplay(%d, %d): failed because user %d was already "
-                        + "assigned that extra display", userId, displayId, userAssignedToDisplay);
+                        + "assigned to extra display", userId, displayId, userAssignedToDisplay);
                 return false;
             }
             if (DBG) {

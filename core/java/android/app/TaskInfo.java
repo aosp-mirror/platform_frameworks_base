@@ -304,6 +304,12 @@ public class TaskInfo {
     public boolean isTopActivityStyleFloating;
 
     /**
+     * The last non-fullscreen bounds the task was launched in or resized to.
+     * @hide
+     */
+    public Rect lastNonFullscreenBounds;
+
+    /**
      * The URI of the intent that generated the top-most activity opened using a URL.
      * @hide
      */
@@ -450,6 +456,7 @@ public class TaskInfo {
                 && Objects.equals(topActivity, that.topActivity)
                 && isTopActivityTransparent == that.isTopActivityTransparent
                 && isTopActivityStyleFloating == that.isTopActivityStyleFloating
+                && lastNonFullscreenBounds == this.lastNonFullscreenBounds
                 && Objects.equals(capturedLink, that.capturedLink)
                 && capturedLinkTimestamp == that.capturedLinkTimestamp
                 && appCompatTaskInfo.equalsForTaskOrganizer(that.appCompatTaskInfo);
@@ -522,6 +529,7 @@ public class TaskInfo {
         displayAreaFeatureId = source.readInt();
         isTopActivityTransparent = source.readBoolean();
         isTopActivityStyleFloating = source.readBoolean();
+        lastNonFullscreenBounds = source.readTypedObject(Rect.CREATOR);
         capturedLink = source.readTypedObject(Uri.CREATOR);
         capturedLinkTimestamp = source.readLong();
         appCompatTaskInfo = source.readTypedObject(AppCompatTaskInfo.CREATOR);
@@ -572,6 +580,7 @@ public class TaskInfo {
         dest.writeInt(displayAreaFeatureId);
         dest.writeBoolean(isTopActivityTransparent);
         dest.writeBoolean(isTopActivityStyleFloating);
+        dest.writeTypedObject(lastNonFullscreenBounds, flags);
         dest.writeTypedObject(capturedLink, flags);
         dest.writeLong(capturedLinkTimestamp);
         dest.writeTypedObject(appCompatTaskInfo, flags);
@@ -612,6 +621,7 @@ public class TaskInfo {
                 + " displayAreaFeatureId=" + displayAreaFeatureId
                 + " isTopActivityTransparent=" + isTopActivityTransparent
                 + " isTopActivityStyleFloating=" + isTopActivityStyleFloating
+                + " lastNonFullscreenBounds=" + lastNonFullscreenBounds
                 + " capturedLink=" + capturedLink
                 + " capturedLinkTimestamp=" + capturedLinkTimestamp
                 + " appCompatTaskInfo=" + appCompatTaskInfo

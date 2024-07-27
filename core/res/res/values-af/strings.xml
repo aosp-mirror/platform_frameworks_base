@@ -1411,10 +1411,8 @@
     <string name="adbwifi_active_notification_message" product="tv" msgid="8633421848366915478">"Kies om draadlose ontfouting te deaktiveer."</string>
     <string name="test_harness_mode_notification_title" msgid="2282785860014142511">"Toetsraamwerkmodus is geaktiveer"</string>
     <string name="test_harness_mode_notification_message" msgid="3039123743127958420">"Voer \'n fabriekterugstelling uit om Toetsraamwerkmodus te deaktiveer."</string>
-    <!-- no translation found for wrong_hsum_configuration_notification_title (7212758829332714385) -->
-    <skip />
-    <!-- no translation found for wrong_hsum_configuration_notification_message (5353475441480684381) -->
-    <skip />
+    <string name="wrong_hsum_configuration_notification_title" msgid="7212758829332714385">"Verkeerde bou-opstelling van Stelselgebruiker sonder Koppelvlak (HSUM)"</string>
+    <string name="wrong_hsum_configuration_notification_message" msgid="5353475441480684381">"Die Stelselgebruiker sonder Koppelvlak-modustoestand van hierdie toestel verskil van sy bou-opstelling. Doen ’n fabriekterugstelling van die toestel."</string>
     <string name="console_running_notification_title" msgid="6087888939261635904">"Reekskonsole is geaktiveer"</string>
     <string name="console_running_notification_message" msgid="7892751888125174039">"Werkverrigting word beïnvloed. Gaan selflaaiprogram na om te deaktiveer."</string>
     <string name="mte_override_notification_title" msgid="4731115381962792944">"Eksperimentele MTE is geaktiveer"</string>
@@ -1430,6 +1428,7 @@
     <string name="share_remote_bugreport_action" msgid="7630880678785123682">"DEEL"</string>
     <string name="decline_remote_bugreport_action" msgid="4040894777519784346">"WEIER"</string>
     <string name="select_input_method" msgid="3971267998568587025">"Kies invoermetode"</string>
+    <string name="input_method_language_settings" msgid="8069089418056819437">"Taalinstellings"</string>
     <string name="show_ime" msgid="6406112007347443383">"Hou dit op die skerm terwyl fisieke sleutelbord aktief is"</string>
     <string name="hardware" msgid="3611039921284836033">"Gebruik skermsleutelbord"</string>
     <string name="select_keyboard_layout_notification_title" msgid="5823199895322205589">"Stel <xliff:g id="DEVICE_NAME">%s</xliff:g> op"</string>
@@ -1759,12 +1758,9 @@
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"Het volumesleutels ingehou. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> aangeskakel."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"Het volumesleutels ingehou. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> is afgeskakel"</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="3760999147597564314">"Los die volumesleutels. Druk en hou albei volumesleutels weer 3 sekondes lank in om <xliff:g id="SERVICE_NAME">%1$s</xliff:g> aan te skakel."</string>
-    <!-- no translation found for accessibility_button_prompt_text (6105393217162198616) -->
-    <skip />
-    <!-- no translation found for accessibility_gesture_prompt_text (6452246951969541792) -->
-    <skip />
-    <!-- no translation found for accessibility_gesture_3finger_prompt_text (77745752309056152) -->
-    <skip />
+    <string name="accessibility_button_prompt_text" msgid="6105393217162198616">"Kies ’n kenmerk"</string>
+    <string name="accessibility_gesture_prompt_text" msgid="6452246951969541792">"Kies ’n kenmerk"</string>
+    <string name="accessibility_gesture_3finger_prompt_text" msgid="77745752309056152">"Kies ’n kenmerk"</string>
     <string name="accessibility_button_instructional_text" msgid="6831154884557881996">"Die kenmerk sal oopmaak wanneer jy weer op die toeganklikheidknoppie tik"</string>
     <string name="accessibility_gesture_instructional_text" msgid="4133877896011098550">"Die kenmerk sal oopmaak wanneer jy weer hierdie kortpad gebruik. Swiep vanaf die onderkant van jou skerm met 2 vingers op en los vinnig."</string>
     <string name="accessibility_gesture_3finger_instructional_text" msgid="1124458279366968154">"Die kenmerk sal oopmaak wanneer jy weer hierdie kortpad gebruik. Swiep vanaf die onderkant van jou skerm met 3 vingers op en los vinnig."</string>
@@ -1890,8 +1886,7 @@
     <string name="restr_pin_error_too_short" msgid="1547007808237941065">"PIN is te kort. Moet ten minste 4 syfers wees."</string>
     <string name="restr_pin_try_later" msgid="5897719962541636727">"Probeer later weer"</string>
     <string name="immersive_cling_title" msgid="2307034298721541791">"Bekyk tans volskerm"</string>
-    <!-- no translation found for immersive_cling_description (2896205051090870978) -->
-    <skip />
+    <string name="immersive_cling_description" msgid="2896205051090870978">"Swiep van die bokant van jou skerm af ondertoe om uit te gaan"</string>
     <string name="immersive_cling_positive" msgid="7047498036346489883">"Het dit"</string>
     <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"Draai vir ’n beter aansig"</string>
     <string name="display_rotation_camera_compat_toast_in_multi_window" msgid="2473122980393502775">"Maak <xliff:g id="NAME">%s</xliff:g> in volskerm oop vir ’n beter aansig"</string>
@@ -2443,22 +2438,13 @@
     <string name="bg_user_sound_notification_button_switch_user" msgid="3091969648572788946">"Wissel gebruiker"</string>
     <string name="bg_user_sound_notification_button_mute" msgid="4942158515665615243">"Demp"</string>
     <string name="bg_user_sound_notification_message" msgid="8613881975316976673">"Tik om klank te demp"</string>
-    <!-- no translation found for keyboard_shortcut_group_applications_browser (6535007304687100909) -->
-    <skip />
-    <!-- no translation found for keyboard_shortcut_group_applications_contacts (2750702518068326356) -->
-    <skip />
-    <!-- no translation found for keyboard_shortcut_group_applications_email (4229037666415353683) -->
-    <skip />
-    <!-- no translation found for keyboard_shortcut_group_applications_sms (3523799286376321137) -->
-    <skip />
-    <!-- no translation found for keyboard_shortcut_group_applications_music (2051507523525651067) -->
-    <skip />
-    <!-- no translation found for keyboard_shortcut_group_applications_calendar (3571770335653387606) -->
-    <skip />
-    <!-- no translation found for keyboard_shortcut_group_applications_calculator (6753209559716091507) -->
-    <skip />
-    <!-- no translation found for keyboard_shortcut_group_applications_maps (7950000659522589471) -->
-    <skip />
-    <!-- no translation found for keyboard_shortcut_group_applications (3010389163951364798) -->
-    <skip />
+    <string name="keyboard_shortcut_group_applications_browser" msgid="6535007304687100909">"Blaaier"</string>
+    <string name="keyboard_shortcut_group_applications_contacts" msgid="2750702518068326356">"Kontakte"</string>
+    <string name="keyboard_shortcut_group_applications_email" msgid="4229037666415353683">"E-pos"</string>
+    <string name="keyboard_shortcut_group_applications_sms" msgid="3523799286376321137">"SMS"</string>
+    <string name="keyboard_shortcut_group_applications_music" msgid="2051507523525651067">"Musiek"</string>
+    <string name="keyboard_shortcut_group_applications_calendar" msgid="3571770335653387606">"Kalender"</string>
+    <string name="keyboard_shortcut_group_applications_calculator" msgid="6753209559716091507">"Sakrekenaar"</string>
+    <string name="keyboard_shortcut_group_applications_maps" msgid="7950000659522589471">"Maps"</string>
+    <string name="keyboard_shortcut_group_applications" msgid="3010389163951364798">"Apps"</string>
 </resources>

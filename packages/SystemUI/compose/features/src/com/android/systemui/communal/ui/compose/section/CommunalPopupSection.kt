@@ -50,7 +50,6 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
@@ -101,8 +100,6 @@ constructor(
     ) {
         val interactionSource = remember { MutableInteractionSource() }
         val focusRequester = remember { FocusRequester() }
-
-        val context = LocalContext.current
 
         LaunchedEffect(Unit) {
             // Adding a delay to ensure the animation completes before requesting focus

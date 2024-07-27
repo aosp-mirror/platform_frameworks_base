@@ -18,7 +18,9 @@ package com.android.systemui.keyguard.domain.interactor
 
 import android.animation.ValueAnimator
 import com.android.keyguard.KeyguardSecurityModel
-import com.android.systemui.communal.domain.interactor.CommunalInteractor
+import com.android.systemui.Flags.communalSceneKtfRefactor
+import com.android.systemui.communal.domain.interactor.CommunalSceneInteractor
+import com.android.systemui.communal.shared.model.CommunalScenes
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
@@ -55,7 +57,7 @@ constructor(
     @Background bgDispatcher: CoroutineDispatcher,
     @Main mainDispatcher: CoroutineDispatcher,
     keyguardInteractor: KeyguardInteractor,
-    private val communalInteractor: CommunalInteractor,
+    private val communalSceneInteractor: CommunalSceneInteractor,
     private val keyguardSecurityModel: KeyguardSecurityModel,
     private val selectedUserInteractor: SelectedUserInteractor,
     powerInteractor: PowerInteractor,
@@ -94,11 +96,13 @@ constructor(
             .distinctUntilChanged()
 
     fun dismissPrimaryBouncer() {
-        scope.launch { startTransitionTo(KeyguardState.GONE) }
+        scope.launch {
+            startTransitionTo(KeyguardState.GONE)
+            closeHubImmediatelyIfNeeded()
+        }
     }
 
     private fun listenForPrimaryBouncerToLockscreenHubOrOccluded() {
-        // TODO(b/336576536): Check if adaptation for scene framework is needed
         if (SceneContainerFlag.isEnabled) return
         if (KeyguardWmStateRefactor.isEnabled) {
             scope.launch {
@@ -106,17 +110,16 @@ constructor(
                     .sample(
                         powerInteractor.isAwake,
                         keyguardInteractor.isActiveDreamLockscreenHosted,
-                        communalInteractor.isIdleOnCommunal
+                        communalSceneInteractor.isIdleOnCommunal
                     )
                     .filterRelevantKeyguardState()
                     .collect {
                         (isBouncerShowing, isAwake, isActiveDreamLockscreenHosted, isIdleOnCommunal)
                         ->
                         if (
-                            !maybeStartTransitionToOccludedOrInsecureCamera() &&
-                                !isBouncerShowing &&
-                                isAwake &&
-                                !isActiveDreamLockscreenHosted
+                            !maybeStartTransitionToOccludedOrInsecureCamera { state, reason ->
+                                startTransitionTo(state, ownerReason = reason)
+                            } && !isBouncerShowing && isAwake && !isActiveDreamLockscreenHosted
                         ) {
                             val toState =
                                 if (isIdleOnCommunal) {
@@ -136,7 +139,7 @@ constructor(
                         keyguardInteractor.isKeyguardOccluded,
                         keyguardInteractor.isDreaming,
                         keyguardInteractor.isActiveDreamLockscreenHosted,
-                        communalInteractor.isIdleOnCommunal,
+                        communalSceneInteractor.isIdleOnCommunal,
                     )
                     .filterRelevantKeyguardStateAnd {
                         (isBouncerShowing, isAwake, _, _, isActiveDreamLockscreenHosted, _) ->
@@ -159,14 +162,25 @@ constructor(
         }
     }
 
+    private fun closeHubImmediatelyIfNeeded() {
+        // If the hub is showing, and we are not animating a widget launch nor transitioning to
+        // edit mode, then close the hub immediately.
+        if (
+            communalSceneKtfRefactor() &&
+                communalSceneInteractor.isIdleOnCommunal.value &&
+                !communalSceneInteractor.isLaunchingWidget.value &&
+                communalSceneInteractor.editModeState.value == null
+        ) {
+            communalSceneInteractor.snapToScene(CommunalScenes.Blank)
+        }
+    }
+
     private fun listenForPrimaryBouncerToAsleep() {
-        // TODO(b/336576536): Check if adaptation for scene framework is needed
         if (SceneContainerFlag.isEnabled) return
         scope.launch { listenForSleepTransition() }
     }
 
     private fun listenForPrimaryBouncerToDreamingLockscreenHosted() {
-        // TODO(b/336576536): Check if adaptation for scene framework is needed
         if (SceneContainerFlag.isEnabled) return
         scope.launch {
             keyguardInteractor.primaryBouncerShowing
@@ -180,7 +194,6 @@ constructor(
     }
 
     private fun listenForPrimaryBouncerToGone() {
-        // TODO(b/336576536): Check if adaptation for scene framework is needed
         if (SceneContainerFlag.isEnabled) return
         if (KeyguardWmStateRefactor.isEnabled) {
             // This is handled in KeyguardSecurityContainerController and
@@ -213,6 +226,7 @@ constructor(
                             },
                         modeOnCanceled = TransitionModeOnCanceled.RESET,
                     )
+                    closeHubImmediatelyIfNeeded()
                 }
         }
     }

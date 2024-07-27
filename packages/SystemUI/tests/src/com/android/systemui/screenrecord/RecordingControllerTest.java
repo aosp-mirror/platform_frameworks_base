@@ -39,10 +39,8 @@ import android.content.Intent;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 
-import androidx.annotation.Nullable;
 import androidx.test.filters.SmallTest;
 
-import com.android.systemui.Dependency;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.animation.DialogTransitionAnimator;
 import com.android.systemui.broadcast.BroadcastDispatcher;
@@ -52,12 +50,9 @@ import com.android.systemui.mediaprojection.MediaProjectionMetricsLogger;
 import com.android.systemui.mediaprojection.SessionCreationSource;
 import com.android.systemui.mediaprojection.devicepolicy.ScreenCaptureDevicePolicyResolver;
 import com.android.systemui.mediaprojection.devicepolicy.ScreenCaptureDisabledDialogDelegate;
-import com.android.systemui.model.SysUiState;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.settings.UserTracker;
-import com.android.systemui.statusbar.phone.DialogDelegate;
 import com.android.systemui.statusbar.phone.SystemUIDialog;
-import com.android.systemui.statusbar.phone.SystemUIDialogManager;
 import com.android.systemui.util.concurrency.FakeExecutor;
 import com.android.systemui.util.time.FakeSystemClock;
 
@@ -110,7 +105,6 @@ public class RecordingControllerTest extends SysuiTestCase {
 
     private FakeFeatureFlags mFeatureFlags;
     private RecordingController mController;
-    private TestSystemUIDialogFactory mDialogFactory;
 
     private static final int USER_ID = 10;
 
@@ -119,14 +113,6 @@ public class RecordingControllerTest extends SysuiTestCase {
         MockitoAnnotations.initMocks(this);
         Context spiedContext = spy(mContext);
         when(spiedContext.getUserId()).thenReturn(TEST_USER_ID);
-
-        mDialogFactory = new TestSystemUIDialogFactory(
-                mContext,
-                Dependency.get(SystemUIDialogManager.class),
-                Dependency.get(SysUiState.class),
-                Dependency.get(BroadcastDispatcher.class),
-                Dependency.get(DialogTransitionAnimator.class)
-        );
 
         mFeatureFlags = new FakeFeatureFlags();
         when(mScreenCaptureDisabledDialogDelegate.createSysUIDialog())
@@ -251,7 +237,6 @@ public class RecordingControllerTest extends SysuiTestCase {
 
     @Test
     public void testPoliciesFlagDisabled_screenCapturingNotAllowed_returnsNullDevicePolicyDialog() {
-        mFeatureFlags.set(Flags.WM_ENABLE_PARTIAL_SCREEN_SHARING, true);
         mFeatureFlags.set(Flags.WM_ENABLE_PARTIAL_SCREEN_SHARING_ENTERPRISE_POLICIES, false);
         when(mDevicePolicyResolver.isScreenCaptureCompletelyDisabled((any()))).thenReturn(true);
 
@@ -269,19 +254,7 @@ public class RecordingControllerTest extends SysuiTestCase {
     }
 
     @Test
-    public void testPartialScreenSharingDisabled_returnsLegacyDialog() {
-        mFeatureFlags.set(Flags.WM_ENABLE_PARTIAL_SCREEN_SHARING, false);
-        mFeatureFlags.set(Flags.WM_ENABLE_PARTIAL_SCREEN_SHARING_ENTERPRISE_POLICIES, false);
-
-        Dialog dialog = mController.createScreenRecordDialog(mContext, mFeatureFlags,
-                mDialogTransitionAnimator, mActivityStarter, /* onStartRecordingClicked= */ null);
-
-        assertThat(dialog).isEqualTo(mScreenRecordSystemUIDialog);
-    }
-
-    @Test
     public void testPoliciesFlagEnabled_screenCapturingNotAllowed_returnsDevicePolicyDialog() {
-        mFeatureFlags.set(Flags.WM_ENABLE_PARTIAL_SCREEN_SHARING, true);
         mFeatureFlags.set(Flags.WM_ENABLE_PARTIAL_SCREEN_SHARING_ENTERPRISE_POLICIES, true);
         when(mDevicePolicyResolver.isScreenCaptureCompletelyDisabled((any()))).thenReturn(true);
 
@@ -293,7 +266,6 @@ public class RecordingControllerTest extends SysuiTestCase {
 
     @Test
     public void testPoliciesFlagEnabled_screenCapturingAllowed_returnsNullDevicePolicyDialog() {
-        mFeatureFlags.set(Flags.WM_ENABLE_PARTIAL_SCREEN_SHARING, true);
         mFeatureFlags.set(Flags.WM_ENABLE_PARTIAL_SCREEN_SHARING_ENTERPRISE_POLICIES, true);
         when(mDevicePolicyResolver.isScreenCaptureCompletelyDisabled((any()))).thenReturn(false);
 
@@ -312,7 +284,6 @@ public class RecordingControllerTest extends SysuiTestCase {
 
     @Test
     public void testPoliciesFlagEnabled_screenCapturingAllowed_logsProjectionInitiated() {
-        mFeatureFlags.set(Flags.WM_ENABLE_PARTIAL_SCREEN_SHARING, true);
         mFeatureFlags.set(Flags.WM_ENABLE_PARTIAL_SCREEN_SHARING_ENTERPRISE_POLICIES, true);
         when(mDevicePolicyResolver.isScreenCaptureCompletelyDisabled((any()))).thenReturn(false);
 
@@ -323,33 +294,5 @@ public class RecordingControllerTest extends SysuiTestCase {
                 .notifyProjectionInitiated(
                         /* hostUid= */ myUid(),
                         SessionCreationSource.SYSTEM_UI_SCREEN_RECORDER);
-    }
-
-    private static class TestSystemUIDialogFactory extends SystemUIDialog.Factory {
-
-        @Nullable private DialogDelegate<SystemUIDialog> mLastDelegate;
-        @Nullable private SystemUIDialog mLastCreatedDialog;
-
-        TestSystemUIDialogFactory(
-                Context context,
-                SystemUIDialogManager systemUIDialogManager,
-                SysUiState sysUiState,
-                BroadcastDispatcher broadcastDispatcher,
-                DialogTransitionAnimator dialogTransitionAnimator) {
-            super(
-                    context,
-                    systemUIDialogManager,
-                    sysUiState,
-                    broadcastDispatcher,
-                    dialogTransitionAnimator);
-        }
-
-        @Override
-        public SystemUIDialog create(SystemUIDialog.Delegate delegate) {
-            SystemUIDialog dialog = super.create(delegate);
-            mLastDelegate = delegate;
-            mLastCreatedDialog = dialog;
-            return dialog;
-        }
     }
 }

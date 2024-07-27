@@ -112,3 +112,10 @@ flag {
       purpose: PURPOSE_BUGFIX
     }
 }
+
+flag {
+    name: "settings_catalyst"
+    namespace: "android_settings"
+    description: "Settings catalyst project migration"
+    bug: "323791114"
+}

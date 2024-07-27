@@ -124,6 +124,7 @@ import com.android.server.net.BaseNetworkObserver;
 import com.android.server.pm.UserManagerInternal;
 import com.android.server.power.optimization.Flags;
 import com.android.server.power.stats.AggregatedPowerStatsConfig;
+import com.android.server.power.stats.AmbientDisplayPowerStatsProcessor;
 import com.android.server.power.stats.AudioPowerStatsProcessor;
 import com.android.server.power.stats.BatteryExternalStatsWorker;
 import com.android.server.power.stats.BatteryStatsDumpHelperImpl;
@@ -142,6 +143,7 @@ import com.android.server.power.stats.PowerStatsExporter;
 import com.android.server.power.stats.PowerStatsScheduler;
 import com.android.server.power.stats.PowerStatsStore;
 import com.android.server.power.stats.PowerStatsUidResolver;
+import com.android.server.power.stats.ScreenPowerStatsProcessor;
 import com.android.server.power.stats.SystemServerCpuThreadReader.SystemServiceCpuThreadTimes;
 import com.android.server.power.stats.VideoPowerStatsProcessor;
 import com.android.server.power.stats.WifiPowerStatsProcessor;
@@ -488,6 +490,20 @@ public final class BatteryStatsService extends IBatteryStats.Stub
                 .setProcessor(
                         new CpuPowerStatsProcessor(mPowerProfile, mCpuScalingPolicies));
 
+        config.trackPowerComponent(BatteryConsumer.POWER_COMPONENT_SCREEN)
+                .trackDeviceStates(
+                        AggregatedPowerStatsConfig.STATE_POWER,
+                        AggregatedPowerStatsConfig.STATE_SCREEN)
+                .trackUidStates(
+                        AggregatedPowerStatsConfig.STATE_POWER,
+                        AggregatedPowerStatsConfig.STATE_SCREEN)
+                .setProcessor(
+                        new ScreenPowerStatsProcessor(mPowerProfile));
+
+        config.trackPowerComponent(BatteryConsumer.POWER_COMPONENT_AMBIENT_DISPLAY,
+                        BatteryConsumer.POWER_COMPONENT_SCREEN)
+                .setProcessor(new AmbientDisplayPowerStatsProcessor());
+
         config.trackPowerComponent(BatteryConsumer.POWER_COMPONENT_MOBILE_RADIO)
                 .trackDeviceStates(
                         AggregatedPowerStatsConfig.STATE_POWER,
@@ -635,6 +651,18 @@ public final class BatteryStatsService extends IBatteryStats.Stub
         mBatteryUsageStatsProvider.setPowerStatsExporterEnabled(
                 BatteryConsumer.POWER_COMPONENT_CPU,
                 Flags.streamlinedBatteryStats());
+
+        mStats.setPowerStatsCollectorEnabled(BatteryConsumer.POWER_COMPONENT_SCREEN,
+                Flags.streamlinedMiscBatteryStats());
+        mBatteryUsageStatsProvider.setPowerStatsExporterEnabled(
+                BatteryConsumer.POWER_COMPONENT_SCREEN,
+                Flags.streamlinedMiscBatteryStats());
+
+        mStats.setPowerStatsCollectorEnabled(BatteryConsumer.POWER_COMPONENT_AMBIENT_DISPLAY,
+                Flags.streamlinedMiscBatteryStats());
+        mBatteryUsageStatsProvider.setPowerStatsExporterEnabled(
+                BatteryConsumer.POWER_COMPONENT_AMBIENT_DISPLAY,
+                Flags.streamlinedMiscBatteryStats());
 
         mStats.setPowerStatsCollectorEnabled(BatteryConsumer.POWER_COMPONENT_MOBILE_RADIO,
                 Flags.streamlinedConnectivityBatteryStats());

@@ -1144,7 +1144,7 @@
     <string name="weeks" msgid="3516247214269821391">"週間"</string>
     <string name="year" msgid="5182610307741238982">"年"</string>
     <string name="years" msgid="5797714729103773425">"年"</string>
-    <string name="now_string_shortest" msgid="3684914126941650330">"現在"</string>
+    <string name="now_string_shortest" msgid="3684914126941650330">"今"</string>
     <string name="duration_minutes_shortest" msgid="5744379079540806690">"<xliff:g id="COUNT">%d</xliff:g> 分"</string>
     <string name="duration_hours_shortest" msgid="1477752094141971675">"<xliff:g id="COUNT">%d</xliff:g> 時間"</string>
     <string name="duration_days_shortest" msgid="4083124701676227233">"<xliff:g id="COUNT">%d</xliff:g> 日"</string>
@@ -1428,6 +1428,7 @@
     <string name="share_remote_bugreport_action" msgid="7630880678785123682">"共有する"</string>
     <string name="decline_remote_bugreport_action" msgid="4040894777519784346">"共有しない"</string>
     <string name="select_input_method" msgid="3971267998568587025">"入力方法の選択"</string>
+    <string name="input_method_language_settings" msgid="8069089418056819437">"言語設定"</string>
     <string name="show_ime" msgid="6406112007347443383">"物理キーボードが有効になっていても画面に表示させます"</string>
     <string name="hardware" msgid="3611039921284836033">"画面キーボードを使用"</string>
     <string name="select_keyboard_layout_notification_title" msgid="5823199895322205589">"<xliff:g id="DEVICE_NAME">%s</xliff:g>の設定"</string>
@@ -2436,23 +2437,14 @@
     <string name="bg_user_sound_notification_title_alarm" msgid="5251678483393143527">"<xliff:g id="USER_NAME">%s</xliff:g> さんのアラーム"</string>
     <string name="bg_user_sound_notification_button_switch_user" msgid="3091969648572788946">"ユーザーを切り替え"</string>
     <string name="bg_user_sound_notification_button_mute" msgid="4942158515665615243">"ミュート"</string>
-    <string name="bg_user_sound_notification_message" msgid="8613881975316976673">"音声をミュートするにはタップします"</string>
-    <!-- no translation found for keyboard_shortcut_group_applications_browser (6535007304687100909) -->
-    <skip />
-    <!-- no translation found for keyboard_shortcut_group_applications_contacts (2750702518068326356) -->
-    <skip />
-    <!-- no translation found for keyboard_shortcut_group_applications_email (4229037666415353683) -->
-    <skip />
-    <!-- no translation found for keyboard_shortcut_group_applications_sms (3523799286376321137) -->
-    <skip />
-    <!-- no translation found for keyboard_shortcut_group_applications_music (2051507523525651067) -->
-    <skip />
-    <!-- no translation found for keyboard_shortcut_group_applications_calendar (3571770335653387606) -->
-    <skip />
-    <!-- no translation found for keyboard_shortcut_group_applications_calculator (6753209559716091507) -->
-    <skip />
-    <!-- no translation found for keyboard_shortcut_group_applications_maps (7950000659522589471) -->
-    <skip />
-    <!-- no translation found for keyboard_shortcut_group_applications (3010389163951364798) -->
-    <skip />
+    <string name="bg_user_sound_notification_message" msgid="8613881975316976673">"通知音をミュートするにはタップしてください"</string>
+    <string name="keyboard_shortcut_group_applications_browser" msgid="6535007304687100909">"ブラウザ"</string>
+    <string name="keyboard_shortcut_group_applications_contacts" msgid="2750702518068326356">"連絡先"</string>
+    <string name="keyboard_shortcut_group_applications_email" msgid="4229037666415353683">"メール"</string>
+    <string name="keyboard_shortcut_group_applications_sms" msgid="3523799286376321137">"SMS"</string>
+    <string name="keyboard_shortcut_group_applications_music" msgid="2051507523525651067">"音楽"</string>
+    <string name="keyboard_shortcut_group_applications_calendar" msgid="3571770335653387606">"カレンダー"</string>
+    <string name="keyboard_shortcut_group_applications_calculator" msgid="6753209559716091507">"電卓"</string>
+    <string name="keyboard_shortcut_group_applications_maps" msgid="7950000659522589471">"マップ"</string>
+    <string name="keyboard_shortcut_group_applications" msgid="3010389163951364798">"アプリ"</string>
 </resources>

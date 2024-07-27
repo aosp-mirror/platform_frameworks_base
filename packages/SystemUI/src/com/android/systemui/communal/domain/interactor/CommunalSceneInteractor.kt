@@ -28,6 +28,7 @@ import com.android.systemui.communal.shared.model.EditModeState
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.keyguard.shared.model.KeyguardState
+import com.android.systemui.util.kotlin.BooleanFlowOperators.allOf
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -52,7 +53,7 @@ constructor(
     @Application private val applicationScope: CoroutineScope,
     private val communalSceneRepository: CommunalSceneRepository,
 ) {
-    val _isLaunchingWidget = MutableStateFlow(false)
+    private val _isLaunchingWidget = MutableStateFlow(false)
 
     /** Whether a widget launch is currently in progress. */
     val isLaunchingWidget: StateFlow<Boolean> = _isLaunchingWidget.asStateFlow()
@@ -183,6 +184,10 @@ constructor(
                 started = SharingStarted.Eagerly,
                 initialValue = false,
             )
+
+    /** This flow will be true when idle on the hub and not transitioning to edit mode. */
+    val isIdleOnCommunalNotEditMode: Flow<Boolean> =
+        allOf(isIdleOnCommunal, editModeState.map { it == null })
 
     /**
      * Flow that emits a boolean if any portion of the communal UI is visible at all.

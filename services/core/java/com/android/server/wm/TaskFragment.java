@@ -216,8 +216,7 @@ class TaskFragment extends WindowContainer<WindowContainer> {
      */
     int mMinHeight;
 
-    Dimmer mDimmer = Dimmer.DIMMER_REFACTOR
-            ? new SmoothDimmer(this) : new LegacyDimmer(this);
+    Dimmer mDimmer = new Dimmer(this);
 
     /** Apply the dim layer on the embedded TaskFragment. */
     static final int EMBEDDED_DIM_AREA_TASK_FRAGMENT = 0;
@@ -1611,18 +1610,15 @@ class TaskFragment extends WindowContainer<WindowContainer> {
                         if (DEBUG_RESULTS) {
                             Slog.v(TAG_RESULTS, "Delivering results to " + next + ": " + a);
                         }
-                        final ActivityResultItem activityResultItem = ActivityResultItem.obtain(
-                                next.token, a);
-                        mAtmService.getLifecycleManager().scheduleTransactionItem(
-                                appThread, activityResultItem);
+                        final ActivityResultItem item = new ActivityResultItem(next.token, a);
+                        mAtmService.getLifecycleManager().scheduleTransactionItem(appThread, item);
                     }
                 }
 
                 if (next.newIntents != null) {
-                    final NewIntentItem newIntentItem = NewIntentItem.obtain(
-                            next.token, next.newIntents, true /* resume */);
-                    mAtmService.getLifecycleManager().scheduleTransactionItem(
-                            appThread, newIntentItem);
+                    final NewIntentItem item =
+                            new NewIntentItem(next.token, next.newIntents, true /* resume */);
+                    mAtmService.getLifecycleManager().scheduleTransactionItem(appThread, item);
                 }
 
                 // Well the app will no longer be stopped.
@@ -1636,7 +1632,7 @@ class TaskFragment extends WindowContainer<WindowContainer> {
                 final int topProcessState = mAtmService.mTopProcessState;
                 next.app.setPendingUiCleanAndForceProcessStateUpTo(topProcessState);
                 next.abortAndClearOptionsAnimation();
-                final ResumeActivityItem resumeActivityItem = ResumeActivityItem.obtain(
+                final ResumeActivityItem resumeActivityItem = new ResumeActivityItem(
                         next.token, topProcessState, dc.isNextTransitionForward(),
                         next.shouldSendCompatFakeFocus());
                 mAtmService.getLifecycleManager().scheduleTransactionItem(
@@ -1882,9 +1878,9 @@ class TaskFragment extends WindowContainer<WindowContainer> {
             EventLogTags.writeWmPauseActivity(prev.mUserId, System.identityHashCode(prev),
                     prev.shortComponentName, "userLeaving=" + userLeaving, reason);
 
-            mAtmService.getLifecycleManager().scheduleTransactionItem(prev.app.getThread(),
-                    PauseActivityItem.obtain(prev.token, prev.finishing, userLeaving,
-                            pauseImmediately, autoEnteringPip));
+            final PauseActivityItem item = new PauseActivityItem(prev.token, prev.finishing,
+                    userLeaving, pauseImmediately, autoEnteringPip);
+            mAtmService.getLifecycleManager().scheduleTransactionItem(prev.app.getThread(), item);
         } catch (Exception e) {
             // Ignore exception, if process died other code will cleanup.
             Slog.w(TAG, "Exception thrown during pause", e);
@@ -2436,7 +2432,7 @@ class TaskFragment extends WindowContainer<WindowContainer> {
                     inOutConfig.smallestScreenWidthDp = (int) (0.5f
                             + Math.min(mTmpFullBounds.width(), mTmpFullBounds.height()) / density);
                 } else if (windowingMode == WINDOWING_MODE_MULTI_WINDOW && mIsEmbedded
-                        && insideParentBounds && !resolvedBounds.equals(parentBounds)) {
+                        && !resolvedBounds.equals(parentBounds)) {
                     // For embedded TFs, the smallest width should be updated. Otherwise, inherit
                     // from the parent task would result in applications loaded wrong resource.
                     inOutConfig.smallestScreenWidthDp =
@@ -3106,6 +3102,7 @@ class TaskFragment extends WindowContainer<WindowContainer> {
         return forAllWindows(getDimBehindWindow, true);
     }
 
+    @Deprecated
     @Override
     Dimmer getDimmer() {
         // If this is in an embedded TaskFragment and we want the dim applies on the TaskFragment.

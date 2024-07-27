@@ -69,6 +69,7 @@ import com.android.systemui.Flags
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.bluetooth.BroadcastDialogController
 import com.android.systemui.broadcast.BroadcastSender
+import com.android.systemui.communal.domain.interactor.CommunalSceneInteractor
 import com.android.systemui.media.controls.MediaTestUtils
 import com.android.systemui.media.controls.domain.pipeline.EMPTY_SMARTSPACE_MEDIA_DATA
 import com.android.systemui.media.controls.domain.pipeline.MediaDataManager
@@ -211,6 +212,8 @@ public class MediaControlPanelTest : SysuiTestCase() {
     @Mock private lateinit var activityIntentHelper: ActivityIntentHelper
     @Mock private lateinit var lockscreenUserManager: NotificationLockscreenUserManager
 
+    @Mock private lateinit var communalSceneInteractor: CommunalSceneInteractor
+
     @Mock private lateinit var recommendationViewHolder: RecommendationViewHolder
     @Mock private lateinit var smartspaceAction: SmartspaceAction
     private lateinit var smartspaceData: SmartspaceMediaData
@@ -271,6 +274,7 @@ public class MediaControlPanelTest : SysuiTestCase() {
                     logger,
                     keyguardStateController,
                     activityIntentHelper,
+                    communalSceneInteractor,
                     lockscreenUserManager,
                     broadcastDialogController,
                     globalSettings,

@@ -110,7 +110,7 @@ internal constructor(
     }
 
     private fun defaultTransition(from: SceneKey, to: SceneKey) =
-        TransitionSpecImpl(key = null, from, to, TransformationSpec.EmptyProvider)
+        TransitionSpecImpl(key = null, from, to, null, null, TransformationSpec.EmptyProvider)
 
     internal fun overscrollSpec(scene: SceneKey, orientation: Orientation): OverscrollSpecImpl? =
         overscrollCache
@@ -177,10 +177,18 @@ interface TransitionSpec {
     /**
      * The [TransformationSpec] associated to this [TransitionSpec].
      *
-     * Note that this is called once every a transition associated to this [TransitionSpec] is
+     * Note that this is called once whenever a transition associated to this [TransitionSpec] is
      * started.
      */
     fun transformationSpec(): TransformationSpec
+
+    /**
+     * The preview [TransformationSpec] associated to this [TransitionSpec].
+     *
+     * Note that this is called once whenever a transition associated to this [TransitionSpec] is
+     * started.
+     */
+    fun previewTransformationSpec(): TransformationSpec?
 }
 
 interface TransformationSpec {
@@ -225,13 +233,17 @@ internal class TransitionSpecImpl(
     override val key: TransitionKey?,
     override val from: SceneKey?,
     override val to: SceneKey?,
-    private val transformationSpec: () -> TransformationSpecImpl,
+    private val previewTransformationSpec: (() -> TransformationSpecImpl)? = null,
+    private val reversePreviewTransformationSpec: (() -> TransformationSpecImpl)? = null,
+    private val transformationSpec: () -> TransformationSpecImpl
 ) : TransitionSpec {
     override fun reversed(): TransitionSpecImpl {
         return TransitionSpecImpl(
             key = key,
             from = to,
             to = from,
+            previewTransformationSpec = reversePreviewTransformationSpec,
+            reversePreviewTransformationSpec = previewTransformationSpec,
             transformationSpec = {
                 val reverse = transformationSpec.invoke()
                 TransformationSpecImpl(
@@ -245,6 +257,9 @@ internal class TransitionSpecImpl(
     }
 
     override fun transformationSpec(): TransformationSpecImpl = this.transformationSpec.invoke()
+
+    override fun previewTransformationSpec(): TransformationSpecImpl? =
+        previewTransformationSpec?.invoke()
 }
 
 /** The definition of the overscroll behavior of the [scene]. */

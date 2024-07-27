@@ -7,6 +7,7 @@ import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
+import androidx.compose.foundation.focusable
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
@@ -25,6 +26,9 @@ import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.android.compose.animation.scene.Back
@@ -41,6 +45,7 @@ import com.android.compose.animation.scene.SwipeDirection
 import com.android.compose.animation.scene.observableTransitionState
 import com.android.compose.animation.scene.transitions
 import com.android.compose.theme.LocalAndroidColorScheme
+import com.android.internal.R.attr.focusable
 import com.android.systemui.Flags.glanceableHubBackGesture
 import com.android.systemui.communal.shared.model.CommunalBackgroundType
 import com.android.systemui.communal.shared.model.CommunalScenes
@@ -88,12 +93,12 @@ val sceneTransitions = transitions {
     }
     to(CommunalScenes.Communal) {
         spec = tween(durationMillis = 1000)
-        translate(Communal.Elements.Grid, Edge.Right)
+        translate(Communal.Elements.Grid, Edge.End)
         timestampRange(startMillis = 167, endMillis = 334) { fade(AllElements) }
     }
     to(CommunalScenes.Blank) {
         spec = tween(durationMillis = 1000)
-        translate(Communal.Elements.Grid, Edge.Right)
+        translate(Communal.Elements.Grid, Edge.End)
         timestampRange(endMillis = 167) {
             fade(Communal.Elements.Grid)
             fade(Communal.Elements.IndicationArea)
@@ -186,9 +191,7 @@ fun CommunalContainer(
         scene(
             CommunalScenes.Blank,
             userActions =
-                mapOf(
-                    Swipe(SwipeDirection.Left, fromSource = Edge.Right) to CommunalScenes.Communal
-                )
+                mapOf(Swipe(SwipeDirection.Start, fromSource = Edge.End) to CommunalScenes.Communal)
         ) {
             // This scene shows nothing only allowing for transitions to the communal scene.
             Box(modifier = Modifier.fillMaxSize())
@@ -197,11 +200,11 @@ fun CommunalContainer(
         val userActions =
             if (glanceableHubBackGesture()) {
                 mapOf(
-                    Swipe(SwipeDirection.Right) to CommunalScenes.Blank,
+                    Swipe(SwipeDirection.End) to CommunalScenes.Blank,
                     Back to CommunalScenes.Blank,
                 )
             } else {
-                mapOf(Swipe(SwipeDirection.Right) to CommunalScenes.Blank)
+                mapOf(Swipe(SwipeDirection.End) to CommunalScenes.Blank)
             }
 
         scene(CommunalScenes.Communal, userActions = userActions) {
@@ -209,6 +212,8 @@ fun CommunalContainer(
                 backgroundType = backgroundType,
                 colors = colors,
                 content = content,
+                viewModel = viewModel,
+                modifier = Modifier.horizontalNestedScrollToScene(),
             )
         }
     }
@@ -224,17 +229,41 @@ private fun SceneScope.CommunalScene(
     backgroundType: CommunalBackgroundType,
     colors: CommunalColors,
     content: CommunalContent,
+    viewModel: CommunalViewModel,
     modifier: Modifier = Modifier,
 ) {
-    Box(modifier = Modifier.element(Communal.Elements.Scrim).fillMaxSize()) {
+    val isFocusable by viewModel.isFocusable.collectAsStateWithLifecycle(initialValue = false)
+
+    Box(
+        modifier =
+            Modifier.element(Communal.Elements.Scrim)
+                .fillMaxSize()
+                .then(
+                    if (isFocusable) {
+                        Modifier.focusable()
+                    } else {
+                        Modifier.semantics { contentDescription = "" }.clearAndSetSemantics {}
+                    }
+                )
+    ) {
         when (backgroundType) {
             CommunalBackgroundType.STATIC -> DefaultBackground(colors = colors)
             CommunalBackgroundType.STATIC_GRADIENT -> StaticLinearGradient()
             CommunalBackgroundType.ANIMATED -> AnimatedLinearGradient()
             CommunalBackgroundType.NONE -> BackgroundTopScrim()
         }
+
+        with(content) {
+            Content(
+                modifier =
+                    modifier.focusable(isFocusable).semantics {
+                        if (!isFocusable) {
+                            contentDescription = ""
+                        }
+                    }
+            )
+        }
     }
-    with(content) { Content(modifier = modifier) }
 }
 
 /** Default background of the hub, a single color */
