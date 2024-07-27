@@ -64,3 +64,13 @@ flag {
         purpose: PURPOSE_FEATURE
     }
 }
+
+flag {
+    namespace: "haptics"
+    name: "throttle_vibration_params_requests"
+    description: "Control the frequency of vibration params requests to prevent overloading the vendor service"
+    bug: "355320860"
+    metadata {
+      purpose: PURPOSE_BUGFIX
+    }
+}

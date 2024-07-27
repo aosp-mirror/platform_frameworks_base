@@ -307,7 +307,7 @@ public class NavigationBarControllerImplTest extends SysuiTestCase {
 
         mNavigationBarController.mIsLargeScreen = false;
         mNavigationBarController.mIsPhone = true;
-        assertFalse(mNavigationBarController.supportsTaskbar());
+        assertTrue(mNavigationBarController.supportsTaskbar());
     }
 
     @Test

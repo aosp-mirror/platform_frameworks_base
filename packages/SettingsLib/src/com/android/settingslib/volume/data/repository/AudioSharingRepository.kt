@@ -62,6 +62,9 @@ interface AudioSharingRepository {
     /** Whether the device is in audio sharing. */
     val inAudioSharing: Flow<Boolean>
 
+    /** The primary headset groupId in audio sharing. */
+    val primaryGroupId: StateFlow<Int>
+
     /** The secondary headset groupId in audio sharing. */
     val secondaryGroupId: StateFlow<Int>
 
@@ -109,6 +112,16 @@ class AudioSharingRepositoryImpl(
         awaitClose { contentResolver.unregisterContentObserver(callback) }
     }
 
+    override val primaryGroupId: StateFlow<Int> =
+        primaryChange
+            .map { BluetoothUtils.getPrimaryGroupIdForBroadcast(contentResolver) }
+            .onStart { emit(BluetoothUtils.getPrimaryGroupIdForBroadcast(contentResolver)) }
+            .flowOn(backgroundCoroutineContext)
+            .stateIn(
+                coroutineScope,
+                SharingStarted.WhileSubscribed(),
+                BluetoothUtils.getPrimaryGroupIdForBroadcast(contentResolver))
+
     override val secondaryGroupId: StateFlow<Int> =
         merge(
                 btManager.profileManager.leAudioBroadcastAssistantProfile
@@ -121,7 +134,7 @@ class AudioSharingRepositoryImpl(
                                 BluetoothProfile.LE_AUDIO_BROADCAST_ASSISTANT
                     }
                     .map { getSecondaryGroupId() },
-                primaryChange.map { getSecondaryGroupId() })
+                primaryGroupId.map { getSecondaryGroupId() })
             .onStart { emit(getSecondaryGroupId()) }
             .flowOn(backgroundCoroutineContext)
             .stateIn(coroutineScope, SharingStarted.WhileSubscribed(), getSecondaryGroupId())
@@ -193,6 +206,8 @@ class AudioSharingRepositoryImpl(
 
 class AudioSharingRepositoryEmptyImpl : AudioSharingRepository {
     override val inAudioSharing: Flow<Boolean> = flowOf(false)
+    override val primaryGroupId: StateFlow<Int> =
+        MutableStateFlow(BluetoothCsipSetCoordinator.GROUP_ID_INVALID)
     override val secondaryGroupId: StateFlow<Int> =
         MutableStateFlow(BluetoothCsipSetCoordinator.GROUP_ID_INVALID)
     override val volumeMap: StateFlow<GroupIdToVolumes> = MutableStateFlow(emptyMap())

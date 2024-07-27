@@ -596,7 +596,7 @@ public class HintManagerServiceTest {
                 ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND, 0, 0);
         service.mUidObserver.onUidStateChanged(UID,
                 ActivityManager.PROCESS_STATE_IMPORTANT_BACKGROUND, 0, 0);
-        LockSupport.parkNanos(TimeUnit.MILLISECONDS.toNanos(500) + TimeUnit.MILLISECONDS.toNanos(
+        LockSupport.parkNanos(TimeUnit.MILLISECONDS.toNanos(1000) + TimeUnit.MILLISECONDS.toNanos(
                 CLEAN_UP_UID_DELAY_MILLIS));
         verify(mNativeWrapperMock, never()).halSetThreads(eq(sessionPtr1), any());
         reset(mNativeWrapperMock);
@@ -653,7 +653,7 @@ public class HintManagerServiceTest {
                 ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND, 0, 0);
         service.mUidObserver.onUidStateChanged(UID,
                 ActivityManager.PROCESS_STATE_IMPORTANT_BACKGROUND, 0, 0);
-        LockSupport.parkNanos(TimeUnit.MILLISECONDS.toNanos(500) + TimeUnit.MILLISECONDS.toNanos(
+        LockSupport.parkNanos(TimeUnit.MILLISECONDS.toNanos(1000) + TimeUnit.MILLISECONDS.toNanos(
                 CLEAN_UP_UID_DELAY_MILLIS));
         verify(mNativeWrapperMock, never()).halSetThreads(eq(sessionPtr1), any());
         verify(mNativeWrapperMock, never()).halSetThreads(eq(sessionPtr2), any());
@@ -666,7 +666,7 @@ public class HintManagerServiceTest {
         service.mUidObserver.onUidStateChanged(UID,
                 ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND, 0, 0);
         // wait for the async uid state change to trigger resume and setThreads
-        LockSupport.parkNanos(TimeUnit.MILLISECONDS.toNanos(500));
+        LockSupport.parkNanos(TimeUnit.MILLISECONDS.toNanos(1000));
         verify(mNativeWrapperMock, times(1)).halSetThreads(eq(sessionPtr2), eq(expectedTids2));
         reset(mNativeWrapperMock);
 
@@ -675,7 +675,7 @@ public class HintManagerServiceTest {
         LockSupport.parkNanos(TimeUnit.MILLISECONDS.toNanos(100));
         service.mUidObserver.onUidStateChanged(UID,
                 ActivityManager.PROCESS_STATE_IMPORTANT_BACKGROUND, 0, 0);
-        LockSupport.parkNanos(TimeUnit.MILLISECONDS.toNanos(500) + TimeUnit.MILLISECONDS.toNanos(
+        LockSupport.parkNanos(TimeUnit.MILLISECONDS.toNanos(1000) + TimeUnit.MILLISECONDS.toNanos(
                 CLEAN_UP_UID_DELAY_MILLIS));
         verify(mNativeWrapperMock, times(1)).halPauseHintSession(eq(sessionPtr1));
         verify(mNativeWrapperMock, never()).halSetThreads(eq(sessionPtr1), any());
@@ -684,7 +684,7 @@ public class HintManagerServiceTest {
         verifyAllHintsEnabled(session2, false);
         service.mUidObserver.onUidStateChanged(UID,
                 ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND, 0, 0);
-        LockSupport.parkNanos(TimeUnit.MILLISECONDS.toNanos(500));
+        LockSupport.parkNanos(TimeUnit.MILLISECONDS.toNanos(1000));
         verifyAllHintsEnabled(session1, false);
         verifyAllHintsEnabled(session2, true);
         reset(mNativeWrapperMock);
@@ -705,7 +705,7 @@ public class HintManagerServiceTest {
         LockSupport.parkNanos(TimeUnit.MILLISECONDS.toNanos(100));
         service.mUidObserver.onUidStateChanged(UID,
                 ActivityManager.PROCESS_STATE_IMPORTANT_BACKGROUND, 0, 0);
-        LockSupport.parkNanos(TimeUnit.MILLISECONDS.toNanos(500) + TimeUnit.MILLISECONDS.toNanos(
+        LockSupport.parkNanos(TimeUnit.MILLISECONDS.toNanos(1000) + TimeUnit.MILLISECONDS.toNanos(
                 CLEAN_UP_UID_DELAY_MILLIS));
         verify(mNativeWrapperMock, times(1)).halPauseHintSession(eq(sessionPtr1));
         verify(mNativeWrapperMock, never()).halSetThreads(eq(sessionPtr1), any());
@@ -721,7 +721,7 @@ public class HintManagerServiceTest {
 
         service.mUidObserver.onUidStateChanged(UID,
                 ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND, 0, 0);
-        LockSupport.parkNanos(TimeUnit.MILLISECONDS.toNanos(500) + TimeUnit.MILLISECONDS.toNanos(
+        LockSupport.parkNanos(TimeUnit.MILLISECONDS.toNanos(1000) + TimeUnit.MILLISECONDS.toNanos(
                 CLEAN_UP_UID_DELAY_MILLIS));
         verify(mNativeWrapperMock, times(1)).halSetThreads(eq(sessionPtr1),
                 eq(SESSION_TIDS_A));

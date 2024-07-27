@@ -300,8 +300,8 @@ final class ZeroJankProxy implements IInputMethodManagerImpl.Callback {
 
     @IInputMethodManagerImpl.PermissionVerified(Manifest.permission.INTERNAL_SYSTEM_WINDOW)
     @Override
-    public void removeImeSurface() {
-        mInner.removeImeSurface();
+    public void removeImeSurface(int displayId) {
+        mInner.removeImeSurface(displayId);
     }
 
     @Override

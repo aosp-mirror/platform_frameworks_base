@@ -171,7 +171,6 @@ public abstract class BaseHeadsUpManager implements HeadsUpManager {
         mLogger.logShowNotificationRequest(entry);
 
         Runnable runnable = () -> {
-            // TODO(b/315362456) log outside runnable too
             mLogger.logShowNotification(entry);
 
             // Add new entry and begin managing it
@@ -244,8 +243,10 @@ public abstract class BaseHeadsUpManager implements HeadsUpManager {
             return;
         }
         // TODO(b/328390331) move accessibility events to the view layer
-        headsUpEntry.mEntry.sendAccessibilityEvent(AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED);
-
+        if (headsUpEntry.mEntry != null) {
+            headsUpEntry.mEntry.sendAccessibilityEvent(
+                    AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED);
+        }
         if (shouldHeadsUpAgain) {
             headsUpEntry.updateEntry(true /* updatePostTime */, "updateNotification");
             if (headsUpEntry != null) {
@@ -334,6 +335,9 @@ public abstract class BaseHeadsUpManager implements HeadsUpManager {
     }
 
     protected boolean shouldHeadsUpBecomePinned(@NonNull NotificationEntry entry) {
+        if (entry == null) {
+            return false;
+        }
         final HeadsUpEntry headsUpEntry = getHeadsUpEntry(entry.getKey());
         if (headsUpEntry == null) {
             // This should not happen since shouldHeadsUpBecomePinned is always called after adding
@@ -344,6 +348,15 @@ public abstract class BaseHeadsUpManager implements HeadsUpManager {
     }
 
     protected boolean hasFullScreenIntent(@NonNull NotificationEntry entry) {
+        if (entry == null) {
+            return false;
+        }
+        if (entry.getSbn() == null) {
+            return false;
+        }
+        if (entry.getSbn().getNotification() == null) {
+            return false;
+        }
         return entry.getSbn().getNotification().fullScreenIntent != null;
     }
 
@@ -451,6 +464,15 @@ public abstract class BaseHeadsUpManager implements HeadsUpManager {
     }
 
     /**
+     * Called to notify the listeners that the HUN animating away animation has ended.
+     */
+    public void onEntryAnimatingAwayEnded(@NonNull NotificationEntry entry) {
+        for (OnHeadsUpChangedListener listener : mListeners) {
+            listener.onHeadsUpAnimatingAwayEnded(entry);
+        }
+    }
+
+    /**
      * Manager-specific logic, that should occur, when the entry is updated, and its posted time has
      * changed.
      *
@@ -499,6 +521,9 @@ public abstract class BaseHeadsUpManager implements HeadsUpManager {
         keySet.addAll(mAvalancheController.getWaitingKeys());
         for (String key : keySet) {
             HeadsUpEntry entry = getHeadsUpEntry(key);
+            if (entry.mEntry == null) {
+                continue;
+            }
             String packageName = entry.mEntry.getSbn().getPackageName();
             String snoozeKey = snoozeKey(packageName, mUser);
             mLogger.logPackageSnoozed(snoozeKey);
@@ -566,7 +591,7 @@ public abstract class BaseHeadsUpManager implements HeadsUpManager {
         pw.print("  now="); pw.println(mSystemClock.elapsedRealtime());
         pw.print("  mUser="); pw.println(mUser);
         for (HeadsUpEntry entry: mHeadsUpEntryMap.values()) {
-            pw.print("  HeadsUpEntry="); pw.println(entry.mEntry);
+            pw.println(entry.mEntry == null ? "null" : entry.mEntry);
         }
         int n = mSnoozedPackages.size();
         pw.println("  snoozed packages: " + n);
@@ -586,7 +611,7 @@ public abstract class BaseHeadsUpManager implements HeadsUpManager {
     private boolean hasPinnedNotificationInternal() {
         for (String key : mHeadsUpEntryMap.keySet()) {
             HeadsUpEntry entry = getHeadsUpEntry(key);
-            if (entry.mEntry.isRowPinned()) {
+            if (entry.mEntry != null && entry.mEntry.isRowPinned()) {
                 return true;
             }
         }
@@ -611,7 +636,7 @@ public abstract class BaseHeadsUpManager implements HeadsUpManager {
                 // when the user unpinned all of HUNs by moving one HUN, all of HUNs should not stay
                 // on the screen.
                 if (userUnPinned && headsUpEntry.mEntry != null) {
-                    if (headsUpEntry.mEntry.mustStayOnScreen()) {
+                    if (headsUpEntry.mEntry != null && headsUpEntry.mEntry.mustStayOnScreen()) {
                         headsUpEntry.mEntry.setHeadsUpIsVisible();
                     }
                 }
@@ -687,7 +712,7 @@ public abstract class BaseHeadsUpManager implements HeadsUpManager {
             return true;
         }
         return headsUpEntry == null || headsUpEntry.wasShownLongEnough()
-                || headsUpEntry.mEntry.isRowDismissed();
+                || (headsUpEntry.mEntry != null && headsUpEntry.mEntry.isRowDismissed());
     }
 
     /**
@@ -866,6 +891,14 @@ public abstract class BaseHeadsUpManager implements HeadsUpManager {
         }
 
         public int compareNonTimeFields(HeadsUpEntry headsUpEntry) {
+            if (mEntry == null && headsUpEntry.mEntry == null) {
+                return 0;
+            } else if (headsUpEntry.mEntry == null) {
+                return -1;
+            } else if (mEntry == null) {
+                return 1;
+            }
+
             boolean selfFullscreen = hasFullScreenIntent(mEntry);
             boolean otherFullscreen = hasFullScreenIntent(headsUpEntry.mEntry);
             if (selfFullscreen && !otherFullscreen) {
@@ -892,6 +925,13 @@ public abstract class BaseHeadsUpManager implements HeadsUpManager {
         }
 
         public int compareTo(@NonNull HeadsUpEntry headsUpEntry) {
+            if (mEntry == null && headsUpEntry.mEntry == null) {
+                return 0;
+            } else if (headsUpEntry.mEntry == null) {
+                return -1;
+            } else if (mEntry == null) {
+                return 1;
+            }
             boolean isPinned = mEntry.isRowPinned();
             boolean otherPinned = headsUpEntry.mEntry.isRowPinned();
             if (isPinned && !otherPinned) {
@@ -956,7 +996,7 @@ public abstract class BaseHeadsUpManager implements HeadsUpManager {
                     mLogger.logAutoRemoveCanceled(mEntry, reason);
                 }
             };
-            if (isHeadsUpEntry(this.mEntry.getKey())) {
+            if (mEntry != null && isHeadsUpEntry(mEntry.getKey())) {
                 mAvalancheController.update(this, runnable, reason + " cancelAutoRemovalCallbacks");
             } else {
                 // Just removed

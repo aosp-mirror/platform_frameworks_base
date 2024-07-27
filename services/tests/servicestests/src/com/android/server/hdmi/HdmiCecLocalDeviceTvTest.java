@@ -28,6 +28,7 @@ import static com.android.server.hdmi.HdmiControlService.INITIATED_BY_ENABLE_CEC
 import static com.android.server.hdmi.HdmiControlService.INITIATED_BY_WAKE_UP_MESSAGE;
 import static com.android.server.hdmi.HdmiControlService.STANDBY_SCREEN_OFF;
 import static com.android.server.hdmi.HdmiControlService.WAKE_UP_SCREEN_ON;
+import static com.android.server.hdmi.RequestActiveSourceAction.TIMEOUT_WAIT_FOR_LAUNCHERX_API_CALL_MS;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -1792,7 +1793,7 @@ public class HdmiCecLocalDeviceTvTest {
         mTestLooper.dispatchAll();
 
         // Skip the LauncherX API timeout.
-        mTestLooper.moveTimeForward(HdmiConfig.TIMEOUT_MS * 2);
+        mTestLooper.moveTimeForward(TIMEOUT_WAIT_FOR_LAUNCHERX_API_CALL_MS);
         mTestLooper.dispatchAll();
 
         assertThat(mNativeWrapper.getResultMessages()).contains(requestActiveSource);
@@ -1825,7 +1826,7 @@ public class HdmiCecLocalDeviceTvTest {
         mTestLooper.dispatchAll();
 
         // Skip the LauncherX API timeout.
-        mTestLooper.moveTimeForward(HdmiConfig.TIMEOUT_MS * 2);
+        mTestLooper.moveTimeForward(TIMEOUT_WAIT_FOR_LAUNCHERX_API_CALL_MS);
         mTestLooper.dispatchAll();
 
         assertThat(mNativeWrapper.getResultMessages()).contains(requestActiveSource);
@@ -1861,7 +1862,7 @@ public class HdmiCecLocalDeviceTvTest {
         mTestLooper.dispatchAll();
 
         // Skip the LauncherX API timeout.
-        mTestLooper.moveTimeForward(HdmiConfig.TIMEOUT_MS * 2);
+        mTestLooper.moveTimeForward(TIMEOUT_WAIT_FOR_LAUNCHERX_API_CALL_MS);
         mTestLooper.dispatchAll();
 
         assertThat(mNativeWrapper.getResultMessages()).contains(requestActiveSource);
@@ -1904,7 +1905,7 @@ public class HdmiCecLocalDeviceTvTest {
         mTestLooper.dispatchAll();
 
         // Skip the LauncherX API timeout.
-        mTestLooper.moveTimeForward(HdmiConfig.TIMEOUT_MS * 2);
+        mTestLooper.moveTimeForward(TIMEOUT_WAIT_FOR_LAUNCHERX_API_CALL_MS);
         mTestLooper.dispatchAll();
 
         assertThat(mNativeWrapper.getResultMessages()).contains(requestActiveSource);
@@ -1941,7 +1942,7 @@ public class HdmiCecLocalDeviceTvTest {
         mHdmiControlService.sendCecCommand(setStreamPathFromTv);
 
         // Skip the LauncherX API timeout.
-        mTestLooper.moveTimeForward(HdmiConfig.TIMEOUT_MS * 2);
+        mTestLooper.moveTimeForward(TIMEOUT_WAIT_FOR_LAUNCHERX_API_CALL_MS);
         mTestLooper.dispatchAll();
 
         assertThat(mNativeWrapper.getResultMessages()).doesNotContain(requestActiveSource);

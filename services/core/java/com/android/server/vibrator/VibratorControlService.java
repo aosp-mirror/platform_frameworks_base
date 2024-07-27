@@ -41,6 +41,7 @@ import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.VibrationAttributes;
 import android.os.VibrationEffect;
+import android.os.vibrator.Flags;
 import android.util.IndentingPrintWriter;
 import android.util.IntArray;
 import android.util.Slog;
@@ -265,9 +266,15 @@ final class VibratorControlService extends IVibratorControlService.Stub {
                 return null;
             }
 
+            if (Flags.throttleVibrationParamsRequests() && mVibrationParamRequest != null
+                    && mVibrationParamRequest.usage == usage) {
+                // Reuse existing future for ongoing request with same usage.
+                return mVibrationParamRequest.future;
+            }
+
             try {
                 endOngoingRequestVibrationParamsLocked(/* wasCancelled= */ true);
-                mVibrationParamRequest = new VibrationParamRequest(uid);
+                mVibrationParamRequest = new VibrationParamRequest(uid, usage);
                 vibratorController.requestVibrationParams(vibrationType, timeoutInMillis,
                         mVibrationParamRequest.token);
                 return mVibrationParamRequest.future;
@@ -533,10 +540,12 @@ final class VibratorControlService extends IVibratorControlService.Stub {
         public final CompletableFuture<Void> future = new CompletableFuture<>();
         public final IBinder token = new Binder();
         public final int uid;
+        public final @VibrationAttributes.Usage int usage;
         public final long uptimeMs;
 
-        VibrationParamRequest(int uid) {
+        VibrationParamRequest(int uid, @VibrationAttributes.Usage int usage) {
             this.uid = uid;
+            this.usage = usage;
             uptimeMs = SystemClock.uptimeMillis();
         }
 

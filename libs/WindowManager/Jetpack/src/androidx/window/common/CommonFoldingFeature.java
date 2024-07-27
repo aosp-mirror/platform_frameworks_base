@@ -16,7 +16,7 @@
 
 package androidx.window.common;
 
-import static androidx.window.util.ExtensionHelper.isZero;
+import static androidx.window.common.ExtensionHelper.isZero;
 
 import android.annotation.IntDef;
 import android.annotation.Nullable;
