@@ -21,7 +21,6 @@ import com.android.systemui.bouncer.data.repository.FakeKeyguardBouncerRepositor
 import com.android.systemui.common.ui.data.repository.FakeConfigurationRepository
 import com.android.systemui.common.ui.domain.interactor.ConfigurationInteractor
 import com.android.systemui.flags.FakeFeatureFlags
-import com.android.systemui.keyguard.data.repository.FakeCommandQueue
 import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.TransitionStep
@@ -49,7 +48,6 @@ object KeyguardInteractorFactory {
     fun create(
         featureFlags: FakeFeatureFlags = FakeFeatureFlags(),
         repository: FakeKeyguardRepository = FakeKeyguardRepository(),
-        commandQueue: FakeCommandQueue = FakeCommandQueue(),
         bouncerRepository: FakeKeyguardBouncerRepository = FakeKeyguardBouncerRepository(),
         configurationRepository: FakeConfigurationRepository = FakeConfigurationRepository(),
         shadeRepository: FakeShadeRepository = FakeShadeRepository(),
@@ -87,7 +85,6 @@ object KeyguardInteractorFactory {
                 }
         return WithDependencies(
             repository = repository,
-            commandQueue = commandQueue,
             featureFlags = featureFlags,
             bouncerRepository = bouncerRepository,
             configurationRepository = configurationRepository,
@@ -95,7 +92,6 @@ object KeyguardInteractorFactory {
             powerInteractor = powerInteractor,
             KeyguardInteractor(
                 repository = repository,
-                commandQueue = commandQueue,
                 powerInteractor = powerInteractor,
                 bouncerRepository = bouncerRepository,
                 configurationInteractor = ConfigurationInteractor(configurationRepository),
@@ -112,7 +108,6 @@ object KeyguardInteractorFactory {
 
     data class WithDependencies(
         val repository: FakeKeyguardRepository,
-        val commandQueue: FakeCommandQueue,
         val featureFlags: FakeFeatureFlags,
         val bouncerRepository: FakeKeyguardBouncerRepository,
         val configurationRepository: FakeConfigurationRepository,

@@ -34,6 +34,7 @@ import com.android.systemui.dreams.DreamOverlayCallbackController
 import com.android.systemui.keyguard.shared.model.BiometricUnlockMode
 import com.android.systemui.keyguard.shared.model.BiometricUnlockModel
 import com.android.systemui.keyguard.shared.model.BiometricUnlockSource
+import com.android.systemui.keyguard.shared.model.CameraLaunchSourceModel
 import com.android.systemui.keyguard.shared.model.DismissAction
 import com.android.systemui.keyguard.shared.model.DozeStateModel
 import com.android.systemui.keyguard.shared.model.DozeTransitionModel
@@ -237,6 +238,9 @@ interface KeyguardRepository {
     /** Observable updated when keyguardDone should be called either now or soon. */
     val keyguardDone: Flow<KeyguardDone>
 
+    /** Last camera launch detection event */
+    val onCameraLaunchDetected: MutableStateFlow<CameraLaunchSourceModel>
+
     /**
      * Emits after the keyguard is done animating away.
      *
@@ -379,6 +383,8 @@ constructor(
 
     private val _keyguardAlpha = MutableStateFlow(1f)
     override val keyguardAlpha = _keyguardAlpha.asStateFlow()
+
+    override val onCameraLaunchDetected = MutableStateFlow(CameraLaunchSourceModel())
 
     override val panelAlpha: MutableStateFlow<Float> = MutableStateFlow(1f)
 

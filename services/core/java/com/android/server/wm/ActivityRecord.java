@@ -8403,7 +8403,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
      */
     @ActivityInfo.SizeChangesSupportMode
     private int supportsSizeChanges() {
-        if (mLetterboxUiController.shouldOverrideForceNonResizeApp()) {
+        if (mAppCompatController.getAppCompatResizeOverrides()
+                .shouldOverrideForceNonResizeApp()) {
             return SIZE_CHANGES_UNSUPPORTED_OVERRIDE;
         }
 
@@ -8411,7 +8412,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             return SIZE_CHANGES_SUPPORTED_METADATA;
         }
 
-        if (mLetterboxUiController.shouldOverrideForceResizeApp()) {
+        if (mAppCompatController.getAppCompatResizeOverrides()
+                .shouldOverrideForceResizeApp()) {
             return SIZE_CHANGES_SUPPORTED_OVERRIDE;
         }
 
@@ -10494,7 +10496,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 mAppCompatController.getAppCompatOrientationOverrides()
                         .shouldIgnoreOrientationRequestLoop());
         proto.write(SHOULD_OVERRIDE_FORCE_RESIZE_APP,
-                mLetterboxUiController.shouldOverrideForceResizeApp());
+                mAppCompatController.getAppCompatResizeOverrides().shouldOverrideForceResizeApp());
         proto.write(SHOULD_ENABLE_USER_ASPECT_RATIO_SETTINGS,
                 mAppCompatController.getAppCompatAspectRatioOverrides()
                         .shouldEnableUserAspectRatioSettings());

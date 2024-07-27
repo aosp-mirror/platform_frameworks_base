@@ -26,7 +26,9 @@ import com.android.systemui.animation.DelegateTransitionAnimatorController
 import com.android.systemui.animation.DialogCuj
 import com.android.systemui.animation.DialogTransitionAnimator
 import com.android.systemui.animation.Expandable
-import com.android.systemui.plugins.FalsingManager
+import com.android.systemui.log.LogBuffer
+import com.android.systemui.log.core.LogLevel
+import com.android.systemui.log.dagger.QSLog
 import com.android.systemui.plugins.qs.QSTile
 import com.android.systemui.statusbar.VibratorHelper
 import com.android.systemui.statusbar.policy.KeyguardStateController
@@ -48,7 +50,7 @@ class QSLongPressEffect
 constructor(
     private val vibratorHelper: VibratorHelper?,
     private val keyguardStateController: KeyguardStateController,
-    private val falsingManager: FalsingManager,
+    @QSLog private val logBuffer: LogBuffer,
 ) {
 
     var effectDuration = 0
@@ -103,6 +105,7 @@ constructor(
     }
 
     fun handleActionDown() {
+        logEvent(qsTile?.tileSpec, state, "action down received")
         when (state) {
             State.IDLE -> {
                 setState(State.TIMEOUT_WAIT)
@@ -114,6 +117,7 @@ constructor(
     }
 
     fun handleActionUp() {
+        logEvent(qsTile?.tileSpec, state, "action up received")
         if (state == State.RUNNING_FORWARD) {
             setState(State.RUNNING_BACKWARDS_FROM_UP)
             callback?.onReverseAnimator()
@@ -132,6 +136,7 @@ constructor(
     }
 
     fun handleAnimationStart() {
+        logEvent(qsTile?.tileSpec, state, "animation started")
         if (state == State.TIMEOUT_WAIT) {
             vibrate(longPressHint)
             setState(State.RUNNING_FORWARD)
@@ -140,6 +145,7 @@ constructor(
 
     /** This function is called both when an animator completes or gets cancelled */
     fun handleAnimationComplete() {
+        logEvent(qsTile?.tileSpec, state, "animation completed")
         when (state) {
             State.RUNNING_FORWARD -> {
                 vibrate(snapEffect)
@@ -149,11 +155,13 @@ constructor(
                     callback?.onResetProperties()
                     setState(State.IDLE)
                 }
+                logEvent(qsTile?.tileSpec, state, "long click action triggered")
                 qsTile?.longClick(expandable)
             }
             State.RUNNING_BACKWARDS_FROM_UP -> {
                 callback?.onEffectFinishedReversing()
                 setState(getStateForClick())
+                logEvent(qsTile?.tileSpec, state, "click action triggered")
                 qsTile?.click(expandable)
             }
             State.RUNNING_BACKWARDS_FROM_CANCEL -> {
@@ -181,6 +189,7 @@ constructor(
         if (keyguardStateController.isPrimaryBouncerShowing || !isStateClickable) return false
 
         setState(getStateForClick())
+        logEvent(qsTile?.tileSpec, state, "click action triggered")
         qsTile?.click(expandable)
         return true
     }
@@ -195,11 +204,8 @@ constructor(
     @VisibleForTesting
     fun getStateForClick(): State {
         val isTileUnavailable = qsTile?.state?.state == Tile.STATE_UNAVAILABLE
-        val isFalseTapWhileLocked =
-            !keyguardStateController.isUnlocked &&
-                falsingManager.isFalseTap(FalsingManager.LOW_PENALTY)
         val handlesLongClick = qsTile?.state?.handlesLongClick == true
-        return if (isTileUnavailable || isFalseTapWhileLocked || !handlesLongClick) {
+        return if (isTileUnavailable || !handlesLongClick || keyguardStateController.isShowing) {
             // The click event will not perform an action that resets the state. Therefore, this is
             // the last opportunity to reset the state back to IDLE.
             State.IDLE
@@ -278,6 +284,20 @@ constructor(
         return delegated
     }
 
+    private fun logEvent(tileSpec: String?, state: State, event: String) {
+        if (!DEBUG) return
+        logBuffer.log(
+            TAG,
+            LogLevel.DEBUG,
+            {
+                str1 = tileSpec
+                str2 = event
+                str3 = state.name
+            },
+            { "[long-press effect on $str1 tile] $str2 on state: $str3" }
+        )
+    }
+
     enum class State {
         IDLE, /* The effect is idle waiting for touch input */
         TIMEOUT_WAIT, /* The effect is waiting for a tap timeout period */
@@ -308,5 +328,10 @@ constructor(
 
         /** Cancel the effect animator */
         fun onCancelAnimator()
+    }
+
+    companion object {
+        private const val TAG = "QSLongPressEffect"
+        private const val DEBUG = true
     }
 }

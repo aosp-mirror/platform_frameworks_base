@@ -1109,6 +1109,14 @@
     <!-- Priority modes: label for a mode that cannot be manually turned on [CHAR LIMIT=35] -->
     <string name="zen_mode_no_manual_invocation">Manage in settings</string>
 
+    <string name="zen_mode_active_modes">
+        {count, plural,
+            =0 {No active modes}
+            =1 {{mode} is active}
+            other {# modes are active}
+        }
+    </string>
+
     <!-- Zen mode: Priority only introduction message on first use -->
     <string name="zen_priority_introduction">You won\'t be disturbed by sounds and vibrations, except from alarms, reminders, events, and callers you specify. You\'ll still hear anything you choose to play including music, videos, and games.</string>
 
@@ -1216,6 +1224,9 @@
 
     <!-- Label for accessibility action that shows widgets on lock screen on click. [CHAR LIMIT=NONE] -->
     <string name="accessibility_action_open_communal_hub">Widgets on lock screen</string>
+
+    <!-- Label for an accessibility announcement when a widget has been added to the lock screen. [CHAR LIMIT=NONE] -->
+    <string name="accessibility_announcement_communal_widget_added"><xliff:g id="widget_name" example="Calendar month view">%1$s</xliff:g> widget added to lock screen</string>
 
     <!-- Indicator on keyguard to start the communal tutorial. [CHAR LIMIT=100] -->
     <string name="communal_tutorial_indicator_text">Swipe left to start the communal tutorial</string>
@@ -3214,9 +3225,6 @@
 
     <!-- Provider Model: Default title of the mobile network in the mobile layout. [CHAR LIMIT=50] -->
     <string name="mobile_data_settings_title">Mobile data</string>
-    <!-- Provider Model: Summary text separator for preferences including a short description
-         (eg. "Connected / 5G"). [CHAR LIMIT=50] -->
-    <string name="preference_summary_default_combination"><xliff:g id="state" example="Connected">%1$s</xliff:g> / <xliff:g id="networkMode" example="LTE">%2$s</xliff:g></string>
     <!-- Provider Model:
          Summary indicating that a SIM has an active mobile data connection [CHAR LIMIT=50] -->
     <string name="mobile_data_connection_active">Connected</string>

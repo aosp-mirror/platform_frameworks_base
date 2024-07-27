@@ -116,54 +116,6 @@ final class LetterboxUiController {
         }
     }
 
-    /**
-     * Whether we should apply the force resize per-app override. When this override is applied it
-     * forces the packages it is applied to to be resizable. It won't change whether the app can be
-     * put into multi-windowing mode, but allow the app to resize without going into size-compat
-     * mode when the window container resizes, such as display size change or screen rotation.
-     *
-     * <p>This method returns {@code true} when the following conditions are met:
-     * <ul>
-     *     <li>Opt-out component property isn't enabled
-     *     <li>Per-app override is enabled
-     * </ul>
-     */
-    boolean shouldOverrideForceResizeApp() {
-        return getAppCompatOverrides().shouldOverrideForceResizeApp();
-    }
-
-    /**
-     * Whether we should apply the force non resize per-app override. When this override is applied
-     * it forces the packages it is applied to to be non-resizable.
-     *
-     * <p>This method returns {@code true} when the following conditions are met:
-     * <ul>
-     *     <li>Opt-out component property isn't enabled
-     *     <li>Per-app override is enabled
-     * </ul>
-     */
-    boolean shouldOverrideForceNonResizeApp() {
-        return getAppCompatOverrides().shouldOverrideForceNonResizeApp();
-    }
-
-    /**
-     * Whether should fix display orientation to landscape natural orientation when a task is
-     * fullscreen and the display is ignoring orientation requests.
-     *
-     * <p>This treatment is enabled when the following conditions are met:
-     * <ul>
-     *     <li>Opt-out component property isn't enabled
-     *     <li>Opt-in per-app override is enabled
-     *     <li>Task is in fullscreen.
-     *     <li>{@link DisplayContent#getIgnoreOrientationRequest} is enabled
-     *     <li>Natural orientation of the display is landscape.
-     * </ul>
-     */
-    boolean shouldUseDisplayLandscapeNaturalOrientation() {
-        return getAppCompatOverrides().getAppCompatOrientationOverrides()
-                .shouldUseDisplayLandscapeNaturalOrientation();
-    }
-
     boolean hasWallpaperBackgroundForLetterbox() {
         return mShowWallpaperForLetterboxBackground;
     }

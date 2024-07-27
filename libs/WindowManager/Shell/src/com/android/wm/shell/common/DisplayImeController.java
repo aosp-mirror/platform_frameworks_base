@@ -315,7 +315,7 @@ public class DisplayImeController implements DisplayController.OnDisplaysChanged
                         }
                     }
                     if (!mImeShowing) {
-                        removeImeSurface();
+                        removeImeSurface(mDisplayId);
                     }
                 }
             } else if (!android.view.inputmethod.Flags.refactorInsetsController()
@@ -617,7 +617,7 @@ public class DisplayImeController implements DisplayController.OnDisplaysChanged
                                 || hasLeash) {
                             t.hide(mImeSourceControl.getLeash());
                         }
-                        removeImeSurface();
+                        removeImeSurface(mDisplayId);
                         ImeTracker.forLogging().onHidden(mStatsToken);
                     } else if (mAnimationDirection == DIRECTION_SHOW && !mCancelled) {
                         ImeTracker.forLogging().onShown(mStatsToken);
@@ -671,10 +671,10 @@ public class DisplayImeController implements DisplayController.OnDisplaysChanged
         }
     }
 
-    void removeImeSurface() {
+    void removeImeSurface(int displayId) {
         // Remove the IME surface to make the insets invisible for
         // non-client controlled insets.
-        InputMethodManagerGlobal.removeImeSurface(
+        InputMethodManagerGlobal.removeImeSurface(displayId,
                 e -> Slog.e(TAG, "Failed to remove IME surface.", e));
     }
 

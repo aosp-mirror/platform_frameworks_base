@@ -95,7 +95,7 @@ class CompatUIWindowManager extends CompatUIWindowManagerAbstract {
         mCallback = callback;
         mHasSizeCompat = taskInfo.appCompatTaskInfo.topActivityInSizeCompat;
         if (DESKTOP_WINDOWING_MODE.isEnabled(mContext)
-                && DesktopModeFlags.THEMED_APP_HEADERS.isEnabled(context)) {
+                && DesktopModeFlags.DYNAMIC_INITIAL_BOUNDS.isEnabled(context)) {
             // Don't show the SCM button for freeform tasks
             mHasSizeCompat &= !taskInfo.isFreeform();
         }

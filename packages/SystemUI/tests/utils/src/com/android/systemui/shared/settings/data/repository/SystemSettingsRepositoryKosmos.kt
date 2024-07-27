@@ -14,11 +14,10 @@
  * limitations under the License.
  */
 
-package com.android.systemui.qs.panels.domain.interactor
+package com.android.systemui.shared.settings.data.repository
 
 import com.android.systemui.kosmos.Kosmos
-import com.android.systemui.qs.panels.ui.compose.PartitionedGridLayout
-import com.android.systemui.qs.panels.ui.viewmodel.partitionedGridViewModel
 
-val Kosmos.partitionedGridLayout by
-    Kosmos.Fixture { PartitionedGridLayout(partitionedGridViewModel) }
+var Kosmos.systemSettingsRepository: SystemSettingsRepository by
+    Kosmos.Fixture { fakeSystemSettingsRepository }
+val Kosmos.fakeSystemSettingsRepository by Kosmos.Fixture { FakeSystemSettingsRepository() }

@@ -1254,14 +1254,15 @@ public class InputManagerService extends IInputManager.Stub
     /**
      * Start drag and drop.
      *
-     * @param fromChannel The input channel that is currently receiving a touch gesture that should
-     *                    be turned into the drag pointer.
-     * @param dragAndDropChannel The input channel associated with the system drag window.
+     * @param fromChannelToken The token of the input channel that is currently receiving a touch
+     *                        gesture that should be turned into the drag pointer.
+     * @param dragAndDropChannelToken The token of the input channel associated with the system drag
+     *                               window.
      * @return true if drag and drop was successfully started, false otherwise.
      */
     public boolean startDragAndDrop(@NonNull IBinder fromChannelToken,
-            @NonNull InputChannel dragAndDropChannel) {
-        return mNative.transferTouchGesture(fromChannelToken, dragAndDropChannel.getToken(),
+            @NonNull IBinder dragAndDropChannelToken) {
+        return mNative.transferTouchGesture(fromChannelToken, dragAndDropChannelToken,
                 true /* isDragDrop */);
     }
 

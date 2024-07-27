@@ -16,10 +16,7 @@
 
 package com.android.server.wm;
 
-import static android.content.pm.ActivityInfo.FORCE_NON_RESIZE_APP;
-import static android.content.pm.ActivityInfo.FORCE_RESIZE_APP;
 import static android.view.InsetsSource.FLAG_INSETS_ROUNDED_CORNER;
-import static android.view.WindowManager.PROPERTY_COMPAT_ALLOW_RESIZEABLE_ACTIVITY_OVERRIDES;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.eq;
@@ -32,15 +29,12 @@ import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.annotation.Nullable;
 import android.compat.testing.PlatformCompatChangeRule;
 import android.content.ComponentName;
-import android.content.pm.PackageManager;
-import android.content.pm.PackageManager.Property;
 import android.content.res.Resources;
 import android.graphics.Rect;
 import android.platform.test.annotations.DisableFlags;
@@ -57,9 +51,6 @@ import androidx.test.filters.SmallTest;
 
 import com.android.internal.R;
 import com.android.window.flags.Flags;
-
-import libcore.junit.util.compat.CoreCompatChangeRule.DisableCompatChanges;
-import libcore.junit.util.compat.CoreCompatChangeRule.EnableCompatChanges;
 
 import org.junit.Before;
 import org.junit.Rule;
@@ -306,122 +297,6 @@ public class LetterboxUiControllerTest extends WindowTestsBase {
     }
 
     @Test
-    @EnableCompatChanges({FORCE_RESIZE_APP})
-    public void testshouldOverrideForceResizeApp_overrideEnabled_returnsTrue() {
-        mController = new LetterboxUiController(mWm, mActivity);
-
-        assertTrue(mController.shouldOverrideForceResizeApp());
-    }
-
-    @Test
-    @EnableCompatChanges({FORCE_RESIZE_APP})
-    public void testshouldOverrideForceResizeApp_propertyTrue_overrideEnabled_returnsTrue()
-            throws Exception {
-        mockThatProperty(PROPERTY_COMPAT_ALLOW_RESIZEABLE_ACTIVITY_OVERRIDES, /* value */ true);
-        mController = new LetterboxUiController(mWm, mActivity);
-
-        assertTrue(mController.shouldOverrideForceResizeApp());
-    }
-
-    @Test
-    @DisableCompatChanges({FORCE_RESIZE_APP})
-    public void testshouldOverrideForceResizeApp_propertyTrue_overrideDisabled_returnsFalse()
-            throws Exception {
-        mockThatProperty(PROPERTY_COMPAT_ALLOW_RESIZEABLE_ACTIVITY_OVERRIDES, /* value */ true);
-        mController = new LetterboxUiController(mWm, mActivity);
-
-        assertFalse(mController.shouldOverrideForceResizeApp());
-    }
-
-    @Test
-    @DisableCompatChanges({FORCE_RESIZE_APP})
-    public void testshouldOverrideForceResizeApp_overrideDisabled_returnsFalse() {
-        mController = new LetterboxUiController(mWm, mActivity);
-
-        assertFalse(mController.shouldOverrideForceResizeApp());
-    }
-
-    @Test
-    @EnableCompatChanges({FORCE_RESIZE_APP})
-    public void testshouldOverrideForceResizeApp_propertyFalse_overrideEnabled_returnsFalse()
-            throws Exception {
-        mockThatProperty(PROPERTY_COMPAT_ALLOW_RESIZEABLE_ACTIVITY_OVERRIDES, /* value */ false);
-
-        mActivity = setUpActivityWithComponent();
-        mController = new LetterboxUiController(mWm, mActivity);
-
-        assertFalse(mController.shouldOverrideForceResizeApp());
-    }
-
-    @Test
-    @DisableCompatChanges({FORCE_RESIZE_APP})
-    public void testshouldOverrideForceResizeApp_propertyFalse_noOverride_returnsFalse()
-            throws Exception {
-        mockThatProperty(PROPERTY_COMPAT_ALLOW_RESIZEABLE_ACTIVITY_OVERRIDES, /* value */ false);
-        mController = new LetterboxUiController(mWm, mActivity);
-
-        assertFalse(mController.shouldOverrideForceResizeApp());
-    }
-
-    @Test
-    @EnableCompatChanges({FORCE_NON_RESIZE_APP})
-    public void testshouldOverrideForceNonResizeApp_overrideEnabled_returnsTrue() {
-        mController = new LetterboxUiController(mWm, mActivity);
-
-        assertTrue(mController.shouldOverrideForceNonResizeApp());
-    }
-
-    @Test
-    @EnableCompatChanges({FORCE_NON_RESIZE_APP})
-    public void testshouldOverrideForceNonResizeApp_propertyTrue_overrideEnabled_returnsTrue()
-            throws Exception {
-        mockThatProperty(PROPERTY_COMPAT_ALLOW_RESIZEABLE_ACTIVITY_OVERRIDES, /* value */ true);
-        mController = new LetterboxUiController(mWm, mActivity);
-
-        assertTrue(mController.shouldOverrideForceNonResizeApp());
-    }
-
-    @Test
-    @DisableCompatChanges({FORCE_NON_RESIZE_APP})
-    public void testshouldOverrideForceNonResizeApp_propertyTrue_overrideDisabled_returnsFalse()
-            throws Exception {
-        mockThatProperty(PROPERTY_COMPAT_ALLOW_RESIZEABLE_ACTIVITY_OVERRIDES, /* value */ true);
-        mController = new LetterboxUiController(mWm, mActivity);
-
-        assertFalse(mController.shouldOverrideForceNonResizeApp());
-    }
-
-    @Test
-    @DisableCompatChanges({FORCE_NON_RESIZE_APP})
-    public void testshouldOverrideForceNonResizeApp_overrideDisabled_returnsFalse() {
-        mController = new LetterboxUiController(mWm, mActivity);
-
-        assertFalse(mController.shouldOverrideForceNonResizeApp());
-    }
-
-    @Test
-    @EnableCompatChanges({FORCE_NON_RESIZE_APP})
-    public void testshouldOverrideForceNonResizeApp_propertyFalse_overrideEnabled_returnsFalse()
-            throws Exception {
-        mockThatProperty(PROPERTY_COMPAT_ALLOW_RESIZEABLE_ACTIVITY_OVERRIDES, /* value */ false);
-
-        mActivity = setUpActivityWithComponent();
-        mController = new LetterboxUiController(mWm, mActivity);
-
-        assertFalse(mController.shouldOverrideForceNonResizeApp());
-    }
-
-    @Test
-    @DisableCompatChanges({FORCE_NON_RESIZE_APP})
-    public void testshouldOverrideForceNonResizeApp_propertyFalse_noOverride_returnsFalse()
-            throws Exception {
-        mockThatProperty(PROPERTY_COMPAT_ALLOW_RESIZEABLE_ACTIVITY_OVERRIDES, /* value */ false);
-        mController = new LetterboxUiController(mWm, mActivity);
-
-        assertFalse(mController.shouldOverrideForceNonResizeApp());
-    }
-
-    @Test
     public void testgetFixedOrientationLetterboxAspectRatio_splitScreenAspectEnabled() {
         doReturn(true).when(mActivity.mWmService.mAppCompatConfiguration)
                 .isCameraCompatTreatmentEnabled();
@@ -548,14 +423,6 @@ public class LetterboxUiControllerTest extends WindowTestsBase {
     public void testIsLetterboxEducationEnabled() {
         mController.isLetterboxEducationEnabled();
         verify(mAppCompatConfiguration).getIsEducationEnabled();
-    }
-
-    private void mockThatProperty(String propertyName, boolean value) throws Exception {
-        Property property = new Property(propertyName, /* value */ value, /* packageName */ "",
-                /* className */ "");
-        PackageManager pm = mWm.mContext.getPackageManager();
-        spyOn(pm);
-        doReturn(property).when(pm).getProperty(eq(propertyName), anyString());
     }
 
     private ActivityRecord setUpActivityWithComponent() {

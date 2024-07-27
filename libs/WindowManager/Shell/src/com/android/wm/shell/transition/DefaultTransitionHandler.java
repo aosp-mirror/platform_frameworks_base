@@ -502,7 +502,8 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
                 backgroundColorForTransition = getTransitionBackgroundColorIfSet(info, change, a,
                         backgroundColorForTransition);
 
-                if (!isTask && a.hasExtension()) {
+                if (!com.android.graphics.libgui.flags.Flags.edgeExtensionShader() && !isTask
+                        && a.getExtensionEdges() != 0) {
                     if (!TransitionUtil.isOpeningType(mode)) {
                         // Can screenshot now (before startTransaction is applied)
                         edgeExtendWindow(change, a, startTransaction, finishTransaction);
@@ -512,6 +513,8 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
                         postStartTransactionCallbacks
                                 .add(t -> edgeExtendWindow(change, a, t, finishTransaction));
                     }
+                } else if (com.android.graphics.libgui.flags.Flags.edgeExtensionShader()) {
+                    finishTransaction.setEdgeExtensionEffect(change.getLeash(), /* edge */ 0);
                 }
 
                 final Rect clipRect = TransitionUtil.isClosingType(mode)
@@ -1008,6 +1011,10 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
             Point position, float cornerRadius, @Nullable Rect immutableClipRect) {
         tmpTransformation.clear();
         anim.getTransformation(time, tmpTransformation);
+        if (anim.getExtensionEdges() != 0
+                && com.android.graphics.libgui.flags.Flags.edgeExtensionShader()) {
+            t.setEdgeExtensionEffect(leash, anim.getExtensionEdges());
+        }
         if (position != null) {
             tmpTransformation.getMatrix().postTranslate(position.x, position.y);
         }

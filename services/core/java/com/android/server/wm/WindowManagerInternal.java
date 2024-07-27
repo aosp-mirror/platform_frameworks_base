@@ -41,7 +41,6 @@ import android.view.Display;
 import android.view.IInputFilter;
 import android.view.IRemoteAnimationFinishedCallback;
 import android.view.IWindow;
-import android.view.InputChannel;
 import android.view.MagnificationSpec;
 import android.view.RemoteAnimationTarget;
 import android.view.Surface;
@@ -377,10 +376,10 @@ public abstract class WindowManagerInternal {
     public interface IDragDropCallback {
         default CompletableFuture<Boolean> registerInputChannel(
                 DragState state, Display display, InputManagerService service,
-                InputChannel source) {
+                IBinder sourceInputChannelToken) {
             return state.register(display)
                 .thenApply(unused ->
-                    service.startDragAndDrop(source.getToken(), state.getInputChannel()));
+                    service.startDragAndDrop(sourceInputChannelToken, state.getInputToken()));
         }
 
         /**

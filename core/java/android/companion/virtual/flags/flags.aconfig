@@ -117,3 +117,11 @@ flag {
     description: "Enable high resolution scroll"
     bug: "335160780"
 }
+
+flag {
+  name: "camera_multiple_input_streams"
+  is_exported: true
+  namespace: "virtual_devices"
+  description: "Expose multiple surface for the virtual camera owner for different stream resolution"
+  bug: "341083465"
+}

@@ -401,6 +401,7 @@ java_defaults {
     ],
     sdk_version: "core_platform",
     static_libs: [
+        "aconfig_storage_reader_java",
         "android.hardware.common.fmq-V1-java",
         "bouncycastle-repackaged-unbundled",
         "com.android.sysprop.foldlockbehavior",
@@ -636,7 +637,6 @@ java_library {
         "core/java/com/android/internal/util/AsyncService.java",
         "core/java/com/android/internal/util/Protocol.java",
         "telephony/java/android/telephony/Annotation.java",
-        ":net-utils-framework-wifi-common-srcs",
     ],
     libs: [
         "framework-annotations-lib",

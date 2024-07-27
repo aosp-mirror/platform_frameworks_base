@@ -173,6 +173,7 @@ class FromAlternateBouncerTransitionInteractorTest : SysuiTestCase() {
         }
 
     @Test
+    @DisableFlags(Flags.FLAG_KEYGUARD_WM_STATE_REFACTOR)
     fun transitionToGone_whenOpeningGlanceableHubEditMode() =
         testScope.runTest {
             kosmos.fakeKeyguardBouncerRepository.setAlternateVisible(true)

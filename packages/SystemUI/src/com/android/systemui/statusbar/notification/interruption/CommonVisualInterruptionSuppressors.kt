@@ -46,6 +46,7 @@ import com.android.internal.messages.nano.SystemMessageProto.SystemMessage
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.settings.UserTracker
+import com.android.systemui.shared.notifications.domain.interactor.NotificationSettingsInteractor
 import com.android.systemui.statusbar.StatusBarState.SHADE
 import com.android.systemui.statusbar.notification.collection.NotificationEntry
 import com.android.systemui.statusbar.notification.interruption.NotificationInterruptStateProviderImpl.MAX_HUN_WHEN_AGE_MS
@@ -57,7 +58,6 @@ import com.android.systemui.statusbar.policy.BatteryController
 import com.android.systemui.statusbar.policy.HeadsUpManager
 import com.android.systemui.util.NotificationChannels
 import com.android.systemui.util.settings.GlobalSettings
-import com.android.systemui.util.settings.SystemSettings
 import com.android.systemui.util.time.SystemClock
 import com.android.wm.shell.bubbles.Bubbles
 import java.util.Optional
@@ -98,8 +98,7 @@ class PeekDisabledSuppressor(
         globalSettings.registerContentObserverSync(
             globalSettings.getUriFor(HEADS_UP_NOTIFICATIONS_ENABLED),
             /* notifyForDescendants = */ true,
-            observer
-        )
+            observer)
 
         // QQQ: Do we need to register for SETTING_HEADS_UP_TICKER? It seems unused.
 
@@ -171,10 +170,7 @@ class PeekDeviceNotInUseSuppressor(
 
 class PeekOldWhenSuppressor(private val systemClock: SystemClock) :
     VisualInterruptionFilter(
-        types = setOf(PEEK),
-        reason = "has old `when`",
-        uiEventId = HUN_SUPPRESSED_OLD_WHEN
-    ) {
+        types = setOf(PEEK), reason = "has old `when`", uiEventId = HUN_SUPPRESSED_OLD_WHEN) {
     private fun whenAge(entry: NotificationEntry) =
         systemClock.currentTimeMillis() - entry.sbn.notification.getWhen()
 
@@ -201,9 +197,7 @@ class PulseEffectSuppressor() :
 
 class PulseLockscreenVisibilityPrivateSuppressor() :
     VisualInterruptionFilter(
-        types = setOf(PULSE),
-        reason = "hidden by lockscreen visibility override"
-    ) {
+        types = setOf(PULSE), reason = "hidden by lockscreen visibility override") {
     override fun shouldSuppress(entry: NotificationEntry) =
         entry.ranking.lockscreenVisibilityOverride == VISIBILITY_PRIVATE
 }
@@ -215,18 +209,13 @@ class PulseLowImportanceSuppressor() :
 
 class HunGroupAlertBehaviorSuppressor() :
     VisualInterruptionFilter(
-        types = setOf(PEEK, PULSE),
-        reason = "suppressive group alert behavior"
-    ) {
+        types = setOf(PEEK, PULSE), reason = "suppressive group alert behavior") {
     override fun shouldSuppress(entry: NotificationEntry) =
         entry.sbn.let { it.isGroup && it.notification.suppressAlertingDueToGrouping() }
 }
 
 class HunSilentNotificationSuppressor() :
-    VisualInterruptionFilter(
-        types = setOf(PEEK, PULSE),
-        reason = "notification isSilent"
-    ) {
+    VisualInterruptionFilter(types = setOf(PEEK, PULSE), reason = "notification isSilent") {
     override fun shouldSuppress(entry: NotificationEntry) =
         entry.sbn.let { Flags.notificationSilentFlag() && it.notification.isSilent }
 }
@@ -273,7 +262,7 @@ private const val PREF_HAS_SEEN_AVALANCHE_EDU = "has_seen_avalanche_edu"
 class AvalancheSuppressor(
     private val avalancheProvider: AvalancheProvider,
     private val systemClock: SystemClock,
-    private val systemSettings: SystemSettings,
+    private val settingsInteractor: NotificationSettingsInteractor,
     private val packageManager: PackageManager,
     private val uiEventLogger: UiEventLogger,
     private val context: Context,
@@ -298,7 +287,7 @@ class AvalancheSuppressor(
     // education HUNs.
     private var hasShownOnceForDebug = false
 
-    private fun shouldShowEdu() : Boolean {
+    private fun shouldShowEdu(): Boolean {
         val forceShowOnce = SystemProperties.get(FORCE_SHOW_AVALANCHE_EDU_ONCE, "").equals("1")
         return !hasSeenEdu || (forceShowOnce && !hasShownOnceForDebug)
     }
@@ -361,28 +350,25 @@ class AvalancheSuppressor(
         return true
     }
 
-    /**
-     * Show avalanche education HUN from SystemUI.
-     */
+    /** Show avalanche education HUN from SystemUI. */
     private fun showEdu() {
         val res = context.resources
-        val titleStr = res.getString(
-            com.android.systemui.res.R.string.adaptive_notification_edu_hun_title)
-        val textStr = res.getString(
-            com.android.systemui.res.R.string.adaptive_notification_edu_hun_text)
-        val actionStr = res.getString(
-            com.android.systemui.res.R.string.go_to_adaptive_notification_settings)
+        val titleStr =
+            res.getString(com.android.systemui.res.R.string.adaptive_notification_edu_hun_title)
+        val textStr =
+            res.getString(com.android.systemui.res.R.string.adaptive_notification_edu_hun_text)
+        val actionStr =
+            res.getString(com.android.systemui.res.R.string.go_to_adaptive_notification_settings)
 
         val intent = Intent(Settings.ACTION_MANAGE_ADAPTIVE_NOTIFICATIONS)
-        val pendingIntent = PendingIntent.getActivity(
-            context, 0, intent,
-            PendingIntent.FLAG_IMMUTABLE
-        )
+        val pendingIntent =
+            PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_IMMUTABLE)
 
         // Replace "System UI" app name with "Android System"
         val bundle = Bundle()
-        bundle.putString(Notification.EXTRA_SUBSTITUTE_APP_NAME,
-                context.getString(com.android.internal.R.string.android_system_label))
+        bundle.putString(
+            Notification.EXTRA_SUBSTITUTE_APP_NAME,
+            context.getString(com.android.internal.R.string.android_system_label))
 
         val builder =
             Notification.Builder(context, NotificationChannels.ALERTS)
@@ -400,14 +386,12 @@ class AvalancheSuppressor(
 
         notificationManager.notify(SystemMessage.NOTE_ADAPTIVE_NOTIFICATIONS, builder.build())
         hasSeenEdu = true
-        hasShownOnceForDebug = true;
+        hasShownOnceForDebug = true
     }
 
     private fun calculateState(entry: NotificationEntry): State {
-        if (
-            entry.ranking.isConversation &&
-                entry.sbn.notification.getWhen() > avalancheProvider.startTime
-        ) {
+        if (entry.ranking.isConversation &&
+            entry.sbn.notification.getWhen() > avalancheProvider.startTime) {
             uiEventLogger.log(AvalancheEvent.AVALANCHE_SUPPRESSOR_HUN_ALLOWED_NEW_CONVERSATION)
             return State.ALLOW_CONVERSATION_AFTER_AVALANCHE
         }
@@ -440,10 +424,8 @@ class AvalancheSuppressor(
             uiEventLogger.log(AvalancheEvent.AVALANCHE_SUPPRESSOR_HUN_ALLOWED_COLORIZED)
             return State.ALLOW_COLORIZED
         }
-        if (
-            packageManager.checkPermission(RECEIVE_EMERGENCY_BROADCAST, entry.sbn.packageName) ==
-                PERMISSION_GRANTED
-        ) {
+        if (packageManager.checkPermission(RECEIVE_EMERGENCY_BROADCAST, entry.sbn.packageName) ==
+            PERMISSION_GRANTED) {
             uiEventLogger.log(AvalancheEvent.AVALANCHE_SUPPRESSOR_HUN_ALLOWED_EMERGENCY)
             return State.ALLOW_EMERGENCY
         }
@@ -452,7 +434,6 @@ class AvalancheSuppressor(
     }
 
     private fun isCooldownEnabled(): Boolean {
-        return systemSettings.getInt(Settings.System.NOTIFICATION_COOLDOWN_ENABLED, /* def */ 1) ==
-            1
+        return settingsInteractor.isCooldownEnabled.value
     }
 }

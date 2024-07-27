@@ -75,7 +75,6 @@ interface AudioModule {
         @Provides
         @SysUISingleton
         fun provideAudioSharingRepository(
-            @Application context: Context,
             contentResolver: ContentResolver,
             localBluetoothManager: LocalBluetoothManager?,
             @Application coroutineScope: CoroutineScope,

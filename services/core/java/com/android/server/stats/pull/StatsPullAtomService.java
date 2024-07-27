@@ -64,6 +64,7 @@ import static com.android.internal.util.FrameworkStatsLog.TIME_ZONE_DETECTOR_STA
 import static com.android.internal.util.FrameworkStatsLog.TIME_ZONE_DETECTOR_STATE__DETECTION_MODE__UNKNOWN;
 import static com.android.server.am.MemoryStatUtil.readMemoryStatFromFilesystem;
 import static com.android.server.stats.Flags.addMobileBytesTransferByProcStatePuller;
+import static com.android.server.stats.Flags.applyNetworkStatsPollRateLimit;
 import static com.android.server.stats.pull.IonMemoryUtil.readProcessSystemIonHeapSizesFromDebugfs;
 import static com.android.server.stats.pull.IonMemoryUtil.readSystemIonHeapSizeFromDebugfs;
 import static com.android.server.stats.pull.ProcfsMemoryUtil.getProcessCmdlines;
@@ -298,6 +299,13 @@ public class StatsPullAtomService extends SystemService {
      */
     private static final long NETSTATS_UID_DEFAULT_BUCKET_DURATION_MS = HOURS.toMillis(2);
 
+    /**
+     * Polling NetworkStats is a heavy operation and it should be done sparingly. Atom pulls may
+     * happen in bursts, but these should be infrequent. The poll rate limit ensures that data is
+     * sufficiently fresh (i.e. not stale) while reducing system load during atom pull bursts.
+     */
+    private static final long NETSTATS_POLL_RATE_LIMIT_MS = 15000;
+
     private static final int CPU_TIME_PER_THREAD_FREQ_MAX_NUM_FREQUENCIES = 8;
     private static final int OP_FLAGS_PULLED = OP_FLAG_SELF | OP_FLAG_TRUSTED_PROXIED;
     private static final String COMMON_PERMISSION_PREFIX = "android.permission.";
@@ -414,6 +422,9 @@ public class StatsPullAtomService extends SystemService {
     @NonNull
     @GuardedBy("mDataBytesTransferLock")
     private final ArrayList<NetworkStatsExt> mNetworkStatsBaselines = new ArrayList<>();
+
+    @GuardedBy("mDataBytesTransferLock")
+    private long mLastNetworkStatsPollTime = -NETSTATS_POLL_RATE_LIMIT_MS;
 
     // Listener for monitoring subscriptions changed event.
     private StatsSubscriptionsListener mStatsSubscriptionsListener;
@@ -1063,24 +1074,26 @@ public class StatsPullAtomService extends SystemService {
         // Initialize NetworkStats baselines.
         synchronized (mDataBytesTransferLock) {
             mNetworkStatsBaselines.addAll(
-                    collectNetworkStatsSnapshotForAtom(FrameworkStatsLog.WIFI_BYTES_TRANSFER));
+                    collectNetworkStatsSnapshotForAtomLocked(
+                            FrameworkStatsLog.WIFI_BYTES_TRANSFER));
             mNetworkStatsBaselines.addAll(
-                    collectNetworkStatsSnapshotForAtom(
+                    collectNetworkStatsSnapshotForAtomLocked(
                             FrameworkStatsLog.WIFI_BYTES_TRANSFER_BY_FG_BG));
             mNetworkStatsBaselines.addAll(
-                    collectNetworkStatsSnapshotForAtom(FrameworkStatsLog.MOBILE_BYTES_TRANSFER));
-            mNetworkStatsBaselines.addAll(collectNetworkStatsSnapshotForAtom(
+                    collectNetworkStatsSnapshotForAtomLocked(
+                            FrameworkStatsLog.MOBILE_BYTES_TRANSFER));
+            mNetworkStatsBaselines.addAll(collectNetworkStatsSnapshotForAtomLocked(
                     FrameworkStatsLog.MOBILE_BYTES_TRANSFER_BY_FG_BG));
-            mNetworkStatsBaselines.addAll(collectNetworkStatsSnapshotForAtom(
+            mNetworkStatsBaselines.addAll(collectNetworkStatsSnapshotForAtomLocked(
                     FrameworkStatsLog.BYTES_TRANSFER_BY_TAG_AND_METERED));
             mNetworkStatsBaselines.addAll(
-                    collectNetworkStatsSnapshotForAtom(
+                    collectNetworkStatsSnapshotForAtomLocked(
                             FrameworkStatsLog.DATA_USAGE_BYTES_TRANSFER));
             mNetworkStatsBaselines.addAll(
-                    collectNetworkStatsSnapshotForAtom(
+                    collectNetworkStatsSnapshotForAtomLocked(
                             FrameworkStatsLog.OEM_MANAGED_BYTES_TRANSFER));
             if (canQueryTypeProxy) {
-                mNetworkStatsBaselines.addAll(collectNetworkStatsSnapshotForAtom(
+                mNetworkStatsBaselines.addAll(collectNetworkStatsSnapshotForAtomLocked(
                         FrameworkStatsLog.PROXY_BYTES_TRANSFER_BY_FG_BG));
             }
         }
@@ -1243,12 +1256,14 @@ public class StatsPullAtomService extends SystemService {
         );
     }
 
+    @GuardedBy("mDataBytesTransferLock")
     @NonNull
-    private List<NetworkStatsExt> collectNetworkStatsSnapshotForAtom(int atomTag) {
+    private List<NetworkStatsExt> collectNetworkStatsSnapshotForAtomLocked(int atomTag) {
         List<NetworkStatsExt> ret = new ArrayList<>();
         switch (atomTag) {
             case FrameworkStatsLog.WIFI_BYTES_TRANSFER: {
-                final NetworkStats stats = getUidNetworkStatsSnapshotForTransport(TRANSPORT_WIFI);
+                final NetworkStats stats = getUidNetworkStatsSnapshotForTransportLocked(
+                        TRANSPORT_WIFI);
                 if (stats != null) {
                     ret.add(new NetworkStatsExt(sliceNetworkStatsByUid(stats),
                             new int[]{TRANSPORT_WIFI}, /*slicedByFgbg=*/false));
@@ -1256,7 +1271,8 @@ public class StatsPullAtomService extends SystemService {
                 break;
             }
             case FrameworkStatsLog.WIFI_BYTES_TRANSFER_BY_FG_BG: {
-                final NetworkStats stats = getUidNetworkStatsSnapshotForTransport(TRANSPORT_WIFI);
+                final NetworkStats stats = getUidNetworkStatsSnapshotForTransportLocked(
+                        TRANSPORT_WIFI);
                 if (stats != null) {
                     ret.add(new NetworkStatsExt(sliceNetworkStatsByUidAndFgbg(stats),
                             new int[]{TRANSPORT_WIFI}, /*slicedByFgbg=*/true));
@@ -1265,7 +1281,7 @@ public class StatsPullAtomService extends SystemService {
             }
             case FrameworkStatsLog.MOBILE_BYTES_TRANSFER: {
                 final NetworkStats stats =
-                        getUidNetworkStatsSnapshotForTransport(TRANSPORT_CELLULAR);
+                        getUidNetworkStatsSnapshotForTransportLocked(TRANSPORT_CELLULAR);
                 if (stats != null) {
                     ret.add(new NetworkStatsExt(sliceNetworkStatsByUid(stats),
                             new int[]{TRANSPORT_CELLULAR}, /*slicedByFgbg=*/false));
@@ -1274,7 +1290,7 @@ public class StatsPullAtomService extends SystemService {
             }
             case FrameworkStatsLog.MOBILE_BYTES_TRANSFER_BY_FG_BG: {
                 final NetworkStats stats =
-                        getUidNetworkStatsSnapshotForTransport(TRANSPORT_CELLULAR);
+                        getUidNetworkStatsSnapshotForTransportLocked(TRANSPORT_CELLULAR);
                 if (stats != null) {
                     ret.add(new NetworkStatsExt(sliceNetworkStatsByUidAndFgbg(stats),
                             new int[]{TRANSPORT_CELLULAR}, /*slicedByFgbg=*/true));
@@ -1282,7 +1298,7 @@ public class StatsPullAtomService extends SystemService {
                 break;
             }
             case FrameworkStatsLog.PROXY_BYTES_TRANSFER_BY_FG_BG: {
-                final NetworkStats stats = getUidNetworkStatsSnapshotForTemplate(
+                final NetworkStats stats = getUidNetworkStatsSnapshotForTemplateLocked(
                         new NetworkTemplate.Builder(MATCH_PROXY).build(),  /*includeTags=*/false);
                 if (stats != null) {
                     ret.add(new NetworkStatsExt(sliceNetworkStatsByUidTagAndMetered(stats),
@@ -1294,9 +1310,9 @@ public class StatsPullAtomService extends SystemService {
                 break;
             }
             case FrameworkStatsLog.BYTES_TRANSFER_BY_TAG_AND_METERED: {
-                final NetworkStats wifiStats = getUidNetworkStatsSnapshotForTemplate(
+                final NetworkStats wifiStats = getUidNetworkStatsSnapshotForTemplateLocked(
                         new NetworkTemplate.Builder(MATCH_WIFI).build(), /*includeTags=*/true);
-                final NetworkStats cellularStats = getUidNetworkStatsSnapshotForTemplate(
+                final NetworkStats cellularStats = getUidNetworkStatsSnapshotForTemplateLocked(
                         new NetworkTemplate.Builder(MATCH_MOBILE)
                                 .setMeteredness(METERED_YES).build(), /*includeTags=*/true);
                 if (wifiStats != null && cellularStats != null) {
@@ -1311,12 +1327,12 @@ public class StatsPullAtomService extends SystemService {
             }
             case FrameworkStatsLog.DATA_USAGE_BYTES_TRANSFER: {
                 for (final SubInfo subInfo : mHistoricalSubs) {
-                    ret.addAll(getDataUsageBytesTransferSnapshotForSub(subInfo));
+                    ret.addAll(getDataUsageBytesTransferSnapshotForSubLocked(subInfo));
                 }
                 break;
             }
             case FrameworkStatsLog.OEM_MANAGED_BYTES_TRANSFER: {
-                ret.addAll(getDataUsageBytesTransferSnapshotForOemManaged());
+                ret.addAll(getDataUsageBytesTransferSnapshotForOemManagedLocked());
                 break;
             }
             default:
@@ -1325,8 +1341,9 @@ public class StatsPullAtomService extends SystemService {
         return ret;
     }
 
+    @GuardedBy("mDataBytesTransferLock")
     private int pullDataBytesTransferLocked(int atomTag, @NonNull List<StatsEvent> pulledData) {
-        final List<NetworkStatsExt> current = collectNetworkStatsSnapshotForAtom(atomTag);
+        final List<NetworkStatsExt> current = collectNetworkStatsSnapshotForAtomLocked(atomTag);
 
         if (current == null) {
             Slog.e(TAG, "current snapshot is null for " + atomTag + ", return.");
@@ -1459,8 +1476,9 @@ public class StatsPullAtomService extends SystemService {
         }
     }
 
+    @GuardedBy("mDataBytesTransferLock")
     @NonNull
-    private List<NetworkStatsExt> getDataUsageBytesTransferSnapshotForOemManaged() {
+    private List<NetworkStatsExt> getDataUsageBytesTransferSnapshotForOemManagedLocked() {
         final List<Pair<Integer, Integer>> matchRulesAndTransports = List.of(
                 new Pair(MATCH_ETHERNET, TRANSPORT_ETHERNET),
                 new Pair(MATCH_MOBILE, TRANSPORT_CELLULAR),
@@ -1479,7 +1497,8 @@ public class StatsPullAtomService extends SystemService {
                 // Thus, specifying networks through their identifiers are not needed.
                 final NetworkTemplate template = new NetworkTemplate.Builder(matchRule)
                         .setOemManaged(oemManaged).build();
-                final NetworkStats stats = getUidNetworkStatsSnapshotForTemplate(template, false);
+                final NetworkStats stats = getUidNetworkStatsSnapshotForTemplateLocked(
+                        template, false);
                 final Integer transport = ruleAndTransport.second;
                 if (stats != null) {
                     ret.add(new NetworkStatsExt(sliceNetworkStatsByUidAndFgbg(stats),
@@ -1496,8 +1515,9 @@ public class StatsPullAtomService extends SystemService {
     /**
      * Create a snapshot of NetworkStats for a given transport.
      */
+    @GuardedBy("mDataBytesTransferLock")
     @Nullable
-    private NetworkStats getUidNetworkStatsSnapshotForTransport(int transport) {
+    private NetworkStats getUidNetworkStatsSnapshotForTransportLocked(int transport) {
         NetworkTemplate template = null;
         switch (transport) {
             case TRANSPORT_CELLULAR:
@@ -1510,7 +1530,7 @@ public class StatsPullAtomService extends SystemService {
             default:
                 Log.wtf(TAG, "Unexpected transport.");
         }
-        return getUidNetworkStatsSnapshotForTemplate(template, /*includeTags=*/false);
+        return getUidNetworkStatsSnapshotForTemplateLocked(template, /*includeTags=*/false);
     }
 
     /**
@@ -1534,8 +1554,9 @@ public class StatsPullAtomService extends SystemService {
      * Note that this should be only used to calculate diff since the snapshot might contains
      * some traffic before boot.
      */
+    @GuardedBy("mDataBytesTransferLock")
     @Nullable
-    private NetworkStats getUidNetworkStatsSnapshotForTemplate(
+    private NetworkStats getUidNetworkStatsSnapshotForTemplateLocked(
             @NonNull NetworkTemplate template, boolean includeTags) {
         final long elapsedMillisSinceBoot = SystemClock.elapsedRealtime();
         final long currentTimeInMillis = MICROSECONDS.toMillis(SystemClock.currentTimeMicro());
@@ -1547,13 +1568,19 @@ public class StatsPullAtomService extends SystemService {
         final long startTime = currentTimeInMillis - elapsedMillisSinceBoot - bucketDuration;
         final long endTime = currentTimeInMillis + bucketDuration;
 
-        // TODO (b/156313635): This is short-term hack to allow perfd gets updated networkStats
-        //  history when query in every second in order to show realtime statistics. However,
-        //  this is not a good long-term solution since NetworkStatsService will make frequent
-        //  I/O and also block main thread when polling.
-        //  Consider making perfd queries NetworkStatsService directly.
-        if (template.getMatchRule() == MATCH_WIFI && template.getSubscriberIds().isEmpty()) {
-            getNetworkStatsManager().forceUpdate();
+        // NetworkStatsManager#forceUpdate updates stats for all networks
+        if (applyNetworkStatsPollRateLimit()) {
+            // The new way: rate-limit force-polling for all NetworkStats queries
+            if (elapsedMillisSinceBoot - mLastNetworkStatsPollTime >= NETSTATS_POLL_RATE_LIMIT_MS) {
+                mLastNetworkStatsPollTime = elapsedMillisSinceBoot;
+                getNetworkStatsManager().forceUpdate();
+            }
+        } else {
+            // The old way: force-poll only on WiFi queries. Data for other queries can be stale
+            // if there was no recent poll beforehand (e.g. for WiFi or scheduled poll)
+            if (template.getMatchRule() == MATCH_WIFI && template.getSubscriberIds().isEmpty()) {
+                getNetworkStatsManager().forceUpdate();
+            }
         }
 
         final android.app.usage.NetworkStats queryNonTaggedStats =
@@ -1572,8 +1599,9 @@ public class StatsPullAtomService extends SystemService {
         return nonTaggedStats.add(taggedStats);
     }
 
+    @GuardedBy("mDataBytesTransferLock")
     @NonNull
-    private List<NetworkStatsExt> getDataUsageBytesTransferSnapshotForSub(
+    private List<NetworkStatsExt> getDataUsageBytesTransferSnapshotForSubLocked(
             @NonNull SubInfo subInfo) {
         final List<NetworkStatsExt> ret = new ArrayList<>();
         for (final int ratType : getAllCollapsedRatTypes()) {
@@ -1583,7 +1611,7 @@ public class StatsPullAtomService extends SystemService {
                             .setRatType(ratType)
                             .setMeteredness(METERED_YES).build();
             final NetworkStats stats =
-                    getUidNetworkStatsSnapshotForTemplate(template, /*includeTags=*/false);
+                    getUidNetworkStatsSnapshotForTemplateLocked(template, /*includeTags=*/false);
             if (stats != null) {
                 ret.add(new NetworkStatsExt(sliceNetworkStatsByFgbg(stats),
                         new int[]{TRANSPORT_CELLULAR}, /*slicedByFgbg=*/true,
@@ -5273,6 +5301,13 @@ public class StatsPullAtomService extends SystemService {
 
         @Override
         public void onSubscriptionsChanged() {
+            synchronized (mDataBytesTransferLock) {
+                onSubscriptionsChangedLocked();
+            }
+        }
+
+        @GuardedBy("mDataBytesTransferLock")
+        private void onSubscriptionsChangedLocked() {
             final List<SubscriptionInfo> currentSubs = mSm.getCompleteActiveSubscriptionInfoList();
             for (final SubscriptionInfo sub : currentSubs) {
                 final SubInfo match = CollectionUtils.find(mHistoricalSubs,
@@ -5295,12 +5330,11 @@ public class StatsPullAtomService extends SystemService {
                         subscriberId, sub.isOpportunistic());
                 Slog.i(TAG, "subId " + subId + " added into historical sub list");
 
-                synchronized (mDataBytesTransferLock) {
-                    mHistoricalSubs.add(subInfo);
-                    // Since getting snapshot when pulling will also include data before boot,
-                    // query stats as baseline to prevent double count is needed.
-                    mNetworkStatsBaselines.addAll(getDataUsageBytesTransferSnapshotForSub(subInfo));
-                }
+                mHistoricalSubs.add(subInfo);
+                // Since getting snapshot when pulling will also include data before boot,
+                // query stats as baseline to prevent double count is needed.
+                mNetworkStatsBaselines.addAll(
+                        getDataUsageBytesTransferSnapshotForSubLocked(subInfo));
             }
         }
     }

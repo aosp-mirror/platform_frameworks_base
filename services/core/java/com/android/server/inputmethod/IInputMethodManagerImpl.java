@@ -154,7 +154,7 @@ final class IInputMethodManagerImpl extends IInputMethodManager.Stub {
         void reportPerceptibleAsync(IBinder windowToken, boolean perceptible);
 
         @PermissionVerified(Manifest.permission.INTERNAL_SYSTEM_WINDOW)
-        void removeImeSurface();
+        void removeImeSurface(int displayId);
 
         void removeImeSurfaceFromWindowAsync(IBinder windowToken);
 
@@ -384,10 +384,10 @@ final class IInputMethodManagerImpl extends IInputMethodManager.Stub {
 
     @EnforcePermission(Manifest.permission.INTERNAL_SYSTEM_WINDOW)
     @Override
-    public void removeImeSurface() {
+    public void removeImeSurface(int displayId) {
         super.removeImeSurface_enforcePermission();
 
-        mCallback.removeImeSurface();
+        mCallback.removeImeSurface(displayId);
     }
 
     @Override

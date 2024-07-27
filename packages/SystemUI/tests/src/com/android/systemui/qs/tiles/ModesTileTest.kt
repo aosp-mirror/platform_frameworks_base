@@ -47,8 +47,8 @@ import com.android.systemui.util.settings.FakeSettings
 import com.android.systemui.util.settings.SecureSettings
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.After
@@ -82,9 +82,12 @@ class ModesTileTest : SysuiTestCase() {
 
     @Mock private lateinit var dialogDelegate: ModesDialogDelegate
 
+    private val testDispatcher = UnconfinedTestDispatcher()
+    private val testScope = TestScope(testDispatcher)
+
     private val inputHandler = FakeQSTileIntentUserInputHandler()
     private val zenModeRepository = FakeZenModeRepository()
-    private val tileDataInteractor = ModesTileDataInteractor(zenModeRepository)
+    private val tileDataInteractor = ModesTileDataInteractor(zenModeRepository, testDispatcher)
     private val mapper =
         ModesTileMapper(
             context.orCreateTestableResources
@@ -95,9 +98,6 @@ class ModesTileTest : SysuiTestCase() {
                 .resources,
             context.theme,
         )
-
-    private val testDispatcher = StandardTestDispatcher()
-    private val testScope = TestScope(testDispatcher)
 
     private lateinit var userActionInteractor: ModesTileUserActionInteractor
     private lateinit var secureSettings: SecureSettings

@@ -21,22 +21,23 @@ import android.os.PowerManager
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.camera.cameraGestureHelper
 import com.android.systemui.classifier.FalsingCollector
+import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
-import com.android.systemui.power.shared.model.WakeSleepReason
-import com.android.systemui.power.shared.model.WakefulnessState
+import com.android.systemui.kosmos.testScope
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.power.data.repository.FakePowerRepository
+import com.android.systemui.power.shared.model.WakeSleepReason
+import com.android.systemui.power.shared.model.WakefulnessState
 import com.android.systemui.statusbar.phone.ScreenOffAnimationController
+import com.android.systemui.testKosmos
+import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
 import junit.framework.Assert.assertFalse
 import junit.framework.Assert.assertTrue
-import kotlin.test.assertEquals
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -47,6 +48,9 @@ import org.mockito.MockitoAnnotations
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 class PowerInteractorTest : SysuiTestCase() {
+    private val kosmos = testKosmos()
+    private val testScope = kosmos.testScope
+    private val cameraGestureHelper = kosmos.cameraGestureHelper
 
     private lateinit var underTest: PowerInteractor
     private lateinit var repository: FakePowerRepository
@@ -66,33 +70,30 @@ class PowerInteractorTest : SysuiTestCase() {
                 falsingCollector,
                 screenOffAnimationController,
                 statusBarStateController,
+                { cameraGestureHelper },
             )
+
+        whenever(cameraGestureHelper.canCameraGestureBeLaunched(any())).thenReturn(true)
     }
 
     @Test
     fun isInteractive_screenTurnsOff() =
-        runBlocking(IMMEDIATE) {
+        testScope.runTest {
             repository.setInteractive(true)
-            var value: Boolean? = null
-            val job = underTest.isInteractive.onEach { value = it }.launchIn(this)
+            val isInteractive by collectLastValue(underTest.isInteractive)
 
             repository.setInteractive(false)
-
-            assertThat(value).isFalse()
-            job.cancel()
+            assertThat(isInteractive).isFalse()
         }
 
     @Test
     fun isInteractive_becomesInteractive() =
-        runBlocking(IMMEDIATE) {
+        testScope.runTest {
             repository.setInteractive(false)
-            var value: Boolean? = null
-            val job = underTest.isInteractive.onEach { value = it }.launchIn(this)
+            val isInteractive by collectLastValue(underTest.isInteractive)
 
             repository.setInteractive(true)
-
-            assertThat(value).isTrue()
-            job.cancel()
+            assertThat(isInteractive).isTrue()
         }
 
     @Test
@@ -203,6 +204,23 @@ class PowerInteractorTest : SysuiTestCase() {
     }
 
     @Test
+    fun onCameraLaunchGestureDetected_isNotTrueWhenCannotLaunch() {
+        whenever(cameraGestureHelper.canCameraGestureBeLaunched(any())).thenReturn(false)
+        underTest.onStartedWakingUp(
+            PowerManager.WAKE_REASON_POWER_BUTTON,
+            /*powerButtonLaunchGestureTriggeredDuringSleep= */ false
+        )
+        underTest.onFinishedWakingUp()
+        underTest.onCameraLaunchGestureDetected()
+
+        assertThat(repository.wakefulness.value.internalWakefulnessState)
+            .isEqualTo(WakefulnessState.AWAKE)
+        assertThat(repository.wakefulness.value.lastWakeReason)
+            .isEqualTo(WakeSleepReason.POWER_BUTTON)
+        assertFalse(repository.wakefulness.value.powerButtonLaunchGestureTriggered)
+    }
+
+    @Test
     fun onCameraLaunchGestureDetected_maintainsAllOtherState() {
         underTest.onStartedWakingUp(
             PowerManager.WAKE_REASON_POWER_BUTTON,
@@ -211,8 +229,10 @@ class PowerInteractorTest : SysuiTestCase() {
         underTest.onFinishedWakingUp()
         underTest.onCameraLaunchGestureDetected()
 
-        assertEquals(WakefulnessState.AWAKE, repository.wakefulness.value.internalWakefulnessState)
-        assertEquals(WakeSleepReason.POWER_BUTTON, repository.wakefulness.value.lastWakeReason)
+        assertThat(repository.wakefulness.value.internalWakefulnessState)
+            .isEqualTo(WakefulnessState.AWAKE)
+        assertThat(repository.wakefulness.value.lastWakeReason)
+            .isEqualTo(WakeSleepReason.POWER_BUTTON)
         assertTrue(repository.wakefulness.value.powerButtonLaunchGestureTriggered)
     }
 
@@ -221,21 +241,23 @@ class PowerInteractorTest : SysuiTestCase() {
         underTest.onCameraLaunchGestureDetected()
         // Ensure that the 'false' here does not clear the direct launch detection call earlier.
         // This state should only be reset onStartedGoingToSleep.
-        underTest.onFinishedGoingToSleep(/*powerButtonLaunchGestureTriggeredDuringSleep= */ false)
+        underTest.onFinishedGoingToSleep(/* powerButtonLaunchGestureTriggeredDuringSleep= */ false)
         underTest.onStartedWakingUp(
             PowerManager.WAKE_REASON_POWER_BUTTON,
             /*powerButtonLaunchGestureTriggeredDuringSleep= */ false
         )
         underTest.onFinishedWakingUp()
 
-        assertEquals(WakefulnessState.AWAKE, repository.wakefulness.value.internalWakefulnessState)
-        assertEquals(WakeSleepReason.POWER_BUTTON, repository.wakefulness.value.lastWakeReason)
+        assertThat(repository.wakefulness.value.internalWakefulnessState)
+            .isEqualTo(WakefulnessState.AWAKE)
+        assertThat(repository.wakefulness.value.lastWakeReason)
+            .isEqualTo(WakeSleepReason.POWER_BUTTON)
         assertTrue(repository.wakefulness.value.powerButtonLaunchGestureTriggered)
     }
 
     @Test
     fun cameraLaunchDetectedOnGoingToSleep_stillTrue_ifGestureNotDetectedOnWakingUp() {
-        underTest.onFinishedGoingToSleep(/*powerButtonLaunchGestureTriggeredDuringSleep= */ true)
+        underTest.onFinishedGoingToSleep(/* powerButtonLaunchGestureTriggeredDuringSleep= */ true)
         // Ensure that the 'false' here does not clear the direct launch detection call earlier.
         // This state should only be reset onStartedGoingToSleep.
         underTest.onStartedWakingUp(
@@ -244,12 +266,10 @@ class PowerInteractorTest : SysuiTestCase() {
         )
         underTest.onFinishedWakingUp()
 
-        assertEquals(WakefulnessState.AWAKE, repository.wakefulness.value.internalWakefulnessState)
-        assertEquals(WakeSleepReason.POWER_BUTTON, repository.wakefulness.value.lastWakeReason)
+        assertThat(repository.wakefulness.value.internalWakefulnessState)
+            .isEqualTo(WakefulnessState.AWAKE)
+        assertThat(repository.wakefulness.value.lastWakeReason)
+            .isEqualTo(WakeSleepReason.POWER_BUTTON)
         assertTrue(repository.wakefulness.value.powerButtonLaunchGestureTriggered)
-    }
-
-    companion object {
-        private val IMMEDIATE = Dispatchers.Main.immediate
     }
 }

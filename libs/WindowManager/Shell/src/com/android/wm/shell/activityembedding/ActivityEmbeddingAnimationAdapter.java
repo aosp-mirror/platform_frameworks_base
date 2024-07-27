@@ -146,6 +146,11 @@ class ActivityEmbeddingAnimationAdapter {
     /** To be overridden by subclasses to adjust the animation surface change. */
     void onAnimationUpdateInner(@NonNull SurfaceControl.Transaction t) {
         // Update the surface position and alpha.
+        if (com.android.graphics.libgui.flags.Flags.edgeExtensionShader()
+                && mAnimation.getExtensionEdges() != 0) {
+            t.setEdgeExtensionEffect(mLeash, mAnimation.getExtensionEdges());
+        }
+
         mTransformation.getMatrix().postTranslate(mContentRelOffset.x, mContentRelOffset.y);
         t.setMatrix(mLeash, mTransformation.getMatrix(), mMatrix);
         t.setAlpha(mLeash, mTransformation.getAlpha());
@@ -165,7 +170,7 @@ class ActivityEmbeddingAnimationAdapter {
         if (!cropRect.intersect(mWholeAnimationBounds)) {
             // Hide the surface when it is outside of the animation area.
             t.setAlpha(mLeash, 0);
-        } else if (mAnimation.hasExtension()) {
+        } else if (mAnimation.getExtensionEdges() != 0) {
             // Allow the surface to be shown in its original bounds in case we want to use edge
             // extensions.
             cropRect.union(mContentBounds);
@@ -180,6 +185,7 @@ class ActivityEmbeddingAnimationAdapter {
     @CallSuper
     void onAnimationEnd(@NonNull SurfaceControl.Transaction t) {
         onAnimationUpdate(t, mAnimation.getDuration());
+        t.setEdgeExtensionEffect(mLeash, /* edge */ 0);
     }
 
     final long getDurationHint() {

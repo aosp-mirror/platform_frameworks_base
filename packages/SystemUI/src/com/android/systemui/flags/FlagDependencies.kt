@@ -51,6 +51,7 @@ class FlagDependencies @Inject constructor(featureFlags: FeatureFlagsClassic, ha
         // Internal notification backend dependencies
         crossAppPoliteNotifications dependsOn politeNotifications
         vibrateWhileUnlockedToken dependsOn politeNotifications
+        modesUi dependsOn modesApi
 
         // Internal notification frontend dependencies
         NotificationsLiveDataStoreRefactor.token dependsOn NotificationIconContainerRefactor.token
@@ -84,6 +85,12 @@ class FlagDependencies @Inject constructor(featureFlags: FeatureFlagsClassic, ha
 
     private inline val vibrateWhileUnlockedToken: FlagToken
         get() = FlagToken(FLAG_VIBRATE_WHILE_UNLOCKED, vibrateWhileUnlocked())
+
+    private inline val modesUi
+        get() = FlagToken(android.app.Flags.FLAG_MODES_UI, android.app.Flags.modesUi())
+
+    private inline val modesApi
+        get() = FlagToken(android.app.Flags.FLAG_MODES_API, android.app.Flags.modesApi())
 
     private inline val communalHub
         get() = FlagToken(FLAG_COMMUNAL_HUB, communalHub())

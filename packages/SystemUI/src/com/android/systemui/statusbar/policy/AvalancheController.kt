@@ -54,6 +54,7 @@ constructor(
                 // allowed again.
                 logDroppedHunsInBackground(getWaitingKeys().size)
                 clearNext()
+                headsUpEntryShowing = null
             }
             if (field != value) {
                 field = value
@@ -222,13 +223,17 @@ constructor(
 
     /**
      * Returns duration based on
-     * 1) Whether HeadsUpEntry is the last one tracked byAvalancheController
+     * 1) Whether HeadsUpEntry is the last one tracked by AvalancheController
      * 2) The priority of the top HUN in the next batch Used by
      *    BaseHeadsUpManager.HeadsUpEntry.calculateFinishTime to shorten display duration.
      */
-    fun getDurationMs(entry: HeadsUpEntry, autoDismissMs: Int): Int {
+    fun getDurationMs(entry: HeadsUpEntry?, autoDismissMs: Int): Int {
         if (!isEnabled()) {
             // Use default duration, like we did before AvalancheController existed
+            return autoDismissMs
+        }
+        if (entry == null) {
+            // This should never happen
             return autoDismissMs
         }
         val showingList: MutableList<HeadsUpEntry> = mutableListOf()
