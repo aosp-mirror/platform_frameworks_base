@@ -19,6 +19,7 @@ package com.android.systemui.communal.data.repository
 import android.app.smartspace.SmartspaceTarget
 import android.os.Parcelable
 import androidx.annotation.VisibleForTesting
+import com.android.systemui.Flags.communalTimerFlickerFix
 import com.android.systemui.communal.data.model.CommunalSmartspaceTimer
 import com.android.systemui.communal.smartspace.CommunalSmartspaceController
 import com.android.systemui.dagger.SysUISingleton
@@ -80,7 +81,8 @@ constructor(
                     // The view layer should have the instance based smartspaceTargetId instead of
                     // stable id, so that when a new instance of the timer is created, for example,
                     // when it is paused, the view should re-render its remote views.
-                    smartspaceTargetId = target.smartspaceTargetId,
+                    smartspaceTargetId =
+                        if (communalTimerFlickerFix()) stableId else target.smartspaceTargetId,
                     createdTimestampMillis = targetCreationTimes[stableId]!!,
                     remoteViews = target.remoteViews!!,
                 )
