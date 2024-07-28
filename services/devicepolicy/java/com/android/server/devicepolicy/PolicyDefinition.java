@@ -538,6 +538,9 @@ final class PolicyDefinition<V> {
         USER_RESTRICTION_FLAGS.put(
                 UserManager.DISALLOW_ULTRA_WIDEBAND_RADIO, POLICY_FLAG_GLOBAL_ONLY_POLICY);
         USER_RESTRICTION_FLAGS.put(
+                UserManager.DISALLOW_NEAR_FIELD_COMMUNICATION_RADIO,
+                POLICY_FLAG_GLOBAL_ONLY_POLICY);
+        USER_RESTRICTION_FLAGS.put(
                 UserManager.DISALLOW_SIM_GLOBALLY,
                 POLICY_FLAG_GLOBAL_ONLY_POLICY);
         USER_RESTRICTION_FLAGS.put(UserManager.DISALLOW_ASSIST_CONTENT, /* flags= */ 0);

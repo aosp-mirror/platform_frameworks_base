@@ -19,6 +19,7 @@ package com.android.systemui.media.controls.ui.composable
 import com.android.compose.animation.scene.ElementKey
 import com.android.compose.animation.scene.ElementScenePicker
 import com.android.compose.animation.scene.SceneKey
+import com.android.compose.animation.scene.SceneTransitionLayoutState
 import com.android.compose.animation.scene.TransitionState
 import com.android.systemui.scene.shared.model.Scenes
 
@@ -42,31 +43,31 @@ object MediaScenePicker : ElementScenePicker {
         toSceneZIndex: Float
     ): SceneKey? {
         return when {
-            // TODO: 352052894 - update with the actual scene picking
-            transition.isTransitioning(from = Scenes.Lockscreen, to = Scenes.Shade) -> {
-                if (transition.progress < SHADE_FRACTION) {
-                    Scenes.Lockscreen
-                } else {
-                    Scenes.Shade
-                }
+            shouldElevateMedia(transition) -> {
+                Scenes.Shade
             }
-
-            // TODO: 345467290 - update with the actual scene picking
-            transition.isTransitioning(from = Scenes.Shade, to = Scenes.Lockscreen) -> {
-                if (transition.progress < 1f - SHADE_FRACTION) {
-                    Scenes.Shade
-                } else {
-                    Scenes.Lockscreen
-                }
+            transition.isTransitioningBetween(Scenes.Lockscreen, Scenes.Communal) -> {
+                Scenes.Lockscreen
             }
-
-            // TODO: 345467290 - update with the actual scene picking
             transition.isTransitioningBetween(Scenes.QuickSettings, Scenes.Shade) -> {
                 Scenes.QuickSettings
             }
-
-            // TODO: 340216785 - update with the actual scene picking
-            else -> pickSingleSceneIn(scenes, transition, element)
+            else -> {
+                when {
+                    scenes.contains(transition.toScene) -> transition.toScene
+                    scenes.contains(transition.fromScene) -> transition.fromScene
+                    else -> null
+                }
+            }
         }
     }
+
+    /** Returns true when the media should be laid on top of the rest for the given [transition]. */
+    fun shouldElevateMedia(transition: TransitionState.Transition): Boolean {
+        return transition.isTransitioningBetween(Scenes.Lockscreen, Scenes.Shade)
+    }
+}
+
+fun MediaScenePicker.shouldElevateMedia(layoutState: SceneTransitionLayoutState): Boolean {
+    return layoutState.currentTransition?.let { shouldElevateMedia(it) } ?: false
 }

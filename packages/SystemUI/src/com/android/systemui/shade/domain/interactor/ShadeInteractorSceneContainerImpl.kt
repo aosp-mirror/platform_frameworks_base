@@ -16,6 +16,7 @@
 
 package com.android.systemui.shade.domain.interactor
 
+import com.android.app.tracing.FlowTracing.traceAsCounter
 import com.android.compose.animation.scene.ObservableTransitionState
 import com.android.compose.animation.scene.SceneKey
 import com.android.systemui.dagger.SysUISingleton
@@ -46,6 +47,7 @@ constructor(
 ) : BaseShadeInteractor {
     override val shadeExpansion: StateFlow<Float> =
         sceneBasedExpansion(sceneInteractor, SceneFamilies.NotifShade)
+            .traceAsCounter("panel_expansion") { (it * 100f).toInt() }
             .stateIn(scope, SharingStarted.Eagerly, 0f)
 
     private val sceneBasedQsExpansion =

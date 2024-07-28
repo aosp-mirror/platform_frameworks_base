@@ -1428,6 +1428,7 @@
     <string name="share_remote_bugreport_action" msgid="7630880678785123682">"শ্বেয়াৰ কৰক"</string>
     <string name="decline_remote_bugreport_action" msgid="4040894777519784346">"প্ৰত্যাখ্যান কৰক"</string>
     <string name="select_input_method" msgid="3971267998568587025">"ইনপুট পদ্ধতি বাছনি কৰক"</string>
+    <string name="input_method_language_settings" msgid="8069089418056819437">"ভাষাৰ ছেটিং"</string>
     <string name="show_ime" msgid="6406112007347443383">"কায়িক কীব’ৰ্ড সক্ৰিয় হৈ থাকোঁতে ইয়াক স্ক্ৰীনত ৰাখক"</string>
     <string name="hardware" msgid="3611039921284836033">"অন-স্ক্ৰীন কীব’ৰ্ড ব্যৱহাৰ কৰক"</string>
     <string name="select_keyboard_layout_notification_title" msgid="5823199895322205589">"<xliff:g id="DEVICE_NAME">%s</xliff:g> কনফিগাৰ কৰক"</string>

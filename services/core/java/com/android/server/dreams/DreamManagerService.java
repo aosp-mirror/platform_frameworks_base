@@ -544,11 +544,10 @@ public final class DreamManagerService extends SystemService {
 
     private void startDozingInternal(IBinder token, int screenState,
             @Display.StateReason int reason, int screenBrightness) {
-        if (DEBUG) {
-            Slog.d(TAG, "Dream requested to start dozing: " + token
-                    + ", screenState=" + screenState
-                    + ", screenBrightness=" + screenBrightness);
-        }
+        Slog.d(TAG, "Dream requested to start dozing: " + token
+                + ", screenState=" + Display.stateToString(screenState)
+                + ", reason=" + Display.stateReasonToString(reason)
+                + ", screenBrightness=" + screenBrightness);
 
         synchronized (mLock) {
             if (mCurrentDream != null && mCurrentDream.token == token && mCurrentDream.canDoze) {

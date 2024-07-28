@@ -550,7 +550,6 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
 
     /** Save allocating when calculating rects */
     private final Rect mTmpRect = new Rect();
-    private final Rect mTmpRect2 = new Rect();
     private final Region mTmpRegion = new Region();
 
     private final Configuration mTmpConfiguration = new Configuration();
@@ -619,8 +618,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
     private static final long FIXED_ROTATION_HIDE_ANIMATION_DEBOUNCE_DELAY_MS = 250;
     private AsyncRotationController mAsyncRotationController;
 
-    final FixedRotationTransitionListener mFixedRotationTransitionListener =
-            new FixedRotationTransitionListener();
+    final FixedRotationTransitionListener mFixedRotationTransitionListener;
 
     @VisibleForTesting
     final DeviceStateController mDeviceStateController;
@@ -1163,6 +1161,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
                 TAG_WM + "/displayId:" + mDisplayId, mDisplayId);
         mHoldScreenWakeLock.setReferenceCounted(false);
 
+        mFixedRotationTransitionListener = new FixedRotationTransitionListener(mDisplayId);
         mAppTransition = new AppTransition(mWmService.mContext, mWmService, this);
         mAppTransition.registerListenerLocked(mWmService.mActivityManagerAppTransitionNotifier);
         mAppTransition.registerListenerLocked(mFixedRotationTransitionListener);
@@ -2940,8 +2939,9 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
 
         if (!handlesOrientationChangeFromDescendant(orientation)) {
             ActivityRecord topActivity = topRunningActivity(/* considerKeyguardState= */ true);
-            if (topActivity != null && topActivity.mLetterboxUiController
-                    .shouldUseDisplayLandscapeNaturalOrientation()) {
+            if (topActivity != null && topActivity.mAppCompatController
+                    .getAppCompatOrientationOverrides()
+                        .shouldUseDisplayLandscapeNaturalOrientation()) {
                 ProtoLog.v(WM_DEBUG_ORIENTATION,
                         "Display id=%d is ignoring orientation request for %d, return %d"
                         + " following a per-app override for %s",
@@ -6927,8 +6927,8 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         /** Whether {@link #mAnimatingRecents} is going to be the top activity. */
         private boolean mRecentsWillBeTop;
 
-        FixedRotationTransitionListener() {
-            super(DisplayContent.this.mDisplayId);
+        FixedRotationTransitionListener(int displayId) {
+            super(displayId);
         }
 
         /**
@@ -7017,7 +7017,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
             // by finishing the recents animation and moving it to top. That also avoids flickering
             // due to wait for previous activity to be paused if it supports PiP that ignores the
             // effect of resume-while-pausing.
-            if (r == null || r == mAnimatingRecents || r.getDisplayId() != mDisplayId) {
+            if (r == null || r == mAnimatingRecents) {
                 return;
             }
             if (mAnimatingRecents != null && mRecentsWillBeTop) {
@@ -7180,8 +7180,8 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         @Override
         public void setImeInputTargetRequestedVisibility(boolean visible) {
             if (android.view.inputmethod.Flags.refactorInsetsController()) {
+                // TODO(b/329229469) we won't have the statsToken in all cases, but should still log
                 try {
-                    // TODO stats token
                     mRemoteInsetsController.setImeInputTargetRequestedVisibility(visible);
                 } catch (RemoteException e) {
                     Slog.w(TAG, "Failed to deliver setImeInputTargetRequestedVisibility", e);

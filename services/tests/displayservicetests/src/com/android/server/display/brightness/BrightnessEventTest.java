@@ -46,6 +46,7 @@ public final class BrightnessEventTest {
         mBrightnessEvent.setPhysicalDisplayId("987654321");
         mBrightnessEvent.setPhysicalDisplayName("display_name");
         mBrightnessEvent.setDisplayState(Display.STATE_ON);
+        mBrightnessEvent.setDisplayStateReason(Display.STATE_REASON_DEFAULT_POLICY);
         mBrightnessEvent.setDisplayPolicy(POLICY_BRIGHT);
         mBrightnessEvent.setLux(100.0f);
         mBrightnessEvent.setPercent(46.5f);
@@ -82,9 +83,9 @@ public final class BrightnessEventTest {
         String actualString = mBrightnessEvent.toString(false);
         String expectedString =
                 "BrightnessEvent: brt=0.6 (46.5%), nits= 893.8, lux=100.0, reason=doze [ "
-                        + "low_pwr ], strat=strategy_name, state=ON, policy=BRIGHT, flags=, "
-                        + "initBrt=25.0, rcmdBrt=0.6, preBrt=NaN, preLux=150.0, "
-                        + "wasShortTermModelActive=true, autoBrightness=true (idle), "
+                        + "low_pwr ], strat=strategy_name, state=ON, stateReason=DEFAULT_POLICY, "
+                        + "policy=BRIGHT, flags=, initBrt=25.0, rcmdBrt=0.6, preBrt=NaN, "
+                        + "preLux=150.0, wasShortTermModelActive=true, autoBrightness=true (idle), "
                         + "unclampedBrt=0.65, hbmMax=0.62, hbmMode=off, thrmMax=0.65, "
                         + "rbcStrength=-1, powerFactor=0.2, physDisp=display_name(987654321), "
                         + "logicalId=1";

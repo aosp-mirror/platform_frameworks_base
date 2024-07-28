@@ -18,6 +18,7 @@ package com.android.systemui.education.domain.interactor
 
 import com.android.systemui.education.data.repository.contextualEducationRepository
 import com.android.systemui.kosmos.Kosmos
+import com.android.systemui.kosmos.testDispatcher
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.user.domain.interactor.selectedUserInteractor
 
@@ -25,6 +26,7 @@ val Kosmos.contextualEducationInteractor by
     Kosmos.Fixture {
         ContextualEducationInteractor(
             backgroundScope = testScope.backgroundScope,
+            backgroundDispatcher = testDispatcher,
             repository = contextualEducationRepository,
             selectedUserInteractor = selectedUserInteractor
         )

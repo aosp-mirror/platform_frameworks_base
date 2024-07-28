@@ -523,9 +523,8 @@ public class ActivityRecordTests extends WindowTestsBase {
         assertEquals(newConfig.uiMode, activityConfig.uiMode);
 
         // The configuration change is still sent to the activity, even if it doesn't relaunch.
-        final ActivityConfigurationChangeItem expected =
-                ActivityConfigurationChangeItem.obtain(activity.token, activityConfig,
-                        activity.getActivityWindowInfo());
+        final ActivityConfigurationChangeItem expected = new ActivityConfigurationChangeItem(
+                activity.token, activityConfig, activity.getActivityWindowInfo());
         verify(mClientLifecycleManager).scheduleTransactionItem(
                 eq(activity.app.getThread()), eq(expected));
     }
@@ -596,9 +595,8 @@ public class ActivityRecordTests extends WindowTestsBase {
 
         final Configuration currentConfig = activity.getConfiguration();
         assertEquals(expectedOrientation, currentConfig.orientation);
-        final ActivityConfigurationChangeItem expected =
-                ActivityConfigurationChangeItem.obtain(activity.token, currentConfig,
-                        activity.getActivityWindowInfo());
+        final ActivityConfigurationChangeItem expected = new ActivityConfigurationChangeItem(
+                activity.token, currentConfig, activity.getActivityWindowInfo());
         verify(mClientLifecycleManager).scheduleTransactionItem(activity.app.getThread(), expected);
         verify(displayRotation).onSetRequestedOrientation();
     }
@@ -817,9 +815,8 @@ public class ActivityRecordTests extends WindowTestsBase {
 
             activity.ensureActivityConfiguration(true /* ignoreVisibility */);
 
-            final ActivityConfigurationChangeItem expected =
-                    ActivityConfigurationChangeItem.obtain(activity.token,
-                            activity.getConfiguration(), activity.getActivityWindowInfo());
+            final ActivityConfigurationChangeItem expected = new ActivityConfigurationChangeItem(
+                    activity.token, activity.getConfiguration(), activity.getActivityWindowInfo());
             verify(mClientLifecycleManager).scheduleTransactionItem(
                     activity.app.getThread(), expected);
         } finally {
@@ -3354,7 +3351,8 @@ public class ActivityRecordTests extends WindowTestsBase {
 
         // app1 requests IME visible.
         app1.setRequestedVisibleTypes(ime(), ime());
-        mDisplayContent.getInsetsStateController().onRequestedVisibleTypesChanged(app1);
+        mDisplayContent.getInsetsStateController().onRequestedVisibleTypesChanged(app1,
+                null /* statsToken */);
 
         // Verify app1's IME insets is visible and app2's IME insets frozen flag set.
         assertTrue(app1.getInsetsState().peekSource(ID_IME).isVisible());
@@ -3425,7 +3423,7 @@ public class ActivityRecordTests extends WindowTestsBase {
         assertFalse(activity2.mImeInsetsFrozenUntilStartInput);
 
         app1.setRequestedVisibleTypes(ime());
-        controller.onRequestedVisibleTypesChanged(app1);
+        controller.onRequestedVisibleTypesChanged(app1, null /* statsToken */);
 
         // Expect all activities in split-screen will get IME insets visible state
         assertTrue(app1.getInsetsState().peekSource(ID_IME).isVisible());

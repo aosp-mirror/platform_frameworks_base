@@ -61,7 +61,6 @@ public final class TextFlags {
             Flags.FLAG_FIX_LINE_HEIGHT_FOR_LOCALE,
             Flags.FLAG_ICU_BIDI_MIGRATION,
             Flags.FLAG_FIX_MISALIGNED_CONTEXT_MENU,
-            Flags.FLAG_CLEAR_FONT_VARIATION_SETTINGS,
     };
 
     /**
@@ -76,7 +75,6 @@ public final class TextFlags {
             Flags.fixLineHeightForLocale(),
             Flags.icuBidiMigration(),
             Flags.fixMisalignedContextMenu(),
-            Flags.clearFontVariationSettings(),
     };
 
     /**

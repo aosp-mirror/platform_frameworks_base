@@ -44,6 +44,7 @@ import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.DisplayInsetsController;
 import com.android.wm.shell.common.DisplayLayout;
 import com.android.wm.shell.common.ExternalInterfaceBinder;
+import com.android.wm.shell.common.ImeListener;
 import com.android.wm.shell.common.RemoteCallable;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.SingleInstanceRemoteListener;
@@ -56,7 +57,6 @@ import com.android.wm.shell.common.pip.PipBoundsState;
 import com.android.wm.shell.common.pip.PipDisplayLayoutState;
 import com.android.wm.shell.common.pip.PipUtils;
 import com.android.wm.shell.pip.Pip;
-import com.android.wm.shell.pip.PipTransitionController;
 import com.android.wm.shell.protolog.ShellProtoLogGroup;
 import com.android.wm.shell.sysui.ConfigurationChangeListener;
 import com.android.wm.shell.sysui.ShellCommandHandler;
@@ -200,6 +200,11 @@ public class PipController implements ConfigurationChangeListener,
                         onDisplayChanged(mDisplayController
                                         .getDisplayLayout(mPipDisplayLayoutState.getDisplayId()));
                     }
+                });
+        mDisplayInsetsController.addInsetsChangedListener(mPipDisplayLayoutState.getDisplayId(),
+                new ImeListener(mDisplayController, mPipDisplayLayoutState.getDisplayId()) {
+                    @Override
+                    public void onImeVisibilityChanged(boolean imeVisible, int imeHeight) {}
                 });
 
         // Allow other outside processes to bind to PiP controller using the key below.

@@ -89,20 +89,15 @@ public class DesktopModeStatus {
     private static final int DESKTOP_DENSITY_MAX = 1000;
 
     /**
-     * Default value for {@code MAX_TASK_LIMIT}.
-     */
-    @VisibleForTesting
-    public static final int DEFAULT_MAX_TASK_LIMIT = 4;
-
-    // TODO(b/335131008): add a config-overlay field for the max number of tasks in Desktop Mode
-    /**
-     * Flag declaring the maximum number of Tasks to show in Desktop Mode at any one time.
+     * Sysprop declaring the maximum number of Tasks to show in Desktop Mode at any one time.
      *
-     * <p> The limit does NOT affect Picture-in-Picture, Bubbles, or System Modals (like a screen
+     * <p>If it is not defined, then {@code R.integer.config_maxDesktopWindowingActiveTasks} is
+     * used.
+     *
+     * <p>The limit does NOT affect Picture-in-Picture, Bubbles, or System Modals (like a screen
      * recording window, or Bluetooth pairing window).
      */
-    private static final int MAX_TASK_LIMIT = SystemProperties.getInt(
-            "persist.wm.debug.desktop_max_task_limit", DEFAULT_MAX_TASK_LIMIT);
+    private static final String MAX_TASK_LIMIT_SYS_PROP = "persist.wm.debug.desktop_max_task_limit";
 
     /**
      * Return {@code true} if veiled resizing is active. If false, fluid resizing is used.
@@ -139,8 +134,9 @@ public class DesktopModeStatus {
     /**
      * Return the maximum limit on the number of Tasks to show in Desktop Mode at any one time.
      */
-    public static int getMaxTaskLimit() {
-        return MAX_TASK_LIMIT;
+    public static int getMaxTaskLimit(@NonNull Context context) {
+        return SystemProperties.getInt(MAX_TASK_LIMIT_SYS_PROP,
+                context.getResources().getInteger(R.integer.config_maxDesktopWindowingActiveTasks));
     }
 
     /**

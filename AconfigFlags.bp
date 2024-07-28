@@ -99,6 +99,7 @@ aconfig_declarations_group {
         "framework_graphics_flags_java_lib",
         "hwui_flags_java_lib",
         "libcore_exported_aconfig_flags_lib",
+        "libgui_flags_java_lib",
         "power_flags_lib",
         "sdk_sandbox_flags_lib",
         "surfaceflinger_flags_java_lib",
@@ -1205,6 +1206,12 @@ java_aconfig_library {
 java_aconfig_library {
     name: "surfaceflinger_flags_java_lib",
     aconfig_declarations: "surfaceflinger_flags",
+    defaults: ["framework-minus-apex-aconfig-java-defaults"],
+}
+
+java_aconfig_library {
+    name: "libgui_flags_java_lib",
+    aconfig_declarations: "libgui_flags",
     defaults: ["framework-minus-apex-aconfig-java-defaults"],
 }
 

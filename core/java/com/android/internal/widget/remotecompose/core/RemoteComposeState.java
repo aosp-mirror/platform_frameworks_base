@@ -21,6 +21,8 @@ import static com.android.internal.widget.remotecompose.core.RemoteContext.ID_TI
 import static com.android.internal.widget.remotecompose.core.RemoteContext.ID_WINDOW_HEIGHT;
 import static com.android.internal.widget.remotecompose.core.RemoteContext.ID_WINDOW_WIDTH;
 
+import com.android.internal.widget.remotecompose.core.operations.utilities.IntFloatMap;
+import com.android.internal.widget.remotecompose.core.operations.utilities.IntIntMap;
 import com.android.internal.widget.remotecompose.core.operations.utilities.IntMap;
 
 import java.util.ArrayList;
@@ -37,16 +39,12 @@ public class RemoteComposeState {
     private final IntMap<Object> mIntDataMap = new IntMap<>();
     private final IntMap<Boolean> mIntWrittenMap = new IntMap<>();
     private final HashMap<Object, Integer> mDataIntMap = new HashMap();
-    private final float[] mFloatMap = new float[MAX_FLOATS]; // efficient cache
-    private final int[] mColorMap = new int[MAX_COLORS]; // efficient cache
+    private final IntFloatMap mFloatMap = new IntFloatMap(); // efficient cache
+    private final IntIntMap mIntegerMap = new IntIntMap(); // efficient cache
+    private final IntIntMap mColorMap = new IntIntMap(); // efficient cache
     private final boolean[] mColorOverride = new boolean[MAX_COLORS];
     private int mNextId = START_ID;
 
-    {
-        for (int i = 0; i < mFloatMap.length; i++) {
-            mFloatMap[i] = Float.NaN;
-        }
-    }
 
     /**
      * Get Object based on id. The system will cache things like bitmaps
@@ -113,7 +111,18 @@ public class RemoteComposeState {
      */
     public int cacheFloat(float item) {
         int id = nextId();
-        mFloatMap[id] = item;
+        mFloatMap.put(id, item);
+        mIntegerMap.put(id, (int) item);
+        return id;
+    }
+
+    /**
+     * Insert an item in the cache
+     */
+    public int cacheInteger(int item) {
+        int id = nextId();
+        mIntegerMap.put(id, item);
+        mFloatMap.put(id, item);
         return id;
     }
 
@@ -121,21 +130,43 @@ public class RemoteComposeState {
      * Insert an item in the cache
      */
     public void cacheFloat(int id, float item) {
-        mFloatMap[id] = item;
+        mFloatMap.put(id, item);
     }
 
     /**
-     * Insert an item in the cache
+     * Insert an float item in the cache
      */
     public void updateFloat(int id, float item) {
-        mFloatMap[id] = item;
+        mFloatMap.put(id, item);
+        mIntegerMap.put(id, (int) item);
     }
 
     /**
-     * get float
+     * Insert an integer item in the cache
+     */
+    public void updateInteger(int id, int item) {
+        mFloatMap.put(id, item);
+        mIntegerMap.put(id, item);
+    }
+
+    /**
+     * get a float from the float cache
+     *
+     * @param id of the float value
+     * @return the float value
      */
     public float getFloat(int id) {
-        return mFloatMap[id];
+        return mFloatMap.get(id);
+    }
+
+    /**
+     * get an integer from the cache
+     *
+     * @param id of the integer value
+     * @return the integer
+     */
+    public int getInteger(int id) {
+        return mIntegerMap.get(id);
     }
 
     /**
@@ -145,11 +176,12 @@ public class RemoteComposeState {
      * @return
      */
     public int getColor(int id) {
-        return mColorMap[id];
+        return mColorMap.get(id);
     }
 
     /**
      * Modify the color at id.
+     *
      * @param id
      * @param color
      */
@@ -157,7 +189,7 @@ public class RemoteComposeState {
         if (mColorOverride[id]) {
             return;
         }
-        mColorMap[id] = color;
+        mColorMap.put(id, color);
     }
 
     /**
@@ -169,7 +201,7 @@ public class RemoteComposeState {
      */
     public void overrideColor(int id, int color) {
         mColorOverride[id] = true;
-        mColorMap[id] = color;
+        mColorMap.put(id, color);
     }
 
     /**
@@ -205,6 +237,7 @@ public class RemoteComposeState {
 
     /**
      * Get the next available id
+     *
      * @return
      */
     public int nextId() {
@@ -213,6 +246,7 @@ public class RemoteComposeState {
 
     /**
      * Set the next id
+     *
      * @param id
      */
     public void setNextId(int id) {
@@ -234,6 +268,7 @@ public class RemoteComposeState {
 
     /**
      * Commands that listen to variables add themselves.
+     *
      * @param id
      * @param variableSupport
      */
@@ -243,6 +278,7 @@ public class RemoteComposeState {
 
     /**
      * List of Commands that need to be updated
+     *
      * @param context
      * @return
      */
@@ -264,6 +300,7 @@ public class RemoteComposeState {
 
     /**
      * Set the width of the overall document on screen.
+     *
      * @param width
      */
     public void setWindowWidth(float width) {
@@ -272,6 +309,7 @@ public class RemoteComposeState {
 
     /**
      * Set the width of the overall document on screen.
+     *
      * @param height
      */
     public void setWindowHeight(float height) {

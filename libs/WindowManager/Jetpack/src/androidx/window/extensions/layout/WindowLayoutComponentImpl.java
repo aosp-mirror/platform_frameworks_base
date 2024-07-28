@@ -21,9 +21,9 @@ import static android.view.Display.INVALID_DISPLAY;
 
 import static androidx.window.common.CommonFoldingFeature.COMMON_STATE_FLAT;
 import static androidx.window.common.CommonFoldingFeature.COMMON_STATE_HALF_OPENED;
-import static androidx.window.util.ExtensionHelper.isZero;
-import static androidx.window.util.ExtensionHelper.rotateRectToDisplayRotation;
-import static androidx.window.util.ExtensionHelper.transformToWindowSpaceRect;
+import static androidx.window.common.ExtensionHelper.isZero;
+import static androidx.window.common.ExtensionHelper.rotateRectToDisplayRotation;
+import static androidx.window.common.ExtensionHelper.transformToWindowSpaceRect;
 
 import android.app.Activity;
 import android.app.ActivityThread;

@@ -66,6 +66,7 @@ public abstract class BatteryConsumer {
             POWER_COMPONENT_WAKELOCK,
             POWER_COMPONENT_MEMORY,
             POWER_COMPONENT_PHONE,
+            POWER_COMPONENT_AMBIENT_DISPLAY,
             POWER_COMPONENT_IDLE,
             POWER_COMPONENT_REATTRIBUTED_TO_OTHER_CONSUMERS,
     })
@@ -208,7 +209,8 @@ public abstract class BatteryConsumer {
                 POWER_COMPONENT_VIDEO,
                 POWER_COMPONENT_FLASHLIGHT,
                 POWER_COMPONENT_CAMERA,
-                POWER_COMPONENT_GNSS};
+                POWER_COMPONENT_GNSS,
+                POWER_COMPONENT_SENSORS};
         Arrays.sort(supportedPowerComponents);
         SUPPORTED_POWER_COMPONENTS_PER_PROCESS_STATE = IntArray.wrap(supportedPowerComponents);
     };

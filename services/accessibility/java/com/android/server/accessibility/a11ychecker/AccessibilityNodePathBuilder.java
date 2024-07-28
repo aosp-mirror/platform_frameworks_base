@@ -47,12 +47,15 @@ public final class AccessibilityNodePathBuilder {
      *
      * <p>This format is consistent with elements paths in Pre-Launch Reports and the Accessibility
      * Scanner, starting from the window's root node instead of the first resource name.
-     * TODO (b/344607035): link to ClusteringUtils when AATF is merged in main.
+     * See {@link com.google.android.apps.common.testing.accessibility.framework.ClusteringUtils}.
      */
     public static @Nullable String createNodePath(@NonNull AccessibilityNodeInfo nodeInfo) {
+        String packageName = nodeInfo.getPackageName().toString();
+        if (packageName == null) {
+            return null;
+        }
         StringBuilder resourceIdBuilder = getNodePathBuilder(nodeInfo);
-        return resourceIdBuilder == null ? null : String.valueOf(nodeInfo.getPackageName()) + ':'
-                + resourceIdBuilder;
+        return resourceIdBuilder == null ? null : packageName + ':' + resourceIdBuilder;
     }
 
     private static @Nullable StringBuilder getNodePathBuilder(AccessibilityNodeInfo nodeInfo) {
@@ -84,20 +87,23 @@ public final class AccessibilityNodePathBuilder {
     //Returns the part of the element's View ID resource name after the qualifier
     // "package_name:id/"  or the last '/', when available. Otherwise, returns the element's
     // simple class name.
-    private static CharSequence getShortUiElementName(AccessibilityNodeInfo nodeInfo) {
+    private static @Nullable CharSequence getShortUiElementName(AccessibilityNodeInfo nodeInfo) {
         String viewIdResourceName = nodeInfo.getViewIdResourceName();
-        if (viewIdResourceName != null) {
-            String idQualifier = ":id/";
-            int idQualifierStartIndex = viewIdResourceName.indexOf(idQualifier);
-            int unqualifiedNameStartIndex = idQualifierStartIndex == -1 ? 0
-                    : (idQualifierStartIndex + idQualifier.length());
-            return viewIdResourceName.substring(unqualifiedNameStartIndex);
+        if (viewIdResourceName == null) {
+            return getSimpleClassName(nodeInfo);
         }
-        return getSimpleClassName(nodeInfo);
+        String idQualifier = ":id/";
+        int idQualifierStartIndex = viewIdResourceName.indexOf(idQualifier);
+        int unqualifiedNameStartIndex =
+                idQualifierStartIndex == -1 ? 0 : (idQualifierStartIndex + idQualifier.length());
+        return viewIdResourceName.substring(unqualifiedNameStartIndex);
     }
 
-    private static CharSequence getSimpleClassName(AccessibilityNodeInfo nodeInfo) {
+    private static @Nullable CharSequence getSimpleClassName(AccessibilityNodeInfo nodeInfo) {
         CharSequence name = nodeInfo.getClassName();
+        if (name == null) {
+            return null;
+        }
         for (int i = name.length() - 1; i > 0; i--) {
             char ithChar = name.charAt(i);
             if (ithChar == '.' || ithChar == '$') {

@@ -301,8 +301,8 @@ public class ClipboardOverlayController implements ClipboardListener.ClipboardOv
                     mClipboardLogger.logUnguarded(CLIPBOARD_OVERLAY_SHOWN_EXPANDED);
                     setExpandedView(this::animateIn);
                 }
-                mView.announceForAccessibility(
-                        getAccessibilityAnnouncement(mClipboardModel.getType()));
+                mWindow.withWindowAttached(() -> mView.announceForAccessibility(
+                        getAccessibilityAnnouncement(mClipboardModel.getType())));
             } else if (!mIsMinimized) {
                 setExpandedView(() -> {
                 });
@@ -320,8 +320,8 @@ public class ClipboardOverlayController implements ClipboardListener.ClipboardOv
                     setExpandedView();
                 }
                 animateIn();
-                mView.announceForAccessibility(
-                        getAccessibilityAnnouncement(mClipboardModel.getType()));
+                mWindow.withWindowAttached(() -> mView.announceForAccessibility(
+                        getAccessibilityAnnouncement(mClipboardModel.getType())));
             } else if (!mIsMinimized) {
                 setExpandedView();
             }

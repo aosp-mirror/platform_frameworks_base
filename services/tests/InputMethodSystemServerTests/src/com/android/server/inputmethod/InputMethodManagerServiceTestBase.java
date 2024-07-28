@@ -272,7 +272,7 @@ public class InputMethodManagerServiceTestBase {
 
         // Certain tests rely on TEST_IME_ID that is installed with AndroidTest.xml.
         // TODO(b/352615651): Consider just synthesizing test InputMethodInfo then injecting it.
-        AdditionalSubtypeMapRepository.ensureInitializedAndGet(mCallingUserId);
+        AdditionalSubtypeMapRepository.initializeIfNecessary(mCallingUserId);
         final var settings = InputMethodManagerService.queryInputMethodServicesInternal(mContext,
                 mCallingUserId, AdditionalSubtypeMapRepository.get(mCallingUserId),
                 DirectBootAwareness.AUTO);
@@ -348,7 +348,7 @@ public class InputMethodManagerServiceTestBase {
             ClientState cs = mInputMethodManagerService.getClientStateLocked(client);
             cs.mCurSession = new InputMethodManagerService.SessionState(cs,
                     mMockInputMethodInvoker, mMockInputMethodSession, mock(
-                    InputChannel.class));
+                    InputChannel.class), mCallingUserId);
         }
     }
 }

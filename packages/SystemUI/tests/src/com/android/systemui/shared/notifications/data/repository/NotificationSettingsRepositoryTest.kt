@@ -22,6 +22,7 @@ import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.shared.settings.data.repository.FakeSecureSettingsRepository
+import com.android.systemui.shared.settings.data.repository.FakeSystemSettingsRepository
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
@@ -38,18 +39,21 @@ class NotificationSettingsRepositoryTest : SysuiTestCase() {
 
     private lateinit var testScope: TestScope
     private lateinit var secureSettingsRepository: FakeSecureSettingsRepository
+    private lateinit var systemSettingsRepository: FakeSystemSettingsRepository
 
     @Before
     fun setUp() {
         val testDispatcher = StandardTestDispatcher()
         testScope = TestScope(testDispatcher)
         secureSettingsRepository = FakeSecureSettingsRepository()
+        systemSettingsRepository = FakeSystemSettingsRepository()
 
         underTest =
             NotificationSettingsRepository(
                 scope = testScope.backgroundScope,
                 backgroundDispatcher = testDispatcher,
                 secureSettingsRepository = secureSettingsRepository,
+                systemSettingsRepository = systemSettingsRepository,
             )
     }
 
@@ -99,5 +103,23 @@ class NotificationSettingsRepositoryTest : SysuiTestCase() {
                 value = 0,
             )
             assertThat(historyEnabled).isEqualTo(false)
+        }
+
+    @Test
+    fun testGetIsCooldownEnabled() =
+        testScope.runTest {
+            val cooldownEnabled by collectLastValue(underTest.isCooldownEnabled)
+
+            systemSettingsRepository.setInt(
+                name = Settings.System.NOTIFICATION_COOLDOWN_ENABLED,
+                value = 1,
+            )
+            assertThat(cooldownEnabled).isEqualTo(true)
+
+            systemSettingsRepository.setInt(
+                name = Settings.System.NOTIFICATION_COOLDOWN_ENABLED,
+                value = 0,
+            )
+            assertThat(cooldownEnabled).isEqualTo(false)
         }
 }

@@ -16,12 +16,17 @@
 
 package com.android.systemui.screenshot.dagger;
 
+import static com.android.systemui.Flags.screenshotUiControllerRefactor;
+
 import android.app.Service;
 import android.view.accessibility.AccessibilityManager;
 
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.screenshot.ImageCapture;
 import com.android.systemui.screenshot.ImageCaptureImpl;
+import com.android.systemui.screenshot.InteractiveScreenshotHandler;
+import com.android.systemui.screenshot.LegacyScreenshotController;
+import com.android.systemui.screenshot.ScreenshotController;
 import com.android.systemui.screenshot.ScreenshotPolicy;
 import com.android.systemui.screenshot.ScreenshotPolicyImpl;
 import com.android.systemui.screenshot.ScreenshotSoundController;
@@ -89,5 +94,16 @@ public abstract class ScreenshotModule {
     static ScreenshotViewModel providesScreenshotViewModel(
             AccessibilityManager accessibilityManager) {
         return new ScreenshotViewModel(accessibilityManager);
+    }
+
+    @Provides
+    static InteractiveScreenshotHandler.Factory providesScreenshotController(
+            LegacyScreenshotController.Factory legacyScreenshotController,
+            ScreenshotController.Factory screenshotController) {
+        if (screenshotUiControllerRefactor()) {
+            return screenshotController;
+        } else {
+            return legacyScreenshotController;
+        }
     }
 }

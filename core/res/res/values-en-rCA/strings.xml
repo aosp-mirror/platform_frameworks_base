@@ -1428,6 +1428,7 @@
     <string name="share_remote_bugreport_action" msgid="7630880678785123682">"SHARE"</string>
     <string name="decline_remote_bugreport_action" msgid="4040894777519784346">"DECLINE"</string>
     <string name="select_input_method" msgid="3971267998568587025">"Choose input method"</string>
+    <string name="input_method_language_settings" msgid="8069089418056819437">"Language Settings"</string>
     <string name="show_ime" msgid="6406112007347443383">"Keep it on screen while physical keyboard is active"</string>
     <string name="hardware" msgid="3611039921284836033">"Use on-screen keyboard"</string>
     <string name="select_keyboard_layout_notification_title" msgid="5823199895322205589">"Configure <xliff:g id="DEVICE_NAME">%s</xliff:g>"</string>

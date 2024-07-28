@@ -18,23 +18,26 @@
 package com.android.systemui.statusbar.notification.collection.coordinator
 
 import android.app.Notification
-import android.os.UserHandle
 import android.platform.test.flag.junit.FlagsParameterization
 import android.provider.Settings
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.dump.DumpManager
+import com.android.systemui.dump.dumpManager
 import com.android.systemui.flags.andSceneContainer
-import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
+import com.android.systemui.keyguard.data.repository.fakeKeyguardRepository
 import com.android.systemui.keyguard.data.repository.fakeKeyguardTransitionRepository
+import com.android.systemui.keyguard.data.repository.keyguardRepository
+import com.android.systemui.keyguard.data.repository.keyguardTransitionRepository
 import com.android.systemui.keyguard.domain.interactor.keyguardTransitionInteractor
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.TransitionStep
-import com.android.systemui.kosmos.Kosmos
+import com.android.systemui.kosmos.testDispatcher
+import com.android.systemui.kosmos.testScope
 import com.android.systemui.log.logcatLogBuffer
-import com.android.systemui.plugins.statusbar.StatusBarStateController
+import com.android.systemui.plugins.statusbar.statusBarStateController
 import com.android.systemui.scene.data.repository.Idle
 import com.android.systemui.scene.data.repository.setTransition
+import com.android.systemui.scene.domain.interactor.sceneInteractor
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.statusbar.notification.collection.GroupEntryBuilder
 import com.android.systemui.statusbar.notification.collection.NotifPipeline
@@ -42,12 +45,15 @@ import com.android.systemui.statusbar.notification.collection.NotificationEntryB
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifFilter
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.Pluggable
 import com.android.systemui.statusbar.notification.collection.notifcollection.NotifCollectionListener
-import com.android.systemui.statusbar.notification.data.repository.ActiveNotificationListRepository
 import com.android.systemui.statusbar.notification.domain.interactor.SeenNotificationsInteractor
+import com.android.systemui.statusbar.notification.domain.interactor.lockScreenShowOnlyUnseenNotificationsSetting
+import com.android.systemui.statusbar.notification.domain.interactor.seenNotificationsInteractor
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow
-import com.android.systemui.statusbar.policy.HeadsUpManager
 import com.android.systemui.statusbar.policy.OnHeadsUpChangedListener
+import com.android.systemui.statusbar.policy.headsUpManager
+import com.android.systemui.testKosmos
 import com.android.systemui.util.settings.FakeSettings
+import com.android.systemui.util.settings.fakeSettings
 import com.google.common.truth.Truth.assertThat
 import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.CoroutineScope
@@ -72,13 +78,23 @@ import platform.test.runner.parameterized.Parameters
 @RunWith(ParameterizedAndroidJunit4::class)
 class OriginalUnseenKeyguardCoordinatorTest(flags: FlagsParameterization) : SysuiTestCase() {
 
-    private val kosmos = Kosmos()
+    private val kosmos =
+        testKosmos().apply {
+            testDispatcher = UnconfinedTestDispatcher()
+            statusBarStateController = mock()
+            fakeSettings.putInt(Settings.Secure.LOCK_SCREEN_SHOW_ONLY_UNSEEN_NOTIFICATIONS, 1)
+        }
 
-    private val headsUpManager: HeadsUpManager = mock()
-    private val keyguardRepository = FakeKeyguardRepository()
-    private val keyguardTransitionRepository = kosmos.fakeKeyguardTransitionRepository
+    private val keyguardRepository
+        get() = kosmos.fakeKeyguardRepository
+
+    private val keyguardTransitionRepository
+        get() = kosmos.fakeKeyguardTransitionRepository
+
+    private val statusBarStateController
+        get() = kosmos.statusBarStateController
+
     private val notifPipeline: NotifPipeline = mock()
-    private val statusBarStateController: StatusBarStateController = mock()
 
     init {
         mSetFlagsRule.setFlagsParameterization(flags)
@@ -252,7 +268,7 @@ class OriginalUnseenKeyguardCoordinatorTest(flags: FlagsParameterization) : Sysu
             collectionListener.onEntryAdded(fakeEntry)
 
             // GIVEN: The setting for filtering unseen notifications is disabled
-            showOnlyUnseenNotifsOnKeyguardSetting = false
+            kosmos.lockScreenShowOnlyUnseenNotificationsSetting = false
 
             // GIVEN: The pipeline has registered the unseen filter for invalidation
             val invalidationListener: Pluggable.PluggableListener<NotifFilter> = mock()
@@ -266,7 +282,7 @@ class OriginalUnseenKeyguardCoordinatorTest(flags: FlagsParameterization) : Sysu
             assertThat(unseenFilter.shouldFilterOut(fakeEntry, 0L)).isFalse()
 
             // WHEN: The secure setting is changed
-            showOnlyUnseenNotifsOnKeyguardSetting = true
+            kosmos.lockScreenShowOnlyUnseenNotificationsSetting = true
 
             // THEN: The pipeline is invalidated
             verify(invalidationListener).onPluggableInvalidated(same(unseenFilter), any())
@@ -607,34 +623,25 @@ class OriginalUnseenKeyguardCoordinatorTest(flags: FlagsParameterization) : Sysu
     private fun runKeyguardCoordinatorTest(
         testBlock: suspend KeyguardCoordinatorTestScope.() -> Unit
     ) {
-        val testDispatcher = UnconfinedTestDispatcher()
-        val testScope = TestScope(testDispatcher)
-        val fakeSettings =
-            FakeSettings().apply {
-                putInt(Settings.Secure.LOCK_SCREEN_SHOW_ONLY_UNSEEN_NOTIFICATIONS, 1)
-            }
-        val seenNotificationsInteractor =
-            SeenNotificationsInteractor(ActiveNotificationListRepository())
         val keyguardCoordinator =
             OriginalUnseenKeyguardCoordinator(
-                testDispatcher,
-                mock<DumpManager>(),
-                headsUpManager,
-                keyguardRepository,
-                kosmos.keyguardTransitionInteractor,
-                KeyguardCoordinatorLogger(logcatLogBuffer()),
-                testScope.backgroundScope,
-                fakeSettings,
-                seenNotificationsInteractor,
-                statusBarStateController,
+                dumpManager = kosmos.dumpManager,
+                headsUpManager = kosmos.headsUpManager,
+                keyguardRepository = kosmos.keyguardRepository,
+                keyguardTransitionInteractor = kosmos.keyguardTransitionInteractor,
+                logger = KeyguardCoordinatorLogger(logcatLogBuffer()),
+                scope = kosmos.testScope.backgroundScope,
+                seenNotificationsInteractor = kosmos.seenNotificationsInteractor,
+                statusBarStateController = kosmos.statusBarStateController,
+                sceneInteractor = kosmos.sceneInteractor,
             )
         keyguardCoordinator.attach(notifPipeline)
-        testScope.runTest {
+        kosmos.testScope.runTest {
             KeyguardCoordinatorTestScope(
                     keyguardCoordinator,
-                    testScope,
-                    seenNotificationsInteractor,
-                    fakeSettings,
+                    kosmos.testScope,
+                    kosmos.seenNotificationsInteractor,
+                    kosmos.fakeSettings,
                 )
                 .testBlock()
         }
@@ -656,21 +663,8 @@ class OriginalUnseenKeyguardCoordinatorTest(flags: FlagsParameterization) : Sysu
             argumentCaptor { verify(notifPipeline).addCollectionListener(capture()) }.lastValue
 
         val onHeadsUpChangedListener: OnHeadsUpChangedListener
-            get() = argumentCaptor { verify(headsUpManager).addListener(capture()) }.lastValue
-
-        var showOnlyUnseenNotifsOnKeyguardSetting: Boolean
             get() =
-                fakeSettings.getIntForUser(
-                    Settings.Secure.LOCK_SCREEN_SHOW_ONLY_UNSEEN_NOTIFICATIONS,
-                    UserHandle.USER_CURRENT,
-                ) == 1
-            set(value) {
-                fakeSettings.putIntForUser(
-                    Settings.Secure.LOCK_SCREEN_SHOW_ONLY_UNSEEN_NOTIFICATIONS,
-                    if (value) 1 else 2,
-                    UserHandle.USER_CURRENT,
-                )
-            }
+                argumentCaptor { verify(kosmos.headsUpManager).addListener(capture()) }.lastValue
     }
 
     companion object {

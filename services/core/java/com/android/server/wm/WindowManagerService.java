@@ -4717,8 +4717,10 @@ public class WindowManagerService extends IWindowManager.Stub
                     return;
                 }
                 dc.mRemoteInsetsControlTarget.setRequestedVisibleTypes(requestedVisibleTypes);
+                // TODO(b/353463205) the statsToken shouldn't be null as it is used later in the
+                //  IME provider. Check if we have to create a new request here
                 dc.getInsetsStateController().onRequestedVisibleTypesChanged(
-                        dc.mRemoteInsetsControlTarget);
+                        dc.mRemoteInsetsControlTarget, null /* statsToken */);
             }
         } finally {
             Binder.restoreCallingIdentity(origId);
@@ -9776,7 +9778,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 Slog.e(TAG, "Host window not found");
                 return;
             }
-            if (hostWindow.mInputChannel == null) {
+            if (hostWindow.mInputChannelToken == null) {
                 Slog.e(TAG, "Host window does not have an input channel");
                 return;
             }

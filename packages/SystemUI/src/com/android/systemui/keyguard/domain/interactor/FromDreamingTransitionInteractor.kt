@@ -100,7 +100,6 @@ constructor(
 
     private fun listenForDreamingToGlanceableHub() {
         if (!communalSettingsInteractor.isCommunalFlagEnabled()) return
-        // TODO(b/336576536): Check if adaptation for scene framework is needed
         if (SceneContainerFlag.isEnabled) return
         scope.launch("$TAG#listenForDreamingToGlanceableHub", mainDispatcher) {
             glanceableHubTransitions.listenForGlanceableHubTransition(
@@ -195,7 +194,7 @@ constructor(
 
     private fun listenForDreamingToGoneWhenDismissable() {
         if (SceneContainerFlag.isEnabled) {
-            return // TODO(b/336576536): Check if adaptation for scene framework is needed
+            return
         }
 
         if (KeyguardWmStateRefactor.isEnabled) {
@@ -217,7 +216,7 @@ constructor(
     }
 
     private fun listenForDreamingToGoneFromBiometricUnlock() {
-        // TODO(b/336576536): Check if adaptation for scene framework is needed
+        // TODO(b/353542570): Adaptation for scene framework is needed
         if (SceneContainerFlag.isEnabled) return
         scope.launch {
             keyguardInteractor.biometricUnlockState

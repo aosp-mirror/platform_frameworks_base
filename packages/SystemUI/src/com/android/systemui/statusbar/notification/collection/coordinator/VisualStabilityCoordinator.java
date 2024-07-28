@@ -263,7 +263,8 @@ public class VisualStabilityCoordinator implements Coordinator, Dumpable {
 
     private boolean isReorderingAllowed() {
         final boolean sleepyAndDozed = mFullyDozed && mSleepy;
-        final boolean stackShowing = mPanelExpanded || mLockscreenShowing;
+        final boolean stackShowing = mPanelExpanded
+                || (SceneContainerFlag.isEnabled() && mLockscreenShowing);
         return (sleepyAndDozed || !stackShowing || mCommunalShowing) && !mPulsing;
     }
 

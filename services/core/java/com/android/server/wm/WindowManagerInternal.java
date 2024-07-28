@@ -41,7 +41,6 @@ import android.view.Display;
 import android.view.IInputFilter;
 import android.view.IRemoteAnimationFinishedCallback;
 import android.view.IWindow;
-import android.view.InputChannel;
 import android.view.MagnificationSpec;
 import android.view.RemoteAnimationTarget;
 import android.view.Surface;
@@ -247,7 +246,7 @@ public abstract class WindowManagerInternal {
          * The display this listener is interested in. If it is INVALID_DISPLAY, then which display
          * should be notified depends on the dispatcher.
          */
-        public final int mDisplayId;
+        public final int mTargetDisplayId;
 
         /** Let transition controller decide which display should receive the callbacks. */
         public AppTransitionListener() {
@@ -256,7 +255,7 @@ public abstract class WindowManagerInternal {
 
         /** It will listen the transition on the given display. */
         public AppTransitionListener(int displayId) {
-            mDisplayId = displayId;
+            mTargetDisplayId = displayId;
         }
 
         /**
@@ -365,8 +364,10 @@ public abstract class WindowManagerInternal {
          *
          * @param windowToken The window token
          * @param imeVisible {@code true} if the IME should be shown, {@code false} to hide
+         * @param statsToken the token tracking the current IME request.
          */
-        void onImeRequestedChanged(IBinder windowToken, boolean imeVisible);
+        void onImeRequestedChanged(IBinder windowToken, boolean imeVisible,
+                @Nullable ImeTracker.Token statsToken);
     }
 
     /**
@@ -375,10 +376,10 @@ public abstract class WindowManagerInternal {
     public interface IDragDropCallback {
         default CompletableFuture<Boolean> registerInputChannel(
                 DragState state, Display display, InputManagerService service,
-                InputChannel source) {
+                IBinder sourceInputChannelToken) {
             return state.register(display)
                 .thenApply(unused ->
-                    service.startDragAndDrop(source, state.getInputChannel()));
+                    service.startDragAndDrop(sourceInputChannelToken, state.getInputToken()));
         }
 
         /**

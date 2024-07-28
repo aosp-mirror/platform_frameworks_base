@@ -377,17 +377,29 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
         LocalServices.addService(AppWidgetManagerInternal.class, new AppWidgetManagerLocal());
     }
 
+    /**
+     * Returns the maximum memory can be used in widget bitmaps, in respect to
+     * the display size. Note this should only be called after
+     * {@link #computeMaximumWidgetBitmapMemory} is invoked.
+     */
     @Override
     public int getMaxBitmapMemory() {
         return mMaxWidgetBitmapMemory;
     }
 
+    /**
+     * Signals that system services (esp. ActivityManagerService) are ready.
+     */
     void systemServicesReady() {
         mActivityManagerInternal = LocalServices.getService(ActivityManagerInternal.class);
         mAppOpsManagerInternal = LocalServices.getService(AppOpsManagerInternal.class);
         mUsageStatsManagerInternal = LocalServices.getService(UsageStatsManagerInternal.class);
     }
 
+    /**
+     * Computes the maximum memory can be used in widget bitmaps, in respect to
+     * the display size.
+     */
     private void computeMaximumWidgetBitmapMemory() {
         Display display = mContext.getDisplayNoVerify();
         Point size = new Point();
@@ -397,6 +409,10 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
         mMaxWidgetBitmapMemory = 6 * size.x * size.y;
     }
 
+    /**
+     * Callback function that persists the states of the widgets to disk,
+     * should be scheduled on a background thread.
+     */
     private boolean handleSaveMessage(Message msg) {
         final int userId = msg.what;
         SparseArray<byte[]> userIdToBytesMapping;
@@ -435,6 +451,9 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
         return true;
     }
 
+    /**
+     * Register receivers for system broadcasts, esp. broadcasts from package manager.
+     */
     private void registerBroadcastReceiver() {
         // Register for broadcasts about package install, etc., so we can
         // update the provider list.
@@ -470,6 +489,13 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
                 suspendPackageFilter, null, mCallbackHandler);
     }
 
+    /**
+     * Listens to cross-profile widget providers changes.
+     *
+     * @see #onCrossProfileWidgetProvidersChanged
+     * @see DevicePolicyManager#addCrossProfileWidgetProvider
+     * @see DevicePolicyManager#removeCrossProfileWidgetProvider
+     */
     private void registerOnCrossProfileProvidersChangedListener() {
         // The device policy is an optional component.
         if (mDevicePolicyManagerInternal != null) {
@@ -481,6 +507,11 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
         mSafeMode = safeMode;
     }
 
+    /**
+     * Handles broadcasts from package manager, add/remove/update widget
+     * providers in respect to changes in corresponding packages.
+     * Note: When a package is archived, it is treated as removed.
+     */
     private void onPackageBroadcastReceived(Intent intent, int userId) {
         final String action = intent.getAction();
         boolean added = false;
@@ -585,6 +616,10 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
         }
     }
 
+    /**
+     * Clears the generated previews for all widgets belonging to the given UID.
+     * @return true if any previews were cleared.
+     */
     @GuardedBy("mLock")
     private boolean clearPreviewsForUidLocked(int clearedUid) {
         boolean changed = false;
@@ -616,6 +651,11 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
         }
     }
 
+    /**
+     * Reload all widgets' masked state for the given user or profile.
+     * Keep track of whether the given user or profile is locked, in quiet mode,
+     * suspended or stopped.
+     */
     private void reloadWidgetsMaskedState(int userId) {
         final long identity = Binder.clearCallingIdentity();
         try {
@@ -859,6 +899,10 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
         }
     }
 
+    /**
+     * Unmask widgets of the specified provider. Notify the host to remove the masked views
+     * if previously masked.
+     */
     private void unmaskWidgetsViewsLocked(Provider provider) {
         final int widgetCount = provider.widgets.size();
         for (int j = 0; j < widgetCount; j++) {
@@ -869,6 +913,10 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
         }
     }
 
+    /**
+     * Called when a new package is installed, and updates {@link HostId} in corresponding
+     * {@link Host}.
+     */
     private void resolveHostUidLocked(String pkg, int uid) {
         final int N = mHosts.size();
         for (int i = 0; i < N; i++) {
@@ -883,11 +931,28 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
         }
     }
 
+    /**
+     * Load widgets/providers/hosts for the specified user and all of its enabled
+     * child profiles from disk if not already loaded.
+     *
+     * @param userId the user id to load
+     *
+     * @see #ensureGroupStateLoadedLocked(int, boolean)
+     */
     @GuardedBy("mLock")
     private void ensureGroupStateLoadedLocked(int userId) {
         ensureGroupStateLoadedLocked(userId, /* enforceUserUnlockingOrUnlocked */ true );
     }
 
+    /**
+     * Load widgets/providers/hosts for the specified user and all of its enabled
+     * child profiles from disk if not already loaded.
+     *
+     * @param userId the user id to load
+     * @param enforceUserUnlockingOrUnlocked if true, the user must be unlocked or unlocking
+     * @throws IllegalStateException if the user or profile is not unlocked or unlocking and
+     * {@code enforceUserUnlockingOrUnlocked} is true
+     */
     @GuardedBy("mLock")
     private void ensureGroupStateLoadedLocked(int userId, boolean enforceUserUnlockingOrUnlocked) {
         if (enforceUserUnlockingOrUnlocked && !isUserRunningAndUnlocked(userId)) {
@@ -1003,6 +1068,9 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
         }
     }
 
+    /**
+     * Called by {@link AppWidgetHost} to start listening for updates from specified widgets.
+     */
     @Override
     public ParceledListSlice<PendingHostUpdate> startListening(IAppWidgetHost callbacks,
             String callingPackage, int hostId, int[] appWidgetIds) {
@@ -1049,6 +1117,10 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
         }
     }
 
+    /**
+     * Called by {@link AppWidgetHost} to stop listening for updates from all
+     * widgets bounded to this host.
+     */
     @Override
     public void stopListening(String callingPackage, int hostId) {
         final int userId = UserHandle.getCallingUserId();
@@ -1077,6 +1149,10 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
         }
     }
 
+    /**
+     * Creates a new instance of app widget and associate it with the specified host.
+     * Allocate a new app widget id for the new instance.
+     */
     @Override
     public int allocateAppWidgetId(String callingPackage, int hostId) {
         final int userId = UserHandle.getCallingUserId();
@@ -1126,6 +1202,12 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
         }
     }
 
+    /**
+     * Called by {@link AppWidgetHost} to mark all widgets associated with this host
+     * to be visually hidden (for state tracking).
+     *
+     * @see AppOpsManagerInternal#updateAppWidgetVisibility
+     */
     @Override
     public void setAppWidgetHidden(String callingPackage, int hostId) {
         final int userId = UserHandle.getCallingUserId();
@@ -1149,6 +1231,11 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
         }
     }
 
+    /**
+     * Deletes specified widget.
+     * Note: appWidgetId is a monotonic increasing number, so the appWidgetId cannot be
+     * reclaimed by a new widget.
+     */
     @Override
     public void deleteAppWidgetId(String callingPackage, int appWidgetId) {
         final int userId = UserHandle.getCallingUserId();
@@ -1183,8 +1270,19 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
         }
     }
 
+    /**
+     * Query if a given package was granted permission by the user to bind app widgets.
+     *
+     * <p class="note">You need the MODIFY_APPWIDGET_BIND_PERMISSIONS permission
+     *
+     * @param packageName The package for which the permission is being queried
+     * @param userId The user id of the user under which the package runs.
+     * @return true if the package was granted permission by the user to bind app widgets
+     *
+     * @see AppWidgetManager#hasBindAppWidgetPermission(String, int)
+     */
     @Override
-    public boolean hasBindAppWidgetPermission(String packageName, int grantId) {
+    public boolean hasBindAppWidgetPermission(String packageName, int userId) {
         if (DEBUG) {
             Slog.i(TAG, "hasBindAppWidgetPermission() " + UserHandle.getCallingUserId());
         }
@@ -1194,20 +1292,31 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
 
         synchronized (mLock) {
             // The grants are stored in user state wich gets the grant.
-            ensureGroupStateLoadedLocked(grantId);
+            ensureGroupStateLoadedLocked(userId);
 
-            final int packageUid = getUidForPackage(packageName, grantId);
+            final int packageUid = getUidForPackage(packageName, userId);
             if (packageUid < 0) {
                 return false;
             }
 
-            Pair<Integer, String> packageId = Pair.create(grantId, packageName);
+            Pair<Integer, String> packageId = Pair.create(userId, packageName);
             return mPackagesWithBindWidgetPermission.contains(packageId);
         }
     }
 
+    /**
+     * Changes any user-granted permission for the given package to bind app widgets.
+     *
+     * <p class="note">You need the MODIFY_APPWIDGET_BIND_PERMISSIONS permission
+     *
+     * @param packageName The package whose permission is being changed
+     * @param userId The user under which the package is running.
+     * @param permission Whether to give the package permission to bind widgets
+     *
+     * @see AppWidgetManager#setBindAppWidgetPermission(String, int, boolean)
+     */
     @Override
-    public void setBindAppWidgetPermission(String packageName, int grantId,
+    public void setBindAppWidgetPermission(String packageName, int userId,
             boolean grantPermission) {
         if (DEBUG) {
             Slog.i(TAG, "setBindAppWidgetPermission() " + UserHandle.getCallingUserId());
@@ -1218,24 +1327,42 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
 
         synchronized (mLock) {
             // The grants are stored in user state wich gets the grant.
-            ensureGroupStateLoadedLocked(grantId);
+            ensureGroupStateLoadedLocked(userId);
 
-            final int packageUid = getUidForPackage(packageName, grantId);
+            final int packageUid = getUidForPackage(packageName, userId);
             if (packageUid < 0) {
                 return;
             }
 
-            Pair<Integer, String> packageId = Pair.create(grantId, packageName);
+            Pair<Integer, String> packageId = Pair.create(userId, packageName);
             if (grantPermission) {
                 mPackagesWithBindWidgetPermission.add(packageId);
             } else {
                 mPackagesWithBindWidgetPermission.remove(packageId);
             }
 
-            saveGroupStateAsync(grantId);
+            saveGroupStateAsync(userId);
         }
     }
 
+    /**
+     * Called by {@link AppWidgetHost} to start app widget provider configure
+     * activity for result.
+     * This method is used if the provider is in a profile different from the host
+     * as the host is not allowed to start an activity in another profile.
+     * <p>
+     * Note that the provided app widget has to be bound for this method to work.
+     * </p>
+     *
+     * @param callingPackage Package that calls this method.
+     * @param appWidgetId The bound app widget whose provider's config activity to start.
+     * @param intentFlags Optional intent flags.
+     * @return IntentSender to start the config activity.
+     * @throws IllegalArgumentException If the widget is not found.
+     *
+     * @see AppWidgetProviderInfo#getProfile()
+     * @see AppWidgetHost#startAppWidgetConfigureActivityForResult
+     */
     @Override
     public IntentSender createAppWidgetConfigIntentSender(String callingPackage, int appWidgetId,
             final int intentFlags) {
@@ -1291,6 +1418,23 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
         }
     }
 
+    /**
+     * Associates an {@link Widget} (as specified by {@code appWidgetId}) with
+     * a {@link Provider} (as specified by {@code providerComponent}) from
+     * a specific user/profile, if applicable.
+     *
+     * Note: The {@link Widget} itself is already associated with its {@link Host}
+     * in {@link #allocateAppWidgetId}.
+     *
+     * @param callingPackage The package that calls this method.
+     * @param appWidgetId The id of theapp widget to bind.
+     * @param providerProfileId The user/profile id of the provider.
+     * @param providerComponent The {@link ComponentName} that provides the widget.
+     * @param options The options to pass to the provider.
+     * @see AppWidgetManager#bindAppWidgetIdIfAllowed(int, ComponentName)
+     * @see AppWidgetManager#bindAppWidgetIdIfAllowed(int, ComponentName, Bundle)
+     * @see AppWidgetManager#bindAppWidgetIdIfAllowed(int, UserHandle, ComponentName, Bundle)
+     */
     @Override
     public boolean bindAppWidgetId(String callingPackage, int appWidgetId,
             int providerProfileId, ComponentName providerComponent, Bundle options) {
@@ -1400,6 +1544,17 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
         return true;
     }
 
+    /**
+     * Get the list of appWidgetIds that have been bound to the given AppWidget
+     * provider.
+     *
+     * Note: User can create multiple instances of {@link Widget} that are
+     * supplied by the same {@link Provider}.
+     *
+     * @param provider The {@link android.content.BroadcastReceiver} that is the
+     *            AppWidget provider to find appWidgetIds for.
+     * @see AppWidgetManager#getAppWidgetIds(ComponentName)
+     */
     @Override
     public int[] getAppWidgetIds(ComponentName componentName) {
         final int userId = UserHandle.getCallingUserId();
@@ -1427,6 +1582,13 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
         }
     }
 
+    /**
+     * Gets a list of appWidgetIds that are bound to the specified host.
+     *
+     * @param callingPackage The package that calls this method.
+     * @param hostId id of the {@link Host}.
+     * @rerurn int[] list of appWidgetIds that are bound to this host.
+     */
     @Override
     public int[] getAppWidgetIdsForHost(String callingPackage, int hostId) {
         final int userId = UserHandle.getCallingUserId();
@@ -1454,6 +1616,31 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
         }
     }
 
+    /**
+     * Binds the RemoteViewsService for a given appWidgetId and intent.
+     * This method is used by {@link RemoteViewsAdapter} to establish a connection
+     * to the {@link RemoteViewsService} that provides data for the adapter.
+     *
+     * The appWidgetId specified must already be bound to the calling AppWidgetHost via
+     * {@link android.appwidget.AppWidgetManager#bindAppWidgetId AppWidgetManager.bindAppWidgetId()}.
+     *
+     * Note: Since {@link AppWidgetManager#setRemoteAdapter(int, RemoteViewsAdapter))} is deprecated,
+     * this method is effectively deprecated as well.
+     *
+     * @param callingPackage The package that calls this method.
+     * @param appWidgetId   The AppWidget instance for which to bind the RemoteViewsService.
+     * @param intent        The intent of the service which will be providing the data to the
+     *                      RemoteViewsAdapter.
+     * @param caller        Caller's {@link IApplicationThread}, see
+     *                      {@link Context#getIApplicationThread()}
+     * @param activityToken Caller's {@link IBinder}, see {@link Context#getActivityToken()}
+     * @param connection    The callback interface to be notified when a connection is made or lost.
+     * @param flags         Flags used for binding to the service. Only
+     *                     {@link Context#BIND_AUTO_CREATE} and
+     *                     {@link Context#BIND_FOREGROUND_SERVICE_WHILE_AWAKE} are supported.
+     *
+     * @see AppWidgetManager#setRemoteAdapter(int, RemoteViewsAdapter)
+     */
     @Override
     public boolean bindRemoteViewsService(String callingPackage, int appWidgetId, Intent intent,
             IApplicationThread caller, IBinder activtiyToken, IServiceConnection connection,
@@ -4205,6 +4392,11 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
         }
     }
 
+    /**
+     * Callback functions that add/update/remove widget providers in respect to
+     * changes in a specific child profile (e.g. deleting a work profile)
+     * depicted by DevicePolicyManager.
+     */
     @Override
     public void onCrossProfileWidgetProvidersChanged(int userId, List<String> packages) {
         final int parentId = mSecurityPolicy.getProfileParent(userId);

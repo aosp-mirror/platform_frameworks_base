@@ -70,10 +70,10 @@ import android.view.IRemoteAnimationFinishedCallback;
 import android.view.RemoteAnimationTarget;
 import android.view.View;
 import android.view.ViewRootImpl;
-import android.view.WindowManager;
 
 import androidx.test.filters.SmallTest;
 
+import com.android.app.viewcapture.ViewCaptureAwareWindowManager;
 import com.android.internal.foldables.FoldGracePeriodProvider;
 import com.android.internal.logging.InstanceId;
 import com.android.internal.logging.UiEventLogger;
@@ -167,7 +167,7 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
     private @Mock BroadcastDispatcher mBroadcastDispatcher;
     private @Mock DismissCallbackRegistry mDismissCallbackRegistry;
     private @Mock DumpManager mDumpManager;
-    private @Mock WindowManager mWindowManager;
+    private @Mock ViewCaptureAwareWindowManager mWindowManager;
     private @Mock IActivityManager mActivityManager;
     private @Mock ConfigurationController mConfigurationController;
     private @Mock PowerManager mPowerManager;

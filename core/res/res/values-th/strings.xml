@@ -1428,6 +1428,7 @@
     <string name="share_remote_bugreport_action" msgid="7630880678785123682">"แชร์"</string>
     <string name="decline_remote_bugreport_action" msgid="4040894777519784346">"ปฏิเสธ"</string>
     <string name="select_input_method" msgid="3971267998568587025">"เลือกวิธีการป้อนข้อมูล"</string>
+    <string name="input_method_language_settings" msgid="8069089418056819437">"การตั้งค่าภาษา"</string>
     <string name="show_ime" msgid="6406112007347443383">"เปิดทิ้งไว้บนหน้าจอในระหว่างใช้งานแป้นพิมพ์จริง"</string>
     <string name="hardware" msgid="3611039921284836033">"ใช้แป้นพิมพ์บนหน้าจอ"</string>
     <string name="select_keyboard_layout_notification_title" msgid="5823199895322205589">"กำหนดค่า <xliff:g id="DEVICE_NAME">%s</xliff:g>"</string>
@@ -2433,7 +2434,7 @@
     <string name="face_dangling_notification_msg" msgid="746235263598985384">"ระบบไม่จดจำรูปแบบใบหน้าของคุณอีกต่อไป ตั้งค่าการปลดล็อกด้วยใบหน้าอีกครั้ง"</string>
     <string name="biometric_dangling_notification_action_set_up" msgid="8246885009807817961">"ตั้งค่า"</string>
     <string name="biometric_dangling_notification_action_not_now" msgid="8095249216864443491">"ไว้ทีหลัง"</string>
-    <string name="bg_user_sound_notification_title_alarm" msgid="5251678483393143527">"นาฬิกาปลุกสำหรับ <xliff:g id="USER_NAME">%s</xliff:g>"</string>
+    <string name="bg_user_sound_notification_title_alarm" msgid="5251678483393143527">"นาฬิกาปลุกสำหรับ \"<xliff:g id="USER_NAME">%s</xliff:g>\""</string>
     <string name="bg_user_sound_notification_button_switch_user" msgid="3091969648572788946">"สลับผู้ใช้"</string>
     <string name="bg_user_sound_notification_button_mute" msgid="4942158515665615243">"ปิดเสียง"</string>
     <string name="bg_user_sound_notification_message" msgid="8613881975316976673">"แตะเพื่อปิดเสียง"</string>

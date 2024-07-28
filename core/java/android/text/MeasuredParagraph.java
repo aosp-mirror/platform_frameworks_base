@@ -42,6 +42,8 @@ import android.text.style.MetricAffectingSpan;
 import android.text.style.ReplacementSpan;
 import android.util.Pools.SynchronizedPool;
 
+import com.android.text.flags.Flags;
+
 import java.util.Arrays;
 
 /**
@@ -199,7 +201,7 @@ public class MeasuredParagraph {
      * @hide
      */
     public @Layout.Direction int getParagraphDir() {
-        if (ClientFlags.icuBidiMigration()) {
+        if (Flags.icuBidiMigration()) {
             if (mBidi == null) {
                 return Layout.DIR_LEFT_TO_RIGHT;
             }
@@ -217,7 +219,7 @@ public class MeasuredParagraph {
      */
     public Directions getDirections(@IntRange(from = 0) int start,  // inclusive
                                     @IntRange(from = 0) int end) {  // exclusive
-        if (ClientFlags.icuBidiMigration()) {
+        if (Flags.icuBidiMigration()) {
             // Easy case: mBidi == null means the text is all LTR and no bidi suppot is needed.
             if (mBidi == null) {
                 return Layout.DIRS_ALL_LEFT_TO_RIGHT;
@@ -679,7 +681,7 @@ public class MeasuredParagraph {
             }
         }
 
-        if (ClientFlags.icuBidiMigration()) {
+        if (Flags.icuBidiMigration()) {
             if ((textDir == TextDirectionHeuristics.LTR
                     || textDir == TextDirectionHeuristics.FIRSTSTRONG_LTR
                     || textDir == TextDirectionHeuristics.ANYRTL_LTR)

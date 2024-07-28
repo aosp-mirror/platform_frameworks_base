@@ -16,6 +16,7 @@
 
 package com.android.systemui.communal.ui.viewmodel
 
+import android.content.ComponentName
 import android.content.res.Resources
 import android.os.Bundle
 import android.view.View
@@ -25,6 +26,7 @@ import com.android.systemui.communal.domain.interactor.CommunalSceneInteractor
 import com.android.systemui.communal.domain.interactor.CommunalSettingsInteractor
 import com.android.systemui.communal.domain.interactor.CommunalTutorialInteractor
 import com.android.systemui.communal.domain.model.CommunalContentModel
+import com.android.systemui.communal.shared.log.CommunalMetricsLogger
 import com.android.systemui.communal.shared.model.CommunalBackgroundType
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
@@ -92,6 +94,7 @@ constructor(
     private val shadeInteractor: ShadeInteractor,
     @Named(MediaModule.COMMUNAL_HUB) mediaHost: MediaHost,
     @CommunalLog logBuffer: LogBuffer,
+    private val metricsLogger: CommunalMetricsLogger,
 ) : BaseCommunalViewModel(communalSceneInteractor, communalInteractor, mediaHost) {
 
     private val _isMediaHostVisible =
@@ -258,6 +261,10 @@ constructor(
             communalInteractor.dismissCtaTile()
             setCurrentPopupType(PopupType.CtaTile)
         }
+    }
+
+    override fun onTapWidget(componentName: ComponentName, priority: Int) {
+        metricsLogger.logTapWidget(componentName.flattenToString(), priority)
     }
 
     fun onClick() {

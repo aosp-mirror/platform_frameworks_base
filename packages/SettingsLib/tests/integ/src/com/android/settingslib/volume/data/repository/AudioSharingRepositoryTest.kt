@@ -26,8 +26,6 @@ import android.bluetooth.BluetoothVolumeControl
 import android.content.ContentResolver
 import android.content.Context
 import android.database.ContentObserver
-import android.platform.test.annotations.DisableFlags
-import android.platform.test.annotations.EnableFlags
 import android.platform.test.flag.junit.SetFlagsRule
 import android.provider.Settings
 import androidx.test.core.app.ApplicationProvider
@@ -43,7 +41,6 @@ import com.android.settingslib.bluetooth.LocalBluetoothLeBroadcastAssistant
 import com.android.settingslib.bluetooth.LocalBluetoothManager
 import com.android.settingslib.bluetooth.LocalBluetoothProfileManager
 import com.android.settingslib.bluetooth.VolumeControlProfile
-import com.android.settingslib.flags.Flags
 import com.google.common.truth.Truth
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.launchIn
@@ -57,14 +54,12 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers.any
-import org.mockito.ArgumentMatchers.anyBoolean
-import org.mockito.ArgumentMatchers.anyInt
 import org.mockito.ArgumentMatchers.eq
 import org.mockito.Captor
 import org.mockito.Mock
-import org.mockito.Mockito.never
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.`when`
+import org.mockito.Spy
 import org.mockito.junit.MockitoJUnit
 import org.mockito.junit.MockitoRule
 
@@ -100,8 +95,6 @@ class AudioSharingRepositoryTest {
 
     @Mock private lateinit var receiveState: BluetoothLeBroadcastReceiveState
 
-    @Mock private lateinit var contentResolver: ContentResolver
-
     @Captor
     private lateinit var broadcastCallbackCaptor: ArgumentCaptor<BluetoothLeBroadcast.Callback>
 
@@ -118,6 +111,7 @@ class AudioSharingRepositoryTest {
 
     private val testScope = TestScope()
     private val context: Context = ApplicationProvider.getApplicationContext()
+    @Spy private val contentResolver: ContentResolver = context.contentResolver
     private lateinit var underTest: AudioSharingRepository
 
     @Before
@@ -137,9 +131,12 @@ class AudioSharingRepositoryTest {
         `when`(deviceManager.findDevice(device2)).thenReturn(cachedDevice2)
         `when`(receiveState.bisSyncState).thenReturn(arrayListOf(TEST_RECEIVE_STATE_CONTENT))
         `when`(assistant.getAllSources(any())).thenReturn(listOf(receiveState))
+        Settings.Secure.putInt(
+            contentResolver,
+            BluetoothUtils.getPrimaryGroupIdUriForBroadcast(),
+            TEST_GROUP_ID_INVALID)
         underTest =
             AudioSharingRepositoryImpl(
-                context,
                 contentResolver,
                 btManager,
                 testScope.backgroundScope,
@@ -148,7 +145,6 @@ class AudioSharingRepositoryTest {
     }
 
     @Test
-    @EnableFlags(Flags.FLAG_ENABLE_LE_AUDIO_SHARING)
     fun audioSharingStateChange_emitValues() {
         testScope.runTest {
             val states = mutableListOf<Boolean?>()
@@ -164,21 +160,22 @@ class AudioSharingRepositoryTest {
     }
 
     @Test
-    @DisableFlags(Flags.FLAG_ENABLE_LE_AUDIO_SHARING)
-    fun audioSharingFlagOff_returnFalse() {
+    fun primaryGroupIdChange_emitValues() {
         testScope.runTest {
-            val states = mutableListOf<Boolean?>()
-            underTest.inAudioSharing.onEach { states.add(it) }.launchIn(backgroundScope)
+            val groupIds = mutableListOf<Int?>()
+            underTest.primaryGroupId.onEach { groupIds.add(it) }.launchIn(backgroundScope)
+            runCurrent()
+            triggerContentObserverChange()
             runCurrent()
 
-            Truth.assertThat(states).containsExactly(false)
-            verify(broadcast, never()).registerServiceCallBack(any(), any())
-            verify(broadcast, never()).isEnabled(any())
+            Truth.assertThat(groupIds)
+                .containsExactly(
+                    TEST_GROUP_ID_INVALID,
+                    TEST_GROUP_ID2)
         }
     }
 
     @Test
-    @EnableFlags(Flags.FLAG_VOLUME_DIALOG_AUDIO_SHARING_FIX)
     fun secondaryGroupIdChange_emitValues() {
         testScope.runTest {
             val groupIds = mutableListOf<Int?>()
@@ -214,21 +211,6 @@ class AudioSharingRepositoryTest {
     }
 
     @Test
-    @DisableFlags(Flags.FLAG_VOLUME_DIALOG_AUDIO_SHARING_FIX)
-    fun secondaryGroupIdChange_audioSharingFlagOff_returnFalse() {
-        testScope.runTest {
-            val groupIds = mutableListOf<Int?>()
-            underTest.secondaryGroupId.onEach { groupIds.add(it) }.launchIn(backgroundScope)
-            runCurrent()
-
-            Truth.assertThat(groupIds).containsExactly(TEST_GROUP_ID_INVALID)
-            verify(assistant, never()).registerServiceCallBack(any(), any())
-            verify(eventManager, never()).registerCallback(any())
-        }
-    }
-
-    @Test
-    @EnableFlags(Flags.FLAG_VOLUME_DIALOG_AUDIO_SHARING_FIX)
     fun volumeMapChange_emitValues() {
         testScope.runTest {
             val volumeMaps = mutableListOf<GroupIdToVolumes?>()
@@ -252,25 +234,10 @@ class AudioSharingRepositoryTest {
     }
 
     @Test
-    @DisableFlags(Flags.FLAG_VOLUME_DIALOG_AUDIO_SHARING_FIX)
-    fun volumeMapChange_audioSharingFlagOff_returnFalse() {
-        testScope.runTest {
-            val volumeMaps = mutableListOf<GroupIdToVolumes?>()
-            underTest.volumeMap.onEach { volumeMaps.add(it) }.launchIn(backgroundScope)
-            runCurrent()
-
-            Truth.assertThat(volumeMaps).isEmpty()
-            verify(broadcast, never()).registerServiceCallBack(any(), any())
-            verify(volumeControl, never()).registerCallback(any(), any())
-        }
-    }
-
-    @Test
-    @EnableFlags(Flags.FLAG_VOLUME_DIALOG_AUDIO_SHARING_FIX)
     fun setSecondaryVolume_setValue() {
         testScope.runTest {
             Settings.Secure.putInt(
-                context.contentResolver,
+                contentResolver,
                 BluetoothUtils.getPrimaryGroupIdUriForBroadcast(),
                 TEST_GROUP_ID2)
             `when`(assistant.allConnectedDevices).thenReturn(listOf(device1, device2))
@@ -278,22 +245,6 @@ class AudioSharingRepositoryTest {
 
             runCurrent()
             verify(volumeControl).setDeviceVolume(device1, TEST_VOLUME1, true)
-        }
-    }
-
-    @Test
-    @DisableFlags(Flags.FLAG_VOLUME_DIALOG_AUDIO_SHARING_FIX)
-    fun setSecondaryVolume_audioSharingFlagOff_doNothing() {
-        testScope.runTest {
-            Settings.Secure.putInt(
-                context.contentResolver,
-                BluetoothUtils.getPrimaryGroupIdUriForBroadcast(),
-                TEST_GROUP_ID2)
-            `when`(assistant.allConnectedDevices).thenReturn(listOf(device1, device2))
-            underTest.setSecondaryVolume(TEST_VOLUME1)
-
-            runCurrent()
-            verify(volumeControl, never()).setDeviceVolume(any(), anyInt(), anyBoolean())
         }
     }
 
@@ -317,7 +268,7 @@ class AudioSharingRepositoryTest {
     private fun triggerSourceAdded() {
         verify(assistant).registerServiceCallBack(any(), assistantCallbackCaptor.capture())
         Settings.Secure.putInt(
-            context.contentResolver,
+            contentResolver,
             BluetoothUtils.getPrimaryGroupIdUriForBroadcast(),
             TEST_GROUP_ID1)
         `when`(assistant.allConnectedDevices).thenReturn(listOf(device1, device2))
@@ -328,7 +279,7 @@ class AudioSharingRepositoryTest {
         verify(assistant).registerServiceCallBack(any(), assistantCallbackCaptor.capture())
         `when`(assistant.allConnectedDevices).thenReturn(listOf(device1))
         Settings.Secure.putInt(
-            context.contentResolver,
+            contentResolver,
             BluetoothUtils.getPrimaryGroupIdUriForBroadcast(),
             TEST_GROUP_ID1)
         assistantCallbackCaptor.value.sourceRemoved(device2)
@@ -338,7 +289,7 @@ class AudioSharingRepositoryTest {
         verify(eventManager).registerCallback(btCallbackCaptor.capture())
         `when`(assistant.allConnectedDevices).thenReturn(listOf(device1))
         Settings.Secure.putInt(
-            context.contentResolver,
+            contentResolver,
             BluetoothUtils.getPrimaryGroupIdUriForBroadcast(),
             TEST_GROUP_ID1)
         btCallbackCaptor.value.onProfileConnectionStateChanged(cachedDevice2, state, profile)
@@ -352,7 +303,7 @@ class AudioSharingRepositoryTest {
                 contentObserverCaptor.capture())
         `when`(assistant.allConnectedDevices).thenReturn(listOf(device1, device2))
         Settings.Secure.putInt(
-            context.contentResolver,
+            contentResolver,
             BluetoothUtils.getPrimaryGroupIdUriForBroadcast(),
             TEST_GROUP_ID2)
         contentObserverCaptor.value.primaryChanged()

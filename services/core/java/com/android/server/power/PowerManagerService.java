@@ -629,6 +629,9 @@ public final class PowerManagerService extends SystemService
     private float mScreenBrightnessOverrideFromWindowManager =
             PowerManager.BRIGHTNESS_INVALID_FLOAT;
 
+    // Tag identifying the window/activity that requested the brightness override.
+    private CharSequence mScreenBrightnessOverrideFromWmTag = null;
+
     // The window manager has determined the user to be inactive via other means.
     // Set this to false to disable.
     private boolean mUserInactiveOverrideFromWindowManager;
@@ -3623,16 +3626,18 @@ public final class PowerManagerService extends SystemService
 
                 // Determine appropriate screen brightness.
                 final float screenBrightnessOverride;
+                CharSequence overrideTag = null;
                 if (!mBootCompleted) {
                     // Keep the brightness steady during boot. This requires the
                     // bootloader brightness and the default brightness to be identical.
                     screenBrightnessOverride = mScreenBrightnessDefault;
                 } else if (isValidBrightness(mScreenBrightnessOverrideFromWindowManager)) {
                     screenBrightnessOverride = mScreenBrightnessOverrideFromWindowManager;
+                    overrideTag = mScreenBrightnessOverrideFromWmTag;
                 } else {
                     screenBrightnessOverride = PowerManager.BRIGHTNESS_INVALID_FLOAT;
                 }
-                boolean ready = powerGroup.updateLocked(screenBrightnessOverride,
+                boolean ready = powerGroup.updateLocked(screenBrightnessOverride, overrideTag,
                         shouldUseProximitySensorLocked(), shouldBoostScreenBrightness(),
                         mDozeScreenStateOverrideFromDreamManager,
                         mDozeScreenStateOverrideReasonFromDreamManager,
@@ -4417,11 +4422,13 @@ public final class PowerManagerService extends SystemService
         }
     }
 
-    private void setScreenBrightnessOverrideFromWindowManagerInternal(float brightness) {
+    private void setScreenBrightnessOverrideFromWindowManagerInternal(
+            float brightness, CharSequence tag) {
         synchronized (mLock) {
             if (!BrightnessSynchronizer.floatEquals(mScreenBrightnessOverrideFromWindowManager,
                     brightness)) {
                 mScreenBrightnessOverrideFromWindowManager = brightness;
+                mScreenBrightnessOverrideFromWmTag = tag;
                 mDirty |= DIRTY_SETTINGS;
                 updatePowerStateLocked();
             }
@@ -4760,6 +4767,8 @@ public final class PowerManagerService extends SystemService
             pw.println("  mStayOnWhilePluggedInSetting=" + mStayOnWhilePluggedInSetting);
             pw.println("  mScreenBrightnessOverrideFromWindowManager="
                     + mScreenBrightnessOverrideFromWindowManager);
+            pw.println("  mScreenBrightnessOverrideFromWmTag="
+                    + mScreenBrightnessOverrideFromWmTag);
             pw.println("  mUserActivityTimeoutOverrideFromWindowManager="
                     + mUserActivityTimeoutOverrideFromWindowManager);
             pw.println("  mUserInactiveOverrideFromWindowManager="
@@ -7074,12 +7083,14 @@ public final class PowerManagerService extends SystemService
     @VisibleForTesting
     final class LocalService extends PowerManagerInternal {
         @Override
-        public void setScreenBrightnessOverrideFromWindowManager(float screenBrightness) {
+        public void setScreenBrightnessOverrideFromWindowManager(
+                float screenBrightness, CharSequence tag) {
             if (screenBrightness < PowerManager.BRIGHTNESS_MIN
                     || screenBrightness > PowerManager.BRIGHTNESS_MAX) {
                 screenBrightness = PowerManager.BRIGHTNESS_INVALID_FLOAT;
+                tag = null;
             }
-            setScreenBrightnessOverrideFromWindowManagerInternal(screenBrightness);
+            setScreenBrightnessOverrideFromWindowManagerInternal(screenBrightness, tag);
         }
 
         @Override

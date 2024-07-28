@@ -19,20 +19,27 @@ package com.android.systemui.qs.tiles.impl.modes.domain.interactor
 import android.app.Flags
 import android.os.UserHandle
 import com.android.settingslib.notification.data.repository.ZenModeRepository
+import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.qs.tiles.base.interactor.DataUpdateTrigger
 import com.android.systemui.qs.tiles.base.interactor.QSTileDataInteractor
 import com.android.systemui.qs.tiles.impl.modes.domain.model.ModesTileModel
 import javax.inject.Inject
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 
-class ModesTileDataInteractor @Inject constructor(val zenModeRepository: ZenModeRepository) :
-    QSTileDataInteractor<ModesTileModel> {
-    private val zenModeActive =
+class ModesTileDataInteractor
+@Inject
+constructor(
+    val zenModeRepository: ZenModeRepository,
+    @Background val bgDispatcher: CoroutineDispatcher,
+) : QSTileDataInteractor<ModesTileModel> {
+    private val activeModes =
         zenModeRepository.modes
-            .map { modes -> modes.any { mode -> mode.isActive } }
+            .map { modes -> modes.filter { mode -> mode.isActive }.map { it.name } }
             .distinctUntilChanged()
 
     override fun tileData(
@@ -45,7 +52,10 @@ class ModesTileDataInteractor @Inject constructor(val zenModeRepository: ZenMode
      *
      * TODO(b/299909989): Remove after the transition.
      */
-    fun tileData() = zenModeActive.map { ModesTileModel(isActivated = it) }
+    fun tileData() =
+        activeModes
+            .map { ModesTileModel(isActivated = it.isNotEmpty(), activeModes = it) }
+            .flowOn(bgDispatcher)
 
     override fun availability(user: UserHandle): Flow<Boolean> = flowOf(Flags.modesUi())
 }

@@ -257,7 +257,6 @@ class LockscreenSceneViewModelTest : SysuiTestCase() {
 
     private fun createLockscreenSceneViewModel(): LockscreenSceneViewModel {
         return LockscreenSceneViewModel(
-            applicationScope = testScope.backgroundScope,
             deviceEntryInteractor = kosmos.deviceEntryInteractor,
             communalInteractor = kosmos.communalInteractor,
             touchHandling =

@@ -60,6 +60,7 @@ class AvalancheControllerTest : SysuiTestCase() {
     // For creating TestableHeadsUpManager
     @Mock private val mAccessibilityMgr: AccessibilityManagerWrapper? = null
     private val mUiEventLoggerFake = UiEventLoggerFake()
+    @Mock private lateinit var mHeadsUpManagerLogger: HeadsUpManagerLogger
 
     @Mock private lateinit var mBgHandler: Handler
 
@@ -82,7 +83,8 @@ class AvalancheControllerTest : SysuiTestCase() {
 
         // Initialize AvalancheController and TestableHeadsUpManager during setUp instead of
         // declaration, where mocks are null
-        mAvalancheController = AvalancheController(dumpManager, mUiEventLoggerFake, mBgHandler)
+        mAvalancheController = AvalancheController(dumpManager, mUiEventLoggerFake,
+                mHeadsUpManagerLogger, mBgHandler)
 
         testableHeadsUpManager =
             TestableHeadsUpManager(

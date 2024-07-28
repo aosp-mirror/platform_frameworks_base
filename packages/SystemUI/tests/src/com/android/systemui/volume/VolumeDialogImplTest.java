@@ -44,7 +44,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.app.KeyguardManager;
-import android.content.Intent;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
@@ -57,7 +56,6 @@ import android.platform.test.annotations.EnableFlags;
 import android.provider.Settings;
 import android.testing.TestableLooper;
 import android.util.Log;
-import android.util.Pair;
 import android.view.Gravity;
 import android.view.InputDevice;
 import android.view.MotionEvent;
@@ -166,7 +164,7 @@ public class VolumeDialogImplTest extends SysuiTestCase {
             new CsdWarningDialog.Factory() {
                 @Override
                 public CsdWarningDialog create(int warningType, Runnable onCleanup,
-                        Optional<ImmutableList<Pair<String, Intent>>> actionIntents) {
+                        Optional<ImmutableList<CsdWarningAction>> actionIntents) {
                     return mCsdWarningDialog;
                 }
             };

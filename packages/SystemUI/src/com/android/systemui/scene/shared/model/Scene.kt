@@ -19,7 +19,8 @@ package com.android.systemui.scene.shared.model
 import com.android.compose.animation.scene.SceneKey
 import com.android.compose.animation.scene.UserAction
 import com.android.compose.animation.scene.UserActionResult
-import kotlinx.coroutines.flow.StateFlow
+import com.android.systemui.activatable.Activatable
+import kotlinx.coroutines.flow.Flow
 
 /**
  * Defines interface for classes that can describe a "scene".
@@ -29,10 +30,12 @@ import kotlinx.coroutines.flow.StateFlow
  * based on either user action (for example, swiping down while on the lock screen scene may switch
  * to the shade scene).
  */
-interface Scene {
+interface Scene : Activatable {
 
     /** Uniquely-identifying key for this scene. The key must be unique within its container. */
     val key: SceneKey
+
+    override suspend fun activate() = Unit
 
     /**
      * The mapping between [UserAction] and destination [UserActionResult]s.
@@ -54,5 +57,5 @@ interface Scene {
      * type is not currently active in the scene and should be ignored by the framework, while the
      * current scene is this one.
      */
-    val destinationScenes: StateFlow<Map<UserAction, UserActionResult>>
+    val destinationScenes: Flow<Map<UserAction, UserActionResult>>
 }

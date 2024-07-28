@@ -46,6 +46,7 @@ object KeyguardLongPressViewBinder {
         onSingleTap: () -> Unit,
         falsingManager: FalsingManager,
     ) {
+        view.contentDescription = view.resources.getString(R.string.accessibility_desc_lock_screen)
         view.accessibilityHintLongPressAction =
             AccessibilityNodeInfo.AccessibilityAction(
                 AccessibilityNodeInfoCompat.ACTION_LONG_CLICK,
