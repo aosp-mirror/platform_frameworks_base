@@ -103,6 +103,7 @@ import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_ADD_REMOVE;
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_ANIM;
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_APP_TRANSITIONS;
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_BACK_PREVIEW;
+import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_DIMMER;
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_FOCUS;
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_FOCUS_LIGHT;
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_ORIENTATION;
@@ -637,7 +638,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     /**
      * Only populated if flag REMOVE_INPUT_CHANNEL_FROM_WINDOWSTATE is disabled.
      */
-    InputChannel mInputChannel;
+    private InputChannel mInputChannel;
 
     /**
      * The token will be assigned to {@link InputWindowHandle#token} if this window can receive
@@ -3784,7 +3785,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
         markRedrawForSyncReported();
         getProcess().scheduleClientTransactionItem(
-                WindowStateResizeItem.obtain(mClient, mLastReportedFrames, reportDraw,
+                new WindowStateResizeItem(mClient, mLastReportedFrames, reportDraw,
                         mLastReportedConfiguration, mLastReportedInsetsState, forceRelayout,
                         alwaysConsumeSystemBars, displayId,
                         syncWithBuffers ? mSyncSeqId : -1, isDragResizing,
@@ -3854,7 +3855,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         fillInsetsState(mLastReportedInsetsState, false /* copySources */);
         fillInsetsSourceControls(mLastReportedActiveControls, false /* copyControls */);
         if (Flags.insetsControlChangedItem()) {
-            getProcess().scheduleClientTransactionItem(WindowStateInsetsControlChangeItem.obtain(
+            getProcess().scheduleClientTransactionItem(new WindowStateInsetsControlChangeItem(
                     mClient, mLastReportedInsetsState, mLastReportedActiveControls));
         } else {
             try {
@@ -5195,9 +5196,10 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     }
 
     private void applyDims() {
+        Task task = getTask();
         if (((mAttrs.flags & FLAG_DIM_BEHIND) != 0 || shouldDrawBlurBehind())
-                && (Dimmer.DIMMER_REFACTOR ? mWinAnimator.getShown() : isVisibleNow())
-                && !mHidden && mTransitionController.canApplyDim(getTask())) {
+                && mWinAnimator.getShown()
+                && !mHidden && mTransitionController.canApplyDim(task)) {
             // Only show the Dimmer when the following is satisfied:
             // 1. The window has the flag FLAG_DIM_BEHIND or blur behind is requested
             // 2. The WindowToken is not hidden so dims aren't shown when the window is exiting.
@@ -5210,10 +5212,31 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             // If the window is visible from surface flinger perspective (mWinAnimator.getShown())
             // but not window manager visible (!isVisibleNow()), it can still be the parent of the
             // dim, but can not create a new surface or continue a dim alone.
-            if (isVisibleNow()) {
-                getDimmer().adjustAppearance(this, dimAmount, blurRadius);
+            Dimmer dimmer;
+            WindowContainer<?> geometryParent = task;
+            if (Flags.useTasksDimOnly()) {
+                if (task != null) {
+                    geometryParent = task.getDimmerParent();
+                    dimmer = task.mDimmer;
+                } else {
+                    RootDisplayArea displayArea = getRootDisplayArea();
+                    geometryParent = displayArea;
+                    dimmer = displayArea != null ? displayArea.getDimmer() : null;
+                }
+                if (dimmer == null) {
+                    ProtoLog.e(WM_DEBUG_DIMMER, "WindowState %s does not have task or"
+                            + " display area for dimming", this);
+                    return;
+                }
+            } else {
+                dimmer = getDimmer();
             }
-            getDimmer().adjustRelativeLayer(this, -1 /* relativeLayer */);
+
+            if (isVisibleNow()) {
+                dimmer.adjustAppearance(this, dimAmount, blurRadius);
+            }
+            dimmer.adjustPosition(geometryParent,
+                    this /* relativeParent */, -1 /* relativeLayer */);
         }
     }
 
@@ -5277,17 +5300,12 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     void prepareSurfaces() {
         mIsDimming = false;
         if (mHasSurface) {
-            if (!Dimmer.DIMMER_REFACTOR) {
-                applyDims();
-            }
             updateSurfacePositionNonOrganized();
             // Send information to SurfaceFlinger about the priority of the current window.
             updateFrameRateSelectionPriorityIfNeeded();
             updateScaleIfNeeded();
             mWinAnimator.prepareSurfaceLocked(getSyncTransaction());
-            if (Dimmer.DIMMER_REFACTOR) {
-                applyDims();
-            }
+            applyDims();
         }
         super.prepareSurfaces();
     }
@@ -5355,7 +5373,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             // change then delay the position update until it has redrawn to avoid any flickers.
             final boolean isLetterboxedAndRelaunching = activityRecord != null
                     && activityRecord.areBoundsLetterboxed()
-                    && activityRecord.mLetterboxUiController
+                    && activityRecord.mAppCompatController.getAppCompatOrientationOverrides()
                         .getIsRelaunchingAfterRequestedOrientationChanged();
             if (surfaceResizedWithoutMoveAnimation || isLetterboxedAndRelaunching) {
                 applyWithNextDraw(mSetSurfacePositionConsumer);

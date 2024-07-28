@@ -22,6 +22,8 @@ package com.android.systemui.inputmethod.data.model
  * @see android.view.inputmethod.InputMethodInfo
  */
 data class InputMethodModel(
+    /** A unique ID for the user associated with this input method. */
+    val userId: Int,
     /** A unique ID for this input method. */
     val imeId: String,
     /** The subtypes of this IME (may be empty). */

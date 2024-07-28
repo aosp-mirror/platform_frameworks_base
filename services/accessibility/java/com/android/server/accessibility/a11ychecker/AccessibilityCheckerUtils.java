@@ -19,11 +19,9 @@ package com.android.server.accessibility.a11ychecker;
 
 import android.annotation.Nullable;
 import android.content.ComponentName;
-import android.content.Context;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.util.Slog;
-import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -62,6 +60,7 @@ import java.util.stream.Collectors;
 public class AccessibilityCheckerUtils {
 
     private static final String LOG_TAG = "AccessibilityCheckerUtils";
+
     @VisibleForTesting
     // LINT.IfChange
     static final Map<Class<? extends AccessibilityHierarchyCheck>, AccessibilityCheckClass>
@@ -94,30 +93,24 @@ public class AccessibilityCheckerUtils {
     // LINT.ThenChange(/services/accessibility/java/com/android/server/accessibility/a11ychecker/proto/a11ychecker.proto)
 
     static Set<AccessibilityCheckResultReported> processResults(
-            Context context,
             AccessibilityNodeInfo nodeInfo,
             List<AccessibilityHierarchyCheckResult> checkResults,
-            @Nullable AccessibilityEvent accessibilityEvent,
-            ComponentName a11yServiceComponentName) {
-        return processResults(nodeInfo, checkResults, accessibilityEvent,
-                context.getPackageManager(), a11yServiceComponentName);
-    }
-
-    @VisibleForTesting
-    static Set<AccessibilityCheckResultReported> processResults(
-            AccessibilityNodeInfo nodeInfo,
-            List<AccessibilityHierarchyCheckResult> checkResults,
-            @Nullable AccessibilityEvent accessibilityEvent,
+            @Nullable String activityClassName,
             PackageManager packageManager,
             ComponentName a11yServiceComponentName) {
         String appPackageName = nodeInfo.getPackageName().toString();
+        String nodePath = AccessibilityNodePathBuilder.createNodePath(nodeInfo);
+        if (nodePath == null) {
+            return Set.of();
+        }
         AccessibilityCheckResultReported.Builder builder;
         try {
             builder = AccessibilityCheckResultReported.newBuilder()
                     .setPackageName(appPackageName)
                     .setAppVersionCode(getAppVersionCode(packageManager, appPackageName))
-                    .setUiElementPath(AccessibilityNodePathBuilder.createNodePath(nodeInfo))
-                    .setActivityName(getActivityName(packageManager, accessibilityEvent))
+                    .setUiElementPath(nodePath)
+                    .setActivityName(
+                            getActivityName(packageManager, appPackageName, activityClassName))
                     .setWindowTitle(getWindowTitle(nodeInfo))
                     .setSourceComponentName(a11yServiceComponentName.flattenToString())
                     .setSourceVersionCode(
@@ -147,31 +140,23 @@ public class AccessibilityCheckerUtils {
     }
 
     /**
-     * Returns the simple class name of the Activity providing the cache update, if available,
+     * Returns the simple class name of the Activity associated with the window, if available,
      * or an empty String if not.
      */
     @VisibleForTesting
     static String getActivityName(
-            PackageManager packageManager, @Nullable AccessibilityEvent accessibilityEvent) {
-        if (accessibilityEvent == null) {
+            PackageManager packageManager, String packageName, @Nullable String activityClassName) {
+        if (activityClassName == null) {
             return "";
         }
-        CharSequence activityName = accessibilityEvent.getClassName();
-        if (accessibilityEvent.getEventType() == AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED
-                && accessibilityEvent.getPackageName() != null
-                && activityName != null) {
-            try {
-                // Check class is for a valid Activity.
-                packageManager
-                        .getActivityInfo(
-                                new ComponentName(accessibilityEvent.getPackageName().toString(),
-                                        activityName.toString()), 0);
-                int qualifierEnd = activityName.toString().lastIndexOf('.');
-                return activityName.toString().substring(qualifierEnd + 1);
-            } catch (PackageManager.NameNotFoundException e) {
-                // No need to spam the logs. This is very frequent when the class doesn't match
-                // an activity.
-            }
+        try {
+            // Check class is for a valid Activity.
+            packageManager.getActivityInfo(new ComponentName(packageName, activityClassName), 0);
+            int qualifierEnd = activityClassName.lastIndexOf('.');
+            return activityClassName.substring(qualifierEnd + 1);
+        } catch (PackageManager.NameNotFoundException e) {
+            // No need to spam the logs. This is very frequent when the class doesn't match
+            // an activity.
         }
         return "";
     }

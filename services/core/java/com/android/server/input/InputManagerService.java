@@ -1254,14 +1254,15 @@ public class InputManagerService extends IInputManager.Stub
     /**
      * Start drag and drop.
      *
-     * @param fromChannel The input channel that is currently receiving a touch gesture that should
-     *                    be turned into the drag pointer.
-     * @param dragAndDropChannel The input channel associated with the system drag window.
+     * @param fromChannelToken The token of the input channel that is currently receiving a touch
+     *                        gesture that should be turned into the drag pointer.
+     * @param dragAndDropChannelToken The token of the input channel associated with the system drag
+     *                               window.
      * @return true if drag and drop was successfully started, false otherwise.
      */
-    public boolean startDragAndDrop(@NonNull InputChannel fromChannel,
-            @NonNull InputChannel dragAndDropChannel) {
-        return mNative.transferTouchGesture(fromChannel.getToken(), dragAndDropChannel.getToken(),
+    public boolean startDragAndDrop(@NonNull IBinder fromChannelToken,
+            @NonNull IBinder dragAndDropChannelToken) {
+        return mNative.transferTouchGesture(fromChannelToken, dragAndDropChannelToken,
                 true /* isDragDrop */);
     }
 
@@ -1355,8 +1356,7 @@ public class InputManagerService extends IInputManager.Stub
             int patternRepeatIndex = -1;
             int amplitudeCount = -1;
 
-            if (effect instanceof VibrationEffect.Composed) {
-                VibrationEffect.Composed composed = (VibrationEffect.Composed) effect;
+            if (effect instanceof VibrationEffect.Composed composed) {
                 int segmentCount = composed.getSegments().size();
                 pattern = new long[segmentCount];
                 amplitudes = new int[segmentCount];
@@ -1381,6 +1381,8 @@ public class InputManagerService extends IInputManager.Stub
                     }
                     pattern[amplitudeCount++] = segment.getDuration();
                 }
+            } else {
+                Slog.w(TAG, "Input devices don't support effect " + effect);
             }
 
             if (amplitudeCount < 0) {

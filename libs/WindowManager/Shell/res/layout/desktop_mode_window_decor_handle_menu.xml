@@ -17,6 +17,7 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:androidprv="http://schemas.android.com/apk/prv/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/handle_menu"
     android:layout_width="@dimen/desktop_mode_handle_menu_width"
     android:layout_height="wrap_content"
     android:clipChildren="false"

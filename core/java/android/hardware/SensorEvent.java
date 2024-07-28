@@ -600,7 +600,7 @@ public class SensorEvent {
      *
      * <p>
      * This sensor must be able to detect and report an on-body to off-body
-     * transition within 1 second of the device being removed from the body,
+     * transition within 3 seconds of the device being removed from the body,
      * and must be able to detect and report an off-body to on-body transition
      * within 5 seconds of the device being put back onto the body.
      * </p>

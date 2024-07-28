@@ -456,10 +456,6 @@ class DragState {
         }
     }
 
-    InputChannel getInputChannel() {
-        return mInputInterceptor == null ? null : mInputInterceptor.mClientChannel;
-    }
-
     InputWindowHandle getInputWindowHandle() {
         return mInputInterceptor == null ? null : mInputInterceptor.mDragWindowHandle;
     }

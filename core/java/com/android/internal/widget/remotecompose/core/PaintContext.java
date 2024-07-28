@@ -59,6 +59,16 @@ public abstract class PaintContext {
 
     public abstract void drawRect(float left, float top, float right, float bottom);
 
+    /**
+     * this caches the paint to a paint stack
+     */
+    public abstract void  savePaint();
+
+    /**
+     * This restores the paint form the paint stack
+     */
+    public abstract void  restorePaint();
+
     public abstract void drawRoundRect(float left,
                                        float top,
                                        float right,
@@ -119,6 +129,10 @@ public abstract class PaintContext {
                                        float start,
                                        float stop);
 
+    /**
+     * This applies changes to the current paint
+     * @param mPaintData the list of changes
+     */
     public abstract void applyPaint(PaintBundle mPaintData);
 
     /**

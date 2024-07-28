@@ -1432,6 +1432,8 @@ public class AudioDeviceBroker {
         }
         mCurCommunicationPortId = portId;
 
+        mAudioService.postScoDeviceActive(isBluetoothScoActive());
+
         final int nbDispatchers = mCommDevDispatchers.beginBroadcast();
         for (int i = 0; i < nbDispatchers; i++) {
             try {

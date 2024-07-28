@@ -18,12 +18,15 @@ package com.android.systemui.volume.domain.interactor
 
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.applicationCoroutineScope
+import com.android.systemui.kosmos.backgroundCoroutineContext
 import com.android.systemui.volume.data.repository.audioSharingRepository
 
 val Kosmos.audioSharingInteractor by
     Kosmos.Fixture {
         AudioSharingInteractorImpl(
             applicationCoroutineScope,
+            backgroundCoroutineContext,
+            audioVolumeInteractor,
             audioSharingRepository,
         )
     }

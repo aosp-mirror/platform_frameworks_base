@@ -724,7 +724,10 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
     @Override
     public void onResume(int reason) {
         if (DEBUG) Log.d(TAG, "screen on, instance " + Integer.toHexString(hashCode()));
+        mView.clearFocus();
+        mView.clearAccessibilityFocus();
         mView.requestFocus();
+        mView.requestAccessibilityFocus();
         if (mCurrentSecurityMode != SecurityMode.None) {
             int state = SysUiStatsLog.KEYGUARD_BOUNCER_STATE_CHANGED__STATE__SHOWN;
             if (mView.isSidedSecurityMode()) {

@@ -74,7 +74,6 @@ import com.android.systemui.keyguard.shared.model.AcquiredFingerprintAuthenticat
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.res.R
-import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.withArgCaptor
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -92,6 +91,7 @@ import org.mockito.ArgumentMatchers.eq
 import org.mockito.Mock
 import org.mockito.Mockito
 import org.mockito.junit.MockitoJUnit
+import org.mockito.kotlin.any
 import org.mockito.kotlin.whenever
 import platform.test.runner.parameterized.ParameterizedAndroidJunit4
 import platform.test.runner.parameterized.Parameters
@@ -1376,6 +1376,28 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
         } else {
             assertThat(hint.isNullOrBlank()).isTrue()
         }
+    }
+
+    @Test
+    @EnableFlags(FLAG_BP_TALKBACK)
+    fun no_hint_for_talkback_guidance_after_auth() = runGenericTest {
+        val hint by collectLastValue(kosmos.promptViewModel.accessibilityHint)
+
+        kosmos.promptViewModel.showAuthenticated(testCase.authenticatedModality, 0)
+        kosmos.promptViewModel.confirmAuthenticated()
+
+        // Touches should fall outside of sensor area
+        whenever(kosmos.udfpsUtils.getTouchInNativeCoordinates(any(), any(), any()))
+            .thenReturn(Point(0, 0))
+        whenever(kosmos.udfpsUtils.onTouchOutsideOfSensorArea(any(), any(), any(), any(), any()))
+            .thenReturn("Direction")
+
+        kosmos.promptViewModel.onAnnounceAccessibilityHint(
+            obtainMotionEvent(MotionEvent.ACTION_HOVER_ENTER),
+            true
+        )
+
+        assertThat(hint.isNullOrBlank()).isTrue()
     }
 
     @Test

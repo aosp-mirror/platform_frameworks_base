@@ -103,7 +103,7 @@ interface KeyedObservable<K> {
 }
 
 /** A thread safe implementation of [KeyedObservable]. */
-class KeyedDataObservable<K> : KeyedObservable<K> {
+open class KeyedDataObservable<K> : KeyedObservable<K> {
     // Instead of @GuardedBy("this"), guarded by itself because KeyedDataObservable object could be
     // synchronized outside by the holder
     @GuardedBy("itself") private val observers = WeakHashMap<KeyedObserver<K?>, Executor>()

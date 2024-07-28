@@ -16,7 +16,7 @@
 
 package com.android.systemui.keyguard.domain.interactor
 
-import com.android.systemui.communal.domain.interactor.communalInteractor
+import com.android.systemui.communal.domain.interactor.communalSceneInteractor
 import com.android.systemui.keyguard.data.repository.biometricSettingsRepository
 import com.android.systemui.keyguard.data.repository.fakeKeyguardTransitionRepository
 import com.android.systemui.keyguard.data.repository.keyguardRepository
@@ -37,7 +37,7 @@ val Kosmos.fromGoneTransitionInteractor by
             mainDispatcher = testDispatcher,
             keyguardInteractor = keyguardInteractor,
             powerInteractor = powerInteractor,
-            communalInteractor = communalInteractor,
+            communalSceneInteractor = communalSceneInteractor,
             keyguardOcclusionInteractor = keyguardOcclusionInteractor,
             biometricSettingsRepository = biometricSettingsRepository,
             keyguardRepository = keyguardRepository,

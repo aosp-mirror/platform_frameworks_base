@@ -87,11 +87,21 @@ class AppCompatController {
         return mAppCompatOverrides.getAppCompatAspectRatioOverrides();
     }
 
+    @NonNull
+    AppCompatResizeOverrides getAppCompatResizeOverrides() {
+        return mAppCompatOverrides.getAppCompatResizeOverrides();
+    }
+
     @Nullable
     AppCompatCameraPolicy getAppCompatCameraPolicy() {
         if (mActivityRecord.mDisplayContent != null) {
             return mActivityRecord.mDisplayContent.mAppCompatCameraPolicy;
         }
         return null;
+    }
+
+    @NonNull
+    AppCompatFocusOverrides getAppCompatFocusOverrides() {
+        return mAppCompatOverrides.getAppCompatFocusOverrides();
     }
 }

@@ -39,7 +39,9 @@ interface IDreamManager {
     @UnsupportedAppUsage
     boolean isDreamingOrInPreview();
     boolean canStartDreaming(boolean isScreenOn);
+    /** @deprecated Please use finishSelfOneway instead. */
     void finishSelf(in IBinder token, boolean immediate);
+    /** @deprecated Please use startDozingOneway instead. */
     void startDozing(in IBinder token, int screenState, int reason, int screenBrightness);
     void stopDozing(in IBinder token);
     void forceAmbientDisplayEnabled(boolean enabled);

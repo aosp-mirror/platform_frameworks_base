@@ -30,9 +30,9 @@ import android.platform.test.flag.junit.DeviceFlagsValueProvider;
 import android.util.AttributeSet;
 import android.util.PollingCheck;
 
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.MediumTest;
 import androidx.test.rule.ActivityTestRule;
-import androidx.test.runner.AndroidJUnit4;
 
 import com.android.frameworks.coretests.R;
 

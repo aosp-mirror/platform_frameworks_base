@@ -9992,6 +9992,51 @@ public class CarrierConfigManager {
     @FlaggedApi(Flags.FLAG_CARRIER_ROAMING_NB_IOT_NTN)
     public static final String KEY_SATELLITE_ESOS_SUPPORTED_BOOL = "satellite_esos_supported_bool";
 
+    /** @hide */
+    @IntDef({
+            CARRIER_ROAMING_NTN_CONNECT_AUTOMATIC,
+            CARRIER_ROAMING_NTN_CONNECT_MANUAL,
+    })
+    public @interface CARRIER_ROAMING_NTN_CONNECT_TYPE {}
+
+    /**
+     * Device can connect to carrier roaming non-terrestrial network automatically.
+     * @hide
+     */
+    public static final int CARRIER_ROAMING_NTN_CONNECT_AUTOMATIC = 0;
+    /**
+     * Device can connect to carrier roaming non-terrestrial network only if user manually triggers
+     * satellite connection.
+     * @hide
+     */
+    public static final int CARRIER_ROAMING_NTN_CONNECT_MANUAL = 1;
+    /**
+     * Indicates carrier roaming non-terrestrial network connect type that the device can use to
+     * perform satellite communication.
+     * If this key is set to CARRIER_ROAMING_NTN_CONNECT_MANUAL then connect button will be
+     * displayed to user when the device is eligible to use carrier roaming
+     * non-terrestrial network.
+     * @hide
+     */
+    public static final String KEY_CARRIER_ROAMING_NTN_CONNECT_TYPE_INT =
+            "carrier_roaming_ntn_connect_type_int";
+
+    /**
+     * The carrier roaming non-terrestrial network hysteresis time in seconds.
+     *
+     * If the device supports P2P satellite messaging which is defined by
+     * {@link CarrierConfigManager#KEY_CARRIER_SUPPORTED_SATELLITE_SERVICES_PER_PROVIDER_BUNDLE}
+     * and the device is in {@link ServiceState#STATE_OUT_OF_SERVICE}, not connected to Wi-Fi,
+     * then hysteresis timer defined by this key will start.
+     * After the timer is expired, device is marked as eligible for satellite communication.
+     *
+     * The default value is 180 seconds.
+     *
+     * @hide
+     */
+    public static final String KEY_CARRIER_SUPPORTED_SATELLITE_NOTIFICATION_HYSTERESIS_SEC_INT =
+            "carrier_supported_satellite_notification_hysteresis_sec_int";
+
     /**
      * Indicating whether DUN APN should be disabled when the device is roaming. In that case,
      * the default APN (i.e. internet) will be used for tethering.
@@ -11150,6 +11195,8 @@ public class CarrierConfigManager {
         sDefaults.putInt(KEY_EMERGENCY_CALL_TO_SATELLITE_T911_HANDOVER_TIMEOUT_MILLIS_INT,
                 (int) TimeUnit.SECONDS.toMillis(30));
         sDefaults.putBoolean(KEY_SATELLITE_ESOS_SUPPORTED_BOOL, false);
+        sDefaults.putInt(KEY_CARRIER_ROAMING_NTN_CONNECT_TYPE_INT, 0);
+        sDefaults.putInt(KEY_CARRIER_SUPPORTED_SATELLITE_NOTIFICATION_HYSTERESIS_SEC_INT, 180);
         sDefaults.putString(KEY_DEFAULT_PREFERRED_APN_NAME_STRING, "");
         sDefaults.putBoolean(KEY_SUPPORTS_CALL_COMPOSER_BOOL, false);
         sDefaults.putBoolean(KEY_SUPPORTS_BUSINESS_CALL_COMPOSER_BOOL, false);

@@ -16,6 +16,9 @@
 
 package com.android.server.wm;
 
+import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
+import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
+import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.content.pm.ActivityInfo.RESIZE_MODE_RESIZEABLE;
 import static android.content.pm.ActivityInfo.RESIZE_MODE_UNRESIZEABLE;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
@@ -123,6 +126,10 @@ class AppCompatActivityRobot {
                 .isCameraActive(any(ActivityRecord.class), anyBoolean());
     }
 
+    void setDisplayNaturalOrientation(@Configuration.Orientation int naturalOrientation) {
+        doReturn(naturalOrientation).when(mDisplayContent).getNaturalOrientation();
+    }
+
     @NonNull
     ActivityRecord top() {
         return mActivityStack.top();
@@ -186,8 +193,34 @@ class AppCompatActivityRobot {
         mDisplayContent.setIgnoreOrientationRequest(enabled);
     }
 
+    void setTopTaskInMultiWindowMode(boolean inMultiWindowMode) {
+        doReturn(inMultiWindowMode).when(mTaskStack.top())
+                .inMultiWindowMode();
+    }
+
     void setTopActivityAsEmbedded(boolean embedded) {
         doReturn(embedded).when(mActivityStack.top()).isEmbedded();
+    }
+
+    void setTopActivityInMultiWindowMode(boolean multiWindowMode) {
+        doReturn(multiWindowMode).when(mActivityStack.top()).inMultiWindowMode();
+        if (multiWindowMode) {
+            doReturn(WINDOWING_MODE_MULTI_WINDOW).when(mActivityStack.top()).getWindowingMode();
+        }
+    }
+
+    void setTopActivityInPinnedWindowingMode(boolean pinnedWindowingMode) {
+        doReturn(pinnedWindowingMode).when(mActivityStack.top()).inPinnedWindowingMode();
+        if (pinnedWindowingMode) {
+            doReturn(WINDOWING_MODE_PINNED).when(mActivityStack.top()).getWindowingMode();
+        }
+    }
+
+    void setTopActivityInFreeformWindowingMode(boolean freeformWindowingMode) {
+        doReturn(freeformWindowingMode).when(mActivityStack.top()).inFreeformWindowingMode();
+        if (freeformWindowingMode) {
+            doReturn(WINDOWING_MODE_FREEFORM).when(mActivityStack.top()).getWindowingMode();
+        }
     }
 
     void destroyTopActivity() {
@@ -201,20 +234,21 @@ class AppCompatActivityRobot {
     void createNewDisplay() {
         mDisplayContent = new TestDisplayContent.Builder(mAtm, mDisplayWidth, mDisplayHeight)
                 .build();
+        spyOn(mDisplayContent);
         spyOnAppCompatCameraPolicy();
     }
 
     void createNewTask() {
         final Task newTask = new WindowTestsBase.TaskBuilder(mSupervisor)
                 .setDisplay(mDisplayContent).build();
-        mTaskStack.push(newTask);
+        pushTask(newTask);
     }
 
     void createNewTaskWithBaseActivity() {
         final Task newTask = new WindowTestsBase.TaskBuilder(mSupervisor)
                 .setCreateActivity(true)
                 .setDisplay(mDisplayContent).build();
-        mTaskStack.push(newTask);
+        pushTask(newTask);
         pushActivity(newTask.getTopNonFinishingActivity());
     }
 
@@ -401,10 +435,18 @@ class AppCompatActivityRobot {
     private void pushActivity(@NonNull ActivityRecord activity) {
         mActivityStack.push(activity);
         spyOn(activity);
+        // TODO (b/351763164): Use these spyOn calls only when necessary.
         spyOn(activity.mAppCompatController.getTransparentPolicy());
         spyOn(activity.mAppCompatController.getAppCompatAspectRatioOverrides());
         spyOn(activity.mAppCompatController.getAppCompatAspectRatioPolicy());
+        spyOn(activity.mAppCompatController.getAppCompatFocusOverrides());
+        spyOn(activity.mAppCompatController.getAppCompatResizeOverrides());
         spyOn(activity.mLetterboxUiController);
+    }
+
+    private void pushTask(@NonNull Task task) {
+        spyOn(task);
+        mTaskStack.push(task);
     }
 
     private void spyOnAppCompatCameraPolicy() {

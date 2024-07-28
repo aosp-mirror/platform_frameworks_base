@@ -22,6 +22,7 @@ import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.education.data.repository.ContextualEducationRepository
 import com.android.systemui.education.data.repository.ContextualEducationRepositoryImpl
 import com.android.systemui.education.domain.interactor.ContextualEducationInteractor
+import com.android.systemui.education.domain.interactor.KeyboardTouchpadEduInteractor
 import com.android.systemui.education.domain.interactor.KeyboardTouchpadEduStatsInteractor
 import com.android.systemui.education.domain.interactor.KeyboardTouchpadEduStatsInteractorImpl
 import com.android.systemui.shared.education.GestureType
@@ -73,7 +74,7 @@ interface ContextualEducationModule {
                 implLazy.get()
             } else {
                 // No-op implementation when the flag is disabled.
-                return NoOpCoreStartable
+                return NoOpContextualEducationInteractor
             }
         }
 
@@ -88,6 +89,18 @@ interface ContextualEducationModule {
                 return NoOpKeyboardTouchpadEduStatsInteractor
             }
         }
+
+        @Provides
+        fun provideKeyboardTouchpadEduInteractor(
+            implLazy: Lazy<KeyboardTouchpadEduInteractor>
+        ): CoreStartable {
+            return if (Flags.keyboardTouchpadContextualEducation()) {
+                implLazy.get()
+            } else {
+                // No-op implementation when the flag is disabled.
+                return NoOpKeyboardTouchpadEduInteractor
+            }
+        }
     }
 
     private object NoOpKeyboardTouchpadEduStatsInteractor : KeyboardTouchpadEduStatsInteractor {
@@ -96,7 +109,11 @@ interface ContextualEducationModule {
         override fun updateShortcutTriggerTime(gestureType: GestureType) {}
     }
 
-    private object NoOpCoreStartable : CoreStartable {
+    private object NoOpContextualEducationInteractor : CoreStartable {
+        override fun start() {}
+    }
+
+    private object NoOpKeyboardTouchpadEduInteractor : CoreStartable {
         override fun start() {}
     }
 }

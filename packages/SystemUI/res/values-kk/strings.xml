@@ -126,38 +126,25 @@
     <string name="screenrecord_save_text" msgid="3008973099800840163">"Көру үшін түртіңіз."</string>
     <string name="screenrecord_save_error" msgid="5862648532560118815">"Экран жазбасын сақтау кезінде қате шықты."</string>
     <string name="screenrecord_start_error" msgid="2200660692479682368">"Экрандағы бейнені жазу кезінде қате шықты."</string>
-    <!-- no translation found for screenrecord_stop_dialog_title (8716193661764511095) -->
-    <skip />
-    <!-- no translation found for screenrecord_stop_dialog_message (6262768207331626817) -->
-    <skip />
-    <!-- no translation found for screenrecord_stop_dialog_message_specific_app (5995770227684523244) -->
-    <skip />
+    <string name="screenrecord_stop_dialog_title" msgid="8716193661764511095">"Жазу тоқтатылсын ба?"</string>
+    <string name="screenrecord_stop_dialog_message" msgid="6262768207331626817">"Қазір бүкіл экранды жазып жатырсыз."</string>
+    <string name="screenrecord_stop_dialog_message_specific_app" msgid="5995770227684523244">"Қазір қолданбадағы (<xliff:g id="APP_NAME">%1$s</xliff:g>) контентті жазып жатырсыз."</string>
     <string name="screenrecord_stop_dialog_button" msgid="2883812564938194350">"Жазуды тоқтату"</string>
     <string name="share_to_app_chip_accessibility_label" msgid="4210256229976947065">"Экранды бөлісіп жатыр."</string>
     <string name="share_to_app_stop_dialog_title" msgid="9212915050910250438">"Экранды бөлісуді тоқтатасыз ба?"</string>
-    <!-- no translation found for share_to_app_stop_dialog_message_entire_screen_with_host_app (522823522115375414) -->
-    <skip />
-    <!-- no translation found for share_to_app_stop_dialog_message_entire_screen (5090115386271179270) -->
-    <skip />
-    <!-- no translation found for share_to_app_stop_dialog_message_single_app_specific (5923772039347985172) -->
-    <skip />
-    <!-- no translation found for share_to_app_stop_dialog_message_single_app_generic (6681016774654578261) -->
-    <skip />
+    <string name="share_to_app_stop_dialog_message_entire_screen_with_host_app" msgid="522823522115375414">"Қазір бүкіл экранды қолданбамен (<xliff:g id="HOST_APP_NAME">%1$s</xliff:g>) бөлісіп жатырсыз."</string>
+    <string name="share_to_app_stop_dialog_message_entire_screen" msgid="5090115386271179270">"Қазір бүкіл экранды қолданбамен бөлісіп жатырсыз."</string>
+    <string name="share_to_app_stop_dialog_message_single_app_specific" msgid="5923772039347985172">"Қазір қолданбадағы (<xliff:g id="APP_BEING_SHARED_NAME">%1$s</xliff:g>) контентті бөлісіп жатырсыз."</string>
+    <string name="share_to_app_stop_dialog_message_single_app_generic" msgid="6681016774654578261">"Қазір қолданбаны бөлісіп жатырсыз."</string>
     <string name="share_to_app_stop_dialog_button" msgid="6334056916284230217">"Бөлісуді тоқтату"</string>
     <string name="cast_screen_to_other_device_chip_accessibility_label" msgid="4687917476203009885">"Экранды трансляциялап жатырсыз."</string>
     <string name="cast_to_other_device_stop_dialog_title" msgid="7836517190930357326">"Трансляциялау тоқтасын ба?"</string>
-    <!-- no translation found for cast_to_other_device_stop_dialog_message_entire_screen_with_device (1474703115926205251) -->
-    <skip />
-    <!-- no translation found for cast_to_other_device_stop_dialog_message_entire_screen (8419219169553867625) -->
-    <skip />
-    <!-- no translation found for cast_to_other_device_stop_dialog_message_specific_app_with_device (2715934698604085519) -->
-    <skip />
-    <!-- no translation found for cast_to_other_device_stop_dialog_message_specific_app (8616103075630934513) -->
-    <skip />
-    <!-- no translation found for cast_to_other_device_stop_dialog_message_generic_with_device (9213582497852420203) -->
-    <skip />
-    <!-- no translation found for cast_to_other_device_stop_dialog_message_generic (4100272100480415076) -->
-    <skip />
+    <string name="cast_to_other_device_stop_dialog_message_entire_screen_with_device" msgid="1474703115926205251">"Қазір бүкіл экранды құрылғыға (<xliff:g id="DEVICE_NAME">%1$s</xliff:g>) трансляциялап жатырсыз."</string>
+    <string name="cast_to_other_device_stop_dialog_message_entire_screen" msgid="8419219169553867625">"Қазір бүкіл экранды маңайдағы құрылғыға трансляциялап жатырсыз."</string>
+    <string name="cast_to_other_device_stop_dialog_message_specific_app_with_device" msgid="2715934698604085519">"Қазір қолданбаны (<xliff:g id="APP_BEING_SHARED_NAME">%1$s</xliff:g>) құрылғыға (<xliff:g id="DEVICE_NAME">%2$s</xliff:g>) трансляциялап жатырсыз."</string>
+    <string name="cast_to_other_device_stop_dialog_message_specific_app" msgid="8616103075630934513">"Қазір қолданбаны (<xliff:g id="APP_BEING_SHARED_NAME">%1$s</xliff:g>) маңайдағы құрылғыға трансляциялап жатырсыз."</string>
+    <string name="cast_to_other_device_stop_dialog_message_generic_with_device" msgid="9213582497852420203">"Қазір құрылғыға (<xliff:g id="DEVICE_NAME">%1$s</xliff:g>) трансляциялап жатырсыз."</string>
+    <string name="cast_to_other_device_stop_dialog_message_generic" msgid="4100272100480415076">"Қазір маңайдағы құрылғыға трансляциялап жатырсыз."</string>
     <string name="cast_to_other_device_stop_dialog_button" msgid="6420183747435521834">"Трансляцияны тоқтату"</string>
     <string name="close_dialog_button" msgid="4749497706540104133">"Жабу"</string>
     <string name="issuerecord_title" msgid="286627115110121849">"Мәселені жазу құралы"</string>
@@ -303,8 +290,7 @@
     <string name="start_dreams" msgid="9131802557946276718">"Скринсейвер"</string>
     <string name="ethernet_label" msgid="2203544727007463351">"Этернет"</string>
     <string name="quick_settings_dnd_label" msgid="7728690179108024338">"Мазаламау"</string>
-    <!-- no translation found for quick_settings_modes_label (5407025818652750501) -->
-    <skip />
+    <string name="quick_settings_modes_label" msgid="5407025818652750501">"Басымдық режимдері"</string>
     <string name="quick_settings_bluetooth_label" msgid="7018763367142041481">"Bluetooth"</string>
     <string name="quick_settings_bluetooth_detail_empty_text" msgid="5760239584390514322">"Жұптасқан құрылғылар жоқ"</string>
     <string name="quick_settings_bluetooth_tile_subtitle" msgid="212752719010829550">"Құрылғыны жалғау не ажырату үшін түртіңіз."</string>
@@ -334,7 +320,7 @@
     <string name="quick_settings_camera_label" msgid="5612076679385269339">"Камераны пайдалану"</string>
     <string name="quick_settings_mic_label" msgid="8392773746295266375">"Микрофонды пайдалану"</string>
     <string name="quick_settings_camera_mic_available" msgid="1453719768420394314">"Қолжетімді"</string>
-    <string name="quick_settings_camera_mic_blocked" msgid="4710884905006788281">"Бөгелген"</string>
+    <string name="quick_settings_camera_mic_blocked" msgid="4710884905006788281">"Блокталған"</string>
     <string name="quick_settings_media_device_label" msgid="8034019242363789941">"Meдиа құрылғысы"</string>
     <string name="quick_settings_user_title" msgid="8673045967216204537">"Пайдаланушы"</string>
     <string name="quick_settings_wifi_label" msgid="2879507532983487244">"Wi-Fi"</string>
@@ -440,6 +426,13 @@
     <string name="sensor_privacy_dialog_open_settings" msgid="5635865896053011859">"Параметрлерді ашу"</string>
     <string name="media_seamless_other_device" msgid="4654849800789196737">"Басқа құрылғы"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"Шолуды қосу/өшіру"</string>
+    <string name="zen_modes_dialog_title" msgid="4159138230418567383">"Басымдық режимдері"</string>
+    <string name="zen_modes_dialog_done" msgid="6654130880256438950">"Дайын"</string>
+    <string name="zen_modes_dialog_settings" msgid="2310248023728936697">"Параметрлер"</string>
+    <!-- no translation found for zen_mode_on (9085304934016242591) -->
+    <skip />
+    <!-- no translation found for zen_mode_off (1736604456618147306) -->
+    <skip />
     <string name="zen_priority_introduction" msgid="3159291973383796646">"Оятқыш, еске салғыш, іс-шара мен өзіңіз көрсеткен контактілердің қоңырауларынан басқа дыбыстар мен дірілдер мазаламайтын болады. Музыка, бейне және ойын сияқты медиафайлдарды қоссаңыз, оларды естисіз."</string>
     <string name="zen_alarms_introduction" msgid="3987266042682300470">"Дабылдардан басқа ешқандай дыбыстар мен дірілдер мазаламайтын болады. Музыка, бейне және ойындар сияқты ойнатылатын контентті ести алатын боласыз."</string>
     <string name="zen_priority_customize_button" msgid="4119213187257195047">"Реттеу"</string>
@@ -504,9 +497,9 @@
     <string name="accessibility_action_label_select_widget" msgid="8897281501387398191">"виджет таңдау"</string>
     <string name="accessibility_action_label_remove_widget" msgid="3373779447448758070">"виджетті өшіру"</string>
     <string name="accessibility_action_label_place_widget" msgid="1914197458644168978">"таңдалған виджетті орналастыру"</string>
-    <!-- no translation found for communal_widget_picker_title (1953369090475731663) -->
-    <skip />
-    <!-- no translation found for communal_widget_picker_description (490515450110487871) -->
+    <string name="communal_widget_picker_title" msgid="1953369090475731663">"Құлып экранының виджеттері"</string>
+    <string name="communal_widget_picker_description" msgid="490515450110487871">"Планшет құлыпталып тұрса да, құлып экранындағы виджеттерді кез келген адам көре алады."</string>
+    <!-- no translation found for accessibility_action_label_unselect_widget (1041811747619468698) -->
     <skip />
     <string name="communal_widgets_disclaimer_title" msgid="1150954395585308868">"Құлып экранының виджеттері"</string>
     <string name="communal_widgets_disclaimer_text" msgid="1423545475160506349">"Қолданбаны виджет көмегімен ашу үшін жеке басыңызды растауыңыз керек. Сондай-ақ басқалар оларды планшетіңіз құлыптаулы кезде де көре алатынын ескеріңіз. Кейбір виджеттер құлып экранына арналмаған болады, сондықтан оларды мұнда қосу қауіпсіз болмауы мүмкін."</string>
@@ -564,8 +557,10 @@
     <string name="media_projection_action_text" msgid="3634906766918186440">"Қазір бастау"</string>
     <string name="empty_shade_text" msgid="8935967157319717412">"Хабарландырулар жоқ"</string>
     <string name="no_unseen_notif_text" msgid="395512586119868682">"Жаңа хабарландырулар жоқ"</string>
-    <string name="adaptive_notification_edu_hun_title" msgid="5720882373252389461">"Бейімделетін хабарландырулар қосулы"</string>
-    <string name="adaptive_notification_edu_hun_text" msgid="4260536236101821273">"Қысқа уақыт аралығында көп хабарландыру алсаңыз, құрылғыңыз дыбыс деңгейін және экранда шығатын қалқымалы терезелердің уақытын екі минутқа дейін азайтады."</string>
+    <!-- no translation found for adaptive_notification_edu_hun_title (7790738150177329960) -->
+    <skip />
+    <!-- no translation found for adaptive_notification_edu_hun_text (7743367744129536610) -->
+    <skip />
     <string name="go_to_adaptive_notification_settings" msgid="2423690125178298479">"Өшіру"</string>
     <string name="unlock_to_see_notif_text" msgid="7439033907167561227">"Ескі хабарландырулар үшін құлыпты ашыңыз"</string>
     <string name="quick_settings_disclosure_parental_controls" msgid="2114102871438223600">"Бұл құрылғыны ата-анаңыз басқарады."</string>
@@ -732,8 +727,7 @@
     <string name="notification_alert_title" msgid="3656229781017543655">"Әдепкі"</string>
     <string name="notification_automatic_title" msgid="3745465364578762652">"Автоматты"</string>
     <string name="notification_channel_summary_low" msgid="4860617986908931158">"Дыбыс не діріл болмайды."</string>
-    <!-- no translation found for notification_conversation_summary_low (3855696451919728790) -->
-    <skip />
+    <string name="notification_conversation_summary_low" msgid="3855696451919728790">"Дыбысы не дірілі өшіріледі, алайда әңгімелер бөлімінде көрсетіле береді"</string>
     <string name="notification_channel_summary_default" msgid="777294388712200605">"Құрылғы параметрлеріне байланысты шырылдауы не дірілдеуі мүмкін"</string>
     <string name="notification_channel_summary_default_with_bubbles" msgid="3482483084451555344">"Құрылғы параметрлеріне байланысты шырылдауы не дірілдеуі мүмкін. <xliff:g id="APP_NAME">%1$s</xliff:g> чаттары әдепкісінше қалқымалы етіп көрсетіледі."</string>
     <string name="notification_channel_summary_automatic" msgid="5813109268050235275">"Хабарландыру дыбысының немесе дірілдің қосылуын жүйе анықтайтын болады"</string>
@@ -790,8 +784,7 @@
     <string name="keyboard_key_page_up" msgid="173914303254199845">"Page Up"</string>
     <string name="keyboard_key_page_down" msgid="9035902490071829731">"Page Down"</string>
     <string name="keyboard_key_forward_del" msgid="5325501825762733459">"Delete"</string>
-    <!-- no translation found for keyboard_key_esc (6230365950511411322) -->
-    <skip />
+    <string name="keyboard_key_esc" msgid="6230365950511411322">"Esc"</string>
     <string name="keyboard_key_move_home" msgid="3496502501803911971">"Home"</string>
     <string name="keyboard_key_move_end" msgid="99190401463834854">"End"</string>
     <string name="keyboard_key_insert" msgid="4621692715704410493">"Insert"</string>
@@ -1374,8 +1367,7 @@
     <string name="shortcutHelper_category_split_screen" msgid="1159669813444812244">"Экранды бөлу"</string>
     <string name="shortcut_helper_category_input" msgid="8674018654124839566">"Кіріс"</string>
     <string name="shortcut_helper_category_app_shortcuts" msgid="8010249408308587117">"Қолданба таңбашалары"</string>
-    <!-- no translation found for shortcut_helper_category_current_app_shortcuts (4017840565974573628) -->
-    <skip />
+    <string name="shortcut_helper_category_current_app_shortcuts" msgid="4017840565974573628">"Қолданыстағы қолданба"</string>
     <string name="shortcut_helper_category_a11y" msgid="6314444792641773464">"Арнайы мүмкіндіктер"</string>
     <string name="shortcut_helper_title" msgid="8567500639300970049">"Перне тіркесімдері"</string>
     <string name="shortcut_helper_search_placeholder" msgid="5488547526269871819">"Іздеу жылдам пәрмендері"</string>
@@ -1395,6 +1387,29 @@
     <string name="keyboard_backlight_value" msgid="7336398765584393538">"Деңгей: %1$d/%2$d"</string>
     <string name="home_controls_dream_label" msgid="6567105701292324257">"Үй басқару элементтері"</string>
     <string name="home_controls_dream_description" msgid="4644150952104035789">"Үй басқару элементтерін скринсейверден қолданыңыз."</string>
-    <!-- no translation found for volume_undo_action (5815519725211877114) -->
+    <string name="volume_undo_action" msgid="5815519725211877114">"Қайтару"</string>
+    <!-- no translation found for back_edu_toast_content (4530314597378982956) -->
+    <skip />
+    <!-- no translation found for home_edu_toast_content (3381071147871955415) -->
+    <skip />
+    <!-- no translation found for overview_edu_toast_content (5797030644017804518) -->
+    <skip />
+    <!-- no translation found for all_apps_edu_toast_content (8807496014667211562) -->
+    <skip />
+    <!-- no translation found for back_edu_notification_title (5624780717751357278) -->
+    <skip />
+    <!-- no translation found for back_edu_notification_content (2497557451540954068) -->
+    <skip />
+    <!-- no translation found for home_edu_notification_title (6097902076909654045) -->
+    <skip />
+    <!-- no translation found for home_edu_notification_content (6631697734535766588) -->
+    <skip />
+    <!-- no translation found for overview_edu_notification_title (1265824157319562406) -->
+    <skip />
+    <!-- no translation found for overview_edu_notification_content (3578204677648432500) -->
+    <skip />
+    <!-- no translation found for all_apps_edu_notification_title (372262997265569063) -->
+    <skip />
+    <!-- no translation found for all_apps_edu_notification_content (3255070575694025585) -->
     <skip />
 </resources>

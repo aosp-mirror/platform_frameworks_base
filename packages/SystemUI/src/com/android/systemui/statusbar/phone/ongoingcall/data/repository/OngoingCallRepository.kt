@@ -17,6 +17,9 @@
 package com.android.systemui.statusbar.phone.ongoingcall.data.repository
 
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.log.LogBuffer
+import com.android.systemui.log.core.LogLevel
+import com.android.systemui.statusbar.phone.ongoingcall.OngoingCallLog
 import com.android.systemui.statusbar.phone.ongoingcall.shared.model.OngoingCallModel
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -32,7 +35,11 @@ import kotlinx.coroutines.flow.asStateFlow
  * classes both refer to this repository.
  */
 @SysUISingleton
-class OngoingCallRepository @Inject constructor() {
+class OngoingCallRepository
+@Inject
+constructor(
+    @OngoingCallLog private val logger: LogBuffer,
+) {
     private val _ongoingCallState = MutableStateFlow<OngoingCallModel>(OngoingCallModel.NoCall)
     /** The current ongoing call state. */
     val ongoingCallState: StateFlow<OngoingCallModel> = _ongoingCallState.asStateFlow()
@@ -42,6 +49,16 @@ class OngoingCallRepository @Inject constructor() {
      * [com.android.systemui.statusbar.phone.ongoingcall.OngoingCallController].
      */
     fun setOngoingCallState(state: OngoingCallModel) {
+        logger.log(
+            TAG,
+            LogLevel.DEBUG,
+            { str1 = state::class.simpleName },
+            { "Repo#setOngoingCallState: $str1" },
+        )
         _ongoingCallState.value = state
+    }
+
+    companion object {
+        const val TAG = "OngoingCall"
     }
 }

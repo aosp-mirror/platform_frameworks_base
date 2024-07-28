@@ -11,6 +11,7 @@ import android.bluetooth.BluetoothLeBroadcastReceiveState;
 import android.bluetooth.BluetoothProfile;
 import android.bluetooth.BluetoothStatusCodes;
 import android.content.ComponentName;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
@@ -475,14 +476,26 @@ public class BluetoothUtils {
     }
 
     /**
+     * Gets string metadata from Fast Pair customized fields.
+     *
+     * @param bluetoothDevice the BluetoothDevice to get metadata
+     * @return the string metadata
+     */
+    @Nullable
+    public static String getFastPairCustomizedField(
+            @Nullable BluetoothDevice bluetoothDevice, @NonNull String key) {
+        String data = getStringMetaData(bluetoothDevice, METADATA_FAST_PAIR_CUSTOMIZED_FIELDS);
+        return extraTagValue(key, data);
+    }
+
+    /**
      * Get URI Bluetooth metadata for extra control
      *
      * @param bluetoothDevice the BluetoothDevice to get metadata
      * @return the URI metadata
      */
     public static String getControlUriMetaData(BluetoothDevice bluetoothDevice) {
-        String data = getStringMetaData(bluetoothDevice, METADATA_FAST_PAIR_CUSTOMIZED_FIELDS);
-        return extraTagValue(KEY_HEARABLE_CONTROL_SLICE, data);
+        return getFastPairCustomizedField(bluetoothDevice, KEY_HEARABLE_CONTROL_SLICE);
     }
 
     /**
@@ -835,9 +848,9 @@ public class BluetoothUtils {
 
     /** Get primary device group id in broadcast. */
     @WorkerThread
-    public static int getPrimaryGroupIdForBroadcast(@NonNull Context context) {
+    public static int getPrimaryGroupIdForBroadcast(@NonNull ContentResolver contentResolver) {
         return Settings.Secure.getInt(
-                context.getContentResolver(),
+                contentResolver,
                 getPrimaryGroupIdUriForBroadcast(),
                 BluetoothCsipSetCoordinator.GROUP_ID_INVALID);
     }
@@ -846,9 +859,13 @@ public class BluetoothUtils {
     @Nullable
     @WorkerThread
     public static CachedBluetoothDevice getSecondaryDeviceForBroadcast(
-            @NonNull Context context, @Nullable LocalBluetoothManager localBtManager) {
+            @NonNull ContentResolver contentResolver,
+            @Nullable LocalBluetoothManager localBtManager) {
         if (localBtManager == null) return null;
-        int primaryGroupId = getPrimaryGroupIdForBroadcast(context);
+        LocalBluetoothLeBroadcast broadcast =
+                localBtManager.getProfileManager().getLeAudioBroadcastProfile();
+        if (!broadcast.isEnabled(null)) return null;
+        int primaryGroupId = getPrimaryGroupIdForBroadcast(contentResolver);
         if (primaryGroupId == BluetoothCsipSetCoordinator.GROUP_ID_INVALID) return null;
         LocalBluetoothLeBroadcastAssistant assistant =
                 localBtManager.getProfileManager().getLeAudioBroadcastAssistantProfile();

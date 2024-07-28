@@ -36,7 +36,7 @@ import com.android.systemui.statusbar.notification.stack.ui.view.NotificationScr
 import com.android.systemui.statusbar.notification.stack.ui.viewmodel.NotificationsPlaceholderViewModel
 import dagger.Lazy
 import javax.inject.Inject
-import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.Flow
 
 /**
  * "Gone" is not a real scene but rather the absence of scenes when we want to skip showing any
@@ -52,7 +52,7 @@ constructor(
 ) : ComposableScene {
     override val key = Scenes.Gone
 
-    override val destinationScenes: StateFlow<Map<UserAction, UserActionResult>> =
+    override val destinationScenes: Flow<Map<UserAction, UserActionResult>> =
         viewModel.destinationScenes
 
     @Composable

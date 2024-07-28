@@ -16,10 +16,16 @@
 
 package com.android.systemui.haptics.qs
 
-import com.android.systemui.classifier.falsingManager
 import com.android.systemui.haptics.vibratorHelper
 import com.android.systemui.kosmos.Kosmos
+import com.android.systemui.log.core.FakeLogBuffer
 import com.android.systemui.statusbar.policy.keyguardStateController
 
 val Kosmos.qsLongPressEffect by
-    Kosmos.Fixture { QSLongPressEffect(vibratorHelper, keyguardStateController, falsingManager) }
+    Kosmos.Fixture {
+        QSLongPressEffect(
+            vibratorHelper,
+            keyguardStateController,
+            FakeLogBuffer.Factory.create(),
+        )
+    }

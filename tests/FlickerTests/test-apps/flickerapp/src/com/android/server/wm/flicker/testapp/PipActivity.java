@@ -43,10 +43,10 @@ import android.media.MediaMetadata;
 import android.media.session.MediaSession;
 import android.media.session.PlaybackState;
 import android.os.Bundle;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.Rational;
 import android.view.View;
-import android.view.ViewTreeObserver;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.CheckBox;
@@ -70,7 +70,7 @@ public class PipActivity extends Activity {
      */
     private static final String TITLE_STATE_PAUSED = "TestApp media is paused";
 
-    private static final Rational RATIO_DEFAULT = null;
+    private static final Rational RATIO_DEFAULT = new Rational(16, 9);
     private static final Rational RATIO_SQUARE = new Rational(1, 1);
     private static final Rational RATIO_WIDE = new Rational(2, 1);
     private static final Rational RATIO_TALL = new Rational(1, 2);
@@ -88,8 +88,7 @@ public class PipActivity extends Activity {
             "com.android.wm.shell.flicker.testapp.ASPECT_RATIO";
 
     private final PictureInPictureParams.Builder mPipParamsBuilder =
-            new PictureInPictureParams.Builder()
-                    .setAspectRatio(RATIO_DEFAULT);
+            new PictureInPictureParams.Builder();
     private MediaSession mMediaSession;
     private final PlaybackState.Builder mPlaybackStateBuilder = new PlaybackState.Builder()
             .setActions(ACTION_PLAY | ACTION_PAUSE | ACTION_STOP)
@@ -139,6 +138,9 @@ public class PipActivity extends Activity {
         }
     };
 
+    private Rational mAspectRatio = RATIO_DEFAULT;
+    private boolean mEnableSourceRectHint;
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -155,6 +157,14 @@ public class PipActivity extends Activity {
                 .setOnClickListener(v -> updateMediaSessionState(STATE_PLAYING));
         findViewById(R.id.media_session_stop)
                 .setOnClickListener(v -> updateMediaSessionState(STATE_STOPPED));
+
+        final CheckBox setSourceRectHintCheckBox = findViewById(R.id.set_source_rect_hint);
+        setSourceRectHintCheckBox.setOnCheckedChangeListener((v, isChecked) -> {
+            if (mEnableSourceRectHint != isChecked) {
+                mEnableSourceRectHint = isChecked;
+                updateSourceRectHint();
+            }
+        });
 
         mMediaSession = new MediaSession(this, "WMShell_TestApp");
         mMediaSession.setPlaybackState(mPlaybackStateBuilder.build());
@@ -250,46 +260,63 @@ public class PipActivity extends Activity {
         }
     }
 
+    private void updateSourceRectHint() {
+        if (!mEnableSourceRectHint) return;
+        // Similar to PipUtils#getEnterPipWithOverlaySrcRectHint, crop the display bounds
+        // as source rect hint based on the current aspect ratio.
+        final DisplayMetrics displayMetrics = getResources().getDisplayMetrics();
+        final Rect displayBounds = new Rect(0, 0,
+                displayMetrics.widthPixels, displayMetrics.heightPixels);
+        final Rect sourceRectHint = getEnterPipWithOverlaySrcRectHint(
+                displayBounds, mAspectRatio.floatValue());
+        mPipParamsBuilder
+                .setAspectRatio(mAspectRatio)
+                .setSourceRectHint(sourceRectHint);
+        setPictureInPictureParams(mPipParamsBuilder.build());
+    }
+
     /**
-     * Adds a temporary view used for testing sourceRectHint.
-     *
+     * Crop a Rect matches the aspect ratio and pivots at the center point.
+     * This is a counterpart of {@link PipUtils#getEnterPipWithOverlaySrcRectHint}
      */
-    public void setSourceRectHint(View v) {
-        View rectView = findViewById(R.id.source_rect);
-        if (rectView != null) {
-            rectView.setVisibility(View.VISIBLE);
-            rectView.getViewTreeObserver().addOnGlobalLayoutListener(
-                    new ViewTreeObserver.OnGlobalLayoutListener() {
-                        @Override
-                        public void onGlobalLayout() {
-                            Rect boundingRect = new Rect();
-                            rectView.getGlobalVisibleRect(boundingRect);
-                            mPipParamsBuilder.setSourceRectHint(boundingRect);
-                            setPictureInPictureParams(mPipParamsBuilder.build());
-                            rectView.getViewTreeObserver().removeOnGlobalLayoutListener(this);
-                        }
-                    });
-            rectView.invalidate(); // changing the visibility, invalidating to redraw the view
+    private Rect getEnterPipWithOverlaySrcRectHint(Rect appBounds, float aspectRatio) {
+        final float appBoundsAspectRatio = appBounds.width() / (float) appBounds.height();
+        final int width, height;
+        int left = appBounds.left;
+        int top = appBounds.top;
+        if (appBoundsAspectRatio < aspectRatio) {
+            width = appBounds.width();
+            height = (int) (width / aspectRatio);
+            top = appBounds.top + (appBounds.height() - height) / 2;
+        } else {
+            height = appBounds.height();
+            width = (int) (height * aspectRatio);
+            left = appBounds.left + (appBounds.width() - width) / 2;
         }
+        return new Rect(left, top, left + width, top + height);
     }
 
     public void onRatioSelected(View v) {
         switch (v.getId()) {
             case R.id.ratio_default:
-                mPipParamsBuilder.setAspectRatio(RATIO_DEFAULT);
+                mAspectRatio = RATIO_DEFAULT;
                 break;
 
             case R.id.ratio_square:
-                mPipParamsBuilder.setAspectRatio(RATIO_SQUARE);
+                mAspectRatio = RATIO_SQUARE;
                 break;
 
             case R.id.ratio_wide:
-                mPipParamsBuilder.setAspectRatio(RATIO_WIDE);
+                mAspectRatio = RATIO_WIDE;
                 break;
 
             case R.id.ratio_tall:
-                mPipParamsBuilder.setAspectRatio(RATIO_TALL);
+                mAspectRatio = RATIO_TALL;
                 break;
+        }
+        setPictureInPictureParams(mPipParamsBuilder.setAspectRatio(mAspectRatio).build());
+        if (mEnableSourceRectHint) {
+            updateSourceRectHint();
         }
     }
 

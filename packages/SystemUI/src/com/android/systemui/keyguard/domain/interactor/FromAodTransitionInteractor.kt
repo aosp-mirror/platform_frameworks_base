@@ -119,7 +119,9 @@ constructor(
                                 // needed. Also, don't react to wake and unlock events, as we'll be
                                 // receiving a call to #dismissAod() shortly when the authentication
                                 // completes.
-                                !maybeStartTransitionToOccludedOrInsecureCamera() &&
+                                !maybeStartTransitionToOccludedOrInsecureCamera { state, reason ->
+                                    startTransitionTo(state, ownerReason = reason)
+                                } &&
                                     !isWakeAndUnlock(biometricUnlockState.mode) &&
                                     !primaryBouncerShowing
                             } else {

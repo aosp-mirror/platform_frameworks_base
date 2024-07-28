@@ -39,6 +39,7 @@ public final class FakeVibratorController extends IVibratorController.Stub {
     public boolean didRequestVibrationParams = false;
     public int requestVibrationType = VibrationAttributes.USAGE_UNKNOWN;
     public long requestTimeoutInMillis = 0;
+    public int requestVibrationParamsCounter = 0;
 
     public FakeVibratorController(Looper looper) {
         mHandler = new Handler(looper);
@@ -58,6 +59,7 @@ public final class FakeVibratorController extends IVibratorController.Stub {
         didRequestVibrationParams = true;
         requestVibrationType = vibrationType;
         requestTimeoutInMillis = timeoutInMillis;
+        requestVibrationParamsCounter++;
         mHandler.post(() -> {
             if (mVibratorControlService != null) {
                 mVibratorControlService.onRequestVibrationParamsComplete(token, mRequestResult);

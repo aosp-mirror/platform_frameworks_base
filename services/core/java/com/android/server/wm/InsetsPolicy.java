@@ -47,6 +47,7 @@ import android.view.WindowInsets.Type.InsetsType;
 import android.view.WindowInsetsAnimation;
 import android.view.WindowInsetsAnimation.Bounds;
 import android.view.WindowManager;
+import android.view.inputmethod.ImeTracker;
 import android.view.inputmethod.InputMethodManager;
 
 import com.android.internal.R;
@@ -433,8 +434,9 @@ class InsetsPolicy {
         return originalState;
     }
 
-    void onRequestedVisibleTypesChanged(InsetsControlTarget caller) {
-        mStateController.onRequestedVisibleTypesChanged(caller);
+    void onRequestedVisibleTypesChanged(InsetsControlTarget caller,
+            @Nullable ImeTracker.Token statsToken) {
+        mStateController.onRequestedVisibleTypesChanged(caller, statsToken);
         checkAbortTransient(caller);
         updateBarControlTarget(mFocusedWin);
     }
@@ -803,7 +805,8 @@ class InsetsPolicy {
         }
 
         @Override
-        public void updateRequestedVisibleTypes(int types) { }
+        public void updateRequestedVisibleTypes(int types, @Nullable ImeTracker.Token statsToken) {
+        }
 
         @Override
         public boolean hasAnimationCallbacks() {

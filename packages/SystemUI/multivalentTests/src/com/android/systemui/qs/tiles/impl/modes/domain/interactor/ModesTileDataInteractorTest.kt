@@ -22,11 +22,14 @@ import android.platform.test.annotations.DisableFlags
 import android.platform.test.annotations.EnableFlags
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
-import com.android.settingslib.notification.data.repository.FakeZenModeRepository
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectValues
+import com.android.systemui.kosmos.testDispatcher
+import com.android.systemui.kosmos.testScope
 import com.android.systemui.qs.tiles.base.interactor.DataUpdateTrigger
 import com.android.systemui.qs.tiles.impl.modes.domain.model.ModesTileModel
+import com.android.systemui.statusbar.policy.data.repository.fakeZenModeRepository
+import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.flowOf
@@ -40,51 +43,72 @@ import org.junit.runner.RunWith
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 class ModesTileDataInteractorTest : SysuiTestCase() {
-    private val zenModeRepository = FakeZenModeRepository()
+    private val kosmos = testKosmos()
+    private val testScope = kosmos.testScope
+    private val dispatcher = kosmos.testDispatcher
+    private val zenModeRepository = kosmos.fakeZenModeRepository
 
-    private val underTest = ModesTileDataInteractor(zenModeRepository)
+    private val underTest = ModesTileDataInteractor(zenModeRepository, dispatcher)
 
     @EnableFlags(Flags.FLAG_MODES_UI)
     @Test
-    fun availableWhenFlagIsOn() = runTest {
-        val availability = underTest.availability(TEST_USER).toCollection(mutableListOf())
+    fun availableWhenFlagIsOn() =
+        testScope.runTest {
+            val availability = underTest.availability(TEST_USER).toCollection(mutableListOf())
 
-        assertThat(availability).containsExactly(true)
-    }
+            assertThat(availability).containsExactly(true)
+        }
 
     @DisableFlags(Flags.FLAG_MODES_UI)
     @Test
-    fun unavailableWhenFlagIsOff() = runTest {
-        val availability = underTest.availability(TEST_USER).toCollection(mutableListOf())
+    fun unavailableWhenFlagIsOff() =
+        testScope.runTest {
+            val availability = underTest.availability(TEST_USER).toCollection(mutableListOf())
 
-        assertThat(availability).containsExactly(false)
-    }
+            assertThat(availability).containsExactly(false)
+        }
 
     @EnableFlags(Flags.FLAG_MODES_UI)
     @Test
-    fun isActivatedWhenModesChange() = runTest {
-        val dataList: List<ModesTileModel> by
-            collectValues(underTest.tileData(TEST_USER, flowOf(DataUpdateTrigger.InitialRequest)))
-        runCurrent()
-        assertThat(dataList.map { it.isActivated }).containsExactly(false).inOrder()
+    fun isActivatedWhenModesChange() =
+        testScope.runTest {
+            val dataList: List<ModesTileModel> by
+                collectValues(
+                    underTest.tileData(TEST_USER, flowOf(DataUpdateTrigger.InitialRequest))
+                )
+            runCurrent()
+            assertThat(dataList.map { it.isActivated }).containsExactly(false).inOrder()
 
-        // Add active mode
-        zenModeRepository.addMode(id = "One", active = true)
-        runCurrent()
-        assertThat(dataList.map { it.isActivated }).containsExactly(false, true).inOrder()
+            // Add active mode
+            zenModeRepository.addMode(id = "One", active = true)
+            runCurrent()
+            assertThat(dataList.map { it.isActivated }).containsExactly(false, true).inOrder()
+            assertThat(dataList.map { it.activeModes }.last()).containsExactly("Mode One")
 
-        // Add another mode: state hasn't changed, so this shouldn't cause another emission
-        zenModeRepository.addMode(id = "Two", active = true)
-        runCurrent()
-        assertThat(dataList.map { it.isActivated }).containsExactly(false, true).inOrder()
+            // Add an inactive mode: state hasn't changed, so this shouldn't cause another emission
+            zenModeRepository.addMode(id = "Two", active = false)
+            runCurrent()
+            assertThat(dataList.map { it.isActivated }).containsExactly(false, true).inOrder()
+            assertThat(dataList.map { it.activeModes }.last()).containsExactly("Mode One")
 
-        // Remove a mode and disable the other
-        zenModeRepository.removeMode("One")
-        runCurrent()
-        zenModeRepository.deactivateMode("Two")
-        runCurrent()
-        assertThat(dataList.map { it.isActivated }).containsExactly(false, true, false).inOrder()
-    }
+            // Add another active mode
+            zenModeRepository.addMode(id = "Three", active = true)
+            runCurrent()
+            assertThat(dataList.map { it.isActivated }).containsExactly(false, true, true).inOrder()
+            assertThat(dataList.map { it.activeModes }.last())
+                .containsExactly("Mode One", "Mode Three")
+                .inOrder()
+
+            // Remove a mode and deactivate the other
+            zenModeRepository.removeMode("One")
+            runCurrent()
+            zenModeRepository.deactivateMode("Three")
+            runCurrent()
+            assertThat(dataList.map { it.isActivated })
+                .containsExactly(false, true, true, true, false)
+                .inOrder()
+            assertThat(dataList.map { it.activeModes }.last()).isEmpty()
+        }
 
     private companion object {
 

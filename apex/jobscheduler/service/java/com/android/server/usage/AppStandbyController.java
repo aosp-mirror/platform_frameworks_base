@@ -1990,7 +1990,7 @@ public class AppStandbyController
             }
         }
         if (android.app.admin.flags.Flags.disallowUserControlBgUsageFix()) {
-            if (!Flags.avoidIdleCheck()) {
+            if (!Flags.avoidIdleCheck() || mInjector.getBootPhase() >= PHASE_BOOT_COMPLETED) {
                 postCheckIdleStates(userId);
             }
         }

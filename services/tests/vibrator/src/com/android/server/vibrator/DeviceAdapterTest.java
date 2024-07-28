@@ -25,6 +25,7 @@ import android.content.pm.PackageManagerInternal;
 import android.hardware.vibrator.IVibrator;
 import android.os.CombinedVibration;
 import android.os.Handler;
+import android.os.PersistableBundle;
 import android.os.VibrationEffect;
 import android.os.test.TestLooper;
 import android.os.vibrator.PrebakedSegment;
@@ -32,6 +33,7 @@ import android.os.vibrator.PrimitiveSegment;
 import android.os.vibrator.RampSegment;
 import android.os.vibrator.StepSegment;
 import android.os.vibrator.VibrationEffectSegment;
+import android.platform.test.annotations.RequiresFlagsEnabled;
 import android.util.SparseArray;
 
 import androidx.test.InstrumentationRegistry;
@@ -97,6 +99,17 @@ public class DeviceAdapterTest {
                         VibrationEffect.EFFECT_THUD, true, VibrationEffect.EFFECT_STRENGTH_STRONG),
                 new PrimitiveSegment(VibrationEffect.Composition.PRIMITIVE_SPIN, 0.5f, 100)),
                 /* repeatIndex= */ -1);
+
+        assertThat(mAdapter.adaptToVibrator(EMPTY_VIBRATOR_ID, effect)).isEqualTo(effect);
+        assertThat(mAdapter.adaptToVibrator(PWLE_VIBRATOR_ID, effect)).isEqualTo(effect);
+    }
+
+    @Test
+    @RequiresFlagsEnabled(android.os.vibrator.Flags.FLAG_VENDOR_VIBRATION_EFFECTS)
+    public void testVendorEffect_returnsOriginalSegment() {
+        PersistableBundle vendorData = new PersistableBundle();
+        vendorData.putInt("key", 1);
+        VibrationEffect effect = VibrationEffect.createVendorEffect(vendorData);
 
         assertThat(mAdapter.adaptToVibrator(EMPTY_VIBRATOR_ID, effect)).isEqualTo(effect);
         assertThat(mAdapter.adaptToVibrator(PWLE_VIBRATOR_ID, effect)).isEqualTo(effect);

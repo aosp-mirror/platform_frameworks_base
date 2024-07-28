@@ -51,7 +51,6 @@ import android.app.KeyguardManager;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.ColorStateList;
 import android.content.res.Configuration;
@@ -79,7 +78,6 @@ import android.provider.Settings;
 import android.provider.Settings.Global;
 import android.text.InputFilter;
 import android.util.Log;
-import android.util.Pair;
 import android.util.Slog;
 import android.util.SparseBooleanArray;
 import android.view.ContextThemeWrapper;
@@ -322,8 +320,8 @@ public class VolumeDialogImpl implements VolumeDialog, Dumpable,
     private final VolumePanelFlag mVolumePanelFlag;
     private final VolumeDialogInteractor mInteractor;
     // Optional actions for soundDose
-    private Optional<ImmutableList<Pair<String, Intent>>> mCsdWarningNotificationActions =
-            Optional.of(ImmutableList.of());
+    private Optional<ImmutableList<CsdWarningAction>>
+            mCsdWarningNotificationActions = Optional.of(ImmutableList.of());
 
     public VolumeDialogImpl(
             Context context,
@@ -2231,7 +2229,7 @@ public class VolumeDialogImpl implements VolumeDialog, Dumpable,
     }
 
     public void setCsdWarningNotificationActionIntents(
-            ImmutableList<Pair<String, Intent>> actionIntent) {
+            ImmutableList<CsdWarningAction> actionIntent) {
         mCsdWarningNotificationActions = Optional.of(actionIntent);
     }
 

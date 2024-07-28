@@ -1044,6 +1044,8 @@ public class ZenModeHelperTest extends UiServiceTestCase {
         AudioManagerInternal mAudioManager = mock(AudioManagerInternal.class);
         mZenModeHelper.mAudioManager = mAudioManager;
         setupZenConfig();
+        mTestableLooper.processAllMessages();
+        reset(mAudioManager);
 
         // Turn manual zen mode on
         mZenModeHelper.setManualZenMode(ZEN_MODE_IMPORTANT_INTERRUPTIONS, null, UPDATE_ORIGIN_APP,
@@ -1057,6 +1059,44 @@ public class ZenModeHelperTest extends UiServiceTestCase {
 
         // Expect calls to audio manager
         verify(mAudioManager, times(1)).updateRingerModeAffectedStreamsInternal();
+
+        // called during applyZenToRingerMode(), which should be true since zen changed
+        verify(mAudioManager, atLeastOnce()).getRingerModeInternal();
+    }
+
+    @Test
+    public void testSetConfig_updatesAudioForSequentialChangesToZenMode() {
+        AudioManagerInternal mAudioManager = mock(AudioManagerInternal.class);
+        mZenModeHelper.mAudioManager = mAudioManager;
+        setupZenConfig();
+        mTestableLooper.processAllMessages();
+        reset(mAudioManager);
+
+        // Turn manual zen mode on
+        mZenModeHelper.setManualZenMode(
+                ZEN_MODE_IMPORTANT_INTERRUPTIONS,
+                null,
+                UPDATE_ORIGIN_APP,
+                null,
+                "test",
+                CUSTOM_PKG_UID);
+        mZenModeHelper.setManualZenMode(
+                ZEN_MODE_IMPORTANT_INTERRUPTIONS,
+                null,
+                UPDATE_ORIGIN_APP,
+                null,
+                "test",
+                CUSTOM_PKG_UID);
+
+        // audio manager shouldn't do anything until the handler processes its messages
+        verify(mAudioManager, never()).updateRingerModeAffectedStreamsInternal();
+
+        // now process the looper's messages
+        mTestableLooper.processAllMessages();
+
+        // Expect calls to audio manager
+        verify(mAudioManager, times(2)).updateRingerModeAffectedStreamsInternal();
+        verify(mAudioManager, times(1)).setRingerModeInternal(anyInt(), anyString());
 
         // called during applyZenToRingerMode(), which should be true since zen changed
         verify(mAudioManager, atLeastOnce()).getRingerModeInternal();

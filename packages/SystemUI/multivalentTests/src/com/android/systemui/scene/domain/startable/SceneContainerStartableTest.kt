@@ -78,6 +78,7 @@ import com.android.systemui.statusbar.notificationShadeWindowController
 import com.android.systemui.statusbar.phone.centralSurfaces
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.fakeMobileConnectionsRepository
 import com.android.systemui.statusbar.policy.data.repository.fakeDeviceProvisioningRepository
+import com.android.systemui.statusbar.sysuiStatusBarStateController
 import com.android.systemui.testKosmos
 import com.android.systemui.util.mockito.mock
 import com.google.common.truth.Truth.assertThat
@@ -274,9 +275,10 @@ class SceneContainerStartableTest : SysuiTestCase() {
         }
 
     @Test
-    fun switchFromBouncerToQuickSettingsWhenDeviceUnlocked() =
+    fun switchFromBouncerToQuickSettingsWhenDeviceUnlocked_whenLeaveOpenShade() =
         testScope.runTest {
             val currentSceneKey by collectLastValue(sceneInteractor.currentScene)
+            kosmos.sysuiStatusBarStateController.leaveOpen = true // leave shade open
 
             val transitionState =
                 prepareState(
@@ -303,6 +305,39 @@ class SceneContainerStartableTest : SysuiTestCase() {
             )
 
             assertThat(currentSceneKey).isEqualTo(Scenes.QuickSettings)
+        }
+
+    @Test
+    fun switchFromBouncerToGoneWhenDeviceUnlocked_whenDoNotLeaveOpenShade() =
+        testScope.runTest {
+            val currentSceneKey by collectLastValue(sceneInteractor.currentScene)
+            kosmos.sysuiStatusBarStateController.leaveOpen = false // don't leave shade open
+
+            val transitionState =
+                prepareState(
+                    authenticationMethod = AuthenticationMethodModel.Pin,
+                    isDeviceUnlocked = false,
+                    initialSceneKey = Scenes.Lockscreen,
+                )
+            assertThat(currentSceneKey).isEqualTo(Scenes.Lockscreen)
+            underTest.start()
+            runCurrent()
+
+            sceneInteractor.changeScene(Scenes.QuickSettings, "switching to qs for test")
+            transitionState.value = ObservableTransitionState.Idle(Scenes.QuickSettings)
+            runCurrent()
+            assertThat(currentSceneKey).isEqualTo(Scenes.QuickSettings)
+
+            sceneInteractor.changeScene(Scenes.Bouncer, "switching to bouncer for test")
+            transitionState.value = ObservableTransitionState.Idle(Scenes.Bouncer)
+            runCurrent()
+            assertThat(currentSceneKey).isEqualTo(Scenes.Bouncer)
+
+            kosmos.fakeDeviceEntryFingerprintAuthRepository.setAuthenticationStatus(
+                SuccessFingerprintAuthenticationStatus(0, true)
+            )
+
+            assertThat(currentSceneKey).isEqualTo(Scenes.Gone)
         }
 
     @Test

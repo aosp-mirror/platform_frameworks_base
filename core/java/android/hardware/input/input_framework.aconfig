@@ -75,3 +75,13 @@ flag {
     description: "Enables a developer overlay that displays raw touchpad input data and gesture recognition status in real-time."
     bug: "286551975"
 }
+
+flag {
+    namespace: "input_native"
+    name: "keyboard_layout_manager_multi_user_ime_setup"
+    description: "Update KeyboardLayoutManager to work correctly with multi-user IME setup"
+    bug: "354333072"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}

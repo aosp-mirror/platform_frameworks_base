@@ -143,9 +143,12 @@ public class VisualStabilityCoordinator implements Coordinator, Dumpable {
                 this::onLaunchingActivityChanged);
         mJavaAdapter.alwaysCollectFlow(mCommunalInteractor.isIdleOnCommunal(),
                 this::onCommunalShowingChanged);
-        mJavaAdapter.alwaysCollectFlow(mKeyguardTransitionInteractor.transitionValue(
-                        KeyguardState.LOCKSCREEN),
-                this::onLockscreenKeyguardStateTransitionValueChanged);
+
+        if (SceneContainerFlag.isEnabled()) {
+            mJavaAdapter.alwaysCollectFlow(mKeyguardTransitionInteractor.transitionValue(
+                            KeyguardState.LOCKSCREEN),
+                    this::onLockscreenKeyguardStateTransitionValueChanged);
+        }
 
         pipeline.setVisualStabilityManager(mNotifStabilityManager);
     }
@@ -260,7 +263,8 @@ public class VisualStabilityCoordinator implements Coordinator, Dumpable {
 
     private boolean isReorderingAllowed() {
         final boolean sleepyAndDozed = mFullyDozed && mSleepy;
-        final boolean stackShowing = mPanelExpanded || mLockscreenShowing;
+        final boolean stackShowing = mPanelExpanded
+                || (SceneContainerFlag.isEnabled() && mLockscreenShowing);
         return (sleepyAndDozed || !stackShowing || mCommunalShowing) && !mPulsing;
     }
 
@@ -381,6 +385,10 @@ public class VisualStabilityCoordinator implements Coordinator, Dumpable {
         }
 
         final boolean isShowing = value > 0.0f;
+        if (isShowing == mLockscreenShowing) {
+            return;
+        }
+
         mLockscreenShowing = isShowing;
         updateAllowedStates("lockscreenShowing", isShowing);
     }
