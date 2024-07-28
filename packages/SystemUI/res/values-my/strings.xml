@@ -126,38 +126,25 @@
     <string name="screenrecord_save_text" msgid="3008973099800840163">"ကြည့်ရှုရန် တို့ပါ"</string>
     <string name="screenrecord_save_error" msgid="5862648532560118815">"ဖန်သားပြင်ရိုက်ကူးမှုကို သိမ်းရာတွင် အမှားရှိသည်"</string>
     <string name="screenrecord_start_error" msgid="2200660692479682368">"ဖန်သားပြင် ရိုက်ကူးမှု စတင်ရာတွင် အမှားအယွင်းရှိနေသည်"</string>
-    <!-- no translation found for screenrecord_stop_dialog_title (8716193661764511095) -->
-    <skip />
-    <!-- no translation found for screenrecord_stop_dialog_message (6262768207331626817) -->
-    <skip />
-    <!-- no translation found for screenrecord_stop_dialog_message_specific_app (5995770227684523244) -->
-    <skip />
+    <string name="screenrecord_stop_dialog_title" msgid="8716193661764511095">"ရိုက်ကူးခြင်း ရပ်မလား။"</string>
+    <string name="screenrecord_stop_dialog_message" msgid="6262768207331626817">"လောလောဆယ် ဖန်သားပြင်တစ်ခုလုံးကို ရိုက်ကူးနေသည်"</string>
+    <string name="screenrecord_stop_dialog_message_specific_app" msgid="5995770227684523244">"လောလောဆယ် <xliff:g id="APP_NAME">%1$s</xliff:g> ကို ရိုက်ကူးနေသည်"</string>
     <string name="screenrecord_stop_dialog_button" msgid="2883812564938194350">"ရိုက်ကူးမှု ရပ်ရန်"</string>
     <string name="share_to_app_chip_accessibility_label" msgid="4210256229976947065">"ဖန်သားပြင်ကို မျှဝေနေသည်"</string>
     <string name="share_to_app_stop_dialog_title" msgid="9212915050910250438">"ဖန်သားပြင်မျှဝေခြင်း ရပ်မလား။"</string>
-    <!-- no translation found for share_to_app_stop_dialog_message_entire_screen_with_host_app (522823522115375414) -->
-    <skip />
-    <!-- no translation found for share_to_app_stop_dialog_message_entire_screen (5090115386271179270) -->
-    <skip />
-    <!-- no translation found for share_to_app_stop_dialog_message_single_app_specific (5923772039347985172) -->
-    <skip />
-    <!-- no translation found for share_to_app_stop_dialog_message_single_app_generic (6681016774654578261) -->
-    <skip />
+    <string name="share_to_app_stop_dialog_message_entire_screen_with_host_app" msgid="522823522115375414">"<xliff:g id="HOST_APP_NAME">%1$s</xliff:g> ဖြင့် သင့်ဖန်သားပြင်တစ်ခုလုံးကို လောလောဆယ် မျှဝေနေသည်"</string>
+    <string name="share_to_app_stop_dialog_message_entire_screen" msgid="5090115386271179270">"အက်ပ်ဖြင့် သင့်ဖန်သားပြင်တစ်ခုလုံးကို လောလောဆယ် မျှဝေနေသည်"</string>
+    <string name="share_to_app_stop_dialog_message_single_app_specific" msgid="5923772039347985172">"<xliff:g id="APP_BEING_SHARED_NAME">%1$s</xliff:g> ကို လောလောဆယ် မျှဝေနေသည်"</string>
+    <string name="share_to_app_stop_dialog_message_single_app_generic" msgid="6681016774654578261">"အက်ပ်ကို လောလောဆယ် မျှဝေနေသည်"</string>
     <string name="share_to_app_stop_dialog_button" msgid="6334056916284230217">"မျှဝေခြင်း ရပ်ရန်"</string>
     <string name="cast_screen_to_other_device_chip_accessibility_label" msgid="4687917476203009885">"ဖန်သားပြင်ကို ကာစ်လုပ်နေသည်"</string>
     <string name="cast_to_other_device_stop_dialog_title" msgid="7836517190930357326">"ကာစ်လုပ်ခြင်းကို ရပ်လိုသလား။"</string>
-    <!-- no translation found for cast_to_other_device_stop_dialog_message_entire_screen_with_device (1474703115926205251) -->
-    <skip />
-    <!-- no translation found for cast_to_other_device_stop_dialog_message_entire_screen (8419219169553867625) -->
-    <skip />
-    <!-- no translation found for cast_to_other_device_stop_dialog_message_specific_app_with_device (2715934698604085519) -->
-    <skip />
-    <!-- no translation found for cast_to_other_device_stop_dialog_message_specific_app (8616103075630934513) -->
-    <skip />
-    <!-- no translation found for cast_to_other_device_stop_dialog_message_generic_with_device (9213582497852420203) -->
-    <skip />
-    <!-- no translation found for cast_to_other_device_stop_dialog_message_generic (4100272100480415076) -->
-    <skip />
+    <string name="cast_to_other_device_stop_dialog_message_entire_screen_with_device" msgid="1474703115926205251">"သင့်ဖန်သားပြင်တစ်ခုလုံးကို <xliff:g id="DEVICE_NAME">%1$s</xliff:g> သို့ လောလောဆယ် ကာစ်လုပ်နေသည်"</string>
+    <string name="cast_to_other_device_stop_dialog_message_entire_screen" msgid="8419219169553867625">"သင့်ဖန်သားပြင်တစ်ခုလုံးကို အနီးတစ်ဝိုက်ရှိ စက်သို့ လောလောဆယ် ကာစ်လုပ်နေသည်"</string>
+    <string name="cast_to_other_device_stop_dialog_message_specific_app_with_device" msgid="2715934698604085519">"<xliff:g id="APP_BEING_SHARED_NAME">%1$s</xliff:g> ကို <xliff:g id="DEVICE_NAME">%2$s</xliff:g> သို့ လောလောဆယ် ကာစ်လုပ်နေသည်"</string>
+    <string name="cast_to_other_device_stop_dialog_message_specific_app" msgid="8616103075630934513">"<xliff:g id="APP_BEING_SHARED_NAME">%1$s</xliff:g> ကို အနီးတစ်ဝိုက်ရှိ စက်သို့ လောလောဆယ် ကာစ်လုပ်နေသည်"</string>
+    <string name="cast_to_other_device_stop_dialog_message_generic_with_device" msgid="9213582497852420203">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> သို့ လောလောဆယ် ကာစ်လုပ်နေသည်"</string>
+    <string name="cast_to_other_device_stop_dialog_message_generic" msgid="4100272100480415076">"အနီးတစ်ဝိုက်ရှိ စက်သို့ လောလောဆယ် ကာစ်လုပ်နေသည်"</string>
     <string name="cast_to_other_device_stop_dialog_button" msgid="6420183747435521834">"ကာစ် ရပ်ရန်"</string>
     <string name="close_dialog_button" msgid="4749497706540104133">"ပိတ်ရန်"</string>
     <string name="issuerecord_title" msgid="286627115110121849">"ပြဿနာရိုက်ကူးစနစ်"</string>
@@ -303,8 +290,7 @@
     <string name="start_dreams" msgid="9131802557946276718">"စခရင်နားချိန်ပုံ"</string>
     <string name="ethernet_label" msgid="2203544727007463351">"အီသာနက်"</string>
     <string name="quick_settings_dnd_label" msgid="7728690179108024338">"မနှောင့်ယှက်ရ"</string>
-    <!-- no translation found for quick_settings_modes_label (5407025818652750501) -->
-    <skip />
+    <string name="quick_settings_modes_label" msgid="5407025818652750501">"ဦးစားပေးမုဒ်"</string>
     <string name="quick_settings_bluetooth_label" msgid="7018763367142041481">"ဘလူးတုသ်"</string>
     <string name="quick_settings_bluetooth_detail_empty_text" msgid="5760239584390514322">"ချိတ်တွဲထားသည့် ကိရိယာများ မရှိ"</string>
     <string name="quick_settings_bluetooth_tile_subtitle" msgid="212752719010829550">"စက်ကို ချိတ်ဆက်ရန် (သို့) ချိတ်ဆက်မှုဖြုတ်ရန် တို့ပါ"</string>
@@ -440,6 +426,13 @@
     <string name="sensor_privacy_dialog_open_settings" msgid="5635865896053011859">"ဆက်တင်များဖွင့်ရန်"</string>
     <string name="media_seamless_other_device" msgid="4654849800789196737">"အခြားစက်ပစ္စည်း"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"ဖွင့်၊ ပိတ် အနှစ်ချုပ်"</string>
+    <string name="zen_modes_dialog_title" msgid="4159138230418567383">"ဦးစားပေးမုဒ်"</string>
+    <string name="zen_modes_dialog_done" msgid="6654130880256438950">"ပြီးပြီ"</string>
+    <string name="zen_modes_dialog_settings" msgid="2310248023728936697">"ဆက်တင်များ"</string>
+    <!-- no translation found for zen_mode_on (9085304934016242591) -->
+    <skip />
+    <!-- no translation found for zen_mode_off (1736604456618147306) -->
+    <skip />
     <string name="zen_priority_introduction" msgid="3159291973383796646">"နှိုးစက်သံ၊ သတိပေးချက်အသံများ၊ ပွဲစဉ်သတိပေးသံများနှင့် သင်ခွင့်ပြုထားသူများထံမှ ဖုန်းခေါ်မှုများမှလွဲ၍ အခြားအသံများနှင့် တုန်ခါမှုများက သင့်ကို အနှောင့်အယှက်ပြုမည် မဟုတ်ပါ။ သို့သော်လည်း သီချင်း၊ ဗီဒီယိုနှင့် ဂိမ်းများအပါအဝင် သင်ကရွေးချယ်ဖွင့်ထားသည့် အရာတိုင်း၏ အသံကိုမူ ကြားနေရဆဲဖြစ်ပါလိမ့်မည်။"</string>
     <string name="zen_alarms_introduction" msgid="3987266042682300470">"နှိုးစက်သံမှလွဲ၍ အခြားအသံများနှင့် တုန်ခါမှုများက သင့်ကို အနှောင့်အယှက်ပြုမည် မဟုတ်ပါ။ သို့သော်လည်း သီချင်း၊ ဗီဒီယိုနှင့် ဂိမ်းများအပါအဝင် သင်ကရွေးချယ်ဖွင့်ထားသည့် အရာတိုင်း၏ အသံကိုမူ ကြားနေရဆဲဖြစ်ပါလိမ့်မည်။"</string>
     <string name="zen_priority_customize_button" msgid="4119213187257195047">"စိတ်ကြိုက် ပြုလုပ်ရန်"</string>
@@ -504,9 +497,9 @@
     <string name="accessibility_action_label_select_widget" msgid="8897281501387398191">"ဝိဂျက် ရွေးရန်"</string>
     <string name="accessibility_action_label_remove_widget" msgid="3373779447448758070">"ဝိဂျက် ဖယ်ရှားရန်"</string>
     <string name="accessibility_action_label_place_widget" msgid="1914197458644168978">"ရွေးချယ်ထားသော ဝိဂျက်ကို တင်ရန်"</string>
-    <!-- no translation found for communal_widget_picker_title (1953369090475731663) -->
-    <skip />
-    <!-- no translation found for communal_widget_picker_description (490515450110487871) -->
+    <string name="communal_widget_picker_title" msgid="1953369090475731663">"လော့ခ်မျက်နှာပြင် ဝိဂျက်များ"</string>
+    <string name="communal_widget_picker_description" msgid="490515450110487871">"တက်ဘလက်လော့ခ်ချထားသော်လည်း မည်သူမဆို လော့ခ်မျက်နှာပြင်ဝိဂျက်ကို ကြည့်နိုင်သည်။"</string>
+    <!-- no translation found for accessibility_action_label_unselect_widget (1041811747619468698) -->
     <skip />
     <string name="communal_widgets_disclaimer_title" msgid="1150954395585308868">"လော့ခ်မျက်နှာပြင် ဝိဂျက်များ"</string>
     <string name="communal_widgets_disclaimer_text" msgid="1423545475160506349">"ဝိဂျက်သုံး၍ အက်ပ်ဖွင့်ရန်အတွက် သင်ဖြစ်ကြောင်း အတည်ပြုရန်လိုသည်။ ထို့ပြင် သင့်တက်ဘလက် လော့ခ်ချထားချိန်၌ပင် မည်သူမဆို ၎င်းတို့ကို ကြည့်နိုင်ကြောင်း သတိပြုပါ။ ဝိဂျက်အချို့ကို လော့ခ်မျက်နှာပြင်အတွက် ရည်ရွယ်ထားခြင်း မရှိသဖြင့် ဤနေရာတွင် ထည့်ပါက မလုံခြုံနိုင်ပါ။"</string>
@@ -564,8 +557,10 @@
     <string name="media_projection_action_text" msgid="3634906766918186440">"ယခု စတင်ပါ"</string>
     <string name="empty_shade_text" msgid="8935967157319717412">"အကြောင်းကြားချက် မရှိပါ"</string>
     <string name="no_unseen_notif_text" msgid="395512586119868682">"အကြောင်းကြားချက်သစ် မရှိပါ"</string>
-    <string name="adaptive_notification_edu_hun_title" msgid="5720882373252389461">"အလိုက်သင့်အကြောင်းကြားချက် ဖွင့်ထားသည်"</string>
-    <string name="adaptive_notification_edu_hun_text" msgid="4260536236101821273">"သင့်စက်သည် အချိန်တိုအတွင်း အကြောင်းကြားချက်များစွာ ရပါက အသံတိုးပြီး စခရင်ရှိ ပေါ့ပ်အပ်များကို နှစ်မိနစ်အထိ လျှော့ပေးသည်။"</string>
+    <!-- no translation found for adaptive_notification_edu_hun_title (7790738150177329960) -->
+    <skip />
+    <!-- no translation found for adaptive_notification_edu_hun_text (7743367744129536610) -->
+    <skip />
     <string name="go_to_adaptive_notification_settings" msgid="2423690125178298479">"ပိတ်ရန်"</string>
     <string name="unlock_to_see_notif_text" msgid="7439033907167561227">"အကြောင်းကြားချက်ဟောင်းကြည့်ရန် လော့ခ်ဖွင့်ပါ"</string>
     <string name="quick_settings_disclosure_parental_controls" msgid="2114102871438223600">"ဤစက်ပစ္စည်းကို သင့်မိဘက စီမံခန့်ခွဲသည်"</string>
@@ -732,8 +727,7 @@
     <string name="notification_alert_title" msgid="3656229781017543655">"မူလ"</string>
     <string name="notification_automatic_title" msgid="3745465364578762652">"အလိုအလျောက်"</string>
     <string name="notification_channel_summary_low" msgid="4860617986908931158">"အသံ သို့မဟုတ် တုန်ခါမှုမရှိပါ"</string>
-    <!-- no translation found for notification_conversation_summary_low (3855696451919728790) -->
-    <skip />
+    <string name="notification_conversation_summary_low" msgid="3855696451919728790">"အသံမကြားရ (သို့) တုန်ခါမှုမရှိသော်လည်း စကားဝိုင်းကဏ္ဍတွင် မြင်ရပါသေးသည်"</string>
     <string name="notification_channel_summary_default" msgid="777294388712200605">"စက်ပစ္စည်း ဆက်တင်များပေါ် အခြေခံပြီး အသံမြည်နိုင်သည် (သို့) တုန်ခါနိုင်သည်"</string>
     <string name="notification_channel_summary_default_with_bubbles" msgid="3482483084451555344">"စက်ပစ္စည်းဆက်တင်များပေါ် အခြေခံပြီး အသံမြည်နိုင်သည် (သို့) တုန်ခါနိုင်သည်။ မူရင်းသတ်မှတ်ချက်အဖြစ် <xliff:g id="APP_NAME">%1$s</xliff:g> မှ စကားဝိုင်းများကို ပူဖောင်းကွက်ဖြင့် ပြသည်။"</string>
     <string name="notification_channel_summary_automatic" msgid="5813109268050235275">"ဤအကြောင်းကြားချက်က အသံ သို့မဟုတ် တုန်ခါမှု ပေးရန် သင့်/မသင့်ကို စနစ်က ဆုံးဖြတ်ပါစေ"</string>
@@ -790,8 +784,7 @@
     <string name="keyboard_key_page_up" msgid="173914303254199845">"အပေါ်စာမျက်နှာသို့သွားပါ"</string>
     <string name="keyboard_key_page_down" msgid="9035902490071829731">"အောက်စာမျက်နှာသို့သွားပါ"</string>
     <string name="keyboard_key_forward_del" msgid="5325501825762733459">"ဖျက်ရန်"</string>
-    <!-- no translation found for keyboard_key_esc (6230365950511411322) -->
-    <skip />
+    <string name="keyboard_key_esc" msgid="6230365950511411322">"Esc"</string>
     <string name="keyboard_key_move_home" msgid="3496502501803911971">"ပင်မ"</string>
     <string name="keyboard_key_move_end" msgid="99190401463834854">"ပြီးပါပြီ"</string>
     <string name="keyboard_key_insert" msgid="4621692715704410493">"ထည့်ပါ"</string>
@@ -1394,6 +1387,29 @@
     <string name="keyboard_backlight_value" msgid="7336398765584393538">"အဆင့် %2$d အနက် %1$d"</string>
     <string name="home_controls_dream_label" msgid="6567105701292324257">"အိမ်ထိန်းချုပ်မှုများ"</string>
     <string name="home_controls_dream_description" msgid="4644150952104035789">"အိမ်ထိန်းချုပ်မှုများကို စခရင်နားချိန်ပုံအဖြစ် အမြန်ဝင်ကြည့်ရန်"</string>
-    <!-- no translation found for volume_undo_action (5815519725211877114) -->
+    <string name="volume_undo_action" msgid="5815519725211877114">"နောက်ပြန်ရန်"</string>
+    <!-- no translation found for back_edu_toast_content (4530314597378982956) -->
+    <skip />
+    <!-- no translation found for home_edu_toast_content (3381071147871955415) -->
+    <skip />
+    <!-- no translation found for overview_edu_toast_content (5797030644017804518) -->
+    <skip />
+    <!-- no translation found for all_apps_edu_toast_content (8807496014667211562) -->
+    <skip />
+    <!-- no translation found for back_edu_notification_title (5624780717751357278) -->
+    <skip />
+    <!-- no translation found for back_edu_notification_content (2497557451540954068) -->
+    <skip />
+    <!-- no translation found for home_edu_notification_title (6097902076909654045) -->
+    <skip />
+    <!-- no translation found for home_edu_notification_content (6631697734535766588) -->
+    <skip />
+    <!-- no translation found for overview_edu_notification_title (1265824157319562406) -->
+    <skip />
+    <!-- no translation found for overview_edu_notification_content (3578204677648432500) -->
+    <skip />
+    <!-- no translation found for all_apps_edu_notification_title (372262997265569063) -->
+    <skip />
+    <!-- no translation found for all_apps_edu_notification_content (3255070575694025585) -->
     <skip />
 </resources>

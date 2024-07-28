@@ -734,6 +734,9 @@ public class BubbleController implements ConfigurationChangeListener,
     public void setBubbleBarLocation(BubbleBarLocation bubbleBarLocation) {
         if (canShowAsBubbleBar()) {
             mBubblePositioner.setBubbleBarLocation(bubbleBarLocation);
+            if (mLayerView != null && !mLayerView.isExpandedViewDragged()) {
+                mLayerView.updateExpandedView();
+            }
             BubbleBarUpdate bubbleBarUpdate = new BubbleBarUpdate();
             bubbleBarUpdate.bubbleBarLocation = bubbleBarLocation;
             mBubbleStateListener.onBubbleStateChange(bubbleBarUpdate);

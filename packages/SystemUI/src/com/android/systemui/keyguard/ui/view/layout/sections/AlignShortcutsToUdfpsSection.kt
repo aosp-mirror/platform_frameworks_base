@@ -25,6 +25,7 @@ import androidx.constraintlayout.widget.ConstraintSet.LEFT
 import androidx.constraintlayout.widget.ConstraintSet.PARENT_ID
 import androidx.constraintlayout.widget.ConstraintSet.RIGHT
 import androidx.constraintlayout.widget.ConstraintSet.TOP
+import com.android.keyguard.logging.KeyguardQuickAffordancesLogger
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.deviceentry.shared.DeviceEntryUdfpsRefactor
 import com.android.systemui.keyguard.KeyguardBottomAreaRefactor
@@ -47,6 +48,7 @@ constructor(
     private val falsingManager: FalsingManager,
     private val indicationController: KeyguardIndicationController,
     private val vibratorHelper: VibratorHelper,
+    private val shortcutsLogger: KeyguardQuickAffordancesLogger,
 ) : BaseShortcutSection() {
     override fun addViews(constraintLayout: ConstraintLayout) {
         if (KeyguardBottomAreaRefactor.isEnabled) {
@@ -64,6 +66,7 @@ constructor(
                     keyguardQuickAffordancesCombinedViewModel.transitionAlpha,
                     falsingManager,
                     vibratorHelper,
+                    shortcutsLogger,
                 ) {
                     indicationController.showTransientIndication(it)
                 }
@@ -74,6 +77,7 @@ constructor(
                     keyguardQuickAffordancesCombinedViewModel.transitionAlpha,
                     falsingManager,
                     vibratorHelper,
+                    shortcutsLogger,
                 ) {
                     indicationController.showTransientIndication(it)
                 }

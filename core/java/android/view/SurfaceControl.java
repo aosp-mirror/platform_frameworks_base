@@ -164,6 +164,9 @@ public final class SurfaceControl implements Parcelable {
             float width, float height, float vecX, float vecY,
             float maxStretchAmountX, float maxStretchAmountY, float childRelativeLeft,
             float childRelativeTop, float childRelativeRight, float childRelativeBottom);
+    private static native void nativeSetEdgeExtensionEffect(long transactionObj, long nativeObj,
+                                                            boolean leftEdge, boolean rightEdge,
+                                                            boolean topEdge, boolean bottomEdge);
     private static native void nativeSetTrustedOverlay(long transactionObj, long nativeObject,
             int isTrustedOverlay);
     private static native void nativeSetDropInputMode(
@@ -3513,6 +3516,19 @@ public final class SurfaceControl implements Parcelable {
         /**
          * @hide
          */
+        public Transaction setEdgeExtensionEffect(SurfaceControl sc, int edge) {
+            checkPreconditions(sc);
+
+            nativeSetEdgeExtensionEffect(
+                    mNativeObject, sc.mNativeObject,
+                    (edge & WindowInsets.Side.LEFT) != 0, (edge & WindowInsets.Side.RIGHT) != 0,
+                    (edge & WindowInsets.Side.TOP) != 0, (edge & WindowInsets.Side.BOTTOM) != 0);
+            return this;
+        }
+
+        /**
+         * @hide
+         */
         @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.O)
         public Transaction setLayerStack(SurfaceControl sc, int layerStack) {
             checkPreconditions(sc);
@@ -4882,4 +4898,5 @@ public final class SurfaceControl implements Parcelable {
     public static void notifyShutdown() {
         nativeNotifyShutdown();
     }
+
 }

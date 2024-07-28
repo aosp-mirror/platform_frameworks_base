@@ -50,14 +50,14 @@ fun ModeTile(viewModel: ModeTileViewModel) {
         Surface(
             color = tileColor,
             shape = RoundedCornerShape(16.dp),
-            modifier =
-                Modifier.combinedClickable(
-                    onClick = viewModel.onClick,
-                    onLongClick = viewModel.onLongClick
-                ),
         ) {
             Row(
-                modifier = Modifier.padding(20.dp),
+                modifier =
+                    Modifier.combinedClickable(
+                            onClick = viewModel.onClick,
+                            onLongClick = viewModel.onLongClick
+                        )
+                        .padding(20.dp),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement =
                     Arrangement.spacedBy(

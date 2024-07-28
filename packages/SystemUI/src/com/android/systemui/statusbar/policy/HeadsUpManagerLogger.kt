@@ -66,6 +66,30 @@ class HeadsUpManagerLogger @Inject constructor(
         })
     }
 
+    fun logAvalancheUpdate(caller: String, isEnabled: Boolean, notifEntryKey: String,
+                           outcome: String) {
+        buffer.log(TAG, INFO, {
+            str1 = caller
+            str2 = notifEntryKey
+            str3 = outcome
+            bool1 = isEnabled
+        }, {
+            "$str1\n\t=> AC[isEnabled:$bool1] update: $str2\n\t=> $str3"
+        })
+    }
+
+    fun logAvalancheDelete(caller: String, isEnabled: Boolean, notifEntryKey: String,
+                           outcome: String) {
+        buffer.log(TAG, INFO, {
+            str1 = caller
+            str2 = notifEntryKey
+            str3 = outcome
+            bool1 = isEnabled
+        }, {
+            "$str1\n\t=> AC[isEnabled:$bool1] delete: $str2\n\t=> $str3"
+        })
+    }
+
     fun logShowNotification(entry: NotificationEntry) {
         buffer.log(TAG, INFO, {
             str1 = entry.logKey

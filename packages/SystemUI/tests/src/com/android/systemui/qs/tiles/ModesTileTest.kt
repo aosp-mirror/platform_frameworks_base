@@ -27,7 +27,6 @@ import androidx.test.filters.SmallTest
 import com.android.internal.logging.MetricsLogger
 import com.android.settingslib.notification.data.repository.FakeZenModeRepository
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.animation.DialogTransitionAnimator
 import com.android.systemui.classifier.FalsingManagerFake
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.plugins.statusbar.StatusBarStateController
@@ -47,10 +46,9 @@ import com.android.systemui.util.mockito.any
 import com.android.systemui.util.settings.FakeSettings
 import com.android.systemui.util.settings.SecureSettings
 import com.google.common.truth.Truth.assertThat
-import kotlin.coroutines.EmptyCoroutineContext
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.After
@@ -82,13 +80,14 @@ class ModesTileTest : SysuiTestCase() {
 
     @Mock private lateinit var qsTileConfigProvider: QSTileConfigProvider
 
-    @Mock private lateinit var dialogTransitionAnimator: DialogTransitionAnimator
-
     @Mock private lateinit var dialogDelegate: ModesDialogDelegate
+
+    private val testDispatcher = UnconfinedTestDispatcher()
+    private val testScope = TestScope(testDispatcher)
 
     private val inputHandler = FakeQSTileIntentUserInputHandler()
     private val zenModeRepository = FakeZenModeRepository()
-    private val tileDataInteractor = ModesTileDataInteractor(zenModeRepository)
+    private val tileDataInteractor = ModesTileDataInteractor(zenModeRepository, testDispatcher)
     private val mapper =
         ModesTileMapper(
             context.orCreateTestableResources
@@ -99,9 +98,6 @@ class ModesTileTest : SysuiTestCase() {
                 .resources,
             context.theme,
         )
-
-    private val testDispatcher = StandardTestDispatcher()
-    private val testScope = TestScope(testDispatcher)
 
     private lateinit var userActionInteractor: ModesTileUserActionInteractor
     private lateinit var secureSettings: SecureSettings
@@ -131,9 +127,7 @@ class ModesTileTest : SysuiTestCase() {
 
         userActionInteractor =
             ModesTileUserActionInteractor(
-                EmptyCoroutineContext,
                 inputHandler,
-                dialogTransitionAnimator,
                 dialogDelegate,
             )
 

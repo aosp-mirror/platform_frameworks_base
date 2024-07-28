@@ -398,7 +398,6 @@ constructor(
      * including KeyguardSecurityContainerController and WindowManager.
      */
     fun startDismissKeyguardTransition(reason: String = "") {
-        // TODO(b/336576536): Check if adaptation for scene framework is needed
         if (SceneContainerFlag.isEnabled) return
         Log.d(TAG, "#startDismissKeyguardTransition(reason=$reason)")
         when (val startedState = repository.currentTransitionInfoInternal.value.to) {

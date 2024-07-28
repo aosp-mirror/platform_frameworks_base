@@ -661,9 +661,6 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
         } else {
             hideOngoingActivityChip(animate);
         }
-        if (!Flags.statusBarScreenSharingChips()) {
-            mOngoingCallController.notifyChipVisibilityChanged(showOngoingActivityChip);
-        }
     }
 
     private boolean shouldHideStatusBar() {

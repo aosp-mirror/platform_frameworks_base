@@ -150,6 +150,7 @@ import com.android.systemui.shade.ShadeController;
 import com.android.systemui.shade.ShadeControllerImpl;
 import com.android.systemui.shade.ShadeExpansionStateManager;
 import com.android.systemui.shade.ShadeLogger;
+import com.android.systemui.shared.notifications.domain.interactor.NotificationSettingsInteractor;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.KeyboardShortcutListSearch;
 import com.android.systemui.statusbar.KeyboardShortcuts;
@@ -343,7 +344,7 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
     @Mock private NotificationManager mNotificationManager;
     @Mock private GlanceableHubContainerController mGlanceableHubContainerController;
     @Mock private EmergencyGestureIntentFactory mEmergencyGestureIntentFactory;
-
+    @Mock private NotificationSettingsInteractor mNotificationSettingsInteractor;
     private ShadeController mShadeController;
     private final FakeSystemClock mFakeSystemClock = new FakeSystemClock();
     private final FakeGlobalSettings mFakeGlobalSettings = new FakeGlobalSettings();
@@ -403,7 +404,8 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
                         mPackageManager,
                         Optional.of(mBubbles),
                         mContext,
-                        mNotificationManager);
+                        mNotificationManager,
+                        mNotificationSettingsInteractor);
         mVisualInterruptionDecisionProvider.start();
 
         mContext.addMockSystemService(TrustManager.class, mock(TrustManager.class));

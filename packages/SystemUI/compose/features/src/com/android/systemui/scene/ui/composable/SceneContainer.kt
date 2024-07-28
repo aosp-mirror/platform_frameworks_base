@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-@file:OptIn(ExperimentalComposeUiApi::class)
-
 package com.android.systemui.scene.ui.composable
 
 import androidx.compose.foundation.layout.Box
@@ -23,14 +21,13 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.android.compose.animation.scene.MutableSceneTransitionLayoutState
 import com.android.compose.animation.scene.SceneKey
 import com.android.compose.animation.scene.SceneTransitionLayout
@@ -40,6 +37,7 @@ import com.android.compose.animation.scene.observableTransitionState
 import com.android.systemui.ribbon.ui.composable.BottomRightCornerRibbon
 import com.android.systemui.scene.shared.model.SceneDataSourceDelegator
 import com.android.systemui.scene.ui.viewmodel.SceneContainerViewModel
+import kotlinx.coroutines.flow.collectLatest
 
 /**
  * Renders a container of a collection of "scenes" that the user can switch between using certain
@@ -62,19 +60,20 @@ import com.android.systemui.scene.ui.viewmodel.SceneContainerViewModel
 fun SceneContainer(
     viewModel: SceneContainerViewModel,
     sceneByKey: Map<SceneKey, ComposableScene>,
+    initialSceneKey: SceneKey,
     dataSourceDelegator: SceneDataSourceDelegator,
     modifier: Modifier = Modifier,
 ) {
     val coroutineScope = rememberCoroutineScope()
-    val currentSceneKey: SceneKey by viewModel.currentScene.collectAsStateWithLifecycle()
     val state: MutableSceneTransitionLayoutState = remember {
         MutableSceneTransitionLayoutState(
-            initialScene = currentSceneKey,
+            initialScene = initialSceneKey,
             canChangeScene = { toScene -> viewModel.canChangeScene(toScene) },
             transitions = SceneContainerTransitions,
             enableInterruptions = false,
         )
     }
+    val currentSceneKey = state.transitionState.currentScene
 
     DisposableEffect(state) {
         val dataSource = SceneTransitionLayoutDataSource(state, coroutineScope)
@@ -87,19 +86,32 @@ fun SceneContainer(
         onDispose { viewModel.setTransitionState(null) }
     }
 
-    val userActionsBySceneKey: Map<SceneKey, Map<UserAction, UserActionResult>> =
-        sceneByKey.values.associate { scene ->
-            val userActions by scene.destinationScenes.collectAsStateWithLifecycle(emptyMap())
-            val resolvedUserActions = viewModel.resolveSceneFamilies(userActions)
-            scene.key to resolvedUserActions
+    val userActionsBySceneKey: MutableMap<SceneKey, Map<UserAction, UserActionResult>> = remember {
+        mutableStateMapOf()
+    }
+    LaunchedEffect(currentSceneKey) {
+        try {
+            sceneByKey[currentSceneKey]?.destinationScenes?.collectLatest { userActions ->
+                userActionsBySceneKey[currentSceneKey] = viewModel.resolveSceneFamilies(userActions)
+            }
+        } finally {
+            userActionsBySceneKey[currentSceneKey] = emptyMap()
         }
+    }
 
     Box(
         modifier = Modifier.fillMaxSize(),
     ) {
         SceneTransitionLayout(state = state, modifier = modifier.fillMaxSize()) {
             sceneByKey.forEach { (sceneKey, composableScene) ->
-                scene(key = sceneKey, userActions = checkNotNull(userActionsBySceneKey[sceneKey])) {
+                scene(
+                    key = sceneKey,
+                    userActions = userActionsBySceneKey.getOrDefault(sceneKey, emptyMap())
+                ) {
+                    // Activate the scene.
+                    LaunchedEffect(composableScene) { composableScene.activate() }
+
+                    // Render the scene.
                     with(composableScene) {
                         this@scene.Content(
                             modifier = Modifier.element(sceneKey.rootElementKey).fillMaxSize(),

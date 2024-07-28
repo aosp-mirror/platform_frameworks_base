@@ -26,7 +26,6 @@ import androidx.annotation.VisibleForTesting
 import com.android.internal.protolog.ProtoLog
 import com.android.wm.shell.ShellTaskOrganizer
 import com.android.wm.shell.protolog.ShellProtoLogGroup
-import com.android.wm.shell.shared.desktopmode.DesktopModeStatus
 import com.android.wm.shell.transition.Transitions
 import com.android.wm.shell.transition.Transitions.TransitionObserver
 
@@ -40,12 +39,17 @@ class DesktopTasksLimiter (
         transitions: Transitions,
         private val taskRepository: DesktopModeTaskRepository,
         private val shellTaskOrganizer: ShellTaskOrganizer,
+        private val maxTasksLimit: Int,
 ) {
     private val minimizeTransitionObserver = MinimizeTransitionObserver()
     @VisibleForTesting
     val leftoverMinimizedTasksRemover = LeftoverMinimizedTasksRemover()
 
     init {
+        require(maxTasksLimit > 0) {
+            "DesktopTasksLimiter should not be created with a maxTasksLimit at 0 or less. " +
+                    "Current value: $maxTasksLimit."
+        }
         transitions.registerObserver(minimizeTransitionObserver)
         taskRepository.addActiveTaskListener(leftoverMinimizedTasksRemover)
     }
@@ -61,10 +65,10 @@ class DesktopTasksLimiter (
         }
 
         override fun onTransitionReady(
-                transition: IBinder,
-                info: TransitionInfo,
-                startTransaction: SurfaceControl.Transaction,
-                finishTransaction: SurfaceControl.Transaction
+            transition: IBinder,
+            info: TransitionInfo,
+            startTransaction: SurfaceControl.Transaction,
+            finishTransaction: SurfaceControl.Transaction
         ) {
             val taskToMinimize = mPendingTransitionTokensAndTasks.remove(transition) ?: return
 
@@ -125,8 +129,7 @@ class DesktopTasksLimiter (
         }
 
         fun removeLeftoverMinimizedTasks(displayId: Int, wct: WindowContainerTransaction) {
-            if (taskRepository
-                .getActiveNonMinimizedTasksOrderedFrontToBack(displayId).isNotEmpty()) {
+            if (taskRepository.getActiveNonMinimizedOrderedTasks(displayId).isNotEmpty()) {
                 return
             }
             val remainingMinimizedTasks = taskRepository.getMinimizedTasks(displayId)
@@ -174,7 +177,7 @@ class DesktopTasksLimiter (
                 "DesktopTasksLimiter: addMinimizeBackTaskChangesIfNeeded, newFrontTask=%d",
                 newFrontTaskInfo.taskId)
         val newTaskListOrderedFrontToBack = createOrderedTaskListWithGivenTaskInFront(
-                taskRepository.getActiveNonMinimizedTasksOrderedFrontToBack(displayId),
+                taskRepository.getActiveNonMinimizedOrderedTasks(displayId),
                 newFrontTaskInfo.taskId)
         val taskToMinimize = getTaskToMinimizeIfNeeded(newTaskListOrderedFrontToBack)
         if (taskToMinimize != null) {
@@ -194,12 +197,6 @@ class DesktopTasksLimiter (
     }
 
     /**
-     * Returns the maximum number of tasks that should ever be displayed at the same time in Desktop
-     * Mode.
-     */
-    fun getMaxTaskLimit(): Int = DesktopModeStatus.getMaxTaskLimit()
-
-    /**
      * Returns the Task to minimize given 1. a list of visible tasks ordered from front to back and
      * 2. a new task placed in front of all the others.
      */
@@ -216,7 +213,7 @@ class DesktopTasksLimiter (
     fun getTaskToMinimizeIfNeeded(
             visibleFreeformTaskIdsOrderedFrontToBack: List<Int>
     ): RunningTaskInfo? {
-        if (visibleFreeformTaskIdsOrderedFrontToBack.size <= getMaxTaskLimit()) {
+        if (visibleFreeformTaskIdsOrderedFrontToBack.size <= maxTasksLimit) {
             ProtoLog.v(
                     ShellProtoLogGroup.WM_SHELL_DESKTOP_MODE,
                     "DesktopTasksLimiter: no need to minimize; tasks below limit")
@@ -244,7 +241,5 @@ class DesktopTasksLimiter (
     }
 
     @VisibleForTesting
-    fun getTransitionObserver(): TransitionObserver {
-        return minimizeTransitionObserver
-    }
+    fun getTransitionObserver(): TransitionObserver = minimizeTransitionObserver
 }

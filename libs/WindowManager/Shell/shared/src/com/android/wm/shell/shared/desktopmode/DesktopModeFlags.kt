@@ -35,12 +35,18 @@ enum class DesktopModeFlags(
 ) {
   // All desktop mode related flags will be added here
   DESKTOP_WINDOWING_MODE(Flags::enableDesktopWindowingMode, true),
-  WALLPAPER_ACTIVITY(Flags::enableDesktopWindowingWallpaperActivity, true);
+  CASCADING_WINDOWS(Flags::enableCascadingWindows, true),
+  WALLPAPER_ACTIVITY(Flags::enableDesktopWindowingWallpaperActivity, true),
+  MODALS_POLICY(Flags::enableDesktopWindowingModalsPolicy, true),
+  THEMED_APP_HEADERS(Flags::enableThemedAppHeaders, true),
+  QUICK_SWITCH(Flags::enableDesktopWindowingQuickSwitch, true),
+  APP_HEADER_WITH_TASK_DENSITY(Flags::enableAppHeaderWithTaskDensity, true),
+  TASK_STACK_OBSERVER_IN_SHELL(Flags::enableTaskStackObserverInShell, true),
+  SIZE_CONSTRAINTS(Flags::enableDesktopWindowingSizeConstraints, true),
+  DYNAMIC_INITIAL_BOUNDS(Flags::enableWindowingDynamicInitialBounds, true);
 
   /**
    * Determines state of flag based on the actual flag and desktop mode developer option overrides.
-   *
-   * Note, this method makes sure that a constant developer toggle overrides is read until reboot.
    */
   fun isEnabled(context: Context): Boolean =
       if (!Flags.showDesktopWindowingDevOption() ||
@@ -65,7 +71,7 @@ enum class DesktopModeFlags(
             ?: run {
               val override = getToggleOverrideFromSystem(context)
               // Cache toggle override the first time we encounter context. Override does not change
-              // with context, as context is just used to fetch System Property and Settings.Global
+              // with context, as context is just used to fetch Settings.Global
               cachedToggleOverride = override
               Log.d(TAG, "Toggle override initialized to: $override")
               override
@@ -74,29 +80,13 @@ enum class DesktopModeFlags(
     return override
   }
 
-  private fun getToggleOverrideFromSystem(context: Context): ToggleOverride {
-    // A non-persistent System Property is used to store override to ensure it remains
-    // constant till reboot.
-    val overrideFromSystemProperties: ToggleOverride? =
-        System.getProperty(SYSTEM_PROPERTY_OVERRIDE_KEY, null).convertToToggleOverride()
-    return overrideFromSystemProperties
-        ?: run {
-          // Read Setting Global if System Property is not present (just after reboot)
-          // or not valid (user manually changed the value)
-          val overrideFromSettingsGlobal =
-              convertToToggleOverrideWithFallback(
-                  Settings.Global.getInt(
-                      context.contentResolver,
-                      Settings.Global.DEVELOPMENT_OVERRIDE_DESKTOP_MODE_FEATURES,
-                      ToggleOverride.OVERRIDE_UNSET.setting),
-                  ToggleOverride.OVERRIDE_UNSET)
-          // Initialize System Property
-          System.setProperty(
-              SYSTEM_PROPERTY_OVERRIDE_KEY, overrideFromSettingsGlobal.setting.toString())
-
-          overrideFromSettingsGlobal
-        }
-  }
+  private fun getToggleOverrideFromSystem(context: Context): ToggleOverride =
+      convertToToggleOverrideWithFallback(
+          Settings.Global.getInt(
+              context.contentResolver,
+              Settings.Global.DEVELOPMENT_OVERRIDE_DESKTOP_MODE_FEATURES,
+              ToggleOverride.OVERRIDE_UNSET.setting),
+          ToggleOverride.OVERRIDE_UNSET)
 
   /**
    * Override state of desktop mode developer option toggle.
@@ -113,27 +103,12 @@ enum class DesktopModeFlags(
     OVERRIDE_ON(1)
   }
 
-  private fun String?.convertToToggleOverride(): ToggleOverride? {
-    val intValue = this?.toIntOrNull() ?: return null
-    return settingToToggleOverrideMap[intValue]
-        ?: run {
-          Log.w(TAG, "Unknown toggleOverride int $intValue")
-          null
-        }
-  }
-
   companion object {
     private const val TAG = "DesktopModeFlags"
 
     /**
-     * Key for non-persistent System Property which is used to store desktop windowing developer
-     * option overrides.
-     */
-    private const val SYSTEM_PROPERTY_OVERRIDE_KEY = "sys.wmshell.desktopmode.dev_toggle_override"
-
-    /**
      * Local cache for toggle override, which is initialized once on its first access. It needs to
-     * be refreshed only on reboots as overridden state takes effect on reboots.
+     * be refreshed only on reboots as overridden state is expected to take effect on reboots.
      */
     private var cachedToggleOverride: ToggleOverride? = null
 

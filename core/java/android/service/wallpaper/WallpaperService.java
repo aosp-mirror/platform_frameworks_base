@@ -404,8 +404,7 @@ public abstract class WallpaperService extends Service {
             }
 
             private void prepareToDraw() {
-                if (mDisplayState == Display.STATE_DOZE
-                        || mDisplayState == Display.STATE_DOZE_SUSPEND) {
+                if (mDisplayState == Display.STATE_DOZE) {
                     try {
                         mSession.pokeDrawLock(mWindow);
                     } catch (RemoteException e) {

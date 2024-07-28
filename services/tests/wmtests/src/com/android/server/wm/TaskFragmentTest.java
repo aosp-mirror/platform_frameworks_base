@@ -1049,6 +1049,28 @@ public class TaskFragmentTest extends WindowTestsBase {
         assertFalse(taskFragment.shouldBeVisible(null));
     }
 
+    @Test
+    public void testTaskFragmentSmallestScreenWidthDp() {
+        // Create an embedded TaskFragment in a Task.
+        final Task task = createTask(mDisplayContent);
+        final TaskFragment taskFragment = new TaskFragmentBuilder(mAtm)
+                .setParentTask(task)
+                .createActivityCount(1)
+                .build();
+        final Rect taskBounds = task.getBounds();
+
+        // Making the bounds of the embedded TaskFragment smaller than the parent Task.
+        taskFragment.setBounds(taskBounds.left, taskBounds.top, taskBounds.right / 2,
+                taskBounds.bottom);
+
+        // The swdp should be calculated via the TF bounds when it is a multi-window TF.
+        final Configuration outConfig = new Configuration();
+        outConfig.windowConfiguration.setWindowingMode(WINDOWING_MODE_MULTI_WINDOW);
+        taskFragment.computeConfigResourceOverrides(outConfig, task.getConfiguration());
+        assertEquals(outConfig.smallestScreenWidthDp,
+                Math.min(outConfig.screenWidthDp, outConfig.screenHeightDp));
+    }
+
     private WindowState createAppWindow(ActivityRecord app, String name) {
         final WindowState win = createWindow(null, TYPE_BASE_APPLICATION, app, name,
                 0 /* ownerId */, false /* ownerCanAddInternalSystemWindow */, new TestIWindow());

@@ -80,14 +80,6 @@ flag {
 }
 
 flag {
-  name: "introduce_smoother_dimmer"
-  namespace: "windowing_frontend"
-  description: "Refactor dim to fix flickers"
-  bug: "295291019"
-  is_fixed_read_only: true
-}
-
-flag {
   name: "transit_ready_tracking"
   namespace: "windowing_frontend"
   description: "Enable accurate transition readiness tracking"
@@ -166,21 +158,21 @@ flag {
 }
 
 flag {
-  name: "keyguard_appear_transition"
-  namespace: "windowing_frontend"
-  description: "Add transition when keyguard appears"
-  bug: "327970608"
-  is_fixed_read_only: true
-  metadata {
-      purpose: PURPOSE_BUGFIX
-  }
-}
-
-flag {
   name: "get_dimmer_on_closing"
   namespace: "windowing_frontend"
   description: "Change check for when to ignore a closing task's dim"
   bug: "329233513"
+  is_fixed_read_only: true
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}
+
+flag {
+  name: "use_tasks_dim_only"
+  namespace: "windowing_frontend"
+  description: "Only use the task's dim and reparent it to the display area when needed instead of coordinating multiple dimmers"
+  bug: "352522056"
   is_fixed_read_only: true
   metadata {
     purpose: PURPOSE_BUGFIX

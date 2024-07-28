@@ -67,5 +67,7 @@ class AppCompatConfigurationRobot {
                 .isCameraCompatSplitScreenAspectRatioEnabled();
     }
 
-
+    void enableCompatFakeFocus(boolean enabled) {
+        doReturn(enabled).when(mAppCompatConfiguration).isCompatFakeFocusEnabled();
+    }
 }

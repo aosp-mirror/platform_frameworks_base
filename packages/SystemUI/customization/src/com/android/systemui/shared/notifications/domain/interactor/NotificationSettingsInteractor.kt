@@ -38,4 +38,5 @@ class NotificationSettingsInteractor(
         val current = repository.isShowNotificationsOnLockScreenEnabled().value
         repository.setShowNotificationsOnLockscreenEnabled(!current)
     }
-}
+
+    val isCooldownEnabled = repository.isCooldownEnabled}

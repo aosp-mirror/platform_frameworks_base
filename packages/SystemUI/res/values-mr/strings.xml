@@ -426,6 +426,11 @@
     <string name="sensor_privacy_dialog_open_settings" msgid="5635865896053011859">"सेटिंग्ज उघडा"</string>
     <string name="media_seamless_other_device" msgid="4654849800789196737">"इतर डिव्हाइस"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"अवलोकन टॉगल करा."</string>
+    <string name="zen_modes_dialog_title" msgid="4159138230418567383">"प्राधान्य मोड"</string>
+    <string name="zen_modes_dialog_done" msgid="6654130880256438950">"पूर्ण झाले"</string>
+    <string name="zen_modes_dialog_settings" msgid="2310248023728936697">"सेटिंग्ज"</string>
+    <string name="zen_mode_on" msgid="9085304934016242591">"सुरू आहे"</string>
+    <string name="zen_mode_off" msgid="1736604456618147306">"बंद आहे"</string>
     <string name="zen_priority_introduction" msgid="3159291973383796646">"अलार्म, रिमाइंडर, इव्‍हेंट आणि तुम्ही निश्चित केलेल्या कॉलर व्यतिरिक्त तुम्हाला कोणत्याही आवाज आणि कंपनांचा व्यत्त्यय आणला जाणार नाही. तरीही तुम्ही प्ले करायचे ठरवलेले कोणतेही संगीत, व्हिडिओ आणि गेमचे आवाज ऐकू शकतात."</string>
     <string name="zen_alarms_introduction" msgid="3987266042682300470">"अलार्म व्यतिरिक्त तुम्हाला कोणत्याही आवाज आणि कंपनांचा व्यत्त्यय आणला जाणार नाही. तरीही तुम्ही प्ले करायचे ठरवलेले कोणतेही संगीत, व्हिडिओ आणि गेमचे आवाज ऐकू शकतात."</string>
     <string name="zen_priority_customize_button" msgid="4119213187257195047">"सानुकूलित करा"</string>
@@ -492,6 +497,7 @@
     <string name="accessibility_action_label_place_widget" msgid="1914197458644168978">"निवडलेले विजेट ठेवा"</string>
     <string name="communal_widget_picker_title" msgid="1953369090475731663">"लॉक स्‍क्रीन विजेट"</string>
     <string name="communal_widget_picker_description" msgid="490515450110487871">"तुमचा टॅबलेट लॉक केला, तरी कोणीही तुमच्या लॉक स्क्रीनवरील विजेट पाहू शकतो."</string>
+    <string name="accessibility_action_label_unselect_widget" msgid="1041811747619468698">"विजेटची निवड रद्द करा"</string>
     <string name="communal_widgets_disclaimer_title" msgid="1150954395585308868">"लॉक स्‍क्रीन विजेट"</string>
     <string name="communal_widgets_disclaimer_text" msgid="1423545475160506349">"विजेट वापरून अ‍ॅप उघडण्यासाठी, तुम्हाला हे तुम्हीच असल्याची पडताळणी करावी लागेल. तसेच, लक्षात ठेवा, तुमचा टॅबलेट लॉक असतानादेखील कोणीही ती पाहू शकते. काही विजेट कदाचित तुमच्या लॉक स्‍क्रीनसाठी नाहीत आणि ती इथे जोडणे असुरक्षित असू शकते."</string>
     <string name="communal_widgets_disclaimer_button" msgid="4423059765740780753">"समजले"</string>
@@ -548,8 +554,10 @@
     <string name="media_projection_action_text" msgid="3634906766918186440">"आता सुरू करा"</string>
     <string name="empty_shade_text" msgid="8935967157319717412">"सूचना नाहीत"</string>
     <string name="no_unseen_notif_text" msgid="395512586119868682">"नवीन सूचना नाहीत"</string>
-    <string name="adaptive_notification_edu_hun_title" msgid="5720882373252389461">"अडॅप्टिव्ह नोटिफिकेशन सुरू आहे"</string>
-    <string name="adaptive_notification_edu_hun_text" msgid="4260536236101821273">"कमी वेळेत खूप नोटिफिकेशन मिळल्यास डिव्हाइस आता कमाल २ मिनिटे व्हॉल्यूम, स्क्रीनवरील पॉप-अप कमी करते."</string>
+    <!-- no translation found for adaptive_notification_edu_hun_title (7790738150177329960) -->
+    <skip />
+    <!-- no translation found for adaptive_notification_edu_hun_text (7743367744129536610) -->
+    <skip />
     <string name="go_to_adaptive_notification_settings" msgid="2423690125178298479">"बंद करा"</string>
     <string name="unlock_to_see_notif_text" msgid="7439033907167561227">"जुन्या सूचना पाहण्यासाठी अनलॉक करा"</string>
     <string name="quick_settings_disclosure_parental_controls" msgid="2114102871438223600">"हे डिव्हाइस तुमच्या पालकाने व्यवस्थापित केले आहे"</string>
@@ -716,8 +724,7 @@
     <string name="notification_alert_title" msgid="3656229781017543655">"डीफॉल्ट"</string>
     <string name="notification_automatic_title" msgid="3745465364578762652">"ऑटोमॅटिक"</string>
     <string name="notification_channel_summary_low" msgid="4860617986908931158">"आवाज किंवा व्हायब्रेशन नाही"</string>
-    <!-- no translation found for notification_conversation_summary_low (3855696451919728790) -->
-    <skip />
+    <string name="notification_conversation_summary_low" msgid="3855696451919728790">"आवाज किंवा व्हायब्रेशन नाही, पण तरीही संभाषण विभागामध्ये दिसते"</string>
     <string name="notification_channel_summary_default" msgid="777294388712200605">"डिव्‍हाइस सेटिंग्जनुसार रिंग किंवा व्हायब्रेट होऊ शकतो"</string>
     <string name="notification_channel_summary_default_with_bubbles" msgid="3482483084451555344">"डिव्‍हाइस सेटिंग्जनुसार रिंग किंवा व्हायब्रेट होऊ शकतो. <xliff:g id="APP_NAME">%1$s</xliff:g> मधील संभाषणे बाय डीफॉल्ट बबल होतात."</string>
     <string name="notification_channel_summary_automatic" msgid="5813109268050235275">"ही सूचना मिळाल्‍यावर आवाज व्‍हावा की व्हायब्रेशन व्‍हावे ते सिस्‍टममध्ये नमूद करा"</string>
@@ -1378,4 +1385,16 @@
     <string name="home_controls_dream_label" msgid="6567105701292324257">"होम कंट्रोल"</string>
     <string name="home_controls_dream_description" msgid="4644150952104035789">"स्क्रीनसेव्हर म्हणून होम कंट्रोल झटपट ॲक्सेस करा"</string>
     <string name="volume_undo_action" msgid="5815519725211877114">"पहिल्यासारखे करा"</string>
+    <string name="back_edu_toast_content" msgid="4530314597378982956">"मागे जाण्यासाठी, टचपॅडवर तीन बोटांनी डावीकडे किंवा उजवीकडे स्वाइप करा"</string>
+    <string name="home_edu_toast_content" msgid="3381071147871955415">"होमवर जाण्यासाठी, टचपॅडवर तीन बोटांनी वरती स्वाइप करा"</string>
+    <string name="overview_edu_toast_content" msgid="5797030644017804518">"अलीकडील ॲप्स पाहण्यासाठी, टचपॅडवर तीन बोटांनी वरती स्वाइप करा आणि धरून ठेवा"</string>
+    <string name="all_apps_edu_toast_content" msgid="8807496014667211562">"तुमची सर्व ॲप्स पाहण्यासाठी, तुमच्या कीबोर्डवरील अ‍ॅक्शन की प्रेस करा"</string>
+    <string name="back_edu_notification_title" msgid="5624780717751357278">"मागे जाण्यासाठी तुमचा टचपॅड वापरा"</string>
+    <string name="back_edu_notification_content" msgid="2497557451540954068">"तीन बोटांनी डावीकडे किंवा उजवीकडे स्वाइप करा. आणखी जेश्चर जाणून घेण्यासाठी टॅप करा."</string>
+    <string name="home_edu_notification_title" msgid="6097902076909654045">"होमवर जाण्यासाठी तुमचा टचपॅड वापरा"</string>
+    <string name="home_edu_notification_content" msgid="6631697734535766588">"तीन बोटांनी वरती स्‍वाइप करा. आणखी जेश्चर जाणून घेण्यासाठी टॅप करा."</string>
+    <string name="overview_edu_notification_title" msgid="1265824157319562406">"अलीकडील अ‍ॅप्स पाहण्यासाठी तुमचा टचपॅड वापरा"</string>
+    <string name="overview_edu_notification_content" msgid="3578204677648432500">"तीन बोटांनी वरती आणि खाली स्वाइप करा. आणखी जेश्चर जाणून घेण्यासाठी टॅप करा."</string>
+    <string name="all_apps_edu_notification_title" msgid="372262997265569063">"सर्व ॲप्स पाहण्यासाठी तुमचा कीबोर्ड वापरा"</string>
+    <string name="all_apps_edu_notification_content" msgid="3255070575694025585">"अ‍ॅक्शन की कधीही प्रेस करा. आणखी जेश्चर जाणून घेण्यासाठी टॅप करा."</string>
 </resources>

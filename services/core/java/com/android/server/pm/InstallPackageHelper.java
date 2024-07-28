@@ -3264,6 +3264,7 @@ final class InstallPackageHelper {
     /**
      * Tries to restore the disabled system package after an update has been deleted.
      */
+    @GuardedBy("mPm.mInstallLock")
     public void restoreDisabledSystemPackageLIF(DeletePackageAction action,
             @NonNull int[] allUserHandles, boolean writeSettings) throws SystemDeleteException {
         final PackageSetting deletedPs = action.mDeletingPs;
@@ -3282,10 +3283,21 @@ final class InstallPackageHelper {
         }
         // Install the system package
         if (DEBUG_REMOVE) Slog.d(TAG, "Re-installing system package: " + disabledPs);
-        try (PackageManagerTracedLock installLock = mPm.mInstallLock.acquireLock()) {
+        try {
             final int[] origUsers = outInfo == null ? null : outInfo.mOrigUsers;
-            installPackageFromSystemLIF(disabledPs.getPathString(), allUserHandles,
-                    origUsers, writeSettings);
+            try (PackageManagerTracedLock installLock = mPm.mInstallLock.acquireLock()) {
+                installPackageFromSystemLIF(disabledPs.getPathString(), allUserHandles,
+                        origUsers, writeSettings);
+            }
+            if (origUsers != null) {
+                mPm.commitPackageStateMutation(null, mutator -> {
+                    for (int userId : origUsers) {
+                        mutator.forPackage(disabledPs.getPackageName())
+                                .userState(userId)
+                                .setOverlayPaths(deletedPs.getOverlayPaths(userId));
+                    }
+                });
+            }
         } catch (PackageManagerException e) {
             Slog.w(TAG, "Failed to restore system package:" + deletedPs.getPackageName() + ": "
                     + e.getMessage());
@@ -3813,13 +3825,13 @@ final class InstallPackageHelper {
                 // This also has the (beneficial) side effect where if a package disappears from an
                 // APEX, leaving only a /data copy, it will lose its apexModuleName.
                 //
-                // This must be done before scanSystemPackageLI as that will throw in the case of a
+                // This must be done before scanPackageForInitLI as that will throw in the case of a
                 // system -> data package.
                 disabledPkgSetting.setApexModuleName(activeApexInfo.apexModuleName);
             }
         }
 
-        final Pair<ScanResult, Boolean> scanResultPair = scanSystemPackageLI(
+        final Pair<ScanResult, Boolean> scanResultPair = scanPackageForInitLI(
                 parsedPackage, parseFlags, scanFlags, user);
         final ScanResult scanResult = scanResultPair.first;
         boolean shouldHideSystemApp = scanResultPair.second;
@@ -4054,7 +4066,7 @@ final class InstallPackageHelper {
         }
     }
 
-    private Pair<ScanResult, Boolean> scanSystemPackageLI(ParsedPackage parsedPackage,
+    private Pair<ScanResult, Boolean> scanPackageForInitLI(ParsedPackage parsedPackage,
             @ParsingPackageUtils.ParseFlags int parseFlags,
             @PackageManagerService.ScanFlags int scanFlags,
             @Nullable UserHandle user) throws PackageManagerException {
@@ -4167,7 +4179,7 @@ final class InstallPackageHelper {
                         ParsingPackageUtils.getSigningDetails(input, parsedPackage,
                                 false /*skipVerify*/);
                 if (result.isError()) {
-                    throw new PrepareFailure("Failed collect during scanSystemPackageLI",
+                    throw new PrepareFailure("Failed collect during scanPackageForInitLI",
                             result.getException());
                 }
                 disabledPkgSetting.setSigningDetails(result.getResult());

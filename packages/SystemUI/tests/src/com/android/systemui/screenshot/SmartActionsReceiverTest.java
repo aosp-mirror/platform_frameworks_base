@@ -16,8 +16,8 @@
 
 package com.android.systemui.screenshot;
 
-import static com.android.systemui.screenshot.ScreenshotController.EXTRA_ACTION_TYPE;
-import static com.android.systemui.screenshot.ScreenshotController.EXTRA_ID;
+import static com.android.systemui.screenshot.SmartActionsReceiver.EXTRA_ACTION_TYPE;
+import static com.android.systemui.screenshot.SmartActionsReceiver.EXTRA_ID;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -57,7 +57,7 @@ public class SmartActionsReceiverTest extends SysuiTestCase {
         MockitoAnnotations.initMocks(this);
         mSmartActionsReceiver = new SmartActionsReceiver(mMockScreenshotSmartActions);
         mIntent = new Intent(mContext, SmartActionsReceiver.class)
-                .putExtra(ScreenshotController.EXTRA_ACTION_INTENT, mMockPendingIntent);
+                .putExtra(SmartActionsReceiver.EXTRA_ACTION_INTENT, mMockPendingIntent);
     }
 
     @Test

@@ -24,7 +24,6 @@
 #include <utils/String8.h>
 #include <utils/Thread.h>
 
-#include <gui/IProducerListener.h>
 #include <gui/Surface.h>
 #include <ui/PublicFormat.h>
 #include <android_runtime/AndroidRuntime.h>
@@ -65,15 +64,18 @@ static struct {
 
 // ----------------------------------------------------------------------------
 
-class JNIImageWriterContext : public BnProducerListener {
+class JNIImageWriterContext : public SurfaceListener {
 public:
     JNIImageWriterContext(JNIEnv* env, jobject weakThiz, jclass clazz);
 
     virtual ~JNIImageWriterContext();
 
-    // Implementation of IProducerListener, used to notify the ImageWriter that the consumer
+    // Implementation of SurfaceListener, used to notify the ImageWriter that the consumer
     // has returned a buffer and it is ready for ImageWriter to dequeue.
     virtual void onBufferReleased();
+    virtual bool needsReleaseNotify() override { return true; };
+    virtual void onBuffersDiscarded(const std::vector<sp<GraphicBuffer>>& /*buffers*/) override {};
+    virtual void onBufferDetached(int /*slot*/) override {};
 
     void setProducer(const sp<Surface>& producer) { mProducer = producer; }
     Surface* getProducer() { return mProducer.get(); }

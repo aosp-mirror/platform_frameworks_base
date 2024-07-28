@@ -39,7 +39,7 @@ import android.platform.test.annotations.Presubmit;
 import android.util.Size;
 
 import androidx.test.InstrumentationRegistry;
-import androidx.test.runner.AndroidJUnit4;
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 
 import org.junit.After;
 import org.junit.Before;

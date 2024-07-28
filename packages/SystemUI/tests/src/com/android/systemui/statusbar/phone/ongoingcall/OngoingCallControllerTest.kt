@@ -31,10 +31,11 @@ import android.view.View
 import android.widget.LinearLayout
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
-import com.android.internal.logging.testing.UiEventLoggerFake
 import com.android.systemui.Flags.FLAG_STATUS_BAR_SCREEN_SHARING_CHIPS
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.dump.DumpManager
+import com.android.systemui.kosmos.Kosmos
+import com.android.systemui.log.logcatLogBuffer
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.res.R
 import com.android.systemui.statusbar.data.repository.FakeStatusBarModeRepository
@@ -43,7 +44,7 @@ import com.android.systemui.statusbar.notification.collection.NotificationEntry
 import com.android.systemui.statusbar.notification.collection.NotificationEntryBuilder
 import com.android.systemui.statusbar.notification.collection.notifcollection.CommonNotifCollection
 import com.android.systemui.statusbar.notification.collection.notifcollection.NotifCollectionListener
-import com.android.systemui.statusbar.phone.ongoingcall.data.repository.OngoingCallRepository
+import com.android.systemui.statusbar.phone.ongoingcall.data.repository.ongoingCallRepository
 import com.android.systemui.statusbar.phone.ongoingcall.shared.model.OngoingCallModel
 import com.android.systemui.statusbar.window.StatusBarWindowController
 import com.android.systemui.util.concurrency.FakeExecutor
@@ -84,13 +85,13 @@ private const val PROC_STATE_INVISIBLE = ActivityManager.PROCESS_STATE_FOREGROUN
 @TestableLooper.RunWithLooper
 @OptIn(ExperimentalCoroutinesApi::class)
 class OngoingCallControllerTest : SysuiTestCase() {
+    private val kosmos = Kosmos()
 
     private val clock = FakeSystemClock()
     private val mainExecutor = FakeExecutor(clock)
-    private val uiEventLoggerFake = UiEventLoggerFake()
     private val testScope = TestScope()
     private val statusBarModeRepository = FakeStatusBarModeRepository()
-    private val ongoingCallRepository = OngoingCallRepository()
+    private val ongoingCallRepository = kosmos.ongoingCallRepository
 
     private lateinit var controller: OngoingCallController
     private lateinit var notifCollectionListener: NotifCollectionListener
@@ -124,11 +125,11 @@ class OngoingCallControllerTest : SysuiTestCase() {
                 mockActivityStarter,
                 mainExecutor,
                 mockIActivityManager,
-                OngoingCallLogger(uiEventLoggerFake),
                 DumpManager(),
                 mockStatusBarWindowController,
                 mockSwipeStatusBarAwayGestureHandler,
                 statusBarModeRepository,
+                logcatLogBuffer("OngoingCallControllerTest"),
             )
         controller.start()
         controller.addCallback(mockOngoingCallListener)
@@ -544,18 +545,6 @@ class OngoingCallControllerTest : SysuiTestCase() {
         verify(mockOngoingCallListener).onOngoingCallStateChanged(anyBoolean())
     }
 
-    @Test
-    @DisableFlags(FLAG_STATUS_BAR_SCREEN_SHARING_CHIPS)
-    fun chipClicked_clickEventLogged() {
-        notifCollectionListener.onEntryUpdated(createOngoingCallNotifEntry())
-
-        chipView.performClick()
-
-        assertThat(uiEventLoggerFake.numLogs()).isEqualTo(1)
-        assertThat(uiEventLoggerFake.eventId(0))
-            .isEqualTo(OngoingCallLogger.OngoingCallEvents.ONGOING_CALL_CLICKED.id)
-    }
-
     /** Regression test for b/212467440. */
     @Test
     @DisableFlags(FLAG_STATUS_BAR_SCREEN_SHARING_CHIPS)
@@ -569,18 +558,6 @@ class OngoingCallControllerTest : SysuiTestCase() {
         // Ensure that the sysui didn't modify the notification's intent -- see b/212467440.
         verify(mockActivityStarter).postStartActivityDismissingKeyguard(eq(pendingIntent), any())
     }
-
-    @Test
-    fun notifyChipVisibilityChanged_visibleEventLogged() {
-        controller.notifyChipVisibilityChanged(true)
-
-        assertThat(uiEventLoggerFake.numLogs()).isEqualTo(1)
-        assertThat(uiEventLoggerFake.eventId(0))
-            .isEqualTo(OngoingCallLogger.OngoingCallEvents.ONGOING_CALL_VISIBLE.id)
-    }
-
-    // Other tests for notifyChipVisibilityChanged are in [OngoingCallLogger], since
-    // [OngoingCallController.notifyChipVisibilityChanged] just delegates to that class.
 
     @Test
     @DisableFlags(FLAG_STATUS_BAR_SCREEN_SHARING_CHIPS)

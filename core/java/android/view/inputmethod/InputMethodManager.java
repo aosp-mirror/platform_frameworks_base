@@ -1350,11 +1350,15 @@ public final class InputMethodManager {
                     return;
                 }
                 case MSG_SET_VISIBILITY:
-                    final boolean visible = msg.arg1 != 0;
+                    final SomeArgs args = (SomeArgs) msg.obj;
+                    final boolean visible = (boolean) args.arg1;
+                    final ImeTracker.Token statsToken = (ImeTracker.Token) args.arg2;
                     synchronized (mH) {
                         if (mCurRootView != null) {
                             final var insetsController = mCurRootView.getInsetsController();
                             if (insetsController != null) {
+                                ImeTracker.forLogging().onProgress(statsToken,
+                                        ImeTracker.PHASE_CLIENT_HANDLE_SET_IME_VISIBILITY);
                                 if (visible) {
                                     insetsController.show(WindowInsets.Type.ime(),
                                             false /* fromIme */, null /* statsToken */);
@@ -1363,6 +1367,9 @@ public final class InputMethodManager {
                                             false /* fromIme */, null /* statsToken */);
                                 }
                             }
+                        } else {
+                            ImeTracker.forLogging().onFailed(statsToken,
+                                    ImeTracker.PHASE_CLIENT_HANDLE_SET_IME_VISIBILITY);
                         }
                     }
                     break;
@@ -1463,8 +1470,13 @@ public final class InputMethodManager {
         }
 
         @Override
-        public void setImeVisibility(boolean visible) {
-            mH.obtainMessage(MSG_SET_VISIBILITY, visible ? 1 : 0, 0).sendToTarget();
+        public void setImeVisibility(boolean visible, @Nullable ImeTracker.Token statsToken) {
+            final SomeArgs args = SomeArgs.obtain();
+            args.arg1 = visible;
+            args.arg2 = statsToken;
+            ImeTracker.forLogging().onProgress(statsToken,
+                    ImeTracker.PHASE_CLIENT_SET_IME_VISIBILITY);
+            mH.obtainMessage(MSG_SET_VISIBILITY, args).sendToTarget();
         }
 
         @Override
@@ -2344,11 +2356,15 @@ public final class InputMethodManager {
                 if (viewRootImpl != null
                         && (viewRootImpl.getInsetsController().computeUserAnimatingTypes()
                                 & WindowInsets.Type.ime()) == 0) {
+                    ImeTracker.forLogging().onProgress(statsToken,
+                            ImeTracker.PHASE_CLIENT_NO_ONGOING_USER_ANIMATION);
                     // TODO(b/322992891) handle case of SHOW_IMPLICIT
                     viewRootImpl.getInsetsController().show(WindowInsets.Type.ime(),
                             false /* fromIme */, statsToken);
                     return true;
                 }
+                ImeTracker.forLogging().onCancelled(statsToken,
+                        ImeTracker.PHASE_CLIENT_NO_ONGOING_USER_ANIMATION);
                 return false;
             } else {
                 // Makes sure to call ImeInsetsSourceConsumer#onShowRequested on the UI thread.

@@ -99,7 +99,7 @@ public class DeveloperInfoTest {
             developerInfoEle.removeAttribute(optField);
             DeveloperInfo developerInfo =
                     new DeveloperInfoFactory().createFromHrElement(developerInfoEle);
-            developerInfo.toOdDomElement(TestUtils.document());
+            var unused = developerInfo.toOdDomElement(TestUtils.document());
         }
 
         for (String optField : OPTIONAL_FIELD_NAMES_OD) {
@@ -109,7 +109,7 @@ public class DeveloperInfoTest {
             TestUtils.removeOdChildEleWithName(developerInfoEle, optField);
             DeveloperInfo developerInfo =
                     new DeveloperInfoFactory().createFromOdElement(developerInfoEle);
-            developerInfo.toHrDomElement(TestUtils.document());
+            var unused = developerInfo.toHrDomElement(TestUtils.document());
         }
     }
 

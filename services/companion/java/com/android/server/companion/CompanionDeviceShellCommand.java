@@ -103,9 +103,10 @@ class CompanionDeviceShellCommand extends ShellCommand {
                     String packageName = getNextArgRequired();
                     String address = getNextArgRequired();
                     String deviceProfile = getNextArg();
+                    boolean selfManaged = getNextBooleanArg();
                     final MacAddress macAddress = MacAddress.fromString(address);
                     mAssociationRequestsProcessor.createAssociation(userId, packageName, macAddress,
-                            deviceProfile, deviceProfile, /* associatedDevice */ null, false,
+                            deviceProfile, deviceProfile, /* associatedDevice */ null, selfManaged,
                             /* callback */ null, /* resultReceiver */ null);
                 }
                 break;
@@ -462,6 +463,17 @@ class CompanionDeviceShellCommand extends ShellCommand {
         }
     }
 
+    private boolean getNextBooleanArg() {
+        String arg = getNextArg();
+        if (arg == null || "false".equalsIgnoreCase(arg)) {
+            return false;
+        } else if ("true".equalsIgnoreCase(arg)) {
+            return Boolean.parseBoolean(arg);
+        } else {
+            throw new IllegalArgumentException("Expected a boolean argument but was: " + arg);
+        }
+    }
+
     @Override
     public void onHelp() {
         PrintWriter pw = getOutPrintWriter();
@@ -470,7 +482,7 @@ class CompanionDeviceShellCommand extends ShellCommand {
         pw.println("      Print this help text.");
         pw.println("  list USER_ID");
         pw.println("      List all Associations for a user.");
-        pw.println("  associate USER_ID PACKAGE MAC_ADDRESS [DEVICE_PROFILE]");
+        pw.println("  associate USER_ID PACKAGE MAC_ADDRESS [DEVICE_PROFILE] [SELF_MANAGED]");
         pw.println("      Create a new Association.");
         pw.println("  disassociate USER_ID PACKAGE MAC_ADDRESS");
         pw.println("      Remove an existing Association.");

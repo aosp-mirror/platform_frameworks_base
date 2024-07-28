@@ -1374,7 +1374,6 @@ public class BubbleStackView extends FrameLayout
         // The menu itself should respect locale direction so the icons are on the correct side.
         mManageMenu.setLayoutDirection(LAYOUT_DIRECTION_LOCALE);
         addView(mManageMenu);
-        updateManageButtonListener();
     }
 
     /**
@@ -3375,14 +3374,6 @@ public class BubbleStackView extends FrameLayout
             mExpandedViewContainer.setAlpha(0f);
             mExpandedViewContainer.addView(bev);
 
-            postDelayed(() -> {
-                // Set the Manage button click handler from postDelayed. This appears to resolve
-                // a race condition with adding the BubbleExpandedView view to the expanded view
-                // container. Due to the race condition the click handler sometimes is not set up
-                // correctly and is never called.
-                updateManageButtonListener();
-            }, 0);
-
             if (!mIsExpansionAnimating) {
                 mIsBubbleSwitchAnimating = true;
                 mSurfaceSynchronizer.syncSurfaceAndRun(() -> {
@@ -3392,13 +3383,8 @@ public class BubbleStackView extends FrameLayout
         }
     }
 
-    private void updateManageButtonListener() {
-        BubbleExpandedView bev = getExpandedView();
-        if (mIsExpanded && bev != null) {
-            bev.setManageClickListener((view) -> {
-                showManageMenu(true /* show */);
-            });
-        }
+    void onManageBubbleClicked() {
+        showManageMenu(true /* show */);
     }
 
     /**
