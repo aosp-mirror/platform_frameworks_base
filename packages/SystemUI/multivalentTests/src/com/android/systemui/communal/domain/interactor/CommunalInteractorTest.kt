@@ -19,10 +19,8 @@ package com.android.systemui.communal.domain.interactor
 
 import android.app.admin.DevicePolicyManager
 import android.app.admin.devicePolicyManager
-import android.appwidget.AppWidgetProviderInfo
 import android.content.Intent
 import android.content.pm.UserInfo
-import android.graphics.Bitmap
 import android.os.UserHandle
 import android.os.UserManager
 import android.os.userManager
@@ -52,7 +50,6 @@ import com.android.systemui.communal.domain.model.CommunalContentModel
 import com.android.systemui.communal.domain.model.CommunalTransitionProgressModel
 import com.android.systemui.communal.shared.model.CommunalContentSize
 import com.android.systemui.communal.shared.model.CommunalScenes
-import com.android.systemui.communal.shared.model.CommunalWidgetContentModel
 import com.android.systemui.communal.shared.model.EditModeState
 import com.android.systemui.communal.widgets.EditWidgetsActivityStarter
 import com.android.systemui.coroutines.collectLastValue
@@ -251,18 +248,16 @@ class CommunalInteractorTest : SysuiTestCase() {
             runCurrent()
 
             // Widgets available.
-            val widget1 = createWidgetForUser(1, USER_INFO_WORK.id)
-            val widget2 = createWidgetForUser(2, MAIN_USER_INFO.id)
-            val widget3 = createWidgetForUser(3, MAIN_USER_INFO.id)
-            val widgets = listOf(widget1, widget2, widget3)
-            widgetRepository.setCommunalWidgets(widgets)
+            widgetRepository.addWidget(appWidgetId = 1, userId = USER_INFO_WORK.id)
+            widgetRepository.addWidget(appWidgetId = 2, userId = MAIN_USER_INFO.id)
+            widgetRepository.addWidget(appWidgetId = 3, userId = MAIN_USER_INFO.id)
 
             val widgetContent by collectLastValue(underTest.widgetContent)
 
-            assertThat(widgetContent!!).isNotEmpty()
-            widgetContent!!.forEachIndexed { index, model ->
-                assertThat(model.appWidgetId).isEqualTo(widgets[index].appWidgetId)
-            }
+            assertThat(checkNotNull(widgetContent)).isNotEmpty()
+            assertThat(widgetContent!![0].appWidgetId).isEqualTo(1)
+            assertThat(widgetContent!![1].appWidgetId).isEqualTo(2)
+            assertThat(widgetContent!![2].appWidgetId).isEqualTo(3)
         }
 
     @Test
@@ -839,11 +834,9 @@ class CommunalInteractorTest : SysuiTestCase() {
 
             val widgetContent by collectLastValue(underTest.widgetContent)
             // Given three widgets, and one of them is associated with pre-existing work profile.
-            val widget1 = createWidgetForUser(1, USER_INFO_WORK.id)
-            val widget2 = createWidgetForUser(2, MAIN_USER_INFO.id)
-            val widget3 = createWidgetForUser(3, MAIN_USER_INFO.id)
-            val widgets = listOf(widget1, widget2, widget3)
-            widgetRepository.setCommunalWidgets(widgets)
+            widgetRepository.addWidget(appWidgetId = 1, userId = USER_INFO_WORK.id)
+            widgetRepository.addWidget(appWidgetId = 2, userId = MAIN_USER_INFO.id)
+            widgetRepository.addWidget(appWidgetId = 3, userId = MAIN_USER_INFO.id)
 
             // One widget is filtered out and the remaining two link to main user id.
             assertThat(checkNotNull(widgetContent).size).isEqualTo(2)
@@ -882,11 +875,9 @@ class CommunalInteractorTest : SysuiTestCase() {
             whenever(userManager.isManagedProfile(eq(USER_INFO_WORK.id))).thenReturn(true)
 
             val widgetContent by collectLastValue(underTest.widgetContent)
-            val widget1 = createWidgetForUser(1, USER_INFO_WORK.id)
-            val widget2 = createWidgetForUser(2, MAIN_USER_INFO.id)
-            val widget3 = createWidgetForUser(3, MAIN_USER_INFO.id)
-            val widgets = listOf(widget1, widget2, widget3)
-            widgetRepository.setCommunalWidgets(widgets)
+            widgetRepository.addWidget(appWidgetId = 1, userId = USER_INFO_WORK.id)
+            widgetRepository.addWidget(appWidgetId = 2, userId = MAIN_USER_INFO.id)
+            widgetRepository.addWidget(appWidgetId = 3, userId = MAIN_USER_INFO.id)
 
             // The work profile widget is in quiet mode, while other widgets are not.
             assertThat(widgetContent).hasSize(3)
@@ -927,11 +918,9 @@ class CommunalInteractorTest : SysuiTestCase() {
 
             val widgetContent by collectLastValue(underTest.widgetContent)
             // One available work widget, one pending work widget, and one regular available widget.
-            val widget1 = createWidgetForUser(1, USER_INFO_WORK.id)
-            val widget2 = createPendingWidgetForUser(2, userId = USER_INFO_WORK.id)
-            val widget3 = createWidgetForUser(3, MAIN_USER_INFO.id)
-            val widgets = listOf(widget1, widget2, widget3)
-            widgetRepository.setCommunalWidgets(widgets)
+            widgetRepository.addWidget(appWidgetId = 1, userId = USER_INFO_WORK.id)
+            widgetRepository.addPendingWidget(appWidgetId = 2, userId = USER_INFO_WORK.id)
+            widgetRepository.addWidget(appWidgetId = 3, userId = MAIN_USER_INFO.id)
 
             setKeyguardFeaturesDisabled(
                 USER_INFO_WORK,
@@ -962,11 +951,9 @@ class CommunalInteractorTest : SysuiTestCase() {
 
             val widgetContent by collectLastValue(underTest.widgetContent)
             // Given three widgets, and one of them is associated with work profile.
-            val widget1 = createWidgetForUser(1, USER_INFO_WORK.id)
-            val widget2 = createPendingWidgetForUser(2, userId = USER_INFO_WORK.id)
-            val widget3 = createWidgetForUser(3, MAIN_USER_INFO.id)
-            val widgets = listOf(widget1, widget2, widget3)
-            widgetRepository.setCommunalWidgets(widgets)
+            widgetRepository.addWidget(appWidgetId = 1, userId = USER_INFO_WORK.id)
+            widgetRepository.addPendingWidget(appWidgetId = 2, userId = USER_INFO_WORK.id)
+            widgetRepository.addWidget(appWidgetId = 3, userId = MAIN_USER_INFO.id)
 
             setKeyguardFeaturesDisabled(
                 USER_INFO_WORK,
@@ -1087,47 +1074,6 @@ class CommunalInteractorTest : SysuiTestCase() {
             Intent(DevicePolicyManager.ACTION_DEVICE_POLICY_MANAGER_STATE_CHANGED),
         )
     }
-
-    private fun createWidgetForUser(
-        appWidgetId: Int,
-        userId: Int
-    ): CommunalWidgetContentModel.Available =
-        mock<CommunalWidgetContentModel.Available> {
-            whenever(this.appWidgetId).thenReturn(appWidgetId)
-            val providerInfo =
-                mock<AppWidgetProviderInfo>().apply {
-                    widgetCategory = AppWidgetProviderInfo.WIDGET_CATEGORY_KEYGUARD
-                }
-            whenever(providerInfo.profile).thenReturn(UserHandle(userId))
-            whenever(this.providerInfo).thenReturn(providerInfo)
-        }
-
-    private fun createPendingWidgetForUser(
-        appWidgetId: Int,
-        priority: Int = 0,
-        packageName: String = "",
-        icon: Bitmap? = null,
-        userId: Int = 0,
-    ): CommunalWidgetContentModel.Pending {
-        return CommunalWidgetContentModel.Pending(
-            appWidgetId = appWidgetId,
-            priority = priority,
-            packageName = packageName,
-            icon = icon,
-            user = UserHandle(userId),
-        )
-    }
-
-    private fun createWidgetWithCategory(
-        appWidgetId: Int,
-        category: Int
-    ): CommunalWidgetContentModel =
-        mock<CommunalWidgetContentModel.Available> {
-            whenever(this.appWidgetId).thenReturn(appWidgetId)
-            val providerInfo = mock<AppWidgetProviderInfo>().apply { widgetCategory = category }
-            whenever(providerInfo.profile).thenReturn(UserHandle(MAIN_USER_INFO.id))
-            whenever(this.providerInfo).thenReturn(providerInfo)
-        }
 
     private companion object {
         val MAIN_USER_INFO = UserInfo(0, "primary", UserInfo.FLAG_MAIN)

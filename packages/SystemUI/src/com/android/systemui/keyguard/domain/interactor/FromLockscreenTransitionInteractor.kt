@@ -20,6 +20,7 @@ import android.animation.ValueAnimator
 import android.util.MathUtils
 import com.android.app.animation.Interpolators
 import com.android.app.tracing.coroutines.launch
+import com.android.systemui.Flags.communalSceneKtfRefactor
 import com.android.systemui.communal.domain.interactor.CommunalSettingsInteractor
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
@@ -90,7 +91,9 @@ constructor(
         listenForLockscreenToPrimaryBouncerDragging()
         listenForLockscreenToAlternateBouncer()
         listenForLockscreenTransitionToCamera()
-        listenForLockscreenToGlanceableHub()
+        if (!communalSceneKtfRefactor()) {
+            listenForLockscreenToGlanceableHub()
+        }
     }
 
     /**
@@ -348,7 +351,6 @@ constructor(
      * keyguard transition.
      */
     private fun listenForLockscreenToGlanceableHub() {
-        // TODO(b/336576536): Check if adaptation for scene framework is needed
         if (SceneContainerFlag.isEnabled) return
         if (!communalSettingsInteractor.isCommunalFlagEnabled()) {
             return

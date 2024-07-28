@@ -3105,6 +3105,29 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     }
 
     @Test
+    @EnableFlags(android.app.Flags.FLAG_LIFETIME_EXTENSION_REFACTOR)
+    public void testLifetimeExtendedCancelledOnClick() throws Exception {
+        // Adds a lifetime extended notification.
+        final NotificationRecord notif = generateNotificationRecord(mTestNotificationChannel, 1,
+                null, false);
+        notif.getSbn().getNotification().flags =
+                Notification.FLAG_LIFETIME_EXTENDED_BY_DIRECT_REPLY;
+        mService.addNotification(notif);
+        // Verify that the notification is posted and active.
+        assertThat(mBinderService.getActiveNotifications(mPkg).length).isEqualTo(1);
+
+        // Click the notification.
+        final NotificationVisibility nv = NotificationVisibility.obtain(notif.getKey(), 1, 2, true);
+        mService.mNotificationDelegate.onNotificationClick(mUid, Binder.getCallingPid(),
+                notif.getKey(), nv);
+        waitForIdle();
+
+        // The notification has been cancelled.
+        StatusBarNotification[] notifs = mBinderService.getActiveNotifications(mPkg);
+        assertThat(notifs.length).isEqualTo(0);
+    }
+
+    @Test
     public void testCancelNotificationWithTag_fromApp_cannotCancelFgsChild()
             throws Exception {
         when(mAmi.applyForegroundServiceNotification(

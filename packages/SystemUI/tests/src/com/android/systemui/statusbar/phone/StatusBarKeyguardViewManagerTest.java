@@ -27,6 +27,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyFloat;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.mock;
@@ -94,6 +95,7 @@ import com.android.systemui.navigationbar.TaskbarDelegate;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.ActivityStarter.OnDismissAction;
 import com.android.systemui.scene.domain.interactor.SceneInteractor;
+import com.android.systemui.scene.shared.model.Scenes;
 import com.android.systemui.shade.NotificationShadeWindowView;
 import com.android.systemui.shade.ShadeController;
 import com.android.systemui.shade.ShadeExpansionChangeEvent;
@@ -166,6 +168,7 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
     @Mock private StatusBarKeyguardViewManager.KeyguardViewManagerCallback mCallback;
     @Mock private SelectedUserInteractor mSelectedUserInteractor;
     @Mock private DeviceEntryInteractor mDeviceEntryInteractor;
+    @Mock private SceneInteractor mSceneInteractor;
 
     private StatusBarKeyguardViewManager mStatusBarKeyguardViewManager;
     private PrimaryBouncerCallbackInteractor.PrimaryBouncerExpansionCallback
@@ -233,7 +236,7 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
                         mSelectedUserInteractor,
                         () -> mock(KeyguardSurfaceBehindInteractor.class),
                         mock(JavaAdapter.class),
-                        () -> mock(SceneInteractor.class),
+                        () -> mSceneInteractor,
                         mock(StatusBarKeyguardViewManagerInteractor.class),
                         () -> mDeviceEntryInteractor) {
                     @Override
@@ -270,21 +273,23 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
     }
 
     @Test
-    public void showBouncer_onlyWhenShowing() {
+    public void showPrimaryBouncer_onlyWhenShowing() {
         mStatusBarKeyguardViewManager.hide(0 /* startTime */, 0 /* fadeoutDuration */);
         mStatusBarKeyguardViewManager.showPrimaryBouncer(true /* scrimmed */);
         verify(mPrimaryBouncerInteractor, never()).show(anyBoolean());
         verify(mDeviceEntryInteractor, never()).attemptDeviceEntry();
+        verify(mSceneInteractor, never()).changeScene(any(), any());
     }
 
     @Test
-    public void showBouncer_notWhenBouncerAlreadyShowing() {
+    public void showPrimaryBouncer_notWhenBouncerAlreadyShowing() {
         mStatusBarKeyguardViewManager.hide(0 /* startTime */, 0 /* fadeoutDuration */);
         when(mKeyguardSecurityModel.getSecurityMode(anyInt())).thenReturn(
                 KeyguardSecurityModel.SecurityMode.Password);
         mStatusBarKeyguardViewManager.showPrimaryBouncer(true /* scrimmed */);
         verify(mPrimaryBouncerInteractor, never()).show(anyBoolean());
         verify(mDeviceEntryInteractor, never()).attemptDeviceEntry();
+        verify(mSceneInteractor, never()).changeScene(any(), any());
     }
 
     @Test
@@ -753,7 +758,7 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
                         mSelectedUserInteractor,
                         () -> mock(KeyguardSurfaceBehindInteractor.class),
                         mock(JavaAdapter.class),
-                        () -> mock(SceneInteractor.class),
+                        () -> mSceneInteractor,
                         mock(StatusBarKeyguardViewManagerInteractor.class),
                         () -> mDeviceEntryInteractor) {
                     @Override
@@ -1104,9 +1109,9 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
 
     @Test
     @EnableSceneContainer
-    public void showPrimaryBouncer_attemptDeviceEntry() {
+    public void showPrimaryBouncer() {
         mStatusBarKeyguardViewManager.showPrimaryBouncer(false);
-        verify(mDeviceEntryInteractor).attemptDeviceEntry();
+        verify(mSceneInteractor).changeScene(eq(Scenes.Bouncer), anyString());
     }
 
     @Test

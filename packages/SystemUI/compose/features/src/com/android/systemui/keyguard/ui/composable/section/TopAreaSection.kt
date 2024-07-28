@@ -60,7 +60,7 @@ constructor(
     private val clockInteractor: KeyguardClockInteractor,
 ) {
     @Composable
-    fun DefaultClockLayout(
+    fun SceneScope.DefaultClockLayout(
         modifier: Modifier = Modifier,
     ) {
         val currentClockLayout by clockViewModel.currentClockLayout.collectAsStateWithLifecycle()
@@ -95,26 +95,29 @@ constructor(
             }
         }
 
-        SceneTransitionLayout(state, modifier) {
-            scene(splitShadeLargeClockScene) {
-                LargeClockWithSmartSpace(
-                    shouldOffSetClockToOneHalf = !hasCustomPositionUpdatedAnimation
-                )
+        Column(modifier) {
+            SceneTransitionLayout(state) {
+                scene(splitShadeLargeClockScene) {
+                    LargeClockWithSmartSpace(
+                        shouldOffSetClockToOneHalf = !hasCustomPositionUpdatedAnimation
+                    )
+                }
+
+                scene(splitShadeSmallClockScene) {
+                    SmallClockWithSmartSpace(modifier = Modifier.fillMaxWidth(0.5f))
+                }
+
+                scene(smallClockScene) { SmallClockWithSmartSpace() }
+
+                scene(largeClockScene) { LargeClockWithSmartSpace() }
+
+                scene(WeatherClockScenes.largeClockScene) { WeatherLargeClockWithSmartSpace() }
+
+                scene(WeatherClockScenes.splitShadeLargeClockScene) {
+                    WeatherLargeClockWithSmartSpace(modifier = Modifier.fillMaxWidth(0.5f))
+                }
             }
-
-            scene(splitShadeSmallClockScene) {
-                SmallClockWithSmartSpace(modifier = Modifier.fillMaxWidth(0.5f))
-            }
-
-            scene(smallClockScene) { SmallClockWithSmartSpace() }
-
-            scene(largeClockScene) { LargeClockWithSmartSpace() }
-
-            scene(WeatherClockScenes.largeClockScene) { WeatherLargeClockWithSmartSpace() }
-
-            scene(WeatherClockScenes.splitShadeLargeClockScene) {
-                WeatherLargeClockWithSmartSpace(modifier = Modifier.fillMaxWidth(0.5f))
-            }
+            with(mediaCarouselSection) { KeyguardMediaCarousel() }
         }
     }
 
@@ -136,7 +139,6 @@ constructor(
                     onTopChanged = burnIn.onSmartspaceTopChanged,
                 )
             }
-            with(mediaCarouselSection) { KeyguardMediaCarousel() }
         }
     }
 

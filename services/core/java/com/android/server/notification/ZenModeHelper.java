@@ -2811,8 +2811,9 @@ public class ZenModeHelper {
     private final class H extends Handler {
         private static final int MSG_DISPATCH = 1;
         private static final int MSG_METRICS = 2;
-        private static final int MSG_RINGER_AUDIO = 5;
         private static final int MSG_APPLY_EFFECTS = 6;
+        private static final int MSG_AUDIO_APPLIED_TO_RINGER = 7;
+        private static final int MSG_AUDIO_NOT_APPLIED_TO_RINGER = 8;
 
         private static final long METRICS_PERIOD_MS = 6 * 60 * 60 * 1000;
 
@@ -2831,8 +2832,13 @@ public class ZenModeHelper {
         }
 
         private void postUpdateRingerAndAudio(boolean shouldApplyToRinger) {
-            removeMessages(MSG_RINGER_AUDIO);
-            sendMessage(obtainMessage(MSG_RINGER_AUDIO, shouldApplyToRinger));
+            if (shouldApplyToRinger) {
+                removeMessages(MSG_AUDIO_APPLIED_TO_RINGER);
+                sendEmptyMessage(MSG_AUDIO_APPLIED_TO_RINGER);
+            } else {
+                removeMessages(MSG_AUDIO_NOT_APPLIED_TO_RINGER);
+                sendEmptyMessage(MSG_AUDIO_NOT_APPLIED_TO_RINGER);
+            }
         }
 
         private void postApplyDeviceEffects(@ConfigChangeOrigin int origin) {
@@ -2849,9 +2855,11 @@ public class ZenModeHelper {
                 case MSG_METRICS:
                     mMetrics.emit();
                     break;
-                case MSG_RINGER_AUDIO:
-                    boolean shouldApplyToRinger = (boolean) msg.obj;
-                    updateRingerAndAudio(shouldApplyToRinger);
+                case MSG_AUDIO_APPLIED_TO_RINGER:
+                    updateRingerAndAudio(/* shouldApplyToRinger= */ true);
+                    break;
+                case MSG_AUDIO_NOT_APPLIED_TO_RINGER:
+                    updateRingerAndAudio(/* shouldApplyToRinger= */ false);
                     break;
                 case MSG_APPLY_EFFECTS:
                     @ConfigChangeOrigin int origin = msg.arg1;

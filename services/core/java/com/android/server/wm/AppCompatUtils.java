@@ -73,4 +73,13 @@ class AppCompatUtils {
     static boolean isInVrUiMode(Configuration config) {
         return (config.uiMode & UI_MODE_TYPE_MASK) == UI_MODE_TYPE_VR_HEADSET;
     }
+
+    /**
+     * @param activityRecord The {@link ActivityRecord} for the app package.
+     * @param overrideChangeId The per-app override identifier.
+     * @return {@code true} if the per-app override is enable for the given activity.
+     */
+    static boolean isChangeEnabled(@NonNull ActivityRecord activityRecord, long overrideChangeId) {
+        return activityRecord.info.isChangeEnabled(overrideChangeId);
+    }
 }

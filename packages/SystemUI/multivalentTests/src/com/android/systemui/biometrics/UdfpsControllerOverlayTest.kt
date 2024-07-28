@@ -35,6 +35,8 @@ import android.view.WindowManager
 import android.view.accessibility.AccessibilityManager
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
+import com.android.app.viewcapture.ViewCapture
+import com.android.app.viewcapture.ViewCaptureAwareWindowManager
 import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.systemui.Flags
 import com.android.systemui.SysuiTestCase
@@ -70,6 +72,7 @@ import com.android.systemui.statusbar.policy.KeyguardStateController
 import com.android.systemui.testKosmos
 import com.android.systemui.user.domain.interactor.SelectedUserInteractor
 import com.google.common.truth.Truth.assertThat
+import dagger.Lazy
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runCurrent
@@ -108,6 +111,7 @@ class UdfpsControllerOverlayTest : SysuiTestCase() {
 
     @Mock private lateinit var inflater: LayoutInflater
     @Mock private lateinit var windowManager: WindowManager
+    @Mock private lateinit var lazyViewCapture: kotlin.Lazy<ViewCapture>
     @Mock private lateinit var accessibilityManager: AccessibilityManager
     @Mock private lateinit var statusBarStateController: StatusBarStateController
     @Mock private lateinit var statusBarKeyguardViewManager: StatusBarKeyguardViewManager
@@ -192,7 +196,8 @@ class UdfpsControllerOverlayTest : SysuiTestCase() {
             UdfpsControllerOverlay(
                 context,
                 inflater,
-                windowManager,
+                ViewCaptureAwareWindowManager(windowManager, lazyViewCapture,
+                        isViewCaptureEnabled = false),
                 accessibilityManager,
                 statusBarStateController,
                 statusBarKeyguardViewManager,

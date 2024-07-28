@@ -1133,10 +1133,98 @@ private inline fun <T> computeValue(
 
     val transformation =
         transformation(transition.transformationSpec.transformations(element.key, scene))
-            // If there is no transformation explicitly associated to this element value, let's use
-            // the value given by the system (like the current position and size given by the layout
-            // pass).
-            ?: return currentValue()
+
+    val previewTransformation =
+        transition.previewTransformationSpec?.let {
+            transformation(it.transformations(element.key, scene))
+        }
+    if (previewTransformation != null) {
+        val isInPreviewStage = transition.isInPreviewStage
+
+        val idleValue = sceneValue(sceneState)
+        val isEntering = scene == toScene
+        val previewTargetValue =
+            previewTransformation.transform(
+                layoutImpl,
+                scene,
+                element,
+                sceneState,
+                transition,
+                idleValue,
+            )
+
+        val targetValueOrNull =
+            transformation?.transform(
+                layoutImpl,
+                scene,
+                element,
+                sceneState,
+                transition,
+                idleValue,
+            )
+
+        // Make sure we don't read progress if values are the same and we don't need to interpolate,
+        // so we don't invalidate the phase where this is read.
+        when {
+            isInPreviewStage && isEntering && previewTargetValue == targetValueOrNull ->
+                return previewTargetValue
+            isInPreviewStage && !isEntering && idleValue == previewTargetValue -> return idleValue
+            previewTargetValue == targetValueOrNull && idleValue == previewTargetValue ->
+                return idleValue
+            else -> {}
+        }
+
+        val previewProgress = transition.previewProgress
+        // progress is not needed for all cases of the below when block, therefore read it lazily
+        // TODO(b/290184746): Make sure that we don't overflow transformations associated to a range
+        val previewRangeProgress =
+            previewTransformation.range?.progress(previewProgress) ?: previewProgress
+
+        if (isInPreviewStage) {
+            // if we're in the preview stage of the transition, interpolate between start state and
+            // preview target state:
+            return if (isEntering) {
+                // i.e. in the entering case between previewTargetValue and targetValue (or
+                // idleValue if no transformation is defined in the second stage transition)...
+                lerp(previewTargetValue, targetValueOrNull ?: idleValue, previewRangeProgress)
+            } else {
+                // ...and in the exiting case between the idleValue and the previewTargetValue.
+                lerp(idleValue, previewTargetValue, previewRangeProgress)
+            }
+        }
+
+        // if we're in the second stage of the transition, interpolate between the state the
+        // element was left at the end of the preview-phase and the target state:
+        return if (isEntering) {
+            // i.e. in the entering case between preview-end-state and the idleValue...
+            lerp(
+                lerp(previewTargetValue, targetValueOrNull ?: idleValue, previewRangeProgress),
+                idleValue,
+                transformation?.range?.progress(transition.progress) ?: transition.progress
+            )
+        } else {
+            if (targetValueOrNull == null) {
+                // ... and in the exiting case, the element should remain in the preview-end-state
+                // if no further transformation is defined in the second-stage transition...
+                lerp(idleValue, previewTargetValue, previewRangeProgress)
+            } else {
+                // ...and otherwise it should be interpolated between preview-end-state and
+                // targetValue
+                lerp(
+                    lerp(idleValue, previewTargetValue, previewRangeProgress),
+                    targetValueOrNull,
+                    transformation.range?.progress(transition.progress) ?: transition.progress
+                )
+            }
+        }
+    }
+
+    if (transformation == null) {
+        // If there is no transformation explicitly associated to this element value, let's use
+        // the value given by the system (like the current position and size given by the layout
+        // pass).
+        return currentValue()
+    }
 
     val idleValue = sceneValue(sceneState)
     val targetValue =

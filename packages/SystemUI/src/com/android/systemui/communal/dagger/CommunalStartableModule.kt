@@ -19,6 +19,7 @@ package com.android.systemui.communal.dagger
 import com.android.systemui.CoreStartable
 import com.android.systemui.communal.CommunalBackupRestoreStartable
 import com.android.systemui.communal.CommunalDreamStartable
+import com.android.systemui.communal.CommunalMetricsStartable
 import com.android.systemui.communal.CommunalOngoingContentStartable
 import com.android.systemui.communal.CommunalSceneStartable
 import com.android.systemui.communal.log.CommunalLoggerStartable
@@ -59,4 +60,9 @@ interface CommunalStartableModule {
     @IntoMap
     @ClassKey(CommunalOngoingContentStartable::class)
     fun bindCommunalOngoingContentStartable(impl: CommunalOngoingContentStartable): CoreStartable
+
+    @Binds
+    @IntoMap
+    @ClassKey(CommunalMetricsStartable::class)
+    fun bindCommunalMetricsStartable(impl: CommunalMetricsStartable): CoreStartable
 }

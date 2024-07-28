@@ -55,6 +55,7 @@ import android.telephony.Annotation.SrvccState;
 import android.telephony.BarringInfo;
 import android.telephony.CallQuality;
 import android.telephony.CallState;
+import android.telephony.CarrierConfigManager;
 import android.telephony.CellIdentity;
 import android.telephony.CellInfo;
 import android.telephony.CellSignalStrength;
@@ -426,6 +427,7 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
     private boolean[] mSCBMStarted;
 
     private boolean[] mCarrierRoamingNtnMode = null;
+    private boolean[] mCarrierRoamingNtnEligible = null;
 
     /**
      * Per-phone map of precise data connection state. The key of the map is the pair of transport
@@ -726,6 +728,7 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
             mSCBMReason = copyOf(mSCBMReason, mNumPhones);
             mSCBMStarted = copyOf(mSCBMStarted, mNumPhones);
             mCarrierRoamingNtnMode = copyOf(mCarrierRoamingNtnMode, mNumPhones);
+            mCarrierRoamingNtnEligible = copyOf(mCarrierRoamingNtnEligible, mNumPhones);
             // ds -> ss switch.
             if (mNumPhones < oldNumPhones) {
                 cutListToSize(mCellInfo, mNumPhones);
@@ -785,6 +788,7 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
                 mSCBMReason[i] = TelephonyManager.STOP_REASON_UNKNOWN;
                 mSCBMStarted[i] = false;
                 mCarrierRoamingNtnMode[i] = false;
+                mCarrierRoamingNtnEligible[i] = false;
             }
         }
     }
@@ -859,6 +863,7 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
         mSCBMReason = new int[numPhones];
         mSCBMStarted = new boolean[numPhones];
         mCarrierRoamingNtnMode = new boolean[numPhones];
+        mCarrierRoamingNtnEligible = new boolean[numPhones];
 
         for (int i = 0; i < numPhones; i++) {
             mCallState[i] =  TelephonyManager.CALL_STATE_IDLE;
@@ -903,6 +908,7 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
             mSCBMReason[i] = TelephonyManager.STOP_REASON_UNKNOWN;
             mSCBMStarted[i] = false;
             mCarrierRoamingNtnMode[i] = false;
+            mCarrierRoamingNtnEligible[i] = false;
         }
 
         mAppOps = mContext.getSystemService(AppOpsManager.class);
@@ -1514,6 +1520,15 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
                     try {
                         r.callback.onCarrierRoamingNtnModeChanged(
                                 mCarrierRoamingNtnMode[r.phoneId]);
+                    } catch (RemoteException ex) {
+                        remove(r.binder);
+                    }
+                }
+                if (events.contains(
+                        TelephonyCallback.EVENT_CARRIER_ROAMING_NTN_ELIGIBLE_STATE_CHANGED)) {
+                    try {
+                        r.callback.onCarrierRoamingNtnEligibleStateChanged(
+                                mCarrierRoamingNtnEligible[r.phoneId]);
                     } catch (RemoteException ex) {
                         remove(r.binder);
                     }
@@ -3536,6 +3551,53 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
         }
     }
 
+    /**
+     * Notify external listeners that device eligibility to connect to carrier roaming
+     * non-terrestrial network changed.
+     *
+     * @param subId subscription ID.
+     * @param eligible {@code true} when the device is eligible for satellite
+     * communication if all the following conditions are met:
+     * <ul>
+     * <li>Any subscription on the device supports P2P satellite messaging which is defined by
+     * {@link CarrierConfigManager#KEY_SATELLITE_ATTACH_SUPPORTED_BOOL} </li>
+     * <li>{@link CarrierConfigManager#KEY_CARRIER_ROAMING_NTN_CONNECT_TYPE_INT} set to
+     * {@link CarrierConfigManager#CARRIER_ROAMING_NTN_CONNECT_MANUAL} </li>
+     * <li>The device is in {@link ServiceState#STATE_OUT_OF_SERVICE}, not connected to Wi-Fi,
+     * and the hysteresis timer defined by {@link CarrierConfigManager
+     * #KEY_CARRIER_SUPPORTED_SATELLITE_NOTIFICATION_HYSTERESIS_SEC_INT} is expired. </li>
+     * </ul>
+     */
+    public void notifyCarrierRoamingNtnEligibleStateChanged(int subId, boolean eligible) {
+        if (!checkNotifyPermission("notifyCarrierRoamingNtnEligibleStateChanged")) {
+            log("notifyCarrierRoamingNtnEligibleStateChanged: caller does not have required "
+                    + "permissions.");
+            return;
+        }
+
+        if (VDBG) {
+            log("notifyCarrierRoamingNtnEligibleStateChanged: "
+                    + "subId=" + subId + " eligible" + eligible);
+        }
+
+        synchronized (mRecords) {
+            int phoneId = getPhoneIdFromSubId(subId);
+            mCarrierRoamingNtnEligible[phoneId] = eligible;
+            for (Record r : mRecords) {
+                if (r.matchTelephonyCallbackEvent(
+                        TelephonyCallback.EVENT_CARRIER_ROAMING_NTN_ELIGIBLE_STATE_CHANGED)
+                        && idMatch(r, subId, phoneId)) {
+                    try {
+                        r.callback.onCarrierRoamingNtnEligibleStateChanged(eligible);
+                    } catch (RemoteException ex) {
+                        mRemoveList.add(r.binder);
+                    }
+                }
+            }
+            handleRemoveListLocked();
+        }
+    }
+
     @NeverCompile // Avoid size overhead of debugging code.
     @Override
     public void dump(FileDescriptor fd, PrintWriter writer, String[] args) {
@@ -3589,6 +3651,8 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
                 pw.println("mECBMStarted=" + mECBMStarted[i]);
                 pw.println("mSCBMReason=" + mSCBMReason[i]);
                 pw.println("mSCBMStarted=" + mSCBMStarted[i]);
+                pw.println("mCarrierRoamingNtnMode=" + mCarrierRoamingNtnMode[i]);
+                pw.println("mCarrierRoamingNtnEligible=" + mCarrierRoamingNtnEligible[i]);
 
                 // We need to obfuscate package names, and primitive arrays' native toString is ugly
                 Pair<List<String>, int[]> carrierPrivilegeState = mCarrierPrivilegeStates.get(i);

@@ -261,8 +261,6 @@ public interface CentralSurfaces extends Dumpable, LifecycleOwner, CoreStartable
 
     boolean isScreenFullyOff();
 
-    boolean isCameraAllowedByAdmin();
-
     boolean isGoingToSleep();
 
     void notifyBiometricAuthModeChanged();

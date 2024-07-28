@@ -11004,6 +11004,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             ? afm.isAutofillable(this) : false;
     }
 
+    /**
+     * Returns whether the view is autofillable.
+     *
+     * @return whether the view is autofillable, and should send out autofill request to provider.
+     */
     private boolean isAutofillable() {
         if (DBG) {
             Log.d(VIEW_LOG_TAG, "isAutofillable() entered.");
@@ -27631,6 +27636,23 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         return null;
     }
 
+
+    /**
+     * Performs the traversal to find views that are autofillable.
+     * Autofillable views are added to the provided list.
+     *
+     * <strong>Note:</strong>This method does not stop at the root namespace
+     * boundary.
+     *
+     * @param autofillableViews The output list of autofillable Views.
+     * @hide
+     */
+    public void findAutofillableViewsByTraversal(@NonNull List<View> autofillableViews) {
+        if (isAutofillable()) {
+            autofillableViews.add(this);
+        }
+    }
+
     /**
      * Look for a child view with the given tag.  If this view has the given
      * tag, return this view.
@@ -30597,6 +30619,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         }
     }
 
+    // Note that if the function returns true, it indicates aapt did not generate this id.
+    // However false value does not indicate that aapt did generated this id.
     private static boolean isViewIdGenerated(int id) {
         return (id & 0xFF000000) == 0 && (id & 0x00FFFFFF) != 0;
     }
@@ -34047,14 +34071,21 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     private float convertVelocityToFrameRate(float velocityPps) {
-        // From UXR study, premium experience is:
-        // 1500+    dp/s: 120fps
-        // 0 - 1500 dp/s:  80fps
-        // OEMs are likely to modify this to balance battery and user experience for their
-        // specific device.
+        // Internal testing has shown that this gives a premium experience:
+        // above 300dp/s => 120fps
+        // between 300dp/s and 125fps => 80fps
+        // below 125dp/s => 60fps
         float density = mAttachInfo.mDensity;
         float velocityDps = velocityPps / density;
-        return (velocityDps >= 1500f) ? MAX_FRAME_RATE : 80f;
+        float frameRate;
+        if (velocityDps > 300f) {
+            frameRate = MAX_FRAME_RATE; // Use maximum at fast motion
+        } else if (velocityDps > 125f) {
+            frameRate = 80f; // Use medium frame rate when motion is slower
+        } else {
+            frameRate = 60f; // Use minimum frame rate when motion is very slow
+        }
+        return frameRate;
     }
 
     /**

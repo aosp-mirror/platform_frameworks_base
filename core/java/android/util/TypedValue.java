@@ -65,10 +65,11 @@ public class TypedValue {
     /** The <var>data</var> field holds a number that was
      *  originally specified in hexadecimal (0xn). */
     public static final int TYPE_INT_HEX = 0x11;
-    /** The <var>data</var> field holds 0 or 1 that was originally
-     *  specified as "false" or "true". */
+    /**
+     * {@link #data} holds 0 to represent {@code false}, or a value different from 0 to represent
+     * {@code true}.
+     */
     public static final int TYPE_INT_BOOLEAN = 0x12;
-
     /** Identifies the start of integer values that were specified as
      *  color constants (starting with '#'). */
     public static final int TYPE_FIRST_COLOR_INT = 0x1c;

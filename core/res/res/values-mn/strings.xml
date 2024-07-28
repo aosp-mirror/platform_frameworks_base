@@ -312,7 +312,7 @@
     <string name="foreground_service_tap_for_details" msgid="9078123626015586751">"Батарей, дата ашиглалтын талаар дэлгэрэнгүйг харахын тулд товшино уу"</string>
     <string name="foreground_service_multiple_separator" msgid="5002287361849863168">"<xliff:g id="LEFT_SIDE">%1$s</xliff:g>, <xliff:g id="RIGHT_SIDE">%2$s</xliff:g>"</string>
     <string name="safeMode" msgid="8974401416068943888">"Аюулгүй горим"</string>
-    <string name="android_system_label" msgid="5974767339591067210">"Андройд систем"</string>
+    <string name="android_system_label" msgid="5974767339591067210">"Android систем"</string>
     <string name="user_owner_label" msgid="8628726904184471211">"Хувийн профайл руу сэлгэх"</string>
     <string name="managed_profile_label" msgid="7316778766973512382">"Ажлын профайл руу сэлгэх"</string>
     <string name="user_owner_app_label" msgid="1553595155465750298">"Хувийн <xliff:g id="APP_NAME">%1$s</xliff:g> руу сэлгэх"</string>
@@ -1428,6 +1428,7 @@
     <string name="share_remote_bugreport_action" msgid="7630880678785123682">"ХУВААЛЦАХ"</string>
     <string name="decline_remote_bugreport_action" msgid="4040894777519784346">"ТАТГАЛЗАХ"</string>
     <string name="select_input_method" msgid="3971267998568587025">"Оруулах аргыг сонгоно уу"</string>
+    <string name="input_method_language_settings" msgid="8069089418056819437">"Хэлний тохиргоо"</string>
     <string name="show_ime" msgid="6406112007347443383">"Биет гар идэвхтэй үед үүнийг дэлгэцэд харуулна уу"</string>
     <string name="hardware" msgid="3611039921284836033">"Дэлгэц дээрх гарыг ашиглах"</string>
     <string name="select_keyboard_layout_notification_title" msgid="5823199895322205589">"<xliff:g id="DEVICE_NAME">%s</xliff:g>-г тохируулна уу"</string>
@@ -2437,22 +2438,13 @@
     <string name="bg_user_sound_notification_button_switch_user" msgid="3091969648572788946">"Хэрэглэгч сэлгэх"</string>
     <string name="bg_user_sound_notification_button_mute" msgid="4942158515665615243">"Дууг хаах"</string>
     <string name="bg_user_sound_notification_message" msgid="8613881975316976673">"Дууг хаахын тулд товшино уу"</string>
-    <!-- no translation found for keyboard_shortcut_group_applications_browser (6535007304687100909) -->
-    <skip />
-    <!-- no translation found for keyboard_shortcut_group_applications_contacts (2750702518068326356) -->
-    <skip />
-    <!-- no translation found for keyboard_shortcut_group_applications_email (4229037666415353683) -->
-    <skip />
-    <!-- no translation found for keyboard_shortcut_group_applications_sms (3523799286376321137) -->
-    <skip />
-    <!-- no translation found for keyboard_shortcut_group_applications_music (2051507523525651067) -->
-    <skip />
-    <!-- no translation found for keyboard_shortcut_group_applications_calendar (3571770335653387606) -->
-    <skip />
-    <!-- no translation found for keyboard_shortcut_group_applications_calculator (6753209559716091507) -->
-    <skip />
-    <!-- no translation found for keyboard_shortcut_group_applications_maps (7950000659522589471) -->
-    <skip />
-    <!-- no translation found for keyboard_shortcut_group_applications (3010389163951364798) -->
-    <skip />
+    <string name="keyboard_shortcut_group_applications_browser" msgid="6535007304687100909">"Хөтөч"</string>
+    <string name="keyboard_shortcut_group_applications_contacts" msgid="2750702518068326356">"Харилцагчид"</string>
+    <string name="keyboard_shortcut_group_applications_email" msgid="4229037666415353683">"Имэйл"</string>
+    <string name="keyboard_shortcut_group_applications_sms" msgid="3523799286376321137">"SMS"</string>
+    <string name="keyboard_shortcut_group_applications_music" msgid="2051507523525651067">"Хөгжим"</string>
+    <string name="keyboard_shortcut_group_applications_calendar" msgid="3571770335653387606">"Календарь"</string>
+    <string name="keyboard_shortcut_group_applications_calculator" msgid="6753209559716091507">"Тооны машин"</string>
+    <string name="keyboard_shortcut_group_applications_maps" msgid="7950000659522589471">"Газрын зураг"</string>
+    <string name="keyboard_shortcut_group_applications" msgid="3010389163951364798">"Аппликэйшн"</string>
 </resources>

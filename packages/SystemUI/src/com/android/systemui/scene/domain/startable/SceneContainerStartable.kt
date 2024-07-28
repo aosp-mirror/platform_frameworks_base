@@ -60,6 +60,7 @@ import com.android.systemui.scene.shared.logger.SceneLogger
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import com.android.systemui.statusbar.NotificationShadeWindowController
+import com.android.systemui.statusbar.SysuiStatusBarStateController
 import com.android.systemui.statusbar.notification.domain.interactor.HeadsUpNotificationInteractor
 import com.android.systemui.statusbar.phone.CentralSurfaces
 import com.android.systemui.statusbar.policy.domain.interactor.DeviceProvisioningInteractor
@@ -130,6 +131,7 @@ constructor(
     private val windowMgrLockscreenVisInteractor: WindowManagerLockscreenVisibilityInteractor,
     private val keyguardEnabledInteractor: KeyguardEnabledInteractor,
     private val dismissCallbackRegistry: DismissCallbackRegistry,
+    private val statusBarStateController: SysuiStatusBarStateController,
 ) : CoreStartable {
     private val centralSurfaces: CentralSurfaces?
         get() = centralSurfacesOptLazy.get().getOrNull()
@@ -170,12 +172,28 @@ constructor(
 
     private fun resetShadeSessions() {
         applicationScope.launch {
-            sceneBackInteractor.backStack
-                // We are in a session if either Shade or QuickSettings is on the back stack
-                .map { backStack ->
-                    backStack.asIterable().any { it == Scenes.Shade || it == Scenes.QuickSettings }
+            combine(
+                    sceneBackInteractor.backStack
+                        // We are in a session if either Shade or QuickSettings is on the back stack
+                        .map { backStack ->
+                            backStack.asIterable().any {
+                                it == Scenes.Shade || it == Scenes.QuickSettings
+                            }
+                        }
+                        .distinctUntilChanged(),
+                    sceneInteractor.transitionState
+                        .mapNotNull { state ->
+                            // We are also in a session if either Shade or QuickSettings is the
+                            // current scene
+                            when (state) {
+                                is ObservableTransitionState.Idle -> state.currentScene
+                                is ObservableTransitionState.Transition -> state.fromScene
+                            }.let { it == Scenes.Shade || it == Scenes.QuickSettings }
+                        }
+                        .distinctUntilChanged()
+                ) { inBackStack, isCurrentScene ->
+                    inBackStack || isCurrentScene
                 }
-                .distinctUntilChanged()
                 // Once a session has ended, clear the session storage.
                 .filter { inSession -> !inSession }
                 .collect { shadeSessionStorage.clear() }
@@ -356,8 +374,13 @@ constructor(
                         isOnBouncer ->
                             // When the device becomes unlocked in Bouncer, go to previous scene,
                             // or Gone.
-                            if (previousScene.value == Scenes.Lockscreen) {
-                                Scenes.Gone to "device was unlocked in Bouncer scene"
+                            if (
+                                previousScene.value == Scenes.Lockscreen ||
+                                    !statusBarStateController.leaveOpenOnKeyguardHide()
+                            ) {
+                                Scenes.Gone to
+                                    "device was unlocked in Bouncer scene and shade" +
+                                        " didn't need to be left open"
                             } else {
                                 val prevScene = previousScene.value
                                 (prevScene ?: Scenes.Gone) to

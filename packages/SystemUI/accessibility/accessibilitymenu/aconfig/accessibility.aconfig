@@ -19,3 +19,13 @@ flag {
         purpose: PURPOSE_BUGFIX
     }
 }
+
+flag {
+    name: "action_bar_wrap_content"
+    namespace: "accessibility"
+    description: "Applies WRAP_CONTENT to the action bar in A11yMenu settings to better fit large fonts"
+    bug: "347911378"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}

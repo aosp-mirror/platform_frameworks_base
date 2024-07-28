@@ -290,6 +290,7 @@ fun SceneScope.NotificationScrollingStack(
     val isCurrentGestureOverscroll =
         viewModel.isCurrentGestureOverscroll.collectAsStateWithLifecycle(false)
     val expansionFraction by viewModel.expandFraction.collectAsStateWithLifecycle(0f)
+    val shadeToQsFraction by viewModel.shadeToQsFraction.collectAsStateWithLifecycle(0f)
 
     val topPadding = dimensionResource(id = R.dimen.notification_side_paddings)
     val navBarHeight = WindowInsets.systemBars.asPaddingValues().calculateBottomPadding()
@@ -385,14 +386,26 @@ fun SceneScope.NotificationScrollingStack(
             modifier
                 .element(Notifications.Elements.NotificationScrim)
                 .offset {
-                    // if scrim is expanded while transitioning to Gone scene, increase the offset
-                    // in step with the transition so that it is 0 when it completes.
+                    // if scrim is expanded while transitioning to Gone or QS scene, increase the
+                    // offset in step with the corresponding transition so that it is 0 when it
+                    // completes.
                     if (
                         scrimOffset.value < 0 &&
                             layoutState.isTransitioning(from = Scenes.Shade, to = Scenes.Gone) ||
                             layoutState.isTransitioning(from = Scenes.Shade, to = Scenes.Lockscreen)
                     ) {
                         IntOffset(x = 0, y = (scrimOffset.value * expansionFraction).roundToInt())
+                    } else if (
+                        scrimOffset.value < 0 &&
+                            layoutState.isTransitioning(
+                                from = Scenes.Shade,
+                                to = Scenes.QuickSettings
+                            )
+                    ) {
+                        IntOffset(
+                            x = 0,
+                            y = (scrimOffset.value * (1 - shadeToQsFraction)).roundToInt()
+                        )
                     } else {
                         IntOffset(x = 0, y = scrimOffset.value.roundToInt())
                     }

@@ -20,7 +20,6 @@ package com.android.systemui.statusbar.notification.collection.coordinator
 import android.app.Notification
 import android.app.NotificationManager.IMPORTANCE_DEFAULT
 import android.app.NotificationManager.IMPORTANCE_LOW
-import android.os.UserHandle
 import android.platform.test.annotations.EnableFlags
 import android.provider.Settings
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -475,20 +474,6 @@ class LockScreenMinimalismCoordinatorTest : SysuiTestCase() {
 
         val collectionListener: NotifCollectionListener =
             argumentCaptor { verify(notifPipeline).addCollectionListener(capture()) }.lastValue
-
-        var showOnlyUnseenNotifsOnKeyguardSetting: Boolean
-            get() =
-                fakeSettings.getIntForUser(
-                    Settings.Secure.LOCK_SCREEN_SHOW_ONLY_UNSEEN_NOTIFICATIONS,
-                    UserHandle.USER_CURRENT,
-                ) == 1
-            set(value) {
-                fakeSettings.putIntForUser(
-                    Settings.Secure.LOCK_SCREEN_SHOW_ONLY_UNSEEN_NOTIFICATIONS,
-                    if (value) 1 else 2,
-                    UserHandle.USER_CURRENT,
-                )
-            }
     }
 
     companion object {

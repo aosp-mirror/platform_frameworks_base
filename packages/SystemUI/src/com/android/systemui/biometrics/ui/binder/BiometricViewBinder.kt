@@ -24,7 +24,6 @@ import android.hardware.biometrics.BiometricConstants
 import android.hardware.biometrics.BiometricPrompt
 import android.hardware.biometrics.Flags
 import android.hardware.face.FaceManager
-import android.text.method.ScrollingMovementMethod
 import android.util.Log
 import android.view.HapticFeedbackConstants
 import android.view.MotionEvent
@@ -124,7 +123,6 @@ object BiometricViewBinder {
             !accessibilityManager.isEnabled || !accessibilityManager.isTouchExplorationEnabled
         subtitleView.isSelected =
             !accessibilityManager.isEnabled || !accessibilityManager.isTouchExplorationEnabled
-        descriptionView.movementMethod = ScrollingMovementMethod()
 
         val iconOverlayView = view.requireViewById<LottieAnimationView>(R.id.biometric_icon_overlay)
         val iconView = view.requireViewById<LottieAnimationView>(R.id.biometric_icon)

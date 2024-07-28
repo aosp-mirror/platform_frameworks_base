@@ -17,6 +17,7 @@
 package com.android.systemui.communal.shared.model
 
 import android.appwidget.AppWidgetProviderInfo
+import android.content.ComponentName
 import android.graphics.Bitmap
 import android.os.UserHandle
 
@@ -36,7 +37,7 @@ sealed interface CommunalWidgetContentModel {
     data class Pending(
         override val appWidgetId: Int,
         override val priority: Int,
-        val packageName: String,
+        val componentName: ComponentName,
         val icon: Bitmap?,
         val user: UserHandle,
     ) : CommunalWidgetContentModel

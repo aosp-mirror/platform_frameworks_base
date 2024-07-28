@@ -497,7 +497,27 @@ public abstract class Vibrator {
      */
     @RequiresPermission(android.Manifest.permission.VIBRATE)
     public void vibrate(@NonNull VibrationEffect vibe, @NonNull VibrationAttributes attributes) {
-        vibrate(Process.myUid(), mPackageName, vibe, null, attributes);
+        vibrate(vibe, attributes, null);
+    }
+
+    /**
+     * Vibrate with a given effect.
+     *
+     * <p>The app should be in the foreground for the vibration to happen. Background apps should
+     * specify a ringtone, notification or alarm usage in order to vibrate.</p>
+     *
+     * @param vibe       {@link VibrationEffect} describing the vibration to be performed.
+     * @param attributes {@link VibrationAttributes} corresponding to the vibration. For example,
+     *                   specify {@link VibrationAttributes#USAGE_ALARM} for alarm vibrations or
+     *                   {@link VibrationAttributes#USAGE_RINGTONE} for vibrations associated with
+     *                   incoming calls.
+     * @param reason     the reason for this vibration, used for debugging purposes.
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.VIBRATE)
+    public void vibrate(@NonNull VibrationEffect vibe,
+            @NonNull VibrationAttributes attributes, String reason) {
+        vibrate(Process.myUid(), mPackageName, vibe, reason, attributes);
     }
 
     /**
