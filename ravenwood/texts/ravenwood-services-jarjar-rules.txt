@@ -1,0 +1,11 @@
+# Ignore one-off class defined out in core/java/
+rule com.android.server.LocalServices @0
+rule com.android.server.pm.pkg.AndroidPackage @0
+rule com.android.server.pm.pkg.AndroidPackageSplit @0
+
+# Rename all other service internals so that tests can continue to statically
+# link services code when owners aren't ready to support on Ravenwood
+rule com.android.server.** repackaged.@0
+
+# TODO: support AIDL generated Parcelables via hoststubgen
+rule android.hardware.power.stats.** repackaged.@0
