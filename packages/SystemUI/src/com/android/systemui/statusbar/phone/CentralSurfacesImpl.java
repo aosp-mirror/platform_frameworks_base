@@ -2273,7 +2273,10 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         // applying the dimming effect twice.
         mUiBgExecutor.execute(() -> {
             float dimAmount = 0f;
-            if (mWallpaperManager.lockScreenWallpaperExists()) {
+            // Note that access to WallpaperManager APIs should be guarded by a check into
+            // WallpaperManager#isWallpaperSupported. Form factors that do not use wallpaper
+            // may crash SysUI during improper access. ref: b/355307617
+            if (!mWallpaperSupported || mWallpaperManager.lockScreenWallpaperExists()) {
                 dimAmount = mWallpaperManager.getWallpaperDimAmount();
             }
             final float scrimDimAmount = dimAmount;
