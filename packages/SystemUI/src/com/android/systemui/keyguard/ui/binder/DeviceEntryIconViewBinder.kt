@@ -106,6 +106,7 @@ object DeviceEntryIconViewBinder {
                     launch("$TAG#viewModel.isVisible") {
                         viewModel.isVisible.collect { isVisible ->
                             longPressHandlingView.isInvisible = !isVisible
+                            view.isClickable = isVisible
                         }
                     }
                     launch("$TAG#viewModel.isLongPressEnabled") {

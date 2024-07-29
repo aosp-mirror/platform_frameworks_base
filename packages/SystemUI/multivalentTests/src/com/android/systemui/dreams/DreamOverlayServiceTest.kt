@@ -62,12 +62,13 @@ import com.android.systemui.complication.dagger.ComplicationComponent
 import com.android.systemui.dreams.complication.HideComplicationTouchHandler
 import com.android.systemui.dreams.dagger.DreamOverlayComponent
 import com.android.systemui.keyguard.domain.interactor.keyguardInteractor
+import com.android.systemui.keyguard.gesture.domain.gestureInteractor
 import com.android.systemui.kosmos.testScope
+import com.android.systemui.navigationbar.gestural.domain.GestureInteractor
 import com.android.systemui.testKosmos
 import com.android.systemui.touch.TouchInsetManager
 import com.android.systemui.util.concurrency.FakeExecutor
 import com.android.systemui.util.mockito.any
-import com.android.systemui.util.mockito.eq
 import com.android.systemui.util.mockito.whenever
 import com.android.systemui.util.time.FakeSystemClock
 import com.google.common.truth.Truth.assertThat
@@ -84,9 +85,11 @@ import org.mockito.Mock
 import org.mockito.Mockito
 import org.mockito.Mockito.clearInvocations
 import org.mockito.Mockito.isNull
-import org.mockito.Mockito.spy
 import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
+import org.mockito.kotlin.argumentCaptor
+import org.mockito.kotlin.eq
+import org.mockito.kotlin.spy
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
@@ -166,6 +169,7 @@ class DreamOverlayServiceTest : SysuiTestCase() {
     private lateinit var bouncerRepository: FakeKeyguardBouncerRepository
     private lateinit var communalRepository: FakeCommunalSceneRepository
     private var viewCaptureSpy = spy(ViewCaptureFactory.getInstance(context))
+    private lateinit var gestureInteractor: GestureInteractor
 
     @Captor var mViewCaptor: ArgumentCaptor<View>? = null
     private lateinit var mService: DreamOverlayService
@@ -177,6 +181,7 @@ class DreamOverlayServiceTest : SysuiTestCase() {
         lifecycleRegistry = FakeLifecycleRegistry(mLifecycleOwner)
         bouncerRepository = kosmos.fakeKeyguardBouncerRepository
         communalRepository = kosmos.fakeCommunalSceneRepository
+        gestureInteractor = spy(kosmos.gestureInteractor)
 
         whenever(mDreamOverlayComponent.getDreamOverlayContainerViewController())
             .thenReturn(mDreamOverlayContainerViewController)
@@ -231,6 +236,7 @@ class DreamOverlayServiceTest : SysuiTestCase() {
                 HOME_CONTROL_PANEL_DREAM_COMPONENT,
                 mDreamOverlayCallbackController,
                 kosmos.keyguardInteractor,
+                gestureInteractor,
                 WINDOW_NAME
             )
     }
@@ -953,6 +959,47 @@ class DreamOverlayServiceTest : SysuiTestCase() {
 
         // Lifecycle state goes back to RESUMED.
         assertThat(lifecycleRegistry.currentState).isEqualTo(Lifecycle.State.RESUMED)
+    }
+
+    @Test
+    fun testDreamActivityGesturesBlockedOnStart() {
+        val client = client
+
+        // Inform the overlay service of dream starting.
+        client.startDream(
+            mWindowParams,
+            mDreamOverlayCallback,
+            DREAM_COMPONENT,
+            false /*shouldShowComplication*/
+        )
+        mMainExecutor.runAllReady()
+        val captor = argumentCaptor<ComponentName>()
+        verify(gestureInteractor)
+            .addGestureBlockedActivity(captor.capture(), eq(GestureInteractor.Scope.Global))
+        assertThat(captor.firstValue.packageName)
+            .isEqualTo(ComponentName.unflattenFromString(DREAM_COMPONENT)?.packageName)
+    }
+
+    @Test
+    fun testDreamActivityGesturesUnblockedOnEnd() {
+        val client = client
+
+        // Inform the overlay service of dream starting.
+        client.startDream(
+            mWindowParams,
+            mDreamOverlayCallback,
+            DREAM_COMPONENT,
+            false /*shouldShowComplication*/
+        )
+        mMainExecutor.runAllReady()
+
+        client.endDream()
+        mMainExecutor.runAllReady()
+        val captor = argumentCaptor<ComponentName>()
+        verify(gestureInteractor)
+            .removeGestureBlockedActivity(captor.capture(), eq(GestureInteractor.Scope.Global))
+        assertThat(captor.firstValue.packageName)
+            .isEqualTo(ComponentName.unflattenFromString(DREAM_COMPONENT)?.packageName)
     }
 
     internal class FakeLifecycleRegistry(provider: LifecycleOwner) : LifecycleRegistry(provider) {

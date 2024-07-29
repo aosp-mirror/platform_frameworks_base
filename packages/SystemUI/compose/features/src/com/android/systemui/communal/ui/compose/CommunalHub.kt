@@ -152,6 +152,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.unit.times
 import androidx.compose.ui.util.fastAll
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.compose.ui.viewinterop.NoOpUpdate
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.window.layout.WindowMetricsCalculator
 import com.android.compose.animation.Easings.Emphasized
@@ -159,6 +160,7 @@ import com.android.compose.modifiers.thenIf
 import com.android.compose.theme.LocalAndroidColorScheme
 import com.android.compose.ui.graphics.painter.rememberDrawablePainter
 import com.android.internal.R.dimen.system_app_widget_background_radius
+import com.android.systemui.Flags.communalTimerFlickerFix
 import com.android.systemui.communal.domain.model.CommunalContentModel
 import com.android.systemui.communal.shared.model.CommunalContentSize
 import com.android.systemui.communal.shared.model.CommunalScenes
@@ -221,7 +223,7 @@ fun CommunalHub(
     val layoutDirection = LocalLayoutDirection.current
 
     if (viewModel.isEditMode) {
-        ScrollOnNewWidgetAddedEffect(communalContent, gridState)
+        ObserveNewWidgetAddedEffect(communalContent, gridState, viewModel)
     } else {
         ScrollOnUpdatedLiveContentEffect(communalContent, gridState)
     }
@@ -553,25 +555,45 @@ private fun ScrollOnUpdatedLiveContentEffect(
     }
 }
 
-/** Observes communal content and scrolls to a newly added widget if any. */
+/**
+ * Observes communal content and determines whether a new widget has been added, upon which case:
+ * - Announce for accessibility
+ * - Scroll if the new widget is not visible
+ */
 @Composable
-private fun ScrollOnNewWidgetAddedEffect(
+private fun ObserveNewWidgetAddedEffect(
     communalContent: List<CommunalContentModel>,
     gridState: LazyGridState,
+    viewModel: BaseCommunalViewModel,
 ) {
     val coroutineScope = rememberCoroutineScope()
     val widgetKeys = remember { mutableListOf<String>() }
+    var communalContentPending by remember { mutableStateOf(true) }
 
     LaunchedEffect(communalContent) {
+        // Do nothing until any communal content comes in
+        if (communalContentPending && communalContent.isEmpty()) {
+            return@LaunchedEffect
+        }
+
         val oldWidgetKeys = widgetKeys.toList()
+        val widgets = communalContent.filterIsInstance<CommunalContentModel.WidgetContent.Widget>()
         widgetKeys.clear()
-        widgetKeys.addAll(communalContent.filter { it.isWidgetContent() }.map { it.key })
+        widgetKeys.addAll(widgets.map { it.key })
+
+        // Do nothing on first communal content since we don't have a delta
+        if (communalContentPending) {
+            communalContentPending = false
+            return@LaunchedEffect
+        }
 
         // Do nothing if there is no new widget
         val indexOfFirstNewWidget = widgetKeys.indexOfFirst { !oldWidgetKeys.contains(it) }
         if (indexOfFirstNewWidget < 0) {
             return@LaunchedEffect
         }
+
+        viewModel.onNewWidgetAdded(widgets[indexOfFirstNewWidget].providerInfo)
 
         // Scroll if the new widget is not visible
         val lastVisibleItemIndex = gridState.layoutInfo.visibleItemsInfo.lastOrNull()?.index
@@ -1336,9 +1358,15 @@ private fun SmartspaceContent(
         factory = { context ->
             SmartspaceAppWidgetHostView(context).apply {
                 interactionHandler?.let { setInteractionHandler(it) }
-                updateAppWidget(model.remoteViews)
+                if (!communalTimerFlickerFix()) {
+                    updateAppWidget(model.remoteViews)
+                }
             }
         },
+        update =
+            if (communalTimerFlickerFix()) {
+                { view: SmartspaceAppWidgetHostView -> view.updateAppWidget(model.remoteViews) }
+            } else NoOpUpdate,
         // For reusing composition in lazy lists.
         onReset = {},
     )

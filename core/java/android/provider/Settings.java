@@ -12560,6 +12560,14 @@ public final class Settings {
                 "contextual_screen_timeout_enabled";
 
         /**
+         * Whether hinge angle lidevent is enabled.
+         *
+         * @hide
+         */
+        public static final String HINGE_ANGLE_LIDEVENT_ENABLED =
+                "hinge_angle_lidevent_enabled";
+
+        /**
          * Whether lockscreen weather is enabled.
          *
          * @hide
