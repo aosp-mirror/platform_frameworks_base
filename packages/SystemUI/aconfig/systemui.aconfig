@@ -1005,6 +1005,16 @@ flag {
 }
 
 flag {
+  name: "communal_timer_flicker_fix"
+  namespace: "systemui"
+  description: "fixes timers on the hub flickering when pausing"
+  bug: "353801573"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}
+
+flag {
   name: "app_clips_backlinks"
   namespace: "systemui"
   description: "Enables Backlinks improvement feature in App Clips"

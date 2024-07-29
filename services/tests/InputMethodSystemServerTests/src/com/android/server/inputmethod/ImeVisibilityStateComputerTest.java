@@ -311,10 +311,8 @@ public class ImeVisibilityStateComputerTest extends InputMethodManagerServiceTes
             final ArgumentCaptor<IBinder> targetCaptor = ArgumentCaptor.forClass(IBinder.class);
             final ArgumentCaptor<ImeVisibilityResult> resultCaptor = ArgumentCaptor.forClass(
                     ImeVisibilityResult.class);
-            synchronized (ImfLock.class) {
-                verify(mInputMethodManagerService).onApplyImeVisibilityFromComputerLocked(
-                        targetCaptor.capture(), notNull() /* statsToken */, resultCaptor.capture());
-            }
+            verify(mInputMethodManagerService).onApplyImeVisibilityFromComputerLocked(
+                    targetCaptor.capture(), notNull() /* statsToken */, resultCaptor.capture());
             final IBinder imeInputTarget = targetCaptor.getValue();
             final ImeVisibilityResult result = resultCaptor.getValue();
 

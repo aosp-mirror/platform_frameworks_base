@@ -37,6 +37,7 @@ import com.android.internal.widget.remotecompose.core.operations.DrawTweenPath;
 import com.android.internal.widget.remotecompose.core.operations.FloatConstant;
 import com.android.internal.widget.remotecompose.core.operations.FloatExpression;
 import com.android.internal.widget.remotecompose.core.operations.Header;
+import com.android.internal.widget.remotecompose.core.operations.IntegerExpression;
 import com.android.internal.widget.remotecompose.core.operations.MatrixRestore;
 import com.android.internal.widget.remotecompose.core.operations.MatrixRotate;
 import com.android.internal.widget.remotecompose.core.operations.MatrixSave;
@@ -55,6 +56,7 @@ import com.android.internal.widget.remotecompose.core.operations.Theme;
 import com.android.internal.widget.remotecompose.core.operations.Utils;
 import com.android.internal.widget.remotecompose.core.operations.paint.PaintBundle;
 import com.android.internal.widget.remotecompose.core.operations.utilities.easing.FloatAnimation;
+import com.android.internal.widget.remotecompose.core.types.IntegerConstant;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -876,6 +878,27 @@ public class RemoteComposeBuffer {
         return Utils.asNan(id);
     }
 
+
+    /**
+     * Add a Integer return an id number pointing to that float.
+     * @param value
+     * @return
+     */
+    public int addInteger(int value) {
+        int id = mRemoteComposeState.cacheInteger(value);
+        IntegerConstant.COMPANION.apply(mBuffer, id, value);
+        return id;
+    }
+
+    /**
+     * Add a IntegerId as float ID.
+     * @param id id to be converted
+     * @return
+     */
+    public float asFloatId(int id) {
+        return Utils.asNan(id);
+    }
+
     /**
      * Add a float that is a computation based on variables
      * @param value A RPN style float operation i.e. "4, 3, ADD" outputs 7
@@ -898,6 +921,18 @@ public class RemoteComposeBuffer {
         int id = mRemoteComposeState.cache(value);
         FloatExpression.COMPANION.apply(mBuffer, id, value, animation);
         return Utils.asNan(id);
+    }
+
+    /**
+     * Add and integer expression
+     * @param mask defines which elements are operators or variables
+     * @param value array of values to calculate maximum 32
+     * @return
+     */
+    public int addIntegerExpression(int mask, int[] value) {
+        int id = mRemoteComposeState.cache(value);
+        IntegerExpression.COMPANION.apply(mBuffer, id, mask, value);
+        return  id;
     }
 
     /**
@@ -1038,5 +1073,6 @@ public class RemoteComposeBuffer {
         NamedVariable.COMPANION.apply(mBuffer, id,
                 NamedVariable.COLOR_TYPE, name);
     }
+
 }
 
