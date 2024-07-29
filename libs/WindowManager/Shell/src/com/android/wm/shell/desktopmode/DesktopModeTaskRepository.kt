@@ -250,11 +250,17 @@ class DesktopModeTaskRepository {
             logD("getVisibleTaskCount=$it")
         }
 
-    /** Adds task (or moves if it already exists) to the top of the ordered list. */
+    /**
+     * Adds task (or moves if it already exists) to the top of the ordered list.
+     *
+     * Unminimizes the task if it is minimized.
+     */
     fun addOrMoveFreeformTaskToTop(displayId: Int, taskId: Int) {
         logD("Add or move task to top: display=%d taskId=%d", taskId, displayId)
         desktopTaskDataByDisplayId[displayId]?.freeformTasksInZOrder?.remove(taskId)
         desktopTaskDataByDisplayId.getOrCreate(displayId).freeformTasksInZOrder.add(0, taskId)
+        // Unminimize the task if it is minimized.
+        unminimizeTask(displayId, taskId)
     }
 
     /** Minimizes the task for [taskId] and [displayId] */
