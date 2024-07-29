@@ -182,7 +182,9 @@ private fun GestureTutorialContent(
                     if (gestureState == FINISHED) R.string.touchpad_tutorial_gesture_done
                     else R.string.touchpad_back_gesture_action_title,
                 titleColor = screenColors.titleColor,
-                bodyTextId = R.string.touchpad_back_gesture_guidance,
+                bodyTextId =
+                    if (gestureState == FINISHED) R.string.touchpad_back_gesture_finished
+                    else R.string.touchpad_back_gesture_guidance,
                 modifier = Modifier.weight(1f)
             )
             Spacer(modifier = Modifier.width(76.dp))
