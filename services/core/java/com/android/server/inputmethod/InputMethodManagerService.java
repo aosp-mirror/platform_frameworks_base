@@ -5032,7 +5032,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
             return;
         }
 
-        if (Flags.imeSwitcherRevamp()) {
+        if (mNewInputMethodSwitcherMenuEnabled) {
             if (DEBUG) {
                 Slog.v(TAG, "Show IME switcher menu,"
                         + " showAuxSubtypes=" + showAuxSubtypes
