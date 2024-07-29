@@ -16,6 +16,7 @@
 
 #include "format/proto/ProtoDeserialize.h"
 
+#include "Resource.h"
 #include "ResourceTable.h"
 #include "ResourceUtils.h"
 #include "ResourceValues.h"
@@ -532,6 +533,8 @@ static bool DeserializePackageFromPb(const pb::Package& pb_package, const ResStr
           *out_error = "duplicate configuration in resource table";
           return false;
         }
+
+        config_value->flag_status = (FlagStatus)pb_config_value.flag_status();
 
         config_value->value = DeserializeValueFromPb(pb_config_value.value(), src_pool, config,
                                                      &out_table->string_pool, files, out_error);

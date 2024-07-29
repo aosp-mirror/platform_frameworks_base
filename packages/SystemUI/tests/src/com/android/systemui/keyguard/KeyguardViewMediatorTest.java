@@ -70,13 +70,14 @@ import android.view.IRemoteAnimationFinishedCallback;
 import android.view.RemoteAnimationTarget;
 import android.view.View;
 import android.view.ViewRootImpl;
-import android.view.WindowManager;
 
 import androidx.test.filters.SmallTest;
 
+import com.android.app.viewcapture.ViewCaptureAwareWindowManager;
 import com.android.internal.foldables.FoldGracePeriodProvider;
 import com.android.internal.logging.InstanceId;
 import com.android.internal.logging.UiEventLogger;
+import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.keyguard.KeyguardDisplayManager;
 import com.android.keyguard.KeyguardSecurityView;
@@ -101,6 +102,7 @@ import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor;
 import com.android.systemui.kosmos.KosmosJavaAdapter;
 import com.android.systemui.log.SessionTracker;
 import com.android.systemui.navigationbar.NavigationModeController;
+import com.android.systemui.process.ProcessWrapper;
 import com.android.systemui.scene.FakeWindowRootViewComponent;
 import com.android.systemui.scene.ui.view.WindowRootView;
 import com.android.systemui.settings.UserTracker;
@@ -165,7 +167,7 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
     private @Mock BroadcastDispatcher mBroadcastDispatcher;
     private @Mock DismissCallbackRegistry mDismissCallbackRegistry;
     private @Mock DumpManager mDumpManager;
-    private @Mock WindowManager mWindowManager;
+    private @Mock ViewCaptureAwareWindowManager mWindowManager;
     private @Mock IActivityManager mActivityManager;
     private @Mock ConfigurationController mConfigurationController;
     private @Mock PowerManager mPowerManager;
@@ -188,6 +190,7 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
     private @Mock ActivityTransitionAnimator mActivityTransitionAnimator;
     private @Mock ScrimController mScrimController;
     private @Mock IActivityTaskManager mActivityTaskManagerService;
+    private @Mock IStatusBarService mStatusBarService;
     private @Mock SysuiColorExtractor mColorExtractor;
     private @Mock AuthController mAuthController;
     private @Mock ShadeExpansionStateManager mShadeExpansionStateManager;
@@ -211,6 +214,7 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
     private @Mock SystemSettings mSystemSettings;
     private @Mock SecureSettings mSecureSettings;
     private @Mock AlarmManager mAlarmManager;
+    private @Mock ProcessWrapper mProcessWrapper;
     private FakeSystemClock mSystemClock;
     private final FakeWallpaperRepository mWallpaperRepository = new FakeWallpaperRepository();
 
@@ -247,6 +251,7 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
                 .thenReturn(mock(Flow.class));
         when(mSelectedUserInteractor.getSelectedUserId()).thenReturn(mDefaultUserId);
         when(mSelectedUserInteractor.getSelectedUserId(anyBoolean())).thenReturn(mDefaultUserId);
+        when(mProcessWrapper.isSystemUser()).thenReturn(true);
         mNotificationShadeWindowController = new NotificationShadeWindowControllerImpl(
                 mContext,
                 new FakeWindowRootViewComponent.Factory(mock(WindowRootView.class)),
@@ -1225,10 +1230,12 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
                 () -> mActivityTransitionAnimator,
                 () -> mScrimController,
                 mActivityTaskManagerService,
+                mStatusBarService,
                 mFeatureFlags,
                 mSecureSettings,
                 mSystemSettings,
                 mSystemClock,
+                mProcessWrapper,
                 mDispatcher,
                 () -> mDreamViewModel,
                 () -> mCommunalTransitionViewModel,

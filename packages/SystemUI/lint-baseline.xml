@@ -9168,39 +9168,6 @@
 
     <issue
         id="UnclosedTrace"
-        message="The `beginSection()` call is not always closed with a matching `endSection()` because the code in between may return early"
-        errorLine1="        Trace.beginSection(&quot;KeyguardViewMediator#handleKeyguardDone&quot;);"
-        errorLine2="              ~~~~~~~~~~~~">
-        <location
-            file="frameworks/base/packages/SystemUI/src/com/android/systemui/keyguard/KeyguardViewMediator.java"
-            line="2654"
-            column="15"/>
-    </issue>
-
-    <issue
-        id="UnclosedTrace"
-        message="The `beginSection()` call is not always closed with a matching `endSection()` because the code in between may return early"
-        errorLine1="        Trace.beginSection(&quot;KeyguardViewMediator#handleShow&quot;);"
-        errorLine2="              ~~~~~~~~~~~~">
-        <location
-            file="frameworks/base/packages/SystemUI/src/com/android/systemui/keyguard/KeyguardViewMediator.java"
-            line="2780"
-            column="15"/>
-    </issue>
-
-    <issue
-        id="UnclosedTrace"
-        message="The `beginSection()` call is not always closed with a matching `endSection()` because the code in between may return early"
-        errorLine1="        Trace.beginSection(&quot;KeyguardViewMediator#handleStartKeyguardExitAnimation&quot;);"
-        errorLine2="              ~~~~~~~~~~~~">
-        <location
-            file="frameworks/base/packages/SystemUI/src/com/android/systemui/keyguard/KeyguardViewMediator.java"
-            line="3011"
-            column="15"/>
-    </issue>
-
-    <issue
-        id="UnclosedTrace"
         message="The `traceBegin()` call is not always closed with a matching `traceEnd()` because the code in between may return early"
         errorLine1="            Trace.traceBegin(Trace.TRACE_TAG_APP, &quot;MediaControlPanel#bindPlayer&lt;&quot; + key + &quot;>&quot;);"
         errorLine2="                  ~~~~~~~~~~">

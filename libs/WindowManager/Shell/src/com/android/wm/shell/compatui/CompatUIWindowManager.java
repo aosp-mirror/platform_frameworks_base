@@ -23,6 +23,8 @@ import static android.app.CameraCompatTaskInfo.CAMERA_COMPAT_CONTROL_TREATMENT_S
 import static android.view.WindowManager.LARGE_SCREEN_SMALLEST_SCREEN_WIDTH_DP;
 import static android.window.TaskConstants.TASK_CHILD_LAYER_COMPAT_UI;
 
+import static com.android.wm.shell.shared.desktopmode.DesktopModeFlags.DESKTOP_WINDOWING_MODE;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.CameraCompatTaskInfo.CameraCompatControlState;
@@ -40,8 +42,11 @@ import com.android.wm.shell.R;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.common.DisplayLayout;
 import com.android.wm.shell.common.SyncTransactionQueue;
-import com.android.wm.shell.compatui.CompatUIController.CompatUICallback;
 import com.android.wm.shell.compatui.CompatUIController.CompatUIHintsState;
+import com.android.wm.shell.compatui.api.CompatUIEvent;
+import com.android.wm.shell.compatui.impl.CompatUIEvents.CameraControlStateUpdated;
+import com.android.wm.shell.compatui.impl.CompatUIEvents.SizeCompatRestartButtonAppeared;
+import com.android.wm.shell.shared.desktopmode.DesktopModeFlags;
 
 import java.util.function.Consumer;
 
@@ -50,10 +55,13 @@ import java.util.function.Consumer;
  */
 class CompatUIWindowManager extends CompatUIWindowManagerAbstract {
 
-    private final CompatUICallback mCallback;
+    @NonNull
+    private final Consumer<CompatUIEvent> mCallback;
 
+    @NonNull
     private final CompatUIConfiguration mCompatUIConfiguration;
 
+    @NonNull
     private final Consumer<Pair<TaskInfo, ShellTaskOrganizer.TaskListener>> mOnRestartButtonClicked;
 
     // Remember the last reported states in case visibility changes due to keyguard or IME updates.
@@ -65,6 +73,7 @@ class CompatUIWindowManager extends CompatUIWindowManagerAbstract {
     int mCameraCompatControlState = CAMERA_COMPAT_CONTROL_HIDDEN;
 
     @VisibleForTesting
+    @NonNull
     CompatUIHintsState mCompatUIHintsState;
 
     @Nullable
@@ -73,15 +82,20 @@ class CompatUIWindowManager extends CompatUIWindowManagerAbstract {
 
     private final float mHideScmTolerance;
 
-    CompatUIWindowManager(Context context, TaskInfo taskInfo,
-            SyncTransactionQueue syncQueue, CompatUICallback callback,
-            ShellTaskOrganizer.TaskListener taskListener, DisplayLayout displayLayout,
-            CompatUIHintsState compatUIHintsState, CompatUIConfiguration compatUIConfiguration,
-            Consumer<Pair<TaskInfo, ShellTaskOrganizer.TaskListener>> onRestartButtonClicked) {
+    CompatUIWindowManager(@NonNull Context context, @NonNull TaskInfo taskInfo,
+                          @NonNull SyncTransactionQueue syncQueue,
+                          @NonNull Consumer<CompatUIEvent> callback,
+                          @Nullable ShellTaskOrganizer.TaskListener taskListener,
+                          @Nullable DisplayLayout displayLayout,
+                          @NonNull CompatUIHintsState compatUIHintsState,
+                          @NonNull CompatUIConfiguration compatUIConfiguration,
+                          @NonNull Consumer<Pair<TaskInfo, ShellTaskOrganizer.TaskListener>>
+                                  onRestartButtonClicked) {
         super(context, taskInfo, syncQueue, taskListener, displayLayout);
         mCallback = callback;
         mHasSizeCompat = taskInfo.appCompatTaskInfo.topActivityInSizeCompat;
-        if (Flags.enableDesktopWindowingMode() && Flags.enableWindowingDynamicInitialBounds()) {
+        if (DESKTOP_WINDOWING_MODE.isEnabled(mContext)
+                && DesktopModeFlags.DYNAMIC_INITIAL_BOUNDS.isEnabled(context)) {
             // Don't show the SCM button for freeform tasks
             mHasSizeCompat &= !taskInfo.isFreeform();
         }
@@ -122,7 +136,7 @@ class CompatUIWindowManager extends CompatUIWindowManagerAbstract {
         updateVisibilityOfViews();
 
         if (mHasSizeCompat) {
-            mCallback.onSizeCompatRestartButtonAppeared(mTaskId);
+            mCallback.accept(new SizeCompatRestartButtonAppeared(mTaskId));
         }
 
         return mLayout;
@@ -140,7 +154,8 @@ class CompatUIWindowManager extends CompatUIWindowManagerAbstract {
         final boolean prevHasSizeCompat = mHasSizeCompat;
         final int prevCameraCompatControlState = mCameraCompatControlState;
         mHasSizeCompat = taskInfo.appCompatTaskInfo.topActivityInSizeCompat;
-        if (Flags.enableDesktopWindowingMode() && Flags.enableWindowingDynamicInitialBounds()) {
+        if (DESKTOP_WINDOWING_MODE.isEnabled(mContext)
+                && DesktopModeFlags.DYNAMIC_INITIAL_BOUNDS.isEnabled(mContext)) {
             // Don't show the SCM button for freeform tasks
             mHasSizeCompat &= !taskInfo.isFreeform();
         }
@@ -177,7 +192,7 @@ class CompatUIWindowManager extends CompatUIWindowManagerAbstract {
                 mCameraCompatControlState == CAMERA_COMPAT_CONTROL_TREATMENT_SUGGESTED
                         ? CAMERA_COMPAT_CONTROL_TREATMENT_APPLIED
                         : CAMERA_COMPAT_CONTROL_TREATMENT_SUGGESTED;
-        mCallback.onCameraControlStateUpdated(mTaskId, mCameraCompatControlState);
+        mCallback.accept(new CameraControlStateUpdated(mTaskId, mCameraCompatControlState));
         mLayout.updateCameraTreatmentButton(mCameraCompatControlState);
     }
 
@@ -188,7 +203,7 @@ class CompatUIWindowManager extends CompatUIWindowManagerAbstract {
             return;
         }
         mCameraCompatControlState = CAMERA_COMPAT_CONTROL_DISMISSED;
-        mCallback.onCameraControlStateUpdated(mTaskId, CAMERA_COMPAT_CONTROL_DISMISSED);
+        mCallback.accept(new CameraControlStateUpdated(mTaskId, CAMERA_COMPAT_CONTROL_DISMISSED));
         mLayout.setCameraControlVisibility(/* show= */ false);
     }
 

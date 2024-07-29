@@ -834,6 +834,14 @@ public class AudioDeviceBroker {
         return isDeviceActiveForCommunication(AudioDeviceInfo.TYPE_BLUETOOTH_SCO);
     }
 
+    /*package*/ boolean isBluetoothBleHeadsetActive() {
+        return isDeviceActiveForCommunication(AudioDeviceInfo.TYPE_BLE_HEADSET);
+    }
+
+    /*package*/ boolean isBluetoothBleSpeakerActive() {
+        return isDeviceActiveForCommunication(AudioDeviceInfo.TYPE_BLE_SPEAKER);
+    }
+
     /*package*/ boolean isDeviceConnected(@NonNull AudioDeviceAttributes device) {
         synchronized (mDeviceStateLock) {
             return mDeviceInventory.isDeviceConnected(device);
@@ -1424,6 +1432,8 @@ public class AudioDeviceBroker {
         }
         mCurCommunicationPortId = portId;
 
+        mAudioService.postScoDeviceActive(isBluetoothScoActive());
+
         final int nbDispatchers = mCommDevDispatchers.beginBroadcast();
         for (int i = 0; i < nbDispatchers; i++) {
             try {
@@ -1863,7 +1873,10 @@ public class AudioDeviceBroker {
                             synchronized (mBluetoothAudioStateLock) {
                                 reapplyAudioHalBluetoothState();
                             }
-                            mBtHelper.onAudioServerDiedRestoreA2dp();
+                            final int forceForMedia = getBluetoothA2dpEnabled()
+                                    ? AudioSystem.FORCE_NONE : AudioSystem.FORCE_NO_BT_A2DP;
+                            setForceUse_Async(
+                                    AudioSystem.FOR_MEDIA, forceForMedia, "MSG_RESTORE_DEVICES");
                             updateCommunicationRoute("MSG_RESTORE_DEVICES");
                         }
                     }

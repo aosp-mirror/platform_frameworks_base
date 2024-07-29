@@ -17,6 +17,7 @@
 package com.android.systemui.keyguard.domain.interactor
 
 import android.animation.ValueAnimator
+import android.util.Log
 import com.android.app.animation.Interpolators
 import com.android.app.tracing.coroutines.launch
 import com.android.systemui.dagger.SysUISingleton
@@ -44,6 +45,7 @@ class FromAodTransitionInteractor
 @Inject
 constructor(
     override val transitionRepository: KeyguardTransitionRepository,
+    override val internalTransitionInteractor: InternalKeyguardTransitionInteractor,
     transitionInteractor: KeyguardTransitionInteractor,
     @Background private val scope: CoroutineScope,
     @Background bgDispatcher: CoroutineDispatcher,
@@ -52,6 +54,7 @@ constructor(
     powerInteractor: PowerInteractor,
     keyguardOcclusionInteractor: KeyguardOcclusionInteractor,
     val deviceEntryRepository: DeviceEntryRepository,
+    private val wakeToGoneInteractor: KeyguardWakeDirectlyToGoneInteractor,
 ) :
     TransitionInteractor(
         fromState = KeyguardState.AOD,
@@ -97,6 +100,7 @@ constructor(
                     keyguardInteractor.primaryBouncerShowing,
                     keyguardInteractor.isKeyguardOccluded,
                     canDismissLockscreen,
+                    wakeToGoneInteractor.canWakeDirectlyToGone,
                 )
                 .collect {
                     (
@@ -106,6 +110,7 @@ constructor(
                         primaryBouncerShowing,
                         isKeyguardOccludedLegacy,
                         canDismissLockscreen,
+                        canWakeDirectlyToGone,
                     ) ->
                     if (!maybeHandleInsecurePowerGesture()) {
                         val shouldTransitionToLockscreen =
@@ -114,7 +119,9 @@ constructor(
                                 // needed. Also, don't react to wake and unlock events, as we'll be
                                 // receiving a call to #dismissAod() shortly when the authentication
                                 // completes.
-                                !maybeStartTransitionToOccludedOrInsecureCamera() &&
+                                !maybeStartTransitionToOccludedOrInsecureCamera { state, reason ->
+                                    startTransitionTo(state, ownerReason = reason)
+                                } &&
                                     !isWakeAndUnlock(biometricUnlockState.mode) &&
                                     !primaryBouncerShowing
                             } else {
@@ -130,10 +137,11 @@ constructor(
 
                         val shouldTransitionToGone =
                             (!KeyguardWmStateRefactor.isEnabled && canDismissLockscreen) ||
-                                (KeyguardWmStateRefactor.isEnabled &&
-                                    !deviceEntryRepository.isLockscreenEnabled())
+                                (KeyguardWmStateRefactor.isEnabled && canWakeDirectlyToGone)
 
                         if (shouldTransitionToGone) {
+                            // TODO(b/336576536): Check if adaptation for scene framework is needed
+                            if (SceneContainerFlag.isEnabled) return@collect
                             startTransitionTo(
                                 toState = KeyguardState.GONE,
                             )
@@ -179,11 +187,7 @@ constructor(
                 .filterRelevantKeyguardStateAnd { isOccluded -> isOccluded }
                 .collect {
                     if (!maybeHandleInsecurePowerGesture()) {
-                        startTransitionTo(
-                            toState = KeyguardState.OCCLUDED,
-                            modeOnCanceled = TransitionModeOnCanceled.RESET,
-                            ownerReason = "isOccluded = true",
-                        )
+                        Log.i(TAG, "Ignoring change to isOccluded to prevent errant AOD->OCCLUDED")
                     }
                 }
         }
@@ -194,6 +198,7 @@ constructor(
      * PRIMARY_BOUNCER.
      */
     private fun listenForAodToPrimaryBouncer() {
+        // TODO(b/336576536): Check if adaptation for scene framework is needed
         if (SceneContainerFlag.isEnabled) return
         scope.launch("$TAG#listenForAodToPrimaryBouncer") {
             keyguardInteractor.primaryBouncerShowing

@@ -33,9 +33,12 @@ constructor(
     /** Whether the long-press handling feature should be enabled. */
     val isLongPressHandlingEnabled: Flow<Boolean> = interactor.isLongPressHandlingEnabled
 
-    /** Notifies that the user has long-pressed on the lock screen. */
-    fun onLongPress() {
-        interactor.onLongPress()
+    /** Notifies that the user has long-pressed on the lock screen.
+     *
+     * @param isA11yAction: Whether the action was performed as an a11y action
+     */
+    fun onLongPress(isA11yAction: Boolean) {
+        interactor.onLongPress(isA11yAction)
     }
 
     /**

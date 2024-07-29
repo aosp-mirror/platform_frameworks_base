@@ -145,6 +145,7 @@ fun SceneScope.HeadsUpNotificationSpace(
                     }
                     // Note: boundsInWindow doesn't scroll off the screen
                     stackScrollView.setHeadsUpTop(boundsInWindow.top)
+                    stackScrollView.setHeadsUpBottom(boundsInWindow.bottom)
                 }
     )
 }
@@ -198,6 +199,7 @@ fun SceneScope.SnoozeableHeadsUpNotificationSpace(
 
     LaunchedEffect(scrollableState.isScrollInProgress) {
         if (!scrollableState.isScrollInProgress && scrollOffset <= minScrollOffset) {
+            viewModel.setHeadsUpAnimatingAway(false)
             viewModel.snoozeHun()
         }
     }
@@ -288,12 +290,11 @@ fun SceneScope.NotificationScrollingStack(
     val isCurrentGestureOverscroll =
         viewModel.isCurrentGestureOverscroll.collectAsStateWithLifecycle(false)
     val expansionFraction by viewModel.expandFraction.collectAsStateWithLifecycle(0f)
+    val shadeToQsFraction by viewModel.shadeToQsFraction.collectAsStateWithLifecycle(0f)
 
-    val navBarHeightPx =
-        with(density) {
-            WindowInsets.systemBars.asPaddingValues().calculateBottomPadding().toPx().toInt()
-        }
-    val bottomPaddingPx = if (shouldReserveSpaceForNavBar) navBarHeightPx else 0
+    val topPadding = dimensionResource(id = R.dimen.notification_side_paddings)
+    val navBarHeight = WindowInsets.systemBars.asPaddingValues().calculateBottomPadding()
+    val bottomPadding = if (shouldReserveSpaceForNavBar) navBarHeight else 0.dp
 
     val screenHeight = LocalRawScreenHeight.current
 
@@ -339,7 +340,7 @@ fun SceneScope.NotificationScrollingStack(
     // expanded, reset scrim offset.
     LaunchedEffect(stackHeight, scrimOffset) {
         snapshotFlow { stackHeight.intValue < minVisibleScrimHeight() && scrimOffset.value < 0f }
-            .collect { shouldCollapse -> if (shouldCollapse) scrimOffset.snapTo(0f) }
+            .collect { shouldCollapse -> if (shouldCollapse) scrimOffset.animateTo(0f, tween()) }
     }
 
     // if we receive scroll delta from NSSL, offset the scrim and placeholder accordingly.
@@ -385,14 +386,26 @@ fun SceneScope.NotificationScrollingStack(
             modifier
                 .element(Notifications.Elements.NotificationScrim)
                 .offset {
-                    // if scrim is expanded while transitioning to Gone scene, increase the offset
-                    // in step with the transition so that it is 0 when it completes.
+                    // if scrim is expanded while transitioning to Gone or QS scene, increase the
+                    // offset in step with the corresponding transition so that it is 0 when it
+                    // completes.
                     if (
                         scrimOffset.value < 0 &&
                             layoutState.isTransitioning(from = Scenes.Shade, to = Scenes.Gone) ||
                             layoutState.isTransitioning(from = Scenes.Shade, to = Scenes.Lockscreen)
                     ) {
                         IntOffset(x = 0, y = (scrimOffset.value * expansionFraction).roundToInt())
+                    } else if (
+                        scrimOffset.value < 0 &&
+                            layoutState.isTransitioning(
+                                from = Scenes.Shade,
+                                to = Scenes.QuickSettings
+                            )
+                    ) {
+                        IntOffset(
+                            x = 0,
+                            y = (scrimOffset.value * (1 - shadeToQsFraction)).roundToInt()
+                        )
                     } else {
                         IntOffset(x = 0, y = scrimOffset.value.roundToInt())
                     }
@@ -462,13 +475,21 @@ fun SceneScope.NotificationScrollingStack(
                             Modifier.nestedScroll(scrimNestedScrollConnection)
                         }
                         .verticalScroll(scrollState)
+                        .padding(top = topPadding)
                         .fillMaxWidth()
-                        .notificationStackHeight(view = stackScrollView, padding = bottomPaddingPx)
+                        .notificationStackHeight(
+                            view = stackScrollView,
+                            totalVerticalPadding = topPadding + bottomPadding,
+                        )
                         .onSizeChanged { size -> stackHeight.intValue = size.height },
             )
         }
         if (shouldIncludeHeadsUpSpace) {
-            HeadsUpNotificationSpace(stackScrollView = stackScrollView, viewModel = viewModel)
+            HeadsUpNotificationSpace(
+                stackScrollView = stackScrollView,
+                viewModel = viewModel,
+                modifier = Modifier.padding(top = topPadding)
+            )
         }
     }
 }

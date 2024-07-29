@@ -266,9 +266,9 @@ public class DreamService extends Service implements Window.Callback {
     private boolean mDozing;
     private boolean mWindowless;
     private boolean mPreviewMode;
-    private int mDozeScreenState = Display.STATE_UNKNOWN;
-    private @Display.StateReason int mDozeScreenStateReason = Display.STATE_REASON_UNKNOWN;
-    private int mDozeScreenBrightness = PowerManager.BRIGHTNESS_DEFAULT;
+    private volatile int mDozeScreenState = Display.STATE_UNKNOWN;
+    private volatile @Display.StateReason int mDozeScreenStateReason = Display.STATE_REASON_UNKNOWN;
+    private volatile int mDozeScreenBrightness = PowerManager.BRIGHTNESS_DEFAULT;
 
     private boolean mDebug = false;
 
@@ -742,7 +742,9 @@ public class DreamService extends Service implements Window.Callback {
      * @see View#findViewById(int)
      * @see DreamService#requireViewById(int)
      */
-    /* TODO(b/347672184): Re-add @Nullable */
+    // Strictly speaking this should be marked as @Nullable but the nullability of the return value
+    // is deliberately left unspecified as idiomatically correct code can make assumptions either
+    // way based on local context, e.g. layout specification.
     public <T extends View> T findViewById(@IdRes int id) {
         return getWindow().findViewById(id);
     }
@@ -785,7 +787,6 @@ public class DreamService extends Service implements Window.Callback {
      */
     public void setInteractive(boolean interactive) {
         mInteractive = interactive;
-        updateAccessibilityMessage();
     }
 
     /**
@@ -1345,7 +1346,11 @@ public class DreamService extends Service implements Window.Callback {
                     Slog.w(mTag, "WakeUp was called before the dream was attached.");
                 } else {
                     try {
-                        mDreamManager.finishSelf(mDreamToken, false /*immediate*/);
+                        if (startAndStopDozingInBackground()) {
+                            mDreamManager.finishSelfOneway(mDreamToken, false /*immediate*/);
+                        } else {
+                            mDreamManager.finishSelf(mDreamToken, false /*immediate*/);
+                        }
                     } catch (RemoteException ex) {
                         // system server died
                     }
@@ -1496,7 +1501,11 @@ public class DreamService extends Service implements Window.Callback {
         if (mFinished || mWaking) {
             Slog.w(mTag, "attach() called after dream already finished");
             try {
-                mDreamManager.finishSelf(dreamToken, true /*immediate*/);
+                if (startAndStopDozingInBackground()) {
+                    mDreamManager.finishSelfOneway(dreamToken, true /*immediate*/);
+                } else {
+                    mDreamManager.finishSelf(dreamToken, true /*immediate*/);
+                }
             } catch (RemoteException ex) {
                 // system server died
             }
@@ -1639,9 +1648,9 @@ public class DreamService extends Service implements Window.Callback {
         if (mWindow == null) return;
         if (mDreamAccessibility == null) {
             final View rootView = mWindow.getDecorView();
-            mDreamAccessibility = new DreamAccessibility(this, rootView);
+            mDreamAccessibility = new DreamAccessibility(this, rootView, this::wakeUp);
         }
-        mDreamAccessibility.updateAccessibilityConfiguration(isInteractive());
+        mDreamAccessibility.updateAccessibilityConfiguration();
     }
 
     private boolean getWindowFlagValue(int flag, boolean defaultValue) {

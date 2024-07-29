@@ -16,6 +16,7 @@
 package com.android.server.wm;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.content.pm.PackageManager;
 
 import com.android.server.wm.utils.OptPropFactory;
@@ -26,31 +27,29 @@ import com.android.server.wm.utils.OptPropFactory;
 class AppCompatController {
 
     @NonNull
+    private final ActivityRecord mActivityRecord;
+    @NonNull
     private final TransparentPolicy mTransparentPolicy;
     @NonNull
     private final AppCompatOrientationPolicy mOrientationPolicy;
     @NonNull
-    private final AppCompatOverrides mAppCompatOverrides;
+    private final AppCompatAspectRatioPolicy mAppCompatAspectRatioPolicy;
     @NonNull
-    private final AppCompatCameraPolicy mAppCompatCameraPolicy;
+    private final AppCompatOverrides mAppCompatOverrides;
 
     AppCompatController(@NonNull WindowManagerService wmService,
                         @NonNull ActivityRecord activityRecord) {
+        mActivityRecord = activityRecord;
         final PackageManager packageManager = wmService.mContext.getPackageManager();
         final OptPropFactory optPropBuilder = new OptPropFactory(packageManager,
                 activityRecord.packageName);
         mTransparentPolicy = new TransparentPolicy(activityRecord,
-                wmService.mLetterboxConfiguration);
+                wmService.mAppCompatConfiguration);
         mAppCompatOverrides = new AppCompatOverrides(activityRecord,
-                wmService.mLetterboxConfiguration, optPropBuilder);
-        // TODO(b/341903757) Remove BooleanSuppliers after fixing dependency with aspectRatio.
-        final LetterboxUiController tmpController = activityRecord.mLetterboxUiController;
-        mOrientationPolicy = new AppCompatOrientationPolicy(activityRecord,
-                mAppCompatOverrides, tmpController::shouldApplyUserFullscreenOverride,
-                tmpController::shouldApplyUserMinAspectRatioOverride,
-                tmpController::isSystemOverrideToFullscreenEnabled);
-        mAppCompatCameraPolicy = new AppCompatCameraPolicy(activityRecord,
-                mAppCompatOverrides.getAppCompatCameraOverrides());
+                wmService.mAppCompatConfiguration, optPropBuilder);
+        mOrientationPolicy = new AppCompatOrientationPolicy(activityRecord, mAppCompatOverrides);
+        mAppCompatAspectRatioPolicy = new AppCompatAspectRatioPolicy(activityRecord,
+                mTransparentPolicy, mAppCompatOverrides);
     }
 
     @NonNull
@@ -64,8 +63,8 @@ class AppCompatController {
     }
 
     @NonNull
-    AppCompatCameraPolicy getAppCompatCameraPolicy() {
-        return mAppCompatCameraPolicy;
+    AppCompatAspectRatioPolicy getAppCompatAspectRatioPolicy() {
+        return mAppCompatAspectRatioPolicy;
     }
 
     @NonNull
@@ -81,5 +80,28 @@ class AppCompatController {
     @NonNull
     AppCompatCameraOverrides getAppCompatCameraOverrides() {
         return mAppCompatOverrides.getAppCompatCameraOverrides();
+    }
+
+    @NonNull
+    AppCompatAspectRatioOverrides getAppCompatAspectRatioOverrides() {
+        return mAppCompatOverrides.getAppCompatAspectRatioOverrides();
+    }
+
+    @NonNull
+    AppCompatResizeOverrides getAppCompatResizeOverrides() {
+        return mAppCompatOverrides.getAppCompatResizeOverrides();
+    }
+
+    @Nullable
+    AppCompatCameraPolicy getAppCompatCameraPolicy() {
+        if (mActivityRecord.mDisplayContent != null) {
+            return mActivityRecord.mDisplayContent.mAppCompatCameraPolicy;
+        }
+        return null;
+    }
+
+    @NonNull
+    AppCompatFocusOverrides getAppCompatFocusOverrides() {
+        return mAppCompatOverrides.getAppCompatFocusOverrides();
     }
 }

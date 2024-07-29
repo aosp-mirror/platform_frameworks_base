@@ -27,7 +27,6 @@ import android.os.UserHandle
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.flags.FakeFeatureFlags
-import com.android.systemui.screenshot.ScreenshotController.SaveImageInBackgroundData
 import com.android.systemui.screenshot.ScreenshotNotificationSmartActionsProvider.ScreenshotSmartActionType
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.eq
@@ -44,7 +43,7 @@ class SaveImageInBackgroundTaskTest : SysuiTestCase() {
     private val imageExporter = mock<ImageExporter>()
     private val smartActions = mock<ScreenshotSmartActions>()
     private val smartActionsProvider = mock<ScreenshotNotificationSmartActionsProvider>()
-    private val saveImageData = SaveImageInBackgroundData()
+    private val saveImageData = SaveImageInBackgroundTask.SaveImageInBackgroundData()
     private val testScreenshotId: String = "testScreenshotId"
     private val testBitmap = mock<Bitmap>()
     private val testUser = UserHandle.getUserHandleForUid(0)
@@ -229,7 +228,7 @@ class SaveImageInBackgroundTaskTest : SysuiTestCase() {
             )
         val quickSharePendingIntent =
             quickShareAction.actionIntent.intent.extras!!.getParcelable(
-                ScreenshotController.EXTRA_ACTION_INTENT,
+                SmartActionsReceiver.EXTRA_ACTION_INTENT,
                 PendingIntent::class.java
             )
 
@@ -267,7 +266,7 @@ class SaveImageInBackgroundTaskTest : SysuiTestCase() {
         assertEquals(
             immutablePendingIntent,
             quickShareAction.actionIntent.intent.extras!!.getParcelable(
-                ScreenshotController.EXTRA_ACTION_INTENT,
+                SmartActionsReceiver.EXTRA_ACTION_INTENT,
                 PendingIntent::class.java
             )
         )

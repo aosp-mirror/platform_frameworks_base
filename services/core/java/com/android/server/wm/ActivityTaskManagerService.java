@@ -190,6 +190,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
 import android.content.pm.ParceledListSlice;
 import android.content.pm.ResolveInfo;
+import android.content.pm.UserInfo;
 import android.content.res.CompatibilityInfo;
 import android.content.res.Configuration;
 import android.content.res.Resources;
@@ -4709,6 +4710,10 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         // Update stored global config and notify everyone about the change.
         mRootWindowContainer.onConfigurationChanged(mTempConfig);
         Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
+        if ((changes & ActivityInfo.CONFIG_ORIENTATION) != 0) {
+            FrameworkStatsLog.write(FrameworkStatsLog.DEVICE_ORIENTATION_CHANGED,
+                    values.orientation);
+        }
 
         Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
         return changes;
@@ -4895,14 +4900,21 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
      * dialog / global actions also might want different behaviors.
      */
     private void updateShouldShowDialogsLocked(Configuration config) {
+        mShowDialogs = shouldShowDialogs(config, /* checkUiMode= */ true);
+    }
+
+    private boolean shouldShowDialogs(Configuration config, boolean checkUiMode) {
         final boolean inputMethodExists = !(config.keyboard == Configuration.KEYBOARD_NOKEYS
                 && config.touchscreen == Configuration.TOUCHSCREEN_NOTOUCH
                 && config.navigation == Configuration.NAVIGATION_NONAV);
         final boolean hideDialogsSet = Settings.Global.getInt(mContext.getContentResolver(),
                 HIDE_ERROR_DIALOGS, 0) != 0;
-        mShowDialogs = inputMethodExists
-                && ActivityTaskManager.currentUiModeSupportsErrorDialogs(config)
-                && !hideDialogsSet;
+        boolean showDialogs = inputMethodExists && !hideDialogsSet;
+        if (checkUiMode) {
+            showDialogs = showDialogs
+                    && ActivityTaskManager.currentUiModeSupportsErrorDialogs(config);
+        }
+        return showDialogs;
     }
 
     private void updateFontScaleIfNeeded(@UserIdInt int userId) {
@@ -5056,16 +5068,10 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
 
         @Override
         public void acquire(int displayId) {
-            acquire(displayId, false /* isSwappingDisplay */);
-        }
-
-        @Override
-        public void acquire(int displayId, boolean isSwappingDisplay) {
             synchronized (mGlobalLock) {
                 if (!mSleepTokens.contains(displayId)) {
                     mSleepTokens.append(displayId,
-                            mRootWindowContainer.createSleepToken(mTag, displayId,
-                                    isSwappingDisplay));
+                            mRootWindowContainer.createSleepToken(mTag, displayId));
                     updateSleepIfNeededLocked();
                 }
             }
@@ -5189,6 +5195,10 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             String hostingType) {
         if (!mStartingProcessActivities.contains(activity)) {
             mStartingProcessActivities.add(activity);
+            // Let the activity with higher z-order be started first.
+            if (mStartingProcessActivities.size() > 1) {
+                mStartingProcessActivities.sort(null /* by WindowContainer#compareTo */);
+            }
         } else if (mProcessNames.get(
                 activity.processName, activity.info.applicationInfo.uid) != null) {
             // The process is already starting. Wait for it to attach.
@@ -5512,7 +5522,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             final int procCount = procs.size();
             for (int i = 0; i < procCount; i++) {
                 final int procUid = procs.keyAt(i);
-                if (UserHandle.isApp(procUid) || !UserHandle.isSameUser(procUid, uid)) {
+                if (!UserHandle.isCore(procUid) || !UserHandle.isSameUser(procUid, uid)) {
                     // Don't use an app process or different user process for system component.
                     continue;
                 }
@@ -7146,15 +7156,67 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         }
 
         @Override
-        public boolean canShowErrorDialogs() {
+        public boolean canShowErrorDialogs(int userId) {
             synchronized (mGlobalLock) {
-                return mShowDialogs && !mSleeping && !mShuttingDown
+                final boolean showDialogs = mShowDialogs
+                        || shouldShowDialogsForVisibleBackgroundUserLocked(userId);
+                final UserInfo userInfo = getUserManager().getUserInfo(userId);
+                if (userInfo == null) {
+                    // Unable to retrieve user information. Returning false, assuming there is
+                    // no valid user with the given id.
+                    return false;
+                }
+                return showDialogs && !mSleeping && !mShuttingDown
                         && !mKeyguardController.isKeyguardOrAodShowing(DEFAULT_DISPLAY)
-                        && !hasUserRestriction(UserManager.DISALLOW_SYSTEM_ERROR_DIALOGS,
-                        mAmInternal.getCurrentUserId())
+                        && !hasUserRestriction(UserManager.DISALLOW_SYSTEM_ERROR_DIALOGS, userId)
                         && !(UserManager.isDeviceInDemoMode(mContext)
-                        && mAmInternal.getCurrentUser().isDemo());
+                        && userInfo.isDemo());
             }
+        }
+
+        /**
+         * Checks if the given user is a visible background user, which is a full, background user
+         * assigned to secondary displays on the devices that have
+         * {@link UserManager#isVisibleBackgroundUsersEnabled()
+         * config_multiuserVisibleBackgroundUsers enabled} (for example, passenger users on
+         * automotive builds, using the display associated with their seats).
+         *
+         * @see UserManager#isUserVisible()
+         */
+        private boolean isVisibleBackgroundUser(int userId) {
+            if (!UserManager.isVisibleBackgroundUsersEnabled()) {
+                return false;
+            }
+            boolean isForeground = getCurrentUserId() == userId;
+            boolean isProfile = getUserManager().isProfile(userId);
+            boolean isVisible = mWindowManager.mUmInternal.isUserVisible(userId);
+            return isVisible && !isForeground && !isProfile;
+        }
+
+        /**
+         * In a car environment, {@link ActivityTaskManagerService#mShowDialogs} is always set to
+         * {@code false} from {@link ActivityTaskManagerService#updateShouldShowDialogsLocked}
+         * because its UI mode is {@link Configuration#UI_MODE_TYPE_CAR}. Thus, error dialogs are
+         * not displayed when an ANR or a crash occurs. However, in the automotive multi-user
+         * multi-display environment, this can confuse the passenger users and leave them
+         * uninformed when an app is terminated by the ANR or crash without any notification.
+         * To address this, error dialogs are allowed for the passenger users who have UI access
+         * on assigned displays (a.k.a. visible background users) on devices that have
+         * config_multiuserVisibleBackgroundUsers enabled even though the UI mode is
+         * {@link Configuration#UI_MODE_TYPE_CAR}.
+         *
+         * @see ActivityTaskManagerService#updateShouldShowDialogsLocked
+         */
+        private boolean shouldShowDialogsForVisibleBackgroundUserLocked(int userId) {
+            if (!isVisibleBackgroundUser(userId)) {
+                return false;
+            }
+            final int displayId = mWindowManager.mUmInternal.getMainDisplayAssignedToUser(userId);
+            final DisplayContent dc = mRootWindowContainer.getDisplayContent(displayId);
+            if (dc == null) {
+                return false;
+            }
+            return shouldShowDialogs(dc.getConfiguration(), /* checkUiMode= */ false);
         }
 
         @Override

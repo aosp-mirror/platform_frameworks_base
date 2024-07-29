@@ -23,7 +23,10 @@ package {
 // See: http://go/android-license-faq
 license {
     name: "frameworks_base_packages_SystemUI_license",
-    visibility: [":__subpackages__"],
+    visibility: [
+        ":__subpackages__",
+        "//development/samples/SceneTransitionLayoutDemo:__subpackages__",
+    ],
     license_kinds: [
         "SPDX-license-identifier-Apache-2.0",
     ],
@@ -255,6 +258,7 @@ filegroup {
         "tests/src/**/systemui/statusbar/policy/LocationControllerImplTest.java",
         "tests/src/**/systemui/statusbar/policy/RemoteInputViewTest.java",
         "tests/src/**/systemui/statusbar/policy/SmartReplyViewTest.java",
+        "tests/src/**/systemui/statusbar/policy/ui/dialog/ModesDialogDelegateTest.kt",
         "tests/src/**/systemui/statusbar/StatusBarStateControllerImplTest.kt",
         "tests/src/**/systemui/theme/ThemeOverlayApplierTest.java",
         "tests/src/**/systemui/touch/TouchInsetManagerTest.java",
@@ -536,6 +540,7 @@ android_library {
         "androidx.preference_preference",
         "androidx.appcompat_appcompat",
         "androidx.concurrent_concurrent-futures",
+        "androidx.concurrent_concurrent-futures-ktx",
         "androidx.mediarouter_mediarouter",
         "androidx.palette_palette",
         "androidx.legacy_legacy-preference-v14",
@@ -552,6 +557,7 @@ android_library {
         "androidx.exifinterface_exifinterface",
         "androidx.room_room-runtime",
         "androidx.room_room-ktx",
+        "androidx.datastore_datastore-preferences",
         "com.google.android.material_material",
         "device_state_flags_lib",
         "kotlinx_coroutines_android",
@@ -565,8 +571,10 @@ android_library {
         "jsr305",
         "jsr330",
         "lottie",
+        "lottie_compose",
         "LowLightDreamLib",
         "TraceurCommon",
+        "Traceur-res",
         "//frameworks/libs/systemui:motion_tool_lib",
         "notification_flags_lib",
         "PlatformComposeCore",
@@ -577,7 +585,6 @@ android_library {
         "androidx.activity_activity-compose",
         "androidx.compose.animation_animation-graphics",
         "androidx.lifecycle_lifecycle-viewmodel-compose",
-        "device_policy_aconfig_flags_lib",
     ],
     libs: [
         "keepanno-annotations",
@@ -665,6 +672,7 @@ android_library {
     ],
     asset_dirs: [
         "tests/goldens",
+        "schemas",
     ],
     static_libs: [
         "SystemUI-res",
@@ -704,7 +712,9 @@ android_library {
         "androidx-constraintlayout_constraintlayout",
         "androidx.exifinterface_exifinterface",
         "androidx.room_room-runtime",
+        "androidx.room_room-testing",
         "androidx.room_room-ktx",
+        "androidx.datastore_datastore-preferences",
         "device_state_flags_lib",
         "kotlinx-coroutines-android",
         "kotlinx-coroutines-core",
@@ -720,6 +730,7 @@ android_library {
         "truth",
         "monet",
         "libmonet",
+        "lottie_compose",
         "dagger2",
         "jsr330",
         "WindowManager-Shell",
@@ -740,6 +751,7 @@ android_library {
         "androidx.compose.animation_animation-graphics",
         "androidx.lifecycle_lifecycle-viewmodel-compose",
         "TraceurCommon",
+        "Traceur-res",
     ],
 }
 
@@ -784,7 +796,11 @@ android_library {
         "android.test.mock",
         "keepanno-annotations",
     ],
-    kotlincflags: ["-Xjvm-default=all"],
+    kotlincflags: [
+        "-Xjvm-default=all",
+        // TODO(b/352363800): Why do we need this?
+        "-J-Xmx8192M",
+    ],
     aaptflags: [
         "--extra-packages",
         "com.android.systemui",
@@ -1015,7 +1031,5 @@ android_app {
     },
     required: [
         "privapp_whitelist_com.android.systemui",
-        "wmshell.protolog.json.gz",
-        "wmshell.protolog.pb",
     ],
 }

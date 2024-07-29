@@ -83,7 +83,7 @@ public class DisplayImeControllerTest extends ShellTestCase {
             }
         }, mExecutor) {
             @Override
-            void removeImeSurface() { }
+            void removeImeSurface(int displayId) { }
         }.new PerDisplay(DEFAULT_DISPLAY, ROTATION_0);
     }
 

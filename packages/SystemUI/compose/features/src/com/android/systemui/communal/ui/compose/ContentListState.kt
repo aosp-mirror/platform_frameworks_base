@@ -58,7 +58,7 @@ internal constructor(
     communalContent: List<CommunalContentModel>,
     private val onAddWidget:
         (componentName: ComponentName, user: UserHandle, priority: Int) -> Unit,
-    private val onDeleteWidget: (id: Int) -> Unit,
+    private val onDeleteWidget: (id: Int, componentName: ComponentName, priority: Int) -> Unit,
     private val onReorderWidgets: (widgetIdToPriorityMap: Map<Int, Int>) -> Unit,
 ) {
     var list = communalContent.toMutableStateList()
@@ -74,7 +74,7 @@ internal constructor(
         if (list[indexToRemove].isWidgetContent()) {
             val widget = list[indexToRemove] as CommunalContentModel.WidgetContent
             list.apply { removeAt(indexToRemove) }
-            onDeleteWidget(widget.appWidgetId)
+            onDeleteWidget(widget.appWidgetId, widget.componentName, widget.priority)
         }
     }
 
@@ -110,7 +110,7 @@ internal constructor(
         // reorder and then add the new widget
         onReorderWidgets(widgetIdToPriorityMap)
         if (newItemComponentName != null && newItemUser != null && newItemIndex != null) {
-            onAddWidget(newItemComponentName, newItemUser, /*priority=*/ list.size - newItemIndex)
+            onAddWidget(newItemComponentName, newItemUser, /* priority= */ list.size - newItemIndex)
         }
     }
 

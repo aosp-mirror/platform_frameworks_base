@@ -81,6 +81,16 @@ public abstract class Pip2Module {
 
     @WMSingleton
     @Provides
+    static Optional<PipController.PipImpl> providePip2(Optional<PipController> pipController) {
+        if (pipController.isEmpty()) {
+            return Optional.empty();
+        } else {
+            return Optional.ofNullable(pipController.get().getPipImpl());
+        }
+    }
+
+    @WMSingleton
+    @Provides
     static Optional<PipController> providePipController(Context context,
             ShellInit shellInit,
             ShellCommandHandler shellCommandHandler,

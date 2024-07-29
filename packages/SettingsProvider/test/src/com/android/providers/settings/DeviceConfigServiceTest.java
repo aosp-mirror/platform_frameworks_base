@@ -22,8 +22,6 @@ import static junit.framework.Assert.assertNull;
 
 import android.content.ContentResolver;
 import android.os.Bundle;
-import android.platform.test.annotations.RequiresFlagsDisabled;
-import android.platform.test.annotations.RequiresFlagsEnabled;
 import android.platform.test.flag.junit.CheckFlagsRule;
 import android.platform.test.flag.junit.DeviceFlagsValueProvider;
 import android.provider.Settings;
@@ -73,24 +71,9 @@ public class DeviceConfigServiceTest {
     }
 
     /**
-     * Test that setting overrides are properly disabled when the flag is off.
-     */
-    @Test
-    @RequiresFlagsDisabled("com.android.providers.settings.support_overrides")
-    public void testOverrideDisabled() throws IOException {
-        final String newValue = "value2";
-
-        executeShellCommand("device_config put " + sNamespace + " " + sKey + " " + sValue);
-        executeShellCommand("device_config override " + sNamespace + " " + sKey + " " + newValue);
-        String result = readShellCommandOutput("device_config get " + sNamespace + " " + sKey);
-        assertEquals(sValue + "\n", result);
-    }
-
-    /**
      * Test that overrides are readable and can be cleared.
      */
     @Test
-    @RequiresFlagsEnabled("com.android.providers.settings.support_overrides")
     public void testOverride() throws IOException {
         final String newValue = "value2";
 

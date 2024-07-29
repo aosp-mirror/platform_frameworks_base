@@ -6653,9 +6653,10 @@ public final class ActiveServices {
 
             // If unbound while waiting to start and there is no connection left in this service,
             // remove the pending service
-            if (s.getConnections().isEmpty()) {
+            if (s.getConnections().isEmpty() && !s.startRequested) {
                 mPendingServices.remove(s);
                 mPendingBringups.remove(s);
+                if (DEBUG_SERVICE) Slog.v(TAG_SERVICE, "Removed pending service: " + s);
             }
 
             if (c.hasFlag(Context.BIND_AUTO_CREATE)) {

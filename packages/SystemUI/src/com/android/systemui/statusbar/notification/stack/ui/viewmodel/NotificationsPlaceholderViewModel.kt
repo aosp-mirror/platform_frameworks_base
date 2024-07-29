@@ -91,6 +91,12 @@ constructor(
     val expandFraction: Flow<Float> = shadeInteractor.anyExpansion.dumpValue("expandFraction")
 
     /**
+     * The amount [0-1] that quick settings has been opened. At 0, the shade may be open or closed;
+     * at 1, the quick settings are open.
+     */
+    val shadeToQsFraction: Flow<Float> = shadeInteractor.qsExpansion.dumpValue("shadeToQsFraction")
+
+    /**
      * The amount in px that the notification stack should scroll due to internal expansion. This
      * should only happen when a notification expansion hits the bottom of the screen, so it is
      * necessary to scroll up to keep expanding the notification.
@@ -108,6 +114,11 @@ constructor(
     /** Sets whether the notification stack is scrolled to the top. */
     fun setScrolledToTop(scrolledToTop: Boolean) {
         interactor.setScrolledToTop(scrolledToTop)
+    }
+
+    /** Sets whether the heads up notification is animating away. */
+    fun setHeadsUpAnimatingAway(animatingAway: Boolean) {
+        headsUpNotificationInteractor.setHeadsUpAnimatingAway(animatingAway)
     }
 
     /** Snooze the currently pinned HUN. */

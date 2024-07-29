@@ -408,18 +408,12 @@
     <string name="enable_gpu_debug_layers_summary" msgid="4921521407377170481">"Hata ayıklama uygulamaları için GPU hata ayıklama katmanlarının yüklenmesine izin ver"</string>
     <string name="enable_verbose_vendor_logging" msgid="1196698788267682072">"Ayrıntılı satıcı günlüğünü etkinleştir"</string>
     <string name="enable_verbose_vendor_logging_summary" msgid="5426292185780393708">"Hata raporlarına cihaza özgü ek satıcı günlükleri ekle. Bu günlükler gizli bilgiler içerebilir, daha fazla pil ve/veya daha fazla depolama alanı kullanabilir."</string>
-    <!-- no translation found for enable_verbose_vendor_logging_checkbox (3864578373293835530) -->
-    <skip />
-    <!-- no translation found for verbose_vendor_logging_notification_title (6811217272559843592) -->
-    <skip />
-    <!-- no translation found for verbose_vendor_logging_notification_summary (5226524769774370942) -->
-    <skip />
-    <!-- no translation found for verbose_vendor_logging_notification_action (1190831050259046071) -->
-    <skip />
-    <!-- no translation found for verbose_vendor_logging_preference_summary_will_disable (6175431593394522553) -->
-    <skip />
-    <!-- no translation found for verbose_vendor_logging_preference_summary_on (9017757242481762036) -->
-    <skip />
+    <string name="enable_verbose_vendor_logging_checkbox" msgid="3864578373293835530">"1 gün sonra devre dışı bırak"</string>
+    <string name="verbose_vendor_logging_notification_title" msgid="6811217272559843592">"Ayrıntılı satıcı günlüğü sona erdi"</string>
+    <string name="verbose_vendor_logging_notification_summary" msgid="5226524769774370942">"1 günlüğüne etkinleştirildi"</string>
+    <string name="verbose_vendor_logging_notification_action" msgid="1190831050259046071">"1 gün daha etkinleştir"</string>
+    <string name="verbose_vendor_logging_preference_summary_will_disable" msgid="6175431593394522553">"1 gün sonra devre dışı bırakılır"</string>
+    <string name="verbose_vendor_logging_preference_summary_on" msgid="9017757242481762036">"Süresiz olarak etkinleştirildi"</string>
     <string name="window_animation_scale_title" msgid="5236381298376812508">"Pencere animasyonu ölçeği"</string>
     <string name="transition_animation_scale_title" msgid="1278477690695439337">"Geçiş animasyonu ölçeği"</string>
     <string name="animator_duration_scale_title" msgid="7082913931326085176">"Animatör süre ölçeği"</string>
@@ -436,8 +430,8 @@
     <string name="force_allow_on_external_summary" msgid="8525425782530728238">"Manifest değerlerinden bağımsız olarak uygulamaları harici depolamaya yazmak için uygun hale getirir"</string>
     <string name="force_resizable_activities" msgid="7143612144399959606">"Etkinlikleri yeniden boyutlandırılabilmeye zorla"</string>
     <string name="force_resizable_activities_summary" msgid="2490382056981583062">"Manifest değerlerinden bağımsız olarak, tüm etkinlikleri birden fazla pencerede yeniden boyutlandırılabilir yap."</string>
-    <string name="enable_freeform_support" msgid="7599125687603914253">"Serbest biçimli pencereleri etkinleştir"</string>
-    <string name="enable_freeform_support_summary" msgid="1822862728719276331">"Deneysel serbest biçimli pencere desteğini etkinleştir."</string>
+    <string name="enable_freeform_support" msgid="8409932201445109106">"Serbest biçimli pencereleri (eski) etkinleştir"</string>
+    <string name="enable_freeform_support_summary" msgid="2242481082356957934">"Deneysel eski serbest biçimli pencere desteğini etkinleştir."</string>
     <string name="local_backup_password_title" msgid="4631017948933578709">"Masaüstü yedekleme şifresi"</string>
     <string name="local_backup_password_summary_none" msgid="7646898032616361714">"Masaüstü tam yedeklemeleri şu an korunmuyor"</string>
     <string name="local_backup_password_summary_change" msgid="1707357670383995567">"Masaüstü tam yedeklemelerinin şifresini değiştirmek veya kaldırmak için dokunun"</string>

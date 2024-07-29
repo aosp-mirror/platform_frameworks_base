@@ -33,6 +33,7 @@ import androidx.annotation.VisibleForTesting
 import androidx.core.os.postDelayed
 import androidx.core.view.isVisible
 import androidx.dynamicanimation.animation.DynamicAnimation
+import com.android.app.viewcapture.ViewCaptureAwareWindowManager
 import com.android.internal.jank.Cuj
 import com.android.internal.jank.InteractionJankMonitor
 import com.android.internal.util.LatencyTracker
@@ -83,7 +84,7 @@ private const val DEBUG = false
 class BackPanelController
 internal constructor(
     context: Context,
-    private val windowManager: WindowManager,
+    private val windowManager: ViewCaptureAwareWindowManager,
     private val viewConfiguration: ViewConfiguration,
     private val mainHandler: Handler,
     private val systemClock: SystemClock,
@@ -102,7 +103,7 @@ internal constructor(
     class Factory
     @Inject
     constructor(
-        private val windowManager: WindowManager,
+        private val windowManager: ViewCaptureAwareWindowManager,
         private val viewConfiguration: ViewConfiguration,
         @BackPanelUiThread private val uiThreadContext: UiThreadContext,
         private val systemClock: SystemClock,

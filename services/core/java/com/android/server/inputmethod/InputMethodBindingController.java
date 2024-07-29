@@ -408,7 +408,8 @@ final class InputMethodBindingController {
                         InputMethodManager
                                 .invalidateLocalConnectionlessStylusHandwritingAvailabilityCaches();
                     }
-                    mService.initializeImeLocked(mCurMethod, mCurToken, mUserId);
+                    mService.initializeImeLocked(mCurMethod, mCurToken,
+                            InputMethodBindingController.this);
                     mService.scheduleNotifyImeUidToAudioService(mCurMethodUid);
                     mService.reRequestCurrentClientSessionLocked(mUserId);
                     mAutofillController.performOnCreateInlineSuggestionsRequest();
@@ -462,7 +463,7 @@ final class InputMethodBindingController {
                     // should now try to restart the service for us.
                     mLastBindTime = SystemClock.uptimeMillis();
                     clearCurMethodAndSessions();
-                    mService.clearInputShownLocked();
+                    mService.mVisibilityStateComputer.setInputShown(false);
                     mService.unbindCurrentClientLocked(UnbindReason.DISCONNECT_IME, mUserId);
                 }
             }

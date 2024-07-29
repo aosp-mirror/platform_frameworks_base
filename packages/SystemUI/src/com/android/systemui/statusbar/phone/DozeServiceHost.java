@@ -29,8 +29,10 @@ import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 
+import androidx.annotation.MainThread;
 import androidx.annotation.Nullable;
 
+import com.android.app.tracing.TraceUtils;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.assist.AssistManager;
@@ -60,6 +62,8 @@ import com.android.systemui.util.CopyOnLoopListenerSet;
 import com.android.systemui.util.IListenerSet;
 
 import dagger.Lazy;
+
+import kotlin.Unit;
 
 import kotlinx.coroutines.ExperimentalCoroutinesApi;
 
@@ -109,7 +113,7 @@ public final class DozeServiceHost implements DozeHost {
     private CentralSurfaces mCentralSurfaces;
     private boolean mAlwaysOnSuppressed;
     private boolean mPulsePending;
-    private DozeInteractor mDozeInteractor;
+    private final DozeInteractor mDozeInteractor;
 
     @Inject
     public DozeServiceHost(DozeLog dozeLog, PowerManager powerManager,
@@ -337,13 +341,17 @@ public final class DozeServiceHost implements DozeHost {
     }
 
     @Override
+    @MainThread
     public void dozeTimeTick() {
-        mDozeInteractor.dozeTimeTick();
-        mShadeLockscreenInteractor.dozeTimeTick();
-        mAuthController.dozeTimeTick();
-        if (mAmbientIndicationContainer instanceof DozeReceiver) {
-            ((DozeReceiver) mAmbientIndicationContainer).dozeTimeTick();
-        }
+        TraceUtils.trace("DozeServiceHost#dozeTimeTick", () -> {
+            mDozeInteractor.dozeTimeTick();
+            mShadeLockscreenInteractor.dozeTimeTick();
+            mAuthController.dozeTimeTick();
+            if (mAmbientIndicationContainer instanceof DozeReceiver) {
+                ((DozeReceiver) mAmbientIndicationContainer).dozeTimeTick();
+            }
+            return Unit.INSTANCE;
+        });
     }
 
     @Override

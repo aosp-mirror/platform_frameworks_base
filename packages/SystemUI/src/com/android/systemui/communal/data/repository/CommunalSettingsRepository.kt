@@ -20,6 +20,7 @@ import android.app.admin.DevicePolicyManager
 import android.app.admin.DevicePolicyManager.KEYGUARD_DISABLE_WIDGETS_ALL
 import android.content.IntentFilter
 import android.content.pm.UserInfo
+import android.os.UserHandle
 import android.provider.Settings
 import com.android.systemui.Flags.communalHub
 import com.android.systemui.broadcast.BroadcastDispatcher
@@ -51,6 +52,14 @@ interface CommunalSettingsRepository {
     /** A [CommunalEnabledState] for the specified user. */
     fun getEnabledState(user: UserInfo): Flow<CommunalEnabledState>
 
+    /**
+     * Returns true if both the communal trunk-stable flag and resource flag are enabled.
+     *
+     * The trunk-stable flag is controlled by server rollout and is on all devices. The resource
+     * flag is enabled via resource overlay only on products we want the hub to be present on.
+     */
+    fun getFlagEnabled(): Boolean
+
     /** Keyguard widgets enabled state by Device Policy Manager for the specified user. */
     fun getAllowedByDevicePolicy(user: UserInfo): Flow<Boolean>
 
@@ -69,15 +78,15 @@ constructor(
     private val devicePolicyManager: DevicePolicyManager,
 ) : CommunalSettingsRepository {
 
-    private val flagEnabled: Boolean by lazy {
-        featureFlagsClassic.isEnabled(Flags.COMMUNAL_SERVICE_ENABLED) && communalHub()
+    override fun getFlagEnabled(): Boolean {
+        return featureFlagsClassic.isEnabled(Flags.COMMUNAL_SERVICE_ENABLED) && communalHub()
     }
 
     override fun getEnabledState(user: UserInfo): Flow<CommunalEnabledState> {
         if (!user.isMain) {
             return flowOf(CommunalEnabledState(DISABLED_REASON_INVALID_USER))
         }
-        if (!flagEnabled) {
+        if (!getFlagEnabled()) {
             return flowOf(CommunalEnabledState(DISABLED_REASON_FLAG))
         }
         return combine(
@@ -102,7 +111,10 @@ constructor(
             .broadcastFlow(
                 filter =
                     IntentFilter(DevicePolicyManager.ACTION_DEVICE_POLICY_MANAGER_STATE_CHANGED),
-                user = user.userHandle
+                // In COPE management mode, the restriction from the managed profile may
+                // propagate to the main profile. Therefore listen to this broadcast across
+                // all users and update the state each time it changes.
+                user = UserHandle.ALL,
             )
             .emitOnStart()
             .map { devicePolicyManager.areKeyguardWidgetsAllowed(user.id) }

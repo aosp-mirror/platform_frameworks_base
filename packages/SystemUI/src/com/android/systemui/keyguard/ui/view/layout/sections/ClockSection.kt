@@ -25,7 +25,6 @@ import androidx.constraintlayout.widget.ConstraintSet
 import androidx.constraintlayout.widget.ConstraintSet.BOTTOM
 import androidx.constraintlayout.widget.ConstraintSet.END
 import androidx.constraintlayout.widget.ConstraintSet.GONE
-import androidx.constraintlayout.widget.ConstraintSet.MATCH_CONSTRAINT
 import androidx.constraintlayout.widget.ConstraintSet.PARENT_ID
 import androidx.constraintlayout.widget.ConstraintSet.START
 import androidx.constraintlayout.widget.ConstraintSet.TOP
@@ -48,6 +47,7 @@ import com.android.systemui.shared.R as sharedR
 import com.android.systemui.util.ui.value
 import dagger.Lazy
 import javax.inject.Inject
+import kotlinx.coroutines.DisposableHandle
 
 internal fun ConstraintSet.setVisibility(
     views: Iterable<View>,
@@ -70,21 +70,24 @@ constructor(
     val blueprintInteractor: Lazy<KeyguardBlueprintInteractor>,
     private val rootViewModel: KeyguardRootViewModel,
 ) : KeyguardSection() {
+    private var disposableHandle: DisposableHandle? = null
+
     override fun addViews(constraintLayout: ConstraintLayout) {}
 
     override fun bindData(constraintLayout: ConstraintLayout) {
         if (!MigrateClocksToBlueprint.isEnabled) {
             return
         }
-
-        KeyguardClockViewBinder.bind(
-            this,
-            constraintLayout,
-            keyguardClockViewModel,
-            clockInteractor,
-            blueprintInteractor.get(),
-            rootViewModel,
-        )
+        disposableHandle?.dispose()
+        disposableHandle =
+            KeyguardClockViewBinder.bind(
+                this,
+                constraintLayout,
+                keyguardClockViewModel,
+                clockInteractor,
+                blueprintInteractor.get(),
+                rootViewModel,
+            )
     }
 
     override fun applyConstraints(constraintSet: ConstraintSet) {
@@ -97,7 +100,13 @@ constructor(
         }
     }
 
-    override fun removeViews(constraintLayout: ConstraintLayout) {}
+    override fun removeViews(constraintLayout: ConstraintLayout) {
+        if (!MigrateClocksToBlueprint.isEnabled) {
+            return
+        }
+
+        disposableHandle?.dispose()
+    }
 
     private fun buildConstraints(
         clock: ClockController,
@@ -174,7 +183,11 @@ constructor(
                     getDimen(ENHANCED_SMARTSPACE_HEIGHT)
             connect(R.id.lockscreen_clock_view_large, TOP, PARENT_ID, TOP, largeClockTopMargin)
             constrainWidth(R.id.lockscreen_clock_view_large, WRAP_CONTENT)
-            constrainHeight(R.id.lockscreen_clock_view_large, MATCH_CONSTRAINT)
+
+            // The following two lines make lockscreen_clock_view_large is constrained to available
+            // height when it goes beyond constraints; otherwise, it use WRAP_CONTENT
+            constrainHeight(R.id.lockscreen_clock_view_large, WRAP_CONTENT)
+            constrainMaxHeight(R.id.lockscreen_clock_view_large, 0)
             constrainWidth(R.id.lockscreen_clock_view, WRAP_CONTENT)
             constrainHeight(
                 R.id.lockscreen_clock_view,

@@ -62,6 +62,7 @@ import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP
 import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_RESTORE_TRANSIENT_ORDER;
 import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_SET_ADJACENT_ROOTS;
 import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_SET_ALWAYS_ON_TOP;
+import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_SET_IS_TRIMMABLE;
 import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_SET_LAUNCH_ADJACENT_FLAG_ROOT;
 import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_SET_LAUNCH_ROOT;
 import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_SET_REPARENT_LEAF_TASK_IF_RELAUNCH;
@@ -123,8 +124,8 @@ import android.window.WindowContainerToken;
 import android.window.WindowContainerTransaction;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.protolog.ProtoLogGroup;
 import com.android.internal.protolog.ProtoLog;
+import com.android.internal.protolog.ProtoLogGroup;
 import com.android.internal.util.ArrayUtils;
 import com.android.server.LocalServices;
 import com.android.server.pm.LauncherAppsService.LauncherAppsServiceInternal;
@@ -878,15 +879,20 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
 
         final int childWindowingMode = c.getActivityWindowingMode();
         if (!ActivityTaskManagerService.isPip2ExperimentEnabled()
-                && tr.getWindowingMode() == WINDOWING_MODE_PINNED
-                && (childWindowingMode == WINDOWING_MODE_PINNED
-                || childWindowingMode == WINDOWING_MODE_UNDEFINED)) {
-            // If setActivityWindowingMode requested to match its pinned task's windowing mode,
-            // remove any inconsistency checking timeout callbacks for PiP.
-            Slog.d(TAG, "Task and activity windowing modes match, so remove any timeout "
-                    + "abort PiP callbacks scheduled if needed; task_win_mode="
-                    + tr.getWindowingMode() + ", activity_win_mode=" + childWindowingMode);
-            mService.mRootWindowContainer.removeAllMaybeAbortPipEnterRunnable();
+                && tr.getWindowingMode() == WINDOWING_MODE_PINNED) {
+            if (childWindowingMode == WINDOWING_MODE_PINNED
+                    || childWindowingMode == WINDOWING_MODE_UNDEFINED) {
+                // If setActivityWindowingMode requested to match its pinned task's windowing mode,
+                // remove any inconsistency checking timeout callbacks for PiP.
+                Slog.d(TAG, "Task and activity windowing modes match, so remove any timeout "
+                        + "abort PiP callbacks scheduled if needed; task_win_mode="
+                        + tr.getWindowingMode() + ", activity_win_mode=" + childWindowingMode);
+                mService.mRootWindowContainer.removeAllMaybeAbortPipEnterRunnable();
+            } else if (shouldApplyLifecycleEffectOnPipChange()) {
+                // This is leaving PiP: task is pinned mode and activity changes to non-pip mode.
+                // Then the activity can be resumed because it becomes focusable.
+                effects |= TRANSACT_EFFECTS_LIFECYCLE;
+            }
         }
         if (childWindowingMode > -1) {
             tr.forAllActivities(a -> { a.setWindowingMode(childWindowingMode); });
@@ -911,6 +917,9 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                 if (canEnterPip) {
                     canEnterPip = mService.mActivityClientController
                             .requestPictureInPictureMode(activity);
+                    if (canEnterPip && shouldApplyLifecycleEffectOnPipChange()) {
+                        effects |= TRANSACT_EFFECTS_LIFECYCLE;
+                    }
                 }
                 if (!canEnterPip) {
                     // Restore the flag to its previous state when the activity cannot enter PIP.
@@ -920,6 +929,14 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
         }
 
         return effects;
+    }
+
+    // TODO(b/333452456): For testing on local easier. Remove after the use case is gone.
+    @VisibleForTesting
+    static boolean shouldApplyLifecycleEffectOnPipChange() {
+        return android.os.SystemProperties.getBoolean(
+                "persist.wm.debug.apply_lifecycle_on_pip_change", false)
+                || com.android.window.flags.Flags.applyLifecycleOnPipChange();
     }
 
     private int applyDisplayAreaChanges(DisplayArea displayArea,
@@ -1355,6 +1372,17 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                 task.setReparentLeafTaskIfRelaunch(hop.isReparentLeafTaskIfRelaunch());
                 break;
             }
+            case HIERARCHY_OP_TYPE_SET_IS_TRIMMABLE: {
+                final WindowContainer container = WindowContainer.fromBinder(hop.getContainer());
+                final Task task = container != null ? container.asTask() : null;
+                if (task == null || !task.isAttached()) {
+                    Slog.e(TAG, "Attempt to operate on unknown or detached container: "
+                            + container);
+                    break;
+                }
+                task.setTrimmableFromRecents(hop.isTrimmableFromRecents());
+                break;
+            }
         }
         return effects;
     }
@@ -1580,7 +1608,7 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
             case OP_TYPE_REORDER_TO_BOTTOM_OF_TASK: {
                 final Task task = taskFragment.getTask();
                 if (task != null) {
-                    if (task.mChildren.peekFirst() != taskFragment) {
+                    if (task.getBottomChild() != taskFragment) {
                         task.mChildren.remove(taskFragment);
                         task.mChildren.add(0, taskFragment);
                         if (!taskFragment.hasChild()) {
@@ -1596,7 +1624,7 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
             case OP_TYPE_REORDER_TO_TOP_OF_TASK: {
                 final Task task = taskFragment.getTask();
                 if (task != null) {
-                    if (task.mChildren.peekLast() != taskFragment) {
+                    if (task.getTopChild() != taskFragment) {
                         task.mChildren.remove(taskFragment);
                         task.mChildren.add(taskFragment);
                         if (!taskFragment.hasChild()) {

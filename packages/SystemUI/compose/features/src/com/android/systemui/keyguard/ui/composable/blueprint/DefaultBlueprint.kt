@@ -31,6 +31,7 @@ import androidx.compose.ui.unit.IntRect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.android.compose.animation.scene.SceneScope
 import com.android.compose.modifiers.padding
+import com.android.compose.modifiers.thenIf
 import com.android.systemui.compose.modifiers.sysuiResTag
 import com.android.systemui.keyguard.ui.composable.LockscreenLongPress
 import com.android.systemui.keyguard.ui.composable.section.AmbientIndicationSection
@@ -67,8 +68,7 @@ constructor(
     @Composable
     override fun SceneScope.Content(modifier: Modifier) {
         val isUdfpsVisible = viewModel.isUdfpsVisible
-        val shouldUseSplitNotificationShade by
-            viewModel.shouldUseSplitNotificationShade.collectAsStateWithLifecycle()
+        val isShadeLayoutWide by viewModel.isShadeLayoutWide.collectAsStateWithLifecycle()
         val unfoldTranslations by viewModel.unfoldTranslations.collectAsStateWithLifecycle()
 
         LockscreenLongPress(
@@ -95,12 +95,15 @@ constructor(
                             with(topAreaSection) {
                                 DefaultClockLayout(
                                     modifier =
-                                        Modifier.graphicsLayer {
-                                            translationX = unfoldTranslations.start
-                                        }
+                                        Modifier.thenIf(isShadeLayoutWide) {
+                                                Modifier.fillMaxWidth(0.5f)
+                                            }
+                                            .graphicsLayer {
+                                                translationX = unfoldTranslations.start
+                                            }
                                 )
                             }
-                            if (shouldUseSplitNotificationShade) {
+                            if (isShadeLayoutWide) {
                                 with(notificationSection) {
                                     Notifications(
                                         burnInParams = null,
@@ -112,7 +115,7 @@ constructor(
                                 }
                             }
                         }
-                        if (!shouldUseSplitNotificationShade) {
+                        if (!isShadeLayoutWide) {
                             with(notificationSection) {
                                 Notifications(
                                     burnInParams = null,

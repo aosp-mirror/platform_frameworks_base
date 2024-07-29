@@ -92,6 +92,7 @@ import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.content.InstallLocationUtils;
 import com.android.internal.content.NativeLibraryHelper;
+import com.android.internal.telephony.TelephonyPermissions;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.FastPrintWriter;
 import com.android.internal.util.HexDump;
@@ -356,7 +357,7 @@ public class PackageManagerServiceUtils {
      * If not, throws a {@link SecurityException}.
      */
     public static void enforceSystemOrPhoneCaller(String methodName, int callingUid) {
-        if (callingUid != Process.PHONE_UID && callingUid != Process.SYSTEM_UID) {
+        if (!TelephonyPermissions.isSystemOrPhone(callingUid)) {
             throw new SecurityException(
                     "Cannot call " + methodName + " from UID " + callingUid);
         }
@@ -1418,32 +1419,56 @@ public class PackageManagerServiceUtils {
 
     /**
      * Check and throw if the given before/after packages would be considered a
-     * downgrade.
+     * downgrade with {@link PackageSetting}.
      */
-    public static void checkDowngrade(AndroidPackage before, PackageInfoLite after)
-            throws PackageManagerException {
-        if (after.getLongVersionCode() < before.getLongVersionCode()) {
+    public static void checkDowngrade(@NonNull PackageSetting before,
+            @NonNull PackageInfoLite after) throws PackageManagerException {
+        checkDowngrade(before.getVersionCode(), before.getBaseRevisionCode(),
+                before.getSplitNames(), before.getSplitRevisionCodes(), after);
+    }
+
+    /**
+     * Check and throw if the given before/after packages would be considered a
+     * downgrade with {@link AndroidPackage}.
+     */
+    public static void checkDowngrade(@NonNull AndroidPackage before,
+            @NonNull PackageInfoLite after) throws PackageManagerException {
+        checkDowngrade(before.getLongVersionCode(), before.getBaseRevisionCode(),
+                before.getSplitNames(), before.getSplitRevisionCodes(), after);
+    }
+
+    private static void checkDowngrade(long beforeVersionCode, int beforeBaseRevisionCode,
+            @NonNull String[] beforeSplitNames, @NonNull int[] beforeSplitRevisionCodes,
+            @NonNull PackageInfoLite after) throws PackageManagerException {
+        if (after.getLongVersionCode() < beforeVersionCode) {
             throw new PackageManagerException(INSTALL_FAILED_VERSION_DOWNGRADE,
                     "Update version code " + after.versionCode + " is older than current "
-                            + before.getLongVersionCode());
-        } else if (after.getLongVersionCode() == before.getLongVersionCode()) {
-            if (after.baseRevisionCode < before.getBaseRevisionCode()) {
+                            + beforeVersionCode);
+        } else if (after.getLongVersionCode() == beforeVersionCode) {
+            if (after.baseRevisionCode < beforeBaseRevisionCode) {
                 throw new PackageManagerException(INSTALL_FAILED_VERSION_DOWNGRADE,
                         "Update base revision code " + after.baseRevisionCode
-                                + " is older than current " + before.getBaseRevisionCode());
+                                + " is older than current " + beforeBaseRevisionCode);
             }
 
             if (!ArrayUtils.isEmpty(after.splitNames)) {
+                if (beforeSplitNames.length != beforeSplitRevisionCodes.length) {
+                    throw new PackageManagerException(INSTALL_FAILED_VERSION_DOWNGRADE,
+                            "Current split names and the split revision codes are not 1:1 mapping."
+                                    + "This indicates that the package info data has been"
+                                    + " corrupted.");
+                }
+
                 for (int i = 0; i < after.splitNames.length; i++) {
                     final String splitName = after.splitNames[i];
-                    final int j = ArrayUtils.indexOf(before.getSplitNames(), splitName);
+                    final int j = ArrayUtils.indexOf(beforeSplitNames, splitName);
                     if (j != -1) {
-                        if (after.splitRevisionCodes[i] < before.getSplitRevisionCodes()[j]) {
+                        if (after.splitRevisionCodes[i] < beforeSplitRevisionCodes[j]) {
                             throw new PackageManagerException(INSTALL_FAILED_VERSION_DOWNGRADE,
                                     "Update split " + splitName + " revision code "
                                             + after.splitRevisionCodes[i]
                                             + " is older than current "
-                                            + before.getSplitRevisionCodes()[j]);
+                                            + beforeSplitRevisionCodes[j]);
                         }
                     }
                 }

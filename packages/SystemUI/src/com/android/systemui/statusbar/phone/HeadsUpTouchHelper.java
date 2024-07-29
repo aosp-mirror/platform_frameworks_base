@@ -124,7 +124,6 @@ public class HeadsUpTouchHelper implements Gefingerpoken {
                     mPanel.setHeadsUpDraggingStartingHeight(startHeight);
                     mPanel.startExpand(x, y, true /* startTracking */, startHeight);
 
-                    // TODO(b/340514839): Figure out where to move this side effect in flexiglass
                     if (!SceneContainerFlag.isEnabled()) {
                         // This call needs to be after the expansion start otherwise we will get a
                         // flicker of one frame as it's not expanded yet.

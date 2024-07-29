@@ -75,8 +75,8 @@ public final class WindowMetricsController {
     /**
      * The core implementation to obtain {@link WindowMetrics}
      *
-     * @param isMaximum {@code true} to obtain {@link WindowManager#getCurrentWindowMetrics()}.
-     *                  {@code false} to obtain {@link WindowManager#getMaximumWindowMetrics()}.
+     * @param isMaximum {@code false} to obtain {@link WindowManager#getCurrentWindowMetrics()}.
+     *                  {@code true} to obtain {@link WindowManager#getMaximumWindowMetrics()}.
      */
     private WindowMetrics getWindowMetricsInternal(boolean isMaximum) {
         final Rect bounds;

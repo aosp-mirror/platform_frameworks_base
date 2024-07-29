@@ -27,6 +27,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 
@@ -252,6 +253,45 @@ public class BubbleDataTest extends ShellTestCase {
         // Verify
         verifyUpdateReceived();
         assertBubbleRemoved(mBubbleA1, Bubbles.DISMISS_USER_GESTURE);
+    }
+
+    @Test
+    public void testRemoveBubbleInLauncher_beforeBubbleUpdate_processedAfter_shouldNotBeRemoved() {
+        sendUpdatedEntryAtTime(mEntryA1, 1000);
+        sendUpdatedEntryAtTime(mEntryA2, 2000);
+        mBubbleData.setListener(mListener);
+
+        sendUpdatedEntryAtTime(mEntryA2, 3000);
+
+        verifyUpdateReceived();
+        assertThat(mBubbleData.hasBubbleInStackWithKey(mEntryA2.getKey())).isTrue();
+        assertThat(mBubbleData.getBubbleInStackWithKey(mEntryA2.getKey()).getLastActivity())
+                .isEqualTo(3000);
+
+        // dismiss the bubble with a timestamp in the past
+        mBubbleData.dismissBubbleWithKey(
+                mEntryA2.getKey(), Bubbles.DISMISS_USER_GESTURE_FROM_LAUNCHER, 2500);
+
+        verifyNoMoreInteractions(mListener);
+        assertThat(mBubbleData.hasBubbleInStackWithKey(mEntryA2.getKey())).isTrue();
+    }
+
+    @Test
+    public void testRemoveBubbleInLauncher_isNotSentBackToLauncher() {
+        sendUpdatedEntryAtTime(mEntryA1, 1000);
+        sendUpdatedEntryAtTime(mEntryA2, 2000);
+        mBubbleData.setListener(mListener);
+
+        mBubbleData.dismissBubbleWithKey(
+                mEntryA2.getKey(), Bubbles.DISMISS_USER_GESTURE_FROM_LAUNCHER, 4000);
+        verifyUpdateReceived();
+
+        BubbleData.Update update = mUpdateCaptor.getValue();
+        assertThat(update.removedBubbles).hasSize(1);
+        assertThat(update.removedBubbles.getFirst().first.getKey()).isEqualTo(mBubbleA2.getKey());
+
+        BubbleBarUpdate bubbleBarUpdate = update.toBubbleBarUpdate();
+        assertThat(bubbleBarUpdate.removedBubbles).isEmpty();
     }
 
     @Test
@@ -1415,15 +1455,13 @@ public class BubbleDataTest extends ShellTestCase {
         sendUpdatedEntryAtTime(entry, postTime, true /* isTextChanged */);
     }
 
-    private void sendUpdatedEntryAtTime(BubbleEntry entry, long postTime,
-            boolean textChanged) {
+    private void sendUpdatedEntryAtTime(BubbleEntry entry, long postTime, boolean textChanged) {
         setPostTime(entry, postTime);
         // BubbleController calls this:
         Bubble b = mBubbleData.getOrCreateBubble(entry, null /* persistedBubble */);
         b.setTextChangedForTest(textChanged);
         // And then this
-        mBubbleData.notificationEntryUpdated(b, false /* suppressFlyout*/,
-                true /* showInShade */);
+        mBubbleData.notificationEntryUpdated(b, false /* suppressFlyout*/, true /* showInShade */);
     }
 
     private void changeExpandedStateAtTime(boolean shouldBeExpanded, long time) {

@@ -27,11 +27,14 @@ import android.os.Trace;
 
 /**
  * Request to move an activity to stopped state.
+ *
  * @hide
  */
 public class StopActivityItem extends ActivityLifecycleItem {
 
-    private static final String TAG = "StopActivityItem";
+    public StopActivityItem(@NonNull IBinder activityToken) {
+        super(activityToken);
+    }
 
     @Override
     public void execute(@NonNull ClientTransactionHandler client, @NonNull ActivityClientRecord r,
@@ -53,34 +56,9 @@ public class StopActivityItem extends ActivityLifecycleItem {
         return ON_STOP;
     }
 
-    // ObjectPoolItem implementation
-
-    private StopActivityItem() {}
-
-    /**
-     * Obtain an instance initialized with provided params.
-     * @param activityToken the activity that stops.
-     */
-    @NonNull
-    public static StopActivityItem obtain(@NonNull IBinder activityToken) {
-        StopActivityItem instance = ObjectPool.obtain(StopActivityItem.class);
-        if (instance == null) {
-            instance = new StopActivityItem();
-        }
-        instance.setActivityToken(activityToken);
-
-        return instance;
-    }
-
-    @Override
-    public void recycle() {
-        super.recycle();
-        ObjectPool.recycle(this);
-    }
-
     // Parcelable implementation
 
-    /** Read from Parcel. */
+    /** Reads from Parcel. */
     private StopActivityItem(@NonNull Parcel in) {
         super(in);
     }

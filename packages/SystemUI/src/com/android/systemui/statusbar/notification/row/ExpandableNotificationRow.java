@@ -68,6 +68,7 @@ import androidx.annotation.Nullable;
 import com.android.app.animation.Interpolators;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.logging.MetricsLogger;
+import com.android.internal.logging.UiEventLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.util.ContrastColorUtil;
@@ -369,12 +370,6 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
             } else {
                 nowExpanded = !isExpanded();
                 setUserExpanded(nowExpanded);
-            }
-
-            if (ExpandHeadsUpOnInlineReply.isEnabled() && mExpandable) {
-                // it is triggered by the user.
-                // So, mHasUserChangedExpansion should be marked true.
-                mHasUserChangedExpansion = true;
             }
 
             notifyHeightChanged(/* needsAnimation= */ true);
@@ -865,8 +860,8 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     }
 
     @Override
-    public void setHeadsUpIsVisible() {
-        super.setHeadsUpIsVisible();
+    public void markHeadsUpSeen() {
+        super.markHeadsUpSeen();
         mMustStayOnScreen = false;
     }
 
@@ -1879,7 +1874,8 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
             SmartReplyConstants smartReplyConstants,
             SmartReplyController smartReplyController,
             FeatureFlags featureFlags,
-            IStatusBarService statusBarService) {
+            IStatusBarService statusBarService,
+            UiEventLogger uiEventLogger) {
         mEntry = entry;
         mAppName = appName;
         if (mMenuRow == null) {
@@ -1907,7 +1903,9 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
                     rivSubcomponentFactory,
                     smartReplyConstants,
                     smartReplyController,
-                    statusBarService);
+                    statusBarService,
+                    uiEventLogger
+            );
         }
         mOnUserInteractionCallback = onUserInteractionCallback;
         mBubblesManagerOptional = bubblesManagerOptional;

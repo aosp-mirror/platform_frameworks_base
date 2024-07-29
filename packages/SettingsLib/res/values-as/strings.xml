@@ -408,18 +408,12 @@
     <string name="enable_gpu_debug_layers_summary" msgid="4921521407377170481">"ডিবাগ এপসমূহৰ বাবে জিপিইউ ডিবাগ তৰপ ল\'ড কৰিবলৈ অনুমতি দিয়ক"</string>
     <string name="enable_verbose_vendor_logging" msgid="1196698788267682072">"বিক্ৰেতাৰ ভাৰ্ব’ছ লগিং সক্ষম কৰক"</string>
     <string name="enable_verbose_vendor_logging_summary" msgid="5426292185780393708">"বাগ ৰিপ’ৰ্টসমূহত অতিৰিক্ত ডিভাইচ নিৰ্দিষ্ট বিক্ৰেতাৰ লগসমূহ অন্তৰ্ভুক্ত কৰক, য’ত ব্যক্তিগত তথ্য থাকিব পাৰে, যি অধিক বেটাৰী আৰু/অথবা ষ্ট’ৰেজ ব্যৱহাৰ কৰিব পাৰে।"</string>
-    <!-- no translation found for enable_verbose_vendor_logging_checkbox (3864578373293835530) -->
-    <skip />
-    <!-- no translation found for verbose_vendor_logging_notification_title (6811217272559843592) -->
-    <skip />
-    <!-- no translation found for verbose_vendor_logging_notification_summary (5226524769774370942) -->
-    <skip />
-    <!-- no translation found for verbose_vendor_logging_notification_action (1190831050259046071) -->
-    <skip />
-    <!-- no translation found for verbose_vendor_logging_preference_summary_will_disable (6175431593394522553) -->
-    <skip />
-    <!-- no translation found for verbose_vendor_logging_preference_summary_on (9017757242481762036) -->
-    <skip />
+    <string name="enable_verbose_vendor_logging_checkbox" msgid="3864578373293835530">"এদিনৰ পাছত অক্ষম কৰক"</string>
+    <string name="verbose_vendor_logging_notification_title" msgid="6811217272559843592">"ভাৰ্ব’ছ বিক্ৰেতাৰ লগ ইন সমাপ্ত হৈছে"</string>
+    <string name="verbose_vendor_logging_notification_summary" msgid="5226524769774370942">"এদিনৰ বাবে সক্ষম কৰক"</string>
+    <string name="verbose_vendor_logging_notification_action" msgid="1190831050259046071">"আৰু এদিনৰ বাবে সক্ষম কৰক"</string>
+    <string name="verbose_vendor_logging_preference_summary_will_disable" msgid="6175431593394522553">"এদিনৰ পাছত অক্ষম কৰে"</string>
+    <string name="verbose_vendor_logging_preference_summary_on" msgid="9017757242481762036">"অনিৰ্দিষ্ট কালৰ বাবে সক্ষম কৰা আছে"</string>
     <string name="window_animation_scale_title" msgid="5236381298376812508">"ৱিণ্ড\' এনিমেশ্বন স্কেল"</string>
     <string name="transition_animation_scale_title" msgid="1278477690695439337">"ট্ৰাঞ্জিশ্বন এনিমেশ্বন স্কেল"</string>
     <string name="animator_duration_scale_title" msgid="7082913931326085176">"এনিমেটৰ কালদৈৰ্ঘ্য স্কেল"</string>
@@ -436,8 +430,8 @@
     <string name="force_allow_on_external_summary" msgid="8525425782530728238">"মেনিফেষ্টৰ মান যিয়েই নহওক, বাহ্যিক ষ্ট’ৰেজত লিখিবলৈ যিকোনো এপক উপযুক্ত কৰি তোলে"</string>
     <string name="force_resizable_activities" msgid="7143612144399959606">"বলেৰে কাৰ্যকলাপসমূহৰ আকাৰ সলনি কৰিব পৰা কৰক"</string>
     <string name="force_resizable_activities_summary" msgid="2490382056981583062">"মেনিফেষ্টৰ মান যিয়েই নহওক, মাল্টি-ৱিণ্ডৰ বাবে আটাইবোৰ কাৰ্যকলাপৰ আকাৰ সলনি কৰিব পৰা কৰক।"</string>
-    <string name="enable_freeform_support" msgid="7599125687603914253">"ফ্ৰিফৰ্ম ৱিণ্ড\'জ সক্ষম কৰক"</string>
-    <string name="enable_freeform_support_summary" msgid="1822862728719276331">"পৰীক্ষামূলক ফ্ৰী-ফৰ্ম ৱিণ্ড’বোৰৰ বাবে সহায়তা সক্ষম কৰক৷"</string>
+    <string name="enable_freeform_support" msgid="8409932201445109106">"ফ্ৰীফৰ্ম ৱিণ্ড’ সক্ষম কৰ (লিগেচী)"</string>
+    <string name="enable_freeform_support_summary" msgid="2242481082356957934">"পৰীক্ষামূলক লিগেচী ফ্ৰীফৰ্ম ৱিণ্ড’ৰ সমৰ্থন সক্ষম কৰক।"</string>
     <string name="local_backup_password_title" msgid="4631017948933578709">"ডেস্কটপ বেকআপ পাছৱৰ্ড"</string>
     <string name="local_backup_password_summary_none" msgid="7646898032616361714">"ডেস্কটপৰ পূৰ্ণ বেকআপ এতিয়ালৈকে সংৰক্ষিত অৱস্থাত নাই"</string>
     <string name="local_backup_password_summary_change" msgid="1707357670383995567">"ডেস্কটপ সম্পূৰ্ণ বেকআপৰ বাবে পাছৱৰ্ডটো সলনি কৰিবলৈ বা আঁতৰাবলৈ টিপক"</string>

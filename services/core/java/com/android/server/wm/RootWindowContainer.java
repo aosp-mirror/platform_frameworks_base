@@ -183,6 +183,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
 
     private Object mLastWindowFreezeSource = null;
     private float mScreenBrightnessOverride = PowerManager.BRIGHTNESS_INVALID_FLOAT;
+    private CharSequence mScreenBrightnessOverrideTag;
     private long mUserActivityTimeout = -1;
     private boolean mUpdateRotation = false;
     // Only set while traversing the default display based on its content.
@@ -667,7 +668,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
 
     boolean reclaimSomeSurfaceMemory(WindowStateAnimator winAnimator, String operation,
             boolean secure) {
-        final WindowSurfaceController surfaceController = winAnimator.mSurfaceController;
+        final SurfaceControl surfaceControl = winAnimator.mSurfaceControl;
         boolean leakedSurface = false;
         boolean killedApps = false;
         EventLogTags.writeWmNoSurfaceMemory(winAnimator.mWin.toString(),
@@ -692,7 +693,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
                             return;
                         }
                         final WindowStateAnimator wsa = w.mWinAnimator;
-                        if (wsa.mSurfaceController != null) {
+                        if (wsa.mSurfaceControl != null) {
                             pidCandidates.append(wsa.mSession.mPid, wsa.mSession.mPid);
                         }
                     }, false /* traverseTopToBottom */);
@@ -717,7 +718,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
                 // app to request another one.
                 Slog.w(TAG_WM,
                         "Looks like we have reclaimed some memory, clearing surface for retry.");
-                if (surfaceController != null) {
+                if (surfaceControl != null) {
                     ProtoLog.i(WM_SHOW_SURFACE_ALLOC,
                             "SURFACE RECOVER DESTROY: %s", winAnimator.mWin);
                     SurfaceControl.Transaction t = mWmService.mTransactionFactory.get();
@@ -770,6 +771,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
         }
 
         mScreenBrightnessOverride = PowerManager.BRIGHTNESS_INVALID_FLOAT;
+        mScreenBrightnessOverrideTag = null;
         mUserActivityTimeout = -1;
         mObscureApplicationContentOnSecondaryDisplays = false;
         mSustainedPerformanceModeCurrent = false;
@@ -881,11 +883,15 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
             final float brightnessOverride = mScreenBrightnessOverride < PowerManager.BRIGHTNESS_MIN
                     || mScreenBrightnessOverride > PowerManager.BRIGHTNESS_MAX
                     ? PowerManager.BRIGHTNESS_INVALID_FLOAT : mScreenBrightnessOverride;
+            CharSequence overrideTag = null;
+            if (brightnessOverride != PowerManager.BRIGHTNESS_INVALID_FLOAT) {
+                overrideTag = mScreenBrightnessOverrideTag;
+            }
             int brightnessFloatAsIntBits = Float.floatToIntBits(brightnessOverride);
             // Post these on a handler such that we don't call into power manager service while
             // holding the window manager lock to avoid lock contention with power manager lock.
             mHandler.obtainMessage(SET_SCREEN_BRIGHTNESS_OVERRIDE, brightnessFloatAsIntBits,
-                    0).sendToTarget();
+                    0, overrideTag).sendToTarget();
             mHandler.obtainMessage(SET_USER_ACTIVITY_TIMEOUT, mUserActivityTimeout).sendToTarget();
         }
 
@@ -1040,6 +1046,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
             if (!syswin && w.mAttrs.screenBrightness >= 0
                     && Float.isNaN(mScreenBrightnessOverride)) {
                 mScreenBrightnessOverride = w.mAttrs.screenBrightness;
+                mScreenBrightnessOverrideTag = w.getWindowTag();
             }
 
             // This function assumes that the contents of the default display are processed first
@@ -1112,7 +1119,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
             switch (msg.what) {
                 case SET_SCREEN_BRIGHTNESS_OVERRIDE:
                     mWmService.mPowerManagerInternal.setScreenBrightnessOverrideFromWindowManager(
-                            Float.intBitsToFloat(msg.arg1));
+                            Float.intBitsToFloat(msg.arg1), (CharSequence) msg.obj);
                     break;
                 case SET_USER_ACTIVITY_TIMEOUT:
                     mWmService.mPowerManagerInternal.
@@ -2847,10 +2854,6 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
     }
 
     SleepToken createSleepToken(String tag, int displayId) {
-        return createSleepToken(tag, displayId, false /* isSwappingDisplay */);
-    }
-
-    SleepToken createSleepToken(String tag, int displayId, boolean isSwappingDisplay) {
         final DisplayContent display = getDisplayContent(displayId);
         if (display == null) {
             throw new IllegalArgumentException("Invalid display: " + displayId);
@@ -2859,7 +2862,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
         final int tokenKey = makeSleepTokenKey(tag, displayId);
         SleepToken token = mSleepTokens.get(tokenKey);
         if (token == null) {
-            token = new SleepToken(tag, displayId, isSwappingDisplay);
+            token = new SleepToken(tag, displayId);
             mSleepTokens.put(tokenKey, token);
             display.mAllSleepTokens.add(token);
             ProtoLog.d(WM_DEBUG_STATES, "Create sleep token: tag=%s, displayId=%d", tag, displayId);
@@ -3799,34 +3802,18 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
         private final String mTag;
         private final long mAcquireTime;
         private final int mDisplayId;
-        private final boolean mIsSwappingDisplay;
         final int mHashKey;
 
-        // The display could remain in sleep after the physical display swapped, adding a 1
-        // seconds display swap timeout to prevent activities staying in PAUSED state.
-        // Otherwise, the sleep token should be removed once display turns back on after swapped.
-        private static final long DISPLAY_SWAP_TIMEOUT = 1000;
-
-        SleepToken(String tag, int displayId, boolean isSwappingDisplay) {
+        SleepToken(String tag, int displayId) {
             mTag = tag;
             mDisplayId = displayId;
             mAcquireTime = SystemClock.uptimeMillis();
-            mIsSwappingDisplay = isSwappingDisplay;
             mHashKey = makeSleepTokenKey(mTag, mDisplayId);
-        }
-
-        public boolean isDisplaySwapping() {
-            long now = SystemClock.uptimeMillis();
-            if (now - mAcquireTime > DISPLAY_SWAP_TIMEOUT) {
-                return false;
-            }
-            return mIsSwappingDisplay;
         }
 
         @Override
         public String toString() {
             return "{\"" + mTag + "\", display " + mDisplayId
-                    + (mIsSwappingDisplay ? " is swapping " : "")
                     + ", acquire at " + TimeUtils.formatUptime(mAcquireTime) + "}";
         }
 

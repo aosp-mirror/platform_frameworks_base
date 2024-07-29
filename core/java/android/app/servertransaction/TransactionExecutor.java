@@ -45,6 +45,7 @@ import java.util.List;
 
 /**
  * Class that manages transaction execution in the correct order.
+ *
  * @hide
  */
 public class TransactionExecutor {

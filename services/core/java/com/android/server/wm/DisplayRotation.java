@@ -326,7 +326,7 @@ public class DisplayRotation {
     DisplayRotationImmersiveAppCompatPolicy initImmersiveAppCompatPolicy(
                 WindowManagerService service, DisplayContent displayContent) {
         return DisplayRotationImmersiveAppCompatPolicy.createIfNeeded(
-                service.mLetterboxConfiguration, this, displayContent);
+                service.mAppCompatConfiguration, this, displayContent);
     }
 
     // Change the default value to the value specified in the sysprop
@@ -627,6 +627,7 @@ public class DisplayRotation {
 
         mRotation = rotation;
 
+        mDisplayContent.applyFixedRotationForNonTopVisibleActivityIfNeeded();
         mDisplayContent.setLayoutNeeded();
         mDisplayContent.mWaitingForConfig = true;
 
@@ -2294,10 +2295,8 @@ public class DisplayRotation {
                     mInHalfFoldTransition = false;
                     mDeviceState = DeviceStateController.DeviceState.UNKNOWN;
                 }
-                mDisplayRotationCompatPolicySummary = dc.mDisplayRotationCompatPolicy == null
-                        ? null
-                        : dc.mDisplayRotationCompatPolicy
-                                .getSummaryForDisplayRotationHistoryRecord();
+                mDisplayRotationCompatPolicySummary = dc.mAppCompatCameraPolicy
+                        .getSummaryForDisplayRotationHistoryRecord();
                 mRotationReversionSlots =
                         dr.mDisplayContent.getRotationReversionController().getSlotsCopy();
             }

@@ -35,6 +35,7 @@ import static androidx.window.extensions.embedding.SplitPresenter.CONTAINER_POSI
 import static androidx.window.extensions.embedding.SplitPresenter.CONTAINER_POSITION_RIGHT;
 import static androidx.window.extensions.embedding.SplitPresenter.CONTAINER_POSITION_TOP;
 import static androidx.window.extensions.embedding.SplitPresenter.getOverlayPosition;
+import static androidx.window.extensions.embedding.SplitPresenter.positionToString;
 import static androidx.window.extensions.embedding.SplitPresenter.sanitizeBounds;
 import static androidx.window.extensions.embedding.WindowAttributes.DIM_AREA_ON_TASK;
 
@@ -78,13 +79,15 @@ import android.window.WindowContainerTransaction;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.test.core.app.ApplicationProvider;
-import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 import androidx.window.common.DeviceStateManagerFoldingFeatureProducer;
 import androidx.window.extensions.layout.WindowLayoutComponentImpl;
 import androidx.window.extensions.layout.WindowLayoutInfo;
 
 import com.android.window.flags.Flags;
+
+import com.google.testing.junit.testparameterinjector.TestParameter;
+import com.google.testing.junit.testparameterinjector.TestParameterInjector;
 
 import org.junit.Before;
 import org.junit.Rule;
@@ -108,7 +111,7 @@ import java.util.List;
 @SuppressWarnings("GuardedBy")
 @Presubmit
 @SmallTest
-@RunWith(AndroidJUnit4.class)
+@RunWith(TestParameterInjector.class)
 public class OverlayPresentationTest {
     @Rule
     public MockitoRule rule = MockitoJUnit.rule();
@@ -875,57 +878,70 @@ public class OverlayPresentationTest {
                 eq(overlayContainer.getTaskFragmentToken()), eq(activityToken));
     }
 
-    // TODO(b/243518738): Rewrite with TestParameter.
     @Test
-    public void testGetOverlayPosition() {
-        assertWithMessage("It must be position left for left overlay.")
-                .that(getOverlayPosition(new Rect(
-                        TASK_BOUNDS.left,
-                        TASK_BOUNDS.top,
-                        TASK_BOUNDS.right / 2,
-                        TASK_BOUNDS.bottom), TASK_BOUNDS)).isEqualTo(CONTAINER_POSITION_LEFT);
-        assertWithMessage("It must be position left for shrunk left overlay.")
-                .that(getOverlayPosition(new Rect(
-                        TASK_BOUNDS.left,
-                        TASK_BOUNDS.top + 20,
-                        TASK_BOUNDS.right / 2,
-                        TASK_BOUNDS.bottom - 20), TASK_BOUNDS)).isEqualTo(CONTAINER_POSITION_LEFT);
-        assertWithMessage("It must be position left for top overlay.")
-                .that(getOverlayPosition(new Rect(
-                        TASK_BOUNDS.left,
-                        TASK_BOUNDS.top,
-                        TASK_BOUNDS.right,
-                        TASK_BOUNDS.bottom / 2), TASK_BOUNDS)).isEqualTo(CONTAINER_POSITION_TOP);
-        assertWithMessage("It must be position left for shrunk top overlay.")
-                .that(getOverlayPosition(new Rect(
-                        TASK_BOUNDS.left + 20,
-                        TASK_BOUNDS.top,
-                        TASK_BOUNDS.right - 20,
-                        TASK_BOUNDS.bottom / 2), TASK_BOUNDS)).isEqualTo(CONTAINER_POSITION_TOP);
-        assertWithMessage("It must be position left for right overlay.")
-                .that(getOverlayPosition(new Rect(
-                        TASK_BOUNDS.right / 2,
-                        TASK_BOUNDS.top,
-                        TASK_BOUNDS.right,
-                        TASK_BOUNDS.bottom), TASK_BOUNDS)).isEqualTo(CONTAINER_POSITION_RIGHT);
-        assertWithMessage("It must be position left for shrunk right overlay.")
-                .that(getOverlayPosition(new Rect(
-                        TASK_BOUNDS.right / 2,
-                        TASK_BOUNDS.top + 20,
-                        TASK_BOUNDS.right,
-                        TASK_BOUNDS.bottom - 20), TASK_BOUNDS)).isEqualTo(CONTAINER_POSITION_RIGHT);
-        assertWithMessage("It must be position left for bottom overlay.")
-                .that(getOverlayPosition(new Rect(
-                        TASK_BOUNDS.left,
-                        TASK_BOUNDS.bottom / 2,
-                        TASK_BOUNDS.right,
-                        TASK_BOUNDS.bottom), TASK_BOUNDS)).isEqualTo(CONTAINER_POSITION_BOTTOM);
-        assertWithMessage("It must be position left for shrunk bottom overlay.")
-                .that(getOverlayPosition(new Rect(
-                        TASK_BOUNDS.left + 20,
-                        TASK_BOUNDS.bottom / 20,
-                        TASK_BOUNDS.right - 20,
-                        TASK_BOUNDS.bottom), TASK_BOUNDS)).isEqualTo(CONTAINER_POSITION_BOTTOM);
+    public void testGetOverlayPosition(@TestParameter OverlayPositionTestParams params) {
+        final Rect taskBounds = new Rect(TASK_BOUNDS);
+        final Rect overlayBounds = params.toOverlayBounds();
+        final int overlayPosition = getOverlayPosition(overlayBounds, taskBounds);
+
+        assertWithMessage("The overlay position must be "
+                + positionToString(params.mPosition) + ", but is "
+                + positionToString(overlayPosition)
+                + ", parent bounds=" + taskBounds + ", overlay bounds=" + overlayBounds)
+                .that(overlayPosition).isEqualTo(params.mPosition);
+    }
+
+    private enum OverlayPositionTestParams {
+        LEFT_OVERLAY(CONTAINER_POSITION_LEFT, false /* shouldBeShrunk */),
+        LEFT_SHRUNK_OVERLAY(CONTAINER_POSITION_LEFT, true  /* shouldBeShrunk */),
+        TOP_OVERLAY(CONTAINER_POSITION_TOP, false /* shouldBeShrunk */),
+        TOP_SHRUNK_OVERLAY(CONTAINER_POSITION_TOP, true  /* shouldBeShrunk */),
+        RIGHT_OVERLAY(CONTAINER_POSITION_RIGHT, false /* shouldBeShrunk */),
+        RIGHT_SHRUNK_OVERLAY(CONTAINER_POSITION_RIGHT, true /* shouldBeShrunk */),
+        BOTTOM_OVERLAY(CONTAINER_POSITION_BOTTOM, false /* shouldBeShrunk */),
+        BOTTOM_SHRUNK_OVERLAY(CONTAINER_POSITION_BOTTOM, true /* shouldBeShrunk */);
+
+        @SplitPresenter.ContainerPosition
+        private final int mPosition;
+
+        private final boolean mShouldBeShrunk;
+
+        OverlayPositionTestParams(
+                @SplitPresenter.ContainerPosition int position, boolean shouldBeShrunk) {
+            mPosition = position;
+            mShouldBeShrunk = shouldBeShrunk;
+        }
+
+        @NonNull
+        private Rect toOverlayBounds() {
+            Rect r = new Rect(TASK_BOUNDS);
+            final int offset = mShouldBeShrunk ? 20 : 0;
+            switch (mPosition) {
+                case CONTAINER_POSITION_LEFT:
+                    r.top += offset;
+                    r.right /= 2;
+                    r.bottom -= offset;
+                    break;
+                case CONTAINER_POSITION_TOP:
+                    r.left += offset;
+                    r.right -= offset;
+                    r.bottom /= 2;
+                    break;
+                case CONTAINER_POSITION_RIGHT:
+                    r.left = r.right / 2;
+                    r.top += offset;
+                    r.bottom -= offset;
+                    break;
+                case CONTAINER_POSITION_BOTTOM:
+                    r.left += offset;
+                    r.right -= offset;
+                    r.top = r.bottom / 2;
+                    break;
+                default:
+                    throw new IllegalArgumentException("Invalid position: " + mPosition);
+            }
+            return r;
+        }
     }
 
     /**

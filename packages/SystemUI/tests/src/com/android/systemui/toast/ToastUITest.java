@@ -134,7 +134,6 @@ public class ToastUITest extends SysuiTestCase {
                 mNotificationManager,
                 mAccessibilityManager,
                 new ToastFactory(
-                        mLayoutInflater,
                         mPluginManager,
                         mDumpManager),
                 mToastLogger);

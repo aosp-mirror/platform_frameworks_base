@@ -2656,6 +2656,7 @@ public final class CachedAppOptimizer {
         // PIDs that run out of async binder buffer when being frozen
         ArraySet<Integer> pidsAsync = (mFreezerBinderAsyncThreshold < 0) ? null : new ArraySet<>();
 
+        Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "binderErrorSync");
         for (int i = 0; i < pids.size(); i++) {
             int current = pids.get(i);
             try {
@@ -2684,6 +2685,7 @@ public final class CachedAppOptimizer {
                 Slog.w(TAG_AM, "Unable to query binder frozen stats for pid " + current);
             }
         }
+        Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
 
         // TODO: when kernel binder driver supports, poll the binder status directly.
         // Binderfs stats, like other debugfs files, is not a reliable interface. But it's the
@@ -2693,6 +2695,8 @@ public final class CachedAppOptimizer {
         if (pidsAsync == null || pidsAsync.size() == 0) {
             return;
         }
+
+        Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "binderErrorAsync");
         new BinderfsStatsReader().handleFreeAsyncSpace(
                 // Check if the frozen process has pending async calls
                 pidsAsync::contains,
@@ -2710,5 +2714,6 @@ public final class CachedAppOptimizer {
 
                 // Log the error if binderfs stats can't be accesses or correctly parsed
                 exception -> Slog.e(TAG_AM, "Unable to parse binderfs stats"));
+        Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
     }
 }

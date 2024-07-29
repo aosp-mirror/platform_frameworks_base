@@ -16,7 +16,9 @@
 
 package com.android.systemui.communal.ui.viewmodel
 
+import android.content.ComponentName
 import android.content.res.Resources
+import android.os.Bundle
 import android.view.View
 import android.view.accessibility.AccessibilityNodeInfo
 import com.android.systemui.communal.domain.interactor.CommunalInteractor
@@ -24,6 +26,7 @@ import com.android.systemui.communal.domain.interactor.CommunalSceneInteractor
 import com.android.systemui.communal.domain.interactor.CommunalSettingsInteractor
 import com.android.systemui.communal.domain.interactor.CommunalTutorialInteractor
 import com.android.systemui.communal.domain.model.CommunalContentModel
+import com.android.systemui.communal.shared.log.CommunalMetricsLogger
 import com.android.systemui.communal.shared.model.CommunalBackgroundType
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
@@ -91,6 +94,7 @@ constructor(
     private val shadeInteractor: ShadeInteractor,
     @Named(MediaModule.COMMUNAL_HUB) mediaHost: MediaHost,
     @CommunalLog logBuffer: LogBuffer,
+    private val metricsLogger: CommunalMetricsLogger,
 ) : BaseCommunalViewModel(communalSceneInteractor, communalInteractor, mediaHost) {
 
     private val _isMediaHostVisible =
@@ -209,6 +213,20 @@ constructor(
                     )
                 )
             }
+
+            override fun performAccessibilityAction(
+                host: View,
+                action: Int,
+                args: Bundle?
+            ): Boolean {
+                when (action) {
+                    AccessibilityNodeInfo.AccessibilityAction.ACTION_LONG_CLICK.id -> {
+                        onOpenWidgetEditor()
+                        return true
+                    }
+                }
+                return super.performAccessibilityAction(host, action, args)
+            }
         }
 
     private val _isEnableWidgetDialogShowing: MutableStateFlow<Boolean> = MutableStateFlow(false)
@@ -233,13 +251,20 @@ constructor(
 
     override fun onOpenWidgetEditor(
         shouldOpenWidgetPickerOnStart: Boolean,
-    ) = communalInteractor.showWidgetEditor(selectedKey.value, shouldOpenWidgetPickerOnStart)
+    ) {
+        persistScrollPosition()
+        communalInteractor.showWidgetEditor(selectedKey.value, shouldOpenWidgetPickerOnStart)
+    }
 
     override fun onDismissCtaTile() {
         scope.launch {
             communalInteractor.dismissCtaTile()
             setCurrentPopupType(PopupType.CtaTile)
         }
+    }
+
+    override fun onTapWidget(componentName: ComponentName, priority: Int) {
+        metricsLogger.logTapWidget(componentName.flattenToString(), priority)
     }
 
     fun onClick() {
@@ -321,14 +346,6 @@ constructor(
     val touchesAllowed: StateFlow<Boolean> =
         not(shadeInteractor.isAnyFullyExpanded)
             .stateIn(bgScope, SharingStarted.Eagerly, initialValue = false)
-
-    // TODO(b/339667383): remove this temporary swipe gesture handle
-    /**
-     * The dream overlay has its own gesture handle as the SysUI window is not visible above the
-     * dream. This flow will be false when dreaming so that we don't show a duplicate handle when
-     * opening the hub over the dream.
-     */
-    val showGestureIndicator: Flow<Boolean> = not(keyguardInteractor.isDreaming)
 
     /** The type of background to use for the hub. */
     val communalBackground: Flow<CommunalBackgroundType> =

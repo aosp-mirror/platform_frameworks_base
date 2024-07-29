@@ -3,16 +3,6 @@ container: "system"
 
 # Project link: https://gantry.corp.google.com/projects/android_platform_windowing_sdk/changes
 
-# Using a fixed read only flag because there are ClientTransaction scheduling before
-# WindowManagerService creation.
-flag {
-    namespace: "windowing_sdk"
-    name: "bundle_client_transaction_flag"
-    description: "To bundle multiple ClientTransactionItems into one ClientTransaction"
-    bug: "260873529"
-    is_fixed_read_only: true
-}
-
 flag {
     namespace: "windowing_sdk"
     name: "activity_embedding_overlay_presentation_flag"
@@ -47,14 +37,6 @@ flag {
     is_exported: true
     description: "Feature flag to enable the permission to embed any app in untrusted mode."
     bug: "293647332"
-    is_fixed_read_only: true
-}
-
-flag {
-    namespace: "windowing_sdk"
-    name: "activity_window_info_flag"
-    description: "To dispatch ActivityWindowInfo through ClientTransaction"
-    bug: "287582673"
     is_fixed_read_only: true
 }
 
@@ -137,17 +119,6 @@ flag {
      metadata {
          purpose: PURPOSE_BUGFIX
      }
-}
-
-flag {
-    namespace: "windowing_sdk"
-    name: "disable_object_pool"
-    description: "Whether to disable object pool and let the GC handle lifecycle items"
-    bug: "311089192"
-    is_fixed_read_only: true
-    metadata {
-        purpose: PURPOSE_BUGFIX
-    }
 }
 
 flag {

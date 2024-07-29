@@ -25,8 +25,6 @@ import android.widget.TextView
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.flags.FeatureFlagsClassic
-import com.android.systemui.flags.Flags
 import com.android.systemui.mediaprojection.MediaProjectionMetricsLogger
 import com.android.systemui.res.R
 import com.android.systemui.statusbar.phone.AlertDialogWithDelegate
@@ -34,10 +32,8 @@ import com.android.systemui.statusbar.phone.SystemUIDialog
 import com.android.systemui.util.mockito.mock
 import junit.framework.Assert.assertEquals
 import org.junit.After
-import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.Mockito.`when` as whenever
 
 @SmallTest
 @RunWith(AndroidJUnit4::class)
@@ -46,24 +42,12 @@ class MediaProjectionPermissionDialogDelegateTest : SysuiTestCase() {
 
     private lateinit var dialog: AlertDialog
 
-    private val flags = mock<FeatureFlagsClassic>()
-    private val onStartRecordingClicked = mock<Runnable>()
-    private val mediaProjectionMetricsLogger = mock<MediaProjectionMetricsLogger>()
-
-    private val mediaProjectionConfig: MediaProjectionConfig =
-        MediaProjectionConfig.createConfigForDefaultDisplay()
-    private val appName: String = "testApp"
-    private val hostUid: Int = 12345
+    private val appName = "Test App"
 
     private val resIdSingleApp = R.string.screen_share_permission_dialog_option_single_app
     private val resIdFullScreen = R.string.screen_share_permission_dialog_option_entire_screen
     private val resIdSingleAppDisabled =
         R.string.media_projection_entry_app_permission_dialog_single_app_disabled
-
-    @Before
-    fun setUp() {
-        whenever(flags.isEnabled(Flags.WM_ENABLE_PARTIAL_SCREEN_SHARING)).thenReturn(true)
-    }
 
     @After
     fun teardown() {
@@ -73,34 +57,10 @@ class MediaProjectionPermissionDialogDelegateTest : SysuiTestCase() {
     }
 
     @Test
-    fun showDialog_forceShowPartialScreenShareFalse() {
-        // Set up dialog with MediaProjectionConfig.createConfigForDefaultDisplay() and
-        // overrideDisableSingleAppOption = false
-        val overrideDisableSingleAppOption = false
-        setUpAndShowDialog(overrideDisableSingleAppOption)
+    fun showDefaultDialog() {
+        setUpAndShowDialog()
 
-        val spinner = dialog.requireViewById<Spinner>(R.id.screen_share_mode_spinner)
-        val secondOptionText =
-            spinner.adapter
-                .getDropDownView(1, null, spinner)
-                .findViewById<TextView>(android.R.id.text2)
-                ?.text
-
-        // check that the first option is full screen and enabled
-        assertEquals(context.getString(resIdFullScreen), spinner.selectedItem)
-
-        // check that the second option is single app and disabled
-        assertEquals(context.getString(resIdSingleAppDisabled, appName), secondOptionText)
-    }
-
-    @Test
-    fun showDialog_forceShowPartialScreenShareTrue() {
-        // Set up dialog with MediaProjectionConfig.createConfigForDefaultDisplay() and
-        // overrideDisableSingleAppOption = true
-        val overrideDisableSingleAppOption = true
-        setUpAndShowDialog(overrideDisableSingleAppOption)
-
-        val spinner = dialog.requireViewById<Spinner>(R.id.screen_share_mode_spinner)
+        val spinner = dialog.requireViewById<Spinner>(R.id.screen_share_mode_options)
         val secondOptionText =
             spinner.adapter
                 .getDropDownView(1, null, spinner)
@@ -114,17 +74,84 @@ class MediaProjectionPermissionDialogDelegateTest : SysuiTestCase() {
         assertEquals(context.getString(resIdFullScreen), secondOptionText)
     }
 
-    private fun setUpAndShowDialog(overrideDisableSingleAppOption: Boolean) {
+    @Test
+    fun showDialog_disableSingleApp() {
+        setUpAndShowDialog(
+            mediaProjectionConfig = MediaProjectionConfig.createConfigForDefaultDisplay()
+        )
+
+        val spinner = dialog.requireViewById<Spinner>(R.id.screen_share_mode_options)
+        val secondOptionWarningText =
+            spinner.adapter
+                .getDropDownView(1, null, spinner)
+                .findViewById<TextView>(android.R.id.text2)
+                ?.text
+
+        // check that the first option is full screen and enabled
+        assertEquals(context.getString(resIdFullScreen), spinner.selectedItem)
+
+        // check that the second option is single app and disabled
+        assertEquals(context.getString(resIdSingleAppDisabled, appName), secondOptionWarningText)
+    }
+
+    @Test
+    fun showDialog_disableSingleApp_forceShowPartialScreenShareTrue() {
+        setUpAndShowDialog(
+            mediaProjectionConfig = MediaProjectionConfig.createConfigForDefaultDisplay(),
+            overrideDisableSingleAppOption = true
+        )
+
+        val spinner = dialog.requireViewById<Spinner>(R.id.screen_share_mode_options)
+        val secondOptionText =
+            spinner.adapter
+                .getDropDownView(1, null, spinner)
+                .findViewById<TextView>(android.R.id.text1)
+                ?.text
+
+        // check that the first option is single app and enabled
+        assertEquals(context.getString(resIdSingleApp), spinner.selectedItem)
+
+        // check that the second option is full screen and enabled
+        assertEquals(context.getString(resIdFullScreen), secondOptionText)
+    }
+
+    @Test
+    fun showDialog_disableSingleApp_hasCastingCapabilities() {
+        setUpAndShowDialog(
+            mediaProjectionConfig = MediaProjectionConfig.createConfigForDefaultDisplay(),
+            hasCastingCapabilities = true
+        )
+
+        val spinner = dialog.requireViewById<Spinner>(R.id.screen_share_mode_options)
+        val secondOptionWarningText =
+            spinner.adapter
+                .getDropDownView(1, null, spinner)
+                .findViewById<TextView>(android.R.id.text2)
+                ?.text
+
+        // check that the first option is full screen and enabled
+        assertEquals(context.getString(resIdFullScreen), spinner.selectedItem)
+
+        // check that the second option is single app and disabled
+        assertEquals(context.getString(resIdSingleAppDisabled, appName), secondOptionWarningText)
+    }
+
+    private fun setUpAndShowDialog(
+        mediaProjectionConfig: MediaProjectionConfig? = null,
+        overrideDisableSingleAppOption: Boolean = false,
+        hasCastingCapabilities: Boolean = false,
+    ) {
         val delegate =
             MediaProjectionPermissionDialogDelegate(
                 context,
                 mediaProjectionConfig,
-                {},
-                onStartRecordingClicked,
+                onStartRecordingClicked = {},
+                onCancelClicked = {},
+                hasCastingCapabilities,
                 appName,
                 overrideDisableSingleAppOption,
-                hostUid,
-                mediaProjectionMetricsLogger
+                hostUid = 12345,
+                mediaProjectionMetricsLogger = mock<MediaProjectionMetricsLogger>()
             )
 
         dialog = AlertDialogWithDelegate(context, R.style.Theme_SystemUI_Dialog, delegate)

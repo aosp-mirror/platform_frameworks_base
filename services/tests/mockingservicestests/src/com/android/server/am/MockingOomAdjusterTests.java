@@ -500,6 +500,13 @@ public class MockingOomAdjusterTests {
         updateOomAdj(app);
         assertProcStates(app, PROCESS_STATE_TOP, VISIBLE_APP_ADJ, SCHED_GROUP_TOP_APP);
         assertEquals("resumed-split-screen-activity", app.mState.getAdjType());
+
+        doReturn(WindowProcessController.ACTIVITY_STATE_FLAG_IS_VISIBLE
+                | WindowProcessController.ACTIVITY_STATE_FLAG_PERCEPTIBLE_FREEFORM)
+                .when(wpc).getActivityStateFlags();
+        updateOomAdj(app);
+        assertProcStates(app, PROCESS_STATE_TOP, VISIBLE_APP_ADJ, SCHED_GROUP_TOP_APP);
+        assertEquals("perceptible-freeform-activity", app.mState.getAdjType());
     }
 
     @SuppressWarnings("GuardedBy")
@@ -3209,7 +3216,7 @@ public class MockingOomAdjusterTests {
             final ProcessReceiverRecord receivers = app.mReceivers;
             final ProcessProfileRecord profile = app.mProfile;
             final ProcessProviderRecord providers = app.mProviders;
-            app.makeActive(mock(IApplicationThread.class), mService.mProcessStats);
+            app.makeActive(mock(ApplicationThreadDeferred.class), mService.mProcessStats);
             app.setLastActivityTime(mLastActivityTime);
             app.setKilledByAm(mKilledByAm);
             app.setIsolatedEntryPoint(mIsolatedEntryPoint);

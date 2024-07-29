@@ -47,7 +47,7 @@ import static com.android.server.accessibility.AccessibilityTraceProto.WHERE;
 import static com.android.server.accessibility.AccessibilityTraceProto.WINDOW_MANAGER_SERVICE;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
-import static com.android.server.wm.WindowTracing.WINSCOPE_EXT;
+import static com.android.server.wm.WindowTracingLegacy.WINSCOPE_EXT;
 
 import android.accessibilityservice.AccessibilityTrace;
 import android.animation.ObjectAnimator;

@@ -17,6 +17,7 @@
 package com.android.server.media.projection;
 
 import static android.Manifest.permission.MANAGE_MEDIA_PROJECTION;
+import static android.Manifest.permission.RECORD_SENSITIVE_CONTENT;
 import static android.app.ActivityManagerInternal.MEDIA_PROJECTION_TOKEN_EVENT_CREATED;
 import static android.app.ActivityManagerInternal.MEDIA_PROJECTION_TOKEN_EVENT_DESTROYED;
 import static android.content.Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS;
@@ -34,10 +35,12 @@ import android.Manifest;
 import android.annotation.EnforcePermission;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.RequiresPermission;
 import android.app.ActivityManagerInternal;
 import android.app.ActivityOptions.LaunchCookie;
 import android.app.AppOpsManager;
 import android.app.IProcessObserver;
+import android.app.KeyguardManager;
 import android.app.compat.CompatChanges;
 import android.compat.annotation.ChangeId;
 import android.compat.annotation.EnabledSince;
@@ -78,6 +81,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.DumpUtils;
 import com.android.server.LocalServices;
+import com.android.server.SystemConfig;
 import com.android.server.SystemService;
 import com.android.server.Watchdog;
 import com.android.server.wm.WindowManagerInternal;
@@ -132,6 +136,7 @@ public final class MediaProjectionManagerService extends SystemService
     private final ActivityManagerInternal mActivityManagerInternal;
     private final PackageManager mPackageManager;
     private final WindowManagerInternal mWmInternal;
+    private final KeyguardManager mKeyguardManager;
 
     private final MediaRouter mMediaRouter;
     private final MediaRouterCallback mMediaRouterCallback;
@@ -147,7 +152,9 @@ public final class MediaProjectionManagerService extends SystemService
         this(context, new Injector());
     }
 
-    @VisibleForTesting MediaProjectionManagerService(Context context, Injector injector) {
+    @RequiresPermission(Manifest.permission.SUBSCRIBE_TO_KEYGUARD_LOCKED_STATE)
+    @VisibleForTesting
+    MediaProjectionManagerService(Context context, Injector injector) {
         super(context);
         mContext = context;
         mInjector = injector;
@@ -163,7 +170,45 @@ public final class MediaProjectionManagerService extends SystemService
         mMediaRouter = (MediaRouter) mContext.getSystemService(Context.MEDIA_ROUTER_SERVICE);
         mMediaRouterCallback = new MediaRouterCallback();
         mMediaProjectionMetricsLogger = injector.mediaProjectionMetricsLogger(context);
+        mKeyguardManager = (KeyguardManager) mContext.getSystemService(Context.KEYGUARD_SERVICE);
+        mKeyguardManager.addKeyguardLockedStateListener(
+                mContext.getMainExecutor(), this::onKeyguardLockedStateChanged);
         Watchdog.getInstance().addMonitor(this);
+    }
+
+    /**
+     * In order to record the keyguard, the MediaProjection package must be either:
+     *   - a holder of RECORD_SENSITIVE_CONTENT permission, or
+     *   - be one of the bugreport whitelisted packages
+     */
+    private boolean canCaptureKeyguard() {
+        if (!android.companion.virtualdevice.flags.Flags.mediaProjectionKeyguardRestrictions()) {
+            return true;
+        }
+        synchronized (mLock) {
+            if (mProjectionGrant == null || mProjectionGrant.packageName == null) {
+                return false;
+            }
+            if (mPackageManager.checkPermission(RECORD_SENSITIVE_CONTENT,
+                    mProjectionGrant.packageName)
+                    == PackageManager.PERMISSION_GRANTED) {
+                return true;
+            }
+            return SystemConfig.getInstance().getBugreportWhitelistedPackages()
+                    .contains(mProjectionGrant.packageName);
+        }
+    }
+
+    @VisibleForTesting
+    void onKeyguardLockedStateChanged(boolean isKeyguardLocked) {
+        if (!isKeyguardLocked) return;
+        synchronized (mLock) {
+            if (mProjectionGrant != null && !canCaptureKeyguard()) {
+                Slog.d(TAG, "Content Recording: Stopped MediaProjection"
+                        + " due to keyguard lock");
+                mProjectionGrant.stop();
+            }
+        }
     }
 
     /** Functional interface for providing time. */
@@ -657,7 +702,7 @@ public final class MediaProjectionManagerService extends SystemService
         }
     }
 
-    private final class BinderService extends IMediaProjectionManager.Stub {
+    final class BinderService extends IMediaProjectionManager.Stub {
 
         BinderService(Context context) {
             super(PermissionEnforcer.fromContext(context));
@@ -846,6 +891,13 @@ public final class MediaProjectionManagerService extends SystemService
         @Override
         public void requestConsentForInvalidProjection(@NonNull IMediaProjection projection) {
             requestConsentForInvalidProjection_enforcePermission();
+
+            if (android.companion.virtualdevice.flags.Flags.mediaProjectionKeyguardRestrictions()
+                    && mKeyguardManager.isKeyguardLocked()) {
+                Slog.v(TAG, "Reusing token: Won't request consent while the keyguard is locked");
+                return;
+            }
+
             synchronized (mLock) {
                 if (!isCurrentProjection(projection)) {
                     Slog.v(TAG, "Reusing token: Won't request consent again for a token that "
@@ -1252,6 +1304,11 @@ public final class MediaProjectionManagerService extends SystemService
         @Override
         public void notifyVirtualDisplayCreated(int displayId) {
             notifyVirtualDisplayCreated_enforcePermission();
+            if (mKeyguardManager.isKeyguardLocked() && !canCaptureKeyguard()) {
+                Slog.w(TAG, "Content Recording: Keyguard locked, aborting MediaProjection");
+                stop();
+                return;
+            }
             synchronized (mLock) {
                 mVirtualDisplayId = displayId;
 

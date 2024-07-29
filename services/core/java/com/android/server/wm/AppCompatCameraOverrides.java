@@ -30,6 +30,7 @@ import static android.view.WindowManager.PROPERTY_COMPAT_ALLOW_MIN_ASPECT_RATIO_
 
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_ATM;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_WITH_CLASS_NAME;
+import static com.android.server.wm.AppCompatUtils.isChangeEnabled;
 
 import android.annotation.NonNull;
 import android.app.CameraCompatTaskInfo.FreeformCameraCompatMode;
@@ -52,7 +53,7 @@ class AppCompatCameraOverrides {
     @NonNull
     private final AppCompatCameraOverridesState mAppCompatCameraOverridesState;
     @NonNull
-    private final LetterboxConfiguration mLetterboxConfiguration;
+    private final AppCompatConfiguration mAppCompatConfiguration;
     @NonNull
     private final OptPropFactory.OptProp mAllowMinAspectRatioOverrideOptProp;
     @NonNull
@@ -63,15 +64,15 @@ class AppCompatCameraOverrides {
     private final OptPropFactory.OptProp mCameraCompatAllowForceRotationOptProp;
 
     AppCompatCameraOverrides(@NonNull ActivityRecord activityRecord,
-            @NonNull LetterboxConfiguration letterboxConfiguration,
+            @NonNull AppCompatConfiguration appCompatConfiguration,
             @NonNull OptPropFactory optPropBuilder) {
         mActivityRecord = activityRecord;
-        mLetterboxConfiguration = letterboxConfiguration;
+        mAppCompatConfiguration = appCompatConfiguration;
         mAppCompatCameraOverridesState = new AppCompatCameraOverridesState();
         mAllowMinAspectRatioOverrideOptProp = optPropBuilder.create(
                 PROPERTY_COMPAT_ALLOW_MIN_ASPECT_RATIO_OVERRIDE);
         final BooleanSupplier isCameraCompatTreatmentEnabled = AppCompatUtils.asLazy(
-                mLetterboxConfiguration::isCameraCompatTreatmentEnabled);
+                mAppCompatConfiguration::isCameraCompatTreatmentEnabled);
         mCameraCompatAllowRefreshOptProp = optPropBuilder.create(
                 PROPERTY_CAMERA_COMPAT_ALLOW_REFRESH,
                 isCameraCompatTreatmentEnabled);
@@ -97,10 +98,10 @@ class AppCompatCameraOverrides {
      * </ul>
      */
     boolean shouldOverrideMinAspectRatioForCamera() {
-        return mActivityRecord.isCameraActive()
-                && mAllowMinAspectRatioOverrideOptProp
+        return isCameraActive() && mAllowMinAspectRatioOverrideOptProp
                 .shouldEnableWithOptInOverrideAndOptOutProperty(
-                        isCompatChangeEnabled(OVERRIDE_MIN_ASPECT_RATIO_ONLY_FOR_CAMERA));
+                        isChangeEnabled(mActivityRecord,
+                                OVERRIDE_MIN_ASPECT_RATIO_ONLY_FOR_CAMERA));
     }
 
     /**
@@ -116,7 +117,7 @@ class AppCompatCameraOverrides {
      */
     boolean shouldRefreshActivityForCameraCompat() {
         return mCameraCompatAllowRefreshOptProp.shouldEnableWithOptOutOverrideAndProperty(
-                isCompatChangeEnabled(OVERRIDE_CAMERA_COMPAT_DISABLE_REFRESH));
+                isChangeEnabled(mActivityRecord, OVERRIDE_CAMERA_COMPAT_DISABLE_REFRESH));
     }
 
     /**
@@ -135,7 +136,7 @@ class AppCompatCameraOverrides {
      */
     boolean shouldRefreshActivityViaPauseForCameraCompat() {
         return mCameraCompatEnableRefreshViaPauseOptProp.shouldEnableWithOverrideAndProperty(
-                isCompatChangeEnabled(OVERRIDE_CAMERA_COMPAT_ENABLE_REFRESH_VIA_PAUSE));
+                isChangeEnabled(mActivityRecord, OVERRIDE_CAMERA_COMPAT_ENABLE_REFRESH_VIA_PAUSE));
     }
 
     /**
@@ -151,7 +152,7 @@ class AppCompatCameraOverrides {
      */
     boolean shouldForceRotateForCameraCompat() {
         return mCameraCompatAllowForceRotationOptProp.shouldEnableWithOptOutOverrideAndProperty(
-                isCompatChangeEnabled(OVERRIDE_CAMERA_COMPAT_DISABLE_FORCE_ROTATION));
+                isChangeEnabled(mActivityRecord, OVERRIDE_CAMERA_COMPAT_DISABLE_FORCE_ROTATION));
     }
 
     /**
@@ -169,8 +170,17 @@ class AppCompatCameraOverrides {
      * </ul>
      */
     boolean shouldApplyFreeformTreatmentForCameraCompat() {
-        return Flags.cameraCompatForFreeform() && !isCompatChangeEnabled(
+        return Flags.cameraCompatForFreeform() && !isChangeEnabled(mActivityRecord,
                 OVERRIDE_CAMERA_COMPAT_DISABLE_FREEFORM_WINDOWING_TREATMENT);
+    }
+
+    /**
+     * @return {@code true} if the Camera is active for the current activity
+     */
+    boolean isCameraActive() {
+        return mActivityRecord.mDisplayContent != null
+                && mActivityRecord.mDisplayContent.mAppCompatCameraPolicy
+                    .isCameraActive(mActivityRecord, /* mustBeFullscreen */ true);
     }
 
     /**
@@ -183,7 +193,7 @@ class AppCompatCameraOverrides {
     }
 
     boolean isOverrideOrientationOnlyForCameraEnabled() {
-        return isCompatChangeEnabled(OVERRIDE_ORIENTATION_ONLY_FOR_CAMERA);
+        return isChangeEnabled(mActivityRecord, OVERRIDE_ORIENTATION_ONLY_FOR_CAMERA);
     }
 
     /**
@@ -206,7 +216,7 @@ class AppCompatCameraOverrides {
      * is active because the corresponding config is enabled and activity supports resizing.
      */
     boolean isCameraCompatSplitScreenAspectRatioAllowed() {
-        return mLetterboxConfiguration.isCameraCompatSplitScreenAspectRatioEnabled()
+        return mAppCompatConfiguration.isCameraCompatSplitScreenAspectRatioEnabled()
                 && !mActivityRecord.shouldCreateCompatDisplayInsets();
     }
 
@@ -217,10 +227,6 @@ class AppCompatCameraOverrides {
 
     void setFreeformCameraCompatMode(@FreeformCameraCompatMode int freeformCameraCompatMode) {
         mAppCompatCameraOverridesState.mFreeformCameraCompatMode = freeformCameraCompatMode;
-    }
-
-    private boolean isCompatChangeEnabled(long overrideChangeId) {
-        return mActivityRecord.info.isChangeEnabled(overrideChangeId);
     }
 
     static class AppCompatCameraOverridesState {

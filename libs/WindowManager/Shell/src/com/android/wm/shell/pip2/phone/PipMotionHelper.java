@@ -416,6 +416,17 @@ public class PipMotionHelper implements PipAppOpsListener.Callback,
         // location now.
         mSpringingToTouch = false;
 
+        // Boost the velocityX if it's zero to forcefully push it towards the nearest edge.
+        // We don't simply change the xEndValue below since the PhysicsAnimator would rely on the
+        // same velocityX to find out which edge to snap to.
+        if (velocityX == 0) {
+            final int motionCenterX = mPipBoundsState
+                    .getMotionBoundsState().getBoundsInMotion().centerX();
+            final int displayCenterX = mPipBoundsState
+                    .getDisplayBounds().centerX();
+            velocityX = (motionCenterX < displayCenterX) ? -0.001f : 0.001f;
+        }
+
         mTemporaryBoundsPhysicsAnimator
                 .spring(FloatProperties.RECT_WIDTH, getBounds().width(), mSpringConfig)
                 .spring(FloatProperties.RECT_HEIGHT, getBounds().height(), mSpringConfig)
@@ -816,6 +827,26 @@ public class PipMotionHelper implements PipAppOpsListener.Callback,
         mPipBoundsState.getMotionBoundsState().onPhysicsAnimationEnded();
         mSpringingToTouch = false;
         mDismissalPending = false;
+
+        // Check whether new bounds after fling imply we need to update stash state too.
+        stashEndActionIfNeeded();
+    }
+
+    private void stashEndActionIfNeeded() {
+        boolean isStashing = mPipBoundsState.getBounds().right > mPipBoundsState
+                .getDisplayBounds().width() || mPipBoundsState.getBounds().left < 0;
+        if (!isStashing) {
+            return;
+        }
+
+        if (mPipBoundsState.getBounds().left < 0
+                && mPipBoundsState.getStashedState() != STASH_TYPE_LEFT) {
+            mPipBoundsState.setStashed(STASH_TYPE_LEFT);
+        } else if (mPipBoundsState.getBounds().left >= 0
+                && mPipBoundsState.getStashedState() != STASH_TYPE_RIGHT) {
+            mPipBoundsState.setStashed(STASH_TYPE_RIGHT);
+        }
+        mMenuController.hideMenu();
     }
 
     /**

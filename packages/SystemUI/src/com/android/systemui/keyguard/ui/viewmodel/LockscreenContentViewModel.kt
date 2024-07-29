@@ -17,6 +17,7 @@
 package com.android.systemui.keyguard.ui.viewmodel
 
 import android.content.res.Resources
+import com.android.compose.animation.scene.SceneKey
 import com.android.internal.annotations.VisibleForTesting
 import com.android.systemui.biometrics.AuthController
 import com.android.systemui.dagger.SysUISingleton
@@ -25,15 +26,18 @@ import com.android.systemui.keyguard.domain.interactor.KeyguardBlueprintInteract
 import com.android.systemui.keyguard.domain.interactor.KeyguardClockInteractor
 import com.android.systemui.keyguard.shared.model.ClockSize
 import com.android.systemui.res.R
+import com.android.systemui.scene.domain.interactor.SceneContainerOcclusionInteractor
+import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
-import com.android.systemui.shade.shared.model.ShadeMode
 import com.android.systemui.unfold.domain.interactor.UnfoldTransitionInteractor
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 
@@ -48,33 +52,14 @@ constructor(
     val shadeInteractor: ShadeInteractor,
     @Application private val applicationScope: CoroutineScope,
     unfoldTransitionInteractor: UnfoldTransitionInteractor,
+    occlusionInteractor: SceneContainerOcclusionInteractor,
 ) {
     @VisibleForTesting val clockSize = clockInteractor.clockSize
 
     val isUdfpsVisible: Boolean
         get() = authController.isUdfpsSupported
 
-    val shouldUseSplitNotificationShade: StateFlow<Boolean> =
-        shadeInteractor.shadeMode
-            .map { it == ShadeMode.Split }
-            .stateIn(
-                scope = applicationScope,
-                started = SharingStarted.WhileSubscribed(),
-                initialValue = false,
-            )
-
-    val areNotificationsVisible: StateFlow<Boolean> =
-        combine(
-                clockSize,
-                shouldUseSplitNotificationShade,
-            ) { clockSize, shouldUseSplitNotificationShade ->
-                clockSize == ClockSize.SMALL || shouldUseSplitNotificationShade
-            }
-            .stateIn(
-                scope = applicationScope,
-                started = SharingStarted.WhileSubscribed(),
-                initialValue = false,
-            )
+    val isShadeLayoutWide: StateFlow<Boolean> = shadeInteractor.isShadeLayoutWide
 
     /** Amount of horizontal translation that should be applied to elements in the scene. */
     val unfoldTranslations: StateFlow<UnfoldTranslations> =
@@ -92,6 +77,35 @@ constructor(
                 started = SharingStarted.WhileSubscribed(),
                 initialValue = UnfoldTranslations(),
             )
+
+    /** Whether the content of the scene UI should be shown. */
+    val isContentVisible: StateFlow<Boolean> =
+        occlusionInteractor.isOccludingActivityShown
+            .map { !it }
+            .stateIn(
+                scope = applicationScope,
+                started = SharingStarted.WhileSubscribed(),
+                initialValue = true,
+            )
+
+    /**
+     * Returns a flow that indicates whether lockscreen notifications should be rendered in the
+     * given [sceneKey].
+     */
+    fun areNotificationsVisible(sceneKey: SceneKey): Flow<Boolean> {
+        // `Scenes.NotificationsShade` renders its own separate notifications stack, so when it's
+        // open we avoid rendering the lockscreen notifications stack.
+        if (sceneKey == Scenes.NotificationsShade) {
+            return flowOf(false)
+        }
+
+        return combine(
+            clockSize,
+            shadeInteractor.isShadeLayoutWide,
+        ) { clockSize, isShadeLayoutWide ->
+            clockSize == ClockSize.SMALL || isShadeLayoutWide
+        }
+    }
 
     fun getSmartSpacePaddingTop(resources: Resources): Int {
         return if (clockSize.value == ClockSize.LARGE) {

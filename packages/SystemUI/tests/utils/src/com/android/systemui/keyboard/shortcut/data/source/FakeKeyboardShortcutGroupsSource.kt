@@ -22,7 +22,11 @@ class FakeKeyboardShortcutGroupsSource : KeyboardShortcutGroupsSource {
 
     private var groups = listOf<KeyboardShortcutGroup>()
 
-    override fun shortcutGroups(): List<KeyboardShortcutGroup> = groups
+    override suspend fun shortcutGroups(deviceId: Int): List<KeyboardShortcutGroup> = groups
+
+    fun setGroups(vararg groups: KeyboardShortcutGroup) {
+        this.groups = groups.asList()
+    }
 
     fun setGroups(groups: List<KeyboardShortcutGroup>) {
         this.groups = groups

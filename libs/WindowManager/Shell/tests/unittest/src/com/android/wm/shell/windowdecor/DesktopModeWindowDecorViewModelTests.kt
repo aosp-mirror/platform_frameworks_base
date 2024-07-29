@@ -30,6 +30,7 @@ import android.hardware.display.DisplayManager
 import android.hardware.display.VirtualDisplay
 import android.hardware.input.InputManager
 import android.os.Handler
+import android.platform.test.annotations.DisableFlags
 import android.platform.test.annotations.EnableFlags
 import android.platform.test.annotations.RequiresFlagsEnabled
 import android.platform.test.flag.junit.CheckFlagsRule
@@ -62,6 +63,8 @@ import com.android.wm.shell.RootTaskDisplayAreaOrganizer
 import com.android.wm.shell.ShellTaskOrganizer
 import com.android.wm.shell.ShellTestCase
 import com.android.wm.shell.TestRunningTaskInfoBuilder
+import com.android.wm.shell.TestShellExecutor
+import com.android.wm.shell.apptoweb.AppToWebGenericLinksParser
 import com.android.wm.shell.common.DisplayController
 import com.android.wm.shell.common.DisplayInsetsController
 import com.android.wm.shell.common.DisplayLayout
@@ -70,7 +73,8 @@ import com.android.wm.shell.common.SyncTransactionQueue
 import com.android.wm.shell.desktopmode.DesktopTasksController
 import com.android.wm.shell.desktopmode.DesktopTasksController.SnapPosition
 import com.android.wm.shell.freeform.FreeformTaskTransitionStarter
-import com.android.wm.shell.shared.DesktopModeStatus
+import com.android.wm.shell.shared.desktopmode.DesktopModeStatus
+import com.android.wm.shell.splitscreen.SplitScreenController
 import com.android.wm.shell.sysui.KeyguardChangeListener
 import com.android.wm.shell.sysui.ShellCommandHandler
 import com.android.wm.shell.sysui.ShellController
@@ -78,8 +82,6 @@ import com.android.wm.shell.sysui.ShellInit
 import com.android.wm.shell.transition.Transitions
 import com.android.wm.shell.windowdecor.DesktopModeWindowDecorViewModel.DesktopModeOnInsetsChangedListener
 import com.android.wm.shell.windowdecor.common.OnTaskActionClickListener
-import java.util.Optional
-import java.util.function.Supplier
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Rule
@@ -99,6 +101,8 @@ import org.mockito.kotlin.eq
 import org.mockito.kotlin.spy
 import org.mockito.kotlin.whenever
 import org.mockito.quality.Strictness
+import java.util.Optional
+import java.util.function.Supplier
 
 /**
  * Tests of [DesktopModeWindowDecorViewModel]
@@ -122,6 +126,7 @@ class DesktopModeWindowDecorViewModelTests : ShellTestCase() {
     @Mock private lateinit var mockMainChoreographer: Choreographer
     @Mock private lateinit var mockTaskOrganizer: ShellTaskOrganizer
     @Mock private lateinit var mockDisplayController: DisplayController
+    @Mock private lateinit var mockSplitScreenController: SplitScreenController
     @Mock private lateinit var mockDisplayLayout: DisplayLayout
     @Mock private lateinit var displayInsetsController: DisplayInsetsController
     @Mock private lateinit var mockSyncQueue: SyncTransactionQueue
@@ -136,6 +141,8 @@ class DesktopModeWindowDecorViewModelTests : ShellTestCase() {
     @Mock private lateinit var mockShellCommandHandler: ShellCommandHandler
     @Mock private lateinit var mockWindowManager: IWindowManager
     @Mock private lateinit var mockInteractionJankMonitor: InteractionJankMonitor
+    @Mock private lateinit var mockGenericLinksParser: AppToWebGenericLinksParser
+    private val bgExecutor = TestShellExecutor()
 
     private val transactionFactory = Supplier<SurfaceControl.Transaction> {
         SurfaceControl.Transaction()
@@ -155,6 +162,7 @@ class DesktopModeWindowDecorViewModelTests : ShellTestCase() {
                 mockShellExecutor,
                 mockMainHandler,
                 mockMainChoreographer,
+                bgExecutor,
                 shellInit,
                 mockShellCommandHandler,
                 mockWindowManager,
@@ -165,13 +173,15 @@ class DesktopModeWindowDecorViewModelTests : ShellTestCase() {
                 mockSyncQueue,
                 mockTransitions,
                 Optional.of(mockDesktopTasksController),
+                mockGenericLinksParser,
                 mockDesktopModeWindowDecorFactory,
                 mockInputMonitorFactory,
                 transactionFactory,
                 mockRootTaskDisplayAreaOrganizer,
-            windowDecorByTaskIdSpy, mockInteractionJankMonitor
+                windowDecorByTaskIdSpy,
+                mockInteractionJankMonitor
         )
-
+        desktopModeWindowDecorViewModel.setSplitScreenController(mockSplitScreenController)
         whenever(mockDisplayController.getDisplayLayout(any())).thenReturn(mockDisplayLayout)
         whenever(mockDisplayLayout.stableInsets()).thenReturn(STABLE_INSETS)
         whenever(mockInputMonitorFactory.create(any(), any())).thenReturn(mockInputMonitor)
@@ -204,13 +214,16 @@ class DesktopModeWindowDecorViewModelTests : ShellTestCase() {
         verify(mockDesktopModeWindowDecorFactory).create(
                 mContext,
                 mockDisplayController,
+                mockSplitScreenController,
                 mockTaskOrganizer,
                 task,
                 taskSurface,
                 mockMainHandler,
+                bgExecutor,
                 mockMainChoreographer,
                 mockSyncQueue,
-                mockRootTaskDisplayAreaOrganizer
+                mockRootTaskDisplayAreaOrganizer,
+                mockGenericLinksParser
         )
         verify(decoration).close()
     }
@@ -228,13 +241,16 @@ class DesktopModeWindowDecorViewModelTests : ShellTestCase() {
         verify(mockDesktopModeWindowDecorFactory, never()).create(
                 mContext,
                 mockDisplayController,
+                mockSplitScreenController,
                 mockTaskOrganizer,
                 task,
                 taskSurface,
                 mockMainHandler,
+                bgExecutor,
                 mockMainChoreographer,
                 mockSyncQueue,
-                mockRootTaskDisplayAreaOrganizer
+                mockRootTaskDisplayAreaOrganizer,
+                mockGenericLinksParser
         )
 
         task.setWindowingMode(WINDOWING_MODE_FREEFORM)
@@ -243,17 +259,21 @@ class DesktopModeWindowDecorViewModelTests : ShellTestCase() {
         verify(mockDesktopModeWindowDecorFactory, times(1)).create(
                 mContext,
                 mockDisplayController,
+                mockSplitScreenController,
                 mockTaskOrganizer,
                 task,
                 taskSurface,
                 mockMainHandler,
+                bgExecutor,
                 mockMainChoreographer,
                 mockSyncQueue,
-                mockRootTaskDisplayAreaOrganizer
+                mockRootTaskDisplayAreaOrganizer,
+                mockGenericLinksParser
         )
     }
 
     @Test
+    @DisableFlags(Flags.FLAG_ENABLE_ADDITIONAL_WINDOWS_ABOVE_STATUS_BAR)
     fun testCreateAndDisposeEventReceiver() {
         val task = createTask(windowingMode = WINDOWING_MODE_FREEFORM)
         setUpMockDecorationForTask(task)
@@ -266,6 +286,7 @@ class DesktopModeWindowDecorViewModelTests : ShellTestCase() {
     }
 
     @Test
+    @DisableFlags(Flags.FLAG_ENABLE_ADDITIONAL_WINDOWS_ABOVE_STATUS_BAR)
     fun testEventReceiversOnMultipleDisplays() {
         val secondaryDisplay = createVirtualDisplay() ?: return
         val secondaryDisplayId = secondaryDisplay.display.displayId
@@ -344,23 +365,52 @@ class DesktopModeWindowDecorViewModelTests : ShellTestCase() {
         onTaskChanging(task)
 
         verify(mockDesktopModeWindowDecorFactory, never())
-                .create(any(), any(), any(), eq(task), any(), any(), any(), any(), any())
+                .create(any(), any(), any(), any(), eq(task), any(), any(), any(), any(), any(),
+                    any(), any())
     }
 
     @Test
-    fun testDecorationIsNotCreatedForTopTranslucentActivities() {
-        setFlagsRule.enableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_MODALS_POLICY)
+    @EnableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_MODALS_POLICY)
+    fun testDecorationIsCreatedForTopTranslucentActivitiesWithStyleFloating() {
+        val mockitoSession: StaticMockitoSession = mockitoSession()
+                .strictness(Strictness.LENIENT)
+                .spyStatic(DesktopModeStatus::class.java)
+                .startMocking()
+        try {
+            val task = createTask(windowingMode = WINDOWING_MODE_FULLSCREEN, focused = true).apply {
+                isTopActivityTransparent = true
+                isTopActivityStyleFloating = true
+                numActivities = 1
+            }
+            doReturn(true).`when` { DesktopModeStatus.canEnterDesktopMode(any()) }
+            setUpMockDecorationsForTasks(task)
+
+            onTaskOpening(task)
+            verify(mockDesktopModeWindowDecorFactory)
+                    .create(any(), any(), any(), any(), eq(task), any(), any(), any(), any(),
+                        any(), any(), any())
+        } finally {
+            mockitoSession.finishMocking()
+        }
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_MODALS_POLICY)
+    fun testDecorationIsNotCreatedForTopTranslucentActivitiesWithoutStyleFloating() {
         val task = createTask(windowingMode = WINDOWING_MODE_FULLSCREEN, focused = true).apply {
             isTopActivityTransparent = true
+            isTopActivityStyleFloating = false
             numActivities = 1
         }
         onTaskOpening(task)
 
         verify(mockDesktopModeWindowDecorFactory, never())
-                .create(any(), any(), any(), eq(task), any(), any(), any(), any(), any())
+                .create(any(), any(), any(), any(), eq(task), any(), any(), any(), any(), any(),
+                    any(), any())
     }
 
     @Test
+    @EnableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_MODALS_POLICY)
     fun testDecorationIsNotCreatedForSystemUIActivities() {
         val task = createTask(windowingMode = WINDOWING_MODE_FULLSCREEN, focused = true)
 
@@ -373,7 +423,8 @@ class DesktopModeWindowDecorViewModelTests : ShellTestCase() {
         onTaskOpening(task)
 
         verify(mockDesktopModeWindowDecorFactory, never())
-                .create(any(), any(), any(), eq(task), any(), any(), any(), any(), any())
+                .create(any(), any(), any(), any(), eq(task), any(), any(), any(), any(), any(),
+                    any(), any())
     }
 
     @Test
@@ -470,7 +521,8 @@ class DesktopModeWindowDecorViewModelTests : ShellTestCase() {
 
             onTaskOpening(task)
             verify(mockDesktopModeWindowDecorFactory, never())
-                .create(any(), any(), any(), eq(task), any(), any(), any(), any(), any())
+                .create(any(), any(), any(), any(), eq(task), any(), any(), any(), any(), any(),
+                    any(), any())
         } finally {
             mockitoSession.finishMocking()
         }
@@ -494,7 +546,8 @@ class DesktopModeWindowDecorViewModelTests : ShellTestCase() {
 
             onTaskOpening(task)
             verify(mockDesktopModeWindowDecorFactory)
-                .create(any(), any(), any(), eq(task), any(), any(), any(), any(), any())
+                .create(any(), any(), any(), any(), eq(task), any(), any(), any(), any(), any(),
+                    any(), any())
         } finally {
             mockitoSession.finishMocking()
         }
@@ -517,7 +570,8 @@ class DesktopModeWindowDecorViewModelTests : ShellTestCase() {
 
             onTaskOpening(task)
             verify(mockDesktopModeWindowDecorFactory)
-                .create(any(), any(), any(), eq(task), any(), any(), any(), any(), any())
+                .create(any(), any(), any(), any(), eq(task), any(), any(), any(), any(), any(),
+                    any(), any())
         } finally {
             mockitoSession.finishMocking()
         }
@@ -655,8 +709,8 @@ class DesktopModeWindowDecorViewModelTests : ShellTestCase() {
     private fun setUpMockDecorationForTask(task: RunningTaskInfo): DesktopModeWindowDecoration {
         val decoration = mock(DesktopModeWindowDecoration::class.java)
         whenever(
-            mockDesktopModeWindowDecorFactory.create(
-                any(), any(), any(), eq(task), any(), any(), any(), any(), any())
+            mockDesktopModeWindowDecorFactory.create(any(), any(), any(), any(), eq(task), any(),
+                any(), any(), any(), any(), any(), any())
         ).thenReturn(decoration)
         decoration.mTaskInfo = task
         whenever(decoration.isFocused).thenReturn(task.isFocused)

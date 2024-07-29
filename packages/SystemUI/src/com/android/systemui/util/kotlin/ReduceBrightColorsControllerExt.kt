@@ -35,3 +35,17 @@ fun ReduceBrightColorsController.isEnabled(): Flow<Boolean> {
         }
         .onStart { emit(isReduceBrightColorsActivated) }
 }
+
+fun ReduceBrightColorsController.isAvailable(): Flow<Boolean> {
+    return conflatedCallbackFlow {
+            val callback =
+                object : ReduceBrightColorsController.Listener {
+                    override fun onFeatureEnabledChanged(enabled: Boolean) {
+                        trySend(enabled)
+                    }
+                }
+            addCallback(callback)
+            awaitClose { removeCallback(callback) }
+        }
+        .onStart { emit(isReduceBrightColorsFeatureAvailable) }
+}
