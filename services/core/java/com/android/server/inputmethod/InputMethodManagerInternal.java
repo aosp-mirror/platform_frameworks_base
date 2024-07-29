@@ -75,13 +75,13 @@ public abstract class InputMethodManagerInternal {
     public abstract void setInteractive(boolean interactive);
 
     /**
-     * Hides the input methods for all the users, if visible.
+     * Hides the input method for the specified {@code originatingDisplayId}, if visible.
      *
      * @param reason               the reason for hiding the current input method
      * @param originatingDisplayId the display ID the request is originated
      */
     @ImfLockFree
-    public abstract void hideAllInputMethods(@SoftInputShowHideReason int reason,
+    public abstract void hideInputMethod(@SoftInputShowHideReason int reason,
             int originatingDisplayId);
 
     /**
@@ -315,7 +315,7 @@ public abstract class InputMethodManagerInternal {
 
                 @ImfLockFree
                 @Override
-                public void hideAllInputMethods(@SoftInputShowHideReason int reason,
+                public void hideInputMethod(@SoftInputShowHideReason int reason,
                         int originatingDisplayId) {
                 }
 

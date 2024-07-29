@@ -254,7 +254,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
     private @interface MultiUserUnawareField {
     }
 
-    private static final int MSG_HIDE_ALL_INPUT_METHODS = 1035;
+    private static final int MSG_HIDE_INPUT_METHOD = 1035;
     private static final int MSG_REMOVE_IME_SURFACE = 1060;
     private static final int MSG_REMOVE_IME_SURFACE_FROM_WINDOW = 1061;
 
@@ -5064,7 +5064,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
     @Override
     public boolean handleMessage(Message msg) {
         switch (msg.what) {
-            case MSG_HIDE_ALL_INPUT_METHODS: {
+            case MSG_HIDE_INPUT_METHOD: {
                 @SoftInputShowHideReason final int reason = msg.arg1;
                 final int originatingDisplayId = msg.arg2;
                 synchronized (ImfLock.class) {
@@ -5800,10 +5800,10 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
 
         @ImfLockFree
         @Override
-        public void hideAllInputMethods(@SoftInputShowHideReason int reason,
+        public void hideInputMethod(@SoftInputShowHideReason int reason,
                 int originatingDisplayId) {
-            mHandler.removeMessages(MSG_HIDE_ALL_INPUT_METHODS);
-            mHandler.obtainMessage(MSG_HIDE_ALL_INPUT_METHODS, reason, originatingDisplayId)
+            mHandler.removeMessages(MSG_HIDE_INPUT_METHOD);
+            mHandler.obtainMessage(MSG_HIDE_INPUT_METHOD, reason, originatingDisplayId)
                     .sendToTarget();
         }
 
