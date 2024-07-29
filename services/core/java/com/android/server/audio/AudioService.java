@@ -63,6 +63,7 @@ import static android.provider.Settings.Secure.VOLUME_HUSH_VIBRATE;
 import static com.android.internal.annotations.VisibleForTesting.Visibility.PACKAGE;
 import static com.android.media.audio.Flags.absVolumeIndexFix;
 import static com.android.media.audio.Flags.alarmMinVolumeZero;
+import static com.android.media.audio.Flags.asDeviceConnectionFailure;
 import static com.android.media.audio.Flags.audioserverPermissions;
 import static com.android.media.audio.Flags.disablePrescaleAbsoluteVolume;
 import static com.android.media.audio.Flags.replaceStreamBtSco;
@@ -4765,6 +4766,8 @@ public class AudioService extends IAudioService.Stub
     private void dumpFlags(PrintWriter pw) {
 
         pw.println("\nFun with Flags:");
+        pw.println("\tcom.android.media.audio.as_device_connection_failure:"
+                + asDeviceConnectionFailure());
         pw.println("\tandroid.media.audio.autoPublicVolumeApiHardening:"
                 + autoPublicVolumeApiHardening());
         pw.println("\tandroid.media.audio.Flags.automaticBtDeviceType:"
