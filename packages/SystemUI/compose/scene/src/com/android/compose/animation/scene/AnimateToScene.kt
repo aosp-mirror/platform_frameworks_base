@@ -19,6 +19,7 @@ package com.android.compose.animation.scene
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.AnimationVector1D
 import androidx.compose.animation.core.SpringSpec
+import com.android.compose.animation.scene.content.state.TransitionState
 import kotlin.math.absoluteValue
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.CoroutineStart

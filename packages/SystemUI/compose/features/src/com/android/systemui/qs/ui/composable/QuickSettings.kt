@@ -35,8 +35,8 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.android.compose.animation.scene.ElementKey
 import com.android.compose.animation.scene.MovableElementScenePicker
 import com.android.compose.animation.scene.SceneScope
-import com.android.compose.animation.scene.TransitionState
 import com.android.compose.animation.scene.ValueKey
+import com.android.compose.animation.scene.content.state.TransitionState
 import com.android.compose.modifiers.thenIf
 import com.android.systemui.compose.modifiers.sysuiResTag
 import com.android.systemui.qs.ui.adapter.QSSceneAdapter

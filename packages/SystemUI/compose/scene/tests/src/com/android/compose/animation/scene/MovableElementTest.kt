@@ -43,6 +43,7 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.unit.dp
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.android.compose.animation.scene.content.state.TransitionState
 import com.android.compose.animation.scene.subjects.assertThat
 import com.android.compose.test.assertSizeIsEqualTo
 import com.google.common.truth.Truth.assertThat

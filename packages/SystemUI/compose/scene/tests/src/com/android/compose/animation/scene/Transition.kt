@@ -17,6 +17,7 @@
 package com.android.compose.animation.scene
 
 import androidx.compose.foundation.gestures.Orientation
+import com.android.compose.animation.scene.content.state.TransitionState
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex

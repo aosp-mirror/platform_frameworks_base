@@ -61,9 +61,9 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.android.compose.animation.scene.ElementKey
 import com.android.compose.animation.scene.LowestZIndexScenePicker
 import com.android.compose.animation.scene.SceneScope
-import com.android.compose.animation.scene.TransitionState
 import com.android.compose.animation.scene.ValueKey
 import com.android.compose.animation.scene.animateElementFloatAsState
+import com.android.compose.animation.scene.content.state.TransitionState
 import com.android.compose.modifiers.thenIf
 import com.android.compose.windowsizeclass.LocalWindowSizeClass
 import com.android.settingslib.Utils
@@ -110,6 +110,7 @@ object ShadeHeader {
     object Colors {
         val ColorScheme.shadeHeaderText: Color
             get() = Color.White
+
         val ColorScheme.onScrimDim: Color
             get() = Color.DarkGray
     }
@@ -148,8 +149,8 @@ fun SceneScope.CollapsedShadeHeader(
         }
 
     val isLargeScreenLayout =
-            LocalWindowSizeClass.current.widthSizeClass == WindowWidthSizeClass.Medium ||
-                    LocalWindowSizeClass.current.widthSizeClass == WindowWidthSizeClass.Expanded
+        LocalWindowSizeClass.current.widthSizeClass == WindowWidthSizeClass.Medium ||
+            LocalWindowSizeClass.current.widthSizeClass == WindowWidthSizeClass.Expanded
 
     val isPrivacyChipVisible by viewModel.isPrivacyChipVisible.collectAsStateWithLifecycle()
 
@@ -197,8 +198,8 @@ fun SceneScope.CollapsedShadeHeader(
                         ) {
                             if (isLargeScreenLayout) {
                                 ShadeCarrierGroup(
-                                        viewModel = viewModel,
-                                        modifier = Modifier.align(Alignment.CenterVertically),
+                                    viewModel = viewModel,
+                                    modifier = Modifier.align(Alignment.CenterVertically),
                                 )
                             }
                             SystemIconContainer(
@@ -552,19 +553,20 @@ private fun SystemIconContainer(
     val interactionSource = remember { MutableInteractionSource() }
     val isHovered by interactionSource.collectIsHoveredAsState()
 
-    val hoverModifier = Modifier
-            .clip(RoundedCornerShape(CollapsedHeight / 4))
+    val hoverModifier =
+        Modifier.clip(RoundedCornerShape(CollapsedHeight / 4))
             .background(MaterialTheme.colorScheme.onScrimDim)
 
     Row(
-        modifier = modifier
+        modifier =
+            modifier
                 .height(CollapsedHeight)
                 .padding(vertical = CollapsedHeight / 4)
                 .thenIf(isClickable) {
                     Modifier.clickable(
-                            interactionSource = interactionSource,
-                            indication = null,
-                            onClick = { viewModel.onSystemIconContainerClicked() },
+                        interactionSource = interactionSource,
+                        indication = null,
+                        onClick = { viewModel.onSystemIconContainerClicked() },
                     )
                 }
                 .thenIf(isHovered) { hoverModifier },

@@ -49,6 +49,7 @@ import androidx.compose.ui.util.fastCoerceIn
 import androidx.compose.ui.util.fastLastOrNull
 import androidx.compose.ui.util.lerp
 import com.android.compose.animation.scene.content.Content
+import com.android.compose.animation.scene.content.state.TransitionState
 import com.android.compose.animation.scene.transformation.PropertyTransformation
 import com.android.compose.animation.scene.transformation.SharedElementTransformation
 import com.android.compose.ui.util.lerp

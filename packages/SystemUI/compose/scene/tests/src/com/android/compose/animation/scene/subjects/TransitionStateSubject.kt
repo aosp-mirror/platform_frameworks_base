@@ -18,7 +18,7 @@ package com.android.compose.animation.scene.subjects
 
 import com.android.compose.animation.scene.OverscrollSpec
 import com.android.compose.animation.scene.SceneKey
-import com.android.compose.animation.scene.TransitionState
+import com.android.compose.animation.scene.content.state.TransitionState
 import com.google.common.truth.Fact.simpleFact
 import com.google.common.truth.FailureMetadata
 import com.google.common.truth.Subject

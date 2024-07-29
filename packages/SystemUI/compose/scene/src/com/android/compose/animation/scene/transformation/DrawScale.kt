@@ -22,7 +22,7 @@ import com.android.compose.animation.scene.Element
 import com.android.compose.animation.scene.ElementMatcher
 import com.android.compose.animation.scene.Scale
 import com.android.compose.animation.scene.SceneTransitionLayoutImpl
-import com.android.compose.animation.scene.TransitionState
+import com.android.compose.animation.scene.content.state.TransitionState
 
 /**
  * Scales the draw size of an element. Note this will only scale the draw inside of an element,

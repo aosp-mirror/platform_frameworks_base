@@ -23,7 +23,8 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import com.android.compose.animation.scene.TransitionState.HasOverscrollProperties.Companion.DistanceUnspecified
+import com.android.compose.animation.scene.content.state.TransitionState
+import com.android.compose.animation.scene.content.state.TransitionState.HasOverscrollProperties.Companion.DistanceUnspecified
 
 /** Define the [transitions][SceneTransitions] to be used with a [SceneTransitionLayout]. */
 fun transitions(builder: SceneTransitionsBuilder.() -> Unit): SceneTransitions {

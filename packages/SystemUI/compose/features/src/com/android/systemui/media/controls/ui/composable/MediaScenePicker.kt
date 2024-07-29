@@ -20,7 +20,7 @@ import com.android.compose.animation.scene.ElementKey
 import com.android.compose.animation.scene.ElementScenePicker
 import com.android.compose.animation.scene.SceneKey
 import com.android.compose.animation.scene.SceneTransitionLayoutState
-import com.android.compose.animation.scene.TransitionState
+import com.android.compose.animation.scene.content.state.TransitionState
 import com.android.systemui.scene.shared.model.Scenes
 
 /** [ElementScenePicker] implementation for the media carousel object. */

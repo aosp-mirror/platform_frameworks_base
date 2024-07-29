@@ -35,7 +35,8 @@ import com.android.compose.animation.scene.NestedScrollBehavior.EdgeWithPreview
 import com.android.compose.animation.scene.TestScenes.SceneA
 import com.android.compose.animation.scene.TestScenes.SceneB
 import com.android.compose.animation.scene.TestScenes.SceneC
-import com.android.compose.animation.scene.TransitionState.Transition
+import com.android.compose.animation.scene.content.state.TransitionState
+import com.android.compose.animation.scene.content.state.TransitionState.Transition
 import com.android.compose.animation.scene.subjects.assertThat
 import com.android.compose.test.MonotonicClockTestScope
 import com.android.compose.test.runMonotonicClockTest

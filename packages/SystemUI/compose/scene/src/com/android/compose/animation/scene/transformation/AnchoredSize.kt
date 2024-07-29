@@ -23,7 +23,7 @@ import com.android.compose.animation.scene.ElementKey
 import com.android.compose.animation.scene.ElementMatcher
 import com.android.compose.animation.scene.SceneKey
 import com.android.compose.animation.scene.SceneTransitionLayoutImpl
-import com.android.compose.animation.scene.TransitionState
+import com.android.compose.animation.scene.content.state.TransitionState
 
 /** Anchor the size of an element to the size of another element. */
 internal class AnchoredSize(

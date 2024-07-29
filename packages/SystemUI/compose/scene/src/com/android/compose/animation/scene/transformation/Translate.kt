@@ -24,7 +24,7 @@ import com.android.compose.animation.scene.Element
 import com.android.compose.animation.scene.ElementMatcher
 import com.android.compose.animation.scene.OverscrollScope
 import com.android.compose.animation.scene.SceneTransitionLayoutImpl
-import com.android.compose.animation.scene.TransitionState
+import com.android.compose.animation.scene.content.state.TransitionState
 
 internal class Translate(
     override val matcher: ElementMatcher,

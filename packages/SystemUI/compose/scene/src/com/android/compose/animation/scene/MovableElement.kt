@@ -28,6 +28,7 @@ import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.util.fastLastOrNull
 import com.android.compose.animation.scene.content.Content
+import com.android.compose.animation.scene.content.state.TransitionState
 
 @Composable
 internal fun Element(

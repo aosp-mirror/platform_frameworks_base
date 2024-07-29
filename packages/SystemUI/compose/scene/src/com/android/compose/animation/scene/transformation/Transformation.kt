@@ -23,7 +23,7 @@ import com.android.compose.animation.scene.ContentKey
 import com.android.compose.animation.scene.Element
 import com.android.compose.animation.scene.ElementMatcher
 import com.android.compose.animation.scene.SceneTransitionLayoutImpl
-import com.android.compose.animation.scene.TransitionState
+import com.android.compose.animation.scene.content.state.TransitionState
 
 /** A transformation applied to one or more elements during a transition. */
 sealed interface Transformation {
