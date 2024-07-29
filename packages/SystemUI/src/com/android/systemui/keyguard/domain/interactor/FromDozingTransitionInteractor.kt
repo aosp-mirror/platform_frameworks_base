@@ -302,16 +302,25 @@ constructor(
     override fun getDefaultAnimatorForTransitionsToState(toState: KeyguardState): ValueAnimator {
         return ValueAnimator().apply {
             interpolator = Interpolators.LINEAR
-            duration = DEFAULT_DURATION.inWholeMilliseconds
+            duration =
+                when (toState) {
+                    KeyguardState.GONE -> TO_GONE_DURATION
+                    KeyguardState.GLANCEABLE_HUB -> TO_GLANCEABLE_HUB_DURATION
+                    KeyguardState.LOCKSCREEN -> TO_LOCKSCREEN_DURATION
+                    KeyguardState.OCCLUDED -> TO_OCCLUDED_DURATION
+                    KeyguardState.PRIMARY_BOUNCER -> TO_PRIMARY_BOUNCER_DURATION
+                    else -> DEFAULT_DURATION
+                }.inWholeMilliseconds
         }
     }
 
     companion object {
         const val TAG = "FromDozingTransitionInteractor"
         private val DEFAULT_DURATION = 500.milliseconds
-        val TO_LOCKSCREEN_DURATION = DEFAULT_DURATION
-        val TO_GONE_DURATION = DEFAULT_DURATION
-        val TO_PRIMARY_BOUNCER_DURATION = DEFAULT_DURATION
         val TO_GLANCEABLE_HUB_DURATION = DEFAULT_DURATION
+        val TO_GONE_DURATION = DEFAULT_DURATION
+        val TO_LOCKSCREEN_DURATION = DEFAULT_DURATION
+        val TO_OCCLUDED_DURATION = 550.milliseconds
+        val TO_PRIMARY_BOUNCER_DURATION = DEFAULT_DURATION
     }
 }
