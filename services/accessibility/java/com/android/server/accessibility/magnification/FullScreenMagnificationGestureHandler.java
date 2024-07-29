@@ -523,6 +523,7 @@ public class FullScreenMagnificationGestureHandler extends MagnificationGestureH
             mScaleGestureDetector = new ScaleGestureDetector(context, this, Handler.getMain());
             mScaleGestureDetector.setQuickScaleEnabled(false);
             mScrollGestureDetector = new GestureDetector(context, this, Handler.getMain());
+            mScrollGestureDetector.setIsLongpressEnabled(false);
         }
 
         @Override
@@ -1876,6 +1877,7 @@ public class FullScreenMagnificationGestureHandler extends MagnificationGestureH
         private MotionEventInfo mEvent;
         SinglePanningState(Context context) {
             mScrollGestureDetector = new GestureDetector(context, this, Handler.getMain());
+            mScrollGestureDetector.setIsLongpressEnabled(false);
         }
 
         @Override
