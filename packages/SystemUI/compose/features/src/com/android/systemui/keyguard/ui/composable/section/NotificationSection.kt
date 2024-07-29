@@ -92,7 +92,7 @@ constructor(
     fun SceneScope.Notifications(burnInParams: BurnInParameters?, modifier: Modifier = Modifier) {
         val areNotificationsVisible by
             lockscreenContentViewModel
-                .areNotificationsVisible(sceneKey)
+                .areNotificationsVisible(contentKey)
                 .collectAsStateWithLifecycle(initialValue = false)
         if (!areNotificationsVisible) {
             return

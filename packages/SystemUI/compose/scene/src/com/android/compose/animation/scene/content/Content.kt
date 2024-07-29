@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 The Android Open Source Project
+ * Copyright (C) 2024 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.compose.animation.scene
+package com.android.compose.animation.scene.content
 
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.layout.Box
@@ -29,24 +29,44 @@ import androidx.compose.ui.layout.approachLayout
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.zIndex
+import com.android.compose.animation.scene.AnimatedState
+import com.android.compose.animation.scene.ContentKey
+import com.android.compose.animation.scene.ContentScope
+import com.android.compose.animation.scene.Element
+import com.android.compose.animation.scene.ElementContentScope
+import com.android.compose.animation.scene.ElementKey
+import com.android.compose.animation.scene.ElementScope
+import com.android.compose.animation.scene.ElementStateScope
+import com.android.compose.animation.scene.MovableElement
+import com.android.compose.animation.scene.MovableElementContentScope
+import com.android.compose.animation.scene.NestedScrollBehavior
+import com.android.compose.animation.scene.SceneTransitionLayoutImpl
+import com.android.compose.animation.scene.SceneTransitionLayoutState
+import com.android.compose.animation.scene.SharedValueType
+import com.android.compose.animation.scene.UserAction
+import com.android.compose.animation.scene.UserActionResult
+import com.android.compose.animation.scene.ValueKey
+import com.android.compose.animation.scene.animateSharedValueAsState
+import com.android.compose.animation.scene.element
 import com.android.compose.animation.scene.modifiers.noResizeDuringTransitions
+import com.android.compose.animation.scene.nestedScrollToScene
 
-/** A scene in a [SceneTransitionLayout]. */
+/** A content defined in a [SceneTransitionLayout], i.e. a scene or an overlay. */
 @Stable
-internal class Scene(
-    val key: SceneKey,
-    layoutImpl: SceneTransitionLayoutImpl,
-    content: @Composable SceneScope.() -> Unit,
+internal sealed class Content(
+    open val key: ContentKey,
+    val layoutImpl: SceneTransitionLayoutImpl,
+    content: @Composable ContentScope.() -> Unit,
     actions: Map<UserAction.Resolved, UserActionResult>,
     zIndex: Float,
 ) {
-    internal val scope = SceneScopeImpl(layoutImpl, this)
+    internal val scope = ContentScopeImpl(layoutImpl, content = this)
 
     var content by mutableStateOf(content)
-    private var _userActions by mutableStateOf(checkValid(actions))
     var zIndex by mutableFloatStateOf(zIndex)
     var targetSize by mutableStateOf(IntSize.Zero)
 
+    private var _userActions by mutableStateOf(checkValid(actions))
     var userActions
         get() = _userActions
         set(value) {
@@ -59,8 +79,8 @@ internal class Scene(
         userActions.forEach { (action, result) ->
             if (key == result.toScene) {
                 error(
-                    "Transition to the same scene is not supported. Scene $key, action $action," +
-                        " result $result"
+                    "Transition to the same content (scene/overlay) is not supported. Content " +
+                        "$key, action $action, result $result"
                 )
             }
         }
@@ -73,7 +93,7 @@ internal class Scene(
             modifier
                 .zIndex(zIndex)
                 .approachLayout(
-                    isMeasurementApproachInProgress = { scope.layoutState.isTransitioning() }
+                    isMeasurementApproachInProgress = { layoutImpl.state.isTransitioning() }
                 ) { measurable, constraints ->
                     targetSize = lookaheadSize
                     val placeable = measurable.measure(constraints)
@@ -84,21 +104,19 @@ internal class Scene(
             scope.content()
         }
     }
-
-    override fun toString(): String {
-        return "Scene(key=$key)"
-    }
 }
 
-internal class SceneScopeImpl(
+internal class ContentScopeImpl(
     private val layoutImpl: SceneTransitionLayoutImpl,
-    private val scene: Scene,
-) : SceneScope, ElementStateScope by layoutImpl.elementStateScope {
-    override val sceneKey: SceneKey = scene.key
+    private val content: Content,
+) : ContentScope, ElementStateScope by layoutImpl.elementStateScope {
+    override val contentKey: ContentKey
+        get() = content.key
+
     override val layoutState: SceneTransitionLayoutState = layoutImpl.state
 
     override fun Modifier.element(key: ElementKey): Modifier {
-        return element(layoutImpl, scene, key)
+        return element(layoutImpl, content, key)
     }
 
     @Composable
@@ -107,7 +125,7 @@ internal class SceneScopeImpl(
         modifier: Modifier,
         content: @Composable (ElementScope<ElementContentScope>.() -> Unit)
     ) {
-        Element(layoutImpl, scene, key, modifier, content)
+        Element(layoutImpl, this@ContentScopeImpl.content, key, modifier, content)
     }
 
     @Composable
@@ -116,19 +134,19 @@ internal class SceneScopeImpl(
         modifier: Modifier,
         content: @Composable (ElementScope<MovableElementContentScope>.() -> Unit)
     ) {
-        MovableElement(layoutImpl, scene, key, modifier, content)
+        MovableElement(layoutImpl, this@ContentScopeImpl.content, key, modifier, content)
     }
 
     @Composable
-    override fun <T> animateSceneValueAsState(
+    override fun <T> animateContentValueAsState(
         value: T,
         key: ValueKey,
         type: SharedValueType<T, *>,
-        canOverflow: Boolean
+        canOverflow: Boolean,
     ): AnimatedState<T> {
         return animateSharedValueAsState(
             layoutImpl = layoutImpl,
-            scene = scene.key,
+            content = content.key,
             element = null,
             key = key,
             value = value,
@@ -141,27 +159,29 @@ internal class SceneScopeImpl(
         leftBehavior: NestedScrollBehavior,
         rightBehavior: NestedScrollBehavior,
         isExternalOverscrollGesture: () -> Boolean,
-    ): Modifier =
-        nestedScrollToScene(
+    ): Modifier {
+        return nestedScrollToScene(
             layoutImpl = layoutImpl,
             orientation = Orientation.Horizontal,
             topOrLeftBehavior = leftBehavior,
             bottomOrRightBehavior = rightBehavior,
             isExternalOverscrollGesture = isExternalOverscrollGesture,
         )
+    }
 
     override fun Modifier.verticalNestedScrollToScene(
         topBehavior: NestedScrollBehavior,
         bottomBehavior: NestedScrollBehavior,
         isExternalOverscrollGesture: () -> Boolean,
-    ): Modifier =
-        nestedScrollToScene(
+    ): Modifier {
+        return nestedScrollToScene(
             layoutImpl = layoutImpl,
             orientation = Orientation.Vertical,
             topOrLeftBehavior = topBehavior,
             bottomOrRightBehavior = bottomBehavior,
             isExternalOverscrollGesture = isExternalOverscrollGesture,
         )
+    }
 
     override fun Modifier.noResizeDuringTransitions(): Modifier {
         return noResizeDuringTransitions(layoutState = layoutImpl.state)
