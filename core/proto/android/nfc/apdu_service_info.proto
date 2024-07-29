@@ -27,6 +27,20 @@ option java_multiple_files = true;
 message ApduServiceInfoProto {
     option (.android.msg_privacy).dest = DEST_EXPLICIT;
 
+    message AutoTransactMapping {
+        option (.android.msg_privacy).dest = DEST_EXPLICIT;
+
+        optional string aid = 1;
+        optional bool should_auto_transact = 2;
+    }
+
+    message AutoTransactPattern {
+        option (.android.msg_privacy).dest = DEST_EXPLICIT;
+
+        optional string regexp_pattern = 1;
+        optional bool should_auto_transact = 2;
+    }
+
     optional .android.content.ComponentNameProto component_name = 1;
     optional string description = 2;
     optional bool on_host = 3;
@@ -35,4 +49,7 @@ message ApduServiceInfoProto {
     repeated AidGroupProto static_aid_groups = 6;
     repeated AidGroupProto dynamic_aid_groups = 7;
     optional string settings_activity_name = 8;
+    optional bool should_default_to_observe_mode = 9;
+    repeated AutoTransactMapping auto_transact_mapping = 10;
+    repeated AutoTransactPattern auto_transact_patterns = 11;
 }
