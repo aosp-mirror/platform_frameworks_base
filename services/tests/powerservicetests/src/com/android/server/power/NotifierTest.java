@@ -44,6 +44,7 @@ import android.os.PowerManager;
 import android.os.RemoteException;
 import android.os.VibrationAttributes;
 import android.os.Vibrator;
+import android.os.WorkSource;
 import android.os.test.TestLooper;
 import android.provider.Settings;
 import android.testing.TestableContext;
@@ -60,6 +61,7 @@ import com.android.server.statusbar.StatusBarManagerInternal;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
 import java.util.concurrent.Executor;
@@ -231,7 +233,7 @@ public class NotifierTest {
     }
 
     @Test
-    public void testOnWakeLockListener_RemoteException_NoRethrow() {
+    public void testOnWakeLockListener_RemoteException_NoRethrow() throws RemoteException {
         when(mPowerManagerFlags.improveWakelockLatency()).thenReturn(true);
         createNotifier();
         clearInvocations(mWakeLockLog, mBatteryStats, mAppOpsManager);
@@ -249,33 +251,58 @@ public class NotifierTest {
         verifyZeroInteractions(mWakeLockLog);
         mTestLooper.dispatchAll();
         verify(mWakeLockLog).onWakeLockReleased("wakelockTag", uid, 1);
-
+        clearInvocations(mBatteryStats);
         mNotifier.onWakeLockAcquired(PowerManager.PARTIAL_WAKE_LOCK, "wakelockTag",
                 "my.package.name", uid, pid, /* workSource= */ null, /* historyTag= */ null,
                 exceptingCallback);
-        mNotifier.onWakeLockChanging(PowerManager.PARTIAL_WAKE_LOCK, "wakelockTag",
-                "my.package.name", uid, pid, /* workSource= */ null, /* historyTag= */ null,
-                exceptingCallback,
-                PowerManager.SCREEN_BRIGHT_WAKE_LOCK, "wakelockTag",
-                "my.package.name", uid, pid, /* newWorkSource= */ null, /* newHistoryTag= */ null,
-                exceptingCallback);
-        verifyNoMoreInteractions(mWakeLockLog);
+
+        verifyNoMoreInteractions(mWakeLockLog, mBatteryStats);
         mTestLooper.dispatchAll();
         verify(mWakeLockLog).onWakeLockAcquired("wakelockTag", uid,
                 PowerManager.PARTIAL_WAKE_LOCK, 1);
+        verify(mBatteryStats).noteStartWakelock(uid, pid, "wakelockTag", /* historyTag= */ null,
+                BatteryStats.WAKE_TYPE_PARTIAL, false);
+
+        verifyNoMoreInteractions(mWakeLockLog, mBatteryStats);
+        WorkSource worksourceOld = Mockito.mock(WorkSource.class);
+        WorkSource worksourceNew = Mockito.mock(WorkSource.class);
+
+        mNotifier.onWakeLockChanging(PowerManager.PARTIAL_WAKE_LOCK, "wakelockTag",
+                "my.package.name", uid, pid, worksourceOld, /* historyTag= */ null,
+                exceptingCallback,
+                PowerManager.SCREEN_BRIGHT_WAKE_LOCK, "wakelockTag",
+                "my.package.name", uid, pid, worksourceNew, /* newHistoryTag= */ null,
+                exceptingCallback);
+        mTestLooper.dispatchAll();
+        verify(mBatteryStats).noteChangeWakelockFromSource(worksourceOld, pid, "wakelockTag",
+                null, BatteryStats.WAKE_TYPE_PARTIAL, worksourceNew, pid, "wakelockTag",
+                null, BatteryStats.WAKE_TYPE_FULL, false);
         // If we didn't throw, we're good!
 
         // Test with improveWakelockLatency flag false, hence the wakelock log will run on the same
         // thread
-        clearInvocations(mWakeLockLog);
+        clearInvocations(mWakeLockLog, mBatteryStats);
         when(mPowerManagerFlags.improveWakelockLatency()).thenReturn(false);
 
+        // Acquire the wakelock
         mNotifier.onWakeLockAcquired(PowerManager.PARTIAL_WAKE_LOCK, "wakelockTag",
                 "my.package.name", uid, pid, /* workSource= */ null, /* historyTag= */ null,
                 exceptingCallback);
         verify(mWakeLockLog).onWakeLockAcquired("wakelockTag", uid,
                 PowerManager.PARTIAL_WAKE_LOCK, -1);
 
+        // Update the wakelock
+        mNotifier.onWakeLockChanging(PowerManager.PARTIAL_WAKE_LOCK, "wakelockTag",
+                "my.package.name", uid, pid, worksourceOld, /* historyTag= */ null,
+                exceptingCallback,
+                PowerManager.SCREEN_BRIGHT_WAKE_LOCK, "wakelockTag",
+                "my.package.name", uid, pid, worksourceNew, /* newHistoryTag= */ null,
+                exceptingCallback);
+        verify(mBatteryStats).noteChangeWakelockFromSource(worksourceOld, pid, "wakelockTag",
+                null, BatteryStats.WAKE_TYPE_PARTIAL, worksourceNew, pid, "wakelockTag",
+                null, BatteryStats.WAKE_TYPE_FULL, false);
+
+        // Release the wakelock
         mNotifier.onWakeLockReleased(PowerManager.PARTIAL_WAKE_LOCK, "wakelockTag",
                 "my.package.name", uid, pid, /* workSource= */ null, /* historyTag= */ null,
                 exceptingCallback);
