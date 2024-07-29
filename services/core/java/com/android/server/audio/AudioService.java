@@ -4306,7 +4306,8 @@ public class AudioService extends IAudioService.Stub
         super.getVolumeGroupVolumeIndex_enforcePermission();
         synchronized (VolumeStreamState.class) {
             if (sVolumeGroupStates.indexOfKey(groupId) < 0) {
-                throw new IllegalArgumentException("No volume group for id " + groupId);
+                Log.e(TAG, "No volume group for id " + groupId);
+                return 0;
             }
             VolumeGroupState vgs = sVolumeGroupStates.get(groupId);
             // Return 0 when muted, not min index since for e.g. Voice Call, it has a non zero
@@ -4322,7 +4323,8 @@ public class AudioService extends IAudioService.Stub
         super.getVolumeGroupMaxVolumeIndex_enforcePermission();
         synchronized (VolumeStreamState.class) {
             if (sVolumeGroupStates.indexOfKey(groupId) < 0) {
-                throw new IllegalArgumentException("No volume group for id " + groupId);
+                Log.e(TAG, "No volume group for id " + groupId);
+                return 0;
             }
             VolumeGroupState vgs = sVolumeGroupStates.get(groupId);
             return vgs.getMaxIndex();
@@ -4336,7 +4338,8 @@ public class AudioService extends IAudioService.Stub
         super.getVolumeGroupMinVolumeIndex_enforcePermission();
         synchronized (VolumeStreamState.class) {
             if (sVolumeGroupStates.indexOfKey(groupId) < 0) {
-                throw new IllegalArgumentException("No volume group for id " + groupId);
+                Log.e(TAG, "No volume group for id " + groupId);
+                return 0;
             }
             VolumeGroupState vgs = sVolumeGroupStates.get(groupId);
             return vgs.getMinIndex();
@@ -8259,11 +8262,21 @@ public class AudioService extends IAudioService.Stub
     private static final SparseArray<VolumeGroupState> sVolumeGroupStates = new SparseArray<>();
 
     private void initVolumeGroupStates() {
+        int btScoGroupId = -1;
+        VolumeGroupState voiceCallGroup = null;
         for (final AudioVolumeGroup avg : getAudioVolumeGroups()) {
             try {
-                // if no valid attributes, this volume group is not controllable
-                if (ensureValidAttributes(avg)) {
-                    sVolumeGroupStates.append(avg.getId(), new VolumeGroupState(avg));
+                if (ensureValidVolumeGroup(avg)) {
+                    final VolumeGroupState vgs = new VolumeGroupState(avg);
+                    sVolumeGroupStates.append(avg.getId(), vgs);
+                    if (vgs.isVoiceCall()) {
+                        voiceCallGroup = vgs;
+                    }
+                } else {
+                    // invalid volume group will be reported for bt sco group with no other
+                    // legacy stream type, we try to replace it in sVolumeGroupStates with the
+                    // voice call volume group
+                    btScoGroupId = avg.getId();
                 }
             } catch (IllegalArgumentException e) {
                 // Volume Groups without attributes are not controllable through set/get volume
@@ -8271,8 +8284,13 @@ public class AudioService extends IAudioService.Stub
                 if (DEBUG_VOL) {
                     Log.d(TAG, "volume group " + avg.name() + " for internal policy needs");
                 }
-                continue;
             }
+        }
+
+        if (replaceStreamBtSco() && btScoGroupId >= 0 && voiceCallGroup != null) {
+            // the bt sco group is deprecated, storing the voice call group instead
+            // to keep the code backwards compatible when calling the volume group APIs
+            sVolumeGroupStates.append(btScoGroupId, voiceCallGroup);
         }
 
         // need mSettingsLock for vgs.applyAllVolumes -> vss.setIndex which grabs this lock after
@@ -8285,7 +8303,15 @@ public class AudioService extends IAudioService.Stub
         }
     }
 
-    private boolean ensureValidAttributes(AudioVolumeGroup avg) {
+    /**
+     * Returns false if the legacy stream types only contains the deprecated
+     * {@link AudioSystem#STREAM_BLUETOOTH_SCO}.
+     *
+     * @throws IllegalArgumentException if it has more than one non-default {@link AudioAttributes}
+     *
+     * @param avg the volume group to check
+     */
+    private boolean ensureValidVolumeGroup(AudioVolumeGroup avg) {
         boolean hasAtLeastOneValidAudioAttributes = avg.getAudioAttributes().stream()
                 .anyMatch(aa -> !aa.equals(AudioProductStrategy.getDefaultAttributes()));
         if (!hasAtLeastOneValidAudioAttributes) {
@@ -8293,10 +8319,11 @@ public class AudioService extends IAudioService.Stub
                     + " has no valid audio attributes");
         }
         if (replaceStreamBtSco()) {
-            for (int streamType : avg.getLegacyStreamTypes()) {
-                if (streamType == AudioSystem.STREAM_BLUETOOTH_SCO) {
-                    return false;
-                }
+            // if there are multiple legacy stream types associated we can omit stream bt sco
+            // otherwise this is not a valid volume group
+            if (avg.getLegacyStreamTypes().length == 1
+                    && avg.getLegacyStreamTypes()[0] == AudioSystem.STREAM_BLUETOOTH_SCO) {
+                return false;
             }
         }
         return true;
@@ -8635,6 +8662,10 @@ public class AudioService extends IAudioService.Stub
 
         public boolean isMusic() {
             return mHasValidStreamType && mPublicStreamType == AudioSystem.STREAM_MUSIC;
+        }
+
+        public boolean isVoiceCall() {
+            return mHasValidStreamType && mPublicStreamType == AudioSystem.STREAM_VOICE_CALL;
         }
 
         public void applyAllVolumes(boolean userSwitch) {
