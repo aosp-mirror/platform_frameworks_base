@@ -123,6 +123,7 @@ import com.android.systemui.shade.NotificationShadeWindowView;
 import com.android.systemui.shade.ShadeController;
 import com.android.systemui.shade.ShadeWindowLogger;
 import com.android.systemui.shade.domain.interactor.ShadeInteractor;
+import com.android.systemui.shared.notifications.domain.interactor.NotificationSettingsInteractor;
 import com.android.systemui.shared.system.QuickStepContract;
 import com.android.systemui.statusbar.NotificationEntryHelper;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
@@ -486,7 +487,8 @@ public class BubblesTest extends SysuiTestCase {
                         mock(PackageManager.class),
                         Optional.of(mock(Bubbles.class)),
                         mContext,
-                        mock(NotificationManager.class)
+                        mock(NotificationManager.class),
+                        mock(NotificationSettingsInteractor.class)
                         );
         interruptionDecisionProvider.start();
 
