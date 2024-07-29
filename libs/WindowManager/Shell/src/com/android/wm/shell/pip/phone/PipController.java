@@ -272,6 +272,7 @@ public class PipController implements PipTransitionController.PipTransitionCallb
         final boolean changed = onDisplayRotationChanged(mContext, outBounds, currentBounds,
                 mTmpInsetBounds, displayId, fromRotation, toRotation, t);
         if (changed) {
+            mMenuController.hideMenu();
             // If the pip was in the offset zone earlier, adjust the new bounds to the bottom of the
             // movement bounds
             mTouchHandler.adjustBoundsForRotation(outBounds, mPipBoundsState.getBounds(),
