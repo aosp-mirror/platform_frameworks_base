@@ -468,8 +468,42 @@ class DesktopModeTaskRepositoryTest : ShellTestCase() {
     }
 
     @Test
+    fun removeFreeformTask_invalidDisplay_removesTaskFromFreeformTasks() {
+        repo.addOrMoveFreeformTaskToTop(DEFAULT_DISPLAY, taskId = 1)
+
+        repo.removeFreeformTask(INVALID_DISPLAY, taskId = 1)
+
+        val invalidDisplayTasks = repo.getFreeformTasksInZOrder(INVALID_DISPLAY)
+        assertThat(invalidDisplayTasks).isEmpty()
+        val validDisplayTasks = repo.getFreeformTasksInZOrder(DEFAULT_DISPLAY)
+        assertThat(validDisplayTasks).isEmpty()
+    }
+
+    @Test
+    fun removeFreeformTask_validDisplay_removesTaskFromFreeformTasks() {
+        repo.addOrMoveFreeformTaskToTop(DEFAULT_DISPLAY, taskId = 1)
+
+        repo.removeFreeformTask(DEFAULT_DISPLAY, taskId = 1)
+
+        val tasks = repo.getFreeformTasksInZOrder(DEFAULT_DISPLAY)
+        assertThat(tasks).isEmpty()
+    }
+
+    @Test
+    fun removeFreeformTask_validDisplay_differentDisplay_doesNotRemovesTask() {
+        repo.addOrMoveFreeformTaskToTop(DEFAULT_DISPLAY, taskId = 1)
+
+        repo.removeFreeformTask(SECOND_DISPLAY, taskId = 1)
+
+        val tasks = repo.getFreeformTasksInZOrder(DEFAULT_DISPLAY)
+        assertThat(tasks).containsExactly(1)
+    }
+
+    @Test
     fun removeFreeformTask_removesTaskBoundsBeforeMaximize() {
         val taskId = 1
+        repo.addActiveTask(THIRD_DISPLAY, taskId)
+        repo.addOrMoveFreeformTaskToTop(THIRD_DISPLAY, taskId)
         repo.saveBoundsBeforeMaximize(taskId, Rect(0, 0, 200, 200))
 
         repo.removeFreeformTask(THIRD_DISPLAY, taskId)
