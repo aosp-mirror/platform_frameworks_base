@@ -24,6 +24,7 @@ import com.android.compose.animation.scene.Element
 import com.android.compose.animation.scene.ElementMatcher
 import com.android.compose.animation.scene.OverscrollScope
 import com.android.compose.animation.scene.SceneTransitionLayoutImpl
+import com.android.compose.animation.scene.content.state.ContentState
 import com.android.compose.animation.scene.content.state.TransitionState
 
 internal class Translate(
@@ -64,7 +65,7 @@ internal class OverscrollTranslate(
         // As this object is created by OverscrollBuilderImpl and we retrieve the current
         // OverscrollSpec only when the transition implements HasOverscrollProperties, we can assume
         // that this method was invoked after performing this check.
-        val overscrollProperties = transition as TransitionState.HasOverscrollProperties
+        val overscrollProperties = transition as ContentState.HasOverscrollProperties
 
         return Offset(
             x = value.x + overscrollProperties.overscrollScope.x(),

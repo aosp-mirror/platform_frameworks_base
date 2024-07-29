@@ -31,8 +31,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.round
 import androidx.compose.ui.util.fastCoerceIn
 import com.android.compose.animation.scene.content.Scene
+import com.android.compose.animation.scene.content.state.ContentState
+import com.android.compose.animation.scene.content.state.ContentState.HasOverscrollProperties.Companion.DistanceUnspecified
 import com.android.compose.animation.scene.content.state.TransitionState
-import com.android.compose.animation.scene.content.state.TransitionState.HasOverscrollProperties.Companion.DistanceUnspecified
 import com.android.compose.nestedscroll.PriorityNestedScrollConnection
 import kotlin.math.absoluteValue
 import kotlinx.coroutines.CoroutineScope
@@ -609,7 +610,7 @@ private class SwipeTransition(
     var lastDistance: Float = DistanceUnspecified,
 ) :
     TransitionState.Transition(_fromScene.key, _toScene.key, replacedTransition),
-    TransitionState.HasOverscrollProperties {
+    ContentState.HasOverscrollProperties {
     var _currentScene by mutableStateOf(_fromScene)
     override val currentScene: SceneKey
         get() = _currentScene.key
@@ -646,7 +647,7 @@ private class SwipeTransition(
 
     override val isInitiatedByUserInput = true
 
-    override var bouncingScene: SceneKey? = null
+    override var bouncingContent: SceneKey? = null
 
     /** The current offset caused by the drag gesture. */
     var dragOffset by mutableFloatStateOf(0f)
@@ -765,7 +766,7 @@ private class SwipeTransition(
                                 animationSpec = swipeSpec,
                                 initialVelocity = initialVelocity,
                             ) {
-                                if (bouncingScene == null) {
+                                if (bouncingContent == null) {
                                     val isBouncing =
                                         if (isTargetGreater) {
                                             if (startedWhenOvercrollingTargetScene) {
@@ -782,7 +783,7 @@ private class SwipeTransition(
                                         }
 
                                     if (isBouncing) {
-                                        bouncingScene = targetScene
+                                        bouncingContent = targetScene
 
                                         // Immediately stop this transition if we are bouncing on a
                                         // scene that does not bounce.

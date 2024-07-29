@@ -25,6 +25,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.util.fastAll
 import androidx.compose.ui.util.fastFilter
 import androidx.compose.ui.util.fastForEach
+import com.android.compose.animation.scene.content.state.ContentState
 import com.android.compose.animation.scene.content.state.TransitionState
 import com.android.compose.animation.scene.transition.link.LinkedTransition
 import com.android.compose.animation.scene.transition.link.StateLink
@@ -239,7 +240,7 @@ internal class MutableSceneTransitionLayoutStateImpl(
         // Compute the [TransformationSpec] when the transition starts.
         val fromScene = transition.fromScene
         val toScene = transition.toScene
-        val orientation = (transition as? TransitionState.HasOverscrollProperties)?.orientation
+        val orientation = (transition as? ContentState.HasOverscrollProperties)?.orientation
 
         // Update the transition specs.
         transition.transformationSpec =

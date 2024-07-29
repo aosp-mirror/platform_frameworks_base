@@ -49,6 +49,7 @@ import androidx.compose.ui.util.fastCoerceIn
 import androidx.compose.ui.util.fastLastOrNull
 import androidx.compose.ui.util.lerp
 import com.android.compose.animation.scene.content.Content
+import com.android.compose.animation.scene.content.state.ContentState
 import com.android.compose.animation.scene.content.state.TransitionState
 import com.android.compose.animation.scene.transformation.PropertyTransformation
 import com.android.compose.animation.scene.transformation.SharedElementTransformation
@@ -1075,7 +1076,7 @@ private inline fun <T> computeValue(
     }
 
     val currentScene = currentContentState.content
-    if (transition is TransitionState.HasOverscrollProperties) {
+    if (transition is ContentState.HasOverscrollProperties) {
         val overscroll = transition.currentOverscrollSpec
         if (overscroll?.scene == currentScene) {
             val elementSpec =
