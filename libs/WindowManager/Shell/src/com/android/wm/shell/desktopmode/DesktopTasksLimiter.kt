@@ -53,6 +53,8 @@ class DesktopTasksLimiter (
         }
         transitions.registerObserver(minimizeTransitionObserver)
         taskRepository.addActiveTaskListener(leftoverMinimizedTasksRemover)
+        ProtoLog.v(ShellProtoLogGroup.WM_SHELL_DESKTOP_MODE,
+            "DesktopTasksLimiter: starting limiter with a maximum of %d tasks", maxTasksLimit)
     }
 
     private data class TaskDetails (val displayId: Int, val taskId: Int)
@@ -139,7 +141,9 @@ class DesktopTasksLimiter (
             }
             ProtoLog.v(
                 ShellProtoLogGroup.WM_SHELL_DESKTOP_MODE,
-                "DesktopTasksLimiter: removing leftover minimized tasks: $remainingMinimizedTasks")
+                "DesktopTasksLimiter: removing leftover minimized tasks: %s",
+                remainingMinimizedTasks,
+            )
             remainingMinimizedTasks.forEach { taskIdToRemove ->
                 val taskToRemove = shellTaskOrganizer.getRunningTaskInfo(taskIdToRemove)
                 if (taskToRemove != null) {
@@ -219,13 +223,15 @@ class DesktopTasksLimiter (
             // No need to minimize anything
             return null
         }
+        val taskIdToMinimize = visibleFreeformTaskIdsOrderedFrontToBack.last()
         val taskToMinimize =
-                shellTaskOrganizer.getRunningTaskInfo(
-                        visibleFreeformTaskIdsOrderedFrontToBack.last())
+                shellTaskOrganizer.getRunningTaskInfo(taskIdToMinimize)
         if (taskToMinimize == null) {
             ProtoLog.e(
                     ShellProtoLogGroup.WM_SHELL_DESKTOP_MODE,
-                    "DesktopTasksLimiter: taskToMinimize == null")
+                    "DesktopTasksLimiter: taskToMinimize(taskId = %d) == null",
+                    taskIdToMinimize,
+                )
             return null
         }
         return taskToMinimize
