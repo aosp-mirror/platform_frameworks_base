@@ -36,9 +36,12 @@ import android.content.ComponentName;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
+import android.graphics.Rect;
 import android.view.Surface;
 
+import androidx.annotation.CallSuper;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import com.android.server.wm.utils.TestComponentStack;
 
@@ -74,6 +77,9 @@ class AppCompatActivityRobot {
     private final int mDisplayHeight;
     private DisplayContent mDisplayContent;
 
+    @Nullable
+    private Consumer<ActivityRecord> mOnPostActivityCreation;
+
     AppCompatActivityRobot(@NonNull WindowManagerService wm,
             @NonNull ActivityTaskManagerService atm, @NonNull ActivityTaskSupervisor supervisor,
             int displayWidth, int displayHeight) {
@@ -94,6 +100,10 @@ class AppCompatActivityRobot {
     void createActivityWithComponent() {
         createActivityWithComponentInNewTask(/* inNewTask */ mTaskStack.isEmpty(),
                 /* inNewDisplay */ false);
+    }
+
+    void createActivityWithComponentWithoutTask() {
+        createActivityWithComponentInNewTask(/* inNewTask */ false, /* inNewDisplay */ false);
     }
 
     void createActivityWithComponentInNewTask() {
@@ -128,6 +138,14 @@ class AppCompatActivityRobot {
 
     void setDisplayNaturalOrientation(@Configuration.Orientation int naturalOrientation) {
         doReturn(naturalOrientation).when(mDisplayContent).getNaturalOrientation();
+    }
+
+    void configureTaskBounds(@NonNull Rect taskBounds) {
+        doReturn(taskBounds).when(mTaskStack.top()).getBounds();
+    }
+
+    void configureTopActivityBounds(@NonNull Rect activityBounds) {
+        doReturn(activityBounds).when(mActivityStack.top()).getBounds();
     }
 
     @NonNull
@@ -167,6 +185,10 @@ class AppCompatActivityRobot {
     void setTopActivityEligibleForOrientationOverride(boolean enabled) {
         doReturn(enabled).when(getTopDisplayRotationCompatPolicy())
                 .isActivityEligibleForOrientationOverride(eq(mActivityStack.top()));
+    }
+
+    void setTopActivityInTransition(boolean inTransition) {
+        doReturn(inTransition).when(mActivityStack.top()).isInTransition();
     }
 
     void setShouldApplyUserMinAspectRatioOverride(boolean enabled) {
@@ -378,6 +400,32 @@ class AppCompatActivityRobot {
         pushActivity(newActivity);
     }
 
+    /**
+     * Specific Robots can override this method to add operation to run on a newly created
+     * {@link ActivityRecord}. Common case is to invoke spyOn().
+     *
+     * @param activity The newly created {@link ActivityRecord}.
+     */
+    @CallSuper
+    void onPostActivityCreation(@NonNull ActivityRecord activity) {
+        spyOn(activity);
+        spyOn(activity.mLetterboxUiController);
+        if (mOnPostActivityCreation != null) {
+            mOnPostActivityCreation.accept(activity);
+        }
+    }
+
+    /**
+     * Each Robot can specify its own set of operation to execute on a newly created
+     * {@link ActivityRecord}. Most common the use of spyOn().
+     *
+     * @param onPostActivityCreation The reference to the code to execute after the creation of a
+     *                               new {@link ActivityRecord}.
+     */
+    void setOnPostActivityCreation(@Nullable Consumer<ActivityRecord> onPostActivityCreation) {
+        mOnPostActivityCreation = onPostActivityCreation;
+    }
+
     private void createActivityWithComponentInNewTask(boolean inNewTask, boolean inNewDisplay) {
         if (inNewDisplay) {
             createNewDisplay();
@@ -385,14 +433,16 @@ class AppCompatActivityRobot {
         if (inNewTask) {
             createNewTask();
         }
-        final ActivityRecord activity = new WindowTestsBase.ActivityBuilder(mAtm)
-                .setOnTop(true)
-                .setTask(mTaskStack.top())
+        final WindowTestsBase.ActivityBuilder activityBuilder =
+                new WindowTestsBase.ActivityBuilder(mAtm).setOnTop(true)
                 // Set the component to be that of the test class in order
                 // to enable compat changes
-                .setComponent(ComponentName.createRelative(mAtm.mContext, TEST_COMPONENT_NAME))
-                .build();
-        pushActivity(activity);
+                .setComponent(ComponentName.createRelative(mAtm.mContext, TEST_COMPONENT_NAME));
+        if (!mTaskStack.isEmpty()) {
+            // We put the Activity in the current task if any.
+            activityBuilder.setTask(mTaskStack.top());
+        }
+        pushActivity(activityBuilder.build());
     }
 
     /**
@@ -438,14 +488,15 @@ class AppCompatActivityRobot {
     // We add the activity to the stack and spyOn() on its properties.
     private void pushActivity(@NonNull ActivityRecord activity) {
         mActivityStack.push(activity);
-        spyOn(activity);
+        onPostActivityCreation(activity);
         // TODO (b/351763164): Use these spyOn calls only when necessary.
         spyOn(activity.mAppCompatController.getTransparentPolicy());
         spyOn(activity.mAppCompatController.getAppCompatAspectRatioOverrides());
         spyOn(activity.mAppCompatController.getAppCompatAspectRatioPolicy());
         spyOn(activity.mAppCompatController.getAppCompatFocusOverrides());
         spyOn(activity.mAppCompatController.getAppCompatResizeOverrides());
-        spyOn(activity.mLetterboxUiController);
+        spyOn(activity.mAppCompatController.getAppCompatReachabilityPolicy());
+        spyOn(activity.mAppCompatController.getAppCompatReachabilityOverrides());
     }
 
     private void pushTask(@NonNull Task task) {
