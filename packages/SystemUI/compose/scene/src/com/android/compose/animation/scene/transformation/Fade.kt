@@ -20,7 +20,7 @@ import com.android.compose.animation.scene.ContentKey
 import com.android.compose.animation.scene.Element
 import com.android.compose.animation.scene.ElementMatcher
 import com.android.compose.animation.scene.SceneTransitionLayoutImpl
-import com.android.compose.animation.scene.content.state.TransitionState
+import com.android.compose.animation.scene.content.state.ContentState
 
 /** Fade an element in or out. */
 internal class Fade(
@@ -30,8 +30,8 @@ internal class Fade(
         layoutImpl: SceneTransitionLayoutImpl,
         content: ContentKey,
         element: Element,
-        sceneState: Element.State,
-        transition: TransitionState.Transition,
+        stateInContent: Element.State,
+        transition: ContentState.Transition<*>,
         value: Float
     ): Float {
         // Return the alpha value of [element] either when it starts fading in or when it finished

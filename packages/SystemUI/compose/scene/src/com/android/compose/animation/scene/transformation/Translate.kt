@@ -25,7 +25,6 @@ import com.android.compose.animation.scene.ElementMatcher
 import com.android.compose.animation.scene.OverscrollScope
 import com.android.compose.animation.scene.SceneTransitionLayoutImpl
 import com.android.compose.animation.scene.content.state.ContentState
-import com.android.compose.animation.scene.content.state.TransitionState
 
 internal class Translate(
     override val matcher: ElementMatcher,
@@ -36,8 +35,8 @@ internal class Translate(
         layoutImpl: SceneTransitionLayoutImpl,
         content: ContentKey,
         element: Element,
-        sceneState: Element.State,
-        transition: TransitionState.Transition,
+        stateInContent: Element.State,
+        transition: ContentState.Transition<*>,
         value: Offset,
     ): Offset {
         return with(layoutImpl.density) {
@@ -58,8 +57,8 @@ internal class OverscrollTranslate(
         layoutImpl: SceneTransitionLayoutImpl,
         content: ContentKey,
         element: Element,
-        sceneState: Element.State,
-        transition: TransitionState.Transition,
+        stateInContent: Element.State,
+        transition: ContentState.Transition<*>,
         value: Offset,
     ): Offset {
         // As this object is created by OverscrollBuilderImpl and we retrieve the current
