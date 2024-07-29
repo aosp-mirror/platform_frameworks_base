@@ -1844,13 +1844,6 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
         }
     }
 
-    @VisibleForTesting
-    void setAttachedClientForTesting(@NonNull ClientState cs) {
-        synchronized (ImfLock.class) {
-            getUserData(mCurrentUserId).mCurClient = cs;
-        }
-    }
-
     @GuardedBy("ImfLock.class")
     private boolean isShowRequestedForCurrentWindow(@UserIdInt int userId) {
         final var userData = getUserData(userId);
