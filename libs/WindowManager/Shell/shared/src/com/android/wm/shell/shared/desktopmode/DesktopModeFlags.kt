@@ -43,7 +43,8 @@ enum class DesktopModeFlags(
   APP_HEADER_WITH_TASK_DENSITY(Flags::enableAppHeaderWithTaskDensity, true),
   TASK_STACK_OBSERVER_IN_SHELL(Flags::enableTaskStackObserverInShell, true),
   SIZE_CONSTRAINTS(Flags::enableDesktopWindowingSizeConstraints, true),
-  DYNAMIC_INITIAL_BOUNDS(Flags::enableWindowingDynamicInitialBounds, true);
+  DYNAMIC_INITIAL_BOUNDS(Flags::enableWindowingDynamicInitialBounds, true),
+  ENABLE_DESKTOP_WINDOWING_TASK_LIMIT(Flags::enableDesktopWindowingTaskLimit, true);
 
   /**
    * Determines state of flag based on the actual flag and desktop mode developer option overrides.
