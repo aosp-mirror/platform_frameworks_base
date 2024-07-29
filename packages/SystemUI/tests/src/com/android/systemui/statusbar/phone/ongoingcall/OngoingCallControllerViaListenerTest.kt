@@ -32,9 +32,11 @@ import android.widget.LinearLayout
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.Flags.FLAG_STATUS_BAR_SCREEN_SHARING_CHIPS
+import com.android.systemui.Flags.FLAG_STATUS_BAR_USE_REPOS_FOR_CALL_CHIP
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.kosmos.Kosmos
+import com.android.systemui.kosmos.testScope
 import com.android.systemui.log.logcatLogBuffer
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.res.R
@@ -44,6 +46,7 @@ import com.android.systemui.statusbar.notification.collection.NotificationEntry
 import com.android.systemui.statusbar.notification.collection.NotificationEntryBuilder
 import com.android.systemui.statusbar.notification.collection.notifcollection.CommonNotifCollection
 import com.android.systemui.statusbar.notification.collection.notifcollection.NotifCollectionListener
+import com.android.systemui.statusbar.notification.domain.interactor.activeNotificationsInteractor
 import com.android.systemui.statusbar.phone.ongoingcall.data.repository.ongoingCallRepository
 import com.android.systemui.statusbar.phone.ongoingcall.shared.model.OngoingCallModel
 import com.android.systemui.statusbar.window.StatusBarWindowController
@@ -84,7 +87,8 @@ private const val PROC_STATE_INVISIBLE = ActivityManager.PROCESS_STATE_FOREGROUN
 @RunWith(AndroidJUnit4::class)
 @TestableLooper.RunWithLooper
 @OptIn(ExperimentalCoroutinesApi::class)
-class OngoingCallControllerTest : SysuiTestCase() {
+@DisableFlags(FLAG_STATUS_BAR_USE_REPOS_FOR_CALL_CHIP)
+class OngoingCallControllerViaListenerTest : SysuiTestCase() {
     private val kosmos = Kosmos()
 
     private val clock = FakeSystemClock()
@@ -121,6 +125,7 @@ class OngoingCallControllerTest : SysuiTestCase() {
                 context,
                 ongoingCallRepository,
                 notificationCollection,
+                kosmos.activeNotificationsInteractor,
                 clock,
                 mockActivityStarter,
                 mainExecutor,
@@ -129,7 +134,7 @@ class OngoingCallControllerTest : SysuiTestCase() {
                 mockStatusBarWindowController,
                 mockSwipeStatusBarAwayGestureHandler,
                 statusBarModeRepository,
-                logcatLogBuffer("OngoingCallControllerTest"),
+                logcatLogBuffer("OngoingCallControllerViaListenerTest"),
             )
         controller.start()
         controller.addCallback(mockOngoingCallListener)
