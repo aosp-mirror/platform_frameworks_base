@@ -118,6 +118,13 @@ flag {
 }
 
 flag {
+  name: "insert_mode_highlight_range"
+  namespace: "text"
+  description: "Make the highlight range stick after editing, this handles the corner cases where the entire text is replaced with itself(or transformed by developer) after each editing."
+  bug: "355137282"
+}
+
+flag {
   name: "insert_mode_not_update_selection"
   namespace: "text"
   description: "Fix that InputService#onUpdateSelection is not called when insert mode gesture is performed."
