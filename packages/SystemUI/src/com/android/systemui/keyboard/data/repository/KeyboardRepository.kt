@@ -41,6 +41,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.asFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.emptyFlow
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.flatMapConcat
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.flowOn
@@ -78,9 +79,15 @@ constructor(
 ) : KeyboardRepository {
 
     private val keyboardsChange: Flow<Pair<Collection<Int>, DeviceChange>> =
-        inputDeviceRepository.deviceChange.map { (ids, change) ->
-            ids.filter { id -> isPhysicalFullKeyboard(id) } to change
-        }
+        inputDeviceRepository.deviceChange
+            .map { (ids, change) -> ids.filter { id -> isPhysicalFullKeyboard(id) } to change }
+            .filter { (_, change) ->
+                when (change) {
+                    FreshStart -> true
+                    is DeviceAdded -> isPhysicalFullKeyboard(change.deviceId)
+                    is DeviceRemoved -> isPhysicalFullKeyboard(change.deviceId)
+                }
+            }
 
     @FlowPreview
     override val newlyConnectedKeyboard: Flow<Keyboard> =
