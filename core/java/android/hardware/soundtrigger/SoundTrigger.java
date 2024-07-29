@@ -900,7 +900,8 @@ public class SoundTrigger {
          */
         public GenericSoundModel(@NonNull UUID uuid, @NonNull UUID vendorUuid,
                 @Nullable byte[] data, int version) {
-            super(uuid, vendorUuid, TYPE_GENERIC_SOUND, data, version);
+            super(uuid, Objects.requireNonNull(vendorUuid, "vendorUuid cannot be null"),
+                    TYPE_GENERIC_SOUND, data, version);
         }
 
         /**

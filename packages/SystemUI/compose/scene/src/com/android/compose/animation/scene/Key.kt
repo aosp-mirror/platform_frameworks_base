@@ -40,15 +40,20 @@ sealed class Key(val debugName: String, val identity: Any) {
     }
 }
 
+/** The key for a content (scene or overlay). */
+sealed class ContentKey(debugName: String, identity: Any) : Key(debugName, identity) {
+    @VisibleForTesting
+    // TODO(b/240432457): Make internal once PlatformComposeSceneTransitionLayoutTestsUtils can
+    // access internal members.
+    abstract val testTag: String
+}
+
 /** Key for a scene. */
 class SceneKey(
     debugName: String,
     identity: Any = Object(),
-) : Key(debugName, identity) {
-    @VisibleForTesting
-    // TODO(b/240432457): Make internal once PlatformComposeSceneTransitionLayoutTestsUtils can
-    // access internal members.
-    val testTag: String = "scene:$debugName"
+) : ContentKey(debugName, identity) {
+    override val testTag: String = "scene:$debugName"
 
     /** The unique [ElementKey] identifying this scene's root element. */
     val rootElementKey = ElementKey(debugName, identity)
@@ -74,7 +79,7 @@ class ElementKey(
     // access internal members.
     val testTag: String = "element:$debugName"
 
-    override fun matches(key: ElementKey, scene: SceneKey): Boolean {
+    override fun matches(key: ElementKey, content: ContentKey): Boolean {
         return key == this
     }
 
@@ -86,7 +91,7 @@ class ElementKey(
         /** Matches any element whose [key identity][ElementKey.identity] matches [predicate]. */
         fun withIdentity(predicate: (Any) -> Boolean): ElementMatcher {
             return object : ElementMatcher {
-                override fun matches(key: ElementKey, scene: SceneKey): Boolean {
+                override fun matches(key: ElementKey, content: ContentKey): Boolean {
                     return predicate(key.identity)
                 }
             }

@@ -33,7 +33,8 @@ import com.android.wm.shell.transition.Transitions.TransitionObserver
  * Limits the number of tasks shown in Desktop Mode.
  *
  * This class should only be used if
- * [com.android.window.flags.Flags.enableDesktopWindowingTaskLimit()] is true.
+ * [com.android.wm.shell.shared.desktopmode.DesktopModeFlags.ENABLE_DESKTOP_WINDOWING_TASK_LIMIT]
+ * is enabled and [maxTasksLimit] is strictly greater than 0.
  */
 class DesktopTasksLimiter (
         transitions: Transitions,
@@ -86,10 +87,10 @@ class DesktopTasksLimiter (
         }
 
         /**
-         * Returns whether the given Task is being reordered to the back in the given transition, or
-         * is already invisible.
+         * Returns whether the Task [taskDetails] is being reordered to the back in the transition
+         * [info], or is already invisible.
          *
-         * <p> This check can be used to double-check that a task was indeed minimized before
+         * This check can be used to double-check that a task was indeed minimized before
          * marking it as such.
          */
         private fun isTaskReorderedToBackOrInvisible(
@@ -149,8 +150,8 @@ class DesktopTasksLimiter (
     }
 
     /**
-     * Mark a task as minimized, this should only be done after the corresponding transition has
-     * finished so we don't minimize the task if the transition fails.
+     * Mark [taskId], which must be on [displayId], as minimized, this should only be done after the
+     * corresponding transition has finished so we don't minimize the task if the transition fails.
      */
     private fun markTaskMinimized(displayId: Int, taskId: Int) {
         ProtoLog.v(
@@ -161,11 +162,9 @@ class DesktopTasksLimiter (
 
     /**
      * Add a minimize-transition to [wct] if adding [newFrontTaskInfo] brings us over the task
-     * limit.
+     * limit, returning the task to minimize.
      *
-     * @param transition the transition that the minimize-transition will be appended to, or null if
-     * the transition will be started later.
-     * @return the ID of the minimized task, or null if no task is being minimized.
+     * The task must be on [displayId].
      */
     fun addAndGetMinimizeTaskChangesIfNeeded(
             displayId: Int,

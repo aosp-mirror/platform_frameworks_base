@@ -36,6 +36,8 @@ import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.util.fastForEach
 import androidx.compose.ui.util.fastForEachReversed
+import com.android.compose.animation.scene.content.Content
+import com.android.compose.animation.scene.content.Scene
 import com.android.compose.ui.util.lerp
 import kotlinx.coroutines.CoroutineScope
 
@@ -84,7 +86,7 @@ internal class SceneTransitionLayoutImpl(
 
     /**
      * The different values of a shared value keyed by a a [ValueKey] and the different elements and
-     * scenes it is associated to.
+     * contents it is associated to.
      */
     private var _sharedValues: MutableMap<ValueKey, MutableMap<ElementKey?, SharedValue<*, *>>>? =
         null
@@ -149,6 +151,12 @@ internal class SceneTransitionLayoutImpl(
         return scenes[key] ?: error("Scene $key is not configured")
     }
 
+    internal fun content(key: ContentKey): Content {
+        return when (key) {
+            is SceneKey -> scene(key)
+        }
+    }
+
     internal fun updateScenes(
         builder: SceneTransitionLayoutScope.() -> Unit,
         layoutDirection: LayoutDirection,
@@ -164,7 +172,7 @@ internal class SceneTransitionLayoutImpl(
                 override fun scene(
                     key: SceneKey,
                     userActions: Map<UserAction, UserActionResult>,
-                    content: @Composable SceneScope.() -> Unit,
+                    content: @Composable ContentScope.() -> Unit,
                 ) {
                     scenesToRemove.remove(key)
 

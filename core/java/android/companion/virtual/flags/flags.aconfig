@@ -84,6 +84,13 @@ flag {
 }
 
 flag {
+     namespace: "virtual_devices"
+     name: "enforce_remote_device_opt_out_on_all_virtual_displays"
+     description: "Respect canDisplayOnRemoteDevices on all virtual displays"
+     bug: "338973239"
+}
+
+flag {
     namespace: "virtual_devices"
     name: "virtual_display_multi_window_mode_support"
     description: "Add support for WINDOWING_MODE_MULTI_WINDOW to virtual displays by default"

@@ -37,7 +37,7 @@ import android.tools.traces.monitors.TraceMonitor;
 import android.util.proto.ProtoInputStream;
 import android.util.proto.ProtoOutputStream;
 
-import androidx.test.runner.AndroidJUnit4;
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 
 import com.google.common.truth.Truth;
 import com.google.protobuf.InvalidProtocolBufferException;

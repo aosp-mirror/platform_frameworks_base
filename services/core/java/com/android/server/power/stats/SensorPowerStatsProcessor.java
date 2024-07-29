@@ -151,7 +151,8 @@ public class SensorPowerStatsProcessor extends PowerStatsProcessor {
             return;
         }
 
-        if (item.eventTag == null || !item.eventTag.string.startsWith(SENSOR_EVENT_TAG_PREFIX)) {
+        if (item.eventTag == null || item.eventTag.string == null
+                || !item.eventTag.string.startsWith(SENSOR_EVENT_TAG_PREFIX)) {
             return;
         }
 

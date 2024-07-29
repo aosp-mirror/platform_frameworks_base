@@ -48,7 +48,7 @@ class NestedScrollToSceneTest {
     private val layoutHeight = 400.dp
 
     private fun setup2ScenesAndScrollTouchSlop(
-        modifierSceneA: @Composable SceneScope.() -> Modifier = { Modifier },
+        modifierSceneA: @Composable ContentScope.() -> Modifier = { Modifier },
     ): MutableSceneTransitionLayoutState {
         val state =
             rule.runOnUiThread {

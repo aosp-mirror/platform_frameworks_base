@@ -98,7 +98,8 @@ class PeekDisabledSuppressor(
         globalSettings.registerContentObserverSync(
             globalSettings.getUriFor(HEADS_UP_NOTIFICATIONS_ENABLED),
             /* notifyForDescendants = */ true,
-            observer)
+            observer
+        )
 
         // QQQ: Do we need to register for SETTING_HEADS_UP_TICKER? It seems unused.
 
@@ -147,12 +148,12 @@ class PeekAlreadyBubbledSuppressor(
         }
 }
 
-class PeekDndSuppressor() :
+class PeekDndSuppressor :
     VisualInterruptionFilter(types = setOf(PEEK), reason = "suppressed by DND") {
     override fun shouldSuppress(entry: NotificationEntry) = entry.shouldSuppressPeek()
 }
 
-class PeekNotImportantSuppressor() :
+class PeekNotImportantSuppressor :
     VisualInterruptionFilter(types = setOf(PEEK), reason = "importance < HIGH") {
     override fun shouldSuppress(entry: NotificationEntry) = entry.importance < IMPORTANCE_HIGH
 }
@@ -170,7 +171,10 @@ class PeekDeviceNotInUseSuppressor(
 
 class PeekOldWhenSuppressor(private val systemClock: SystemClock) :
     VisualInterruptionFilter(
-        types = setOf(PEEK), reason = "has old `when`", uiEventId = HUN_SUPPRESSED_OLD_WHEN) {
+        types = setOf(PEEK),
+        reason = "has old `when`",
+        uiEventId = HUN_SUPPRESSED_OLD_WHEN
+    ) {
     private fun whenAge(entry: NotificationEntry) =
         systemClock.currentTimeMillis() - entry.sbn.notification.getWhen()
 
@@ -190,47 +194,51 @@ class PeekOldWhenSuppressor(private val systemClock: SystemClock) :
         }
 }
 
-class PulseEffectSuppressor() :
+class PulseEffectSuppressor :
     VisualInterruptionFilter(types = setOf(PULSE), reason = "suppressed by DND") {
     override fun shouldSuppress(entry: NotificationEntry) = entry.shouldSuppressAmbient()
 }
 
-class PulseLockscreenVisibilityPrivateSuppressor() :
+class PulseLockscreenVisibilityPrivateSuppressor :
     VisualInterruptionFilter(
-        types = setOf(PULSE), reason = "hidden by lockscreen visibility override") {
+        types = setOf(PULSE),
+        reason = "hidden by lockscreen visibility override"
+    ) {
     override fun shouldSuppress(entry: NotificationEntry) =
         entry.ranking.lockscreenVisibilityOverride == VISIBILITY_PRIVATE
 }
 
-class PulseLowImportanceSuppressor() :
+class PulseLowImportanceSuppressor :
     VisualInterruptionFilter(types = setOf(PULSE), reason = "importance < DEFAULT") {
     override fun shouldSuppress(entry: NotificationEntry) = entry.importance < IMPORTANCE_DEFAULT
 }
 
-class HunGroupAlertBehaviorSuppressor() :
+class HunGroupAlertBehaviorSuppressor :
     VisualInterruptionFilter(
-        types = setOf(PEEK, PULSE), reason = "suppressive group alert behavior") {
+        types = setOf(PEEK, PULSE),
+        reason = "suppressive group alert behavior"
+    ) {
     override fun shouldSuppress(entry: NotificationEntry) =
         entry.sbn.let { it.isGroup && it.notification.suppressAlertingDueToGrouping() }
 }
 
-class HunSilentNotificationSuppressor() :
+class HunSilentNotificationSuppressor :
     VisualInterruptionFilter(types = setOf(PEEK, PULSE), reason = "notification isSilent") {
     override fun shouldSuppress(entry: NotificationEntry) =
         entry.sbn.let { Flags.notificationSilentFlag() && it.notification.isSilent }
 }
 
-class HunJustLaunchedFsiSuppressor() :
+class HunJustLaunchedFsiSuppressor :
     VisualInterruptionFilter(types = setOf(PEEK, PULSE), reason = "just launched FSI") {
     override fun shouldSuppress(entry: NotificationEntry) = entry.hasJustLaunchedFullScreenIntent()
 }
 
-class BubbleNotAllowedSuppressor() :
-    VisualInterruptionFilter(types = setOf(BUBBLE), reason = "cannot bubble") {
+class BubbleNotAllowedSuppressor :
+    VisualInterruptionFilter(types = setOf(BUBBLE), reason = "cannot bubble", isSpammy = true) {
     override fun shouldSuppress(entry: NotificationEntry) = !entry.canBubble()
 }
 
-class BubbleNoMetadataSuppressor() :
+class BubbleNoMetadataSuppressor :
     VisualInterruptionFilter(types = setOf(BUBBLE), reason = "has no or invalid bubble metadata") {
 
     private fun isValidMetadata(metadata: BubbleMetadata?) =
@@ -253,6 +261,7 @@ class AlertKeyguardVisibilitySuppressor(
 
 /**
  * Set with:
+ *
  * adb shell setprop persist.force_show_avalanche_edu_once 1 && adb shell stop; adb shell start
  */
 private const val FORCE_SHOW_AVALANCHE_EDU_ONCE = "persist.force_show_avalanche_edu_once"
@@ -368,7 +377,8 @@ class AvalancheSuppressor(
         val bundle = Bundle()
         bundle.putString(
             Notification.EXTRA_SUBSTITUTE_APP_NAME,
-            context.getString(com.android.internal.R.string.android_system_label))
+            context.getString(com.android.internal.R.string.android_system_label)
+        )
 
         val builder =
             Notification.Builder(context, NotificationChannels.ALERTS)
@@ -390,8 +400,10 @@ class AvalancheSuppressor(
     }
 
     private fun calculateState(entry: NotificationEntry): State {
-        if (entry.ranking.isConversation &&
-            entry.sbn.notification.getWhen() > avalancheProvider.startTime) {
+        if (
+            entry.ranking.isConversation &&
+                entry.sbn.notification.getWhen() > avalancheProvider.startTime
+        ) {
             uiEventLogger.log(AvalancheEvent.AVALANCHE_SUPPRESSOR_HUN_ALLOWED_NEW_CONVERSATION)
             return State.ALLOW_CONVERSATION_AFTER_AVALANCHE
         }
@@ -424,8 +436,10 @@ class AvalancheSuppressor(
             uiEventLogger.log(AvalancheEvent.AVALANCHE_SUPPRESSOR_HUN_ALLOWED_COLORIZED)
             return State.ALLOW_COLORIZED
         }
-        if (packageManager.checkPermission(RECEIVE_EMERGENCY_BROADCAST, entry.sbn.packageName) ==
-            PERMISSION_GRANTED) {
+        if (
+            packageManager.checkPermission(RECEIVE_EMERGENCY_BROADCAST, entry.sbn.packageName) ==
+                PERMISSION_GRANTED
+        ) {
             uiEventLogger.log(AvalancheEvent.AVALANCHE_SUPPRESSOR_HUN_ALLOWED_EMERGENCY)
             return State.ALLOW_EMERGENCY
         }

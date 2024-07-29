@@ -23,6 +23,7 @@ import static android.os.VibrationAttributes.USAGE_ACCESSIBILITY;
 import static android.os.VibrationAttributes.USAGE_ALARM;
 import static android.os.VibrationAttributes.USAGE_COMMUNICATION_REQUEST;
 import static android.os.VibrationAttributes.USAGE_HARDWARE_FEEDBACK;
+import static android.os.VibrationAttributes.USAGE_IME_FEEDBACK;
 import static android.os.VibrationAttributes.USAGE_MEDIA;
 import static android.os.VibrationAttributes.USAGE_NOTIFICATION;
 import static android.os.VibrationAttributes.USAGE_PHYSICAL_EMULATION;
@@ -890,6 +891,22 @@ public class VibrationSettingsTest {
                 mVibrationSettings.getCurrentIntensity(USAGE_HARDWARE_FEEDBACK));
         assertEquals(VIBRATION_INTENSITY_HIGH,
                 mVibrationSettings.getCurrentIntensity(USAGE_PHYSICAL_EMULATION));
+    }
+
+    @Test
+    public void getCurrentIntensity_ImeFeedbackValueReflectsToKeyboardVibrationSettings() {
+        setDefaultIntensity(USAGE_IME_FEEDBACK, VIBRATION_INTENSITY_MEDIUM);
+        setDefaultIntensity(USAGE_TOUCH, VIBRATION_INTENSITY_HIGH);
+
+        setKeyboardVibrationSettingsSupported(false);
+        mVibrationSettings.update();
+        assertEquals(VIBRATION_INTENSITY_HIGH,
+                mVibrationSettings.getCurrentIntensity(USAGE_IME_FEEDBACK));
+
+        setKeyboardVibrationSettingsSupported(true);
+        mVibrationSettings.update();
+        assertEquals(VIBRATION_INTENSITY_MEDIUM,
+                mVibrationSettings.getCurrentIntensity(USAGE_IME_FEEDBACK));
     }
 
     @Test

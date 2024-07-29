@@ -19,7 +19,6 @@ package com.android.server.wm;
 import static android.view.InsetsSource.FLAG_INSETS_ROUNDED_CORNER;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
-import static com.android.dx.mockito.inline.extended.ExtendedMockito.eq;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mock;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 
@@ -294,37 +293,6 @@ public class LetterboxUiControllerTest extends WindowTestsBase {
         mController = new LetterboxUiController(mWm, mActivity);
 
         return mainWindow;
-    }
-
-    @Test
-    public void testgetFixedOrientationLetterboxAspectRatio_splitScreenAspectEnabled() {
-        doReturn(true).when(mActivity.mWmService.mAppCompatConfiguration)
-                .isCameraCompatTreatmentEnabled();
-        doReturn(true).when(mActivity.mWmService.mAppCompatConfiguration)
-                .isCameraCompatTreatmentEnabledAtBuildTime();
-        doReturn(true).when(mActivity.mWmService.mAppCompatConfiguration)
-                .isCameraCompatSplitScreenAspectRatioEnabled();
-        doReturn(false).when(mActivity.mWmService.mAppCompatConfiguration)
-                .getIsDisplayAspectRatioEnabledForFixedOrientationLetterbox();
-        doReturn(1.5f).when(mActivity.mWmService.mAppCompatConfiguration)
-                .getFixedOrientationLetterboxAspectRatio();
-
-        // Recreate DisplayContent with DisplayRotationCompatPolicy
-        mActivity = setUpActivityWithComponent();
-        mController = new LetterboxUiController(mWm, mActivity);
-
-        assertEquals(1.5f, mController.getFixedOrientationLetterboxAspectRatio(
-                mActivity.getParent().getConfiguration()), /* delta */ 0.01);
-
-        spyOn(mDisplayContent.mAppCompatCameraPolicy);
-        doReturn(true).when(mDisplayContent.mAppCompatCameraPolicy)
-                .isTreatmentEnabledForActivity(eq(mActivity));
-
-        final AppCompatAspectRatioOverrides aspectRatioOverrides =
-                mActivity.mAppCompatController.getAppCompatAspectRatioOverrides();
-        assertEquals(aspectRatioOverrides.getSplitScreenAspectRatio(),
-                aspectRatioOverrides.getFixedOrientationLetterboxAspectRatio(
-                        mActivity.getParent().getConfiguration()), /* delta */  0.01);
     }
 
     @Test

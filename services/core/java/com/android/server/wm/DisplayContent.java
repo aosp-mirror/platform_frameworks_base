@@ -159,7 +159,6 @@ import static com.android.server.wm.utils.DisplayInfoOverrides.WM_OVERRIDE_FIELD
 import static com.android.server.wm.utils.DisplayInfoOverrides.copyDisplayInfoFields;
 import static com.android.server.wm.utils.RegionUtils.forEachRectReverse;
 import static com.android.server.wm.utils.RegionUtils.rectListToRegion;
-import static com.android.window.flags.Flags.deferDisplayUpdates;
 import static com.android.window.flags.Flags.explicitRefreshRateHints;
 
 import android.annotation.IntDef;
@@ -478,7 +477,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
     AppCompatCameraPolicy mAppCompatCameraPolicy;
 
     DisplayFrames mDisplayFrames;
-    final DisplayUpdater mDisplayUpdater;
+    final DeferredDisplayUpdater mDisplayUpdater;
 
     private boolean mInTouchMode;
 
@@ -623,7 +622,6 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
     @VisibleForTesting
     final DeviceStateController mDeviceStateController;
     final Consumer<DeviceStateController.DeviceState> mDeviceStateConsumer;
-    final PhysicalDisplaySwitchTransitionLauncher mDisplaySwitchTransitionLauncher;
     final RemoteDisplayChangeController mRemoteDisplayChangeController;
 
     /** Windows added since {@link #mCurrentFocus} was set to null. Used for ANR blaming. */
@@ -1140,11 +1138,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         mWallpaperController.resetLargestDisplay(display);
         display.getDisplayInfo(mDisplayInfo);
         display.getMetrics(mDisplayMetrics);
-        if (deferDisplayUpdates()) {
-            mDisplayUpdater = new DeferredDisplayUpdater(this);
-        } else {
-            mDisplayUpdater = new ImmediateDisplayUpdater(this);
-        }
+        mDisplayUpdater = new DeferredDisplayUpdater(this);
         mSystemGestureExclusionLimit = mWmService.mConstants.mSystemGestureExclusionLimitDp
                 * mDisplayMetrics.densityDpi / DENSITY_DEFAULT;
         isDefaultDisplay = mDisplayId == DEFAULT_DISPLAY;
@@ -1168,8 +1162,6 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         mAppTransitionController = new AppTransitionController(mWmService, this);
         mTransitionController.registerLegacyListener(mFixedRotationTransitionListener);
         mUnknownAppVisibilityController = new UnknownAppVisibilityController(mWmService, this);
-        mDisplaySwitchTransitionLauncher = new PhysicalDisplaySwitchTransitionLauncher(this,
-                mTransitionController);
         mRemoteDisplayChangeController = new RemoteDisplayChangeController(this);
 
         final InputChannel inputChannel = mWmService.mInputManager.monitorInput(
@@ -1190,7 +1182,6 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
 
         mDeviceStateConsumer =
                 (@NonNull DeviceStateController.DeviceState newFoldState) -> {
-                    mDisplaySwitchTransitionLauncher.foldStateChanged(newFoldState);
                     mDisplayRotation.foldStateChanged(newFoldState);
                 };
         mDeviceStateController.registerDeviceStateCallback(mDeviceStateConsumer,
@@ -3094,8 +3085,6 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
                 // metrics are updated as rotation settings might depend on them
                 mWmService.mDisplayWindowSettings.applySettingsToDisplayLocked(this,
                         /* includeRotationSettings */ false);
-                mDisplayUpdater.onDisplayContentDisplayPropertiesPreChanged(mDisplayId,
-                        mInitialDisplayWidth, mInitialDisplayHeight, newWidth, newHeight);
                 mDisplayRotation.physicalDisplayChanged();
                 mDisplayPolicy.physicalDisplayChanged();
             }
@@ -3130,8 +3119,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
 
             if (physicalDisplayChanged) {
                 mDisplayPolicy.physicalDisplayUpdated();
-                mDisplayUpdater.onDisplayContentDisplayPropertiesPostChanged(currentRotation,
-                        getRotation(), getDisplayAreaInfo());
+                mDisplayUpdater.onDisplayContentDisplayPropertiesPostChanged();
             }
         }
     }

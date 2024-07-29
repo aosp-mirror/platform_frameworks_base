@@ -474,6 +474,7 @@ fun SceneScope.NotificationScrollingStack(
                         .thenIf(shadeMode == ShadeMode.Single) {
                             Modifier.nestedScroll(scrimNestedScrollConnection)
                         }
+                        .stackVerticalOverscroll(coroutineScope) { scrollState.canScrollForward }
                         .verticalScroll(scrollState)
                         .padding(top = topPadding)
                         .fillMaxWidth()
@@ -671,3 +672,4 @@ private val DEBUG_HUN_COLOR = Color(0f, 0f, 1f, 0.2f)
 private val DEBUG_BOX_COLOR = Color(0f, 1f, 0f, 0.2f)
 private const val HUN_SNOOZE_POSITIONAL_THRESHOLD_FRACTION = 0.25f
 private const val HUN_SNOOZE_VELOCITY_THRESHOLD = -70f
+internal const val STACK_OVERSCROLL_FLING_MIN_OFFSET = -100f

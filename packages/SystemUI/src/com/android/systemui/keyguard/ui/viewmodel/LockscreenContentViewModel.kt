@@ -17,7 +17,7 @@
 package com.android.systemui.keyguard.ui.viewmodel
 
 import android.content.res.Resources
-import com.android.compose.animation.scene.SceneKey
+import com.android.compose.animation.scene.ContentKey
 import com.android.internal.annotations.VisibleForTesting
 import com.android.systemui.biometrics.AuthController
 import com.android.systemui.dagger.SysUISingleton
@@ -90,12 +90,12 @@ constructor(
 
     /**
      * Returns a flow that indicates whether lockscreen notifications should be rendered in the
-     * given [sceneKey].
+     * given [contentKey].
      */
-    fun areNotificationsVisible(sceneKey: SceneKey): Flow<Boolean> {
+    fun areNotificationsVisible(contentKey: ContentKey): Flow<Boolean> {
         // `Scenes.NotificationsShade` renders its own separate notifications stack, so when it's
         // open we avoid rendering the lockscreen notifications stack.
-        if (sceneKey == Scenes.NotificationsShade) {
+        if (contentKey == Scenes.NotificationsShade) {
             return flowOf(false)
         }
 

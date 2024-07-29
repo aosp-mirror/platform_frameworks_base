@@ -52,7 +52,7 @@ import java.util.Objects;
  * display change transition. In this case, we will queue all display updates until the current
  * transition's collection finishes and then apply them afterwards.
  */
-public class DeferredDisplayUpdater implements DisplayUpdater {
+class DeferredDisplayUpdater {
 
     /**
      * List of fields that could be deferred before applying to DisplayContent.
@@ -110,7 +110,7 @@ public class DeferredDisplayUpdater implements DisplayUpdater {
         continueScreenUnblocking();
     };
 
-    public DeferredDisplayUpdater(@NonNull DisplayContent displayContent) {
+    DeferredDisplayUpdater(@NonNull DisplayContent displayContent) {
         mDisplayContent = displayContent;
         mNonOverrideDisplayInfo.copyFrom(mDisplayContent.getDisplayInfo());
     }
@@ -122,8 +122,7 @@ public class DeferredDisplayUpdater implements DisplayUpdater {
      *
      * @param finishCallback is called when all pending display updates are finished
      */
-    @Override
-    public void updateDisplayInfo(@NonNull Runnable finishCallback) {
+    void updateDisplayInfo(@NonNull Runnable finishCallback) {
         // Get the latest display parameters from the DisplayManager
         final DisplayInfo displayInfo = getCurrentDisplayInfo();
 
@@ -310,9 +309,11 @@ public class DeferredDisplayUpdater implements DisplayUpdater {
         return !Objects.equals(first.uniqueId, second.uniqueId);
     }
 
-    @Override
-    public void onDisplayContentDisplayPropertiesPostChanged(int previousRotation, int newRotation,
-            DisplayAreaInfo newDisplayAreaInfo) {
+    /**
+     * Called after physical display has changed and after DisplayContent applied new display
+     * properties.
+     */
+    void onDisplayContentDisplayPropertiesPostChanged() {
         // Unblock immediately in case there is no transition. This is unlikely to happen.
         if (mScreenUnblocker != null && !mDisplayContent.mTransitionController.inTransition()) {
             mScreenUnblocker.sendToTarget();
@@ -320,13 +321,16 @@ public class DeferredDisplayUpdater implements DisplayUpdater {
         }
     }
 
-    @Override
-    public void onDisplaySwitching(boolean switching) {
+    /**
+     * Called with {@code true} when physical display is going to switch. And {@code false} when
+     * the display is turned on or the device goes to sleep.
+     */
+    void onDisplaySwitching(boolean switching) {
         mShouldWaitForTransitionWhenScreenOn = switching;
     }
 
-    @Override
-    public boolean waitForTransition(@NonNull Message screenUnblocker) {
+    /** Returns {@code true} if the transition will control when to turn on the screen. */
+    boolean waitForTransition(@NonNull Message screenUnblocker) {
         if (!Flags.waitForTransitionOnDisplaySwitch()) return false;
         if (!mShouldWaitForTransitionWhenScreenOn) {
             return false;
