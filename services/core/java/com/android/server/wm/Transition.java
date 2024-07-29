@@ -2185,8 +2185,7 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
         for (int i = mParticipants.size() - 1; i >= 0; --i) {
             final WallpaperWindowToken wallpaper = mParticipants.valueAt(i).asWallpaperToken();
             if (wallpaper != null) {
-                if (!wallpaper.isVisible() && (wallpaper.isVisibleRequested()
-                        || (Flags.ensureWallpaperInTransitions() && showWallpaper))) {
+                if (!wallpaper.isVisible() && wallpaper.isVisibleRequested()) {
                     wallpaper.commitVisibility(showWallpaper);
                 } else if (Flags.ensureWallpaperInTransitions() && wallpaper.isVisible()
                         && !showWallpaper && !wallpaper.getDisplayContent().isKeyguardLocked()
