@@ -740,15 +740,15 @@ internal fun shouldPlaceOrComposeSharedElement(
         return content == overscrollScene
     }
 
-    val scenePicker = element.scenePicker
+    val scenePicker = element.contentPicker
     val pickedScene =
         when (transition) {
             is TransitionState.Transition -> {
-                scenePicker.sceneDuringTransition(
+                scenePicker.contentDuringTransition(
                     element = element,
                     transition = transition,
-                    fromSceneZIndex = layoutImpl.scene(transition.fromScene).zIndex,
-                    toSceneZIndex = layoutImpl.scene(transition.toScene).zIndex,
+                    fromContentZIndex = layoutImpl.scene(transition.fromScene).zIndex,
+                    toContentZIndex = layoutImpl.scene(transition.toScene).zIndex,
                 ) ?: return false
             }
         }

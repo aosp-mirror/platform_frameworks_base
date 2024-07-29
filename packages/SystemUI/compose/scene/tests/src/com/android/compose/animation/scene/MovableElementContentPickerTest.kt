@@ -22,16 +22,17 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 @RunWith(AndroidJUnit4::class)
-class MovableElementScenePickerTest {
+class MovableElementContentPickerTest {
     @Test
     fun toSceneInScenes() {
-        val picker = MovableElementScenePicker(scenes = setOf(TestScenes.SceneA, TestScenes.SceneB))
+        val picker =
+            MovableElementContentPicker(contents = setOf(TestScenes.SceneA, TestScenes.SceneB))
         assertThat(
-                picker.sceneDuringTransition(
+                picker.contentDuringTransition(
                     TestElements.Foo,
                     transition(from = TestScenes.SceneA, to = TestScenes.SceneB),
-                    fromSceneZIndex = 0f,
-                    toSceneZIndex = 1f,
+                    fromContentZIndex = 0f,
+                    toContentZIndex = 1f,
                 )
             )
             .isEqualTo(TestScenes.SceneB)
@@ -39,13 +40,13 @@ class MovableElementScenePickerTest {
 
     @Test
     fun fromSceneInScenes() {
-        val picker = MovableElementScenePicker(scenes = setOf(TestScenes.SceneA))
+        val picker = MovableElementContentPicker(contents = setOf(TestScenes.SceneA))
         assertThat(
-                picker.sceneDuringTransition(
+                picker.contentDuringTransition(
                     TestElements.Foo,
                     transition(from = TestScenes.SceneA, to = TestScenes.SceneB),
-                    fromSceneZIndex = 0f,
-                    toSceneZIndex = 1f,
+                    fromContentZIndex = 0f,
+                    toContentZIndex = 1f,
                 )
             )
             .isEqualTo(TestScenes.SceneA)
@@ -53,13 +54,13 @@ class MovableElementScenePickerTest {
 
     @Test
     fun noneInScenes() {
-        val picker = MovableElementScenePicker(scenes = emptySet())
+        val picker = MovableElementContentPicker(contents = emptySet())
         assertThat(
-                picker.sceneDuringTransition(
+                picker.contentDuringTransition(
                     TestElements.Foo,
                     transition(from = TestScenes.SceneA, to = TestScenes.SceneB),
-                    fromSceneZIndex = 0f,
-                    toSceneZIndex = 1f,
+                    fromContentZIndex = 0f,
+                    toContentZIndex = 1f,
                 )
             )
             .isEqualTo(null)

@@ -43,6 +43,7 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.unit.dp
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.android.compose.animation.scene.content.state.ContentState
 import com.android.compose.animation.scene.content.state.TransitionState
 import com.android.compose.animation.scene.subjects.assertThat
 import com.android.compose.test.assertSizeIsEqualTo
@@ -151,18 +152,19 @@ class MovableElementTest {
         val key =
             ElementKey(
                 "Foo",
-                scenePicker =
-                    object : ElementScenePicker {
-                        override fun sceneDuringTransition(
+                contentPicker =
+                    object : ElementContentPicker {
+                        override fun contentDuringTransition(
                             element: ElementKey,
-                            transition: TransitionState.Transition,
-                            fromSceneZIndex: Float,
-                            toSceneZIndex: Float
-                        ): SceneKey {
+                            transition: ContentState.Transition<*>,
+                            fromContentZIndex: Float,
+                            toContentZIndex: Float
+                        ): ContentKey? {
+                            transition as TransitionState.Transition
                             assertThat(transition).hasFromScene(TestScenes.SceneA)
                             assertThat(transition).hasToScene(TestScenes.SceneB)
-                            assertThat(fromSceneZIndex).isEqualTo(0)
-                            assertThat(toSceneZIndex).isEqualTo(1)
+                            assertThat(fromContentZIndex).isEqualTo(0)
+                            assertThat(toContentZIndex).isEqualTo(1)
 
                             // Compose Foo in Scene A if progress < 0.65f, otherwise compose it
                             // in Scene B.

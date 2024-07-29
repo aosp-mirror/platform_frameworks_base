@@ -16,15 +16,15 @@
 
 package com.android.systemui.media.controls.ui.composable
 
+import com.android.compose.animation.scene.ContentKey
+import com.android.compose.animation.scene.ElementContentPicker
 import com.android.compose.animation.scene.ElementKey
-import com.android.compose.animation.scene.ElementScenePicker
-import com.android.compose.animation.scene.SceneKey
 import com.android.compose.animation.scene.SceneTransitionLayoutState
-import com.android.compose.animation.scene.content.state.TransitionState
+import com.android.compose.animation.scene.content.state.ContentState
 import com.android.systemui.scene.shared.model.Scenes
 
-/** [ElementScenePicker] implementation for the media carousel object. */
-object MediaScenePicker : ElementScenePicker {
+/** [ElementContentPicker] implementation for the media carousel object. */
+object MediaContentPicker : ElementContentPicker {
 
     const val SHADE_FRACTION = 0.66f
     private val scenes =
@@ -36,12 +36,12 @@ object MediaScenePicker : ElementScenePicker {
             Scenes.Communal
         )
 
-    override fun sceneDuringTransition(
+    override fun contentDuringTransition(
         element: ElementKey,
-        transition: TransitionState.Transition,
-        fromSceneZIndex: Float,
-        toSceneZIndex: Float
-    ): SceneKey? {
+        transition: ContentState.Transition<*>,
+        fromContentZIndex: Float,
+        toContentZIndex: Float
+    ): ContentKey? {
         return when {
             shouldElevateMedia(transition) -> {
                 Scenes.Shade
@@ -52,22 +52,18 @@ object MediaScenePicker : ElementScenePicker {
             transition.isTransitioningBetween(Scenes.QuickSettings, Scenes.Shade) -> {
                 Scenes.QuickSettings
             }
-            else -> {
-                when {
-                    scenes.contains(transition.toScene) -> transition.toScene
-                    scenes.contains(transition.fromScene) -> transition.fromScene
-                    else -> null
-                }
-            }
+            scenes.contains(transition.toContent) -> transition.toContent
+            scenes.contains(transition.fromContent) -> transition.fromContent
+            else -> null
         }
     }
 
     /** Returns true when the media should be laid on top of the rest for the given [transition]. */
-    fun shouldElevateMedia(transition: TransitionState.Transition): Boolean {
+    fun shouldElevateMedia(transition: ContentState.Transition<*>): Boolean {
         return transition.isTransitioningBetween(Scenes.Lockscreen, Scenes.Shade)
     }
 }
 
-fun MediaScenePicker.shouldElevateMedia(layoutState: SceneTransitionLayoutState): Boolean {
+fun MediaContentPicker.shouldElevateMedia(layoutState: SceneTransitionLayoutState): Boolean {
     return layoutState.currentTransition?.let { shouldElevateMedia(it) } ?: false
 }

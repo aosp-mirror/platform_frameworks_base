@@ -59,7 +59,7 @@ import androidx.compose.ui.unit.max
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.android.compose.animation.scene.ElementKey
-import com.android.compose.animation.scene.LowestZIndexScenePicker
+import com.android.compose.animation.scene.LowestZIndexContentPicker
 import com.android.compose.animation.scene.SceneScope
 import com.android.compose.animation.scene.ValueKey
 import com.android.compose.animation.scene.animateElementFloatAsState
@@ -93,8 +93,8 @@ object ShadeHeader {
         val ExpandedContent = ElementKey("ShadeHeaderExpandedContent")
         val CollapsedContentStart = ElementKey("ShadeHeaderCollapsedContentStart")
         val CollapsedContentEnd = ElementKey("ShadeHeaderCollapsedContentEnd")
-        val PrivacyChip = ElementKey("PrivacyChip", scenePicker = LowestZIndexScenePicker)
-        val Clock = ElementKey("ShadeHeaderClock", scenePicker = LowestZIndexScenePicker)
+        val PrivacyChip = ElementKey("PrivacyChip", contentPicker = LowestZIndexContentPicker)
+        val Clock = ElementKey("ShadeHeaderClock", contentPicker = LowestZIndexContentPicker)
         val ShadeCarrierGroup = ElementKey("ShadeCarrierGroup")
     }
 

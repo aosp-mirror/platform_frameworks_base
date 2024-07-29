@@ -63,7 +63,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.android.compose.animation.scene.ElementKey
-import com.android.compose.animation.scene.LowestZIndexScenePicker
+import com.android.compose.animation.scene.LowestZIndexContentPicker
 import com.android.compose.animation.scene.NestedScrollBehavior
 import com.android.compose.animation.scene.SceneScope
 import com.android.compose.animation.scene.UserAction
@@ -81,7 +81,7 @@ import com.android.systemui.common.ui.compose.windowinsets.LocalScreenCornerRadi
 import com.android.systemui.compose.modifiers.sysuiResTag
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.media.controls.ui.composable.MediaCarousel
-import com.android.systemui.media.controls.ui.composable.MediaScenePicker
+import com.android.systemui.media.controls.ui.composable.MediaContentPicker
 import com.android.systemui.media.controls.ui.composable.shouldElevateMedia
 import com.android.systemui.media.controls.ui.controller.MediaCarouselController
 import com.android.systemui.media.controls.ui.controller.MediaHierarchyManager
@@ -118,7 +118,7 @@ object Shade {
     object Elements {
         val MediaCarousel = ElementKey("ShadeMediaCarousel")
         val BackgroundScrim =
-            ElementKey("ShadeBackgroundScrim", scenePicker = LowestZIndexScenePicker)
+            ElementKey("ShadeBackgroundScrim", contentPicker = LowestZIndexContentPicker)
         val SplitShadeStartColumn = ElementKey("SplitShadeStartColumn")
     }
 
@@ -376,7 +376,7 @@ private fun SceneScope.SingleShade(
 
             layout(constraints.maxWidth, constraints.maxHeight) {
                 val qsZIndex =
-                    if (MediaScenePicker.shouldElevateMedia(layoutState)) {
+                    if (MediaContentPicker.shouldElevateMedia(layoutState)) {
                         1f
                     } else {
                         0f
@@ -563,7 +563,7 @@ private fun SceneScope.SplitShade(
                                 mediaHost = mediaHost,
                                 modifier =
                                     Modifier.fillMaxWidth().thenIf(
-                                        MediaScenePicker.shouldElevateMedia(layoutState)
+                                        MediaContentPicker.shouldElevateMedia(layoutState)
                                     ) {
                                         Modifier.zIndex(1f)
                                     },

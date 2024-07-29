@@ -184,11 +184,11 @@ private fun shouldComposeMovableElement(
     // toScene contains the element.
     val transition =
         transitions.fastLastOrNull { transition ->
-            element.scenePicker.sceneDuringTransition(
+            element.contentPicker.contentDuringTransition(
                 element = element,
                 transition = transition,
-                fromSceneZIndex = layoutImpl.scenes.getValue(transition.fromScene).zIndex,
-                toSceneZIndex = layoutImpl.scenes.getValue(transition.toScene).zIndex,
+                fromContentZIndex = layoutImpl.scenes.getValue(transition.fromScene).zIndex,
+                toContentZIndex = layoutImpl.scenes.getValue(transition.toScene).zIndex,
             ) != null
         } ?: return false
 

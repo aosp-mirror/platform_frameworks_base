@@ -23,7 +23,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import com.android.compose.animation.scene.content.state.TransitionState
+import com.android.compose.animation.scene.content.state.ContentState
 
 /** Define the [transitions][SceneTransitions] to be used with a [SceneTransitionLayout]. */
 fun transitions(builder: SceneTransitionsBuilder.() -> Unit): SceneTransitions {
@@ -233,99 +233,104 @@ interface OverscrollScope : Density {
 /**
  * An interface to decide where we should draw shared Elements or compose MovableElements.
  *
- * @see DefaultElementScenePicker
- * @see HighestZIndexScenePicker
- * @see LowestZIndexScenePicker
- * @see MovableElementScenePicker
+ * @see DefaultElementContentPicker
+ * @see HighestZIndexContentPicker
+ * @see LowestZIndexContentPicker
+ * @see MovableElementContentPicker
  */
-interface ElementScenePicker {
+interface ElementContentPicker {
     /**
-     * Return the scene in which [element] should be drawn (when using `Modifier.element(key)`) or
+     * Return the content in which [element] should be drawn (when using `Modifier.element(key)`) or
      * composed (when using `MovableElement(key)`) during the given [transition]. If this element
-     * should not be drawn or composed in neither [transition.fromScene] nor [transition.toScene],
-     * return `null`.
+     * should not be drawn or composed in neither [transition.fromContent] nor
+     * [transition.toContent], return `null`.
      *
-     * Important: For [MovableElements][ContentScope.MovableElement], this scene picker will
+     * Important: For [MovableElements][ContentScope.MovableElement], this content picker will
      * *always* be used during transitions to decide whether we should compose that element in a
-     * given scene or not. Therefore, you should make sure that the returned [SceneKey] contains the
-     * movable element, otherwise that element will not be composed in any scene during the
+     * given content or not. Therefore, you should make sure that the returned [ContentKey] contains
+     * the movable element, otherwise that element will not be composed in any scene during the
      * transition.
      */
-    fun sceneDuringTransition(
+    fun contentDuringTransition(
         element: ElementKey,
-        transition: TransitionState.Transition,
-        fromSceneZIndex: Float,
-        toSceneZIndex: Float,
-    ): SceneKey?
+        transition: ContentState.Transition<*>,
+        fromContentZIndex: Float,
+        toContentZIndex: Float,
+    ): ContentKey?
 
     /**
-     * Return [transition.fromScene] if it is in [scenes] and [transition.toScene] is not, or return
-     * [transition.toScene] if it is in [scenes] and [transition.fromScene] is not. If neither
-     * [transition.fromScene] and [transition.toScene] are in [scenes], return `null`. If both
-     * [transition.fromScene] and [transition.toScene] are in [scenes], throw an exception.
+     * Return [transition.fromContent] if it is in [contents] and [transition.toContent] is not, or
+     * return [transition.toContent] if it is in [contents] and [transition.fromContent] is not. If
+     * neither [transition.toContent] and [transition.fromContent] are in [contents], return `null`.
+     * If both [transition.fromContent] and [transition.toContent] are in [contents], throw an
+     * exception.
      *
-     * This function can be useful when computing the scene in which a movable element should be
+     * This function can be useful when computing the content in which a movable element should be
      * composed.
      */
-    fun pickSingleSceneIn(
-        scenes: Set<SceneKey>,
-        transition: TransitionState.Transition,
+    fun pickSingleContentIn(
+        contents: Set<ContentKey>,
+        transition: ContentState.Transition<*>,
         element: ElementKey,
-    ): SceneKey? {
-        val fromScene = transition.fromScene
-        val toScene = transition.toScene
-        val fromSceneInScenes = scenes.contains(fromScene)
-        val toSceneInScenes = scenes.contains(toScene)
+    ): ContentKey? {
+        val fromContent = transition.fromContent
+        val toContent = transition.toContent
+        val fromContentInContents = contents.contains(fromContent)
+        val toContentInContents = contents.contains(toContent)
 
         return when {
-            fromSceneInScenes && toSceneInScenes -> {
+            fromContentInContents && toContentInContents -> {
                 error(
-                    "Element $element can be in both $fromScene and $toScene. You should add a " +
-                        "special case for this transition before calling pickSingleSceneIn()."
+                    "Element $element can be in both $fromContent and $toContent. You should add " +
+                        "a special case for this transition before calling pickSingleSceneIn()."
                 )
             }
-            fromSceneInScenes -> fromScene
-            toSceneInScenes -> toScene
+            fromContentInContents -> fromContent
+            toContentInContents -> toContent
             else -> null
         }
     }
 }
 
-/** An [ElementScenePicker] that draws/composes elements in the scene with the highest z-order. */
-object HighestZIndexScenePicker : ElementScenePicker {
-    override fun sceneDuringTransition(
+/**
+ * An [ElementContentPicker] that draws/composes elements in the content with the highest z-order.
+ */
+object HighestZIndexContentPicker : ElementContentPicker {
+    override fun contentDuringTransition(
         element: ElementKey,
-        transition: TransitionState.Transition,
-        fromSceneZIndex: Float,
-        toSceneZIndex: Float
-    ): SceneKey {
-        return if (fromSceneZIndex > toSceneZIndex) {
-            transition.fromScene
+        transition: ContentState.Transition<*>,
+        fromContentZIndex: Float,
+        toContentZIndex: Float
+    ): ContentKey? {
+        return if (fromContentZIndex > toContentZIndex) {
+            transition.fromContent
         } else {
-            transition.toScene
-        }
-    }
-}
-
-/** An [ElementScenePicker] that draws/composes elements in the scene with the lowest z-order. */
-object LowestZIndexScenePicker : ElementScenePicker {
-    override fun sceneDuringTransition(
-        element: ElementKey,
-        transition: TransitionState.Transition,
-        fromSceneZIndex: Float,
-        toSceneZIndex: Float
-    ): SceneKey {
-        return if (fromSceneZIndex < toSceneZIndex) {
-            transition.fromScene
-        } else {
-            transition.toScene
+            transition.toContent
         }
     }
 }
 
 /**
- * An [ElementScenePicker] that draws/composes elements in the scene we are transitioning to, iff
- * that scene is in [scenes].
+ * An [ElementContentPicker] that draws/composes elements in the content with the lowest z-order.
+ */
+object LowestZIndexContentPicker : ElementContentPicker {
+    override fun contentDuringTransition(
+        element: ElementKey,
+        transition: ContentState.Transition<*>,
+        fromContentZIndex: Float,
+        toContentZIndex: Float
+    ): ContentKey? {
+        return if (fromContentZIndex < toContentZIndex) {
+            transition.fromContent
+        } else {
+            transition.toContent
+        }
+    }
+}
+
+/**
+ * An [ElementContentPicker] that draws/composes elements in the content we are transitioning to,
+ * iff that content is in [contents].
  *
  * This picker can be useful for movable elements whose content size depends on its content (because
  * it wraps it) in at least one scene. That way, the target size of the MovableElement will be
@@ -337,23 +342,23 @@ object LowestZIndexScenePicker : ElementScenePicker {
  * is not the same as when going from scene B to scene A, so it's not usable in situations where
  * z-ordering during the transition matters.
  */
-class MovableElementScenePicker(private val scenes: Set<SceneKey>) : ElementScenePicker {
-    override fun sceneDuringTransition(
+class MovableElementContentPicker(private val contents: Set<ContentKey>) : ElementContentPicker {
+    override fun contentDuringTransition(
         element: ElementKey,
-        transition: TransitionState.Transition,
-        fromSceneZIndex: Float,
-        toSceneZIndex: Float,
-    ): SceneKey? {
+        transition: ContentState.Transition<*>,
+        fromContentZIndex: Float,
+        toContentZIndex: Float,
+    ): ContentKey? {
         return when {
-            scenes.contains(transition.toScene) -> transition.toScene
-            scenes.contains(transition.fromScene) -> transition.fromScene
+            contents.contains(transition.toContent) -> transition.toContent
+            contents.contains(transition.fromContent) -> transition.fromContent
             else -> null
         }
     }
 }
 
-/** The default [ElementScenePicker]. */
-val DefaultElementScenePicker = HighestZIndexScenePicker
+/** The default [ElementContentPicker]. */
+val DefaultElementContentPicker = HighestZIndexContentPicker
 
 @TransitionDsl
 interface PropertyTransformationBuilder {
