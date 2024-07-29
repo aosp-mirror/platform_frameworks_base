@@ -101,6 +101,8 @@ float Properties::maxHdrHeadroomOn8bit = 5.f;  // TODO: Refine this number
 bool Properties::clipSurfaceViews = false;
 bool Properties::hdr10bitPlus = false;
 
+int Properties::timeoutMultiplier = 1;
+
 StretchEffectBehavior Properties::stretchEffectBehavior = StretchEffectBehavior::ShaderHWUI;
 
 DrawingEnabled Properties::drawingEnabled = DrawingEnabled::NotInitialized;
@@ -173,6 +175,8 @@ bool Properties::load() {
     clipSurfaceViews =
             base::GetBoolProperty("debug.hwui.clip_surfaceviews", hwui_flags::clip_surfaceviews());
     hdr10bitPlus = hwui_flags::hdr_10bit_plus();
+
+    timeoutMultiplier = android::base::GetIntProperty("ro.hw_timeout_multiplier", 1);
 
     return (prevDebugLayersUpdates != debugLayersUpdates) || (prevDebugOverdraw != debugOverdraw);
 }
