@@ -984,6 +984,53 @@ public class FullScreenMagnificationGestureHandlerTest {
     }
 
     @Test
+    public void testSingleFingerOverscrollAtTopEdge_isWatch_scrollDiagonally_noOverscroll() {
+        assumeTrue(isWatch());
+        goFromStateIdleTo(STATE_SINGLE_PANNING);
+        float centerX =
+                (INITIAL_MAGNIFICATION_BOUNDS.right + INITIAL_MAGNIFICATION_BOUNDS.left) / 2.0f;
+        mFullScreenMagnificationController.setCenter(
+                DISPLAY_0, centerX, INITIAL_MAGNIFICATION_BOUNDS.top, false, 1);
+        final float swipeMinDistance = ViewConfiguration.get(mContext).getScaledTouchSlop() + 1;
+        PointF initCoords =
+                new PointF(
+                        mFullScreenMagnificationController.getCenterX(DISPLAY_0),
+                        mFullScreenMagnificationController.getCenterY(DISPLAY_0));
+        PointF edgeCoords = new PointF(initCoords.x, initCoords.y);
+        // Scroll diagonally towards top-right with a bigger right delta
+        edgeCoords.offset(swipeMinDistance * 2, swipeMinDistance);
+
+        swipeAndHold(initCoords, edgeCoords);
+
+        assertTrue(mMgh.mOverscrollHandler.mOverscrollState == mMgh.OVERSCROLL_NONE);
+        assertTrue(isZoomed());
+    }
+
+    @Test
+    public void
+            testSingleFingerOverscrollAtTopEdge_isWatch_scrollDiagonally_expectedOverscrollState() {
+        assumeTrue(isWatch());
+        goFromStateIdleTo(STATE_SINGLE_PANNING);
+        float centerX =
+                (INITIAL_MAGNIFICATION_BOUNDS.right + INITIAL_MAGNIFICATION_BOUNDS.left) / 2.0f;
+        mFullScreenMagnificationController.setCenter(
+                DISPLAY_0, centerX, INITIAL_MAGNIFICATION_BOUNDS.top, false, 1);
+        final float swipeMinDistance = ViewConfiguration.get(mContext).getScaledTouchSlop() + 1;
+        PointF initCoords =
+                new PointF(
+                        mFullScreenMagnificationController.getCenterX(DISPLAY_0),
+                        mFullScreenMagnificationController.getCenterY(DISPLAY_0));
+        PointF edgeCoords = new PointF(initCoords.x, initCoords.y);
+        // Scroll diagonally towards top-right with a bigger top delta
+        edgeCoords.offset(swipeMinDistance, swipeMinDistance * 2);
+
+        swipeAndHold(initCoords, edgeCoords);
+
+        assertTrue(mMgh.mOverscrollHandler.mOverscrollState == mMgh.OVERSCROLL_VERTICAL_EDGE);
+        assertTrue(isZoomed());
+    }
+
+    @Test
     public void testSingleFingerScrollAtEdge_isWatch_noOverscroll() {
         assumeTrue(isWatch());
         goFromStateIdleTo(STATE_SINGLE_PANNING);
