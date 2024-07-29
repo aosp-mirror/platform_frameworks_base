@@ -18,6 +18,7 @@ package com.android.compose.animation.scene
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.common.truth.Truth.assertThat
+import org.junit.Assert.assertThrows
 import org.junit.Test
 import org.junit.runner.RunWith
 
@@ -55,14 +56,13 @@ class MovableElementContentPickerTest {
     @Test
     fun noneInScenes() {
         val picker = MovableElementContentPicker(contents = emptySet())
-        assertThat(
-                picker.contentDuringTransition(
-                    TestElements.Foo,
-                    transition(from = TestScenes.SceneA, to = TestScenes.SceneB),
-                    fromContentZIndex = 0f,
-                    toContentZIndex = 1f,
-                )
+        assertThrows(IllegalStateException::class.java) {
+            picker.contentDuringTransition(
+                TestElements.Foo,
+                transition(from = TestScenes.SceneA, to = TestScenes.SceneB),
+                fromContentZIndex = 0f,
+                toContentZIndex = 1f,
             )
-            .isEqualTo(null)
+        }
     }
 }

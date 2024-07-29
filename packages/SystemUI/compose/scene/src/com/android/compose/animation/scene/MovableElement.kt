@@ -54,7 +54,7 @@ internal fun Element(
 internal fun MovableElement(
     layoutImpl: SceneTransitionLayoutImpl,
     sceneOrOverlay: Content,
-    key: ElementKey,
+    key: MovableElementKey,
     modifier: Modifier,
     content: @Composable ElementScope<MovableElementContentScope>.() -> Unit,
 ) {
@@ -112,7 +112,7 @@ private class ElementScopeImpl(
 
 private class MovableElementScopeImpl(
     private val layoutImpl: SceneTransitionLayoutImpl,
-    private val element: ElementKey,
+    private val element: MovableElementKey,
     private val content: Content,
     private val baseContentScope: BaseContentScope,
     private val boxScope: BoxScope,
@@ -170,7 +170,7 @@ private class MovableElementScopeImpl(
 private fun shouldComposeMovableElement(
     layoutImpl: SceneTransitionLayoutImpl,
     content: ContentKey,
-    element: ElementKey,
+    element: MovableElementKey,
 ): Boolean {
     val transitions = layoutImpl.state.currentTransitions
     if (transitions.isEmpty()) {
@@ -182,14 +182,10 @@ private fun shouldComposeMovableElement(
 
     // The current transition for this element is the last transition in which either fromScene or
     // toScene contains the element.
+    val contents = element.contentPicker.contents
     val transition =
         transitions.fastLastOrNull { transition ->
-            element.contentPicker.contentDuringTransition(
-                element = element,
-                transition = transition,
-                fromContentZIndex = layoutImpl.scenes.getValue(transition.fromScene).zIndex,
-                toContentZIndex = layoutImpl.scenes.getValue(transition.toScene).zIndex,
-            ) != null
+            transition.fromScene in contents || transition.toScene in contents
         } ?: return false
 
     // Always compose movable elements in the scene picked by their scene picker.

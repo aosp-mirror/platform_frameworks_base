@@ -256,14 +256,13 @@ interface ElementContentPicker {
         transition: ContentState.Transition<*>,
         fromContentZIndex: Float,
         toContentZIndex: Float,
-    ): ContentKey?
+    ): ContentKey
 
     /**
      * Return [transition.fromContent] if it is in [contents] and [transition.toContent] is not, or
      * return [transition.toContent] if it is in [contents] and [transition.fromContent] is not. If
-     * neither [transition.toContent] and [transition.fromContent] are in [contents], return `null`.
-     * If both [transition.fromContent] and [transition.toContent] are in [contents], throw an
-     * exception.
+     * neither [transition.toContent] and [transition.fromContent] are in [contents] or if both
+     * [transition.fromContent] and [transition.toContent] are in [contents], throw an exception.
      *
      * This function can be useful when computing the content in which a movable element should be
      * composed.
@@ -272,24 +271,44 @@ interface ElementContentPicker {
         contents: Set<ContentKey>,
         transition: ContentState.Transition<*>,
         element: ElementKey,
-    ): ContentKey? {
+    ): ContentKey {
         val fromContent = transition.fromContent
         val toContent = transition.toContent
         val fromContentInContents = contents.contains(fromContent)
         val toContentInContents = contents.contains(toContent)
 
-        return when {
-            fromContentInContents && toContentInContents -> {
-                error(
-                    "Element $element can be in both $fromContent and $toContent. You should add " +
-                        "a special case for this transition before calling pickSingleSceneIn()."
-                )
-            }
-            fromContentInContents -> fromContent
-            toContentInContents -> toContent
-            else -> null
+        if (fromContentInContents && toContentInContents) {
+            error(
+                "Element $element can be in both $fromContent and $toContent. You should add a " +
+                    "special case for this transition before calling pickSingleSceneIn()."
+            )
+        }
+
+        if (!fromContentInContents && !toContentInContents) {
+            error(
+                "Element $element can be neither in $fromContent and $toContent. This either " +
+                    "means that you should add one of them in the scenes set passed to " +
+                    "pickSingleSceneIn(), or there is an internal error and this element was " +
+                    "composed when it shouldn't be."
+            )
+        }
+
+        return if (fromContentInContents) {
+            fromContent
+        } else {
+            toContent
         }
     }
+}
+
+/**
+ * An element picker on which we can query the set of contents (scenes or overlays) that contain the
+ * element. This is needed by [MovableElement], that needs to know at composition time on which of
+ * the candidate contents an element should be composed.
+ */
+interface StaticElementContentPicker : ElementContentPicker {
+    /** The exhaustive lists of contents that contain this element. */
+    val contents: Set<ContentKey>
 }
 
 /**
@@ -301,11 +320,35 @@ object HighestZIndexContentPicker : ElementContentPicker {
         transition: ContentState.Transition<*>,
         fromContentZIndex: Float,
         toContentZIndex: Float
-    ): ContentKey? {
+    ): ContentKey {
         return if (fromContentZIndex > toContentZIndex) {
             transition.fromContent
         } else {
             transition.toContent
+        }
+    }
+
+    /**
+     * Return a [StaticElementContentPicker] that behaves like [HighestZIndexContentPicker] and can
+     * be used by [MovableElement].
+     */
+    operator fun invoke(contents: Set<ContentKey>): StaticElementContentPicker {
+        return object : StaticElementContentPicker {
+            override val contents: Set<ContentKey> = contents
+
+            override fun contentDuringTransition(
+                element: ElementKey,
+                transition: ContentState.Transition<*>,
+                fromContentZIndex: Float,
+                toContentZIndex: Float
+            ): ContentKey {
+                return HighestZIndexContentPicker.contentDuringTransition(
+                    element,
+                    transition,
+                    fromContentZIndex,
+                    toContentZIndex,
+                )
+            }
         }
     }
 }
@@ -319,11 +362,35 @@ object LowestZIndexContentPicker : ElementContentPicker {
         transition: ContentState.Transition<*>,
         fromContentZIndex: Float,
         toContentZIndex: Float
-    ): ContentKey? {
+    ): ContentKey {
         return if (fromContentZIndex < toContentZIndex) {
             transition.fromContent
         } else {
             transition.toContent
+        }
+    }
+
+    /**
+     * Return a [StaticElementContentPicker] that behaves like [LowestZIndexContentPicker] and can
+     * be used by [MovableElement].
+     */
+    operator fun invoke(contents: Set<ContentKey>): StaticElementContentPicker {
+        return object : StaticElementContentPicker {
+            override val contents: Set<ContentKey> = contents
+
+            override fun contentDuringTransition(
+                element: ElementKey,
+                transition: ContentState.Transition<*>,
+                fromContentZIndex: Float,
+                toContentZIndex: Float
+            ): ContentKey {
+                return LowestZIndexContentPicker.contentDuringTransition(
+                    element,
+                    transition,
+                    fromContentZIndex,
+                    toContentZIndex,
+                )
+            }
         }
     }
 }
@@ -342,17 +409,24 @@ object LowestZIndexContentPicker : ElementContentPicker {
  * is not the same as when going from scene B to scene A, so it's not usable in situations where
  * z-ordering during the transition matters.
  */
-class MovableElementContentPicker(private val contents: Set<ContentKey>) : ElementContentPicker {
+class MovableElementContentPicker(
+    override val contents: Set<ContentKey>,
+) : StaticElementContentPicker {
     override fun contentDuringTransition(
         element: ElementKey,
         transition: ContentState.Transition<*>,
         fromContentZIndex: Float,
         toContentZIndex: Float,
-    ): ContentKey? {
+    ): ContentKey {
         return when {
-            contents.contains(transition.toContent) -> transition.toContent
-            contents.contains(transition.fromContent) -> transition.fromContent
-            else -> null
+            transition.toContent in contents -> transition.toContent
+            else -> {
+                check(transition.fromContent in contents) {
+                    "Neither ${transition.fromContent} nor ${transition.toContent} are in " +
+                        "contents. This transition should not have been used for this element."
+                }
+                transition.fromContent
+            }
         }
     }
 }

@@ -749,7 +749,7 @@ internal fun shouldPlaceOrComposeSharedElement(
                     transition = transition,
                     fromContentZIndex = layoutImpl.scene(transition.fromScene).zIndex,
                     toContentZIndex = layoutImpl.scene(transition.toScene).zIndex,
-                ) ?: return false
+                )
             }
         }
 

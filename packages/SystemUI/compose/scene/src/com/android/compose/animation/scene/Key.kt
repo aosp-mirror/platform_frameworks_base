@@ -64,7 +64,7 @@ class SceneKey(
 }
 
 /** Key for an element. */
-class ElementKey(
+open class ElementKey(
     debugName: String,
     identity: Any = Object(),
 
@@ -72,7 +72,7 @@ class ElementKey(
      * The [ElementContentPicker] to use when deciding in which scene we should draw shared Elements
      * or compose MovableElements.
      */
-    val contentPicker: ElementContentPicker = DefaultElementContentPicker,
+    open val contentPicker: ElementContentPicker = DefaultElementContentPicker,
 ) : Key(debugName, identity), ElementMatcher {
     @VisibleForTesting
     // TODO(b/240432457): Make internal once PlatformComposeSceneTransitionLayoutTestsUtils can
@@ -96,6 +96,32 @@ class ElementKey(
                 }
             }
         }
+    }
+}
+
+/** Key for a movable element. */
+class MovableElementKey(
+    debugName: String,
+
+    /**
+     * The [StaticElementContentPicker] to use when deciding in which scene we should draw shared
+     * Elements or compose MovableElements.
+     *
+     * @see MovableElementContentPicker
+     */
+    override val contentPicker: StaticElementContentPicker,
+    identity: Any = Object(),
+) : ElementKey(debugName, identity, contentPicker) {
+    constructor(
+        debugName: String,
+
+        /** The exhaustive list of contents (scenes or overlays) that can contain this element. */
+        contents: Set<ContentKey>,
+        identity: Any = Object(),
+    ) : this(debugName, MovableElementContentPicker(contents), identity)
+
+    override fun toString(): String {
+        return "MovableElementKey(debugName=$debugName)"
     }
 }
 

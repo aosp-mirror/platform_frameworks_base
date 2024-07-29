@@ -28,7 +28,7 @@ import androidx.compose.ui.layout.layout
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.viewinterop.AndroidView
-import com.android.compose.animation.scene.ElementKey
+import com.android.compose.animation.scene.MovableElementKey
 import com.android.compose.animation.scene.SceneScope
 import com.android.systemui.media.controls.ui.controller.MediaCarouselController
 import com.android.systemui.media.controls.ui.view.MediaHost
@@ -38,7 +38,10 @@ import com.android.systemui.util.animation.MeasurementInput
 object MediaCarousel {
     object Elements {
         internal val Content =
-            ElementKey(debugName = "MediaCarouselContent", contentPicker = MediaContentPicker)
+            MovableElementKey(
+                debugName = "MediaCarouselContent",
+                contentPicker = MediaContentPicker,
+            )
     }
 }
 

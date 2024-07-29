@@ -20,14 +20,15 @@ import com.android.compose.animation.scene.ContentKey
 import com.android.compose.animation.scene.ElementContentPicker
 import com.android.compose.animation.scene.ElementKey
 import com.android.compose.animation.scene.SceneTransitionLayoutState
+import com.android.compose.animation.scene.StaticElementContentPicker
 import com.android.compose.animation.scene.content.state.ContentState
 import com.android.systemui.scene.shared.model.Scenes
 
 /** [ElementContentPicker] implementation for the media carousel object. */
-object MediaContentPicker : ElementContentPicker {
+object MediaContentPicker : StaticElementContentPicker {
 
     const val SHADE_FRACTION = 0.66f
-    private val scenes =
+    override val contents =
         setOf(
             Scenes.Lockscreen,
             Scenes.Shade,
@@ -41,7 +42,7 @@ object MediaContentPicker : ElementContentPicker {
         transition: ContentState.Transition<*>,
         fromContentZIndex: Float,
         toContentZIndex: Float
-    ): ContentKey? {
+    ): ContentKey {
         return when {
             shouldElevateMedia(transition) -> {
                 Scenes.Shade
@@ -52,9 +53,14 @@ object MediaContentPicker : ElementContentPicker {
             transition.isTransitioningBetween(Scenes.QuickSettings, Scenes.Shade) -> {
                 Scenes.QuickSettings
             }
-            scenes.contains(transition.toContent) -> transition.toContent
-            scenes.contains(transition.fromContent) -> transition.fromContent
-            else -> null
+            transition.toContent in contents -> transition.toContent
+            else -> {
+                check(transition.fromContent in contents) {
+                    "Media player should not be composed for the transition from " +
+                        "${transition.fromContent} to ${transition.toContent}"
+                }
+                transition.fromContent
+            }
         }
     }
 

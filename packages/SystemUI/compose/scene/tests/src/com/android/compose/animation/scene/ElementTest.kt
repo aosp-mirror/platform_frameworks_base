@@ -1723,9 +1723,11 @@ class ElementTest {
         val fooInA = "fooInA"
         val fooInB = "fooInB"
 
+        val key = MovableElementKey("Foo", contents = setOf(SceneA, SceneB))
+
         @Composable
         fun ContentScope.MovableFoo(text: String, modifier: Modifier = Modifier) {
-            MovableElement(TestElements.Foo, modifier) { content { Text(text) } }
+            MovableElement(key, modifier) { content { Text(text) } }
         }
 
         rule.setContent {
