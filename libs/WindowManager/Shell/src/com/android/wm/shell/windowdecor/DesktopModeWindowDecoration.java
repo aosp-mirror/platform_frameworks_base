@@ -490,8 +490,9 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
         final Resources res = mResult.mRootView.getResources();
         if (mDragResizeListener.setGeometry(
                 new DragResizeWindowGeometry(mRelayoutParams.mCornerRadius,
-                        new Size(mResult.mWidth, mResult.mHeight), getResizeEdgeHandleSize(res),
-                        getFineResizeCornerSize(res), getLargeResizeCornerSize(res)), touchSlop)
+                        new Size(mResult.mWidth, mResult.mHeight),
+                        getResizeEdgeHandleSize(mContext, res), getFineResizeCornerSize(res),
+                        getLargeResizeCornerSize(res)), touchSlop)
                 || !mTaskInfo.positionInParent.equals(mPositionInParent)) {
             updateExclusionRegion();
         }

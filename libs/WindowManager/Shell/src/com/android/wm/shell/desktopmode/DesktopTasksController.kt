@@ -54,7 +54,6 @@ import com.android.internal.jank.Cuj.CUJ_DESKTOP_MODE_ENTER_APP_HANDLE_DRAG_RELE
 import com.android.internal.jank.InteractionJankMonitor
 import com.android.internal.policy.ScreenDecorationsUtils
 import com.android.internal.protolog.ProtoLog
-import com.android.window.flags.Flags
 import com.android.wm.shell.RootTaskDisplayAreaOrganizer
 import com.android.wm.shell.ShellTaskOrganizer
 import com.android.wm.shell.common.DisplayController
@@ -982,7 +981,7 @@ class DesktopTasksController(
         }
         taskRepository.addClosingTask(task.displayId, task.taskId)
         // If a CLOSE or TO_BACK is triggered on a desktop task, remove the task.
-        if (Flags.enableDesktopWindowingBackNavigation() &&
+        if (DesktopModeFlags.BACK_NAVIGATION.isEnabled(context) &&
             taskRepository.isVisibleTask(task.taskId)) {
             wct.removeTask(task.token)
         }
@@ -1488,7 +1487,8 @@ class DesktopTasksController(
         }
 
         override fun hideStashedDesktopApps(displayId: Int) {
-            ProtoLog.w(WM_SHELL_DESKTOP_MODE, "IDesktopModeImpl: hideStashedDesktopApps is deprecated")
+            ProtoLog.w(WM_SHELL_DESKTOP_MODE,
+                "IDesktopModeImpl: hideStashedDesktopApps is deprecated")
         }
 
         override fun getVisibleTaskCount(displayId: Int): Int {
