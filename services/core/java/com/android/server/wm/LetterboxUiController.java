@@ -325,11 +325,6 @@ final class LetterboxUiController {
                 : mAppCompatConfiguration.getLetterboxVerticalPositionMultiplier(tabletopMode);
     }
 
-    float getFixedOrientationLetterboxAspectRatio(@NonNull Configuration parentConfiguration) {
-        return mActivityRecord.mAppCompatController.getAppCompatAspectRatioOverrides()
-                .getFixedOrientationLetterboxAspectRatio(parentConfiguration);
-    }
-
     boolean isLetterboxEducationEnabled() {
         return mAppCompatConfiguration.getIsEducationEnabled();
     }
