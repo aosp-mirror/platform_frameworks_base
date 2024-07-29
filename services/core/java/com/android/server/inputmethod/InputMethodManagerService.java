@@ -1126,6 +1126,21 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
                 }
             });
         }
+
+        @Override
+        public void onUserStopped(@NonNull TargetUser user) {
+            final int userId = user.getUserIdentifier();
+            // Called on ActivityManager thread.
+            SecureSettingsWrapper.onUserStopped(userId);
+            mService.mIoHandler.post(() -> {
+                final var additionalSubtypeMap = AdditionalSubtypeMapRepository.get(userId);
+                final var settings = InputMethodManagerService.queryInputMethodServicesInternal(
+                        mService.mContext, userId, additionalSubtypeMap,
+                        DirectBootAwareness.AUTO).getMethodMap();
+                InputMethodSettingsRepository.put(userId,
+                        InputMethodSettings.create(settings, userId));
+            });
+        }
     }
 
     @GuardedBy("ImfLock.class")
