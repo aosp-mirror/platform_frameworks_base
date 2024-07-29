@@ -197,3 +197,10 @@ flag {
     description: "Enables the tracking of the status for compat ui elements."
     bug: "350953004"
 }
+
+flag {
+    name: "enable_desktop_windowing_app_to_web_education"
+    namespace: "lse_desktop_experience"
+    description: "Enables desktop windowing app-to-web education"
+    bug: "348205896"
+}
