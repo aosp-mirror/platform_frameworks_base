@@ -76,7 +76,7 @@ abstract class VisualInterruptionCondition(
     constructor(
         types: Set<VisualInterruptionType>,
         reason: String
-    ) : this(types, reason, /* uiEventId = */ null)
+    ) : this(types, reason, /* uiEventId= */ null)
 
     /** @return true if these interruptions should be suppressed right now. */
     abstract fun shouldSuppress(): Boolean
@@ -92,7 +92,7 @@ abstract class VisualInterruptionFilter(
     constructor(
         types: Set<VisualInterruptionType>,
         reason: String
-    ) : this(types, reason, /* uiEventId = */ null)
+    ) : this(types, reason, /* uiEventId= */ null)
 
     /**
      * @param entry the notification to consider suppressing

@@ -185,8 +185,15 @@ constructor(
 
         if (NotificationAvalancheSuppression.isEnabled) {
             addFilter(
-                AvalancheSuppressor(avalancheProvider, systemClock, settingsInteractor,
-                    packageManager, uiEventLogger, context, notificationManager)
+                AvalancheSuppressor(
+                    avalancheProvider,
+                    systemClock,
+                    settingsInteractor,
+                    packageManager,
+                    uiEventLogger,
+                    context,
+                    notificationManager
+                )
             )
             avalancheProvider.register()
         }
