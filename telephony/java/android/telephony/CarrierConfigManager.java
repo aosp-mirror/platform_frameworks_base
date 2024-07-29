@@ -9603,9 +9603,8 @@ public class CarrierConfigManager {
      * Defines the rules for data setup retry.
      *
      * The syntax of the retry rule:
-     * 1. Retry based on {@link NetworkCapabilities}. Note that only APN-type network capabilities
-     *    are supported. If the capabilities are not specified, then the retry rule only applies
-     *    to the current failed APN used in setup data call request.
+     * 1. Retry based on {@link NetworkCapabilities}. If the capabilities are not specified, then
+     * the retry rule only applies to the current failed APN used in setup data call request.
      * "capabilities=[netCaps1|netCaps2|...], [retry_interval=n1|n2|n3|n4...], [maximum_retries=n]"
      *
      * 2. Retry based on {@link DataFailCause}
