@@ -63,7 +63,7 @@ class AppCompatUtils {
     /**
      * Returns the aspect ratio of the given {@code rect}.
      */
-    static float computeAspectRatio(Rect rect) {
+    static float computeAspectRatio(@NonNull Rect rect) {
         final int width = rect.width();
         final int height = rect.height();
         if (width == 0 || height == 0) {
@@ -156,5 +156,31 @@ class AppCompatUtils {
         appCompatTaskInfo.topActivityBoundsLetterboxed = top.areBoundsLetterboxed();
         appCompatTaskInfo.cameraCompatTaskInfo.freeformCameraCompatMode = top.mAppCompatController
                 .getAppCompatCameraOverrides().getFreeformCameraCompatMode();
+    }
+
+    /**
+     * Returns a string representing the reason for letterboxing. This method assumes the activity
+     * is letterboxed.
+     * @param activityRecord The {@link ActivityRecord} for the letterboxed activity.
+     * @param mainWin   The {@link WindowState} used to letterboxing.
+     */
+    @NonNull
+    static String getLetterboxReasonString(@NonNull ActivityRecord activityRecord,
+            @NonNull WindowState mainWin) {
+        if (activityRecord.inSizeCompatMode()) {
+            return "SIZE_COMPAT_MODE";
+        }
+        final AppCompatAspectRatioPolicy aspectRatioPolicy = activityRecord.mAppCompatController
+                .getAppCompatAspectRatioPolicy();
+        if (aspectRatioPolicy.isLetterboxedForFixedOrientationAndAspectRatio()) {
+            return "FIXED_ORIENTATION";
+        }
+        if (mainWin.isLetterboxedForDisplayCutout()) {
+            return "DISPLAY_CUTOUT";
+        }
+        if (aspectRatioPolicy.isLetterboxedForAspectRatioOnly()) {
+            return "ASPECT_RATIO";
+        }
+        return "UNKNOWN_REASON";
     }
 }
