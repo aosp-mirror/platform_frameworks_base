@@ -5584,4 +5584,7 @@
   <java-symbol type="string" name="keyboard_shortcut_group_applications_music" />
   <java-symbol type="string" name="keyboard_shortcut_group_applications_sms" />
   <java-symbol type="string" name="keyboard_shortcut_group_applications" />
+
+  <!-- Fingerprint loe notification string -->
+  <java-symbol type="string" name="fingerprint_loe_notification_msg" />
 </resources>
