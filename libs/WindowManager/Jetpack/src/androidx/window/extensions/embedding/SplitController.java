@@ -2759,9 +2759,7 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
         //      in the same task, the overlay will be dismissed in case an activity above
         //      the overlay is dismissed and the overlay is shown unexpectedly.
         for (final TaskFragmentContainer overlayContainer : overlayContainers) {
-            final boolean isTopNonFinishingOverlay = overlayContainer.equals(
-                    overlayContainer.getTaskContainer().getTopNonFinishingTaskFragmentContainer(
-                            true /* includePin */, true /* includeOverlay */));
+            final boolean isTopNonFinishingOverlay = overlayContainer.isTopNonFinishingChild();
             final boolean areInSameTask = taskId == overlayContainer.getTaskId();
             final boolean haveSameTag = overlayTag.equals(overlayContainer.getOverlayTag());
             if (!associateLaunchingActivity && overlayContainer.isAlwaysOnTopOverlay()
