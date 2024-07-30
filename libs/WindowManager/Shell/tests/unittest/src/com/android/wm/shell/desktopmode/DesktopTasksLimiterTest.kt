@@ -358,7 +358,7 @@ class DesktopTasksLimiterTest : ShellTestCase() {
     }
 
     private fun markTaskVisible(task: RunningTaskInfo) {
-        desktopTaskRepo.updateVisibleFreeformTasks(
+        desktopTaskRepo.updateTaskVisibility(
                 task.displayId,
                 task.taskId,
                 visible = true
@@ -366,7 +366,7 @@ class DesktopTasksLimiterTest : ShellTestCase() {
     }
 
     private fun markTaskHidden(task: RunningTaskInfo) {
-        desktopTaskRepo.updateVisibleFreeformTasks(
+        desktopTaskRepo.updateTaskVisibility(
                 task.displayId,
                 task.taskId,
                 visible = false

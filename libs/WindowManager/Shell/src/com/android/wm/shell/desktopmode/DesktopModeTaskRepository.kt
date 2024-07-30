@@ -213,7 +213,7 @@ class DesktopModeTaskRepository {
      * If task was visible on a different display with a different [displayId], removes from
      * the set of visible tasks on that display and notifies listeners.
      */
-    fun updateVisibleFreeformTasks(displayId: Int, taskId: Int, visible: Boolean) {
+    fun updateTaskVisibility(displayId: Int, taskId: Int, visible: Boolean) {
         if (visible) {
             // If task is visible, remove it from any other display besides [displayId].
             removeVisibleTask(taskId, excludedDisplayId = displayId)
