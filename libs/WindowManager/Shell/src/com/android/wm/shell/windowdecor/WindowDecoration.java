@@ -106,6 +106,7 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
      * System-wide context. Only used to create context with overridden configurations.
      */
     final Context mContext;
+    final @NonNull Context mUserContext;
     final @NonNull DisplayController mDisplayController;
     final ShellTaskOrganizer mTaskOrganizer;
     final Supplier<SurfaceControl.Builder> mSurfaceControlBuilderSupplier;
@@ -147,11 +148,12 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
 
     WindowDecoration(
             Context context,
+            @NonNull Context userContext,
             DisplayController displayController,
             ShellTaskOrganizer taskOrganizer,
             RunningTaskInfo taskInfo,
             SurfaceControl taskSurface) {
-        this(context, displayController, taskOrganizer, taskInfo, taskSurface,
+        this(context, userContext, displayController, taskOrganizer, taskInfo, taskSurface,
                 SurfaceControl.Builder::new, SurfaceControl.Transaction::new,
                 WindowContainerTransaction::new, SurfaceControl::new,
                 new SurfaceControlViewHostFactory() {});
@@ -159,6 +161,7 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
 
     WindowDecoration(
             Context context,
+            @NonNull Context userContext,
             @NonNull DisplayController displayController,
             ShellTaskOrganizer taskOrganizer,
             RunningTaskInfo taskInfo,
@@ -169,6 +172,7 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
             Supplier<SurfaceControl> surfaceControlSupplier,
             SurfaceControlViewHostFactory surfaceControlViewHostFactory) {
         mContext = context;
+        mUserContext = userContext;
         mDisplayController = displayController;
         mTaskOrganizer = taskOrganizer;
         mTaskInfo = taskInfo;
@@ -177,7 +181,6 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
         mSurfaceControlTransactionSupplier = surfaceControlTransactionSupplier;
         mWindowContainerTransactionSupplier = windowContainerTransactionSupplier;
         mSurfaceControlViewHostFactory = surfaceControlViewHostFactory;
-
         mDisplay = mDisplayController.getDisplay(mTaskInfo.displayId);
     }
 
