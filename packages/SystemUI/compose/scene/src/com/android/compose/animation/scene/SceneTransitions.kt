@@ -302,18 +302,18 @@ internal class TransformationSpecImpl(
     override val distance: UserActionDistance?,
     override val transformations: List<Transformation>,
 ) : TransformationSpec {
-    private val cache = mutableMapOf<ElementKey, MutableMap<SceneKey, ElementTransformations>>()
+    private val cache = mutableMapOf<ElementKey, MutableMap<ContentKey, ElementTransformations>>()
 
-    internal fun transformations(element: ElementKey, scene: SceneKey): ElementTransformations {
+    internal fun transformations(element: ElementKey, content: ContentKey): ElementTransformations {
         return cache
             .getOrPut(element) { mutableMapOf() }
-            .getOrPut(scene) { computeTransformations(element, scene) }
+            .getOrPut(content) { computeTransformations(element, content) }
     }
 
     /** Filter [transformations] to compute the [ElementTransformations] of [element]. */
     private fun computeTransformations(
         element: ElementKey,
-        scene: SceneKey,
+        content: ContentKey,
     ): ElementTransformations {
         var shared: SharedElementTransformation? = null
         var offset: PropertyTransformation<Offset>? = null
@@ -351,7 +351,7 @@ internal class TransformationSpecImpl(
         }
 
         transformations.fastForEach { transformation ->
-            if (!transformation.matcher.matches(element, scene)) {
+            if (!transformation.matcher.matches(element, content)) {
                 return@fastForEach
             }
 

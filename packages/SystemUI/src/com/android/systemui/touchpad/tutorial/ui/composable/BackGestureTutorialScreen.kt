@@ -26,6 +26,7 @@ import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -49,6 +50,7 @@ import androidx.compose.ui.input.pointer.pointerInteropFilter
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.airbnb.lottie.LottieComposition
 import com.airbnb.lottie.LottieProperty
 import com.airbnb.lottie.compose.LottieAnimation
 import com.airbnb.lottie.compose.LottieCompositionSpec
@@ -61,6 +63,9 @@ import com.airbnb.lottie.compose.rememberLottieDynamicProperties
 import com.airbnb.lottie.compose.rememberLottieDynamicProperty
 import com.android.compose.theme.LocalAndroidColorScheme
 import com.android.systemui.res.R
+import com.android.systemui.touchpad.tutorial.ui.gesture.GestureState
+import com.android.systemui.touchpad.tutorial.ui.gesture.GestureState.FINISHED
+import com.android.systemui.touchpad.tutorial.ui.gesture.GestureState.IN_PROGRESS
 import com.android.systemui.touchpad.tutorial.ui.gesture.TouchpadGesture.BACK
 import com.android.systemui.touchpad.tutorial.ui.gesture.TouchpadGestureHandler
 
@@ -78,23 +83,49 @@ fun BackGestureTutorialScreen(
 ) {
     val screenColors = rememberScreenColors()
     BackHandler(onBack = onBack)
-    var gestureDone by remember { mutableStateOf(false) }
+    var gestureState by remember { mutableStateOf(GestureState.NOT_STARTED) }
     val swipeDistanceThresholdPx =
         LocalContext.current.resources.getDimensionPixelSize(
             com.android.internal.R.dimen.system_gestures_distance_threshold
         )
     val gestureHandler =
         remember(swipeDistanceThresholdPx) {
-            TouchpadGestureHandler(BACK, swipeDistanceThresholdPx, onDone = { gestureDone = true })
+            TouchpadGestureHandler(
+                BACK,
+                swipeDistanceThresholdPx,
+                onGestureStateChanged = { gestureState = it }
+            )
         }
+    TouchpadGesturesHandlingBox(gestureHandler, gestureState) {
+        GestureTutorialContent(gestureState, onDoneButtonClicked, screenColors)
+    }
+}
+
+@Composable
+private fun TouchpadGesturesHandlingBox(
+    gestureHandler: TouchpadGestureHandler,
+    gestureState: GestureState,
+    modifier: Modifier = Modifier,
+    content: @Composable BoxScope.() -> Unit
+) {
     Box(
         modifier =
-            Modifier.fillMaxSize()
+            modifier
+                .fillMaxSize()
                 // we need to use pointerInteropFilter because some info about touchpad gestures is
                 // only available in MotionEvent
-                .pointerInteropFilter(onTouchEvent = gestureHandler::onMotionEvent)
+                .pointerInteropFilter(
+                    onTouchEvent = { event ->
+                        // FINISHED is the final state so we don't need to process touches anymore
+                        if (gestureState != FINISHED) {
+                            gestureHandler.onMotionEvent(event)
+                        } else {
+                            false
+                        }
+                    }
+                )
     ) {
-        GestureTutorialContent(gestureDone, onDoneButtonClicked, screenColors)
+        content()
     }
 }
 
@@ -126,14 +157,14 @@ private fun rememberScreenColors(): TutorialScreenColors {
 
 @Composable
 private fun GestureTutorialContent(
-    gestureDone: Boolean,
+    gestureState: GestureState,
     onDoneButtonClicked: () -> Unit,
     screenColors: TutorialScreenColors
 ) {
     val animatedColor by
         animateColorAsState(
             targetValue =
-                if (gestureDone) screenColors.successBackgroundColor
+                if (gestureState == FINISHED) screenColors.successBackgroundColor
                 else screenColors.backgroundColor,
             animationSpec = tween(durationMillis = 150, easing = LinearEasing),
             label = "backgroundColor"
@@ -148,15 +179,17 @@ private fun GestureTutorialContent(
         Row(modifier = Modifier.fillMaxWidth().weight(1f)) {
             TutorialDescription(
                 titleTextId =
-                    if (gestureDone) R.string.touchpad_tutorial_gesture_done
+                    if (gestureState == FINISHED) R.string.touchpad_tutorial_gesture_done
                     else R.string.touchpad_back_gesture_action_title,
                 titleColor = screenColors.titleColor,
-                bodyTextId = R.string.touchpad_back_gesture_guidance,
+                bodyTextId =
+                    if (gestureState == FINISHED) R.string.touchpad_back_gesture_finished
+                    else R.string.touchpad_back_gesture_guidance,
                 modifier = Modifier.weight(1f)
             )
             Spacer(modifier = Modifier.width(76.dp))
             TutorialAnimation(
-                gestureDone,
+                gestureState,
                 screenColors.animationProperties,
                 modifier = Modifier.weight(1f).padding(top = 8.dp)
             )
@@ -189,23 +222,34 @@ fun TutorialDescription(
 
 @Composable
 fun TutorialAnimation(
-    gestureDone: Boolean,
+    gestureState: GestureState,
     animationProperties: LottieDynamicProperties,
     modifier: Modifier = Modifier
 ) {
     Column(modifier = modifier.fillMaxWidth()) {
-        val resId = if (gestureDone) R.raw.trackpad_back_success else R.raw.trackpad_back_edu
+        val resId =
+            if (gestureState == FINISHED) R.raw.trackpad_back_success else R.raw.trackpad_back_edu
         val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(resId))
-        val progress by
-            animateLottieCompositionAsState(
-                composition,
-                iterations = if (gestureDone) 1 else LottieConstants.IterateForever
-            )
+        val progress = progressForGestureState(composition, gestureState)
         LottieAnimation(
             composition = composition,
-            progress = { progress },
+            progress = progress,
             dynamicProperties = animationProperties
         )
+    }
+}
+
+@Composable
+private fun progressForGestureState(
+    composition: LottieComposition?,
+    gestureState: GestureState
+): () -> Float {
+    if (gestureState == IN_PROGRESS) {
+        return { 0f } // when gesture is in progress, animation should freeze on 1st frame
+    } else {
+        val iterations = if (gestureState == FINISHED) 1 else LottieConstants.IterateForever
+        val animationState by animateLottieCompositionAsState(composition, iterations = iterations)
+        return { animationState }
     }
 }
 

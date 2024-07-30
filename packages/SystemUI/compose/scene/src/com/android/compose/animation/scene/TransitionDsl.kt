@@ -239,10 +239,11 @@ interface ElementScenePicker {
      * should not be drawn or composed in neither [transition.fromScene] nor [transition.toScene],
      * return `null`.
      *
-     * Important: For [MovableElements][SceneScope.MovableElement], this scene picker will *always*
-     * be used during transitions to decide whether we should compose that element in a given scene
-     * or not. Therefore, you should make sure that the returned [SceneKey] contains the movable
-     * element, otherwise that element will not be composed in any scene during the transition.
+     * Important: For [MovableElements][ContentScope.MovableElement], this scene picker will
+     * *always* be used during transitions to decide whether we should compose that element in a
+     * given scene or not. Therefore, you should make sure that the returned [SceneKey] contains the
+     * movable element, otherwise that element will not be composed in any scene during the
+     * transition.
      */
     fun sceneDuringTransition(
         element: ElementKey,

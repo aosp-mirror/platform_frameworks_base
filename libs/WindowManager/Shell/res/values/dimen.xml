@@ -554,15 +554,10 @@
          enable_windowing_edge_drag_resize is disabled. -->
     <dimen name="freeform_resize_corner">44dp</dimen>
 
-    <!-- The width of the area at the sides of the screen where a freeform task will transition to
-    split select if dragged until the touch input is within the range. -->
-    <dimen name="desktop_mode_transition_area_width">32dp</dimen>
+    <!-- The thickness in dp for all desktop drag transition regions. -->
+    <dimen name="desktop_mode_transition_region_thickness">44dp</dimen>
 
-    <!-- The width of the area where a desktop task will transition to fullscreen. -->
-    <dimen name="desktop_mode_fullscreen_from_desktop_width">80dp</dimen>
-
-    <!-- The height of the area where a desktop task will transition to fullscreen. -->
-    <dimen name="desktop_mode_fullscreen_from_desktop_height">40dp</dimen>
+    <item type="dimen" format="float" name="desktop_mode_fullscreen_region_scale">0.4</item>
 
     <!-- The height on the screen where drag to the left or right edge will result in a
     desktop task snapping to split size. The empty space between this and the top is to allow

@@ -22,10 +22,10 @@ enum class TouchpadGesture {
 
     fun toMonitor(
         swipeDistanceThresholdPx: Int,
-        gestureDoneCallback: () -> Unit
+        onStateChanged: (GestureState) -> Unit
     ): TouchpadGestureMonitor {
         return when (this) {
-            BACK -> BackGestureMonitor(swipeDistanceThresholdPx, gestureDoneCallback)
+            BACK -> BackGestureMonitor(swipeDistanceThresholdPx, onStateChanged)
             else -> throw IllegalArgumentException("Not implemented yet")
         }
     }

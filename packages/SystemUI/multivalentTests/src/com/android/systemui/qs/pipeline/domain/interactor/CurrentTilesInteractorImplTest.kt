@@ -675,6 +675,24 @@ class CurrentTilesInteractorImplTest : SysuiTestCase() {
             assertThat(tiles!!.size).isEqualTo(3)
         }
 
+    @Test
+    fun changeInPackagesTiles_doesntTriggerUserChange_logged() =
+        testScope.runTest(USER_INFO_0) {
+            val specs =
+                listOf(
+                    TileSpec.create("a"),
+                )
+            tileSpecRepository.setTiles(USER_INFO_0.id, specs)
+            runCurrent()
+            // Settled on the same list of tiles.
+            assertThat(underTest.currentTilesSpecs).isEqualTo(specs)
+
+            installedTilesPackageRepository.setInstalledPackagesForUser(USER_INFO_0.id, emptySet())
+            runCurrent()
+
+            verify(logger, never()).logTileUserChanged(TileSpec.create("a"), 0)
+        }
+
     private fun QSTile.State.fillIn(state: Int, label: CharSequence, secondaryLabel: CharSequence) {
         this.state = state
         this.label = label

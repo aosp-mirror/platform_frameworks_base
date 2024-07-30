@@ -381,6 +381,8 @@ public class ParcelFileDescriptor implements Parcelable, Closeable {
     }
 
     private static void closeInternal$ravenwood(FileDescriptor fd) {
+        // Desktop JVM doesn't have FileDescriptor.close(), so we'll need to go to the ravenwood
+        // side to close it.
         native_close$ravenwood(fd);
     }
 
