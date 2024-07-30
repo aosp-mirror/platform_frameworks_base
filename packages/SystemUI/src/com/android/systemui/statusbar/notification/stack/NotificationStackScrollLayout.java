@@ -89,8 +89,10 @@ import com.android.systemui.ExpandHelper;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.flags.Flags;
 import com.android.systemui.plugins.ActivityStarter;
+import com.android.systemui.qs.flags.QSComposeFragment;
 import com.android.systemui.res.R;
 import com.android.systemui.scene.shared.flag.SceneContainerFlag;
+import com.android.systemui.shade.QSHeaderBoundsProvider;
 import com.android.systemui.shade.TouchLogger;
 import com.android.systemui.statusbar.EmptyShadeView;
 import com.android.systemui.statusbar.NotificationShelf;
@@ -350,6 +352,10 @@ public class NotificationStackScrollLayout
     private final NotificationSection[] mSections;
     private final ArrayList<ExpandableView> mTmpSortedChildren = new ArrayList<>();
     protected ViewGroup mQsHeader;
+
+    @Nullable
+    private QSHeaderBoundsProvider mQSHeaderBoundsProvider;
+
     // Rect of QsHeader. Kept as a field just to avoid creating a new one each time.
     private final Rect mQsHeaderBound = new Rect();
     private boolean mContinuousShadowUpdate;
@@ -1178,7 +1184,21 @@ public class NotificationStackScrollLayout
         if (!SceneContainerFlag.isEnabled()) {
             // Give The Algorithm information regarding the QS height so it can layout notifications
             // properly. Needed for some devices that grows notifications down-to-top
-            mStackScrollAlgorithm.updateQSFrameTop(mQsHeader == null ? 0 : mQsHeader.getHeight());
+            int height;
+            if (QSComposeFragment.isEnabled()) {
+                if (mQSHeaderBoundsProvider != null) {
+                    height = mQSHeaderBoundsProvider.getHeightProvider().invoke();
+                } else {
+                    height = 0;
+                }
+            } else {
+                if (mQsHeader != null) {
+                    height = mQsHeader.getHeight();
+                } else {
+                    height = 0;
+                }
+            }
+            mStackScrollAlgorithm.updateQSFrameTop(height);
         }
 
         // Once the layout has finished, we don't need to animate any scrolling clampings anymore.
@@ -1828,8 +1848,14 @@ public class NotificationStackScrollLayout
     }
 
     public void setQsHeader(ViewGroup qsHeader) {
-        SceneContainerFlag.assertInLegacyMode();
+        QSComposeFragment.assertInLegacyMode();
         mQsHeader = qsHeader;
+    }
+
+    public void setQsHeaderBoundsProvider(QSHeaderBoundsProvider qsHeaderBoundsProvider) {
+        SceneContainerFlag.assertInLegacyMode();
+        QSComposeFragment.isUnexpectedlyInLegacyMode();
+        mQSHeaderBoundsProvider = qsHeaderBoundsProvider;
     }
 
     public static boolean isPinnedHeadsUp(View v) {
@@ -3749,7 +3775,20 @@ public class NotificationStackScrollLayout
             return ev.getY() < mAmbientState.getStackTop();
         }
 
-        mQsHeader.getBoundsOnScreen(mQsHeaderBound);
+        if (QSComposeFragment.isEnabled()) {
+            if (mQSHeaderBoundsProvider == null) {
+                return false;
+            } else {
+                mQSHeaderBoundsProvider.getBoundsOnScreenProvider().invoke(mQsHeaderBound);
+            }
+        } else {
+            if (mQsHeader == null) {
+                return false;
+            } else {
+                mQsHeader.getBoundsOnScreen(mQsHeaderBound);
+            }
+        }
+
         /**
          * One-handed mode defines a feature FEATURE_ONE_HANDED of DisplayArea {@link DisplayArea}
          * that will translate down the Y-coordinate whole window screen type except for
@@ -3759,7 +3798,10 @@ public class NotificationStackScrollLayout
          * of DisplayArea into relative coordinates for all windows, we need to correct the
          * QS Head bounds here.
          */
-        final int xOffset = Math.round(ev.getRawX() - ev.getX() + mQsHeader.getLeft());
+        int left =
+                QSComposeFragment.isEnabled() ? mQSHeaderBoundsProvider.getLeftProvider().invoke()
+                        : mQsHeader.getLeft();
+        final int xOffset = Math.round(ev.getRawX() - ev.getX() + left);
         final int yOffset = Math.round(ev.getRawY() - ev.getY());
         mQsHeaderBound.offsetTo(xOffset, yOffset);
         return mQsHeaderBound.contains((int) ev.getRawX(), (int) ev.getRawY());

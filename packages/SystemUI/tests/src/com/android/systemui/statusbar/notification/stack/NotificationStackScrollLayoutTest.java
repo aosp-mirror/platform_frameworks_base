@@ -77,7 +77,10 @@ import com.android.systemui.flags.EnableSceneContainer;
 import com.android.systemui.flags.FakeFeatureFlags;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.flags.Flags;
+import com.android.systemui.qs.flags.NewQsUI;
+import com.android.systemui.qs.flags.QSComposeFragment;
 import com.android.systemui.res.R;
+import com.android.systemui.shade.QSHeaderBoundsProvider;
 import com.android.systemui.shade.ShadeController;
 import com.android.systemui.shade.transition.LargeScreenShadeInterpolator;
 import com.android.systemui.statusbar.EmptyShadeView;
@@ -97,6 +100,8 @@ import com.android.systemui.statusbar.phone.ScreenOffAnimationController;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
 import com.android.systemui.statusbar.policy.AvalancheController;
 import com.android.systemui.statusbar.policy.ResourcesSplitShadeStateController;
+
+import kotlin.Unit;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -806,6 +811,7 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
     }
 
     @Test
+    @DisableFlags({QSComposeFragment.FLAG_NAME, NewQsUI.FLAG_NAME})
     @DisableSceneContainer // TODO(b/312473478): address lack of QS Header
     public void testInsideQSHeader_noOffset() {
         ViewGroup qsHeader = mock(ViewGroup.class);
@@ -823,6 +829,7 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
     }
 
     @Test
+    @DisableFlags({QSComposeFragment.FLAG_NAME, NewQsUI.FLAG_NAME})
     @DisableSceneContainer // TODO(b/312473478): address lack of QS Header
     public void testInsideQSHeader_Offset() {
         ViewGroup qsHeader = mock(ViewGroup.class);
@@ -830,6 +837,63 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
         mockBoundsOnScreen(qsHeader, boundsOnScreen);
 
         mStackScroller.setQsHeader(qsHeader);
+        mStackScroller.setLeftTopRightBottom(200, 200, 2000, 2000);
+
+        MotionEvent event1 = transformEventForView(createMotionEvent(50f, 50f), mStackScroller);
+        assertFalse(mStackScroller.isInsideQsHeader(event1));
+
+        MotionEvent event2 = transformEventForView(createMotionEvent(150f, 150f), mStackScroller);
+        assertFalse(mStackScroller.isInsideQsHeader(event2));
+
+        MotionEvent event3 = transformEventForView(createMotionEvent(250f, 250f), mStackScroller);
+        assertTrue(mStackScroller.isInsideQsHeader(event3));
+    }
+
+    @Test
+    @EnableFlags({QSComposeFragment.FLAG_NAME, NewQsUI.FLAG_NAME})
+    @DisableSceneContainer // TODO(b/312473478): address lack of QS Header
+    public void testInsideQSHeader_noOffset_qsCompose() {
+        ViewGroup qsHeader = mock(ViewGroup.class);
+        Rect boundsOnScreen = new Rect(0, 0, 1000, 1000);
+        mockBoundsOnScreen(qsHeader, boundsOnScreen);
+
+        QSHeaderBoundsProvider provider = new QSHeaderBoundsProvider(
+                () -> 0,
+                boundsOnScreen::height,
+                rect -> {
+                    qsHeader.getBoundsOnScreen(rect);
+                    return Unit.INSTANCE;
+                }
+        );
+
+        mStackScroller.setQsHeaderBoundsProvider(provider);
+        mStackScroller.setLeftTopRightBottom(0, 0, 2000, 2000);
+
+        MotionEvent event1 = transformEventForView(createMotionEvent(100f, 100f), mStackScroller);
+        assertTrue(mStackScroller.isInsideQsHeader(event1));
+
+        MotionEvent event2 = transformEventForView(createMotionEvent(1100f, 100f), mStackScroller);
+        assertFalse(mStackScroller.isInsideQsHeader(event2));
+    }
+
+    @Test
+    @EnableFlags({QSComposeFragment.FLAG_NAME, NewQsUI.FLAG_NAME})
+    @DisableSceneContainer // TODO(b/312473478): address lack of QS Header
+    public void testInsideQSHeader_Offset_qsCompose() {
+        ViewGroup qsHeader = mock(ViewGroup.class);
+        Rect boundsOnScreen = new Rect(100, 100, 1000, 1000);
+        mockBoundsOnScreen(qsHeader, boundsOnScreen);
+
+        QSHeaderBoundsProvider provider = new QSHeaderBoundsProvider(
+                () -> 0,
+                boundsOnScreen::height,
+                rect -> {
+                    qsHeader.getBoundsOnScreen(rect);
+                    return Unit.INSTANCE;
+                }
+        );
+
+        mStackScroller.setQsHeaderBoundsProvider(provider);
         mStackScroller.setLeftTopRightBottom(200, 200, 2000, 2000);
 
         MotionEvent event1 = transformEventForView(createMotionEvent(50f, 50f), mStackScroller);
