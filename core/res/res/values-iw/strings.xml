@@ -1241,7 +1241,7 @@
     <string name="unsupported_display_size_show" msgid="980129850974919375">"להציג תמיד"</string>
     <string name="unsupported_compile_sdk_message" msgid="7326293500707890537">"‏<xliff:g id="APP_NAME">%1$s</xliff:g> נבנתה לגרסה לא תואמת של מערכת ההפעלה של Android ועלולה להתנהג באופן לא צפוי. ייתכן שקיימת גרסה מעודכנת של האפליקציה."</string>
     <string name="unsupported_compile_sdk_show" msgid="1601210057960312248">"להציג תמיד"</string>
-    <string name="unsupported_compile_sdk_check_update" msgid="1103639989147664456">"האם יש עדכון חדש?"</string>
+    <string name="unsupported_compile_sdk_check_update" msgid="1103639989147664456">"יש עדכון חדש?"</string>
     <string name="smv_application" msgid="3775183542777792638">"‏האפליקציה <xliff:g id="APPLICATION">%1$s</xliff:g> (תהליך <xliff:g id="PROCESS">%2$s</xliff:g>) הפרה את מדיניות StrictMode באכיפה עצמית שלה."</string>
     <string name="smv_process" msgid="1398801497130695446">"‏התהליך <xliff:g id="PROCESS">%1$s</xliff:g> הפר את מדיניות StrictMode באכיפה עצמית."</string>
     <string name="android_upgrading_title" product="default" msgid="7279077384220829683">"הטלפון מתעדכן…"</string>
