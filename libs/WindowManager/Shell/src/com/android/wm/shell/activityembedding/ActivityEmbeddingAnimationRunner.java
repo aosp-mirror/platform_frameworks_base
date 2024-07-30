@@ -144,10 +144,8 @@ class ActivityEmbeddingAnimationRunner {
             // ending states.
             prepareForJumpCut(info, startTransaction);
         } else {
-            if (!com.android.graphics.libgui.flags.Flags.edgeExtensionShader()) {
-                addEdgeExtensionIfNeeded(startTransaction, finishTransaction,
-                        postStartTransactionCallbacks, adapters);
-            }
+            addEdgeExtensionIfNeeded(startTransaction, finishTransaction,
+                    postStartTransactionCallbacks, adapters);
             addBackgroundColorIfNeeded(info, startTransaction, finishTransaction, adapters);
             for (ActivityEmbeddingAnimationAdapter adapter : adapters) {
                 duration = Math.max(duration, adapter.getDurationHint());
@@ -343,7 +341,7 @@ class ActivityEmbeddingAnimationRunner {
             @NonNull List<ActivityEmbeddingAnimationAdapter> adapters) {
         for (ActivityEmbeddingAnimationAdapter adapter : adapters) {
             final Animation animation = adapter.mAnimation;
-            if (animation.getExtensionEdges() == 0) {
+            if (!animation.hasExtension()) {
                 continue;
             }
             if (adapter.mChange.hasFlags(FLAG_TRANSLUCENT)
