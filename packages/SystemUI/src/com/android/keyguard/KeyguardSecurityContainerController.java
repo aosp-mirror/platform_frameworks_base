@@ -164,11 +164,6 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
                     }
                     mCurrentUser = mSelectedUserInteractor.getSelectedUserId();
                     showPrimarySecurityScreen(false);
-                    if (mCurrentSecurityMode != SimPin
-                            && mCurrentSecurityMode != SimPuk) {
-                        reinflateViewFlipper((l) -> {
-                        });
-                    }
                 }
             };
 
@@ -375,8 +370,7 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
 
                 @Override
                 public void onDensityOrFontScaleChanged() {
-                    KeyguardSecurityContainerController.this
-                            .onDensityOrFontScaleOrOrientationChanged();
+                    mView.onDensityOrFontScaleChanged();
                 }
 
                 @Override
@@ -1227,11 +1221,6 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
         mView.reloadColors();
     }
 
-    /** Handles density or font scale changes. */
-    private void onDensityOrFontScaleOrOrientationChanged() {
-        reinflateViewFlipper(controller -> mView.onDensityOrFontScaleChanged());
-    }
-
     /**
      * Reinflate the view flipper child view.
      */
@@ -1239,7 +1228,10 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
             KeyguardSecurityViewFlipperController.OnViewInflatedCallback onViewInflatedListener) {
         mSecurityViewFlipperController.clearViews();
         mSecurityViewFlipperController.asynchronouslyInflateView(mCurrentSecurityMode,
-                mKeyguardSecurityCallback, onViewInflatedListener);
+                mKeyguardSecurityCallback, (controller) -> {
+                mView.updateSecurityViewFlipper();
+                onViewInflatedListener.onViewInflated(controller);
+            });
     }
 
     /**
