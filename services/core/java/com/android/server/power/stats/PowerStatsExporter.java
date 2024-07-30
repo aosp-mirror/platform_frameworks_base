@@ -59,58 +59,61 @@ public class PowerStatsExporter {
      */
     public void exportAggregatedPowerStats(BatteryUsageStats.Builder batteryUsageStatsBuilder,
             long monotonicStartTime, long monotonicEndTime) {
-        boolean hasStoredSpans = false;
-        long maxEndTime = monotonicStartTime;
-        List<PowerStatsSpan.Metadata> spans = mPowerStatsStore.getTableOfContents();
-        for (int i = spans.size() - 1; i >= 0; i--) {
-            PowerStatsSpan.Metadata metadata = spans.get(i);
-            if (!metadata.getSections().contains(AggregatedPowerStatsSection.TYPE)) {
-                continue;
-            }
-
-            List<PowerStatsSpan.TimeFrame> timeFrames = metadata.getTimeFrames();
-            long spanMinTime = Long.MAX_VALUE;
-            long spanMaxTime = Long.MIN_VALUE;
-            for (int j = 0; j < timeFrames.size(); j++) {
-                PowerStatsSpan.TimeFrame timeFrame = timeFrames.get(j);
-                long startMonotonicTime = timeFrame.startMonotonicTime;
-                long endMonotonicTime = startMonotonicTime + timeFrame.duration;
-                if (startMonotonicTime < spanMinTime) {
-                    spanMinTime = startMonotonicTime;
+        synchronized (this) {
+            boolean hasStoredSpans = false;
+            long maxEndTime = monotonicStartTime;
+            List<PowerStatsSpan.Metadata> spans = mPowerStatsStore.getTableOfContents();
+            for (int i = spans.size() - 1; i >= 0; i--) {
+                PowerStatsSpan.Metadata metadata = spans.get(i);
+                if (!metadata.getSections().contains(AggregatedPowerStatsSection.TYPE)) {
+                    continue;
                 }
-                if (endMonotonicTime > spanMaxTime) {
-                    spanMaxTime = endMonotonicTime;
+
+                List<PowerStatsSpan.TimeFrame> timeFrames = metadata.getTimeFrames();
+                long spanMinTime = Long.MAX_VALUE;
+                long spanMaxTime = Long.MIN_VALUE;
+                for (int j = 0; j < timeFrames.size(); j++) {
+                    PowerStatsSpan.TimeFrame timeFrame = timeFrames.get(j);
+                    long startMonotonicTime = timeFrame.startMonotonicTime;
+                    long endMonotonicTime = startMonotonicTime + timeFrame.duration;
+                    if (startMonotonicTime < spanMinTime) {
+                        spanMinTime = startMonotonicTime;
+                    }
+                    if (endMonotonicTime > spanMaxTime) {
+                        spanMaxTime = endMonotonicTime;
+                    }
+                }
+
+                if (!(spanMinTime >= monotonicStartTime && spanMaxTime < monotonicEndTime)) {
+                    continue;
+                }
+
+                if (spanMaxTime > maxEndTime) {
+                    maxEndTime = spanMaxTime;
+                }
+
+                PowerStatsSpan span = mPowerStatsStore.loadPowerStatsSpan(metadata.getId(),
+                        AggregatedPowerStatsSection.TYPE);
+                if (span == null) {
+                    Slog.e(TAG, "Could not read PowerStatsStore section " + metadata);
+                    continue;
+                }
+                List<PowerStatsSpan.Section> sections = span.getSections();
+                for (int k = 0; k < sections.size(); k++) {
+                    hasStoredSpans = true;
+                    PowerStatsSpan.Section section = sections.get(k);
+                    populateBatteryUsageStatsBuilder(batteryUsageStatsBuilder,
+                            ((AggregatedPowerStatsSection) section).getAggregatedPowerStats());
                 }
             }
 
-            if (!(spanMinTime >= monotonicStartTime && spanMaxTime < monotonicEndTime)) {
-                continue;
+            if (!hasStoredSpans
+                    || maxEndTime < monotonicEndTime - mBatterySessionTimeSpanSlackMillis) {
+                mPowerStatsAggregator.aggregatePowerStats(maxEndTime, monotonicEndTime,
+                        stats -> populateBatteryUsageStatsBuilder(batteryUsageStatsBuilder, stats));
             }
-
-            if (spanMaxTime > maxEndTime) {
-                maxEndTime = spanMaxTime;
-            }
-
-            PowerStatsSpan span = mPowerStatsStore.loadPowerStatsSpan(metadata.getId(),
-                    AggregatedPowerStatsSection.TYPE);
-            if (span == null) {
-                Slog.e(TAG, "Could not read PowerStatsStore section " + metadata);
-                continue;
-            }
-            List<PowerStatsSpan.Section> sections = span.getSections();
-            for (int k = 0; k < sections.size(); k++) {
-                hasStoredSpans = true;
-                PowerStatsSpan.Section section = sections.get(k);
-                populateBatteryUsageStatsBuilder(batteryUsageStatsBuilder,
-                        ((AggregatedPowerStatsSection) section).getAggregatedPowerStats());
-            }
+            mPowerStatsAggregator.reset();
         }
-
-        if (!hasStoredSpans || maxEndTime < monotonicEndTime - mBatterySessionTimeSpanSlackMillis) {
-            mPowerStatsAggregator.aggregatePowerStats(maxEndTime, monotonicEndTime,
-                    stats -> populateBatteryUsageStatsBuilder(batteryUsageStatsBuilder, stats));
-        }
-        mPowerStatsAggregator.reset();
     }
 
     private void populateBatteryUsageStatsBuilder(
