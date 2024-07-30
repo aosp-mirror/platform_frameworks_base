@@ -1306,10 +1306,6 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
     /** Updates the StatusBarViewController and updates any that depend on it. */
     public void updateStatusViewController() {
         // Re-associate the KeyguardStatusViewController
-        if (mKeyguardStatusViewController != null) {
-            mKeyguardStatusViewController.onDestroy();
-        }
-
         if (MigrateClocksToBlueprint.isEnabled()) {
             // Need a shared controller until mKeyguardStatusViewController can be removed from
             // here, due to important state being set in that controller. Rebind in order to pick
