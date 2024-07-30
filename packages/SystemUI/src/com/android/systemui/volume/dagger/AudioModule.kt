@@ -19,8 +19,8 @@ package com.android.systemui.volume.dagger
 import android.content.ContentResolver
 import android.content.Context
 import android.media.AudioManager
+import com.android.settingslib.bluetooth.BluetoothUtils
 import com.android.settingslib.bluetooth.LocalBluetoothManager
-import com.android.settingslib.flags.Flags
 import com.android.settingslib.notification.domain.interactor.NotificationsSoundPolicyInteractor
 import com.android.settingslib.volume.data.repository.AudioRepository
 import com.android.settingslib.volume.data.repository.AudioRepositoryImpl
@@ -80,7 +80,7 @@ interface AudioModule {
             @Application coroutineScope: CoroutineScope,
             @Background coroutineContext: CoroutineContext,
         ): AudioSharingRepository =
-            if (Flags.enableLeAudioSharing() && localBluetoothManager != null) {
+            if (BluetoothUtils.isAudioSharingEnabled() && localBluetoothManager != null) {
                 AudioSharingRepositoryImpl(
                     contentResolver,
                     localBluetoothManager,
