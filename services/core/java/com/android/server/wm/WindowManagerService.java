@@ -9037,7 +9037,8 @@ public class WindowManagerService extends IWindowManager.Stub
         // Otherwise, handle the touch-outside event directly.
         final WindowState w = t.getWindowState();
         final ActivityRecord activity = w != null ? w.getActivityRecord() : null;
-        if (activity != null && activity.isEmbedded()
+        if (mFocusedInputTarget != t && mFocusedInputTarget != null
+                && activity != null && activity.isEmbedded()
                 && activity.getTaskFragment().getAdjacentTaskFragment() != null) {
             mPointerDownOutsideFocusRunnable = () -> handlePointerDownOutsideFocus(t);
             mH.postDelayed(mPointerDownOutsideFocusRunnable, POINTER_DOWN_OUTSIDE_FOCUS_TIMEOUT_MS);
