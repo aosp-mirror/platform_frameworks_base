@@ -236,6 +236,7 @@ public class BackgroundUserSoundNotifier {
         return new Notification.Builder(mSystemUserContext, BUSN_CHANNEL_ID)
                 .setSmallIcon(icon)
                 .setTicker(title)
+                .setCategory(Notification.CATEGORY_REMINDER)
                 .setWhen(0)
                 .setOngoing(true)
                 .setColor(fgContext.getColor(R.color.system_notification_accent_color))
