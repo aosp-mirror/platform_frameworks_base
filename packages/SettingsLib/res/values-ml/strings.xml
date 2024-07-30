@@ -430,8 +430,7 @@
     <string name="force_allow_on_external_summary" msgid="8525425782530728238">"മാനിഫെസ്റ്റ് മൂല്യങ്ങൾ പരിഗണിക്കാതെ, ബാഹ്യ സ്റ്റോറേജിലേക്ക് എഴുതപ്പെടുന്നതിന് ഏതൊരു ആപ്പിനെയും യോഗ്യമാക്കുന്നു"</string>
     <string name="force_resizable_activities" msgid="7143612144399959606">"വലുപ്പം മാറ്റാൻ പ്രവർത്തനങ്ങളെ നിർബന്ധിക്കുക"</string>
     <string name="force_resizable_activities_summary" msgid="2490382056981583062">"മാനിഫെസ്റ്റ് മൂല്യങ്ങൾ പരിഗണിക്കാതെ, എല്ലാ ആക്ടിവിറ്റികളെയും മൾട്ടി-വിൻഡോയ്ക്കായി വലുപ്പം മാറ്റുക."</string>
-    <string name="enable_freeform_support" msgid="8409932201445109106">"ഫ്രീഫോം വിൻഡോകൾ പ്രവർത്തനക്ഷമമാക്കുക (ലെഗസി)"</string>
-    <string name="enable_freeform_support_summary" msgid="2242481082356957934">"പരീക്ഷണാത്മക ലെഗസി ഫ്രീഫോം വിൻഡോകൾക്കുള്ള പിന്തുണ പ്രവർത്തനക്ഷമമാക്കുക."</string>
+    <string name="enable_freeform_support" msgid="7599125687603914253">"ഫ്രീഫോം വിൻഡോകൾ പ്രവർത്തനക്ഷമമാക്കുക"</string>
     <string name="local_backup_password_title" msgid="4631017948933578709">"ഡെ‌സ്‌ക്ടോപ്പ് ബാക്കപ്പ് പാസ്‌വേഡ്"</string>
     <string name="local_backup_password_summary_none" msgid="7646898032616361714">"ഡെസ്‌ക്‌ടോപ്പ് പൂർണ്ണ ബാക്കപ്പുകൾ നിലവിൽ പരിരക്ഷിച്ചിട്ടില്ല"</string>
     <string name="local_backup_password_summary_change" msgid="1707357670383995567">"ഡെസ്‌ക്‌ടോപ്പ് പൂർണ്ണ ബാക്കപ്പുകൾക്കായി പാസ്‌വേഡുകൾ മാറ്റാനോ നീക്കംചെയ്യാനോ ടാപ്പുചെയ്യുക"</string>
@@ -496,7 +495,8 @@
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_remaining_charging_duration_only" msgid="8085099012811384899">"പൂർണ്ണമാകാൻ <xliff:g id="TIME">%1$s</xliff:g> ശേഷിക്കുന്നു"</string>
     <string name="power_charging_duration" msgid="6127154952524919719">"<xliff:g id="LEVEL">%1$s</xliff:g> - പൂർണ്ണമാകാൻ <xliff:g id="TIME">%2$s</xliff:g> ശേഷിക്കുന്നു"</string>
-    <string name="power_charging_limited" msgid="8202147604844938236">"<xliff:g id="LEVEL">%1$s</xliff:g> - ചാർജിംഗ് ഒപ്റ്റിമൈസ് ചെയ്തു"</string>
+    <!-- no translation found for power_charging_limited (4144004473976005214) -->
+    <skip />
     <string name="power_charging_future_paused" msgid="1809543660923642799">"<xliff:g id="LEVEL">%1$s</xliff:g> ‑ ചാർജ് ചെയ്യുന്നു"</string>
     <string name="power_fast_charging_duration_v2" msgid="3797735998640359490">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATUS">%2$s</xliff:g> - <xliff:g id="TIME">%3$s</xliff:g>-നകം പൂർണ്ണമാകും"</string>
     <string name="power_charging_duration_v2" msgid="2938998284074003248">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g>-നകം പൂർണ്ണമായി ചാർജ് ചെയ്യും"</string>
