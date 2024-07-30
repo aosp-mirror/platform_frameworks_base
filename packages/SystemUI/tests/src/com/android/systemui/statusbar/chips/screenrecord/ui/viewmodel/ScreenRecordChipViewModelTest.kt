@@ -148,8 +148,11 @@ class ScreenRecordChipViewModelTest : SysuiTestCase() {
             screenRecordRepo.screenRecordState.value = ScreenRecordModel.Recording
 
             assertThat(latest).isInstanceOf(OngoingActivityChipModel.Shown.Timer::class.java)
-            val icon = (latest as OngoingActivityChipModel.Shown).icon
-            assertThat((icon as Icon.Resource).res).isEqualTo(R.drawable.ic_screenrecord)
+            val icon =
+                (((latest as OngoingActivityChipModel.Shown).icon)
+                        as OngoingActivityChipModel.ChipIcon.Basic)
+                    .impl as Icon.Resource
+            assertThat(icon.res).isEqualTo(R.drawable.ic_screenrecord)
             assertThat(icon.contentDescription).isNotNull()
         }
 

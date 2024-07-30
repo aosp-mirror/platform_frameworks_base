@@ -25,6 +25,8 @@ import android.graphics.drawable.Icon
 import android.service.notification.StatusBarNotification
 import android.util.ArrayMap
 import com.android.app.tracing.traceSection
+import com.android.systemui.Flags
+import com.android.systemui.statusbar.StatusBarIconView
 import com.android.systemui.statusbar.notification.collection.GroupEntry
 import com.android.systemui.statusbar.notification.collection.ListEntry
 import com.android.systemui.statusbar.notification.collection.NotificationEntry
@@ -128,8 +130,14 @@ private class ActiveNotificationsStoreBuilder(
         return result
     }
 
-    private fun NotificationEntry.toModel(): ActiveNotificationModel =
-        existingModels.createOrReuse(
+    private fun NotificationEntry.toModel(): ActiveNotificationModel {
+        val statusBarChipIcon =
+            if (Flags.statusBarCallChipNotificationIcon()) {
+                icons.statusBarChipIcon
+            } else {
+                null
+            }
+        return existingModels.createOrReuse(
             key = key,
             groupKey = sbn.groupKey,
             whenTime = sbn.notification.`when`,
@@ -142,6 +150,7 @@ private class ActiveNotificationsStoreBuilder(
             aodIcon = icons.aodIcon?.sourceIcon,
             shelfIcon = icons.shelfIcon?.sourceIcon,
             statusBarIcon = icons.statusBarIcon?.sourceIcon,
+            statusBarChipIconView = statusBarChipIcon,
             uid = sbn.uid,
             packageName = sbn.packageName,
             contentIntent = sbn.notification.contentIntent,
@@ -150,6 +159,7 @@ private class ActiveNotificationsStoreBuilder(
             bucket = bucket,
             callType = sbn.toCallType(),
         )
+    }
 }
 
 private fun ActiveNotificationsStore.createOrReuse(
@@ -165,6 +175,7 @@ private fun ActiveNotificationsStore.createOrReuse(
     aodIcon: Icon?,
     shelfIcon: Icon?,
     statusBarIcon: Icon?,
+    statusBarChipIconView: StatusBarIconView?,
     uid: Int,
     packageName: String,
     contentIntent: PendingIntent?,
@@ -187,6 +198,7 @@ private fun ActiveNotificationsStore.createOrReuse(
             aodIcon = aodIcon,
             shelfIcon = shelfIcon,
             statusBarIcon = statusBarIcon,
+            statusBarChipIconView = statusBarChipIconView,
             uid = uid,
             instanceId = instanceId,
             isGroupSummary = isGroupSummary,
@@ -209,6 +221,7 @@ private fun ActiveNotificationsStore.createOrReuse(
             aodIcon = aodIcon,
             shelfIcon = shelfIcon,
             statusBarIcon = statusBarIcon,
+            statusBarChipIconView = statusBarChipIconView,
             uid = uid,
             instanceId = instanceId,
             isGroupSummary = isGroupSummary,
@@ -232,6 +245,7 @@ private fun ActiveNotificationModel.isCurrent(
     aodIcon: Icon?,
     shelfIcon: Icon?,
     statusBarIcon: Icon?,
+    statusBarChipIconView: StatusBarIconView?,
     uid: Int,
     packageName: String,
     contentIntent: PendingIntent?,
@@ -253,6 +267,7 @@ private fun ActiveNotificationModel.isCurrent(
         aodIcon != this.aodIcon -> false
         shelfIcon != this.shelfIcon -> false
         statusBarIcon != this.statusBarIcon -> false
+        statusBarChipIconView != this.statusBarChipIconView -> false
         uid != this.uid -> false
         instanceId != this.instanceId -> false
         isGroupSummary != this.isGroupSummary -> false
