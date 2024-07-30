@@ -1233,6 +1233,17 @@ flag {
 }
 
 flag {
+  name: "hubmode_fullscreen_vertical_swipe_fix"
+  namespace: "systemui"
+  description: "Bug fix that enables fullscreen vertical swiping in hub mode to bring up and down the bouncer and shade"
+  bug: "340177049"
+  metadata {
+      purpose: PURPOSE_BUGFIX
+  }
+}
+
+
+flag {
    namespace: "systemui"
    name: "remove_update_listener_in_qs_icon_view_impl"
    description: "Remove update listeners in QsIconViewImpl class to avoid memory leak."
