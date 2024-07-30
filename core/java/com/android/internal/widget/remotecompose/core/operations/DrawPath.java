@@ -41,7 +41,7 @@ public class DrawPath extends PaintOperation {
 
     @Override
     public String toString() {
-        return "DrawPath " + ";";
+        return "DrawPath " + "[" + mId + "]" + ", " + mStart + ", " + mEnd;
     }
 
     public static class Companion implements CompanionOperation {

@@ -21,6 +21,7 @@ import android.provider.DeviceConfig
 import com.android.internal.annotations.VisibleForTesting
 import com.android.internal.config.sysui.SystemUiDeviceConfigFlags.NOTIFICATIONS_USE_PEOPLE_FILTERING
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.statusbar.notification.collection.NotificationClassificationFlag
 import com.android.systemui.statusbar.notification.shared.NotificationMinimalismPrototype
 import com.android.systemui.statusbar.notification.shared.PriorityPeopleSection
 import com.android.systemui.statusbar.notification.stack.BUCKET_ALERTING
@@ -51,7 +52,11 @@ constructor(val proxy: DeviceConfigProxy, val context: Context) {
     }
 
     fun getNotificationBuckets(): IntArray {
-        if (PriorityPeopleSection.isEnabled || NotificationMinimalismPrototype.V2.isEnabled) {
+        if (
+            PriorityPeopleSection.isEnabled ||
+                NotificationMinimalismPrototype.isEnabled ||
+                NotificationClassificationFlag.isEnabled
+        ) {
             // We don't need this list to be adaptive, it can be the superset of all features.
             return PriorityBucket.getAllInOrder()
         }

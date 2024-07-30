@@ -43,11 +43,12 @@ import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.After
+import platform.test.runner.parameterized.ParameterizedAndroidJunit4
+import platform.test.runner.parameterized.Parameters
+import platform.test.runner.parameterized.Parameter
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.junit.runners.Parameterized
-import org.junit.runners.Parameterized.Parameters
 
 /**
  * Parameterized test for all of the common values of [FakeNetworkEventModel]. This test simply
@@ -56,7 +57,7 @@ import org.junit.runners.Parameterized.Parameters
  */
 @OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
-@RunWith(Parameterized::class)
+@RunWith(ParameterizedAndroidJunit4::class)
 internal class DemoMobileConnectionParameterizedTest(private val testCase: TestCase) :
     SysuiTestCase() {
 

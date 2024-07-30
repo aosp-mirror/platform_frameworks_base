@@ -31,6 +31,7 @@ import static android.media.AudioSystem.isBluetoothScoOutDevice;
 import static android.media.audio.Flags.automaticBtDeviceType;
 
 import static com.android.internal.annotations.VisibleForTesting.Visibility.PACKAGE;
+import static com.android.media.audio.Flags.asDeviceConnectionFailure;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -135,9 +136,10 @@ public class AudioDeviceInventory {
      * AdiDeviceState in the {@link AudioDeviceInventory#mDeviceInventory} list.
      * @param deviceState the device to update
      */
-    void addOrUpdateDeviceSAStateInInventory(AdiDeviceState deviceState) {
+    void addOrUpdateDeviceSAStateInInventory(AdiDeviceState deviceState, boolean syncInventory) {
         synchronized (mDeviceInventoryLock) {
-            mDeviceInventory.merge(deviceState.getDeviceId(), deviceState, (oldState, newState) -> {
+            mDeviceInventory.merge(deviceState.getDeviceId(), deviceState,
+                    (oldState, newState) -> {
                 oldState.setHasHeadTracker(newState.hasHeadTracker());
                 oldState.setHeadTrackerEnabled(newState.isHeadTrackerEnabled());
                 oldState.setSAEnabled(newState.isSAEnabled());
@@ -145,7 +147,9 @@ public class AudioDeviceInventory {
             });
             checkDeviceInventorySize_l();
         }
-        mDeviceBroker.postSynchronizeAdiDevicesInInventory(deviceState);
+        if (syncInventory) {
+            mDeviceBroker.postSynchronizeAdiDevicesInInventory(deviceState);
+        }
     }
 
     /**
@@ -196,7 +200,8 @@ public class AudioDeviceInventory {
      * AdiDeviceState in the {@link AudioDeviceInventory#mDeviceInventory} list.
      * @param deviceState the device to update
      */
-    void addOrUpdateAudioDeviceCategoryInInventory(AdiDeviceState deviceState) {
+    void addOrUpdateAudioDeviceCategoryInInventory(
+            AdiDeviceState deviceState, boolean syncInventory) {
         AtomicBoolean updatedCategory = new AtomicBoolean(false);
         synchronized (mDeviceInventoryLock) {
             if (automaticBtDeviceType()) {
@@ -218,7 +223,9 @@ public class AudioDeviceInventory {
         if (updatedCategory.get()) {
             mDeviceBroker.postUpdatedAdiDeviceState(deviceState, false /*initSA*/);
         }
-        mDeviceBroker.postSynchronizeAdiDevicesInInventory(deviceState);
+        if (syncInventory) {
+            mDeviceBroker.postSynchronizeAdiDevicesInInventory(deviceState);
+        }
     }
 
     void addAudioDeviceWithCategoryInInventoryIfNeeded(@NonNull String address,
@@ -235,14 +242,14 @@ public class AudioDeviceInventory {
         boolean bleCategoryFound = false;
         AdiDeviceState deviceState = findBtDeviceStateForAddress(address, DEVICE_OUT_BLE_HEADSET);
         if (deviceState != null) {
-            addOrUpdateAudioDeviceCategoryInInventory(deviceState);
+            addOrUpdateAudioDeviceCategoryInInventory(deviceState, true /*syncInventory*/);
             btCategory = deviceState.getAudioDeviceCategory();
             bleCategoryFound = true;
         }
 
         deviceState = findBtDeviceStateForAddress(address, DEVICE_OUT_BLUETOOTH_A2DP);
         if (deviceState != null) {
-            addOrUpdateAudioDeviceCategoryInInventory(deviceState);
+            addOrUpdateAudioDeviceCategoryInInventory(deviceState, true /*syncInventory*/);
             int a2dpCategory = deviceState.getAudioDeviceCategory();
             if (bleCategoryFound && a2dpCategory != btCategory) {
                 Log.w(TAG, "Found different audio device category for A2DP and BLE profiles with "
@@ -269,20 +276,40 @@ public class AudioDeviceInventory {
     }
 
     /**
-     * synchronize AdiDeviceState for LE devices in the same group
+     * Synchronize AdiDeviceState for LE devices in the same group
+     * or BT classic devices with the same address.
+     * @param updatedDevice the device state to synchronize or null.
+     * Called with null once after the device inventory and spatializer helper
+     * have been initialized to resync all devices.
      */
     void onSynchronizeAdiDevicesInInventory(AdiDeviceState updatedDevice) {
         synchronized (mDevicesLock) {
             synchronized (mDeviceInventoryLock) {
-                boolean found = false;
-                found |= synchronizeBleDeviceInInventory(updatedDevice);
-                if (automaticBtDeviceType()) {
-                    found |= synchronizeDeviceProfilesInInventory(updatedDevice);
-                }
-                if (found) {
-                    mDeviceBroker.postPersistAudioDeviceSettings();
+                if (updatedDevice != null) {
+                    onSynchronizeAdiDeviceInInventory_l(updatedDevice);
+                } else {
+                    for (AdiDeviceState ads : mDeviceInventory.values()) {
+                        onSynchronizeAdiDeviceInInventory_l(ads);
+                    }
                 }
             }
+        }
+    }
+
+    /**
+     * Synchronize AdiDeviceState for LE devices in the same group
+     * or BT classic devices with the same address.
+     * @param updatedDevice the device state to synchronize.
+     */
+    @GuardedBy({"mDevicesLock", "mDeviceInventoryLock"})
+    void onSynchronizeAdiDeviceInInventory_l(AdiDeviceState updatedDevice) {
+        boolean found = false;
+        found |= synchronizeBleDeviceInInventory(updatedDevice);
+        if (automaticBtDeviceType()) {
+            found |= synchronizeDeviceProfilesInInventory(updatedDevice);
+        }
+        if (found) {
+            mDeviceBroker.postPersistAudioDeviceSettings();
         }
     }
 
@@ -449,7 +476,7 @@ public class AudioDeviceInventory {
         @Override
         public DeviceInfo put(String key, DeviceInfo value) {
             final DeviceInfo result = super.put(key, value);
-            record("put", true /* connected */, key, value);
+            record("put", true /* connected */, value);
             return result;
         }
 
@@ -457,7 +484,7 @@ public class AudioDeviceInventory {
         public DeviceInfo putIfAbsent(String key, DeviceInfo value) {
             final DeviceInfo result = super.putIfAbsent(key, value);
             if (result == null) {
-                record("putIfAbsent", true /* connected */, key, value);
+                record("putIfAbsent", true /* connected */, value);
             }
             return result;
         }
@@ -466,7 +493,7 @@ public class AudioDeviceInventory {
         public DeviceInfo remove(Object key) {
             final DeviceInfo result = super.remove(key);
             if (result != null) {
-                record("remove", false /* connected */, (String) key, result);
+                record("remove", false /* connected */, result);
             }
             return result;
         }
@@ -475,7 +502,7 @@ public class AudioDeviceInventory {
         public boolean remove(Object key, Object value) {
             final boolean result = super.remove(key, value);
             if (result) {
-                record("remove", false /* connected */, (String) key, (DeviceInfo) value);
+                record("remove", false /* connected */, (DeviceInfo) value);
             }
             return result;
         }
@@ -489,7 +516,7 @@ public class AudioDeviceInventory {
         // putAll
         // replace
         // replaceAll
-        private void record(String event, boolean connected, String key, DeviceInfo value) {
+        private void record(String event, boolean connected, DeviceInfo value) {
             // DeviceInfo - int mDeviceType;
             // DeviceInfo - int mDeviceCodecFormat;
             new MediaMetrics.Item(MediaMetrics.Name.AUDIO_DEVICE
@@ -502,6 +529,17 @@ public class AudioDeviceInventory {
                     .record();
         }
     };
+
+    /**
+     * package-protected for unit testing only
+     * Returns the currently connected devices
+     * @return the collection of connected devices
+     */
+    /*package*/ @NonNull Collection<DeviceInfo> getConnectedDevices() {
+        synchronized (mDevicesLock) {
+            return mConnectedDevices.values();
+        }
+    }
 
     // List of devices actually connected to AudioPolicy (through AudioSystem), only one
     // by device type, which is used as the key, value is the DeviceInfo generated key.
@@ -572,8 +610,9 @@ public class AudioDeviceInventory {
     /**
      * Class to store info about connected devices.
      * Use makeDeviceListKey() to make a unique key for this list.
+     * Package-protected for unit tests
      */
-    private static class DeviceInfo {
+    /*package*/ static class DeviceInfo {
         final int mDeviceType;
         final @NonNull String mDeviceName;
         final @NonNull String mDeviceAddress;
@@ -595,6 +634,9 @@ public class AudioDeviceInventory {
             mDeviceName = TextUtils.emptyIfNull(deviceName);
             mDeviceAddress = TextUtils.emptyIfNull(address);
             mDeviceIdentityAddress = TextUtils.emptyIfNull(identityAddress);
+            if (mDeviceIdentityAddress.isEmpty()) {
+                mDeviceIdentityAddress = mDeviceAddress;
+            }
             mDeviceCodecFormat = codecFormat;
             mGroupId = groupId;
             mPeerDeviceAddress = TextUtils.emptyIfNull(peerAddress);
@@ -662,7 +704,7 @@ public class AudioDeviceInventory {
     /**
      * A class just for packaging up a set of connection parameters.
      */
-    /*package*/ class WiredDeviceConnectionState {
+    /*package*/ static class WiredDeviceConnectionState {
         public final AudioDeviceAttributes mAttributes;
         public final @AudioService.ConnectionState int mState;
         public final String mCaller;
@@ -733,13 +775,27 @@ public class AudioDeviceInventory {
     // Always executed on AudioDeviceBroker message queue
     /*package*/ void onRestoreDevices() {
         synchronized (mDevicesLock) {
+            int res;
+            List<DeviceInfo> failedReconnectionDeviceList = new ArrayList<>(/*initialCapacity*/ 0);
             //TODO iterate on mApmConnectedDevices instead once it handles all device types
             for (DeviceInfo di : mConnectedDevices.values()) {
-                mAudioSystem.setDeviceConnectionState(new AudioDeviceAttributes(di.mDeviceType,
+                res = mAudioSystem.setDeviceConnectionState(new AudioDeviceAttributes(
+                        di.mDeviceType,
                         di.mDeviceAddress,
                         di.mDeviceName),
                         AudioSystem.DEVICE_STATE_AVAILABLE,
                         di.mDeviceCodecFormat);
+                if (asDeviceConnectionFailure() && res != AudioSystem.AUDIO_STATUS_OK) {
+                    failedReconnectionDeviceList.add(di);
+                }
+            }
+            if (asDeviceConnectionFailure()) {
+                for (DeviceInfo di : failedReconnectionDeviceList) {
+                    AudioService.sDeviceLogger.enqueueAndSlog(
+                            "Device inventory restore failed to reconnect " + di,
+                            EventLogger.Event.ALOGE, TAG);
+                    mConnectedDevices.remove(di.getKey(), di);
+                }
             }
             mAppliedStrategyRolesInt.clear();
             mAppliedPresetRolesInt.clear();
@@ -1054,7 +1110,9 @@ public class AudioDeviceInventory {
                 IAudioRoutesObserver obs = mRoutesObservers.getBroadcastItem(n);
                 try {
                     obs.dispatchAudioRoutesChanged(routes);
-                } catch (RemoteException e) { }
+                } catch (RemoteException e) {
+                    Log.e(TAG, "onReportNewRoutes", e);
+                }
             }
         }
         mRoutesObservers.finishBroadcast();
@@ -1726,6 +1784,15 @@ public class AudioDeviceInventory {
             if (AudioService.DEBUG_DEVICES) {
                 Slog.i(TAG, "deviceInfo:" + di + " is(already)Connected:" + isConnected);
             }
+            // Do not report an error in case of redundant connect or disconnect request
+            // as this can cause a state mismatch between BtHelper and AudioDeviceInventory
+            if (connect == isConnected) {
+                Log.i(TAG, "handleDeviceConnection() deviceInfo=" + di + " is already "
+                        + (connect ? "" : "dis") + "connected");
+                mmi.set(MediaMetrics.Property.STATE, connect
+                        ? MediaMetrics.Value.CONNECT : MediaMetrics.Value.DISCONNECT).record();
+                return true;
+            }
             if (connect && !isConnected) {
                 final int res;
                 if (isForTesting) {
@@ -1835,7 +1902,8 @@ public class AudioDeviceInventory {
                     .set(MediaMetrics.Property.EVENT, "disconnectHearingAid")
                     .record();
             if (toRemove.size() > 0) {
-                final int delay = checkSendBecomingNoisyIntentInt(DEVICE_OUT_HEARING_AID,
+                /*final int delay = */
+                checkSendBecomingNoisyIntentInt(DEVICE_OUT_HEARING_AID,
                         AudioService.CONNECTION_STATE_DISCONNECTED, AudioSystem.DEVICE_NONE);
                 toRemove.stream().forEach(deviceAddress ->
                         // TODO delay not used?
@@ -2029,8 +2097,9 @@ public class AudioDeviceInventory {
                     "APM failed to make available A2DP device addr="
                             + Utils.anonymizeBluetoothAddress(address)
                             + " error=" + res).printSlog(EventLogger.Event.ALOGE, TAG));
-            // TODO: connection failed, stop here
-            // TODO: return;
+            if (asDeviceConnectionFailure()) {
+                return;
+            }
         } else {
             AudioService.sDeviceLogger.enqueue(new EventLogger.StringEvent(
                     "A2DP sink device addr=" + Utils.anonymizeBluetoothAddress(address)
@@ -2295,8 +2364,7 @@ public class AudioDeviceInventory {
                     "APM failed to make unavailable A2DP device addr="
                             + Utils.anonymizeBluetoothAddress(address)
                             + " error=" + res).printSlog(EventLogger.Event.ALOGE, TAG));
-            // TODO:  failed to disconnect, stop here
-            // TODO: return;
+            // not taking further action: proceeding as if disconnection from APM worked
         } else {
             AudioService.sDeviceLogger.enqueue((new EventLogger.StringEvent(
                     "A2DP device addr=" + Utils.anonymizeBluetoothAddress(address)
@@ -2342,8 +2410,9 @@ public class AudioDeviceInventory {
                     "APM failed to make available A2DP source device addr="
                             + Utils.anonymizeBluetoothAddress(address)
                             + " error=" + res).printSlog(EventLogger.Event.ALOGE, TAG));
-            // TODO: connection failed, stop here
-            // TODO: return
+            if (asDeviceConnectionFailure()) {
+                return;
+            }
         } else {
             AudioService.sDeviceLogger.enqueue(new EventLogger.StringEvent(
                     "A2DP source device addr=" + Utils.anonymizeBluetoothAddress(address)
@@ -2361,6 +2430,7 @@ public class AudioDeviceInventory {
         mAudioSystem.setDeviceConnectionState(ada,
                 AudioSystem.DEVICE_STATE_UNAVAILABLE,
                 AudioSystem.AUDIO_FORMAT_DEFAULT);
+        // always remove regardless of the result
         mConnectedDevices.remove(
                 DeviceInfo.makeDeviceListKey(AudioSystem.DEVICE_IN_BLUETOOTH_A2DP, address));
         mDeviceBroker.postCheckCommunicationDeviceRemoval(ada);
@@ -2377,9 +2447,18 @@ public class AudioDeviceInventory {
 
         AudioDeviceAttributes ada = new AudioDeviceAttributes(
                 DEVICE_OUT_HEARING_AID, address, name);
-        mAudioSystem.setDeviceConnectionState(ada,
+        final int res = mAudioSystem.setDeviceConnectionState(ada,
                 AudioSystem.DEVICE_STATE_AVAILABLE,
                 AudioSystem.AUDIO_FORMAT_DEFAULT);
+        if (asDeviceConnectionFailure() && res != AudioSystem.AUDIO_STATUS_OK) {
+            AudioService.sDeviceLogger.enqueueAndSlog(
+                    "APM failed to make available HearingAid addr=" + address
+                            + " error=" + res,
+                    EventLogger.Event.ALOGE, TAG);
+            return;
+        }
+        AudioService.sDeviceLogger.enqueueAndSlog("HearingAid made available addr=" + address,
+                EventLogger.Event.ALOGI, TAG);
         mConnectedDevices.put(
                 DeviceInfo.makeDeviceListKey(DEVICE_OUT_HEARING_AID, address),
                 new DeviceInfo(DEVICE_OUT_HEARING_AID, name, address));
@@ -2406,6 +2485,7 @@ public class AudioDeviceInventory {
         mAudioSystem.setDeviceConnectionState(ada,
                 AudioSystem.DEVICE_STATE_UNAVAILABLE,
                 AudioSystem.AUDIO_FORMAT_DEFAULT);
+        // always remove regardless of return code
         mConnectedDevices.remove(
                 DeviceInfo.makeDeviceListKey(DEVICE_OUT_HEARING_AID, address));
         // Remove Hearing Aid routes as well
@@ -2496,14 +2576,15 @@ public class AudioDeviceInventory {
             mDeviceBroker.setBluetoothA2dpOnInt(true, false /*fromA2dp*/, eventSource);
 
             AudioDeviceAttributes ada = new AudioDeviceAttributes(device, address, name);
-            final int res = AudioSystem.setDeviceConnectionState(ada,
+            final int res = mAudioSystem.setDeviceConnectionState(ada,
                     AudioSystem.DEVICE_STATE_AVAILABLE, codec);
             if (res != AudioSystem.AUDIO_STATUS_OK) {
-                AudioService.sDeviceLogger.enqueue(new EventLogger.StringEvent(
+                AudioService.sDeviceLogger.enqueueAndSlog(
                         "APM failed to make available LE Audio device addr=" + address
-                                + " error=" + res).printSlog(EventLogger.Event.ALOGE, TAG));
-                // TODO: connection failed, stop here
-                // TODO: return;
+                                + " error=" + res, EventLogger.Event.ALOGE, TAG);
+                if (asDeviceConnectionFailure()) {
+                    return;
+                }
             } else {
                 AudioService.sDeviceLogger.enqueue(new EventLogger.StringEvent(
                         "LE Audio " + (AudioSystem.isInputDevice(device) ? "source" : "sink")
@@ -2516,23 +2597,27 @@ public class AudioDeviceInventory {
                     new DeviceInfo(device, name, address,
                             btInfo.mDevice.getIdentityAddress(), codec,
                             groupId, peerAddress, peerIdentityAddress));
-            mDeviceBroker.postAccessoryPlugMediaUnmute(device);
-            setCurrentAudioRouteNameIfPossible(name, /*fromA2dp=*/false);
+            if (btInfo.mIsLeOutput) {
+                mDeviceBroker.postAccessoryPlugMediaUnmute(device);
+                setCurrentAudioRouteNameIfPossible(name, /*fromA2dp=*/false);
+            }
             addAudioDeviceInInventoryIfNeeded(device, address, peerAddress,
                     BtHelper.getBtDeviceCategory(address), /*userDefined=*/false);
         }
 
-        if (streamType == AudioSystem.STREAM_DEFAULT) {
-            // No need to update volume for input devices
-            return;
-        }
+        if (btInfo.mIsLeOutput) {
+            if (streamType == AudioSystem.STREAM_DEFAULT) {
+                // No need to update volume for input devices
+                return;
+            }
 
-        final int leAudioVolIndex = (volumeIndex == -1)
-                ? mDeviceBroker.getVssVolumeForDevice(streamType, device)
-                : volumeIndex;
-        final int maxIndex = mDeviceBroker.getMaxVssVolumeForStream(streamType);
-        mDeviceBroker.postSetLeAudioVolumeIndex(leAudioVolIndex, maxIndex, streamType);
-        mDeviceBroker.postApplyVolumeOnDevice(streamType, device, "makeLeAudioDeviceAvailable");
+            final int leAudioVolIndex = (volumeIndex == -1)
+                    ? mDeviceBroker.getVssVolumeForDevice(streamType, device)
+                    : volumeIndex;
+            final int maxIndex = mDeviceBroker.getMaxVssVolumeForStream(streamType);
+            mDeviceBroker.postSetLeAudioVolumeIndex(leAudioVolIndex, maxIndex, streamType);
+            mDeviceBroker.postApplyVolumeOnDevice(streamType, device, "makeLeAudioDeviceAvailable");
+        }
 
         updateBluetoothPreferredModes_l(btInfo.mDevice /*connectedDevice*/);
     }
@@ -2543,7 +2628,7 @@ public class AudioDeviceInventory {
         AudioDeviceAttributes ada = null;
         if (device != AudioSystem.DEVICE_NONE) {
             ada = new AudioDeviceAttributes(device, address);
-            final int res = AudioSystem.setDeviceConnectionState(ada,
+            final int res = mAudioSystem.setDeviceConnectionState(ada,
                     AudioSystem.DEVICE_STATE_UNAVAILABLE,
                     codec);
 
@@ -2551,8 +2636,7 @@ public class AudioDeviceInventory {
                 AudioService.sDeviceLogger.enqueue(new EventLogger.StringEvent(
                         "APM failed to make unavailable LE Audio device addr=" + address
                                 + " error=" + res).printSlog(EventLogger.Event.ALOGE, TAG));
-                // TODO:  failed to disconnect, stop here
-                // TODO: return;
+                // not taking further action: proceeding as if disconnection from APM worked
             } else {
                 AudioService.sDeviceLogger.enqueue(new EventLogger.StringEvent(
                         "LE Audio device addr=" + Utils.anonymizeBluetoothAddress(address)
@@ -2697,10 +2781,6 @@ public class AudioDeviceInventory {
     private static final String CONNECT_INTENT_KEY_PORT_NAME = "portName";
     private static final String CONNECT_INTENT_KEY_STATE = "state";
     private static final String CONNECT_INTENT_KEY_ADDRESS = "address";
-    private static final String CONNECT_INTENT_KEY_HAS_PLAYBACK = "hasPlayback";
-    private static final String CONNECT_INTENT_KEY_HAS_CAPTURE = "hasCapture";
-    private static final String CONNECT_INTENT_KEY_HAS_MIDI = "hasMIDI";
-    private static final String CONNECT_INTENT_KEY_DEVICE_CLASS = "class";
 
     private void sendDeviceConnectionIntent(int device, int state, String address,
                                             String deviceName) {
@@ -2863,6 +2943,7 @@ public class AudioDeviceInventory {
                 mPrefDevDispatchers.getBroadcastItem(i).dispatchPrefDevicesChanged(
                         strategy, devices);
             } catch (RemoteException e) {
+                Log.e(TAG, "dispatchPreferredDevice ", e);
             }
         }
         mPrefDevDispatchers.finishBroadcast();
@@ -2879,6 +2960,7 @@ public class AudioDeviceInventory {
                 mNonDefDevDispatchers.getBroadcastItem(i).dispatchNonDefDevicesChanged(
                         strategy, devices);
             } catch (RemoteException e) {
+                Log.e(TAG, "dispatchNonDefaultDevice ", e);
             }
         }
         mNonDefDevDispatchers.finishBroadcast();
@@ -2895,6 +2977,7 @@ public class AudioDeviceInventory {
                 mDevRoleCapturePresetDispatchers.getBroadcastItem(i).dispatchDevicesRoleChanged(
                         capturePreset, role, devices);
             } catch (RemoteException e) {
+                Log.e(TAG, "dispatchDevicesRoleForCapturePreset ", e);
             }
         }
         mDevRoleCapturePresetDispatchers.finishBroadcast();
@@ -2949,8 +3032,8 @@ public class AudioDeviceInventory {
             // Note if the device is not compatible with spatialization mode or the device
             // type is not canonical, it will be ignored in {@link SpatializerHelper}.
             if (devState != null) {
-                addOrUpdateDeviceSAStateInInventory(devState);
-                addOrUpdateAudioDeviceCategoryInInventory(devState);
+                addOrUpdateDeviceSAStateInInventory(devState, false /*syncInventory*/);
+                addOrUpdateAudioDeviceCategoryInInventory(devState, false /*syncInventory*/);
             }
         }
     }
@@ -2960,7 +3043,7 @@ public class AudioDeviceInventory {
 
     /**
      * Check if device is in the list of connected devices
-     * @param device
+     * @param device the device to query
      * @return true if connected
      */
     @VisibleForTesting

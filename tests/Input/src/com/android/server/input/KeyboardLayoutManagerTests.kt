@@ -58,7 +58,7 @@ import java.io.FileOutputStream
 import java.io.IOException
 import java.io.InputStream
 
-private fun createKeyboard(
+fun createKeyboard(
     deviceId: Int,
     vendorId: Int,
     productId: Int,

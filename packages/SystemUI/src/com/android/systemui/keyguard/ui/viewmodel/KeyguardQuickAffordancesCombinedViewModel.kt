@@ -18,6 +18,7 @@
 package com.android.systemui.keyguard.ui.viewmodel
 
 import androidx.annotation.VisibleForTesting
+import com.android.app.tracing.FlowTracing.traceEmissionCount
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardQuickAffordanceInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
@@ -229,7 +230,7 @@ constructor(
                     )
                 }
                 .distinctUntilChanged()
-        }
+        }.traceEmissionCount({"QuickAfforcances#button${position.toSlotId()}"})
     }
 
     private fun KeyguardQuickAffordanceModel.toViewModel(

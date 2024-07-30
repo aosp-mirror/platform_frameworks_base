@@ -34,6 +34,7 @@ import com.android.internal.util.LatencyTracker;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.keyguard.KeyguardSecurityModel.SecurityMode;
 import com.android.keyguard.domain.interactor.KeyguardKeyboardInteractor;
+import com.android.systemui.Flags;
 import com.android.systemui.classifier.FalsingCollector;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.res.R;
@@ -130,7 +131,10 @@ public abstract class KeyguardPinBasedInputViewController<T extends KeyguardPinB
                     verifyPasswordAndUnlock();
                 }
             });
-            okButton.setOnHoverListener(mLiftToActivateListener);
+
+            if (!Flags.simPinTalkbackFixForDoubleSubmit()) {
+                okButton.setOnHoverListener(mLiftToActivateListener);
+            }
         }
         if (pinInputFieldStyledFocusState()) {
             collectFlow(mPasswordEntry, mKeyguardKeyboardInteractor.isAnyKeyboardConnected(),

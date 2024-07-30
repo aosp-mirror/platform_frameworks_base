@@ -434,7 +434,6 @@ public final class Parcel {
     @RavenwoodThrow
     private static native void nativeWriteStrongBinder(long nativePtr, IBinder val);
     @FastNative
-    @RavenwoodThrow
     private static native void nativeWriteFileDescriptor(long nativePtr, FileDescriptor val);
 
     private static native byte[] nativeCreateByteArray(long nativePtr);
@@ -456,7 +455,6 @@ public final class Parcel {
     @RavenwoodThrow
     private static native IBinder nativeReadStrongBinder(long nativePtr);
     @FastNative
-    @RavenwoodThrow
     private static native FileDescriptor nativeReadFileDescriptor(long nativePtr);
 
     private static native long nativeCreate();

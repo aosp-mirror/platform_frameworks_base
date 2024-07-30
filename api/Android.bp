@@ -29,12 +29,14 @@ bootstrap_go_package {
     pkgPath: "android/soong/api",
     deps: [
         "blueprint",
+        "blueprint-proptools",
         "soong",
         "soong-android",
         "soong-genrule",
         "soong-java",
     ],
     srcs: ["api.go"],
+    testSrcs: ["api_test.go"],
     pluginFor: ["soong_build"],
 }
 
@@ -60,40 +62,8 @@ metalava_cmd = "$(location metalava)"
 metalava_cmd += " -J--add-opens=java.base/java.util=ALL-UNNAMED "
 metalava_cmd += " --quiet "
 
-soong_config_module_type {
-    name: "enable_crashrecovery_module",
-    module_type: "combined_apis_defaults",
-    config_namespace: "ANDROID",
-    bool_variables: ["release_crashrecovery_module"],
-    properties: [
-        "bootclasspath",
-        "system_server_classpath",
-    ],
-}
-
-soong_config_bool_variable {
-    name: "release_crashrecovery_module",
-}
-
-enable_crashrecovery_module {
-    name: "crashrecovery_module_defaults",
-    soong_config_variables: {
-        release_crashrecovery_module: {
-            bootclasspath: [
-                "framework-crashrecovery",
-            ],
-            system_server_classpath: [
-                "service-crashrecovery",
-            ],
-        },
-    },
-}
-
 combined_apis {
     name: "frameworks-base-api",
-    defaults: [
-        "crashrecovery_module_defaults",
-    ],
     bootclasspath: [
         "android.net.ipsec.ike",
         "art.module.public.api",
@@ -126,7 +96,12 @@ combined_apis {
         "framework-virtualization",
         "framework-wifi",
         "i18n.module.public.api",
-    ],
+    ] + select(soong_config_variable("ANDROID", "release_crashrecovery_module"), {
+        "true": [
+            "framework-crashrecovery",
+        ],
+        default: [],
+    }),
     system_server_classpath: [
         "service-art",
         "service-configinfrastructure",
@@ -135,7 +110,12 @@ combined_apis {
         "service-permission",
         "service-rkp",
         "service-sdksandbox",
-    ],
+    ] + select(soong_config_variable("ANDROID", "release_crashrecovery_module"), {
+        "true": [
+            "service-crashrecovery",
+        ],
+        default: [],
+    }),
 }
 
 genrule {
@@ -157,6 +137,7 @@ genrule {
 genrule {
     name: "frameworks-base-api-system-current-compat",
     srcs: [
+        ":android.api.public.latest",
         ":android.api.system.latest",
         ":android-incompatibilities.api.system.latest",
         ":frameworks-base-api-current.txt",
@@ -165,33 +146,35 @@ genrule {
     out: ["updated-baseline.txt"],
     tools: ["metalava"],
     cmd: metalava_cmd +
+        "--check-compatibility:api:released $(location :android.api.public.latest) " +
         "--check-compatibility:api:released $(location :android.api.system.latest) " +
-        "--check-compatibility:base $(location :frameworks-base-api-current.txt) " +
         "--baseline:compatibility:released $(location :android-incompatibilities.api.system.latest) " +
         "--update-baseline:compatibility:released $(genDir)/updated-baseline.txt " +
+        "$(location :frameworks-base-api-current.txt) " +
         "$(location :frameworks-base-api-system-current.txt)",
 }
 
 genrule {
     name: "frameworks-base-api-module-lib-current-compat",
     srcs: [
+        ":android.api.public.latest",
+        ":android.api.system.latest",
         ":android.api.module-lib.latest",
         ":android-incompatibilities.api.module-lib.latest",
         ":frameworks-base-api-current.txt",
+        ":frameworks-base-api-system-current.txt",
         ":frameworks-base-api-module-lib-current.txt",
     ],
     out: ["updated-baseline.txt"],
     tools: ["metalava"],
     cmd: metalava_cmd +
+        "--check-compatibility:api:released $(location :android.api.public.latest) " +
+        "--check-compatibility:api:released $(location :android.api.system.latest) " +
         "--check-compatibility:api:released $(location :android.api.module-lib.latest) " +
-        // Note: having "public" be the base of module-lib is not perfect -- it should
-        // ideally be a merged public+system (which metalava is not currently able to generate).
-        // This "base" will help when migrating from MODULE_LIBS -> public, but not when
-        // migrating from MODULE_LIBS -> system (where it needs to instead be listed as
-        // an incompatibility).
-        "--check-compatibility:base $(location :frameworks-base-api-current.txt) " +
         "--baseline:compatibility:released $(location :android-incompatibilities.api.module-lib.latest) " +
         "--update-baseline:compatibility:released $(genDir)/updated-baseline.txt " +
+        "$(location :frameworks-base-api-current.txt) " +
+        "$(location :frameworks-base-api-system-current.txt) " +
         "$(location :frameworks-base-api-module-lib-current.txt)",
 }
 
@@ -365,15 +348,12 @@ stubs_defaults {
         "--hide CallbackInterface",
         // Disable HiddenSuperclass, as Metalava handles this fine (it should be hidden by default)
         "--hide HiddenSuperclass",
-        "--hide-package android.audio.policy.configuration.V7_0",
-        "--hide-package com.android.server",
         "--manifest $(location :frameworks-base-core-AndroidManifest.xml)",
     ],
     filter_packages: packages_to_document,
     high_mem: true, // Lots of sources => high memory use, see b/170701554
     installable: false,
     annotations_enabled: true,
-    previous_api: ":android.api.public.latest",
     merge_annotations_dirs: ["metalava-manual"],
     defaults_visibility: ["//frameworks/base/api"],
     visibility: [

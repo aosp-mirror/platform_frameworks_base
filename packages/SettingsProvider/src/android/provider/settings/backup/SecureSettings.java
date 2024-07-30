@@ -134,6 +134,7 @@ public class SecureSettings {
         Settings.Secure.SFPS_PERFORMANT_AUTH_ENABLED,
         Settings.Secure.ACTIVE_UNLOCK_ON_WAKE,
         Settings.Secure.ACTIVE_UNLOCK_ON_UNLOCK_INTENT,
+        Settings.Secure.ACTIVE_UNLOCK_ON_UNLOCK_INTENT_LEGACY,
         Settings.Secure.ACTIVE_UNLOCK_ON_BIOMETRIC_FAIL,
         Settings.Secure.ACTIVE_UNLOCK_ON_FACE_ERRORS,
         Settings.Secure.ACTIVE_UNLOCK_ON_FACE_ACQUIRE_INFO,
@@ -227,6 +228,7 @@ public class SecureSettings {
         Settings.Secure.ACCESSIBILITY_MAGNIFICATION_ALWAYS_ON_ENABLED,
         Settings.Secure.ACCESSIBILITY_MAGNIFICATION_JOYSTICK_ENABLED,
         Settings.Secure.ACCESSIBILITY_MAGNIFICATION_TWO_FINGER_TRIPLE_TAP_ENABLED,
+        Settings.Secure.ACCESSIBILITY_MOUSE_KEYS_ENABLED,
         Settings.Secure.ACCESSIBILITY_PINCH_TO_ZOOM_ANYWHERE_ENABLED,
         Settings.Secure.ACCESSIBILITY_SINGLE_FINGER_PANNING_ENABLED,
         Settings.Secure.ODI_CAPTIONS_VOLUME_UI_ENABLED,
@@ -251,6 +253,7 @@ public class SecureSettings {
         Settings.Secure.CUSTOM_BUGREPORT_HANDLER_APP,
         Settings.Secure.CUSTOM_BUGREPORT_HANDLER_USER,
         Settings.Secure.CONTEXTUAL_SCREEN_TIMEOUT_ENABLED,
+        Settings.Secure.HINGE_ANGLE_LIDEVENT_ENABLED,
         Settings.Secure.LOCK_SCREEN_WEATHER_ENABLED,
         Settings.Secure.HEARING_AID_RINGTONE_ROUTING,
         Settings.Secure.HEARING_AID_CALL_ROUTING,
@@ -279,5 +282,7 @@ public class SecureSettings {
         Settings.Secure.ON_DEVICE_INTELLIGENCE_UNBIND_TIMEOUT_MS,
         Settings.Secure.ON_DEVICE_INFERENCE_UNBIND_TIMEOUT_MS,
         Settings.Secure.ON_DEVICE_INTELLIGENCE_IDLE_TIMEOUT_MS,
+        Settings.Secure.MANDATORY_BIOMETRICS,
+        Settings.Secure.MANDATORY_BIOMETRICS_REQUIREMENTS_SATISFIED,
     };
 }

@@ -18,6 +18,7 @@ package com.android.wm.shell.desktopmode
 
 import android.app.ActivityManager.RunningTaskInfo
 import android.app.ActivityOptions
+import android.app.KeyguardManager
 import android.app.PendingIntent
 import android.app.TaskInfo
 import android.app.WindowConfiguration.ACTIVITY_TYPE_HOME
@@ -35,12 +36,12 @@ import android.graphics.Rect
 import android.graphics.Region
 import android.os.IBinder
 import android.os.SystemProperties
+import android.util.Size
 import android.view.Display.DEFAULT_DISPLAY
 import android.view.SurfaceControl
 import android.view.WindowManager.TRANSIT_CHANGE
 import android.view.WindowManager.TRANSIT_NONE
 import android.view.WindowManager.TRANSIT_OPEN
-import android.view.WindowManager.TRANSIT_TO_BACK
 import android.view.WindowManager.TRANSIT_TO_FRONT
 import android.window.RemoteTransition
 import android.window.TransitionInfo
@@ -48,7 +49,11 @@ import android.window.TransitionRequestInfo
 import android.window.WindowContainerTransaction
 import androidx.annotation.BinderThread
 import com.android.internal.annotations.VisibleForTesting
+import com.android.internal.jank.Cuj.CUJ_DESKTOP_MODE_ENTER_APP_HANDLE_DRAG_HOLD
+import com.android.internal.jank.Cuj.CUJ_DESKTOP_MODE_ENTER_APP_HANDLE_DRAG_RELEASE
+import com.android.internal.jank.InteractionJankMonitor
 import com.android.internal.policy.ScreenDecorationsUtils
+import com.android.internal.protolog.ProtoLog
 import com.android.window.flags.Flags
 import com.android.wm.shell.RootTaskDisplayAreaOrganizer
 import com.android.wm.shell.ShellTaskOrganizer
@@ -62,20 +67,24 @@ import com.android.wm.shell.common.RemoteCallable
 import com.android.wm.shell.common.ShellExecutor
 import com.android.wm.shell.common.SingleInstanceRemoteListener
 import com.android.wm.shell.common.SyncTransactionQueue
+import com.android.wm.shell.shared.desktopmode.DesktopModeFlags.WALLPAPER_ACTIVITY
 import com.android.wm.shell.common.desktopmode.DesktopModeTransitionSource
 import com.android.wm.shell.common.split.SplitScreenConstants.SPLIT_POSITION_BOTTOM_OR_RIGHT
 import com.android.wm.shell.common.split.SplitScreenConstants.SPLIT_POSITION_TOP_OR_LEFT
-import com.android.wm.shell.compatui.isSingleTopActivityTranslucent
+import com.android.wm.shell.compatui.isTopActivityExemptFromDesktopWindowing
 import com.android.wm.shell.desktopmode.DesktopModeTaskRepository.VisibleTasksListener
+import com.android.wm.shell.desktopmode.DesktopModeVisualIndicator.IndicatorType
 import com.android.wm.shell.desktopmode.DragToDesktopTransitionHandler.DragToDesktopStateListener
 import com.android.wm.shell.draganddrop.DragAndDropController
 import com.android.wm.shell.protolog.ShellProtoLogGroup.WM_SHELL_DESKTOP_MODE
 import com.android.wm.shell.recents.RecentTasksController
 import com.android.wm.shell.recents.RecentsTransitionHandler
 import com.android.wm.shell.recents.RecentsTransitionStateListener
-import com.android.wm.shell.shared.DesktopModeStatus
-import com.android.wm.shell.shared.DesktopModeStatus.DESKTOP_DENSITY_OVERRIDE
-import com.android.wm.shell.shared.DesktopModeStatus.useDesktopOverrideDensity
+import com.android.wm.shell.shared.desktopmode.DesktopModeFlags
+import com.android.wm.shell.shared.desktopmode.DesktopModeStatus
+import com.android.wm.shell.shared.desktopmode.DesktopModeStatus.DESKTOP_DENSITY_OVERRIDE
+import com.android.wm.shell.shared.desktopmode.DesktopModeStatus.useDesktopOverrideDensity
+import com.android.wm.shell.shared.TransitionUtil
 import com.android.wm.shell.shared.annotations.ExternalThread
 import com.android.wm.shell.shared.annotations.ShellMainThread
 import com.android.wm.shell.splitscreen.SplitScreenController
@@ -86,7 +95,6 @@ import com.android.wm.shell.sysui.ShellInit
 import com.android.wm.shell.sysui.ShellSharedConstants
 import com.android.wm.shell.transition.OneShotRemoteHandler
 import com.android.wm.shell.transition.Transitions
-import com.android.wm.shell.util.KtProtoLog
 import com.android.wm.shell.windowdecor.DragPositioningCallbackUtility
 import com.android.wm.shell.windowdecor.MoveToDesktopAnimator
 import com.android.wm.shell.windowdecor.OnTaskResizeAnimationListener
@@ -108,18 +116,20 @@ class DesktopTasksController(
     private val rootTaskDisplayAreaOrganizer: RootTaskDisplayAreaOrganizer,
     private val dragAndDropController: DragAndDropController,
     private val transitions: Transitions,
+    private val keyguardManager: KeyguardManager,
     private val enterDesktopTaskTransitionHandler: EnterDesktopTaskTransitionHandler,
     private val exitDesktopTaskTransitionHandler: ExitDesktopTaskTransitionHandler,
     private val toggleResizeDesktopTaskTransitionHandler: ToggleResizeDesktopTaskTransitionHandler,
     private val dragToDesktopTransitionHandler: DragToDesktopTransitionHandler,
-    private val desktopModeTaskRepository: DesktopModeTaskRepository,
+    private val taskRepository: DesktopModeTaskRepository,
     private val desktopModeLoggerTransitionObserver: DesktopModeLoggerTransitionObserver,
     private val launchAdjacentController: LaunchAdjacentController,
     private val recentsTransitionHandler: RecentsTransitionHandler,
     private val multiInstanceHelper: MultiInstanceHelper,
     @ShellMainThread private val mainExecutor: ShellExecutor,
     private val desktopTasksLimiter: Optional<DesktopTasksLimiter>,
-    private val recentTasksController: RecentTasksController?
+    private val recentTasksController: RecentTasksController?,
+    private val interactionJankMonitor: InteractionJankMonitor
 ) :
     RemoteCallable<DesktopTasksController>,
     Transitions.TransitionHandler,
@@ -156,18 +166,6 @@ class DesktopTasksController(
             }
         }
 
-    private val transitionAreaHeight
-        get() =
-            context.resources.getDimensionPixelSize(
-                com.android.wm.shell.R.dimen.desktop_mode_fullscreen_from_desktop_height
-            )
-
-    private val transitionAreaWidth
-        get() =
-            context.resources.getDimensionPixelSize(
-                com.android.wm.shell.R.dimen.desktop_mode_transition_area_width
-            )
-
     /** Task id of the task currently being dragged from fullscreen/split. */
     val draggingTaskId
         get() = dragToDesktopTransitionHandler.draggingTaskId
@@ -183,7 +181,7 @@ class DesktopTasksController(
     }
 
     private fun onInit() {
-        KtProtoLog.d(WM_SHELL_DESKTOP_MODE, "Initialize DesktopTasksController")
+        logD("onInit")
         shellCommandHandler.addDumpCallback(this::dump, this)
         shellCommandHandler.addCommandCallback("desktopmode", desktopModeShellCommandHandler, this)
         shellController.addExternalInterface(
@@ -192,16 +190,12 @@ class DesktopTasksController(
             this
         )
         transitions.addHandler(this)
-        desktopModeTaskRepository.addVisibleTasksListener(taskVisibilityListener, mainExecutor)
+        taskRepository.addVisibleTasksListener(taskVisibilityListener, mainExecutor)
         dragToDesktopTransitionHandler.setDragToDesktopStateListener(dragToDesktopStateListener)
         recentsTransitionHandler.addTransitionStateListener(
             object : RecentsTransitionStateListener {
                 override fun onAnimationStateChanged(running: Boolean) {
-                    KtProtoLog.v(
-                        WM_SHELL_DESKTOP_MODE,
-                        "DesktopTasksController: recents animation state changed running=%b",
-                        running
-                    )
+                    logV("Recents animation state changed running=%b", running)
                     recentsAnimationRunning = running
                 }
             }
@@ -226,15 +220,23 @@ class DesktopTasksController(
         dragToDesktopTransitionHandler.setSplitScreenController(controller)
     }
 
+    /** Returns the transition type for the given remote transition. */
+    private fun transitionType(remoteTransition: RemoteTransition?): Int {
+        if (remoteTransition == null) {
+            logV("RemoteTransition is null")
+            return TRANSIT_NONE
+        }
+        return TRANSIT_TO_FRONT
+    }
+
     /** Show all tasks, that are part of the desktop, on top of launcher */
     fun showDesktopApps(displayId: Int, remoteTransition: RemoteTransition? = null) {
-        KtProtoLog.v(WM_SHELL_DESKTOP_MODE, "DesktopTasksController: showDesktopApps")
+        logV("showDesktopApps")
         val wct = WindowContainerTransaction()
         bringDesktopAppsToFront(displayId, wct)
 
         if (Transitions.ENABLE_SHELL_TRANSITIONS) {
-            // TODO(b/309014605): ensure remote transition is supplied once state is introduced
-            val transitionType = if (remoteTransition == null) TRANSIT_NONE else TRANSIT_TO_FRONT
+            val transitionType = transitionType(remoteTransition)
             val handler =
                 remoteTransition?.let {
                     OneShotRemoteHandler(transitions.mainExecutor, remoteTransition)
@@ -247,10 +249,12 @@ class DesktopTasksController(
         }
     }
 
-    /** Get number of tasks that are marked as visible */
-    fun getVisibleTaskCount(displayId: Int): Int {
-        return desktopModeTaskRepository.getVisibleTaskCount(displayId)
-    }
+    /** Gets number of visible tasks in [displayId]. */
+    fun visibleTaskCount(displayId: Int): Int =
+        taskRepository.getVisibleTaskCount(displayId)
+
+    /** Returns true if any tasks are visible in Desktop Mode. */
+    fun isDesktopModeShowing(displayId: Int): Boolean = visibleTaskCount(displayId) > 0
 
     /** Enter desktop by using the focused task in given `displayId` */
     fun moveFocusedTaskToDesktop(displayId: Int, transitionSource: DesktopModeTransitionSource) {
@@ -278,14 +282,8 @@ class DesktopTasksController(
                     // Fullscreen case where we move the current focused task.
                     moveToDesktop(allFocusedTasks[0].taskId, transitionSource = transitionSource)
                 }
-                else -> {
-                    KtProtoLog.w(
-                        WM_SHELL_DESKTOP_MODE,
-                        "DesktopTasksController: Cannot enter desktop, expected less " +
-                            "than 3 focused tasks but found %d",
-                        allFocusedTasks.size
-                    )
-                }
+                else -> logW("Cannot enter desktop, expected < 3 focused tasks, found %d",
+                    allFocusedTasks.size)
             }
         }
     }
@@ -309,11 +307,7 @@ class DesktopTasksController(
         transitionSource: DesktopModeTransitionSource,
     ): Boolean {
         recentTasksController?.findTaskInBackground(taskId)?.let {
-            KtProtoLog.v(
-                WM_SHELL_DESKTOP_MODE,
-                "DesktopTasksController: moveToDesktopFromNonRunningTask taskId=%d",
-                taskId
-            )
+            logV("moveToDesktopFromNonRunningTask with taskId=%d, displayId=%d", taskId)
             // TODO(342378842): Instead of using default display, support multiple displays
             val taskToMinimize =
                 bringDesktopAppsToFrontBeforeShowingNewTask(DEFAULT_DISPLAY, wct, taskId)
@@ -341,19 +335,12 @@ class DesktopTasksController(
         wct: WindowContainerTransaction = WindowContainerTransaction(),
         transitionSource: DesktopModeTransitionSource,
     ) {
-        if (Flags.enableDesktopWindowingModalsPolicy() && isSingleTopActivityTranslucent(task)) {
-            KtProtoLog.w(
-                WM_SHELL_DESKTOP_MODE,
-                "DesktopTasksController: Cannot enter desktop, " +
-                    "translucent top activity found. This is likely a modal dialog."
-            )
+        if (DesktopModeFlags.MODALS_POLICY.isEnabled(context)
+            && isTopActivityExemptFromDesktopWindowing(context, task)) {
+            logW("Cannot enter desktop for taskId %d, ineligible top activity found", task.taskId)
             return
         }
-        KtProtoLog.v(
-            WM_SHELL_DESKTOP_MODE,
-            "DesktopTasksController: moveToDesktop taskId=%d",
-            task.taskId
-        )
+        logV("moveToDesktop taskId=%d", task.taskId)
         exitSplitIfApplicable(wct, task)
         // Bring other apps to front first
         val taskToMinimize =
@@ -375,12 +362,11 @@ class DesktopTasksController(
     fun startDragToDesktop(
         taskInfo: RunningTaskInfo,
         dragToDesktopValueAnimator: MoveToDesktopAnimator,
+        taskSurface: SurfaceControl,
     ) {
-        KtProtoLog.v(
-            WM_SHELL_DESKTOP_MODE,
-            "DesktopTasksController: startDragToDesktop taskId=%d",
-            taskInfo.taskId
-        )
+        logV("startDragToDesktop taskId=%d", taskInfo.taskId)
+        interactionJankMonitor.begin(taskSurface, context,
+            CUJ_DESKTOP_MODE_ENTER_APP_HANDLE_DRAG_HOLD)
         dragToDesktopTransitionHandler.startDragToDesktopTransition(
             taskInfo.taskId,
             dragToDesktopValueAnimator
@@ -391,19 +377,18 @@ class DesktopTasksController(
      * The second part of the animated drag to desktop transition, called after
      * [startDragToDesktop].
      */
-    private fun finalizeDragToDesktop(taskInfo: RunningTaskInfo, freeformBounds: Rect) {
-        KtProtoLog.v(
+    private fun finalizeDragToDesktop(taskInfo: RunningTaskInfo) {
+        ProtoLog.v(
             WM_SHELL_DESKTOP_MODE,
             "DesktopTasksController: finalizeDragToDesktop taskId=%d",
             taskInfo.taskId
         )
         val wct = WindowContainerTransaction()
         exitSplitIfApplicable(wct, taskInfo)
-        moveHomeTaskToFront(wct)
+        moveHomeTask(wct, toTop = true)
         val taskToMinimize =
             bringDesktopAppsToFrontBeforeShowingNewTask(taskInfo.displayId, wct, taskInfo.taskId)
         addMoveToDesktopChanges(wct, taskInfo)
-        wct.setBounds(taskInfo.token, freeformBounds)
         val transition = dragToDesktopTransitionHandler.finishDragToDesktopTransition(wct)
         transition?.let { addPendingMinimizeTransition(it, taskToMinimize) }
     }
@@ -427,12 +412,14 @@ class DesktopTasksController(
      * active task.
      *
      * @param wct transaction to modify if the last active task is closed
+     * @param displayId display id of the window that's being closed
      * @param taskId task id of the window that's being closed
      */
-    fun onDesktopWindowClose(wct: WindowContainerTransaction, taskId: Int) {
-        if (desktopModeTaskRepository.isOnlyActiveTask(taskId)) {
+    fun onDesktopWindowClose(wct: WindowContainerTransaction, displayId: Int, taskId: Int) {
+        if (taskRepository.isOnlyVisibleNonClosingTask(taskId)) {
             removeWallpaperActivity(wct)
         }
+        taskRepository.addClosingTask(displayId, taskId)
     }
 
     /** Move a task with given `taskId` to fullscreen */
@@ -451,11 +438,7 @@ class DesktopTasksController(
 
     /** Move a desktop app to split screen. */
     fun moveToSplit(task: RunningTaskInfo) {
-        KtProtoLog.v(
-            WM_SHELL_DESKTOP_MODE,
-            "DesktopTasksController: moveToSplit taskId=%d",
-            task.taskId
-        )
+        logV( "moveToSplit taskId=%s", task.taskId)
         val wct = WindowContainerTransaction()
         wct.setBounds(task.token, Rect())
         // Rather than set windowing mode to multi-window at task level, set it to
@@ -484,11 +467,7 @@ class DesktopTasksController(
      * [startDragToDesktop].
      */
     fun cancelDragToDesktop(task: RunningTaskInfo) {
-        KtProtoLog.v(
-            WM_SHELL_DESKTOP_MODE,
-            "DesktopTasksController: cancelDragToDesktop taskId=%d",
-            task.taskId
-        )
+        logV("cancelDragToDesktop taskId=%d", task.taskId)
         dragToDesktopTransitionHandler.cancelDragToDesktopTransition(
             DragToDesktopTransitionHandler.CancelState.STANDARD_CANCEL
         )
@@ -499,11 +478,7 @@ class DesktopTasksController(
         position: Point,
         transitionSource: DesktopModeTransitionSource
     ) {
-        KtProtoLog.v(
-            WM_SHELL_DESKTOP_MODE,
-            "DesktopTasksController: moveToFullscreen with animation taskId=%d",
-            task.taskId
-        )
+        logV("moveToFullscreenWithAnimation taskId=%d", task.taskId)
         val wct = WindowContainerTransaction()
         addMoveToFullscreenChanges(wct, task)
 
@@ -527,12 +502,7 @@ class DesktopTasksController(
 
     /** Move a task to the front */
     fun moveTaskToFront(taskInfo: RunningTaskInfo) {
-        KtProtoLog.v(
-            WM_SHELL_DESKTOP_MODE,
-            "DesktopTasksController: moveTaskToFront taskId=%d",
-            taskInfo.taskId
-        )
-
+        logV("moveTaskToFront taskId=%s", taskInfo.taskId)
         val wct = WindowContainerTransaction()
         wct.reorder(taskInfo.token, true)
         val taskToMinimize = addAndGetMinimizeChangesIfNeeded(taskInfo.displayId, wct, taskInfo)
@@ -558,15 +528,10 @@ class DesktopTasksController(
     fun moveToNextDisplay(taskId: Int) {
         val task = shellTaskOrganizer.getRunningTaskInfo(taskId)
         if (task == null) {
-            KtProtoLog.w(WM_SHELL_DESKTOP_MODE, "moveToNextDisplay: taskId=%d not found", taskId)
+            logW("moveToNextDisplay: taskId=%d not found", taskId)
             return
         }
-        KtProtoLog.v(
-            WM_SHELL_DESKTOP_MODE,
-            "moveToNextDisplay: taskId=%d taskDisplayId=%d",
-            taskId,
-            task.displayId
-        )
+        logV("moveToNextDisplay: taskId=%d displayId=%d", taskId, task.displayId)
 
         val displayIds = rootTaskDisplayAreaOrganizer.displayIds.sorted()
         // Get the first display id that is higher than current task display id
@@ -576,7 +541,7 @@ class DesktopTasksController(
             newDisplayId = displayIds.firstOrNull { displayId -> displayId < task.displayId }
         }
         if (newDisplayId == null) {
-            KtProtoLog.w(WM_SHELL_DESKTOP_MODE, "moveToNextDisplay: next display not found")
+            logW("moveToNextDisplay: next display not found")
             return
         }
         moveToDisplay(task, newDisplayId)
@@ -588,21 +553,15 @@ class DesktopTasksController(
      * No-op if task is already on that display per [RunningTaskInfo.displayId].
      */
     private fun moveToDisplay(task: RunningTaskInfo, displayId: Int) {
-        KtProtoLog.v(
-            WM_SHELL_DESKTOP_MODE,
-            "moveToDisplay: taskId=%d displayId=%d",
-            task.taskId,
-            displayId
-        )
-
+        logV("moveToDisplay: taskId=%d displayId=%d", task.taskId, displayId)
         if (task.displayId == displayId) {
-            KtProtoLog.d(WM_SHELL_DESKTOP_MODE, "moveToDisplay: task already on display")
+            logD("moveToDisplay: task already on display %d", displayId)
             return
         }
 
         val displayAreaInfo = rootTaskDisplayAreaOrganizer.getDisplayAreaInfo(displayId)
         if (displayAreaInfo == null) {
-            KtProtoLog.w(WM_SHELL_DESKTOP_MODE, "moveToDisplay: display not found")
+            logW("moveToDisplay: display not found")
             return
         }
 
@@ -623,19 +582,27 @@ class DesktopTasksController(
     fun toggleDesktopTaskSize(taskInfo: RunningTaskInfo) {
         val displayLayout = displayController.getDisplayLayout(taskInfo.displayId) ?: return
 
-        val stableBounds = Rect()
-        displayLayout.getStableBounds(stableBounds)
+        val stableBounds = Rect().apply { displayLayout.getStableBounds(this) }
+        val currentTaskBounds = taskInfo.configuration.windowConfiguration.bounds
         val destinationBounds = Rect()
-        if (taskInfo.configuration.windowConfiguration.bounds == stableBounds) {
-            // The desktop task is currently occupying the whole stable bounds. If the bounds
-            // before the task was toggled to stable bounds were saved, toggle the task to those
-            // bounds. Otherwise, toggle to the default bounds.
+
+        val isMaximized = if (taskInfo.isResizeable) {
+            currentTaskBounds == stableBounds
+        } else {
+            currentTaskBounds.width() == stableBounds.width()
+                    || currentTaskBounds.height() == stableBounds.height()
+        }
+
+        if (isMaximized) {
+            // The desktop task is at the maximized width and/or height of the stable bounds.
+            // If the task's pre-maximize stable bounds were saved, toggle the task to those bounds.
+            // Otherwise, toggle to the default bounds.
             val taskBoundsBeforeMaximize =
-                desktopModeTaskRepository.removeBoundsBeforeMaximize(taskInfo.taskId)
+                taskRepository.removeBoundsBeforeMaximize(taskInfo.taskId)
             if (taskBoundsBeforeMaximize != null) {
                 destinationBounds.set(taskBoundsBeforeMaximize)
             } else {
-                if (Flags.enableWindowingDynamicInitialBounds()) {
+                if (DesktopModeFlags.DYNAMIC_INITIAL_BOUNDS.isEnabled(context)) {
                     destinationBounds.set(calculateInitialBounds(displayLayout, taskInfo))
                 } else {
                     destinationBounds.set(getDefaultDesktopTaskBounds(displayLayout))
@@ -644,9 +611,20 @@ class DesktopTasksController(
         } else {
             // Save current bounds so that task can be restored back to original bounds if necessary
             // and toggle to the stable bounds.
-            val taskBounds = taskInfo.configuration.windowConfiguration.bounds
-            desktopModeTaskRepository.saveBoundsBeforeMaximize(taskInfo.taskId, taskBounds)
-            destinationBounds.set(stableBounds)
+            taskRepository.saveBoundsBeforeMaximize(taskInfo.taskId, currentTaskBounds)
+
+            if (taskInfo.isResizeable) {
+                // if resizable then expand to entire stable bounds (full display minus insets)
+                destinationBounds.set(stableBounds)
+            } else {
+                // if non-resizable then calculate max bounds according to aspect ratio
+                val activityAspectRatio = calculateAspectRatio(taskInfo)
+                val newSize = maximizeSizeGivenAspectRatio(taskInfo,
+                    Size(stableBounds.width(), stableBounds.height()), activityAspectRatio)
+                val newBounds = centerInArea(
+                    newSize, stableBounds, stableBounds.left, stableBounds.top)
+                destinationBounds.set(newBounds)
+            }
         }
 
         val wct = WindowContainerTransaction().setBounds(taskInfo.token, destinationBounds)
@@ -738,22 +716,18 @@ class DesktopTasksController(
         wct: WindowContainerTransaction,
         newTaskIdInFront: Int? = null
     ): RunningTaskInfo? {
-        KtProtoLog.v(
-            WM_SHELL_DESKTOP_MODE,
-            "DesktopTasksController: bringDesktopAppsToFront, newTaskIdInFront=%s",
-            newTaskIdInFront ?: "null"
-        )
+        logV("bringDesktopAppsToFront, newTaskId=%d", newTaskIdInFront)
+        // Move home to front, ensures that we go back home when all desktop windows are closed
+        moveHomeTask(wct, toTop = true)
 
-        if (Flags.enableDesktopWindowingWallpaperActivity()) {
+        // Currently, we only handle the desktop on the default display really.
+        if (displayId == DEFAULT_DISPLAY && WALLPAPER_ACTIVITY.isEnabled(context)) {
             // Add translucent wallpaper activity to show the wallpaper underneath
             addWallpaperActivity(wct)
-        } else {
-            // Move home to front
-            moveHomeTaskToFront(wct)
         }
 
         val nonMinimizedTasksOrderedFrontToBack =
-            desktopModeTaskRepository.getActiveNonMinimizedTasksOrderedFrontToBack(displayId)
+            taskRepository.getActiveNonMinimizedOrderedTasks(displayId)
         // If we're adding a new Task we might need to minimize an old one
         val taskToMinimize: RunningTaskInfo? =
             if (newTaskIdInFront != null && desktopTasksLimiter.isPresent) {
@@ -771,25 +745,24 @@ class DesktopTasksController(
             .filter { taskId -> taskId != taskToMinimize?.taskId }
             .mapNotNull { taskId -> shellTaskOrganizer.getRunningTaskInfo(taskId) }
             .reversed() // Start from the back so the front task is brought forward last
-            .forEach { task -> wct.reorder(task.token, true /* onTop */) }
+            .forEach { task -> wct.reorder(task.token, /* onTop= */ true) }
         return taskToMinimize
     }
 
-    private fun moveHomeTaskToFront(wct: WindowContainerTransaction) {
+    private fun moveHomeTask(wct: WindowContainerTransaction, toTop: Boolean) {
         shellTaskOrganizer
             .getRunningTasks(context.displayId)
             .firstOrNull { task -> task.activityType == ACTIVITY_TYPE_HOME }
-            ?.let { homeTask -> wct.reorder(homeTask.getToken(), true /* onTop */) }
+            ?.let { homeTask -> wct.reorder(homeTask.getToken(), /* onTop= */ toTop) }
     }
 
     private fun addWallpaperActivity(wct: WindowContainerTransaction) {
-        KtProtoLog.v(WM_SHELL_DESKTOP_MODE, "DesktopTasksController: addWallpaper")
+        logV("addWallpaperActivity")
         val intent = Intent(context, DesktopWallpaperActivity::class.java)
         val options =
             ActivityOptions.makeBasic().apply {
-                isPendingIntentBackgroundActivityLaunchAllowedByPermission = true
                 pendingIntentBackgroundActivityStartMode =
-                    ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOWED
+                    ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOW_ALWAYS
             }
         val pendingIntent =
             PendingIntent.getActivity(
@@ -802,8 +775,8 @@ class DesktopTasksController(
     }
 
     private fun removeWallpaperActivity(wct: WindowContainerTransaction) {
-        desktopModeTaskRepository.wallpaperActivityToken?.let { token ->
-            KtProtoLog.v(WM_SHELL_DESKTOP_MODE, "DesktopTasksController: removeWallpaper")
+        taskRepository.wallpaperActivityToken?.let { token ->
+            logV("removeWallpaperActivity")
             wct.removeTask(token)
         }
     }
@@ -841,11 +814,7 @@ class DesktopTasksController(
         transition: IBinder,
         request: TransitionRequestInfo
     ): WindowContainerTransaction? {
-        KtProtoLog.v(
-            WM_SHELL_DESKTOP_MODE,
-            "DesktopTasksController: handleRequest request=%s",
-            request
-        )
+        logV("handleRequest request=%s", request)
         // Check if we should skip handling this transition
         var reason = ""
         val triggerTask = request.triggerTask
@@ -855,8 +824,8 @@ class DesktopTasksController(
                     reason = "recents animation is running"
                     false
                 }
-                // Handle back navigation for the last window if wallpaper available
-                shouldRemoveWallpaper(request) -> true
+                // Handle task closing for the last window if wallpaper is available
+                shouldHandleTaskClosing(request) -> true
                 // Only handle open or to front transitions
                 request.type != TRANSIT_OPEN && request.type != TRANSIT_TO_FRONT -> {
                     reason = "transition type not handled (${request.type})"
@@ -883,20 +852,17 @@ class DesktopTasksController(
             }
 
         if (!shouldHandleRequest) {
-            KtProtoLog.v(
-                WM_SHELL_DESKTOP_MODE,
-                "DesktopTasksController: skipping handleRequest reason=%s",
-                reason
-            )
+            logV("skipping handleRequest reason=%s", reason)
             return null
         }
 
         val result =
             triggerTask?.let { task ->
                 when {
-                    request.type == TRANSIT_TO_BACK -> handleBackNavigation(task)
-                    // Check if the task has a top transparent activity
-                    shouldLaunchAsModal(task) -> handleTransparentTaskLaunch(task)
+                    // Check if the closing task needs to be handled
+                    TransitionUtil.isClosingType(request.type) -> handleTaskClosing(task)
+                    // Check if the top task shouldn't be allowed to enter desktop mode
+                    isIncompatibleTask(task) -> handleIncompatibleTaskLaunch(task)
                     // Check if fullscreen task should be updated
                     task.isFullscreen -> handleFullscreenTaskLaunch(task, transition)
                     // Check if freeform task should be updated
@@ -906,11 +872,7 @@ class DesktopTasksController(
                     }
                 }
             }
-        KtProtoLog.v(
-            WM_SHELL_DESKTOP_MODE,
-            "DesktopTasksController: handleRequest result=%s",
-            result ?: "null"
-        )
+        logV("handleRequest result=%s", result)
         return result
     }
 
@@ -930,36 +892,41 @@ class DesktopTasksController(
             .forEach { finishTransaction.setCornerRadius(it.leash, cornerRadius) }
     }
 
-    private fun shouldLaunchAsModal(task: TaskInfo) =
-        Flags.enableDesktopWindowingModalsPolicy() && isSingleTopActivityTranslucent(task)
+    private fun isIncompatibleTask(task: TaskInfo) =
+        DesktopModeFlags.MODALS_POLICY.isEnabled(context)
+                && isTopActivityExemptFromDesktopWindowing(context, task)
 
-    private fun shouldRemoveWallpaper(request: TransitionRequestInfo): Boolean {
-        return Flags.enableDesktopWindowingWallpaperActivity() &&
-            request.type == TRANSIT_TO_BACK &&
-            request.triggerTask?.let { task ->
-                desktopModeTaskRepository.isOnlyActiveTask(task.taskId)
-            }
-                ?: false
+    private fun shouldHandleTaskClosing(request: TransitionRequestInfo): Boolean {
+        return WALLPAPER_ACTIVITY.isEnabled(context) &&
+            TransitionUtil.isClosingType(request.type) &&
+            request.triggerTask != null
     }
 
     private fun handleFreeformTaskLaunch(
         task: RunningTaskInfo,
         transition: IBinder
     ): WindowContainerTransaction? {
-        KtProtoLog.v(WM_SHELL_DESKTOP_MODE, "DesktopTasksController: handleFreeformTaskLaunch")
-        if (!desktopModeTaskRepository.isDesktopModeShowing(task.displayId)) {
-            KtProtoLog.d(
-                WM_SHELL_DESKTOP_MODE,
-                "DesktopTasksController: switch freeform task to fullscreen oon transition" +
-                    " taskId=%d",
-                task.taskId
-            )
-            return WindowContainerTransaction().also { wct ->
-                bringDesktopAppsToFrontBeforeShowingNewTask(task.displayId, wct, task.taskId)
-                wct.reorder(task.token, true)
-            }
+        logV("handleFreeformTaskLaunch")
+        if (keyguardManager.isKeyguardLocked) {
+            // Do NOT handle freeform task launch when locked.
+            // It will be launched in fullscreen windowing mode (Details: b/160925539)
+            logV("skip keyguard is locked")
+            return null
         }
         val wct = WindowContainerTransaction()
+        if (!isDesktopModeShowing(task.displayId)) {
+            logD("Bring desktop tasks to front on transition=taskId=%d", task.taskId)
+            // We are outside of desktop mode and already existing desktop task is being launched.
+            // We should make this task go to fullscreen instead of freeform. Note that this means
+            // any re-launch of a freeform window outside of desktop will be in fullscreen.
+            if (taskRepository.isActiveTask(task.taskId)) {
+                addMoveToFullscreenChanges(wct, task)
+                return wct
+            }
+            bringDesktopAppsToFrontBeforeShowingNewTask(task.displayId, wct, task.taskId)
+            wct.reorder(task.token, true)
+            return wct
+        }
         if (useDesktopOverrideDensity()) {
             wct.setDensityDpi(task.token, DESKTOP_DENSITY_OVERRIDE)
         }
@@ -977,16 +944,14 @@ class DesktopTasksController(
         task: RunningTaskInfo,
         transition: IBinder
     ): WindowContainerTransaction? {
-        KtProtoLog.v(WM_SHELL_DESKTOP_MODE, "DesktopTasksController: handleFullscreenTaskLaunch")
-        if (desktopModeTaskRepository.isDesktopModeShowing(task.displayId)) {
-            KtProtoLog.d(
-                WM_SHELL_DESKTOP_MODE,
-                "DesktopTasksController: switch fullscreen task to freeform on transition" +
-                    " taskId=%d",
-                task.taskId
-            )
+        logV("handleFullscreenTaskLaunch")
+        if (isDesktopModeShowing(task.displayId)) {
+            logD("Switch fullscreen task to freeform on transition: taskId=%d", task.taskId)
             return WindowContainerTransaction().also { wct ->
                 addMoveToDesktopChanges(wct, task)
+                // In some launches home task is moved behind new task being launched. Make sure
+                // that's not the case for launches in desktop.
+                moveHomeTask(wct, toTop = false)
                 // Desktop Mode is already showing and we're launching a new Task - we might need to
                 // minimize another Task.
                 val taskToMinimize = addAndGetMinimizeChangesIfNeeded(task.displayId, wct, task)
@@ -996,27 +961,36 @@ class DesktopTasksController(
         return null
     }
 
-    // Always launch transparent tasks in fullscreen.
-    private fun handleTransparentTaskLaunch(task: RunningTaskInfo): WindowContainerTransaction? {
+    /**
+     * If a task is not compatible with desktop mode freeform, it should always be launched in
+     * fullscreen.
+     */
+    private fun handleIncompatibleTaskLaunch(task: RunningTaskInfo): WindowContainerTransaction? {
         // Already fullscreen, no-op.
         if (task.isFullscreen) return null
         return WindowContainerTransaction().also { wct -> addMoveToFullscreenChanges(wct, task) }
     }
 
-    /** Handle back navigation by removing wallpaper activity if it's the last active task */
-    private fun handleBackNavigation(task: RunningTaskInfo): WindowContainerTransaction? {
-        if (
-            desktopModeTaskRepository.isOnlyActiveTask(task.taskId) &&
-                desktopModeTaskRepository.wallpaperActivityToken != null
-        ) {
+    /** Handle task closing by removing wallpaper activity if it's the last active task */
+    private fun handleTaskClosing(task: RunningTaskInfo): WindowContainerTransaction? {
+        logV("handleTaskClosing")
+        val wct = WindowContainerTransaction()
+        if (taskRepository.isOnlyVisibleNonClosingTask(task.taskId)
+            && taskRepository.wallpaperActivityToken != null) {
             // Remove wallpaper activity when the last active task is removed
-            return WindowContainerTransaction().also { wct -> removeWallpaperActivity(wct) }
-        } else {
-            return null
+            removeWallpaperActivity(wct)
         }
+        taskRepository.addClosingTask(task.displayId, task.taskId)
+        // If a CLOSE or TO_BACK is triggered on a desktop task, remove the task.
+        if (Flags.enableDesktopWindowingBackNavigation() &&
+            taskRepository.isVisibleTask(task.taskId)) {
+            wct.removeTask(task.token)
+        }
+        return if (wct.isEmpty) null else wct
     }
 
-    private fun addMoveToDesktopChanges(
+    @VisibleForTesting
+    fun addMoveToDesktopChanges(
         wct: WindowContainerTransaction,
         taskInfo: RunningTaskInfo
     ) {
@@ -1030,8 +1004,27 @@ class DesktopTasksController(
             } else {
                 WINDOWING_MODE_FREEFORM
             }
-        if (Flags.enableWindowingDynamicInitialBounds()) {
-            wct.setBounds(taskInfo.token, calculateInitialBounds(displayLayout, taskInfo))
+        val initialBounds = if (DesktopModeFlags.DYNAMIC_INITIAL_BOUNDS.isEnabled(context)) {
+            calculateInitialBounds(displayLayout, taskInfo)
+        } else {
+            getDefaultDesktopTaskBounds(displayLayout)
+        }
+
+        if (DesktopModeFlags.CASCADING_WINDOWS.isEnabled(context)) {
+            val stableBounds = Rect()
+            displayLayout.getStableBoundsForDesktopMode(stableBounds)
+
+            val activeTasks = taskRepository
+                .getActiveNonMinimizedOrderedTasks(taskInfo.displayId)
+            activeTasks.firstOrNull()?.let { activeTask ->
+                shellTaskOrganizer.getRunningTaskInfo(activeTask)?.let {
+                    cascadeWindow(context.resources, stableBounds,
+                        it.configuration.windowConfiguration.bounds, initialBounds)
+                }
+            }
+        }
+        if (canChangeTaskPosition(taskInfo)) {
+            wct.setBounds(taskInfo.token, initialBounds)
         }
         wct.setWindowingMode(taskInfo.token, targetWindowingMode)
         wct.reorder(taskInfo.token, true /* onTop */)
@@ -1058,6 +1051,10 @@ class DesktopTasksController(
         if (useDesktopOverrideDensity()) {
             wct.setDensityDpi(taskInfo.token, getDefaultDensityDpi())
         }
+        if (taskRepository.isOnlyVisibleNonClosingTask(taskInfo.taskId)) {
+            // Remove wallpaper activity when leaving desktop mode
+            removeWallpaperActivity(wct)
+        }
     }
 
     /**
@@ -1073,6 +1070,10 @@ class DesktopTasksController(
         // The task's density may have been overridden in freeform; revert it here as we don't
         // want it overridden in multi-window.
         wct.setDensityDpi(taskInfo.token, getDefaultDensityDpi())
+        if (taskRepository.isOnlyVisibleNonClosingTask(taskInfo.taskId)) {
+            // Remove wallpaper activity when leaving desktop mode
+            removeWallpaperActivity(wct)
+        }
     }
 
     /** Returns the ID of the Task that will be minimized, or null if no task will be minimized. */
@@ -1271,43 +1272,46 @@ class DesktopTasksController(
      *
      * @param taskInfo the task being dragged.
      * @param y height of drag, to be checked against status bar height.
+     * @return the [IndicatorType] used for the resulting transition
      */
     fun onDragPositioningEndThroughStatusBar(
         inputCoordinates: PointF,
         taskInfo: RunningTaskInfo,
-    ) {
-        val indicator = getVisualIndicator() ?: return
+        taskSurface: SurfaceControl,
+    ): IndicatorType {
+        // End the drag_hold CUJ interaction.
+        interactionJankMonitor.end(CUJ_DESKTOP_MODE_ENTER_APP_HANDLE_DRAG_HOLD)
+        val indicator = getVisualIndicator() ?: return IndicatorType.NO_INDICATOR
         val indicatorType = indicator.updateIndicatorType(inputCoordinates, taskInfo.windowingMode)
         when (indicatorType) {
-            DesktopModeVisualIndicator.IndicatorType.TO_DESKTOP_INDICATOR -> {
-                val displayLayout = displayController.getDisplayLayout(taskInfo.displayId) ?: return
-                if (Flags.enableWindowingDynamicInitialBounds()) {
-                    finalizeDragToDesktop(taskInfo, calculateInitialBounds(displayLayout, taskInfo))
-                } else {
-                    finalizeDragToDesktop(taskInfo, getDefaultDesktopTaskBounds(displayLayout))
-                }
+            IndicatorType.TO_DESKTOP_INDICATOR -> {
+                // Start a new jank interaction for the drag release to desktop window animation.
+                interactionJankMonitor.begin(taskSurface, context,
+                    CUJ_DESKTOP_MODE_ENTER_APP_HANDLE_DRAG_RELEASE, "to_desktop")
+                finalizeDragToDesktop(taskInfo)
             }
-            DesktopModeVisualIndicator.IndicatorType.NO_INDICATOR,
-            DesktopModeVisualIndicator.IndicatorType.TO_FULLSCREEN_INDICATOR -> {
+            IndicatorType.NO_INDICATOR,
+            IndicatorType.TO_FULLSCREEN_INDICATOR -> {
                 cancelDragToDesktop(taskInfo)
             }
-            DesktopModeVisualIndicator.IndicatorType.TO_SPLIT_LEFT_INDICATOR -> {
+            IndicatorType.TO_SPLIT_LEFT_INDICATOR -> {
                 requestSplit(taskInfo, leftOrTop = true)
             }
-            DesktopModeVisualIndicator.IndicatorType.TO_SPLIT_RIGHT_INDICATOR -> {
+            IndicatorType.TO_SPLIT_RIGHT_INDICATOR -> {
                 requestSplit(taskInfo, leftOrTop = false)
             }
         }
+        return indicatorType
     }
 
     /** Update the exclusion region for a specified task */
     fun onExclusionRegionChanged(taskId: Int, exclusionRegion: Region) {
-        desktopModeTaskRepository.updateTaskExclusionRegions(taskId, exclusionRegion)
+        taskRepository.updateTaskExclusionRegions(taskId, exclusionRegion)
     }
 
     /** Remove a previously tracked exclusion region for a specified task. */
     fun removeExclusionRegionForTask(taskId: Int) {
-        desktopModeTaskRepository.removeExclusionRegion(taskId)
+        taskRepository.removeExclusionRegion(taskId)
     }
 
     /**
@@ -1317,7 +1321,7 @@ class DesktopTasksController(
      * @param callbackExecutor the executor to call the listener on.
      */
     fun addVisibleTasksListener(listener: VisibleTasksListener, callbackExecutor: Executor) {
-        desktopModeTaskRepository.addVisibleTasksListener(listener, callbackExecutor)
+        taskRepository.addVisibleTasksListener(listener, callbackExecutor)
     }
 
     /**
@@ -1327,7 +1331,7 @@ class DesktopTasksController(
      * @param callbackExecutor the executor to call the listener on.
      */
     fun setTaskRegionListener(listener: Consumer<Region>, callbackExecutor: Executor) {
-        desktopModeTaskRepository.setExclusionRegionListener(listener, callbackExecutor)
+        taskRepository.setExclusionRegionListener(listener, callbackExecutor)
     }
 
     override fun onUnhandledDrag(
@@ -1336,8 +1340,7 @@ class DesktopTasksController(
         onFinishCallback: Consumer<Boolean>
     ): Boolean {
         // TODO(b/320797628): Pass through which display we are dropping onto
-        val activeTasks = desktopModeTaskRepository.getActiveTasks(DEFAULT_DISPLAY)
-        if (!activeTasks.any { desktopModeTaskRepository.isVisibleTask(it) }) {
+        if (!isDesktopModeShowing(DEFAULT_DISPLAY)) {
             // Not currently in desktop mode, ignore the drop
             return false
         }
@@ -1346,7 +1349,7 @@ class DesktopTasksController(
         if (!multiInstanceHelper.supportsMultiInstanceSplit(launchComponent)) {
             // TODO(b/320797628): Should only return early if there is an existing running task, and
             //                    notify the user as well. But for now, just ignore the drop.
-            KtProtoLog.v(WM_SHELL_DESKTOP_MODE, "Dropped intent does not support multi-instance")
+            logV("Dropped intent does not support multi-instance")
             return false
         }
 
@@ -1359,7 +1362,6 @@ class DesktopTasksController(
                 setPendingIntentBackgroundActivityStartMode(
                     ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_DENIED
                 )
-                isPendingIntentBackgroundActivityLaunchAllowedByPermission = true
             }
         val wct = WindowContainerTransaction()
         wct.sendPendingIntent(launchIntent, null, opts.toBundle())
@@ -1379,7 +1381,7 @@ class DesktopTasksController(
     private fun dump(pw: PrintWriter, prefix: String) {
         val innerPrefix = "$prefix  "
         pw.println("${prefix}DesktopTasksController")
-        desktopModeTaskRepository.dump(pw, innerPrefix)
+        taskRepository.dump(pw, innerPrefix)
     }
 
     /** The interface for calls from outside the shell, within the host process. */
@@ -1437,7 +1439,7 @@ class DesktopTasksController(
         private val listener: VisibleTasksListener =
             object : VisibleTasksListener {
                 override fun onTasksVisibilityChanged(displayId: Int, visibleTasksCount: Int) {
-                    KtProtoLog.v(
+                    ProtoLog.v(
                         WM_SHELL_DESKTOP_MODE,
                         "IDesktopModeImpl: onVisibilityChanged display=%d visible=%d",
                         displayId,
@@ -1454,12 +1456,12 @@ class DesktopTasksController(
                 SingleInstanceRemoteListener<DesktopTasksController, IDesktopTaskListener>(
                     controller,
                     { c ->
-                        c.desktopModeTaskRepository.addVisibleTasksListener(
+                        c.taskRepository.addVisibleTasksListener(
                             listener,
                             c.mainExecutor
                         )
                     },
-                    { c -> c.desktopModeTaskRepository.removeVisibleTasksListener(listener) }
+                    { c -> c.taskRepository.removeVisibleTasksListener(listener) }
                 )
         }
 
@@ -1482,22 +1484,19 @@ class DesktopTasksController(
         }
 
         override fun stashDesktopApps(displayId: Int) {
-            KtProtoLog.w(WM_SHELL_DESKTOP_MODE, "IDesktopModeImpl: stashDesktopApps is deprecated")
+            ProtoLog.w(WM_SHELL_DESKTOP_MODE, "IDesktopModeImpl: stashDesktopApps is deprecated")
         }
 
         override fun hideStashedDesktopApps(displayId: Int) {
-            KtProtoLog.w(
-                WM_SHELL_DESKTOP_MODE,
-                "IDesktopModeImpl: hideStashedDesktopApps is deprecated"
-            )
+            ProtoLog.w(WM_SHELL_DESKTOP_MODE, "IDesktopModeImpl: hideStashedDesktopApps is deprecated")
         }
 
         override fun getVisibleTaskCount(displayId: Int): Int {
             val result = IntArray(1)
             executeRemoteCallWithTaskPermission(
                 controller,
-                "getVisibleTaskCount",
-                { controller -> result[0] = controller.getVisibleTaskCount(displayId) },
+                "visibleTaskCount",
+                { controller -> result[0] = controller.visibleTaskCount(displayId) },
                 true /* blocking */
             )
             return result[0]
@@ -1513,11 +1512,7 @@ class DesktopTasksController(
         }
 
         override fun setTaskListener(listener: IDesktopTaskListener?) {
-            KtProtoLog.v(
-                WM_SHELL_DESKTOP_MODE,
-                "IDesktopModeImpl: set task listener=%s",
-                listener ?: "null"
-            )
+            ProtoLog.v(WM_SHELL_DESKTOP_MODE, "IDesktopModeImpl: set task listener=%s", listener)
             executeRemoteCallWithTaskPermission(controller, "setTaskListener") { _ ->
                 listener?.let { remoteListener.register(it) } ?: remoteListener.unregister()
             }
@@ -1530,10 +1525,22 @@ class DesktopTasksController(
         }
     }
 
+    private fun logV(msg: String, vararg arguments: Any?) {
+        ProtoLog.v(WM_SHELL_DESKTOP_MODE, "%s: $msg", TAG, *arguments)
+    }
+    private fun logD(msg: String, vararg arguments: Any?) {
+        ProtoLog.d(WM_SHELL_DESKTOP_MODE, "%s: $msg", TAG, *arguments)
+    }
+    private fun logW(msg: String, vararg arguments: Any?) {
+        ProtoLog.w(WM_SHELL_DESKTOP_MODE, "%s: $msg", TAG, *arguments)
+    }
+
     companion object {
         @JvmField
         val DESKTOP_MODE_INITIAL_BOUNDS_SCALE =
             SystemProperties.getInt("persist.wm.debug.desktop_mode_initial_bounds_scale", 75) / 100f
+
+        private const val TAG = "DesktopTasksController"
     }
 
     /** The positions on a screen that a task can snap to. */

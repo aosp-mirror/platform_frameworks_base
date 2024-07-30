@@ -19,10 +19,12 @@ package com.android.systemui.keyguard.domain.interactor
 import android.animation.ValueAnimator
 import com.android.app.animation.Interpolators
 import com.android.app.tracing.coroutines.launch
-import com.android.systemui.Flags.communalHub
+import com.android.systemui.Flags.communalSceneKtfRefactor
+import com.android.systemui.communal.domain.interactor.CommunalSettingsInteractor
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
+import com.android.systemui.deviceentry.domain.interactor.DeviceEntryInteractor
 import com.android.systemui.keyguard.KeyguardWmStateRefactor
 import com.android.systemui.keyguard.data.repository.KeyguardTransitionRepository
 import com.android.systemui.keyguard.shared.model.BiometricUnlockMode
@@ -37,24 +39,30 @@ import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.launch
 
+@OptIn(ExperimentalCoroutinesApi::class)
 @SysUISingleton
 class FromDreamingTransitionInteractor
 @Inject
 constructor(
     override val transitionRepository: KeyguardTransitionRepository,
+    override val internalTransitionInteractor: InternalKeyguardTransitionInteractor,
     transitionInteractor: KeyguardTransitionInteractor,
     @Background private val scope: CoroutineScope,
     @Background bgDispatcher: CoroutineDispatcher,
     @Main mainDispatcher: CoroutineDispatcher,
     keyguardInteractor: KeyguardInteractor,
     private val glanceableHubTransitions: GlanceableHubTransitions,
+    private val communalSettingsInteractor: CommunalSettingsInteractor,
     powerInteractor: PowerInteractor,
     keyguardOcclusionInteractor: KeyguardOcclusionInteractor,
+    private val deviceEntryInteractor: DeviceEntryInteractor,
 ) :
     TransitionInteractor(
         fromState = KeyguardState.DREAMING,
@@ -71,10 +79,12 @@ constructor(
         listenForDreamingToOccluded()
         listenForDreamingToGoneWhenDismissable()
         listenForDreamingToGoneFromBiometricUnlock()
-        listenForDreamingToLockscreen()
+        listenForDreamingToLockscreenOrGone()
         listenForDreamingToAodOrDozing()
         listenForTransitionToCamera(scope, keyguardInteractor)
-        listenForDreamingToGlanceableHub()
+        if (!communalSceneKtfRefactor()) {
+            listenForDreamingToGlanceableHub()
+        }
         listenForDreamingToPrimaryBouncer()
     }
 
@@ -89,9 +99,8 @@ constructor(
     }
 
     private fun listenForDreamingToGlanceableHub() {
-        if (!communalHub()) return
-        if (SceneContainerFlag.isEnabled)
-            return // TODO(b/336576536): Check if adaptation for scene framework is needed
+        if (!communalSettingsInteractor.isCommunalFlagEnabled()) return
+        if (SceneContainerFlag.isEnabled) return
         scope.launch("$TAG#listenForDreamingToGlanceableHub", mainDispatcher) {
             glanceableHubTransitions.listenForGlanceableHubTransition(
                 transitionOwnerName = TAG,
@@ -102,6 +111,8 @@ constructor(
     }
 
     private fun listenForDreamingToPrimaryBouncer() {
+        // TODO(b/336576536): Check if adaptation for scene framework is needed
+        if (SceneContainerFlag.isEnabled) return
         scope.launch {
             keyguardInteractor.primaryBouncerShowing
                 .sample(startedKeyguardTransitionStep, ::Pair)
@@ -118,7 +129,6 @@ constructor(
 
     fun startToLockscreenTransition() {
         scope.launch {
-            KeyguardWmStateRefactor.isUnexpectedlyInLegacyMode()
             if (
                 transitionInteractor.startedKeyguardState.replayCache.last() ==
                     KeyguardState.DREAMING
@@ -130,17 +140,7 @@ constructor(
 
     @OptIn(FlowPreview::class)
     private fun listenForDreamingToOccluded() {
-        if (KeyguardWmStateRefactor.isEnabled) {
-            scope.launch {
-                combine(
-                        keyguardInteractor.isDreaming,
-                        keyguardOcclusionInteractor.isShowWhenLockedActivityOnTop,
-                        ::Pair
-                    )
-                    .filterRelevantKeyguardStateAnd { (isDreaming, _) -> !isDreaming }
-                    .collect { maybeStartTransitionToOccludedOrInsecureCamera() }
-            }
-        } else {
+        if (!KeyguardWmStateRefactor.isEnabled) {
             scope.launch {
                 combine(
                         keyguardInteractor.isKeyguardOccluded,
@@ -166,21 +166,41 @@ constructor(
         }
     }
 
-    private fun listenForDreamingToLockscreen() {
+    private fun listenForDreamingToLockscreenOrGone() {
         if (!KeyguardWmStateRefactor.isEnabled) {
             return
         }
 
         scope.launch {
-            keyguardOcclusionInteractor.isShowWhenLockedActivityOnTop
-                .filterRelevantKeyguardStateAnd { onTop -> !onTop }
-                .collect { startTransitionTo(KeyguardState.LOCKSCREEN) }
+            keyguardInteractor.isDreaming
+                .filter { !it }
+                .sample(deviceEntryInteractor.isUnlocked, ::Pair)
+                .collect { (_, dismissable) ->
+                    // TODO(b/349837588): Add check for -> OCCLUDED.
+                    if (dismissable) {
+                        startTransitionTo(
+                            KeyguardState.GONE,
+                            ownerReason = "No longer dreaming; dismissable"
+                        )
+                    } else {
+                        startTransitionTo(
+                            KeyguardState.LOCKSCREEN,
+                            ownerReason = "No longer dreaming"
+                        )
+                    }
+                }
         }
     }
 
     private fun listenForDreamingToGoneWhenDismissable() {
-        if (SceneContainerFlag.isEnabled)
-            return // TODO(b/336576536): Check if adaptation for scene framework is needed
+        if (SceneContainerFlag.isEnabled) {
+            return
+        }
+
+        if (KeyguardWmStateRefactor.isEnabled) {
+            return
+        }
+
         scope.launch {
             keyguardInteractor.isAbleToDream
                 .sampleCombine(
@@ -196,7 +216,7 @@ constructor(
     }
 
     private fun listenForDreamingToGoneFromBiometricUnlock() {
-        // TODO(b/336576536): Check if adaptation for scene framework is needed
+        // TODO(b/353542570): Adaptation for scene framework is needed
         if (SceneContainerFlag.isEnabled) return
         scope.launch {
             keyguardInteractor.biometricUnlockState

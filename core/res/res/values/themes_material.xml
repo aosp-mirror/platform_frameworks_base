@@ -408,8 +408,12 @@ please see themes_device_defaults.xml.
         <item name="colorProgressBackgroundNormal">?attr/colorControlNormal</item>
 
         <!-- Tooltip popup properties -->
-        <item name="tooltipForegroundColor">@color/foreground_material_light</item>
-        <item name="tooltipBackgroundColor">@color/tooltip_background_light</item>
+        <item name="tooltipForegroundColor">@color/system_on_surface_light</item>
+        <item name="tooltipBackgroundColor">@color/system_surface_light</item>
+        <item name="tooltipCornerRadius">@dimen/tooltip_corner_radius_material</item>
+        <item name="tooltipHorizontalPadding">@dimen/tooltip_horizontal_padding_material</item>
+        <item name="tooltipVerticalPadding">@dimen/tooltip_vertical_padding_material</item>
+        <item name="tooltipFontSize">@dimen/tooltip_font_size_material</item>
     </style>
 
     <!-- Material theme (light version). -->
@@ -785,8 +789,13 @@ please see themes_device_defaults.xml.
         <item name="colorProgressBackgroundNormal">?attr/colorControlNormal</item>
 
         <!-- Tooltip popup properties -->
-        <item name="tooltipForegroundColor">@color/foreground_material_dark</item>
-        <item name="tooltipBackgroundColor">@color/tooltip_background_dark</item>
+        <item name="tooltipForegroundColor">@color/system_on_surface_dark</item>
+        <item name="tooltipBackgroundColor">@color/system_surface_dark</item>
+        <item name="tooltipCornerRadius">@dimen/tooltip_corner_radius_material</item>
+        <item name="tooltipHorizontalPadding">@dimen/tooltip_horizontal_padding_material</item>
+        <item name="tooltipVerticalPadding">@dimen/tooltip_vertical_padding_material</item>
+        <item name="tooltipFontSize">@dimen/tooltip_font_size_material</item>
+
     </style>
 
     <!-- Variant of the material (light) theme that has a solid (opaque) action bar

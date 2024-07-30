@@ -16,12 +16,11 @@
 
 package android.os;
 
-import android.platform.test.annotations.IgnoreUnderRavenwood;
 import android.platform.test.ravenwood.RavenwoodRule;
 
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.MediumTest;
 import androidx.test.filters.Suppress;
-import androidx.test.runner.AndroidJUnit4;
 
 import org.junit.Rule;
 import org.junit.Test;
@@ -154,7 +153,6 @@ public class MessageQueueTest {
 
     @Test
     @MediumTest
-    @IgnoreUnderRavenwood(reason = "Flaky test, b/315872700")
     public void testFieldIntegrity() throws Exception {
 
         TestHandlerThread tester = new TestFieldIntegrityHandler() {

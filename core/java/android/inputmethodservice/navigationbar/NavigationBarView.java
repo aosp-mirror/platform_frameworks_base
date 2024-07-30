@@ -26,6 +26,7 @@ import android.animation.ObjectAnimator;
 import android.animation.PropertyValuesHolder;
 import android.annotation.DrawableRes;
 import android.annotation.FloatRange;
+import android.annotation.NonNull;
 import android.app.StatusBarManager;
 import android.content.Context;
 import android.content.res.Configuration;
@@ -39,6 +40,7 @@ import android.view.Surface;
 import android.view.View;
 import android.view.animation.Interpolator;
 import android.view.animation.PathInterpolator;
+import android.view.inputmethod.Flags;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.FrameLayout;
 
@@ -79,6 +81,28 @@ public final class NavigationBarView extends FrameLayout {
 
     private NavigationBarInflaterView mNavigationInflaterView;
 
+    /**
+     * Interface definition for callbacks to be invoked when navigation bar buttons are clicked.
+     */
+    public interface ButtonClickListener {
+
+        /**
+         * Called when the IME switch button is clicked.
+         *
+         * @param v The view that was clicked.
+         */
+        void onImeSwitchButtonClick(View v);
+
+        /**
+         * Called when the IME switch button has been clicked and held.
+         *
+         * @param v The view that was clicked and held.
+         *
+         * @return true if the callback consumed the long click, false otherwise.
+         */
+        boolean onImeSwitchButtonLongClick(View v);
+    }
+
     public NavigationBarView(Context context, AttributeSet attrs) {
         super(context, attrs);
 
@@ -98,13 +122,27 @@ public final class NavigationBarView extends FrameLayout {
                 new ButtonDispatcher(com.android.internal.R.id.input_method_nav_home_handle));
 
         mDeadZone = new android.inputmethodservice.navigationbar.DeadZone(this);
+    }
 
+    /**
+     * Prepares the navigation bar buttons to be used and sets the on click listeners.
+     *
+     * @param listener The listener used to handle the clicks on the navigation bar buttons.
+     */
+    public void prepareNavButtons(@NonNull ButtonClickListener listener) {
         getBackButton().setLongClickable(false);
 
-        final ButtonDispatcher imeSwitchButton = getImeSwitchButton();
-        imeSwitchButton.setLongClickable(false);
-        imeSwitchButton.setOnClickListener(view -> view.getContext()
-                .getSystemService(InputMethodManager.class).showInputMethodPicker());
+        if (Flags.imeSwitcherRevamp()) {
+            final var imeSwitchButton = getImeSwitchButton();
+            imeSwitchButton.setLongClickable(true);
+            imeSwitchButton.setOnClickListener(listener::onImeSwitchButtonClick);
+            imeSwitchButton.setOnLongClickListener(listener::onImeSwitchButtonLongClick);
+        } else {
+            final ButtonDispatcher imeSwitchButton = getImeSwitchButton();
+            imeSwitchButton.setLongClickable(false);
+            imeSwitchButton.setOnClickListener(view -> view.getContext()
+                    .getSystemService(InputMethodManager.class).showInputMethodPicker());
+        }
     }
 
     @Override
@@ -178,7 +216,11 @@ public final class NavigationBarView extends FrameLayout {
                 oldConfig.getLayoutDirection() != mConfiguration.getLayoutDirection();
 
         if (densityChange || dirChange) {
-            mImeSwitcherIcon = getDrawable(com.android.internal.R.drawable.ic_ime_switcher);
+            final int switcherResId = Flags.imeSwitcherRevamp()
+                    ? com.android.internal.R.drawable.ic_ime_switcher_new
+                    : com.android.internal.R.drawable.ic_ime_switcher;
+
+            mImeSwitcherIcon = getDrawable(switcherResId);
         }
         if (orientationChange || densityChange || dirChange) {
             mBackIcon = getBackDrawable();

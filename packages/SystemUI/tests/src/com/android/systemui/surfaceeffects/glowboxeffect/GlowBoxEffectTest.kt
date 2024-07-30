@@ -18,8 +18,8 @@ package com.android.systemui.surfaceeffects.glowboxeffect
 
 import android.graphics.Color
 import android.graphics.Paint
-import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.animation.AnimatorTestRule
@@ -31,7 +31,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 @SmallTest
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 @TestableLooper.RunWithLooper(setAsMainLooper = true)
 class GlowBoxEffectTest : SysuiTestCase() {
 

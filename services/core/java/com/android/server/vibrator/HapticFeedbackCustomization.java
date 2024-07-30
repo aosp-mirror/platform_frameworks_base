@@ -108,9 +108,9 @@ final class HapticFeedbackCustomization {
             throws CustomizationParserException, IOException {
         try {
             return loadVibrationsInternal(res, vibratorInfo);
-        } catch (VibrationXmlParser.VibrationXmlParserException
-                | XmlParserException
-                | XmlPullParserException e) {
+        } catch (VibrationXmlParser.ParseFailedException
+                 | XmlParserException
+                 | XmlPullParserException e) {
             throw new CustomizationParserException(
                     "Error parsing haptic feedback customization file.", e);
         }
@@ -121,7 +121,6 @@ final class HapticFeedbackCustomization {
             Resources res, VibratorInfo vibratorInfo) throws
                     CustomizationParserException,
                     IOException,
-                    VibrationXmlParser.VibrationXmlParserException,
                     XmlParserException,
                     XmlPullParserException {
         if (!Flags.hapticFeedbackVibrationOemCustomizationEnabled()) {
@@ -172,10 +171,6 @@ final class HapticFeedbackCustomization {
 
             ParsedVibration parsedVibration = VibrationXmlParser.parseElement(
                     parser, VibrationXmlParser.FLAG_ALLOW_HIDDEN_APIS);
-            if (parsedVibration == null) {
-                throw new CustomizationParserException(
-                        "Unable to parse vibration element for effect " + effectId);
-            }
             VibrationEffect effect = parsedVibration.resolve(vibratorInfo);
             if (effect != null) {
                 if (effect.getDuration() == Long.MAX_VALUE) {

@@ -213,3 +213,11 @@ flag {
         purpose: PURPOSE_BUGFIX
     }
 }
+
+flag {
+    name: "location_bypass_privacy_dashboard_enabled"
+    is_exported: true
+    namespace: "permissions"
+    description: "Show access entry of location bypass permission in the Privacy Dashboard"
+    bug: "325536053"
+}

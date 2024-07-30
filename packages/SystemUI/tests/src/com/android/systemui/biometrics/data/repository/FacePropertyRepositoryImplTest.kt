@@ -26,6 +26,7 @@ import android.hardware.camera2.CameraManager
 import android.hardware.face.FaceManager
 import android.hardware.face.FaceSensorPropertiesInternal
 import android.hardware.face.IFaceAuthenticatorsRegisteredCallback
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.biometrics.shared.model.LockoutMode
@@ -46,7 +47,6 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.junit.runners.JUnit4
 import org.mockito.ArgumentCaptor
 import org.mockito.Captor
 import org.mockito.Mock
@@ -57,7 +57,7 @@ import org.mockito.junit.MockitoRule
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
-@RunWith(JUnit4::class)
+@RunWith(AndroidJUnit4::class)
 class FacePropertyRepositoryImplTest : SysuiTestCase() {
     companion object {
         private const val LOGICAL_CAMERA_ID_OUTER_FRONT = "0"

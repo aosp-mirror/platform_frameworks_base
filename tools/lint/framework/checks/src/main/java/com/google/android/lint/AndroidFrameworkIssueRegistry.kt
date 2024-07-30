@@ -41,6 +41,7 @@ class AndroidFrameworkIssueRegistry : IssueRegistry() {
         PermissionAnnotationDetector.ISSUE_MISSING_PERMISSION_ANNOTATION,
         PermissionMethodDetector.ISSUE_PERMISSION_METHOD_USAGE,
         PermissionMethodDetector.ISSUE_CAN_BE_PERMISSION_METHOD,
+        FeatureAutomotiveDetector.ISSUE,
     )
 
     override val api: Int

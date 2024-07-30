@@ -31,6 +31,7 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 
+import android.app.AppOpsManager;
 import android.content.Context;
 import android.content.res.Resources;
 import android.hardware.SensorManager;
@@ -41,9 +42,9 @@ import android.os.IWakeLockCallback;
 import android.os.Looper;
 import android.os.PowerManager;
 import android.os.RemoteException;
-import android.os.ServiceManager;
 import android.os.VibrationAttributes;
 import android.os.Vibrator;
+import android.os.WorkSource;
 import android.os.test.TestLooper;
 import android.provider.Settings;
 import android.testing.TestableContext;
@@ -60,6 +61,7 @@ import com.android.server.statusbar.StatusBarManagerInternal;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
 import java.util.concurrent.Executor;
@@ -82,7 +84,11 @@ public class NotifierTest {
     @Mock private StatusBarManagerInternal mStatusBarManagerInternal;
     @Mock private WakeLockLog mWakeLockLog;
 
+    @Mock private IBatteryStats mBatteryStats;
+
     @Mock private PowerManagerFlags mPowerManagerFlags;
+
+    @Mock private AppOpsManager mAppOpsManager;
 
     private PowerManagerService mService;
     private Context mContextSpy;
@@ -227,10 +233,10 @@ public class NotifierTest {
     }
 
     @Test
-    public void testOnWakeLockListener_RemoteException_NoRethrow() {
+    public void testOnWakeLockListener_RemoteException_NoRethrow() throws RemoteException {
         when(mPowerManagerFlags.improveWakelockLatency()).thenReturn(true);
         createNotifier();
-
+        clearInvocations(mWakeLockLog, mBatteryStats, mAppOpsManager);
         IWakeLockCallback exceptingCallback = new IWakeLockCallback.Stub() {
             @Override public void onStateChanged(boolean enabled) throws RemoteException {
                 throw new RemoteException("Just testing");
@@ -245,36 +251,171 @@ public class NotifierTest {
         verifyZeroInteractions(mWakeLockLog);
         mTestLooper.dispatchAll();
         verify(mWakeLockLog).onWakeLockReleased("wakelockTag", uid, 1);
+        clearInvocations(mBatteryStats);
         mNotifier.onWakeLockAcquired(PowerManager.PARTIAL_WAKE_LOCK, "wakelockTag",
                 "my.package.name", uid, pid, /* workSource= */ null, /* historyTag= */ null,
                 exceptingCallback);
-        mNotifier.onWakeLockChanging(PowerManager.PARTIAL_WAKE_LOCK, "wakelockTag",
-                "my.package.name", uid, pid, /* workSource= */ null, /* historyTag= */ null,
-                exceptingCallback,
-                PowerManager.SCREEN_BRIGHT_WAKE_LOCK, "wakelockTag",
-                "my.package.name", uid, pid, /* newWorkSource= */ null, /* newHistoryTag= */ null,
-                exceptingCallback);
-        verifyNoMoreInteractions(mWakeLockLog);
+
+        verifyNoMoreInteractions(mWakeLockLog, mBatteryStats);
         mTestLooper.dispatchAll();
         verify(mWakeLockLog).onWakeLockAcquired("wakelockTag", uid,
                 PowerManager.PARTIAL_WAKE_LOCK, 1);
+        verify(mBatteryStats).noteStartWakelock(uid, pid, "wakelockTag", /* historyTag= */ null,
+                BatteryStats.WAKE_TYPE_PARTIAL, false);
+
+        verifyNoMoreInteractions(mWakeLockLog, mBatteryStats);
+        WorkSource worksourceOld = Mockito.mock(WorkSource.class);
+        WorkSource worksourceNew = Mockito.mock(WorkSource.class);
+
+        mNotifier.onWakeLockChanging(PowerManager.PARTIAL_WAKE_LOCK, "wakelockTag",
+                "my.package.name", uid, pid, worksourceOld, /* historyTag= */ null,
+                exceptingCallback,
+                PowerManager.SCREEN_BRIGHT_WAKE_LOCK, "wakelockTag",
+                "my.package.name", uid, pid, worksourceNew, /* newHistoryTag= */ null,
+                exceptingCallback);
+        mTestLooper.dispatchAll();
+        verify(mBatteryStats).noteChangeWakelockFromSource(worksourceOld, pid, "wakelockTag",
+                null, BatteryStats.WAKE_TYPE_PARTIAL, worksourceNew, pid, "wakelockTag",
+                null, BatteryStats.WAKE_TYPE_FULL, false);
         // If we didn't throw, we're good!
 
         // Test with improveWakelockLatency flag false, hence the wakelock log will run on the same
         // thread
-        clearInvocations(mWakeLockLog);
+        clearInvocations(mWakeLockLog, mBatteryStats);
         when(mPowerManagerFlags.improveWakelockLatency()).thenReturn(false);
 
+        // Acquire the wakelock
         mNotifier.onWakeLockAcquired(PowerManager.PARTIAL_WAKE_LOCK, "wakelockTag",
                 "my.package.name", uid, pid, /* workSource= */ null, /* historyTag= */ null,
                 exceptingCallback);
         verify(mWakeLockLog).onWakeLockAcquired("wakelockTag", uid,
                 PowerManager.PARTIAL_WAKE_LOCK, -1);
 
+        // Update the wakelock
+        mNotifier.onWakeLockChanging(PowerManager.PARTIAL_WAKE_LOCK, "wakelockTag",
+                "my.package.name", uid, pid, worksourceOld, /* historyTag= */ null,
+                exceptingCallback,
+                PowerManager.SCREEN_BRIGHT_WAKE_LOCK, "wakelockTag",
+                "my.package.name", uid, pid, worksourceNew, /* newHistoryTag= */ null,
+                exceptingCallback);
+        verify(mBatteryStats).noteChangeWakelockFromSource(worksourceOld, pid, "wakelockTag",
+                null, BatteryStats.WAKE_TYPE_PARTIAL, worksourceNew, pid, "wakelockTag",
+                null, BatteryStats.WAKE_TYPE_FULL, false);
+
+        // Release the wakelock
         mNotifier.onWakeLockReleased(PowerManager.PARTIAL_WAKE_LOCK, "wakelockTag",
                 "my.package.name", uid, pid, /* workSource= */ null, /* historyTag= */ null,
                 exceptingCallback);
         verify(mWakeLockLog).onWakeLockReleased("wakelockTag", uid, -1);
+    }
+
+
+    @Test
+    public void testOnWakeLockListener_FullWakeLock_ProcessesOnHandler() throws RemoteException {
+        when(mPowerManagerFlags.improveWakelockLatency()).thenReturn(true);
+        createNotifier();
+
+        IWakeLockCallback exceptingCallback = new IWakeLockCallback.Stub() {
+            @Override public void onStateChanged(boolean enabled) throws RemoteException {
+                throw new RemoteException("Just testing");
+            }
+        };
+        clearInvocations(mWakeLockLog, mBatteryStats, mAppOpsManager);
+
+        final int uid = 1234;
+        final int pid = 5678;
+
+        // Release the wakelock
+        mNotifier.onWakeLockReleased(PowerManager.SCREEN_BRIGHT_WAKE_LOCK, "wakelockTag",
+                "my.package.name", uid, pid, /* workSource= */ null, /* historyTag= */ null,
+                exceptingCallback);
+
+        // No interaction because we expect that to happen in async
+        verifyZeroInteractions(mWakeLockLog, mBatteryStats, mAppOpsManager);
+
+        // Progressing the looper, and validating all the interactions
+        mTestLooper.dispatchAll();
+        verify(mWakeLockLog).onWakeLockReleased("wakelockTag", uid, 1);
+        verify(mBatteryStats).noteStopWakelock(uid, pid, "wakelockTag", /* historyTag= */ null,
+                BatteryStats.WAKE_TYPE_FULL);
+        verify(mAppOpsManager).finishOp(AppOpsManager.OP_WAKE_LOCK, uid,
+                "my.package.name", null);
+
+        clearInvocations(mWakeLockLog, mBatteryStats, mAppOpsManager);
+
+        // Acquire the wakelock
+        mNotifier.onWakeLockAcquired(PowerManager.SCREEN_BRIGHT_WAKE_LOCK, "wakelockTag",
+                "my.package.name", uid, pid, /* workSource= */ null, /* historyTag= */ null,
+                exceptingCallback);
+
+        // No interaction because we expect that to happen in async
+        verifyNoMoreInteractions(mWakeLockLog, mBatteryStats, mAppOpsManager);
+
+        // Progressing the looper, and validating all the interactions
+        mTestLooper.dispatchAll();
+        verify(mWakeLockLog).onWakeLockAcquired("wakelockTag", uid,
+                PowerManager.SCREEN_BRIGHT_WAKE_LOCK, 1);
+        verify(mBatteryStats).noteStartWakelock(uid, pid, "wakelockTag", /* historyTag= */ null,
+                BatteryStats.WAKE_TYPE_FULL, false);
+        verify(mAppOpsManager).startOpNoThrow(AppOpsManager.OP_WAKE_LOCK, uid,
+                "my.package.name", false, null, null);
+
+        // Test with improveWakelockLatency flag false, hence the wakelock log will run on the same
+        // thread
+        clearInvocations(mWakeLockLog, mBatteryStats, mAppOpsManager);
+        when(mPowerManagerFlags.improveWakelockLatency()).thenReturn(false);
+
+        mNotifier.onWakeLockAcquired(PowerManager.SCREEN_BRIGHT_WAKE_LOCK, "wakelockTag",
+                "my.package.name", uid, pid, /* workSource= */ null, /* historyTag= */ null,
+                exceptingCallback);
+        verify(mWakeLockLog).onWakeLockAcquired("wakelockTag", uid,
+                PowerManager.SCREEN_BRIGHT_WAKE_LOCK, -1);
+
+        mNotifier.onWakeLockReleased(PowerManager.SCREEN_BRIGHT_WAKE_LOCK, "wakelockTag",
+                "my.package.name", uid, pid, /* workSource= */ null, /* historyTag= */ null,
+                exceptingCallback);
+        verify(mWakeLockLog).onWakeLockReleased("wakelockTag", uid, -1);
+    }
+
+    @Test
+    public void testOnWakeLockListener_FullWakeLock_ProcessesInSync() throws RemoteException {
+        createNotifier();
+
+        IWakeLockCallback exceptingCallback = new IWakeLockCallback.Stub() {
+            @Override public void onStateChanged(boolean enabled) throws RemoteException {
+                throw new RemoteException("Just testing");
+            }
+        };
+        clearInvocations(mWakeLockLog, mBatteryStats, mAppOpsManager);
+
+        final int uid = 1234;
+        final int pid = 5678;
+
+        // Release the wakelock
+        mNotifier.onWakeLockReleased(PowerManager.SCREEN_BRIGHT_WAKE_LOCK, "wakelockTag",
+                "my.package.name", uid, pid, /* workSource= */ null, /* historyTag= */ null,
+                exceptingCallback);
+
+        verify(mWakeLockLog).onWakeLockReleased("wakelockTag", uid, -1);
+        verify(mBatteryStats).noteStopWakelock(uid, pid, "wakelockTag", /* historyTag= */ null,
+                BatteryStats.WAKE_TYPE_FULL);
+        verify(mAppOpsManager).finishOp(AppOpsManager.OP_WAKE_LOCK, uid,
+                "my.package.name", null);
+
+        clearInvocations(mWakeLockLog, mBatteryStats, mAppOpsManager);
+
+        // Acquire the wakelock
+        mNotifier.onWakeLockAcquired(PowerManager.SCREEN_BRIGHT_WAKE_LOCK, "wakelockTag",
+                "my.package.name", uid, pid, /* workSource= */ null, /* historyTag= */ null,
+                exceptingCallback);
+
+        mTestLooper.dispatchAll();
+        verify(mWakeLockLog).onWakeLockAcquired("wakelockTag", uid,
+                PowerManager.SCREEN_BRIGHT_WAKE_LOCK, -1);
+        verify(mBatteryStats).noteStartWakelock(uid, pid, "wakelockTag", /* historyTag= */ null,
+                BatteryStats.WAKE_TYPE_FULL, false);
+        verify(mAppOpsManager).startOpNoThrow(AppOpsManager.OP_WAKE_LOCK, uid,
+                "my.package.name", false, null, null);
     }
 
     private final PowerManagerService.Injector mInjector = new PowerManagerService.Injector() {
@@ -365,13 +506,17 @@ public class NotifierTest {
             public WakeLockLog getWakeLockLog(Context context) {
                 return mWakeLockLog;
             }
+
+            @Override
+            public AppOpsManager getAppOpsManager(Context context) {
+                return mAppOpsManager;
+            }
         };
 
         mNotifier = new Notifier(
                 mTestLooper.getLooper(),
                 mContextSpy,
-                IBatteryStats.Stub.asInterface(ServiceManager.getService(
-                        BatteryStats.SERVICE_NAME)),
+                mBatteryStats,
                 mInjector.createSuspendBlocker(mService, "testBlocker"),
                 null,
                 null,

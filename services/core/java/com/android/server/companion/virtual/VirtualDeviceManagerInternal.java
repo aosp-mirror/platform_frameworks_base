@@ -20,6 +20,8 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.companion.virtual.IVirtualDevice;
 import android.companion.virtual.VirtualDevice;
+import android.companion.virtual.VirtualDeviceManager;
+import android.companion.virtual.VirtualDeviceParams;
 import android.companion.virtual.sensor.VirtualSensor;
 import android.content.Context;
 import android.os.LocaleList;
@@ -180,4 +182,14 @@ public abstract class VirtualDeviceManagerInternal {
      * exists, as long as one may have existed or can be created.
      */
     public abstract @NonNull Set<String> getAllPersistentDeviceIds();
+
+    /**
+     * Creates a virtual device where applications can launch and receive input events injected by
+     * the creator.
+     *
+     * <p>A Companion Device Manager association is not required. Only the system may create such
+     * virtual devices.</p>
+     */
+    public abstract @NonNull VirtualDeviceManager.VirtualDevice createVirtualDevice(
+            @NonNull VirtualDeviceParams params);
 }

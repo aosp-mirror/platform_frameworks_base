@@ -84,6 +84,8 @@
     <string name="notification_bubble_title" msgid="6082910224488253378">"Bong bóng"</string>
     <string name="manage_bubbles_text" msgid="7730624269650594419">"Quản lý"</string>
     <string name="accessibility_bubble_dismissed" msgid="8367471990421247357">"Đã đóng bong bóng."</string>
+    <string name="bubble_shortcut_label" msgid="666269077944378311">"Bong bóng"</string>
+    <string name="bubble_shortcut_long_label" msgid="6088437544312894043">"Hiện bong bóng"</string>
     <string name="restart_button_description" msgid="4564728020654658478">"Nhấn nút khởi động lại ứng dụng này để xem dễ hơn"</string>
     <string name="user_aspect_ratio_settings_button_hint" msgid="734835849600713016">"Thay đổi tỷ lệ khung hình của ứng dụng này thông qua phần Cài đặt"</string>
     <string name="user_aspect_ratio_settings_button_description" msgid="4315566801697411684">"Thay đổi tỷ lệ khung hình"</string>
@@ -105,7 +107,7 @@
     <string name="minimize_button_text" msgid="271592547935841753">"Thu nhỏ"</string>
     <string name="close_button_text" msgid="2913281996024033299">"Đóng"</string>
     <string name="back_button_text" msgid="1469718707134137085">"Quay lại"</string>
-    <string name="handle_text" msgid="1766582106752184456">"Xử lý"</string>
+    <string name="handle_text" msgid="4419667835599523257">"Ô điều khiển ứng dụng"</string>
     <string name="app_icon_text" msgid="2823268023931811747">"Biểu tượng ứng dụng"</string>
     <string name="fullscreen_text" msgid="1162316685217676079">"Toàn màn hình"</string>
     <string name="desktop_text" msgid="1077633567027630454">"Chế độ máy tính"</string>
@@ -114,6 +116,7 @@
     <string name="float_button_text" msgid="9221657008391364581">"Nổi"</string>
     <string name="select_text" msgid="5139083974039906583">"Chọn"</string>
     <string name="screenshot_text" msgid="1477704010087786671">"Ảnh chụp màn hình"</string>
+    <string name="open_in_browser_text" msgid="9181692926376072904">"Mở trong trình duyệt"</string>
     <string name="close_text" msgid="4986518933445178928">"Đóng"</string>
     <string name="collapse_menu_text" msgid="7515008122450342029">"Đóng trình đơn"</string>
     <string name="expand_menu_text" msgid="3847736164494181168">"Mở Trình đơn"</string>

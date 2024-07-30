@@ -7,3 +7,10 @@ flag {
     description: "Feature flag for auto PowerHintSession dead thread cleanup"
     bug: "296160319"
 }
+
+flag {
+    name: "adpf_session_tag"
+    namespace: "game"
+    description: "Feature flag for adding session tag to hint session atom"
+    bug: "345011125"
+}

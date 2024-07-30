@@ -2086,6 +2086,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
 
     private void handleUserUnlocked(int userId) {
         Assert.isMainThread();
+        mLogger.logUserUnlocked(userId);
         mUserIsUnlocked.put(userId, true);
         mNeedsSlowUnlockTransition = resolveNeedsSlowUnlockTransition();
         for (int i = 0; i < mCallbacks.size(); i++) {
@@ -2098,12 +2099,15 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
 
     private void handleUserStopped(int userId) {
         Assert.isMainThread();
-        mUserIsUnlocked.put(userId, mUserManager.isUserUnlocked(userId));
+        boolean isUnlocked = mUserManager.isUserUnlocked(userId);
+        mLogger.logUserStopped(userId, isUnlocked);
+        mUserIsUnlocked.put(userId, isUnlocked);
     }
 
     @VisibleForTesting
     void handleUserRemoved(int userId) {
         Assert.isMainThread();
+        mLogger.logUserRemoved(userId);
         mUserIsUnlocked.delete(userId);
         mUserTrustIsUsuallyManaged.delete(userId);
     }
@@ -2444,7 +2448,9 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
 
         mTaskStackChangeListeners.registerTaskStackListener(mTaskStackListener);
         int user = mSelectedUserInteractor.getSelectedUserId(true);
-        mUserIsUnlocked.put(user, mUserManager.isUserUnlocked(user));
+        boolean isUserUnlocked = mUserManager.isUserUnlocked(user);
+        mLogger.logUserUnlockedInitialState(user, isUserUnlocked);
+        mUserIsUnlocked.put(user, isUserUnlocked);
         mLogoutEnabled = mDevicePolicyManager.isLogoutEnabled();
         updateSecondaryLockscreenRequirement(user);
         List<UserInfo> allUsers = mUserManager.getUsers();
@@ -4059,6 +4065,9 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
         pw.println("    strongAuthFlags=" + Integer.toHexString(strongAuthFlags));
         pw.println("ActiveUnlockRunning="
                 + mTrustManager.isActiveUnlockRunning(mSelectedUserInteractor.getSelectedUserId()));
+        pw.println("userUnlockedCache[userid=" + userId + "]=" + isUserUnlocked(userId));
+        pw.println("actualUserUnlocked[userid=" + userId + "]="
+                + mUserManager.isUserUnlocked(userId));
         new DumpsysTableLogger(
                 "KeyguardActiveUnlockTriggers",
                 KeyguardActiveUnlockModel.TABLE_HEADERS,

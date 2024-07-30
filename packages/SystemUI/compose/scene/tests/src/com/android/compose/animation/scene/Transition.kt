@@ -30,6 +30,9 @@ fun transition(
     current: () -> SceneKey = { from },
     progress: () -> Float = { 0f },
     progressVelocity: () -> Float = { 0f },
+    previewProgress: () -> Float = { 0f },
+    previewProgressVelocity: () -> Float = { 0f },
+    isInPreviewStage: () -> Boolean = { false },
     interruptionProgress: () -> Float = { 0f },
     isInitiatedByUserInput: Boolean = false,
     isUserInputOngoing: Boolean = false,
@@ -37,8 +40,11 @@ fun transition(
     bouncingScene: SceneKey? = null,
     orientation: Orientation = Orientation.Horizontal,
     onFinish: ((TransitionState.Transition) -> Job)? = null,
+    replacedTransition: TransitionState.Transition? = null,
 ): TransitionState.Transition {
-    return object : TransitionState.Transition(from, to), TransitionState.HasOverscrollProperties {
+    return object :
+        TransitionState.Transition(from, to, replacedTransition),
+        TransitionState.HasOverscrollProperties {
         override val currentScene: SceneKey
             get() = current()
 
@@ -47,6 +53,15 @@ fun transition(
 
         override val progressVelocity: Float
             get() = progressVelocity()
+
+        override val previewProgress: Float
+            get() = previewProgress()
+
+        override val previewProgressVelocity: Float
+            get() = previewProgressVelocity()
+
+        override val isInPreviewStage: Boolean
+            get() = isInPreviewStage()
 
         override val isInitiatedByUserInput: Boolean = isInitiatedByUserInput
         override val isUserInputOngoing: Boolean = isUserInputOngoing

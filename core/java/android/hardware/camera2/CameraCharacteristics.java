@@ -564,7 +564,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * {@link Build.VERSION_CODES#VANILLA_ICE_CREAM}, then this list will only contain
      * CONTROL_ZOOM_RATIO_RANGE and SCALER_AVAILABLE_MAX_DIGITAL_ZOOM
      *
-     * @see INFO_SESSION_CONFIGURATION_QUERY_VERSION
+     * @see #INFO_SESSION_CONFIGURATION_QUERY_VERSION
      */
     @NonNull
     @FlaggedApi(Flags.FLAG_FEATURE_COMBINATION_QUERY)

@@ -30,8 +30,7 @@ import com.android.systemui.keyguard.shared.model.ClockSize
 import com.android.systemui.keyguard.shared.model.ClockSizeSetting
 import com.android.systemui.res.R
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
-import com.android.systemui.shade.shared.model.ShadeMode
-import com.android.systemui.statusbar.notification.domain.interactor.NotificationsKeyguardInteractor
+import com.android.systemui.statusbar.notification.icon.ui.viewmodel.NotificationIconContainerAlwaysOnDisplayViewModel
 import com.android.systemui.statusbar.ui.SystemBarUtilsProxy
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
@@ -48,7 +47,7 @@ class KeyguardClockViewModel
 constructor(
     keyguardClockInteractor: KeyguardClockInteractor,
     @Application private val applicationScope: CoroutineScope,
-    notifsKeyguardInteractor: NotificationsKeyguardInteractor,
+    aodNotificationIconViewModel: NotificationIconContainerAlwaysOnDisplayViewModel,
     @get:VisibleForTesting val shadeInteractor: ShadeInteractor,
     private val systemBarUtils: SystemBarUtilsProxy,
     configurationInteractor: ConfigurationInteractor,
@@ -88,14 +87,13 @@ constructor(
                 currentClock?.let { clock ->
                     val face = if (isLargeClock) clock.largeClock else clock.smallClock
                     face.config.hasCustomWeatherDataDisplay
-                }
-                    ?: false
+                } ?: false
             }
             .stateIn(
                 scope = applicationScope,
                 started = SharingStarted.WhileSubscribed(),
-                initialValue = currentClock.value?.largeClock?.config?.hasCustomWeatherDataDisplay
-                        ?: false
+                initialValue =
+                    currentClock.value?.largeClock?.config?.hasCustomWeatherDataDisplay ?: false
             )
 
     val clockShouldBeCentered: StateFlow<Boolean> =
@@ -105,37 +103,40 @@ constructor(
             initialValue = false
         )
 
-    val isAodIconsVisible: StateFlow<Boolean> =
-        notifsKeyguardInteractor.areNotificationsFullyHidden.stateIn(
-            scope = applicationScope,
-            started = SharingStarted.WhileSubscribed(),
-            initialValue = false
-        )
+    // To translate elements below smartspace in weather clock to avoid overlapping between date
+    // element in weather clock and aod icons
+    val hasAodIcons: StateFlow<Boolean> =
+        aodNotificationIconViewModel.icons
+            .map { it.visibleIcons.isNotEmpty() }
+            .stateIn(
+                scope = applicationScope,
+                started = SharingStarted.WhileSubscribed(),
+                initialValue = false
+            )
 
     val currentClockLayout: StateFlow<ClockLayout> =
         combine(
                 isLargeClockVisible,
                 clockShouldBeCentered,
-                shadeInteractor.shadeMode,
+                shadeInteractor.isShadeLayoutWide,
                 currentClock,
-            ) { isLargeClockVisible, clockShouldBeCentered, shadeMode, currentClock ->
-                val shouldUseSplitShade = shadeMode == ShadeMode.Split
+            ) { isLargeClockVisible, clockShouldBeCentered, isShadeLayoutWide, currentClock ->
                 if (currentClock?.config?.useCustomClockScene == true) {
                     when {
-                        shouldUseSplitShade && clockShouldBeCentered ->
+                        isShadeLayoutWide && clockShouldBeCentered ->
                             ClockLayout.WEATHER_LARGE_CLOCK
-                        shouldUseSplitShade && isLargeClockVisible ->
+                        isShadeLayoutWide && isLargeClockVisible ->
                             ClockLayout.SPLIT_SHADE_WEATHER_LARGE_CLOCK
-                        shouldUseSplitShade -> ClockLayout.SPLIT_SHADE_SMALL_CLOCK
+                        isShadeLayoutWide -> ClockLayout.SPLIT_SHADE_SMALL_CLOCK
                         isLargeClockVisible -> ClockLayout.WEATHER_LARGE_CLOCK
                         else -> ClockLayout.SMALL_CLOCK
                     }
                 } else {
                     when {
-                        shouldUseSplitShade && clockShouldBeCentered -> ClockLayout.LARGE_CLOCK
-                        shouldUseSplitShade && isLargeClockVisible ->
+                        isShadeLayoutWide && clockShouldBeCentered -> ClockLayout.LARGE_CLOCK
+                        isShadeLayoutWide && isLargeClockVisible ->
                             ClockLayout.SPLIT_SHADE_LARGE_CLOCK
-                        shouldUseSplitShade -> ClockLayout.SPLIT_SHADE_SMALL_CLOCK
+                        isShadeLayoutWide -> ClockLayout.SPLIT_SHADE_SMALL_CLOCK
                         isLargeClockVisible -> ClockLayout.LARGE_CLOCK
                         else -> ClockLayout.SMALL_CLOCK
                     }
@@ -161,7 +162,7 @@ constructor(
     /** Calculates the top margin for the small clock. */
     fun getSmallClockTopMargin(): Int {
         val statusBarHeight = systemBarUtils.getStatusBarHeaderHeightKeyguard()
-        return if (shadeInteractor.shadeMode.value == ShadeMode.Split) {
+        return if (shadeInteractor.isShadeLayoutWide.value) {
             resources.getDimensionPixelSize(R.dimen.keyguard_split_shade_top_margin) -
                 if (ComposeLockscreen.isEnabled) statusBarHeight else 0
         } else {
@@ -173,7 +174,7 @@ constructor(
     val smallClockTopMargin =
         combine(
             configurationInteractor.onAnyConfigurationChange,
-            shadeInteractor.shadeMode,
+            shadeInteractor.isShadeLayoutWide,
         ) { _, _ ->
             getSmallClockTopMargin()
         }

@@ -1,5 +1,4 @@
 <data-labels>
-    <data-shared dataCategory="identifiers"
-        dataType="other"
+    <data-shared dataType="identifiers_data_type_other"
         purposes="analytics" />
 </data-labels>

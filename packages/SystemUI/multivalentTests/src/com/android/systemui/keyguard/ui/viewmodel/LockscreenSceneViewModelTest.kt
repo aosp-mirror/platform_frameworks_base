@@ -19,6 +19,7 @@
 package com.android.systemui.keyguard.ui.viewmodel
 
 import android.platform.test.annotations.EnableFlags
+import android.testing.TestableLooper.RunWithLooper
 import androidx.test.filters.SmallTest
 import com.android.compose.animation.scene.Edge
 import com.android.compose.animation.scene.SceneKey
@@ -43,13 +44,13 @@ import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.scene.shared.model.TransitionKeys
 import com.android.systemui.shade.data.repository.shadeRepository
 import com.android.systemui.shade.domain.interactor.shadeInteractor
-import com.android.systemui.shade.shared.model.ShadeMode
 import com.android.systemui.statusbar.notification.stack.ui.viewmodel.notificationsPlaceholderViewModel
 import com.android.systemui.testKosmos
 import com.android.systemui.util.mockito.mock
 import com.google.common.truth.Truth.assertThat
 import kotlin.math.pow
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
 import org.junit.BeforeClass
 import org.junit.Test
@@ -60,6 +61,7 @@ import platform.test.runner.parameterized.Parameters
 
 @SmallTest
 @RunWith(ParameterizedAndroidJunit4::class)
+@RunWithLooper
 @EnableSceneContainer
 class LockscreenSceneViewModelTest : SysuiTestCase() {
 
@@ -179,13 +181,7 @@ class LockscreenSceneViewModelTest : SysuiTestCase() {
                 }
             )
             sceneInteractor.changeScene(Scenes.Lockscreen, "reason")
-            kosmos.shadeRepository.setShadeMode(
-                if (isSingleShade) {
-                    ShadeMode.Single
-                } else {
-                    ShadeMode.Split
-                }
-            )
+            kosmos.shadeRepository.setShadeLayoutWide(!isSingleShade)
             kosmos.setCommunalAvailable(isCommunalAvailable)
             kosmos.fakePowerRepository.updateWakefulness(
                 rawState =
@@ -205,8 +201,13 @@ class LockscreenSceneViewModelTest : SysuiTestCase() {
                         pointerCount = if (downWithTwoPointers) 2 else 1,
                     )
                 )
-
-            assertThat(downDestination?.toScene)
+            val downScene by
+                collectLastValue(
+                    downDestination?.let {
+                        kosmos.sceneInteractor.resolveSceneFamily(downDestination.toScene)
+                    } ?: flowOf(null)
+                )
+            assertThat(downScene)
                 .isEqualTo(
                     expectedDownDestination(
                         downFromEdge = downFromEdge,
@@ -223,7 +224,14 @@ class LockscreenSceneViewModelTest : SysuiTestCase() {
                     )
                 )
 
-            assertThat(destinationScenes?.get(Swipe(SwipeDirection.Up))?.toScene)
+            val upScene by
+                collectLastValue(
+                    destinationScenes?.get(Swipe(SwipeDirection.Up))?.toScene?.let { scene ->
+                        kosmos.sceneInteractor.resolveSceneFamily(scene)
+                    } ?: flowOf(null)
+                )
+
+            assertThat(upScene)
                 .isEqualTo(
                     expectedUpDestination(
                         canSwipeToEnter = canSwipeToEnter,
@@ -231,7 +239,14 @@ class LockscreenSceneViewModelTest : SysuiTestCase() {
                     )
                 )
 
-            assertThat(destinationScenes?.get(Swipe(SwipeDirection.Left))?.toScene)
+            val leftScene by
+                collectLastValue(
+                    destinationScenes?.get(Swipe(SwipeDirection.Left))?.toScene?.let { scene ->
+                        kosmos.sceneInteractor.resolveSceneFamily(scene)
+                    } ?: flowOf(null)
+                )
+
+            assertThat(leftScene)
                 .isEqualTo(
                     expectedLeftDestination(
                         isCommunalAvailable = isCommunalAvailable,
@@ -242,11 +257,10 @@ class LockscreenSceneViewModelTest : SysuiTestCase() {
 
     private fun createLockscreenSceneViewModel(): LockscreenSceneViewModel {
         return LockscreenSceneViewModel(
-            applicationScope = testScope.backgroundScope,
             deviceEntryInteractor = kosmos.deviceEntryInteractor,
             communalInteractor = kosmos.communalInteractor,
-            longPress =
-                KeyguardLongPressViewModel(
+            touchHandling =
+                KeyguardTouchHandlingViewModel(
                     interactor = mock(),
                 ),
             notifications = kosmos.notificationsPlaceholderViewModel,

@@ -16,7 +16,7 @@
 
 package com.android.systemui.accessibility;
 
-import static com.android.systemui.accessibility.Magnification.DELAY_SHOW_MAGNIFICATION_TIMEOUT_MS;
+import static com.android.systemui.accessibility.MagnificationImpl.DELAY_SHOW_MAGNIFICATION_TIMEOUT_MS;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -37,14 +37,15 @@ import android.platform.test.annotations.RequiresFlagsEnabled;
 import android.platform.test.flag.junit.CheckFlagsRule;
 import android.platform.test.flag.junit.DeviceFlagsValueProvider;
 import android.provider.Settings;
-import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.view.Display;
+import android.view.IWindowManager;
 import android.view.accessibility.AccessibilityManager;
 import android.view.accessibility.IMagnificationConnection;
 import android.view.accessibility.IMagnificationConnectionCallback;
 import android.view.accessibility.IRemoteMagnificationAnimationCallback;
 
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.Flags;
@@ -64,10 +65,10 @@ import org.mockito.MockitoAnnotations;
 
 /**
  * Tests for {@link android.view.accessibility.IMagnificationConnection} retrieved from
- * {@link Magnification}
+ * {@link MagnificationImpl}
  */
 @SmallTest
-@RunWith(AndroidTestingRunner.class)
+@RunWith(AndroidJUnit4.class)
 @TestableLooper.RunWithLooper(setAsMainLooper = true)
 public class IMagnificationConnectionTest extends SysuiTestCase {
 
@@ -99,9 +100,11 @@ public class IMagnificationConnectionTest extends SysuiTestCase {
     private SecureSettings mSecureSettings;
     @Mock
     private AccessibilityLogger mA11yLogger;
+    @Mock
+    private IWindowManager mIWindowManager;
 
     private IMagnificationConnection mIMagnificationConnection;
-    private Magnification mMagnification;
+    private MagnificationImpl mMagnification;
     private FakeDisplayTracker mDisplayTracker = new FakeDisplayTracker(mContext);
     private TestableLooper mTestableLooper;
 
@@ -116,10 +119,11 @@ public class IMagnificationConnectionTest extends SysuiTestCase {
                 any(IMagnificationConnection.class));
         mTestableLooper = TestableLooper.get(this);
         assertNotNull(mTestableLooper);
-        mMagnification = new Magnification(getContext(),
-                mTestableLooper.getLooper(), getContext().getMainExecutor(), mCommandQueue,
+        mMagnification = new MagnificationImpl(getContext(),
+                mTestableLooper.getLooper(), mContext.getMainExecutor(), mCommandQueue,
                 mModeSwitchesController, mSysUiState, mOverviewProxyService, mSecureSettings,
-                mDisplayTracker, getContext().getSystemService(DisplayManager.class), mA11yLogger);
+                mDisplayTracker, getContext().getSystemService(DisplayManager.class),
+                mA11yLogger, mIWindowManager, mAccessibilityManager);
         mMagnification.mWindowMagnificationControllerSupplier =
                 new FakeWindowMagnificationControllerSupplier(
                         mContext.getSystemService(DisplayManager.class));

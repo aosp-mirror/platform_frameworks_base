@@ -26,6 +26,7 @@ import android.graphics.PorterDuffColorFilter;
 import android.graphics.RadialGradient;
 import android.graphics.Rect;
 import android.graphics.RectF;
+import android.graphics.RuntimeShader;
 import android.graphics.Shader;
 import android.graphics.SweepGradient;
 import android.graphics.Typeface;
@@ -33,8 +34,13 @@ import android.graphics.Typeface;
 import com.android.internal.widget.remotecompose.core.PaintContext;
 import com.android.internal.widget.remotecompose.core.RemoteContext;
 import com.android.internal.widget.remotecompose.core.operations.ClipPath;
+import com.android.internal.widget.remotecompose.core.operations.ShaderData;
+import com.android.internal.widget.remotecompose.core.operations.Utils;
 import com.android.internal.widget.remotecompose.core.operations.paint.PaintBundle;
 import com.android.internal.widget.remotecompose.core.operations.paint.PaintChanges;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * An implementation of PaintContext for the Android Canvas.
@@ -42,7 +48,9 @@ import com.android.internal.widget.remotecompose.core.operations.paint.PaintChan
  */
 public class AndroidPaintContext extends PaintContext {
     Paint mPaint = new Paint();
+    List<Paint> mPaintList = new ArrayList<>();
     Canvas mCanvas;
+    Rect mTmpRect = new Rect(); // use in calculation of bounds
 
     public AndroidPaintContext(RemoteContext context, Canvas canvas) {
         super(context);
@@ -158,6 +166,16 @@ public class AndroidPaintContext extends PaintContext {
     }
 
     @Override
+    public void savePaint() {
+        mPaintList.add(new Paint(mPaint));
+    }
+
+    @Override
+    public void restorePaint() {
+        mPaint = mPaintList.remove(mPaintList.size() - 1);
+    }
+
+    @Override
     public void drawRoundRect(float left,
                               float top,
                               float right,
@@ -177,6 +195,22 @@ public class AndroidPaintContext extends PaintContext {
     }
 
     @Override
+    public void getTextBounds(int textId, int start, int end, boolean monospace, float[] bounds) {
+        String str = getText(textId);
+        if (end == -1) {
+            end = str.length();
+        }
+
+        mPaint.getTextBounds(str, start, end, mTmpRect);
+
+        bounds[0] = mTmpRect.left;
+        bounds[1] = mTmpRect.top;
+        bounds[2] = monospace ? (mPaint.measureText(str, start, end) - mTmpRect.left)
+                : mTmpRect.right;
+        bounds[3] = mTmpRect.bottom;
+    }
+
+    @Override
     public void drawTextRun(int textID,
                             int start,
                             int end,
@@ -185,7 +219,16 @@ public class AndroidPaintContext extends PaintContext {
                             float x,
                             float y,
                             boolean rtl) {
-        String textToPaint = getText(textID).substring(start, end);
+
+        String textToPaint = getText(textID);
+        if (end == -1) {
+            if (start != 0) {
+                textToPaint = textToPaint.substring(start);
+            }
+        } else {
+            textToPaint = textToPaint.substring(start, end);
+        }
+
         mCanvas.drawText(textToPaint, x, y, mPaint);
     }
 
@@ -306,9 +349,14 @@ public class AndroidPaintContext extends PaintContext {
         return null;
     }
 
+    /**
+     * This applies paint changes to the current paint
+     *
+     * @param mPaintData the list change to the paint
+     */
     @Override
     public void applyPaint(PaintBundle mPaintData) {
-        mPaintData.applyPaintChange(new PaintChanges() {
+        mPaintData.applyPaintChange((PaintContext) this, new PaintChanges() {
             @Override
             public void setTextSize(float size) {
                 mPaint.setTextSize(size);
@@ -361,9 +409,7 @@ public class AndroidPaintContext extends PaintContext {
                     }
                 }
 
-
             }
-
 
             @Override
             public void setStrokeWidth(float width) {
@@ -386,13 +432,37 @@ public class AndroidPaintContext extends PaintContext {
             }
 
             @Override
-            public void setShader(int shader, String shaderString) {
-
+            public void setShader(int shaderId) {
+                // TODO this stuff should check the shader creation
+                if (shaderId == 0) {
+                    mPaint.setShader(null);
+                    return;
+                }
+                ShaderData data = getShaderData(shaderId);
+                RuntimeShader shader = new RuntimeShader(getText(data.getShaderTextId()));
+                String[] names = data.getUniformFloatNames();
+                for (int i = 0; i < names.length; i++) {
+                    String name = names[i];
+                    float[] val = data.getUniformFloats(name);
+                    shader.setFloatUniform(name, val);
+                }
+                names = data.getUniformIntegerNames();
+                for (int i = 0; i < names.length; i++) {
+                    String name = names[i];
+                    int[] val = data.getUniformInts(name);
+                    shader.setIntUniform(name, val);
+                }
+                names = data.getUniformBitmapNames();
+                for (int i = 0; i < names.length; i++) {
+                    String name = names[i];
+                    int val = data.getUniformBitmapId(name);
+                }
+                mPaint.setShader(shader);
             }
 
             @Override
             public void setImageFilterQuality(int quality) {
-                System.out.println(">>>>>>>>>>>> ");
+                Utils.log(" quality =" + quality);
             }
 
             @Override
@@ -420,7 +490,6 @@ public class AndroidPaintContext extends PaintContext {
                 mPaint.setFilterBitmap(filter);
             }
 
-
             @Override
             public void setAntiAlias(boolean aa) {
                 mPaint.setAntiAlias(aa);
@@ -437,7 +506,6 @@ public class AndroidPaintContext extends PaintContext {
 
                             case PaintBundle.COLOR_FILTER:
                                 mPaint.setColorFilter(null);
-                                System.out.println(">>>>>>>>>>>>> CLEAR!!!!");
                                 break;
                         }
                     }
@@ -446,11 +514,10 @@ public class AndroidPaintContext extends PaintContext {
                 }
             }
 
-            Shader.TileMode[] mTilesModes = new Shader.TileMode[]{
+            Shader.TileMode[] mTileModes = new Shader.TileMode[]{
                     Shader.TileMode.CLAMP,
                     Shader.TileMode.REPEAT,
                     Shader.TileMode.MIRROR};
-
 
             @Override
             public void setLinearGradient(int[] colors,
@@ -463,7 +530,7 @@ public class AndroidPaintContext extends PaintContext {
                 mPaint.setShader(new LinearGradient(startX,
                         startY,
                         endX,
-                        endY, colors, stops, mTilesModes[tileMode]));
+                        endY, colors, stops, mTileModes[tileMode]));
 
             }
 
@@ -475,7 +542,7 @@ public class AndroidPaintContext extends PaintContext {
                                           float radius,
                                           int tileMode) {
                 mPaint.setShader(new RadialGradient(centerX, centerY, radius,
-                        colors, stops, mTilesModes[tileMode]));
+                        colors, stops, mTileModes[tileMode]));
             }
 
             @Override
@@ -490,7 +557,6 @@ public class AndroidPaintContext extends PaintContext {
             @Override
             public void setColorFilter(int color, int mode) {
                 PorterDuff.Mode pmode = origamiToPorterDuffMode(mode);
-                System.out.println("setting color filter to " + pmode.name());
                 if (pmode != null) {
                     mPaint.setColorFilter(
                             new PorterDuffColorFilter(color, pmode));
@@ -500,10 +566,10 @@ public class AndroidPaintContext extends PaintContext {
     }
 
     @Override
-    public void mtrixScale(float scaleX,
-                           float scaleY,
-                           float centerX,
-                           float centerY) {
+    public void matrixScale(float scaleX,
+                            float scaleY,
+                            float centerX,
+                            float centerY) {
         if (Float.isNaN(centerX)) {
             mCanvas.scale(scaleX, scaleY);
         } else {
@@ -556,6 +622,11 @@ public class AndroidPaintContext extends PaintContext {
         }
     }
 
+    @Override
+    public void reset() {
+        mPaint.reset();
+    }
+
     private Path getPath(int path1Id,
                          int path2Id,
                          float tween,
@@ -598,6 +669,10 @@ public class AndroidPaintContext extends PaintContext {
 
     private String getText(int id) {
         return (String) mContext.mRemoteComposeState.getFromId(id);
+    }
+
+    private ShaderData getShaderData(int id) {
+        return (ShaderData) mContext.mRemoteComposeState.getFromId(id);
     }
 }
 

@@ -17,11 +17,11 @@
 package com.android.systemui.charging
 
 import android.graphics.Rect
-import android.testing.AndroidTestingRunner
 import android.view.Surface
 import android.view.View
 import android.view.WindowManager
 import android.view.WindowMetrics
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.internal.logging.UiEventLogger
 import com.android.systemui.res.R
@@ -49,7 +49,7 @@ import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
 
 @SmallTest
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 class WiredChargingRippleControllerTest : SysuiTestCase() {
     private lateinit var controller: WiredChargingRippleController
     @Mock private lateinit var commandRegistry: CommandRegistry

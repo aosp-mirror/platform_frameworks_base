@@ -17,18 +17,27 @@
 package com.android.systemui.keyguard.domain.interactor
 
 import android.animation.ValueAnimator
+import android.annotation.SuppressLint
+import android.app.DreamManager
 import com.android.app.animation.Interpolators
+import com.android.systemui.Flags.communalSceneKtfRefactor
 import com.android.systemui.communal.domain.interactor.CommunalInteractor
+import com.android.systemui.communal.domain.interactor.CommunalSceneInteractor
+import com.android.systemui.communal.shared.model.CommunalScenes
+import com.android.systemui.communal.shared.model.CommunalTransitionKeys
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
-import com.android.systemui.deviceentry.data.repository.DeviceEntryRepository
+import com.android.systemui.deviceentry.domain.interactor.DeviceEntryInteractor
 import com.android.systemui.keyguard.KeyguardWmStateRefactor
 import com.android.systemui.keyguard.data.repository.KeyguardTransitionRepository
 import com.android.systemui.keyguard.shared.model.BiometricUnlockMode.Companion.isWakeAndUnlock
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.power.domain.interactor.PowerInteractor
+import com.android.systemui.power.shared.model.WakeSleepReason
+import com.android.systemui.scene.shared.flag.SceneContainerFlag
 import com.android.systemui.util.kotlin.Utils.Companion.sample
+import com.android.systemui.util.kotlin.sample
 import javax.inject.Inject
 import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.CoroutineDispatcher
@@ -43,6 +52,7 @@ class FromDozingTransitionInteractor
 @Inject
 constructor(
     override val transitionRepository: KeyguardTransitionRepository,
+    override val internalTransitionInteractor: InternalKeyguardTransitionInteractor,
     transitionInteractor: KeyguardTransitionInteractor,
     @Background private val scope: CoroutineScope,
     @Background bgDispatcher: CoroutineDispatcher,
@@ -50,8 +60,11 @@ constructor(
     keyguardInteractor: KeyguardInteractor,
     powerInteractor: PowerInteractor,
     private val communalInteractor: CommunalInteractor,
+    private val communalSceneInteractor: CommunalSceneInteractor,
     keyguardOcclusionInteractor: KeyguardOcclusionInteractor,
-    val deviceEntryRepository: DeviceEntryRepository,
+    val deviceEntryInteractor: DeviceEntryInteractor,
+    private val wakeToGoneInteractor: KeyguardWakeDirectlyToGoneInteractor,
+    private val dreamManager: DreamManager,
 ) :
     TransitionInteractor(
         fromState = KeyguardState.DOZING,
@@ -65,6 +78,7 @@ constructor(
 
     override fun start() {
         listenForDozingToAny()
+        listenForDozingToGoneViaBiometrics()
         listenForWakeFromDozing()
         listenForTransitionToCamera(scope, keyguardInteractor)
     }
@@ -77,6 +91,40 @@ constructor(
             isKeyguardDismissible && !isKeyguardShowing
         }
 
+    private fun listenForDozingToGoneViaBiometrics() {
+        if (KeyguardWmStateRefactor.isEnabled) {
+            return
+        }
+
+        // This is separate from `listenForDozingToAny` because any delay on wake and unlock will
+        // cause a noticeable issue with animations
+        scope.launch {
+            powerInteractor.isAwake
+                .filterRelevantKeyguardStateAnd { isAwake -> isAwake }
+                .sample(
+                    keyguardInteractor.biometricUnlockState,
+                    ::Pair,
+                )
+                .collect {
+                    (
+                        _,
+                        biometricUnlockState,
+                    ) ->
+                    if (isWakeAndUnlock(biometricUnlockState.mode)) {
+                        if (SceneContainerFlag.isEnabled) {
+                            // TODO(b/336576536): Check if adaptation for scene framework is needed
+                        } else {
+                            startTransitionTo(
+                                KeyguardState.GONE,
+                                ownerReason = "biometric wake and unlock",
+                            )
+                        }
+                    }
+                }
+        }
+    }
+
+    @SuppressLint("MissingPermission")
     private fun listenForDozingToAny() {
         if (KeyguardWmStateRefactor.isEnabled) {
             return
@@ -87,42 +135,68 @@ constructor(
                 .debounce(50L)
                 .filterRelevantKeyguardStateAnd { isAwake -> isAwake }
                 .sample(
-                    keyguardInteractor.biometricUnlockState,
                     keyguardInteractor.isKeyguardOccluded,
-                    communalInteractor.isIdleOnCommunal,
+                    communalInteractor.isCommunalAvailable,
+                    communalSceneInteractor.isIdleOnCommunal,
                     canTransitionToGoneOnWake,
                     keyguardInteractor.primaryBouncerShowing,
                 )
                 .collect {
                     (
                         _,
-                        biometricUnlockState,
                         occluded,
+                        isCommunalAvailable,
                         isIdleOnCommunal,
                         canTransitionToGoneOnWake,
                         primaryBouncerShowing) ->
-                    startTransitionTo(
-                        if (!deviceEntryRepository.isLockscreenEnabled()) {
-                            KeyguardState.GONE
-                        } else if (isWakeAndUnlock(biometricUnlockState.mode)) {
-                            KeyguardState.GONE
-                        } else if (canTransitionToGoneOnWake) {
-                            KeyguardState.GONE
-                        } else if (primaryBouncerShowing) {
-                            KeyguardState.PRIMARY_BOUNCER
-                        } else if (occluded) {
-                            KeyguardState.OCCLUDED
-                        } else if (isIdleOnCommunal) {
-                            KeyguardState.GLANCEABLE_HUB
+                    if (!deviceEntryInteractor.isLockscreenEnabled()) {
+                        if (SceneContainerFlag.isEnabled) {
+                            // TODO(b/336576536): Check if adaptation for scene framework is needed
                         } else {
-                            KeyguardState.LOCKSCREEN
+                            startTransitionTo(KeyguardState.GONE)
                         }
-                    )
+                    } else if (canTransitionToGoneOnWake) {
+                        if (SceneContainerFlag.isEnabled) {
+                            // TODO(b/336576536): Check if adaptation for scene framework is needed
+                        } else {
+                            startTransitionTo(KeyguardState.GONE)
+                        }
+                    } else if (primaryBouncerShowing) {
+                        if (SceneContainerFlag.isEnabled) {
+                            // TODO(b/336576536): Check if adaptation for scene framework is needed
+                        } else {
+                            startTransitionTo(KeyguardState.PRIMARY_BOUNCER)
+                        }
+                    } else if (occluded) {
+                        startTransitionTo(KeyguardState.OCCLUDED)
+                    } else if (isIdleOnCommunal && !communalSceneKtfRefactor()) {
+                        if (SceneContainerFlag.isEnabled) {
+                            // TODO(b/336576536): Check if adaptation for scene framework is needed
+                        } else {
+                            startTransitionTo(KeyguardState.GLANCEABLE_HUB)
+                        }
+                    } else if (
+                        powerInteractor.detailedWakefulness.value.lastWakeReason ==
+                            WakeSleepReason.POWER_BUTTON &&
+                            isCommunalAvailable &&
+                            dreamManager.canStartDreaming(true)
+                    ) {
+                        // This case handles tapping the power button to transition through
+                        // dream -> off -> hub.
+                        if (SceneContainerFlag.isEnabled) {
+                            // TODO(b/336576536): Check if adaptation for scene framework is needed
+                        } else {
+                            transitionToGlanceableHub()
+                        }
+                    } else {
+                        startTransitionTo(KeyguardState.LOCKSCREEN)
+                    }
                 }
         }
     }
 
     /** Figure out what state to transition to when we awake from DOZING. */
+    @SuppressLint("MissingPermission")
     private fun listenForWakeFromDozing() {
         if (!KeyguardWmStateRefactor.isEnabled) {
             return
@@ -132,42 +206,91 @@ constructor(
             powerInteractor.detailedWakefulness
                 .filterRelevantKeyguardStateAnd { it.isAwake() }
                 .sample(
-                    communalInteractor.isIdleOnCommunal,
+                    communalInteractor.isCommunalAvailable,
+                    communalSceneInteractor.isIdleOnCommunal,
                     keyguardInteractor.biometricUnlockState,
-                    canTransitionToGoneOnWake,
+                    wakeToGoneInteractor.canWakeDirectlyToGone,
                     keyguardInteractor.primaryBouncerShowing,
                 )
                 .collect {
                     (
                         _,
+                        isCommunalAvailable,
                         isIdleOnCommunal,
                         biometricUnlockState,
-                        canDismissLockscreen,
+                        canWakeDirectlyToGone,
                         primaryBouncerShowing) ->
                     if (
-                        !maybeStartTransitionToOccludedOrInsecureCamera() &&
+                        !maybeStartTransitionToOccludedOrInsecureCamera { state, reason ->
+                            startTransitionTo(state, ownerReason = reason)
+                        } &&
                             // Handled by dismissFromDozing().
                             !isWakeAndUnlock(biometricUnlockState.mode)
                     ) {
-                        startTransitionTo(
-                            if (!KeyguardWmStateRefactor.isEnabled && canDismissLockscreen) {
-                                KeyguardState.GONE
-                            } else if (
-                                KeyguardWmStateRefactor.isEnabled &&
-                                    !deviceEntryRepository.isLockscreenEnabled()
-                            ) {
-                                KeyguardState.GONE
-                            } else if (primaryBouncerShowing) {
-                                KeyguardState.PRIMARY_BOUNCER
-                            } else if (isIdleOnCommunal) {
-                                KeyguardState.GLANCEABLE_HUB
+                        if (canWakeDirectlyToGone) {
+                            if (SceneContainerFlag.isEnabled) {
+                                // TODO(b/336576536): Check if adaptation for scene framework is
+                                // needed
                             } else {
-                                KeyguardState.LOCKSCREEN
-                            },
-                            ownerReason = "waking from dozing"
-                        )
+                                startTransitionTo(
+                                    KeyguardState.GONE,
+                                    ownerReason = "waking from dozing"
+                                )
+                            }
+                        } else if (primaryBouncerShowing) {
+                            if (SceneContainerFlag.isEnabled) {
+                                // TODO(b/336576536): Check if adaptation for scene framework is
+                                // needed
+                            } else {
+                                startTransitionTo(
+                                    KeyguardState.PRIMARY_BOUNCER,
+                                    ownerReason = "waking from dozing"
+                                )
+                            }
+                        } else if (isIdleOnCommunal && !communalSceneKtfRefactor()) {
+                            if (SceneContainerFlag.isEnabled) {
+                                // TODO(b/336576536): Check if adaptation for scene framework is
+                                // needed
+                            } else {
+                                startTransitionTo(
+                                    KeyguardState.GLANCEABLE_HUB,
+                                    ownerReason = "waking from dozing"
+                                )
+                            }
+                        } else if (
+                            powerInteractor.detailedWakefulness.value.lastWakeReason ==
+                                WakeSleepReason.POWER_BUTTON &&
+                                isCommunalAvailable &&
+                                dreamManager.canStartDreaming(true)
+                        ) {
+                            // This case handles tapping the power button to transition through
+                            // dream -> off -> hub.
+                            if (SceneContainerFlag.isEnabled) {
+                                // TODO(b/336576536): Check if adaptation for scene framework is
+                                // needed
+                            } else {
+                                transitionToGlanceableHub()
+                            }
+                        } else {
+                            startTransitionTo(
+                                KeyguardState.LOCKSCREEN,
+                                ownerReason = "waking from dozing"
+                            )
+                        }
                     }
                 }
+        }
+    }
+
+    private suspend fun transitionToGlanceableHub() {
+        if (communalSceneKtfRefactor()) {
+            communalSceneInteractor.changeScene(
+                CommunalScenes.Communal,
+                // Immediately show the hub when transitioning from dozing to hub.
+                CommunalTransitionKeys.Immediately,
+            )
+        } else {
+            startTransitionTo(KeyguardState.GLANCEABLE_HUB)
         }
     }
 
@@ -179,15 +302,25 @@ constructor(
     override fun getDefaultAnimatorForTransitionsToState(toState: KeyguardState): ValueAnimator {
         return ValueAnimator().apply {
             interpolator = Interpolators.LINEAR
-            duration = DEFAULT_DURATION.inWholeMilliseconds
+            duration =
+                when (toState) {
+                    KeyguardState.GONE -> TO_GONE_DURATION
+                    KeyguardState.GLANCEABLE_HUB -> TO_GLANCEABLE_HUB_DURATION
+                    KeyguardState.LOCKSCREEN -> TO_LOCKSCREEN_DURATION
+                    KeyguardState.OCCLUDED -> TO_OCCLUDED_DURATION
+                    KeyguardState.PRIMARY_BOUNCER -> TO_PRIMARY_BOUNCER_DURATION
+                    else -> DEFAULT_DURATION
+                }.inWholeMilliseconds
         }
     }
 
     companion object {
         const val TAG = "FromDozingTransitionInteractor"
         private val DEFAULT_DURATION = 500.milliseconds
-        val TO_LOCKSCREEN_DURATION = DEFAULT_DURATION
+        val TO_GLANCEABLE_HUB_DURATION = DEFAULT_DURATION
         val TO_GONE_DURATION = DEFAULT_DURATION
+        val TO_LOCKSCREEN_DURATION = DEFAULT_DURATION
+        val TO_OCCLUDED_DURATION = 550.milliseconds
         val TO_PRIMARY_BOUNCER_DURATION = DEFAULT_DURATION
     }
 }

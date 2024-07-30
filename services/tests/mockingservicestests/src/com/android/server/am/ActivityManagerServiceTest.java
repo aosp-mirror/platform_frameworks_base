@@ -527,7 +527,7 @@ public class ActivityManagerServiceTest {
 
         final ProcessRecord appRec = new ProcessRecord(mAms, info, info.processName, uid);
         final ProcessStatsService tracker = mAms.mProcessStats;
-        final IApplicationThread appThread = mock(IApplicationThread.class);
+        final ApplicationThreadDeferred appThread = mock(ApplicationThreadDeferred.class);
         doReturn(mock(IBinder.class)).when(appThread).asBinder();
         appRec.makeActive(appThread, tracker);
         mAms.mProcessList.addProcessNameLocked(appRec);
@@ -701,7 +701,8 @@ public class ActivityManagerServiceTest {
         final var wpc = fifoProc.getWindowProcessController();
         spyOn(wpc);
         doReturn(true).when(wpc).useFifoUiScheduling();
-        fifoProc.makeActive(fifoProc.getThread(), mAms.mProcessStats);
+        fifoProc.makeActive(new ApplicationThreadDeferred(fifoProc.getThread()),
+                mAms.mProcessStats);
         assertTrue(fifoProc.useFifoUiScheduling());
         assertTrue(mAms.mSpecifiedFifoProcesses.contains(fifoProc));
 

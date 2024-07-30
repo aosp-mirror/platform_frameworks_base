@@ -343,6 +343,8 @@ public:
     static bool clipSurfaceViews;
     static bool hdr10bitPlus;
 
+    static int timeoutMultiplier;
+
     static StretchEffectBehavior getStretchEffectBehavior() {
         return stretchEffectBehavior;
     }

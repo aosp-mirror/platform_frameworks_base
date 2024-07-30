@@ -50,3 +50,10 @@ flag {
       purpose: PURPOSE_BUGFIX
   }
 }
+
+flag {
+  name: "remote_views_proto"
+  namespace: "app_widgets"
+  description: "Enable support for persisting RemoteViews previews to Protobuf"
+  bug: "306546610"
+}

@@ -26,6 +26,10 @@ import com.android.compose.animation.scene.TransitionKey
 object CommunalTransitionKeys {
     /** Fades the glanceable hub without any translation */
     val SimpleFade = TransitionKey("SimpleFade")
+    /** Transition from the glanceable hub before entering edit mode */
+    val ToEditMode = TransitionKey("ToEditMode")
+    /** Transition to the glanceable hub after exiting edit mode */
+    val FromEditMode = TransitionKey("FromEditMode")
     /** Immediately transitions without any delay */
     val Immediately = TransitionKey("Immediately")
 }

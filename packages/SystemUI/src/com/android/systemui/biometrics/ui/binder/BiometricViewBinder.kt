@@ -24,7 +24,6 @@ import android.hardware.biometrics.BiometricConstants
 import android.hardware.biometrics.BiometricPrompt
 import android.hardware.biometrics.Flags
 import android.hardware.face.FaceManager
-import android.text.method.ScrollingMovementMethod
 import android.util.Log
 import android.view.HapticFeedbackConstants
 import android.view.MotionEvent
@@ -94,8 +93,16 @@ object BiometricViewBinder {
 
         val textColorError =
             view.resources.getColor(R.color.biometric_dialog_error, view.context.theme)
+
+        val attributes =
+            view.context.obtainStyledAttributes(
+                R.style.TextAppearance_AuthCredential_Indicator,
+                intArrayOf(android.R.attr.textColor)
+            )
         val textColorHint =
-            view.resources.getColor(R.color.biometric_dialog_gray, view.context.theme)
+            if (constraintBp()) attributes.getColor(0, 0)
+            else view.resources.getColor(R.color.biometric_dialog_gray, view.context.theme)
+        attributes.recycle()
 
         val logoView = view.requireViewById<ImageView>(R.id.logo)
         val logoDescriptionView = view.requireViewById<TextView>(R.id.logo_description)
@@ -116,7 +123,6 @@ object BiometricViewBinder {
             !accessibilityManager.isEnabled || !accessibilityManager.isTouchExplorationEnabled
         subtitleView.isSelected =
             !accessibilityManager.isEnabled || !accessibilityManager.isTouchExplorationEnabled
-        descriptionView.movementMethod = ScrollingMovementMethod()
 
         val iconOverlayView = view.requireViewById<LottieAnimationView>(R.id.biometric_icon_overlay)
         val iconView = view.requireViewById<LottieAnimationView>(R.id.biometric_icon)
@@ -376,8 +382,12 @@ object BiometricViewBinder {
                             backgroundView.importantForAccessibility =
                                 IMPORTANT_FOR_ACCESSIBILITY_NO
 
-                            // Allow icon to be used as confirmation button with a11y enabled
-                            if (accessibilityManager.isTouchExplorationEnabled) {
+                            // Allow icon to be used as confirmation button with udfps and a11y
+                            // enabled
+                            if (
+                                accessibilityManager.isTouchExplorationEnabled &&
+                                    modalities.hasUdfps
+                            ) {
                                 iconOverlayView.setOnClickListener {
                                     viewModel.confirmAuthenticated()
                                 }
@@ -457,17 +467,10 @@ object BiometricViewBinder {
 
                 // Retry and confirmation when finger on sensor
                 launch {
-                    combine(
-                            viewModel.canTryAgainNow,
-                            viewModel.hasFingerOnSensor,
-                            viewModel.isPendingConfirmation,
-                            ::Triple
-                        )
-                        .collect { (canRetry, fingerAcquired, pendingConfirmation) ->
+                    combine(viewModel.canTryAgainNow, viewModel.hasFingerOnSensor, ::Pair)
+                        .collect { (canRetry, fingerAcquired) ->
                             if (canRetry && fingerAcquired) {
                                 legacyCallback.onButtonTryAgain()
-                            } else if (pendingConfirmation && fingerAcquired) {
-                                viewModel.confirmAuthenticated()
                             }
                         }
                 }
@@ -497,13 +500,21 @@ class Spaghetti(
     @Deprecated("TODO(b/330788871): remove after replacing AuthContainerView")
     interface Callback {
         fun onAuthenticated()
+
         fun onUserCanceled()
+
         fun onButtonNegative()
+
         fun onButtonTryAgain()
+
         fun onContentViewMoreOptionsButtonPressed()
+
         fun onError()
+
         fun onUseDeviceCredential()
+
         fun onStartDelayedFingerprintSensor()
+
         fun onAuthenticatedAndConfirmed()
     }
 
@@ -579,17 +590,22 @@ class Spaghetti(
         }
     }
 
-    private suspend fun getHelpForSuccessfulAuthentication(
+    private fun getHelpForSuccessfulAuthentication(
         authenticatedModality: BiometricModality,
-    ): Int? =
-        when {
-            // for coex, show a message when face succeeds after fingerprint has also started
-            modalities.hasFaceAndFingerprint &&
-                (viewModel.fingerprintStartMode.first() != FingerprintStartMode.Pending) &&
-                (authenticatedModality == BiometricModality.Face) ->
-                R.string.biometric_dialog_tap_confirm_with_face_alt_1
-            else -> null
+    ): Int? {
+        // for coex, show a message when face succeeds after fingerprint has also started
+        if (authenticatedModality != BiometricModality.Face) {
+            return null
         }
+
+        if (modalities.hasUdfps) {
+            return R.string.biometric_dialog_tap_confirm_with_face_alt_1
+        }
+        if (modalities.hasSfps) {
+            return R.string.biometric_dialog_tap_confirm_with_face_sfps
+        }
+        return null
+    }
 
     fun onAuthenticationFailed(
         @BiometricAuthenticator.Modality modality: Int,

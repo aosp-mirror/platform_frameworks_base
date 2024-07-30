@@ -73,7 +73,7 @@ constructor(
     @Main private val executor: Executor,
     @Assisted private val displaySelector: List<DisplayInfo>.() -> DisplayInfo?,
     @Assisted private val lightRevealEffectFactory: (rotation: Int) -> LightRevealEffect,
-    @Assisted private val overlayContainerName: String
+    @Assisted private val overlayTitle: String
 ) {
 
     private lateinit var bgExecutor: Executor
@@ -81,7 +81,10 @@ constructor(
 
     private var currentRotation: Int = context.display.rotation
     private var root: SurfaceControlViewHost? = null
-    private var scrimView: LightRevealScrim? = null
+
+    /** The scrim view that is used to reveal the screen. */
+    var scrimView: LightRevealScrim? = null
+        private set
 
     private val rotationWatcher = RotationWatcher()
     private val internalDisplayInfos: List<DisplayInfo> =
@@ -153,7 +156,7 @@ constructor(
         val containerBuilder =
             SurfaceControl.Builder(SurfaceSession())
                 .setContainerLayer()
-                .setName(overlayContainerName)
+                .setName("FoldUnfoldAnimationContainer")
 
         displayAreaHelper
             .get()
@@ -221,7 +224,7 @@ constructor(
             }
             format = PixelFormat.TRANSLUCENT
             type = WindowManager.LayoutParams.TYPE_DISPLAY_OVERLAY
-            title = javaClass.simpleName
+            title = overlayTitle
             layoutInDisplayCutoutMode =
                 WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS
             fitInsetsTypes = 0

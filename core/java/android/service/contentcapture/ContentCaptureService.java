@@ -29,6 +29,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.app.Service;
+import android.app.assist.AssistContent;
 import android.content.ComponentName;
 import android.content.ContentCaptureOptions;
 import android.content.Intent;
@@ -132,6 +133,16 @@ public abstract class ContentCaptureService extends Service {
      * </pre>
      */
     public static final String SERVICE_META_DATA = "android.content_capture";
+
+
+    /**
+     * Extras key to flag that the passed in {@link AssistContent} is sent only during Activity
+     * start.
+     *
+     * @hide
+     */
+    public static final String ASSIST_CONTENT_ACTIVITY_START_KEY = "activity_start_assist_content";
+
 
     private final LocalDataShareAdapterResourceManager mDataShareAdapterResourceManager =
             new LocalDataShareAdapterResourceManager();

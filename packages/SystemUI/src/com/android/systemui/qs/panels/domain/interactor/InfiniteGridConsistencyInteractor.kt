@@ -28,7 +28,7 @@ class InfiniteGridConsistencyInteractor
 @Inject
 constructor(
     private val iconTilesInteractor: IconTilesInteractor,
-    private val gridSizeInteractor: InfiniteGridSizeInteractor
+    private val gridSizeInteractor: FixedColumnsSizeInteractor
 ) : GridTypeConsistencyInteractor {
 
     /**

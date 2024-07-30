@@ -19,19 +19,24 @@ package com.android.systemui.util.kotlin
 import android.content.Context
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.map
 
 class Utils {
     companion object {
         fun <A, B, C> toTriple(a: A, bc: Pair<B, C>) = Triple(a, bc.first, bc.second)
+
         fun <A, B, C> toTriple(ab: Pair<A, B>, c: C) = Triple(ab.first, ab.second, c)
 
         fun <A, B, C, D> toQuad(a: A, b: B, c: C, d: D) = Quad(a, b, c, d)
+
         fun <A, B, C, D> toQuad(a: A, bcd: Triple<B, C, D>) =
             Quad(a, bcd.first, bcd.second, bcd.third)
         fun <A, B, C, D> toQuad(abc: Triple<A, B, C>, d: D) =
             Quad(abc.first, abc.second, abc.third, d)
 
         fun <A, B, C, D, E> toQuint(a: A, b: B, c: C, d: D, e: E) = Quint(a, b, c, d, e)
+
         fun <A, B, C, D, E> toQuint(a: A, bcde: Quad<B, C, D, E>) =
             Quint(a, bcde.first, bcde.second, bcde.third, bcde.fourth)
 
@@ -48,6 +53,14 @@ class Utils {
                 bcdefg.fifth,
                 bcdefg.sixth
             )
+
+        /**
+         * Samples the provided flow, performs a filter on the sampled value, then returns the
+         * original value.
+         */
+        fun <A, B> Flow<A>.sampleFilter(b: Flow<B>, predicate: (B) -> Boolean): Flow<A> {
+            return this.sample(b, ::Pair).filter { (_, b) -> predicate(b) }.map { (a, _) -> a }
+        }
 
         /**
          * Samples the provided flows, emitting a tuple of the original flow's value as well as each

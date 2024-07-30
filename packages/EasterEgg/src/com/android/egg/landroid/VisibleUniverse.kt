@@ -30,6 +30,7 @@ import androidx.compose.ui.util.lerp
 import androidx.core.math.MathUtils.clamp
 import com.android.egg.flags.Flags.flagFlag
 import java.lang.Float.max
+import kotlin.math.exp
 import kotlin.math.sqrt
 
 const val DRAW_ORBITS = true
@@ -289,7 +290,8 @@ fun ZoomedDrawScope.drawLanding(landing: Landing) {
 
 fun ZoomedDrawScope.drawSpark(spark: Spark) {
     with(spark) {
-        if (lifetime < 0) return
+        if (fuse.lifetime < 0) return
+        val life = 1f - fuse.lifetime / ttl
         when (style) {
             Spark.Style.LINE ->
                 if (opos != Vec2.Zero) drawLine(color, opos, pos, strokeWidth = size)
@@ -297,7 +299,13 @@ fun ZoomedDrawScope.drawSpark(spark: Spark) {
                 if (opos != Vec2.Zero) drawLine(color, opos, pos, strokeWidth = size / zoom)
             Spark.Style.DOT -> drawCircle(color, size, pos)
             Spark.Style.DOT_ABSOLUTE -> drawCircle(color, size, pos / zoom)
-            Spark.Style.RING -> drawCircle(color, size, pos, style = Stroke(width = 1f / zoom))
+            Spark.Style.RING ->
+                drawCircle(
+                    color = color.copy(alpha = color.alpha * (1f - life)),
+                    radius = exp(lerp(size, 3f * size, life)) - 1f,
+                    center = pos,
+                    style = Stroke(width = 1f / zoom)
+                )
         }
     }
 }

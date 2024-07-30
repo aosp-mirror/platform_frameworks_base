@@ -19,6 +19,7 @@ package android.hardware.input;
 import static com.android.input.flags.Flags.FLAG_INPUT_DEVICE_VIEW_BEHAVIOR_API;
 import static com.android.input.flags.Flags.FLAG_DEVICE_ASSOCIATIONS;
 import static com.android.hardware.input.Flags.keyboardLayoutPreviewFlag;
+import static com.android.hardware.input.Flags.keyboardGlyphMap;
 
 import android.Manifest;
 import android.annotation.FlaggedApi;
@@ -156,6 +157,34 @@ public final class InputManager {
      */
     public static final String META_DATA_KEYBOARD_LAYOUTS =
             "android.hardware.input.metadata.KEYBOARD_LAYOUTS";
+
+    /**
+     * Broadcast Action: Query available keyboard glyph maps.
+     * <p>
+     * The input manager service locates available keyboard glyph maps
+     * by querying broadcast receivers that are registered for this action.
+     * An application can offer additional keyboard glyph maps to the user
+     * by declaring a suitable broadcast receiver in its manifest.
+     * </p>
+     *
+     * @hide
+     */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String ACTION_QUERY_KEYBOARD_GLYPH_MAPS =
+            "android.hardware.input.action.QUERY_KEYBOARD_GLYPH_MAPS";
+
+    /**
+     * Metadata Key: Keyboard glyph map metadata associated with
+     * {@link #ACTION_QUERY_KEYBOARD_GLYPH_MAPS}.
+     * <p>
+     * Specifies the resource id of a XML resource that describes the keyboard
+     * glyph maps that are provided by the application.
+     * </p>
+     *
+     * @hide
+     */
+    public static final String META_DATA_KEYBOARD_GLYPH_MAPS =
+            "android.hardware.input.metadata.KEYBOARD_GLYPH_MAPS";
 
     /**
      * Prevent touches from being consumed by apps if these touches passed through a non-trusted
@@ -898,6 +927,23 @@ public final class InputManager {
     }
 
     /**
+     * Provides associated glyph map for the keyboard device (if available)
+     *
+     * @hide
+     */
+    @Nullable
+    public KeyGlyphMap getKeyGlyphMap(int deviceId) {
+        if (!keyboardGlyphMap()) {
+            return null;
+        }
+        try {
+            return mIm.getKeyGlyphMap(deviceId);
+        } catch (RemoteException ex) {
+            throw ex.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Injects an input event into the event system, targeting windows owned by the provided uid.
      *
      * If a valid targetUid is provided, the system will only consider injecting the input event
@@ -1025,8 +1071,18 @@ public final class InputManager {
     /**
      * Monitor input on the specified display for gestures.
      *
+     * NOTE: New usages of Gesture Monitors are strongly discouraged. Gesture Monitors are
+     * deprecated, in favor of spy windows (see {@link LayoutParams#INPUT_FEATURE_SPY}).
+     * The spy window should be configured specifically to receive the desired events,
+     * unlike the gesture monitor which receives all events on the display.
+     *
      * @hide
+     * @deprecated
+     * @see LayoutParams#INPUT_FEATURE_SPY
+     * @see android.os.InputConfig#SPY
+     * @see #pilferPointers(IBinder)
      */
+    @Deprecated
     public InputMonitor monitorGestureInput(String name, int displayId) {
         return mGlobal.monitorGestureInput(name, displayId);
     }
@@ -1195,8 +1251,22 @@ public final class InputManager {
      * canceled. Only the pilfering window will continue to receive events for the affected pointers
      * until the pointer is lifted.
      *
-     * This method should be used with caution as unexpected pilfering can break fundamental user
-     * interactions.
+     * Furthermore, if any new pointers go down within the touchable region of the pilfering window
+     * and are part of the same gesture, those new pointers will be pilfered as well, and will not
+     * be sent to any other windows.
+     *
+     * Pilfering is designed to be used only once per gesture. Once the gesture is complete
+     * (i.e. on {@link MotionEvent#ACTION_UP}, {@link MotionEvent#ACTION_CANCEL},
+     * or {@link MotionEvent#ACTION_HOVER_EXIT}), the system will resume dispatching pointers
+     * to the appropriately touched windows.
+     *
+     * NOTE: This method should be used with caution as unexpected pilfering can break fundamental
+     * user interactions.
+     *
+     * NOTE: Since this method pilfers pointers based on gesture stream that is
+     * currently active for the window, the behavior will depend on the state of the system, and
+     * is inherently racy. For example, a pilfer request on a quick tap may not be successful if
+     * the tap is already complete by the time the pilfer request is received by the system.
      *
      * @see android.os.InputConfig#SPY
      * @hide

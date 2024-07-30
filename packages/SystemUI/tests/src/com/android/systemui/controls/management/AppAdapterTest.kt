@@ -18,10 +18,10 @@ package com.android.systemui.controls.management
 
 import android.content.ComponentName
 import android.content.res.Resources
-import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
 import android.view.LayoutInflater
 import android.view.View
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.settingslib.core.lifecycle.Lifecycle
 import com.android.systemui.SysuiTestCase
@@ -45,7 +45,7 @@ import org.mockito.MockitoAnnotations
 import java.text.Collator
 
 @SmallTest
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 @TestableLooper.RunWithLooper(setAsMainLooper = true)
 class AppAdapterTest : SysuiTestCase() {
     private val fakeSystemClock = FakeSystemClock()

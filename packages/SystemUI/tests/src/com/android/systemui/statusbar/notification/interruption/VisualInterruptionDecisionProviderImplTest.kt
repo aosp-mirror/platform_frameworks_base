@@ -20,6 +20,7 @@ import android.Manifest.permission
 import android.app.Notification.CATEGORY_EVENT
 import android.app.Notification.CATEGORY_REMINDER
 import android.app.NotificationManager
+import android.content.pm.PackageManager.PERMISSION_DENIED
 import android.content.pm.PackageManager.PERMISSION_GRANTED
 import android.platform.test.annotations.EnableFlags
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -28,11 +29,16 @@ import com.android.systemui.statusbar.notification.collection.NotificationEntry
 import com.android.systemui.statusbar.notification.interruption.VisualInterruptionType.BUBBLE
 import com.android.systemui.statusbar.notification.interruption.VisualInterruptionType.PEEK
 import com.android.systemui.statusbar.notification.interruption.VisualInterruptionType.PULSE
-import java.util.Optional
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.ArgumentMatchers.any
+import org.mockito.ArgumentMatchers.anyInt
 import org.mockito.Mockito.anyString
+import org.mockito.Mockito.times
+import org.mockito.Mockito.verify
 import org.mockito.Mockito.`when`
+import org.mockito.kotlin.whenever
+import java.util.Optional
 
 @SmallTest
 @RunWith(AndroidJUnit4::class)
@@ -58,7 +64,10 @@ class VisualInterruptionDecisionProviderImplTest : VisualInterruptionDecisionPro
             avalancheProvider,
             systemSettings,
             packageManager,
-            Optional.of(bubbles)
+            Optional.of(bubbles),
+            context,
+            notificationManager,
+            settingsInteractor
         )
     }
 
@@ -87,12 +96,60 @@ class VisualInterruptionDecisionProviderImplTest : VisualInterruptionDecisionPro
     // because avalanche code is based on the suppression refactor.
 
     @Test
+    fun testAvalancheFilter_suppress_hasNotSeenEdu_showEduHun() {
+        setAllowedEmergencyPkg(false)
+        whenever(avalancheProvider.timeoutMs).thenReturn(20)
+        whenever(avalancheProvider.startTime).thenReturn(whenAgo(10))
+
+        val avalancheSuppressor = AvalancheSuppressor(
+            avalancheProvider, systemClock, settingsInteractor, packageManager,
+            uiEventLogger, context, notificationManager
+        )
+        avalancheSuppressor.hasSeenEdu = false
+
+        withFilter(avalancheSuppressor) {
+            ensurePeekState()
+            assertShouldNotHeadsUp(
+                buildEntry {
+                    importance = NotificationManager.IMPORTANCE_HIGH
+                    whenMs = whenAgo(5)
+                }
+            )
+        }
+        verify(notificationManager, times(1)).notify(anyInt(), any())
+    }
+
+    @Test
+    fun testAvalancheFilter_suppress_hasSeenEduHun_doNotShowEduHun() {
+        setAllowedEmergencyPkg(false)
+        whenever(avalancheProvider.timeoutMs).thenReturn(20)
+        whenever(avalancheProvider.startTime).thenReturn(whenAgo(10))
+
+        val avalancheSuppressor = AvalancheSuppressor(
+            avalancheProvider, systemClock, settingsInteractor, packageManager,
+            uiEventLogger, context, notificationManager
+        )
+        avalancheSuppressor.hasSeenEdu = true
+
+        withFilter(avalancheSuppressor) {
+            ensurePeekState()
+            assertShouldNotHeadsUp(
+                buildEntry {
+                    importance = NotificationManager.IMPORTANCE_HIGH
+                    whenMs = whenAgo(5)
+                }
+            )
+        }
+        verify(notificationManager, times(0)).notify(anyInt(), any())
+    }
+
+    @Test
     fun testAvalancheFilter_duringAvalanche_allowConversationFromAfterEvent() {
         avalancheProvider.startTime = whenAgo(10)
 
         withFilter(
-            AvalancheSuppressor(avalancheProvider, systemClock, systemSettings, packageManager,
-                    uiEventLogger)
+            AvalancheSuppressor(avalancheProvider, systemClock, settingsInteractor, packageManager,
+                    uiEventLogger, context, notificationManager)
         ) {
             ensurePeekState()
             assertShouldHeadsUp(
@@ -111,8 +168,8 @@ class VisualInterruptionDecisionProviderImplTest : VisualInterruptionDecisionPro
         avalancheProvider.startTime = whenAgo(10)
 
         withFilter(
-            AvalancheSuppressor(avalancheProvider, systemClock, systemSettings, packageManager,
-                    uiEventLogger)
+            AvalancheSuppressor(avalancheProvider, systemClock, settingsInteractor, packageManager,
+                    uiEventLogger, context, notificationManager)
         ) {
             ensurePeekState()
             assertShouldNotHeadsUp(
@@ -131,8 +188,8 @@ class VisualInterruptionDecisionProviderImplTest : VisualInterruptionDecisionPro
         avalancheProvider.startTime = whenAgo(10)
 
         withFilter(
-            AvalancheSuppressor(avalancheProvider, systemClock, systemSettings, packageManager,
-                    uiEventLogger)
+            AvalancheSuppressor(avalancheProvider, systemClock, settingsInteractor, packageManager,
+                    uiEventLogger, context, notificationManager)
         ) {
             ensurePeekState()
             assertShouldHeadsUp(
@@ -149,8 +206,8 @@ class VisualInterruptionDecisionProviderImplTest : VisualInterruptionDecisionPro
         avalancheProvider.startTime = whenAgo(10)
 
         withFilter(
-            AvalancheSuppressor(avalancheProvider, systemClock, systemSettings, packageManager,
-                    uiEventLogger)
+            AvalancheSuppressor(avalancheProvider, systemClock, settingsInteractor, packageManager,
+                    uiEventLogger, context, notificationManager)
         ) {
             ensurePeekState()
             assertShouldHeadsUp(
@@ -167,8 +224,8 @@ class VisualInterruptionDecisionProviderImplTest : VisualInterruptionDecisionPro
         avalancheProvider.startTime = whenAgo(10)
 
         withFilter(
-            AvalancheSuppressor(avalancheProvider, systemClock, systemSettings, packageManager,
-                    uiEventLogger)
+            AvalancheSuppressor(avalancheProvider, systemClock, settingsInteractor, packageManager,
+                    uiEventLogger, context, notificationManager)
         ) {
             ensurePeekState()
             assertShouldHeadsUp(
@@ -185,8 +242,8 @@ class VisualInterruptionDecisionProviderImplTest : VisualInterruptionDecisionPro
         avalancheProvider.startTime = whenAgo(10)
 
         withFilter(
-            AvalancheSuppressor(avalancheProvider, systemClock, systemSettings, packageManager,
-                    uiEventLogger)
+            AvalancheSuppressor(avalancheProvider, systemClock, settingsInteractor, packageManager,
+                    uiEventLogger, context, notificationManager)
         ) {
             ensurePeekState()
             assertShouldHeadsUp(
@@ -203,8 +260,8 @@ class VisualInterruptionDecisionProviderImplTest : VisualInterruptionDecisionPro
         avalancheProvider.startTime = whenAgo(10)
 
         withFilter(
-            AvalancheSuppressor(avalancheProvider, systemClock, systemSettings, packageManager,
-                    uiEventLogger)
+            AvalancheSuppressor(avalancheProvider, systemClock, settingsInteractor, packageManager,
+                    uiEventLogger, context, notificationManager)
         ) {
             assertFsiNotSuppressed()
         }
@@ -215,8 +272,8 @@ class VisualInterruptionDecisionProviderImplTest : VisualInterruptionDecisionPro
         avalancheProvider.startTime = whenAgo(10)
 
         withFilter(
-            AvalancheSuppressor(avalancheProvider, systemClock, systemSettings, packageManager,
-                    uiEventLogger)
+            AvalancheSuppressor(avalancheProvider, systemClock, settingsInteractor, packageManager,
+                    uiEventLogger, context, notificationManager)
         ) {
             ensurePeekState()
             assertShouldHeadsUp(
@@ -228,20 +285,24 @@ class VisualInterruptionDecisionProviderImplTest : VisualInterruptionDecisionPro
         }
     }
 
-    @Test
-    fun testAvalancheFilter_duringAvalanche_allowEmergency() {
-        avalancheProvider.startTime = whenAgo(10)
-
+    private fun setAllowedEmergencyPkg(allow: Boolean) {
         `when`(
             packageManager.checkPermission(
                 org.mockito.Mockito.eq(permission.RECEIVE_EMERGENCY_BROADCAST),
                 anyString()
             )
-        ).thenReturn(PERMISSION_GRANTED)
+        ).thenReturn(if (allow) PERMISSION_GRANTED else PERMISSION_DENIED)
+    }
+
+    @Test
+    fun testAvalancheFilter_duringAvalanche_allowEmergency() {
+        avalancheProvider.startTime = whenAgo(10)
+
+        setAllowedEmergencyPkg(true)
 
         withFilter(
-            AvalancheSuppressor(avalancheProvider, systemClock, systemSettings, packageManager,
-                    uiEventLogger)
+            AvalancheSuppressor(avalancheProvider, systemClock, settingsInteractor, packageManager,
+                    uiEventLogger, context, notificationManager)
         ) {
             ensurePeekState()
             assertShouldHeadsUp(

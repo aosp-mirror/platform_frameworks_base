@@ -30,6 +30,7 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.database.ContentObserver;
+import android.graphics.Rect;
 import android.hardware.input.InputManager;
 import android.net.Uri;
 import android.os.Bundle;
@@ -47,6 +48,7 @@ import android.view.KeyCharacterMap;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.RemoteAnimationTarget;
+import android.view.WindowManager;
 import android.window.BackAnimationAdapter;
 import android.window.BackEvent;
 import android.window.BackMotionEvent;
@@ -57,7 +59,7 @@ import android.window.IBackAnimationRunner;
 import android.window.IOnBackInvokedCallback;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.protolog.common.ProtoLog;
+import com.android.internal.protolog.ProtoLog;
 import com.android.internal.util.LatencyTracker;
 import com.android.internal.view.AppearanceRegion;
 import com.android.wm.shell.R;
@@ -112,6 +114,7 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
 
     @Nullable
     private BackNavigationInfo mBackNavigationInfo;
+    private boolean mReceivedNullNavigationInfo = false;
     private final IActivityTaskManager mActivityTaskManager;
     private final Context mContext;
     private final ContentResolver mContentResolver;
@@ -119,6 +122,9 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
     private final ShellCommandHandler mShellCommandHandler;
     private final ShellExecutor mShellExecutor;
     private final Handler mBgHandler;
+    private final WindowManager mWindowManager;
+    @VisibleForTesting
+    final Rect mTouchableArea = new Rect();
 
     /**
      * Tracks the current user back gesture.
@@ -174,6 +180,7 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
     @BackNavigationInfo.BackTargetType
     private int mPreviousNavigationType;
     private Runnable mPilferPointerCallback;
+    private BackAnimation.TopUiRequest mRequestTopUiCallback;
 
     public BackAnimationController(
             @NonNull ShellInit shellInit,
@@ -222,6 +229,8 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
         mShellBackAnimationRegistry = shellBackAnimationRegistry;
         mLatencyTracker = LatencyTracker.getInstance(mContext);
         mShellCommandHandler = shellCommandHandler;
+        mWindowManager = context.getSystemService(WindowManager.class);
+        updateTouchableArea();
     }
 
     private void onInit() {
@@ -283,6 +292,11 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
         mShellBackAnimationRegistry.onConfigurationChanged(newConfig);
+        updateTouchableArea();
+    }
+
+    private void updateTouchableArea() {
+        mTouchableArea.set(mWindowManager.getCurrentWindowMetrics().getBounds());
     }
 
     @Override
@@ -344,6 +358,11 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
             mShellExecutor.execute(() -> {
                 mPilferPointerCallback = callback;
             });
+        }
+
+        @Override
+        public void setTopUiRequestCallback(TopUiRequest topUiRequest) {
+            mShellExecutor.execute(() -> mRequestTopUiCallback = topUiRequest);
         }
     }
 
@@ -410,15 +429,29 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
     @VisibleForTesting
     public void onThresholdCrossed() {
         mThresholdCrossed = true;
+        // There was no focus window when calling startBackNavigation, still pilfer pointers so
+        // the next focus window won't receive motion events.
+        if (mBackNavigationInfo == null && mReceivedNullNavigationInfo) {
+            tryPilferPointers();
+            return;
+        }
         // Dispatch onBackStarted, only to app callbacks.
         // System callbacks will receive onBackStarted when the remote animation starts.
         final boolean shouldDispatchToAnimator = shouldDispatchToAnimator();
         if (!shouldDispatchToAnimator && mActiveCallback != null) {
             mCurrentTracker.updateStartLocation();
             tryDispatchOnBackStarted(mActiveCallback, mCurrentTracker.createStartEvent(null));
+            if (mBackNavigationInfo != null && !isAppProgressGenerationAllowed()) {
+                tryPilferPointers();
+            }
         } else if (shouldDispatchToAnimator) {
             tryPilferPointers();
         }
+    }
+
+    private boolean isAppProgressGenerationAllowed() {
+        return mBackNavigationInfo.isAppProgressGenerationAllowed()
+                && mBackNavigationInfo.getTouchableRegion().equals(mTouchableArea);
     }
 
     /**
@@ -521,7 +554,9 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
         ProtoLog.d(WM_SHELL_BACK_PREVIEW, "Received backNavigationInfo:%s", backNavigationInfo);
         if (backNavigationInfo == null) {
             ProtoLog.e(WM_SHELL_BACK_PREVIEW, "Received BackNavigationInfo is null.");
+            mReceivedNullNavigationInfo = true;
             cancelLatencyTracking();
+            tryPilferPointers();
             return;
         }
         final int backType = backNavigationInfo.getType();
@@ -530,12 +565,16 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
             if (!mShellBackAnimationRegistry.startGesture(backType)) {
                 mActiveCallback = null;
             }
+            requestTopUi(true, backType);
             tryPilferPointers();
         } else {
             mActiveCallback = mBackNavigationInfo.getOnBackInvokedCallback();
             // App is handling back animation. Cancel system animation latency tracking.
             cancelLatencyTracking();
             tryDispatchOnBackStarted(mActiveCallback, touchTracker.createStartEvent(null));
+            if (!isAppProgressGenerationAllowed()) {
+                tryPilferPointers();
+            }
         }
     }
 
@@ -642,7 +681,8 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
 
     private void dispatchOnBackProgressed(IOnBackInvokedCallback callback,
             BackMotionEvent backEvent) {
-        if (callback == null || !shouldDispatchToAnimator()) {
+        if (callback == null || (!shouldDispatchToAnimator() && mBackNavigationInfo != null
+                && isAppProgressGenerationAllowed())) {
             return;
         }
         try {
@@ -871,10 +911,12 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
         mPointersPilfered = false;
         mShellBackAnimationRegistry.resetDefaultCrossActivity();
         cancelLatencyTracking();
+        mReceivedNullNavigationInfo = false;
         if (mBackNavigationInfo != null) {
             mPreviousNavigationType = mBackNavigationInfo.getType();
             mBackNavigationInfo.onBackNavigationFinished(triggerBack);
             mBackNavigationInfo = null;
+            requestTopUi(false, mPreviousNavigationType);
         }
     }
 
@@ -935,6 +977,13 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
             mCurrentTracker.updateStartLocation();
             BackMotionEvent startEvent = mCurrentTracker.createStartEvent(mApps[0]);
             dispatchOnBackStarted(mActiveCallback, startEvent);
+        }
+    }
+
+    private void requestTopUi(boolean hasTopUi, int backType) {
+        if (mRequestTopUiCallback != null && (backType == BackNavigationInfo.TYPE_CROSS_TASK
+                || backType == BackNavigationInfo.TYPE_CROSS_ACTIVITY)) {
+            mRequestTopUiCallback.requestTopUi(hasTopUi, TAG);
         }
     }
 

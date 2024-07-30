@@ -1,12 +1,12 @@
 package com.android.systemui.animation
 
 import android.animation.ObjectAnimator
-import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
 import android.view.View
 import android.view.ViewGroup
 import android.widget.LinearLayout
 import android.widget.RelativeLayout
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.app.animation.Interpolators
 import com.android.systemui.SysuiTestCase
@@ -22,7 +22,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 @SmallTest
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 @TestableLooper.RunWithLooper
 class
 ViewHierarchyAnimatorTest : SysuiTestCase() {

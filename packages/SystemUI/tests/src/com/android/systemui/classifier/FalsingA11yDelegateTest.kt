@@ -16,10 +16,10 @@
 
 package com.android.systemui.classifier
 
-import android.testing.AndroidTestingRunner
 import android.view.View
 import android.view.accessibility.AccessibilityNodeInfo.ACTION_CLICK
 import android.view.accessibility.AccessibilityNodeInfo.ACTION_LONG_CLICK
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import org.junit.Before
@@ -31,7 +31,7 @@ import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
 
 @SmallTest
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 class FalsingA11yDelegateTest : SysuiTestCase() {
     @Mock lateinit var falsingCollector: FalsingCollector
     @Mock lateinit var view: View

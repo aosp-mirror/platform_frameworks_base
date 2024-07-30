@@ -88,8 +88,11 @@ public class PipAnimationControllerTest extends ShellTestCase {
 
     @Test
     public void getAnimator_withBounds_returnBoundsAnimator() {
+        final Rect baseValue = new Rect(0, 0, 100, 100);
+        final Rect startValue = new Rect(0, 0, 100, 100);
+        final Rect endValue1 = new Rect(100, 100, 200, 200);
         final PipAnimationController.PipTransitionAnimator animator = mPipAnimationController
-                .getAnimator(mTaskInfo, mLeash, new Rect(), new Rect(), new Rect(), null,
+                .getAnimator(mTaskInfo, mLeash, baseValue, startValue, endValue1, null,
                         TRANSITION_DIRECTION_TO_PIP, 0, ROTATION_0);
 
         assertEquals("Expect ANIM_TYPE_BOUNDS animation",

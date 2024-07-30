@@ -153,6 +153,7 @@ import com.android.server.contentsuggestions.ContentSuggestionsManagerService;
 import com.android.server.contextualsearch.ContextualSearchManagerService;
 import com.android.server.coverage.CoverageService;
 import com.android.server.cpu.CpuMonitorService;
+import com.android.server.crashrecovery.CrashRecoveryModule;
 import com.android.server.credentials.CredentialManagerService;
 import com.android.server.criticalevents.CriticalEventLog;
 import com.android.server.devicepolicy.DevicePolicyManagerService;
@@ -381,6 +382,7 @@ public final class SystemServer implements Dumpable {
                     + "OnDevicePersonalizationSystemService$Lifecycle";
     private static final String UPDATABLE_DEVICE_CONFIG_SERVICE_CLASS =
             "com.android.server.deviceconfig.DeviceConfigInit$Lifecycle";
+
 
     /*
      * Implementation class names and jar locations for services in
@@ -1196,13 +1198,17 @@ public final class SystemServer implements Dumpable {
         mSystemServiceManager.startService(RecoverySystemService.Lifecycle.class);
         t.traceEnd();
 
-        if (!Flags.recoverabilityDetection()) {
-            // Now that we have the bare essentials of the OS up and running, take
-            // note that we just booted, which might send out a rescue party if
-            // we're stuck in a runtime restart loop.
+        if (!Flags.refactorCrashrecovery()) {
+            // Initialize RescueParty.
             RescueParty.registerHealthObserver(mSystemContext);
-            PackageWatchdog.getInstance(mSystemContext).noteBoot();
+            if (!Flags.recoverabilityDetection()) {
+                // Now that we have the bare essentials of the OS up and running, take
+                // note that we just booted, which might send out a rescue party if
+                // we're stuck in a runtime restart loop.
+                PackageWatchdog.getInstance(mSystemContext).noteBoot();
+            }
         }
+
 
         // Manages LEDs and display backlight so we need it to bring up the display.
         t.traceBegin("StartLightsService");
@@ -1923,7 +1929,11 @@ public final class SystemServer implements Dumpable {
             startRotationResolverService(context, t);
             startSystemCaptionsManagerService(context, t);
             startTextToSpeechManagerService(context, t);
-            startWearableSensingService(t);
+            if (!isWatch || !android.server.Flags.removeWearableSensingServiceFromWear()) {
+                startWearableSensingService(t);
+            } else {
+                Slog.d(TAG, "Not starting WearableSensingService");
+            }
             startOnDeviceIntelligenceService(t);
 
             if (deviceHasConfigString(
@@ -2129,14 +2139,20 @@ public final class SystemServer implements Dumpable {
             }
             t.traceEnd();
 
-            t.traceBegin("StartVpnManagerService");
-            try {
-                vpnManager = VpnManagerService.create(context);
-                ServiceManager.addService(Context.VPN_MANAGEMENT_SERVICE, vpnManager);
-            } catch (Throwable e) {
-                reportWtf("starting VPN Manager Service", e);
+            if (!isWatch || !android.server.Flags.allowRemovingVpnService()) {
+                t.traceBegin("StartVpnManagerService");
+                try {
+                    vpnManager = VpnManagerService.create(context);
+                    ServiceManager.addService(Context.VPN_MANAGEMENT_SERVICE, vpnManager);
+                } catch (Throwable e) {
+                    reportWtf("starting VPN Manager Service", e);
+                }
+                t.traceEnd();
+            } else {
+                // VPN management currently does not work in Wear, so skip starting the
+                // VPN manager SystemService.
+                Slog.i(TAG, "Not starting VpnManagerService");
             }
-            t.traceEnd();
 
             t.traceBegin("StartVcnManagementService");
             try {
@@ -2434,11 +2450,11 @@ public final class SystemServer implements Dumpable {
                 t.traceEnd();
             }
 
-            t.traceBegin("CertBlacklister");
+            t.traceBegin("CertBlocklister");
             try {
-                CertBlacklister blacklister = new CertBlacklister(context);
+                CertBlocklister blocklister = new CertBlocklister(context);
             } catch (Throwable e) {
-                reportWtf("starting CertBlacklister", e);
+                reportWtf("starting CertBlocklister", e);
             }
             t.traceEnd();
 
@@ -2639,9 +2655,13 @@ public final class SystemServer implements Dumpable {
             mSystemServiceManager.startService(MediaMetricsManagerService.class);
             t.traceEnd();
 
-            t.traceBegin("StartBackgroundInstallControlService");
-            mSystemServiceManager.startService(BackgroundInstallControlService.class);
-            t.traceEnd();
+            if (!com.android.server.flags.Flags.optionalBackgroundInstallControl()
+                    || SystemProperties.getBoolean(
+                            "ro.system_settings.service.backgound_install_control_enabled", true)) {
+                t.traceBegin("StartBackgroundInstallControlService");
+                mSystemServiceManager.startService(BackgroundInstallControlService.class);
+                t.traceEnd();
+            }
         }
 
         t.traceBegin("StartMediaProjectionManager");
@@ -2916,12 +2936,18 @@ public final class SystemServer implements Dumpable {
         mPackageManagerService.systemReady();
         t.traceEnd();
 
-        if (Flags.recoverabilityDetection()) {
-            // Now that we have the essential services needed for rescue party, initialize
-            // RescuParty. note that we just booted, which might send out a rescue party if
-            // we're stuck in a runtime restart loop.
-            RescueParty.registerHealthObserver(mSystemContext);
-            PackageWatchdog.getInstance(mSystemContext).noteBoot();
+        if (Flags.refactorCrashrecovery()) {
+            t.traceBegin("StartCrashRecoveryModule");
+            mSystemServiceManager.startService(CrashRecoveryModule.Lifecycle.class);
+            t.traceEnd();
+        } else {
+            if (Flags.recoverabilityDetection()) {
+                // Now that we have the essential services needed for mitigations, register the boot
+                // with package watchdog.
+                // Note that we just booted, which might send out a rescue party if we're stuck in a
+                // runtime restart loop.
+                PackageWatchdog.getInstance(mSystemContext).noteBoot();
+            }
         }
 
         t.traceBegin("MakeDisplayManagerServiceReady");

@@ -1,5 +1,4 @@
 <data-labels>
-    <data-shared dataCategory="storage"
-        dataType="files_docs"
+    <data-shared dataType="storage_data_type_files_docs"
         purposes="analytics" />
 </data-labels>

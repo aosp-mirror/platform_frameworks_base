@@ -90,10 +90,16 @@ constructor(
      */
     @Composable
     fun SceneScope.Notifications(burnInParams: BurnInParameters?, modifier: Modifier = Modifier) {
-        val shouldUseSplitNotificationShade by
-            lockscreenContentViewModel.shouldUseSplitNotificationShade.collectAsStateWithLifecycle()
         val areNotificationsVisible by
-            lockscreenContentViewModel.areNotificationsVisible.collectAsStateWithLifecycle()
+            lockscreenContentViewModel
+                .areNotificationsVisible(contentKey)
+                .collectAsStateWithLifecycle(initialValue = false)
+        if (!areNotificationsVisible) {
+            return
+        }
+
+        val isShadeLayoutWide by
+            lockscreenContentViewModel.isShadeLayoutWide.collectAsStateWithLifecycle()
         val splitShadeTopMargin: Dp =
             if (Flags.centralizedStatusBarHeightFix()) {
                 LargeScreenHeaderHelper.getLargeScreenHeaderHeight(LocalContext.current).dp
@@ -101,19 +107,13 @@ constructor(
                 dimensionResource(id = R.dimen.large_screen_shade_header_height)
             }
 
-        if (!areNotificationsVisible) {
-            return
-        }
-
         ConstrainedNotificationStack(
             stackScrollView = stackScrollView.get(),
             viewModel = viewModel,
             modifier =
                 modifier
                     .fillMaxWidth()
-                    .thenIf(shouldUseSplitNotificationShade) {
-                        Modifier.padding(top = splitShadeTopMargin)
-                    }
+                    .thenIf(isShadeLayoutWide) { Modifier.padding(top = splitShadeTopMargin) }
                     .let {
                         if (burnInParams == null) {
                             it

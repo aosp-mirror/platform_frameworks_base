@@ -58,7 +58,6 @@ import android.graphics.Insets;
 import android.graphics.Rect;
 import android.os.Handler;
 import android.os.SystemClock;
-import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.view.Choreographer;
 import android.view.MotionEvent;
@@ -71,6 +70,7 @@ import android.view.accessibility.AccessibilityManager;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.widget.ImageView;
 
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.graphics.SfVsyncFrameCallbackProvider;
@@ -90,7 +90,7 @@ import org.mockito.MockitoAnnotations;
 import java.util.List;
 
 @SmallTest
-@RunWith(AndroidTestingRunner.class)
+@RunWith(AndroidJUnit4.class)
 @TestableLooper.RunWithLooper(setAsMainLooper = true)
 public class MagnificationModeSwitchTest extends SysuiTestCase {
 

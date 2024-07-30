@@ -16,9 +16,9 @@
 
 package com.android.wm.shell.desktopmode
 
+import com.android.internal.protolog.ProtoLog
 import com.android.internal.util.FrameworkStatsLog
 import com.android.wm.shell.protolog.ShellProtoLogGroup
-import com.android.wm.shell.util.KtProtoLog
 
 /** Event logger for logging desktop mode session events */
 class DesktopModeEventLogger {
@@ -27,7 +27,7 @@ class DesktopModeEventLogger {
      * entering desktop mode
      */
     fun logSessionEnter(sessionId: Int, enterReason: EnterReason) {
-        KtProtoLog.v(
+        ProtoLog.v(
             ShellProtoLogGroup.WM_SHELL_DESKTOP_MODE,
             "DesktopModeLogger: Logging session enter, session: %s reason: %s",
             sessionId,
@@ -47,7 +47,7 @@ class DesktopModeEventLogger {
      * exiting desktop mode
      */
     fun logSessionExit(sessionId: Int, exitReason: ExitReason) {
-        KtProtoLog.v(
+        ProtoLog.v(
             ShellProtoLogGroup.WM_SHELL_DESKTOP_MODE,
             "DesktopModeLogger: Logging session exit, session: %s reason: %s",
             sessionId,
@@ -67,7 +67,7 @@ class DesktopModeEventLogger {
      * session id [sessionId]
      */
     fun logTaskAdded(sessionId: Int, taskUpdate: TaskUpdate) {
-        KtProtoLog.v(
+        ProtoLog.v(
             ShellProtoLogGroup.WM_SHELL_DESKTOP_MODE,
             "DesktopModeLogger: Logging task added, session: %s taskId: %s",
             sessionId,
@@ -99,7 +99,7 @@ class DesktopModeEventLogger {
      * session id [sessionId]
      */
     fun logTaskRemoved(sessionId: Int, taskUpdate: TaskUpdate) {
-        KtProtoLog.v(
+        ProtoLog.v(
             ShellProtoLogGroup.WM_SHELL_DESKTOP_MODE,
             "DesktopModeLogger: Logging task remove, session: %s taskId: %s",
             sessionId,
@@ -131,7 +131,7 @@ class DesktopModeEventLogger {
      * having session id [sessionId]
      */
     fun logTaskInfoChanged(sessionId: Int, taskUpdate: TaskUpdate) {
-        KtProtoLog.v(
+        ProtoLog.v(
             ShellProtoLogGroup.WM_SHELL_DESKTOP_MODE,
             "DesktopModeLogger: Logging task info changed, session: %s taskId: %s",
             sessionId,
@@ -159,13 +159,24 @@ class DesktopModeEventLogger {
     }
 
     companion object {
+        /**
+         * Describes a task position and dimensions.
+         *
+         * @property instanceId instance id of the task
+         * @property uid uid of the app associated with the task
+         * @property taskHeight height of the task in px
+         * @property taskWidth width of the task in px
+         * @property taskX x-coordinate of the top-left corner
+         * @property taskY y-coordinate of the top-left corner
+         *
+         */
         data class TaskUpdate(
             val instanceId: Int,
             val uid: Int,
-            val taskHeight: Int = Int.MIN_VALUE,
-            val taskWidth: Int = Int.MIN_VALUE,
-            val taskX: Int = Int.MIN_VALUE,
-            val taskY: Int = Int.MIN_VALUE,
+            val taskHeight: Int,
+            val taskWidth: Int,
+            val taskX: Int,
+            val taskY: Int,
         )
 
         /**
@@ -187,7 +198,10 @@ class DesktopModeEventLogger {
             KEYBOARD_SHORTCUT_ENTER(
                 FrameworkStatsLog.DESKTOP_MODE_UICHANGED__ENTER_REASON__KEYBOARD_SHORTCUT_ENTER
             ),
-            SCREEN_ON(FrameworkStatsLog.DESKTOP_MODE_UICHANGED__ENTER_REASON__SCREEN_ON)
+            SCREEN_ON(FrameworkStatsLog.DESKTOP_MODE_UICHANGED__ENTER_REASON__SCREEN_ON),
+            APP_FROM_OVERVIEW(
+                FrameworkStatsLog.DESKTOP_MODE_UICHANGED__ENTER_REASON__APP_FROM_OVERVIEW
+            ),
         }
 
         /**
@@ -204,7 +218,7 @@ class DesktopModeEventLogger {
                 FrameworkStatsLog.DESKTOP_MODE_UICHANGED__EXIT_REASON__KEYBOARD_SHORTCUT_EXIT
             ),
             RETURN_HOME_OR_OVERVIEW(
-                FrameworkStatsLog.SPLITSCREEN_UICHANGED__EXIT_REASON__RETURN_HOME
+                FrameworkStatsLog.DESKTOP_MODE_UICHANGED__EXIT_REASON__RETURN_HOME_OR_OVERVIEW
             ),
             TASK_FINISHED(FrameworkStatsLog.DESKTOP_MODE_UICHANGED__EXIT_REASON__TASK_FINISHED),
             SCREEN_OFF(FrameworkStatsLog.DESKTOP_MODE_UICHANGED__EXIT_REASON__SCREEN_OFF)

@@ -28,39 +28,22 @@ import java.util.Objects;
 
 /**
  * {@link android.window.WindowContext} window removal message.
+ *
  * @hide
  */
 public class WindowContextWindowRemovalItem extends ClientTransactionItem {
 
-    @Nullable
-    private IBinder mClientToken;
+    @NonNull
+    private final IBinder mClientToken;
+
+    public WindowContextWindowRemovalItem(@NonNull IBinder clientToken) {
+        mClientToken = requireNonNull(clientToken);
+    }
 
     @Override
     public void execute(@NonNull ClientTransactionHandler client,
             @NonNull PendingTransactionActions pendingActions) {
         client.handleWindowContextWindowRemoval(mClientToken);
-    }
-
-    // ObjectPoolItem implementation
-
-    private WindowContextWindowRemovalItem() {}
-
-    /** Obtains an instance initialized with provided params. */
-    public static WindowContextWindowRemovalItem obtain(@NonNull IBinder clientToken) {
-        WindowContextWindowRemovalItem instance =
-                ObjectPool.obtain(WindowContextWindowRemovalItem.class);
-        if (instance == null) {
-            instance = new WindowContextWindowRemovalItem();
-        }
-        instance.mClientToken = requireNonNull(clientToken);
-
-        return instance;
-    }
-
-    @Override
-    public void recycle() {
-        mClientToken = null;
-        ObjectPool.recycle(this);
     }
 
     // Parcelable implementation

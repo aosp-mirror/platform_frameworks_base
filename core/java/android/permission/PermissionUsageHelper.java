@@ -374,20 +374,22 @@ public class PermissionUsageHelper implements AppOpsManager.OnOpActiveChangedLis
     public @NonNull List<PermissionGroupUsage> getOpUsageDataForAllDevices(
             boolean includeMicrophoneUsage) {
         List<PermissionGroupUsage> allUsages = new ArrayList<>();
-        List<VirtualDevice> virtualDevices = mVirtualDeviceManager.getVirtualDevices();
-        ArraySet<String> persistentDeviceIds = new ArraySet<>();
 
-        for (int num = 0; num < virtualDevices.size(); num++) {
-            persistentDeviceIds.add(virtualDevices.get(num).getPersistentDeviceId());
+        if (mVirtualDeviceManager != null) {
+            List<VirtualDevice> virtualDevices = mVirtualDeviceManager.getVirtualDevices();
+            ArraySet<String> persistentDeviceIds = new ArraySet<>();
+
+            for (int num = 0; num < virtualDevices.size(); num++) {
+                persistentDeviceIds.add(virtualDevices.get(num).getPersistentDeviceId());
+            }
+            persistentDeviceIds.add(VirtualDeviceManager.PERSISTENT_DEVICE_ID_DEFAULT);
+
+            for (int index = 0; index < persistentDeviceIds.size(); index++) {
+                allUsages.addAll(
+                        getOpUsageDataByDevice(includeMicrophoneUsage,
+                                persistentDeviceIds.valueAt(index)));
+            }
         }
-        persistentDeviceIds.add(VirtualDeviceManager.PERSISTENT_DEVICE_ID_DEFAULT);
-
-        for (int index = 0; index < persistentDeviceIds.size(); index++) {
-            allUsages.addAll(
-                    getOpUsageDataByDevice(includeMicrophoneUsage,
-                            persistentDeviceIds.valueAt(index)));
-        }
-
         return allUsages;
     }
 

@@ -18,10 +18,13 @@ package com.android.compose.animation.scene
 
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -64,7 +67,7 @@ class AnimatedSharedAsStateTest {
     }
 
     @Composable
-    private fun SceneScope.Foo(
+    private fun ContentScope.Foo(
         targetValues: Values,
         onCurrentValueChanged: (Values) -> Unit,
     ) {
@@ -84,7 +87,7 @@ class AnimatedSharedAsStateTest {
     }
 
     @Composable
-    private fun SceneScope.MovableFoo(
+    private fun ContentScope.MovableFoo(
         targetValues: Values,
         onCurrentValueChanged: (Values) -> Unit,
     ) {
@@ -102,14 +105,14 @@ class AnimatedSharedAsStateTest {
     }
 
     @Composable
-    private fun SceneScope.SceneValues(
+    private fun ContentScope.SceneValues(
         targetValues: Values,
         onCurrentValueChanged: (Values) -> Unit,
     ) {
-        val int by animateSceneIntAsState(targetValues.int, key = TestValues.Value1)
-        val float by animateSceneFloatAsState(targetValues.float, key = TestValues.Value2)
-        val dp by animateSceneDpAsState(targetValues.dp, key = TestValues.Value3)
-        val color by animateSceneColorAsState(targetValues.color, key = TestValues.Value4)
+        val int by animateContentIntAsState(targetValues.int, key = TestValues.Value1)
+        val float by animateContentFloatAsState(targetValues.float, key = TestValues.Value2)
+        val dp by animateContentDpAsState(targetValues.dp, key = TestValues.Value3)
+        val color by animateContentColorAsState(targetValues.color, key = TestValues.Value4)
 
         LaunchedEffect(Unit) {
             snapshotFlow { Values(int, float, dp, color) }.collect(onCurrentValueChanged)
@@ -289,7 +292,7 @@ class AnimatedSharedAsStateTest {
     fun readingAnimatedStateValueDuringCompositionThrows() {
         assertThrows(IllegalStateException::class.java) {
             rule.testTransition(
-                fromSceneContent = { animateSceneIntAsState(0, TestValues.Value1).value },
+                fromSceneContent = { animateContentIntAsState(0, TestValues.Value1).value },
                 toSceneContent = {},
                 transition = {},
             ) {}
@@ -299,21 +302,21 @@ class AnimatedSharedAsStateTest {
     @Test
     fun readingAnimatedStateValueDuringCompositionIsStillPossible() {
         @Composable
-        fun SceneScope.SceneValuesDuringComposition(
+        fun ContentScope.SceneValuesDuringComposition(
             targetValues: Values,
             onCurrentValueChanged: (Values) -> Unit,
         ) {
             val int by
-                animateSceneIntAsState(targetValues.int, key = TestValues.Value1)
+                animateContentIntAsState(targetValues.int, key = TestValues.Value1)
                     .unsafeCompositionState(targetValues.int)
             val float by
-                animateSceneFloatAsState(targetValues.float, key = TestValues.Value2)
+                animateContentFloatAsState(targetValues.float, key = TestValues.Value2)
                     .unsafeCompositionState(targetValues.float)
             val dp by
-                animateSceneDpAsState(targetValues.dp, key = TestValues.Value3)
+                animateContentDpAsState(targetValues.dp, key = TestValues.Value3)
                     .unsafeCompositionState(targetValues.dp)
             val color by
-                animateSceneColorAsState(targetValues.color, key = TestValues.Value4)
+                animateContentColorAsState(targetValues.color, key = TestValues.Value4)
                     .unsafeCompositionState(targetValues.color)
 
             val values = Values(int, float, dp, color)
@@ -394,14 +397,14 @@ class AnimatedSharedAsStateTest {
 
         val foo = ValueKey("foo")
         val bar = ValueKey("bar")
-        val lastValues = mutableMapOf<ValueKey, MutableMap<SceneKey, Float>>()
+        val lastValues = mutableMapOf<ValueKey, MutableMap<ContentKey, Float>>()
 
         @Composable
-        fun SceneScope.animateFloat(value: Float, key: ValueKey) {
-            val animatedValue = animateSceneFloatAsState(value, key)
+        fun ContentScope.animateFloat(value: Float, key: ValueKey) {
+            val animatedValue = animateContentFloatAsState(value, key)
             LaunchedEffect(animatedValue) {
                 snapshotFlow { animatedValue.value }
-                    .collect { lastValues.getOrPut(key) { mutableMapOf() }[sceneKey] = it }
+                    .collect { lastValues.getOrPut(key) { mutableMapOf() }[contentKey] = it }
             }
         }
 
@@ -442,5 +445,57 @@ class AnimatedSharedAsStateTest {
         assertThat(lastValues[bar]?.get(SceneB)).isNull()
         assertThat(lastValues[bar]?.get(SceneC)).isWithin(0.001f).of(7f)
         assertThat(lastValues[bar]?.get(SceneD)).isWithin(0.001f).of(7f)
+    }
+
+    @Test
+    fun animatedValueDoesNotOverscrollWhenOverscrollIsSpecified() {
+        val state =
+            rule.runOnUiThread {
+                MutableSceneTransitionLayoutStateImpl(
+                    SceneA,
+                    transitions { overscroll(SceneB, Orientation.Horizontal) }
+                )
+            }
+
+        val key = ValueKey("foo")
+        val lastValues = mutableMapOf<ContentKey, Float>()
+
+        @Composable
+        fun ContentScope.animateFloat(value: Float, key: ValueKey) {
+            val animatedValue = animateContentFloatAsState(value, key)
+            LaunchedEffect(animatedValue) {
+                snapshotFlow { animatedValue.value }.collect { lastValues[contentKey] = it }
+            }
+        }
+
+        rule.setContent {
+            SceneTransitionLayout(state) {
+                scene(SceneA) { animateFloat(0f, key) }
+                scene(SceneB) { animateFloat(100f, key) }
+            }
+        }
+
+        // Overscroll on A at -100%: value should be interpolated given that there is no overscroll
+        // defined for scene A.
+        var progress by mutableStateOf(-1f)
+        rule.runOnIdle {
+            state.startTransition(transition(from = SceneA, to = SceneB, progress = { progress }))
+        }
+        rule.waitForIdle()
+        assertThat(lastValues[SceneA]).isWithin(0.001f).of(-100f)
+        assertThat(lastValues[SceneB]).isWithin(0.001f).of(-100f)
+
+        // Middle of the transition.
+        progress = 0.5f
+        rule.waitForIdle()
+        assertThat(lastValues[SceneA]).isWithin(0.001f).of(50f)
+        assertThat(lastValues[SceneB]).isWithin(0.001f).of(50f)
+
+        // Overscroll on B at 200%: value should not be interpolated given that there is an
+        // overscroll defined for scene B.
+        progress = 2f
+        rule.waitForIdle()
+        assertThat(lastValues[SceneA]).isWithin(0.001f).of(100f)
+        assertThat(lastValues[SceneB]).isWithin(0.001f).of(100f)
     }
 }

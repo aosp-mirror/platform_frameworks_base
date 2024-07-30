@@ -16,6 +16,7 @@
 
 package com.android.systemui.log.echo
 
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.log.core.LogLevel
@@ -24,8 +25,10 @@ import com.android.systemui.log.echo.EchoOverrideType.BUFFER
 import com.android.systemui.log.echo.EchoOverrideType.TAG
 import kotlin.test.assertEquals
 import org.junit.Test
+import org.junit.runner.RunWith
 
 @SmallTest
+@RunWith(AndroidJUnit4::class)
 class LogcatEchoSettingsFormatTest : SysuiTestCase() {
 
     private val format = LogcatEchoSettingFormat()

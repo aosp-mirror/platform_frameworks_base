@@ -25,7 +25,7 @@ import com.android.wm.shell.flicker.utils.SplitScreenUtils
 
 abstract class SplitScreenBase(flicker: LegacyFlickerTest) : BaseBenchmarkTest(flicker) {
     protected val context: Context = instrumentation.context
-    protected val primaryApp = SplitScreenUtils.getPrimary(instrumentation)
+    protected open val primaryApp = SplitScreenUtils.getPrimary(instrumentation)
     protected val secondaryApp = SplitScreenUtils.getSecondary(instrumentation)
 
     protected open val defaultSetup: FlickerBuilder.() -> Unit = {

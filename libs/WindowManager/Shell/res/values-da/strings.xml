@@ -84,6 +84,8 @@
     <string name="notification_bubble_title" msgid="6082910224488253378">"Boble"</string>
     <string name="manage_bubbles_text" msgid="7730624269650594419">"Administrer"</string>
     <string name="accessibility_bubble_dismissed" msgid="8367471990421247357">"Boblen blev lukket."</string>
+    <string name="bubble_shortcut_label" msgid="666269077944378311">"Bobler"</string>
+    <string name="bubble_shortcut_long_label" msgid="6088437544312894043">"Vis bobler"</string>
     <string name="restart_button_description" msgid="4564728020654658478">"Tryk for at genstarte denne app, så visningen forbedres"</string>
     <string name="user_aspect_ratio_settings_button_hint" msgid="734835849600713016">"Skift denne apps billedformat i Indstillinger"</string>
     <string name="user_aspect_ratio_settings_button_description" msgid="4315566801697411684">"Skift billedformat"</string>
@@ -105,7 +107,7 @@
     <string name="minimize_button_text" msgid="271592547935841753">"Minimer"</string>
     <string name="close_button_text" msgid="2913281996024033299">"Luk"</string>
     <string name="back_button_text" msgid="1469718707134137085">"Tilbage"</string>
-    <string name="handle_text" msgid="1766582106752184456">"Håndtag"</string>
+    <string name="handle_text" msgid="4419667835599523257">"Apphåndtag"</string>
     <string name="app_icon_text" msgid="2823268023931811747">"Appikon"</string>
     <string name="fullscreen_text" msgid="1162316685217676079">"Fuld skærm"</string>
     <string name="desktop_text" msgid="1077633567027630454">"Computertilstand"</string>
@@ -114,6 +116,7 @@
     <string name="float_button_text" msgid="9221657008391364581">"Svævende"</string>
     <string name="select_text" msgid="5139083974039906583">"Vælg"</string>
     <string name="screenshot_text" msgid="1477704010087786671">"Screenshot"</string>
+    <string name="open_in_browser_text" msgid="9181692926376072904">"Åbn i browser"</string>
     <string name="close_text" msgid="4986518933445178928">"Luk"</string>
     <string name="collapse_menu_text" msgid="7515008122450342029">"Luk menu"</string>
     <string name="expand_menu_text" msgid="3847736164494181168">"Åbn menu"</string>

@@ -52,8 +52,11 @@ constructor(
     udfpsOverlayInteractor: UdfpsOverlayInteractor,
 ) {
     private val isShowingAodOrDozing: Flow<Boolean> =
-        transitionInteractor.startedKeyguardState.map { keyguardState ->
-            keyguardState == KeyguardState.AOD || keyguardState == KeyguardState.DOZING
+        combine(
+            transitionInteractor.startedKeyguardState,
+            transitionInteractor.transitionValue(KeyguardState.DOZING),
+        ) { startedKeyguardState, dozingTransitionValue ->
+            startedKeyguardState == KeyguardState.AOD || dozingTransitionValue == 1f
         }
 
     private fun getColor(usingBackgroundProtection: Boolean): Int {

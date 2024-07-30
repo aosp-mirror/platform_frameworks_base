@@ -29,6 +29,7 @@ import android.os.IServiceCallback;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.util.ArrayMap;
+import android.util.IndentingPrintWriter;
 import android.util.Log;
 import android.util.SparseArray;
 
@@ -128,7 +129,7 @@ public final class BroadcastRadioServiceImpl {
                     if (entry.getValue() == mModuleId) {
                         Slogf.w(TAG, "Service %s died, removed RadioModule with ID %d",
                                 entry.getKey(), mModuleId);
-                        return;
+                        break;
                     }
                 }
             }
@@ -260,7 +261,7 @@ public final class BroadcastRadioServiceImpl {
      *
      * @param pw The file to which {@link BroadcastRadioServiceImpl} state is dumped.
      */
-    public void dumpInfo(android.util.IndentingPrintWriter pw) {
+    public void dumpInfo(IndentingPrintWriter pw) {
         synchronized (mLock) {
             pw.printf("Next module id available: %d\n", mNextModuleId);
             pw.printf("ServiceName to module id map:\n");

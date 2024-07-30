@@ -26,6 +26,7 @@ import static android.content.Intent.EXTRA_CAPTURE_CONTENT_FOR_NOTE_STATUS_CODE;
 
 import static com.android.internal.infra.AndroidFuture.completedFuture;
 import static com.android.systemui.screenshot.appclips.AppClipsEvent.SCREENSHOT_FOR_NOTE_TRIGGERED;
+import static com.android.systemui.screenshot.appclips.AppClipsTrampolineActivity.EXTRA_CLIP_DATA;
 import static com.android.systemui.screenshot.appclips.AppClipsTrampolineActivity.EXTRA_SCREENSHOT_URI;
 
 import static com.google.common.truth.Truth.assertThat;
@@ -37,6 +38,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.app.Activity;
+import android.content.ClipData;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
@@ -81,6 +83,7 @@ public final class AppClipsTrampolineActivityTest extends SysuiTestCase {
 
     private static final String TEST_URI_STRING = "www.test-uri.com";
     private static final Uri TEST_URI = Uri.parse(TEST_URI_STRING);
+    private static final ClipData TEST_CLIP_DATA = ClipData.newRawUri("Test backlinks", TEST_URI);
     private static final int TEST_UID = 42;
     private static final String TEST_CALLING_PACKAGE = "test-calling-package";
 
@@ -238,6 +241,7 @@ public final class AppClipsTrampolineActivityTest extends SysuiTestCase {
         Bundle bundle = new Bundle();
         bundle.putParcelable(EXTRA_SCREENSHOT_URI, TEST_URI);
         bundle.putInt(EXTRA_CAPTURE_CONTENT_FOR_NOTE_STATUS_CODE, CAPTURE_CONTENT_FOR_NOTE_SUCCESS);
+        bundle.putParcelable(EXTRA_CLIP_DATA, TEST_CLIP_DATA);
         activity.getResultReceiverForTest().send(Activity.RESULT_OK, bundle);
         waitForIdleSync();
 
@@ -245,7 +249,10 @@ public final class AppClipsTrampolineActivityTest extends SysuiTestCase {
         assertThat(actualResult.getResultCode()).isEqualTo(Activity.RESULT_OK);
         assertThat(getStatusCodeExtra(actualResult.getResultData()))
                 .isEqualTo(CAPTURE_CONTENT_FOR_NOTE_SUCCESS);
-        assertThat(actualResult.getResultData().getData()).isEqualTo(TEST_URI);
+
+        Intent resultData = actualResult.getResultData();
+        assertThat(resultData.getData()).isEqualTo(TEST_URI);
+        assertThat(resultData.getClipData()).isEqualTo(TEST_CLIP_DATA);
         assertThat(mActivityRule.getActivity().isFinishing()).isTrue();
     }
 

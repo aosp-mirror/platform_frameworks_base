@@ -55,7 +55,10 @@ cc_defaults {
             cflags: ["-D_DARWIN_UNLIMITED_STREAMS"],
         },
     },
-    header_libs: ["jni_headers"],
+    header_libs: [
+        "jni_headers",
+        "native_headers",
+    ],
     static_libs: [
         "libandroidfw",
         "libutils",

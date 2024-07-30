@@ -26,20 +26,9 @@ import androidx.room.PrimaryKey;
 @Entity(tableName = DataServiceUtils.UiccInfoData.TABLE_NAME)
 public class UiccInfoEntity {
 
-    public UiccInfoEntity(@NonNull String subId, @NonNull String physicalSlotIndex,
-            int logicalSlotIndex, int cardId, boolean isEuicc,
-            boolean isMultipleEnabledProfilesSupported, int cardState, boolean isRemovable,
-            boolean isActive, int portIndex) {
+    public UiccInfoEntity(@NonNull String subId, boolean isActive) {
         this.subId = subId;
-        this.physicalSlotIndex = physicalSlotIndex;
-        this.logicalSlotIndex = logicalSlotIndex;
-        this.cardId = cardId;
-        this.isEuicc = isEuicc;
-        this.isMultipleEnabledProfilesSupported = isMultipleEnabledProfilesSupported;
-        this.cardState = cardState;
-        this.isRemovable = isRemovable;
         this.isActive = isActive;
-        this.portIndex = portIndex;
     }
 
     @PrimaryKey
@@ -47,48 +36,14 @@ public class UiccInfoEntity {
     @NonNull
     public String subId;
 
-    @ColumnInfo(name = DataServiceUtils.UiccInfoData.COLUMN_PHYSICAL_SLOT_INDEX)
-    @NonNull
-    public String physicalSlotIndex;
-
-    @ColumnInfo(name = DataServiceUtils.UiccInfoData.COLUMN_LOGICAL_SLOT_INDEX)
-    public int logicalSlotIndex;
-
-    @ColumnInfo(name = DataServiceUtils.UiccInfoData.COLUMN_CARD_ID)
-    public int cardId;
-
-    @ColumnInfo(name = DataServiceUtils.UiccInfoData.COLUMN_IS_EUICC)
-    public boolean isEuicc;
-
-    @ColumnInfo(name = DataServiceUtils.UiccInfoData.COLUMN_IS_MULTIPLE_ENABLED_PROFILES_SUPPORTED)
-    public boolean isMultipleEnabledProfilesSupported;
-
-    @ColumnInfo(name = DataServiceUtils.UiccInfoData.COLUMN_CARD_STATE)
-    public int cardState;
-
-    @ColumnInfo(name = DataServiceUtils.UiccInfoData.COLUMN_IS_REMOVABLE)
-    public boolean isRemovable;
-
     @ColumnInfo(name = DataServiceUtils.UiccInfoData.COLUMN_IS_ACTIVE)
     public boolean isActive;
-
-    @ColumnInfo(name = DataServiceUtils.UiccInfoData.COLUMN_PORT_INDEX)
-    public int portIndex;
-
 
     @Override
     public int hashCode() {
         int result = 17;
         result = 31 * result + subId.hashCode();
-        result = 31 * result + physicalSlotIndex.hashCode();
-        result = 31 * result + logicalSlotIndex;
-        result = 31 * result + cardId;
-        result = 31 * result + Boolean.hashCode(isEuicc);
-        result = 31 * result + Boolean.hashCode(isMultipleEnabledProfilesSupported);
-        result = 31 * result + cardState;
-        result = 31 * result + Boolean.hashCode(isRemovable);
         result = 31 * result + Boolean.hashCode(isActive);
-        result = 31 * result + portIndex;
         return result;
     }
 
@@ -102,40 +57,15 @@ public class UiccInfoEntity {
         }
 
         UiccInfoEntity info = (UiccInfoEntity) obj;
-        return  TextUtils.equals(subId, info.subId)
-                && TextUtils.equals(physicalSlotIndex, info.physicalSlotIndex)
-                && logicalSlotIndex == info.logicalSlotIndex
-                && cardId == info.cardId
-                && isEuicc == info.isEuicc
-                && isMultipleEnabledProfilesSupported == info.isMultipleEnabledProfilesSupported
-                && cardState == info.cardState
-                && isRemovable == info.isRemovable
-                && isActive == info.isActive
-                && portIndex == info.portIndex;
+        return TextUtils.equals(subId, info.subId) && isActive == info.isActive;
     }
 
     public String toString() {
         StringBuilder builder = new StringBuilder();
         builder.append(" {UiccInfoEntity(subId = ")
                 .append(subId)
-                .append(", logicalSlotIndex = ")
-                .append(physicalSlotIndex)
-                .append(", logicalSlotIndex = ")
-                .append(logicalSlotIndex)
-                .append(", cardId = ")
-                .append(cardId)
-                .append(", isEuicc = ")
-                .append(isEuicc)
-                .append(", isMultipleEnabledProfilesSupported = ")
-                .append(isMultipleEnabledProfilesSupported)
-                .append(", cardState = ")
-                .append(cardState)
-                .append(", isRemovable = ")
-                .append(isRemovable)
                 .append(", isActive = ")
                 .append(isActive)
-                .append(", portIndex = ")
-                .append(portIndex)
                 .append(")}");
         return builder.toString();
     }

@@ -57,7 +57,7 @@ public class PossibleDisplayInfoMapper {
      * Returns, for the given displayId, a list of unique display infos. List contains each
      * supported device state.
      * <p>List contents are guaranteed to be unique, but returned as a list rather than a set to
-     * minimize copies needed to make an iteraable data structure.
+     * minimize copies needed to make an iterable data structure.
      */
     public List<DisplayInfo> getPossibleDisplayInfos(int displayId) {
         // Update display infos before returning, since any cached values would have been removed

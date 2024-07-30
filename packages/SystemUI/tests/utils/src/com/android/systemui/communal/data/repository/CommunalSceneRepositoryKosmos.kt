@@ -20,7 +20,7 @@ import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.Kosmos.Fixture
 import com.android.systemui.kosmos.applicationCoroutineScope
 
-val Kosmos.fakeCommunalSceneRepository by Fixture {
+var Kosmos.fakeCommunalSceneRepository by Fixture {
     FakeCommunalSceneRepository(applicationScope = applicationCoroutineScope)
 }
 

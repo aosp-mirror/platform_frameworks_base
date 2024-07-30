@@ -43,7 +43,7 @@ constructor(
     @Composable
     override fun SceneScope.Content(modifier: Modifier) {
         LockscreenLongPress(
-            viewModel = viewModel.longPress,
+            viewModel = viewModel.touchHandling,
             modifier = modifier,
         ) { _ ->
             Box(modifier.background(Color.Black)) {

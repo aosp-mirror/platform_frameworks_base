@@ -38,6 +38,7 @@ import static org.mockito.Mockito.when;
 import android.app.Notification;
 import android.app.PendingIntent;
 import android.app.Person;
+import android.os.Handler;
 import android.platform.test.annotations.DisableFlags;
 import android.platform.test.annotations.EnableFlags;
 import android.platform.test.flag.junit.FlagsParameterization;
@@ -80,8 +81,9 @@ public class BaseHeadsUpManagerTest extends SysuiTestCase {
     static final int TEST_A11Y_AUTO_DISMISS_TIME = 1_000;
 
     private UiEventLoggerFake mUiEventLoggerFake = new UiEventLoggerFake();
-    private final HeadsUpManagerLogger mLogger = spy(new HeadsUpManagerLogger(logcatLogBuffer()));
 
+    private final HeadsUpManagerLogger mLogger = spy(new HeadsUpManagerLogger(logcatLogBuffer()));
+    @Mock private Handler mBgHandler;
     @Mock private DumpManager dumpManager;
     private AvalancheController mAvalancheController;
 
@@ -148,7 +150,8 @@ public class BaseHeadsUpManagerTest extends SysuiTestCase {
     @Override
     public void SysuiSetup() throws Exception {
         super.SysuiSetup();
-        mAvalancheController = new AvalancheController(dumpManager, mUiEventLoggerFake);
+        mAvalancheController = new AvalancheController(dumpManager, mUiEventLoggerFake, mLogger,
+                mBgHandler);
     }
 
     @Test
@@ -627,7 +630,7 @@ public class BaseHeadsUpManagerTest extends SysuiTestCase {
         hum.onEntryAdded(entryToPin);
 
         assertEquals(2, mUiEventLoggerFake.numLogs());
-        assertEquals(AvalancheController.ThrottleEvent.SHOWN.getId(),
+        assertEquals(AvalancheController.ThrottleEvent.AVALANCHE_THROTTLING_HUN_SHOWN.getId(),
                 mUiEventLoggerFake.eventId(0));
         assertEquals(BaseHeadsUpManager.NotificationPeekEvent.NOTIFICATION_PEEK.getId(),
                 mUiEventLoggerFake.eventId(1));

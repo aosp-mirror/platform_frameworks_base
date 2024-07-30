@@ -47,7 +47,7 @@ genrule {
     ],
     tools: ["protologtool"],
     cmd: "$(location protologtool) transform-protolog-calls " +
-        "--protolog-class com.android.internal.protolog.common.ProtoLog " +
+        "--protolog-class com.android.internal.protolog.ProtoLog " +
         "--loggroups-class com.android.internal.protolog.ProtoLogGroup " +
         "--loggroups-jar $(location :protolog-groups) " +
         "--viewer-config-file-path /etc/core.protolog.pb " +
@@ -66,7 +66,7 @@ genrule {
     ],
     tools: ["protologtool"],
     cmd: "$(location protologtool) generate-viewer-config " +
-        "--protolog-class com.android.internal.protolog.common.ProtoLog " +
+        "--protolog-class com.android.internal.protolog.ProtoLog " +
         "--loggroups-class com.android.internal.protolog.ProtoLogGroup " +
         "--loggroups-jar $(location :protolog-groups) " +
         "--viewer-config-type json " +
@@ -83,7 +83,7 @@ genrule {
     ],
     tools: ["protologtool"],
     cmd: "$(location protologtool) generate-viewer-config " +
-        "--protolog-class com.android.internal.protolog.common.ProtoLog " +
+        "--protolog-class com.android.internal.protolog.ProtoLog " +
         "--loggroups-class com.android.internal.protolog.ProtoLogGroup " +
         "--loggroups-jar $(location :protolog-groups) " +
         "--viewer-config-type proto " +
@@ -148,7 +148,7 @@ java_library_static {
         "android.hardware.common-V2-java",
         "android.hardware.light-V2.0-java",
         "android.hardware.gnss-V2-java",
-        "android.hardware.vibrator-V2-java",
+        "android.hardware.vibrator-V3-java",
         "app-compat-annotations",
         "framework-tethering.stubs.module_lib",
         "keepanno-annotations",
@@ -215,6 +215,7 @@ java_library_static {
         "power_hint_flags_lib",
         "biometrics_flags_lib",
         "am_flags_lib",
+        "updates_flags_lib",
         "com_android_server_accessibility_flags_lib",
         "//frameworks/libs/systemui:com_android_systemui_shared_flags_lib",
         "com_android_wm_shell_flags_lib",
@@ -227,6 +228,7 @@ java_library_static {
         "connectivity_flags_lib",
         "dreams_flags_lib",
         "aconfig_new_storage_flags_lib",
+        "powerstats_flags_lib",
     ],
     javac_shard_size: 50,
     javacflags: [
@@ -238,6 +240,9 @@ java_library_static {
     ],
     lint: {
         baseline_filename: "lint-baseline.xml",
+        warning_checks: [
+            "FlaggedApi",
+        ],
     },
 }
 

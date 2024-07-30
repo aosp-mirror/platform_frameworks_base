@@ -16,7 +16,6 @@
 
 package com.android.server.display.brightness.clamper;
 
-import static com.android.server.display.AutomaticBrightnessController.AUTO_BRIGHTNESS_ENABLED;
 
 import android.content.ContentResolver;
 import android.content.Context;
@@ -30,6 +29,7 @@ import android.util.Slog;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.display.BrightnessSynchronizer;
+import com.android.server.display.BrightnessMappingStrategy;
 import com.android.server.display.DisplayBrightnessState;
 import com.android.server.display.DisplayDeviceConfig;
 import com.android.server.display.brightness.BrightnessReason;
@@ -41,7 +41,8 @@ import java.io.PrintWriter;
  * Class used to prevent the screen brightness dipping below a certain value, based on current
  * lux conditions and user preferred minimum.
  */
-public class BrightnessLowLuxModifier extends BrightnessModifier {
+public class BrightnessLowLuxModifier extends BrightnessModifier implements
+        BrightnessClamperController.UserSwitchListener {
 
     // To enable these logs, run:
     // 'adb shell setprop persist.log.tag.BrightnessLowLuxModifier DEBUG && adb reboot'
@@ -56,7 +57,6 @@ public class BrightnessLowLuxModifier extends BrightnessModifier {
     private float mBrightnessLowerBound;
     private float mMinNitsAllowed;
     private boolean mIsActive;
-    private boolean mAutoBrightnessEnabled;
     private float mAmbientLux;
     private final DisplayDeviceConfig mDisplayDeviceConfig;
 
@@ -82,20 +82,19 @@ public class BrightnessLowLuxModifier extends BrightnessModifier {
      */
     @VisibleForTesting
     public void recalculateLowerBound() {
-        int userId = UserHandle.USER_CURRENT;
         float settingNitsLowerBound = Settings.Secure.getFloatForUser(
                 mContentResolver, Settings.Secure.EVEN_DIMMER_MIN_NITS,
-                /* def= */ MIN_NITS_DEFAULT, userId);
+                /* def= */ MIN_NITS_DEFAULT, UserHandle.USER_CURRENT);
 
-        boolean isActive = isSettingEnabled() && mAutoBrightnessEnabled;
-
-        float luxBasedNitsLowerBound = mDisplayDeviceConfig.getMinNitsFromLux(mAmbientLux);
+        boolean isActive = isSettingEnabled()
+                && mAmbientLux != BrightnessMappingStrategy.INVALID_LUX;
 
         final int reason;
         float minNitsAllowed = -1f; // undefined, if setting is off.
         final float minBrightnessAllowed;
 
         if (isActive) {
+            float luxBasedNitsLowerBound = mDisplayDeviceConfig.getMinNitsFromLux(mAmbientLux);
             minNitsAllowed = Math.max(settingNitsLowerBound,
                     luxBasedNitsLowerBound);
             minBrightnessAllowed = getBrightnessFromNits(minNitsAllowed);
@@ -124,6 +123,12 @@ public class BrightnessLowLuxModifier extends BrightnessModifier {
             mBrightnessLowerBound = minBrightnessAllowed;
             mChangeListener.onChanged();
         }
+    }
+
+    @VisibleForTesting
+    public void setAmbientLux(float lux) {
+        mAmbientLux = lux;
+        recalculateLowerBound();
     }
 
     @VisibleForTesting
@@ -164,10 +169,10 @@ public class BrightnessLowLuxModifier extends BrightnessModifier {
     @Override
     public void apply(DisplayManagerInternal.DisplayPowerRequest request,
             DisplayBrightnessState.Builder stateBuilder) {
+
         stateBuilder.setMinBrightness(mBrightnessLowerBound);
         float boundedBrightness = Math.max(mBrightnessLowerBound, stateBuilder.getBrightness());
         stateBuilder.setBrightness(boundedBrightness);
-
         if (BrightnessSynchronizer.floatEquals(stateBuilder.getBrightness(),
                 mBrightnessLowerBound)) {
             stateBuilder.getBrightnessReason().addModifier(mReason);
@@ -180,14 +185,13 @@ public class BrightnessLowLuxModifier extends BrightnessModifier {
     }
 
     @Override
-    public void onAmbientLuxChange(float ambientLux) {
-        mAmbientLux = ambientLux;
-        recalculateLowerBound();
+    public boolean shouldListenToLightSensor() {
+        return isSettingEnabled();
     }
 
     @Override
-    public void setAutoBrightnessState(int state) {
-        mAutoBrightnessEnabled = state == AUTO_BRIGHTNESS_ENABLED;
+    public void onSwitchUser() {
+        recalculateLowerBound();
     }
 
     @Override
@@ -217,14 +221,15 @@ public class BrightnessLowLuxModifier extends BrightnessModifier {
     }
 
     private final class SettingsObserver extends ContentObserver {
+
         SettingsObserver(Handler handler) {
             super(handler);
             mContentResolver.registerContentObserver(
                     Settings.Secure.getUriFor(Settings.Secure.EVEN_DIMMER_MIN_NITS),
-                    false, this);
+                    false, this, UserHandle.USER_ALL);
             mContentResolver.registerContentObserver(
                     Settings.Secure.getUriFor(Settings.Secure.EVEN_DIMMER_ACTIVATED),
-                    false, this);
+                    false, this, UserHandle.USER_ALL);
         }
 
         @Override

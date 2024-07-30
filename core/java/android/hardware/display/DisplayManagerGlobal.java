@@ -21,6 +21,7 @@ import static android.hardware.display.DisplayManager.EventsMask;
 import static android.view.Display.HdrCapabilities.HdrType;
 
 import android.Manifest;
+import android.annotation.FloatRange;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -548,6 +549,25 @@ public final class DisplayManagerGlobal {
         }
     }
 
+    /**
+     * Request to power a display OFF or reset it to a power state it supposed to have.
+     * @param displayId the id of the display
+     * @param state one of {@link android.view.Display#STATE_UNKNOWN} (to reset the state to
+     *  the one the display should have had now), {@link android.view.Display#STATE_OFF}.
+     * @return true if successful, false otherwise
+     * @hide
+     */
+    @RequiresPermission("android.permission.MANAGE_DISPLAYS")
+    public boolean requestDisplayPower(int displayId, int state) {
+        try {
+            return mDm.requestDisplayPower(displayId, state);
+        } catch (RemoteException ex) {
+            Log.e(TAG, "Error trying to request display power:"
+                    + " state=" + state, ex);
+            return false;
+        }
+    }
+
     public void startWifiDisplayScan() {
         synchronized (mLock) {
             if (mWifiDisplayScanNestCount++ == 0) {
@@ -793,6 +813,14 @@ public final class DisplayManagerGlobal {
     void setVirtualDisplayState(IVirtualDisplayCallback token, boolean isOn) {
         try {
             mDm.setVirtualDisplayState(token, isOn);
+        } catch (RemoteException ex) {
+            throw ex.rethrowFromSystemServer();
+        }
+    }
+
+    void setVirtualDisplayRotation(IVirtualDisplayCallback token, @Surface.Rotation int rotation) {
+        try {
+            mDm.setVirtualDisplayRotation(token, rotation);
         } catch (RemoteException ex) {
             throw ex.rethrowFromSystemServer();
         }
@@ -1194,6 +1222,32 @@ public final class DisplayManagerGlobal {
     public void requestDisplayModes(int displayId, @Nullable int[] modeIds) {
         try {
             mDm.requestDisplayModes(mToken, displayId, modeIds);
+        } catch (RemoteException ex) {
+            throw ex.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * @see DisplayManager#getDozeBrightnessSensorValueToBrightness
+     */
+    @RequiresPermission(Manifest.permission.CONTROL_DISPLAY_BRIGHTNESS)
+    @Nullable
+    public float[] getDozeBrightnessSensorValueToBrightness(int displayId) {
+        try {
+            return mDm.getDozeBrightnessSensorValueToBrightness(displayId);
+        } catch (RemoteException ex) {
+            throw ex.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * @see DisplayManager#getDefaultDozeBrightness
+     */
+    @RequiresPermission(Manifest.permission.CONTROL_DISPLAY_BRIGHTNESS)
+    @FloatRange(from = 0f, to = 1f)
+    public float getDefaultDozeBrightness(int displayId) {
+        try {
+            return mDm.getDefaultDozeBrightness(displayId);
         } catch (RemoteException ex) {
             throw ex.rethrowFromSystemServer();
         }

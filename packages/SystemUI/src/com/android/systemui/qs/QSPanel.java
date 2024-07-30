@@ -217,10 +217,13 @@ public class QSPanel extends LinearLayout implements Tunable {
     private void setBrightnessViewMargin() {
         if (mBrightnessView != null) {
             MarginLayoutParams lp = (MarginLayoutParams) mBrightnessView.getLayoutParams();
+            // For Brightness Slider to extend its boundary to draw focus background
+            int offset = getResources()
+                    .getDimensionPixelSize(R.dimen.rounded_slider_boundary_offset);
             lp.topMargin = mContext.getResources()
-                    .getDimensionPixelSize(R.dimen.qs_brightness_margin_top);
+                    .getDimensionPixelSize(R.dimen.qs_brightness_margin_top) - offset;
             lp.bottomMargin = mContext.getResources()
-                    .getDimensionPixelSize(R.dimen.qs_brightness_margin_bottom);
+                    .getDimensionPixelSize(R.dimen.qs_brightness_margin_bottom) - offset;
             mBrightnessView.setLayoutParams(lp);
         }
     }
@@ -635,9 +638,9 @@ public class QSPanel extends LinearLayout implements Tunable {
         return mListening;
     }
 
-    protected void setPageMargin(int pageMargin) {
+    protected void setPageMargin(int pageMarginStart, int pageMarginEnd) {
         if (mTileLayout instanceof PagedTileLayout) {
-            ((PagedTileLayout) mTileLayout).setPageMargin(pageMargin);
+            ((PagedTileLayout) mTileLayout).setPageMargin(pageMarginStart, pageMarginEnd);
         }
     }
 

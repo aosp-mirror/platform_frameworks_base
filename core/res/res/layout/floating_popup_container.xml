@@ -24,4 +24,4 @@
     android:elevation="@android:dimen/text_edit_floating_toolbar_elevation"
     android:focusable="true"
     android:focusableInTouchMode="true"
-    android:background="?attr/floatingToolbarPopupBackgroundDrawable"/>
+    android:background="@drawable/floating_popup_background"/>

@@ -20,7 +20,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.android.compose.animation.scene.SceneScope
@@ -45,7 +44,7 @@ import com.android.systemui.statusbar.phone.ui.TintedIconManager
 import dagger.Lazy
 import java.util.Optional
 import javax.inject.Inject
-import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.Flow
 
 @SysUISingleton
 class NotificationsShadeScene
@@ -65,7 +64,7 @@ constructor(
 
     override val key = Scenes.NotificationsShade
 
-    override val destinationScenes: StateFlow<Map<UserAction, UserActionResult>> =
+    override val destinationScenes: Flow<Map<UserAction, UserActionResult>> =
         sceneViewModel.destinationScenes
 
     @Composable
@@ -75,7 +74,6 @@ constructor(
         OverlayShade(
             modifier = modifier,
             viewModel = overlayShadeViewModel,
-            panelAlignment = Alignment.TopEnd,
             lockscreenContent = lockscreenContent,
         ) {
             Column {
@@ -97,6 +95,12 @@ constructor(
                     shouldReserveSpaceForNavBar = false,
                     shadeMode = ShadeMode.Dual,
                     modifier = Modifier.fillMaxWidth(),
+                )
+
+                // Communicates the bottom position of the drawable area within the shade to NSSL.
+                NotificationStackCutoffGuideline(
+                    stackScrollView = stackScrollView.get(),
+                    viewModel = notificationsPlaceholderViewModel,
                 )
             }
         }

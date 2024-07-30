@@ -68,7 +68,6 @@ import android.app.ActivityManager;
 import android.app.ActivityTaskManager;
 import android.app.FullscreenRequestHandler;
 import android.app.IActivityClientController;
-import android.app.ICompatCameraControlCallback;
 import android.app.IRequestFinishCallback;
 import android.app.PictureInPictureParams;
 import android.app.PictureInPictureUiState;
@@ -102,7 +101,7 @@ import android.window.TransitionInfo;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.AssistUtils;
 import com.android.internal.policy.IKeyguardDismissCallback;
-import com.android.internal.protolog.common.ProtoLog;
+import com.android.internal.protolog.ProtoLog;
 import com.android.server.LocalServices;
 import com.android.server.Watchdog;
 import com.android.server.pm.KnownPackages;
@@ -1008,22 +1007,6 @@ class ActivityClientController extends IActivityClientController.Stub {
         Binder.restoreCallingIdentity(origId);
     }
 
-    @Override
-    public void requestCompatCameraControl(IBinder token, boolean showControl,
-            boolean transformationApplied, ICompatCameraControlCallback callback) {
-        final long origId = Binder.clearCallingIdentity();
-        try {
-            synchronized (mGlobalLock) {
-                final ActivityRecord r = ActivityRecord.isInRootTaskLocked(token);
-                if (r != null) {
-                    r.updateCameraCompatState(showControl, transformationApplied, callback);
-                }
-            }
-        } finally {
-            Binder.restoreCallingIdentity(origId);
-        }
-    }
-
     /**
      * Initialize the {@link #mSetPipAspectRatioQuotaTracker} if applicable, which should happen
      * out of {@link #mGlobalLock} to avoid deadlock (AM lock is used in QuotaTrack ctor).
@@ -1124,8 +1107,8 @@ class ActivityClientController extends IActivityClientController.Stub {
         }
 
         try {
-            mService.getLifecycleManager().scheduleTransactionItem(r.app.getThread(),
-                    EnterPipRequestedItem.obtain(r.token));
+            final EnterPipRequestedItem item = new EnterPipRequestedItem(r.token);
+            mService.getLifecycleManager().scheduleTransactionItem(r.app.getThread(), item);
             return true;
         } catch (Exception e) {
             Slog.w(TAG, "Failed to send enter pip requested item: "
@@ -1140,8 +1123,8 @@ class ActivityClientController extends IActivityClientController.Stub {
     void onPictureInPictureUiStateChanged(@NonNull ActivityRecord r,
             PictureInPictureUiState pipState) {
         try {
-            mService.getLifecycleManager().scheduleTransactionItem(r.app.getThread(),
-                    PipStateTransactionItem.obtain(r.token, pipState));
+            final PipStateTransactionItem item = new PipStateTransactionItem(r.token, pipState);
+            mService.getLifecycleManager().scheduleTransactionItem(r.app.getThread(), item);
         } catch (Exception e) {
             Slog.w(TAG, "Failed to send pip state transaction item: "
                     + r.intent.getComponent(), e);
@@ -1299,9 +1282,11 @@ class ActivityClientController extends IActivityClientController.Stub {
             // The restore windowing mode must be set after the windowing mode is set since
             // Task#setWindowingMode resets the restore windowing mode to WINDOWING_MODE_INVALID.
             requester.mMultiWindowRestoreWindowingMode = restoreWindowingMode;
+            requester.mMultiWindowRestoreParent =
+                    requester.getParent().mRemoteToken.toWindowContainerToken();
         } else {
             targetWindowingMode = requester.mMultiWindowRestoreWindowingMode;
-            requester.setWindowingMode(targetWindowingMode);
+            requester.restoreWindowingMode();
         }
         if (targetWindowingMode == WINDOWING_MODE_FULLSCREEN) {
             requester.setBounds(null);

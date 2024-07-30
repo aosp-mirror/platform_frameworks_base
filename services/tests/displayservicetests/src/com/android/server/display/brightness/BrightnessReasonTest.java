@@ -18,7 +18,6 @@ package com.android.server.display.brightness;
 
 import static org.junit.Assert.assertEquals;
 
-
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
@@ -43,17 +42,34 @@ public final class BrightnessReasonTest {
         assertEquals(mBrightnessReason.getReason(), BrightnessReason.REASON_UNKNOWN);
         assertEquals(mBrightnessReason.getModifier(), 0);
 
+        CharSequence tag = "my tag";
         mBrightnessReason.set(
                 getReason(BrightnessReason.REASON_BOOST, BrightnessReason.MODIFIER_THROTTLED));
+        mBrightnessReason.setTag(tag);
+
         assertEquals(mBrightnessReason.getReason(), BrightnessReason.REASON_BOOST);
         assertEquals(mBrightnessReason.getModifier(), BrightnessReason.MODIFIER_THROTTLED);
+        assertEquals(mBrightnessReason.getTag().toString(), tag);
     }
 
     @Test
-    public void toStringGeneratesExpectedString() {
-        String actualString = mBrightnessReason.toString();
-        String expectedString = "doze [ low_pwr ]";
-        assertEquals(actualString, expectedString);
+    public void toStringGeneratedExpectedString() {
+        assertEquals("doze [ low_pwr ]", mBrightnessReason.toString());
+    }
+
+    @Test
+    public void overrideTagString() {
+        // Should not print out the tag for "doze"
+        mBrightnessReason.setTag("my/tag");
+        assertEquals("doze(my/tag) [ low_pwr ]", mBrightnessReason.toString());
+
+        // Should print out tag for "override"
+        mBrightnessReason.setReason(BrightnessReason.REASON_OVERRIDE);
+        assertEquals("override(my/tag) [ low_pwr ]", mBrightnessReason.toString());
+
+        // Should not print anything if no tag.
+        mBrightnessReason.setTag(null);
+        assertEquals("override [ low_pwr ]", mBrightnessReason.toString());
     }
 
     @Test

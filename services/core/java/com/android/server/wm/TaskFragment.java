@@ -29,6 +29,7 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
+import static android.app.WindowConfiguration.isFloating;
 import static android.content.pm.ActivityInfo.FLAG_ALLOW_UNTRUSTED_ACTIVITY_EMBEDDING;
 import static android.content.pm.ActivityInfo.FLAG_RESUME_WHILE_PAUSING;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSET;
@@ -81,7 +82,6 @@ import android.app.IApplicationThread;
 import android.app.ResultInfo;
 import android.app.WindowConfiguration;
 import android.app.servertransaction.ActivityResultItem;
-import android.app.servertransaction.ClientTransaction;
 import android.app.servertransaction.NewIntentItem;
 import android.app.servertransaction.PauseActivityItem;
 import android.app.servertransaction.ResumeActivityItem;
@@ -106,7 +106,7 @@ import android.window.TaskFragmentInfo;
 import android.window.TaskFragmentOrganizerToken;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.protolog.common.ProtoLog;
+import com.android.internal.protolog.ProtoLog;
 import com.android.internal.util.ToBooleanFunction;
 import com.android.server.am.HostingRecord;
 import com.android.server.pm.pkg.AndroidPackage;
@@ -216,8 +216,7 @@ class TaskFragment extends WindowContainer<WindowContainer> {
      */
     int mMinHeight;
 
-    Dimmer mDimmer = Dimmer.DIMMER_REFACTOR
-            ? new SmoothDimmer(this) : new LegacyDimmer(this);
+    Dimmer mDimmer = new Dimmer(this);
 
     /** Apply the dim layer on the embedded TaskFragment. */
     static final int EMBEDDED_DIM_AREA_TASK_FRAGMENT = 0;
@@ -1104,21 +1103,34 @@ class TaskFragment extends WindowContainer<WindowContainer> {
     }
 
     ActivityRecord getTopNonFinishingActivity() {
-        return getTopNonFinishingActivity(true /* includeOverlays */);
+        return getTopNonFinishingActivity(
+                true /* includeOverlays */, true /* includeLaunchedFromBubble */);
     }
 
     /**
      * Returns the top-most non-finishing activity, even if the activity is NOT ok to show to
      * the current user.
      * @param includeOverlays whether the task overlay activity should be included.
+     * @param includeLaunchedFromBubble whether activities that were launched from a bubble should
+     *                                  be included.
      * @see #topRunningActivity(boolean)
      */
-    ActivityRecord getTopNonFinishingActivity(boolean includeOverlays) {
-        // Split into 2 to avoid object creation due to variable capture.
+    ActivityRecord getTopNonFinishingActivity(boolean includeOverlays,
+            boolean includeLaunchedFromBubble) {
+        // Split to avoid object creation due to variable capture.
         if (includeOverlays) {
-            return getActivity((r) -> !r.finishing);
+            if (includeLaunchedFromBubble) {
+                return getActivity(r -> !r.finishing);
+            } else {
+                return getActivity(r -> !r.finishing && !r.getLaunchedFromBubble());
+            }
         }
-        return getActivity((r) -> !r.finishing && !r.isTaskOverlay());
+        if (includeLaunchedFromBubble) {
+            return getActivity(r -> !r.finishing && !r.isTaskOverlay());
+        } else {
+            return getActivity(
+                    r -> !r.finishing && !r.isTaskOverlay() && !r.getLaunchedFromBubble());
+        }
     }
 
     ActivityRecord topRunningActivity() {
@@ -1590,9 +1602,6 @@ class TaskFragment extends WindowContainer<WindowContainer> {
 
             try {
                 final IApplicationThread appThread = next.app.getThread();
-                final ClientTransaction transaction = Flags.bundleClientTransactionFlag()
-                        ? null
-                        : ClientTransaction.obtain(appThread);
                 // Deliver all pending results.
                 final ArrayList<ResultInfo> a = next.results;
                 if (a != null) {
@@ -1601,26 +1610,15 @@ class TaskFragment extends WindowContainer<WindowContainer> {
                         if (DEBUG_RESULTS) {
                             Slog.v(TAG_RESULTS, "Delivering results to " + next + ": " + a);
                         }
-                        final ActivityResultItem activityResultItem = ActivityResultItem.obtain(
-                                next.token, a);
-                        if (transaction == null) {
-                            mAtmService.getLifecycleManager().scheduleTransactionItem(
-                                    appThread, activityResultItem);
-                        } else {
-                            transaction.addTransactionItem(activityResultItem);
-                        }
+                        final ActivityResultItem item = new ActivityResultItem(next.token, a);
+                        mAtmService.getLifecycleManager().scheduleTransactionItem(appThread, item);
                     }
                 }
 
                 if (next.newIntents != null) {
-                    final NewIntentItem newIntentItem = NewIntentItem.obtain(
-                            next.token, next.newIntents, true /* resume */);
-                    if (transaction == null) {
-                        mAtmService.getLifecycleManager().scheduleTransactionItem(
-                                appThread, newIntentItem);
-                    } else {
-                        transaction.addTransactionItem(newIntentItem);
-                    }
+                    final NewIntentItem item =
+                            new NewIntentItem(next.token, next.newIntents, true /* resume */);
+                    mAtmService.getLifecycleManager().scheduleTransactionItem(appThread, item);
                 }
 
                 // Well the app will no longer be stopped.
@@ -1634,16 +1632,11 @@ class TaskFragment extends WindowContainer<WindowContainer> {
                 final int topProcessState = mAtmService.mTopProcessState;
                 next.app.setPendingUiCleanAndForceProcessStateUpTo(topProcessState);
                 next.abortAndClearOptionsAnimation();
-                final ResumeActivityItem resumeActivityItem = ResumeActivityItem.obtain(
+                final ResumeActivityItem resumeActivityItem = new ResumeActivityItem(
                         next.token, topProcessState, dc.isNextTransitionForward(),
                         next.shouldSendCompatFakeFocus());
-                if (transaction == null) {
-                    mAtmService.getLifecycleManager().scheduleTransactionItem(
-                            appThread, resumeActivityItem);
-                } else {
-                    transaction.addTransactionItem(resumeActivityItem);
-                    mAtmService.getLifecycleManager().scheduleTransaction(transaction);
-                }
+                mAtmService.getLifecycleManager().scheduleTransactionItem(
+                        appThread, resumeActivityItem);
 
                 ProtoLog.d(WM_DEBUG_STATES, "resumeTopActivity: Resumed %s", next);
             } catch (Exception e) {
@@ -1885,9 +1878,9 @@ class TaskFragment extends WindowContainer<WindowContainer> {
             EventLogTags.writeWmPauseActivity(prev.mUserId, System.identityHashCode(prev),
                     prev.shortComponentName, "userLeaving=" + userLeaving, reason);
 
-            mAtmService.getLifecycleManager().scheduleTransactionItem(prev.app.getThread(),
-                    PauseActivityItem.obtain(prev.token, prev.finishing, userLeaving,
-                            pauseImmediately, autoEnteringPip));
+            final PauseActivityItem item = new PauseActivityItem(prev.token, prev.finishing,
+                    userLeaving, pauseImmediately, autoEnteringPip);
+            mAtmService.getLifecycleManager().scheduleTransactionItem(prev.app.getThread(), item);
         } catch (Exception e) {
             // Ignore exception, if process died other code will cleanup.
             Slog.w(TAG, "Exception thrown during pause", e);
@@ -2228,15 +2221,17 @@ class TaskFragment extends WindowContainer<WindowContainer> {
     static class ConfigOverrideHint {
         @Nullable DisplayInfo mTmpOverrideDisplayInfo;
         @Nullable ActivityRecord.CompatDisplayInsets mTmpCompatInsets;
-        @Nullable Rect mTmpParentAppBoundsOverride;
+        @Nullable Rect mParentAppBoundsOverride;
         int mTmpOverrideConfigOrientation;
         boolean mUseOverrideInsetsForConfig;
 
         void resolveTmpOverrides(DisplayContent dc, Configuration parentConfig,
                 boolean isFixedRotationTransforming) {
-            mTmpParentAppBoundsOverride = new Rect(parentConfig.windowConfiguration.getAppBounds());
+            mParentAppBoundsOverride = new Rect(parentConfig.windowConfiguration.getAppBounds());
+            mTmpOverrideConfigOrientation = parentConfig.orientation;
             final Insets insets;
-            if (mUseOverrideInsetsForConfig && dc != null) {
+            if (mUseOverrideInsetsForConfig && dc != null
+                    && !isFloating(parentConfig.windowConfiguration.getWindowingMode())) {
                 // Insets are decoupled from configuration by default from V+, use legacy
                 // compatibility behaviour for apps targeting SDK earlier than 35
                 // (see applySizeOverrideIfNeeded).
@@ -2256,13 +2251,12 @@ class TaskFragment extends WindowContainer<WindowContainer> {
             } else {
                 insets = Insets.NONE;
             }
-            mTmpParentAppBoundsOverride.inset(insets);
+            mParentAppBoundsOverride.inset(insets);
         }
 
         void resetTmpOverrides() {
             mTmpOverrideDisplayInfo = null;
             mTmpCompatInsets = null;
-            mTmpParentAppBoundsOverride = null;
             mTmpOverrideConfigOrientation = ORIENTATION_UNDEFINED;
         }
     }
@@ -2351,7 +2345,7 @@ class TaskFragment extends WindowContainer<WindowContainer> {
                 final Rect containingAppBounds;
                 if (insideParentBounds) {
                     containingAppBounds = useOverrideInsetsForConfig
-                            ? overrideHint.mTmpParentAppBoundsOverride
+                            ? overrideHint.mParentAppBoundsOverride
                             : parentConfig.windowConfiguration.getAppBounds();
                 } else {
                     // Restrict appBounds to display non-decor rather than parent because the
@@ -2438,7 +2432,7 @@ class TaskFragment extends WindowContainer<WindowContainer> {
                     inOutConfig.smallestScreenWidthDp = (int) (0.5f
                             + Math.min(mTmpFullBounds.width(), mTmpFullBounds.height()) / density);
                 } else if (windowingMode == WINDOWING_MODE_MULTI_WINDOW && mIsEmbedded
-                        && insideParentBounds && !resolvedBounds.equals(parentBounds)) {
+                        && !resolvedBounds.equals(parentBounds)) {
                     // For embedded TFs, the smallest width should be updated. Otherwise, inherit
                     // from the parent task would result in applications loaded wrong resource.
                     inOutConfig.smallestScreenWidthDp =
@@ -2825,7 +2819,21 @@ class TaskFragment extends WindowContainer<WindowContainer> {
                 mClearedTaskForReuse,
                 mClearedTaskFragmentForPip,
                 mClearedForReorderActivityToFront,
-                calculateMinDimension());
+                calculateMinDimension(),
+                isTopNonFinishingChild());
+    }
+
+    private boolean isTopNonFinishingChild() {
+        final WindowContainer<?> parent = getParent();
+        if (parent == null) {
+            // Either the TaskFragment is not attached or is going to destroy. Return false.
+            return false;
+        }
+        final ActivityRecord topNonFishingActivity = parent.getActivity(ar -> !ar.finishing);
+        // If the parent's top non-finishing activity is this TaskFragment's, it means
+        // this TaskFragment is the top non-finishing container of its parent.
+        return topNonFishingActivity != null && topNonFishingActivity
+                .equals(getTopNonFinishingActivity());
     }
 
     /**
@@ -3108,6 +3116,7 @@ class TaskFragment extends WindowContainer<WindowContainer> {
         return forAllWindows(getDimBehindWindow, true);
     }
 
+    @Deprecated
     @Override
     Dimmer getDimmer() {
         // If this is in an embedded TaskFragment and we want the dim applies on the TaskFragment.

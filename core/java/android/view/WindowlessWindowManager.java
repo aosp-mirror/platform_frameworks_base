@@ -23,7 +23,6 @@ import android.content.res.Configuration;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.graphics.Region;
-import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteCallback;
 import android.os.RemoteException;
@@ -31,6 +30,7 @@ import android.util.Log;
 import android.util.MergedConfiguration;
 import android.view.View.FocusDirection;
 import android.view.WindowInsets.Type.InsetsType;
+import android.view.inputmethod.ImeTracker;
 import android.window.ClientWindowFrames;
 import android.window.InputTransferToken;
 import android.window.OnBackInvokedCallbackInfo;
@@ -349,18 +349,6 @@ public class WindowlessWindowManager implements IWindowSession {
     }
 
     @Override
-    public int relayoutLegacy(IWindow window, WindowManager.LayoutParams inAttrs,
-            int requestedWidth, int requestedHeight, int viewFlags, int flags, int seq,
-            int lastSyncSeqId, ClientWindowFrames outFrames,
-            MergedConfiguration outMergedConfiguration, SurfaceControl outSurfaceControl,
-            InsetsState outInsetsState, InsetsSourceControl.Array outActiveControls,
-            Bundle outSyncSeqIdBundle) {
-        return relayoutInner(window, inAttrs, requestedWidth, requestedHeight, viewFlags, flags,
-                seq, lastSyncSeqId, outFrames, outMergedConfiguration, outSurfaceControl,
-                outInsetsState, outActiveControls);
-    }
-
-    @Override
     public int relayout(IWindow window, WindowManager.LayoutParams inAttrs,
             int requestedWidth, int requestedHeight, int viewFlags, int flags, int seq,
             int lastSyncSeqId, WindowRelayoutResult outRelayoutResult) {
@@ -516,13 +504,13 @@ public class WindowlessWindowManager implements IWindowSession {
     }
 
     @Override
-    public boolean performHapticFeedback(int effectId, boolean always, boolean fromIme) {
+    public boolean performHapticFeedback(int effectId, int flags, int privFlags) {
         return false;
     }
 
     @Override
-    public void performHapticFeedbackAsync(int effectId, boolean always, boolean fromIme) {
-        performHapticFeedback(effectId, always, fromIme);
+    public void performHapticFeedbackAsync(int effectId, int flags, int privFlags) {
+        performHapticFeedback(effectId, flags, privFlags);
     }
 
     @Override
@@ -609,7 +597,7 @@ public class WindowlessWindowManager implements IWindowSession {
 
     @Override
     public void updateRequestedVisibleTypes(IWindow window,
-            @InsetsType int requestedVisibleTypes)  {
+            @InsetsType int requestedVisibleTypes, @Nullable ImeTracker.Token imeStatsToken)  {
     }
 
     @Override
@@ -688,6 +676,11 @@ public class WindowlessWindowManager implements IWindowSession {
         Log.e(TAG, "Received request to moveFocusToAdjacentWindow on"
                 + " WindowlessWindowManager. We shouldn't get here!");
         return false;
+    }
+
+    @Override
+    public void notifyImeWindowVisibilityChangedFromClient(IWindow window, boolean visible,
+            @NonNull ImeTracker.Token statsToken) {
     }
 
     void setParentInterface(@Nullable ISurfaceControlViewHostParent parentInterface) {

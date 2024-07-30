@@ -16,6 +16,7 @@
 
 package com.android.systemui.shade.domain.interactor
 
+import com.android.systemui.shade.shared.model.ShadeAlignment
 import com.android.systemui.shade.shared.model.ShadeMode
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
@@ -51,8 +52,27 @@ interface ShadeInteractor : BaseShadeInteractor {
     /** Are touches allowed on the notification panel? */
     val isShadeTouchable: Flow<Boolean>
 
-    /** Emits true if the shade can be expanded from QQS to QS and false otherwise. */
+    /** Whether the shade can be expanded from QQS to QS. */
     val isExpandToQsEnabled: Flow<Boolean>
+
+    /**
+     * The version of the shade layout to use.
+     *
+     * Note: Most likely, you want to read [isShadeLayoutWide] instead of this.
+     */
+    val shadeMode: StateFlow<ShadeMode>
+
+    /**
+     * Whether the shade layout should be wide (true) or narrow (false).
+     *
+     * In a wide layout, notifications and quick settings each take up only half the screen width
+     * (whether they are shown at the same time or not). In a narrow layout, they can each be as
+     * wide as the entire screen.
+     */
+    val isShadeLayoutWide: StateFlow<Boolean>
+
+    /** How to align the shade content. */
+    val shadeAlignment: ShadeAlignment
 }
 
 /** ShadeInteractor methods with implementations that differ between non-empty impls. */
@@ -109,8 +129,6 @@ interface BaseShadeInteractor {
      * animating.
      */
     val isUserInteractingWithQs: Flow<Boolean>
-
-    val shadeMode: StateFlow<ShadeMode>
 }
 
 fun createAnyExpansionFlow(

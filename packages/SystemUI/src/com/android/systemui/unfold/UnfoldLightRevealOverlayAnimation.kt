@@ -71,7 +71,7 @@ constructor(
             fullscreenLightRevealAnimationControllerFactory.create(
                 displaySelector = { maxByOrNull { it.naturalWidth } },
                 effectFactory = { LinearLightRevealEffect(it.isVerticalRotation()) },
-                overlayContainerName = SURFACE_CONTAINER_NAME,
+                overlayContainerName = OVERLAY_TITLE,
             )
         controller.init()
         bgExecutor = threadFactory.buildDelayableExecutorOnHandler(unfoldProgressHandler)
@@ -194,7 +194,7 @@ constructor(
 
     private companion object {
         const val TAG = "UnfoldLightRevealOverlayAnimation"
-        const val SURFACE_CONTAINER_NAME = "unfold-overlay-container"
+        const val OVERLAY_TITLE = "unfold-animation-overlay"
         const val UNFOLD_BLOCK_TOUCHES_UNTIL_PROGRESS = 0.8f
     }
 }

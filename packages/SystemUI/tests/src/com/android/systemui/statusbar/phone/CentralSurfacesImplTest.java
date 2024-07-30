@@ -53,6 +53,7 @@ import static java.util.Collections.emptySet;
 
 import android.app.ActivityManager;
 import android.app.IWallpaperManager;
+import android.app.NotificationManager;
 import android.app.WallpaperManager;
 import android.app.trust.TrustManager;
 import android.content.BroadcastReceiver;
@@ -112,6 +113,7 @@ import com.android.systemui.colorextraction.SysuiColorExtractor;
 import com.android.systemui.communal.shared.model.CommunalScenes;
 import com.android.systemui.demomode.DemoModeController;
 import com.android.systemui.dump.DumpManager;
+import com.android.systemui.emergency.EmergencyGestureModule.EmergencyGestureIntentFactory;
 import com.android.systemui.flags.DisableSceneContainer;
 import com.android.systemui.flags.EnableSceneContainer;
 import com.android.systemui.flags.FakeFeatureFlags;
@@ -148,6 +150,7 @@ import com.android.systemui.shade.ShadeController;
 import com.android.systemui.shade.ShadeControllerImpl;
 import com.android.systemui.shade.ShadeExpansionStateManager;
 import com.android.systemui.shade.ShadeLogger;
+import com.android.systemui.shared.notifications.domain.interactor.NotificationSettingsInteractor;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.KeyboardShortcutListSearch;
 import com.android.systemui.statusbar.KeyboardShortcuts;
@@ -338,8 +341,10 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
     @Mock private KeyboardShortcuts mKeyboardShortcuts;
     @Mock private KeyboardShortcutListSearch mKeyboardShortcutListSearch;
     @Mock private PackageManager mPackageManager;
+    @Mock private NotificationManager mNotificationManager;
     @Mock private GlanceableHubContainerController mGlanceableHubContainerController;
-
+    @Mock private EmergencyGestureIntentFactory mEmergencyGestureIntentFactory;
+    @Mock private NotificationSettingsInteractor mNotificationSettingsInteractor;
     private ShadeController mShadeController;
     private final FakeSystemClock mFakeSystemClock = new FakeSystemClock();
     private final FakeGlobalSettings mFakeGlobalSettings = new FakeGlobalSettings();
@@ -397,7 +402,10 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
                         mAvalancheProvider,
                         mSystemSettings,
                         mPackageManager,
-                        Optional.of(mBubbles));
+                        Optional.of(mBubbles),
+                        mContext,
+                        mNotificationManager,
+                        mNotificationSettingsInteractor);
         mVisualInterruptionDecisionProvider.start();
 
         mContext.addMockSystemService(TrustManager.class, mock(TrustManager.class));
@@ -596,7 +604,8 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
                 () -> mFingerprintManager,
                 mActivityStarter,
                 mBrightnessMirrorShowingInteractor,
-                mGlanceableHubContainerController
+                mGlanceableHubContainerController,
+                mEmergencyGestureIntentFactory
         );
         mScreenLifecycle.addObserver(mCentralSurfaces.mScreenObserver);
         mCentralSurfaces.initShadeVisibilityListener();

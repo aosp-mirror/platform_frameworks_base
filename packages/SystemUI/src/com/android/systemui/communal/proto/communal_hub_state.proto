@@ -35,5 +35,8 @@ message CommunalHubState {
 
         // Rank or order of the widget in the communal hub.
         int32 rank = 3;
+
+        // Serial number of the user associated with the widget.
+        int32 user_serial_number = 4;
     }
 }

@@ -22,20 +22,28 @@ import com.android.compose.animation.scene.UserAction
 import com.android.compose.animation.scene.UserActionResult
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.scene.shared.model.SceneFamilies
+import com.android.systemui.shade.domain.interactor.ShadeInteractor
+import com.android.systemui.shade.shared.model.ShadeAlignment
 import javax.inject.Inject
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flowOf
 
 /** Models UI state and handles user input for the Notifications Shade scene. */
 @SysUISingleton
-class NotificationsShadeSceneViewModel @Inject constructor() {
-    val destinationScenes: StateFlow<Map<UserAction, UserActionResult>> =
-        MutableStateFlow(
-                mapOf(
-                    Swipe.Up to SceneFamilies.Home,
-                    Back to SceneFamilies.Home,
-                )
+class NotificationsShadeSceneViewModel
+@Inject
+constructor(
+    shadeInteractor: ShadeInteractor,
+) {
+    val destinationScenes: Flow<Map<UserAction, UserActionResult>> =
+        flowOf(
+            mapOf(
+                if (shadeInteractor.shadeAlignment == ShadeAlignment.Top) {
+                    Swipe.Up
+                } else {
+                    Swipe.Down
+                } to SceneFamilies.Home,
+                Back to SceneFamilies.Home,
             )
-            .asStateFlow()
+        )
 }

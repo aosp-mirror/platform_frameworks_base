@@ -31,3 +31,57 @@ flag {
     description: "Enables the adaptive haptics feature"
     bug: "305961689"
 }
+
+flag {
+    namespace: "haptics"
+    name: "cancel_by_appops"
+    description: "Cancels ongoing vibrations when the appops mode changes to disallow them"
+    bug: "230745615"
+    is_fixed_read_only: true
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
+    namespace: "haptics"
+    name: "vibration_xml_apis"
+    is_exported: true
+    description: "Enabled System APIs for vibration effect XML parser and serializer"
+    bug: "347273158"
+    metadata {
+        purpose: PURPOSE_FEATURE
+    }
+}
+
+flag {
+    namespace: "haptics"
+    name: "vendor_vibration_effects"
+    is_exported: true
+    description: "Enabled System APIs for vendor-defined vibration effects"
+    bug: "345454923"
+    metadata {
+        purpose: PURPOSE_FEATURE
+    }
+}
+
+flag {
+    namespace: "haptics"
+    name: "throttle_vibration_params_requests"
+    description: "Control the frequency of vibration params requests to prevent overloading the vendor service"
+    bug: "355320860"
+    metadata {
+      purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
+    namespace: "haptics"
+    name: "vibration_attribute_ime_usage_api"
+    is_exported: true
+    description: "A public API for IME usage vibration attribute"
+    bug: "332661766"
+    metadata {
+        purpose: PURPOSE_FEATURE
+    }
+}

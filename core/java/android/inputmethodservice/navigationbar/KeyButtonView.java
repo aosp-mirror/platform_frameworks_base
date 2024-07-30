@@ -41,6 +41,7 @@ import android.view.View;
 import android.view.ViewConfiguration;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
+import android.view.inputmethod.Flags;
 import android.view.inputmethod.InputConnection;
 import android.widget.ImageView;
 
@@ -58,11 +59,29 @@ public class KeyButtonView extends ImageView implements ButtonInterface {
     private int mTouchDownY;
     private AudioManager mAudioManager;
     private boolean mGestureAborted;
+    /**
+     * Whether the long click action has been invoked. The short click action is invoked on the up
+     * event while a long click is invoked as soon as the long press duration is reached, so a long
+     * click could be performed before the short click is checked, in which case the short click's
+     * action should not be invoked.
+     *
+     * @see View#mHasPerformedLongPress
+     */
+    private boolean mLongClicked;
     private OnClickListener mOnClickListener;
     private final KeyButtonRipple mRipple;
     private final Paint mOvalBgPaint = new Paint(Paint.ANTI_ALIAS_FLAG | Paint.FILTER_BITMAP_FLAG);
     private float mDarkIntensity;
     private boolean mHasOvalBg = false;
+
+    /** Runnable for checking whether the long click action should be performed. */
+    private final Runnable mCheckLongPress = new Runnable() {
+        public void run() {
+            if (isPressed() && performLongClick()) {
+                mLongClicked = true;
+            }
+        }
+    };
 
     public KeyButtonView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -159,6 +178,7 @@ public class KeyButtonView extends ImageView implements ButtonInterface {
         switch (action) {
             case MotionEvent.ACTION_DOWN:
                 mDownTime = SystemClock.uptimeMillis();
+                mLongClicked = false;
                 setPressed(true);
 
                 // Use raw X and Y to detect gestures in case a parent changes the x and y values
@@ -173,6 +193,10 @@ public class KeyButtonView extends ImageView implements ButtonInterface {
                 if (!showSwipeUI) {
                     playSoundEffect(SoundEffectConstants.CLICK);
                 }
+                if (Flags.imeSwitcherRevamp() && isLongClickable()) {
+                    removeCallbacks(mCheckLongPress);
+                    postDelayed(mCheckLongPress, ViewConfiguration.getLongPressTimeout());
+                }
                 break;
             case MotionEvent.ACTION_MOVE:
                 x = (int) ev.getRawX();
@@ -183,6 +207,9 @@ public class KeyButtonView extends ImageView implements ButtonInterface {
                     // When quick step is enabled, prevent animating the ripple triggered by
                     // setPressed and decide to run it on touch up
                     setPressed(false);
+                    if (isLongClickable()) {
+                        removeCallbacks(mCheckLongPress);
+                    }
                 }
                 break;
             case MotionEvent.ACTION_CANCEL:
@@ -190,9 +217,12 @@ public class KeyButtonView extends ImageView implements ButtonInterface {
                 if (mCode != KEYCODE_UNKNOWN) {
                     sendEvent(KeyEvent.ACTION_UP, KeyEvent.FLAG_CANCELED);
                 }
+                if (isLongClickable()) {
+                    removeCallbacks(mCheckLongPress);
+                }
                 break;
             case MotionEvent.ACTION_UP:
-                final boolean doIt = isPressed();
+                final boolean doIt = isPressed() && !mLongClicked;
                 setPressed(false);
                 final boolean doHapticFeedback = (SystemClock.uptimeMillis() - mDownTime) > 150;
                 if (showSwipeUI) {
@@ -201,7 +231,7 @@ public class KeyButtonView extends ImageView implements ButtonInterface {
                         performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY);
                         playSoundEffect(SoundEffectConstants.CLICK);
                     }
-                } else if (doHapticFeedback) {
+                } else if (doHapticFeedback && !mLongClicked) {
                     // Always send a release ourselves because it doesn't seem to be sent elsewhere
                     // and it feels weird to sometimes get a release haptic and other times not.
                     performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY_RELEASE);
@@ -220,6 +250,9 @@ public class KeyButtonView extends ImageView implements ButtonInterface {
                         mOnClickListener.onClick(this);
                         sendAccessibilityEvent(AccessibilityEvent.TYPE_VIEW_CLICKED);
                     }
+                }
+                if (isLongClickable()) {
+                    removeCallbacks(mCheckLongPress);
                 }
                 break;
         }

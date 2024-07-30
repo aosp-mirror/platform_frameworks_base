@@ -84,6 +84,8 @@
     <string name="notification_bubble_title" msgid="6082910224488253378">"Бөмбөлөг"</string>
     <string name="manage_bubbles_text" msgid="7730624269650594419">"Удирдах"</string>
     <string name="accessibility_bubble_dismissed" msgid="8367471990421247357">"Бөмбөлгийг үл хэрэгссэн."</string>
+    <string name="bubble_shortcut_label" msgid="666269077944378311">"Бөмбөлгүүд"</string>
+    <string name="bubble_shortcut_long_label" msgid="6088437544312894043">"Бөмбөлгүүдийг харуулах"</string>
     <string name="restart_button_description" msgid="4564728020654658478">"Харагдах байдлыг сайжруулахын тулд энэ аппыг товшиж, дахин эхлүүлнэ үү"</string>
     <string name="user_aspect_ratio_settings_button_hint" msgid="734835849600713016">"Энэ аппын харьцааг Тохиргоонд өөрчилнө үү"</string>
     <string name="user_aspect_ratio_settings_button_description" msgid="4315566801697411684">"Харьцааг өөрчлөх"</string>
@@ -105,7 +107,7 @@
     <string name="minimize_button_text" msgid="271592547935841753">"Багасгах"</string>
     <string name="close_button_text" msgid="2913281996024033299">"Хаах"</string>
     <string name="back_button_text" msgid="1469718707134137085">"Буцах"</string>
-    <string name="handle_text" msgid="1766582106752184456">"Бариул"</string>
+    <string name="handle_text" msgid="4419667835599523257">"Аппын бариул"</string>
     <string name="app_icon_text" msgid="2823268023931811747">"Aппын дүрс тэмдэг"</string>
     <string name="fullscreen_text" msgid="1162316685217676079">"Бүтэн дэлгэц"</string>
     <string name="desktop_text" msgid="1077633567027630454">"Дэлгэцийн горим"</string>
@@ -114,6 +116,7 @@
     <string name="float_button_text" msgid="9221657008391364581">"Хөвөгч"</string>
     <string name="select_text" msgid="5139083974039906583">"Сонгох"</string>
     <string name="screenshot_text" msgid="1477704010087786671">"Дэлгэцийн агшин"</string>
+    <string name="open_in_browser_text" msgid="9181692926376072904">"Хөтчид нээх"</string>
     <string name="close_text" msgid="4986518933445178928">"Хаах"</string>
     <string name="collapse_menu_text" msgid="7515008122450342029">"Цэсийг хаах"</string>
     <string name="expand_menu_text" msgid="3847736164494181168">"Цэс нээх"</string>

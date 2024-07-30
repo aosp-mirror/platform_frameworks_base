@@ -25,9 +25,6 @@ import static android.app.servertransaction.ActivityLifecycleItem.ON_START;
 import static android.app.servertransaction.ActivityLifecycleItem.ON_STOP;
 import static android.app.servertransaction.ActivityLifecycleItem.PRE_ON_CREATE;
 import static android.app.servertransaction.ActivityLifecycleItem.UNDEFINED;
-import static android.platform.test.flag.junit.SetFlagsRule.DefaultInitValueType.DEVICE_DEFAULT;
-
-import static com.android.window.flags.Flags.FLAG_BUNDLE_CLIENT_TRANSACTION_FLAG;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
@@ -54,11 +51,10 @@ import android.os.IBinder;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.platform.test.annotations.Presubmit;
-import android.platform.test.flag.junit.SetFlagsRule;
 import android.util.ArrayMap;
 
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
-import androidx.test.runner.AndroidJUnit4;
 
 import org.junit.Before;
 import org.junit.Rule;
@@ -66,7 +62,8 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InOrder;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.MockitoJUnit;
+import org.mockito.junit.MockitoRule;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -89,7 +86,7 @@ import java.util.stream.Collectors;
 public class TransactionExecutorTests {
 
     @Rule
-    public final SetFlagsRule mSetFlagsRule = new SetFlagsRule(DEVICE_DEFAULT);
+    public final MockitoRule mocks = MockitoJUnit.rule();
 
     @Mock
     private ClientTransactionHandler mTransactionHandler;
@@ -106,8 +103,6 @@ public class TransactionExecutorTests {
 
     @Before
     public void setUp() throws Exception {
-        MockitoAnnotations.initMocks(this);
-
         mClientRecord = new ActivityClientRecord();
         when(mTransactionHandler.getActivityClient(any())).thenReturn(mClientRecord);
 
@@ -248,25 +243,12 @@ public class TransactionExecutorTests {
 
     @Test
     public void testTransactionResolution() {
-        mSetFlagsRule.disableFlags(FLAG_BUNDLE_CLIENT_TRANSACTION_FLAG);
-
-        testTransactionResolutionInner();
-    }
-
-    @Test
-    public void testTransactionResolution_bundleClientTransaction() {
-        mSetFlagsRule.enableFlags(FLAG_BUNDLE_CLIENT_TRANSACTION_FLAG);
-
-        testTransactionResolutionInner();
-    }
-
-    private void testTransactionResolutionInner() {
         ClientTransactionItem callback1 = mock(ClientTransactionItem.class);
         when(callback1.getPostExecutionState()).thenReturn(UNDEFINED);
         ClientTransactionItem callback2 = mock(ClientTransactionItem.class);
         when(callback2.getPostExecutionState()).thenReturn(UNDEFINED);
 
-        ClientTransaction transaction = ClientTransaction.obtain(null /* client */);
+        final ClientTransaction transaction = new ClientTransaction();
         transaction.addTransactionItem(callback1);
         transaction.addTransactionItem(callback2);
         transaction.addTransactionItem(mActivityLifecycleItem);
@@ -284,19 +266,6 @@ public class TransactionExecutorTests {
 
     @Test
     public void testDoNotLaunchDestroyedActivity() {
-        mSetFlagsRule.disableFlags(FLAG_BUNDLE_CLIENT_TRANSACTION_FLAG);
-
-        testDoNotLaunchDestroyedActivityInner();
-    }
-
-    @Test
-    public void testDoNotLaunchDestroyedActivity_bundleClientTransaction() {
-        mSetFlagsRule.enableFlags(FLAG_BUNDLE_CLIENT_TRANSACTION_FLAG);
-
-        testDoNotLaunchDestroyedActivityInner();
-    }
-
-    private void testDoNotLaunchDestroyedActivityInner() {
         final Map<IBinder, DestroyActivityItem> activitiesToBeDestroyed = new ArrayMap<>();
         when(mTransactionHandler.getActivitiesToBeDestroyed()).thenReturn(activitiesToBeDestroyed);
         // Assume launch transaction is still in queue, so there is no client record.
@@ -304,15 +273,15 @@ public class TransactionExecutorTests {
 
         // An incoming destroy transaction enters binder thread (preExecute).
         final IBinder token = mock(IBinder.class);
-        final ClientTransaction destroyTransaction = ClientTransaction.obtain(null /* client */);
+        final ClientTransaction destroyTransaction = new ClientTransaction();
         destroyTransaction.addTransactionItem(
-                DestroyActivityItem.obtain(token, false /* finished */));
+                new DestroyActivityItem(token, false /* finished */));
         destroyTransaction.preExecute(mTransactionHandler);
         // The activity should be added to to-be-destroyed container.
         assertEquals(1, activitiesToBeDestroyed.size());
 
         // A previous queued launch transaction runs on main thread (execute).
-        final ClientTransaction launchTransaction = ClientTransaction.obtain(null /* client */);
+        final ClientTransaction launchTransaction = new ClientTransaction();
         final LaunchActivityItem launchItem =
                 spy(new LaunchActivityItemBuilder(token, new Intent(), new ActivityInfo()).build());
         launchTransaction.addTransactionItem(launchItem);
@@ -329,24 +298,11 @@ public class TransactionExecutorTests {
 
     @Test
     public void testActivityResultRequiredStateResolution() {
-        mSetFlagsRule.disableFlags(FLAG_BUNDLE_CLIENT_TRANSACTION_FLAG);
-
-        testActivityResultRequiredStateResolutionInner();
-    }
-
-    @Test
-    public void testActivityResultRequiredStateResolution_bundleClientTransaction() {
-        mSetFlagsRule.enableFlags(FLAG_BUNDLE_CLIENT_TRANSACTION_FLAG);
-
-        testActivityResultRequiredStateResolutionInner();
-    }
-
-    private void testActivityResultRequiredStateResolutionInner() {
         when(mTransactionHandler.getActivity(any())).thenReturn(mock(Activity.class));
 
         PostExecItem postExecItem = new PostExecItem(ON_RESUME);
 
-        ClientTransaction transaction = ClientTransaction.obtain(null /* client */);
+        final ClientTransaction transaction = new ClientTransaction();
         transaction.addTransactionItem(postExecItem);
 
         // Verify resolution that should get to onPause
@@ -495,23 +451,10 @@ public class TransactionExecutorTests {
 
     @Test(expected = IllegalArgumentException.class)
     public void testActivityItemNullRecordThrowsException() {
-        mSetFlagsRule.disableFlags(FLAG_BUNDLE_CLIENT_TRANSACTION_FLAG);
-
-        testActivityItemNullRecordThrowsExceptionInner();
-    }
-
-    @Test(expected = IllegalArgumentException.class)
-    public void testActivityItemNullRecordThrowsException_bundleClientTransaction() {
-        mSetFlagsRule.enableFlags(FLAG_BUNDLE_CLIENT_TRANSACTION_FLAG);
-
-        testActivityItemNullRecordThrowsExceptionInner();
-    }
-
-    private void testActivityItemNullRecordThrowsExceptionInner() {
         final ActivityTransactionItem activityItem = mock(ActivityTransactionItem.class);
         when(activityItem.getPostExecutionState()).thenReturn(UNDEFINED);
         final IBinder token = mock(IBinder.class);
-        final ClientTransaction transaction = ClientTransaction.obtain(null /* client */);
+        final ClientTransaction transaction = new ClientTransaction();
         transaction.addTransactionItem(activityItem);
         when(mTransactionHandler.getActivityClient(token)).thenReturn(null);
 
@@ -520,20 +463,7 @@ public class TransactionExecutorTests {
 
     @Test
     public void testActivityItemExecute() {
-        mSetFlagsRule.disableFlags(FLAG_BUNDLE_CLIENT_TRANSACTION_FLAG);
-
-        testActivityItemExecuteInner();
-    }
-
-    @Test
-    public void testActivityItemExecute_bundleClientTransaction() {
-        mSetFlagsRule.enableFlags(FLAG_BUNDLE_CLIENT_TRANSACTION_FLAG);
-
-        testActivityItemExecuteInner();
-    }
-
-    private void testActivityItemExecuteInner() {
-        final ClientTransaction transaction = ClientTransaction.obtain(null /* client */);
+        final ClientTransaction transaction = new ClientTransaction();
         final ActivityTransactionItem activityItem = mock(ActivityTransactionItem.class);
         when(activityItem.getPostExecutionState()).thenReturn(UNDEFINED);
         when(activityItem.getActivityToken()).thenReturn(mActivityToken);
@@ -568,7 +498,7 @@ public class TransactionExecutorTests {
     private static class PostExecItem extends StubItem {
 
         @LifecycleState
-        private int mPostExecutionState;
+        private final int mPostExecutionState;
 
         PostExecItem(@LifecycleState int state) {
             mPostExecutionState = state;
@@ -592,10 +522,6 @@ public class TransactionExecutorTests {
         @Override
         public void execute(@NonNull ClientTransactionHandler client,
                 @NonNull PendingTransactionActions pendingActions) {
-        }
-
-        @Override
-        public void recycle() {
         }
 
         @Override

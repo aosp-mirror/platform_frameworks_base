@@ -220,7 +220,8 @@ public class HearingDevicesPresetsController implements
         if (mActiveHearingDevice == null) {
             return emptyList();
         }
-        return mHapClientProfile.getAllPresetInfo(mActiveHearingDevice.getDevice());
+        return mHapClientProfile.getAllPresetInfo(mActiveHearingDevice.getDevice()).stream().filter(
+                BluetoothHapPresetInfo::isAvailable).toList();
     }
 
     /**

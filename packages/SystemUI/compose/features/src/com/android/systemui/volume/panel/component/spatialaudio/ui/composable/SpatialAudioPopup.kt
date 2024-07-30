@@ -17,6 +17,7 @@
 package com.android.systemui.volume.panel.component.spatialaudio.ui.composable
 
 import android.view.Gravity
+import androidx.annotation.VisibleForTesting
 import androidx.compose.foundation.basicMarquee
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
@@ -71,7 +72,8 @@ constructor(
     }
 
     @Composable
-    private fun Content(dialog: SystemUIDialog) {
+    @VisibleForTesting
+    fun Content(dialog: SystemUIDialog) {
         val isAvailable by viewModel.isAvailable.collectAsStateWithLifecycle()
 
         if (!isAvailable) {

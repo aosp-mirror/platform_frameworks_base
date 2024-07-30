@@ -49,9 +49,12 @@ import java.util.Objects;
 public abstract class ActivityTransactionItem extends ClientTransactionItem {
 
     /** Target client activity. */
-    private IBinder mActivityToken;
+    @NonNull
+    private final IBinder mActivityToken;
 
-    ActivityTransactionItem() {}
+    public ActivityTransactionItem(@NonNull IBinder activityToken) {
+        mActivityToken = requireNonNull(activityToken);
+    }
 
     @Override
     public final void execute(@NonNull ClientTransactionHandler client,
@@ -94,26 +97,18 @@ public abstract class ActivityTransactionItem extends ClientTransactionItem {
         return mActivityToken;
     }
 
-    void setActivityToken(@NonNull IBinder activityToken) {
-        mActivityToken = requireNonNull(activityToken);
-    }
+    // Parcelable implementation
 
-    // To be overridden
-
-    ActivityTransactionItem(@NonNull Parcel in) {
-        mActivityToken = in.readStrongBinder();
-    }
-
+    /** Writes to Parcel. */
     @CallSuper
     @Override
     public void writeToParcel(@NonNull Parcel dest, int flags) {
         dest.writeStrongBinder(mActivityToken);
     }
 
-    @CallSuper
-    @Override
-    public void recycle() {
-        mActivityToken = null;
+    /** Reads from Parcel. */
+    ActivityTransactionItem(@NonNull Parcel in) {
+        this(in.readStrongBinder());
     }
 
     @Override

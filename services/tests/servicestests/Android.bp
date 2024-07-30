@@ -36,6 +36,8 @@ android_test {
         "-Werror",
     ],
     static_libs: [
+        "a11ychecker-protos-java-proto-lite",
+        "aatf",
         "cts-input-lib",
         "frameworks-base-testutils",
         "services.accessibility",
@@ -76,7 +78,6 @@ android_test {
         // TODO: remove once Android migrates to JUnit 4.12,
         // which provides assertThrows
         "testng",
-        "truth",
         "junit",
         "junit-params",
         "ActivityContext",
@@ -92,7 +93,7 @@ android_test {
     libs: [
         "android.hardware.power-V1-java",
         "android.hardware.tv.cec-V1.0-java",
-        "android.hardware.vibrator-V2-java",
+        "android.hardware.vibrator-V3-java",
         "android.hidl.manager-V1.0-java",
         "android.test.mock",
         "android.test.base",

@@ -16,13 +16,15 @@
 
 package android.os.vibrator.persistence;
 
+import static android.os.vibrator.Flags.FLAG_VIBRATION_XML_APIS;
+
+import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.annotation.SuppressLint;
+import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.os.VibrationEffect;
-import android.util.Slog;
 import android.util.Xml;
 
 import com.android.internal.vibrator.persistence.VibrationEffectXmlParser;
@@ -36,9 +38,12 @@ import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.Reader;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -116,10 +121,9 @@ import java.util.List;
  *
  * @hide
  */
-@TestApi
-@SuppressLint("UnflaggedApi") // @TestApi without associated feature.
+@SystemApi
+@FlaggedApi(FLAG_VIBRATION_XML_APIS)
 public final class VibrationXmlParser {
-    private static final String TAG = "VibrationXmlParser";
 
     /**
      * The MIME type for a xml holding a vibration.
@@ -168,55 +172,12 @@ public final class VibrationXmlParser {
     }
 
     /**
-     * Parses XML content from given input stream into a {@link VibrationEffect}.
-     *
-     * <p>This method parses an XML content that contains a single, complete {@link VibrationEffect}
-     * serialization. As such, the root tag must be a "vibration" tag.
-     *
-     * <p>This parser fails silently and returns {@code null} if the content of the input stream
-     * does not follow the schema or has unsupported values.
-     *
-     * @return the {@link VibrationEffect} if parsed successfully, {@code null} otherwise.
-     * @throws IOException error reading from given {@link Reader}
-     *
-     * @hide
-     */
-    @TestApi
-    @Nullable
-    public static VibrationEffect parseVibrationEffect(@NonNull Reader reader) throws IOException {
-        return parseVibrationEffect(reader, /* flags= */ 0);
-    }
-
-    /**
-     * Parses XML content from given input stream into a {@link VibrationEffect}.
-     *
-     * <p>This method parses an XML content that contains a single, complete {@link VibrationEffect}
-     * serialization. As such, the root tag must be a "vibration" tag.
-     *
-     * <p>Same as {@link #parseVibrationEffect(Reader)}, with extra flags to control the parsing
-     * behavior.
-     *
-     * @hide
-     */
-    @Nullable
-    public static VibrationEffect parseVibrationEffect(@NonNull Reader reader, @Flags int flags)
-            throws IOException {
-        try {
-            return parseDocumentInternal(
-                    reader, flags, VibrationXmlParser::parseVibrationEffectInternal);
-        } catch (XmlParserException | XmlPullParserException e) {
-            Slog.w(TAG, "Error parsing vibration XML", e);
-            return null;
-        }
-    }
-
-    /**
      * Parses XML content from given input stream into a {@link ParsedVibration}.
      *
-     * <p>It supports both the "vibration" and "vibration-select" root tags.
+     * <p>It supports both the "vibration-effect" and "vibration-select" root tags.
      * <ul>
-     *     <li>If "vibration" is the root tag, the serialization provided through {@code reader}
-     *         should contain a valid serialization for a single vibration.
+     *     <li>If "vibration-effect" is the root tag, the serialization provided should contain a
+     *         valid serialization for a single vibration.
      *     <li>If "vibration-select" is the root tag, the serialization may contain one or more
      *         valid vibration serializations.
      * </ul>
@@ -225,36 +186,93 @@ public final class VibrationXmlParser {
      * vibration(s), and the caller can get a concrete {@link VibrationEffect} by resolving this
      * result to a specific vibrator.
      *
-     * <p>This parser fails silently and returns {@code null} if the content of the input does not
-     * follow the schema or has unsupported values.
+     * <p>This parser fails with an exception if the content of the input stream does not follow the
+     * schema or has unsupported values.
      *
      * @return a {@link ParsedVibration}
-     * @throws IOException error reading from given {@link Reader}
+     * @throws IOException error reading from given {@link InputStream} or parsing the content.
      *
      * @hide
      */
-    @TestApi
-    @Nullable
+    @SystemApi
+    @FlaggedApi(FLAG_VIBRATION_XML_APIS)
+    @NonNull
+    public static ParsedVibration parse(@NonNull InputStream inputStream) throws IOException {
+        return parseDocument(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
+    }
+
+    /**
+     * Parses XML content from given input stream into a single {@link VibrationEffect}.
+     *
+     * <p>This method parses an XML content that contains a single, complete {@link VibrationEffect}
+     * serialization. As such, the root tag must be a "vibration-effect" tag.
+     *
+     * <p>This parser fails with an exception if the content of the input stream does not follow the
+     * schema or has unsupported values.
+     *
+     * @return the parsed {@link VibrationEffect}
+     * @throws IOException error reading from given {@link InputStream} or parsing the content.
+     *
+     * @hide
+     */
+    @SystemApi
+    @FlaggedApi(FLAG_VIBRATION_XML_APIS)
+    @NonNull
+    public static VibrationEffect parseVibrationEffect(@NonNull InputStream inputStream)
+            throws IOException {
+        return parseVibrationEffect(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
+    }
+
+    /**
+     * Parses XML content from given {@link Reader} into a {@link VibrationEffect}.
+     *
+     * <p>Same as {@link #parseVibrationEffect(InputStream)}, but with a {@link Reader}.
+     *
+     * @hide
+     */
+    @NonNull
+    public static VibrationEffect parseVibrationEffect(@NonNull Reader reader) throws IOException {
+        return parseVibrationEffect(reader, /* flags= */ 0);
+    }
+
+    /**
+     * Parses XML content from given {@link Reader} into a {@link VibrationEffect}.
+     *
+     * <p>Same as {@link #parseVibrationEffect(Reader)}, with extra flags to control the parsing
+     * behavior.
+     *
+     * @hide
+     */
+    @NonNull
+    public static VibrationEffect parseVibrationEffect(@NonNull Reader reader, @Flags int flags)
+            throws IOException {
+        return parseDocumentInternal(reader, flags,
+                VibrationXmlParser::parseVibrationEffectInternal);
+    }
+
+    /**
+     * Parses XML content from given {@link Reader} into a {@link ParsedVibration}.
+     *
+     * <p>Same as {@link #parse(InputStream)}, but with a {@link Reader}.
+     *
+     * @hide
+     */
+    @NonNull
     public static ParsedVibration parseDocument(@NonNull Reader reader) throws IOException {
         return parseDocument(reader, /* flags= */ 0);
     }
 
     /**
-     * Parses XML content from given input stream into a {@link ParsedVibration}.
+     * Parses XML content from given {@link Reader} into a {@link ParsedVibration}.
      *
      * <p>Same as {@link #parseDocument(Reader)}, with extra flags to control the parsing behavior.
      *
      * @hide
      */
-    @Nullable
+    @NonNull
     public static ParsedVibration parseDocument(@NonNull Reader reader, @Flags int flags)
             throws IOException {
-        try {
-            return parseDocumentInternal(reader, flags, VibrationXmlParser::parseElementInternal);
-        } catch (XmlParserException | XmlPullParserException e) {
-            Slog.w(TAG, "Error parsing vibration/vibration-select XML", e);
-            return null;
-        }
+        return parseDocumentInternal(reader, flags, VibrationXmlParser::parseElementInternal);
     }
 
     /**
@@ -262,7 +280,7 @@ public final class VibrationXmlParser {
      * {@link ParsedVibration}.
      *
      * <p>Same as {@link #parseDocument(Reader, int)}, but, instead of parsing the full XML content,
-     * it takes a parser that points to either a <vibration-effect> or a <vibration-select> start
+     * it takes a parser that points to either a "vibration-effect" or a "vibration-select" start
      * tag. No other parser position, including start of document, is considered valid.
      *
      * <p>This method parses until an end "vibration-effect" or "vibration-select" tag (depending
@@ -270,37 +288,22 @@ public final class VibrationXmlParser {
      * will point to the end tag.
      *
      * @throws IOException error parsing from given {@link TypedXmlPullParser}.
-     * @throws VibrationXmlParserException if the XML tag cannot be parsed into a
-     *      {@link ParsedVibration}. The given {@code parser} might be pointing to a child XML tag
-     *      that caused the parser failure.
+     *         The given {@code parser} might be pointing to a child XML tag that caused the parser
+     *         failure.
      *
      * @hide
      */
     @NonNull
     public static ParsedVibration parseElement(@NonNull TypedXmlPullParser parser, @Flags int flags)
-            throws IOException, VibrationXmlParserException {
+            throws IOException {
         try {
             return parseElementInternal(parser, flags);
         } catch (XmlParserException e) {
-            throw new VibrationXmlParserException("Error parsing vibration-select.", e);
+            throw new ParseFailedException(e);
         }
     }
 
-    /**
-     * Represents an error while parsing a vibration XML input.
-     *
-     * @hide
-     */
-    public static final class VibrationXmlParserException extends Exception {
-        private VibrationXmlParserException(String message, Throwable cause) {
-            super(message, cause);
-        }
-
-        private VibrationXmlParserException(String message) {
-            super(message);
-        }
-    }
-
+    @NonNull
     private static ParsedVibration parseElementInternal(
                 @NonNull TypedXmlPullParser parser, @Flags int flags)
                         throws IOException, XmlParserException {
@@ -313,11 +316,12 @@ public final class VibrationXmlParser {
             case XmlConstants.TAG_VIBRATION_SELECT:
                 return parseVibrationSelectInternal(parser, flags);
             default:
-                throw new XmlParserException(
-                        "Unexpected tag name when parsing element: " + tagName);
+                throw new ParseFailedException(
+                        "Unexpected tag " + tagName + " when parsing a vibration");
         }
     }
 
+    @NonNull
     private static ParsedVibration parseVibrationSelectInternal(
             @NonNull TypedXmlPullParser parser, @Flags int flags)
                     throws IOException, XmlParserException {
@@ -332,7 +336,7 @@ public final class VibrationXmlParser {
         return new ParsedVibration(effects);
     }
 
-    /** Parses a single XML element for "vibration" tag into a {@link VibrationEffect}. */
+    @NonNull
     private static VibrationEffect parseVibrationEffectInternal(
             @NonNull TypedXmlPullParser parser, @Flags int flags)
                     throws IOException, XmlParserException {
@@ -347,30 +351,58 @@ public final class VibrationXmlParser {
      * This method parses a whole XML document (provided through a {@link Reader}). The root tag is
      * parsed as per a provided {@link ElementParser}.
      */
+    @NonNull
     private static <T> T parseDocumentInternal(
             @NonNull Reader reader, @Flags int flags, ElementParser<T> parseLogic)
-                    throws IOException, XmlParserException, XmlPullParserException {
-        TypedXmlPullParser parser = Xml.newFastPullParser();
-        parser.setFeature(XmlPullParser.FEATURE_PROCESS_NAMESPACES, true);
-        parser.setInput(reader);
+            throws IOException {
+        try {
+            TypedXmlPullParser parser = Xml.newFastPullParser();
+            parser.setFeature(XmlPullParser.FEATURE_PROCESS_NAMESPACES, true);
+            parser.setInput(reader);
 
-        // Ensure XML starts with a document start tag.
-        XmlReader.readDocumentStart(parser);
+            // Ensure XML starts with a document start tag.
+            XmlReader.readDocumentStart(parser);
 
-        // Parse root tag.
-        T result = parseLogic.parse(parser, flags);
+            // Parse root tag.
+            T result = parseLogic.parse(parser, flags);
 
-        // Ensure XML ends after root tag is consumed.
-        XmlReader.readDocumentEndTag(parser);
+            // Ensure XML ends after root tag is consumed.
+            XmlReader.readDocumentEndTag(parser);
 
-        return result;
+            return result;
+        } catch (XmlPullParserException e) {
+            throw new ParseFailedException("Error initializing XMLPullParser", e);
+        } catch (XmlParserException e) {
+            throw new ParseFailedException(e);
+        }
     }
 
     /** Encapsulate a logic to parse an XML element from an open parser. */
     private interface ElementParser<T> {
         /** Parses a single XML element starting from the current position of the {@code parser}. */
+        @NonNull
         T parse(@NonNull TypedXmlPullParser parser, @Flags int flags)
                 throws IOException, XmlParserException;
+    }
+
+    /**
+     * Represents an error while parsing a vibration XML input.
+     *
+     * @hide
+     */
+    @TestApi
+    public static final class ParseFailedException extends IOException {
+        private ParseFailedException(String message) {
+            super(message);
+        }
+
+        private ParseFailedException(XmlParserException parserException) {
+            this(parserException.getMessage(), parserException);
+        }
+
+        private ParseFailedException(String message, Throwable cause) {
+            super(message, cause);
+        }
     }
 
     private VibrationXmlParser() {

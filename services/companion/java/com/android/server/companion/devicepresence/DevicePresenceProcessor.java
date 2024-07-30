@@ -181,14 +181,16 @@ public class DevicePresenceProcessor implements AssociationStore.OnChangeListene
      * Process device presence start request.
      */
     public void startObservingDevicePresence(ObservingDevicePresenceRequest request,
-            String packageName, int userId) {
+            String packageName, int userId, boolean enforcePermissions) {
         Slog.i(TAG,
                 "Start observing request=[" + request + "] for userId=[" + userId + "], package=["
                         + packageName + "]...");
         final ParcelUuid requestUuid = request.getUuid();
 
         if (requestUuid != null) {
-            enforceCallerCanObserveDevicePresenceByUuid(mContext);
+            if (enforcePermissions) {
+                enforceCallerCanObserveDevicePresenceByUuid(mContext, packageName, userId);
+            }
 
             // If it's already being observed, then no-op.
             if (mObservableUuidStore.isUuidBeingObserved(requestUuid, userId, packageName)) {
@@ -236,7 +238,7 @@ public class DevicePresenceProcessor implements AssociationStore.OnChangeListene
      * Process device presence stop request.
      */
     public void stopObservingDevicePresence(ObservingDevicePresenceRequest request,
-            String packageName, int userId) {
+            String packageName, int userId, boolean enforcePermissions) {
         Slog.i(TAG,
                 "Stop observing request=[" + request + "] for userId=[" + userId + "], package=["
                         + packageName + "]...");
@@ -244,7 +246,9 @@ public class DevicePresenceProcessor implements AssociationStore.OnChangeListene
         final ParcelUuid requestUuid = request.getUuid();
 
         if (requestUuid != null) {
-            enforceCallerCanObserveDevicePresenceByUuid(mContext);
+            if (enforcePermissions) {
+                enforceCallerCanObserveDevicePresenceByUuid(mContext, packageName, userId);
+            }
 
             if (!mObservableUuidStore.isUuidBeingObserved(requestUuid, userId, packageName)) {
                 Slog.i(TAG, "UUID=[" + requestUuid + "], package=[" + packageName + "], userId=["
@@ -283,7 +287,7 @@ public class DevicePresenceProcessor implements AssociationStore.OnChangeListene
      * For legacy device presence below Android V.
      *
      * @deprecated Use {@link #startObservingDevicePresence(ObservingDevicePresenceRequest, String,
-     * int)}
+     * int, boolean)}
      */
     @Deprecated
     public void startObservingDevicePresence(int userId, String packageName, String deviceAddress)
@@ -306,14 +310,14 @@ public class DevicePresenceProcessor implements AssociationStore.OnChangeListene
 
         startObservingDevicePresence(
                 new ObservingDevicePresenceRequest.Builder().setAssociationId(association.getId())
-                        .build(), packageName, userId);
+                        .build(), packageName, userId, /* enforcePermissions */ true);
     }
 
     /**
      * For legacy device presence below Android V.
      *
      * @deprecated Use {@link #stopObservingDevicePresence(ObservingDevicePresenceRequest, String,
-     * int)}
+     * int, boolean)}
      */
     @Deprecated
     public void stopObservingDevicePresence(int userId, String packageName, String deviceAddress)
@@ -336,7 +340,7 @@ public class DevicePresenceProcessor implements AssociationStore.OnChangeListene
 
         stopObservingDevicePresence(
                 new ObservingDevicePresenceRequest.Builder().setAssociationId(association.getId())
-                        .build(), packageName, userId);
+                        .build(), packageName, userId, /* enforcePermissions */ true);
     }
 
     /**

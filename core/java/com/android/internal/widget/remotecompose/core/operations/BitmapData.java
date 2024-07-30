@@ -51,11 +51,12 @@ public class BitmapData implements Operation {
 
     @Override
     public String toString() {
-        return "BITMAP DATA $imageId";
+        return "BITMAP DATA " + mImageId;
     }
 
     public static class Companion implements CompanionOperation {
-        private Companion() {}
+        private Companion() {
+        }
 
         @Override
         public String name() {

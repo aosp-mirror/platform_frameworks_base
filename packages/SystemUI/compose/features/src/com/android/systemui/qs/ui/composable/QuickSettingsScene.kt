@@ -42,6 +42,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.rememberScrollState
@@ -62,10 +64,13 @@ import androidx.compose.ui.layout.layoutId
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.android.compose.animation.scene.SceneScope
 import com.android.compose.animation.scene.TransitionState
+import com.android.compose.animation.scene.UserAction
+import com.android.compose.animation.scene.UserActionResult
 import com.android.compose.animation.scene.animateSceneDpAsState
 import com.android.compose.animation.scene.animateSceneFloatAsState
 import com.android.compose.modifiers.thenIf
@@ -76,12 +81,13 @@ import com.android.systemui.common.ui.compose.windowinsets.LocalDisplayCutout
 import com.android.systemui.common.ui.compose.windowinsets.LocalRawScreenHeight
 import com.android.systemui.compose.modifiers.sysuiResTag
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.media.controls.ui.composable.MediaCarousel
 import com.android.systemui.media.controls.ui.controller.MediaCarouselController
 import com.android.systemui.media.controls.ui.view.MediaHost
 import com.android.systemui.media.dagger.MediaModule
 import com.android.systemui.notifications.ui.composable.HeadsUpNotificationSpace
+import com.android.systemui.notifications.ui.composable.NotificationScrollingStack
+import com.android.systemui.notifications.ui.composable.NotificationStackCutoffGuideline
 import com.android.systemui.qs.footer.ui.compose.FooterActionsWithAnimatedVisibility
 import com.android.systemui.qs.ui.composable.QuickSettings.SharedValues.MediaLandscapeTopOffset
 import com.android.systemui.qs.ui.composable.QuickSettings.SharedValues.MediaOffset.InQS
@@ -90,6 +96,7 @@ import com.android.systemui.res.R
 import com.android.systemui.scene.session.ui.composable.SaveableSession
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.scene.ui.composable.ComposableScene
+import com.android.systemui.shade.shared.model.ShadeMode
 import com.android.systemui.shade.ui.composable.CollapsedShadeHeader
 import com.android.systemui.shade.ui.composable.ExpandedShadeHeader
 import com.android.systemui.shade.ui.composable.Shade
@@ -102,16 +109,14 @@ import com.android.systemui.statusbar.phone.ui.TintedIconManager
 import dagger.Lazy
 import javax.inject.Inject
 import javax.inject.Named
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.stateIn
+import kotlin.math.roundToInt
+import kotlinx.coroutines.flow.Flow
 
 /** The Quick Settings (AKA "QS") scene shows the quick setting tiles. */
 @SysUISingleton
 class QuickSettingsScene
 @Inject
 constructor(
-    @Application private val applicationScope: CoroutineScope,
     private val shadeSession: SaveableSession,
     private val notificationStackScrollView: Lazy<NotificationScrollView>,
     private val viewModel: QuickSettingsSceneViewModel,
@@ -124,12 +129,8 @@ constructor(
 ) : ComposableScene {
     override val key = Scenes.QuickSettings
 
-    override val destinationScenes =
-        viewModel.destinationScenes.stateIn(
-            scope = applicationScope,
-            started = SharingStarted.WhileSubscribed(),
-            initialValue = emptyMap(),
-        )
+    override val destinationScenes: Flow<Map<UserAction, UserActionResult>> =
+        viewModel.destinationScenes
 
     @Composable
     override fun SceneScope.Content(
@@ -178,7 +179,11 @@ private fun SceneScope.QuickSettingsScene(
 
     BrightnessMirror(
         viewModel = viewModel.brightnessMirrorViewModel,
-        qsSceneAdapter = viewModel.qsSceneAdapter
+        qsSceneAdapter = viewModel.qsSceneAdapter,
+        modifier =
+            Modifier.thenIf(cutoutLocation != CutoutLocation.CENTER) {
+                Modifier.displayCutoutPadding()
+            }
     )
 
     val shouldPunchHoleBehindScrim =
@@ -294,8 +299,7 @@ private fun SceneScope.QuickSettingsScene(
                     if (isCustomizerShowing) {
                         Modifier.fillMaxHeight().align(Alignment.TopCenter)
                     } else {
-                        Modifier.verticalNestedScrollToScene()
-                            .verticalScroll(
+                        Modifier.verticalScroll(
                                 scrollState,
                                 enabled = isScrollable,
                             )
@@ -397,8 +401,27 @@ private fun SceneScope.QuickSettingsScene(
         HeadsUpNotificationSpace(
             stackScrollView = notificationStackScrollView,
             viewModel = notificationsPlaceholderViewModel,
-            modifier = Modifier.align(Alignment.BottomCenter),
+            modifier = Modifier.align(Alignment.BottomCenter).navigationBarsPadding(),
             isPeekFromBottom = true,
+        )
+        NotificationScrollingStack(
+            shadeSession = shadeSession,
+            stackScrollView = notificationStackScrollView,
+            viewModel = notificationsPlaceholderViewModel,
+            maxScrimTop = { screenHeight },
+            shouldPunchHoleBehindScrim = shouldPunchHoleBehindScrim,
+            shouldIncludeHeadsUpSpace = false,
+            shadeMode = ShadeMode.Single,
+            modifier =
+                Modifier.fillMaxWidth().offset { IntOffset(x = 0, y = screenHeight.roundToInt()) },
+        )
+        NotificationStackCutoffGuideline(
+            stackScrollView = notificationStackScrollView,
+            viewModel = viewModel.notifications,
+            modifier =
+                Modifier.align(Alignment.BottomCenter).navigationBarsPadding().offset {
+                    IntOffset(x = 0, y = screenHeight.roundToInt())
+                }
         )
     }
 }

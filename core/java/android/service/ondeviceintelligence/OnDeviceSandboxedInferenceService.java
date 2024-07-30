@@ -101,6 +101,11 @@ public abstract class OnDeviceSandboxedInferenceService extends Service {
     private static final String TAG = OnDeviceSandboxedInferenceService.class.getSimpleName();
 
     /**
+     * @hide
+     */
+    public static final String INFERENCE_INFO_BUNDLE_KEY = "inference_info";
+
+    /**
      * The {@link Intent} that must be declared as handled by the service. To be supported, the
      * service must also require the
      * {@link android.Manifest.permission#BIND_ON_DEVICE_SANDBOXED_INFERENCE_SERVICE}

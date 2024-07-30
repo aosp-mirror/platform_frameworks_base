@@ -501,9 +501,9 @@ final class InstallPackageHelper {
             mPm.setUpCustomResolverActivity(pkg, pkgSetting);
         }
 
-        // When upgrading a package, pkgSetting is copied from oldPkgSetting. Clear the app
-        // metadata file path for the new package.
-        if (oldPkgSetting != null) {
+        // When upgrading a package, clear the app metadata file path for the new package.
+        if (oldPkgSetting != null
+                && oldPkgSetting.getLastUpdateTime() < pkgSetting.getLastUpdateTime()) {
             pkgSetting.setAppMetadataFilePath(null);
             pkgSetting.setAppMetadataSource(APP_METADATA_SOURCE_UNKNOWN);
         }
@@ -801,8 +801,9 @@ final class InstallPackageHelper {
         try {
             final BroadcastOptions options = BroadcastOptions.makeBasic();
             options.setPendingIntentBackgroundActivityLaunchAllowed(false);
-            target.sendIntent(context, 0, fillIn, null /* onFinished*/, null /* handler */,
-                    null /* requiredPermission */, options.toBundle());
+            target.sendIntent(context, 0, fillIn,
+                    null /* requiredPermission */, options.toBundle(),
+                    null /* executor */, null /* onFinished*/);
         } catch (IntentSender.SendIntentException ignored) {
         }
     }
@@ -2260,6 +2261,12 @@ final class InstallPackageHelper {
                         installRequest.getNewUsers());
                 mPm.updateSequenceNumberLP(ps, installRequest.getNewUsers());
                 mPm.updateInstantAppInstallerLocked(packageName);
+
+                // The installation is success, remove the split info copy stored in package
+                // setting for the downgrade version check of DELETE_KEEP_DATA and archived app
+                // cases.
+                ps.setSplitNames(null);
+                ps.setSplitRevisionCodes(null);
             }
             installRequest.onCommitFinished();
         }
@@ -2504,13 +2511,13 @@ final class InstallPackageHelper {
         Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
     }
 
-    private void enableRestrictedSettings(String pkgName, int appId, int userId) {
+    private void setAccessRestrictedSettingsMode(String pkgName, int appId, int userId, int mode) {
         final AppOpsManager appOpsManager = mPm.mContext.getSystemService(AppOpsManager.class);
         final int uid = UserHandle.getUid(userId, appId);
         appOpsManager.setMode(AppOpsManager.OP_ACCESS_RESTRICTED_SETTINGS,
                 uid,
                 pkgName,
-                AppOpsManager.MODE_ERRORED);
+                mode);
     }
 
     /**
@@ -2628,17 +2635,27 @@ final class InstallPackageHelper {
 
         String packageName = pkgLite.packageName;
         synchronized (mPm.mLock) {
-            // Package which currently owns the data that the new package will own if installed.
-            // If an app is uninstalled while keeping data (e.g. adb uninstall -k), installedPkg
-            // will be null whereas dataOwnerPkg will contain information about the package
-            // which was uninstalled while keeping its data.
-            AndroidPackage dataOwnerPkg = mPm.mPackages.get(packageName);
             PackageSetting dataOwnerPs = mPm.mSettings.getPackageLPr(packageName);
-            if (dataOwnerPkg  == null) {
-                if (dataOwnerPs != null) {
-                    dataOwnerPkg = dataOwnerPs.getPkg();
+            if (dataOwnerPs == null) {
+                if (requiredInstalledVersionCode != PackageManager.VERSION_CODE_HIGHEST) {
+                    String errorMsg = "Required installed version code was "
+                            + requiredInstalledVersionCode
+                            + " but package is not installed";
+                    Slog.w(TAG, errorMsg);
+                    return Pair.create(
+                            PackageManager.INSTALL_FAILED_WRONG_INSTALLED_VERSION, errorMsg);
                 }
+                // The package doesn't exist in the system, don't need to check the version
+                // replacing.
+                return Pair.create(PackageManager.INSTALL_SUCCEEDED, null);
             }
+
+            // Package which currently owns the data that the new package will own if installed.
+            // If an app is uninstalled while keeping data (e.g. adb uninstall -k), dataOwnerPkg
+            // will be null whereas dataOwnerPs will contain information about the package
+            // which was uninstalled while keeping its data. The AndroidPackage object that the
+            // PackageSetting refers to is the same object that is stored in mPackages.
+            AndroidPackage dataOwnerPkg = dataOwnerPs.getPkg();
 
             if (requiredInstalledVersionCode != PackageManager.VERSION_CODE_HIGHEST) {
                 if (dataOwnerPkg == null) {
@@ -2661,7 +2678,27 @@ final class InstallPackageHelper {
                 }
             }
 
-            if (dataOwnerPkg != null && !dataOwnerPkg.isSdkLibrary()) {
+            // If dataOwnerPkg is null but dataOwnerPs is not null, there is always data on
+            // some users. Wwe should do the downgrade check. E.g. DELETE_KEEP_DATA and
+            // archived apps
+            if (dataOwnerPkg == null) {
+                if (!PackageManagerServiceUtils.isDowngradePermitted(installFlags,
+                        dataOwnerPs.isDebuggable())) {
+                    // The data exists on some users and downgrade is not permitted; a lower
+                    // version of the app will not be allowed.
+                    try {
+                        PackageManagerServiceUtils.checkDowngrade(dataOwnerPs, pkgLite);
+                    } catch (PackageManagerException e) {
+                        String errorMsg = "Downgrade detected on app uninstalled with"
+                                + " DELETE_KEEP_DATA: " + e.getMessage();
+                        Slog.w(TAG, errorMsg);
+                        return Pair.create(
+                                PackageManager.INSTALL_FAILED_VERSION_DOWNGRADE, errorMsg);
+                    }
+                }
+                // dataOwnerPs.getPkg() is not null on system apps case. Don't need to consider
+                // system apps case like below.
+            } else if (dataOwnerPkg != null && !dataOwnerPkg.isSdkLibrary()) {
                 if (!PackageManagerServiceUtils.isDowngradePermitted(installFlags,
                         dataOwnerPkg.isDebuggable())) {
                     // Downgrade is not permitted; a lower version of the app will not be allowed
@@ -2888,8 +2925,21 @@ final class InstallPackageHelper {
                 mPm.notifyPackageChanged(packageName, request.getAppId());
             }
 
-            if (!android.permission.flags.Flags.enhancedConfirmationModeApisEnabled()
-                    || !android.security.Flags.extendEcmToAllSettings()) {
+            // Set the OP_ACCESS_RESTRICTED_SETTINGS op, which is used by ECM (see {@link
+            // EnhancedConfirmationManager}) as a persistent state denoting whether an app is
+            // currently guarded by ECM, not guarded by ECM, or (in Android V+) that this should
+            // be decided later.
+            if (android.permission.flags.Flags.enhancedConfirmationModeApisEnabled()
+                    && android.security.Flags.extendEcmToAllSettings()) {
+                final int appId = request.getAppId();
+                mPm.mHandler.post(() -> {
+                    for (int userId : firstUserIds) {
+                        // MODE_DEFAULT means that the app's guardedness will be decided lazily
+                        setAccessRestrictedSettingsMode(packageName, appId, userId,
+                                AppOpsManager.MODE_DEFAULT);
+                    }
+                });
+            } else {
                 // Apply restricted settings on potentially dangerous packages. Needs to happen
                 // after appOpsManager is notified of the new package
                 if (request.getPackageSource() == PackageInstaller.PACKAGE_SOURCE_LOCAL_FILE
@@ -2898,7 +2948,9 @@ final class InstallPackageHelper {
                     final int appId = request.getAppId();
                     mPm.mHandler.post(() -> {
                         for (int userId : firstUserIds) {
-                            enableRestrictedSettings(packageName, appId, userId);
+                            // MODE_ERRORED means that the app is explicitly guarded
+                            setAccessRestrictedSettingsMode(packageName, appId, userId,
+                                    AppOpsManager.MODE_ERRORED);
                         }
                     });
                 }
@@ -3212,6 +3264,7 @@ final class InstallPackageHelper {
     /**
      * Tries to restore the disabled system package after an update has been deleted.
      */
+    @GuardedBy("mPm.mInstallLock")
     public void restoreDisabledSystemPackageLIF(DeletePackageAction action,
             @NonNull int[] allUserHandles, boolean writeSettings) throws SystemDeleteException {
         final PackageSetting deletedPs = action.mDeletingPs;
@@ -3230,10 +3283,21 @@ final class InstallPackageHelper {
         }
         // Install the system package
         if (DEBUG_REMOVE) Slog.d(TAG, "Re-installing system package: " + disabledPs);
-        try (PackageManagerTracedLock installLock = mPm.mInstallLock.acquireLock()) {
+        try {
             final int[] origUsers = outInfo == null ? null : outInfo.mOrigUsers;
-            installPackageFromSystemLIF(disabledPs.getPathString(), allUserHandles,
-                    origUsers, writeSettings);
+            try (PackageManagerTracedLock installLock = mPm.mInstallLock.acquireLock()) {
+                installPackageFromSystemLIF(disabledPs.getPathString(), allUserHandles,
+                        origUsers, writeSettings);
+            }
+            if (origUsers != null) {
+                mPm.commitPackageStateMutation(null, mutator -> {
+                    for (int userId : origUsers) {
+                        mutator.forPackage(disabledPs.getPackageName())
+                                .userState(userId)
+                                .setOverlayPaths(deletedPs.getOverlayPaths(userId));
+                    }
+                });
+            }
         } catch (PackageManagerException e) {
             Slog.w(TAG, "Failed to restore system package:" + deletedPs.getPackageName() + ": "
                     + e.getMessage());
@@ -3761,13 +3825,13 @@ final class InstallPackageHelper {
                 // This also has the (beneficial) side effect where if a package disappears from an
                 // APEX, leaving only a /data copy, it will lose its apexModuleName.
                 //
-                // This must be done before scanSystemPackageLI as that will throw in the case of a
+                // This must be done before scanPackageForInitLI as that will throw in the case of a
                 // system -> data package.
                 disabledPkgSetting.setApexModuleName(activeApexInfo.apexModuleName);
             }
         }
 
-        final Pair<ScanResult, Boolean> scanResultPair = scanSystemPackageLI(
+        final Pair<ScanResult, Boolean> scanResultPair = scanPackageForInitLI(
                 parsedPackage, parseFlags, scanFlags, user);
         final ScanResult scanResult = scanResultPair.first;
         boolean shouldHideSystemApp = scanResultPair.second;
@@ -4002,7 +4066,7 @@ final class InstallPackageHelper {
         }
     }
 
-    private Pair<ScanResult, Boolean> scanSystemPackageLI(ParsedPackage parsedPackage,
+    private Pair<ScanResult, Boolean> scanPackageForInitLI(ParsedPackage parsedPackage,
             @ParsingPackageUtils.ParseFlags int parseFlags,
             @PackageManagerService.ScanFlags int scanFlags,
             @Nullable UserHandle user) throws PackageManagerException {
@@ -4115,7 +4179,7 @@ final class InstallPackageHelper {
                         ParsingPackageUtils.getSigningDetails(input, parsedPackage,
                                 false /*skipVerify*/);
                 if (result.isError()) {
-                    throw new PrepareFailure("Failed collect during scanSystemPackageLI",
+                    throw new PrepareFailure("Failed collect during scanPackageForInitLI",
                             result.getException());
                 }
                 disabledPkgSetting.setSigningDetails(result.getResult());
@@ -4553,7 +4617,7 @@ final class InstallPackageHelper {
                             PackageManagerException.INTERNAL_ERROR_SYSTEM_OVERLAY_STATIC);
                 }
             } else {
-                if ((scanFlags & SCAN_AS_VENDOR) != 0) {
+                if ((scanFlags & (SCAN_AS_VENDOR | SCAN_AS_ODM)) != 0) {
                     if (pkg.getTargetSdkVersion() < ScanPackageUtils.getVendorPartitionVersion()) {
                         Slog.w(TAG, "System overlay " + pkg.getPackageName()
                                 + " targets an SDK below the required SDK level of vendor"

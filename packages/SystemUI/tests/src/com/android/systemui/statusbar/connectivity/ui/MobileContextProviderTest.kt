@@ -17,6 +17,7 @@
 package com.android.systemui.statusbar.connectivity.ui
 
 import android.telephony.SubscriptionInfo
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.demomode.DemoModeController
@@ -28,12 +29,14 @@ import com.android.systemui.util.mockito.withArgCaptor
 import com.google.common.truth.Truth.assertThat
 import org.junit.Before
 import org.junit.Test
+import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.`when` as whenever
 import org.mockito.MockitoAnnotations
 
 @SmallTest
+@RunWith(AndroidJUnit4::class)
 class MobileContextProviderTest : SysuiTestCase() {
     @Mock private lateinit var networkController: NetworkController
     @Mock private lateinit var dumpManager: DumpManager

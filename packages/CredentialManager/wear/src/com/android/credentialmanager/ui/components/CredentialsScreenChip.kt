@@ -15,6 +15,7 @@
  */
 package com.android.credentialmanager.ui.components
 
+import androidx.wear.compose.material.MaterialTheme as WearMaterialTheme
 import androidx.compose.foundation.layout.Row
 import androidx.compose.material3.Icon
 import android.graphics.drawable.Drawable
@@ -22,7 +23,11 @@ import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Lock
+import androidx.compose.material.icons.outlined.LockOpen
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -46,7 +51,7 @@ fun CredentialsScreenChip(
     onClick: () -> Unit,
     secondaryLabel: String? = null,
     icon: Drawable? = null,
-    isAuthenticationEntryLocked: Boolean = false,
+    isAuthenticationEntryLocked: Boolean? = null,
     textAlign: TextAlign = TextAlign.Center,
     modifier: Modifier = Modifier,
     colors: ChipColors = ChipDefaults.secondaryChipColors()
@@ -77,7 +82,7 @@ fun CredentialsScreenChip(
     text: @Composable () -> Unit,
     secondaryLabel: String? = null,
     icon: Drawable? = null,
-    isAuthenticationEntryLocked: Boolean = false,
+    isAuthenticationEntryLocked: Boolean? = null,
     modifier: Modifier = Modifier,
     colors: ChipColors = ChipDefaults.primaryChipColors(),
     ) {
@@ -94,16 +99,23 @@ fun CredentialsScreenChip(
                         text = secondaryLabel,
                     )
 
-                    if (isAuthenticationEntryLocked)
-                    // TODO(b/324465527) change this to lock icon and correct size once figma mocks are
-                    // updated
-                        Icon(
-                            bitmap = checkNotNull(icon?.toBitmap()?.asImageBitmap()),
-                            // Decorative purpose only.
-                            contentDescription = null,
-                            modifier = Modifier.size(10.dp),
-                            tint = Color.Unspecified
-                        )
+                    if (isAuthenticationEntryLocked != null) {
+                        if (isAuthenticationEntryLocked) {
+                            Icon(
+                                Icons.Outlined.Lock,
+                                contentDescription = null,
+                                modifier = Modifier.size(12.dp).align(Alignment.CenterVertically),
+                                tint = WearMaterialTheme.colors.onSurfaceVariant
+                            )
+                        } else {
+                            Icon(
+                                Icons.Outlined.LockOpen,
+                                contentDescription = null,
+                                modifier = Modifier.size(12.dp).align(Alignment.CenterVertically),
+                                tint = WearMaterialTheme.colors.onSurfaceVariant
+                            )
+                        }
+                    }
                 }
             }
         }

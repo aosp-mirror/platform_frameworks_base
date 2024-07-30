@@ -25,11 +25,11 @@ import android.content.Context;
 import android.util.SparseArray;
 import android.view.SurfaceControl;
 
-import com.android.internal.protolog.common.ProtoLog;
+import com.android.internal.protolog.ProtoLog;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.desktopmode.DesktopModeTaskRepository;
 import com.android.wm.shell.protolog.ShellProtoLogGroup;
-import com.android.wm.shell.shared.DesktopModeStatus;
+import com.android.wm.shell.shared.desktopmode.DesktopModeStatus;
 import com.android.wm.shell.sysui.ShellInit;
 import com.android.wm.shell.transition.Transitions;
 import com.android.wm.shell.windowdecor.WindowDecorViewModel;
@@ -99,14 +99,10 @@ public class FreeformTaskListener implements ShellTaskOrganizer.TaskListener,
         if (DesktopModeStatus.canEnterDesktopMode(mContext)) {
             mDesktopModeTaskRepository.ifPresent(repository -> {
                 repository.addOrMoveFreeformTaskToTop(taskInfo.displayId, taskInfo.taskId);
-                repository.unminimizeTask(taskInfo.displayId, taskInfo.taskId);
                 if (taskInfo.isVisible) {
-                    if (repository.addActiveTask(taskInfo.displayId, taskInfo.taskId)) {
-                        ProtoLog.v(ShellProtoLogGroup.WM_SHELL_DESKTOP_MODE,
-                                "Adding active freeform task: #%d", taskInfo.taskId);
-                    }
-                    repository.updateVisibleFreeformTasks(taskInfo.displayId, taskInfo.taskId,
-                            true);
+                    repository.addActiveTask(taskInfo.displayId, taskInfo.taskId);
+                    repository.updateTaskVisibility(taskInfo.displayId, taskInfo.taskId,
+                        /* visible= */ true);
                 }
             });
         }
@@ -122,11 +118,9 @@ public class FreeformTaskListener implements ShellTaskOrganizer.TaskListener,
             mDesktopModeTaskRepository.ifPresent(repository -> {
                 repository.removeFreeformTask(taskInfo.displayId, taskInfo.taskId);
                 repository.unminimizeTask(taskInfo.displayId, taskInfo.taskId);
-                if (repository.removeActiveTask(taskInfo.taskId)) {
-                    ProtoLog.v(ShellProtoLogGroup.WM_SHELL_DESKTOP_MODE,
-                            "Removing active freeform task: #%d", taskInfo.taskId);
-                }
-                repository.updateVisibleFreeformTasks(taskInfo.displayId, taskInfo.taskId, false);
+                repository.removeActiveTask(taskInfo.taskId, /* excludedDisplayId= */ null);
+                repository.updateTaskVisibility(
+                    taskInfo.displayId, taskInfo.taskId, /* visible= */ false);
             });
         }
         mWindowDecorationViewModel.onTaskVanished(taskInfo);
@@ -146,12 +140,11 @@ public class FreeformTaskListener implements ShellTaskOrganizer.TaskListener,
         if (DesktopModeStatus.canEnterDesktopMode(mContext)) {
             mDesktopModeTaskRepository.ifPresent(repository -> {
                 if (taskInfo.isVisible) {
-                    if (repository.addActiveTask(taskInfo.displayId, taskInfo.taskId)) {
-                        ProtoLog.v(ShellProtoLogGroup.WM_SHELL_DESKTOP_MODE,
-                                "Adding active freeform task: #%d", taskInfo.taskId);
-                    }
+                    repository.addActiveTask(taskInfo.displayId, taskInfo.taskId);
+                } else if (repository.isClosingTask(taskInfo.taskId)) {
+                    repository.removeClosingTask(taskInfo.taskId);
                 }
-                repository.updateVisibleFreeformTasks(taskInfo.displayId, taskInfo.taskId,
+                repository.updateTaskVisibility(taskInfo.displayId, taskInfo.taskId,
                         taskInfo.isVisible);
             });
         }
@@ -168,7 +161,6 @@ public class FreeformTaskListener implements ShellTaskOrganizer.TaskListener,
         if (DesktopModeStatus.canEnterDesktopMode(mContext) && taskInfo.isFocused) {
             mDesktopModeTaskRepository.ifPresent(repository -> {
                 repository.addOrMoveFreeformTaskToTop(taskInfo.displayId, taskInfo.taskId);
-                repository.unminimizeTask(taskInfo.displayId, taskInfo.taskId);
             });
         }
     }

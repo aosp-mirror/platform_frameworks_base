@@ -134,6 +134,8 @@ public interface ServiceProvider extends
 
     void setUdfpsOverlayController(@NonNull IUdfpsOverlayController controller);
 
+    void setIgnoreDisplayTouches(long requestId, int sensorId, boolean ignoreTouches);
+
     void onPowerPressed();
 
     @NonNull

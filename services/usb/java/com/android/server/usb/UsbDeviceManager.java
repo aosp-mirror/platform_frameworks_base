@@ -16,6 +16,8 @@
 
 package com.android.server.usb;
 
+import com.android.internal.annotations.Keep;
+
 import static android.hardware.usb.UsbPortStatus.DATA_ROLE_DEVICE;
 import static android.hardware.usb.UsbPortStatus.DATA_ROLE_HOST;
 import static android.hardware.usb.UsbPortStatus.MODE_AUDIO_ACCESSORY;
@@ -80,7 +82,9 @@ import android.service.usb.UsbDeviceManagerProto;
 import android.service.usb.UsbHandlerProto;
 import android.util.Pair;
 import android.util.Slog;
+import android.text.TextUtils;
 
+import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
@@ -110,6 +114,8 @@ import java.util.NoSuchElementException;
 import java.util.Scanner;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * UsbDeviceManager manages USB state in device mode.
@@ -135,10 +141,17 @@ public class UsbDeviceManager implements ActivityTaskManagerInternal.ScreenObser
      */
     private static final String NORMAL_BOOT = "normal";
 
+    /**
+     *  UDC controller for the ConfigFS USB Gadgets.
+     */
+    private static final String USB_CONTROLLER_NAME_PROPERTY = "sys.usb.controller";
+
     private static final String USB_STATE_MATCH =
             "DEVPATH=/devices/virtual/android_usb/android0";
     private static final String ACCESSORY_START_MATCH =
             "DEVPATH=/devices/virtual/misc/usb_accessory";
+    private static final String UDC_SUBSYS_MATCH =
+            "SUBSYSTEM=udc";
     private static final String FUNCTIONS_PATH =
             "/sys/class/android_usb/android0/functions";
     private static final String STATE_PATH =
@@ -218,6 +231,9 @@ public class UsbDeviceManager implements ActivityTaskManagerInternal.ScreenObser
 
     private static UsbGadgetHal mUsbGadgetHal;
 
+    private final boolean mEnableUdcSysfsUsbStateUpdate;
+    private String mUdcName = "";
+
     /**
      * Counter for tracking UsbOperation operations.
      */
@@ -252,12 +268,9 @@ public class UsbDeviceManager implements ActivityTaskManagerInternal.ScreenObser
                 if (DEBUG) Slog.d(TAG, "sEventLogger == null");
             }
 
-            String state = event.get("USB_STATE");
             String accessory = event.get("ACCESSORY");
 
-            if (state != null) {
-                mHandler.updateState(state);
-            } else if ("GETPROTOCOL".equals(accessory)) {
+            if ("GETPROTOCOL".equals(accessory)) {
                 if (DEBUG) Slog.d(TAG, "got accessory get protocol");
                 mHandler.setAccessoryUEventTime(SystemClock.elapsedRealtime());
                 resetAccessoryHandshakeTimeoutHandler();
@@ -270,6 +283,24 @@ public class UsbDeviceManager implements ActivityTaskManagerInternal.ScreenObser
                 mHandler.removeMessages(MSG_ACCESSORY_HANDSHAKE_TIMEOUT);
                 mHandler.setStartAccessoryTrue();
                 startAccessoryMode();
+            }
+
+            if (mEnableUdcSysfsUsbStateUpdate) {
+                if (!mUdcName.isEmpty()
+                        && "udc".equals(event.get("SUBSYSTEM"))
+                        && event.get("DEVPATH").contains(mUdcName)) {
+                    String action = event.get("ACTION");
+                    if ("add".equals(action)) {
+                        nativeStartGadgetMonitor(mUdcName);
+                    } else if ("remove".equals(action)) {
+                        nativeStopGadgetMonitor();
+                    }
+                }
+            } else {
+                String state = event.get("USB_STATE");
+                if (state != null) {
+                    mHandler.updateState(state);
+                }
             }
         }
     }
@@ -398,8 +429,27 @@ public class UsbDeviceManager implements ActivityTaskManagerInternal.ScreenObser
 
         // Watch for USB configuration changes
         mUEventObserver = new UsbUEventObserver();
-        mUEventObserver.startObserving(USB_STATE_MATCH);
         mUEventObserver.startObserving(ACCESSORY_START_MATCH);
+
+        mEnableUdcSysfsUsbStateUpdate =
+                android.hardware.usb.flags.Flags.enableUdcSysfsUsbStateUpdate()
+                && context.getResources().getBoolean(R.bool.config_enableUdcSysfsUsbStateUpdate);
+
+        if (mEnableUdcSysfsUsbStateUpdate) {
+            mUEventObserver.startObserving(UDC_SUBSYS_MATCH);
+            new Thread("GetUsbControllerSysprop") {
+                public void run() {
+                    String udcName;
+                    // blocking wait until usb controller sysprop is available
+                    udcName = nativeWaitAndGetProperty(USB_CONTROLLER_NAME_PROPERTY);
+                    nativeStartGadgetMonitor(udcName);
+                    mUdcName = udcName;
+                    Slog.v(TAG, "USB controller name " + udcName);
+                }
+            }.start();
+        } else {
+            mUEventObserver.startObserving(USB_STATE_MATCH);
+        }
 
         sEventLogger = new EventLogger(DUMPSYS_LOG_BUFFER, "UsbDeviceManager activity");
     }
@@ -932,6 +982,42 @@ public class UsbDeviceManager implements ActivityTaskManagerInternal.ScreenObser
             sEventLogger.enqueue(new EventLogger.StringEvent("USB intent: " + intent));
         }
 
+        private void getMidiCardDevice() throws FileNotFoundException {
+            String controllerName =  getSystemProperty(USB_CONTROLLER_NAME_PROPERTY, "");
+            if (TextUtils.isEmpty(controllerName)) {
+                throw new FileNotFoundException("controller name not found");
+            }
+
+            File soundDir = new File("/sys/class/udc/" + controllerName + "/gadget/sound");
+            if (!soundDir.exists()) {
+                throw new FileNotFoundException("sound device not found");
+            }
+
+            // There should be exactly one sound card
+            File[] cardDirs = FileUtils.listFilesOrEmpty(soundDir,
+                                                         (dir, file) -> file.startsWith("card"));
+            if (cardDirs.length != 1) {
+                throw new FileNotFoundException("sound card not match");
+            }
+
+            // There should be exactly one midi device
+            File[] midis = FileUtils.listFilesOrEmpty(cardDirs[0],
+                                                      (dir, file) -> file.startsWith("midi"));
+            if (midis.length != 1) {
+                throw new FileNotFoundException("MIDI device not match");
+            }
+
+            Pattern pattern = Pattern.compile("midiC(\\d+)D(\\d+)");
+            Matcher matcher = pattern.matcher(midis[0].getName());
+            if (matcher.matches()) {
+                mMidiCard = Integer.parseInt(matcher.group(1));
+                mMidiDevice = Integer.parseInt(matcher.group(2));
+                Slog.i(TAG, "Found MIDI card " + mMidiCard + " device " + mMidiDevice);
+            } else {
+                throw new FileNotFoundException("MIDI name not match");
+            }
+        }
+
         private void updateUsbFunctions() {
             updateMidiFunction();
             updateMtpFunction();
@@ -941,17 +1027,26 @@ public class UsbDeviceManager implements ActivityTaskManagerInternal.ScreenObser
             boolean enabled = (mCurrentFunctions & UsbManager.FUNCTION_MIDI) != 0;
             if (enabled != mMidiEnabled) {
                 if (enabled) {
-                    Scanner scanner = null;
-                    try {
-                        scanner = new Scanner(new File(MIDI_ALSA_PATH));
-                        mMidiCard = scanner.nextInt();
-                        mMidiDevice = scanner.nextInt();
-                    } catch (FileNotFoundException e) {
-                        Slog.e(TAG, "could not open MIDI file", e);
-                        enabled = false;
-                    } finally {
-                        if (scanner != null) {
-                            scanner.close();
+                    if (android.hardware.usb.flags.Flags.enableUsbSysfsMidiIdentification()) {
+                        try {
+                            getMidiCardDevice();
+                        } catch (FileNotFoundException e) {
+                            Slog.e(TAG, "could not identify MIDI device", e);
+                            enabled = false;
+                        }
+                    } else {
+                        Scanner scanner = null;
+                        try {
+                            scanner = new Scanner(new File(MIDI_ALSA_PATH));
+                            mMidiCard = scanner.nextInt();
+                            mMidiDevice = scanner.nextInt();
+                        } catch (FileNotFoundException e) {
+                            Slog.e(TAG, "could not open MIDI file", e);
+                            enabled = false;
+                        } finally {
+                            if (scanner != null) {
+                                scanner.close();
+                            }
                         }
                     }
                 }
@@ -2556,11 +2651,27 @@ public class UsbDeviceManager implements ActivityTaskManagerInternal.ScreenObser
         dump.end(token);
     }
 
+    /**
+     * Update usb state (Called by native code).
+     */
+    @Keep
+    private void updateGadgetState(String state) {
+        Slog.d(TAG, "Usb state update " + state);
+
+        mHandler.updateState(state);
+    }
+
     private native String[] nativeGetAccessoryStrings();
 
     private native ParcelFileDescriptor nativeOpenAccessory();
 
+    private native String nativeWaitAndGetProperty(String propName);
+
     private native FileDescriptor nativeOpenControl(String usbFunction);
 
     private native boolean nativeIsStartRequested();
+
+    private native boolean nativeStartGadgetMonitor(String udcName);
+
+    private native void nativeStopGadgetMonitor();
 }

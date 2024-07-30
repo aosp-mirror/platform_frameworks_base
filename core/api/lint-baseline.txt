@@ -245,14 +245,6 @@ BroadcastBehavior: android.telephony.euicc.EuiccManager#ACTION_NOTIFY_CARRIER_SE
     Field 'ACTION_NOTIFY_CARRIER_SETUP_INCOMPLETE' is missing @BroadcastBehavior
 
 
-CompileTimeConstant: android.hardware.camera2.ExtensionCaptureRequest#EFV_STABILIZATION_MODE_GIMBAL:
-    All constants must be defined at compile time: android.hardware.camera2.ExtensionCaptureRequest#EFV_STABILIZATION_MODE_GIMBAL
-CompileTimeConstant: android.hardware.camera2.ExtensionCaptureRequest#EFV_STABILIZATION_MODE_LOCKED:
-    All constants must be defined at compile time: android.hardware.camera2.ExtensionCaptureRequest#EFV_STABILIZATION_MODE_LOCKED
-CompileTimeConstant: android.hardware.camera2.ExtensionCaptureRequest#EFV_STABILIZATION_MODE_OFF:
-    All constants must be defined at compile time: android.hardware.camera2.ExtensionCaptureRequest#EFV_STABILIZATION_MODE_OFF
-
-
 DeprecationMismatch: android.accounts.AccountManager#newChooseAccountIntent(android.accounts.Account, java.util.ArrayList<android.accounts.Account>, String[], boolean, String, String, String[], android.os.Bundle):
     Method android.accounts.AccountManager.newChooseAccountIntent(android.accounts.Account, java.util.ArrayList<android.accounts.Account>, String[], boolean, String, String, String[], android.os.Bundle): @Deprecated annotation (present) and @deprecated doc tag (not present) do not match
 DeprecationMismatch: android.app.Activity#enterPictureInPictureMode():
@@ -1095,14 +1087,6 @@ RequiresPermission: android.webkit.WebSettings#setGeolocationEnabled(boolean):
     Method 'setGeolocationEnabled' documentation mentions permissions without declaring @RequiresPermission
 
 
-StaticUtils: ExtensionCaptureRequest:
-    Fully-static utility classes must not have constructor
-StaticUtils: android.hardware.camera2.ExtensionCaptureRequest:
-    Fully-static utility classes must not have constructor
-StaticUtils: android.hardware.camera2.ExtensionCaptureResult:
-    Fully-static utility classes must not have constructor
-
-
 Todo: android.hardware.camera2.params.StreamConfigurationMap:
     Documentation mentions 'TODO'
 Todo: android.provider.ContactsContract.RawContacts#newEntityIterator(android.database.Cursor):
@@ -1462,14 +1446,6 @@ UnflaggedApi: android.graphics.text.PositionedGlyphs#getItalicOverride(int):
 UnflaggedApi: android.graphics.text.PositionedGlyphs#getWeightOverride(int):
     New API must be flagged with @FlaggedApi: method android.graphics.text.PositionedGlyphs.getWeightOverride(int)
 
-UnflaggedApi: android.hardware.camera2.ExtensionCaptureRequest:
-    New API must be flagged with @FlaggedApi: class android.hardware.camera2.ExtensionCaptureRequest
-UnflaggedApi: android.hardware.camera2.ExtensionCaptureRequest#ExtensionCaptureRequest():
-    New API must be flagged with @FlaggedApi: constructor android.hardware.camera2.ExtensionCaptureRequest()
-UnflaggedApi: android.hardware.camera2.ExtensionCaptureResult:
-    New API must be flagged with @FlaggedApi: class android.hardware.camera2.ExtensionCaptureResult
-UnflaggedApi: android.hardware.camera2.ExtensionCaptureResult#ExtensionCaptureResult():
-    New API must be flagged with @FlaggedApi: constructor android.hardware.camera2.ExtensionCaptureResult()
 UnflaggedApi: android.media.MediaRoute2Info#TYPE_REMOTE_CAR:
     New API must be flagged with @FlaggedApi: field android.media.MediaRoute2Info.TYPE_REMOTE_CAR
 UnflaggedApi: android.media.MediaRoute2Info#TYPE_REMOTE_COMPUTER:

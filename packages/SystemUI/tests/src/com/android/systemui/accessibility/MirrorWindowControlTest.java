@@ -27,12 +27,12 @@ import static org.mockito.Mockito.verify;
 
 import android.content.Context;
 import android.graphics.Point;
-import android.testing.AndroidTestingRunner;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
@@ -45,7 +45,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 @SmallTest
-@RunWith(AndroidTestingRunner.class)
+@RunWith(AndroidJUnit4.class)
 public class MirrorWindowControlTest extends SysuiTestCase {
 
     @Mock WindowManager mWindowManager;

@@ -24,12 +24,13 @@ import static android.companion.virtual.VirtualDeviceParams.DEVICE_POLICY_DEFAUL
 import static android.companion.virtual.VirtualDeviceParams.NAVIGATION_POLICY_DEFAULT_ALLOWED;
 import static android.companion.virtual.VirtualDeviceParams.POLICY_TYPE_ACTIVITY;
 import static android.companion.virtual.VirtualDeviceParams.POLICY_TYPE_AUDIO;
+import static android.companion.virtual.VirtualDeviceParams.POLICY_TYPE_BLOCKED_ACTIVITY_BEHAVIOR;
 import static android.companion.virtual.VirtualDeviceParams.POLICY_TYPE_CAMERA;
 import static android.companion.virtual.VirtualDeviceParams.POLICY_TYPE_CLIPBOARD;
 import static android.companion.virtual.VirtualDeviceParams.POLICY_TYPE_RECENTS;
-import static android.content.pm.PackageManager.ACTION_REQUEST_PERMISSIONS;
 import static android.companion.virtualdevice.flags.Flags.virtualCameraServiceDiscovery;
 import static android.companion.virtualdevice.flags.Flags.intentInterceptionActionMatchingFix;
+import static android.content.pm.PackageManager.ACTION_REQUEST_PERMISSIONS;
 
 import android.annotation.EnforcePermission;
 import android.annotation.NonNull;
@@ -77,6 +78,8 @@ import android.hardware.input.VirtualMouseConfig;
 import android.hardware.input.VirtualMouseRelativeEvent;
 import android.hardware.input.VirtualMouseScrollEvent;
 import android.hardware.input.VirtualNavigationTouchpadConfig;
+import android.hardware.input.VirtualRotaryEncoderConfig;
+import android.hardware.input.VirtualRotaryEncoderScrollEvent;
 import android.hardware.input.VirtualStylusButtonEvent;
 import android.hardware.input.VirtualStylusConfig;
 import android.hardware.input.VirtualStylusMotionEvent;
@@ -183,8 +186,9 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
     private final SparseIntArray mDevicePolicies;
     @GuardedBy("mVirtualDeviceLock")
     private final SparseArray<VirtualDisplayWrapper> mVirtualDisplays = new SparseArray<>();
-    private final IVirtualDeviceActivityListener mActivityListener;
-    private final IVirtualDeviceSoundEffectListener mSoundEffectListener;
+    private IVirtualDeviceActivityListener mActivityListener;
+    private ActivityListener mActivityListenerAdapter = null;
+    private IVirtualDeviceSoundEffectListener mSoundEffectListener;
     private final DisplayManagerGlobal mDisplayManager;
     private final DisplayManagerInternal mDisplayManagerInternal;
     @GuardedBy("mVirtualDeviceLock")
@@ -233,6 +237,16 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
             public void onDisplayEmpty(int displayId) {
                 try {
                     mActivityListener.onDisplayEmpty(displayId);
+                } catch (RemoteException e) {
+                    Slog.w(TAG, "Unable to call mActivityListener for display: " + displayId, e);
+                }
+            }
+
+            @Override
+            public void onActivityLaunchBlocked(int displayId,
+                    @NonNull ComponentName componentName, @UserIdInt int userId) {
+                try {
+                    mActivityListener.onActivityLaunchBlocked(displayId, componentName, userId);
                 } catch (RemoteException e) {
                     Slog.w(TAG, "Unable to call mActivityListener for display: " + displayId, e);
                 }
@@ -301,7 +315,9 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
         UserHandle ownerUserHandle = UserHandle.getUserHandleForUid(attributionSource.getUid());
         mContext = context.createContextAsUser(ownerUserHandle, 0);
         mAssociationInfo = associationInfo;
-        mPersistentDeviceId = createPersistentDeviceId(associationInfo.getId());
+        mPersistentDeviceId = associationInfo == null
+                ? null
+                : createPersistentDeviceId(associationInfo.getId());
         mService = service;
         mPendingTrampolineCallback = pendingTrampolineCallback;
         mActivityListener = activityListener;
@@ -403,7 +419,7 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
 
     /** Returns the device display name. */
     CharSequence getDisplayName() {
-        return mAssociationInfo.getDisplayName();
+        return mAssociationInfo == null ? mParams.getName() : mAssociationInfo.getDisplayName();
     }
 
     /** Returns the public representation of the device. */
@@ -416,6 +432,22 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
         synchronized (mVirtualDeviceLock) {
             return mLocaleList;
         }
+    }
+
+    /**
+     * Setter for listeners that live in the client process, namely in
+     * {@link android.companion.virtual.VirtualDeviceInternal}.
+     *
+     * This is needed for virtual devices that are created by the system, as the VirtualDeviceImpl
+     * object is created before the returned VirtualDeviceInternal one.
+     */
+    @Override // Binder call
+    @EnforcePermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
+    public void setListeners(@NonNull IVirtualDeviceActivityListener activityListener,
+            @NonNull IVirtualDeviceSoundEffectListener soundEffectListener) {
+        super.setListeners_enforcePermission();
+        mActivityListener = Objects.requireNonNull(activityListener);
+        mSoundEffectListener = Objects.requireNonNull(soundEffectListener);
     }
 
     @Override  // Binder call
@@ -454,7 +486,9 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
 
     @Override // Binder call
     public int getAssociationId() {
-        return mAssociationInfo.getId();
+        return mAssociationInfo == null
+                ? VirtualDeviceManagerService.CDM_ASSOCIATION_ID_NONE
+                : mAssociationInfo.getId();
     }
 
     @Override // Binder call
@@ -527,8 +561,8 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
     private void sendPendingIntent(int displayId, PendingIntent pendingIntent)
             throws PendingIntent.CanceledException {
         final ActivityOptions options = ActivityOptions.makeBasic().setLaunchDisplayId(displayId);
-        options.setPendingIntentBackgroundActivityLaunchAllowed(true);
-        options.setPendingIntentBackgroundActivityLaunchAllowedByPermission(true);
+        options.setPendingIntentBackgroundActivityStartMode(
+                ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOW_ALWAYS);
         pendingIntent.send(
                 mContext,
                 /* code= */ 0,
@@ -687,6 +721,13 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
                     }
                 }
                 break;
+            case POLICY_TYPE_BLOCKED_ACTIVITY_BEHAVIOR:
+                if (android.companion.virtualdevice.flags.Flags.activityControlApi()) {
+                    synchronized (mVirtualDeviceLock) {
+                        mDevicePolicies.put(policyType, devicePolicy);
+                    }
+                }
+                break;
             default:
                 throw new IllegalArgumentException("Device policy " + policyType
                         + " cannot be changed at runtime. ");
@@ -803,6 +844,26 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
             mInputController.createStylus(config.getInputDeviceName(), config.getVendorId(),
                     config.getProductId(), deviceToken, config.getAssociatedDisplayId(),
                     config.getHeight(), config.getWidth());
+        } catch (InputController.DeviceCreationException e) {
+            throw new IllegalArgumentException(e);
+        } finally {
+            Binder.restoreCallingIdentity(ident);
+        }
+    }
+
+    @Override // Binder call
+    @EnforcePermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
+    public void createVirtualRotaryEncoder(@NonNull VirtualRotaryEncoderConfig config,
+            @NonNull IBinder deviceToken) {
+        super.createVirtualRotaryEncoder_enforcePermission();
+        Objects.requireNonNull(config);
+        Objects.requireNonNull(deviceToken);
+        checkVirtualInputDeviceDisplayIdAssociation(config.getAssociatedDisplayId());
+        final long ident = Binder.clearCallingIdentity();
+        try {
+            mInputController.createRotaryEncoder(config.getInputDeviceName(), config.getVendorId(),
+                    config.getProductId(), deviceToken,
+                    getTargetDisplayIdForInput(config.getAssociatedDisplayId()));
         } catch (InputController.DeviceCreationException e) {
             throw new IllegalArgumentException(e);
         } finally {
@@ -940,6 +1001,19 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
         final long ident = Binder.clearCallingIdentity();
         try {
             return mInputController.sendStylusButtonEvent(token, event);
+        } finally {
+            Binder.restoreCallingIdentity(ident);
+        }
+    }
+
+    @Override // Binder call
+    @EnforcePermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
+    public boolean sendRotaryEncoderScrollEvent(@NonNull IBinder token,
+            @NonNull VirtualRotaryEncoderScrollEvent event) {
+        super.sendRotaryEncoderScrollEvent_enforcePermission();
+        final long ident = Binder.clearCallingIdentity();
+        try {
+            return mInputController.sendRotaryEncoderScrollEvent(token, event);
         } finally {
             Binder.restoreCallingIdentity(ident);
         }
@@ -1105,7 +1179,7 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
         String indent = "    ";
         fout.println("  VirtualDevice: ");
         fout.println(indent + "mDeviceId: " + mDeviceId);
-        fout.println(indent + "mAssociationId: " + mAssociationInfo.getId());
+        fout.println(indent + "mAssociationId: " + getAssociationId());
         fout.println(indent + "mOwnerPackageName: " + mOwnerPackageName);
         fout.println(indent + "mParams: ");
         mParams.dump(fout, indent + indent);
@@ -1154,6 +1228,10 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
         final ComponentName homeComponent =
                 Flags.vdmCustomHome() ? mParams.getHomeComponent() : null;
 
+        if (mActivityListenerAdapter == null) {
+            mActivityListenerAdapter = createListenerAdapter();
+        }
+
         final GenericWindowPolicyController gwpc = new GenericWindowPolicyController(
                 WindowManager.LayoutParams.FLAG_SECURE,
                 WindowManager.LayoutParams.SYSTEM_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS,
@@ -1166,8 +1244,7 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
                         ? mParams.getBlockedCrossTaskNavigations()
                         : mParams.getAllowedCrossTaskNavigations(),
                 mPermissionDialogComponent,
-                createListenerAdapter(),
-                this::onEnteringPipBlocked,
+                mActivityListenerAdapter,
                 this::onActivityBlocked,
                 this::onSecureWindowShown,
                 this::shouldInterceptIntent,
@@ -1251,12 +1328,37 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
 
     @RequiresPermission(android.Manifest.permission.INTERACT_ACROSS_USERS)
     private void onActivityBlocked(int displayId, ActivityInfo activityInfo) {
-        Intent intent = BlockedAppStreamingActivity.createIntent(
-                activityInfo, mAssociationInfo.getDisplayName());
-        mContext.startActivityAsUser(
-                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK),
-                ActivityOptions.makeBasic().setLaunchDisplayId(displayId).toBundle(),
-                UserHandle.SYSTEM);
+        Intent intent = BlockedAppStreamingActivity.createIntent(activityInfo, getDisplayName());
+        if (shouldShowBlockedActivityDialog(
+                activityInfo.getComponentName(), intent.getComponent())) {
+            mContext.startActivityAsUser(
+                    intent.addFlags(
+                            Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK),
+                    ActivityOptions.makeBasic().setLaunchDisplayId(displayId).toBundle(),
+                    UserHandle.SYSTEM);
+        }
+
+        if (android.companion.virtualdevice.flags.Flags.activityControlApi()) {
+            mActivityListenerAdapter.onActivityLaunchBlocked(
+                    displayId,
+                    activityInfo.getComponentName(),
+                    UserHandle.getUserHandleForUid(
+                            activityInfo.applicationInfo.uid).getIdentifier());
+        }
+    }
+
+    private boolean shouldShowBlockedActivityDialog(ComponentName blockedComponent,
+            ComponentName blockedAppStreamingActivityComponent) {
+        if (Objects.equals(blockedComponent, blockedAppStreamingActivityComponent)) {
+            // Do not show the dialog if it was blocked for some reason already to avoid
+            // infinite blocking loop.
+            return false;
+        }
+        if (!android.companion.virtualdevice.flags.Flags.activityControlApi()) {
+            return true;
+        }
+        // Do not show the dialog if disabled by policy.
+        return getDevicePolicy(POLICY_TYPE_BLOCKED_ACTIVITY_BEHAVIOR) == DEVICE_POLICY_DEFAULT;
     }
 
     private void onSecureWindowShown(int displayId, int uid) {
@@ -1339,7 +1441,7 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
 
     @SuppressWarnings("AndroidFrameworkRequiresPermission")
     private void checkVirtualInputDeviceDisplayIdAssociation(int displayId) {
-        if (mContext.checkCallingPermission(android.Manifest.permission.INJECT_EVENTS)
+        if (mContext.checkCallingOrSelfPermission(android.Manifest.permission.INJECT_EVENTS)
                     == PackageManager.PERMISSION_GRANTED) {
             // The INJECT_EVENTS permission allows for injecting input to any window / display.
             return;
@@ -1456,12 +1558,6 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
         return mInputController.getInputDeviceDescriptors().values().stream().anyMatch(
                 inputDeviceDescriptor -> inputDeviceDescriptor.getInputDeviceId() == inputDeviceId);
     }
-
-    void onEnteringPipBlocked(int uid) {
-        // Do nothing. ActivityRecord#checkEnterPictureInPictureState logs that the display does not
-        // support PiP.
-    }
-
     void playSoundEffect(int effectType) {
         try {
             mSoundEffectListener.onPlaySoundEffect(effectType);

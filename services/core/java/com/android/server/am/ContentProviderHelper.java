@@ -538,6 +538,8 @@ public class ContentProviderHelper {
                             if (!pr.hasProvider(cpi.name)) {
                                 checkTime(startTime, "getContentProviderImpl: scheduling install");
                                 pr.installProvider(cpi.name, cpr);
+                                mService.mOomAdjuster.unfreezeTemporarily(proc,
+                                        CachedAppOptimizer.UNFREEZE_REASON_GET_PROVIDER);
                                 try {
                                     thread.scheduleInstallProvider(cpi);
                                 } catch (RemoteException e) {
@@ -674,7 +676,9 @@ public class ContentProviderHelper {
                     if (conn != null) {
                         conn.waiting = true;
                     }
-                    cpr.wait(wait);
+                    if (wait > 0) {
+                        cpr.wait(wait);
+                    }
                     if (cpr.provider == null) {
                         timedOut = true;
                         break;

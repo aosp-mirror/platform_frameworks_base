@@ -115,7 +115,7 @@ filegroup {
         ":android.security.legacykeystore-java-source",
         ":android.security.maintenance-java-source",
         ":android.security.metrics-java-source",
-        ":android.system.keystore2-V3-java-source",
+        ":android.system.keystore2-V4-java-source",
         ":android.hardware.cas-V1-java-source",
         ":credstore_aidl",
         ":dumpstate_aidl",
@@ -255,7 +255,7 @@ java_library {
         "android.hardware.vibrator-V1.1-java",
         "android.hardware.vibrator-V1.2-java",
         "android.hardware.vibrator-V1.3-java",
-        "android.hardware.vibrator-V2-java",
+        "android.hardware.vibrator-V3-java",
         "android.se.omapi-V1-java",
         "android.system.suspend.control.internal-java",
         "devicepolicyprotosnano",
@@ -401,9 +401,11 @@ java_defaults {
     ],
     sdk_version: "core_platform",
     static_libs: [
+        "aconfig_storage_reader_java",
         "android.hardware.common.fmq-V1-java",
         "bouncycastle-repackaged-unbundled",
         "com.android.sysprop.foldlockbehavior",
+        "com.android.sysprop.view",
         "framework-internal-utils",
         // If MimeMap ever becomes its own APEX, then this dependency would need to be removed
         // in favor of an API stubs dependency in java_library "framework" below.
@@ -416,7 +418,6 @@ java_defaults {
         "modules-utils-fastxmlserializer",
         "modules-utils-preconditions",
         "modules-utils-statemachine",
-        "modules-utils-synchronous-result-receiver",
         "modules-utils-os",
         "modules-utils-uieventlogger-interface",
         "framework-permission-aidl-java",
@@ -510,6 +511,9 @@ java_library {
     },
     lint: {
         baseline_filename: "lint-baseline.xml",
+        warning_checks: [
+            "FlaggedApi",
+        ],
     },
     jarjar_prefix: "com.android.internal.hidden_from_bootclasspath",
 }
@@ -633,7 +637,6 @@ java_library {
         "core/java/com/android/internal/util/AsyncService.java",
         "core/java/com/android/internal/util/Protocol.java",
         "telephony/java/android/telephony/Annotation.java",
-        ":net-utils-framework-wifi-common-srcs",
     ],
     libs: [
         "framework-annotations-lib",

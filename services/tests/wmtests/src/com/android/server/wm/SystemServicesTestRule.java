@@ -77,6 +77,7 @@ import android.view.InputChannel;
 import android.view.SurfaceControl;
 
 import com.android.dx.mockito.inline.extended.StaticMockitoSession;
+import com.android.internal.os.BackgroundThread;
 import com.android.server.AnimationThread;
 import com.android.server.DisplayThread;
 import com.android.server.LocalServices;
@@ -202,7 +203,8 @@ public class SystemServicesTestRule implements TestRule {
                 .mockStatic(DisplayControl.class, mockStubOnly)
                 .mockStatic(LockGuard.class, mockStubOnly)
                 .mockStatic(Watchdog.class, mockStubOnly)
-                .spyStatic(DesktopModeLaunchParamsModifier.class)
+                .spyStatic(DesktopModeHelper.class)
+                .spyStatic(DesktopModeBoundsCalculator.class)
                 .strictness(Strictness.LENIENT)
                 .startMocking();
 
@@ -442,12 +444,7 @@ public class SystemServicesTestRule implements TestRule {
                 dc.getDisplayPolicy().release();
                 // Unregister SensorEventListener (foldable device may register for hinge angle).
                 dc.getDisplayRotation().onDisplayRemoved();
-                if (dc.mDisplayRotationCompatPolicy != null) {
-                    dc.mDisplayRotationCompatPolicy.dispose();
-                }
-                if (dc.mCameraStateMonitor != null) {
-                    dc.mCameraStateMonitor.dispose();
-                }
+                dc.mAppCompatCameraPolicy.dispose();
             }
         }
 
@@ -557,6 +554,9 @@ public class SystemServicesTestRule implements TestRule {
         // This is a different handler object than the wm.mAnimationHandler above.
         waitHandlerIdle(AnimationThread.getHandler());
         waitHandlerIdle(SurfaceAnimationThread.getHandler());
+        // Some binder calls are posted to BackgroundThread.getHandler(), we should wait for them
+        // to finish to run next test.
+        waitHandlerIdle(BackgroundThread.getHandler());
     }
 
     static void waitHandlerIdle(Handler handler) {

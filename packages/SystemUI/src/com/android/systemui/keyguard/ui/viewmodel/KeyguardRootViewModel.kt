@@ -66,7 +66,6 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.combineTransform
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
-import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.flow.onStart
@@ -86,14 +85,17 @@ constructor(
     private val notificationsKeyguardInteractor: NotificationsKeyguardInteractor,
     private val alternateBouncerToGoneTransitionViewModel:
         AlternateBouncerToGoneTransitionViewModel,
+    private val alternateBouncerToLockscreenTransitionViewModel:
+        AlternateBouncerToLockscreenTransitionViewModel,
     private val aodToGoneTransitionViewModel: AodToGoneTransitionViewModel,
     private val aodToLockscreenTransitionViewModel: AodToLockscreenTransitionViewModel,
     private val aodToOccludedTransitionViewModel: AodToOccludedTransitionViewModel,
     private val dozingToGoneTransitionViewModel: DozingToGoneTransitionViewModel,
     private val dozingToLockscreenTransitionViewModel: DozingToLockscreenTransitionViewModel,
     private val dozingToOccludedTransitionViewModel: DozingToOccludedTransitionViewModel,
-    private val dreamingToLockscreenTransitionViewModel: DreamingToLockscreenTransitionViewModel,
+    private val dreamingToAodTransitionViewModel: DreamingToAodTransitionViewModel,
     private val dreamingToGoneTransitionViewModel: DreamingToGoneTransitionViewModel,
+    private val dreamingToLockscreenTransitionViewModel: DreamingToLockscreenTransitionViewModel,
     private val glanceableHubToLockscreenTransitionViewModel:
         GlanceableHubToLockscreenTransitionViewModel,
     private val goneToAodTransitionViewModel: GoneToAodTransitionViewModel,
@@ -144,7 +146,7 @@ constructor(
 
     private val isOnLockscreen: Flow<Boolean> =
         combine(
-                keyguardTransitionInteractor.isFinishedInState(LOCKSCREEN).onStart { emit(false) },
+                keyguardTransitionInteractor.isFinishedIn(LOCKSCREEN).onStart { emit(false) },
                 anyOf(
                     keyguardTransitionInteractor.isInTransition(Edge.create(to = LOCKSCREEN)),
                     keyguardTransitionInteractor.isInTransition(Edge.create(from = LOCKSCREEN)),
@@ -161,7 +163,7 @@ constructor(
                     edgeWithoutSceneContainer = Edge.create(from = LOCKSCREEN, to = GONE),
                 ),
                 keyguardTransitionInteractor.isInTransition(
-                    edge = Edge.create(from = PRIMARY_BOUNCER, to = Scenes.Lockscreen),
+                    edge = Edge.create(from = Scenes.Bouncer, to = LOCKSCREEN),
                     edgeWithoutSceneContainer =
                         Edge.create(from = PRIMARY_BOUNCER, to = LOCKSCREEN),
                 ),
@@ -203,7 +205,7 @@ constructor(
         combine(
                 communalInteractor.isIdleOnCommunal,
                 keyguardTransitionInteractor
-                    .transitionValue(GONE)
+                    .transitionValue(scene = Scenes.Gone, stateWithoutSceneContainer = GONE)
                     .map { it == 1f }
                     .onStart { emit(false) },
                 keyguardTransitionInteractor
@@ -236,14 +238,16 @@ constructor(
                 // value emitted by any of them. Do not add flows that cannot make this guarantee.
                 merge(
                         alphaOnShadeExpansion,
-                        keyguardInteractor.dismissAlpha.filterNotNull(),
+                        keyguardInteractor.dismissAlpha,
                         alternateBouncerToGoneTransitionViewModel.lockscreenAlpha(viewState),
+                        alternateBouncerToLockscreenTransitionViewModel.lockscreenAlpha(viewState),
                         aodToGoneTransitionViewModel.lockscreenAlpha(viewState),
                         aodToLockscreenTransitionViewModel.lockscreenAlpha(viewState),
                         aodToOccludedTransitionViewModel.lockscreenAlpha(viewState),
                         dozingToGoneTransitionViewModel.lockscreenAlpha(viewState),
                         dozingToLockscreenTransitionViewModel.lockscreenAlpha,
                         dozingToOccludedTransitionViewModel.lockscreenAlpha(viewState),
+                        dreamingToAodTransitionViewModel.lockscreenAlpha,
                         dreamingToGoneTransitionViewModel.lockscreenAlpha,
                         dreamingToLockscreenTransitionViewModel.lockscreenAlpha,
                         glanceableHubToLockscreenTransitionViewModel.keyguardAlpha,
@@ -252,6 +256,7 @@ constructor(
                         goneToDreamingTransitionViewModel.lockscreenAlpha,
                         goneToLockscreenTransitionViewModel.lockscreenAlpha,
                         lockscreenToAodTransitionViewModel.lockscreenAlpha(viewState),
+                        lockscreenToAodTransitionViewModel.lockscreenAlphaOnFold,
                         lockscreenToDozingTransitionViewModel.lockscreenAlpha,
                         lockscreenToDreamingTransitionViewModel.lockscreenAlpha,
                         lockscreenToGlanceableHubTransitionViewModel.keyguardAlpha,

@@ -16,13 +16,16 @@
 
 package com.android.systemui.deviceentry.shared
 
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import junit.framework.Assert
 import kotlin.reflect.full.declaredMembers
 import org.junit.Test
+import org.junit.runner.RunWith
 
 @SmallTest
+@RunWith(AndroidJUnit4::class)
 class FaceAuthReasonTest : SysuiTestCase() {
     @Test
     fun testApiReasonToUiEvent_forAllReasons_isNotNull() {

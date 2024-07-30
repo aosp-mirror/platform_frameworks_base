@@ -637,7 +637,10 @@ public abstract class ExpandableView extends FrameLayout implements Dumpable, Ro
         return false;
     }
 
-    public void setHeadsUpIsVisible() {
+    /**
+     * Called, when the notification has been seen by the user in the heads up state.
+     */
+    public void markHeadsUpSeen() {
     }
 
     public boolean showingPulsing() {

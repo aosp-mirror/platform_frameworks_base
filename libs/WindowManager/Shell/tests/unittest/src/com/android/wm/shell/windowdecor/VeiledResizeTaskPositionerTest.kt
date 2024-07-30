@@ -17,6 +17,8 @@ package com.android.wm.shell.windowdecor
 
 import android.app.ActivityManager
 import android.app.WindowConfiguration
+import android.content.Context
+import android.content.res.Resources
 import android.graphics.Point
 import android.graphics.Rect
 import android.os.IBinder
@@ -31,6 +33,7 @@ import android.view.WindowManager.TRANSIT_CHANGE
 import android.window.TransitionInfo
 import android.window.WindowContainerToken
 import androidx.test.filters.SmallTest
+import com.android.internal.jank.InteractionJankMonitor
 import com.android.wm.shell.ShellTaskOrganizer
 import com.android.wm.shell.ShellTestCase
 import com.android.wm.shell.common.DisplayController
@@ -98,6 +101,12 @@ class VeiledResizeTaskPositionerTest : ShellTestCase() {
     private lateinit var mockFinishCallback: TransitionFinishCallback
     @Mock
     private lateinit var mockTransitions: Transitions
+    @Mock
+    private lateinit var mockContext: Context
+    @Mock
+    private lateinit var mockResources: Resources
+    @Mock
+    private lateinit var mockInteractionJankMonitor: InteractionJankMonitor
 
     private lateinit var taskPositioner: VeiledResizeTaskPositioner
 
@@ -105,6 +114,9 @@ class VeiledResizeTaskPositionerTest : ShellTestCase() {
     fun setUp() {
         MockitoAnnotations.initMocks(this)
 
+        mockDesktopWindowDecoration.mDisplay = mockDisplay
+        mockDesktopWindowDecoration.mDecorWindowContext = mockContext
+        whenever(mockContext.getResources()).thenReturn(mockResources)
         whenever(taskToken.asBinder()).thenReturn(taskBinder)
         whenever(mockDisplayController.getDisplayLayout(DISPLAY_ID)).thenReturn(mockDisplayLayout)
         whenever(mockDisplayLayout.densityDpi()).thenReturn(DENSITY_DPI)
@@ -141,7 +153,8 @@ class VeiledResizeTaskPositionerTest : ShellTestCase() {
                         mockDisplayController,
                         mockDragStartListener,
                         mockTransactionFactory,
-                        mockTransitions
+                        mockTransitions,
+                        mockInteractionJankMonitor
                 )
     }
 

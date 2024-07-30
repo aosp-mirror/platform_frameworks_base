@@ -20,6 +20,7 @@ import android.animation.AnimatorListenerAdapter
 import android.animation.ValueAnimator
 import android.animation.ValueAnimator.AnimatorUpdateListener
 import android.annotation.FloatRange
+import android.annotation.SuppressLint
 import android.os.Trace
 import android.util.Log
 import com.android.app.tracing.coroutines.withContext
@@ -117,10 +118,11 @@ class KeyguardTransitionRepositoryImpl
 constructor(
     @Main val mainDispatcher: CoroutineDispatcher,
 ) : KeyguardTransitionRepository {
-    /*
-     * Each transition between [KeyguardState]s will have an associated Flow.
-     * In order to collect these events, clients should call [transition].
+    /**
+     * Each transition between [KeyguardState]s will have an associated Flow. In order to collect
+     * these events, clients should call [transition].
      */
+    @SuppressLint("SharedFlowCreation")
     private val _transitions =
         MutableSharedFlow<TransitionStep>(
             replay = 2,
@@ -250,7 +252,10 @@ constructor(
                 return@withContext null
             }
                 ?: run {
-                    emitTransition(TransitionStep(info, startingValue, TransitionState.STARTED))
+                    emitTransition(
+                        nextStep = TransitionStep(info, startingValue, TransitionState.STARTED),
+                        isManual = true,
+                    )
 
                     // No animator, so it's manual. Provide a mechanism to callback
                     updateTransitionId = UUID.randomUUID()

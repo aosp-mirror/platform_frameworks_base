@@ -84,6 +84,8 @@
     <string name="notification_bubble_title" msgid="6082910224488253378">"Көпіршік"</string>
     <string name="manage_bubbles_text" msgid="7730624269650594419">"Басқару"</string>
     <string name="accessibility_bubble_dismissed" msgid="8367471990421247357">"Қалқыма хабар жабылды."</string>
+    <string name="bubble_shortcut_label" msgid="666269077944378311">"Қалқыма хабарлар"</string>
+    <string name="bubble_shortcut_long_label" msgid="6088437544312894043">"Қалқыма хабарлар көрсету"</string>
     <string name="restart_button_description" msgid="4564728020654658478">"Көріністі жақсарту үшін осы қолданбаны түртіп, қайта ашыңыз."</string>
     <string name="user_aspect_ratio_settings_button_hint" msgid="734835849600713016">"Осы қолданбаның арақатынасын параметрлерден өзгертуге болады."</string>
     <string name="user_aspect_ratio_settings_button_description" msgid="4315566801697411684">"Арақатынасты өзгерту"</string>
@@ -105,7 +107,7 @@
     <string name="minimize_button_text" msgid="271592547935841753">"Кішірейту"</string>
     <string name="close_button_text" msgid="2913281996024033299">"Жабу"</string>
     <string name="back_button_text" msgid="1469718707134137085">"Артқа"</string>
-    <string name="handle_text" msgid="1766582106752184456">"Идентификатор"</string>
+    <string name="handle_text" msgid="4419667835599523257">"Қолданба идентификаторы"</string>
     <string name="app_icon_text" msgid="2823268023931811747">"Қолданба белгішесі"</string>
     <string name="fullscreen_text" msgid="1162316685217676079">"Толық экран"</string>
     <string name="desktop_text" msgid="1077633567027630454">"Компьютер режимі"</string>
@@ -114,6 +116,7 @@
     <string name="float_button_text" msgid="9221657008391364581">"Қалқыма"</string>
     <string name="select_text" msgid="5139083974039906583">"Таңдау"</string>
     <string name="screenshot_text" msgid="1477704010087786671">"Скриншот"</string>
+    <string name="open_in_browser_text" msgid="9181692926376072904">"Браузерден ашу"</string>
     <string name="close_text" msgid="4986518933445178928">"Жабу"</string>
     <string name="collapse_menu_text" msgid="7515008122450342029">"Мәзірді жабу"</string>
     <string name="expand_menu_text" msgid="3847736164494181168">"Мәзірді ашу"</string>

@@ -39,7 +39,7 @@ import android.platform.test.annotations.Presubmit;
 import android.util.Size;
 
 import androidx.test.InstrumentationRegistry;
-import androidx.test.runner.AndroidJUnit4;
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 
 import org.junit.After;
 import org.junit.Before;
@@ -87,7 +87,7 @@ public class ContentResolverTest {
         bitmap.compress(Bitmap.CompressFormat.PNG, 90, mImage.getOutputStream());
 
         final AssetFileDescriptor afd = new AssetFileDescriptor(
-                new ParcelFileDescriptor(mImage.getFileDescriptor()), 0, mSize, null);
+                ParcelFileDescriptor.dup(mImage.getFileDescriptor()), 0, mSize, null);
         when(mProvider.openTypedAssetFile(any(), any(), any(), any(), any())).thenReturn(
                 afd);
     }

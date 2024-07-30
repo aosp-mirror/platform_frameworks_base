@@ -320,10 +320,10 @@ public class ShortcutService extends IShortcutService.Stub {
 
     private final Handler mHandler;
 
-    @GuardedBy("itself")
+    @GuardedBy("mServiceLock")
     private final ArrayList<ShortcutChangeListener> mListeners = new ArrayList<>(1);
 
-    @GuardedBy("itself")
+    @GuardedBy("mServiceLock")
     private final ArrayList<LauncherApps.ShortcutChangeCallback> mShortcutChangeCallbacks =
             new ArrayList<>(1);
 
@@ -1847,9 +1847,7 @@ public class ShortcutService extends IShortcutService.Stub {
                         return;
                     }
 
-                    synchronized (mListeners) {
-                        copy = new ArrayList<>(mListeners);
-                    }
+                    copy = new ArrayList<>(mListeners);
                 }
                 // Note onShortcutChanged() needs to be called with the system service permissions.
                 for (int i = copy.size() - 1; i >= 0; i--) {
@@ -1874,9 +1872,8 @@ public class ShortcutService extends IShortcutService.Stub {
                     if (!isUserUnlockedL(userId)) {
                         return;
                     }
-                    synchronized (mShortcutChangeCallbacks) {
-                        copy = new ArrayList<>(mShortcutChangeCallbacks);
-                    }
+
+                    copy = new ArrayList<>(mShortcutChangeCallbacks);
                 }
                 for (int i = copy.size() - 1; i >= 0; i--) {
                     if (!CollectionUtils.isEmpty(changedList)) {
@@ -3432,7 +3429,7 @@ public class ShortcutService extends IShortcutService.Stub {
 
         @Override
         public void addListener(@NonNull ShortcutChangeListener listener) {
-            synchronized (mListeners) {
+            synchronized (mServiceLock) {
                 mListeners.add(Objects.requireNonNull(listener));
             }
         }
@@ -3440,8 +3437,16 @@ public class ShortcutService extends IShortcutService.Stub {
         @Override
         public void addShortcutChangeCallback(
                 @NonNull LauncherApps.ShortcutChangeCallback callback) {
-            synchronized (mShortcutChangeCallbacks) {
+            synchronized (mServiceLock) {
                 mShortcutChangeCallbacks.add(Objects.requireNonNull(callback));
+            }
+        }
+
+        @Override
+        public void removeShortcutChangeCallback(
+                @NonNull LauncherApps.ShortcutChangeCallback callback) {
+            synchronized (mServiceLock) {
+                mShortcutChangeCallbacks.remove(Objects.requireNonNull(callback));
             }
         }
 
@@ -4485,8 +4490,9 @@ public class ShortcutService extends IShortcutService.Stub {
             ActivityOptions options = ActivityOptions.makeBasic()
                     .setPendingIntentBackgroundActivityStartMode(
                             MODE_BACKGROUND_ACTIVITY_START_DENIED);
-            intentSender.sendIntent(mContext, /* code= */ 0, extras,
-                    /* onFinished=*/ null, /* handler= */ null, null, options.toBundle());
+            intentSender.sendIntent(mContext, 0 /* code */, extras,
+                    null /* requiredPermission */, options.toBundle(),
+                    null /* executor */, null /* onFinished*/);
         } catch (SendIntentException e) {
             Slog.w(TAG, "sendIntent failed().", e);
         }

@@ -23,9 +23,11 @@ import android.content.res.Resources
 import android.content.res.Resources.NotFoundException
 import android.platform.test.annotations.DisableFlags
 import android.platform.test.annotations.EnableFlags
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.Flags.FLAG_SYSUI_TEAMFOOD
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.settings.FakeUserTracker
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.eq
 import com.android.systemui.util.mockito.nullable
@@ -39,6 +41,7 @@ import java.util.function.Consumer
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
+import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.Mockito.anyBoolean
 import org.mockito.Mockito.anyString
@@ -55,6 +58,7 @@ import org.mockito.MockitoAnnotations
  * the default.
  */
 @SmallTest
+@RunWith(AndroidJUnit4::class)
 class FeatureFlagsClassicDebugTest : SysuiTestCase() {
     private lateinit var mFeatureFlagsClassicDebug: FeatureFlagsClassicDebug
 
@@ -64,6 +68,7 @@ class FeatureFlagsClassicDebugTest : SysuiTestCase() {
     @Mock private lateinit var systemProperties: SystemPropertiesHelper
     @Mock private lateinit var resources: Resources
     @Mock private lateinit var restarter: Restarter
+    private lateinit var userTracker: FakeUserTracker
     private val flagMap = mutableMapOf<String, Flag<*>>()
     private lateinit var broadcastReceiver: BroadcastReceiver
     private lateinit var clearCacheAction: Consumer<String>
@@ -75,9 +80,11 @@ class FeatureFlagsClassicDebugTest : SysuiTestCase() {
     @Before
     fun setup() {
         MockitoAnnotations.initMocks(this)
-
         flagMap.put(teamfoodableFlagA.name, teamfoodableFlagA)
         flagMap.put(releasedFlagB.name, releasedFlagB)
+
+        userTracker = FakeUserTracker(onCreateCurrentUserContext = { mockContext })
+
         mFeatureFlagsClassicDebug =
             FeatureFlagsClassicDebug(
                 flagManager,
@@ -87,7 +94,8 @@ class FeatureFlagsClassicDebugTest : SysuiTestCase() {
                 resources,
                 serverFlagReader,
                 flagMap,
-                restarter
+                restarter,
+                userTracker
             )
         mFeatureFlagsClassicDebug.init()
         verify(flagManager).onSettingsChangedAction = any()

@@ -9202,6 +9202,14 @@ public class DevicePolicyManager {
     /**
      * @hide
      */
+    @UnsupportedAppUsage
+    public void setActiveAdmin(@NonNull ComponentName policyReceiver, boolean refreshing) {
+        setActiveAdmin(policyReceiver, refreshing, myUserId());
+    }
+
+    /**
+     * @hide
+     */
     @TestApi
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     @RequiresPermission(allOf = {
@@ -9210,21 +9218,45 @@ public class DevicePolicyManager {
     })
     public void setActiveAdmin(@NonNull ComponentName policyReceiver, boolean refreshing,
             int userHandle) {
-        if (mService != null) {
-            try {
-                mService.setActiveAdmin(policyReceiver, refreshing, userHandle);
-            } catch (RemoteException e) {
-                throw e.rethrowFromSystemServer();
-            }
-        }
+        setActiveAdminInternal(policyReceiver, refreshing, userHandle, null);
     }
 
     /**
      * @hide
      */
-    @UnsupportedAppUsage
-    public void setActiveAdmin(@NonNull ComponentName policyReceiver, boolean refreshing) {
-        setActiveAdmin(policyReceiver, refreshing, myUserId());
+    @TestApi
+    @RequiresPermission(allOf = {
+            MANAGE_DEVICE_ADMINS,
+            INTERACT_ACROSS_USERS_FULL
+    })
+    @FlaggedApi(Flags.FLAG_PROVISIONING_CONTEXT_PARAMETER)
+    public void setActiveAdmin(
+            @NonNull ComponentName policyReceiver,
+            boolean refreshing,
+            int userHandle,
+            @Nullable String provisioningContext
+    ) {
+        setActiveAdminInternal(policyReceiver, refreshing, userHandle, provisioningContext);
+    }
+
+    private void setActiveAdminInternal(
+            @NonNull ComponentName policyReceiver,
+            boolean refreshing,
+            int userHandle,
+            @Nullable String provisioningContext
+    ) {
+        if (mService != null) {
+            try {
+                mService.setActiveAdmin(
+                        policyReceiver,
+                        refreshing,
+                        userHandle,
+                        provisioningContext
+                );
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
     }
 
     /**
@@ -9678,7 +9710,7 @@ public class DevicePolicyManager {
         if (mService != null) {
             try {
                 final int myUserId = myUserId();
-                mService.setActiveAdmin(admin, false, myUserId);
+                mService.setActiveAdmin(admin, false, myUserId, null);
                 return mService.setProfileOwner(admin, myUserId);
             } catch (RemoteException re) {
                 throw re.rethrowFromSystemServer();
@@ -13724,6 +13756,13 @@ public class DevicePolicyManager {
      * user control, the admin may opt out of controlling grants for these permissions by including
      * {@link #EXTRA_PROVISIONING_SENSORS_PERMISSION_GRANT_OPT_OUT} in the provisioning parameters.
      * In that case the device owner's control will be limited to denying these permissions.
+     * <p>
+     * When sensor-related permissions aren't grantable due to the above cases, calling this method
+     * to grant these permissions will silently fail, if device admins are built with
+     * {@code targetSdkVersion} &lt; {@link android.os.Build.VERSION_CODES#VANILLA_ICE_CREAM}. If
+     * they are built with {@code targetSdkVersion} &gt;=
+     * {@link android.os.Build.VERSION_CODES#VANILLA_ICE_CREAM}, this method will throw a
+     * {@link SecurityException}.
      * <p>
      * NOTE: On devices running {@link android.os.Build.VERSION_CODES#S} and above, control over
      * the following permissions are restricted for managed profile owners:

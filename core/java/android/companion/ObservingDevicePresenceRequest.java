@@ -180,6 +180,9 @@ public final class ObservingDevicePresenceRequest implements Parcelable {
          * <p>Calling apps must use either this API or {@link #setAssociationId(int)},
          * but not both.</p>
          *
+         * <p>Calling app must hold the
+         * {@link AssociationRequest#DEVICE_PROFILE_AUTOMOTIVE_PROJECTION} profile.</p>
+         *
          * @param uuid The ParcelUuid for observing device presence.
          */
         @NonNull

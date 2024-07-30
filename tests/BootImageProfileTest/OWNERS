@@ -1,4 +1,1 @@
-calin@google.com
-ngeoffray@google.com
-vmarko@google.com
-yawanng@google.com
+include platform/art:main:/OWNERS_boot_profile

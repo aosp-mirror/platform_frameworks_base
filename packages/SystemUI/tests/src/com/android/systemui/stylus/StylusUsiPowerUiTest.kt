@@ -31,8 +31,8 @@ import androidx.test.filters.SmallTest
 import com.android.internal.logging.InstanceId
 import com.android.internal.logging.UiEventLogger
 import com.android.systemui.InstanceIdSequenceFake
-import com.android.systemui.res.R
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.res.R
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.argumentCaptor
 import com.android.systemui.util.mockito.eq
@@ -105,6 +105,14 @@ class StylusUsiPowerUiTest : SysuiTestCase() {
     fun updateBatteryState_capacityZero_noop() {
         stylusUsiPowerUi.updateBatteryState(0, FixedCapacityBatteryState(0f))
 
+        verifyNoMoreInteractions(notificationManager)
+    }
+
+    @Test
+    fun updateBatteryState_capacityNaN_cancelsNotification() {
+        stylusUsiPowerUi.updateBatteryState(0, FixedCapacityBatteryState(Float.NaN))
+
+        verify(notificationManager, times(1)).cancel(R.string.stylus_battery_low_percentage)
         verifyNoMoreInteractions(notificationManager)
     }
 

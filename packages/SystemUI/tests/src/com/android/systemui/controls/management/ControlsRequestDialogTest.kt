@@ -25,9 +25,9 @@ import android.os.UserHandle
 import android.service.controls.Control
 import android.service.controls.ControlsProviderService
 import android.service.controls.DeviceTypes
-import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
 import androidx.lifecycle.Lifecycle
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.MediumTest
 import androidx.test.rule.ActivityTestRule
 import com.android.systemui.SysuiTestCase
@@ -53,7 +53,7 @@ import org.mockito.MockitoAnnotations
 import java.util.concurrent.Executor
 
 @MediumTest
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 @TestableLooper.RunWithLooper
 class ControlsRequestDialogTest : SysuiTestCase() {
 

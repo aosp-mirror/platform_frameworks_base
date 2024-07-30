@@ -182,6 +182,12 @@
     <!-- Content description to tell the user a bubble has been dismissed. -->
     <string name="accessibility_bubble_dismissed">Bubble dismissed.</string>
 
+    <!-- Label used to for bubbles shortcut [CHAR_LIMIT=10] -->
+    <string name="bubble_shortcut_label">Bubbles</string>
+
+    <!-- Longer label used to for bubbles shortcut, shown if there is enough space [CHAR_LIMIT=25] -->
+    <string name="bubble_shortcut_long_label">Show Bubbles</string>
+
     <!-- Description of the restart button in the hint of size compatibility mode. [CHAR LIMIT=NONE] -->
     <string name="restart_button_description">Tap to restart this app for a better view</string>
 
@@ -257,7 +263,7 @@
     <!-- Accessibility text for the caption back button [CHAR LIMIT=NONE] -->
     <string name="back_button_text">Back</string>
     <!-- Accessibility text for the caption handle [CHAR LIMIT=NONE] -->
-    <string name="handle_text">Handle</string>
+    <string name="handle_text">App handle</string>
     <!-- Accessibility text for the handle menu app icon [CHAR LIMIT=NONE] -->
     <string name="app_icon_text">App Icon</string>
     <!-- Accessibility text for the handle fullscreen button [CHAR LIMIT=NONE] -->
@@ -274,6 +280,8 @@
     <string name="select_text">Select</string>
     <!-- Accessibility text for the handle menu screenshot button [CHAR LIMIT=NONE] -->
     <string name="screenshot_text">Screenshot</string>
+    <!-- Accessibility text for the handle menu open in browser button [CHAR LIMIT=NONE] -->
+    <string name="open_in_browser_text">Open in browser</string>
     <!-- Accessibility text for the handle menu close button [CHAR LIMIT=NONE] -->
     <string name="close_text">Close</string>
     <!-- Accessibility text for the handle menu close menu button [CHAR LIMIT=NONE] -->

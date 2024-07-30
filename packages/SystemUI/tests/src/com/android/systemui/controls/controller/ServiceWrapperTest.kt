@@ -23,7 +23,7 @@ import android.service.controls.IControlsSubscriber
 import android.service.controls.IControlsSubscription
 import android.service.controls.actions.ControlAction
 import android.service.controls.actions.ControlActionWrapper
-import android.testing.AndroidTestingRunner
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import org.junit.Assert.assertEquals
@@ -42,7 +42,7 @@ import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
 
 @SmallTest
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 class ServiceWrapperTest : SysuiTestCase() {
 
     @Mock

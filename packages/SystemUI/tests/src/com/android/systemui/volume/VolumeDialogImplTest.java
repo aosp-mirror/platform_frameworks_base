@@ -23,6 +23,7 @@ import static android.media.AudioManager.RINGER_MODE_VIBRATE;
 import static com.android.systemui.Flags.FLAG_HAPTIC_VOLUME_SLIDER;
 import static com.android.systemui.volume.Events.DISMISS_REASON_UNKNOWN;
 import static com.android.systemui.volume.Events.SHOW_REASON_UNKNOWN;
+import static com.android.systemui.volume.VolumeDialogControllerImpl.DYNAMIC_STREAM_BROADCAST;
 import static com.android.systemui.volume.VolumeDialogControllerImpl.STREAMS;
 
 import static junit.framework.Assert.assertEquals;
@@ -35,6 +36,7 @@ import static org.junit.Assume.assumeNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.times;
@@ -69,6 +71,7 @@ import androidx.test.filters.SmallTest;
 
 import com.android.internal.jank.InteractionJankMonitor;
 import com.android.internal.logging.testing.UiEventLoggerFake;
+import com.android.settingslib.flags.Flags;
 import com.android.systemui.Prefs;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.animation.AnimatorTestRule;
@@ -86,9 +89,12 @@ import com.android.systemui.statusbar.policy.FakeConfigurationController;
 import com.android.systemui.util.settings.FakeSettings;
 import com.android.systemui.util.settings.SecureSettings;
 import com.android.systemui.util.time.FakeSystemClock;
+import com.android.systemui.volume.domain.interactor.VolumeDialogInteractor;
 import com.android.systemui.volume.domain.interactor.VolumePanelNavigationInteractor;
-import com.android.systemui.volume.ui.binder.VolumeDialogMenuIconBinder;
+import com.android.systemui.volume.panel.shared.flag.VolumePanelFlag;
 import com.android.systemui.volume.ui.navigation.VolumeNavigator;
+
+import com.google.common.collect.ImmutableList;
 
 import dagger.Lazy;
 
@@ -105,6 +111,7 @@ import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
 import java.util.Arrays;
+import java.util.Optional;
 import java.util.function.Predicate;
 
 @SmallTest
@@ -119,7 +126,6 @@ public class VolumeDialogImplTest extends SysuiTestCase {
     View mDrawerNormal;
     ViewGroup mDialogRowsView;
     CaptionsToggleImageButton mODICaptionsIcon;
-
     private TestableLooper mTestableLooper;
     private ConfigurationController mConfigurationController;
     private int mOriginalOrientation;
@@ -150,15 +156,18 @@ public class VolumeDialogImplTest extends SysuiTestCase {
     @Mock
     private VolumeNavigator mVolumeNavigator;
     @Mock
-    private VolumeDialogMenuIconBinder mVolumeDialogMenuIconBinder;
+    private VolumePanelFlag mVolumePanelFlag;
+    @Mock
+    private VolumeDialogInteractor mVolumeDialogInteractor;
 
     private final CsdWarningDialog.Factory mCsdWarningDialogFactory =
             new CsdWarningDialog.Factory() {
-        @Override
-        public CsdWarningDialog create(int warningType, Runnable onCleanup) {
-            return mCsdWarningDialog;
-        }
-    };
+                @Override
+                public CsdWarningDialog create(int warningType, Runnable onCleanup,
+                        Optional<ImmutableList<CsdWarningAction>> actionIntents) {
+                    return mCsdWarningDialog;
+                }
+            };
     @Mock
     private VibratorHelper mVibratorHelper;
 
@@ -211,11 +220,12 @@ public class VolumeDialogImplTest extends SysuiTestCase {
                 mCsdWarningDialogFactory,
                 mPostureController,
                 mTestableLooper.getLooper(),
+                mVolumePanelFlag,
                 mDumpManager,
                 mLazySecureSettings,
                 mVibratorHelper,
-                mVolumeDialogMenuIconBinder,
-                new FakeSystemClock());
+                new FakeSystemClock(),
+                mVolumeDialogInteractor);
         mDialog.init(0, null);
         State state = createShellState();
         mDialog.onStateChangedH(state);
@@ -773,6 +783,47 @@ public class VolumeDialogImplTest extends SysuiTestCase {
 
         boolean foundDnDIcon = findDndIconAmongVolumeRows();
         assertFalse(foundDnDIcon);
+    }
+
+    @Test
+    public void testInteractor_onShow() {
+        mDialog.show(SHOW_REASON_UNKNOWN);
+        mTestableLooper.processAllMessages();
+
+        verify(mVolumeDialogInteractor, atLeastOnce()).onDialogShown();
+        verify(mVolumeDialogInteractor, atLeastOnce()).onDialogDismissed(); // dismiss by timeout
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_VOLUME_DIALOG_AUDIO_SHARING_FIX)
+    public void testDynamicStreamForBroadcast_createRow() {
+        State state = createShellState();
+        VolumeDialogController.StreamState ss = new VolumeDialogController.StreamState();
+        ss.dynamic = true;
+        ss.levelMin = 0;
+        ss.levelMax = 255;
+        ss.level = 20;
+        ss.name = -1;
+        ss.remoteLabel = mContext.getString(R.string.audio_sharing_description);
+        state.states.append(DYNAMIC_STREAM_BROADCAST, ss);
+
+        mDialog.onStateChangedH(state);
+        mTestableLooper.processAllMessages();
+
+        ViewGroup volumeDialogRows = mDialog.getDialogView().findViewById(R.id.volume_dialog_rows);
+        assumeNotNull(volumeDialogRows);
+        View broadcastRow = null;
+        final int rowCount = volumeDialogRows.getChildCount();
+        // we don't make assumptions about the position of the dnd row
+        for (int i = 0; i < rowCount; i++) {
+            View volumeRow = volumeDialogRows.getChildAt(i);
+            if (volumeRow.getId() == DYNAMIC_STREAM_BROADCAST) {
+                broadcastRow = volumeRow;
+                break;
+            }
+        }
+        assertNotNull(broadcastRow);
+        assertEquals(broadcastRow.getVisibility(), View.VISIBLE);
     }
 
     /**

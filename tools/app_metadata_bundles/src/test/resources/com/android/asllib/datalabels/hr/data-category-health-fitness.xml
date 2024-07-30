@@ -1,8 +1,6 @@
 <data-labels>
-    <data-shared dataCategory="health_fitness"
-        dataType="health"
+    <data-shared dataType="health_fitness_data_type_health"
         purposes="analytics" />
-    <data-shared dataCategory="health_fitness"
-        dataType="fitness"
+    <data-shared dataType="health_fitness_data_type_fitness"
         purposes="analytics" />
 </data-labels>

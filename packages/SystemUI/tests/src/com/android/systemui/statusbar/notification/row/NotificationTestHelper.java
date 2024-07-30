@@ -54,6 +54,7 @@ import android.widget.RemoteViews;
 import androidx.annotation.NonNull;
 
 import com.android.internal.logging.MetricsLogger;
+import com.android.internal.logging.UiEventLogger;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.keyguard.TestScopeProvider;
 import com.android.systemui.TestableDependency;
@@ -199,6 +200,8 @@ public class NotificationTestHelper {
                                 mock(NotifRemoteViewCache.class),
                                 mock(NotificationRemoteInputManager.class),
                                 mock(ConversationNotificationProcessor.class),
+                                mock(RichOngoingNotificationContentExtractor.class),
+                                mock(RichOngoingNotificationViewInflater.class),
                                 mock(Executor.class),
                                 new MockSmartReplyInflater(),
                                 mock(NotifLayoutInflaterFactory.Provider.class),
@@ -669,7 +672,8 @@ public class NotificationTestHelper {
                 mock(SmartReplyConstants.class),
                 mock(SmartReplyController.class),
                 mFeatureFlags,
-                mock(IStatusBarService.class));
+                mock(IStatusBarService.class),
+                mock(UiEventLogger.class));
 
         row.setAboveShelfChangedListener(aboveShelf -> { });
         mBindStage.getStageParams(entry).requireContentViews(extraInflationFlags);

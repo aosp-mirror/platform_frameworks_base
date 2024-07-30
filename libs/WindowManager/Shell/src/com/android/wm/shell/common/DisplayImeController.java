@@ -315,7 +315,7 @@ public class DisplayImeController implements DisplayController.OnDisplaysChanged
                         }
                     }
                     if (!mImeShowing) {
-                        removeImeSurface();
+                        removeImeSurface(mDisplayId);
                     }
                 }
             } else if (!android.view.inputmethod.Flags.refactorInsetsController()
@@ -344,8 +344,7 @@ public class DisplayImeController implements DisplayController.OnDisplaysChanged
 
             if (android.view.inputmethod.Flags.refactorInsetsController()) {
                 if (pendingImeStartAnimation) {
-                    startAnimation(true, true /* forceRestart */,
-                            null /* statsToken */);
+                    startAnimation(true, true /* forceRestart */);
                 }
             }
         }
@@ -398,8 +397,7 @@ public class DisplayImeController implements DisplayController.OnDisplaysChanged
                 // already (e.g., when focussing an editText in activity B, while and editText in
                 // activity A is focussed), we will not get a call of #insetsControlChanged, and
                 // therefore have to start the show animation from here
-                startAnimation(mImeRequestedVisible /* show */, false /* forceRestart */,
-                        null /* TODO statsToken */);
+                startAnimation(mImeRequestedVisible /* show */, false /* forceRestart */);
             }
         }
 
@@ -436,16 +434,31 @@ public class DisplayImeController implements DisplayController.OnDisplaysChanged
                     .navBarFrameHeight();
         }
 
+        private void startAnimation(final boolean show, final boolean forceRestart) {
+            final var imeSource = mInsetsState.peekSource(InsetsSource.ID_IME);
+            if (imeSource == null || mImeSourceControl == null) {
+                return;
+            }
+            final var statsToken = mImeSourceControl.getImeStatsToken();
+
+            startAnimation(show, forceRestart, statsToken);
+        }
+
         private void startAnimation(final boolean show, final boolean forceRestart,
                 @SoftInputShowHideReason int reason) {
             final var imeSource = mInsetsState.peekSource(InsetsSource.ID_IME);
             if (imeSource == null || mImeSourceControl == null) {
                 return;
             }
-            final var statsToken = ImeTracker.forLogging().onStart(
-                    show ? ImeTracker.TYPE_SHOW : ImeTracker.TYPE_HIDE, ImeTracker.ORIGIN_WM_SHELL,
-                    reason, false /* fromUser */);
-
+            final ImeTracker.Token statsToken;
+            if (android.view.inputmethod.Flags.refactorInsetsController()
+                    && mImeSourceControl.getImeStatsToken() != null) {
+                statsToken = mImeSourceControl.getImeStatsToken();
+            } else {
+                statsToken = ImeTracker.forLogging().onStart(
+                        show ? ImeTracker.TYPE_SHOW : ImeTracker.TYPE_HIDE,
+                        ImeTracker.ORIGIN_WM_SHELL, reason, false /* fromUser */);
+            }
             startAnimation(show, forceRestart, statsToken);
         }
 
@@ -538,8 +551,10 @@ public class DisplayImeController implements DisplayController.OnDisplaysChanged
 
                 @Override
                 public void onAnimationStart(Animator animation) {
+                    ValueAnimator valueAnimator = (ValueAnimator) animation;
+                    float value = (float) valueAnimator.getAnimatedValue();
                     SurfaceControl.Transaction t = mTransactionPool.acquire();
-                    t.setPosition(mImeSourceControl.getLeash(), x, startY);
+                    t.setPosition(mImeSourceControl.getLeash(), x, value);
                     if (DEBUG) {
                         Slog.d(TAG, "onAnimationStart d:" + mDisplayId + " top:"
                                 + imeTop(hiddenY) + "->" + imeTop(shownY)
@@ -549,7 +564,7 @@ public class DisplayImeController implements DisplayController.OnDisplaysChanged
                             imeTop(shownY), mAnimationDirection == DIRECTION_SHOW, isFloating, t);
                     mAnimateAlpha = (flags & ImePositionProcessor.IME_ANIMATION_NO_ALPHA) == 0;
                     final float alpha = (mAnimateAlpha || isFloating)
-                            ? (startY - hiddenY) / (shownY - hiddenY)
+                            ? (value - hiddenY) / (shownY - hiddenY)
                             : 1.f;
                     t.setAlpha(mImeSourceControl.getLeash(), alpha);
                     if (mAnimationDirection == DIRECTION_SHOW) {
@@ -560,7 +575,7 @@ public class DisplayImeController implements DisplayController.OnDisplaysChanged
                     if (DEBUG_IME_VISIBILITY) {
                         EventLog.writeEvent(IMF_IME_REMOTE_ANIM_START,
                                 mStatsToken != null ? mStatsToken.getTag() : ImeTracker.TOKEN_NONE,
-                                mDisplayId, mAnimationDirection, alpha, startY , endY,
+                                mDisplayId, mAnimationDirection, alpha, value, endY,
                                 Objects.toString(mImeSourceControl.getLeash()),
                                 Objects.toString(mImeSourceControl.getInsetsHint()),
                                 Objects.toString(mImeSourceControl.getSurfacePosition()),
@@ -602,7 +617,7 @@ public class DisplayImeController implements DisplayController.OnDisplaysChanged
                                 || hasLeash) {
                             t.hide(mImeSourceControl.getLeash());
                         }
-                        removeImeSurface();
+                        removeImeSurface(mDisplayId);
                         ImeTracker.forLogging().onHidden(mStatsToken);
                     } else if (mAnimationDirection == DIRECTION_SHOW && !mCancelled) {
                         ImeTracker.forLogging().onShown(mStatsToken);
@@ -656,10 +671,10 @@ public class DisplayImeController implements DisplayController.OnDisplaysChanged
         }
     }
 
-    void removeImeSurface() {
+    void removeImeSurface(int displayId) {
         // Remove the IME surface to make the insets invisible for
         // non-client controlled insets.
-        InputMethodManagerGlobal.removeImeSurface(
+        InputMethodManagerGlobal.removeImeSurface(displayId,
                 e -> Slog.e(TAG, "Failed to remove IME surface.", e));
     }
 

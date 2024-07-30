@@ -23,6 +23,7 @@ import static android.os.VibrationAttributes.USAGE_ACCESSIBILITY;
 import static android.os.VibrationAttributes.USAGE_ALARM;
 import static android.os.VibrationAttributes.USAGE_COMMUNICATION_REQUEST;
 import static android.os.VibrationAttributes.USAGE_HARDWARE_FEEDBACK;
+import static android.os.VibrationAttributes.USAGE_IME_FEEDBACK;
 import static android.os.VibrationAttributes.USAGE_MEDIA;
 import static android.os.VibrationAttributes.USAGE_NOTIFICATION;
 import static android.os.VibrationAttributes.USAGE_PHYSICAL_EMULATION;
@@ -605,7 +606,7 @@ public class VibrationSettingsTest {
     public void shouldIgnoreVibration_withKeyboardSettingsOff_shouldIgnoreKeyboardVibration() {
         setUserSetting(Settings.System.HAPTIC_FEEDBACK_INTENSITY, VIBRATION_INTENSITY_MEDIUM);
         setUserSetting(Settings.System.KEYBOARD_VIBRATION_ENABLED, 0 /* OFF*/);
-        setHasFixedKeyboardAmplitudeIntensity(true);
+        setKeyboardVibrationSettingsSupported(true);
 
         // Keyboard touch ignored.
         assertVibrationIgnoredForAttributes(
@@ -630,7 +631,7 @@ public class VibrationSettingsTest {
     public void shouldIgnoreVibration_withKeyboardSettingsOn_shouldNotIgnoreKeyboardVibration() {
         setUserSetting(Settings.System.HAPTIC_FEEDBACK_INTENSITY, VIBRATION_INTENSITY_OFF);
         setUserSetting(Settings.System.KEYBOARD_VIBRATION_ENABLED, 1 /* ON */);
-        setHasFixedKeyboardAmplitudeIntensity(true);
+        setKeyboardVibrationSettingsSupported(true);
 
         // General touch ignored.
         assertVibrationIgnoredForUsage(USAGE_TOUCH, Vibration.Status.IGNORED_FOR_SETTINGS);
@@ -645,10 +646,10 @@ public class VibrationSettingsTest {
 
     @Test
     @RequiresFlagsEnabled(Flags.FLAG_KEYBOARD_CATEGORY_ENABLED)
-    public void shouldIgnoreVibration_noFixedKeyboardAmplitude_ignoresKeyboardTouchVibration() {
+    public void shouldIgnoreVibration_notSupportKeyboardVibration_ignoresKeyboardTouchVibration() {
         setUserSetting(Settings.System.HAPTIC_FEEDBACK_INTENSITY, VIBRATION_INTENSITY_OFF);
         setUserSetting(Settings.System.KEYBOARD_VIBRATION_ENABLED, 1 /* ON */);
-        setHasFixedKeyboardAmplitudeIntensity(false);
+        setKeyboardVibrationSettingsSupported(false);
 
         // General touch ignored.
         assertVibrationIgnoredForUsage(USAGE_TOUCH, Vibration.Status.IGNORED_FOR_SETTINGS);
@@ -893,6 +894,22 @@ public class VibrationSettingsTest {
     }
 
     @Test
+    public void getCurrentIntensity_ImeFeedbackValueReflectsToKeyboardVibrationSettings() {
+        setDefaultIntensity(USAGE_IME_FEEDBACK, VIBRATION_INTENSITY_MEDIUM);
+        setDefaultIntensity(USAGE_TOUCH, VIBRATION_INTENSITY_HIGH);
+
+        setKeyboardVibrationSettingsSupported(false);
+        mVibrationSettings.update();
+        assertEquals(VIBRATION_INTENSITY_HIGH,
+                mVibrationSettings.getCurrentIntensity(USAGE_IME_FEEDBACK));
+
+        setKeyboardVibrationSettingsSupported(true);
+        mVibrationSettings.update();
+        assertEquals(VIBRATION_INTENSITY_MEDIUM,
+                mVibrationSettings.getCurrentIntensity(USAGE_IME_FEEDBACK));
+    }
+
+    @Test
     public void getFallbackEffect_returnsEffectsFromSettings() {
         assertNotNull(mVibrationSettings.getFallbackEffect(VibrationEffect.EFFECT_TICK));
         assertNotNull(mVibrationSettings.getFallbackEffect(VibrationEffect.EFFECT_TEXTURE_TICK));
@@ -974,8 +991,8 @@ public class VibrationSettingsTest {
         when(mVibrationConfigMock.ignoreVibrationsOnWirelessCharger()).thenReturn(ignore);
     }
 
-    private void setHasFixedKeyboardAmplitudeIntensity(boolean hasFixedAmplitude) {
-        when(mVibrationConfigMock.hasFixedKeyboardAmplitude()).thenReturn(hasFixedAmplitude);
+    private void setKeyboardVibrationSettingsSupported(boolean supported) {
+        when(mVibrationConfigMock.isKeyboardVibrationSettingsSupported()).thenReturn(supported);
     }
 
     private void deleteUserSetting(String settingName) {

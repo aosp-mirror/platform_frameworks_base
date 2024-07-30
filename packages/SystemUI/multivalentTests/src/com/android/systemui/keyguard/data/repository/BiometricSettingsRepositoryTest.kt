@@ -528,6 +528,30 @@ class BiometricSettingsRepositoryTest : SysuiTestCase() {
     }
 
     @Test
+    fun userChange_isFingerprintEnrolledAndEnabledUpdated() =
+        testScope.runTest {
+            createBiometricSettingsRepository()
+            whenever(authController.isFingerprintEnrolled(ANOTHER_USER_ID)).thenReturn(false)
+            whenever(authController.isFingerprintEnrolled(PRIMARY_USER_ID)).thenReturn(true)
+
+            verify(biometricManager)
+                .registerEnabledOnKeyguardCallback(biometricManagerCallback.capture())
+            val isFingerprintEnrolledAndEnabled =
+                collectLastValue(underTest.isFingerprintEnrolledAndEnabled)
+            biometricManagerCallback.value.onChanged(true, ANOTHER_USER_ID)
+            runCurrent()
+            userRepository.setSelectedUserInfo(ANOTHER_USER)
+            runCurrent()
+            assertThat(isFingerprintEnrolledAndEnabled()).isFalse()
+
+            biometricManagerCallback.value.onChanged(true, PRIMARY_USER_ID)
+            runCurrent()
+            userRepository.setSelectedUserInfo(PRIMARY_USER)
+            runCurrent()
+            assertThat(isFingerprintEnrolledAndEnabled()).isTrue()
+        }
+
+    @Test
     fun userChange_biometricEnabledChange_handlesRaceCondition() =
         testScope.runTest {
             createBiometricSettingsRepository()

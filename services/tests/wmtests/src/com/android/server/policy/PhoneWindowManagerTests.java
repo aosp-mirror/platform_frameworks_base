@@ -54,6 +54,8 @@ import androidx.test.filters.SmallTest;
 
 import com.android.server.LocalServices;
 import com.android.server.pm.UserManagerInternal;
+import com.android.server.policy.keyguard.KeyguardServiceDelegate;
+import com.android.server.statusbar.StatusBarManagerInternal;
 import com.android.server.wm.ActivityTaskManagerInternal;
 import com.android.server.wm.DisplayPolicy;
 import com.android.server.wm.DisplayRotation;
@@ -68,7 +70,7 @@ import org.junit.Test;
  * Test class for {@link PhoneWindowManager}.
  *
  * Build/Install/Run:
- *  atest WmTests:PhoneWindowManagerTests
+ * atest WmTests:PhoneWindowManagerTests
  */
 @SmallTest
 public class PhoneWindowManagerTests {
@@ -78,6 +80,7 @@ public class PhoneWindowManagerTests {
 
     PhoneWindowManager mPhoneWindowManager;
     private ActivityTaskManagerInternal mAtmInternal;
+    private StatusBarManagerInternal mStatusBarManagerInternal;
     private Context mContext;
 
     @Before
@@ -90,6 +93,9 @@ public class PhoneWindowManagerTests {
         LocalServices.addService(ActivityTaskManagerInternal.class, mAtmInternal);
         mPhoneWindowManager.mActivityTaskManagerInternal = mAtmInternal;
         LocalServices.addService(WindowManagerInternal.class, mock(WindowManagerInternal.class));
+        mStatusBarManagerInternal = mock(StatusBarManagerInternal.class);
+        LocalServices.addService(StatusBarManagerInternal.class, mStatusBarManagerInternal);
+        mPhoneWindowManager.mKeyguardDelegate = mock(KeyguardServiceDelegate.class);
     }
 
     @After
@@ -98,6 +104,7 @@ public class PhoneWindowManagerTests {
         reset(mContext);
         LocalServices.removeServiceForTest(ActivityTaskManagerInternal.class);
         LocalServices.removeServiceForTest(WindowManagerInternal.class);
+        LocalServices.removeServiceForTest(StatusBarManagerInternal.class);
     }
 
     @Test
@@ -124,8 +131,6 @@ public class PhoneWindowManagerTests {
 
     @Test
     public void testScreenTurnedOff() {
-        mSetFlagsRule.enableFlags(com.android.window.flags.Flags
-                .FLAG_SKIP_SLEEPING_WHEN_SWITCHING_DISPLAY);
         doNothing().when(mPhoneWindowManager).updateSettings(any());
         doNothing().when(mPhoneWindowManager).initializeHdmiState();
         final boolean[] isScreenTurnedOff = { false };
@@ -152,14 +157,15 @@ public class PhoneWindowManagerTests {
         // Skip sleep-token for non-sleep-screen-off.
         clearInvocations(tokenAcquirer);
         mPhoneWindowManager.screenTurnedOff(DEFAULT_DISPLAY, true /* isSwappingDisplay */);
-        verify(tokenAcquirer, never()).acquire(anyInt(), anyBoolean());
+        verify(tokenAcquirer, never()).acquire(anyInt());
         assertThat(isScreenTurnedOff[0]).isTrue();
 
         // Apply sleep-token for sleep-screen-off.
+        isScreenTurnedOff[0] = false;
         mPhoneWindowManager.startedGoingToSleep(DEFAULT_DISPLAY, 0 /* reason */);
         assertThat(mPhoneWindowManager.mIsGoingToSleepDefaultDisplay).isTrue();
         mPhoneWindowManager.screenTurnedOff(DEFAULT_DISPLAY, true /* isSwappingDisplay */);
-        verify(tokenAcquirer).acquire(eq(DEFAULT_DISPLAY), eq(true));
+        verify(tokenAcquirer).acquire(eq(DEFAULT_DISPLAY));
 
         mPhoneWindowManager.finishedGoingToSleep(DEFAULT_DISPLAY, 0 /* reason */);
         assertThat(mPhoneWindowManager.mIsGoingToSleepDefaultDisplay).isFalse();
@@ -169,11 +175,11 @@ public class PhoneWindowManagerTests {
         isScreenTurnedOff[0] = false;
         clearInvocations(tokenAcquirer);
         mPhoneWindowManager.screenTurnedOff(DEFAULT_DISPLAY, true /* isSwappingDisplay */);
-        verify(tokenAcquirer, never()).acquire(anyInt(), anyBoolean());
+        verify(tokenAcquirer, never()).acquire(anyInt());
         assertThat(displayPolicy.isScreenOnEarly()).isFalse();
         assertThat(displayPolicy.isScreenOnFully()).isFalse();
         mPhoneWindowManager.startedGoingToSleep(DEFAULT_DISPLAY, 0 /* reason */);
-        verify(tokenAcquirer).acquire(eq(DEFAULT_DISPLAY), eq(false));
+        verify(tokenAcquirer).acquire(eq(DEFAULT_DISPLAY));
     }
 
     @Test
@@ -204,6 +210,20 @@ public class PhoneWindowManagerTests {
         assertEquals(ADD_OKAY, mPhoneWindowManager.checkAddPermission(TYPE_ACCESSIBILITY_OVERLAY,
                 /* isRoundedCornerOverlay= */ false, "test.pkg", outAppOp));
         assertThat(outAppOp[0]).isEqualTo(AppOpsManager.OP_NONE);
+    }
+
+    @Test
+    public void userSwitching_keyboardShortcutHelperDismissed() {
+        mPhoneWindowManager.setSwitchingUser(true);
+
+        verify(mStatusBarManagerInternal).dismissKeyboardShortcutsMenu();
+    }
+
+    @Test
+    public void userNotSwitching_keyboardShortcutHelperDismissed() {
+        mPhoneWindowManager.setSwitchingUser(false);
+
+        verify(mStatusBarManagerInternal, never()).dismissKeyboardShortcutsMenu();
     }
 
     private void mockStartDockOrHome() throws Exception {

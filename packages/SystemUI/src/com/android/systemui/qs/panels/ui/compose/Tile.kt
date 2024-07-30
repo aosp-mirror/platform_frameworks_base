@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+@file:OptIn(ExperimentalFoundationApi::class)
+
 package com.android.systemui.qs.panels.ui.compose
 
 import android.graphics.drawable.Animatable
@@ -21,39 +23,51 @@ import android.service.quicksettings.Tile.STATE_ACTIVE
 import android.service.quicksettings.Tile.STATE_INACTIVE
 import android.text.TextUtils
 import androidx.appcompat.content.res.AppCompatResources
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.animation.graphics.ExperimentalAnimationGraphicsApi
 import androidx.compose.animation.graphics.res.animatedVectorResource
 import androidx.compose.animation.graphics.res.rememberAnimatedVectorPainter
 import androidx.compose.animation.graphics.vector.AnimatedImageVector
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
+import androidx.compose.foundation.LocalOverscrollConfiguration
 import androidx.compose.foundation.basicMarquee
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.border
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Arrangement.spacedBy
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyGridScope
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Remove
+import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material3.Icon
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -68,7 +82,6 @@ import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.onClick
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.stateDescription
@@ -78,25 +91,28 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.android.compose.animation.Expandable
+import com.android.compose.modifiers.thenIf
+import com.android.systemui.animation.Expandable
 import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.common.ui.compose.Icon
 import com.android.systemui.common.ui.compose.load
-import com.android.systemui.qs.panels.ui.viewmodel.AvailableEditActions
+import com.android.systemui.plugins.qs.QSTile
+import com.android.systemui.qs.panels.shared.model.SizedTile
+import com.android.systemui.qs.panels.shared.model.TileRow
 import com.android.systemui.qs.panels.ui.viewmodel.EditTileViewModel
-import com.android.systemui.qs.panels.ui.viewmodel.TileUiState
 import com.android.systemui.qs.panels.ui.viewmodel.TileViewModel
 import com.android.systemui.qs.panels.ui.viewmodel.toUiState
 import com.android.systemui.qs.pipeline.domain.interactor.CurrentTilesInteractor
 import com.android.systemui.qs.pipeline.shared.TileSpec
 import com.android.systemui.qs.tileimpl.QSTileImpl
 import com.android.systemui.res.R
+import java.util.function.Supplier
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.mapLatest
 
 object TileType
 
-@OptIn(ExperimentalCoroutinesApi::class, ExperimentalFoundationApi::class)
+@OptIn(ExperimentalCoroutinesApi::class)
 @Composable
 fun Tile(
     tile: TileViewModel,
@@ -104,49 +120,153 @@ fun Tile(
     showLabels: Boolean = false,
     modifier: Modifier,
 ) {
-    val state: TileUiState by
-        tile.state
-            .mapLatest { it.toUiState() }
-            .collectAsStateWithLifecycle(tile.currentState.toUiState())
-    val colors = TileDefaults.getColorForState(state.state)
+    val state by tile.state.collectAsStateWithLifecycle(tile.currentState)
+    val uiState = remember(state) { state.toUiState() }
+    val colors = TileDefaults.getColorForState(uiState.state)
 
-    val context = LocalContext.current
-
-    Expandable(
-        color = colors.background,
-        shape = RoundedCornerShape(dimensionResource(R.dimen.qs_corner_radius)),
+    TileContainer(
+        colors = colors,
+        showLabels = showLabels,
+        label = uiState.label,
+        iconOnly = iconOnly,
+        clickEnabled = true,
+        onClick = tile::onClick,
+        onLongClick = tile::onLongClick,
+        modifier = modifier,
     ) {
-        Row(
-            modifier =
-                modifier
-                    .combinedClickable(
-                        onClick = { tile.onClick(it) },
-                        onLongClick = { tile.onLongClick(it) }
-                    )
-                    .tileModifier(colors),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = tileHorizontalArrangement(iconOnly),
-        ) {
-            val icon =
-                remember(state.icon) {
-                    state.icon.get().let {
-                        if (it is QSTileImpl.ResourceIcon) {
-                            Icon.Resource(it.resId, null)
-                        } else {
-                            Icon.Loaded(it.getDrawable(context), null)
-                        }
-                    }
-                }
-            TileContent(
-                label = state.label.toString(),
-                secondaryLabel = state.secondaryLabel.toString(),
+        val icon = getTileIcon(icon = uiState.icon)
+        if (iconOnly) {
+            TileIcon(icon = icon, color = colors.icon, modifier = Modifier.align(Alignment.Center))
+        } else {
+            LargeTileContent(
+                label = uiState.label,
+                secondaryLabel = uiState.secondaryLabel,
                 icon = icon,
                 colors = colors,
-                iconOnly = iconOnly,
-                showLabels = showLabels,
+                clickEnabled = true,
+                onClick = tile::onSecondaryClick,
+                onLongClick = tile::onLongClick,
             )
         }
     }
+}
+
+@Composable
+private fun TileContainer(
+    colors: TileColors,
+    showLabels: Boolean,
+    label: String,
+    iconOnly: Boolean,
+    clickEnabled: Boolean = false,
+    onClick: (Expandable) -> Unit = {},
+    onLongClick: (Expandable) -> Unit = {},
+    modifier: Modifier = Modifier,
+    content: @Composable BoxScope.() -> Unit,
+) {
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement =
+            spacedBy(dimensionResource(id = R.dimen.qs_label_container_margin), Alignment.Top),
+        modifier = modifier,
+    ) {
+        val backgroundColor =
+            if (iconOnly) {
+                colors.iconBackground
+            } else {
+                colors.background
+            }
+        Expandable(
+            color = backgroundColor,
+            shape = TileDefaults.TileShape,
+            modifier =
+                Modifier.height(dimensionResource(id = R.dimen.qs_tile_height))
+                    .clip(TileDefaults.TileShape)
+        ) {
+            Box(
+                modifier =
+                    Modifier.fillMaxSize()
+                        .thenIf(clickEnabled) {
+                            Modifier.combinedClickable(
+                                onClick = { onClick(it) },
+                                onLongClick = { onLongClick(it) }
+                            )
+                        }
+                        .tilePadding(),
+            ) {
+                content()
+            }
+        }
+
+        if (showLabels && iconOnly) {
+            Text(
+                label,
+                maxLines = 2,
+                color = colors.label,
+                overflow = TextOverflow.Ellipsis,
+                textAlign = TextAlign.Center,
+            )
+        }
+    }
+}
+
+@Composable
+private fun LargeTileContent(
+    label: String,
+    secondaryLabel: String?,
+    icon: Icon,
+    colors: TileColors,
+    clickEnabled: Boolean = false,
+    onClick: (Expandable) -> Unit = {},
+    onLongClick: (Expandable) -> Unit = {},
+) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = tileHorizontalArrangement()
+    ) {
+        Expandable(
+            color = colors.iconBackground,
+            shape = TileDefaults.TileShape,
+            modifier = Modifier.fillMaxHeight().aspectRatio(1f)
+        ) {
+            Box(
+                modifier =
+                    Modifier.fillMaxSize().clip(TileDefaults.TileShape).thenIf(clickEnabled) {
+                        Modifier.combinedClickable(
+                            onClick = { onClick(it) },
+                            onLongClick = { onLongClick(it) }
+                        )
+                    }
+            ) {
+                TileIcon(
+                    icon = icon,
+                    color = colors.icon,
+                    modifier = Modifier.align(Alignment.Center)
+                )
+            }
+        }
+
+        Column(verticalArrangement = Arrangement.Center, modifier = Modifier.fillMaxHeight()) {
+            Text(
+                label,
+                color = colors.label,
+                modifier = Modifier.tileMarquee(),
+            )
+            if (!TextUtils.isEmpty(secondaryLabel)) {
+                Text(
+                    secondaryLabel ?: "",
+                    color = colors.secondaryLabel,
+                    modifier = Modifier.tileMarquee(),
+                )
+            }
+        }
+    }
+}
+
+private fun Modifier.tileMarquee(): Modifier {
+    return basicMarquee(
+        iterations = 1,
+        initialDelayMillis = 200,
+    )
 }
 
 @Composable
@@ -168,49 +288,258 @@ fun TileLazyGrid(
 fun DefaultEditTileGrid(
     tiles: List<EditTileViewModel>,
     isIconOnly: (TileSpec) -> Boolean,
-    columns: GridCells,
+    columns: Int,
     modifier: Modifier,
     onAddTile: (TileSpec, Int) -> Unit,
     onRemoveTile: (TileSpec) -> Unit,
+    onResize: (TileSpec, Boolean) -> Unit,
 ) {
     val (currentTiles, otherTiles) = tiles.partition { it.isCurrent }
-    val (otherTilesStock, otherTilesCustom) = otherTiles.partition { it.appName == null }
+    val currentListState = rememberEditListState(currentTiles)
+    val dragAndDropState = rememberDragAndDropState(currentListState)
+
     val addTileToEnd: (TileSpec) -> Unit by rememberUpdatedState {
         onAddTile(it, CurrentTilesInteractor.POSITION_AT_END)
     }
+    val onDropAdd: (TileSpec, Int) -> Unit by rememberUpdatedState { tileSpec, position ->
+        onAddTile(tileSpec, position)
+    }
+    val onDoubleTap: (TileSpec) -> Unit by rememberUpdatedState { tileSpec ->
+        onResize(tileSpec, !isIconOnly(tileSpec))
+    }
+    val tilePadding = dimensionResource(R.dimen.qs_tile_margin_vertical)
 
-    TileLazyGrid(modifier = modifier, columns = columns) {
-        // These Text are just placeholders to see the different sections. Not final UI.
-        item(span = { GridItemSpan(maxLineSpan) }) { Text("Current tiles", color = Color.White) }
+    CompositionLocalProvider(LocalOverscrollConfiguration provides null) {
+        Column(
+            verticalArrangement =
+                spacedBy(dimensionResource(id = R.dimen.qs_label_container_margin)),
+            modifier = modifier.fillMaxSize().verticalScroll(rememberScrollState())
+        ) {
+            AnimatedContent(
+                targetState = dragAndDropState.dragInProgress,
+                modifier = Modifier.wrapContentSize()
+            ) { dragIsInProgress ->
+                EditGridHeader(Modifier.dragAndDropRemoveZone(dragAndDropState, onRemoveTile)) {
+                    if (dragIsInProgress) {
+                        RemoveTileTarget()
+                    } else {
+                        Text(text = "Hold and drag to rearrange tiles.")
+                    }
+                }
+            }
 
-        editTiles(
-            currentTiles,
-            ClickAction.REMOVE,
-            onRemoveTile,
-            isIconOnly,
-            indicatePosition = true,
-        )
+            CurrentTilesGrid(
+                currentListState.tiles,
+                columns,
+                tilePadding,
+                isIconOnly,
+                onRemoveTile,
+                onDoubleTap,
+                dragAndDropState,
+                onDropAdd,
+            )
 
-        item(span = { GridItemSpan(maxLineSpan) }) { Text("Tiles to add", color = Color.White) }
+            // Hide available tiles when dragging
+            AnimatedVisibility(
+                visible = !dragAndDropState.dragInProgress,
+                enter = fadeIn(),
+                exit = fadeOut()
+            ) {
+                Column(
+                    verticalArrangement =
+                        spacedBy(dimensionResource(id = R.dimen.qs_label_container_margin)),
+                    modifier = modifier.fillMaxSize()
+                ) {
+                    EditGridHeader { Text(text = "Hold and drag to add tiles.") }
 
+                    AvailableTileGrid(
+                        otherTiles,
+                        columns,
+                        tilePadding,
+                        addTileToEnd,
+                        dragAndDropState,
+                    )
+                }
+            }
+
+            // Drop zone to remove tiles dragged out of the tile grid
+            Spacer(
+                modifier =
+                    Modifier.fillMaxWidth()
+                        .weight(1f)
+                        .dragAndDropRemoveZone(dragAndDropState, onRemoveTile)
+            )
+        }
+    }
+}
+
+@Composable
+private fun EditGridHeader(
+    modifier: Modifier = Modifier,
+    content: @Composable BoxScope.() -> Unit
+) {
+    CompositionLocalProvider(
+        LocalContentColor provides MaterialTheme.colorScheme.onBackground.copy(alpha = .5f)
+    ) {
+        Box(
+            contentAlignment = Alignment.Center,
+            modifier = modifier.fillMaxWidth().height(TileDefaults.EditGridHeaderHeight)
+        ) {
+            content()
+        }
+    }
+}
+
+@Composable
+private fun RemoveTileTarget() {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = tileHorizontalArrangement(),
+        modifier =
+            Modifier.fillMaxHeight()
+                .border(1.dp, LocalContentColor.current, shape = TileDefaults.TileShape)
+                .padding(10.dp)
+    ) {
+        Icon(imageVector = Icons.Default.Clear, contentDescription = null)
+        Text(text = "Remove")
+    }
+}
+
+@Composable
+private fun CurrentTilesContainer(content: @Composable () -> Unit) {
+    Box(
+        Modifier.fillMaxWidth()
+            .border(
+                width = 1.dp,
+                color = MaterialTheme.colorScheme.onBackground.copy(alpha = .5f),
+                shape = RoundedCornerShape(48.dp),
+            )
+            .padding(dimensionResource(R.dimen.qs_tile_margin_vertical))
+    ) {
+        content()
+    }
+}
+
+@Composable
+private fun CurrentTilesGrid(
+    tiles: List<EditTileViewModel>,
+    columns: Int,
+    tilePadding: Dp,
+    isIconOnly: (TileSpec) -> Boolean,
+    onClick: (TileSpec) -> Unit,
+    onDoubleTap: (TileSpec) -> Unit,
+    dragAndDropState: DragAndDropState,
+    onDrop: (TileSpec, Int) -> Unit
+) {
+    val tileHeight = tileHeight()
+    val currentRows =
+        remember(tiles) {
+            calculateRows(
+                tiles.map {
+                    SizedTile(
+                        it,
+                        if (isIconOnly(it.tileSpec)) {
+                            1
+                        } else {
+                            2
+                        }
+                    )
+                },
+                columns
+            )
+        }
+    val currentGridHeight = gridHeight(currentRows, tileHeight, tilePadding)
+    // Current tiles
+    CurrentTilesContainer {
+        TileLazyGrid(
+            modifier =
+                Modifier.height(currentGridHeight)
+                    .dragAndDropTileList(dragAndDropState, { true }, onDrop),
+            columns = GridCells.Fixed(columns)
+        ) {
+            editTiles(
+                tiles,
+                ClickAction.REMOVE,
+                onClick,
+                isIconOnly,
+                dragAndDropState,
+                onDoubleTap = onDoubleTap,
+                indicatePosition = true,
+                acceptDrops = { true },
+                onDrop = onDrop,
+            )
+        }
+    }
+}
+
+@Composable
+private fun AvailableTileGrid(
+    tiles: List<EditTileViewModel>,
+    columns: Int,
+    tilePadding: Dp,
+    onClick: (TileSpec) -> Unit,
+    dragAndDropState: DragAndDropState,
+) {
+    val (otherTilesStock, otherTilesCustom) = tiles.partition { it.appName == null }
+    val availableTileHeight = tileHeight(true)
+    val availableGridHeight = gridHeight(tiles.size, availableTileHeight, columns, tilePadding)
+
+    // Available tiles
+    TileLazyGrid(
+        modifier = Modifier.height(availableGridHeight),
+        columns = GridCells.Fixed(columns)
+    ) {
         editTiles(
             otherTilesStock,
             ClickAction.ADD,
-            addTileToEnd,
-            isIconOnly,
+            onClick,
+            isIconOnly = { true },
+            dragAndDropState = dragAndDropState,
+            acceptDrops = { false },
+            showLabels = true,
         )
-
-        item(span = { GridItemSpan(maxLineSpan) }) {
-            Text("Custom tiles to add", color = Color.White)
-        }
-
         editTiles(
             otherTilesCustom,
             ClickAction.ADD,
-            addTileToEnd,
-            isIconOnly,
+            onClick,
+            isIconOnly = { true },
+            dragAndDropState = dragAndDropState,
+            acceptDrops = { false },
+            showLabels = true,
         )
     }
+}
+
+fun gridHeight(nTiles: Int, tileHeight: Dp, columns: Int, padding: Dp): Dp {
+    val rows = (nTiles + columns - 1) / columns
+    return gridHeight(rows, tileHeight, padding)
+}
+
+fun gridHeight(rows: Int, tileHeight: Dp, padding: Dp): Dp {
+    return ((tileHeight + padding) * rows) - padding
+}
+
+private fun calculateRows(tiles: List<SizedTile<EditTileViewModel>>, columns: Int): Int {
+    val row = TileRow<EditTileViewModel>(columns)
+    var count = 0
+
+    for (tile in tiles) {
+        if (row.maybeAddTile(tile)) {
+            if (row.isFull()) {
+                // Row is full, no need to stretch tiles
+                count += 1
+                row.clear()
+            }
+        } else {
+            count += 1
+            row.clear()
+            row.maybeAddTile(tile)
+        }
+    }
+    if (row.tiles.isNotEmpty()) {
+        count += 1
+    }
+    return count
 }
 
 fun LazyGridScope.editTiles(
@@ -218,6 +547,10 @@ fun LazyGridScope.editTiles(
     clickAction: ClickAction,
     onClick: (TileSpec) -> Unit,
     isIconOnly: (TileSpec) -> Boolean,
+    dragAndDropState: DragAndDropState,
+    acceptDrops: (TileSpec) -> Boolean,
+    onDoubleTap: (TileSpec) -> Unit = {},
+    onDrop: (TileSpec, Int) -> Unit = { _, _ -> },
     showLabels: Boolean = false,
     indicatePosition: Boolean = false,
 ) {
@@ -226,63 +559,45 @@ fun LazyGridScope.editTiles(
         key = { tiles[it].tileSpec.spec },
         span = { GridItemSpan(if (isIconOnly(tiles[it].tileSpec)) 1 else 2) },
         contentType = { TileType }
-    ) {
-        val viewModel = tiles[it]
-        val canClick =
-            when (clickAction) {
-                ClickAction.ADD -> AvailableEditActions.ADD in viewModel.availableEditActions
-                ClickAction.REMOVE -> AvailableEditActions.REMOVE in viewModel.availableEditActions
-            }
-        val onClickActionName =
-            when (clickAction) {
-                ClickAction.ADD ->
-                    stringResource(id = R.string.accessibility_qs_edit_tile_add_action)
-                ClickAction.REMOVE ->
-                    stringResource(id = R.string.accessibility_qs_edit_remove_tile_action)
-            }
-        val stateDescription =
-            if (indicatePosition) {
-                stringResource(id = R.string.accessibility_qs_edit_position, it + 1)
-            } else {
-                ""
-            }
+    ) { index ->
+        val viewModel = tiles[index]
+        val iconOnly = isIconOnly(viewModel.tileSpec)
+        val tileHeight = tileHeight(iconOnly && showLabels)
 
-        Box(
-            modifier =
-                Modifier.clickable(enabled = canClick) { onClick.invoke(viewModel.tileSpec) }
-                    .animateItem()
-                    .semantics {
-                        onClick(onClickActionName) { false }
-                        this.stateDescription = stateDescription
-                    }
-        ) {
-            val iconOnly = isIconOnly(viewModel.tileSpec)
-            val tileHeight = tileHeight(iconOnly && showLabels)
+        if (!dragAndDropState.isMoving(viewModel.tileSpec)) {
+            val onClickActionName =
+                when (clickAction) {
+                    ClickAction.ADD ->
+                        stringResource(id = R.string.accessibility_qs_edit_tile_add_action)
+                    ClickAction.REMOVE ->
+                        stringResource(id = R.string.accessibility_qs_edit_remove_tile_action)
+                }
+            val stateDescription =
+                if (indicatePosition) {
+                    stringResource(id = R.string.accessibility_qs_edit_position, index + 1)
+                } else {
+                    ""
+                }
             EditTile(
                 tileViewModel = viewModel,
                 iconOnly = iconOnly,
                 showLabels = showLabels,
-                modifier = Modifier.height(tileHeight)
+                modifier =
+                    Modifier.height(tileHeight)
+                        .animateItem()
+                        .semantics {
+                            onClick(onClickActionName) { false }
+                            this.stateDescription = stateDescription
+                        }
+                        .dragAndDropTile(dragAndDropState, viewModel.tileSpec, acceptDrops, onDrop)
+                        .dragAndDropTileSource(
+                            viewModel,
+                            onClick,
+                            onDoubleTap,
+                            dragAndDropState,
+                        )
             )
-            if (canClick) {
-                Badge(clickAction, Modifier.align(Alignment.TopEnd))
-            }
         }
-    }
-}
-
-@Composable
-fun Badge(action: ClickAction, modifier: Modifier = Modifier) {
-    Box(modifier = modifier.size(16.dp).background(Color.Cyan, shape = CircleShape)) {
-        Icon(
-            imageVector =
-                when (action) {
-                    ClickAction.ADD -> Icons.Filled.Add
-                    ClickAction.REMOVE -> Icons.Filled.Remove
-                },
-            "",
-            tint = Color.Black,
-        )
     }
 }
 
@@ -296,20 +611,27 @@ fun EditTile(
     val label = tileViewModel.label.load() ?: tileViewModel.tileSpec.spec
     val colors = TileDefaults.inactiveTileColors()
 
-    Row(
-        modifier = modifier.tileModifier(colors).semantics { this.contentDescription = label },
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = tileHorizontalArrangement(iconOnly)
+    TileContainer(
+        colors = colors,
+        showLabels = showLabels,
+        label = label,
+        iconOnly = iconOnly,
+        modifier = modifier,
     ) {
-        TileContent(
-            label = label,
-            secondaryLabel = tileViewModel.appName?.load(),
-            colors = colors,
-            icon = tileViewModel.icon,
-            iconOnly = iconOnly,
-            showLabels = showLabels,
-            animateIconToEnd = true,
-        )
+        if (iconOnly) {
+            TileIcon(
+                icon = tileViewModel.icon,
+                color = colors.icon,
+                modifier = Modifier.align(Alignment.Center)
+            )
+        } else {
+            LargeTileContent(
+                label = label,
+                secondaryLabel = tileViewModel.appName?.load(),
+                icon = tileViewModel.icon,
+                colors = colors,
+            )
+        }
     }
 }
 
@@ -318,14 +640,27 @@ enum class ClickAction {
     REMOVE,
 }
 
+@Composable
+private fun getTileIcon(icon: Supplier<QSTile.Icon>): Icon {
+    val context = LocalContext.current
+    return icon.get().let {
+        if (it is QSTileImpl.ResourceIcon) {
+            Icon.Resource(it.resId, null)
+        } else {
+            Icon.Loaded(it.getDrawable(context), null)
+        }
+    }
+}
+
 @OptIn(ExperimentalAnimationGraphicsApi::class)
 @Composable
 private fun TileIcon(
     icon: Icon,
     color: Color,
     animateToEnd: Boolean = false,
+    modifier: Modifier = Modifier,
 ) {
-    val modifier = Modifier.size(dimensionResource(id = R.dimen.qs_icon_size))
+    val iconModifier = modifier.size(dimensionResource(id = R.dimen.qs_icon_size))
     val context = LocalContext.current
     val loadedDrawable =
         remember(icon, context) {
@@ -338,7 +673,7 @@ private fun TileIcon(
         Icon(
             icon = icon,
             tint = color,
-            modifier = modifier,
+            modifier = iconModifier,
         )
     } else if (icon is Icon.Resource) {
         val image = AnimatedImageVector.animatedVectorResource(id = icon.res)
@@ -357,77 +692,22 @@ private fun TileIcon(
             painter = painter,
             contentDescription = null,
             colorFilter = ColorFilter.tint(color = color),
-            modifier = modifier
+            modifier = iconModifier
         )
     }
 }
 
 @Composable
-private fun Modifier.tileModifier(colors: TileColors): Modifier {
-    return fillMaxWidth()
-        .clip(RoundedCornerShape(dimensionResource(R.dimen.qs_corner_radius)))
-        .background(colors.background)
-        .padding(horizontal = dimensionResource(id = R.dimen.qs_label_container_margin))
+private fun Modifier.tilePadding(): Modifier {
+    return padding(dimensionResource(id = R.dimen.qs_label_container_margin))
 }
 
 @Composable
-private fun tileHorizontalArrangement(iconOnly: Boolean): Arrangement.Horizontal {
-    val horizontalAlignment =
-        if (iconOnly) {
-            Alignment.CenterHorizontally
-        } else {
-            Alignment.Start
-        }
+private fun tileHorizontalArrangement(): Arrangement.Horizontal {
     return spacedBy(
         space = dimensionResource(id = R.dimen.qs_label_container_margin),
-        alignment = horizontalAlignment
+        alignment = Alignment.Start
     )
-}
-
-@Composable
-private fun TileContent(
-    label: String,
-    secondaryLabel: String?,
-    icon: Icon,
-    colors: TileColors,
-    iconOnly: Boolean,
-    showLabels: Boolean = false,
-    animateIconToEnd: Boolean = false,
-) {
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center,
-        modifier = Modifier.fillMaxHeight()
-    ) {
-        TileIcon(icon, colors.icon, animateIconToEnd)
-
-        if (iconOnly && showLabels) {
-            Text(
-                label,
-                maxLines = 2,
-                color = colors.label,
-                overflow = TextOverflow.Ellipsis,
-                textAlign = TextAlign.Center,
-            )
-        }
-    }
-
-    if (!iconOnly) {
-        Column(verticalArrangement = Arrangement.Center, modifier = Modifier.fillMaxHeight()) {
-            Text(
-                label,
-                color = colors.label,
-                modifier = Modifier.basicMarquee(),
-            )
-            if (!TextUtils.isEmpty(secondaryLabel)) {
-                Text(
-                    secondaryLabel ?: "",
-                    color = colors.secondaryLabel,
-                    modifier = Modifier.basicMarquee(),
-                )
-            }
-        }
-    }
 }
 
 @Composable
@@ -441,20 +721,24 @@ fun tileHeight(iconWithLabel: Boolean = false): Dp {
 
 private data class TileColors(
     val background: Color,
+    val iconBackground: Color,
     val label: Color,
     val secondaryLabel: Color,
     val icon: Color,
 )
 
 private object TileDefaults {
-    val IconTileWithLabelHeight = 100.dp
+    val TileShape = CircleShape
+    val IconTileWithLabelHeight = 140.dp
+    val EditGridHeaderHeight = 60.dp
 
     @Composable
     fun activeTileColors(): TileColors =
         TileColors(
-            background = MaterialTheme.colorScheme.primary,
-            label = MaterialTheme.colorScheme.onPrimary,
-            secondaryLabel = MaterialTheme.colorScheme.onPrimary,
+            background = MaterialTheme.colorScheme.surfaceVariant,
+            iconBackground = MaterialTheme.colorScheme.primary,
+            label = MaterialTheme.colorScheme.onSurfaceVariant,
+            secondaryLabel = MaterialTheme.colorScheme.onSurfaceVariant,
             icon = MaterialTheme.colorScheme.onPrimary,
         )
 
@@ -462,6 +746,7 @@ private object TileDefaults {
     fun inactiveTileColors(): TileColors =
         TileColors(
             background = MaterialTheme.colorScheme.surfaceVariant,
+            iconBackground = MaterialTheme.colorScheme.surfaceVariant,
             label = MaterialTheme.colorScheme.onSurfaceVariant,
             secondaryLabel = MaterialTheme.colorScheme.onSurfaceVariant,
             icon = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -471,6 +756,7 @@ private object TileDefaults {
     fun unavailableTileColors(): TileColors =
         TileColors(
             background = MaterialTheme.colorScheme.surface,
+            iconBackground = MaterialTheme.colorScheme.surface,
             label = MaterialTheme.colorScheme.onSurface,
             secondaryLabel = MaterialTheme.colorScheme.onSurface,
             icon = MaterialTheme.colorScheme.onSurface,
