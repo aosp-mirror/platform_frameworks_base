@@ -170,7 +170,7 @@
     <string name="biometric_re_enroll_notification_content" msgid="8685925877186288180">"Ação necessária para melhorar a segurança e o desempenho"</string>
     <string name="fingerprint_re_enroll_notification_title" msgid="4539432429683916604">"Configurar o Desbloqueio por impressão digital de novo"</string>
     <string name="fingerprint_re_enroll_notification_name" msgid="630798657797645704">"Desbloqueio por impressão digital"</string>
-    <string name="fingerprint_re_enroll_dialog_title" msgid="3526033128113925780">"Configurar o Desbloqueio por impressão digital"</string>
+    <string name="fingerprint_re_enroll_dialog_title" msgid="3526033128113925780">"Configurar o Desbloqueio por impressão digital"</string>
     <string name="fingerprint_re_enroll_dialog_content" msgid="4866561176695984879">"Os modelos e as imagens atuais serão excluídos para reconfigurar o Desbloqueio por impressão digital.\n\nDepois disso, você vai precisar configurar esse recurso de novo para desbloquear o smartphone com o dedo ou confirmar sua identidade."</string>
     <string name="fingerprint_re_enroll_dialog_content_singular" msgid="3083663339787381218">"O modelo e as imagens atuais serão excluídos para reconfigurar o Desbloqueio por impressão digital.\n\nDepois disso, você vai precisar configurar esse recurso de novo para desbloquear o smartphone com o dedo ou confirmar sua identidade."</string>
     <string name="fingerprint_reenroll_failure_dialog_content" msgid="4733768492747300666">"Não foi possível configurar o Desbloqueio por impressão digital. Acesse as Configurações e tente de novo."</string>
