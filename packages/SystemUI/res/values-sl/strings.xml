@@ -187,7 +187,7 @@
     <string name="biometric_re_enroll_notification_content" msgid="8685925877186288180">"To je potrebno, če želite izboljšati varnost in učinkovitost delovanja."</string>
     <string name="fingerprint_re_enroll_notification_title" msgid="4539432429683916604">"Vnovična nastavitev odklepanja s prstnim odtisom"</string>
     <string name="fingerprint_re_enroll_notification_name" msgid="630798657797645704">"Odklepanje s prstnim odtisom"</string>
-    <string name="fingerprint_re_enroll_dialog_title" msgid="3526033128113925780">"Nastavitev odklepanja s prstnim odtisom"</string>
+    <string name="fingerprint_re_enroll_dialog_title" msgid="3526033128113925780">"Nastavite odklepanje s prstnim odtisom"</string>
     <string name="fingerprint_re_enroll_dialog_content" msgid="4866561176695984879">"Če želite znova nastaviti odklepanje s prstnim odtisom, bodo trenutne slike in modeli prstnih odtisov izbrisani.\n\nPo izbrisu boste morali znova nastaviti odklepanje s prstnim odtisom, da boste telefon lahko odklenili s prstnim odtisom ali potrdili svojo identiteto."</string>
     <string name="fingerprint_re_enroll_dialog_content_singular" msgid="3083663339787381218">"Če želite znova nastaviti odklepanje s prstnim odtisom, bodo trenutne slike in model prstnih odtisov izbrisani.\n\nPo izbrisu boste morali znova nastaviti odklepanje s prstnim odtisom, da boste telefon lahko odklenili s prstnim odtisom ali potrdili svojo identiteto."</string>
     <string name="fingerprint_reenroll_failure_dialog_content" msgid="4733768492747300666">"Odklepanja s prstnim odtisom ni bilo mogoče nastaviti. Odprite nastavitve in poskusite znova."</string>
