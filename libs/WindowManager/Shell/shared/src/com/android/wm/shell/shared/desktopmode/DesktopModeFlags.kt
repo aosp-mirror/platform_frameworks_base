@@ -46,7 +46,8 @@ enum class DesktopModeFlags(
     DYNAMIC_INITIAL_BOUNDS(Flags::enableWindowingDynamicInitialBounds, true),
     ENABLE_DESKTOP_WINDOWING_TASK_LIMIT(Flags::enableDesktopWindowingTaskLimit, true),
     BACK_NAVIGATION(Flags::enableDesktopWindowingBackNavigation, true),
-    EDGE_DRAG_RESIZE(Flags::enableWindowingEdgeDragResize, true);
+    EDGE_DRAG_RESIZE(Flags::enableWindowingEdgeDragResize, true),
+    TASKBAR_RUNNING_APPS(Flags::enableDesktopWindowingTaskbarRunningApps, true);
 
     /**
      * Determines state of flag based on the actual flag and desktop mode developer option
