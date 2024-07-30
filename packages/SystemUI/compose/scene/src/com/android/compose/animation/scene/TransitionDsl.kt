@@ -47,9 +47,9 @@ interface SceneTransitionsBuilder {
     var interruptionHandler: InterruptionHandler
 
     /**
-     * Define the default animation to be played when transitioning [to] the specified scene, from
-     * any scene. For the animation specification to apply only when transitioning between two
-     * specific scenes, use [from] instead.
+     * Define the default animation to be played when transitioning [to] the specified content, from
+     * any content. For the animation specification to apply only when transitioning between two
+     * specific contents, use [from] instead.
      *
      * If [key] is not `null`, then this transition will only be used if the same key is specified
      * when triggering the transition.
@@ -61,7 +61,7 @@ interface SceneTransitionsBuilder {
      * @see from
      */
     fun to(
-        to: SceneKey,
+        to: ContentKey,
         key: TransitionKey? = null,
         preview: (TransitionBuilder.() -> Unit)? = null,
         reversePreview: (TransitionBuilder.() -> Unit)? = null,
@@ -69,12 +69,12 @@ interface SceneTransitionsBuilder {
     ): TransitionSpec
 
     /**
-     * Define the animation to be played when transitioning [from] the specified scene. For the
-     * animation specification to apply only when transitioning between two specific scenes, pass
-     * the destination scene via the [to] argument.
+     * Define the animation to be played when transitioning [from] the specified content. For the
+     * animation specification to apply only when transitioning between two specific contents, pass
+     * the destination content via the [to] argument.
      *
-     * When looking up which transition should be used when animating from scene A to scene B, we
-     * pick the single transition with the given [key] and matching one of these predicates (in
+     * When looking up which transition should be used when animating from content A to content B,
+     * we pick the single transition with the given [key] and matching one of these predicates (in
      * order of importance):
      * 1. from == A && to == B
      * 2. to == A && from == B, which is then treated in reverse.
@@ -86,8 +86,8 @@ interface SceneTransitionsBuilder {
      * reversible with the reverse animation having a preview as well, define a [reversePreview].
      */
     fun from(
-        from: SceneKey,
-        to: SceneKey? = null,
+        from: ContentKey,
+        to: ContentKey? = null,
         key: TransitionKey? = null,
         preview: (TransitionBuilder.() -> Unit)? = null,
         reversePreview: (TransitionBuilder.() -> Unit)? = null,

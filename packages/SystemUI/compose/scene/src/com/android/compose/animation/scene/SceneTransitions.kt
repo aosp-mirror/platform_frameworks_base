@@ -157,16 +157,16 @@ interface TransitionSpec {
     val key: TransitionKey?
 
     /**
-     * The scene we are transitioning from. If `null`, this spec can be used to animate from any
-     * scene.
+     * The content we are transitioning from. If `null`, this spec can be used to animate from any
+     * content.
      */
-    val from: SceneKey?
+    val from: ContentKey?
 
     /**
-     * The scene we are transitioning to. If `null`, this spec can be used to animate from any
-     * scene.
+     * The content we are transitioning to. If `null`, this spec can be used to animate from any
+     * content.
      */
-    val to: SceneKey?
+    val to: ContentKey?
 
     /**
      * Return a reversed version of this [TransitionSpec] for a transition going from [to] to
@@ -231,8 +231,8 @@ interface TransformationSpec {
 
 internal class TransitionSpecImpl(
     override val key: TransitionKey?,
-    override val from: SceneKey?,
-    override val to: SceneKey?,
+    override val from: ContentKey?,
+    override val to: ContentKey?,
     private val previewTransformationSpec: (() -> TransformationSpecImpl)? = null,
     private val reversePreviewTransformationSpec: (() -> TransformationSpecImpl)? = null,
     private val transformationSpec: () -> TransformationSpecImpl

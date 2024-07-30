@@ -60,7 +60,7 @@ private class SceneTransitionsBuilderImpl : SceneTransitionsBuilder {
     val transitionOverscrollSpecs = mutableListOf<OverscrollSpecImpl>()
 
     override fun to(
-        to: SceneKey,
+        to: ContentKey,
         key: TransitionKey?,
         preview: (TransitionBuilder.() -> Unit)?,
         reversePreview: (TransitionBuilder.() -> Unit)?,
@@ -70,8 +70,8 @@ private class SceneTransitionsBuilderImpl : SceneTransitionsBuilder {
     }
 
     override fun from(
-        from: SceneKey,
-        to: SceneKey?,
+        from: ContentKey,
+        to: ContentKey?,
         key: TransitionKey?,
         preview: (TransitionBuilder.() -> Unit)?,
         reversePreview: (TransitionBuilder.() -> Unit)?,
@@ -120,8 +120,8 @@ private class SceneTransitionsBuilderImpl : SceneTransitionsBuilder {
     }
 
     private fun transition(
-        from: SceneKey?,
-        to: SceneKey?,
+        from: ContentKey?,
+        to: ContentKey?,
         key: TransitionKey?,
         preview: (TransitionBuilder.() -> Unit)?,
         reversePreview: (TransitionBuilder.() -> Unit)?,
