@@ -1263,6 +1263,16 @@ flag {
 }
 
 flag {
+   name: "use_transitions_for_keyguard_occluded"
+   namespace: "systemui"
+   description: "Use Keyguard Transitions to set Notification Shade occlusion state"
+   bug: "344716537"
+   metadata {
+        purpose: PURPOSE_BUGFIX
+   }
+}
+
+flag {
    name: "lockscreen_preview_renderer_create_on_main_thread"
    namespace: "systemui"
    description: "Force preview renderer to be created on the main thread"
