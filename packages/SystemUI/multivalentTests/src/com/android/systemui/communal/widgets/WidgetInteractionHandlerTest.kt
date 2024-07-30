@@ -29,6 +29,7 @@ import com.android.systemui.SysuiTestCase
 import com.android.systemui.communal.domain.interactor.communalSceneInteractor
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.kosmos.testScope
+import com.android.systemui.log.logcatLogBuffer
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.testKosmos
 import kotlinx.coroutines.test.runTest
@@ -53,7 +54,7 @@ class WidgetInteractionHandlerTest : SysuiTestCase() {
     private val testIntent =
         PendingIntent.getActivity(
             context,
-            /* requestCode = */ 0,
+            /* requestCode= */ 0,
             Intent("action"),
             PendingIntent.FLAG_IMMUTABLE
         )
@@ -64,7 +65,12 @@ class WidgetInteractionHandlerTest : SysuiTestCase() {
     @Before
     fun setUp() {
         with(kosmos) {
-            underTest = WidgetInteractionHandler(activityStarter, communalSceneInteractor)
+            underTest =
+                WidgetInteractionHandler(
+                    activityStarter = activityStarter,
+                    communalSceneInteractor = communalSceneInteractor,
+                    logBuffer = logcatLogBuffer(),
+                )
         }
     }
 
