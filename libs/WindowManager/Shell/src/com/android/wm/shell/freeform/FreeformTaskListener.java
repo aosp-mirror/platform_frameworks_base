@@ -117,10 +117,6 @@ public class FreeformTaskListener implements ShellTaskOrganizer.TaskListener,
         if (DesktopModeStatus.canEnterDesktopMode(mContext)) {
             mDesktopModeTaskRepository.ifPresent(repository -> {
                 repository.removeFreeformTask(taskInfo.displayId, taskInfo.taskId);
-                repository.unminimizeTask(taskInfo.displayId, taskInfo.taskId);
-                repository.removeActiveTask(taskInfo.taskId, /* excludedDisplayId= */ null);
-                repository.updateTaskVisibility(
-                    taskInfo.displayId, taskInfo.taskId, /* visible= */ false);
             });
         }
         mWindowDecorationViewModel.onTaskVanished(taskInfo);
