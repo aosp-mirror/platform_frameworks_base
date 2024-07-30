@@ -382,8 +382,12 @@ object BiometricViewBinder {
                             backgroundView.importantForAccessibility =
                                 IMPORTANT_FOR_ACCESSIBILITY_NO
 
-                            // Allow icon to be used as confirmation button with a11y enabled
-                            if (accessibilityManager.isTouchExplorationEnabled) {
+                            // Allow icon to be used as confirmation button with udfps and a11y
+                            // enabled
+                            if (
+                                accessibilityManager.isTouchExplorationEnabled &&
+                                    modalities.hasUdfps
+                            ) {
                                 iconOverlayView.setOnClickListener {
                                     viewModel.confirmAuthenticated()
                                 }
