@@ -31,6 +31,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.display.BrightnessSynchronizer;
 import com.android.server.display.DisplayBrightnessState;
 import com.android.server.display.DisplayDeviceConfig;
+import com.android.server.display.brightness.BrightnessReason;
 import com.android.server.display.config.HdrBrightnessData;
 
 import java.io.PrintWriter;
@@ -99,7 +100,7 @@ public class HdrBrightnessModifier implements BrightnessStateModifier,
             mMaxBrightness = mPendingMaxBrightness;
             mClamperChangeListener.onChanged();
         };
-        onDisplayChanged(displayData);
+        mHandler.post(() -> onDisplayChanged(displayData));
     }
 
     // Called in DisplayControllerHandler
@@ -120,6 +121,8 @@ public class HdrBrightnessModifier implements BrightnessStateModifier,
 
         stateBuilder.setHdrBrightness(hdrBrightness);
         stateBuilder.setCustomAnimationRate(mTransitionRate);
+        stateBuilder.getBrightnessReason().addModifier(BrightnessReason.MODIFIER_HDR);
+
         // transition rate applied, reset
         mTransitionRate = CUSTOM_ANIMATION_RATE_NOT_SET;
     }
@@ -168,10 +171,18 @@ public class HdrBrightnessModifier implements BrightnessStateModifier,
         }
     }
 
+    // Called in DisplayControllerHandler
     @Override
     public void onDisplayChanged(BrightnessClamperController.DisplayDeviceData displayData) {
-        mHandler.post(() -> onDisplayChanged(displayData.mDisplayToken, displayData.mWidth,
-                displayData.mHeight, displayData.mDisplayDeviceConfig));
+        mDisplayDeviceConfig = displayData.mDisplayDeviceConfig;
+        mScreenSize = (float) displayData.mWidth * displayData.mHeight;
+        HdrBrightnessData data = mDisplayDeviceConfig.getHdrBrightnessData();
+        if (data == null) {
+            unregisterHdrListener();
+        } else {
+            registerHdrListener(displayData.mDisplayToken);
+        }
+        recalculate(data, mMaxDesiredHdrRatio);
     }
 
     // Called in DisplayControllerHandler, when any modifier state changes
@@ -215,20 +226,6 @@ public class HdrBrightnessModifier implements BrightnessStateModifier,
     }
 
     // Called in DisplayControllerHandler
-    private void onDisplayChanged(IBinder displayToken, int width, int height,
-            DisplayDeviceConfig config) {
-        mDisplayDeviceConfig = config;
-        mScreenSize = (float) width * height;
-        HdrBrightnessData data = config.getHdrBrightnessData();
-        if (data == null) {
-            unregisterHdrListener();
-        } else {
-            registerHdrListener(displayToken);
-        }
-        recalculate(data, mMaxDesiredHdrRatio);
-    }
-
-    // Called in DisplayControllerHandler
     private void recalculate(@Nullable HdrBrightnessData data, float maxDesiredHdrRatio) {
         Mode newMode = recalculateMode(data);
         // if HDR mode changed, notify changed
@@ -256,6 +253,10 @@ public class HdrBrightnessModifier implements BrightnessStateModifier,
     private Mode recalculateMode(@Nullable HdrBrightnessData data) {
         // no config
         if (data == null) {
+            return Mode.NO_HDR;
+        }
+        // no HDR layer present
+        if (mHdrLayerSize == DEFAULT_HDR_LAYER_SIZE) {
             return Mode.NO_HDR;
         }
         // HDR layer < minHdr % for Nbm
