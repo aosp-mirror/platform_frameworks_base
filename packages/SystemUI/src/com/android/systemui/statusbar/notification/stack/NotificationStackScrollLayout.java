@@ -3809,6 +3809,7 @@ public class NotificationStackScrollLayout
     }
 
     void handleEmptySpaceClick(MotionEvent ev) {
+        if (SceneContainerFlag.isEnabled()) return;
         logEmptySpaceClick(ev, isBelowLastNotification(mInitialTouchX, mInitialTouchY),
                 mStatusBarState, mTouchIsClick);
         switch (ev.getActionMasked()) {
@@ -4020,6 +4021,7 @@ public class NotificationStackScrollLayout
     }
 
     public void setOnEmptySpaceClickListener(OnEmptySpaceClickListener listener) {
+        SceneContainerFlag.assertInLegacyMode();
         mOnEmptySpaceClickListener = listener;
     }
 
