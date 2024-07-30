@@ -85,3 +85,13 @@ flag {
         purpose: PURPOSE_FEATURE
     }
 }
+
+flag {
+    namespace: "haptics"
+    name: "fix_audio_coupled_haptics_scaling"
+    description: "Fix the audio-coupled haptics scaling to use same function as VibrationEffect"
+    bug: "356144312"
+    metadata {
+      purpose: PURPOSE_BUGFIX
+    }
+}
