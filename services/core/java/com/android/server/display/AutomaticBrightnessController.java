@@ -579,6 +579,14 @@ public class AutomaticBrightnessController {
         return mCurrentBrightnessMapper.getMode();
     }
 
+    /**
+     * @return The preset for this mapping strategy. Presets are used on devices that allow users
+     * to choose from a set of predefined options in display auto-brightness settings.
+     */
+    public int getPreset() {
+        return mCurrentBrightnessMapper.getPreset();
+    }
+
     public boolean isInIdleMode() {
         return mCurrentBrightnessMapper.getMode() == AUTO_BRIGHTNESS_MODE_IDLE;
     }
