@@ -3045,6 +3045,9 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
 
     @GuardedBy("ImfLock.class")
     private void sendResultReceiverFailureLocked(@Nullable ResultReceiver resultReceiver) {
+        if (resultReceiver == null) {
+            return;
+        }
         final boolean isInputShown = mVisibilityStateComputer.isInputShown();
         resultReceiver.send(isInputShown
                 ? InputMethodManager.RESULT_UNCHANGED_SHOWN
