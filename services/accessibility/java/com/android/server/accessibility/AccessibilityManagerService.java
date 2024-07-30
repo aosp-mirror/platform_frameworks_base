@@ -4090,11 +4090,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
             boolean enable, @UserShortcutType int shortcutTypes,
             @NonNull List<String> shortcutTargets, @UserIdInt int userId) {
         enableShortcutsForTargets_enforcePermission();
-        if ((shortcutTypes & GESTURE) == GESTURE
-                && !android.provider.Flags.a11yStandaloneGestureEnabled()) {
-            throw new IllegalArgumentException(
-                    "GESTURE type shortcuts are disabled by feature flag");
-        }
+
         for (int shortcutType : USER_SHORTCUT_TYPES) {
             if ((shortcutTypes & shortcutType) == shortcutType) {
                 enableShortcutForTargets(enable, shortcutType, shortcutTargets, userId);
@@ -4105,6 +4101,13 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
     private void enableShortcutForTargets(
             boolean enable, @UserShortcutType int shortcutType,
             @NonNull List<String> shortcutTargets, @UserIdInt int userId) {
+        if (shortcutType == UserShortcutType.GESTURE
+                && !android.provider.Flags.a11yStandaloneGestureEnabled()) {
+            Slog.w(LOG_TAG,
+                    "GESTURE type shortcuts are disabled by feature flag");
+            return;
+        }
+
         final String shortcutTypeSettingKey = ShortcutUtils.convertToKey(shortcutType);
         if (shortcutType == UserShortcutType.TRIPLETAP
                 || shortcutType == UserShortcutType.TWOFINGER_DOUBLETAP) {
