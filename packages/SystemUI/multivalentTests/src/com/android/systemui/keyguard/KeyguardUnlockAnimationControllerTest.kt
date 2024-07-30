@@ -20,6 +20,8 @@ import androidx.test.filters.SmallTest
 import com.android.keyguard.KeyguardViewController
 import com.android.systemui.Flags
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.defaultDeviceState
+import com.android.systemui.deviceStateManager
 import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.shared.system.smartspace.ILauncherUnlockAnimationController
@@ -27,8 +29,6 @@ import com.android.systemui.statusbar.NotificationShadeWindowController
 import com.android.systemui.statusbar.SysuiStatusBarStateController
 import com.android.systemui.statusbar.phone.BiometricUnlockController
 import com.android.systemui.statusbar.policy.KeyguardStateController
-import com.android.systemui.defaultDeviceState
-import com.android.systemui.deviceStateManager
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.argThat
 import java.util.function.Predicate

@@ -492,10 +492,7 @@ constructor(
                 "${!notificationShadeWindowController.isLaunchingActivity}"
         )
         Log.wtf(TAG, "  launcherUnlockController != null: ${launcherUnlockController != null}")
-        Log.wtf(
-            TAG,
-            "  !isFoldable(context): ${!isDeviceFoldable(resources, deviceStateManager)}"
-        )
+        Log.wtf(TAG, "  !isFoldable(context): ${!isDeviceFoldable(resources, deviceStateManager)}")
     }
 
     /**

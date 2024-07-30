@@ -19,10 +19,10 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.internal.R
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.kosmos.Kosmos
-import com.android.systemui.statusbar.phone.FoldStateListener.OnFoldStateChangeListener
 import com.android.systemui.foldedDeviceStateList
 import com.android.systemui.halfFoldedDeviceState
+import com.android.systemui.kosmos.Kosmos
+import com.android.systemui.statusbar.phone.FoldStateListener.OnFoldStateChangeListener
 import com.android.systemui.unfoldedDeviceState
 import org.junit.Before
 import org.junit.Test

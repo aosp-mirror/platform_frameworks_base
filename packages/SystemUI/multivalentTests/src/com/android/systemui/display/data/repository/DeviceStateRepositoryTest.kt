@@ -48,8 +48,8 @@ import org.junit.Before
 import org.junit.runner.RunWith
 import org.mockito.Mockito.never
 import org.mockito.Mockito.verify
-import android.hardware.devicestate.DeviceState as PlatformDeviceState
 import org.mockito.kotlin.whenever
+import android.hardware.devicestate.DeviceState as PlatformDeviceState
 
 @RunWith(AndroidJUnit4::class)
 @TestableLooper.RunWithLooper

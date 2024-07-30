@@ -31,106 +31,103 @@ import org.mockito.kotlin.mock
 
 val Kosmos.deviceStateManager by Kosmos.Fixture { mock<DeviceStateManager>() }
 
-val Kosmos.defaultDeviceState by Kosmos.Fixture {
-    DeviceState(
-        DeviceState.Configuration.Builder(
-            0 /* identifier */,
-            "DEFAULT"
-        ).build()
-    )
-}
+val Kosmos.defaultDeviceState by
+    Kosmos.Fixture {
+        DeviceState(DeviceState.Configuration.Builder(0 /* identifier */, "DEFAULT").build())
+    }
 
-val Kosmos.foldedDeviceStateList by Kosmos.Fixture {
-    listOf(
+val Kosmos.foldedDeviceStateList by
+    Kosmos.Fixture {
+        listOf(
+            DeviceState(
+                DeviceState.Configuration.Builder(0, "FOLDED_0")
+                    .setSystemProperties(
+                        setOf(
+                            PROPERTY_FOLDABLE_DISPLAY_CONFIGURATION_OUTER_PRIMARY,
+                            PROPERTY_POWER_CONFIGURATION_TRIGGER_SLEEP
+                        )
+                    )
+                    .setPhysicalProperties(
+                        setOf(PROPERTY_FOLDABLE_HARDWARE_CONFIGURATION_FOLD_IN_CLOSED)
+                    )
+                    .build()
+            ),
+            DeviceState(
+                DeviceState.Configuration.Builder(1, "FOLDED_1")
+                    .setSystemProperties(
+                        setOf(
+                            PROPERTY_FOLDABLE_DISPLAY_CONFIGURATION_OUTER_PRIMARY,
+                            PROPERTY_POWER_CONFIGURATION_TRIGGER_SLEEP
+                        )
+                    )
+                    .setPhysicalProperties(
+                        setOf(PROPERTY_FOLDABLE_HARDWARE_CONFIGURATION_FOLD_IN_CLOSED)
+                    )
+                    .build()
+            ),
+            DeviceState(
+                DeviceState.Configuration.Builder(2, "FOLDED_2")
+                    .setSystemProperties(
+                        setOf(
+                            PROPERTY_FOLDABLE_DISPLAY_CONFIGURATION_OUTER_PRIMARY,
+                            PROPERTY_POWER_CONFIGURATION_TRIGGER_SLEEP
+                        )
+                    )
+                    .setPhysicalProperties(
+                        setOf(PROPERTY_FOLDABLE_HARDWARE_CONFIGURATION_FOLD_IN_CLOSED)
+                    )
+                    .build()
+            )
+        )
+    }
+
+val Kosmos.halfFoldedDeviceState by
+    Kosmos.Fixture {
         DeviceState(
-            DeviceState.Configuration.Builder(0, "FOLDED_0")
+            DeviceState.Configuration.Builder(3 /* identifier */, "HALF_FOLDED")
                 .setSystemProperties(
                     setOf(
-                        PROPERTY_FOLDABLE_DISPLAY_CONFIGURATION_OUTER_PRIMARY,
-                        PROPERTY_POWER_CONFIGURATION_TRIGGER_SLEEP
+                        PROPERTY_FOLDABLE_DISPLAY_CONFIGURATION_INNER_PRIMARY,
+                        PROPERTY_POWER_CONFIGURATION_TRIGGER_WAKE
                     )
                 )
                 .setPhysicalProperties(
-                    setOf(PROPERTY_FOLDABLE_HARDWARE_CONFIGURATION_FOLD_IN_CLOSED)
-                )
-                .build()
-        ),
-        DeviceState(
-            DeviceState.Configuration.Builder(1, "FOLDED_1")
-                .setSystemProperties(
-                    setOf(
-                        PROPERTY_FOLDABLE_DISPLAY_CONFIGURATION_OUTER_PRIMARY,
-                        PROPERTY_POWER_CONFIGURATION_TRIGGER_SLEEP
-                    )
-                )
-                .setPhysicalProperties(
-                    setOf(PROPERTY_FOLDABLE_HARDWARE_CONFIGURATION_FOLD_IN_CLOSED)
-                )
-                .build()
-        ),
-        DeviceState(
-            DeviceState.Configuration.Builder(2, "FOLDED_2")
-                .setSystemProperties(
-                    setOf(
-                        PROPERTY_FOLDABLE_DISPLAY_CONFIGURATION_OUTER_PRIMARY,
-                        PROPERTY_POWER_CONFIGURATION_TRIGGER_SLEEP
-                    )
-                )
-                .setPhysicalProperties(
-                    setOf(PROPERTY_FOLDABLE_HARDWARE_CONFIGURATION_FOLD_IN_CLOSED)
+                    setOf(PROPERTY_FOLDABLE_HARDWARE_CONFIGURATION_FOLD_IN_HALF_OPEN)
                 )
                 .build()
         )
-    )
-}
+    }
 
-val Kosmos.halfFoldedDeviceState by Kosmos.Fixture {
-    DeviceState(
-        DeviceState.Configuration.Builder(3 /* identifier */, "HALF_FOLDED")
-            .setSystemProperties(
-                setOf(
-                    PROPERTY_FOLDABLE_DISPLAY_CONFIGURATION_INNER_PRIMARY,
-                    PROPERTY_POWER_CONFIGURATION_TRIGGER_WAKE
+val Kosmos.unfoldedDeviceState by
+    Kosmos.Fixture {
+        DeviceState(
+            DeviceState.Configuration.Builder(4 /* identifier */, "UNFOLDED")
+                .setSystemProperties(
+                    setOf(
+                        PROPERTY_FOLDABLE_DISPLAY_CONFIGURATION_INNER_PRIMARY,
+                        PROPERTY_POWER_CONFIGURATION_TRIGGER_WAKE
+                    )
                 )
-            )
-            .setPhysicalProperties(
-                setOf(PROPERTY_FOLDABLE_HARDWARE_CONFIGURATION_FOLD_IN_HALF_OPEN)
-            )
-            .build()
-    )
-}
+                .setPhysicalProperties(setOf(PROPERTY_FOLDABLE_HARDWARE_CONFIGURATION_FOLD_IN_OPEN))
+                .build()
+        )
+    }
 
-val Kosmos.unfoldedDeviceState by Kosmos.Fixture {
-    DeviceState(
-        DeviceState.Configuration.Builder(4 /* identifier */, "UNFOLDED")
-            .setSystemProperties(
-                setOf(
-                    PROPERTY_FOLDABLE_DISPLAY_CONFIGURATION_INNER_PRIMARY,
-                    PROPERTY_POWER_CONFIGURATION_TRIGGER_WAKE
+val Kosmos.rearDisplayDeviceState by
+    Kosmos.Fixture {
+        DeviceState(
+            DeviceState.Configuration.Builder(5 /* identifier */, "REAR_DISPLAY")
+                .setSystemProperties(
+                    setOf(
+                        PROPERTY_FOLDABLE_DISPLAY_CONFIGURATION_OUTER_PRIMARY,
+                        PROPERTY_FEATURE_REAR_DISPLAY
+                    )
                 )
-            )
-            .setPhysicalProperties(
-                setOf(PROPERTY_FOLDABLE_HARDWARE_CONFIGURATION_FOLD_IN_OPEN)
-            )
-            .build()
-    )
-}
+                .build()
+        )
+    }
 
-val Kosmos.rearDisplayDeviceState by Kosmos.Fixture {
-    DeviceState(
-        DeviceState.Configuration.Builder(5 /* identifier */, "REAR_DISPLAY")
-            .setSystemProperties(
-                setOf(
-                    PROPERTY_FOLDABLE_DISPLAY_CONFIGURATION_OUTER_PRIMARY,
-                    PROPERTY_FEATURE_REAR_DISPLAY
-                )
-            )
-            .build()
-    )
-}
-
-val Kosmos.unknownDeviceState by Kosmos.Fixture {
-    DeviceState(
-        DeviceState.Configuration.Builder(8 /* identifier */, "UNKNOWN").build()
-    )
-}
+val Kosmos.unknownDeviceState by
+    Kosmos.Fixture {
+        DeviceState(DeviceState.Configuration.Builder(8 /* identifier */, "UNKNOWN").build())
+    }
