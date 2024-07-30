@@ -10628,8 +10628,16 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 final DevicePolicyData policyData = getUserData(userId);
                 if (transitionCheckNeeded) {
                     // Optional state transition check for non-ADB case.
-                    checkUserProvisioningStateTransition(policyData.mUserProvisioningState,
-                            newState);
+                    try {
+                        checkUserProvisioningStateTransition(
+                                policyData.mUserProvisioningState,
+                                newState);
+
+                    } catch (IllegalStateException e) {
+                        Slogf.e(LOG_TAG,
+                                "Exception caught while changing provisioning state", e);
+                        throw e;
+                    }
                 }
                 policyData.mUserProvisioningState = newState;
                 saveSettingsLocked(userId);
@@ -10640,6 +10648,10 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     }
 
     private void checkUserProvisioningStateTransition(int currentState, int newState) {
+        if (Flags.userProvisioningSameState()) {
+            Preconditions.checkState(newState != currentState, "New state cannot"
+                    + " be the same as the current state: [" + newState + "]");
+        }
         // Valid transitions for normal use-cases.
         switch (currentState) {
             case DevicePolicyManager.STATE_USER_UNMANAGED:
