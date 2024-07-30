@@ -225,7 +225,8 @@ public class QuickSettingsControllerImplBaseTest extends SysuiTestCase {
                         new SharedNotificationContainerInteractor(
                                 configurationRepository,
                                 mContext,
-                                splitShadeStateController,
+                                () -> splitShadeStateController,
+                                () -> mShadeInteractor,
                                 keyguardInteractor,
                                 deviceEntryUdfpsInteractor,
                                 () -> mLargeScreenHeaderHelper),
