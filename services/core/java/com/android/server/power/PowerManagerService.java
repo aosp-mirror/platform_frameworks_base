@@ -34,6 +34,7 @@ import static android.os.PowerManagerInternal.wakefulnessToString;
 import static com.android.internal.util.LatencyTracker.ACTION_TURN_ON_SCREEN;
 import static com.android.server.deviceidle.Flags.disableWakelocksInLightIdle;
 import static com.android.server.display.DisplayDeviceConfig.INVALID_BRIGHTNESS_IN_CONFIG;
+import static com.android.server.display.brightness.BrightnessUtils.isValidBrightnessValue;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
@@ -650,11 +651,16 @@ public final class PowerManagerService extends SystemService
 
     private int mDozeScreenStateOverrideReasonFromDreamManager = Display.STATE_REASON_UNKNOWN;
 
-    // The screen brightness to use while dozing.
+    // The screen brightness between 1 and 255 to use while dozing.
     private int mDozeScreenBrightnessOverrideFromDreamManager = PowerManager.BRIGHTNESS_DEFAULT;
 
+    /**
+     * The screen brightness between {@link PowerManager#BRIGHTNESS_MIN} and
+     * {@link PowerManager.BRIGHTNESS_MAX} to use while dozing.
+     */
     private float mDozeScreenBrightnessOverrideFromDreamManagerFloat =
             PowerManager.BRIGHTNESS_INVALID_FLOAT;
+
     // Keep display state when dozing.
     private boolean mDrawWakeLockOverrideFromSidekick;
 
@@ -4455,15 +4461,21 @@ public final class PowerManagerService extends SystemService
     }
 
     private void setDozeOverrideFromDreamManagerInternal(
-            int screenState, @Display.StateReason int reason, int screenBrightness) {
+            int screenState, @Display.StateReason int reason, float screenBrightnessFloat,
+            int screenBrightnessInt) {
         synchronized (mLock) {
             if (mDozeScreenStateOverrideFromDreamManager != screenState
-                    || mDozeScreenBrightnessOverrideFromDreamManager != screenBrightness) {
+                    || mDozeScreenBrightnessOverrideFromDreamManager != screenBrightnessInt
+                    || !BrightnessSynchronizer.floatEquals(
+                    mDozeScreenBrightnessOverrideFromDreamManagerFloat,
+                    screenBrightnessFloat)) {
                 mDozeScreenStateOverrideFromDreamManager = screenState;
                 mDozeScreenStateOverrideReasonFromDreamManager = reason;
-                mDozeScreenBrightnessOverrideFromDreamManager = screenBrightness;
+                mDozeScreenBrightnessOverrideFromDreamManager = screenBrightnessInt;
                 mDozeScreenBrightnessOverrideFromDreamManagerFloat =
-                        BrightnessSynchronizer.brightnessIntToFloat(mDozeScreenBrightnessOverrideFromDreamManager);
+                        isValidBrightnessValue(screenBrightnessFloat)
+                                ? screenBrightnessFloat
+                                : BrightnessSynchronizer.brightnessIntToFloat(screenBrightnessInt);
                 mDirty |= DIRTY_SETTINGS;
                 updatePowerStateLocked();
             }
@@ -7095,7 +7107,7 @@ public final class PowerManagerService extends SystemService
 
         @Override
         public void setDozeOverrideFromDreamManager(
-                int screenState, int reason, int screenBrightness) {
+                int screenState, int reason, float screenBrightnessFloat, int screenBrightnessInt) {
             switch (screenState) {
                 case Display.STATE_UNKNOWN:
                 case Display.STATE_OFF:
@@ -7108,11 +7120,17 @@ public final class PowerManagerService extends SystemService
                     screenState = Display.STATE_UNKNOWN;
                     break;
             }
-            if (screenBrightness < PowerManager.BRIGHTNESS_DEFAULT
-                    || screenBrightness > PowerManager.BRIGHTNESS_ON) {
-                screenBrightness = PowerManager.BRIGHTNESS_DEFAULT;
+            if (screenBrightnessInt < PowerManager.BRIGHTNESS_DEFAULT
+                    || screenBrightnessInt > PowerManager.BRIGHTNESS_ON) {
+                screenBrightnessInt = PowerManager.BRIGHTNESS_DEFAULT;
             }
-            setDozeOverrideFromDreamManagerInternal(screenState, reason, screenBrightness);
+            if (screenBrightnessFloat != PowerManager.BRIGHTNESS_OFF_FLOAT
+                    && (screenBrightnessFloat < PowerManager.BRIGHTNESS_MIN
+                    || screenBrightnessFloat > PowerManager.BRIGHTNESS_MAX)) {
+                screenBrightnessFloat = PowerManager.BRIGHTNESS_INVALID_FLOAT;
+            }
+            setDozeOverrideFromDreamManagerInternal(screenState, reason, screenBrightnessFloat,
+                    screenBrightnessInt);
         }
 
         @Override
