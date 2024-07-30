@@ -456,7 +456,7 @@ public class TaskInfo {
                 && Objects.equals(topActivity, that.topActivity)
                 && isTopActivityTransparent == that.isTopActivityTransparent
                 && isTopActivityStyleFloating == that.isTopActivityStyleFloating
-                && lastNonFullscreenBounds == this.lastNonFullscreenBounds
+                && Objects.equals(lastNonFullscreenBounds, that.lastNonFullscreenBounds)
                 && Objects.equals(capturedLink, that.capturedLink)
                 && capturedLinkTimestamp == that.capturedLinkTimestamp
                 && appCompatTaskInfo.equalsForTaskOrganizer(that.appCompatTaskInfo);
