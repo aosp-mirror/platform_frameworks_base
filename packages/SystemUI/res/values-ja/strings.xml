@@ -388,6 +388,9 @@
     <string name="performance" msgid="6552785217174378320">"パフォーマンス"</string>
     <string name="user_interface" msgid="3712869377953950887">"ユーザー インターフェース"</string>
     <string name="thermal" msgid="6758074791325414831">"温度"</string>
+    <string name="custom" msgid="3337456985275158299">"カスタム"</string>
+    <string name="custom_trace_settings_dialog_title" msgid="2608570500144830554">"カスタム トレース設定"</string>
+    <string name="restore_default" msgid="5259420807486239755">"デフォルトに戻す"</string>
     <string name="quick_settings_onehanded_label" msgid="2416537930246274991">"片手モード"</string>
     <string name="quick_settings_hearing_devices_label" msgid="7277170419679404129">"補聴器"</string>
     <string name="quick_settings_hearing_devices_connected" msgid="6519069502397037781">"アクティブ"</string>
@@ -431,6 +434,9 @@
     <string name="zen_modes_dialog_settings" msgid="2310248023728936697">"設定"</string>
     <string name="zen_mode_on" msgid="9085304934016242591">"ON"</string>
     <string name="zen_mode_off" msgid="1736604456618147306">"OFF"</string>
+    <string name="zen_mode_set_up" msgid="7457957033034460064">"設定"</string>
+    <string name="zen_mode_no_manual_invocation" msgid="1769975741344633672">"設定で管理"</string>
+    <string name="zen_mode_active_modes" msgid="1625850411578488856">"{count,plural, =0{アクティブなモードはありません}=1{{mode} がアクティブです}other{# 個のモードがアクティブです}}"</string>
     <string name="zen_priority_introduction" msgid="3159291973383796646">"アラーム、リマインダー、予定、指定した人からの着信以外の音やバイブレーションに煩わされることはありません。音楽、動画、ゲームなど再生対象として選択したコンテンツは引き続き再生されます。"</string>
     <string name="zen_alarms_introduction" msgid="3987266042682300470">"アラーム以外の音やバイブレーションに煩わされることはありません。音楽、動画、ゲームなど再生対象として選択したコンテンツは引き続き再生されます。"</string>
     <string name="zen_priority_customize_button" msgid="4119213187257195047">"カスタマイズ"</string>
@@ -469,6 +475,8 @@
     <string name="keyguard_indication_charging_time_slowly" msgid="301936949731705417">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • 低速充電中 • 完了まで <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>"</string>
     <string name="keyguard_indication_charging_time_dock" msgid="3149328898931741271">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • 充電中 • フル充電まで <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>"</string>
     <string name="accessibility_action_open_communal_hub" msgid="3081702792413787849">"ロック画面のウィジェット"</string>
+    <!-- no translation found for accessibility_announcement_communal_widget_added (6911593106099328271) -->
+    <skip />
     <string name="communal_tutorial_indicator_text" msgid="4503010353591430123">"左にスワイプすると、コミュニティ チュートリアルが開始します"</string>
     <string name="cta_tile_button_to_open_widget_editor" msgid="3871562362382963878">"カスタマイズ"</string>
     <string name="cta_tile_button_to_dismiss" msgid="3377597875997861754">"閉じる"</string>
@@ -554,10 +562,8 @@
     <string name="media_projection_action_text" msgid="3634906766918186440">"今すぐ開始"</string>
     <string name="empty_shade_text" msgid="8935967157319717412">"通知はありません"</string>
     <string name="no_unseen_notif_text" msgid="395512586119868682">"新しい通知はありません"</string>
-    <!-- no translation found for adaptive_notification_edu_hun_title (7790738150177329960) -->
-    <skip />
-    <!-- no translation found for adaptive_notification_edu_hun_text (7743367744129536610) -->
-    <skip />
+    <string name="adaptive_notification_edu_hun_title" msgid="7790738150177329960">"通知のクールダウンが ON になっています"</string>
+    <string name="adaptive_notification_edu_hun_text" msgid="7743367744129536610">"一度に多くの通知が届いたときに、最大 2 分間自動的にデバイスの音量が小さくなりアラートも減ります。"</string>
     <string name="go_to_adaptive_notification_settings" msgid="2423690125178298479">"OFF にする"</string>
     <string name="unlock_to_see_notif_text" msgid="7439033907167561227">"ロック解除して以前の通知を表示"</string>
     <string name="quick_settings_disclosure_parental_controls" msgid="2114102871438223600">"このデバイスは保護者によって管理されています"</string>
@@ -1223,7 +1229,6 @@
     <string name="accessibility_fingerprint_bouncer" msgid="7189102492498735519">"認証が必要です。指紋認証センサーをタッチして認証してください。"</string>
     <string name="ongoing_phone_call_content_description" msgid="5332334388483099947">"通話中"</string>
     <string name="mobile_data_settings_title" msgid="3955246641380064901">"モバイルデータ"</string>
-    <string name="preference_summary_default_combination" msgid="8453246369903749670">"<xliff:g id="STATE">%1$s</xliff:g> / <xliff:g id="NETWORKMODE">%2$s</xliff:g>"</string>
     <string name="mobile_data_connection_active" msgid="944490013299018227">"接続済み"</string>
     <string name="mobile_data_temp_connection_active" msgid="4590222725908806824">"一時的に接続されています"</string>
     <string name="mobile_data_poor_connection" msgid="819617772268371434">"接続が不安定です"</string>
@@ -1377,7 +1382,10 @@
     <string name="touchpad_tutorial_done_button" msgid="176168488821755503">"完了"</string>
     <string name="touchpad_tutorial_gesture_done" msgid="4784438360736821255">"よくできました。"</string>
     <string name="touchpad_back_gesture_action_title" msgid="7199067250654332735">"戻る"</string>
-    <string name="touchpad_back_gesture_guidance" msgid="4222430588599527272">"戻るには、3 本の指でタッチパッドを左右にスワイプします。"</string>
+    <!-- no translation found for touchpad_back_gesture_guidance (6263750214998421587) -->
+    <skip />
+    <!-- no translation found for touchpad_back_gesture_finished (5353616006999726249) -->
+    <skip />
     <string name="touchpad_back_gesture_animation_content_description" msgid="2646107450922379918">"タッチパッドで 3 本の指を左右に動かしている様子"</string>
     <string name="touchpad_back_gesture_screen_animation_content_description" msgid="4036267494237748710">"デバイスの画面で「戻る」ジェスチャーのアニメーションが表示されている様子"</string>
     <string name="keyboard_backlight_dialog_title" msgid="8273102932345564724">"キーボード バックライト"</string>

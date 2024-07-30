@@ -138,13 +138,13 @@
     <string name="share_to_app_stop_dialog_message_single_app_generic" msgid="6681016774654578261">"מתבצע כרגע שיתוף של אפליקציה"</string>
     <string name="share_to_app_stop_dialog_button" msgid="6334056916284230217">"הפסקת השיתוף"</string>
     <string name="cast_screen_to_other_device_chip_accessibility_label" msgid="4687917476203009885">"‏הפעלת Cast של המסך מתבצעת"</string>
-    <string name="cast_to_other_device_stop_dialog_title" msgid="7836517190930357326">"‏להפסיק את הפעלת ה-Cast?"</string>
-    <string name="cast_to_other_device_stop_dialog_message_entire_screen_with_device" msgid="1474703115926205251">"‏מתבצעת כרגע הפעלת Cast של כל המסך שלך למכשיר <xliff:g id="DEVICE_NAME">%1$s</xliff:g>"</string>
-    <string name="cast_to_other_device_stop_dialog_message_entire_screen" msgid="8419219169553867625">"‏מתבצעת כרגע הפעלת Cast של כל המסך שלך למכשיר בקרבת מקום"</string>
-    <string name="cast_to_other_device_stop_dialog_message_specific_app_with_device" msgid="2715934698604085519">"‏מתבצעת כרגע הפעלת Cast של <xliff:g id="APP_BEING_SHARED_NAME">%1$s</xliff:g> למכשיר <xliff:g id="DEVICE_NAME">%2$s</xliff:g>"</string>
-    <string name="cast_to_other_device_stop_dialog_message_specific_app" msgid="8616103075630934513">"‏מתבצעת כרגע הפעלת Cast של <xliff:g id="APP_BEING_SHARED_NAME">%1$s</xliff:g> למכשיר בקרבת מקום"</string>
-    <string name="cast_to_other_device_stop_dialog_message_generic_with_device" msgid="9213582497852420203">"‏מתבצעת כרגע הפעלת Cast למכשיר <xliff:g id="DEVICE_NAME">%1$s</xliff:g>"</string>
-    <string name="cast_to_other_device_stop_dialog_message_generic" msgid="4100272100480415076">"‏מתבצעת כרגע הפעלת Cast למכשיר בקרבת מקום"</string>
+    <string name="cast_to_other_device_stop_dialog_title" msgid="7836517190930357326">"‏להפסיק את פעולת ה-Cast?"</string>
+    <string name="cast_to_other_device_stop_dialog_message_entire_screen_with_device" msgid="1474703115926205251">"‏מתבצעת כרגע פעולת Cast של כל המסך שלך למכשיר <xliff:g id="DEVICE_NAME">%1$s</xliff:g>"</string>
+    <string name="cast_to_other_device_stop_dialog_message_entire_screen" msgid="8419219169553867625">"‏מתבצעת כרגע פעולת Cast של כל המסך שלך למכשיר בקרבת מקום"</string>
+    <string name="cast_to_other_device_stop_dialog_message_specific_app_with_device" msgid="2715934698604085519">"‏מתבצעת כרגע פעולת Cast של <xliff:g id="APP_BEING_SHARED_NAME">%1$s</xliff:g> למכשיר <xliff:g id="DEVICE_NAME">%2$s</xliff:g>"</string>
+    <string name="cast_to_other_device_stop_dialog_message_specific_app" msgid="8616103075630934513">"‏מתבצעת כרגע פעולת Cast של <xliff:g id="APP_BEING_SHARED_NAME">%1$s</xliff:g> למכשיר בקרבת מקום"</string>
+    <string name="cast_to_other_device_stop_dialog_message_generic_with_device" msgid="9213582497852420203">"‏מתבצעת כרגע פעולת Cast למכשיר <xliff:g id="DEVICE_NAME">%1$s</xliff:g>"</string>
+    <string name="cast_to_other_device_stop_dialog_message_generic" msgid="4100272100480415076">"‏מתבצעת כרגע פעולת Cast למכשיר בקרבת מקום"</string>
     <string name="cast_to_other_device_stop_dialog_button" msgid="6420183747435521834">"‏הפסקת ה-Cast"</string>
     <string name="close_dialog_button" msgid="4749497706540104133">"סגירה"</string>
     <string name="issuerecord_title" msgid="286627115110121849">"בעיה במכשיר ההקלטה"</string>
@@ -388,6 +388,9 @@
     <string name="performance" msgid="6552785217174378320">"ביצועים"</string>
     <string name="user_interface" msgid="3712869377953950887">"ממשק משתמש"</string>
     <string name="thermal" msgid="6758074791325414831">"תרמי"</string>
+    <string name="custom" msgid="3337456985275158299">"בהתאמה אישית"</string>
+    <string name="custom_trace_settings_dialog_title" msgid="2608570500144830554">"הגדרות מעקב מותאמות אישית"</string>
+    <string name="restore_default" msgid="5259420807486239755">"שחזור של ברירת המחדל"</string>
     <string name="quick_settings_onehanded_label" msgid="2416537930246274991">"מצב שימוש ביד אחת"</string>
     <string name="quick_settings_hearing_devices_label" msgid="7277170419679404129">"מכשירי שמיעה"</string>
     <string name="quick_settings_hearing_devices_connected" msgid="6519069502397037781">"פעיל"</string>
@@ -429,9 +432,13 @@
     <string name="zen_modes_dialog_title" msgid="4159138230418567383">"מצבי עדיפות"</string>
     <string name="zen_modes_dialog_done" msgid="6654130880256438950">"סיום"</string>
     <string name="zen_modes_dialog_settings" msgid="2310248023728936697">"הגדרות"</string>
-    <!-- no translation found for zen_mode_on (9085304934016242591) -->
+    <string name="zen_mode_on" msgid="9085304934016242591">"מצב מופעל"</string>
+    <string name="zen_mode_off" msgid="1736604456618147306">"מצב מושבת"</string>
+    <!-- no translation found for zen_mode_set_up (7457957033034460064) -->
     <skip />
-    <!-- no translation found for zen_mode_off (1736604456618147306) -->
+    <!-- no translation found for zen_mode_no_manual_invocation (1769975741344633672) -->
+    <skip />
+    <!-- no translation found for zen_mode_active_modes (1625850411578488856) -->
     <skip />
     <string name="zen_priority_introduction" msgid="3159291973383796646">"כדי לא להפריע לך, המכשיר לא ירטוט ולא ישמיע שום צליל, חוץ מהתראות, תזכורות, אירועים ושיחות ממתקשרים מסוימים לבחירתך. המצב הזה לא ישפיע על צלילים שהם חלק מתוכן שבחרת להפעיל, כמו מוזיקה, סרטונים ומשחקים."</string>
     <string name="zen_alarms_introduction" msgid="3987266042682300470">"כדי לא להפריע לך, המכשיר לא ירטוט ולא ישמיע שום צליל, חוץ מהתראות. המצב הזה לא ישפיע על צלילים שהם חלק מתוכן שבחרת להפעיל, כמו מוזיקה, סרטונים ומשחקים."</string>
@@ -471,6 +478,8 @@
     <string name="keyguard_indication_charging_time_slowly" msgid="301936949731705417">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • בטעינה איטית • <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> עד לסיום"</string>
     <string name="keyguard_indication_charging_time_dock" msgid="3149328898931741271">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • בטעינה • <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> עד לסיום"</string>
     <string name="accessibility_action_open_communal_hub" msgid="3081702792413787849">"ווידג\'טים במסך הנעילה"</string>
+    <!-- no translation found for accessibility_announcement_communal_widget_added (6911593106099328271) -->
+    <skip />
     <string name="communal_tutorial_indicator_text" msgid="4503010353591430123">"אפשר להחליק שמאלה כדי להפעיל את המדריך המשותף"</string>
     <string name="cta_tile_button_to_open_widget_editor" msgid="3871562362382963878">"התאמה אישית"</string>
     <string name="cta_tile_button_to_dismiss" msgid="3377597875997861754">"סגירה"</string>
@@ -499,8 +508,7 @@
     <string name="accessibility_action_label_place_widget" msgid="1914197458644168978">"צריך למקם את הווידג\'ט שנבחר"</string>
     <string name="communal_widget_picker_title" msgid="1953369090475731663">"ווידג\'טים במסך הנעילה"</string>
     <string name="communal_widget_picker_description" msgid="490515450110487871">"כולם יכולים לראות את הווידג\'טים במסך הנעילה שלך, גם אם הטאבלט נעול."</string>
-    <!-- no translation found for accessibility_action_label_unselect_widget (1041811747619468698) -->
-    <skip />
+    <string name="accessibility_action_label_unselect_widget" msgid="1041811747619468698">"ביטול הבחירה בווידג\'ט"</string>
     <string name="communal_widgets_disclaimer_title" msgid="1150954395585308868">"ווידג\'טים במסך הנעילה"</string>
     <string name="communal_widgets_disclaimer_text" msgid="1423545475160506349">"כדי לפתוח אפליקציה באמצעות ווידג\'ט, עליך לאמת את זהותך. בנוסף, כדאי לזכור שכל אחד יכול לראות את הווידג\'טים גם כשהטאבלט שלך נעול. יכול להיות שחלק מהווידג\'טים לא נועדו למסך הנעילה ושלא בטוח להוסיף אותם לכאן."</string>
     <string name="communal_widgets_disclaimer_button" msgid="4423059765740780753">"הבנתי"</string>
@@ -557,10 +565,8 @@
     <string name="media_projection_action_text" msgid="3634906766918186440">"כן, אפשר להתחיל"</string>
     <string name="empty_shade_text" msgid="8935967157319717412">"אין התראות"</string>
     <string name="no_unseen_notif_text" msgid="395512586119868682">"אין התראות חדשות"</string>
-    <!-- no translation found for adaptive_notification_edu_hun_title (7790738150177329960) -->
-    <skip />
-    <!-- no translation found for adaptive_notification_edu_hun_text (7743367744129536610) -->
-    <skip />
+    <string name="adaptive_notification_edu_hun_title" msgid="7790738150177329960">"הפוגת ההתראות מופעלת"</string>
+    <string name="adaptive_notification_edu_hun_text" msgid="7743367744129536610">"עוצמת הקול וההתראות במכשיר מופחתות אוטומטית למשך עד 2 דקות כשמתקבלות יותר מדי התראות בבת אחת."</string>
     <string name="go_to_adaptive_notification_settings" msgid="2423690125178298479">"השבתה"</string>
     <string name="unlock_to_see_notif_text" msgid="7439033907167561227">"יש לבטל את הנעילה כדי לראות התראות ישנות"</string>
     <string name="quick_settings_disclosure_parental_controls" msgid="2114102871438223600">"המכשיר הזה מנוהל על ידי ההורה שלך"</string>
@@ -1226,7 +1232,6 @@
     <string name="accessibility_fingerprint_bouncer" msgid="7189102492498735519">"נדרש אימות. יש לגעת בחיישן טביעות האצבע כדי לבצע אימות."</string>
     <string name="ongoing_phone_call_content_description" msgid="5332334388483099947">"מתקיימת שיחה"</string>
     <string name="mobile_data_settings_title" msgid="3955246641380064901">"חבילת גלישה"</string>
-    <string name="preference_summary_default_combination" msgid="8453246369903749670">"<xliff:g id="STATE">%1$s</xliff:g> / <xliff:g id="NETWORKMODE">%2$s</xliff:g>"</string>
     <string name="mobile_data_connection_active" msgid="944490013299018227">"מחובר"</string>
     <string name="mobile_data_temp_connection_active" msgid="4590222725908806824">"מחובר באופן זמני"</string>
     <string name="mobile_data_poor_connection" msgid="819617772268371434">"חיבור באיכות ירודה"</string>
@@ -1380,7 +1385,10 @@
     <string name="touchpad_tutorial_done_button" msgid="176168488821755503">"סיום"</string>
     <string name="touchpad_tutorial_gesture_done" msgid="4784438360736821255">"מעולה!"</string>
     <string name="touchpad_back_gesture_action_title" msgid="7199067250654332735">"חזרה"</string>
-    <string name="touchpad_back_gesture_guidance" msgid="4222430588599527272">"כדי לחזור אחורה, מחליקים שמאלה או ימינה עם שלוש אצבעות בכל מקום על לוח המגע."</string>
+    <!-- no translation found for touchpad_back_gesture_guidance (6263750214998421587) -->
+    <skip />
+    <!-- no translation found for touchpad_back_gesture_finished (5353616006999726249) -->
+    <skip />
     <string name="touchpad_back_gesture_animation_content_description" msgid="2646107450922379918">"לוח מגע שמראה שלוש אצבעות זזות ימינה ושמאלה"</string>
     <string name="touchpad_back_gesture_screen_animation_content_description" msgid="4036267494237748710">"מסך מכשיר שמראה אנימציה לתנועה אחורה"</string>
     <string name="keyboard_backlight_dialog_title" msgid="8273102932345564724">"התאורה האחורית במקלדת"</string>
@@ -1388,28 +1396,16 @@
     <string name="home_controls_dream_label" msgid="6567105701292324257">"שליטה במכשירים"</string>
     <string name="home_controls_dream_description" msgid="4644150952104035789">"גישה מהירה לממשק השליטה במכשירים כשומר מסך"</string>
     <string name="volume_undo_action" msgid="5815519725211877114">"ביטול"</string>
-    <!-- no translation found for back_edu_toast_content (4530314597378982956) -->
-    <skip />
-    <!-- no translation found for home_edu_toast_content (3381071147871955415) -->
-    <skip />
-    <!-- no translation found for overview_edu_toast_content (5797030644017804518) -->
-    <skip />
-    <!-- no translation found for all_apps_edu_toast_content (8807496014667211562) -->
-    <skip />
-    <!-- no translation found for back_edu_notification_title (5624780717751357278) -->
-    <skip />
-    <!-- no translation found for back_edu_notification_content (2497557451540954068) -->
-    <skip />
-    <!-- no translation found for home_edu_notification_title (6097902076909654045) -->
-    <skip />
-    <!-- no translation found for home_edu_notification_content (6631697734535766588) -->
-    <skip />
-    <!-- no translation found for overview_edu_notification_title (1265824157319562406) -->
-    <skip />
-    <!-- no translation found for overview_edu_notification_content (3578204677648432500) -->
-    <skip />
-    <!-- no translation found for all_apps_edu_notification_title (372262997265569063) -->
-    <skip />
-    <!-- no translation found for all_apps_edu_notification_content (3255070575694025585) -->
-    <skip />
+    <string name="back_edu_toast_content" msgid="4530314597378982956">"כדי לחזור אחורה, מחליקים שמאלה או ימינה עם שלוש אצבעות על לוח המגע."</string>
+    <string name="home_edu_toast_content" msgid="3381071147871955415">"כדי לעבור למסך הבית, מחליקים למעלה עם שלוש אצבעות על לוח המגע"</string>
+    <string name="overview_edu_toast_content" msgid="5797030644017804518">"כדי לראות את האפליקציות האחרונות, מחליקים למעלה עם שלוש אצבעות על לוח המגע ולוחצים לחיצה ארוכה"</string>
+    <string name="all_apps_edu_toast_content" msgid="8807496014667211562">"כדי לראות את כל האפליקציות, מקישים על מקש הפעולה במקלדת"</string>
+    <string name="back_edu_notification_title" msgid="5624780717751357278">"איך להשתמש בלוח המגע כדי לחזור אחורה"</string>
+    <string name="back_edu_notification_content" msgid="2497557451540954068">"מחליקים ימינה או שמאלה עם שלוש אצבעות. ניתן להקיש כדי לקבל מידע נוסף על התנועות."</string>
+    <string name="home_edu_notification_title" msgid="6097902076909654045">"איך להשתמש בלוח המגע כדי לעבור למסך הבית"</string>
+    <string name="home_edu_notification_content" msgid="6631697734535766588">"מחליקים למעלה עם שלוש אצבעות. ניתן להקיש כדי לקבל מידע נוסף על התנועות."</string>
+    <string name="overview_edu_notification_title" msgid="1265824157319562406">"איך להשתמש בלוח המגע כדי לראות את האפליקציות האחרונות"</string>
+    <string name="overview_edu_notification_content" msgid="3578204677648432500">"מחליקים למעלה ולוחצים לחיצה ארוכה עם שלוש אצבעות. ניתן להקיש כדי לקבל מידע נוסף על התנועות."</string>
+    <string name="all_apps_edu_notification_title" msgid="372262997265569063">"איך להשתמש במקלדת כדי לראות את כל האפליקציות"</string>
+    <string name="all_apps_edu_notification_content" msgid="3255070575694025585">"בכל שלב אפשר ללחוץ על מקש הפעולה. ניתן להקיש כדי לקבל מידע נוסף על התנועות."</string>
 </resources>

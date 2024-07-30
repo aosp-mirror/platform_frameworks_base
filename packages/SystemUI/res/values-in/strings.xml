@@ -388,6 +388,9 @@
     <string name="performance" msgid="6552785217174378320">"Performa"</string>
     <string name="user_interface" msgid="3712869377953950887">"Antarmuka Pengguna"</string>
     <string name="thermal" msgid="6758074791325414831">"Termal"</string>
+    <string name="custom" msgid="3337456985275158299">"Kustom"</string>
+    <string name="custom_trace_settings_dialog_title" msgid="2608570500144830554">"Setelan Rekaman Aktivitas Kustom"</string>
+    <string name="restore_default" msgid="5259420807486239755">"Pulihkan Default"</string>
     <string name="quick_settings_onehanded_label" msgid="2416537930246274991">"Mode satu tangan"</string>
     <string name="quick_settings_hearing_devices_label" msgid="7277170419679404129">"Alat bantu dengar"</string>
     <string name="quick_settings_hearing_devices_connected" msgid="6519069502397037781">"Aktif"</string>
@@ -429,9 +432,13 @@
     <string name="zen_modes_dialog_title" msgid="4159138230418567383">"Mode prioritas"</string>
     <string name="zen_modes_dialog_done" msgid="6654130880256438950">"Selesai"</string>
     <string name="zen_modes_dialog_settings" msgid="2310248023728936697">"Setelan"</string>
-    <!-- no translation found for zen_mode_on (9085304934016242591) -->
+    <string name="zen_mode_on" msgid="9085304934016242591">"Aktif"</string>
+    <string name="zen_mode_off" msgid="1736604456618147306">"Nonaktif"</string>
+    <!-- no translation found for zen_mode_set_up (7457957033034460064) -->
     <skip />
-    <!-- no translation found for zen_mode_off (1736604456618147306) -->
+    <!-- no translation found for zen_mode_no_manual_invocation (1769975741344633672) -->
+    <skip />
+    <!-- no translation found for zen_mode_active_modes (1625850411578488856) -->
     <skip />
     <string name="zen_priority_introduction" msgid="3159291973383796646">"Anda tidak akan terganggu oleh suara dan getaran, kecuali dari alarm, pengingat, acara, dan penelepon yang Anda tentukan. Anda akan tetap mendengar apa pun yang telah dipilih untuk diputar, termasuk musik, video, dan game."</string>
     <string name="zen_alarms_introduction" msgid="3987266042682300470">"Anda tidak akan terganggu oleh suara dan getaran, kecuali dari alarm. Anda akan tetap mendengar apa pun yang telah dipilih untuk diputar, termasuk musik, video, dan game."</string>
@@ -471,6 +478,8 @@
     <string name="keyguard_indication_charging_time_slowly" msgid="301936949731705417">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Mengisi daya dengan lambat • Penuh dalam waktu <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>"</string>
     <string name="keyguard_indication_charging_time_dock" msgid="3149328898931741271">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Mengisi daya • Penuh dalam waktu <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>"</string>
     <string name="accessibility_action_open_communal_hub" msgid="3081702792413787849">"Widget di layar kunci"</string>
+    <!-- no translation found for accessibility_announcement_communal_widget_added (6911593106099328271) -->
+    <skip />
     <string name="communal_tutorial_indicator_text" msgid="4503010353591430123">"Geser ke kiri untuk memulai tutorial komunal"</string>
     <string name="cta_tile_button_to_open_widget_editor" msgid="3871562362382963878">"Sesuaikan"</string>
     <string name="cta_tile_button_to_dismiss" msgid="3377597875997861754">"Tutup"</string>
@@ -499,8 +508,7 @@
     <string name="accessibility_action_label_place_widget" msgid="1914197458644168978">"letakkan widget yang dipilih"</string>
     <string name="communal_widget_picker_title" msgid="1953369090475731663">"Widget layar kunci"</string>
     <string name="communal_widget_picker_description" msgid="490515450110487871">"Siapa saja dapat melihat widget di layar kunci Anda, meskipun tablet terkunci."</string>
-    <!-- no translation found for accessibility_action_label_unselect_widget (1041811747619468698) -->
-    <skip />
+    <string name="accessibility_action_label_unselect_widget" msgid="1041811747619468698">"batalkan pilihan widget"</string>
     <string name="communal_widgets_disclaimer_title" msgid="1150954395585308868">"Widget layar kunci"</string>
     <string name="communal_widgets_disclaimer_text" msgid="1423545475160506349">"Untuk membuka aplikasi menggunakan widget, Anda perlu memverifikasi diri Anda. Selain itu, harap ingat bahwa siapa saja dapat melihatnya, bahkan saat tablet Anda terkunci. Beberapa widget mungkin tidak dirancang untuk layar kunci Anda dan mungkin tidak aman untuk ditambahkan di sini."</string>
     <string name="communal_widgets_disclaimer_button" msgid="4423059765740780753">"Oke"</string>
@@ -557,10 +565,8 @@
     <string name="media_projection_action_text" msgid="3634906766918186440">"Mulai sekarang"</string>
     <string name="empty_shade_text" msgid="8935967157319717412">"Tidak ada notifikasi"</string>
     <string name="no_unseen_notif_text" msgid="395512586119868682">"Tidak ada notifikasi baru"</string>
-    <!-- no translation found for adaptive_notification_edu_hun_title (7790738150177329960) -->
-    <skip />
-    <!-- no translation found for adaptive_notification_edu_hun_text (7743367744129536610) -->
-    <skip />
+    <string name="adaptive_notification_edu_hun_title" msgid="7790738150177329960">"Pengurangan suara dan getaran notifikasi aktif"</string>
+    <string name="adaptive_notification_edu_hun_text" msgid="7743367744129536610">"Saat Anda menerima terlalu banyak notifikasi sekaligus, volume dan notifikasi perangkat akan otomatis dikurangi hingga selama 2 menit."</string>
     <string name="go_to_adaptive_notification_settings" msgid="2423690125178298479">"Nonaktifkan"</string>
     <string name="unlock_to_see_notif_text" msgid="7439033907167561227">"Buka kunci untuk melihat notifikasi lama"</string>
     <string name="quick_settings_disclosure_parental_controls" msgid="2114102871438223600">"Perangkat ini dikelola oleh orang tuamu"</string>
@@ -1226,7 +1232,6 @@
     <string name="accessibility_fingerprint_bouncer" msgid="7189102492498735519">"Perlu autentikasi. Sentuh sensor sidik jari untuk melakukan autentikasi."</string>
     <string name="ongoing_phone_call_content_description" msgid="5332334388483099947">"Panggilan telepon sedang berlangsung"</string>
     <string name="mobile_data_settings_title" msgid="3955246641380064901">"Data seluler"</string>
-    <string name="preference_summary_default_combination" msgid="8453246369903749670">"<xliff:g id="STATE">%1$s</xliff:g>/<xliff:g id="NETWORKMODE">%2$s</xliff:g>"</string>
     <string name="mobile_data_connection_active" msgid="944490013299018227">"Terhubung"</string>
     <string name="mobile_data_temp_connection_active" msgid="4590222725908806824">"Terhubung sementara"</string>
     <string name="mobile_data_poor_connection" msgid="819617772268371434">"Koneksi buruk"</string>
@@ -1380,7 +1385,10 @@
     <string name="touchpad_tutorial_done_button" msgid="176168488821755503">"Selesai"</string>
     <string name="touchpad_tutorial_gesture_done" msgid="4784438360736821255">"Bagus!"</string>
     <string name="touchpad_back_gesture_action_title" msgid="7199067250654332735">"Kembali"</string>
-    <string name="touchpad_back_gesture_guidance" msgid="4222430588599527272">"Untuk kembali, geser ke kiri atau ke kanan menggunakan tiga jari ke mana saja di touchpad."</string>
+    <!-- no translation found for touchpad_back_gesture_guidance (6263750214998421587) -->
+    <skip />
+    <!-- no translation found for touchpad_back_gesture_finished (5353616006999726249) -->
+    <skip />
     <string name="touchpad_back_gesture_animation_content_description" msgid="2646107450922379918">"Touchpad menampilkan tiga jari yang bergerak ke kanan dan ke kiri"</string>
     <string name="touchpad_back_gesture_screen_animation_content_description" msgid="4036267494237748710">"Layar perangkat menampilkan animasi untuk gestur kembali"</string>
     <string name="keyboard_backlight_dialog_title" msgid="8273102932345564724">"Lampu latar keyboard"</string>
@@ -1388,28 +1396,16 @@
     <string name="home_controls_dream_label" msgid="6567105701292324257">"Kontrol Rumah"</string>
     <string name="home_controls_dream_description" msgid="4644150952104035789">"Akses cepat kontrol rumah Anda sebagai screensaver"</string>
     <string name="volume_undo_action" msgid="5815519725211877114">"Urungkan"</string>
-    <!-- no translation found for back_edu_toast_content (4530314597378982956) -->
-    <skip />
-    <!-- no translation found for home_edu_toast_content (3381071147871955415) -->
-    <skip />
-    <!-- no translation found for overview_edu_toast_content (5797030644017804518) -->
-    <skip />
-    <!-- no translation found for all_apps_edu_toast_content (8807496014667211562) -->
-    <skip />
-    <!-- no translation found for back_edu_notification_title (5624780717751357278) -->
-    <skip />
-    <!-- no translation found for back_edu_notification_content (2497557451540954068) -->
-    <skip />
-    <!-- no translation found for home_edu_notification_title (6097902076909654045) -->
-    <skip />
-    <!-- no translation found for home_edu_notification_content (6631697734535766588) -->
-    <skip />
-    <!-- no translation found for overview_edu_notification_title (1265824157319562406) -->
-    <skip />
-    <!-- no translation found for overview_edu_notification_content (3578204677648432500) -->
-    <skip />
-    <!-- no translation found for all_apps_edu_notification_title (372262997265569063) -->
-    <skip />
-    <!-- no translation found for all_apps_edu_notification_content (3255070575694025585) -->
-    <skip />
+    <string name="back_edu_toast_content" msgid="4530314597378982956">"Untuk kembali, geser ke kiri atau kanan menggunakan tiga jari di touchpad"</string>
+    <string name="home_edu_toast_content" msgid="3381071147871955415">"Untuk membuka layar utama, geser ke atas menggunakan tiga jari di touchpad"</string>
+    <string name="overview_edu_toast_content" msgid="5797030644017804518">"Untuk melihat aplikasi terkini, geser ke atas dan tahan menggunakan tiga jari di touchpad"</string>
+    <string name="all_apps_edu_toast_content" msgid="8807496014667211562">"Untuk melihat semua aplikasi, tekan tombol tindakan di keyboard"</string>
+    <string name="back_edu_notification_title" msgid="5624780717751357278">"Gunakan touchpad untuk kembali"</string>
+    <string name="back_edu_notification_content" msgid="2497557451540954068">"Geser ke kiri atau kanan menggunakan tiga jari. Ketuk untuk mempelajari gestur lainnya."</string>
+    <string name="home_edu_notification_title" msgid="6097902076909654045">"Gunakan touchpad untuk membuka layar utama"</string>
+    <string name="home_edu_notification_content" msgid="6631697734535766588">"Geser ke atas menggunakan tiga jari. Ketuk untuk mempelajari gestur lainnya."</string>
+    <string name="overview_edu_notification_title" msgid="1265824157319562406">"Gunakan touchpad untuk melihat aplikasi terkini"</string>
+    <string name="overview_edu_notification_content" msgid="3578204677648432500">"Geser ke atas dan tahan menggunakan tiga jari. Ketuk untuk mempelajari gestur lainnya."</string>
+    <string name="all_apps_edu_notification_title" msgid="372262997265569063">"Gunakan keyboard untuk melihat semua aplikasi"</string>
+    <string name="all_apps_edu_notification_content" msgid="3255070575694025585">"Tekan tombol tindakan kapan saja. Ketuk untuk mempelajari gestur lainnya."</string>
 </resources>
