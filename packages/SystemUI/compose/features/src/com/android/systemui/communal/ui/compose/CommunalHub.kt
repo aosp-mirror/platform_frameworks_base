@@ -244,48 +244,59 @@ fun CommunalHub(
                 .semantics { testTagsAsResourceId = true }
                 .testTag(COMMUNAL_HUB_TEST_TAG)
                 .fillMaxSize()
-                .nestedScroll(nestedScrollConnection)
-                .pointerInput(layoutDirection, gridState, contentOffset, contentListState) {
-                    awaitPointerEventScope {
-                        while (true) {
-                            var event = awaitFirstDown(requireUnconsumed = false)
-                            // Reset touch on first event.
-                            viewModel.onResetTouchState()
-
-                            // Process down event in case it's consumed immediately
-                            if (event.isConsumed) {
-                                viewModel.onHubTouchConsumed()
-                            }
-
-                            do {
-                                var event = awaitPointerEvent()
-                                for (change in event.changes) {
-                                    if (change.isConsumed) {
-                                        // Signal touch consumption on any consumed event.
-                                        viewModel.onHubTouchConsumed()
-                                    }
-                                }
-                            } while (
-                                !event.changes.fastAll {
-                                    it.changedToUp() || it.changedToUpIgnoreConsumed()
-                                }
-                            )
+                // Observe taps for selecting items
+                .thenIf(viewModel.isEditMode) {
+                    Modifier.pointerInput(
+                        layoutDirection,
+                        gridState,
+                        contentOffset,
+                        contentListState,
+                    ) {
+                        observeTaps { offset ->
+                            // if RTL, flip offset direction from Left side to Right
+                            val adjustedOffset =
+                                Offset(
+                                    if (layoutDirection == LayoutDirection.Rtl)
+                                        screenWidth - offset.x
+                                    else offset.x,
+                                    offset.y
+                                ) - contentOffset
+                            val index = firstIndexAtOffset(gridState, adjustedOffset)
+                            val key =
+                                index?.let { keyAtIndexIfEditable(contentListState.list, index) }
+                            viewModel.setSelectedKey(key)
                         }
                     }
+                }
+                // Nested scroll for full screen swipe to get to shade and bouncer
+                .thenIf(!viewModel.isEditMode) {
+                    Modifier.nestedScroll(nestedScrollConnection).pointerInput(viewModel) {
+                        awaitPointerEventScope {
+                            while (true) {
+                                val firstDownEvent = awaitFirstDown(requireUnconsumed = false)
+                                // Reset touch on first event.
+                                viewModel.onResetTouchState()
 
-                    // If not in edit mode, don't allow selecting items.
-                    if (!viewModel.isEditMode) return@pointerInput
-                    observeTaps { offset ->
-                        // if RTL, flip offset direction from Left side to Right
-                        val adjustedOffset =
-                            Offset(
-                                if (layoutDirection == LayoutDirection.Rtl) screenWidth - offset.x
-                                else offset.x,
-                                offset.y
-                            ) - contentOffset
-                        val index = firstIndexAtOffset(gridState, adjustedOffset)
-                        val key = index?.let { keyAtIndexIfEditable(contentListState.list, index) }
-                        viewModel.setSelectedKey(key)
+                                // Process down event in case it's consumed immediately
+                                if (firstDownEvent.isConsumed) {
+                                    viewModel.onHubTouchConsumed()
+                                }
+
+                                do {
+                                    val event = awaitPointerEvent()
+                                    for (change in event.changes) {
+                                        if (change.isConsumed) {
+                                            // Signal touch consumption on any consumed event.
+                                            viewModel.onHubTouchConsumed()
+                                        }
+                                    }
+                                } while (
+                                    !event.changes.fastAll {
+                                        it.changedToUp() || it.changedToUpIgnoreConsumed()
+                                    }
+                                )
+                            }
+                        }
                     }
                 }
                 .thenIf(!viewModel.isEditMode && !isEmptyState) {
@@ -293,7 +304,7 @@ fun CommunalHub(
                         gridState,
                         contentOffset,
                         communalContent,
-                        gridCoordinates
+                        gridCoordinates,
                     ) {
                         detectLongPressGesture { offset ->
                             // Deduct both grid offset relative to its container and content
