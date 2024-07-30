@@ -1126,6 +1126,21 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
                 }
             });
         }
+
+        @Override
+        public void onUserStopped(@NonNull TargetUser user) {
+            final int userId = user.getUserIdentifier();
+            // Called on ActivityManager thread.
+            SecureSettingsWrapper.onUserStopped(userId);
+            mService.mIoHandler.post(() -> {
+                final var additionalSubtypeMap = AdditionalSubtypeMapRepository.get(userId);
+                final var settings = InputMethodManagerService.queryInputMethodServicesInternal(
+                        mService.mContext, userId, additionalSubtypeMap,
+                        DirectBootAwareness.AUTO).getMethodMap();
+                InputMethodSettingsRepository.put(userId,
+                        InputMethodSettings.create(settings, userId));
+            });
+        }
     }
 
     @GuardedBy("ImfLock.class")
@@ -3030,6 +3045,9 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
 
     @GuardedBy("ImfLock.class")
     private void sendResultReceiverFailureLocked(@Nullable ResultReceiver resultReceiver) {
+        if (resultReceiver == null) {
+            return;
+        }
         final boolean isInputShown = mVisibilityStateComputer.isInputShown();
         resultReceiver.send(isInputShown
                 ? InputMethodManager.RESULT_UNCHANGED_SHOWN
@@ -3987,7 +4005,9 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
         }
     }
 
-    @IInputMethodManagerImpl.PermissionVerified(Manifest.permission.WRITE_SECURE_SETTINGS)
+    @IInputMethodManagerImpl.PermissionVerified(allOf = {
+            Manifest.permission.INTERACT_ACROSS_USERS_FULL,
+            Manifest.permission.WRITE_SECURE_SETTINGS})
     @Override
     public void showInputMethodPickerFromSystem(int auxiliarySubtypeMode, int displayId) {
         // Always call subtype picker, because subtype picker is a superset of input method
@@ -4081,7 +4101,9 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
         }
     }
 
-    @IInputMethodManagerImpl.PermissionVerified(Manifest.permission.WRITE_SECURE_SETTINGS)
+    @IInputMethodManagerImpl.PermissionVerified(allOf = {
+            Manifest.permission.INTERACT_ACROSS_USERS_FULL,
+            Manifest.permission.WRITE_SECURE_SETTINGS})
     @Override
     public void onImeSwitchButtonClickFromSystem(int displayId) {
         synchronized (ImfLock.class) {
@@ -4423,7 +4445,9 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
         });
     }
 
-    @IInputMethodManagerImpl.PermissionVerified(Manifest.permission.INTERNAL_SYSTEM_WINDOW)
+    @IInputMethodManagerImpl.PermissionVerified(allOf = {
+            Manifest.permission.INTERACT_ACROSS_USERS_FULL,
+            Manifest.permission.INTERNAL_SYSTEM_WINDOW})
     @Override
     public void removeImeSurface(int displayId) {
         mHandler.obtainMessage(MSG_REMOVE_IME_SURFACE).sendToTarget();

@@ -3398,10 +3398,6 @@ class Task extends TaskFragment {
                 && top.isEligibleForLetterboxEducation();
         appCompatTaskInfo.isLetterboxEducationEnabled = top != null
                 && top.mLetterboxUiController.isLetterboxEducationEnabled();
-        // Whether the direct top activity requested showing camera compat control.
-        appCompatTaskInfo.cameraCompatTaskInfo.cameraCompatControlState = isTopActivityResumed
-                ? top.getCameraCompatControlState()
-                : CameraCompatTaskInfo.CAMERA_COMPAT_CONTROL_HIDDEN;
 
         final Task parentTask = getParent() != null ? getParent().asTask() : null;
         info.parentTaskId = parentTask != null && parentTask.mCreatedByOrganizer
@@ -3513,6 +3509,9 @@ class Task extends TaskFragment {
         if (task.effectiveUid != baseActivityUid) {
             info.baseActivity = new ComponentName("", "");
         }
+
+        info.capturedLink = null;
+        info.capturedLinkTimestamp = 0;
     }
 
     @Nullable PictureInPictureParams getPictureInPictureParams() {

@@ -1428,8 +1428,7 @@
     <string name="share_remote_bugreport_action" msgid="7630880678785123682">"SHPËRNDAJ"</string>
     <string name="decline_remote_bugreport_action" msgid="4040894777519784346">"REFUZO"</string>
     <string name="select_input_method" msgid="3971267998568587025">"Zgjidh metodën e hyrjes"</string>
-    <!-- no translation found for input_method_language_settings (8069089418056819437) -->
-    <skip />
+    <string name="input_method_language_settings" msgid="8069089418056819437">"Cilësimet e gjuhës"</string>
     <string name="show_ime" msgid="6406112007347443383">"Mbaje në ekran ndërsa tastiera fizike është aktive"</string>
     <string name="hardware" msgid="3611039921284836033">"Përdor tastierën në ekran"</string>
     <string name="select_keyboard_layout_notification_title" msgid="5823199895322205589">"Konfiguro <xliff:g id="DEVICE_NAME">%s</xliff:g>"</string>

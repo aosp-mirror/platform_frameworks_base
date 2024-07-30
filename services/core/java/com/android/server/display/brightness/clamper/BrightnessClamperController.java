@@ -71,6 +71,7 @@ public class BrightnessClamperController {
 
     private final List<DisplayDeviceDataListener> mDisplayDeviceDataListeners = new ArrayList<>();
     private final List<StatefulModifier> mStatefulModifiers = new ArrayList<>();
+    private final List<UserSwitchListener> mUserSwitchListeners = new ArrayList<>();
     private ModifiersAggregatedState mModifiersAggregatedState = new ModifiersAggregatedState();
 
     private final DeviceConfig.OnPropertiesChangedListener mOnPropertiesChangedListener;
@@ -126,6 +127,9 @@ public class BrightnessClamperController {
             }
             if (m instanceof StatefulModifier s) {
                 mStatefulModifiers.add(s);
+            }
+            if (m instanceof UserSwitchListener l) {
+                mUserSwitchListeners.add(l);
             }
         });
         mOnPropertiesChangedListener =
@@ -206,6 +210,13 @@ public class BrightnessClamperController {
             Slog.wtf(TAG, "BrightnessMaxReason not mapped for type=" + mClamperType);
             return BrightnessInfo.BRIGHTNESS_MAX_REASON_NONE;
         }
+    }
+
+    /**
+     * Called when the user switches.
+     */
+    public void onUserSwitch() {
+        mUserSwitchListeners.forEach(listener -> listener.onSwitchUser());
     }
 
     /**
@@ -463,6 +474,13 @@ public class BrightnessClamperController {
      */
     interface StatefulModifier {
         void applyStateChange(ModifiersAggregatedState aggregatedState);
+    }
+
+    /**
+     * A clamper/modifier should implement this interface if it reads user-specific settings
+     */
+    interface UserSwitchListener {
+        void onSwitchUser();
     }
 
     /**

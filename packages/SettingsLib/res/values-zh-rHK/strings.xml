@@ -430,8 +430,7 @@
     <string name="force_allow_on_external_summary" msgid="8525425782530728238">"在任何資訊清單值下，允許將所有符合資格的應用程式寫入到外部儲存完間"</string>
     <string name="force_resizable_activities" msgid="7143612144399959606">"強制將活動設為可調整尺寸"</string>
     <string name="force_resizable_activities_summary" msgid="2490382056981583062">"在任何資訊清單值下，允許系統配合多重視窗環境調整所有活動的尺寸。"</string>
-    <string name="enable_freeform_support" msgid="8409932201445109106">"啟用自由形態視窗 (舊的)"</string>
-    <string name="enable_freeform_support_summary" msgid="2242481082356957934">"啟用舊的實驗版自由形態視窗的支援功能。"</string>
+    <string name="enable_freeform_support" msgid="7599125687603914253">"啟用自由形態視窗"</string>
     <string name="local_backup_password_title" msgid="4631017948933578709">"桌面電腦備份密碼"</string>
     <string name="local_backup_password_summary_none" msgid="7646898032616361714">"桌面電腦的完整備份目前未受保護"</string>
     <string name="local_backup_password_summary_change" msgid="1707357670383995567">"輕按即可變更或移除桌面電腦完整備份的密碼"</string>
@@ -496,7 +495,8 @@
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_remaining_charging_duration_only" msgid="8085099012811384899">"<xliff:g id="TIME">%1$s</xliff:g>後充滿電"</string>
     <string name="power_charging_duration" msgid="6127154952524919719">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g>後充滿電"</string>
-    <string name="power_charging_limited" msgid="8202147604844938236">"<xliff:g id="LEVEL">%1$s</xliff:g> - 已優化充電"</string>
+    <!-- no translation found for power_charging_limited (4144004473976005214) -->
+    <skip />
     <string name="power_charging_future_paused" msgid="1809543660923642799">"<xliff:g id="LEVEL">%1$s</xliff:g> ‑ 充電中"</string>
     <string name="power_fast_charging_duration_v2" msgid="3797735998640359490">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATUS">%2$s</xliff:g> - 在 <xliff:g id="TIME">%3$s</xliff:g>前充滿電"</string>
     <string name="power_charging_duration_v2" msgid="2938998284074003248">"<xliff:g id="LEVEL">%1$s</xliff:g> • 在 <xliff:g id="TIME">%2$s</xliff:g>前充滿電"</string>

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 The Android Open Source Project
+ * Copyright (C) 2024 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,17 +14,10 @@
  * limitations under the License.
  */
 
-package android.app;
+package com.android.systemui.shade.ui.viewmodel
 
-/**
- * This callback allows ActivityRecord to ask the calling View to apply the treatment for stretched
- * issues affecting camera viewfinders when the user clicks on the camera compat control.
- *
- * {@hide}
- */
-oneway interface ICompatCameraControlCallback {
+import com.android.systemui.keyguard.domain.interactor.keyguardTransitionInteractor
+import com.android.systemui.kosmos.Kosmos
 
-    void applyCameraCompatTreatment();
-
-    void revertCameraCompatTreatment();
-}
+val Kosmos.notificationShadeWindowModel: NotificationShadeWindowModel by
+    Kosmos.Fixture { NotificationShadeWindowModel(keyguardTransitionInteractor) }

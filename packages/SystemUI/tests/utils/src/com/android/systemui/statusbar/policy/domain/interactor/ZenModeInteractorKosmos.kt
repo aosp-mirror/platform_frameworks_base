@@ -18,10 +18,12 @@ package com.android.systemui.statusbar.policy.domain.interactor
 
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.Kosmos.Fixture
+import com.android.systemui.shared.notifications.data.repository.notificationSettingsRepository
 import com.android.systemui.statusbar.policy.data.repository.zenModeRepository
 
 val Kosmos.zenModeInteractor by Fixture {
     ZenModeInteractor(
-        repository = zenModeRepository,
+        zenModeRepository = zenModeRepository,
+        notificationSettingsRepository = notificationSettingsRepository,
     )
 }

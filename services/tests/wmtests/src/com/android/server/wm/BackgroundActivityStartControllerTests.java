@@ -547,7 +547,7 @@ public class BackgroundActivityStartControllerTests {
         assertThat(balState.callerExplicitOptInOrOut()).isFalse();
         assertThat(balState.realCallerExplicitOptInOrAutoOptIn()).isTrue();
         assertThat(balState.realCallerExplicitOptInOrOut()).isFalse();
-        assertThat(balState.toString()).contains(
+        assertThat(balState.toString()).startsWith(
                 "[callingPackage: package.app1; "
                         + "callingPackageTargetSdk: -1; "
                         + "callingUid: 10001; "
@@ -563,6 +563,7 @@ public class BackgroundActivityStartControllerTests {
                         + "balAllowedByPiCreator: BSP.ALLOW_BAL; "
                         + "balAllowedByPiCreatorWithHardening: BSP.ALLOW_BAL; "
                         + "resultIfPiCreatorAllowsBal: null; "
+                        + "callerStartMode: MODE_BACKGROUND_ACTIVITY_START_SYSTEM_DEFINED; "
                         + "hasRealCaller: true; "
                         + "isCallForResult: false; "
                         + "isPendingIntent: false; "
@@ -646,7 +647,7 @@ public class BackgroundActivityStartControllerTests {
         assertThat(balState.callerExplicitOptInOrOut()).isFalse();
         assertThat(balState.realCallerExplicitOptInOrAutoOptIn()).isFalse();
         assertThat(balState.realCallerExplicitOptInOrOut()).isFalse();
-        assertThat(balState.toString()).contains(
+        assertThat(balState.toString()).startsWith(
                 "[callingPackage: package.app1; "
                         + "callingPackageTargetSdk: -1; "
                         + "callingUid: 10001; "
@@ -662,6 +663,7 @@ public class BackgroundActivityStartControllerTests {
                         + "balAllowedByPiCreator: BSP.NONE; "
                         + "balAllowedByPiCreatorWithHardening: BSP.NONE; "
                         + "resultIfPiCreatorAllowsBal: null; "
+                        + "callerStartMode: MODE_BACKGROUND_ACTIVITY_START_SYSTEM_DEFINED; "
                         + "hasRealCaller: true; "
                         + "isCallForResult: false; "
                         + "isPendingIntent: true; "

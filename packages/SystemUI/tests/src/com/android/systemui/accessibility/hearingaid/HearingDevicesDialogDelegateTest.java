@@ -52,6 +52,7 @@ import android.widget.Spinner;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
+import com.android.internal.logging.UiEventLogger;
 import com.android.settingslib.bluetooth.BluetoothEventManager;
 import com.android.settingslib.bluetooth.CachedBluetoothDevice;
 import com.android.settingslib.bluetooth.CachedBluetoothDeviceManager;
@@ -123,6 +124,8 @@ public class HearingDevicesDialogDelegateTest extends SysuiTestCase {
     @Mock
     private AudioManager mAudioManager;
     @Mock
+    private UiEventLogger mUiEventLogger;
+    @Mock
     private CachedBluetoothDevice mCachedDevice;
     @Mock
     private BluetoothDevice mDevice;
@@ -179,6 +182,7 @@ public class HearingDevicesDialogDelegateTest extends SysuiTestCase {
                 anyInt(), any());
         assertThat(intentCaptor.getValue().getAction()).isEqualTo(
                 Settings.ACTION_HEARING_DEVICE_PAIRING_SETTINGS);
+        verify(mUiEventLogger).log(HearingDevicesUiEvent.HEARING_DEVICES_PAIR);
     }
 
     @Test
@@ -192,7 +196,7 @@ public class HearingDevicesDialogDelegateTest extends SysuiTestCase {
                 anyInt(), any());
         assertThat(intentCaptor.getValue().getAction()).isEqualTo(
                 HearingDevicesDialogDelegate.ACTION_BLUETOOTH_DEVICE_DETAILS);
-
+        verify(mUiEventLogger).log(HearingDevicesUiEvent.HEARING_DEVICES_GEAR_CLICK);
     }
 
     @Test
@@ -200,9 +204,10 @@ public class HearingDevicesDialogDelegateTest extends SysuiTestCase {
         setUpDeviceListDialog();
         when(mHearingDeviceItem.getType()).thenReturn(DeviceItemType.CONNECTED_BLUETOOTH_DEVICE);
 
-        mDialogDelegate.onDeviceItemOnClicked(mHearingDeviceItem, new View(mContext));
+        mDialogDelegate.onDeviceItemClicked(mHearingDeviceItem, new View(mContext));
 
         verify(mCachedDevice).disconnect();
+        verify(mUiEventLogger).log(HearingDevicesUiEvent.HEARING_DEVICES_DISCONNECT);
     }
 
     @Test
@@ -304,7 +309,8 @@ public class HearingDevicesDialogDelegateTest extends SysuiTestCase {
                 mDialogTransitionAnimator,
                 mLocalBluetoothManager,
                 new Handler(mTestableLooper.getLooper()),
-                mAudioManager
+                mAudioManager,
+                mUiEventLogger
         );
 
         mDialog = mDialogDelegate.createDialog();
@@ -326,7 +332,8 @@ public class HearingDevicesDialogDelegateTest extends SysuiTestCase {
                 mDialogTransitionAnimator,
                 mLocalBluetoothManager,
                 new Handler(mTestableLooper.getLooper()),
-                mAudioManager
+                mAudioManager,
+                mUiEventLogger
         );
 
         mDialog = mDialogDelegate.createDialog();

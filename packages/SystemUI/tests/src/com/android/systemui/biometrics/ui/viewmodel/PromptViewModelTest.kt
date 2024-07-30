@@ -491,7 +491,7 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
                         assertThat(iconAsset)
                             .isEqualTo(R.raw.fingerprint_dialogue_error_to_unlock_lottie)
                         assertThat(iconContentDescriptionId)
-                            .isEqualTo(R.string.fingerprint_dialog_authenticated_confirmation)
+                            .isEqualTo(R.string.biometric_dialog_confirm)
                         assertThat(shouldAnimateIconView).isEqualTo(true)
 
                         // Confirm authentication
@@ -601,7 +601,7 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
                             .isEqualTo(R.raw.fingerprint_dialogue_fingerprint_to_unlock_lottie)
                         assertThat(iconOverlayAsset).isEqualTo(-1)
                         assertThat(iconContentDescriptionId)
-                            .isEqualTo(R.string.fingerprint_dialog_authenticated_confirmation)
+                            .isEqualTo(R.string.biometric_dialog_confirm)
                         assertThat(shouldAnimateIconView).isEqualTo(true)
                         assertThat(shouldAnimateIconOverlay).isEqualTo(false)
                     }

@@ -121,9 +121,9 @@ public final class ImeVisibilityStateComputer {
     @GuardedBy("ImfLock.class")
     private boolean mRequestedImeScreenshot;
 
-    /** The window token of the current visible IME layering target overlay. */
+    /** Whether there is a visible IME layering target overlay. */
     @GuardedBy("ImfLock.class")
-    private IBinder mCurVisibleImeLayeringOverlay;
+    private boolean mHasVisibleImeLayeringOverlay;
 
     /** The window token of the current visible IME input target. */
     @GuardedBy("ImfLock.class")
@@ -218,33 +218,36 @@ public final class ImeVisibilityStateComputer {
         mPolicy = imePolicy;
         mWindowManagerInternal.setInputMethodTargetChangeListener(new ImeTargetChangeListener() {
             @Override
-            public void onImeTargetOverlayVisibilityChanged(IBinder overlayWindowToken,
+            public void onImeTargetOverlayVisibilityChanged(@NonNull IBinder overlayWindowToken,
                     @WindowManager.LayoutParams.WindowType int windowType, boolean visible,
                     boolean removed) {
                 // Ignoring the starting window since it's ok to cover the IME target
                 // window in temporary without affecting the IME visibility.
-                final var overlay = (visible && !removed && windowType != TYPE_APPLICATION_STARTING)
-                                ? overlayWindowToken : null;
+                final boolean hasOverlay = visible && !removed
+                        && windowType != TYPE_APPLICATION_STARTING;
                 synchronized (ImfLock.class) {
-                    mCurVisibleImeLayeringOverlay = overlay;
+                    mHasVisibleImeLayeringOverlay = hasOverlay;
                 }
             }
 
             @Override
             public void onImeInputTargetVisibilityChanged(IBinder imeInputTarget,
                     boolean visibleRequested, boolean removed) {
+                final boolean visibleAndNotRemoved = visibleRequested && !removed;
                 synchronized (ImfLock.class) {
-                    if (mCurVisibleImeInputTarget == imeInputTarget && (!visibleRequested
-                            || removed)
-                            && mCurVisibleImeLayeringOverlay != null) {
+                    if (visibleAndNotRemoved) {
+                        mCurVisibleImeInputTarget = imeInputTarget;
+                        return;
+                    }
+                    if (mHasVisibleImeLayeringOverlay
+                            && mCurVisibleImeInputTarget == imeInputTarget) {
                         final int reason = SoftInputShowHideReason.HIDE_WHEN_INPUT_TARGET_INVISIBLE;
                         final var statsToken = ImeTracker.forLogging().onStart(ImeTracker.TYPE_HIDE,
                                 ImeTracker.ORIGIN_SERVER, reason, false /* fromUser */);
                         mService.onApplyImeVisibilityFromComputerLocked(imeInputTarget, statsToken,
                                 new ImeVisibilityResult(STATE_HIDE_IME_EXPLICIT, reason));
                     }
-                    mCurVisibleImeInputTarget =
-                            (visibleRequested && !removed) ? imeInputTarget : null;
+                    mCurVisibleImeInputTarget = null;
                 }
             }
         });

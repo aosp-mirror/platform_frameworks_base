@@ -388,6 +388,9 @@
     <string name="performance" msgid="6552785217174378320">"पर्फर्मेन्स"</string>
     <string name="user_interface" msgid="3712869377953950887">"युजर इन्टरफेस"</string>
     <string name="thermal" msgid="6758074791325414831">"थर्मल"</string>
+    <string name="custom" msgid="3337456985275158299">"कस्टम"</string>
+    <string name="custom_trace_settings_dialog_title" msgid="2608570500144830554">"कस्टम ट्रेस सेटिङ"</string>
+    <string name="restore_default" msgid="5259420807486239755">"डिफल्ट सेटिङ रिस्टोर गर्नुहोस्"</string>
     <string name="quick_settings_onehanded_label" msgid="2416537930246274991">"एक हाते मोड"</string>
     <string name="quick_settings_hearing_devices_label" msgid="7277170419679404129">"हियरिङ डिभाइसहरू"</string>
     <string name="quick_settings_hearing_devices_connected" msgid="6519069502397037781">"सक्रिय छ"</string>
@@ -431,6 +434,12 @@
     <string name="zen_modes_dialog_settings" msgid="2310248023728936697">"सेटिङ"</string>
     <string name="zen_mode_on" msgid="9085304934016242591">"अन छ"</string>
     <string name="zen_mode_off" msgid="1736604456618147306">"अफ छ"</string>
+    <!-- no translation found for zen_mode_set_up (7457957033034460064) -->
+    <skip />
+    <!-- no translation found for zen_mode_no_manual_invocation (1769975741344633672) -->
+    <skip />
+    <!-- no translation found for zen_mode_active_modes (1625850411578488856) -->
+    <skip />
     <string name="zen_priority_introduction" msgid="3159291973383796646">"तपाईंलाई अलार्म, रिमाइन्डर, कार्यक्रम र तपाईंले निर्दिष्ट गर्नुभएका कलरहरू बाहेकका ध्वनि र कम्पनहरूले बाधा पुऱ्याउने छैनन्। तपाईंले अझै सङ्गीत, भिडियो र खेलहरू लगायत आफूले प्ले गर्न छनौट गरेका जुनसुकै कुरा सुन्न सक्नुहुनेछ।"</string>
     <string name="zen_alarms_introduction" msgid="3987266042682300470">"तपाईंलाई अलार्महरू बाहेकका ध्वनि र कम्पनहरूले बाधा पुऱ्याउने छैनन्। तपाईंले अझै सङ्गीत, भिडियो र खेलहरू लगायत आफूले प्ले गर्न छनौट गरेका जुनसुकै कुरा सुन्न सक्नुहुनेछ।"</string>
     <string name="zen_priority_customize_button" msgid="4119213187257195047">" कस्टम बनाउनुहोस्"</string>
@@ -469,6 +478,8 @@
     <string name="keyguard_indication_charging_time_slowly" msgid="301936949731705417">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • बिस्तारै चार्ज हुँदै छ • <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> मा पूरै चार्ज हुन्छ"</string>
     <string name="keyguard_indication_charging_time_dock" msgid="3149328898931741271">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • चार्ज हुँदै छ • <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> मा फुल चार्ज हुने छ"</string>
     <string name="accessibility_action_open_communal_hub" msgid="3081702792413787849">"लक स्क्रिनमा भएका विजेटहरू"</string>
+    <!-- no translation found for accessibility_announcement_communal_widget_added (6911593106099328271) -->
+    <skip />
     <string name="communal_tutorial_indicator_text" msgid="4503010353591430123">"कम्युनल ट्युटोरियल सुरु गर्न बायाँतिर स्वाइप गर्नुहोस्"</string>
     <string name="cta_tile_button_to_open_widget_editor" msgid="3871562362382963878">"कस्टमाइज गर्नुहोस्"</string>
     <string name="cta_tile_button_to_dismiss" msgid="3377597875997861754">"खारेज गर्नुहोस्"</string>
@@ -554,10 +565,8 @@
     <string name="media_projection_action_text" msgid="3634906766918186440">"अहिले न"</string>
     <string name="empty_shade_text" msgid="8935967157319717412">"कुनै सूचनाहरू छैनन्"</string>
     <string name="no_unseen_notif_text" msgid="395512586119868682">"कुनै पनि नयाँ सूचना छैन"</string>
-    <!-- no translation found for adaptive_notification_edu_hun_title (7790738150177329960) -->
-    <skip />
-    <!-- no translation found for adaptive_notification_edu_hun_text (7743367744129536610) -->
-    <skip />
+    <string name="adaptive_notification_edu_hun_title" msgid="7790738150177329960">"नोटिफिकेसन कुलडाउन अन छ"</string>
+    <string name="adaptive_notification_edu_hun_text" msgid="7743367744129536610">"तपाईंले एकै पटक धेरै नोटिफिकेसन प्राप्त गर्दा बढीमा २ मिनेटसम्म तपाईंको डिभाइसको भोल्युम र अलर्टहरूको सङ्ख्या स्वतः घटाइन्छ।"</string>
     <string name="go_to_adaptive_notification_settings" msgid="2423690125178298479">"अफ गर्नुहोस्"</string>
     <string name="unlock_to_see_notif_text" msgid="7439033907167561227">"पुराना सूचनाहरू हेर्न अनलक गर्नुहोस्"</string>
     <string name="quick_settings_disclosure_parental_controls" msgid="2114102871438223600">"यो डिभाइस तपाईंका अभिभावक व्यवस्थापन गर्नुहुन्छ"</string>
@@ -1223,7 +1232,6 @@
     <string name="accessibility_fingerprint_bouncer" msgid="7189102492498735519">"पुष्टि गर्नु पर्ने हुन्छ। पुष्टि गर्न फिंगरप्रिन्ट सेन्सर छुनुहोस्।"</string>
     <string name="ongoing_phone_call_content_description" msgid="5332334388483099947">"जारी फोन कल"</string>
     <string name="mobile_data_settings_title" msgid="3955246641380064901">"मोबाइल डेटा"</string>
-    <string name="preference_summary_default_combination" msgid="8453246369903749670">"<xliff:g id="STATE">%1$s</xliff:g> / <xliff:g id="NETWORKMODE">%2$s</xliff:g>"</string>
     <string name="mobile_data_connection_active" msgid="944490013299018227">"इन्टरनेटमा कनेक्ट गरिएको छ"</string>
     <string name="mobile_data_temp_connection_active" msgid="4590222725908806824">"यसमा केही समयका लागि कनेक्ट गरिएको हो"</string>
     <string name="mobile_data_poor_connection" msgid="819617772268371434">"इन्टरनेट राम्री चलेको छैन"</string>
@@ -1377,7 +1385,10 @@
     <string name="touchpad_tutorial_done_button" msgid="176168488821755503">"सम्पन्न भयो"</string>
     <string name="touchpad_tutorial_gesture_done" msgid="4784438360736821255">"अद्भुत!"</string>
     <string name="touchpad_back_gesture_action_title" msgid="7199067250654332735">"पछाडि जानुहोस्"</string>
-    <string name="touchpad_back_gesture_guidance" msgid="4222430588599527272">"पछाडि जान तिन वटा औँलाले टचप्याडमा कतै छोएर बायाँ वा दायाँतिर स्वाइप गर्नुहोस्।"</string>
+    <!-- no translation found for touchpad_back_gesture_guidance (6263750214998421587) -->
+    <skip />
+    <!-- no translation found for touchpad_back_gesture_finished (5353616006999726249) -->
+    <skip />
     <string name="touchpad_back_gesture_animation_content_description" msgid="2646107450922379918">"तिन वटा औँला दायाँ र बायाँ सारेको देखाइएको टचप्याड"</string>
     <string name="touchpad_back_gesture_screen_animation_content_description" msgid="4036267494237748710">"पछाडि जाने जेस्चरको एनिमेसन देखाइएको डिभाइसको स्क्रिन"</string>
     <string name="keyboard_backlight_dialog_title" msgid="8273102932345564724">"किबोर्ड ब्याकलाइट"</string>

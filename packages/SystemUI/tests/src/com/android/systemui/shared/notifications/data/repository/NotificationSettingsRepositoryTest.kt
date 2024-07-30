@@ -17,6 +17,7 @@
 package com.android.systemui.shared.notifications.data.repository
 
 import android.provider.Settings
+import android.provider.Settings.Secure.ZEN_DURATION_FOREVER
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
@@ -50,7 +51,7 @@ class NotificationSettingsRepositoryTest : SysuiTestCase() {
 
         underTest =
             NotificationSettingsRepository(
-                scope = testScope.backgroundScope,
+                backgroundScope = testScope.backgroundScope,
                 backgroundDispatcher = testDispatcher,
                 secureSettingsRepository = secureSettingsRepository,
                 systemSettingsRepository = systemSettingsRepository,
@@ -58,7 +59,7 @@ class NotificationSettingsRepositoryTest : SysuiTestCase() {
     }
 
     @Test
-    fun testGetIsShowNotificationsOnLockscreenEnabled() =
+    fun getIsShowNotificationsOnLockscreenEnabled() =
         testScope.runTest {
             val showNotifs by collectLastValue(underTest.isShowNotificationsOnLockScreenEnabled())
 
@@ -76,7 +77,7 @@ class NotificationSettingsRepositoryTest : SysuiTestCase() {
         }
 
     @Test
-    fun testSetIsShowNotificationsOnLockscreenEnabled() =
+    fun setIsShowNotificationsOnLockscreenEnabled() =
         testScope.runTest {
             val showNotifs by collectLastValue(underTest.isShowNotificationsOnLockScreenEnabled())
 
@@ -88,7 +89,7 @@ class NotificationSettingsRepositoryTest : SysuiTestCase() {
         }
 
     @Test
-    fun testGetIsNotificationHistoryEnabled() =
+    fun getIsNotificationHistoryEnabled() =
         testScope.runTest {
             val historyEnabled by collectLastValue(underTest.isNotificationHistoryEnabled)
 
@@ -121,5 +122,23 @@ class NotificationSettingsRepositoryTest : SysuiTestCase() {
                 value = 0,
             )
             assertThat(cooldownEnabled).isEqualTo(false)
+        }
+
+    @Test
+    fun zenDuration() =
+        testScope.runTest {
+            val zenDuration by collectLastValue(underTest.zenDuration)
+
+            secureSettingsRepository.setInt(
+                name = Settings.Secure.ZEN_DURATION,
+                value = 60,
+            )
+            assertThat(zenDuration).isEqualTo(60)
+
+            secureSettingsRepository.setInt(
+                name = Settings.Secure.ZEN_DURATION,
+                value = ZEN_DURATION_FOREVER,
+            )
+            assertThat(zenDuration).isEqualTo(ZEN_DURATION_FOREVER)
         }
 }

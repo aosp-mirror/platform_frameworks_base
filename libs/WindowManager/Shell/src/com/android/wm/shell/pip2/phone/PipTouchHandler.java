@@ -199,6 +199,7 @@ public class PipTouchHandler implements PipTransitionState.PipTransitionStateCha
         mMenuController.addListener(new PipMenuListener());
         mGesture = new DefaultPipTouchGesture();
         mMotionHelper = pipMotionHelper;
+        mMotionHelper.setUpdateMovementBoundsRunnable(this::updateMovementBounds);
         mPipDismissTargetHandler = new PipDismissTargetHandler(context, pipUiEventLogger,
                 mMotionHelper, mainExecutor);
         mTouchState = new PipTouchState(ViewConfiguration.get(context),
@@ -317,6 +318,8 @@ public class PipTouchHandler implements PipTransitionState.PipTransitionStateCha
         mFloatingContentCoordinator.onContentRemoved(mMotionHelper);
         mPipResizeGestureHandler.onActivityUnpinned();
         mPipInputConsumer.unregisterInputConsumer();
+        mPipBoundsState.setHasUserMovedPip(false);
+        mPipBoundsState.setHasUserResizedPip(false);
     }
 
     void onPinnedStackAnimationEnded(
@@ -346,6 +349,22 @@ public class PipTouchHandler implements PipTransitionState.PipTransitionStateCha
     void onImeVisibilityChanged(boolean imeVisible, int imeHeight) {
         mIsImeShowing = imeVisible;
         mImeHeight = imeHeight;
+
+        // Cache new movement bounds using the new potential IME height.
+        updateMovementBounds();
+
+        mPipTransitionState.setOnIdlePipTransitionStateRunnable(() -> {
+            int delta = mPipBoundsState.getMovementBounds().bottom
+                    - mPipBoundsState.getBounds().top;
+
+            boolean hasUserInteracted = (mPipBoundsState.hasUserMovedPip()
+                    || mPipBoundsState.hasUserResizedPip());
+            if ((imeVisible && delta < 0) || (!imeVisible && !hasUserInteracted)) {
+                // The policy is to ignore an IME disappearing if user has interacted with PiP.
+                // Otherwise, only offset due to an appearing IME if PiP occludes it.
+                mMotionHelper.animateToOffset(mPipBoundsState.getBounds(), delta);
+            }
+        });
     }
 
     void onShelfVisibilityChanged(boolean shelfVisible, int shelfHeight) {
@@ -1077,6 +1096,7 @@ public class PipTouchHandler implements PipTransitionState.PipTransitionStateCha
         switch (newState) {
             case PipTransitionState.ENTERED_PIP:
                 onActivityPinned();
+                updateMovementBounds();
                 mTouchState.setAllowInputEvents(true);
                 mTouchState.reset();
                 break;

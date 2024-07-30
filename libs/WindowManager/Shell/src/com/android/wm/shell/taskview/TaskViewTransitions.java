@@ -217,6 +217,11 @@ public class TaskViewTransitions implements Transitions.TransitionHandler {
         return null;
     }
 
+    /** Returns true if the given {@code taskInfo} belongs to a task view. */
+    public boolean isTaskViewTask(ActivityManager.RunningTaskInfo taskInfo) {
+        return findTaskView(taskInfo) != null;
+    }
+
     void startTaskView(@NonNull WindowContainerTransaction wct,
             @NonNull TaskViewTaskController taskView, @NonNull IBinder launchCookie) {
         updateVisibilityState(taskView, true /* visible */);
