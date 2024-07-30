@@ -685,6 +685,15 @@ public class ShellTaskOrganizer extends TaskOrganizer {
         return result;
     }
 
+    /** Return list of {@link RunningTaskInfo}s on all the displays. */
+    public ArrayList<RunningTaskInfo> getRunningTasks() {
+        ArrayList<RunningTaskInfo> result = new ArrayList<>();
+        for (int i = 0; i < mTasks.size(); i++) {
+            result.add(mTasks.valueAt(i).getTaskInfo());
+        }
+        return result;
+    }
+
     /** Gets running task by taskId. Returns {@code null} if no such task observed. */
     @Nullable
     public RunningTaskInfo getRunningTaskInfo(int taskId) {
