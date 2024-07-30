@@ -86,7 +86,7 @@ class ElementTest {
     @get:Rule val rule = createComposeRule()
 
     @Composable
-    private fun SceneScope.Element(
+    private fun ContentScope.Element(
         key: ElementKey,
         size: Dp,
         offset: Dp,
@@ -380,7 +380,7 @@ class ElementTest {
 
         assertThat(layoutImpl.elements.keys).containsExactly(key)
         val element = layoutImpl.elements.getValue(key)
-        assertThat(element.sceneStates.keys).containsExactly(SceneB)
+        assertThat(element.stateByContent.keys).containsExactly(SceneB)
 
         // Scene C, state 0: the same element is reused.
         rule.runOnUiThread { state.setTargetScene(SceneC, coroutineScope) }
@@ -389,13 +389,13 @@ class ElementTest {
 
         assertThat(layoutImpl.elements.keys).containsExactly(key)
         assertThat(layoutImpl.elements.getValue(key)).isSameInstanceAs(element)
-        assertThat(element.sceneStates.keys).containsExactly(SceneC)
+        assertThat(element.stateByContent.keys).containsExactly(SceneC)
 
         // Scene C, state 1: the element is removed from the map.
         sceneCState = 1
         rule.waitForIdle()
 
-        assertThat(element.sceneStates).isEmpty()
+        assertThat(element.stateByContent).isEmpty()
         assertThat(layoutImpl.elements).isEmpty()
     }
 
@@ -405,7 +405,7 @@ class ElementTest {
 
         assertThrows(IllegalStateException::class.java) {
             rule.setContent {
-                TestSceneScope {
+                TestContentScope {
                     Column {
                         Box(Modifier.element(key))
                         Box(Modifier.element(key))
@@ -421,7 +421,7 @@ class ElementTest {
 
         assertThrows(IllegalStateException::class.java) {
             rule.setContent {
-                TestSceneScope {
+                TestContentScope {
                     Column {
                         val childModifier = Modifier.element(key)
                         Box(childModifier)
@@ -439,7 +439,7 @@ class ElementTest {
         assertThrows(IllegalStateException::class.java) {
             var nElements by mutableStateOf(1)
             rule.setContent {
-                TestSceneScope {
+                TestContentScope {
                     Column {
                         val childModifier = Modifier.element(key)
                         repeat(nElements) { Box(childModifier) }
@@ -457,7 +457,7 @@ class ElementTest {
         assertThrows(IllegalStateException::class.java) {
             var key by mutableStateOf(TestElements.Foo)
             rule.setContent {
-                TestSceneScope {
+                TestContentScope {
                     Column {
                         Box(Modifier.element(key))
                         Box(Modifier.element(TestElements.Bar))
@@ -491,7 +491,7 @@ class ElementTest {
         // There is only Foo in the elements map.
         assertThat(layoutImpl.elements.keys).containsExactly(TestElements.Foo)
         val fooElement = layoutImpl.elements.getValue(TestElements.Foo)
-        assertThat(fooElement.sceneStates.keys).containsExactly(SceneA)
+        assertThat(fooElement.stateByContent.keys).containsExactly(SceneA)
 
         key = TestElements.Bar
 
@@ -499,8 +499,8 @@ class ElementTest {
         rule.waitForIdle()
         assertThat(layoutImpl.elements.keys).containsExactly(TestElements.Bar)
         val barElement = layoutImpl.elements.getValue(TestElements.Bar)
-        assertThat(barElement.sceneStates.keys).containsExactly(SceneA)
-        assertThat(fooElement.sceneStates).isEmpty()
+        assertThat(barElement.stateByContent.keys).containsExactly(SceneA)
+        assertThat(fooElement.stateByContent).isEmpty()
     }
 
     @Test
@@ -553,7 +553,7 @@ class ElementTest {
         // There is only Foo in the elements map.
         assertThat(layoutImpl.elements.keys).containsExactly(TestElements.Foo)
         val element = layoutImpl.elements.getValue(TestElements.Foo)
-        val sceneValues = element.sceneStates
+        val sceneValues = element.stateByContent
         assertThat(sceneValues.keys).containsExactly(SceneA)
 
         // Get the ElementModifier node that should be reused later on when coming back to this
@@ -576,7 +576,7 @@ class ElementTest {
 
         assertThat(layoutImpl.elements.keys).containsExactly(TestElements.Foo)
         val newElement = layoutImpl.elements.getValue(TestElements.Foo)
-        val newSceneValues = newElement.sceneStates
+        val newSceneValues = newElement.stateByContent
         assertThat(newElement).isNotEqualTo(element)
         assertThat(newSceneValues).isNotEqualTo(sceneValues)
         assertThat(newSceneValues.keys).containsExactly(SceneA)
@@ -677,7 +677,7 @@ class ElementTest {
                 modifier = Modifier.size(layoutWidth, layoutHeight)
             ) {
                 scene(key = SceneA, userActions = mapOf(Swipe.Down to SceneB)) {
-                    animateSceneFloatAsState(
+                    animateContentFloatAsState(
                         value = animatedFloatRange.start,
                         key = TestValues.Value1,
                         false
@@ -686,7 +686,7 @@ class ElementTest {
                 }
                 scene(SceneB) {
                     val animatedFloat by
-                        animateSceneFloatAsState(
+                        animateContentFloatAsState(
                             value = animatedFloatRange.endInclusive,
                             key = TestValues.Value1,
                             canOverflow = false
@@ -1215,15 +1215,15 @@ class ElementTest {
             }
 
         val layoutSize = DpSize(200.dp, 100.dp)
-        val lastValues = mutableMapOf<SceneKey, Float>()
+        val lastValues = mutableMapOf<ContentKey, Float>()
 
         @Composable
-        fun SceneScope.Foo(size: Dp, value: Float, modifier: Modifier = Modifier) {
-            val sceneKey = this.sceneKey
+        fun ContentScope.Foo(size: Dp, value: Float, modifier: Modifier = Modifier) {
+            val contentKey = this.contentKey
             Element(TestElements.Foo, modifier.size(size)) {
                 val animatedValue = animateElementFloatAsState(value, TestValues.Value1)
                 LaunchedEffect(animatedValue) {
-                    snapshotFlow { animatedValue.value }.collect { lastValues[sceneKey] = it }
+                    snapshotFlow { animatedValue.value }.collect { lastValues[contentKey] = it }
                 }
             }
         }
@@ -1388,8 +1388,8 @@ class ElementTest {
 
         // The interruption values should be unspecified and deltas should be set to zero.
         val foo = layoutImpl.elements.getValue(TestElements.Foo)
-        assertThat(foo.sceneStates.keys).containsExactly(SceneC)
-        val stateInC = foo.sceneStates.getValue(SceneC)
+        assertThat(foo.stateByContent.keys).containsExactly(SceneC)
+        val stateInC = foo.stateByContent.getValue(SceneC)
         assertThat(stateInC.offsetBeforeInterruption).isEqualTo(Offset.Unspecified)
         assertThat(stateInC.sizeBeforeInterruption).isEqualTo(Element.SizeUnspecified)
         assertThat(stateInC.scaleBeforeInterruption).isEqualTo(Scale.Unspecified)
@@ -1423,7 +1423,7 @@ class ElementTest {
             }
 
         @Composable
-        fun SceneScope.Foo(modifier: Modifier = Modifier) {
+        fun ContentScope.Foo(modifier: Modifier = Modifier) {
             Box(modifier.element(TestElements.Foo).size(fooSize))
         }
 
@@ -1542,8 +1542,8 @@ class ElementTest {
         assertThat(layoutImpl.elements).containsKey(TestElements.Foo)
         val foo = layoutImpl.elements.getValue(TestElements.Foo)
 
-        assertThat(foo.sceneStates).containsKey(SceneB)
-        val bState = foo.sceneStates.getValue(SceneB)
+        assertThat(foo.stateByContent).containsKey(SceneB)
+        val bState = foo.stateByContent.getValue(SceneB)
 
         assertThat(bState.targetSize).isNotEqualTo(Element.SizeUnspecified)
         assertThat(bState.targetOffset).isNotEqualTo(Offset.Unspecified)
@@ -1583,9 +1583,9 @@ class ElementTest {
         rule.waitForIdle()
 
         val foo = checkNotNull(layoutImpl.elements[TestElements.Foo])
-        assertThat(foo.sceneStates[SceneA]).isNull()
+        assertThat(foo.stateByContent[SceneA]).isNull()
 
-        val fooInB = foo.sceneStates[SceneB]
+        val fooInB = foo.stateByContent[SceneB]
         assertThat(fooInB).isNotNull()
         assertThat(fooInB!!.lastAlpha).isEqualTo(0.5f)
 
@@ -1599,7 +1599,7 @@ class ElementTest {
             state.startTransition(transition(from = SceneB, to = SceneC, progress = { 0.3f }))
         }
         rule.waitForIdle()
-        val fooInC = foo.sceneStates[SceneC]
+        val fooInC = foo.stateByContent[SceneC]
         assertThat(fooInC).isNotNull()
         assertThat(fooInC!!.lastAlpha).isEqualTo(1f)
         assertThat(fooInB.lastAlpha).isEqualTo(Element.AlphaUnspecified)
@@ -1645,7 +1645,7 @@ class ElementTest {
         rule.waitForIdle()
 
         // Alpha of Foo should be 0f at interruption progress 100%.
-        val fooInB = layoutImpl.elements.getValue(TestElements.Foo).sceneStates.getValue(SceneB)
+        val fooInB = layoutImpl.elements.getValue(TestElements.Foo).stateByContent.getValue(SceneB)
         assertThat(fooInB.lastAlpha).isEqualTo(0f)
 
         // Alpha of Foo should be 0.6f at interruption progress 0%.
@@ -1673,7 +1673,7 @@ class ElementTest {
             }
 
         @Composable
-        fun SceneScope.Foo() {
+        fun ContentScope.Foo() {
             Box(Modifier.element(TestElements.Foo).size(10.dp))
         }
 
@@ -1724,7 +1724,7 @@ class ElementTest {
         val fooInB = "fooInB"
 
         @Composable
-        fun SceneScope.MovableFoo(text: String, modifier: Modifier = Modifier) {
+        fun ContentScope.MovableFoo(text: String, modifier: Modifier = Modifier) {
             MovableElement(TestElements.Foo, modifier) { content { Text(text) } }
         }
 
@@ -1773,7 +1773,7 @@ class ElementTest {
             }
 
         @Composable
-        fun SceneScope.SceneWithFoo(offset: DpOffset, modifier: Modifier = Modifier) {
+        fun ContentScope.SceneWithFoo(offset: DpOffset, modifier: Modifier = Modifier) {
             Box(modifier.fillMaxSize()) {
                 Box(Modifier.offset(offset.x, offset.y).element(TestElements.Foo).size(100.dp))
             }
@@ -1856,7 +1856,7 @@ class ElementTest {
         val state = rule.runOnIdle { MutableSceneTransitionLayoutStateImpl(SceneA) }
 
         @Composable
-        fun SceneScope.NestedFooBar() {
+        fun ContentScope.NestedFooBar() {
             Box(Modifier.element(TestElements.Foo)) {
                 Box(Modifier.element(TestElements.Bar).size(10.dp))
             }
@@ -1881,13 +1881,13 @@ class ElementTest {
         val foo = layoutImpl.elements.getValue(TestElements.Foo)
         val bar = layoutImpl.elements.getValue(TestElements.Bar)
 
-        assertThat(foo.sceneStates).containsKey(SceneA)
-        assertThat(bar.sceneStates).containsKey(SceneA)
-        assertThat(foo.sceneStates).doesNotContainKey(SceneB)
-        assertThat(bar.sceneStates).doesNotContainKey(SceneB)
+        assertThat(foo.stateByContent).containsKey(SceneA)
+        assertThat(bar.stateByContent).containsKey(SceneA)
+        assertThat(foo.stateByContent).doesNotContainKey(SceneB)
+        assertThat(bar.stateByContent).doesNotContainKey(SceneB)
 
-        val fooInA = foo.sceneStates.getValue(SceneA)
-        val barInA = bar.sceneStates.getValue(SceneA)
+        val fooInA = foo.stateByContent.getValue(SceneA)
+        val barInA = bar.stateByContent.getValue(SceneA)
         assertThat(fooInA.lastOffset).isNotEqualTo(Offset.Unspecified)
         assertThat(fooInA.lastAlpha).isNotEqualTo(Element.AlphaUnspecified)
         assertThat(fooInA.lastScale).isNotEqualTo(Scale.Unspecified)
@@ -1903,11 +1903,11 @@ class ElementTest {
         rule.onNode(isElement(TestElements.Foo, SceneB)).assertIsDisplayed()
         rule.onNode(isElement(TestElements.Bar, SceneB)).assertIsDisplayed()
 
-        assertThat(foo.sceneStates).containsKey(SceneB)
-        assertThat(bar.sceneStates).containsKey(SceneB)
+        assertThat(foo.stateByContent).containsKey(SceneB)
+        assertThat(bar.stateByContent).containsKey(SceneB)
 
-        val fooInB = foo.sceneStates.getValue(SceneB)
-        val barInB = bar.sceneStates.getValue(SceneB)
+        val fooInB = foo.stateByContent.getValue(SceneB)
+        val barInB = bar.stateByContent.getValue(SceneB)
         assertThat(fooInA.lastOffset).isEqualTo(Offset.Unspecified)
         assertThat(fooInA.lastAlpha).isEqualTo(Element.AlphaUnspecified)
         assertThat(fooInA.lastScale).isEqualTo(Scale.Unspecified)
@@ -1938,8 +1938,8 @@ class ElementTest {
             }
 
         @Composable
-        fun SceneScope.Foo() {
-            Box(Modifier.testTag("fooParentIn${sceneKey.debugName}")) {
+        fun ContentScope.Foo() {
+            Box(Modifier.testTag("fooParentIn${contentKey.debugName}")) {
                 Box(Modifier.element(TestElements.Foo).size(20.dp))
             }
         }
@@ -1973,7 +1973,7 @@ class ElementTest {
         val state = rule.runOnIdle { MutableSceneTransitionLayoutStateImpl(SceneA) }
 
         @Composable
-        fun SceneScope.Foo(offset: Dp) {
+        fun ContentScope.Foo(offset: Dp) {
             Box(Modifier.fillMaxSize()) {
                 Box(Modifier.offset(offset, offset).element(TestElements.Foo).size(20.dp))
             }
@@ -2041,7 +2041,7 @@ class ElementTest {
             }
 
         @Composable
-        fun SceneScope.Foo() {
+        fun ContentScope.Foo() {
             Box(Modifier.element(TestElements.Foo).size(10.dp))
         }
 
@@ -2062,7 +2062,11 @@ class ElementTest {
         rule.waitForIdle()
 
         assertThat(
-                layoutImpl.elements.getValue(TestElements.Foo).sceneStates.getValue(SceneB).lastSize
+                layoutImpl.elements
+                    .getValue(TestElements.Foo)
+                    .stateByContent
+                    .getValue(SceneB)
+                    .lastSize
             )
             .isEqualTo(Element.SizeUnspecified)
     }
@@ -2078,8 +2082,8 @@ class ElementTest {
                             // In A => B, Foo is not shared and first fades out from A then fades in
                             // B.
                             sharedElement(TestElements.Foo, enabled = false)
-                            fractionRange(end = 0.5f) { fade(TestElements.Foo.inScene(SceneA)) }
-                            fractionRange(start = 0.5f) { fade(TestElements.Foo.inScene(SceneB)) }
+                            fractionRange(end = 0.5f) { fade(TestElements.Foo.inContent(SceneA)) }
+                            fractionRange(start = 0.5f) { fade(TestElements.Foo.inContent(SceneB)) }
                         }
 
                         from(SceneB, to = SceneA) {
@@ -2091,7 +2095,7 @@ class ElementTest {
             }
 
         @Composable
-        fun SceneScope.Foo(modifier: Modifier = Modifier) {
+        fun ContentScope.Foo(modifier: Modifier = Modifier) {
             Box(modifier.element(TestElements.Foo).size(10.dp))
         }
 
@@ -2149,7 +2153,7 @@ class ElementTest {
         val state = rule.runOnIdle { MutableSceneTransitionLayoutStateImpl(SceneA) }
 
         @Composable
-        fun SceneScope.Foo(modifier: Modifier = Modifier) {
+        fun ContentScope.Foo(modifier: Modifier = Modifier) {
             Box(modifier.element(TestElements.Foo).size(10.dp))
         }
 
@@ -2216,7 +2220,7 @@ class ElementTest {
 
         // verify that preview transition for exiting elements is halfway played from
         // current-scene-value -> preview-target-value
-        val exiting1InB = layoutImpl.elements.getValue(exiting1).sceneStates.getValue(SceneB)
+        val exiting1InB = layoutImpl.elements.getValue(exiting1).stateByContent.getValue(SceneB)
         // e.g. exiting1 is half scaled...
         assertThat(exiting1InB.lastScale).isEqualTo(Scale(0.9f, 0.9f, Offset.Unspecified))
         // ...and exiting2 is halfway translated from 0.dp to 20.dp...
@@ -2228,7 +2232,7 @@ class ElementTest {
         // verify that preview transition for entering elements is halfway played from
         // preview-target-value -> transition-target-value (or target-scene-value if no
         // transition-target-value defined).
-        val entering1InA = layoutImpl.elements.getValue(entering1).sceneStates.getValue(SceneA)
+        val entering1InA = layoutImpl.elements.getValue(entering1).stateByContent.getValue(SceneA)
         // e.g. entering1 is half scaled between 0f and 0.5f -> 0.25f...
         assertThat(entering1InA.lastScale).isEqualTo(Scale(0.25f, 0.25f, Offset.Unspecified))
         // ...and entering2 is half way translated between 30.dp and 0.dp
@@ -2272,7 +2276,7 @@ class ElementTest {
 
         // verify that exiting elements remain in the preview-end state if no further transition is
         // defined for them in the second stage
-        val exiting1InB = layoutImpl.elements.getValue(exiting1).sceneStates.getValue(SceneB)
+        val exiting1InB = layoutImpl.elements.getValue(exiting1).stateByContent.getValue(SceneB)
         // i.e. exiting1 remains half scaled
         assertThat(exiting1InB.lastScale).isEqualTo(Scale(0.9f, 0.9f, Offset.Unspecified))
         // in case there is an additional transition defined for the second stage, verify that the
@@ -2286,7 +2290,7 @@ class ElementTest {
         rule.onNode(isElement(exiting3)).assertSizeIsEqualTo(90.dp, 90.dp)
 
         // verify that entering elements animate seamlessly to their target state
-        val entering1InA = layoutImpl.elements.getValue(entering1).sceneStates.getValue(SceneA)
+        val entering1InA = layoutImpl.elements.getValue(entering1).stateByContent.getValue(SceneA)
         // e.g. entering1, which was scaled from 0f to 0.25f during the preview phase, should now be
         // half way scaled between 0.25f and its target-state of 1f -> 0.625f
         assertThat(entering1InA.lastScale).isEqualTo(Scale(0.625f, 0.625f, Offset.Unspecified))
@@ -2318,7 +2322,7 @@ class ElementTest {
             }
 
         @Composable
-        fun SceneScope.Foo(elementKey: ElementKey) {
+        fun ContentScope.Foo(elementKey: ElementKey) {
             Box(Modifier.element(elementKey).size(100.dp))
         }
 

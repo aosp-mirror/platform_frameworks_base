@@ -20,6 +20,7 @@ import static android.os.VibrationAttributes.USAGE_ACCESSIBILITY;
 import static android.os.VibrationAttributes.USAGE_ALARM;
 import static android.os.VibrationAttributes.USAGE_COMMUNICATION_REQUEST;
 import static android.os.VibrationAttributes.USAGE_HARDWARE_FEEDBACK;
+import static android.os.VibrationAttributes.USAGE_IME_FEEDBACK;
 import static android.os.VibrationAttributes.USAGE_MEDIA;
 import static android.os.VibrationAttributes.USAGE_NOTIFICATION;
 import static android.os.VibrationAttributes.USAGE_PHYSICAL_EMULATION;
@@ -67,6 +68,8 @@ public class VibrationConfig {
     private final int mDefaultNotificationVibrationIntensity;
     @VibrationIntensity
     private final int mDefaultRingVibrationIntensity;
+    @VibrationIntensity
+    private final int mDefaultKeyboardVibrationIntensity;
 
     private final boolean mKeyboardVibrationSettingsSupported;
 
@@ -98,6 +101,8 @@ public class VibrationConfig {
                 com.android.internal.R.integer.config_defaultNotificationVibrationIntensity);
         mDefaultRingVibrationIntensity = loadDefaultIntensity(resources,
                 com.android.internal.R.integer.config_defaultRingVibrationIntensity);
+        mDefaultKeyboardVibrationIntensity = loadDefaultIntensity(resources,
+                com.android.internal.R.integer.config_defaultKeyboardVibrationIntensity);
     }
 
     @VibrationIntensity
@@ -213,6 +218,9 @@ public class VibrationConfig {
             case USAGE_PHYSICAL_EMULATION:
             case USAGE_ACCESSIBILITY:
                 return mDefaultHapticFeedbackIntensity;
+            case USAGE_IME_FEEDBACK:
+                return isKeyboardVibrationSettingsSupported()
+                        ? mDefaultKeyboardVibrationIntensity : mDefaultHapticFeedbackIntensity;
             case USAGE_MEDIA:
             case USAGE_UNKNOWN:
                 // fall through
@@ -236,6 +244,7 @@ public class VibrationConfig {
                 + ", mDefaultMediaIntensity=" + mDefaultMediaVibrationIntensity
                 + ", mDefaultNotificationIntensity=" + mDefaultNotificationVibrationIntensity
                 + ", mDefaultRingIntensity=" + mDefaultRingVibrationIntensity
+                + ", mDefaultKeyboardIntensity=" + mDefaultKeyboardVibrationIntensity
                 + ", mKeyboardVibrationSettingsSupported=" + mKeyboardVibrationSettingsSupported
                 + "}";
     }

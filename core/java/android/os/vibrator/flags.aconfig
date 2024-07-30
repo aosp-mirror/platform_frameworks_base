@@ -74,3 +74,14 @@ flag {
       purpose: PURPOSE_BUGFIX
     }
 }
+
+flag {
+    namespace: "haptics"
+    name: "vibration_attribute_ime_usage_api"
+    is_exported: true
+    description: "A public API for IME usage vibration attribute"
+    bug: "332661766"
+    metadata {
+        purpose: PURPOSE_FEATURE
+    }
+}

@@ -70,7 +70,7 @@ constructor(
             applicationScope.launch {
                 launch {
                     qsTileViewModel.isAvailable.collectIndexed { index, isAvailable ->
-                        if (!isAvailable) {
+                        if (!isAvailable && qsTileViewModel.config.autoRemoveOnUnavailable) {
                             qsHost.removeTile(tileSpec)
                         }
                         // qsTileViewModel.isAvailable flow often starts with isAvailable == true.

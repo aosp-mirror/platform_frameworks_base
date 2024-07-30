@@ -270,13 +270,37 @@ class DesktopModeTaskRepository {
             logW("Unminimize Task: display=%d, task=%d, no task data", displayId, taskId)
     }
 
-    /** Removes task from the ordered list. */
+    private fun getDisplayIdForTask(taskId: Int): Int? {
+        desktopTaskDataByDisplayId.forEach { displayId, data ->
+            if (taskId in data.freeformTasksInZOrder) {
+                return displayId
+            }
+        }
+        logW("No display id found for task: taskId=%d", taskId)
+        return null
+    }
+
+    /**
+     * Removes [taskId] from the respective display. If [INVALID_DISPLAY], the original display id
+     * will be looked up from the task id.
+     */
     fun removeFreeformTask(displayId: Int, taskId: Int) {
         logD("Removes freeform task: taskId=%d", taskId)
+        if (displayId == INVALID_DISPLAY) {
+            // Removes the original display id of the task.
+            getDisplayIdForTask(taskId)?.let { removeTaskFromDisplay(it, taskId) }
+        } else {
+            removeTaskFromDisplay(displayId, taskId)
+        }
+    }
+
+    /** Removes given task from a valid [displayId]. */
+    private fun removeTaskFromDisplay(displayId: Int, taskId: Int) {
+        logD("Removes freeform task: taskId=%d, displayId=%d", taskId, displayId)
         desktopTaskDataByDisplayId[displayId]?.freeformTasksInZOrder?.remove(taskId)
         boundsBeforeMaximizeByTaskId.remove(taskId)
-        logD("Remaining freeform tasks: %d",
-            desktopTaskDataByDisplayId[displayId]?.freeformTasksInZOrder?.toDumpString() ?: "")
+        logD("Remaining freeform tasks: %s",
+            desktopTaskDataByDisplayId[displayId]?.freeformTasksInZOrder?.toDumpString())
     }
 
     /**
@@ -358,3 +382,4 @@ class DesktopModeTaskRepository {
 
 private fun <T> Iterable<T>.toDumpString(): String =
     joinToString(separator = ", ", prefix = "[", postfix = "]")
+

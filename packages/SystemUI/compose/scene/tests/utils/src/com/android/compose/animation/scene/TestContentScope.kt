@@ -20,11 +20,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 
-/** `SceneScope` for tests, which allows a single scene to be drawn in a [SceneTransitionLayout]. */
+/**
+ * [ContentScope] for tests, which allows a single scene to be drawn in a [SceneTransitionLayout].
+ */
 @Composable
-fun TestSceneScope(
+fun TestContentScope(
     modifier: Modifier = Modifier,
-    content: @Composable SceneScope.() -> Unit,
+    content: @Composable ContentScope.() -> Unit,
 ) {
     val currentScene = remember { SceneKey("current") }
     val state = remember { MutableSceneTransitionLayoutState(currentScene) }

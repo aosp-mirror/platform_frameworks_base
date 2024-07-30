@@ -620,7 +620,7 @@ public class FullScreenMagnificationGestureHandlerTest {
 
     @Test
     @RequiresFlagsEnabled(Flags.FLAG_ENABLE_MAGNIFICATION_MULTIPLE_FINGER_MULTIPLE_TAP_GESTURE)
-    public void testTwoFingerTap_StateIsActivated_shouldInDelegating() {
+    public void testTwoFingerTap_StateIsActivated_shouldInDetecting() {
         assumeTrue(isWatch());
         enableOneFingerPanning(false);
         goFromStateIdleTo(STATE_ACTIVATED);
@@ -629,14 +629,15 @@ public class FullScreenMagnificationGestureHandlerTest {
         send(downEvent());
         send(pointerEvent(ACTION_POINTER_DOWN, DEFAULT_X * 2, DEFAULT_Y));
         send(upEvent());
-        fastForward(ViewConfiguration.getDoubleTapTimeout());
+        fastForward(mMgh.mDetectingState.mMultiTapMaxDelay);
 
-        assertTrue(mMgh.mCurrentState == mMgh.mDelegatingState);
+        verify(mMgh.getNext(), times(3)).onMotionEvent(any(), any(), anyInt());
+        assertTrue(mMgh.mCurrentState == mMgh.mDetectingState);
     }
 
     @Test
     @RequiresFlagsEnabled(Flags.FLAG_ENABLE_MAGNIFICATION_MULTIPLE_FINGER_MULTIPLE_TAP_GESTURE)
-    public void testTwoFingerTap_StateIsIdle_shouldInDelegating() {
+    public void testTwoFingerTap_StateIsIdle_shouldInDetecting() {
         assumeTrue(isWatch());
         enableOneFingerPanning(false);
         goFromStateIdleTo(STATE_IDLE);
@@ -645,9 +646,10 @@ public class FullScreenMagnificationGestureHandlerTest {
         send(downEvent());
         send(pointerEvent(ACTION_POINTER_DOWN, DEFAULT_X * 2, DEFAULT_Y));
         send(upEvent());
-        fastForward(ViewConfiguration.getDoubleTapTimeout());
+        fastForward(mMgh.mDetectingState.mMultiTapMaxDelay);
 
-        assertTrue(mMgh.mCurrentState == mMgh.mDelegatingState);
+        verify(mMgh.getNext(), times(3)).onMotionEvent(any(), any(), anyInt());
+        assertTrue(mMgh.mCurrentState == mMgh.mDetectingState);
     }
 
     @Test
@@ -982,6 +984,53 @@ public class FullScreenMagnificationGestureHandlerTest {
     }
 
     @Test
+    public void testSingleFingerOverscrollAtTopEdge_isWatch_scrollDiagonally_noOverscroll() {
+        assumeTrue(isWatch());
+        goFromStateIdleTo(STATE_SINGLE_PANNING);
+        float centerX =
+                (INITIAL_MAGNIFICATION_BOUNDS.right + INITIAL_MAGNIFICATION_BOUNDS.left) / 2.0f;
+        mFullScreenMagnificationController.setCenter(
+                DISPLAY_0, centerX, INITIAL_MAGNIFICATION_BOUNDS.top, false, 1);
+        final float swipeMinDistance = ViewConfiguration.get(mContext).getScaledTouchSlop() + 1;
+        PointF initCoords =
+                new PointF(
+                        mFullScreenMagnificationController.getCenterX(DISPLAY_0),
+                        mFullScreenMagnificationController.getCenterY(DISPLAY_0));
+        PointF edgeCoords = new PointF(initCoords.x, initCoords.y);
+        // Scroll diagonally towards top-right with a bigger right delta
+        edgeCoords.offset(swipeMinDistance * 2, swipeMinDistance);
+
+        swipeAndHold(initCoords, edgeCoords);
+
+        assertTrue(mMgh.mOverscrollHandler.mOverscrollState == mMgh.OVERSCROLL_NONE);
+        assertTrue(isZoomed());
+    }
+
+    @Test
+    public void
+            testSingleFingerOverscrollAtTopEdge_isWatch_scrollDiagonally_expectedOverscrollState() {
+        assumeTrue(isWatch());
+        goFromStateIdleTo(STATE_SINGLE_PANNING);
+        float centerX =
+                (INITIAL_MAGNIFICATION_BOUNDS.right + INITIAL_MAGNIFICATION_BOUNDS.left) / 2.0f;
+        mFullScreenMagnificationController.setCenter(
+                DISPLAY_0, centerX, INITIAL_MAGNIFICATION_BOUNDS.top, false, 1);
+        final float swipeMinDistance = ViewConfiguration.get(mContext).getScaledTouchSlop() + 1;
+        PointF initCoords =
+                new PointF(
+                        mFullScreenMagnificationController.getCenterX(DISPLAY_0),
+                        mFullScreenMagnificationController.getCenterY(DISPLAY_0));
+        PointF edgeCoords = new PointF(initCoords.x, initCoords.y);
+        // Scroll diagonally towards top-right with a bigger top delta
+        edgeCoords.offset(swipeMinDistance, swipeMinDistance * 2);
+
+        swipeAndHold(initCoords, edgeCoords);
+
+        assertTrue(mMgh.mOverscrollHandler.mOverscrollState == mMgh.OVERSCROLL_VERTICAL_EDGE);
+        assertTrue(isZoomed());
+    }
+
+    @Test
     public void testSingleFingerScrollAtEdge_isWatch_noOverscroll() {
         assumeTrue(isWatch());
         goFromStateIdleTo(STATE_SINGLE_PANNING);
@@ -1057,9 +1106,24 @@ public class FullScreenMagnificationGestureHandlerTest {
         assumeTrue(isWatch());
         goFromStateIdleTo(STATE_ACTIVATED);
 
-        swipeAndHold();
+        PointF pointer = DEFAULT_POINT;
+        send(downEvent(pointer.x, pointer.y));
+
+        // first move triggers the panning state
+        pointer.offset(100, 100);
         fastForward(20);
-        swipe(DEFAULT_POINT, new PointF(DEFAULT_X * 2, DEFAULT_Y * 2), /* durationMs= */ 20);
+        send(moveEvent(pointer.x, pointer.y));
+
+        // second move actually pans
+        pointer.offset(100, 100);
+        fastForward(20);
+        send(moveEvent(pointer.x, pointer.y));
+        pointer.offset(100, 100);
+        fastForward(20);
+        send(moveEvent(pointer.x, pointer.y));
+
+        fastForward(20);
+        send(upEvent(pointer.x, pointer.y));
 
         verify(mMockScroller).fling(
                 /* startX= */ anyInt(),

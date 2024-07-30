@@ -359,3 +359,13 @@ flag {
     purpose: PURPOSE_BUGFIX
   }
 }
+
+flag {
+  name: "show_different_creation_error_for_unsupported_devices"
+  namespace: "profile_experiences"
+  description: "On private space create error due to child account added/fully managed user show message with link to the Help Center to find out more."
+  bug: "340130375"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}

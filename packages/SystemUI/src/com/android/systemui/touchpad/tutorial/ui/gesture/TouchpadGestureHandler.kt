@@ -26,11 +26,11 @@ import android.view.MotionEvent
 class TouchpadGestureHandler(
     touchpadGesture: TouchpadGesture,
     swipeDistanceThresholdPx: Int,
-    onDone: () -> Unit
+    onGestureStateChanged: (GestureState) -> Unit
 ) {
 
     private val gestureRecognition =
-        touchpadGesture.toMonitor(swipeDistanceThresholdPx, gestureDoneCallback = onDone)
+        touchpadGesture.toMonitor(swipeDistanceThresholdPx, onStateChanged = onGestureStateChanged)
 
     fun onMotionEvent(event: MotionEvent): Boolean {
         // events from touchpad have SOURCE_MOUSE and not SOURCE_TOUCHPAD because of legacy reasons

@@ -154,6 +154,9 @@ public class VibratorManagerServiceTest {
     private static final VibrationAttributes RINGTONE_ATTRS =
             new VibrationAttributes.Builder().setUsage(
                     VibrationAttributes.USAGE_RINGTONE).build();
+    private static final VibrationAttributes IME_FEEDBACK_ATTRS =
+            new VibrationAttributes.Builder().setUsage(
+                    VibrationAttributes.USAGE_IME_FEEDBACK).build();
     private static final VibrationAttributes UNKNOWN_ATTRS =
             new VibrationAttributes.Builder().setUsage(VibrationAttributes.USAGE_UNKNOWN).build();
 
@@ -853,6 +856,7 @@ public class VibratorManagerServiceTest {
         vibrate(service, VibrationEffect.createOneShot(2000, 200),
                 new VibrationAttributes.Builder().setUsage(
                         VibrationAttributes.USAGE_UNKNOWN).build());
+        vibrate(service, VibrationEffect.get(VibrationEffect.EFFECT_CLICK), IME_FEEDBACK_ATTRS);
 
         InOrder inOrderVerifier = inOrder(mAppOpsManagerMock);
         inOrderVerifier.verify(mAppOpsManagerMock).checkAudioOpNoThrow(eq(AppOpsManager.OP_VIBRATE),
@@ -868,6 +872,8 @@ public class VibratorManagerServiceTest {
                 anyInt(), anyString());
         inOrderVerifier.verify(mAppOpsManagerMock).checkAudioOpNoThrow(eq(AppOpsManager.OP_VIBRATE),
                 eq(AudioAttributes.USAGE_UNKNOWN), anyInt(), anyString());
+        inOrderVerifier.verify(mAppOpsManagerMock).checkAudioOpNoThrow(eq(AppOpsManager.OP_VIBRATE),
+                eq(AudioAttributes.USAGE_ASSISTANCE_SONIFICATION), anyInt(), anyString());
     }
 
     @Test
@@ -1681,40 +1687,6 @@ public class VibratorManagerServiceTest {
         // Alarm vibration will be scaled with SCALE_NONE.
         assertEquals(1f,
                 ((PrimitiveSegment) fakeVibrator.getAllEffectSegments().get(2)).getScale(), 1e-5);
-    }
-
-    @Test
-    public void vibrate_withBypassScaleFlag_ignoresIntensitySettingsAndResolvesAmplitude()
-            throws Exception {
-        // Permission needed for bypassing user settings
-        grantPermission(android.Manifest.permission.MODIFY_PHONE_STATE);
-
-        int defaultTouchIntensity =
-                mVibrator.getDefaultVibrationIntensity(VibrationAttributes.USAGE_TOUCH);
-        // This will scale down touch vibrations.
-        setUserSetting(Settings.System.HAPTIC_FEEDBACK_INTENSITY,
-                defaultTouchIntensity > Vibrator.VIBRATION_INTENSITY_LOW
-                        ? defaultTouchIntensity - 1
-                        : defaultTouchIntensity);
-
-        int defaultAmplitude = mContextSpy.getResources().getInteger(
-                com.android.internal.R.integer.config_defaultVibrationAmplitude);
-
-        mockVibrators(1);
-        FakeVibratorControllerProvider fakeVibrator = mVibratorProviders.get(1);
-        fakeVibrator.setCapabilities(IVibrator.CAP_AMPLITUDE_CONTROL);
-        VibratorManagerService service = createSystemReadyService();
-
-        vibrateAndWaitUntilFinished(service,
-                VibrationEffect.createOneShot(100, VibrationEffect.DEFAULT_AMPLITUDE),
-                new VibrationAttributes.Builder()
-                        .setUsage(VibrationAttributes.USAGE_TOUCH)
-                        .setFlags(VibrationAttributes.FLAG_BYPASS_USER_VIBRATION_INTENSITY_SCALE)
-                        .build());
-
-        assertEquals(1, fakeVibrator.getAllEffectSegments().size());
-
-        assertEquals(defaultAmplitude / 255f, fakeVibrator.getAmplitudes().get(0), 1e-5);
     }
 
     @Test

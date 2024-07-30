@@ -46,6 +46,8 @@ public final class HapticFeedbackVibrationProvider {
             VibrationAttributes.createForUsage(VibrationAttributes.USAGE_HARDWARE_FEEDBACK);
     private static final VibrationAttributes COMMUNICATION_REQUEST_VIBRATION_ATTRIBUTES =
             VibrationAttributes.createForUsage(VibrationAttributes.USAGE_COMMUNICATION_REQUEST);
+    private static final VibrationAttributes IME_FEEDBACK_VIBRATION_ATTRIBUTES =
+            VibrationAttributes.createForUsage(VibrationAttributes.USAGE_IME_FEEDBACK);
 
     private final VibratorInfo mVibratorInfo;
     private final boolean mHapticTextHandleEnabled;
@@ -219,8 +221,6 @@ public final class HapticFeedbackVibrationProvider {
         }
 
         int vibFlags = 0;
-        boolean fromIme =
-                (privFlags & HapticFeedbackConstants.PRIVATE_FLAG_APPLY_INPUT_METHOD_SETTINGS) != 0;
         boolean bypassVibrationIntensitySetting =
                 (flags & HapticFeedbackConstants.FLAG_IGNORE_GLOBAL_SETTING) != 0;
         if (bypassVibrationIntensitySetting) {
@@ -228,9 +228,6 @@ public final class HapticFeedbackVibrationProvider {
         }
         if (shouldBypassInterruptionPolicy(effectId)) {
             vibFlags |= VibrationAttributes.FLAG_BYPASS_INTERRUPTION_POLICY;
-        }
-        if (shouldBypassIntensityScale(effectId, fromIme)) {
-            vibFlags |= VibrationAttributes.FLAG_BYPASS_USER_VIBRATION_INTENSITY_SCALE;
         }
 
         return vibFlags == 0 ? attrs : new VibrationAttributes.Builder(attrs)
@@ -362,22 +359,6 @@ public final class HapticFeedbackVibrationProvider {
                 /* fallbackForPredefinedEffect= */ predefinedEffectFallback);
     }
 
-    private boolean shouldBypassIntensityScale(int effectId, boolean isIme) {
-        if (!Flags.keyboardCategoryEnabled() || mKeyboardVibrationFixedAmplitude < 0 || !isIme) {
-            // Shouldn't bypass if not support keyboard category, no fixed amplitude or not an IME.
-            return false;
-        }
-        switch (effectId) {
-            case HapticFeedbackConstants.KEYBOARD_TAP:
-                return mVibratorInfo.isPrimitiveSupported(
-                        VibrationEffect.Composition.PRIMITIVE_CLICK);
-            case HapticFeedbackConstants.KEYBOARD_RELEASE:
-                return mVibratorInfo.isPrimitiveSupported(
-                        VibrationEffect.Composition.PRIMITIVE_TICK);
-        }
-        return false;
-    }
-
     private VibrationAttributes createKeyboardVibrationAttributes(
             @HapticFeedbackConstants.PrivateFlags int privFlags) {
         // Use touch attribute when the keyboard category is disable.
@@ -388,7 +369,8 @@ public final class HapticFeedbackVibrationProvider {
         if ((privFlags & HapticFeedbackConstants.PRIVATE_FLAG_APPLY_INPUT_METHOD_SETTINGS) == 0) {
             return TOUCH_VIBRATION_ATTRIBUTES;
         }
-        return new VibrationAttributes.Builder(TOUCH_VIBRATION_ATTRIBUTES)
+        return new VibrationAttributes.Builder(IME_FEEDBACK_VIBRATION_ATTRIBUTES)
+                // TODO(b/332661766): Remove CATEGORY_KEYBOARD logic
                 .setCategory(VibrationAttributes.CATEGORY_KEYBOARD)
                 .build();
     }
