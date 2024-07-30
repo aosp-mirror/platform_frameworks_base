@@ -30,7 +30,7 @@ import android.widget.Button
 import androidx.core.animation.doOnEnd
 import androidx.core.view.children
 import com.android.wm.shell.R
-import com.android.wm.shell.animation.Interpolators
+import com.android.wm.shell.shared.animation.Interpolators
 
 /** Animates the Handle Menu opening. */
 class HandleMenuAnimator(

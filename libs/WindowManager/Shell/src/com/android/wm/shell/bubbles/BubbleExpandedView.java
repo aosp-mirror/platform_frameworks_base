@@ -71,7 +71,7 @@ import com.android.internal.protolog.ProtoLog;
 import com.android.wm.shell.Flags;
 import com.android.wm.shell.R;
 import com.android.wm.shell.common.AlphaOptimizedButton;
-import com.android.wm.shell.common.TriangleShape;
+import com.android.wm.shell.shared.TriangleShape;
 import com.android.wm.shell.taskview.TaskView;
 
 import java.io.PrintWriter;

@@ -35,7 +35,7 @@ import static com.android.wm.shell.bubbles.Bubbles.DISMISS_PACKAGE_REMOVED;
 import static com.android.wm.shell.bubbles.Bubbles.DISMISS_SHORTCUT_REMOVED;
 import static com.android.wm.shell.bubbles.Bubbles.DISMISS_USER_CHANGED;
 import static com.android.wm.shell.protolog.ShellProtoLogGroup.WM_SHELL_BUBBLES;
-import static com.android.wm.shell.sysui.ShellSharedConstants.KEY_EXTRA_SHELL_BUBBLES;
+import static com.android.wm.shell.shared.ShellSharedConstants.KEY_EXTRA_SHELL_BUBBLES;
 
 import android.annotation.BinderThread;
 import android.annotation.NonNull;

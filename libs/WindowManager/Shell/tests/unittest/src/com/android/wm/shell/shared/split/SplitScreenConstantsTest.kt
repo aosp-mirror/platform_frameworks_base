@@ -17,6 +17,7 @@
 package com.android.wm.shell.common.split
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.android.wm.shell.shared.split.SplitScreenConstants
 import org.junit.Assert.assertEquals
 import org.junit.Test
 import org.junit.runner.RunWith
