@@ -46,7 +46,7 @@ import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.round
 import androidx.compose.ui.util.fastCoerceIn
-import androidx.compose.ui.util.fastLastOrNull
+import androidx.compose.ui.util.fastForEachReversed
 import androidx.compose.ui.util.lerp
 import com.android.compose.animation.scene.content.Content
 import com.android.compose.animation.scene.content.state.TransitionState
@@ -145,8 +145,9 @@ internal fun Modifier.element(
     // layout/drawing.
     // TODO(b/341072461): Revert this and read the current transitions in ElementNode directly once
     // we can ensure that SceneTransitionLayoutImpl will compose new contents first.
-    val currentTransitions = layoutImpl.state.currentTransitions
-    return then(ElementModifier(layoutImpl, currentTransitions, content, key)).testTag(key.testTag)
+    val currentTransitionStates = layoutImpl.state.transitionStates
+    return then(ElementModifier(layoutImpl, currentTransitionStates, content, key))
+        .testTag(key.testTag)
 }
 
 /**
@@ -155,20 +156,21 @@ internal fun Modifier.element(
  */
 private data class ElementModifier(
     private val layoutImpl: SceneTransitionLayoutImpl,
-    private val currentTransitions: List<TransitionState.Transition>,
+    private val currentTransitionStates: List<TransitionState>,
     private val content: Content,
     private val key: ElementKey,
 ) : ModifierNodeElement<ElementNode>() {
-    override fun create(): ElementNode = ElementNode(layoutImpl, currentTransitions, content, key)
+    override fun create(): ElementNode =
+        ElementNode(layoutImpl, currentTransitionStates, content, key)
 
     override fun update(node: ElementNode) {
-        node.update(layoutImpl, currentTransitions, content, key)
+        node.update(layoutImpl, currentTransitionStates, content, key)
     }
 }
 
 internal class ElementNode(
     private var layoutImpl: SceneTransitionLayoutImpl,
-    private var currentTransitions: List<TransitionState.Transition>,
+    private var currentTransitionStates: List<TransitionState>,
     private var content: Content,
     private var key: ElementKey,
 ) : Modifier.Node(), DrawModifierNode, ApproachLayoutModifierNode, TraversableNode {
@@ -226,12 +228,12 @@ internal class ElementNode(
 
     fun update(
         layoutImpl: SceneTransitionLayoutImpl,
-        currentTransitions: List<TransitionState.Transition>,
+        currentTransitionStates: List<TransitionState>,
         content: Content,
         key: ElementKey,
     ) {
         check(layoutImpl == this.layoutImpl && content == this.content)
-        this.currentTransitions = currentTransitions
+        this.currentTransitionStates = currentTransitionStates
 
         removeNodeFromContentState()
 
@@ -287,31 +289,72 @@ internal class ElementNode(
         measurable: Measurable,
         constraints: Constraints,
     ): MeasureResult {
-        val transitions = currentTransitions
-        val transition = elementTransition(layoutImpl, element, transitions)
+        val elementState = elementState(layoutImpl, element, currentTransitionStates)
+        if (elementState == null) {
+            // If the element is not part of any transition, place it normally in its idle scene.
+            val currentState = currentTransitionStates.last()
+            val placeInThisContent =
+                elementContentWhenIdle(
+                    layoutImpl,
+                    currentState.currentScene,
+                    currentState.currentOverlays,
+                    isInContent = { it in element.stateByContent },
+                ) == content.key
 
-        // If this element is not supposed to be laid out now, either because it is not part of any
-        // ongoing transition or the other content of its transition is overscrolling, then lay out
-        // the element normally and don't place it.
+            return if (placeInThisContent) {
+                placeNormally(measurable, constraints)
+            } else {
+                doNotPlace(measurable, constraints)
+            }
+        }
+
+        val transition = elementState as? TransitionState.Transition
+
+        // If this element is not supposed to be laid out now because the other content of its
+        // transition is overscrolling, then lay out the element normally and don't place it.
         val overscrollScene = transition?.currentOverscrollSpec?.scene
         val isOtherSceneOverscrolling = overscrollScene != null && overscrollScene != content.key
-        val isNotPartOfAnyOngoingTransitions = transitions.isNotEmpty() && transition == null
-        if (isNotPartOfAnyOngoingTransitions || isOtherSceneOverscrolling) {
-            recursivelyClearPlacementValues()
-            stateInContent.lastSize = Element.SizeUnspecified
-
-            val placeable = measurable.measure(constraints)
-            return layout(placeable.width, placeable.height) { /* Do not place */ }
+        if (isOtherSceneOverscrolling) {
+            return doNotPlace(measurable, constraints)
         }
 
         val placeable =
             measure(layoutImpl, element, transition, stateInContent, measurable, constraints)
         stateInContent.lastSize = placeable.size()
-        return layout(placeable.width, placeable.height) { place(transition, placeable) }
+        return layout(placeable.width, placeable.height) { place(elementState, placeable) }
+    }
+
+    private fun ApproachMeasureScope.doNotPlace(
+        measurable: Measurable,
+        constraints: Constraints
+    ): MeasureResult {
+        recursivelyClearPlacementValues()
+        stateInContent.lastSize = Element.SizeUnspecified
+
+        val placeable = measurable.measure(constraints)
+        return layout(placeable.width, placeable.height) { /* Do not place */ }
+    }
+
+    private fun ApproachMeasureScope.placeNormally(
+        measurable: Measurable,
+        constraints: Constraints
+    ): MeasureResult {
+        val placeable = measurable.measure(constraints)
+        stateInContent.lastSize = placeable.size()
+        return layout(placeable.width, placeable.height) {
+            coordinates?.let {
+                with(layoutImpl.lookaheadScope) {
+                    stateInContent.lastOffset =
+                        lookaheadScopeCoordinates.localPositionOf(it, Offset.Zero)
+                }
+            }
+
+            placeable.place(0, 0)
+        }
     }
 
     private fun Placeable.PlacementScope.place(
-        transition: TransitionState.Transition?,
+        elementState: TransitionState,
         placeable: Placeable,
     ) {
         with(layoutImpl.lookaheadScope) {
@@ -321,11 +364,12 @@ internal class ElementNode(
                 coordinates ?: error("Element ${element.key} does not have any coordinates")
 
             // No need to place the element in this content if we don't want to draw it anyways.
-            if (!shouldPlaceElement(layoutImpl, content.key, element, transition)) {
+            if (!shouldPlaceElement(layoutImpl, content.key, element, elementState)) {
                 recursivelyClearPlacementValues()
                 return
             }
 
+            val transition = elementState as? TransitionState.Transition
             val currentOffset = lookaheadScopeCoordinates.localPositionOf(coords, Offset.Zero)
             val targetOffset =
                 computeValue(
@@ -391,11 +435,15 @@ internal class ElementNode(
                         return@placeWithLayer
                     }
 
-                    val transition = elementTransition(layoutImpl, element, currentTransitions)
-                    if (!shouldPlaceElement(layoutImpl, content.key, element, transition)) {
+                    val elementState = elementState(layoutImpl, element, currentTransitionStates)
+                    if (
+                        elementState == null ||
+                            !shouldPlaceElement(layoutImpl, content.key, element, elementState)
+                    ) {
                         return@placeWithLayer
                     }
 
+                    val transition = elementState as? TransitionState.Transition
                     alpha = elementAlpha(layoutImpl, element, transition, stateInContent)
                     compositingStrategy = CompositingStrategy.ModulateAlpha
                 }
@@ -425,7 +473,9 @@ internal class ElementNode(
     override fun ContentDrawScope.draw() {
         element.wasDrawnInAnyContent = true
 
-        val transition = elementTransition(layoutImpl, element, currentTransitions)
+        val transition =
+            elementState(layoutImpl, element, currentTransitionStates)
+                as? TransitionState.Transition
         val drawScale = getDrawScale(layoutImpl, element, transition, stateInContent)
         if (drawScale == Scale.Default) {
             drawContent()
@@ -468,21 +518,15 @@ internal class ElementNode(
     }
 }
 
-/**
- * The transition that we should consider for [element]. This is the last transition where one of
- * its contents contains the element.
- */
-private fun elementTransition(
+/** The [TransitionState] that we should consider for [element]. */
+private fun elementState(
     layoutImpl: SceneTransitionLayoutImpl,
     element: Element,
-    transitions: List<TransitionState.Transition>,
-): TransitionState.Transition? {
-    val transition =
-        transitions.fastLastOrNull { transition ->
-            transition.fromContent in element.stateByContent ||
-                transition.toContent in element.stateByContent
-        }
+    transitionStates: List<TransitionState>,
+): TransitionState? {
+    val state = elementState(transitionStates, isInContent = { it in element.stateByContent })
 
+    val transition = state as? TransitionState.Transition
     val previousTransition = element.lastTransition
     element.lastTransition = transition
 
@@ -497,7 +541,66 @@ private fun elementTransition(
         }
     }
 
-    return transition
+    return state
+}
+
+internal inline fun elementState(
+    transitionStates: List<TransitionState>,
+    isInContent: (ContentKey) -> Boolean,
+): TransitionState? {
+    val lastState = transitionStates.last()
+    if (lastState is TransitionState.Idle) {
+        check(transitionStates.size == 1)
+        return lastState
+    }
+
+    // Find the last transition with a content that contains the element.
+    transitionStates.fastForEachReversed { state ->
+        val transition = state as TransitionState.Transition
+        if (isInContent(transition.fromContent) || isInContent(transition.toContent)) {
+            return transition
+        }
+    }
+
+    return null
+}
+
+internal inline fun elementContentWhenIdle(
+    layoutImpl: SceneTransitionLayoutImpl,
+    idle: TransitionState.Idle,
+    isInContent: (ContentKey) -> Boolean,
+): ContentKey {
+    val currentScene = idle.currentScene
+    val overlays = idle.currentOverlays
+    return elementContentWhenIdle(layoutImpl, currentScene, overlays, isInContent)
+}
+
+private inline fun elementContentWhenIdle(
+    layoutImpl: SceneTransitionLayoutImpl,
+    currentScene: SceneKey,
+    overlays: Set<OverlayKey>,
+    isInContent: (ContentKey) -> Boolean,
+): ContentKey {
+    if (overlays.isEmpty()) {
+        return currentScene
+    }
+
+    // Find the overlay with highest zIndex that contains the element.
+    // TODO(b/353679003): Should we cache enabledOverlays into a List<> to avoid a lot of
+    // allocations here?
+    var currentOverlay: OverlayKey? = null
+    for (overlay in overlays) {
+        if (
+            isInContent(overlay) &&
+                (currentOverlay == null ||
+                    (layoutImpl.overlay(overlay).zIndex >
+                        layoutImpl.overlay(currentOverlay).zIndex))
+        ) {
+            currentOverlay = overlay
+        }
+    }
+
+    return currentOverlay ?: currentScene
 }
 
 private fun prepareInterruption(
@@ -693,12 +796,20 @@ private fun shouldPlaceElement(
     layoutImpl: SceneTransitionLayoutImpl,
     content: ContentKey,
     element: Element,
-    transition: TransitionState.Transition?,
+    elementState: TransitionState,
 ): Boolean {
-    // Always place the element if we are idle.
-    if (transition == null) {
-        return true
-    }
+    val transition =
+        when (elementState) {
+            is TransitionState.Idle -> {
+                return content ==
+                    elementContentWhenIdle(
+                        layoutImpl,
+                        elementState,
+                        isInContent = { it in element.stateByContent },
+                    )
+            }
+            is TransitionState.Transition -> elementState
+        }
 
     // Don't place the element in this content if this content is not part of the current element
     // transition.
@@ -741,16 +852,12 @@ internal fun shouldPlaceOrComposeSharedElement(
 
     val scenePicker = element.contentPicker
     val pickedScene =
-        when (transition) {
-            is TransitionState.Transition.ChangeCurrentScene -> {
-                scenePicker.contentDuringTransition(
-                    element = element,
-                    transition = transition,
-                    fromContentZIndex = layoutImpl.scene(transition.fromScene).zIndex,
-                    toContentZIndex = layoutImpl.scene(transition.toScene).zIndex,
-                )
-            }
-        }
+        scenePicker.contentDuringTransition(
+            element = element,
+            transition = transition,
+            fromContentZIndex = layoutImpl.content(transition.fromContent).zIndex,
+            toContentZIndex = layoutImpl.content(transition.toContent).zIndex,
+        )
 
     return pickedScene == content
 }

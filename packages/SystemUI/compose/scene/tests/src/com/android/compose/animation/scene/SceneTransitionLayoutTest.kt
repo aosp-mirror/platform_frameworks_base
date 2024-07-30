@@ -500,4 +500,19 @@ class SceneTransitionLayoutTest {
         assertThat(keyInB).isEqualTo(SceneB)
         assertThat(keyInC).isEqualTo(SceneC)
     }
+
+    @Test
+    fun overlaysMapIsNotAllocatedWhenNoOverlayIsDefined() {
+        lateinit var layoutImpl: SceneTransitionLayoutImpl
+        rule.setContent {
+            SceneTransitionLayoutForTesting(
+                remember { MutableSceneTransitionLayoutState(SceneA) },
+                onLayoutImpl = { layoutImpl = it },
+            ) {
+                scene(SceneA) { Box(Modifier.fillMaxSize()) }
+            }
+        }
+
+        assertThat(layoutImpl.overlaysOrNullForTest()).isNull()
+    }
 }

@@ -43,12 +43,15 @@ internal fun CoroutineScope.animateToScene(
     }
 
     return when (transitionState) {
-        is TransitionState.Idle -> {
+        is TransitionState.Idle,
+        is TransitionState.Transition.ShowOrHideOverlay,
+        is TransitionState.Transition.ReplaceOverlay -> {
             animateToScene(
                 layoutState,
                 target,
                 transitionKey,
                 isInitiatedByUserInput = false,
+                fromScene = transitionState.currentScene,
                 replacedTransition = null,
             )
         }

@@ -393,7 +393,8 @@ private class AnimatedStateImpl<T, Delta>(
         transition: TransitionState.Transition?,
     ): T? {
         if (transition == null) {
-            return sharedValue[layoutImpl.state.transitionState.currentScene]
+            return sharedValue[content]
+                ?: sharedValue[layoutImpl.state.transitionState.currentScene]
         }
 
         val fromValue = sharedValue[transition.fromContent]
@@ -424,10 +425,12 @@ private class AnimatedStateImpl<T, Delta>(
         val targetValues = sharedValue.targetValues
         val transition =
             if (element != null) {
-                layoutImpl.elements[element]?.stateByContent?.let { sceneStates ->
-                    layoutImpl.state.currentTransitions.fastLastOrNull { transition ->
-                        transition.fromContent in sceneStates || transition.toContent in sceneStates
-                    }
+                layoutImpl.elements[element]?.let { element ->
+                    elementState(
+                        layoutImpl.state.transitionStates,
+                        isInContent = { it in element.stateByContent },
+                    )
+                        as? TransitionState.Transition
                 }
             } else {
                 layoutImpl.state.currentTransitions.fastLastOrNull { transition ->

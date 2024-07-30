@@ -493,7 +493,9 @@ class SceneFrameworkIntegrationTest : SysuiTestCase() {
     private fun getCurrentSceneInUi(): SceneKey {
         return when (val state = transitionState.value) {
             is ObservableTransitionState.Idle -> state.currentScene
-            is ObservableTransitionState.Transition -> state.fromScene
+            is ObservableTransitionState.Transition.ChangeCurrentScene -> state.fromScene
+            is ObservableTransitionState.Transition.ShowOrHideOverlay -> state.currentScene
+            is ObservableTransitionState.Transition.ReplaceOverlay -> state.currentScene
         }
     }
 

@@ -21,7 +21,11 @@ import androidx.compose.animation.core.AnimationVector1D
 import androidx.compose.animation.core.spring
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.runtime.Stable
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
 import com.android.compose.animation.scene.ContentKey
+import com.android.compose.animation.scene.MutableSceneTransitionLayoutState
+import com.android.compose.animation.scene.OverlayKey
 import com.android.compose.animation.scene.OverscrollScope
 import com.android.compose.animation.scene.OverscrollSpecImpl
 import com.android.compose.animation.scene.ProgressVisibilityThreshold
@@ -49,9 +53,20 @@ sealed interface TransitionState {
      */
     val currentScene: SceneKey
 
+    /**
+     * The current set of overlays. This represents the set of overlays that will be visible on
+     * screen once all transitions are finished.
+     *
+     * @see MutableSceneTransitionLayoutState.showOverlay
+     * @see MutableSceneTransitionLayoutState.hideOverlay
+     * @see MutableSceneTransitionLayoutState.replaceOverlay
+     */
+    val currentOverlays: Set<OverlayKey>
+
     /** The scene [currentScene] is idle. */
     data class Idle(
         override val currentScene: SceneKey,
+        override val currentOverlays: Set<OverlayKey> = emptySet(),
     ) : TransitionState
 
     sealed class Transition(
@@ -69,7 +84,125 @@ sealed interface TransitionState {
 
             /** The transition that `this` transition is replacing, if any. */
             replacedTransition: Transition? = null,
-        ) : Transition(fromScene, toScene, replacedTransition)
+        ) : Transition(fromScene, toScene, replacedTransition) {
+            final override val currentOverlays: Set<OverlayKey>
+                get() {
+                    // The set of overlays does not change in a [ChangeCurrentScene] transition.
+                    return currentOverlaysWhenTransitionStarted
+                }
+        }
+
+        /**
+         * A transition that is animating one or more overlays and for which [currentOverlays] will
+         * change over the course of the transition.
+         */
+        sealed class OverlayTransition(
+            fromContent: ContentKey,
+            toContent: ContentKey,
+            replacedTransition: Transition?,
+        ) : Transition(fromContent, toContent, replacedTransition) {
+            final override val currentScene: SceneKey
+                get() {
+                    // The current scene does not change during overlay transitions.
+                    return currentSceneWhenTransitionStarted
+                }
+
+            // Note: We use deriveStateOf() so that the computed set is cached and reused when the
+            // inputs of the computations don't change, to avoid recomputing and allocating a new
+            // set every time currentOverlays is called (which is every frame and for each element).
+            final override val currentOverlays: Set<OverlayKey> by derivedStateOf {
+                computeCurrentOverlays()
+            }
+
+            protected abstract fun computeCurrentOverlays(): Set<OverlayKey>
+        }
+
+        /** The [overlay] is either showing from [fromOrToScene] or hiding into [fromOrToScene]. */
+        abstract class ShowOrHideOverlay(
+            val overlay: OverlayKey,
+            val fromOrToScene: SceneKey,
+            fromContent: ContentKey,
+            toContent: ContentKey,
+            replacedTransition: Transition? = null,
+        ) : OverlayTransition(fromContent, toContent, replacedTransition) {
+            /**
+             * Whether [overlay] is effectively shown. For instance, this will be `false` when
+             * starting a swipe transition to show [overlay] and will be `true` only once the swipe
+             * transition is committed.
+             */
+            protected abstract val isEffectivelyShown: Boolean
+
+            init {
+                check(
+                    (fromContent == fromOrToScene && toContent == overlay) ||
+                        (fromContent == overlay && toContent == fromOrToScene)
+                )
+            }
+
+            final override fun computeCurrentOverlays(): Set<OverlayKey> {
+                return if (isEffectivelyShown) {
+                    currentOverlaysWhenTransitionStarted + overlay
+                } else {
+                    currentOverlaysWhenTransitionStarted - overlay
+                }
+            }
+        }
+
+        /** We are transitioning from [fromOverlay] to [toOverlay]. */
+        abstract class ReplaceOverlay(
+            val fromOverlay: OverlayKey,
+            val toOverlay: OverlayKey,
+            replacedTransition: Transition? = null,
+        ) :
+            OverlayTransition(
+                fromContent = fromOverlay,
+                toContent = toOverlay,
+                replacedTransition,
+            ) {
+            /**
+             * The current effective overlay, either [fromOverlay] or [toOverlay]. For instance,
+             * this will be [fromOverlay] when starting a swipe transition that replaces
+             * [fromOverlay] by [toOverlay] and will [toOverlay] once the swipe transition is
+             * committed.
+             */
+            protected abstract val effectivelyShownOverlay: OverlayKey
+
+            init {
+                check(fromOverlay != toOverlay)
+            }
+
+            final override fun computeCurrentOverlays(): Set<OverlayKey> {
+                return when (effectivelyShownOverlay) {
+                    fromOverlay ->
+                        computeCurrentOverlays(include = fromOverlay, exclude = toOverlay)
+                    toOverlay -> computeCurrentOverlays(include = toOverlay, exclude = fromOverlay)
+                    else ->
+                        error(
+                            "effectivelyShownOverlay=$effectivelyShownOverlay, should be " +
+                                "equal to fromOverlay=$fromOverlay or toOverlay=$toOverlay"
+                        )
+                }
+            }
+
+            private fun computeCurrentOverlays(
+                include: OverlayKey,
+                exclude: OverlayKey
+            ): Set<OverlayKey> {
+                return buildSet {
+                    addAll(currentOverlaysWhenTransitionStarted)
+                    remove(exclude)
+                    add(include)
+                }
+            }
+        }
+
+        /**
+         * The current scene and overlays observed right when this transition started. These are set
+         * when this transition is started in
+         * [com.android.compose.animation.scene.MutableSceneTransitionLayoutStateImpl.startTransition].
+         */
+        internal lateinit var currentSceneWhenTransitionStarted: SceneKey
+        internal lateinit var currentOverlaysWhenTransitionStarted: Set<OverlayKey>
 
         /**
          * The key of this transition. This should usually be null, but it can be specified to use a
@@ -161,6 +294,11 @@ sealed interface TransitionState {
         fun isTransitioningBetween(content: ContentKey, other: ContentKey): Boolean {
             return isTransitioning(from = content, to = other) ||
                 isTransitioning(from = other, to = content)
+        }
+
+        /** Whether we are transitioning from or to [content]. */
+        fun isTransitioningFromOrTo(content: ContentKey): Boolean {
+            return fromContent == content || toContent == content
         }
 
         /**

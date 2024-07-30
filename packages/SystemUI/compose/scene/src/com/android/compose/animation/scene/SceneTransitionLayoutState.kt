@@ -39,6 +39,21 @@ import kotlinx.coroutines.CoroutineScope
 @Stable
 sealed interface SceneTransitionLayoutState {
     /**
+     * The current effective scene. If a new transition is triggered, it will start from this scene.
+     */
+    val currentScene: SceneKey
+
+    /**
+     * The current set of overlays. This represents the set of overlays that will be visible on
+     * screen once all [currentTransitions] are finished.
+     *
+     * @see MutableSceneTransitionLayoutState.showOverlay
+     * @see MutableSceneTransitionLayoutState.hideOverlay
+     * @see MutableSceneTransitionLayoutState.replaceOverlay
+     */
+    val currentOverlays: Set<OverlayKey>
+
+    /**
      * The current [TransitionState]. All values read here are backed by the Snapshot system.
      *
      * To observe those values outside of Compose/the Snapshot system, use
@@ -110,7 +125,50 @@ sealed interface MutableSceneTransitionLayoutState : SceneTransitionLayoutState 
     ): TransitionState.Transition?
 
     /** Immediately snap to the given [scene]. */
-    fun snapToScene(scene: SceneKey)
+    fun snapToScene(
+        scene: SceneKey,
+        currentOverlays: Set<OverlayKey> = transitionState.currentOverlays,
+    )
+
+    /**
+     * Request to show [overlay] so that it animates in from [currentScene] and ends up being
+     * visible on screen.
+     *
+     * After this returns, this overlay will be included in [currentOverlays]. This does nothing if
+     * [overlay] is already in [currentOverlays].
+     */
+    fun showOverlay(
+        overlay: OverlayKey,
+        animationScope: CoroutineScope,
+        transitionKey: TransitionKey? = null,
+    )
+
+    /**
+     * Request to hide [overlay] so that it animates out to [currentScene] and ends up *not* being
+     * visible on screen.
+     *
+     * After this returns, this overlay will not be included in [currentOverlays]. This does nothing
+     * if [overlay] is not in [currentOverlays].
+     */
+    fun hideOverlay(
+        overlay: OverlayKey,
+        animationScope: CoroutineScope,
+        transitionKey: TransitionKey? = null,
+    )
+
+    /**
+     * Replace [from] by [to] so that [from] ends up not being visible on screen and [to] ends up
+     * being visible.
+     *
+     * This throws if [from] is not currently in [currentOverlays] or if [to] is already in
+     * [currentOverlays].
+     */
+    fun replaceOverlay(
+        from: OverlayKey,
+        to: OverlayKey,
+        animationScope: CoroutineScope,
+        transitionKey: TransitionKey? = null,
+    )
 }
 
 /**
@@ -128,6 +186,7 @@ sealed interface MutableSceneTransitionLayoutState : SceneTransitionLayoutState 
 fun MutableSceneTransitionLayoutState(
     initialScene: SceneKey,
     transitions: SceneTransitions = SceneTransitions.Empty,
+    initialOverlays: Set<OverlayKey> = emptySet(),
     canChangeScene: (SceneKey) -> Boolean = { true },
     stateLinks: List<StateLink> = emptyList(),
     enableInterruptions: Boolean = DEFAULT_INTERRUPTIONS_ENABLED,
@@ -135,6 +194,7 @@ fun MutableSceneTransitionLayoutState(
     return MutableSceneTransitionLayoutStateImpl(
         initialScene,
         transitions,
+        initialOverlays,
         canChangeScene,
         stateLinks,
         enableInterruptions,
@@ -145,6 +205,7 @@ fun MutableSceneTransitionLayoutState(
 internal class MutableSceneTransitionLayoutStateImpl(
     initialScene: SceneKey,
     override var transitions: SceneTransitions = transitions {},
+    initialOverlays: Set<OverlayKey> = emptySet(),
     internal val canChangeScene: (SceneKey) -> Boolean = { true },
     private val stateLinks: List<StateLink> = emptyList(),
 
@@ -158,13 +219,18 @@ internal class MutableSceneTransitionLayoutStateImpl(
      * 1. A list with a single [TransitionState.Idle] element, when we are idle.
      * 2. A list with one or more [TransitionState.Transition], when we are transitioning.
      */
-    @VisibleForTesting
     internal var transitionStates: List<TransitionState> by
-        mutableStateOf(listOf(TransitionState.Idle(initialScene)))
+        mutableStateOf(listOf(TransitionState.Idle(initialScene, initialOverlays)))
         private set
 
+    override val currentScene: SceneKey
+        get() = transitionState.currentScene
+
+    override val currentOverlays: Set<OverlayKey>
+        get() = transitionState.currentOverlays
+
     override val transitionState: TransitionState
-        get() = transitionStates.last()
+        get() = transitionStates[transitionStates.lastIndex]
 
     override val currentTransitions: List<TransitionState.Transition>
         get() {
@@ -232,6 +298,11 @@ internal class MutableSceneTransitionLayoutStateImpl(
         chain: Boolean = true,
     ) {
         checkThread()
+
+        // Set the current scene and overlays on the transition.
+        val currentState = transitionState
+        transition.currentSceneWhenTransitionStarted = currentState.currentScene
+        transition.currentOverlaysWhenTransitionStarted = currentState.currentOverlays
 
         // Compute the [TransformationSpec] when the transition starts.
         val fromScene = transition.fromScene
@@ -356,6 +427,7 @@ internal class MutableSceneTransitionLayoutStateImpl(
                     transition.activeTransitionLinks[stateLink] = linkedTransition
                 }
             }
+            else -> error("transition links are not supported with overlays yet")
         }
     }
 
@@ -408,23 +480,28 @@ internal class MutableSceneTransitionLayoutStateImpl(
         // If all transitions are finished, we are idle.
         if (i == nStates) {
             check(finishedTransitions.isEmpty())
-            this.transitionStates = listOf(TransitionState.Idle(lastTransition.currentScene))
+            this.transitionStates =
+                listOf(
+                    TransitionState.Idle(
+                        lastTransition.currentScene,
+                        lastTransition.currentOverlays,
+                    )
+                )
         } else if (i > 0) {
             this.transitionStates = transitionStates.subList(fromIndex = i, toIndex = nStates)
         }
     }
 
-    override fun snapToScene(scene: SceneKey) {
+    override fun snapToScene(scene: SceneKey, currentOverlays: Set<OverlayKey>) {
         checkThread()
 
         // Force finish all transitions.
         while (currentTransitions.isNotEmpty()) {
-            val transition = transitionStates[0] as TransitionState.Transition
-            finishTransition(transition)
+            finishTransition(transitionStates[0] as TransitionState.Transition)
         }
 
         check(transitionStates.size == 1)
-        transitionStates = listOf(TransitionState.Idle(scene))
+        transitionStates = listOf(TransitionState.Idle(scene, currentOverlays))
     }
 
     private fun finishActiveTransitionLinks(transition: TransitionState.Transition) {
@@ -465,6 +542,57 @@ internal class MutableSceneTransitionLayoutStateImpl(
         } else {
             false
         }
+    }
+
+    override fun showOverlay(
+        overlay: OverlayKey,
+        animationScope: CoroutineScope,
+        transitionKey: TransitionKey?
+    ) {
+        checkThread()
+
+        // Overlay is already shown, do nothing.
+        if (overlay in transitionState.currentOverlays) {
+            return
+        }
+
+        // TODO(b/353679003): Animate the overlay instead of instantly snapping to an Idle state.
+        snapToScene(transitionState.currentScene, transitionState.currentOverlays + overlay)
+    }
+
+    override fun hideOverlay(
+        overlay: OverlayKey,
+        animationScope: CoroutineScope,
+        transitionKey: TransitionKey?
+    ) {
+        checkThread()
+
+        // Overlay is not shown, do nothing.
+        if (!transitionState.currentOverlays.contains(overlay)) {
+            return
+        }
+
+        // TODO(b/353679003): Animate the overlay instead of instantly snapping to an Idle state.
+        snapToScene(transitionState.currentScene, transitionState.currentOverlays - overlay)
+    }
+
+    override fun replaceOverlay(
+        from: OverlayKey,
+        to: OverlayKey,
+        animationScope: CoroutineScope,
+        transitionKey: TransitionKey?
+    ) {
+        checkThread()
+        require(from in currentOverlays) {
+            "Overlay ${from.debugName} is not shown so it can't be replaced by ${to.debugName}"
+        }
+        require(to !in currentOverlays) {
+            "Overlay ${to.debugName} is already shown so it can't replace ${from.debugName}"
+        }
+
+        // TODO(b/353679003): Animate from into to instead of hiding/showing the overlays
+        // separately.
+        snapToScene(transitionState.currentScene, transitionState.currentOverlays - from + to)
     }
 }
 
