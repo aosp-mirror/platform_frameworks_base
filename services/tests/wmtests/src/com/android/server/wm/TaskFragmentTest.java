@@ -995,16 +995,14 @@ public class TaskFragmentTest extends WindowTestsBase {
         // The focus should change.
         assertEquals(winLeftTop, mDisplayContent.mCurrentFocus);
 
-        if (Flags.embeddedActivityBackNavFlag()) {
-            // Move focus if the adjacent activity is more recently active.
-            doReturn(1L).when(appLeftTop).getLastWindowCreateTime();
-            doReturn(2L).when(appRightTop).getLastWindowCreateTime();
-            assertTrue(mWm.moveFocusToAdjacentEmbeddedWindow(winLeftTop));
+        // Move focus if the adjacent activity is more recently active.
+        doReturn(1L).when(appLeftTop).getLastWindowCreateTime();
+        doReturn(2L).when(appRightTop).getLastWindowCreateTime();
+        assertTrue(mWm.moveFocusToAdjacentEmbeddedWindow(winLeftTop));
 
-            // Do not move the focus if the adjacent activity is less recently active.
-            doReturn(3L).when(appLeftTop).getLastWindowCreateTime();
-            assertFalse(mWm.moveFocusToAdjacentEmbeddedWindow(winLeftTop));
-        }
+        // Do not move the focus if the adjacent activity is less recently active.
+        doReturn(3L).when(appLeftTop).getLastWindowCreateTime();
+        assertFalse(mWm.moveFocusToAdjacentEmbeddedWindow(winLeftTop));
     }
 
     @Test
