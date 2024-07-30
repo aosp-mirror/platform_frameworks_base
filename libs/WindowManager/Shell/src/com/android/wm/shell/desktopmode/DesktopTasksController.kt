@@ -255,81 +255,82 @@ class DesktopTasksController(
     /** Returns true if any tasks are visible in Desktop Mode. */
     fun isDesktopModeShowing(displayId: Int): Boolean = visibleTaskCount(displayId) > 0
 
-    /** Enter desktop by using the focused task in given `displayId` */
+    /** Moves focused task to desktop mode for given [displayId]. */
     fun moveFocusedTaskToDesktop(displayId: Int, transitionSource: DesktopModeTransitionSource) {
-        val allFocusedTasks =
-            shellTaskOrganizer.getRunningTasks(displayId).filter { taskInfo ->
-                taskInfo.isFocused &&
-                    (taskInfo.windowingMode == WINDOWING_MODE_FULLSCREEN ||
-                        taskInfo.windowingMode == WINDOWING_MODE_MULTI_WINDOW) &&
-                    taskInfo.activityType != ACTIVITY_TYPE_HOME
-            }
-        if (allFocusedTasks.isNotEmpty()) {
-            when (allFocusedTasks.size) {
-                2 -> {
-                    // Split-screen case where there are two focused tasks, then we find the child
-                    // task to move to desktop.
-                    val splitFocusedTask =
-                        if (allFocusedTasks[0].taskId == allFocusedTasks[1].parentTaskId) {
-                            allFocusedTasks[1]
-                        } else {
-                            allFocusedTasks[0]
-                        }
-                    moveToDesktop(splitFocusedTask, transitionSource = transitionSource)
-                }
-                1 -> {
-                    // Fullscreen case where we move the current focused task.
-                    moveToDesktop(allFocusedTasks[0].taskId, transitionSource = transitionSource)
-                }
-                else -> logW("Cannot enter desktop, expected < 3 focused tasks, found %d",
-                    allFocusedTasks.size)
-            }
+        val allFocusedTasks = getAllFocusedTasks(displayId)
+        when (allFocusedTasks.size) {
+            0 -> return
+            // Full screen case
+            1 -> moveRunningTaskToDesktop(
+                allFocusedTasks.single(), transitionSource = transitionSource)
+            // Split-screen case where there are two focused tasks, then we find the child
+            // task to move to desktop.
+            2 -> moveRunningTaskToDesktop(
+                getSplitFocusedTask(allFocusedTasks[0], allFocusedTasks[1]),
+                    transitionSource = transitionSource)
+            else -> logW(
+                "DesktopTasksController: Cannot enter desktop, expected less " +
+                "than 3 focused tasks but found %d", allFocusedTasks.size)
         }
     }
 
-    /** Move a task with given `taskId` to desktop */
-    fun moveToDesktop(
+    /**
+     * Returns all focused tasks in full screen or split screen mode in [displayId] when
+     * it is not the home activity.
+     */
+    private fun getAllFocusedTasks(displayId: Int): List<RunningTaskInfo> =
+        shellTaskOrganizer.getRunningTasks(displayId).filter {
+            it.isFocused &&
+            (it.windowingMode == WINDOWING_MODE_FULLSCREEN ||
+                it.windowingMode == WINDOWING_MODE_MULTI_WINDOW) &&
+            it.activityType != ACTIVITY_TYPE_HOME
+        }
+
+    /** Returns child task from two focused tasks in split screen mode. */
+    private fun getSplitFocusedTask(task1: RunningTaskInfo, task2: RunningTaskInfo) =
+        if (task1.taskId == task2.parentTaskId) task2 else task1
+
+    /** Moves task to desktop mode if task is running, else launches it in desktop mode. */
+    fun moveTaskToDesktop(
         taskId: Int,
         wct: WindowContainerTransaction = WindowContainerTransaction(),
         transitionSource: DesktopModeTransitionSource,
     ): Boolean {
-        shellTaskOrganizer.getRunningTaskInfo(taskId)?.let {
-            moveToDesktop(it, wct, transitionSource)
+        val runningTask = shellTaskOrganizer.getRunningTaskInfo(taskId)
+        if (runningTask == null) {
+            return moveBackgroundTaskToDesktop(taskId, wct, transitionSource)
         }
-            ?: moveToDesktopFromNonRunningTask(taskId, wct, transitionSource)
+        moveRunningTaskToDesktop(runningTask, wct, transitionSource)
         return true
     }
 
-    private fun moveToDesktopFromNonRunningTask(
-        taskId: Int,
-        wct: WindowContainerTransaction,
-        transitionSource: DesktopModeTransitionSource,
+    private fun moveBackgroundTaskToDesktop(
+            taskId: Int,
+            wct: WindowContainerTransaction,
+            transitionSource: DesktopModeTransitionSource,
     ): Boolean {
-        recentTasksController?.findTaskInBackground(taskId)?.let {
-            logV("moveToDesktopFromNonRunningTask with taskId=%d, displayId=%d", taskId)
-            // TODO(342378842): Instead of using default display, support multiple displays
-            val taskToMinimize =
-                bringDesktopAppsToFrontBeforeShowingNewTask(DEFAULT_DISPLAY, wct, taskId)
-            addMoveToDesktopChangesNonRunningTask(wct, taskId)
-            // TODO(343149901): Add DPI changes for task launch
-            val transition = enterDesktopTaskTransitionHandler.moveToDesktop(wct, transitionSource)
-            addPendingMinimizeTransition(transition, taskToMinimize)
-            return true
+        if (recentTasksController?.findTaskInBackground(taskId) == null) {
+            logW("moveBackgroundTaskToDesktop taskId=%d not found", taskId)
+            return false
         }
-            ?: return false
+        logV("moveBackgroundTaskToDesktop with taskId=%d, displayId=%d", taskId)
+        // TODO(342378842): Instead of using default display, support multiple displays
+        val taskToMinimize = bringDesktopAppsToFrontBeforeShowingNewTask(
+            DEFAULT_DISPLAY, wct, taskId)
+        wct.startTask(
+            taskId,
+            ActivityOptions.makeBasic().apply {
+                launchWindowingMode = WINDOWING_MODE_FREEFORM
+            }.toBundle(),
+        )
+        // TODO(343149901): Add DPI changes for task launch
+        val transition = enterDesktopTaskTransitionHandler.moveToDesktop(wct, transitionSource)
+        addPendingMinimizeTransition(transition, taskToMinimize)
+        return true
     }
 
-    private fun addMoveToDesktopChangesNonRunningTask(
-        wct: WindowContainerTransaction,
-        taskId: Int
-    ) {
-        val options = ActivityOptions.makeBasic()
-        options.launchWindowingMode = WINDOWING_MODE_FREEFORM
-        wct.startTask(taskId, options.toBundle())
-    }
-
-    /** Move a task to desktop */
-    fun moveToDesktop(
+   /** Moves a running task to desktop. */
+    fun moveRunningTaskToDesktop(
         task: RunningTaskInfo,
         wct: WindowContainerTransaction = WindowContainerTransaction(),
         transitionSource: DesktopModeTransitionSource,
@@ -339,7 +340,7 @@ class DesktopTasksController(
             logW("Cannot enter desktop for taskId %d, ineligible top activity found", task.taskId)
             return
         }
-        logV("moveToDesktop taskId=%d", task.taskId)
+        logV("moveRunningTaskToDesktop taskId=%d", task.taskId)
         exitSplitIfApplicable(wct, task)
         // Bring other apps to front first
         val taskToMinimize =
@@ -1519,8 +1520,8 @@ class DesktopTasksController(
         }
 
         override fun moveToDesktop(taskId: Int, transitionSource: DesktopModeTransitionSource) {
-            executeRemoteCallWithTaskPermission(controller, "moveToDesktop") { c ->
-                c.moveToDesktop(taskId, transitionSource = transitionSource)
+            executeRemoteCallWithTaskPermission(controller, "moveTaskToDesktop") { c ->
+                c.moveTaskToDesktop(taskId, transitionSource = transitionSource)
             }
         }
     }

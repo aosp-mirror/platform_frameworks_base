@@ -512,7 +512,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
                 mInteractionJankMonitor.begin(decoration.mTaskSurface, mContext,
                         CUJ_DESKTOP_MODE_ENTER_MODE_APP_HANDLE_MENU);
                 mWindowDecorByTaskId.get(mTaskId).addCaptionInset(wct);
-                mDesktopTasksController.moveToDesktop(mTaskId, wct,
+                mDesktopTasksController.moveTaskToDesktop(mTaskId, wct,
                         DesktopModeTransitionSource.APP_HANDLE_MENU_BUTTON);
                 decoration.closeHandleMenu();
             } else if (id == R.id.fullscreen_button) {
