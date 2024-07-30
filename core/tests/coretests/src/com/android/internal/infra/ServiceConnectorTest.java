@@ -29,8 +29,8 @@ import android.os.Process;
 import android.os.UserHandle;
 
 import androidx.annotation.NonNull;
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.platform.app.InstrumentationRegistry;
-import androidx.test.runner.AndroidJUnit4;
 
 import com.android.frameworks.coretests.aidl.ITestServiceConnectorService;
 import com.android.internal.infra.ServiceConnectorTest.CapturingServiceLifecycleCallbacks.ServiceLifeCycleEvent;

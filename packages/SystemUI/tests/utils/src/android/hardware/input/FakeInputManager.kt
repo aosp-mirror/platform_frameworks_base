@@ -16,6 +16,7 @@
 
 package android.hardware.input
 
+import android.hardware.input.InputManager.InputDeviceListener
 import android.view.InputDevice
 import android.view.KeyCharacterMap
 import android.view.KeyCharacterMap.VIRTUAL_KEYBOARD
@@ -46,6 +47,8 @@ class FakeInputManager {
             // Mark all keys supported by default
             VIRTUAL_KEYBOARD to allKeyCodes.toMutableSet()
         )
+
+    private var inputDeviceListener: InputDeviceListener? = null
 
     val inputManager =
         mock<InputManager> {
@@ -84,6 +87,11 @@ class FakeInputManager {
         addPhysicalKeyboard(deviceId, enabled)
     }
 
+    fun registerInputDeviceListener(listener: InputDeviceListener) {
+        // TODO (b/355422259): handle this by listening to inputManager.registerInputDeviceListener
+        inputDeviceListener = listener
+    }
+
     fun addPhysicalKeyboard(id: Int, enabled: Boolean = true) {
         check(id > 0) { "Physical keyboard ids have to be > 0" }
         addKeyboard(id, enabled)
@@ -104,6 +112,16 @@ class FakeInputManager {
                 .setKeyCharacterMap(keyCharacterMap)
                 .build()
         supportedKeyCodesByDeviceId[id] = allKeyCodes.toMutableSet()
+    }
+
+    fun addDevice(id: Int, sources: Int) {
+        devices[id] = InputDevice.Builder().setId(id).setSources(sources).build()
+        inputDeviceListener?.onInputDeviceAdded(id)
+    }
+
+    fun removeDevice(id: Int) {
+        devices.remove(id)
+        inputDeviceListener?.onInputDeviceRemoved(id)
     }
 
     private fun InputDevice.copy(

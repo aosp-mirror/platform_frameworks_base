@@ -50,7 +50,6 @@ import android.os.IBinder;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
-import android.os.UserHandle;
 import android.util.ArraySet;
 import android.view.InputChannel;
 import android.view.inputmethod.EditorInfo;
@@ -128,7 +127,7 @@ public class InputMethodManagerServiceTestBase {
     protected Context mContext;
     protected MockitoSession mMockingSession;
     protected int mTargetSdkVersion;
-    protected int mCallingUserId;
+    protected int mUserId;
     protected EditorInfo mEditorInfo;
     protected IInputMethodInvoker mMockInputMethodInvoker;
     protected InputMethodManagerService mInputMethodManagerService;
@@ -165,12 +164,12 @@ public class InputMethodManagerServiceTestBase {
                         .spyStatic(AdditionalSubtypeUtils.class)
                         .startMocking();
 
-        mContext = spy(InstrumentationRegistry.getInstrumentation().getContext());
+        mContext = spy(InstrumentationRegistry.getInstrumentation().getTargetContext());
 
         mTargetSdkVersion = mContext.getApplicationInfo().targetSdkVersion;
         mIsLargeScreen = mContext.getResources().getConfiguration()
                 .isLayoutSizeAtLeast(Configuration.SCREENLAYOUT_SIZE_LARGE);
-        mCallingUserId = UserHandle.getCallingUserId();
+        mUserId = mContext.getUserId();
         mEditorInfo = new EditorInfo();
         mEditorInfo.packageName = TEST_EDITOR_PKG_NAME;
 
@@ -202,7 +201,7 @@ public class InputMethodManagerServiceTestBase {
         // Injecting and mocked InputMethodBindingController and InputMethod.
         mMockInputMethodInvoker = IInputMethodInvoker.create(mMockInputMethod);
         mInputManagerGlobalSession = InputManagerGlobal.createTestSession(mMockIInputManager);
-        when(mMockInputMethodBindingController.getUserId()).thenReturn(mCallingUserId);
+        when(mMockInputMethodBindingController.getUserId()).thenReturn(mUserId);
         synchronized (ImfLock.class) {
             when(mMockInputMethodBindingController.getCurMethod())
                     .thenReturn(mMockInputMethodInvoker);
@@ -222,7 +221,7 @@ public class InputMethodManagerServiceTestBase {
                 .thenReturn(new int[] {0});
         when(mMockUserManagerInternal.getUserIds()).thenReturn(new int[] {0});
         when(mMockActivityManagerInternal.isSystemReady()).thenReturn(true);
-        when(mMockActivityManagerInternal.getCurrentUserId()).thenReturn(mCallingUserId);
+        when(mMockActivityManagerInternal.getCurrentUserId()).thenReturn(mUserId);
         when(mMockPackageManagerInternal.getPackageUid(anyString(), anyLong(), anyInt()))
                 .thenReturn(Binder.getCallingUid());
         when(mMockPackageManagerInternal.isSameApp(anyString(), anyLong(), anyInt(), anyInt()))
@@ -272,14 +271,13 @@ public class InputMethodManagerServiceTestBase {
 
         // Certain tests rely on TEST_IME_ID that is installed with AndroidTest.xml.
         // TODO(b/352615651): Consider just synthesizing test InputMethodInfo then injecting it.
-        AdditionalSubtypeMapRepository.initializeIfNecessary(mCallingUserId);
+        AdditionalSubtypeMapRepository.initializeIfNecessary(mUserId);
         final var settings = InputMethodManagerService.queryInputMethodServicesInternal(mContext,
-                mCallingUserId, AdditionalSubtypeMapRepository.get(mCallingUserId),
-                DirectBootAwareness.AUTO);
-        InputMethodSettingsRepository.put(mCallingUserId, settings);
+                mUserId, AdditionalSubtypeMapRepository.get(mUserId), DirectBootAwareness.AUTO);
+        InputMethodSettingsRepository.put(mUserId, settings);
 
         // Emulate that the user initialization is done.
-        mInputMethodManagerService.getUserData(mCallingUserId).mBackgroundLoadLatch.countDown();
+        mInputMethodManagerService.getUserData(mUserId).mBackgroundLoadLatch.countDown();
 
         // After this boot phase, services can broadcast Intents.
         lifecycle.onBootPhase(SystemService.PHASE_ACTIVITY_MANAGER_READY);
@@ -291,7 +289,7 @@ public class InputMethodManagerServiceTestBase {
 
     @After
     public void tearDown() {
-        InputMethodSettingsRepository.remove(mCallingUserId);
+        InputMethodSettingsRepository.remove(mUserId);
 
         if (mInputMethodManagerService != null) {
             mInputMethodManagerService.mInputMethodDeviceConfigs.destroy();
@@ -347,8 +345,8 @@ public class InputMethodManagerServiceTestBase {
         synchronized (ImfLock.class) {
             ClientState cs = mInputMethodManagerService.getClientStateLocked(client);
             cs.mCurSession = new InputMethodManagerService.SessionState(cs,
-                    mMockInputMethodInvoker, mMockInputMethodSession, mock(
-                    InputChannel.class), mCallingUserId);
+                    mMockInputMethodInvoker, mMockInputMethodSession, mock(InputChannel.class),
+                    mUserId);
         }
     }
 }

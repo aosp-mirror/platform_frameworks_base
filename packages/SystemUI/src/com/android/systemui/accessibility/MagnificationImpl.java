@@ -149,6 +149,7 @@ public class MagnificationImpl implements Magnification, CommandQueue.Callbacks 
         private final Context mContext;
         private final Handler mHandler;
         private final Executor mExecutor;
+        private final DisplayManager mDisplayManager;
         private final IWindowManager mIWindowManager;
 
         FullscreenMagnificationControllerSupplier(Context context,
@@ -159,6 +160,7 @@ public class MagnificationImpl implements Magnification, CommandQueue.Callbacks 
             mContext = context;
             mHandler = handler;
             mExecutor = executor;
+            mDisplayManager = displayManager;
             mIWindowManager = iWindowManager;
         }
 
@@ -173,6 +175,7 @@ public class MagnificationImpl implements Magnification, CommandQueue.Callbacks 
                     windowContext,
                     mHandler,
                     mExecutor,
+                    mDisplayManager,
                     windowContext.getSystemService(AccessibilityManager.class),
                     windowContext.getSystemService(WindowManager.class),
                     mIWindowManager,

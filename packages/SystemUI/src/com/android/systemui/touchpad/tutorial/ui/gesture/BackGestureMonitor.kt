@@ -17,23 +17,26 @@
 package com.android.systemui.touchpad.tutorial.ui.gesture
 
 import android.view.MotionEvent
+import com.android.systemui.touchpad.tutorial.ui.gesture.GestureState.FINISHED
+import com.android.systemui.touchpad.tutorial.ui.gesture.GestureState.IN_PROGRESS
+import com.android.systemui.touchpad.tutorial.ui.gesture.GestureState.NOT_STARTED
 import kotlin.math.abs
 
 /**
- * Monitor for touchpad gestures that calls [gestureDoneCallback] when gesture was successfully
- * done. All tracked motion events should be passed to [processTouchpadEvent]
+ * Monitor for touchpad gestures that calls [gestureStateChangedCallback] when [GestureState]
+ * changes. All tracked motion events should be passed to [processTouchpadEvent]
  */
 interface TouchpadGestureMonitor {
 
     val gestureDistanceThresholdPx: Int
-    val gestureDoneCallback: () -> Unit
+    val gestureStateChangedCallback: (GestureState) -> Unit
 
     fun processTouchpadEvent(event: MotionEvent)
 }
 
 class BackGestureMonitor(
     override val gestureDistanceThresholdPx: Int,
-    override val gestureDoneCallback: () -> Unit
+    override val gestureStateChangedCallback: (GestureState) -> Unit
 ) : TouchpadGestureMonitor {
 
     private var xStart = 0f
@@ -44,13 +47,16 @@ class BackGestureMonitor(
             MotionEvent.ACTION_DOWN -> {
                 if (isThreeFingerTouchpadSwipe(event)) {
                     xStart = event.x
+                    gestureStateChangedCallback(IN_PROGRESS)
                 }
             }
             MotionEvent.ACTION_UP -> {
                 if (isThreeFingerTouchpadSwipe(event)) {
                     val distance = abs(event.x - xStart)
                     if (distance >= gestureDistanceThresholdPx) {
-                        gestureDoneCallback()
+                        gestureStateChangedCallback(FINISHED)
+                    } else {
+                        gestureStateChangedCallback(NOT_STARTED)
                     }
                 }
             }

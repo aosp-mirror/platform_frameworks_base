@@ -144,6 +144,7 @@ import com.android.systemui.statusbar.ui.binder.StatusBarViewBinderModule;
 import com.android.systemui.statusbar.window.StatusBarWindowModule;
 import com.android.systemui.telephony.data.repository.TelephonyRepositoryModule;
 import com.android.systemui.temporarydisplay.dagger.TemporaryDisplayModule;
+import com.android.systemui.touchpad.TouchpadModule;
 import com.android.systemui.tuner.dagger.TunerModule;
 import com.android.systemui.user.UserModule;
 import com.android.systemui.user.domain.UserDomainLayerModule;
@@ -259,6 +260,7 @@ import javax.inject.Named;
         CommonSystemUIUnfoldModule.class,
         TelephonyRepositoryModule.class,
         TemporaryDisplayModule.class,
+        TouchpadModule.class,
         TunerModule.class,
         UserDomainLayerModule.class,
         UserModule.class,

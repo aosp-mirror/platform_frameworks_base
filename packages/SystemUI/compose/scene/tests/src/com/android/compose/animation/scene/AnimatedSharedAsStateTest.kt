@@ -67,7 +67,7 @@ class AnimatedSharedAsStateTest {
     }
 
     @Composable
-    private fun SceneScope.Foo(
+    private fun ContentScope.Foo(
         targetValues: Values,
         onCurrentValueChanged: (Values) -> Unit,
     ) {
@@ -87,7 +87,7 @@ class AnimatedSharedAsStateTest {
     }
 
     @Composable
-    private fun SceneScope.MovableFoo(
+    private fun ContentScope.MovableFoo(
         targetValues: Values,
         onCurrentValueChanged: (Values) -> Unit,
     ) {
@@ -105,14 +105,14 @@ class AnimatedSharedAsStateTest {
     }
 
     @Composable
-    private fun SceneScope.SceneValues(
+    private fun ContentScope.SceneValues(
         targetValues: Values,
         onCurrentValueChanged: (Values) -> Unit,
     ) {
-        val int by animateSceneIntAsState(targetValues.int, key = TestValues.Value1)
-        val float by animateSceneFloatAsState(targetValues.float, key = TestValues.Value2)
-        val dp by animateSceneDpAsState(targetValues.dp, key = TestValues.Value3)
-        val color by animateSceneColorAsState(targetValues.color, key = TestValues.Value4)
+        val int by animateContentIntAsState(targetValues.int, key = TestValues.Value1)
+        val float by animateContentFloatAsState(targetValues.float, key = TestValues.Value2)
+        val dp by animateContentDpAsState(targetValues.dp, key = TestValues.Value3)
+        val color by animateContentColorAsState(targetValues.color, key = TestValues.Value4)
 
         LaunchedEffect(Unit) {
             snapshotFlow { Values(int, float, dp, color) }.collect(onCurrentValueChanged)
@@ -292,7 +292,7 @@ class AnimatedSharedAsStateTest {
     fun readingAnimatedStateValueDuringCompositionThrows() {
         assertThrows(IllegalStateException::class.java) {
             rule.testTransition(
-                fromSceneContent = { animateSceneIntAsState(0, TestValues.Value1).value },
+                fromSceneContent = { animateContentIntAsState(0, TestValues.Value1).value },
                 toSceneContent = {},
                 transition = {},
             ) {}
@@ -302,21 +302,21 @@ class AnimatedSharedAsStateTest {
     @Test
     fun readingAnimatedStateValueDuringCompositionIsStillPossible() {
         @Composable
-        fun SceneScope.SceneValuesDuringComposition(
+        fun ContentScope.SceneValuesDuringComposition(
             targetValues: Values,
             onCurrentValueChanged: (Values) -> Unit,
         ) {
             val int by
-                animateSceneIntAsState(targetValues.int, key = TestValues.Value1)
+                animateContentIntAsState(targetValues.int, key = TestValues.Value1)
                     .unsafeCompositionState(targetValues.int)
             val float by
-                animateSceneFloatAsState(targetValues.float, key = TestValues.Value2)
+                animateContentFloatAsState(targetValues.float, key = TestValues.Value2)
                     .unsafeCompositionState(targetValues.float)
             val dp by
-                animateSceneDpAsState(targetValues.dp, key = TestValues.Value3)
+                animateContentDpAsState(targetValues.dp, key = TestValues.Value3)
                     .unsafeCompositionState(targetValues.dp)
             val color by
-                animateSceneColorAsState(targetValues.color, key = TestValues.Value4)
+                animateContentColorAsState(targetValues.color, key = TestValues.Value4)
                     .unsafeCompositionState(targetValues.color)
 
             val values = Values(int, float, dp, color)
@@ -397,14 +397,14 @@ class AnimatedSharedAsStateTest {
 
         val foo = ValueKey("foo")
         val bar = ValueKey("bar")
-        val lastValues = mutableMapOf<ValueKey, MutableMap<SceneKey, Float>>()
+        val lastValues = mutableMapOf<ValueKey, MutableMap<ContentKey, Float>>()
 
         @Composable
-        fun SceneScope.animateFloat(value: Float, key: ValueKey) {
-            val animatedValue = animateSceneFloatAsState(value, key)
+        fun ContentScope.animateFloat(value: Float, key: ValueKey) {
+            val animatedValue = animateContentFloatAsState(value, key)
             LaunchedEffect(animatedValue) {
                 snapshotFlow { animatedValue.value }
-                    .collect { lastValues.getOrPut(key) { mutableMapOf() }[sceneKey] = it }
+                    .collect { lastValues.getOrPut(key) { mutableMapOf() }[contentKey] = it }
             }
         }
 
@@ -458,13 +458,13 @@ class AnimatedSharedAsStateTest {
             }
 
         val key = ValueKey("foo")
-        val lastValues = mutableMapOf<SceneKey, Float>()
+        val lastValues = mutableMapOf<ContentKey, Float>()
 
         @Composable
-        fun SceneScope.animateFloat(value: Float, key: ValueKey) {
-            val animatedValue = animateSceneFloatAsState(value, key)
+        fun ContentScope.animateFloat(value: Float, key: ValueKey) {
+            val animatedValue = animateContentFloatAsState(value, key)
             LaunchedEffect(animatedValue) {
-                snapshotFlow { animatedValue.value }.collect { lastValues[sceneKey] = it }
+                snapshotFlow { animatedValue.value }.collect { lastValues[contentKey] = it }
             }
         }
 

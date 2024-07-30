@@ -108,23 +108,6 @@ final class HalVibration extends Vibration {
     }
 
     /**
-     * Resolves the default vibration amplitude of {@link #getEffectToPlay()} and each fallback.
-     *
-     * @param defaultAmplitude An integer in [1,255] representing the device default amplitude to
-     *                        replace the {@link VibrationEffect#DEFAULT_AMPLITUDE}.
-     */
-    public void resolveEffects(int defaultAmplitude) {
-        CombinedVibration newEffect =
-                mEffectToPlay.transform(VibrationEffect::resolve, defaultAmplitude);
-        if (!Objects.equals(mEffectToPlay, newEffect)) {
-            mEffectToPlay = newEffect;
-        }
-        for (int i = 0; i < mFallbacks.size(); i++) {
-            mFallbacks.setValueAt(i, mFallbacks.valueAt(i).resolve(defaultAmplitude));
-        }
-    }
-
-    /**
      * Scales the {@link #getEffectToPlay()} and each fallback effect based on the vibration usage.
      */
     public void scaleEffects(VibrationScaler scaler) {
