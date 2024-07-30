@@ -114,7 +114,7 @@
     <string name="screenrecord_continue" msgid="4055347133700593164">"Начать"</string>
     <string name="screenrecord_ongoing_screen_only" msgid="4459670242451527727">"Идет запись видео с экрана"</string>
     <string name="screenrecord_ongoing_screen_and_audio" msgid="5351133763125180920">"Идет запись видео с экрана и звука"</string>
-    <string name="screenrecord_taps_label" msgid="1595690528298857649">"Показывать прикосновения к экрану"</string>
+    <string name="screenrecord_taps_label" msgid="1595690528298857649">"Показывать прикосновения"</string>
     <string name="screenrecord_stop_label" msgid="72699670052087989">"Остановить"</string>
     <string name="screenrecord_share_label" msgid="5025590804030086930">"Поделиться"</string>
     <string name="screenrecord_save_title" msgid="1886652605520893850">"Видео с экрана сохранено"</string>
@@ -342,7 +342,7 @@
     <string name="quick_settings_screen_record_label" msgid="8650355346742003694">"Запись видео с экрана"</string>
     <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"Начать"</string>
     <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"Остановить"</string>
-    <string name="qs_record_issue_label" msgid="8166290137285529059">"Запись неисправности"</string>
+    <string name="qs_record_issue_label" msgid="8166290137285529059">"Запись неполадки"</string>
     <string name="qs_record_issue_start" msgid="2979831312582567056">"Начать"</string>
     <string name="qs_record_issue_stop" msgid="3531747965741982657">"Остановить"</string>
     <string name="qs_record_issue_dropdown_header" msgid="5995983175678658329">"С чем связана проблема, с которой вы столкнулись?"</string>
@@ -582,15 +582,15 @@
     <string name="volume_stream_content_description_mute" msgid="4079046784917920984">"%1$s. Нажмите, чтобы выключить звук. Специальные возможности могут прекратить работу."</string>
     <string name="volume_stream_content_description_vibrate_a11y" msgid="2742330052979397471">"%1$s. Нажмите, чтобы включить вибрацию."</string>
     <string name="volume_stream_content_description_mute_a11y" msgid="5743548478357238156">"%1$s. Нажмите, чтобы выключить звук."</string>
-    <string name="volume_panel_noise_control_title" msgid="7413949943872304474">"Контроль уровня шума"</string>
+    <string name="volume_panel_noise_control_title" msgid="7413949943872304474">"Контроль шума"</string>
     <string name="volume_ringer_change" msgid="3574969197796055532">"Нажмите, чтобы изменить режим звонка."</string>
     <string name="volume_ringer_hint_mute" msgid="4263821214125126614">"отключить звук"</string>
     <string name="volume_ringer_hint_unmute" msgid="6119086890306456976">"включить звук"</string>
     <string name="volume_ringer_hint_vibrate" msgid="6211609047099337509">"включить вибрацию"</string>
     <string name="volume_dialog_title" msgid="6502703403483577940">"%s: регулировка громкости"</string>
     <string name="volume_dialog_ringer_guidance_ring" msgid="9143194270463146858">"Для звонков и уведомлений включен звук (уровень громкости: <xliff:g id="VOLUME_LEVEL">%1$s</xliff:g>)"</string>
-    <string name="media_output_label_title" msgid="872824698593182505">"<xliff:g id="LABEL">%s</xliff:g> – запущено здесь:"</string>
-    <string name="media_output_title_without_playing" msgid="3825663683169305013">"Проигрывание аудио:"</string>
+    <string name="media_output_label_title" msgid="872824698593182505">"<xliff:g id="LABEL">%s</xliff:g> – играет здесь:"</string>
+    <string name="media_output_title_without_playing" msgid="3825663683169305013">"Аудио будет звучать здесь"</string>
     <string name="system_ui_tuner" msgid="1471348823289954729">"System UI Tuner"</string>
     <string name="status_bar" msgid="4357390266055077437">"Строка состояния"</string>
     <string name="demo_mode" msgid="263484519766901593">"Интерфейс системы: деморежим"</string>
@@ -646,7 +646,7 @@
     <string name="notification_channel_summary_automatic_silenced" msgid="7403004439649872047">"&lt;b&gt;Статус:&lt;/b&gt; понижено до уровня \"Без звука\""</string>
     <string name="notification_channel_summary_automatic_promoted" msgid="1301710305149590426">"&lt;b&gt;Статус:&lt;/b&gt; уровень важности повышен"</string>
     <string name="notification_channel_summary_automatic_demoted" msgid="1831303964660807700">"&lt;b&gt;Статус:&lt;/b&gt; уровень важности понижен"</string>
-    <string name="notification_channel_summary_priority_baseline" msgid="46674690072551234">"Появляется в верхней части уведомлений о сообщениях, а также в качестве фото профиля на заблокированном экране"</string>
+    <string name="notification_channel_summary_priority_baseline" msgid="46674690072551234">"Вверху списка уведомлений о разговорах и в виде фото профиля на заблокированном экране"</string>
     <string name="notification_channel_summary_priority_bubble" msgid="1275413109619074576">"Появляется в верхней части уведомлений о сообщениях, в виде всплывающего чата, а также в качестве фото профиля на заблокированном экране."</string>
     <string name="notification_channel_summary_priority_dnd" msgid="6665395023264154361">"Появляется в верхней части уведомлений о сообщениях, а также в виде фото профиля на заблокированном экране, прерывает режим \"Не беспокоить\"."</string>
     <string name="notification_channel_summary_priority_all" msgid="7151752959650048285">"Появляется в верхней части уведомлений о сообщениях, в виде всплывающего чата, а также в качестве фото профиля на заблокированном экране, прерывает режим \"Не беспокоить\"."</string>
