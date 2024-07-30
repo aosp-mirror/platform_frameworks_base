@@ -468,6 +468,29 @@ class DesktopModeTaskRepositoryTest : ShellTestCase() {
     }
 
     @Test
+    fun addOrMoveFreeformTaskToTop_taskIsMinimized_unminimizesTask() {
+        repo.addOrMoveFreeformTaskToTop(DEFAULT_DISPLAY, 5)
+        repo.addOrMoveFreeformTaskToTop(DEFAULT_DISPLAY, 6)
+        repo.addOrMoveFreeformTaskToTop(DEFAULT_DISPLAY, 7)
+        repo.minimizeTask(displayId = 0, taskId = 6)
+
+        val tasks = repo.getFreeformTasksInZOrder(DEFAULT_DISPLAY)
+        assertThat(tasks).containsExactly(7, 6, 5).inOrder()
+        assertThat(repo.isMinimizedTask(taskId = 6)).isTrue()
+    }
+
+    @Test
+    fun addOrMoveFreeformTaskToTop_taskIsUnminimized_noop() {
+        repo.addOrMoveFreeformTaskToTop(DEFAULT_DISPLAY, 5)
+        repo.addOrMoveFreeformTaskToTop(DEFAULT_DISPLAY, 6)
+        repo.addOrMoveFreeformTaskToTop(DEFAULT_DISPLAY, 7)
+
+        val tasks = repo.getFreeformTasksInZOrder(DEFAULT_DISPLAY)
+        assertThat(tasks).containsExactly(7, 6, 5).inOrder()
+        assertThat(repo.isMinimizedTask(taskId = 6)).isFalse()
+    }
+
+    @Test
     fun removeFreeformTask_invalidDisplay_removesTaskFromFreeformTasks() {
         repo.addOrMoveFreeformTaskToTop(DEFAULT_DISPLAY, taskId = 1)
 
