@@ -668,7 +668,7 @@
     <string name="face_recalibrate_notification_name" msgid="7311163114750748686">"Ansigtsoplåsning"</string>
     <string name="face_recalibrate_notification_title" msgid="2524791952735579082">"Der er et problem med Ansigtsoplåsning"</string>
     <string name="face_recalibrate_notification_content" msgid="3064513770251355594">"Tryk for at slette din ansigtsmodel, og tilføj derefter dit ansigt igen"</string>
-    <string name="face_setup_notification_title" msgid="8843461561970741790">"Konfigurer ansigtsoplåsning"</string>
+    <string name="face_setup_notification_title" msgid="8843461561970741790">"Konfigurer ansigts­oplåsning"</string>
     <string name="face_setup_notification_content" msgid="5463999831057751676">"Lås din telefon op ved at kigge på den"</string>
     <string name="face_sensor_privacy_enabled" msgid="7407126963510598508">"Hvis du vil bruge ansigtsoplåsning, skal du aktivere "<b>"Kameraadgang"</b>" under Indstillinger &gt; Privatliv"</string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"Konfigurer flere måder at låse op på"</string>
