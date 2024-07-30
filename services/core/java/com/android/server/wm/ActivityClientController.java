@@ -68,7 +68,6 @@ import android.app.ActivityManager;
 import android.app.ActivityTaskManager;
 import android.app.FullscreenRequestHandler;
 import android.app.IActivityClientController;
-import android.app.ICompatCameraControlCallback;
 import android.app.IRequestFinishCallback;
 import android.app.PictureInPictureParams;
 import android.app.PictureInPictureUiState;
@@ -1006,22 +1005,6 @@ class ActivityClientController extends IActivityClientController.Stub {
             ActivityRecord.splashScreenAttachedLocked(token);
         }
         Binder.restoreCallingIdentity(origId);
-    }
-
-    @Override
-    public void requestCompatCameraControl(IBinder token, boolean showControl,
-            boolean transformationApplied, ICompatCameraControlCallback callback) {
-        final long origId = Binder.clearCallingIdentity();
-        try {
-            synchronized (mGlobalLock) {
-                final ActivityRecord r = ActivityRecord.isInRootTaskLocked(token);
-                if (r != null) {
-                    r.updateCameraCompatState(showControl, transformationApplied, callback);
-                }
-            }
-        } finally {
-            Binder.restoreCallingIdentity(origId);
-        }
     }
 
     /**
