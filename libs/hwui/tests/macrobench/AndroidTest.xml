@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Copyright (C) 2017 The Android Open Source Project
+<!-- Copyright 2024 The Android Open Source Project
 
      Licensed under the Apache License, Version 2.0 (the "License");
      you may not use this file except in compliance with the License.
@@ -13,24 +13,13 @@
      See the License for the specific language governing permissions and
      limitations under the License.
 -->
-<configuration description="Config for hwuimicro">
+<configuration description="Config for hwuimacro">
     <target_preparer class="com.android.tradefed.targetprep.PushFilePreparer">
         <option name="cleanup" value="true" />
-        <option name="push" value="hwui_unit_tests->/data/local/tmp/nativetest/hwui_unit_tests" />
-        <option name="push" value="hwuimicro->/data/local/tmp/benchmarktest/hwuimicro" />
         <option name="push" value="hwuimacro->/data/local/tmp/benchmarktest/hwuimacro" />
     </target_preparer>
     <option name="test-suite-tag" value="apct" />
     <option name="not-shardable" value="true" />
-    <test class="com.android.tradefed.testtype.GTest" >
-        <option name="native-test-device-path" value="/data/local/tmp/nativetest" />
-        <option name="module-name" value="hwui_unit_tests" />
-    </test>
-    <test class="com.android.tradefed.testtype.GoogleBenchmarkTest" >
-        <option name="native-benchmark-device-path" value="/data/local/tmp/benchmarktest" />
-        <option name="benchmark-module-name" value="hwuimicro" />
-        <option name="file-exclusion-filter-regex" value=".*\.config$" />
-    </test>
     <test class="com.android.tradefed.testtype.GoogleBenchmarkTest" >
         <option name="native-benchmark-device-path" value="/data/local/tmp/benchmarktest" />
         <option name="benchmark-module-name" value="hwuimacro" />

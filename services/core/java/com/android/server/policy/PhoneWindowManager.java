@@ -1158,8 +1158,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     break;
                 case SHORT_PRESS_POWER_CLOSE_IME_OR_GO_HOME: {
                     if (mDismissImeOnBackKeyPressed) {
-                        // TODO(b/308479256): Check if hiding "all" IMEs is OK or not.
-                        InputMethodManagerInternal.get().hideAllInputMethods(
+                        InputMethodManagerInternal.get().hideInputMethod(
                                 SoftInputShowHideReason.HIDE_POWER_BUTTON_GO_HOME, displayId);
                     } else {
                         shortPressPowerGoHome();

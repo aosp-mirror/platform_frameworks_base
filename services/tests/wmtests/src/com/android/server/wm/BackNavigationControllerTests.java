@@ -72,7 +72,6 @@ import android.window.TaskSnapshot;
 import android.window.WindowOnBackInvokedDispatcher;
 
 import com.android.server.LocalServices;
-import com.android.window.flags.Flags;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -672,7 +671,6 @@ public class BackNavigationControllerTests extends WindowTestsBase {
 
     @Test
     public void testBackOnMostRecentWindowInActivityEmbedding() {
-        mSetFlagsRule.enableFlags(Flags.FLAG_EMBEDDED_ACTIVITY_BACK_NAV_FLAG);
         final Task task = createTask(mDefaultDisplay);
         final TaskFragmentOrganizer organizer = new TaskFragmentOrganizer(Runnable::run);
         final TaskFragment primaryTf = createTaskFragmentWithEmbeddedActivity(task, organizer);

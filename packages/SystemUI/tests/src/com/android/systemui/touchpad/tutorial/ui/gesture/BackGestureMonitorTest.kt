@@ -28,6 +28,9 @@ import android.view.MotionEvent.CLASSIFICATION_TWO_FINGER_SWIPE
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.touchpad.tutorial.ui.gesture.GestureState.FINISHED
+import com.android.systemui.touchpad.tutorial.ui.gesture.GestureState.IN_PROGRESS
+import com.android.systemui.touchpad.tutorial.ui.gesture.GestureState.NOT_STARTED
 import com.google.common.truth.Truth.assertThat
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -36,16 +39,19 @@ import org.junit.runner.RunWith
 @RunWith(AndroidJUnit4::class)
 class BackGestureMonitorTest : SysuiTestCase() {
 
-    private var gestureDoneWasCalled = false
-    private val gestureDoneCallback = { gestureDoneWasCalled = true }
-    private val gestureMonitor = BackGestureMonitor(SWIPE_DISTANCE.toInt(), gestureDoneCallback)
+    private var gestureState = NOT_STARTED
+    private val gestureMonitor =
+        BackGestureMonitor(
+            gestureDistanceThresholdPx = SWIPE_DISTANCE.toInt(),
+            gestureStateChangedCallback = { gestureState = it }
+        )
 
     companion object {
         const val SWIPE_DISTANCE = 100f
     }
 
     @Test
-    fun triggersGestureDoneForThreeFingerGestureRight() {
+    fun triggersGestureFinishedForThreeFingerGestureRight() {
         val events =
             listOf(
                 threeFingerEvent(ACTION_DOWN, x = 0f, y = 0f),
@@ -59,11 +65,11 @@ class BackGestureMonitorTest : SysuiTestCase() {
 
         events.forEach { gestureMonitor.processTouchpadEvent(it) }
 
-        assertThat(gestureDoneWasCalled).isTrue()
+        assertThat(gestureState).isEqualTo(FINISHED)
     }
 
     @Test
-    fun triggersGestureDoneForThreeFingerGestureLeft() {
+    fun triggersGestureFinishedForThreeFingerGestureLeft() {
         val events =
             listOf(
                 threeFingerEvent(ACTION_DOWN, x = SWIPE_DISTANCE, y = 0f),
@@ -77,7 +83,21 @@ class BackGestureMonitorTest : SysuiTestCase() {
 
         events.forEach { gestureMonitor.processTouchpadEvent(it) }
 
-        assertThat(gestureDoneWasCalled).isTrue()
+        assertThat(gestureState).isEqualTo(FINISHED)
+    }
+
+    @Test
+    fun triggersGestureProgressForThreeFingerGestureStarted() {
+        val events =
+            listOf(
+                threeFingerEvent(ACTION_DOWN, x = SWIPE_DISTANCE, y = 0f),
+                threeFingerEvent(ACTION_POINTER_DOWN, x = SWIPE_DISTANCE, y = 0f),
+                threeFingerEvent(ACTION_POINTER_DOWN, x = SWIPE_DISTANCE, y = 0f),
+            )
+
+        events.forEach { gestureMonitor.processTouchpadEvent(it) }
+
+        assertThat(gestureState).isEqualTo(IN_PROGRESS)
     }
 
     private fun threeFingerEvent(action: Int, x: Float, y: Float): MotionEvent {
@@ -91,7 +111,7 @@ class BackGestureMonitorTest : SysuiTestCase() {
     }
 
     @Test
-    fun doesntTriggerGestureDone_onThreeFingersSwipeUp() {
+    fun doesntTriggerGestureFinished_onThreeFingersSwipeUp() {
         val events =
             listOf(
                 threeFingerEvent(ACTION_DOWN, x = 0f, y = 0f),
@@ -105,11 +125,11 @@ class BackGestureMonitorTest : SysuiTestCase() {
 
         events.forEach { gestureMonitor.processTouchpadEvent(it) }
 
-        assertThat(gestureDoneWasCalled).isFalse()
+        assertThat(gestureState).isEqualTo(NOT_STARTED)
     }
 
     @Test
-    fun doesntTriggerGestureDone_onTwoFingersSwipe() {
+    fun doesntTriggerGestureFinished_onTwoFingersSwipe() {
         fun twoFingerEvent(action: Int, x: Float, y: Float) =
             motionEvent(
                 action = action,
@@ -127,11 +147,11 @@ class BackGestureMonitorTest : SysuiTestCase() {
 
         events.forEach { gestureMonitor.processTouchpadEvent(it) }
 
-        assertThat(gestureDoneWasCalled).isFalse()
+        assertThat(gestureState).isEqualTo(NOT_STARTED)
     }
 
     @Test
-    fun doesntTriggerGestureDone_onFourFingersSwipe() {
+    fun doesntTriggerGestureFinished_onFourFingersSwipe() {
         fun fourFingerEvent(action: Int, x: Float, y: Float) =
             motionEvent(
                 action = action,
@@ -155,6 +175,6 @@ class BackGestureMonitorTest : SysuiTestCase() {
 
         events.forEach { gestureMonitor.processTouchpadEvent(it) }
 
-        assertThat(gestureDoneWasCalled).isFalse()
+        assertThat(gestureState).isEqualTo(NOT_STARTED)
     }
 }

@@ -125,6 +125,16 @@ flag {
 }
 
 flag {
+  name: "insert_mode_crash_update_layout_span"
+  namespace: "text"
+  description: "Fix insert mode crash when the text has UpdateLayout span attached."
+  bug: "355137282"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}
+
+flag {
   name: "icu_bidi_migration"
   namespace: "text"
   description: "A flag for replacing AndroidBidi with android.icu.text.Bidi."

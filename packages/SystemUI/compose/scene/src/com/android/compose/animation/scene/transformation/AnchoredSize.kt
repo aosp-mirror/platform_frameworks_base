@@ -17,6 +17,7 @@
 package com.android.compose.animation.scene.transformation
 
 import androidx.compose.ui.unit.IntSize
+import com.android.compose.animation.scene.ContentKey
 import com.android.compose.animation.scene.Element
 import com.android.compose.animation.scene.ElementKey
 import com.android.compose.animation.scene.ElementMatcher
@@ -33,15 +34,15 @@ internal class AnchoredSize(
 ) : PropertyTransformation<IntSize> {
     override fun transform(
         layoutImpl: SceneTransitionLayoutImpl,
-        scene: SceneKey,
+        content: ContentKey,
         element: Element,
-        sceneState: Element.SceneState,
+        sceneState: Element.State,
         transition: TransitionState.Transition,
         value: IntSize,
     ): IntSize {
         fun anchorSizeIn(scene: SceneKey): IntSize {
             val size =
-                layoutImpl.elements[anchor]?.sceneStates?.get(scene)?.targetSize?.takeIf {
+                layoutImpl.elements[anchor]?.stateByContent?.get(scene)?.targetSize?.takeIf {
                     it != Element.SizeUnspecified
                 }
                     ?: throwMissingAnchorException(
@@ -59,7 +60,7 @@ internal class AnchoredSize(
         // This simple implementation assumes that the size of [element] is the same as the size of
         // the [anchor] in [scene], so simply transform to the size of the anchor in the other
         // scene.
-        return if (scene == transition.fromScene) {
+        return if (content == transition.fromScene) {
             anchorSizeIn(transition.toScene)
         } else {
             anchorSizeIn(transition.fromScene)

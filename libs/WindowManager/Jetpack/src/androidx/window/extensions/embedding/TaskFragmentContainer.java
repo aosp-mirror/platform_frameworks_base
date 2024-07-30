@@ -340,6 +340,13 @@ class TaskFragmentContainer {
         return mInfo != null && mInfo.isVisible();
     }
 
+    /**
+     * See {@link TaskFragmentInfo#isTopNonFinishingChild()}
+     */
+    boolean isTopNonFinishingChild() {
+        return mInfo != null && mInfo.isTopNonFinishingChild();
+    }
+
     /** Whether the TaskFragment is in an intermediate state waiting for the server update.*/
     boolean isInIntermediateState() {
         if (mInfo == null) {

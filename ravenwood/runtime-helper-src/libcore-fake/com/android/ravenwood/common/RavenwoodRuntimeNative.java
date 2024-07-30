@@ -48,6 +48,8 @@ public class RavenwoodRuntimeNative {
 
     public static native StructStat stat(String path) throws ErrnoException;
 
+    private static native void nClose(int fd) throws ErrnoException;
+
     public static long lseek(FileDescriptor fd, long offset, int whence) throws ErrnoException {
         return nLseek(JvmWorkaround.getInstance().getFdInt(fd), offset, whence);
     }
@@ -82,5 +84,12 @@ public class RavenwoodRuntimeNative {
         var fdInt = JvmWorkaround.getInstance().getFdInt(fd);
 
         return nFstat(fdInt);
+    }
+
+    /** See close(2) */
+    public static void close(FileDescriptor fd) throws ErrnoException {
+        var fdInt = JvmWorkaround.getInstance().getFdInt(fd);
+
+        nClose(fdInt);
     }
 }

@@ -1890,8 +1890,7 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
         enforceStatusBarService();
         final long token = Binder.clearCallingIdentity();
         try {
-            // TODO(b/308479256): Check if hiding "all" IMEs is OK or not.
-            InputMethodManagerInternal.get().hideAllInputMethods(
+            InputMethodManagerInternal.get().hideInputMethod(
                     SoftInputShowHideReason.HIDE_BUBBLES, displayId);
         } finally {
             Binder.restoreCallingIdentity(token);

@@ -1399,6 +1399,10 @@
          Settings.System.RING_VIBRATION_INTENSITY more details on the constant values and
          meanings. -->
     <integer name="config_defaultRingVibrationIntensity">2</integer>
+    <!-- The default intensity level for keyboard vibrations. Note that this will only be applied
+         on devices where config_keyboardVibrationSettingsSupported is true, otherwise the
+         keyboard vibration will follow config_defaultHapticFeedbackIntensity -->
+    <integer name="config_defaultKeyboardVibrationIntensity">2</integer>
 
     <!-- Whether to use the strict phone number matcher by default. -->
     <bool name="config_use_strict_phone_number_comparation">false</bool>

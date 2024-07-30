@@ -167,6 +167,11 @@ static jobject Linux_stat(JNIEnv* env, jobject, jstring javaPath) {
     return doStat(env, javaPath, false);
 }
 
+static void nClose(JNIEnv* env, jclass, jint fd) {
+    // Don't use TEMP_FAILURE_RETRY() on close(): https://lkml.org/lkml/2005/9/10/129
+    throwIfMinusOne(env, "close", close(fd));
+}
+
 // ---- Registration ----
 
 static const JNINativeMethod sMethods[] =
@@ -179,6 +184,7 @@ static const JNINativeMethod sMethods[] =
     { "nFstat", "(I)Landroid/system/StructStat;", (void*)nFstat },
     { "lstat", "(Ljava/lang/String;)Landroid/system/StructStat;", (void*)Linux_lstat },
     { "stat", "(Ljava/lang/String;)Landroid/system/StructStat;", (void*)Linux_stat },
+    { "nClose", "(I)V", (void*)nClose },
 };
 
 extern "C" jint JNI_OnLoad(JavaVM* vm, void* /* reserved */)

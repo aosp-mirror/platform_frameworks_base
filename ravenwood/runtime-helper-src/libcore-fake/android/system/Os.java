@@ -53,4 +53,9 @@ public final class Os {
     public static StructStat stat(String path) throws ErrnoException {
         return RavenwoodRuntimeNative.stat(path);
     }
+
+    /** Ravenwood version of the OS API. */
+    public static void close(FileDescriptor fd) throws ErrnoException {
+        RavenwoodRuntimeNative.close(fd);
+    }
 }

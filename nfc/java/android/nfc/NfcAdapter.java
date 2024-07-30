@@ -1166,10 +1166,11 @@ public final class NfcAdapter {
 
 
     /**
-     * Returns whether the device supports observer mode or not. When observe
-     * mode is enabled, the NFC hardware will listen for NFC readers, but not
-     * respond to them. When observe mode is disabled, the NFC hardware will
-     * resoond to the reader and proceed with the transaction.
+     * Returns whether the device supports observe mode or not. When observe mode is enabled, the
+     * NFC hardware will listen to NFC readers, but not respond to them. While enabled, observed
+     * polling frames will be sent to the APDU service (see {@link #setObserveModeEnabled(boolean)}.
+     * When observe mode is disabled (or if it's not supported), the NFC hardware will automatically
+     * respond to the reader and proceed with the transaction.
      * @return true if the mode is supported, false otherwise.
      */
     @FlaggedApi(Flags.FLAG_NFC_OBSERVE_MODE)
@@ -1193,9 +1194,10 @@ public final class NfcAdapter {
      * and simply observe and notify the APDU service of polling loop frames. See
      * {@link #isObserveModeSupported()} for a description of observe mode. Only the package of the
      * currently preferred service (the service set as preferred by the current foreground
-     * application via {@link CardEmulation#setPreferredService(Activity, ComponentName)} or the
-     * current Default Wallet Role Holder {@link android.app.role.RoleManager#ROLE_WALLET}),
-     * otherwise a call to this method will fail and return false.
+     * application via {@link android.nfc.cardemulation.CardEmulation#setPreferredService(Activity,
+     * android.content.ComponentName)} or the current Default Wallet Role Holder
+     * {@link android.app.role.RoleManager#ROLE_WALLET}), otherwise a call to this method will fail
+     * and return false.
      *
      * @param enabled false disables observe mode to allow the transaction to proceed while true
      *                enables observe mode and does not allow transactions to proceed.

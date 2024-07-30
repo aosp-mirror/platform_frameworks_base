@@ -1171,12 +1171,14 @@ public class InputMethodService extends AbstractInputMethodService {
             }
             switch (motionEvent.getAction()) {
                 case MotionEvent.ACTION_DOWN:
+                case MotionEvent.ACTION_HOVER_ENTER:
                     // Consume and ignore all touches while stylus is down to prevent
                     // accidental touches from going to the app while writing.
                     mPrivOps.setHandwritingSurfaceNotTouchable(false);
                     break;
                 case MotionEvent.ACTION_UP:
                 case MotionEvent.ACTION_CANCEL:
+                case MotionEvent.ACTION_HOVER_EXIT:
                     // Go back to only consuming stylus events so that the user
                     // can continue to interact with the app using touch
                     // when the stylus is not down.

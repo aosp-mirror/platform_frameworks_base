@@ -2292,7 +2292,7 @@ static jint nativeAudioMixToJavaAudioMixingRule(JNIEnv *env, const AudioMix &nAu
                                  criteria.mValue.mUsage);
                 jMixMatchCriterion = env->NewObject(gAudioMixMatchCriterionClass,
                                                     gAudioMixMatchCriterionAttrCstor,
-                                                    jMixMatchCriterion, criteria.mRule);
+                                                    jAudioAttributes, criteria.mRule);
                 break;
             case RULE_MATCH_ATTRIBUTE_CAPTURE_PRESET:
                 jAudioAttributes = env->NewObject(gAudioAttributesClass, gAudioAttributesCstor);
@@ -2300,7 +2300,7 @@ static jint nativeAudioMixToJavaAudioMixingRule(JNIEnv *env, const AudioMix &nAu
                                  criteria.mValue.mSource);
                 jMixMatchCriterion = env->NewObject(gAudioMixMatchCriterionClass,
                                                     gAudioMixMatchCriterionAttrCstor,
-                                                    jMixMatchCriterion, criteria.mRule);
+                                                    jAudioAttributes, criteria.mRule);
                 break;
         }
         env->CallBooleanMethod(jAudioMixMatchCriterionList, gArrayListMethods.add,

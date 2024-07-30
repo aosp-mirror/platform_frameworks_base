@@ -129,7 +129,7 @@ class SceneTransitionLayoutTest {
     }
 
     @Composable
-    private fun SceneScope.SharedFoo(size: Dp, childOffset: Dp, modifier: Modifier = Modifier) {
+    private fun ContentScope.SharedFoo(size: Dp, childOffset: Dp, modifier: Modifier = Modifier) {
         Element(TestElements.Foo, modifier.size(size).background(Color.Red)) {
             // Offset the single child of Foo by some animated shared offset.
             val offset by animateElementDpAsState(childOffset, TestValues.Value1)
@@ -479,14 +479,14 @@ class SceneTransitionLayoutTest {
     fun sceneKeyInScope() {
         val state = rule.runOnUiThread { MutableSceneTransitionLayoutState(SceneA) }
 
-        var keyInA: SceneKey? = null
-        var keyInB: SceneKey? = null
-        var keyInC: SceneKey? = null
+        var keyInA: ContentKey? = null
+        var keyInB: ContentKey? = null
+        var keyInC: ContentKey? = null
         rule.setContent {
             SceneTransitionLayout(state) {
-                scene(SceneA) { keyInA = sceneKey }
-                scene(SceneB) { keyInB = sceneKey }
-                scene(SceneC) { keyInC = sceneKey }
+                scene(SceneA) { keyInA = contentKey }
+                scene(SceneB) { keyInB = contentKey }
+                scene(SceneC) { keyInC = contentKey }
             }
         }
 
