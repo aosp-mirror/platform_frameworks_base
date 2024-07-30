@@ -122,6 +122,7 @@ constructor(
                     startTime = 1100.milliseconds,
                     duration = 200.milliseconds,
                     onStep = { it },
+                    onCancel = { 1f },
                     onFinish = { 1f },
                 )
             } else {
