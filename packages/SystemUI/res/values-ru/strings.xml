@@ -111,7 +111,7 @@
     <string name="screenrecord_continue" msgid="4055347133700593164">"Начать"</string>
     <string name="screenrecord_ongoing_screen_only" msgid="4459670242451527727">"Идет запись видео с экрана"</string>
     <string name="screenrecord_ongoing_screen_and_audio" msgid="5351133763125180920">"Идет запись видео с экрана и звука"</string>
-    <string name="screenrecord_taps_label" msgid="1595690528298857649">"Показывать прикосновения к экрану"</string>
+    <string name="screenrecord_taps_label" msgid="1595690528298857649">"Показывать прикосновения"</string>
     <string name="screenrecord_stop_label" msgid="72699670052087989">"Остановить"</string>
     <string name="screenrecord_share_label" msgid="5025590804030086930">"Поделиться"</string>
     <string name="screenrecord_save_title" msgid="1886652605520893850">"Видео с экрана сохранено"</string>
@@ -574,7 +574,7 @@
     <string name="notification_channel_summary_automatic_silenced" msgid="7403004439649872047">"&lt;b&gt;Статус:&lt;/b&gt; понижено до уровня \"Без звука\""</string>
     <string name="notification_channel_summary_automatic_promoted" msgid="1301710305149590426">"&lt;b&gt;Статус:&lt;/b&gt; уровень важности повышен"</string>
     <string name="notification_channel_summary_automatic_demoted" msgid="1831303964660807700">"&lt;b&gt;Статус:&lt;/b&gt; уровень важности понижен"</string>
-    <string name="notification_channel_summary_priority_baseline" msgid="46674690072551234">"Появляется в верхней части уведомлений о сообщениях, а также в качестве фото профиля на заблокированном экране"</string>
+    <string name="notification_channel_summary_priority_baseline" msgid="46674690072551234">"Вверху списка уведомлений о разговорах и в виде фото профиля на заблокированном экране"</string>
     <string name="notification_channel_summary_priority_bubble" msgid="1275413109619074576">"Появляется в верхней части уведомлений о сообщениях, в виде всплывающего чата, а также в качестве фото профиля на заблокированном экране."</string>
     <string name="notification_channel_summary_priority_dnd" msgid="6665395023264154361">"Появляется в верхней части уведомлений о сообщениях, а также в виде фото профиля на заблокированном экране, прерывает режим \"Не беспокоить\"."</string>
     <string name="notification_channel_summary_priority_all" msgid="7151752959650048285">"Появляется в верхней части уведомлений о сообщениях, в виде всплывающего чата, а также в качестве фото профиля на заблокированном экране, прерывает режим \"Не беспокоить\"."</string>
