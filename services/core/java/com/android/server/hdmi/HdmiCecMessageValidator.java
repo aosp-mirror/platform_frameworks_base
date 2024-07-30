@@ -770,6 +770,7 @@ public class HdmiCecMessageValidator {
      * @return true if the UI Broadcast type is valid
      */
     private static boolean isValidUiBroadcastType(int value) {
+        value = value & 0xFF;
         return ((value == 0x00)
                 || (value == 0x01)
                 || (value == 0x10)
