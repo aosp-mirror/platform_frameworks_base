@@ -107,7 +107,7 @@
     <string name="minimize_button_text" msgid="271592547935841753">"Thu nhỏ"</string>
     <string name="close_button_text" msgid="2913281996024033299">"Đóng"</string>
     <string name="back_button_text" msgid="1469718707134137085">"Quay lại"</string>
-    <string name="handle_text" msgid="1766582106752184456">"Xử lý"</string>
+    <string name="handle_text" msgid="4419667835599523257">"Ô điều khiển ứng dụng"</string>
     <string name="app_icon_text" msgid="2823268023931811747">"Biểu tượng ứng dụng"</string>
     <string name="fullscreen_text" msgid="1162316685217676079">"Toàn màn hình"</string>
     <string name="desktop_text" msgid="1077633567027630454">"Chế độ máy tính"</string>
