@@ -30,6 +30,7 @@ import static androidx.window.extensions.embedding.EmbeddingTestUtils.createSpli
 import static androidx.window.extensions.embedding.EmbeddingTestUtils.createSplitPlaceholderRuleBuilder;
 import static androidx.window.extensions.embedding.EmbeddingTestUtils.createSplitRule;
 import static androidx.window.extensions.embedding.EmbeddingTestUtils.createTfContainer;
+import static androidx.window.extensions.embedding.SplitController.KEY_OVERLAY_ASSOCIATE_WITH_LAUNCHING_ACTIVITY;
 import static androidx.window.extensions.embedding.SplitPresenter.CONTAINER_POSITION_BOTTOM;
 import static androidx.window.extensions.embedding.SplitPresenter.CONTAINER_POSITION_LEFT;
 import static androidx.window.extensions.embedding.SplitPresenter.CONTAINER_POSITION_RIGHT;
@@ -94,6 +95,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
 
@@ -267,7 +269,7 @@ public class OverlayPresentationTest {
     }
 
     @Test
-    public void testCreateOrUpdateOverlay_visibleOverlaySameTagInTask_dismissOverlay() {
+    public void testCreateOrUpdateOverlay_visibleOverlayInTask_dismissOverlay() {
         createExistingOverlayContainers();
 
         final TaskFragmentContainer overlayContainer =
@@ -292,26 +294,6 @@ public class OverlayPresentationTest {
                 + "task")
                 .that(mSplitController.getAllNonFinishingOverlayContainers())
                 .containsExactly(mOverlayContainer2, overlayContainer);
-    }
-
-    @Test
-    public void testCreateOrUpdateOverlay_sameTagTaskAndActivity_updateOverlay() {
-        createExistingOverlayContainers();
-
-        final Rect bounds = new Rect(0, 0, 100, 100);
-        mSplitController.setActivityStackAttributesCalculator(params ->
-                new ActivityStackAttributes.Builder().setRelativeBounds(bounds).build());
-        final TaskFragmentContainer overlayContainer = createOrUpdateOverlayTaskFragmentIfNeeded(
-                mOverlayContainer1.getOverlayTag());
-
-        assertWithMessage("overlayContainer1 must be updated since the new overlay container"
-                + " is launched with the same tag and task")
-                .that(mSplitController.getAllNonFinishingOverlayContainers())
-                .containsExactly(mOverlayContainer1, mOverlayContainer2);
-
-        assertThat(overlayContainer).isEqualTo(mOverlayContainer1);
-        verify(mSplitPresenter).resizeTaskFragment(eq(mTransaction),
-                eq(mOverlayContainer1.getTaskFragmentToken()), eq(bounds));
     }
 
     @Test
@@ -359,6 +341,43 @@ public class OverlayPresentationTest {
         assertWithMessage("overlayContainer1 and overlayContainer2 must be dismissed")
                 .that(mSplitController.getAllNonFinishingOverlayContainers())
                 .containsExactly(overlayContainer);
+    }
+
+    @Test
+    public void testCreateOrUpdateAlwaysOnTopOverlay_dismissMultipleOverlaysInTask() {
+        createExistingOverlayContainers();
+        // Create another overlay in task.
+        final TaskFragmentContainer overlayContainer3 =
+                createTestOverlayContainer(TASK_ID, "test3");
+        assertThat(mSplitController.getAllNonFinishingOverlayContainers())
+                .containsExactly(mOverlayContainer1, mOverlayContainer2, overlayContainer3);
+
+        final TaskFragmentContainer overlayContainer =
+                createOrUpdateAlwaysOnTopOverlay("test4");
+
+        assertWithMessage("overlayContainer1 and overlayContainer3 must be dismissed")
+                .that(mSplitController.getAllNonFinishingOverlayContainers())
+                .containsExactly(mOverlayContainer2, overlayContainer);
+    }
+
+    @Test
+    public void testCreateOrUpdateAlwaysOnTopOverlay_updateOverlay() {
+        createExistingOverlayContainers();
+        // Create another overlay in task.
+        final TaskFragmentContainer alwaysOnTopOverlay = createTestOverlayContainer(TASK_ID,
+                "test3", true /* isVisible */, false /* associateLaunchingActivity */);
+        final ActivityStackAttributes attrs = new ActivityStackAttributes.Builder()
+                .setRelativeBounds(new Rect(0, 0, 100, 100)).build();
+        mSplitController.setActivityStackAttributesCalculator(params -> attrs);
+
+        Mockito.clearInvocations(mSplitPresenter);
+        final TaskFragmentContainer overlayContainer =
+                createOrUpdateAlwaysOnTopOverlay(alwaysOnTopOverlay.getOverlayTag());
+
+        assertWithMessage("overlayContainer1 and overlayContainer3 must be dismissed")
+                .that(mSplitController.getAllNonFinishingOverlayContainers())
+                .containsExactly(mOverlayContainer2, alwaysOnTopOverlay);
+        assertThat(overlayContainer).isEqualTo(alwaysOnTopOverlay);
     }
 
     @Test
@@ -966,6 +985,16 @@ public class OverlayPresentationTest {
                 launchOptions, mIntent, activity);
     }
 
+    @Nullable
+    private TaskFragmentContainer createOrUpdateAlwaysOnTopOverlay(
+            @NonNull String tag) {
+        final Bundle launchOptions = new Bundle();
+        launchOptions.putBoolean(KEY_OVERLAY_ASSOCIATE_WITH_LAUNCHING_ACTIVITY, false);
+        launchOptions.putString(KEY_OVERLAY_TAG, tag);
+        return mSplitController.createOrUpdateOverlayTaskFragmentIfNeeded(mTransaction,
+                launchOptions, mIntent, createMockActivity());
+    }
+
     /** Creates a mock TaskFragment that has been registered and appeared in the organizer. */
     @NonNull
     private TaskFragmentContainer createMockTaskFragmentContainer(@NonNull Activity activity) {
@@ -1002,8 +1031,6 @@ public class OverlayPresentationTest {
                 null /* launchingActivity */);
     }
 
-    // TODO(b/243518738): add more test coverage on overlay container without activity association
-    //  once we have use cases.
     @NonNull
     private TaskFragmentContainer createTestOverlayContainer(int taskId, @NonNull String tag,
             boolean isVisible, boolean associateLaunchingActivity,
