@@ -14,14 +14,15 @@
  * limitations under the License.
  */
 
-package com.android.systemui.inputdevice.oobe.domain.interactor
+package com.android.systemui.inputdevice.tutorial.domain.interactor
 
 import android.content.Context
 import android.content.Intent
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
-import com.android.systemui.inputdevice.oobe.data.model.DeviceSchedulerInfo
-import com.android.systemui.inputdevice.oobe.data.model.OobeSchedulerInfo
+import com.android.systemui.inputdevice.tutorial.data.model.DeviceSchedulerInfo
+import com.android.systemui.inputdevice.tutorial.data.repository.DeviceType
+import com.android.systemui.inputdevice.tutorial.data.repository.TutorialSchedulerRepository
 import com.android.systemui.keyboard.data.repository.KeyboardRepository
 import com.android.systemui.touchpad.data.repository.TouchpadRepository
 import java.time.Duration
@@ -35,49 +36,65 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
 /**
- * When the first time a keyboard or touchpad id connected, wait for [LAUNCH_DELAY], then launch the
+ * When the first time a keyboard or touchpad is connected, wait for [LAUNCH_DELAY], then launch the
  * tutorial as soon as there's a connected device
  */
 @SysUISingleton
-class OobeSchedulerInteractor
+class TutorialSchedulerInteractor
 @Inject
 constructor(
     @Application private val context: Context,
     @Application private val applicationScope: CoroutineScope,
     private val keyboardRepository: KeyboardRepository,
-    private val touchpadRepository: TouchpadRepository
+    private val touchpadRepository: TouchpadRepository,
+    private val tutorialSchedulerRepository: TutorialSchedulerRepository
 ) {
-    private val info = OobeSchedulerInfo()
-
     fun start() {
-        if (!info.keyboard.isLaunched) {
-            applicationScope.launch {
-                schedule(keyboardRepository.isAnyKeyboardConnected, info.keyboard)
+        applicationScope.launch {
+            val info = tutorialSchedulerRepository.loadData()
+            if (!info.keyboard.isLaunched) {
+                applicationScope.launch {
+                    schedule(
+                        keyboardRepository.isAnyKeyboardConnected,
+                        info.keyboard,
+                        DeviceType.KEYBOARD
+                    )
+                }
             }
-        }
-        if (!info.touchpad.isLaunched) {
-            applicationScope.launch {
-                schedule(touchpadRepository.isAnyTouchpadConnected, info.touchpad)
+            if (!info.touchpad.isLaunched) {
+                applicationScope.launch {
+                    schedule(
+                        touchpadRepository.isAnyTouchpadConnected,
+                        info.touchpad,
+                        DeviceType.TOUCHPAD
+                    )
+                }
             }
         }
     }
 
-    private suspend fun schedule(isAnyDeviceConnected: Flow<Boolean>, info: DeviceSchedulerInfo) {
+    private suspend fun schedule(
+        isAnyDeviceConnected: Flow<Boolean>,
+        info: DeviceSchedulerInfo,
+        deviceType: DeviceType
+    ) {
         if (!info.wasEverConnected) {
             waitForDeviceConnection(isAnyDeviceConnected)
-            info.connectionTime = Instant.now().toEpochMilli()
+            info.connectTime = Instant.now().toEpochMilli()
+            tutorialSchedulerRepository.updateConnectTime(deviceType, info.connectTime!!)
         }
-        delay(remainingTimeMillis(info.connectionTime!!))
+        delay(remainingTimeMillis(info.connectTime!!))
         waitForDeviceConnection(isAnyDeviceConnected)
         info.isLaunched = true
-        launchOobe()
+        tutorialSchedulerRepository.updateLaunch(deviceType)
+        launchTutorial()
     }
 
     private suspend fun waitForDeviceConnection(isAnyDeviceConnected: Flow<Boolean>): Boolean {
         return isAnyDeviceConnected.filter { it }.first()
     }
 
-    private fun launchOobe() {
+    private fun launchTutorial() {
         val intent = Intent(TUTORIAL_ACTION)
         intent.addCategory(Intent.CATEGORY_DEFAULT)
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
@@ -90,7 +107,6 @@ constructor(
     }
 
     companion object {
-        const val TAG = "OobeSchedulerInteractor"
         const val TUTORIAL_ACTION = "com.android.systemui.action.TOUCHPAD_TUTORIAL"
         private val LAUNCH_DELAY = Duration.ofHours(72).toMillis()
     }

@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-package com.android.systemui.inputdevice.oobe.data.model
+package com.android.systemui.inputdevice.tutorial.data.model
 
-data class OobeSchedulerInfo(
+data class TutorialSchedulerInfo(
     val keyboard: DeviceSchedulerInfo = DeviceSchedulerInfo(),
     val touchpad: DeviceSchedulerInfo = DeviceSchedulerInfo()
 )
 
-data class DeviceSchedulerInfo(var isLaunched: Boolean = false, var connectionTime: Long? = null) {
+data class DeviceSchedulerInfo(var isLaunched: Boolean = false, var connectTime: Long? = null) {
     val wasEverConnected: Boolean
-        get() = connectionTime != null
+        get() = connectTime != null
 }
