@@ -16,10 +16,12 @@
 
 package com.android.credentialmanager.ui.screens.multiple
 
-import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.Row
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.foundation.layout.fillMaxSize
 import com.android.credentialmanager.R
 import androidx.compose.ui.res.stringResource
-import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -53,29 +55,31 @@ fun MultiCredentialsFoldScreen(
     flowEngine: FlowEngine,
 ) {
     val selectEntry = flowEngine.getEntrySelector()
-    ScalingLazyColumn(
-        columnState = columnState,
-        modifier = Modifier.fillMaxSize(),
-    ) {
-        // flatten all credentials into one
-        val credentials = credentialSelectorUiState.sortedEntries
-        item {
-            var title = stringResource(R.string.choose_sign_in_title)
-            if (credentials.isNotEmpty()) {
-                if (credentials.all { it.credentialType == CredentialType.PASSKEY }) {
-                    title = stringResource(R.string.choose_passkey_title)
-                } else if (credentials.all { it.credentialType == CredentialType.PASSWORD }) {
-                    title = stringResource(R.string.choose_password_title)
+    Row {
+        Spacer(Modifier.weight(0.052f)) // 5.2% side margin
+        ScalingLazyColumn(
+            columnState = columnState,
+            modifier = Modifier.weight(0.896f).fillMaxSize(),
+        ) {
+            // flatten all credentials into one
+            val credentials = credentialSelectorUiState.sortedEntries
+            item {
+                var title = stringResource(R.string.choose_sign_in_title)
+                if (credentials.isNotEmpty()) {
+                    if (credentials.all { it.credentialType == CredentialType.PASSKEY }) {
+                        title = stringResource(R.string.choose_passkey_title)
+                    } else if (credentials.all { it.credentialType == CredentialType.PASSWORD }) {
+                        title = stringResource(R.string.choose_password_title)
+                    }
                 }
+
+                SignInHeader(
+                    icon = credentialSelectorUiState.icon,
+                    title = title,
+                )
             }
 
-            SignInHeader(
-                icon = credentialSelectorUiState.icon,
-                title = title,
-            )
-        }
-
-        credentials.forEach { credential: CredentialEntryInfo ->
+            credentials.forEach { credential: CredentialEntryInfo ->
                 item {
                     CredentialsScreenChip(
                         label = credential.userName,
@@ -85,29 +89,32 @@ fun MultiCredentialsFoldScreen(
                             credential.providerDisplayName
                         },
                         icon = credential.icon,
+                        textAlign = TextAlign.Start
                     )
                     CredentialsScreenChipSpacer()
                 }
             }
 
-        credentialSelectorUiState.authenticationEntryList.forEach { authenticationEntryInfo ->
-            item {
-                LockedProviderChip(authenticationEntryInfo) {
-                    selectEntry(authenticationEntryInfo, false)
+            credentialSelectorUiState.authenticationEntryList.forEach { authenticationEntryInfo ->
+                item {
+                    LockedProviderChip(authenticationEntryInfo) {
+                        selectEntry(authenticationEntryInfo, false)
+                    }
+                    CredentialsScreenChipSpacer()
                 }
-                CredentialsScreenChipSpacer()
+            }
+            item {
+                Spacer(modifier = Modifier.size(8.dp))
+            }
+
+            item {
+                SignInOptionsChip { flowEngine.openSecondaryScreen() }
+            }
+            item {
+                DismissChip { flowEngine.cancel() }
+                BottomSpacer()
             }
         }
-        item {
-            Spacer(modifier = Modifier.size(8.dp))
+            Spacer(Modifier.weight(0.052f)) // 5.2% side margin
         }
-
-        item {
-            SignInOptionsChip { flowEngine.openSecondaryScreen() }
-        }
-        item {
-            DismissChip { flowEngine.cancel() }
-            BottomSpacer()
-        }
-    }
 }
