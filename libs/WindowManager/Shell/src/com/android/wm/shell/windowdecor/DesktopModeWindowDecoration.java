@@ -74,6 +74,7 @@ import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.apptoweb.AppToWebGenericLinksParser;
 import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.DisplayLayout;
+import com.android.wm.shell.common.MultiInstanceHelper;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.shared.annotations.ShellBackgroundThread;
@@ -157,6 +158,7 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
     // to cancel the close.
     private final Runnable mCloseMaximizeWindowRunnable = this::closeMaximizeMenu;
     private final Runnable mCapturedLinkExpiredRunnable = this::onCapturedLinkExpired;
+    private final MultiInstanceHelper mMultiInstanceHelper;
 
     DesktopModeWindowDecoration(
             Context context,
@@ -171,13 +173,15 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
             Choreographer choreographer,
             SyncTransactionQueue syncQueue,
             RootTaskDisplayAreaOrganizer rootTaskDisplayAreaOrganizer,
-            AppToWebGenericLinksParser genericLinksParser) {
+            AppToWebGenericLinksParser genericLinksParser,
+            MultiInstanceHelper multiInstanceHelper) {
         this (context, userContext, displayController, splitScreenController, taskOrganizer,
                 taskInfo, taskSurface, handler, bgExecutor, choreographer, syncQueue,
                 rootTaskDisplayAreaOrganizer, genericLinksParser, SurfaceControl.Builder::new,
                 SurfaceControl.Transaction::new,  WindowContainerTransaction::new,
                 SurfaceControl::new, new SurfaceControlViewHostFactory() {},
-                DefaultMaximizeMenuFactory.INSTANCE, DefaultHandleMenuFactory.INSTANCE);
+                DefaultMaximizeMenuFactory.INSTANCE, DefaultHandleMenuFactory.INSTANCE,
+                multiInstanceHelper);
     }
 
     DesktopModeWindowDecoration(
@@ -200,7 +204,8 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
             Supplier<SurfaceControl> surfaceControlSupplier,
             SurfaceControlViewHostFactory surfaceControlViewHostFactory,
             MaximizeMenuFactory maximizeMenuFactory,
-            HandleMenuFactory handleMenuFactory) {
+            HandleMenuFactory handleMenuFactory,
+            MultiInstanceHelper multiInstanceHelper) {
         super(context, userContext, displayController, taskOrganizer, taskInfo, taskSurface,
                 surfaceControlBuilderSupplier, surfaceControlTransactionSupplier,
                 windowContainerTransactionSupplier, surfaceControlSupplier,
@@ -214,6 +219,7 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
         mGenericLinksParser = genericLinksParser;
         mMaximizeMenuFactory = maximizeMenuFactory;
         mHandleMenuFactory = handleMenuFactory;
+        mMultiInstanceHelper = multiInstanceHelper;
     }
 
     /**
@@ -966,6 +972,9 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
                 mDisplayController,
                 splitScreenController,
                 DesktopModeStatus.canEnterDesktopMode(mContext),
+                Flags.enableDesktopWindowingMultiInstanceFeatures()
+                        && mMultiInstanceHelper
+                        .supportsMultiInstanceSplit(mTaskInfo.baseActivity),
                 getBrowserLink(),
                 mResult.mCaptionWidth,
                 mResult.mCaptionHeight,
@@ -1274,7 +1283,8 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
                 Choreographer choreographer,
                 SyncTransactionQueue syncQueue,
                 RootTaskDisplayAreaOrganizer rootTaskDisplayAreaOrganizer,
-                AppToWebGenericLinksParser genericLinksParser) {
+                AppToWebGenericLinksParser genericLinksParser,
+                MultiInstanceHelper multiInstanceHelper) {
             return new DesktopModeWindowDecoration(
                     context,
                     userContext,
@@ -1288,7 +1298,8 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
                     choreographer,
                     syncQueue,
                     rootTaskDisplayAreaOrganizer,
-                    genericLinksParser);
+                    genericLinksParser,
+                    multiInstanceHelper);
         }
     }
 

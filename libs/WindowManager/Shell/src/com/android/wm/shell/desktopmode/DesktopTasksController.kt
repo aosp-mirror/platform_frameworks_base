@@ -98,6 +98,7 @@ import com.android.wm.shell.windowdecor.DragPositioningCallbackUtility
 import com.android.wm.shell.windowdecor.MoveToDesktopAnimator
 import com.android.wm.shell.windowdecor.OnTaskResizeAnimationListener
 import com.android.wm.shell.windowdecor.extension.isFullscreen
+import com.android.wm.shell.windowdecor.extension.isMultiWindow
 import java.io.PrintWriter
 import java.util.Optional
 import java.util.concurrent.Executor
@@ -900,6 +901,60 @@ class DesktopTasksController(
         return WALLPAPER_ACTIVITY.isEnabled(context) &&
             TransitionUtil.isClosingType(request.type) &&
             request.triggerTask != null
+    }
+
+    fun openNewWindow(
+        taskInfo: RunningTaskInfo
+    ) {
+        // TODO(b/337915660): Add a transition handler for these; animations
+        //  need updates in some cases.
+        val newTaskWindowingMode = when {
+            taskInfo.isFreeform -> {
+                WINDOWING_MODE_FREEFORM
+            }
+            taskInfo.isFullscreen || taskInfo.isMultiWindow -> {
+                WINDOWING_MODE_MULTI_WINDOW
+            }
+            else -> {
+                error("Invalid windowing mode: ${taskInfo.windowingMode}")
+            }
+        }
+
+        val baseActivity = taskInfo.baseActivity ?: return
+        val fillIn: Intent = context.packageManager
+            .getLaunchIntentForPackage(
+                baseActivity.packageName
+            ) ?: return
+        fillIn
+            .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_MULTIPLE_TASK)
+        val options =
+            ActivityOptions.makeBasic().apply {
+                launchWindowingMode = newTaskWindowingMode
+                isPendingIntentBackgroundActivityLaunchAllowedByPermission = true
+                pendingIntentBackgroundActivityStartMode =
+                    ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOWED
+            }
+        val launchIntent = PendingIntent.getActivity(
+            context,
+            /* requestCode= */ 0,
+            fillIn,
+            PendingIntent.FLAG_IMMUTABLE
+        )
+        when (newTaskWindowingMode) {
+            WINDOWING_MODE_MULTI_WINDOW -> {
+                val splitPosition = splitScreenController.determineNewInstancePosition(taskInfo)
+                splitScreenController.startIntent(
+                    launchIntent, context.userId, fillIn, splitPosition,
+                    options.toBundle(), null /* hideTaskToken */
+                )
+            }
+            WINDOWING_MODE_FREEFORM -> {
+                // TODO(b/336289597): This currently does not respect the desktop window limit.
+                val wct = WindowContainerTransaction()
+                wct.sendPendingIntent(launchIntent, fillIn, options.toBundle())
+                transitions.startTransition(TRANSIT_OPEN, wct, null)
+            }
+        }
     }
 
     private fun handleFreeformTaskLaunch(
