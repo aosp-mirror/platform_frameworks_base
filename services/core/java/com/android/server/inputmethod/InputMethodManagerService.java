@@ -1240,8 +1240,9 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
     }
 
     @GuardedBy("ImfLock.class")
-    private void onUpdateEditorToolTypeLocked(@MotionEvent.ToolType int toolType) {
-        final IInputMethodInvoker curMethod = getCurMethodLocked();
+    private void onUpdateEditorToolTypeLocked(@MotionEvent.ToolType int toolType,
+            @UserIdInt int userId) {
+        final var curMethod = getInputMethodBindingController(userId).getCurMethod();
         if (curMethod != null) {
             curMethod.updateEditorToolType(toolType);
         }
@@ -3462,9 +3463,9 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
             userData.mCurStatsToken = null;
 
             if (Flags.useHandwritingListenerForTooltype()) {
-                maybeReportToolType();
+                maybeReportToolType(userId);
             } else if (lastClickToolType != MotionEvent.TOOL_TYPE_UNKNOWN) {
-                onUpdateEditorToolTypeLocked(lastClickToolType);
+                onUpdateEditorToolTypeLocked(lastClickToolType, userId);
             }
             mVisibilityApplier.performShowIme(windowToken, statsToken,
                     mVisibilityStateComputer.getShowFlagsForInputMethodServiceOnly(),
@@ -3479,7 +3480,8 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
     }
 
     @GuardedBy("ImfLock.class")
-    private void maybeReportToolType() {
+    private void maybeReportToolType(@UserIdInt int userId) {
+        // TODO(b/356638981): This needs to be compatible with visible background users.
         int lastDeviceId = mInputManagerInternal.getLastUsedInputDeviceId();
         final InputManager im = mContext.getSystemService(InputManager.class);
         if (im == null) {
@@ -3498,7 +3500,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
             // other toolTypes are irrelevant and reported as unknown.
             toolType = MotionEvent.TOOL_TYPE_UNKNOWN;
         }
-        onUpdateEditorToolTypeLocked(toolType);
+        onUpdateEditorToolTypeLocked(toolType, userId);
     }
 
     @Override
