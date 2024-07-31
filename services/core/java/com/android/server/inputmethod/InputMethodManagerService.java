@@ -2581,33 +2581,28 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
         if (!mConcurrentMultiUserModeEnabled && userId != mCurrentUserId) {
             return;
         }
-        final long ident = Binder.clearCallingIdentity();
-        try {
-            if (iconId == 0) {
-                if (DEBUG) Slog.d(TAG, "hide the small icon for the input method");
-                hideStatusBarIconLocked(userId);
-            } else if (packageName != null) {
-                if (DEBUG) Slog.d(TAG, "show a small icon for the input method");
-                final PackageManager userAwarePackageManager =
-                        getPackageManagerForUser(mContext, userId);
-                ApplicationInfo applicationInfo = null;
-                try {
-                    applicationInfo = userAwarePackageManager.getApplicationInfo(packageName,
-                            PackageManager.ApplicationInfoFlags.of(0));
-                } catch (PackageManager.NameNotFoundException e) {
-                }
-                final CharSequence contentDescription = applicationInfo != null
-                        ? userAwarePackageManager.getApplicationLabel(applicationInfo)
-                        : null;
-                if (mStatusBarManagerInternal != null) {
-                    mStatusBarManagerInternal.setIcon(mSlotIme, packageName, iconId, 0,
-                            contentDescription != null
-                                    ? contentDescription.toString() : null);
-                    mStatusBarManagerInternal.setIconVisibility(mSlotIme, true);
-                }
+        if (iconId == 0) {
+            if (DEBUG) Slog.d(TAG, "hide the small icon for the input method");
+            hideStatusBarIconLocked(userId);
+        } else if (packageName != null) {
+            if (DEBUG) Slog.d(TAG, "show a small icon for the input method");
+            final PackageManager userAwarePackageManager =
+                    getPackageManagerForUser(mContext, userId);
+            ApplicationInfo applicationInfo = null;
+            try {
+                applicationInfo = userAwarePackageManager.getApplicationInfo(packageName,
+                        PackageManager.ApplicationInfoFlags.of(0));
+            } catch (PackageManager.NameNotFoundException e) {
             }
-        } finally {
-            Binder.restoreCallingIdentity(ident);
+            final CharSequence contentDescription = applicationInfo != null
+                    ? userAwarePackageManager.getApplicationLabel(applicationInfo)
+                    : null;
+            if (mStatusBarManagerInternal != null) {
+                mStatusBarManagerInternal.setIcon(mSlotIme, packageName, iconId, 0,
+                        contentDescription != null
+                                ? contentDescription.toString() : null);
+                mStatusBarManagerInternal.setIconVisibility(mSlotIme, true);
+            }
         }
     }
 
@@ -4792,21 +4787,14 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
             @InputMethodManager.HideFlags int flags, @SoftInputShowHideReason int reason,
             @NonNull UserData userData) {
         final int userId = userData.mUserId;
-        Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "IMMS.hideMySoftInputLocked");
-        final long ident = Binder.clearCallingIdentity();
-        try {
-            if (Flags.refactorInsetsController()) {
-                userData.mCurClient.mClient.setImeVisibility(false, statsToken);
-                // TODO we will loose the flags here
-                setImeVisibilityOnFocusedWindowClient(false, userData, statsToken);
-            } else {
-                final var visibilityStateComputer = userData.mVisibilityStateComputer;
-                hideCurrentInputLocked(visibilityStateComputer.getLastImeTargetWindow(),
-                        statsToken, flags, null /* resultReceiver */, reason, userId);
-            }
-        } finally {
-            Binder.restoreCallingIdentity(ident);
-            Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
+        if (Flags.refactorInsetsController()) {
+            userData.mCurClient.mClient.setImeVisibility(false, statsToken);
+            // TODO we will loose the flags here
+            setImeVisibilityOnFocusedWindowClient(false, userData, statsToken);
+        } else {
+            final var visibilityStateComputer = userData.mVisibilityStateComputer;
+            hideCurrentInputLocked(visibilityStateComputer.getLastImeTargetWindow(),
+                    statsToken, flags, null /* resultReceiver */, reason, userId);
         }
     }
 
@@ -4816,21 +4804,14 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
             @InputMethodManager.ShowFlags int flags, @SoftInputShowHideReason int reason,
             @NonNull UserData userData) {
         final int userId = userData.mUserId;
-        Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "IMMS.showMySoftInputLocked");
-        final long ident = Binder.clearCallingIdentity();
-        try {
-            if (Flags.refactorInsetsController()) {
-                userData.mCurClient.mClient.setImeVisibility(true, statsToken);
-                setImeVisibilityOnFocusedWindowClient(true, userData, statsToken);
-            } else {
-                final var visibilityStateComputer = userData.mVisibilityStateComputer;
-                showCurrentInputLocked(visibilityStateComputer.getLastImeTargetWindow(),
-                        statsToken, flags, MotionEvent.TOOL_TYPE_UNKNOWN,
-                        null /* resultReceiver */, reason, userId);
-            }
-        } finally {
-            Binder.restoreCallingIdentity(ident);
-            Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
+        if (Flags.refactorInsetsController()) {
+            userData.mCurClient.mClient.setImeVisibility(true, statsToken);
+            setImeVisibilityOnFocusedWindowClient(true, userData, statsToken);
+        } else {
+            final var visibilityStateComputer = userData.mVisibilityStateComputer;
+            showCurrentInputLocked(visibilityStateComputer.getLastImeTargetWindow(),
+                    statsToken, flags, MotionEvent.TOOL_TYPE_UNKNOWN,
+                    null /* resultReceiver */, reason, userId);
         }
     }
 
@@ -6915,8 +6896,15 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
                     }
                     ImeTracker.forLogging().onProgress(statsToken,
                             ImeTracker.PHASE_SERVER_CURRENT_ACTIVE_IME);
-                    mImms.hideMySoftInputLocked(statsToken, flags, reason, mUserData);
-                    typedFuture.complete(null);
+                    Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "IMMS.hideMySoftInput");
+                    final long ident = Binder.clearCallingIdentity();
+                    try {
+                        mImms.hideMySoftInputLocked(statsToken, flags, reason, mUserData);
+                        typedFuture.complete(null);
+                    } finally {
+                        Binder.restoreCallingIdentity(ident);
+                        Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
+                    }
                 }
             } catch (Throwable e) {
                 typedFuture.completeExceptionally(e);
@@ -6939,8 +6927,15 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
                     }
                     ImeTracker.forLogging().onProgress(statsToken,
                             ImeTracker.PHASE_SERVER_CURRENT_ACTIVE_IME);
-                    mImms.showMySoftInputLocked(statsToken, flags, reason, mUserData);
-                    typedFuture.complete(null);
+                    Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "IMMS.showMySoftInput");
+                    final long ident = Binder.clearCallingIdentity();
+                    try {
+                        mImms.showMySoftInputLocked(statsToken, flags, reason, mUserData);
+                        typedFuture.complete(null);
+                    } finally {
+                        Binder.restoreCallingIdentity(ident);
+                        Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
+                    }
                 }
             } catch (Throwable e) {
                 typedFuture.completeExceptionally(e);
@@ -6954,7 +6949,12 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
                 if (!calledWithValidTokenLocked(mToken, mUserData)) {
                     return;
                 }
-                mImms.updateStatusIconLocked(packageName, iconId, mUserData);
+                final long ident = Binder.clearCallingIdentity();
+                try {
+                    mImms.updateStatusIconLocked(packageName, iconId, mUserData);
+                } finally {
+                    Binder.restoreCallingIdentity(ident);
+                }
             }
         }
 
