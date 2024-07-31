@@ -1,0 +1,11 @@
+aconfig_declarations {
+    name: "updates_flags",
+    package: "com.android.server.updates",
+    container: "system",
+    srcs: ["*.aconfig"],
+}
+
+java_aconfig_library {
+    name: "updates_flags_lib",
+    aconfig_declarations: "updates_flags",
+}

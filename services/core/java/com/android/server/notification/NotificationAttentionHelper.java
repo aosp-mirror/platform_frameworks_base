@@ -138,6 +138,7 @@ public final class NotificationAttentionHelper {
 
     private final boolean mUseAttentionLight;
     boolean mHasLight;
+    private final boolean mEnableNotificationAccessibilityEvents;
 
     private final SettingsObserver mSettingsObserver;
 
@@ -190,6 +191,9 @@ public final class NotificationAttentionHelper {
         mUseAttentionLight = resources.getBoolean(R.bool.config_useAttentionLight);
         mHasLight =
                 resources.getBoolean(com.android.internal.R.bool.config_intrusiveNotificationLed);
+        mEnableNotificationAccessibilityEvents =
+                resources.getBoolean(
+                        com.android.internal.R.bool.config_enableNotificationAccessibilityEvents);
 
         // Don't start allowing notifications until the setup wizard has run once.
         // After that, including subsequent boots, init with notifications turned on.
@@ -600,6 +604,13 @@ public final class NotificationAttentionHelper {
         // Suppressed because another notification in its group handles alerting
         if (record.getSbn().isGroup()) {
             if (notification.suppressAlertingDueToGrouping()) {
+                return true;
+            }
+        }
+
+        // Suppressed because notification was explicitly flagged as silent
+        if (android.service.notification.Flags.notificationSilentFlag()) {
+            if (notification.isSilent()) {
                 return true;
             }
         }
@@ -1023,7 +1034,7 @@ public final class NotificationAttentionHelper {
     }
 
     void sendAccessibilityEvent(NotificationRecord record) {
-        if (!mAccessibilityManager.isEnabled()) {
+        if (!mAccessibilityManager.isEnabled() || !mEnableNotificationAccessibilityEvents) {
             return;
         }
 

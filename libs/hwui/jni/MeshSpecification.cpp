@@ -126,7 +126,7 @@ static void MeshSpecification_safeUnref(SkMeshSpecification* meshSpec) {
     SkSafeUnref(meshSpec);
 }
 
-static jlong getMeshSpecificationFinalizer() {
+static jlong getMeshSpecificationFinalizer(CRITICAL_JNI_PARAMS) {
     return static_cast<jlong>(reinterpret_cast<uintptr_t>(&MeshSpecification_safeUnref));
 }
 

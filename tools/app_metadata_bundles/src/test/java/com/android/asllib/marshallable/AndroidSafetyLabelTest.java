@@ -16,12 +16,19 @@
 
 package com.android.asllib.marshallable;
 
+import static org.junit.Assert.assertThrows;
+
 import com.android.asllib.testutils.TestUtils;
+import com.android.asllib.util.MalformedXmlException;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
+import org.w3c.dom.Element;
+
+import java.nio.file.Paths;
+import java.util.List;
 
 @RunWith(JUnit4.class)
 public class AndroidSafetyLabelTest {
@@ -31,11 +38,15 @@ public class AndroidSafetyLabelTest {
             "com/android/asllib/androidsafetylabel/od";
 
     private static final String MISSING_VERSION_FILE_NAME = "missing-version.xml";
-    private static final String VALID_EMPTY_FILE_NAME = "valid-empty.xml";
+    private static final String VALID_V2_FILE_NAME = "valid-empty.xml";
+    private static final String VALID_V1_FILE_NAME = "valid-v1.xml";
     private static final String WITH_SAFETY_LABELS_FILE_NAME = "with-safety-labels.xml";
     private static final String WITH_SYSTEM_APP_SAFETY_LABEL_FILE_NAME =
             "with-system-app-safety-label.xml";
     private static final String WITH_TRANSPARENCY_INFO_FILE_NAME = "with-transparency-info.xml";
+
+    public static final List<String> REQUIRED_FIELD_NAMES_OD_V2 =
+            List.of("system_app_safety_label", "transparency_info");
 
     @Before
     public void setUp() throws Exception {
@@ -50,12 +61,12 @@ public class AndroidSafetyLabelTest {
         odToHrExpectException(MISSING_VERSION_FILE_NAME);
     }
 
-    /** Test for android safety label valid empty. */
+    /** Test for android safety label valid v2. */
     @Test
-    public void testAndroidSafetyLabelValidEmptyFile() throws Exception {
-        System.out.println("starting testAndroidSafetyLabelValidEmptyFile.");
-        testHrToOdAndroidSafetyLabel(VALID_EMPTY_FILE_NAME);
-        testOdToHrAndroidSafetyLabel(VALID_EMPTY_FILE_NAME);
+    public void testAndroidSafetyLabelValidV2File() throws Exception {
+        System.out.println("starting testAndroidSafetyLabelValidV2File.");
+        testHrToOdAndroidSafetyLabel(VALID_V2_FILE_NAME);
+        testOdToHrAndroidSafetyLabel(VALID_V2_FILE_NAME);
     }
 
     /** Test for android safety label with safety labels. */
@@ -66,47 +77,77 @@ public class AndroidSafetyLabelTest {
         testOdToHrAndroidSafetyLabel(WITH_SAFETY_LABELS_FILE_NAME);
     }
 
-    /** Test for android safety label with system app safety label. */
+    /** Tests missing required fields fails, V2. */
     @Test
-    public void testAndroidSafetyLabelWithSystemAppSafetyLabel() throws Exception {
-        System.out.println("starting testAndroidSafetyLabelWithSystemAppSafetyLabel.");
-        testHrToOdAndroidSafetyLabel(WITH_SYSTEM_APP_SAFETY_LABEL_FILE_NAME);
-        testOdToHrAndroidSafetyLabel(WITH_SYSTEM_APP_SAFETY_LABEL_FILE_NAME);
+    public void testMissingRequiredFieldsOdV2() throws Exception {
+        for (String reqField : REQUIRED_FIELD_NAMES_OD_V2) {
+            System.out.println("testing missing required field od v2: " + reqField);
+            var ele =
+                    TestUtils.getElementFromResource(
+                            Paths.get(ANDROID_SAFETY_LABEL_OD_PATH, VALID_V2_FILE_NAME));
+            TestUtils.removeOdChildEleWithName(ele, reqField);
+            assertThrows(
+                    MalformedXmlException.class,
+                    () -> new AndroidSafetyLabelFactory().createFromOdElement(ele));
+        }
     }
 
-    /** Test for android safety label with transparency info. */
+    /** Tests missing optional fields succeeds, V1. */
     @Test
-    public void testAndroidSafetyLabelWithTransparencyInfo() throws Exception {
-        System.out.println("starting testAndroidSafetyLabelWithTransparencyInfo.");
-        testHrToOdAndroidSafetyLabel(WITH_TRANSPARENCY_INFO_FILE_NAME);
-        testOdToHrAndroidSafetyLabel(WITH_TRANSPARENCY_INFO_FILE_NAME);
+    public void testMissingOptionalFieldsOdV1() throws Exception {
+        for (String reqField : REQUIRED_FIELD_NAMES_OD_V2) {
+            System.out.println("testing missing optional field od v1: " + reqField);
+            var ele =
+                    TestUtils.getElementFromResource(
+                            Paths.get(ANDROID_SAFETY_LABEL_OD_PATH, VALID_V1_FILE_NAME));
+            TestUtils.removeOdChildEleWithName(ele, reqField);
+            var unused = new AndroidSafetyLabelFactory().createFromOdElement(ele);
+        }
     }
 
     private void hrToOdExpectException(String fileName) {
-        TestUtils.hrToOdExpectException(
-                new AndroidSafetyLabelFactory(), ANDROID_SAFETY_LABEL_HR_PATH, fileName);
+        assertThrows(
+                MalformedXmlException.class,
+                () -> {
+                    new AndroidSafetyLabelFactory()
+                            .createFromHrElement(
+                                    TestUtils.getElementFromResource(
+                                            Paths.get(ANDROID_SAFETY_LABEL_HR_PATH, fileName)));
+                });
     }
 
     private void odToHrExpectException(String fileName) {
-        TestUtils.odToHrExpectException(
-                new AndroidSafetyLabelFactory(), ANDROID_SAFETY_LABEL_OD_PATH, fileName);
+        assertThrows(
+                MalformedXmlException.class,
+                () -> {
+                    new AndroidSafetyLabelFactory()
+                            .createFromOdElement(
+                                    TestUtils.getElementFromResource(
+                                            Paths.get(ANDROID_SAFETY_LABEL_OD_PATH, fileName)));
+                });
     }
 
     private void testHrToOdAndroidSafetyLabel(String fileName) throws Exception {
-        TestUtils.testHrToOd(
-                TestUtils.document(),
-                new AndroidSafetyLabelFactory(),
-                ANDROID_SAFETY_LABEL_HR_PATH,
-                ANDROID_SAFETY_LABEL_OD_PATH,
-                fileName);
+        var doc = TestUtils.document();
+        AndroidSafetyLabel asl =
+                new AndroidSafetyLabelFactory()
+                        .createFromHrElement(
+                                TestUtils.getElementFromResource(
+                                        Paths.get(ANDROID_SAFETY_LABEL_HR_PATH, fileName)));
+        Element aslEle = asl.toOdDomElement(doc);
+        doc.appendChild(aslEle);
+        TestUtils.testFormatToFormat(doc, Paths.get(ANDROID_SAFETY_LABEL_OD_PATH, fileName));
     }
 
     private void testOdToHrAndroidSafetyLabel(String fileName) throws Exception {
-        TestUtils.testOdToHr(
-                TestUtils.document(),
-                new AndroidSafetyLabelFactory(),
-                ANDROID_SAFETY_LABEL_OD_PATH,
-                ANDROID_SAFETY_LABEL_HR_PATH,
-                fileName);
+        var doc = TestUtils.document();
+        AndroidSafetyLabel asl =
+                new AndroidSafetyLabelFactory()
+                        .createFromOdElement(
+                                TestUtils.getElementFromResource(
+                                        Paths.get(ANDROID_SAFETY_LABEL_OD_PATH, fileName)));
+        Element aslEle = asl.toHrDomElement(doc);
+        doc.appendChild(aslEle);
+        TestUtils.testFormatToFormat(doc, Paths.get(ANDROID_SAFETY_LABEL_HR_PATH, fileName));
     }
 }

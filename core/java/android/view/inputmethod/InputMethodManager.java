@@ -1350,15 +1350,26 @@ public final class InputMethodManager {
                     return;
                 }
                 case MSG_SET_VISIBILITY:
-                    final boolean visible = msg.arg1 != 0;
+                    final SomeArgs args = (SomeArgs) msg.obj;
+                    final boolean visible = (boolean) args.arg1;
+                    final ImeTracker.Token statsToken = (ImeTracker.Token) args.arg2;
                     synchronized (mH) {
-                        if (visible) {
-                            showSoftInput(mServedView, /* flags */ 0);
-                        } else {
-                            if (mCurRootView != null
-                                    && mCurRootView.getInsetsController() != null) {
-                                mCurRootView.getInsetsController().hide(WindowInsets.Type.ime());
+                        if (mCurRootView != null) {
+                            final var insetsController = mCurRootView.getInsetsController();
+                            if (insetsController != null) {
+                                ImeTracker.forLogging().onProgress(statsToken,
+                                        ImeTracker.PHASE_CLIENT_HANDLE_SET_IME_VISIBILITY);
+                                if (visible) {
+                                    insetsController.show(WindowInsets.Type.ime(),
+                                            false /* fromIme */, null /* statsToken */);
+                                } else {
+                                    insetsController.hide(WindowInsets.Type.ime(),
+                                            false /* fromIme */, null /* statsToken */);
+                                }
                             }
+                        } else {
+                            ImeTracker.forLogging().onFailed(statsToken,
+                                    ImeTracker.PHASE_CLIENT_HANDLE_SET_IME_VISIBILITY);
                         }
                     }
                     break;
@@ -1459,8 +1470,13 @@ public final class InputMethodManager {
         }
 
         @Override
-        public void setImeVisibility(boolean visible) {
-            mH.obtainMessage(MSG_SET_VISIBILITY, visible ? 1 : 0, 0).sendToTarget();
+        public void setImeVisibility(boolean visible, @Nullable ImeTracker.Token statsToken) {
+            final SomeArgs args = SomeArgs.obtain();
+            args.arg1 = visible;
+            args.arg2 = statsToken;
+            ImeTracker.forLogging().onProgress(statsToken,
+                    ImeTracker.PHASE_CLIENT_SET_IME_VISIBILITY);
+            mH.obtainMessage(MSG_SET_VISIBILITY, args).sendToTarget();
         }
 
         @Override
@@ -2334,16 +2350,22 @@ public final class InputMethodManager {
             ImeTracker.forLogging().onProgress(statsToken, ImeTracker.PHASE_CLIENT_VIEW_SERVED);
 
             if (Flags.refactorInsetsController()) {
+                final var viewRootImpl = view.getViewRootImpl();
                 // In case of a running show IME animation, it should not be requested visible,
                 // otherwise the animation would jump and not be controlled by the user anymore
-                if ((mCurRootView.getInsetsController().computeUserAnimatingTypes()
-                        & WindowInsets.Type.ime()) == 0) {
+                if (viewRootImpl != null
+                        && (viewRootImpl.getInsetsController().computeUserAnimatingTypes()
+                                & WindowInsets.Type.ime()) == 0) {
+                    ImeTracker.forLogging().onProgress(statsToken,
+                            ImeTracker.PHASE_CLIENT_NO_ONGOING_USER_ANIMATION);
                     // TODO(b/322992891) handle case of SHOW_IMPLICIT
-                    view.getWindowInsetsController().show(WindowInsets.Type.ime());
+                    viewRootImpl.getInsetsController().show(WindowInsets.Type.ime(),
+                            false /* fromIme */, statsToken);
                     return true;
-                } else {
-                    return false;
                 }
+                ImeTracker.forLogging().onCancelled(statsToken,
+                        ImeTracker.PHASE_CLIENT_NO_ONGOING_USER_ANIMATION);
+                return false;
             } else {
                 // Makes sure to call ImeInsetsSourceConsumer#onShowRequested on the UI thread.
                 // TODO(b/229426865): call WindowInsetsController#show instead.
@@ -2497,7 +2519,10 @@ public final class InputMethodManager {
 
             if (Flags.refactorInsetsController()) {
                 // TODO(b/322992891) handle case of HIDE_IMPLICIT_ONLY
-                servedView.getWindowInsetsController().hide(WindowInsets.Type.ime());
+                final var viewRootImpl = servedView.getViewRootImpl();
+                if (viewRootImpl != null) {
+                    viewRootImpl.getInsetsController().hide(WindowInsets.Type.ime());
+                }
                 return true;
             } else {
                 return IInputMethodManagerGlobalInvoker.hideSoftInput(mClient, windowToken,
@@ -4351,6 +4376,20 @@ public final class InputMethodManager {
     @RequiresPermission(Manifest.permission.TEST_INPUT_METHOD)
     public boolean isInputMethodPickerShown() {
         return IInputMethodManagerGlobalInvoker.isInputMethodPickerShownForTest();
+    }
+
+    /**
+     * Called when the IME switch button was clicked from the system. Depending on the number of
+     * enabled IME subtypes, this will either switch to the next IME/subtype, or show the input
+     * method picker dialog.
+     *
+     * @param displayId The ID of the display where the input method picker dialog should be shown.
+     *
+     * @hide
+     */
+    @RequiresPermission(Manifest.permission.WRITE_SECURE_SETTINGS)
+    public void onImeSwitchButtonClickFromSystem(int displayId) {
+        IInputMethodManagerGlobalInvoker.onImeSwitchButtonClickFromSystem(displayId);
     }
 
     /**

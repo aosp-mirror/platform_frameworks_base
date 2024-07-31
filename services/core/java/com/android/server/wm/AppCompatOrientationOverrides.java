@@ -20,19 +20,22 @@ import static android.content.pm.ActivityInfo.OVERRIDE_ANY_ORIENTATION;
 import static android.content.pm.ActivityInfo.OVERRIDE_ENABLE_COMPAT_IGNORE_ORIENTATION_REQUEST_WHEN_LOOP_DETECTED;
 import static android.content.pm.ActivityInfo.OVERRIDE_ENABLE_COMPAT_IGNORE_REQUESTED_ORIENTATION;
 import static android.content.pm.ActivityInfo.OVERRIDE_LANDSCAPE_ORIENTATION_TO_REVERSE_LANDSCAPE;
+import static android.content.pm.ActivityInfo.OVERRIDE_RESPECT_REQUESTED_ORIENTATION;
 import static android.content.pm.ActivityInfo.OVERRIDE_UNDEFINED_ORIENTATION_TO_NOSENSOR;
 import static android.content.pm.ActivityInfo.OVERRIDE_UNDEFINED_ORIENTATION_TO_PORTRAIT;
-import static android.content.pm.ActivityInfo.screenOrientationToString;
+import static android.content.pm.ActivityInfo.OVERRIDE_USE_DISPLAY_LANDSCAPE_NATURAL_ORIENTATION;
+import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
+import static android.view.WindowManager.PROPERTY_COMPAT_ALLOW_DISPLAY_ORIENTATION_OVERRIDE;
 import static android.view.WindowManager.PROPERTY_COMPAT_ALLOW_IGNORING_ORIENTATION_REQUEST_WHEN_LOOP_DETECTED;
+import static android.view.WindowManager.PROPERTY_COMPAT_ALLOW_ORIENTATION_OVERRIDE;
 import static android.view.WindowManager.PROPERTY_COMPAT_IGNORE_REQUESTED_ORIENTATION;
 
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_ATM;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_WITH_CLASS_NAME;
-import static com.android.server.wm.AppCompatOverrides.asLazy;
+import static com.android.server.wm.AppCompatUtils.asLazy;
+import static com.android.server.wm.AppCompatUtils.isChangeEnabled;
 
 import android.annotation.NonNull;
-import android.content.pm.ActivityInfo;
-import android.util.Slog;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.wm.utils.OptPropFactory;
@@ -51,84 +54,56 @@ class AppCompatOrientationOverrides {
 
     @NonNull
     private final ActivityRecord mActivityRecord;
-
+    @NonNull
+    private final AppCompatCameraOverrides mAppCompatCameraOverrides;
     @NonNull
     private final OptPropFactory.OptProp mIgnoreRequestedOrientationOptProp;
     @NonNull
     private final OptPropFactory.OptProp mAllowIgnoringOrientationRequestWhenLoopDetectedOptProp;
+    @NonNull
+    private final OptPropFactory.OptProp mAllowOrientationOverrideOptProp;
+    @NonNull
+    private final OptPropFactory.OptProp mAllowDisplayOrientationOverrideOptProp;
 
     @NonNull
     final OrientationOverridesState mOrientationOverridesState;
 
-    AppCompatOrientationOverrides(@NonNull OptPropFactory optPropBuilder,
-                                   @NonNull LetterboxConfiguration letterboxConfiguration,
-                                   @NonNull ActivityRecord activityRecord) {
+    AppCompatOrientationOverrides(@NonNull ActivityRecord activityRecord,
+            @NonNull AppCompatConfiguration appCompatConfiguration,
+            @NonNull OptPropFactory optPropBuilder,
+            @NonNull AppCompatCameraOverrides appCompatCameraOverrides) {
         mActivityRecord = activityRecord;
+        mAppCompatCameraOverrides = appCompatCameraOverrides;
         mOrientationOverridesState = new OrientationOverridesState(mActivityRecord,
                 System::currentTimeMillis);
         final BooleanSupplier isPolicyForIgnoringRequestedOrientationEnabled = asLazy(
-                letterboxConfiguration::isPolicyForIgnoringRequestedOrientationEnabled);
+                appCompatConfiguration::isPolicyForIgnoringRequestedOrientationEnabled);
         mIgnoreRequestedOrientationOptProp = optPropBuilder.create(
                 PROPERTY_COMPAT_IGNORE_REQUESTED_ORIENTATION,
                 isPolicyForIgnoringRequestedOrientationEnabled);
         mAllowIgnoringOrientationRequestWhenLoopDetectedOptProp = optPropBuilder.create(
                 PROPERTY_COMPAT_ALLOW_IGNORING_ORIENTATION_REQUEST_WHEN_LOOP_DETECTED,
                 isPolicyForIgnoringRequestedOrientationEnabled);
+        mAllowOrientationOverrideOptProp = optPropBuilder.create(
+                PROPERTY_COMPAT_ALLOW_ORIENTATION_OVERRIDE);
+        mAllowDisplayOrientationOverrideOptProp = optPropBuilder.create(
+                PROPERTY_COMPAT_ALLOW_DISPLAY_ORIENTATION_OVERRIDE,
+                () -> mActivityRecord.mDisplayContent != null
+                        && mActivityRecord.getTask() != null
+                        && mActivityRecord.mDisplayContent.getIgnoreOrientationRequest()
+                        && !mActivityRecord.getTask().inMultiWindowMode()
+                        && mActivityRecord.mDisplayContent.getNaturalOrientation()
+                            == ORIENTATION_LANDSCAPE
+        );
     }
 
-    /**
-     * Whether should ignore app requested orientation in response to an app
-     * calling {@link android.app.Activity#setRequestedOrientation}.
-     *
-     * <p>This is needed to avoid getting into {@link android.app.Activity#setRequestedOrientation}
-     * loop when {@link DisplayContent#getIgnoreOrientationRequest} is enabled or device has
-     * landscape natural orientation which app developers don't expect. For example, the loop can
-     * look like this:
-     * <ol>
-     *     <li>App sets default orientation to "unspecified" at runtime
-     *     <li>App requests to "portrait" after checking some condition (e.g. display rotation).
-     *     <li>(2) leads to fullscreen -> letterboxed bounds change and activity relaunch because
-     *     app can't handle the corresponding config changes.
-     *     <li>Loop goes back to (1)
-     * </ol>
-     *
-     * <p>This treatment is enabled when the following conditions are met:
-     * <ul>
-     *     <li>Flag gating the treatment is enabled
-     *     <li>Opt-out component property isn't enabled
-     *     <li>Opt-in component property or per-app override are enabled
-     *     <li>Activity is relaunched after {@link android.app.Activity#setRequestedOrientation}
-     *     call from an app or camera compat force rotation treatment is active for the activity.
-     *     <li>Orientation request loop detected and is not letterboxed for fixed orientation
-     * </ul>
-     */
-    boolean shouldIgnoreRequestedOrientation(
-            @ActivityInfo.ScreenOrientation int requestedOrientation) {
-        if (mIgnoreRequestedOrientationOptProp.shouldEnableWithOverrideAndProperty(
-                isCompatChangeEnabled(OVERRIDE_ENABLE_COMPAT_IGNORE_REQUESTED_ORIENTATION))) {
-            if (mOrientationOverridesState.mIsRelaunchingAfterRequestedOrientationChanged) {
-                Slog.w(TAG, "Ignoring orientation update to "
-                        + screenOrientationToString(requestedOrientation)
-                        + " due to relaunching after setRequestedOrientation for "
-                        + mActivityRecord);
-                return true;
-            }
-            if (isCameraCompatTreatmentActive()) {
-                Slog.w(TAG, "Ignoring orientation update to "
-                        + screenOrientationToString(requestedOrientation)
-                        + " due to camera compat treatment for " + mActivityRecord);
-                return true;
-            }
-        }
+    boolean shouldEnableIgnoreOrientationRequest() {
+        return mIgnoreRequestedOrientationOptProp.shouldEnableWithOverrideAndProperty(
+                isCompatChangeEnabled(OVERRIDE_ENABLE_COMPAT_IGNORE_REQUESTED_ORIENTATION));
+    }
 
-        if (shouldIgnoreOrientationRequestLoop()) {
-            Slog.w(TAG, "Ignoring orientation update to "
-                    + screenOrientationToString(requestedOrientation)
-                    + " as orientation request loop was detected for "
-                    + mActivityRecord);
-            return true;
-        }
-        return false;
+    boolean isOverrideRespectRequestedOrientationEnabled() {
+        return isChangeEnabled(mActivityRecord, OVERRIDE_RESPECT_REQUESTED_ORIENTATION);
     }
 
     /**
@@ -158,7 +133,28 @@ class AppCompatOrientationOverrides {
         mOrientationOverridesState.updateOrientationRequestLoopState();
 
         return mOrientationOverridesState.shouldIgnoreRequestInLoop()
-                && !mActivityRecord.isLetterboxedForFixedOrientationAndAspectRatio();
+                && !mActivityRecord.mAppCompatController.getAppCompatAspectRatioPolicy()
+                    .isLetterboxedForFixedOrientationAndAspectRatio();
+    }
+
+    /**
+     * Whether should fix display orientation to landscape natural orientation when a task is
+     * fullscreen and the display is ignoring orientation requests.
+     *
+     * <p>This treatment is enabled when the following conditions are met:
+     * <ul>
+     *     <li>Opt-out component property isn't enabled
+     *     <li>Opt-in per-app override is enabled
+     *     <li>Task is in fullscreen.
+     *     <li>{@link DisplayContent#getIgnoreOrientationRequest} is enabled
+     *     <li>Natural orientation of the display is landscape.
+     * </ul>
+     */
+    boolean shouldUseDisplayLandscapeNaturalOrientation() {
+        return mAllowDisplayOrientationOverrideOptProp
+                .shouldEnableWithOptInOverrideAndOptOutProperty(
+                        isChangeEnabled(mActivityRecord,
+                                OVERRIDE_USE_DISPLAY_LANDSCAPE_NATURAL_ORIENTATION));
     }
 
     /**
@@ -174,6 +170,10 @@ class AppCompatOrientationOverrides {
         return mOrientationOverridesState.mIsRelaunchingAfterRequestedOrientationChanged;
     }
 
+    boolean isAllowOrientationOverrideOptOut() {
+        return mAllowOrientationOverrideOptProp.isFalse();
+    }
+
     @VisibleForTesting
     int getSetOrientationRequestCounter() {
         return mOrientationOverridesState.mSetOrientationRequestCounter;
@@ -181,20 +181,6 @@ class AppCompatOrientationOverrides {
 
     private boolean isCompatChangeEnabled(long overrideChangeId) {
         return mActivityRecord.info.isChangeEnabled(overrideChangeId);
-    }
-
-    /**
-     * @return {@code true} if the App Compat Camera Policy is active for the current activity.
-     */
-    // TODO(b/346253439): Remove after defining dependency with Camera capabilities.
-    private boolean isCameraCompatTreatmentActive() {
-        DisplayContent displayContent = mActivityRecord.mDisplayContent;
-        if (displayContent == null) {
-            return false;
-        }
-        return displayContent.mDisplayRotationCompatPolicy != null
-                && displayContent.mDisplayRotationCompatPolicy
-                .isTreatmentEnabledForActivity(mActivityRecord);
     }
 
     static class OrientationOverridesState {

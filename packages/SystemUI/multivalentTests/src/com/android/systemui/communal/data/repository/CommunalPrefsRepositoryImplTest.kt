@@ -88,24 +88,6 @@ class CommunalPrefsRepositoryImplTest : SysuiTestCase() {
         }
 
     @Test
-    fun isDisclaimerDismissed_byDefault_isFalse() =
-        testScope.runTest {
-            val isDisclaimerDismissed by
-                collectLastValue(underTest.isDisclaimerDismissed(MAIN_USER))
-            assertThat(isDisclaimerDismissed).isFalse()
-        }
-
-    @Test
-    fun isDisclaimerDismissed_onSet_isTrue() =
-        testScope.runTest {
-            val isDisclaimerDismissed by
-                collectLastValue(underTest.isDisclaimerDismissed(MAIN_USER))
-
-            underTest.setDisclaimerDismissed(MAIN_USER)
-            assertThat(isDisclaimerDismissed).isTrue()
-        }
-
-    @Test
     fun getSharedPreferences_whenFileRestored() =
         testScope.runTest {
             val isCtaDismissed by collectLastValue(underTest.isCtaDismissed(MAIN_USER))

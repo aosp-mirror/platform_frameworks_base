@@ -22,6 +22,7 @@ import android.content.Intent
 import android.view.View
 import android.widget.RemoteViews
 import com.android.systemui.animation.ActivityTransitionAnimator
+import com.android.systemui.communal.domain.interactor.CommunalSceneInteractor
 import com.android.systemui.communal.util.InteractionHandlerDelegate
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.plugins.ActivityStarter
@@ -32,10 +33,12 @@ class WidgetInteractionHandler
 @Inject
 constructor(
     private val activityStarter: ActivityStarter,
+    private val communalSceneInteractor: CommunalSceneInteractor
 ) : RemoteViews.InteractionHandler {
 
     private val delegate =
         InteractionHandlerDelegate(
+            communalSceneInteractor,
             findViewToAnimate = { view -> view is CommunalAppWidgetHostView },
             intentStarter = this::startIntent,
         )

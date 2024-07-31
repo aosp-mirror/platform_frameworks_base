@@ -24,9 +24,10 @@ import static org.junit.Assert.assertTrue;
 import android.content.Context;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
+import android.platform.test.annotations.RequiresFlagsEnabled;
 
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
-import androidx.test.runner.AndroidJUnit4;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -70,6 +71,35 @@ public class ImsConfigurationTrackerTest {
         didReset.set(false);
         // opt-in IME to handle density config changes.
         mImsConfigTracker.setHandledConfigChanges(ActivityInfo.CONFIG_DENSITY);
+        mImsConfigTracker.onConfigurationChanged(newConfig, resetStateRunner);
+        assertFalse("IME shouldn't restart since it handles configChanges",
+                didReset.get());
+    }
+
+    @Test
+    @RequiresFlagsEnabled(android.content.res.Flags.FLAG_HANDLE_ALL_CONFIG_CHANGES)
+    public void testShouldImeRestart_handleResourceUnused() throws Exception {
+        Configuration config = mContext.getResources().getConfiguration();
+        mImsConfigTracker.onInitialize(0 /* handledConfigChanges */);
+        mImsConfigTracker.onBindInput(mContext.getResources());
+        Configuration newConfig = new Configuration(config);
+
+        final AtomicBoolean didReset = new AtomicBoolean();
+        Runnable resetStateRunner = () -> didReset.set(true);
+
+        mImsConfigTracker.onConfigurationChanged(newConfig, resetStateRunner);
+        assertFalse("IME shouldn't restart if config hasn't changed",
+                didReset.get());
+
+        // Screen density changed but IME doesn't handle configChanges
+        newConfig.densityDpi = 99;
+        mImsConfigTracker.onConfigurationChanged(newConfig, resetStateRunner);
+        assertTrue("IME should restart for unhandled configChanges",
+                didReset.get());
+
+        didReset.set(false);
+        // opt-in IME to handle all configuration changes.
+        mImsConfigTracker.setHandledConfigChanges(ActivityInfo.CONFIG_RESOURCES_UNUSED);
         mImsConfigTracker.onConfigurationChanged(newConfig, resetStateRunner);
         assertFalse("IME shouldn't restart since it handles configChanges",
                 didReset.get());

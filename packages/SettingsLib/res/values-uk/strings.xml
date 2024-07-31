@@ -408,18 +408,12 @@
     <string name="enable_gpu_debug_layers_summary" msgid="4921521407377170481">"Дозволити завантажувати шари налагодження ГП для додатків налагодження"</string>
     <string name="enable_verbose_vendor_logging" msgid="1196698788267682072">"Увімкнути докладний журнал постачальника"</string>
     <string name="enable_verbose_vendor_logging_summary" msgid="5426292185780393708">"Включати у звіти про помилки додаткові записи постачальника про пристрій, які можуть містити особисті дані, призводити до надмірного споживання заряду акумулятора та/або використовувати більший обсяг пам\'яті."</string>
-    <!-- no translation found for enable_verbose_vendor_logging_checkbox (3864578373293835530) -->
-    <skip />
-    <!-- no translation found for verbose_vendor_logging_notification_title (6811217272559843592) -->
-    <skip />
-    <!-- no translation found for verbose_vendor_logging_notification_summary (5226524769774370942) -->
-    <skip />
-    <!-- no translation found for verbose_vendor_logging_notification_action (1190831050259046071) -->
-    <skip />
-    <!-- no translation found for verbose_vendor_logging_preference_summary_will_disable (6175431593394522553) -->
-    <skip />
-    <!-- no translation found for verbose_vendor_logging_preference_summary_on (9017757242481762036) -->
-    <skip />
+    <string name="enable_verbose_vendor_logging_checkbox" msgid="3864578373293835530">"Вимкнути через один день"</string>
+    <string name="verbose_vendor_logging_notification_title" msgid="6811217272559843592">"Ведення детального журналу постачальника завершено"</string>
+    <string name="verbose_vendor_logging_notification_summary" msgid="5226524769774370942">"Увімкнено на один день"</string>
+    <string name="verbose_vendor_logging_notification_action" msgid="1190831050259046071">"Увімкнути ще на один день"</string>
+    <string name="verbose_vendor_logging_preference_summary_will_disable" msgid="6175431593394522553">"Вимикається через один день"</string>
+    <string name="verbose_vendor_logging_preference_summary_on" msgid="9017757242481762036">"Увімкнено на необмежений час"</string>
     <string name="window_animation_scale_title" msgid="5236381298376812508">"Анімація вікон"</string>
     <string name="transition_animation_scale_title" msgid="1278477690695439337">"Анімація переходів"</string>
     <string name="animator_duration_scale_title" msgid="7082913931326085176">"Тривалість анімації"</string>
@@ -437,7 +431,6 @@
     <string name="force_resizable_activities" msgid="7143612144399959606">"Примусово масштабувати активність"</string>
     <string name="force_resizable_activities_summary" msgid="2490382056981583062">"Масштабувати активність на кілька вікон, незалежно від значень у файлі маніфесту."</string>
     <string name="enable_freeform_support" msgid="7599125687603914253">"Увімкнути вікна довільного формату"</string>
-    <string name="enable_freeform_support_summary" msgid="1822862728719276331">"Увімкнути експериментальні вікна довільного формату."</string>
     <string name="local_backup_password_title" msgid="4631017948933578709">"Пароль рез. копії на ПК"</string>
     <string name="local_backup_password_summary_none" msgid="7646898032616361714">"Повні резервні копії на комп’ютері наразі не захищені"</string>
     <string name="local_backup_password_summary_change" msgid="1707357670383995567">"Торкніться, щоб змінити або видалити пароль для повного резервного копіювання на комп’ютер"</string>
@@ -502,7 +495,8 @@
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_remaining_charging_duration_only" msgid="8085099012811384899">"<xliff:g id="TIME">%1$s</xliff:g> до повного заряду"</string>
     <string name="power_charging_duration" msgid="6127154952524919719">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="TIME">%2$s</xliff:g> до повного заряду"</string>
-    <string name="power_charging_limited" msgid="8202147604844938236">"<xliff:g id="LEVEL">%1$s</xliff:g> – заряджання оптимізовано"</string>
+    <!-- no translation found for power_charging_limited (4144004473976005214) -->
+    <skip />
     <string name="power_charging_future_paused" msgid="1809543660923642799">"<xliff:g id="LEVEL">%1$s</xliff:g> – заряджається"</string>
     <string name="power_fast_charging_duration_v2" msgid="3797735998640359490">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATUS">%2$s</xliff:g> - Завершиться до <xliff:g id="TIME">%3$s</xliff:g>"</string>
     <string name="power_charging_duration_v2" msgid="2938998284074003248">"<xliff:g id="LEVEL">%1$s</xliff:g> - Повністю зарядиться до <xliff:g id="TIME">%2$s</xliff:g>"</string>

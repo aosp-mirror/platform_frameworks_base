@@ -21,6 +21,7 @@ import android.content.res.ColorStateList
 import android.content.res.Configuration
 import android.graphics.Bitmap
 import android.graphics.Color
+import android.graphics.Point
 import android.graphics.drawable.LayerDrawable
 import android.graphics.drawable.RippleDrawable
 import android.graphics.drawable.ShapeDrawable
@@ -41,8 +42,8 @@ import com.android.internal.R.attr.materialColorSecondaryContainer
 import com.android.internal.R.attr.materialColorSurfaceContainerHigh
 import com.android.internal.R.attr.materialColorSurfaceContainerLow
 import com.android.internal.R.attr.materialColorSurfaceDim
-import com.android.window.flags.Flags
 import com.android.wm.shell.R
+import com.android.wm.shell.shared.desktopmode.DesktopModeFlags
 import com.android.wm.shell.windowdecor.MaximizeButtonView
 import com.android.wm.shell.windowdecor.common.DecorThemeUtil
 import com.android.wm.shell.windowdecor.common.OPACITY_100
@@ -136,8 +137,14 @@ internal class AppHeaderViewHolder(
                 onMaximizeHoverAnimationFinishedListener
     }
 
-    override fun bindData(taskInfo: RunningTaskInfo) {
-        if (Flags.enableThemedAppHeaders()) {
+    override fun bindData(
+        taskInfo: RunningTaskInfo,
+        position: Point,
+        width: Int,
+        height: Int,
+        isCaptionVisible: Boolean
+    ) {
+        if (DesktopModeFlags.THEMED_APP_HEADERS.isEnabled(context)) {
             bindDataWithThemedHeaders(taskInfo)
         } else {
             bindDataLegacy(taskInfo)

@@ -283,6 +283,11 @@ public final class WMShell implements
             public void onFinishedWakingUp() {
                 splitScreen.onFinishedWakingUp();
             }
+
+            @Override
+            public void onStartedGoingToSleep() {
+                splitScreen.onStartedGoingToSleep();
+            }
         });
         mCommandQueue.addCallback(new CommandQueue.Callbacks() {
             @Override

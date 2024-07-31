@@ -22,6 +22,7 @@ import android.os.IBinder;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.display.brightness.clamper.HdrClamper;
+import com.android.server.display.config.HighBrightnessModeData;
 import com.android.server.display.feature.DisplayManagerFlags;
 
 import java.io.PrintWriter;
@@ -59,7 +60,7 @@ class BrightnessRangeController {
         mModeChangeCallback = modeChangeCallback;
         mHdrClamper = hdrClamper;
         mNormalBrightnessModeController = normalBrightnessModeController;
-        mUseHdrClamper = flags.isHdrClamperEnabled();
+        mUseHdrClamper = flags.isHdrClamperEnabled() && !flags.useNewHdrBrightnessModifier();
         mUseNbmController = flags.isNbmControllerEnabled();
         if (mUseNbmController) {
             mNormalBrightnessModeController.resetNbmData(
@@ -157,7 +158,7 @@ class BrightnessRangeController {
     private void updateHdrClamper(DisplayDeviceInfo info, IBinder token,
             DisplayDeviceConfig displayDeviceConfig) {
         if (mUseHdrClamper) {
-            DisplayDeviceConfig.HighBrightnessModeData hbmData =
+            HighBrightnessModeData hbmData =
                     displayDeviceConfig.getHighBrightnessModeData();
             float minimumHdrPercentOfScreen =
                     hbmData == null ? -1f : hbmData.minimumHdrPercentOfScreen;

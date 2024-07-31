@@ -16,6 +16,8 @@
 
 package com.android.systemui.keyguard.domain.interactor
 
+import com.android.systemui.communal.domain.interactor.communalSceneInteractor
+import com.android.systemui.communal.domain.interactor.communalSettingsInteractor
 import com.android.systemui.keyguard.data.repository.keyguardTransitionRepository
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.applicationCoroutineScope
@@ -26,14 +28,17 @@ import com.android.systemui.statusbar.domain.interactor.keyguardOcclusionInterac
 var Kosmos.fromGlanceableHubTransitionInteractor by
     Kosmos.Fixture {
         FromGlanceableHubTransitionInteractor(
-            transitionRepository = keyguardTransitionRepository,
-            transitionInteractor = keyguardTransitionInteractor,
             scope = applicationCoroutineScope,
-            bgDispatcher = testDispatcher,
             mainDispatcher = testDispatcher,
+            bgDispatcher = testDispatcher,
+            glanceableHubTransitions = glanceableHubTransitions,
+            communalSettingsInteractor = communalSettingsInteractor,
             keyguardInteractor = keyguardInteractor,
+            transitionRepository = keyguardTransitionRepository,
+            internalTransitionInteractor = internalKeyguardTransitionInteractor,
+            transitionInteractor = keyguardTransitionInteractor,
             powerInteractor = powerInteractor,
             keyguardOcclusionInteractor = keyguardOcclusionInteractor,
-            glanceableHubTransitions = glanceableHubTransitions,
+            communalSceneInteractor = communalSceneInteractor,
         )
     }

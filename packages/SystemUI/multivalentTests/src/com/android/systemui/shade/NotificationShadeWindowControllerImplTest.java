@@ -46,6 +46,7 @@ import android.view.WindowManager;
 
 import androidx.test.filters.SmallTest;
 
+import com.android.app.viewcapture.ViewCaptureAwareWindowManager;
 import com.android.internal.colorextraction.ColorExtractor;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.biometrics.AuthController;
@@ -59,6 +60,7 @@ import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.res.R;
 import com.android.systemui.scene.FakeWindowRootViewComponent;
 import com.android.systemui.settings.UserTracker;
+import com.android.systemui.shade.ui.viewmodel.NotificationShadeWindowModel;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
 import com.android.systemui.statusbar.phone.DozeParameters;
@@ -89,7 +91,7 @@ import platform.test.runner.parameterized.Parameters;
 @RunWithLooper(setAsMainLooper = true)
 @SmallTest
 public class NotificationShadeWindowControllerImplTest extends SysuiTestCase {
-    @Mock private WindowManager mWindowManager;
+    @Mock private ViewCaptureAwareWindowManager mWindowManager;
     @Mock private DozeParameters mDozeParameters;
     @Spy private final NotificationShadeWindowView mNotificationShadeWindowView = spy(
             new NotificationShadeWindowView(mContext, null));
@@ -105,6 +107,7 @@ public class NotificationShadeWindowControllerImplTest extends SysuiTestCase {
     @Mock private ShadeWindowLogger mShadeWindowLogger;
     @Mock private SelectedUserInteractor mSelectedUserInteractor;
     @Mock private UserTracker mUserTracker;
+    @Mock private NotificationShadeWindowModel mNotificationShadeWindowModel;
     @Captor private ArgumentCaptor<WindowManager.LayoutParams> mLayoutParameters;
     @Captor private ArgumentCaptor<StatusBarStateController.StateListener> mStateListener;
 
@@ -160,6 +163,7 @@ public class NotificationShadeWindowControllerImplTest extends SysuiTestCase {
                 mShadeWindowLogger,
                 () -> mSelectedUserInteractor,
                 mUserTracker,
+                mNotificationShadeWindowModel,
                 mKosmos::getCommunalInteractor) {
                     @Override
                     protected boolean isDebuggable() {

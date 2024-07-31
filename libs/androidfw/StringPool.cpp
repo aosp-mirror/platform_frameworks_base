@@ -132,7 +132,7 @@ bool StringPool::StyleRef::operator==(const StyleRef& rhs) const {
 
   auto rhs_iter = rhs.entry_->spans.begin();
   for (const Span& span : entry_->spans) {
-    const Span& rhs_span = *rhs_iter;
+    const Span& rhs_span = *rhs_iter++;
     if (span.first_char != rhs_span.first_char || span.last_char != rhs_span.last_char ||
         span.name != rhs_span.name) {
       return false;
@@ -297,24 +297,22 @@ void StringPool::Prune() {
 template <typename E>
 static void SortEntries(
     std::vector<std::unique_ptr<E>>& entries,
-    const std::function<int(const StringPool::Context&, const StringPool::Context&)>& cmp) {
+    base::function_ref<int(const StringPool::Context&, const StringPool::Context&)> cmp) {
   using UEntry = std::unique_ptr<E>;
-
-  if (cmp != nullptr) {
-    std::sort(entries.begin(), entries.end(), [&cmp](const UEntry& a, const UEntry& b) -> bool {
-      int r = cmp(a->context, b->context);
-      if (r == 0) {
-        r = a->value.compare(b->value);
-      }
-      return r < 0;
-    });
-  } else {
-    std::sort(entries.begin(), entries.end(),
-              [](const UEntry& a, const UEntry& b) -> bool { return a->value < b->value; });
-  }
+  std::sort(entries.begin(), entries.end(), [cmp](const UEntry& a, const UEntry& b) -> bool {
+    int r = cmp(a->context, b->context);
+    if (r == 0) {
+      r = a->value.compare(b->value);
+    }
+    return r < 0;
+  });
 }
 
-void StringPool::Sort(const std::function<int(const Context&, const Context&)>& cmp) {
+void StringPool::Sort() {
+  Sort([](auto&&, auto&&) { return 0; });
+}
+
+void StringPool::Sort(base::function_ref<int(const Context&, const Context&)> cmp) {
   SortEntries(styles_, cmp);
   SortEntries(strings_, cmp);
   ReAssignIndices();

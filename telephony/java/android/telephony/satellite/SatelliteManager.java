@@ -50,7 +50,6 @@ import java.lang.annotation.RetentionPolicy;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
@@ -1079,6 +1078,11 @@ public final class SatelliteManager {
      * @hide
      */
     public static final int DATAGRAM_TYPE_LAST_SOS_MESSAGE_NO_HELP_NEEDED = 5;
+    /**
+     * Datagram type indicating that the message to be sent or received is of type SMS.
+     * @hide
+     */
+    public static final int DATAGRAM_TYPE_SMS = 6;
 
     /** @hide */
     @IntDef(prefix = "DATAGRAM_TYPE_", value = {
@@ -1087,7 +1091,8 @@ public final class SatelliteManager {
             DATAGRAM_TYPE_LOCATION_SHARING,
             DATAGRAM_TYPE_KEEP_ALIVE,
             DATAGRAM_TYPE_LAST_SOS_MESSAGE_STILL_NEED_HELP,
-            DATAGRAM_TYPE_LAST_SOS_MESSAGE_NO_HELP_NEEDED
+            DATAGRAM_TYPE_LAST_SOS_MESSAGE_NO_HELP_NEEDED,
+            DATAGRAM_TYPE_SMS
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface DatagramType {}
@@ -2636,9 +2641,9 @@ public final class SatelliteManager {
                         if (resultCode == SATELLITE_RESULT_SUCCESS) {
                             if (resultData.containsKey(KEY_REQUEST_PROVISION_SUBSCRIBER_ID_TOKEN)) {
                                 List<ProvisionSubscriberId> list =
-                                        Collections.singletonList(resultData.getParcelable(
+                                        resultData.getParcelableArrayList(
                                                 KEY_REQUEST_PROVISION_SUBSCRIBER_ID_TOKEN,
-                                                ProvisionSubscriberId.class));
+                                                ProvisionSubscriberId.class);
                                 executor.execute(() -> Binder.withCleanCallingIdentity(() ->
                                         callback.onResult(list)));
                             } else {
@@ -2692,13 +2697,13 @@ public final class SatelliteManager {
                     @Override
                     protected void onReceiveResult(int resultCode, Bundle resultData) {
                         if (resultCode == SATELLITE_RESULT_SUCCESS) {
-                            if (resultData.containsKey(KEY_SATELLITE_PROVISIONED)) {
+                            if (resultData.containsKey(KEY_IS_SATELLITE_PROVISIONED)) {
                                 boolean isIsProvisioned =
-                                        resultData.getBoolean(KEY_SATELLITE_PROVISIONED);
+                                        resultData.getBoolean(KEY_IS_SATELLITE_PROVISIONED);
                                 executor.execute(() -> Binder.withCleanCallingIdentity(() ->
                                         callback.onResult(isIsProvisioned)));
                             } else {
-                                loge("KEY_REQUEST_PROVISION_TOKENS does not exist.");
+                                loge("KEY_IS_SATELLITE_PROVISIONED does not exist.");
                                 executor.execute(() -> Binder.withCleanCallingIdentity(() ->
                                         callback.onError(new SatelliteException(
                                                 SATELLITE_RESULT_REQUEST_FAILED))));

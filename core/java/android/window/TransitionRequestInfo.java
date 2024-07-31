@@ -471,7 +471,7 @@ public final class TransitionRequestInfo implements Parcelable {
                 "pipTask = " + mPipTask + ", " +
                 "remoteTransition = " + mRemoteTransition + ", " +
                 "displayChange = " + mDisplayChange + ", " +
-                "flags = " + mFlags + ", " +
+                "flags = " + Integer.toHexString(mFlags) + ", " +
                 "debugId = " + mDebugId +
         " }";
     }

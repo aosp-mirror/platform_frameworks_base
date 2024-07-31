@@ -36,4 +36,10 @@ public class DozeBrightnessHostForwarder extends DozeMachine.Service.Delegate {
         super.setDozeScreenBrightness(brightness);
         mHost.setDozeScreenBrightness(brightness);
     }
+
+    @Override
+    public void setDozeScreenBrightnessFloat(float brightness) {
+        super.setDozeScreenBrightnessFloat(brightness);
+        mHost.setDozeScreenBrightnessFloat(brightness);
+    }
 }

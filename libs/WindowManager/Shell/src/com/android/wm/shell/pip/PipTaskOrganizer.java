@@ -496,7 +496,9 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
         ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
                 "startSwipePipToHome: %s, state=%s", componentName, mPipTransitionState);
         mPipTransitionState.setInSwipePipToHomeTransition(true);
-        sendOnPipTransitionStarted(TRANSITION_DIRECTION_TO_PIP);
+        if (!ENABLE_SHELL_TRANSITIONS) {
+            sendOnPipTransitionStarted(TRANSITION_DIRECTION_TO_PIP);
+        }
         setBoundsStateForEntry(componentName, pictureInPictureParams, activityInfo);
         return mPipBoundsAlgorithm.getEntryDestinationBounds();
     }
@@ -1981,12 +1983,6 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
             }
             clearContentOverlay();
         }
-        if (mPipTransitionState.getTransitionState() == PipTransitionState.UNDEFINED) {
-            // Avoid double removal, which is fatal.
-            ProtoLog.w(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
-                    "%s: trying to remove overlay (%s) while in UNDEFINED state", TAG, surface);
-            return;
-        }
         if (surface == null || !surface.isValid()) {
             ProtoLog.w(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
                     "%s: trying to remove invalid content overlay (%s)", TAG, surface);
@@ -2030,7 +2026,7 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
             removeContentOverlay(mPipOverlay, null /* callback */);
         }
         if (animator != null) {
-            PipAnimationController.quietCancel(animator);
+            animator.cancel();
             mPipAnimationController.resetAnimatorState();
         }
     }

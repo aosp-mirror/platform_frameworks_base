@@ -23,7 +23,6 @@ import com.android.systemui.keyboard.shortcut.shared.model.ShortcutCategory
 import com.android.systemui.keyboard.shortcut.shared.model.ShortcutSubCategory
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 
 @SysUISingleton
@@ -33,23 +32,12 @@ constructor(
     categoriesRepository: ShortcutHelperCategoriesRepository,
 ) {
 
-    private val systemsShortcutCategory = categoriesRepository.systemShortcutsCategory
-    private val multitaskingShortcutsCategory = categoriesRepository.multitaskingShortcutsCategory
-    private val imeShortcutsCategory =
-        categoriesRepository.imeShortcutsCategory.map { groupSubCategoriesInCategory(it) }
-
     val shortcutCategories: Flow<List<ShortcutCategory>> =
-        combine(systemsShortcutCategory, multitaskingShortcutsCategory, imeShortcutsCategory) {
-            shortcutCategories ->
-            shortcutCategories.filterNotNull()
+        categoriesRepository.categories.map { categories ->
+            categories.map { category -> groupSubCategoriesInCategory(category) }
         }
 
-    private fun groupSubCategoriesInCategory(
-        shortcutCategory: ShortcutCategory?
-    ): ShortcutCategory? {
-        if (shortcutCategory == null) {
-            return null
-        }
+    private fun groupSubCategoriesInCategory(shortcutCategory: ShortcutCategory): ShortcutCategory {
         val subCategoriesWithGroupedShortcuts =
             shortcutCategory.subCategories.map {
                 ShortcutSubCategory(
@@ -68,6 +56,10 @@ constructor(
             .groupBy { it.label }
             .entries
             .map { (commonLabel, groupedShortcuts) ->
-                Shortcut(label = commonLabel, commands = groupedShortcuts.flatMap { it.commands })
+                Shortcut(
+                    label = commonLabel,
+                    icon = groupedShortcuts.firstOrNull()?.icon,
+                    commands = groupedShortcuts.flatMap { it.commands }
+                )
             }
 }

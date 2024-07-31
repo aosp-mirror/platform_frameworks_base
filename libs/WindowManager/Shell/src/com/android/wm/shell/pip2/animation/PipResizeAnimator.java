@@ -47,9 +47,17 @@ public class PipResizeAnimator extends ValueAnimator
     @Nullable
     private Runnable mAnimationEndCallback;
     private RectEvaluator mRectEvaluator;
+
+    // Bounds relative to which scaling/cropping must be done.
     private final Rect mBaseBounds = new Rect();
+
+    // Bounds to animate from.
     private final Rect mStartBounds = new Rect();
+
+    // Target bounds.
     private final Rect mEndBounds = new Rect();
+
+    // Bounds updated by the evaluator as animator is running.
     private final Rect mAnimatedRect = new Rect();
     private final float mDelta;
 
@@ -84,7 +92,6 @@ public class PipResizeAnimator extends ValueAnimator
         addListener(this);
         addUpdateListener(this);
         setEvaluator(mRectEvaluator);
-        // TODO: change this
         setDuration(duration);
     }
 

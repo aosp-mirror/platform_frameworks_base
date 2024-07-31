@@ -37,6 +37,7 @@ android_test {
     ],
 
     static_libs: [
+        "TestParameterInjector",
         "WindowManager-Shell",
         "junit",
         "flag-junit",
@@ -59,6 +60,7 @@ android_test {
         "guava-android-testlib",
         "com.android.window.flags.window-aconfig-java",
         "platform-test-annotations",
+        "flag-junit",
     ],
 
     libs: [

@@ -280,6 +280,9 @@
     <!-- to adjust volume in volume panel -->
     <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
 
+    <!-- to get bluetooth audio device category -->
+    <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS_PRIVILEGED" />
+
     <!-- to access ResolverRankerServices -->
     <uses-permission android:name="android.permission.BIND_RESOLVER_RANKER_SERVICE" />
 
@@ -479,7 +482,7 @@
             android:exported="true"
             android:theme="@style/Theme.AppCompat.NoActionBar">
             <intent-filter>
-                <action android:name="com.android.systemui.action.TOUCHPAD_TUTORIAL"/>
+                <action android:name="com.android.systemui.action.TOUCHPAD_KEYBOARD_TUTORIAL"/>
                 <category android:name="android.intent.category.DEFAULT"/>
             </intent-filter>
         </activity>
@@ -1056,6 +1059,14 @@
             android:exported="false">
             <intent-filter android:priority="1">
                 <action android:name="com.android.systemui.action.LAUNCH_HEARING_DEVICES_DIALOG" />
+            </intent-filter>
+        </receiver>
+
+        <receiver android:name=".accessibility.extradim.ExtraDimDialogReceiver"
+            android:singleUser="true"
+            android:exported="false">
+            <intent-filter android:priority="1">
+                <action android:name="com.android.systemui.action.LAUNCH_REMOVE_EXTRA_DIM_DIALOG" />
             </intent-filter>
         </receiver>
 

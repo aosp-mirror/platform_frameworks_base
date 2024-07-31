@@ -38,7 +38,6 @@ import androidx.annotation.StringRes;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceViewHolder;
 
-import com.android.settingslib.utils.BuildCompatUtils;
 import com.android.settingslib.widget.preference.banner.R;
 /**
  * Banner message is a banner displaying important information (permission request, page error etc),
@@ -84,7 +83,7 @@ public class BannerMessagePreference extends Preference {
     }
 
     private static final String TAG = "BannerPreference";
-    private static final boolean IS_AT_LEAST_S = BuildCompatUtils.isAtLeastS();
+    private static final boolean IS_AT_LEAST_S = Build.VERSION.SDK_INT >= Build.VERSION_CODES.S;
 
     private final BannerMessagePreference.ButtonInfo mPositiveButtonInfo =
             new BannerMessagePreference.ButtonInfo();

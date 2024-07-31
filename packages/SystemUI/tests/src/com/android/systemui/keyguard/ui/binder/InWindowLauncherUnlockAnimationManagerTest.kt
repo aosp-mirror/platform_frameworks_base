@@ -18,17 +18,15 @@ package com.android.systemui.keyguard.ui.binder
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
-import com.android.systemui.SysUITestModule
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.biometrics.domain.BiometricsDomainLayerModule
-import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.keyguard.domain.interactor.inWindowLauncherUnlockAnimationInteractor
 import com.android.systemui.keyguard.ui.view.InWindowLauncherUnlockAnimationManager
+import com.android.systemui.keyguard.ui.viewmodel.InWindowLauncherAnimationViewModel
+import com.android.systemui.kosmos.applicationCoroutineScope
+import com.android.systemui.kosmos.testScope
 import com.android.systemui.shared.system.smartspace.ILauncherUnlockAnimationController
-import com.android.systemui.user.domain.UserDomainLayerModule
+import com.android.systemui.testKosmos
 import com.android.systemui.util.mockito.any
-import dagger.BindsInstance
-import dagger.Component
-import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
@@ -45,10 +43,9 @@ import org.mockito.MockitoAnnotations
 @RunWith(AndroidJUnit4::class)
 @kotlinx.coroutines.ExperimentalCoroutinesApi
 class InWindowLauncherUnlockAnimationManagerTest : SysuiTestCase() {
+    private val kosmos = testKosmos()
     private lateinit var underTest: InWindowLauncherUnlockAnimationManager
-
-    private lateinit var testComponent: TestComponent
-    private lateinit var testScope: TestScope
+    private val testScope = kosmos.testScope
 
     @Mock private lateinit var launcherUnlockAnimationController: ILauncherUnlockAnimationController
 
@@ -56,14 +53,14 @@ class InWindowLauncherUnlockAnimationManagerTest : SysuiTestCase() {
     fun setUp() {
         MockitoAnnotations.initMocks(this)
 
-        testComponent =
-            DaggerInWindowLauncherUnlockAnimationManagerTest_TestComponent.factory()
-                .create(
-                    test = this,
-                )
-        underTest = testComponent.underTest
-        testScope = testComponent.testScope
-
+        underTest =
+            InWindowLauncherUnlockAnimationManager(
+                kosmos.inWindowLauncherUnlockAnimationInteractor,
+                InWindowLauncherAnimationViewModel(
+                    kosmos.inWindowLauncherUnlockAnimationInteractor
+                ),
+                kosmos.applicationCoroutineScope
+            )
         underTest.setLauncherUnlockController("launcherClass", launcherUnlockAnimationController)
     }
 
@@ -114,25 +111,4 @@ class InWindowLauncherUnlockAnimationManagerTest : SysuiTestCase() {
 
             verifyNoMoreInteractions(launcherUnlockAnimationController)
         }
-
-    @SysUISingleton
-    @Component(
-        modules =
-            [
-                SysUITestModule::class,
-                BiometricsDomainLayerModule::class,
-                UserDomainLayerModule::class,
-            ]
-    )
-    interface TestComponent {
-        val underTest: InWindowLauncherUnlockAnimationManager
-        val testScope: TestScope
-
-        @Component.Factory
-        interface Factory {
-            fun create(
-                @BindsInstance test: SysuiTestCase,
-            ): TestComponent
-        }
-    }
 }

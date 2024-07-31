@@ -1052,6 +1052,19 @@
         <!-- The font weight adjustment value has changed. Used to reflect the user increasing font
              weight. -->
         <flag name="fontWeightAdjustment" value="0x10000000" />
+        <!-- The assets paths have changed. For example a runtime overlay is installed and enabled.
+             Corresponds to {@link android.content.pm.ActivityInfo#CONFIG_ASSETS_PATHS}. -->
+        <flag name="assetsPaths" value="0x80000000" />
+        <!-- This is probably not the flag you want, the resources compiler supports a less
+             dangerous version of it, 'allKnown', that only suppresses all currently existing
+             configuration change restarts depending on your target SDK rather than whatever the
+             latest SDK supports, allowing the application to work with resources on future Platform
+             versions.
+             Activity doesn't use Android Resources at all and doesn't need to be restarted on any
+             configuration changes. This overrides all other flags, and this is recommended to be
+             used individually. Corresponds to
+             {@link android.content.pm.ActivityInfo#CONFIG_RESOURCES_UNUSED}. -->
+        <flag name="resourcesUnused" value="0x8000000" />
     </attr>
 
     <!-- Indicate that the activity can be launched as the embedded child of another
@@ -3283,8 +3296,8 @@
              usually TVs.
              <p>Requires permission {@code android.permission.DISABLE_SYSTEM_SOUND_EFFECTS}. -->
         <attr name="playHomeTransitionSound" format="boolean"/>
-        <!-- Indicates whether the activity can be displayed on a remote device which may or
-             may not be running Android. -->
+        <!-- Indicates whether the activity can be displayed on a display that may belong to a
+             remote device which may or may not be running Android. -->
         <attr name="canDisplayOnRemoteDevices" format="boolean"/>
         <attr name="allowUntrustedActivityEmbedding" />
         <attr name="knownActivityEmbeddingCerts" />

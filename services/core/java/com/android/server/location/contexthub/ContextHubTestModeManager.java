@@ -29,19 +29,22 @@ import java.util.Random;
 public class ContextHubTestModeManager {
     private static final String TAG = "ContextHubTestModeManager";
 
-    /** Probability (in percent) of duplicating a message. */
-    private static final int MESSAGE_DROP_PROBABILITY_PERCENT = 20;
+    /** Probability of duplicating a message. */
+    private static final double MESSAGE_DROP_PROBABILITY = 0.05;
 
-    /** Probability (in percent) of duplicating a message. */
-    private static final int MESSAGE_DUPLICATION_PROBABILITY_PERCENT = 20;
+    /** Probability of duplicating a message. */
+    private static final double MESSAGE_DUPLICATION_PROBABILITY = 0.05;
 
-    /** The number of total messages to send when the duplicate event happens. */
+    /** The number of total messages to send when the duplication event happens. */
     private static final int NUM_MESSAGES_TO_DUPLICATE = 3;
 
-    /** A probability percent for a certain event. */
-    private static final int MAX_PROBABILITY_PERCENT = 100;
+    /**
+     * The seed for the random number generator. This is used to make the
+     * test more deterministic.
+     */
+    private static final long SEED = 0xDEADBEEF;
 
-    private final Random mRandom = new Random();
+    private final Random mRandom = new Random(SEED);
 
     /**
      * @return whether the message was handled
@@ -50,8 +53,7 @@ public class ContextHubTestModeManager {
     public boolean handleNanoappMessage(Runnable handleMessage, NanoAppMessage message) {
         if (Flags.reliableMessageDuplicateDetectionService()
                 && message.isReliable()
-                && mRandom.nextInt(MAX_PROBABILITY_PERCENT)
-                        < MESSAGE_DUPLICATION_PROBABILITY_PERCENT) {
+                && mRandom.nextDouble() < MESSAGE_DUPLICATION_PROBABILITY) {
             Log.i(TAG, "[TEST MODE] Duplicating message ("
                     + NUM_MESSAGES_TO_DUPLICATE
                     + " sends) with message sequence number: "
@@ -71,8 +73,7 @@ public class ContextHubTestModeManager {
     public boolean sendMessageToContextHub(NanoAppMessage message) {
         if (Flags.reliableMessageRetrySupportService()
                 && message.isReliable()
-                && mRandom.nextInt(MAX_PROBABILITY_PERCENT)
-                        < MESSAGE_DROP_PROBABILITY_PERCENT) {
+                && mRandom.nextDouble() < MESSAGE_DROP_PROBABILITY) {
             Log.i(TAG, "[TEST MODE] Dropping message with message sequence number: "
                     + message.getMessageSequenceNumber());
             return true;

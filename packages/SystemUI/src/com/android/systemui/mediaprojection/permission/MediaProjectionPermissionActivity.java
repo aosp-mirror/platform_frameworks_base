@@ -187,96 +187,40 @@ public class MediaProjectionPermissionActivity extends Activity
             }
         }
 
-        TextPaint paint = new TextPaint();
-        paint.setTextSize(42);
-
-        CharSequence dialogText = null;
-        CharSequence dialogTitle = null;
-        String appName = null;
-        if (Utils.isHeadlessRemoteDisplayProvider(packageManager, mPackageName)) {
-            dialogText = getString(R.string.media_projection_sys_service_dialog_warning);
-            dialogTitle = getString(R.string.media_projection_sys_service_dialog_title);
-        } else {
-            String label = aInfo.loadLabel(packageManager).toString();
-
-            // If the label contains new line characters it may push the security
-            // message below the fold of the dialog. Labels shouldn't have new line
-            // characters anyways, so just truncate the message the first time one
-            // is seen.
-            final int labelLength = label.length();
-            int offset = 0;
-            while (offset < labelLength) {
-                final int codePoint = label.codePointAt(offset);
-                final int type = Character.getType(codePoint);
-                if (type == Character.LINE_SEPARATOR
-                        || type == Character.CONTROL
-                        || type == Character.PARAGRAPH_SEPARATOR) {
-                    label = label.substring(0, offset) + ELLIPSIS;
-                    break;
-                }
-                offset += Character.charCount(codePoint);
-            }
-
-            if (label.isEmpty()) {
-                label = mPackageName;
-            }
-
-            String unsanitizedAppName = TextUtils.ellipsize(label,
-                    paint, MAX_APP_NAME_SIZE_PX, TextUtils.TruncateAt.END).toString();
-            appName = BidiFormatter.getInstance().unicodeWrap(unsanitizedAppName);
-
-            String actionText = getString(R.string.media_projection_dialog_warning, appName);
-            SpannableString message = new SpannableString(actionText);
-
-            int appNameIndex = actionText.indexOf(appName);
-            if (appNameIndex >= 0) {
-                message.setSpan(new StyleSpan(Typeface.BOLD),
-                        appNameIndex, appNameIndex + appName.length(), 0);
-            }
-            dialogText = message;
-            dialogTitle = getString(R.string.media_projection_dialog_title, appName);
-        }
+        final String appName = extractAppName(aInfo, packageManager);
+        final boolean hasCastingCapabilities =
+                Utils.isHeadlessRemoteDisplayProvider(packageManager, mPackageName);
 
         // Using application context for the dialog, instead of the activity context, so we get
         // the correct screen width when in split screen.
         Context dialogContext = getApplicationContext();
-        if (isPartialScreenSharingEnabled()) {
-            final boolean overrideDisableSingleAppOption =
-                    CompatChanges.isChangeEnabled(
-                            OVERRIDE_DISABLE_MEDIA_PROJECTION_SINGLE_APP_OPTION,
-                            mPackageName, getHostUserHandle());
-            MediaProjectionPermissionDialogDelegate delegate =
-                    new MediaProjectionPermissionDialogDelegate(
-                            dialogContext,
-                            getMediaProjectionConfig(),
-                            dialog -> {
-                                ScreenShareOption selectedOption =
-                                        dialog.getSelectedScreenShareOption();
-                                grantMediaProjectionPermission(selectedOption.getMode());
-                            },
-                            () -> finish(RECORD_CANCEL, /* projection= */ null),
-                            appName,
-                            overrideDisableSingleAppOption,
-                            mUid,
-                            mMediaProjectionMetricsLogger);
-            mDialog =
-                    new AlertDialogWithDelegate(
-                            dialogContext, R.style.Theme_SystemUI_Dialog, delegate);
-        } else {
-            AlertDialog.Builder dialogBuilder =
-                    new AlertDialog.Builder(dialogContext, R.style.Theme_SystemUI_Dialog)
-                            .setTitle(dialogTitle)
-                            .setIcon(R.drawable.ic_media_projection_permission)
-                            .setMessage(dialogText)
-                            .setPositiveButton(R.string.media_projection_action_text, this)
-                            .setNeutralButton(android.R.string.cancel, this);
-            mDialog = dialogBuilder.create();
-        }
+        final boolean overrideDisableSingleAppOption =
+                CompatChanges.isChangeEnabled(
+                        OVERRIDE_DISABLE_MEDIA_PROJECTION_SINGLE_APP_OPTION,
+                        mPackageName, getHostUserHandle());
+        MediaProjectionPermissionDialogDelegate delegate =
+                new MediaProjectionPermissionDialogDelegate(
+                        dialogContext,
+                        getMediaProjectionConfig(),
+                        dialog -> {
+                            ScreenShareOption selectedOption =
+                                    dialog.getSelectedScreenShareOption();
+                            grantMediaProjectionPermission(selectedOption.getMode());
+                        },
+                        () -> finish(RECORD_CANCEL, /* projection= */ null),
+                        hasCastingCapabilities,
+                        appName,
+                        overrideDisableSingleAppOption,
+                        mUid,
+                        mMediaProjectionMetricsLogger);
+        mDialog =
+                new AlertDialogWithDelegate(
+                        dialogContext, R.style.Theme_SystemUI_Dialog, delegate);
 
         if (savedInstanceState == null) {
             mMediaProjectionMetricsLogger.notifyProjectionInitiated(
                     mUid,
-                    appName == null
+                    hasCastingCapabilities
                             ? SessionCreationSource.CAST
                             : SessionCreationSource.APP);
         }
@@ -287,6 +231,47 @@ public class MediaProjectionPermissionActivity extends Activity
         if (savedInstanceState == null) {
             mMediaProjectionMetricsLogger.notifyPermissionRequestDisplayed(mUid);
         }
+    }
+
+    private String extractAppName(ApplicationInfo applicationInfo, PackageManager packageManager) {
+        String label = applicationInfo.loadLabel(packageManager).toString();
+
+        // If the label contains new line characters it may push the security
+        // message below the fold of the dialog. Labels shouldn't have new line
+        // characters anyways, so just truncate the message the first time one
+        // is seen.
+        final int labelLength = label.length();
+        int offset = 0;
+        while (offset < labelLength) {
+            final int codePoint = label.codePointAt(offset);
+            final int type = Character.getType(codePoint);
+            if (type == Character.LINE_SEPARATOR
+                    || type == Character.CONTROL
+                    || type == Character.PARAGRAPH_SEPARATOR) {
+                label = label.substring(0, offset) + ELLIPSIS;
+                break;
+            }
+            offset += Character.charCount(codePoint);
+        }
+
+        if (label.isEmpty()) {
+            label = mPackageName;
+        }
+
+        TextPaint paint = new TextPaint();
+        paint.setTextSize(42);
+
+        String unsanitizedAppName = TextUtils.ellipsize(label,
+                paint, MAX_APP_NAME_SIZE_PX, TextUtils.TruncateAt.END).toString();
+        String appName = BidiFormatter.getInstance().unicodeWrap(unsanitizedAppName);
+
+        // Have app name be the package name as a default fallback, if specific app name can't be
+        // extracted
+        if (appName == null || appName.isEmpty()) {
+            return mPackageName;
+        }
+
+        return appName;
     }
 
     @Override
@@ -351,7 +336,7 @@ public class MediaProjectionPermissionActivity extends Activity
                 setResult(RESULT_OK, intent);
                 finish(RECORD_CONTENT_DISPLAY, projection);
             }
-            if (isPartialScreenSharingEnabled() && screenShareMode == SINGLE_APP) {
+            if (screenShareMode == SINGLE_APP) {
                 IMediaProjection projection = MediaProjectionServiceHelper.createOrReuseProjection(
                         mUid, mPackageName, mReviewGrantedConsentRequired);
                 final Intent intent = new Intent(this,
@@ -421,9 +406,5 @@ public class MediaProjectionPermissionActivity extends Activity
         }
         return intent.getParcelableExtra(
                 MediaProjectionManager.EXTRA_MEDIA_PROJECTION_CONFIG);
-    }
-
-    private boolean isPartialScreenSharingEnabled() {
-        return mFeatureFlags.isEnabled(Flags.WM_ENABLE_PARTIAL_SCREEN_SHARING);
     }
 }

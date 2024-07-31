@@ -415,7 +415,7 @@ static void android_view_MotionEvent_nativeAddBatch(JNIEnv* env, jclass clazz,
         env->DeleteLocalRef(pointerCoordsObj);
     }
 
-    event->addSample(eventTimeNanos, rawPointerCoords.data());
+    event->addSample(eventTimeNanos, rawPointerCoords.data(), event->getId());
     event->setMetaState(event->getMetaState() | metaState);
 }
 

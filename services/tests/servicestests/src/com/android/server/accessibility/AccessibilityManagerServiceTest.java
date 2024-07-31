@@ -840,6 +840,10 @@ public class AccessibilityManagerServiceTest {
         info_a.setComponentName(COMPONENT_NAME);
         final AccessibilityServiceInfo info_b = new AccessibilityServiceInfo();
         info_b.setComponentName(new ComponentName("package", "class"));
+        writeStringsToSetting(Set.of(
+                info_a.getComponentName().flattenToString(),
+                info_b.getComponentName().flattenToString()),
+                Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES);
 
         AccessibilityUserState userState = mA11yms.getCurrentUserState();
         userState.mInstalledServices.clear();
@@ -858,10 +862,9 @@ public class AccessibilityManagerServiceTest {
         userState = mA11yms.getCurrentUserState();
         assertThat(userState.mEnabledServices).containsExactly(info_b.getComponentName());
         //Assert setting change
-        final Set<ComponentName> componentsFromSetting = new ArraySet<>();
-        mA11yms.readComponentNamesFromSettingLocked(Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES,
-                userState.mUserId, componentsFromSetting);
-        assertThat(componentsFromSetting).containsExactly(info_b.getComponentName());
+        final Set<String> enabledServices =
+                readStringsFromSetting(Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES);
+        assertThat(enabledServices).containsExactly(info_b.getComponentName().flattenToString());
     }
 
     @Test
@@ -880,6 +883,10 @@ public class AccessibilityManagerServiceTest {
                         info_a.getComponentName().flattenToString(),
                         info_b.getComponentName().flattenToString()),
                 SOFTWARE);
+        writeStringsToSetting(Set.of(
+                        info_a.getComponentName().flattenToString(),
+                        info_b.getComponentName().flattenToString()),
+                ShortcutUtils.convertToKey(SOFTWARE));
 
         // despite force stopping both packages, only the first service has the relevant flag,
         // so only the first should be removed.
@@ -896,10 +903,50 @@ public class AccessibilityManagerServiceTest {
         assertThat(userState.getShortcutTargetsLocked(SOFTWARE)).containsExactly(
                 info_b.getComponentName().flattenToString());
         //Assert setting change
-        final Set<String> targetsFromSetting = new ArraySet<>();
-        mA11yms.readColonDelimitedSettingToSet(ShortcutUtils.convertToKey(SOFTWARE),
-                userState.mUserId, str -> str, targetsFromSetting);
+        final Set<String> targetsFromSetting = readStringsFromSetting(
+                ShortcutUtils.convertToKey(SOFTWARE));
         assertThat(targetsFromSetting).containsExactly(info_b.getComponentName().flattenToString());
+    }
+
+    @Test
+    public void testPackagesForceStopped_otherServiceStopped_doesNotRemoveContinuousTarget() {
+        final AccessibilityServiceInfo info_a = new AccessibilityServiceInfo();
+        info_a.setComponentName(COMPONENT_NAME);
+        info_a.flags = FLAG_REQUEST_ACCESSIBILITY_BUTTON;
+        final AccessibilityServiceInfo info_b = new AccessibilityServiceInfo();
+        info_b.setComponentName(new ComponentName("package", "class"));
+        writeStringsToSetting(Set.of(
+                        info_a.getComponentName().flattenToString(),
+                        info_b.getComponentName().flattenToString()),
+                ShortcutUtils.convertToKey(SOFTWARE));
+
+        AccessibilityUserState userState = mA11yms.getCurrentUserState();
+        userState.mInstalledServices.clear();
+        userState.mInstalledServices.add(info_a);
+        userState.mInstalledServices.add(info_b);
+        userState.updateShortcutTargetsLocked(Set.of(
+                        info_a.getComponentName().flattenToString(),
+                        info_b.getComponentName().flattenToString()),
+                SOFTWARE);
+
+        // Force stopping a service should not disable unrelated continuous services.
+        synchronized (mA11yms.getLock()) {
+            mA11yms.onPackagesForceStoppedLocked(
+                    new String[]{info_b.getComponentName().getPackageName()},
+                    userState);
+        }
+
+        //Assert user state change
+        userState = mA11yms.getCurrentUserState();
+        assertThat(userState.getShortcutTargetsLocked(SOFTWARE)).containsExactly(
+                info_a.getComponentName().flattenToString(),
+                info_b.getComponentName().flattenToString());
+        //Assert setting unchanged
+        final Set<String> targetsFromSetting = readStringsFromSetting(
+                ShortcutUtils.convertToKey(SOFTWARE));
+        assertThat(targetsFromSetting).containsExactly(
+                info_a.getComponentName().flattenToString(),
+                info_b.getComponentName().flattenToString());
     }
 
     @Test
@@ -1842,6 +1889,11 @@ public class AccessibilityManagerServiceTest {
         mA11yms.readColonDelimitedSettingToSet(
                 setting, UserHandle.USER_SYSTEM, str -> str, result);
         return result;
+    }
+
+    private void writeStringsToSetting(Set<String> strings, String setting) {
+        mA11yms.persistColonDelimitedSetToSettingLocked(
+                setting, UserHandle.USER_SYSTEM, strings, str -> str);
     }
 
     private void broadcastSettingRestored(String setting, String newValue) {

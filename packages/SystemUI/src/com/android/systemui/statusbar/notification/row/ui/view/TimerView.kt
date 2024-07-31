@@ -17,7 +17,7 @@
 package com.android.systemui.statusbar.notification.row.ui.view
 
 import android.content.Context
-import android.graphics.drawable.Drawable
+import android.graphics.drawable.Icon
 import android.os.SystemClock
 import android.util.AttributeSet
 import android.widget.Chronometer
@@ -48,6 +48,9 @@ constructor(
     lateinit var altButton: TimerButtonView
         private set
 
+    lateinit var resetButton: TimerButtonView
+        private set
+
     override fun onFinishInflate() {
         super.onFinishInflate()
         icon = requireViewById(R.id.icon)
@@ -56,13 +59,14 @@ constructor(
         pausedTimeRemaining = requireViewById(R.id.pausedTimeRemaining)
         mainButton = requireViewById(R.id.mainButton)
         altButton = requireViewById(R.id.altButton)
+        resetButton = requireViewById(R.id.resetButton)
     }
 
     /** the resources configuration has changed such that the view needs to be reinflated */
     fun isReinflateNeeded(): Boolean = configTracker.hasUnhandledConfigChange()
 
-    fun setIcon(iconDrawable: Drawable?) {
-        this.icon.setImageDrawable(iconDrawable)
+    fun setIcon(icon: Icon?) {
+        this.icon.setImageIcon(icon)
     }
 
     fun setLabel(label: String) {

@@ -20,7 +20,8 @@ import android.animation.ValueAnimator
 import android.util.MathUtils
 import com.android.app.animation.Interpolators
 import com.android.app.tracing.coroutines.launch
-import com.android.systemui.Flags
+import com.android.systemui.Flags.communalSceneKtfRefactor
+import com.android.systemui.communal.domain.interactor.CommunalSettingsInteractor
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
@@ -57,6 +58,7 @@ class FromLockscreenTransitionInteractor
 @Inject
 constructor(
     override val transitionRepository: KeyguardTransitionRepository,
+    override val internalTransitionInteractor: InternalKeyguardTransitionInteractor,
     transitionInteractor: KeyguardTransitionInteractor,
     @Background private val scope: CoroutineScope,
     @Background bgDispatcher: CoroutineDispatcher,
@@ -65,6 +67,7 @@ constructor(
     private val shadeRepository: ShadeRepository,
     powerInteractor: PowerInteractor,
     private val glanceableHubTransitions: GlanceableHubTransitions,
+    private val communalSettingsInteractor: CommunalSettingsInteractor,
     private val swipeToDismissInteractor: SwipeToDismissInteractor,
     keyguardOcclusionInteractor: KeyguardOcclusionInteractor,
 ) :
@@ -88,7 +91,9 @@ constructor(
         listenForLockscreenToPrimaryBouncerDragging()
         listenForLockscreenToAlternateBouncer()
         listenForLockscreenTransitionToCamera()
-        listenForLockscreenToGlanceableHub()
+        if (!communalSceneKtfRefactor()) {
+            listenForLockscreenToGlanceableHub()
+        }
     }
 
     /**
@@ -128,7 +133,7 @@ constructor(
             keyguardInteractor.isAbleToDream
                 .filterRelevantKeyguardState()
                 .sampleCombine(
-                    transitionInteractor.currentTransitionInfoInternal,
+                    internalTransitionInteractor.currentTransitionInfoInternal,
                     finishedKeyguardState,
                     keyguardInteractor.isActiveDreamLockscreenHosted,
                 )
@@ -185,7 +190,7 @@ constructor(
             shadeRepository.legacyShadeExpansion
                 .sampleCombine(
                     startedKeyguardTransitionStep,
-                    transitionInteractor.currentTransitionInfoInternal,
+                    internalTransitionInteractor.currentTransitionInfoInternal,
                     keyguardInteractor.statusBarState,
                     keyguardInteractor.isKeyguardDismissible,
                 )
@@ -271,10 +276,9 @@ constructor(
     }
 
     private fun listenForLockscreenToGone() {
-        if (KeyguardWmStateRefactor.isEnabled) {
-            return
-        }
-
+        // TODO(b/336576536): Check if adaptation for scene framework is needed
+        if (SceneContainerFlag.isEnabled) return
+        if (KeyguardWmStateRefactor.isEnabled) return
         scope.launch("$TAG#listenForLockscreenToGone") {
             keyguardInteractor.isKeyguardGoingAway
                 .filterRelevantKeyguardStateAnd { isKeyguardGoingAway -> isKeyguardGoingAway }
@@ -288,6 +292,7 @@ constructor(
     }
 
     private fun listenForLockscreenToGoneDragging() {
+        // TODO(b/336576536): Check if adaptation for scene framework is needed
         if (SceneContainerFlag.isEnabled) return
         if (KeyguardWmStateRefactor.isEnabled) {
             // When the refactor is enabled, we no longer use isKeyguardGoingAway.
@@ -346,9 +351,8 @@ constructor(
      * keyguard transition.
      */
     private fun listenForLockscreenToGlanceableHub() {
-        // TODO(b/336576536): Check if adaptation for scene framework is needed
         if (SceneContainerFlag.isEnabled) return
-        if (!Flags.communalHub()) {
+        if (!communalSettingsInteractor.isCommunalFlagEnabled()) {
             return
         }
         scope.launch(mainDispatcher) {
@@ -389,7 +393,7 @@ constructor(
         val TO_DOZING_DURATION = 500.milliseconds
         val TO_DREAMING_DURATION = 933.milliseconds
         val TO_DREAMING_HOSTED_DURATION = 933.milliseconds
-        val TO_OCCLUDED_DURATION = 450.milliseconds
+        val TO_OCCLUDED_DURATION = 550.milliseconds
         val TO_AOD_DURATION = 500.milliseconds
         val TO_AOD_FOLD_DURATION = 1100.milliseconds
         val TO_PRIMARY_BOUNCER_DURATION = DEFAULT_DURATION

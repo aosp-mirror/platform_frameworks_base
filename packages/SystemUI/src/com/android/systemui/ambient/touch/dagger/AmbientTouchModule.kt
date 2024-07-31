@@ -17,12 +17,14 @@ package com.android.systemui.ambient.touch.dagger
 
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.coroutineScope
 import com.android.systemui.ambient.dagger.AmbientModule
 import com.android.systemui.ambient.touch.TouchHandler
 import dagger.Module
 import dagger.Provides
 import dagger.multibindings.ElementsIntoSet
 import javax.inject.Named
+import kotlinx.coroutines.CoroutineScope
 
 @Module
 interface AmbientTouchModule {
@@ -31,6 +33,12 @@ interface AmbientTouchModule {
         @Provides
         fun providesLifecycle(lifecycleOwner: LifecycleOwner): Lifecycle {
             return lifecycleOwner.lifecycle
+        }
+
+        @JvmStatic
+        @Provides
+        fun providesLifecycleScope(lifecycle: Lifecycle): CoroutineScope {
+            return lifecycle.coroutineScope
         }
 
         @Provides

@@ -1,3 +1,17 @@
 <app-metadata-bundles>
-
+    <system-app-safety-label declaration="true">
+    </system-app-safety-label>
+    <transparency-info>
+        <app-info
+            apsCompliant="false"
+            privacyPolicy="www.example.com" developerId="dev1" applicationId="app1">
+            <first-party-endpoints>
+                <item>url1</item>
+            </first-party-endpoints>
+            <service-provider-endpoints>
+                <item>url55</item>
+                <item>url56</item>
+            </service-provider-endpoints>
+        </app-info>
+    </transparency-info>
 </app-metadata-bundles>

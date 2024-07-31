@@ -16,6 +16,8 @@
 
 package android.view;
 
+import static android.util.SequenceUtils.getInitSeq;
+import static android.view.HapticFeedbackConstants.FLAG_IGNORE_GLOBAL_SETTING;
 import static android.view.Surface.FRAME_RATE_CATEGORY_DEFAULT;
 import static android.view.Surface.FRAME_RATE_CATEGORY_HIGH;
 import static android.view.Surface.FRAME_RATE_CATEGORY_HIGH_HINT;
@@ -493,8 +495,8 @@ public class ViewRootImplTest {
                 0, displayInfo, new DisplayAdjustments());
         ViewRootImpl viewRootImpl = new ViewRootImpl(sContext, display);
 
-        boolean result = viewRootImpl.performHapticFeedback(
-                HapticFeedbackConstants.CONTEXT_CLICK, true, false /* fromIme */);
+        boolean result = viewRootImpl.performHapticFeedback(HapticFeedbackConstants.CONTEXT_CLICK,
+                FLAG_IGNORE_GLOBAL_SETTING, 0 /* privFlags */);
 
         assertThat(result).isFalse();
     }
@@ -1555,9 +1557,9 @@ public class ViewRootImplTest {
         final InsetsState state0 = new InsetsState();
         final InsetsState state1 = new InsetsState();
         state0.setDisplayFrame(new Rect(0, 0, 500, 1000));
-        state0.setSeq(10000);
+        state0.setSeq(getInitSeq() + 10000);
         state1.setDisplayFrame(new Rect(0, 0, 1500, 2000));
-        state1.setSeq(10001);
+        state1.setSeq(getInitSeq() + 10001);
         final InsetsSourceControl.Array array = new InsetsSourceControl.Array();
 
         sInstrumentation.runOnMainSync(() -> {

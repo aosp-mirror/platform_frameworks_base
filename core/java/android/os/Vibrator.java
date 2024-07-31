@@ -33,6 +33,7 @@ import android.media.AudioAttributes;
 import android.os.vibrator.VibrationConfig;
 import android.os.vibrator.VibratorFrequencyProfile;
 import android.util.Log;
+import android.view.HapticFeedbackConstants;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -181,16 +182,6 @@ public abstract class Vibrator {
     @VibrationIntensity
     public int getDefaultVibrationIntensity(@VibrationAttributes.Usage int usage) {
         return getConfig().getDefaultVibrationIntensity(usage);
-    }
-
-    /**
-     * Whether the keyboard vibration is enabled by default.
-     *
-     * @return {@code true} if the keyboard vibration is default enabled, {@code false} otherwise.
-     * @hide
-     */
-    public boolean isDefaultKeyboardVibrationEnabled() {
-        return getConfig().isDefaultKeyboardVibrationEnabled();
     }
 
     /**
@@ -506,7 +497,27 @@ public abstract class Vibrator {
      */
     @RequiresPermission(android.Manifest.permission.VIBRATE)
     public void vibrate(@NonNull VibrationEffect vibe, @NonNull VibrationAttributes attributes) {
-        vibrate(Process.myUid(), mPackageName, vibe, null, attributes);
+        vibrate(vibe, attributes, null);
+    }
+
+    /**
+     * Vibrate with a given effect.
+     *
+     * <p>The app should be in the foreground for the vibration to happen. Background apps should
+     * specify a ringtone, notification or alarm usage in order to vibrate.</p>
+     *
+     * @param vibe       {@link VibrationEffect} describing the vibration to be performed.
+     * @param attributes {@link VibrationAttributes} corresponding to the vibration. For example,
+     *                   specify {@link VibrationAttributes#USAGE_ALARM} for alarm vibrations or
+     *                   {@link VibrationAttributes#USAGE_RINGTONE} for vibrations associated with
+     *                   incoming calls.
+     * @param reason     the reason for this vibration, used for debugging purposes.
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.VIBRATE)
+    public void vibrate(@NonNull VibrationEffect vibe,
+            @NonNull VibrationAttributes attributes, String reason) {
+        vibrate(Process.myUid(), mPackageName, vibe, reason, attributes);
     }
 
     /**
@@ -529,17 +540,15 @@ public abstract class Vibrator {
      *
      * @param constant the ID for the haptic feedback. This should be one of the constants defined
      *          in {@link HapticFeedbackConstants}.
-     * @param always {@code true} if the haptic feedback should be played regardless of the user
-     *          vibration intensity settings applicable to the corresponding vibration.
-     *          {@code false} if the vibration for the haptic feedback should respect the applicable
-     *          vibration intensity settings.
      * @param reason the reason for this haptic feedback.
-     * @param fromIme the haptic feedback is performed from an IME.
+     * @param flags Additional flags as per {@link HapticFeedbackConstants}.
+     * @param privFlags Additional private flags as per {@link HapticFeedbackConstants}.
      *
      * @hide
      */
-    public void performHapticFeedback(int constant, boolean always, String reason,
-            boolean fromIme) {
+    public void performHapticFeedback(int constant, String reason,
+            @HapticFeedbackConstants.Flags int flags,
+            @HapticFeedbackConstants.PrivateFlags int privFlags) {
         Log.w(TAG, "performHapticFeedback is not supported");
     }
 

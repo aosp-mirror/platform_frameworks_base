@@ -998,7 +998,7 @@ please see styles_device_defaults.xml.
 
     <style name="TextAppearance.Tooltip">
         <item name="fontFamily">sans-serif</item>
-        <item name="textSize">14sp</item>
+        <item name="textSize">?android:attr/tooltipFontSize</item>
     </style>
 
     <style name="Widget.ActivityChooserView">
@@ -1524,6 +1524,24 @@ please see styles_device_defaults.xml.
     <style name="PointerIconVectorStyleFillBlue">
         <item name="pointerIconVectorFill">#8AB4F8</item>
         <item name="pointerIconVectorFillInverse">#8AB4F8</item>
+    </style>
+
+    <!-- @hide -->
+    <style name="PointerIconVectorStyleStrokeWhite">
+        <item name="pointerIconVectorStroke">@color/white</item>
+        <item name="pointerIconVectorStrokeInverse">@color/black</item>
+    </style>
+
+    <!-- @hide -->
+    <style name="PointerIconVectorStyleStrokeBlack">
+        <item name="pointerIconVectorStroke">@color/black</item>
+        <item name="pointerIconVectorStrokeInverse">@color/white</item>
+    </style>
+
+    <!-- @hide -->
+    <style name="PointerIconVectorStyleStrokeNone">
+        <item name="pointerIconVectorStroke">@color/transparent</item>
+        <item name="pointerIconVectorStrokeInverse">@color/transparent</item>
     </style>
 
     <!-- @hide -->

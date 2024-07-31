@@ -41,6 +41,7 @@ import com.android.systemui.communal.shared.model.EditModeState
 import com.android.systemui.communal.ui.compose.CommunalHub
 import com.android.systemui.communal.ui.viewmodel.CommunalEditModeViewModel
 import com.android.systemui.communal.util.WidgetPickerIntentUtils.getWidgetExtraFromIntent
+import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.log.LogBuffer
 import com.android.systemui.log.core.Logger
 import com.android.systemui.log.dagger.CommunalLog
@@ -96,8 +97,7 @@ constructor(
                                 run { Log.w(TAG, "No AppWidgetProviderInfo found in result.") }
                             }
                         }
-                    }
-                        ?: run { Log.w(TAG, "No data in result.") }
+                    } ?: run { Log.w(TAG, "No data in result.") }
                 }
                 else ->
                     Log.w(
@@ -128,7 +128,7 @@ constructor(
                 Box(
                     modifier =
                         Modifier.fillMaxSize()
-                            .background(LocalAndroidColorScheme.current.onSecondaryFixed),
+                            .background(LocalAndroidColorScheme.current.surfaceDim),
                 ) {
                     CommunalHub(
                         viewModel = communalViewModel,
@@ -147,7 +147,8 @@ constructor(
             communalViewModel.canShowEditMode.collect {
                 communalViewModel.changeScene(
                     CommunalScenes.Blank,
-                    CommunalTransitionKeys.ToEditMode
+                    CommunalTransitionKeys.ToEditMode,
+                    KeyguardState.GONE,
                 )
                 // wait till transitioned to Blank scene, then animate in communal content in
                 // edit mode
@@ -195,6 +196,8 @@ constructor(
     override fun onStart() {
         super.onStart()
 
+        communalViewModel.setEditActivityShowing(true)
+
         if (shouldOpenWidgetPickerOnStart) {
             onOpenWidgetPicker()
             shouldOpenWidgetPickerOnStart = false
@@ -206,6 +209,7 @@ constructor(
 
     override fun onStop() {
         super.onStop()
+        communalViewModel.setEditActivityShowing(false)
 
         logger.i("Stopping the communal widget editor activity")
         uiEventLogger.log(CommunalUiEvent.COMMUNAL_HUB_EDIT_MODE_GONE)

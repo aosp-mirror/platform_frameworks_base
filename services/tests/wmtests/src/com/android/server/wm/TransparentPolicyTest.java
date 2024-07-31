@@ -258,7 +258,7 @@ public class TransparentPolicyTest extends WindowTestsBase {
             robot.transparentActivity((ta) -> {
                 ta.applyOnActivity((a) -> {
                     a.applyToTopActivity((topActivity) -> {
-                        topActivity.mWmService.mLetterboxConfiguration
+                        topActivity.mWmService.mAppCompatConfiguration
                                 .setLetterboxHorizontalPositionMultiplier(1.0f);
                     });
                     a.configureUnresizableTopActivity(SCREEN_ORIENTATION_PORTRAIT);

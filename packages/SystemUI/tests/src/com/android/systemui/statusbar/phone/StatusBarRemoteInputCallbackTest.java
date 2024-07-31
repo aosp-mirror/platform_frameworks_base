@@ -27,6 +27,7 @@ import static org.mockito.Mockito.when;
 import static org.mockito.internal.verification.VerificationModeFactory.times;
 
 import android.content.Intent;
+import android.platform.test.annotations.DisableFlags;
 import android.platform.test.annotations.EnableFlags;
 import android.testing.TestableLooper;
 import android.view.View;
@@ -111,8 +112,8 @@ public class StatusBarRemoteInputCallbackTest extends SysuiTestCase {
 
         verify(mStatusBarKeyguardViewManager).showBouncer(true);
     }
-
     @Test
+    @DisableFlags(ExpandHeadsUpOnInlineReply.FLAG_NAME)
     public void onMakeExpandedVisibleForRemoteInput_collapsedGroup_expandGroupExpansion() {
         // GIVEN
         final Runnable onExpandedVisibleRunner = mock(Runnable.class);
@@ -137,6 +138,7 @@ public class StatusBarRemoteInputCallbackTest extends SysuiTestCase {
     }
 
     @Test
+    @DisableFlags(ExpandHeadsUpOnInlineReply.FLAG_NAME)
     public void onMakeExpandedVisibleForRemoteInput_expandedGroup_setUserExpandedTrue() {
         // GIVEN
         final Runnable onExpandedVisibleRunner = mock(Runnable.class);
@@ -161,6 +163,7 @@ public class StatusBarRemoteInputCallbackTest extends SysuiTestCase {
     }
 
     @Test
+    @DisableFlags(ExpandHeadsUpOnInlineReply.FLAG_NAME)
     public void onMakeExpandedVisibleForRemoteInput_nonGroupNotifications_setUserExpandedTrue() {
         // GIVEN
         final Runnable onExpandedVisibleRunner = mock(Runnable.class);

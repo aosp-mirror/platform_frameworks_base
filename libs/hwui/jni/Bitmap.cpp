@@ -33,9 +33,6 @@
 #define DEBUG_PARCEL 0
 
 static jclass   gBitmap_class;
-static jfieldID gBitmap_nativePtr;
-static jmethodID gBitmap_constructorMethodID;
-static jmethodID gBitmap_reinitMethodID;
 
 namespace android {
 
@@ -183,6 +180,9 @@ static void assert_premultiplied(const SkImageInfo& info, bool isPremultiplied) 
 void reinitBitmap(JNIEnv* env, jobject javaBitmap, const SkImageInfo& info,
         bool isPremultiplied)
 {
+    static jmethodID gBitmap_reinitMethodID =
+        GetMethodIDOrDie(env, gBitmap_class, "reinit", "(IIZ)V");
+
     // The caller needs to have already set the alpha type properly, so the
     // native SkBitmap stays in sync with the Java Bitmap.
     assert_premultiplied(info, isPremultiplied);
@@ -194,6 +194,10 @@ void reinitBitmap(JNIEnv* env, jobject javaBitmap, const SkImageInfo& info,
 jobject createBitmap(JNIEnv* env, Bitmap* bitmap,
         int bitmapCreateFlags, jbyteArray ninePatchChunk, jobject ninePatchInsets,
         int density) {
+    static jmethodID gBitmap_constructorMethodID =
+        GetMethodIDOrDie(env, gBitmap_class,
+            "<init>", "(JIIIZ[BLandroid/graphics/NinePatch$InsetStruct;Z)V");
+
     bool isMutable = bitmapCreateFlags & kBitmapCreateFlag_Mutable;
     bool isPremultiplied = bitmapCreateFlags & kBitmapCreateFlag_Premultiplied;
     // The caller needs to have already set the alpha type properly, so the
@@ -232,11 +236,17 @@ Bitmap& toBitmap(jlong bitmapHandle) {
 using namespace android;
 using namespace android::bitmap;
 
+static inline jlong getNativePtr(JNIEnv* env, jobject bitmap) {
+    static jfieldID gBitmap_nativePtr =
+        GetFieldIDOrDie(env, gBitmap_class, "mNativePtr", "J");
+    return env->GetLongField(bitmap, gBitmap_nativePtr);
+}
+
 Bitmap* GraphicsJNI::getNativeBitmap(JNIEnv* env, jobject bitmap) {
     SkASSERT(env);
     SkASSERT(bitmap);
     SkASSERT(env->IsInstanceOf(bitmap, gBitmap_class));
-    jlong bitmapHandle = env->GetLongField(bitmap, gBitmap_nativePtr);
+    jlong bitmapHandle = getNativePtr(env, bitmap);
     LocalScopedBitmap localBitmap(bitmapHandle);
     return localBitmap.valid() ? &localBitmap->bitmap() : nullptr;
 }
@@ -246,7 +256,7 @@ SkImageInfo GraphicsJNI::getBitmapInfo(JNIEnv* env, jobject bitmap, uint32_t* ou
     SkASSERT(env);
     SkASSERT(bitmap);
     SkASSERT(env->IsInstanceOf(bitmap, gBitmap_class));
-    jlong bitmapHandle = env->GetLongField(bitmap, gBitmap_nativePtr);
+    jlong bitmapHandle = getNativePtr(env, bitmap);
     LocalScopedBitmap localBitmap(bitmapHandle);
     if (outRowBytes) {
         *outRowBytes = localBitmap->rowBytes();
@@ -1269,9 +1279,6 @@ static const JNINativeMethod gBitmapMethods[] = {
 int register_android_graphics_Bitmap(JNIEnv* env)
 {
     gBitmap_class = MakeGlobalRefOrDie(env, FindClassOrDie(env, "android/graphics/Bitmap"));
-    gBitmap_nativePtr = GetFieldIDOrDie(env, gBitmap_class, "mNativePtr", "J");
-    gBitmap_constructorMethodID = GetMethodIDOrDie(env, gBitmap_class, "<init>", "(JIIIZ[BLandroid/graphics/NinePatch$InsetStruct;Z)V");
-    gBitmap_reinitMethodID = GetMethodIDOrDie(env, gBitmap_class, "reinit", "(IIZ)V");
     uirenderer::HardwareBufferHelpers::init();
     return android::RegisterMethodsOrDie(env, "android/graphics/Bitmap", gBitmapMethods,
                                          NELEM(gBitmapMethods));

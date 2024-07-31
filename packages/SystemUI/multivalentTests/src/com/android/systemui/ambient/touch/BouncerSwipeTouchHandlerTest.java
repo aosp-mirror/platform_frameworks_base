@@ -50,6 +50,8 @@ import com.android.systemui.SysuiTestCase;
 import com.android.systemui.ambient.touch.scrim.ScrimController;
 import com.android.systemui.ambient.touch.scrim.ScrimManager;
 import com.android.systemui.bouncer.shared.constants.KeyguardBouncerConstants;
+import com.android.systemui.communal.ui.viewmodel.CommunalViewModel;
+import com.android.systemui.kosmos.KosmosJavaAdapter;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.settings.FakeUserTracker;
 import com.android.systemui.shade.ShadeExpansionChangeEvent;
@@ -72,7 +74,9 @@ import java.util.Optional;
 
 @SmallTest
 @RunWith(AndroidJUnit4.class)
+@DisableFlags(Flags.FLAG_HUBMODE_FULLSCREEN_VERTICAL_SWIPE)
 public class BouncerSwipeTouchHandlerTest extends SysuiTestCase {
+    private KosmosJavaAdapter mKosmos;
     @Mock
     CentralSurfaces mCentralSurfaces;
 
@@ -120,6 +124,9 @@ public class BouncerSwipeTouchHandlerTest extends SysuiTestCase {
     @Mock
     Region mRegion;
 
+    @Mock
+    CommunalViewModel mCommunalViewModel;
+
     @Captor
     ArgumentCaptor<Rect> mRectCaptor;
 
@@ -139,9 +146,11 @@ public class BouncerSwipeTouchHandlerTest extends SysuiTestCase {
 
     @Before
     public void setup() {
+        mKosmos = new KosmosJavaAdapter(this);
         MockitoAnnotations.initMocks(this);
         mUserTracker = new FakeUserTracker();
         mTouchHandler = new BouncerSwipeTouchHandler(
+                mKosmos.getTestScope(),
                 mScrimManager,
                 Optional.of(mCentralSurfaces),
                 mNotificationShadeWindowController,
@@ -149,6 +158,7 @@ public class BouncerSwipeTouchHandlerTest extends SysuiTestCase {
                 mVelocityTrackerFactory,
                 mLockPatternUtils,
                 mUserTracker,
+                mCommunalViewModel,
                 mFlingAnimationUtils,
                 mFlingAnimationUtilsClosing,
                 TOUCH_REGION,
@@ -200,7 +210,6 @@ public class BouncerSwipeTouchHandlerTest extends SysuiTestCase {
                         1,
                         2)).isTrue();
     }
-
 
     /**
      * Ensures expansion only happens when touch down happens in valid part of the screen.

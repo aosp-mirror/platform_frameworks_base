@@ -39,6 +39,7 @@ public abstract class RemoteContext {
 
     public float mWidth = 0f;
     public float mHeight = 0f;
+    private float mAnimationTime;
 
     /**
      * Load a path under an id.
@@ -65,11 +66,20 @@ public abstract class RemoteContext {
     public abstract void loadColor(int id, int color);
 
     /**
+     * Set the animation time allowing the creator to control animation rates
+     * @param time
+     */
+    public void setAnimationTime(float time) {
+        mAnimationTime = time;
+    }
+
+    /**
      * gets the time animation clock as float in seconds
      * @return a monotonic time in seconds (arbitrary zero point)
      */
     public float getAnimationTime() {
-        return (System.nanoTime() - mStart) * 1E-9f;
+        mAnimationTime = (System.nanoTime() - mStart) * 1E-9f; // Eliminate
+        return mAnimationTime;
     }
 
     /**
@@ -213,6 +223,13 @@ public abstract class RemoteContext {
     public abstract void loadFloat(int id, float value);
 
     /**
+     * Load a float
+     * @param id
+     * @param value
+     */
+    public abstract void loadInteger(int id, int value);
+
+    /**
      * Load an animated float associated with an id
      * Todo: Remove?
      * @param id
@@ -233,6 +250,13 @@ public abstract class RemoteContext {
      * @return
      */
     public abstract float getFloat(int id);
+
+    /**
+     * Get a float given an id
+     * @param id
+     * @return
+     */
+    public abstract int getInteger(int id);
 
     /**
      * Get the color given and ID

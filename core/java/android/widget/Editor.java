@@ -76,7 +76,6 @@ import android.text.SpannableStringBuilder;
 import android.text.Spanned;
 import android.text.SpannedString;
 import android.text.StaticLayout;
-import android.text.TextFlags;
 import android.text.TextUtils;
 import android.text.method.InsertModeTransformationMethod;
 import android.text.method.KeyListener;
@@ -471,7 +470,6 @@ public class Editor {
     private static final int LINE_CHANGE_SLOP_MIN_DP = 8;
     private int mLineChangeSlopMax;
     private int mLineChangeSlopMin;
-    private boolean mUseNewContextMenu;
 
     private final AccessibilitySmartActions mA11ySmartActions;
     private InsertModeController mInsertModeController;
@@ -502,9 +500,6 @@ public class Editor {
         mLineSlopRatio = AppGlobals.getFloatCoreSetting(
                 WidgetFlags.KEY_LINE_SLOP_RATIO,
                 WidgetFlags.LINE_SLOP_RATIO_DEFAULT);
-        mUseNewContextMenu = AppGlobals.getIntCoreSetting(
-                TextFlags.KEY_ENABLE_NEW_CONTEXT_MENU,
-                TextFlags.ENABLE_NEW_CONTEXT_MENU_DEFAULT ? 1 : 0) != 0;
         if (TextView.DEBUG_CURSOR) {
             logCursor("Editor", "Cursor drag from anywhere is %s.",
                     mFlagCursorDragFromAnywhereEnabled ? "enabled" : "disabled");
@@ -3216,29 +3211,18 @@ public class Editor {
         final int menuItemOrderCut = 4;
         final int menuItemOrderCopy = 5;
         final int menuItemOrderPaste = 6;
-        final int menuItemOrderPasteAsPlainText;
-        final int menuItemOrderSelectAll;
-        final int menuItemOrderShare;
-        final int menuItemOrderAutofill;
-        if (mUseNewContextMenu) {
-            menuItemOrderPasteAsPlainText = 7;
-            menuItemOrderSelectAll = 8;
-            menuItemOrderShare = 9;
-            menuItemOrderAutofill = 10;
+        final int menuItemOrderPasteAsPlainText = 7;
+        final int menuItemOrderSelectAll = 8;
+        final int menuItemOrderShare = 9;
+        final int menuItemOrderAutofill = 10;
 
-            menu.setOptionalIconsVisible(true);
-            menu.setGroupDividerEnabled(true);
+        menu.setOptionalIconsVisible(true);
+        menu.setGroupDividerEnabled(true);
 
-            setAssistContextMenuItems(menu);
+        setAssistContextMenuItems(menu);
 
-            final int keyboard = mTextView.getResources().getConfiguration().keyboard;
-            menu.setQwertyMode(keyboard == Configuration.KEYBOARD_QWERTY);
-        } else {
-            menuItemOrderShare = 7;
-            menuItemOrderSelectAll = 8;
-            menuItemOrderAutofill = 10;
-            menuItemOrderPasteAsPlainText = 11;
-        }
+        final int keyboard = mTextView.getResources().getConfiguration().keyboard;
+        menu.setQwertyMode(keyboard == Configuration.KEYBOARD_QWERTY);
 
         final TypedArray a = mTextView.getContext().obtainStyledAttributes(new int[] {
                 // TODO: Make Undo/Redo be public attribute.

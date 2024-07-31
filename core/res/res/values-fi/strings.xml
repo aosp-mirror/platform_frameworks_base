@@ -1411,10 +1411,8 @@
     <string name="adbwifi_active_notification_message" product="tv" msgid="8633421848366915478">"Poista langaton virheenkorjaus käytöstä valitsemalla tämä."</string>
     <string name="test_harness_mode_notification_title" msgid="2282785860014142511">"Testikehystila käytössä"</string>
     <string name="test_harness_mode_notification_message" msgid="3039123743127958420">"Palauta tehdasasetukset, niin voit poistaa testikehystilan käytöstä."</string>
-    <!-- no translation found for wrong_hsum_configuration_notification_title (7212758829332714385) -->
-    <skip />
-    <!-- no translation found for wrong_hsum_configuration_notification_message (5353475441480684381) -->
-    <skip />
+    <string name="wrong_hsum_configuration_notification_title" msgid="7212758829332714385">"Väärä HSUM-koontiversiomääritys"</string>
+    <string name="wrong_hsum_configuration_notification_message" msgid="5353475441480684381">"Tämän laitteen järjestelmäkäyttäjän tila eroaa koontiversiomäärityksestä. Palauta laitteen tehdasasetukset."</string>
     <string name="console_running_notification_title" msgid="6087888939261635904">"Sarjakonsoli käytössä"</string>
     <string name="console_running_notification_message" msgid="7892751888125174039">"Tämä vaikuttaa suorituskykyyn. Jos haluat poistaa toiminnon käytöstä, tarkista käynnistysohjelma."</string>
     <string name="mte_override_notification_title" msgid="4731115381962792944">"Kokeellinen MTE käytössä"</string>
@@ -1430,6 +1428,7 @@
     <string name="share_remote_bugreport_action" msgid="7630880678785123682">"JAA"</string>
     <string name="decline_remote_bugreport_action" msgid="4040894777519784346">"HYLKÄÄ"</string>
     <string name="select_input_method" msgid="3971267998568587025">"Valitse syöttötapa"</string>
+    <string name="input_method_language_settings" msgid="8069089418056819437">"Kieliasetukset"</string>
     <string name="show_ime" msgid="6406112007347443383">"Pidä näytöllä, kun fyysinen näppäimistö on aktiivinen"</string>
     <string name="hardware" msgid="3611039921284836033">"Käytä näyttönäppäimistöä"</string>
     <string name="select_keyboard_layout_notification_title" msgid="5823199895322205589">"Määritä <xliff:g id="DEVICE_NAME">%s</xliff:g>"</string>
@@ -1759,18 +1758,12 @@
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"Äänenvoimakkuuspainikkeita painettiin pitkään. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> laitettiin päälle."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"Äänenvoimakkuuspainikkeita painettiin pitkään. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> laitettiin pois päältä."</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="3760999147597564314">"Vapauta äänenvoimakkuuspainikkeet. Laita <xliff:g id="SERVICE_NAME">%1$s</xliff:g> päälle painamalla äänenvoimakkuuspainikkeita uudelleen kolmen sekunnin ajan."</string>
-    <!-- no translation found for accessibility_button_prompt_text (6105393217162198616) -->
-    <skip />
-    <!-- no translation found for accessibility_gesture_prompt_text (6452246951969541792) -->
-    <skip />
-    <!-- no translation found for accessibility_gesture_3finger_prompt_text (77745752309056152) -->
-    <skip />
-    <!-- no translation found for accessibility_button_instructional_text (8029780800681458835) -->
-    <skip />
-    <!-- no translation found for accessibility_gesture_instructional_text (1485998586929977949) -->
-    <skip />
-    <!-- no translation found for accessibility_gesture_3finger_instructional_text (3430237316928654219) -->
-    <skip />
+    <string name="accessibility_button_prompt_text" msgid="6105393217162198616">"Valitse ominaisuus"</string>
+    <string name="accessibility_gesture_prompt_text" msgid="6452246951969541792">"Valitse ominaisuus"</string>
+    <string name="accessibility_gesture_3finger_prompt_text" msgid="77745752309056152">"Valitse ominaisuus"</string>
+    <string name="accessibility_button_instructional_text" msgid="6831154884557881996">"Ominaisuus avautuu, kun seuraavan kerran napautat saavutettavuuspainiketta"</string>
+    <string name="accessibility_gesture_instructional_text" msgid="4133877896011098550">"Ominaisuus avautuu, kun seuraavan kerran käytät tätä pikakomentoa. Pyyhkäise näytön alareunasta ylös kahdella sormella ja nosta sormet näytöltä nopeasti."</string>
+    <string name="accessibility_gesture_3finger_instructional_text" msgid="1124458279366968154">"Ominaisuus avautuu, kun seuraavan kerran käytät tätä pikakomentoa. Pyyhkäise näytön alareunasta ylös kolmella sormella ja nosta sormet näytöltä nopeasti."</string>
     <string name="accessibility_magnification_chooser_text" msgid="1502075582164931596">"Suurennus"</string>
     <string name="user_switched" msgid="7249833311585228097">"Nykyinen käyttäjä: <xliff:g id="NAME">%1$s</xliff:g>."</string>
     <string name="user_switching_message" msgid="1912993630661332336">"Vaihdetaan käyttäjään <xliff:g id="NAME">%1$s</xliff:g>…"</string>
@@ -1893,8 +1886,7 @@
     <string name="restr_pin_error_too_short" msgid="1547007808237941065">"PIN-koodi on liian lyhyt. Vähimmäispituus on neljä merkkiä."</string>
     <string name="restr_pin_try_later" msgid="5897719962541636727">"Yritä myöhemmin uudelleen"</string>
     <string name="immersive_cling_title" msgid="2307034298721541791">"Koko ruudun tilassa"</string>
-    <!-- no translation found for immersive_cling_description (2896205051090870978) -->
-    <skip />
+    <string name="immersive_cling_description" msgid="2896205051090870978">"Poistu pyyhkäisemällä alas näytön yläreunasta"</string>
     <string name="immersive_cling_positive" msgid="7047498036346489883">"Selvä"</string>
     <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"Kierrä, niin saat paremman näkymän"</string>
     <string name="display_rotation_camera_compat_toast_in_multi_window" msgid="2473122980393502775">"Avaa <xliff:g id="NAME">%s</xliff:g>, niin saat paremman näkymän"</string>
@@ -1986,14 +1978,10 @@
     <string name="call_notification_ongoing_text" msgid="3880832933933020875">"Käynnissä oleva puhelu"</string>
     <string name="call_notification_screening_text" msgid="8396931408268940208">"Seulotaan saapuvaa puhelua"</string>
     <string name="default_notification_channel_label" msgid="3697928973567217330">"Luokittelematon"</string>
-    <!-- no translation found for promotional_notification_channel_label (7414844730492860233) -->
-    <skip />
-    <!-- no translation found for social_notification_channel_label (106520267132019945) -->
-    <skip />
-    <!-- no translation found for news_notification_channel_label (4299937455247883311) -->
-    <skip />
-    <!-- no translation found for recs_notification_channel_label (4945985121418684297) -->
-    <skip />
+    <string name="promotional_notification_channel_label" msgid="7414844730492860233">"Tarjoukset"</string>
+    <string name="social_notification_channel_label" msgid="106520267132019945">"Some"</string>
+    <string name="news_notification_channel_label" msgid="4299937455247883311">"Uutiset"</string>
+    <string name="recs_notification_channel_label" msgid="4945985121418684297">"Suositukset"</string>
     <string name="importance_from_user" msgid="2782756722448800447">"Voit valita näiden ilmoitusten tärkeyden."</string>
     <string name="importance_from_person" msgid="4235804979664465383">"Tämä on tärkeää siihen liittyvien ihmisten perusteella."</string>
     <string name="notification_history_title_placeholder" msgid="7748630986182249599">"Oma sovellusilmoitus"</string>
@@ -2210,10 +2198,8 @@
     <string name="accessibility_system_action_on_screen_a11y_shortcut_chooser_label" msgid="1057878690209817886">"Näytöllä näkyvän esteettömyyspainikkeen valitsin"</string>
     <string name="accessibility_system_action_hardware_a11y_shortcut_label" msgid="5764644187715255107">"Saavutettavuuspainike"</string>
     <string name="accessibility_system_action_dismiss_notification_shade" msgid="8931637495533770352">"Sulje ilmoitusalue"</string>
-    <!-- no translation found for accessibility_system_action_menu_label (3385283204496447040) -->
-    <skip />
-    <!-- no translation found for accessibility_system_action_media_play_pause_label (1905647491347119748) -->
-    <skip />
+    <string name="accessibility_system_action_menu_label" msgid="3385283204496447040">"Valikko"</string>
+    <string name="accessibility_system_action_media_play_pause_label" msgid="1905647491347119748">"Media: toista/keskeytä"</string>
     <string name="accessibility_system_action_dpad_up_label" msgid="1029042950229333782">"Suuntanäppäimistö: ylös-painike"</string>
     <string name="accessibility_system_action_dpad_down_label" msgid="3441918448624921461">"Suuntanäppäimisto: alas-painike"</string>
     <string name="accessibility_system_action_dpad_left_label" msgid="6557647179116479152">"Suuntanäppäimistö: vasen painike"</string>
@@ -2440,12 +2426,25 @@
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"Näin se toimii"</string>
     <string name="unarchival_session_app_label" msgid="6811856981546348205">"Odottaa…"</string>
     <string name="fingerprint_dangling_notification_title" msgid="7362075195588639989">"Ota sormenjälkiavaus uudelleen käyttöön"</string>
-    <string name="fingerprint_dangling_notification_msg_1" msgid="8517140433796229725">"<xliff:g id="FINGERPRINT">%s</xliff:g> ei toiminut kunnolla, ja se poistettiin"</string>
-    <string name="fingerprint_dangling_notification_msg_2" msgid="7578829498452127613">"<xliff:g id="FINGERPRINT_0">%1$s</xliff:g> ja <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> eivät toimineet kunnolla, ja ne poistettiin"</string>
-    <string name="fingerprint_dangling_notification_msg_all_deleted_1" msgid="2927018569542316055">"<xliff:g id="FINGERPRINT">%s</xliff:g> ei toiminut kunnolla, ja se poistettiin. Ota se uudelleen käyttöön, jotta voit avata puhelimen lukituksen sormenjäljellä."</string>
-    <string name="fingerprint_dangling_notification_msg_all_deleted_2" msgid="6897989352716156176">"<xliff:g id="FINGERPRINT_0">%1$s</xliff:g> ja <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> eivät toimineet kunnolla, ja ne poistettiin. Ota ne uudelleen käyttöön, jotta voit avata puhelimen lukituksen sormenjäljellä."</string>
+    <string name="fingerprint_dangling_notification_msg_1" msgid="5851784577768803510">"<xliff:g id="FINGERPRINT">%s</xliff:g> ei enää ole tunnistettavissa."</string>
+    <string name="fingerprint_dangling_notification_msg_2" msgid="7925203589860744456">"<xliff:g id="FINGERPRINT_0">%1$s</xliff:g> ja <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> eivät enää ole tunnistettavissa."</string>
+    <string name="fingerprint_dangling_notification_msg_all_deleted_1" msgid="1824812666549916586">"<xliff:g id="FINGERPRINT">%s</xliff:g> ei enää ole tunnistettavissa. Ota sormenjälkiavaus uudelleen käyttöön."</string>
+    <string name="fingerprint_dangling_notification_msg_all_deleted_2" msgid="5974657382960155099">"<xliff:g id="FINGERPRINT_0">%1$s</xliff:g> ja <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> eivät enää ole tunnistettavissa. Ota sormenjälkiavaus uudelleen käyttöön."</string>
     <string name="face_dangling_notification_title" msgid="947852541060975473">"Ota kasvojentunnistusavaus uudelleen käyttöön"</string>
-    <string name="face_dangling_notification_msg" msgid="8806849376915541655">"Kasvomallisi ei toiminut kunnolla, ja se poistettiin. Ota se uudelleen käyttöön, jotta voit avata puhelimen lukituksen kasvoilla."</string>
+    <string name="face_dangling_notification_msg" msgid="746235263598985384">"Kasvomallia ei enää tunnisteta. Ota kasvojentunnistusavaus uudelleen käyttöön."</string>
     <string name="biometric_dangling_notification_action_set_up" msgid="8246885009807817961">"Ota käyttöön"</string>
     <string name="biometric_dangling_notification_action_not_now" msgid="8095249216864443491">"Ei nyt"</string>
+    <string name="bg_user_sound_notification_title_alarm" msgid="5251678483393143527">"Hälytys: <xliff:g id="USER_NAME">%s</xliff:g>"</string>
+    <string name="bg_user_sound_notification_button_switch_user" msgid="3091969648572788946">"Vaihda käyttäjää"</string>
+    <string name="bg_user_sound_notification_button_mute" msgid="4942158515665615243">"Mykistä"</string>
+    <string name="bg_user_sound_notification_message" msgid="8613881975316976673">"Mykistä äänet napauttamalla"</string>
+    <string name="keyboard_shortcut_group_applications_browser" msgid="6535007304687100909">"Selain"</string>
+    <string name="keyboard_shortcut_group_applications_contacts" msgid="2750702518068326356">"Yhteystiedot"</string>
+    <string name="keyboard_shortcut_group_applications_email" msgid="4229037666415353683">"Sähköposti"</string>
+    <string name="keyboard_shortcut_group_applications_sms" msgid="3523799286376321137">"Tekstiviesti"</string>
+    <string name="keyboard_shortcut_group_applications_music" msgid="2051507523525651067">"Musiikki"</string>
+    <string name="keyboard_shortcut_group_applications_calendar" msgid="3571770335653387606">"Kalenteri"</string>
+    <string name="keyboard_shortcut_group_applications_calculator" msgid="6753209559716091507">"Laskin"</string>
+    <string name="keyboard_shortcut_group_applications_maps" msgid="7950000659522589471">"Maps"</string>
+    <string name="keyboard_shortcut_group_applications" msgid="3010389163951364798">"Sovellukset"</string>
 </resources>

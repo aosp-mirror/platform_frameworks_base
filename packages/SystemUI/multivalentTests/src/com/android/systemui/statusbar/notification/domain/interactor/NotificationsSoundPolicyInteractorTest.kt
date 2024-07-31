@@ -21,8 +21,8 @@ import android.media.AudioManager
 import android.provider.Settings.Global
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
-import com.android.settingslib.statusbar.notification.data.repository.updateNotificationPolicy
-import com.android.settingslib.statusbar.notification.domain.interactor.NotificationsSoundPolicyInteractor
+import com.android.settingslib.notification.data.repository.updateNotificationPolicy
+import com.android.settingslib.notification.domain.interactor.NotificationsSoundPolicyInteractor
 import com.android.settingslib.volume.shared.model.AudioStream
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue

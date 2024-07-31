@@ -22,6 +22,7 @@ import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.keyguard.shared.model.BiometricUnlockMode
 import com.android.systemui.keyguard.shared.model.BiometricUnlockModel
 import com.android.systemui.keyguard.shared.model.BiometricUnlockSource
+import com.android.systemui.keyguard.shared.model.CameraLaunchSourceModel
 import com.android.systemui.keyguard.shared.model.DismissAction
 import com.android.systemui.keyguard.shared.model.DozeTransitionModel
 import com.android.systemui.keyguard.shared.model.KeyguardDone
@@ -134,6 +135,11 @@ class FakeKeyguardRepository @Inject constructor() : KeyguardRepository {
     override val topClippingBounds = MutableStateFlow<Int?>(null)
 
     private var isShowKeyguardWhenReenabled: Boolean = false
+
+    private val _canIgnoreAuthAndReturnToGone = MutableStateFlow(false)
+    override val canIgnoreAuthAndReturnToGone = _canIgnoreAuthAndReturnToGone.asStateFlow()
+
+    override val onCameraLaunchDetected = MutableStateFlow(CameraLaunchSourceModel())
 
     override fun setQuickSettingsVisible(isVisible: Boolean) {
         _isQuickSettingsVisible.value = isVisible
@@ -277,6 +283,10 @@ class FakeKeyguardRepository @Inject constructor() : KeyguardRepository {
 
     override fun isShowKeyguardWhenReenabled(): Boolean {
         return isShowKeyguardWhenReenabled
+    }
+
+    override fun setCanIgnoreAuthAndReturnToGone(canWake: Boolean) {
+        _canIgnoreAuthAndReturnToGone.value = canWake
     }
 }
 

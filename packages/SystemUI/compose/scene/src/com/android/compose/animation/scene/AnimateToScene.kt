@@ -30,7 +30,7 @@ import kotlinx.coroutines.launch
  * the currently running transition, if there is one.
  */
 internal fun CoroutineScope.animateToScene(
-    layoutState: BaseSceneTransitionLayoutState,
+    layoutState: MutableSceneTransitionLayoutStateImpl,
     target: SceneKey,
     transitionKey: TransitionKey?,
 ): TransitionState.Transition? {
@@ -154,7 +154,7 @@ internal fun CoroutineScope.animateToScene(
 }
 
 private fun CoroutineScope.animate(
-    layoutState: BaseSceneTransitionLayoutState,
+    layoutState: MutableSceneTransitionLayoutStateImpl,
     targetScene: SceneKey,
     transitionKey: TransitionKey?,
     isInitiatedByUserInput: Boolean,

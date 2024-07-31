@@ -30,7 +30,7 @@ import android.window.IOnBackInvokedCallback;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.jank.Cuj.CujType;
-import com.android.wm.shell.common.InteractionJankMonitorUtils;
+import com.android.internal.jank.InteractionJankMonitor;
 
 /**
  * Used to register the animation callback and runner, it will trigger result if gesture was finish
@@ -86,20 +86,21 @@ public class BackAnimationRunner {
      */
     void startAnimation(RemoteAnimationTarget[] apps, RemoteAnimationTarget[] wallpapers,
             RemoteAnimationTarget[] nonApps, Runnable finishedCallback) {
+        InteractionJankMonitor interactionJankMonitor = InteractionJankMonitor.getInstance();
         final IRemoteAnimationFinishedCallback callback =
                 new IRemoteAnimationFinishedCallback.Stub() {
                     @Override
                     public void onAnimationFinished() {
                         if (shouldMonitorCUJ(apps)) {
-                            InteractionJankMonitorUtils.endTracing(mCujType);
+                            interactionJankMonitor.end(mCujType);
                         }
                         finishedCallback.run();
                     }
                 };
         mWaitingAnimation = false;
         if (shouldMonitorCUJ(apps)) {
-            InteractionJankMonitorUtils.beginTracing(
-                    mCujType, mContext, apps[0].leash, /* tag */ null);
+            interactionJankMonitor.begin(
+                    apps[0].leash, mContext, mCujType);
         }
         try {
             getRunner().onAnimationStart(TRANSIT_OLD_UNSET, apps, wallpapers,

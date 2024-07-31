@@ -29,6 +29,10 @@ import android.window.TransitionInfo.Change
 import android.window.TransitionRequestInfo
 import android.window.WindowContainerToken
 import android.window.WindowContainerTransaction
+import com.android.internal.protolog.ProtoLog
+import com.android.internal.jank.Cuj.CUJ_DESKTOP_MODE_ENTER_APP_HANDLE_DRAG_HOLD
+import com.android.internal.jank.Cuj.CUJ_DESKTOP_MODE_ENTER_APP_HANDLE_DRAG_RELEASE
+import com.android.internal.jank.InteractionJankMonitor
 import com.android.wm.shell.RootTaskDisplayAreaOrganizer
 import com.android.wm.shell.common.split.SplitScreenConstants.SPLIT_POSITION_BOTTOM_OR_RIGHT
 import com.android.wm.shell.common.split.SplitScreenConstants.SPLIT_POSITION_TOP_OR_LEFT
@@ -42,7 +46,6 @@ import com.android.wm.shell.transition.Transitions.TRANSIT_DESKTOP_MODE_CANCEL_D
 import com.android.wm.shell.transition.Transitions.TRANSIT_DESKTOP_MODE_END_DRAG_TO_DESKTOP
 import com.android.wm.shell.transition.Transitions.TRANSIT_DESKTOP_MODE_START_DRAG_TO_DESKTOP
 import com.android.wm.shell.transition.Transitions.TransitionHandler
-import com.android.wm.shell.util.KtProtoLog
 import com.android.wm.shell.windowdecor.MoveToDesktopAnimator
 import com.android.wm.shell.windowdecor.MoveToDesktopAnimator.Companion.DRAG_FREEFORM_SCALE
 import com.android.wm.shell.windowdecor.OnTaskResizeAnimationListener
@@ -57,17 +60,20 @@ class DragToDesktopTransitionHandler(
     private val context: Context,
     private val transitions: Transitions,
     private val taskDisplayAreaOrganizer: RootTaskDisplayAreaOrganizer,
-    private val transactionSupplier: Supplier<SurfaceControl.Transaction>
+    private val interactionJankMonitor: InteractionJankMonitor,
+    private val transactionSupplier: Supplier<SurfaceControl.Transaction>,
 ) : TransitionHandler {
 
     constructor(
         context: Context,
         transitions: Transitions,
-        rootTaskDisplayAreaOrganizer: RootTaskDisplayAreaOrganizer
+        rootTaskDisplayAreaOrganizer: RootTaskDisplayAreaOrganizer,
+        interactionJankMonitor: InteractionJankMonitor
     ) : this(
         context,
         transitions,
         rootTaskDisplayAreaOrganizer,
+        interactionJankMonitor,
         Supplier { SurfaceControl.Transaction() }
     )
 
@@ -114,7 +120,7 @@ class DragToDesktopTransitionHandler(
         dragToDesktopAnimator: MoveToDesktopAnimator,
     ) {
         if (inProgress) {
-            KtProtoLog.v(
+            ProtoLog.v(
                 ShellProtoLogGroup.WM_SHELL_DESKTOP_MODE,
                 "DragToDesktop: Drag to desktop transition already in progress."
             )
@@ -567,6 +573,8 @@ class DragToDesktopTransitionHandler(
                                 onTaskResizeAnimationListener.onAnimationEnd(state.draggedTaskId)
                                 startTransitionFinishCb.onTransitionFinished(null /* null */)
                                 clearState()
+                                interactionJankMonitor.end(
+                                    CUJ_DESKTOP_MODE_ENTER_APP_HANDLE_DRAG_RELEASE)
                             }
                         }
                     )
@@ -599,11 +607,15 @@ class DragToDesktopTransitionHandler(
     ) {
         val state = transitionState ?: return
         if (aborted && state.startTransitionToken == transition) {
-            KtProtoLog.v(
+            ProtoLog.v(
                 ShellProtoLogGroup.WM_SHELL_DESKTOP_MODE,
                 "DragToDesktop: onTransitionConsumed() start transition aborted"
             )
             state.startAborted = true
+            // Cancel CUJ interaction if the transition is aborted.
+            interactionJankMonitor.cancel(CUJ_DESKTOP_MODE_ENTER_APP_HANDLE_DRAG_HOLD)
+        } else if (state.cancelTransitionToken != transition) {
+            interactionJankMonitor.cancel(CUJ_DESKTOP_MODE_ENTER_APP_HANDLE_DRAG_RELEASE)
         }
     }
 

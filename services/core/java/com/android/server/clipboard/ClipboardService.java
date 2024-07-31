@@ -684,7 +684,8 @@ public class ClipboardService extends SystemService {
                 if (clipboard == null) {
                     return null;
                 }
-                showAccessNotificationLocked(pkg, intendingUid, intendingUserId, clipboard);
+                showAccessNotificationLocked(
+                        pkg, intendingUid, intendingUserId, clipboard, deviceId);
                 notifyTextClassifierLocked(clipboard, pkg, intendingUid);
                 if (clipboard.primaryClip != null) {
                     scheduleAutoClear(userId, intendingUid, intendingDeviceId);
@@ -1438,7 +1439,7 @@ public class ClipboardService extends SystemService {
      */
     @GuardedBy("mLock")
     private void showAccessNotificationLocked(String callingPackage, int uid, @UserIdInt int userId,
-            Clipboard clipboard) {
+            Clipboard clipboard, int accessDeviceId) {
         if (clipboard.primaryClip == null) {
             return;
         }
@@ -1477,7 +1478,7 @@ public class ClipboardService extends SystemService {
             return;
         }
 
-        final ArraySet<Context> toastContexts = getToastContexts(clipboard);
+        final ArraySet<Context> toastContexts = getToastContexts(clipboard, accessDeviceId);
         Binder.withCleanCallingIdentity(() -> {
             try {
                 CharSequence callingAppLabel = mPm.getApplicationLabel(
@@ -1516,40 +1517,55 @@ public class ClipboardService extends SystemService {
      * If the clipboard is for a VirtualDevice, we attempt to return the single DisplayContext for
      * the focused VirtualDisplay for that device, but might need to return the contexts for
      * multiple displays if the VirtualDevice has several but none of them were focused.
+     *
+     * If the clipboard is NOT for a VirtualDevice, but it's being accessed from a VirtualDevice,
+     * this means that the clipboard is shared between the default and that device. In this case we
+     * need to show a toast in both places.
      */
-    private ArraySet<Context> getToastContexts(Clipboard clipboard) throws IllegalStateException {
+    private ArraySet<Context> getToastContexts(Clipboard clipboard, int accessDeviceId)
+            throws IllegalStateException {
         ArraySet<Context> contexts = new ArraySet<>();
-
-        if (mVdmInternal != null && clipboard.deviceId != DEVICE_ID_DEFAULT) {
-            DisplayManager displayManager = getContext().getSystemService(DisplayManager.class);
-
-            int topFocusedDisplayId = mWm.getTopFocusedDisplayId();
-            ArraySet<Integer> displayIds = mVdmInternal.getDisplayIdsForDevice(clipboard.deviceId);
-
-            if (displayIds.contains(topFocusedDisplayId)) {
-                Display display = displayManager.getDisplay(topFocusedDisplayId);
-                if (display != null) {
-                    contexts.add(getContext().createDisplayContext(display));
-                    return contexts;
-                }
-            }
-
-            for (int i = 0; i < displayIds.size(); i++) {
-                Display display = displayManager.getDisplay(displayIds.valueAt(i));
-                if (display != null) {
-                    contexts.add(getContext().createDisplayContext(display));
-                }
-            }
-            if (!contexts.isEmpty()) {
-                return contexts;
-            }
-            Slog.e(TAG, "getToastContexts Couldn't find any VirtualDisplays for VirtualDevice "
-                    + clipboard.deviceId);
-            // Since we couldn't find any VirtualDisplays to use at all, just fall through to using
-            // the default display below.
+        if (clipboard.deviceId == DEVICE_ID_DEFAULT || accessDeviceId == DEVICE_ID_DEFAULT) {
+            // Always show the toast on the default display when the default clipboard is accessed -
+            // also when the clipboard is shared with a virtual device and accessed from there.
+            // Same when any clipboard is accessed from the default device.
+            contexts.add(getContext());
         }
 
-        contexts.add(getContext());
+        if ((accessDeviceId == DEVICE_ID_DEFAULT && clipboard.deviceId == DEVICE_ID_DEFAULT)
+                || mVdmInternal == null) {
+            // No virtual devices involved.
+            return contexts;
+        }
+
+        // At this point the clipboard is either accessed from a virtual device, or it is a virtual
+        // device clipboard, so show a toast on the relevant virtual display(s).
+        DisplayManager displayManager = getContext().getSystemService(DisplayManager.class);
+        ArraySet<Integer> displayIds = mVdmInternal.getDisplayIdsForDevice(accessDeviceId);
+        int topFocusedDisplayId = mWm.getTopFocusedDisplayId();
+
+        if (displayIds.contains(topFocusedDisplayId)) {
+            Display display = displayManager.getDisplay(topFocusedDisplayId);
+            if (display != null) {
+                contexts.add(getContext().createDisplayContext(display));
+                return contexts;
+            }
+        }
+
+        for (int i = 0; i < displayIds.size(); i++) {
+            Display display = displayManager.getDisplay(displayIds.valueAt(i));
+            if (display != null) {
+                contexts.add(getContext().createDisplayContext(display));
+            }
+        }
+        if (contexts.isEmpty()) {
+            Slog.e(TAG, "getToastContexts Couldn't find any VirtualDisplays for VirtualDevice "
+                    + accessDeviceId);
+            // Since we couldn't find any VirtualDisplays to use at all, just fall through to using
+            // the default display below.
+            contexts.add(getContext());
+        }
+
         return contexts;
     }
 
