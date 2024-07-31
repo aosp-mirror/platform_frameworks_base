@@ -185,10 +185,7 @@ class ActivityEmbeddingAnimationAdapter {
     @CallSuper
     void onAnimationEnd(@NonNull SurfaceControl.Transaction t) {
         onAnimationUpdate(t, mAnimation.getDuration());
-        if (com.android.graphics.libgui.flags.Flags.edgeExtensionShader()
-                && mAnimation.getExtensionEdges() != 0) {
-            t.setEdgeExtensionEffect(mLeash, /* edge */ 0);
-        }
+        t.setEdgeExtensionEffect(mLeash, /* edge */ 0);
     }
 
     final long getDurationHint() {
