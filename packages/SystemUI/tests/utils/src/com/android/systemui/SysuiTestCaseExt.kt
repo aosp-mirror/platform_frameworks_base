@@ -20,3 +20,11 @@ import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.testCase
 
 fun SysuiTestCase.testKosmos(): Kosmos = Kosmos().apply { testCase = this@testKosmos }
+
+/** Run [f] on the main thread and return its result once completed. */
+fun <T : Any> SysuiTestCase.runOnMainThreadAndWaitForIdleSync(f: () -> T): T {
+    lateinit var result: T
+    context.mainExecutor.execute { result = f() }
+    waitForIdleSync()
+    return result
+}

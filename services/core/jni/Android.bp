@@ -193,7 +193,7 @@ cc_defaults {
         "android.hardware.thermal-V2-ndk",
         "android.hardware.tv.input@1.0",
         "android.hardware.tv.input-V2-ndk",
-        "android.hardware.vibrator-V2-cpp",
+        "android.hardware.vibrator-V3-ndk",
         "android.hardware.vibrator@1.0",
         "android.hardware.vibrator@1.1",
         "android.hardware.vibrator@1.2",
@@ -210,6 +210,7 @@ cc_defaults {
         "android.system.suspend-V1-ndk",
         "server_configurable_flags",
         "service.incremental",
+        "android.companion.virtualdevice.flags-aconfig-cc",
     ],
 
     static_libs: [

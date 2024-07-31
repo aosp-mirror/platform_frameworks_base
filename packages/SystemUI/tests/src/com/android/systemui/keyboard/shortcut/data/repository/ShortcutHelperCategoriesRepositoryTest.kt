@@ -16,18 +16,34 @@
 
 package com.android.systemui.keyboard.shortcut.data.repository
 
-import android.view.KeyEvent
+import android.hardware.input.fakeInputManager
+import android.view.KeyEvent.KEYCODE_A
+import android.view.KeyEvent.KEYCODE_B
+import android.view.KeyEvent.KEYCODE_C
+import android.view.KeyEvent.KEYCODE_D
+import android.view.KeyEvent.KEYCODE_E
+import android.view.KeyEvent.KEYCODE_F
+import android.view.KeyEvent.KEYCODE_G
 import android.view.KeyboardShortcutGroup
 import android.view.KeyboardShortcutInfo
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
+import com.android.systemui.keyboard.shortcut.data.source.FakeKeyboardShortcutGroupsSource
+import com.android.systemui.keyboard.shortcut.data.source.TestShortcuts
 import com.android.systemui.keyboard.shortcut.shared.model.Shortcut
+import com.android.systemui.keyboard.shortcut.shared.model.ShortcutCategory
 import com.android.systemui.keyboard.shortcut.shared.model.ShortcutCategoryType
 import com.android.systemui.keyboard.shortcut.shared.model.ShortcutCommand
-import com.android.systemui.keyboard.shortcut.shared.model.shortcutCategory
+import com.android.systemui.keyboard.shortcut.shared.model.ShortcutKey
+import com.android.systemui.keyboard.shortcut.shared.model.ShortcutSubCategory
+import com.android.systemui.keyboard.shortcut.shortcutHelperAppCategoriesShortcutsSource
 import com.android.systemui.keyboard.shortcut.shortcutHelperCategoriesRepository
+import com.android.systemui.keyboard.shortcut.shortcutHelperCurrentAppShortcutsSource
+import com.android.systemui.keyboard.shortcut.shortcutHelperInputShortcutsSource
+import com.android.systemui.keyboard.shortcut.shortcutHelperMultiTaskingShortcutsSource
+import com.android.systemui.keyboard.shortcut.shortcutHelperSystemShortcutsSource
 import com.android.systemui.keyboard.shortcut.shortcutHelperTestHelper
 import com.android.systemui.kosmos.testDispatcher
 import com.android.systemui.kosmos.testScope
@@ -36,95 +52,127 @@ import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
+import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 
+@OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 class ShortcutHelperCategoriesRepositoryTest : SysuiTestCase() {
-    @OptIn(ExperimentalCoroutinesApi::class)
-    private val kosmos = testKosmos().also { it.testDispatcher = UnconfinedTestDispatcher() }
+
+    private val fakeSystemSource = FakeKeyboardShortcutGroupsSource()
+    private val fakeMultiTaskingSource = FakeKeyboardShortcutGroupsSource()
+    private val fakeAppCategoriesSource = FakeKeyboardShortcutGroupsSource()
+
+    private val kosmos =
+        testKosmos().also {
+            it.testDispatcher = UnconfinedTestDispatcher()
+            it.shortcutHelperSystemShortcutsSource = fakeSystemSource
+            it.shortcutHelperMultiTaskingShortcutsSource = fakeMultiTaskingSource
+            it.shortcutHelperAppCategoriesShortcutsSource = fakeAppCategoriesSource
+            it.shortcutHelperInputShortcutsSource = FakeKeyboardShortcutGroupsSource()
+            it.shortcutHelperCurrentAppShortcutsSource = FakeKeyboardShortcutGroupsSource()
+        }
+
     private val repo = kosmos.shortcutHelperCategoriesRepository
     private val helper = kosmos.shortcutHelperTestHelper
     private val testScope = kosmos.testScope
+    private val fakeInputManager = kosmos.fakeInputManager
+
+    @Before
+    fun setUp() {
+        fakeSystemSource.setGroups(TestShortcuts.systemGroups)
+        fakeMultiTaskingSource.setGroups(TestShortcuts.multitaskingGroups)
+    }
 
     @Test
-    fun stateActive_imeShortcuts_shortcutInfoCorrectlyConverted() =
+    fun categories_multipleSubscribers_replaysExistingValueToNewSubscribers() =
         testScope.runTest {
-            helper.setImeShortcuts(imeShortcutsGroupWithPreviousLanguageSwitchShortcut)
-            val imeShortcutCategory by collectLastValue(repo.imeShortcutsCategory)
-
+            fakeSystemSource.setGroups(TestShortcuts.systemGroups)
+            fakeMultiTaskingSource.setGroups(TestShortcuts.multitaskingGroups)
             helper.showFromActivity()
+            val firstCategories by collectLastValue(repo.categories)
 
-            assertThat(imeShortcutCategory)
-                .isEqualTo(expectedImeShortcutCategoryWithPreviousLanguageSwitchShortcut)
+            // Intentionally change shortcuts now. This simulates "current app" shortcuts changing
+            // when our helper is shown.
+            // We still want to return the shortcuts that were returned before our helper was
+            // showing.
+            fakeSystemSource.setGroups(emptyList())
+
+            val secondCategories by collectLastValue(repo.categories)
+            // Make sure the second subscriber receives the same value as the first subscriber, even
+            // though fetching shortcuts again would have returned a new result.
+            assertThat(secondCategories).isEqualTo(firstCategories)
         }
 
     @Test
-    fun stateActive_imeShortcuts_discardUnsupportedShortcutInfoModifiers() =
+    fun categories_filtersShortcutsWithUnsupportedKeyCodes() =
         testScope.runTest {
-            helper.setImeShortcuts(imeShortcutsGroupWithUnsupportedShortcutModifiers)
-            val imeShortcutCategory by collectLastValue(repo.imeShortcutsCategory)
+            fakeSystemSource.setGroups(
+                listOf(
+                    simpleGroup(
+                        simpleShortcutInfo(KEYCODE_A),
+                        simpleShortcutInfo(KEYCODE_B),
+                    ),
+                    simpleGroup(
+                        simpleShortcutInfo(KEYCODE_C),
+                    ),
+                )
+            )
+            fakeMultiTaskingSource.setGroups(
+                listOf(
+                    simpleGroup(
+                        simpleShortcutInfo(KEYCODE_D),
+                    ),
+                    simpleGroup(
+                        simpleShortcutInfo(KEYCODE_E),
+                        simpleShortcutInfo(KEYCODE_F),
+                    ),
+                )
+            )
+            fakeAppCategoriesSource.setGroups(listOf(simpleGroup(simpleShortcutInfo(KEYCODE_G))))
 
-            helper.showFromActivity()
+            fakeInputManager.removeKeysFromKeyboard(deviceId = 123, KEYCODE_A, KEYCODE_D, KEYCODE_G)
+            helper.toggle(deviceId = 123)
 
-            assertThat(imeShortcutCategory)
-                .isEqualTo(expectedImeShortcutCategoryWithDiscardedUnsupportedShortcuts)
+            val categories by collectLastValue(repo.categories)
+            assertThat(categories)
+                .containsExactly(
+                    ShortcutCategory(
+                        ShortcutCategoryType.System,
+                        listOf(
+                            simpleSubCategory(simpleShortcut("B")),
+                            simpleSubCategory(simpleShortcut("C")),
+                        )
+                    ),
+                    ShortcutCategory(
+                        ShortcutCategoryType.MultiTasking,
+                        listOf(
+                            simpleSubCategory(
+                                simpleShortcut("E"),
+                                simpleShortcut("F"),
+                            ),
+                        )
+                    ),
+                )
         }
 
-    private val switchToPreviousLanguageCommand =
-        ShortcutCommand(
-            listOf(KeyEvent.META_CTRL_ON, KeyEvent.META_SHIFT_ON, KeyEvent.KEYCODE_SPACE)
+    private fun simpleSubCategory(vararg shortcuts: Shortcut) =
+        ShortcutSubCategory(simpleGroupLabel, shortcuts.asList())
+
+    private fun simpleShortcut(vararg keys: String) =
+        Shortcut(
+            label = simpleShortcutLabel,
+            commands = listOf(ShortcutCommand(keys.map { ShortcutKey.Text(it) }))
         )
 
-    private val expectedImeShortcutCategoryWithDiscardedUnsupportedShortcuts =
-        shortcutCategory(ShortcutCategoryType.IME) { subCategory("input", emptyList()) }
+    private fun simpleGroup(vararg shortcuts: KeyboardShortcutInfo) =
+        KeyboardShortcutGroup(simpleGroupLabel, shortcuts.asList())
 
-    private val switchToPreviousLanguageKeyboardShortcutInfo =
-        KeyboardShortcutInfo(
-            /* label = */ "switch to previous language",
-            /* keycode = */ switchToPreviousLanguageCommand.keyCodes[2],
-            /* modifiers = */ switchToPreviousLanguageCommand.keyCodes[0] or
-                switchToPreviousLanguageCommand.keyCodes[1],
-        )
+    private fun simpleShortcutInfo(keyCode: Int = 0) =
+        KeyboardShortcutInfo(simpleShortcutLabel, keyCode, /* modifiers= */ 0)
 
-    private val expectedImeShortcutCategoryWithPreviousLanguageSwitchShortcut =
-        shortcutCategory(ShortcutCategoryType.IME) {
-            subCategory(
-                "input",
-                listOf(
-                    Shortcut(
-                        switchToPreviousLanguageKeyboardShortcutInfo.label!!.toString(),
-                        listOf(switchToPreviousLanguageCommand)
-                    )
-                )
-            )
-        }
-
-    private val imeShortcutsGroupWithPreviousLanguageSwitchShortcut =
-        listOf(
-            KeyboardShortcutGroup(
-                "input",
-                listOf(
-                    switchToPreviousLanguageKeyboardShortcutInfo,
-                )
-            )
-        )
-
-    private val shortcutInfoWithUnsupportedModifier =
-        KeyboardShortcutInfo(
-            /* label = */ "unsupported shortcut",
-            /* keycode = */ KeyEvent.KEYCODE_SPACE,
-            /* modifiers = */ 32
-        )
-
-    private val imeShortcutsGroupWithUnsupportedShortcutModifiers =
-        listOf(
-            KeyboardShortcutGroup(
-                "input",
-                listOf(
-                    shortcutInfoWithUnsupportedModifier,
-                )
-            )
-        )
+    private val simpleShortcutLabel = "shortcut label"
+    private val simpleGroupLabel = "group label"
 }

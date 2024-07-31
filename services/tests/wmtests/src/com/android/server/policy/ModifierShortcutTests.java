@@ -65,7 +65,8 @@ public class ModifierShortcutTests extends ShortcutKeyTestBase {
     private static final SparseArray<String> INTENT_SHORTCUTS =  new SparseArray<>();
     private static final SparseArray<String> ROLE_SHORTCUTS =  new SparseArray<>();
     static {
-        // These shortcuts should align with those defined in bookmarks.xml
+        // These shortcuts should align with those defined in
+        // services/tests/wmtests/res/xml/bookmarks.xml
         INTENT_SHORTCUTS.append(KEYCODE_U, Intent.CATEGORY_APP_CALCULATOR);
         INTENT_SHORTCUTS.append(KEYCODE_C, Intent.CATEGORY_APP_CONTACTS);
         INTENT_SHORTCUTS.append(KEYCODE_E, Intent.CATEGORY_APP_EMAIL);
@@ -96,6 +97,7 @@ public class ModifierShortcutTests extends ShortcutKeyTestBase {
             mPhoneWindowManager.assertLaunchCategory(category);
         }
 
+        mPhoneWindowManager.overrideRoleManager();
         for (int i = 0; i < ROLE_SHORTCUTS.size(); i++) {
             final int keyCode = ROLE_SHORTCUTS.keyAt(i);
             final String role = ROLE_SHORTCUTS.valueAt(i);

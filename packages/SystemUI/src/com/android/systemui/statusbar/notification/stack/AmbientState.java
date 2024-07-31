@@ -66,6 +66,8 @@ public class AmbientState implements Dumpable {
     private StatusBarKeyguardViewManager mStatusBarKeyguardViewManager;
     private float mStackTop;
     private float mStackCutoff;
+    private float mHeadsUpTop;
+    private float mHeadsUpBottom;
     private int mScrollY;
     private float mOverScrollTopAmount;
     private float mOverScrollBottomAmount;
@@ -375,6 +377,30 @@ public class AmbientState implements Dumpable {
     public void setStackCutoff(float stackCutoff) {
         if (SceneContainerFlag.isUnexpectedlyInLegacyMode()) return;
         this.mStackCutoff = stackCutoff;
+    }
+
+    /** y coordinate of the top position of a pinned HUN */
+    public float getHeadsUpTop() {
+        if (SceneContainerFlag.isUnexpectedlyInLegacyMode()) return 0f;
+        return mHeadsUpTop;
+    }
+
+    /** @see #getHeadsUpTop() */
+    public void setHeadsUpTop(float mHeadsUpTop) {
+        if (SceneContainerFlag.isUnexpectedlyInLegacyMode()) return;
+        this.mHeadsUpTop = mHeadsUpTop;
+    }
+
+    /** the bottom-most y position where we can draw pinned HUNs  */
+    public float getHeadsUpBottom() {
+        if (SceneContainerFlag.isUnexpectedlyInLegacyMode()) return 0f;
+        return mHeadsUpBottom;
+    }
+
+    /** @see #getHeadsUpBottom() */
+    public void setHeadsUpBottom(float headsUpBottom) {
+        if (SceneContainerFlag.isUnexpectedlyInLegacyMode()) return;
+        mHeadsUpBottom = headsUpBottom;
     }
 
     public int getScrollY() {
@@ -784,7 +810,9 @@ public class AmbientState implements Dumpable {
     @Override
     public void dump(PrintWriter pw, String[] args) {
         pw.println("mStackTop=" + mStackTop);
-        pw.println("mStackCutoff" + mStackCutoff);
+        pw.println("mStackCutoff=" + mStackCutoff);
+        pw.println("mHeadsUpTop=" + mHeadsUpTop);
+        pw.println("mHeadsUpBottom=" + mHeadsUpBottom);
         pw.println("mTopPadding=" + mTopPadding);
         pw.println("mStackTopMargin=" + mStackTopMargin);
         pw.println("mStackTranslation=" + mStackTranslation);

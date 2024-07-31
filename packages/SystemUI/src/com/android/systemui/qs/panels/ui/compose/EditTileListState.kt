@@ -34,16 +34,25 @@ fun rememberEditListState(
 class EditTileListState(tiles: List<EditTileViewModel>) {
     val tiles: SnapshotStateList<EditTileViewModel> = tiles.toMutableStateList()
 
-    fun move(tileSpec: TileSpec, target: TileSpec) {
-        val fromIndex = indexOf(tileSpec)
+    fun move(tile: EditTileViewModel, target: TileSpec) {
+        val fromIndex = indexOf(tile.tileSpec)
         val toIndex = indexOf(target)
 
-        if (fromIndex == -1 || toIndex == -1 || fromIndex == toIndex) {
+        if (toIndex == -1 || fromIndex == toIndex) {
             return
         }
 
-        val isMovingToCurrent = tiles[toIndex].isCurrent
-        tiles.apply { add(toIndex, removeAt(fromIndex).copy(isCurrent = isMovingToCurrent)) }
+        if (fromIndex == -1) {
+            // If tile isn't in the list, simply insert it
+            tiles.add(toIndex, tile)
+        } else {
+            // If tile is present in the list, move it
+            tiles.apply { add(toIndex, removeAt(fromIndex)) }
+        }
+    }
+
+    fun remove(tileSpec: TileSpec) {
+        tiles.removeIf { it.tileSpec == tileSpec }
     }
 
     fun indexOf(tileSpec: TileSpec): Int {

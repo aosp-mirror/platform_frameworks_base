@@ -8,3 +8,11 @@ flag {
     bug: "309512867"
     is_fixed_read_only: true
 }
+
+flag {
+    name: "apply_network_stats_poll_rate_limit"
+    namespace: "statsd"
+    description: "Apply a rate limit for polling network stats when pulling relevant atoms"
+    bug: "352495181"
+    is_fixed_read_only: true
+}

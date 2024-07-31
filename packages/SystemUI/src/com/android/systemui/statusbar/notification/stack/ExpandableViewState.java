@@ -176,7 +176,7 @@ public class ExpandableViewState extends ViewState {
             expandableView.setInShelf(inShelf);
 
             if (headsUpIsVisible) {
-                expandableView.setHeadsUpIsVisible();
+                expandableView.markHeadsUpSeen();
             }
         }
     }
@@ -231,7 +231,7 @@ public class ExpandableViewState extends ViewState {
         expandableView.setInShelf(this.inShelf);
 
         if (headsUpIsVisible) {
-            expandableView.setHeadsUpIsVisible();
+            expandableView.markHeadsUpSeen();
         }
     }
 

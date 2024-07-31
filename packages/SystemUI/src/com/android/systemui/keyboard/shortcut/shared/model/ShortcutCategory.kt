@@ -16,22 +16,33 @@
 
 package com.android.systemui.keyboard.shortcut.shared.model
 
-enum class ShortcutCategoryType {
-    SYSTEM,
-    MULTI_TASKING,
-    IME
+sealed interface ShortcutCategoryType {
+    data object System : ShortcutCategoryType
+
+    data object MultiTasking : ShortcutCategoryType
+
+    data object InputMethodEditor : ShortcutCategoryType
+
+    data object AppCategories : ShortcutCategoryType
+
+    data class CurrentApp(val packageName: String) : ShortcutCategoryType
 }
 
 data class ShortcutCategory(
     val type: ShortcutCategoryType,
     val subCategories: List<ShortcutSubCategory>
-)
+) {
+    constructor(
+        type: ShortcutCategoryType,
+        vararg subCategories: ShortcutSubCategory
+    ) : this(type, subCategories.asList())
+}
 
 class ShortcutCategoryBuilder(val type: ShortcutCategoryType) {
     private val subCategories = mutableListOf<ShortcutSubCategory>()
 
-    fun subCategory(label: String, shortcuts: List<Shortcut>) {
-        subCategories += ShortcutSubCategory(label, shortcuts)
+    fun subCategory(label: String, builder: ShortcutSubCategoryBuilder.() -> Unit) {
+        subCategories += ShortcutSubCategoryBuilder(label).apply(builder).build()
     }
 
     fun build() = ShortcutCategory(type, subCategories)

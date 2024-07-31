@@ -166,11 +166,6 @@ class SplitPresenter extends JetpackTaskFragmentOrganizer {
         mWindowLayoutComponent = windowLayoutComponent;
         mController = controller;
         registerOrganizer();
-        if (!SplitController.ENABLE_SHELL_TRANSITIONS) {
-            // TODO(b/207070762): cleanup with legacy app transition
-            // Animation will be handled by WM Shell when Shell transition is enabled.
-            overrideSplitAnimation();
-        }
     }
 
     /**
@@ -1363,5 +1358,17 @@ class SplitPresenter extends JetpackTaskFragmentOrganizer {
                         configuration.windowConfiguration);
         return new ParentContainerInfo(taskProperties.getTaskMetrics(), configuration,
                 windowLayoutInfo);
+    }
+
+    @VisibleForTesting
+    @NonNull
+    static String positionToString(@ContainerPosition int position) {
+        return switch (position) {
+            case CONTAINER_POSITION_LEFT -> "left";
+            case CONTAINER_POSITION_TOP -> "top";
+            case CONTAINER_POSITION_RIGHT -> "right";
+            case CONTAINER_POSITION_BOTTOM -> "bottom";
+            default -> "Unknown position:" + position;
+        };
     }
 }

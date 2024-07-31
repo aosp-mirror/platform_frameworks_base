@@ -23,10 +23,14 @@ import javax.inject.Inject
 
 interface IconTilesViewModel {
     fun isIconTile(spec: TileSpec): Boolean
+
+    fun resize(spec: TileSpec, toIcon: Boolean)
 }
 
 @SysUISingleton
 class IconTilesViewModelImpl @Inject constructor(private val interactor: IconTilesInteractor) :
     IconTilesViewModel {
     override fun isIconTile(spec: TileSpec): Boolean = interactor.isIconTile(spec)
+
+    override fun resize(spec: TileSpec, toIcon: Boolean) = interactor.resize(spec, toIcon)
 }

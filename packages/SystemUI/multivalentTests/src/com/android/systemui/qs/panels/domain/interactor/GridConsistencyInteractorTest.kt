@@ -20,11 +20,11 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.kosmos.testScope
-import com.android.systemui.qs.panels.data.repository.IconTilesRepository
+import com.android.systemui.qs.panels.data.repository.DefaultLargeTilesRepository
+import com.android.systemui.qs.panels.data.repository.defaultLargeTilesRepository
 import com.android.systemui.qs.panels.data.repository.gridLayoutTypeRepository
-import com.android.systemui.qs.panels.data.repository.iconTilesRepository
+import com.android.systemui.qs.panels.shared.model.GridLayoutType
 import com.android.systemui.qs.panels.shared.model.InfiniteGridLayoutType
-import com.android.systemui.qs.panels.shared.model.PartitionedGridLayoutType
 import com.android.systemui.qs.pipeline.data.repository.tileSpecRepository
 import com.android.systemui.qs.pipeline.domain.interactor.currentTilesInteractor
 import com.android.systemui.qs.pipeline.shared.TileSpec
@@ -42,23 +42,25 @@ import org.junit.runner.RunWith
 @RunWith(AndroidJUnit4::class)
 class GridConsistencyInteractorTest : SysuiTestCase() {
 
-    private val iconOnlyTiles =
-        setOf(
-            TileSpec.create("smallA"),
-            TileSpec.create("smallB"),
-            TileSpec.create("smallC"),
-            TileSpec.create("smallD"),
-            TileSpec.create("smallE"),
-        )
+    data object NoopGridLayoutType : GridLayoutType
 
     private val kosmos =
         testKosmos().apply {
-            iconTilesRepository =
-                object : IconTilesRepository {
-                    override fun isIconTile(spec: TileSpec): Boolean {
-                        return iconOnlyTiles.contains(spec)
-                    }
+            defaultLargeTilesRepository =
+                object : DefaultLargeTilesRepository {
+                    override val defaultLargeTiles =
+                        setOf(
+                            TileSpec.create("largeA"),
+                            TileSpec.create("largeB"),
+                            TileSpec.create("largeC"),
+                            TileSpec.create("largeD"),
+                        )
                 }
+            gridConsistencyInteractorsMap =
+                mapOf(
+                    Pair(NoopGridLayoutType, noopGridConsistencyInteractor),
+                    Pair(InfiniteGridLayoutType, infiniteGridConsistencyInteractor)
+                )
         }
 
     private val underTest = with(kosmos) { gridConsistencyInteractor }
@@ -76,7 +78,7 @@ class GridConsistencyInteractorTest : SysuiTestCase() {
         with(kosmos) {
             testScope.runTest {
                 // Using the no-op grid consistency interactor
-                gridLayoutTypeRepository.setLayout(PartitionedGridLayoutType)
+                gridLayoutTypeRepository.setLayout(NoopGridLayoutType)
 
                 // Setting an invalid layout with holes
                 // [ Large A ] [ sa ]

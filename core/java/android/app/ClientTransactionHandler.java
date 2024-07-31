@@ -42,6 +42,7 @@ import java.util.Map;
 /**
  * Defines operations that a {@link android.app.servertransaction.ClientTransaction} or its items
  * can perform on client.
+ *
  * @hide
  */
 public abstract class ClientTransactionHandler {
@@ -68,7 +69,6 @@ public abstract class ClientTransactionHandler {
             getTransactionExecutor().execute(transaction);
         } finally {
             mIsExecutingLocalTransaction = false;
-            transaction.recycle();
         }
     }
 

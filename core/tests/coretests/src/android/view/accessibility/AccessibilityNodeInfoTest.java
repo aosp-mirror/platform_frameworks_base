@@ -28,8 +28,8 @@ import android.os.Parcel;
 import android.util.ArraySet;
 import android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction;
 
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.LargeTest;
-import androidx.test.runner.AndroidJUnit4;
 
 import com.android.internal.util.CollectionUtils;
 

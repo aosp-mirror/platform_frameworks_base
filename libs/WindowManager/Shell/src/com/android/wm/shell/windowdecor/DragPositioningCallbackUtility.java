@@ -30,10 +30,10 @@ import android.view.SurfaceControl;
 
 import androidx.annotation.NonNull;
 
-import com.android.window.flags.Flags;
 import com.android.wm.shell.R;
 import com.android.wm.shell.common.DisplayController;
-import com.android.wm.shell.shared.DesktopModeStatus;
+import com.android.wm.shell.shared.desktopmode.DesktopModeFlags;
+import com.android.wm.shell.shared.desktopmode.DesktopModeStatus;
 
 /**
  * Utility class that contains logic common to classes implementing {@link DragPositioningCallback}
@@ -245,7 +245,7 @@ public class DragPositioningCallbackUtility {
 
     private static boolean isSizeConstraintForDesktopModeEnabled(Context context) {
         return DesktopModeStatus.canEnterDesktopMode(context)
-                && Flags.enableDesktopWindowingSizeConstraints();
+                && DesktopModeFlags.SIZE_CONSTRAINTS.isEnabled(context);
     }
 
     interface DragStartListener {

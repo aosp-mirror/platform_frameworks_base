@@ -63,11 +63,6 @@ public class DisplayContentDeferredUpdateTests extends WindowTestsBase {
 
     private final Message mScreenUnblocker = mock(Message.class);
 
-    @Override
-    protected void onBeforeSystemServicesCreated() {
-        mSetFlagsRule.enableFlags(Flags.FLAG_DEFER_DISPLAY_UPDATES);
-    }
-
     @Before
     public void before() {
         doReturn(true).when(mDisplayContent).getLastHasContent();

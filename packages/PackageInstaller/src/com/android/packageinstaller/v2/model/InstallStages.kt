@@ -19,6 +19,7 @@ package com.android.packageinstaller.v2.model
 import android.app.Activity
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.content.pm.PackageInstaller
 import android.graphics.drawable.Drawable
 
 sealed class InstallStage(val stageCode: Int) {
@@ -43,7 +44,10 @@ data class InstallUserActionRequired(
     val actionReason: Int,
     private val appSnippet: PackageUtil.AppSnippet? = null,
     val isAppUpdating: Boolean = false,
-    val dialogMessage: String? = null,
+    /**
+     * This holds either a package name or the app label of the install source.
+     */
+    val sourceApp: String? = null,
 ) : InstallStage(STAGE_USER_ACTION_REQUIRED) {
 
     val appIcon: Drawable?
@@ -74,11 +78,10 @@ data class InstallSuccess(
     val shouldReturnResult: Boolean = false,
     /**
      *
-     * * If the caller is requesting a result back, this will hold the Intent with
-     * [Intent.EXTRA_INSTALL_RESULT] set to [PackageManager.INSTALL_SUCCEEDED] which is sent
-     * back to the caller.
+     * * If the caller is requesting a result back, this will hold an Intent with
+     * [Intent.EXTRA_INSTALL_RESULT] set to [PackageManager.INSTALL_SUCCEEDED].
      *
-     * * If the caller doesn't want the result back, this will hold the Intent that launches
+     * * If the caller doesn't want the result back, this will hold an Intent that launches
      * the newly installed / updated app if a launchable activity exists.
      */
     val resultIntent: Intent? = null,
@@ -92,17 +95,23 @@ data class InstallSuccess(
 }
 
 data class InstallFailed(
-    private val appSnippet: PackageUtil.AppSnippet,
+    private val appSnippet: PackageUtil.AppSnippet? = null,
     val legacyCode: Int,
     val statusCode: Int,
-    val message: String?,
+    val message: String? = null,
+    val shouldReturnResult: Boolean = false,
+    /**
+     * If the caller is requesting a result back, this will hold an Intent with
+     * [Intent.EXTRA_INSTALL_RESULT] set to the [PackageInstaller.EXTRA_LEGACY_STATUS].
+     */
+    val resultIntent: Intent? = null
 ) : InstallStage(STAGE_FAILED) {
 
     val appIcon: Drawable?
-        get() = appSnippet.icon
+        get() = appSnippet?.icon
 
     val appLabel: String?
-        get() = appSnippet.label as String?
+        get() = appSnippet?.label as String?
 }
 
 data class InstallAborted(

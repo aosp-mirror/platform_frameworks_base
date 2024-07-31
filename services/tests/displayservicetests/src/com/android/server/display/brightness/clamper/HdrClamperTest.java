@@ -34,6 +34,7 @@ import android.os.PowerManager;
 import androidx.test.filters.SmallTest;
 
 import com.android.server.display.AutomaticBrightnessController;
+import com.android.server.display.config.DisplayDeviceConfigTestUtilsKt;
 import com.android.server.display.config.HdrBrightnessData;
 import com.android.server.testutils.OffsettableClock;
 import com.android.server.testutils.TestHandler;
@@ -54,13 +55,14 @@ public class HdrClamperTest {
     private static final float FLOAT_TOLERANCE = 0.0001f;
     private static final long SEND_TIME_TOLERANCE = 100;
 
-    private static final HdrBrightnessData TEST_HDR_DATA = new HdrBrightnessData(
-            Map.of(500f, 0.6f),
-            /* brightnessIncreaseDebounceMillis= */ 1000,
-            /* screenBrightnessRampIncrease= */ 0.02f,
-            /* brightnessDecreaseDebounceMillis= */ 3000,
-            /* screenBrightnessRampDecrease= */0.04f
-    );
+    private static final HdrBrightnessData TEST_HDR_DATA = DisplayDeviceConfigTestUtilsKt
+            .createHdrBrightnessData(
+                    Map.of(500f, 0.6f),
+                    /* brightnessIncreaseDebounceMillis= */ 1000,
+                    /* screenBrightnessRampIncrease= */ 0.02f,
+                    /* brightnessDecreaseDebounceMillis= */ 3000,
+                    /* screenBrightnessRampDecrease= */0.04f
+            );
 
     private static final int WIDTH = 600;
     private static final int HEIGHT = 800;

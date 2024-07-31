@@ -96,7 +96,7 @@ public class HearingDevicesListAdapter extends RecyclerView.Adapter<RecyclerView
          * @param deviceItem bluetooth device item
          * @param view       the view that was clicked
          */
-        void onDeviceItemOnClicked(@NonNull DeviceItem deviceItem, @NonNull View view);
+        void onDeviceItemClicked(@NonNull DeviceItem deviceItem, @NonNull View view);
     }
 
     private static class DeviceItemViewHolder extends RecyclerView.ViewHolder {
@@ -119,7 +119,7 @@ public class HearingDevicesListAdapter extends RecyclerView.Adapter<RecyclerView
 
         public void bindView(DeviceItem item, HearingDeviceItemCallback callback) {
             mContainer.setEnabled(item.isEnabled());
-            mContainer.setOnClickListener(view -> callback.onDeviceItemOnClicked(item, view));
+            mContainer.setOnClickListener(view -> callback.onDeviceItemClicked(item, view));
             Integer backgroundResId = item.getBackground();
             if (backgroundResId != null) {
                 mContainer.setBackground(mContext.getDrawable(item.getBackground()));

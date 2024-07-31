@@ -54,6 +54,8 @@ import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.model.SysUiState;
+import com.android.systemui.navigationbar.views.NavigationBar;
+import com.android.systemui.navigationbar.views.NavigationBarView;
 import com.android.systemui.recents.OverviewProxyService;
 import com.android.systemui.settings.DisplayTracker;
 import com.android.systemui.shared.statusbar.phone.BarTransitions.TransitionMode;

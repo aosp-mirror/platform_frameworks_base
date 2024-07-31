@@ -103,6 +103,7 @@ object SceneWindowRootViewBinder {
                                 windowInsets = windowInsets,
                                 sceneByKey = sortedSceneByKey,
                                 dataSourceDelegator = dataSourceDelegator,
+                                containerConfig = containerConfig,
                             )
                             .also { it.id = R.id.scene_container_root_composable }
                     )
@@ -141,6 +142,7 @@ object SceneWindowRootViewBinder {
         windowInsets: StateFlow<WindowInsets?>,
         sceneByKey: Map<SceneKey, Scene>,
         dataSourceDelegator: SceneDataSourceDelegator,
+        containerConfig: SceneContainerConfig,
     ): View {
         return ComposeView(context).apply {
             setContent {
@@ -153,6 +155,7 @@ object SceneWindowRootViewBinder {
                             viewModel = viewModel,
                             sceneByKey =
                                 sceneByKey.mapValues { (_, scene) -> scene as ComposableScene },
+                            initialSceneKey = containerConfig.initialSceneKey,
                             dataSourceDelegator = dataSourceDelegator,
                         )
                     }

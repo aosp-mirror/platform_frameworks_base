@@ -136,6 +136,7 @@ public class SettingsToPropertiesMapper {
     static final String[] sDeviceConfigAconfigScopes = new String[] {
         "accessibility",
         "android_core_networking",
+        "android_sdk",
         "android_stylus",
         "aoc",
         "app_widgets",
@@ -173,6 +174,7 @@ public class SettingsToPropertiesMapper {
         "haptics",
         "hardware_backed_security_mainline",
         "input",
+        "incremental",
         "llvm_and_toolchains",
         "lse_desktop_experience",
         "machine_learning",
@@ -209,6 +211,7 @@ public class SettingsToPropertiesMapper {
         "safety_center",
         "sensors",
         "spoon",
+        "stability",
         "statsd",
         "system_performance",
         "system_sw_touch",

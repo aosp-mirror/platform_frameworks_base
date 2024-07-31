@@ -98,6 +98,8 @@ aconfig_declarations_group {
         "framework-jobscheduler-job.flags-aconfig-java",
         "framework_graphics_flags_java_lib",
         "hwui_flags_java_lib",
+        "libcore_exported_aconfig_flags_lib",
+        "libgui_flags_java_lib",
         "power_flags_lib",
         "sdk_sandbox_flags_lib",
         "surfaceflinger_flags_java_lib",
@@ -137,6 +139,14 @@ java_defaults {
 java_aconfig_library {
     name: "camera_platform_flags_core_java_lib",
     aconfig_declarations: "camera_platform_flags",
+    defaults: ["framework-minus-apex-aconfig-java-defaults"],
+}
+
+// Core Libraries / libcore
+java_aconfig_library {
+    name: "libcore_exported_aconfig_flags_lib",
+    aconfig_declarations: "libcore-aconfig-flags",
+    mode: "exported",
     defaults: ["framework-minus-apex-aconfig-java-defaults"],
 }
 
@@ -230,6 +240,12 @@ java_aconfig_library {
 
 cc_aconfig_library {
     name: "aconfig_text_flags_c_lib",
+    aconfig_declarations: "com.android.text.flags-aconfig",
+}
+
+rust_aconfig_library {
+    name: "libandroid_text_flags_rust",
+    crate_name: "android_text_flags",
     aconfig_declarations: "com.android.text.flags-aconfig",
 }
 
@@ -363,6 +379,7 @@ java_aconfig_library {
     min_sdk_version: "30",
     apex_available: [
         "//apex_available:platform",
+        "com.android.btservices",
         "com.android.mediaprovider",
         "com.android.permission",
     ],
@@ -403,12 +420,8 @@ java_aconfig_library {
 cc_aconfig_library {
     name: "android.companion.virtualdevice.flags-aconfig-cc",
     aconfig_declarations: "android.companion.virtualdevice.flags-aconfig",
-}
-
-cc_aconfig_library {
-    name: "android.companion.virtualdevice.flags-aconfig-cc-host",
-    aconfig_declarations: "android.companion.virtualdevice.flags-aconfig",
     host_supported: true,
+    mode: "test",
 }
 
 java_aconfig_library {
@@ -1196,6 +1209,12 @@ java_aconfig_library {
     defaults: ["framework-minus-apex-aconfig-java-defaults"],
 }
 
+java_aconfig_library {
+    name: "libgui_flags_java_lib",
+    aconfig_declarations: "libgui_flags",
+    defaults: ["framework-minus-apex-aconfig-java-defaults"],
+}
+
 // Content Capture
 aconfig_declarations {
     name: "android.view.contentcapture.flags-aconfig",
@@ -1480,6 +1499,13 @@ aconfig_declarations {
 java_aconfig_library {
     name: "backstage_power_flags_lib",
     aconfig_declarations: "backstage_power_flags",
+    defaults: ["framework-minus-apex-aconfig-java-defaults"],
+}
+
+java_aconfig_library {
+    name: "backstage_power_flags_lib-host",
+    aconfig_declarations: "backstage_power_flags",
+    host_supported: true,
     defaults: ["framework-minus-apex-aconfig-java-defaults"],
 }
 

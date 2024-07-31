@@ -175,6 +175,11 @@ public class BubbleBarLayerView extends FrameLayout
         return mIsExpanded;
     }
 
+    /** Return whether the expanded view is being dragged */
+    public boolean isExpandedViewDragged() {
+        return mDragController != null && mDragController.isDragged();
+    }
+
     /** Shows the expanded view of the provided bubble. */
     public void showExpandedView(BubbleViewProvider b) {
         BubbleBarExpandedView expandedView = b.getBubbleBarExpandedView();

@@ -151,6 +151,10 @@ public class DropZoneView extends FrameLayout {
 
     /** Ignores the bottom margin provided by the insets. */
     public void setForceIgnoreBottomMargin(boolean ignoreBottomMargin) {
+        if (DEBUG_LAYOUT) {
+            ProtoLog.v(ShellProtoLogGroup.WM_SHELL_DRAG_AND_DROP,
+                    "setForceIgnoreBottomMargin: ignore=%b", ignoreBottomMargin);
+        }
         mIgnoreBottomMargin = ignoreBottomMargin;
         if (mMarginPercent > 0) {
             mMarginView.invalidate();
@@ -159,8 +163,14 @@ public class DropZoneView extends FrameLayout {
 
     /** Sets the bottom inset so the drop zones are above bottom navigation. */
     public void setBottomInset(float bottom) {
+        if (DEBUG_LAYOUT) {
+            ProtoLog.v(ShellProtoLogGroup.WM_SHELL_DRAG_AND_DROP, "setBottomInset: inset=%f",
+                    bottom);
+        }
         mBottomInset = bottom;
-        ((LayoutParams) mSplashScreenView.getLayoutParams()).bottomMargin = (int) bottom;
+        final LayoutParams lp = (LayoutParams) mSplashScreenView.getLayoutParams();
+        lp.bottomMargin = (int) bottom;
+        mSplashScreenView.setLayoutParams(lp);
         if (mMarginPercent > 0) {
             mMarginView.invalidate();
         }

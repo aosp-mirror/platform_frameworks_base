@@ -25,6 +25,7 @@ import com.android.systemui.keyguard.shared.model.KeyguardState.DREAMING
 import com.android.systemui.keyguard.ui.KeyguardTransitionAnimationFlow
 import com.android.systemui.keyguard.ui.transitions.DeviceEntryIconTransition
 import javax.inject.Inject
+import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emptyFlow
@@ -43,6 +44,13 @@ constructor(
         animationFlow.setup(
             duration = FromDreamingTransitionInteractor.TO_AOD_DURATION,
             edge = Edge.create(from = DREAMING, to = AOD),
+        )
+
+    /** Lockscreen views alpha */
+    val lockscreenAlpha: Flow<Float> =
+        transitionAnimation.sharedFlow(
+            duration = 300.milliseconds,
+            onStep = { it },
         )
 
     val deviceEntryBackgroundViewAlpha: Flow<Float> =

@@ -33,6 +33,7 @@ import android.view.WindowManager.TRANSIT_CHANGE
 import android.window.TransitionInfo
 import android.window.WindowContainerToken
 import androidx.test.filters.SmallTest
+import com.android.internal.jank.InteractionJankMonitor
 import com.android.wm.shell.ShellTaskOrganizer
 import com.android.wm.shell.ShellTestCase
 import com.android.wm.shell.common.DisplayController
@@ -104,6 +105,8 @@ class VeiledResizeTaskPositionerTest : ShellTestCase() {
     private lateinit var mockContext: Context
     @Mock
     private lateinit var mockResources: Resources
+    @Mock
+    private lateinit var mockInteractionJankMonitor: InteractionJankMonitor
 
     private lateinit var taskPositioner: VeiledResizeTaskPositioner
 
@@ -150,7 +153,8 @@ class VeiledResizeTaskPositionerTest : ShellTestCase() {
                         mockDisplayController,
                         mockDragStartListener,
                         mockTransactionFactory,
-                        mockTransitions
+                        mockTransitions,
+                        mockInteractionJankMonitor
                 )
     }
 

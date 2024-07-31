@@ -29,8 +29,8 @@ import android.platform.test.ravenwood.RavenwoodRule;
 import android.util.Log;
 
 import androidx.test.InstrumentationRegistry;
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.LargeTest;
-import androidx.test.runner.AndroidJUnit4;
 import androidx.test.uiautomator.UiDevice;
 
 import com.android.frameworks.coretests.aidl.IBpcCallbackObserver;

@@ -28,11 +28,19 @@ import java.util.Objects;
 
 /**
  * Request an activity to enter picture-in-picture mode.
+ *
  * @hide
  */
 public final class PipStateTransactionItem extends ActivityTransactionItem {
 
-    private PictureInPictureUiState mPipState;
+    @NonNull
+    private final PictureInPictureUiState mPipState;
+
+    public PipStateTransactionItem(@NonNull IBinder activityToken,
+            @NonNull PictureInPictureUiState pipState) {
+        super(activityToken);
+        mPipState = pipState;
+    }
 
     @Override
     public void execute(@NonNull ClientTransactionHandler client, @NonNull ActivityClientRecord r,
@@ -40,41 +48,16 @@ public final class PipStateTransactionItem extends ActivityTransactionItem {
         client.handlePictureInPictureStateChanged(r, mPipState);
     }
 
-    // ObjectPoolItem implementation
-
-    private PipStateTransactionItem() {}
-
-    /** Obtain an instance initialized with provided params. */
-    @NonNull
-    public static PipStateTransactionItem obtain(@NonNull IBinder activityToken,
-            @NonNull PictureInPictureUiState pipState) {
-        PipStateTransactionItem instance = ObjectPool.obtain(PipStateTransactionItem.class);
-        if (instance == null) {
-            instance = new PipStateTransactionItem();
-        }
-        instance.setActivityToken(activityToken);
-        instance.mPipState = pipState;
-
-        return instance;
-    }
-
-    @Override
-    public void recycle() {
-        super.recycle();
-        mPipState = null;
-        ObjectPool.recycle(this);
-    }
-
     // Parcelable implementation
 
-    /** Write to Parcel. */
+    /** Writes to Parcel. */
     @Override
     public void writeToParcel(@NonNull Parcel dest, int flags) {
         super.writeToParcel(dest, flags);
         mPipState.writeToParcel(dest, flags);
     }
 
-    /** Read from Parcel. */
+    /** Reads from Parcel. */
     private PipStateTransactionItem(@NonNull Parcel in) {
         super(in);
         mPipState = PictureInPictureUiState.CREATOR.createFromParcel(in);

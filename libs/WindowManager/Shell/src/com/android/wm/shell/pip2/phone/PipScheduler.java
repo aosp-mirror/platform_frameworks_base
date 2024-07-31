@@ -162,6 +162,18 @@ public class PipScheduler {
      * @param configAtEnd true if we are delaying config updates until the transition ends.
      */
     public void scheduleAnimateResizePip(Rect toBounds, boolean configAtEnd) {
+        scheduleAnimateResizePip(toBounds, configAtEnd,
+                PipTransition.BOUNDS_CHANGE_JUMPCUT_DURATION);
+    }
+
+    /**
+     * Animates resizing of the pinned stack given the duration.
+     *
+     * @param configAtEnd true if we are delaying config updates until the transition ends.
+     * @param duration    the suggested duration to run the animation; the component responsible
+     *                    for running the animator will get this as an extra.
+     */
+    public void scheduleAnimateResizePip(Rect toBounds, boolean configAtEnd, int duration) {
         if (mPipTransitionState.mPipTaskToken == null || !mPipTransitionState.isInPip()) {
             return;
         }
@@ -170,7 +182,7 @@ public class PipScheduler {
         if (configAtEnd) {
             wct.deferConfigToTransitionEnd(mPipTransitionState.mPipTaskToken);
         }
-        mPipTransitionController.startResizeTransition(wct);
+        mPipTransitionController.startResizeTransition(wct, duration);
     }
 
     /**

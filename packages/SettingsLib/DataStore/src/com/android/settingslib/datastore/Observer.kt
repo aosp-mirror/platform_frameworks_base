@@ -32,10 +32,11 @@ fun interface Observer {
      *
      * This callback will run in the given [Executor] when observer is added.
      *
+     * @param observable observable of the change
      * @param reason the reason of change
      * @see [Observable.addObserver] for the notices.
      */
-    fun onChanged(reason: Int)
+    fun onChanged(observable: Observable, reason: Int)
 }
 
 /** An observable object allows to observe change with [Observer]. */
@@ -68,8 +69,21 @@ interface Observable {
     fun notifyChange(reason: Int)
 }
 
+/** Delegation of [Observable]. */
+interface ObservableDelegation : Observable {
+    /** [Observable] to delegate. */
+    val observableDelegate: Observable
+
+    override fun addObserver(observer: Observer, executor: Executor) =
+        observableDelegate.addObserver(observer, executor)
+
+    override fun removeObserver(observer: Observer) = observableDelegate.removeObserver(observer)
+
+    override fun notifyChange(reason: Int) = observableDelegate.notifyChange(reason)
+}
+
 /** A thread safe implementation of [Observable]. */
-class DataObservable : Observable {
+class DataObservable(private val observable: Observable) : Observable {
     // Instead of @GuardedBy("this"), guarded by itself because DataObservable object could be
     // synchronized outside by the holder
     @GuardedBy("itself") private val observers = WeakHashMap<Observer, Executor>()
@@ -90,7 +104,7 @@ class DataObservable : Observable {
         val entries = synchronized(observers) { observers.entries.toTypedArray() }
         for (entry in entries) {
             val observer = entry.key // avoid reference "entry"
-            entry.value.execute { observer.onChanged(reason) }
+            entry.value.execute { observer.onChanged(observable, reason) }
         }
     }
 }

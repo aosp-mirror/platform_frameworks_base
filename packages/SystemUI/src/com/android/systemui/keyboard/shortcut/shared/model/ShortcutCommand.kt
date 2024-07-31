@@ -16,4 +16,23 @@
 
 package com.android.systemui.keyboard.shortcut.shared.model
 
-data class ShortcutCommand(val keyCodes: List<Int>)
+import androidx.annotation.DrawableRes
+
+data class ShortcutCommand(val keys: List<ShortcutKey>)
+
+class ShortcutCommandBuilder {
+    private val keys = mutableListOf<ShortcutKey>()
+
+    fun key(text: String) {
+        keys += ShortcutKey.Text(text)
+    }
+
+    fun key(@DrawableRes drawableResId: Int) {
+        keys += ShortcutKey.Icon(drawableResId)
+    }
+
+    fun build() = ShortcutCommand(keys)
+}
+
+fun shortcutCommand(block: ShortcutCommandBuilder.() -> Unit) =
+    ShortcutCommandBuilder().apply(block).build()

@@ -21,8 +21,19 @@ import com.android.systemui.common.shared.model.Icon
 
 /** Model representing the display of an ongoing activity as a chip in the status bar. */
 sealed class OngoingActivityChipModel {
-    /** This chip shouldn't be shown. */
-    data object Hidden : OngoingActivityChipModel()
+    /** Condensed name representing the model, used for logs. */
+    abstract val logName: String
+
+    /**
+     * This chip shouldn't be shown.
+     *
+     * @property shouldAnimate true if the transition from [Shown] to [Hidden] should be animated,
+     *   and false if that transition should *not* be animated (i.e. the chip view should
+     *   immediately disappear).
+     */
+    data class Hidden(val shouldAnimate: Boolean = true) : OngoingActivityChipModel() {
+        override val logName = "Hidden(anim=$shouldAnimate)"
+    }
 
     /** This chip should be shown with the given information. */
     abstract class Shown(
@@ -42,7 +53,9 @@ sealed class OngoingActivityChipModel {
             override val icon: Icon,
             override val colors: ColorsModel,
             override val onClickListener: View.OnClickListener?,
-        ) : Shown(icon, colors, onClickListener)
+        ) : Shown(icon, colors, onClickListener) {
+            override val logName = "Shown.Icon"
+        }
 
         /** The chip shows a timer, counting up from [startTimeMs]. */
         data class Timer(
@@ -59,7 +72,9 @@ sealed class OngoingActivityChipModel {
              */
             val startTimeMs: Long,
             override val onClickListener: View.OnClickListener?,
-        ) : Shown(icon, colors, onClickListener)
+        ) : Shown(icon, colors, onClickListener) {
+            override val logName = "Shown.Timer"
+        }
 
         /**
          * This chip shows a countdown using [secondsUntilStarted]. Used to inform users that an
@@ -69,6 +84,8 @@ sealed class OngoingActivityChipModel {
             override val colors: ColorsModel,
             /** The number of seconds until an event is started. */
             val secondsUntilStarted: Long,
-        ) : Shown(icon = null, colors, onClickListener = null)
+        ) : Shown(icon = null, colors, onClickListener = null) {
+            override val logName = "Shown.Countdown"
+        }
     }
 }

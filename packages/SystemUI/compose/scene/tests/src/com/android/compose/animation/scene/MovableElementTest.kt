@@ -62,7 +62,7 @@ class MovableElementTest {
     }
 
     @Composable
-    private fun SceneScope.MovableCounter(key: ElementKey, modifier: Modifier) {
+    private fun ContentScope.MovableCounter(key: ElementKey, modifier: Modifier) {
         MovableElement(key, modifier) { content { Counter() } }
     }
 
@@ -264,7 +264,7 @@ class MovableElementTest {
     @Test
     fun movableElementContentIsRecomposedIfContentParametersChange() {
         @Composable
-        fun SceneScope.MovableFoo(text: String, modifier: Modifier = Modifier) {
+        fun ContentScope.MovableFoo(text: String, modifier: Modifier = Modifier) {
             MovableElement(TestElements.Foo, modifier) { content { Text(text) } }
         }
 
@@ -298,7 +298,7 @@ class MovableElementTest {
     @Test
     fun elementScopeExtendsBoxScope() {
         rule.setContent {
-            TestSceneScope {
+            TestContentScope {
                 Element(TestElements.Foo, Modifier.size(200.dp)) {
                     content {
                         Box(Modifier.testTag("bottomEnd").align(Alignment.BottomEnd))
@@ -315,7 +315,7 @@ class MovableElementTest {
     @Test
     fun movableElementScopeExtendsBoxScope() {
         rule.setContent {
-            TestSceneScope {
+            TestContentScope {
                 MovableElement(TestElements.Foo, Modifier.size(200.dp)) {
                     content {
                         Box(Modifier.testTag("bottomEnd").align(Alignment.BottomEnd))

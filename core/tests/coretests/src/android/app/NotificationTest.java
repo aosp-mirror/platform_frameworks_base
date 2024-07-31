@@ -84,6 +84,8 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.platform.test.annotations.DisableFlags;
+import android.platform.test.annotations.EnableFlags;
 import android.platform.test.annotations.Presubmit;
 import android.platform.test.flag.junit.SetFlagsRule;
 import android.text.Spannable;
@@ -545,12 +547,26 @@ public class NotificationTest {
     }
 
     @Test
+    @DisableFlags(android.service.notification.Flags.FLAG_NOTIFICATION_SILENT_FLAG)
     public void testBuilder_setSilent_emptyGroupKey_groupKeySilent() {
         Notification emptyGroupKeyNotif = new Notification.Builder(mContext, "channelId")
                 .setGroup("")
                 .setSilent(true)
                 .build();
-        assertEquals(GROUP_KEY_SILENT, emptyGroupKeyNotif.getGroup());
+        assertThat(emptyGroupKeyNotif.getGroup()).isEqualTo(GROUP_KEY_SILENT);
+        assertThat(emptyGroupKeyNotif.isSilent()).isTrue();
+    }
+
+    @Test
+    @EnableFlags(android.service.notification.Flags.FLAG_NOTIFICATION_SILENT_FLAG)
+    public void testBuilder_setSilent_flagSilent() {
+        final String groupKey = "groupKey";
+        Notification emptyGroupKeyNotif = new Notification.Builder(mContext, "channelId")
+            .setGroup(groupKey)
+            .setSilent(true)
+            .build();
+        assertThat(emptyGroupKeyNotif.getGroup()).isEqualTo(groupKey);
+        assertThat(emptyGroupKeyNotif.isSilent()).isTrue();
     }
 
     @Test
