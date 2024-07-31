@@ -55,6 +55,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.Executor;
 import java.util.function.BiFunction;
 
 /**
@@ -1266,6 +1267,28 @@ public abstract class ActivityManagerInternal {
      * @hide
      */
     public abstract boolean shouldDelayHomeLaunch(int userId);
+
+    /**
+     * Used to track when a process is frozen or unfrozen.
+     */
+    public interface FrozenProcessListener {
+        /**
+         * Called when a process is frozen.
+         */
+        void onProcessFrozen(int pid);
+
+        /**
+         * Called when a process is unfrozen.
+         */
+        void onProcessUnfrozen(int pid);
+    }
+
+    /**
+     * Register the frozen process event listener callback. The same listener may be reused for
+     * multiple pids. Listeners are dropped when the process dies.
+     */
+    public abstract void addFrozenProcessListener(int pid, @NonNull Executor executor,
+            @NonNull FrozenProcessListener listener);
 
     /**
      * Add a startup timestamp to the most recent start of the specified process.
