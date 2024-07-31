@@ -45,6 +45,9 @@ import com.android.systemui.statusbar.gesture.SwipeStatusBarAwayGestureHandler
 import com.android.systemui.statusbar.notification.collection.NotificationEntry
 import com.android.systemui.statusbar.notification.collection.notifcollection.CommonNotifCollection
 import com.android.systemui.statusbar.notification.collection.notifcollection.NotifCollectionListener
+import com.android.systemui.statusbar.notification.domain.interactor.ActiveNotificationsInteractor
+import com.android.systemui.statusbar.notification.shared.ActiveNotificationModel
+import com.android.systemui.statusbar.notification.shared.CallType
 import com.android.systemui.statusbar.phone.ongoingcall.data.repository.OngoingCallRepository
 import com.android.systemui.statusbar.phone.ongoingcall.shared.model.OngoingCallModel
 import com.android.systemui.statusbar.policy.CallbackController
@@ -65,6 +68,7 @@ constructor(
     private val context: Context,
     private val ongoingCallRepository: OngoingCallRepository,
     private val notifCollection: CommonNotifCollection,
+    private val activeNotificationsInteractor: ActiveNotificationsInteractor,
     private val systemClock: SystemClock,
     private val activityStarter: ActivityStarter,
     @Main private val mainExecutor: Executor,
@@ -97,6 +101,7 @@ constructor(
             }
 
             override fun onEntryUpdated(entry: NotificationEntry) {
+                StatusBarUseReposForCallChip.assertInLegacyMode()
                 // We have a new call notification or our existing call notification has been
                 // updated.
                 // TODO(b/183229367): This likely won't work if you take a call from one app then
@@ -157,7 +162,25 @@ constructor(
 
     override fun start() {
         dumpManager.registerDumpable(this)
-        notifCollection.addCollectionListener(notifListener)
+
+        if (Flags.statusBarUseReposForCallChip()) {
+            scope.launch {
+                // Listening to [ActiveNotificationsInteractor] instead of using
+                // [NotifCollectionListener#onEntryUpdated] is better for two reasons:
+                // 1. ActiveNotificationsInteractor automatically filters the notification list to
+                // just notifications for the current user, which ensures we don't show a call chip
+                // for User 1's call while User 2 is active (see b/328584859).
+                // 2. ActiveNotificationsInteractor only emits notifications that are currently
+                // present in the shade, which means we know we've already inflated the icon that we
+                // might use for the call chip (see b/354930838).
+                activeNotificationsInteractor.ongoingCallNotification.collect {
+                    updateInfoFromNotifModel(it)
+                }
+            }
+        } else {
+            notifCollection.addCollectionListener(notifListener)
+        }
+
         scope.launch {
             statusBarModeRepository.defaultDisplay.isInFullscreenMode.collect {
                 isFullscreen = it
@@ -219,6 +242,35 @@ constructor(
 
     override fun removeCallback(listener: OngoingCallListener) {
         synchronized(mListeners) { mListeners.remove(listener) }
+    }
+
+    private fun updateInfoFromNotifModel(notifModel: ActiveNotificationModel?) {
+        if (notifModel == null) {
+            removeChip()
+        } else if (notifModel.callType != CallType.Ongoing) {
+            logger.log(
+                TAG,
+                LogLevel.ERROR,
+                { str1 = notifModel.callType.name },
+                { "Notification Interactor sent ActiveNotificationModel with callType=$str1" },
+            )
+            removeChip()
+        } else {
+            val newOngoingCallInfo =
+                CallNotificationInfo(
+                    notifModel.key,
+                    notifModel.whenTime,
+                    notifModel.contentIntent,
+                    notifModel.uid,
+                    isOngoing = true,
+                    statusBarSwipedAway = callNotificationInfo?.statusBarSwipedAway ?: false
+                )
+            if (newOngoingCallInfo == callNotificationInfo) {
+                return
+            }
+            callNotificationInfo = newOngoingCallInfo
+            updateChip()
+        }
     }
 
     private fun updateChip() {

@@ -16,14 +16,17 @@
 
 package com.android.systemui.statusbar.notification.data.model
 
+import android.app.PendingIntent
 import android.graphics.drawable.Icon
 import com.android.systemui.statusbar.notification.shared.ActiveNotificationModel
+import com.android.systemui.statusbar.notification.shared.CallType
 import com.android.systemui.statusbar.notification.stack.BUCKET_UNKNOWN
 
 /** Simple ActiveNotificationModel builder for use in tests. */
 fun activeNotificationModel(
     key: String,
     groupKey: String? = null,
+    whenTime: Long = 0L,
     isAmbient: Boolean = false,
     isRowDismissed: Boolean = false,
     isSilent: Boolean = false,
@@ -37,11 +40,14 @@ fun activeNotificationModel(
     instanceId: Int? = null,
     isGroupSummary: Boolean = false,
     packageName: String = "pkg",
+    contentIntent: PendingIntent? = null,
     bucket: Int = BUCKET_UNKNOWN,
+    callType: CallType = CallType.None,
 ) =
     ActiveNotificationModel(
         key = key,
         groupKey = groupKey,
+        whenTime = whenTime,
         isAmbient = isAmbient,
         isRowDismissed = isRowDismissed,
         isSilent = isSilent,
@@ -53,7 +59,9 @@ fun activeNotificationModel(
         statusBarIcon = statusBarIcon,
         uid = uid,
         packageName = packageName,
+        contentIntent = contentIntent,
         instanceId = instanceId,
         isGroupSummary = isGroupSummary,
         bucket = bucket,
+        callType = callType,
     )

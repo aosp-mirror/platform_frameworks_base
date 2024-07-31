@@ -392,6 +392,17 @@ flag {
 }
 
 flag {
+    name: "status_bar_use_repos_for_call_chip"
+    namespace: "systemui"
+    description: "Use repositories as the source of truth for call notifications shown as a chip in"
+        "the status bar"
+    bug: "328584859"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
     name: "compose_bouncer"
     namespace: "systemui"
     description: "Use the new compose bouncer in SystemUI"
