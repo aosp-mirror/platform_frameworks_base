@@ -288,7 +288,7 @@ class MediaRouter2ServiceImpl {
                         == PackageManager.PERMISSION_GRANTED;
         final boolean hasModifyAudioRoutingPermission =
                 checkCallerHasModifyAudioRoutingPermission(pid, uid);
-
+        boolean hasMediaContentControlPermission = checkMediaContentControlPermission(uid, pid);
         boolean hasMediaRoutingControlPermission =
                 checkMediaRoutingControlPermission(uid, pid, packageName);
 
@@ -303,6 +303,7 @@ class MediaRouter2ServiceImpl {
                         userId,
                         hasConfigureWifiDisplayPermission,
                         hasModifyAudioRoutingPermission,
+                        hasMediaContentControlPermission,
                         hasMediaRoutingControlPermission);
             }
         } finally {
@@ -1129,6 +1130,7 @@ class MediaRouter2ServiceImpl {
             int userId,
             boolean hasConfigureWifiDisplayPermission,
             boolean hasModifyAudioRoutingPermission,
+            boolean hasMediaContentControlPermission,
             boolean hasMediaRoutingControlPermission) {
         final IBinder binder = router.asBinder();
         if (mAllRouterRecords.get(binder) != null) {
@@ -1147,6 +1149,7 @@ class MediaRouter2ServiceImpl {
                         packageName,
                         hasConfigureWifiDisplayPermission,
                         hasModifyAudioRoutingPermission,
+                        hasMediaContentControlPermission,
                         hasMediaRoutingControlPermission);
         try {
             binder.linkToDeath(routerRecord, 0);
@@ -2063,9 +2066,10 @@ class MediaRouter2ServiceImpl {
         public final int mPid;
         public final boolean mHasConfigureWifiDisplayPermission;
         public final boolean mHasModifyAudioRoutingPermission;
+        public final boolean mHasMediaContentControlPermission;
+        public final boolean mHasMediaRoutingControl;
         public final AtomicBoolean mHasBluetoothRoutingPermission;
         public final int mRouterId;
-        public final boolean mHasMediaRoutingControl;
         public @ScanningState int mScanningState = SCANNING_STATE_NOT_SCANNING;
 
         public RouteDiscoveryPreference mDiscoveryPreference;
@@ -2079,6 +2083,7 @@ class MediaRouter2ServiceImpl {
                 String packageName,
                 boolean hasConfigureWifiDisplayPermission,
                 boolean hasModifyAudioRoutingPermission,
+                boolean hasMediaContentControlPermission,
                 boolean hasMediaRoutingControl) {
             mUserRecord = userRecord;
             mPackageName = packageName;
@@ -2089,9 +2094,10 @@ class MediaRouter2ServiceImpl {
             mPid = pid;
             mHasConfigureWifiDisplayPermission = hasConfigureWifiDisplayPermission;
             mHasModifyAudioRoutingPermission = hasModifyAudioRoutingPermission;
+            mHasMediaContentControlPermission = hasMediaContentControlPermission;
+            mHasMediaRoutingControl = hasMediaRoutingControl;
             mHasBluetoothRoutingPermission =
                     new AtomicBoolean(checkCallerHasBluetoothPermissions(mPid, mUid));
-            mHasMediaRoutingControl = hasMediaRoutingControl;
             mRouterId = mNextRouterOrManagerId.getAndIncrement();
         }
 
