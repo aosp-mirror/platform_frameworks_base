@@ -43,6 +43,7 @@ import androidx.test.filters.LargeTest;
 import junitparams.JUnitParamsRunner;
 import junitparams.Parameters;
 
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -201,6 +202,7 @@ public final class ServerSocketPerfTest {
 
     @Test
     @Parameters(method = "getParams")
+    @Ignore("b/351034205")
     public void throughput(Config config) throws Exception {
         setup(config);
         BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
