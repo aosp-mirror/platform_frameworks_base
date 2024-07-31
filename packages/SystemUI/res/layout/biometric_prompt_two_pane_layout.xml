@@ -87,20 +87,21 @@ android:layout_height="match_parent">
                 android:id="@+id/logo_description"
                 style="@style/TextAppearance.AuthCredential.LogoDescription"
                 android:layout_width="0dp"
-                android:layout_height="wrap_content"
+                android:layout_height="@dimen/biometric_prompt_logo_size"
+                android:gravity="start|center_vertical"
                 android:textAlignment="viewStart"
-                android:paddingStart="16dp"
-                app:layout_constraintBottom_toBottomOf="@+id/logo"
+                android:layout_marginStart="16dp"
+                app:layout_goneMarginStart="0dp"
+                app:layout_constraintBottom_toTopOf="@+id/title"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toEndOf="@+id/logo"
-                app:layout_constraintTop_toTopOf="@+id/logo" />
+                app:layout_constraintTop_toTopOf="parent" />
 
             <TextView
                 android:id="@+id/title"
                 style="@style/TextAppearance.AuthCredential.Title"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="12dp"
                 android:gravity="@integer/biometric_dialog_text_gravity"
                 android:paddingHorizontal="0dp"
                 android:textAlignment="viewStart"
@@ -108,7 +109,7 @@ android:layout_height="match_parent">
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintHorizontal_bias="0.0"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/logo"
+                app:layout_constraintTop_toBottomOf="@+id/logoBarrier"
                 app:layout_constraintVertical_bias="0.0"
                 app:layout_constraintVertical_chainStyle="packed" />
 
@@ -157,6 +158,15 @@ android:layout_height="match_parent">
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/subtitle"
                 app:layout_constraintVertical_bias="0.0" />
+
+            <androidx.constraintlayout.widget.Barrier
+                android:id="@+id/logoBarrier"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:barrierMargin="12dp"
+                app:barrierAllowsGoneWidgets="false"
+                app:barrierDirection="bottom"
+                app:constraint_referenced_ids="logo_description, logo" />
 
             <androidx.constraintlayout.widget.Barrier
                 android:id="@+id/contentBarrier"
