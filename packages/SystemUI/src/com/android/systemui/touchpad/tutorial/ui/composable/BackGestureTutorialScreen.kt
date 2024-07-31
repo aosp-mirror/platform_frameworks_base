@@ -70,11 +70,11 @@ import com.airbnb.lottie.compose.rememberLottieDynamicProperties
 import com.airbnb.lottie.compose.rememberLottieDynamicProperty
 import com.android.compose.theme.LocalAndroidColorScheme
 import com.android.systemui.res.R
+import com.android.systemui.touchpad.tutorial.ui.gesture.BackGestureMonitor
 import com.android.systemui.touchpad.tutorial.ui.gesture.GestureState
 import com.android.systemui.touchpad.tutorial.ui.gesture.GestureState.FINISHED
 import com.android.systemui.touchpad.tutorial.ui.gesture.GestureState.IN_PROGRESS
 import com.android.systemui.touchpad.tutorial.ui.gesture.GestureState.NOT_STARTED
-import com.android.systemui.touchpad.tutorial.ui.gesture.TouchpadGesture.BACK
 import com.android.systemui.touchpad.tutorial.ui.gesture.TouchpadGestureHandler
 
 data class TutorialScreenColors(
@@ -99,9 +99,10 @@ fun BackGestureTutorialScreen(
     val gestureHandler =
         remember(swipeDistanceThresholdPx) {
             TouchpadGestureHandler(
-                BACK,
-                swipeDistanceThresholdPx,
-                onGestureStateChanged = { gestureState = it }
+                BackGestureMonitor(
+                    swipeDistanceThresholdPx,
+                    gestureStateChangedCallback = { gestureState = it }
+                ),
             )
         }
     TouchpadGesturesHandlingBox(gestureHandler, gestureState) {
