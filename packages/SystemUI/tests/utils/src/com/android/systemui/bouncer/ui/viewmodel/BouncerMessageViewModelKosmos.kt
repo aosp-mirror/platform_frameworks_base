@@ -22,8 +22,8 @@ import com.android.systemui.bouncer.domain.interactor.bouncerInteractor
 import com.android.systemui.bouncer.domain.interactor.simBouncerInteractor
 import com.android.systemui.bouncer.shared.flag.composeBouncerFlags
 import com.android.systemui.deviceentry.domain.interactor.biometricMessageInteractor
+import com.android.systemui.deviceentry.domain.interactor.deviceEntryBiometricsAllowedInteractor
 import com.android.systemui.deviceentry.domain.interactor.deviceEntryFaceAuthInteractor
-import com.android.systemui.deviceentry.domain.interactor.deviceEntryFingerprintAuthInteractor
 import com.android.systemui.deviceentry.domain.interactor.deviceUnlockedInteractor
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.testScope
@@ -45,7 +45,7 @@ val Kosmos.bouncerMessageViewModel by
             biometricMessageInteractor = biometricMessageInteractor,
             faceAuthInteractor = deviceEntryFaceAuthInteractor,
             deviceUnlockedInteractor = deviceUnlockedInteractor,
-            fingerprintInteractor = deviceEntryFingerprintAuthInteractor,
+            deviceEntryBiometricsAllowedInteractor = deviceEntryBiometricsAllowedInteractor,
             flags = composeBouncerFlags,
         )
     }
