@@ -30,6 +30,7 @@ import static android.app.servertransaction.ActivityLifecycleItem.ON_STOP;
 import static android.app.servertransaction.ActivityLifecycleItem.PRE_ON_CREATE;
 import static android.content.ContentResolver.DEPRECATE_DATA_COLUMNS;
 import static android.content.ContentResolver.DEPRECATE_DATA_PREFIX;
+import static android.content.pm.ActivityInfo.CONFIG_RESOURCES_UNUSED;
 import static android.content.res.Configuration.UI_MODE_TYPE_DESK;
 import static android.content.res.Configuration.UI_MODE_TYPE_MASK;
 import static android.view.Display.DEFAULT_DISPLAY;
@@ -41,7 +42,6 @@ import static android.window.ConfigurationHelper.shouldUpdateResources;
 import static com.android.internal.annotations.VisibleForTesting.Visibility.PACKAGE;
 import static com.android.internal.os.SafeZipPathValidatorCallback.VALIDATE_ZIP_PATH_FOR_PATH_TRAVERSAL;
 import static com.android.sdksandbox.flags.Flags.sandboxActivitySdkBasedContext;
-import static com.android.window.flags.Flags.activityWindowInfoFlag;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -734,19 +734,6 @@ public final class ActivityThread extends ClientTransactionHandler
                             activityWindowInfo,
                             false /* alwaysReportChange */);
                 }
-
-                @Override
-                public void requestCompatCameraControl(boolean showControl,
-                        boolean transformationApplied, ICompatCameraControlCallback callback) {
-                    if (activity == null) {
-                        throw new IllegalStateException(
-                                "Received camera compat control update for non-existing activity");
-                    }
-                    ActivityClient.getInstance().requestCompatCameraControl(
-                            activity.getResources(), token, showControl, transformationApplied,
-                            callback);
-                }
-
             };
         }
 
@@ -2105,8 +2092,7 @@ public final class ActivityThread extends ClientTransactionHandler
         @Override
         public void scheduleTaskFragmentTransaction(@NonNull ITaskFragmentOrganizer organizer,
                 @NonNull TaskFragmentTransaction transaction) throws RemoteException {
-            // TODO(b/260873529): ITaskFragmentOrganizer can be cleanup to be a IBinder token
-            // after flag removal.
+            // TODO(b/352665082): ITaskFragmentOrganizer can be cleanup to be a IBinder token
             organizer.onTransactionReady(transaction);
         }
 
@@ -2637,13 +2623,6 @@ public final class ActivityThread extends ClientTransactionHandler
                     } finally {
                         controller.onClientTransactionFinished();
                     }
-                    if (isSystem()) {
-                        // Client transactions inside system process are recycled on the client side
-                        // instead of ClientLifecycleManager to avoid being cleared before this
-                        // message is handled.
-                        transaction.recycle();
-                    }
-                    // TODO(lifecycler): Recycle locally scheduled transactions.
                     break;
                 case RELAUNCH_ACTIVITY:
                     handleRelaunchActivityLocally((IBinder) msg.obj);
@@ -3825,9 +3804,8 @@ public final class ActivityThread extends ClientTransactionHandler
                 + " req=" + requestCode + " res=" + resultCode + " data=" + data);
         final ArrayList<ResultInfo> list = new ArrayList<>();
         list.add(new ResultInfo(id, requestCode, resultCode, data, activityToken));
-        final ClientTransaction clientTransaction = ClientTransaction.obtain(mAppThread);
-        final ActivityResultItem activityResultItem = ActivityResultItem.obtain(
-                activityToken, list);
+        final ClientTransaction clientTransaction = new ClientTransaction(mAppThread);
+        final ActivityResultItem activityResultItem = new ActivityResultItem(activityToken, list);
         clientTransaction.addTransactionItem(activityResultItem);
         try {
             mAppThread.scheduleTransaction(clientTransaction);
@@ -4621,8 +4599,8 @@ public final class ActivityThread extends ClientTransactionHandler
     }
 
     private void schedulePauseWithUserLeavingHint(ActivityClientRecord r) {
-        final ClientTransaction transaction = ClientTransaction.obtain(mAppThread);
-        final PauseActivityItem pauseActivityItem = PauseActivityItem.obtain(r.token,
+        final ClientTransaction transaction = new ClientTransaction(mAppThread);
+        final PauseActivityItem pauseActivityItem = new PauseActivityItem(r.token,
                 r.activity.isFinishing(), /* userLeaving */ true,
                 /* dontReport */ false, /* autoEnteringPip */ false);
         transaction.addTransactionItem(pauseActivityItem);
@@ -4630,8 +4608,8 @@ public final class ActivityThread extends ClientTransactionHandler
     }
 
     private void scheduleResume(ActivityClientRecord r) {
-        final ClientTransaction transaction = ClientTransaction.obtain(mAppThread);
-        final ResumeActivityItem resumeActivityItem = ResumeActivityItem.obtain(r.token,
+        final ClientTransaction transaction = new ClientTransaction(mAppThread);
+        final ResumeActivityItem resumeActivityItem = new ResumeActivityItem(r.token,
                 /* isForward */ false, /* shouldSendCompatFakeFocus */ false);
         transaction.addTransactionItem(resumeActivityItem);
         executeTransaction(transaction);
@@ -6247,7 +6225,7 @@ public final class ActivityThread extends ClientTransactionHandler
                 r.createdConfig != null
                         ? r.createdConfig : mConfigurationController.getConfiguration(),
                 r.overrideConfig);
-        final ActivityRelaunchItem activityRelaunchItem = ActivityRelaunchItem.obtain(
+        final ActivityRelaunchItem activityRelaunchItem = new ActivityRelaunchItem(
                 r.token, null /* pendingResults */, null /* pendingIntents */,
                 0 /* configChanges */, mergedConfiguration, r.mPreserveWindow,
                 r.getActivityWindowInfo());
@@ -6255,7 +6233,7 @@ public final class ActivityThread extends ClientTransactionHandler
         final ActivityLifecycleItem lifecycleRequest =
                 TransactionExecutorHelper.getLifecycleRequestForCurrentState(r);
         // Schedule the transaction.
-        final ClientTransaction transaction = ClientTransaction.obtain(mAppThread);
+        final ClientTransaction transaction = new ClientTransaction(mAppThread);
         transaction.addTransactionItem(activityRelaunchItem);
         transaction.addTransactionItem(lifecycleRequest);
         executeTransaction(transaction);
@@ -6518,6 +6496,13 @@ public final class ActivityThread extends ClientTransactionHandler
         // Report the change regardless if the changes across size-config-buckets.
         if (alwaysReportChange) {
             return true;
+        }
+
+        if (android.content.res.Flags.handleAllConfigChanges()) {
+            if ((handledConfigChanges & CONFIG_RESOURCES_UNUSED) != 0) {
+                // Report the change if activities claim they do not use resources at all.
+                return true;
+            }
         }
 
         final int diffWithBucket = SizeConfigurationBuckets.filterDiff(publicDiff, currentConfig,
@@ -6846,9 +6831,6 @@ public final class ActivityThread extends ClientTransactionHandler
     }
 
     private void handleActivityWindowInfoChanged(@NonNull ActivityClientRecord r) {
-        if (!activityWindowInfoFlag()) {
-            return;
-        }
         if (r.mActivityWindowInfo.equals(r.mLastReportedActivityWindowInfo)) {
             return;
         }

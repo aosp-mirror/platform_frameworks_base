@@ -42,7 +42,7 @@
     <string name="launch" msgid="3952550563999890101">"Apri"</string>
     <string name="unknown_apps_admin_dlg_text" msgid="4456572224020176095">"L\'amministratore non consente l\'installazione di app ottenute da origini sconosciute"</string>
     <string name="unknown_apps_user_restriction_dlg_text" msgid="151020786933988344">"Questo utente non può installare app sconosciute"</string>
-    <string name="install_apps_user_restriction_dlg_text" msgid="2154119597001074022">"L\'utente non è autorizzato a installare app"</string>
+    <string name="install_apps_user_restriction_dlg_text" msgid="2154119597001074022">"L\'utente non dispone dell\'autorizzazione a installare app"</string>
     <string name="ok" msgid="7871959885003339302">"OK"</string>
     <string name="archive" msgid="4447791830199354721">"Archivia"</string>
     <string name="update_anyway" msgid="8792432341346261969">"Aggiorna comunque"</string>

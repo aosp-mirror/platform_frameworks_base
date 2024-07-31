@@ -61,7 +61,7 @@ public class QuickSettingsControllerImplTest extends QuickSettingsControllerImpl
     public void testCloseQsSideEffects() {
         enableSplitShade(true);
         mQsController.setExpandImmediate(true);
-        mQsController.setExpanded(true);
+        mQsController.setExpansionHeight(800);
         mQsController.closeQs();
 
         assertThat(mQsController.getExpanded()).isEqualTo(false);

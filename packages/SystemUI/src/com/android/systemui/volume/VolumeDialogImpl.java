@@ -34,6 +34,7 @@ import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
 
 import static com.android.internal.jank.InteractionJankMonitor.CUJ_VOLUME_CONTROL;
 import static com.android.internal.jank.InteractionJankMonitor.Configuration.Builder;
+import static com.android.settingslib.flags.Flags.volumeDialogAudioSharingFix;
 import static com.android.systemui.Flags.hapticVolumeSlider;
 import static com.android.systemui.volume.Events.DISMISS_REASON_POSTURE_CHANGED;
 import static com.android.systemui.volume.Events.DISMISS_REASON_SETTINGS_CLICKED;
@@ -140,11 +141,14 @@ import com.android.systemui.volume.domain.interactor.VolumePanelNavigationIntera
 import com.android.systemui.volume.panel.shared.flag.VolumePanelFlag;
 import com.android.systemui.volume.ui.navigation.VolumeNavigator;
 
+import com.google.common.collect.ImmutableList;
+
 import dagger.Lazy;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Consumer;
 
 /**
@@ -315,6 +319,9 @@ public class VolumeDialogImpl implements VolumeDialog, Dumpable,
     private final com.android.systemui.util.time.SystemClock mSystemClock;
     private final VolumePanelFlag mVolumePanelFlag;
     private final VolumeDialogInteractor mInteractor;
+    // Optional actions for soundDose
+    private Optional<ImmutableList<CsdWarningAction>>
+            mCsdWarningNotificationActions = Optional.of(ImmutableList.of());
 
     public VolumeDialogImpl(
             Context context,
@@ -1670,6 +1677,14 @@ public class VolumeDialogImpl implements VolumeDialog, Dumpable,
                 return true;
             }
 
+            // Always show the stream for audio sharing if it exists.
+            if (volumeDialogAudioSharingFix()
+                    && row.ss != null
+                    && mContext.getString(R.string.audio_sharing_description)
+                            .equals(row.ss.remoteLabel)) {
+                return true;
+            }
+
             if (row.defaultStream) {
                 return activeRow.stream == STREAM_RING
                         || activeRow.stream == STREAM_ALARM
@@ -1872,10 +1887,25 @@ public class VolumeDialogImpl implements VolumeDialog, Dumpable,
             if (!ss.dynamic) continue;
             mDynamic.put(stream, true);
             if (findRow(stream) == null) {
-                addRow(stream,
-                        com.android.settingslib.R.drawable.ic_volume_remote,
-                        com.android.settingslib.R.drawable.ic_volume_remote_mute,
-                        true, false, true);
+                if (volumeDialogAudioSharingFix()
+                        && mContext.getString(R.string.audio_sharing_description)
+                                .equals(ss.remoteLabel)) {
+                    addRow(
+                            stream,
+                            R.drawable.ic_volume_media,
+                            R.drawable.ic_volume_media_mute,
+                            true,
+                            false,
+                            true);
+                } else {
+                    addRow(
+                            stream,
+                            com.android.settingslib.R.drawable.ic_volume_remote,
+                            com.android.settingslib.R.drawable.ic_volume_remote_mute,
+                            true,
+                            false,
+                            true);
+                }
             }
         }
 
@@ -2198,6 +2228,11 @@ public class VolumeDialogImpl implements VolumeDialog, Dumpable,
         rescheduleTimeoutH();
     }
 
+    public void setCsdWarningNotificationActionIntents(
+            ImmutableList<CsdWarningAction> actionIntent) {
+        mCsdWarningNotificationActions = Optional.of(actionIntent);
+    }
+
     @VisibleForTesting void showCsdWarningH(int csdWarning, int durationMs) {
         synchronized (mSafetyWarningLock) {
 
@@ -2212,7 +2247,8 @@ public class VolumeDialogImpl implements VolumeDialog, Dumpable,
                 recheckH(null);
             };
 
-            mCsdDialog = mCsdWarningDialogFactory.create(csdWarning, cleanUp);
+            mCsdDialog = mCsdWarningDialogFactory.create(
+                    csdWarning, cleanUp, mCsdWarningNotificationActions);
             mCsdDialog.show();
         }
         recheckH(null);

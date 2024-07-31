@@ -48,12 +48,12 @@ import android.os.Build;
 import android.os.SystemClock;
 import android.platform.test.annotations.RootPermissionTest;
 import android.platform.test.rule.UnlockScreenRule;
-import android.support.test.uiautomator.UiDevice;
 import android.util.Log;
 import android.view.WindowManager;
 import android.widget.EditText;
 
 import androidx.test.platform.app.InstrumentationRegistry;
+import androidx.test.uiautomator.UiDevice;
 
 import org.junit.Rule;
 import org.junit.Test;

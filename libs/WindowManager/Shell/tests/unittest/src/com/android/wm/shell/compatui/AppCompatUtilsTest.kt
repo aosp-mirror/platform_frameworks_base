@@ -16,8 +16,10 @@
 
 package com.android.wm.shell.compatui
 
+import android.content.ComponentName
 import android.testing.AndroidTestingRunner
 import androidx.test.filters.SmallTest
+import com.android.internal.R
 import com.android.wm.shell.ShellTestCase
 import com.android.wm.shell.desktopmode.DesktopTestHelpers.Companion.createFreeformTask
 import org.junit.Assert.assertFalse
@@ -34,26 +36,55 @@ import org.junit.runner.RunWith
 @RunWith(AndroidTestingRunner::class)
 @SmallTest
 class AppCompatUtilsTest : ShellTestCase() {
-
     @Test
-    fun testIsSingleTopActivityTranslucent() {
-        assertTrue(isSingleTopActivityTranslucent(
+    fun testIsTopActivityExemptFromDesktopWindowing_topActivityTransparent() {
+        assertTrue(isTopActivityExemptFromDesktopWindowing(mContext,
             createFreeformTask(/* displayId */ 0)
                     .apply {
                         isTopActivityTransparent = true
                         numActivities = 1
                     }))
-        assertFalse(isSingleTopActivityTranslucent(
+        assertFalse(isTopActivityExemptFromDesktopWindowing(mContext,
             createFreeformTask(/* displayId */ 0)
                     .apply {
                         isTopActivityTransparent = true
                         numActivities = 0
                     }))
-        assertFalse(isSingleTopActivityTranslucent(
+    }
+
+    @Test
+    fun testIsTopActivityExemptFromDesktopWindowing_singleTopActivity() {
+        assertTrue(isTopActivityExemptFromDesktopWindowing(mContext,
+            createFreeformTask(/* displayId */ 0)
+                    .apply {
+                        isTopActivityTransparent = true
+                        numActivities = 1
+                    }))
+        assertFalse(isTopActivityExemptFromDesktopWindowing(mContext,
             createFreeformTask(/* displayId */ 0)
                     .apply {
                         isTopActivityTransparent = false
                         numActivities = 1
+                    }))
+    }
+
+    @Test
+    fun testIsTopActivityExemptFromDesktopWindowing__topActivityStyleFloating() {
+        assertFalse(isTopActivityExemptFromDesktopWindowing(mContext,
+            createFreeformTask(/* displayId */ 0)
+                    .apply {
+                        isTopActivityStyleFloating = true
+                    }))
+    }
+
+    @Test
+    fun testIsTopActivityExemptFromDesktopWindowing_systemUiTask() {
+        val systemUIPackageName = context.resources.getString(R.string.config_systemUi)
+        val baseComponent = ComponentName(systemUIPackageName, /* class */ "")
+        assertTrue(isTopActivityExemptFromDesktopWindowing(mContext,
+            createFreeformTask(/* displayId */ 0)
+                    .apply {
+                        baseActivity = baseComponent
                     }))
     }
 }

@@ -216,6 +216,16 @@ public class MagnificationTest extends SysuiTestCase {
     }
 
     @Test
+    public void onRestoreWindowSize_updateSettingsButtonStatusOnRestore() {
+        mMagnification.mWindowMagnifierCallback
+                .onWindowMagnifierBoundsRestored(TEST_DISPLAY, MagnificationSize.SMALL);
+        waitForIdleSync();
+
+        verify(mMagnificationSettingsController)
+                .updateSettingsButtonStatusOnRestore(MagnificationSize.SMALL);
+    }
+
+    @Test
     public void onSetMagnifierSize_delegateToMagnifier() {
         final @MagnificationSize int index = MagnificationSize.SMALL;
         mMagnification.mMagnificationSettingsControllerCallback.onSetMagnifierSize(

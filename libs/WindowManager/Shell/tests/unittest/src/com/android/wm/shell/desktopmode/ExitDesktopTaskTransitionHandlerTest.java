@@ -45,6 +45,7 @@ import android.window.WindowContainerTransaction;
 
 import androidx.test.filters.SmallTest;
 
+import com.android.internal.jank.InteractionJankMonitor;
 import com.android.wm.shell.ShellTestCase;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.desktopmode.DesktopModeTransitionSource;
@@ -64,6 +65,8 @@ public class ExitDesktopTaskTransitionHandlerTest extends ShellTestCase {
 
     @Mock
     private Transitions mTransitions;
+    @Mock
+    private InteractionJankMonitor mInteractionJankMonitor;
     @Mock
     IBinder mToken;
     @Mock
@@ -94,7 +97,7 @@ public class ExitDesktopTaskTransitionHandlerTest extends ShellTestCase {
                 .thenReturn(getContext().getResources().getDisplayMetrics());
 
         mExitDesktopTaskTransitionHandler = new ExitDesktopTaskTransitionHandler(mTransitions,
-                mContext);
+                mContext, mInteractionJankMonitor);
         mPoint = new Point(0, 0);
     }
 

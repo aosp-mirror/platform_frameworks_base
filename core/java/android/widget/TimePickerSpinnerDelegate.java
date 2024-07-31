@@ -477,7 +477,7 @@ class TimePickerSpinnerDelegate extends TimePicker.AbstractTimePickerDelegate {
             } else if (mMinuteSpinnerInput.hasFocus()) {
                 inputMethodManager.hideSoftInputFromView(mMinuteSpinnerInput, 0);
                 mMinuteSpinnerInput.clearFocus();
-            } else if (mAmPmSpinnerInput.hasFocus()) {
+            } else if (mAmPmSpinnerInput != null && mAmPmSpinnerInput.hasFocus()) {
                 inputMethodManager.hideSoftInputFromView(mAmPmSpinnerInput, 0);
                 mAmPmSpinnerInput.clearFocus();
             }

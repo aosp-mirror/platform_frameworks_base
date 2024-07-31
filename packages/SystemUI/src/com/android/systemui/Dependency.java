@@ -54,7 +54,6 @@ import com.android.systemui.statusbar.phone.SystemUIDialogManager;
 import com.android.systemui.statusbar.policy.BluetoothController;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 import com.android.systemui.statusbar.window.StatusBarWindowController;
-import com.android.systemui.tuner.TunablePadding.TunablePaddingService;
 import com.android.systemui.tuner.TunerService;
 
 import dagger.Lazy;
@@ -129,7 +128,6 @@ public class Dependency {
     @Nullable
     @Inject Lazy<VolumeDialogController> mVolumeDialogController;
     @Inject Lazy<MetricsLogger> mMetricsLogger;
-    @Inject Lazy<TunablePaddingService> mTunablePaddingService;
     @Inject Lazy<UiOffloadThread> mUiOffloadThread;
     @Inject Lazy<LightBarController> mLightBarController;
     @Inject Lazy<OverviewProxyService> mOverviewProxyService;
@@ -177,7 +175,6 @@ public class Dependency {
         mProviders.put(FragmentService.class, mFragmentService::get);
         mProviders.put(VolumeDialogController.class, mVolumeDialogController::get);
         mProviders.put(MetricsLogger.class, mMetricsLogger::get);
-        mProviders.put(TunablePaddingService.class, mTunablePaddingService::get);
         mProviders.put(UiOffloadThread.class, mUiOffloadThread::get);
         mProviders.put(LightBarController.class, mLightBarController::get);
         mProviders.put(OverviewProxyService.class, mOverviewProxyService::get);

@@ -80,8 +80,10 @@ import android.os.RemoteException;
 import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
 import android.view.Display;
+import android.view.HapticFeedbackConstants;
 import android.view.IDisplayFoldListener;
 import android.view.KeyEvent;
+import android.view.KeyboardShortcutGroup;
 import android.view.WindowManager;
 import android.view.WindowManagerGlobal;
 import android.view.WindowManagerPolicyConstants;
@@ -698,6 +700,15 @@ public interface WindowManagerPolicy extends WindowManagerPolicyConstants {
     public int interceptKeyBeforeQueueing(KeyEvent event, int policyFlags);
 
     /**
+     * Return the set of applicaition launch keyboard shortcuts the system supports.
+     *
+     * @param deviceId The id of the {@link InputDevice} that will trigger the shortcut.
+     *
+     * @return {@link KeyboardShortcutGroup} containing the shortcuts.
+     */
+    KeyboardShortcutGroup getApplicationLaunchKeyboardShortcuts(int deviceId);
+
+    /**
      * Called from the input reader thread before a motion is enqueued when the device is in a
      * non-interactive state.
      *
@@ -1069,7 +1080,8 @@ public interface WindowManagerPolicy extends WindowManagerPolicyConstants {
      * Call from application to perform haptic feedback on its window.
      */
     public boolean performHapticFeedback(int uid, String packageName, int effectId,
-            boolean always, String reason, boolean fromIme);
+            String reason, @HapticFeedbackConstants.Flags int flags,
+            @HapticFeedbackConstants.PrivateFlags int privFlags);
 
     /**
      * Called when we have started keeping the screen on because a window

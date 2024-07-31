@@ -43,7 +43,7 @@
   </string-array>
   <string-array name="tile_states_cell">
     <item msgid="1235899788959500719">"No disponible"</item>
-    <item msgid="2074416252859094119">"Desactivadas"</item>
+    <item msgid="2074416252859094119">"Desactivado"</item>
     <item msgid="287997784730044767">"Activado"</item>
   </string-array>
   <string-array name="tile_states_battery">
@@ -189,6 +189,6 @@
   <string-array name="tile_states_hearing_devices">
     <item msgid="1235334096484287173">"No disponibles"</item>
     <item msgid="3079622119444911877">"Desactivados"</item>
-    <item msgid="3028994095749238254">"Activados"</item>
+    <item msgid="3028994095749238254">"Activado"</item>
   </string-array>
 </resources>

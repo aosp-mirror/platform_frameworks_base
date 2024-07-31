@@ -20,7 +20,6 @@ import static android.app.sdksandbox.SdkSandboxManager.ACTION_START_SANDBOXED_AC
 import static android.content.ContentProvider.maybeAddUserId;
 import static android.os.Flags.FLAG_ALLOW_PRIVATE_PROFILE;
 import static android.security.Flags.FLAG_FRP_ENFORCEMENT;
-import static android.service.chooser.Flags.FLAG_ENABLE_SHARESHEET_METADATA_EXTRA;
 
 import android.Manifest;
 import android.accessibilityservice.AccessibilityService;
@@ -5278,12 +5277,28 @@ public class Intent implements Parcelable, Cloneable {
      * through {@link #getData()}. User interaction is required to return the edited screenshot to
      * the calling activity.
      *
+     * <p>The response {@link Intent} may include additional data to "backlink" directly back to the
+     * application for which the screenshot was captured. If present, the application "backlink" can
+     * be retrieved via {@link #getClipData()}. The data is present only if the user accepted to
+     * include the link information with the screenshot. The data can contain one of the following:
+     * <ul>
+     *     <li>A deeplinking {@link Uri} or an {@link Intent} if the captured app integrates with
+     *         {@link android.app.assist.AssistContent}.</li>
+     *     <li>Otherwise, a main launcher intent that launches the screenshotted application to
+     *         its home screen.</li>
+     * </ul>
+     * The "backlink" to the screenshotted application will be set within {@link ClipData}, either
+     * as a {@link Uri} or an {@link Intent} if present.
+     *
      * <p>This intent action requires the permission
      * {@link android.Manifest.permission#LAUNCH_CAPTURE_CONTENT_ACTIVITY_FOR_NOTE}.
      *
      * <p>Callers should query
      * {@link StatusBarManager#canLaunchCaptureContentActivityForNote(Activity)} before showing a UI
      * element that allows users to trigger this flow.
+     *
+     * <p>Callers should query for {@link #EXTRA_CAPTURE_CONTENT_FOR_NOTE_STATUS_CODE} in the
+     * response {@link Intent} to check if the request was a success.
      */
     @RequiresPermission(Manifest.permission.LAUNCH_CAPTURE_CONTENT_ACTIVITY_FOR_NOTE)
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
@@ -6252,7 +6267,6 @@ public class Intent implements Parcelable, Cloneable {
      * <p>e.g. When sharing a photo, metadata could inform the user that location data is included
      * in the photo they are sharing.</p>
      */
-    @FlaggedApi(FLAG_ENABLE_SHARESHEET_METADATA_EXTRA)
     public static final String EXTRA_METADATA_TEXT = "android.intent.extra.METADATA_TEXT";
 
     /**

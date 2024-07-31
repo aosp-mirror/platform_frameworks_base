@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+@file:OptIn(ExperimentalCoroutinesApi::class)
+
 package com.android.systemui.biometrics.domain.interactor
 
 import android.hardware.biometrics.AuthenticateOptions
@@ -21,16 +23,22 @@ import android.hardware.biometrics.IBiometricContextListener
 import android.util.Log
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
+import com.android.systemui.deviceentry.domain.interactor.DeviceEntryInteractor
 import com.android.systemui.display.data.repository.DeviceStateRepository
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
 import com.android.systemui.keyguard.shared.model.KeyguardState
+import com.android.systemui.keyguard.shared.model.TransitionStep
+import com.android.systemui.scene.shared.flag.SceneContainerFlag
+import dagger.Lazy
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
@@ -76,22 +84,36 @@ constructor(
     deviceStateRepository: DeviceStateRepository,
     keyguardTransitionInteractor: KeyguardTransitionInteractor,
     udfpsOverlayInteractor: UdfpsOverlayInteractor,
+    deviceEntryInteractor: Lazy<DeviceEntryInteractor>,
 ) : LogContextInteractor {
 
-    override val displayState =
-        keyguardTransitionInteractor.startedKeyguardTransitionStep.map {
-            when (it.to) {
-                KeyguardState.LOCKSCREEN,
-                KeyguardState.OCCLUDED,
-                KeyguardState.ALTERNATE_BOUNCER,
-                KeyguardState.PRIMARY_BOUNCER -> AuthenticateOptions.DISPLAY_STATE_LOCKSCREEN
-                KeyguardState.AOD -> AuthenticateOptions.DISPLAY_STATE_AOD
-                KeyguardState.OFF,
-                KeyguardState.DOZING -> AuthenticateOptions.DISPLAY_STATE_NO_UI
-                KeyguardState.DREAMING -> AuthenticateOptions.DISPLAY_STATE_SCREENSAVER
-                else -> AuthenticateOptions.DISPLAY_STATE_UNKNOWN
+    override val displayState: Flow<Int> by lazy {
+        if (SceneContainerFlag.isEnabled) {
+            combine(
+                deviceEntryInteractor.get().isDeviceEntered,
+                keyguardTransitionInteractor.startedKeyguardTransitionStep,
+            ) { isDeviceEntered, transitionStep ->
+                if (isDeviceEntered) {
+                    AuthenticateOptions.DISPLAY_STATE_UNKNOWN
+                } else {
+                    transitionStep.toAuthenticateOptions(
+                        // Here when isDeviceEntered=false which always means that the device is on
+                        // top of the keyguard. Therefore, any KeyguardState that doesn't have a
+                        // more specific mapping as a sub-state of keyguard, maps to LOCKSCREEN
+                        // instead of UNKNOWN, because it _is_ a known display state and that
+                        // display state is undeniably LOCKSCREEN.
+                        default = AuthenticateOptions.DISPLAY_STATE_LOCKSCREEN
+                    )
+                }
+            }
+        } else {
+            keyguardTransitionInteractor.startedKeyguardTransitionStep.map { transitionStep ->
+                transitionStep.toAuthenticateOptions(
+                    default = AuthenticateOptions.DISPLAY_STATE_UNKNOWN
+                )
             }
         }
+    }
 
     override val isHardwareIgnoringTouches: Flow<Boolean> =
         udfpsOverlayInteractor.shouldHandleTouches.map { shouldHandle -> !shouldHandle }
@@ -149,6 +171,21 @@ constructor(
                 .launchIn(this)
 
             listener.asBinder().linkToDeath({ cancel() }, 0)
+        }
+    }
+
+    private fun TransitionStep.toAuthenticateOptions(default: Int): Int {
+        return when (this.to) {
+            KeyguardState.LOCKSCREEN,
+            KeyguardState.OCCLUDED,
+            KeyguardState.ALTERNATE_BOUNCER,
+            KeyguardState.PRIMARY_BOUNCER -> AuthenticateOptions.DISPLAY_STATE_LOCKSCREEN
+            KeyguardState.AOD -> AuthenticateOptions.DISPLAY_STATE_AOD
+            KeyguardState.OFF,
+            KeyguardState.DOZING -> AuthenticateOptions.DISPLAY_STATE_NO_UI
+            KeyguardState.DREAMING -> AuthenticateOptions.DISPLAY_STATE_SCREENSAVER
+            KeyguardState.GONE -> AuthenticateOptions.DISPLAY_STATE_UNKNOWN
+            else -> default
         }
     }
 

@@ -591,12 +591,6 @@ class ActivitySnapshotController extends AbsAppSnapshotController<ActivityRecord
     }
 
     @Override
-    ActivityRecord getTopFullscreenActivity(ActivityRecord activity) {
-        final WindowState win = activity.findMainWindow();
-        return (win != null && win.mAttrs.isFullscreen()) ? activity : null;
-    }
-
-    @Override
     ActivityManager.TaskDescription getTaskDescription(ActivityRecord object) {
         return object.taskDescription;
     }

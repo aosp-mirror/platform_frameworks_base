@@ -22,6 +22,7 @@
 #include <android/graphics/properties.h>
 #include <android/graphics/region.h>
 #include <android/gui/BnWindowInfosReportedListener.h>
+#include <android/gui/EdgeExtensionParameters.h>
 #include <android/gui/JankData.h>
 #include <android/hardware/display/IDeviceProductInfoConstants.h>
 #include <android/os/IInputConstants.h>
@@ -797,6 +798,20 @@ static void nativeSetStretchEffect(JNIEnv* env, jclass clazz, jlong transactionO
           childRelativeLeft, childRelativeTop, childRelativeRight, childRelativeBottom)
     };
     transaction->setStretchEffect(ctrl, stretch);
+}
+
+static void nativeSetEdgeExtensionEffect(JNIEnv* env, jclass clazz, jlong transactionObj,
+                                         jlong nativeObj, jboolean leftEdge, jboolean rightEdge,
+                                         jboolean topEdge, jboolean bottomEdge) {
+    auto transaction = reinterpret_cast<SurfaceComposerClient::Transaction*>(transactionObj);
+    auto* const ctrl = reinterpret_cast<SurfaceControl*>(nativeObj);
+
+    auto effect = gui::EdgeExtensionParameters();
+    effect.extendLeft = leftEdge;
+    effect.extendRight = rightEdge;
+    effect.extendTop = topEdge;
+    effect.extendBottom = bottomEdge;
+    transaction->setEdgeExtensionEffect(ctrl, effect);
 }
 
 static void nativeSetFlags(JNIEnv* env, jclass clazz, jlong transactionObj,
@@ -2340,6 +2355,8 @@ static const JNINativeMethod sSurfaceControlMethods[] = {
             (void*)nativeSetBlurRegions },
     {"nativeSetStretchEffect", "(JJFFFFFFFFFF)V",
             (void*) nativeSetStretchEffect },
+    {"nativeSetEdgeExtensionEffect", "(JJZZZZ)V",
+            (void*) nativeSetEdgeExtensionEffect },
     {"nativeSetShadowRadius", "(JJF)V",
             (void*)nativeSetShadowRadius },
     {"nativeSetFrameRate", "(JJFII)V",

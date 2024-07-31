@@ -30,7 +30,7 @@ import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.scene.ui.composable.ComposableScene
 import dagger.Lazy
 import javax.inject.Inject
-import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.Flow
 
 /** The lock screen scene shows when the device is locked. */
 @SysUISingleton
@@ -42,7 +42,7 @@ constructor(
 ) : ComposableScene {
     override val key = Scenes.Lockscreen
 
-    override val destinationScenes: StateFlow<Map<UserAction, UserActionResult>> =
+    override val destinationScenes: Flow<Map<UserAction, UserActionResult>> =
         viewModel.destinationScenes
 
     @Composable

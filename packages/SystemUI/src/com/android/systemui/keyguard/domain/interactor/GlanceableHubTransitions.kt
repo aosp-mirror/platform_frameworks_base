@@ -50,7 +50,6 @@ constructor(
         fromState: KeyguardState,
         toState: KeyguardState,
     ) {
-        // TODO(b/336576536): Check if adaptation for scene framework is needed
         if (SceneContainerFlag.isEnabled) return
         val toScene =
             if (fromState == KeyguardState.GLANCEABLE_HUB) {

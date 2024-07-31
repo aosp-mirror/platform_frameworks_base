@@ -74,7 +74,7 @@ constructor(
 
     /** Whether we allow keyguard to show less important notifications above the shelf. */
     private val limitLockScreenToOneImportant
-        get() = NotificationMinimalismPrototype.V2.isEnabled
+        get() = NotificationMinimalismPrototype.isEnabled
 
     /** Minimum space between two notifications, see [calculateGapAndDividerHeight]. */
     private var dividerHeight by notNull<Float>()
@@ -405,16 +405,8 @@ constructor(
 
     fun updateResources() {
         maxKeyguardNotifications =
-            infiniteIfNegative(
-                if (NotificationMinimalismPrototype.V1.isEnabled) {
-                    NotificationMinimalismPrototype.V1.maxNotifs
-                } else {
-                    resources.getInteger(R.integer.keyguard_max_notification_count)
-                }
-            )
-        maxNotificationsExcludesMedia =
-            NotificationMinimalismPrototype.V1.isEnabled ||
-                NotificationMinimalismPrototype.V2.isEnabled
+            infiniteIfNegative(resources.getInteger(R.integer.keyguard_max_notification_count))
+        maxNotificationsExcludesMedia = NotificationMinimalismPrototype.isEnabled
 
         dividerHeight =
             max(1f, resources.getDimensionPixelSize(R.dimen.notification_divider_height).toFloat())

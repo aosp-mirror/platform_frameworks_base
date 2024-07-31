@@ -18,6 +18,7 @@ package com.android.systemui.common.ui.domain.interactor
 
 import android.content.res.Configuration
 import android.graphics.Rect
+import android.util.LayoutDirection
 import android.view.Surface
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
@@ -34,6 +35,8 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.MockitoAnnotations
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.whenever
 
 @ExperimentalCoroutinesApi
 @SmallTest
@@ -67,6 +70,28 @@ class ConfigurationInteractorTest : SysuiTestCase() {
             configurationRepository.onAnyConfigurationChange()
 
             assertThat(dimensionPixelSize).isEqualTo(pixelSize)
+        }
+
+    @Test
+    fun directionalDimensionPixelSize() =
+        testScope.runTest {
+            val resourceId = 1001
+            val pixelSize = 501
+            configurationRepository.setDimensionPixelSize(resourceId, pixelSize)
+
+            val config: Configuration = mock()
+            val dimensionPixelSize by
+                collectLastValue(
+                    underTest.directionalDimensionPixelSize(LayoutDirection.LTR, resourceId)
+                )
+
+            whenever(config.layoutDirection).thenReturn(LayoutDirection.LTR)
+            configurationRepository.onConfigurationChange(config)
+            assertThat(dimensionPixelSize).isEqualTo(pixelSize)
+
+            whenever(config.layoutDirection).thenReturn(LayoutDirection.RTL)
+            configurationRepository.onConfigurationChange(config)
+            assertThat(dimensionPixelSize).isEqualTo(-pixelSize)
         }
 
     @Test

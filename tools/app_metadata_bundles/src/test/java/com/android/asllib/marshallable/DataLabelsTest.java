@@ -16,12 +16,22 @@
 
 package com.android.asllib.marshallable;
 
+import static org.junit.Assert.assertThrows;
+
 import com.android.asllib.testutils.TestUtils;
+import com.android.asllib.util.MalformedXmlException;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
+import org.w3c.dom.Element;
+import org.xml.sax.SAXException;
+
+import java.io.IOException;
+import java.nio.file.Paths;
+
+import javax.xml.parsers.ParserConfigurationException;
 
 @RunWith(JUnit4.class)
 public class DataLabelsTest {
@@ -297,29 +307,43 @@ public class DataLabelsTest {
         odToHrExpectException(PERSONAL_EMPTY_PURPOSE_FILE_NAME);
     }
 
-    private void hrToOdExpectException(String fileName) {
-        TestUtils.hrToOdExpectException(new DataLabelsFactory(), DATA_LABELS_HR_PATH, fileName);
+    private void hrToOdExpectException(String fileName)
+            throws ParserConfigurationException, IOException, SAXException {
+        var ele = TestUtils.getElementFromResource(Paths.get(DATA_LABELS_HR_PATH, fileName));
+        assertThrows(
+                MalformedXmlException.class,
+                () -> new DataLabelsFactory().createFromHrElement(ele));
     }
 
-    private void odToHrExpectException(String fileName) {
-        TestUtils.odToHrExpectException(new DataLabelsFactory(), DATA_LABELS_OD_PATH, fileName);
+    private void odToHrExpectException(String fileName)
+            throws ParserConfigurationException, IOException, SAXException {
+        var ele = TestUtils.getElementFromResource(Paths.get(DATA_LABELS_OD_PATH, fileName));
+        assertThrows(
+                MalformedXmlException.class,
+                () -> new DataLabelsFactory().createFromOdElement(ele));
     }
 
     private void testHrToOdDataLabels(String fileName) throws Exception {
-        TestUtils.testHrToOd(
-                TestUtils.document(),
-                new DataLabelsFactory(),
-                DATA_LABELS_HR_PATH,
-                DATA_LABELS_OD_PATH,
-                fileName);
+        var doc = TestUtils.document();
+        DataLabels dataLabels =
+                new DataLabelsFactory()
+                        .createFromHrElement(
+                                TestUtils.getElementFromResource(
+                                        Paths.get(DATA_LABELS_HR_PATH, fileName)));
+        Element resultingEle = dataLabels.toOdDomElement(doc);
+        doc.appendChild(resultingEle);
+        TestUtils.testFormatToFormat(doc, Paths.get(DATA_LABELS_OD_PATH, fileName));
     }
 
     private void testOdToHrDataLabels(String fileName) throws Exception {
-        TestUtils.testOdToHr(
-                TestUtils.document(),
-                new DataLabelsFactory(),
-                DATA_LABELS_OD_PATH,
-                DATA_LABELS_HR_PATH,
-                fileName);
+        var doc = TestUtils.document();
+        DataLabels dataLabels =
+                new DataLabelsFactory()
+                        .createFromOdElement(
+                                TestUtils.getElementFromResource(
+                                        Paths.get(DATA_LABELS_OD_PATH, fileName)));
+        Element resultingEle = dataLabels.toHrDomElement(doc);
+        doc.appendChild(resultingEle);
+        TestUtils.testFormatToFormat(doc, Paths.get(DATA_LABELS_HR_PATH, fileName));
     }
 }

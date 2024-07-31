@@ -32,27 +32,27 @@ import androidx.annotation.NonNull;
  */
 class AppCompatComponentPropRobot {
     @NonNull
-    private final WindowManagerService mWm;
+    private final PackageManager mPackageManager;
 
     AppCompatComponentPropRobot(@NonNull WindowManagerService wm) {
-        mWm = wm;
+        mPackageManager = wm.mContext.getPackageManager();
+        spyOn(mPackageManager);
     }
 
     void enable(@NonNull String propertyName) {
-        setPropertyValue(propertyName, /* enabled */ true);
+        setPropertyValue(propertyName, "", "", /* enabled */ true);
     }
 
     void disable(@NonNull String propertyName) {
-        setPropertyValue(propertyName, /* enabled */ false);
+        setPropertyValue(propertyName, "", "", /* enabled */ false);
     }
 
-    private void setPropertyValue(@NonNull String propertyName, boolean enabled) {
+    private void setPropertyValue(@NonNull String propertyName, @NonNull String packageName,
+            @NonNull String className, boolean enabled) {
         final PackageManager.Property property = new PackageManager.Property(propertyName,
-                /* value */ enabled, /* packageName */ "", /* className */ "");
-        final PackageManager pm = mWm.mContext.getPackageManager();
-        spyOn(pm);
+                /* value */ enabled, packageName, className);
         try {
-            doReturn(property).when(pm).getProperty(eq(propertyName), anyString());
+            doReturn(property).when(mPackageManager).getProperty(eq(propertyName), anyString());
         } catch (PackageManager.NameNotFoundException e) {
             fail(e.getLocalizedMessage());
         }

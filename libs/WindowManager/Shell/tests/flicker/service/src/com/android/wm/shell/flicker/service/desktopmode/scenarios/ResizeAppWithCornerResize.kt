@@ -38,7 +38,9 @@ import org.junit.Test
 @Ignore("Base Test Class")
 abstract class ResizeAppWithCornerResize
 @JvmOverloads
-constructor(val rotation: Rotation = Rotation.ROTATION_0) {
+constructor(val rotation: Rotation = Rotation.ROTATION_0,
+    val horizontalChange: Int = 50,
+    val verticalChange: Int = -50) {
 
     private val instrumentation: Instrumentation = InstrumentationRegistry.getInstrumentation()
     private val tapl = LauncherInstrumentation()
@@ -46,7 +48,9 @@ constructor(val rotation: Rotation = Rotation.ROTATION_0) {
     private val device = UiDevice.getInstance(instrumentation)
     private val testApp = DesktopModeAppHelper(SimpleAppHelper(instrumentation))
 
-    @Rule @JvmField val testSetupRule = Utils.testSetupRule(NavBar.MODE_GESTURAL, rotation)
+    @Rule
+    @JvmField
+    val testSetupRule = Utils.testSetupRule(NavBar.MODE_GESTURAL, rotation)
 
     @Before
     fun setup() {
@@ -58,7 +62,11 @@ constructor(val rotation: Rotation = Rotation.ROTATION_0) {
 
     @Test
     open fun resizeAppWithCornerResize() {
-        testApp.cornerResize(wmHelper, device, DesktopModeAppHelper.Corners.RIGHT_TOP, 50, -50)
+        testApp.cornerResize(wmHelper,
+            device,
+            DesktopModeAppHelper.Corners.RIGHT_TOP,
+            horizontalChange,
+            verticalChange)
     }
 
     @After

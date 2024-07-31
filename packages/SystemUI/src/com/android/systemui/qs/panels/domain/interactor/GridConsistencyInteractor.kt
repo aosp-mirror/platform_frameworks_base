@@ -20,8 +20,8 @@ import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.log.LogBuffer
 import com.android.systemui.log.core.LogLevel
-import com.android.systemui.qs.panels.shared.model.GridConsistencyLog
 import com.android.systemui.qs.panels.shared.model.GridLayoutType
+import com.android.systemui.qs.panels.shared.model.PanelsLog
 import com.android.systemui.qs.pipeline.domain.interactor.CurrentTilesInteractor
 import com.android.systemui.qs.pipeline.shared.TileSpec
 import javax.inject.Inject
@@ -39,7 +39,7 @@ constructor(
     private val consistencyInteractors:
         Map<GridLayoutType, @JvmSuppressWildcards GridTypeConsistencyInteractor>,
     private val defaultConsistencyInteractor: GridTypeConsistencyInteractor,
-    @GridConsistencyLog private val logBuffer: LogBuffer,
+    @PanelsLog private val logBuffer: LogBuffer,
     @Application private val applicationScope: CoroutineScope,
 ) {
     fun start() {

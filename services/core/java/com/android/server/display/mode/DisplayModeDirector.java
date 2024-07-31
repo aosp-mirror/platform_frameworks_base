@@ -121,6 +121,7 @@ public class DisplayModeDirector {
     private static final int MSG_HIGH_BRIGHTNESS_THRESHOLDS_CHANGED = 6;
     private static final int MSG_REFRESH_RATE_IN_HBM_SUNLIGHT_CHANGED = 7;
     private static final int MSG_REFRESH_RATE_IN_HBM_HDR_CHANGED = 8;
+    private static final int MSG_SWITCH_USER = 9;
 
     private final Object mLock = new Object();
     private final Context mContext;
@@ -564,6 +565,13 @@ public class DisplayModeDirector {
     }
 
     /**
+     * Called when the user switches.
+     */
+    public void onSwitchUser() {
+        mHandler.obtainMessage(MSG_SWITCH_USER).sendToTarget();
+    }
+
+    /**
      * Print the object's state and debug information into the given stream.
      *
      * @param pw The stream to dump information to.
@@ -789,6 +797,13 @@ public class DisplayModeDirector {
                     mHbmObserver.onDeviceConfigRefreshRateInHbmHdrChanged(refreshRateInHbmHdr);
                     break;
                 }
+
+                case MSG_SWITCH_USER: {
+                    synchronized (mLock) {
+                        mSettingsObserver.updateRefreshRateSettingLocked();
+                        mSettingsObserver.updateModeSwitchingTypeSettingLocked();
+                    }
+                }
             }
         }
     }
@@ -1012,10 +1027,10 @@ public class DisplayModeDirector {
             final ContentResolver cr = mContext.getContentResolver();
             mInjector.registerPeakRefreshRateObserver(cr, this);
             mInjector.registerMinRefreshRateObserver(cr, this);
-            cr.registerContentObserver(mLowPowerModeSetting, false /*notifyDescendants*/, this,
-                    UserHandle.USER_SYSTEM);
-            cr.registerContentObserver(mMatchContentFrameRateSetting, false /*notifyDescendants*/,
-                    this);
+            cr.registerContentObserver(mLowPowerModeSetting, /* notifyDescendants= */ false, this,
+                    UserHandle.USER_ALL);
+            cr.registerContentObserver(mMatchContentFrameRateSetting,
+                    /* notifyDescendants= */ false, this, UserHandle.USER_ALL);
             mInjector.registerDisplayListener(mDisplayListener, mHandler);
 
             float deviceConfigDefaultPeakRefresh =
@@ -1156,14 +1171,15 @@ public class DisplayModeDirector {
             float highestRefreshRate = getMaxRefreshRateLocked(displayId);
 
             float minRefreshRate = Settings.System.getFloatForUser(cr,
-                    Settings.System.MIN_REFRESH_RATE, 0f, cr.getUserId());
+                    Settings.System.MIN_REFRESH_RATE, 0f, UserHandle.USER_CURRENT);
             if (Float.isInfinite(minRefreshRate)) {
                 // Infinity means that we want the highest possible refresh rate
                 minRefreshRate = highestRefreshRate;
             }
 
             float peakRefreshRate = Settings.System.getFloatForUser(cr,
-                    Settings.System.PEAK_REFRESH_RATE, mDefaultPeakRefreshRate, cr.getUserId());
+                    Settings.System.PEAK_REFRESH_RATE, mDefaultPeakRefreshRate,
+                    UserHandle.USER_CURRENT);
             if (Float.isInfinite(peakRefreshRate)) {
                 // Infinity means that we want the highest possible refresh rate
                 peakRefreshRate = highestRefreshRate;
@@ -1234,9 +1250,9 @@ public class DisplayModeDirector {
 
         private void updateModeSwitchingTypeSettingLocked() {
             final ContentResolver cr = mContext.getContentResolver();
-            int switchingType = Settings.Secure.getIntForUser(
-                    cr, Settings.Secure.MATCH_CONTENT_FRAME_RATE, mModeSwitchingType /*default*/,
-                    cr.getUserId());
+            int switchingType = Settings.Secure.getIntForUser(cr,
+                    Settings.Secure.MATCH_CONTENT_FRAME_RATE, /* default= */ mModeSwitchingType,
+                    UserHandle.USER_CURRENT);
             if (switchingType != mModeSwitchingType) {
                 mModeSwitchingType = switchingType;
                 notifyDesiredDisplayModeSpecsChangedLocked();
@@ -3033,14 +3049,14 @@ public class DisplayModeDirector {
         public void registerPeakRefreshRateObserver(@NonNull ContentResolver cr,
                 @NonNull ContentObserver observer) {
             cr.registerContentObserver(PEAK_REFRESH_RATE_URI, false /*notifyDescendants*/,
-                    observer, UserHandle.USER_SYSTEM);
+                    observer, UserHandle.USER_ALL);
         }
 
         @Override
         public void registerMinRefreshRateObserver(@NonNull ContentResolver cr,
                 @NonNull ContentObserver observer) {
             cr.registerContentObserver(MIN_REFRESH_RATE_URI, false /*notifyDescendants*/,
-                    observer, UserHandle.USER_SYSTEM);
+                    observer, UserHandle.USER_ALL);
         }
 
         @Override

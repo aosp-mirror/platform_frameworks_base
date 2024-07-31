@@ -9,6 +9,9 @@
       ]
     },
     {
+      "name": "CtsUpdateOwnershipEnforcementTestCases"
+    },
+    {
       "name": "CtsNoPermissionTestCases"
     },
     {

@@ -91,8 +91,10 @@ void Readback::copySurfaceInto(ANativeWindow* window, const std::shared_ptr<Copy
 
     {
         ATRACE_NAME("sync_wait");
-        if (sourceFence != -1 && sync_wait(sourceFence.get(), 500 /* ms */) != NO_ERROR) {
-            ALOGE("Timeout (500ms) exceeded waiting for buffer fence, abandoning readback attempt");
+        int syncWaitTimeoutMs = 500 * Properties::timeoutMultiplier;
+        if (sourceFence != -1 && sync_wait(sourceFence.get(), syncWaitTimeoutMs) != NO_ERROR) {
+            ALOGE("Timeout (%dms) exceeded waiting for buffer fence, abandoning readback attempt",
+                  syncWaitTimeoutMs);
             return request->onCopyFinished(CopyResult::Timeout);
         }
     }
@@ -109,9 +111,8 @@ void Readback::copySurfaceInto(ANativeWindow* window, const std::shared_ptr<Copy
 
     sk_sp<SkColorSpace> colorSpace =
             DataSpaceToColorSpace(static_cast<android_dataspace>(dataspace));
-    sk_sp<SkImage> image =
-            SkImages::DeferredFromAHardwareBuffer(sourceBuffer.get(), kPremul_SkAlphaType, 
-                                                  colorSpace);
+    sk_sp<SkImage> image = SkImages::DeferredFromAHardwareBuffer(sourceBuffer.get(),
+                                                                 kPremul_SkAlphaType, colorSpace);
 
     if (!image.get()) {
         return request->onCopyFinished(CopyResult::UnknownError);

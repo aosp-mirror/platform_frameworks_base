@@ -62,6 +62,8 @@ object DebugLogger {
      * @param error: a [Throwable] to log.
      * @param message: a lazily evaluated message you wish to log.
      */
+    @JvmOverloads
+    @JvmName("logcatMessage")
     inline fun Any.debugLog(
         enabled: Boolean = Build.IS_DEBUGGABLE,
         priority: Int = Log.DEBUG,

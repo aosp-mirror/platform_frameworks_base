@@ -25,7 +25,6 @@ import android.app.servertransaction.ClientTransactionItem;
 import android.app.servertransaction.LaunchActivityItem;
 import android.compat.annotation.ChangeId;
 import android.compat.annotation.EnabledSince;
-import android.os.Binder;
 import android.os.Build;
 import android.os.IBinder;
 import android.os.RemoteException;
@@ -81,13 +80,6 @@ class ClientLifecycleManager {
             Slog.w(TAG, "Failed to deliver transaction for " + client
                             + "\ntransaction=" + transaction);
             throw e;
-        } finally {
-            if (!(client instanceof Binder)) {
-                // If client is not an instance of Binder - it's a remote call and at this point it
-                // is safe to recycle the object. All objects used for local calls will be recycled
-                // after the transaction is executed on client in ActivityThread.
-                transaction.recycle();
-            }
         }
     }
 
@@ -99,7 +91,7 @@ class ClientLifecycleManager {
      */
     void scheduleTransactionItemNow(@NonNull IApplicationThread client,
             @NonNull ClientTransactionItem transactionItem) throws RemoteException {
-        final ClientTransaction clientTransaction = ClientTransaction.obtain(client);
+        final ClientTransaction clientTransaction = new ClientTransaction(client);
         clientTransaction.addTransactionItem(transactionItem);
         scheduleTransaction(clientTransaction);
     }
@@ -210,7 +202,7 @@ class ClientLifecycleManager {
         }
 
         // Create new transaction if there is no existing.
-        final ClientTransaction transaction = ClientTransaction.obtain(client);
+        final ClientTransaction transaction = new ClientTransaction(client);
         mPendingTransactions.put(clientBinder, transaction);
         return transaction;
     }

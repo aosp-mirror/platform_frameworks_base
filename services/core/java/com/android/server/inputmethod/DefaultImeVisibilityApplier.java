@@ -89,8 +89,8 @@ final class DefaultImeVisibilityApplier {
     void performShowIme(IBinder showInputToken, @NonNull ImeTracker.Token statsToken,
             @InputMethod.ShowFlags int showFlags, ResultReceiver resultReceiver,
             @SoftInputShowHideReason int reason, @UserIdInt int userId) {
-        final var bindingController = mService.getInputMethodBindingController(userId);
         final var userData = mService.getUserData(userId);
+        final var bindingController = userData.mBindingController;
         final IInputMethodInvoker curMethod = bindingController.getCurMethod();
         if (curMethod != null) {
             if (DEBUG) {
@@ -128,9 +128,9 @@ final class DefaultImeVisibilityApplier {
     void performHideIme(IBinder hideInputToken, @NonNull ImeTracker.Token statsToken,
             ResultReceiver resultReceiver, @SoftInputShowHideReason int reason,
             @UserIdInt int userId) {
-        final var bindingController = mService.getInputMethodBindingController(userId);
-        final IInputMethodInvoker curMethod = bindingController.getCurMethod();
         final var userData = mService.getUserData(userId);
+        final var bindingController = userData.mBindingController;
+        final IInputMethodInvoker curMethod = bindingController.getCurMethod();
         if (curMethod != null) {
             // The IME will report its visible state again after the following message finally
             // delivered to the IME process as an IPC.  Hence the inconsistency between
@@ -171,7 +171,8 @@ final class DefaultImeVisibilityApplier {
     void applyImeVisibility(IBinder windowToken, @Nullable ImeTracker.Token statsToken,
             @ImeVisibilityStateComputer.VisibilityState int state,
             @SoftInputShowHideReason int reason, @UserIdInt int userId) {
-        final var bindingController = mService.getInputMethodBindingController(userId);
+        final var userData = mService.getUserData(userId);
+        final var bindingController = userData.mBindingController;
         final int displayIdToShowIme = bindingController.getDisplayIdToShowIme();
         switch (state) {
             case STATE_SHOW_IME:
@@ -184,7 +185,7 @@ final class DefaultImeVisibilityApplier {
                 break;
             case STATE_HIDE_IME:
                 if (!Flags.refactorInsetsController()) {
-                    if (mService.hasAttachedClient()) {
+                    if (userData.mCurClient != null) {
                         ImeTracker.forLogging().onProgress(statsToken,
                                 ImeTracker.PHASE_SERVER_APPLY_IME_VISIBILITY);
                         // IMMS only knows of focused window, not the actual IME target.
@@ -201,7 +202,7 @@ final class DefaultImeVisibilityApplier {
                 break;
             case STATE_HIDE_IME_EXPLICIT:
                 if (Flags.refactorInsetsController()) {
-                    setImeVisibilityOnFocusedWindowClient(false, userId);
+                    setImeVisibilityOnFocusedWindowClient(false, userId, statsToken);
                 } else {
                     mService.hideCurrentInputLocked(windowToken, statsToken,
                             0 /* flags */, null /* resultReceiver */, reason, userId);
@@ -209,7 +210,7 @@ final class DefaultImeVisibilityApplier {
                 break;
             case STATE_HIDE_IME_NOT_ALWAYS:
                 if (Flags.refactorInsetsController()) {
-                    setImeVisibilityOnFocusedWindowClient(false, userId);
+                    setImeVisibilityOnFocusedWindowClient(false, userId, statsToken);
                 } else {
                     mService.hideCurrentInputLocked(windowToken, statsToken,
                             InputMethodManager.HIDE_NOT_ALWAYS, null /* resultReceiver */, reason,
@@ -220,7 +221,7 @@ final class DefaultImeVisibilityApplier {
                 if (Flags.refactorInsetsController()) {
                     // This can be triggered by IMMS#startInputOrWindowGainedFocus. We need to
                     // set the requestedVisibleTypes in InsetsController first, before applying it.
-                    setImeVisibilityOnFocusedWindowClient(true, userId);
+                    setImeVisibilityOnFocusedWindowClient(true, userId, statsToken);
                 } else {
                     mService.showCurrentInputLocked(windowToken, statsToken,
                             InputMethodManager.SHOW_IMPLICIT, MotionEvent.TOOL_TYPE_UNKNOWN,
@@ -277,14 +278,17 @@ final class DefaultImeVisibilityApplier {
     }
 
     @GuardedBy("ImfLock.class")
-    private void setImeVisibilityOnFocusedWindowClient(boolean visibility, @UserIdInt int userId) {
+    private void setImeVisibilityOnFocusedWindowClient(boolean visibility, @UserIdInt int userId,
+            @NonNull ImeTracker.Token statsToken) {
         final var userData = mService.getUserData(userId);
         if (userData.mImeBindingState != null
                 && userData.mImeBindingState.mFocusedWindowClient != null
                 && userData.mImeBindingState.mFocusedWindowClient.mClient != null) {
-            userData.mImeBindingState.mFocusedWindowClient.mClient.setImeVisibility(visibility);
+            userData.mImeBindingState.mFocusedWindowClient.mClient.setImeVisibility(visibility,
+                    statsToken);
         } else {
-            // TODO(b/329229469): ImeTracker?
+            ImeTracker.forLogging().onFailed(statsToken,
+                    ImeTracker.PHASE_SERVER_SET_VISIBILITY_ON_FOCUSED_WINDOW);
         }
     }
 }

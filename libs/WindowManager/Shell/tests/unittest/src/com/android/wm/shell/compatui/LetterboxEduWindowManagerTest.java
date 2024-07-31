@@ -19,6 +19,7 @@ package com.android.wm.shell.compatui;
 import static android.content.res.Configuration.UI_MODE_NIGHT_YES;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
+import static com.android.window.flags.Flags.FLAG_APP_COMPAT_UI_FRAMEWORK;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -37,6 +38,9 @@ import android.app.ActivityManager;
 import android.app.TaskInfo;
 import android.graphics.Insets;
 import android.graphics.Rect;
+import android.platform.test.annotations.RequiresFlagsDisabled;
+import android.platform.test.flag.junit.CheckFlagsRule;
+import android.platform.test.flag.junit.DeviceFlagsValueProvider;
 import android.testing.AndroidTestingRunner;
 import android.util.Pair;
 import android.view.DisplayCutout;
@@ -61,6 +65,7 @@ import com.android.wm.shell.transition.Transitions;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -116,6 +121,10 @@ public class LetterboxEduWindowManagerTest extends ShellTestCase {
     private CompatUIConfiguration mCompatUIConfiguration;
     private TestShellExecutor mExecutor;
 
+    @Rule
+    public final CheckFlagsRule mCheckFlagsRule =
+            DeviceFlagsValueProvider.createCheckFlagsRule();
+
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
@@ -153,6 +162,7 @@ public class LetterboxEduWindowManagerTest extends ShellTestCase {
     }
 
     @Test
+    @RequiresFlagsDisabled(FLAG_APP_COMPAT_UI_FRAMEWORK)
     public void testCreateLayout_notEligible_doesNotCreateLayout() {
         LetterboxEduWindowManager windowManager = createWindowManager(/* eligible= */ false);
 
@@ -162,6 +172,7 @@ public class LetterboxEduWindowManagerTest extends ShellTestCase {
     }
 
     @Test
+    @RequiresFlagsDisabled(FLAG_APP_COMPAT_UI_FRAMEWORK)
     public void testCreateLayout_eligibleAndDocked_doesNotCreateLayout() {
         LetterboxEduWindowManager windowManager = createWindowManager(/* eligible= */
                 true, /* isDocked */ true);
@@ -172,6 +183,7 @@ public class LetterboxEduWindowManagerTest extends ShellTestCase {
     }
 
     @Test
+    @RequiresFlagsDisabled(FLAG_APP_COMPAT_UI_FRAMEWORK)
     public void testCreateLayout_taskBarEducationIsShowing_doesNotCreateLayout() {
         LetterboxEduWindowManager windowManager = createWindowManager(/* eligible= */ true,
                 USER_ID_1, /* isTaskbarEduShowing= */ true);
@@ -182,6 +194,7 @@ public class LetterboxEduWindowManagerTest extends ShellTestCase {
     }
 
     @Test
+    @RequiresFlagsDisabled(FLAG_APP_COMPAT_UI_FRAMEWORK)
     public void testCreateLayout_canShowFalse_returnsTrueButDoesNotCreateLayout() {
         LetterboxEduWindowManager windowManager = createWindowManager(/* eligible= */ true);
 
@@ -192,6 +205,7 @@ public class LetterboxEduWindowManagerTest extends ShellTestCase {
     }
 
     @Test
+    @RequiresFlagsDisabled(FLAG_APP_COMPAT_UI_FRAMEWORK)
     public void testCreateLayout_canShowTrue_createsLayoutCorrectly() {
         LetterboxEduWindowManager windowManager = createWindowManager(/* eligible= */ true);
 
@@ -238,6 +252,7 @@ public class LetterboxEduWindowManagerTest extends ShellTestCase {
     }
 
     @Test
+    @RequiresFlagsDisabled(FLAG_APP_COMPAT_UI_FRAMEWORK)
     public void testCreateLayout_alreadyShownToUser_createsLayoutForOtherUserOnly() {
         LetterboxEduWindowManager windowManager = createWindowManager(/* eligible= */ true,
                 USER_ID_1, /* isTaskbarEduShowing= */ false);
@@ -271,6 +286,7 @@ public class LetterboxEduWindowManagerTest extends ShellTestCase {
     }
 
     @Test
+    @RequiresFlagsDisabled(FLAG_APP_COMPAT_UI_FRAMEWORK)
     public void testCreateLayout_windowManagerReleasedBeforeTransitionsIsIdle_doesNotStartAnim() {
         LetterboxEduWindowManager windowManager = createWindowManager(/* eligible= */ true);
 
@@ -288,6 +304,7 @@ public class LetterboxEduWindowManagerTest extends ShellTestCase {
     }
 
     @Test
+    @RequiresFlagsDisabled(FLAG_APP_COMPAT_UI_FRAMEWORK)
     public void testUpdateCompatInfo_updatesLayoutCorrectly() {
         LetterboxEduWindowManager windowManager = createWindowManager(/* eligible= */ true);
 
@@ -316,6 +333,7 @@ public class LetterboxEduWindowManagerTest extends ShellTestCase {
     }
 
     @Test
+    @RequiresFlagsDisabled(FLAG_APP_COMPAT_UI_FRAMEWORK)
     public void testUpdateCompatInfo_notEligibleUntilUpdate_createsLayoutAfterUpdate() {
         LetterboxEduWindowManager windowManager = createWindowManager(/* eligible= */ false);
 
@@ -329,6 +347,7 @@ public class LetterboxEduWindowManagerTest extends ShellTestCase {
     }
 
     @Test
+    @RequiresFlagsDisabled(FLAG_APP_COMPAT_UI_FRAMEWORK)
     public void testUpdateCompatInfo_canShowFalse_doesNothing() {
         LetterboxEduWindowManager windowManager = createWindowManager(/* eligible= */ true);
 
@@ -343,6 +362,7 @@ public class LetterboxEduWindowManagerTest extends ShellTestCase {
     }
 
     @Test
+    @RequiresFlagsDisabled(FLAG_APP_COMPAT_UI_FRAMEWORK)
     public void testUpdateDisplayLayout_updatesLayoutCorrectly() {
         LetterboxEduWindowManager windowManager = createWindowManager(/* eligible= */ true);
 
@@ -364,6 +384,7 @@ public class LetterboxEduWindowManagerTest extends ShellTestCase {
     }
 
     @Test
+    @RequiresFlagsDisabled(FLAG_APP_COMPAT_UI_FRAMEWORK)
     public void testRelease_animationIsCancelled() {
         LetterboxEduWindowManager windowManager = createWindowManager(/* eligible= */ true);
 
@@ -374,6 +395,7 @@ public class LetterboxEduWindowManagerTest extends ShellTestCase {
     }
 
     @Test
+    @RequiresFlagsDisabled(FLAG_APP_COMPAT_UI_FRAMEWORK)
     public void testDeviceThemeChange_educationDialogUnseen_recreated() {
         LetterboxEduWindowManager windowManager = createWindowManager(/* eligible= */ true);
         ActivityManager.RunningTaskInfo newTaskInfo = new ActivityManager.RunningTaskInfo();

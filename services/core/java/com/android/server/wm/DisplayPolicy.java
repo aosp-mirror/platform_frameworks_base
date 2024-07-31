@@ -588,7 +588,7 @@ public class DisplayPolicy {
                     gesturesPointerEventCallbacks);
             displayContent.registerPointerEventListener(mSystemGestures);
         }
-        mAppTransitionListener = new WindowManagerInternal.AppTransitionListener() {
+        mAppTransitionListener = new WindowManagerInternal.AppTransitionListener(displayId) {
 
             private Runnable mAppTransitionPending = () -> {
                 StatusBarManagerInternal statusBar = getStatusBarManagerInternal();
@@ -782,7 +782,6 @@ public class DisplayPolicy {
     }
 
     private void onDisplaySwitchFinished() {
-        mDisplayContent.mWallpaperController.onDisplaySwitchFinished();
         mDisplayContent.mDisplayUpdater.onDisplaySwitching(false);
     }
 

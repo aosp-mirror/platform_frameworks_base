@@ -28,10 +28,12 @@ abstract class AppCompatRobotBase {
     private static final int DEFAULT_DISPLAY_WIDTH = 1000;
     private static final int DEFAULT_DISPLAY_HEIGHT = 2000;
 
+    static final float FLOAT_TOLLERANCE = 0.01f;
+
     @NonNull
     private final AppCompatActivityRobot mActivityRobot;
     @NonNull
-    private final AppCompatLetterboxConfigurationRobot mConfigurationRobot;
+    private final AppCompatConfigurationRobot mConfigurationRobot;
     @NonNull
     private final AppCompatComponentPropRobot mOptPropRobot;
 
@@ -42,7 +44,7 @@ abstract class AppCompatRobotBase {
         mActivityRobot = new AppCompatActivityRobot(wm, atm, supervisor,
                 displayWidth, displayHeight);
         mConfigurationRobot =
-                new AppCompatLetterboxConfigurationRobot(wm.mLetterboxConfiguration);
+                new AppCompatConfigurationRobot(wm.mAppCompatConfiguration);
         mOptPropRobot = new AppCompatComponentPropRobot(wm);
     }
 
@@ -53,12 +55,12 @@ abstract class AppCompatRobotBase {
     }
 
     @NonNull
-    AppCompatLetterboxConfigurationRobot conf() {
+    AppCompatConfigurationRobot conf() {
         return mConfigurationRobot;
     }
 
     @NonNull
-    void applyOnConf(@NonNull Consumer<AppCompatLetterboxConfigurationRobot> consumer) {
+    void applyOnConf(@NonNull Consumer<AppCompatConfigurationRobot> consumer) {
         consumer.accept(mConfigurationRobot);
     }
 

@@ -23,7 +23,6 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.content.pm.ActivityInfo.OVERRIDE_CAMERA_COMPAT_DISABLE_FREEFORM_WINDOWING_TREATMENT;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
-import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
 import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doAnswer;
@@ -89,7 +88,7 @@ public class CameraCompatFreeformPolicyTests extends WindowTestsBase {
     private static final String CAMERA_ID_2 = "camera-2";
     private CameraManager mMockCameraManager;
     private Handler mMockHandler;
-    private LetterboxConfiguration mLetterboxConfiguration;
+    private AppCompatConfiguration mAppCompatConfiguration;
 
     private CameraManager.AvailabilityCallback mCameraAvailabilityCallback;
     private CameraCompatFreeformPolicy mCameraCompatFreeformPolicy;
@@ -99,13 +98,13 @@ public class CameraCompatFreeformPolicyTests extends WindowTestsBase {
 
     @Before
     public void setUp() throws Exception {
-        mLetterboxConfiguration = mDisplayContent.mWmService.mLetterboxConfiguration;
-        spyOn(mLetterboxConfiguration);
-        when(mLetterboxConfiguration.isCameraCompatTreatmentEnabled())
+        mAppCompatConfiguration = mDisplayContent.mWmService.mAppCompatConfiguration;
+        spyOn(mAppCompatConfiguration);
+        when(mAppCompatConfiguration.isCameraCompatTreatmentEnabled())
                 .thenReturn(true);
-        when(mLetterboxConfiguration.isCameraCompatRefreshEnabled())
+        when(mAppCompatConfiguration.isCameraCompatRefreshEnabled())
                 .thenReturn(true);
-        when(mLetterboxConfiguration.isCameraCompatRefreshCycleThroughStopEnabled())
+        when(mAppCompatConfiguration.isCameraCompatRefreshCycleThroughStopEnabled())
                 .thenReturn(true);
 
         mMockCameraManager = mock(CameraManager.class);
@@ -176,40 +175,13 @@ public class CameraCompatFreeformPolicyTests extends WindowTestsBase {
         configureActivity(SCREEN_ORIENTATION_PORTRAIT);
 
         mCameraAvailabilityCallback.onCameraOpened(CAMERA_ID_1, TEST_PACKAGE_1);
+        callOnActivityConfigurationChanging(mActivity);
         mCameraAvailabilityCallback.onCameraClosed(CAMERA_ID_1);
         mCameraAvailabilityCallback.onCameraOpened(CAMERA_ID_1, TEST_PACKAGE_1);
         callOnActivityConfigurationChanging(mActivity);
 
         assertInCameraCompatMode();
         assertActivityRefreshRequested(/* refreshRequested */ true);
-    }
-
-    @Test
-    public void testReconnectedToDifferentCamera_activatesCameraCompatModeAndRefresh()
-            throws Exception {
-        configureActivity(SCREEN_ORIENTATION_PORTRAIT);
-
-        mCameraAvailabilityCallback.onCameraOpened(CAMERA_ID_1, TEST_PACKAGE_1);
-        mCameraAvailabilityCallback.onCameraClosed(CAMERA_ID_1);
-        mCameraAvailabilityCallback.onCameraOpened(CAMERA_ID_2, TEST_PACKAGE_1);
-        callOnActivityConfigurationChanging(mActivity);
-
-        assertInCameraCompatMode();
-        assertActivityRefreshRequested(/* refreshRequested */ true);
-    }
-
-    @Test
-    public void testCameraDisconnected_deactivatesCameraCompatMode() {
-        configureActivityAndDisplay(SCREEN_ORIENTATION_PORTRAIT, ORIENTATION_LANDSCAPE,
-                WINDOWING_MODE_FREEFORM);
-        // Open camera and test for compat treatment
-        mCameraAvailabilityCallback.onCameraOpened(CAMERA_ID_1, TEST_PACKAGE_1);
-        assertInCameraCompatMode();
-
-        // Close camera and test for revert
-        mCameraAvailabilityCallback.onCameraClosed(CAMERA_ID_1);
-
-        assertNotInCameraCompatMode();
     }
 
     @Test
@@ -245,8 +217,8 @@ public class CameraCompatFreeformPolicyTests extends WindowTestsBase {
             throws Exception {
         configureActivity(SCREEN_ORIENTATION_PORTRAIT);
 
-        doReturn(false).when(
-                mActivity.mLetterboxUiController).shouldRefreshActivityForCameraCompat();
+        doReturn(false).when(mActivity.mAppCompatController.getAppCompatCameraOverrides())
+                .shouldRefreshActivityForCameraCompat();
 
         mCameraAvailabilityCallback.onCameraOpened(CAMERA_ID_1, TEST_PACKAGE_1);
         callOnActivityConfigurationChanging(mActivity);
@@ -256,7 +228,7 @@ public class CameraCompatFreeformPolicyTests extends WindowTestsBase {
 
     @Test
     public void testOnActivityConfigurationChanging_cycleThroughStopDisabled() throws Exception {
-        when(mLetterboxConfiguration.isCameraCompatRefreshCycleThroughStopEnabled())
+        when(mAppCompatConfiguration.isCameraCompatRefreshCycleThroughStopEnabled())
                 .thenReturn(false);
 
         configureActivity(SCREEN_ORIENTATION_PORTRAIT);
@@ -271,7 +243,7 @@ public class CameraCompatFreeformPolicyTests extends WindowTestsBase {
     public void testOnActivityConfigurationChanging_cycleThroughStopDisabledForApp()
             throws Exception {
         configureActivity(SCREEN_ORIENTATION_PORTRAIT);
-        doReturn(true).when(mActivity.mLetterboxUiController)
+        doReturn(true).when(mActivity.mAppCompatController.getAppCompatCameraOverrides())
                 .shouldRefreshActivityViaPauseForCameraCompat();
 
         mCameraAvailabilityCallback.onCameraOpened(CAMERA_ID_1, TEST_PACKAGE_1);
@@ -305,6 +277,7 @@ public class CameraCompatFreeformPolicyTests extends WindowTestsBase {
                 .build();
 
         spyOn(mActivity.mLetterboxUiController);
+        spyOn(mActivity.mAppCompatController.getAppCompatCameraOverrides());
         spyOn(mActivity.info);
 
         doReturn(mActivity).when(mDisplayContent).topRunningActivity(anyBoolean());
@@ -315,12 +288,14 @@ public class CameraCompatFreeformPolicyTests extends WindowTestsBase {
 
     private void assertInCameraCompatMode() {
         assertNotEquals(CameraCompatTaskInfo.CAMERA_COMPAT_FREEFORM_NONE,
-                mActivity.mLetterboxUiController.getFreeformCameraCompatMode());
+                mActivity.mAppCompatController.getAppCompatCameraOverrides()
+                        .getFreeformCameraCompatMode());
     }
 
     private void assertNotInCameraCompatMode() {
         assertEquals(CameraCompatTaskInfo.CAMERA_COMPAT_FREEFORM_NONE,
-                mActivity.mLetterboxUiController.getFreeformCameraCompatMode());
+                mActivity.mAppCompatController.getAppCompatCameraOverrides()
+                        .getFreeformCameraCompatMode());
     }
 
     private void assertActivityRefreshRequested(boolean refreshRequested) throws Exception {
@@ -329,12 +304,12 @@ public class CameraCompatFreeformPolicyTests extends WindowTestsBase {
 
     private void assertActivityRefreshRequested(boolean refreshRequested,
             boolean cycleThroughStop) throws Exception {
-        verify(mActivity.mLetterboxUiController, times(refreshRequested ? 1 : 0))
-                .setIsRefreshRequested(true);
+        verify(mActivity.mAppCompatController.getAppCompatCameraOverrides(),
+                times(refreshRequested ? 1 : 0)).setIsRefreshRequested(true);
 
-        final RefreshCallbackItem refreshCallbackItem = RefreshCallbackItem.obtain(mActivity.token,
-                cycleThroughStop ? ON_STOP : ON_PAUSE);
-        final ResumeActivityItem resumeActivityItem = ResumeActivityItem.obtain(mActivity.token,
+        final RefreshCallbackItem refreshCallbackItem =
+                new RefreshCallbackItem(mActivity.token, cycleThroughStop ? ON_STOP : ON_PAUSE);
+        final ResumeActivityItem resumeActivityItem = new ResumeActivityItem(mActivity.token,
                 /* isForward */ false, /* shouldSendCompatFakeFocus */ false);
 
         verify(mActivity.mAtmService.getLifecycleManager(), times(refreshRequested ? 1 : 0))

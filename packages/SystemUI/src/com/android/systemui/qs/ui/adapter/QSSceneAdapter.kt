@@ -24,6 +24,7 @@ import androidx.annotation.VisibleForTesting
 import androidx.asynclayoutinflater.view.AsyncLayoutInflater
 import com.android.settingslib.applications.InterestingConfigChanges
 import com.android.systemui.Dumpable
+import com.android.systemui.biometrics.domain.interactor.DisplayStateInteractor
 import com.android.systemui.common.ui.domain.interactor.ConfigurationInteractor
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
@@ -196,6 +197,7 @@ constructor(
     private val qsSceneComponentFactory: QSSceneComponent.Factory,
     private val qsImplProvider: Provider<QSImpl>,
     shadeInteractor: ShadeInteractor,
+    displayStateInteractor: DisplayStateInteractor,
     dumpManager: DumpManager,
     @Main private val mainDispatcher: CoroutineDispatcher,
     @Application applicationScope: CoroutineScope,
@@ -208,6 +210,7 @@ constructor(
         qsSceneComponentFactory: QSSceneComponent.Factory,
         qsImplProvider: Provider<QSImpl>,
         shadeInteractor: ShadeInteractor,
+        displayStateInteractor: DisplayStateInteractor,
         dumpManager: DumpManager,
         @Main dispatcher: CoroutineDispatcher,
         @Application scope: CoroutineScope,
@@ -216,6 +219,7 @@ constructor(
         qsSceneComponentFactory,
         qsImplProvider,
         shadeInteractor,
+        displayStateInteractor,
         dumpManager,
         dispatcher,
         scope,
@@ -318,6 +322,10 @@ constructor(
                 shadeInteractor.shadeMode.collect {
                     qsImpl.value?.setInSplitShade(it == ShadeMode.Split)
                 }
+            }
+            launch {
+                combine(displayStateInteractor.isLargeScreen, qsImpl.filterNotNull(), ::Pair)
+                    .collect { it.second.setIsNotificationPanelFullWidth(!it.first) }
             }
         }
     }

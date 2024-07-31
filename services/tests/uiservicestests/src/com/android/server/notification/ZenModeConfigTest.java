@@ -18,8 +18,10 @@ package com.android.server.notification;
 
 import static android.app.AutomaticZenRule.TYPE_BEDTIME;
 import static android.app.Flags.FLAG_MODES_UI;
+import static android.app.Flags.modesUi;
 import static android.provider.Settings.Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS;
 import static android.provider.Settings.Global.ZEN_MODE_OFF;
+import static android.service.notification.Condition.SOURCE_UNKNOWN;
 import static android.service.notification.Condition.SOURCE_USER_ACTION;
 import static android.service.notification.Condition.STATE_FALSE;
 import static android.service.notification.Condition.STATE_TRUE;
@@ -36,10 +38,18 @@ import static junit.framework.TestCase.assertNotNull;
 import static junit.framework.TestCase.assertNull;
 import static junit.framework.TestCase.assertTrue;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
 import android.app.AutomaticZenRule;
 import android.app.Flags;
 import android.app.NotificationManager.Policy;
 import android.content.ComponentName;
+import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Parcel;
 import android.platform.test.annotations.DisableFlags;
@@ -66,6 +76,8 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.BufferedInputStream;
@@ -102,6 +114,9 @@ public class ZenModeConfigTest extends UiServiceTestCase {
     private final boolean ENABLED = true;
     private final int CREATION_TIME = 123;
 
+    @Mock
+    PackageManager mPm;
+
     @Rule
     public final SetFlagsRule mSetFlagsRule = new SetFlagsRule(
             SetFlagsRule.DefaultInitValueType.DEVICE_DEFAULT);
@@ -119,6 +134,8 @@ public class ZenModeConfigTest extends UiServiceTestCase {
     @Before
     public final void setUp() {
         mSetFlagsRule.enableFlags(Flags.FLAG_MODES_API);
+        MockitoAnnotations.initMocks(this);
+        mContext.setMockPackageManager(mPm);
     }
 
     @Test
@@ -965,6 +982,85 @@ public class ZenModeConfigTest extends UiServiceTestCase {
         ZenModeConfig.ZenRule fromXml = readRuleXml(bais);
 
         assertThat(fromXml.zenPolicy).isEqualTo(config.getZenPolicy());
+    }
+
+    @Test
+    public void testGetDescription_off() {
+        ZenModeConfig config = new ZenModeConfig();
+        if (!modesUi()) {
+            config.manualRule = new ZenModeConfig.ZenRule();
+        }
+        config.manualRule.pkg = "android";
+        assertThat(ZenModeConfig.getDescription(mContext, true, config, false)).isNull();
+    }
+
+    @Test
+    public void testGetDescription_on_manual_endTime() {
+        ZenModeConfig config = new ZenModeConfig();
+        if (!modesUi()) {
+            config.manualRule = new ZenModeConfig.ZenRule();
+        }
+        config.manualRule.conditionId = ZenModeConfig.toCountdownConditionId(
+                System.currentTimeMillis() + 10000, false);
+        config.manualRule.pkg = "android";
+        config.manualRule.zenMode = ZEN_MODE_IMPORTANT_INTERRUPTIONS;
+        config.manualRule.condition = new Condition(Uri.EMPTY, "", STATE_TRUE, SOURCE_UNKNOWN);
+        assertThat(ZenModeConfig.getDescription(mContext, true, config, false))
+                .startsWith("Until");
+    }
+
+    @Test
+    public void getSoundSummary_on_manual_noEnd() {
+        ZenModeConfig config = new ZenModeConfig();
+        if (!modesUi()) {
+            config.manualRule = new ZenModeConfig.ZenRule();
+        }
+        config.manualRule.conditionId = Uri.EMPTY;
+        config.manualRule.pkg = "android";
+        config.manualRule.zenMode = ZEN_MODE_IMPORTANT_INTERRUPTIONS;
+        config.manualRule.condition = new Condition(Uri.EMPTY, "", STATE_TRUE, SOURCE_UNKNOWN);
+        assertThat(ZenModeConfig.getDescription(mContext, true, config, false)).isNull();
+    }
+
+    @Test
+    public void getSoundSummary_on_manual_enabler() throws Exception {
+        ApplicationInfo ai = mock(ApplicationInfo.class);
+        when(ai.loadLabel(any())).thenReturn("app name");
+        when(mPm.getApplicationInfo(anyString(), anyInt())).thenReturn(ai);
+
+        ZenModeConfig config = new ZenModeConfig();
+        if (!modesUi()) {
+            config.manualRule = new ZenModeConfig.ZenRule();
+        }
+        config.manualRule.conditionId = Uri.EMPTY;
+        config.manualRule.pkg = "android";
+        config.manualRule.zenMode = ZEN_MODE_IMPORTANT_INTERRUPTIONS;
+        config.manualRule.enabler = "app";
+        config.manualRule.condition = new Condition(Uri.EMPTY, "", STATE_TRUE, SOURCE_UNKNOWN);
+        assertThat(ZenModeConfig.getDescription(mContext, true, config, false))
+                .isEqualTo("app name");
+    }
+
+    @Test
+    public void testGetDescription_on_automatic() {
+        ZenModeConfig config = new ZenModeConfig();
+        ZenModeConfig.ZenRule rule = new ZenModeConfig.ZenRule();
+        rule.configurationActivity = new ComponentName("a", "a");
+        rule.component = new ComponentName("b", "b");
+        rule.conditionId = new Uri.Builder().scheme("hello").build();
+        rule.condition = new Condition(rule.conditionId, "", Condition.STATE_TRUE);
+        rule.enabled = true;
+        rule.creationTime = 123;
+        rule.id = "id";
+        rule.zenMode = ZEN_MODE_IMPORTANT_INTERRUPTIONS;
+        rule.modified = true;
+        rule.name = "name";
+        rule.snoozing = false;
+        rule.pkg = "b";
+        config.automaticRules.put("key", rule);
+
+        assertThat(ZenModeConfig.getDescription(mContext, true, config, false))
+                .isEqualTo("name");
     }
 
     private ZenModeConfig getMutedRingerConfig() {

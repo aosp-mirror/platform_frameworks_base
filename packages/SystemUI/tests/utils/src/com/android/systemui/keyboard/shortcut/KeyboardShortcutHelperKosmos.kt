@@ -16,6 +16,7 @@
 
 package com.android.systemui.keyboard.shortcut
 
+import android.app.role.mockRoleManager
 import android.content.applicationContext
 import android.content.res.mainResources
 import android.hardware.input.fakeInputManager
@@ -24,6 +25,10 @@ import com.android.systemui.broadcast.broadcastDispatcher
 import com.android.systemui.keyboard.shortcut.data.repository.ShortcutHelperCategoriesRepository
 import com.android.systemui.keyboard.shortcut.data.repository.ShortcutHelperStateRepository
 import com.android.systemui.keyboard.shortcut.data.repository.ShortcutHelperTestHelper
+import com.android.systemui.keyboard.shortcut.data.source.AppCategoriesShortcutsSource
+import com.android.systemui.keyboard.shortcut.data.source.CurrentAppShortcutsSource
+import com.android.systemui.keyboard.shortcut.data.source.InputShortcutsSource
+import com.android.systemui.keyboard.shortcut.data.source.KeyboardShortcutGroupsSource
 import com.android.systemui.keyboard.shortcut.data.source.MultitaskingShortcutsSource
 import com.android.systemui.keyboard.shortcut.data.source.SystemShortcutsSource
 import com.android.systemui.keyboard.shortcut.domain.interactor.ShortcutHelperCategoriesInteractor
@@ -37,11 +42,20 @@ import com.android.systemui.kosmos.testDispatcher
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.model.sysUiState
 import com.android.systemui.settings.displayTracker
+import com.android.systemui.settings.fakeUserTracker
 
-val Kosmos.shortcutHelperSystemShortcutsSource by
+var Kosmos.shortcutHelperAppCategoriesShortcutsSource: KeyboardShortcutGroupsSource by
+    Kosmos.Fixture {
+        AppCategoriesShortcutsSource(
+            windowManager,
+            testDispatcher,
+        )
+    }
+
+var Kosmos.shortcutHelperSystemShortcutsSource: KeyboardShortcutGroupsSource by
     Kosmos.Fixture { SystemShortcutsSource(mainResources) }
 
-val Kosmos.shortcutHelperMultiTaskingShortcutsSource by
+var Kosmos.shortcutHelperMultiTaskingShortcutsSource: KeyboardShortcutGroupsSource by
     Kosmos.Fixture { MultitaskingShortcutsSource(mainResources) }
 
 val Kosmos.shortcutHelperStateRepository by
@@ -55,13 +69,25 @@ val Kosmos.shortcutHelperStateRepository by
         )
     }
 
+var Kosmos.shortcutHelperInputShortcutsSource: KeyboardShortcutGroupsSource by
+    Kosmos.Fixture { InputShortcutsSource(mainResources, windowManager) }
+
+var Kosmos.shortcutHelperCurrentAppShortcutsSource: KeyboardShortcutGroupsSource by
+    Kosmos.Fixture { CurrentAppShortcutsSource(windowManager) }
+
 val Kosmos.shortcutHelperCategoriesRepository by
     Kosmos.Fixture {
         ShortcutHelperCategoriesRepository(
+            applicationContext,
+            applicationCoroutineScope,
+            testDispatcher,
             shortcutHelperSystemShortcutsSource,
             shortcutHelperMultiTaskingShortcutsSource,
-            windowManager,
-            shortcutHelperStateRepository
+            shortcutHelperAppCategoriesShortcutsSource,
+            shortcutHelperInputShortcutsSource,
+            shortcutHelperCurrentAppShortcutsSource,
+            fakeInputManager.inputManager,
+            shortcutHelperStateRepository,
         )
     }
 
@@ -72,7 +98,8 @@ val Kosmos.shortcutHelperTestHelper by
             applicationContext,
             broadcastDispatcher,
             fakeCommandQueue,
-            windowManager
+            fakeInputManager,
+            windowManager,
         )
     }
 
@@ -90,7 +117,16 @@ val Kosmos.shortcutHelperCategoriesInteractor by
     Kosmos.Fixture { ShortcutHelperCategoriesInteractor(shortcutHelperCategoriesRepository) }
 
 val Kosmos.shortcutHelperViewModel by
-    Kosmos.Fixture { ShortcutHelperViewModel(testDispatcher, shortcutHelperStateInteractor) }
+    Kosmos.Fixture {
+        ShortcutHelperViewModel(
+            mockRoleManager,
+            fakeUserTracker,
+            applicationCoroutineScope,
+            testDispatcher,
+            shortcutHelperStateInteractor,
+            shortcutHelperCategoriesInteractor
+        )
+    }
 
 val Kosmos.fakeShortcutHelperStartActivity by Kosmos.Fixture { FakeShortcutHelperStartActivity() }
 

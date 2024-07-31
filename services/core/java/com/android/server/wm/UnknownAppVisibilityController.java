@@ -153,6 +153,10 @@ class UnknownAppVisibilityController {
             mUnknownApps.put(activity, UNKNOWN_STATE_WAITING_VISIBILITY_UPDATE);
             mDisplayContent.notifyKeyguardFlagsChanged();
             notifyVisibilitiesUpdated();
+        } else if (state == UNKNOWN_STATE_WAITING_RESUME
+                && !activity.isState(ActivityRecord.State.RESUMED)) {
+            Slog.d(TAG, "UAVC: skip waiting for non-resumed relayouted " + activity);
+            mUnknownApps.remove(activity);
         }
     }
 

@@ -26,7 +26,6 @@ import android.media.projection.MediaProjectionInfo;
 import android.media.projection.MediaProjectionManager;
 import android.os.Handler;
 import android.util.ArrayMap;
-import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.VisibleForTesting;
@@ -46,11 +45,11 @@ import javax.inject.Inject;
 /** Platform implementation of the cast controller. **/
 @SysUISingleton
 public class CastControllerImpl implements CastController {
-    public static final String TAG = "CastController";
-    private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
+    private static final String TAG = "CastController";
 
     private final Context mContext;
     private final PackageManager mPackageManager;
+    private final CastControllerLogger mLogger;
     @GuardedBy("mCallbacks")
     private final ArrayList<Callback> mCallbacks = new ArrayList<Callback>();
     private final MediaRouter mMediaRouter;
@@ -67,20 +66,22 @@ public class CastControllerImpl implements CastController {
     public CastControllerImpl(
             Context context,
             PackageManager packageManager,
-            DumpManager dumpManager) {
+            DumpManager dumpManager,
+            CastControllerLogger logger) {
         mContext = context;
         mPackageManager = packageManager;
+        mLogger = logger;
         mMediaRouter = (MediaRouter) context.getSystemService(Context.MEDIA_ROUTER_SERVICE);
         mMediaRouter.setRouterGroupId(MediaRouter.MIRRORING_GROUP_ID);
         mProjectionManager = (MediaProjectionManager)
                 context.getSystemService(Context.MEDIA_PROJECTION_SERVICE);
         mProjection = mProjectionManager.getActiveProjectionInfo();
         mProjectionManager.addCallback(mProjectionCallback, new Handler());
-        dumpManager.registerDumpable(TAG, this);
-        if (DEBUG) Log.d(TAG, "new CastController()");
+        dumpManager.registerNormalDumpable(TAG, this);
     }
 
-    public void dump(PrintWriter pw, String[] args) {
+    @Override
+    public void dump(PrintWriter pw, @NonNull String[] args) {
         pw.println("CastController state:");
         pw.print("  mDiscovering="); pw.println(mDiscovering);
         pw.print("  mCallbackRegistered="); pw.println(mCallbackRegistered);
@@ -88,7 +89,7 @@ public class CastControllerImpl implements CastController {
         pw.print("  mRoutes.size="); pw.println(mRoutes.size());
         for (int i = 0; i < mRoutes.size(); i++) {
             final RouteInfo route = mRoutes.valueAt(i);
-            pw.print("    "); pw.println(routeToString(route));
+            pw.print("    "); pw.println(CastControllerLogger.Companion.toLogString(route));
         }
         pw.print("  mProjection="); pw.println(mProjection);
     }
@@ -119,7 +120,7 @@ public class CastControllerImpl implements CastController {
         synchronized (mDiscoveringLock) {
             if (mDiscovering == request) return;
             mDiscovering = request;
-            if (DEBUG) Log.d(TAG, "setDiscovering: " + request);
+            mLogger.logDiscovering(request);
             handleDiscoveryChangeLocked();
         }
     }
@@ -166,7 +167,8 @@ public class CastControllerImpl implements CastController {
                         CastDevice.Companion.toCastDevice(
                                 mProjection,
                                 mContext,
-                                mPackageManager));
+                                mPackageManager,
+                                mLogger));
             }
         }
 
@@ -177,22 +179,23 @@ public class CastControllerImpl implements CastController {
     public void startCasting(CastDevice device) {
         if (device == null || device.getTag() == null) return;
         final RouteInfo route = (RouteInfo) device.getTag();
-        if (DEBUG) Log.d(TAG, "startCasting: " + routeToString(route));
+        mLogger.logStartCasting(route);
         mMediaRouter.selectRoute(ROUTE_TYPE_REMOTE_DISPLAY, route);
     }
 
     @Override
     public void stopCasting(CastDevice device) {
         final boolean isProjection = device.getTag() instanceof MediaProjectionInfo;
-        if (DEBUG) Log.d(TAG, "stopCasting isProjection=" + isProjection);
+        mLogger.logStopCasting(isProjection);
         if (isProjection) {
             final MediaProjectionInfo projection = (MediaProjectionInfo) device.getTag();
             if (Objects.equals(mProjectionManager.getActiveProjectionInfo(), projection)) {
                 mProjectionManager.stopActiveProjection();
             } else {
-                Log.w(TAG, "Projection is no longer active: " + projection);
+                mLogger.logStopCastingNoProjection(projection);
             }
         } else {
+            mLogger.logStopCastingMediaRouter();
             mMediaRouter.getFallbackRoute().select();
         }
     }
@@ -217,7 +220,7 @@ public class CastControllerImpl implements CastController {
             }
         }
         if (changed) {
-            if (DEBUG) Log.d(TAG, "setProjection: " + oldProjection + " -> " + mProjection);
+            mLogger.logSetProjection(oldProjection, mProjection);
             fireOnCastDevicesChanged();
         }
     }
@@ -264,42 +267,30 @@ public class CastControllerImpl implements CastController {
         callback.onCastDevicesChanged();
     }
 
-    private static String routeToString(RouteInfo route) {
-        if (route == null) return null;
-        final StringBuilder sb = new StringBuilder().append(route.getName()).append('/')
-                .append(route.getDescription()).append('@').append(route.getDeviceAddress())
-                .append(",status=").append(route.getStatus());
-        if (route.isDefault()) sb.append(",default");
-        if (route.isEnabled()) sb.append(",enabled");
-        if (route.isConnecting()) sb.append(",connecting");
-        if (route.isSelected()) sb.append(",selected");
-        return sb.append(",id=").append(route.getTag()).toString();
-    }
-
     private final MediaRouter.SimpleCallback mMediaCallback = new MediaRouter.SimpleCallback() {
         @Override
         public void onRouteAdded(MediaRouter router, RouteInfo route) {
-            if (DEBUG) Log.d(TAG, "onRouteAdded: " + routeToString(route));
+            mLogger.logRouteAdded(route);
             updateRemoteDisplays();
         }
         @Override
         public void onRouteChanged(MediaRouter router, RouteInfo route) {
-            if (DEBUG) Log.d(TAG, "onRouteChanged: " + routeToString(route));
+            mLogger.logRouteChanged(route);
             updateRemoteDisplays();
         }
         @Override
         public void onRouteRemoved(MediaRouter router, RouteInfo route) {
-            if (DEBUG) Log.d(TAG, "onRouteRemoved: " + routeToString(route));
+            mLogger.logRouteRemoved(route);
             updateRemoteDisplays();
         }
         @Override
         public void onRouteSelected(MediaRouter router, int type, RouteInfo route) {
-            if (DEBUG) Log.d(TAG, "onRouteSelected(" + type + "): " + routeToString(route));
+            mLogger.logRouteSelected(route, type);
             updateRemoteDisplays();
         }
         @Override
         public void onRouteUnselected(MediaRouter router, int type, RouteInfo route) {
-            if (DEBUG) Log.d(TAG, "onRouteUnselected(" + type + "): " + routeToString(route));
+            mLogger.logRouteUnselected(route, type);
             updateRemoteDisplays();
         }
     };

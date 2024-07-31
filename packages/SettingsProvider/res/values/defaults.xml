@@ -45,7 +45,7 @@
     <integer name="def_location_mode">3</integer>
     <!-- 0 == off, 1 == on-->
     <integer name="def_paired_device_location_mode">1</integer>
-    <bool name="assisted_gps_enabled">true</bool>
+    <bool name="assisted_gps_enabled">false</bool>
     <bool name="def_netstats_enabled">true</bool>
     <bool name="def_usb_mass_storage_enabled">true</bool>
     <bool name="def_wifi_on">false</bool>

@@ -554,11 +554,18 @@ public class CompanionAssociationActivity extends FragmentActivity implements
         mSelectedDevice = requireNonNull(selectedDevice);
 
         Slog.d(TAG, "onDeviceClicked(): " + mSelectedDevice.toShortString());
-
+        // The permission consent dialog should not be displayed if it's a isSkipPrompt(true)
+        // AssociationRequest or when there is no device profile available
+        // for the multiple devices dialog.
+        // See AssociationRequestsProcessor#mayAssociateWithoutPrompt.
+        final String deviceProfile = mRequest.getDeviceProfile();
+        if (deviceProfile == null || mRequest.isSkipPrompt()) {
+            onUserSelectedDevice(mSelectedDevice);
+            return;
+        }
+        // The permission consent dialog should be displayed for the multiple device
+        // dialog if a device profile exists.
         updateSingleDeviceUi();
-
-        if (mRequest.isSkipPrompt()) return;
-
         mSummary.setVisibility(View.VISIBLE);
         mButtonAllow.setVisibility(View.VISIBLE);
         mButtonNotAllow.setVisibility(View.VISIBLE);
@@ -588,9 +595,6 @@ public class CompanionAssociationActivity extends FragmentActivity implements
         if (deviceProfile == null && mRequest.isSingleDevice()) {
             summary = getHtmlFromResources(this, summaryResourceId, remoteDeviceName);
             mConstraintList.setVisibility(View.GONE);
-        } else if (deviceProfile == null) {
-            onUserSelectedDevice(mSelectedDevice);
-            return;
         } else {
             summary = getHtmlFromResources(
                     this, summaryResourceId, getString(R.string.device_type));

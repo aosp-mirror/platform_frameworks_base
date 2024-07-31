@@ -28,6 +28,7 @@ import com.android.systemui.plugins.clocks.ClockController
 import com.android.systemui.plugins.clocks.ClockId
 import com.android.systemui.plugins.clocks.ClockMessageBuffers
 import com.android.systemui.plugins.clocks.ClockMetadata
+import com.android.systemui.plugins.clocks.ClockPickerConfig
 import com.android.systemui.plugins.clocks.ClockProviderPlugin
 import com.android.systemui.plugins.clocks.ClockSettings
 import com.android.systemui.plugins.PluginLifecycleManager
@@ -74,6 +75,7 @@ class ClockRegistryTest : SysuiTestCase() {
     private lateinit var fakeDefaultProvider: FakeClockPlugin
     private lateinit var pluginListener: PluginListener<ClockProviderPlugin>
     private lateinit var registry: ClockRegistry
+    private lateinit var pickerConfig: ClockPickerConfig
     private val featureFlags = FakeFeatureFlags()
 
     companion object {
@@ -82,9 +84,9 @@ class ClockRegistryTest : SysuiTestCase() {
             return null!!
         }
 
-        private fun failThumbnail(clockId: ClockId): Drawable? {
-            fail("Unexpected call to getThumbnail: $clockId")
-            return null
+        private fun failPickerConfig(clockId: ClockId): ClockPickerConfig {
+            fail("Unexpected call to getClockPickerConfig: $clockId")
+            return null!!
         }
     }
 
@@ -123,22 +125,31 @@ class ClockRegistryTest : SysuiTestCase() {
     private class FakeClockPlugin : ClockProviderPlugin {
         private val metadata = mutableListOf<ClockMetadata>()
         private val createCallbacks = mutableMapOf<ClockId, (ClockId) -> ClockController>()
-        private val thumbnailCallbacks = mutableMapOf<ClockId, (ClockId) -> Drawable?>()
+        private val pickerConfigs = mutableMapOf<ClockId, (ClockId) -> ClockPickerConfig>()
 
         override fun getClocks() = metadata
-        override fun createClock(settings: ClockSettings): ClockController =
-            createCallbacks[settings.clockId!!]!!(settings.clockId!!)
-        override fun getClockThumbnail(id: ClockId): Drawable? = thumbnailCallbacks[id]!!(id)
+
+        override fun createClock(settings: ClockSettings): ClockController {
+            val clockId = settings.clockId ?: throw IllegalArgumentException("No clockId specified")
+            return createCallbacks[clockId]?.invoke(clockId)
+                ?: throw NotImplementedError("No callback for '$clockId'")
+        }
+
+        override fun getClockPickerConfig(clockId: ClockId): ClockPickerConfig {
+            return pickerConfigs[clockId]?.invoke(clockId)
+                ?: throw NotImplementedError("No picker config for '$clockId'")
+        }
+
         override fun initialize(buffers: ClockMessageBuffers?) { }
 
         fun addClock(
             id: ClockId,
             create: (ClockId) -> ClockController = ::failFactory,
-            getThumbnail: (ClockId) -> Drawable? = ::failThumbnail
+            getPickerConfig: (ClockId) -> ClockPickerConfig = ::failPickerConfig
         ): FakeClockPlugin {
             metadata.add(ClockMetadata(id))
             createCallbacks[id] = create
-            thumbnailCallbacks[id] = getThumbnail
+            pickerConfigs[id] = getPickerConfig
             return this
         }
     }
@@ -148,9 +159,10 @@ class ClockRegistryTest : SysuiTestCase() {
         scheduler = TestCoroutineScheduler()
         dispatcher = StandardTestDispatcher(scheduler)
         scope = TestScope(dispatcher)
+        pickerConfig = ClockPickerConfig("CLOCK_ID", "NAME", "DESC", mockThumbnail)
 
         fakeDefaultProvider = FakeClockPlugin()
-            .addClock(DEFAULT_CLOCK_ID, { mockDefaultClock }, { mockThumbnail })
+            .addClock(DEFAULT_CLOCK_ID, { mockDefaultClock }, { pickerConfig })
         whenever(mockContext.contentResolver).thenReturn(mockContentResolver)
 
         val captor = argumentCaptor<PluginListener<ClockProviderPlugin>>()
@@ -215,8 +227,8 @@ class ClockRegistryTest : SysuiTestCase() {
     @Test
     fun clockIdConflict_ErrorWithoutCrash_unloadDuplicate() {
         val plugin1 = FakeClockPlugin()
-            .addClock("clock_1", { mockClock }, { mockThumbnail })
-            .addClock("clock_2", { mockClock }, { mockThumbnail })
+            .addClock("clock_1", { mockClock }, { pickerConfig })
+            .addClock("clock_2", { mockClock }, { pickerConfig })
         val lifecycle1 = spy(FakeLifecycle("1", plugin1))
 
         val plugin2 = FakeClockPlugin()
@@ -238,8 +250,8 @@ class ClockRegistryTest : SysuiTestCase() {
 
         assertEquals(registry.createExampleClock("clock_1"), mockClock)
         assertEquals(registry.createExampleClock("clock_2"), mockClock)
-        assertEquals(registry.getClockThumbnail("clock_1"), mockThumbnail)
-        assertEquals(registry.getClockThumbnail("clock_2"), mockThumbnail)
+        assertEquals(registry.getClockPickerConfig("clock_1"), pickerConfig)
+        assertEquals(registry.getClockPickerConfig("clock_2"), pickerConfig)
         verify(lifecycle1, never()).unloadPlugin()
         verify(lifecycle2, times(2)).unloadPlugin()
     }

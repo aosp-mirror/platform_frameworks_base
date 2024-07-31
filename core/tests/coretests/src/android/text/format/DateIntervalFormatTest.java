@@ -35,14 +35,15 @@ import static android.text.format.DateUtils.FORMAT_SHOW_YEAR;
 import static android.text.format.DateUtils.FORMAT_UTC;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import android.icu.util.Calendar;
 import android.icu.util.TimeZone;
 import android.icu.util.ULocale;
 import android.platform.test.annotations.Presubmit;
 
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
-import androidx.test.runner.AndroidJUnit4;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -682,5 +683,13 @@ public class DateIntervalFormatTest {
         // Spans a leap year's Feb 29th.
         assertEquals("February 27\u2009\u2013\u2009March 1, 2004",
                 fmt.apply(1077840000000L, 1078185600000L));
+    }
+
+    @Test
+    public void testIsLibcoreVFlagEnabled() {
+        // This flag has been fully ramped. It should never be false.
+        assertTrue(DateIntervalFormat.isLibcoreVFlagEnabled());
+        // Call a Android V API in libcore.
+        assertEquals("\ud840\udc2b", Character.toString(0x2002B));
     }
 }

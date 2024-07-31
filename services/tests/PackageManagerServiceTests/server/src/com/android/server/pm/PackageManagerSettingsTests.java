@@ -1027,6 +1027,144 @@ public class PackageManagerSettingsTests {
     }
 
     @Test
+    public void testWriteReadDebuggable() {
+        Settings settings = makeSettings();
+        PackageSetting packageSetting = createPackageSetting(PACKAGE_NAME_1);
+        packageSetting.setAppId(Process.FIRST_APPLICATION_UID);
+        packageSetting.setPkg(PackageImpl.forTesting(PACKAGE_NAME_1).hideAsParsed()
+                .setUid(packageSetting.getAppId())
+                .hideAsFinal());
+
+        packageSetting.setDebuggable(true);
+        settings.mPackages.put(PACKAGE_NAME_1, packageSetting);
+
+        settings.writeLPr(computer, /* sync= */ true);
+        settings.mPackages.clear();
+
+        assertThat(settings.readLPw(computer, createFakeUsers()), is(true));
+        assertThat(settings.getPackageLPr(PACKAGE_NAME_1).isDebuggable(), is(true));
+    }
+
+    @Test
+    public void testWriteReadBaseRevisionCode() {
+        Settings settings = makeSettings();
+        PackageSetting packageSetting = createPackageSetting(PACKAGE_NAME_1);
+        packageSetting.setAppId(Process.FIRST_APPLICATION_UID);
+        packageSetting.setPkg(PackageImpl.forTesting(PACKAGE_NAME_1).hideAsParsed()
+                .setUid(packageSetting.getAppId())
+                .hideAsFinal());
+
+        final int revisionCode = 311;
+        packageSetting.setBaseRevisionCode(revisionCode);
+        settings.mPackages.put(PACKAGE_NAME_1, packageSetting);
+
+        settings.writeLPr(computer, /* sync= */ true);
+        settings.mPackages.clear();
+
+        assertThat(settings.readLPw(computer, createFakeUsers()), is(true));
+        assertThat(settings.getPackageLPr(PACKAGE_NAME_1).getBaseRevisionCode(), is(revisionCode));
+    }
+
+    @Test
+    public void testHasPkg_writeReadSplitVersions() {
+        Settings settings = makeSettings();
+        PackageSetting packageSetting = createPackageSetting(PACKAGE_NAME_1);
+        packageSetting.setAppId(Process.FIRST_APPLICATION_UID);
+        packageSetting.setPkg(PackageImpl.forTesting(PACKAGE_NAME_1).hideAsParsed()
+                .setUid(packageSetting.getAppId())
+                .hideAsFinal());
+
+        final String splitOne = "one";
+        final String splitTwo = "two";
+        final int revisionOne = 311;
+        final int revisionTwo = 330;
+        packageSetting.setSplitNames(new String[] { splitOne, splitTwo});
+        packageSetting.setSplitRevisionCodes(new int[] { revisionOne, revisionTwo});
+        settings.mPackages.put(PACKAGE_NAME_1, packageSetting);
+
+        settings.writeLPr(computer, /* sync= */ true);
+        settings.mPackages.clear();
+
+        assertThat(settings.readLPw(computer, createFakeUsers()), is(true));
+        PackageSetting resultSetting = settings.getPackageLPr(PACKAGE_NAME_1);
+        assertThat(resultSetting.getSplitNames().length, is(0));
+        assertThat(resultSetting.getSplitRevisionCodes().length, is(0));
+    }
+
+    @Test
+    public void testNoPkgDifferentRevisions_writeReadSplitVersions() {
+        Settings settings = makeSettings();
+        PackageSetting packageSetting = createPackageSetting(PACKAGE_NAME_1);
+        packageSetting.setAppId(Process.FIRST_APPLICATION_UID);
+
+        final String splitOne = "one";
+        final String splitTwo = "two";
+        final int revisionOne = 311;
+        final int revisionTwo = 330;
+        packageSetting.setSplitNames(new String[] { splitOne, splitTwo});
+        packageSetting.setSplitRevisionCodes(new int[] { revisionOne, revisionTwo});
+        settings.mPackages.put(PACKAGE_NAME_1, packageSetting);
+
+        settings.writeLPr(computer, /* sync= */ true);
+        settings.mPackages.clear();
+
+        assertThat(settings.readLPw(computer, createFakeUsers()), is(true));
+        PackageSetting resultSetting = settings.getPackageLPr(PACKAGE_NAME_1);
+        assertThat(resultSetting.getSplitNames()[0], is(splitOne));
+        assertThat(resultSetting.getSplitNames()[1], is(splitTwo));
+        assertThat(resultSetting.getSplitRevisionCodes()[0], is(revisionOne));
+        assertThat(resultSetting.getSplitRevisionCodes()[1], is(revisionTwo));
+    }
+
+    @Test
+    public void testNoPkgSameRevisions_writeReadSplitVersions() {
+        Settings settings = makeSettings();
+        PackageSetting packageSetting = createPackageSetting(PACKAGE_NAME_1);
+        packageSetting.setAppId(Process.FIRST_APPLICATION_UID);
+
+        final String splitOne = "one";
+        final String splitTwo = "two";
+        final int revisionOne = 311;
+        packageSetting.setSplitNames(new String[] { splitOne, splitTwo});
+        packageSetting.setSplitRevisionCodes(new int[] { revisionOne, revisionOne});
+        settings.mPackages.put(PACKAGE_NAME_1, packageSetting);
+
+        settings.writeLPr(computer, /* sync= */ true);
+        settings.mPackages.clear();
+
+        assertThat(settings.readLPw(computer, createFakeUsers()), is(true));
+        PackageSetting resultSetting = settings.getPackageLPr(PACKAGE_NAME_1);
+        assertThat(resultSetting.getSplitNames()[0], is(splitOne));
+        assertThat(resultSetting.getSplitNames()[1], is(splitTwo));
+        assertThat(resultSetting.getSplitRevisionCodes()[0], is(revisionOne));
+        assertThat(resultSetting.getSplitRevisionCodes()[1], is(revisionOne));
+    }
+
+    @Test
+    public void testNoPkgSameSplitNames_writeReadSplitVersions() {
+        Settings settings = makeSettings();
+        PackageSetting packageSetting = createPackageSetting(PACKAGE_NAME_1);
+        packageSetting.setAppId(Process.FIRST_APPLICATION_UID);
+
+        final String splitOne = "one";
+        final int revisionOne = 311;
+        final int revisionTwo = 330;
+        packageSetting.setSplitNames(new String[] { splitOne, splitOne});
+        packageSetting.setSplitRevisionCodes(new int[] { revisionOne, revisionTwo});
+        settings.mPackages.put(PACKAGE_NAME_1, packageSetting);
+
+        settings.writeLPr(computer, /* sync= */ true);
+        settings.mPackages.clear();
+
+        assertThat(settings.readLPw(computer, createFakeUsers()), is(true));
+        PackageSetting resultSetting = settings.getPackageLPr(PACKAGE_NAME_1);
+        assertThat(resultSetting.getSplitNames().length, is(1));
+        assertThat(resultSetting.getSplitRevisionCodes().length, is(1));
+        assertThat(resultSetting.getSplitNames()[0], is(splitOne));
+        assertThat(resultSetting.getSplitRevisionCodes()[0], is(revisionTwo));
+    }
+
+    @Test
     public void testWriteReadArchiveState() {
         Settings settings = makeSettings();
         PackageSetting packageSetting = createPackageSetting(PACKAGE_NAME_1);

@@ -102,6 +102,8 @@ public final class TaskFragmentInfo implements Parcelable {
     @NonNull
     private final Point mMinimumDimensions = new Point();
 
+    private final boolean mIsTopNonFishingChild;
+
     /** @hide */
     public TaskFragmentInfo(
             @NonNull IBinder fragmentToken, @NonNull WindowContainerToken token,
@@ -110,7 +112,7 @@ public final class TaskFragmentInfo implements Parcelable {
             @NonNull List<IBinder> inRequestedTaskFragmentActivities,
             @NonNull Point positionInParent, boolean isTaskClearedForReuse,
             boolean isTaskFragmentClearedForPip, boolean isClearedForReorderActivityToFront,
-            @NonNull Point minimumDimensions) {
+            @NonNull Point minimumDimensions, boolean isTopNonFinishingChild) {
         mFragmentToken = requireNonNull(fragmentToken);
         mToken = requireNonNull(token);
         mConfiguration.setTo(configuration);
@@ -123,6 +125,7 @@ public final class TaskFragmentInfo implements Parcelable {
         mIsTaskFragmentClearedForPip = isTaskFragmentClearedForPip;
         mIsClearedForReorderActivityToFront = isClearedForReorderActivityToFront;
         mMinimumDimensions.set(minimumDimensions);
+        mIsTopNonFishingChild = isTopNonFinishingChild;
     }
 
     @NonNull
@@ -212,6 +215,16 @@ public final class TaskFragmentInfo implements Parcelable {
     }
 
     /**
+     * Indicates that this TaskFragment is the top non-finishing child of its parent container
+     * among all Activities and TaskFragment siblings.
+     *
+     * @hide
+     */
+    public boolean isTopNonFinishingChild() {
+        return mIsTopNonFishingChild;
+    }
+
+    /**
      * Returns {@code true} if the parameters that are important for task fragment organizers are
      * equal between this {@link TaskFragmentInfo} and {@param that}.
      * Note that this method is usually called with
@@ -236,7 +249,8 @@ public final class TaskFragmentInfo implements Parcelable {
                 && mIsTaskClearedForReuse == that.mIsTaskClearedForReuse
                 && mIsTaskFragmentClearedForPip == that.mIsTaskFragmentClearedForPip
                 && mIsClearedForReorderActivityToFront == that.mIsClearedForReorderActivityToFront
-                && mMinimumDimensions.equals(that.mMinimumDimensions);
+                && mMinimumDimensions.equals(that.mMinimumDimensions)
+                && mIsTopNonFishingChild == that.mIsTopNonFishingChild;
     }
 
     private TaskFragmentInfo(Parcel in) {
@@ -252,6 +266,7 @@ public final class TaskFragmentInfo implements Parcelable {
         mIsTaskFragmentClearedForPip = in.readBoolean();
         mIsClearedForReorderActivityToFront = in.readBoolean();
         mMinimumDimensions.readFromParcel(in);
+        mIsTopNonFishingChild = in.readBoolean();
     }
 
     /** @hide */
@@ -269,6 +284,7 @@ public final class TaskFragmentInfo implements Parcelable {
         dest.writeBoolean(mIsTaskFragmentClearedForPip);
         dest.writeBoolean(mIsClearedForReorderActivityToFront);
         mMinimumDimensions.writeToParcel(dest, flags);
+        dest.writeBoolean(mIsTopNonFishingChild);
     }
 
     @NonNull
@@ -299,6 +315,7 @@ public final class TaskFragmentInfo implements Parcelable {
                 + " isTaskFragmentClearedForPip=" + mIsTaskFragmentClearedForPip
                 + " mIsClearedForReorderActivityToFront=" + mIsClearedForReorderActivityToFront
                 + " minimumDimensions=" + mMinimumDimensions
+                + " isTopNonFinishingChild=" + mIsTopNonFishingChild
                 + "}";
     }
 

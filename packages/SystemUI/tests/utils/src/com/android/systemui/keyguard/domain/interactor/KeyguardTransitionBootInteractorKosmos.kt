@@ -30,5 +30,6 @@ val Kosmos.keyguardTransitionBootInteractor: KeyguardTransitionBootInteractor by
             deviceProvisioningInteractor = deviceProvisioningInteractor,
             keyguardTransitionInteractor = keyguardTransitionInteractor,
             repository = keyguardTransitionRepository,
+            internalTransitionInteractor = internalKeyguardTransitionInteractor,
         )
     }

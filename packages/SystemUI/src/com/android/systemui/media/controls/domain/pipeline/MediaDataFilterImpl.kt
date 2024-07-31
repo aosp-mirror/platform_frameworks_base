@@ -27,6 +27,7 @@ import com.android.systemui.broadcast.BroadcastSender
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.media.controls.data.repository.MediaFilterRepository
+import com.android.systemui.media.controls.shared.MediaLogger
 import com.android.systemui.media.controls.shared.model.EXTRA_KEY_TRIGGER_RESUME
 import com.android.systemui.media.controls.shared.model.MediaData
 import com.android.systemui.media.controls.shared.model.MediaDataLoadingModel
@@ -70,7 +71,7 @@ constructor(
     private val logger: MediaUiEventLogger,
     private val mediaFlags: MediaFlags,
     private val mediaFilterRepository: MediaFilterRepository,
-    private val mediaLoadingLogger: MediaLoadingLogger,
+    private val mediaLogger: MediaLogger,
 ) : MediaDataManager.Listener {
     /** Non-UI listeners to media changes. */
     private val _listeners: MutableSet<MediaDataProcessor.Listener> = mutableSetOf()
@@ -118,7 +119,7 @@ constructor(
 
         val isUpdate = mediaFilterRepository.addSelectedUserMediaEntry(data)
 
-        mediaLoadingLogger.logMediaLoaded(data.instanceId, data.active, "loading media")
+        mediaLogger.logMediaLoaded(data.instanceId, data.active, "loading media")
         mediaFilterRepository.addMediaDataLoadingState(
             MediaDataLoadingModel.Loaded(data.instanceId),
             isUpdate
@@ -189,7 +190,7 @@ constructor(
                         isSsReactivated = true
                     )
                 )
-                mediaLoadingLogger.logMediaLoaded(
+                mediaLogger.logMediaLoaded(
                     mediaData.instanceId,
                     mediaData.active,
                     "reactivating media instead of smartspace"
@@ -226,7 +227,7 @@ constructor(
         mediaFilterRepository.setRecommendationsLoadingState(
             SmartspaceMediaLoadingModel.Loaded(key, shouldPrioritizeMutable)
         )
-        mediaLoadingLogger.logRecommendationLoaded(key, data.isActive, "loading recommendations")
+        mediaLogger.logRecommendationLoaded(key, data.isActive, "loading recommendations")
         listeners.forEach { it.onSmartspaceMediaDataLoaded(key, data, shouldPrioritizeMutable) }
     }
 
@@ -237,7 +238,7 @@ constructor(
                 mediaFilterRepository.addMediaDataLoadingState(
                     MediaDataLoadingModel.Removed(instanceId)
                 )
-                mediaLoadingLogger.logMediaRemoved(instanceId, "removing media card")
+                mediaLogger.logMediaRemoved(instanceId, "removing media card")
                 // Only notify listeners if something actually changed
                 listeners.forEach { it.onMediaDataRemoved(key, userInitiated) }
             }
@@ -253,11 +254,7 @@ constructor(
                 mediaFilterRepository.addMediaDataLoadingState(
                     MediaDataLoadingModel.Loaded(lastActiveId, immediately)
                 )
-                mediaLoadingLogger.logMediaLoaded(
-                    lastActiveId,
-                    it.active,
-                    "expiring reactivated id"
-                )
+                mediaLogger.logMediaLoaded(lastActiveId, it.active, "expiring reactivated id")
                 listeners.forEach { listener ->
                     getKey(lastActiveId)?.let { lastActiveKey ->
                         listener.onMediaDataLoaded(lastActiveKey, lastActiveKey, it, immediately)
@@ -278,11 +275,7 @@ constructor(
         mediaFilterRepository.setRecommendationsLoadingState(
             SmartspaceMediaLoadingModel.Removed(key, immediately)
         )
-        mediaLoadingLogger.logRecommendationRemoved(
-            key,
-            immediately,
-            "removing recommendations card"
-        )
+        mediaLogger.logRecommendationRemoved(key, immediately, "removing recommendations card")
         listeners.forEach { it.onSmartspaceMediaDataRemoved(key, immediately) }
     }
 
@@ -296,10 +289,7 @@ constructor(
                 mediaFilterRepository.addMediaDataLoadingState(
                     MediaDataLoadingModel.Removed(data.instanceId)
                 )
-                mediaLoadingLogger.logMediaRemoved(
-                    data.instanceId,
-                    "Removing $key after profile change"
-                )
+                mediaLogger.logMediaRemoved(data.instanceId, "Removing $key after profile change")
                 listeners.forEach { listener -> listener.onMediaDataRemoved(key, false) }
             }
         }
@@ -316,7 +306,7 @@ constructor(
             mediaFilterRepository.addMediaDataLoadingState(
                 MediaDataLoadingModel.Removed(instanceId)
             )
-            mediaLoadingLogger.logMediaRemoved(instanceId, "Removing media after user change")
+            mediaLogger.logMediaRemoved(instanceId, "Removing media after user change")
             getKey(instanceId)?.let {
                 listenersCopy.forEach { listener -> listener.onMediaDataRemoved(it, false) }
             }
@@ -329,7 +319,7 @@ constructor(
                     MediaDataLoadingModel.Loaded(data.instanceId),
                     isUpdate
                 )
-                mediaLoadingLogger.logMediaLoaded(
+                mediaLogger.logMediaLoaded(
                     data.instanceId,
                     data.active,
                     "Re-adding $key after user change"

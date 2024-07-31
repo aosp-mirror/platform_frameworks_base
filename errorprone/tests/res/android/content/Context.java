@@ -36,4 +36,15 @@ public class Context {
     public void sendBroadcastWithMultiplePermissions(Intent intent, String[] receiverPermissions) {
         throw new UnsupportedOperationException();
     }
+
+    /* Fake user type for test purposes */
+    public void sendBroadcastAsUser(Intent intent, int user, String receiverPermission) {
+        throw new UnsupportedOperationException();
+    }
+
+    /* Fake user type for test purposes */
+    public void sendBroadcastAsUserMultiplePermissions(
+            Intent intent, int user, String[] receiverPermissions) {
+        throw new UnsupportedOperationException();
+    }
 }

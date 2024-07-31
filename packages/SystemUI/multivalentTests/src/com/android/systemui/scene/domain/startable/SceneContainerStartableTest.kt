@@ -78,6 +78,7 @@ import com.android.systemui.statusbar.notificationShadeWindowController
 import com.android.systemui.statusbar.phone.centralSurfaces
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.fakeMobileConnectionsRepository
 import com.android.systemui.statusbar.policy.data.repository.fakeDeviceProvisioningRepository
+import com.android.systemui.statusbar.sysuiStatusBarStateController
 import com.android.systemui.testKosmos
 import com.android.systemui.util.mockito.mock
 import com.google.common.truth.Truth.assertThat
@@ -175,12 +176,14 @@ class SceneContainerStartableTest : SysuiTestCase() {
             transitionStateFlow.value = ObservableTransitionState.Idle(Scenes.Gone)
             assertThat(isVisible).isFalse()
 
-            kosmos.headsUpNotificationRepository.activeHeadsUpRows.value =
+            kosmos.headsUpNotificationRepository.setNotifications(
                 buildNotificationRows(isPinned = true)
+            )
             assertThat(isVisible).isTrue()
 
-            kosmos.headsUpNotificationRepository.activeHeadsUpRows.value =
+            kosmos.headsUpNotificationRepository.setNotifications(
                 buildNotificationRows(isPinned = false)
+            )
             assertThat(isVisible).isFalse()
         }
 
@@ -272,9 +275,10 @@ class SceneContainerStartableTest : SysuiTestCase() {
         }
 
     @Test
-    fun switchFromBouncerToQuickSettingsWhenDeviceUnlocked() =
+    fun switchFromBouncerToQuickSettingsWhenDeviceUnlocked_whenLeaveOpenShade() =
         testScope.runTest {
             val currentSceneKey by collectLastValue(sceneInteractor.currentScene)
+            kosmos.sysuiStatusBarStateController.leaveOpen = true // leave shade open
 
             val transitionState =
                 prepareState(
@@ -301,6 +305,39 @@ class SceneContainerStartableTest : SysuiTestCase() {
             )
 
             assertThat(currentSceneKey).isEqualTo(Scenes.QuickSettings)
+        }
+
+    @Test
+    fun switchFromBouncerToGoneWhenDeviceUnlocked_whenDoNotLeaveOpenShade() =
+        testScope.runTest {
+            val currentSceneKey by collectLastValue(sceneInteractor.currentScene)
+            kosmos.sysuiStatusBarStateController.leaveOpen = false // don't leave shade open
+
+            val transitionState =
+                prepareState(
+                    authenticationMethod = AuthenticationMethodModel.Pin,
+                    isDeviceUnlocked = false,
+                    initialSceneKey = Scenes.Lockscreen,
+                )
+            assertThat(currentSceneKey).isEqualTo(Scenes.Lockscreen)
+            underTest.start()
+            runCurrent()
+
+            sceneInteractor.changeScene(Scenes.QuickSettings, "switching to qs for test")
+            transitionState.value = ObservableTransitionState.Idle(Scenes.QuickSettings)
+            runCurrent()
+            assertThat(currentSceneKey).isEqualTo(Scenes.QuickSettings)
+
+            sceneInteractor.changeScene(Scenes.Bouncer, "switching to bouncer for test")
+            transitionState.value = ObservableTransitionState.Idle(Scenes.Bouncer)
+            runCurrent()
+            assertThat(currentSceneKey).isEqualTo(Scenes.Bouncer)
+
+            kosmos.fakeDeviceEntryFingerprintAuthRepository.setAuthenticationStatus(
+                SuccessFingerprintAuthenticationStatus(0, true)
+            )
+
+            assertThat(currentSceneKey).isEqualTo(Scenes.Gone)
         }
 
     @Test
@@ -1559,6 +1596,63 @@ class SceneContainerStartableTest : SysuiTestCase() {
             verify(dismissCallback).onDismissCancelled()
         }
 
+    @Test
+    fun refreshLockscreenEnabled() =
+        testScope.runTest {
+            val transitionState =
+                prepareState(
+                    isDeviceUnlocked = true,
+                    initialSceneKey = Scenes.Gone,
+                )
+            underTest.start()
+            val isLockscreenEnabled by
+                collectLastValue(kosmos.deviceEntryInteractor.isLockscreenEnabled)
+            assertThat(isLockscreenEnabled).isTrue()
+
+            kosmos.fakeDeviceEntryRepository.setPendingLockscreenEnabled(false)
+            runCurrent()
+            // Pending value didn't propagate yet.
+            assertThat(isLockscreenEnabled).isTrue()
+
+            // Starting a transition to Lockscreen should refresh the value, causing the pending
+            // value
+            // to propagate to the real flow:
+            transitionState.value =
+                ObservableTransitionState.Transition(
+                    fromScene = Scenes.Gone,
+                    toScene = Scenes.Lockscreen,
+                    currentScene = flowOf(Scenes.Gone),
+                    progress = flowOf(0.1f),
+                    isInitiatedByUserInput = false,
+                    isUserInputOngoing = flowOf(false),
+                )
+            runCurrent()
+            assertThat(isLockscreenEnabled).isFalse()
+
+            kosmos.fakeDeviceEntryRepository.setPendingLockscreenEnabled(true)
+            runCurrent()
+            // Pending value didn't propagate yet.
+            assertThat(isLockscreenEnabled).isFalse()
+            transitionState.value = ObservableTransitionState.Idle(Scenes.Gone)
+            runCurrent()
+            assertThat(isLockscreenEnabled).isFalse()
+
+            // Starting another transition to Lockscreen should refresh the value, causing the
+            // pending
+            // value to propagate to the real flow:
+            transitionState.value =
+                ObservableTransitionState.Transition(
+                    fromScene = Scenes.Gone,
+                    toScene = Scenes.Lockscreen,
+                    currentScene = flowOf(Scenes.Gone),
+                    progress = flowOf(0.1f),
+                    isInitiatedByUserInput = false,
+                    isUserInputOngoing = flowOf(false),
+                )
+            runCurrent()
+            assertThat(isLockscreenEnabled).isTrue()
+        }
+
     private fun TestScope.emulateSceneTransition(
         transitionStateFlow: MutableStateFlow<ObservableTransitionState>,
         toScene: SceneKey,
@@ -1642,8 +1736,8 @@ class SceneContainerStartableTest : SysuiTestCase() {
         return transitionStateFlow
     }
 
-    private fun buildNotificationRows(isPinned: Boolean = false): Set<HeadsUpRowRepository> =
-        setOf(
+    private fun buildNotificationRows(isPinned: Boolean = false): List<HeadsUpRowRepository> =
+        listOf(
             fakeHeadsUpRowRepository(key = "0", isPinned = isPinned),
             fakeHeadsUpRowRepository(key = "1", isPinned = isPinned),
             fakeHeadsUpRowRepository(key = "2", isPinned = isPinned),

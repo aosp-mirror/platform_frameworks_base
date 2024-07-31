@@ -120,6 +120,11 @@ class AndroidRemoteContext extends RemoteContext {
         mRemoteComposeState.updateFloat(id, value);
     }
 
+    @Override
+    public void loadInteger(int id, int value) {
+        mRemoteComposeState.updateInteger(id, value);
+    }
+
 
     @Override
     public void loadColor(int id, int color) {
@@ -139,6 +144,11 @@ class AndroidRemoteContext extends RemoteContext {
     @Override
     public float getFloat(int id) {
         return (float) mRemoteComposeState.getFloat(id);
+    }
+
+    @Override
+    public int getInteger(int id) {
+        return  mRemoteComposeState.getInteger(id);
     }
 
     @Override

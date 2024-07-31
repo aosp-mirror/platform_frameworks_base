@@ -23,7 +23,7 @@ import android.platform.test.annotations.EnableFlags
 import android.platform.test.flag.junit.FlagsParameterization
 import android.provider.Settings
 import androidx.test.filters.SmallTest
-import com.android.settingslib.statusbar.notification.data.repository.updateNotificationPolicy
+import com.android.settingslib.notification.data.repository.updateNotificationPolicy
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.flags.Flags
@@ -43,7 +43,6 @@ import com.android.systemui.statusbar.notification.data.repository.setActiveNoti
 import com.android.systemui.statusbar.notification.footer.shared.FooterViewRefactor
 import com.android.systemui.statusbar.notification.shared.NotificationsHeadsUpRefactor
 import com.android.systemui.statusbar.notification.stack.data.repository.headsUpNotificationRepository
-import com.android.systemui.statusbar.notification.stack.data.repository.setNotifications
 import com.android.systemui.statusbar.policy.data.repository.fakeUserSetupRepository
 import com.android.systemui.statusbar.policy.data.repository.zenModeRepository
 import com.android.systemui.statusbar.policy.fakeConfigurationController
@@ -633,7 +632,7 @@ class NotificationListViewModelTest(flags: FlagsParameterization) : SysuiTestCas
 
     @Test
     @EnableFlags(NotificationsHeadsUpRefactor.FLAG_NAME)
-    fun headsUpAnimationsEnabled_keyguardShowing_false() =
+    fun headsUpAnimationsEnabled_keyguardShowing_true() =
         testScope.runTest {
             val animationsEnabled by collectLastValue(underTest.headsUpAnimationsEnabled)
 
@@ -641,6 +640,6 @@ class NotificationListViewModelTest(flags: FlagsParameterization) : SysuiTestCas
             fakeKeyguardRepository.setStatusBarState(StatusBarState.KEYGUARD)
             runCurrent()
 
-            assertThat(animationsEnabled).isFalse()
+            assertThat(animationsEnabled).isTrue()
         }
 }

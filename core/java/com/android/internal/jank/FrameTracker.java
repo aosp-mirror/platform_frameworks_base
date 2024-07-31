@@ -317,6 +317,7 @@ public class FrameTracker implements HardwareRendererObserver.OnFrameMetricsAvai
         Trace.asyncTraceForTrackBegin(Trace.TRACE_TAG_APP, name, name, (int) mBeginVsyncId);
         markEvent("FT#beginVsync", mBeginVsyncId);
         markEvent("FT#layerId", mSurfaceControl.getLayerId());
+        markCujUiThread();
         mJankDataListenerRegistration =
                 mSurfaceControlWrapper.addJankStatsListener(this, mSurfaceControl);
         if (!mSurfaceOnly) {
@@ -430,6 +431,13 @@ public class FrameTracker implements HardwareRendererObserver.OnFrameMetricsAvai
                         event, MAX_LENGTH_EVENT_DESC));
             }
             Trace.instantForTrack(Trace.TRACE_TAG_APP, mConfig.getSessionName(), event);
+        }
+    }
+
+    private void markCujUiThread() {
+        if (Trace.isTagEnabled(Trace.TRACE_TAG_APP)) {
+            // This is being called from the CUJ ui thread.
+            Trace.instant(Trace.TRACE_TAG_APP, mConfig.getSessionName() + "#UIThread");
         }
     }
 
