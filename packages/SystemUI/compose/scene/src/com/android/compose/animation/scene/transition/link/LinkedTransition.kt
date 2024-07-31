@@ -23,7 +23,7 @@ import kotlinx.coroutines.Job
 
 /** A linked transition which is driven by a [originalTransition]. */
 internal class LinkedTransition(
-    private val originalTransition: TransitionState.Transition.ChangeCurrentScene,
+    private val originalTransition: TransitionState.Transition,
     fromScene: SceneKey,
     toScene: SceneKey,
     override val key: TransitionKey? = null,
@@ -32,8 +32,8 @@ internal class LinkedTransition(
     override val currentScene: SceneKey
         get() {
             return when (originalTransition.currentScene) {
-                originalTransition.fromScene -> fromScene
-                originalTransition.toScene -> toScene
+                originalTransition.fromContent -> fromScene
+                originalTransition.toContent -> toScene
                 else -> error("Original currentScene is neither FromScene nor ToScene")
             }
         }

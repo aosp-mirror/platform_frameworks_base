@@ -495,7 +495,7 @@ class SceneTransitionLayoutStateTest {
         // overscroll for SceneB is defined
         progress.value = 1.1f
         val overscrollSpec = assertThat(transition).hasOverscrollSpec()
-        assertThat(overscrollSpec.scene).isEqualTo(SceneB)
+        assertThat(overscrollSpec.content).isEqualTo(SceneB)
     }
 
     @Test
@@ -516,7 +516,7 @@ class SceneTransitionLayoutStateTest {
         // overscroll for SceneA is defined
         progress.value = -0.1f
         val overscrollSpec = assertThat(transition).hasOverscrollSpec()
-        assertThat(overscrollSpec.scene).isEqualTo(SceneA)
+        assertThat(overscrollSpec.content).isEqualTo(SceneA)
 
         // scroll from SceneA to SceneB
         progress.value = 0.5f

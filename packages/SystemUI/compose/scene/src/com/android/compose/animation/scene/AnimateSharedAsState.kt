@@ -412,7 +412,7 @@ private class AnimatedStateImpl<T, Delta>(
                             if (canOverflow) transition.progress
                             else transition.progress.fastCoerceIn(0f, 1f)
                         }
-                        overscrollSpec.scene == transition.toContent -> 1f
+                        overscrollSpec.content == transition.toContent -> 1f
                         else -> 0f
                     }
 
