@@ -14,18 +14,14 @@
  * limitations under the License.
  */
 
-package com.android.systemui.touchpad
+package com.android.systemui.inputdevice.oobe.data.model
 
-import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.touchpad.data.repository.TouchpadRepository
-import com.android.systemui.touchpad.data.repository.TouchpadRepositoryImpl
-import dagger.Binds
-import dagger.Module
+data class OobeSchedulerInfo(
+    val keyboard: DeviceSchedulerInfo = DeviceSchedulerInfo(),
+    val touchpad: DeviceSchedulerInfo = DeviceSchedulerInfo()
+)
 
-@Module
-abstract class TouchpadModule {
-
-    @Binds
-    @SysUISingleton
-    abstract fun bindTouchpadRepository(repository: TouchpadRepositoryImpl): TouchpadRepository
+data class DeviceSchedulerInfo(var isLaunched: Boolean = false, var connectionTime: Long? = null) {
+    val wasEverConnected: Boolean
+        get() = connectionTime != null
 }
