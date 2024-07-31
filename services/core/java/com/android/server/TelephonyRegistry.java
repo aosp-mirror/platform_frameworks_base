@@ -2215,7 +2215,7 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
                     for (Record r : mRecords) {
                         if (r.matchTelephonyCallbackEvent(
                                 TelephonyCallback.EVENT_PRECISE_DATA_CONNECTION_STATE_CHANGED)
-                                && idMatch(r, subId, phoneId)) {
+                                && idMatchRelaxed(r, subId, phoneId)) {
                             try {
                                 r.callback.onPreciseDataConnectionStateChanged(preciseState);
                             } catch (RemoteException ex) {
