@@ -1077,6 +1077,7 @@ public class NotificationStackScrollLayoutController implements Dumpable {
 
     public void setOnEmptySpaceClickListener(
             OnEmptySpaceClickListener listener) {
+        SceneContainerFlag.assertInLegacyMode();
         mView.setOnEmptySpaceClickListener(listener);
     }
 
