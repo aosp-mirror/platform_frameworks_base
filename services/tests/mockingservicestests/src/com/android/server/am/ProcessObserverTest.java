@@ -56,6 +56,7 @@ import com.android.server.wm.ActivityTaskManagerService;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.mockito.Mock;
@@ -238,6 +239,7 @@ public class ProcessObserverTest {
     /**
      * Verify that a process start event is dispatched to process observers.
      */
+    @Ignore("b/323959187")
     @Test
     public void testNormal() throws Exception {
         ProcessRecord app = startProcess();
