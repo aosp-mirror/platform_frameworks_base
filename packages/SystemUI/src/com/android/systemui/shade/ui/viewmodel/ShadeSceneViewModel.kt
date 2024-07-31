@@ -24,8 +24,8 @@ import com.android.compose.animation.scene.Swipe
 import com.android.compose.animation.scene.SwipeDirection
 import com.android.compose.animation.scene.UserAction
 import com.android.compose.animation.scene.UserActionResult
+import com.android.systemui.activatable.Activatable
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.media.controls.domain.pipeline.interactor.MediaCarouselInteractor
 import com.android.systemui.qs.FooterActionsController
 import com.android.systemui.qs.footer.ui.viewmodel.FooterActionsViewModel
@@ -41,22 +41,23 @@ import com.android.systemui.unfold.domain.interactor.UnfoldTransitionInteractor
 import com.android.systemui.utils.coroutines.flow.flatMapLatestConflated
 import java.util.concurrent.atomic.AtomicBoolean
 import javax.inject.Inject
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 
 /** Models UI state and handles user input for the shade scene. */
 @SysUISingleton
 class ShadeSceneViewModel
 @Inject
 constructor(
-    @Application private val applicationScope: CoroutineScope,
     val qsSceneAdapter: QSSceneAdapter,
     val shadeHeaderViewModel: ShadeHeaderViewModel,
     val brightnessMirrorViewModel: BrightnessMirrorViewModel,
@@ -66,42 +67,61 @@ constructor(
     private val footerActionsController: FooterActionsController,
     private val sceneInteractor: SceneInteractor,
     private val unfoldTransitionInteractor: UnfoldTransitionInteractor,
-) {
-    val destinationScenes: StateFlow<Map<UserAction, UserActionResult>> =
+) : Activatable {
+    val destinationScenes: Flow<Map<UserAction, UserActionResult>> =
         combine(
-                shadeInteractor.shadeMode,
-                qsSceneAdapter.isCustomizerShowing,
-            ) { shadeMode, isCustomizerShowing ->
-                destinationScenes(
-                    shadeMode = shadeMode,
-                    isCustomizing = isCustomizerShowing,
-                )
+            shadeInteractor.shadeMode,
+            qsSceneAdapter.isCustomizerShowing,
+        ) { shadeMode, isCustomizerShowing ->
+            buildMap {
+                if (!isCustomizerShowing) {
+                    set(
+                        Swipe(SwipeDirection.Up),
+                        UserActionResult(
+                            SceneFamilies.Home,
+                            ToSplitShade.takeIf { shadeMode is ShadeMode.Split }
+                        )
+                    )
+                }
+
+                // TODO(b/330200163) Add an else to be able to collapse the shade while customizing
+                if (shadeMode is ShadeMode.Single) {
+                    set(Swipe(SwipeDirection.Down), UserActionResult(Scenes.QuickSettings))
+                }
             }
-            .stateIn(
-                scope = applicationScope,
-                started = SharingStarted.WhileSubscribed(),
-                initialValue =
-                    destinationScenes(
-                        shadeMode = shadeInteractor.shadeMode.value,
-                        isCustomizing = qsSceneAdapter.isCustomizerShowing.value,
-                    ),
-            )
+        }
 
     private val upDestinationSceneKey: Flow<SceneKey?> =
         destinationScenes.map { it[Swipe(SwipeDirection.Up)]?.toScene }
 
+    private val _isClickable = MutableStateFlow(false)
     /** Whether or not the shade container should be clickable. */
-    val isClickable: StateFlow<Boolean> =
-        upDestinationSceneKey
-            .flatMapLatestConflated { key ->
-                key?.let { sceneInteractor.resolveSceneFamily(key) } ?: flowOf(null)
+    val isClickable: StateFlow<Boolean> = _isClickable.asStateFlow()
+
+    /**
+     * Activates the view-model.
+     *
+     * Serves as an entrypoint to kick off coroutine work that the view-model requires in order to
+     * keep its state fresh and/or perform side-effects.
+     *
+     * Suspends the caller forever as it will keep doing work until canceled.
+     *
+     * **Must be invoked** when the scene becomes the current scene or when it becomes visible
+     * during a transition (the choice is the responsibility of the parent). Similarly, the work
+     * must be canceled when the scene stops being visible or the current scene.
+     */
+    override suspend fun activate() {
+        coroutineScope {
+            launch {
+                upDestinationSceneKey
+                    .flatMapLatestConflated { key ->
+                        key?.let { sceneInteractor.resolveSceneFamily(key) } ?: flowOf(null)
+                    }
+                    .map { it == Scenes.Lockscreen }
+                    .collectLatest { _isClickable.value = it }
             }
-            .map { it == Scenes.Lockscreen }
-            .stateIn(
-                scope = applicationScope,
-                started = SharingStarted.WhileSubscribed(),
-                initialValue = false
-            )
+        }
+    }
 
     val shadeMode: StateFlow<ShadeMode> = shadeInteractor.shadeMode
 
@@ -131,25 +151,5 @@ constructor(
             footerActionsController.init()
         }
         return footerActionsViewModelFactory.create(lifecycleOwner)
-    }
-
-    private fun destinationScenes(
-        shadeMode: ShadeMode,
-        isCustomizing: Boolean,
-    ): Map<UserAction, UserActionResult> {
-        return buildMap {
-            if (!isCustomizing) {
-                set(
-                    Swipe(SwipeDirection.Up),
-                    UserActionResult(
-                        SceneFamilies.Home,
-                        ToSplitShade.takeIf { shadeMode is ShadeMode.Split }
-                    )
-                )
-            } // TODO(b/330200163) Add an else to be able to collapse the shade while customizing
-            if (shadeMode is ShadeMode.Single) {
-                set(Swipe(SwipeDirection.Down), UserActionResult(Scenes.QuickSettings))
-            }
-        }
     }
 }

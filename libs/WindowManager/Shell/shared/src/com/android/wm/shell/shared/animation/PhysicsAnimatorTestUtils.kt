@@ -168,6 +168,16 @@ object PhysicsAnimatorTestUtils {
         }
     }
 
+    /** Whether any animation is currently running. */
+    @JvmStatic
+    fun isAnyAnimationRunning(): Boolean {
+        for (target in allAnimatedObjects) {
+            val animator = PhysicsAnimator.getInstance(target)
+            if (animator.isRunning()) return true
+        }
+        return false
+    }
+
     /**
      * Blocks the calling thread until the first animation frame in which predicate returns true. If
      * the given object isn't animating, returns without blocking.

@@ -31,7 +31,7 @@ val Kosmos.sceneInteractor by
             repository = sceneContainerRepository,
             logger = sceneLogger,
             sceneFamilyResolvers = { sceneFamilyResolvers },
-            deviceUnlockedInteractor = deviceUnlockedInteractor,
-            keyguardEnabledInteractor = keyguardEnabledInteractor,
+            deviceUnlockedInteractor = { deviceUnlockedInteractor },
+            keyguardEnabledInteractor = { keyguardEnabledInteractor },
         )
     }

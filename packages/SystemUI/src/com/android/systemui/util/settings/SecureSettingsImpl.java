@@ -23,17 +23,23 @@ import android.provider.Settings;
 import androidx.annotation.NonNull;
 
 import com.android.systemui.settings.UserTracker;
+import com.android.systemui.util.kotlin.SettingsSingleThreadBackground;
 
 import javax.inject.Inject;
+
+import kotlinx.coroutines.CoroutineDispatcher;
 
 class SecureSettingsImpl implements SecureSettings {
     private final ContentResolver mContentResolver;
     private final UserTracker mUserTracker;
+    private final CoroutineDispatcher mBgDispatcher;
 
     @Inject
-    SecureSettingsImpl(ContentResolver contentResolver, UserTracker userTracker) {
+    SecureSettingsImpl(ContentResolver contentResolver, UserTracker userTracker,
+            @SettingsSingleThreadBackground CoroutineDispatcher bgDispatcher) {
         mContentResolver = contentResolver;
         mUserTracker = userTracker;
+        mBgDispatcher = bgDispatcher;
     }
 
     @Override
@@ -49,6 +55,11 @@ class SecureSettingsImpl implements SecureSettings {
     @Override
     public Uri getUriFor(String name) {
         return Settings.Secure.getUriFor(name);
+    }
+
+    @Override
+    public CoroutineDispatcher getBackgroundDispatcher() {
+        return mBgDispatcher;
     }
 
     @Override

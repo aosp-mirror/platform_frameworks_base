@@ -17,7 +17,7 @@
 package com.android.settingslib.volume.domain.interactor
 
 import android.media.AudioManager
-import com.android.settingslib.statusbar.notification.domain.interactor.NotificationsSoundPolicyInteractor
+import com.android.settingslib.notification.domain.interactor.NotificationsSoundPolicyInteractor
 import com.android.settingslib.volume.data.repository.AudioRepository
 import com.android.settingslib.volume.shared.model.AudioStream
 import com.android.settingslib.volume.shared.model.AudioStreamModel
@@ -61,6 +61,10 @@ class AudioVolumeInteractor(
     }
 
     suspend fun setMuted(audioStream: AudioStream, isMuted: Boolean) {
+        val streamModel = getAudioStream(audioStream).first()
+        if (!streamModel.isAffectedByMute) {
+            return
+        }
         if (audioStream.value == AudioManager.STREAM_RING) {
             val mode =
                 if (isMuted) AudioManager.RINGER_MODE_VIBRATE else AudioManager.RINGER_MODE_NORMAL

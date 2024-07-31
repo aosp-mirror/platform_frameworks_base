@@ -40,28 +40,28 @@ final class DisplayRotationImmersiveAppCompatPolicy {
 
     @Nullable
     static DisplayRotationImmersiveAppCompatPolicy createIfNeeded(
-            @NonNull final LetterboxConfiguration letterboxConfiguration,
+            @NonNull final AppCompatConfiguration appCompatConfiguration,
             @NonNull final DisplayRotation displayRotation,
             @NonNull final DisplayContent displayContent) {
-        if (!letterboxConfiguration
+        if (!appCompatConfiguration
                 .isDisplayRotationImmersiveAppCompatPolicyEnabledAtBuildTime()) {
             return null;
         }
 
         return new DisplayRotationImmersiveAppCompatPolicy(
-                letterboxConfiguration, displayRotation, displayContent);
+                appCompatConfiguration, displayRotation, displayContent);
     }
 
     private final DisplayRotation mDisplayRotation;
-    private final LetterboxConfiguration mLetterboxConfiguration;
+    private final AppCompatConfiguration mAppCompatConfiguration;
     private final DisplayContent mDisplayContent;
 
     private DisplayRotationImmersiveAppCompatPolicy(
-            @NonNull final LetterboxConfiguration letterboxConfiguration,
+            @NonNull final AppCompatConfiguration appCompatConfiguration,
             @NonNull final DisplayRotation displayRotation,
             @NonNull final DisplayContent displayContent) {
         mDisplayRotation = displayRotation;
-        mLetterboxConfiguration = letterboxConfiguration;
+        mAppCompatConfiguration = appCompatConfiguration;
         mDisplayContent = displayContent;
     }
 
@@ -80,14 +80,14 @@ final class DisplayRotationImmersiveAppCompatPolicy {
      *   <li>Rotation will lead to letterboxing due to fixed orientation.
      *   <li>{@link DisplayContent#getIgnoreOrientationRequest} is {@code true}
      *   <li>This policy is enabled on the device, for details see
-     *   {@link LetterboxConfiguration#isDisplayRotationImmersiveAppCompatPolicyEnabled}
+     *   {@link AppCompatConfiguration#isDisplayRotationImmersiveAppCompatPolicyEnabled}
      * </ul>
      *
      * @param proposedRotation new proposed {@link Surface.Rotation} for the screen.
      * @return {@code true}, if there is a need to lock screen rotation, {@code false} otherwise.
      */
     boolean isRotationLockEnforced(@Surface.Rotation final int proposedRotation) {
-        if (!mLetterboxConfiguration.isDisplayRotationImmersiveAppCompatPolicyEnabled()) {
+        if (!mAppCompatConfiguration.isDisplayRotationImmersiveAppCompatPolicyEnabled()) {
             return false;
         }
         synchronized (mDisplayContent.mWmService.mGlobalLock) {

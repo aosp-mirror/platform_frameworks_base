@@ -183,9 +183,9 @@ public class InternetDialogDelegate implements
             Context context,
             InternetDialogManager internetDialogManager,
             InternetDialogController internetDialogController,
-            @Assisted(ABOVE_STATUS_BAR) boolean canConfigMobileData,
-            @Assisted(CAN_CONFIG_MOBILE_DATA) boolean canConfigWifi,
-            @Assisted(CAN_CONFIG_WIFI) boolean aboveStatusBar,
+            @Assisted(CAN_CONFIG_MOBILE_DATA) boolean canConfigMobileData,
+            @Assisted(CAN_CONFIG_WIFI) boolean canConfigWifi,
+            @Assisted(ABOVE_STATUS_BAR) boolean aboveStatusBar,
             @Assisted CoroutineScope coroutineScope,
             UiEventLogger uiEventLogger,
             DialogTransitionAnimator dialogTransitionAnimator,
@@ -489,6 +489,10 @@ public class InternetDialogDelegate implements
             mMobileDataToggle.setVisibility(mCanConfigMobileData ? View.VISIBLE : View.INVISIBLE);
             mMobileToggleDivider.setVisibility(
                     mCanConfigMobileData ? View.VISIBLE : View.INVISIBLE);
+            int primaryColor = isNetworkConnected
+                    ? R.color.connected_network_primary_color
+                    : R.color.disconnected_network_primary_color;
+            mMobileToggleDivider.setBackgroundColor(dialog.getContext().getColor(primaryColor));
 
             // Display the info for the non-DDS if it's actively being used
             int autoSwitchNonDdsSubId = mInternetDialogController.getActiveAutoSwitchNonDdsSubId();

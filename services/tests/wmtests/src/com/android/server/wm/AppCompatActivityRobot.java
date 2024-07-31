@@ -16,6 +16,9 @@
 
 package com.android.server.wm;
 
+import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
+import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
+import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.content.pm.ActivityInfo.RESIZE_MODE_RESIZEABLE;
 import static android.content.pm.ActivityInfo.RESIZE_MODE_UNRESIZEABLE;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
@@ -69,6 +72,7 @@ class AppCompatActivityRobot {
 
     private final int mDisplayWidth;
     private final int mDisplayHeight;
+    private DisplayContent mDisplayContent;
 
     AppCompatActivityRobot(@NonNull WindowManagerService wm,
             @NonNull ActivityTaskManagerService atm, @NonNull ActivityTaskSupervisor supervisor,
@@ -79,6 +83,7 @@ class AppCompatActivityRobot {
         mDisplayHeight = displayHeight;
         mActivityStack = new TestComponentStack<>();
         mTaskStack = new TestComponentStack<>();
+        createNewDisplay();
     }
 
     AppCompatActivityRobot(@NonNull WindowManagerService wm,
@@ -87,12 +92,18 @@ class AppCompatActivityRobot {
     }
 
     void createActivityWithComponent() {
-        createActivityWithComponentInNewTask(/* inNewTask */ mTaskStack.isEmpty());
+        createActivityWithComponentInNewTask(/* inNewTask */ mTaskStack.isEmpty(),
+                /* inNewDisplay */ false);
     }
 
     void createActivityWithComponentInNewTask() {
-        createActivityWithComponentInNewTask(/* inNewTask */ true);
+        createActivityWithComponentInNewTask(/* inNewTask */ true, /* inNewDisplay */ false);
     }
+
+    void createActivityWithComponentInNewTaskAndDisplay() {
+        createActivityWithComponentInNewTask(/* inNewTask */ true, /* inNewDisplay */ true);
+    }
+
 
     void configureTopActivity(float minAspect, float maxAspect, int screenOrientation,
             boolean isUnresizable) {
@@ -110,9 +121,23 @@ class AppCompatActivityRobot {
                 /* isUnresizable */ true);
     }
 
+    void activateCameraInPolicy(boolean isCameraActive) {
+        doReturn(isCameraActive).when(mDisplayContent.mAppCompatCameraPolicy)
+                .isCameraActive(any(ActivityRecord.class), anyBoolean());
+    }
+
+    void setDisplayNaturalOrientation(@Configuration.Orientation int naturalOrientation) {
+        doReturn(naturalOrientation).when(mDisplayContent).getNaturalOrientation();
+    }
+
     @NonNull
     ActivityRecord top() {
         return mActivityStack.top();
+    }
+
+    @NonNull
+    DisplayContent displayContent() {
+        return mDisplayContent;
     }
 
     @NonNull
@@ -125,12 +150,12 @@ class AppCompatActivityRobot {
     }
 
     void setLetterboxedForFixedOrientationAndAspectRatio(boolean enabled) {
-        doReturn(enabled).when(mActivityStack.top())
-                .isLetterboxedForFixedOrientationAndAspectRatio();
+        doReturn(enabled).when(mActivityStack.top().mAppCompatController
+                .getAppCompatAspectRatioPolicy()).isLetterboxedForFixedOrientationAndAspectRatio();
     }
 
     void enableTreatmentForTopActivity(boolean enabled) {
-        doReturn(enabled).when(getTopDisplayRotationCompatPolicy())
+        doReturn(enabled).when(mDisplayContent.mAppCompatCameraPolicy)
                 .isTreatmentEnabledForActivity(eq(mActivityStack.top()));
     }
 
@@ -145,26 +170,57 @@ class AppCompatActivityRobot {
     }
 
     void setShouldApplyUserMinAspectRatioOverride(boolean enabled) {
-        doReturn(enabled).when(mActivityStack.top()
-                .mLetterboxUiController).shouldApplyUserMinAspectRatioOverride();
+        doReturn(enabled).when(mActivityStack.top().mAppCompatController
+                .getAppCompatAspectRatioOverrides()).shouldApplyUserMinAspectRatioOverride();
+    }
+
+    void setShouldCreateCompatDisplayInsets(boolean enabled) {
+        doReturn(enabled).when(mActivityStack.top()).shouldCreateCompatDisplayInsets();
     }
 
     void setShouldApplyUserFullscreenOverride(boolean enabled) {
-        doReturn(enabled).when(mActivityStack.top()
-                .mLetterboxUiController).shouldApplyUserFullscreenOverride();
+        doReturn(enabled).when(mActivityStack.top().mAppCompatController
+                .getAppCompatAspectRatioOverrides()).shouldApplyUserFullscreenOverride();
     }
 
     void setGetUserMinAspectRatioOverrideCode(@PackageManager.UserMinAspectRatio int orientation) {
         doReturn(orientation).when(mActivityStack.top()
-                .mLetterboxUiController).getUserMinAspectRatioOverrideCode();
+                .mAppCompatController.getAppCompatAspectRatioOverrides())
+                .getUserMinAspectRatioOverrideCode();
     }
 
     void setIgnoreOrientationRequest(boolean enabled) {
-        mActivityStack.top().mDisplayContent.setIgnoreOrientationRequest(enabled);
+        mDisplayContent.setIgnoreOrientationRequest(enabled);
+    }
+
+    void setTopTaskInMultiWindowMode(boolean inMultiWindowMode) {
+        doReturn(inMultiWindowMode).when(mTaskStack.top())
+                .inMultiWindowMode();
     }
 
     void setTopActivityAsEmbedded(boolean embedded) {
         doReturn(embedded).when(mActivityStack.top()).isEmbedded();
+    }
+
+    void setTopActivityInMultiWindowMode(boolean multiWindowMode) {
+        doReturn(multiWindowMode).when(mActivityStack.top()).inMultiWindowMode();
+        if (multiWindowMode) {
+            doReturn(WINDOWING_MODE_MULTI_WINDOW).when(mActivityStack.top()).getWindowingMode();
+        }
+    }
+
+    void setTopActivityInPinnedWindowingMode(boolean pinnedWindowingMode) {
+        doReturn(pinnedWindowingMode).when(mActivityStack.top()).inPinnedWindowingMode();
+        if (pinnedWindowingMode) {
+            doReturn(WINDOWING_MODE_PINNED).when(mActivityStack.top()).getWindowingMode();
+        }
+    }
+
+    void setTopActivityInFreeformWindowingMode(boolean freeformWindowingMode) {
+        doReturn(freeformWindowingMode).when(mActivityStack.top()).inFreeformWindowingMode();
+        if (freeformWindowingMode) {
+            doReturn(WINDOWING_MODE_FREEFORM).when(mActivityStack.top()).getWindowingMode();
+        }
     }
 
     void destroyTopActivity() {
@@ -175,21 +231,24 @@ class AppCompatActivityRobot {
         mActivityStack.applyTo(/* fromTop */ fromTop, ActivityRecord::removeImmediately);
     }
 
+    void createNewDisplay() {
+        mDisplayContent = new TestDisplayContent.Builder(mAtm, mDisplayWidth, mDisplayHeight)
+                .build();
+        spyOn(mDisplayContent);
+        spyOnAppCompatCameraPolicy();
+    }
+
     void createNewTask() {
-        final DisplayContent displayContent = new TestDisplayContent
-                .Builder(mAtm, mDisplayWidth, mDisplayHeight).build();
         final Task newTask = new WindowTestsBase.TaskBuilder(mSupervisor)
-                .setDisplay(displayContent).build();
-        mTaskStack.push(newTask);
+                .setDisplay(mDisplayContent).build();
+        pushTask(newTask);
     }
 
     void createNewTaskWithBaseActivity() {
-        final DisplayContent displayContent = new TestDisplayContent
-                .Builder(mAtm, mDisplayWidth, mDisplayHeight).build();
         final Task newTask = new WindowTestsBase.TaskBuilder(mSupervisor)
                 .setCreateActivity(true)
-                .setDisplay(displayContent).build();
-        mTaskStack.push(newTask);
+                .setDisplay(mDisplayContent).build();
+        pushTask(newTask);
         pushActivity(newTask.getTopNonFinishingActivity());
     }
 
@@ -315,7 +374,10 @@ class AppCompatActivityRobot {
         pushActivity(newActivity);
     }
 
-    private void createActivityWithComponentInNewTask(boolean inNewTask) {
+    private void createActivityWithComponentInNewTask(boolean inNewTask, boolean inNewDisplay) {
+        if (inNewDisplay) {
+            createNewDisplay();
+        }
         if (inNewTask) {
             createNewTask();
         }
@@ -365,18 +427,35 @@ class AppCompatActivityRobot {
     }
 
     private DisplayRotationCompatPolicy getTopDisplayRotationCompatPolicy() {
-        return mActivityStack.top().mDisplayContent.mDisplayRotationCompatPolicy;
+        return mActivityStack.top().mDisplayContent
+                .mAppCompatCameraPolicy.mDisplayRotationCompatPolicy;
     }
 
     // We add the activity to the stack and spyOn() on its properties.
     private void pushActivity(@NonNull ActivityRecord activity) {
         mActivityStack.push(activity);
         spyOn(activity);
+        // TODO (b/351763164): Use these spyOn calls only when necessary.
         spyOn(activity.mAppCompatController.getTransparentPolicy());
-        if (activity.mDisplayContent != null
-                && activity.mDisplayContent.mDisplayRotationCompatPolicy != null) {
-            spyOn(activity.mDisplayContent.mDisplayRotationCompatPolicy);
-        }
+        spyOn(activity.mAppCompatController.getAppCompatAspectRatioOverrides());
+        spyOn(activity.mAppCompatController.getAppCompatAspectRatioPolicy());
+        spyOn(activity.mAppCompatController.getAppCompatFocusOverrides());
+        spyOn(activity.mAppCompatController.getAppCompatResizeOverrides());
         spyOn(activity.mLetterboxUiController);
+    }
+
+    private void pushTask(@NonNull Task task) {
+        spyOn(task);
+        mTaskStack.push(task);
+    }
+
+    private void spyOnAppCompatCameraPolicy() {
+        spyOn(mDisplayContent.mAppCompatCameraPolicy);
+        if (mDisplayContent.mAppCompatCameraPolicy.hasDisplayRotationCompatPolicy()) {
+            spyOn(mDisplayContent.mAppCompatCameraPolicy.mDisplayRotationCompatPolicy);
+        }
+        if (mDisplayContent.mAppCompatCameraPolicy.hasCameraCompatFreeformPolicy()) {
+            spyOn(mDisplayContent.mAppCompatCameraPolicy.mCameraCompatFreeformPolicy);
+        }
     }
 }

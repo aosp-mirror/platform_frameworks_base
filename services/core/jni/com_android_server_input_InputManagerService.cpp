@@ -104,7 +104,6 @@ static const char* VELOCITYTRACKER_STRATEGY = "velocitytracker_strategy";
 
 static struct {
     jclass clazz;
-    jmethodID notifyConfigurationChanged;
     jmethodID notifyInputDevicesChanged;
     jmethodID notifySwitch;
     jmethodID notifyInputChannelBroken;
@@ -331,7 +330,6 @@ public:
 
     void notifySwitch(nsecs_t when, uint32_t switchValues, uint32_t switchMask,
                       uint32_t policyFlags) override;
-    void notifyConfigurationChanged(nsecs_t when) override;
     // ANR-related callbacks -- start
     void notifyNoFocusedWindowAnr(const std::shared_ptr<InputApplicationHandle>& handle) override;
     void notifyWindowUnresponsive(const sp<IBinder>& token, std::optional<gui::Pid> pid,
@@ -382,6 +380,7 @@ public:
             PointerControllerInterface::ControllerType type) override;
     void notifyPointerDisplayIdChanged(ui::LogicalDisplayId displayId,
                                        const FloatPoint& position) override;
+    void notifyMouseCursorFadedOnTyping() override;
 
     /* --- InputFilterPolicyInterface implementation --- */
     void notifyStickyModifierStateChanged(uint32_t modifierState,
@@ -788,6 +787,10 @@ void NativeInputManager::notifyPointerDisplayIdChanged(ui::LogicalDisplayId poin
             InputReaderConfiguration::Change::DISPLAY_INFO);
 }
 
+void NativeInputManager::notifyMouseCursorFadedOnTyping() {
+    mInputManager->getReader().notifyMouseCursorFadedOnTyping();
+}
+
 void NativeInputManager::notifyStickyModifierStateChanged(uint32_t modifierState,
                                                           uint32_t lockedModifierState) {
     JNIEnv* env = jniEnv();
@@ -933,18 +936,6 @@ void NativeInputManager::notifySwitch(nsecs_t when,
     env->CallVoidMethod(mServiceObj, gServiceClassInfo.notifySwitch,
             when, switchValues, switchMask);
     checkAndClearExceptionFromCallback(env, "notifySwitch");
-}
-
-void NativeInputManager::notifyConfigurationChanged(nsecs_t when) {
-#if DEBUG_INPUT_DISPATCHER_POLICY
-    ALOGD("notifyConfigurationChanged - when=%lld", when);
-#endif
-    ATRACE_CALL();
-
-    JNIEnv* env = jniEnv();
-
-    env->CallVoidMethod(mServiceObj, gServiceClassInfo.notifyConfigurationChanged, when);
-    checkAndClearExceptionFromCallback(env, "notifyConfigurationChanged");
 }
 
 static jobject getInputApplicationHandleObjLocalRef(
@@ -1847,10 +1838,6 @@ static void handleInputChannelDisposed(JNIEnv* env, jobject /* inputChannelObj *
                                        const std::shared_ptr<InputChannel>& inputChannel,
                                        void* data) {
     NativeInputManager* im = static_cast<NativeInputManager*>(data);
-
-    ALOGW("Input channel object '%s' was disposed without first being removed with "
-          "the input manager!",
-          inputChannel->getName().c_str());
     im->removeInputChannel(inputChannel->getConnectionToken());
 }
 
@@ -2871,9 +2858,6 @@ int register_android_server_InputManager(JNIEnv* env) {
     jclass clazz;
     FIND_CLASS(clazz, "com/android/server/input/InputManagerService");
     gServiceClassInfo.clazz = reinterpret_cast<jclass>(env->NewGlobalRef(clazz));
-
-    GET_METHOD_ID(gServiceClassInfo.notifyConfigurationChanged, clazz,
-            "notifyConfigurationChanged", "(J)V");
 
     GET_METHOD_ID(gServiceClassInfo.notifyInputDevicesChanged, clazz,
             "notifyInputDevicesChanged", "([Landroid/view/InputDevice;)V");

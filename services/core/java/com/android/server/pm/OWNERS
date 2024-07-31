@@ -27,6 +27,7 @@ per-file CrossProfile* = file:MULTIUSER_AND_ENTERPRISE_OWNERS
 per-file RestrictionsSet.java = file:MULTIUSER_AND_ENTERPRISE_OWNERS
 per-file UserRestriction* = file:MULTIUSER_AND_ENTERPRISE_OWNERS
 per-file User* = file:/MULTIUSER_OWNERS
+per-file BackgroundUser* = file:/MULTIUSER_OWNERS
 
 # security
 per-file KeySetHandle.java = cbrubaker@google.com, nnk@google.com

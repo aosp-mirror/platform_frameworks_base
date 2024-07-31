@@ -2,6 +2,7 @@ package com.android.systemui.statusbar.notification.collection.provider
 
 import android.util.ArraySet
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.statusbar.notification.shared.NotificationThrottleHun
 import com.android.systemui.util.ListenerSet
 import javax.inject.Inject
 
@@ -21,7 +22,7 @@ class VisualStabilityProvider @Inject constructor() {
                 field = value
                 if (value) {
                     notifyReorderingAllowed()
-                } else {
+                } else if (NotificationThrottleHun.isEnabled){
                     banListeners.forEach { listener ->
                         listener.onReorderingBanned()
                     }
@@ -71,4 +72,3 @@ fun interface OnReorderingAllowedListener {
 fun interface OnReorderingBannedListener {
     fun onReorderingBanned()
 }
-

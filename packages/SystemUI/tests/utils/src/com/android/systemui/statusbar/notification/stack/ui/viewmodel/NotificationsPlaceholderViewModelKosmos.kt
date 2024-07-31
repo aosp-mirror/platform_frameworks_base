@@ -22,6 +22,7 @@ import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.Kosmos.Fixture
 import com.android.systemui.shade.domain.interactor.shadeInteractor
 import com.android.systemui.shade.ui.viewmodel.shadeSceneViewModel
+import com.android.systemui.statusbar.notification.stack.domain.interactor.headsUpNotificationInteractor
 import com.android.systemui.statusbar.notification.stack.domain.interactor.notificationStackAppearanceInteractor
 
 val Kosmos.notificationsPlaceholderViewModel by Fixture {
@@ -30,6 +31,7 @@ val Kosmos.notificationsPlaceholderViewModel by Fixture {
         interactor = notificationStackAppearanceInteractor,
         shadeInteractor = shadeInteractor,
         shadeSceneViewModel = shadeSceneViewModel,
+        headsUpNotificationInteractor = headsUpNotificationInteractor,
         featureFlags = featureFlagsClassic,
     )
 }

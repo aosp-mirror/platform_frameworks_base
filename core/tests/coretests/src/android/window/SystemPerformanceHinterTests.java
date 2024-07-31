@@ -30,8 +30,8 @@ import static android.window.SystemPerformanceHinter.HINT_SF_FRAME_RATE;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
@@ -42,14 +42,16 @@ import android.platform.test.annotations.Presubmit;
 import android.view.SurfaceControl;
 
 import androidx.annotation.NonNull;
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.platform.app.InstrumentationRegistry;
-import androidx.test.runner.AndroidJUnit4;
 
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.MockitoJUnit;
+import org.mockito.junit.MockitoRule;
 
 import java.util.HashMap;
 
@@ -62,6 +64,9 @@ import java.util.HashMap;
 @Presubmit
 @RunWith(AndroidJUnit4.class)
 public class SystemPerformanceHinterTests {
+
+    @Rule
+    public final MockitoRule mockito = MockitoJUnit.rule();
 
     private static final int DEFAULT_DISPLAY_ID = android.view.Display.DEFAULT_DISPLAY;
     private static final int SECONDARY_DISPLAY_ID = DEFAULT_DISPLAY_ID + 1;
@@ -83,8 +88,6 @@ public class SystemPerformanceHinterTests {
 
     @Before
     public void setUpOnce() {
-        MockitoAnnotations.initMocks(this);
-
         mDefaultDisplayRoot = new SurfaceControl();
         mSecondaryDisplayRoot = new SurfaceControl();
         mRootProvider = new SystemPerformanceHinterTests.RootProvider();

@@ -16,6 +16,8 @@
 
 package android.database;
 
+import static java.util.Objects.requireNonNull;
+
 import android.annotation.BytesLong;
 import android.annotation.IntRange;
 import android.compat.annotation.UnsupportedAppUsage;
@@ -640,6 +642,7 @@ public class CursorWindow extends SQLiteClosable implements Parcelable {
      */
     public boolean putBlob(byte[] value,
             @IntRange(from = 0) int row, @IntRange(from = 0) int column) {
+        requireNonNull(value);
         acquireReference();
         try {
             return nativePutBlob(mWindowPtr, value, row - mStartPos, column);
@@ -658,6 +661,7 @@ public class CursorWindow extends SQLiteClosable implements Parcelable {
      */
     public boolean putString(String value,
             @IntRange(from = 0) int row, @IntRange(from = 0) int column) {
+        requireNonNull(value);
         acquireReference();
         try {
             return nativePutString(mWindowPtr, value, row - mStartPos, column);

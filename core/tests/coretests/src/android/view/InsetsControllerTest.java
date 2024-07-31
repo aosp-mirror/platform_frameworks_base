@@ -56,6 +56,7 @@ import static org.mockito.Mockito.verify;
 import static java.util.concurrent.TimeUnit.SECONDS;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.content.Context;
 import android.graphics.Insets;
 import android.graphics.Point;
@@ -1095,9 +1096,10 @@ public class InsetsControllerTest {
         }
 
         @Override
-        public void updateRequestedVisibleTypes(@InsetsType int requestedVisibleTypes) {
+        public void updateRequestedVisibleTypes(@InsetsType int requestedVisibleTypes,
+                @Nullable ImeTracker.Token statsToken) {
             mRequestedVisibleTypes = requestedVisibleTypes;
-            super.updateRequestedVisibleTypes(requestedVisibleTypes);
+            super.updateRequestedVisibleTypes(requestedVisibleTypes, statsToken);
         }
 
         public boolean isRequestedVisible(@InsetsType int types) {

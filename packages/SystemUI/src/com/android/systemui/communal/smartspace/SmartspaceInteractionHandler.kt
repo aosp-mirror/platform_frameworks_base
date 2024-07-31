@@ -22,21 +22,25 @@ import android.content.Intent
 import android.view.View
 import android.widget.RemoteViews
 import com.android.systemui.animation.ActivityTransitionAnimator
+import com.android.systemui.communal.domain.interactor.CommunalSceneInteractor
 import com.android.systemui.communal.util.InteractionHandlerDelegate
 import com.android.systemui.communal.widgets.SmartspaceAppWidgetHostView
 import com.android.systemui.plugins.ActivityStarter
 import javax.inject.Inject
 
-/**
- * Handles interactions on smartspace elements on the hub.
- */
-class SmartspaceInteractionHandler @Inject constructor(
+/** Handles interactions on smartspace elements on the hub. */
+class SmartspaceInteractionHandler
+@Inject
+constructor(
     private val activityStarter: ActivityStarter,
+    communalSceneInteractor: CommunalSceneInteractor,
 ) : RemoteViews.InteractionHandler {
-    private val delegate = InteractionHandlerDelegate(
-        findViewToAnimate = { view -> view is SmartspaceAppWidgetHostView },
-        intentStarter = this::startIntent,
-    )
+    private val delegate =
+        InteractionHandlerDelegate(
+            communalSceneInteractor,
+            findViewToAnimate = { view -> view is SmartspaceAppWidgetHostView },
+            intentStarter = this::startIntent,
+        )
 
     override fun onInteraction(
         view: View,

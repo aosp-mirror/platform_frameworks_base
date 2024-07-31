@@ -19,8 +19,7 @@
 
 #include <expat.h>
 
-#include <algorithm>
-#include <istream>
+#include <optional>
 #include <ostream>
 #include <queue>
 #include <stack>
@@ -195,6 +194,13 @@ std::optional<android::StringPiece> FindAttribute(const XmlPullParser* parser,
                                                   android::StringPiece name);
 
 /**
+ * Finds the attribute in the current element within the given namespace.
+ */
+std::optional<android::StringPiece> FindAttribute(const XmlPullParser* parser,
+                                                  android::StringPiece namespace_uri,
+                                                  android::StringPiece name);
+
+/**
  * Finds the attribute in the current element within the global namespace. The
  * attribute's value
  * must not be the empty string.
@@ -300,31 +306,6 @@ inline bool XmlPullParser::Attribute::operator==(const Attribute& rhs) const {
 
 inline bool XmlPullParser::Attribute::operator!=(const Attribute& rhs) const {
   return compare(rhs) != 0;
-}
-
-inline XmlPullParser::const_iterator XmlPullParser::FindAttribute(
-    android::StringPiece namespace_uri, android::StringPiece name) const {
-  const auto end_iter = end_attributes();
-  const auto iter = std::lower_bound(
-      begin_attributes(), end_iter,
-      std::pair<android::StringPiece, android::StringPiece>(namespace_uri, name),
-      [](const Attribute& attr,
-         const std::pair<android::StringPiece, android::StringPiece>& rhs) -> bool {
-        int cmp = attr.namespace_uri.compare(
-            0, attr.namespace_uri.size(), rhs.first.data(), rhs.first.size());
-        if (cmp < 0) return true;
-        if (cmp > 0) return false;
-        cmp = attr.name.compare(0, attr.name.size(), rhs.second.data(),
-                                rhs.second.size());
-        if (cmp < 0) return true;
-        return false;
-      });
-
-  if (iter != end_iter && namespace_uri == iter->namespace_uri &&
-      name == iter->name) {
-    return iter;
-  }
-  return end_iter;
 }
 
 }  // namespace xml

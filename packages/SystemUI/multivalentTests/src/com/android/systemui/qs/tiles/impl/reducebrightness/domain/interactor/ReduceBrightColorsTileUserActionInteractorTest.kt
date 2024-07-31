@@ -17,9 +17,13 @@
 package com.android.systemui.qs.tiles.impl.reducebrightness.domain.interactor
 
 import android.platform.test.annotations.EnabledOnRavenwood
+import android.platform.test.annotations.RequiresFlagsDisabled
+import android.platform.test.annotations.RequiresFlagsEnabled
 import android.provider.Settings
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
+import com.android.internal.R
+import com.android.server.display.feature.flags.Flags
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.accessibility.reduceBrightColorsController
 import com.android.systemui.kosmos.Kosmos
@@ -43,11 +47,22 @@ class ReduceBrightColorsTileUserActionInteractorTest : SysuiTestCase() {
 
     private val underTest =
         ReduceBrightColorsTileUserActionInteractor(
+            context.resources,
+            inputHandler,
+            controller,
+        )
+
+    private val underTestEvenDimmerEnabled =
+        ReduceBrightColorsTileUserActionInteractor(
+            context.orCreateTestableResources
+                .apply { addOverride(R.bool.config_evenDimmerEnabled, true) }
+                .resources,
             inputHandler,
             controller,
         )
 
     @Test
+    @RequiresFlagsDisabled(Flags.FLAG_EVEN_DIMMER)
     fun handleClickWhenEnabled() = runTest {
         val wasEnabled = true
         controller.isReduceBrightColorsActivated = wasEnabled
@@ -58,6 +73,7 @@ class ReduceBrightColorsTileUserActionInteractorTest : SysuiTestCase() {
     }
 
     @Test
+    @RequiresFlagsDisabled(Flags.FLAG_EVEN_DIMMER)
     fun handleClickWhenDisabled() = runTest {
         val wasEnabled = false
         controller.isReduceBrightColorsActivated = wasEnabled
@@ -68,6 +84,7 @@ class ReduceBrightColorsTileUserActionInteractorTest : SysuiTestCase() {
     }
 
     @Test
+    @RequiresFlagsDisabled(Flags.FLAG_EVEN_DIMMER)
     fun handleLongClickWhenDisabled() = runTest {
         val enabled = false
 
@@ -79,6 +96,7 @@ class ReduceBrightColorsTileUserActionInteractorTest : SysuiTestCase() {
     }
 
     @Test
+    @RequiresFlagsDisabled(Flags.FLAG_EVEN_DIMMER)
     fun handleLongClickWhenEnabled() = runTest {
         val enabled = true
 
@@ -86,6 +104,60 @@ class ReduceBrightColorsTileUserActionInteractorTest : SysuiTestCase() {
 
         QSTileIntentUserInputHandlerSubject.assertThat(inputHandler).handledOneIntentInput {
             assertThat(it.intent.action).isEqualTo(Settings.ACTION_REDUCE_BRIGHT_COLORS_SETTINGS)
+        }
+    }
+
+    @Test
+    @RequiresFlagsEnabled(Flags.FLAG_EVEN_DIMMER)
+    fun handleClickWhenEnabledEvenDimmer() = runTest {
+        val wasEnabled = true
+        controller.isReduceBrightColorsActivated = wasEnabled
+
+        underTestEvenDimmerEnabled.handleInput(
+            QSTileInputTestKtx.click(ReduceBrightColorsTileModel(wasEnabled))
+        )
+
+        assertThat(controller.isReduceBrightColorsActivated).isEqualTo(wasEnabled)
+    }
+
+    @Test
+    @RequiresFlagsEnabled(Flags.FLAG_EVEN_DIMMER)
+    fun handleClickWhenDisabledEvenDimmer() = runTest {
+        val wasEnabled = false
+        controller.isReduceBrightColorsActivated = wasEnabled
+
+        underTestEvenDimmerEnabled.handleInput(
+            QSTileInputTestKtx.click(ReduceBrightColorsTileModel(wasEnabled))
+        )
+
+        assertThat(controller.isReduceBrightColorsActivated).isEqualTo(wasEnabled)
+    }
+
+    @Test
+    @RequiresFlagsEnabled(Flags.FLAG_EVEN_DIMMER)
+    fun handleLongClickWhenDisabledEvenDimmer() = runTest {
+        val enabled = false
+
+        underTestEvenDimmerEnabled.handleInput(
+            QSTileInputTestKtx.longClick(ReduceBrightColorsTileModel(enabled))
+        )
+
+        QSTileIntentUserInputHandlerSubject.assertThat(inputHandler).handledOneIntentInput {
+            assertThat(it.intent.action).isEqualTo(Settings.ACTION_DISPLAY_SETTINGS)
+        }
+    }
+
+    @Test
+    @RequiresFlagsEnabled(Flags.FLAG_EVEN_DIMMER)
+    fun handleLongClickWhenEnabledEvenDimmer() = runTest {
+        val enabled = true
+
+        underTestEvenDimmerEnabled.handleInput(
+            QSTileInputTestKtx.longClick(ReduceBrightColorsTileModel(enabled))
+        )
+
+        QSTileIntentUserInputHandlerSubject.assertThat(inputHandler).handledOneIntentInput {
+            assertThat(it.intent.action).isEqualTo(Settings.ACTION_DISPLAY_SETTINGS)
         }
     }
 }

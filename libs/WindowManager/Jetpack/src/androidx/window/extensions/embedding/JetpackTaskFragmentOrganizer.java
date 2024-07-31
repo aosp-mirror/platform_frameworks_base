@@ -17,6 +17,7 @@
 package androidx.window.extensions.embedding;
 
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
+import static android.window.TaskFragmentAnimationParams.DEFAULT_ANIMATION_BACKGROUND_COLOR;
 import static android.window.TaskFragmentOperation.OP_TYPE_REORDER_TO_FRONT;
 import static android.window.TaskFragmentOperation.OP_TYPE_SET_ANIMATION_PARAMS;
 import static android.window.TaskFragmentOperation.OP_TYPE_SET_DIM_ON_TASK;
@@ -29,6 +30,7 @@ import static androidx.window.extensions.embedding.SplitContainer.shouldFinishAs
 import static androidx.window.extensions.embedding.SplitContainer.shouldFinishPrimaryWithSecondary;
 import static androidx.window.extensions.embedding.SplitContainer.shouldFinishSecondaryWithPrimary;
 
+import android.annotation.ColorInt;
 import android.app.Activity;
 import android.app.WindowConfiguration.WindowingMode;
 import android.content.Intent;
@@ -48,6 +50,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.window.flags.Flags;
 
 import java.util.Map;
 import java.util.concurrent.Executor;
@@ -67,10 +70,6 @@ class JetpackTaskFragmentOrganizer extends TaskFragmentOrganizer {
     @NonNull
     private final TaskFragmentCallback mCallback;
 
-    @VisibleForTesting
-    @Nullable
-    TaskFragmentAnimationController mAnimationController;
-
     /**
      * Callback that notifies the controller about changes to task fragments.
      */
@@ -86,25 +85,6 @@ class JetpackTaskFragmentOrganizer extends TaskFragmentOrganizer {
             @NonNull TaskFragmentCallback callback) {
         super(executor);
         mCallback = callback;
-    }
-
-    @Override
-    public void unregisterOrganizer() {
-        if (mAnimationController != null) {
-            mAnimationController.unregisterRemoteAnimations();
-            mAnimationController = null;
-        }
-        super.unregisterOrganizer();
-    }
-
-    /**
-     * Overrides the animation for transitions of embedded activities organized by this organizer.
-     */
-    void overrideSplitAnimation() {
-        if (mAnimationController == null) {
-            mAnimationController = new TaskFragmentAnimationController(this);
-        }
-        mAnimationController.registerRemoteAnimations();
     }
 
     /**
@@ -391,13 +371,34 @@ class JetpackTaskFragmentOrganizer extends TaskFragmentOrganizer {
         if (splitAttributes == null) {
             return TaskFragmentAnimationParams.DEFAULT;
         }
-        final AnimationBackground animationBackground = splitAttributes.getAnimationBackground();
-        if (animationBackground instanceof AnimationBackground.ColorBackground colorBackground) {
-            return new TaskFragmentAnimationParams.Builder()
-                    .setAnimationBackgroundColor(colorBackground.getColor())
-                    .build();
-        } else {
-            return TaskFragmentAnimationParams.DEFAULT;
+        final TaskFragmentAnimationParams.Builder builder =
+                new TaskFragmentAnimationParams.Builder();
+        final int animationBackgroundColor = getAnimationBackgroundColor(splitAttributes);
+        builder.setAnimationBackgroundColor(animationBackgroundColor);
+        if (Flags.activityEmbeddingAnimationCustomizationFlag()) {
+            final int openAnimationResId =
+                    splitAttributes.getAnimationParams().getOpenAnimationResId();
+            builder.setOpenAnimationResId(openAnimationResId);
+            final int closeAnimationResId =
+                    splitAttributes.getAnimationParams().getCloseAnimationResId();
+            builder.setCloseAnimationResId(closeAnimationResId);
+            final int changeAnimationResId =
+                    splitAttributes.getAnimationParams().getChangeAnimationResId();
+            builder.setChangeAnimationResId(changeAnimationResId);
         }
+        return builder.build();
+    }
+
+    @ColorInt
+    private static int getAnimationBackgroundColor(@NonNull SplitAttributes splitAttributes) {
+        int animationBackgroundColor = DEFAULT_ANIMATION_BACKGROUND_COLOR;
+        AnimationBackground animationBackground = splitAttributes.getAnimationBackground();
+        if (Flags.activityEmbeddingAnimationCustomizationFlag()) {
+            animationBackground = splitAttributes.getAnimationParams().getAnimationBackground();
+        }
+        if (animationBackground instanceof AnimationBackground.ColorBackground colorBackground) {
+            animationBackgroundColor = colorBackground.getColor();
+        }
+        return animationBackgroundColor;
     }
 }

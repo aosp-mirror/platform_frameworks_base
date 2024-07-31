@@ -115,7 +115,7 @@ internal class RestrictedSwitchPreferenceModel(
             content: @Composable (SwitchPreferenceModel) -> Unit,
         ) {
             val context = LocalContext.current
-            val restrictedSwitchPreferenceModel = remember(restrictedMode, model.title) {
+            val restrictedSwitchPreferenceModel = remember(restrictedMode, model) {
                 RestrictedSwitchPreferenceModel(context, model, restrictedMode)
             }
             restrictedSwitchPreferenceModel.RestrictionWrapper {

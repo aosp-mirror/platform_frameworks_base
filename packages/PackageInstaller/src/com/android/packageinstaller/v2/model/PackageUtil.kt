@@ -128,18 +128,19 @@ object PackageUtil {
 
     /**
      * @param context the [Context] object
-     * @param callingUid the UID of the caller who's permission is being checked
-     * @param originatingUid the UID from where install is being originated. This could be same as
-     * callingUid or it will be the UID of the package performing a session based install
-     * @param isTrustedSource whether install request is coming from a privileged app or an app that
-     * has [Manifest.permission.INSTALL_PACKAGES] permission granted
-     * @return `true` if the package is granted the said permission
+     * @param callingUid the UID of the caller of Pia
+     * @param isTrustedSource indicates whether install request is coming from a privileged app
+     * that has passed EXTRA_NOT_UNKNOWN_SOURCE as `true` in the installation intent, or an app that
+     * has the [INSTALL_PACKAGES][Manifest.permission.INSTALL_PACKAGES] permission granted.
+     *
+     * @return `true` if the package is either a system downloads provider, a document manager,
+     * a trusted source, or has declared the
+     * [REQUEST_INSTALL_PACKAGES][Manifest.permission.REQUEST_INSTALL_PACKAGES] in its manifest.
      */
     @JvmStatic
     fun isInstallPermissionGrantedOrRequested(
         context: Context,
         callingUid: Int,
-        originatingUid: Int,
         isTrustedSource: Boolean,
     ): Boolean {
         val isDocumentsManager =
@@ -148,19 +149,18 @@ object PackageUtil {
             getSystemDownloadsProviderInfo(context.packageManager, callingUid) != null
 
         if (!isTrustedSource && !isSystemDownloadsProvider && !isDocumentsManager) {
-            val targetSdkVersion = getMaxTargetSdkVersionForUid(context, originatingUid)
+            val targetSdkVersion = getMaxTargetSdkVersionForUid(context, callingUid)
             if (targetSdkVersion < 0) {
-                // Invalid originating uid supplied. Abort install.
-                Log.w(LOG_TAG, "Cannot get target sdk version for uid $originatingUid")
+                // Invalid calling uid supplied. Abort install.
+                Log.e(LOG_TAG, "Cannot get target SDK version for uid $callingUid")
                 return false
             } else if (targetSdkVersion >= Build.VERSION_CODES.O
                 && !isUidRequestingPermission(
-                    context.packageManager, originatingUid,
-                    Manifest.permission.REQUEST_INSTALL_PACKAGES
+                    context.packageManager, callingUid, Manifest.permission.REQUEST_INSTALL_PACKAGES
                 )
             ) {
                 Log.e(
-                    LOG_TAG, "Requesting uid " + originatingUid + " needs to declare permission "
+                    LOG_TAG, "Requesting uid " + callingUid + " needs to declare permission "
                         + Manifest.permission.REQUEST_INSTALL_PACKAGES
                 )
                 return false
@@ -204,13 +204,13 @@ object PackageUtil {
      * @return `true` if the caller is the session owner
      */
     @JvmStatic
-    fun isCallerSessionOwner(pi: PackageInstaller, originatingUid: Int, sessionId: Int): Boolean {
-        if (originatingUid == Process.ROOT_UID) {
+    fun isCallerSessionOwner(pi: PackageInstaller, callingUid: Int, sessionId: Int): Boolean {
+        if (callingUid == Process.ROOT_UID) {
             return true
         }
         val sessionInfo = pi.getSessionInfo(sessionId) ?: return false
         val installerUid = sessionInfo.getInstallerUid()
-        return originatingUid == installerUid
+        return callingUid == installerUid
     }
 
     /**
@@ -362,8 +362,8 @@ object PackageUtil {
      * @return the packageName corresponding to a UID.
      */
     @JvmStatic
-    fun getPackageNameForUid(context: Context, sourceUid: Int, callingPackage: String?): String? {
-        if (sourceUid == Process.INVALID_UID) {
+    fun getPackageNameForUid(context: Context, uid: Int, preferredPkgName: String?): String? {
+        if (uid == Process.INVALID_UID) {
             return null
         }
         // If the sourceUid belongs to the system downloads provider, we explicitly return the
@@ -371,20 +371,21 @@ object PackageUtil {
         // packages, resulting in uncertainty about which package will end up first in the list
         // of packages associated with this UID
         val pm = context.packageManager
-        val systemDownloadProviderInfo = getSystemDownloadsProviderInfo(pm, sourceUid)
+        val systemDownloadProviderInfo = getSystemDownloadsProviderInfo(pm, uid)
         if (systemDownloadProviderInfo != null) {
             return systemDownloadProviderInfo.packageName
         }
-        val packagesForUid = pm.getPackagesForUid(sourceUid) ?: return null
+
+        val packagesForUid = pm.getPackagesForUid(uid) ?: return null
         if (packagesForUid.size > 1) {
-            if (callingPackage != null) {
+            Log.i(LOG_TAG, "Multiple packages found for source uid $uid")
+            if (preferredPkgName != null) {
                 for (packageName in packagesForUid) {
-                    if (packageName == callingPackage) {
+                    if (packageName == preferredPkgName) {
                         return packageName
                     }
                 }
             }
-            Log.i(LOG_TAG, "Multiple packages found for source uid $sourceUid")
         }
         return packagesForUid[0]
     }
@@ -439,7 +440,7 @@ object PackageUtil {
      */
     data class AppSnippet(var label: CharSequence?, var icon: Drawable?) {
         override fun toString(): String {
-            return "AppSnippet[label = ${label}, hasIcon = ${icon != null}]"
+            return "AppSnippet[label = $label, hasIcon = ${icon != null}]"
         }
     }
 }

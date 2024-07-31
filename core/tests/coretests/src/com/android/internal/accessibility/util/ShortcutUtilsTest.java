@@ -20,6 +20,8 @@ import static android.provider.Settings.Secure.ACCESSIBILITY_DISPLAY_MAGNIFICATI
 import static android.provider.Settings.Secure.ACCESSIBILITY_SHORTCUT_TARGET_MAGNIFICATION_CONTROLLER;
 
 import static com.android.internal.accessibility.common.ShortcutConstants.SERVICES_SEPARATOR;
+import static com.android.internal.accessibility.common.ShortcutConstants.UserShortcutType.GESTURE;
+import static com.android.internal.accessibility.common.ShortcutConstants.UserShortcutType.SOFTWARE;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -99,8 +101,7 @@ public class ShortcutUtilsTest {
     public void getShortcutTargets_softwareShortcutNoService_emptyResult() {
         assertThat(
                 ShortcutUtils.getShortcutTargetsFromSettings(
-                        mContext,
-                        ShortcutConstants.UserShortcutType.SOFTWARE, mDefaultUserId)
+                        mContext, SOFTWARE, mDefaultUserId)
         ).isEmpty();
     }
 
@@ -114,13 +115,21 @@ public class ShortcutUtilsTest {
     }
 
     @Test
+    public void getShortcutTargets_gestureShortcutNoService_emptyResult() {
+        assertThat(
+                ShortcutUtils.getShortcutTargetsFromSettings(
+                        mContext, GESTURE, mDefaultUserId)
+        ).isEmpty();
+    }
+
+    @Test
     public void getShortcutTargets_softwareShortcut1Service_return1Service() {
         setupShortcutTargets(ONE_COMPONENT, Settings.Secure.ACCESSIBILITY_BUTTON_TARGETS);
         setupShortcutTargets(TWO_COMPONENTS, Settings.Secure.ACCESSIBILITY_SHORTCUT_TARGET_SERVICE);
 
         assertThat(
                 ShortcutUtils.getShortcutTargetsFromSettings(
-                        mContext, ShortcutConstants.UserShortcutType.SOFTWARE,
+                        mContext, SOFTWARE,
                         mDefaultUserId)
         ).containsExactlyElementsIn(ONE_COMPONENT);
     }

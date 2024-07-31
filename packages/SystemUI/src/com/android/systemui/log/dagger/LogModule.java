@@ -169,6 +169,14 @@ public class LogModule {
         return factory.create("NotifRemoteInputLog", 50 /* maxSize */, false /* systrace */);
     }
 
+    /** Provides a logging buffer for all logs related to notification visual stability. */
+    @Provides
+    @SysUISingleton
+    @VisualStabilityLog
+    public static LogBuffer provideVisualStabilityLogBuffer(LogBufferFactory factory) {
+        return factory.create("VisualStabilityLog", 50 /* maxSize */, false /* systrace */);
+    }
+
     /** Provides a logging buffer for all logs related to keyguard media controller. */
     @Provides
     @SysUISingleton
@@ -369,9 +377,9 @@ public class LogModule {
      */
     @Provides
     @SysUISingleton
-    @MediaLoadingLog
-    public static LogBuffer providesMediaLoadingLogBuffer(LogBufferFactory factory) {
-        return factory.create("MediaLoadingLog", 20);
+    @MediaLog
+    public static LogBuffer providesMediaLogBuffer(LogBufferFactory factory) {
+        return factory.create("MediaLog", 20);
     }
 
     /** Allows logging buffers to be tweaked via adb on debug builds but not on prod builds. */
@@ -557,6 +565,16 @@ public class LogModule {
     @KeyguardLog
     public static LogBuffer provideKeyguardLogBuffer(LogBufferFactory factory) {
         return factory.create("KeyguardLog", 500);
+    }
+
+    /**
+     * Provides a {@link LogBuffer} for keyguard quick affordances-related logs.
+     */
+    @Provides
+    @SysUISingleton
+    @KeyguardQuickAffordancesLog
+    public static LogBuffer provideKeyguardQuickAffordancesLogBuffer(LogBufferFactory factory) {
+        return factory.create("KeyguardQuickAffordancesLog", 25);
     }
 
     /**

@@ -414,6 +414,14 @@ public class AutoTileManager implements UserAwareController {
                     }
                 }
 
+                @Override
+                public void onFeatureEnabledChanged(boolean enabled) {
+                    if (!enabled) {
+                        mHost.removeTile(BRIGHTNESS);
+                        mHandler.post(() -> mReduceBrightColorsController.removeCallback(this));
+                    }
+                }
+
                 private void addReduceBrightColorsTile() {
                     if (mAutoTracker.isAdded(BRIGHTNESS)) return;
                     mHost.addTile(BRIGHTNESS);

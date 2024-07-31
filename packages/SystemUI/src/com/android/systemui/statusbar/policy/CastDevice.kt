@@ -20,7 +20,7 @@ import android.content.pm.PackageManager
 import android.media.MediaRouter
 import android.media.projection.MediaProjectionInfo
 import android.text.TextUtils
-import android.util.Log
+import com.android.systemui.log.core.LogLevel
 import com.android.systemui.res.R
 import com.android.systemui.util.Utils
 
@@ -37,6 +37,9 @@ data class CastDevice(
     val tag: Any? = null,
 ) {
     val isCasting = state == CastState.Connecting || state == CastState.Connected
+
+    val shortLogString: String =
+        "CastDevice(id=$id name=$name description=$description state=$state origin=$origin)"
 
     companion object {
         /** Creates a [CastDevice] based on the provided information from MediaRouter. */
@@ -61,11 +64,12 @@ data class CastDevice(
         /** Creates a [CastDevice] based on the provided information from MediaProjection. */
         fun MediaProjectionInfo.toCastDevice(
             context: Context,
-            packageManager: PackageManager
+            packageManager: PackageManager,
+            logger: CastControllerLogger,
         ): CastDevice {
             return CastDevice(
                 id = this.packageName,
-                name = getAppName(this.packageName, packageManager),
+                name = getAppName(this.packageName, packageManager, logger),
                 description = context.getString(R.string.quick_settings_casting),
                 state = CastState.Connected,
                 tag = this,
@@ -73,7 +77,11 @@ data class CastDevice(
             )
         }
 
-        private fun getAppName(packageName: String, packageManager: PackageManager): String {
+        private fun getAppName(
+            packageName: String,
+            packageManager: PackageManager,
+            logger: CastControllerLogger,
+        ): String {
             if (Utils.isHeadlessRemoteDisplayProvider(packageManager, packageName)) {
                 return ""
             }
@@ -83,9 +91,20 @@ data class CastDevice(
                 if (!TextUtils.isEmpty(label)) {
                     return label.toString()
                 }
-                Log.w(CastControllerImpl.TAG, "No label found for package: $packageName")
+                logger.log(
+                    "#getAppName",
+                    LogLevel.WARNING,
+                    { str1 = packageName },
+                    { "No label found for package: $str1" },
+                )
             } catch (e: PackageManager.NameNotFoundException) {
-                Log.w(CastControllerImpl.TAG, "Error getting appName for package: $packageName", e)
+                logger.log(
+                    "#getAppName",
+                    LogLevel.WARNING,
+                    { str1 = packageName },
+                    { "Error getting appName for package=$str1" },
+                    e,
+                )
             }
             return packageName
         }

@@ -146,6 +146,16 @@ flag {
 }
 
 flag {
+   name: "notification_transparent_header_fix"
+   namespace: "systemui"
+   description: "fix the transparent group header issue for async header inflation."
+   bug: "340161724"
+   metadata {
+        purpose: PURPOSE_BUGFIX
+   }
+}
+
+flag {
    name: "pss_app_selector_abrupt_exit_fix"
    namespace: "systemui"
    description: "Fixes the app selector abruptly disappearing without an animation, when the"
@@ -524,6 +534,16 @@ flag {
 }
 
 flag {
+    name: "use_volume_controller"
+    namespace: "systemui"
+    description: "Adds Volume Controller signals to the AudioRepository to update volume"
+    bug: "349348461"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
     name: "screenshot_action_dismiss_system_windows"
     namespace: "systemui"
     description: "Dismiss existing system windows when starting action from screenshot UI"
@@ -571,10 +591,20 @@ flag {
 }
 
 flag {
-    name: "screenshot_shelf_ui2"
+    name: "screenshot_save_image_exporter"
     namespace: "systemui"
-    description: "Use new shelf UI flow for screenshots"
-    bug: "329659738"
+    description: "Save all screenshots using ImageExporter"
+    bug: "352308052"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
+    name: "screenshot_ui_controller_refactor"
+    namespace: "systemui"
+    description: "Simplify and refactor ScreenshotController"
+    bug: "354711957"
 }
 
 flag {
@@ -804,13 +834,6 @@ flag {
 }
 
 flag {
-    name: "media_controls_refactor"
-    namespace: "systemui"
-    description: "Refactors media code to follow the recommended architecture"
-    bug: "326408371"
-}
-
-flag {
     name: "qs_tile_focus_state"
     namespace: "systemui"
     description: "enables new focus outline for qs tiles when focused on with physical keyboard"
@@ -850,6 +873,13 @@ flag {
     namespace: "systemui"
     description: "Enables the new QS UI pipeline that follows recommended architecture and uses"
       " Compose for the UI."
+    bug: "325099249"
+}
+
+flag {
+    name: "qs_ui_refactor_compose_fragment"
+    namespace: "systemui"
+    description: "Uses a different QS fragment in NPVC that uses the new compose UI and recommended architecture. This flag depends on qs_ui_refactor flag."
     bug: "325099249"
 }
 
@@ -965,6 +995,26 @@ flag {
 }
 
 flag {
+  name: "communal_scene_ktf_refactor"
+  namespace: "systemui"
+  description: "refactors the syncing mechanism between communal STL and KTF state."
+  bug: "327225415"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}
+
+flag {
+  name: "communal_timer_flicker_fix"
+  namespace: "systemui"
+  description: "fixes timers on the hub flickering when pausing"
+  bug: "353801573"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}
+
+flag {
   name: "app_clips_backlinks"
   namespace: "systemui"
   description: "Enables Backlinks improvement feature in App Clips"
@@ -1032,10 +1082,13 @@ flag {
 }
 
 flag {
-  name: "glanceable_hub_gesture_handle"
+  name: "glanceable_hub_back_gesture"
   namespace: "systemui"
-  description: "Shows a vertical bar at the right edge to indicate the user can swipe to open the glanceable hub"
-  bug: "339667383"
+  description: "Enables back gesture on the glanceable hub"
+  bug: "346331399"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
 }
 
 flag {
@@ -1043,14 +1096,6 @@ flag {
   namespace: "systemui"
   description: "Allows users to exit dream to keyguard with glanceable hub enabled"
   bug: "343505271"
-}
-
-
-flag {
-  name: "new_touchpad_gestures_tutorial"
-  namespace: "systemui"
-  description: "Enables new interactive tutorial for learning touchpad gestures"
-  bug: "309928033"
 }
 
 flag {
@@ -1131,4 +1176,117 @@ flag {
   metadata {
     purpose: PURPOSE_BUGFIX
   }
+}
+
+flag {
+   namespace: "systemui"
+   name: "fetch_bookmarks_xml_keyboard_shortcuts"
+   description: "Fetches application launch keyboard shortcuts from system server rather than building a hardcoded list."
+   bug: "312452252"
+   metadata {
+       purpose: PURPOSE_BUGFIX
+   }
+}
+
+flag {
+  namespace: "systemui"
+  name: "qs_register_setting_observer_on_bg_thread"
+  description: "Registers Quick Settings content providers on background thread"
+  bug: "351766769"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}
+
+flag {
+  name: "sounddose_customization"
+  namespace: "systemui"
+  description: "Enables custom actions for sounddose notifications"
+  bug: "345227709"
+}
+
+flag {
+  namespace: "systemui"
+  name: "register_content_observers_async"
+  description: "Use new Async API to register content observers"
+  bug: "316922634"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}
+
+flag {
+  name: "msdl_feedback"
+  namespace: "systemui"
+  description: "Enables MSDL feedback in SysUI surfaces."
+  bug: "352600066"
+}
+
+flag {
+  name: "hubmode_fullscreen_vertical_swipe"
+  namespace: "systemui"
+  description: "Enables fullscreen vertical swiping in hub mode to bring up and down the bouncer and shade"
+  bug: "340177049"
+  metadata {
+      purpose: PURPOSE_BUGFIX
+  }
+}
+
+flag {
+   namespace: "systemui"
+   name: "remove_update_listener_in_qs_icon_view_impl"
+   description: "Remove update listeners in QsIconViewImpl class to avoid memory leak."
+   bug: "327078684"
+   metadata {
+       purpose: PURPOSE_BUGFIX
+   }
+}
+
+flag {
+   name: "sim_pin_race_condition_on_restart"
+   namespace: "systemui"
+   description: "The SIM PIN screen may be shown incorrectly on reboot"
+   bug: "351426938"
+   metadata {
+        purpose: PURPOSE_BUGFIX
+   }
+}
+
+flag {
+   name: "sim_pin_talkback_fix_for_double_submit"
+   namespace: "systemui"
+   description: "The SIM PIN entry screens show the wrong message due"
+   bug: "346932439"
+   metadata {
+        purpose: PURPOSE_BUGFIX
+   }
+}
+
+flag {
+   name: "use_transitions_for_keyguard_occluded"
+   namespace: "systemui"
+   description: "Use Keyguard Transitions to set Notification Shade occlusion state"
+   bug: "344716537"
+   metadata {
+        purpose: PURPOSE_BUGFIX
+   }
+}
+
+flag {
+   name: "lockscreen_preview_renderer_create_on_main_thread"
+   namespace: "systemui"
+   description: "Force preview renderer to be created on the main thread"
+   bug: "343732179"
+   metadata {
+        purpose: PURPOSE_BUGFIX
+   }
+}
+flag {
+   name: "classic_flags_multi_user"
+   namespace: "systemui"
+   description: "Make the classic feature flag loading multi user aware."
+   bug: "345443431"
+   metadata {
+        purpose: PURPOSE_BUGFIX
+   }
 }

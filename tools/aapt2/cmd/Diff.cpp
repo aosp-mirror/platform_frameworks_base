@@ -106,7 +106,7 @@ static bool EmitResourceConfigValueDiff(
   if (!value_a->Equals(value_b)) {
     std::stringstream str_stream;
     str_stream << "value " << pkg_a.name << ":" << type_a.named_type << "/" << entry_a.name
-               << " config=" << config_value_a->config << " does not match:\n";
+               << " config='" << config_value_a->config << "' does not match:\n";
     value_a->Print(&str_stream);
     str_stream << "\n vs \n";
     value_b->Print(&str_stream);

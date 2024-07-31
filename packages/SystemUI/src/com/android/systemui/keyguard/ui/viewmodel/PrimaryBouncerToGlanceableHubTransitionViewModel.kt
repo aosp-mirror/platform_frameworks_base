@@ -23,7 +23,6 @@ import com.android.systemui.keyguard.shared.model.KeyguardState.GLANCEABLE_HUB
 import com.android.systemui.keyguard.shared.model.KeyguardState.PRIMARY_BOUNCER
 import com.android.systemui.keyguard.ui.KeyguardTransitionAnimationFlow
 import com.android.systemui.keyguard.ui.transitions.DeviceEntryIconTransition
-import com.android.systemui.scene.shared.model.Scenes
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
 
@@ -33,10 +32,7 @@ class PrimaryBouncerToGlanceableHubTransitionViewModel
 constructor(animationFlow: KeyguardTransitionAnimationFlow) : DeviceEntryIconTransition {
     private val transitionAnimation =
         animationFlow
-            .setup(
-                duration = TO_GLANCEABLE_HUB_DURATION,
-                edge = Edge.create(PRIMARY_BOUNCER, Scenes.Communal)
-            )
+            .setup(duration = TO_GLANCEABLE_HUB_DURATION, edge = Edge.INVALID)
             .setupWithoutSceneContainer(edge = Edge.create(PRIMARY_BOUNCER, GLANCEABLE_HUB))
 
     override val deviceEntryParentViewAlpha: Flow<Float> =

@@ -21,6 +21,7 @@ import static android.view.WindowManager.TRANSIT_CLOSE;
 import static android.view.WindowManager.TRANSIT_FIRST_CUSTOM;
 import static android.view.WindowManager.TRANSIT_NONE;
 import static android.view.WindowManager.TRANSIT_OPEN;
+import static android.window.ActivityWindowInfo.getActivityWindowInfo;
 
 import android.annotation.CallSuper;
 import android.annotation.FlaggedApi;
@@ -29,16 +30,17 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.TestApi;
+import android.app.Activity;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
-import android.view.RemoteAnimationDefinition;
 import android.view.WindowManager;
 
 import com.android.window.flags.Flags;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.Objects;
 import java.util.concurrent.Executor;
 
 /**
@@ -205,34 +207,6 @@ public class TaskFragmentOrganizer extends WindowOrganizer {
     }
 
     /**
-     * Registers remote animations per transition type for the organizer. It will override the
-     * animations if the transition only contains windows that belong to the organized
-     * TaskFragments, and at least one of the transition window is embedded (not filling the Task).
-     * @hide
-     */
-    @CallSuper
-    public void registerRemoteAnimations(@NonNull RemoteAnimationDefinition definition) {
-        try {
-            getController().registerRemoteAnimations(mInterface, definition);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
-    }
-
-    /**
-     * Unregisters remote animations per transition type for the organizer.
-     * @hide
-     */
-    @CallSuper
-    public void unregisterRemoteAnimations() {
-        try {
-            getController().unregisterRemoteAnimations(mInterface);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
-    }
-
-    /**
      * Notifies the server that the organizer has finished handling the given transaction. The
      * server should apply the given {@link WindowContainerTransaction} for the necessary changes.
      *
@@ -353,15 +327,15 @@ public class TaskFragmentOrganizer extends WindowOrganizer {
     }
 
     /**
-     * Checks if an activity organized by a {@link android.window.TaskFragmentOrganizer} and
+     * Checks if an activity is organized by a {@link android.window.TaskFragmentOrganizer} and
      * only occupies a portion of Task bounds.
+     *
+     * @see ActivityWindowInfo for additional window info.
      * @hide
      */
-    public boolean isActivityEmbedded(@NonNull IBinder activityToken) {
-        try {
-            return getController().isActivityEmbedded(activityToken);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
+    public static boolean isActivityEmbedded(@NonNull Activity activity) {
+        Objects.requireNonNull(activity);
+        final ActivityWindowInfo activityWindowInfo = getActivityWindowInfo(activity);
+        return activityWindowInfo != null && activityWindowInfo.isEmbedded();
     }
 }

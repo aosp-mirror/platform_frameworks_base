@@ -714,7 +714,7 @@ public class RecentsAnimationControllerTest extends WindowTestsBase {
         // Simulate when the window is exiting and cleanupAnimation invoked
         // (e.g. screen off during RecentsAnimation animating), will expect the window receives
         // onExitAnimationDone to destroy the surface when the removal is allowed.
-        win1.mWinAnimator.mSurfaceController = mock(WindowSurfaceController.class);
+        win1.mWinAnimator.mSurfaceControl = mock(SurfaceControl.class);
         win1.mHasSurface = true;
         win1.mAnimatingExit = true;
         win1.mRemoveOnExit = true;

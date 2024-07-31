@@ -18,5 +18,6 @@ package com.android.systemui.util.settings
 
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.Kosmos.Fixture
+import com.android.systemui.kosmos.testDispatcher
 
-val Kosmos.fakeGlobalSettings: FakeGlobalSettings by Fixture { FakeGlobalSettings() }
+val Kosmos.fakeGlobalSettings: FakeGlobalSettings by Fixture { FakeGlobalSettings(testDispatcher) }

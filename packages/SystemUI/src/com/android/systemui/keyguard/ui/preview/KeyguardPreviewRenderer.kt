@@ -50,6 +50,7 @@ import androidx.core.view.isInvisible
 import com.android.internal.policy.SystemBarUtils
 import com.android.keyguard.ClockEventController
 import com.android.keyguard.KeyguardClockSwitch
+import com.android.keyguard.logging.KeyguardQuickAffordancesLogger
 import com.android.systemui.animation.view.LaunchableImageView
 import com.android.systemui.biometrics.domain.interactor.UdfpsOverlayInteractor
 import com.android.systemui.broadcast.BroadcastDispatcher
@@ -147,6 +148,7 @@ constructor(
     private val defaultShortcutsSection: DefaultShortcutsSection,
     private val keyguardClockInteractor: KeyguardClockInteractor,
     private val keyguardClockViewModel: KeyguardClockViewModel,
+    private val quickAffordancesLogger: KeyguardQuickAffordancesLogger,
 ) {
     val hostToken: IBinder? = bundle.getBinder(KEY_HOST_TOKEN)
     private val width: Int = bundle.getInt(KEY_VIEW_WIDTH)
@@ -394,6 +396,7 @@ constructor(
                     null, // device entry haptics not required for preview mode
                     null, // falsing manager not required for preview mode
                     null, // keyguard view mediator is not required for preview mode
+                    mainDispatcher,
                 )
         }
         rootView.addView(
@@ -461,6 +464,7 @@ constructor(
                     alpha = flowOf(1f),
                     falsingManager = falsingManager,
                     vibratorHelper = vibratorHelper,
+                    logger = quickAffordancesLogger,
                 ) { message ->
                     indicationController.showTransientIndication(message)
                 }
@@ -475,6 +479,7 @@ constructor(
                     alpha = flowOf(1f),
                     falsingManager = falsingManager,
                     vibratorHelper = vibratorHelper,
+                    logger = quickAffordancesLogger,
                 ) { message ->
                     indicationController.showTransientIndication(message)
                 }

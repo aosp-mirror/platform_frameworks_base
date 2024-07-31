@@ -24,7 +24,6 @@ import androidx.compose.ui.input.key.KeyEvent
 import androidx.compose.ui.input.key.type
 import androidx.core.graphics.drawable.toBitmap
 import com.android.compose.animation.scene.Back
-import com.android.compose.animation.scene.SceneKey
 import com.android.compose.animation.scene.Swipe
 import com.android.compose.animation.scene.SwipeDirection
 import com.android.compose.animation.scene.UserAction
@@ -43,7 +42,6 @@ import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.inputmethod.domain.interactor.InputMethodInteractor
-import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.user.domain.interactor.SelectedUserInteractor
 import com.android.systemui.user.ui.viewmodel.UserActionViewModel
 import com.android.systemui.user.ui.viewmodel.UserSwitcherViewModel
@@ -67,7 +65,9 @@ import kotlinx.coroutines.launch
 /** Holds UI state and handles user input on bouncer UIs. */
 class BouncerViewModel(
     @Application private val applicationContext: Context,
-    @Application private val applicationScope: CoroutineScope,
+    @Deprecated("TODO(b/354270224): remove this. Injecting CoroutineScope to view-models is banned")
+    @Application
+    private val applicationScope: CoroutineScope,
     @Main private val mainDispatcher: CoroutineDispatcher,
     private val bouncerInteractor: BouncerInteractor,
     private val inputMethodInteractor: InputMethodInteractor,
@@ -91,14 +91,13 @@ class BouncerViewModel(
                 initialValue = null,
             )
 
-    val destinationScenes: StateFlow<Map<UserAction, UserActionResult>> =
-        bouncerInteractor.dismissDestination
-            .map(::destinationSceneMap)
-            .stateIn(
-                applicationScope,
-                SharingStarted.WhileSubscribed(),
-                initialValue = destinationSceneMap(Scenes.Lockscreen),
+    val destinationScenes: Flow<Map<UserAction, UserActionResult>> =
+        bouncerInteractor.dismissDestination.map { prevScene ->
+            mapOf(
+                Back to UserActionResult(prevScene),
+                Swipe(SwipeDirection.Down) to UserActionResult(prevScene),
             )
+        }
 
     val message: BouncerMessageViewModel = bouncerMessageViewModel
 
@@ -328,8 +327,7 @@ class BouncerViewModel(
                 { message },
                 failedAttempts,
                 remainingAttempts,
-            )
-                ?: message
+            ) ?: message
         } else {
             message
         }
@@ -346,8 +344,7 @@ class BouncerViewModel(
                     .KEYGUARD_DIALOG_FAILED_ATTEMPTS_ERASING_PROFILE,
                 { message },
                 failedAttempts,
-            )
-                ?: message
+            ) ?: message
         } else {
             message
         }
@@ -375,12 +372,6 @@ class BouncerViewModel(
         }
     }
 
-    private fun destinationSceneMap(prevScene: SceneKey) =
-        mapOf(
-            Back to UserActionResult(prevScene),
-            Swipe(SwipeDirection.Down) to UserActionResult(prevScene),
-        )
-
     /**
      * Notifies that a key event has occurred.
      *
@@ -390,8 +381,7 @@ class BouncerViewModel(
         return (authMethodViewModel.value as? PinBouncerViewModel)?.onKeyEvent(
             keyEvent.type,
             keyEvent.nativeKeyEvent.keyCode
-        )
-            ?: false
+        ) ?: false
     }
 
     data class DialogViewModel(

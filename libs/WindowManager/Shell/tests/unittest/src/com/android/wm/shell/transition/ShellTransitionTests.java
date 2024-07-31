@@ -442,6 +442,27 @@ public class ShellTransitionTests extends ShellTestCase {
     }
 
     @Test
+    public void testTransitionFilterAnimOverride() {
+        TransitionFilter filter = new TransitionFilter();
+        filter.mRequirements =
+                new TransitionFilter.Requirement[]{new TransitionFilter.Requirement()};
+        filter.mRequirements[0].mCustomAnimation = true;
+        filter.mRequirements[0].mModes = new int[]{TRANSIT_OPEN, TRANSIT_TO_FRONT};
+
+        final RunningTaskInfo taskInf = createTaskInfo(1);
+        final TransitionInfo openTask = new TransitionInfoBuilder(TRANSIT_OPEN)
+                .addChange(TRANSIT_OPEN, taskInf).build();
+        assertFalse(filter.matches(openTask));
+
+        final TransitionInfo.AnimationOptions overOpts =
+                TransitionInfo.AnimationOptions.makeCustomAnimOptions("pakname", 0, 0, 0, true);
+        final TransitionInfo openTaskOpts = new TransitionInfoBuilder(TRANSIT_OPEN)
+                .addChange(TRANSIT_OPEN, taskInf).build();
+        openTaskOpts.getChanges().get(0).setAnimationOptions(overOpts);
+        assertTrue(filter.matches(openTaskOpts));
+    }
+
+    @Test
     public void testRegisteredRemoteTransition() {
         Transitions transitions = createTestTransitions();
         transitions.replaceDefaultHandlerForTest(mDefaultHandler);
@@ -1191,8 +1212,7 @@ public class ShellTransitionTests extends ShellTestCase {
                         mMainHandler, mAnimExecutor, mock(HomeTransitionObserver.class));
         final RecentsTransitionHandler recentsHandler =
                 new RecentsTransitionHandler(shellInit, transitions,
-                        mock(RecentTasksController.class), mock(HomeTransitionObserver.class),
-                        () -> mock(SurfaceControl.Transaction.class));
+                        mock(RecentTasksController.class), mock(HomeTransitionObserver.class));
         transitions.replaceDefaultHandlerForTest(mDefaultHandler);
         shellInit.init();
 
