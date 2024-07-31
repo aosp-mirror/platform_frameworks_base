@@ -1233,12 +1233,11 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
         }
     }
 
-    private void onUpdateEditorToolType(int toolType) {
-        synchronized (ImfLock.class) {
-            IInputMethodInvoker curMethod = getCurMethodLocked();
-            if (curMethod != null) {
-                curMethod.updateEditorToolType(toolType);
-            }
+    @GuardedBy("ImfLock.class")
+    private void onUpdateEditorToolTypeLocked(@MotionEvent.ToolType int toolType) {
+        final IInputMethodInvoker curMethod = getCurMethodLocked();
+        if (curMethod != null) {
+            curMethod.updateEditorToolType(toolType);
         }
     }
 
@@ -3459,7 +3458,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
             if (Flags.useHandwritingListenerForTooltype()) {
                 maybeReportToolType();
             } else if (lastClickToolType != MotionEvent.TOOL_TYPE_UNKNOWN) {
-                onUpdateEditorToolType(lastClickToolType);
+                onUpdateEditorToolTypeLocked(lastClickToolType);
             }
             mVisibilityApplier.performShowIme(windowToken, statsToken,
                     mVisibilityStateComputer.getShowFlagsForInputMethodServiceOnly(),
@@ -3493,7 +3492,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
             // other toolTypes are irrelevant and reported as unknown.
             toolType = MotionEvent.TOOL_TYPE_UNKNOWN;
         }
-        onUpdateEditorToolType(toolType);
+        onUpdateEditorToolTypeLocked(toolType);
     }
 
     @Override
