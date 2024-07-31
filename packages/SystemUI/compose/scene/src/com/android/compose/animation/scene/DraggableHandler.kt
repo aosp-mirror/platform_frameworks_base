@@ -29,6 +29,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.round
+import androidx.compose.ui.util.fastCoerceIn
 import com.android.compose.animation.scene.TransitionState.HasOverscrollProperties.Companion.DistanceUnspecified
 import com.android.compose.animation.scene.content.Scene
 import com.android.compose.nestedscroll.PriorityNestedScrollConnection
@@ -288,7 +289,8 @@ private class DragControllerImpl(
 
         val toScene = swipeTransition._toScene
         val distance = swipeTransition.distance()
-        val desiredOffset = swipeTransition.dragOffset + delta
+        val previousOffset = swipeTransition.dragOffset
+        val desiredOffset = previousOffset + delta
 
         fun hasReachedToSceneUpOrLeft() =
             distance < 0 &&
@@ -312,6 +314,7 @@ private class DragControllerImpl(
         val fromScene: Scene
         val currentTransitionOffset: Float
         val newOffset: Float
+        val consumedDelta: Float
         if (hasReachedToScene) {
             // The new transition will start from the current toScene
             fromScene = toScene
@@ -319,11 +322,21 @@ private class DragControllerImpl(
             currentTransitionOffset = distance
             // The next transition will start with the remaining offset
             newOffset = desiredOffset - distance
+            consumedDelta = delta
         } else {
             fromScene = swipeTransition._fromScene
-            currentTransitionOffset = desiredOffset
+            val desiredProgress = swipeTransition.computeProgress(desiredOffset)
+            // note: the distance could be negative if fromScene is aboveOrLeft of toScene.
+            currentTransitionOffset =
+                when {
+                    distance == DistanceUnspecified ||
+                        swipeTransition.isWithinProgressRange(desiredProgress) -> desiredOffset
+                    distance > 0f -> desiredOffset.fastCoerceIn(0f, distance)
+                    else -> desiredOffset.fastCoerceIn(distance, 0f)
+                }
             // If there is a new transition, we will use the same offset
             newOffset = currentTransitionOffset
+            consumedDelta = newOffset - previousOffset
         }
 
         swipeTransition.dragOffset = currentTransitionOffset
@@ -363,7 +376,7 @@ private class DragControllerImpl(
             updateTransition(newSwipeTransition)
         }
 
-        return delta
+        return consumedDelta
     }
 
     override fun onStop(velocity: Float, canChangeScene: Boolean): Float {

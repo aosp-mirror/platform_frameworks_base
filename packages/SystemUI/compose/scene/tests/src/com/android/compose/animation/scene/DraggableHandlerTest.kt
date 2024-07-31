@@ -195,10 +195,17 @@ class DraggableHandlerTest {
             startedPosition: Offset = Offset.Zero,
             overSlop: Float,
             pointersDown: Int = 1,
+            expectedConsumedOverSlop: Float = overSlop,
         ): DragController {
             // overSlop should be 0f only if the drag gesture starts with startDragImmediately
             if (overSlop == 0f) error("Consider using onDragStartedImmediately()")
-            return onDragStarted(draggableHandler, startedPosition, overSlop, pointersDown)
+            return onDragStarted(
+                draggableHandler = draggableHandler,
+                startedPosition = startedPosition,
+                overSlop = overSlop,
+                pointersDown = pointersDown,
+                expectedConsumedOverSlop = expectedConsumedOverSlop,
+            )
         }
 
         fun onDragStartedImmediately(
@@ -213,7 +220,7 @@ class DraggableHandlerTest {
             startedPosition: Offset = Offset.Zero,
             overSlop: Float = 0f,
             pointersDown: Int = 1,
-            expectedConsumed: Boolean = true,
+            expectedConsumedOverSlop: Float = overSlop,
         ): DragController {
             val dragController =
                 draggableHandler.onDragStarted(
@@ -223,14 +230,14 @@ class DraggableHandlerTest {
                 )
 
             // MultiPointerDraggable will always call onDelta with the initial overSlop right after
-            dragController.onDragDelta(pixels = overSlop, expectedConsumed = expectedConsumed)
+            dragController.onDragDelta(pixels = overSlop, expectedConsumedOverSlop)
 
             return dragController
         }
 
-        fun DragController.onDragDelta(pixels: Float, expectedConsumed: Boolean = true) {
+        fun DragController.onDragDelta(pixels: Float, expectedConsumed: Float = pixels) {
             val consumed = onDrag(delta = pixels)
-            assertThat(consumed).isEqualTo(if (expectedConsumed) pixels else 0f)
+            assertThat(consumed).isEqualTo(expectedConsumed)
         }
 
         fun DragController.onDragStopped(
@@ -370,14 +377,14 @@ class DraggableHandlerTest {
         onDragStarted(
             horizontalDraggableHandler,
             overSlop = up(fractionOfScreen = 0.3f),
-            expectedConsumed = false,
+            expectedConsumedOverSlop = 0f,
         )
         assertIdle(currentScene = SceneA)
 
         onDragStarted(
             horizontalDraggableHandler,
             overSlop = down(fractionOfScreen = 0.3f),
-            expectedConsumed = false,
+            expectedConsumedOverSlop = 0f,
         )
         assertIdle(currentScene = SceneA)
     }
@@ -504,19 +511,19 @@ class DraggableHandlerTest {
 
         // start accelaratedScroll and scroll over to B -> null
         val dragController2 = onDragStartedImmediately()
-        dragController2.onDragDelta(pixels = up(fractionOfScreen = 0.5f), expectedConsumed = false)
-        dragController2.onDragDelta(pixels = up(fractionOfScreen = 0.5f), expectedConsumed = false)
+        dragController2.onDragDelta(pixels = up(fractionOfScreen = 0.5f), expectedConsumed = 0f)
+        dragController2.onDragDelta(pixels = up(fractionOfScreen = 0.5f), expectedConsumed = 0f)
 
         // here onDragStopped is already triggered, but subsequent onDelta/onDragStopped calls may
         // still be called. Make sure that they don't crash or change the scene
-        dragController2.onDragDelta(pixels = up(fractionOfScreen = 0.5f), expectedConsumed = false)
+        dragController2.onDragDelta(pixels = up(fractionOfScreen = 0.5f), expectedConsumed = 0f)
         dragController2.onDragStopped(velocity = 0f)
 
         advanceUntilIdle()
         assertIdle(SceneB)
 
         // These events can still come in after the animation has settled
-        dragController2.onDragDelta(pixels = up(fractionOfScreen = 0.5f), expectedConsumed = false)
+        dragController2.onDragDelta(pixels = up(fractionOfScreen = 0.5f), expectedConsumed = 0f)
         dragController2.onDragStopped(velocity = 0f)
         assertIdle(SceneB)
     }
@@ -1051,8 +1058,16 @@ class DraggableHandlerTest {
 
         // Swipe up to scene B at progress = 200%.
         val middle = Offset(SCREEN_SIZE / 2f, SCREEN_SIZE / 2f)
-        val dragController = onDragStarted(startedPosition = middle, overSlop = up(2f))
-        val transition = assertTransition(fromScene = SceneA, toScene = SceneB, progress = 2f)
+        val dragController =
+            onDragStarted(
+                startedPosition = middle,
+                overSlop = up(2f),
+                // Overscroll is disabled, it will scroll up to 100%
+                expectedConsumedOverSlop = up(1f),
+            )
+
+        // The progress value is coerced in `[0..1]`
+        assertTransition(fromScene = SceneA, toScene = SceneB, progress = 1f)
 
         // Release the finger.
         dragController.onDragStopped(velocity = -velocityThreshold)
@@ -1061,9 +1076,6 @@ class DraggableHandlerTest {
         // 100% and that the overscroll on scene B is doing nothing, we are already idle.
         runCurrent()
         assertIdle(SceneB)
-
-        // Progress is snapped to 100%.
-        assertThat(transition).hasProgress(1f)
     }
 
     @Test

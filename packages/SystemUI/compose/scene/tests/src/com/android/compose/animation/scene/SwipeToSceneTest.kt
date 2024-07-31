@@ -29,6 +29,9 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
+import androidx.compose.ui.input.nestedscroll.NestedScrollSource
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.LocalViewConfiguration
 import androidx.compose.ui.platform.testTag
@@ -785,5 +788,62 @@ class SwipeToSceneTest {
         rule
             .onNode(isElement(SceneB.rootElementKey))
             .assertPositionInRootIsEqualTo(-layoutSize, 0.dp)
+    }
+
+    @Test
+    fun whenOverscrollIsDisabled_dragGestureShouldNotBeConsumed() {
+        val swipeDistance = 100.dp
+
+        var availableOnPostScroll = Float.MIN_VALUE
+        val connection =
+            object : NestedScrollConnection {
+                override fun onPostScroll(
+                    consumed: Offset,
+                    available: Offset,
+                    source: NestedScrollSource
+                ): Offset {
+                    availableOnPostScroll = available.y
+                    return super.onPostScroll(consumed, available, source)
+                }
+            }
+        val state =
+            rule.runOnUiThread {
+                MutableSceneTransitionLayoutState(
+                    SceneA,
+                    transitions {
+                        from(SceneA, to = SceneB) { distance = FixedDistance(swipeDistance) }
+                        overscroll(SceneB, Orientation.Vertical)
+                    }
+                )
+            }
+        val layoutSize = 200.dp
+        var touchSlop = 0f
+        rule.setContent {
+            touchSlop = LocalViewConfiguration.current.touchSlop
+            SceneTransitionLayout(state, Modifier.size(layoutSize).nestedScroll(connection)) {
+                scene(SceneA, userActions = mapOf(Swipe.Down to SceneB)) {
+                    Box(Modifier.fillMaxSize())
+                }
+                scene(SceneB) { Box(Modifier.element(TestElements.Foo).fillMaxSize()) }
+            }
+        }
+
+        // Swipe down by the swipe distance so that we are on scene B.
+        rule.onRoot().performTouchInput {
+            val middle = (layoutSize / 2).toPx()
+            down(Offset(middle, middle))
+            moveBy(Offset(0f, touchSlop + (swipeDistance).toPx()), delayMillis = 1_000)
+        }
+        val transition = state.currentTransition
+        assertThat(transition).isNotNull()
+        assertThat(transition!!.progress).isEqualTo(1f)
+        assertThat(availableOnPostScroll).isEqualTo(0f)
+
+        // Overscrolling on Scene B
+        val ovescrollPx = 100f
+        rule.onRoot().performTouchInput { moveBy(Offset(0f, ovescrollPx), delayMillis = 1_000) }
+        // Overscroll is disabled on Scene B
+        assertThat(transition.progress).isEqualTo(1f)
+        assertThat(availableOnPostScroll).isEqualTo(ovescrollPx)
     }
 }
