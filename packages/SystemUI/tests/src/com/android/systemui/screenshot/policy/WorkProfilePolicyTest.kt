@@ -18,13 +18,11 @@ package com.android.systemui.screenshot.policy
 
 import android.content.ComponentName
 import android.content.Context
-import android.content.res.Resources
 import android.os.UserHandle
 import android.platform.test.annotations.DisableFlags
 import android.platform.test.annotations.EnableFlags
 import android.platform.test.flag.junit.SetFlagsRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.android.internal.R
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.screenshot.data.model.DisplayContentModel
 import com.android.systemui.screenshot.data.model.DisplayContentScenarios.ActivityNames.FILES
@@ -49,7 +47,6 @@ import com.android.systemui.screenshot.policy.WorkProfilePolicy.Companion.DESKTO
 import com.android.systemui.screenshot.policy.WorkProfilePolicy.Companion.SHADE_EXPANDED
 import com.android.systemui.screenshot.policy.WorkProfilePolicy.Companion.WORK_TASK_IS_TOP
 import com.android.systemui.screenshot.policy.WorkProfilePolicy.Companion.WORK_TASK_NOT_TOP
-import com.android.systemui.util.mockito.whenever
 import com.android.window.flags.Flags
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.test.runTest
@@ -58,7 +55,6 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
-import org.mockito.MockitoAnnotations
 import org.mockito.junit.MockitoJUnit
 import org.mockito.junit.MockitoRule
 
@@ -70,19 +66,12 @@ class WorkProfilePolicyTest {
     @JvmField @Rule(order = 2) val mockitoRule: MockitoRule = MockitoJUnit.rule()
 
     @Mock lateinit var mContext: Context
-    @Mock lateinit var mResources: Resources
 
     private val kosmos = Kosmos()
     private lateinit var policy: WorkProfilePolicy
 
     @Before
     fun setUp() {
-        MockitoAnnotations.initMocks(this)
-
-        // Set desktop mode supported
-        whenever(mContext.resources).thenReturn(mResources)
-        whenever(mResources.getBoolean(R.bool.config_isDesktopModeSupported)).thenReturn(true)
-
         policy = WorkProfilePolicy(kosmos.profileTypeRepository, mContext)
     }
 
