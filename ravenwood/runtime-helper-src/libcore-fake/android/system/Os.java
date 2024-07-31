@@ -15,9 +15,11 @@
  */
 package android.system;
 
+import com.android.ravenwood.common.JvmWorkaround;
 import com.android.ravenwood.common.RavenwoodRuntimeNative;
 
 import java.io.FileDescriptor;
+import java.io.IOException;
 
 /**
  * OS class replacement used on Ravenwood. For now, we just implement APIs as we need them...
@@ -56,6 +58,15 @@ public final class Os {
 
     /** Ravenwood version of the OS API. */
     public static void close(FileDescriptor fd) throws ErrnoException {
-        RavenwoodRuntimeNative.close(fd);
+        try {
+            JvmWorkaround.getInstance().closeFd(fd);
+        } catch (IOException e) {
+            // The only valid error on Linux that can happen is EIO
+            throw new ErrnoException("close", OsConstants.EIO);
+        }
+    }
+
+    public static FileDescriptor open(String path, int flags, int mode) throws ErrnoException {
+        return RavenwoodRuntimeNative.open(path, flags, mode);
     }
 }

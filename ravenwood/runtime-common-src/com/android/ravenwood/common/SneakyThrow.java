@@ -13,19 +13,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package com.android.ravenwood.common;
 
-package com.android.platform.test.ravenwood.nativesubstitution;
+public class SneakyThrow {
 
-import com.android.ravenwood.common.JvmWorkaround;
-
-import java.io.FileDescriptor;
-
-public class ParcelFileDescriptor_host {
-    public static void setFdInt(FileDescriptor fd, int fdInt) {
-        JvmWorkaround.getInstance().setFdInt(fd, fdInt);
+    private SneakyThrow() {
     }
 
-    public static int getFdInt(FileDescriptor fd) {
-        return JvmWorkaround.getInstance().getFdInt(fd);
+    /**
+     * Throw checked exceptions without the need to declare in method signature
+     */
+    public static void sneakyThrow(Throwable t) {
+        SneakyThrow.<RuntimeException>sneakyThrow_(t);
+    }
+
+    private static <T extends Throwable> void sneakyThrow_(Throwable t) throws T {
+        throw (T) t;
     }
 }
