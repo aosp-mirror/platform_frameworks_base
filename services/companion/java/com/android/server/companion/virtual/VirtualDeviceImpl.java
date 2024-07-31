@@ -29,8 +29,6 @@ import static android.companion.virtual.VirtualDeviceParams.POLICY_TYPE_CAMERA;
 import static android.companion.virtual.VirtualDeviceParams.POLICY_TYPE_CLIPBOARD;
 import static android.companion.virtual.VirtualDeviceParams.POLICY_TYPE_RECENTS;
 import static android.companion.virtualdevice.flags.Flags.virtualCameraServiceDiscovery;
-import static android.companion.virtualdevice.flags.Flags.intentInterceptionActionMatchingFix;
-import static android.content.pm.PackageManager.ACTION_REQUEST_PERMISSIONS;
 
 import android.annotation.EnforcePermission;
 import android.annotation.NonNull;
@@ -208,7 +206,6 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
     @GuardedBy("mVirtualDeviceLock")
     @NonNull
     private final Set<ComponentName> mActivityPolicyExemptions;
-    private final ComponentName mPermissionDialogComponent;
 
     private ActivityListener createListenerAdapter() {
         return new ActivityListener() {
@@ -342,11 +339,6 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
         mCameraAccessController = cameraAccessController;
         if (mCameraAccessController != null) {
             mCameraAccessController.startObservingIfNeeded();
-        }
-        if (!Flags.streamPermissions()) {
-            mPermissionDialogComponent = getPermissionDialogComponent();
-        } else {
-            mPermissionDialogComponent = null;
         }
         mVirtualCameraController = virtualCameraController;
         try {
@@ -1243,7 +1235,6 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
                 /* crossTaskNavigationExemptions= */crossTaskNavigationAllowedByDefault
                         ? mParams.getBlockedCrossTaskNavigations()
                         : mParams.getAllowedCrossTaskNavigations(),
-                mPermissionDialogComponent,
                 mActivityListenerAdapter,
                 this::onActivityBlocked,
                 this::onSecureWindowShown,
@@ -1253,13 +1244,6 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
                 homeComponent);
         gwpc.registerRunningAppsChangedListener(/* listener= */ this);
         return gwpc;
-    }
-
-    private ComponentName getPermissionDialogComponent() {
-        Intent intent = new Intent(ACTION_REQUEST_PERMISSIONS);
-        PackageManager packageManager = mContext.getPackageManager();
-        intent.setPackage(packageManager.getPermissionControllerPackageName());
-        return intent.resolveActivity(packageManager);
     }
 
     int createVirtualDisplay(@NonNull VirtualDisplayConfig virtualDisplayConfig,
@@ -1273,7 +1257,7 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
                 this, gwpc, packageName);
         gwpc.setDisplayId(displayId, /* isMirrorDisplay= */ Flags.interactiveScreenMirror()
                 && mDisplayManagerInternal.getDisplayIdToMirror(displayId)
-                    != Display.INVALID_DISPLAY);
+                != Display.INVALID_DISPLAY);
 
         boolean showPointer;
         synchronized (mVirtualDeviceLock) {
@@ -1304,11 +1288,9 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
             Binder.restoreCallingIdentity(token);
         }
 
-        if (android.companion.virtualdevice.flags.Flags.metricsCollection()) {
-            Counter.logIncrementWithUid(
-                    "virtual_devices.value_virtual_display_created_count",
-                    mAttributionSource.getUid());
-        }
+        Counter.logIncrementWithUid(
+                "virtual_devices.value_virtual_display_created_count",
+                mAttributionSource.getUid());
         return displayId;
     }
 
@@ -1376,11 +1358,9 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
             showToastWhereUidIsRunning(uid, com.android.internal.R.string.vdm_secure_window,
                     Toast.LENGTH_LONG, mContext.getMainLooper());
 
-            if (android.companion.virtualdevice.flags.Flags.metricsCollection()) {
-                Counter.logIncrementWithUid(
-                        "virtual_devices.value_secure_window_blocked_count",
-                        mAttributionSource.getUid());
-            }
+            Counter.logIncrementWithUid(
+                    "virtual_devices.value_secure_window_blocked_count",
+                    mAttributionSource.getUid());
         }
     }
 
@@ -1579,8 +1559,8 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
                 // Explicitly match the actions because the intent filter will match any intent
                 // without an explicit action. If the intent has no action, then require that there
                 // are no actions specified in the filter either.
-                boolean explicitActionMatch = !intentInterceptionActionMatchingFix()
-                        || intent.getAction() != null || intentFilter.countActions() == 0;
+                boolean explicitActionMatch =
+                        intent.getAction() != null || intentFilter.countActions() == 0;
                 if (explicitActionMatch && intentFilter.match(
                         intent.getAction(), intent.getType(), intent.getScheme(), intent.getData(),
                         intent.getCategories(), TAG) >= 0) {
