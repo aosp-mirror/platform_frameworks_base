@@ -160,6 +160,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
   @Mock lateinit var mReturnToDragStartAnimator: ReturnToDragStartAnimator
   @Mock lateinit var exitDesktopTransitionHandler: ExitDesktopTaskTransitionHandler
   @Mock lateinit var enterDesktopTransitionHandler: EnterDesktopTaskTransitionHandler
+  @Mock lateinit var dragAndDropTransitionHandler: DesktopModeDragAndDropTransitionHandler
   @Mock
   lateinit var toggleResizeDesktopTaskTransitionHandler: ToggleResizeDesktopTaskTransitionHandler
   @Mock lateinit var dragToDesktopTransitionHandler: DragToDesktopTransitionHandler
@@ -254,6 +255,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
         mReturnToDragStartAnimator,
         enterDesktopTransitionHandler,
         exitDesktopTransitionHandler,
+        dragAndDropTransitionHandler,
         toggleResizeDesktopTaskTransitionHandler,
         dragToDesktopTransitionHandler,
         taskRepository,
@@ -2314,7 +2316,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
   fun dragToDesktop_landscapeDevice_resizable_undefinedOrientation_defaultLandscapeBounds() {
     val spyController = spy(controller)
     whenever(spyController.getVisualIndicator()).thenReturn(desktopModeVisualIndicator)
-    whenever(desktopModeVisualIndicator.updateIndicatorType(anyOrNull(), anyOrNull()))
+    whenever(desktopModeVisualIndicator.updateIndicatorType(anyOrNull()))
         .thenReturn(DesktopModeVisualIndicator.IndicatorType.TO_DESKTOP_INDICATOR)
 
     val task = setUpFullscreenTask()
@@ -2330,7 +2332,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
   fun dragToDesktop_landscapeDevice_resizable_landscapeOrientation_defaultLandscapeBounds() {
     val spyController = spy(controller)
     whenever(spyController.getVisualIndicator()).thenReturn(desktopModeVisualIndicator)
-    whenever(desktopModeVisualIndicator.updateIndicatorType(anyOrNull(), anyOrNull()))
+    whenever(desktopModeVisualIndicator.updateIndicatorType(anyOrNull()))
         .thenReturn(DesktopModeVisualIndicator.IndicatorType.TO_DESKTOP_INDICATOR)
 
     val task = setUpFullscreenTask(screenOrientation = SCREEN_ORIENTATION_LANDSCAPE)
@@ -2346,7 +2348,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
   fun dragToDesktop_landscapeDevice_resizable_portraitOrientation_resizablePortraitBounds() {
     val spyController = spy(controller)
     whenever(spyController.getVisualIndicator()).thenReturn(desktopModeVisualIndicator)
-    whenever(desktopModeVisualIndicator.updateIndicatorType(anyOrNull(), anyOrNull()))
+    whenever(desktopModeVisualIndicator.updateIndicatorType(anyOrNull()))
         .thenReturn(DesktopModeVisualIndicator.IndicatorType.TO_DESKTOP_INDICATOR)
 
     val task =
@@ -2363,7 +2365,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
   fun dragToDesktop_landscapeDevice_unResizable_landscapeOrientation_defaultLandscapeBounds() {
     val spyController = spy(controller)
     whenever(spyController.getVisualIndicator()).thenReturn(desktopModeVisualIndicator)
-    whenever(desktopModeVisualIndicator.updateIndicatorType(anyOrNull(), anyOrNull()))
+    whenever(desktopModeVisualIndicator.updateIndicatorType(anyOrNull()))
         .thenReturn(DesktopModeVisualIndicator.IndicatorType.TO_DESKTOP_INDICATOR)
 
     val task =
@@ -2380,7 +2382,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
   fun dragToDesktop_landscapeDevice_unResizable_portraitOrientation_unResizablePortraitBounds() {
     val spyController = spy(controller)
     whenever(spyController.getVisualIndicator()).thenReturn(desktopModeVisualIndicator)
-    whenever(desktopModeVisualIndicator.updateIndicatorType(anyOrNull(), anyOrNull()))
+    whenever(desktopModeVisualIndicator.updateIndicatorType(anyOrNull()))
         .thenReturn(DesktopModeVisualIndicator.IndicatorType.TO_DESKTOP_INDICATOR)
 
     val task =
@@ -2400,7 +2402,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
   fun dragToDesktop_portraitDevice_resizable_undefinedOrientation_defaultPortraitBounds() {
     val spyController = spy(controller)
     whenever(spyController.getVisualIndicator()).thenReturn(desktopModeVisualIndicator)
-    whenever(desktopModeVisualIndicator.updateIndicatorType(anyOrNull(), anyOrNull()))
+    whenever(desktopModeVisualIndicator.updateIndicatorType(anyOrNull()))
         .thenReturn(DesktopModeVisualIndicator.IndicatorType.TO_DESKTOP_INDICATOR)
 
     val task = setUpFullscreenTask(deviceOrientation = ORIENTATION_PORTRAIT)
@@ -2416,7 +2418,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
   fun dragToDesktop_portraitDevice_resizable_portraitOrientation_defaultPortraitBounds() {
     val spyController = spy(controller)
     whenever(spyController.getVisualIndicator()).thenReturn(desktopModeVisualIndicator)
-    whenever(desktopModeVisualIndicator.updateIndicatorType(anyOrNull(), anyOrNull()))
+    whenever(desktopModeVisualIndicator.updateIndicatorType(anyOrNull()))
         .thenReturn(DesktopModeVisualIndicator.IndicatorType.TO_DESKTOP_INDICATOR)
 
     val task =
@@ -2435,7 +2437,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
   fun dragToDesktop_portraitDevice_resizable_landscapeOrientation_resizableLandscapeBounds() {
     val spyController = spy(controller)
     whenever(spyController.getVisualIndicator()).thenReturn(desktopModeVisualIndicator)
-    whenever(desktopModeVisualIndicator.updateIndicatorType(anyOrNull(), anyOrNull()))
+    whenever(desktopModeVisualIndicator.updateIndicatorType(anyOrNull()))
         .thenReturn(DesktopModeVisualIndicator.IndicatorType.TO_DESKTOP_INDICATOR)
 
     val task =
@@ -2455,7 +2457,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
   fun dragToDesktop_portraitDevice_unResizable_portraitOrientation_defaultPortraitBounds() {
     val spyController = spy(controller)
     whenever(spyController.getVisualIndicator()).thenReturn(desktopModeVisualIndicator)
-    whenever(desktopModeVisualIndicator.updateIndicatorType(anyOrNull(), anyOrNull()))
+    whenever(desktopModeVisualIndicator.updateIndicatorType(anyOrNull()))
         .thenReturn(DesktopModeVisualIndicator.IndicatorType.TO_DESKTOP_INDICATOR)
 
     val task =
@@ -2475,7 +2477,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
   fun dragToDesktop_portraitDevice_unResizable_landscapeOrientation_unResizableLandscapeBounds() {
     val spyController = spy(controller)
     whenever(spyController.getVisualIndicator()).thenReturn(desktopModeVisualIndicator)
-    whenever(desktopModeVisualIndicator.updateIndicatorType(anyOrNull(), anyOrNull()))
+    whenever(desktopModeVisualIndicator.updateIndicatorType(anyOrNull()))
         .thenReturn(DesktopModeVisualIndicator.IndicatorType.TO_DESKTOP_INDICATOR)
 
     val task =
@@ -2532,7 +2534,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
 
     val currentDragBounds = Rect(100, 200, 500, 1000)
     whenever(spyController.getVisualIndicator()).thenReturn(desktopModeVisualIndicator)
-    whenever(desktopModeVisualIndicator.updateIndicatorType(anyOrNull(), anyOrNull()))
+    whenever(desktopModeVisualIndicator.updateIndicatorType(anyOrNull()))
       .thenReturn(DesktopModeVisualIndicator.IndicatorType.NO_INDICATOR)
 
     spyController.onDragPositioningEnd(
