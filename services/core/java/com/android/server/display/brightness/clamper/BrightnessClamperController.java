@@ -347,7 +347,7 @@ public class BrightnessClamperController {
                         data.mDisplayDeviceConfig));
             }
             if (flags.useNewHdrBrightnessModifier()) {
-                modifiers.add(new HdrBrightnessModifier(handler, listener, data));
+                modifiers.add(new HdrBrightnessModifier(handler, context, listener, data));
             }
             return modifiers;
         }
