@@ -35,7 +35,7 @@
         android:layout_height="wrap_content"
         android:text="@string/qs_record_issue_dropdown_prompt"
         android:lines="1"
-        android:drawableRight="@drawable/arrow_pointing_down"
+        android:drawableEnd="@drawable/arrow_pointing_down"
         android:layout_marginTop="@dimen/qqs_layout_margin_top"
         android:focusable="false"
         android:clickable="true" />
