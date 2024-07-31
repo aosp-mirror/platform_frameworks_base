@@ -234,9 +234,18 @@ sealed interface TransitionState {
             }
 
         /** Returns if the [progress] value of this transition can go beyond range `[0; 1]` */
-        fun canOverscroll(): Boolean {
-            val overscrollSpec = currentOverscrollSpec ?: return true
-            return overscrollSpec.transformationSpec.transformations.isNotEmpty()
+        internal fun isWithinProgressRange(progress: Float): Boolean {
+            // If the properties are missing we assume that every [Transition] can overscroll
+            if (this !is HasOverscrollProperties) return true
+            // [OverscrollSpec] for the current scene, even if it hasn't started overscrolling yet.
+            val specForCurrentScene =
+                when {
+                    progress <= 0f -> fromOverscrollSpec
+                    progress >= 1f -> toOverscrollSpec
+                    else -> null
+                } ?: return true
+
+            return specForCurrentScene.transformationSpec.transformations.isNotEmpty()
         }
 
         /**
