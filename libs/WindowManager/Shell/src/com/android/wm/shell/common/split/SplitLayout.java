@@ -70,12 +70,12 @@ import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.DisplayImeController;
 import com.android.wm.shell.common.DisplayInsetsController;
 import com.android.wm.shell.common.DisplayLayout;
-
 import com.android.wm.shell.common.pip.PipUtils;
 import com.android.wm.shell.common.split.SplitScreenConstants.PersistentSnapPosition;
 import com.android.wm.shell.common.split.SplitScreenConstants.SnapPosition;
 import com.android.wm.shell.common.split.SplitScreenConstants.SplitPosition;
 import com.android.wm.shell.protolog.ShellProtoLogGroup;
+import com.android.wm.shell.splitscreen.StageTaskListener;
 
 import java.io.PrintWriter;
 import java.util.function.Consumer;
@@ -93,6 +93,17 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
     public static final int FLING_RESIZE_DURATION = 250;
     private static final int FLING_ENTER_DURATION = 450;
     private static final int FLING_EXIT_DURATION = 450;
+
+    // Here are some (arbitrarily decided) layer definitions used during animations to make sure the
+    // layers stay in order. Note: This does not affect any other layer numbering systems because
+    // the layer system in WindowManager is local within sibling groups. So, for example, each
+    // "veil layer" defined here actually has two sub-layers; and *their* layer values, which we set
+    // in SplitDecorManager, are only important relative to each other.
+    public static final int DIVIDER_LAYER = 0;
+    public static final int FRONT_APP_VEIL_LAYER = DIVIDER_LAYER + 20;
+    public static final int FRONT_APP_LAYER = DIVIDER_LAYER + 10;
+    public static final int BEHIND_APP_VEIL_LAYER = DIVIDER_LAYER - 10;
+    public static final int BEHIND_APP_LAYER = DIVIDER_LAYER - 20;
 
     // Animation specs for the swap animation
     private static final int SWAP_ANIMATION_TOTAL_DURATION = 500;
@@ -702,11 +713,15 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
     }
 
     /** Switch both surface position with animation. */
-    public void playSwapAnimation(SurfaceControl.Transaction t, SurfaceControl leash1,
-            SurfaceControl leash2, Consumer<Rect> finishCallback) {
+    public void playSwapAnimation(SurfaceControl.Transaction t, StageTaskListener topLeftStage,
+            StageTaskListener bottomRightStage, Consumer<Rect> finishCallback) {
         final Rect insets = getDisplayStableInsets(mContext);
+        // If we have insets in the direction of the swap, the animation won't look correct because
+        // window contents will shift and redraw again at the end. So we show a veil to hide that.
         insets.set(mIsLeftRightSplit ? insets.left : 0, mIsLeftRightSplit ? 0 : insets.top,
                 mIsLeftRightSplit ? insets.right : 0, mIsLeftRightSplit ? 0 : insets.bottom);
+        final boolean shouldVeil =
+                insets.left != 0 || insets.top != 0 || insets.right != 0 || insets.bottom != 0;
 
         final int dividerPos = mDividerSnapAlgorithm.calculateNonDismissingSnapTarget(
                 mIsLeftRightSplit ? mBounds2.width() : mBounds2.height()).position;
@@ -721,13 +736,15 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
         endBounds2.offset(-mRootBounds.left, -mRootBounds.top);
         endDividerBounds.offset(-mRootBounds.left, -mRootBounds.top);
 
-        ValueAnimator animator1 = moveSurface(t, leash1, getRefBounds1(), endBounds1,
-                -insets.left, -insets.top, true /* roundCorners */, true /* addShrinkAnimation */);
-        ValueAnimator animator2 = moveSurface(t, leash2, getRefBounds2(), endBounds2,
-                insets.left, insets.top, true /* roundCorners */, false /* addShrinkAnimation */);
-        ValueAnimator animator3 = moveSurface(t, getDividerLeash(), getRefDividerBounds(),
+        ValueAnimator animator1 = moveSurface(t, topLeftStage, getRefBounds1(), endBounds1,
+                -insets.left, -insets.top, true /* roundCorners */, true /* isGoingBehind */,
+                shouldVeil);
+        ValueAnimator animator2 = moveSurface(t, bottomRightStage, getRefBounds2(), endBounds2,
+                insets.left, insets.top, true /* roundCorners */, false /* isGoingBehind */,
+                shouldVeil);
+        ValueAnimator animator3 = moveSurface(t, null /* stage */, getRefDividerBounds(),
                 endDividerBounds, 0 /* offsetX */, 0 /* offsetY */, false /* roundCorners */,
-                false /* addShrinkAnimation */);
+                false /* isGoingBehind */, false /* addVeil */);
 
         mSwapAnimator = new AnimatorSet();
         mSwapAnimator.playTogether(animator1, animator2, animator3);
@@ -737,11 +754,6 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
             public void onAnimationStart(Animator animation) {
                 mInteractionJankMonitor.begin(getDividerLeash(),
                         mContext, CUJ_SPLIT_SCREEN_DOUBLE_TAP_DIVIDER);
-
-                // The right/bottom app moves above the divider, the left/top app moves below.
-                t.setLayer(leash1, Integer.MIN_VALUE);
-                t.setLayer(getDividerLeash(), 0);
-                t.setLayer(leash2, Integer.MAX_VALUE);
             }
 
             @Override
@@ -768,14 +780,19 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
     /**
      * Animates a task leash across the screen. Currently used only for the swap animation.
      *
-     * @param leash The task being animated.
+     * @param stage The stage holding the task being animated. If null, it is the divider.
      * @param roundCorners Whether we should round the corners of the task while animating.
-     * @param addShrinkAnimation Whether we should a shrink-and-grow effect to the task while it is
+     * @param isGoingBehind Whether we should a shrink-and-grow effect to the task while it is
      *                           moving. (Simulates moving behind the divider.)
      */
-    private ValueAnimator moveSurface(SurfaceControl.Transaction t, SurfaceControl leash,
+    private ValueAnimator moveSurface(SurfaceControl.Transaction t, StageTaskListener stage,
             Rect start, Rect end, float offsetX, float offsetY, boolean roundCorners,
-            boolean addShrinkAnimation) {
+            boolean isGoingBehind, boolean addVeil) {
+        final boolean isApp = stage != null; // check if this is an app or a divider
+        final SurfaceControl leash = isApp ? stage.getRootLeash() : getDividerLeash();
+        final ActivityManager.RunningTaskInfo taskInfo = isApp ? stage.getRunningTaskInfo() : null;
+        final SplitDecorManager decorManager = isApp ? stage.getDecorManager() : null;
+
         Rect tempStart = new Rect(start);
         Rect tempEnd = new Rect(end);
         final float diffX = tempEnd.left - tempStart.left;
@@ -810,7 +827,7 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
             int width = (int) (tempStart.width() + progress * diffWidth);
             int height = (int) (tempStart.height() + progress * diffHeight);
 
-            if (addShrinkAnimation) {
+            if (isGoingBehind) {
                 float shrinkDiffX; // the position adjustments needed for this frame
                 float shrinkDiffY;
                 float shrinkScaleX; // the scale adjustments needed for this frame
@@ -863,9 +880,22 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
                 t.setScale(leash, shrinkScaleX, shrinkScaleY);
             }
 
+            // Set layers
+            if (taskInfo != null) {
+                t.setLayer(leash, isGoingBehind ? BEHIND_APP_LAYER : FRONT_APP_LAYER);
+            } else {
+                t.setLayer(leash, DIVIDER_LAYER);
+            }
+
             if (offsetX == 0 && offsetY == 0) {
                 t.setPosition(leash, instantaneousX, instantaneousY);
+                mTempRect.set((int) instantaneousX, (int) instantaneousY,
+                        (int) (instantaneousX + width), (int) (instantaneousY + height));
                 t.setWindowCrop(leash, width, height);
+                if (addVeil) {
+                    decorManager.drawNextVeilFrameForSwapAnimation(
+                            taskInfo, mTempRect, t, isGoingBehind, leash, 0, 0);
+                }
             } else {
                 final int diffOffsetX = (int) (progress * offsetX);
                 final int diffOffsetY = (int) (progress * offsetY);
@@ -873,6 +903,10 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
                 mTempRect.set(0, 0, width, height);
                 mTempRect.offsetTo(-diffOffsetX, -diffOffsetY);
                 t.setCrop(leash, mTempRect);
+                if (addVeil) {
+                    decorManager.drawNextVeilFrameForSwapAnimation(
+                            taskInfo, mTempRect, t, isGoingBehind, leash, diffOffsetX, diffOffsetY);
+                }
             }
             t.apply();
         });
