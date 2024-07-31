@@ -3620,8 +3620,6 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             }
             default -> {
                 Slogf.wtf(LOG_TAG, "Unhandled password complexity: " + passwordComplexity);
-                // The following line is unreachable as Slogf.wtf crashes the process.
-                // But we need this to avoid compilation error missing return statement.
                 return DEVICE_POLICY_STATE__PASSWORD_COMPLEXITY__COMPLEXITY_UNSPECIFIED;
             }
         }
