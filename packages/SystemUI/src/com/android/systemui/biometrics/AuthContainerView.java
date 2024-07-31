@@ -65,9 +65,6 @@ import android.window.OnBackInvokedCallback;
 import android.window.OnBackInvokedDispatcher;
 
 import androidx.constraintlayout.widget.ConstraintLayout;
-import androidx.core.view.AccessibilityDelegateCompat;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.accessibility.AccessibilityNodeInfoCompat;
 
 import com.android.app.animation.Interpolators;
 import com.android.internal.annotations.VisibleForTesting;
@@ -385,19 +382,6 @@ public class AuthContainerView extends LinearLayout
         mBiometricScrollView = mLayout.findViewById(R.id.biometric_scrollview);
         addView(mLayout);
         mBackgroundView = mLayout.findViewById(R.id.background);
-        ViewCompat.setAccessibilityDelegate(mBackgroundView, new AccessibilityDelegateCompat() {
-            @Override
-            public void onInitializeAccessibilityNodeInfo(View host,
-                    AccessibilityNodeInfoCompat info) {
-                super.onInitializeAccessibilityNodeInfo(host, info);
-                info.addAction(
-                        new AccessibilityNodeInfoCompat.AccessibilityActionCompat(
-                                AccessibilityNodeInfoCompat.ACTION_CLICK,
-                                mContext.getString(R.string.biometric_dialog_cancel_authentication)
-                        )
-                );
-            }
-        });
 
         mPanelView = mLayout.findViewById(R.id.panel);
         if (!constraintBp()) {

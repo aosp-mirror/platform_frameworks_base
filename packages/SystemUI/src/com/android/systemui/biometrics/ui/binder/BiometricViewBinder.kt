@@ -34,6 +34,10 @@ import android.widget.Button
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
+import androidx.core.view.AccessibilityDelegateCompat
+import androidx.core.view.ViewCompat
+import androidx.core.view.accessibility.AccessibilityNodeInfoCompat
+import androidx.core.view.accessibility.AccessibilityNodeInfoCompat.AccessibilityActionCompat
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
@@ -144,6 +148,25 @@ object BiometricViewBinder {
         // Positive-side (right) buttons
         val confirmationButton = view.requireViewById<Button>(R.id.button_confirm)
         val retryButton = view.requireViewById<Button>(R.id.button_try_again)
+
+        // Handles custom "Cancel Authentication" talkback action
+        val cancelDelegate: AccessibilityDelegateCompat =
+            object : AccessibilityDelegateCompat() {
+                override fun onInitializeAccessibilityNodeInfo(
+                    host: View,
+                    info: AccessibilityNodeInfoCompat
+                ) {
+                    super.onInitializeAccessibilityNodeInfo(host, info)
+                    info.addAction(
+                        AccessibilityActionCompat(
+                            AccessibilityNodeInfoCompat.ACTION_CLICK,
+                            view.context.getString(R.string.biometric_dialog_cancel_authentication)
+                        )
+                    )
+                }
+            }
+        ViewCompat.setAccessibilityDelegate(backgroundView, cancelDelegate)
+        ViewCompat.setAccessibilityDelegate(cancelButton, cancelDelegate)
 
         // TODO(b/330788871): temporary workaround for the unsafe callbacks & legacy controllers
         val adapter =
