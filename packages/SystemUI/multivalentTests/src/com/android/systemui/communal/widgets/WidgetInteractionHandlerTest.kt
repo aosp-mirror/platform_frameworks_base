@@ -76,7 +76,7 @@ class WidgetInteractionHandlerTest : SysuiTestCase() {
                 assertFalse(launching!!)
 
                 val parent = FrameLayout(context)
-                val view = CommunalAppWidgetHostView(context)
+                val view = CommunalAppWidgetHostView(context, underTest)
                 parent.addView(view)
                 val (fillInIntent, activityOptions) = testResponse.getLaunchOptions(view)
 
