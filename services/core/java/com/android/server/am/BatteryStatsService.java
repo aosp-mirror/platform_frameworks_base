@@ -620,6 +620,10 @@ public final class BatteryStatsService extends IBatteryStats.Stub
 
     private void setPowerStatsThrottlePeriods(BatteryStatsImpl.BatteryStatsConfig.Builder builder,
             String configString) {
+        if (configString == null) {
+            return;
+        }
+
         Matcher matcher = Pattern.compile("([^:]+):(\\d+)\\s*").matcher(configString);
         while (matcher.find()) {
             String powerComponentName = matcher.group(1);
