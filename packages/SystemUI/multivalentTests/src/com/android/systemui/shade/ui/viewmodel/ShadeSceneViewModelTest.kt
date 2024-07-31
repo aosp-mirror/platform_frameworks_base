@@ -16,6 +16,7 @@
 
 package com.android.systemui.shade.ui.viewmodel
 
+import android.platform.test.annotations.DisableFlags
 import android.testing.TestableLooper
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
@@ -24,6 +25,7 @@ import com.android.compose.animation.scene.SceneKey
 import com.android.compose.animation.scene.Swipe
 import com.android.compose.animation.scene.SwipeDirection
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.activatable.activateIn
 import com.android.systemui.authentication.data.repository.fakeAuthenticationRepository
 import com.android.systemui.authentication.shared.model.AuthenticationMethodModel
 import com.android.systemui.common.ui.data.repository.fakeConfigurationRepository
@@ -38,7 +40,6 @@ import com.android.systemui.kosmos.testScope
 import com.android.systemui.media.controls.data.repository.mediaFilterRepository
 import com.android.systemui.media.controls.shared.model.MediaData
 import com.android.systemui.qs.ui.adapter.fakeQSSceneAdapter
-import com.android.systemui.qs.ui.adapter.qsSceneAdapter
 import com.android.systemui.res.R
 import com.android.systemui.scene.domain.interactor.sceneInteractor
 import com.android.systemui.scene.domain.resolver.homeSceneFamilyResolver
@@ -47,6 +48,7 @@ import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.scene.shared.model.TransitionKeys.ToSplitShade
 import com.android.systemui.shade.data.repository.shadeRepository
 import com.android.systemui.shade.domain.startable.shadeStartable
+import com.android.systemui.shade.shared.flag.DualShade
 import com.android.systemui.shade.shared.model.ShadeMode
 import com.android.systemui.testKosmos
 import com.android.systemui.unfold.fakeUnfoldTransitionProgressProvider
@@ -58,6 +60,7 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
+import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 
@@ -66,6 +69,7 @@ import org.junit.runner.RunWith
 @RunWith(AndroidJUnit4::class)
 @TestableLooper.RunWithLooper
 @EnableSceneContainer
+@DisableFlags(DualShade.FLAG_NAME)
 class ShadeSceneViewModelTest : SysuiTestCase() {
 
     private val kosmos = testKosmos()
@@ -75,6 +79,11 @@ class ShadeSceneViewModelTest : SysuiTestCase() {
     private val qsSceneAdapter by lazy { kosmos.fakeQSSceneAdapter }
 
     private val underTest: ShadeSceneViewModel by lazy { kosmos.shadeSceneViewModel }
+
+    @Before
+    fun setUp() {
+        underTest.activateIn(testScope)
+    }
 
     @Test
     fun upTransitionSceneKey_deviceLocked_lockScreen() =
@@ -157,7 +166,7 @@ class ShadeSceneViewModelTest : SysuiTestCase() {
     fun upTransitionKey_splitShadeEnabled_isGoneToSplitShade() =
         testScope.runTest {
             val destinationScenes by collectLastValue(underTest.destinationScenes)
-            shadeRepository.setShadeMode(ShadeMode.Split)
+            shadeRepository.setShadeLayoutWide(true)
             runCurrent()
 
             assertThat(destinationScenes?.get(Swipe(SwipeDirection.Up))?.transitionKey)
@@ -168,7 +177,7 @@ class ShadeSceneViewModelTest : SysuiTestCase() {
     fun upTransitionKey_splitShadeDisable_isNull() =
         testScope.runTest {
             val destinationScenes by collectLastValue(underTest.destinationScenes)
-            shadeRepository.setShadeMode(ShadeMode.Single)
+            shadeRepository.setShadeLayoutWide(false)
             runCurrent()
 
             assertThat(destinationScenes?.get(Swipe(SwipeDirection.Up))?.transitionKey).isNull()
@@ -268,13 +277,13 @@ class ShadeSceneViewModelTest : SysuiTestCase() {
         testScope.runTest {
             val shadeMode by collectLastValue(underTest.shadeMode)
 
-            shadeRepository.setShadeMode(ShadeMode.Split)
+            shadeRepository.setShadeLayoutWide(true)
             assertThat(shadeMode).isEqualTo(ShadeMode.Split)
 
-            shadeRepository.setShadeMode(ShadeMode.Single)
+            shadeRepository.setShadeLayoutWide(false)
             assertThat(shadeMode).isEqualTo(ShadeMode.Single)
 
-            shadeRepository.setShadeMode(ShadeMode.Split)
+            shadeRepository.setShadeLayoutWide(true)
             assertThat(shadeMode).isEqualTo(ShadeMode.Split)
         }
 

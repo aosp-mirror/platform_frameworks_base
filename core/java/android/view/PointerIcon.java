@@ -193,6 +193,25 @@ public final class PointerIcon implements Parcelable {
     /** @hide */ public static final int POINTER_ICON_VECTOR_STYLE_FILL_END =
             POINTER_ICON_VECTOR_STYLE_FILL_BLUE;
 
+    /** @hide */
+    @IntDef(prefix = {"POINTER_ICON_VECTOR_STYLE_STROKE_"}, value = {
+            POINTER_ICON_VECTOR_STYLE_STROKE_WHITE,
+            POINTER_ICON_VECTOR_STYLE_STROKE_BLACK,
+            POINTER_ICON_VECTOR_STYLE_STROKE_NONE
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface PointerIconVectorStyleStroke {}
+
+    /** @hide */ public static final int POINTER_ICON_VECTOR_STYLE_STROKE_WHITE = 0;
+    /** @hide */ public static final int POINTER_ICON_VECTOR_STYLE_STROKE_BLACK = 1;
+    /** @hide */ public static final int POINTER_ICON_VECTOR_STYLE_STROKE_NONE = 2;
+
+    // If adding PointerIconVectorStyleStroke, update END value for {@link SystemSettingsValidators}
+    /** @hide */ public static final int POINTER_ICON_VECTOR_STYLE_STROKE_BEGIN =
+            POINTER_ICON_VECTOR_STYLE_STROKE_WHITE;
+    /** @hide */ public static final int POINTER_ICON_VECTOR_STYLE_STROKE_END =
+            POINTER_ICON_VECTOR_STYLE_STROKE_NONE;
+
     /** @hide */ public static final float DEFAULT_POINTER_SCALE = 1f;
     /** @hide */ public static final float LARGE_POINTER_SCALE = 2.5f;
 
@@ -708,6 +727,23 @@ public final class PointerIcon implements Parcelable {
             case POINTER_ICON_VECTOR_STYLE_FILL_BLUE ->
                     com.android.internal.R.style.PointerIconVectorStyleFillBlue;
             default -> com.android.internal.R.style.PointerIconVectorStyleFillBlack;
+        };
+    }
+
+    /**
+     * Convert stroke style constant to resource ID.
+     *
+     * @hide
+     */
+    public static int vectorStrokeStyleToResource(@PointerIconVectorStyleStroke int strokeStyle) {
+        return switch (strokeStyle) {
+            case POINTER_ICON_VECTOR_STYLE_STROKE_BLACK ->
+                    com.android.internal.R.style.PointerIconVectorStyleStrokeBlack;
+            case POINTER_ICON_VECTOR_STYLE_STROKE_WHITE ->
+                    com.android.internal.R.style.PointerIconVectorStyleStrokeWhite;
+            case POINTER_ICON_VECTOR_STYLE_STROKE_NONE ->
+                    com.android.internal.R.style.PointerIconVectorStyleStrokeNone;
+            default -> com.android.internal.R.style.PointerIconVectorStyleStrokeWhite;
         };
     }
 

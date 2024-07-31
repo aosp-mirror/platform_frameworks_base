@@ -57,15 +57,13 @@ import com.android.systemui.log.FaceAuthenticationLogger
 import com.android.systemui.log.SessionTracker
 import com.android.systemui.log.table.TableLogBuffer
 import com.android.systemui.power.domain.interactor.PowerInteractor
-import com.android.systemui.res.R
+import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.statusbar.phone.KeyguardBypassController
 import com.android.systemui.user.data.model.SelectionStatus
 import com.android.systemui.user.data.repository.UserRepository
 import com.google.errorprone.annotations.CompileTimeConstant
 import java.io.PrintWriter
-import java.util.Arrays
 import java.util.concurrent.Executor
-import java.util.stream.Collectors
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
@@ -169,7 +167,6 @@ constructor(
 ) : DeviceEntryFaceAuthRepository, Dumpable {
     private var authCancellationSignal: CancellationSignal? = null
     private var detectCancellationSignal: CancellationSignal? = null
-    private var faceAcquiredInfoIgnoreList: Set<Int>
     private var retryCount = 0
 
     private var pendingAuthenticateRequest = MutableStateFlow<AuthenticationRequest?>(null)
@@ -221,8 +218,7 @@ constructor(
                 trySendWithFailureLogging(it.bypassEnabled, TAG, "BypassStateChanged")
                 awaitClose { it.unregisterOnBypassStateChangedListener(callback) }
             }
-        }
-            ?: flowOf(false)
+        } ?: flowOf(false)
 
     override fun setLockedOut(isLockedOut: Boolean) {
         _isLockedOut.value = isLockedOut
@@ -240,14 +236,6 @@ constructor(
             faceManager?.addLockoutResetCallback(faceLockoutResetCallback)
             faceAuthLogger.addLockoutResetCallbackDone()
         }
-        faceAcquiredInfoIgnoreList =
-            Arrays.stream(
-                    context.resources.getIntArray(
-                        R.array.config_face_acquire_device_entry_ignorelist
-                    )
-                )
-                .boxed()
-                .collect(Collectors.toSet())
         dumpManager.registerCriticalDumpable("DeviceEntryFaceAuthRepositoryImpl", this)
 
         canRunFaceAuth =
@@ -303,7 +291,10 @@ constructor(
 
     private fun listenForSchedulingWatchdog() {
         keyguardTransitionInteractor
-            .transition(Edge.create(to = KeyguardState.GONE))
+            .transition(
+                edge = Edge.create(to = Scenes.Gone),
+                edgeWithoutSceneContainer = Edge.create(to = KeyguardState.GONE),
+            )
             .filter { it.transitionState == TransitionState.FINISHED }
             .onEach {
                 // We deliberately want to run this in background because scheduleWatchdog does
@@ -322,7 +313,10 @@ constructor(
         merge(
                 powerInteractor.isAsleep,
                 combine(
-                    keyguardTransitionInteractor.isFinishedInState(KeyguardState.GONE),
+                    keyguardTransitionInteractor.isFinishedIn(
+                        scene = Scenes.Gone,
+                        stateWithoutSceneContainer = KeyguardState.GONE,
+                    ),
                     keyguardInteractor.statusBarState,
                 ) { isFinishedInGoneState, statusBarState ->
                     // When the user is dragging the primary bouncer in (up) by manually scrolling
@@ -394,7 +388,7 @@ constructor(
             Pair(keyguardRepository.isKeyguardGoingAway.isFalse(), "keyguardNotGoingAway"),
             Pair(
                 keyguardTransitionInteractor
-                    .isInTransitionToStateWhere(KeyguardState::deviceIsAsleepInState)
+                    .isInTransitionWhere(toStatePredicate = KeyguardState::deviceIsAsleepInState)
                     .isFalse(),
                 "deviceNotTransitioningToAsleepState"
             ),
@@ -479,10 +473,8 @@ constructor(
             }
 
             override fun onAuthenticationHelp(code: Int, helpStr: CharSequence?) {
-                if (faceAcquiredInfoIgnoreList.contains(code)) {
-                    return
-                }
-                _authenticationStatus.value = HelpFaceAuthenticationStatus(code, helpStr.toString())
+                _authenticationStatus.value =
+                    HelpFaceAuthenticationStatus(code, helpStr?.toString())
             }
 
             override fun onAuthenticationSucceeded(result: FaceManager.AuthenticationResult) {
@@ -725,7 +717,6 @@ constructor(
         pw.println("  _pendingAuthenticateRequest: ${pendingAuthenticateRequest.value}")
         pw.println("  authCancellationSignal: $authCancellationSignal")
         pw.println("  detectCancellationSignal: $detectCancellationSignal")
-        pw.println("  faceAcquiredInfoIgnoreList: $faceAcquiredInfoIgnoreList")
         pw.println("  _authenticationStatus: ${_authenticationStatus.value}")
         pw.println("  _detectionStatus: ${_detectionStatus.value}")
         pw.println("  currentUserId: $currentUserId")
@@ -733,6 +724,7 @@ constructor(
         pw.println("  lockscreenBypassEnabled: ${keyguardBypassController?.bypassEnabled ?: false}")
     }
 }
+
 /** Combine two boolean flows by and-ing both of them */
 private fun and(flow: Flow<Boolean>, anotherFlow: Flow<Boolean>) =
     flow.combine(anotherFlow) { a, b -> a && b }

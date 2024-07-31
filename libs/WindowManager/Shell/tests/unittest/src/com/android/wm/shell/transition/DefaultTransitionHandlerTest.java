@@ -17,6 +17,7 @@
 package com.android.wm.shell.transition;
 
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
+import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.view.WindowManager.TRANSIT_OPEN;
 import static android.view.WindowManager.TRANSIT_SLEEP;
@@ -185,6 +186,73 @@ public class DefaultTransitionHandlerTest extends ShellTestCase {
         verify(startT, never()).setColor(any(), any());
     }
 
+    @Test
+    public void startAnimation_freeformOpenChange_doesntReparentTask() {
+        final TransitionInfo.Change openChange = new ChangeBuilder(TRANSIT_OPEN)
+                .setTask(createTaskInfo(
+                        /* taskId= */ 1, /* windowingMode= */ WINDOWING_MODE_FULLSCREEN))
+                .build();
+        final TransitionInfo info = new TransitionInfoBuilder(TRANSIT_OPEN)
+                .addChange(openChange)
+                .build();
+        final IBinder token = new Binder();
+        final SurfaceControl.Transaction startT = MockTransactionPool.create();
+        final SurfaceControl.Transaction finishT = MockTransactionPool.create();
+
+        mTransitionHandler.startAnimation(token, info, startT, finishT,
+                mock(Transitions.TransitionFinishCallback.class));
+
+        verify(startT, never()).reparent(any(), any());
+    }
+
+    @Test
+    public void startAnimation_freeformMinimizeChange_underFullscreenChange_doesntReparentTask() {
+        final TransitionInfo.Change openChange = new ChangeBuilder(TRANSIT_OPEN)
+                .setTask(createTaskInfo(
+                        /* taskId= */ 1, /* windowingMode= */ WINDOWING_MODE_FULLSCREEN))
+                .build();
+        final TransitionInfo.Change toBackChange = new ChangeBuilder(TRANSIT_TO_BACK)
+                .setTask(createTaskInfo(
+                        /* taskId= */ 2, /* windowingMode= */ WINDOWING_MODE_FREEFORM))
+                .build();
+        final TransitionInfo info = new TransitionInfoBuilder(TRANSIT_OPEN)
+                .addChange(openChange)
+                .addChange(toBackChange)
+                .build();
+        final IBinder token = new Binder();
+        final SurfaceControl.Transaction startT = MockTransactionPool.create();
+        final SurfaceControl.Transaction finishT = MockTransactionPool.create();
+
+        mTransitionHandler.startAnimation(token, info, startT, finishT,
+                mock(Transitions.TransitionFinishCallback.class));
+
+        verify(startT, never()).reparent(any(), any());
+    }
+
+    @Test
+    public void startAnimation_freeform_minimizeAnimation_reparentsTask() {
+        final TransitionInfo.Change openChange = new ChangeBuilder(TRANSIT_OPEN)
+                .setTask(createTaskInfo(
+                        /* taskId= */ 1, /* windowingMode= */ WINDOWING_MODE_FREEFORM))
+                .build();
+        final TransitionInfo.Change toBackChange = new ChangeBuilder(TRANSIT_TO_BACK)
+                .setTask(createTaskInfo(
+                        /* taskId= */ 2, /* windowingMode= */ WINDOWING_MODE_FREEFORM))
+                .build();
+        final TransitionInfo info = new TransitionInfoBuilder(TRANSIT_OPEN)
+                .addChange(openChange)
+                .addChange(toBackChange)
+                .build();
+        final IBinder token = new Binder();
+        final SurfaceControl.Transaction startT = MockTransactionPool.create();
+        final SurfaceControl.Transaction finishT = MockTransactionPool.create();
+
+        mTransitionHandler.startAnimation(token, info, startT, finishT,
+                mock(Transitions.TransitionFinishCallback.class));
+
+        verify(startT).reparent(any(), any());
+    }
+
     private static void mergeSync(Transitions.TransitionHandler handler, IBinder token) {
         handler.mergeAnimation(
                 new Binder(),
@@ -195,10 +263,14 @@ public class DefaultTransitionHandlerTest extends ShellTestCase {
     }
 
     private static RunningTaskInfo createTaskInfo(int taskId) {
+        return createTaskInfo(taskId, WINDOWING_MODE_FULLSCREEN);
+    }
+
+    private static RunningTaskInfo createTaskInfo(int taskId, int windowingMode) {
         RunningTaskInfo taskInfo = new RunningTaskInfo();
         taskInfo.taskId = taskId;
         taskInfo.topActivityType = ACTIVITY_TYPE_STANDARD;
-        taskInfo.configuration.windowConfiguration.setWindowingMode(WINDOWING_MODE_FULLSCREEN);
+        taskInfo.configuration.windowConfiguration.setWindowingMode(windowingMode);
         taskInfo.configuration.windowConfiguration.setActivityType(taskInfo.topActivityType);
         taskInfo.token = mock(WindowContainerToken.class);
         return taskInfo;

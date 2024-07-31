@@ -17,6 +17,7 @@
 package android.view;
 
 import static android.view.WindowInsets.Type.SIZE;
+import static android.view.WindowInsets.Type.captionBar;
 import static android.view.WindowInsets.Type.systemBars;
 
 import static org.junit.Assert.assertEquals;
@@ -26,11 +27,13 @@ import android.graphics.Insets;
 import android.graphics.Rect;
 import android.platform.test.annotations.Presubmit;
 
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
-import androidx.test.runner.AndroidJUnit4;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
+
+import java.util.List;
 
 @RunWith(AndroidJUnit4.class)
 @SmallTest
@@ -40,14 +43,14 @@ public class WindowInsetsTest {
     @Test
     public void systemWindowInsets_afterConsuming_isConsumed() {
         assertTrue(new WindowInsets(WindowInsets.createCompatTypeMap(new Rect(1, 2, 3, 4)), null,
-                null, false, 0, 0, null, null, null, null,
+                null, false, 0, false, 0, null, null, null, null,
                 WindowInsets.Type.systemBars(), false, null, null, 0, 0)
                 .consumeSystemWindowInsets().isConsumed());
     }
 
     @Test
     public void multiNullConstructor_isConsumed() {
-        assertTrue(new WindowInsets(null, null, null, false, 0, 0, null, null, null, null,
+        assertTrue(new WindowInsets(null, null, null, false, 0, false, 0, null, null, null, null,
                 WindowInsets.Type.systemBars(), false, null, null, 0, 0).isConsumed());
     }
 
@@ -64,8 +67,21 @@ public class WindowInsetsTest {
         WindowInsets.assignCompatInsets(maxInsets, new Rect(0, 10, 0, 0));
         WindowInsets.assignCompatInsets(insets, new Rect(0, 0, 0, 0));
         WindowInsets windowInsets = new WindowInsets(insets, maxInsets, visible, false, 0,
-                0, null, null, null, DisplayShape.NONE, systemBars(),
+                false, 0, null, null, null, DisplayShape.NONE, systemBars(),
                 true /* compatIgnoreVisibility */, null, null, 0, 0);
         assertEquals(Insets.of(0, 10, 0, 0), windowInsets.getSystemWindowInsets());
+    }
+
+    @Test
+    public void testSetBoundingRectsInBuilder_noInsets_preservedInWindowInsets() {
+        final List<Rect> rects = List.of(new Rect(0, 0, 50, 100));
+        final WindowInsets insets =
+                new WindowInsets.Builder()
+                        .setBoundingRects(captionBar(), rects)
+                        .setBoundingRectsIgnoringVisibility(captionBar(), rects)
+                        .build();
+
+        assertEquals(rects, insets.getBoundingRects(captionBar()));
+        assertEquals(rects, insets.getBoundingRectsIgnoringVisibility(captionBar()));
     }
 }

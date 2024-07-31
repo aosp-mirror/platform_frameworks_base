@@ -569,7 +569,6 @@ public class Camera {
             return native_setup(
                     new WeakReference<>(this),
                     cameraId,
-                    ActivityThread.currentOpPackageName(),
                     rotationOverride,
                     forceSlowJpegMode,
                     clientAttribution.getParcel(),
@@ -660,7 +659,6 @@ public class Camera {
     private native int native_setup(
             Object cameraThis,
             int cameraId,
-            String packageName,
             int rotationOverride,
             boolean forceSlowJpegMode,
             Parcel clientAttributionParcel,

@@ -16,7 +16,6 @@
 
 package com.android.systemui.shade;
 
-import static android.app.StatusBarManager.WINDOW_STATE_SHOWING;
 import static android.view.View.INVISIBLE;
 import static android.view.View.VISIBLE;
 
@@ -57,7 +56,6 @@ import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.app.StatusBarManager;
 import android.content.ContentResolver;
 import android.content.res.Resources;
 import android.database.ContentObserver;
@@ -158,8 +156,8 @@ import com.android.systemui.media.controls.ui.controller.KeyguardMediaController
 import com.android.systemui.media.controls.ui.controller.MediaHierarchyManager;
 import com.android.systemui.model.SysUiState;
 import com.android.systemui.navigationbar.NavigationBarController;
-import com.android.systemui.navigationbar.NavigationBarView;
 import com.android.systemui.navigationbar.NavigationModeController;
+import com.android.systemui.navigationbar.views.NavigationBarView;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.FalsingManager.FalsingTapListener;
@@ -233,7 +231,6 @@ import com.android.systemui.statusbar.policy.KeyguardUserSwitcherController;
 import com.android.systemui.statusbar.policy.KeyguardUserSwitcherView;
 import com.android.systemui.statusbar.policy.OnHeadsUpChangedListener;
 import com.android.systemui.statusbar.policy.SplitShadeStateController;
-import com.android.systemui.statusbar.window.StatusBarWindowStateController;
 import com.android.systemui.unfold.SysUIUnfoldComponent;
 import com.android.systemui.util.Compile;
 import com.android.systemui.util.Utils;
@@ -705,7 +702,6 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
             FalsingCollector falsingCollector,
             KeyguardStateController keyguardStateController,
             StatusBarStateController statusBarStateController,
-            StatusBarWindowStateController statusBarWindowStateController,
             NotificationShadeWindowController notificationShadeWindowController,
             DozeLog dozeLog,
             DozeParameters dozeParameters,
@@ -913,7 +909,6 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
         mMediaDataManager = mediaDataManager;
         mTapAgainViewController = tapAgainViewController;
         mSysUiState = sysUiState;
-        statusBarWindowStateController.addListener(this::onStatusBarWindowStateChanged);
         mKeyguardBypassController = bypassController;
         mUpdateMonitor = keyguardUpdateMonitor;
         mLockscreenShadeTransitionController = lockscreenShadeTransitionController;
@@ -1774,8 +1769,9 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
         // the small clock here
         // With migrateClocksToBlueprint, weather clock will have behaviors similar to other clocks
         if (!MigrateClocksToBlueprint.isEnabled()) {
+            boolean bypassEnabled = mKeyguardBypassController.getBypassEnabled();
             if (mKeyguardStatusViewController.isLargeClockBlockingNotificationShelf()
-                    && hasVisibleNotifications() && isOnAod()) {
+                    && hasVisibleNotifications() && (isOnAod() || bypassEnabled)) {
                 return SMALL;
             }
         }
@@ -4879,16 +4875,6 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
     @VisibleForTesting
     StateListener getStatusBarStateListener() {
         return mStatusBarStateListener;
-    }
-
-    private void onStatusBarWindowStateChanged(@StatusBarManager.WindowVisibleState int state) {
-        if (state != WINDOW_STATE_SHOWING
-                && mStatusBarStateController.getState() == StatusBarState.SHADE) {
-            collapse(
-                    false /* animate */,
-                    false /* delayed */,
-                    1.0f /* speedUpFactor */);
-        }
     }
 
     /** Handles MotionEvents for the Shade. */

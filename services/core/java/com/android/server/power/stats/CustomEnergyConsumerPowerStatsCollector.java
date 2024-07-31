@@ -19,6 +19,7 @@ package com.android.server.power.stats;
 import android.hardware.power.stats.EnergyConsumerType;
 import android.os.BatteryConsumer;
 
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -64,5 +65,13 @@ public class CustomEnergyConsumerPowerStatsCollector extends PowerStatsCollector
             success |= mCollectors.get(i).schedule();
         }
         return success;
+    }
+
+    @Override
+    public void collectAndDump(PrintWriter pw) {
+        ensureInitialized();
+        for (int i = 0; i < mCollectors.size(); i++) {
+            mCollectors.get(i).collectAndDump(pw);
+        }
     }
 }

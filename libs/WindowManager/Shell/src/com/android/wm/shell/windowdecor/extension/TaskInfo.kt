@@ -18,6 +18,8 @@ package com.android.wm.shell.windowdecor.extension
 
 import android.app.TaskInfo
 import android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN
+import android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW
+import android.app.WindowConfiguration.WINDOWING_MODE_PINNED
 import android.view.WindowInsetsController.APPEARANCE_LIGHT_CAPTION_BARS
 import android.view.WindowInsetsController.APPEARANCE_TRANSPARENT_CAPTION_BAR_BACKGROUND
 
@@ -33,5 +35,14 @@ val TaskInfo.isLightCaptionBarAppearance: Boolean
         return (appearance and APPEARANCE_LIGHT_CAPTION_BARS) != 0
     }
 
+/** Whether the task is in fullscreen windowing mode. */
 val TaskInfo.isFullscreen: Boolean
     get() = windowingMode == WINDOWING_MODE_FULLSCREEN
+
+/** Whether the task is in pinned windowing mode. */
+val TaskInfo.isPinned: Boolean
+    get() = windowingMode == WINDOWING_MODE_PINNED
+
+/** Whether the task is in multi-window windowing mode. */
+val TaskInfo.isMultiWindow: Boolean
+    get() = windowingMode == WINDOWING_MODE_MULTI_WINDOW

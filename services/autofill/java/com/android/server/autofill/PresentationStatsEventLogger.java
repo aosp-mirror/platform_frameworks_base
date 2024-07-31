@@ -58,6 +58,7 @@ import static com.android.internal.util.FrameworkStatsLog.AUTOFILL_PRESENTATION_
 import static com.android.server.autofill.Helper.sVerbose;
 
 import android.annotation.IntDef;
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.ComponentName;
 import android.content.Context;
@@ -685,6 +686,19 @@ public final class PresentationStatsEventLogger {
     }
 
     /**
+     * Set views_fillable_total_count as long as mEventInternal presents.
+     */
+    public void maybeUpdateViewFillablesForRefillAttempt(List<AutofillId> autofillIds) {
+        mEventInternal.ifPresent(event -> {
+            // These autofill ids would be the ones being re-attempted.
+            event.mAutofillIdsAttemptedAutofill = new ArraySet<>(autofillIds);
+            // These autofill id's are being refilled, so they had failed previously.
+            // Note that these autofillIds correspond to the new autofill ids after relayout.
+            event.mFailedAutofillIds = new ArraySet<>(autofillIds);
+        });
+    }
+
+    /**
      * Set how many views are filtered from fill because they are not in current session
      */
     public void maybeSetFilteredFillableViewsCount(int filteredViewsCount) {
@@ -697,9 +711,16 @@ public final class PresentationStatsEventLogger {
      * Set views_filled_failure_count using failure count as long as mEventInternal
      * presents.
      */
-    public void maybeSetViewFillFailureCounts(int failureCount) {
+    public void maybeSetViewFillFailureCounts(@NonNull List<AutofillId> ids, boolean isRefill) {
         mEventInternal.ifPresent(event -> {
-            event.mViewFillFailureCount = failureCount;
+            int failureCount = ids.size();
+            if (isRefill) {
+                event.mViewFailedOnRefillCount = failureCount;
+            } else {
+                event.mViewFillFailureCount = failureCount;
+                event.mViewFailedPriorToRefillCount = failureCount;
+                event.mFailedAutofillIds = new ArraySet<>(ids);
+            }
         });
     }
 
@@ -719,7 +740,7 @@ public final class PresentationStatsEventLogger {
      * Set views_filled_failure_count using failure count as long as mEventInternal
      * presents.
      */
-    public void maybeAddSuccessId(AutofillId autofillId) {
+    public synchronized void maybeAddSuccessId(AutofillId autofillId) {
         mEventInternal.ifPresent(event -> {
             ArraySet<AutofillId> autofillIds = event.mAutofillIdsAttemptedAutofill;
             if (autofillIds == null) {
@@ -727,9 +748,21 @@ public final class PresentationStatsEventLogger {
                         + " successfully filled");
                 event.mViewFilledButUnexpectedCount++;
             } else if (autofillIds.contains(autofillId)) {
-                if (sVerbose) {
-                    Slog.v(TAG, "Logging autofill for id:" + autofillId);
+                ArraySet<AutofillId> failedIds = event.mFailedAutofillIds;
+                if (failedIds.contains(autofillId)) {
+                    if (sVerbose) {
+                        Slog.v(TAG, "Logging autofill refill of id:" + autofillId);
+                    }
+                    // This indicates the success after refill attempt
+                    event.mViewFilledSuccessfullyOnRefillCount++;
+                    // Remove so if we don't reprocess duplicate requests
+                    failedIds.remove(autofillId);
+                } else {
+                    if (sVerbose) {
+                        Slog.v(TAG, "Logging autofill for id:" + autofillId);
+                    }
                 }
+                // Common actions to take irrespective of being filled by refill attempt or not.
                 event.mViewFillSuccessCount++;
                 autofillIds.remove(autofillId);
                 event.mAlreadyFilledAutofillIds.add(autofillId);
@@ -743,6 +776,23 @@ public final class PresentationStatsEventLogger {
                         + " not found in list of attempted autofill ids: " + autofillIds);
                 event.mViewFilledButUnexpectedCount++;
             }
+        });
+    }
+
+    /**
+     * Set how many views are filtered from fill because they are not in current session
+     */
+    public void maybeSetNotifyNotExpiringResponseDuringAuth() {
+        mEventInternal.ifPresent(event -> {
+            event.mFixExpireResponseDuringAuthCount++;
+        });
+    }
+    /**
+     * Set how many views are filtered from fill because they are not in current session
+     */
+    public void notifyViewEnteredIgnoredDuringAuthCount() {
+        mEventInternal.ifPresent(event -> {
+            event.mNotifyViewEnteredIgnoredDuringAuthCount++;
         });
     }
 
@@ -804,7 +854,15 @@ public final class PresentationStatsEventLogger {
                     + event.mSuggestionPresentedLastTimestampMs
                     + " event.mFocusedVirtualAutofillId=" + event.mFocusedVirtualAutofillId
                     + " event.mFieldFirstLength=" + event.mFieldFirstLength
-                    + " event.mFieldLastLength=" + event.mFieldLastLength);
+                    + " event.mFieldLastLength=" + event.mFieldLastLength
+                    + " event.mViewFailedPriorToRefillCount=" + event.mViewFailedPriorToRefillCount
+                    + " event.mViewFilledSuccessfullyOnRefillCount="
+                    + event.mViewFilledSuccessfullyOnRefillCount
+                    + " event.mViewFailedOnRefillCount=" + event.mViewFailedOnRefillCount
+                    + " event.notExpiringResponseDuringAuthCount="
+                    + event.mFixExpireResponseDuringAuthCount
+                    + " event.notifyViewEnteredIgnoredDuringAuthCount="
+                    + event.mNotifyViewEnteredIgnoredDuringAuthCount);
         }
 
         // TODO(b/234185326): Distinguish empty responses from other no presentation reasons.
@@ -846,7 +904,6 @@ public final class PresentationStatsEventLogger {
                 mCallingAppUid,
                 event.mIsCredentialRequest,
                 event.mWebviewRequestedCredential,
-                event.mFilteredFillabaleViewCount,
                 event.mViewFillableTotalCount,
                 event.mViewFillFailureCount,
                 event.mFocusedId,
@@ -859,7 +916,13 @@ public final class PresentationStatsEventLogger {
                 event.mSuggestionPresentedLastTimestampMs,
                 event.mFocusedVirtualAutofillId,
                 event.mFieldFirstLength,
-                event.mFieldLastLength);
+                event.mFieldLastLength,
+                event.mFilteredFillabaleViewCount,
+                event.mViewFailedPriorToRefillCount,
+                event.mViewFilledSuccessfullyOnRefillCount,
+                event.mViewFailedOnRefillCount,
+                event.mFixExpireResponseDuringAuthCount,
+                event.mNotifyViewEnteredIgnoredDuringAuthCount);
         mEventInternal = Optional.empty();
     }
 
@@ -912,8 +975,15 @@ public final class PresentationStatsEventLogger {
         // uninitialized doesn't help much, as this would be non-zero only if callback is received.
         int mViewFillSuccessCount = 0;
         int mViewFilledButUnexpectedCount = 0;
+        int mViewFailedPriorToRefillCount = 0;
+        int mViewFailedOnRefillCount = 0;
+        int mViewFilledSuccessfullyOnRefillCount = 0;
+
+        int mFixExpireResponseDuringAuthCount = 0;
+        int mNotifyViewEnteredIgnoredDuringAuthCount = 0;
 
         ArraySet<AutofillId> mAutofillIdsAttemptedAutofill;
+        ArraySet<AutofillId> mFailedAutofillIds = new ArraySet<>();
         ArraySet<AutofillId> mAlreadyFilledAutofillIds = new ArraySet<>();
 
         // Not logged - used for internal logic

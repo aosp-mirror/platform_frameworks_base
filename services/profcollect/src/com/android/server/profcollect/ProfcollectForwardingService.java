@@ -287,7 +287,7 @@ public final class ProfcollectForwardingService extends SystemService {
         if (randomNum < traceFrequency) {
             BackgroundThread.get().getThreadHandler().post(() -> {
                 try {
-                    mIProfcollect.trace_once("applaunch");
+                    mIProfcollect.trace_system("applaunch");
                 } catch (RemoteException e) {
                     Log.e(LOG_TAG, "Failed to initiate trace: " + e.getMessage());
                 }
@@ -327,7 +327,7 @@ public final class ProfcollectForwardingService extends SystemService {
             // Dex2oat could take a while before it starts. Add a short delay before start tracing.
             BackgroundThread.get().getThreadHandler().postDelayed(() -> {
                 try {
-                    mIProfcollect.trace_once("dex2oat");
+                    mIProfcollect.trace_system("dex2oat");
                 } catch (RemoteException e) {
                     Log.e(LOG_TAG, "Failed to initiate trace: " + e.getMessage());
                 }
@@ -354,6 +354,9 @@ public final class ProfcollectForwardingService extends SystemService {
 
     private static void createAndUploadReport(ProfcollectForwardingService pfs) {
         BackgroundThread.get().getThreadHandler().post(() -> {
+            if (pfs.mIProfcollect == null) {
+                return;
+            }
             String reportName;
             try {
                 reportName = pfs.mIProfcollect.report(pfs.mUsageSetting) + ".zip";
@@ -398,14 +401,19 @@ public final class ProfcollectForwardingService extends SystemService {
                 if (randomNum >= traceFrequency) {
                     return;
                 }
-                // Wait for 1s before starting tracing.
-                BackgroundThread.get().getThreadHandler().postDelayed(() -> {
+                final int traceDuration = 5000;
+                final String traceTag = "camera";
+                BackgroundThread.get().getThreadHandler().post(() -> {
+                    if (mIProfcollect == null) {
+                        return;
+                    }
                     try {
-                        mIProfcollect.trace_once("camera");
+                        mIProfcollect.trace_process(traceTag, "android.hardware.camera.provider",
+                                traceDuration);
                     } catch (RemoteException e) {
                         Log.e(LOG_TAG, "Failed to initiate trace: " + e.getMessage());
                     }
-                }, 1000);
+                });
             }
         }, null);
     }

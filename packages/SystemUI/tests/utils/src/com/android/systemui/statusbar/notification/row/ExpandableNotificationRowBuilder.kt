@@ -27,6 +27,7 @@ import android.provider.DeviceConfig
 import androidx.core.os.bundleOf
 import com.android.internal.config.sysui.SystemUiDeviceConfigFlags
 import com.android.internal.logging.MetricsLogger
+import com.android.internal.logging.UiEventLogger
 import com.android.internal.statusbar.IStatusBarService
 import com.android.systemui.TestableDependency
 import com.android.systemui.classifier.FalsingManagerFake
@@ -318,14 +319,9 @@ class ExpandableNotificationRowBuilder(
         // NOTE: This flag is read when the ExpandableNotificationRow is inflated, so it needs to be
         //  set, but we do not want to override an existing value that is needed by a specific test.
 
-        val rowFuture: SettableFuture<ExpandableNotificationRow> = SettableFuture.create()
         val rowInflaterTask =
             RowInflaterTask(mFakeSystemClock, Mockito.mock(RowInflaterTaskLogger::class.java))
-        rowInflaterTask.inflate(context, null, entry, MoreExecutors.directExecutor()) { inflatedRow
-            ->
-            rowFuture.set(inflatedRow)
-        }
-        val row = rowFuture.get(1, TimeUnit.SECONDS)
+        val row = rowInflaterTask.inflateSynchronously(context, null, entry)
 
         entry.row = row
         mIconManager.createIcons(entry)
@@ -357,7 +353,8 @@ class ExpandableNotificationRowBuilder(
             mSmartReplyConstants,
             mSmartReplyController,
             featureFlags,
-            Mockito.mock(IStatusBarService::class.java)
+            Mockito.mock(IStatusBarService::class.java),
+            Mockito.mock(UiEventLogger::class.java)
         )
         row.setAboveShelfChangedListener { aboveShelf: Boolean -> }
         mBindStage.getStageParams(entry).requireContentViews(extraInflationFlags)

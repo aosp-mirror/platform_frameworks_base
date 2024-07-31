@@ -528,9 +528,10 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
                 }
 
                 @Override
-                public void onOngoingActivityStatusChanged(boolean hasOngoingActivity) {
+                public void onOngoingActivityStatusChanged(
+                        boolean hasOngoingActivity, boolean shouldAnimate) {
                     mHasOngoingActivity = hasOngoingActivity;
-                    updateStatusBarVisibilities(/* animate= */ true);
+                    updateStatusBarVisibilities(shouldAnimate);
                 }
 
                 @Override
@@ -659,9 +660,6 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
             showOngoingActivityChip(animate);
         } else {
             hideOngoingActivityChip(animate);
-        }
-        if (!Flags.statusBarScreenSharingChips()) {
-            mOngoingCallController.notifyChipVisibilityChanged(showOngoingActivityChip);
         }
     }
 

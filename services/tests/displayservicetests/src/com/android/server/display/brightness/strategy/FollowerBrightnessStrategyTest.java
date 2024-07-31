@@ -55,7 +55,6 @@ public class FollowerBrightnessStrategyTest {
                 new DisplayBrightnessState.Builder()
                         .setBrightness(brightnessToFollow)
                         .setBrightnessReason(brightnessReason)
-                        .setSdrBrightness(brightnessToFollow)
                         .setDisplayBrightnessStrategyName(mFollowerBrightnessStrategy.getName())
                         .setIsSlowChange(slowChange)
                         .build();

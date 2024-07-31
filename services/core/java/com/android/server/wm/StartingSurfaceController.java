@@ -146,7 +146,9 @@ public class StartingSurfaceController {
                     + activity);
             return null;
         }
-        final WindowState mainWindow = activity.findMainWindow(false);
+        // For snapshot surface, the top activity could be trampoline activity, so here should
+        // search for top fullscreen activity in the task.
+        final WindowState mainWindow = task.getTopFullscreenMainWindow();
         if (mainWindow == null) {
             Slog.w(TAG, "TaskSnapshotSurface.create: no main window in " + activity);
             return null;

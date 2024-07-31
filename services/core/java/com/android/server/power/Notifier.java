@@ -206,7 +206,6 @@ public class Notifier {
         mPolicy = policy;
         mFaceDownDetector = faceDownDetector;
         mScreenUndimDetector = screenUndimDetector;
-        mWakefulnessSessionObserver = new WakefulnessSessionObserver(mContext, null);
         mActivityManagerInternal = LocalServices.getService(ActivityManagerInternal.class);
         mInputManagerInternal = LocalServices.getService(InputManagerInternal.class);
         mInputMethodManagerInternal = LocalServices.getService(InputMethodManagerInternal.class);
@@ -214,6 +213,7 @@ public class Notifier {
         mDisplayManagerInternal = LocalServices.getService(DisplayManagerInternal.class);
         mTrustManager = mContext.getSystemService(TrustManager.class);
         mVibrator = mContext.getSystemService(Vibrator.class);
+        mWakefulnessSessionObserver = new WakefulnessSessionObserver(mContext, null);
 
         mHandler = new NotifierHandler(looper);
         mBackgroundExecutor = backgroundExecutor;
@@ -375,9 +375,9 @@ public class Notifier {
             final boolean unimportantForLogging = newOwnerUid == Process.SYSTEM_UID
                     && (newFlags & PowerManager.UNIMPORTANT_FOR_LOGGING) != 0;
             try {
-                mBatteryStats.noteChangeWakelockFromSource(workSource, ownerPid, tag, historyTag,
-                        monitorType, newWorkSource, newOwnerPid, newTag, newHistoryTag,
-                        newMonitorType, unimportantForLogging);
+                notifyWakelockChanging(workSource, ownerPid, tag,
+                            historyTag, monitorType, newWorkSource, newOwnerPid, newTag,
+                            newHistoryTag, newMonitorType, unimportantForLogging);
             } catch (RemoteException ex) {
                 // Ignore
             }
@@ -813,6 +813,8 @@ public class Notifier {
         if (DEBUG) {
             Slog.d(TAG, "onScreenPolicyUpdate: newPolicy=" + newPolicy);
         }
+        mWakefulnessSessionObserver.onScreenPolicyUpdate(
+                SystemClock.uptimeMillis(), displayGroupId, newPolicy);
 
         synchronized (mLock) {
             Message msg = mHandler.obtainMessage(MSG_SCREEN_POLICY);
@@ -1123,6 +1125,29 @@ public class Notifier {
             }
         }
         mWakeLockLog.onWakeLockReleased(tag, ownerUid, currentTime);
+    }
+
+    @SuppressLint("AndroidFrameworkRequiresPermission")
+    private void notifyWakelockChanging(WorkSource workSource, int ownerPid, String tag,
+            String historyTag, int monitorType, WorkSource newWorkSource, int newOwnerPid,
+            String newTag, String newHistoryTag, int newMonitorType, boolean unimportantForLogging)
+            throws RemoteException {
+        if (!mFlags.improveWakelockLatency()) {
+            mBatteryStats.noteChangeWakelockFromSource(workSource, ownerPid, tag,
+                    historyTag, monitorType, newWorkSource, newOwnerPid, newTag,
+                    newHistoryTag, newMonitorType, unimportantForLogging);
+        } else {
+            mHandler.post(() -> {
+                try {
+                    mBatteryStats.noteChangeWakelockFromSource(workSource, ownerPid, tag,
+                            historyTag, monitorType, newWorkSource, newOwnerPid, newTag,
+                            newHistoryTag, newMonitorType, unimportantForLogging);
+                } catch (RemoteException e) {
+                    Slog.e(TAG, "Failed to notify the wakelock changing from source via "
+                            + "Notifier." + e.getLocalizedMessage());
+                }
+            });
+        }
     }
 
     private final class NotifierHandler extends Handler {

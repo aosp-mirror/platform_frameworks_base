@@ -193,7 +193,7 @@ object OverlayShade {
     }
 
     object Colors {
-        val ScrimBackground = Color(0, 0, 0, alpha = 255 / 3)
+        val ScrimBackground = Color(0f, 0f, 0f, alpha = 0.2f)
         val PanelBackground: Color
             @Composable @ReadOnlyComposable get() = MaterialTheme.colorScheme.surfaceContainer
     }

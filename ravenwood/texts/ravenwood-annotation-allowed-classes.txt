@@ -143,6 +143,7 @@ android.os.Handler
 android.os.HandlerExecutor
 android.os.HandlerThread
 android.os.IBinder
+android.os.LocaleList
 android.os.Looper
 android.os.Message
 android.os.MessageQueue

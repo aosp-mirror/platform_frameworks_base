@@ -22,6 +22,7 @@ import com.android.systemui.keyguard.domain.interactor.KeyguardDismissActionInte
 import com.android.systemui.keyguard.shared.model.Edge
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.KeyguardState.GONE
+import com.android.systemui.keyguard.shared.model.KeyguardState.PRIMARY_BOUNCER
 import com.android.systemui.keyguard.shared.model.ScrimAlpha
 import com.android.systemui.keyguard.ui.KeyguardTransitionAnimationFlow
 import com.android.systemui.scene.shared.flag.SceneContainerFlag
@@ -75,9 +76,12 @@ constructor(
         return animationFlow
             .setup(
                 duration = duration,
-                // TODO(b/330311871): from can be PRIMARY_BOUNCER which would be a scene -> scene
-                //  transition
-                edge = Edge.create(from = from, to = Scenes.Gone)
+                edge =
+                    if (from == PRIMARY_BOUNCER) {
+                        Edge.INVALID
+                    } else {
+                        Edge.create(from = from, to = Scenes.Gone)
+                    }
             )
             .setupWithoutSceneContainer(
                 edge = Edge.create(from = from, to = GONE),
@@ -105,9 +109,12 @@ constructor(
             animationFlow
                 .setup(
                     duration = duration,
-                    // TODO(b/330311871): from can be PRIMARY_BOUNCER which would be a scene ->
-                    //  scene transition
-                    edge = Edge.create(from = fromState, to = Scenes.Gone),
+                    edge =
+                        if (fromState == PRIMARY_BOUNCER) {
+                            Edge.INVALID
+                        } else {
+                            Edge.create(from = fromState, to = Scenes.Gone)
+                        }
                 )
                 .setupWithoutSceneContainer(
                     edge = Edge.create(from = fromState, to = GONE),

@@ -7007,6 +7007,23 @@ public class AudioManager {
     }
 
     /**
+     * Check whether a user can mute this stream type from a given UI element.
+     *
+     * <p>Only useful for volume controllers.
+     *
+     * @param streamType type of stream to check if it's mutable from UI
+     *
+     * @hide
+     */
+    public boolean isStreamMutableByUi(int streamType) {
+        try {
+            return getService().isStreamMutableByUi(streamType);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Only useful for volume controllers.
      * @hide
      */
@@ -7412,6 +7429,21 @@ public class AudioManager {
     public void setVolumePolicy(VolumePolicy policy) {
         try {
             getService().setVolumePolicy(policy);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * @hide
+     * Queries the volume policy
+     * @return the volume policy currently in use
+     */
+    @TestApi
+    @SuppressLint("UnflaggedApi") // @TestApi without associated feature.
+    public @NonNull VolumePolicy getVolumePolicy() {
+        try {
+            return getService().getVolumePolicy();
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

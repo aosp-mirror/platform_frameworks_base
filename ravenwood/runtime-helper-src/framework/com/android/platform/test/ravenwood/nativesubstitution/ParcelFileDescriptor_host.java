@@ -25,19 +25,24 @@ import static android.os.ParcelFileDescriptor.MODE_WORLD_READABLE;
 import static android.os.ParcelFileDescriptor.MODE_WORLD_WRITEABLE;
 import static android.os.ParcelFileDescriptor.MODE_WRITE_ONLY;
 
+import android.system.ErrnoException;
+import android.system.Os;
+import android.util.Log;
+
 import com.android.internal.annotations.GuardedBy;
 import com.android.ravenwood.common.JvmWorkaround;
 
 import java.io.File;
 import java.io.FileDescriptor;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.util.HashMap;
 import java.util.Map;
 
 public class ParcelFileDescriptor_host {
+    private static final String TAG = "ParcelFileDescriptor_host";
+
     /**
      * Since we don't have a great way to keep an unmanaged {@code FileDescriptor} reference
      * alive, we keep a strong reference to the {@code RandomAccessFile} we used to open it. This
@@ -98,16 +103,18 @@ public class ParcelFileDescriptor_host {
         synchronized (sActive) {
             raf = sActive.remove(fd);
         }
+        int fdInt = JvmWorkaround.getInstance().getFdInt(fd);
         try {
             if (raf != null) {
                 raf.close();
             } else {
-                // Odd, we don't remember opening this ourselves, but let's release the
-                // underlying resource as requested
-                System.err.println("Closing unknown FileDescriptor: " + fd);
-                new FileOutputStream(fd).close();
+                // This FD wasn't created by native_open$ravenwood().
+                // The FD was passed to the PFD ctor. Just close it.
+                Os.close(fd);
             }
-        } catch (IOException ignored) {
+        } catch (IOException | ErrnoException e) {
+            Log.w(TAG, "Exception thrown while closing fd " + fdInt, e);
         }
     }
 }
+;

@@ -861,6 +861,23 @@ public class InfoMediaManagerTest {
     }
 
     @Test
+    public void addMediaDevice_withAddresslessBluetoothDevice_shouldIgnoreDeviceAndNotCrash() {
+        MediaRoute2Info bluetoothRoute =
+                new MediaRoute2Info.Builder(TEST_BLUETOOTH_ROUTE).setAddress(null).build();
+
+        final CachedBluetoothDeviceManager cachedBluetoothDeviceManager =
+                mock(CachedBluetoothDeviceManager.class);
+        when(mLocalBluetoothManager.getCachedDeviceManager())
+                .thenReturn(cachedBluetoothDeviceManager);
+        when(cachedBluetoothDeviceManager.findDevice(any(BluetoothDevice.class))).thenReturn(null);
+
+        mInfoMediaManager.mMediaDevices.clear();
+        mInfoMediaManager.addMediaDevice(bluetoothRoute, TEST_SYSTEM_ROUTING_SESSION);
+
+        assertThat(mInfoMediaManager.mMediaDevices.size()).isEqualTo(0);
+    }
+
+    @Test
     public void onRoutesUpdated_setsFirstSelectedRouteAsCurrentConnectedDevice() {
         final CachedBluetoothDeviceManager cachedBluetoothDeviceManager =
                 mock(CachedBluetoothDeviceManager.class);

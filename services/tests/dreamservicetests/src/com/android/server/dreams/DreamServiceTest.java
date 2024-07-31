@@ -91,6 +91,28 @@ public class DreamServiceTest {
     }
 
     @Test
+    public void testMetadataParsing_nonexistentSettingsActivity()
+            throws PackageManager.NameNotFoundException {
+        final String testDreamClassName =
+                "com.android.server.dreams.TestDreamServiceWithNonexistentSettings";
+        final DreamService.DreamMetadata metadata = getDreamMetadata(testDreamClassName);
+
+        assertThat(metadata.settingsActivity).isNull();
+        assertThat(metadata.dreamCategory).isEqualTo(DreamService.DREAM_CATEGORY_DEFAULT);
+    }
+
+    @Test
+    public void testMetadataParsing_noPackage_nonexistentSettingsActivity()
+            throws PackageManager.NameNotFoundException {
+        final String testDreamClassName =
+                "com.android.server.dreams.TestDreamServiceNoPackageNonexistentSettings";
+        final DreamService.DreamMetadata metadata = getDreamMetadata(testDreamClassName);
+
+        assertThat(metadata.settingsActivity).isNull();
+        assertThat(metadata.dreamCategory).isEqualTo(DreamService.DREAM_CATEGORY_DEFAULT);
+    }
+
+    @Test
     public void testMetadataParsing_exceptionReading() {
         final PackageManager packageManager = Mockito.mock(PackageManager.class);
         final ServiceInfo serviceInfo = Mockito.mock(ServiceInfo.class);

@@ -26,6 +26,7 @@ import android.icu.util.ULocale;
 import android.util.LruCache;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.libcore.Flags;
 
 import java.text.FieldPosition;
 import java.util.TimeZone;
@@ -122,5 +123,15 @@ public final class DateIntervalFormat {
                 && c.get(Calendar.MINUTE) == 0
                 && c.get(Calendar.SECOND) == 0
                 && c.get(Calendar.MILLISECOND) == 0;
+    }
+
+
+    @VisibleForTesting(visibility = PACKAGE)
+    public static boolean isLibcoreVFlagEnabled() {
+        // Note that the Flags class is expected to be jarjar-ed in the build-time.
+        // See go/repackage_flags
+        // The full-qualified name should be like
+        // com.android.internal.hidden_from_bootclasspath.com.android.libcore.Flags
+        return Flags.vApis();
     }
 }

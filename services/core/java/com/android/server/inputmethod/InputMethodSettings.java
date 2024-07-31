@@ -571,57 +571,6 @@ final class InputMethodSettings {
         }
     }
 
-    /**
-     * A variant of {@link InputMethodManagerService#getCurrentInputMethodSubtypeLocked()} for
-     * non-current users.
-     *
-     * <p>TODO: Address code duplication between this and
-     * {@link InputMethodManagerService#getCurrentInputMethodSubtypeLocked()}.</p>
-     *
-     * @return {@link InputMethodSubtype} if exists. {@code null} otherwise.
-     */
-    @Nullable
-    InputMethodSubtype getCurrentInputMethodSubtypeForNonCurrentUsers() {
-        final String selectedMethodId = getSelectedInputMethod();
-        if (selectedMethodId == null) {
-            return null;
-        }
-        final InputMethodInfo imi = mMethodMap.get(selectedMethodId);
-        if (imi == null || imi.getSubtypeCount() == 0) {
-            return null;
-        }
-
-        final int subtypeHashCode = getSelectedInputMethodSubtypeHashCode();
-        if (subtypeHashCode != INVALID_SUBTYPE_HASHCODE) {
-            final int subtypeIndex = SubtypeUtils.getSubtypeIdFromHashCode(imi,
-                    subtypeHashCode);
-            if (subtypeIndex >= 0) {
-                return imi.getSubtypeAt(subtypeIndex);
-            }
-        }
-
-        // If there are no selected subtypes, the framework will try to find the most applicable
-        // subtype from explicitly or implicitly enabled subtypes.
-        final List<InputMethodSubtype> explicitlyOrImplicitlyEnabledSubtypes =
-                getEnabledInputMethodSubtypeList(imi, true);
-        // If there is only one explicitly or implicitly enabled subtype, just returns it.
-        if (explicitlyOrImplicitlyEnabledSubtypes.isEmpty()) {
-            return null;
-        }
-        if (explicitlyOrImplicitlyEnabledSubtypes.size() == 1) {
-            return explicitlyOrImplicitlyEnabledSubtypes.get(0);
-        }
-        final String locale = SystemLocaleWrapper.get(mUserId).get(0).toString();
-        final InputMethodSubtype subtype = SubtypeUtils.findLastResortApplicableSubtype(
-                explicitlyOrImplicitlyEnabledSubtypes, SubtypeUtils.SUBTYPE_MODE_KEYBOARD,
-                locale, true);
-        if (subtype != null) {
-            return subtype;
-        }
-        return SubtypeUtils.findLastResortApplicableSubtype(
-                explicitlyOrImplicitlyEnabledSubtypes, null, locale, true);
-    }
-
     @NonNull
     AdditionalSubtypeMap getNewAdditionalSubtypeMap(@NonNull String imeId,
             @NonNull ArrayList<InputMethodSubtype> subtypes,

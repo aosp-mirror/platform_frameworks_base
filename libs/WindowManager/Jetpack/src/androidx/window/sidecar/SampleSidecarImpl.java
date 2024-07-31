@@ -25,11 +25,11 @@ import android.os.Bundle;
 import android.os.IBinder;
 
 import androidx.annotation.NonNull;
+import androidx.window.common.BaseDataProducer;
 import androidx.window.common.CommonFoldingFeature;
 import androidx.window.common.DeviceStateManagerFoldingFeatureProducer;
 import androidx.window.common.EmptyLifecycleCallbacksAdapter;
 import androidx.window.common.RawFoldingFeatureProducer;
-import androidx.window.util.BaseDataProducer;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -16,6 +16,7 @@
 
 package com.android.systemui.util.kotlin
 
+import android.os.Handler
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Background
@@ -23,15 +24,16 @@ import com.android.systemui.dagger.qualifiers.Tracing
 import com.android.systemui.dagger.qualifiers.UiBackground
 import dagger.Module
 import dagger.Provides
-import java.util.concurrent.Executor
-import kotlin.coroutines.CoroutineContext
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.android.asCoroutineDispatcher
 import kotlinx.coroutines.asCoroutineDispatcher
 import kotlinx.coroutines.newFixedThreadPoolContext
 import kotlinx.coroutines.plus
+import java.util.concurrent.Executor
+import kotlin.coroutines.CoroutineContext
 
 private const val LIMIT_BACKGROUND_DISPATCHER_THREADS = true
 
@@ -75,6 +77,14 @@ class SysUICoroutinesModule {
         } else {
             Dispatchers.IO
         }
+    }
+
+    @Provides
+    @SysUISingleton
+    @SettingsSingleThreadBackground
+    fun settingsBgDispatcher(@Background bgHandler: Handler): CoroutineDispatcher {
+        // Handlers are guaranteed to be sequential so we use that one for now.
+        return bgHandler.asCoroutineDispatcher("SettingsBg")
     }
 
     @Provides

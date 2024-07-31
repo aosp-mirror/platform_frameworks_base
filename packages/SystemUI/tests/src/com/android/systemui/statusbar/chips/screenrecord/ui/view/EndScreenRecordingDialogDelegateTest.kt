@@ -20,6 +20,7 @@ import android.app.ActivityManager
 import android.content.ComponentName
 import android.content.DialogInterface
 import android.content.Intent
+import android.content.applicationContext
 import android.content.packageManager
 import android.content.pm.ApplicationInfo
 import androidx.test.filters.SmallTest
@@ -95,11 +96,13 @@ class EndScreenRecordingDialogDelegateTest : SysuiTestCase() {
 
         underTest.beforeCreate(sysuiDialog, /* savedInstanceState= */ null)
 
-        // It'd be nice to use R.string.screenrecord_stop_dialog_message_specific_app directly, but
-        // it includes the <b> tags which aren't in the returned string.
-        val result = argumentCaptor<CharSequence>()
-        verify(sysuiDialog).setMessage(result.capture())
-        assertThat(result.firstValue.toString()).isEqualTo("You will stop recording Fake Package")
+        verify(sysuiDialog)
+            .setMessage(
+                context.getString(
+                    R.string.screenrecord_stop_dialog_message_specific_app,
+                    "Fake Package",
+                )
+            )
     }
 
     @Test
@@ -140,6 +143,7 @@ class EndScreenRecordingDialogDelegateTest : SysuiTestCase() {
         underTest =
             EndScreenRecordingDialogDelegate(
                 kosmos.endMediaProjectionDialogHelper,
+                kosmos.applicationContext,
                 stopAction = kosmos.screenRecordChipInteractor::stopRecording,
                 recordedTask,
             )

@@ -74,7 +74,7 @@ constructor(
         when (intent?.action) {
             ACTION_START -> {
                 bgExecutor.execute {
-                    traceurMessageSender.startTracing(issueRecordingState.traceType)
+                    traceurMessageSender.startTracing(issueRecordingState.traceConfig)
                 }
                 issueRecordingState.isRecording = true
                 if (!issueRecordingState.recordScreen) {

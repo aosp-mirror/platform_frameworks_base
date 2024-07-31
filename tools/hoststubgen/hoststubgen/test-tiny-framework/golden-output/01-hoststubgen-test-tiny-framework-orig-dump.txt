@@ -2706,6 +2706,98 @@ SourceFile: "TinyFrameworkPackageRedirect.java"
 RuntimeInvisibleAnnotations:
   x: #x()
     android.hosttest.annotation.HostSideTestWholeClassStub
+## Class: com/android/hoststubgen/test/tinyframework/packagetest/A.class
+  Compiled from "A.java"
+public class com.android.hoststubgen.test.tinyframework.packagetest.A
+  minor version: 0
+  major version: 61
+  flags: (0x0021) ACC_PUBLIC, ACC_SUPER
+  this_class: #x                          // com/android/hoststubgen/test/tinyframework/packagetest/A
+  super_class: #x                         // java/lang/Object
+  interfaces: 0, fields: 0, methods: 1, attributes: 1
+  public com.android.hoststubgen.test.tinyframework.packagetest.A();
+    descriptor: ()V
+    flags: (0x0001) ACC_PUBLIC
+    Code:
+      stack=1, locals=1, args_size=1
+         x: aload_0
+         x: invokespecial #x                  // Method java/lang/Object."<init>":()V
+         x: return
+      LineNumberTable:
+      LocalVariableTable:
+        Start  Length  Slot  Name   Signature
+            0       5     0  this   Lcom/android/hoststubgen/test/tinyframework/packagetest/A;
+}
+SourceFile: "A.java"
+## Class: com/android/hoststubgen/test/tinyframework/packagetest/B.class
+  Compiled from "B.java"
+public class com.android.hoststubgen.test.tinyframework.packagetest.B
+  minor version: 0
+  major version: 61
+  flags: (0x0021) ACC_PUBLIC, ACC_SUPER
+  this_class: #x                          // com/android/hoststubgen/test/tinyframework/packagetest/B
+  super_class: #x                         // java/lang/Object
+  interfaces: 0, fields: 0, methods: 1, attributes: 1
+  public com.android.hoststubgen.test.tinyframework.packagetest.B();
+    descriptor: ()V
+    flags: (0x0001) ACC_PUBLIC
+    Code:
+      stack=1, locals=1, args_size=1
+         x: aload_0
+         x: invokespecial #x                  // Method java/lang/Object."<init>":()V
+         x: return
+      LineNumberTable:
+      LocalVariableTable:
+        Start  Length  Slot  Name   Signature
+            0       5     0  this   Lcom/android/hoststubgen/test/tinyframework/packagetest/B;
+}
+SourceFile: "B.java"
+## Class: com/android/hoststubgen/test/tinyframework/packagetest/sub/A.class
+  Compiled from "A.java"
+public class com.android.hoststubgen.test.tinyframework.packagetest.sub.A
+  minor version: 0
+  major version: 61
+  flags: (0x0021) ACC_PUBLIC, ACC_SUPER
+  this_class: #x                          // com/android/hoststubgen/test/tinyframework/packagetest/sub/A
+  super_class: #x                         // java/lang/Object
+  interfaces: 0, fields: 0, methods: 1, attributes: 1
+  public com.android.hoststubgen.test.tinyframework.packagetest.sub.A();
+    descriptor: ()V
+    flags: (0x0001) ACC_PUBLIC
+    Code:
+      stack=1, locals=1, args_size=1
+         x: aload_0
+         x: invokespecial #x                  // Method java/lang/Object."<init>":()V
+         x: return
+      LineNumberTable:
+      LocalVariableTable:
+        Start  Length  Slot  Name   Signature
+            0       5     0  this   Lcom/android/hoststubgen/test/tinyframework/packagetest/sub/A;
+}
+SourceFile: "A.java"
+## Class: com/android/hoststubgen/test/tinyframework/packagetest/sub/B.class
+  Compiled from "B.java"
+public class com.android.hoststubgen.test.tinyframework.packagetest.sub.B
+  minor version: 0
+  major version: 61
+  flags: (0x0021) ACC_PUBLIC, ACC_SUPER
+  this_class: #x                          // com/android/hoststubgen/test/tinyframework/packagetest/sub/B
+  super_class: #x                         // java/lang/Object
+  interfaces: 0, fields: 0, methods: 1, attributes: 1
+  public com.android.hoststubgen.test.tinyframework.packagetest.sub.B();
+    descriptor: ()V
+    flags: (0x0001) ACC_PUBLIC
+    Code:
+      stack=1, locals=1, args_size=1
+         x: aload_0
+         x: invokespecial #x                  // Method java/lang/Object."<init>":()V
+         x: return
+      LineNumberTable:
+      LocalVariableTable:
+        Start  Length  Slot  Name   Signature
+            0       5     0  this   Lcom/android/hoststubgen/test/tinyframework/packagetest/sub/B;
+}
+SourceFile: "B.java"
 ## Class: com/android/hoststubgen/test/tinyframework/subclasstest/C1.class
   Compiled from "C1.java"
 public class com.android.hoststubgen.test.tinyframework.subclasstest.C1

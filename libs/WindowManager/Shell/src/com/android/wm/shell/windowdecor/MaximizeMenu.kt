@@ -40,6 +40,7 @@ import android.view.MotionEvent
 import android.view.MotionEvent.ACTION_HOVER_ENTER
 import android.view.MotionEvent.ACTION_HOVER_EXIT
 import android.view.MotionEvent.ACTION_HOVER_MOVE
+import android.view.MotionEvent.ACTION_OUTSIDE
 import android.view.SurfaceControl
 import android.view.SurfaceControl.Transaction
 import android.view.SurfaceControlViewHost
@@ -104,14 +105,16 @@ class MaximizeMenu(
         onMaximizeClickListener: OnTaskActionClickListener,
         onLeftSnapClickListener: OnTaskActionClickListener,
         onRightSnapClickListener: OnTaskActionClickListener,
-        onHoverListener: (Boolean) -> Unit
+        onHoverListener: (Boolean) -> Unit,
+        onOutsideTouchListener: () -> Unit,
     ) {
         if (maximizeMenu != null) return
         createMaximizeMenu(
             onMaximizeClickListener = onMaximizeClickListener,
             onLeftSnapClickListener = onLeftSnapClickListener,
             onRightSnapClickListener = onRightSnapClickListener,
-            onHoverListener = onHoverListener
+            onHoverListener = onHoverListener,
+            onOutsideTouchListener = onOutsideTouchListener
         )
         maximizeMenuView?.animateOpenMenu()
     }
@@ -129,7 +132,8 @@ class MaximizeMenu(
         onMaximizeClickListener: OnTaskActionClickListener,
         onLeftSnapClickListener: OnTaskActionClickListener,
         onRightSnapClickListener: OnTaskActionClickListener,
-        onHoverListener: (Boolean) -> Unit
+        onHoverListener: (Boolean) -> Unit,
+        onOutsideTouchListener: () -> Unit
     ) {
         val t = transactionSupplier.get()
         val builder = SurfaceControl.Builder()
@@ -142,7 +146,8 @@ class MaximizeMenu(
                 menuWidth,
                 menuHeight,
                 WindowManager.LayoutParams.TYPE_APPLICATION,
-                WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
+                WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
+                        or WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH,
                 PixelFormat.TRANSPARENT
         )
         lp.title = "Maximize Menu for Task=" + taskInfo.taskId
@@ -172,6 +177,7 @@ class MaximizeMenu(
                 onRightSnapClickListener.onClick(taskId, "right_snap_option")
             }
             menuView.onMenuHoverListener = onHoverListener
+            menuView.onOutsideTouchListener = onOutsideTouchListener
             viewHost.setView(menuView.rootView, lp)
         }
 
@@ -268,6 +274,8 @@ class MaximizeMenu(
         var onRightSnapClickListener: (() -> Unit)? = null
         /** Invoked whenever the hover state of the menu changes. */
         var onMenuHoverListener: ((Boolean) -> Unit)? = null
+        /** Invoked whenever a click occurs outside the menu */
+        var onOutsideTouchListener: (() -> Unit)? = null
 
         init {
             overlay.setOnHoverListener { _, event ->
@@ -312,6 +320,13 @@ class MaximizeMenu(
             maximizeButton.setOnClickListener { onMaximizeClickListener?.invoke() }
             snapRightButton.setOnClickListener { onRightSnapClickListener?.invoke() }
             snapLeftButton.setOnClickListener { onLeftSnapClickListener?.invoke() }
+            rootView.setOnTouchListener { _, event ->
+                if (event.actionMasked == ACTION_OUTSIDE) {
+                    onOutsideTouchListener?.invoke()
+                    false
+                }
+                true
+            }
 
             // To prevent aliasing.
             maximizeButton.setLayerType(View.LAYER_TYPE_SOFTWARE, null)

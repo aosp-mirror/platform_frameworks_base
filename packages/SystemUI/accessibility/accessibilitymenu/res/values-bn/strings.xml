@@ -23,7 +23,7 @@
     <string name="accessibility_menu_description" msgid="4458354794093858297">"আপনার ডিভাইস নিয়ন্ত্রণ করতে, \'অ্যাক্সেসিবিলিটি মেনু\' একটি বড় অন-স্ক্রিন মেনু দেখায়। আপনি ফোন লক, ভলিউম ও উজ্জ্বলতা নিয়ন্ত্রণ, স্ক্রিনশট নেওয়া এবং আরও অনেক কিছু করতে পারবেন।"</string>
     <string name="accessibility_menu_summary" msgid="340071398148208130">"বড় করে দেখানো মেনুর মাধ্যমে ডিভাইস নিয়ন্ত্রণ করুন"</string>
     <string name="accessibility_menu_settings_name" msgid="1716888058785672611">"অ্যাক্সেসিবিলিটি মেনুর সেটিংস"</string>
-    <string name="accessibility_menu_large_buttons_title" msgid="8978499601044961736">"বোতাম বড় করা"</string>
+    <string name="accessibility_menu_large_buttons_title" msgid="8978499601044961736">"বড় বোতাম"</string>
     <string name="accessibility_menu_large_buttons_summary" msgid="236873938502785311">"অ্যাক্সেসিবিলিটি মেনু বোতামের সাইজ বাড়ান"</string>
     <string name="pref_help_title" msgid="6871558837025010641">"সহায়তা"</string>
     <string name="brightness_percentage_label" msgid="7391554573977867369">"উজ্জ্বলতা <xliff:g id="PERCENTAGE">%1$s</xliff:g> %%"</string>

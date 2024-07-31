@@ -18,9 +18,9 @@ package android.os;
 
 import android.platform.test.ravenwood.RavenwoodRule;
 
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.MediumTest;
 import androidx.test.filters.Suppress;
-import androidx.test.runner.AndroidJUnit4;
 
 import org.junit.Rule;
 import org.junit.Test;

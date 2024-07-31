@@ -250,6 +250,7 @@ public class BatteryControllerImpl extends BroadcastReceiver implements BatteryC
             mLevel = (int) (100f
                     * intent.getIntExtra(BatteryManager.EXTRA_LEVEL, 0)
                     / intent.getIntExtra(BatteryManager.EXTRA_SCALE, 100));
+            int previousPluggedChargingSource = mPluggedChargingSource;
             mPluggedChargingSource = intent.getIntExtra(BatteryManager.EXTRA_PLUGGED, 0);
             mPluggedIn = mPluggedChargingSource != 0;
             final int status = intent.getIntExtra(BatteryManager.EXTRA_STATUS,
@@ -276,7 +277,9 @@ public class BatteryControllerImpl extends BroadcastReceiver implements BatteryC
                 mIsBatteryDefender = isBatteryDefender;
                 fireIsBatteryDefenderChanged();
             }
-
+            if (mPluggedChargingSource != previousPluggedChargingSource) {
+                updatePowerSave();
+            }
             fireBatteryLevelChanged();
         } else if (action.equals(PowerManager.ACTION_POWER_SAVE_MODE_CHANGED)) {
             updatePowerSave();

@@ -324,7 +324,7 @@ class ScreenRotationAnimation {
             if (!w.mToken.mRoundedCornerOverlay || !w.isVisible() || !w.mWinAnimator.hasSurface()) {
                 return;
             }
-            t.setSkipScreenshot(w.mWinAnimator.mSurfaceController.mSurfaceControl, skipScreenshot);
+            t.setSkipScreenshot(w.mWinAnimator.mSurfaceControl, skipScreenshot);
         }, false);
         if (!skipScreenshot) {
             // Use sync apply to apply the change immediately, so that the next
@@ -815,10 +815,8 @@ class ScreenRotationAnimation {
                 if (mDisplayContent.getRotationAnimation() == ScreenRotationAnimation.this) {
                     // It also invokes kill().
                     mDisplayContent.setRotationAnimation(null);
-                    if (mDisplayContent.mDisplayRotationCompatPolicy != null) {
-                        mDisplayContent.mDisplayRotationCompatPolicy
-                                .onScreenRotationAnimationFinished();
-                    }
+                    mDisplayContent.mAppCompatCameraPolicy
+                            .onScreenRotationAnimationFinished();
                 } else {
                     kill();
                 }

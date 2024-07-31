@@ -21,7 +21,6 @@ import android.annotation.Nullable;
 import android.os.Build;
 import android.os.CombinedVibration;
 import android.os.IBinder;
-import android.os.VibrationAttributes;
 import android.os.VibrationEffect;
 import android.os.vibrator.Flags;
 import android.os.vibrator.PrebakedSegment;
@@ -123,6 +122,24 @@ final class VibrationStepConductor implements IBinder.DeathRecipient {
 
     @Nullable
     AbstractVibratorStep nextVibrateStep(long startTime, VibratorController controller,
+            VibrationEffect effect) {
+        if (Build.IS_DEBUGGABLE) {
+            expectIsVibrationThread(true);
+        }
+        if (effect instanceof VibrationEffect.VendorEffect vendorEffect) {
+            return new PerformVendorEffectVibratorStep(this, startTime, controller, vendorEffect,
+                    /* pendingVibratorOffDeadline= */ 0);
+        }
+        if (effect instanceof VibrationEffect.Composed composed) {
+            return nextVibrateStep(startTime, controller, composed, /* segmentIndex= */ 0,
+                    /* pendingVibratorOffDeadline= */ 0);
+        }
+        Slog.wtf(TAG, "Unable to create next step for unexpected effect: " + effect);
+        return null;
+    }
+
+    @NonNull
+    AbstractVibratorStep nextVibrateStep(long startTime, VibratorController controller,
             VibrationEffect.Composed effect, int segmentIndex, long pendingVibratorOffDeadline) {
         if (Build.IS_DEBUGGABLE) {
             expectIsVibrationThread(true);
@@ -159,16 +176,11 @@ final class VibrationStepConductor implements IBinder.DeathRecipient {
             expectIsVibrationThread(true);
         }
 
-        if (!mVibration.callerInfo.attrs.isFlagSet(
-                VibrationAttributes.FLAG_BYPASS_USER_VIBRATION_INTENSITY_SCALE)) {
-            if (Flags.adaptiveHapticsEnabled()) {
-                waitForVibrationParamsIfRequired();
-            }
-            // Scale resolves the default amplitudes from the effect before scaling them.
-            mVibration.scaleEffects(mVibrationScaler);
-        } else {
-            mVibration.resolveEffects(mVibrationScaler.getDefaultVibrationAmplitude());
+        if (Flags.adaptiveHapticsEnabled()) {
+            waitForVibrationParamsIfRequired();
         }
+        // Scale resolves the default amplitudes from the effect before scaling them.
+        mVibration.scaleEffects(mVibrationScaler);
 
         mVibration.adaptToDevice(mDeviceAdapter);
         CombinedVibration.Sequential sequentialEffect = toSequential(mVibration.getEffectToPlay());

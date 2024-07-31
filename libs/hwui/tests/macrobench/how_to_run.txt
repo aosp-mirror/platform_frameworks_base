@@ -3,3 +3,7 @@ adb push $OUT/data/benchmarktest/hwuimacro/hwuimacro /data/benchmarktest/hwuimac
 adb shell /data/benchmarktest/hwuimacro/hwuimacro shadowgrid2 --onscreen
 
 Pass --help to get help
+
+OR (if you don't need to pass arguments)
+
+atest hwuimacro

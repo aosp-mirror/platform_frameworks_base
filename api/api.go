@@ -54,16 +54,15 @@ var non_updatable_modules = []string{virtualization, location}
 // The properties of the combined_apis module type.
 type CombinedApisProperties struct {
 	// Module libraries in the bootclasspath
-	Bootclasspath []string
+	Bootclasspath proptools.Configurable[[]string]
 	// Module libraries on the bootclasspath if include_nonpublic_framework_api is true.
 	Conditional_bootclasspath []string
 	// Module libraries in system server
-	System_server_classpath []string
+	System_server_classpath proptools.Configurable[[]string]
 }
 
 type CombinedApis struct {
 	android.ModuleBase
-	android.DefaultableModuleBase
 
 	properties CombinedApisProperties
 }
@@ -74,34 +73,41 @@ func init() {
 
 func registerBuildComponents(ctx android.RegistrationContext) {
 	ctx.RegisterModuleType("combined_apis", combinedApisModuleFactory)
-	ctx.RegisterModuleType("combined_apis_defaults", CombinedApisModuleDefaultsFactory)
 }
 
 var PrepareForCombinedApisTest = android.FixtureRegisterWithContext(registerBuildComponents)
 
-func (a *CombinedApis) apiFingerprintStubDeps() []string {
+func (a *CombinedApis) bootclasspath(ctx android.ConfigAndErrorContext) []string {
+	return a.properties.Bootclasspath.GetOrDefault(a.ConfigurableEvaluator(ctx), nil)
+}
+
+func (a *CombinedApis) systemServerClasspath(ctx android.ConfigAndErrorContext) []string {
+	return a.properties.System_server_classpath.GetOrDefault(a.ConfigurableEvaluator(ctx), nil)
+}
+
+func (a *CombinedApis) apiFingerprintStubDeps(ctx android.BottomUpMutatorContext) []string {
 	ret := []string{}
 	ret = append(
 		ret,
-		transformArray(a.properties.Bootclasspath, "", ".stubs")...,
+		transformArray(a.bootclasspath(ctx), "", ".stubs")...,
 	)
 	ret = append(
 		ret,
-		transformArray(a.properties.Bootclasspath, "", ".stubs.system")...,
+		transformArray(a.bootclasspath(ctx), "", ".stubs.system")...,
 	)
 	ret = append(
 		ret,
-		transformArray(a.properties.Bootclasspath, "", ".stubs.module_lib")...,
+		transformArray(a.bootclasspath(ctx), "", ".stubs.module_lib")...,
 	)
 	ret = append(
 		ret,
-		transformArray(a.properties.System_server_classpath, "", ".stubs.system_server")...,
+		transformArray(a.systemServerClasspath(ctx), "", ".stubs.system_server")...,
 	)
 	return ret
 }
 
 func (a *CombinedApis) DepsMutator(ctx android.BottomUpMutatorContext) {
-	ctx.AddDependency(ctx.Module(), nil, a.apiFingerprintStubDeps()...)
+	ctx.AddDependency(ctx.Module(), nil, a.apiFingerprintStubDeps(ctx)...)
 }
 
 func (a *CombinedApis) GenerateAndroidBuildActions(ctx android.ModuleContext) {
@@ -532,8 +538,8 @@ func createFullExportableApiLibraries(ctx android.LoadHookContext) {
 }
 
 func (a *CombinedApis) createInternalModules(ctx android.LoadHookContext) {
-	bootclasspath := a.properties.Bootclasspath
-	system_server_classpath := a.properties.System_server_classpath
+	bootclasspath := a.bootclasspath(ctx)
+	system_server_classpath := a.systemServerClasspath(ctx)
 	if ctx.Config().VendorConfig("ANDROID").Bool("include_nonpublic_framework_api") {
 		bootclasspath = append(bootclasspath, a.properties.Conditional_bootclasspath...)
 		sort.Strings(bootclasspath)
@@ -568,7 +574,6 @@ func combinedApisModuleFactory() android.Module {
 	module := &CombinedApis{}
 	module.AddProperties(&module.properties)
 	android.InitAndroidModule(module)
-	android.InitDefaultableModule(module)
 	android.AddLoadHook(module, func(ctx android.LoadHookContext) { module.createInternalModules(ctx) })
 	return module
 }
@@ -604,17 +609,4 @@ func remove(s []string, v string) []string {
 		}
 	}
 	return s2
-}
-
-// Defaults
-type CombinedApisModuleDefaults struct {
-	android.ModuleBase
-	android.DefaultsModuleBase
-}
-
-func CombinedApisModuleDefaultsFactory() android.Module {
-	module := &CombinedApisModuleDefaults{}
-	module.AddProperties(&CombinedApisProperties{})
-	android.InitDefaultsModule(module)
-	return module
 }

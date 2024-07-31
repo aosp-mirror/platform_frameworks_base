@@ -759,20 +759,24 @@ public class TaskFragmentTest extends WindowTestsBase {
         // Assert fixed orientation request is ignored for activity in ActivityEmbedding split.
         activity0.setRequestedOrientation(SCREEN_ORIENTATION_LANDSCAPE);
 
-        assertFalse(activity0.isLetterboxedForFixedOrientationAndAspectRatio());
+        assertFalse(activity0.mAppCompatController.getAppCompatAspectRatioPolicy()
+                .isLetterboxedForFixedOrientationAndAspectRatio());
         assertEquals(SCREEN_ORIENTATION_UNSET, task.getOrientation());
 
         activity1.setRequestedOrientation(SCREEN_ORIENTATION_PORTRAIT);
 
-        assertFalse(activity1.isLetterboxedForFixedOrientationAndAspectRatio());
+        assertFalse(activity1.mAppCompatController.getAppCompatAspectRatioPolicy()
+                .isLetterboxedForFixedOrientationAndAspectRatio());
         assertEquals(SCREEN_ORIENTATION_UNSET, task.getOrientation());
 
         // Also verify the behavior on device that ignore orientation request.
         mDisplayContent.setIgnoreOrientationRequest(true);
         task.onConfigurationChanged(task.getParent().getConfiguration());
 
-        assertFalse(activity0.isLetterboxedForFixedOrientationAndAspectRatio());
-        assertFalse(activity1.isLetterboxedForFixedOrientationAndAspectRatio());
+        assertFalse(activity0.mAppCompatController.getAppCompatAspectRatioPolicy()
+                .isLetterboxedForFixedOrientationAndAspectRatio());
+        assertFalse(activity1.mAppCompatController.getAppCompatAspectRatioPolicy()
+                .isLetterboxedForFixedOrientationAndAspectRatio());
         assertEquals(SCREEN_ORIENTATION_UNSET, task.getOrientation());
 
         tf0.setResumedActivity(activity0, "test");
@@ -991,16 +995,14 @@ public class TaskFragmentTest extends WindowTestsBase {
         // The focus should change.
         assertEquals(winLeftTop, mDisplayContent.mCurrentFocus);
 
-        if (Flags.embeddedActivityBackNavFlag()) {
-            // Move focus if the adjacent activity is more recently active.
-            doReturn(1L).when(appLeftTop).getLastWindowCreateTime();
-            doReturn(2L).when(appRightTop).getLastWindowCreateTime();
-            assertTrue(mWm.moveFocusToAdjacentEmbeddedWindow(winLeftTop));
+        // Move focus if the adjacent activity is more recently active.
+        doReturn(1L).when(appLeftTop).getLastWindowCreateTime();
+        doReturn(2L).when(appRightTop).getLastWindowCreateTime();
+        assertTrue(mWm.moveFocusToAdjacentEmbeddedWindow(winLeftTop));
 
-            // Do not move the focus if the adjacent activity is less recently active.
-            doReturn(3L).when(appLeftTop).getLastWindowCreateTime();
-            assertFalse(mWm.moveFocusToAdjacentEmbeddedWindow(winLeftTop));
-        }
+        // Do not move the focus if the adjacent activity is less recently active.
+        doReturn(3L).when(appLeftTop).getLastWindowCreateTime();
+        assertFalse(mWm.moveFocusToAdjacentEmbeddedWindow(winLeftTop));
     }
 
     @Test
@@ -1043,6 +1045,28 @@ public class TaskFragmentTest extends WindowTestsBase {
         // Should be invisible even if it is ACTIVITY_TYPE_HOME.
         when(taskFragment.getActivityType()).thenReturn(ACTIVITY_TYPE_HOME);
         assertFalse(taskFragment.shouldBeVisible(null));
+    }
+
+    @Test
+    public void testTaskFragmentSmallestScreenWidthDp() {
+        // Create an embedded TaskFragment in a Task.
+        final Task task = createTask(mDisplayContent);
+        final TaskFragment taskFragment = new TaskFragmentBuilder(mAtm)
+                .setParentTask(task)
+                .createActivityCount(1)
+                .build();
+        final Rect taskBounds = task.getBounds();
+
+        // Making the bounds of the embedded TaskFragment smaller than the parent Task.
+        taskFragment.setBounds(taskBounds.left, taskBounds.top, taskBounds.right / 2,
+                taskBounds.bottom);
+
+        // The swdp should be calculated via the TF bounds when it is a multi-window TF.
+        final Configuration outConfig = new Configuration();
+        outConfig.windowConfiguration.setWindowingMode(WINDOWING_MODE_MULTI_WINDOW);
+        taskFragment.computeConfigResourceOverrides(outConfig, task.getConfiguration());
+        assertEquals(outConfig.smallestScreenWidthDp,
+                Math.min(outConfig.screenWidthDp, outConfig.screenHeightDp));
     }
 
     private WindowState createAppWindow(ActivityRecord app, String name) {

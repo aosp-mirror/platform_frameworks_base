@@ -131,8 +131,6 @@ public class PhoneWindowManagerTests {
 
     @Test
     public void testScreenTurnedOff() {
-        mSetFlagsRule.enableFlags(com.android.window.flags.Flags
-                .FLAG_SKIP_SLEEPING_WHEN_SWITCHING_DISPLAY);
         doNothing().when(mPhoneWindowManager).updateSettings(any());
         doNothing().when(mPhoneWindowManager).initializeHdmiState();
         final boolean[] isScreenTurnedOff = { false };
@@ -159,14 +157,15 @@ public class PhoneWindowManagerTests {
         // Skip sleep-token for non-sleep-screen-off.
         clearInvocations(tokenAcquirer);
         mPhoneWindowManager.screenTurnedOff(DEFAULT_DISPLAY, true /* isSwappingDisplay */);
-        verify(tokenAcquirer, never()).acquire(anyInt(), anyBoolean());
+        verify(tokenAcquirer, never()).acquire(anyInt());
         assertThat(isScreenTurnedOff[0]).isTrue();
 
         // Apply sleep-token for sleep-screen-off.
+        isScreenTurnedOff[0] = false;
         mPhoneWindowManager.startedGoingToSleep(DEFAULT_DISPLAY, 0 /* reason */);
         assertThat(mPhoneWindowManager.mIsGoingToSleepDefaultDisplay).isTrue();
         mPhoneWindowManager.screenTurnedOff(DEFAULT_DISPLAY, true /* isSwappingDisplay */);
-        verify(tokenAcquirer).acquire(eq(DEFAULT_DISPLAY), eq(true));
+        verify(tokenAcquirer).acquire(eq(DEFAULT_DISPLAY));
 
         mPhoneWindowManager.finishedGoingToSleep(DEFAULT_DISPLAY, 0 /* reason */);
         assertThat(mPhoneWindowManager.mIsGoingToSleepDefaultDisplay).isFalse();
@@ -176,11 +175,11 @@ public class PhoneWindowManagerTests {
         isScreenTurnedOff[0] = false;
         clearInvocations(tokenAcquirer);
         mPhoneWindowManager.screenTurnedOff(DEFAULT_DISPLAY, true /* isSwappingDisplay */);
-        verify(tokenAcquirer, never()).acquire(anyInt(), anyBoolean());
+        verify(tokenAcquirer, never()).acquire(anyInt());
         assertThat(displayPolicy.isScreenOnEarly()).isFalse();
         assertThat(displayPolicy.isScreenOnFully()).isFalse();
         mPhoneWindowManager.startedGoingToSleep(DEFAULT_DISPLAY, 0 /* reason */);
-        verify(tokenAcquirer).acquire(eq(DEFAULT_DISPLAY), eq(false));
+        verify(tokenAcquirer).acquire(eq(DEFAULT_DISPLAY));
     }
 
     @Test

@@ -26,8 +26,8 @@ import android.os.BatteryManager;
 import android.os.Build;
 import android.os.ConditionVariable;
 
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.platform.app.InstrumentationRegistry;
-import androidx.test.runner.AndroidJUnit4;
 
 import com.android.compatibility.common.util.SystemUtil;
 

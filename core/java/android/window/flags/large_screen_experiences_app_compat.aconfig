@@ -91,6 +91,20 @@ flag {
 }
 
 flag {
+  name: "camera_compat_fullscreen_pick_same_task_activity"
+  namespace: "large_screen_experiences_app_compat"
+  description: "Limit undo of camera compat treatment to the same task that started the treatment."
+  bug: "350495350"
+}
+
+flag {
+  name: "scrolling_from_letterbox"
+  namespace: "large_screen_experiences_app_compat"
+  description: "Whether to enable app scrolling from gestures from letterbox area"
+  bug: "353697519"
+}
+
+flag {
   name: "app_compat_refactoring"
   namespace: "large_screen_experiences_app_compat"
   description: "Whether the changes about app compat refactoring are enabled./n"
@@ -113,4 +127,12 @@ flag {
     namespace: "large_screen_experiences_app_compat"
     description: "Enables sysui animation for user aspect ratio button"
     bug: "300357441"
+}
+
+flag {
+  name: "app_compat_ui_framework"
+  namespace: "large_screen_experiences_app_compat"
+  description: "Whether the declarative compat UI framework is enabled"
+  bug: "270361630"
+  is_fixed_read_only: true
 }

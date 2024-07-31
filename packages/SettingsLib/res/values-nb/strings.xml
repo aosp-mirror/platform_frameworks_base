@@ -408,18 +408,12 @@
     <string name="enable_gpu_debug_layers_summary" msgid="4921521407377170481">"Tillat GPU-feilsøkingslag for feilsøkingsapper"</string>
     <string name="enable_verbose_vendor_logging" msgid="1196698788267682072">"Detaljert leverandørlogging"</string>
     <string name="enable_verbose_vendor_logging_summary" msgid="5426292185780393708">"Inkluder flere enhetsspesifikke leverandørlogger i feilrapporter, som kan inneholde privat informasjon, bruke mer batteri og/eller bruke mer lagringsplass."</string>
-    <!-- no translation found for enable_verbose_vendor_logging_checkbox (3864578373293835530) -->
-    <skip />
-    <!-- no translation found for verbose_vendor_logging_notification_title (6811217272559843592) -->
-    <skip />
-    <!-- no translation found for verbose_vendor_logging_notification_summary (5226524769774370942) -->
-    <skip />
-    <!-- no translation found for verbose_vendor_logging_notification_action (1190831050259046071) -->
-    <skip />
-    <!-- no translation found for verbose_vendor_logging_preference_summary_will_disable (6175431593394522553) -->
-    <skip />
-    <!-- no translation found for verbose_vendor_logging_preference_summary_on (9017757242481762036) -->
-    <skip />
+    <string name="enable_verbose_vendor_logging_checkbox" msgid="3864578373293835530">"Deaktiver etter én dag"</string>
+    <string name="verbose_vendor_logging_notification_title" msgid="6811217272559843592">"Detaljert leverandørloggføring er avsluttet"</string>
+    <string name="verbose_vendor_logging_notification_summary" msgid="5226524769774370942">"Aktivert i én dag"</string>
+    <string name="verbose_vendor_logging_notification_action" msgid="1190831050259046071">"Aktiver i én dag til"</string>
+    <string name="verbose_vendor_logging_preference_summary_will_disable" msgid="6175431593394522553">"Deaktiveres etter én dag"</string>
+    <string name="verbose_vendor_logging_preference_summary_on" msgid="9017757242481762036">"Aktivert på ubestemt tid"</string>
     <string name="window_animation_scale_title" msgid="5236381298376812508">"Animasjonsskala for vindu"</string>
     <string name="transition_animation_scale_title" msgid="1278477690695439337">"Animasjonsskala for overgang"</string>
     <string name="animator_duration_scale_title" msgid="7082913931326085176">"Varighetsskala for animasjoner"</string>
@@ -437,7 +431,6 @@
     <string name="force_resizable_activities" msgid="7143612144399959606">"Alle aktiviteter kan endre størrelse"</string>
     <string name="force_resizable_activities_summary" msgid="2490382056981583062">"Gjør at alle aktiviteter kan endre størrelse for flervindusmodus, uavhengig av manifestverdier."</string>
     <string name="enable_freeform_support" msgid="7599125687603914253">"Slå på vinduer i fritt format"</string>
-    <string name="enable_freeform_support_summary" msgid="1822862728719276331">"Slå på støtte for vinduer i eksperimentelt fritt format."</string>
     <string name="local_backup_password_title" msgid="4631017948933578709">"Passord for sikkerhetskopiering på datamaskin"</string>
     <string name="local_backup_password_summary_none" msgid="7646898032616361714">"Fullstendig sikkerhetskopiering på datamaskin er ikke beskyttet"</string>
     <string name="local_backup_password_summary_change" msgid="1707357670383995567">"Trykk for å endre eller fjerne passordet for fullstendige sikkerhetskopier på datamaskinen"</string>
@@ -502,7 +495,8 @@
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_remaining_charging_duration_only" msgid="8085099012811384899">"Fulladet om <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_charging_duration" msgid="6127154952524919719">"<xliff:g id="LEVEL">%1$s</xliff:g> – Fulladet om <xliff:g id="TIME">%2$s</xliff:g>"</string>
-    <string name="power_charging_limited" msgid="8202147604844938236">"<xliff:g id="LEVEL">%1$s</xliff:g> – Ladingen er optimalisert"</string>
+    <!-- no translation found for power_charging_limited (4144004473976005214) -->
+    <skip />
     <string name="power_charging_future_paused" msgid="1809543660923642799">"<xliff:g id="LEVEL">%1$s</xliff:g> – lader"</string>
     <string name="power_fast_charging_duration_v2" msgid="3797735998640359490">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="STATUS">%2$s</xliff:g> – Fulladet innen <xliff:g id="TIME">%3$s</xliff:g>"</string>
     <string name="power_charging_duration_v2" msgid="2938998284074003248">"<xliff:g id="LEVEL">%1$s</xliff:g> – Fulladet innen <xliff:g id="TIME">%2$s</xliff:g>"</string>

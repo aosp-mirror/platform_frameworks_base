@@ -474,19 +474,10 @@ public class AudioDeviceBroker {
                 mBtHelper.stopBluetoothSco(eventSource);
             }
         }
-        // In BT classic for communication, the device changes from a2dp to sco device, but for
-        // LE Audio it stays the same and we must trigger the proper stream volume alignment, if
-        // LE Audio communication device is activated after the audio system has already switched to
-        // MODE_IN_CALL mode.
-        if (isBluetoothLeAudioRequested() && device != null) {
-            final int streamType = mAudioService.getBluetoothContextualVolumeStream();
-            final int leAudioVolIndex = getVssVolumeForDevice(streamType, device.getInternalType());
-            final int leAudioMaxVolIndex = getMaxVssVolumeForStream(streamType);
-            if (AudioService.DEBUG_COMM_RTE) {
-                Log.v(TAG, "setCommunicationRouteForClient restoring LE Audio device volume lvl.");
-            }
-            postSetLeAudioVolumeIndex(leAudioVolIndex, leAudioMaxVolIndex, streamType);
-        }
+        // In BT classic for communication, the device changes from a2dp to sco device,
+        // but for LE Audio or Hearing Aid it stays the same and we must trigger the proper
+        // stream volume alignment.
+        mAudioService.postUpdateContextualVolumes();
 
         updateCommunicationRoute(eventSource);
     }
@@ -841,6 +832,14 @@ public class AudioDeviceBroker {
 
     /*package*/ boolean isBluetoothScoActive() {
         return isDeviceActiveForCommunication(AudioDeviceInfo.TYPE_BLUETOOTH_SCO);
+    }
+
+    /*package*/ boolean isBluetoothBleHeadsetActive() {
+        return isDeviceActiveForCommunication(AudioDeviceInfo.TYPE_BLE_HEADSET);
+    }
+
+    /*package*/ boolean isBluetoothBleSpeakerActive() {
+        return isDeviceActiveForCommunication(AudioDeviceInfo.TYPE_BLE_SPEAKER);
     }
 
     /*package*/ boolean isDeviceConnected(@NonNull AudioDeviceAttributes device) {
@@ -1433,6 +1432,8 @@ public class AudioDeviceBroker {
         }
         mCurCommunicationPortId = portId;
 
+        mAudioService.postScoDeviceActive(isBluetoothScoActive());
+
         final int nbDispatchers = mCommDevDispatchers.beginBroadcast();
         for (int i = 0; i < nbDispatchers; i++) {
             try {
@@ -1872,7 +1873,10 @@ public class AudioDeviceBroker {
                             synchronized (mBluetoothAudioStateLock) {
                                 reapplyAudioHalBluetoothState();
                             }
-                            mBtHelper.onAudioServerDiedRestoreA2dp();
+                            final int forceForMedia = getBluetoothA2dpEnabled()
+                                    ? AudioSystem.FORCE_NONE : AudioSystem.FORCE_NO_BT_A2DP;
+                            setForceUse_Async(
+                                    AudioSystem.FOR_MEDIA, forceForMedia, "MSG_RESTORE_DEVICES");
                             updateCommunicationRoute("MSG_RESTORE_DEVICES");
                         }
                     }
@@ -2795,6 +2799,10 @@ public class AudioDeviceBroker {
             return;
         }
         final SettingsAdapter settingsAdapter = mAudioService.getSettings();
+        if (settingsAdapter == null) {
+            Log.e(TAG, "No settings adapter when saving AdiDeviceState: " + deviceSettings);
+            return;
+        }
         try {
             boolean res = settingsAdapter.putSecureStringForUser(mAudioService.getContentResolver(),
                     Settings.Secure.AUDIO_DEVICE_INVENTORY,
@@ -2810,6 +2818,12 @@ public class AudioDeviceBroker {
     private String readDeviceSettings() {
         final SettingsAdapter settingsAdapter = mAudioService.getSettings();
         final ContentResolver contentResolver = mAudioService.getContentResolver();
+        if (settingsAdapter == null || contentResolver == null) {
+            // should not happen, throw Exception for stack trace
+            Log.e(TAG, "No settings adapter or content resolver to read device settings",
+                    new Exception("readDeviceSettings_NPE"));
+            return "";
+        }
         return settingsAdapter.getSecureStringForUser(contentResolver,
                 Settings.Secure.AUDIO_DEVICE_INVENTORY, UserHandle.USER_CURRENT);
     }

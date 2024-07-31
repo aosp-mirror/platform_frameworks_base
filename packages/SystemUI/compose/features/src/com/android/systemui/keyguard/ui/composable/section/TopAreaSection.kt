@@ -26,6 +26,7 @@ import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
@@ -33,6 +34,7 @@ import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.android.compose.animation.scene.MutableSceneTransitionLayoutState
 import com.android.compose.animation.scene.SceneScope
 import com.android.compose.animation.scene.SceneTransitionLayout
 import com.android.compose.modifiers.thenIf
@@ -58,7 +60,7 @@ constructor(
     private val clockInteractor: KeyguardClockInteractor,
 ) {
     @Composable
-    fun DefaultClockLayout(
+    fun SceneScope.DefaultClockLayout(
         modifier: Modifier = Modifier,
     ) {
         val currentClockLayout by clockViewModel.currentClockLayout.collectAsStateWithLifecycle()
@@ -78,32 +80,44 @@ constructor(
                     WeatherClockScenes.splitShadeLargeClockScene
             }
 
-        SceneTransitionLayout(
-            modifier = modifier,
-            currentScene = currentScene,
-            onChangeScene = {},
-            transitions = ClockTransition.defaultClockTransitions,
-            enableInterruptions = false,
-        ) {
-            scene(splitShadeLargeClockScene) {
-                LargeClockWithSmartSpace(
-                    shouldOffSetClockToOneHalf = !hasCustomPositionUpdatedAnimation
-                )
+        val state = remember {
+            MutableSceneTransitionLayoutState(
+                currentScene,
+                ClockTransition.defaultClockTransitions,
+                enableInterruptions = false,
+            )
+        }
+
+        // Update state whenever currentSceneKey has changed.
+        LaunchedEffect(state, currentScene) {
+            if (currentScene != state.transitionState.currentScene) {
+                state.setTargetScene(currentScene, coroutineScope = this)
             }
+        }
 
-            scene(splitShadeSmallClockScene) {
-                SmallClockWithSmartSpace(modifier = Modifier.fillMaxWidth(0.5f))
+        Column(modifier) {
+            SceneTransitionLayout(state) {
+                scene(splitShadeLargeClockScene) {
+                    LargeClockWithSmartSpace(
+                        shouldOffSetClockToOneHalf = !hasCustomPositionUpdatedAnimation
+                    )
+                }
+
+                scene(splitShadeSmallClockScene) {
+                    SmallClockWithSmartSpace(modifier = Modifier.fillMaxWidth(0.5f))
+                }
+
+                scene(smallClockScene) { SmallClockWithSmartSpace() }
+
+                scene(largeClockScene) { LargeClockWithSmartSpace() }
+
+                scene(WeatherClockScenes.largeClockScene) { WeatherLargeClockWithSmartSpace() }
+
+                scene(WeatherClockScenes.splitShadeLargeClockScene) {
+                    WeatherLargeClockWithSmartSpace(modifier = Modifier.fillMaxWidth(0.5f))
+                }
             }
-
-            scene(smallClockScene) { SmallClockWithSmartSpace() }
-
-            scene(largeClockScene) { LargeClockWithSmartSpace() }
-
-            scene(WeatherClockScenes.largeClockScene) { WeatherLargeClockWithSmartSpace() }
-
-            scene(WeatherClockScenes.splitShadeLargeClockScene) {
-                WeatherLargeClockWithSmartSpace(modifier = Modifier.fillMaxWidth(0.5f))
-            }
+            with(mediaCarouselSection) { KeyguardMediaCarousel() }
         }
     }
 
@@ -125,7 +139,6 @@ constructor(
                     onTopChanged = burnIn.onSmartspaceTopChanged,
                 )
             }
-            with(mediaCarouselSection) { KeyguardMediaCarousel() }
         }
     }
 

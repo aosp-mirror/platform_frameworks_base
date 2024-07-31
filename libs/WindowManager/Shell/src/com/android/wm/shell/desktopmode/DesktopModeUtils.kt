@@ -19,6 +19,8 @@
 package com.android.wm.shell.desktopmode
 
 import android.app.ActivityManager.RunningTaskInfo
+import android.app.TaskInfo
+import android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
 import android.content.pm.ActivityInfo.isFixedOrientationLandscape
 import android.content.pm.ActivityInfo.isFixedOrientationPortrait
 import android.content.res.Configuration.ORIENTATION_LANDSCAPE
@@ -50,8 +52,10 @@ fun calculateInitialBounds(
     val idealSize = calculateIdealSize(screenBounds, scale)
     // If no top activity exists, apps fullscreen bounds and aspect ratio cannot be calculated.
     // Instead default to the desired initial bounds.
+    val stableBounds = Rect()
+    displayLayout.getStableBoundsForDesktopMode(stableBounds)
     val topActivityInfo =
-        taskInfo.topActivityInfo ?: return positionInScreen(idealSize, screenBounds)
+        taskInfo.topActivityInfo ?: return positionInScreen(idealSize, stableBounds)
 
     val initialSize: Size =
         when (taskInfo.configuration.orientation) {
@@ -64,7 +68,7 @@ fun calculateInitialBounds(
                         idealSize
                     }
                 } else {
-                    maximumSizeMaintainingAspectRatio(taskInfo, idealSize, appAspectRatio)
+                    maximizeSizeGivenAspectRatio(taskInfo, idealSize, appAspectRatio)
                 }
             }
             ORIENTATION_PORTRAIT -> {
@@ -83,13 +87,13 @@ fun calculateInitialBounds(
                 } else {
                     if (isFixedOrientationLandscape(topActivityInfo.screenOrientation)) {
                         // Apply custom app width and calculate maximum size
-                        maximumSizeMaintainingAspectRatio(
+                        maximizeSizeGivenAspectRatio(
                             taskInfo,
                             Size(customPortraitWidthForLandscapeApp, idealSize.height),
                             appAspectRatio
                         )
                     } else {
-                        maximumSizeMaintainingAspectRatio(taskInfo, idealSize, appAspectRatio)
+                        maximizeSizeGivenAspectRatio(taskInfo, idealSize, appAspectRatio)
                     }
                 }
             }
@@ -98,14 +102,14 @@ fun calculateInitialBounds(
             }
         }
 
-    return positionInScreen(initialSize, screenBounds)
+    return positionInScreen(initialSize, stableBounds)
 }
 
 /**
  * Calculates the largest size that can fit in a given area while maintaining a specific aspect
  * ratio.
  */
-private fun maximumSizeMaintainingAspectRatio(
+fun maximizeSizeGivenAspectRatio(
     taskInfo: RunningTaskInfo,
     targetArea: Size,
     aspectRatio: Float
@@ -114,7 +118,8 @@ private fun maximumSizeMaintainingAspectRatio(
     val targetWidth = targetArea.width
     val finalHeight: Int
     val finalWidth: Int
-    if (isFixedOrientationPortrait(taskInfo.topActivityInfo!!.screenOrientation)) {
+    // Get orientation either through top activity or task's orientation
+    if (taskInfo.hasPortraitTopActivity()) {
         val tempWidth = (targetHeight / aspectRatio).toInt()
         if (tempWidth <= targetWidth) {
             finalHeight = targetHeight
@@ -137,7 +142,7 @@ private fun maximumSizeMaintainingAspectRatio(
 }
 
 /** Calculates the aspect ratio of an activity from its fullscreen bounds. */
-private fun calculateAspectRatio(taskInfo: RunningTaskInfo): Float {
+fun calculateAspectRatio(taskInfo: RunningTaskInfo): Float {
     if (taskInfo.appCompatTaskInfo.topActivityBoundsLetterboxed) {
         val appLetterboxWidth = taskInfo.appCompatTaskInfo.topActivityLetterboxWidth
         val appLetterboxHeight = taskInfo.appCompatTaskInfo.topActivityLetterboxHeight
@@ -160,14 +165,46 @@ private fun calculateIdealSize(screenBounds: Rect, scale: Float): Size {
 }
 
 /** Adjusts bounds to be positioned in the middle of the screen. */
-private fun positionInScreen(desiredSize: Size, screenBounds: Rect): Rect {
-    // TODO(b/325240051): Position apps with bottom heavy offset
-    val heightOffset = (screenBounds.height() - desiredSize.height) / 2
-    val widthOffset = (screenBounds.width() - desiredSize.width) / 2
-    return Rect(
-        widthOffset,
-        heightOffset,
-        desiredSize.width + widthOffset,
-        desiredSize.height + heightOffset
-    )
+private fun positionInScreen(desiredSize: Size, stableBounds: Rect): Rect =
+    Rect(0, 0, desiredSize.width, desiredSize.height).apply {
+        val offset = DesktopTaskPosition.Center.getTopLeftCoordinates(stableBounds, this)
+        offsetTo(offset.x, offset.y)
+    }
+
+/**
+ * Adjusts bounds to be positioned in the middle of the area provided, not necessarily the
+ * entire screen, as area can be offset by left and top start.
+ */
+fun centerInArea(desiredSize: Size, areaBounds: Rect, leftStart: Int, topStart: Int): Rect {
+    val heightOffset = (areaBounds.height() - desiredSize.height) / 2
+    val widthOffset = (areaBounds.width() - desiredSize.width) / 2
+
+    val newLeft = leftStart + widthOffset
+    val newTop = topStart + heightOffset
+    val newRight = newLeft + desiredSize.width
+    val newBottom = newTop + desiredSize.height
+
+    return Rect(newLeft, newTop, newRight, newBottom)
+}
+
+fun TaskInfo.hasPortraitTopActivity(): Boolean {
+    val topActivityScreenOrientation =
+        topActivityInfo?.screenOrientation ?: SCREEN_ORIENTATION_UNSPECIFIED
+    val appBounds = configuration.windowConfiguration.appBounds
+
+    return when {
+        // First check if activity has portrait screen orientation
+        topActivityScreenOrientation != SCREEN_ORIENTATION_UNSPECIFIED -> {
+            isFixedOrientationPortrait(topActivityScreenOrientation)
+        }
+
+        // Then check if the activity is portrait when letterboxed
+        appCompatTaskInfo.topActivityBoundsLetterboxed -> appCompatTaskInfo.isTopActivityPillarboxed
+
+        // Then check if the activity is portrait
+        appBounds != null -> appBounds.height() > appBounds.width()
+
+        // Otherwise just take the orientation of the task
+        else -> isFixedOrientationPortrait(configuration.orientation)
+    }
 }

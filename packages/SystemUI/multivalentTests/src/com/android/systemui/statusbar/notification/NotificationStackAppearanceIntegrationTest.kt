@@ -27,6 +27,8 @@ import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.flags.EnableSceneContainer
 import com.android.systemui.flags.Flags
 import com.android.systemui.flags.fakeFeatureFlagsClassic
+import com.android.systemui.keyguard.data.repository.fakeKeyguardRepository
+import com.android.systemui.keyguard.shared.model.StatusBarState
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.scene.domain.interactor.sceneInteractor
 import com.android.systemui.scene.shared.model.Scenes
@@ -64,6 +66,7 @@ class NotificationStackAppearanceIntegrationTest : SysuiTestCase() {
     private val placeholderViewModel by lazy { kosmos.notificationsPlaceholderViewModel }
     private val scrollViewModel by lazy { kosmos.notificationScrollViewModel }
     private val sceneInteractor by lazy { kosmos.sceneInteractor }
+    private val fakeKeyguardRepository by lazy { kosmos.fakeKeyguardRepository }
     private val fakeSceneDataSource by lazy { kosmos.fakeSceneDataSource }
 
     @Test
@@ -73,9 +76,11 @@ class NotificationStackAppearanceIntegrationTest : SysuiTestCase() {
             val leftOffset = MutableStateFlow(0)
             val shape by collectLastValue(scrollViewModel.shadeScrimShape(radius, leftOffset))
 
+            // When: receive scrim bounds
             placeholderViewModel.onScrimBoundsChanged(
                 ShadeScrimBounds(left = 0f, top = 200f, right = 100f, bottom = 550f)
             )
+            // Then: shape is updated
             assertThat(shape)
                 .isEqualTo(
                     ShadeScrimShape(
@@ -86,11 +91,13 @@ class NotificationStackAppearanceIntegrationTest : SysuiTestCase() {
                     )
                 )
 
+            // When: receive new scrim bounds
             leftOffset.value = 200
             radius.value = 24
             placeholderViewModel.onScrimBoundsChanged(
                 ShadeScrimBounds(left = 210f, top = 200f, right = 300f, bottom = 550f)
             )
+            // Then: shape is updated
             assertThat(shape)
                 .isEqualTo(
                     ShadeScrimShape(
@@ -100,6 +107,16 @@ class NotificationStackAppearanceIntegrationTest : SysuiTestCase() {
                         bottomRadius = 0
                     )
                 )
+
+            // When: QuickSettings shows up full screen
+            fakeKeyguardRepository.setStatusBarState(StatusBarState.SHADE)
+            val transitionState =
+                MutableStateFlow<ObservableTransitionState>(
+                    ObservableTransitionState.Idle(Scenes.QuickSettings)
+                )
+            sceneInteractor.setTransitionState(transitionState)
+            // Then: shape is null
+            assertThat(shape).isNull()
         }
 
     @Test

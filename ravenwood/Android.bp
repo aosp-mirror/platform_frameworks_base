@@ -68,7 +68,10 @@ java_library {
     srcs: [
         "runtime-common-ravenwood-src/**/*.java",
     ],
-    visibility: ["//frameworks/base"],
+    visibility: [
+        // Some tests need to access the utilities.
+        ":__subpackages__",
+    ],
 }
 
 java_library {
@@ -182,6 +185,9 @@ java_library {
 // want to verify they're unbundled.  The "impl" library above is what
 // ships inside the Ravenwood environment to actually drive any API
 // access to implementation details.
+// This library needs to be statically linked to mainline tests as well,
+// which need to be able to run on multiple API levels, so we can't use
+// test APIs in this module.
 java_library {
     name: "ravenwood-junit",
     srcs: [
@@ -189,7 +195,7 @@ java_library {
         "junit-stub-src/**/*.java",
         "junit-flag-src/**/*.java",
     ],
-    sdk_version: "test_current",
+    sdk_version: "module_current",
     static_libs: [
         "ravenwood-runtime-common",
         "ravenwood-runtime-common-device",
@@ -315,6 +321,9 @@ java_library {
 
 android_ravenwood_libgroup {
     name: "ravenwood-runtime",
+    data: [
+        "framework-res",
+    ],
     libs: [
         "100-framework-minus-apex.ravenwood",
         "200-kxml2-android",
@@ -326,6 +335,11 @@ android_ravenwood_libgroup {
         "hoststubgen-helper-runtime.ravenwood",
         "services.core.ravenwood-jarjar",
         "services.fakes.ravenwood-jarjar",
+
+        // ICU
+        "core-icu4j-for-host.ravenwood",
+        "icu4j-icudata-jarjar",
+        "icu4j-icutzdata-jarjar",
 
         // Provide runtime versions of utils linked in below
         "junit",

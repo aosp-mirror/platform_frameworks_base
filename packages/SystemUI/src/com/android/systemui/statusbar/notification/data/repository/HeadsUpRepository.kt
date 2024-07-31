@@ -41,4 +41,7 @@ interface HeadsUpRepository {
     val activeHeadsUpRows: Flow<Set<HeadsUpRowRepository>>
 
     fun setHeadsUpAnimatingAway(animatingAway: Boolean)
+
+    /** Snooze the currently pinned HUN. */
+    fun snooze()
 }

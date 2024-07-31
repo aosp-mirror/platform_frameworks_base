@@ -19,6 +19,7 @@ package com.android.systemui.keyguard.domain.interactor
 
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
+import com.android.systemui.deviceentry.domain.interactor.DeviceEntryInteractor
 import com.android.systemui.keyguard.data.repository.KeyguardRepository
 import com.android.systemui.keyguard.shared.model.DismissAction
 import com.android.systemui.keyguard.shared.model.KeyguardDone
@@ -26,8 +27,11 @@ import com.android.systemui.keyguard.shared.model.KeyguardState.ALTERNATE_BOUNCE
 import com.android.systemui.keyguard.shared.model.KeyguardState.GONE
 import com.android.systemui.keyguard.shared.model.KeyguardState.PRIMARY_BOUNCER
 import com.android.systemui.scene.domain.interactor.SceneInteractor
+import com.android.systemui.scene.domain.resolver.NotifShadeSceneFamilyResolver
+import com.android.systemui.scene.domain.resolver.QuickSettingsSceneFamilyResolver
 import com.android.systemui.scene.shared.flag.SceneContainerFlag
 import com.android.systemui.scene.shared.model.Scenes
+import com.android.systemui.util.kotlin.Utils.Companion.sampleFilter
 import com.android.systemui.util.kotlin.sample
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
@@ -35,6 +39,8 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.filterNot
 import kotlinx.coroutines.flow.map
@@ -52,6 +58,9 @@ constructor(
     val dismissInteractor: KeyguardDismissInteractor,
     @Application private val applicationScope: CoroutineScope,
     sceneInteractor: SceneInteractor,
+    deviceEntryInteractor: DeviceEntryInteractor,
+    quickSettingsSceneFamilyResolver: QuickSettingsSceneFamilyResolver,
+    notifShadeSceneFamilyResolver: NotifShadeSceneFamilyResolver,
 ) {
     val dismissAction: Flow<DismissAction> = repository.dismissAction
 
@@ -76,32 +85,60 @@ constructor(
             )
 
     private val finishedTransitionToGone: Flow<Unit> =
-        if (SceneContainerFlag.isEnabled) {
-            sceneInteractor.transitionState.filter { it.isIdle(Scenes.Gone) }.map {}
-        } else {
-            transitionInteractor.finishedKeyguardState.filter { it == GONE }.map {}
-        }
+        transitionInteractor
+            .isFinishedIn(scene = Scenes.Gone, stateWithoutSceneContainer = GONE)
+            .filter { it }
+            .map {}
 
+    /**
+     * True if the any variation of the notification shade or quick settings is showing AND the
+     * device is unlocked. Else, false.
+     */
+    private val isOnShadeWhileUnlocked: Flow<Boolean> =
+        combine(
+                sceneInteractor.currentScene,
+                deviceEntryInteractor.isUnlocked,
+            ) { scene, isUnlocked ->
+                isUnlocked &&
+                    (quickSettingsSceneFamilyResolver.includesScene(scene) ||
+                        notifShadeSceneFamilyResolver.includesScene(scene))
+            }
+            .distinctUntilChanged()
     val executeDismissAction: Flow<() -> KeyguardDone> =
         merge(
                 finishedTransitionToGone,
+                isOnShadeWhileUnlocked.filter { it }.map {},
                 dismissInteractor.dismissKeyguardRequestWithImmediateDismissAction
             )
             .sample(dismissAction)
             .filterNot { it is DismissAction.None }
             .map { it.onDismissAction }
+
     val resetDismissAction: Flow<Unit> =
-        transitionInteractor.finishedKeyguardTransitionStep
-            .filter { it.to != ALTERNATE_BOUNCER && it.to != PRIMARY_BOUNCER && it.to != GONE }
-            .sample(dismissAction)
-            .filterNot { it is DismissAction.None }
-            .map {} // map to Unit
+        combine(
+                transitionInteractor.isFinishedIn(
+                    scene = Scenes.Gone,
+                    stateWithoutSceneContainer = GONE
+                ),
+                transitionInteractor.isFinishedIn(
+                    scene = Scenes.Bouncer,
+                    stateWithoutSceneContainer = PRIMARY_BOUNCER
+                ),
+                transitionInteractor.isFinishedIn(state = ALTERNATE_BOUNCER),
+                isOnShadeWhileUnlocked,
+            ) { isOnGone, isOnBouncer, isOnAltBouncer, isOnShadeWhileUnlocked ->
+                !isOnGone && !isOnBouncer && !isOnAltBouncer && !isOnShadeWhileUnlocked
+            }
+            .filter { it }
+            .sampleFilter(dismissAction) { it !is DismissAction.None }
+            .map {}
 
     fun runDismissAnimationOnKeyguard(): Boolean {
         return willAnimateDismissActionOnLockscreen.value
     }
 
     fun runAfterKeyguardGone(runnable: Runnable) {
+        if (SceneContainerFlag.isUnexpectedlyInLegacyMode()) return
         setDismissAction(
             DismissAction.RunAfterKeyguardGone(
                 dismissAction = { runnable.run() },
@@ -113,15 +150,18 @@ constructor(
     }
 
     fun setDismissAction(dismissAction: DismissAction) {
+        if (SceneContainerFlag.isUnexpectedlyInLegacyMode()) return
         repository.dismissAction.value.onCancelAction.run()
         repository.setDismissAction(dismissAction)
     }
 
     fun handleDismissAction() {
+        if (SceneContainerFlag.isUnexpectedlyInLegacyMode()) return
         repository.setDismissAction(DismissAction.None)
     }
 
     suspend fun setKeyguardDone(keyguardDoneTiming: KeyguardDone) {
+        if (SceneContainerFlag.isUnexpectedlyInLegacyMode()) return
         dismissInteractor.setKeyguardDone(keyguardDoneTiming)
     }
 }

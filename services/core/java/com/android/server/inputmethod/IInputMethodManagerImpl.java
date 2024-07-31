@@ -71,7 +71,20 @@ final class IInputMethodManagerImpl extends IInputMethodManager.Stub {
     @Retention(SOURCE)
     @Target({METHOD})
     @interface PermissionVerified {
+        /**
+         * The name of the permission that is verified, if precisely one permission is required.
+         * If more than one permission is required, specify either {@link #allOf()} instead.
+         *
+         * <p>If specified, {@link #allOf()} must both be {@code null}.</p>
+         */
         String value() default "";
+
+        /**
+         * Specifies a list of permission names that are all required.
+         *
+         * <p>If specified, {@link #value()} must both be {@code null}.</p>
+         */
+        String[] allOf() default {};
     }
 
     @BinderThread
@@ -132,11 +145,18 @@ final class IInputMethodManagerImpl extends IInputMethodManager.Stub {
 
         void showInputMethodPickerFromClient(IInputMethodClient client, int auxiliarySubtypeMode);
 
-        @PermissionVerified(Manifest.permission.WRITE_SECURE_SETTINGS)
+        @PermissionVerified(allOf = {
+                Manifest.permission.INTERACT_ACROSS_USERS_FULL,
+                Manifest.permission.WRITE_SECURE_SETTINGS})
         void showInputMethodPickerFromSystem(int auxiliarySubtypeMode, int displayId);
 
         @PermissionVerified(Manifest.permission.TEST_INPUT_METHOD)
         boolean isInputMethodPickerShownForTest();
+
+        @PermissionVerified(allOf = {
+                Manifest.permission.INTERACT_ACROSS_USERS_FULL,
+                Manifest.permission.WRITE_SECURE_SETTINGS})
+        void onImeSwitchButtonClickFromSystem(int displayId);
 
         InputMethodSubtype getCurrentInputMethodSubtype(@UserIdInt int userId);
 
@@ -150,8 +170,10 @@ final class IInputMethodManagerImpl extends IInputMethodManager.Stub {
 
         void reportPerceptibleAsync(IBinder windowToken, boolean perceptible);
 
-        @PermissionVerified(Manifest.permission.INTERNAL_SYSTEM_WINDOW)
-        void removeImeSurface();
+        @PermissionVerified(allOf = {
+                Manifest.permission.INTERACT_ACROSS_USERS_FULL,
+                Manifest.permission.INTERNAL_SYSTEM_WINDOW})
+        void removeImeSurface(int displayId);
 
         void removeImeSurfaceFromWindowAsync(IBinder windowToken);
 
@@ -327,13 +349,14 @@ final class IInputMethodManagerImpl extends IInputMethodManager.Stub {
         mCallback.showInputMethodPickerFromClient(client, auxiliarySubtypeMode);
     }
 
-    @EnforcePermission(Manifest.permission.WRITE_SECURE_SETTINGS)
+    @EnforcePermission(allOf = {
+            Manifest.permission.WRITE_SECURE_SETTINGS,
+            Manifest.permission.INTERACT_ACROSS_USERS_FULL})
     @Override
     public void showInputMethodPickerFromSystem(int auxiliarySubtypeMode, int displayId) {
         super.showInputMethodPickerFromSystem_enforcePermission();
 
         mCallback.showInputMethodPickerFromSystem(auxiliarySubtypeMode, displayId);
-
     }
 
     @EnforcePermission(Manifest.permission.TEST_INPUT_METHOD)
@@ -342,6 +365,16 @@ final class IInputMethodManagerImpl extends IInputMethodManager.Stub {
         super.isInputMethodPickerShownForTest_enforcePermission();
 
         return mCallback.isInputMethodPickerShownForTest();
+    }
+
+    @EnforcePermission(allOf = {
+            Manifest.permission.WRITE_SECURE_SETTINGS,
+            Manifest.permission.INTERACT_ACROSS_USERS_FULL})
+    @Override
+    public void onImeSwitchButtonClickFromSystem(int displayId) {
+        super.onImeSwitchButtonClickFromSystem_enforcePermission();
+
+        mCallback.onImeSwitchButtonClickFromSystem(displayId);
     }
 
     @Override
@@ -371,12 +404,14 @@ final class IInputMethodManagerImpl extends IInputMethodManager.Stub {
         mCallback.reportPerceptibleAsync(windowToken, perceptible);
     }
 
-    @EnforcePermission(Manifest.permission.INTERNAL_SYSTEM_WINDOW)
+    @EnforcePermission(allOf = {
+            Manifest.permission.INTERNAL_SYSTEM_WINDOW,
+            Manifest.permission.INTERACT_ACROSS_USERS_FULL})
     @Override
-    public void removeImeSurface() {
+    public void removeImeSurface(int displayId) {
         super.removeImeSurface_enforcePermission();
 
-        mCallback.removeImeSurface();
+        mCallback.removeImeSurface(displayId);
     }
 
     @Override
