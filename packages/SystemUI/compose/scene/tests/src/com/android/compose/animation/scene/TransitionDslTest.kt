@@ -27,6 +27,7 @@ import com.android.compose.animation.scene.transformation.Transformation
 import com.android.compose.animation.scene.transformation.TransformationRange
 import com.google.common.truth.Correspondence
 import com.google.common.truth.Truth.assertThat
+import org.junit.Assert.assertThrows
 import org.junit.Test
 import org.junit.runner.RunWith
 
@@ -250,6 +251,22 @@ class TransitionDslTest {
         val overscrollSpec = transitions.overscrollSpecs.single()
         val transformation = overscrollSpec.transformationSpec.transformations.single()
         assertThat(transformation).isInstanceOf(OverscrollTranslate::class.java)
+    }
+
+    @Test
+    fun overscrollSpec_for_overscrollDisabled() {
+        val transitions = transitions {
+            overscrollDisabled(TestScenes.SceneA, Orientation.Vertical)
+        }
+        val overscrollSpec = transitions.overscrollSpecs.single()
+        assertThat(overscrollSpec.transformationSpec.transformations).isEmpty()
+    }
+
+    @Test
+    fun overscrollSpec_throwIfTransformationsIsEmpty() {
+        assertThrows(IllegalStateException::class.java) {
+            transitions { overscroll(TestScenes.SceneA, Orientation.Vertical) {} }
+        }
     }
 
     companion object {
