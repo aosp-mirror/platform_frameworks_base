@@ -10038,6 +10038,19 @@ public class CarrierConfigManager {
             "carrier_supported_satellite_notification_hysteresis_sec_int";
 
     /**
+     * An integer key holds the timeout duration in seconds used to determine whether to exit
+     * carrier-roaming NB-IOT satellite mode.
+     *
+     * The timer is started when the device screen is turned off during a satellite session.
+     * When the timer expires, the device exits Carrier Roaming NB IOT NTN.
+     *
+     * The default value is 30 seconds.
+     */
+    @FlaggedApi(Flags.FLAG_CARRIER_ROAMING_NB_IOT_NTN)
+    public static final String KEY_SATELLITE_SCREEN_OFF_INACTIVITY_TIMEOUT_SEC_INT =
+            "satellite_screen_off_inactivity_timeout_duration_sec_int";
+
+    /**
      * Indicating whether DUN APN should be disabled when the device is roaming. In that case,
      * the default APN (i.e. internet) will be used for tethering.
      *
@@ -11197,6 +11210,7 @@ public class CarrierConfigManager {
         sDefaults.putBoolean(KEY_SATELLITE_ESOS_SUPPORTED_BOOL, false);
         sDefaults.putInt(KEY_CARRIER_ROAMING_NTN_CONNECT_TYPE_INT, 0);
         sDefaults.putInt(KEY_CARRIER_SUPPORTED_SATELLITE_NOTIFICATION_HYSTERESIS_SEC_INT, 180);
+        sDefaults.putInt(KEY_SATELLITE_SCREEN_OFF_INACTIVITY_TIMEOUT_SEC_INT, 30);
         sDefaults.putString(KEY_DEFAULT_PREFERRED_APN_NAME_STRING, "");
         sDefaults.putBoolean(KEY_SUPPORTS_CALL_COMPOSER_BOOL, false);
         sDefaults.putBoolean(KEY_SUPPORTS_BUSINESS_CALL_COMPOSER_BOOL, false);
