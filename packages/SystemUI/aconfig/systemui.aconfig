@@ -1032,6 +1032,16 @@ flag {
 }
 
 flag {
+  name: "communal_edit_widgets_activity_finish_fix"
+  namespace: "systemui"
+  description: "finish edit widgets activity when stopping"
+  bug: "354725145"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}
+
+flag {
   name: "app_clips_backlinks"
   namespace: "systemui"
   description: "Enables Backlinks improvement feature in App Clips"
