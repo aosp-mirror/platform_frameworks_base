@@ -14,19 +14,14 @@
  * limitations under the License.
  */
 
-package com.android.systemui.touchpad.tutorial.ui.gesture
+package com.android.systemui.inputdevice.oobe.data.model
 
-enum class TouchpadGesture {
-    BACK,
-    HOME;
+data class OobeSchedulerInfo(
+    val keyboard: DeviceSchedulerInfo = DeviceSchedulerInfo(),
+    val touchpad: DeviceSchedulerInfo = DeviceSchedulerInfo()
+)
 
-    fun toMonitor(
-        swipeDistanceThresholdPx: Int,
-        onStateChanged: (GestureState) -> Unit
-    ): TouchpadGestureMonitor {
-        return when (this) {
-            BACK -> BackGestureMonitor(swipeDistanceThresholdPx, onStateChanged)
-            else -> throw IllegalArgumentException("Not implemented yet")
-        }
-    }
+data class DeviceSchedulerInfo(var isLaunched: Boolean = false, var connectionTime: Long? = null) {
+    val wasEverConnected: Boolean
+        get() = connectionTime != null
 }

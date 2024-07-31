@@ -65,68 +65,74 @@ constructor(
     ) {
         val resources = LocalContext.current.resources
 
-        MovableElement(key = ClockElementKeys.smartspaceElementKey, modifier = modifier) {
-            Column(
-                modifier =
-                    modifier
-                        .onTopPlacementChanged(onTopChanged)
-                        .padding(
-                            top = { lockscreenContentViewModel.getSmartSpacePaddingTop(resources) },
-                            bottom = {
-                                resources.getDimensionPixelSize(
-                                    R.dimen.keyguard_status_view_bottom_margin
-                                )
-                            }
-                        )
-            ) {
-                if (!keyguardSmartspaceViewModel.isSmartspaceEnabled) {
-                    return@Column
-                }
+        Element(key = ClockElementKeys.smartspaceElementKey, modifier = modifier) {
+            content {
+                Column(
+                    modifier =
+                        modifier
+                            .onTopPlacementChanged(onTopChanged)
+                            .padding(
+                                top = {
+                                    lockscreenContentViewModel.getSmartSpacePaddingTop(resources)
+                                },
+                                bottom = {
+                                    resources.getDimensionPixelSize(
+                                        R.dimen.keyguard_status_view_bottom_margin
+                                    )
+                                }
+                            )
+                ) {
+                    if (!keyguardSmartspaceViewModel.isSmartspaceEnabled) {
+                        return@Column
+                    }
 
-                val paddingBelowClockStart = dimensionResource(R.dimen.below_clock_padding_start)
-                val paddingBelowClockEnd = dimensionResource(R.dimen.below_clock_padding_end)
+                    val paddingBelowClockStart =
+                        dimensionResource(R.dimen.below_clock_padding_start)
+                    val paddingBelowClockEnd = dimensionResource(R.dimen.below_clock_padding_end)
 
-                if (keyguardSmartspaceViewModel.isDateWeatherDecoupled) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
+                    if (keyguardSmartspaceViewModel.isDateWeatherDecoupled) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier =
+                                Modifier.fillMaxWidth()
+                                    // All items will be constrained to be as tall as the shortest
+                                    // item.
+                                    .height(IntrinsicSize.Min)
+                                    .padding(
+                                        start = paddingBelowClockStart,
+                                    ),
+                        ) {
+                            Date(
+                                modifier =
+                                    Modifier.burnInAware(
+                                        viewModel = aodBurnInViewModel,
+                                        params = burnInParams,
+                                    ),
+                            )
+                            Spacer(modifier = Modifier.width(4.dp))
+                            Weather(
+                                modifier =
+                                    Modifier.burnInAware(
+                                        viewModel = aodBurnInViewModel,
+                                        params = burnInParams,
+                                    ),
+                            )
+                        }
+                    }
+
+                    Card(
                         modifier =
                             Modifier.fillMaxWidth()
-                                // All items will be constrained to be as tall as the shortest item.
-                                .height(IntrinsicSize.Min)
                                 .padding(
                                     start = paddingBelowClockStart,
-                                ),
-                    ) {
-                        Date(
-                            modifier =
-                                Modifier.burnInAware(
+                                    end = paddingBelowClockEnd,
+                                )
+                                .burnInAware(
                                     viewModel = aodBurnInViewModel,
                                     params = burnInParams,
                                 ),
-                        )
-                        Spacer(modifier = Modifier.width(4.dp))
-                        Weather(
-                            modifier =
-                                Modifier.burnInAware(
-                                    viewModel = aodBurnInViewModel,
-                                    params = burnInParams,
-                                ),
-                        )
-                    }
+                    )
                 }
-
-                Card(
-                    modifier =
-                        Modifier.fillMaxWidth()
-                            .padding(
-                                start = paddingBelowClockStart,
-                                end = paddingBelowClockEnd,
-                            )
-                            .burnInAware(
-                                viewModel = aodBurnInViewModel,
-                                params = burnInParams,
-                            ),
-                )
             }
         }
     }

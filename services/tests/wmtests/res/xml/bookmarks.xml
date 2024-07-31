@@ -41,30 +41,33 @@
         category="android.intent.category.APP_CALCULATOR"
         shortcut="u" />
 
+    <bookmark
+        role="android.app.role.BROWSER"
+        shortcut="b"
+        shift="true" />
+
+    <bookmark
+        category="android.intent.category.APP_CONTACTS"
+        shortcut="c"
+        shift="true" />
+
+    <bookmark
+        package="com.test"
+        class="com.test.BookmarkTest"
+        shortcut="j"
+        shift="true" />
+
     <!-- The following shortcuts will not be invoked by tests but are here to
          provide test coverage of parsing the different types of shortcut. -->
     <bookmark
         package="com.test"
         class="com.test.BookmarkTest"
-        shortcut="a" />
+        shortcut="j" />
     <bookmark
         package="com.test2"
         class="com.test.BookmarkTest"
         shortcut="d" />
 
-    <bookmark
-        role="android.app.role.BROWSER"
-        shortcut="b"
-        shift="true" />
-    <bookmark
-        category="android.intent.category.APP_CONTACTS"
-        shortcut="c"
-        shift="true" />
-    <bookmark
-        package="com.test"
-        class="com.test.BookmarkTest"
-        shortcut="a"
-        shift="true" />
 
     <!-- It's intended that this package/class will NOT resolve so we test the resolution
          failure case. -->

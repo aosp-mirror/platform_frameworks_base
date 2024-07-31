@@ -160,6 +160,7 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
 
     DesktopModeWindowDecoration(
             Context context,
+            @NonNull Context userContext,
             DisplayController displayController,
             SplitScreenController splitScreenController,
             ShellTaskOrganizer taskOrganizer,
@@ -171,8 +172,8 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
             SyncTransactionQueue syncQueue,
             RootTaskDisplayAreaOrganizer rootTaskDisplayAreaOrganizer,
             AppToWebGenericLinksParser genericLinksParser) {
-        this (context, displayController, splitScreenController, taskOrganizer, taskInfo,
-                taskSurface, handler, bgExecutor, choreographer, syncQueue,
+        this (context, userContext, displayController, splitScreenController, taskOrganizer,
+                taskInfo, taskSurface, handler, bgExecutor, choreographer, syncQueue,
                 rootTaskDisplayAreaOrganizer, genericLinksParser, SurfaceControl.Builder::new,
                 SurfaceControl.Transaction::new,  WindowContainerTransaction::new,
                 SurfaceControl::new, new SurfaceControlViewHostFactory() {},
@@ -181,6 +182,7 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
 
     DesktopModeWindowDecoration(
             Context context,
+            @NonNull Context userContext,
             DisplayController displayController,
             SplitScreenController splitScreenController,
             ShellTaskOrganizer taskOrganizer,
@@ -199,7 +201,7 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
             SurfaceControlViewHostFactory surfaceControlViewHostFactory,
             MaximizeMenuFactory maximizeMenuFactory,
             HandleMenuFactory handleMenuFactory) {
-        super(context, displayController, taskOrganizer, taskInfo, taskSurface,
+        super(context, userContext, displayController, taskOrganizer, taskInfo, taskSurface,
                 surfaceControlBuilderSupplier, surfaceControlTransactionSupplier,
                 windowContainerTransactionSupplier, surfaceControlSupplier,
                 surfaceControlViewHostFactory);
@@ -490,8 +492,9 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
         final Resources res = mResult.mRootView.getResources();
         if (mDragResizeListener.setGeometry(
                 new DragResizeWindowGeometry(mRelayoutParams.mCornerRadius,
-                        new Size(mResult.mWidth, mResult.mHeight), getResizeEdgeHandleSize(res),
-                        getFineResizeCornerSize(res), getLargeResizeCornerSize(res)), touchSlop)
+                        new Size(mResult.mWidth, mResult.mHeight),
+                        getResizeEdgeHandleSize(mContext, res), getFineResizeCornerSize(res),
+                        getLargeResizeCornerSize(res)), touchSlop)
                 || !mTaskInfo.positionInParent.equals(mPositionInParent)) {
             updateExclusionRegion();
         }
@@ -737,12 +740,8 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
                 Slog.e(TAG, "Base activity component not found in task");
                 return;
             }
-            final PackageManager pm = mContext.getApplicationContext().getPackageManager();
-            final ActivityInfo activityInfo = pm.getActivityInfo(baseActivity,
-                    // Include uninstalled apps. Despite its name, adding this flag is a workaround
-                    // to #getActivityInfo throwing a NameNotFoundException for installed packages
-                    // when HSUM is enabled. See b/354884302.
-                    PackageManager.MATCH_UNINSTALLED_PACKAGES);
+            final PackageManager pm = mUserContext.getPackageManager();
+            final ActivityInfo activityInfo = pm.getActivityInfo(baseActivity, 0 /* flags */);
             final IconProvider provider = new IconProvider(mContext);
             final Drawable appIconDrawable = provider.getIcon(activityInfo);
             final BaseIconFactory headerIconFactory = createIconFactory(mContext,
@@ -1264,6 +1263,7 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
 
         DesktopModeWindowDecoration create(
                 Context context,
+                @NonNull Context userContext,
                 DisplayController displayController,
                 SplitScreenController splitScreenController,
                 ShellTaskOrganizer taskOrganizer,
@@ -1277,6 +1277,7 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
                 AppToWebGenericLinksParser genericLinksParser) {
             return new DesktopModeWindowDecoration(
                     context,
+                    userContext,
                     displayController,
                     splitScreenController,
                     taskOrganizer,

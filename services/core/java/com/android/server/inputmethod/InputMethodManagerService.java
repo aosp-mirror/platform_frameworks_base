@@ -2779,7 +2779,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
             }
             final IBinder targetWindow = mImeTargetWindowMap.get(startInputToken);
             if (targetWindow != null) {
-                mWindowManagerInternal.updateInputMethodTargetWindow(token, targetWindow);
+                mWindowManagerInternal.updateInputMethodTargetWindow(targetWindow);
             }
             mVisibilityStateComputer.setLastImeTargetWindow(targetWindow);
         }
@@ -2849,8 +2849,8 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
             }
             final boolean needsToShowImeSwitcher = shouldShowImeSwitcherLocked(vis, userId);
             if (mStatusBarManagerInternal != null) {
-                mStatusBarManagerInternal.setImeWindowStatus(curTokenDisplayId,
-                        curToken, vis, backDisposition, needsToShowImeSwitcher);
+                mStatusBarManagerInternal.setImeWindowStatus(curTokenDisplayId, vis,
+                        backDisposition, needsToShowImeSwitcher);
             }
         } finally {
             Binder.restoreCallingIdentity(ident);

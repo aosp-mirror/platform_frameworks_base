@@ -35,6 +35,8 @@ import static com.android.internal.util.LatencyTracker.ACTION_TURN_ON_SCREEN;
 import static com.android.server.deviceidle.Flags.disableWakelocksInLightIdle;
 import static com.android.server.display.DisplayDeviceConfig.INVALID_BRIGHTNESS_IN_CONFIG;
 import static com.android.server.display.brightness.BrightnessUtils.isValidBrightnessValue;
+import static com.android.server.power.ScreenTimeoutOverridePolicy.RELEASE_REASON_UNKNOWN;
+import static com.android.server.power.ScreenTimeoutOverridePolicy.RELEASE_REASON_WAKE_LOCK_DEATH;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
@@ -1825,7 +1827,7 @@ public final class PowerManagerService extends SystemService
                 return;
             }
 
-            removeWakeLockLocked(wakeLock, index);
+            removeWakeLockDeathLocked(wakeLock, index);
         }
     }
 
@@ -1853,6 +1855,12 @@ public final class PowerManagerService extends SystemService
     @GuardedBy("mLock")
     private void removeWakeLockLocked(WakeLock wakeLock, int index) {
         removeWakeLockNoUpdateLocked(wakeLock, index);
+        updatePowerStateLocked();
+    }
+
+    @GuardedBy("mLock")
+    private void removeWakeLockDeathLocked(WakeLock wakeLock, int index) {
+        removeWakeLockNoUpdateLocked(wakeLock, index, RELEASE_REASON_WAKE_LOCK_DEATH);
         updatePowerStateLocked();
     }
 
@@ -2011,7 +2019,7 @@ public final class PowerManagerService extends SystemService
 
     @GuardedBy("mLock")
     private void notifyWakeLockReleasedLocked(WakeLock wakeLock) {
-        notifyWakeLockReleasedLocked(wakeLock, ScreenTimeoutOverridePolicy.RELEASE_REASON_UNKNOWN);
+        notifyWakeLockReleasedLocked(wakeLock, RELEASE_REASON_UNKNOWN);
     }
 
     @GuardedBy("mLock")

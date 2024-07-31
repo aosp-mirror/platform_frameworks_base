@@ -18,6 +18,7 @@ package com.android.server.wm;
 
 import static android.app.ActivityOptions.ANIM_CUSTOM;
 import static android.app.ActivityOptions.ANIM_OPEN_CROSS_PROFILE_APPS;
+import static android.app.ActivityOptions.ANIM_SCENE_TRANSITION;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_RECENTS;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
@@ -1936,8 +1937,7 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
             for (int i = changes.size() - 1; i >= 0; --i) {
                 final WindowContainer<?> container = mTargets.get(i).mContainer;
                 if (container.asActivityRecord() != null
-                        || (container.asTask() != null
-                                && mOverrideOptions.getOverrideTaskTransition())) {
+                        || shouldApplyAnimOptionsToTask(container.asTask())) {
                     changes.get(i).setAnimationOptions(mOverrideOptions);
                     // TODO(b/295805497): Extract mBackgroundColor from AnimationOptions.
                     changes.get(i).setBackgroundColor(mOverrideOptions.getBackgroundColor());
@@ -1949,6 +1949,16 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
             }
         }
         updateActivityTargetForCrossProfileAnimation(info);
+    }
+
+    private boolean shouldApplyAnimOptionsToTask(@Nullable Task task) {
+        if (task == null || mOverrideOptions == null) {
+            return false;
+        }
+        final int animType = mOverrideOptions.getType();
+        // Only apply AnimationOptions to Task if it is specified in #getOverrideTaskTransition
+        // or it's ANIM_SCENE_TRANSITION.
+        return animType == ANIM_SCENE_TRANSITION || mOverrideOptions.getOverrideTaskTransition();
     }
 
     private boolean shouldApplyAnimOptionsToEmbeddedTf(@Nullable TaskFragment taskFragment) {
@@ -2377,6 +2387,7 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
         sb.append(" id=" + mSyncId);
         sb.append(" type=" + transitTypeToString(mType));
         sb.append(" flags=0x" + Integer.toHexString(mFlags));
+        sb.append(" overrideAnimOptions=" + mOverrideOptions);
         sb.append('}');
         return sb.toString();
     }

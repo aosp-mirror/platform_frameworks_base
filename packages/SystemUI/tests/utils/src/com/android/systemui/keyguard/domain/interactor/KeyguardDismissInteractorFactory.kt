@@ -27,8 +27,8 @@ import com.android.systemui.bouncer.domain.interactor.PrimaryBouncerCallbackInte
 import com.android.systemui.bouncer.domain.interactor.PrimaryBouncerInteractor
 import com.android.systemui.bouncer.ui.BouncerView
 import com.android.systemui.classifier.FalsingCollector
+import com.android.systemui.deviceentry.domain.interactor.DeviceEntryBiometricsAllowedInteractor
 import com.android.systemui.deviceentry.domain.interactor.DeviceEntryFaceAuthInteractor
-import com.android.systemui.deviceentry.domain.interactor.DeviceEntryFingerprintAuthInteractor
 import com.android.systemui.keyguard.DismissCallbackRegistry
 import com.android.systemui.keyguard.data.repository.FakeBiometricSettingsRepository
 import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
@@ -87,7 +87,7 @@ object KeyguardDismissInteractorFactory {
                 FakeBiometricSettingsRepository(),
                 FakeSystemClock(),
                 keyguardUpdateMonitor,
-                { mock(DeviceEntryFingerprintAuthInteractor::class.java) },
+                { mock(DeviceEntryBiometricsAllowedInteractor::class.java) },
                 { mock(KeyguardInteractor::class.java) },
                 { mock(KeyguardTransitionInteractor::class.java) },
                 { mock(SceneInteractor::class.java) },

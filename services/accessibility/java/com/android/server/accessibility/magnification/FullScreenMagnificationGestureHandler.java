@@ -1168,9 +1168,8 @@ public class FullScreenMagnificationGestureHandler extends MagnificationGestureH
 
         DetectingState(Context context) {
             mLongTapMinDelay = ViewConfiguration.getLongPressTimeout();
-            mMultiTapMaxDelay = ViewConfiguration.getDoubleTapTimeout()
-                    + context.getResources().getInteger(
-                    R.integer.config_screen_magnification_multi_tap_adjustment);
+            mMultiTapMaxDelay =
+                    MagnificationGestureMatcher.getMagnificationMultiTapTimeout(context);
             mSwipeMinDistance = ViewConfiguration.get(context).getScaledTouchSlop();
             mMultiTapMaxDistance = ViewConfiguration.get(context).getScaledDoubleTapSlop();
         }

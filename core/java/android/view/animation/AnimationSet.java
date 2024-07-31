@@ -21,7 +21,6 @@ import android.content.res.TypedArray;
 import android.graphics.RectF;
 import android.os.Build;
 import android.util.AttributeSet;
-import android.view.WindowInsets;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -541,12 +540,12 @@ public class AnimationSet extends Animation {
 
     /** @hide */
     @Override
-    @WindowInsets.Side.InsetsSide
-    public int getExtensionEdges() {
-        int edge = 0x0;
+    public boolean hasExtension() {
         for (Animation animation : mAnimations) {
-            edge |= animation.getExtensionEdges();
+            if (animation.hasExtension()) {
+                return true;
+            }
         }
-        return edge;
+        return false;
     }
 }

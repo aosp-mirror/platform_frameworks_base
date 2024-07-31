@@ -535,6 +535,43 @@ class DesktopModeTaskRepositoryTest : ShellTestCase() {
     }
 
     @Test
+    fun removeFreeformTask_removesActiveTask() {
+        val taskId = 1
+        val listener = TestListener()
+        repo.addActiveTaskListener(listener)
+        repo.addActiveTask(DEFAULT_DISPLAY, taskId)
+        repo.addOrMoveFreeformTaskToTop(DEFAULT_DISPLAY, taskId)
+
+        repo.removeFreeformTask(THIRD_DISPLAY, taskId)
+
+        assertThat(repo.isActiveTask(taskId)).isFalse()
+        assertThat(listener.activeChangesOnDefaultDisplay).isEqualTo(2)
+    }
+
+    @Test
+    fun removeFreeformTask_unminimizesTask() {
+        val taskId = 1
+        repo.addActiveTask(DEFAULT_DISPLAY, taskId)
+        repo.addOrMoveFreeformTaskToTop(DEFAULT_DISPLAY, taskId)
+        repo.minimizeTask(DEFAULT_DISPLAY, taskId)
+
+        repo.removeFreeformTask(DEFAULT_DISPLAY, taskId)
+
+        assertThat(repo.isMinimizedTask(taskId)).isFalse()
+    }
+
+    @Test
+    fun removeFreeformTask_updatesTaskVisibility() {
+        val taskId = 1
+        repo.addActiveTask(DEFAULT_DISPLAY, taskId)
+        repo.addOrMoveFreeformTaskToTop(DEFAULT_DISPLAY, taskId)
+
+        repo.removeFreeformTask(THIRD_DISPLAY, taskId)
+
+        assertThat(repo.isVisibleTask(taskId)).isFalse()
+    }
+
+    @Test
     fun saveBoundsBeforeMaximize_boundsSavedByTaskId() {
         val taskId = 1
         val bounds = Rect(0, 0, 200, 200)

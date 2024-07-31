@@ -806,14 +806,27 @@ private fun ShortcutsSearchBar(onQueryChange: (String) -> Unit) {
 
 @Composable
 private fun KeyboardSettings(onClick: () -> Unit) {
+    val interactionSource = remember { MutableInteractionSource() }
+    val isFocused by interactionSource.collectIsFocusedAsState()
+
     Surface(
         onClick = onClick,
         shape = RoundedCornerShape(24.dp),
         color = Color.Transparent,
-        modifier = Modifier.semantics { role = Role.Button }.fillMaxWidth()
+        modifier =
+            Modifier.semantics { role = Role.Button }
+                .fillMaxWidth()
+                .focusable(interactionSource = interactionSource)
     ) {
         Row(
-            modifier = Modifier.padding(horizontal = 24.dp, vertical = 16.dp),
+            modifier =
+                Modifier.padding(horizontal = 12.dp, vertical = 16.dp)
+                    .outlineFocusModifier(
+                        isFocused = isFocused,
+                        focusColor = MaterialTheme.colorScheme.secondary,
+                        padding = 8.dp,
+                        cornerRadius = 28.dp
+                    ),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
@@ -825,7 +838,8 @@ private fun KeyboardSettings(onClick: () -> Unit) {
             Icon(
                 imageVector = Icons.AutoMirrored.Default.OpenInNew,
                 contentDescription = null,
-                tint = MaterialTheme.colorScheme.onSurfaceVariant
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.size(24.dp)
             )
         }
     }
