@@ -31,6 +31,7 @@ import static android.view.inputmethod.EditorInfo.STYLUS_HANDWRITING_ENABLED_AND
 
 import static com.android.text.flags.Flags.FLAG_FIX_LINE_HEIGHT_FOR_LOCALE;
 import static com.android.text.flags.Flags.FLAG_USE_BOUNDS_FOR_WIDTH;
+import static android.view.inputmethod.Flags.initiationWithoutInputConnection;
 
 import android.R;
 import android.annotation.CallSuper;
@@ -2738,6 +2739,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
         InputMethodManager imm = getInputMethodManager();
         if (imm != null) imm.restartInput(this);
+
+        ensureEditorFocusedNotifiedToHandwritingInitiator();
     }
 
     private void setInputTypeFromEditor() {
@@ -7843,6 +7846,20 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         if (type == InputType.TYPE_NULL && mEditor == null) return; //TYPE_NULL is the default value
         createEditorIfNeeded();
         mEditor.mInputType = type;
+        ensureEditorFocusedNotifiedToHandwritingInitiator();
+    }
+
+    private void ensureEditorFocusedNotifiedToHandwritingInitiator() {
+        if (!initiationWithoutInputConnection() || isHandwritingDelegate()) {
+            return;
+        }
+        ViewRootImpl viewRoot = getViewRootImpl();
+        if (viewRoot == null) {
+            return;
+        }
+        if (isFocused() && hasWindowFocus() && onCheckIsTextEditor()) {
+            viewRoot.getHandwritingInitiator().onEditorFocused(this);
+        }
     }
 
     @Override
