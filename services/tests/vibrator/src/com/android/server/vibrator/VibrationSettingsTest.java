@@ -610,7 +610,6 @@ public class VibrationSettingsTest {
         assertVibrationIgnoredForAttributes(
                 new VibrationAttributes.Builder()
                         .setUsage(USAGE_IME_FEEDBACK)
-                        .setCategory(VibrationAttributes.CATEGORY_KEYBOARD)
                         .build(),
                 Vibration.Status.IGNORED_FOR_SETTINGS);
 
@@ -619,7 +618,6 @@ public class VibrationSettingsTest {
         assertVibrationNotIgnoredForAttributes(
                 new VibrationAttributes.Builder()
                         .setUsage(USAGE_IME_FEEDBACK)
-                        .setCategory(VibrationAttributes.CATEGORY_KEYBOARD)
                         .setFlags(VibrationAttributes.FLAG_BYPASS_USER_VIBRATION_INTENSITY_OFF)
                         .build());
     }
@@ -637,7 +635,6 @@ public class VibrationSettingsTest {
         assertVibrationNotIgnoredForAttributes(
                 new VibrationAttributes.Builder()
                         .setUsage(USAGE_IME_FEEDBACK)
-                        .setCategory(VibrationAttributes.CATEGORY_KEYBOARD)
                         .build());
     }
 
@@ -654,7 +651,6 @@ public class VibrationSettingsTest {
         assertVibrationIgnoredForAttributes(
                 new VibrationAttributes.Builder()
                         .setUsage(USAGE_IME_FEEDBACK)
-                        .setCategory(VibrationAttributes.CATEGORY_KEYBOARD)
                         .build(),
                 Vibration.Status.IGNORED_FOR_SETTINGS);
     }
