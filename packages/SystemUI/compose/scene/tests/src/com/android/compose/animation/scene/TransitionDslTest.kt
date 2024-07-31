@@ -59,7 +59,7 @@ class TransitionDslTest {
 
         assertThat(transitions.transitionSpecs)
             .comparingElementsUsing(
-                Correspondence.transforming<TransitionSpecImpl, Pair<SceneKey?, SceneKey?>>(
+                Correspondence.transforming<TransitionSpecImpl, Pair<ContentKey?, ContentKey?>>(
                     { it?.from to it?.to },
                     "has (from, to) equal to"
                 )
