@@ -412,7 +412,6 @@ public class AuthContainerView extends LinearLayout
         });
 
         setImportantForAccessibility(IMPORTANT_FOR_ACCESSIBILITY_NO);
-        setFocusableInTouchMode(true);
         requestFocus();
     }
 
@@ -464,7 +463,8 @@ public class AuthContainerView extends LinearLayout
         }
     }
 
-    private void onBackInvoked() {
+    @VisibleForTesting
+    public void onBackInvoked() {
         sendEarlyUserCanceled();
         animateAway(AuthDialogCallback.DISMISSED_USER_CANCELED);
     }
