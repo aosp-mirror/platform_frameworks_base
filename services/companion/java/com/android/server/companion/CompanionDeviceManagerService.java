@@ -676,7 +676,7 @@ public class CompanionDeviceManagerService extends SystemService {
 
             final MacAddress macAddressObj = MacAddress.fromString(macAddress);
             mAssociationRequestsProcessor.createAssociation(userId, packageName, macAddressObj,
-                    null, null, null, false, null, null);
+                    null, null, null, false, null, null, null);
         }
 
         private void checkCanCallNotificationApi(String callingPackage, int userId) {
