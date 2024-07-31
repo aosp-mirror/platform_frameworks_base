@@ -6150,7 +6150,8 @@ public class Intent implements Parcelable, Cloneable {
      * {@link #EXTRA_CHOOSER_MODIFY_SHARE_ACTION},
      * {@link #EXTRA_METADATA_TEXT},
      * {@link #EXTRA_CHOOSER_REFINEMENT_INTENT_SENDER},
-     * {@link #EXTRA_CHOOSER_RESULT_INTENT_SENDER}.
+     * {@link #EXTRA_CHOOSER_RESULT_INTENT_SENDER},
+     * {@link #EXTRA_EXCLUDE_COMPONENTS}.
      * </p>
      */
     @FlaggedApi(android.service.chooser.Flags.FLAG_CHOOSER_PAYLOAD_TOGGLING)
