@@ -864,7 +864,7 @@ public class BluetoothUtils {
         if (localBtManager == null) return null;
         LocalBluetoothLeBroadcast broadcast =
                 localBtManager.getProfileManager().getLeAudioBroadcastProfile();
-        if (!broadcast.isEnabled(null)) return null;
+        if (broadcast == null || !broadcast.isEnabled(null)) return null;
         int primaryGroupId = getPrimaryGroupIdForBroadcast(contentResolver);
         if (primaryGroupId == BluetoothCsipSetCoordinator.GROUP_ID_INVALID) return null;
         LocalBluetoothLeBroadcastAssistant assistant =
