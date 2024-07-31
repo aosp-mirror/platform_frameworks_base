@@ -513,7 +513,8 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
                         postStartTransactionCallbacks
                                 .add(t -> edgeExtendWindow(change, a, t, finishTransaction));
                     }
-                } else if (com.android.graphics.libgui.flags.Flags.edgeExtensionShader()) {
+                } else if (com.android.graphics.libgui.flags.Flags.edgeExtensionShader()
+                        && a.getExtensionEdges() != 0) {
                     finishTransaction.setEdgeExtensionEffect(change.getLeash(), /* edge */ 0);
                 }
 
