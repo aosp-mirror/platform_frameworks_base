@@ -619,7 +619,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
             case Settings.Secure.SHOW_IME_WITH_HARD_KEYBOARD: {
                 if (!mNewInputMethodSwitcherMenuEnabled) {
                     if (userId == mCurrentUserId) {
-                        mMenuController.updateKeyboardFromSettingsLocked();
+                        mMenuController.updateKeyboardFromSettingsLocked(userId);
                     }
                 }
                 break;
@@ -693,7 +693,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
                                 senderUserId);
                     }
                 } else {
-                    mMenuController.hideInputMethodMenu();
+                    mMenuController.hideInputMethodMenu(senderUserId);
                 }
             } else {
                 Slog.w(TAG, "Unexpected intent " + intent);
@@ -1220,12 +1220,6 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
             registerDeviceListenerAndCheckStylusSupport();
             mInputMethodManagerInternal = new LocalServiceImpl();
         }
-    }
-
-    @GuardedBy("ImfLock.class")
-    @UserIdInt
-    int getCurrentImeUserIdLocked() {
-        return mCurrentUserId;
     }
 
     private final class InkWindowInitializer implements Runnable {
@@ -1826,7 +1820,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
             if (mNewInputMethodSwitcherMenuEnabled) {
                 mMenuControllerNew.hide(bindingController.getCurTokenDisplayId(), userId);
             } else {
-                mMenuController.hideInputMethodMenuLocked();
+                mMenuController.hideInputMethodMenuLocked(userId);
             }
         }
     }
@@ -2860,7 +2854,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
     void updateFromSettingsLocked(boolean enabledMayChange, @UserIdInt int userId) {
         updateInputMethodsFromSettingsLocked(enabledMayChange, userId);
         if (!mNewInputMethodSwitcherMenuEnabled) {
-            mMenuController.updateKeyboardFromSettingsLocked();
+            mMenuController.updateKeyboardFromSettingsLocked(userId);
         }
     }
 
@@ -5071,7 +5065,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
             mMenuControllerNew.show(menuItems, selectedIndex, displayId, userId);
         } else {
             mMenuController.showInputMethodMenuLocked(showAuxSubtypes, displayId,
-                    lastInputMethodId, lastInputMethodSubtypeId, imList);
+                    lastInputMethodId, lastInputMethodSubtypeId, imList, userId);
         }
     }
 
@@ -5948,7 +5942,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
                         final var bindingController = getInputMethodBindingController(userId);
                         mMenuControllerNew.hide(bindingController.getCurTokenDisplayId(), userId);
                     } else {
-                        mMenuController.hideInputMethodMenuLocked();
+                        mMenuController.hideInputMethodMenuLocked(userId);
                     }
                 }
             }
