@@ -18,7 +18,6 @@ package android.content;
 
 import static org.junit.Assert.fail;
 import static org.junit.Assume.assumeTrue;
-import org.junit.Ignore;
 
 import android.app.ActivityManager;
 import android.app.activity.LocalProvider;
@@ -33,13 +32,14 @@ import android.os.UserHandle;
 import android.os.UserManager;
 
 import androidx.test.InstrumentationRegistry;
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.LargeTest;
-import androidx.test.runner.AndroidJUnit4;
 
 import com.android.compatibility.common.util.SystemUtil;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 

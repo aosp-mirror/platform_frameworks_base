@@ -149,6 +149,13 @@ final class DefaultPermissionGrantPolicy {
         CONTACTS_PERMISSIONS.add(Manifest.permission.GET_ACCOUNTS);
     }
 
+    private static final Set<String> CALL_LOG_PERMISSIONS = new ArraySet<>();
+    static {
+        CALL_LOG_PERMISSIONS.add(Manifest.permission.READ_CALL_LOG);
+        CALL_LOG_PERMISSIONS.add(Manifest.permission.WRITE_CALL_LOG);
+    }
+
+
     private static final Set<String> ALWAYS_LOCATION_PERMISSIONS = new ArraySet<>();
     static {
         ALWAYS_LOCATION_PERMISSIONS.add(Manifest.permission.ACCESS_FINE_LOCATION);
@@ -753,7 +760,7 @@ final class DefaultPermissionGrantPolicy {
         String contactsProviderPackage =
                 getDefaultProviderAuthorityPackage(ContactsContract.AUTHORITY, userId);
         grantSystemFixedPermissionsToSystemPackage(pm, contactsProviderPackage, userId,
-                CONTACTS_PERMISSIONS, PHONE_PERMISSIONS);
+                CONTACTS_PERMISSIONS, PHONE_PERMISSIONS, CALL_LOG_PERMISSIONS);
         grantPermissionsToSystemPackage(pm, contactsProviderPackage, userId, STORAGE_PERMISSIONS);
 
         // Device provisioning
@@ -807,7 +814,7 @@ final class DefaultPermissionGrantPolicy {
                     getDefaultSystemHandlerActivityPackage(pm,
                             SearchManager.INTENT_ACTION_GLOBAL_SEARCH, userId),
                     userId, MICROPHONE_PERMISSIONS, ALWAYS_LOCATION_PERMISSIONS,
-                    NOTIFICATION_PERMISSIONS, PHONE_PERMISSIONS, CALENDAR_PERMISSIONS);
+                    NOTIFICATION_PERMISSIONS);
         }
 
         // Voice recognition
@@ -875,6 +882,12 @@ final class DefaultPermissionGrantPolicy {
                     getDefaultSystemHandlerActivityPackage(pm, ACTION_TRACK, userId), userId,
                     SENSORS_PERMISSIONS);
             }
+
+            // Allow voice search on wear
+            grantPermissionsToSystemPackage(pm,
+                    getDefaultSystemHandlerActivityPackage(pm,
+                            SearchManager.INTENT_ACTION_GLOBAL_SEARCH, userId),
+                    userId, PHONE_PERMISSIONS, CALENDAR_PERMISSIONS);
         }
 
         // Print Spooler
@@ -1631,10 +1644,12 @@ final class DefaultPermissionGrantPolicy {
     private boolean isSystemOrCertificateMatchingPackage(PackageInfo pi, String cert) {
         if (cert == null) {
             return pi.applicationInfo.isSystemApp();
+        } else if (Objects.equals(cert, "platform")) {
+            return mServiceInternal.isPlatformSigned(pi.packageName);
+        } else {
+            return mContext.getPackageManager().hasSigningCertificate(pi.packageName, HexEncoding.
+                    decode(cert.replace(":", "")), PackageManager.CERT_INPUT_SHA256);
         }
-
-        return mContext.getPackageManager().hasSigningCertificate(pi.packageName, HexEncoding.
-                decode(cert.replace(":", "")), PackageManager.CERT_INPUT_SHA256);
     }
 
     private static boolean doesPackageSupportRuntimePermissions(PackageInfo pkg) {

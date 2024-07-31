@@ -19,7 +19,7 @@ package com.android.systemui.keyguard.domain.interactor
 import android.animation.ValueAnimator
 import com.android.app.animation.Interpolators
 import com.android.app.tracing.coroutines.launch
-import com.android.systemui.communal.domain.interactor.CommunalInteractor
+import com.android.systemui.communal.domain.interactor.CommunalSceneInteractor
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
@@ -45,13 +45,14 @@ class FromGoneTransitionInteractor
 @Inject
 constructor(
     override val transitionRepository: KeyguardTransitionRepository,
+    override val internalTransitionInteractor: InternalKeyguardTransitionInteractor,
     transitionInteractor: KeyguardTransitionInteractor,
     @Background private val scope: CoroutineScope,
     @Background bgDispatcher: CoroutineDispatcher,
     @Main mainDispatcher: CoroutineDispatcher,
     keyguardInteractor: KeyguardInteractor,
     powerInteractor: PowerInteractor,
-    private val communalInteractor: CommunalInteractor,
+    private val communalSceneInteractor: CommunalSceneInteractor,
     keyguardOcclusionInteractor: KeyguardOcclusionInteractor,
     private val biometricSettingsRepository: BiometricSettingsRepository,
     private val keyguardRepository: KeyguardRepository,
@@ -68,7 +69,7 @@ constructor(
     ) {
 
     override fun start() {
-        // TODO(b/336576536): Check if adaptation for scene framework is needed
+        // KeyguardState.GONE does not exist with SceneContainerFlag enabled
         if (SceneContainerFlag.isEnabled) return
         listenForGoneToAodOrDozing()
         listenForGoneToDreaming()
@@ -87,7 +88,7 @@ constructor(
                 biometricSettingsRepository.isCurrentUserInLockdown
                     .distinctUntilChanged()
                     .filterRelevantKeyguardStateAnd { inLockdown -> inLockdown }
-                    .sample(communalInteractor.isIdleOnCommunal, ::Pair)
+                    .sample(communalSceneInteractor.isIdleOnCommunalNotEditMode, ::Pair)
                     .collect { (_, isIdleOnCommunal) ->
                         val to =
                             if (isIdleOnCommunal) {
@@ -99,27 +100,25 @@ constructor(
                     }
             }
 
-            if (!SceneContainerFlag.isEnabled) {
-                scope.launch {
-                    keyguardRepository.isKeyguardEnabled
-                        .filterRelevantKeyguardStateAnd { enabled -> enabled }
-                        .sample(keyguardEnabledInteractor.showKeyguardWhenReenabled)
-                        .filter { reshow -> reshow }
-                        .collect {
-                            startTransitionTo(
-                                KeyguardState.LOCKSCREEN,
-                                ownerReason =
-                                    "Keyguard was re-enabled, and we weren't GONE when it " +
-                                        "was originally disabled"
-                            )
-                        }
-                }
+            scope.launch {
+                keyguardRepository.isKeyguardEnabled
+                    .filterRelevantKeyguardStateAnd { enabled -> enabled }
+                    .sample(keyguardEnabledInteractor.showKeyguardWhenReenabled)
+                    .filter { reshow -> reshow }
+                    .collect {
+                        startTransitionTo(
+                            KeyguardState.LOCKSCREEN,
+                            ownerReason =
+                                "Keyguard was re-enabled, and we weren't GONE when it " +
+                                    "was originally disabled"
+                        )
+                    }
             }
         } else {
             scope.launch("$TAG#listenForGoneToLockscreenOrHub") {
                 keyguardInteractor.isKeyguardShowing
                     .filterRelevantKeyguardStateAnd { isKeyguardShowing -> isKeyguardShowing }
-                    .sample(communalInteractor.isIdleOnCommunal, ::Pair)
+                    .sample(communalSceneInteractor.isIdleOnCommunalNotEditMode, ::Pair)
                     .collect { (_, isIdleOnCommunal) ->
                         val to =
                             if (isIdleOnCommunal) {

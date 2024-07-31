@@ -2941,7 +2941,7 @@ public class ZenModeConfig implements Parcelable {
         long latestEndTime = -1;
 
         // DND turned on by manual rule
-        if (config.manualRule != null) {
+        if (config.isManualActive()) {
             final Uri id = config.manualRule.conditionId;
             if (config.manualRule.enabler != null) {
                 // app triggered manual rule
@@ -2950,7 +2950,7 @@ public class ZenModeConfig implements Parcelable {
                     secondaryText = appName;
                 }
             } else {
-                if (id == null) {
+                if (id == null || Uri.EMPTY.equals(id)) {
                     // Do not disturb manually triggered to remain on forever until turned off
                     if (describeForeverCondition) {
                         return context.getString(R.string.zen_mode_forever);

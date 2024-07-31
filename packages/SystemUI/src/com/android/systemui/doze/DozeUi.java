@@ -27,6 +27,8 @@ import android.os.SystemClock;
 import android.text.format.Formatter;
 import android.util.Log;
 
+import androidx.annotation.AnyThread;
+
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.doze.dagger.DozeScope;
@@ -55,7 +57,7 @@ public class DozeUi implements DozeMachine.Part {
     private final DozeParameters mDozeParameters;
     private final DozeLog mDozeLog;
     private final DelayableExecutor mBgExecutor;
-    private long mLastTimeTickElapsed = 0;
+    private volatile long mLastTimeTickElapsed = 0;
     // If time tick is scheduled and there's not a pending runnable to cancel:
     private volatile boolean mTimeTickScheduled;
     private final Runnable mCancelTimeTickerRunnable =  new Runnable() {
@@ -218,10 +220,15 @@ public class DozeUi implements DozeMachine.Part {
         return calendar.getTimeInMillis();
     }
 
+    @AnyThread
     private void onTimeTick() {
         verifyLastTimeTick();
 
-        mHost.dozeTimeTick();
+        if (dozeuiSchedulingAlarmsBackgroundExecution()) {
+            mHandler.post(mHost::dozeTimeTick);
+        } else {
+            mHost.dozeTimeTick();
+        }
 
         // Keep wakelock until a frame has been pushed.
         mHandler.post(mWakeLock.wrap(() -> {}));

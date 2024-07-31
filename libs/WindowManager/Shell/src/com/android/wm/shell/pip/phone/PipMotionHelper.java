@@ -34,7 +34,7 @@ import android.graphics.PointF;
 import android.graphics.Rect;
 import android.os.Debug;
 
-import com.android.internal.protolog.common.ProtoLog;
+import com.android.internal.protolog.ProtoLog;
 import com.android.wm.shell.R;
 import com.android.wm.shell.animation.FloatProperties;
 import com.android.wm.shell.common.FloatingContentCoordinator;
@@ -415,6 +415,17 @@ public class PipMotionHelper implements PipAppOpsListener.Callback,
         // If we're flinging to a snap target now, we're not springing to catch up to the touch
         // location now.
         mSpringingToTouch = false;
+
+        // Boost the velocityX if it's zero to forcefully push it towards the nearest edge.
+        // We don't simply change the xEndValue below since the PhysicsAnimator would rely on the
+        // same velocityX to find out which edge to snap to.
+        if (velocityX == 0) {
+            final int motionCenterX = mPipBoundsState
+                    .getMotionBoundsState().getBoundsInMotion().centerX();
+            final int displayCenterX = mPipBoundsState
+                    .getDisplayBounds().centerX();
+            velocityX = (motionCenterX < displayCenterX) ? -0.001f : 0.001f;
+        }
 
         mTemporaryBoundsPhysicsAnimator
                 .spring(FloatProperties.RECT_WIDTH, getBounds().width(), mSpringConfig)

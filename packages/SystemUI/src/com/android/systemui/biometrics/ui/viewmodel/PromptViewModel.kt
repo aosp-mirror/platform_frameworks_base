@@ -915,7 +915,12 @@ constructor(
         event: MotionEvent,
         touchExplorationEnabled: Boolean,
     ): Boolean {
-        if (bpTalkback() && modalities.first().hasUdfps && touchExplorationEnabled) {
+        if (
+            bpTalkback() &&
+                modalities.first().hasUdfps &&
+                touchExplorationEnabled &&
+                !isAuthenticated.first().isAuthenticated
+        ) {
             // TODO(b/315184924): Remove uses of UdfpsUtils
             val scaledTouch =
                 udfpsUtils.getTouchInNativeCoordinates(

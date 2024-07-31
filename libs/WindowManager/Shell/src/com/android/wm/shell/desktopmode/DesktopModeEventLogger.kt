@@ -16,9 +16,9 @@
 
 package com.android.wm.shell.desktopmode
 
+import com.android.internal.protolog.ProtoLog
 import com.android.internal.util.FrameworkStatsLog
 import com.android.wm.shell.protolog.ShellProtoLogGroup
-import com.android.wm.shell.util.KtProtoLog
 
 /** Event logger for logging desktop mode session events */
 class DesktopModeEventLogger {
@@ -27,7 +27,7 @@ class DesktopModeEventLogger {
      * entering desktop mode
      */
     fun logSessionEnter(sessionId: Int, enterReason: EnterReason) {
-        KtProtoLog.v(
+        ProtoLog.v(
             ShellProtoLogGroup.WM_SHELL_DESKTOP_MODE,
             "DesktopModeLogger: Logging session enter, session: %s reason: %s",
             sessionId,
@@ -47,7 +47,7 @@ class DesktopModeEventLogger {
      * exiting desktop mode
      */
     fun logSessionExit(sessionId: Int, exitReason: ExitReason) {
-        KtProtoLog.v(
+        ProtoLog.v(
             ShellProtoLogGroup.WM_SHELL_DESKTOP_MODE,
             "DesktopModeLogger: Logging session exit, session: %s reason: %s",
             sessionId,
@@ -67,7 +67,7 @@ class DesktopModeEventLogger {
      * session id [sessionId]
      */
     fun logTaskAdded(sessionId: Int, taskUpdate: TaskUpdate) {
-        KtProtoLog.v(
+        ProtoLog.v(
             ShellProtoLogGroup.WM_SHELL_DESKTOP_MODE,
             "DesktopModeLogger: Logging task added, session: %s taskId: %s",
             sessionId,
@@ -99,7 +99,7 @@ class DesktopModeEventLogger {
      * session id [sessionId]
      */
     fun logTaskRemoved(sessionId: Int, taskUpdate: TaskUpdate) {
-        KtProtoLog.v(
+        ProtoLog.v(
             ShellProtoLogGroup.WM_SHELL_DESKTOP_MODE,
             "DesktopModeLogger: Logging task remove, session: %s taskId: %s",
             sessionId,
@@ -131,7 +131,7 @@ class DesktopModeEventLogger {
      * having session id [sessionId]
      */
     fun logTaskInfoChanged(sessionId: Int, taskUpdate: TaskUpdate) {
-        KtProtoLog.v(
+        ProtoLog.v(
             ShellProtoLogGroup.WM_SHELL_DESKTOP_MODE,
             "DesktopModeLogger: Logging task info changed, session: %s taskId: %s",
             sessionId,

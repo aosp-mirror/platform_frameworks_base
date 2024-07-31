@@ -54,7 +54,6 @@ import static android.service.dreams.Flags.dreamHandlesConfirmKeys;
 import static android.view.ContentRecordingSession.RECORD_CONTENT_TASK;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Display.INVALID_DISPLAY;
-import static android.view.flags.Flags.sensitiveContentAppProtection;
 import static android.view.WindowManager.DISPLAY_IME_POLICY_FALLBACK_DISPLAY;
 import static android.view.WindowManager.DISPLAY_IME_POLICY_LOCAL;
 import static android.view.WindowManager.LayoutParams.FIRST_APPLICATION_WINDOW;
@@ -97,6 +96,7 @@ import static android.view.WindowManagerGlobal.RELAYOUT_RES_SURFACE_CHANGED;
 import static android.view.WindowManagerPolicyConstants.TYPE_LAYER_MULTIPLIER;
 import static android.view.displayhash.DisplayHashResultCallback.DISPLAY_HASH_ERROR_MISSING_WINDOW;
 import static android.view.displayhash.DisplayHashResultCallback.DISPLAY_HASH_ERROR_NOT_VISIBLE_ON_SCREEN;
+import static android.view.flags.Flags.sensitiveContentAppProtection;
 import static android.window.WindowProviderService.isWindowProviderService;
 
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_ADD_REMOVE;
@@ -118,12 +118,12 @@ import static com.android.server.LockGuard.installLock;
 import static com.android.server.policy.PhoneWindowManager.TRACE_WAIT_FOR_ALL_WINDOWS_DRAWN_METHOD;
 import static com.android.server.policy.WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER;
 import static com.android.server.wm.ActivityTaskManagerService.POWER_MODE_REASON_CHANGE_DISPLAY;
+import static com.android.server.wm.AppCompatConfiguration.LETTERBOX_BACKGROUND_APP_COLOR_BACKGROUND;
+import static com.android.server.wm.AppCompatConfiguration.LETTERBOX_BACKGROUND_APP_COLOR_BACKGROUND_FLOATING;
+import static com.android.server.wm.AppCompatConfiguration.LETTERBOX_BACKGROUND_SOLID_COLOR;
+import static com.android.server.wm.AppCompatConfiguration.LETTERBOX_BACKGROUND_WALLPAPER;
 import static com.android.server.wm.DisplayContent.IME_TARGET_CONTROL;
 import static com.android.server.wm.DisplayContent.IME_TARGET_LAYERING;
-import static com.android.server.wm.LetterboxConfiguration.LETTERBOX_BACKGROUND_APP_COLOR_BACKGROUND;
-import static com.android.server.wm.LetterboxConfiguration.LETTERBOX_BACKGROUND_APP_COLOR_BACKGROUND_FLOATING;
-import static com.android.server.wm.LetterboxConfiguration.LETTERBOX_BACKGROUND_SOLID_COLOR;
-import static com.android.server.wm.LetterboxConfiguration.LETTERBOX_BACKGROUND_WALLPAPER;
 import static com.android.server.wm.RootWindowContainer.MATCH_ATTACHED_TASK_OR_RECENT_TASKS;
 import static com.android.server.wm.SensitiveContentPackages.PackageInfo;
 import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_ALL;
@@ -283,6 +283,7 @@ import android.view.InsetsFrameProvider;
 import android.view.InsetsSourceControl;
 import android.view.InsetsState;
 import android.view.KeyEvent;
+import android.view.KeyboardShortcutGroup;
 import android.view.MagnificationSpec;
 import android.view.RemoteAnimationAdapter;
 import android.view.ScrollCaptureResponse;
@@ -334,8 +335,8 @@ import com.android.internal.policy.IKeyguardLockedStateListener;
 import com.android.internal.policy.IShortcutService;
 import com.android.internal.policy.KeyInterceptionInfo;
 import com.android.internal.protolog.LegacyProtoLogImpl;
+import com.android.internal.protolog.ProtoLog;
 import com.android.internal.protolog.ProtoLogGroup;
-import com.android.internal.protolog.common.ProtoLog;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.FastPrintWriter;
 import com.android.internal.util.FrameworkStatsLog;
@@ -356,7 +357,6 @@ import com.android.server.policy.WindowManagerPolicy.ScreenOffListener;
 import com.android.server.power.ShutdownThread;
 import com.android.server.utils.PriorityDump;
 import com.android.server.wallpaper.WallpaperCropper.WallpaperCropUtils;
-import com.android.window.flags.Flags;
 
 import dalvik.annotation.optimization.NeverCompile;
 
@@ -732,6 +732,13 @@ public class WindowManagerService extends IWindowManager.Stub
     final DisplayWindowListenerController mDisplayNotificationController;
     final TaskSystemBarsListenerController mTaskSystemBarsListenerController;
 
+    /** Amount of time (in milliseconds) to delay the pointer down outside focus handling */
+    private static final int POINTER_DOWN_OUTSIDE_FOCUS_TIMEOUT_MS = 50;
+
+    /** A runnable to handle pointer down outside focus event. */
+    @Nullable
+    private Runnable mPointerDownOutsideFocusRunnable;
+
     boolean mDisplayFrozen = false;
     long mDisplayFreezeTime = 0;
     int mLastDisplayFreezeDuration = 0;
@@ -1046,7 +1053,7 @@ public class WindowManagerService extends IWindowManager.Stub
     private boolean mAnimationsDisabled = false;
     boolean mPointerLocationEnabled = false;
 
-    final LetterboxConfiguration mLetterboxConfiguration;
+    final AppCompatConfiguration mAppCompatConfiguration;
 
     private boolean mIsIgnoreOrientationRequestDisabled;
 
@@ -1062,7 +1069,6 @@ public class WindowManagerService extends IWindowManager.Stub
     /** Whether or not a layout can cause a wake up when theater mode is enabled. */
     boolean mAllowTheaterModeWakeFromLayout;
 
-    final TaskPositioningController mTaskPositioningController;
     final DragDropController mDragDropController;
 
     /** For frozen screen animations. */
@@ -1286,7 +1292,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     | WindowInsets.Type.navigationBars();
         }
 
-        mLetterboxConfiguration = new LetterboxConfiguration(
+        mAppCompatConfiguration = new AppCompatConfiguration(
                 // Using SysUI context to have access to Material colors extracted from Wallpaper.
                 ActivityThread.currentActivityThread().getSystemUiContext());
 
@@ -1420,7 +1426,6 @@ public class WindowManagerService extends IWindowManager.Stub
         mAllowTheaterModeWakeFromLayout = context.getResources().getBoolean(
                 com.android.internal.R.bool.config_allowTheaterModeWakeFromWindowLayout);
 
-        mTaskPositioningController = new TaskPositioningController(this);
         mDragDropController = new DragDropController(this, mH.getLooper());
 
         mHighRefreshRateDenylist = HighRefreshRateDenylist.create(context.getResources());
@@ -2562,7 +2567,7 @@ public class WindowManagerService extends IWindowManager.Stub
                         // surface, let the client use that, but don't create new surface at this
                         // point.
                         Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "relayoutWindow: getSurface");
-                        winAnimator.mSurfaceController.getSurfaceControl(outSurfaceControl);
+                        winAnimator.getSurfaceControl(outSurfaceControl);
                         Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
                     } else {
                         if (DEBUG_VISIBILITY) Slog.i(TAG_WM, "Releasing surface in: " + win);
@@ -2758,15 +2763,15 @@ public class WindowManagerService extends IWindowManager.Stub
             result |= RELAYOUT_RES_SURFACE_CHANGED;
         }
 
-        WindowSurfaceController surfaceController;
+        SurfaceControl surfaceControl;
         try {
             Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "createSurfaceControl");
-            surfaceController = winAnimator.createSurfaceLocked();
+            surfaceControl = winAnimator.createSurfaceLocked();
         } finally {
             Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
         }
-        if (surfaceController != null) {
-            surfaceController.getSurfaceControl(outSurfaceControl);
+        if (surfaceControl != null) {
+            winAnimator.getSurfaceControl(outSurfaceControl);
             ProtoLog.i(WM_SHOW_TRANSACTIONS, "OUT SURFACE %s: copied", outSurfaceControl);
 
         } else {
@@ -3743,6 +3748,8 @@ public class WindowManagerService extends IWindowManager.Stub
                         null /* trigger */, null /* remote */, null /* disp */);
             }
             mCurrentUserId = newUserId;
+            mDisplayWindowSettingsProvider.setOverrideSettingsForUser(newUserId);
+            mDisplayWindowSettingsProvider.removeStaleDisplaySettingsLocked(this, mRoot);
             mPolicy.setCurrentUserLw(newUserId);
             mKeyguardDisableHandler.setCurrentUser(newUserId);
 
@@ -4431,7 +4438,7 @@ public class WindowManagerService extends IWindowManager.Stub
      */
     boolean isIgnoreOrientationRequestDisabled() {
         return mIsIgnoreOrientationRequestDisabled
-                || !mLetterboxConfiguration.isIgnoreOrientationRequestAllowed();
+                || !mAppCompatConfiguration.isIgnoreOrientationRequestAllowed();
     }
 
     @Override
@@ -4709,8 +4716,10 @@ public class WindowManagerService extends IWindowManager.Stub
                     return;
                 }
                 dc.mRemoteInsetsControlTarget.setRequestedVisibleTypes(requestedVisibleTypes);
+                // TODO(b/353463205) the statsToken shouldn't be null as it is used later in the
+                //  IME provider. Check if we have to create a new request here
                 dc.getInsetsStateController().onRequestedVisibleTypesChanged(
-                        dc.mRemoteInsetsControlTarget);
+                        dc.mRemoteInsetsControlTarget, null /* statsToken */);
             }
         } finally {
             Binder.restoreCallingIdentity(origId);
@@ -5479,6 +5488,9 @@ public class WindowManagerService extends IWindowManager.Stub
             // DisplayWindowSettings are applied. In addition, wide-color/hdr/isTouchDevice also
             // affect the Configuration.
             mRoot.forAllDisplays(DisplayContent::reconfigureDisplayLocked);
+            // Per-user display settings may leave outdated settings after user switches, especially
+            // during reboots starting with the default user without setCurrentUser called.
+            mDisplayWindowSettingsProvider.removeStaleDisplaySettingsLocked(this, mRoot);
         }
     }
 
@@ -5891,7 +5903,8 @@ public class WindowManagerService extends IWindowManager.Stub
                 case ON_POINTER_DOWN_OUTSIDE_FOCUS: {
                     synchronized (mGlobalLock) {
                         final IBinder touchedToken = (IBinder) msg.obj;
-                        onPointerDownOutsideFocusLocked(getInputTargetFromToken(touchedToken));
+                        onPointerDownOutsideFocusLocked(getInputTargetFromToken(touchedToken),
+                                true /* fromHandler */);
                     }
                     break;
                 }
@@ -6759,11 +6772,11 @@ public class WindowManagerService extends IWindowManager.Stub
             if (windowState == null) {
                 return false;
             }
-            WindowSurfaceController surfaceController = windowState.mWinAnimator.mSurfaceController;
-            if (surfaceController == null) {
+            final SurfaceControl surfaceControl = windowState.mWinAnimator.mSurfaceControl;
+            if (surfaceControl == null) {
                 return false;
             }
-            return surfaceController.clearWindowContentFrameStats();
+            return surfaceControl.clearContentFrameStats();
         }
     }
 
@@ -6778,15 +6791,15 @@ public class WindowManagerService extends IWindowManager.Stub
             if (windowState == null) {
                 return null;
             }
-            WindowSurfaceController surfaceController = windowState.mWinAnimator.mSurfaceController;
-            if (surfaceController == null) {
+            final SurfaceControl surfaceControl = windowState.mWinAnimator.mSurfaceControl;
+            if (surfaceControl == null) {
                 return null;
             }
             if (mTempWindowRenderStats == null) {
                 mTempWindowRenderStats = new WindowContentFrameStats();
             }
             WindowContentFrameStats stats = mTempWindowRenderStats;
-            if (!surfaceController.getWindowContentFrameStats(stats)) {
+            if (!surfaceControl.getContentFrameStats(stats)) {
                 return null;
             }
             return stats;
@@ -7427,6 +7440,16 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     @Override
+    public KeyboardShortcutGroup getApplicationLaunchKeyboardShortcuts(int deviceId) {
+        long token = Binder.clearCallingIdentity();
+        try {
+            return mPolicy.getApplicationLaunchKeyboardShortcuts(deviceId);
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
+    }
+
+    @Override
     public void requestAppKeyboardShortcuts(IResultReceiver receiver, int deviceId) {
         enforceRegisterWindowManagerListenersPermission("requestAppKeyboardShortcuts");
 
@@ -7917,7 +7940,8 @@ public class WindowManagerService extends IWindowManager.Stub
             synchronized (mGlobalLock) {
                 final InputTarget inputTarget =
                         WindowManagerService.this.getInputTargetFromWindowTokenLocked(windowToken);
-                WindowManagerService.this.onPointerDownOutsideFocusLocked(inputTarget);
+                WindowManagerService.this.onPointerDownOutsideFocusLocked(inputTarget,
+                        false /* fromHandler */);
             }
         }
 
@@ -8353,6 +8377,26 @@ public class WindowManagerService extends IWindowManager.Stub
         public Context getTopFocusedDisplayUiContext() {
             synchronized (mGlobalLock) {
                 return mRoot.getTopFocusedDisplayContent().getDisplayUiContext();
+            }
+        }
+
+        @Override
+        public void setNonDefaultDisplayRotation(int displayId, @Surface.Rotation int rotation,
+                @NonNull String caller) {
+            if (displayId == Display.DEFAULT_DISPLAY || displayId == Display.INVALID_DISPLAY) {
+                Slog.w(TAG, "Cannot set rotation for display with id: " + displayId);
+                return;
+            }
+            synchronized (mGlobalLock) {
+                final DisplayContent displayContent = mRoot.getDisplayContent(displayId);
+                if (displayContent == null) {
+                    Slog.w(TAG, "Cannot set rotation for display " + displayId
+                            + " due to missing DisplayContent");
+                    return;
+                }
+                displayContent.getDisplayRotation().setUserRotation(
+                        displayContent.getDisplayRotation().getUserRotationMode(), rotation,
+                        caller);
             }
         }
 
@@ -8972,39 +9016,78 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
-    private void onPointerDownOutsideFocusLocked(InputTarget t) {
+    void clearPointerDownOutsideFocusRunnable() {
+        if (mPointerDownOutsideFocusRunnable == null) return;
+
+        mH.removeCallbacks(mPointerDownOutsideFocusRunnable);
+        mPointerDownOutsideFocusRunnable = null;
+    }
+
+    private void onPointerDownOutsideFocusLocked(InputTarget t, boolean fromHandler) {
         if (t == null || !t.receiveFocusFromTapOutside()) {
             // If the window that received the input event cannot receive keys, don't move the
             // display it's on to the top since that window won't be able to get focus anyway.
             return;
         }
-        if (mRecentsAnimationController != null
-            && mRecentsAnimationController.getTargetAppMainWindow() == t) {
-            // If there is an active recents animation and touched window is the target, then ignore
-            // the touch. The target already handles touches using its own input monitor and we
-            // don't want to trigger any lifecycle changes from focusing another window.
-            // TODO(b/186770026): We should remove this once we support multiple resumed activities
-            //                    while in overview
-            return;
-        }
+        clearPointerDownOutsideFocusRunnable();
+
+        // For embedded activity that is showing side-by-side with another activity, delay
+        // handling the touch-outside event to prevent focus rapid changes back-n-forth.
+        // Otherwise, handle the touch-outside event directly.
         final WindowState w = t.getWindowState();
-        if (w != null) {
-            final Task task = w.getTask();
-            if (task != null && w.mTransitionController.isTransientHide(task)) {
-                // Don't disturb transient animation by accident touch.
+        final ActivityRecord activity = w != null ? w.getActivityRecord() : null;
+        if (activity != null && activity.isEmbedded()
+                && activity.getTaskFragment().getAdjacentTaskFragment() != null) {
+            mPointerDownOutsideFocusRunnable = () -> handlePointerDownOutsideFocus(t);
+            mH.postDelayed(mPointerDownOutsideFocusRunnable, POINTER_DOWN_OUTSIDE_FOCUS_TIMEOUT_MS);
+        } else if (!fromHandler) {
+            // Still post the runnable to handler thread in case there is already a runnable
+            // in execution, but still waiting to hold the wm lock.
+            mPointerDownOutsideFocusRunnable = () -> handlePointerDownOutsideFocus(t);
+            mH.post(mPointerDownOutsideFocusRunnable);
+        } else {
+            handlePointerDownOutsideFocus(t);
+        }
+    }
+
+    private void handlePointerDownOutsideFocus(InputTarget t) {
+        synchronized (mGlobalLock) {
+            if (mPointerDownOutsideFocusRunnable != null
+                    && mH.hasCallbacks(mPointerDownOutsideFocusRunnable)) {
+                // Skip if there's another pending pointer-down-outside-focus event.
                 return;
             }
-        }
+            clearPointerDownOutsideFocusRunnable();
 
-        ProtoLog.i(WM_DEBUG_FOCUS_LIGHT, "onPointerDownOutsideFocusLocked called on %s",
-                t);
-        if (mFocusedInputTarget != t && mFocusedInputTarget != null) {
-            mFocusedInputTarget.handleTapOutsideFocusOutsideSelf();
+            if (mRecentsAnimationController != null
+                    && mRecentsAnimationController.getTargetAppMainWindow() == t) {
+                // If there is an active recents animation and touched window is the target,
+                // then ignore the touch. The target already handles touches using its own
+                // input monitor and we don't want to trigger any lifecycle changes from
+                // focusing another window.
+                // TODO(b/186770026): We should remove this once we support multiple resumed
+                //  activities while in overview
+                return;
+            }
+
+            final WindowState w = t.getWindowState();
+            if (w != null) {
+                final Task task = w.getTask();
+                if (task != null && w.mTransitionController.isTransientHide(task)) {
+                    // Don't disturb transient animation by accident touch.
+                    return;
+                }
+            }
+
+            ProtoLog.i(WM_DEBUG_FOCUS_LIGHT, "onPointerDownOutsideFocusLocked called on %s", t);
+            if (mFocusedInputTarget != t && mFocusedInputTarget != null) {
+                mFocusedInputTarget.handleTapOutsideFocusOutsideSelf();
+            }
+            // Trigger Activity#onUserLeaveHint() if the order change of task pauses any activities.
+            mAtmService.mTaskSupervisor.mUserLeaving = true;
+            t.handleTapOutsideFocusInsideSelf();
+            mAtmService.mTaskSupervisor.mUserLeaving = false;
         }
-        // Trigger Activity#onUserLeaveHint() if the order change of task pauses any activities.
-        mAtmService.mTaskSupervisor.mUserLeaving = true;
-        t.handleTapOutsideFocusInsideSelf();
-        mAtmService.mTaskSupervisor.mUserLeaving = false;
     }
 
     @VisibleForTesting
@@ -9226,7 +9309,8 @@ public class WindowManagerService extends IWindowManager.Stub
                 isTrustedOverlay);
 
         final int sanitizedLpFlags =
-                (flags & (FLAG_NOT_TOUCHABLE | FLAG_SLIPPERY | LayoutParams.FLAG_NOT_FOCUSABLE))
+                (flags & (FLAG_NOT_TOUCHABLE | FLAG_SLIPPERY | LayoutParams.FLAG_NOT_FOCUSABLE
+                    | LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH))
                 | LayoutParams.FLAG_NOT_TOUCH_MODAL;
         h.layoutParamsType = type;
         h.layoutParamsFlags = sanitizedLpFlags;
@@ -9294,40 +9378,77 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     /**
-     * Move focus to the adjacent embedded activity if the adjacent activity is more recently
-     * created or has a window more recently added.
+     * Returns the Activity that has the most recently created window in the adjacent activities
+     * if any.
      */
-    boolean moveFocusToAdjacentEmbeddedWindow(@NonNull WindowState focusedWindow) {
-        final TaskFragment taskFragment = focusedWindow.getTaskFragment();
+    @NonNull
+    ActivityRecord getMostRecentActivityInAdjacent(@NonNull ActivityRecord focusedActivity) {
+        final TaskFragment taskFragment = focusedActivity.getTaskFragment();
         if (taskFragment == null) {
-            // Skip if not an Activity window.
-            return false;
+            // Return if activity no attached.
+            return focusedActivity;
         }
 
-        if (!Flags.embeddedActivityBackNavFlag()) {
-            // Skip if flag is not enabled.
-            return false;
-        }
-
-        if (!focusedWindow.mActivityRecord.isEmbedded()) {
-            // Skip if the focused activity is not embedded
-            return false;
+        if (!focusedActivity.isEmbedded()) {
+            // Return if the focused activity is not embedded.
+            return focusedActivity;
         }
 
         final TaskFragment adjacentTaskFragment = taskFragment.getAdjacentTaskFragment();
         final ActivityRecord adjacentTopActivity =
                 adjacentTaskFragment != null ? adjacentTaskFragment.topRunningActivity() : null;
         if (adjacentTopActivity == null) {
-            return false;
+            // Return if no adjacent activity.
+            return focusedActivity;
         }
 
         if (adjacentTopActivity.getLastWindowCreateTime()
-                < focusedWindow.mActivityRecord.getLastWindowCreateTime()) {
-            // Skip if the current focus activity has more recently active window.
+                < focusedActivity.getLastWindowCreateTime()) {
+            // Return if the current focus activity has more recently active window.
+            return focusedActivity;
+        }
+
+        return adjacentTopActivity;
+    }
+
+    @NonNull
+    WindowState getMostRecentUsedEmbeddedWindowForBack(@NonNull WindowState focusedWindow) {
+        final ActivityRecord focusedActivity = focusedWindow.getActivityRecord();
+        if (focusedActivity == null) {
+            // Not an Activity.
+            return focusedWindow;
+        }
+
+        final ActivityRecord mostRecentActivityInAdjacent = getMostRecentActivityInAdjacent(
+                focusedActivity);
+        if (mostRecentActivityInAdjacent == focusedActivity) {
+            // Already be the most recent window.
+            return focusedWindow;
+        }
+
+        // Looks for a candidate focused window on the adjacent Activity for the back event.
+        final WindowState candidate =
+                mostRecentActivityInAdjacent.getDisplayContent().findFocusedWindow(
+                        mostRecentActivityInAdjacent);
+        return candidate != null ? candidate : focusedWindow;
+    }
+
+    /**
+     * Move focus to the adjacent embedded activity if the adjacent activity is more recently
+     * created or has a window more recently added.
+     * <p>
+     * Returns {@code true} if the focused window is changed. Otherwise, returns {@code false}.
+     */
+    boolean moveFocusToAdjacentEmbeddedWindow(@NonNull WindowState focusedWindow) {
+        final ActivityRecord activity = focusedWindow.getActivityRecord();
+        if (activity == null) {
             return false;
         }
 
-        moveFocusToActivity(adjacentTopActivity);
+        final ActivityRecord mostRecentActivityInAdjacent = getMostRecentActivityInAdjacent(
+                activity);
+
+        moveFocusToActivity(mostRecentActivityInAdjacent);
         return !focusedWindow.isFocused();
     }
 
@@ -9651,7 +9772,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 Slog.e(TAG, "Host window not found");
                 return;
             }
-            if (hostWindow.mInputChannel == null) {
+            if (hostWindow.mInputChannelToken == null) {
                 Slog.e(TAG, "Host window does not have an input channel");
                 return;
             }
@@ -9907,7 +10028,7 @@ public class WindowManagerService extends IWindowManager.Stub
      */
     @Override
     public int getLetterboxBackgroundColorInArgb() {
-        return mLetterboxConfiguration.getLetterboxBackgroundColor().toArgb();
+        return mAppCompatConfiguration.getLetterboxBackgroundColor().toArgb();
     }
 
     /**
@@ -9915,8 +10036,8 @@ public class WindowManagerService extends IWindowManager.Stub
      */
     @Override
     public boolean isLetterboxBackgroundMultiColored() {
-        @LetterboxConfiguration.LetterboxBackgroundType int letterboxBackgroundType =
-                mLetterboxConfiguration.getLetterboxBackgroundType();
+        @AppCompatConfiguration.LetterboxBackgroundType int letterboxBackgroundType =
+                mAppCompatConfiguration.getLetterboxBackgroundType();
         switch (letterboxBackgroundType) {
             case LETTERBOX_BACKGROUND_APP_COLOR_BACKGROUND_FLOATING:
             case LETTERBOX_BACKGROUND_APP_COLOR_BACKGROUND:

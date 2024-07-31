@@ -160,7 +160,8 @@ interface IDevicePolicyManager {
     void setKeyguardDisabledFeatures(in ComponentName who, String callerPackageName, int which, boolean parent);
     int getKeyguardDisabledFeatures(in ComponentName who, int userHandle, boolean parent);
 
-    void setActiveAdmin(in ComponentName policyReceiver, boolean refreshing, int userHandle);
+    void setActiveAdmin(in ComponentName policyReceiver, boolean refreshing,
+        int userHandle, String provisioningContext);
     boolean isAdminActive(in ComponentName policyReceiver, int userHandle);
     List<ComponentName> getActiveAdmins(int userHandle);
     @UnsupportedAppUsage

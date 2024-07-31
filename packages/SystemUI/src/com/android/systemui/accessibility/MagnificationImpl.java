@@ -149,6 +149,7 @@ public class MagnificationImpl implements Magnification, CommandQueue.Callbacks 
         private final Context mContext;
         private final Handler mHandler;
         private final Executor mExecutor;
+        private final DisplayManager mDisplayManager;
         private final IWindowManager mIWindowManager;
 
         FullscreenMagnificationControllerSupplier(Context context,
@@ -159,6 +160,7 @@ public class MagnificationImpl implements Magnification, CommandQueue.Callbacks 
             mContext = context;
             mHandler = handler;
             mExecutor = executor;
+            mDisplayManager = displayManager;
             mIWindowManager = iWindowManager;
         }
 
@@ -173,6 +175,7 @@ public class MagnificationImpl implements Magnification, CommandQueue.Callbacks 
                     windowContext,
                     mHandler,
                     mExecutor,
+                    mDisplayManager,
                     windowContext.getSystemService(AccessibilityManager.class),
                     windowContext.getSystemService(WindowManager.class),
                     mIWindowManager,
@@ -363,6 +366,16 @@ public class MagnificationImpl implements Magnification, CommandQueue.Callbacks 
     }
 
     @MainThread
+    void updateSettingsButtonStatus(int displayId,
+            @WindowMagnificationSettings.MagnificationSize int index) {
+        final MagnificationSettingsController magnificationSettingsController =
+                mMagnificationSettingsSupplier.get(displayId);
+        if (magnificationSettingsController != null) {
+            magnificationSettingsController.updateSettingsButtonStatusOnRestore(index);
+        }
+    }
+
+    @MainThread
     void toggleSettingsPanelVisibility(int displayId) {
         final MagnificationSettingsController magnificationSettingsController =
                 mMagnificationSettingsSupplier.get(displayId);
@@ -445,6 +458,11 @@ public class MagnificationImpl implements Magnification, CommandQueue.Callbacks 
 
     @VisibleForTesting
     final WindowMagnifierCallback mWindowMagnifierCallback = new WindowMagnifierCallback() {
+        @Override
+        public void onWindowMagnifierBoundsRestored(int displayId, int index) {
+            mHandler.post(() -> updateSettingsButtonStatus(displayId, index));
+        }
+
         @Override
         public void onWindowMagnifierBoundsChanged(int displayId, Rect frame) {
             if (mMagnificationConnectionImpl != null) {

@@ -771,6 +771,7 @@
     <dimen name="tooltip_precise_anchor_threshold">96dp</dimen>
     <!-- Extra tooltip offset used when anchoring to the mouse/touch position -->
     <dimen name="tooltip_precise_anchor_extra_offset">8dp</dimen>
+    <dimen name="tooltip_font_size">14sp</dimen>
 
     <!-- The max amount of scroll ItemTouchHelper will trigger if dragged view is out of
          RecyclerView's bounds.-->

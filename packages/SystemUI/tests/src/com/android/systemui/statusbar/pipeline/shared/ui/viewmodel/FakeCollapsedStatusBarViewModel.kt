@@ -29,7 +29,9 @@ class FakeCollapsedStatusBarViewModel : CollapsedStatusBarViewModel {
     override val transitionFromLockscreenToDreamStartedEvent = MutableSharedFlow<Unit>()
 
     override val ongoingActivityChip: MutableStateFlow<OngoingActivityChipModel> =
-        MutableStateFlow(OngoingActivityChipModel.Hidden)
+        MutableStateFlow(OngoingActivityChipModel.Hidden())
+
+    override val isHomeStatusBarAllowedByScene = MutableStateFlow(false)
 
     override fun areNotificationsLightsOut(displayId: Int): Flow<Boolean> = areNotificationLightsOut
 

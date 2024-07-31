@@ -24,7 +24,7 @@ import com.android.systemui.bouncer.shared.flag.composeBouncerFlags
 import com.android.systemui.deviceentry.domain.interactor.biometricMessageInteractor
 import com.android.systemui.deviceentry.domain.interactor.deviceEntryFaceAuthInteractor
 import com.android.systemui.deviceentry.domain.interactor.deviceEntryFingerprintAuthInteractor
-import com.android.systemui.deviceentry.domain.interactor.deviceEntryInteractor
+import com.android.systemui.deviceentry.domain.interactor.deviceUnlockedInteractor
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.user.ui.viewmodel.userSwitcherViewModel
@@ -44,7 +44,7 @@ val Kosmos.bouncerMessageViewModel by
             clock = systemClock,
             biometricMessageInteractor = biometricMessageInteractor,
             faceAuthInteractor = deviceEntryFaceAuthInteractor,
-            deviceEntryInteractor = deviceEntryInteractor,
+            deviceUnlockedInteractor = deviceUnlockedInteractor,
             fingerprintInteractor = deviceEntryFingerprintAuthInteractor,
             flags = composeBouncerFlags,
         )

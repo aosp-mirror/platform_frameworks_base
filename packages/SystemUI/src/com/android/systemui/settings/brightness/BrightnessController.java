@@ -137,14 +137,24 @@ public class BrightnessController implements ToggleSlider.Listener, MirroredBrig
         public void startObserving() {
             if (!mObserving) {
                 mObserving = true;
-                mSecureSettings.registerContentObserverForUserSync(
-                        BRIGHTNESS_MODE_URI,
-                        false, this, UserHandle.USER_ALL);
+                if (Flags.registerContentObserversAsync()) {
+                    mSecureSettings.registerContentObserverForUserAsync(
+                            BRIGHTNESS_MODE_URI,
+                            false, this, UserHandle.USER_ALL);
+                } else {
+                    mSecureSettings.registerContentObserverForUserSync(
+                            BRIGHTNESS_MODE_URI,
+                            false, this, UserHandle.USER_ALL);
+                }
             }
         }
 
         public void stopObserving() {
-            mSecureSettings.unregisterContentObserverSync(this);
+            if (Flags.registerContentObserversAsync()) {
+                mSecureSettings.unregisterContentObserverAsync(this);
+            } else {
+                mSecureSettings.unregisterContentObserverSync(this);
+            }
             mObserving = false;
         }
 

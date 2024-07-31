@@ -30,6 +30,7 @@ import com.android.systemui.common.ui.binder.IconViewBinder
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.lifecycle.repeatWhenAttached
 import com.android.systemui.res.R
+import com.android.systemui.scene.shared.flag.SceneContainerFlag
 import com.android.systemui.statusbar.chips.ui.binder.ChipChronometerBinder
 import com.android.systemui.statusbar.chips.ui.model.OngoingActivityChipModel
 import com.android.systemui.statusbar.chips.ui.view.ChipBackgroundContainer
@@ -109,7 +110,7 @@ class CollapsedStatusBarViewBinderImpl @Inject constructor() : CollapsedStatusBa
                                     chipView.setOnClickListener(chipModel.onClickListener)
 
                                     // Accessibility
-                                    setChipAccessibility(chipModel, chipView)
+                                    setChipAccessibility(chipModel, chipView, chipBackgroundView)
 
                                     // Colors
                                     val textColor = chipModel.colors.text(chipContext)
@@ -121,7 +122,8 @@ class CollapsedStatusBarViewBinderImpl @Inject constructor() : CollapsedStatusBa
 
                                     // Notify listeners
                                     listener.onOngoingActivityStatusChanged(
-                                        hasOngoingActivity = true
+                                        hasOngoingActivity = true,
+                                        shouldAnimate = true,
                                     )
                                 }
                                 is OngoingActivityChipModel.Hidden -> {
@@ -129,10 +131,19 @@ class CollapsedStatusBarViewBinderImpl @Inject constructor() : CollapsedStatusBa
                                     // b/192243808 and [Chronometer.start].
                                     chipTimeView.stop()
                                     listener.onOngoingActivityStatusChanged(
-                                        hasOngoingActivity = false
+                                        hasOngoingActivity = false,
+                                        shouldAnimate = chipModel.shouldAnimate,
                                     )
                                 }
                             }
+                        }
+                    }
+                }
+
+                if (SceneContainerFlag.isEnabled) {
+                    launch {
+                        viewModel.isHomeStatusBarAllowedByScene.collect {
+                            listener.onIsHomeStatusBarAllowedBySceneChanged(it)
                         }
                     }
                 }
@@ -202,7 +213,11 @@ class CollapsedStatusBarViewBinderImpl @Inject constructor() : CollapsedStatusBa
         this.setPaddingRelative(/* start= */ 0, paddingTop, paddingEnd, paddingBottom)
     }
 
-    private fun setChipAccessibility(chipModel: OngoingActivityChipModel.Shown, chipView: View) {
+    private fun setChipAccessibility(
+        chipModel: OngoingActivityChipModel.Shown,
+        chipView: View,
+        chipBackgroundView: View,
+    ) {
         when (chipModel) {
             is OngoingActivityChipModel.Shown.Countdown -> {
                 // Set as assertive so talkback will announce the countdown
@@ -212,6 +227,16 @@ class CollapsedStatusBarViewBinderImpl @Inject constructor() : CollapsedStatusBa
             is OngoingActivityChipModel.Shown.IconOnly -> {
                 chipView.accessibilityLiveRegion = View.ACCESSIBILITY_LIVE_REGION_NONE
             }
+        }
+        // Clickable chips need to be a minimum size for accessibility purposes, but let
+        // non-clickable chips be smaller.
+        if (chipModel.onClickListener != null) {
+            chipBackgroundView.minimumWidth =
+                chipBackgroundView.context.resources.getDimensionPixelSize(
+                    R.dimen.min_clickable_item_size
+                )
+        } else {
+            chipBackgroundView.minimumWidth = 0
         }
     }
 
@@ -257,6 +282,17 @@ interface StatusBarVisibilityChangeListener {
     /** Called when a transition from lockscreen to dream has started. */
     fun onTransitionFromLockscreenToDreamStarted()
 
-    /** Called when the status of the ongoing activity chip (active or not active) has changed. */
-    fun onOngoingActivityStatusChanged(hasOngoingActivity: Boolean)
+    /**
+     * Called when the status of the ongoing activity chip (active or not active) has changed.
+     *
+     * @param shouldAnimate true if the chip should animate in/out, and false if the chip should
+     *   immediately appear/disappear.
+     */
+    fun onOngoingActivityStatusChanged(hasOngoingActivity: Boolean, shouldAnimate: Boolean)
+
+    /**
+     * Called when the scene state has changed such that the home status bar is newly allowed or no
+     * longer allowed. See [CollapsedStatusBarViewModel.isHomeStatusBarAllowedByScene].
+     */
+    fun onIsHomeStatusBarAllowedBySceneChanged(isHomeStatusBarAllowedByScene: Boolean)
 }

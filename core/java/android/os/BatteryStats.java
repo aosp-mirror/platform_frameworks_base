@@ -2491,7 +2491,7 @@ public abstract class BatteryStats {
     public static final int SCREEN_BRIGHTNESS_LIGHT = 3;
     public static final int SCREEN_BRIGHTNESS_BRIGHT = 4;
 
-    static final String[] SCREEN_BRIGHTNESS_NAMES = {
+    public static final String[] SCREEN_BRIGHTNESS_NAMES = {
         "dark", "dim", "medium", "light", "bright"
     };
 
@@ -3077,7 +3077,7 @@ public abstract class BatteryStats {
     public static final String[] HISTORY_EVENT_NAMES = new String[] {
             "null", "proc", "fg", "top", "sync", "wake_lock_in", "job", "user", "userfg", "conn",
             "active", "pkginst", "pkgunin", "alarm", "stats", "pkginactive", "pkgactive",
-            "tmpwhitelist", "screenwake", "wakeupap", "longwake", "est_capacity", "state"
+            "tmpwhitelist", "screenwake", "wakeupap", "longwake", "state"
     };
 
     public static final String[] HISTORY_EVENT_CHECKIN_NAMES = new String[] {
@@ -9025,6 +9025,10 @@ public abstract class BatteryStats {
 
             final int uid = consumer.getUid();
             final Uid u = uidStats.get(uid);
+            if (u == null) {
+                continue;
+            }
+
             final long rxPackets = u.getNetworkActivityPackets(
                     BatteryStats.NETWORK_MOBILE_RX_DATA, STATS_SINCE_CHARGED);
             final long txPackets = u.getNetworkActivityPackets(

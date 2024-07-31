@@ -72,6 +72,7 @@ import static android.content.pm.PackageManager.MATCH_SYSTEM_ONLY;
 import static android.content.pm.PackageManager.MATCH_UNINSTALLED_PACKAGES;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.content.pm.PackageManager.SIGNATURE_NO_MATCH;
+import static android.crashrecovery.flags.Flags.refactorCrashrecovery;
 import static android.net.ConnectivityManager.BLOCKED_REASON_NONE;
 import static android.os.FactoryTest.FACTORY_TEST_OFF;
 import static android.os.IServiceManager.DUMP_FLAG_PRIORITY_CRITICAL;
@@ -429,7 +430,7 @@ import com.android.internal.os.TransferPipe;
 import com.android.internal.os.Zygote;
 import com.android.internal.pm.pkg.parsing.ParsingPackageUtils;
 import com.android.internal.policy.AttributeCache;
-import com.android.internal.protolog.common.ProtoLog;
+import com.android.internal.protolog.ProtoLog;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.FastPrintWriter;
 import com.android.internal.util.FrameworkStatsLog;
@@ -2075,7 +2076,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                 app.setPersistent(true);
                 app.setPid(MY_PID);
                 app.mState.setMaxAdj(ProcessList.SYSTEM_ADJ);
-                app.makeActive(mSystemThread.getApplicationThread(), mProcessStats);
+                app.makeActive(new ApplicationThreadDeferred(mSystemThread.getApplicationThread()),
+                        mProcessStats);
                 app.mProfile.addHostingComponentType(HOSTING_COMPONENT_TYPE_SYSTEM);
                 addPidLocked(app);
                 updateLruProcessLocked(app, false, null);
@@ -2322,7 +2324,9 @@ public class ActivityManagerService extends IActivityManager.Stub
             } else if (phase == PHASE_ACTIVITY_MANAGER_READY) {
                 mService.startBroadcastObservers();
             } else if (phase == PHASE_THIRD_PARTY_APPS_CAN_START) {
-                mService.mPackageWatchdog.onPackagesReady();
+                if (!refactorCrashrecovery()) {
+                    mService.mPackageWatchdog.onPackagesReady();
+                }
                 mService.scheduleHomeTimeout();
             }
         }
@@ -4871,7 +4875,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             // Make app active after binding application or client may be running requests (e.g
             // starting activities) before it is ready.
             synchronized (mProcLock) {
-                app.makeActive(thread, mProcessStats);
+                app.makeActive(new ApplicationThreadDeferred(thread), mProcessStats);
                 checkTime(startTime, "attachApplicationLocked: immediately after bindApplication");
             }
             app.setPendingFinishAttach(true);
@@ -16957,16 +16961,24 @@ public class ActivityManagerService extends IActivityManager.Stub
 
         int userId = UserHandle.getCallingUserId();
 
-        if (UserManager.isVisibleBackgroundUsersEnabled() && userId != getCurrentUserId()) {
-            // The check is added mainly for auto devices. On auto devices, it is possible that
-            // multiple users are visible simultaneously using visible background users.
-            // In such cases, it is desired that only the current user (not the visible background
-            // user) can change the locale and other persistent settings of the device.
-            Slog.w(TAG, "Only current user is allowed to update persistent configuration if "
-                    + "visible background users are enabled. Current User" + getCurrentUserId()
-                    + ". Calling User: " + userId);
-            throw new SecurityException("Only current user is allowed to update persistent "
-                    + "configuration.");
+        if (UserManager.isVisibleBackgroundUsersEnabled()) {
+            final long origId = Binder.clearCallingIdentity();
+            try {
+                if (userId != getCurrentUserId()) {
+                    // The check is added mainly for auto devices. On auto devices, it is
+                    // possible that multiple users are visible simultaneously using visible
+                    // background users. In such cases, it is desired that only the current user
+                    // (not the visible background user) can change the locale and other persistent
+                    // settings of the device.
+                    Slog.w(TAG, "Only current user is allowed to update persistent configuration "
+                            + "if visible background users are enabled. Current User"
+                            + getCurrentUserId() + ". Calling User: " + userId);
+                    throw new SecurityException("Only current user is allowed to update persistent "
+                            + "configuration.");
+                }
+            } finally {
+                Binder.restoreCallingIdentity(origId);
+            }
         }
 
         mActivityTaskManager.updatePersistentConfiguration(values, userId);

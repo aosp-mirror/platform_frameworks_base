@@ -20,6 +20,7 @@ import static com.google.common.util.concurrent.Futures.immediateFuture;
 
 import static java.util.Objects.requireNonNull;
 
+import android.annotation.DrawableRes;
 import android.annotation.Nullable;
 import android.app.AutomaticZenRule;
 import android.content.Context;
@@ -34,7 +35,6 @@ import android.util.LruCache;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.VisibleForTesting;
-import androidx.appcompat.content.res.AppCompatResources;
 
 import com.google.common.util.concurrent.FluentFuture;
 import com.google.common.util.concurrent.Futures;
@@ -103,7 +103,7 @@ public class ZenIconLoader {
                 return context.getDrawable(iconResId);
             } else {
                 Context appContext = context.createPackageContext(pkg, 0);
-                Drawable appDrawable = AppCompatResources.getDrawable(appContext, iconResId);
+                Drawable appDrawable = appContext.getDrawable(iconResId);
                 return getMonochromeIconIfPresent(appDrawable);
             }
         })).catching(Exception.class, ex -> {
@@ -120,7 +120,14 @@ public class ZenIconLoader {
     }
 
     private static Drawable getFallbackIcon(Context context, int ruleType) {
-        int iconResIdFromType = switch (ruleType) {
+        int iconResIdFromType = getIconResourceIdFromType(ruleType);
+        return requireNonNull(context.getDrawable(iconResIdFromType));
+    }
+
+    /** Return the default icon resource associated to a {@link AutomaticZenRule.Type} */
+    @DrawableRes
+    public static int getIconResourceIdFromType(@AutomaticZenRule.Type int ruleType) {
+        return switch (ruleType) {
             case AutomaticZenRule.TYPE_UNKNOWN ->
                     com.android.internal.R.drawable.ic_zen_mode_type_unknown;
             case AutomaticZenRule.TYPE_OTHER ->
@@ -141,7 +148,6 @@ public class ZenIconLoader {
                     com.android.internal.R.drawable.ic_zen_mode_type_managed;
             default -> com.android.internal.R.drawable.ic_zen_mode_type_unknown;
         };
-        return requireNonNull(context.getDrawable(iconResIdFromType));
     }
 
     private static Drawable getMonochromeIconIfPresent(Drawable icon) {

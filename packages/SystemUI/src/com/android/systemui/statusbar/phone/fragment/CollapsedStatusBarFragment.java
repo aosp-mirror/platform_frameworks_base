@@ -14,6 +14,8 @@
 
 package com.android.systemui.statusbar.phone.fragment;
 
+import static com.android.systemui.statusbar.phone.fragment.StatusBarVisibilityModel.createHiddenModel;
+
 import android.annotation.Nullable;
 import android.annotation.SuppressLint;
 import android.app.Fragment;
@@ -46,6 +48,7 @@ import com.android.systemui.demomode.DemoModeController;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.res.R;
+import com.android.systemui.scene.shared.flag.SceneContainerFlag;
 import com.android.systemui.shade.ShadeExpansionStateManager;
 import com.android.systemui.shade.domain.interactor.PanelExpansionInteractor;
 import com.android.systemui.statusbar.CommandQueue;
@@ -203,6 +206,13 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
      * Similar to [mWaitingForWindowStateChangeAfterCameraLaunch].
      */
     private boolean mTransitionFromLockscreenToDreamStarted = false;
+
+    /**
+     * True if the current scene allows the home status bar (aka this status bar) to be shown, and
+     * false if the current scene should never show the home status bar. Only used if the scene
+     * container is enabled.
+     */
+    private boolean mHomeStatusBarAllowedByScene = true;
 
     /**
      * True if there's an active ongoing activity that should be showing a chip and false otherwise.
@@ -518,8 +528,16 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
                 }
 
                 @Override
-                public void onOngoingActivityStatusChanged(boolean hasOngoingActivity) {
+                public void onOngoingActivityStatusChanged(
+                        boolean hasOngoingActivity, boolean shouldAnimate) {
                     mHasOngoingActivity = hasOngoingActivity;
+                    updateStatusBarVisibilities(shouldAnimate);
+                }
+
+                @Override
+                public void onIsHomeStatusBarAllowedBySceneChanged(
+                        boolean isHomeStatusBarAllowedByScene) {
+                    mHomeStatusBarAllowedByScene = isHomeStatusBarAllowedByScene;
                     updateStatusBarVisibilities(/* animate= */ true);
                 }
     };
@@ -580,17 +598,22 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
         boolean headsUpVisible =
                 mStatusBarFragmentComponent.getHeadsUpAppearanceController().shouldBeVisible();
 
-        if (!mKeyguardStateController.isLaunchTransitionFadingAway()
-                && !mKeyguardStateController.isKeyguardFadingAway()
-                && shouldHideStatusBar()
-                && !(mStatusBarStateController.getState() == StatusBarState.KEYGUARD
-                        && headsUpVisible)) {
-            // Hide everything
-            return new StatusBarVisibilityModel(
-                    /* showClock= */ false,
-                    /* showNotificationIcons= */ false,
-                    /* showOngoingActivityChip= */ false,
-                    /* showSystemInfo= */ false);
+        if (SceneContainerFlag.isEnabled()) {
+            // With the scene container, only use the value calculated by the view model to
+            // determine if the status bar needs hiding.
+            if (!mHomeStatusBarAllowedByScene) {
+                return createHiddenModel();
+            }
+        } else {
+            // Without the scene container, use our old, mildly-hacky logic to determine if the
+            // status bar needs hiding.
+            if (!mKeyguardStateController.isLaunchTransitionFadingAway()
+                    && !mKeyguardStateController.isKeyguardFadingAway()
+                    && shouldHideStatusBar()
+                    && !(mStatusBarStateController.getState() == StatusBarState.KEYGUARD
+                    && headsUpVisible)) {
+                return createHiddenModel();
+            }
         }
 
         boolean showClock = externalModel.getShowClock() && !headsUpVisible;
@@ -637,9 +660,6 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
             showOngoingActivityChip(animate);
         } else {
             hideOngoingActivityChip(animate);
-        }
-        if (!Flags.statusBarScreenSharingChips()) {
-            mOngoingCallController.notifyChipVisibilityChanged(showOngoingActivityChip);
         }
     }
 
@@ -698,7 +718,7 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
     }
 
     private void hideEndSideContent(boolean animate) {
-        if (!animate) {
+        if (!animate || !mAnimationsEnabled) {
             mEndSideAlphaController.setAlpha(/*alpha*/ 0f, SOURCE_OTHER);
         } else {
             mEndSideAlphaController.animateToAlpha(/*alpha*/ 0f, SOURCE_OTHER, FADE_OUT_DURATION,
@@ -707,7 +727,7 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
     }
 
     private void showEndSideContent(boolean animate) {
-        if (!animate) {
+        if (!animate || !mAnimationsEnabled) {
             mEndSideAlphaController.setAlpha(1f, SOURCE_OTHER);
             return;
         }

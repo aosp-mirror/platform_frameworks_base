@@ -46,6 +46,7 @@ import android.view.WindowMetrics;
 
 import androidx.annotation.NonNull;
 import androidx.lifecycle.Lifecycle;
+import androidx.lifecycle.LifecycleCoroutineScope;
 import androidx.lifecycle.LifecycleObserver;
 import androidx.lifecycle.LifecycleOwner;
 import androidx.lifecycle.LifecycleRegistry;
@@ -159,7 +160,9 @@ public class TouchMonitorTest extends SysuiTestCase {
             ArgumentCaptor<LifecycleObserver> observerCaptor =
                     ArgumentCaptor.forClass(LifecycleObserver.class);
             verify(mLifecycleRegistry, atLeast(1)).addObserver(observerCaptor.capture());
-            mLifecycleObservers.addAll(observerCaptor.getAllValues());
+            mLifecycleObservers.addAll(observerCaptor.getAllValues().stream().filter(
+                    lifecycleObserver -> !(lifecycleObserver instanceof LifecycleCoroutineScope))
+                    .toList());
 
             updateLifecycle(Lifecycle.State.RESUMED);
 
@@ -705,6 +708,35 @@ public class TouchMonitorTest extends SysuiTestCase {
                 .collect(Collectors.toCollection(HashSet::new)), mKosmos);
         environment.destroyMonitor();
         environment.verifyLifecycleObserversUnregistered();
+    }
+
+    @Test
+    public void testLastSessionPop_createsNewInputSession() {
+        final TouchHandler touchHandler = createTouchHandler();
+
+        final TouchHandler.TouchSession.Callback callback =
+                Mockito.mock(TouchHandler.TouchSession.Callback.class);
+
+        final Environment environment = new Environment(Stream.of(touchHandler)
+                .collect(Collectors.toCollection(HashSet::new)), mKosmos);
+
+        final InputEvent initialEvent = Mockito.mock(InputEvent.class);
+        environment.publishInputEvent(initialEvent);
+
+        final TouchHandler.TouchSession session = captureSession(touchHandler);
+        session.registerCallback(callback);
+
+        // Clear invocations on input session and factory.
+        clearInvocations(environment.mInputFactory);
+        clearInvocations(environment.mInputSession);
+
+        // Pop only active touch session.
+        session.pop();
+        environment.executeAll();
+
+        // Verify that input session disposed and new session requested from factory.
+        verify(environment.mInputSession).dispose();
+        verify(environment.mInputFactory).create(any(), any(), any(), anyBoolean());
     }
 
     private GestureDetector.OnGestureListener registerGestureListener(TouchHandler handler) {

@@ -36,6 +36,17 @@ data class StatusBarVisibilityModel(
             return createModelFromFlags(DISABLE_NONE, DISABLE2_NONE)
         }
 
+        /** Creates a model that hides every piece of the status bar. */
+        @JvmStatic
+        fun createHiddenModel(): StatusBarVisibilityModel {
+            return StatusBarVisibilityModel(
+                showClock = false,
+                showNotificationIcons = false,
+                showOngoingActivityChip = false,
+                showSystemInfo = false,
+            )
+        }
+
         /**
          * Given a set of disabled flags, converts them into the correct visibility statuses.
          *

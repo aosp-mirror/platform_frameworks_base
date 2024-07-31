@@ -41,7 +41,7 @@ import android.window.WindowContainerTransaction;
 
 import androidx.annotation.NonNull;
 
-import com.android.internal.protolog.common.ProtoLog;
+import com.android.internal.protolog.ProtoLog;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.common.pip.PipBoundsAlgorithm;
 import com.android.wm.shell.common.pip.PipBoundsState;
@@ -127,8 +127,10 @@ public abstract class PipTransitionController implements Transitions.TransitionH
 
     /**
      * Called when the Shell wants to start resizing Pip transition/animation.
+     *
+     * @param duration the suggested duration for resize animation.
      */
-    public void startResizeTransition(WindowContainerTransaction wct) {
+    public void startResizeTransition(WindowContainerTransaction wct, int duration) {
         // Default implementation does nothing.
     }
 
@@ -190,6 +192,8 @@ public abstract class PipTransitionController implements Transitions.TransitionH
     protected void sendOnPipTransitionStarted(
             @PipAnimationController.TransitionDirection int direction) {
         final Rect pipBounds = mPipBoundsState.getBounds();
+        ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
+                "sendOnPipTransitionStarted direction=%d, bounds=%s", direction, pipBounds);
         for (Map.Entry<PipTransitionCallback, Executor> entry
                 : mPipTransitionCallbacks.entrySet()) {
             entry.getValue().execute(
@@ -210,6 +214,8 @@ public abstract class PipTransitionController implements Transitions.TransitionH
 
     protected void sendOnPipTransitionFinished(
             @PipAnimationController.TransitionDirection int direction) {
+        ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
+                "sendOnPipTransitionFinished direction=%d", direction);
         for (Map.Entry<PipTransitionCallback, Executor> entry
                 : mPipTransitionCallbacks.entrySet()) {
             entry.getValue().execute(
@@ -230,6 +236,8 @@ public abstract class PipTransitionController implements Transitions.TransitionH
 
     protected void sendOnPipTransitionCancelled(
             @PipAnimationController.TransitionDirection int direction) {
+        ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
+                "sendOnPipTransitionCancelled direction=%d", direction);
         for (Map.Entry<PipTransitionCallback, Executor> entry
                 : mPipTransitionCallbacks.entrySet()) {
             entry.getValue().execute(

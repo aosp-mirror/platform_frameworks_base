@@ -432,6 +432,13 @@ final class RemovePackageHelper {
                 }
                 deletedPs.setInstalled(/* installed= */ false, userId);
             }
+
+            // Preserve split apk information for downgrade check with DELETE_KEEP_DATA and archived
+            // app cases
+            if (deletedPkg.getSplitNames() != null) {
+                deletedPs.setSplitNames(deletedPkg.getSplitNames());
+                deletedPs.setSplitRevisionCodes(deletedPkg.getSplitRevisionCodes());
+            }
         }
 
         // make sure to preserve per-user installed state if this removal was just

@@ -17,6 +17,13 @@ package android.content
 
 import android.content.pm.PackageManager
 import com.android.systemui.kosmos.Kosmos
+import com.android.systemui.shared.system.PackageManagerWrapper
 import com.android.systemui.util.mockito.mock
 
-val Kosmos.packageManager by Kosmos.Fixture { mock<PackageManager>() }
+val Kosmos.mockPackageManager by Kosmos.Fixture { mock<PackageManager>() }
+
+var Kosmos.packageManager by Kosmos.Fixture { mockPackageManager }
+
+val Kosmos.mockPackageManagerWrapper by Kosmos.Fixture { mock<PackageManagerWrapper>() }
+
+var Kosmos.packageManagerWrapper by Kosmos.Fixture { mockPackageManagerWrapper }

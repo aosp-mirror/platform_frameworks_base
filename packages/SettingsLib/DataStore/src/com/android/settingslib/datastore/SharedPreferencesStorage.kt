@@ -80,15 +80,7 @@ constructor(
             return context.getSharedPreferences(intermediateName, Context.MODE_MULTI_PROCESS)
         }
 
-    private val sharedPreferencesListener =
-        SharedPreferences.OnSharedPreferenceChangeListener { _, key ->
-            if (key != null) {
-                notifyChange(key, DataChangeReason.UPDATE)
-            } else {
-                // On Android >= R, SharedPreferences.Editor.clear() will trigger this case
-                notifyChange(DataChangeReason.DELETE)
-            }
-        }
+    private val sharedPreferencesListener = createSharedPreferenceListener()
 
     init {
         // listener is weakly referenced, so unregister is optional
@@ -191,8 +183,7 @@ constructor(
                 else -> {
                     Log.e(
                         LOG_TAG,
-                        "[$name] $operation $key=$value, unknown type: ${value?.javaClass}"
-                    )
+                        "[$name] $operation $key=$value, unknown type: ${value?.javaClass}")
                 }
             }
         }

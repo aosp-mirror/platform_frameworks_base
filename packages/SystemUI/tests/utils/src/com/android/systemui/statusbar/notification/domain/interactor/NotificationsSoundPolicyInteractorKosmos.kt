@@ -16,7 +16,7 @@
 
 package com.android.systemui.statusbar.notification.domain.interactor
 
-import com.android.settingslib.statusbar.notification.domain.interactor.NotificationsSoundPolicyInteractor
+import com.android.settingslib.notification.domain.interactor.NotificationsSoundPolicyInteractor
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.statusbar.policy.data.repository.zenModeRepository
 

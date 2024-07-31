@@ -244,6 +244,7 @@ public class WindowOnBackInvokedDispatcher implements OnBackInvokedDispatcher {
                 // We should call onBackCancelled() when an active callback is removed from
                 // dispatcher.
                 sendCancelledIfInProgress(callback);
+                mHandler.post(mProgressAnimator::reset);
                 setTopOnBackInvokedCallback(getTopCallback());
             }
         }
@@ -489,7 +490,8 @@ public class WindowOnBackInvokedDispatcher implements OnBackInvokedDispatcher {
                     return;
                 }
                 OnBackAnimationCallback animationCallback = getBackAnimationCallback();
-                if (animationCallback != null) {
+                if (animationCallback != null
+                        && !(callback instanceof ImeBackAnimationController)) {
                     mProgressAnimator.onBackInvoked(callback::onBackInvoked);
                 } else {
                     mProgressAnimator.reset();

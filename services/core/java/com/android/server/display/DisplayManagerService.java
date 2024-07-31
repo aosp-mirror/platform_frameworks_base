@@ -722,6 +722,7 @@ public final class DisplayManagerService extends SystemService {
             if (userSwitching) {
                 mCurrentUserId = newUserId;
             }
+            mDisplayModeDirector.onSwitchUser();
             mLogicalDisplayMapper.forEachLocked(logicalDisplay -> {
                 if (logicalDisplay.getDisplayInfoLocked().type != Display.TYPE_INTERNAL) {
                     return;
@@ -820,6 +821,13 @@ public final class DisplayManagerService extends SystemService {
 
         mSmallAreaDetectionController = (mFlags.isSmallAreaDetectionEnabled())
                 ? SmallAreaDetectionController.create(mContext) : null;
+    }
+
+    @VisibleForTesting
+    void setDisplayState(int displayId, int state) {
+        synchronized (mSyncRoot) {
+            mDisplayStates.setValueAt(displayId, state);
+        }
     }
 
     @VisibleForTesting
@@ -1938,6 +1946,27 @@ public final class DisplayManagerService extends SystemService {
 
             mVirtualDisplayAdapter.setVirtualDisplayStateLocked(appToken, isOn);
         }
+    }
+
+    private void setVirtualDisplayRotationInternal(IBinder appToken,
+            @Surface.Rotation int rotation) {
+        int displayId;
+        synchronized (mSyncRoot) {
+            if (mVirtualDisplayAdapter == null) {
+                return;
+            }
+            DisplayDevice device = mVirtualDisplayAdapter.getDisplayDevice(appToken);
+            if (device == null) {
+                return;
+            }
+            LogicalDisplay display = mLogicalDisplayMapper.getDisplayLocked(device);
+            if (display == null) {
+                return;
+            }
+            displayId = display.getDisplayIdLocked();
+        }
+        mWindowManagerInternal.setNonDefaultDisplayRotation(
+                displayId, rotation, /* caller= */ "Virtual Display");
     }
 
     private void registerDefaultDisplayAdapters() {
@@ -3411,27 +3440,39 @@ public final class DisplayManagerService extends SystemService {
         }
     }
 
-    boolean requestDisplayPower(int displayId, boolean on) {
+    boolean requestDisplayPower(int displayId, int requestedState) {
         synchronized (mSyncRoot) {
             final var display = mLogicalDisplayMapper.getDisplayLocked(displayId);
             if (display == null) {
-                Slog.w(TAG, "requestDisplayPower: Cannot find a display with displayId="
+                Slog.w(TAG, "requestDisplayPower: Cannot find the display with displayId="
                         + displayId);
                 return false;
             }
+            var state = requestedState;
+            if (state == Display.STATE_UNKNOWN) {
+                state = mDisplayStates.get(displayId);
+            }
+
             final BrightnessPair brightnessPair = mDisplayBrightnesses.get(displayId);
+            var brightnessState = brightnessPair.brightness;
+            if (state == Display.STATE_OFF) {
+                brightnessState = PowerManager.BRIGHTNESS_OFF_FLOAT;
+            }
+
             var runnable = display.getPrimaryDisplayDeviceLocked().requestDisplayStateLocked(
-                    on ? Display.STATE_ON : Display.STATE_OFF,
-                    on ? brightnessPair.brightness : PowerManager.BRIGHTNESS_OFF_FLOAT,
+                    state,
+                    brightnessState,
                     brightnessPair.sdrBrightness,
                     display.getDisplayOffloadSessionLocked());
             if (runnable == null) {
-                Slog.w(TAG, "requestDisplayPower: Cannot update the power state to ON=" + on
-                        + " for a display with displayId=" + displayId + ", runnable is null");
+                Slog.w(TAG, "requestDisplayPower: Cannot set power state = " + state
+                        + " for the display with displayId=" + displayId + ","
+                        + " requestedState=" + requestedState + ": runnable is null");
                 return false;
             }
             runnable.run();
-            Slog.i(TAG, "requestDisplayPower(displayId=" + displayId + ", on=" + on + ")");
+            Slog.i(TAG, "requestDisplayPower(displayId=" + displayId
+                    + ", requestedState=" + requestedState + "): state set to " + state);
         }
         return true;
     }
@@ -3809,9 +3850,10 @@ public final class DisplayManagerService extends SystemService {
             // Ignore redundant events. Further optimization is possible by merging adjacent events.
             Pair<Integer, Integer> last = mDisplayEvents.get(mDisplayEvents.size() - 1);
             if (last.first == displayId && last.second == event) {
-                Slog.d(TAG,
-                        "Ignore redundant display event " + displayId + "/" + event + " to "
-                                + mCallbackRecord.mUid + "/" + mCallbackRecord.mPid);
+                if (DEBUG) {
+                    Slog.d(TAG, "Ignore redundant display event " + displayId + "/" + event + " to "
+                            + mCallbackRecord.mUid + "/" + mCallbackRecord.mPid);
+                }
                 return;
             }
 
@@ -4174,6 +4216,20 @@ public final class DisplayManagerService extends SystemService {
             final long token = Binder.clearCallingIdentity();
             try {
                 setVirtualDisplayStateInternal(callback.asBinder(), isOn);
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
+        }
+
+        @Override // Binder call
+        public void setVirtualDisplayRotation(IVirtualDisplayCallback callback,
+                @Surface.Rotation int rotation) {
+            if (!android.companion.virtualdevice.flags.Flags.virtualDisplayRotationApi()) {
+                return;
+            }
+            final long token = Binder.clearCallingIdentity();
+            try {
+                setVirtualDisplayRotationInternal(callback.asBinder(), rotation);
             } finally {
                 Binder.restoreCallingIdentity(token);
             }
@@ -4660,9 +4716,9 @@ public final class DisplayManagerService extends SystemService {
         }
 
         @EnforcePermission(MANAGE_DISPLAYS)
-        public boolean requestDisplayPower(int displayId, boolean on) {
+        public boolean requestDisplayPower(int displayId, int state) {
             requestDisplayPower_enforcePermission();
-            return DisplayManagerService.this.requestDisplayPower(displayId, on);
+            return DisplayManagerService.this.requestDisplayPower(displayId, state);
         }
 
         @EnforcePermission(RESTRICT_DISPLAY_MODES)
@@ -4671,6 +4727,32 @@ public final class DisplayManagerService extends SystemService {
             requestDisplayModes_enforcePermission();
             DisplayManagerService.this.mDisplayModeDirector.requestDisplayModes(
                     token, displayId, modeIds);
+        }
+
+        @EnforcePermission(android.Manifest.permission.CONTROL_DISPLAY_BRIGHTNESS)
+        @Override // Binder call
+        public float[] getDozeBrightnessSensorValueToBrightness(int displayId) {
+            getDozeBrightnessSensorValueToBrightness_enforcePermission();
+            DisplayDeviceConfig ddc =
+                    mDisplayDeviceConfigProvider.getDisplayDeviceConfig(displayId);
+            if (ddc == null) {
+                throw new IllegalArgumentException(
+                        "Display ID does not have a config: " + displayId);
+            }
+            return ddc.getDozeBrightnessSensorValueToBrightness();
+        }
+
+        @EnforcePermission(android.Manifest.permission.CONTROL_DISPLAY_BRIGHTNESS)
+        @Override // Binder call
+        public float getDefaultDozeBrightness(int displayId) {
+            getDefaultDozeBrightness_enforcePermission();
+            DisplayDeviceConfig ddc =
+                    mDisplayDeviceConfigProvider.getDisplayDeviceConfig(displayId);
+            if (ddc == null) {
+                throw new IllegalArgumentException(
+                        "Display ID does not have a config for doze-default: " + displayId);
+            }
+            return ddc.getDefaultDozeBrightness();
         }
     }
 
@@ -4787,6 +4869,8 @@ public final class DisplayManagerService extends SystemService {
                 }
                 final int[] supportedStates =
                         mDeviceStateManager.getSupportedStateIdentifiers();
+                // TODO(b/352019542): remove the log once b/345960547 is fixed.
+                Slog.d(TAG, "supportedStates=" + Arrays.toString(supportedStates));
                 DisplayInfo displayInfo;
                 for (int state : supportedStates) {
                     displayInfo = mLogicalDisplayMapper.getDisplayInfoForStateLocked(state,
@@ -4795,6 +4879,8 @@ public final class DisplayManagerService extends SystemService {
                         possibleInfo.add(displayInfo);
                     }
                 }
+                // TODO(b/352019542): remove the log once b/345960547 is fixed.
+                Slog.d(TAG, "possibleInfos=" + possibleInfo);
                 return possibleInfo;
             }
         }
@@ -5182,7 +5268,7 @@ public final class DisplayManagerService extends SystemService {
                 mHandler.sendMessage(msg);
 
                 mLogicalDisplayMapper
-                        .setDeviceStateLocked(deviceState.getIdentifier());
+                        .setDeviceStateLocked(deviceState);
             }
         }
     };

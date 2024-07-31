@@ -2,3 +2,11 @@ mmm -j8 frameworks/base/libs/hwui &&
 adb push $ANDROID_PRODUCT_OUT/data/nativetest/hwui_unit_tests/hwui_unit_tests \
     /data/nativetest/hwui_unit_tests/hwui_unit_tests &&
 adb shell /data/nativetest/hwui_unit_tests/hwui_unit_tests
+
+OR
+
+atest hwui_unit_tests
+
+OR, if you need arguments, they can be passed as native-test-flags, as in:
+
+atest hwui_unit_tests -- --test-arg com.android.tradefed.testtype.GTest:native-test-flag:"--renderer=skiavk"

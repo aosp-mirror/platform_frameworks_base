@@ -186,7 +186,15 @@ art_profile_java_defaults {
 
 // merge all required services into one jar
 // ============================================================
-java_library {
+soong_config_module_type {
+    name: "system_java_library",
+    module_type: "java_library",
+    config_namespace: "system_services",
+    bool_variables: ["without_vibrator"],
+    properties: ["vintf_fragments"],
+}
+
+system_java_library {
     name: "services",
     defaults: [
         "services_java_defaults",
@@ -248,9 +256,19 @@ java_library {
         "service-sdksandbox.stubs.system_server",
     ],
 
-    vintf_fragments: [
-        "manifest_services.xml",
-    ],
+    soong_config_variables: {
+        without_vibrator: {
+            vintf_fragments: [
+                "manifest_services.xml",
+            ],
+            conditions_default: {
+                vintf_fragments: [
+                    "manifest_services.xml",
+                    "manifest_services_android.frameworks.vibrator.xml",
+                ],
+            },
+        },
+    },
 
     required: [
         "libukey2_jni_shared",

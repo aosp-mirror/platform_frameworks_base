@@ -84,6 +84,8 @@ import android.os.UserManager;
 import android.os.VibrationAttributes;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
+import android.platform.test.annotations.DisableFlags;
+import android.platform.test.annotations.EnableFlags;
 import android.platform.test.flag.junit.SetFlagsRule;
 import android.provider.Settings;
 import android.service.notification.NotificationListenerService;
@@ -221,10 +223,16 @@ public class NotificationAttentionHelperTest extends UiServiceTestCase {
         Settings.System.putInt(getContext().getContentResolver(),
                 Settings.System.NOTIFICATION_LIGHT_PULSE, 1);
 
+        // Enable notification cooldown independent of device Settings
+        Settings.System.putInt(getContext().getContentResolver(),
+                Settings.System.NOTIFICATION_COOLDOWN_ENABLED, 1);
+
         Resources resources = spy(getContext().getResources());
         when(resources.getBoolean(R.bool.config_useAttentionLight)).thenReturn(true);
         when(resources.getBoolean(
                 com.android.internal.R.bool.config_intrusiveNotificationLed)).thenReturn(true);
+        when(resources.getBoolean(R.bool.config_enableNotificationAccessibilityEvents))
+                .thenReturn(true);
         when(getContext().getResources()).thenReturn(resources);
 
         // TODO (b/291907312): remove feature flag
@@ -1218,6 +1226,44 @@ public class NotificationAttentionHelperTest extends UiServiceTestCase {
         verifyBeepUnlooped();
         assertTrue(group.isInterruptive());
         assertNotEquals(-1, group.getLastAudiblyAlertedMs());
+    }
+
+    @Test
+    @EnableFlags(android.service.notification.Flags.FLAG_NOTIFICATION_SILENT_FLAG)
+    public void testSilentNotification_flagSilent() throws Exception {
+        final Notification n = new Builder(getContext(), "test")
+                .setSmallIcon(android.R.drawable.sym_def_app_icon)
+                .setSilent(true)
+                .build();
+        StatusBarNotification sbn = new StatusBarNotification(mPkg, mPkg, 0, mTag, mUid,
+                mPid, n, mUser, null, System.currentTimeMillis());
+        NotificationRecord r = new NotificationRecord(getContext(), sbn,
+                new NotificationChannel("test", "test", IMPORTANCE_HIGH));
+
+        mAttentionHelper.buzzBeepBlinkLocked(r, DEFAULT_SIGNALS);
+        verifyNeverBeep();
+        assertFalse(r.isInterruptive());
+        assertEquals(-1, r.getLastAudiblyAlertedMs());
+        assertTrue(mAttentionHelper.shouldMuteNotificationLocked(r, DEFAULT_SIGNALS));
+    }
+
+    @Test
+    @DisableFlags(android.service.notification.Flags.FLAG_NOTIFICATION_SILENT_FLAG)
+    public void testSilentNotification_groupKeySilent() throws Exception {
+        final Notification n = new Builder(getContext(), "test")
+                .setSmallIcon(android.R.drawable.sym_def_app_icon)
+                .setSilent(true)
+                .build();
+        StatusBarNotification sbn = new StatusBarNotification(mPkg, mPkg, 0, mTag, mUid,
+                mPid, n, mUser, null, System.currentTimeMillis());
+        NotificationRecord r = new NotificationRecord(getContext(), sbn,
+                new NotificationChannel("test", "test", IMPORTANCE_HIGH));
+
+        mAttentionHelper.buzzBeepBlinkLocked(r, DEFAULT_SIGNALS);
+        verifyNeverBeep();
+        assertFalse(r.isInterruptive());
+        assertEquals(-1, r.getLastAudiblyAlertedMs());
+        assertTrue(mAttentionHelper.shouldMuteNotificationLocked(r, DEFAULT_SIGNALS));
     }
 
     @Test
@@ -2788,6 +2834,34 @@ public class NotificationAttentionHelperTest extends UiServiceTestCase {
         NotificationRecord r = getBuzzyBeepyNotification();
         mAttentionHelper.buzzBeepBlinkLocked(r, DEFAULT_SIGNALS);
         assertThat(r.getRankingTimeMs()).isEqualTo(r.getSbn().getPostTime());
+    }
+
+    @Test
+    public void testAccessibilityEventsEnabledInConfig() throws Exception {
+        Resources resources = spy(getContext().getResources());
+        when(resources.getBoolean(R.bool.config_enableNotificationAccessibilityEvents))
+                .thenReturn(true);
+        when(getContext().getResources()).thenReturn(resources);
+        initAttentionHelper(mTestFlagResolver);
+        NotificationRecord r = getBeepyNotification();
+
+        mAttentionHelper.buzzBeepBlinkLocked(r, DEFAULT_SIGNALS);
+
+        verify(mAccessibilityService).sendAccessibilityEvent(any(), anyInt());
+    }
+
+    @Test
+    public void testAccessibilityEventsDisabledInConfig() throws Exception {
+        Resources resources = spy(getContext().getResources());
+        when(resources.getBoolean(R.bool.config_enableNotificationAccessibilityEvents))
+                .thenReturn(false);
+        when(getContext().getResources()).thenReturn(resources);
+        initAttentionHelper(mTestFlagResolver);
+        NotificationRecord r = getBeepyNotification();
+
+        mAttentionHelper.buzzBeepBlinkLocked(r, DEFAULT_SIGNALS);
+
+        verify(mAccessibilityService, never()).sendAccessibilityEvent(any(), anyInt());
     }
 
     static class VibrateRepeatMatcher implements ArgumentMatcher<VibrationEffect> {

@@ -61,7 +61,7 @@ import android.window.TaskSnapshot;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.policy.TransitionAnimation;
-import com.android.internal.protolog.common.ProtoLog;
+import com.android.internal.protolog.ProtoLog;
 import com.android.window.flags.Flags;
 
 import java.io.PrintWriter;
@@ -166,15 +166,14 @@ class BackNavigationController {
                 return null;
             }
 
-            // Move focus to the top embedded window if possible
-            if (mWindowManagerService.moveFocusToAdjacentEmbeddedWindow(window)) {
-                window = wmService.getFocusedWindowLocked();
-                if (window == null) {
-                    Slog.e(TAG, "New focused window is null, returning null.");
-                    return null;
-                }
+            // Updating the window to the most recently used one among the embedded windows
+            // that are displayed adjacently, unless the IME is visible.
+            // When the IME is visible, the IME is displayed on top of embedded activities.
+            // In that case, the back event should still be delivered to focused activity in
+            // order to dismiss the IME.
+            if (!window.getDisplayContent().getImeContainer().isVisible()) {
+                window = mWindowManagerService.getMostRecentUsedEmbeddedWindowForBack(window);
             }
-
             if (!window.isDrawn()) {
                 ProtoLog.d(WM_DEBUG_BACK_PREVIEW,
                         "Focused window didn't have a valid surface drawn.");
@@ -209,6 +208,9 @@ class BackNavigationController {
             ProtoLog.d(WM_DEBUG_BACK_PREVIEW, "startBackNavigation currentTask=%s, "
                             + "topRunningActivity=%s, callbackInfo=%s, currentFocus=%s",
                     currentTask, currentActivity, callbackInfo, window);
+
+            // Clear the pointer down outside focus if any.
+            mWindowManagerService.clearPointerDownOutsideFocusRunnable();
 
             // If we don't need to set up the animation, we return early. This is the case when
             // - We have an application callback.
@@ -357,8 +359,7 @@ class BackNavigationController {
                                 removedWindowContainer);
                 mBackAnimationInProgress = builder != null;
                 if (mBackAnimationInProgress) {
-                    if (removedWindowContainer.hasCommittedReparentToAnimationLeash()
-                            || removedWindowContainer.mTransitionController.inTransition()
+                    if (removedWindowContainer.mTransitionController.inTransition()
                             || mWindowManagerService.mSyncEngine.hasPendingSyncSets()) {
                         ProtoLog.w(WM_DEBUG_BACK_PREVIEW,
                                 "Pending back animation due to another animation is running");
@@ -1336,12 +1337,16 @@ class BackNavigationController {
                 }
                 // If there is only one adaptor, attach the windowless window to top activity,
                 // because fixed rotation only applies on activity.
-                // Note that embedded activity won't use fixed rotation.
-                final Configuration openConfig = mAdaptors.length == 1
+                // Note that embedded activity won't use fixed rotation. Also, there is only one
+                // animation target for closing task.
+                final boolean chooseActivity = mAdaptors.length == 1
+                        && (switchType == ACTIVITY_SWITCH || mainActivity.mDisplayContent
+                                .isFixedRotationLaunchingApp(mainActivity));
+                final Configuration openConfig = chooseActivity
                         ? mainActivity.getConfiguration() : openTask.getConfiguration();
                 mRequestedStartingSurfaceId = openTask.mAtmService.mTaskOrganizerController
                         .addWindowlessStartingSurface(openTask, mainActivity,
-                                mAdaptors.length == 1 ? mainActivity.getSurfaceControl()
+                                chooseActivity ? mainActivity.getSurfaceControl()
                                         : mRemoteAnimationTarget.leash, snapshot, openConfig,
                             new IWindowlessStartingSurfaceCallback.Stub() {
                             // Once the starting surface has been created in shell, it will call
@@ -1358,6 +1363,8 @@ class BackNavigationController {
                                     synchronized (openTask.mWmService.mGlobalLock) {
                                         if (mRequestedStartingSurfaceId != INVALID_TASK_ID) {
                                             mStartingSurface = sc;
+                                        } else {
+                                            sc.release();
                                         }
                                     }
                                 }
@@ -1596,12 +1603,20 @@ class BackNavigationController {
                     @NonNull ActivityRecord[] visibleOpenActivities) {
                 boolean needsLaunchBehind = true;
                 if (isSupportWindowlessSurface() && mShowWindowlessSurface && !mIsLaunchBehind) {
+                    boolean activitiesAreDrawn = false;
+                    for (int i = visibleOpenActivities.length - 1; i >= 0; --i) {
+                        // If the activity hasn't stopped, it's window should remain drawn.
+                        activitiesAreDrawn |= visibleOpenActivities[i].firstWindowDrawn;
+                    }
                     final WindowContainer mainOpen = openAnimationAdaptor.mAdaptors[0].mTarget;
                     final TaskSnapshot snapshot = getSnapshot(mainOpen, visibleOpenActivities);
-                    openAnimationAdaptor.createStartingSurface(snapshot);
-                    // set LaunchBehind if we are creating splash screen surface.
-                    needsLaunchBehind = snapshot == null
-                            && openAnimationAdaptor.mRequestedStartingSurfaceId != INVALID_TASK_ID;
+                    // Don't create starting surface if previous activities haven't stopped or
+                    // the snapshot does not exist.
+                    if (snapshot != null || !activitiesAreDrawn) {
+                        openAnimationAdaptor.createStartingSurface(snapshot);
+                    }
+                    // Only use LaunchBehind if snapshot does not exist.
+                    needsLaunchBehind = snapshot == null;
                 }
                 if (needsLaunchBehind) {
                     for (int i = visibleOpenActivities.length - 1; i >= 0; --i) {

@@ -133,7 +133,6 @@ class SceneFrameworkIntegrationTest : SysuiTestCase() {
                 sceneInteractor = sceneInteractor,
                 falsingInteractor = kosmos.falsingInteractor,
                 powerInteractor = kosmos.powerInteractor,
-                scenes = kosmos.scenes,
             )
             .apply { setTransitionState(transitionState) }
     }
@@ -144,7 +143,6 @@ class SceneFrameworkIntegrationTest : SysuiTestCase() {
 
     private val lockscreenSceneViewModel by lazy {
         LockscreenSceneViewModel(
-            applicationScope = testScope.backgroundScope,
             deviceEntryInteractor = deviceEntryInteractor,
             communalInteractor = communalInteractor,
             touchHandling =

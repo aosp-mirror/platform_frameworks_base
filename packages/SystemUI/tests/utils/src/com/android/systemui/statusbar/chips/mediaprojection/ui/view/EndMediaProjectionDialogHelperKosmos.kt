@@ -16,8 +16,8 @@
 
 package com.android.systemui.statusbar.chips.mediaprojection.ui.view
 
-import android.content.applicationContext
 import android.content.packageManager
+import com.android.systemui.animation.mockDialogTransitionAnimator
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.statusbar.phone.mockSystemUIDialogFactory
 
@@ -25,7 +25,7 @@ val Kosmos.endMediaProjectionDialogHelper: EndMediaProjectionDialogHelper by
     Kosmos.Fixture {
         EndMediaProjectionDialogHelper(
             dialogFactory = mockSystemUIDialogFactory,
+            dialogTransitionAnimator = mockDialogTransitionAnimator,
             packageManager = packageManager,
-            context = applicationContext,
         )
     }

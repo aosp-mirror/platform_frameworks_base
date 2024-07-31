@@ -34,10 +34,14 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LifecycleRegistry
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
+import com.android.app.viewcapture.ViewCapture
+import com.android.app.viewcapture.ViewCaptureAwareWindowManager
+import com.android.app.viewcapture.ViewCaptureFactory
 import com.android.compose.animation.scene.ObservableTransitionState
 import com.android.internal.logging.UiEventLogger
 import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.keyguard.KeyguardUpdateMonitorCallback
+import com.android.systemui.Flags.FLAG_COMMUNAL_HUB
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.ambient.touch.TouchMonitor
 import com.android.systemui.ambient.touch.dagger.AmbientTouchComponent
@@ -50,6 +54,7 @@ import com.android.systemui.communal.data.repository.fakeCommunalSceneRepository
 import com.android.systemui.communal.domain.interactor.CommunalInteractor
 import com.android.systemui.communal.domain.interactor.communalInteractor
 import com.android.systemui.communal.domain.interactor.setCommunalAvailable
+import com.android.systemui.communal.shared.log.CommunalUiEvent
 import com.android.systemui.communal.shared.model.CommunalScenes
 import com.android.systemui.complication.ComplicationHostViewController
 import com.android.systemui.complication.ComplicationLayoutEngine
@@ -57,12 +62,13 @@ import com.android.systemui.complication.dagger.ComplicationComponent
 import com.android.systemui.dreams.complication.HideComplicationTouchHandler
 import com.android.systemui.dreams.dagger.DreamOverlayComponent
 import com.android.systemui.keyguard.domain.interactor.keyguardInteractor
+import com.android.systemui.keyguard.gesture.domain.gestureInteractor
 import com.android.systemui.kosmos.testScope
+import com.android.systemui.navigationbar.gestural.domain.GestureInteractor
 import com.android.systemui.testKosmos
 import com.android.systemui.touch.TouchInsetManager
 import com.android.systemui.util.concurrency.FakeExecutor
 import com.android.systemui.util.mockito.any
-import com.android.systemui.util.mockito.eq
 import com.android.systemui.util.mockito.whenever
 import com.android.systemui.util.time.FakeSystemClock
 import com.google.common.truth.Truth.assertThat
@@ -81,6 +87,9 @@ import org.mockito.Mockito.clearInvocations
 import org.mockito.Mockito.isNull
 import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
+import org.mockito.kotlin.argumentCaptor
+import org.mockito.kotlin.eq
+import org.mockito.kotlin.spy
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
@@ -154,8 +163,13 @@ class DreamOverlayServiceTest : SysuiTestCase() {
 
     @Mock lateinit var mDreamOverlayCallbackController: DreamOverlayCallbackController
 
+    @Mock lateinit var mLazyViewCapture: Lazy<ViewCapture>
+
+    private lateinit var mViewCaptureAwareWindowManager: ViewCaptureAwareWindowManager
     private lateinit var bouncerRepository: FakeKeyguardBouncerRepository
     private lateinit var communalRepository: FakeCommunalSceneRepository
+    private var viewCaptureSpy = spy(ViewCaptureFactory.getInstance(context))
+    private lateinit var gestureInteractor: GestureInteractor
 
     @Captor var mViewCaptor: ArgumentCaptor<View>? = null
     private lateinit var mService: DreamOverlayService
@@ -167,6 +181,7 @@ class DreamOverlayServiceTest : SysuiTestCase() {
         lifecycleRegistry = FakeLifecycleRegistry(mLifecycleOwner)
         bouncerRepository = kosmos.fakeKeyguardBouncerRepository
         communalRepository = kosmos.fakeCommunalSceneRepository
+        gestureInteractor = spy(kosmos.gestureInteractor)
 
         whenever(mDreamOverlayComponent.getDreamOverlayContainerViewController())
             .thenReturn(mDreamOverlayContainerViewController)
@@ -192,13 +207,20 @@ class DreamOverlayServiceTest : SysuiTestCase() {
         whenever(mDreamOverlayContainerViewController.containerView)
             .thenReturn(mDreamOverlayContainerView)
         whenever(mScrimManager.getCurrentController()).thenReturn(mScrimController)
+        whenever(mLazyViewCapture.value).thenReturn(viewCaptureSpy)
         mWindowParams = WindowManager.LayoutParams()
+        mViewCaptureAwareWindowManager =
+            ViewCaptureAwareWindowManager(
+                mWindowManager,
+                mLazyViewCapture,
+                isViewCaptureEnabled = false
+            )
         mService =
             DreamOverlayService(
                 mContext,
                 mLifecycleOwner,
                 mMainExecutor,
-                mWindowManager,
+                mViewCaptureAwareWindowManager,
                 mComplicationComponentFactory,
                 mDreamComplicationComponentFactory,
                 mDreamOverlayComponentFactory,
@@ -214,6 +236,7 @@ class DreamOverlayServiceTest : SysuiTestCase() {
                 HOME_CONTROL_PANEL_DREAM_COMPONENT,
                 mDreamOverlayCallbackController,
                 kosmos.keyguardInteractor,
+                gestureInteractor,
                 WINDOW_NAME
             )
     }
@@ -623,7 +646,7 @@ class DreamOverlayServiceTest : SysuiTestCase() {
     }
 
     @Test
-    @EnableFlags(Flags.FLAG_DREAM_WAKE_REDIRECT)
+    @EnableFlags(Flags.FLAG_DREAM_WAKE_REDIRECT, FLAG_COMMUNAL_HUB)
     @kotlin.Throws(RemoteException::class)
     fun testTransitionToGlanceableHub() =
         testScope.runTest {
@@ -644,10 +667,11 @@ class DreamOverlayServiceTest : SysuiTestCase() {
             verify(mDreamOverlayCallback).onRedirectWake(true)
             client.onWakeRequested()
             verify(mCommunalInteractor).changeScene(eq(CommunalScenes.Communal), isNull())
+            verify(mUiEventLogger).log(CommunalUiEvent.DREAM_TO_COMMUNAL_HUB_DREAM_AWAKE_START)
         }
 
     @Test
-    @EnableFlags(Flags.FLAG_DREAM_WAKE_REDIRECT)
+    @EnableFlags(Flags.FLAG_DREAM_WAKE_REDIRECT, FLAG_COMMUNAL_HUB)
     @Throws(RemoteException::class)
     fun testRedirectExit() =
         testScope.runTest {
@@ -935,6 +959,47 @@ class DreamOverlayServiceTest : SysuiTestCase() {
 
         // Lifecycle state goes back to RESUMED.
         assertThat(lifecycleRegistry.currentState).isEqualTo(Lifecycle.State.RESUMED)
+    }
+
+    @Test
+    fun testDreamActivityGesturesBlockedOnStart() {
+        val client = client
+
+        // Inform the overlay service of dream starting.
+        client.startDream(
+            mWindowParams,
+            mDreamOverlayCallback,
+            DREAM_COMPONENT,
+            false /*shouldShowComplication*/
+        )
+        mMainExecutor.runAllReady()
+        val captor = argumentCaptor<ComponentName>()
+        verify(gestureInteractor)
+            .addGestureBlockedActivity(captor.capture(), eq(GestureInteractor.Scope.Global))
+        assertThat(captor.firstValue.packageName)
+            .isEqualTo(ComponentName.unflattenFromString(DREAM_COMPONENT)?.packageName)
+    }
+
+    @Test
+    fun testDreamActivityGesturesUnblockedOnEnd() {
+        val client = client
+
+        // Inform the overlay service of dream starting.
+        client.startDream(
+            mWindowParams,
+            mDreamOverlayCallback,
+            DREAM_COMPONENT,
+            false /*shouldShowComplication*/
+        )
+        mMainExecutor.runAllReady()
+
+        client.endDream()
+        mMainExecutor.runAllReady()
+        val captor = argumentCaptor<ComponentName>()
+        verify(gestureInteractor)
+            .removeGestureBlockedActivity(captor.capture(), eq(GestureInteractor.Scope.Global))
+        assertThat(captor.firstValue.packageName)
+            .isEqualTo(ComponentName.unflattenFromString(DREAM_COMPONENT)?.packageName)
     }
 
     internal class FakeLifecycleRegistry(provider: LifecycleOwner) : LifecycleRegistry(provider) {

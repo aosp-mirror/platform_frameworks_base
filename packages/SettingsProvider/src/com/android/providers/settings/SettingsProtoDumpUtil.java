@@ -2916,6 +2916,9 @@ class SettingsProtoDumpUtil {
                 Settings.System.POINTER_FILL_STYLE,
                 SystemSettingsProto.Pointer.POINTER_FILL_STYLE);
         dumpSetting(s, p,
+                Settings.System.POINTER_STROKE_STYLE,
+                SystemSettingsProto.Pointer.POINTER_STROKE_STYLE);
+        dumpSetting(s, p,
                 Settings.System.POINTER_SCALE,
                 SystemSettingsProto.Pointer.POINTER_SCALE);
         p.end(pointerToken);

@@ -29,6 +29,7 @@ val Kosmos.fromAodTransitionInteractor by
         FromAodTransitionInteractor(
             transitionRepository = fakeKeyguardTransitionRepository,
             transitionInteractor = keyguardTransitionInteractor,
+            internalTransitionInteractor = internalKeyguardTransitionInteractor,
             scope = applicationCoroutineScope,
             bgDispatcher = testDispatcher,
             mainDispatcher = testDispatcher,
@@ -36,5 +37,6 @@ val Kosmos.fromAodTransitionInteractor by
             powerInteractor = powerInteractor,
             keyguardOcclusionInteractor = keyguardOcclusionInteractor,
             deviceEntryRepository = deviceEntryRepository,
+            wakeToGoneInteractor = keyguardWakeDirectlyToGoneInteractor,
         )
     }

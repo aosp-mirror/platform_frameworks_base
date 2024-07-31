@@ -110,7 +110,6 @@ public class AutoBrightnessFallbackStrategyTest {
                 new DisplayBrightnessState.Builder()
                         .setBrightness(fallbackBrightness)
                         .setBrightnessReason(brightnessReason)
-                        .setSdrBrightness(fallbackBrightness)
                         .setDisplayBrightnessStrategyName(mAutoBrightnessFallbackStrategy.getName())
                         .build();
         DisplayBrightnessState updatedDisplayBrightnessState =

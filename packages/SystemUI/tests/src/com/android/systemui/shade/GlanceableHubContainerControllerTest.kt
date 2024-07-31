@@ -16,19 +16,24 @@
 
 package com.android.systemui.shade
 
+import android.graphics.Insets
 import android.graphics.Rect
 import android.os.PowerManager
+import android.platform.test.annotations.DisableFlags
+import android.platform.test.annotations.EnableFlags
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
 import android.testing.ViewUtils
 import android.view.MotionEvent
 import android.view.View
+import android.view.WindowInsets
 import android.widget.FrameLayout
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
 import androidx.test.filters.SmallTest
 import com.android.compose.animation.scene.SceneKey
 import com.android.systemui.Flags
+import com.android.systemui.Flags.FLAG_GLANCEABLE_HUB_BACK_GESTURE
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.ambient.touch.TouchHandler
 import com.android.systemui.ambient.touch.TouchMonitor
@@ -43,7 +48,12 @@ import com.android.systemui.communal.ui.compose.CommunalContent
 import com.android.systemui.communal.ui.viewmodel.CommunalViewModel
 import com.android.systemui.communal.util.CommunalColors
 import com.android.systemui.coroutines.collectLastValue
+import com.android.systemui.keyguard.data.repository.fakeKeyguardTransitionRepository
 import com.android.systemui.keyguard.domain.interactor.keyguardInteractor
+import com.android.systemui.keyguard.domain.interactor.keyguardTransitionInteractor
+import com.android.systemui.keyguard.shared.model.KeyguardState
+import com.android.systemui.keyguard.shared.model.TransitionState
+import com.android.systemui.keyguard.shared.model.TransitionStep
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.testDispatcher
 import com.android.systemui.kosmos.testScope
@@ -62,10 +72,13 @@ import org.junit.Assert.assertThrows
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.ArgumentMatchers.anyFloat
-import org.mockito.Mock
-import org.mockito.Mockito.`when`
-import org.mockito.MockitoAnnotations
+import org.mockito.kotlin.any
+import org.mockito.kotlin.doReturn
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.never
+import org.mockito.kotlin.spy
+import org.mockito.kotlin.verify
+import org.mockito.kotlin.whenever
 
 @ExperimentalCoroutinesApi
 @RunWith(AndroidTestingRunner::class)
@@ -79,11 +92,11 @@ class GlanceableHubContainerControllerTest : SysuiTestCase() {
             testDispatcher = UnconfinedTestDispatcher()
         }
 
-    @Mock private lateinit var communalViewModel: CommunalViewModel
-    @Mock private lateinit var powerManager: PowerManager
-    @Mock private lateinit var touchMonitor: TouchMonitor
-    @Mock private lateinit var communalColors: CommunalColors
-    @Mock private lateinit var communalContent: CommunalContent
+    private var communalViewModel = mock<CommunalViewModel>()
+    private var powerManager = mock<PowerManager>()
+    private var touchMonitor = mock<TouchMonitor>()
+    private var communalColors = mock<CommunalColors>()
+    private var communalContent = mock<CommunalContent>()
     private lateinit var ambientTouchComponentFactory: AmbientTouchComponent.Factory
 
     private lateinit var parentView: FrameLayout
@@ -95,8 +108,6 @@ class GlanceableHubContainerControllerTest : SysuiTestCase() {
 
     @Before
     fun setUp() {
-        MockitoAnnotations.initMocks(this)
-
         communalRepository = kosmos.fakeCommunalSceneRepository
 
         ambientTouchComponentFactory =
@@ -116,6 +127,7 @@ class GlanceableHubContainerControllerTest : SysuiTestCase() {
                     communalInteractor,
                     communalViewModel,
                     keyguardInteractor,
+                    kosmos.keyguardTransitionInteractor,
                     shadeInteractor,
                     powerManager,
                     communalColors,
@@ -159,6 +171,7 @@ class GlanceableHubContainerControllerTest : SysuiTestCase() {
                         communalInteractor,
                         communalViewModel,
                         keyguardInteractor,
+                        kosmos.keyguardTransitionInteractor,
                         shadeInteractor,
                         powerManager,
                         communalColors,
@@ -184,6 +197,7 @@ class GlanceableHubContainerControllerTest : SysuiTestCase() {
                     communalInteractor,
                     communalViewModel,
                     keyguardInteractor,
+                    kosmos.keyguardTransitionInteractor,
                     shadeInteractor,
                     powerManager,
                     communalColors,
@@ -204,6 +218,7 @@ class GlanceableHubContainerControllerTest : SysuiTestCase() {
                     communalInteractor,
                     communalViewModel,
                     keyguardInteractor,
+                    kosmos.keyguardTransitionInteractor,
                     shadeInteractor,
                     powerManager,
                     communalColors,
@@ -227,12 +242,15 @@ class GlanceableHubContainerControllerTest : SysuiTestCase() {
     }
 
     @Test
-    fun lifecycle_resumedAfterCommunalShows() {
-        // Communal is open.
-        goToScene(CommunalScenes.Communal)
+    fun lifecycle_resumedAfterCommunalShows() =
+        with(kosmos) {
+            testScope.runTest {
+                // Communal is open.
+                goToScene(CommunalScenes.Communal)
 
-        assertThat(underTest.lifecycle.currentState).isEqualTo(Lifecycle.State.RESUMED)
-    }
+                assertThat(underTest.lifecycle.currentState).isEqualTo(Lifecycle.State.RESUMED)
+            }
+        }
 
     @Test
     fun lifecycle_startedAfterCommunalCloses() =
@@ -281,6 +299,43 @@ class GlanceableHubContainerControllerTest : SysuiTestCase() {
         }
 
     @Test
+    fun lifecycle_startedWhenEditActivityShowing() =
+        with(kosmos) {
+            testScope.runTest {
+                // Communal is open.
+                goToScene(CommunalScenes.Communal)
+
+                // Edit activity is showing.
+                communalInteractor.setEditActivityShowing(true)
+                testableLooper.processAllMessages()
+
+                assertThat(underTest.lifecycle.currentState).isEqualTo(Lifecycle.State.STARTED)
+            }
+        }
+
+    @Test
+    fun lifecycle_startedWhenEditModeTransitionStarted() =
+        with(kosmos) {
+            testScope.runTest {
+                // Communal is open.
+                goToScene(CommunalScenes.Communal)
+
+                // Leaving edit mode to return to the hub.
+                fakeKeyguardTransitionRepository.sendTransitionStep(
+                    TransitionStep(
+                        from = KeyguardState.GONE,
+                        to = KeyguardState.GLANCEABLE_HUB,
+                        value = 1.0f,
+                        transitionState = TransitionState.RUNNING
+                    )
+                )
+                testableLooper.processAllMessages()
+
+                assertThat(underTest.lifecycle.currentState).isEqualTo(Lifecycle.State.STARTED)
+            }
+        }
+
+    @Test
     fun lifecycle_createdAfterDisposeView() {
         // Container view disposed.
         underTest.disposeView()
@@ -304,6 +359,59 @@ class GlanceableHubContainerControllerTest : SysuiTestCase() {
         }
 
     @Test
+    fun lifecycle_doesNotResumeOnUserInteractivityOnceExpanded() =
+        with(kosmos) {
+            testScope.runTest {
+                // Communal is open.
+                goToScene(CommunalScenes.Communal)
+
+                // Shade shows up.
+                shadeTestUtil.setShadeExpansion(1.0f)
+                testableLooper.processAllMessages()
+                underTest.onTouchEvent(DOWN_EVENT)
+                testableLooper.processAllMessages()
+
+                assertThat(underTest.lifecycle.currentState).isEqualTo(Lifecycle.State.STARTED)
+
+                // Shade starts collapsing.
+                shadeTestUtil.setShadeExpansion(.5f)
+                testableLooper.processAllMessages()
+                underTest.onTouchEvent(DOWN_EVENT)
+                testableLooper.processAllMessages()
+
+                assertThat(underTest.lifecycle.currentState).isEqualTo(Lifecycle.State.STARTED)
+
+                // Shade fully collpase, and then expand should with touch interaction should now
+                // be resumed.
+                shadeTestUtil.setShadeExpansion(0f)
+                testableLooper.processAllMessages()
+                shadeTestUtil.setShadeExpansion(.5f)
+                testableLooper.processAllMessages()
+                underTest.onTouchEvent(DOWN_EVENT)
+                testableLooper.processAllMessages()
+
+                assertThat(underTest.lifecycle.currentState).isEqualTo(Lifecycle.State.RESUMED)
+            }
+        }
+
+    @Test
+    fun touchHandling_moveEventProcessedAfterCancel() =
+        with(kosmos) {
+            testScope.runTest {
+                // Communal is open.
+                goToScene(CommunalScenes.Communal)
+
+                // Shade shows up.
+                shadeTestUtil.setQsExpansion(0.5f)
+                testableLooper.processAllMessages()
+                assertThat(underTest.onTouchEvent(DOWN_EVENT)).isTrue()
+                assertThat(underTest.onTouchEvent(CANCEL_EVENT)).isTrue()
+                assertThat(underTest.onTouchEvent(UP_EVENT)).isFalse()
+                assertThat(underTest.onTouchEvent(MOVE_EVENT)).isTrue()
+            }
+        }
+
+    @Test
     fun editMode_communalAvailable() =
         with(kosmos) {
             testScope.runTest {
@@ -317,18 +425,104 @@ class GlanceableHubContainerControllerTest : SysuiTestCase() {
         }
 
     @Test
+    @DisableFlags(FLAG_GLANCEABLE_HUB_BACK_GESTURE)
     fun gestureExclusionZone_setAfterInit() =
         with(kosmos) {
             testScope.runTest {
+                whenever(containerView.layoutDirection).thenReturn(View.LAYOUT_DIRECTION_LTR)
                 goToScene(CommunalScenes.Communal)
 
                 assertThat(containerView.systemGestureExclusionRects)
                     .containsExactly(
                         Rect(
-                            /* left */ 0,
-                            /* top */ TOP_SWIPE_REGION_WIDTH,
-                            /* right */ CONTAINER_WIDTH,
-                            /* bottom */ CONTAINER_HEIGHT - BOTTOM_SWIPE_REGION_WIDTH
+                            /* left= */ 0,
+                            /* top= */ TOP_SWIPE_REGION_WIDTH,
+                            /* right= */ CONTAINER_WIDTH,
+                            /* bottom= */ CONTAINER_HEIGHT - BOTTOM_SWIPE_REGION_WIDTH
+                        ),
+                        Rect(
+                            /* left= */ 0,
+                            /* top= */ 0,
+                            /* right= */ 0,
+                            /* bottom= */ CONTAINER_HEIGHT
+                        )
+                    )
+            }
+        }
+
+    @Test
+    @DisableFlags(FLAG_GLANCEABLE_HUB_BACK_GESTURE)
+    fun gestureExclusionZone_setAfterInit_rtl() =
+        with(kosmos) {
+            testScope.runTest {
+                whenever(containerView.layoutDirection).thenReturn(View.LAYOUT_DIRECTION_RTL)
+                goToScene(CommunalScenes.Communal)
+
+                assertThat(containerView.systemGestureExclusionRects)
+                    .containsExactly(
+                        Rect(
+                            /* left= */ 0,
+                            /* top= */ TOP_SWIPE_REGION_WIDTH,
+                            /* right= */ CONTAINER_WIDTH,
+                            /* bottom= */ CONTAINER_HEIGHT - BOTTOM_SWIPE_REGION_WIDTH
+                        ),
+                        Rect(
+                            /* left= */ 0,
+                            /* top= */ 0,
+                            /* right= */ CONTAINER_WIDTH,
+                            /* bottom= */ CONTAINER_HEIGHT
+                        )
+                    )
+            }
+        }
+
+    @Test
+    @EnableFlags(FLAG_GLANCEABLE_HUB_BACK_GESTURE)
+    fun gestureExclusionZone_setAfterInit_backGestureEnabled() =
+        with(kosmos) {
+            testScope.runTest {
+                whenever(containerView.layoutDirection).thenReturn(View.LAYOUT_DIRECTION_LTR)
+                goToScene(CommunalScenes.Communal)
+
+                assertThat(containerView.systemGestureExclusionRects)
+                    .containsExactly(
+                        Rect(
+                            /* left= */ FAKE_INSETS.left,
+                            /* top= */ TOP_SWIPE_REGION_WIDTH,
+                            /* right= */ CONTAINER_WIDTH - FAKE_INSETS.right,
+                            /* bottom= */ CONTAINER_HEIGHT - BOTTOM_SWIPE_REGION_WIDTH
+                        ),
+                        Rect(
+                            /* left= */ 0,
+                            /* top= */ 0,
+                            /* right= */ FAKE_INSETS.right,
+                            /* bottom= */ CONTAINER_HEIGHT
+                        )
+                    )
+            }
+        }
+
+    @Test
+    @EnableFlags(FLAG_GLANCEABLE_HUB_BACK_GESTURE)
+    fun gestureExclusionZone_setAfterInit_backGestureEnabled_rtl() =
+        with(kosmos) {
+            testScope.runTest {
+                whenever(containerView.layoutDirection).thenReturn(View.LAYOUT_DIRECTION_RTL)
+                goToScene(CommunalScenes.Communal)
+
+                assertThat(containerView.systemGestureExclusionRects)
+                    .containsExactly(
+                        Rect(
+                            /* left= */ FAKE_INSETS.left,
+                            /* top= */ TOP_SWIPE_REGION_WIDTH,
+                            /* right= */ CONTAINER_WIDTH - FAKE_INSETS.right,
+                            /* bottom= */ CONTAINER_HEIGHT - BOTTOM_SWIPE_REGION_WIDTH
+                        ),
+                        Rect(
+                            /* left= */ FAKE_INSETS.left,
+                            /* top= */ 0,
+                            /* right= */ CONTAINER_WIDTH,
+                            /* bottom= */ CONTAINER_HEIGHT
                         )
                     )
             }
@@ -339,6 +533,9 @@ class GlanceableHubContainerControllerTest : SysuiTestCase() {
         with(kosmos) {
             testScope.runTest {
                 goToScene(CommunalScenes.Communal)
+
+                // Exclusion rect is set.
+                assertThat(containerView.systemGestureExclusionRects).isNotEmpty()
 
                 // Shade shows up.
                 shadeTestUtil.setQsExpansion(1.0f)
@@ -354,6 +551,9 @@ class GlanceableHubContainerControllerTest : SysuiTestCase() {
         with(kosmos) {
             testScope.runTest {
                 goToScene(CommunalScenes.Communal)
+
+                // Exclusion rect is set.
+                assertThat(containerView.systemGestureExclusionRects).isNotEmpty()
 
                 // Bouncer is visible.
                 fakeKeyguardBouncerRepository.setPrimaryShow(true)
@@ -371,7 +571,7 @@ class GlanceableHubContainerControllerTest : SysuiTestCase() {
                 goToScene(CommunalScenes.Communal)
 
                 // Exclusion rect is set.
-                assertThat(containerView.systemGestureExclusionRects).hasSize(1)
+                assertThat(containerView.systemGestureExclusionRects).isNotEmpty()
 
                 // Leave the hub.
                 goToScene(CommunalScenes.Blank)
@@ -387,10 +587,10 @@ class GlanceableHubContainerControllerTest : SysuiTestCase() {
             testScope.runTest {
                 // Communal is closed.
                 goToScene(CommunalScenes.Blank)
-                `when`(
+                whenever(
                         notificationStackScrollLayoutController.isBelowLastNotification(
-                            anyFloat(),
-                            anyFloat()
+                            any(),
+                            any()
                         )
                     )
                     .thenReturn(false)
@@ -398,8 +598,69 @@ class GlanceableHubContainerControllerTest : SysuiTestCase() {
             }
         }
 
+    @Test
+    fun onTouchEvent_hubOpen_touchesDispatched() =
+        with(kosmos) {
+            testScope.runTest {
+                // Communal is open.
+                goToScene(CommunalScenes.Communal)
+
+                // Touch event is sent to the container view.
+                assertThat(underTest.onTouchEvent(DOWN_EVENT)).isTrue()
+                verify(containerView).onTouchEvent(any())
+            }
+        }
+
+    @Test
+    fun onTouchEvent_editActivityShowing_touchesConsumedButNotDispatched() =
+        with(kosmos) {
+            testScope.runTest {
+                // Communal is open.
+                goToScene(CommunalScenes.Communal)
+
+                // Transitioning to or from edit mode.
+                communalInteractor.setEditActivityShowing(true)
+                testableLooper.processAllMessages()
+
+                // onTouchEvent returns true to consume the touch, but it is not sent to the
+                // container view.
+                assertThat(underTest.onTouchEvent(DOWN_EVENT)).isTrue()
+                verify(containerView, never()).onTouchEvent(any())
+            }
+        }
+
+    @Test
+    fun onTouchEvent_editModeTransitionStarted_touchesConsumedButNotDispatched() =
+        with(kosmos) {
+            testScope.runTest {
+                // Communal is open.
+                goToScene(CommunalScenes.Communal)
+
+                // Leaving edit mode to return to the hub.
+                fakeKeyguardTransitionRepository.sendTransitionStep(
+                    TransitionStep(
+                        from = KeyguardState.GONE,
+                        to = KeyguardState.GLANCEABLE_HUB,
+                        value = 1.0f,
+                        transitionState = TransitionState.RUNNING
+                    )
+                )
+                testableLooper.processAllMessages()
+
+                // onTouchEvent returns true to consume the touch, but it is not sent to the
+                // container view.
+                assertThat(underTest.onTouchEvent(DOWN_EVENT)).isTrue()
+                verify(containerView, never()).onTouchEvent(any())
+            }
+        }
+
     private fun initAndAttachContainerView() {
-        containerView = View(context)
+        val mockInsets =
+            mock<WindowInsets> {
+                on { getInsets(WindowInsets.Type.systemGestures()) } doReturn FAKE_INSETS
+            }
+
+        containerView = spy(View(context)) { on { rootWindowInsets } doReturn mockInsets }
 
         parentView = FrameLayout(context)
 
@@ -411,8 +672,21 @@ class GlanceableHubContainerControllerTest : SysuiTestCase() {
         testableLooper.processAllMessages()
     }
 
-    private fun goToScene(scene: SceneKey) {
+    private suspend fun goToScene(scene: SceneKey) {
         communalRepository.changeScene(scene)
+        if (scene == CommunalScenes.Communal) {
+            kosmos.fakeKeyguardTransitionRepository.sendTransitionSteps(
+                from = KeyguardState.LOCKSCREEN,
+                to = KeyguardState.GLANCEABLE_HUB,
+                kosmos.testScope
+            )
+        } else {
+            kosmos.fakeKeyguardTransitionRepository.sendTransitionSteps(
+                from = KeyguardState.GLANCEABLE_HUB,
+                to = KeyguardState.LOCKSCREEN,
+                kosmos.testScope
+            )
+        }
         testableLooper.processAllMessages()
     }
 
@@ -422,6 +696,7 @@ class GlanceableHubContainerControllerTest : SysuiTestCase() {
         private const val RIGHT_SWIPE_REGION_WIDTH = 20
         private const val TOP_SWIPE_REGION_WIDTH = 12
         private const val BOTTOM_SWIPE_REGION_WIDTH = 14
+        private val FAKE_INSETS = Insets.of(10, 20, 30, 50)
 
         /**
          * A touch down event right in the middle of the screen, to avoid being in any of the swipe
@@ -432,6 +707,36 @@ class GlanceableHubContainerControllerTest : SysuiTestCase() {
                 0L,
                 0L,
                 MotionEvent.ACTION_DOWN,
+                CONTAINER_WIDTH.toFloat() / 2,
+                CONTAINER_HEIGHT.toFloat() / 2,
+                0
+            )
+
+        private val CANCEL_EVENT =
+            MotionEvent.obtain(
+                0L,
+                0L,
+                MotionEvent.ACTION_CANCEL,
+                CONTAINER_WIDTH.toFloat() / 2,
+                CONTAINER_HEIGHT.toFloat() / 2,
+                0
+            )
+
+        private val MOVE_EVENT =
+            MotionEvent.obtain(
+                0L,
+                0L,
+                MotionEvent.ACTION_MOVE,
+                CONTAINER_WIDTH.toFloat() / 2,
+                CONTAINER_HEIGHT.toFloat() / 2,
+                0
+            )
+
+        private val UP_EVENT =
+            MotionEvent.obtain(
+                0L,
+                0L,
+                MotionEvent.ACTION_UP,
                 CONTAINER_WIDTH.toFloat() / 2,
                 CONTAINER_HEIGHT.toFloat() / 2,
                 0

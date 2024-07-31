@@ -18,6 +18,7 @@
 
 package com.android.systemui.shade
 
+import android.platform.test.annotations.DisableFlags
 import android.platform.test.annotations.EnableFlags
 import android.testing.TestableLooper
 import android.view.HapticFeedbackConstants
@@ -27,6 +28,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.internal.util.CollectionUtils
 import com.android.keyguard.KeyguardClockSwitch.LARGE
+import com.android.systemui.Flags
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.res.R
 import com.android.systemui.statusbar.StatusBarState.KEYGUARD
@@ -34,7 +36,6 @@ import com.android.systemui.statusbar.StatusBarState.SHADE
 import com.android.systemui.statusbar.StatusBarState.SHADE_LOCKED
 import com.android.systemui.statusbar.notification.data.repository.FakeHeadsUpRowRepository
 import com.android.systemui.statusbar.notification.shared.NotificationsHeadsUpRefactor
-import com.android.systemui.statusbar.notification.stack.data.repository.setNotifications
 import com.android.systemui.util.mockito.eq
 import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
@@ -58,6 +59,7 @@ import org.mockito.Mockito.verify
 @RunWith(AndroidJUnit4::class)
 @TestableLooper.RunWithLooper(setAsMainLooper = true)
 @SmallTest
+@DisableFlags(Flags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT)
 class NotificationPanelViewControllerWithCoroutinesTest :
     NotificationPanelViewControllerBaseTest() {
 

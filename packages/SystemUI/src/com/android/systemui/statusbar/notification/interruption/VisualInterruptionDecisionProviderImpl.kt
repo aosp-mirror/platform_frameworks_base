@@ -29,6 +29,7 @@ import com.android.internal.logging.UiEventLogger.UiEventEnum
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.settings.UserTracker
+import com.android.systemui.shared.notifications.domain.interactor.NotificationSettingsInteractor
 import com.android.systemui.statusbar.notification.collection.NotificationEntry
 import com.android.systemui.statusbar.notification.interruption.VisualInterruptionDecisionProvider.Decision
 import com.android.systemui.statusbar.notification.interruption.VisualInterruptionDecisionProvider.FullScreenIntentDecision
@@ -72,7 +73,8 @@ constructor(
     private val packageManager: PackageManager,
     private val bubbles: Optional<Bubbles>,
     private val context: Context,
-    private val notificationManager: NotificationManager
+    private val notificationManager: NotificationManager,
+    private val settingsInteractor: NotificationSettingsInteractor
 ) : VisualInterruptionDecisionProvider {
 
     init {
@@ -93,7 +95,8 @@ constructor(
     private constructor(
         val decision: DecisionImpl,
         override val uiEventId: UiEventEnum? = null,
-        override val eventLogData: EventLogData? = null
+        override val eventLogData: EventLogData? = null,
+        val isSpammy: Boolean = false,
     ) : Loggable {
         companion object {
             val unsuppressed =
@@ -111,7 +114,8 @@ constructor(
                 LoggableDecision(
                     DecisionImpl(shouldInterrupt = false, logReason = suppressor.reason),
                     uiEventId = suppressor.uiEventId,
-                    eventLogData = suppressor.eventLogData
+                    eventLogData = suppressor.eventLogData,
+                    isSpammy = suppressor.isSpammy,
                 )
         }
     }
@@ -176,14 +180,22 @@ constructor(
         addFilter(BubbleNotAllowedSuppressor())
         addFilter(BubbleNoMetadataSuppressor())
         addFilter(HunGroupAlertBehaviorSuppressor())
+        addFilter(HunSilentNotificationSuppressor())
         addFilter(HunJustLaunchedFsiSuppressor())
         addFilter(AlertAppSuspendedSuppressor())
         addFilter(AlertKeyguardVisibilitySuppressor(keyguardNotificationVisibilityProvider))
 
         if (NotificationAvalancheSuppression.isEnabled) {
             addFilter(
-                AvalancheSuppressor(avalancheProvider, systemClock, systemSettings, packageManager,
-                        uiEventLogger, context, notificationManager)
+                AvalancheSuppressor(
+                    avalancheProvider,
+                    systemClock,
+                    settingsInteractor,
+                    packageManager,
+                    uiEventLogger,
+                    context,
+                    notificationManager
+                )
             )
             avalancheProvider.register()
         }
@@ -277,7 +289,9 @@ constructor(
         entry: NotificationEntry,
         loggableDecision: LoggableDecision
     ) {
-        logger.logDecision(type.name, entry, loggableDecision.decision)
+        if (!loggableDecision.isSpammy || logger.spew) {
+            logger.logDecision(type.name, entry, loggableDecision.decision)
+        }
         logEvents(entry, loggableDecision)
     }
 

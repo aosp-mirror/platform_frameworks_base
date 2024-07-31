@@ -65,12 +65,12 @@ import android.view.Surface;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewRootImpl;
-import android.view.WindowManager;
 import android.view.accessibility.AccessibilityManager;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
+import com.android.app.viewcapture.ViewCaptureAwareWindowManager;
 import com.android.internal.logging.InstanceIdSequence;
 import com.android.internal.util.LatencyTracker;
 import com.android.keyguard.KeyguardUpdateMonitor;
@@ -87,6 +87,7 @@ import com.android.systemui.biometrics.ui.viewmodel.DefaultUdfpsTouchOverlayView
 import com.android.systemui.biometrics.ui.viewmodel.DeviceEntryUdfpsTouchOverlayViewModel;
 import com.android.systemui.bouncer.domain.interactor.AlternateBouncerInteractor;
 import com.android.systemui.bouncer.domain.interactor.PrimaryBouncerInteractor;
+import com.android.systemui.camera.CameraGestureHelper;
 import com.android.systemui.classifier.FalsingCollector;
 import com.android.systemui.deviceentry.domain.interactor.DeviceEntryFaceAuthInteractor;
 import com.android.systemui.dump.DumpManager;
@@ -117,6 +118,8 @@ import com.android.systemui.util.time.FakeSystemClock;
 import com.android.systemui.util.time.SystemClock;
 
 import dagger.Lazy;
+
+import javax.inject.Provider;
 
 import kotlinx.coroutines.CoroutineScope;
 
@@ -152,7 +155,7 @@ public class UdfpsControllerTest extends SysuiTestCase {
     @Mock
     private FingerprintManager mFingerprintManager;
     @Mock
-    private WindowManager mWindowManager;
+    private ViewCaptureAwareWindowManager mWindowManager;
     @Mock
     private StatusBarStateController mStatusBarStateController;
     @Mock
@@ -261,6 +264,8 @@ public class UdfpsControllerTest extends SysuiTestCase {
     private Lazy<DeviceEntryUdfpsTouchOverlayViewModel> mDeviceEntryUdfpsTouchOverlayViewModel;
     @Mock
     private Lazy<DefaultUdfpsTouchOverlayViewModel> mDefaultUdfpsTouchOverlayViewModel;
+    @Mock
+    private Provider<CameraGestureHelper> mCameraGestureHelper;
 
     @Before
     public void setUp() {
@@ -269,7 +274,8 @@ public class UdfpsControllerTest extends SysuiTestCase {
                 mPowerRepository,
                 mock(FalsingCollector.class),
                 mock(ScreenOffAnimationController.class),
-                mStatusBarStateController
+                mStatusBarStateController,
+                mCameraGestureHelper
         );
         mPowerRepository.updateWakefulness(
                 WakefulnessState.AWAKE,
@@ -1279,6 +1285,41 @@ public class UdfpsControllerTest extends SysuiTestCase {
 
         // THEN the touch is still processed
         verify(mFingerprintManager, times(2)).onPointerDown(anyLong(), anyInt(), anyInt(),
+                anyFloat(), anyFloat(), anyFloat(), anyFloat(), anyFloat(), anyLong(), anyLong(),
+                anyBoolean());
+    }
+
+    @Test
+    public void onAodDownAndDownTouchReceived() throws RemoteException {
+        final NormalizedTouchData touchData = new NormalizedTouchData(0, 0f, 0f, 0f, 0f, 0f, 0L,
+                0L);
+        final TouchProcessorResult processorResultDown =
+                new TouchProcessorResult.ProcessedTouch(InteractionEvent.DOWN,
+                        -1 /* pointerId */, touchData);
+
+        mOverlayController.showUdfpsOverlay(TEST_REQUEST_ID, mOpticalProps.sensorId,
+                BiometricRequestConstants.REASON_AUTH_KEYGUARD, mUdfpsOverlayControllerCallback);
+        mFgExecutor.runAllReady();
+
+        verify(mUdfpsView).setOnTouchListener(mTouchListenerCaptor.capture());
+
+        // WHEN fingerprint is requested because of AOD interrupt
+        // GIVEN there's been an AoD interrupt
+        when(mKeyguardUpdateMonitor.isFingerprintDetectionRunning()).thenReturn(true);
+        mScreenObserver.onScreenTurnedOn();
+        mUdfpsController.onAodInterrupt(0, 0, 0, 0);
+        mFgExecutor.runAllReady();
+
+        // and an ACTION_DOWN is received and touch is within sensor
+        when(mSinglePointerTouchProcessor.processTouch(any(), anyInt(), any())).thenReturn(
+                processorResultDown);
+        MotionEvent firstDownEvent = MotionEvent.obtain(0, 0, ACTION_DOWN, 0, 0, 0);
+        mTouchListenerCaptor.getValue().onTouch(mUdfpsView, firstDownEvent);
+        mBiometricExecutor.runAllReady();
+        firstDownEvent.recycle();
+
+        // THEN the touch is only processed once
+        verify(mFingerprintManager).onPointerDown(anyLong(), anyInt(), anyInt(),
                 anyFloat(), anyFloat(), anyFloat(), anyFloat(), anyFloat(), anyLong(), anyLong(),
                 anyBoolean());
     }

@@ -35,7 +35,6 @@ import androidx.annotation.WorkerThread
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.flags.FeatureFlagsClassic
-import com.android.systemui.flags.Flags
 import com.android.systemui.flags.Flags.WM_ENABLE_PARTIAL_SCREEN_SHARING_ENTERPRISE_POLICIES
 import com.android.systemui.mediaprojection.MediaProjectionMetricsLogger
 import com.android.systemui.mediaprojection.SessionCreationSource
@@ -87,7 +86,10 @@ constructor(
             setNegativeButton(R.string.cancel) { _, _ -> }
             setPositiveButton(R.string.qs_record_issue_start) { _, _ -> onStarted.run() }
         }
-        bgExecutor.execute { traceurMessageSender.bindToTraceur(dialog.context) }
+        bgExecutor.execute {
+            traceurMessageSender.onBoundToTraceur.add { traceurMessageSender.getTags(state) }
+            traceurMessageSender.bindToTraceur(dialog.context)
+        }
     }
 
     override fun createDialog(): SystemUIDialog = factory.create(this)
@@ -151,10 +153,7 @@ constructor(
             SessionCreationSource.SYSTEM_UI_SCREEN_RECORDER
         )
 
-        if (
-            flags.isEnabled(Flags.WM_ENABLE_PARTIAL_SCREEN_SHARING) &&
-                !state.hasUserApprovedScreenRecording
-        ) {
+        if (!state.hasUserApprovedScreenRecording) {
             mainExecutor.execute {
                 ScreenCapturePermissionDialogDelegate(factory, state).createDialog().apply {
                     setOnCancelListener { screenRecordSwitch.isChecked = false }
@@ -167,18 +166,8 @@ constructor(
     @MainThread
     private fun onIssueTypeClicked(context: Context, onIssueTypeSelected: Runnable) {
         val popupMenu = PopupMenu(context, issueTypeButton)
-
-        ALL_ISSUE_TYPES.keys.forEach {
-            popupMenu.menu.add(it).apply {
-                setIcon(R.drawable.arrow_pointing_down)
-                if (it != state.issueTypeRes) {
-                    iconTintList = ColorStateList.valueOf(Color.TRANSPARENT)
-                }
-                intent = Intent().putExtra(KEY_ISSUE_TYPE_RES, it)
-            }
-        }
-        popupMenu.apply {
-            setOnMenuItemClickListener {
+        val onMenuItemClickListener =
+            PopupMenu.OnMenuItemClickListener {
                 issueTypeButton.text = it.title
                 state.issueTypeRes =
                     it.intent?.getIntExtra(KEY_ISSUE_TYPE_RES, ISSUE_TYPE_NOT_SET)
@@ -186,6 +175,32 @@ constructor(
                 onIssueTypeSelected.run()
                 true
             }
+        ALL_ISSUE_TYPES.keys.forEach {
+            popupMenu.menu.add(it).apply {
+                setIcon(R.drawable.arrow_pointing_down)
+                if (it != state.issueTypeRes) {
+                    iconTintList = ColorStateList.valueOf(Color.TRANSPARENT)
+                }
+                intent = Intent().putExtra(KEY_ISSUE_TYPE_RES, it)
+
+                if (it == R.string.custom) {
+                    setOnMenuItemClickListener {
+                        CustomTraceSettingsDialogDelegate(
+                                factory,
+                                state.customTraceState,
+                                state.tagTitles
+                            ) {
+                                onMenuItemClickListener.onMenuItemClick(it)
+                            }
+                            .createDialog()
+                            .show()
+                        true
+                    }
+                }
+            }
+        }
+        popupMenu.apply {
+            setOnMenuItemClickListener(onMenuItemClickListener)
             setForceShowIcon(true)
             show()
         }

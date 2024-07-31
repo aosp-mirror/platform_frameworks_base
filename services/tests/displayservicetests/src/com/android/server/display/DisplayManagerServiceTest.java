@@ -31,6 +31,7 @@ import static android.view.ContentRecordingSession.RECORD_CONTENT_TASK;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doAnswer;
 import static com.android.server.display.ExternalDisplayPolicy.ENABLE_ON_CONNECT;
 import static com.android.server.display.VirtualDisplayAdapter.UNIQUE_ID_PREFIX;
+import static com.android.server.display.config.DisplayDeviceConfigTestUtilsKt.createSensorData;
 
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth.assertWithMessage;
@@ -2423,7 +2424,7 @@ public class DisplayManagerServiceTest {
         String testSensorType = "testType";
         Sensor testSensor = TestUtils.createSensor(testSensorType, testSensorName);
 
-        SensorData sensorData = new SensorData(testSensorType, testSensorName,
+        SensorData sensorData = createSensorData(testSensorType, testSensorName,
                 /* minRefreshRate= */ 10f, /* maxRefreshRate= */ 100f);
 
         when(mMockDisplayDeviceConfig.getProximitySensor()).thenReturn(sensorData);
@@ -2584,18 +2585,19 @@ public class DisplayManagerServiceTest {
 
         LogicalDisplay display =
                 logicalDisplayMapper.getDisplayLocked(displayDevice, /* includeDisabled= */ true);
+        displayManager.setDisplayState(display.getDisplayIdLocked(), Display.STATE_ON);
 
         assertThat(displayDevice.getDisplayDeviceInfoLocked().committedState)
                 .isEqualTo(Display.STATE_ON);
 
-        assertThat(displayManager.requestDisplayPower(display.getDisplayIdLocked(), false))
-                .isTrue();
+        assertThat(displayManager.requestDisplayPower(display.getDisplayIdLocked(),
+                Display.STATE_OFF)).isTrue();
 
         assertThat(displayDevice.getDisplayDeviceInfoLocked().committedState)
                 .isEqualTo(Display.STATE_OFF);
 
-        assertThat(displayManager.requestDisplayPower(display.getDisplayIdLocked(), true))
-                .isTrue();
+        assertThat(displayManager.requestDisplayPower(display.getDisplayIdLocked(),
+                Display.STATE_UNKNOWN)).isTrue();
 
         assertThat(displayDevice.getDisplayDeviceInfoLocked().committedState)
                 .isEqualTo(Display.STATE_ON);
@@ -2621,8 +2623,10 @@ public class DisplayManagerServiceTest {
         assertThat(displayDevice.getDisplayDeviceInfoLocked().committedState)
                 .isEqualTo(Display.STATE_ON);
 
-        assertThrows(SecurityException.class, () -> bs.requestDisplayPower(displayId, true));
-        assertThrows(SecurityException.class, () -> bs.requestDisplayPower(displayId, false));
+        assertThrows(SecurityException.class,
+                () -> bs.requestDisplayPower(displayId, Display.STATE_UNKNOWN));
+        assertThrows(SecurityException.class,
+                () -> bs.requestDisplayPower(displayId, Display.STATE_OFF));
     }
 
     @Test

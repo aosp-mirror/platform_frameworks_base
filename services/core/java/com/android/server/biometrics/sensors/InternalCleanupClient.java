@@ -25,6 +25,7 @@ import android.util.Slog;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.biometrics.BiometricsProto;
+import com.android.server.biometrics.Flags;
 import com.android.server.biometrics.log.BiometricContext;
 import com.android.server.biometrics.log.BiometricLogger;
 
@@ -62,7 +63,7 @@ public abstract class InternalCleanupClient<S extends BiometricAuthenticator.Ide
     }
 
     private final ArrayList<UserTemplate> mUnknownHALTemplates = new ArrayList<>();
-    private final BiometricUtils<S> mBiometricUtils;
+    protected final BiometricUtils<S> mBiometricUtils;
     private final Map<Integer, Long> mAuthenticatorIds;
     private final boolean mHasEnrollmentsBeforeStarting;
     private BaseClientMonitor mCurrentTask;
@@ -104,6 +105,11 @@ public abstract class InternalCleanupClient<S extends BiometricAuthenticator.Ide
                 } else {
                     startCleanupUnknownHalTemplates();
                 }
+            }
+
+            if (mBiometricUtils.hasValidBiometricUserState(getContext(), getTargetUserId())
+                    && Flags.notifyFingerprintLoe()) {
+                handleInvalidBiometricState();
             }
         }
     };
@@ -248,4 +254,8 @@ public abstract class InternalCleanupClient<S extends BiometricAuthenticator.Ide
     public ArrayList<UserTemplate> getUnknownHALTemplates() {
         return mUnknownHALTemplates;
     }
+
+    protected void handleInvalidBiometricState() {}
+
+    protected abstract int getModality();
 }

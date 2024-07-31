@@ -355,7 +355,7 @@ public class WifiPowerStatsCollectorTest {
         assertThat(stats.getNumBytesRx()).isEqualTo(13321);
         assertThat(stats.getNumPacketsTx()).isEqualTo(263);
         assertThat(stats.getNumBytesTx()).isEqualTo(7234);
-        assertThat(stats.getScanTimeMillis()).isEqualTo(2200);
+        assertThat(stats.getScanTimeMillis()).isEqualTo(200);
         assertThat(stats.getRxTimeMillis()).isEqualTo(6000);
         assertThat(stats.getTxTimeMillis()).isEqualTo(1000);
         assertThat(stats.getIdleTimeMillis()).isEqualTo(300);

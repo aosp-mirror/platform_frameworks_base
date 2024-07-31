@@ -106,3 +106,13 @@ fun <A, B, C, R> combineFlows(
 ): Flow<R> {
     return combine(flow1, flow2, flow3, trifunction)
 }
+
+fun <T1, T2, T3, T4, R> combineFlows(
+    flow: Flow<T1>,
+    flow2: Flow<T2>,
+    flow3: Flow<T3>,
+    flow4: Flow<T4>,
+    transform: (T1, T2, T3, T4) -> R
+): Flow<R> {
+    return combine(flow, flow2, flow3, flow4, transform)
+}

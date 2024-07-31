@@ -22,6 +22,40 @@ package {
     default_team: "trendy_team_multitasking_windowing",
 }
 
+android_app {
+    name: "WMShellRobolectricScreenshotTestApp",
+    platform_apis: true,
+    certificate: "platform",
+    static_libs: [
+        "WindowManager-Shell",
+        "platform-screenshot-diff-core",
+    ],
+    asset_dirs: ["goldens/robolectric"],
+    manifest: "AndroidManifestRobolectric.xml",
+    use_resource_processor: true,
+}
+
+android_robolectric_test {
+    name: "WMShellRobolectricScreenshotTests",
+    instrumentation_for: "WMShellRobolectricScreenshotTestApp",
+    upstream: true,
+    java_resource_dirs: [
+        "robolectric/config",
+    ],
+    srcs: [
+        "src/**/*.kt",
+    ],
+    static_libs: [
+        "junit",
+        "androidx.test.runner",
+        "androidx.test.rules",
+        "androidx.test.ext.junit",
+        "truth",
+        "platform-parametric-runner-lib",
+    ],
+    auto_gen_config: true,
+}
+
 android_test {
     name: "WMShellMultivalentScreenshotTestsOnDevice",
     srcs: [

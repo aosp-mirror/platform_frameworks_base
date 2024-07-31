@@ -66,7 +66,7 @@ import android.view.WindowManager;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.inputmethod.SoftInputShowHideReason;
-import com.android.internal.protolog.common.ProtoLog;
+import com.android.internal.protolog.ProtoLog;
 import com.android.server.LocalServices;
 import com.android.server.inputmethod.InputMethodManagerInternal;
 
@@ -439,8 +439,7 @@ final class InputMonitor {
                         final InputMethodManagerInternal inputMethodManagerInternal =
                                 LocalServices.getService(InputMethodManagerInternal.class);
                         if (inputMethodManagerInternal != null) {
-                            // TODO(b/308479256): Check if hiding "all" IMEs is OK or not.
-                            inputMethodManagerInternal.hideAllInputMethods(
+                            inputMethodManagerInternal.hideInputMethod(
                                     SoftInputShowHideReason.HIDE_RECENTS_ANIMATION,
                                     mDisplayContent.getDisplayId());
                         }
@@ -623,7 +622,7 @@ final class InputMonitor {
                     // occlusion detection depending on the type or if it's a trusted overlay.
                     populateOverlayInputInfo(inputWindowHandle, w);
                     setInputWindowInfoIfNeeded(mInputTransaction,
-                            w.mWinAnimator.mSurfaceController.mSurfaceControl, inputWindowHandle);
+                            w.mWinAnimator.mSurfaceControl, inputWindowHandle);
                     return;
                 }
                 // Skip this window because it cannot possibly receive input.
@@ -687,7 +686,7 @@ final class InputMonitor {
             if (w.mWinAnimator.hasSurface()) {
                 populateInputWindowHandle(inputWindowHandle, w);
                 setInputWindowInfoIfNeeded(mInputTransaction,
-                        w.mWinAnimator.mSurfaceController.mSurfaceControl, inputWindowHandle);
+                        w.mWinAnimator.mSurfaceControl, inputWindowHandle);
             }
         }
     }

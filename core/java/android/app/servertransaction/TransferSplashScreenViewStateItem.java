@@ -29,12 +29,24 @@ import java.util.Objects;
 
 /**
  * Transfer a splash screen view to an Activity.
+ *
  * @hide
  */
 public class TransferSplashScreenViewStateItem extends ActivityTransactionItem {
 
-    private SplashScreenViewParcelable mSplashScreenViewParcelable;
-    private SurfaceControl mStartingWindowLeash;
+    @Nullable
+    private final SplashScreenViewParcelable mSplashScreenViewParcelable;
+
+    @Nullable
+    private final SurfaceControl mStartingWindowLeash;
+
+    public TransferSplashScreenViewStateItem(@NonNull IBinder activityToken,
+            @Nullable SplashScreenViewParcelable parcelable,
+            @Nullable SurfaceControl startingWindowLeash) {
+        super(activityToken);
+        mSplashScreenViewParcelable = parcelable;
+        mStartingWindowLeash = startingWindowLeash;
+    }
 
     @Override
     public void execute(@NonNull ClientTransactionHandler client,
@@ -43,14 +55,9 @@ public class TransferSplashScreenViewStateItem extends ActivityTransactionItem {
         client.handleAttachSplashScreenView(r, mSplashScreenViewParcelable, mStartingWindowLeash);
     }
 
-    @Override
-    public void recycle() {
-        super.recycle();
-        mSplashScreenViewParcelable = null;
-        mStartingWindowLeash = null;
-        ObjectPool.recycle(this);
-    }
+    // Parcelable implementation
 
+    /** Writes to Parcel. */
     @Override
     public void writeToParcel(@NonNull Parcel dest, int flags) {
         super.writeToParcel(dest, flags);
@@ -58,29 +65,11 @@ public class TransferSplashScreenViewStateItem extends ActivityTransactionItem {
         dest.writeTypedObject(mStartingWindowLeash, flags);
     }
 
-    private TransferSplashScreenViewStateItem() {}
-
+    /** Reads from Parcel. */
     private TransferSplashScreenViewStateItem(@NonNull Parcel in) {
         super(in);
         mSplashScreenViewParcelable = in.readTypedObject(SplashScreenViewParcelable.CREATOR);
         mStartingWindowLeash = in.readTypedObject(SurfaceControl.CREATOR);
-    }
-
-    /** Obtain an instance initialized with provided params. */
-    @NonNull
-    public static TransferSplashScreenViewStateItem obtain(
-            @NonNull IBinder activityToken, @Nullable SplashScreenViewParcelable parcelable,
-            @Nullable SurfaceControl startingWindowLeash) {
-        TransferSplashScreenViewStateItem instance =
-                ObjectPool.obtain(TransferSplashScreenViewStateItem.class);
-        if (instance == null) {
-            instance = new TransferSplashScreenViewStateItem();
-        }
-        instance.setActivityToken(activityToken);
-        instance.mSplashScreenViewParcelable = parcelable;
-        instance.mStartingWindowLeash = startingWindowLeash;
-
-        return instance;
     }
 
     public static final @NonNull Creator<TransferSplashScreenViewStateItem> CREATOR =

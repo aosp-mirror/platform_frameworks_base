@@ -86,8 +86,6 @@ final class ZeroJankProxy implements IInputMethodManagerImpl.Callback {
     interface Callback extends IInputMethodManagerImpl.Callback {
         @GuardedBy("ImfLock.class")
         ClientState getClientStateLocked(IInputMethodClient client);
-        @GuardedBy("ImfLock.class")
-        boolean isInputShownLocked();
     }
 
     private final Callback mInner;
@@ -178,19 +176,8 @@ final class ZeroJankProxy implements IInputMethodManagerImpl.Callback {
             @Nullable ImeTracker.Token statsToken, @InputMethodManager.ShowFlags int flags,
             @MotionEvent.ToolType int lastClickToolType, ResultReceiver resultReceiver,
             @SoftInputShowHideReason int reason) {
-        offload(
-                () -> {
-                    if (!mInner.showSoftInput(
-                            client,
-                            windowToken,
-                            statsToken,
-                            flags,
-                            lastClickToolType,
-                            resultReceiver,
-                            reason)) {
-                        sendResultReceiverFailure(resultReceiver);
-                    }
-                });
+        offload(() -> mInner.showSoftInput(
+                client, windowToken, statsToken, flags, lastClickToolType, resultReceiver, reason));
         return true;
     }
 
@@ -198,28 +185,9 @@ final class ZeroJankProxy implements IInputMethodManagerImpl.Callback {
     public boolean hideSoftInput(IInputMethodClient client, IBinder windowToken,
             @Nullable ImeTracker.Token statsToken, @InputMethodManager.HideFlags int flags,
             ResultReceiver resultReceiver, @SoftInputShowHideReason int reason) {
-        offload(
-                () -> {
-                    if (!mInner.hideSoftInput(
-                            client, windowToken, statsToken, flags, resultReceiver, reason)) {
-                        sendResultReceiverFailure(resultReceiver);
-                    }
-                });
+        offload(() -> mInner.hideSoftInput(
+                client, windowToken, statsToken, flags, resultReceiver, reason));
         return true;
-    }
-
-    private void sendResultReceiverFailure(@Nullable ResultReceiver resultReceiver) {
-        if (resultReceiver == null) {
-            return;
-        }
-        final boolean isInputShown;
-        synchronized (ImfLock.class) {
-            isInputShown = mInner.isInputShownLocked();
-        }
-        resultReceiver.send(isInputShown
-                        ? InputMethodManager.RESULT_UNCHANGED_SHOWN
-                        : InputMethodManager.RESULT_UNCHANGED_HIDDEN,
-                null);
     }
 
     @Override
@@ -284,7 +252,9 @@ final class ZeroJankProxy implements IInputMethodManagerImpl.Callback {
         offload(() -> mInner.showInputMethodPickerFromClient(client, auxiliarySubtypeMode));
     }
 
-    @IInputMethodManagerImpl.PermissionVerified(Manifest.permission.WRITE_SECURE_SETTINGS)
+    @IInputMethodManagerImpl.PermissionVerified(allOf = {
+            Manifest.permission.INTERACT_ACROSS_USERS_FULL,
+            Manifest.permission.WRITE_SECURE_SETTINGS})
     @Override
     public void showInputMethodPickerFromSystem(int auxiliarySubtypeMode, int displayId) {
         mInner.showInputMethodPickerFromSystem(auxiliarySubtypeMode, displayId);
@@ -294,6 +264,14 @@ final class ZeroJankProxy implements IInputMethodManagerImpl.Callback {
     @Override
     public boolean isInputMethodPickerShownForTest() {
         return mInner.isInputMethodPickerShownForTest();
+    }
+
+    @IInputMethodManagerImpl.PermissionVerified(allOf = {
+            Manifest.permission.INTERACT_ACROSS_USERS_FULL,
+            Manifest.permission.WRITE_SECURE_SETTINGS})
+    @Override
+    public void onImeSwitchButtonClickFromSystem(int displayId) {
+        mInner.onImeSwitchButtonClickFromSystem(displayId);
     }
 
     @Override
@@ -324,10 +302,12 @@ final class ZeroJankProxy implements IInputMethodManagerImpl.Callback {
         mInner.reportPerceptibleAsync(windowToken, perceptible);
     }
 
-    @IInputMethodManagerImpl.PermissionVerified(Manifest.permission.INTERNAL_SYSTEM_WINDOW)
+    @IInputMethodManagerImpl.PermissionVerified(allOf = {
+            Manifest.permission.INTERACT_ACROSS_USERS_FULL,
+            Manifest.permission.INTERNAL_SYSTEM_WINDOW})
     @Override
-    public void removeImeSurface() {
-        mInner.removeImeSurface();
+    public void removeImeSurface(int displayId) {
+        mInner.removeImeSurface(displayId);
     }
 
     @Override

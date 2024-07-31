@@ -33,6 +33,20 @@ flag {
 
 flag {
      namespace: "virtual_devices"
+     name: "media_projection_keyguard_restrictions"
+     description: "Auto-stop MP when the device locks"
+     bug: "348335290"
+}
+
+flag {
+    namespace: "virtual_devices"
+    name: "virtual_display_insets"
+    description: "APIs for specifying virtual display insets (via cutout)"
+    bug: "350007135"
+}
+
+flag {
+     namespace: "virtual_devices"
      name: "metrics_collection"
      description: "Enable collection of VDM-related metrics"
      bug: "324842215"
@@ -70,6 +84,13 @@ flag {
 }
 
 flag {
+     namespace: "virtual_devices"
+     name: "enforce_remote_device_opt_out_on_all_virtual_displays"
+     description: "Respect canDisplayOnRemoteDevices on all virtual displays"
+     bug: "338973239"
+}
+
+flag {
     namespace: "virtual_devices"
     name: "virtual_display_multi_window_mode_support"
     description: "Add support for WINDOWING_MODE_MULTI_WINDOW to virtual displays by default"
@@ -88,4 +109,26 @@ flag {
     metadata {
         purpose: PURPOSE_BUGFIX
     }
+}
+
+flag {
+    namespace: "virtual_devices"
+    name: "virtual_display_rotation_api"
+    description: "API for on-demand rotation of virtual displays"
+    bug: "291748430"
+}
+
+flag {
+    namespace: "virtual_devices"
+    name: "high_resolution_scroll"
+    description: "Enable high resolution scroll"
+    bug: "335160780"
+}
+
+flag {
+  name: "camera_multiple_input_streams"
+  is_exported: true
+  namespace: "virtual_devices"
+  description: "Expose multiple surface for the virtual camera owner for different stream resolution"
+  bug: "341083465"
 }

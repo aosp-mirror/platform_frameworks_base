@@ -37,9 +37,11 @@ import static org.mockito.ArgumentMatchers.notNull;
 import static org.mockito.Mockito.anyInt;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import static java.util.Objects.requireNonNull;
 
+import android.annotation.Nullable;
 import android.os.Binder;
 import android.os.IBinder;
 import android.os.RemoteException;
@@ -49,7 +51,9 @@ import android.view.inputmethod.ImeTracker;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 
 import com.android.dx.mockito.inline.extended.ExtendedMockito;
+import com.android.internal.annotations.GuardedBy;
 import com.android.internal.inputmethod.InputBindResult;
+import com.android.internal.inputmethod.SoftInputShowHideReason;
 import com.android.internal.inputmethod.StartInputFlags;
 import com.android.internal.inputmethod.StartInputReason;
 
@@ -68,16 +72,12 @@ import org.junit.runner.RunWith;
 public class DefaultImeVisibilityApplierTest extends InputMethodManagerServiceTestBase {
     private DefaultImeVisibilityApplier mVisibilityApplier;
 
-    private int mUserId = 0;
-
     @Before
     public void setUp() throws RemoteException {
         super.setUp();
-        mVisibilityApplier =
-                (DefaultImeVisibilityApplier) mInputMethodManagerService.getVisibilityApplier();
         synchronized (ImfLock.class) {
-            mUserId = mInputMethodManagerService.getCurrentImeUserIdLocked();
-            mInputMethodManagerService.setAttachedClientForTesting(requireNonNull(
+            mVisibilityApplier = mInputMethodManagerService.getVisibilityApplierLocked();
+            setAttachedClientLocked(requireNonNull(
                     mInputMethodManagerService.getClientStateLocked(mMockInputMethodClient)));
         }
     }
@@ -106,7 +106,7 @@ public class DefaultImeVisibilityApplierTest extends InputMethodManagerServiceTe
         assertThrows(IllegalArgumentException.class, () -> {
             synchronized (ImfLock.class) {
                 mVisibilityApplier.applyImeVisibility(mWindowToken, ImeTracker.Token.empty(),
-                        STATE_INVALID, mUserId);
+                        STATE_INVALID, eq(SoftInputShowHideReason.NOT_SET), mUserId);
             }
         });
     }
@@ -116,7 +116,7 @@ public class DefaultImeVisibilityApplierTest extends InputMethodManagerServiceTe
         final var statsToken = ImeTracker.Token.empty();
         synchronized (ImfLock.class) {
             mVisibilityApplier.applyImeVisibility(mWindowToken, statsToken, STATE_SHOW_IME,
-                    mUserId);
+                    eq(SoftInputShowHideReason.NOT_SET), mUserId);
         }
         verify(mMockWindowManagerInternal).showImePostLayout(eq(mWindowToken), eq(statsToken));
     }
@@ -126,7 +126,7 @@ public class DefaultImeVisibilityApplierTest extends InputMethodManagerServiceTe
         final var statsToken = ImeTracker.Token.empty();
         synchronized (ImfLock.class) {
             mVisibilityApplier.applyImeVisibility(mWindowToken, statsToken, STATE_HIDE_IME,
-                    mUserId);
+                    eq(SoftInputShowHideReason.NOT_SET), mUserId);
         }
         verify(mMockWindowManagerInternal).hideIme(eq(mWindowToken), anyInt() /* displayId */,
                 eq(statsToken));
@@ -134,20 +134,24 @@ public class DefaultImeVisibilityApplierTest extends InputMethodManagerServiceTe
 
     @Test
     public void testApplyImeVisibility_hideImeExplicit() throws Exception {
-        mInputMethodManagerService.mImeWindowVis = IME_ACTIVE;
         synchronized (ImfLock.class) {
+            final var bindingController =
+                    mInputMethodManagerService.getInputMethodBindingController(mUserId);
+            when(bindingController.getImeWindowVis()).thenReturn(IME_ACTIVE);
             mVisibilityApplier.applyImeVisibility(mWindowToken, ImeTracker.Token.empty(),
-                    STATE_HIDE_IME_EXPLICIT, mUserId);
+                    STATE_HIDE_IME_EXPLICIT, eq(SoftInputShowHideReason.NOT_SET), mUserId);
         }
         verifyHideSoftInput(true, true);
     }
 
     @Test
     public void testApplyImeVisibility_hideNotAlways() throws Exception {
-        mInputMethodManagerService.mImeWindowVis = IME_ACTIVE;
         synchronized (ImfLock.class) {
+            final var bindingController =
+                    mInputMethodManagerService.getInputMethodBindingController(mUserId);
+            when(bindingController.getImeWindowVis()).thenReturn(IME_ACTIVE);
             mVisibilityApplier.applyImeVisibility(mWindowToken, ImeTracker.Token.empty(),
-                    STATE_HIDE_IME_NOT_ALWAYS, mUserId);
+                    STATE_HIDE_IME_NOT_ALWAYS, eq(SoftInputShowHideReason.NOT_SET), mUserId);
         }
         verifyHideSoftInput(true, true);
     }
@@ -156,7 +160,7 @@ public class DefaultImeVisibilityApplierTest extends InputMethodManagerServiceTe
     public void testApplyImeVisibility_showImeImplicit() throws Exception {
         synchronized (ImfLock.class) {
             mVisibilityApplier.applyImeVisibility(mWindowToken, ImeTracker.Token.empty(),
-                    STATE_SHOW_IME_IMPLICIT, mUserId);
+                    STATE_SHOW_IME_IMPLICIT, eq(SoftInputShowHideReason.NOT_SET), mUserId);
         }
         verifyShowSoftInput(true, true, 0 /* showFlags */);
     }
@@ -166,7 +170,9 @@ public class DefaultImeVisibilityApplierTest extends InputMethodManagerServiceTe
         // Init a IME target client on the secondary display to show IME.
         mInputMethodManagerService.addClient(mMockInputMethodClient, mMockRemoteInputConnection,
                 10 /* selfReportedDisplayId */);
-        mInputMethodManagerService.setAttachedClientForTesting(null);
+        synchronized (ImfLock.class) {
+            setAttachedClientLocked(null);
+        }
         startInputOrWindowGainedFocus(mWindowToken, SOFT_INPUT_STATE_ALWAYS_VISIBLE);
 
         final var statsToken = ImeTracker.Token.empty();
@@ -177,7 +183,7 @@ public class DefaultImeVisibilityApplierTest extends InputMethodManagerServiceTe
             // Verify hideIme will apply the expected displayId when the default IME
             // visibility applier app STATE_HIDE_IME.
             mVisibilityApplier.applyImeVisibility(mWindowToken, statsToken, STATE_HIDE_IME,
-                    mUserId);
+                    eq(SoftInputShowHideReason.NOT_SET), mUserId);
             verify(mInputMethodManagerService.mWindowManagerInternal).hideIme(
                     eq(mWindowToken), eq(displayIdToShowIme), eq(statsToken));
         }
@@ -204,7 +210,9 @@ public class DefaultImeVisibilityApplierTest extends InputMethodManagerServiceTe
 
     @Test
     public void testApplyImeVisibility_hideImeWhenUnbinding() {
-        mInputMethodManagerService.setAttachedClientForTesting(null);
+        synchronized (ImfLock.class) {
+            setAttachedClientLocked(null);
+        }
         startInputOrWindowGainedFocus(mWindowToken, SOFT_INPUT_STATE_ALWAYS_VISIBLE);
         ExtendedMockito.spyOn(mVisibilityApplier);
 
@@ -224,10 +232,16 @@ public class DefaultImeVisibilityApplierTest extends InputMethodManagerServiceTe
             // the IME hidden state.
             // The unbind will cancel the previous stats token, and create a new one internally.
             verify(mVisibilityApplier).applyImeVisibility(
-                    eq(mWindowToken), any(), eq(STATE_HIDE_IME), eq(mUserId) /* userId */);
+                    eq(mWindowToken), any(), eq(STATE_HIDE_IME),
+                    eq(SoftInputShowHideReason.NOT_SET), eq(mUserId) /* userId */);
             verify(mInputMethodManagerService.mWindowManagerInternal).hideIme(
                     eq(mWindowToken), eq(displayIdToShowIme), and(not(eq(statsToken)), notNull()));
         }
+    }
+
+    @GuardedBy("ImfLock.class")
+    private void setAttachedClientLocked(@Nullable ClientState cs) {
+        mInputMethodManagerService.getUserData(mUserId).mCurClient = cs;
     }
 
     private InputBindResult startInputOrWindowGainedFocus(IBinder windowToken, int softInputMode) {
@@ -242,7 +256,7 @@ public class DefaultImeVisibilityApplierTest extends InputMethodManagerServiceTe
                 mMockRemoteInputConnection /* inputConnection */,
                 mMockRemoteAccessibilityInputConnection /* remoteAccessibilityInputConnection */,
                 mTargetSdkVersion /* unverifiedTargetSdkVersion */,
-                mCallingUserId /* userId */,
+                mUserId /* userId */,
                 mMockImeOnBackInvokedDispatcher /* imeDispatcher */);
     }
 }

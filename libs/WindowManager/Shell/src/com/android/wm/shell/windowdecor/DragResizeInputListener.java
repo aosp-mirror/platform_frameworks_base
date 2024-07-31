@@ -55,7 +55,7 @@ import android.view.ViewConfiguration;
 import android.view.WindowManagerGlobal;
 import android.window.InputTransferToken;
 
-import com.android.internal.protolog.common.ProtoLog;
+import com.android.internal.protolog.ProtoLog;
 import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.DisplayLayout;
 
@@ -468,8 +468,7 @@ class DragResizeInputListener implements AutoCloseable {
                 case MotionEvent.ACTION_HOVER_ENTER:
                 case MotionEvent.ACTION_HOVER_MOVE: {
                     updateCursorType(e.getDisplayId(), e.getDeviceId(),
-                            e.getPointerId(/*pointerIndex=*/0), e.getXCursorPosition(),
-                            e.getYCursorPosition());
+                            e.getPointerId(/*pointerIndex=*/0), e.getX(), e.getY());
                     result = true;
                     break;
                 }

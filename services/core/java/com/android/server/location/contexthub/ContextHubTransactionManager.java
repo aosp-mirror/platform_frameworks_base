@@ -56,6 +56,9 @@ import java.util.concurrent.atomic.AtomicInteger;
 
     public static final Duration RELIABLE_MESSAGE_TIMEOUT = Duration.ofSeconds(1);
 
+    public static final Duration RELIABLE_MESSAGE_DUPLICATE_DETECTION_TIMEOUT =
+            RELIABLE_MESSAGE_TIMEOUT.multipliedBy(3);
+
     private static final int MAX_PENDING_REQUESTS = 10000;
 
     private static final int RELIABLE_MESSAGE_MAX_NUM_RETRY = 3;
@@ -474,9 +477,8 @@ import java.util.concurrent.atomic.AtomicInteger;
                 return;
             }
 
-            Integer transactionMessageSequenceNumber = transaction.getMessageSequenceNumber();
+            int transactionMessageSequenceNumber = transaction.getMessageSequenceNumber();
             if (transaction.getTransactionType() != ContextHubTransaction.TYPE_RELIABLE_MESSAGE
-                    || transactionMessageSequenceNumber == null
                     || transactionMessageSequenceNumber != messageSequenceNumber) {
                 Log.w(TAG, "Received unexpected message transaction response (expected message "
                         + "sequence number = "
@@ -494,7 +496,8 @@ import java.util.concurrent.atomic.AtomicInteger;
         ContextHubServiceTransaction transaction =
                 mReliableMessageTransactionMap.get(messageSequenceNumber);
         if (transaction == null) {
-            Log.w(TAG, "Could not find reliable message transaction with message sequence number"
+            Log.w(TAG, "Could not find reliable message transaction with "
+                    + "message sequence number = "
                     + messageSequenceNumber);
             return;
         }
@@ -618,12 +621,14 @@ import java.util.concurrent.atomic.AtomicInteger;
 
     /**
      * Processes message transactions, starting and completing them as needed.
+     * <p>
      * This function is called when adding a message transaction or when a timer
      * expires for an existing message transaction's retry or timeout. The
      * internal processing loop will iterate at most twice as if one iteration
      * completes a transaction, the next iteration can only start new transactions.
      * If the first iteration does not complete any transaction, the loop will
      * only iterate once.
+     * <p>
      */
     private synchronized void processMessageTransactions() {
         if (!Flags.reliableMessageRetrySupportService()) {
