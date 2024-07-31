@@ -707,6 +707,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
      * <p>Note: For historical reasons, {@link Intent#ACTION_LOCALE_CHANGED} has been sent to all
      * the users.</p>
      */
+    @WorkerThread
     void onActionLocaleChanged(@NonNull LocaleList prevLocales, @NonNull LocaleList newLocales) {
         if (DEBUG) {
             Slog.d(TAG, "onActionLocaleChanged prev=" + prevLocales + " new=" + newLocales);
@@ -1177,7 +1178,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
 
             mHandler = Handler.createAsync(uiLooper, this);
             mIoHandler = ioHandler;
-            SystemLocaleWrapper.onStart(context, this::onActionLocaleChanged, mHandler);
+            SystemLocaleWrapper.onStart(context, this::onActionLocaleChanged, mIoHandler);
             mImeTrackerService = new ImeTrackerService(mHandler);
             mWindowManagerInternal = LocalServices.getService(WindowManagerInternal.class);
             mActivityManagerInternal = LocalServices.getService(ActivityManagerInternal.class);
