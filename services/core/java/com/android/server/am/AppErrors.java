@@ -1050,7 +1050,7 @@ class AppErrors {
                         mContext.getContentResolver(),
                         Settings.Secure.SHOW_FIRST_CRASH_DIALOG_DEV_OPTION,
                         0,
-                        mService.mUserController.getCurrentUserId()) != 0;
+                        visibleUserId) != 0;
                 final String packageName = proc.info.packageName;
                 final boolean crashSilenced = mAppsNotReportingCrashes != null
                         && mAppsNotReportingCrashes.contains(proc.info.packageName);
