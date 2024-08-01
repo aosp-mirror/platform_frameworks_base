@@ -51,6 +51,7 @@ import android.telephony.ims.MediaQualityStatus;
 import android.telephony.ims.RcsUceAdapter;
 import android.telephony.ims.feature.MmTelFeature;
 import android.telephony.ims.feature.RcsFeature;
+import android.telephony.satellite.SatelliteManager;
 
 import com.android.internal.telephony.ICarrierConfigLoader;
 import com.android.internal.telephony.flags.Flags;
@@ -10022,6 +10023,22 @@ public class CarrierConfigManager {
             "carrier_roaming_ntn_connect_type_int";
 
     /**
+     * Indicates carrier roaming non-terrestrial network emergency call handover type that the
+     * device will use to perform a handover between ESOS or T911.
+     * If this key is set to {@link SatelliteManager#EMERGENCY_CALL_TO_SATELLITE_HANDOVER_TYPE_SOS}
+     * then the handover will be made to ESOS. If this key is set to
+     * {@link SatelliteManager#EMERGENCY_CALL_TO_SATELLITE_HANDOVER_TYPE_T911} then the handover
+     * will be made to T911.
+     *
+     * The default value is {@link SatelliteManager#EMERGENCY_CALL_TO_SATELLITE_HANDOVER_TYPE_T911}.
+     *
+     */
+    @FlaggedApi(Flags.FLAG_CARRIER_ROAMING_NB_IOT_NTN)
+    public static final String
+            KEY_CARRIER_ROAMING_NTN_EMERGENCY_CALL_TO_SATELLITE_HANDOVER_TYPE_INT =
+            "carrier_roaming_ntn_emergency_call_to_satellite_handover_type_int";
+
+    /**
      * The carrier roaming non-terrestrial network hysteresis time in seconds.
      *
      * If the device supports P2P satellite messaging which is defined by
@@ -11209,6 +11226,8 @@ public class CarrierConfigManager {
                 (int) TimeUnit.SECONDS.toMillis(30));
         sDefaults.putBoolean(KEY_SATELLITE_ESOS_SUPPORTED_BOOL, false);
         sDefaults.putInt(KEY_CARRIER_ROAMING_NTN_CONNECT_TYPE_INT, 0);
+        sDefaults.putInt(KEY_CARRIER_ROAMING_NTN_EMERGENCY_CALL_TO_SATELLITE_HANDOVER_TYPE_INT,
+                SatelliteManager.EMERGENCY_CALL_TO_SATELLITE_HANDOVER_TYPE_T911);
         sDefaults.putInt(KEY_CARRIER_SUPPORTED_SATELLITE_NOTIFICATION_HYSTERESIS_SEC_INT, 180);
         sDefaults.putInt(KEY_SATELLITE_SCREEN_OFF_INACTIVITY_TIMEOUT_SEC_INT, 30);
         sDefaults.putString(KEY_DEFAULT_PREFERRED_APN_NAME_STRING, "");
