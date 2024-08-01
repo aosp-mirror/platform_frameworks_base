@@ -269,15 +269,21 @@ public class InputMethodManagerServiceTestBase {
         LocalServices.removeServiceForTest(InputMethodManagerInternal.class);
         lifecycle.onStart();
 
+        final var userData = mInputMethodManagerService.getUserData(mUserId);
+
         // Certain tests rely on TEST_IME_ID that is installed with AndroidTest.xml.
         // TODO(b/352615651): Consider just synthesizing test InputMethodInfo then injecting it.
         AdditionalSubtypeMapRepository.initializeIfNecessary(mUserId);
-        final var settings = InputMethodManagerService.queryInputMethodServicesInternal(mContext,
-                mUserId, AdditionalSubtypeMapRepository.get(mUserId), DirectBootAwareness.AUTO);
+        final var rawMethodMap = InputMethodManagerService.queryRawInputMethodServiceMap(mContext,
+                mUserId);
+        userData.mRawInputMethodMap.set(rawMethodMap);
+        final var settings = InputMethodSettings.create(rawMethodMap.toInputMethodMap(
+                AdditionalSubtypeMap.EMPTY_MAP, DirectBootAwareness.AUTO, true /* userUnlocked */),
+                mUserId);
         InputMethodSettingsRepository.put(mUserId, settings);
 
         // Emulate that the user initialization is done.
-        mInputMethodManagerService.getUserData(mUserId).mBackgroundLoadLatch.countDown();
+        userData.mBackgroundLoadLatch.countDown();
 
         // After this boot phase, services can broadcast Intents.
         lifecycle.onBootPhase(SystemService.PHASE_ACTIVITY_MANAGER_READY);
