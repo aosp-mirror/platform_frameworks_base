@@ -346,6 +346,7 @@ public class PipController implements ConfigurationChangeListener,
             mPipBoundsState.setNamedUnrestrictedKeepClearArea(
                     PipBoundsState.NAMED_KCA_LAUNCHER_SHELF, null);
         }
+        mPipTouchHandler.onShelfVisibilityChanged(visible, height);
     }
 
     @Override
