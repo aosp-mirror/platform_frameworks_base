@@ -16,10 +16,8 @@
 
 package com.android.systemui.touchpad.tutorial.ui.gesture
 
-import kotlin.math.abs
-
-/** Monitors for touchpad back gesture, that is three fingers swiping left or right */
-class BackGestureMonitor(
+/** Monitors for touchpad home gesture, that is three fingers swiping up */
+class HomeGestureMonitor(
     override val gestureDistanceThresholdPx: Int,
     override val gestureStateChangedCallback: (GestureState) -> Unit
 ) :
@@ -34,7 +32,7 @@ class BackGestureMonitor(
                     endX: Float,
                     endY: Float
                 ): Boolean {
-                    val distance = abs(endX - startX)
+                    val distance = startY - endY
                     return distance >= gestureDistanceThresholdPx
                 }
             }
