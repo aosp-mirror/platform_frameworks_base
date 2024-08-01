@@ -45,6 +45,7 @@ import java.math.BigDecimal
 import java.math.RoundingMode
 import java.util.UUID
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.dropWhile
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
@@ -332,10 +333,11 @@ class KeyguardTransitionRepositoryTest : SysuiTestCase() {
         }
 
     @Test
-    fun attemptTomanuallyUpdateTransitionWithInvalidUUIDthrowsException() {
-        underTest.updateTransition(UUID.randomUUID(), 0f, TransitionState.RUNNING)
-        assertThat(wtfHandler.failed).isTrue()
-    }
+    fun attemptTomanuallyUpdateTransitionWithInvalidUUIDthrowsException() =
+        testScope.runTest {
+            underTest.updateTransition(UUID.randomUUID(), 0f, TransitionState.RUNNING)
+            assertThat(wtfHandler.failed).isTrue()
+        }
 
     @Test
     fun attemptToManuallyUpdateTransitionAfterFINISHEDstateThrowsException() =
@@ -412,6 +414,64 @@ class KeyguardTransitionRepositoryTest : SysuiTestCase() {
                 .isEqualTo(
                     TransitionStep(info2.from, info2.to, 0f, TransitionState.STARTED, OWNER_NAME)
                 )
+        }
+
+    @Test
+    fun simulateRaceConditionIsProcessedInOrderUsingUpdateTransition() =
+        testScope.runTest {
+            val ktr = KeyguardTransitionRepositoryImpl(kosmos.testDispatcher)
+            val steps by collectValues(ktr.transitions.dropWhile { step -> step.from == OFF })
+
+            // Begin a manual transition
+            val info1 = TransitionInfo(OWNER_NAME, AOD, LOCKSCREEN, animator = null)
+            launch {
+                ktr.forceDelayForRaceConditionTest = false
+                val uuid = ktr.startTransition(info1)
+
+                // Pause here to allow another transition to start
+                delay(20)
+
+                // Attempt to send an update, which should fail
+                ktr.updateTransition(uuid!!, 0.5f, TransitionState.RUNNING)
+            }
+
+            // Now start another transition, which should acquire the preempt the first
+            val info2 = TransitionInfo(OWNER_NAME, LOCKSCREEN, OCCLUDED, animator = null)
+            launch {
+                delay(10)
+                ktr.forceDelayForRaceConditionTest = true
+                ktr.startTransition(info2)
+            }
+
+            runCurrent()
+
+            // Manual transition has started
+            assertThat(steps[0])
+                .isEqualTo(
+                    TransitionStep(info1.from, info1.to, 0f, TransitionState.STARTED, OWNER_NAME)
+                )
+
+            // The second transition has requested to start, and grabbed the mutex. But it is
+            // delayed
+            advanceTimeBy(15L)
+
+            // Advancing another 10ms should now trigger the first transition to request an update,
+            // which should not happen as the second transition has the mutex
+            advanceTimeBy(10L)
+
+            // Finally, advance past the delay in the second transition so it can run
+            advanceTimeBy(50L)
+
+            assertThat(steps[1])
+                .isEqualTo(
+                    TransitionStep(info1.from, info1.to, 0f, TransitionState.CANCELED, OWNER_NAME)
+                )
+            assertThat(steps[2])
+                .isEqualTo(
+                    TransitionStep(info2.from, info2.to, 0f, TransitionState.STARTED, OWNER_NAME)
+                )
+
+            assertThat(steps.size).isEqualTo(3)
         }
 
     private fun listWithStep(
