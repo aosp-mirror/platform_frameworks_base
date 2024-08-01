@@ -356,9 +356,14 @@ public class PipTouchHandler implements PipTransitionState.PipTransitionStateCha
         mPipTransitionState.setOnIdlePipTransitionStateRunnable(() -> {
             int delta = mPipBoundsState.getMovementBounds().bottom
                     - mPipBoundsState.getBounds().top;
-
             boolean hasUserInteracted = (mPipBoundsState.hasUserMovedPip()
                     || mPipBoundsState.hasUserResizedPip());
+
+            if (!imeVisible && !hasUserInteracted) {
+                delta = mPipBoundsAlgorithm.getEntryDestinationBounds().top
+                        - mPipBoundsState.getBounds().top;
+            }
+
             if ((imeVisible && delta < 0) || (!imeVisible && !hasUserInteracted)) {
                 // The policy is to ignore an IME disappearing if user has interacted with PiP.
                 // Otherwise, only offset due to an appearing IME if PiP occludes it.

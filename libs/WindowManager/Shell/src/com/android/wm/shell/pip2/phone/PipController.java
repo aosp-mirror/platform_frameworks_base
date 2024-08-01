@@ -332,6 +332,22 @@ public class PipController implements ConfigurationChangeListener,
         mPipRecentsAnimationListener.onPipAnimationStarted();
     }
 
+    private void setLauncherKeepClearAreaHeight(boolean visible, int height) {
+        ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
+                "setLauncherKeepClearAreaHeight: visible=%b, height=%d", visible, height);
+        if (visible) {
+            Rect rect = new Rect(
+                    0, mPipDisplayLayoutState.getDisplayBounds().bottom - height,
+                    mPipDisplayLayoutState.getDisplayBounds().right,
+                    mPipDisplayLayoutState.getDisplayBounds().bottom);
+            mPipBoundsState.setNamedUnrestrictedKeepClearArea(
+                    PipBoundsState.NAMED_KCA_LAUNCHER_SHELF, rect);
+        } else {
+            mPipBoundsState.setNamedUnrestrictedKeepClearArea(
+                    PipBoundsState.NAMED_KCA_LAUNCHER_SHELF, null);
+        }
+    }
+
     @Override
     public void onPipTransitionStateChanged(@PipTransitionState.TransitionState int oldState,
             @PipTransitionState.TransitionState int newState, @Nullable Bundle extra) {
@@ -507,7 +523,10 @@ public class PipController implements ConfigurationChangeListener,
         public void setShelfHeight(boolean visible, int height) {}
 
         @Override
-        public void setLauncherKeepClearAreaHeight(boolean visible, int height) {}
+        public void setLauncherKeepClearAreaHeight(boolean visible, int height) {
+            executeRemoteCallWithTaskPermission(mController, "setLauncherKeepClearAreaHeight",
+                    (controller) -> controller.setLauncherKeepClearAreaHeight(visible, height));
+        }
 
         @Override
         public void setLauncherAppIconSize(int iconSizePx) {}
