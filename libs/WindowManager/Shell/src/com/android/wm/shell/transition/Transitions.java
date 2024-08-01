@@ -40,6 +40,7 @@ import static android.window.TransitionInfo.FLAG_STARTING_WINDOW_TRANSFER_RECIPI
 
 import static com.android.window.flags.Flags.ensureWallpaperInTransitions;
 import static com.android.systemui.shared.Flags.returnAnimationFrameworkLibrary;
+import static com.android.window.flags.Flags.migratePredictiveBackTransition;
 import static com.android.wm.shell.shared.TransitionUtil.isClosingType;
 import static com.android.wm.shell.shared.TransitionUtil.isOpeningType;
 import static com.android.wm.shell.sysui.ShellSharedConstants.KEY_EXTRA_SHELL_SHELL_TRANSITIONS;
@@ -821,7 +822,8 @@ public class Transitions implements RemoteCallable<Transitions>,
             }
             // The change has already animated by back gesture, don't need to play transition
             // animation on it.
-            if (change.hasFlags(FLAG_BACK_GESTURE_ANIMATED)) {
+            if (!migratePredictiveBackTransition()
+                    && change.hasFlags(FLAG_BACK_GESTURE_ANIMATED)) {
                 info.getChanges().remove(i);
             }
         }

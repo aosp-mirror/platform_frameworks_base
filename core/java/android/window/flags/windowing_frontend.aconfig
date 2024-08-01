@@ -209,3 +209,13 @@ flag {
     purpose: PURPOSE_BUGFIX
   }
 }
+flag {
+  name: "migrate_predictive_back_transition"
+  namespace: "windowing_frontend"
+  description: "Create transition when visibility change from predictive back"
+  bug: "347168362"
+  is_fixed_read_only: true
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}
