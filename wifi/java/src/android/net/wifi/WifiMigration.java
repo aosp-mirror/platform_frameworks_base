@@ -574,7 +574,7 @@ public final class WifiMigration {
      *
      * @hide
      */
-    @FlaggedApi(Flags.FLAG_LEGACY_KEYSTORE_TO_WIFI_BLOBSTORE_MIGRATION)
+    @FlaggedApi(Flags.FLAG_LEGACY_KEYSTORE_TO_WIFI_BLOBSTORE_MIGRATION_READ_ONLY)
     @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
     public static void migrateLegacyKeystoreToWifiBlobstore() {
         final long identity = Binder.clearCallingIdentity();
