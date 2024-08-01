@@ -1298,3 +1298,10 @@ flag {
         purpose: PURPOSE_BUGFIX
    }
 }
+
+flag {
+   name: "compose_haptic_sliders"
+   namespace: "systemui"
+   description: "Adding haptic component infrastructure to sliders in Compose."
+   bug: "341968766"
+}
