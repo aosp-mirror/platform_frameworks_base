@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 The Android Open Source Project
+ * Copyright (C) 2024 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,27 +13,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.android.internal.widget.remotecompose.core;
+package com.android.internal.widget.remotecompose.core.operations.layout.animation;
 
-/**
- * Base interface for RemoteCompose operations
- */
-public interface Operation {
+public class Particle {
+    public final float x;
+    public final float y;
+    public float radius;
+    public float r;
+    public float g;
+    public float b;
 
-    /**
-     * add the operation to the buffer
-     */
-    void write(WireBuffer buffer);
-
-    /**
-     * paint an operation
-     *
-     * @param context the paint context used to paint the operation
-     */
-    void apply(RemoteContext context);
-
-    /**
-     * Debug utility to display an operation + indentation
-     */
-    String deepToString(String indent);
+    public Particle(float x, float y, float radius, float r, float g, float b) {
+        this.x = x;
+        this.y = y;
+        this.radius = radius;
+        this.r = r;
+        this.g = g;
+        this.b = b;
+    }
 }
