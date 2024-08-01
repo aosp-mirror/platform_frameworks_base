@@ -16,48 +16,24 @@
 
 package androidx.window.extensions.layout;
 
-import androidx.window.common.CommonFoldingFeature;
-import androidx.window.common.DeviceStateManagerFoldingFeatureProducer;
-
-import java.util.ArrayList;
-import java.util.List;
+import androidx.window.common.layout.DisplayFoldFeatureCommon;
 
 /**
  * Util functions for working with {@link androidx.window.extensions.layout.DisplayFoldFeature}.
  */
-public class DisplayFoldFeatureUtil {
+public final class DisplayFoldFeatureUtil {
 
     private DisplayFoldFeatureUtil() {}
 
-    private static DisplayFoldFeature create(CommonFoldingFeature foldingFeature,
-            boolean isHalfOpenedSupported) {
-        final int foldType;
-        if (foldingFeature.getType() == CommonFoldingFeature.COMMON_TYPE_HINGE) {
-            foldType = DisplayFoldFeature.TYPE_HINGE;
-        } else {
-            foldType = DisplayFoldFeature.TYPE_SCREEN_FOLD_IN;
-        }
-        DisplayFoldFeature.Builder featureBuilder = new DisplayFoldFeature.Builder(foldType);
-
-        if (isHalfOpenedSupported) {
-            featureBuilder.addProperty(DisplayFoldFeature.FOLD_PROPERTY_SUPPORTS_HALF_OPENED);
-        }
-        return featureBuilder.build();
-    }
-
     /**
-     * Returns the list of supported {@link DisplayFeature} calculated from the
-     * {@link DeviceStateManagerFoldingFeatureProducer}.
+     * Returns a {@link DisplayFoldFeature} that matches the given {@link DisplayFoldFeatureCommon}.
      */
-    public static List<DisplayFoldFeature> extractDisplayFoldFeatures(
-            DeviceStateManagerFoldingFeatureProducer producer) {
-        List<DisplayFoldFeature> foldFeatures = new ArrayList<>();
-        List<CommonFoldingFeature> folds = producer.getFoldsWithUnknownState();
-
-        final boolean isHalfOpenedSupported = producer.isHalfOpenedSupported();
-        for (CommonFoldingFeature fold : folds) {
-            foldFeatures.add(DisplayFoldFeatureUtil.create(fold, isHalfOpenedSupported));
+    public static DisplayFoldFeature translate(DisplayFoldFeatureCommon foldFeatureCommon) {
+        final DisplayFoldFeature.Builder builder =
+                new DisplayFoldFeature.Builder(foldFeatureCommon.getType());
+        for (int property: foldFeatureCommon.getProperties()) {
+            builder.addProperty(property);
         }
-        return foldFeatures;
+        return builder.build();
     }
 }

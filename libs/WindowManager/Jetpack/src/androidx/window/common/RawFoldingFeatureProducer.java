@@ -26,6 +26,8 @@ import android.os.Looper;
 import android.provider.Settings;
 import android.text.TextUtils;
 
+import androidx.window.common.layout.CommonFoldingFeature;
+
 import com.android.internal.R;
 
 import java.util.Optional;
