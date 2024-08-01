@@ -678,22 +678,18 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
                 }
                 // sender userId can be a real user ID or USER_ALL.
                 final int senderUserId = pendingResult.getSendingUserId();
-                if (senderUserId != UserHandle.USER_ALL) {
-                    synchronized (ImfLock.class) {
-                        if (senderUserId != mCurrentUserId) {
-                            // A background user is trying to hide the dialog. Ignore.
-                            return;
-                        }
+                synchronized (ImfLock.class) {
+                    if (senderUserId != UserHandle.USER_ALL && senderUserId != mCurrentUserId) {
+                        // A background user is trying to hide the dialog. Ignore.
+                        return;
                     }
-                }
-                if (mNewInputMethodSwitcherMenuEnabled) {
-                    synchronized (ImfLock.class) {
-                        final var bindingController = getInputMethodBindingController(senderUserId);
-                        mMenuControllerNew.hide(bindingController.getCurTokenDisplayId(),
-                                senderUserId);
+                    final int userId = mCurrentUserId;
+                    if (mNewInputMethodSwitcherMenuEnabled) {
+                        final var bindingController = getInputMethodBindingController(userId);
+                        mMenuControllerNew.hide(bindingController.getCurTokenDisplayId(), userId);
+                    } else {
+                        mMenuController.hideInputMethodMenuLocked(userId);
                     }
-                } else {
-                    mMenuController.hideInputMethodMenu(senderUserId);
                 }
             } else {
                 Slog.w(TAG, "Unexpected intent " + intent);
