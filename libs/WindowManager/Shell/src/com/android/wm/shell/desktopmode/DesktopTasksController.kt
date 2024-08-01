@@ -949,9 +949,8 @@ class DesktopTasksController(
         val options =
             ActivityOptions.makeBasic().apply {
                 launchWindowingMode = newTaskWindowingMode
-                isPendingIntentBackgroundActivityLaunchAllowedByPermission = true
                 pendingIntentBackgroundActivityStartMode =
-                    ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOWED
+                    ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOW_ALWAYS
             }
         val launchIntent = PendingIntent.getActivity(
             context,
