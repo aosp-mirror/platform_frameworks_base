@@ -613,7 +613,7 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
      * Create a window associated with this WindowDecoration.
      * Note that subclass must dispose of this when the task is hidden/closed.
      *
-     * @param layoutId     layout to make the window from
+     * @param v            View to attach to the window
      * @param t            the transaction to apply
      * @param xPos         x position of new window
      * @param yPos         y position of new window
@@ -621,9 +621,9 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
      * @param height       height of new window
      * @return the {@link AdditionalViewHostViewContainer} that was added.
      */
-    AdditionalViewHostViewContainer addWindow(int layoutId, String namePrefix,
-            SurfaceControl.Transaction t, SurfaceSyncGroup ssg, int xPos, int yPos,
-            int width, int height) {
+    AdditionalViewHostViewContainer addWindow(@NonNull View v, @NonNull String namePrefix,
+            @NonNull SurfaceControl.Transaction t, @NonNull SurfaceSyncGroup ssg,
+            int xPos, int yPos, int width, int height) {
         final SurfaceControl.Builder builder = mSurfaceControlBuilderSupplier.get();
         SurfaceControl windowSurfaceControl = builder
                 .setName(namePrefix + " of Task=" + mTaskInfo.taskId)
@@ -631,8 +631,6 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
                 .setParent(mDecorationContainerSurface)
                 .setCallsite("WindowDecoration.addWindow")
                 .build();
-        View v = LayoutInflater.from(mDecorWindowContext).inflate(layoutId, null);
-
         t.setPosition(windowSurfaceControl, xPos, yPos)
                 .setWindowCrop(windowSurfaceControl, width, height)
                 .show(windowSurfaceControl);
@@ -650,6 +648,25 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
         ssg.add(viewHost.getSurfacePackage(), () -> viewHost.setView(v, lp));
         return new AdditionalViewHostViewContainer(windowSurfaceControl, viewHost,
                 mSurfaceControlTransactionSupplier);
+    }
+
+    /**
+     * Create a window associated with this WindowDecoration.
+     * Note that subclass must dispose of this when the task is hidden/closed.
+     *
+     * @param layoutId     layout to make the window from
+     * @param t            the transaction to apply
+     * @param xPos         x position of new window
+     * @param yPos         y position of new window
+     * @param width        width of new window
+     * @param height       height of new window
+     * @return the {@link AdditionalViewHostViewContainer} that was added.
+     */
+    AdditionalViewHostViewContainer addWindow(int layoutId, String namePrefix,
+            SurfaceControl.Transaction t, SurfaceSyncGroup ssg, int xPos, int yPos,
+            int width, int height) {
+        final View v = LayoutInflater.from(mDecorWindowContext).inflate(layoutId, null);
+        return addWindow(v, namePrefix, t, ssg, xPos, yPos, width, height);
     }
 
     /**

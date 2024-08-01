@@ -78,7 +78,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.lerp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.android.compose.animation.scene.ElementKey
-import com.android.compose.animation.scene.LowestZIndexScenePicker
+import com.android.compose.animation.scene.LowestZIndexContentPicker
 import com.android.compose.animation.scene.NestedScrollBehavior
 import com.android.compose.animation.scene.SceneScope
 import com.android.compose.modifiers.thenIf
@@ -105,7 +105,7 @@ object Notifications {
         val NotificationScrim = ElementKey("NotificationScrim")
         val NotificationStackPlaceholder = ElementKey("NotificationStackPlaceholder")
         val HeadsUpNotificationPlaceholder =
-            ElementKey("HeadsUpNotificationPlaceholder", scenePicker = LowestZIndexScenePicker)
+            ElementKey("HeadsUpNotificationPlaceholder", contentPicker = LowestZIndexContentPicker)
         val ShelfSpace = ElementKey("ShelfSpace")
         val NotificationStackCutoffGuideline = ElementKey("NotificationStackCutoffGuideline")
     }

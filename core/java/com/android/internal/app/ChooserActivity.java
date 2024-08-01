@@ -2960,10 +2960,10 @@ public class ChooserActivity extends ResolverActivity implements
     }
 
     private boolean shouldShowStickyContentPreviewNoOrientationCheck() {
-        return shouldShowTabs()
-                && (mMultiProfilePagerAdapter.getListAdapterForUserHandle(
-                        UserHandle.of(UserHandle.myUserId())).getCount() > 0
-                    || shouldShowStickyContentPreviewWhenEmpty())
+        ResolverListAdapter adapter = mMultiProfilePagerAdapter.getListAdapterForUserHandle(
+                UserHandle.of(UserHandle.myUserId()));
+        boolean isEmpty = adapter == null || adapter.getCount() == 0;
+        return shouldShowTabs() && (!isEmpty || shouldShowStickyContentPreviewWhenEmpty())
                 && shouldShowContentPreview();
     }
 

@@ -87,7 +87,7 @@ val SceneContainerTransitions = transitions {
 
     // Scene overscroll
 
-    overscroll(Scenes.Gone, Orientation.Vertical) {}
+    overscrollDisabled(Scenes.Gone, Orientation.Vertical)
     overscroll(Scenes.Bouncer, Orientation.Vertical) {
         translate(Bouncer.Elements.Content, y = { absoluteDistance })
     }

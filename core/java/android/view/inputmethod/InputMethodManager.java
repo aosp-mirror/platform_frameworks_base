@@ -2949,7 +2949,8 @@ public final class InputMethodManager {
      * @param callback Consumer callback that provides {@code true} if view belongs to allowed
      *                delegate package declared in
      *                {@link #prepareStylusHandwritingDelegation(View, String)} and handwriting
-     *                session can start.
+     *                session can start. Note: The caller should hold a reference to the callback.
+     *                The framework only holds a weak reference.
      * @see #prepareStylusHandwritingDelegation(View, String)
      * @see #acceptStylusHandwritingDelegation(View)
      */
@@ -2979,7 +2980,8 @@ public final class InputMethodManager {
      * @param delegatorPackageName package name of the delegator that handled initial stylus stroke.
      * @param flags {@link #HANDWRITING_DELEGATE_FLAG_HOME_DELEGATOR_ALLOWED} or {@code 0}
      * @param executor The executor to run the callback on.
-     * @param callback {@code true>} would be received if delegation was accepted.
+     * @param callback {@code true} would be received if delegation was accepted. The caller should
+     *                 hold a reference to the callback. The framework only holds a weak reference.
      * @see #prepareStylusHandwritingDelegation(View, String)
      * @see #acceptStylusHandwritingDelegation(View)
      */

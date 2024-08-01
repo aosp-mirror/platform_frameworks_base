@@ -19,6 +19,7 @@ package com.android.wm.shell.splitscreen;
 import static android.app.ActivityManager.START_SUCCESS;
 import static android.app.ActivityManager.START_TASK_TO_FRONT;
 import static android.app.ActivityTaskManager.INVALID_TASK_ID;
+import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.content.Intent.FLAG_ACTIVITY_MULTIPLE_TASK;
 import static android.content.Intent.FLAG_ACTIVITY_NO_USER_ACTION;
 import static android.view.Display.DEFAULT_DISPLAY;
@@ -429,6 +430,20 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
             @StageType int stageToTop, @ExitReason int reason) {
         mStageCoordinator.prepareExitSplitScreen(stageToTop, wct);
         mStageCoordinator.clearSplitPairedInRecents(reason);
+    }
+
+    /**
+     * Determines which split position a new instance of a task should take.
+     * @param callingTask The task requesting a new instance.
+     * @return the split position of the new instance
+     */
+    public int determineNewInstancePosition(@NonNull ActivityManager.RunningTaskInfo callingTask) {
+        if (callingTask.getWindowingMode() == WINDOWING_MODE_FULLSCREEN
+                || getSplitPosition(callingTask.taskId) == SPLIT_POSITION_TOP_OR_LEFT) {
+            return SPLIT_POSITION_BOTTOM_OR_RIGHT;
+        } else {
+            return SPLIT_POSITION_TOP_OR_LEFT;
+        }
     }
 
     public void enterSplitScreen(int taskId, boolean leftOrTop) {

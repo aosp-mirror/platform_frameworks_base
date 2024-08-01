@@ -18,7 +18,7 @@ package com.android.systemui.inputdevice.oobe
 
 import com.android.systemui.CoreStartable
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.inputdevice.oobe.domain.interactor.OobeTutorialSchedulerInteractor
+import com.android.systemui.inputdevice.oobe.domain.interactor.OobeSchedulerInteractor
 import com.android.systemui.shared.Flags.newTouchpadGesturesTutorial
 import dagger.Lazy
 import javax.inject.Inject
@@ -27,11 +27,10 @@ import javax.inject.Inject
 @SysUISingleton
 class KeyboardTouchpadOobeTutorialCoreStartable
 @Inject
-constructor(private val oobeTutorialSchedulerInteractor: Lazy<OobeTutorialSchedulerInteractor>) :
-    CoreStartable {
+constructor(private val oobeSchedulerInteractor: Lazy<OobeSchedulerInteractor>) : CoreStartable {
     override fun start() {
         if (newTouchpadGesturesTutorial()) {
-            oobeTutorialSchedulerInteractor.get().start()
+            oobeSchedulerInteractor.get().start()
         }
     }
 }

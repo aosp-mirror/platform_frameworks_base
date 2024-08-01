@@ -189,7 +189,7 @@ interface BaseContentScope : ElementStateScope {
      */
     @Composable
     fun MovableElement(
-        key: ElementKey,
+        key: MovableElementKey,
         modifier: Modifier,
 
         // TODO(b/317026105): As discussed in http://shortn/_gJVdltF8Si, remove the @Composable

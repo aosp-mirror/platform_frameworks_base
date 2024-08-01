@@ -5912,6 +5912,14 @@ public final class Settings {
         public static final String SHOW_KEY_PRESSES = "show_key_presses";
 
         /**
+         * Show touchpad input visualization on screen.
+         * 0 = no
+         * 1 = yes
+         * @hide
+         */
+        public static final String TOUCHPAD_VISUALIZER = "touchpad_visualizer";
+
+        /**
          * Show rotary input dispatched to focused windows on the screen.
          * 0 = no
          * 1 = yes

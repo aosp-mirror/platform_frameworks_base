@@ -32,7 +32,7 @@ public class AppCompatTaskInfo implements Parcelable {
     public boolean topActivityEligibleForLetterboxEducation;
 
     /**
-     * Whether the letterbox education is enabled
+     * Whether the letterbox education is enabled.
      */
     public boolean isLetterboxEducationEnabled;
 
@@ -73,26 +73,26 @@ public class AppCompatTaskInfo implements Parcelable {
     public boolean isFromLetterboxDoubleTap;
 
     /**
-     * If {@link isLetterboxDoubleTapEnabled} it contains the current letterbox vertical position or
-     * {@link TaskInfo.PROPERTY_VALUE_UNSET} otherwise.
+     * If {@link #isLetterboxDoubleTapEnabled} it contains the current letterbox vertical position
+     * or {@link TaskInfo#PROPERTY_VALUE_UNSET} otherwise.
      */
     public int topActivityLetterboxVerticalPosition;
 
     /**
-     * If {@link isLetterboxDoubleTapEnabled} it contains the current letterbox vertical position or
-     * {@link TaskInfo.PROPERTY_VALUE_UNSET} otherwise.
+     * If {@link #isLetterboxDoubleTapEnabled} it contains the current letterbox vertical position
+     * or {@link TaskInfo#PROPERTY_VALUE_UNSET} otherwise.
      */
     public int topActivityLetterboxHorizontalPosition;
 
     /**
-     * If {@link isLetterboxDoubleTapEnabled} it contains the current width of the letterboxed
-     * activity or {@link TaskInfo.PROPERTY_VALUE_UNSET} otherwise.
+     * If {@link #isLetterboxDoubleTapEnabled} it contains the current width of the letterboxed
+     * activity or {@link TaskInfo#PROPERTY_VALUE_UNSET} otherwise.
      */
     public int topActivityLetterboxWidth;
 
     /**
-     * If {@link isLetterboxDoubleTapEnabled} it contains the current height of the letterboxed
-     * activity or {@link TaskInfo.PROPERTY_VALUE_UNSET} otherwise.
+     * If {@link #isLetterboxDoubleTapEnabled} it contains the current height of the letterboxed
+     * activity or {@link TaskInfo#PROPERTY_VALUE_UNSET} otherwise.
      */
     public int topActivityLetterboxHeight;
 
@@ -133,7 +133,7 @@ public class AppCompatTaskInfo implements Parcelable {
             };
 
     /**
-     * @return {@value true} if the task has some compat ui.
+     * @return {@code true} if the task has some compat ui.
      */
     public boolean hasCompatUI() {
         return topActivityInSizeCompat || topActivityEligibleForLetterboxEducation
@@ -142,14 +142,14 @@ public class AppCompatTaskInfo implements Parcelable {
     }
 
     /**
-     * @return {@value true} if top activity is pillarboxed.
+     * @return {@code true} if top activity is pillarboxed.
      */
     public boolean isTopActivityPillarboxed() {
         return topActivityLetterboxWidth < topActivityLetterboxHeight;
     }
 
     /**
-     * @return  {@code true} if the app compat parameters that are important for task organizers
+     * @return {@code true} if the app compat parameters that are important for task organizers
      * are equal.
      */
     public boolean equalsForTaskOrganizer(@Nullable AppCompatTaskInfo that) {

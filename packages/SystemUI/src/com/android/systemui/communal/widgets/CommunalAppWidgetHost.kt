@@ -36,7 +36,7 @@ class CommunalAppWidgetHost(
     context: Context,
     private val backgroundScope: CoroutineScope,
     hostId: Int,
-    interactionHandler: RemoteViews.InteractionHandler,
+    private val interactionHandler: RemoteViews.InteractionHandler,
     looper: Looper,
     logBuffer: LogBuffer,
 ) : AppWidgetHost(context, hostId, interactionHandler, looper) {
@@ -55,7 +55,7 @@ class CommunalAppWidgetHost(
         appWidgetId: Int,
         appWidget: AppWidgetProviderInfo?
     ): AppWidgetHostView {
-        return CommunalAppWidgetHostView(context)
+        return CommunalAppWidgetHostView(context, interactionHandler)
     }
 
     /**

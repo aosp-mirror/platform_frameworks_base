@@ -554,6 +554,30 @@ public class QSImplTest extends SysuiTestCase {
         assertThat(mUnderTest.isKeyguardState()).isFalse();
     }
 
+    @Test
+    public void testHeaderBounds() {
+        int left = 20;
+        int top = 30;
+        int right = 200;
+        int bottom = 100;
+        setHeaderBounds(left, top, right, bottom);
+
+        assertThat(mUnderTest.getHeaderLeft()).isEqualTo(left);
+        assertThat(mUnderTest.getHeaderTop()).isEqualTo(top);
+        assertThat(mUnderTest.getHeaderBottom()).isEqualTo(bottom);
+        assertThat(mUnderTest.getHeaderHeight()).isEqualTo(bottom - top);
+    }
+
+    @Test
+    public void testHeaderBoundsOnScreen() {
+        Rect bounds = new Rect(0, 10, 100, 200);
+        setHeaderBoundsOnScreen(bounds);
+
+        Rect out = new Rect();
+        mUnderTest.getHeaderBoundsOnScreen(out);
+        assertThat(out).isEqualTo(bounds);
+    }
+
     private QSImpl instantiate() {
         setupQsComponent();
         setUpViews();
@@ -671,5 +695,20 @@ public class QSImplTest extends SysuiTestCase {
 
     private void setIsSmallScreen() {
         mUnderTest.setIsNotificationPanelFullWidth(true);
+    }
+
+    private void setHeaderBounds(int left, int top, int right, int bottom) {
+        when(mHeader.getLeft()).thenReturn(left);
+        when(mHeader.getTop()).thenReturn(top);
+        when(mHeader.getRight()).thenReturn(right);
+        when(mHeader.getBottom()).thenReturn(bottom);
+    }
+
+    private void setHeaderBoundsOnScreen(Rect rect) {
+        doAnswer(invocation -> {
+            Rect bounds = invocation.getArgument(/* index= */ 0);
+            bounds.set(rect);
+            return null;
+        }).when(mHeader).getBoundsOnScreen(any(Rect.class));
     }
 }

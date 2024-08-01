@@ -25,6 +25,7 @@ import static com.android.hardware.input.Flags.keyboardA11ySlowKeysFlag;
 import static com.android.hardware.input.Flags.keyboardA11yStickyKeysFlag;
 import static com.android.hardware.input.Flags.keyboardA11yMouseKeys;
 import static com.android.hardware.input.Flags.touchpadTapDragging;
+import static com.android.hardware.input.Flags.touchpadVisualizer;
 import static com.android.input.flags.Flags.enableInputFilterRustImpl;
 
 import android.Manifest;
@@ -323,6 +324,15 @@ public class InputSettings {
      */
     public static boolean isTouchpadTapDraggingFeatureFlagEnabled() {
         return touchpadTapDragging();
+    }
+
+    /**
+     * Returns true if the feature flag for touchpad visualizer is enabled.
+     *
+     * @hide
+     */
+    public static boolean isTouchpadVisualizerFeatureFlagEnabled() {
+        return touchpadVisualizer();
     }
 
     /**

@@ -498,7 +498,7 @@ public class NavigationBarTest extends SysuiTestCase {
         defaultNavBar.init();
         externalNavBar.init();
 
-        defaultNavBar.setImeWindowStatus(DEFAULT_DISPLAY, null, IME_VISIBLE,
+        defaultNavBar.setImeWindowStatus(DEFAULT_DISPLAY, IME_VISIBLE,
                 BACK_DISPOSITION_DEFAULT, true);
 
         // Verify IME window state will be updated in default NavBar & external NavBar state reset.
@@ -510,10 +510,10 @@ public class NavigationBarTest extends SysuiTestCase {
         assertFalse((externalNavBar.getNavigationIconHints() & NAVIGATION_HINT_IME_SWITCHER_SHOWN)
                 != 0);
 
-        externalNavBar.setImeWindowStatus(EXTERNAL_DISPLAY_ID, null, IME_VISIBLE,
+        externalNavBar.setImeWindowStatus(EXTERNAL_DISPLAY_ID, IME_VISIBLE,
                 BACK_DISPOSITION_DEFAULT, true);
-        defaultNavBar.setImeWindowStatus(
-                DEFAULT_DISPLAY, null, IME_INVISIBLE, BACK_DISPOSITION_DEFAULT, false);
+        defaultNavBar.setImeWindowStatus(DEFAULT_DISPLAY, IME_INVISIBLE,
+                BACK_DISPOSITION_DEFAULT, false);
         // Verify IME window state will be updated in external NavBar & default NavBar state reset.
         assertEquals(NAVIGATION_HINT_BACK_ALT | NAVIGATION_HINT_IME_SHOWN
                         | NAVIGATION_HINT_IME_SWITCHER_SHOWN,
@@ -535,7 +535,7 @@ public class NavigationBarTest extends SysuiTestCase {
         doReturn(windowInsets).when(mockShadeWindowView).getRootWindowInsets();
 
         // Verify navbar altered back icon when an app is showing IME
-        mNavigationBar.setImeWindowStatus(DEFAULT_DISPLAY, null, IME_VISIBLE,
+        mNavigationBar.setImeWindowStatus(DEFAULT_DISPLAY, IME_VISIBLE,
                 BACK_DISPOSITION_DEFAULT, true);
         assertTrue((mNavigationBar.getNavigationIconHints() & NAVIGATION_HINT_BACK_ALT) != 0);
         assertTrue((mNavigationBar.getNavigationIconHints() & NAVIGATION_HINT_IME_SHOWN) != 0);
@@ -545,7 +545,7 @@ public class NavigationBarTest extends SysuiTestCase {
         // Verify navbar didn't alter and showing back icon when the keyguard is showing without
         // requesting IME insets visible.
         doReturn(true).when(mKeyguardStateController).isShowing();
-        mNavigationBar.setImeWindowStatus(DEFAULT_DISPLAY, null, IME_VISIBLE,
+        mNavigationBar.setImeWindowStatus(DEFAULT_DISPLAY, IME_VISIBLE,
                 BACK_DISPOSITION_DEFAULT, true);
         assertFalse((mNavigationBar.getNavigationIconHints() & NAVIGATION_HINT_BACK_ALT) != 0);
         assertFalse((mNavigationBar.getNavigationIconHints() & NAVIGATION_HINT_IME_SHOWN) != 0);
@@ -556,7 +556,7 @@ public class NavigationBarTest extends SysuiTestCase {
         // requesting IME insets visible.
         windowInsets = new WindowInsets.Builder().setVisible(ime(), true).build();
         doReturn(windowInsets).when(mockShadeWindowView).getRootWindowInsets();
-        mNavigationBar.setImeWindowStatus(DEFAULT_DISPLAY, null, IME_VISIBLE,
+        mNavigationBar.setImeWindowStatus(DEFAULT_DISPLAY, IME_VISIBLE,
                 BACK_DISPOSITION_DEFAULT, true);
         assertTrue((mNavigationBar.getNavigationIconHints() & NAVIGATION_HINT_BACK_ALT) != 0);
         assertTrue((mNavigationBar.getNavigationIconHints() & NAVIGATION_HINT_IME_SHOWN) != 0);

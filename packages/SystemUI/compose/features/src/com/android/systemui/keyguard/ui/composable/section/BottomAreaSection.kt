@@ -71,7 +71,7 @@ constructor(
         applyPadding: Boolean,
         modifier: Modifier = Modifier,
     ) {
-        MovableElement(
+        Element(
             key = if (isStart) StartButtonElementKey else EndButtonElementKey,
             modifier = modifier,
         ) {
@@ -98,7 +98,7 @@ constructor(
     fun SceneScope.IndicationArea(
         modifier: Modifier = Modifier,
     ) {
-        MovableElement(
+        Element(
             key = IndicationAreaElementKey,
             modifier = modifier.indicationAreaPadding(),
         ) {

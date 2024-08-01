@@ -739,6 +739,7 @@ public final class VirtualDeviceManager {
          *
          * @param policyType the type of policy, i.e. which behavior to specify a policy for.
          * @param devicePolicy the value of the policy, i.e. how to interpret the device behavior.
+         * @throws IllegalArgumentException if the policy cannot be changed at runtime.
          *
          * @see VirtualDeviceParams#POLICY_TYPE_RECENTS
          * @see VirtualDeviceParams#POLICY_TYPE_ACTIVITY
@@ -794,6 +795,81 @@ public final class VirtualDeviceManager {
         public void removeActivityPolicyExemption(@NonNull ComponentName componentName) {
             mVirtualDeviceInternal.removeActivityPolicyExemption(
                     Objects.requireNonNull(componentName));
+        }
+
+        /**
+         * Specifies a policy for this virtual device to be applied on the given virtual display.
+         * <p>
+         * Any policy specified for a particular display takes precedence over the policy specified
+         * for the device itself.
+         * </p>
+         *
+         * @param policyType the type of policy, i.e. which behavior to specify a policy for.
+         * @param devicePolicy the value of the policy, i.e. how to interpret the device behavior.
+         * @param displayId the ID of the display, for which to apply the policy.
+         * @throws IllegalArgumentException if the specified policy cannot be changed per
+         *   display or if the specified display does not belong to the virtual device.
+         *
+         * @see #setDevicePolicy(int, int)
+         * @see VirtualDeviceParams#POLICY_TYPE_RECENTS
+         * @see VirtualDeviceParams#POLICY_TYPE_ACTIVITY
+         */
+        @FlaggedApi(android.companion.virtualdevice.flags.Flags.FLAG_ACTIVITY_CONTROL_API)
+        @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
+        public void setDevicePolicy(
+                @VirtualDeviceParams.DynamicDisplayPolicyType int policyType,
+                @VirtualDeviceParams.DevicePolicy int devicePolicy,
+                int displayId) {
+            mVirtualDeviceInternal.setDevicePolicyForDisplay(displayId, policyType, devicePolicy);
+        }
+
+        /**
+         * Specifies a component name to be exempt from the given display's activity launch policy.
+         *
+         * <p>If the current {@link VirtualDeviceParams#POLICY_TYPE_ACTIVITY} allows activity
+         * launches by default, (i.e. it is {@link VirtualDeviceParams#DEVICE_POLICY_DEFAULT}),
+         * then the specified component will be blocked from launching.
+         * If the current {@link VirtualDeviceParams#POLICY_TYPE_ACTIVITY} blocks activity launches
+         * by default, (i.e. it is {@link VirtualDeviceParams#DEVICE_POLICY_CUSTOM}), then the
+         * specified component will be allowed to launch.</p>
+         *
+         * <p>Note that changing the activity launch policy will clear current set of exempt
+         * components.</p>
+         * <p>Any change to the exemptions will only be applied for new activity launches.</p>
+         *
+         * @see #removeActivityPolicyExemption
+         * @see #setDevicePolicy
+         */
+        @FlaggedApi(android.companion.virtualdevice.flags.Flags.FLAG_ACTIVITY_CONTROL_API)
+        @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
+        public void addActivityPolicyExemption(
+                @NonNull ComponentName componentName, int displayId) {
+            mVirtualDeviceInternal.addActivityPolicyExemptionForDisplay(
+                    displayId, Objects.requireNonNull(componentName));
+        }
+
+        /**
+         * Makes the specified component name adhere to the given display's activity launch policy.
+         *
+         * <p>If the current {@link VirtualDeviceParams#POLICY_TYPE_ACTIVITY} allows activity
+         * launches by default, (i.e. it is {@link VirtualDeviceParams#DEVICE_POLICY_DEFAULT}),
+         * then the specified component will be allowed to launch.
+         * If the current {@link VirtualDeviceParams#POLICY_TYPE_ACTIVITY} blocks activity launches
+         * by default, (i.e. it is {@link VirtualDeviceParams#DEVICE_POLICY_CUSTOM}), then the
+         * specified component will be blocked from launching.</p>
+         *
+         * <p>Note that changing the activity launch policy will clear current set of exempt
+         * components.</p>
+         *
+         * @see #addActivityPolicyExemption
+         * @see #setDevicePolicy
+         */
+        @FlaggedApi(android.companion.virtualdevice.flags.Flags.FLAG_ACTIVITY_CONTROL_API)
+        @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
+        public void removeActivityPolicyExemption(
+                @NonNull ComponentName componentName, int displayId) {
+            mVirtualDeviceInternal.removeActivityPolicyExemptionForDisplay(
+                    displayId, Objects.requireNonNull(componentName));
         }
 
         /**

@@ -8094,11 +8094,10 @@ public class WindowManagerService extends IWindowManager.Stub
         }
 
         @Override
-        public void updateInputMethodTargetWindow(@NonNull IBinder imeToken,
-                @NonNull IBinder imeTargetWindowToken) {
+        public void updateInputMethodTargetWindow(@NonNull IBinder imeTargetWindowToken) {
             // TODO (b/34628091): Use this method to address the window animation issue.
             if (DEBUG_INPUT_METHOD) {
-                Slog.w(TAG_WM, "updateInputMethodTargetWindow: imeToken=" + imeToken
+                Slog.w(TAG_WM, "updateInputMethodTargetWindow:"
                         + " imeTargetWindowToken=" + imeTargetWindowToken);
             }
             synchronized (mGlobalLock) {
@@ -9036,7 +9035,8 @@ public class WindowManagerService extends IWindowManager.Stub
         // Otherwise, handle the touch-outside event directly.
         final WindowState w = t.getWindowState();
         final ActivityRecord activity = w != null ? w.getActivityRecord() : null;
-        if (activity != null && activity.isEmbedded()
+        if (mFocusedInputTarget != t && mFocusedInputTarget != null
+                && activity != null && activity.isEmbedded()
                 && activity.getTaskFragment().getAdjacentTaskFragment() != null) {
             mPointerDownOutsideFocusRunnable = () -> handlePointerDownOutsideFocus(t);
             mH.postDelayed(mPointerDownOutsideFocusRunnable, POINTER_DOWN_OUTSIDE_FOCUS_TIMEOUT_MS);

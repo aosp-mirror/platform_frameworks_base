@@ -65,7 +65,6 @@ import com.android.internal.logging.nano.MetricsProto;
 import com.android.server.LocalServices;
 import com.android.server.PackageWatchdog;
 import com.android.server.pm.UserManagerInternal;
-import com.android.server.pm.UserManagerService;
 import com.android.server.usage.AppStandbyInternal;
 import com.android.server.wm.WindowProcessController;
 
@@ -1027,7 +1026,8 @@ class AppErrors {
                 isBackground &= (userId != profileId);
             }
             int visibleUserId = getVisibleUserId(userId);
-            boolean isVisibleUser = isVisibleBackgroundUser(visibleUserId);
+            boolean isVisibleUser = LocalServices.getService(UserManagerInternal.class)
+                    .isVisibleBackgroundFullUser(visibleUserId);
             boolean showBackground = Settings.Secure.getIntForUser(mContext.getContentResolver(),
                     Settings.Secure.ANR_SHOW_BACKGROUND, 0, visibleUserId) != 0;
             if (isBackground && !showBackground && !isVisibleUser) {
@@ -1050,7 +1050,7 @@ class AppErrors {
                         mContext.getContentResolver(),
                         Settings.Secure.SHOW_FIRST_CRASH_DIALOG_DEV_OPTION,
                         0,
-                        mService.mUserController.getCurrentUserId()) != 0;
+                        visibleUserId) != 0;
                 final String packageName = proc.info.packageName;
                 final boolean crashSilenced = mAppsNotReportingCrashes != null
                         && mAppsNotReportingCrashes.contains(proc.info.packageName);
@@ -1180,26 +1180,6 @@ class AppErrors {
             return mService.mUserController.getCurrentUserId();
         }
         return appUserId;
-    }
-
-    /**
-     * Checks if the given user is a visible background user, which is a full, background user
-     * assigned to secondary displays on the devices that have
-     * {@link UserManager#isVisibleBackgroundUsersEnabled()
-     * config_multiuserVisibleBackgroundUsers enabled} (for example, passenger users on
-     * automotive builds, using the display associated with their seats).
-     *
-     * @see UserManager#isUserVisible()
-     */
-    private boolean isVisibleBackgroundUser(int userId) {
-        if (!UserManager.isVisibleBackgroundUsersEnabled()) {
-            return false;
-        }
-        boolean isForeground = mService.mUserController.getCurrentUserId() == userId;
-        boolean isProfile = UserManagerService.getInstance().isProfile(userId);
-        boolean isVisible = LocalServices.getService(UserManagerInternal.class)
-                .isUserVisible(userId);
-        return isVisible && !isForeground && !isProfile;
     }
 
     /**
