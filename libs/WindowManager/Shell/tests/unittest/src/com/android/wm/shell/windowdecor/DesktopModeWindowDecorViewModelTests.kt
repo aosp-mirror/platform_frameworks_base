@@ -21,6 +21,7 @@ import android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED
 import android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM
 import android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN
 import android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW
+import android.app.WindowConfiguration.WINDOWING_MODE_PINNED
 import android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED
 import android.app.WindowConfiguration.WindowingMode
 import android.content.ComponentName
@@ -51,11 +52,13 @@ import android.view.InputMonitor
 import android.view.InsetsSource
 import android.view.InsetsState
 import android.view.KeyEvent
+import android.view.Surface
 import android.view.SurfaceControl
 import android.view.SurfaceView
 import android.view.View
 import android.view.WindowInsets.Type.navigationBars
 import android.view.WindowInsets.Type.statusBars
+import android.window.WindowContainerTransaction
 import androidx.test.filters.SmallTest
 import com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn
 import com.android.dx.mockito.inline.extended.ExtendedMockito.mockitoSession
@@ -69,6 +72,7 @@ import com.android.wm.shell.ShellTestCase
 import com.android.wm.shell.TestRunningTaskInfoBuilder
 import com.android.wm.shell.TestShellExecutor
 import com.android.wm.shell.apptoweb.AppToWebGenericLinksParser
+import com.android.wm.shell.common.DisplayChangeController
 import com.android.wm.shell.common.DisplayController
 import com.android.wm.shell.common.DisplayInsetsController
 import com.android.wm.shell.common.DisplayLayout
@@ -110,6 +114,7 @@ import org.mockito.kotlin.argThat
 import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.doNothing
 import org.mockito.kotlin.eq
+import org.mockito.kotlin.mock
 import org.mockito.kotlin.spy
 import org.mockito.kotlin.whenever
 import org.mockito.quality.Strictness
@@ -166,6 +171,7 @@ class DesktopModeWindowDecorViewModelTests : ShellTestCase() {
     private lateinit var mockitoSession: StaticMockitoSession
     private lateinit var shellInit: ShellInit
     private lateinit var desktopModeOnInsetsChangedListener: DesktopModeOnInsetsChangedListener
+    private lateinit var displayChangingListener: DisplayChangeController.OnDisplayChangingListener
     private lateinit var desktopModeWindowDecorViewModel: DesktopModeWindowDecorViewModel
 
     @Before
@@ -174,6 +180,7 @@ class DesktopModeWindowDecorViewModelTests : ShellTestCase() {
             mockitoSession()
                 .strictness(Strictness.LENIENT)
                 .spyStatic(DesktopModeStatus::class.java)
+                .spyStatic(DragPositioningCallbackUtility::class.java)
                 .startMocking()
         doReturn(true).`when` { DesktopModeStatus.isDesktopModeSupported(Mockito.any()) }
 
@@ -218,10 +225,17 @@ class DesktopModeWindowDecorViewModelTests : ShellTestCase() {
 
         shellInit.init()
 
-        val listenerCaptor =
-                argumentCaptor<DesktopModeWindowDecorViewModel.DesktopModeOnInsetsChangedListener>()
-        verify(displayInsetsController).addInsetsChangedListener(anyInt(), listenerCaptor.capture())
-        desktopModeOnInsetsChangedListener = listenerCaptor.firstValue
+        val insetListenerCaptor =
+            argumentCaptor<DesktopModeWindowDecorViewModel.DesktopModeOnInsetsChangedListener>()
+        verify(displayInsetsController)
+            .addInsetsChangedListener(anyInt(), insetListenerCaptor.capture())
+        desktopModeOnInsetsChangedListener = insetListenerCaptor.firstValue
+
+        val displayChangingListenerCaptor =
+            argumentCaptor<DisplayChangeController.OnDisplayChangingListener>()
+        verify(mockDisplayController)
+            .addDisplayChangingController(displayChangingListenerCaptor.capture())
+        displayChangingListener = displayChangingListenerCaptor.firstValue
     }
 
     @After
@@ -786,6 +800,135 @@ class DesktopModeWindowDecorViewModelTests : ShellTestCase() {
         })
     }
 
+    @Test
+    fun testOnDisplayRotation_tasksOutOfValidArea_taskBoundsUpdated() {
+        val task = createTask(focused = true, windowingMode = WINDOWING_MODE_FREEFORM)
+        val secondTask =
+            createTask(displayId = task.displayId, windowingMode = WINDOWING_MODE_FREEFORM)
+        val thirdTask =
+            createTask(displayId = task.displayId, windowingMode = WINDOWING_MODE_FREEFORM)
+
+        doReturn(true).`when` {
+            DragPositioningCallbackUtility.snapTaskBoundsIfNecessary(any(), any())
+        }
+        setUpMockDecorationsForTasks(task, secondTask, thirdTask)
+
+        onTaskOpening(task)
+        onTaskOpening(secondTask)
+        onTaskOpening(thirdTask)
+
+        val wct = mock<WindowContainerTransaction>()
+
+        displayChangingListener.onDisplayChange(
+            task.displayId, Surface.ROTATION_0, Surface.ROTATION_90, null, wct
+        )
+
+        verify(wct).setBounds(eq(task.token), any())
+        verify(wct).setBounds(eq(secondTask.token), any())
+        verify(wct).setBounds(eq(thirdTask.token), any())
+    }
+
+    @Test
+    fun testOnDisplayRotation_taskInValidArea_taskBoundsNotUpdated() {
+        val task = createTask(focused = true, windowingMode = WINDOWING_MODE_FREEFORM)
+        val secondTask =
+            createTask(displayId = task.displayId, windowingMode = WINDOWING_MODE_FREEFORM)
+        val thirdTask =
+            createTask(displayId = task.displayId, windowingMode = WINDOWING_MODE_FREEFORM)
+
+        doReturn(false).`when` {
+            DragPositioningCallbackUtility.snapTaskBoundsIfNecessary(any(), any())
+        }
+        setUpMockDecorationsForTasks(task, secondTask, thirdTask)
+
+        onTaskOpening(task)
+        onTaskOpening(secondTask)
+        onTaskOpening(thirdTask)
+
+        val wct = mock<WindowContainerTransaction>()
+        displayChangingListener.onDisplayChange(
+            task.displayId, Surface.ROTATION_0, Surface.ROTATION_90, null, wct
+        )
+
+        verify(wct, never()).setBounds(eq(task.token), any())
+        verify(wct, never()).setBounds(eq(secondTask.token), any())
+        verify(wct, never()).setBounds(eq(thirdTask.token), any())
+    }
+
+    @Test
+    fun testOnDisplayRotation_sameOrientationRotation_taskBoundsNotUpdated() {
+        val task = createTask(focused = true, windowingMode = WINDOWING_MODE_FREEFORM)
+        val secondTask =
+            createTask(displayId = task.displayId, windowingMode = WINDOWING_MODE_FREEFORM)
+        val thirdTask =
+            createTask(displayId = task.displayId, windowingMode = WINDOWING_MODE_FREEFORM)
+
+        setUpMockDecorationsForTasks(task, secondTask, thirdTask)
+
+        onTaskOpening(task)
+        onTaskOpening(secondTask)
+        onTaskOpening(thirdTask)
+
+        val wct = mock<WindowContainerTransaction>()
+        displayChangingListener.onDisplayChange(
+            task.displayId, Surface.ROTATION_0, Surface.ROTATION_180, null, wct
+        )
+
+        verify(wct, never()).setBounds(eq(task.token), any())
+        verify(wct, never()).setBounds(eq(secondTask.token), any())
+        verify(wct, never()).setBounds(eq(thirdTask.token), any())
+    }
+
+    @Test
+    fun testOnDisplayRotation_differentDisplayId_taskBoundsNotUpdated() {
+        val task = createTask(focused = true, windowingMode = WINDOWING_MODE_FREEFORM)
+        val secondTask = createTask(displayId = -2, windowingMode = WINDOWING_MODE_FREEFORM)
+        val thirdTask = createTask(displayId = -3, windowingMode = WINDOWING_MODE_FREEFORM)
+
+        doReturn(true).`when` {
+            DragPositioningCallbackUtility.snapTaskBoundsIfNecessary(any(), any())
+        }
+        setUpMockDecorationsForTasks(task, secondTask, thirdTask)
+
+        onTaskOpening(task)
+        onTaskOpening(secondTask)
+        onTaskOpening(thirdTask)
+
+        val wct = mock<WindowContainerTransaction>()
+        displayChangingListener.onDisplayChange(
+            task.displayId, Surface.ROTATION_0, Surface.ROTATION_90, null, wct
+        )
+
+        verify(wct).setBounds(eq(task.token), any())
+        verify(wct, never()).setBounds(eq(secondTask.token), any())
+        verify(wct, never()).setBounds(eq(thirdTask.token), any())
+    }
+
+    @Test
+    fun testOnDisplayRotation_nonFreeformTask_taskBoundsNotUpdated() {
+        val task = createTask(focused = true, windowingMode = WINDOWING_MODE_FREEFORM)
+        val secondTask = createTask(displayId = -2, windowingMode = WINDOWING_MODE_FULLSCREEN)
+        val thirdTask = createTask(displayId = -3, windowingMode = WINDOWING_MODE_PINNED)
+
+        doReturn(true).`when` {
+            DragPositioningCallbackUtility.snapTaskBoundsIfNecessary(any(), any())
+        }
+        setUpMockDecorationsForTasks(task, secondTask, thirdTask)
+
+        onTaskOpening(task)
+        onTaskOpening(secondTask)
+        onTaskOpening(thirdTask)
+
+        val wct = mock<WindowContainerTransaction>()
+        displayChangingListener.onDisplayChange(
+            task.displayId, Surface.ROTATION_0, Surface.ROTATION_90, null, wct
+        )
+
+        verify(wct).setBounds(eq(task.token), any())
+        verify(wct, never()).setBounds(eq(secondTask.token), any())
+        verify(wct, never()).setBounds(eq(thirdTask.token), any())
+    }
+
     private fun createOpenTaskDecoration(
         @WindowingMode windowingMode: Int,
         onMaxOrRestoreListenerCaptor: ArgumentCaptor<Function0<Unit>> =
@@ -864,6 +1007,7 @@ class DesktopModeWindowDecorViewModelTests : ShellTestCase() {
             whenever(mockSplitScreenController.isTaskInSplitScreen(task.taskId))
                 .thenReturn(true)
         }
+        whenever(decoration.calculateValidDragArea()).thenReturn(Rect(0, 60, 2560, 1600))
         return decoration
     }
 
