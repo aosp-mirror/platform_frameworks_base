@@ -194,6 +194,26 @@ public class StemKeyGestureTests extends ShortcutKeyTestBase {
     }
 
     @Test
+    public void stemLongKey_appHasOverridePermission_consumedByApp_triggerStatusBarToStartAssist() {
+        overrideBehavior(
+                STEM_PRIMARY_BUTTON_LONG_PRESS,
+                LONG_PRESS_PRIMARY_LAUNCH_VOICE_ASSISTANT);
+        setUpPhoneWindowManager(/* supportSettingsUpdate= */ true);
+        mPhoneWindowManager.overrideShouldEarlyShortPressOnStemPrimary(false);
+        mPhoneWindowManager.setupAssistForLaunch();
+        mPhoneWindowManager.overrideSearchManager(null);
+        mPhoneWindowManager.overrideStatusBarManagerInternal();
+        mPhoneWindowManager.overrideIsUserSetupComplete(true);
+        mPhoneWindowManager.overrideFocusedWindowButtonOverridePermission(true);
+
+        setDispatchedKeyHandler(keyEvent -> true);
+
+        sendKey(KEYCODE_STEM_PRIMARY, /* longPress= */ true);
+
+        mPhoneWindowManager.assertStatusBarStartAssist();
+    }
+
+    @Test
     public void stemDoubleKey_EarlyShortPress_AllAppsThenSwitchToMostRecent()
             throws RemoteException {
         overrideBehavior(STEM_PRIMARY_BUTTON_SHORT_PRESS, SHORT_PRESS_PRIMARY_LAUNCH_ALL_APPS);
