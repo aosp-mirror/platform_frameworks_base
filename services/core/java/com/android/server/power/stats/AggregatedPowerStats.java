@@ -27,6 +27,7 @@ import android.text.format.DateFormat;
 import android.util.IndentingPrintWriter;
 import android.util.Slog;
 import android.util.SparseArray;
+import android.util.SparseBooleanArray;
 import android.util.TimeUtils;
 
 import com.android.internal.os.PowerStats;
@@ -73,14 +74,21 @@ class AggregatedPowerStats {
     private long mDurationMs;
 
     AggregatedPowerStats(@NonNull AggregatedPowerStatsConfig aggregatedPowerStatsConfig) {
+        this(aggregatedPowerStatsConfig, new SparseBooleanArray());
+    }
+
+    AggregatedPowerStats(@NonNull AggregatedPowerStatsConfig aggregatedPowerStatsConfig,
+            @NonNull SparseBooleanArray enabledComponents) {
         mConfig = aggregatedPowerStatsConfig;
         List<PowerComponent> configs =
                 aggregatedPowerStatsConfig.getPowerComponentsAggregatedStatsConfigs();
         mPowerComponentStats = new SparseArray<>(configs.size());
         for (int i = 0; i < configs.size(); i++) {
             PowerComponent powerComponent = configs.get(i);
-            mPowerComponentStats.put(powerComponent.getPowerComponentId(),
-                    new PowerComponentAggregatedPowerStats(this, powerComponent));
+            if (enabledComponents.get(powerComponent.getPowerComponentId(), true)) {
+                mPowerComponentStats.put(powerComponent.getPowerComponentId(),
+                        new PowerComponentAggregatedPowerStats(this, powerComponent));
+            }
         }
         mGenericPowerComponent = createGenericPowerComponent();
         mPowerComponentStats.put(BatteryConsumer.POWER_COMPONENT_ANY, mGenericPowerComponent);
