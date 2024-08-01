@@ -1566,6 +1566,21 @@ class DesktopTasksControllerTest : ShellTestCase() {
   }
 
   @Test
+  fun handleRequest_recentsAnimationRunning_relaunchActiveTask_taskBecomesUndefined() {
+    // Set up a visible freeform task
+    val freeformTask = setUpFreeformTask()
+    markTaskVisible(freeformTask)
+
+    // Mark recents animation running
+    recentsTransitionStateListener.onAnimationStateChanged(true)
+
+    // Should become undefined as the TDA is set to fullscreen. It will inherit from the TDA.
+    val result = controller.handleRequest(Binder(), createTransition(freeformTask))
+    assertThat(result?.changes?.get(freeformTask.token.asBinder())?.windowingMode)
+      .isEqualTo(WINDOWING_MODE_UNDEFINED)
+  }
+
+  @Test
   @EnableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_MODALS_POLICY)
   fun handleRequest_topActivityTransparentWithStyleFloating_returnSwitchToFreeformWCT() {
     val freeformTask = setUpFreeformTask()
