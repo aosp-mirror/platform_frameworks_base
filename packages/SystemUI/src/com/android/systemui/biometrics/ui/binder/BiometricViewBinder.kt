@@ -196,11 +196,12 @@ object BiometricViewBinder {
                 }
             }
 
-            logoView.setImageDrawable(viewModel.logo.first())
+            val logoInfo = viewModel.logoInfo.first()
+            logoView.setImageDrawable(logoInfo.first)
             // The ellipsize effect on xml happens only when the TextView does not have any free
             // space on the screen to show the text. So we need to manually truncate.
             logoDescriptionView.text =
-                viewModel.logoDescription.first().ellipsize(MAX_LOGO_DESCRIPTION_CHARACTER_NUMBER)
+                logoInfo.second?.ellipsize(MAX_LOGO_DESCRIPTION_CHARACTER_NUMBER)
             titleView.text = viewModel.title.first()
             subtitleView.text = viewModel.subtitle.first()
             descriptionView.text = viewModel.description.first()
