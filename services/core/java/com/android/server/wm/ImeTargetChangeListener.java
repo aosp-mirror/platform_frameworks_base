@@ -37,25 +37,27 @@ public interface ImeTargetChangeListener {
      * @param visible            the visibility of the overlay window, {@code true} means visible
      *                           and {@code false} otherwise.
      * @param removed            Whether the IME target overlay window has being removed.
+     * @param displayId          display ID where the overlay window exists.
      */
     default void onImeTargetOverlayVisibilityChanged(@NonNull IBinder overlayWindowToken,
             @WindowManager.LayoutParams.WindowType int windowType,
-            boolean visible, boolean removed) {
+            boolean visible, boolean removed, int displayId) {
     }
 
     /**
      * Called when the visibility of IME input target window has changed.
      *
      * @param imeInputTarget   the window token of the IME input target window.
-     * @param visible          the new window visibility made by {@param imeInputTarget}. visible is
+     * @param visible          the new window visibility made by {@code imeInputTarget}. visible is
      *                         {@code true} when switching to the new visible IME input target
      *                         window and started input, or the same input target relayout to
      *                         visible from invisible. In contrast, visible is {@code false} when
      *                         closing the input target, or the same input target relayout to
      *                         invisible from visible.
      * @param removed          Whether the IME input target window has being removed.
+     * @param displayId        display ID where the overlay window exists.
      */
     default void onImeInputTargetVisibilityChanged(@NonNull IBinder imeInputTarget, boolean visible,
-            boolean removed) {
+            boolean removed, int displayId) {
     }
 }
