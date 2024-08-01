@@ -16,6 +16,8 @@
 
 package com.android.compose.animation.scene
 
+import com.android.compose.animation.scene.content.state.TransitionState
+
 /**
  * A handler to specify how a transition should be interrupted.
  *

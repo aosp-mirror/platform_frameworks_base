@@ -33,6 +33,7 @@ import android.graphics.Region;
 import android.hardware.input.InputManager;
 import android.os.Handler;
 import android.os.RemoteException;
+import android.os.UserHandle;
 import android.provider.Settings;
 import android.util.Log;
 import android.util.SparseArray;
@@ -288,6 +289,7 @@ public class CaptionWindowDecorViewModel implements WindowDecorViewModel {
         final CaptionWindowDecoration windowDecoration =
                 new CaptionWindowDecoration(
                         mContext,
+                        mContext.createContextAsUser(UserHandle.of(taskInfo.userId), 0 /* flags */),
                         mDisplayController,
                         mTaskOrganizer,
                         taskInfo,

@@ -270,6 +270,36 @@ public class HdmiCecNetworkTest {
     }
 
     @Test
+    public void cecDevices_tracking_event_update_device() {
+        int logicalAddress = Constants.ADDR_PLAYBACK_1;
+        int initialPhysicalAddress = 0x1000;
+        int type = HdmiDeviceInfo.DEVICE_PLAYBACK;
+        String osdName = "Test Device";
+
+        mHdmiCecNetwork.handleCecMessage(
+                HdmiCecMessageBuilder.buildReportPhysicalAddressCommand(logicalAddress,
+                        initialPhysicalAddress, type));
+        // Change OSD to make the info different
+        mHdmiCecNetwork.handleCecMessage(
+                HdmiCecMessageBuilder.buildSetOsdNameCommand(logicalAddress,
+                        Constants.ADDR_BROADCAST, osdName));
+        synchronized (mHdmiCecNetwork.mLock) {
+            assertThat(mHdmiCecNetwork.getSafeCecDevicesLocked()).hasSize(1);
+        }
+
+        HdmiDeviceInfo cecDeviceInfo = mHdmiCecNetwork.getCecDeviceInfo(logicalAddress);
+        assertThat(cecDeviceInfo.getLogicalAddress()).isEqualTo(logicalAddress);
+        assertThat(cecDeviceInfo.getPhysicalAddress()).isEqualTo(initialPhysicalAddress);
+        assertThat(cecDeviceInfo.getDeviceType()).isEqualTo(type);
+
+        // ADD for physical address first detected
+        // UPDATE for updating device with new OSD name
+        assertThat(mDeviceEventListenerStatuses).containsExactly(
+                HdmiControlManager.DEVICE_EVENT_ADD_DEVICE,
+                HdmiControlManager.DEVICE_EVENT_UPDATE_DEVICE);
+    }
+
+    @Test
     public void cecDevices_tracking_updateDeviceInfo_sameDoesntNotify() {
         int logicalAddress = Constants.ADDR_PLAYBACK_1;
         int physicalAddress = 0x1000;

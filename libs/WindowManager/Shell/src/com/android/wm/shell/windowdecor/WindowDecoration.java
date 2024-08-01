@@ -106,6 +106,7 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
      * System-wide context. Only used to create context with overridden configurations.
      */
     final Context mContext;
+    final @NonNull Context mUserContext;
     final @NonNull DisplayController mDisplayController;
     final ShellTaskOrganizer mTaskOrganizer;
     final Supplier<SurfaceControl.Builder> mSurfaceControlBuilderSupplier;
@@ -147,11 +148,12 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
 
     WindowDecoration(
             Context context,
+            @NonNull Context userContext,
             DisplayController displayController,
             ShellTaskOrganizer taskOrganizer,
             RunningTaskInfo taskInfo,
             SurfaceControl taskSurface) {
-        this(context, displayController, taskOrganizer, taskInfo, taskSurface,
+        this(context, userContext, displayController, taskOrganizer, taskInfo, taskSurface,
                 SurfaceControl.Builder::new, SurfaceControl.Transaction::new,
                 WindowContainerTransaction::new, SurfaceControl::new,
                 new SurfaceControlViewHostFactory() {});
@@ -159,6 +161,7 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
 
     WindowDecoration(
             Context context,
+            @NonNull Context userContext,
             @NonNull DisplayController displayController,
             ShellTaskOrganizer taskOrganizer,
             RunningTaskInfo taskInfo,
@@ -169,6 +172,7 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
             Supplier<SurfaceControl> surfaceControlSupplier,
             SurfaceControlViewHostFactory surfaceControlViewHostFactory) {
         mContext = context;
+        mUserContext = userContext;
         mDisplayController = displayController;
         mTaskOrganizer = taskOrganizer;
         mTaskInfo = taskInfo;
@@ -177,7 +181,6 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
         mSurfaceControlTransactionSupplier = surfaceControlTransactionSupplier;
         mWindowContainerTransactionSupplier = windowContainerTransactionSupplier;
         mSurfaceControlViewHostFactory = surfaceControlViewHostFactory;
-
         mDisplay = mDisplayController.getDisplay(mTaskInfo.displayId);
     }
 
@@ -610,7 +613,7 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
      * Create a window associated with this WindowDecoration.
      * Note that subclass must dispose of this when the task is hidden/closed.
      *
-     * @param layoutId     layout to make the window from
+     * @param v            View to attach to the window
      * @param t            the transaction to apply
      * @param xPos         x position of new window
      * @param yPos         y position of new window
@@ -618,9 +621,9 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
      * @param height       height of new window
      * @return the {@link AdditionalViewHostViewContainer} that was added.
      */
-    AdditionalViewHostViewContainer addWindow(int layoutId, String namePrefix,
-            SurfaceControl.Transaction t, SurfaceSyncGroup ssg, int xPos, int yPos,
-            int width, int height) {
+    AdditionalViewHostViewContainer addWindow(@NonNull View v, @NonNull String namePrefix,
+            @NonNull SurfaceControl.Transaction t, @NonNull SurfaceSyncGroup ssg,
+            int xPos, int yPos, int width, int height) {
         final SurfaceControl.Builder builder = mSurfaceControlBuilderSupplier.get();
         SurfaceControl windowSurfaceControl = builder
                 .setName(namePrefix + " of Task=" + mTaskInfo.taskId)
@@ -628,8 +631,6 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
                 .setParent(mDecorationContainerSurface)
                 .setCallsite("WindowDecoration.addWindow")
                 .build();
-        View v = LayoutInflater.from(mDecorWindowContext).inflate(layoutId, null);
-
         t.setPosition(windowSurfaceControl, xPos, yPos)
                 .setWindowCrop(windowSurfaceControl, width, height)
                 .show(windowSurfaceControl);
@@ -647,6 +648,25 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
         ssg.add(viewHost.getSurfacePackage(), () -> viewHost.setView(v, lp));
         return new AdditionalViewHostViewContainer(windowSurfaceControl, viewHost,
                 mSurfaceControlTransactionSupplier);
+    }
+
+    /**
+     * Create a window associated with this WindowDecoration.
+     * Note that subclass must dispose of this when the task is hidden/closed.
+     *
+     * @param layoutId     layout to make the window from
+     * @param t            the transaction to apply
+     * @param xPos         x position of new window
+     * @param yPos         y position of new window
+     * @param width        width of new window
+     * @param height       height of new window
+     * @return the {@link AdditionalViewHostViewContainer} that was added.
+     */
+    AdditionalViewHostViewContainer addWindow(int layoutId, String namePrefix,
+            SurfaceControl.Transaction t, SurfaceSyncGroup ssg, int xPos, int yPos,
+            int width, int height) {
+        final View v = LayoutInflater.from(mDecorWindowContext).inflate(layoutId, null);
+        return addWindow(v, namePrefix, t, ssg, xPos, yPos, width, height);
     }
 
     /**

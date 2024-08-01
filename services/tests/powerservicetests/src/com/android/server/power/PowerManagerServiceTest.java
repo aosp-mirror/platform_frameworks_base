@@ -1304,6 +1304,7 @@ public class PowerManagerServiceTest {
                 .setDozeOverrideFromDreamManager(
                         Display.STATE_ON,
                         Display.STATE_REASON_DEFAULT_POLICY,
+                        PowerManager.BRIGHTNESS_INVALID_FLOAT,
                         PowerManager.BRIGHTNESS_DEFAULT);
         assertTrue(isAcquired[0]);
     }

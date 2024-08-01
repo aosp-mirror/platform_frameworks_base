@@ -1088,6 +1088,21 @@ public class DisplayModeDirectorTest {
     }
 
     @Test
+    public void testModeSwitching_UserSwitch() {
+        DisplayModeDirector director = createDirectorFromFpsRange(0, 90);
+        assertThat(director.getModeSwitchingType()).isEqualTo(
+                DisplayManager.SWITCHING_TYPE_WITHIN_GROUPS);
+
+        int newModeSwitchingType = DisplayManager.SWITCHING_TYPE_NONE;
+        Settings.Secure.putInt(mContext.getContentResolver(),
+                Settings.Secure.MATCH_CONTENT_FRAME_RATE, newModeSwitchingType);
+        director.onSwitchUser();
+        waitForIdleSync();
+
+        assertThat(director.getModeSwitchingType()).isEqualTo(newModeSwitchingType);
+    }
+
+    @Test
     public void testDefaultDisplayModeIsSelectedIfAvailable() {
         final float[] refreshRates = new float[]{24f, 25f, 30f, 60f, 90f};
         final int defaultModeId = 3;
@@ -1883,6 +1898,62 @@ public class DisplayModeDirectorTest {
     }
 
     @Test
+    public void testPeakRefreshRate_UserSwitch() {
+        when(mDisplayManagerFlags.isBackUpSmoothDisplayAndForcePeakRefreshRateEnabled())
+                .thenReturn(true);
+        DisplayModeDirector director =
+                new DisplayModeDirector(mContext, mHandler, mInjector,
+                        mDisplayManagerFlags, mDisplayDeviceConfigProvider);
+        director.getBrightnessObserver().setDefaultDisplayState(Display.STATE_ON);
+
+        Display.Mode[] modes1 = new Display.Mode[] {
+                new Display.Mode(/* modeId= */ 1, /* width= */ 1280, /* height= */ 720,
+                        /* refreshRate= */ 60),
+                new Display.Mode(/* modeId= */ 2, /* width= */ 1280, /* height= */ 720,
+                        /* refreshRate= */ 130),
+        };
+        Display.Mode[] modes2 = new Display.Mode[] {
+                new Display.Mode(/* modeId= */ 1, /* width= */ 1280, /* height= */ 720,
+                        /* refreshRate= */ 60),
+                new Display.Mode(/* modeId= */ 2, /* width= */ 1280, /* height= */ 720,
+                        /* refreshRate= */ 140),
+        };
+        SparseArray<Display.Mode[]> supportedModesByDisplay = new SparseArray<>();
+        supportedModesByDisplay.put(DISPLAY_ID, modes1);
+        supportedModesByDisplay.put(DISPLAY_ID_2, modes2);
+
+        Sensor lightSensor = createLightSensor();
+        SensorManager sensorManager = createMockSensorManager(lightSensor);
+        director.start(sensorManager);
+        director.injectSupportedModesByDisplay(supportedModesByDisplay);
+
+        // Disable Smooth Display
+        setPeakRefreshRate(RefreshRateSettingsUtils.DEFAULT_REFRESH_RATE);
+
+        Vote vote1 = director.getVote(DISPLAY_ID,
+                Vote.PRIORITY_USER_SETTING_PEAK_RENDER_FRAME_RATE);
+        Vote vote2 = director.getVote(DISPLAY_ID_2,
+                Vote.PRIORITY_USER_SETTING_PEAK_RENDER_FRAME_RATE);
+        assertVoteForRenderFrameRateRange(vote1, /* frameRateLow= */ 0,
+                /* frameRateHigh= */ RefreshRateSettingsUtils.DEFAULT_REFRESH_RATE);
+        assertVoteForRenderFrameRateRange(vote2, /* frameRateLow= */ 0,
+                /* frameRateHigh= */ RefreshRateSettingsUtils.DEFAULT_REFRESH_RATE);
+
+        // Switch user to one that has Smooth Display Enabled
+        Settings.System.putFloat(mContext.getContentResolver(), Settings.System.PEAK_REFRESH_RATE,
+                Float.POSITIVE_INFINITY);
+        director.onSwitchUser();
+        waitForIdleSync();
+
+        vote1 = director.getVote(DISPLAY_ID,
+                Vote.PRIORITY_USER_SETTING_PEAK_RENDER_FRAME_RATE);
+        vote2 = director.getVote(DISPLAY_ID_2,
+                Vote.PRIORITY_USER_SETTING_PEAK_RENDER_FRAME_RATE);
+        assertVoteForRenderFrameRateRange(vote1, /* frameRateLow= */ 0, /* frameRateHigh= */ 130);
+        assertVoteForRenderFrameRateRange(vote2, /* frameRateLow= */ 0, /* frameRateHigh= */ 140);
+    }
+
+    @Test
     @Parameters({
         "true, true, 60",
         "false, true, 50",
@@ -2032,6 +2103,62 @@ public class DisplayModeDirectorTest {
 
         vote = director.getVote(DISPLAY_ID, Vote.PRIORITY_USER_SETTING_MIN_RENDER_FRAME_RATE);
         assertVoteForRenderFrameRateRange(vote, /* frameRateLow= */ 140,
+                /* frameRateHigh= */ Float.POSITIVE_INFINITY);
+    }
+
+    @Test
+    public void testMinRefreshRate_UserSwitch() {
+        when(mDisplayManagerFlags.isBackUpSmoothDisplayAndForcePeakRefreshRateEnabled())
+                .thenReturn(true);
+        DisplayModeDirector director =
+                new DisplayModeDirector(mContext, mHandler, mInjector,
+                        mDisplayManagerFlags, mDisplayDeviceConfigProvider);
+        director.getBrightnessObserver().setDefaultDisplayState(Display.STATE_ON);
+
+        Display.Mode[] modes1 = new Display.Mode[] {
+                new Display.Mode(/* modeId= */ 1, /* width= */ 1280, /* height= */ 720,
+                        /* refreshRate= */ 60),
+                new Display.Mode(/* modeId= */ 2, /* width= */ 1280, /* height= */ 720,
+                        /* refreshRate= */ 130),
+        };
+        Display.Mode[] modes2 = new Display.Mode[] {
+                new Display.Mode(/* modeId= */ 1, /* width= */ 1280, /* height= */ 720,
+                        /* refreshRate= */ 60),
+                new Display.Mode(/* modeId= */ 2, /* width= */ 1280, /* height= */ 720,
+                        /* refreshRate= */ 140),
+        };
+        SparseArray<Display.Mode[]> supportedModesByDisplay = new SparseArray<>();
+        supportedModesByDisplay.put(DISPLAY_ID, modes1);
+        supportedModesByDisplay.put(DISPLAY_ID_2, modes2);
+
+        Sensor lightSensor = createLightSensor();
+        SensorManager sensorManager = createMockSensorManager(lightSensor);
+        director.start(sensorManager);
+        director.injectSupportedModesByDisplay(supportedModesByDisplay);
+
+        // Disable Force Peak Refresh Rate
+        setMinRefreshRate(0);
+
+        Vote vote1 = director.getVote(DISPLAY_ID, Vote.PRIORITY_USER_SETTING_MIN_RENDER_FRAME_RATE);
+        Vote vote2 = director.getVote(DISPLAY_ID_2,
+                Vote.PRIORITY_USER_SETTING_MIN_RENDER_FRAME_RATE);
+        assertVoteForRenderFrameRateRange(vote1, /* frameRateLow= */ 0,
+                /* frameRateHigh= */ Float.POSITIVE_INFINITY);
+        assertVoteForRenderFrameRateRange(vote2, /* frameRateLow= */ 0,
+                /* frameRateHigh= */ Float.POSITIVE_INFINITY);
+
+        // Switch user to one that has Force Peak Refresh Rate enabled
+        Settings.System.putFloat(mContext.getContentResolver(), Settings.System.MIN_REFRESH_RATE,
+                Float.POSITIVE_INFINITY);
+        director.onSwitchUser();
+        waitForIdleSync();
+
+        vote1 = director.getVote(DISPLAY_ID, Vote.PRIORITY_USER_SETTING_MIN_RENDER_FRAME_RATE);
+        vote2 = director.getVote(DISPLAY_ID_2,
+                Vote.PRIORITY_USER_SETTING_MIN_RENDER_FRAME_RATE);
+        assertVoteForRenderFrameRateRange(vote1, /* frameRateLow= */ 130,
+                /* frameRateHigh= */ Float.POSITIVE_INFINITY);
+        assertVoteForRenderFrameRateRange(vote2, /* frameRateLow= */ 140,
                 /* frameRateHigh= */ Float.POSITIVE_INFINITY);
     }
 

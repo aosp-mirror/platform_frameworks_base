@@ -240,18 +240,19 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
          *
          * @param logoDescription The logo description text that will be shown on the prompt.
          * @return This builder.
-         * @throws IllegalArgumentException If logo description is null or exceeds certain character
-         *                                  limit.
+         * @throws IllegalArgumentException If logo description is null.
          */
         @FlaggedApi(FLAG_CUSTOM_BIOMETRIC_PROMPT)
         @RequiresPermission(SET_BIOMETRIC_DIALOG_ADVANCED)
         @NonNull
         public BiometricPrompt.Builder setLogoDescription(@NonNull String logoDescription) {
-            if (logoDescription == null
-                    || logoDescription.length() > MAX_LOGO_DESCRIPTION_CHARACTER_NUMBER) {
-                throw new IllegalArgumentException(
-                        "Logo description passed in can not be null or exceed "
-                                + MAX_LOGO_DESCRIPTION_CHARACTER_NUMBER + " character number.");
+            if (logoDescription == null || logoDescription.isEmpty()) {
+                throw new IllegalArgumentException("Logo description passed in can not be null");
+            }
+            if (logoDescription.length() > MAX_LOGO_DESCRIPTION_CHARACTER_NUMBER) {
+                Log.w(TAG,
+                        "Logo description passed in exceeds" + MAX_LOGO_DESCRIPTION_CHARACTER_NUMBER
+                                + " character number and may be truncated.");
             }
             mPromptInfo.setLogoDescription(logoDescription);
             return this;

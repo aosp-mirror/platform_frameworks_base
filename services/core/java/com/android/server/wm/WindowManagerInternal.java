@@ -690,15 +690,10 @@ public abstract class WindowManagerInternal {
      * <p>Only {@link com.android.server.inputmethod.InputMethodManagerService} is the expected and
      * tested caller of this method.</p>
      *
-     * @param imeToken token to track the active input method. Corresponding IME windows can be
-     *                 identified by checking {@link android.view.WindowManager.LayoutParams#token}.
-     *                 Note that there is no guarantee that the corresponding window is already
-     *                 created
      * @param imeTargetWindowToken token to identify the target window that the IME is associated
      *                             with
      */
-    public abstract void updateInputMethodTargetWindow(@NonNull IBinder imeToken,
-            @NonNull IBinder imeTargetWindowToken);
+    public abstract void updateInputMethodTargetWindow(@NonNull IBinder imeTargetWindowToken);
 
     /**
       * Returns true when the hardware keyboard is available.

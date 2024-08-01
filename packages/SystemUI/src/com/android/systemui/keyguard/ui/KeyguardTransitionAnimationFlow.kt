@@ -177,7 +177,12 @@ constructor(
          * Immediately (after 1ms) emits the given value for every step of the KeyguardTransition.
          */
         fun immediatelyTransitionTo(value: Float): Flow<Float> {
-            return sharedFlow(duration = 1.milliseconds, onStep = { value }, onFinish = { value })
+            return sharedFlow(
+                duration = 1.milliseconds,
+                onStep = { value },
+                onCancel = { value },
+                onFinish = { value }
+            )
         }
     }
 }

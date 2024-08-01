@@ -108,7 +108,7 @@ public class GenericWindowPolicyController extends DisplayWindowPolicyController
     private boolean mActivityLaunchAllowedByDefault;
     @NonNull
     @GuardedBy("mGenericWindowPolicyControllerLock")
-    private final Set<ComponentName> mActivityPolicyExemptions;
+    private final ArraySet<ComponentName> mActivityPolicyExemptions;
     private final boolean mCrossTaskNavigationAllowedByDefault;
     @NonNull
     private final ArraySet<ComponentName> mCrossTaskNavigationExemptions;
@@ -190,7 +190,7 @@ public class GenericWindowPolicyController extends DisplayWindowPolicyController
         mAttributionSource = attributionSource;
         mAllowedUsers = allowedUsers;
         mActivityLaunchAllowedByDefault = activityLaunchAllowedByDefault;
-        mActivityPolicyExemptions = activityPolicyExemptions;
+        mActivityPolicyExemptions = new ArraySet<>(activityPolicyExemptions);
         mCrossTaskNavigationAllowedByDefault = crossTaskNavigationAllowedByDefault;
         mCrossTaskNavigationExemptions = new ArraySet<>(crossTaskNavigationExemptions);
         mPermissionDialogComponent = permissionDialogComponent;

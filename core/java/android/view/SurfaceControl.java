@@ -4898,5 +4898,4 @@ public final class SurfaceControl implements Parcelable {
     public static void notifyShutdown() {
         nativeNotifyShutdown();
     }
-
 }
