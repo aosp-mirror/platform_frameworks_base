@@ -561,9 +561,11 @@ class DesktopModeWindowDecorViewModelTests : ShellTestCase() {
             onLeftSnapClickListenerCaptor = onLeftSnapClickListenerCaptor
         )
 
+        val currentBounds = decor.mTaskInfo.configuration.windowConfiguration.bounds
         onLeftSnapClickListenerCaptor.value.invoke()
 
-        verify(mockDesktopTasksController).snapToHalfScreen(decor.mTaskInfo, SnapPosition.LEFT)
+        verify(mockDesktopTasksController)
+            .snapToHalfScreen(decor.mTaskInfo, currentBounds, SnapPosition.LEFT)
     }
 
     @Test
@@ -590,9 +592,11 @@ class DesktopModeWindowDecorViewModelTests : ShellTestCase() {
             onRightSnapClickListenerCaptor = onRightSnapClickListenerCaptor
         )
 
+        val currentBounds = decor.mTaskInfo.configuration.windowConfiguration.bounds
         onRightSnapClickListenerCaptor.value.invoke()
 
-        verify(mockDesktopTasksController).snapToHalfScreen(decor.mTaskInfo, SnapPosition.RIGHT)
+        verify(mockDesktopTasksController)
+            .snapToHalfScreen(decor.mTaskInfo, currentBounds, SnapPosition.RIGHT)
     }
 
     @Test

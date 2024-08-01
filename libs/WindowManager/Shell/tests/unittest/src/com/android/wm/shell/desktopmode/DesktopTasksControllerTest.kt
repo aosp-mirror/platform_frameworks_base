@@ -85,6 +85,7 @@ import com.android.wm.shell.common.ShellExecutor
 import com.android.wm.shell.common.SyncTransactionQueue
 import com.android.wm.shell.common.desktopmode.DesktopModeTransitionSource.UNKNOWN
 import com.android.wm.shell.common.split.SplitScreenConstants
+import com.android.wm.shell.desktopmode.DesktopTasksController.SnapPosition
 import com.android.wm.shell.desktopmode.DesktopTestHelpers.Companion.createFreeformTask
 import com.android.wm.shell.desktopmode.DesktopTestHelpers.Companion.createFullscreenTask
 import com.android.wm.shell.desktopmode.DesktopTestHelpers.Companion.createHomeTask
@@ -128,10 +129,10 @@ import org.mockito.Mockito.clearInvocations
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.spy
 import org.mockito.Mockito.verify
-import org.mockito.Mockito.`when` as whenever
 import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.atLeastOnce
 import org.mockito.kotlin.capture
+import org.mockito.kotlin.whenever
 import org.mockito.quality.Strictness
 
 /**
@@ -2376,7 +2377,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
         task,
         Point(100, -100), /* position */
         PointF(200f, -200f), /* inputCoordinate */
-        Rect(100, -100, 500, 1000), /* taskBounds */
+        Rect(100, -100, 500, 1000), /* currentDragBounds */
         Rect(0, 50, 2000, 2000) /* validDragArea */)
     val rectAfterEnd = Rect(100, 50, 500, 1150)
     verify(transitions)
@@ -2388,6 +2389,40 @@ class DesktopTasksControllerTest : ShellTestCase() {
               }
             },
             eq(null))
+  }
+
+  @Test
+  fun onDesktopDragEnd_noIndicator_updatesTaskBounds() {
+    val task = setUpFreeformTask()
+    val spyController = spy(controller)
+    val mockSurface = mock(SurfaceControl::class.java)
+    val mockDisplayLayout = mock(DisplayLayout::class.java)
+    whenever(displayController.getDisplayLayout(task.displayId)).thenReturn(mockDisplayLayout)
+    whenever(mockDisplayLayout.stableInsets()).thenReturn(Rect(0, 100, 2000, 2000))
+    spyController.onDragPositioningMove(task, mockSurface, 200f, Rect(100, 200, 500, 1000))
+
+    val currentDragBounds = Rect(100, 200, 500, 1000)
+    whenever(spyController.getVisualIndicator()).thenReturn(desktopModeVisualIndicator)
+    whenever(desktopModeVisualIndicator.updateIndicatorType(anyOrNull(), anyOrNull()))
+      .thenReturn(DesktopModeVisualIndicator.IndicatorType.NO_INDICATOR)
+
+    spyController.onDragPositioningEnd(
+      task,
+      Point(100, 200), /* position */
+      PointF(200f, 300f), /* inputCoordinate */
+      currentDragBounds, /* currentDragBounds */
+      Rect(0, 50, 2000, 2000) /* validDragArea */)
+
+
+    verify(transitions)
+      .startTransition(
+        eq(TRANSIT_CHANGE),
+        Mockito.argThat { wct ->
+          return@argThat wct.changes.any { (token, change) ->
+            change.configuration.windowConfiguration.bounds == currentDragBounds
+          }
+        },
+        eq(null))
   }
 
   @Test
@@ -2472,6 +2507,28 @@ class DesktopTasksControllerTest : ShellTestCase() {
     // Assert bounds set to stable bounds
     val wct = getLatestToggleResizeDesktopTaskWct()
     assertThat(findBoundsChange(wct, task)).isEqualTo(STABLE_BOUNDS)
+  }
+
+  @Test
+  fun getSnapBounds_calculatesBoundsForResizable() {
+    val bounds = Rect(100, 100, 300, 300)
+    val task = setUpFreeformTask(DEFAULT_DISPLAY, bounds).apply {
+      topActivityInfo = ActivityInfo().apply {
+        screenOrientation = SCREEN_ORIENTATION_LANDSCAPE
+        configuration.windowConfiguration.appBounds = bounds
+      }
+      isResizeable = true
+    }
+
+    val currentDragBounds = Rect(0, 100, 200, 300)
+    val expectedBounds = Rect(
+      STABLE_BOUNDS.left, STABLE_BOUNDS.top, STABLE_BOUNDS.right / 2, STABLE_BOUNDS.bottom
+    )
+
+    controller.snapToHalfScreen(task, currentDragBounds, SnapPosition.LEFT)
+    // Assert bounds set to stable bounds
+    val wct = getLatestToggleResizeDesktopTaskWct(currentDragBounds)
+    assertThat(findBoundsChange(wct, task)).isEqualTo(expectedBounds)
   }
 
   @Test
@@ -2720,11 +2777,14 @@ class DesktopTasksControllerTest : ShellTestCase() {
     return arg.value
   }
 
-  private fun getLatestToggleResizeDesktopTaskWct(): WindowContainerTransaction {
+  private fun getLatestToggleResizeDesktopTaskWct(
+    currentBounds: Rect? = null
+  ): WindowContainerTransaction {
     val arg: ArgumentCaptor<WindowContainerTransaction> =
         ArgumentCaptor.forClass(WindowContainerTransaction::class.java)
     if (ENABLE_SHELL_TRANSITIONS) {
-      verify(toggleResizeDesktopTaskTransitionHandler, atLeastOnce()).startTransition(capture(arg))
+      verify(toggleResizeDesktopTaskTransitionHandler, atLeastOnce())
+        .startTransition(capture(arg), eq(currentBounds))
     } else {
       verify(shellTaskOrganizer).applyTransaction(capture(arg))
     }

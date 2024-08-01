@@ -163,14 +163,7 @@ public class VeiledResizeTaskPositioner implements DragPositioningCallback,
         } else {
             DragPositioningCallbackUtility.updateTaskBounds(mRepositionTaskBounds,
                     mTaskBoundsAtDragStart, mRepositionStartPoint, x, y);
-            if (!mTaskBoundsAtDragStart.equals(mRepositionTaskBounds)) {
-                final WindowContainerTransaction wct = new WindowContainerTransaction();
-                wct.setBounds(mDesktopWindowDecoration.mTaskInfo.token, mRepositionTaskBounds);
-                mTransitions.startTransition(TRANSIT_CHANGE, wct, this);
-            } else {
-                // Drag-move ended where it originally started, no need to update WM.
                 mInteractionJankMonitor.end(CUJ_DESKTOP_MODE_DRAG_WINDOW);
-            }
         }
 
         mCtrlType = CTRL_TYPE_UNDEFINED;
