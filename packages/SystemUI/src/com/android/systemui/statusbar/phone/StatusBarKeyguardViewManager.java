@@ -708,7 +708,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
      * Shows the notification keyguard or the bouncer depending on
      * {@link #needsFullscreenBouncer()}.
      */
-    protected void showBouncerOrKeyguard(boolean hideBouncerWhenShowing, boolean isFalsingReset) {
+    protected void showBouncerOrKeyguard(boolean hideBouncerWhenShowing) {
         boolean isDozing = mDozing;
         if (Flags.simPinRaceConditionOnRestart()) {
             KeyguardState toState = mKeyguardTransitionInteractor.getTransitionState().getValue()
@@ -734,12 +734,8 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
                         mPrimaryBouncerInteractor.show(/* isScrimmed= */ true);
                     }
                 }
-            } else if (!isFalsingReset) {
-                // Falsing resets can cause this to flicker, so don't reset in this case
-                Log.i(TAG, "Sim bouncer is already showing, issuing a refresh");
-                mPrimaryBouncerInteractor.hide();
-                mPrimaryBouncerInteractor.show(/* isScrimmed= */ true);
-
+            } else {
+                Log.e(TAG, "Attempted to show the sim bouncer when it is already showing.");
             }
         } else {
             mCentralSurfaces.showKeyguard();
@@ -961,10 +957,6 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
 
     @Override
     public void reset(boolean hideBouncerWhenShowing) {
-        reset(hideBouncerWhenShowing, /* isFalsingReset= */false);
-    }
-
-    public void reset(boolean hideBouncerWhenShowing, boolean isFalsingReset) {
         if (mKeyguardStateController.isShowing() && !bouncerIsAnimatingAway()) {
             final boolean isOccluded = mKeyguardStateController.isOccluded();
             // Hide quick settings.
@@ -976,7 +968,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
                     hideBouncer(false /* destroyView */);
                 }
             } else {
-                showBouncerOrKeyguard(hideBouncerWhenShowing, isFalsingReset);
+                showBouncerOrKeyguard(hideBouncerWhenShowing);
             }
             if (hideBouncerWhenShowing) {
                 hideAlternateBouncer(true);
