@@ -23,13 +23,16 @@ import com.android.systemui.mediaprojection.MediaProjectionMetricsLogger
 import com.android.systemui.res.R
 import java.util.function.Consumer
 
-/** Dialog to select screen recording options */
-class MediaProjectionPermissionDialogDelegate(
+/**
+ * Dialog to select screen recording options for sharing the screen to another app on the same
+ * device.
+ */
+class ShareToAppPermissionDialogDelegate(
     context: Context,
     mediaProjectionConfig: MediaProjectionConfig?,
-    private val onStartRecordingClicked: Consumer<MediaProjectionPermissionDialogDelegate>,
+    private val onStartRecordingClicked:
+        Consumer<BaseMediaProjectionPermissionDialogDelegate<AlertDialog>>,
     private val onCancelClicked: Runnable,
-    private val hasCastingCapabilities: Boolean,
     appName: String,
     forceShowPartialScreenshare: Boolean,
     hostUid: Int,
@@ -39,24 +42,18 @@ class MediaProjectionPermissionDialogDelegate(
         createOptionList(
             context,
             appName,
-            hasCastingCapabilities,
             mediaProjectionConfig,
-            forceShowPartialScreenshare
+            overrideDisableSingleAppOption = forceShowPartialScreenshare,
         ),
         appName,
         hostUid,
-        mediaProjectionMetricsLogger
+        mediaProjectionMetricsLogger,
     ) {
     override fun onCreate(dialog: AlertDialog, savedInstanceState: Bundle?) {
         super.onCreate(dialog, savedInstanceState)
         // TODO(b/270018943): Handle the case of System sharing (not recording nor casting)
-        if (hasCastingCapabilities) {
-            setDialogTitle(R.string.media_projection_entry_cast_permission_dialog_title)
-            setStartButtonText(R.string.media_projection_entry_cast_permission_dialog_continue)
-        } else {
-            setDialogTitle(R.string.media_projection_entry_app_permission_dialog_title)
-            setStartButtonText(R.string.media_projection_entry_app_permission_dialog_continue)
-        }
+        setDialogTitle(R.string.media_projection_entry_app_permission_dialog_title)
+        setStartButtonText(R.string.media_projection_entry_app_permission_dialog_continue)
         setStartButtonOnClickListener {
             // Note that it is important to run this callback before dismissing, so that the
             // callback can disable the dialog exit animation if it wants to.
@@ -73,55 +70,35 @@ class MediaProjectionPermissionDialogDelegate(
         private fun createOptionList(
             context: Context,
             appName: String,
-            hasCastingCapabilities: Boolean,
             mediaProjectionConfig: MediaProjectionConfig?,
-            overrideDisableSingleAppOption: Boolean = false,
+            overrideDisableSingleAppOption: Boolean,
         ): List<ScreenShareOption> {
-            val singleAppWarningText =
-                if (hasCastingCapabilities) {
-                    R.string.media_projection_entry_cast_permission_dialog_warning_single_app
-                } else {
-                    R.string.media_projection_entry_app_permission_dialog_warning_single_app
-                }
-            val entireScreenWarningText =
-                if (hasCastingCapabilities) {
-                    R.string.media_projection_entry_cast_permission_dialog_warning_entire_screen
-                } else {
-                    R.string.media_projection_entry_app_permission_dialog_warning_entire_screen
-                }
-
-            // The single app option should only be disabled if the client has setup a
-            // MediaProjection with MediaProjectionConfig#createConfigForDefaultDisplay AND
-            // it hasn't been overridden by the OVERRIDE_DISABLE_SINGLE_APP_OPTION per-app override.
-            val singleAppOptionDisabled =
-                !overrideDisableSingleAppOption &&
-                    mediaProjectionConfig?.regionToCapture ==
-                        MediaProjectionConfig.CAPTURE_REGION_FIXED_DISPLAY
-
             val singleAppDisabledText =
-                if (singleAppOptionDisabled) {
-                    context.getString(
-                        R.string.media_projection_entry_app_permission_dialog_single_app_disabled,
-                        appName
-                    )
-                } else {
-                    null
-                }
+                MediaProjectionPermissionUtils.getSingleAppDisabledText(
+                    context,
+                    appName,
+                    mediaProjectionConfig,
+                    overrideDisableSingleAppOption,
+                )
             val options =
                 listOf(
                     ScreenShareOption(
                         mode = SINGLE_APP,
                         spinnerText = R.string.screen_share_permission_dialog_option_single_app,
-                        warningText = singleAppWarningText,
+                        warningText =
+                            R.string
+                                .media_projection_entry_app_permission_dialog_warning_single_app,
                         spinnerDisabledText = singleAppDisabledText,
                     ),
                     ScreenShareOption(
                         mode = ENTIRE_SCREEN,
                         spinnerText = R.string.screen_share_permission_dialog_option_entire_screen,
-                        warningText = entireScreenWarningText
+                        warningText =
+                            R.string
+                                .media_projection_entry_app_permission_dialog_warning_entire_screen,
                     )
                 )
-            return if (singleAppOptionDisabled) {
+            return if (singleAppDisabledText != null) {
                 // Make sure "Entire screen" is the first option when "Single App" is disabled.
                 options.reversed()
             } else {
