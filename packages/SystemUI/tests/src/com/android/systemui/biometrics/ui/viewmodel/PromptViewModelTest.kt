@@ -44,7 +44,6 @@ import android.view.MotionEvent
 import android.view.Surface
 import androidx.test.filters.SmallTest
 import com.android.app.activityTaskManager
-import com.android.systemui.Flags.FLAG_BP_TALKBACK
 import com.android.systemui.Flags.FLAG_CONSTRAINT_BP
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.biometrics.AuthController
@@ -100,9 +99,10 @@ private const val USER_ID = 4
 private const val REQUEST_ID = 4L
 private const val CHALLENGE = 2L
 private const val DELAY = 1000L
-private const val OP_PACKAGE_NAME = "biometric.testapp"
+private const val OP_PACKAGE_NAME_WITH_APP_LOGO = "biometric.testapp"
 private const val OP_PACKAGE_NAME_NO_ICON = "biometric.testapp.noicon"
 private const val OP_PACKAGE_NAME_CAN_NOT_BE_FOUND = "can.not.be.found"
+private const val OP_PACKAGE_NAME_WITH_ACTIVITY_LOGO = "should.use.activiy.logo"
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
@@ -112,19 +112,19 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
     @JvmField @Rule var mockitoRule = MockitoJUnit.rule()
 
     @Mock private lateinit var authController: AuthController
-    @Mock private lateinit var applicationInfoWithIcon: ApplicationInfo
-    @Mock private lateinit var applicationInfoNoIcon: ApplicationInfo
+    @Mock private lateinit var applicationInfoWithIconAndDescription: ApplicationInfo
+    @Mock private lateinit var applicationInfoNoIconOrDescription: ApplicationInfo
     @Mock private lateinit var activityInfo: ActivityInfo
     @Mock private lateinit var runningTaskInfo: RunningTaskInfo
 
-    private val defaultLogoIcon = context.getDrawable(R.drawable.ic_android)
-    private val defaultLogoIconWithOverrides = context.getDrawable(R.drawable.ic_add)
+    private val defaultLogoIconFromAppInfo = context.getDrawable(R.drawable.ic_android)
+    private val defaultLogoIconFromActivityInfo = context.getDrawable(R.drawable.ic_add)
     private val logoResFromApp = R.drawable.ic_cake
     private val logoDrawableFromAppRes = context.getDrawable(logoResFromApp)
     private val logoBitmapFromApp = Bitmap.createBitmap(400, 400, Bitmap.Config.RGB_565)
-    private val defaultLogoDescription = "Test Android App"
+    private val defaultLogoDescriptionFromAppInfo = "Test Android App"
+    private val defaultLogoDescriptionFromActivityInfo = "Test Coke App"
     private val logoDescriptionFromApp = "Test Cake App"
-    private val packageNameForLogoWithOverrides = "should.use.overridden.logo"
     /** Prompt panel size padding */
     private val smallHorizontalGuidelinePadding =
         context.resources.getDimensionPixelSize(
@@ -172,16 +172,21 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
 
         // Set up default logo info and app customized info
         whenever(kosmos.packageManager.getApplicationInfo(eq(OP_PACKAGE_NAME_NO_ICON), anyInt()))
-            .thenReturn(applicationInfoNoIcon)
-        whenever(kosmos.packageManager.getApplicationInfo(eq(OP_PACKAGE_NAME), anyInt()))
-            .thenReturn(applicationInfoWithIcon)
+            .thenReturn(applicationInfoNoIconOrDescription)
         whenever(
                 kosmos.packageManager.getApplicationInfo(
-                    eq(packageNameForLogoWithOverrides),
+                    eq(OP_PACKAGE_NAME_WITH_APP_LOGO),
                     anyInt()
                 )
             )
-            .thenReturn(applicationInfoWithIcon)
+            .thenReturn(applicationInfoWithIconAndDescription)
+        whenever(
+                kosmos.packageManager.getApplicationInfo(
+                    eq(OP_PACKAGE_NAME_WITH_ACTIVITY_LOGO),
+                    anyInt()
+                )
+            )
+            .thenReturn(applicationInfoWithIconAndDescription)
         whenever(
                 kosmos.packageManager.getApplicationInfo(
                     eq(OP_PACKAGE_NAME_CAN_NOT_BE_FOUND),
@@ -191,19 +196,27 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
             .thenThrow(NameNotFoundException())
 
         whenever(kosmos.packageManager.getActivityInfo(any(), anyInt())).thenReturn(activityInfo)
-        whenever(kosmos.iconProvider.getIcon(activityInfo)).thenReturn(defaultLogoIconWithOverrides)
-        whenever(kosmos.packageManager.getApplicationIcon(applicationInfoWithIcon))
-            .thenReturn(defaultLogoIcon)
-        whenever(kosmos.packageManager.getApplicationLabel(applicationInfoWithIcon))
-            .thenReturn(defaultLogoDescription)
+        whenever(kosmos.iconProvider.getIcon(activityInfo))
+            .thenReturn(defaultLogoIconFromActivityInfo)
+        whenever(activityInfo.loadLabel(kosmos.packageManager))
+            .thenReturn(defaultLogoDescriptionFromActivityInfo)
+
+        whenever(kosmos.packageManager.getApplicationIcon(applicationInfoWithIconAndDescription))
+            .thenReturn(defaultLogoIconFromAppInfo)
+        whenever(kosmos.packageManager.getApplicationLabel(applicationInfoWithIconAndDescription))
+            .thenReturn(defaultLogoDescriptionFromAppInfo)
+        whenever(kosmos.packageManager.getApplicationIcon(applicationInfoNoIconOrDescription))
+            .thenReturn(null)
+        whenever(kosmos.packageManager.getApplicationLabel(applicationInfoNoIconOrDescription))
+            .thenReturn("")
         whenever(kosmos.packageManager.getUserBadgedIcon(any(), any())).then { it.getArgument(0) }
         whenever(kosmos.packageManager.getUserBadgedLabel(any(), any())).then { it.getArgument(0) }
 
         context.setMockPackageManager(kosmos.packageManager)
         overrideResource(logoResFromApp, logoDrawableFromAppRes)
         overrideResource(
-            R.array.biometric_dialog_package_names_for_logo_with_overrides,
-            arrayOf(packageNameForLogoWithOverrides)
+            R.array.config_useActivityLogoForBiometricPrompt,
+            arrayOf(OP_PACKAGE_NAME_WITH_ACTIVITY_LOGO)
         )
 
         overrideResource(R.dimen.biometric_dialog_fingerprint_icon_width, mockFingerprintIconWidth)
@@ -1356,7 +1369,6 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
     }
 
     @Test
-    @EnableFlags(FLAG_BP_TALKBACK)
     fun hint_for_talkback_guidance() = runGenericTest {
         val hint by collectLastValue(kosmos.promptViewModel.accessibilityHint)
 
@@ -1379,7 +1391,6 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
     }
 
     @Test
-    @EnableFlags(FLAG_BP_TALKBACK)
     fun no_hint_for_talkback_guidance_after_auth() = runGenericTest {
         val hint by collectLastValue(kosmos.promptViewModel.accessibilityHint)
 
@@ -1440,36 +1451,41 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
     @EnableFlags(FLAG_CUSTOM_BIOMETRIC_PROMPT, FLAG_CONSTRAINT_BP)
     fun logo_nullIfPkgNameNotFound() =
         runGenericTest(packageName = OP_PACKAGE_NAME_CAN_NOT_BE_FOUND) {
-            val logo by collectLastValue(kosmos.promptViewModel.logo)
-            assertThat(logo).isNull()
+            val logoInfo by collectLastValue(kosmos.promptViewModel.logoInfo)
+            assertThat(logoInfo).isNotNull()
+            assertThat(logoInfo!!.first).isNull()
         }
 
     @Test
     @EnableFlags(FLAG_CUSTOM_BIOMETRIC_PROMPT, FLAG_CONSTRAINT_BP)
-    fun logo_defaultWithOverrides() =
-        runGenericTest(packageName = packageNameForLogoWithOverrides) {
-            val logo by collectLastValue(kosmos.promptViewModel.logo)
+    fun logo_defaultFromActivityInfo() =
+        runGenericTest(packageName = OP_PACKAGE_NAME_WITH_ACTIVITY_LOGO) {
+            val logoInfo by collectLastValue(kosmos.promptViewModel.logoInfo)
 
-            // 1. PM.getApplicationInfo(packageNameForLogoWithOverrides) is set to return
-            // applicationInfoWithIcon with defaultLogoIcon,
-            // 2. iconProvider.getIcon() is set to return defaultLogoIconForGMSCore
-            // For the apps with packageNameForLogoWithOverrides, 2 should be called instead of 1
-            assertThat(logo).isEqualTo(defaultLogoIconWithOverrides)
+            // 1. PM.getApplicationInfo(OP_PACKAGE_NAME_WITH_ACTIVITY_LOGO) is set to return
+            // applicationInfoWithIconAndDescription with "defaultLogoIconFromAppInfo",
+            // 2. iconProvider.getIcon(activityInfo) is set to return
+            // "defaultLogoIconFromActivityInfo"
+            // For the apps with OP_PACKAGE_NAME_WITH_ACTIVITY_LOGO, 2 should be called instead of 1
+            assertThat(logoInfo).isNotNull()
+            assertThat(logoInfo!!.first).isEqualTo(defaultLogoIconFromActivityInfo)
         }
 
     @Test
     @EnableFlags(FLAG_CUSTOM_BIOMETRIC_PROMPT, FLAG_CONSTRAINT_BP)
     fun logo_defaultIsNull() =
         runGenericTest(packageName = OP_PACKAGE_NAME_NO_ICON) {
-            val logo by collectLastValue(kosmos.promptViewModel.logo)
-            assertThat(logo).isNull()
+            val logoInfo by collectLastValue(kosmos.promptViewModel.logoInfo)
+            assertThat(logoInfo).isNotNull()
+            assertThat(logoInfo!!.first).isNull()
         }
 
     @Test
     @EnableFlags(FLAG_CUSTOM_BIOMETRIC_PROMPT, FLAG_CONSTRAINT_BP)
     fun logo_default() = runGenericTest {
-        val logo by collectLastValue(kosmos.promptViewModel.logo)
-        assertThat(logo).isEqualTo(defaultLogoIcon)
+        val logoInfo by collectLastValue(kosmos.promptViewModel.logoInfo)
+        assertThat(logoInfo).isNotNull()
+        assertThat(logoInfo!!.first).isEqualTo(defaultLogoIconFromAppInfo)
     }
 
     @Test
@@ -1477,47 +1493,60 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
     fun logo_resSetByApp() =
         runGenericTest(logoRes = logoResFromApp) {
             val expectedBitmap = context.getDrawable(logoResFromApp).toBitmap()
-            val logo by collectLastValue(kosmos.promptViewModel.logo)
-            assertThat((logo as BitmapDrawable).bitmap.sameAs(expectedBitmap)).isTrue()
+            val logoInfo by collectLastValue(kosmos.promptViewModel.logoInfo)
+            assertThat(logoInfo).isNotNull()
+            assertThat((logoInfo!!.first as BitmapDrawable).bitmap.sameAs(expectedBitmap)).isTrue()
         }
 
     @Test
     @EnableFlags(FLAG_CUSTOM_BIOMETRIC_PROMPT, FLAG_CONSTRAINT_BP)
     fun logo_bitmapSetByApp() =
         runGenericTest(logoBitmap = logoBitmapFromApp) {
-            val logo by collectLastValue(kosmos.promptViewModel.logo)
-            assertThat((logo as BitmapDrawable).bitmap).isEqualTo(logoBitmapFromApp)
+            val logoInfo by collectLastValue(kosmos.promptViewModel.logoInfo)
+            assertThat((logoInfo!!.first as BitmapDrawable).bitmap).isEqualTo(logoBitmapFromApp)
         }
 
     @Test
     @EnableFlags(FLAG_CUSTOM_BIOMETRIC_PROMPT, FLAG_CONSTRAINT_BP)
     fun logoDescription_emptyIfPkgNameNotFound() =
         runGenericTest(packageName = OP_PACKAGE_NAME_CAN_NOT_BE_FOUND) {
-            val logoDescription by collectLastValue(kosmos.promptViewModel.logoDescription)
-            assertThat(logoDescription).isEqualTo("")
+            val logoInfo by collectLastValue(kosmos.promptViewModel.logoInfo)
+            assertThat(logoInfo!!.second).isEqualTo("")
+        }
+
+    @Test
+    @EnableFlags(FLAG_CUSTOM_BIOMETRIC_PROMPT, FLAG_CONSTRAINT_BP)
+    fun logoDescription_defaultFromActivityInfo() =
+        runGenericTest(packageName = OP_PACKAGE_NAME_WITH_ACTIVITY_LOGO) {
+            val logoInfo by collectLastValue(kosmos.promptViewModel.logoInfo)
+            // 1. PM.getApplicationInfo(packageNameForLogoWithOverrides) is set to return
+            // applicationInfoWithIconAndDescription with defaultLogoDescription,
+            // 2. activityInfo.loadLabel() is set to return defaultLogoDescriptionWithOverrides
+            // For the apps with packageNameForLogoWithOverrides, 2 should be called instead of 1
+            assertThat(logoInfo!!.second).isEqualTo(defaultLogoDescriptionFromActivityInfo)
         }
 
     @Test
     @EnableFlags(FLAG_CUSTOM_BIOMETRIC_PROMPT, FLAG_CONSTRAINT_BP)
     fun logoDescription_defaultIsEmpty() =
         runGenericTest(packageName = OP_PACKAGE_NAME_NO_ICON) {
-            val logoDescription by collectLastValue(kosmos.promptViewModel.logoDescription)
-            assertThat(logoDescription).isEqualTo("")
+            val logoInfo by collectLastValue(kosmos.promptViewModel.logoInfo)
+            assertThat(logoInfo!!.second).isEqualTo("")
         }
 
     @Test
     @EnableFlags(FLAG_CUSTOM_BIOMETRIC_PROMPT, FLAG_CONSTRAINT_BP)
     fun logoDescription_default() = runGenericTest {
-        val logoDescription by collectLastValue(kosmos.promptViewModel.logoDescription)
-        assertThat(logoDescription).isEqualTo(defaultLogoDescription)
+        val logoInfo by collectLastValue(kosmos.promptViewModel.logoInfo)
+        assertThat(logoInfo!!.second).isEqualTo(defaultLogoDescriptionFromAppInfo)
     }
 
     @Test
     @EnableFlags(FLAG_CUSTOM_BIOMETRIC_PROMPT, FLAG_CONSTRAINT_BP)
     fun logoDescription_setByApp() =
         runGenericTest(logoDescription = logoDescriptionFromApp) {
-            val logoDescription by collectLastValue(kosmos.promptViewModel.logoDescription)
-            assertThat(logoDescription).isEqualTo(logoDescriptionFromApp)
+            val logoInfo by collectLastValue(kosmos.promptViewModel.logoInfo)
+            assertThat(logoInfo!!.second).isEqualTo(logoDescriptionFromApp)
         }
 
     @Test
@@ -1692,7 +1721,7 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
         logoRes: Int = 0,
         logoBitmap: Bitmap? = null,
         logoDescription: String? = null,
-        packageName: String = OP_PACKAGE_NAME,
+        packageName: String = OP_PACKAGE_NAME_WITH_APP_LOGO,
         block: suspend TestScope.() -> Unit,
     ) {
         val topActivity = ComponentName(packageName, "test app")
@@ -1951,7 +1980,7 @@ private fun PromptSelectorInteractor.initializePrompt(
     logoResFromApp: Int = 0,
     logoBitmapFromApp: Bitmap? = null,
     logoDescriptionFromApp: String? = null,
-    packageName: String = OP_PACKAGE_NAME,
+    packageName: String = OP_PACKAGE_NAME_WITH_APP_LOGO,
 ) {
     val info =
         PromptInfo().apply {

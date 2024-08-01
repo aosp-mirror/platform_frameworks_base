@@ -32,6 +32,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.fastCoerceIn
 import androidx.compose.ui.util.fastLastOrNull
+import com.android.compose.animation.scene.content.state.TransitionState
 import kotlin.math.roundToInt
 
 /**

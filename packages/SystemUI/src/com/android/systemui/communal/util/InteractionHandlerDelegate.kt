@@ -26,12 +26,14 @@ import androidx.core.util.component2
 import com.android.systemui.animation.ActivityTransitionAnimator
 import com.android.systemui.communal.domain.interactor.CommunalSceneInteractor
 import com.android.systemui.communal.widgets.CommunalTransitionAnimatorController
+import com.android.systemui.log.core.Logger
 
 /** A delegate that can be used to launch activities from [RemoteViews] */
 class InteractionHandlerDelegate(
     private val communalSceneInteractor: CommunalSceneInteractor,
     private val findViewToAnimate: (View) -> Boolean,
     private val intentStarter: IntentStarter,
+    private val logger: Logger,
 ) : RemoteViews.InteractionHandler {
 
     /** Responsible for starting the pending intent for launching activities. */
@@ -49,6 +51,10 @@ class InteractionHandlerDelegate(
         pendingIntent: PendingIntent,
         response: RemoteViews.RemoteResponse
     ): Boolean {
+        logger.i({ "Starting $str1 ($str2)" }) {
+            str1 = pendingIntent.toLoggingString()
+            str2 = pendingIntent.creatorPackage
+        }
         val launchOptions = response.getLaunchOptions(view)
         return when {
             pendingIntent.isActivity -> {
@@ -82,3 +88,12 @@ class InteractionHandlerDelegate(
         return null
     }
 }
+
+private fun PendingIntent.toLoggingString() =
+    when {
+        isActivity -> "activity"
+        isBroadcast -> "broadcast"
+        isForegroundService -> "fgService"
+        isService -> "service"
+        else -> "unknown"
+    }

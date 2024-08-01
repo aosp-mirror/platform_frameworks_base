@@ -1764,7 +1764,7 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
 
         // Check whether the participants were animated from back navigation.
         mController.mAtm.mBackNavigationController.onTransactionReady(this, mTargets,
-                transaction);
+                transaction, mFinishTransaction);
         final TransitionInfo info = calculateTransitionInfo(mType, mFlags, mTargets, transaction);
         info.setDebugId(mSyncId);
         mController.assignTrack(this, info);
@@ -2201,6 +2201,11 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
                         && !showWallpaper && !wallpaper.getDisplayContent().isKeyguardLocked()
                         && !wallpaperIsOwnTarget(wallpaper)) {
                     wallpaper.setVisibleRequested(false);
+                }
+                if (showWallpaper && wallpaper.isVisibleRequested()) {
+                    for (int j = wallpaper.mChildren.size() - 1; j >= 0; --j) {
+                        wallpaper.mChildren.get(j).mWinAnimator.prepareSurfaceLocked(t);
+                    }
                 }
             }
         }

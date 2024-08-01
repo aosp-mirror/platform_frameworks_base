@@ -16,6 +16,7 @@
 
 package com.android.credentialmanager.common.ui.components
 
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.material3.Text
@@ -43,7 +44,7 @@ fun WearDisplayNameText(text: String, modifier: Modifier = Modifier) {
     Text(
         modifier = modifier.wrapContentSize(),
         text = text,
-        color = WearMaterialTheme.colors.onSurfaceVariant,
+        color = WearMaterialTheme.colors.onSurface,
         textAlign = TextAlign.Center,
         overflow = TextOverflow.Ellipsis,
         maxLines = 2,
@@ -60,7 +61,7 @@ fun WearUsernameText(
     Text(
         modifier = modifier.padding(start = 8.dp, end = 8.dp).wrapContentSize(),
         text = text,
-        color = WearMaterialTheme.colors.onSurfaceVariant,
+        color = WearMaterialTheme.colors.onSurface,
         style = WearMaterialTheme.typography.caption1,
         overflow = TextOverflow.Ellipsis,
         textAlign = textAlign,
@@ -91,12 +92,13 @@ fun WearButtonText(
 @Composable
 fun WearSecondaryLabel(
     text: String,
-    modifier: Modifier = Modifier,
+    color: Color = WearMaterialTheme.colors.onSurface,
+    modifier: Modifier = Modifier
 ) {
     Text(
-        modifier = modifier.wrapContentSize(),
+        modifier = modifier.fillMaxSize(),
         text = text,
-        color = WearMaterialTheme.colors.onSurfaceVariant,
+        color = color,
         style = WearMaterialTheme.typography.caption1,
         overflow = TextOverflow.Ellipsis,
         textAlign = TextAlign.Start,

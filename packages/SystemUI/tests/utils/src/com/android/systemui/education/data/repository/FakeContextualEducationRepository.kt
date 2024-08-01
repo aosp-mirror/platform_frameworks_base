@@ -16,8 +16,8 @@
 
 package com.android.systemui.education.data.repository
 
+import com.android.systemui.contextualeducation.GestureType
 import com.android.systemui.education.data.model.GestureEduModel
-import com.android.systemui.shared.education.GestureType
 import java.time.Clock
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow

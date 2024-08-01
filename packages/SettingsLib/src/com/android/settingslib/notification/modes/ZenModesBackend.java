@@ -28,6 +28,7 @@ import android.service.notification.ZenModeConfig;
 import android.util.Log;
 
 import androidx.annotation.DrawableRes;
+import androidx.annotation.VisibleForTesting;
 
 import com.android.settingslib.R;
 
@@ -59,6 +60,12 @@ public class ZenModesBackend {
             sInstance = new ZenModesBackend(context.getApplicationContext());
         }
         return sInstance;
+    }
+
+    /** Replaces the singleton instance of {@link ZenModesBackend} by the provided one. */
+    @VisibleForTesting(otherwise = VisibleForTesting.NONE)
+    public static void setInstance(@Nullable ZenModesBackend backend) {
+        sInstance = backend;
     }
 
     ZenModesBackend(Context context) {

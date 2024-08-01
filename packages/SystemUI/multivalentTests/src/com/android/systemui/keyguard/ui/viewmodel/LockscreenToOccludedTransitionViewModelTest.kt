@@ -201,6 +201,24 @@ class LockscreenToOccludedTransitionViewModelTest(flags: FlagsParameterization) 
             assertThat(actual).isEqualTo(0f)
         }
 
+    @Test
+    fun deviceEntryParentViewAlpha_shadeNotExpanded_onCancel() =
+        testScope.runTest {
+            val actual by collectLastValue(underTest.deviceEntryParentViewAlpha)
+            shadeExpanded(false)
+            runCurrent()
+
+            // START transition
+            repository.sendTransitionStep(step(0f, TransitionState.STARTED))
+            assertThat(actual).isEqualTo(1f)
+
+            // WHEN transition is canceled
+            repository.sendTransitionStep(step(1f, TransitionState.CANCELED))
+
+            // THEN alpha is immediately set to 0f
+            assertThat(actual).isEqualTo(0f)
+        }
+
     private fun step(
         value: Float,
         state: TransitionState = TransitionState.RUNNING,

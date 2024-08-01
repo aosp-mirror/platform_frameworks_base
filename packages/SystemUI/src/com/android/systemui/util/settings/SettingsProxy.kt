@@ -15,6 +15,7 @@
  */
 package com.android.systemui.util.settings
 
+import android.annotation.UserIdInt
 import android.content.ContentResolver
 import android.database.ContentObserver
 import android.net.Uri
@@ -628,5 +629,9 @@ interface SettingsProxy {
                 throw SettingNotFoundException(name)
             }
         }
+    }
+
+    fun interface CurrentUserIdProvider {
+        @UserIdInt fun getUserId(): Int
     }
 }

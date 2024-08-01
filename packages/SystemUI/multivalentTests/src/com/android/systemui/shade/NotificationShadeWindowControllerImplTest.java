@@ -60,7 +60,6 @@ import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.res.R;
 import com.android.systemui.scene.FakeWindowRootViewComponent;
 import com.android.systemui.settings.UserTracker;
-import com.android.systemui.shade.ui.viewmodel.NotificationShadeWindowModel;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
 import com.android.systemui.statusbar.phone.DozeParameters;
@@ -107,7 +106,6 @@ public class NotificationShadeWindowControllerImplTest extends SysuiTestCase {
     @Mock private ShadeWindowLogger mShadeWindowLogger;
     @Mock private SelectedUserInteractor mSelectedUserInteractor;
     @Mock private UserTracker mUserTracker;
-    @Mock private NotificationShadeWindowModel mNotificationShadeWindowModel;
     @Captor private ArgumentCaptor<WindowManager.LayoutParams> mLayoutParameters;
     @Captor private ArgumentCaptor<StatusBarStateController.StateListener> mStateListener;
 
@@ -163,7 +161,7 @@ public class NotificationShadeWindowControllerImplTest extends SysuiTestCase {
                 mShadeWindowLogger,
                 () -> mSelectedUserInteractor,
                 mUserTracker,
-                mNotificationShadeWindowModel,
+                mKosmos.getNotificationShadeWindowModel(),
                 mKosmos::getCommunalInteractor) {
                     @Override
                     protected boolean isDebuggable() {

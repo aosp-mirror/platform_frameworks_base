@@ -58,7 +58,6 @@ import androidx.test.filters.SmallTest;
 import com.android.internal.display.BrightnessSynchronizer;
 import com.android.server.display.feature.flags.Flags;
 import com.android.systemui.SysuiTestCase;
-import com.android.systemui.dock.DockManager;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
 import com.android.systemui.statusbar.phone.DozeParameters;
 import com.android.systemui.statusbar.policy.DevicePostureController;
@@ -105,8 +104,6 @@ public class DozeScreenBrightnessTest extends SysuiTestCase {
     @Mock
     DozeParameters mDozeParameters;
     @Mock
-    DockManager mDockManager;
-    @Mock
     DevicePostureController mDevicePostureController;
     @Mock
     DozeLog mDozeLog;
@@ -114,8 +111,8 @@ public class DozeScreenBrightnessTest extends SysuiTestCase {
     SystemSettings mSystemSettings;
     @Mock
     DisplayManager mDisplayManager;
-    private FakeExecutor mFakeExecutor = new FakeExecutor(new FakeSystemClock());
-    private FakeThreadFactory mFakeThreadFactory = new FakeThreadFactory(mFakeExecutor);
+    private final FakeExecutor mFakeExecutor = new FakeExecutor(new FakeSystemClock());
+    private final FakeThreadFactory mFakeThreadFactory = new FakeThreadFactory(mFakeExecutor);
 
     private DozeScreenBrightness mScreen;
 
@@ -249,32 +246,35 @@ public class DozeScreenBrightnessTest extends SysuiTestCase {
     }
 
     @Test
-    @RequiresFlagsDisabled(Flags.FLAG_DOZE_BRIGHTNESS_FLOAT)
-    public void testAod_usesLightSensorNotClampingToAutoBrightnessValue_Int() {
-        int maxBrightness = 3;
-        when(mSystemSettings.getIntForUser(eq(Settings.System.SCREEN_BRIGHTNESS), anyInt(),
-                eq(UserHandle.USER_CURRENT))).thenReturn(maxBrightness);
+    @RequiresFlagsEnabled(Flags.FLAG_DOZE_BRIGHTNESS_FLOAT)
+    public void initialBrightness_clampsToAutoBrightnessValue_Float() {
+        float maxBrightnessFromAutoBrightness = DEFAULT_BRIGHTNESS_FLOAT / 2;
+        when(mDisplayManager.getBrightness(Display.DEFAULT_DISPLAY)).thenReturn(
+                maxBrightnessFromAutoBrightness
+        );
         when(mSystemSettings.getIntForUser(eq(Settings.System.SCREEN_BRIGHTNESS_MODE), anyInt(),
                 eq(UserHandle.USER_CURRENT)))
                 .thenReturn(Settings.System.SCREEN_BRIGHTNESS_MODE_AUTOMATIC);
 
         mScreen.transitionTo(UNINITIALIZED, INITIALIZED);
-        assertEquals(DEFAULT_BRIGHTNESS_INT, mServiceFake.screenBrightnessInt);
-        assertTrue(Float.isNaN(mServiceFake.screenBrightnessFloat));
+        assertEquals(maxBrightnessFromAutoBrightness, mServiceFake.screenBrightnessFloat,
+                DELTA);
+        assertEquals(PowerManager.BRIGHTNESS_DEFAULT, mServiceFake.screenBrightnessInt);
     }
 
     @Test
-    @RequiresFlagsEnabled(Flags.FLAG_DOZE_BRIGHTNESS_FLOAT)
-    public void testAod_usesLightSensorNotClampingToAutoBrightnessValue_Float() {
-        float maxBrightness = DEFAULT_BRIGHTNESS_FLOAT / 2;
-        when(mDisplayManager.getBrightness(Display.DEFAULT_DISPLAY)).thenReturn(maxBrightness);
+    @RequiresFlagsDisabled(Flags.FLAG_DOZE_BRIGHTNESS_FLOAT)
+    public void initialBrightness_clampsToAutoBrightnessValue_Int() {
+        int maxBrightnessFromAutoBrightness = DEFAULT_BRIGHTNESS_INT / 2;
+        when(mSystemSettings.getIntForUser(eq(Settings.System.SCREEN_BRIGHTNESS), anyInt(),
+                eq(UserHandle.USER_CURRENT))).thenReturn(maxBrightnessFromAutoBrightness);
         when(mSystemSettings.getIntForUser(eq(Settings.System.SCREEN_BRIGHTNESS_MODE), anyInt(),
                 eq(UserHandle.USER_CURRENT)))
                 .thenReturn(Settings.System.SCREEN_BRIGHTNESS_MODE_AUTOMATIC);
 
         mScreen.transitionTo(UNINITIALIZED, INITIALIZED);
-        assertEquals(DEFAULT_BRIGHTNESS_FLOAT, mServiceFake.screenBrightnessFloat, DELTA);
-        assertEquals(PowerManager.BRIGHTNESS_DEFAULT, mServiceFake.screenBrightnessInt);
+        assertEquals(maxBrightnessFromAutoBrightness, mServiceFake.screenBrightnessInt);
+        assertTrue(Float.isNaN(mServiceFake.screenBrightnessFloat));
     }
 
     @Test
@@ -375,6 +375,54 @@ public class DozeScreenBrightnessTest extends SysuiTestCase {
         // THEN brightness is updated
         assertEquals(SENSOR_TO_BRIGHTNESS_FLOAT[3], mServiceFake.screenBrightnessFloat, DELTA);
         assertEquals(PowerManager.BRIGHTNESS_DEFAULT, mServiceFake.screenBrightnessInt);
+    }
+
+    @Test
+    @RequiresFlagsEnabled(Flags.FLAG_DOZE_BRIGHTNESS_FLOAT)
+    public void lightSensorChangesInAod_doesNotClampToAutoBrightnessValue_Float() {
+        // GIVEN auto brightness reports low brightness
+        float maxBrightnessFromAutoBrightness = DEFAULT_BRIGHTNESS_FLOAT / 2;
+        when(mDisplayManager.getBrightness(Display.DEFAULT_DISPLAY))
+                .thenReturn(maxBrightnessFromAutoBrightness);
+        when(mSystemSettings.getIntForUser(eq(Settings.System.SCREEN_BRIGHTNESS_MODE), anyInt(),
+                eq(UserHandle.USER_CURRENT)))
+                .thenReturn(Settings.System.SCREEN_BRIGHTNESS_MODE_AUTOMATIC);
+
+        // GIVEN the device is DOZE_AOD and the display state changes to ON
+        mScreen.transitionTo(UNINITIALIZED, INITIALIZED);
+        mScreen.transitionTo(INITIALIZED, DOZE_AOD);
+        waitForSensorManager();
+
+        // WHEN new sensor event sent
+        mSensor.sendSensorEvent(3);
+
+        // THEN brightness is updated
+        assertEquals(SENSOR_TO_BRIGHTNESS_FLOAT[3], mServiceFake.screenBrightnessFloat, DELTA);
+        assertEquals(PowerManager.BRIGHTNESS_DEFAULT, mServiceFake.screenBrightnessInt);
+    }
+
+    @Test
+    @RequiresFlagsDisabled(Flags.FLAG_DOZE_BRIGHTNESS_FLOAT)
+    public void lightSensorChangesInAod_doesNotClampToAutoBrightnessValue_Int() {
+        // GIVEN auto brightness reports low brightness
+        int maxBrightnessFromAutoBrightness = 1;
+        when(mSystemSettings.getIntForUser(eq(Settings.System.SCREEN_BRIGHTNESS), anyInt(),
+                eq(UserHandle.USER_CURRENT))).thenReturn(maxBrightnessFromAutoBrightness);
+        when(mSystemSettings.getIntForUser(eq(Settings.System.SCREEN_BRIGHTNESS_MODE), anyInt(),
+                eq(UserHandle.USER_CURRENT)))
+                .thenReturn(Settings.System.SCREEN_BRIGHTNESS_MODE_AUTOMATIC);
+
+        // GIVEN the device is DOZE_AOD and the display state changes to ON
+        mScreen.transitionTo(UNINITIALIZED, INITIALIZED);
+        mScreen.transitionTo(INITIALIZED, DOZE_AOD);
+        waitForSensorManager();
+
+        // WHEN new sensor event sent
+        mSensor.sendSensorEvent(3);
+
+        // THEN brightness is updated
+        assertEquals(SENSOR_TO_BRIGHTNESS_INT[3], mServiceFake.screenBrightnessInt);
+        assertTrue(Float.isNaN(mServiceFake.screenBrightnessFloat));
     }
 
     @Test

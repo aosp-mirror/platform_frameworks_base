@@ -42,7 +42,6 @@ import android.content.Context;
 import android.graphics.Rect;
 import android.hardware.display.DisplayManager;
 import android.inputmethodservice.InputMethodService;
-import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.Trace;
 import android.util.Log;
@@ -425,7 +424,7 @@ public class TaskbarDelegate implements CommandQueue.Callbacks,
     }
 
     @Override
-    public void setImeWindowStatus(int displayId, IBinder token, int vis, int backDisposition,
+    public void setImeWindowStatus(int displayId, int vis, int backDisposition,
             boolean showImeSwitcher) {
         boolean imeShown = mNavBarHelper.isImeShown(vis);
         if (!imeShown) {

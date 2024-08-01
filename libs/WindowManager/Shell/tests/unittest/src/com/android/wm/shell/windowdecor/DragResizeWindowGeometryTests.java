@@ -25,6 +25,7 @@ import static com.android.wm.shell.windowdecor.DragPositioningCallback.CTRL_TYPE
 import static com.google.common.truth.Truth.assertThat;
 
 import android.annotation.NonNull;
+import android.content.Context;
 import android.graphics.Point;
 import android.graphics.Region;
 import android.platform.test.annotations.DisableFlags;
@@ -36,6 +37,7 @@ import android.util.Size;
 import androidx.test.filters.SmallTest;
 
 import com.android.window.flags.Flags;
+import com.android.wm.shell.ShellTestCase;
 
 import com.google.common.testing.EqualsTester;
 
@@ -51,7 +53,7 @@ import org.junit.runner.RunWith;
  */
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
-public class DragResizeWindowGeometryTests {
+public class DragResizeWindowGeometryTests extends ShellTestCase {
     private static final Size TASK_SIZE = new Size(500, 1000);
     private static final int TASK_CORNER_RADIUS = 10;
     private static final int EDGE_RESIZE_THICKNESS = 15;
@@ -107,7 +109,7 @@ public class DragResizeWindowGeometryTests {
     @Test
     public void testRegionUnionContainsEdges() {
         Region region = new Region();
-        GEOMETRY.union(region);
+        GEOMETRY.union(mContext, region);
         assertThat(region.isComplex()).isTrue();
         // Region excludes task area. Note that coordinates start from top left.
         assertThat(region.contains(TASK_SIZE.getWidth() / 2, TASK_SIZE.getHeight() / 2)).isFalse();
@@ -147,10 +149,10 @@ public class DragResizeWindowGeometryTests {
     @EnableFlags(Flags.FLAG_ENABLE_WINDOWING_EDGE_DRAG_RESIZE)
     public void testRegionUnion_edgeDragResizeEnabled_containsLargeCorners() {
         Region region = new Region();
-        GEOMETRY.union(region);
+        GEOMETRY.union(mContext, region);
         final int cornerRadius = LARGE_CORNER_SIZE / 2;
 
-        new TestPoints(TASK_SIZE, cornerRadius).validateRegion(region);
+        new TestPoints(mContext, TASK_SIZE, cornerRadius).validateRegion(region);
     }
 
     /**
@@ -161,10 +163,10 @@ public class DragResizeWindowGeometryTests {
     @DisableFlags(Flags.FLAG_ENABLE_WINDOWING_EDGE_DRAG_RESIZE)
     public void testRegionUnion_edgeDragResizeDisabled_containsFineCorners() {
         Region region = new Region();
-        GEOMETRY.union(region);
+        GEOMETRY.union(mContext, region);
         final int cornerRadius = FINE_CORNER_SIZE / 2;
 
-        new TestPoints(TASK_SIZE, cornerRadius).validateRegion(region);
+        new TestPoints(mContext, TASK_SIZE, cornerRadius).validateRegion(region);
     }
 
     @Test
@@ -186,16 +188,16 @@ public class DragResizeWindowGeometryTests {
     }
 
     private void validateCtrlTypeForEdges(boolean isTouchscreen, boolean isEdgeResizePermitted) {
-        assertThat(GEOMETRY.calculateCtrlType(isTouchscreen, isEdgeResizePermitted,
+        assertThat(GEOMETRY.calculateCtrlType(mContext, isTouchscreen, isEdgeResizePermitted,
                 LEFT_EDGE_POINT.x, LEFT_EDGE_POINT.y)).isEqualTo(
                         isEdgeResizePermitted ? CTRL_TYPE_LEFT : CTRL_TYPE_UNDEFINED);
-        assertThat(GEOMETRY.calculateCtrlType(isTouchscreen, isEdgeResizePermitted,
+        assertThat(GEOMETRY.calculateCtrlType(mContext, isTouchscreen, isEdgeResizePermitted,
                 TOP_EDGE_POINT.x, TOP_EDGE_POINT.y)).isEqualTo(
                         isEdgeResizePermitted ? CTRL_TYPE_TOP : CTRL_TYPE_UNDEFINED);
-        assertThat(GEOMETRY.calculateCtrlType(isTouchscreen, isEdgeResizePermitted,
+        assertThat(GEOMETRY.calculateCtrlType(mContext, isTouchscreen, isEdgeResizePermitted,
                 RIGHT_EDGE_POINT.x, RIGHT_EDGE_POINT.y)).isEqualTo(
                         isEdgeResizePermitted ? CTRL_TYPE_RIGHT : CTRL_TYPE_UNDEFINED);
-        assertThat(GEOMETRY.calculateCtrlType(isTouchscreen, isEdgeResizePermitted,
+        assertThat(GEOMETRY.calculateCtrlType(mContext, isTouchscreen, isEdgeResizePermitted,
                 BOTTOM_EDGE_POINT.x, BOTTOM_EDGE_POINT.y)).isEqualTo(
                         isEdgeResizePermitted ? CTRL_TYPE_BOTTOM : CTRL_TYPE_UNDEFINED);
     }
@@ -203,8 +205,9 @@ public class DragResizeWindowGeometryTests {
     @Test
     @EnableFlags(Flags.FLAG_ENABLE_WINDOWING_EDGE_DRAG_RESIZE)
     public void testCalculateControlType_edgeDragResizeEnabled_corners() {
-        final TestPoints fineTestPoints = new TestPoints(TASK_SIZE, FINE_CORNER_SIZE / 2);
-        final TestPoints largeCornerTestPoints = new TestPoints(TASK_SIZE, LARGE_CORNER_SIZE / 2);
+        final TestPoints fineTestPoints = new TestPoints(mContext, TASK_SIZE, FINE_CORNER_SIZE / 2);
+        final TestPoints largeCornerTestPoints =
+                new TestPoints(mContext, TASK_SIZE, LARGE_CORNER_SIZE / 2);
 
         // When the flag is enabled, points within fine corners should pass regardless of touch or
         // not. Points outside fine corners should not pass when using a course input (non-touch).
@@ -241,8 +244,10 @@ public class DragResizeWindowGeometryTests {
     @Test
     @DisableFlags(Flags.FLAG_ENABLE_WINDOWING_EDGE_DRAG_RESIZE)
     public void testCalculateControlType_edgeDragResizeDisabled_corners() {
-        final TestPoints fineTestPoints = new TestPoints(TASK_SIZE, FINE_CORNER_SIZE / 2);
-        final TestPoints largeCornerTestPoints = new TestPoints(TASK_SIZE, LARGE_CORNER_SIZE / 2);
+        final TestPoints fineTestPoints =
+                new TestPoints(mContext, TASK_SIZE, FINE_CORNER_SIZE / 2);
+        final TestPoints largeCornerTestPoints =
+                new TestPoints(mContext, TASK_SIZE, LARGE_CORNER_SIZE / 2);
 
         // When the flag is disabled, points within fine corners should pass only from touchscreen.
         // Edge resize permitted (indicating the event is from a cursor/stylus) should have no
@@ -284,6 +289,7 @@ public class DragResizeWindowGeometryTests {
      * <p>Creates points that are both just within the bounds of each corner, and just outside.
      */
     private static final class TestPoints {
+        private final Context mContext;
         private final Point mTopLeftPoint;
         private final Point mTopLeftPointOutside;
         private final Point mTopRightPoint;
@@ -293,7 +299,8 @@ public class DragResizeWindowGeometryTests {
         private final Point mBottomRightPoint;
         private final Point mBottomRightPointOutside;
 
-        TestPoints(@NonNull Size taskSize, int cornerRadius) {
+        TestPoints(@NonNull Context context, @NonNull Size taskSize, int cornerRadius) {
+            mContext = context;
             // Point just inside corner square is included.
             mTopLeftPoint = new Point(-cornerRadius + 1, -cornerRadius + 1);
             // Point just outside corner square is excluded.
@@ -340,17 +347,17 @@ public class DragResizeWindowGeometryTests {
         public void validateCtrlTypeForInnerPoints(@NonNull DragResizeWindowGeometry geometry,
                 boolean isTouchscreen, boolean isEdgeResizePermitted,
                 boolean expectedWithinGeometry) {
-            assertThat(geometry.calculateCtrlType(isTouchscreen, isEdgeResizePermitted,
+            assertThat(geometry.calculateCtrlType(mContext, isTouchscreen, isEdgeResizePermitted,
                     mTopLeftPoint.x, mTopLeftPoint.y)).isEqualTo(
                     expectedWithinGeometry ? CTRL_TYPE_LEFT | CTRL_TYPE_TOP : CTRL_TYPE_UNDEFINED);
-            assertThat(geometry.calculateCtrlType(isTouchscreen, isEdgeResizePermitted,
+            assertThat(geometry.calculateCtrlType(mContext, isTouchscreen, isEdgeResizePermitted,
                     mTopRightPoint.x, mTopRightPoint.y)).isEqualTo(
                     expectedWithinGeometry ? CTRL_TYPE_RIGHT | CTRL_TYPE_TOP : CTRL_TYPE_UNDEFINED);
-            assertThat(geometry.calculateCtrlType(isTouchscreen, isEdgeResizePermitted,
+            assertThat(geometry.calculateCtrlType(mContext, isTouchscreen, isEdgeResizePermitted,
                     mBottomLeftPoint.x, mBottomLeftPoint.y)).isEqualTo(
                     expectedWithinGeometry ? CTRL_TYPE_LEFT | CTRL_TYPE_BOTTOM
                             : CTRL_TYPE_UNDEFINED);
-            assertThat(geometry.calculateCtrlType(isTouchscreen, isEdgeResizePermitted,
+            assertThat(geometry.calculateCtrlType(mContext, isTouchscreen, isEdgeResizePermitted,
                     mBottomRightPoint.x, mBottomRightPoint.y)).isEqualTo(
                     expectedWithinGeometry ? CTRL_TYPE_RIGHT | CTRL_TYPE_BOTTOM
                             : CTRL_TYPE_UNDEFINED);
@@ -363,17 +370,17 @@ public class DragResizeWindowGeometryTests {
         public void validateCtrlTypeForOutsidePoints(@NonNull DragResizeWindowGeometry geometry,
                 boolean isTouchscreen, boolean isEdgeResizePermitted,
                 boolean expectedWithinGeometry) {
-            assertThat(geometry.calculateCtrlType(isTouchscreen, isEdgeResizePermitted,
+            assertThat(geometry.calculateCtrlType(mContext, isTouchscreen, isEdgeResizePermitted,
                     mTopLeftPointOutside.x, mTopLeftPointOutside.y)).isEqualTo(
                     expectedWithinGeometry ? CTRL_TYPE_LEFT | CTRL_TYPE_TOP : CTRL_TYPE_UNDEFINED);
-            assertThat(geometry.calculateCtrlType(isTouchscreen, isEdgeResizePermitted,
+            assertThat(geometry.calculateCtrlType(mContext, isTouchscreen, isEdgeResizePermitted,
                     mTopRightPointOutside.x, mTopRightPointOutside.y)).isEqualTo(
                     expectedWithinGeometry ? CTRL_TYPE_RIGHT | CTRL_TYPE_TOP : CTRL_TYPE_UNDEFINED);
-            assertThat(geometry.calculateCtrlType(isTouchscreen, isEdgeResizePermitted,
+            assertThat(geometry.calculateCtrlType(mContext, isTouchscreen, isEdgeResizePermitted,
                     mBottomLeftPointOutside.x, mBottomLeftPointOutside.y)).isEqualTo(
                     expectedWithinGeometry ? CTRL_TYPE_LEFT | CTRL_TYPE_BOTTOM
                             : CTRL_TYPE_UNDEFINED);
-            assertThat(geometry.calculateCtrlType(isTouchscreen, isEdgeResizePermitted,
+            assertThat(geometry.calculateCtrlType(mContext, isTouchscreen, isEdgeResizePermitted,
                     mBottomRightPointOutside.x, mBottomRightPointOutside.y)).isEqualTo(
                     expectedWithinGeometry ? CTRL_TYPE_RIGHT | CTRL_TYPE_BOTTOM
                             : CTRL_TYPE_UNDEFINED);

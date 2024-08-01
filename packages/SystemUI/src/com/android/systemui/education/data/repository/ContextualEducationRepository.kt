@@ -17,9 +17,9 @@
 package com.android.systemui.education.data.repository
 
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.contextualeducation.GestureType
 import com.android.systemui.education.dagger.ContextualEducationModule.EduClock
 import com.android.systemui.education.data.model.GestureEduModel
-import com.android.systemui.shared.education.GestureType
 import java.time.Clock
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow

@@ -1612,7 +1612,8 @@ class ActivityMetricsLogger {
 
         int positionToLog = APP_COMPAT_STATE_CHANGED__LETTERBOX_POSITION__NOT_LETTERBOXED_POSITION;
         if (isAppCompateStateChangedToLetterboxed(state)) {
-            positionToLog = activity.mLetterboxUiController.getLetterboxPositionForLogging();
+            positionToLog = activity.mAppCompatController.getAppCompatReachabilityOverrides()
+                    .getLetterboxPositionForLogging();
         }
         FrameworkStatsLog.write(FrameworkStatsLog.APP_COMPAT_STATE_CHANGED,
                 packageUid, state, positionToLog);

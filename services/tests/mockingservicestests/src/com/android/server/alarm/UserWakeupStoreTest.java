@@ -23,7 +23,6 @@ import static com.android.server.alarm.UserWakeupStore.USER_START_TIME_DEVIATION
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import static org.testng.AssertJUnit.assertFalse;
 
 import android.os.Environment;
 import android.os.FileUtils;
@@ -52,7 +51,6 @@ public class UserWakeupStoreTest {
     private static final int USER_ID_1 = 10;
     private static final int USER_ID_2 = 11;
     private static final int USER_ID_3 = 12;
-    private static final int USER_ID_SYSTEM = 0;
     private static final long TEST_TIMESTAMP = 150_000;
     private static final File TEST_SYSTEM_DIR = new File(InstrumentationRegistry
             .getInstrumentation().getContext().getDataDir(), "alarmsTestDir");
@@ -109,14 +107,6 @@ public class UserWakeupStoreTest {
 
         final File file = new File(ROOT_DIR , "usersWithAlarmClocks.xml");
         assertTrue(file.exists());
-    }
-
-    @Test
-    public void testAddWakeupForSystemUser_shouldDoNothing() {
-        mUserWakeupStore.addUserWakeup(USER_ID_SYSTEM, TEST_TIMESTAMP - 19_000);
-        assertEquals(0, mUserWakeupStore.getUserIdsToWakeup(TEST_TIMESTAMP).length);
-        final File file = new File(ROOT_DIR , "usersWithAlarmClocks.xml");
-        assertFalse(file.exists());
     }
 
     @Test

@@ -7066,9 +7066,6 @@ public final class ActivityThread extends ClientTransactionHandler
                     && level >= ComponentCallbacks2.TRIM_MEMORY_BACKGROUND) {
                 return;
             }
-            if (level >= ComponentCallbacks2.TRIM_MEMORY_COMPLETE) {
-                PropertyInvalidatedCache.onTrimMemory();
-            }
 
             final ArrayList<ComponentCallbacks2> callbacks =
                     collectComponentCallbacks(true /* includeUiContexts */);

@@ -31,12 +31,12 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 @RunWith(AndroidJUnit4::class)
-class ElementScenePickerTest {
+class ElementContentPickerTest {
     @get:Rule val rule = createComposeRule()
 
     @Test
     fun highestZIndexPicker() {
-        val key = ElementKey("TestElement", scenePicker = HighestZIndexScenePicker)
+        val key = ElementKey("TestElement", contentPicker = HighestZIndexContentPicker)
         rule.testTransition(
             fromSceneContent = { Box(Modifier.element(key).size(10.dp)) },
             toSceneContent = { Box(Modifier.element(key).size(10.dp)) },
@@ -62,7 +62,7 @@ class ElementScenePickerTest {
 
     @Test
     fun lowestZIndexPicker() {
-        val key = ElementKey("TestElement", scenePicker = LowestZIndexScenePicker)
+        val key = ElementKey("TestElement", contentPicker = LowestZIndexContentPicker)
         rule.testTransition(
             fromSceneContent = { Box(Modifier.element(key).size(10.dp)) },
             toSceneContent = { Box(Modifier.element(key).size(10.dp)) },

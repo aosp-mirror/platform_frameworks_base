@@ -88,11 +88,11 @@ class AnimatedSharedAsStateTest {
 
     @Composable
     private fun ContentScope.MovableFoo(
+        key: MovableElementKey,
         targetValues: Values,
         onCurrentValueChanged: (Values) -> Unit,
     ) {
-        val key = TestElements.Foo
-        MovableElement(key = key, Modifier) {
+        MovableElement(key, Modifier) {
             val int by animateElementIntAsState(targetValues.int, key = TestValues.Value1)
             val float by animateElementFloatAsState(targetValues.float, key = TestValues.Value2)
             val dp by animateElementDpAsState(targetValues.dp, key = TestValues.Value3)
@@ -183,15 +183,22 @@ class AnimatedSharedAsStateTest {
         var lastValueInFrom = fromValues
         var lastValueInTo = toValues
 
+        val key = MovableElementKey("Foo", contents = setOf(SceneA, SceneB))
+
         rule.testTransition(
             fromSceneContent = {
                 MovableFoo(
+                    key = key,
                     targetValues = fromValues,
-                    onCurrentValueChanged = { lastValueInFrom = it }
+                    onCurrentValueChanged = { lastValueInFrom = it },
                 )
             },
             toSceneContent = {
-                MovableFoo(targetValues = toValues, onCurrentValueChanged = { lastValueInTo = it })
+                MovableFoo(
+                    key = key,
+                    targetValues = toValues,
+                    onCurrentValueChanged = { lastValueInTo = it },
+                )
             },
             transition = {
                 // The transition lasts 64ms = 4 frames.
@@ -453,7 +460,7 @@ class AnimatedSharedAsStateTest {
             rule.runOnUiThread {
                 MutableSceneTransitionLayoutStateImpl(
                     SceneA,
-                    transitions { overscroll(SceneB, Orientation.Horizontal) }
+                    transitions { overscrollDisabled(SceneB, Orientation.Horizontal) }
                 )
             }
 
