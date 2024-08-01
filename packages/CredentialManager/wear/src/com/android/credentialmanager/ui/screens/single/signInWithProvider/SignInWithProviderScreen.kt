@@ -55,15 +55,15 @@ fun SignInWithProviderScreen(
         },
         accountContent = {
             val displayName = entry.displayName
-            if (displayName == null ||
+            if (displayName.isNullOrBlank() ||
                 entry.displayName.equals(entry.userName, ignoreCase = true)) {
                 AccountRow(
                     primaryText = entry.userName,
                 )
             } else {
                 AccountRow(
-                    primaryText = displayName,
-                    secondaryText = entry.userName,
+                    primaryText = entry.userName,
+                    secondaryText = displayName,
                 )
             }
         },
