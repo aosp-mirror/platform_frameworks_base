@@ -161,8 +161,8 @@ constructor(
     override fun setListening(client: Any?, listening: Boolean) {
         client ?: return
         if (listening) {
-            listeningClients.add(client)
-            if (listeningClients.size == 1) {
+            val clientWasNotAlreadyListening = listeningClients.add(client)
+            if (clientWasNotAlreadyListening && listeningClients.size == 1) {
                 stateJob =
                     qsTileViewModel.state
                         .filterNotNull()
