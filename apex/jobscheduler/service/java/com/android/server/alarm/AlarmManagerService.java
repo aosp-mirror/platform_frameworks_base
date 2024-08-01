@@ -165,6 +165,7 @@ import com.android.server.SystemService;
 import com.android.server.SystemServiceManager;
 import com.android.server.SystemTimeZone;
 import com.android.server.SystemTimeZone.TimeZoneConfidence;
+import com.android.server.pm.UserManagerInternal;
 import com.android.server.pm.permission.PermissionManagerService;
 import com.android.server.pm.permission.PermissionManagerServiceInternal;
 import com.android.server.pm.pkg.AndroidPackage;
@@ -3763,8 +3764,10 @@ public class AlarmManagerService extends SystemService {
             }
             mNextAlarmClockForUser.put(userId, alarmClock);
             if (mStartUserBeforeScheduledAlarms) {
-                mUserWakeupStore.addUserWakeup(userId, convertToElapsed(
-                        mNextAlarmClockForUser.get(userId).getTriggerTime(), RTC));
+                if (shouldAddWakeupForUser(userId)) {
+                    mUserWakeupStore.addUserWakeup(userId, convertToElapsed(
+                            mNextAlarmClockForUser.get(userId).getTriggerTime(), RTC));
+                }
             }
         } else {
             if (DEBUG_ALARM_CLOCK) {
@@ -3781,6 +3784,23 @@ public class AlarmManagerService extends SystemService {
         mPendingSendNextAlarmClockChangedForUser.put(userId, true);
         mHandler.removeMessages(AlarmHandler.SEND_NEXT_ALARM_CLOCK_CHANGED);
         mHandler.sendEmptyMessage(AlarmHandler.SEND_NEXT_ALARM_CLOCK_CHANGED);
+    }
+
+    /**
+     * Checks whether the user is of type that needs to be started before the alarm.
+     */
+    @VisibleForTesting
+    boolean shouldAddWakeupForUser(@UserIdInt int userId) {
+        final UserManagerInternal umInternal = LocalServices.getService(UserManagerInternal.class);
+        if (umInternal.getUserInfo(userId) == null || umInternal.getUserInfo(userId).isGuest()) {
+            // Guest user should not be started in the background.
+            return false;
+        } else {
+            // SYSTEM user is always running, so no need to schedule wakeup for it.
+            // Profiles are excluded from the wakeup list because users can explicitly stop them and
+            // so starting them in the background would go against the user's intent.
+            return userId != UserHandle.USER_SYSTEM && umInternal.getUserInfo(userId).isFull();
+        }
     }
 
     /**
