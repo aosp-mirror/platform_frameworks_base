@@ -22,18 +22,6 @@ import com.android.systemui.touchpad.tutorial.ui.gesture.GestureState.IN_PROGRES
 import com.android.systemui.touchpad.tutorial.ui.gesture.GestureState.NOT_STARTED
 import kotlin.math.abs
 
-/**
- * Monitor for touchpad gestures that calls [gestureStateChangedCallback] when [GestureState]
- * changes. All tracked motion events should be passed to [processTouchpadEvent]
- */
-interface TouchpadGestureMonitor {
-
-    val gestureDistanceThresholdPx: Int
-    val gestureStateChangedCallback: (GestureState) -> Unit
-
-    fun processTouchpadEvent(event: MotionEvent)
-}
-
 class BackGestureMonitor(
     override val gestureDistanceThresholdPx: Int,
     override val gestureStateChangedCallback: (GestureState) -> Unit
@@ -61,10 +49,5 @@ class BackGestureMonitor(
                 }
             }
         }
-    }
-
-    private fun isThreeFingerTouchpadSwipe(event: MotionEvent): Boolean {
-        return event.classification == MotionEvent.CLASSIFICATION_MULTI_FINGER_SWIPE &&
-            event.getAxisValue(MotionEvent.AXIS_GESTURE_SWIPE_FINGER_COUNT) == 3f
     }
 }

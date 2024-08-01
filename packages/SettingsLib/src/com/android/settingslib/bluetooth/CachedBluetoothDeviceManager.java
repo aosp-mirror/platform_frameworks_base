@@ -40,7 +40,7 @@ public class CachedBluetoothDeviceManager {
     private static final String TAG = "CachedBluetoothDeviceManager";
     private static final boolean DEBUG = BluetoothUtils.D;
 
-    @VisibleForTesting static int sLateBondingTimeoutMillis = 5000; // 5s
+    @VisibleForTesting static int sLateBondingTimeoutMillis = 10000; // 10s
 
     private Context mContext;
     private final LocalBluetoothManager mBtManager;

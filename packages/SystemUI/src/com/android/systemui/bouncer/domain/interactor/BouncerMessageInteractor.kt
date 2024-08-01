@@ -33,6 +33,7 @@ import com.android.systemui.bouncer.shared.model.Message
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.deviceentry.data.repository.DeviceEntryFaceAuthRepository
+import com.android.systemui.deviceentry.domain.interactor.DeviceEntryBiometricsAllowedInteractor
 import com.android.systemui.deviceentry.domain.interactor.DeviceEntryFingerprintAuthInteractor
 import com.android.systemui.flags.SystemPropertiesHelper
 import com.android.systemui.keyguard.data.repository.BiometricSettingsRepository
@@ -76,10 +77,11 @@ constructor(
     private val deviceEntryFingerprintAuthInteractor: DeviceEntryFingerprintAuthInteractor,
     faceAuthRepository: DeviceEntryFaceAuthRepository,
     private val securityModel: KeyguardSecurityModel,
+    deviceEntryBiometricsAllowedInteractor: DeviceEntryBiometricsAllowedInteractor,
 ) {
 
     private val isFingerprintAuthCurrentlyAllowedOnBouncer =
-        deviceEntryFingerprintAuthInteractor.isFingerprintCurrentlyAllowedOnBouncer.stateIn(
+        deviceEntryBiometricsAllowedInteractor.isFingerprintCurrentlyAllowedOnBouncer.stateIn(
             applicationScope,
             SharingStarted.Eagerly,
             false
@@ -87,6 +89,7 @@ constructor(
 
     private val currentSecurityMode
         get() = securityModel.getSecurityMode(currentUserId)
+
     private val currentUserId
         get() = userRepository.getSelectedUserInfo().id
 
@@ -349,6 +352,7 @@ constructor(
 
 interface CountDownTimerCallback {
     fun onFinish()
+
     fun onTick(millisUntilFinished: Long)
 }
 

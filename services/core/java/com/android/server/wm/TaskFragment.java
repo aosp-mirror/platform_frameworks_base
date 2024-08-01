@@ -2819,7 +2819,21 @@ class TaskFragment extends WindowContainer<WindowContainer> {
                 mClearedTaskForReuse,
                 mClearedTaskFragmentForPip,
                 mClearedForReorderActivityToFront,
-                calculateMinDimension());
+                calculateMinDimension(),
+                isTopNonFinishingChild());
+    }
+
+    private boolean isTopNonFinishingChild() {
+        final WindowContainer<?> parent = getParent();
+        if (parent == null) {
+            // Either the TaskFragment is not attached or is going to destroy. Return false.
+            return false;
+        }
+        final ActivityRecord topNonFishingActivity = parent.getActivity(ar -> !ar.finishing);
+        // If the parent's top non-finishing activity is this TaskFragment's, it means
+        // this TaskFragment is the top non-finishing container of its parent.
+        return topNonFishingActivity != null && topNonFishingActivity
+                .equals(getTopNonFinishingActivity());
     }
 
     /**

@@ -13,15 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.android.wm.shell.windowdecor.common
 
-/** A callback to be invoked when a Task's window decor element is clicked. */
-fun interface OnTaskActionClickListener {
-    /**
-     * Called when a task's decor element has been clicked.
-     *
-     * @param taskId the id of the task.
-     * @param tag a readable identifier for the element.
-     */
-    fun onClick(taskId: Int, tag: String)
-}
+package com.android.systemui.shade
+
+import android.graphics.Rect
+
+class QSHeaderBoundsProvider(
+    val leftProvider: () -> Int,
+    val heightProvider: () -> Int,
+    val boundsOnScreenProvider: (Rect) -> Unit,
+)

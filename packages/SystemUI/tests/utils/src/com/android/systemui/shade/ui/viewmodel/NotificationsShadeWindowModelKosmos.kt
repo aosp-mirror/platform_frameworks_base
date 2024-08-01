@@ -14,19 +14,10 @@
  * limitations under the License.
  */
 
-package com.android.systemui.touchpad.tutorial.ui.gesture
+package com.android.systemui.shade.ui.viewmodel
 
-enum class TouchpadGesture {
-    BACK,
-    HOME;
+import com.android.systemui.keyguard.domain.interactor.keyguardTransitionInteractor
+import com.android.systemui.kosmos.Kosmos
 
-    fun toMonitor(
-        swipeDistanceThresholdPx: Int,
-        onStateChanged: (GestureState) -> Unit
-    ): TouchpadGestureMonitor {
-        return when (this) {
-            BACK -> BackGestureMonitor(swipeDistanceThresholdPx, onStateChanged)
-            else -> throw IllegalArgumentException("Not implemented yet")
-        }
-    }
-}
+val Kosmos.notificationShadeWindowModel: NotificationShadeWindowModel by
+    Kosmos.Fixture { NotificationShadeWindowModel(keyguardTransitionInteractor) }

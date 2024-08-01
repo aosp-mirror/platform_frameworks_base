@@ -401,10 +401,19 @@ public class DozeLog implements Dumpable {
 
     /**
      * Appends new AOD screen brightness to logs
-     * @param brightness display brightness setting
+     * @param brightness display brightness setting between 1 and 255
      */
     public void traceDozeScreenBrightness(int brightness) {
         mLogger.logDozeScreenBrightness(brightness);
+    }
+
+    /**
+     * Appends new AOD screen brightness to logs
+     * @param brightness display brightness setting between {@link PowerManager#BRIGHTNESS_MIN} and
+     *                   {@link PowerManager#BRIGHTNESS_MAX}
+     */
+    public void traceDozeScreenBrightnessFloat(float brightness) {
+        mLogger.logDozeScreenBrightnessFloat(brightness);
     }
 
     /**

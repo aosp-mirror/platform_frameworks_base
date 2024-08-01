@@ -495,6 +495,7 @@ public class Parcel_host {
             return null;
         }
         nativeReadInt(nativePtr);
+        nativeReadInt(nativePtr);
         return fd;
     }
 

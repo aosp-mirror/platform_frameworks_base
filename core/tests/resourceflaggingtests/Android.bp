@@ -34,12 +34,24 @@ genrule {
 }
 
 genrule {
+    name: "resource-flagging-test-app-resources-compile2",
+    tools: ["aapt2"],
+    srcs: [
+        "flagged_resources_res/values/bools2.xml",
+    ],
+    out: ["values_bools2.arsc.flat"],
+    cmd: "$(location aapt2) compile $(in) -o $(genDir) " +
+        "--feature-flags test.package.falseFlag:ro=false,test.package.trueFlag:ro=true",
+}
+
+genrule {
     name: "resource-flagging-test-app-apk",
     tools: ["aapt2"],
     // The first input file in the list must be the manifest
     srcs: [
         "TestAppAndroidManifest.xml",
         ":resource-flagging-test-app-resources-compile",
+        ":resource-flagging-test-app-resources-compile2",
     ],
     out: ["resapp.apk"],
     cmd: "$(location aapt2) link -o $(out) --manifest $(in)",

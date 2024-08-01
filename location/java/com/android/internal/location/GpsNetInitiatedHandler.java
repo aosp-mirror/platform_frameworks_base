@@ -27,6 +27,7 @@ import android.telephony.TelephonyManager;
 import android.telephony.emergency.EmergencyNumber;
 import android.util.Log;
 
+import com.android.internal.annotations.KeepForWeakReference;
 import com.android.internal.telephony.flags.Flags;
 
 import java.util.concurrent.TimeUnit;
@@ -94,6 +95,7 @@ public class GpsNetInitiatedHandler {
 
     // The internal implementation of TelephonyManager uses WeakReference so we have to keep a
     // reference here.
+    @KeepForWeakReference
     private final EmergencyCallListener mEmergencyCallListener = new EmergencyCallListener();
 
     private final EmergencyCallCallback mEmergencyCallCallback;

@@ -9,16 +9,6 @@ flag {
 }
 
 flag {
-    name: "enable_cached_bluetooth_device_dedup"
-    namespace: "bluetooth"
-    description: "Enable dedup in CachedBluetoothDevice"
-    bug: "319197962"
-    metadata {
-        purpose: PURPOSE_BUGFIX
-    }
-}
-
-flag {
    name: "bluetooth_qs_tile_dialog_auto_on_toggle"
    namespace: "bluetooth"
    description: "Displays the auto on toggle in the bluetooth QS tile dialog"

@@ -58,6 +58,7 @@ import android.os.Looper;
 import android.os.RemoteCallback;
 import android.os.RemoteException;
 import android.platform.test.annotations.Presubmit;
+import android.platform.test.annotations.RequiresFlagsDisabled;
 import android.util.ArraySet;
 import android.view.WindowManager;
 import android.window.BackAnimationAdapter;
@@ -613,6 +614,7 @@ public class BackNavigationControllerTests extends WindowTestsBase {
     }
 
     @Test
+    @RequiresFlagsDisabled(Flags.FLAG_MIGRATE_PREDICTIVE_BACK_TRANSITION)
     public void testTransitionHappensCancelNavigation() {
         // Create a floating task and a fullscreen task, then navigating on fullscreen task.
         // The navigation should not been cancelled when transition happens on floating task, and
@@ -672,7 +674,6 @@ public class BackNavigationControllerTests extends WindowTestsBase {
 
     @Test
     public void testBackOnMostRecentWindowInActivityEmbedding() {
-        mSetFlagsRule.enableFlags(Flags.FLAG_EMBEDDED_ACTIVITY_BACK_NAV_FLAG);
         final Task task = createTask(mDefaultDisplay);
         final TaskFragmentOrganizer organizer = new TaskFragmentOrganizer(Runnable::run);
         final TaskFragment primaryTf = createTaskFragmentWithEmbeddedActivity(task, organizer);

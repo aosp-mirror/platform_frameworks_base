@@ -21,6 +21,7 @@ import static com.android.server.inputmethod.InputMethodUtils.NOT_A_SUBTYPE_ID;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.UserIdInt;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -77,13 +78,12 @@ final class InputMethodMenuController {
     @GuardedBy("ImfLock.class")
     void showInputMethodMenuLocked(boolean showAuxSubtypes, int displayId,
             String preferredInputMethodId, int preferredInputMethodSubtypeId,
-            @NonNull List<ImeSubtypeListItem> imList) {
+            @NonNull List<ImeSubtypeListItem> imList, @UserIdInt int userId) {
         if (DEBUG) Slog.v(TAG, "Show switching menu. showAuxSubtypes=" + showAuxSubtypes);
 
-        final int userId = mService.getCurrentImeUserIdLocked();
         final var bindingController = mService.getInputMethodBindingController(userId);
 
-        hideInputMethodMenuLocked();
+        hideInputMethodMenuLocked(userId);
 
         if (preferredInputMethodSubtypeId == NOT_A_SUBTYPE_ID) {
             final InputMethodSubtype currentSubtype =
@@ -131,7 +131,7 @@ final class InputMethodMenuController {
         }
         final Context dialogWindowContext = mDialogWindowContext.get(displayId);
         mDialogBuilder = new AlertDialog.Builder(dialogWindowContext);
-        mDialogBuilder.setOnCancelListener(dialog -> hideInputMethodMenu());
+        mDialogBuilder.setOnCancelListener(dialog -> hideInputMethodMenu(userId));
 
         final Context dialogContext = mDialogBuilder.getContext();
         final TypedArray a = dialogContext.obtainStyledAttributes(null,
@@ -162,7 +162,7 @@ final class InputMethodMenuController {
                     isChecked, userId);
             // Ensure that the input method dialog is dismissed when changing
             // the hardware keyboard state.
-            hideInputMethodMenu();
+            hideInputMethodMenu(userId);
         });
 
         // Fill the list items with onClick listener, which takes care of IME (and subtype)
@@ -185,7 +185,7 @@ final class InputMethodMenuController {
                     }
                     mService.setInputMethodLocked(im.getId(), subtypeId, userId);
                 }
-                hideInputMethodMenuLocked();
+                hideInputMethodMenuLocked(userId);
             }
         };
         mDialogBuilder.setSingleChoiceItems(adapter, checkedItem, choiceListener);
@@ -209,10 +209,10 @@ final class InputMethodMenuController {
         mSwitchingDialog.show();
     }
 
-    void updateKeyboardFromSettingsLocked() {
+    void updateKeyboardFromSettingsLocked(@UserIdInt int userId) {
         mShowImeWithHardKeyboard =
                 SecureSettingsWrapper.getBoolean(Settings.Secure.SHOW_IME_WITH_HARD_KEYBOARD,
-                        false, mService.getCurrentImeUserIdLocked());
+                        false, userId);
         if (mSwitchingDialog != null && mSwitchingDialogTitleView != null
                 && mSwitchingDialog.isShowing()) {
             final Switch hardKeySwitch = mSwitchingDialogTitleView.findViewById(
@@ -223,18 +223,22 @@ final class InputMethodMenuController {
 
     /**
      * Hides the input method switcher menu.
+     *
+     * @param userId user ID for this operation
      */
-    void hideInputMethodMenu() {
+    void hideInputMethodMenu(@UserIdInt int userId) {
         synchronized (ImfLock.class) {
-            hideInputMethodMenuLocked();
+            hideInputMethodMenuLocked(userId);
         }
     }
 
     /**
      * Hides the input method switcher menu, synchronised version of {@link #hideInputMethodMenu}.
+     *
+     * @param userId user ID for this operation
      */
     @GuardedBy("ImfLock.class")
-    void hideInputMethodMenuLocked() {
+    void hideInputMethodMenuLocked(@UserIdInt int userId) {
         if (DEBUG) Slog.v(TAG, "Hide switching menu");
 
         if (mSwitchingDialog != null) {
@@ -242,8 +246,6 @@ final class InputMethodMenuController {
             mSwitchingDialog = null;
             mSwitchingDialogTitleView = null;
 
-            // TODO(b/305849394): Make InputMethodMenuController multi-user aware
-            final int userId = mService.getCurrentImeUserIdLocked();
             mService.updateSystemUiLocked(userId);
             mService.sendOnNavButtonFlagsChangedToAllImesLocked();
             mDialogBuilder = null;

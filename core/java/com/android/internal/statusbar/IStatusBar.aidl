@@ -51,8 +51,7 @@ oneway interface IStatusBar
 
     void showWirelessChargingAnimation(int batteryLevel);
 
-    void setImeWindowStatus(int displayId, in IBinder token, int vis, int backDisposition,
-            boolean showImeSwitcher);
+    void setImeWindowStatus(int displayId, int vis, int backDisposition, boolean showImeSwitcher);
     void setWindowState(int display, int window, int state);
 
     void showRecentApps(boolean triggeredFromAltTab);

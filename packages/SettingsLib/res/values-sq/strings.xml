@@ -430,8 +430,7 @@
     <string name="force_allow_on_external_summary" msgid="8525425782530728238">"Bën që çdo aplikacion të jetë i përshtatshëm për t\'u shkruar në hapësirën ruajtëse të jashtme, pavarësisht nga vlerat e manifestit"</string>
     <string name="force_resizable_activities" msgid="7143612144399959606">"Detyro madhësinë e ndryshueshme për aktivitetet"</string>
     <string name="force_resizable_activities_summary" msgid="2490382056981583062">"Bëj që të gjitha aktivitetet të kenë madhësi të ndryshueshme për përdorimin me shumë dritare, pavarësisht vlerave të manifestit."</string>
-    <string name="enable_freeform_support" msgid="8409932201445109106">"Aktivizo dritaret me formë të lirë (të vjetra)"</string>
-    <string name="enable_freeform_support_summary" msgid="2242481082356957934">"Aktivizo mbështetjen për dritaret eksperimentale me formë të lirë të versionit të vjetër."</string>
+    <string name="enable_freeform_support" msgid="7599125687603914253">"Aktivizo dritaret me formë të lirë"</string>
     <string name="local_backup_password_title" msgid="4631017948933578709">"Fjalëkalimi i rezervimit të desktopit"</string>
     <string name="local_backup_password_summary_none" msgid="7646898032616361714">"Rezervimet e plota të desktopit nuk janë të mbrojtura aktualisht"</string>
     <string name="local_backup_password_summary_change" msgid="1707357670383995567">"Trokit për të ndryshuar ose hequr fjalëkalimin për rezervime të plota të desktopit"</string>
@@ -496,7 +495,8 @@
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_remaining_charging_duration_only" msgid="8085099012811384899">"<xliff:g id="TIME">%1$s</xliff:g> derisa të mbushet"</string>
     <string name="power_charging_duration" msgid="6127154952524919719">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> derisa të mbushet"</string>
-    <string name="power_charging_limited" msgid="8202147604844938236">"<xliff:g id="LEVEL">%1$s</xliff:g> - Karikimi u optimizua"</string>
+    <!-- no translation found for power_charging_limited (4144004473976005214) -->
+    <skip />
     <string name="power_charging_future_paused" msgid="1809543660923642799">"<xliff:g id="LEVEL">%1$s</xliff:g> - Po karikohet"</string>
     <string name="power_fast_charging_duration_v2" msgid="3797735998640359490">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATUS">%2$s</xliff:g> - Plot deri në <xliff:g id="TIME">%3$s</xliff:g>"</string>
     <string name="power_charging_duration_v2" msgid="2938998284074003248">"<xliff:g id="LEVEL">%1$s</xliff:g> - Karikohet plotësisht deri në <xliff:g id="TIME">%2$s</xliff:g>"</string>

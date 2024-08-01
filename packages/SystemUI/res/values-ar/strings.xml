@@ -210,9 +210,9 @@
     <string name="biometric_dialog_last_pattern_attempt_before_wipe_user" msgid="8400180746043407270">"عند إدخال نقش غير صحيح في المحاولة التالية، سيتم حذف هذا المستخدم."</string>
     <string name="biometric_dialog_last_pin_attempt_before_wipe_user" msgid="4159878829962411168">"عند إدخال رقم تعريف شخصي غير صحيح في المحاولة التالية، سيتم حذف هذا المستخدم."</string>
     <string name="biometric_dialog_last_password_attempt_before_wipe_user" msgid="4695682515465063885">"عند إدخال كلمة مرور غير صحيحة في المحاولة التالية، سيتم حذف هذا المستخدم."</string>
-    <string name="biometric_dialog_last_pattern_attempt_before_wipe_profile" msgid="6045224069529284686">"عند إدخال نقش غير صحيح في المحاولة التالية، سيتم حذف ملفك الشخصي للعمل وبياناته."</string>
-    <string name="biometric_dialog_last_pin_attempt_before_wipe_profile" msgid="545567685899091757">"عند إدخال رقم تعريف شخصي غير صحيح في المحاولة التالية، سيتم حذف ملفك الشخصي للعمل وبياناته."</string>
-    <string name="biometric_dialog_last_password_attempt_before_wipe_profile" msgid="8538032972389729253">"عند إدخال كلمة مرور غير صحيحة في المحاولة التالية، سيتم حذف ملفك الشخصي للعمل وبياناته."</string>
+    <string name="biometric_dialog_last_pattern_attempt_before_wipe_profile" msgid="6045224069529284686">"عند إدخال نقش غير صحيح في المحاولة التالية، سيتم حذف ملف العمل الخاص بك وبياناته."</string>
+    <string name="biometric_dialog_last_pin_attempt_before_wipe_profile" msgid="545567685899091757">"عند إدخال رقم تعريف شخصي غير صحيح في المحاولة التالية، سيتم حذف ملف العمل الخاص بك وبياناته."</string>
+    <string name="biometric_dialog_last_password_attempt_before_wipe_profile" msgid="8538032972389729253">"عند إدخال كلمة مرور غير صحيحة في المحاولة التالية، سيتم حذف ملف العمل الخاص بك وبياناته."</string>
     <string name="biometric_re_enroll_dialog_confirm" msgid="3049858021857801836">"إعداد"</string>
     <string name="biometric_re_enroll_dialog_cancel" msgid="93760939407091417">"لاحقًا"</string>
     <string name="biometric_re_enroll_notification_content" msgid="8685925877186288180">"هذا الإجراء مطلوب لتحسين مستوى الأمان والأداء."</string>
@@ -222,11 +222,11 @@
     <string name="fingerprint_re_enroll_dialog_content" msgid="4866561176695984879">"لإعادة إعداد ميزة \"فتح الجهاز ببصمة الإصبع\"، سيتم حذف صور بصمة الإصبع ونماذجها.\n\nبعد حذفها، عليك إعادة إعداد ميزة \"فتح الجهاز ببصمة الإصبع\" لتتمكن من استخدام بصمة الإصبع في فتح قفل الهاتف أو إثبات هويتك."</string>
     <string name="fingerprint_re_enroll_dialog_content_singular" msgid="3083663339787381218">"لإعادة إعداد ميزة \"فتح الجهاز ببصمة الإصبع\"، سيتم حذف صور بصمة الإصبع ونموذجها.\n\nبعد حذفها، عليك إعادة إعداد ميزة \"فتح الجهاز ببصمة الإصبع\" لتتمكن من استخدام بصمة الإصبع في فتح قفل الهاتف أو إثبات هويتك."</string>
     <string name="fingerprint_reenroll_failure_dialog_content" msgid="4733768492747300666">"تعذّر إعداد ميزة \"فتح الجهاز ببصمة الإصبع\". انتقِل إلى \"الإعدادات\" لإعادة المحاولة."</string>
-    <string name="face_re_enroll_notification_title" msgid="1850838867718410520">"إعادة إعداد ميزة \"فتح الجهاز بالتعرّف على الوجه\""</string>
-    <string name="face_re_enroll_notification_name" msgid="7384545252206120659">"فتح الجهاز بالتعرّف على الوجه"</string>
-    <string name="face_re_enroll_dialog_title" msgid="6392173708176069994">"إعداد ميزة \"فتح الجهاز بالتعرّف على الوجه\""</string>
-    <string name="face_re_enroll_dialog_content" msgid="7353502359464038511">"لإعادة إعداد ميزة \"فتح الجهاز بالتعرّف على الوجه\"، سيتم حذف نموذج الوجه الحالي.\n\nعليك إعادة إعداد الميزة لتتمكن من فتح قفل الهاتف باستخدام وجهك."</string>
-    <string name="face_reenroll_failure_dialog_content" msgid="7073947334397236935">"تعذّر إعداد ميزة \"فتح الجهاز بالتعرّف على الوجه\". انتقِل إلى \"الإعدادات\" لإعادة المحاولة."</string>
+    <string name="face_re_enroll_notification_title" msgid="1850838867718410520">"إعادة إعداد ميزة \"فتح الجهاز ببصمة الوجه\""</string>
+    <string name="face_re_enroll_notification_name" msgid="7384545252206120659">"فتح الجهاز ببصمة الوجه"</string>
+    <string name="face_re_enroll_dialog_title" msgid="6392173708176069994">"إعداد ميزة \"فتح الجهاز ببصمة الوجه\""</string>
+    <string name="face_re_enroll_dialog_content" msgid="7353502359464038511">"لإعادة إعداد ميزة \"فتح الجهاز ببصمة الوجه\"، سيتم حذف نموذج الوجه الحالي.\n\nعليك إعادة إعداد الميزة لتتمكن من فتح قفل الهاتف باستخدام وجهك."</string>
+    <string name="face_reenroll_failure_dialog_content" msgid="7073947334397236935">"تعذّر إعداد ميزة \"فتح الجهاز ببصمة الوجه\". انتقِل إلى \"الإعدادات\" لإعادة المحاولة."</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="2817887108047658975">"المس أداة استشعار بصمة الإصبع"</string>
     <string name="fingerprint_dialog_authenticated_confirmation" msgid="1603899612957562862">"للمتابعة، اضغط على رمز فتح القفل."</string>
     <string name="fingerprint_dialog_use_fingerprint_instead" msgid="5542430577183894219">"يتعذّر التعرّف على الوجه. يمكنك استخدام بصمة إصبعك."</string>
@@ -234,7 +234,7 @@
     <skip />
     <string name="keyguard_face_failed" msgid="2346762871330729634">"يتعذّر التعرّف على الوجه."</string>
     <string name="keyguard_suggest_fingerprint" msgid="8742015961962702960">"يمكنك استخدام بصمة إصبعك."</string>
-    <string name="keyguard_face_unlock_unavailable" msgid="1581949044193418736">"ميزة \"فتح الجهاز بالتعرف على الوجه\" غير متاحة."</string>
+    <string name="keyguard_face_unlock_unavailable" msgid="1581949044193418736">"ميزة \"فتح الجهاز ببصمة الوجه\" غير متاحة."</string>
     <string name="accessibility_bluetooth_connected" msgid="4745196874551115205">"تم توصيل البلوتوث."</string>
     <string name="accessibility_bluetooth_device_icon" msgid="9163840051642587982">"رمز الجهاز الذي يتضمّن بلوتوث"</string>
     <string name="accessibility_bluetooth_device_settings_gear" msgid="3314916468105272540">"انقر هنا لضبط إعدادات الجهاز."</string>
@@ -388,6 +388,9 @@
     <string name="performance" msgid="6552785217174378320">"الأداء"</string>
     <string name="user_interface" msgid="3712869377953950887">"واجهة المستخدم"</string>
     <string name="thermal" msgid="6758074791325414831">"الأداء الحراري"</string>
+    <string name="custom" msgid="3337456985275158299">"مخصّص"</string>
+    <string name="custom_trace_settings_dialog_title" msgid="2608570500144830554">"إعدادات التتبع المخصصة"</string>
+    <string name="restore_default" msgid="5259420807486239755">"استعادة الإعدادات التلقائية"</string>
     <string name="quick_settings_onehanded_label" msgid="2416537930246274991">"وضع \"التصفح بيد واحدة\""</string>
     <string name="quick_settings_hearing_devices_label" msgid="7277170419679404129">"سماعات الأذن الطبية"</string>
     <string name="quick_settings_hearing_devices_connected" msgid="6519069502397037781">"متّصلة حاليًا"</string>
@@ -429,9 +432,13 @@
     <string name="zen_modes_dialog_title" msgid="4159138230418567383">"الأوضاع ذات الأولوية"</string>
     <string name="zen_modes_dialog_done" msgid="6654130880256438950">"تم"</string>
     <string name="zen_modes_dialog_settings" msgid="2310248023728936697">"الإعدادات"</string>
-    <!-- no translation found for zen_mode_on (9085304934016242591) -->
+    <string name="zen_mode_on" msgid="9085304934016242591">"مفعَّل"</string>
+    <string name="zen_mode_off" msgid="1736604456618147306">"غير مفعَّل"</string>
+    <!-- no translation found for zen_mode_set_up (7457957033034460064) -->
     <skip />
-    <!-- no translation found for zen_mode_off (1736604456618147306) -->
+    <!-- no translation found for zen_mode_no_manual_invocation (1769975741344633672) -->
+    <skip />
+    <!-- no translation found for zen_mode_active_modes (1625850411578488856) -->
     <skip />
     <string name="zen_priority_introduction" msgid="3159291973383796646">"لن يتم إزعاجك بالأصوات والاهتزاز، باستثناء المُنبِّهات والتذكيرات والأحداث والمتصلين الذين تحددهم. وسيظل بإمكانك سماع أي عناصر أخرى تختار تشغيلها، بما في ذلك الموسيقى والفيديوهات والألعاب."</string>
     <string name="zen_alarms_introduction" msgid="3987266042682300470">"لن يتم إزعاجك بالأصوات والاهتزاز، باستثناء المُنبِّهات. وسيظل بإمكانك سماع أي عناصر أخرى تختار تشغيلها، بما في ذلك الموسيقى والفيديوهات والألعاب."</string>
@@ -443,14 +450,14 @@
     <string name="keyguard_unlock" msgid="8031975796351361601">"التمرير إلى الأعلى لفتح القفل"</string>
     <string name="keyguard_unlock_press" msgid="9140109453735019209">"اضغط على رمز فتح القفل لفتح قفل الشاشة."</string>
     <string name="keyguard_face_successful_unlock_swipe" msgid="6180997591385846073">"تم فتح قفل جهازك عند تقريبه من وجهك. مرِّر سريعًا للأعلى لفتح الجهاز."</string>
-    <string name="keyguard_face_successful_unlock_press" msgid="25520941264602588">"تم فتح القفل بالتعرّف على وجهك. لفتح الجهاز، اضغط على رمز فتح القفل."</string>
+    <string name="keyguard_face_successful_unlock_press" msgid="25520941264602588">"تم فتح القفل ببصمة وجهك. لفتح الجهاز، اضغط على رمز فتح القفل."</string>
     <string name="keyguard_face_successful_unlock_press_alt_1" msgid="5715461103913071474">"تم فتح قفل جهازك عند تقريبه من وجهك. اضغط لفتح الجهاز."</string>
     <string name="keyguard_face_successful_unlock_press_alt_2" msgid="8310787946357120406">"تم التعرّف على الوجه. اضغط لفتح الجهاز."</string>
     <string name="keyguard_face_successful_unlock_press_alt_3" msgid="7219030481255573962">"تم التعرّف على الوجه. اضغط على رمز فتح القفل لفتح الجهاز."</string>
     <string name="keyguard_face_successful_unlock" msgid="4203999851465708287">"تم فتح قفل جهازك عند تقريبه من وجهك."</string>
     <string name="keyguard_face_successful_unlock_alt1" msgid="5853906076353839628">"تم التعرّف على الوجه."</string>
     <string name="keyguard_retry" msgid="886802522584053523">"مرِّر سريعًا للأعلى لإعادة المحاولة."</string>
-    <string name="accesssibility_keyguard_retry" msgid="8880238862712870676">"مرِّر سريعًا للأعلى لاستخدام \"فتح الجهاز بالتعرف على الوجه\""</string>
+    <string name="accesssibility_keyguard_retry" msgid="8880238862712870676">"مرِّر سريعًا للأعلى لاستخدام ميزة \"فتح الجهاز ببصمة الوجه\""</string>
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"‏افتح قفل الشاشة لاستخدام تقنية NFC"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"هذا الجهاز يخص مؤسستك."</string>
     <string name="do_disclosure_with_name" msgid="2091641464065004091">"هذا الجهاز يخص <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>."</string>
@@ -471,6 +478,8 @@
     <string name="keyguard_indication_charging_time_slowly" msgid="301936949731705417">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • جارٍ الشحن ببطء • ستمتلئ البطارية خلال <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>"</string>
     <string name="keyguard_indication_charging_time_dock" msgid="3149328898931741271">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • جارٍ الشحن • ستمتلئ البطارية خلال <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>"</string>
     <string name="accessibility_action_open_communal_hub" msgid="3081702792413787849">"التطبيقات المصغّرة على شاشة القفل"</string>
+    <!-- no translation found for accessibility_announcement_communal_widget_added (6911593106099328271) -->
+    <skip />
     <string name="communal_tutorial_indicator_text" msgid="4503010353591430123">"مرِّر سريعًا لليمين لبدء الدليل التوجيهي العام."</string>
     <string name="cta_tile_button_to_open_widget_editor" msgid="3871562362382963878">"تخصيص"</string>
     <string name="cta_tile_button_to_dismiss" msgid="3377597875997861754">"إغلاق"</string>
@@ -499,8 +508,7 @@
     <string name="accessibility_action_label_place_widget" msgid="1914197458644168978">"إضافة التطبيق المصغّر المحدَّد"</string>
     <string name="communal_widget_picker_title" msgid="1953369090475731663">"التطبيقات المصغّرة المصمَّمة لشاشة القفل"</string>
     <string name="communal_widget_picker_description" msgid="490515450110487871">"يمكن للجميع رؤية التطبيقات المصغّرة على شاشة القفل، حتى في حال قفل الجهاز اللوحي."</string>
-    <!-- no translation found for accessibility_action_label_unselect_widget (1041811747619468698) -->
-    <skip />
+    <string name="accessibility_action_label_unselect_widget" msgid="1041811747619468698">"إلغاء اختيار التطبيق المصغّر"</string>
     <string name="communal_widgets_disclaimer_title" msgid="1150954395585308868">"التطبيقات المصغّرة المصمَّمة لشاشة القفل"</string>
     <string name="communal_widgets_disclaimer_text" msgid="1423545475160506349">"لفتح تطبيق باستخدام تطبيق مصغَّر، عليك إثبات هويتك. يُرجى ملاحظة أنّ أي شخص يمكنه الاطّلاع محتوى التطبيقات المصغَّرة، حتى وإن كان جهازك اللوحي مُقفلاً. بعض التطبيقات المصغّرة قد لا تكون مُصمَّمة لإضافتها إلى شاشة القفل، وقد يكون هذا الإجراء غير آمن."</string>
     <string name="communal_widgets_disclaimer_button" msgid="4423059765740780753">"حسنًا"</string>
@@ -557,10 +565,8 @@
     <string name="media_projection_action_text" msgid="3634906766918186440">"البدء الآن"</string>
     <string name="empty_shade_text" msgid="8935967157319717412">"ما مِن إشعارات"</string>
     <string name="no_unseen_notif_text" msgid="395512586119868682">"ما مِن إشعارات جديدة"</string>
-    <!-- no translation found for adaptive_notification_edu_hun_title (7790738150177329960) -->
-    <skip />
-    <!-- no translation found for adaptive_notification_edu_hun_text (7743367744129536610) -->
-    <skip />
+    <string name="adaptive_notification_edu_hun_title" msgid="7790738150177329960">"ميزة \"تخفيض الإشعارات الصوتية والاهتزاز\" مُفعَّلة"</string>
+    <string name="adaptive_notification_edu_hun_text" msgid="7743367744129536610">"يتم تلقائيًا خفض مستوى صوت جهازك والتنبيهات لمدة تصل إلى دقيقتين عند تلقّي إشعارات كثيرة في آنٍ واحد."</string>
     <string name="go_to_adaptive_notification_settings" msgid="2423690125178298479">"إيقاف"</string>
     <string name="unlock_to_see_notif_text" msgid="7439033907167561227">"افتَح قفل الشاشة لعرض الإشعارات الأقدم."</string>
     <string name="quick_settings_disclosure_parental_controls" msgid="2114102871438223600">"يتولّى أحد الوالدين إدارة هذا الجهاز."</string>
@@ -574,7 +580,7 @@
     <string name="quick_settings_disclosure_management_vpns" msgid="929181757984262902">"‏ينتمي هذا الجهاز إلى مؤسستك، ويتّصل بالإنترنت من خلال خدمات الشبكة الافتراضية الخاصة (VPN)."</string>
     <string name="quick_settings_disclosure_named_management_vpns" msgid="3312645578322079185">"‏ينتمي هذا الجهاز إلى <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>، ويتّصل بالإنترنت من خلال خدمات الشبكة الافتراضية الخاصة (VPN)."</string>
     <string name="quick_settings_disclosure_managed_profile_monitoring" msgid="1423899084754272514">"يمكن لمؤسستك مراقبة حركة بيانات الشبكة في ملف العمل"</string>
-    <string name="quick_settings_disclosure_named_managed_profile_monitoring" msgid="8321469176706219860">"يمكن لـ <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> مراقبة حركة بيانات الشبكة في ملفك الشخصي للعمل"</string>
+    <string name="quick_settings_disclosure_named_managed_profile_monitoring" msgid="8321469176706219860">"يمكن لـ <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> مراقبة حركة بيانات الشبكة في ملف العمل الخاص بك"</string>
     <string name="quick_settings_disclosure_managed_profile_network_activity" msgid="2636594621387832827">"تكون أنشطة شبكة ملف العمل مرئية لمشرف تكنولوجيا المعلومات."</string>
     <string name="quick_settings_disclosure_monitoring" msgid="8548019955631378680">"قد تكون الشبكة خاضعة للمراقبة"</string>
     <string name="quick_settings_disclosure_vpns" msgid="3586175303518266301">"‏هذا الجهاز متّصل بالإنترنت من خلال خدمات الشبكات الافتراضية الخاصة (VPN)."</string>
@@ -592,10 +598,10 @@
     <string name="monitoring_financed_description_named_management" msgid="6108439201399938668">"قد تتمكّن مؤسسة <xliff:g id="ORGANIZATION_NAME_0">%1$s</xliff:g> من الوصول إلى البيانات المرتبطة بهذا الجهاز وإدارة التطبيقات وتغيير إعدادات الجهاز.\n\nإذا كان لديك أسئلة، يُرجى التواصل مع <xliff:g id="ORGANIZATION_NAME_1">%2$s</xliff:g>."</string>
     <string name="monitoring_description_management" msgid="4308879039175729014">"هذا الجهاز يخص مؤسستك.\n\nيمكن لمشرف تكنولوجيا المعلومات في مؤسستك تتبّع وإدارة الإعدادات والتطبيقات والبيانات المرتبطة بجهازك ومعلومات الموقع الجغرافي للجهاز وعمليات الدخول إلى نظام المؤسسة.\n\nللحصول على المزيد من المعلومات، يمكنك التواصل مع مشرف تكنولوجيا المعلومات."</string>
     <string name="monitoring_description_management_ca_certificate" msgid="7785013130658110130">"ثبّتت مؤسستك مرجعًا مصدّقًا على هذا الجهاز. قد تتم مراقبة حركة بيانات شبكتك الآمنة أو تعديلها."</string>
-    <string name="monitoring_description_managed_profile_ca_certificate" msgid="7904323416598435647">"ثبّتت مؤسستك مرجعًا مصدّقًا في ملفك الشخصي للعمل. قد تتم مراقبة حركة بيانات شبكتك الآمنة أو تعديلها."</string>
+    <string name="monitoring_description_managed_profile_ca_certificate" msgid="7904323416598435647">"ثبّتت مؤسستك مرجعًا مصدّقًا في ملف العمل الخاص بك. قد تتم مراقبة حركة بيانات شبكتك الآمنة أو تعديلها."</string>
     <string name="monitoring_description_ca_certificate" msgid="448923057059097497">"تم تثبيت مرجع مصدّق على هذا الجهاز. قد تتم مراقبة حركة بيانات شبكتك الآمنة أو تعديلها."</string>
     <string name="monitoring_description_management_network_logging" msgid="216983105036994771">"شغَّل المشرف ميزة تسجيل بيانات الشبكة، والتي يتم من خلالها مراقبة حركة البيانات على جهازك."</string>
-    <string name="monitoring_description_managed_profile_network_logging" msgid="6932303843097006037">"شغَّل المشرف ميزة تسجيل بيانات الشبكة، والتي يتم من خلالها مراقبة حركة البيانات في ملفك الشخصي للعمل ولكن لا تتم مراقبتها في ملفك الشخصي."</string>
+    <string name="monitoring_description_managed_profile_network_logging" msgid="6932303843097006037">"شغَّل المشرف ميزة تسجيل بيانات الشبكة، والتي يتم من خلالها مراقبة حركة البيانات في ملف العمل الخاص بك ولكن لا تتم مراقبتها في ملفك الشخصي."</string>
     <string name="monitoring_description_named_vpn" msgid="8220190039787149671">"‏هذا الجهاز متّصل بالإنترنت من خلال \"<xliff:g id="VPN_APP">%1$s</xliff:g>\". ويمكن لمقدِّم شبكة VPN الاطّلاع على أنشطة الشبكة، بما في ذلك الرسائل الإلكترونية وبيانات التصفّح."</string>
     <string name="monitoring_description_managed_device_named_vpn" msgid="7693648349547785255">"هذا الجهاز متّصل بالإنترنت من خلال \"<xliff:g id="VPN_APP">%1$s</xliff:g>\". تجدر الإشارة إلى أنّ أنشطة الشبكة، بما في ذلك الرسائل الإلكترونية وبيانات التصفُّح، مرئية لمشرف تكنولوجيا المعلومات في مؤسستك."</string>
     <string name="monitoring_description_two_named_vpns" msgid="6726394451199620634">"هذا الجهاز متّصل بالإنترنت من خلال <xliff:g id="VPN_APP_0">%1$s</xliff:g> و<xliff:g id="VPN_APP_1">%2$s</xliff:g>. يمكن لمشرف تكنولوجيا المعلومات رؤية أنشطة الشبكة، بما في ذلك الرسائل الإلكترونية وبيانات التصفُّح."</string>
@@ -687,7 +693,7 @@
     <string name="show_demo_mode" msgid="3677956462273059726">"عرض الوضع التجريبي"</string>
     <string name="status_bar_ethernet" msgid="5690979758988647484">"إيثرنت"</string>
     <string name="status_bar_alarm" msgid="87160847643623352">"المنبّه"</string>
-    <string name="wallet_title" msgid="5369767670735827105">"محفظة"</string>
+    <string name="wallet_title" msgid="5369767670735827105">"‏محفظة Google"</string>
     <string name="wallet_empty_state_label" msgid="7776761245237530394">"يمكنك إعداد طريقة دفع لإجراء عمليات شراء بسرعة وأمان أكبر باستخدام هاتفك."</string>
     <string name="wallet_app_button_label" msgid="7123784239111190992">"عرض الكل"</string>
     <string name="wallet_secondary_label_no_card" msgid="8488069304491125713">"انقر لفتح قفل الجهاز"</string>
@@ -1226,7 +1232,6 @@
     <string name="accessibility_fingerprint_bouncer" msgid="7189102492498735519">"المصادقة مطلوبة. المس مستشعر بصمات الإصبع للمصادقة."</string>
     <string name="ongoing_phone_call_content_description" msgid="5332334388483099947">"مكالمة هاتفية جارية"</string>
     <string name="mobile_data_settings_title" msgid="3955246641380064901">"بيانات الجوّال"</string>
-    <string name="preference_summary_default_combination" msgid="8453246369903749670">"<xliff:g id="STATE">%1$s</xliff:g> / <xliff:g id="NETWORKMODE">%2$s</xliff:g>"</string>
     <string name="mobile_data_connection_active" msgid="944490013299018227">"متصلة بالإنترنت"</string>
     <string name="mobile_data_temp_connection_active" msgid="4590222725908806824">"متصلة مؤقتًا"</string>
     <string name="mobile_data_poor_connection" msgid="819617772268371434">"الاتصال ضعيف"</string>
@@ -1380,7 +1385,10 @@
     <string name="touchpad_tutorial_done_button" msgid="176168488821755503">"تم"</string>
     <string name="touchpad_tutorial_gesture_done" msgid="4784438360736821255">"أحسنت."</string>
     <string name="touchpad_back_gesture_action_title" msgid="7199067250654332735">"رجوع"</string>
-    <string name="touchpad_back_gesture_guidance" msgid="4222430588599527272">"للرجوع، مرِّر سريعًا لليسار أو لليمين باستخدام ثلاثة أصابع في أي مكان على لوحة اللمس."</string>
+    <!-- no translation found for touchpad_back_gesture_guidance (6263750214998421587) -->
+    <skip />
+    <!-- no translation found for touchpad_back_gesture_finished (5353616006999726249) -->
+    <skip />
     <string name="touchpad_back_gesture_animation_content_description" msgid="2646107450922379918">"لوحة لمس تعرض ثلاثة أصابع تتحرك يمينًا ويسارًا"</string>
     <string name="touchpad_back_gesture_screen_animation_content_description" msgid="4036267494237748710">"شاشة جهاز تعرض صورة متحركة لإيماءة الرجوع"</string>
     <string name="keyboard_backlight_dialog_title" msgid="8273102932345564724">"الإضاءة الخلفية للوحة المفاتيح"</string>
@@ -1388,28 +1396,16 @@
     <string name="home_controls_dream_label" msgid="6567105701292324257">"إدارة المنزل آليًّا"</string>
     <string name="home_controls_dream_description" msgid="4644150952104035789">"يمكنك إدارة المنزل آليًّا بشكل سريع من شاشة الاستراحة"</string>
     <string name="volume_undo_action" msgid="5815519725211877114">"تراجع"</string>
-    <!-- no translation found for back_edu_toast_content (4530314597378982956) -->
-    <skip />
-    <!-- no translation found for home_edu_toast_content (3381071147871955415) -->
-    <skip />
-    <!-- no translation found for overview_edu_toast_content (5797030644017804518) -->
-    <skip />
-    <!-- no translation found for all_apps_edu_toast_content (8807496014667211562) -->
-    <skip />
-    <!-- no translation found for back_edu_notification_title (5624780717751357278) -->
-    <skip />
-    <!-- no translation found for back_edu_notification_content (2497557451540954068) -->
-    <skip />
-    <!-- no translation found for home_edu_notification_title (6097902076909654045) -->
-    <skip />
-    <!-- no translation found for home_edu_notification_content (6631697734535766588) -->
-    <skip />
-    <!-- no translation found for overview_edu_notification_title (1265824157319562406) -->
-    <skip />
-    <!-- no translation found for overview_edu_notification_content (3578204677648432500) -->
-    <skip />
-    <!-- no translation found for all_apps_edu_notification_title (372262997265569063) -->
-    <skip />
-    <!-- no translation found for all_apps_edu_notification_content (3255070575694025585) -->
-    <skip />
+    <string name="back_edu_toast_content" msgid="4530314597378982956">"للرجوع، مرِّر سريعًا لليمين أو لليسار على لوحة اللمس باستخدام 3 أصابع"</string>
+    <string name="home_edu_toast_content" msgid="3381071147871955415">"للانتقال إلى الشاشة الرئيسية، مرِّر سريعًا للأعلى على لوحة اللمس باستخدام 3 أصابع"</string>
+    <string name="overview_edu_toast_content" msgid="5797030644017804518">"لعرض التطبيقات المستخدَمة مؤخرًا، مرِّر سريعًا للأعلى مع استمرار الضغط على لوحة اللمس باستخدام 3 أصابع"</string>
+    <string name="all_apps_edu_toast_content" msgid="8807496014667211562">"لعرض جميع التطبيقات، اضغط على مفتاح الإجراء في لوحة المفاتيح"</string>
+    <string name="back_edu_notification_title" msgid="5624780717751357278">"استخدِم لوحة اللمس للرجوع"</string>
+    <string name="back_edu_notification_content" msgid="2497557451540954068">"مرِّر سريعًا لليمين أو لليسار باستخدام 3 أصابع. انقر للتعرّف على المزيد من الإيماءات."</string>
+    <string name="home_edu_notification_title" msgid="6097902076909654045">"استخدِم لوحة اللمس للانتقال إلى الشاشة الرئيسية"</string>
+    <string name="home_edu_notification_content" msgid="6631697734535766588">"مرِّر سريعًا للأعلى باستخدام 3 أصابع. انقر للتعرّف على المزيد من الإيماءات."</string>
+    <string name="overview_edu_notification_title" msgid="1265824157319562406">"استخدِم لوحة اللمس لعرض التطبيقات المستخدَمة مؤخرًا"</string>
+    <string name="overview_edu_notification_content" msgid="3578204677648432500">"مرِّر سريعًا للأعلى مع استمرار الضغط باستخدام 3 أصابع. انقر للتعرّف على المزيد من الإيماءات."</string>
+    <string name="all_apps_edu_notification_title" msgid="372262997265569063">"استخدِم لوحة المفاتيح لعرض جميع التطبيقات"</string>
+    <string name="all_apps_edu_notification_content" msgid="3255070575694025585">"اضغط على مفتاح الإجراء في أي وقت. انقر للتعرّف على المزيد من الإيماءات."</string>
 </resources>

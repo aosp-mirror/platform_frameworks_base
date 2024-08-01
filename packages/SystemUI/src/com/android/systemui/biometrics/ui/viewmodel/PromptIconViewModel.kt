@@ -469,7 +469,7 @@ constructor(
         if (isPendingConfirmation) {
             when (sensorType) {
                 FingerprintSensorType.POWER_BUTTON -> -1
-                else -> R.string.fingerprint_dialog_authenticated_confirmation
+                else -> R.string.biometric_dialog_confirm
             }
         } else if (isAuthenticating || isAuthenticated) {
             when (sensorType) {

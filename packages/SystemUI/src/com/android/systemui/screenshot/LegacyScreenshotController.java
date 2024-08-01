@@ -35,7 +35,6 @@ import android.animation.AnimatorListenerAdapter;
 import android.annotation.MainThread;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.app.ICompatCameraControlCallback;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -491,13 +490,6 @@ public class LegacyScreenshotController implements InteractiveScreenshotHandler 
                                     mScreenshotAnimation.end();
                                 }
                             }
-                        }
-
-                        @Override
-                        public void requestCompatCameraControl(boolean showControl,
-                                boolean transformationApplied,
-                                ICompatCameraControlCallback callback) {
-                            Log.w(TAG, "Unexpected requestCompatCameraControl callback");
                         }
                     });
         });

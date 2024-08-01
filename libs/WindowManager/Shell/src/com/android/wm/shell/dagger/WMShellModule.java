@@ -226,7 +226,8 @@ public abstract class WMShellModule {
             Optional<DesktopTasksController> desktopTasksController,
             RootTaskDisplayAreaOrganizer rootTaskDisplayAreaOrganizer,
             InteractionJankMonitor interactionJankMonitor,
-            AppToWebGenericLinksParser genericLinksParser) {
+            AppToWebGenericLinksParser genericLinksParser,
+            MultiInstanceHelper multiInstanceHelper) {
         if (DesktopModeStatus.canEnterDesktopMode(context)) {
             return new DesktopModeWindowDecorViewModel(
                     context,
@@ -246,7 +247,8 @@ public abstract class WMShellModule {
                     desktopTasksController,
                     rootTaskDisplayAreaOrganizer,
                     interactionJankMonitor,
-                    genericLinksParser);
+                    genericLinksParser,
+                    multiInstanceHelper);
         }
         return new CaptionWindowDecorViewModel(
                 context,
@@ -566,7 +568,8 @@ public abstract class WMShellModule {
             Context context,
             Transitions transitions,
             @DynamicOverride DesktopModeTaskRepository desktopModeTaskRepository,
-            ShellTaskOrganizer shellTaskOrganizer) {
+            ShellTaskOrganizer shellTaskOrganizer,
+            InteractionJankMonitor interactionJankMonitor) {
         int maxTaskLimit = DesktopModeStatus.getMaxTaskLimit(context);
         if (!DesktopModeStatus.canEnterDesktopMode(context)
                 || !ENABLE_DESKTOP_WINDOWING_TASK_LIMIT.isEnabled(context)
@@ -575,7 +578,13 @@ public abstract class WMShellModule {
         }
         return Optional.of(
                 new DesktopTasksLimiter(
-                        transitions, desktopModeTaskRepository, shellTaskOrganizer, maxTaskLimit));
+                        transitions,
+                        desktopModeTaskRepository,
+                        shellTaskOrganizer,
+                        maxTaskLimit,
+                        interactionJankMonitor,
+                        context)
+        );
     }
 
 

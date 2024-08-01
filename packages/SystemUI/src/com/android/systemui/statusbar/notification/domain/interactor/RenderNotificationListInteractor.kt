@@ -15,7 +15,14 @@
  */
 package com.android.systemui.statusbar.notification.domain.interactor
 
+import android.app.Notification.CallStyle.CALL_TYPE_INCOMING
+import android.app.Notification.CallStyle.CALL_TYPE_ONGOING
+import android.app.Notification.CallStyle.CALL_TYPE_SCREENING
+import android.app.Notification.CallStyle.CALL_TYPE_UNKNOWN
+import android.app.Notification.EXTRA_CALL_TYPE
+import android.app.PendingIntent
 import android.graphics.drawable.Icon
+import android.service.notification.StatusBarNotification
 import android.util.ArrayMap
 import com.android.app.tracing.traceSection
 import com.android.systemui.statusbar.notification.collection.GroupEntry
@@ -27,6 +34,7 @@ import com.android.systemui.statusbar.notification.data.repository.ActiveNotific
 import com.android.systemui.statusbar.notification.shared.ActiveNotificationEntryModel
 import com.android.systemui.statusbar.notification.shared.ActiveNotificationGroupModel
 import com.android.systemui.statusbar.notification.shared.ActiveNotificationModel
+import com.android.systemui.statusbar.notification.shared.CallType
 import javax.inject.Inject
 import kotlinx.coroutines.flow.update
 
@@ -124,6 +132,7 @@ private class ActiveNotificationsStoreBuilder(
         existingModels.createOrReuse(
             key = key,
             groupKey = sbn.groupKey,
+            whenTime = sbn.notification.`when`,
             isAmbient = sectionStyleProvider.isMinimized(this),
             isRowDismissed = isRowDismissed,
             isSilent = sectionStyleProvider.isSilent(this),
@@ -135,15 +144,18 @@ private class ActiveNotificationsStoreBuilder(
             statusBarIcon = icons.statusBarIcon?.sourceIcon,
             uid = sbn.uid,
             packageName = sbn.packageName,
+            contentIntent = sbn.notification.contentIntent,
             instanceId = sbn.instanceId?.id,
             isGroupSummary = sbn.notification.isGroupSummary,
             bucket = bucket,
+            callType = sbn.toCallType(),
         )
 }
 
 private fun ActiveNotificationsStore.createOrReuse(
     key: String,
     groupKey: String?,
+    whenTime: Long,
     isAmbient: Boolean,
     isRowDismissed: Boolean,
     isSilent: Boolean,
@@ -155,14 +167,17 @@ private fun ActiveNotificationsStore.createOrReuse(
     statusBarIcon: Icon?,
     uid: Int,
     packageName: String,
+    contentIntent: PendingIntent?,
     instanceId: Int?,
     isGroupSummary: Boolean,
     bucket: Int,
+    callType: CallType,
 ): ActiveNotificationModel {
     return individuals[key]?.takeIf {
         it.isCurrent(
             key = key,
             groupKey = groupKey,
+            whenTime = whenTime,
             isAmbient = isAmbient,
             isRowDismissed = isRowDismissed,
             isSilent = isSilent,
@@ -176,12 +191,15 @@ private fun ActiveNotificationsStore.createOrReuse(
             instanceId = instanceId,
             isGroupSummary = isGroupSummary,
             packageName = packageName,
+            contentIntent = contentIntent,
             bucket = bucket,
+            callType = callType,
         )
     }
         ?: ActiveNotificationModel(
             key = key,
             groupKey = groupKey,
+            whenTime = whenTime,
             isAmbient = isAmbient,
             isRowDismissed = isRowDismissed,
             isSilent = isSilent,
@@ -195,13 +213,16 @@ private fun ActiveNotificationsStore.createOrReuse(
             instanceId = instanceId,
             isGroupSummary = isGroupSummary,
             packageName = packageName,
+            contentIntent = contentIntent,
             bucket = bucket,
+            callType = callType,
         )
 }
 
 private fun ActiveNotificationModel.isCurrent(
     key: String,
     groupKey: String?,
+    whenTime: Long,
     isAmbient: Boolean,
     isRowDismissed: Boolean,
     isSilent: Boolean,
@@ -213,13 +234,16 @@ private fun ActiveNotificationModel.isCurrent(
     statusBarIcon: Icon?,
     uid: Int,
     packageName: String,
+    contentIntent: PendingIntent?,
     instanceId: Int?,
     isGroupSummary: Boolean,
     bucket: Int,
+    callType: CallType,
 ): Boolean {
     return when {
         key != this.key -> false
         groupKey != this.groupKey -> false
+        whenTime != this.whenTime -> false
         isAmbient != this.isAmbient -> false
         isRowDismissed != this.isRowDismissed -> false
         isSilent != this.isSilent -> false
@@ -233,7 +257,9 @@ private fun ActiveNotificationModel.isCurrent(
         instanceId != this.instanceId -> false
         isGroupSummary != this.isGroupSummary -> false
         packageName != this.packageName -> false
+        contentIntent != this.contentIntent -> false
         bucket != this.bucket -> false
+        callType != this.callType -> false
         else -> true
     }
 }
@@ -259,3 +285,13 @@ private fun ActiveNotificationGroupModel.isCurrent(
         else -> true
     }
 }
+
+private fun StatusBarNotification.toCallType(): CallType =
+    when (this.notification.extras.getInt(EXTRA_CALL_TYPE, -1)) {
+        -1 -> CallType.None
+        CALL_TYPE_INCOMING -> CallType.Incoming
+        CALL_TYPE_ONGOING -> CallType.Ongoing
+        CALL_TYPE_SCREENING -> CallType.Screening
+        CALL_TYPE_UNKNOWN -> CallType.Unknown
+        else -> CallType.Unknown
+    }

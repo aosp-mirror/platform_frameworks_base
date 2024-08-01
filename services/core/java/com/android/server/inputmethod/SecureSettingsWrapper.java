@@ -377,6 +377,23 @@ final class SecureSettingsWrapper {
     }
 
     /**
+     * Called when a user is stopped, which changes the user storage to the locked state again.
+     *
+     * @param userId the ID of the user whose storage is being locked again.
+     */
+    @AnyThread
+    static void onUserStopped(@UserIdInt int userId) {
+        final LockedUserImpl lockedUserImpl = new LockedUserImpl(userId, sContentResolver);
+        synchronized (sMutationLock) {
+            final ReaderWriter current = sUserMap.get(userId);
+            if (current == null || current instanceof LockedUserImpl) {
+                return;
+            }
+            sUserMap = sUserMap.cloneWithPutOrSelf(userId, lockedUserImpl);
+        }
+    }
+
+    /**
      * Put the given string {@code value} to {@code key}.
      *
      * @param key a secure settings key.
