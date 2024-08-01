@@ -1884,8 +1884,7 @@
     <string name="restr_pin_error_too_short" msgid="1547007808237941065">"O PIN é demasiado pequeno. Deve ter, no mínimo, 4 dígitos."</string>
     <string name="restr_pin_try_later" msgid="5897719962541636727">"Tente mais tarde"</string>
     <string name="immersive_cling_title" msgid="2307034298721541791">"Visualização de ecrã inteiro"</string>
-    <!-- no translation found for immersive_cling_description (2896205051090870978) -->
-    <skip />
+    <string name="immersive_cling_description" msgid="2896205051090870978">"Para sair, deslize rapidamente para baixo a partir da parte superior do ecrã"</string>
     <string name="immersive_cling_positive" msgid="7047498036346489883">"OK"</string>
     <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"Rode para uma melhor visualização"</string>
     <string name="display_rotation_camera_compat_toast_in_multi_window" msgid="2473122980393502775">"Abra <xliff:g id="NAME">%s</xliff:g> em ecrã inteiro para uma melhor visualização"</string>
@@ -2419,12 +2418,12 @@
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"Como funciona"</string>
     <string name="unarchival_session_app_label" msgid="6811856981546348205">"Pendente…"</string>
     <string name="fingerprint_dangling_notification_title" msgid="7362075195588639989">"Configure o Desbloqueio por impressão digital novamente"</string>
-    <string name="fingerprint_dangling_notification_msg_1" msgid="8517140433796229725">"A <xliff:g id="FINGERPRINT">%s</xliff:g> não estava a funcionar bem e foi eliminada"</string>
-    <string name="fingerprint_dangling_notification_msg_2" msgid="7578829498452127613">"A <xliff:g id="FINGERPRINT_0">%1$s</xliff:g> e a <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> não estavam a funcionar bem e foram eliminadas"</string>
-    <string name="fingerprint_dangling_notification_msg_all_deleted_1" msgid="2927018569542316055">"A <xliff:g id="FINGERPRINT">%s</xliff:g> não estava a funcionar bem e foi eliminada. Configure-a novamente para desbloquear o telemóvel com a impressão digital."</string>
-    <string name="fingerprint_dangling_notification_msg_all_deleted_2" msgid="6897989352716156176">"A <xliff:g id="FINGERPRINT_0">%1$s</xliff:g> e a <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> não estavam a funcionar bem e foram eliminadas. Configure-as novamente para desbloquear o telemóvel com a sua impressão digital."</string>
+    <string name="fingerprint_dangling_notification_msg_1" msgid="5851784577768803510">"Já não é possível reconhecer <xliff:g id="FINGERPRINT">%s</xliff:g>."</string>
+    <string name="fingerprint_dangling_notification_msg_2" msgid="7925203589860744456">"Já não é possível reconhecer <xliff:g id="FINGERPRINT_0">%1$s</xliff:g> e <xliff:g id="FINGERPRINT_1">%2$s</xliff:g>."</string>
+    <string name="fingerprint_dangling_notification_msg_all_deleted_1" msgid="1824812666549916586">"Já não é possível reconhecer <xliff:g id="FINGERPRINT">%s</xliff:g>. Configure o Desbloqueio por impressão digital novamente."</string>
+    <string name="fingerprint_dangling_notification_msg_all_deleted_2" msgid="5974657382960155099">"Já não é possível reconhecer <xliff:g id="FINGERPRINT_0">%1$s</xliff:g> e <xliff:g id="FINGERPRINT_1">%2$s</xliff:g>. Configure o Desbloqueio por impressão digital novamente."</string>
     <string name="face_dangling_notification_title" msgid="947852541060975473">"Configure o Desbloqueio facial novamente"</string>
-    <string name="face_dangling_notification_msg" msgid="8806849376915541655">"O seu modelo de rosto não estava a funcionar bem e foi eliminado. Configure-o novamente para desbloquear o telemóvel com o rosto."</string>
+    <string name="face_dangling_notification_msg" msgid="746235263598985384">"Já não é possível reconhecer o seu modelo de rosto. Configure o Desbloqueio facial novamente."</string>
     <string name="biometric_dangling_notification_action_set_up" msgid="8246885009807817961">"Configurar"</string>
     <string name="biometric_dangling_notification_action_not_now" msgid="8095249216864443491">"Agora não"</string>
 </resources>
