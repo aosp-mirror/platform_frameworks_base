@@ -284,28 +284,26 @@ public class WindowManagerShellCommand extends ShellCommand {
 
     private int runDisplayDensity(PrintWriter pw) throws RemoteException {
         String densityStr = getNextArg();
-        String option = getNextOption();
         String arg = getNextArg();
         int density;
         int displayId = Display.DEFAULT_DISPLAY;
-        if ("-d".equals(option) && arg != null) {
+        if ("-d".equals(densityStr) && arg != null) {
             try {
                 displayId = Integer.parseInt(arg);
             } catch (NumberFormatException e) {
                 getErrPrintWriter().println("Error: bad number " + e);
             }
-        } else if ("-u".equals(option) && arg != null) {
+            densityStr = getNextArg();
+        } else if ("-u".equals(densityStr) && arg != null) {
             displayId = mInterface.getDisplayIdByUniqueId(arg);
             if (displayId == Display.INVALID_DISPLAY) {
                 getErrPrintWriter().println("Error: the uniqueId is invalid ");
                 return -1;
             }
+            densityStr = getNextArg();
         }
 
         if (densityStr == null) {
-            printInitialDisplayDensity(pw, displayId);
-            return 0;
-        } else if ("-d".equals(densityStr)) {
             printInitialDisplayDensity(pw, displayId);
             return 0;
         } else if ("reset".equals(densityStr)) {
