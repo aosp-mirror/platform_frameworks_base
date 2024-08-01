@@ -14,19 +14,12 @@
  * limitations under the License.
  */
 
-package com.android.systemui.touchpad.tutorial.ui.gesture
+package com.android.systemui.shade
 
-enum class TouchpadGesture {
-    BACK,
-    HOME;
+import android.graphics.Rect
 
-    fun toMonitor(
-        swipeDistanceThresholdPx: Int,
-        onStateChanged: (GestureState) -> Unit
-    ): TouchpadGestureMonitor {
-        return when (this) {
-            BACK -> BackGestureMonitor(swipeDistanceThresholdPx, onStateChanged)
-            else -> throw IllegalArgumentException("Not implemented yet")
-        }
-    }
-}
+class QSHeaderBoundsProvider(
+    val leftProvider: () -> Int,
+    val heightProvider: () -> Int,
+    val boundsOnScreenProvider: (Rect) -> Unit,
+)

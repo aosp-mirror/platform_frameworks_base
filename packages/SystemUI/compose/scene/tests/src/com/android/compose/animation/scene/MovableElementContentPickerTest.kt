@@ -18,20 +18,22 @@ package com.android.compose.animation.scene
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.common.truth.Truth.assertThat
+import org.junit.Assert.assertThrows
 import org.junit.Test
 import org.junit.runner.RunWith
 
 @RunWith(AndroidJUnit4::class)
-class MovableElementScenePickerTest {
+class MovableElementContentPickerTest {
     @Test
     fun toSceneInScenes() {
-        val picker = MovableElementScenePicker(scenes = setOf(TestScenes.SceneA, TestScenes.SceneB))
+        val picker =
+            MovableElementContentPicker(contents = setOf(TestScenes.SceneA, TestScenes.SceneB))
         assertThat(
-                picker.sceneDuringTransition(
+                picker.contentDuringTransition(
                     TestElements.Foo,
                     transition(from = TestScenes.SceneA, to = TestScenes.SceneB),
-                    fromSceneZIndex = 0f,
-                    toSceneZIndex = 1f,
+                    fromContentZIndex = 0f,
+                    toContentZIndex = 1f,
                 )
             )
             .isEqualTo(TestScenes.SceneB)
@@ -39,13 +41,13 @@ class MovableElementScenePickerTest {
 
     @Test
     fun fromSceneInScenes() {
-        val picker = MovableElementScenePicker(scenes = setOf(TestScenes.SceneA))
+        val picker = MovableElementContentPicker(contents = setOf(TestScenes.SceneA))
         assertThat(
-                picker.sceneDuringTransition(
+                picker.contentDuringTransition(
                     TestElements.Foo,
                     transition(from = TestScenes.SceneA, to = TestScenes.SceneB),
-                    fromSceneZIndex = 0f,
-                    toSceneZIndex = 1f,
+                    fromContentZIndex = 0f,
+                    toContentZIndex = 1f,
                 )
             )
             .isEqualTo(TestScenes.SceneA)
@@ -53,15 +55,14 @@ class MovableElementScenePickerTest {
 
     @Test
     fun noneInScenes() {
-        val picker = MovableElementScenePicker(scenes = emptySet())
-        assertThat(
-                picker.sceneDuringTransition(
-                    TestElements.Foo,
-                    transition(from = TestScenes.SceneA, to = TestScenes.SceneB),
-                    fromSceneZIndex = 0f,
-                    toSceneZIndex = 1f,
-                )
+        val picker = MovableElementContentPicker(contents = emptySet())
+        assertThrows(IllegalStateException::class.java) {
+            picker.contentDuringTransition(
+                TestElements.Foo,
+                transition(from = TestScenes.SceneA, to = TestScenes.SceneB),
+                fromContentZIndex = 0f,
+                toContentZIndex = 1f,
             )
-            .isEqualTo(null)
+        }
     }
 }

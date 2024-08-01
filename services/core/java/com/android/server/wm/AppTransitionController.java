@@ -250,7 +250,7 @@ public class AppTransitionController {
 
         ArraySet<ActivityRecord> tmpOpenApps = mDisplayContent.mOpeningApps;
         ArraySet<ActivityRecord> tmpCloseApps = mDisplayContent.mClosingApps;
-        if (mDisplayContent.mAtmService.mBackNavigationController.isMonitoringTransition()) {
+        if (mDisplayContent.mAtmService.mBackNavigationController.isMonitoringFinishTransition()) {
             tmpOpenApps = new ArraySet<>(mDisplayContent.mOpeningApps);
             tmpCloseApps = new ArraySet<>(mDisplayContent.mClosingApps);
             if (mDisplayContent.mAtmService.mBackNavigationController

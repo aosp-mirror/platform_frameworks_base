@@ -20,10 +20,18 @@ import android.graphics.ColorFilter
 import android.graphics.PorterDuff
 import android.graphics.PorterDuffColorFilter
 import androidx.activity.compose.BackHandler
+import androidx.annotation.RawRes
 import androidx.annotation.StringRes
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.snap
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
@@ -50,7 +58,6 @@ import androidx.compose.ui.input.pointer.pointerInteropFilter
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import com.airbnb.lottie.LottieComposition
 import com.airbnb.lottie.LottieProperty
 import com.airbnb.lottie.compose.LottieAnimation
 import com.airbnb.lottie.compose.LottieCompositionSpec
@@ -63,10 +70,11 @@ import com.airbnb.lottie.compose.rememberLottieDynamicProperties
 import com.airbnb.lottie.compose.rememberLottieDynamicProperty
 import com.android.compose.theme.LocalAndroidColorScheme
 import com.android.systemui.res.R
+import com.android.systemui.touchpad.tutorial.ui.gesture.BackGestureMonitor
 import com.android.systemui.touchpad.tutorial.ui.gesture.GestureState
 import com.android.systemui.touchpad.tutorial.ui.gesture.GestureState.FINISHED
 import com.android.systemui.touchpad.tutorial.ui.gesture.GestureState.IN_PROGRESS
-import com.android.systemui.touchpad.tutorial.ui.gesture.TouchpadGesture.BACK
+import com.android.systemui.touchpad.tutorial.ui.gesture.GestureState.NOT_STARTED
 import com.android.systemui.touchpad.tutorial.ui.gesture.TouchpadGestureHandler
 
 data class TutorialScreenColors(
@@ -83,7 +91,7 @@ fun BackGestureTutorialScreen(
 ) {
     val screenColors = rememberScreenColors()
     BackHandler(onBack = onBack)
-    var gestureState by remember { mutableStateOf(GestureState.NOT_STARTED) }
+    var gestureState by remember { mutableStateOf(NOT_STARTED) }
     val swipeDistanceThresholdPx =
         LocalContext.current.resources.getDimensionPixelSize(
             com.android.internal.R.dimen.system_gestures_distance_threshold
@@ -91,9 +99,10 @@ fun BackGestureTutorialScreen(
     val gestureHandler =
         remember(swipeDistanceThresholdPx) {
             TouchpadGestureHandler(
-                BACK,
-                swipeDistanceThresholdPx,
-                onGestureStateChanged = { gestureState = it }
+                BackGestureMonitor(
+                    swipeDistanceThresholdPx,
+                    gestureStateChangedCallback = { gestureState = it }
+                ),
             )
         }
     TouchpadGesturesHandlingBox(gestureHandler, gestureState) {
@@ -226,31 +235,74 @@ fun TutorialAnimation(
     animationProperties: LottieDynamicProperties,
     modifier: Modifier = Modifier
 ) {
-    Column(modifier = modifier.fillMaxWidth()) {
-        val resId =
-            if (gestureState == FINISHED) R.raw.trackpad_back_success else R.raw.trackpad_back_edu
-        val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(resId))
-        val progress = progressForGestureState(composition, gestureState)
-        LottieAnimation(
-            composition = composition,
-            progress = progress,
-            dynamicProperties = animationProperties
-        )
+    Box(modifier = modifier.fillMaxWidth()) {
+        AnimatedContent(
+            targetState = gestureState,
+            transitionSpec = {
+                if (initialState == NOT_STARTED && targetState == IN_PROGRESS) {
+                    val transitionDurationMillis = 150
+                    fadeIn(
+                        animationSpec = tween(transitionDurationMillis, easing = LinearEasing)
+                    ) togetherWith
+                        fadeOut(animationSpec = snap(delayMillis = transitionDurationMillis))
+                } else {
+                    // empty transition works because all remaining transitions are from IN_PROGRESS
+                    // state which shares initial animation frame with both FINISHED and NOT_STARTED
+                    EnterTransition.None togetherWith ExitTransition.None
+                }
+            }
+        ) { gestureState ->
+            @RawRes val successAnimationId = R.raw.trackpad_back_success
+            @RawRes val educationAnimationId = R.raw.trackpad_back_edu
+            when (gestureState) {
+                NOT_STARTED -> EducationAnimation(educationAnimationId, animationProperties)
+                IN_PROGRESS -> FrozenSuccessAnimation(successAnimationId, animationProperties)
+                FINISHED -> SuccessAnimation(successAnimationId, animationProperties)
+            }
+        }
     }
 }
 
 @Composable
-private fun progressForGestureState(
-    composition: LottieComposition?,
-    gestureState: GestureState
-): () -> Float {
-    if (gestureState == IN_PROGRESS) {
-        return { 0f } // when gesture is in progress, animation should freeze on 1st frame
-    } else {
-        val iterations = if (gestureState == FINISHED) 1 else LottieConstants.IterateForever
-        val animationState by animateLottieCompositionAsState(composition, iterations = iterations)
-        return { animationState }
-    }
+private fun FrozenSuccessAnimation(
+    @RawRes successAnimationId: Int,
+    animationProperties: LottieDynamicProperties
+) {
+    val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(successAnimationId))
+    LottieAnimation(
+        composition = composition,
+        progress = { 0f }, // animation should freeze on 1st frame
+        dynamicProperties = animationProperties,
+    )
+}
+
+@Composable
+private fun EducationAnimation(
+    @RawRes educationAnimationId: Int,
+    animationProperties: LottieDynamicProperties
+) {
+    val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(educationAnimationId))
+    val progress by
+        animateLottieCompositionAsState(composition, iterations = LottieConstants.IterateForever)
+    LottieAnimation(
+        composition = composition,
+        progress = { progress },
+        dynamicProperties = animationProperties,
+    )
+}
+
+@Composable
+private fun SuccessAnimation(
+    @RawRes successAnimationId: Int,
+    animationProperties: LottieDynamicProperties
+) {
+    val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(successAnimationId))
+    val progress by animateLottieCompositionAsState(composition, iterations = 1)
+    LottieAnimation(
+        composition = composition,
+        progress = { progress },
+        dynamicProperties = animationProperties,
+    )
 }
 
 @Composable

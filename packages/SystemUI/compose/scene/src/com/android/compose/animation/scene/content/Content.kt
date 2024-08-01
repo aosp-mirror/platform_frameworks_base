@@ -39,6 +39,7 @@ import com.android.compose.animation.scene.ElementScope
 import com.android.compose.animation.scene.ElementStateScope
 import com.android.compose.animation.scene.MovableElement
 import com.android.compose.animation.scene.MovableElementContentScope
+import com.android.compose.animation.scene.MovableElementKey
 import com.android.compose.animation.scene.NestedScrollBehavior
 import com.android.compose.animation.scene.SceneTransitionLayoutImpl
 import com.android.compose.animation.scene.SceneTransitionLayoutState
@@ -130,7 +131,7 @@ internal class ContentScopeImpl(
 
     @Composable
     override fun MovableElement(
-        key: ElementKey,
+        key: MovableElementKey,
         modifier: Modifier,
         content: @Composable (ElementScope<MovableElementContentScope>.() -> Unit)
     ) {

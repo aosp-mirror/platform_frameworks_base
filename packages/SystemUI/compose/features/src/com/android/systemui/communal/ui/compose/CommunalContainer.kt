@@ -36,7 +36,7 @@ import com.android.compose.animation.scene.ContentKey
 import com.android.compose.animation.scene.Edge
 import com.android.compose.animation.scene.ElementKey
 import com.android.compose.animation.scene.ElementMatcher
-import com.android.compose.animation.scene.LowestZIndexScenePicker
+import com.android.compose.animation.scene.LowestZIndexContentPicker
 import com.android.compose.animation.scene.MutableSceneTransitionLayoutState
 import com.android.compose.animation.scene.SceneKey
 import com.android.compose.animation.scene.SceneScope
@@ -62,7 +62,7 @@ import kotlin.time.DurationUnit
 
 object Communal {
     object Elements {
-        val Scrim = ElementKey("Scrim", scenePicker = LowestZIndexScenePicker)
+        val Scrim = ElementKey("Scrim", contentPicker = LowestZIndexContentPicker)
         val Grid = ElementKey("CommunalContent")
         val LockIcon = ElementKey("CommunalLockIcon")
         val IndicationArea = ElementKey("CommunalIndicationArea")
@@ -134,7 +134,7 @@ val sceneTransitions = transitions {
     }
     // Disable horizontal overscroll. If the scene is overscrolled too soon after showing, this
     // can lead to inconsistent KeyguardState changes.
-    overscroll(CommunalScenes.Communal, Orientation.Horizontal) {}
+    overscrollDisabled(CommunalScenes.Communal, Orientation.Horizontal)
 }
 
 /**

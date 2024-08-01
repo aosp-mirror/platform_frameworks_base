@@ -16,6 +16,7 @@
 
 package com.android.systemui.shade;
 
+import static android.platform.test.flag.junit.FlagsParameterization.progressionOf;
 import static android.view.MotionEvent.ACTION_DOWN;
 import static android.view.MotionEvent.ACTION_MOVE;
 import static android.view.MotionEvent.ACTION_POINTER_DOWN;
@@ -23,6 +24,8 @@ import static android.view.MotionEvent.ACTION_UP;
 import static android.view.MotionEvent.BUTTON_SECONDARY;
 import static android.view.MotionEvent.BUTTON_STYLUS_PRIMARY;
 
+import static com.android.systemui.Flags.FLAG_QS_UI_REFACTOR;
+import static com.android.systemui.Flags.FLAG_QS_UI_REFACTOR_COMPOSE_FRAGMENT;
 import static com.android.systemui.statusbar.StatusBarState.KEYGUARD;
 import static com.android.systemui.statusbar.StatusBarState.SHADE;
 
@@ -36,10 +39,10 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.platform.test.annotations.EnableFlags;
+import android.platform.test.flag.junit.FlagsParameterization;
 import android.testing.TestableLooper;
 import android.view.MotionEvent;
 
-import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.plugins.qs.QS;
@@ -52,10 +55,23 @@ import org.mockito.ArgumentCaptor;
 
 import java.util.List;
 
+import platform.test.runner.parameterized.ParameterizedAndroidJunit4;
+import platform.test.runner.parameterized.Parameters;
+
 @SmallTest
-@RunWith(AndroidJUnit4.class)
+@RunWith(ParameterizedAndroidJunit4.class)
 @TestableLooper.RunWithLooper(setAsMainLooper = true)
 public class QuickSettingsControllerImplTest extends QuickSettingsControllerImplBaseTest {
+
+    @Parameters(name = "{0}")
+    public static List<FlagsParameterization> getParams() {
+        return progressionOf(FLAG_QS_UI_REFACTOR, FLAG_QS_UI_REFACTOR_COMPOSE_FRAGMENT);
+    }
+
+    public QuickSettingsControllerImplTest(FlagsParameterization flags) {
+        super();
+        mSetFlagsRule.setFlagsParameterization(flags);
+    }
 
     @Test
     public void testCloseQsSideEffects() {

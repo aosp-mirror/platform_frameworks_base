@@ -1334,13 +1334,24 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
         if (shouldContainerBeExpanded(container)) {
             // Make sure that the existing container is expanded.
             mPresenter.expandTaskFragment(wct, container);
-        } else {
-            // Put activity into a new expanded container.
-            final TaskFragmentContainer newContainer =
-                    new TaskFragmentContainer.Builder(this, getTaskId(activity), activity)
-                            .setPendingAppearedActivity(activity).build();
-            mPresenter.expandActivity(wct, newContainer.getTaskFragmentToken(), activity);
+            return;
         }
+
+        final SplitContainer splitContainer = getActiveSplitForContainer(container);
+        if (splitContainer instanceof SplitPinContainer
+                && !container.isPinned() && container.getRunningActivityCount() == 1) {
+            // This is already the expected state when the pinned container is shown with an
+            // expanded activity in a standalone container on the side. Moving the activity into
+            // another new expanded container again is not necessary and could result in
+            // recursively creating new TaskFragmentContainers if the activity somehow relaunched.
+            return;
+        }
+
+        // Put activity into a new expanded container.
+        final TaskFragmentContainer newContainer =
+                new TaskFragmentContainer.Builder(this, getTaskId(activity), activity)
+                        .setPendingAppearedActivity(activity).build();
+        mPresenter.expandActivity(wct, newContainer.getTaskFragmentToken(), activity);
     }
 
     /**

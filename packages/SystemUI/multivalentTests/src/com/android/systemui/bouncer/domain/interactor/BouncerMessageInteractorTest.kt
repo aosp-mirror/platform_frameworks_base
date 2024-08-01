@@ -35,6 +35,7 @@ import com.android.systemui.bouncer.data.repository.BouncerMessageRepositoryImpl
 import com.android.systemui.bouncer.data.repository.fakeKeyguardBouncerRepository
 import com.android.systemui.bouncer.shared.model.BouncerMessageModel
 import com.android.systemui.coroutines.collectLastValue
+import com.android.systemui.deviceentry.domain.interactor.deviceEntryBiometricsAllowedInteractor
 import com.android.systemui.deviceentry.domain.interactor.deviceEntryFingerprintAuthInteractor
 import com.android.systemui.flags.SystemPropertiesHelper
 import com.android.systemui.keyguard.data.repository.fakeBiometricSettingsRepository
@@ -108,7 +109,9 @@ class BouncerMessageInteractorTest : SysuiTestCase() {
                 facePropertyRepository = kosmos.fakeFacePropertyRepository,
                 deviceEntryFingerprintAuthInteractor = kosmos.deviceEntryFingerprintAuthInteractor,
                 faceAuthRepository = kosmos.fakeDeviceEntryFaceAuthRepository,
-                securityModel = securityModel
+                securityModel = securityModel,
+                deviceEntryBiometricsAllowedInteractor =
+                    kosmos.deviceEntryBiometricsAllowedInteractor,
             )
         biometricSettingsRepository.setIsFingerprintAuthCurrentlyAllowed(
             fingerprintAuthCurrentlyAllowed

@@ -6496,10 +6496,14 @@ ul.</string>
     <string name="screen_not_shared_sensitive_content">App content hidden from screen share for security</string>
 
     <!-- Satellite related messages -->
-    <!-- Notification title when satellite service is connected. -->
+    <!-- Notification title when satellite service is auto connected. -->
     <string name="satellite_notification_title">Auto connected to satellite</string>
-    <!-- Notification summary when satellite service is connected. [CHAR LIMIT=NONE] -->
+    <!-- Notification summary when satellite service is auto connected. [CHAR LIMIT=NONE] -->
     <string name="satellite_notification_summary">You can send and receive messages without a mobile or Wi-Fi network</string>
+    <!-- Notification title when satellite service can be manually enabled. -->
+    <string name="satellite_notification_manual_title">Use satellite messaging?</string>
+    <!-- Notification summary when satellite service can be manually enabled. [CHAR LIMIT=NONE] -->
+    <string name="satellite_notification_manual_summary">Send and receive messages without a mobile or Wi-Fi network</string>
     <!-- Invoke "What to expect" dialog of messaging application -->
     <string name="satellite_notification_open_message">Open Messages</string>
     <!-- Invoke Satellite setting activity of Settings -->

@@ -17,6 +17,7 @@
 package com.android.compose.animation.scene
 
 import androidx.compose.runtime.snapshotFlow
+import com.android.compose.animation.scene.content.state.TransitionState
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flowOf

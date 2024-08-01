@@ -140,6 +140,8 @@ final class InputMethodMenuControllerNew {
         // Indicate that the list can be scrolled.
         recyclerView.setScrollIndicators(
                 hasLanguageSettingsButton ? View.SCROLL_INDICATOR_BOTTOM : 0);
+        // Request focus to enable rotary scrolling on watches.
+        recyclerView.requestFocus();
 
         builder.setOnCancelListener(dialog -> hide(displayId, userId));
         mMenuItems = items;
