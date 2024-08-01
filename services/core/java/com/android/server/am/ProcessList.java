@@ -2333,8 +2333,8 @@ public final class ProcessList {
             }
             String volumeUuid = packageState.getVolumeUuid();
             long inode = packageState.getUserStateOrDefault(userId).getCeDataInode();
-            if (inode == 0) {
-                Slog.w(TAG, packageName + " inode == 0 (b/152760674)");
+            if (inode <= 0) {
+                Slog.w(TAG, packageName + " inode == 0 or app uninstalled with keep-data");
                 return null;
             }
             result.put(packageName, Pair.create(volumeUuid, inode));
