@@ -27,4 +27,11 @@ oneway interface ISatelliteModemStateCallback {
      * @param state The current satellite modem state.
      */
     void onSatelliteModemStateChanged(in int state);
+
+    /**
+     * Indicates that the satellite emergency mode has changed.
+     *
+     * @param isEmergency True means satellite enabled for emergency mode, false otherwise.
+     */
+    void onEmergencyModeChanged(in boolean isEmergency);
 }

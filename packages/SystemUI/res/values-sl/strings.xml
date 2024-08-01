@@ -218,7 +218,7 @@
     <string name="biometric_re_enroll_notification_content" msgid="8685925877186288180">"To je potrebno, če želite izboljšati varnost in učinkovitost delovanja."</string>
     <string name="fingerprint_re_enroll_notification_title" msgid="4539432429683916604">"Vnovična nastavitev odklepanja s prstnim odtisom"</string>
     <string name="fingerprint_re_enroll_notification_name" msgid="630798657797645704">"Odklepanje s prstnim odtisom"</string>
-    <string name="fingerprint_re_enroll_dialog_title" msgid="3526033128113925780">"Nastavitev odklepanja s prstnim odtisom"</string>
+    <string name="fingerprint_re_enroll_dialog_title" msgid="3526033128113925780">"Nastavite odklepanje s prstnim odtisom"</string>
     <string name="fingerprint_re_enroll_dialog_content" msgid="4866561176695984879">"Če želite znova nastaviti odklepanje s prstnim odtisom, bodo trenutne slike in modeli prstnih odtisov izbrisani.\n\nPo izbrisu boste morali znova nastaviti odklepanje s prstnim odtisom, da boste telefon lahko odklenili s prstnim odtisom ali potrdili svojo identiteto."</string>
     <string name="fingerprint_re_enroll_dialog_content_singular" msgid="3083663339787381218">"Če želite znova nastaviti odklepanje s prstnim odtisom, bodo trenutne slike in model prstnih odtisov izbrisani.\n\nPo izbrisu boste morali znova nastaviti odklepanje s prstnim odtisom, da boste telefon lahko odklenili s prstnim odtisom ali potrdili svojo identiteto."</string>
     <string name="fingerprint_reenroll_failure_dialog_content" msgid="4733768492747300666">"Odklepanja s prstnim odtisom ni bilo mogoče nastaviti. Odprite nastavitve in poskusite znova."</string>
@@ -388,6 +388,9 @@
     <string name="performance" msgid="6552785217174378320">"Učinkovitost delovanja"</string>
     <string name="user_interface" msgid="3712869377953950887">"Uporabniški vmesnik"</string>
     <string name="thermal" msgid="6758074791325414831">"Toplotno"</string>
+    <string name="custom" msgid="3337456985275158299">"Po meri"</string>
+    <string name="custom_trace_settings_dialog_title" msgid="2608570500144830554">"Nastavitve sledi po meri"</string>
+    <string name="restore_default" msgid="5259420807486239755">"Obnovi privzeto"</string>
     <string name="quick_settings_onehanded_label" msgid="2416537930246274991">"Enoročni način"</string>
     <string name="quick_settings_hearing_devices_label" msgid="7277170419679404129">"Slušni pripomočki"</string>
     <string name="quick_settings_hearing_devices_connected" msgid="6519069502397037781">"Aktivno"</string>
@@ -429,9 +432,13 @@
     <string name="zen_modes_dialog_title" msgid="4159138230418567383">"Prednostni načini"</string>
     <string name="zen_modes_dialog_done" msgid="6654130880256438950">"Končano"</string>
     <string name="zen_modes_dialog_settings" msgid="2310248023728936697">"Nastavitve"</string>
-    <!-- no translation found for zen_mode_on (9085304934016242591) -->
+    <string name="zen_mode_on" msgid="9085304934016242591">"Vklopljeno"</string>
+    <string name="zen_mode_off" msgid="1736604456618147306">"Izklopljeno"</string>
+    <!-- no translation found for zen_mode_set_up (7457957033034460064) -->
     <skip />
-    <!-- no translation found for zen_mode_off (1736604456618147306) -->
+    <!-- no translation found for zen_mode_no_manual_invocation (1769975741344633672) -->
+    <skip />
+    <!-- no translation found for zen_mode_active_modes (1625850411578488856) -->
     <skip />
     <string name="zen_priority_introduction" msgid="3159291973383796646">"Ne bodo vas motili zvoki ali vibriranje, razen v primeru alarmov, opomnikov, dogodkov in klicateljev, ki jih določite. Še vedno pa boste slišali vse, kar se boste odločili predvajati, vključno z glasbo, videoposnetki in igrami."</string>
     <string name="zen_alarms_introduction" msgid="3987266042682300470">"Ne bodo vas motili zvoki ali vibriranje, razen v primeru alarmov. Še vedno pa boste slišali vse, kar se boste odločili predvajati, vključno z glasbo, videoposnetki in igrami."</string>
@@ -471,6 +478,8 @@
     <string name="keyguard_indication_charging_time_slowly" msgid="301936949731705417">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Počasno polnjenje • Napolnjeno čez <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>"</string>
     <string name="keyguard_indication_charging_time_dock" msgid="3149328898931741271">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Polnjenje • Napolnjeno čez <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>"</string>
     <string name="accessibility_action_open_communal_hub" msgid="3081702792413787849">"Pripomočki na zaklenjenem zaslonu"</string>
+    <!-- no translation found for accessibility_announcement_communal_widget_added (6911593106099328271) -->
+    <skip />
     <string name="communal_tutorial_indicator_text" msgid="4503010353591430123">"Povlecite levo, da zaženete vadnico za skupnost"</string>
     <string name="cta_tile_button_to_open_widget_editor" msgid="3871562362382963878">"Prilagodi"</string>
     <string name="cta_tile_button_to_dismiss" msgid="3377597875997861754">"Opusti"</string>
@@ -499,8 +508,7 @@
     <string name="accessibility_action_label_place_widget" msgid="1914197458644168978">"postavitev izbranega pripomočka"</string>
     <string name="communal_widget_picker_title" msgid="1953369090475731663">"Pripomočki na zaklenjenem zaslonu"</string>
     <string name="communal_widget_picker_description" msgid="490515450110487871">"Pripomočki na zaklenjenem zaslonu so vidni vsem, tudi če je tablica zaklenjena."</string>
-    <!-- no translation found for accessibility_action_label_unselect_widget (1041811747619468698) -->
-    <skip />
+    <string name="accessibility_action_label_unselect_widget" msgid="1041811747619468698">"preklic izbire pripomočka"</string>
     <string name="communal_widgets_disclaimer_title" msgid="1150954395585308868">"Pripomočki na zaklenjenem zaslonu"</string>
     <string name="communal_widgets_disclaimer_text" msgid="1423545475160506349">"Če želite aplikacijo odpreti s pripomočkom, morate potrditi, da ste to vi. Upoštevajte tudi, da si jih lahko ogledajo vsi, tudi ko je tablični računalnik zaklenjen. Nekateri pripomočki morda niso predvideni za uporabo na zaklenjenem zaslonu, zato jih tukaj morda ni varno dodati."</string>
     <string name="communal_widgets_disclaimer_button" msgid="4423059765740780753">"Razumem"</string>
@@ -557,10 +565,8 @@
     <string name="media_projection_action_text" msgid="3634906766918186440">"Začni zdaj"</string>
     <string name="empty_shade_text" msgid="8935967157319717412">"Ni obvestil"</string>
     <string name="no_unseen_notif_text" msgid="395512586119868682">"Ni novih obvestil"</string>
-    <!-- no translation found for adaptive_notification_edu_hun_title (7790738150177329960) -->
-    <skip />
-    <!-- no translation found for adaptive_notification_edu_hun_text (7743367744129536610) -->
-    <skip />
+    <string name="adaptive_notification_edu_hun_title" msgid="7790738150177329960">"Utišanje obvestil je vklopljeno"</string>
+    <string name="adaptive_notification_edu_hun_text" msgid="7743367744129536610">"Ko prejmete preveč obvestil naenkrat, se glasnost naprave in opozoril samodejno zmanjša za največ 2 minuti."</string>
     <string name="go_to_adaptive_notification_settings" msgid="2423690125178298479">"Izklopi"</string>
     <string name="unlock_to_see_notif_text" msgid="7439033907167561227">"Odklenite za ogled starejših obvestil"</string>
     <string name="quick_settings_disclosure_parental_controls" msgid="2114102871438223600">"To napravo upravlja tvoj starš"</string>
@@ -1226,7 +1232,6 @@
     <string name="accessibility_fingerprint_bouncer" msgid="7189102492498735519">"Zahtevano je preverjanje pristnosti. Za preverjanje pristnosti se dotaknite tipala prstnih odtisov."</string>
     <string name="ongoing_phone_call_content_description" msgid="5332334388483099947">"Poteka klic"</string>
     <string name="mobile_data_settings_title" msgid="3955246641380064901">"Prenos podatkov v mobilnem omrežju"</string>
-    <string name="preference_summary_default_combination" msgid="8453246369903749670">"<xliff:g id="STATE">%1$s</xliff:g>/<xliff:g id="NETWORKMODE">%2$s</xliff:g>"</string>
     <string name="mobile_data_connection_active" msgid="944490013299018227">"Povezano"</string>
     <string name="mobile_data_temp_connection_active" msgid="4590222725908806824">"Začasno vzpostavljena povezava"</string>
     <string name="mobile_data_poor_connection" msgid="819617772268371434">"Slaba povezava"</string>
@@ -1380,7 +1385,10 @@
     <string name="touchpad_tutorial_done_button" msgid="176168488821755503">"Končano"</string>
     <string name="touchpad_tutorial_gesture_done" msgid="4784438360736821255">"Odlično!"</string>
     <string name="touchpad_back_gesture_action_title" msgid="7199067250654332735">"Nazaj"</string>
-    <string name="touchpad_back_gesture_guidance" msgid="4222430588599527272">"Za pomik nazaj povlecite levo ali desno s tremi prsti kjer koli na sledilni ploščici."</string>
+    <!-- no translation found for touchpad_back_gesture_guidance (6263750214998421587) -->
+    <skip />
+    <!-- no translation found for touchpad_back_gesture_finished (5353616006999726249) -->
+    <skip />
     <string name="touchpad_back_gesture_animation_content_description" msgid="2646107450922379918">"Sledilna ploščica s tremi prsti, ki se premikajo desno in levo"</string>
     <string name="touchpad_back_gesture_screen_animation_content_description" msgid="4036267494237748710">"Zaslon naprave z animacijo, ki prikazuje potezo za pomik nazaj"</string>
     <string name="keyboard_backlight_dialog_title" msgid="8273102932345564724">"Osvetlitev tipkovnice"</string>
@@ -1388,28 +1396,16 @@
     <string name="home_controls_dream_label" msgid="6567105701292324257">"Kontrolniki za dom"</string>
     <string name="home_controls_dream_description" msgid="4644150952104035789">"Hiter dostop do kontrolnikov za dom na ohranjevalniku zaslona"</string>
     <string name="volume_undo_action" msgid="5815519725211877114">"Razveljavi"</string>
-    <!-- no translation found for back_edu_toast_content (4530314597378982956) -->
-    <skip />
-    <!-- no translation found for home_edu_toast_content (3381071147871955415) -->
-    <skip />
-    <!-- no translation found for overview_edu_toast_content (5797030644017804518) -->
-    <skip />
-    <!-- no translation found for all_apps_edu_toast_content (8807496014667211562) -->
-    <skip />
-    <!-- no translation found for back_edu_notification_title (5624780717751357278) -->
-    <skip />
-    <!-- no translation found for back_edu_notification_content (2497557451540954068) -->
-    <skip />
-    <!-- no translation found for home_edu_notification_title (6097902076909654045) -->
-    <skip />
-    <!-- no translation found for home_edu_notification_content (6631697734535766588) -->
-    <skip />
-    <!-- no translation found for overview_edu_notification_title (1265824157319562406) -->
-    <skip />
-    <!-- no translation found for overview_edu_notification_content (3578204677648432500) -->
-    <skip />
-    <!-- no translation found for all_apps_edu_notification_title (372262997265569063) -->
-    <skip />
-    <!-- no translation found for all_apps_edu_notification_content (3255070575694025585) -->
-    <skip />
+    <string name="back_edu_toast_content" msgid="4530314597378982956">"Za pomik nazaj povlecite s tremi prsti levo ali desno po sledilni ploščici"</string>
+    <string name="home_edu_toast_content" msgid="3381071147871955415">"Za pomik na začetni zaslon povlecite s tremi prsti navzgor po sledilni ploščici"</string>
+    <string name="overview_edu_toast_content" msgid="5797030644017804518">"Za ogled nedavnih aplikacij povlecite s tremi prsti navzgor po sledilni ploščici in pridržite"</string>
+    <string name="all_apps_edu_toast_content" msgid="8807496014667211562">"Za ogled vseh aplikacij pritisnite tipko za dejanja na tipkovnici"</string>
+    <string name="back_edu_notification_title" msgid="5624780717751357278">"Uporaba sledilne ploščice za pomik nazaj"</string>
+    <string name="back_edu_notification_content" msgid="2497557451540954068">"S tremi prsti povlecite levo ali desno. Dotaknite se, če želite spoznati več potez."</string>
+    <string name="home_edu_notification_title" msgid="6097902076909654045">"Uporaba sledilne ploščice za pomik na začetni zaslon"</string>
+    <string name="home_edu_notification_content" msgid="6631697734535766588">"S tremi prsti povlecite navzgor. Dotaknite se, če želite spoznati več potez."</string>
+    <string name="overview_edu_notification_title" msgid="1265824157319562406">"Uporaba sledilne ploščice za ogled nedavnih aplikacij"</string>
+    <string name="overview_edu_notification_content" msgid="3578204677648432500">"S tremi prsti povlecite navzgor in pridržite. Dotaknite se, če želite spoznati več potez."</string>
+    <string name="all_apps_edu_notification_title" msgid="372262997265569063">"Uporaba tipkovnice za prikaz vseh aplikacij"</string>
+    <string name="all_apps_edu_notification_content" msgid="3255070575694025585">"Kadar koli pritisnite tipko za dejanja. Dotaknite se, če želite spoznati več potez."</string>
 </resources>

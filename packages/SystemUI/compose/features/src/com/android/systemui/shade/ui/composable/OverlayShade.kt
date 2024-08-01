@@ -49,7 +49,7 @@ import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.android.compose.animation.scene.ElementKey
-import com.android.compose.animation.scene.LowestZIndexScenePicker
+import com.android.compose.animation.scene.LowestZIndexContentPicker
 import com.android.compose.animation.scene.SceneScope
 import com.android.compose.windowsizeclass.LocalWindowSizeClass
 import com.android.systemui.keyguard.ui.composable.LockscreenContent
@@ -186,10 +186,10 @@ private fun combinePaddings(vararg paddingValues: PaddingValues): PaddingValues 
 
 object OverlayShade {
     object Elements {
-        val Scrim = ElementKey("OverlayShadeScrim", scenePicker = LowestZIndexScenePicker)
-        val Panel = ElementKey("OverlayShadePanel", scenePicker = LowestZIndexScenePicker)
+        val Scrim = ElementKey("OverlayShadeScrim", contentPicker = LowestZIndexContentPicker)
+        val Panel = ElementKey("OverlayShadePanel", contentPicker = LowestZIndexContentPicker)
         val PanelBackground =
-            ElementKey("OverlayShadePanelBackground", scenePicker = LowestZIndexScenePicker)
+            ElementKey("OverlayShadePanelBackground", contentPicker = LowestZIndexContentPicker)
     }
 
     object Colors {

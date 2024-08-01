@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 The Android Open Source Project
+ * Copyright (C) 2024 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,17 +14,14 @@
  * limitations under the License.
  */
 
-package android.app;
+package com.android.systemui.inputdevice.oobe.data.model
 
-/**
- * This callback allows ActivityRecord to ask the calling View to apply the treatment for stretched
- * issues affecting camera viewfinders when the user clicks on the camera compat control.
- *
- * {@hide}
- */
-oneway interface ICompatCameraControlCallback {
+data class OobeSchedulerInfo(
+    val keyboard: DeviceSchedulerInfo = DeviceSchedulerInfo(),
+    val touchpad: DeviceSchedulerInfo = DeviceSchedulerInfo()
+)
 
-    void applyCameraCompatTreatment();
-
-    void revertCameraCompatTreatment();
+data class DeviceSchedulerInfo(var isLaunched: Boolean = false, var connectionTime: Long? = null) {
+    val wasEverConnected: Boolean
+        get() = connectionTime != null
 }

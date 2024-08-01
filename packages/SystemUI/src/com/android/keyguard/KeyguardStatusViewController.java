@@ -48,9 +48,7 @@ import com.android.app.animation.Interpolators;
 import com.android.internal.jank.InteractionJankMonitor;
 import com.android.keyguard.KeyguardClockSwitch.ClockSize;
 import com.android.keyguard.logging.KeyguardLogger;
-import com.android.systemui.Dumpable;
 import com.android.systemui.animation.ViewHierarchyAnimator;
-import com.android.systemui.dump.DumpManager;
 import com.android.systemui.keyguard.MigrateClocksToBlueprint;
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor;
 import com.android.systemui.plugins.clocks.ClockController;
@@ -70,15 +68,12 @@ import com.android.systemui.util.ViewController;
 import kotlin.coroutines.CoroutineContext;
 import kotlin.coroutines.EmptyCoroutineContext;
 
-import java.io.PrintWriter;
-
 import javax.inject.Inject;
 
 /**
  * Injectable controller for {@link KeyguardStatusView}.
  */
-public class KeyguardStatusViewController extends ViewController<KeyguardStatusView> implements
-        Dumpable {
+public class KeyguardStatusViewController extends ViewController<KeyguardStatusView> {
     private static final boolean DEBUG = KeyguardConstants.DEBUG;
     @VisibleForTesting static final String TAG = "KeyguardStatusViewController";
     private static final long STATUS_AREA_HEIGHT_ANIMATION_MILLIS = 133;
@@ -108,7 +103,6 @@ public class KeyguardStatusViewController extends ViewController<KeyguardStatusV
 
     private Boolean mSplitShadeEnabled = false;
     private Boolean mStatusViewCentered = true;
-    private DumpManager mDumpManager;
 
     private final TransitionListenerAdapter mKeyguardStatusAlignmentTransitionListener =
             new TransitionListenerAdapter() {
@@ -176,7 +170,6 @@ public class KeyguardStatusViewController extends ViewController<KeyguardStatusV
             KeyguardLogger logger,
             InteractionJankMonitor interactionJankMonitor,
             KeyguardInteractor keyguardInteractor,
-            DumpManager dumpManager,
             PowerInteractor powerInteractor) {
         super(keyguardStatusView);
         mKeyguardSliceViewController = keyguardSliceViewController;
@@ -188,7 +181,6 @@ public class KeyguardStatusViewController extends ViewController<KeyguardStatusV
                 dozeParameters, screenOffAnimationController, /* animateYPos= */ true,
                 logger.getBuffer());
         mInteractionJankMonitor = interactionJankMonitor;
-        mDumpManager = dumpManager;
         mKeyguardInteractor = keyguardInteractor;
         mPowerInteractor = powerInteractor;
     }
@@ -222,7 +214,6 @@ public class KeyguardStatusViewController extends ViewController<KeyguardStatusV
                     });
         }
 
-        mDumpManager.registerDumpable(getInstanceName(), this);
         if (MigrateClocksToBlueprint.isEnabled()) {
             startCoroutines(EmptyCoroutineContext.INSTANCE);
             mView.setVisibility(View.GONE);
@@ -273,13 +264,6 @@ public class KeyguardStatusViewController extends ViewController<KeyguardStatusV
     /** Sets the StatusView as shown on an external display. */
     public void setDisplayedOnSecondaryDisplay() {
         mKeyguardClockSwitchController.setShownOnSecondaryDisplay(true);
-    }
-
-    /**
-     * Called in notificationPanelViewController to avoid leak
-     */
-    public void onDestroy() {
-        mDumpManager.unregisterDumpable(getInstanceName());
     }
 
     /**
@@ -602,11 +586,6 @@ public class KeyguardStatusViewController extends ViewController<KeyguardStatusV
 
     public ClockController getClockController() {
         return mKeyguardClockSwitchController.getClock();
-    }
-
-    @Override
-    public void dump(@NonNull PrintWriter pw, @NonNull String[] args) {
-        mView.dump(pw, args);
     }
 
     String getInstanceName() {

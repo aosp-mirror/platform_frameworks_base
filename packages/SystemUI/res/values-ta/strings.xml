@@ -388,6 +388,9 @@
     <string name="performance" msgid="6552785217174378320">"செயல்திறன்"</string>
     <string name="user_interface" msgid="3712869377953950887">"பயனர் இடைமுகம்"</string>
     <string name="thermal" msgid="6758074791325414831">"தெர்மல்"</string>
+    <string name="custom" msgid="3337456985275158299">"பிரத்தியேகம்"</string>
+    <string name="custom_trace_settings_dialog_title" msgid="2608570500144830554">"பிரத்தியேக டிரேஸ் அமைப்புகள்"</string>
+    <string name="restore_default" msgid="5259420807486239755">"இயல்புக்கு மீட்டெடு"</string>
     <string name="quick_settings_onehanded_label" msgid="2416537930246274991">"ஒற்றைக் கைப் பயன்முறை"</string>
     <string name="quick_settings_hearing_devices_label" msgid="7277170419679404129">"செவித்துணைக் கருவிகள்"</string>
     <string name="quick_settings_hearing_devices_connected" msgid="6519069502397037781">"செயலில் உள்ளது"</string>
@@ -429,9 +432,13 @@
     <string name="zen_modes_dialog_title" msgid="4159138230418567383">"முன்னுரிமைப் பயன்முறைகள்"</string>
     <string name="zen_modes_dialog_done" msgid="6654130880256438950">"முடிந்தது"</string>
     <string name="zen_modes_dialog_settings" msgid="2310248023728936697">"அமைப்புகள்"</string>
-    <!-- no translation found for zen_mode_on (9085304934016242591) -->
+    <string name="zen_mode_on" msgid="9085304934016242591">"இயக்கப்பட்டுள்ளது"</string>
+    <string name="zen_mode_off" msgid="1736604456618147306">"முடக்கப்பட்டுள்ளது"</string>
+    <!-- no translation found for zen_mode_set_up (7457957033034460064) -->
     <skip />
-    <!-- no translation found for zen_mode_off (1736604456618147306) -->
+    <!-- no translation found for zen_mode_no_manual_invocation (1769975741344633672) -->
+    <skip />
+    <!-- no translation found for zen_mode_active_modes (1625850411578488856) -->
     <skip />
     <string name="zen_priority_introduction" msgid="3159291973383796646">"அலாரங்கள், நினைவூட்டல்கள், நிகழ்வுகள் மற்றும் குறிப்பிட்ட அழைப்பாளர்களைத் தவிர்த்து, பிற ஒலிகள் மற்றும் அதிர்வுகளின் தொந்தரவு இருக்காது. எனினும், நீங்கள் எதையேனும் (இசை, வீடியோக்கள், கேம்ஸ் போன்றவை) ஒலிக்கும்படி தேர்ந்தெடுத்திருந்தால், அவை வழக்கம் போல் ஒலிக்கும்."</string>
     <string name="zen_alarms_introduction" msgid="3987266042682300470">"அலாரங்களைத் தவிர்த்து, பிற ஒலிகள் மற்றும் அதிர்வுகளின் தொந்தரவு இருக்காது. எனினும், நீங்கள் எதையேனும் (இசை, வீடியோக்கள், கேம்ஸ் போன்றவை) ஒலிக்கும்படி தேர்ந்தெடுத்திருந்தால், அவை வழக்கம் போல் ஒலிக்கும்."</string>
@@ -471,6 +478,8 @@
     <string name="keyguard_indication_charging_time_slowly" msgid="301936949731705417">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • மெதுவாக சார்ஜாகிறது • <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> இல் முழுதும் சார்ஜாகும்"</string>
     <string name="keyguard_indication_charging_time_dock" msgid="3149328898931741271">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • சார்ஜாகிறது • <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> இல் முழுவதும் சார்ஜாகும்"</string>
     <string name="accessibility_action_open_communal_hub" msgid="3081702792413787849">"பூட்டுத் திரையில் விட்ஜெட்கள்"</string>
+    <!-- no translation found for accessibility_announcement_communal_widget_added (6911593106099328271) -->
+    <skip />
     <string name="communal_tutorial_indicator_text" msgid="4503010353591430123">"சமூகப் பயிற்சியைத் தொடங்க இடதுபுறம் ஸ்வைப் செய்யுங்கள்"</string>
     <string name="cta_tile_button_to_open_widget_editor" msgid="3871562362382963878">"பிரத்தியேகமாக்குங்கள்"</string>
     <string name="cta_tile_button_to_dismiss" msgid="3377597875997861754">"மூடுக"</string>
@@ -499,8 +508,7 @@
     <string name="accessibility_action_label_place_widget" msgid="1914197458644168978">"தேர்ந்தெடுத்த விட்ஜெட்டைக் காட்சிப்படுத்தும்"</string>
     <string name="communal_widget_picker_title" msgid="1953369090475731663">"பூட்டுத் திரை விட்ஜெட்கள்"</string>
     <string name="communal_widget_picker_description" msgid="490515450110487871">"டேப்லெட் பூட்டப்பட்டிருந்தாலும் பூட்டுத் திரையில் விட்ஜெட்டை எவரும் பார்க்கலாம்."</string>
-    <!-- no translation found for accessibility_action_label_unselect_widget (1041811747619468698) -->
-    <skip />
+    <string name="accessibility_action_label_unselect_widget" msgid="1041811747619468698">"விட்ஜெட்டைத் தேர்வுநீக்கும்"</string>
     <string name="communal_widgets_disclaimer_title" msgid="1150954395585308868">"பூட்டுத் திரை விட்ஜெட்கள்"</string>
     <string name="communal_widgets_disclaimer_text" msgid="1423545475160506349">"விட்ஜெட்டைப் பயன்படுத்தி ஆப்ஸைத் திறக்க, அது நீங்கள்தான் என்பதை உறுதிசெய்ய வேண்டும். அத்துடன், உங்கள் டேப்லெட் பூட்டப்பட்டிருந்தாலும்கூட அவற்றை யார் வேண்டுமானாலும் பார்க்கலாம் என்பதை நினைவில்கொள்ளுங்கள். சில விட்ஜெட்கள் உங்கள் பூட்டுத் திரைக்காக உருவாக்கப்பட்டவை அல்ல என்பதையும் அவற்றை இங்கே சேர்ப்பது பாதுகாப்பற்றதாக இருக்கக்கூடும் என்பதையும் நினைவில்கொள்ளுங்கள்."</string>
     <string name="communal_widgets_disclaimer_button" msgid="4423059765740780753">"சரி"</string>
@@ -557,10 +565,8 @@
     <string name="media_projection_action_text" msgid="3634906766918186440">"இப்போது தொடங்கு"</string>
     <string name="empty_shade_text" msgid="8935967157319717412">"அறிவிப்புகள் இல்லை"</string>
     <string name="no_unseen_notif_text" msgid="395512586119868682">"புதிய அறிவிப்புகள் இல்லை"</string>
-    <!-- no translation found for adaptive_notification_edu_hun_title (7790738150177329960) -->
-    <skip />
-    <!-- no translation found for adaptive_notification_edu_hun_text (7743367744129536610) -->
-    <skip />
+    <string name="adaptive_notification_edu_hun_title" msgid="7790738150177329960">"\'குறைந்த ஒலியளவில் அறிவிப்புகள்\' இயக்கப்பட்டுள்ளது"</string>
+    <string name="adaptive_notification_edu_hun_text" msgid="7743367744129536610">"ஒரே நேரம் பல அறிவிப்புகள் வரும்போது சாதன ஒலியளவும் விழிப்பூட்டலும் தானாக 2 நிமிடம் குறைக்கப்படும்."</string>
     <string name="go_to_adaptive_notification_settings" msgid="2423690125178298479">"முடக்கு"</string>
     <string name="unlock_to_see_notif_text" msgid="7439033907167561227">"பழைய அறிவிப்பைப் பார்க்க அன்லாக் செய்க"</string>
     <string name="quick_settings_disclosure_parental_controls" msgid="2114102871438223600">"இந்தச் சாதனம் உங்கள் பெற்றோரால் நிர்வகிக்கப்படுகிறது"</string>
@@ -1226,7 +1232,6 @@
     <string name="accessibility_fingerprint_bouncer" msgid="7189102492498735519">"அங்கீகாரம் தேவை. கைரேகை சென்சாரைத் தொட்டு அங்கீகரியுங்கள்."</string>
     <string name="ongoing_phone_call_content_description" msgid="5332334388483099947">"செயலில் உள்ள மொபைல் அழைப்பு"</string>
     <string name="mobile_data_settings_title" msgid="3955246641380064901">"மொபைல் டேட்டா"</string>
-    <string name="preference_summary_default_combination" msgid="8453246369903749670">"<xliff:g id="STATE">%1$s</xliff:g> / <xliff:g id="NETWORKMODE">%2$s</xliff:g>"</string>
     <string name="mobile_data_connection_active" msgid="944490013299018227">"இணைக்கப்பட்டது"</string>
     <string name="mobile_data_temp_connection_active" msgid="4590222725908806824">"தற்காலிகமாக இணைக்கப்பட்டுள்ளது"</string>
     <string name="mobile_data_poor_connection" msgid="819617772268371434">"இணைப்பு மோசமாக உள்ளது"</string>
@@ -1380,7 +1385,10 @@
     <string name="touchpad_tutorial_done_button" msgid="176168488821755503">"முடிந்தது"</string>
     <string name="touchpad_tutorial_gesture_done" msgid="4784438360736821255">"அருமை!"</string>
     <string name="touchpad_back_gesture_action_title" msgid="7199067250654332735">"பின்செல்"</string>
-    <string name="touchpad_back_gesture_guidance" msgid="4222430588599527272">"பின்செல்ல, உங்கள் டச்பேடில் எங்கு வேண்டுமானாலும் இடது அல்லது வலதுபுறமாக மூன்று விரல்களால் ஸ்வைப் செய்யவும்."</string>
+    <!-- no translation found for touchpad_back_gesture_guidance (6263750214998421587) -->
+    <skip />
+    <!-- no translation found for touchpad_back_gesture_finished (5353616006999726249) -->
+    <skip />
     <string name="touchpad_back_gesture_animation_content_description" msgid="2646107450922379918">"மூன்று விரல்கள் வலது மற்றும் இடதுபுறம் நகர்வதை டச்பேட் காட்டுகிறது"</string>
     <string name="touchpad_back_gesture_screen_animation_content_description" msgid="4036267494237748710">"பின்செல்லும் சைகைக்கான அனிமேஷனை சாதனத்தின் திரை காட்டுகிறது"</string>
     <string name="keyboard_backlight_dialog_title" msgid="8273102932345564724">"கீபோர்டு பேக்லைட்"</string>
@@ -1388,28 +1396,16 @@
     <string name="home_controls_dream_label" msgid="6567105701292324257">"ஹோம் கன்ட்ரோல்கள்"</string>
     <string name="home_controls_dream_description" msgid="4644150952104035789">"ஹோம் கன்ட்ரோல்களை ஸ்கிரீன் சேவராக அணுகலாம்"</string>
     <string name="volume_undo_action" msgid="5815519725211877114">"செயல்தவிர்"</string>
-    <!-- no translation found for back_edu_toast_content (4530314597378982956) -->
-    <skip />
-    <!-- no translation found for home_edu_toast_content (3381071147871955415) -->
-    <skip />
-    <!-- no translation found for overview_edu_toast_content (5797030644017804518) -->
-    <skip />
-    <!-- no translation found for all_apps_edu_toast_content (8807496014667211562) -->
-    <skip />
-    <!-- no translation found for back_edu_notification_title (5624780717751357278) -->
-    <skip />
-    <!-- no translation found for back_edu_notification_content (2497557451540954068) -->
-    <skip />
-    <!-- no translation found for home_edu_notification_title (6097902076909654045) -->
-    <skip />
-    <!-- no translation found for home_edu_notification_content (6631697734535766588) -->
-    <skip />
-    <!-- no translation found for overview_edu_notification_title (1265824157319562406) -->
-    <skip />
-    <!-- no translation found for overview_edu_notification_content (3578204677648432500) -->
-    <skip />
-    <!-- no translation found for all_apps_edu_notification_title (372262997265569063) -->
-    <skip />
-    <!-- no translation found for all_apps_edu_notification_content (3255070575694025585) -->
-    <skip />
+    <string name="back_edu_toast_content" msgid="4530314597378982956">"பின்செல்ல, உங்கள் டச்பேடில் இடது அல்லது வலதுபுறமாக மூன்று விரல்களால் ஸ்வைப் செய்யவும்"</string>
+    <string name="home_edu_toast_content" msgid="3381071147871955415">"முகப்புக்குச் செல்ல, உங்கள் டச்பேடில் மூன்று விரல்களால் மேல்நோக்கி ஸ்வைப் செய்யவும்"</string>
+    <string name="overview_edu_toast_content" msgid="5797030644017804518">"சமீபத்திய ஆப்ஸைப் பார்க்க, டச்பேடில் மூன்று விரல்களால் மேல்நோக்கி ஸ்வைப் செய்து பிடிக்கவும்"</string>
+    <string name="all_apps_edu_toast_content" msgid="8807496014667211562">"அனைத்து ஆப்ஸையும் பார்க்க, உங்கள் கீபோர்டில் உள்ள ஆக்ஷன் பட்டனை அழுத்தவும்"</string>
+    <string name="back_edu_notification_title" msgid="5624780717751357278">"பின்செல்ல, உங்கள் டச்பேடைப் பயன்படுத்துங்கள்"</string>
+    <string name="back_edu_notification_content" msgid="2497557451540954068">"மூன்று விரல்களால் இடது அல்லது வலதுபுறம் ஸ்வைப் செய்யவும். சைகைகள் குறித்து மேலும் அறிய தட்டவும்."</string>
+    <string name="home_edu_notification_title" msgid="6097902076909654045">"முகப்புக்குச் செல்ல, உங்கள் டச்பேடைப் பயன்படுத்துங்கள்"</string>
+    <string name="home_edu_notification_content" msgid="6631697734535766588">"மூன்று விரல்களால் மேல்நோக்கி ஸ்வைப் செய்யவும். சைகைகள் குறித்து மேலும் அறிய தட்டவும்."</string>
+    <string name="overview_edu_notification_title" msgid="1265824157319562406">"சமீபத்திய ஆப்ஸைப் பார்க்க, உங்கள் டச்பேடைப் பயன்படுத்துங்கள்"</string>
+    <string name="overview_edu_notification_content" msgid="3578204677648432500">"மூன்று விரல்களால் மேல்நோக்கி ஸ்வைப் செய்து பிடிக்கவும். சைகைகள் குறித்து மேலும் அறிய தட்டவும்."</string>
+    <string name="all_apps_edu_notification_title" msgid="372262997265569063">"அனைத்து ஆப்ஸையும் பார்க்க உங்கள் கீபோர்டைப் பயன்படுத்துங்கள்"</string>
+    <string name="all_apps_edu_notification_content" msgid="3255070575694025585">"எப்போது வேண்டுமானாலும் ஆக்ஷன் பட்டனை அழுத்தலாம். சைகைகள் குறித்து மேலும் அறிய தட்டவும்."</string>
 </resources>

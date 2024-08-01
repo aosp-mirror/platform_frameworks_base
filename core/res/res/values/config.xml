@@ -6158,10 +6158,6 @@
         is enabled and activity is connected to the camera in fullscreen. -->
     <bool name="config_isWindowManagerCameraCompatSplitScreenAspectRatioEnabled">false</bool>
 
-    <!-- Whether a camera compat controller is enabled to allow the user to apply or revert
-         treatment for stretched issues in camera viewfinder. -->
-    <bool name="config_isCameraCompatControlForStretchedIssuesEnabled">false</bool>
-
     <!-- Docking is a uiMode configuration change and will cause activities to relaunch if it's not
          handled. If true, the configuration change will be sent but activities will not be
          relaunched upon docking. Apps with desk resources will behave like normal, since they may

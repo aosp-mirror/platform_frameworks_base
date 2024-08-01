@@ -33,10 +33,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.android.compose.animation.scene.ElementKey
-import com.android.compose.animation.scene.MovableElementScenePicker
+import com.android.compose.animation.scene.MovableElementContentPicker
+import com.android.compose.animation.scene.MovableElementKey
 import com.android.compose.animation.scene.SceneScope
-import com.android.compose.animation.scene.TransitionState
 import com.android.compose.animation.scene.ValueKey
+import com.android.compose.animation.scene.content.state.TransitionState
 import com.android.compose.modifiers.thenIf
 import com.android.systemui.compose.modifiers.sysuiResTag
 import com.android.systemui.qs.ui.adapter.QSSceneAdapter
@@ -55,7 +56,10 @@ object QuickSettings {
 
     object Elements {
         val Content =
-            ElementKey("QuickSettingsContent", scenePicker = MovableElementScenePicker(SCENES))
+            MovableElementKey(
+                "QuickSettingsContent",
+                contentPicker = MovableElementContentPicker(SCENES)
+            )
         val QuickQuickSettings = ElementKey("QuickQuickSettings")
         val SplitShadeQuickSettings = ElementKey("SplitShadeQuickSettings")
         val FooterActions = ElementKey("QuickSettingsFooterActions")

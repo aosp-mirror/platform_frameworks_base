@@ -252,6 +252,8 @@ public class QuickSettingsControllerImplBaseTest extends SysuiTestCase {
         when(mQsFrame.getWidth()).thenReturn(QS_FRAME_WIDTH);
         when(mQsHeader.getTop()).thenReturn(QS_FRAME_TOP);
         when(mQsHeader.getBottom()).thenReturn(QS_FRAME_BOTTOM);
+        when(mQs.getHeaderTop()).thenReturn(QS_FRAME_TOP);
+        when(mQs.getHeaderBottom()).thenReturn(QS_FRAME_BOTTOM);
         when(mPanelView.getY()).thenReturn((float) QS_FRAME_TOP);
         when(mPanelView.getHeight()).thenReturn(QS_FRAME_BOTTOM);
         when(mPanelView.findViewById(R.id.keyguard_status_view))

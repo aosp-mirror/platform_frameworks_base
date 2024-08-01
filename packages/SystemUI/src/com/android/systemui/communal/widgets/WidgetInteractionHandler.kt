@@ -25,6 +25,9 @@ import com.android.systemui.animation.ActivityTransitionAnimator
 import com.android.systemui.communal.domain.interactor.CommunalSceneInteractor
 import com.android.systemui.communal.util.InteractionHandlerDelegate
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.log.LogBuffer
+import com.android.systemui.log.core.Logger
+import com.android.systemui.log.dagger.CommunalLog
 import com.android.systemui.plugins.ActivityStarter
 import javax.inject.Inject
 
@@ -33,14 +36,20 @@ class WidgetInteractionHandler
 @Inject
 constructor(
     private val activityStarter: ActivityStarter,
-    private val communalSceneInteractor: CommunalSceneInteractor
+    communalSceneInteractor: CommunalSceneInteractor,
+    @CommunalLog val logBuffer: LogBuffer,
 ) : RemoteViews.InteractionHandler {
+
+    private companion object {
+        const val TAG = "WidgetInteractionHandler"
+    }
 
     private val delegate =
         InteractionHandlerDelegate(
             communalSceneInteractor,
             findViewToAnimate = { view -> view is CommunalAppWidgetHostView },
             intentStarter = this::startIntent,
+            logger = Logger(logBuffer, TAG),
         )
 
     override fun onInteraction(

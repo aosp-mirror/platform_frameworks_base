@@ -15820,7 +15820,7 @@ public final class Settings {
          * The following keys are supported:
          *
          * <pre>
-         * screen_brightness_array         (int[])
+         * screen_brightness_array         (int[], values in range [1, 255])
          * dimming_scrim_array             (int[])
          * prox_screen_off_delay           (long)
          * prox_cooldown_trigger           (long)

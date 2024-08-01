@@ -227,6 +227,9 @@ public class FaceAuthenticationClient
                 onError(BiometricFaceConstants.FACE_ERROR_HW_UNAVAILABLE, 0 /* vendorCode */);
                 mCallback.onClientFinished(this, false /* success */);
             }
+        } else {
+            Slog.e(TAG, "Cancellation signal is null");
+            mCallback.onClientFinished(this, false /* success */);
         }
     }
 

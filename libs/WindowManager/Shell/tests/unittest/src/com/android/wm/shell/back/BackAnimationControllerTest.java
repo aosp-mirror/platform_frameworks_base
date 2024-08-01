@@ -68,6 +68,7 @@ import com.android.wm.shell.sysui.ShellCommandHandler;
 import com.android.wm.shell.sysui.ShellController;
 import com.android.wm.shell.sysui.ShellInit;
 import com.android.wm.shell.sysui.ShellSharedConstants;
+import com.android.wm.shell.transition.Transitions;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -114,6 +115,8 @@ public class BackAnimationControllerTest extends ShellTestCase {
     @Mock
     private ShellCommandHandler mShellCommandHandler;
     @Mock
+    private Transitions mTransitions;
+    @Mock
     private RootTaskDisplayAreaOrganizer mRootTaskDisplayAreaOrganizer;
 
     private BackAnimationController mController;
@@ -156,7 +159,8 @@ public class BackAnimationControllerTest extends ShellTestCase {
                         mContentResolver,
                         mAnimationBackground,
                         mShellBackAnimationRegistry,
-                        mShellCommandHandler);
+                        mShellCommandHandler,
+                        mTransitions);
         mShellInit.init();
         mShellExecutor.flushAll();
         mTouchableRegion = new Rect(0, 0, 100, 100);
@@ -316,7 +320,8 @@ public class BackAnimationControllerTest extends ShellTestCase {
                         mContentResolver,
                         mAnimationBackground,
                         mShellBackAnimationRegistry,
-                        mShellCommandHandler);
+                        mShellCommandHandler,
+                        mTransitions);
         shellInit.init();
         registerAnimation(BackNavigationInfo.TYPE_RETURN_TO_HOME);
 

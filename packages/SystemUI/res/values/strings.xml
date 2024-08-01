@@ -432,8 +432,6 @@
 
     <!-- Content description for the app logo icon on biometric prompt. [CHAR LIMIT=NONE] -->
     <string name="biometric_dialog_logo">App logo</string>
-    <!-- List of packages for which we want to show overridden logo. For example, an app overrides its launcher logo, if it's in this array, biometric dialog shows the overridden logo; otherwise biometric dialog still shows the default application info icon. [CHAR LIMIT=NONE] -->
-    <string-array name="biometric_dialog_package_names_for_logo_with_overrides" />
     <!-- Message shown when a biometric is authenticated, asking the user to confirm authentication [CHAR LIMIT=30] -->
     <string name="biometric_dialog_confirm">Confirm</string>
     <!-- Button name on BiometricPrompt shown when a biometric is detected but not authenticated. Tapping the button resumes authentication [CHAR LIMIT=30] -->
@@ -3725,4 +3723,16 @@ Action + ESC for this.</string>
     <string name="all_apps_edu_notification_title">Use your keyboard to view all apps</string>
     <!-- Education notification text for All Apps [CHAR_LIMIT=100] -->
     <string name="all_apps_edu_notification_content">Press the action key at any time. Tap to learn more gestures.</string>
+
+    <!-- Title for Extra Dim dialog [CHAR LIMIT=NONE] -->
+    <string name="accessibility_deprecate_extra_dim_dialog_title">Extra dim is now part of the brightness bar</string>
+    <!-- Content description for Extra Dim dialog. This helps users understand that we could make screen much dimmer by lowering the brightness through the brightness bar in a dark environment. [CHAR LIMIT=NONE] -->
+    <string name="accessibility_deprecate_extra_dim_dialog_description">
+        You can now make the screen extra dim by lowering the brightness level even further from the top of your screen.\n\nThis works best when you\'re in a dark environment.
+    </string>
+    <!-- Label for button removing Extra Dim shortcuts [CHAR LIMIT=NONE] -->
+    <string name="accessibility_deprecate_extra_dim_dialog_button">Remove extra dim shortcut</string>
+    <!-- Toast message for notifying users to use regular brightness bar to lower the brightness. [CHAR LIMIT=NONE] -->
+    <string name="accessibility_deprecate_extra_dim_dialog_toast">
+        Extra dim shortcut removed. To lower your brightness, use the regular brightness bar.</string>
 </resources>

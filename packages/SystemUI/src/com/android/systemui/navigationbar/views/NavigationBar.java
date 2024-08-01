@@ -71,7 +71,6 @@ import android.graphics.Region;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.Trace;
 import android.provider.DeviceConfig;
@@ -1095,7 +1094,7 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
     // ----- CommandQueue Callbacks -----
 
     @Override
-    public void setImeWindowStatus(int displayId, IBinder token, int vis, int backDisposition,
+    public void setImeWindowStatus(int displayId, int vis, int backDisposition,
             boolean showImeSwitcher) {
         if (displayId != mDisplayId) {
             return;

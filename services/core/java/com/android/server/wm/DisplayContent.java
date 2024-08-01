@@ -5081,9 +5081,11 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
             Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
         }
 
-        // This should be called after the insets have been dispatched to clients and we have
-        // committed finish drawing windows.
-        mInsetsStateController.getImeSourceProvider().checkAndStartShowImePostLayout();
+        if (!android.view.inputmethod.Flags.refactorInsetsController()) {
+            // This should be called after the insets have been dispatched to clients and we have
+            // committed finish drawing windows.
+            mInsetsStateController.getImeSourceProvider().checkAndStartShowImePostLayout();
+        }
 
         mLastHasContent = mTmpApplySurfaceChangesTransactionState.displayHasContent;
         if (!inTransition() && !mDisplayRotation.isRotatingSeamlessly()) {
@@ -6266,7 +6268,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         // by looping the children, so that we don't miss any root tasks after the children size
         // changed or reordered.
         final ArrayList<Task> rootTasks = new ArrayList<>();
-        forAllRootTasks(rootTask -> {
+        getDefaultTaskDisplayArea().forAllRootTasks(rootTask -> {
             for (int activityType : activityTypes) {
                 // Collect the root tasks that are currently being organized.
                 if (rootTask.mCreatedByOrganizer) {
