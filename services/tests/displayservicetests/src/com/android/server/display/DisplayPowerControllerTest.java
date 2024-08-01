@@ -1613,16 +1613,21 @@ public final class DisplayPowerControllerTest {
         advanceTime(1); // Run updatePowerState
 
         reset(mHolder.wakelockController);
+        when(mHolder.wakelockController
+                .acquireWakelock(WakelockController.WAKE_LOCK_OVERRIDE_DOZE_SCREEN_STATE))
+                .thenReturn(true);
         mHolder.dpc.overrideDozeScreenState(
                 supportedTargetState, Display.STATE_REASON_DEFAULT_POLICY);
-        advanceTime(1); // Run updatePowerState
 
         // Should get a wakelock to notify powermanager
-        verify(mHolder.wakelockController, atLeastOnce()).acquireWakelock(
-                eq(WakelockController.WAKE_LOCK_UNFINISHED_BUSINESS));
+        verify(mHolder.wakelockController).acquireWakelock(
+                eq(WakelockController.WAKE_LOCK_OVERRIDE_DOZE_SCREEN_STATE));
 
+        advanceTime(1); // Run updatePowerState
         verify(mHolder.displayPowerState)
                 .setScreenState(supportedTargetState, Display.STATE_REASON_DEFAULT_POLICY);
+        verify(mHolder.wakelockController).releaseWakelock(
+                eq(WakelockController.WAKE_LOCK_OVERRIDE_DOZE_SCREEN_STATE));
     }
 
     @Test
