@@ -20205,14 +20205,6 @@ public final class Settings {
             public static final int TETHERED_CONFIG_RESTRICTED = 3;
 
             /**
-             * Whether phone switching is supported.
-             *
-             * (0 = false, 1 = true)
-             * @hide
-             */
-            public static final String PHONE_SWITCHING_SUPPORTED = "phone_switching_supported";
-
-            /**
              * Setting indicating the name of the Wear OS package that hosts the Media Controls UI.
              *
              * @hide
