@@ -19,7 +19,6 @@ package com.android.systemui.screenshot;
 import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
 import static android.view.WindowManager.LayoutParams.TYPE_SCREENSHOT;
 
-import static com.android.systemui.Flags.screenshotPrivateProfileAccessibilityAnnouncementFix;
 import static com.android.systemui.Flags.screenshotSaveImageExporter;
 import static com.android.systemui.screenshot.LogConfig.DEBUG_ANIM;
 import static com.android.systemui.screenshot.LogConfig.DEBUG_CALLBACK;
@@ -355,19 +354,9 @@ public class LegacyScreenshotController implements InteractiveScreenshotHandler 
 
     void prepareViewForNewScreenshot(@NonNull ScreenshotData screenshot, String oldPackageName) {
         withWindowAttached(() -> {
-            if (screenshotPrivateProfileAccessibilityAnnouncementFix()) {
-                mAnnouncementResolver.getScreenshotAnnouncement(
-                        screenshot.getUserHandle().getIdentifier(),
-                        mViewProxy::announceForAccessibility);
-            } else {
-                if (mUserManager.isManagedProfile(screenshot.getUserHandle().getIdentifier())) {
-                    mViewProxy.announceForAccessibility(mContext.getResources().getString(
-                            R.string.screenshot_saving_work_profile_title));
-                } else {
-                    mViewProxy.announceForAccessibility(
-                            mContext.getResources().getString(R.string.screenshot_saving_title));
-                }
-            }
+            mAnnouncementResolver.getScreenshotAnnouncement(
+                    screenshot.getUserHandle().getIdentifier(),
+                    mViewProxy::announceForAccessibility);
         });
 
         mViewProxy.reset();
