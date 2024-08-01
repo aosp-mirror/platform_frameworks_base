@@ -2031,8 +2031,11 @@ public class AudioService extends IAudioService.Stub
 
         synchronized (mCachedAbsVolDrivingStreamsLock) {
             mCachedAbsVolDrivingStreams.forEach((dev, stream) -> {
-                mAudioSystem.setDeviceAbsoluteVolumeEnabled(dev, /*address=*/"", /*enabled=*/true,
-                        stream);
+                boolean enabled = true;
+                if (dev == AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP) {
+                    enabled = mAvrcpAbsVolSupported;
+                }
+                mAudioSystem.setDeviceAbsoluteVolumeEnabled(dev, /*address=*/"", enabled, stream);
             });
         }
 
@@ -4828,6 +4831,20 @@ public class AudioService extends IAudioService.Stub
     private void onUpdateContextualVolumes() {
         final int streamType = getBluetoothContextualVolumeStream();
 
+        synchronized (mCachedAbsVolDrivingStreamsLock) {
+            mCachedAbsVolDrivingStreams.replaceAll((absDev, stream) -> {
+                boolean enabled = true;
+                if (absDev == AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP) {
+                    enabled = mAvrcpAbsVolSupported;
+                }
+                if (stream != streamType) {
+                    mAudioSystem.setDeviceAbsoluteVolumeEnabled(absDev, /*address=*/"",
+                            enabled, streamType);
+                }
+                return streamType;
+            });
+        }
+
         final Set<Integer> deviceTypes = getDeviceSetForStreamDirect(streamType);
         final Set<Integer> absVolumeMultiModeCaseDevices =
                 AudioSystem.intersectionAudioDeviceTypes(
@@ -6446,17 +6463,6 @@ public class AudioService extends IAudioService.Stub
 
                 // change of mode may require volume to be re-applied on some devices
                 onUpdateContextualVolumes();
-
-                synchronized (mCachedAbsVolDrivingStreamsLock) {
-                    mCachedAbsVolDrivingStreams.replaceAll((absDev, stream) -> {
-                        int streamToDriveAbs = getBluetoothContextualVolumeStream();
-                        if (stream != streamToDriveAbs) {
-                            mAudioSystem.setDeviceAbsoluteVolumeEnabled(absDev, /*address=*/
-                                    "", /*enabled*/true, streamToDriveAbs);
-                        }
-                        return streamToDriveAbs;
-                    });
-                }
 
                 // when entering RINGTONE, IN_CALL or IN_COMMUNICATION mode, clear all SCO
                 // connections not started by the application changing the mode when pid changes
