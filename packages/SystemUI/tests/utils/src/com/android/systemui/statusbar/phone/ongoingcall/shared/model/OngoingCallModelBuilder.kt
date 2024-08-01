@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 The Android Open Source Project
+ * Copyright (C) 2024 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,20 +14,14 @@
  * limitations under the License.
  */
 
-package com.android.systemui.common.ui.binder
+package com.android.systemui.statusbar.phone.ongoingcall.shared.model
 
-import android.widget.ImageView
-import com.android.systemui.common.shared.model.Icon
+import android.app.PendingIntent
+import com.android.systemui.statusbar.StatusBarIconView
 
-object IconViewBinder {
-    fun bind(
-        icon: Icon,
-        view: ImageView,
-    ) {
-        ContentDescriptionViewBinder.bind(icon.contentDescription, view)
-        when (icon) {
-            is Icon.Loaded -> view.setImageDrawable(icon.drawable)
-            is Icon.Resource -> view.setImageResource(icon.res)
-        }
-    }
-}
+/** Helper for building [OngoingCallModel.InCall] instances in tests. */
+fun inCallModel(
+    startTimeMs: Long,
+    notificationIcon: StatusBarIconView? = null,
+    intent: PendingIntent? = null
+) = OngoingCallModel.InCall(startTimeMs, notificationIcon, intent)
