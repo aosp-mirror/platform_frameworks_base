@@ -4415,6 +4415,11 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         for (int i = mChildren.size() - 1; i >= 0; i--) {
             committed |= mChildren.get(i).commitFinishDrawing(t);
         }
+        // In case commitFinishDrawingLocked starts a window level animation, make sure the surface
+        // operation (reparent to leash) is synced with the visibility by transition.
+        if (getAnimationLeash() != null) {
+            t.merge(getSyncTransaction());
+        }
         return committed;
     }
 
@@ -5028,7 +5033,9 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                 new WindowAnimationSpec(anim, position, false /* canSkipFirstFrame */,
                         0 /* windowCornerRadius */),
                 mWmService.mSurfaceAnimationRunner);
-        startAnimation(getPendingTransaction(), adapter);
+        final Transaction t = mActivityRecord != null
+                ? getSyncTransaction() : getPendingTransaction();
+        startAnimation(t, adapter);
         commitPendingTransaction();
     }
 
