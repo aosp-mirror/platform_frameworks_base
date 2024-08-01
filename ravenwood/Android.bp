@@ -68,7 +68,10 @@ java_library {
     srcs: [
         "runtime-common-ravenwood-src/**/*.java",
     ],
-    visibility: ["//frameworks/base"],
+    visibility: [
+        // Some tests need to access the utilities.
+        ":__subpackages__",
+    ],
 }
 
 java_library {
@@ -318,6 +321,9 @@ java_library {
 
 android_ravenwood_libgroup {
     name: "ravenwood-runtime",
+    data: [
+        "framework-res",
+    ],
     libs: [
         "100-framework-minus-apex.ravenwood",
         "200-kxml2-android",
