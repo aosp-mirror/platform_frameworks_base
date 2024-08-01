@@ -71,7 +71,7 @@
     <string name="kg_prompt_after_dpm_lock" msgid="6002804765868345917">"لمزيد من الأمان، تم قفل الجهاز وفقًا لسياسة العمل."</string>
     <string name="kg_prompt_after_user_lockdown_pin" msgid="5374732179740050373">"يجب إدخال رقم التعريف الشخصي بعد إلغاء الفتح الذكي."</string>
     <string name="kg_prompt_after_user_lockdown_password" msgid="9097968458291129795">"يجب إدخال كلمة المرور بعد إلغاء الفتح الذكي."</string>
-    <string name="kg_prompt_after_user_lockdown_pattern" msgid="215072203613597906">"يجب رسم النقش بعد إلغاء التأمين."</string>
+    <string name="kg_prompt_after_user_lockdown_pattern" msgid="215072203613597906">"يجب رسم النقش بعد إلغاء الفتح الذكي."</string>
     <string name="kg_prompt_unattended_update" msgid="4366635751738712452">"سيتم تثبيت التحديث عندما لا يكون الجهاز قيد الاستخدام."</string>
     <string name="kg_prompt_pin_auth_timeout" msgid="5868644725126275245">"‏يجب تعزيز الأمان. لم يُستخدَم رقم PIN لبعض الوقت."</string>
     <string name="kg_prompt_password_auth_timeout" msgid="5809110458491920871">"يجب تعزيز الأمان. لم تستخدَم كلمة المرور لبعض الوقت."</string>
