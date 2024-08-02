@@ -30,7 +30,6 @@ import android.view.View
 import android.view.WindowInsets
 import android.widget.FrameLayout
 import androidx.test.filters.SmallTest
-import com.android.systemui.Flags
 import com.android.systemui.Gefingerpoken
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.plugins.DarkIconDispatcher
@@ -41,7 +40,6 @@ import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
 import org.junit.Before
 import org.junit.Test
-import org.mockito.Mockito.never
 import org.mockito.Mockito.spy
 import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
@@ -123,36 +121,21 @@ class PhoneStatusBarViewTest : SysuiTestCase() {
     }
 
     @Test
-    fun onAttachedToWindow_flagEnabled_updatesWindowHeight() {
-        mSetFlagsRule.enableFlags(Flags.FLAG_TRUNCATED_STATUS_BAR_ICONS_FIX)
-
+    fun onAttachedToWindow_updatesWindowHeight() {
         view.onAttachedToWindow()
 
         verify(windowController).refreshStatusBarHeight()
     }
 
     @Test
-    fun onAttachedToWindow_flagDisabled_doesNotUpdateWindowHeight() {
-        mSetFlagsRule.disableFlags(Flags.FLAG_TRUNCATED_STATUS_BAR_ICONS_FIX)
-
-        view.onAttachedToWindow()
-
-        verify(windowController, never()).refreshStatusBarHeight()
-    }
-
-    @Test
-    fun onConfigurationChanged_flagEnabled_updatesWindowHeight() {
-        mSetFlagsRule.enableFlags(Flags.FLAG_TRUNCATED_STATUS_BAR_ICONS_FIX)
-
+    fun onConfigurationChanged_updatesWindowHeight() {
         view.onConfigurationChanged(Configuration())
 
         verify(windowController).refreshStatusBarHeight()
     }
 
     @Test
-    fun onConfigurationChanged_multipleCalls_flagEnabled_updatesWindowHeightMultipleTimes() {
-        mSetFlagsRule.enableFlags(Flags.FLAG_TRUNCATED_STATUS_BAR_ICONS_FIX)
-
+    fun onConfigurationChanged_multipleCalls_updatesWindowHeightMultipleTimes() {
         view.onConfigurationChanged(Configuration())
         view.onConfigurationChanged(Configuration())
         view.onConfigurationChanged(Configuration())
@@ -162,29 +145,8 @@ class PhoneStatusBarViewTest : SysuiTestCase() {
     }
 
     @Test
-    fun onConfigurationChanged_flagDisabled_doesNotUpdateWindowHeight() {
-        mSetFlagsRule.disableFlags(Flags.FLAG_TRUNCATED_STATUS_BAR_ICONS_FIX)
-
-        view.onConfigurationChanged(Configuration())
-
-        verify(windowController, never()).refreshStatusBarHeight()
-    }
-
-    @Test
-    fun onConfigurationChanged_multipleCalls_flagDisabled_doesNotUpdateWindowHeight() {
-        mSetFlagsRule.disableFlags(Flags.FLAG_TRUNCATED_STATUS_BAR_ICONS_FIX)
-
-        view.onConfigurationChanged(Configuration())
-        view.onConfigurationChanged(Configuration())
-        view.onConfigurationChanged(Configuration())
-        view.onConfigurationChanged(Configuration())
-
-        verify(windowController, never()).refreshStatusBarHeight()
-    }
-
-    @Test
     fun onAttachedToWindow_updatesLeftTopRightPaddingsBasedOnInsets() {
-        val insets = Insets.of(/* left = */ 10, /* top = */ 20, /* right = */ 30, /* bottom = */ 40)
+        val insets = Insets.of(/* left= */ 10, /* top= */ 20, /* right= */ 30, /* bottom= */ 40)
         whenever(contentInsetsProvider.getStatusBarContentInsetsForCurrentRotation())
             .thenReturn(insets)
 
@@ -198,7 +160,7 @@ class PhoneStatusBarViewTest : SysuiTestCase() {
 
     @Test
     fun onConfigurationChanged_updatesLeftTopRightPaddingsBasedOnInsets() {
-        val insets = Insets.of(/* left = */ 40, /* top = */ 30, /* right = */ 20, /* bottom = */ 10)
+        val insets = Insets.of(/* left= */ 40, /* top= */ 30, /* right= */ 20, /* bottom= */ 10)
         whenever(contentInsetsProvider.getStatusBarContentInsetsForCurrentRotation())
             .thenReturn(insets)
 
@@ -213,7 +175,7 @@ class PhoneStatusBarViewTest : SysuiTestCase() {
     @Test
     fun onConfigurationChanged_noRelevantChange_doesNotUpdateInsets() {
         val previousInsets =
-            Insets.of(/* left = */ 40, /* top = */ 30, /* right = */ 20, /* bottom = */ 10)
+            Insets.of(/* left= */ 40, /* top= */ 30, /* right= */ 20, /* bottom= */ 10)
         whenever(contentInsetsProvider.getStatusBarContentInsetsForCurrentRotation())
             .thenReturn(previousInsets)
         context.orCreateTestableResources.overrideConfiguration(Configuration())
@@ -233,7 +195,7 @@ class PhoneStatusBarViewTest : SysuiTestCase() {
     @Test
     fun onConfigurationChanged_densityChanged_updatesInsets() {
         val previousInsets =
-            Insets.of(/* left = */ 40, /* top = */ 30, /* right = */ 20, /* bottom = */ 10)
+            Insets.of(/* left= */ 40, /* top= */ 30, /* right= */ 20, /* bottom= */ 10)
         whenever(contentInsetsProvider.getStatusBarContentInsetsForCurrentRotation())
             .thenReturn(previousInsets)
         val configuration = Configuration()
@@ -256,7 +218,7 @@ class PhoneStatusBarViewTest : SysuiTestCase() {
     @Test
     fun onConfigurationChanged_fontScaleChanged_updatesInsets() {
         val previousInsets =
-            Insets.of(/* left = */ 40, /* top = */ 30, /* right = */ 20, /* bottom = */ 10)
+            Insets.of(/* left= */ 40, /* top= */ 30, /* right= */ 20, /* bottom= */ 10)
         whenever(contentInsetsProvider.getStatusBarContentInsetsForCurrentRotation())
             .thenReturn(previousInsets)
         val configuration = Configuration()
@@ -291,7 +253,7 @@ class PhoneStatusBarViewTest : SysuiTestCase() {
 
     @Test
     fun onApplyWindowInsets_updatesLeftTopRightPaddingsBasedOnInsets() {
-        val insets = Insets.of(/* left = */ 90, /* top = */ 10, /* right = */ 45, /* bottom = */ 50)
+        val insets = Insets.of(/* left= */ 90, /* top= */ 10, /* right= */ 45, /* bottom= */ 50)
         whenever(contentInsetsProvider.getStatusBarContentInsetsForCurrentRotation())
             .thenReturn(insets)
 
