@@ -4441,6 +4441,11 @@ public class AlarmManagerService extends SystemService {
         public void run() {
             ArrayList<Alarm> triggerList = new ArrayList<Alarm>();
 
+            synchronized (mLock) {
+                mLastTimeChangeClockTime = mInjector.getCurrentTimeMillis();
+                mLastTimeChangeRealtime = mInjector.getElapsedRealtimeMillis();
+            }
+
             while (true) {
                 int result = mInjector.waitForAlarm();
                 final long nowRTC = mInjector.getCurrentTimeMillis();
@@ -4464,10 +4469,9 @@ public class AlarmManagerService extends SystemService {
                         expectedClockTime = lastTimeChangeClockTime
                                 + (nowELAPSED - mLastTimeChangeRealtime);
                     }
-                    if (lastTimeChangeClockTime == 0 || nowRTC < (expectedClockTime - 1000)
+                    if (nowRTC < (expectedClockTime - 1000)
                             || nowRTC > (expectedClockTime + 1000)) {
-                        // The change is by at least +/- 1000 ms (or this is the first change),
-                        // let's do it!
+                        // The change is by at least +/- 1000 ms, let's do it!
                         if (DEBUG_BATCH) {
                             Slog.v(TAG, "Time changed notification from kernel; rebatching");
                         }
