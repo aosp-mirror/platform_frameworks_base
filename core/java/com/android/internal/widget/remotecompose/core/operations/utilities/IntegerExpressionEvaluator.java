@@ -400,8 +400,7 @@ public class IntegerExpressionEvaluator {
             -1, // no op
             2, 2, 2, 2, 2, // + - * / %
             2, 2, 2, 2, 2, 2, 2, 2, 2, //<<, >> , >>> , | , &, ^, min max
-            1, 1, 1, 1, 1, 1,   // neg, abs, ++, -- , not , sign
-
+            1, 1, 1, 1, 1, 1,  // neg, abs, ++, -- , not , sign
             3, 3, 3, // clamp, ifElse, mad,
             0, 0, 0 // mad, ?:,
             // a[0],a[1],a[2]
