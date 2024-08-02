@@ -705,17 +705,15 @@ final class PolicyDefinition<V> {
     }
 
     @Nullable
-    static <V> PolicyKey readPolicyKeyFromXml(TypedXmlPullParser parser)
+    static PolicyKey readPolicyKeyFromXml(TypedXmlPullParser parser)
             throws XmlPullParserException, IOException {
-        // TODO: can we avoid casting?
         PolicyKey policyKey = PolicyKey.readGenericPolicyKeyFromXml(parser);
         if (policyKey == null) {
             Slogf.wtf(TAG, "Error parsing PolicyKey, GenericPolicyKey is null");
             return null;
         }
-        PolicyDefinition<PolicyValue<V>> genericPolicyDefinition =
-                (PolicyDefinition<PolicyValue<V>>) POLICY_DEFINITIONS.get(
-                        policyKey.getIdentifier());
+        PolicyDefinition<?> genericPolicyDefinition =
+                POLICY_DEFINITIONS.get(policyKey.getIdentifier());
         if (genericPolicyDefinition == null) {
             Slogf.wtf(TAG, "Error parsing PolicyKey, Unknown generic policy key: " + policyKey);
             return null;
