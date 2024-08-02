@@ -3147,11 +3147,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
             if (Flags.refactorInsetsController()) {
                 final var visibilityStateComputer = userData.mVisibilityStateComputer;
                 boolean wasVisible = visibilityStateComputer.isInputShown();
-                if (userData.mImeBindingState != null
-                        && userData.mImeBindingState.mFocusedWindowClient != null
-                        && userData.mImeBindingState.mFocusedWindowClient.mClient != null) {
-                    userData.mImeBindingState.mFocusedWindowClient.mClient
-                            .setImeVisibility(true, statsToken);
+                if (setImeVisibilityOnFocusedWindowClient(false, userData, statsToken)) {
                     if (resultReceiver != null) {
                         resultReceiver.send(
                                 wasVisible ? InputMethodManager.RESULT_UNCHANGED_SHOWN
@@ -3600,13 +3596,9 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
             Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "IMMS.hideSoftInput");
             if (DEBUG) Slog.v(TAG, "Client requesting input be hidden");
             if (Flags.refactorInsetsController()) {
-                if (userData.mImeBindingState != null
-                        && userData.mImeBindingState.mFocusedWindowClient != null
-                        && userData.mImeBindingState.mFocusedWindowClient.mClient != null) {
-                    boolean wasVisible = visibilityStateComputer.isInputShown();
-                    // TODO add windowToken to interface
-                    userData.mImeBindingState.mFocusedWindowClient.mClient
-                            .setImeVisibility(false, statsToken);
+                boolean wasVisible = visibilityStateComputer.isInputShown();
+                // TODO add windowToken to interface
+                if (setImeVisibilityOnFocusedWindowClient(false, userData, statsToken)) {
                     if (resultReceiver != null) {
                         resultReceiver.send(wasVisible ? InputMethodManager.RESULT_HIDDEN
                                 : InputMethodManager.RESULT_UNCHANGED_HIDDEN, null);
@@ -4943,12 +4935,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
                     if (Flags.refactorInsetsController()) {
                         userData.mCurClient.mClient.setImeVisibility(false, statsToken);
                         // TODO we will loose the flags here
-                        if (userData.mImeBindingState != null
-                                && userData.mImeBindingState.mFocusedWindowClient != null
-                                && userData.mImeBindingState.mFocusedWindowClient.mClient != null) {
-                            userData.mImeBindingState.mFocusedWindowClient.mClient
-                                    .setImeVisibility(false, statsToken);
-                        }
+                        setImeVisibilityOnFocusedWindowClient(false, userData, statsToken);
                     } else {
                         final var visibilityStateComputer = userData.mVisibilityStateComputer;
                         hideCurrentInputLocked(visibilityStateComputer.getLastImeTargetWindow(),
@@ -4981,14 +4968,8 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
                 final long ident = Binder.clearCallingIdentity();
                 try {
                     if (Flags.refactorInsetsController()) {
-                        userData.mCurClient.mClient.setImeVisibility(false, statsToken);
-                        // TODO we will loose the flags here
-                        if (userData.mImeBindingState != null
-                                && userData.mImeBindingState.mFocusedWindowClient != null
-                                && userData.mImeBindingState.mFocusedWindowClient.mClient != null) {
-                            userData.mImeBindingState.mFocusedWindowClient.mClient
-                                    .setImeVisibility(true, statsToken);
-                        }
+                        userData.mCurClient.mClient.setImeVisibility(true, statsToken);
+                        setImeVisibilityOnFocusedWindowClient(true, userData, statsToken);
                     } else {
                         final var visibilityStateComputer = userData.mVisibilityStateComputer;
                         showCurrentInputLocked(visibilityStateComputer.getLastImeTargetWindow(),
@@ -5150,13 +5131,8 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
                     final int userId = resolveImeUserIdFromDisplayIdLocked(originatingDisplayId);
                     final var userData = getUserData(userId);
                     if (Flags.refactorInsetsController()) {
-                        if (userData.mImeBindingState != null
-                                && userData.mImeBindingState.mFocusedWindowClient != null
-                                && userData.mImeBindingState.mFocusedWindowClient.mClient != null) {
-                            userData.mImeBindingState.mFocusedWindowClient.mClient
-                                    .setImeVisibility(false,
-                                            null /* TODO(b329229469) check statsToken */);
-                        }
+                        setImeVisibilityOnFocusedWindowClient(false, userData,
+                                null /* TODO(b329229469) check statsToken */);
                     } else {
 
                         hideCurrentInputLocked(userData.mImeBindingState.mFocusedWindow,
@@ -6825,16 +6801,8 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
                     final InputMethodSettings settings = InputMethodSettingsRepository.get(userId);
                     final var userData = getUserData(userId);
                     if (Flags.refactorInsetsController()) {
-                        if (userData.mImeBindingState != null
-                                && userData.mImeBindingState.mFocusedWindowClient != null
-                                && userData.mImeBindingState.mFocusedWindowClient.mClient
-                                != null) {
-                            userData.mImeBindingState.mFocusedWindowClient.mClient
-                                    .setImeVisibility(false,
-                                    null /* TODO(b329229469) initialize statsToken here? */);
-                        } else {
-                            // TODO(b329229469): ImeTracker?
-                        }
+                        setImeVisibilityOnFocusedWindowClient(false, userData,
+                                null /* TODO(b329229469) initialize statsToken here? */);
                     } else {
                         hideCurrentInputLocked(userData.mImeBindingState.mFocusedWindow,
                                 0 /* flags */,
@@ -6871,6 +6839,23 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
             }
         }
         return ShellCommandResult.SUCCESS;
+    }
+
+    @GuardedBy("ImfLock.class")
+    boolean setImeVisibilityOnFocusedWindowClient(boolean visible, UserData userData,
+            @NonNull ImeTracker.Token statsToken) {
+        if (Flags.refactorInsetsController()) {
+            if (userData.mImeBindingState != null
+                    && userData.mImeBindingState.mFocusedWindowClient != null
+                    && userData.mImeBindingState.mFocusedWindowClient.mClient != null) {
+                userData.mImeBindingState.mFocusedWindowClient.mClient.setImeVisibility(visible,
+                        statsToken);
+                return true;
+            }
+            ImeTracker.forLogging().onFailed(statsToken,
+                    ImeTracker.PHASE_SERVER_SET_VISIBILITY_ON_FOCUSED_WINDOW);
+        }
+        return false;
     }
 
     /**
