@@ -4401,17 +4401,14 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
         final long ident = Binder.clearCallingIdentity();
         try {
             synchronized (ImfLock.class) {
-                final boolean currentUser = (mCurrentUserId == userId);
                 final InputMethodSettings settings = InputMethodSettingsRepository.get(userId);
                 if (!settings.setEnabledInputMethodSubtypes(imeId, subtypeHashCodes)) {
                     return;
                 }
-                if (currentUser) {
-                    // To avoid unnecessary "updateInputMethodsFromSettingsLocked" from happening.
-                    final var userData = getUserData(userId);
-                    userData.mLastEnabledInputMethodsStr = settings.getEnabledInputMethodsStr();
-                    updateInputMethodsFromSettingsLocked(false /* enabledChanged */, userId);
-                }
+                // To avoid unnecessary "updateInputMethodsFromSettingsLocked" from happening.
+                final var userData = getUserData(userId);
+                userData.mLastEnabledInputMethodsStr = settings.getEnabledInputMethodsStr();
+                updateInputMethodsFromSettingsLocked(false /* enabledChanged */, userId);
             }
         } finally {
             Binder.restoreCallingIdentity(ident);
