@@ -578,7 +578,7 @@ public class BluetoothUtils {
     }
 
     /**
-     * Check if {@link CachedBluetoothDevice} has connected to a broadcast source.
+     * Check if {@link CachedBluetoothDevice} (lead or member) has connected to a broadcast source.
      *
      * @param cachedDevice The cached bluetooth device to check.
      * @param localBtManager The BT manager to provide BT functions.
@@ -586,20 +586,10 @@ public class BluetoothUtils {
      */
     @WorkerThread
     public static boolean hasConnectedBroadcastSource(
-            CachedBluetoothDevice cachedDevice, LocalBluetoothManager localBtManager) {
-        if (localBtManager == null) {
-            Log.d(TAG, "Skip check hasConnectedBroadcastSource due to bt manager is null");
-            return false;
-        }
-        LocalBluetoothLeBroadcastAssistant assistant =
-                localBtManager.getProfileManager().getLeAudioBroadcastAssistantProfile();
-        if (assistant == null) {
-            Log.d(TAG, "Skip check hasConnectedBroadcastSource due to assistant profile is null");
-            return false;
-        }
-        List<BluetoothLeBroadcastReceiveState> sourceList =
-                assistant.getAllSources(cachedDevice.getDevice());
-        if (!sourceList.isEmpty() && sourceList.stream().anyMatch(BluetoothUtils::isConnected)) {
+            @Nullable CachedBluetoothDevice cachedDevice,
+            @Nullable LocalBluetoothManager localBtManager) {
+        if (cachedDevice == null) return false;
+        if (hasConnectedBroadcastSourceForBtDevice(cachedDevice.getDevice(), localBtManager)) {
             Log.d(
                     TAG,
                     "Lead device has connected broadcast source, device = "
@@ -608,9 +598,7 @@ public class BluetoothUtils {
         }
         // Return true if member device is in broadcast.
         for (CachedBluetoothDevice device : cachedDevice.getMemberDevice()) {
-            List<BluetoothLeBroadcastReceiveState> list =
-                    assistant.getAllSources(device.getDevice());
-            if (!list.isEmpty() && list.stream().anyMatch(BluetoothUtils::isConnected)) {
+            if (hasConnectedBroadcastSourceForBtDevice(device.getDevice(), localBtManager)) {
                 Log.d(
                         TAG,
                         "Member device has connected broadcast source, device = "
@@ -619,6 +607,28 @@ public class BluetoothUtils {
             }
         }
         return false;
+    }
+
+    /**
+     * Check if {@link BluetoothDevice} has connected to a broadcast source.
+     *
+     * @param device The bluetooth device to check.
+     * @param localBtManager The BT manager to provide BT functions.
+     * @return Whether the device has connected to a broadcast source.
+     */
+    @WorkerThread
+    public static boolean hasConnectedBroadcastSourceForBtDevice(
+            @Nullable BluetoothDevice device, @Nullable LocalBluetoothManager localBtManager) {
+        LocalBluetoothLeBroadcastAssistant assistant =
+                localBtManager == null
+                        ? null
+                        : localBtManager.getProfileManager().getLeAudioBroadcastAssistantProfile();
+        if (device == null || assistant == null) {
+            Log.d(TAG, "Skip check hasConnectedBroadcastSourceForBtDevice due to arg is null");
+            return false;
+        }
+        List<BluetoothLeBroadcastReceiveState> sourceList = assistant.getAllSources(device);
+        return !sourceList.isEmpty() && sourceList.stream().anyMatch(BluetoothUtils::isConnected);
     }
 
     /** Checks the connectivity status based on the provided broadcast receive state. */
@@ -805,8 +815,10 @@ public class BluetoothUtils {
 
         ComponentName exclusiveManagerComponent =
                 ComponentName.unflattenFromString(exclusiveManagerName);
-        String exclusiveManagerPackage = exclusiveManagerComponent != null
-                ? exclusiveManagerComponent.getPackageName() : exclusiveManagerName;
+        String exclusiveManagerPackage =
+                exclusiveManagerComponent != null
+                        ? exclusiveManagerComponent.getPackageName()
+                        : exclusiveManagerName;
 
         if (!isPackageInstalledAndEnabled(context, exclusiveManagerPackage)) {
             return false;

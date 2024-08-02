@@ -2454,6 +2454,50 @@ public class NotificationAttentionHelperTest extends UiServiceTestCase {
     }
 
     @Test
+    public void testBeepVolume_politeNotif_Avalanche_exemptCategories() throws Exception {
+        mSetFlagsRule.enableFlags(Flags.FLAG_POLITE_NOTIFICATIONS);
+        mSetFlagsRule.enableFlags(Flags.FLAG_CROSS_APP_POLITE_NOTIFICATIONS);
+        mSetFlagsRule.enableFlags(Flags.FLAG_POLITE_NOTIFICATIONS_ATTN_UPDATE);
+        TestableFlagResolver flagResolver = new TestableFlagResolver();
+        flagResolver.setFlagOverride(NotificationFlags.NOTIF_VOLUME1, 50);
+        flagResolver.setFlagOverride(NotificationFlags.NOTIF_VOLUME2, 0);
+        initAttentionHelper(flagResolver);
+
+        // Trigger avalanche trigger intent
+        final Intent intent = new Intent(Intent.ACTION_AIRPLANE_MODE_CHANGED);
+        intent.putExtra("state", false);
+        mAvalancheBroadcastReceiver.onReceive(getContext(), intent);
+
+        // CATEGORY_ALARM is exempted
+        NotificationRecord r = getBeepyNotification();
+        r.getNotification().category = Notification.CATEGORY_ALARM;
+        // Should beep at 100% volume
+        mAttentionHelper.buzzBeepBlinkLocked(r, DEFAULT_SIGNALS);
+        verifyBeepVolume(1.0f);
+        assertNotEquals(-1, r.getLastAudiblyAlertedMs());
+
+        // CATEGORY_CAR_EMERGENCY is exempted
+        Mockito.reset(mRingtonePlayer);
+        NotificationRecord r2 = getBeepyNotification();
+        r2.getNotification().category = Notification.CATEGORY_CAR_EMERGENCY;
+        // Should beep at 100% volume
+        mAttentionHelper.buzzBeepBlinkLocked(r2, DEFAULT_SIGNALS);
+        verifyBeepVolume(1.0f);
+        assertNotEquals(-1, r2.getLastAudiblyAlertedMs());
+
+        // CATEGORY_CAR_WARNING is exempted
+        Mockito.reset(mRingtonePlayer);
+        NotificationRecord r3 = getBeepyNotification();
+        r3.getNotification().category = Notification.CATEGORY_CAR_WARNING;
+        // Should beep at 100% volume
+        mAttentionHelper.buzzBeepBlinkLocked(r3, DEFAULT_SIGNALS);
+        verifyBeepVolume(1.0f);
+        assertNotEquals(-1, r3.getLastAudiblyAlertedMs());
+
+        verify(mAccessibilityService, times(3)).sendAccessibilityEvent(any(), anyInt());
+    }
+
+    @Test
     public void testBeepVolume_politeNotif_exemptEmergency() throws Exception {
         mSetFlagsRule.enableFlags(Flags.FLAG_POLITE_NOTIFICATIONS);
         mSetFlagsRule.disableFlags(Flags.FLAG_CROSS_APP_POLITE_NOTIFICATIONS);
@@ -2489,6 +2533,73 @@ public class NotificationAttentionHelperTest extends UiServiceTestCase {
         verifyBeepVolume(1.0f);
 
         verify(mAccessibilityService, times(3)).sendAccessibilityEvent(any(), anyInt());
+    }
+
+    @Test
+    public void testBeepVolume_politeNotif_exemptCategories() throws Exception {
+        mSetFlagsRule.enableFlags(Flags.FLAG_POLITE_NOTIFICATIONS);
+        mSetFlagsRule.disableFlags(Flags.FLAG_CROSS_APP_POLITE_NOTIFICATIONS);
+        mSetFlagsRule.enableFlags(Flags.FLAG_POLITE_NOTIFICATIONS_ATTN_UPDATE);
+        TestableFlagResolver flagResolver = new TestableFlagResolver();
+        flagResolver.setFlagOverride(NotificationFlags.NOTIF_VOLUME1, 50);
+        flagResolver.setFlagOverride(NotificationFlags.NOTIF_VOLUME2, 0);
+        // NOTIFICATION_COOLDOWN_ALL setting is enabled
+        Settings.System.putInt(getContext().getContentResolver(),
+                Settings.System.NOTIFICATION_COOLDOWN_ALL, 1);
+        initAttentionHelper(flagResolver);
+
+        // CATEGORY_ALARM is exempted
+        NotificationRecord r = getBeepyNotification();
+        r.getNotification().category = Notification.CATEGORY_ALARM;
+        mAttentionHelper.buzzBeepBlinkLocked(r, DEFAULT_SIGNALS);
+        Mockito.reset(mRingtonePlayer);
+
+        // update should beep at 100% volume
+        mAttentionHelper.buzzBeepBlinkLocked(r, DEFAULT_SIGNALS);
+        assertNotEquals(-1, r.getLastAudiblyAlertedMs());
+        verifyBeepVolume(1.0f);
+
+        // 2nd update should beep at 100% volume
+        Mockito.reset(mRingtonePlayer);
+        mAttentionHelper.buzzBeepBlinkLocked(r, DEFAULT_SIGNALS);
+        assertNotEquals(-1, r.getLastAudiblyAlertedMs());
+        verifyBeepVolume(1.0f);
+
+        // CATEGORY_CAR_WARNING is exempted
+        r = getBeepyNotification();
+        r.getNotification().category = Notification.CATEGORY_CAR_WARNING;
+        mAttentionHelper.buzzBeepBlinkLocked(r, DEFAULT_SIGNALS);
+        Mockito.reset(mRingtonePlayer);
+
+        // update should beep at 100% volume
+        mAttentionHelper.buzzBeepBlinkLocked(r, DEFAULT_SIGNALS);
+        assertNotEquals(-1, r.getLastAudiblyAlertedMs());
+        verifyBeepVolume(1.0f);
+
+        // 2nd update should beep at 100% volume
+        Mockito.reset(mRingtonePlayer);
+        mAttentionHelper.buzzBeepBlinkLocked(r, DEFAULT_SIGNALS);
+        assertNotEquals(-1, r.getLastAudiblyAlertedMs());
+        verifyBeepVolume(1.0f);
+
+        // CATEGORY_CAR_EMERGENCY is exempted
+        r = getBeepyNotification();
+        r.getNotification().category = Notification.CATEGORY_CAR_EMERGENCY;
+        mAttentionHelper.buzzBeepBlinkLocked(r, DEFAULT_SIGNALS);
+        Mockito.reset(mRingtonePlayer);
+
+        // update should beep at 100% volume
+        mAttentionHelper.buzzBeepBlinkLocked(r, DEFAULT_SIGNALS);
+        assertNotEquals(-1, r.getLastAudiblyAlertedMs());
+        verifyBeepVolume(1.0f);
+
+        // 2nd update should beep at 100% volume
+        Mockito.reset(mRingtonePlayer);
+        mAttentionHelper.buzzBeepBlinkLocked(r, DEFAULT_SIGNALS);
+        assertNotEquals(-1, r.getLastAudiblyAlertedMs());
+        verifyBeepVolume(1.0f);
+
+        verify(mAccessibilityService, times(9)).sendAccessibilityEvent(any(), anyInt());
     }
 
     @Test

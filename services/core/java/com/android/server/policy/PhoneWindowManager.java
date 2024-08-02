@@ -2725,11 +2725,16 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
         @Override
         void onLongPress(long eventTime) {
-            // Long-press should be triggered only if app doesn't handle it.
-            mDeferredKeyActionExecutor.queueKeyAction(
-                    KeyEvent.KEYCODE_STEM_PRIMARY,
-                    eventTime,
-                    () -> stemPrimaryLongPress(eventTime));
+            if (mLongPressOnStemPrimaryBehavior == LONG_PRESS_PRIMARY_LAUNCH_VOICE_ASSISTANT) {
+                // Long-press to assistant gesture is not overridable by apps.
+                stemPrimaryLongPress(eventTime);
+            } else {
+                // Other long-press actions should be triggered only if app doesn't handle it.
+                mDeferredKeyActionExecutor.queueKeyAction(
+                        KeyEvent.KEYCODE_STEM_PRIMARY,
+                        eventTime,
+                        () -> stemPrimaryLongPress(eventTime));
+            }
         }
 
         @Override

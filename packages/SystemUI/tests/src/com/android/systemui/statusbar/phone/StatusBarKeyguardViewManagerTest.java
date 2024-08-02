@@ -1068,7 +1068,7 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
     public void testShowBouncerOrKeyguard_needsFullScreen() {
         when(mKeyguardSecurityModel.getSecurityMode(anyInt())).thenReturn(
                 KeyguardSecurityModel.SecurityMode.SimPin);
-        mStatusBarKeyguardViewManager.showBouncerOrKeyguard(false, false);
+        mStatusBarKeyguardViewManager.showBouncerOrKeyguard(false);
         verify(mCentralSurfaces).hideKeyguard();
         verify(mPrimaryBouncerInteractor).show(true);
     }
@@ -1084,7 +1084,7 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
                 .thenReturn(KeyguardState.LOCKSCREEN);
 
         reset(mCentralSurfaces);
-        mStatusBarKeyguardViewManager.showBouncerOrKeyguard(false, false);
+        mStatusBarKeyguardViewManager.showBouncerOrKeyguard(false);
         verify(mPrimaryBouncerInteractor).show(true);
         verify(mCentralSurfaces).showKeyguard();
     }
@@ -1092,26 +1092,11 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
     @Test
     @DisableSceneContainer
     public void testShowBouncerOrKeyguard_needsFullScreen_bouncerAlreadyShowing() {
-        boolean isFalsingReset = false;
         when(mKeyguardSecurityModel.getSecurityMode(anyInt())).thenReturn(
                 KeyguardSecurityModel.SecurityMode.SimPin);
         when(mPrimaryBouncerInteractor.isFullyShowing()).thenReturn(true);
-        mStatusBarKeyguardViewManager.showBouncerOrKeyguard(false, isFalsingReset);
+        mStatusBarKeyguardViewManager.showBouncerOrKeyguard(false);
         verify(mCentralSurfaces, never()).hideKeyguard();
-        verify(mPrimaryBouncerInteractor).show(true);
-    }
-
-    @Test
-    @DisableSceneContainer
-    public void testShowBouncerOrKeyguard_needsFullScreen_bouncerAlreadyShowing_onFalsing() {
-        boolean isFalsingReset = true;
-        when(mKeyguardSecurityModel.getSecurityMode(anyInt())).thenReturn(
-                KeyguardSecurityModel.SecurityMode.SimPin);
-        when(mPrimaryBouncerInteractor.isFullyShowing()).thenReturn(true);
-        mStatusBarKeyguardViewManager.showBouncerOrKeyguard(false, isFalsingReset);
-        verify(mCentralSurfaces, never()).hideKeyguard();
-
-        // Do not refresh the full screen bouncer if the call is from falsing
         verify(mPrimaryBouncerInteractor, never()).show(true);
     }
 

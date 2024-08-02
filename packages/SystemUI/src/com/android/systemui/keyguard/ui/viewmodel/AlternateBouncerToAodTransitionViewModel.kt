@@ -51,6 +51,7 @@ constructor(
         transitionAnimation.sharedFlow(
             duration = FromAlternateBouncerTransitionInteractor.TO_AOD_DURATION,
             onStep = { 1 - it },
+            onCancel = { 0f },
             onFinish = { 0f },
         )
 

@@ -120,6 +120,14 @@ public class WallpaperBackupAgent extends BackupAgent {
     static final String SYSTEM_GENERATION = "system_gen";
     static final String LOCK_GENERATION = "lock_gen";
 
+    static final String DEVICE_CONFIG_WIDTH = "device_config_width";
+
+    static final String DEVICE_CONFIG_HEIGHT = "device_config_height";
+
+    static final String DEVICE_CONFIG_SECONDARY_WIDTH = "device_config_secondary_width";
+
+    static final String DEVICE_CONFIG_SECONDARY_HEIGHT = "device_config_secondary_height";
+
     static final float DEFAULT_ACCEPTABLE_PARALLAX = 0.2f;
 
     // If this file exists, it means we exceeded our quota last time
@@ -175,6 +183,16 @@ public class WallpaperBackupAgent extends BackupAgent {
             // disk churn.
             final int lastSysGeneration = sharedPrefs.getInt(SYSTEM_GENERATION, /* defValue= */ -1);
             final int lastLockGeneration = sharedPrefs.getInt(LOCK_GENERATION, /* defValue= */ -1);
+
+            final int deviceConfigWidth = sharedPrefs.getInt(
+                    DEVICE_CONFIG_WIDTH, /* defValue= */ -1);
+            final int deviceConfigHeight = sharedPrefs.getInt(
+                    DEVICE_CONFIG_HEIGHT, /* defValue= */ -1);
+            final int deviceConfigSecondaryWidth = sharedPrefs.getInt(
+                    DEVICE_CONFIG_SECONDARY_WIDTH, /* defValue= */ -1);
+            final int deviceConfigSecondaryHeight = sharedPrefs.getInt(
+                    DEVICE_CONFIG_SECONDARY_HEIGHT, /* defValue= */ -1);
+
             final int sysGeneration = mWallpaperManager.getWallpaperId(FLAG_SYSTEM);
             final int lockGeneration = mWallpaperManager.getWallpaperId(FLAG_LOCK);
             final boolean sysChanged = (sysGeneration != lastSysGeneration);
@@ -195,7 +213,11 @@ public class WallpaperBackupAgent extends BackupAgent {
             backupWallpaperInfoFile(/* sysOrLockChanged= */ sysChanged || lockChanged, data);
             backupSystemWallpaperFile(sharedPrefs, sysChanged, sysGeneration, data);
             backupLockWallpaperFileIfItExists(sharedPrefs, lockChanged, lockGeneration, data);
-            backupDeviceInfoFile(data);
+
+            final boolean isDeviceConfigChanged = isDeviceConfigChanged(deviceConfigWidth,
+                    deviceConfigHeight, deviceConfigSecondaryWidth, deviceConfigSecondaryHeight);
+
+            backupDeviceInfoFile(sharedPrefs, isDeviceConfigChanged, data);
         } catch (Exception e) {
             Slog.e(TAG, "Unable to back up wallpaper", e);
             mEventLogger.onBackupException(e);
@@ -209,50 +231,72 @@ public class WallpaperBackupAgent extends BackupAgent {
         }
     }
 
+    private boolean isDeviceConfigChanged(int width, int height, int secondaryWidth,
+            int secondaryHeight) {
+        Point currentDimensions = getScreenDimensions();
+        Display smallerDisplay = getSmallerDisplayIfExists();
+        Point currentSecondaryDimensions = smallerDisplay != null ? getRealSize(smallerDisplay) :
+                new Point(0, 0);
+
+        return (currentDimensions.x != width
+                || currentDimensions.y != height
+                || currentSecondaryDimensions.x != secondaryWidth
+                || currentSecondaryDimensions.y != secondaryHeight);
+    }
+
     /**
      * This method backs up the device dimension information. The device data will always get
      * overwritten when triggering a backup
      */
-    private void backupDeviceInfoFile(FullBackupDataOutput data)
+    private void backupDeviceInfoFile(SharedPreferences sharedPrefs, boolean isDeviceConfigChanged,
+            FullBackupDataOutput data)
             throws IOException {
         final File deviceInfoStage = new File(getFilesDir(), WALLPAPER_BACKUP_DEVICE_INFO_STAGE);
 
-        // save the dimensions of the device with xml formatting
-        Point dimensions = getScreenDimensions();
-        Display smallerDisplay = getSmallerDisplayIfExists();
-        Point secondaryDimensions = smallerDisplay != null ? getRealSize(smallerDisplay) :
-                new Point(0, 0);
+        if (isDeviceConfigChanged) {
+            // save the dimensions of the device with xml formatting
+            Point dimensions = getScreenDimensions();
+            Display smallerDisplay = getSmallerDisplayIfExists();
+            Point secondaryDimensions = smallerDisplay != null ? getRealSize(smallerDisplay) :
+                    new Point(0, 0);
 
-        deviceInfoStage.createNewFile();
-        FileOutputStream fstream = new FileOutputStream(deviceInfoStage, false);
-        TypedXmlSerializer out = Xml.resolveSerializer(fstream);
-        out.startDocument(null, true);
-        out.startTag(null, "dimensions");
+            deviceInfoStage.createNewFile();
+            FileOutputStream fstream = new FileOutputStream(deviceInfoStage, false);
+            TypedXmlSerializer out = Xml.resolveSerializer(fstream);
+            out.startDocument(null, true);
+            out.startTag(null, "dimensions");
 
-        out.startTag(null, "width");
-        out.text(String.valueOf(dimensions.x));
-        out.endTag(null, "width");
+            out.startTag(null, "width");
+            out.text(String.valueOf(dimensions.x));
+            out.endTag(null, "width");
 
-        out.startTag(null, "height");
-        out.text(String.valueOf(dimensions.y));
-        out.endTag(null, "height");
+            out.startTag(null, "height");
+            out.text(String.valueOf(dimensions.y));
+            out.endTag(null, "height");
 
-        if (smallerDisplay != null) {
-            out.startTag(null, "secondarywidth");
-            out.text(String.valueOf(secondaryDimensions.x));
-            out.endTag(null, "secondarywidth");
+            if (smallerDisplay != null) {
+                out.startTag(null, "secondarywidth");
+                out.text(String.valueOf(secondaryDimensions.x));
+                out.endTag(null, "secondarywidth");
 
-            out.startTag(null, "secondaryheight");
-            out.text(String.valueOf(secondaryDimensions.y));
-            out.endTag(null, "secondaryheight");
+                out.startTag(null, "secondaryheight");
+                out.text(String.valueOf(secondaryDimensions.y));
+                out.endTag(null, "secondaryheight");
+            }
+
+            out.endTag(null, "dimensions");
+            out.endDocument();
+            fstream.flush();
+            FileUtils.sync(fstream);
+            fstream.close();
+
+            SharedPreferences.Editor editor = sharedPrefs.edit();
+            editor.putInt(DEVICE_CONFIG_WIDTH, dimensions.x);
+            editor.putInt(DEVICE_CONFIG_HEIGHT, dimensions.y);
+            editor.putInt(DEVICE_CONFIG_SECONDARY_WIDTH, secondaryDimensions.x);
+            editor.putInt(DEVICE_CONFIG_SECONDARY_HEIGHT, secondaryDimensions.y);
+            editor.apply();
         }
-
-        out.endTag(null, "dimensions");
-        out.endDocument();
-        fstream.flush();
-        FileUtils.sync(fstream);
-        fstream.close();
-
         if (DEBUG) Slog.v(TAG, "Storing device dimension data");
         backupFile(deviceInfoStage, data);
     }

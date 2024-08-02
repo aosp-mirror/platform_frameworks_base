@@ -104,7 +104,7 @@ class ResourceConfigValue {
   // The actual Value.
   std::unique_ptr<Value> value;
 
-  FlagStatus flag_status;
+  FlagStatus flag_status = FlagStatus::NoFlag;
 
   ResourceConfigValue(const android::ConfigDescription& config, android::StringPiece product)
       : config(config), product(product) {
@@ -271,7 +271,7 @@ struct NewResource {
   std::optional<AllowNew> allow_new;
   std::optional<StagedId> staged_id;
   bool allow_mangled = false;
-  FlagStatus flag_status;
+  FlagStatus flag_status = FlagStatus::NoFlag;
 };
 
 struct NewResourceBuilder {

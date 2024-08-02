@@ -1729,10 +1729,18 @@
     <dimen name="wallet_button_vertical_padding">8dp</dimen>
 
     <!-- Ongoing activity chip -->
+    <!-- The activity chip side padding, used with the default phone icon. -->
     <dimen name="ongoing_activity_chip_side_padding">12dp</dimen>
+    <!-- The activity chip side padding, used with an icon that has embedded padding (e.g. if the icon comes from the notification's smallIcon field). If the icon has padding, the chip itself can have less padding. -->
+    <dimen name="ongoing_activity_chip_side_padding_for_embedded_padding_icon">6dp</dimen>
+    <!-- The icon size, used with the default phone icon. -->
     <dimen name="ongoing_activity_chip_icon_size">16dp</dimen>
-    <!-- The padding between the icon and the text. -->
+    <!-- The icon size, used with an icon that has embedded padding. (If the icon has embedded padding, we need to make the whole icon larger so the icon itself doesn't look small.) -->
+    <dimen name="ongoing_activity_chip_embedded_padding_icon_size">22dp</dimen>
+    <!-- The padding between the icon and the text. Only used if the default phone icon is used. -->
     <dimen name="ongoing_activity_chip_icon_text_padding">4dp</dimen>
+    <!-- The end padding for the timer text view. Only used if an embedded padding icon is used. -->
+    <dimen name="ongoing_activity_chip_text_end_padding_for_embedded_padding_icon">6dp</dimen>
     <dimen name="ongoing_activity_chip_corner_radius">28dp</dimen>
 
     <!-- Status bar user chip -->

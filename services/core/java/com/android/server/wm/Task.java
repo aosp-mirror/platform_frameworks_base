@@ -3389,7 +3389,6 @@ class Task extends TaskFragment {
         info.isTopActivityTransparent = top != null && !top.fillsParent();
         info.isTopActivityStyleFloating = top != null && top.isStyleFloating();
         info.lastNonFullscreenBounds = topTask.mLastNonFullscreenBounds;
-
         AppCompatUtils.fillAppCompatTaskInfo(this, info, top);
     }
 

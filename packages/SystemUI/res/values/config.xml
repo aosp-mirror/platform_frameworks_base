@@ -1050,4 +1050,7 @@
 
     <!-- Only applicable for dual shade - Allow Notifications/QS shade to anchor to the bottom. -->
     <bool name="config_dualShadeAlignedToBottom">false</bool>
+
+    <!-- List of packages for which we want to use activity info (instead of application info) for biometric prompt logo. Empty for AOSP. [DO NOT TRANSLATE] -->
+    <string-array name="config_useActivityLogoForBiometricPrompt" translatable="false"/>
 </resources>

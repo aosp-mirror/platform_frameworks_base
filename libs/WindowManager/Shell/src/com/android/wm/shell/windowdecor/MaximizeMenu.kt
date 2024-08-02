@@ -66,7 +66,6 @@ import com.android.wm.shell.windowdecor.additionalviewcontainer.AdditionalViewHo
 import com.android.wm.shell.windowdecor.common.DecorThemeUtil
 import com.android.wm.shell.windowdecor.common.OPACITY_12
 import com.android.wm.shell.windowdecor.common.OPACITY_40
-import com.android.wm.shell.windowdecor.common.OnTaskActionClickListener
 import com.android.wm.shell.windowdecor.common.withAlpha
 import java.util.function.Supplier
 
@@ -102,15 +101,15 @@ class MaximizeMenu(
 
     /** Creates and shows the maximize window. */
     fun show(
-        onMaximizeClickListener: OnTaskActionClickListener,
-        onLeftSnapClickListener: OnTaskActionClickListener,
-        onRightSnapClickListener: OnTaskActionClickListener,
+        onMaximizeOrRestoreClickListener: () -> Unit,
+        onLeftSnapClickListener: () -> Unit,
+        onRightSnapClickListener: () -> Unit,
         onHoverListener: (Boolean) -> Unit,
         onOutsideTouchListener: () -> Unit,
     ) {
         if (maximizeMenu != null) return
         createMaximizeMenu(
-            onMaximizeClickListener = onMaximizeClickListener,
+            onMaximizeClickListener = onMaximizeOrRestoreClickListener,
             onLeftSnapClickListener = onLeftSnapClickListener,
             onRightSnapClickListener = onRightSnapClickListener,
             onHoverListener = onHoverListener,
@@ -129,9 +128,9 @@ class MaximizeMenu(
 
     /** Create a maximize menu that is attached to the display area. */
     private fun createMaximizeMenu(
-        onMaximizeClickListener: OnTaskActionClickListener,
-        onLeftSnapClickListener: OnTaskActionClickListener,
-        onRightSnapClickListener: OnTaskActionClickListener,
+        onMaximizeClickListener: () -> Unit,
+        onLeftSnapClickListener: () -> Unit,
+        onRightSnapClickListener: () -> Unit,
         onHoverListener: (Boolean) -> Unit,
         onOutsideTouchListener: () -> Unit
     ) {
@@ -165,17 +164,10 @@ class MaximizeMenu(
             menuHeight = menuHeight,
             menuPadding = menuPadding,
         ).also { menuView ->
-            val taskId = taskInfo.taskId
             menuView.bind(taskInfo)
-            menuView.onMaximizeClickListener = {
-                onMaximizeClickListener.onClick(taskId, "maximize_menu_option")
-            }
-            menuView.onLeftSnapClickListener = {
-                onLeftSnapClickListener.onClick(taskId, "left_snap_option")
-            }
-            menuView.onRightSnapClickListener = {
-                onRightSnapClickListener.onClick(taskId, "right_snap_option")
-            }
+            menuView.onMaximizeClickListener = onMaximizeClickListener
+            menuView.onLeftSnapClickListener = onLeftSnapClickListener
+            menuView.onRightSnapClickListener = onRightSnapClickListener
             menuView.onMenuHoverListener = onHoverListener
             menuView.onOutsideTouchListener = onOutsideTouchListener
             viewHost.setView(menuView.rootView, lp)

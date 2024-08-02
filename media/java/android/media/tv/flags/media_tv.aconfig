@@ -24,3 +24,11 @@ flag {
     description: "TIAF V3.0 APIs for Android V"
     bug: "303323657"
 }
+
+flag {
+    name: "tis_always_bound_permission"
+    is_exported: true
+    namespace: "media_tv"
+    description: "Introduce ALWAYS_BOUND_TV_INPUT for TIS."
+    bug: "332201346"
+}
