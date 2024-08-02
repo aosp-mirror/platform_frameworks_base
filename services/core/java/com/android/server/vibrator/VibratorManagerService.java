@@ -103,8 +103,7 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
             new VibrationAttributes.Builder().build();
     private static final int ATTRIBUTES_ALL_BYPASS_FLAGS =
             VibrationAttributes.FLAG_BYPASS_INTERRUPTION_POLICY
-                    | VibrationAttributes.FLAG_BYPASS_USER_VIBRATION_INTENSITY_OFF
-                    | VibrationAttributes.FLAG_BYPASS_USER_VIBRATION_INTENSITY_SCALE;
+                    | VibrationAttributes.FLAG_BYPASS_USER_VIBRATION_INTENSITY_OFF;
 
     /** Fixed large duration used to note repeating vibrations to {@link IBatteryStats}. */
     private static final long BATTERY_STATS_REPEATING_VIBRATION_DURATION = 5_000;
@@ -925,8 +924,7 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
     private VibrationStepConductor createVibrationStepConductor(HalVibration vib) {
         CompletableFuture<Void> requestVibrationParamsFuture = null;
 
-        if (Flags.adaptiveHapticsEnabled() && !vib.callerInfo.attrs.isFlagSet(
-                VibrationAttributes.FLAG_BYPASS_USER_VIBRATION_INTENSITY_SCALE)
+        if (Flags.adaptiveHapticsEnabled()
                 && mVibratorControlService.shouldRequestVibrationParams(
                 vib.callerInfo.attrs.getUsage())) {
             requestVibrationParamsFuture =
@@ -940,13 +938,8 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
     }
 
     private Vibration.EndInfo startVibrationOnInputDevicesLocked(HalVibration vib) {
-        if (!vib.callerInfo.attrs.isFlagSet(
-                VibrationAttributes.FLAG_BYPASS_USER_VIBRATION_INTENSITY_SCALE)) {
-            // Scale resolves the default amplitudes from the effect before scaling them.
-            vib.scaleEffects(mVibrationScaler);
-        } else {
-            vib.resolveEffects(mVibrationScaler.getDefaultVibrationAmplitude());
-        }
+        // Scale resolves the default amplitudes from the effect before scaling them.
+        vib.scaleEffects(mVibrationScaler);
         mInputDeviceDelegate.vibrateIfAvailable(vib.callerInfo, vib.getEffectToPlay());
 
         return new Vibration.EndInfo(Vibration.Status.FORWARDED_TO_INPUT_DEVICES);

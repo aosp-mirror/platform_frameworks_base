@@ -1024,6 +1024,7 @@ public abstract class VibrationEffect implements Parcelable {
                 new Creator<Composed>() {
                     @Override
                     public Composed createFromParcel(Parcel in) {
+                        in.readInt(); // Skip the parcel type token
                         return new Composed(in);
                     }
 
@@ -1298,6 +1299,7 @@ public abstract class VibrationEffect implements Parcelable {
                 new Creator<VendorEffect>() {
                     @Override
                     public VendorEffect createFromParcel(Parcel in) {
+                        in.readInt(); // Skip the parcel type token
                         return new VendorEffect(in);
                     }
 

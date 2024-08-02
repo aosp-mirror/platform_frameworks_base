@@ -20,7 +20,10 @@ import android.annotation.AnyThread;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
+import android.app.ActivityManagerInternal;
 import android.content.ContentResolver;
+import android.content.Context;
+import android.content.pm.UserInfo;
 import android.provider.Settings;
 import android.util.ArrayMap;
 import android.util.ArraySet;
@@ -318,13 +321,30 @@ final class SecureSettingsWrapper {
     }
 
     /**
-     * Called when the system is starting.
+     * Called when {@link InputMethodManagerService} is starting.
      *
-     * @param contentResolver the {@link ContentResolver} to be used
+     * @param context the {@link Context} to be used.
      */
     @AnyThread
-    static void setContentResolver(@NonNull ContentResolver contentResolver) {
-        sContentResolver = contentResolver;
+    static void onStart(@NonNull Context context) {
+        sContentResolver = context.getContentResolver();
+
+        final int userId = LocalServices.getService(ActivityManagerInternal.class)
+                .getCurrentUserId();
+        final UserManagerInternal userManagerInternal =
+                LocalServices.getService(UserManagerInternal.class);
+        putOrGet(userId, createImpl(userManagerInternal, userId));
+
+        userManagerInternal.addUserLifecycleListener(
+                new UserManagerInternal.UserLifecycleListener() {
+                    @Override
+                    public void onUserRemoved(UserInfo user) {
+                        synchronized (sMutationLock) {
+                            sUserMap = sUserMap.cloneWithRemoveOrSelf(user.id);
+                        }
+                    }
+                }
+        );
     }
 
     /**
@@ -357,14 +377,19 @@ final class SecureSettingsWrapper {
     }
 
     /**
-     * Called when a user is being removed.
+     * Called when a user is stopped, which changes the user storage to the locked state again.
      *
-     * @param userId the ID of the user whose storage is being removed.
+     * @param userId the ID of the user whose storage is being locked again.
      */
     @AnyThread
-    static void onUserRemoved(@UserIdInt int userId) {
+    static void onUserStopped(@UserIdInt int userId) {
+        final LockedUserImpl lockedUserImpl = new LockedUserImpl(userId, sContentResolver);
         synchronized (sMutationLock) {
-            sUserMap = sUserMap.cloneWithRemoveOrSelf(userId);
+            final ReaderWriter current = sUserMap.get(userId);
+            if (current == null || current instanceof LockedUserImpl) {
+                return;
+            }
+            sUserMap = sUserMap.cloneWithPutOrSelf(userId, lockedUserImpl);
         }
     }
 

@@ -157,16 +157,16 @@ interface TransitionSpec {
     val key: TransitionKey?
 
     /**
-     * The scene we are transitioning from. If `null`, this spec can be used to animate from any
-     * scene.
+     * The content we are transitioning from. If `null`, this spec can be used to animate from any
+     * content.
      */
-    val from: SceneKey?
+    val from: ContentKey?
 
     /**
-     * The scene we are transitioning to. If `null`, this spec can be used to animate from any
-     * scene.
+     * The content we are transitioning to. If `null`, this spec can be used to animate from any
+     * content.
      */
-    val to: SceneKey?
+    val to: ContentKey?
 
     /**
      * Return a reversed version of this [TransitionSpec] for a transition going from [to] to
@@ -231,8 +231,8 @@ interface TransformationSpec {
 
 internal class TransitionSpecImpl(
     override val key: TransitionKey?,
-    override val from: SceneKey?,
-    override val to: SceneKey?,
+    override val from: ContentKey?,
+    override val to: ContentKey?,
     private val previewTransformationSpec: (() -> TransformationSpecImpl)? = null,
     private val reversePreviewTransformationSpec: (() -> TransformationSpecImpl)? = null,
     private val transformationSpec: () -> TransformationSpecImpl
@@ -302,18 +302,18 @@ internal class TransformationSpecImpl(
     override val distance: UserActionDistance?,
     override val transformations: List<Transformation>,
 ) : TransformationSpec {
-    private val cache = mutableMapOf<ElementKey, MutableMap<SceneKey, ElementTransformations>>()
+    private val cache = mutableMapOf<ElementKey, MutableMap<ContentKey, ElementTransformations>>()
 
-    internal fun transformations(element: ElementKey, scene: SceneKey): ElementTransformations {
+    internal fun transformations(element: ElementKey, content: ContentKey): ElementTransformations {
         return cache
             .getOrPut(element) { mutableMapOf() }
-            .getOrPut(scene) { computeTransformations(element, scene) }
+            .getOrPut(content) { computeTransformations(element, content) }
     }
 
     /** Filter [transformations] to compute the [ElementTransformations] of [element]. */
     private fun computeTransformations(
         element: ElementKey,
-        scene: SceneKey,
+        content: ContentKey,
     ): ElementTransformations {
         var shared: SharedElementTransformation? = null
         var offset: PropertyTransformation<Offset>? = null
@@ -351,7 +351,7 @@ internal class TransformationSpecImpl(
         }
 
         transformations.fastForEach { transformation ->
-            if (!transformation.matcher.matches(element, scene)) {
+            if (!transformation.matcher.matches(element, content)) {
                 return@fastForEach
             }
 

@@ -161,6 +161,7 @@ public class NotificationShadeWindowControllerImplTest extends SysuiTestCase {
                 mShadeWindowLogger,
                 () -> mSelectedUserInteractor,
                 mUserTracker,
+                mKosmos.getNotificationShadeWindowModel(),
                 mKosmos::getCommunalInteractor) {
                     @Override
                     protected boolean isDebuggable() {

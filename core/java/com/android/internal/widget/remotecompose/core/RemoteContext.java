@@ -19,6 +19,7 @@ import com.android.internal.widget.remotecompose.core.operations.FloatExpression
 import com.android.internal.widget.remotecompose.core.operations.ShaderData;
 import com.android.internal.widget.remotecompose.core.operations.Theme;
 import com.android.internal.widget.remotecompose.core.operations.Utils;
+import com.android.internal.widget.remotecompose.core.operations.layout.Component;
 
 /**
  * Specify an abstract context used to playback RemoteCompose documents
@@ -35,11 +36,25 @@ public abstract class RemoteContext {
     ContextMode mMode = ContextMode.UNSET;
 
     boolean mDebug = false;
+
     private int mTheme = Theme.UNSPECIFIED;
 
     public float mWidth = 0f;
     public float mHeight = 0f;
     private float mAnimationTime;
+
+    private boolean mAnimate = true;
+
+    public Component lastComponent;
+    public long currentTime = 0L;
+
+    public boolean isAnimationEnabled() {
+        return mAnimate;
+    }
+
+    public void setAnimationEnabled(boolean value) {
+        mAnimate = value;
+    }
 
     /**
      * Load a path under an id.
@@ -333,9 +348,11 @@ public abstract class RemoteContext {
     public static final float FLOAT_COMPONENT_HEIGHT = Utils.asNan(ID_COMPONENT_HEIGHT);
     // ID_OFFSET_TO_UTC is the offset from UTC in sec (typically / 3600f)
     public static final float FLOAT_OFFSET_TO_UTC = Utils.asNan(ID_OFFSET_TO_UTC);
+
     ///////////////////////////////////////////////////////////////////////////////////////////////
     // Click handling
     ///////////////////////////////////////////////////////////////////////////////////////////////
+
     public abstract void addClickArea(
             int id,
             int contentDescription,

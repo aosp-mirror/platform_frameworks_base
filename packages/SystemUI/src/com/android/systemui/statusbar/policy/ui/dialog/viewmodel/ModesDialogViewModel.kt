@@ -16,14 +16,18 @@
 
 package com.android.systemui.statusbar.policy.ui.dialog.viewmodel
 
+import android.app.Dialog
 import android.content.Context
 import android.content.Intent
 import android.provider.Settings.ACTION_AUTOMATIC_ZEN_RULE_SETTINGS
 import android.provider.Settings.EXTRA_AUTOMATIC_ZEN_RULE_ID
+import com.android.settingslib.notification.modes.EnableZenModeDialog
 import com.android.settingslib.notification.modes.ZenMode
+import com.android.settingslib.notification.modes.ZenModeDialogMetricsLogger
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.res.R
+import com.android.systemui.statusbar.phone.SystemUIDialog
 import com.android.systemui.statusbar.policy.domain.interactor.ZenModeInteractor
 import com.android.systemui.statusbar.policy.ui.dialog.ModesDialogDelegate
 import javax.inject.Inject
@@ -46,6 +50,8 @@ constructor(
     @Background val bgDispatcher: CoroutineDispatcher,
     private val dialogDelegate: ModesDialogDelegate,
 ) {
+    private val zenDialogMetricsLogger = ZenModeDialogMetricsLogger(context)
+
     // Modes that should be displayed in the dialog
     private val visibleModes: Flow<List<ZenMode>> =
         zenModeInteractor.modes
@@ -91,8 +97,13 @@ constructor(
                                 zenModeInteractor.deactivateMode(mode)
                             } else {
                                 if (mode.rule.isManualInvocationAllowed) {
-                                    // TODO(b/346519570): Handle duration for DND mode.
-                                    zenModeInteractor.activateMode(mode)
+                                    if (zenModeInteractor.shouldAskForZenDuration(mode)) {
+                                        // NOTE: The dialog handles turning on the mode itself.
+                                        val dialog = makeZenModeDialog()
+                                        dialog.show()
+                                    } else {
+                                        zenModeInteractor.activateMode(mode)
+                                    }
                                 }
                             }
                         },
@@ -121,5 +132,21 @@ constructor(
         val on = context.resources.getString(R.string.zen_mode_on)
         val off = context.resources.getString(R.string.zen_mode_off)
         return mode.rule.triggerDescription ?: if (mode.isActive) on else off
+    }
+
+    private fun makeZenModeDialog(): Dialog {
+        val dialog =
+            EnableZenModeDialog(
+                    context,
+                    R.style.Theme_SystemUI_Dialog,
+                    /* cancelIsNeutral= */ true,
+                    zenDialogMetricsLogger
+                )
+                .createDialog()
+        SystemUIDialog.applyFlags(dialog)
+        SystemUIDialog.setShowForAllUsers(dialog, true)
+        SystemUIDialog.registerDismissListener(dialog)
+        SystemUIDialog.setDialogSize(dialog)
+        return dialog
     }
 }

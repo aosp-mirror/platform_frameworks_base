@@ -51,13 +51,6 @@ flag {
 
 flag {
     namespace: "windowing_sdk"
-    name: "embedded_activity_back_nav_flag"
-    description: "Refines embedded activity back navigation behavior"
-    bug: "293642394"
-}
-
-flag {
-    namespace: "windowing_sdk"
     name: "cover_display_opt_in"
     is_exported: true
     description: "Properties to allow apps and activities to opt-in to cover display rendering"
@@ -137,17 +130,6 @@ flag {
     name: "fix_no_container_update_without_resize"
     description: "Fix the containers not being updated when the Task is brought to front and has the same configuration"
     bug: "344721335"
-    is_fixed_read_only: true
-    metadata {
-        purpose: PURPOSE_BUGFIX
-    }
-}
-
-flag {
-    namespace: "windowing_sdk"
-    name: "per_user_display_window_settings"
-    description: "Whether to store display window settings per user to avoid conflicts"
-    bug: "346668297"
     is_fixed_read_only: true
     metadata {
         purpose: PURPOSE_BUGFIX

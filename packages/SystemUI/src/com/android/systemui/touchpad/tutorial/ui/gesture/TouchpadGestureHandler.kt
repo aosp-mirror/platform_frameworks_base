@@ -24,13 +24,8 @@ import android.view.MotionEvent
  * motion events passed to [onMotionEvent] and will filter touchpad events accordingly
  */
 class TouchpadGestureHandler(
-    touchpadGesture: TouchpadGesture,
-    swipeDistanceThresholdPx: Int,
-    onDone: () -> Unit
+    private val gestureMonitor: TouchpadGestureMonitor,
 ) {
-
-    private val gestureRecognition =
-        touchpadGesture.toMonitor(swipeDistanceThresholdPx, gestureDoneCallback = onDone)
 
     fun onMotionEvent(event: MotionEvent): Boolean {
         // events from touchpad have SOURCE_MOUSE and not SOURCE_TOUCHPAD because of legacy reasons
@@ -41,7 +36,7 @@ class TouchpadGestureHandler(
             event.actionMasked == MotionEvent.ACTION_DOWN &&
                 event.isButtonPressed(MotionEvent.BUTTON_PRIMARY)
         return if (isFromTouchpad && !buttonClick) {
-            gestureRecognition.processTouchpadEvent(event)
+            gestureMonitor.processTouchpadEvent(event)
             true
         } else {
             false

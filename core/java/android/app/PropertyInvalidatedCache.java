@@ -1617,18 +1617,4 @@ public class PropertyInvalidatedCache<Query, Result> {
             Log.e(TAG, "Failed to dump PropertyInvalidatedCache instances");
         }
     }
-
-    /**
-     * Trim memory by clearing all the caches.
-     * @hide
-     */
-    public static void onTrimMemory() {
-        ArrayList<PropertyInvalidatedCache> activeCaches;
-        synchronized (sGlobalLock) {
-            activeCaches = getActiveCaches();
-        }
-        for (int i = 0; i < activeCaches.size(); i++) {
-            activeCaches.get(i).clear();
-        }
-    }
 }

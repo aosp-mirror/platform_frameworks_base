@@ -16,7 +16,7 @@
 
 package com.android.wm.shell.dagger;
 
-import static com.android.wm.shell.shared.desktopmode.DesktopModeFlags.DESKTOP_WINDOWING_MODE;
+import static com.android.wm.shell.shared.desktopmode.DesktopModeFlags.ENABLE_DESKTOP_WINDOWING_TASK_LIMIT;
 
 import android.annotation.Nullable;
 import android.app.KeyguardManager;
@@ -226,7 +226,8 @@ public abstract class WMShellModule {
             Optional<DesktopTasksController> desktopTasksController,
             RootTaskDisplayAreaOrganizer rootTaskDisplayAreaOrganizer,
             InteractionJankMonitor interactionJankMonitor,
-            AppToWebGenericLinksParser genericLinksParser) {
+            AppToWebGenericLinksParser genericLinksParser,
+            MultiInstanceHelper multiInstanceHelper) {
         if (DesktopModeStatus.canEnterDesktopMode(context)) {
             return new DesktopModeWindowDecorViewModel(
                     context,
@@ -246,7 +247,8 @@ public abstract class WMShellModule {
                     desktopTasksController,
                     rootTaskDisplayAreaOrganizer,
                     interactionJankMonitor,
-                    genericLinksParser);
+                    genericLinksParser,
+                    multiInstanceHelper);
         }
         return new CaptionWindowDecorViewModel(
                 context,
@@ -566,16 +568,23 @@ public abstract class WMShellModule {
             Context context,
             Transitions transitions,
             @DynamicOverride DesktopModeTaskRepository desktopModeTaskRepository,
-            ShellTaskOrganizer shellTaskOrganizer) {
+            ShellTaskOrganizer shellTaskOrganizer,
+            InteractionJankMonitor interactionJankMonitor) {
         int maxTaskLimit = DesktopModeStatus.getMaxTaskLimit(context);
         if (!DesktopModeStatus.canEnterDesktopMode(context)
-                || !DESKTOP_WINDOWING_MODE.isEnabled(context)
+                || !ENABLE_DESKTOP_WINDOWING_TASK_LIMIT.isEnabled(context)
                 || maxTaskLimit <= 0) {
             return Optional.empty();
         }
         return Optional.of(
                 new DesktopTasksLimiter(
-                        transitions, desktopModeTaskRepository, shellTaskOrganizer, maxTaskLimit));
+                        transitions,
+                        desktopModeTaskRepository,
+                        shellTaskOrganizer,
+                        maxTaskLimit,
+                        interactionJankMonitor,
+                        context)
+        );
     }
 
 

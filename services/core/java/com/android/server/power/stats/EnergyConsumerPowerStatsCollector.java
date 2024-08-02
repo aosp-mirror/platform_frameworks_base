@@ -163,10 +163,7 @@ public class EnergyConsumerPowerStatsCollector extends PowerStatsCollector {
 
         mLayout.setConsumedEnergy(mPowerStats.stats, 0, uJtoUc(energyDelta, averageVoltage));
 
-        for (int i = mPowerStats.uidStats.size() - 1; i >= 0; i--) {
-            mLayout.setUidConsumedEnergy(mPowerStats.uidStats.valueAt(i), 0, 0);
-        }
-
+        mPowerStats.uidStats.clear();
         if (energy != null) {
             for (int i = energy.length - 1; i >= 0; i--) {
                 EnergyConsumerAttribution[] perUid = energy[i].attribution;

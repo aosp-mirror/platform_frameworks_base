@@ -24,6 +24,9 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.focusable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsFocusedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
@@ -77,11 +80,16 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
@@ -100,6 +108,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.util.fastFirstOrNull
 import androidx.compose.ui.util.fastForEach
 import androidx.compose.ui.util.fastForEachIndexed
+import androidx.compose.ui.zIndex
 import com.android.compose.ui.graphics.painter.rememberDrawablePainter
 import com.android.compose.windowsizeclass.LocalWindowSizeClass
 import com.android.systemui.keyboard.shortcut.shared.model.Shortcut
@@ -405,7 +414,7 @@ private fun ShortcutHelperTwoPane(
         Row(Modifier.fillMaxWidth()) {
             StartSidePanel(
                 onSearchQueryChanged = onSearchQueryChanged,
-                modifier = Modifier.fillMaxWidth(fraction = 0.32f),
+                modifier = Modifier.width(200.dp),
                 categories = categories,
                 onKeyboardSettingsClicked = onKeyboardSettingsClicked,
                 selectedCategory = selectedCategoryType,
@@ -462,7 +471,18 @@ private fun SubCategoryTitle(title: String) {
 
 @Composable
 private fun ShortcutView(modifier: Modifier, searchQuery: String, shortcut: Shortcut) {
-    Row(modifier) {
+    val interactionSource = remember { MutableInteractionSource() }
+    val isFocused by interactionSource.collectIsFocusedAsState()
+    Row(
+        modifier
+            .focusable(interactionSource = interactionSource)
+            .outlineFocusModifier(
+                isFocused = isFocused,
+                focusColor = MaterialTheme.colorScheme.secondary,
+                padding = 8.dp,
+                cornerRadius = 16.dp
+            )
+    ) {
         Row(
             modifier = Modifier.width(128.dp).align(Alignment.CenterVertically),
             horizontalArrangement = Arrangement.spacedBy(16.dp),
@@ -670,10 +690,23 @@ private fun CategoryItemTwoPane(
     colors: NavigationDrawerItemColors =
         NavigationDrawerItemDefaults.colors(unselectedContainerColor = Color.Transparent),
 ) {
+    val interactionSource = remember { MutableInteractionSource() }
+    val isFocused by interactionSource.collectIsFocusedAsState()
+
     Surface(
         selected = selected,
         onClick = onClick,
-        modifier = Modifier.semantics { role = Role.Tab }.heightIn(min = 64.dp).fillMaxWidth(),
+        modifier =
+            Modifier.semantics { role = Role.Tab }
+                .heightIn(min = 64.dp)
+                .fillMaxWidth()
+                .focusable(interactionSource = interactionSource)
+                .outlineFocusModifier(
+                    isFocused = isFocused,
+                    focusColor = MaterialTheme.colorScheme.secondary,
+                    padding = 2.dp,
+                    cornerRadius = 33.dp
+                ),
         shape = RoundedCornerShape(28.dp),
         color = colors.containerColor(selected).value,
     ) {
@@ -694,6 +727,39 @@ private fun CategoryItemTwoPane(
                 )
             }
         }
+    }
+}
+
+private fun Modifier.outlineFocusModifier(
+    isFocused: Boolean,
+    focusColor: Color,
+    padding: Dp,
+    cornerRadius: Dp
+): Modifier {
+    if (isFocused) {
+        return this.drawWithContent {
+                val focusOutline =
+                    Rect(Offset.Zero, size).let {
+                        if (padding > 0.dp) {
+                            it.inflate(padding.toPx())
+                        } else {
+                            it.deflate(padding.unaryMinus().toPx())
+                        }
+                    }
+                drawContent()
+                drawRoundRect(
+                    color = focusColor,
+                    style = Stroke(width = 3.dp.toPx()),
+                    topLeft = focusOutline.topLeft,
+                    size = focusOutline.size,
+                    cornerRadius = CornerRadius(cornerRadius.toPx())
+                )
+            }
+            // Increasing Z-Index so focus outline is drawn on top of "selected" category
+            // background.
+            .zIndex(1f)
+    } else {
+        return this
     }
 }
 
@@ -740,14 +806,27 @@ private fun ShortcutsSearchBar(onQueryChange: (String) -> Unit) {
 
 @Composable
 private fun KeyboardSettings(onClick: () -> Unit) {
+    val interactionSource = remember { MutableInteractionSource() }
+    val isFocused by interactionSource.collectIsFocusedAsState()
+
     Surface(
         onClick = onClick,
         shape = RoundedCornerShape(24.dp),
         color = Color.Transparent,
-        modifier = Modifier.semantics { role = Role.Button }.fillMaxWidth()
+        modifier =
+            Modifier.semantics { role = Role.Button }
+                .fillMaxWidth()
+                .focusable(interactionSource = interactionSource)
     ) {
         Row(
-            modifier = Modifier.padding(horizontal = 24.dp, vertical = 16.dp),
+            modifier =
+                Modifier.padding(horizontal = 12.dp, vertical = 16.dp)
+                    .outlineFocusModifier(
+                        isFocused = isFocused,
+                        focusColor = MaterialTheme.colorScheme.secondary,
+                        padding = 8.dp,
+                        cornerRadius = 28.dp
+                    ),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
@@ -759,7 +838,8 @@ private fun KeyboardSettings(onClick: () -> Unit) {
             Icon(
                 imageVector = Icons.AutoMirrored.Default.OpenInNew,
                 contentDescription = null,
-                tint = MaterialTheme.colorScheme.onSurfaceVariant
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.size(24.dp)
             )
         }
     }

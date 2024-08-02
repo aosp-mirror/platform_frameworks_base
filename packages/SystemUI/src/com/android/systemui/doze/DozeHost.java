@@ -71,9 +71,15 @@ public interface DozeHost {
 
     /**
      * Sets the actual display brightness.
-     * @param value from 0 to 255.
+     * @param value from 1 to 255.
      */
     void setDozeScreenBrightness(int value);
+
+    /**
+     * Sets the actual display brightness.
+     * @param value from {@link PowerManager#BRIGHTNESS_MIN} to {@link PowerManager#BRIGHTNESS_MAX}.
+     */
+    void setDozeScreenBrightnessFloat(float value);
 
     /**
      * Fade out screen before switching off the display power mode.

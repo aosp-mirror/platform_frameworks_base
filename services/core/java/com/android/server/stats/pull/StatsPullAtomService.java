@@ -1301,7 +1301,7 @@ public class StatsPullAtomService extends SystemService {
                 final NetworkStats stats = getUidNetworkStatsSnapshotForTemplateLocked(
                         new NetworkTemplate.Builder(MATCH_PROXY).build(),  /*includeTags=*/false);
                 if (stats != null) {
-                    ret.add(new NetworkStatsExt(sliceNetworkStatsByUidTagAndMetered(stats),
+                    ret.add(new NetworkStatsExt(sliceNetworkStatsByUidAndFgbg(stats),
                             new int[]{TRANSPORT_BLUETOOTH},
                             /*slicedByFgbg=*/true, /*slicedByTag=*/false,
                             /*slicedByMetered=*/false, TelephonyManager.NETWORK_TYPE_UNKNOWN,

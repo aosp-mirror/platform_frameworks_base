@@ -63,6 +63,7 @@ constructor(
                 transitionAnimation.sharedFlow(
                     duration = FromDreamingTransitionInteractor.TO_AOD_DURATION,
                     onStep = { it },
+                    onCancel = { 1f },
                     onFinish = { 1f },
                 )
             } else {

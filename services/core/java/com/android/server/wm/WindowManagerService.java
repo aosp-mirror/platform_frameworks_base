@@ -118,12 +118,12 @@ import static com.android.server.LockGuard.installLock;
 import static com.android.server.policy.PhoneWindowManager.TRACE_WAIT_FOR_ALL_WINDOWS_DRAWN_METHOD;
 import static com.android.server.policy.WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER;
 import static com.android.server.wm.ActivityTaskManagerService.POWER_MODE_REASON_CHANGE_DISPLAY;
-import static com.android.server.wm.DisplayContent.IME_TARGET_CONTROL;
-import static com.android.server.wm.DisplayContent.IME_TARGET_LAYERING;
 import static com.android.server.wm.AppCompatConfiguration.LETTERBOX_BACKGROUND_APP_COLOR_BACKGROUND;
 import static com.android.server.wm.AppCompatConfiguration.LETTERBOX_BACKGROUND_APP_COLOR_BACKGROUND_FLOATING;
 import static com.android.server.wm.AppCompatConfiguration.LETTERBOX_BACKGROUND_SOLID_COLOR;
 import static com.android.server.wm.AppCompatConfiguration.LETTERBOX_BACKGROUND_WALLPAPER;
+import static com.android.server.wm.DisplayContent.IME_TARGET_CONTROL;
+import static com.android.server.wm.DisplayContent.IME_TARGET_LAYERING;
 import static com.android.server.wm.RootWindowContainer.MATCH_ATTACHED_TASK_OR_RECENT_TASKS;
 import static com.android.server.wm.SensitiveContentPackages.PackageInfo;
 import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_ALL;
@@ -357,7 +357,6 @@ import com.android.server.policy.WindowManagerPolicy.ScreenOffListener;
 import com.android.server.power.ShutdownThread;
 import com.android.server.utils.PriorityDump;
 import com.android.server.wallpaper.WallpaperCropper.WallpaperCropUtils;
-import com.android.window.flags.Flags;
 
 import dalvik.annotation.optimization.NeverCompile;
 
@@ -1898,7 +1897,8 @@ public class WindowManagerService extends IWindowManager.Stub
                 displayContent.computeImeTarget(true /* updateImeTarget */);
                 if (win.isImeOverlayLayeringTarget()) {
                     dispatchImeTargetOverlayVisibilityChanged(client.asBinder(), win.mAttrs.type,
-                            win.isVisibleRequestedOrAdding(), false /* removed */);
+                            win.isVisibleRequestedOrAdding(), false /* removed */,
+                            displayContent.getDisplayId());
                 }
             }
 
@@ -2662,13 +2662,13 @@ public class WindowManagerService extends IWindowManager.Stub
             final boolean winVisibleChanged = win.isVisible() != wasVisible;
             if (win.isImeOverlayLayeringTarget() && winVisibleChanged) {
                 dispatchImeTargetOverlayVisibilityChanged(client.asBinder(), win.mAttrs.type,
-                        win.isVisible(), false /* removed */);
+                        win.isVisible(), false /* removed */, win.getDisplayId());
             }
             // Notify listeners about IME input target window visibility change.
             final boolean isImeInputTarget = win.getDisplayContent().getImeInputTarget() == win;
             if (isImeInputTarget && winVisibleChanged) {
                 dispatchImeInputTargetVisibilityChanged(win.mClient.asBinder(),
-                        win.isVisible() /* visible */, false /* removed */);
+                        win.isVisible() /* visible */, false /* removed */, win.getDisplayId());
             }
 
             if (outRelayoutResult != null) {
@@ -3516,27 +3516,29 @@ public class WindowManagerService extends IWindowManager.Stub
 
     void dispatchImeTargetOverlayVisibilityChanged(@NonNull IBinder token,
             @WindowManager.LayoutParams.WindowType int windowType, boolean visible,
-            boolean removed) {
+            boolean removed, int displayId) {
         if (mImeTargetChangeListener != null) {
             if (DEBUG_INPUT_METHOD) {
                 Slog.d(TAG, "onImeTargetOverlayVisibilityChanged, win=" + mWindowMap.get(token)
                         + ", type=" + ViewDebug.intToString(WindowManager.LayoutParams.class,
-                        "type", windowType) + "visible=" + visible + ", removed=" + removed);
+                        "type", windowType) + "visible=" + visible + ", removed=" + removed
+                        + ", displayId=" + displayId);
             }
             mH.post(() -> mImeTargetChangeListener.onImeTargetOverlayVisibilityChanged(token,
-                    windowType, visible, removed));
+                    windowType, visible, removed, displayId));
         }
     }
 
     void dispatchImeInputTargetVisibilityChanged(@NonNull IBinder token, boolean visible,
-            boolean removed) {
+            boolean removed, int displayId) {
         if (mImeTargetChangeListener != null) {
             if (DEBUG_INPUT_METHOD) {
                 Slog.d(TAG, "onImeInputTargetVisibilityChanged, win=" + mWindowMap.get(token)
-                        + "visible=" + visible + ", removed=" + removed);
+                        + "visible=" + visible + ", removed=" + removed
+                        + ", displayId" + displayId);
             }
             mH.post(() -> mImeTargetChangeListener.onImeInputTargetVisibilityChanged(token,
-                    visible, removed));
+                    visible, removed, displayId));
         }
     }
 
@@ -3750,7 +3752,7 @@ public class WindowManagerService extends IWindowManager.Stub
             }
             mCurrentUserId = newUserId;
             mDisplayWindowSettingsProvider.setOverrideSettingsForUser(newUserId);
-            mDisplayWindowSettingsProvider.removeStaleDisplaySettings(mRoot);
+            mDisplayWindowSettingsProvider.removeStaleDisplaySettingsLocked(this, mRoot);
             mPolicy.setCurrentUserLw(newUserId);
             mKeyguardDisableHandler.setCurrentUser(newUserId);
 
@@ -5491,7 +5493,7 @@ public class WindowManagerService extends IWindowManager.Stub
             mRoot.forAllDisplays(DisplayContent::reconfigureDisplayLocked);
             // Per-user display settings may leave outdated settings after user switches, especially
             // during reboots starting with the default user without setCurrentUser called.
-            mDisplayWindowSettingsProvider.removeStaleDisplaySettings(mRoot);
+            mDisplayWindowSettingsProvider.removeStaleDisplaySettingsLocked(this, mRoot);
         }
     }
 
@@ -8095,11 +8097,10 @@ public class WindowManagerService extends IWindowManager.Stub
         }
 
         @Override
-        public void updateInputMethodTargetWindow(@NonNull IBinder imeToken,
-                @NonNull IBinder imeTargetWindowToken) {
+        public void updateInputMethodTargetWindow(@NonNull IBinder imeTargetWindowToken) {
             // TODO (b/34628091): Use this method to address the window animation issue.
             if (DEBUG_INPUT_METHOD) {
-                Slog.w(TAG_WM, "updateInputMethodTargetWindow: imeToken=" + imeToken
+                Slog.w(TAG_WM, "updateInputMethodTargetWindow:"
                         + " imeTargetWindowToken=" + imeTargetWindowToken);
             }
             synchronized (mGlobalLock) {
@@ -9037,7 +9038,8 @@ public class WindowManagerService extends IWindowManager.Stub
         // Otherwise, handle the touch-outside event directly.
         final WindowState w = t.getWindowState();
         final ActivityRecord activity = w != null ? w.getActivityRecord() : null;
-        if (activity != null && activity.isEmbedded()
+        if (mFocusedInputTarget != t && mFocusedInputTarget != null
+                && activity != null && activity.isEmbedded()
                 && activity.getTaskFragment().getAdjacentTaskFragment() != null) {
             mPointerDownOutsideFocusRunnable = () -> handlePointerDownOutsideFocus(t);
             mH.postDelayed(mPointerDownOutsideFocusRunnable, POINTER_DOWN_OUTSIDE_FOCUS_TIMEOUT_MS);
@@ -9387,11 +9389,6 @@ public class WindowManagerService extends IWindowManager.Stub
         final TaskFragment taskFragment = focusedActivity.getTaskFragment();
         if (taskFragment == null) {
             // Return if activity no attached.
-            return focusedActivity;
-        }
-
-        if (!Flags.embeddedActivityBackNavFlag()) {
-            // Return if flag is not enabled.
             return focusedActivity;
         }
 

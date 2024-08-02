@@ -388,6 +388,9 @@
     <string name="performance" msgid="6552785217174378320">"Unumdorlik"</string>
     <string name="user_interface" msgid="3712869377953950887">"Foydalanuvchi interfeysi"</string>
     <string name="thermal" msgid="6758074791325414831">"Termal"</string>
+    <string name="custom" msgid="3337456985275158299">"Maxsus"</string>
+    <string name="custom_trace_settings_dialog_title" msgid="2608570500144830554">"Maxsus trassirovka sozlamalari"</string>
+    <string name="restore_default" msgid="5259420807486239755">"Asliga qaytarish"</string>
     <string name="quick_settings_onehanded_label" msgid="2416537930246274991">"Ixcham rejim"</string>
     <string name="quick_settings_hearing_devices_label" msgid="7277170419679404129">"Eshitish qurilmalari"</string>
     <string name="quick_settings_hearing_devices_connected" msgid="6519069502397037781">"Faol"</string>
@@ -429,9 +432,13 @@
     <string name="zen_modes_dialog_title" msgid="4159138230418567383">"Muhim rejimlar"</string>
     <string name="zen_modes_dialog_done" msgid="6654130880256438950">"Tayyor"</string>
     <string name="zen_modes_dialog_settings" msgid="2310248023728936697">"Sozlamalar"</string>
-    <!-- no translation found for zen_mode_on (9085304934016242591) -->
+    <string name="zen_mode_on" msgid="9085304934016242591">"Yoniq"</string>
+    <string name="zen_mode_off" msgid="1736604456618147306">"Yoqilmagan"</string>
+    <!-- no translation found for zen_mode_set_up (7457957033034460064) -->
     <skip />
-    <!-- no translation found for zen_mode_off (1736604456618147306) -->
+    <!-- no translation found for zen_mode_no_manual_invocation (1769975741344633672) -->
+    <skip />
+    <!-- no translation found for zen_mode_active_modes (1625850411578488856) -->
     <skip />
     <string name="zen_priority_introduction" msgid="3159291973383796646">"Turli ovoz va tebranishlar endi sizni bezovta qilmaydi. Biroq, signallar, eslatmalar, tadbirlar haqidagi bildirishnomalar va siz tanlagan abonentlardan kelgan chaqiruvlar bundan mustasno. Lekin, ijro etiladigan barcha narsalar, jumladan, musiqa, video va o‘yinlar ovozi eshitiladi."</string>
     <string name="zen_alarms_introduction" msgid="3987266042682300470">"Turli ovoz va tebranishlar endi sizni bezovta qilmaydi. Biroq, signallar bundan mustasno. Lekin, ijro etiladigan barcha narsalar, jumladan, musiqa, video va o‘yinlar ovozi eshitiladi."</string>
@@ -471,6 +478,8 @@
     <string name="keyguard_indication_charging_time_slowly" msgid="301936949731705417">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Sekin quvvat olmoqda • <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> qoldi"</string>
     <string name="keyguard_indication_charging_time_dock" msgid="3149328898931741271">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Quvvat olmoqda • <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> qoldi"</string>
     <string name="accessibility_action_open_communal_hub" msgid="3081702792413787849">"Ekran qulfidagi vidjetlar"</string>
+    <!-- no translation found for accessibility_announcement_communal_widget_added (6911593106099328271) -->
+    <skip />
     <string name="communal_tutorial_indicator_text" msgid="4503010353591430123">"Qoʻllanma bilan tanishish uchun chapga suring"</string>
     <string name="cta_tile_button_to_open_widget_editor" msgid="3871562362382963878">"Moslash"</string>
     <string name="cta_tile_button_to_dismiss" msgid="3377597875997861754">"Yopish"</string>
@@ -499,8 +508,7 @@
     <string name="accessibility_action_label_place_widget" msgid="1914197458644168978">"tanlangan vidjetni joylash"</string>
     <string name="communal_widget_picker_title" msgid="1953369090475731663">"Ekran qulfi vidjetlari"</string>
     <string name="communal_widget_picker_description" msgid="490515450110487871">"Ekran quflidagi vidjetlar hammaga koʻrinadi, hatto planshet qulflanganda ham."</string>
-    <!-- no translation found for accessibility_action_label_unselect_widget (1041811747619468698) -->
-    <skip />
+    <string name="accessibility_action_label_unselect_widget" msgid="1041811747619468698">"vidjetni bekor qilish"</string>
     <string name="communal_widgets_disclaimer_title" msgid="1150954395585308868">"Ekran qulfi vidjetlari"</string>
     <string name="communal_widgets_disclaimer_text" msgid="1423545475160506349">"Ilovani vidjet orqali ochish uchun shaxsingizni tasdiqlashingiz kerak. Shuningdek, planshet qulflanganda ham bu axborotlar hammaga koʻrinishini unutmang. Ayrim vidjetlar ekran qulfiga moslanmagan va ularni bu yerda chiqarish xavfli boʻlishi mumkin."</string>
     <string name="communal_widgets_disclaimer_button" msgid="4423059765740780753">"OK"</string>
@@ -557,10 +565,8 @@
     <string name="media_projection_action_text" msgid="3634906766918186440">"Boshlash"</string>
     <string name="empty_shade_text" msgid="8935967157319717412">"Bildirishnomalar yo‘q"</string>
     <string name="no_unseen_notif_text" msgid="395512586119868682">"Yangi bildirishoma yoʻq"</string>
-    <!-- no translation found for adaptive_notification_edu_hun_title (7790738150177329960) -->
-    <skip />
-    <!-- no translation found for adaptive_notification_edu_hun_text (7743367744129536610) -->
-    <skip />
+    <string name="adaptive_notification_edu_hun_title" msgid="7790738150177329960">"Bildirishnomalarni sekinlatish yoniq"</string>
+    <string name="adaptive_notification_edu_hun_text" msgid="7743367744129536610">"Bir vaqtda juda koʻp bildirishnoma olsangiz, qurilmangiz tovushi va ogohlantirishlar 2 daqiqagacha avtomatik pasaytiriladi."</string>
     <string name="go_to_adaptive_notification_settings" msgid="2423690125178298479">"Faolsizlantirish"</string>
     <string name="unlock_to_see_notif_text" msgid="7439033907167561227">"Eskilarini koʻrish uchun qulfni yeching"</string>
     <string name="quick_settings_disclosure_parental_controls" msgid="2114102871438223600">"Bu qurilmani ota-onangiz boshqaradi"</string>
@@ -1226,7 +1232,6 @@
     <string name="accessibility_fingerprint_bouncer" msgid="7189102492498735519">"Haqiqiylikni tekshirish talab etiladi. Autentifikatsiya uchun barmoq izi skaneriga tegining."</string>
     <string name="ongoing_phone_call_content_description" msgid="5332334388483099947">"Joriy telefon chaqiruvi"</string>
     <string name="mobile_data_settings_title" msgid="3955246641380064901">"Mobil internet"</string>
-    <string name="preference_summary_default_combination" msgid="8453246369903749670">"<xliff:g id="STATE">%1$s</xliff:g> / <xliff:g id="NETWORKMODE">%2$s</xliff:g>"</string>
     <string name="mobile_data_connection_active" msgid="944490013299018227">"Ulangan"</string>
     <string name="mobile_data_temp_connection_active" msgid="4590222725908806824">"Vaqtincha ulangan"</string>
     <string name="mobile_data_poor_connection" msgid="819617772268371434">"Aloqa beqaror"</string>
@@ -1380,7 +1385,10 @@
     <string name="touchpad_tutorial_done_button" msgid="176168488821755503">"Tayyor"</string>
     <string name="touchpad_tutorial_gesture_done" msgid="4784438360736821255">"Barakalla!"</string>
     <string name="touchpad_back_gesture_action_title" msgid="7199067250654332735">"Orqaga qaytish"</string>
-    <string name="touchpad_back_gesture_guidance" msgid="4222430588599527272">"Ortga qaytish uchun sensorli panelda uchta barmoqni chapga yoki oʻngga suring."</string>
+    <!-- no translation found for touchpad_back_gesture_guidance (6263750214998421587) -->
+    <skip />
+    <!-- no translation found for touchpad_back_gesture_finished (5353616006999726249) -->
+    <skip />
     <string name="touchpad_back_gesture_animation_content_description" msgid="2646107450922379918">"Sensorli panelda uchta barmoq chapga va oʻngga harakatlanishi"</string>
     <string name="touchpad_back_gesture_screen_animation_content_description" msgid="4036267494237748710">"Qurilma ekranidagi ortga qaytish ishorasi animatsiyasi"</string>
     <string name="keyboard_backlight_dialog_title" msgid="8273102932345564724">"Klaviatura orqa yoritkichi"</string>
@@ -1388,28 +1396,16 @@
     <string name="home_controls_dream_label" msgid="6567105701292324257">"Uy boshqaruvi"</string>
     <string name="home_controls_dream_description" msgid="4644150952104035789">"Uy boshqaruvi tugmalarini ekran lavhasida tezkor oching"</string>
     <string name="volume_undo_action" msgid="5815519725211877114">"Bekor qilish"</string>
-    <!-- no translation found for back_edu_toast_content (4530314597378982956) -->
-    <skip />
-    <!-- no translation found for home_edu_toast_content (3381071147871955415) -->
-    <skip />
-    <!-- no translation found for overview_edu_toast_content (5797030644017804518) -->
-    <skip />
-    <!-- no translation found for all_apps_edu_toast_content (8807496014667211562) -->
-    <skip />
-    <!-- no translation found for back_edu_notification_title (5624780717751357278) -->
-    <skip />
-    <!-- no translation found for back_edu_notification_content (2497557451540954068) -->
-    <skip />
-    <!-- no translation found for home_edu_notification_title (6097902076909654045) -->
-    <skip />
-    <!-- no translation found for home_edu_notification_content (6631697734535766588) -->
-    <skip />
-    <!-- no translation found for overview_edu_notification_title (1265824157319562406) -->
-    <skip />
-    <!-- no translation found for overview_edu_notification_content (3578204677648432500) -->
-    <skip />
-    <!-- no translation found for all_apps_edu_notification_title (372262997265569063) -->
-    <skip />
-    <!-- no translation found for all_apps_edu_notification_content (3255070575694025585) -->
-    <skip />
+    <string name="back_edu_toast_content" msgid="4530314597378982956">"Orqaga qaytish uchun sensorli panelda uchta barmoq bilan chapga yoki oʻngga suring"</string>
+    <string name="home_edu_toast_content" msgid="3381071147871955415">"Bosh ekranga qaytish uchun sensorli panelda uchta barmoq bilan chapga yoki oʻngga suring"</string>
+    <string name="overview_edu_toast_content" msgid="5797030644017804518">"Oxirgi ilovalarni koʻrish uchun sensorli panelda uchta barmoq bilan tepaga surib, bosib turing"</string>
+    <string name="all_apps_edu_toast_content" msgid="8807496014667211562">"Barcha ishoralarni koʻrish uchun klaviaturadagi amal tugmasini bosing"</string>
+    <string name="back_edu_notification_title" msgid="5624780717751357278">"Sensorli panel orqali orqaga qaytish"</string>
+    <string name="back_edu_notification_content" msgid="2497557451540954068">"Uchta barmoq bilan chapga yoki oʻngga suring. Boshqa ishoralar bilan tanishish uchun bosing."</string>
+    <string name="home_edu_notification_title" msgid="6097902076909654045">"Sensorli panel orqali bosh ekranga qaytish"</string>
+    <string name="home_edu_notification_content" msgid="6631697734535766588">"Uchta barmoq bilan tepaga suring. Boshqa ishoralar bilan tanishish uchun bosing."</string>
+    <string name="overview_edu_notification_title" msgid="1265824157319562406">"Sensorli panel orqali oxirgi ilovalarni koʻrish"</string>
+    <string name="overview_edu_notification_content" msgid="3578204677648432500">"Uchta barmoq bilan tepaga surib, bosib turing. Boshqa ishoralar bilan tanishish uchun bosing."</string>
+    <string name="all_apps_edu_notification_title" msgid="372262997265569063">"Klaviatura orqali barcha ilovalarni koʻrish"</string>
+    <string name="all_apps_edu_notification_content" msgid="3255070575694025585">"Amal tugmasini istalganda bosing. Boshqa ishoralar bilan tanishish uchun bosing."</string>
 </resources>

@@ -16,6 +16,8 @@
 
 package android.content;
 
+import static android.os.Build.VERSION_CODES.VANILLA_ICE_CREAM;
+
 import android.annotation.FlaggedApi;
 import android.annotation.Nullable;
 import android.app.ActivityManager;
@@ -23,6 +25,9 @@ import android.app.ActivityManager.PendingIntentInfo;
 import android.app.ActivityOptions;
 import android.app.ActivityThread;
 import android.app.IApplicationThread;
+import android.app.compat.CompatChanges;
+import android.compat.annotation.ChangeId;
+import android.compat.annotation.EnabledAfter;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.os.Bundle;
 import android.os.Handler;
@@ -65,6 +70,11 @@ import java.util.concurrent.Executor;
  * {@link android.app.PendingIntent#getIntentSender() PendingIntent.getIntentSender()}.
  */
 public class IntentSender implements Parcelable {
+    /** If enabled consider the deprecated @hide method as removed. */
+    @ChangeId
+    @EnabledAfter(targetSdkVersion = VANILLA_ICE_CREAM)
+    private static final long REMOVE_HIDDEN_SEND_INTENT_METHOD = 356174596;
+
     private static final Bundle SEND_INTENT_DEFAULT_OPTIONS =
             ActivityOptions.makeBasic().setPendingIntentBackgroundActivityStartMode(
                     ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_COMPAT).toBundle();
@@ -204,6 +214,44 @@ public class IntentSender implements Parcelable {
             OnFinished onFinished, Handler handler, String requiredPermission)
             throws SendIntentException {
         sendIntent(context, code, intent, requiredPermission, SEND_INTENT_DEFAULT_OPTIONS,
+                handler == null ? null : handler::post, onFinished);
+    }
+
+    /**
+     * Perform the operation associated with this IntentSender, allowing the
+     * caller to specify information about the Intent to use and be notified
+     * when the send has completed.
+     *
+     * @param context The Context of the caller.  This may be {@code null} if
+     * <var>intent</var> is also {@code null}.
+     * @param code Result code to supply back to the IntentSender's target.
+     * @param intent Additional Intent data.  See {@link Intent#fillIn
+     * Intent.fillIn()} for information on how this is applied to the
+     * original Intent.  Use {@code null} to not modify the original Intent.
+     * @param onFinished The object to call back on when the send has
+     * completed, or {@code null} for no callback.
+     * @param handler Handler identifying the thread on which the callback
+     * should happen.  If {@code null}, the callback will happen from the thread
+     * pool of the process.
+     * @param options Additional options the caller would like to provide to modify the sending
+     * behavior.  Typically built from using {@link ActivityOptions} to apply to an activity start.
+     *
+     * @throws SendIntentException Throws CanceledIntentException if the IntentSender
+     * is no longer allowing more intents to be sent through it.
+     *
+     * @deprecated use {@link #sendIntent(Context, int, Intent, String, Bundle, Executor,
+     *         OnFinished)}
+     *
+     * @hide
+     */
+    @Deprecated public void sendIntent(Context context, int code, Intent intent,
+            OnFinished onFinished, Handler handler, String requiredPermission,
+            @Nullable Bundle options)
+            throws SendIntentException {
+        if (CompatChanges.isChangeEnabled(REMOVE_HIDDEN_SEND_INTENT_METHOD)) {
+            throw new NoSuchMethodError("This overload of sendIntent was removed.");
+        }
+        sendIntent(context, code, intent, requiredPermission, options,
                 handler == null ? null : handler::post, onFinished);
     }
 

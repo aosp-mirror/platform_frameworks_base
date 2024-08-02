@@ -77,6 +77,7 @@ public class CaptionWindowDecoration extends WindowDecoration<WindowDecorLinearL
 
     CaptionWindowDecoration(
             Context context,
+            @NonNull Context userContext,
             DisplayController displayController,
             ShellTaskOrganizer taskOrganizer,
             RunningTaskInfo taskInfo,
@@ -85,7 +86,7 @@ public class CaptionWindowDecoration extends WindowDecoration<WindowDecorLinearL
             @ShellBackgroundThread ShellExecutor bgExecutor,
             Choreographer choreographer,
             SyncTransactionQueue syncQueue) {
-        super(context, displayController, taskOrganizer, taskInfo, taskSurface);
+        super(context, userContext, displayController, taskOrganizer, taskInfo, taskSurface);
         mHandler = handler;
         mBgExecutor = bgExecutor;
         mChoreographer = choreographer;
@@ -278,7 +279,7 @@ public class CaptionWindowDecoration extends WindowDecoration<WindowDecorLinearL
 
         final Resources res = mResult.mRootView.getResources();
         mDragResizeListener.setGeometry(new DragResizeWindowGeometry(0 /* taskCornerRadius */,
-                new Size(mResult.mWidth, mResult.mHeight), getResizeEdgeHandleSize(res),
+                new Size(mResult.mWidth, mResult.mHeight), getResizeEdgeHandleSize(mContext, res),
                 getFineResizeCornerSize(res), getLargeResizeCornerSize(res)), touchSlop);
     }
 

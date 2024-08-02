@@ -107,7 +107,7 @@
     <string name="minimize_button_text" msgid="271592547935841753">"சிறிதாக்கும்"</string>
     <string name="close_button_text" msgid="2913281996024033299">"மூடும்"</string>
     <string name="back_button_text" msgid="1469718707134137085">"பின்செல்லும்"</string>
-    <string name="handle_text" msgid="1766582106752184456">"ஹேண்டில்"</string>
+    <string name="handle_text" msgid="4419667835599523257">"ஆப்ஸ் ஹேண்டில்"</string>
     <string name="app_icon_text" msgid="2823268023931811747">"ஆப்ஸ் ஐகான்"</string>
     <string name="fullscreen_text" msgid="1162316685217676079">"முழுத்திரை"</string>
     <string name="desktop_text" msgid="1077633567027630454">"டெஸ்க்டாப் பயன்முறை"</string>

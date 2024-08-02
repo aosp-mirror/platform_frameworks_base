@@ -20,9 +20,11 @@ import static android.Manifest.permission.START_ACTIVITIES_FROM_BACKGROUND;
 import static android.app.ActivityManager.PROCESS_STATE_NONEXISTENT;
 import static android.app.ActivityOptions.BackgroundActivityStartMode;
 import static android.app.ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOWED;
+import static android.app.ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOW_ALWAYS;
 import static android.app.ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_COMPAT;
 import static android.app.ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_DENIED;
 import static android.app.ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_SYSTEM_DEFINED;
+import static android.app.ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOW_IF_VISIBLE;
 import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.os.Build.VERSION_CODES.UPSIDE_DOWN_CAKE;
@@ -223,6 +225,21 @@ public class BackgroundActivityStartController {
             case BAL_ALLOW_VISIBLE_WINDOW -> "BAL_ALLOW_VISIBLE_WINDOW";
             case BAL_BLOCK -> "BAL_BLOCK";
             default -> throw new IllegalArgumentException("Unexpected value: " + balCode);
+        };
+    }
+
+    static String balStartModeToString(@BackgroundActivityStartMode int startMode) {
+        return switch (startMode) {
+            case MODE_BACKGROUND_ACTIVITY_START_ALLOWED -> "MODE_BACKGROUND_ACTIVITY_START_ALLOWED";
+            case MODE_BACKGROUND_ACTIVITY_START_SYSTEM_DEFINED ->
+                    "MODE_BACKGROUND_ACTIVITY_START_SYSTEM_DEFINED";
+            case MODE_BACKGROUND_ACTIVITY_START_COMPAT -> "MODE_BACKGROUND_ACTIVITY_START_COMPAT";
+            case MODE_BACKGROUND_ACTIVITY_START_DENIED -> "MODE_BACKGROUND_ACTIVITY_START_DENIED";
+            case MODE_BACKGROUND_ACTIVITY_START_ALLOW_ALWAYS ->
+                    "MODE_BACKGROUND_ACTIVITY_START_ALWAYS";
+            case MODE_BACKGROUND_ACTIVITY_START_ALLOW_IF_VISIBLE ->
+                    "MODE_BACKGROUND_ACTIVITY_START_ALLOW_IF_VISIBLE";
+            default -> "MODE_BACKGROUND_ACTIVITY_START_ALLOWED(" + startMode + ")";
         };
     }
 
@@ -464,10 +481,6 @@ public class BackgroundActivityStartController {
             this.mResultForRealCaller = resultForRealCaller;
         }
 
-        public boolean isPendingIntentBalAllowedByPermission() {
-            return PendingIntentRecord.isPendingIntentBalAllowedByPermission(mCheckedOptions);
-        }
-
         public boolean callerExplicitOptInOrAutoOptIn() {
             if (mAutoOptInCaller) {
                 return !callerExplicitOptOut();
@@ -528,6 +541,8 @@ public class BackgroundActivityStartController {
             sb.append("; balAllowedByPiCreatorWithHardening: ")
                     .append(mBalAllowedByPiCreatorWithHardening);
             sb.append("; resultIfPiCreatorAllowsBal: ").append(mResultForCaller);
+            sb.append("; callerStartMode: ").append(balStartModeToString(
+                    mCheckedOptions.getPendingIntentBackgroundActivityStartMode()));
             sb.append("; hasRealCaller: ").append(hasRealCaller());
             sb.append("; isCallForResult: ").append(mIsCallForResult);
             sb.append("; isPendingIntent: ").append(isPendingIntent());
@@ -553,6 +568,8 @@ public class BackgroundActivityStartController {
                 }
                 sb.append("; balAllowedByPiSender: ").append(mBalAllowedByPiSender);
                 sb.append("; resultIfPiSenderAllowsBal: ").append(mResultForRealCaller);
+                sb.append("; realCallerStartMode: ").append(balStartModeToString(
+                        mCheckedOptions.getPendingIntentCreatorBackgroundActivityStartMode()));
             }
             // features
             sb.append("; balImproveRealCallerVisibilityCheck: ")
@@ -949,7 +966,8 @@ public class BackgroundActivityStartController {
             }
         }
 
-        if (state.isPendingIntentBalAllowedByPermission()
+        if (state.mCheckedOptions.getPendingIntentBackgroundActivityStartMode()
+                == MODE_BACKGROUND_ACTIVITY_START_ALLOW_ALWAYS
                 && hasBalPermission(state.mRealCallingUid, state.mRealCallingPid)) {
             return new BalVerdict(BAL_ALLOW_PERMISSION,
                     /*background*/ false,

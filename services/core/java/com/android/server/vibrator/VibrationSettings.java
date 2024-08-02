@@ -21,6 +21,7 @@ import static android.os.VibrationAttributes.USAGE_ACCESSIBILITY;
 import static android.os.VibrationAttributes.USAGE_ALARM;
 import static android.os.VibrationAttributes.USAGE_COMMUNICATION_REQUEST;
 import static android.os.VibrationAttributes.USAGE_HARDWARE_FEEDBACK;
+import static android.os.VibrationAttributes.USAGE_IME_FEEDBACK;
 import static android.os.VibrationAttributes.USAGE_MEDIA;
 import static android.os.VibrationAttributes.USAGE_NOTIFICATION;
 import static android.os.VibrationAttributes.USAGE_PHYSICAL_EMULATION;
@@ -560,6 +561,7 @@ final class VibrationSettings {
             mKeyboardVibrationOn = loadSystemSetting(
                     Settings.System.KEYBOARD_VIBRATION_ENABLED, 1, userHandle) > 0;
 
+            int keyboardIntensity = getDefaultIntensity(USAGE_IME_FEEDBACK);
             int alarmIntensity = toIntensity(
                     loadSystemSetting(Settings.System.ALARM_VIBRATION_INTENSITY, -1, userHandle),
                     getDefaultIntensity(USAGE_ALARM));
@@ -608,6 +610,12 @@ final class VibrationSettings {
                 mCurrentVibrationIntensities.put(USAGE_TOUCH, Vibrator.VIBRATION_INTENSITY_OFF);
             } else {
                 mCurrentVibrationIntensities.put(USAGE_TOUCH, hapticFeedbackIntensity);
+            }
+
+            if (mVibrationConfig.isKeyboardVibrationSettingsSupported()) {
+                mCurrentVibrationIntensities.put(USAGE_IME_FEEDBACK, keyboardIntensity);
+            } else {
+                mCurrentVibrationIntensities.put(USAGE_IME_FEEDBACK, hapticFeedbackIntensity);
             }
 
             // A11y is not disabled by any haptic feedback setting.

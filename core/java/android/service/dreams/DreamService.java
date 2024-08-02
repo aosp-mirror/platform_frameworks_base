@@ -74,6 +74,7 @@ import android.view.accessibility.AccessibilityEvent;
 
 import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.display.BrightnessSynchronizer;
 import com.android.internal.util.DumpUtils;
 
 import java.io.FileDescriptor;
@@ -269,6 +270,7 @@ public class DreamService extends Service implements Window.Callback {
     private volatile int mDozeScreenState = Display.STATE_UNKNOWN;
     private volatile @Display.StateReason int mDozeScreenStateReason = Display.STATE_REASON_UNKNOWN;
     private volatile int mDozeScreenBrightness = PowerManager.BRIGHTNESS_DEFAULT;
+    private volatile float mDozeScreenBrightnessFloat = PowerManager.BRIGHTNESS_INVALID_FLOAT;
 
     private boolean mDebug = false;
 
@@ -927,12 +929,12 @@ public class DreamService extends Service implements Window.Callback {
             try {
                 if (startAndStopDozingInBackground()) {
                     mDreamManager.startDozingOneway(
-                        mDreamToken, mDozeScreenState, mDozeScreenStateReason,
-                        mDozeScreenBrightness);
+                            mDreamToken, mDozeScreenState, mDozeScreenStateReason,
+                            mDozeScreenBrightnessFloat, mDozeScreenBrightness);
                 } else {
                     mDreamManager.startDozing(
                             mDreamToken, mDozeScreenState, mDozeScreenStateReason,
-                            mDozeScreenBrightness);
+                            mDozeScreenBrightnessFloat, mDozeScreenBrightness);
                 }
 
             } catch (RemoteException ex) {
@@ -1057,7 +1059,7 @@ public class DreamService extends Service implements Window.Callback {
      * Gets the screen brightness to use while dozing.
      *
      * @return The screen brightness while dozing as a value between
-     * {@link PowerManager#BRIGHTNESS_OFF} (0) and {@link PowerManager#BRIGHTNESS_ON} (255),
+     * {@link PowerManager#BRIGHTNESS_OFF + 1} (1) and {@link PowerManager#BRIGHTNESS_ON} (255),
      * or {@link PowerManager#BRIGHTNESS_DEFAULT} (-1) to ask the system to apply
      * its default policy based on the screen state.
      *
@@ -1078,11 +1080,11 @@ public class DreamService extends Service implements Window.Callback {
      * The dream may set a different brightness before starting to doze and may adjust
      * the brightness while dozing to conserve power and achieve various effects.
      * </p><p>
-     * Note that dream may specify any brightness in the full 0-255 range, including
+     * Note that dream may specify any brightness in the full 1-255 range, including
      * values that are less than the minimum value for manual screen brightness
-     * adjustments by the user. In particular, the value may be set to 0 which may
-     * turn off the backlight entirely while still leaving the screen on although
-     * this behavior is device dependent and not guaranteed.
+     * adjustments by the user. In particular, the value may be set to
+     * {@link PowerManager.BRIGHTNESS_OFF} which may turn off the backlight entirely while still
+     * leaving the screen on although this behavior is device dependent and not guaranteed.
      * </p><p>
      * The available range of display brightness values and their behavior while dozing is
      * hardware dependent and may vary across devices. The dream may therefore
@@ -1090,7 +1092,7 @@ public class DreamService extends Service implements Window.Callback {
      * </p>
      *
      * @param brightness The screen brightness while dozing as a value between
-     * {@link PowerManager#BRIGHTNESS_OFF} (0) and {@link PowerManager#BRIGHTNESS_ON} (255),
+     * {@link PowerManager#BRIGHTNESS_OFF + 1} (1) and {@link PowerManager#BRIGHTNESS_ON} (255),
      * or {@link PowerManager#BRIGHTNESS_DEFAULT} (-1) to ask the system to apply
      * its default policy based on the screen state.
      *
@@ -1103,6 +1105,44 @@ public class DreamService extends Service implements Window.Callback {
         }
         if (mDozeScreenBrightness != brightness) {
             mDozeScreenBrightness = brightness;
+            updateDoze();
+        }
+    }
+
+    /**
+     * Sets the screen brightness to use while dozing.
+     * <p>
+     * The value of this property determines the power state of the primary display
+     * once {@link #startDozing} has been called. The default value is
+     * {@link PowerManager#BRIGHTNESS_INVALID_FLOAT} which lets the system decide.
+     * The dream may set a different brightness before starting to doze and may adjust
+     * the brightness while dozing to conserve power and achieve various effects.
+     * </p><p>
+     * Note that dream may specify any brightness in the full 0-1 range, including
+     * values that are less than the minimum value for manual screen brightness
+     * adjustments by the user. In particular, the value may be set to
+     * {@link PowerManager#BRIGHTNESS_OFF_FLOAT} which may turn off the backlight entirely while
+     * still leaving the screen on although this behavior is device dependent and not guaranteed.
+     * </p><p>
+     * The available range of display brightness values and their behavior while dozing is
+     * hardware dependent and may vary across devices. The dream may therefore
+     * need to be modified or configured to correctly support the hardware.
+     * </p>
+     *
+     * @param brightness The screen brightness while dozing as a value between
+     * {@link PowerManager#BRIGHTNESS_MIN} (0) and {@link PowerManager#BRIGHTNESS_MAX} (1),
+     * or {@link PowerManager#BRIGHTNESS_INVALID_FLOAT} (Float.NaN) to ask the system to apply
+     * its default policy based on the screen state.
+     *
+     * @hide For use by system UI components only.
+     */
+    @UnsupportedAppUsage
+    public void setDozeScreenBrightnessFloat(float brightness) {
+        if (!Float.isNaN(brightness)) {
+            brightness = clampAbsoluteBrightnessFloat(brightness);
+        }
+        if (!BrightnessSynchronizer.floatEquals(mDozeScreenBrightnessFloat, brightness)) {
+            mDozeScreenBrightnessFloat = brightness;
             updateDoze();
         }
     }
@@ -1749,6 +1789,13 @@ public class DreamService extends Service implements Window.Callback {
 
     private static int clampAbsoluteBrightness(int value) {
         return MathUtils.constrain(value, PowerManager.BRIGHTNESS_OFF, PowerManager.BRIGHTNESS_ON);
+    }
+
+    private static float clampAbsoluteBrightnessFloat(float value) {
+        if (value == PowerManager.BRIGHTNESS_OFF_FLOAT) {
+            return value;
+        }
+        return MathUtils.constrain(value, PowerManager.BRIGHTNESS_MIN, PowerManager.BRIGHTNESS_MAX);
     }
 
     /**

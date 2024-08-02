@@ -472,6 +472,7 @@ public class ZenModeDiff {
         public static final String FIELD_ICON_RES = "iconResName";
         public static final String FIELD_TRIGGER_DESCRIPTION = "triggerDescription";
         public static final String FIELD_TYPE = "type";
+        public static final String FIELD_LEGACY_SUPPRESSED_EFFECTS = "legacySuppressedEffects";
         // NOTE: new field strings must match the variable names in ZenModeConfig.ZenRule
 
         // Special field to track whether this rule became active or inactive
@@ -566,6 +567,13 @@ public class ZenModeDiff {
                 }
                 if (!Objects.equals(from.iconResName, to.iconResName)) {
                     addField(FIELD_ICON_RES, new FieldDiff<>(from.iconResName, to.iconResName));
+                }
+                if (android.app.Flags.modesUi()) {
+                    if (from.legacySuppressedEffects != to.legacySuppressedEffects) {
+                        addField(FIELD_LEGACY_SUPPRESSED_EFFECTS,
+                                new FieldDiff<>(from.legacySuppressedEffects,
+                                        to.legacySuppressedEffects));
+                    }
                 }
             }
         }
