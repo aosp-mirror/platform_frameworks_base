@@ -22,10 +22,10 @@ import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.SysuiTestableContext
 import com.android.systemui.coroutines.collectLastValue
+import com.android.systemui.contextualeducation.GestureType.BACK
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.testDispatcher
 import com.android.systemui.kosmos.testScope
-import com.android.systemui.shared.education.GestureType.BACK_GESTURE
 import com.google.common.truth.Truth.assertThat
 import java.io.File
 import java.time.Clock
@@ -70,8 +70,8 @@ class ContextualEducationRepositoryTest : SysuiTestCase() {
     fun changeRetrievedValueForNewUser() =
         testScope.runTest {
             // Update data for old user.
-            underTest.incrementSignalCount(BACK_GESTURE)
-            val model by collectLastValue(underTest.readGestureEduModelFlow(BACK_GESTURE))
+            underTest.incrementSignalCount(BACK)
+            val model by collectLastValue(underTest.readGestureEduModelFlow(BACK))
             assertThat(model?.signalCount).isEqualTo(1)
 
             // User is changed.
@@ -83,17 +83,17 @@ class ContextualEducationRepositoryTest : SysuiTestCase() {
     @Test
     fun incrementSignalCount() =
         testScope.runTest {
-            underTest.incrementSignalCount(BACK_GESTURE)
-            val model by collectLastValue(underTest.readGestureEduModelFlow(BACK_GESTURE))
+            underTest.incrementSignalCount(BACK)
+            val model by collectLastValue(underTest.readGestureEduModelFlow(BACK))
             assertThat(model?.signalCount).isEqualTo(1)
         }
 
     @Test
     fun dataAddedOnUpdateShortcutTriggerTime() =
         testScope.runTest {
-            val model by collectLastValue(underTest.readGestureEduModelFlow(BACK_GESTURE))
+            val model by collectLastValue(underTest.readGestureEduModelFlow(BACK))
             assertThat(model?.lastShortcutTriggeredTime).isNull()
-            underTest.updateShortcutTriggerTime(BACK_GESTURE)
+            underTest.updateShortcutTriggerTime(BACK)
             assertThat(model?.lastShortcutTriggeredTime).isEqualTo(clock.instant())
         }
 

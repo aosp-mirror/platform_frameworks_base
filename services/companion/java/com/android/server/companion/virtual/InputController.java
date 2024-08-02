@@ -842,11 +842,9 @@ class InputController {
                             deviceName, inputDeviceId));
         }
 
-        if (android.companion.virtualdevice.flags.Flags.metricsCollection()) {
-            String metricId = getMetricIdForInputType(type);
-            if (metricId != null) {
-                Counter.logIncrementWithUid(metricId, mAttributionSource.getUid());
-            }
+        String metricId = getMetricIdForInputType(type);
+        if (metricId != null) {
+            Counter.logIncrementWithUid(metricId, mAttributionSource.getUid());
         }
     }
 

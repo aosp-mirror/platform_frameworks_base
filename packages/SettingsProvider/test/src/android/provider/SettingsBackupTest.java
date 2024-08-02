@@ -918,6 +918,7 @@ public class SettingsBackupTest {
                         Settings.System.SHOW_GTALK_SERVICE_STATUS, // candidate for backup?
                         Settings.System.SHOW_TOUCHES,
                         Settings.System.SHOW_KEY_PRESSES,
+                        Settings.System.TOUCHPAD_VISUALIZER,
                         Settings.System.SHOW_ROTARY_INPUT,
                         Settings.System.SIP_ADDRESS_ONLY, // value, not a setting
                         Settings.System.SIP_ALWAYS, // value, not a setting

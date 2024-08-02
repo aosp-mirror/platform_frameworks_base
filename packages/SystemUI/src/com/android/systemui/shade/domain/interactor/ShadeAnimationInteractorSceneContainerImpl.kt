@@ -36,12 +36,12 @@ import kotlinx.coroutines.flow.stateIn
 @SysUISingleton
 class ShadeAnimationInteractorSceneContainerImpl
 @Inject
+@OptIn(ExperimentalCoroutinesApi::class)
 constructor(
     @Background scope: CoroutineScope,
     shadeAnimationRepository: ShadeAnimationRepository,
     sceneInteractor: SceneInteractor,
 ) : ShadeAnimationInteractor(shadeAnimationRepository) {
-    @OptIn(ExperimentalCoroutinesApi::class)
     override val isAnyCloseAnimationRunning =
         sceneInteractor.transitionState
             .flatMapLatest { state ->
@@ -53,6 +53,28 @@ constructor(
                                 state.toScene != Scenes.QuickSettings) ||
                                 (state.fromScene == Scenes.QuickSettings &&
                                     state.toScene != Scenes.Shade)
+                        ) {
+                            state.isUserInputOngoing.map { !it }
+                        } else {
+                            flowOf(false)
+                        }
+                }
+            }
+            .distinctUntilChanged()
+            .stateIn(scope, SharingStarted.Eagerly, false)
+
+    override val isAnyFlingAnimationRunning =
+        sceneInteractor.transitionState
+            .flatMapLatest { state ->
+                when (state) {
+                    is ObservableTransitionState.Idle -> flowOf(false)
+                    is ObservableTransitionState.Transition ->
+                        if (
+                            state.isInitiatedByUserInput &&
+                                (state.fromScene == Scenes.Shade ||
+                                    state.toScene == Scenes.Shade ||
+                                    state.fromScene == Scenes.QuickSettings ||
+                                    state.toScene == Scenes.QuickSettings)
                         ) {
                             state.isUserInputOngoing.map { !it }
                         } else {

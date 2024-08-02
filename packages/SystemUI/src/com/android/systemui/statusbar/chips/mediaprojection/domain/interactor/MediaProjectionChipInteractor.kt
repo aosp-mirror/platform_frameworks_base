@@ -21,11 +21,11 @@ import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.log.LogBuffer
 import com.android.systemui.log.core.LogLevel
+import com.android.systemui.mediaprojection.MediaProjectionUtils.packageHasCastingCapabilities
 import com.android.systemui.mediaprojection.data.model.MediaProjectionState
 import com.android.systemui.mediaprojection.data.repository.MediaProjectionRepository
 import com.android.systemui.statusbar.chips.StatusBarChipsLog
 import com.android.systemui.statusbar.chips.mediaprojection.domain.model.ProjectionChipModel
-import com.android.systemui.util.Utils
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.SharingStarted
@@ -60,7 +60,7 @@ constructor(
                     }
                     is MediaProjectionState.Projecting -> {
                         val type =
-                            if (isProjectionToOtherDevice(state.hostPackage)) {
+                            if (packageHasCastingCapabilities(packageManager, state.hostPackage)) {
                                 ProjectionChipModel.Type.CAST_TO_OTHER_DEVICE
                             } else {
                                 ProjectionChipModel.Type.SHARE_TO_APP
@@ -84,19 +84,6 @@ constructor(
     /** Stops the currently active projection. */
     fun stopProjecting() {
         scope.launch { mediaProjectionRepository.stopProjecting() }
-    }
-
-    /**
-     * Returns true iff projecting to the given [packageName] means that we're projecting to a
-     * *different* device (as opposed to projecting to some application on *this* device).
-     */
-    private fun isProjectionToOtherDevice(packageName: String?): Boolean {
-        // The [isHeadlessRemoteDisplayProvider] check approximates whether a projection is to a
-        // different device or the same device, because headless remote display packages are the
-        // only kinds of packages that do cast-to-other-device. This isn't exactly perfect,
-        // because it means that any projection by those headless remote display packages will be
-        // marked as going to a different device, even if that isn't always true. See b/321078669.
-        return Utils.isHeadlessRemoteDisplayProvider(packageManager, packageName)
     }
 
     companion object {

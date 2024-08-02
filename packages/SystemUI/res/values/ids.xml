@@ -132,6 +132,7 @@
 
     <!-- Status bar -->
     <item type="id" name="status_bar_dot" />
+    <item type="id" name="ongoing_activity_chip_custom_icon" />
 
     <!-- Default display cutout on the physical top of screen -->
     <item type="id" name="display_cutout" />

@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 The Android Open Source Project
+ * Copyright (C) 2024 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,9 +13,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package com.android.ravenwood.common;
 
-package com.android.systemui.shared.education
+public class SneakyThrow {
 
-enum class GestureType {
-    BACK_GESTURE,
+    private SneakyThrow() {
+    }
+
+    /**
+     * Throw checked exceptions without the need to declare in method signature
+     */
+    public static void sneakyThrow(Throwable t) {
+        SneakyThrow.<RuntimeException>sneakyThrow_(t);
+    }
+
+    private static <T extends Throwable> void sneakyThrow_(Throwable t) throws T {
+        throw (T) t;
+    }
 }

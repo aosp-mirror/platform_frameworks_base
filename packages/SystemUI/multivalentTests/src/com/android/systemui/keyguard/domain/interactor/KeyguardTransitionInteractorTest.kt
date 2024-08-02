@@ -136,30 +136,6 @@ class KeyguardTransitionInteractorTest : SysuiTestCase() {
         }
 
     @Test
-    fun finishedKeyguardTransitionStepTests() =
-        testScope.runTest {
-            val finishedSteps by collectValues(underTest.finishedKeyguardTransitionStep)
-            val steps = mutableListOf<TransitionStep>()
-
-            steps.add(TransitionStep(LOCKSCREEN, AOD, 0f, STARTED))
-            steps.add(TransitionStep(LOCKSCREEN, AOD, 0.9f, RUNNING))
-            steps.add(TransitionStep(LOCKSCREEN, AOD, 1f, FINISHED))
-            steps.add(TransitionStep(AOD, LOCKSCREEN, 0f, STARTED))
-            steps.add(TransitionStep(AOD, LOCKSCREEN, 0.5f, RUNNING))
-            steps.add(TransitionStep(AOD, LOCKSCREEN, 1f, FINISHED))
-            steps.add(TransitionStep(AOD, GONE, 1f, STARTED))
-
-            steps.forEach {
-                repository.sendTransitionStep(it)
-                runCurrent()
-            }
-
-            // Ignore the default state.
-            assertThat(finishedSteps.subList(1, finishedSteps.size))
-                .isEqualTo(listOf(steps[2], steps[5]))
-        }
-
-    @Test
     fun startedKeyguardTransitionStepTests() =
         testScope.runTest {
             val startedSteps by collectValues(underTest.startedKeyguardTransitionStep)

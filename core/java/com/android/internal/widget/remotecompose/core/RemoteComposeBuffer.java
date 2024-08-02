@@ -54,6 +54,18 @@ import com.android.internal.widget.remotecompose.core.operations.TextFromFloat;
 import com.android.internal.widget.remotecompose.core.operations.TextMerge;
 import com.android.internal.widget.remotecompose.core.operations.Theme;
 import com.android.internal.widget.remotecompose.core.operations.Utils;
+import com.android.internal.widget.remotecompose.core.operations.layout.ComponentEnd;
+import com.android.internal.widget.remotecompose.core.operations.layout.ComponentStart;
+import com.android.internal.widget.remotecompose.core.operations.layout.LayoutComponentContent;
+import com.android.internal.widget.remotecompose.core.operations.layout.RootLayoutComponent;
+import com.android.internal.widget.remotecompose.core.operations.layout.managers.BoxLayout;
+import com.android.internal.widget.remotecompose.core.operations.layout.managers.ColumnLayout;
+import com.android.internal.widget.remotecompose.core.operations.layout.managers.RowLayout;
+import com.android.internal.widget.remotecompose.core.operations.layout.modifiers.BackgroundModifierOperation;
+import com.android.internal.widget.remotecompose.core.operations.layout.modifiers.BorderModifierOperation;
+import com.android.internal.widget.remotecompose.core.operations.layout.modifiers.ClipRectModifierOperation;
+import com.android.internal.widget.remotecompose.core.operations.layout.modifiers.PaddingModifierOperation;
+import com.android.internal.widget.remotecompose.core.operations.layout.modifiers.RoundedClipRectModifierOperation;
 import com.android.internal.widget.remotecompose.core.operations.paint.PaintBundle;
 import com.android.internal.widget.remotecompose.core.operations.utilities.easing.FloatAnimation;
 import com.android.internal.widget.remotecompose.core.types.IntegerConstant;
@@ -132,8 +144,9 @@ public class RemoteComposeBuffer {
      * @param contentDescription content description of the document
      * @param capabilities       bitmask indicating needed capabilities (unused for now)
      */
-    public void header(int width, int height, String contentDescription, long capabilities) {
-        Header.COMPANION.apply(mBuffer, width, height, capabilities);
+    public void header(int width, int height, String contentDescription,
+                       float density, long capabilities) {
+        Header.COMPANION.apply(mBuffer, width, height, density, capabilities);
         int contentDescriptionId = 0;
         if (contentDescription != null) {
             contentDescriptionId = addText(contentDescription);
@@ -149,7 +162,7 @@ public class RemoteComposeBuffer {
      * @param contentDescription content description of the document
      */
     public void header(int width, int height, String contentDescription) {
-        header(width, height, contentDescription, 0);
+        header(width, height, contentDescription, 1f, 0);
     }
 
     /**
@@ -857,7 +870,7 @@ public class RemoteComposeBuffer {
     }
 
     /**
-     * Sets the clip based on clip rec
+     * Sets the clip based on clip rect
      * @param left
      * @param top
      * @param right
@@ -1074,5 +1087,128 @@ public class RemoteComposeBuffer {
                 NamedVariable.COLOR_TYPE, name);
     }
 
+    /**
+     * Add a component start tag
+     * @param type type of component
+     * @param id component id
+     */
+    public void addComponentStart(int type, int id) {
+        switch (type) {
+            case ComponentStart.ROOT_LAYOUT: {
+                RootLayoutComponent.COMPANION.apply(mBuffer);
+            } break;
+            case ComponentStart.LAYOUT_CONTENT: {
+                LayoutComponentContent.COMPANION.apply(mBuffer);
+            } break;
+            case ComponentStart.LAYOUT_BOX: {
+                BoxLayout.COMPANION.apply(mBuffer, id, -1,
+                        BoxLayout.CENTER, BoxLayout.CENTER);
+            } break;
+            case ComponentStart.LAYOUT_ROW: {
+                RowLayout.COMPANION.apply(mBuffer, id, -1,
+                        RowLayout.START, RowLayout.TOP, 0f);
+            } break;
+            case ComponentStart.LAYOUT_COLUMN: {
+                ColumnLayout.COMPANION.apply(mBuffer, id, -1,
+                        ColumnLayout.START, ColumnLayout.TOP, 0f);
+            } break;
+            default:
+                ComponentStart.Companion.apply(mBuffer,
+                        type, id, 0f, 0f);
+        }
+    }
+
+    /**
+     * Add a component start tag
+     * @param type type of component
+     */
+    public void addComponentStart(int type) {
+        addComponentStart(type, -1);
+    }
+
+    /**
+     * Add a component end tag
+     */
+    public void addComponentEnd() {
+        ComponentEnd.Companion.apply(mBuffer);
+    }
+
+    /**
+     * Add a background modifier of provided color
+     * @param color the color of the background
+     * @param shape the background shape -- SHAPE_RECTANGLE, SHAPE_CIRCLE
+     */
+    public void addModifierBackground(int color, int shape) {
+        float r = ((color >> 16) & 0xff) / 255.0f;
+        float g = ((color >> 8) & 0xff) / 255.0f;
+        float b = ((color) & 0xff) / 255.0f;
+        float a = ((color >> 24) & 0xff) / 255.0f;
+        BackgroundModifierOperation.COMPANION.apply(mBuffer, 0f, 0f, 0f, 0f,
+                r, g, b, a, shape);
+    }
+
+    /**
+     * Add a border modifier
+     * @param borderWidth the border width
+     * @param borderRoundedCorner the rounded corner radius if the shape is ROUNDED_RECT
+     * @param color the color of the border
+     * @param shape the shape of the border
+     */
+    public void addModifierBorder(float borderWidth, float borderRoundedCorner,
+                                  int color, int shape) {
+        float r = ((color >> 16) & 0xff) / 255.0f;
+        float g = ((color >>  8) & 0xff) / 255.0f;
+        float b = ((color) & 0xff) / 255.0f;
+        float a = ((color >> 24) & 0xff) / 255.0f;
+        BorderModifierOperation.COMPANION.apply(mBuffer, 0f, 0f, 0f, 0f,
+                borderWidth, borderRoundedCorner, r, g, b, a, shape);
+    }
+
+    /**
+     * Add a padding modifier
+     * @param left left padding
+     * @param top top padding
+     * @param right right padding
+     * @param bottom bottom padding
+     */
+    public void addModifierPadding(float left, float top, float right, float bottom) {
+        PaddingModifierOperation.COMPANION.apply(mBuffer, left, top, right, bottom);
+    }
+
+
+    /**
+     * Sets the clip based on rounded clip rect
+     * @param topStart
+     * @param topEnd
+     * @param bottomStart
+     * @param bottomEnd
+     */
+    public void addRoundClipRectModifier(float topStart, float topEnd,
+                                         float bottomStart, float bottomEnd) {
+        RoundedClipRectModifierOperation.COMPANION.apply(mBuffer,
+                topStart, topEnd, bottomStart, bottomEnd);
+    }
+
+    public void addClipRectModifier() {
+        ClipRectModifierOperation.COMPANION.apply(mBuffer);
+    }
+
+    public void addBoxStart(int componentId, int animationId,
+                            int horizontal, int vertical) {
+        BoxLayout.COMPANION.apply(mBuffer, componentId, animationId,
+                horizontal, vertical);
+    }
+
+    public void addRowStart(int componentId, int animationId,
+                            int horizontal, int vertical, float spacedBy) {
+        RowLayout.COMPANION.apply(mBuffer, componentId, animationId,
+                horizontal, vertical, spacedBy);
+    }
+
+    public void addColumnStart(int componentId, int animationId,
+                            int horizontal, int vertical, float spacedBy) {
+        ColumnLayout.COMPANION.apply(mBuffer, componentId, animationId,
+                horizontal, vertical, spacedBy);
+    }
 }
 

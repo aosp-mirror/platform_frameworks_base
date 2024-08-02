@@ -19,12 +19,18 @@ package com.android.server.notification;
 import static android.app.AutomaticZenRule.TYPE_BEDTIME;
 import static android.app.Flags.FLAG_MODES_UI;
 import static android.app.Flags.modesUi;
+import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_AMBIENT;
+import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_FULL_SCREEN_INTENT;
+import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_LIGHTS;
+import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_PEEK;
+import static android.app.NotificationManager.Policy.suppressedEffectsToString;
 import static android.provider.Settings.Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS;
 import static android.provider.Settings.Global.ZEN_MODE_OFF;
 import static android.service.notification.Condition.SOURCE_UNKNOWN;
 import static android.service.notification.Condition.SOURCE_USER_ACTION;
 import static android.service.notification.Condition.STATE_FALSE;
 import static android.service.notification.Condition.STATE_TRUE;
+import static android.service.notification.NotificationListenerService.SUPPRESSED_EFFECT_SCREEN_ON;
 import static android.service.notification.ZenPolicy.CONVERSATION_SENDERS_IMPORTANT;
 import static android.service.notification.ZenPolicy.CONVERSATION_SENDERS_NONE;
 import static android.service.notification.ZenPolicy.PEOPLE_TYPE_ANYONE;
@@ -219,8 +225,8 @@ public class ZenModeConfigTest extends UiServiceTestCase {
         priorityCategories |= Policy.PRIORITY_CATEGORY_REMINDERS;
         priorityCategories |= Policy.PRIORITY_CATEGORY_EVENTS;
         priorityCategories |= Policy.PRIORITY_CATEGORY_CONVERSATIONS;
-        suppressedVisualEffects |= Policy.SUPPRESSED_EFFECT_LIGHTS;
-        suppressedVisualEffects |= Policy.SUPPRESSED_EFFECT_AMBIENT;
+        suppressedVisualEffects |= SUPPRESSED_EFFECT_LIGHTS;
+        suppressedVisualEffects |= SUPPRESSED_EFFECT_AMBIENT;
 
         Policy expectedPolicy = new Policy(priorityCategories, priorityCallSenders,
                 priorityMessageSenders, suppressedVisualEffects, 0, priorityConversationsSenders);
@@ -256,8 +262,8 @@ public class ZenModeConfigTest extends UiServiceTestCase {
         priorityCategories |= Policy.PRIORITY_CATEGORY_REMINDERS;
         priorityCategories |= Policy.PRIORITY_CATEGORY_EVENTS;
         priorityCategories |= Policy.PRIORITY_CATEGORY_CONVERSATIONS;
-        suppressedVisualEffects |= Policy.SUPPRESSED_EFFECT_LIGHTS;
-        suppressedVisualEffects |= Policy.SUPPRESSED_EFFECT_AMBIENT;
+        suppressedVisualEffects |= SUPPRESSED_EFFECT_LIGHTS;
+        suppressedVisualEffects |= SUPPRESSED_EFFECT_AMBIENT;
 
         Policy expectedPolicy = new Policy(priorityCategories, priorityCallSenders,
                 priorityMessageSenders, suppressedVisualEffects,
@@ -309,8 +315,8 @@ public class ZenModeConfigTest extends UiServiceTestCase {
             config.setAllowMessagesFrom(Policy.PRIORITY_SENDERS_STARRED);
             config.setAllowConversationsFrom(CONVERSATION_SENDERS_NONE);
             config.setSuppressedVisualEffects(config.getSuppressedVisualEffects()
-                    | Policy.SUPPRESSED_EFFECT_BADGE | Policy.SUPPRESSED_EFFECT_LIGHTS
-                    | Policy.SUPPRESSED_EFFECT_AMBIENT);
+                    | Policy.SUPPRESSED_EFFECT_BADGE | SUPPRESSED_EFFECT_LIGHTS
+                    | SUPPRESSED_EFFECT_AMBIENT);
         }
         ZenPolicy actual = config.getZenPolicy();
 
@@ -357,8 +363,8 @@ public class ZenModeConfigTest extends UiServiceTestCase {
             config.setAllowConversationsFrom(CONVERSATION_SENDERS_NONE);
             config.setAllowPriorityChannels(false);
             config.setSuppressedVisualEffects(config.getSuppressedVisualEffects()
-                    | Policy.SUPPRESSED_EFFECT_BADGE | Policy.SUPPRESSED_EFFECT_LIGHTS
-                    | Policy.SUPPRESSED_EFFECT_AMBIENT);
+                    | Policy.SUPPRESSED_EFFECT_BADGE | SUPPRESSED_EFFECT_LIGHTS
+                    | SUPPRESSED_EFFECT_AMBIENT);
         }
         ZenPolicy actual = config.getZenPolicy();
 
@@ -1061,6 +1067,43 @@ public class ZenModeConfigTest extends UiServiceTestCase {
 
         assertThat(ZenModeConfig.getDescription(mContext, true, config, false))
                 .isEqualTo("name");
+    }
+
+    @Test
+    public void toNotificationPolicy_withNewSuppressedEffects_returnsSuppressedEffects() {
+        ZenModeConfig config = getCustomConfig();
+        // From LegacyNotificationManagerTest.testSetNotificationPolicy_preP_setNewFields
+        // When a pre-P app sets SUPPRESSED_EFFECT_NOTIFICATION_LIST, it's converted by NMS into:
+        Policy policy = new Policy(0, 0, 0,
+                SUPPRESSED_EFFECT_FULL_SCREEN_INTENT | SUPPRESSED_EFFECT_LIGHTS
+                        | SUPPRESSED_EFFECT_PEEK | SUPPRESSED_EFFECT_AMBIENT);
+
+        config.applyNotificationPolicy(policy);
+        Policy result = config.toNotificationPolicy();
+
+        assertThat(suppressedEffectsOf(result)).isEqualTo(suppressedEffectsOf(policy));
+    }
+
+    @Test
+    public void toNotificationPolicy_withOldAndNewSuppressedEffects_returnsSuppressedEffects() {
+        ZenModeConfig config = getCustomConfig();
+        // From LegacyNotificationManagerTest.testSetNotificationPolicy_preP_setOldNewFields.
+        // When a pre-P app sets SUPPRESSED_EFFECT_SCREEN_ON | SUPPRESSED_EFFECT_STATUS_BAR, it's
+        // converted by NMS into:
+        Policy policy = new Policy(0, 0, 0,
+                SUPPRESSED_EFFECT_SCREEN_ON | SUPPRESSED_EFFECT_FULL_SCREEN_INTENT
+                        | SUPPRESSED_EFFECT_LIGHTS | SUPPRESSED_EFFECT_PEEK
+                        | SUPPRESSED_EFFECT_AMBIENT);
+
+        config.applyNotificationPolicy(policy);
+        Policy result = config.toNotificationPolicy();
+
+        assertThat(suppressedEffectsOf(result)).isEqualTo(suppressedEffectsOf(policy));
+    }
+
+    private static String suppressedEffectsOf(Policy policy) {
+        return suppressedEffectsToString(policy.suppressedVisualEffects) + "("
+                + policy.suppressedVisualEffects + ")";
     }
 
     private ZenModeConfig getMutedRingerConfig() {

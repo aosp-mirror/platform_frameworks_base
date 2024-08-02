@@ -19,10 +19,10 @@ package com.android.systemui.education.domain.interactor
 import com.android.systemui.CoreStartable
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
+import com.android.systemui.contextualeducation.GestureType.BACK
 import com.android.systemui.education.data.model.GestureEduModel
 import com.android.systemui.education.shared.model.EducationInfo
 import com.android.systemui.education.shared.model.EducationUiType
-import com.android.systemui.shared.education.GestureType.BACK_GESTURE
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -50,7 +50,7 @@ constructor(
         backgroundScope.launch {
             contextualEducationInteractor.backGestureModelFlow
                 .mapNotNull { getEduType(it) }
-                .collect { _educationTriggered.value = EducationInfo(BACK_GESTURE, it) }
+                .collect { _educationTriggered.value = EducationInfo(BACK, it) }
         }
     }
 
