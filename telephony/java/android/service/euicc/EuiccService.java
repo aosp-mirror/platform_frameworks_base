@@ -267,6 +267,17 @@ public abstract class EuiccService extends Service {
             "android.service.euicc.extra.RESOLUTION_CONFIRMATION_CODE_RETRIED";
 
     /**
+     * Bundle key for the {@code resolvedBundle} passed to {@link #onDownloadSubscription(
+     * int, int, DownloadableSubscription, boolean, boolean, Bundle)}. The value is a
+     * {@link String} for the package name of the app calling the
+     * {@link EuiccManager#downloadSubscription(int, DownloadableSubscription, PendingIntent)} API.
+     * This is to be used by LPA to determine the app that is requesting the download.
+     *
+     * @hide
+     */
+    public static final String EXTRA_PACKAGE_NAME = "android.service.euicc.extra.PACKAGE_NAME";
+
+    /**
      * Intent extra set for resolution requests containing an int indicating the current card Id.
      */
     public static final String EXTRA_RESOLUTION_CARD_ID =
