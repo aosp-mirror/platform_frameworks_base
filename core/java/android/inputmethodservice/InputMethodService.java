@@ -2794,6 +2794,9 @@ public class InputMethodService extends AbstractInputMethodService {
      * <p>This dismisses the {@link #getStylusHandwritingWindow ink window} and stops intercepting
      * stylus {@code MotionEvent}s.
      *
+     * <p>Connectionless handwriting sessions should be finished using {@link
+     * #finishConnectionlessStylusHandwriting(CharSequence)}.
+     *
      * <p>Note for IME developers: Call this method at any time to finish the current handwriting
      * session. Generally, this should be invoked after a short timeout, giving the user enough time
      * to start the next stylus stroke, if any. By default, system will time-out after few seconds.
@@ -2801,9 +2804,6 @@ public class InputMethodService extends AbstractInputMethodService {
      *
      * <p>Handwriting session will be finished by framework on next {@link #onFinishInput()}.
      */
-    // TODO(b/300979854): Once connectionless APIs are finalised, update documentation to add:
-    // <p>Connectionless handwriting sessions should be finished using {@link
-    // #finishConnectionlessStylusHandwriting(CharSequence)}.
     public final void finishStylusHandwriting() {
         if (DEBUG) Log.v(TAG, "finishStylusHandwriting()");
         if (mInkWindow == null) {
