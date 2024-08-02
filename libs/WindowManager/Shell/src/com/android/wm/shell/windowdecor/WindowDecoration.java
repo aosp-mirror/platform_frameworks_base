@@ -239,7 +239,8 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
         outResult.mHeight = taskBounds.height();
         outResult.mRootView.setTaskFocusState(mTaskInfo.isFocused);
         final Resources resources = mDecorWindowContext.getResources();
-        outResult.mCaptionHeight = loadDimensionPixelSize(resources, params.mCaptionHeightId);
+        outResult.mCaptionHeight = loadDimensionPixelSize(resources, params.mCaptionHeightId)
+                + params.mCaptionTopPadding;
         outResult.mCaptionWidth = params.mCaptionWidthId != Resources.ID_NULL
                 ? loadDimensionPixelSize(resources, params.mCaptionWidthId) : taskBounds.width();
         outResult.mCaptionX = (outResult.mWidth - outResult.mCaptionWidth) / 2;
@@ -459,6 +460,7 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
                 }
                 mViewHost.getRootSurfaceControl().applyTransactionOnDraw(onDrawTransaction);
             }
+            outResult.mRootView.setPadding(0, params.mCaptionTopPadding, 0, 0);
             mViewHost.setView(outResult.mRootView, lp);
             Trace.endSection();
         } else {
@@ -469,6 +471,7 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
                 }
                 mViewHost.getRootSurfaceControl().applyTransactionOnDraw(onDrawTransaction);
             }
+            outResult.mRootView.setPadding(0, params.mCaptionTopPadding, 0, 0);
             mViewHost.relayout(lp);
             Trace.endSection();
         }
@@ -700,6 +703,8 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
         int mShadowRadiusId;
         int mCornerRadius;
 
+        int mCaptionTopPadding;
+
         Configuration mWindowDecorConfig;
 
         boolean mApplyStartTransactionOnDraw;
@@ -715,6 +720,8 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
 
             mShadowRadiusId = Resources.ID_NULL;
             mCornerRadius = 0;
+
+            mCaptionTopPadding = 0;
 
             mApplyStartTransactionOnDraw = false;
             mSetTaskPositionAndCrop = false;
