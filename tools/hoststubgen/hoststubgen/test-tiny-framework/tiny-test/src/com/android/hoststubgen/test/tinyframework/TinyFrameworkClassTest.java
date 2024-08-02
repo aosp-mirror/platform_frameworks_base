@@ -334,4 +334,9 @@ public class TinyFrameworkClassTest {
     public void testRFileHeuristics() {
         assertThat(Nested.ARRAY.length).isEqualTo(1);
     }
+
+    @Test
+    public void testTypeRename() {
+        assertThat(TinyFrameworkRenamedClassCaller.foo(1)).isEqualTo(1);
+    }
 }

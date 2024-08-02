@@ -159,7 +159,8 @@ java_library {
         "framework-minus-apex.ravenwood",
     ],
     sdk_version: "core_platform",
-    jarjar_rules: ":ravenwood-framework-jarjar-rules",
+    // See b/313930116. Jarjar is too slow on this jar. We use HostStubGen to do the rename.
+    // jarjar_rules: ":ravenwood-framework-jarjar-rules",
 }
 
 java_genrule {
