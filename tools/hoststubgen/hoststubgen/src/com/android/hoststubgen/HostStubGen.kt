@@ -85,6 +85,8 @@ class HostStubGen(val options: HostStubGenOptions) {
                 errors,
                 stats,
                 policyFileRemapper,
+                options.numShards.get,
+                options.shard.get,
         )
 
         // Dump statistics, if specified.
@@ -213,6 +215,8 @@ class HostStubGen(val options: HostStubGenOptions) {
             errors: HostStubGenErrors,
             stats: HostStubGenStats,
             remapper: Remapper?,
+            numShards: Int,
+            shard: Int,
             ) {
         log.i("Converting %s into [stub: %s, impl: %s] ...", inJar, outStubJar, outImplJar)
         log.i("ASM CheckClassAdapter is %s", if (enableChecker) "enabled" else "disabled")
@@ -221,17 +225,32 @@ class HostStubGen(val options: HostStubGenOptions) {
 
         val packageRedirector = PackageRedirectRemapper(options.packageRedirects)
 
+        var itemIndex = 0
+        var numItemsProcessed = 0
+        var numItems = -1 // == Unknown
+
         log.withIndent {
             // Open the input jar file and process each entry.
             ZipFile(inJar).use { inZip ->
+
+                numItems = inZip.size()
+                val shardStart = numItems * shard / numShards
+                val shardNextStart = numItems * (shard + 1) / numShards
+
                 maybeWithZipOutputStream(outStubJar) { stubOutStream ->
                     maybeWithZipOutputStream(outImplJar) { implOutStream ->
                         val inEntries = inZip.entries()
                         while (inEntries.hasMoreElements()) {
                             val entry = inEntries.nextElement()
+                            val inShard = (shardStart <= itemIndex) && (itemIndex < shardNextStart)
+                            itemIndex++
+                            if (!inShard) {
+                                continue
+                            }
                             convertSingleEntry(inZip, entry, stubOutStream, implOutStream,
                                     filter, packageRedirector, remapper,
                                     enableChecker, classes, errors, stats)
+                            numItemsProcessed++
                         }
                         log.i("Converted all entries.")
                     }
@@ -241,7 +260,8 @@ class HostStubGen(val options: HostStubGenOptions) {
             }
         }
         val end = System.currentTimeMillis()
-        log.i("Done transforming the jar in %.1f second(s).", (end - start) / 1000.0)
+        log.i("Done transforming the jar in %.1f second(s). %d / %d item(s) processed.",
+            (end - start) / 1000.0, numItemsProcessed, numItems)
     }
 
     private fun <T> maybeWithZipOutputStream(filename: String?, block: (ZipOutputStream?) -> T): T {
