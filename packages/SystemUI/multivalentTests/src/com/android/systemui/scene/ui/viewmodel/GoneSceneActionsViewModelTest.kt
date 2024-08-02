@@ -25,6 +25,7 @@ import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.flags.EnableSceneContainer
 import com.android.systemui.kosmos.testScope
+import com.android.systemui.lifecycle.activateIn
 import com.android.systemui.scene.shared.model.TransitionKeys.ToSplitShade
 import com.android.systemui.shade.data.repository.shadeRepository
 import com.android.systemui.shade.domain.interactor.shadeInteractor
@@ -42,25 +43,26 @@ import org.junit.runner.RunWith
 @RunWith(AndroidJUnit4::class)
 @TestableLooper.RunWithLooper
 @EnableSceneContainer
-class GoneSceneViewModelTest : SysuiTestCase() {
+class GoneSceneActionsViewModelTest : SysuiTestCase() {
 
     private val kosmos = testKosmos()
     private val testScope = kosmos.testScope
     private val shadeRepository by lazy { kosmos.shadeRepository }
-    private lateinit var underTest: GoneSceneViewModel
+    private lateinit var underTest: GoneSceneActionsViewModel
 
     @Before
     fun setUp() {
         underTest =
-            GoneSceneViewModel(
+            GoneSceneActionsViewModel(
                 shadeInteractor = kosmos.shadeInteractor,
             )
+        underTest.activateIn(testScope)
     }
 
     @Test
     fun downTransitionKey_splitShadeEnabled_isGoneToSplitShade() =
         testScope.runTest {
-            val destinationScenes by collectLastValue(underTest.destinationScenes)
+            val destinationScenes by collectLastValue(underTest.actions)
             shadeRepository.setShadeLayoutWide(true)
             runCurrent()
 
@@ -71,7 +73,7 @@ class GoneSceneViewModelTest : SysuiTestCase() {
     @Test
     fun downTransitionKey_splitShadeDisabled_isNull() =
         testScope.runTest {
-            val destinationScenes by collectLastValue(underTest.destinationScenes)
+            val destinationScenes by collectLastValue(underTest.actions)
             shadeRepository.setShadeLayoutWide(false)
             runCurrent()
 
