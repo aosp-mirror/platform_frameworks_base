@@ -93,11 +93,15 @@ fun PinPad(
         }
     }
 
+    // set the focus, so adb can send the key events for testing.
+    val focusRequester = FocusRequester()
+    LaunchedEffect(Unit) { focusRequester.requestFocus() }
+
     VerticalGrid(
         columns = columns,
         verticalSpacing = verticalSpacing,
         horizontalSpacing = calculateHorizontalSpacingBetweenColumns(gridWidth = 300.dp),
-        modifier = modifier,
+        modifier = modifier.focusRequester(focusRequester)
     ) {
         repeat(9) { index ->
             DigitButton(
@@ -285,26 +289,26 @@ private fun PinPadButton(
     Box(
         contentAlignment = Alignment.Center,
         modifier =
-        modifier
-            .focusRequester(FocusRequester.Default)
-            .focusable()
-            .sizeIn(maxWidth = pinButtonMaxSize, maxHeight = pinButtonMaxSize)
-            .aspectRatio(1f)
-            .drawBehind {
-                drawRoundRect(
-                    color = containerColor,
-                    cornerRadius = CornerRadius(cornerRadius.toPx()),
-                )
-            }
-            .clip(CircleShape)
-            .thenIf(isEnabled) {
-                Modifier.combinedClickable(
-                    interactionSource = interactionSource,
-                    indication = indication,
-                    onClick = onClicked,
-                    onLongClick = onLongPressed
-                )
-            },
+            modifier
+                .focusRequester(FocusRequester.Default)
+                .focusable()
+                .sizeIn(maxWidth = pinButtonMaxSize, maxHeight = pinButtonMaxSize)
+                .aspectRatio(1f)
+                .drawBehind {
+                    drawRoundRect(
+                        color = containerColor,
+                        cornerRadius = CornerRadius(cornerRadius.toPx()),
+                    )
+                }
+                .clip(CircleShape)
+                .thenIf(isEnabled) {
+                    Modifier.combinedClickable(
+                        interactionSource = interactionSource,
+                        indication = indication,
+                        onClick = onClicked,
+                        onLongClick = onLongPressed
+                    )
+                },
     ) {
         content(contentColor::value)
     }

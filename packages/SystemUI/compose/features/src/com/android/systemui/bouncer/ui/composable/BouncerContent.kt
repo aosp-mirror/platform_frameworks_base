@@ -102,6 +102,7 @@ import com.android.systemui.bouncer.ui.viewmodel.PatternBouncerViewModel
 import com.android.systemui.bouncer.ui.viewmodel.PinBouncerViewModel
 import com.android.systemui.common.shared.model.Text.Companion.loadText
 import com.android.systemui.common.ui.compose.Icon
+import com.android.systemui.compose.modifiers.sysuiResTag
 import com.android.systemui.fold.ui.composable.foldPosture
 import com.android.systemui.fold.ui.helper.FoldPosture
 import com.android.systemui.res.R
@@ -259,8 +260,11 @@ private fun SplitLayout(
                         viewModel = viewModel.message,
                         modifier = Modifier.align(Alignment.TopCenter),
                     )
-
-                    OutputArea(viewModel = viewModel, modifier = Modifier.align(Alignment.Center))
+                    OutputArea(
+                        viewModel = viewModel,
+                        modifier =
+                            Modifier.align(Alignment.Center).sysuiResTag("bouncer_text_entry")
+                    )
 
                     ActionArea(
                         viewModel = viewModel,
@@ -310,8 +314,11 @@ private fun SplitLayout(
                         StatusMessage(
                             viewModel = viewModel.message,
                         )
-
-                        OutputArea(viewModel = viewModel, modifier = Modifier.padding(top = 24.dp))
+                        OutputArea(
+                            viewModel = viewModel,
+                            modifier =
+                                Modifier.padding(top = 24.dp).sysuiResTag("bouncer_text_entry")
+                        )
                     }
                 }
                 else -> Unit
@@ -417,10 +424,9 @@ private fun BesideUserSwitcherLayout(
                     StatusMessage(
                         viewModel = viewModel.message,
                     )
-
                     OutputArea(
                         viewModel = viewModel,
-                        modifier = Modifier.padding(top = 24.dp).testTag("OutputArea")
+                        modifier = Modifier.padding(top = 24.dp).sysuiResTag("bouncer_text_entry")
                     )
                 }
             },
@@ -485,7 +491,6 @@ private fun BelowUserSwitcherLayout(
                 StatusMessage(
                     viewModel = viewModel.message,
                 )
-
                 OutputArea(viewModel = viewModel, modifier = Modifier.padding(top = 24.dp))
 
                 InputArea(
@@ -654,17 +659,16 @@ private fun OutputArea(
 ) {
     val authMethodViewModel: AuthMethodBouncerViewModel? by
         viewModel.authMethodViewModel.collectAsStateWithLifecycle()
-
     when (val nonNullViewModel = authMethodViewModel) {
         is PinBouncerViewModel ->
             PinInputDisplay(
                 viewModel = nonNullViewModel,
-                modifier = modifier,
+                modifier = modifier.sysuiResTag("bouncer_text_entry")
             )
         is PasswordBouncerViewModel ->
             PasswordBouncer(
                 viewModel = nonNullViewModel,
-                modifier = modifier,
+                modifier = modifier.sysuiResTag("bouncer_text_entry")
             )
         else -> Unit
     }
