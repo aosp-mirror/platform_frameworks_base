@@ -881,6 +881,11 @@
     <!-- UI debug setting: show physical key presses summary [CHAR LIMIT=150] -->
     <string name="show_key_presses_summary">Show visual feedback for physical key presses</string>
 
+    <!-- UI debug setting: Title text for a debug setting that enables a visualization of touchpad input in a window on the screen  [CHAR LIMIT=50] -->
+    <string name="touchpad_visualizer">Show touchpad input</string>
+    <!-- UI debug setting: Summary text for a debug setting that enables a visualization of touchpad input in a window on the screen [CHAR LIMIT=150] -->
+    <string name="touchpad_visualizer_summary">Screen overlay displaying touchpad input data and recognized gestures</string>
+
     <!-- UI debug setting: show where surface updates happen? [CHAR LIMIT=25] -->
     <string name="show_screen_updates">Show surface updates</string>
     <!-- UI debug setting: show surface updates summary [CHAR LIMIT=50] -->

@@ -300,7 +300,9 @@ public class LetterboxUiControllerTest extends WindowTestsBase {
         // Vertical thin letterbox disabled
         doReturn(-1).when(mActivity.mWmService.mAppCompatConfiguration)
                 .getThinLetterboxHeightPx();
-        assertFalse(mController.isVerticalThinLetterboxed());
+        final AppCompatReachabilityOverrides reachabilityOverrides = mActivity.mAppCompatController
+                .getAppCompatReachabilityOverrides();
+        assertFalse(reachabilityOverrides.isVerticalThinLetterboxed());
         // Define a Task 100x100
         final Task task = mock(Task.class);
         doReturn(new Rect(0, 0, 100, 100)).when(task).getBounds();
@@ -309,21 +311,21 @@ public class LetterboxUiControllerTest extends WindowTestsBase {
 
         // Vertical thin letterbox disabled without Task
         doReturn(null).when(mActivity).getTask();
-        assertFalse(mController.isVerticalThinLetterboxed());
+        assertFalse(reachabilityOverrides.isVerticalThinLetterboxed());
         // Assign a Task for the Activity
         doReturn(task).when(mActivity).getTask();
 
         // (task.width() - act.width()) / 2  = 5 < 10
         doReturn(new Rect(5, 5, 95, 95)).when(mActivity).getBounds();
-        assertTrue(mController.isVerticalThinLetterboxed());
+        assertTrue(reachabilityOverrides.isVerticalThinLetterboxed());
 
         // (task.width() - act.width()) / 2  = 10 = 10
         doReturn(new Rect(10, 10, 90, 90)).when(mActivity).getBounds();
-        assertTrue(mController.isVerticalThinLetterboxed());
+        assertTrue(reachabilityOverrides.isVerticalThinLetterboxed());
 
         // (task.width() - act.width()) / 2  = 11 > 10
         doReturn(new Rect(11, 11, 89, 89)).when(mActivity).getBounds();
-        assertFalse(mController.isVerticalThinLetterboxed());
+        assertFalse(reachabilityOverrides.isVerticalThinLetterboxed());
     }
 
     @Test
@@ -331,7 +333,9 @@ public class LetterboxUiControllerTest extends WindowTestsBase {
         // Horizontal thin letterbox disabled
         doReturn(-1).when(mActivity.mWmService.mAppCompatConfiguration)
                 .getThinLetterboxWidthPx();
-        assertFalse(mController.isHorizontalThinLetterboxed());
+        final AppCompatReachabilityOverrides reachabilityOverrides = mActivity.mAppCompatController
+                .getAppCompatReachabilityOverrides();
+        assertFalse(reachabilityOverrides.isHorizontalThinLetterboxed());
         // Define a Task 100x100
         final Task task = mock(Task.class);
         doReturn(new Rect(0, 0, 100, 100)).when(task).getBounds();
@@ -340,51 +344,55 @@ public class LetterboxUiControllerTest extends WindowTestsBase {
 
         // Vertical thin letterbox disabled without Task
         doReturn(null).when(mActivity).getTask();
-        assertFalse(mController.isHorizontalThinLetterboxed());
+        assertFalse(reachabilityOverrides.isHorizontalThinLetterboxed());
         // Assign a Task for the Activity
         doReturn(task).when(mActivity).getTask();
 
         // (task.height() - act.height()) / 2  = 5 < 10
         doReturn(new Rect(5, 5, 95, 95)).when(mActivity).getBounds();
-        assertTrue(mController.isHorizontalThinLetterboxed());
+        assertTrue(reachabilityOverrides.isHorizontalThinLetterboxed());
 
         // (task.height() - act.height()) / 2  = 10 = 10
         doReturn(new Rect(10, 10, 90, 90)).when(mActivity).getBounds();
-        assertTrue(mController.isHorizontalThinLetterboxed());
+        assertTrue(reachabilityOverrides.isHorizontalThinLetterboxed());
 
         // (task.height() - act.height()) / 2  = 11 > 10
         doReturn(new Rect(11, 11, 89, 89)).when(mActivity).getBounds();
-        assertFalse(mController.isHorizontalThinLetterboxed());
+        assertFalse(reachabilityOverrides.isHorizontalThinLetterboxed());
     }
 
     @Test
     @EnableFlags(Flags.FLAG_DISABLE_THIN_LETTERBOXING_POLICY)
     public void testAllowReachabilityForThinLetterboxWithFlagEnabled() {
-        spyOn(mController);
-        doReturn(true).when(mController).isVerticalThinLetterboxed();
-        assertFalse(mController.allowVerticalReachabilityForThinLetterbox());
-        doReturn(true).when(mController).isHorizontalThinLetterboxed();
-        assertFalse(mController.allowHorizontalReachabilityForThinLetterbox());
+        final AppCompatReachabilityOverrides reachabilityOverrides =
+                mActivity.mAppCompatController.getAppCompatReachabilityOverrides();
+        spyOn(reachabilityOverrides);
+        doReturn(true).when(reachabilityOverrides).isVerticalThinLetterboxed();
+        assertFalse(reachabilityOverrides.allowVerticalReachabilityForThinLetterbox());
+        doReturn(true).when(reachabilityOverrides).isHorizontalThinLetterboxed();
+        assertFalse(reachabilityOverrides.allowHorizontalReachabilityForThinLetterbox());
 
-        doReturn(false).when(mController).isVerticalThinLetterboxed();
-        assertTrue(mController.allowVerticalReachabilityForThinLetterbox());
-        doReturn(false).when(mController).isHorizontalThinLetterboxed();
-        assertTrue(mController.allowHorizontalReachabilityForThinLetterbox());
+        doReturn(false).when(reachabilityOverrides).isVerticalThinLetterboxed();
+        assertTrue(reachabilityOverrides.allowVerticalReachabilityForThinLetterbox());
+        doReturn(false).when(reachabilityOverrides).isHorizontalThinLetterboxed();
+        assertTrue(reachabilityOverrides.allowHorizontalReachabilityForThinLetterbox());
     }
 
     @Test
     @DisableFlags(Flags.FLAG_DISABLE_THIN_LETTERBOXING_POLICY)
     public void testAllowReachabilityForThinLetterboxWithFlagDisabled() {
-        spyOn(mController);
-        doReturn(true).when(mController).isVerticalThinLetterboxed();
-        assertTrue(mController.allowVerticalReachabilityForThinLetterbox());
-        doReturn(true).when(mController).isHorizontalThinLetterboxed();
-        assertTrue(mController.allowHorizontalReachabilityForThinLetterbox());
+        final AppCompatReachabilityOverrides reachabilityOverrides =
+                mActivity.mAppCompatController.getAppCompatReachabilityOverrides();
+        spyOn(reachabilityOverrides);
+        doReturn(true).when(reachabilityOverrides).isVerticalThinLetterboxed();
+        assertTrue(reachabilityOverrides.allowVerticalReachabilityForThinLetterbox());
+        doReturn(true).when(reachabilityOverrides).isHorizontalThinLetterboxed();
+        assertTrue(reachabilityOverrides.allowHorizontalReachabilityForThinLetterbox());
 
-        doReturn(false).when(mController).isVerticalThinLetterboxed();
-        assertTrue(mController.allowVerticalReachabilityForThinLetterbox());
-        doReturn(false).when(mController).isHorizontalThinLetterboxed();
-        assertTrue(mController.allowHorizontalReachabilityForThinLetterbox());
+        doReturn(false).when(reachabilityOverrides).isVerticalThinLetterboxed();
+        assertTrue(reachabilityOverrides.allowVerticalReachabilityForThinLetterbox());
+        doReturn(false).when(reachabilityOverrides).isHorizontalThinLetterboxed();
+        assertTrue(reachabilityOverrides.allowHorizontalReachabilityForThinLetterbox());
     }
 
     @Test

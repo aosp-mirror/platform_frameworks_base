@@ -19,9 +19,10 @@ package com.android.systemui.education.domain.interactor
 import com.android.systemui.CoreStartable
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
+import com.android.systemui.contextualeducation.GestureType
+import com.android.systemui.contextualeducation.GestureType.BACK
 import com.android.systemui.education.data.model.GestureEduModel
 import com.android.systemui.education.data.repository.ContextualEducationRepository
-import com.android.systemui.shared.education.GestureType
 import com.android.systemui.user.domain.interactor.SelectedUserInteractor
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
@@ -46,7 +47,7 @@ constructor(
     private val repository: ContextualEducationRepository,
 ) : CoreStartable {
 
-    val backGestureModelFlow = readEduModelsOnSignalCountChanged(GestureType.BACK_GESTURE)
+    val backGestureModelFlow = readEduModelsOnSignalCountChanged(BACK)
 
     override fun start() {
         backgroundScope.launch {

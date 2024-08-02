@@ -220,7 +220,7 @@ public final class ImeVisibilityStateComputer {
             @Override
             public void onImeTargetOverlayVisibilityChanged(@NonNull IBinder overlayWindowToken,
                     @WindowManager.LayoutParams.WindowType int windowType, boolean visible,
-                    boolean removed) {
+                    boolean removed, int displayId) {
                 // Ignoring the starting window since it's ok to cover the IME target
                 // window in temporary without affecting the IME visibility.
                 final boolean hasOverlay = visible && !removed
@@ -232,7 +232,7 @@ public final class ImeVisibilityStateComputer {
 
             @Override
             public void onImeInputTargetVisibilityChanged(IBinder imeInputTarget,
-                    boolean visibleRequested, boolean removed) {
+                    boolean visibleRequested, boolean removed, int displayId) {
                 final boolean visibleAndNotRemoved = visibleRequested && !removed;
                 synchronized (ImfLock.class) {
                     if (visibleAndNotRemoved) {

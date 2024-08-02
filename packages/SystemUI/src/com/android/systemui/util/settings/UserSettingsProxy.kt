@@ -23,7 +23,6 @@ import android.net.Uri
 import android.os.UserHandle
 import android.provider.Settings.SettingNotFoundException
 import com.android.app.tracing.TraceUtils.trace
-import com.android.systemui.settings.UserTracker
 import com.android.systemui.util.settings.SettingsProxy.Companion.parseFloat
 import com.android.systemui.util.settings.SettingsProxy.Companion.parseFloatOrThrow
 import com.android.systemui.util.settings.SettingsProxy.Companion.parseLongOrThrow
@@ -46,8 +45,8 @@ import kotlinx.coroutines.withContext
  * instances, unifying setting related actions in one place.
  */
 interface UserSettingsProxy : SettingsProxy {
-    /** Returns that [UserTracker] this instance was constructed with. */
-    val userTracker: UserTracker
+    val currentUserProvider: SettingsProxy.CurrentUserIdProvider
+
     /** Returns the user id for the associated [ContentResolver]. */
     var userId: Int
         get() = getContentResolver().userId
@@ -64,7 +63,7 @@ interface UserSettingsProxy : SettingsProxy {
     fun getRealUserHandle(userHandle: Int): Int {
         return if (userHandle != UserHandle.USER_CURRENT) {
             userHandle
-        } else userTracker.userId
+        } else currentUserProvider.getUserId()
     }
 
     @WorkerThread

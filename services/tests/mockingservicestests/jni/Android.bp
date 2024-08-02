@@ -21,6 +21,7 @@ cc_library_shared {
 
     srcs: [
         ":lib_cachedAppOptimizer_native",
+        ":lib_freezer_native",
         ":lib_gameManagerService_native",
         ":lib_oomConnection_native",
         "onload.cpp",

@@ -18,7 +18,7 @@ package com.android.compose.animation.scene.transition.link
 
 import com.android.compose.animation.scene.SceneKey
 import com.android.compose.animation.scene.TransitionKey
-import com.android.compose.animation.scene.TransitionState
+import com.android.compose.animation.scene.content.state.TransitionState
 import kotlinx.coroutines.Job
 
 /** A linked transition which is driven by a [originalTransition]. */

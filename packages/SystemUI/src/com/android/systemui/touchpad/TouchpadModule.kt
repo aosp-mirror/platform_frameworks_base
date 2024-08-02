@@ -16,6 +16,7 @@
 
 package com.android.systemui.touchpad
 
+import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.touchpad.data.repository.TouchpadRepository
 import com.android.systemui.touchpad.data.repository.TouchpadRepositoryImpl
 import dagger.Binds
@@ -25,5 +26,6 @@ import dagger.Module
 abstract class TouchpadModule {
 
     @Binds
+    @SysUISingleton
     abstract fun bindTouchpadRepository(repository: TouchpadRepositoryImpl): TouchpadRepository
 }

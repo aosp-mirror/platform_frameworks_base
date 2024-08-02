@@ -497,7 +497,7 @@
 
     <!-- The maximum height of the handle menu in desktop mode. Four pills (52dp each) plus 2dp
         spacing between them plus 4dp top padding. -->
-    <dimen name="desktop_mode_handle_menu_height">218dp</dimen>
+    <dimen name="desktop_mode_handle_menu_height">270dp</dimen>
 
     <!-- The elevation set on the handle menu pills. -->
     <dimen name="desktop_mode_handle_menu_pill_elevation">1dp</dimen>
@@ -508,8 +508,11 @@
     <!-- The height of the handle menu's "Windowing" pill in desktop mode. -->
     <dimen name="desktop_mode_handle_menu_windowing_pill_height">52dp</dimen>
 
-    <!-- The height of the handle menu's "More Actions" pill in desktop mode. -->
-    <dimen name="desktop_mode_handle_menu_more_actions_pill_height">52dp</dimen>
+    <!-- The maximum height of the handle menu's "New Window" button in desktop mode. -->
+    <dimen name="desktop_mode_handle_menu_new_window_height">52dp</dimen>
+
+    <!-- The maximum height of the handle menu's "Screenshot" button in desktop mode. -->
+    <dimen name="desktop_mode_handle_menu_screenshot_height">52dp</dimen>
 
     <!-- The height of the handle menu's "Open in browser" pill in desktop mode. -->
     <dimen name="desktop_mode_handle_menu_open_in_browser_pill_height">52dp</dimen>

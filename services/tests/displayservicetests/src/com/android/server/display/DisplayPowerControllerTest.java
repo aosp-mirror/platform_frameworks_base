@@ -936,6 +936,9 @@ public final class DisplayPowerControllerTest {
 
     @Test
     public void testSetScreenOffBrightnessSensorDisabled_DisplayIsOn() {
+        Settings.System.putInt(mContext.getContentResolver(),
+                Settings.System.SCREEN_BRIGHTNESS_MODE,
+                Settings.System.SCREEN_BRIGHTNESS_MODE_AUTOMATIC);
         DisplayPowerRequest dpr = new DisplayPowerRequest();
         dpr.policy = DisplayPowerRequest.POLICY_BRIGHT;
 
@@ -948,10 +951,31 @@ public final class DisplayPowerControllerTest {
 
     @Test
     public void testSetScreenOffBrightnessSensorDisabled_DisplayIsAFollower() {
+        Settings.System.putInt(mContext.getContentResolver(),
+                Settings.System.SCREEN_BRIGHTNESS_MODE,
+                Settings.System.SCREEN_BRIGHTNESS_MODE_AUTOMATIC);
         DisplayPowerRequest dpr = new DisplayPowerRequest();
         dpr.policy = DisplayPowerRequest.POLICY_OFF;
 
         mHolder.dpc.onDisplayChanged(mHolder.hbmMetadata, /* leadDisplayId= */ 42);
+        mHolder.dpc.requestPowerState(dpr, /* waitForNegativeProximity= */ false);
+        advanceTime(1); // Run updatePowerState
+
+        verify(mHolder.screenOffBrightnessSensorController, atLeastOnce())
+                .setLightSensorEnabled(false);
+    }
+
+    @Test
+    public void testSetScreenOffBrightnessSensorDisabled_AutoBrightnessInDoze() {
+        Settings.System.putInt(mContext.getContentResolver(),
+                Settings.System.SCREEN_BRIGHTNESS_MODE,
+                Settings.System.SCREEN_BRIGHTNESS_MODE_AUTOMATIC);
+        mContext.getOrCreateTestableResources().addOverride(
+                com.android.internal.R.bool.config_allowAutoBrightnessWhileDozing, true);
+        mHolder = createDisplayPowerController(DISPLAY_ID, UNIQUE_ID);
+        DisplayPowerRequest dpr = new DisplayPowerRequest();
+        dpr.policy = DisplayPowerRequest.POLICY_DOZE;
+
         mHolder.dpc.requestPowerState(dpr, /* waitForNegativeProximity= */ false);
         advanceTime(1); // Run updatePowerState
 
@@ -1589,16 +1613,21 @@ public final class DisplayPowerControllerTest {
         advanceTime(1); // Run updatePowerState
 
         reset(mHolder.wakelockController);
+        when(mHolder.wakelockController
+                .acquireWakelock(WakelockController.WAKE_LOCK_OVERRIDE_DOZE_SCREEN_STATE))
+                .thenReturn(true);
         mHolder.dpc.overrideDozeScreenState(
                 supportedTargetState, Display.STATE_REASON_DEFAULT_POLICY);
-        advanceTime(1); // Run updatePowerState
 
         // Should get a wakelock to notify powermanager
-        verify(mHolder.wakelockController, atLeastOnce()).acquireWakelock(
-                eq(WakelockController.WAKE_LOCK_UNFINISHED_BUSINESS));
+        verify(mHolder.wakelockController).acquireWakelock(
+                eq(WakelockController.WAKE_LOCK_OVERRIDE_DOZE_SCREEN_STATE));
 
+        advanceTime(1); // Run updatePowerState
         verify(mHolder.displayPowerState)
                 .setScreenState(supportedTargetState, Display.STATE_REASON_DEFAULT_POLICY);
+        verify(mHolder.wakelockController).releaseWakelock(
+                eq(WakelockController.WAKE_LOCK_OVERRIDE_DOZE_SCREEN_STATE));
     }
 
     @Test

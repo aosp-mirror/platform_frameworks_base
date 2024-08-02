@@ -17,6 +17,9 @@
 package com.android.systemui.statusbar.notification.interruption
 
 import android.Manifest.permission
+import android.app.Notification.CATEGORY_ALARM
+import android.app.Notification.CATEGORY_CAR_EMERGENCY
+import android.app.Notification.CATEGORY_CAR_WARNING
 import android.app.Notification.CATEGORY_EVENT
 import android.app.Notification.CATEGORY_REMINDER
 import android.app.NotificationManager
@@ -250,6 +253,61 @@ class VisualInterruptionDecisionProviderImplTest : VisualInterruptionDecisionPro
                 buildEntry {
                     importance = NotificationManager.IMPORTANCE_HIGH
                     category = CATEGORY_EVENT
+                }
+            )
+        }
+    }
+
+    @Test
+    fun testAvalancheFilter_duringAvalanche_allowCategoryAlarm() {
+        avalancheProvider.startTime = whenAgo(10)
+
+        withFilter(
+            AvalancheSuppressor(avalancheProvider, systemClock, settingsInteractor, packageManager,
+                uiEventLogger, context, notificationManager)
+        ) {
+            ensurePeekState()
+            assertShouldHeadsUp(
+                buildEntry {
+                    importance = NotificationManager.IMPORTANCE_HIGH
+                    category = CATEGORY_ALARM
+                }
+            )
+        }
+    }
+
+    @Test
+    fun testAvalancheFilter_duringAvalanche_allowCategoryCarEmergency() {
+        avalancheProvider.startTime = whenAgo(10)
+
+        withFilter(
+            AvalancheSuppressor(avalancheProvider, systemClock, settingsInteractor, packageManager,
+                uiEventLogger, context, notificationManager)
+        ) {
+            ensurePeekState()
+            assertShouldHeadsUp(
+                buildEntry {
+                    importance = NotificationManager.IMPORTANCE_HIGH
+                    category = CATEGORY_CAR_EMERGENCY
+
+                }
+            )
+        }
+    }
+
+    @Test
+    fun testAvalancheFilter_duringAvalanche_allowCategoryCarWarning() {
+        avalancheProvider.startTime = whenAgo(10)
+
+        withFilter(
+            AvalancheSuppressor(avalancheProvider, systemClock, settingsInteractor, packageManager,
+                uiEventLogger, context, notificationManager)
+        ) {
+            ensurePeekState()
+            assertShouldHeadsUp(
+                buildEntry {
+                    importance = NotificationManager.IMPORTANCE_HIGH
+                    category = CATEGORY_CAR_WARNING
                 }
             )
         }

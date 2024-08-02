@@ -216,6 +216,8 @@ public class PowerStatsExporter {
             PowerStatsLayout layout) {
         AggregatedPowerStatsConfig.PowerComponent powerComponent = powerComponentStats.getConfig();
         int powerComponentId = powerComponent.getPowerComponentId();
+        boolean isCustomComponent =
+                powerComponentId >= BatteryConsumer.FIRST_CUSTOM_POWER_COMPONENT_ID;
         PowerStats.Descriptor descriptor = powerComponentStats.getPowerStatsDescriptor();
         long[] uidStats = new long[descriptor.uidStatsArrayLength];
 
@@ -223,7 +225,7 @@ public class PowerStatsExporter {
         boolean breakDownByProcState = batteryUsageStatsBuilder.isProcessStateDataNeeded()
                 && powerComponent
                 .getUidStateConfig()[AggregatedPowerStatsConfig.STATE_PROCESS_STATE].isTracked()
-                && powerComponentId < BatteryConsumer.FIRST_CUSTOM_POWER_COMPONENT_ID;
+                && !isCustomComponent;
 
         ArrayList<Integer> uids = new ArrayList<>();
         powerComponentStats.collectUids(uids);
@@ -237,7 +239,7 @@ public class PowerStatsExporter {
             }
 
             for (int powerState = 0; powerState < BatteryConsumer.POWER_STATE_COUNT; powerState++) {
-                if (batteryUsageStatsBuilder.isPowerStateDataNeeded()) {
+                if (batteryUsageStatsBuilder.isPowerStateDataNeeded() && !isCustomComponent) {
                     if (powerState == BatteryConsumer.POWER_STATE_UNSPECIFIED) {
                         continue;
                     }

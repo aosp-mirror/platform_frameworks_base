@@ -1071,6 +1071,27 @@ public class VibrationEffectTest {
                 .isHapticFeedbackCandidate());
     }
 
+    @Test
+    public void testParcelingComposed() {
+        Parcel p = Parcel.obtain();
+        VibrationEffect effect = VibrationEffect.createPredefined(VibrationEffect.EFFECT_CLICK);
+        effect.writeToParcel(p, 0);
+        p.setDataPosition(0);
+        VibrationEffect parceledEffect = VibrationEffect.Composed.CREATOR.createFromParcel(p);
+        assertThat(parceledEffect).isEqualTo(effect);
+    }
+
+    @Test
+    @RequiresFlagsEnabled(android.os.vibrator.Flags.FLAG_VENDOR_VIBRATION_EFFECTS)
+    public void testParcelingVendorEffect() {
+        Parcel p = Parcel.obtain();
+        VibrationEffect effect = VibrationEffect.createVendorEffect(createNonEmptyBundle());
+        effect.writeToParcel(p, 0);
+        p.setDataPosition(0);
+        VibrationEffect parceledEffect = VibrationEffect.VendorEffect.CREATOR.createFromParcel(p);
+        assertThat(parceledEffect).isEqualTo(effect);
+    }
+
     private void assertArrayEq(long[] expected, long[] actual) {
         assertTrue(
                 String.format("Expected pattern %s, but was %s",

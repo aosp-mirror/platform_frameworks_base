@@ -91,6 +91,8 @@ flag {
     bug: "283989236"
 }
 
+# This flag is enabled since V but not a MUST requirement in CDD yet, so it needs to stay around
+# for now and any code working with it should keep checking the flag.
 flag {
     name: "signature_permission_allowlist_enabled"
     is_fixed_read_only: true

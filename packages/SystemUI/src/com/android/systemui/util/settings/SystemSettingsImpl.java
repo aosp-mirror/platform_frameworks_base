@@ -22,23 +22,23 @@ import android.provider.Settings;
 
 import androidx.annotation.NonNull;
 
-import com.android.systemui.settings.UserTracker;
 import com.android.systemui.util.kotlin.SettingsSingleThreadBackground;
-
-import javax.inject.Inject;
 
 import kotlinx.coroutines.CoroutineDispatcher;
 
+import javax.inject.Inject;
+
 class SystemSettingsImpl implements SystemSettings {
     private final ContentResolver mContentResolver;
-    private final UserTracker mUserTracker;
+    private final CurrentUserIdProvider mCurrentUserProvider;
     private final CoroutineDispatcher mBgCoroutineDispatcher;
 
     @Inject
-    SystemSettingsImpl(ContentResolver contentResolver, UserTracker userTracker,
+    SystemSettingsImpl(ContentResolver contentResolver,
+            CurrentUserIdProvider currentUserProvider,
             @SettingsSingleThreadBackground CoroutineDispatcher bgDispatcher) {
         mContentResolver = contentResolver;
-        mUserTracker = userTracker;
+        mCurrentUserProvider = currentUserProvider;
         mBgCoroutineDispatcher = bgDispatcher;
     }
 
@@ -48,8 +48,8 @@ class SystemSettingsImpl implements SystemSettings {
     }
 
     @Override
-    public UserTracker getUserTracker() {
-        return mUserTracker;
+    public CurrentUserIdProvider getCurrentUserProvider() {
+        return mCurrentUserProvider;
     }
 
     @Override
