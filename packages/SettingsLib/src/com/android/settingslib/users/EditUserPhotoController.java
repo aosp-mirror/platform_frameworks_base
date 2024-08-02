@@ -18,6 +18,7 @@ package com.android.settingslib.users;
 
 import android.app.Activity;
 import android.content.ClipData;
+import android.content.ContentProvider;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
@@ -137,6 +138,12 @@ public class EditUserPhotoController {
         if (!ContentResolver.SCHEME_CONTENT.equals(pictureUri.getScheme())) {
             Log.e(TAG, "Invalid pictureUri scheme: " + pictureUri.getScheme());
             EventLog.writeEvent(0x534e4554, "172939189", -1, pictureUri.getPath());
+            return false;
+        }
+
+        final int currentUserId = UserHandle.myUserId();
+        if (currentUserId != ContentProvider.getUserIdFromUri(pictureUri, currentUserId)) {
+            Log.e(TAG, "Invalid pictureUri: " + pictureUri);
             return false;
         }
 
