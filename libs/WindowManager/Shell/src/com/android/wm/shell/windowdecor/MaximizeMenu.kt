@@ -146,7 +146,8 @@ class MaximizeMenu(
                 menuHeight,
                 WindowManager.LayoutParams.TYPE_APPLICATION,
                 WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
-                        or WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH,
+                        or WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH
+                        or WindowManager.LayoutParams.FLAG_SPLIT_TOUCH,
                 PixelFormat.TRANSPARENT
         )
         lp.title = "Maximize Menu for Task=" + taskInfo.taskId

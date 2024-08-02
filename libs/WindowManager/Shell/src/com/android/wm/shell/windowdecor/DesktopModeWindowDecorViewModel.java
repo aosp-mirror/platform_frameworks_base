@@ -629,13 +629,21 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
                     && id != R.id.maximize_window) {
                 return false;
             }
-            moveTaskToFront(decoration.mTaskInfo);
 
             final int actionMasked = e.getActionMasked();
             final boolean isDown = actionMasked == MotionEvent.ACTION_DOWN;
             final boolean isUpOrCancel = actionMasked == MotionEvent.ACTION_CANCEL
                     || actionMasked == MotionEvent.ACTION_UP;
             if (isDown) {
+                // Only move to front on down to prevent 2+ tasks from fighting
+                // (and thus flickering) for front status when drag-moving them simultaneously with
+                // two pointers.
+                // TODO(b/356962065): during a drag-move, this shouldn't be a WCT - just move the
+                //  task surface to the top of other tasks and reorder once the user releases the
+                //  gesture together with the bounds' WCT. This is probably still valid for other
+                //  gestures like simple clicks.
+                moveTaskToFront(decoration.mTaskInfo);
+
                 final boolean downInCustomizableCaptionRegion =
                         decoration.checkTouchEventInCustomizableRegion(e);
                 final boolean downInExclusionRegion = mExclusionRegion.contains(
