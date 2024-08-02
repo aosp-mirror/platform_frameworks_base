@@ -357,6 +357,7 @@ public class AlarmManagerService extends SystemService {
     }
 
     // TODO(b/172085676): Move inside alarm store.
+    @GuardedBy("mLock")
     private final SparseArray<AlarmManager.AlarmClockInfo> mNextAlarmClockForUser =
             new SparseArray<>();
     private final SparseArray<AlarmManager.AlarmClockInfo> mTmpSparseAlarmClockArray =
@@ -2615,6 +2616,13 @@ public class AlarmManagerService extends SystemService {
             synchronized (mLock) {
                 mInFlightListeners.add(callback);
             }
+        }
+
+        /** @see AlarmManagerInternal#getNextAlarmTriggerTimeForUser(int) */
+        @Override
+        public long getNextAlarmTriggerTimeForUser(@UserIdInt int userId) {
+            final AlarmManager.AlarmClockInfo nextAlarm = getNextAlarmClockImpl(userId);
+            return nextAlarm != null ? nextAlarm.getTriggerTime() : 0;
         }
     }
 
