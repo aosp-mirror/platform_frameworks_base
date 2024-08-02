@@ -73,8 +73,7 @@ import javax.inject.Inject;
 
 import dagger.Lazy;
 
-public class MediaProjectionPermissionActivity extends Activity
-        implements DialogInterface.OnClickListener {
+public class MediaProjectionPermissionActivity extends Activity {
     private static final String TAG = "MediaProjectionPermissionActivity";
     private static final float MAX_APP_NAME_SIZE_PX = 500f;
     private static final String ELLIPSIS = "\u2026";
@@ -269,7 +268,8 @@ public class MediaProjectionPermissionActivity extends Activity
         Consumer<BaseMediaProjectionPermissionDialogDelegate<AlertDialog>> onStartRecordingClicked =
                 dialog -> {
                     ScreenShareOption selectedOption = dialog.getSelectedScreenShareOption();
-                    grantMediaProjectionPermission(selectedOption.getMode());
+                    grantMediaProjectionPermission(
+                            selectedOption.getMode(), hasCastingCapabilities);
                 };
         Runnable onCancelClicked = () -> finish(RECORD_CANCEL, /* projection= */ null);
         if (hasCastingCapabilities) {
@@ -305,19 +305,6 @@ public class MediaProjectionPermissionActivity extends Activity
         }
     }
 
-    @Override
-    public void onClick(DialogInterface dialog, int which) {
-        if (which == AlertDialog.BUTTON_POSITIVE) {
-            grantMediaProjectionPermission(ENTIRE_SCREEN);
-        } else {
-            if (mDialog != null) {
-                mDialog.dismiss();
-            }
-            setResult(RESULT_CANCELED);
-            finish(RECORD_CANCEL, /* projection= */ null);
-        }
-    }
-
     private void setUpDialog(AlertDialog dialog) {
         SystemUIDialog.registerDismissListener(dialog);
         SystemUIDialog.applyFlags(dialog);
@@ -345,25 +332,21 @@ public class MediaProjectionPermissionActivity extends Activity
         return false;
     }
 
-    private void grantMediaProjectionPermission(int screenShareMode) {
+    private void grantMediaProjectionPermission(
+            int screenShareMode, boolean hasCastingCapabilities) {
         try {
+            IMediaProjection projection = MediaProjectionServiceHelper.createOrReuseProjection(
+                    mUid, mPackageName, mReviewGrantedConsentRequired);
             if (screenShareMode == ENTIRE_SCREEN) {
-                final IMediaProjection projection =
-                        MediaProjectionServiceHelper.createOrReuseProjection(mUid, mPackageName,
-                                mReviewGrantedConsentRequired);
                 final Intent intent = new Intent();
-                intent.putExtra(MediaProjectionManager.EXTRA_MEDIA_PROJECTION,
-                        projection.asBinder());
+                setCommonIntentExtras(intent, hasCastingCapabilities, projection);
                 setResult(RESULT_OK, intent);
                 finish(RECORD_CONTENT_DISPLAY, projection);
             }
             if (screenShareMode == SINGLE_APP) {
-                IMediaProjection projection = MediaProjectionServiceHelper.createOrReuseProjection(
-                        mUid, mPackageName, mReviewGrantedConsentRequired);
                 final Intent intent = new Intent(this,
                         MediaProjectionAppSelectorActivity.class);
-                intent.putExtra(MediaProjectionManager.EXTRA_MEDIA_PROJECTION,
-                        projection.asBinder());
+                setCommonIntentExtras(intent, hasCastingCapabilities, projection);
                 intent.putExtra(MediaProjectionAppSelectorActivity.EXTRA_HOST_APP_USER_HANDLE,
                         getHostUserHandle());
                 intent.putExtra(
@@ -389,6 +372,19 @@ public class MediaProjectionPermissionActivity extends Activity
                 mDialog.dismiss();
             }
         }
+    }
+
+    private void setCommonIntentExtras(
+            Intent intent,
+            boolean hasCastingCapabilities,
+            IMediaProjection projection) throws RemoteException {
+        intent.putExtra(MediaProjectionManager.EXTRA_MEDIA_PROJECTION,
+                projection.asBinder());
+        intent.putExtra(
+                MediaProjectionAppSelectorActivity.EXTRA_SCREEN_SHARE_TYPE,
+                hasCastingCapabilities
+                        ? MediaProjectionAppSelectorActivity.ScreenShareType.SystemCast.name()
+                        : MediaProjectionAppSelectorActivity.ScreenShareType.ShareToApp.name());
     }
 
     private UserHandle getHostUserHandle() {
