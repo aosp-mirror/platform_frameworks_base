@@ -2108,16 +2108,28 @@ final class DevicePolicyEngine {
                 TypedXmlPullParser parser, Map<PolicyKey, PolicyState<?>> policyStateMap)
                 throws IOException, XmlPullParserException {
             PolicyKey policyKey = null;
+            PolicyDefinition<?> policyDefinition = null;
             PolicyState<?> policyState = null;
             int outerDepth = parser.getDepth();
             while (XmlUtils.nextElementWithin(parser, outerDepth)) {
                 String tag = parser.getName();
                 switch (tag) {
                     case TAG_POLICY_KEY_ENTRY:
-                        policyKey = PolicyDefinition.readPolicyKeyFromXml(parser);
+                        if (Flags.dontReadPolicyDefinition()) {
+                            policyDefinition = PolicyDefinition.readFromXml(parser);
+                            if (policyDefinition != null) {
+                                policyKey = policyDefinition.getPolicyKey();
+                            }
+                        } else {
+                            policyKey = PolicyDefinition.readPolicyKeyFromXml(parser);
+                        }
                         break;
                     case TAG_POLICY_STATE_ENTRY:
-                        policyState = PolicyState.readFromXml(parser);
+                        if (Flags.dontReadPolicyDefinition() && policyDefinition == null) {
+                            Slogf.w(TAG, "Skipping policy state - unknown policy definition");
+                        } else {
+                            policyState = PolicyState.readFromXml(policyDefinition, parser);
+                        }
                         break;
                     default:
                         Slogf.wtf(TAG, "Unknown tag for policy entry" + tag);
