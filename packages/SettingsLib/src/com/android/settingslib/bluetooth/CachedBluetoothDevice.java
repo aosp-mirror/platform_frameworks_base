@@ -1026,21 +1026,29 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
         return mDevice.getBluetoothClass();
     }
 
+    /**
+     * Returns a list of {@link LocalBluetoothProfile} supported by the device.
+     */
     public List<LocalBluetoothProfile> getProfiles() {
         return new ArrayList<>(mProfiles);
     }
 
-    public List<LocalBluetoothProfile> getConnectableProfiles() {
-        List<LocalBluetoothProfile> connectableProfiles =
-                new ArrayList<LocalBluetoothProfile>();
+    /**
+     * Returns a list of {@link LocalBluetoothProfile} that are user-accessible from UI to
+     * initiate a connection.
+     *
+     * Note: Use {@link #getProfiles()} to retrieve all supported profiles on the device.
+     */
+    public List<LocalBluetoothProfile> getUiAccessibleProfiles() {
+        List<LocalBluetoothProfile> accessibleProfiles = new ArrayList<>();
         synchronized (mProfileLock) {
             for (LocalBluetoothProfile profile : mProfiles) {
                 if (profile.accessProfileEnabled()) {
-                    connectableProfiles.add(profile);
+                    accessibleProfiles.add(profile);
                 }
             }
         }
-        return connectableProfiles;
+        return accessibleProfiles;
     }
 
     public List<LocalBluetoothProfile> getRemovedProfiles() {
