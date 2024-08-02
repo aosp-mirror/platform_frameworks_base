@@ -31,7 +31,6 @@ import static com.android.server.wm.AppCompatConfiguration.letterboxBackgroundTy
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityManager.TaskDescription;
-import android.content.res.Configuration;
 import android.graphics.Color;
 import android.graphics.Point;
 import android.graphics.Rect;
@@ -63,6 +62,16 @@ final class LetterboxUiController {
 
     private final ActivityRecord mActivityRecord;
 
+    // TODO(b/356385137): Remove these we added to make dependencies temporarily explicit.
+    @NonNull
+    private final AppCompatReachabilityOverrides mAppCompatReachabilityOverrides;
+    @NonNull
+    private final AppCompatReachabilityPolicy mAppCompatReachabilityPolicy;
+    @NonNull
+    private final TransparentPolicy mTransparentPolicy;
+    @NonNull
+    private final AppCompatOrientationOverrides mAppCompatOrientationOverrides;
+
     private boolean mShowWallpaperForLetterboxBackground;
 
     @Nullable
@@ -76,6 +85,15 @@ final class LetterboxUiController {
         // is created in its constructor. It shouldn't be used in this constructor but it's safe
         // to use it after since controller is only used in ActivityRecord.
         mActivityRecord = activityRecord;
+        // TODO(b/356385137): Remove these we added to make dependencies temporarily explicit.
+        mAppCompatReachabilityOverrides = mActivityRecord.mAppCompatController
+                .getAppCompatReachabilityOverrides();
+        mAppCompatReachabilityPolicy = mActivityRecord.mAppCompatController
+                .getAppCompatReachabilityPolicy();
+        mTransparentPolicy = mActivityRecord.mAppCompatController.getTransparentPolicy();
+        mAppCompatOrientationOverrides = mActivityRecord.mAppCompatController
+                .getAppCompatOrientationOverrides();
+
     }
 
     /** Cleans up {@link Letterbox} if it exists.*/
@@ -83,6 +101,8 @@ final class LetterboxUiController {
         if (mLetterbox != null) {
             mLetterbox.destroy();
             mLetterbox = null;
+            // TODO Remove after Letterbox refactoring.
+            mAppCompatReachabilityPolicy.setLetterboxInnerBoundsSupplier(null);
         }
     }
 
@@ -166,8 +186,7 @@ final class LetterboxUiController {
                         this::hasWallpaperBackgroundForLetterbox,
                         this::getLetterboxWallpaperBlurRadiusPx,
                         this::getLetterboxWallpaperDarkScrimAlpha,
-                        this::handleHorizontalDoubleTap,
-                        this::handleVerticalDoubleTap,
+                        mAppCompatReachabilityPolicy,
                         this::getLetterboxParentSurface);
                 mLetterbox.attachInput(w);
             }
@@ -203,12 +222,10 @@ final class LetterboxUiController {
             // For this reason we use ActivityRecord#getBounds() that the translucent activity
             // inherits from the first opaque activity beneath and also takes care of the scaling
             // in case of activities in size compat mode.
-            final Rect innerFrame = mActivityRecord.mAppCompatController
-                    .getTransparentPolicy().isRunning()
-                    ? mActivityRecord.getBounds() : w.getFrame();
+            final Rect innerFrame =
+                    mTransparentPolicy.isRunning() ? mActivityRecord.getBounds() : w.getFrame();
             mLetterbox.layout(spaceToFill, innerFrame, mTmpPoint);
-            if (mActivityRecord.mAppCompatController
-                    .getAppCompatReachabilityOverrides().isDoubleTapEvent()) {
+            if (mAppCompatReachabilityOverrides.isDoubleTapEvent()) {
                 // We need to notify Shell that letterbox position has changed.
                 mActivityRecord.getTask().dispatchTaskInfoChangedIfNeeded(true /* force */);
             }
@@ -243,36 +260,13 @@ final class LetterboxUiController {
                 && mActivityRecord.fillsParent();
     }
 
-    float getHorizontalPositionMultiplier(@NonNull Configuration parentConfiguration) {
-        return mActivityRecord.mAppCompatController.getAppCompatReachabilityOverrides()
-                .getHorizontalPositionMultiplier(parentConfiguration);
-    }
-
-    float getVerticalPositionMultiplier(@NonNull Configuration parentConfiguration) {
-        return mActivityRecord.mAppCompatController.getAppCompatReachabilityOverrides()
-                .getVerticalPositionMultiplier(parentConfiguration);
-    }
-
     boolean isLetterboxEducationEnabled() {
         return mAppCompatConfiguration.getIsEducationEnabled();
     }
 
     @VisibleForTesting
-    void handleHorizontalDoubleTap(int x) {
-        mActivityRecord.mAppCompatController.getAppCompatReachabilityPolicy()
-                .handleHorizontalDoubleTap(x, mLetterbox::getInnerFrame);
-    }
-
-    @VisibleForTesting
-    void handleVerticalDoubleTap(int y) {
-        mActivityRecord.mAppCompatController.getAppCompatReachabilityPolicy()
-                .handleVerticalDoubleTap(y, mLetterbox::getInnerFrame);
-    }
-
-    @VisibleForTesting
     boolean shouldShowLetterboxUi(WindowState mainWindow) {
-        if (mActivityRecord.mAppCompatController.getAppCompatOrientationOverrides()
-                .getIsRelaunchingAfterRequestedOrientationChanged()) {
+        if (mAppCompatOrientationOverrides.getIsRelaunchingAfterRequestedOrientationChanged()) {
             return mLastShouldShowLetterboxUi;
         }
 
@@ -361,8 +355,7 @@ final class LetterboxUiController {
         // corners because we assume the specific layout would. This is the case when the layout
         // of the translucent activity uses only a part of all the bounds because of the use of
         // LayoutParams.WRAP_CONTENT.
-        if (mActivityRecord.mAppCompatController.getTransparentPolicy().isRunning()
-                && (cropBounds.width() != mainWindow.mRequestedWidth
+        if (mTransparentPolicy.isRunning() && (cropBounds.width() != mainWindow.mRequestedWidth
                 || cropBounds.height() != mainWindow.mRequestedHeight)) {
             return null;
         }
@@ -505,7 +498,8 @@ final class LetterboxUiController {
             return;
         }
 
-        pw.println(prefix + "  letterboxReason=" + getLetterboxReasonString(mainWin));
+        pw.println(prefix + "  letterboxReason="
+                + AppCompatUtils.getLetterboxReasonString(mActivityRecord, mainWin));
         pw.println(prefix + "  activityAspectRatio="
                 + AppCompatUtils.computeAspectRatio(mActivityRecord.getBounds()));
 
@@ -515,10 +509,10 @@ final class LetterboxUiController {
         if (!shouldShowLetterboxUi) {
             return;
         }
-        pw.println(prefix + "  isVerticalThinLetterboxed=" + mActivityRecord.mAppCompatController
-                .getAppCompatReachabilityOverrides().isVerticalThinLetterboxed());
-        pw.println(prefix + "  isHorizontalThinLetterboxed=" + mActivityRecord.mAppCompatController
-                .getAppCompatReachabilityOverrides().isHorizontalThinLetterboxed());
+        pw.println(prefix + "  isVerticalThinLetterboxed="
+                + mAppCompatReachabilityOverrides.isVerticalThinLetterboxed());
+        pw.println(prefix + "  isHorizontalThinLetterboxed="
+                + mAppCompatReachabilityOverrides.isHorizontalThinLetterboxed());
         pw.println(prefix + "  letterboxBackgroundColor=" + Integer.toHexString(
                 getLetterboxBackgroundColor().toArgb()));
         pw.println(prefix + "  letterboxBackgroundType="
@@ -542,9 +536,11 @@ final class LetterboxUiController {
         pw.println(prefix + "  isVerticalReachabilityEnabled="
                 + reachabilityOverrides.isVerticalReachabilityEnabled());
         pw.println(prefix + "  letterboxHorizontalPositionMultiplier="
-                + getHorizontalPositionMultiplier(mActivityRecord.getParent().getConfiguration()));
+                + mAppCompatReachabilityOverrides.getHorizontalPositionMultiplier(mActivityRecord
+                    .getParent().getConfiguration()));
         pw.println(prefix + "  letterboxVerticalPositionMultiplier="
-                + getVerticalPositionMultiplier(mActivityRecord.getParent().getConfiguration()));
+                + mAppCompatReachabilityOverrides.getVerticalPositionMultiplier(mActivityRecord
+                    .getParent().getConfiguration()));
         pw.println(prefix + "  letterboxPositionForHorizontalReachability="
                 + AppCompatConfiguration.letterboxHorizontalReachabilityPositionToString(
                 mAppCompatConfiguration.getLetterboxPositionForHorizontalReachability(false)));
@@ -560,28 +556,6 @@ final class LetterboxUiController {
         pw.println(prefix + "  isDisplayAspectRatioEnabledForFixedOrientationLetterbox="
                 + mAppCompatConfiguration
                 .getIsDisplayAspectRatioEnabledForFixedOrientationLetterbox());
-    }
-
-    /**
-     * Returns a string representing the reason for letterboxing. This method assumes the activity
-     * is letterboxed.
-     */
-    private String getLetterboxReasonString(WindowState mainWin) {
-        if (mActivityRecord.inSizeCompatMode()) {
-            return "SIZE_COMPAT_MODE";
-        }
-        if (mActivityRecord.mAppCompatController.getAppCompatAspectRatioPolicy()
-                .isLetterboxedForFixedOrientationAndAspectRatio()) {
-            return "FIXED_ORIENTATION";
-        }
-        if (mainWin.isLetterboxedForDisplayCutout()) {
-            return "DISPLAY_CUTOUT";
-        }
-        if (mActivityRecord.mAppCompatController.getAppCompatAspectRatioPolicy()
-                .isLetterboxedForAspectRatioOnly()) {
-            return "ASPECT_RATIO";
-        }
-        return "UNKNOWN_REASON";
     }
 
     @Nullable
