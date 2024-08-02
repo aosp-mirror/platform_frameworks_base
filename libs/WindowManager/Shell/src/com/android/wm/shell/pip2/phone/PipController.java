@@ -300,6 +300,10 @@ public class PipController implements ConfigurationChangeListener,
             int launcherRotation, Rect hotseatKeepClearArea) {
         ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
                 "getSwipePipToHomeBounds: %s", componentName);
+        // preemptively add the keep clear area for Hotseat, so that it is taken into account
+        // when calculating the entry destination bounds of PiP window
+        mPipBoundsState.setNamedUnrestrictedKeepClearArea(
+                PipBoundsState.NAMED_KCA_LAUNCHER_SHELF, hotseatKeepClearArea);
         mPipBoundsState.setBoundsStateForEntry(componentName, activityInfo, pictureInPictureParams,
                 mPipBoundsAlgorithm);
         return mPipBoundsAlgorithm.getEntryDestinationBounds();
@@ -349,10 +353,14 @@ public class PipController implements ConfigurationChangeListener,
                 if (mPipTransitionState.isInSwipePipToHomeTransition()) {
                     mPipTransitionState.resetSwipePipToHomeState();
                 }
-                mOnIsInPipStateChangedListener.accept(true /* inPip */);
+                if (mOnIsInPipStateChangedListener != null) {
+                    mOnIsInPipStateChangedListener.accept(true /* inPip */);
+                }
                 break;
             case PipTransitionState.EXITED_PIP:
-                mOnIsInPipStateChangedListener.accept(false /* inPip */);
+                if (mOnIsInPipStateChangedListener != null) {
+                    mOnIsInPipStateChangedListener.accept(false /* inPip */);
+                }
                 break;
         }
     }
