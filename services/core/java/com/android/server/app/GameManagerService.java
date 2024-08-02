@@ -402,15 +402,18 @@ public final class GameManagerService extends IGameManagerService.Stub {
     public enum FrameRate {
         FPS_DEFAULT(0),
         FPS_30(30),
+        FPS_33(33),
         FPS_36(36),
         FPS_40(40),
         FPS_45(45),
         FPS_48(48),
+        FPS_55(55),
         FPS_60(60),
         FPS_72(72),
         FPS_90(90),
         FPS_120(120),
         FPS_144(144),
+        FPS_165(165),
         FPS_INVALID(-1);
 
         public final int fps;
@@ -427,6 +430,8 @@ public final class GameManagerService extends IGameManagerService.Stub {
         switch (raw) {
             case "30":
                 return FrameRate.FPS_30.fps;
+            case "33":
+                return FrameRate.FPS_33.fps;
             case "36":
                 return FrameRate.FPS_36.fps;
             case "40":
@@ -435,6 +440,8 @@ public final class GameManagerService extends IGameManagerService.Stub {
                 return FrameRate.FPS_45.fps;
             case "48":
                 return FrameRate.FPS_48.fps;
+            case "55":
+                return FrameRate.FPS_55.fps;
             case "60":
                 return FrameRate.FPS_60.fps;
             case "72":
@@ -445,6 +452,8 @@ public final class GameManagerService extends IGameManagerService.Stub {
                 return FrameRate.FPS_120.fps;
             case "144":
                 return FrameRate.FPS_144.fps;
+            case "165":
+                return FrameRate.FPS_165.fps;
             case "disable":
             case "":
                 return FrameRate.FPS_DEFAULT.fps;
