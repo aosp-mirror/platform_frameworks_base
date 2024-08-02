@@ -973,8 +973,12 @@ public final class InputMethodManager {
 
         @GuardedBy("mH")
         private void setCurrentRootViewLocked(ViewRootImpl rootView) {
+            final boolean wasEmpty = mCurRootView == null;
             mImeDispatcher.switchRootView(mCurRootView, rootView);
             mCurRootView = rootView;
+            if (wasEmpty && mCurRootView != null) {
+                mImeDispatcher.updateReceivingDispatcher(mCurRootView.getOnBackInvokedDispatcher());
+            }
         }
     }
 
