@@ -39,10 +39,10 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.collectIndexed
 import kotlinx.coroutines.flow.filterNotNull
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.takeWhile
 import kotlinx.coroutines.launch
 
 // TODO(b/http://b/299909989): Use QSTileViewModel directly after the rollout
@@ -87,8 +87,9 @@ constructor(
                         }
                     }
                 }
-                // Warm up tile with some initial state
-                launch { qsTileViewModel.state.first() }
+                // Warm up tile with some initial state. Because `state` is a StateFlow with initial
+                // state `null`, we collect until it's not null.
+                launch { qsTileViewModel.state.takeWhile { it == null }.collect {} }
             }
 
         // QSTileHost doesn't call this when userId is initialized

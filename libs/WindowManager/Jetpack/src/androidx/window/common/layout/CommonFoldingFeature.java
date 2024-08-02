@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package androidx.window.common;
+package androidx.window.common.layout;
 
 import static androidx.window.common.ExtensionHelper.isZero;
 

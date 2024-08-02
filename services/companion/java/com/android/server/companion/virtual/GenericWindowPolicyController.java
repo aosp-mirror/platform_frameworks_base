@@ -28,7 +28,6 @@ import android.annotation.UserIdInt;
 import android.app.WindowConfiguration;
 import android.app.compat.CompatChanges;
 import android.companion.virtual.VirtualDeviceManager.ActivityListener;
-import android.companion.virtual.flags.Flags;
 import android.compat.annotation.ChangeId;
 import android.compat.annotation.EnabledSince;
 import android.content.AttributionSource;
@@ -113,7 +112,6 @@ public class GenericWindowPolicyController extends DisplayWindowPolicyController
     @NonNull
     private final ArraySet<ComponentName> mCrossTaskNavigationExemptions;
     @Nullable
-    private final ComponentName mPermissionDialogComponent;
     private final Object mGenericWindowPolicyControllerLock = new Object();
     @Nullable private final ActivityBlockedCallback mActivityBlockedCallback;
 
@@ -178,7 +176,6 @@ public class GenericWindowPolicyController extends DisplayWindowPolicyController
             @NonNull Set<ComponentName> activityPolicyExemptions,
             boolean crossTaskNavigationAllowedByDefault,
             @NonNull Set<ComponentName> crossTaskNavigationExemptions,
-            @Nullable ComponentName permissionDialogComponent,
             @Nullable ActivityListener activityListener,
             @Nullable ActivityBlockedCallback activityBlockedCallback,
             @Nullable SecureWindowCallback secureWindowCallback,
@@ -193,7 +190,6 @@ public class GenericWindowPolicyController extends DisplayWindowPolicyController
         mActivityPolicyExemptions = new ArraySet<>(activityPolicyExemptions);
         mCrossTaskNavigationAllowedByDefault = crossTaskNavigationAllowedByDefault;
         mCrossTaskNavigationExemptions = new ArraySet<>(crossTaskNavigationExemptions);
-        mPermissionDialogComponent = permissionDialogComponent;
         mActivityBlockedCallback = activityBlockedCallback;
         setInterestedWindowFlags(windowFlags, systemWindowFlags);
         mActivityListener = activityListener;
@@ -287,28 +283,15 @@ public class GenericWindowPolicyController extends DisplayWindowPolicyController
     public boolean canActivityBeLaunched(@NonNull ActivityInfo activityInfo,
             @Nullable Intent intent, @WindowConfiguration.WindowingMode int windowingMode,
             int launchingFromDisplayId, boolean isNewTask) {
-        if (Flags.interceptIntentsBeforeApplyingPolicy()) {
-            if (mIntentListenerCallback != null && intent != null
-                    && mIntentListenerCallback.shouldInterceptIntent(intent)) {
-                logActivityLaunchBlocked("Virtual device intercepting intent");
-                return false;
-            }
-            if (!canContainActivity(activityInfo, windowingMode, launchingFromDisplayId,
-                    isNewTask)) {
-                notifyActivityBlocked(activityInfo);
-                return false;
-            }
-        } else {
-            if (!canContainActivity(activityInfo, windowingMode, launchingFromDisplayId,
-                    isNewTask)) {
-                notifyActivityBlocked(activityInfo);
-                return false;
-            }
-            if (mIntentListenerCallback != null && intent != null
-                    && mIntentListenerCallback.shouldInterceptIntent(intent)) {
-                logActivityLaunchBlocked("Virtual device intercepting intent");
-                return false;
-            }
+        if (mIntentListenerCallback != null && intent != null
+                && mIntentListenerCallback.shouldInterceptIntent(intent)) {
+            logActivityLaunchBlocked("Virtual device intercepting intent");
+            return false;
+        }
+        if (!canContainActivity(activityInfo, windowingMode, launchingFromDisplayId,
+                isNewTask)) {
+            notifyActivityBlocked(activityInfo);
+            return false;
         }
         return true;
     }
@@ -367,14 +350,6 @@ public class GenericWindowPolicyController extends DisplayWindowPolicyController
                         mCrossTaskNavigationExemptions, activityComponent)) {
             logActivityLaunchBlocked("Cross task navigation disallowed by policy: "
                     + activityComponent);
-            return false;
-        }
-
-        // mPermissionDialogComponent being null means we don't want to block permission Dialogs
-        // based on FLAG_STREAM_PERMISSIONS
-        if (mPermissionDialogComponent != null
-                && mPermissionDialogComponent.equals(activityComponent)) {
-            logActivityLaunchBlocked("Permission dialog not allowed on virtual device");
             return false;
         }
 
@@ -487,11 +462,9 @@ public class GenericWindowPolicyController extends DisplayWindowPolicyController
                 && displayId != INVALID_DISPLAY) {
             mActivityBlockedCallback.onActivityBlocked(displayId, activityInfo);
         }
-        if (android.companion.virtualdevice.flags.Flags.metricsCollection()) {
-            Counter.logIncrementWithUid(
-                    "virtual_devices.value_activity_blocked_count",
-                    mAttributionSource.getUid());
-        }
+        Counter.logIncrementWithUid(
+                "virtual_devices.value_activity_blocked_count",
+                mAttributionSource.getUid());
     }
 
     private static boolean isAllowedByPolicy(boolean allowedByDefault,

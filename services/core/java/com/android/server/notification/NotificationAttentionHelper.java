@@ -230,9 +230,17 @@ public final class NotificationAttentionHelper {
                     mFlagResolver.getIntValue(NotificationFlags.NOTIF_VOLUME1),
                     mFlagResolver.getIntValue(NotificationFlags.NOTIF_VOLUME2),
                     mFlagResolver.getIntValue(NotificationFlags.NOTIF_COOLDOWN_COUNTER_RESET),
-                    record -> mPackageManager.checkPermission(
+                    record -> {
+                        final String category = record.getNotification().category;
+                        if (Notification.CATEGORY_ALARM.equals(category)
+                                || Notification.CATEGORY_CAR_EMERGENCY.equals(category)
+                                || Notification.CATEGORY_CAR_WARNING.equals(category)) {
+                            return true;
+                        }
+                        return mPackageManager.checkPermission(
                             permission.RECEIVE_EMERGENCY_BROADCAST,
-                            record.getSbn().getPackageName()) == PERMISSION_GRANTED);
+                            record.getSbn().getPackageName()) == PERMISSION_GRANTED;
+                    });
 
             return new StrategyAvalanche(
                     mFlagResolver.getIntValue(NotificationFlags.NOTIF_COOLDOWN_T1),
@@ -248,9 +256,17 @@ public final class NotificationAttentionHelper {
                     mFlagResolver.getIntValue(NotificationFlags.NOTIF_VOLUME1),
                     mFlagResolver.getIntValue(NotificationFlags.NOTIF_VOLUME2),
                     mFlagResolver.getIntValue(NotificationFlags.NOTIF_COOLDOWN_COUNTER_RESET),
-                    record -> mPackageManager.checkPermission(
+                    record -> {
+                        final String category = record.getNotification().category;
+                        if (Notification.CATEGORY_ALARM.equals(category)
+                                || Notification.CATEGORY_CAR_EMERGENCY.equals(category)
+                                || Notification.CATEGORY_CAR_WARNING.equals(category)) {
+                            return true;
+                        }
+                        return mPackageManager.checkPermission(
                             permission.RECEIVE_EMERGENCY_BROADCAST,
-                            record.getSbn().getPackageName()) == PERMISSION_GRANTED);
+                            record.getSbn().getPackageName()) == PERMISSION_GRANTED;
+                    });
         }
     }
 

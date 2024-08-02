@@ -20,10 +20,10 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
+import com.android.systemui.contextualeducation.GestureType
+import com.android.systemui.contextualeducation.GestureType.BACK
 import com.android.systemui.education.data.repository.contextualEducationRepository
 import com.android.systemui.kosmos.testScope
-import com.android.systemui.shared.education.GestureType
-import com.android.systemui.shared.education.GestureType.BACK_GESTURE
 import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.test.runTest
@@ -47,15 +47,15 @@ class KeyboardTouchpadEduInteractorTest : SysuiTestCase() {
     @Test
     fun newEducationInfoOnMaxSignalCountReached() =
         testScope.runTest {
-            tryTriggeringEducation(BACK_GESTURE)
+            tryTriggeringEducation(BACK)
             val model by collectLastValue(underTest.educationTriggered)
-            assertThat(model?.gestureType).isEqualTo(BACK_GESTURE)
+            assertThat(model?.gestureType).isEqualTo(BACK)
         }
 
     @Test
     fun noEducationInfoBeforeMaxSignalCountReached() =
         testScope.runTest {
-            repository.incrementSignalCount(BACK_GESTURE)
+            repository.incrementSignalCount(BACK)
             val model by collectLastValue(underTest.educationTriggered)
             assertThat(model).isNull()
         }
@@ -64,8 +64,8 @@ class KeyboardTouchpadEduInteractorTest : SysuiTestCase() {
     fun noEducationInfoWhenShortcutTriggeredPreviously() =
         testScope.runTest {
             val model by collectLastValue(underTest.educationTriggered)
-            repository.updateShortcutTriggerTime(BACK_GESTURE)
-            tryTriggeringEducation(BACK_GESTURE)
+            repository.updateShortcutTriggerTime(BACK)
+            tryTriggeringEducation(BACK)
             assertThat(model).isNull()
         }
 

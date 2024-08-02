@@ -340,7 +340,6 @@ public class ParcelFileDescriptor implements Parcelable, Closeable {
         return pfd;
     }
 
-    @RavenwoodReplace
     private static FileDescriptor openInternal(File file, int mode) throws FileNotFoundException {
         if ((mode & MODE_WRITE_ONLY) != 0 && (mode & MODE_APPEND) == 0
                 && (mode & MODE_TRUNCATE) == 0 && ((mode & MODE_READ_ONLY) == 0)
@@ -364,26 +363,16 @@ public class ParcelFileDescriptor implements Parcelable, Closeable {
         }
     }
 
-    private static FileDescriptor openInternal$ravenwood(File file, int mode)
-            throws FileNotFoundException {
-        try {
-            return native_open$ravenwood(file, mode);
-        } catch (FileNotFoundException e) {
-            throw e;
-        } catch (IOException e) {
-            throw new FileNotFoundException(e.getMessage());
-        }
-    }
-
     @RavenwoodReplace
     private static void closeInternal(FileDescriptor fd) {
         IoUtils.closeQuietly(fd);
     }
 
     private static void closeInternal$ravenwood(FileDescriptor fd) {
-        // Desktop JVM doesn't have FileDescriptor.close(), so we'll need to go to the ravenwood
-        // side to close it.
-        native_close$ravenwood(fd);
+        try {
+            Os.close(fd);
+        } catch (ErrnoException ignored) {
+        }
     }
 
     /**
@@ -743,7 +732,6 @@ public class ParcelFileDescriptor implements Parcelable, Closeable {
      * Return the total size of the file representing this fd, as determined by
      * {@code stat()}. Returns -1 if the fd is not a file.
      */
-    @RavenwoodThrow(reason = "Os.readlink() and Os.stat()")
     public long getStatSize() {
         if (mWrapped != null) {
             return mWrapped.getStatSize();
@@ -1277,30 +1265,17 @@ public class ParcelFileDescriptor implements Parcelable, Closeable {
         }
     }
 
-    // These native methods are currently only implemented by Ravenwood, as it's the only
-    // mechanism we have to jump to our RavenwoodNativeSubstitutionClass
-    private static native void native_setFdInt$ravenwood(FileDescriptor fd, int fdInt);
-    private static native int native_getFdInt$ravenwood(FileDescriptor fd);
-    private static native FileDescriptor native_open$ravenwood(File file, int pfdMode)
-            throws IOException;
-    private static native void native_close$ravenwood(FileDescriptor fd);
+    private static native void setFdInt$ravenwood(FileDescriptor fd, int fdInt);
+    private static native int getFdInt$ravenwood(FileDescriptor fd);
 
     @RavenwoodReplace
     private static void setFdInt(FileDescriptor fd, int fdInt) {
         fd.setInt$(fdInt);
     }
 
-    private static void setFdInt$ravenwood(FileDescriptor fd, int fdInt) {
-        native_setFdInt$ravenwood(fd, fdInt);
-    }
-
     @RavenwoodReplace
     private static int getFdInt(FileDescriptor fd) {
         return fd.getInt$();
-    }
-
-    private static int getFdInt$ravenwood(FileDescriptor fd) {
-        return native_getFdInt$ravenwood(fd);
     }
 
     @RavenwoodReplace
@@ -1320,7 +1295,6 @@ public class ParcelFileDescriptor implements Parcelable, Closeable {
     private int acquireRawFd$ravenwood(FileDescriptor fd) {
         // FD owners currently unsupported under Ravenwood; return FD directly
         return getFdInt(fd);
-
     }
 
     @RavenwoodReplace

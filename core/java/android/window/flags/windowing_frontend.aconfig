@@ -94,14 +94,6 @@ flag {
 }
 
 flag {
-    name: "activity_snapshot_by_default"
-    namespace: "systemui"
-    description: "Enable record activity snapshot by default"
-    bug: "259497289"
-    is_fixed_read_only: true
-}
-
-flag {
     name: "supports_multi_instance_system_ui"
     is_exported: true
     namespace: "multitasking"
