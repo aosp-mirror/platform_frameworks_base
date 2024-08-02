@@ -664,6 +664,8 @@ public final class CachedAppOptimizer {
     private final ProcessDependencies mProcessDependencies;
     private final ProcLocksReader mProcLocksReader;
 
+    private final Freezer mFreezer;
+
     public CachedAppOptimizer(ActivityManagerService am) {
         this(am, null, new DefaultProcessDependencies());
     }
@@ -680,6 +682,7 @@ public final class CachedAppOptimizer {
         mTestCallback = callback;
         mSettingsObserver = new SettingsContentObserver();
         mProcLocksReader = new ProcLocksReader();
+        mFreezer = mAm.getFreezer();
     }
 
     /**
@@ -1050,89 +1053,6 @@ public final class CachedAppOptimizer {
     }
 
     /**
-     * Informs binder that a process is about to be frozen. If freezer is enabled on a process via
-     * this method, this method will synchronously dispatch all pending transactions to the
-     * specified pid. This method will not add significant latencies when unfreezing.
-     * After freezing binder calls, binder will block all transaction to the frozen pid, and return
-     * an error to the sending process.
-     *
-     * @param pid the target pid for which binder transactions are to be frozen
-     * @param freeze specifies whether to flush transactions and then freeze (true) or unfreeze
-     * binder for the specificed pid.
-     * @param timeoutMs the timeout in milliseconds to wait for the binder interface to freeze
-     * before giving up.
-     *
-     * @throws RuntimeException in case a flush/freeze operation could not complete successfully.
-     * @return 0 if success, or -EAGAIN indicating there's pending transaction.
-     */
-    public static native int freezeBinder(int pid, boolean freeze, int timeoutMs);
-
-    /**
-     * Retrieves binder freeze info about a process.
-     * @param pid the pid for which binder freeze info is to be retrieved.
-     *
-     * @throws RuntimeException if the operation could not complete successfully.
-     * @return a bit field reporting the binder freeze info for the process.
-     */
-    private static native int getBinderFreezeInfo(int pid);
-
-    /**
-     * Returns the path to be checked to verify whether the freezer is supported by this system.
-     * @return absolute path to the file
-     */
-    private static native String getFreezerCheckPath();
-
-    /**
-     * Check if task_profiles.json includes valid freezer profiles and actions
-     * @return false if there are invalid profiles or actions
-     */
-    private static native boolean isFreezerProfileValid();
-
-    /**
-     * Determines whether the freezer is supported by this system
-     */
-    public static boolean isFreezerSupported() {
-        boolean supported = false;
-        FileReader fr = null;
-
-        try {
-            String path = getFreezerCheckPath();
-            Slog.d(TAG_AM, "Checking cgroup freezer: " + path);
-            fr = new FileReader(path);
-            char state = (char) fr.read();
-
-            if (state == '1' || state == '0') {
-                // Also check freezer binder ioctl
-                Slog.d(TAG_AM, "Checking binder freezer ioctl");
-                getBinderFreezeInfo(Process.myPid());
-
-                // Check if task_profiles.json contains invalid profiles
-                Slog.d(TAG_AM, "Checking freezer profiles");
-                supported = isFreezerProfileValid();
-            } else {
-                Slog.e(TAG_AM, "Unexpected value in cgroup.freeze");
-            }
-        } catch (java.io.FileNotFoundException e) {
-            Slog.w(TAG_AM, "File cgroup.freeze not present");
-        } catch (RuntimeException e) {
-            Slog.w(TAG_AM, "Unable to read freezer info");
-        } catch (Exception e) {
-            Slog.w(TAG_AM, "Unable to read cgroup.freeze: " + e.toString());
-        }
-
-        if (fr != null) {
-            try {
-                fr.close();
-            } catch (java.io.IOException e) {
-                Slog.e(TAG_AM, "Exception closing cgroup.freeze: " + e.toString());
-            }
-        }
-
-        Slog.d(TAG_AM, "Freezer supported: " + supported);
-        return supported;
-    }
-
-    /**
      * Reads the flag value from DeviceConfig to determine whether app freezer
      * should be enabled, and starts the freeze/compaction thread if needed.
      */
@@ -1146,7 +1066,7 @@ public final class CachedAppOptimizer {
         } else if ("enabled".equals(configOverride)
                 || DeviceConfig.getBoolean(DeviceConfig.NAMESPACE_ACTIVITY_MANAGER_NATIVE_BOOT,
                     KEY_USE_FREEZER, DEFAULT_USE_FREEZER)) {
-            mUseFreezer = isFreezerSupported();
+            mUseFreezer = mFreezer.isFreezerSupported();
             updateFreezerDebounceTimeout();
             updateFreezerExemptInstPkg();
         } else {
@@ -1528,7 +1448,7 @@ public final class CachedAppOptimizer {
         boolean processKilled = false;
 
         try {
-            int freezeInfo = getBinderFreezeInfo(pid);
+            int freezeInfo = mFreezer.getBinderFreezeInfo(pid);
 
             if ((freezeInfo & SYNC_RECEIVED_WHILE_FROZEN) != 0) {
                 Slog.d(TAG_AM, "pid " + pid + " " + app.processName
@@ -1562,7 +1482,7 @@ public final class CachedAppOptimizer {
         long freezeTime = opt.getFreezeUnfreezeTime();
 
         try {
-            freezeBinder(pid, false, FREEZE_BINDER_TIMEOUT_MS);
+            mFreezer.freezeBinder(pid, false, FREEZE_BINDER_TIMEOUT_MS);
         } catch (RuntimeException e) {
             Slog.e(TAG_AM, "Unable to unfreeze binder for " + pid + " " + app.processName
                     + ". Killing it");
@@ -1574,7 +1494,7 @@ public final class CachedAppOptimizer {
 
         try {
             traceAppFreeze(app.processName, pid, reason);
-            Process.setProcessFrozen(pid, app.uid, false);
+            mFreezer.setProcessFrozen(pid, app.uid, false);
 
             opt.setFreezeUnfreezeTime(SystemClock.uptimeMillis());
             opt.setFrozen(false);
@@ -1617,7 +1537,7 @@ public final class CachedAppOptimizer {
             }
             Slog.d(TAG_AM, "quick sync unfreeze " + pid + " for " +  reason);
             try {
-                freezeBinder(pid, false, FREEZE_BINDER_TIMEOUT_MS);
+                mFreezer.freezeBinder(pid, false, FREEZE_BINDER_TIMEOUT_MS);
             } catch (RuntimeException e) {
                 Slog.e(TAG_AM, "Unable to quick unfreeze binder for " + pid);
                 return;
@@ -1625,7 +1545,7 @@ public final class CachedAppOptimizer {
 
             try {
                 traceAppFreeze(app.processName, pid, reason);
-                Process.setProcessFrozen(pid, app.uid, false);
+                mFreezer.setProcessFrozen(pid, app.uid, false);
             } catch (Exception e) {
                 Slog.e(TAG_AM, "Unable to quick unfreeze " + pid);
             }
@@ -2394,7 +2314,7 @@ public final class CachedAppOptimizer {
                 // Freeze binder interface before the process, to flush any
                 // transactions that might be pending.
                 try {
-                    if (freezeBinder(pid, true, FREEZE_BINDER_TIMEOUT_MS) != 0) {
+                    if (mFreezer.freezeBinder(pid, true, FREEZE_BINDER_TIMEOUT_MS) != 0) {
                         handleBinderFreezerFailure(proc, "outstanding txns");
                         return;
                     }
@@ -2413,7 +2333,7 @@ public final class CachedAppOptimizer {
 
                 try {
                     traceAppFreeze(proc.processName, pid, -1);
-                    Process.setProcessFrozen(pid, proc.uid, true);
+                    mFreezer.setProcessFrozen(pid, proc.uid, true);
                     opt.setFreezeUnfreezeTime(SystemClock.uptimeMillis());
                     opt.setFrozen(true);
                     opt.setHasCollectedFrozenPSS(false);
@@ -2452,7 +2372,7 @@ public final class CachedAppOptimizer {
 
             try {
                 // post-check to prevent races
-                int freezeInfo = getBinderFreezeInfo(pid);
+                int freezeInfo = mFreezer.getBinderFreezeInfo(pid);
 
                 if ((freezeInfo & TXNS_PENDING_WHILE_FROZEN) != 0) {
                     synchronized (mProcLock) {
@@ -2620,6 +2540,22 @@ public final class CachedAppOptimizer {
     }
 
     /**
+     * Freeze or unfreeze a process.  This should only be used for testing.
+     */
+    @VisibleForTesting
+    void forceFreezeForTest(ProcessRecord proc, boolean freeze) {
+        synchronized (mAm) {
+            synchronized (mProcLock) {
+                if (freeze) {
+                    forceFreezeAppAsyncLSP(proc);
+                } else {
+                    unfreezeAppInternalLSP(proc, UNFREEZE_REASON_NONE, true);
+                }
+            }
+        }
+    }
+
+    /**
      * Sending binder transactions to frozen apps most likely indicates there's a bug. Log it and
      * kill the frozen apps if they 1) receive sync binder transactions while frozen, or 2) miss
      * async binder transactions due to kernel binder buffer running out.
@@ -2660,7 +2596,7 @@ public final class CachedAppOptimizer {
         for (int i = 0; i < pids.size(); i++) {
             int current = pids.get(i);
             try {
-                int freezeInfo = getBinderFreezeInfo(current);
+                int freezeInfo = mFreezer.getBinderFreezeInfo(current);
 
                 if ((freezeInfo & SYNC_RECEIVED_WHILE_FROZEN) != 0) {
                     killProcess(current, "Sync transaction while frozen",

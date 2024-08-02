@@ -23,12 +23,38 @@ import com.android.internal.widget.remotecompose.core.operations.paint.PaintBund
 public abstract class PaintContext {
     protected RemoteContext mContext;
 
+    public RemoteContext getContext() {
+        return mContext;
+    }
+
     public PaintContext(RemoteContext context) {
         this.mContext = context;
     }
 
     public void setContext(RemoteContext context) {
         this.mContext = context;
+    }
+
+    /**
+     * convenience function to call matrixSave()
+     */
+    public void save() {
+        matrixSave();
+    }
+
+    /**
+     * convenience function to call matrixRestore()
+     */
+    public void restore() {
+        matrixRestore();
+    }
+
+    /**
+     * convenience function to call matrixSave()
+     */
+    public void saveLayer(float x, float y, float width, float height) {
+        // TODO
+        matrixSave();
     }
 
     public abstract void drawBitmap(int imageId,
@@ -197,8 +223,49 @@ public abstract class PaintContext {
     public abstract void clipPath(int pathId, int regionOp);
 
     /**
+     * Clip based ona  round rect
+     * @param width
+     * @param height
+     * @param topStart
+     * @param topEnd
+     * @param bottomStart
+     * @param bottomEnd
+     */
+    public abstract void roundedClipRect(float width, float height,
+                                         float topStart, float topEnd,
+                                         float bottomStart, float bottomEnd);
+
+    /**
      * Reset the paint
      */
     public abstract void reset();
+
+    /**
+     * Returns true if the context is in debug mode
+     *
+     * @return true if in debug mode, false otherwise
+     */
+    public boolean isDebug() {
+        return mContext.isDebug();
+    }
+
+    /**
+     * Returns true if layout animations are enabled
+     *
+     * @return true if animations are enabled, false otherwise
+     */
+    public boolean isAnimationEnabled() {
+        return mContext.isAnimationEnabled();
+    }
+
+    /**
+     * Utility function to log comments
+     *
+     * @param content the content to log
+     */
+    public void log(String content) {
+        System.out.println("[LOG] " + content);
+    }
+
 }
 

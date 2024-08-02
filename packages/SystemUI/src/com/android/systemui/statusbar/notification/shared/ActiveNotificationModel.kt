@@ -17,6 +17,7 @@ package com.android.systemui.statusbar.notification.shared
 
 import android.app.PendingIntent
 import android.graphics.drawable.Icon
+import com.android.systemui.statusbar.StatusBarIconView
 import com.android.systemui.statusbar.notification.stack.PriorityBucket
 
 /**
@@ -59,6 +60,8 @@ data class ActiveNotificationModel(
     val shelfIcon: Icon?,
     /** Icon to display in the status bar. */
     val statusBarIcon: Icon?,
+    /** Icon to display in the status bar chip. */
+    val statusBarChipIconView: StatusBarIconView?,
     /** The notifying app's [packageName]'s uid. */
     val uid: Int,
     /** The notifying app's packageName. */

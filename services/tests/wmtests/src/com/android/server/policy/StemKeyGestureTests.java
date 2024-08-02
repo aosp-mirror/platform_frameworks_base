@@ -36,6 +36,7 @@ import android.os.RemoteException;
 import android.provider.Settings;
 import android.view.Display;
 
+import org.junit.Before;
 import org.junit.Test;
 
 /**
@@ -47,6 +48,13 @@ import org.junit.Test;
 public class StemKeyGestureTests extends ShortcutKeyTestBase {
 
     private static final String TEST_TARGET_ACTIVITY = "com.android.server.policy/.TestActivity";
+
+    @Before
+    public void setup() {
+        super.setup();
+        overrideResource(com.android.internal.R.integer.config_longPressOnStemPrimaryBehavior,
+                LONG_PRESS_PRIMARY_LAUNCH_VOICE_ASSISTANT);
+    }
 
     /**
      * Stem single key should not launch behavior during set up.
@@ -182,6 +190,26 @@ public class StemKeyGestureTests extends ShortcutKeyTestBase {
         mPhoneWindowManager.overrideIsUserSetupComplete(true);
 
         sendKey(KEYCODE_STEM_PRIMARY, /* longPress= */ true);
+        mPhoneWindowManager.assertStatusBarStartAssist();
+    }
+
+    @Test
+    public void stemLongKey_appHasOverridePermission_consumedByApp_triggerStatusBarToStartAssist() {
+        overrideBehavior(
+                STEM_PRIMARY_BUTTON_LONG_PRESS,
+                LONG_PRESS_PRIMARY_LAUNCH_VOICE_ASSISTANT);
+        setUpPhoneWindowManager(/* supportSettingsUpdate= */ true);
+        mPhoneWindowManager.overrideShouldEarlyShortPressOnStemPrimary(false);
+        mPhoneWindowManager.setupAssistForLaunch();
+        mPhoneWindowManager.overrideSearchManager(null);
+        mPhoneWindowManager.overrideStatusBarManagerInternal();
+        mPhoneWindowManager.overrideIsUserSetupComplete(true);
+        mPhoneWindowManager.overrideFocusedWindowButtonOverridePermission(true);
+
+        setDispatchedKeyHandler(keyEvent -> true);
+
+        sendKey(KEYCODE_STEM_PRIMARY, /* longPress= */ true);
+
         mPhoneWindowManager.assertStatusBarStartAssist();
     }
 

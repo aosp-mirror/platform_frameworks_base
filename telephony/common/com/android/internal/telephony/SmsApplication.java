@@ -528,7 +528,7 @@ public final class SmsApplication {
                 // current SMS app will already be the preferred activity - but checking whether or
                 // not this is true is just as expensive as reconfiguring the preferred activity so
                 // we just reconfigure every time.
-                defaultSmsAppChanged(context);
+                grantPermissionsToSystemApps(context);
             }
         }
         if (DEBUG_MULTIUSER) {
@@ -542,9 +542,9 @@ public final class SmsApplication {
     }
 
     /**
-     * Grants various permissions and appops on sms app change
+     * Grants various permissions and appops, e.g. on sms app change
      */
-    private static void defaultSmsAppChanged(Context context) {
+    public static void grantPermissionsToSystemApps(Context context) {
         PackageManager packageManager = context.getPackageManager();
         AppOpsManager appOps = context.getSystemService(AppOpsManager.class);
 
@@ -680,7 +680,7 @@ public final class SmsApplication {
                 return;
             }
 
-            defaultSmsAppChanged(context);
+            grantPermissionsToSystemApps(context);
         }
     }
 

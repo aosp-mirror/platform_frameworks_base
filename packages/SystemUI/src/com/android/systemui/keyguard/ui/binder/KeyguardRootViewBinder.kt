@@ -207,14 +207,12 @@ object KeyguardRootViewBinder {
                         launch {
                             viewModel.burnInLayerVisibility.collect { visibility ->
                                 childViews[burnInLayerId]?.visibility = visibility
-                                childViews[aodNotificationIconContainerId]?.visibility = visibility
                             }
                         }
 
                         launch {
                             viewModel.burnInLayerAlpha.collect { alpha ->
                                 childViews[statusViewId]?.alpha = alpha
-                                childViews[aodNotificationIconContainerId]?.alpha = alpha
                             }
                         }
 

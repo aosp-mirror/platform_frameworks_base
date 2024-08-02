@@ -518,19 +518,6 @@ public class GenericWindowPolicyControllerTest {
     }
 
     @Test
-    public void canActivityBeLaunched_permissionComponent_isBlocked() {
-        GenericWindowPolicyController gwpc = createGwpcWithPermissionComponent(BLOCKED_COMPONENT);
-        gwpc.setDisplayId(DISPLAY_ID, /* isMirrorDisplay= */ false);
-
-        ActivityInfo activityInfo = getActivityInfo(
-                BLOCKED_PACKAGE_NAME,
-                BLOCKED_PACKAGE_NAME,
-                /* displayOnRemoteDevices */ true,
-                /* targetDisplayCategory */ null);
-        assertActivityIsBlocked(gwpc, activityInfo);
-    }
-
-    @Test
     public void registerRunningAppsChangedListener_onRunningAppsChanged_listenersNotified() {
         ArraySet<Integer> uids = new ArraySet<>(Arrays.asList(TEST_UID));
         GenericWindowPolicyController gwpc = createGwpc();
@@ -740,7 +727,6 @@ public class GenericWindowPolicyControllerTest {
                 /* activityPolicyExemptions= */ new ArraySet<>(),
                 /* crossTaskNavigationAllowedByDefault= */ true,
                 /* crossTaskNavigationExemptions= */ new ArraySet<>(),
-                /* permissionDialogComponent= */ null,
                 /* activityListener= */ mActivityListener,
                 /* activityBlockedCallback= */ mActivityBlockedCallback,
                 /* secureWindowCallback= */ mSecureWindowCallback,
@@ -760,7 +746,6 @@ public class GenericWindowPolicyControllerTest {
                 /* activityPolicyExemptions= */ new ArraySet<>(),
                 /* crossTaskNavigationAllowedByDefault= */ true,
                 /* crossTaskNavigationExemptions= */ new ArraySet<>(),
-                /* permissionDialogComponent= */ null,
                 /* activityListener= */ mActivityListener,
                 /* activityBlockedCallback= */ mActivityBlockedCallback,
                 /* secureWindowCallback= */ mSecureWindowCallback,
@@ -781,7 +766,6 @@ public class GenericWindowPolicyControllerTest {
                 /* activityPolicyExemptions= */ new ArraySet<>(),
                 /* crossTaskNavigationAllowedByDefault= */ true,
                 /* crossTaskNavigationExemptions= */ new ArraySet<>(),
-                /* permissionDialogComponent= */ null,
                 /* activityListener= */ mActivityListener,
                 /* activityBlockedCallback= */ mActivityBlockedCallback,
                 /* secureWindowCallback= */ null,
@@ -802,7 +786,6 @@ public class GenericWindowPolicyControllerTest {
                 /* activityPolicyExemptions= */ Collections.singleton(blockedComponent),
                 /* crossTaskNavigationAllowedByDefault= */ true,
                 /* crossTaskNavigationExemptions= */ new ArraySet<>(),
-                /* permissionDialogComponent= */ null,
                 /* activityListener= */ mActivityListener,
                 /* activityBlockedCallback= */ mActivityBlockedCallback,
                 /* secureWindowCallback= */ null,
@@ -823,7 +806,6 @@ public class GenericWindowPolicyControllerTest {
                 /* activityPolicyExemptions= */ Collections.singleton(allowedComponent),
                 /* crossTaskNavigationAllowedByDefault= */ true,
                 /* crossTaskNavigationExemptions= */ new ArraySet<>(),
-                /* permissionDialogComponent= */ null,
                 /* activityListener= */ mActivityListener,
                 /* activityBlockedCallback= */ mActivityBlockedCallback,
                 /* secureWindowCallback= */ null,
@@ -844,7 +826,6 @@ public class GenericWindowPolicyControllerTest {
                 /* activityPolicyExemptions= */ new ArraySet<>(),
                 /* crossTaskNavigationAllowedByDefault= */ true,
                 /* crossTaskNavigationExemptions= */ new ArraySet<>(),
-                /* permissionDialogComponent= */ null,
                 /* activityListener= */ mActivityListener,
                 /* activityBlockedCallback= */ mActivityBlockedCallback,
                 /* secureWindowCallback= */ null,
@@ -865,7 +846,6 @@ public class GenericWindowPolicyControllerTest {
                 /* activityPolicyExemptions= */ new ArraySet<>(),
                 /* crossTaskNavigationAllowedByDefault= */ true,
                 /* crossTaskNavigationExemptions= */ Collections.singleton(blockedComponent),
-                /* permissionDialogComponent= */ null,
                 /* activityListener= */ mActivityListener,
                 /* activityBlockedCallback= */ mActivityBlockedCallback,
                 /* secureWindowCallback= */ null,
@@ -886,29 +866,6 @@ public class GenericWindowPolicyControllerTest {
                 /* activityPolicyExemptions= */ new ArraySet<>(),
                 /* crossTaskNavigationAllowedByDefault= */ false,
                 /* crossTaskNavigationExemptions= */ Collections.singleton(allowedComponent),
-                /* permissionDialogComponent= */ null,
-                /* activityListener= */ mActivityListener,
-                /* activityBlockedCallback= */ mActivityBlockedCallback,
-                /* secureWindowCallback= */ null,
-                /* intentListenerCallback= */ mIntentListenerCallback,
-                /* displayCategories= */ new ArraySet<>(),
-                /* showTasksInHostDeviceRecents= */ true,
-                /* customHomeComponent= */ null);
-    }
-
-    private GenericWindowPolicyController createGwpcWithPermissionComponent(
-            ComponentName permissionComponent) {
-        //TODO instert the component
-        return new GenericWindowPolicyController(
-                0,
-                0,
-                AttributionSource.myAttributionSource(),
-                /* allowedUsers= */ new ArraySet<>(getCurrentUserId()),
-                /* activityLaunchAllowedByDefault= */ true,
-                /* activityPolicyExemptions= */ new ArraySet<>(),
-                /* crossTaskNavigationAllowedByDefault= */ false,
-                /* crossTaskNavigationExemptions= */ new ArraySet<>(),
-                /* permissionDialogComponent= */ permissionComponent,
                 /* activityListener= */ mActivityListener,
                 /* activityBlockedCallback= */ mActivityBlockedCallback,
                 /* secureWindowCallback= */ null,

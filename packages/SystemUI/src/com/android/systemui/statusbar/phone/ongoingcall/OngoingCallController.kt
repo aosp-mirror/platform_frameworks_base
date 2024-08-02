@@ -38,6 +38,7 @@ import com.android.systemui.log.LogBuffer
 import com.android.systemui.log.core.LogLevel
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.res.R
+import com.android.systemui.statusbar.StatusBarIconView
 import com.android.systemui.statusbar.chips.ui.view.ChipBackgroundContainer
 import com.android.systemui.statusbar.chips.ui.view.ChipChronometer
 import com.android.systemui.statusbar.data.repository.StatusBarModeRepositoryStore
@@ -114,6 +115,9 @@ constructor(
                         CallNotificationInfo(
                             entry.sbn.key,
                             entry.sbn.notification.getWhen(),
+                            // In this old listener pattern, we don't have access to the
+                            // notification icon.
+                            notificationIconView = null,
                             entry.sbn.notification.contentIntent,
                             entry.sbn.uid,
                             entry.sbn.notification.extras.getInt(
@@ -223,8 +227,15 @@ constructor(
                 callNotificationInfo
                     // This shouldn't happen, but protect against it in case
                     ?: return OngoingCallModel.NoCall
+            val icon =
+                if (Flags.statusBarCallChipNotificationIcon()) {
+                    currentInfo.notificationIconView
+                } else {
+                    null
+                }
             return OngoingCallModel.InCall(
                 startTimeMs = currentInfo.callStartTime,
+                notificationIconView = icon,
                 intent = currentInfo.intent,
             )
         } else {
@@ -260,6 +271,7 @@ constructor(
                 CallNotificationInfo(
                     notifModel.key,
                     notifModel.whenTime,
+                    notifModel.statusBarChipIconView,
                     notifModel.contentIntent,
                     notifModel.uid,
                     isOngoing = true,
@@ -407,6 +419,8 @@ constructor(
     private data class CallNotificationInfo(
         val key: String,
         val callStartTime: Long,
+        /** The icon set as the [android.app.Notification.getSmallIcon] field. */
+        val notificationIconView: StatusBarIconView?,
         val intent: PendingIntent?,
         val uid: Int,
         /** True if the call is currently ongoing (as opposed to incoming, screening, etc.). */

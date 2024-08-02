@@ -403,6 +403,13 @@ flag {
 }
 
 flag {
+    name: "status_bar_call_chip_notification_icon"
+    namespace: "systemui"
+    description: "Use the small icon set on the notification for the status bar call chip"
+    bug: "354930838"
+}
+
+flag {
     name: "compose_bouncer"
     namespace: "systemui"
     description: "Use the new compose bouncer in SystemUI"
@@ -576,16 +583,6 @@ flag {
     namespace: "systemui"
     description: "Mitigate crash on invalid computed range in CropView"
     bug: "232633995"
-    metadata {
-        purpose: PURPOSE_BUGFIX
-    }
-}
-
-flag {
-    name: "screenshot_private_profile_accessibility_announcement_fix"
-    namespace: "systemui"
-    description: "Modified a11y announcement for private space screenshots"
-    bug: "326941376"
     metadata {
         purpose: PURPOSE_BUGFIX
     }
@@ -1300,4 +1297,11 @@ flag {
    metadata {
         purpose: PURPOSE_BUGFIX
    }
+}
+
+flag {
+   name: "compose_haptic_sliders"
+   namespace: "systemui"
+   description: "Adding haptic component infrastructure to sliders in Compose."
+   bug: "341968766"
 }

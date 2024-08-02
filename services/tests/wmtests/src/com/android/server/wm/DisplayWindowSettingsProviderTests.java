@@ -31,7 +31,6 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assume.assumeTrue;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.testng.Assert.assertFalse;
 
@@ -357,8 +356,6 @@ public class DisplayWindowSettingsProviderTests extends WindowTestsBase {
 
     @Test
     public void testRemovesStaleDisplaySettings_defaultDisplay_removesStaleDisplaySettings() {
-        assumeTrue(com.android.window.flags.Flags.perUserDisplayWindowSettings());
-
         // Write density setting for second display then remove it.
         final DisplayWindowSettingsProvider provider = new DisplayWindowSettingsProvider(
                 mDefaultVendorSettingsStorage, mOverrideSettingsStorage);
@@ -387,8 +384,6 @@ public class DisplayWindowSettingsProviderTests extends WindowTestsBase {
 
     @Test
     public void testRemovesStaleDisplaySettings_displayNotInLayout_keepsDisplaySettings() {
-        assumeTrue(com.android.window.flags.Flags.perUserDisplayWindowSettings());
-
         // Write density setting for primary display.
         final DisplayWindowSettingsProvider provider = new DisplayWindowSettingsProvider(
                 mDefaultVendorSettingsStorage, mOverrideSettingsStorage);
