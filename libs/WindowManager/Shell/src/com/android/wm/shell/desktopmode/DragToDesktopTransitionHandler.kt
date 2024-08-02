@@ -28,17 +28,20 @@ import android.window.TransitionInfo
 import android.window.TransitionInfo.Change
 import android.window.TransitionRequestInfo
 import android.window.WindowContainerTransaction
+import androidx.dynamicanimation.animation.SpringForce
 import com.android.internal.jank.Cuj.CUJ_DESKTOP_MODE_ENTER_APP_HANDLE_DRAG_HOLD
 import com.android.internal.jank.Cuj.CUJ_DESKTOP_MODE_ENTER_APP_HANDLE_DRAG_RELEASE
 import com.android.internal.jank.InteractionJankMonitor
 import com.android.internal.protolog.ProtoLog
 import com.android.wm.shell.RootTaskDisplayAreaOrganizer
+import com.android.wm.shell.animation.FloatProperties
 import com.android.wm.shell.common.split.SplitScreenConstants.SPLIT_POSITION_BOTTOM_OR_RIGHT
 import com.android.wm.shell.common.split.SplitScreenConstants.SPLIT_POSITION_TOP_OR_LEFT
 import com.android.wm.shell.common.split.SplitScreenConstants.SPLIT_POSITION_UNDEFINED
 import com.android.wm.shell.common.split.SplitScreenConstants.SplitPosition
 import com.android.wm.shell.protolog.ShellProtoLogGroup
 import com.android.wm.shell.shared.TransitionUtil
+import com.android.wm.shell.shared.animation.PhysicsAnimator
 import com.android.wm.shell.splitscreen.SplitScreenController
 import com.android.wm.shell.transition.Transitions
 import com.android.wm.shell.transition.Transitions.TRANSIT_DESKTOP_MODE_CANCEL_DRAG_TO_DESKTOP
@@ -49,6 +52,7 @@ import com.android.wm.shell.windowdecor.MoveToDesktopAnimator
 import com.android.wm.shell.windowdecor.MoveToDesktopAnimator.Companion.DRAG_FREEFORM_SCALE
 import com.android.wm.shell.windowdecor.OnTaskResizeAnimationListener
 import java.util.function.Supplier
+import kotlin.math.max
 
 /**
  * Handles the transition to enter desktop from fullscreen by dragging on the handle bar. It also
@@ -64,17 +68,15 @@ sealed class DragToDesktopTransitionHandler(
     private val context: Context,
     private val transitions: Transitions,
     private val taskDisplayAreaOrganizer: RootTaskDisplayAreaOrganizer,
-    private val interactionJankMonitor: InteractionJankMonitor,
-    private val transactionSupplier: Supplier<SurfaceControl.Transaction>,
+    protected val interactionJankMonitor: InteractionJankMonitor,
+    protected val transactionSupplier: Supplier<SurfaceControl.Transaction>,
 ) : TransitionHandler {
 
-    private val rectEvaluator = RectEvaluator(Rect())
+    protected val rectEvaluator = RectEvaluator(Rect())
     private val launchHomeIntent = Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_HOME)
 
-    private var dragToDesktopStateListener: DragToDesktopStateListener? = null
     private lateinit var splitScreenController: SplitScreenController
     private var transitionState: TransitionState? = null
-    private lateinit var onTaskResizeAnimationListener: OnTaskResizeAnimationListener
 
     /** Whether a drag-to-desktop transition is in progress. */
     val inProgress: Boolean
@@ -83,18 +85,16 @@ sealed class DragToDesktopTransitionHandler(
     /** The task id of the task currently being dragged from fullscreen/split. */
     val draggingTaskId: Int
         get() = transitionState?.draggedTaskId ?: INVALID_TASK_ID
-    /** Sets a listener to receive callback about events during the transition animation. */
-    fun setDragToDesktopStateListener(listener: DragToDesktopStateListener) {
-        dragToDesktopStateListener = listener
-    }
+
+    /** Listener to receive callback about events during the transition animation. */
+    var dragToDesktopStateListener: DragToDesktopStateListener? = null
+
+    /** Task listener for animation start, task bounds resize, and the animation finish */
+    lateinit var onTaskResizeAnimationListener: OnTaskResizeAnimationListener
 
     /** Setter needed to avoid cyclic dependency. */
     fun setSplitScreenController(controller: SplitScreenController) {
         splitScreenController = controller
-    }
-
-    fun setOnTaskResizeAnimatorListener(listener: OnTaskResizeAnimationListener) {
-        onTaskResizeAnimationListener = listener
     }
 
     /**
@@ -503,6 +503,7 @@ sealed class DragToDesktopTransitionHandler(
         finishTransaction: SurfaceControl.Transaction
     ) {
         val state = requireTransitionState()
+        val freeformTaskChanges = mutableListOf<Change>()
         info.changes.forEachIndexed { i, change ->
             when {
                 state is TransitionState.FromSplit &&
@@ -527,12 +528,15 @@ sealed class DragToDesktopTransitionHandler(
                             ?: error("Expected dragged leash to be non-null")
                     startTransaction.setRelativeLayer(change.leash, draggedTaskLeash, -i)
                     finishTransaction.setRelativeLayer(change.leash, draggedTaskLeash, -i)
+                    freeformTaskChanges.add(change)
                 }
             }
         }
+
+        state.freeformTaskChanges = freeformTaskChanges
     }
 
-    private fun animateEndDragToDesktop(
+    protected open fun animateEndDragToDesktop(
         startTransaction: SurfaceControl.Transaction,
         startTransitionFinishCb: Transitions.TransitionFinishCallback
     ) {
@@ -597,7 +601,7 @@ sealed class DragToDesktopTransitionHandler(
                     object : AnimatorListenerAdapter() {
                         override fun onAnimationEnd(animation: Animator) {
                             onTaskResizeAnimationListener.onAnimationEnd(state.draggedTaskId)
-                            startTransitionFinishCb.onTransitionFinished(null /* null */)
+                            startTransitionFinishCb.onTransitionFinished(/* wct = */ null)
                             clearState()
                             interactionJankMonitor.end(
                                 CUJ_DESKTOP_MODE_ENTER_APP_HANDLE_DRAG_RELEASE
@@ -728,7 +732,7 @@ sealed class DragToDesktopTransitionHandler(
         wct.restoreTransientOrder(homeWc)
     }
 
-    private fun clearState() {
+    protected fun clearState() {
         transitionState = null
     }
 
@@ -778,6 +782,7 @@ sealed class DragToDesktopTransitionHandler(
         abstract var cancelTransitionToken: IBinder?
         abstract var homeChange: Change?
         abstract var draggedTaskChange: Change?
+        abstract var freeformTaskChanges: List<Change>
         abstract var cancelState: CancelState
         abstract var startAborted: Boolean
 
@@ -790,6 +795,7 @@ sealed class DragToDesktopTransitionHandler(
             override var cancelTransitionToken: IBinder? = null,
             override var homeChange: Change? = null,
             override var draggedTaskChange: Change? = null,
+            override var freeformTaskChanges: List<Change> = emptyList(),
             override var cancelState: CancelState = CancelState.NO_CANCEL,
             override var startAborted: Boolean = false,
             var otherRootChanges: MutableList<Change> = mutableListOf()
@@ -804,6 +810,7 @@ sealed class DragToDesktopTransitionHandler(
             override var cancelTransitionToken: IBinder? = null,
             override var homeChange: Change? = null,
             override var draggedTaskChange: Change? = null,
+            override var freeformTaskChanges: List<Change> = emptyList(),
             override var cancelState: CancelState = CancelState.NO_CANCEL,
             override var startAborted: Boolean = false,
             var splitRootChange: Change? = null,
@@ -825,7 +832,7 @@ sealed class DragToDesktopTransitionHandler(
 
     companion object {
         /** The duration of the animation to commit or cancel the drag-to-desktop gesture. */
-        private const val DRAG_TO_DESKTOP_FINISH_ANIM_DURATION_MS = 336L
+        internal const val DRAG_TO_DESKTOP_FINISH_ANIM_DURATION_MS = 336L
     }
 }
 
@@ -885,6 +892,15 @@ constructor(
         transactionSupplier
     ) {
 
+    private val positionSpringConfig =
+        PhysicsAnimator.SpringConfig(
+            SpringForce.STIFFNESS_LOW,
+            SpringForce.DAMPING_RATIO_LOW_BOUNCY
+        )
+
+    private val sizeSpringConfig =
+        PhysicsAnimator.SpringConfig(SpringForce.STIFFNESS_LOW, SpringForce.DAMPING_RATIO_NO_BOUNCY)
+
     /**
      * @return layers in order:
      * - appLayers - below everything z < 0, effectively hides the leash
@@ -911,5 +927,115 @@ constructor(
         val homeLeash = state.homeChange?.leash ?: error("Expects home leash to be non-null")
         // Hide home on finish to prevent flickering when wallpaper activity flag is enabled
         finishTransaction.hide(homeLeash)
+        // Setup freeform tasks before animation
+        state.freeformTaskChanges.forEach { change ->
+            val startScale = DRAG_TO_DESKTOP_FREEFORM_TASK_INITIAL_SCALE
+            val startX =
+                change.endAbsBounds.left + change.endAbsBounds.width() * (1 - startScale) / 2
+            val startY =
+                change.endAbsBounds.top + change.endAbsBounds.height() * (1 - startScale) / 2
+            startTransaction.setPosition(change.leash, startX, startY)
+            startTransaction.setScale(change.leash, startScale, startScale)
+            startTransaction.setAlpha(change.leash, 0f)
+        }
+    }
+
+    override fun animateEndDragToDesktop(
+        startTransaction: SurfaceControl.Transaction,
+        startTransitionFinishCb: Transitions.TransitionFinishCallback
+    ) {
+        val state = requireTransitionState()
+        val draggedTaskChange =
+            state.draggedTaskChange ?: error("Expected non-null change of dragged task")
+        val draggedTaskLeash = draggedTaskChange.leash
+        val freeformTaskChanges = state.freeformTaskChanges
+        val startBounds = draggedTaskChange.startAbsBounds
+        val endBounds = draggedTaskChange.endAbsBounds
+        val currentVelocity = state.dragAnimator.computeCurrentVelocity()
+
+        // Cancel any animation that may be currently playing; we will use the relevant
+        // details of that animation here.
+        state.dragAnimator.cancelAnimator()
+        // We still apply scale to task bounds; as we animate the bounds to their
+        // end value, animate scale to 1.
+        val startScale = state.dragAnimator.scale
+        val startPosition = state.dragAnimator.position
+        val startBoundsWithOffset =
+            Rect(startBounds).apply { offset(startPosition.x.toInt(), startPosition.y.toInt()) }
+
+        dragToDesktopStateListener?.onCommitToDesktopAnimationStart(startTransaction)
+        // Accept the merge by applying the merging transaction (applied by #showResizeVeil)
+        // and finish callback. Show the veil and position the task at the first frame before
+        // starting the final animation.
+        onTaskResizeAnimationListener.onAnimationStart(
+            state.draggedTaskId,
+            startTransaction,
+            startBoundsWithOffset
+        )
+
+        val tx: SurfaceControl.Transaction = transactionSupplier.get()
+        PhysicsAnimator.getInstance(startBoundsWithOffset)
+            .spring(
+                FloatProperties.RECT_X,
+                endBounds.left.toFloat(),
+                currentVelocity.x,
+                positionSpringConfig
+            )
+            .spring(
+                FloatProperties.RECT_Y,
+                endBounds.top.toFloat(),
+                currentVelocity.y,
+                positionSpringConfig
+            )
+            .spring(FloatProperties.RECT_WIDTH, endBounds.width().toFloat(), sizeSpringConfig)
+            .spring(FloatProperties.RECT_HEIGHT, endBounds.height().toFloat(), sizeSpringConfig)
+            .addUpdateListener { animBounds, _ ->
+                val animFraction =
+                    (animBounds.width() - startBounds.width()).toFloat() /
+                        (endBounds.width() - startBounds.width())
+                val animScale = startScale + animFraction * (1 - startScale)
+                // Freeform animation starts 50% in the animation
+                val freeformAnimFraction = max(animFraction - 0.5f, 0f) * 2f
+                val freeformStartScale = DRAG_TO_DESKTOP_FREEFORM_TASK_INITIAL_SCALE
+                val freeformAnimScale =
+                    freeformStartScale + freeformAnimFraction * (1 - freeformStartScale)
+                tx.apply {
+                    // Update dragged task
+                    setScale(draggedTaskLeash, animScale, animScale)
+                    setPosition(
+                        draggedTaskLeash,
+                        animBounds.left.toFloat(),
+                        animBounds.top.toFloat()
+                    )
+                    // Update freeform tasks
+                    freeformTaskChanges.forEach {
+                        val startX =
+                            it.endAbsBounds.left +
+                                it.endAbsBounds.width() * (1 - freeformAnimScale) / 2
+                        val startY =
+                            it.endAbsBounds.top +
+                                it.endAbsBounds.height() * (1 - freeformAnimScale) / 2
+                        setPosition(it.leash, startX, startY)
+                        setScale(it.leash, freeformAnimScale, freeformAnimScale)
+                        setAlpha(it.leash, freeformAnimFraction)
+                    }
+                }
+                onTaskResizeAnimationListener.onBoundsChange(state.draggedTaskId, tx, animBounds)
+            }
+            .withEndActions({
+                onTaskResizeAnimationListener.onAnimationEnd(state.draggedTaskId)
+                startTransitionFinishCb.onTransitionFinished(/* wct = */ null)
+                clearState()
+                interactionJankMonitor.end(CUJ_DESKTOP_MODE_ENTER_APP_HANDLE_DRAG_RELEASE)
+            })
+            .start()
+    }
+
+    companion object {
+        /**
+         * The initial scale of the freeform tasks in the animation to commit the drag-to-desktop
+         * gesture.
+         */
+        private const val DRAG_TO_DESKTOP_FREEFORM_TASK_INITIAL_SCALE = 0.9f
     }
 }

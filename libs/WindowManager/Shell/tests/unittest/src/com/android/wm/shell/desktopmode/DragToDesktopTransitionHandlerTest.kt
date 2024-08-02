@@ -304,7 +304,7 @@ class DragToDesktopTransitionHandlerTest : ShellTestCase() {
         val task = createTask()
         val startTransition =
             startDrag(defaultHandler, task, finishTransaction = playingFinishTransaction)
-        defaultHandler.setOnTaskResizeAnimatorListener(mock())
+        defaultHandler.onTaskResizeAnimationListener = mock()
 
         defaultHandler.mergeAnimation(
             transition = mock(),
@@ -327,13 +327,14 @@ class DragToDesktopTransitionHandlerTest : ShellTestCase() {
 
     @Test
     fun mergeAnimation_endTransition_springHandler_hidesHome() {
+        whenever(dragAnimator.computeCurrentVelocity()).thenReturn(PointF())
         val playingFinishTransaction = mock<SurfaceControl.Transaction>()
         val mergedStartTransaction = mock<SurfaceControl.Transaction>()
         val finishCallback = mock<Transitions.TransitionFinishCallback>()
         val task = createTask()
         val startTransition =
             startDrag(springHandler, task, finishTransaction = playingFinishTransaction)
-        springHandler.setOnTaskResizeAnimatorListener(mock())
+        springHandler.onTaskResizeAnimationListener = mock()
 
         springHandler.mergeAnimation(
             transition = mock(),
