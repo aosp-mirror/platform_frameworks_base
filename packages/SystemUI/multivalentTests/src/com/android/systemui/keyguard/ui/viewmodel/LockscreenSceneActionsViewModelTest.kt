@@ -37,6 +37,7 @@ import com.android.systemui.deviceentry.data.repository.fakeDeviceEntryRepositor
 import com.android.systemui.deviceentry.domain.interactor.deviceEntryInteractor
 import com.android.systemui.flags.EnableSceneContainer
 import com.android.systemui.kosmos.testScope
+import com.android.systemui.lifecycle.activateIn
 import com.android.systemui.power.data.repository.fakePowerRepository
 import com.android.systemui.power.shared.model.WakefulnessState
 import com.android.systemui.scene.domain.interactor.sceneInteractor
@@ -44,9 +45,7 @@ import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.scene.shared.model.TransitionKeys
 import com.android.systemui.shade.data.repository.shadeRepository
 import com.android.systemui.shade.domain.interactor.shadeInteractor
-import com.android.systemui.statusbar.notification.stack.ui.viewmodel.notificationsPlaceholderViewModel
 import com.android.systemui.testKosmos
-import com.android.systemui.util.mockito.mock
 import com.google.common.truth.Truth.assertThat
 import kotlin.math.pow
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -63,7 +62,7 @@ import platform.test.runner.parameterized.Parameters
 @RunWith(ParameterizedAndroidJunit4::class)
 @RunWithLooper
 @EnableSceneContainer
-class LockscreenSceneViewModelTest : SysuiTestCase() {
+class LockscreenSceneActionsViewModelTest : SysuiTestCase() {
 
     companion object {
         private const val parameterCount = 6
@@ -172,6 +171,7 @@ class LockscreenSceneViewModelTest : SysuiTestCase() {
     @EnableFlags(Flags.FLAG_COMMUNAL_HUB)
     fun destinationScenes() =
         testScope.runTest {
+            underTest.activateIn(this)
             kosmos.fakeDeviceEntryRepository.setLockscreenEnabled(true)
             kosmos.fakeAuthenticationRepository.setAuthenticationMethod(
                 if (canSwipeToEnter) {
@@ -192,7 +192,7 @@ class LockscreenSceneViewModelTest : SysuiTestCase() {
                     },
             )
 
-            val destinationScenes by collectLastValue(underTest.destinationScenes)
+            val destinationScenes by collectLastValue(underTest.actions)
             val downDestination =
                 destinationScenes?.get(
                     Swipe(
@@ -255,15 +255,10 @@ class LockscreenSceneViewModelTest : SysuiTestCase() {
                 )
         }
 
-    private fun createLockscreenSceneViewModel(): LockscreenSceneViewModel {
-        return LockscreenSceneViewModel(
+    private fun createLockscreenSceneViewModel(): LockscreenSceneActionsViewModel {
+        return LockscreenSceneActionsViewModel(
             deviceEntryInteractor = kosmos.deviceEntryInteractor,
             communalInteractor = kosmos.communalInteractor,
-            touchHandling =
-                KeyguardTouchHandlingViewModel(
-                    interactor = mock(),
-                ),
-            notifications = kosmos.notificationsPlaceholderViewModel,
             shadeInteractor = kosmos.shadeInteractor,
         )
     }
