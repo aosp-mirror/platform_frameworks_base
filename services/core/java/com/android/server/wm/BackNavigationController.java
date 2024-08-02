@@ -963,8 +963,7 @@ class BackNavigationController {
             mWindowManagerService = wms;
             final Context context = wms.mContext;
             mShowWindowlessSurface = context.getResources().getBoolean(
-                    com.android.internal.R.bool.config_predictShowStartingSurface)
-                    && Flags.activitySnapshotByDefault();
+                    com.android.internal.R.bool.config_predictShowStartingSurface);
         }
         private static final int UNKNOWN = 0;
         private static final int TASK_SWITCH = 1;
