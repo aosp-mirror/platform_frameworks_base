@@ -751,6 +751,50 @@ class DesktopTasksControllerTest : ShellTestCase() {
   }
 
   @Test
+  @EnableFlags(Flags.FLAG_ENABLE_WINDOWING_DYNAMIC_INITIAL_BOUNDS)
+  fun addMoveToDesktopChanges_landscapeDevice_userFullscreenOverride_defaultPortraitBounds() {
+    setUpLandscapeDisplay()
+    val task = setUpFullscreenTask(enableUserFullscreenOverride = true)
+    val wct = WindowContainerTransaction()
+    controller.addMoveToDesktopChanges(wct, task)
+
+    assertThat(findBoundsChange(wct, task)).isEqualTo(DEFAULT_LANDSCAPE_BOUNDS)
+  }
+
+  @Test
+  @EnableFlags(Flags.FLAG_ENABLE_WINDOWING_DYNAMIC_INITIAL_BOUNDS)
+  fun addMoveToDesktopChanges_landscapeDevice_systemFullscreenOverride_defaultPortraitBounds() {
+    setUpLandscapeDisplay()
+    val task = setUpFullscreenTask(enableSystemFullscreenOverride = true)
+    val wct = WindowContainerTransaction()
+    controller.addMoveToDesktopChanges(wct, task)
+
+    assertThat(findBoundsChange(wct, task)).isEqualTo(DEFAULT_LANDSCAPE_BOUNDS)
+  }
+
+  @Test
+  @EnableFlags(Flags.FLAG_ENABLE_WINDOWING_DYNAMIC_INITIAL_BOUNDS)
+  fun addMoveToDesktopChanges_portraitDevice_userFullscreenOverride_defaultPortraitBounds() {
+    setUpPortraitDisplay()
+    val task = setUpFullscreenTask(enableUserFullscreenOverride = true)
+    val wct = WindowContainerTransaction()
+    controller.addMoveToDesktopChanges(wct, task)
+
+    assertThat(findBoundsChange(wct, task)).isEqualTo(DEFAULT_PORTRAIT_BOUNDS)
+  }
+
+  @Test
+  @EnableFlags(Flags.FLAG_ENABLE_WINDOWING_DYNAMIC_INITIAL_BOUNDS)
+  fun addMoveToDesktopChanges_portraitDevice_systemFullscreenOverride_defaultPortraitBounds() {
+    setUpPortraitDisplay()
+    val task = setUpFullscreenTask(enableSystemFullscreenOverride = true)
+    val wct = WindowContainerTransaction()
+    controller.addMoveToDesktopChanges(wct, task)
+
+    assertThat(findBoundsChange(wct, task)).isEqualTo(DEFAULT_PORTRAIT_BOUNDS)
+  }
+
+  @Test
   fun moveToDesktop_tdaFullscreen_windowingModeSetToFreeform() {
     val task = setUpFullscreenTask()
     val tda = rootTaskDisplayAreaOrganizer.getDisplayAreaInfo(DEFAULT_DISPLAY)!!
@@ -2712,13 +2756,15 @@ class DesktopTasksControllerTest : ShellTestCase() {
   }
 
   private fun setUpFullscreenTask(
-      displayId: Int = DEFAULT_DISPLAY,
-      isResizable: Boolean = true,
-      windowingMode: Int = WINDOWING_MODE_FULLSCREEN,
-      deviceOrientation: Int = ORIENTATION_LANDSCAPE,
-      screenOrientation: Int = SCREEN_ORIENTATION_UNSPECIFIED,
-      shouldLetterbox: Boolean = false,
-      gravity: Int = Gravity.NO_GRAVITY
+    displayId: Int = DEFAULT_DISPLAY,
+    isResizable: Boolean = true,
+    windowingMode: Int = WINDOWING_MODE_FULLSCREEN,
+    deviceOrientation: Int = ORIENTATION_LANDSCAPE,
+    screenOrientation: Int = SCREEN_ORIENTATION_UNSPECIFIED,
+    shouldLetterbox: Boolean = false,
+    gravity: Int = Gravity.NO_GRAVITY,
+    enableUserFullscreenOverride: Boolean = false,
+    enableSystemFullscreenOverride: Boolean = false
   ): RunningTaskInfo {
     val task = createFullscreenTask(displayId)
     val activityInfo = ActivityInfo()
@@ -2729,6 +2775,8 @@ class DesktopTasksControllerTest : ShellTestCase() {
       isResizeable = isResizable
       configuration.orientation = deviceOrientation
       configuration.windowConfiguration.windowingMode = windowingMode
+      appCompatTaskInfo.isUserFullscreenOverrideEnabled = enableUserFullscreenOverride
+      appCompatTaskInfo.isSystemFullscreenOverrideEnabled = enableSystemFullscreenOverride
 
       if (shouldLetterbox) {
         if (deviceOrientation == ORIENTATION_LANDSCAPE &&
