@@ -130,24 +130,19 @@
     <!-- no translation found for screenrecord_stop_dialog_message (1926783607059442889) -->
     <skip />
     <string name="screenrecord_stop_dialog_message_specific_app" msgid="5285148796772616326">"Vous arrêterez d\'enregistrer &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;"</string>
-    <!-- no translation found for screenrecord_stop_dialog_button (2883812564938194350) -->
-    <skip />
-    <!-- no translation found for share_to_app_stop_dialog_title (9212915050910250438) -->
-    <skip />
+    <string name="screenrecord_stop_dialog_button" msgid="2883812564938194350">"Arrêter l\'enregistrement"</string>
+    <string name="share_to_app_stop_dialog_title" msgid="9212915050910250438">"Arrêter le partage d\'écran?"</string>
     <!-- no translation found for share_to_app_stop_dialog_message (3181723638915877339) -->
     <skip />
     <string name="share_to_app_stop_dialog_message_specific_app" msgid="124371406810544777">"Vous arrêterez de partager &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;"</string>
-    <!-- no translation found for share_to_app_stop_dialog_button (6334056916284230217) -->
-    <skip />
+    <string name="share_to_app_stop_dialog_button" msgid="6334056916284230217">"Arrêter le partage"</string>
     <!-- no translation found for cast_to_other_device_stop_dialog_title (1910372600290258193) -->
     <skip />
     <!-- no translation found for cast_to_other_device_stop_dialog_message (1502520537030715412) -->
     <skip />
     <string name="cast_to_other_device_stop_dialog_message_specific_app" msgid="4891536209254041850">"Vous arrêterez de diffuser &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;"</string>
-    <!-- no translation found for cast_to_other_device_stop_dialog_button (6420183747435521834) -->
-    <skip />
-    <!-- no translation found for close_dialog_button (4749497706540104133) -->
-    <skip />
+    <string name="cast_to_other_device_stop_dialog_button" msgid="6420183747435521834">"Arrêter la diffusion"</string>
+    <string name="close_dialog_button" msgid="4749497706540104133">"Fermer"</string>
     <string name="issuerecord_title" msgid="286627115110121849">"Enregistreur de problèmes"</string>
     <string name="issuerecord_background_processing_label" msgid="1666840264959336876">"Trait. de l\'enreg. du problème"</string>
     <string name="issuerecord_channel_description" msgid="6142326363431474632">"Notification continue pour une session de collecte d\'un problème"</string>
@@ -158,8 +153,7 @@
     <string name="issuerecord_save_error" msgid="6913040083446722726">"Erreur lors de l\'enregistrement du problème"</string>
     <string name="issuerecord_start_error" msgid="3402782952722871190">"Erreur lors du démarrage de l\'enregistrement du problème"</string>
     <string name="immersive_cling_title" msgid="8372056499315585941">"Affichage plein écran"</string>
-    <!-- no translation found for immersive_cling_description (2717426731830851921) -->
-    <skip />
+    <string name="immersive_cling_description" msgid="2717426731830851921">"Pour quitter ce mode, balayer l\'écran vers le bas à partir du haut"</string>
     <string name="immersive_cling_positive" msgid="3076681691468978568">"OK"</string>
     <string name="accessibility_back" msgid="6530104400086152611">"Précédent"</string>
     <string name="accessibility_home" msgid="5430449841237966217">"Domicile"</string>
@@ -212,7 +206,7 @@
     <string name="biometric_dialog_last_pattern_attempt_before_wipe_user" msgid="8400180746043407270">"Si vous entrez un schéma incorrect à la prochaine tentative, cet utilisateur sera supprimé."</string>
     <string name="biometric_dialog_last_pin_attempt_before_wipe_user" msgid="4159878829962411168">"Si vous entrez un NIP incorrect à la prochaine tentative, cet utilisateur sera supprimé."</string>
     <string name="biometric_dialog_last_password_attempt_before_wipe_user" msgid="4695682515465063885">"Si vous entrez un mot de passe incorrect à la prochaine tentative, cet utilisateur sera supprimé."</string>
-    <string name="biometric_dialog_last_pattern_attempt_before_wipe_profile" msgid="6045224069529284686">"Si vous entrez un schéma incorrect à la prochaine tentative suivante, votre profil professionnel et ses données seront supprimés."</string>
+    <string name="biometric_dialog_last_pattern_attempt_before_wipe_profile" msgid="6045224069529284686">"Si vous entrez un schéma incorrect à la prochaine tentative, votre profil professionnel et ses données seront supprimés."</string>
     <string name="biometric_dialog_last_pin_attempt_before_wipe_profile" msgid="545567685899091757">"Si vous entrez un NIP incorrect à la prochaine tentative, votre profil professionnel et ses données seront supprimés."</string>
     <string name="biometric_dialog_last_password_attempt_before_wipe_profile" msgid="8538032972389729253">"Si vous entrez un mot de passe incorrect à la prochaine tentative suivante, votre profil professionnel et ses données seront supprimés."</string>
     <string name="biometric_re_enroll_dialog_confirm" msgid="3049858021857801836">"Configuration"</string>
@@ -303,8 +297,7 @@
     <string name="quick_settings_bluetooth_device_saved" msgid="7549938728928069477">"Enregistré"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_disconnect" msgid="415980329093277342">"Déconnecter"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_activate" msgid="3724301751036877403">"Activer"</string>
-    <!-- no translation found for turn_on_bluetooth_auto_tomorrow (3345758139235739006) -->
-    <skip />
+    <string name="turn_on_bluetooth_auto_tomorrow" msgid="3345758139235739006">"L\'activer automatiquement demain"</string>
     <string name="turn_on_bluetooth_auto_info_disabled" msgid="682984290339848844">"Les fonctionnalités comme Partage rapide et Localiser mon appareil utilisent le Bluetooth"</string>
     <string name="turn_on_bluetooth_auto_info_enabled" msgid="7440944034584560279">"Le Bluetooth s\'activera demain matin"</string>
     <string name="quick_settings_bluetooth_audio_sharing_button" msgid="7545274861795853838">"Partager l\'audio"</string>
@@ -502,7 +495,7 @@
     <string name="guest_notification_session_active" msgid="5567273684713471450">"Vous êtes en mode Invité"</string>
     <string name="user_add_user_message_guest_remove" msgid="5589286604543355007">\n\n"Si vous ajoutez un nouvel utilisateur, vous quitterez le mode Invité, et toutes les applis et données de la session d\'invité en cours seront supprimées."</string>
     <string name="user_limit_reached_title" msgid="2429229448830346057">"Limite d\'utilisateurs atteinte"</string>
-    <string name="user_limit_reached_message" msgid="1070703858915935796">"{count,plural, =1{Vous ne pouvez créer qu\'un seul utilisateur.}one{Vous pouvez ajouter jusqu\'à # utilisateur.}many{Vous pouvez ajouter jusqu\'à # d\'utilisateurs.}other{Vous pouvez ajouter jusqu\'à # utilisateurs.}}"</string>
+    <string name="user_limit_reached_message" msgid="1070703858915935796">"{count,plural, =1{Un seul utilisateur peut être créé}one{Vous pouvez ajouter jusqu\'à # utilisateur.}many{Vous pouvez ajouter jusqu\'à # d\'utilisateurs.}other{Vous pouvez ajouter jusqu\'à # utilisateurs.}}"</string>
     <string name="user_remove_user_title" msgid="9124124694835811874">"Supprimer l\'utilisateur?"</string>
     <string name="user_remove_user_message" msgid="6702834122128031833">"Toutes les applis et les données de cet utilisateur seront supprimées."</string>
     <string name="user_remove_user_remove" msgid="8387386066949061256">"Supprimer"</string>
@@ -898,7 +891,7 @@
     <string name="accessibility_quick_settings_settings" msgid="7098489591715844713">"Ouvrir les paramètres."</string>
     <string name="accessibility_quick_settings_expand" msgid="2609275052412521467">"Ouvrir les réglages rapides."</string>
     <string name="accessibility_quick_settings_collapse" msgid="4674876336725041982">"Fermer les réglages rapides."</string>
-    <string name="accessibility_quick_settings_user" msgid="505821942882668619">"Connecté comme <xliff:g id="ID_1">%s</xliff:g>"</string>
+    <string name="accessibility_quick_settings_user" msgid="505821942882668619">"Personne connectée en tant que <xliff:g id="ID_1">%s</xliff:g>"</string>
     <string name="accessibility_quick_settings_choose_user_action" msgid="4554388498186576087">"choisir un utilisateur"</string>
     <string name="data_connection_no_internet" msgid="691058178914184544">"Aucune connexion Internet"</string>
     <string name="accessibility_quick_settings_open_settings" msgid="536838345505030893">"Ouvrir les paramètres <xliff:g id="ID_1">%s</xliff:g>."</string>
@@ -987,7 +980,7 @@
     <string name="privacy_type_media_projection" msgid="8136723828804251547">"enregistrement d\'écran"</string>
     <string name="music_controls_no_title" msgid="4166497066552290938">"Sans titre"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"Veille"</string>
-    <string name="font_scaling_dialog_title" msgid="6273107303850248375">"Taille de police"</string>
+    <string name="font_scaling_dialog_title" msgid="6273107303850248375">"Taille de la police"</string>
     <string name="font_scaling_smaller" msgid="1012032217622008232">"Rapetisser"</string>
     <string name="font_scaling_larger" msgid="5476242157436806760">"Agrandir"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"Fenêtre d\'agrandissement"</string>
@@ -1350,14 +1343,10 @@
     <string name="shortcut_helper_content_description_collapse_icon" msgid="8028015738431664954">"Icône Réduire"</string>
     <string name="shortcut_helper_content_description_expand_icon" msgid="1084435697860417390">"Icône Développer"</string>
     <string name="shortcut_helper_key_combinations_or_separator" msgid="7082902112102125540">"ou"</string>
-    <!-- no translation found for touchpad_tutorial_back_gesture_button (2746834288077265946) -->
-    <skip />
-    <!-- no translation found for touchpad_tutorial_home_gesture_button (7640544867625955304) -->
-    <skip />
-    <!-- no translation found for touchpad_tutorial_action_key_button (3220074511852927267) -->
-    <skip />
-    <!-- no translation found for touchpad_tutorial_done_button (176168488821755503) -->
-    <skip />
+    <string name="touchpad_tutorial_back_gesture_button" msgid="2746834288077265946">"Geste de retour"</string>
+    <string name="touchpad_tutorial_home_gesture_button" msgid="7640544867625955304">"Geste d\'accès à l\'écran d\'accueil"</string>
+    <string name="touchpad_tutorial_action_key_button" msgid="3220074511852927267">"Touche d\'action"</string>
+    <string name="touchpad_tutorial_done_button" msgid="176168488821755503">"OK"</string>
     <string name="keyboard_backlight_dialog_title" msgid="8273102932345564724">"Rétroéclairage du clavier"</string>
     <string name="keyboard_backlight_value" msgid="7336398765584393538">"Niveau %1$d de %2$d"</string>
     <string name="home_controls_dream_label" msgid="6567105701292324257">"Domotique"</string>
