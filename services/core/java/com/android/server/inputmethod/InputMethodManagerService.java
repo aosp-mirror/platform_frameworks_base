@@ -44,7 +44,6 @@ import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Display.INVALID_DISPLAY;
 import static android.view.WindowManager.DISPLAY_IME_POLICY_HIDE;
 import static android.view.WindowManager.DISPLAY_IME_POLICY_LOCAL;
-import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_STARTING;
 import static android.view.inputmethod.ConnectionlessHandwritingCallback.CONNECTIONLESS_HANDWRITING_ERROR_OTHER;
 import static android.view.inputmethod.ConnectionlessHandwritingCallback.CONNECTIONLESS_HANDWRITING_ERROR_UNSUPPORTED;
 
@@ -188,7 +187,6 @@ import com.android.server.inputmethod.InputMethodSubtypeSwitchingController.ImeS
 import com.android.server.pm.UserManagerInternal;
 import com.android.server.statusbar.StatusBarManagerInternal;
 import com.android.server.utils.PriorityDump;
-import com.android.server.wm.ImeTargetChangeListener;
 import com.android.server.wm.WindowManagerInternal;
 
 import java.io.FileDescriptor;
@@ -968,37 +966,6 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
             InputMethodDrawsNavBarResourceMonitor.registerCallback(context, mService.mIoHandler,
                     mService::onUpdateResourceOverlay);
 
-            // Also hook up ImeTargetChangeListener.
-            // TODO(b/356876005): Merge this into InputMethodManagerInternal.
-            final var windowManagerInternal = mService.mWindowManagerInternal;
-            windowManagerInternal.setInputMethodTargetChangeListener(new ImeTargetChangeListener() {
-                @Override
-                public void onImeTargetOverlayVisibilityChanged(@NonNull IBinder overlayWindowToken,
-                        @WindowManager.LayoutParams.WindowType int windowType, boolean visible,
-                        boolean removed, int displayId) {
-                    // Ignoring the starting window since it's ok to cover the IME target
-                    // window in temporary without affecting the IME visibility.
-                    final boolean hasOverlay = visible && !removed
-                            && windowType != TYPE_APPLICATION_STARTING;
-                    synchronized (ImfLock.class) {
-                        final var userId = mService.resolveImeUserIdFromDisplayIdLocked(displayId);
-                        mService.getUserData(userId).mVisibilityStateComputer
-                                .setHasVisibleImeLayeringOverlay(hasOverlay);
-                    }
-                }
-
-                @Override
-                public void onImeInputTargetVisibilityChanged(IBinder imeInputTarget,
-                        boolean visibleRequested, boolean removed, int displayId) {
-                    final boolean visibleAndNotRemoved = visibleRequested && !removed;
-                    synchronized (ImfLock.class) {
-                        final var userId = mService.resolveImeUserIdFromDisplayIdLocked(displayId);
-                        mService.getUserData(userId).mVisibilityStateComputer
-                                .onImeInputTargetVisibilityChanged(imeInputTarget,
-                                        visibleAndNotRemoved);
-                    }
-                }
-            });
             // Also schedule user init tasks onto an I/O thread.
             initializeUsersAsync(mService.mUserManagerInternal.getUserIds());
         }
@@ -5998,6 +5965,25 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
         @Override
         public void removeImeSurface(int displayId) {
             mHandler.obtainMessage(MSG_REMOVE_IME_SURFACE).sendToTarget();
+        }
+
+        @Override
+        public void setHasVisibleImeLayeringOverlay(boolean hasVisibleOverlay, int displayId) {
+            synchronized (ImfLock.class) {
+                final var userId = resolveImeUserIdFromDisplayIdLocked(displayId);
+                getUserData(userId).mVisibilityStateComputer.setHasVisibleImeLayeringOverlay(
+                        hasVisibleOverlay);
+            }
+        }
+
+        @Override
+        public void onImeInputTargetVisibilityChanged(@NonNull IBinder imeInputTarget,
+                boolean visibleAndNotRemoved, int displayId) {
+            synchronized (ImfLock.class) {
+                final var userId = resolveImeUserIdFromDisplayIdLocked(displayId);
+                getUserData(userId).mVisibilityStateComputer.onImeInputTargetVisibilityChanged(
+                        imeInputTarget, visibleAndNotRemoved);
+            }
         }
 
         @ImfLockFree

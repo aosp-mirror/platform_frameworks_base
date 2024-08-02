@@ -238,6 +238,33 @@ public abstract class InputMethodManagerInternal {
     public abstract void removeImeSurface(int displayId);
 
     /**
+     * Called when a non-IME-focusable overlay window being the IME layering target (e.g. a
+     * window with {@link android.view.WindowManager.LayoutParams#FLAG_NOT_FOCUSABLE} and
+     * {@link android.view.WindowManager.LayoutParams#FLAG_ALT_FOCUSABLE_IM} flags)
+     * has changed its window visibility.
+     *
+     * @param hasVisibleOverlay  whether such an overlay window exists or not
+     * @param displayId          the display ID where the overlay window exists
+     */
+    public abstract void setHasVisibleImeLayeringOverlay(boolean hasVisibleOverlay, int displayId);
+
+    /**
+     * Called when the visibility of IME input target window has changed.
+     *
+     * @param imeInputTarget        the window token of the IME input target window
+     * @param visibleAndNotRemoved  {@code true} when the new window is made visible by
+     *                              {@code imeInputTarget} and the IME input target window has not
+     *                              been removed. The new window is considered to be visible when
+     *                              switching to the new visible IME input target window and
+     *                              starting input, or the existing input target becomes visible.
+     *                              In contrast, {@code false} when closing the input target, or the
+     *                              existing input target becomes invisible
+     * @param displayId             the display for which to update the IME window status
+     */
+    public abstract void onImeInputTargetVisibilityChanged(@NonNull IBinder imeInputTarget,
+            boolean visibleAndNotRemoved, int displayId);
+
+    /**
      * Updates the IME visibility, back disposition and show IME picker status for SystemUI.
      * TODO(b/189923292): Making SystemUI to be true IME icon controller vs. presenter that
      * controlled by IMMS.
@@ -387,6 +414,16 @@ public abstract class InputMethodManagerInternal {
                 @ImfLockFree
                 @Override
                 public void removeImeSurface(int displayId) {
+                }
+
+                @Override
+                public void setHasVisibleImeLayeringOverlay(boolean hasVisibleOverlay,
+                        int displayId) {
+                }
+
+                @Override
+                public void onImeInputTargetVisibilityChanged(@NonNull IBinder imeInputTarget,
+                        boolean visibleAndNotRemoved, int displayId) {
                 }
 
                 @ImfLockFree
