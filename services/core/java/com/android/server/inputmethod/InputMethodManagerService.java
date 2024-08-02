@@ -4358,7 +4358,6 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
             }
 
             final var additionalSubtypeMap = AdditionalSubtypeMapRepository.get(userId);
-            final boolean isCurrentUser = (mCurrentUserId == userId);
             final InputMethodSettings settings = InputMethodSettingsRepository.get(userId);
             final var newAdditionalSubtypeMap = settings.getNewAdditionalSubtypeMap(
                     imiId, toBeAdded, additionalSubtypeMap, mPackageManagerInternal, callingUid);
@@ -4372,10 +4371,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
                             mUserManagerInternal.isUserUnlockingOrUnlocked(userId));
                     final var newSettings = InputMethodSettings.create(methodMap, userId);
                     InputMethodSettingsRepository.put(userId, newSettings);
-                    if (isCurrentUser) {
-                        postInputMethodSettingUpdatedLocked(false /* resetDefaultEnabledIme */,
-                                userId);
-                    }
+                    postInputMethodSettingUpdatedLocked(false /* resetDefaultEnabledIme */, userId);
                 } finally {
                     Binder.restoreCallingIdentity(ident);
                 }
