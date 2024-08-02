@@ -7,4 +7,6 @@
     <bool name="res2" android:featureFlag="test.package.trueFlag">true</bool>
 
     <bool name="res3">false</bool>
+
+    <bool name="res4" android:featureFlag="test.package.falseFlag">true</bool>
 </resources>
