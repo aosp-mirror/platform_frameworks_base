@@ -78,11 +78,13 @@ constructor(
                     is ScreenRecordChipModel.Recording -> {
                         OngoingActivityChipModel.Shown.Timer(
                             icon =
-                                Icon.Resource(
-                                    ICON,
-                                    ContentDescription.Resource(
-                                        R.string.screenrecord_ongoing_screen_only,
-                                    ),
+                                OngoingActivityChipModel.ChipIcon.Basic(
+                                    Icon.Resource(
+                                        ICON,
+                                        ContentDescription.Resource(
+                                            R.string.screenrecord_ongoing_screen_only,
+                                        ),
+                                    )
                                 ),
                             colors = ColorsModel.Red,
                             startTimeMs = systemClock.elapsedRealtime(),

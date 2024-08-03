@@ -41,6 +41,7 @@ import static android.content.Context.DEVICE_ID_DEFAULT;
 import static android.provider.Settings.Secure.ACCESSIBILITY_DISPLAY_MAGNIFICATION_NAVBAR_ENABLED;
 import static android.view.accessibility.AccessibilityManager.FlashNotificationReason;
 
+import static com.android.hardware.input.Flags.keyboardA11yMouseKeys;
 import static com.android.internal.accessibility.AccessibilityShortcutController.ACCESSIBILITY_HEARING_AIDS_COMPONENT_NAME;
 import static com.android.internal.accessibility.AccessibilityShortcutController.MAGNIFICATION_COMPONENT_NAME;
 import static com.android.internal.accessibility.AccessibilityShortcutController.MAGNIFICATION_CONTROLLER_NAME;
@@ -57,7 +58,6 @@ import static com.android.internal.accessibility.util.AccessibilityStatsLogUtils
 import static com.android.internal.util.FunctionalUtils.ignoreRemoteException;
 import static com.android.internal.util.function.pooled.PooledLambda.obtainMessage;
 import static com.android.server.accessibility.AccessibilityUserState.doesShortcutTargetsStringContain;
-import static com.android.hardware.input.Flags.keyboardA11yMouseKeys;
 import static com.android.settingslib.RestrictedLockUtils.EnforcedAdmin;
 
 import android.accessibilityservice.AccessibilityGestureEvent;
@@ -825,25 +825,27 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
     @VisibleForTesting
     boolean onPackagesForceStoppedLocked(
             String[] packages, AccessibilityUserState userState) {
-        final List<String> continuousServicePackages =
+        final Set<String> packageSet = new HashSet<>(List.of(packages));
+        final ArrayList<ComponentName> continuousServices = new ArrayList<>(
                 userState.mInstalledServices.stream().filter(service ->
                         (service.flags & FLAG_REQUEST_ACCESSIBILITY_BUTTON)
                                 == FLAG_REQUEST_ACCESSIBILITY_BUTTON
-                ).map(service -> service.getComponentName().flattenToString()).toList();
+                ).map(AccessibilityServiceInfo::getComponentName).toList());
+
+        // Filter out continuous packages that are not from the array of stopped packages.
+        continuousServices.removeIf(
+                continuousName -> !packageSet.contains(continuousName.getPackageName()));
 
         boolean enabledServicesChanged = false;
         final Iterator<ComponentName> it = userState.mEnabledServices.iterator();
         while (it.hasNext()) {
             final ComponentName comp = it.next();
             final String compPkg = comp.getPackageName();
-            for (String pkg : packages) {
-                if (compPkg.equals(pkg)) {
-                    it.remove();
-                    userState.getBindingServicesLocked().remove(comp);
-                    userState.getCrashedServicesLocked().remove(comp);
-                    enabledServicesChanged = true;
-                    break;
-                }
+            if (packageSet.contains(compPkg)) {
+                it.remove();
+                userState.getBindingServicesLocked().remove(comp);
+                userState.getCrashedServicesLocked().remove(comp);
+                enabledServicesChanged = true;
             }
         }
         if (enabledServicesChanged) {
@@ -855,8 +857,8 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         // Remove any button targets that match any stopped continuous services
         Set<String> buttonTargets = userState.getShortcutTargetsLocked(SOFTWARE);
         boolean buttonTargetsChanged = buttonTargets.removeIf(
-                target -> continuousServicePackages.stream().anyMatch(
-                        pkg -> Objects.equals(target, pkg)));
+                target -> continuousServices.stream().anyMatch(
+                        continuousName -> continuousName.flattenToString().equals(target)));
         if (buttonTargetsChanged) {
             userState.updateShortcutTargetsLocked(buttonTargets, SOFTWARE);
             persistColonDelimitedSetToSettingLocked(
@@ -2641,7 +2643,8 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         }
     }
 
-    private <T> void persistColonDelimitedSetToSettingLocked(String settingName, int userId,
+    @VisibleForTesting
+    <T> void persistColonDelimitedSetToSettingLocked(String settingName, int userId,
             Set<T> set, Function<T, String> toString) {
         persistColonDelimitedSetToSettingLocked(settingName, userId, set,
                 toString, /* defaultEmptyString= */ null);
@@ -4087,11 +4090,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
             boolean enable, @UserShortcutType int shortcutTypes,
             @NonNull List<String> shortcutTargets, @UserIdInt int userId) {
         enableShortcutsForTargets_enforcePermission();
-        if ((shortcutTypes & GESTURE) == GESTURE
-                && !android.provider.Flags.a11yStandaloneGestureEnabled()) {
-            throw new IllegalArgumentException(
-                    "GESTURE type shortcuts are disabled by feature flag");
-        }
+
         for (int shortcutType : USER_SHORTCUT_TYPES) {
             if ((shortcutTypes & shortcutType) == shortcutType) {
                 enableShortcutForTargets(enable, shortcutType, shortcutTargets, userId);
@@ -4102,6 +4101,13 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
     private void enableShortcutForTargets(
             boolean enable, @UserShortcutType int shortcutType,
             @NonNull List<String> shortcutTargets, @UserIdInt int userId) {
+        if (shortcutType == UserShortcutType.GESTURE
+                && !android.provider.Flags.a11yStandaloneGestureEnabled()) {
+            Slog.w(LOG_TAG,
+                    "GESTURE type shortcuts are disabled by feature flag");
+            return;
+        }
+
         final String shortcutTypeSettingKey = ShortcutUtils.convertToKey(shortcutType);
         if (shortcutType == UserShortcutType.TRIPLETAP
                 || shortcutType == UserShortcutType.TWOFINGER_DOUBLETAP) {

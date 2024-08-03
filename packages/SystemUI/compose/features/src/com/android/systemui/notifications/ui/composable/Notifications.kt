@@ -78,7 +78,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.lerp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.android.compose.animation.scene.ElementKey
-import com.android.compose.animation.scene.LowestZIndexScenePicker
+import com.android.compose.animation.scene.LowestZIndexContentPicker
 import com.android.compose.animation.scene.NestedScrollBehavior
 import com.android.compose.animation.scene.SceneScope
 import com.android.compose.modifiers.thenIf
@@ -105,7 +105,7 @@ object Notifications {
         val NotificationScrim = ElementKey("NotificationScrim")
         val NotificationStackPlaceholder = ElementKey("NotificationStackPlaceholder")
         val HeadsUpNotificationPlaceholder =
-            ElementKey("HeadsUpNotificationPlaceholder", scenePicker = LowestZIndexScenePicker)
+            ElementKey("HeadsUpNotificationPlaceholder", contentPicker = LowestZIndexContentPicker)
         val ShelfSpace = ElementKey("ShelfSpace")
         val NotificationStackCutoffGuideline = ElementKey("NotificationStackCutoffGuideline")
     }
@@ -474,6 +474,7 @@ fun SceneScope.NotificationScrollingStack(
                         .thenIf(shadeMode == ShadeMode.Single) {
                             Modifier.nestedScroll(scrimNestedScrollConnection)
                         }
+                        .stackVerticalOverscroll(coroutineScope) { scrollState.canScrollForward }
                         .verticalScroll(scrollState)
                         .padding(top = topPadding)
                         .fillMaxWidth()
@@ -671,3 +672,4 @@ private val DEBUG_HUN_COLOR = Color(0f, 0f, 1f, 0.2f)
 private val DEBUG_BOX_COLOR = Color(0f, 1f, 0f, 0.2f)
 private const val HUN_SNOOZE_POSITIONAL_THRESHOLD_FRACTION = 0.25f
 private const val HUN_SNOOZE_VELOCITY_THRESHOLD = -70f
+internal const val STACK_OVERSCROLL_FLING_MIN_OFFSET = -100f

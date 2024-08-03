@@ -59,6 +59,10 @@ sealed interface VisualInterruptionSuppressor {
     /** Optional data to be logged in the EventLog when this suppresses an interruption. */
     val eventLogData: EventLogData?
 
+    /** Whether the interruption is spammy and should be dropped under normal circumstances. */
+    val isSpammy: Boolean
+        get() = false
+
     /**
      * Called after the suppressor is added to the [VisualInterruptionDecisionProvider] but before
      * any other methods are called on the suppressor.
@@ -76,7 +80,7 @@ abstract class VisualInterruptionCondition(
     constructor(
         types: Set<VisualInterruptionType>,
         reason: String
-    ) : this(types, reason, /* uiEventId = */ null)
+    ) : this(types, reason, /* uiEventId= */ null)
 
     /** @return true if these interruptions should be suppressed right now. */
     abstract fun shouldSuppress(): Boolean
@@ -87,12 +91,13 @@ abstract class VisualInterruptionFilter(
     override val types: Set<VisualInterruptionType>,
     override val reason: String,
     override val uiEventId: UiEventEnum? = null,
-    override val eventLogData: EventLogData? = null
+    override val eventLogData: EventLogData? = null,
+    override val isSpammy: Boolean = false,
 ) : VisualInterruptionSuppressor {
     constructor(
         types: Set<VisualInterruptionType>,
         reason: String
-    ) : this(types, reason, /* uiEventId = */ null)
+    ) : this(types, reason, /* uiEventId= */ null)
 
     /**
      * @param entry the notification to consider suppressing

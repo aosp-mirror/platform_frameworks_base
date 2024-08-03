@@ -20,6 +20,7 @@ import android.app.Dialog
 import android.content.ContextWrapper
 import android.content.SharedPreferences
 import android.os.Handler
+import android.platform.test.annotations.DisableFlags
 import android.provider.Settings
 import android.provider.Settings.Global.ZEN_MODE_NO_INTERRUPTIONS
 import android.provider.Settings.Global.ZEN_MODE_OFF
@@ -61,6 +62,7 @@ import org.mockito.Mockito.`when` as whenever
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 @TestableLooper.RunWithLooper(setAsMainLooper = true)
+@DisableFlags(android.app.Flags.FLAG_MODES_UI)
 class DndTileTest : SysuiTestCase() {
 
     companion object {

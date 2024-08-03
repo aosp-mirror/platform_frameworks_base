@@ -20,7 +20,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.fail;
 
-import android.platform.test.annotations.IgnoreUnderRavenwood;
 import android.platform.test.ravenwood.RavenwoodRule;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
@@ -33,7 +32,6 @@ import org.junit.runner.RunWith;
 import java.util.Locale;
 
 @RunWith(AndroidJUnit4.class)
-@IgnoreUnderRavenwood(blockedBy = LocaleList.class)
 public class LocaleListTest {
     @Rule
     public final RavenwoodRule mRavenwood = new RavenwoodRule();

@@ -388,6 +388,9 @@
     <string name="performance" msgid="6552785217174378320">"పనితీరు"</string>
     <string name="user_interface" msgid="3712869377953950887">"యూజర్ ఇంటర్‌ఫేస్"</string>
     <string name="thermal" msgid="6758074791325414831">"థర్మల్"</string>
+    <string name="custom" msgid="3337456985275158299">"అనుకూలంగా మార్చుకోండి"</string>
+    <string name="custom_trace_settings_dialog_title" msgid="2608570500144830554">"కస్టమ్ ట్రేస్ సెట్టింగ్‌లు"</string>
+    <string name="restore_default" msgid="5259420807486239755">"డిఫాల్ట్‌ను రీస్టోర్ చేయండి"</string>
     <string name="quick_settings_onehanded_label" msgid="2416537930246274991">"వన్-హ్యాండెడ్ మోడ్"</string>
     <string name="quick_settings_hearing_devices_label" msgid="7277170419679404129">"వినికిడి పరికరాలు"</string>
     <string name="quick_settings_hearing_devices_connected" msgid="6519069502397037781">"యాక్టివ్"</string>
@@ -429,10 +432,11 @@
     <string name="zen_modes_dialog_title" msgid="4159138230418567383">"ముఖ్యమైన ఫైళ్ల మోడ్స్"</string>
     <string name="zen_modes_dialog_done" msgid="6654130880256438950">"పూర్తయింది"</string>
     <string name="zen_modes_dialog_settings" msgid="2310248023728936697">"సెట్టింగ్‌లు"</string>
-    <!-- no translation found for zen_mode_on (9085304934016242591) -->
-    <skip />
-    <!-- no translation found for zen_mode_off (1736604456618147306) -->
-    <skip />
+    <string name="zen_mode_on" msgid="9085304934016242591">"ఆన్‌లో ఉంది"</string>
+    <string name="zen_mode_off" msgid="1736604456618147306">"ఆఫ్‌లో ఉంది"</string>
+    <string name="zen_mode_set_up" msgid="7457957033034460064">"సెటప్ చేయండి"</string>
+    <string name="zen_mode_no_manual_invocation" msgid="1769975741344633672">"సెట్టింగ్‌లలో మేనేజ్ చేయండి"</string>
+    <string name="zen_mode_active_modes" msgid="1625850411578488856">"{count,plural, =0{మోడ్స్ ఏవీ యాక్టివ్‌గా లేవు}=1{{mode} యాక్టివ్‌గా ఉంది}other{# మోడ్స్ యాక్టివ్‌గా ఉన్నాయి}}"</string>
     <string name="zen_priority_introduction" msgid="3159291973383796646">"మీరు పేర్కొనే అలారాలు, రిమైండర్‌లు, ఈవెంట్‌లు మరియు కాలర్‌ల నుండి మినహా మరే ఇతర ధ్వనులు మరియు వైబ్రేషన్‌లతో మీకు అంతరాయం కలగదు. మీరు ఇప్పటికీ సంగీతం, వీడియోలు మరియు గేమ్‌లతో సహా మీరు ప్లే చేయడానికి ఎంచుకున్నవి ఏవైనా వింటారు."</string>
     <string name="zen_alarms_introduction" msgid="3987266042682300470">"అలారాలు నుండి మినహా మరే ఇతర ధ్వనులు మరియు వైబ్రేషన్‌లతో మీకు అంతరాయం కలగదు. మీరు ఇప్పటికీ సంగీతం, వీడియోలు మరియు గేమ్‌లతో సహా మీరు ప్లే చేయడానికి ఎంచుకున్నవి ఏవైనా వింటారు."</string>
     <string name="zen_priority_customize_button" msgid="4119213187257195047">"అనుకూలంగా మార్చండి"</string>
@@ -471,6 +475,8 @@
     <string name="keyguard_indication_charging_time_slowly" msgid="301936949731705417">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • నెమ్మదిగా ఛార్జ్ అవుతోంది • <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>లో పూర్తి ఛార్జ్"</string>
     <string name="keyguard_indication_charging_time_dock" msgid="3149328898931741271">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • ఛార్జ్ అవుతోంది • <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>లో పూర్తిగా ఛార్జ్ అవుతుంది"</string>
     <string name="accessibility_action_open_communal_hub" msgid="3081702792413787849">"లాక్ స్క్రీన్‌లో విడ్జెట్‌లు"</string>
+    <!-- no translation found for accessibility_announcement_communal_widget_added (6911593106099328271) -->
+    <skip />
     <string name="communal_tutorial_indicator_text" msgid="4503010353591430123">"కమ్యూనల్ ట్యుటోరియల్‌ను ప్రారంభించడానికి ఎడమ వైపునకు స్వైప్ చేయండి"</string>
     <string name="cta_tile_button_to_open_widget_editor" msgid="3871562362382963878">"అనుకూలంగా మార్చండి"</string>
     <string name="cta_tile_button_to_dismiss" msgid="3377597875997861754">"విస్మరించండి"</string>
@@ -499,8 +505,7 @@
     <string name="accessibility_action_label_place_widget" msgid="1914197458644168978">"ఎంచుకున్న విడ్జెట్ కోసం ప్లేస్‌ను ఎంచుకోండి"</string>
     <string name="communal_widget_picker_title" msgid="1953369090475731663">"లాక్ స్క్రీన్ విడ్జెట్‌లు"</string>
     <string name="communal_widget_picker_description" msgid="490515450110487871">"మీ టాబ్లెట్ లాక్ చేసి ఉన్నా, మీ లాక్ స్క్రీన్‌లో విడ్జెట్‌లను ఎవరైనా చూడవచ్చు."</string>
-    <!-- no translation found for accessibility_action_label_unselect_widget (1041811747619468698) -->
-    <skip />
+    <string name="accessibility_action_label_unselect_widget" msgid="1041811747619468698">"విడ్జెట్ ఎంపిక రద్దు చేయండి"</string>
     <string name="communal_widgets_disclaimer_title" msgid="1150954395585308868">"లాక్ స్క్రీన్ విడ్జెట్‌లు"</string>
     <string name="communal_widgets_disclaimer_text" msgid="1423545475160506349">"విడ్జెట్‌ను ఉపయోగించి యాప్‌ను తెరవడానికి, ఇది మీరేనని వెరిఫై చేయాల్సి ఉంటుంది. అలాగే, మీ టాబ్లెట్ లాక్ చేసి ఉన్నప్పటికీ, ఎవరైనా వాటిని చూడగలరని గుర్తుంచుకోండి. కొన్ని విడ్జెట్‌లు మీ లాక్ స్క్రీన్‌కు తగినవి కాకపోవచ్చు, వాటిని ఇక్కడ జోడించడం సురక్షితం కాకపోవచ్చు."</string>
     <string name="communal_widgets_disclaimer_button" msgid="4423059765740780753">"అర్థమైంది"</string>
@@ -557,10 +562,8 @@
     <string name="media_projection_action_text" msgid="3634906766918186440">"ఇప్పుడే ప్రారంభించండి"</string>
     <string name="empty_shade_text" msgid="8935967157319717412">"నోటిఫికేషన్‌లు లేవు"</string>
     <string name="no_unseen_notif_text" msgid="395512586119868682">"కొత్త నోటిఫికేషన్‌లు ఏవీ లేవు"</string>
-    <!-- no translation found for adaptive_notification_edu_hun_title (7790738150177329960) -->
-    <skip />
-    <!-- no translation found for adaptive_notification_edu_hun_text (7743367744129536610) -->
-    <skip />
+    <string name="adaptive_notification_edu_hun_title" msgid="7790738150177329960">"నోటిఫికేషన్ కూల్‌డౌన్ ఆన్ అయింది"</string>
+    <string name="adaptive_notification_edu_hun_text" msgid="7743367744129536610">"ఒకేసారి పలు నోటిఫికేషన్‌లు వస్తే, పరికర వాల్యూమ్, అలర్ట్‌లు ఆటోమేటిక్‌గా 2 నిమిషాలకు తగ్గించబడతాయి."</string>
     <string name="go_to_adaptive_notification_settings" msgid="2423690125178298479">"ఆఫ్ చేయండి"</string>
     <string name="unlock_to_see_notif_text" msgid="7439033907167561227">"పాత నోటిఫికేషన్‌ల కోసం అన్‌లాక్ చేయండి"</string>
     <string name="quick_settings_disclosure_parental_controls" msgid="2114102871438223600">"ఈ పరికరాన్ని మీ తల్లి/తండ్రి మేనేజ్ చేస్తున్నారు"</string>
@@ -1226,7 +1229,6 @@
     <string name="accessibility_fingerprint_bouncer" msgid="7189102492498735519">"ప్రామాణీకరణ అవసరం. ప్రామాణీకరించడానికి వేలిముద్ర సెన్సార్‌ను తాకండి."</string>
     <string name="ongoing_phone_call_content_description" msgid="5332334388483099947">"ఫోన్ కాల్ జరుగుతోంది"</string>
     <string name="mobile_data_settings_title" msgid="3955246641380064901">"మొబైల్ డేటా"</string>
-    <string name="preference_summary_default_combination" msgid="8453246369903749670">"<xliff:g id="STATE">%1$s</xliff:g> / <xliff:g id="NETWORKMODE">%2$s</xliff:g>"</string>
     <string name="mobile_data_connection_active" msgid="944490013299018227">"కనెక్ట్ చేయబడింది"</string>
     <string name="mobile_data_temp_connection_active" msgid="4590222725908806824">"తాత్కాలికంగా కనెక్ట్ చేయబడింది"</string>
     <string name="mobile_data_poor_connection" msgid="819617772268371434">"కనెక్షన్ బాగాలేదు"</string>
@@ -1380,7 +1382,10 @@
     <string name="touchpad_tutorial_done_button" msgid="176168488821755503">"పూర్తయింది"</string>
     <string name="touchpad_tutorial_gesture_done" msgid="4784438360736821255">"విజయవంతమైంది!"</string>
     <string name="touchpad_back_gesture_action_title" msgid="7199067250654332735">"వెనుకకు"</string>
-    <string name="touchpad_back_gesture_guidance" msgid="4222430588599527272">"వెనుకకు వెళ్లడానికి, టచ్‌ప్యాడ్‌లో ఎక్కడైనా మూడు వేళ్లను ఉపయోగించి ఎడమ లేదా కుడికి స్వైప్ చేయండి."</string>
+    <!-- no translation found for touchpad_back_gesture_guidance (6263750214998421587) -->
+    <skip />
+    <!-- no translation found for touchpad_back_gesture_finished (5353616006999726249) -->
+    <skip />
     <string name="touchpad_back_gesture_animation_content_description" msgid="2646107450922379918">"మూడు వేళ్లు కుడి, ఎడమకు కదులుతున్నట్లు చూపే టచ్‌ప్యాడ్"</string>
     <string name="touchpad_back_gesture_screen_animation_content_description" msgid="4036267494237748710">"వెనుక సంజ్ఞ కోసం యానిమేషన్‌ను చూపుతున్న పరికర స్క్రీన్"</string>
     <string name="keyboard_backlight_dialog_title" msgid="8273102932345564724">"కీబోర్డ్ బ్యాక్‌లైట్"</string>
@@ -1388,28 +1393,16 @@
     <string name="home_controls_dream_label" msgid="6567105701292324257">"హోమ్ కంట్రోల్స్"</string>
     <string name="home_controls_dream_description" msgid="4644150952104035789">"హోమ్ కంట్రోల్స్‌ను స్క్రీన్ సేవర్‌గా చేసి వేగంగా యాక్సెస్ పొందండి"</string>
     <string name="volume_undo_action" msgid="5815519725211877114">"చర్య రద్దు చేయండి"</string>
-    <!-- no translation found for back_edu_toast_content (4530314597378982956) -->
-    <skip />
-    <!-- no translation found for home_edu_toast_content (3381071147871955415) -->
-    <skip />
-    <!-- no translation found for overview_edu_toast_content (5797030644017804518) -->
-    <skip />
-    <!-- no translation found for all_apps_edu_toast_content (8807496014667211562) -->
-    <skip />
-    <!-- no translation found for back_edu_notification_title (5624780717751357278) -->
-    <skip />
-    <!-- no translation found for back_edu_notification_content (2497557451540954068) -->
-    <skip />
-    <!-- no translation found for home_edu_notification_title (6097902076909654045) -->
-    <skip />
-    <!-- no translation found for home_edu_notification_content (6631697734535766588) -->
-    <skip />
-    <!-- no translation found for overview_edu_notification_title (1265824157319562406) -->
-    <skip />
-    <!-- no translation found for overview_edu_notification_content (3578204677648432500) -->
-    <skip />
-    <!-- no translation found for all_apps_edu_notification_title (372262997265569063) -->
-    <skip />
-    <!-- no translation found for all_apps_edu_notification_content (3255070575694025585) -->
-    <skip />
+    <string name="back_edu_toast_content" msgid="4530314597378982956">"వెనుకకు వెళ్లడానికి, టచ్‌ప్యాడ్‌లో మూడు వేళ్లను ఉపయోగించి ఎడమ లేదా కుడి వైపునకు స్వైప్ చేయండి"</string>
+    <string name="home_edu_toast_content" msgid="3381071147871955415">"హోమ్‌కు వెళ్లడానికి, టచ్‌ప్యాడ్‌లో మీ మూడు వెళ్లతో పైకి స్వైప్ చేయండి"</string>
+    <string name="overview_edu_toast_content" msgid="5797030644017804518">"ఇటీవలి యాప్‌లను చూడటానికి, టచ్‌ప్యాడ్‌లో మూడు వేళ్లతో పైకి స్వైప్ చేసి, హోల్డ్ చేయండి"</string>
+    <string name="all_apps_edu_toast_content" msgid="8807496014667211562">"మీ యాప్‌లన్నింటినీ చూడటానికి, మీ కీబోర్డ్‌లో యాక్షన్ కీని నొక్కండి"</string>
+    <string name="back_edu_notification_title" msgid="5624780717751357278">"వెనుకకు వెళ్లడానికి మీ టచ్‌ప్యాడ్‌ను ఉపయోగించండి"</string>
+    <string name="back_edu_notification_content" msgid="2497557451540954068">"మూడు వేళ్లతో ఎడమ / కుడి వైపునకు స్వైప్ చేయండి. మరిన్ని సంజ్ఞల గురించి తెలుసుకోవడానికి ట్యాప్ చేయండి."</string>
+    <string name="home_edu_notification_title" msgid="6097902076909654045">"హోమ్‌కు వెళ్లడానికి మీ టచ్‌ప్యాడ్‌ను ఉపయోగించండి"</string>
+    <string name="home_edu_notification_content" msgid="6631697734535766588">"మూడు వేళ్లను ఉపయోగించి పైకి స్వైప్ చేయండి. మరిన్ని సంజ్ఞల గురించి తెలుసుకోవడానికి ట్యాప్ చేయండి."</string>
+    <string name="overview_edu_notification_title" msgid="1265824157319562406">"ఇటీవలి యాప్‌లను చూడటానికి మీ టచ్‌ప్యాడ్‌ను ఉపయోగించండి"</string>
+    <string name="overview_edu_notification_content" msgid="3578204677648432500">"మూడు వేళ్లతో పైకి స్వైప్ చేసి, హోల్డ్ చేయండి. మరిన్ని సంజ్ఞల గురించి తెలుసుకోవడానికి ట్యాప్ చేయండి."</string>
+    <string name="all_apps_edu_notification_title" msgid="372262997265569063">"యాప్‌లన్నింటినీ చూడటానికి మీ కీబోర్డ్‌ను ఉపయోగించండి"</string>
+    <string name="all_apps_edu_notification_content" msgid="3255070575694025585">"ఏ సమయంలోనైనా యాక్షన్ కీని నొక్కండి. మరిన్ని సంజ్ఞల గురించి తెలుసుకోవడానికి ట్యాప్ చేయండి."</string>
 </resources>

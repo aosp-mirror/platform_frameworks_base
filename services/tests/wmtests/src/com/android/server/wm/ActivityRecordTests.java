@@ -18,10 +18,6 @@ package com.android.server.wm;
 
 import static android.app.AppOpsManager.MODE_ALLOWED;
 import static android.app.AppOpsManager.OP_PICTURE_IN_PICTURE;
-import static android.app.CameraCompatTaskInfo.CAMERA_COMPAT_CONTROL_DISMISSED;
-import static android.app.CameraCompatTaskInfo.CAMERA_COMPAT_CONTROL_HIDDEN;
-import static android.app.CameraCompatTaskInfo.CAMERA_COMPAT_CONTROL_TREATMENT_APPLIED;
-import static android.app.CameraCompatTaskInfo.CAMERA_COMPAT_CONTROL_TREATMENT_SUGGESTED;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
@@ -119,7 +115,6 @@ import static org.mockito.Mockito.never;
 
 import android.app.ActivityOptions;
 import android.app.AppOpsManager;
-import android.app.ICompatCameraControlCallback;
 import android.app.PictureInPictureParams;
 import android.app.servertransaction.ActivityConfigurationChangeItem;
 import android.app.servertransaction.ClientTransaction;
@@ -3483,178 +3478,6 @@ public class ActivityRecordTests extends WindowTestsBase {
         assertFalse(app.mActivityRecord.isSurfaceShowing());
     }
 
-    @Test
-    public void testUpdateCameraCompatState_flagIsEnabled_controlStateIsUpdated() {
-        final ActivityRecord activity = createActivityWithTask();
-        // Mock a flag being enabled.
-        doReturn(true).when(activity).isCameraCompatControlEnabled();
-
-        activity.updateCameraCompatState(/* showControl */ true,
-                /* transformationApplied */ false, /* callback */ null);
-
-        assertEquals(activity.getCameraCompatControlState(),
-                CAMERA_COMPAT_CONTROL_TREATMENT_SUGGESTED);
-
-        activity.updateCameraCompatState(/* showControl */ true,
-                /* transformationApplied */ true, /* callback */ null);
-
-        assertEquals(activity.getCameraCompatControlState(),
-                CAMERA_COMPAT_CONTROL_TREATMENT_APPLIED);
-
-        activity.updateCameraCompatState(/* showControl */ false,
-                /* transformationApplied */ false, /* callback */ null);
-
-        assertEquals(activity.getCameraCompatControlState(), CAMERA_COMPAT_CONTROL_HIDDEN);
-
-        activity.updateCameraCompatState(/* showControl */ false,
-                /* transformationApplied */ true, /* callback */ null);
-
-        assertEquals(activity.getCameraCompatControlState(), CAMERA_COMPAT_CONTROL_HIDDEN);
-    }
-
-    @Test
-    public void testUpdateCameraCompatState_flagIsDisabled_controlStateIsHidden() {
-        final ActivityRecord activity = createActivityWithTask();
-        // Mock a flag being disabled.
-        doReturn(false).when(activity).isCameraCompatControlEnabled();
-
-        activity.updateCameraCompatState(/* showControl */ true,
-                /* transformationApplied */ false, /* callback */ null);
-
-        assertEquals(activity.getCameraCompatControlState(), CAMERA_COMPAT_CONTROL_HIDDEN);
-
-        activity.updateCameraCompatState(/* showControl */ true,
-                /* transformationApplied */ true, /* callback */ null);
-
-        assertEquals(activity.getCameraCompatControlState(), CAMERA_COMPAT_CONTROL_HIDDEN);
-    }
-
-    @Test
-    public void testUpdateCameraCompatStateFromUser_clickedOnDismiss() throws RemoteException {
-        final ActivityRecord activity = createActivityWithTask();
-        // Mock a flag being enabled.
-        doReturn(true).when(activity).isCameraCompatControlEnabled();
-
-        ICompatCameraControlCallback callback = getCompatCameraControlCallback();
-        spyOn(callback);
-        activity.updateCameraCompatState(/* showControl */ true,
-                /* transformationApplied */ false, callback);
-
-        assertEquals(activity.getCameraCompatControlState(),
-                CAMERA_COMPAT_CONTROL_TREATMENT_SUGGESTED);
-
-        // Clicking on the button.
-        activity.updateCameraCompatStateFromUser(CAMERA_COMPAT_CONTROL_DISMISSED);
-
-        verify(callback, never()).revertCameraCompatTreatment();
-        verify(callback, never()).applyCameraCompatTreatment();
-        assertEquals(activity.getCameraCompatControlState(), CAMERA_COMPAT_CONTROL_DISMISSED);
-
-        // All following updates are ignored.
-        activity.updateCameraCompatState(/* showControl */ true,
-                /* transformationApplied */ false, /* callback */ null);
-
-        assertEquals(activity.getCameraCompatControlState(), CAMERA_COMPAT_CONTROL_DISMISSED);
-
-        activity.updateCameraCompatState(/* showControl */ true,
-                /* transformationApplied */ true, /* callback */ null);
-
-        assertEquals(activity.getCameraCompatControlState(), CAMERA_COMPAT_CONTROL_DISMISSED);
-
-        activity.updateCameraCompatState(/* showControl */ false,
-                /* transformationApplied */ true, /* callback */ null);
-
-        assertEquals(activity.getCameraCompatControlState(), CAMERA_COMPAT_CONTROL_DISMISSED);
-    }
-
-    @Test
-    public void testUpdateCameraCompatStateFromUser_clickedOnApplyTreatment()
-            throws RemoteException {
-        final ActivityRecord activity = createActivityWithTask();
-        // Mock a flag being enabled.
-        doReturn(true).when(activity).isCameraCompatControlEnabled();
-
-        ICompatCameraControlCallback callback = getCompatCameraControlCallback();
-        spyOn(callback);
-        activity.updateCameraCompatState(/* showControl */ true,
-                /* transformationApplied */ false, callback);
-
-        assertEquals(activity.getCameraCompatControlState(),
-                CAMERA_COMPAT_CONTROL_TREATMENT_SUGGESTED);
-
-        // Clicking on the button.
-        activity.updateCameraCompatStateFromUser(CAMERA_COMPAT_CONTROL_TREATMENT_APPLIED);
-
-        verify(callback, never()).revertCameraCompatTreatment();
-        verify(callback).applyCameraCompatTreatment();
-        assertEquals(activity.getCameraCompatControlState(),
-                CAMERA_COMPAT_CONTROL_TREATMENT_APPLIED);
-
-        // Request from the client to show the control are ignored respecting the user choice.
-        activity.updateCameraCompatState(/* showControl */ true,
-                /* transformationApplied */ false, /* callback */ null);
-
-        assertEquals(activity.getCameraCompatControlState(),
-                CAMERA_COMPAT_CONTROL_TREATMENT_APPLIED);
-
-        // Request from the client to hide the control is respected.
-        activity.updateCameraCompatState(/* showControl */ false,
-                /* transformationApplied */ true, /* callback */ null);
-
-        assertEquals(activity.getCameraCompatControlState(), CAMERA_COMPAT_CONTROL_HIDDEN);
-
-        // Request from the client to show the control again is respected.
-        activity.updateCameraCompatState(/* showControl */ true,
-                /* transformationApplied */ false, /* callback */ null);
-
-        assertEquals(activity.getCameraCompatControlState(),
-                CAMERA_COMPAT_CONTROL_TREATMENT_SUGGESTED);
-    }
-
-    @Test
-    public void testUpdateCameraCompatStateFromUser_clickedOnRevertTreatment()
-            throws RemoteException {
-        final ActivityRecord activity = createActivityWithTask();
-        // Mock a flag being enabled.
-        doReturn(true).when(activity).isCameraCompatControlEnabled();
-
-        ICompatCameraControlCallback callback = getCompatCameraControlCallback();
-        spyOn(callback);
-        activity.updateCameraCompatState(/* showControl */ true,
-                /* transformationApplied */ true, callback);
-
-        assertEquals(activity.getCameraCompatControlState(),
-                CAMERA_COMPAT_CONTROL_TREATMENT_APPLIED);
-
-        // Clicking on the button.
-        activity.updateCameraCompatStateFromUser(CAMERA_COMPAT_CONTROL_TREATMENT_SUGGESTED);
-
-        verify(callback).revertCameraCompatTreatment();
-        verify(callback, never()).applyCameraCompatTreatment();
-        assertEquals(activity.getCameraCompatControlState(),
-                CAMERA_COMPAT_CONTROL_TREATMENT_SUGGESTED);
-
-        // Request from the client to show the control are ignored respecting the user choice.
-        activity.updateCameraCompatState(/* showControl */ true,
-                /* transformationApplied */ true, /* callback */ null);
-
-        assertEquals(activity.getCameraCompatControlState(),
-                CAMERA_COMPAT_CONTROL_TREATMENT_SUGGESTED);
-
-        // Request from the client to hide the control is respected.
-        activity.updateCameraCompatState(/* showControl */ false,
-                /* transformationApplied */ true, /* callback */ null);
-
-        assertEquals(activity.getCameraCompatControlState(), CAMERA_COMPAT_CONTROL_HIDDEN);
-
-        // Request from the client to show the control again is respected.
-        activity.updateCameraCompatState(/* showControl */ true,
-                /* transformationApplied */ true, /* callback */ null);
-
-        assertEquals(activity.getCameraCompatControlState(),
-                CAMERA_COMPAT_CONTROL_TREATMENT_APPLIED);
-    }
-
     @Test // b/162542125
     public void testInputDispatchTimeout() throws RemoteException {
         final ActivityRecord activity = createActivityWithTask();
@@ -3816,16 +3639,6 @@ public class ActivityRecordTests extends WindowTestsBase {
         verify(mClientLifecycleManager, times(2)).scheduleTransaction(any());
         assertEquals(130, appWindow.getWindowConfiguration().getBounds().width());
         assertTrue(appWindow.mResizeReported);
-    }
-
-    private ICompatCameraControlCallback getCompatCameraControlCallback() {
-        return new ICompatCameraControlCallback.Stub() {
-            @Override
-            public void applyCameraCompatTreatment() {}
-
-            @Override
-            public void revertCameraCompatTreatment() {}
-        };
     }
 
     private void assertHasStartingWindow(ActivityRecord atoken) {

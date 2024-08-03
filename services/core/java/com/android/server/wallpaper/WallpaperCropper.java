@@ -676,7 +676,12 @@ public class WallpaperCropper {
 
                     final Rect estimateCrop = new Rect(cropHint);
                     if (!multiCrop()) estimateCrop.scale(1f / options.inSampleSize);
-                    else estimateCrop.scale(1f / sampleSize);
+                    else {
+                        estimateCrop.left = (int) Math.floor(estimateCrop.left / sampleSize);
+                        estimateCrop.top = (int) Math.floor(estimateCrop.top / sampleSize);
+                        estimateCrop.right = (int) Math.ceil(estimateCrop.right / sampleSize);
+                        estimateCrop.bottom = (int) Math.ceil(estimateCrop.bottom / sampleSize);
+                    }
                     float hRatio = (float) wpData.mHeight / estimateCrop.height();
                     final int destHeight = (int) (estimateCrop.height() * hRatio);
                     final int destWidth = (int) (estimateCrop.width() * hRatio);
@@ -720,7 +725,10 @@ public class WallpaperCropper {
                         }
                         if (multiCrop()) {
                             Slog.v(TAG, "  cropHint=" + cropHint);
+                            Slog.v(TAG, "  estimateCrop=" + estimateCrop);
                             Slog.v(TAG, "  sampleSize=" + sampleSize);
+                            Slog.v(TAG, "  user defined crops: " + wallpaper.mCropHints);
+                            Slog.v(TAG, "  all crops: " + defaultCrops);
                         }
                         Slog.v(TAG, "  targetSize=" + safeWidth + "x" + safeHeight);
                         Slog.v(TAG, "  maxTextureSize=" + GLHelper.getMaxTextureSize());

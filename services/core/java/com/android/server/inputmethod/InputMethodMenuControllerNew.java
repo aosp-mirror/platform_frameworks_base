@@ -135,11 +135,13 @@ final class InputMethodMenuControllerNew {
         final RecyclerView recyclerView = contentView
                 .requireViewById(com.android.internal.R.id.list);
         recyclerView.setAdapter(new Adapter(items, selectedIndex, inflater, onClickListener));
-        // Scroll to the currently selected IME.
-        recyclerView.scrollToPosition(selectedIndex);
+        // Scroll to the currently selected IME. This must run after the recycler view is laid out.
+        recyclerView.post(() -> recyclerView.scrollToPosition(selectedIndex));
         // Indicate that the list can be scrolled.
         recyclerView.setScrollIndicators(
                 hasLanguageSettingsButton ? View.SCROLL_INDICATOR_BOTTOM : 0);
+        // Request focus to enable rotary scrolling on watches.
+        recyclerView.requestFocus();
 
         builder.setOnCancelListener(dialog -> hide(displayId, userId));
         mMenuItems = items;

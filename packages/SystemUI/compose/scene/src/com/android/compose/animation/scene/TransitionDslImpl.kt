@@ -60,7 +60,7 @@ private class SceneTransitionsBuilderImpl : SceneTransitionsBuilder {
     val transitionOverscrollSpecs = mutableListOf<OverscrollSpecImpl>()
 
     override fun to(
-        to: SceneKey,
+        to: ContentKey,
         key: TransitionKey?,
         preview: (TransitionBuilder.() -> Unit)?,
         reversePreview: (TransitionBuilder.() -> Unit)?,
@@ -70,8 +70,8 @@ private class SceneTransitionsBuilderImpl : SceneTransitionsBuilder {
     }
 
     override fun from(
-        from: SceneKey,
-        to: SceneKey?,
+        from: ContentKey,
+        to: ContentKey?,
         key: TransitionKey?,
         preview: (TransitionBuilder.() -> Unit)?,
         reversePreview: (TransitionBuilder.() -> Unit)?,
@@ -86,6 +86,22 @@ private class SceneTransitionsBuilderImpl : SceneTransitionsBuilder {
         builder: OverscrollBuilder.() -> Unit
     ): OverscrollSpec {
         val impl = OverscrollBuilderImpl().apply(builder)
+        check(impl.transformations.isNotEmpty()) {
+            "This method does not allow empty transformations. " +
+                "Use overscrollDisabled($scene, $orientation) instead."
+        }
+        return overscrollSpec(scene, orientation, impl)
+    }
+
+    override fun overscrollDisabled(scene: SceneKey, orientation: Orientation): OverscrollSpec {
+        return overscrollSpec(scene, orientation, OverscrollBuilderImpl())
+    }
+
+    private fun overscrollSpec(
+        scene: SceneKey,
+        orientation: Orientation,
+        impl: OverscrollBuilderImpl,
+    ): OverscrollSpec {
         val spec =
             OverscrollSpecImpl(
                 scene = scene,
@@ -97,15 +113,15 @@ private class SceneTransitionsBuilderImpl : SceneTransitionsBuilder {
                         distance = impl.distance,
                         transformations = impl.transformations,
                     ),
-                progressConverter = impl.progressConverter
+                progressConverter = impl.progressConverter,
             )
         transitionOverscrollSpecs.add(spec)
         return spec
     }
 
     private fun transition(
-        from: SceneKey?,
-        to: SceneKey?,
+        from: ContentKey?,
+        to: ContentKey?,
         key: TransitionKey?,
         preview: (TransitionBuilder.() -> Unit)?,
         reversePreview: (TransitionBuilder.() -> Unit)?,

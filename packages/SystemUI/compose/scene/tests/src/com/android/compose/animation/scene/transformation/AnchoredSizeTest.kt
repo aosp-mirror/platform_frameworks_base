@@ -25,7 +25,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.android.compose.animation.scene.SceneScope
+import com.android.compose.animation.scene.ContentScope
 import com.android.compose.animation.scene.TestElements
 import com.android.compose.animation.scene.TransitionBuilder
 import com.android.compose.animation.scene.TransitionRecordingSpec
@@ -108,8 +108,8 @@ class AnchoredSizeTest {
     }
 
     private fun assertBarSizeMatchesGolden(
-        fromSceneContent: @Composable SceneScope.() -> Unit,
-        toSceneContent: @Composable SceneScope.() -> Unit,
+        fromSceneContent: @Composable ContentScope.() -> Unit,
+        toSceneContent: @Composable ContentScope.() -> Unit,
         transition: TransitionBuilder.() -> Unit,
     ) {
         val recordingSpec =

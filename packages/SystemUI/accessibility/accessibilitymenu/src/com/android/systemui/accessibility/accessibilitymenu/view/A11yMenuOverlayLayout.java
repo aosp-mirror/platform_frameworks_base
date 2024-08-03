@@ -16,6 +16,8 @@
 
 package com.android.systemui.accessibility.accessibilitymenu.view;
 
+import static android.os.UserManager.DISALLOW_ADJUST_VOLUME;
+import static android.os.UserManager.DISALLOW_CONFIG_BRIGHTNESS;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.View.ACCESSIBILITY_LIVE_REGION_POLITE;
 import static android.view.WindowManager.LayoutParams.TYPE_ACCESSIBILITY_OVERLAY;
@@ -24,6 +26,7 @@ import static java.lang.Math.max;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.graphics.Insets;
@@ -32,6 +35,8 @@ import android.graphics.Rect;
 import android.hardware.display.DisplayManager;
 import android.os.Handler;
 import android.os.Looper;
+import android.os.UserHandle;
+import android.os.UserManager;
 import android.view.Display;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -48,6 +53,7 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 
 import com.android.systemui.accessibility.accessibilitymenu.AccessibilityMenuService;
+import com.android.systemui.accessibility.accessibilitymenu.Flags;
 import com.android.systemui.accessibility.accessibilitymenu.R;
 import com.android.systemui.accessibility.accessibilitymenu.activity.A11yMenuSettingsActivity.A11yMenuPreferenceFragment;
 import com.android.systemui.accessibility.accessibilitymenu.model.A11yMenuShortcut;
@@ -93,8 +99,6 @@ public class A11yMenuOverlayLayout {
             A11yMenuShortcut.ShortcutId.ID_NOTIFICATION_VALUE.ordinal(),
             A11yMenuShortcut.ShortcutId.ID_SCREENSHOT_VALUE.ordinal()
     };
-
-
 
     private final AccessibilityMenuService mService;
     private final WindowManager mWindowManager;
@@ -195,9 +199,41 @@ public class A11yMenuOverlayLayout {
         for (int shortcutId :
                 (A11yMenuPreferenceFragment.isLargeButtonsEnabled(mService)
                         ? LARGE_SHORTCUT_LIST_DEFAULT : SHORTCUT_LIST_DEFAULT)) {
-            shortcutList.add(new A11yMenuShortcut(shortcutId));
+            if (!isShortcutRestricted(shortcutId)) {
+                shortcutList.add(new A11yMenuShortcut(shortcutId));
+            }
         }
         return shortcutList;
+    }
+
+    @SuppressLint("MissingPermission")
+    private boolean isShortcutRestricted(int shortcutId) {
+        if (!Flags.hideRestrictedActions()) {
+            return false;
+        }
+        final UserManager userManager = mService.getSystemService(UserManager.class);
+        if (userManager == null) {
+            return false;
+        }
+        final int userId = mService.getUserId();
+        final UserHandle userHandle = UserHandle.of(userId);
+        if (shortcutId == A11yMenuShortcut.ShortcutId.ID_BRIGHTNESS_DOWN_VALUE.ordinal()
+                || shortcutId == A11yMenuShortcut.ShortcutId.ID_BRIGHTNESS_UP_VALUE.ordinal()) {
+            if (userManager.hasUserRestriction(DISALLOW_CONFIG_BRIGHTNESS)
+                    || (com.android.systemui.Flags.enforceBrightnessBaseUserRestriction()
+                    && userManager.hasBaseUserRestriction(
+                            DISALLOW_CONFIG_BRIGHTNESS, userHandle))) {
+                return true;
+            }
+        }
+        if (shortcutId == A11yMenuShortcut.ShortcutId.ID_VOLUME_DOWN_VALUE.ordinal()
+                || shortcutId == A11yMenuShortcut.ShortcutId.ID_VOLUME_UP_VALUE.ordinal()) {
+            if (userManager.hasUserRestriction(DISALLOW_ADJUST_VOLUME)
+                    || userManager.hasBaseUserRestriction(DISALLOW_ADJUST_VOLUME, userHandle)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /** Updates a11y menu layout position by configuring layout params. */
@@ -326,8 +362,7 @@ public class A11yMenuOverlayLayout {
             return;
         }
         snackbar.setText(text);
-        if (com.android.systemui.accessibility.accessibilitymenu
-                .Flags.a11yMenuSnackbarLiveRegion()) {
+        if (Flags.a11yMenuSnackbarLiveRegion()) {
             snackbar.setAccessibilityLiveRegion(ACCESSIBILITY_LIVE_REGION_POLITE);
         }
 

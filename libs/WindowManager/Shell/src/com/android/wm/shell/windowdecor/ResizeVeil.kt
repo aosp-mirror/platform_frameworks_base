@@ -32,6 +32,7 @@ import android.view.SurfaceControl
 import android.view.SurfaceControlViewHost
 import android.view.SurfaceSession
 import android.view.WindowManager
+import android.view.WindowManager.LayoutParams.INPUT_FEATURE_NO_INPUT_CHANNEL
 import android.view.WindowlessWindowManager
 import android.widget.ImageView
 import android.window.TaskConstants
@@ -151,6 +152,7 @@ class ResizeVeil @JvmOverloads constructor(
                 WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
                 PixelFormat.TRANSPARENT)
         lp.title = "Resize veil icon window of Task=" + taskInfo.taskId
+        lp.inputFeatures = INPUT_FEATURE_NO_INPUT_CHANNEL
         lp.setTrustedOverlay()
         val wwm = WindowlessWindowManager(taskInfo.configuration,
                 iconSurface, null /* hostInputToken */)

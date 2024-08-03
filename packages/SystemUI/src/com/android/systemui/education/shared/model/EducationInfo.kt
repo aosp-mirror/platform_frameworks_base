@@ -16,7 +16,7 @@
 
 package com.android.systemui.education.shared.model
 
-import com.android.systemui.shared.education.GestureType
+import com.android.systemui.contextualeducation.GestureType
 
 /**
  * Model for education triggered. [gestureType] indicates what gesture it is trying to educate about

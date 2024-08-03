@@ -30,8 +30,8 @@ import com.android.systemui.bouncer.shared.model.secondaryMessage
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.deviceentry.domain.interactor.BiometricMessageInteractor
+import com.android.systemui.deviceentry.domain.interactor.DeviceEntryBiometricsAllowedInteractor
 import com.android.systemui.deviceentry.domain.interactor.DeviceEntryFaceAuthInteractor
-import com.android.systemui.deviceentry.domain.interactor.DeviceEntryFingerprintAuthInteractor
 import com.android.systemui.deviceentry.domain.interactor.DeviceUnlockedInteractor
 import com.android.systemui.deviceentry.shared.model.DeviceEntryRestrictionReason
 import com.android.systemui.deviceentry.shared.model.FaceFailureMessage
@@ -76,7 +76,7 @@ class BouncerMessageViewModel(
     private val biometricMessageInteractor: BiometricMessageInteractor,
     private val faceAuthInteractor: DeviceEntryFaceAuthInteractor,
     private val deviceUnlockedInteractor: DeviceUnlockedInteractor,
-    private val fingerprintInteractor: DeviceEntryFingerprintAuthInteractor,
+    private val deviceEntryBiometricsAllowedInteractor: DeviceEntryBiometricsAllowedInteractor,
     flags: ComposeBouncerFlags,
 ) {
     /**
@@ -121,7 +121,8 @@ class BouncerMessageViewModel(
                         combine(
                             deviceUnlockedInteractor.deviceEntryRestrictionReason,
                             lockoutMessage,
-                            fingerprintInteractor.isFingerprintCurrentlyAllowedOnBouncer,
+                            deviceEntryBiometricsAllowedInteractor
+                                .isFingerprintCurrentlyAllowedOnBouncer,
                             resetToDefault,
                         ) { deviceEntryRestrictedReason, lockoutMsg, isFpAllowedInBouncer, _ ->
                             lockoutMsg
@@ -168,7 +169,7 @@ class BouncerMessageViewModel(
             biometricMessageInteractor.faceMessage
                 .sample(
                     authenticationInteractor.authenticationMethod,
-                    fingerprintInteractor.isFingerprintCurrentlyAllowedOnBouncer,
+                    deviceEntryBiometricsAllowedInteractor.isFingerprintCurrentlyAllowedOnBouncer,
                 )
                 .collectLatest { (faceMessage, authMethod, fingerprintAllowedOnBouncer) ->
                     val isFaceAuthStrong = faceAuthInteractor.isFaceAuthStrong()
@@ -223,7 +224,7 @@ class BouncerMessageViewModel(
             biometricMessageInteractor.fingerprintMessage
                 .sample(
                     authenticationInteractor.authenticationMethod,
-                    fingerprintInteractor.isFingerprintCurrentlyAllowedOnBouncer
+                    deviceEntryBiometricsAllowedInteractor.isFingerprintCurrentlyAllowedOnBouncer
                 )
                 .collectLatest { (fingerprintMessage, authMethod, isFingerprintAllowed) ->
                     val defaultPrimaryMessage =
@@ -261,7 +262,7 @@ class BouncerMessageViewModel(
             bouncerInteractor.onIncorrectBouncerInput
                 .sample(
                     authenticationInteractor.authenticationMethod,
-                    fingerprintInteractor.isFingerprintCurrentlyAllowedOnBouncer
+                    deviceEntryBiometricsAllowedInteractor.isFingerprintCurrentlyAllowedOnBouncer
                 )
                 .collectLatest { (_, authMethod, isFingerprintAllowed) ->
                     message.emit(
@@ -414,7 +415,7 @@ object BouncerMessageViewModelModule {
         biometricMessageInteractor: BiometricMessageInteractor,
         faceAuthInteractor: DeviceEntryFaceAuthInteractor,
         deviceUnlockedInteractor: DeviceUnlockedInteractor,
-        fingerprintInteractor: DeviceEntryFingerprintAuthInteractor,
+        deviceEntryBiometricsAllowedInteractor: DeviceEntryBiometricsAllowedInteractor,
         flags: ComposeBouncerFlags,
         userSwitcherViewModel: UserSwitcherViewModel,
     ): BouncerMessageViewModel {
@@ -428,7 +429,7 @@ object BouncerMessageViewModelModule {
             biometricMessageInteractor = biometricMessageInteractor,
             faceAuthInteractor = faceAuthInteractor,
             deviceUnlockedInteractor = deviceUnlockedInteractor,
-            fingerprintInteractor = fingerprintInteractor,
+            deviceEntryBiometricsAllowedInteractor = deviceEntryBiometricsAllowedInteractor,
             flags = flags,
             selectedUser = userSwitcherViewModel.selectedUser,
         )

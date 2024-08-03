@@ -51,6 +51,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.mockito.quality.Strictness.LENIENT;
 
+import android.annotation.NonNull;
 import android.app.ActivityManager;
 import android.content.Context;
 import android.content.res.Resources;
@@ -866,6 +867,7 @@ public class WindowDecorationTests extends ShellTestCase {
         final TestWindowDecoration windowDecor = createWindowDecoration(
                 new TestRunningTaskInfoBuilder().build());
         mRelayoutParams.mApplyStartTransactionOnDraw = true;
+        mRelayoutResult.mRootView = mMockView;
 
         windowDecor.updateViewHost(mRelayoutParams, mMockSurfaceControlStartT, mRelayoutResult);
 
@@ -877,6 +879,7 @@ public class WindowDecorationTests extends ShellTestCase {
         final TestWindowDecoration windowDecor = createWindowDecoration(
                 new TestRunningTaskInfoBuilder().build());
         mRelayoutParams.mApplyStartTransactionOnDraw = true;
+        mRelayoutResult.mRootView = mMockView;
 
         assertThrows(IllegalArgumentException.class,
                 () -> windowDecor.updateViewHost(
@@ -888,13 +891,14 @@ public class WindowDecorationTests extends ShellTestCase {
         final TestWindowDecoration windowDecor = createWindowDecoration(
                 new TestRunningTaskInfoBuilder().build());
         mRelayoutParams.mApplyStartTransactionOnDraw = false;
+        mRelayoutResult.mRootView = mMockView;
 
         windowDecor.updateViewHost(mRelayoutParams, null /* onDrawTransaction */, mRelayoutResult);
     }
 
     private TestWindowDecoration createWindowDecoration(ActivityManager.RunningTaskInfo taskInfo) {
-        return new TestWindowDecoration(mContext, mMockDisplayController, mMockShellTaskOrganizer,
-                taskInfo, mMockTaskSurface,
+        return new TestWindowDecoration(mContext, mContext, mMockDisplayController,
+                mMockShellTaskOrganizer, taskInfo, mMockTaskSurface,
                 new MockObjectSupplier<>(mMockSurfaceControlBuilders,
                         () -> createMockSurfaceControlBuilder(mock(SurfaceControl.class))),
                 new MockObjectSupplier<>(mMockSurfaceControlTransactions,
@@ -932,7 +936,8 @@ public class WindowDecorationTests extends ShellTestCase {
     }
 
     private class TestWindowDecoration extends WindowDecoration<TestView> {
-        TestWindowDecoration(Context context, DisplayController displayController,
+        TestWindowDecoration(Context context, @NonNull Context userContext,
+                DisplayController displayController,
                 ShellTaskOrganizer taskOrganizer, ActivityManager.RunningTaskInfo taskInfo,
                 SurfaceControl taskSurface,
                 Supplier<SurfaceControl.Builder> surfaceControlBuilderSupplier,
@@ -940,7 +945,7 @@ public class WindowDecorationTests extends ShellTestCase {
                 Supplier<WindowContainerTransaction> windowContainerTransactionSupplier,
                 Supplier<SurfaceControl> surfaceControlSupplier,
                 SurfaceControlViewHostFactory surfaceControlViewHostFactory) {
-            super(context, displayController, taskOrganizer, taskInfo, taskSurface,
+            super(context, userContext, displayController, taskOrganizer, taskInfo, taskSurface,
                     surfaceControlBuilderSupplier, surfaceControlTransactionSupplier,
                     windowContainerTransactionSupplier, surfaceControlSupplier,
                     surfaceControlViewHostFactory);

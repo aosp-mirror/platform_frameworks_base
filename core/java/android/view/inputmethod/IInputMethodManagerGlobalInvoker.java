@@ -201,7 +201,9 @@ final class IInputMethodManagerGlobalInvoker {
      * @param exceptionHandler an optional {@link RemoteException} handler
      */
     @AnyThread
-    @RequiresPermission(Manifest.permission.INTERNAL_SYSTEM_WINDOW)
+    @RequiresPermission(allOf = {
+            Manifest.permission.INTERNAL_SYSTEM_WINDOW,
+            Manifest.permission.INTERACT_ACROSS_USERS_FULL})
     static void removeImeSurface(int displayId,
             @Nullable Consumer<RemoteException> exceptionHandler) {
         final IInputMethodManager service = getService();
@@ -441,7 +443,9 @@ final class IInputMethodManagerGlobalInvoker {
     }
 
     @AnyThread
-    @RequiresPermission(Manifest.permission.WRITE_SECURE_SETTINGS)
+    @RequiresPermission(allOf = {
+            Manifest.permission.WRITE_SECURE_SETTINGS,
+            Manifest.permission.INTERACT_ACROSS_USERS_FULL})
     static void showInputMethodPickerFromSystem(int auxiliarySubtypeMode, int displayId) {
         final IInputMethodManager service = getService();
         if (service == null) {
@@ -469,7 +473,9 @@ final class IInputMethodManagerGlobalInvoker {
     }
 
     @AnyThread
-    @RequiresPermission(Manifest.permission.WRITE_SECURE_SETTINGS)
+    @RequiresPermission(allOf = {
+            Manifest.permission.WRITE_SECURE_SETTINGS,
+            Manifest.permission.INTERACT_ACROSS_USERS_FULL})
     static void onImeSwitchButtonClickFromSystem(int displayId) {
         final IInputMethodManager service = getService();
         if (service == null) {

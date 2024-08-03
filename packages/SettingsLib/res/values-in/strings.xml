@@ -430,8 +430,7 @@
     <string name="force_allow_on_external_summary" msgid="8525425782530728238">"Membuat semua aplikasi dapat ditulis ke penyimpanan eksternal, terlepas dari nilai manifes"</string>
     <string name="force_resizable_activities" msgid="7143612144399959606">"Paksa aktivitas agar ukurannya dapat diubah"</string>
     <string name="force_resizable_activities_summary" msgid="2490382056981583062">"Membuat semua aktivitas dapat diubah ukurannya untuk banyak jendela, terlepas dari nilai manifes."</string>
-    <string name="enable_freeform_support" msgid="8409932201445109106">"Aktifkan jendela freeform (versi lama)"</string>
-    <string name="enable_freeform_support_summary" msgid="2242481082356957934">"Aktifkan dukungan untuk jendela freeform eksperimental versi lama."</string>
+    <string name="enable_freeform_support" msgid="7599125687603914253">"Aktifkan jendela berformat bebas"</string>
     <string name="local_backup_password_title" msgid="4631017948933578709">"Sandi cadangan desktop"</string>
     <string name="local_backup_password_summary_none" msgid="7646898032616361714">"Saat ini cadangan desktop penuh tidak dilindungi"</string>
     <string name="local_backup_password_summary_change" msgid="1707357670383995567">"Ketuk guna mengubah atau menghapus sandi untuk cadangan lengkap desktop"</string>
@@ -496,7 +495,8 @@
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_remaining_charging_duration_only" msgid="8085099012811384899">"<xliff:g id="TIME">%1$s</xliff:g> lagi sampai penuh"</string>
     <string name="power_charging_duration" msgid="6127154952524919719">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> lagi sampai penuh"</string>
-    <string name="power_charging_limited" msgid="8202147604844938236">"<xliff:g id="LEVEL">%1$s</xliff:g> - Pengisian daya dioptimalkan"</string>
+    <!-- no translation found for power_charging_limited (4144004473976005214) -->
+    <skip />
     <string name="power_charging_future_paused" msgid="1809543660923642799">"<xliff:g id="LEVEL">%1$s</xliff:g> - Mengisi daya"</string>
     <string name="power_fast_charging_duration_v2" msgid="3797735998640359490">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATUS">%2$s</xliff:g> - Penuh pukul <xliff:g id="TIME">%3$s</xliff:g>"</string>
     <string name="power_charging_duration_v2" msgid="2938998284074003248">"<xliff:g id="LEVEL">%1$s</xliff:g> - Baterai terisi penuh dalam <xliff:g id="TIME">%2$s</xliff:g>"</string>

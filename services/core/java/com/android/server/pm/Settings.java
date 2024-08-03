@@ -4489,10 +4489,24 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
         String splitName = parser.getAttributeValue(null, ATTR_NAME);
         int splitRevision = parser.getAttributeInt(null, ATTR_VERSION, -1);
         if (splitName != null && splitRevision >= 0) {
+            final int beforeSplitNamesLength = outPs.getSplitNames().length;
+            // If the split name already exists in the outPs#getSplitNames, don't add it
+            // into the array and update its revision code below
             outPs.setSplitNames(ArrayUtils.appendElement(String.class,
                     outPs.getSplitNames(), splitName));
-            outPs.setSplitRevisionCodes(ArrayUtils.appendInt(
-                    outPs.getSplitRevisionCodes(), splitRevision));
+
+            // If the same split name has already been added before, update the latest
+            // revision code
+            final int afterSplitNamesLength = outPs.getSplitNames().length;
+            if (beforeSplitNamesLength == afterSplitNamesLength) {
+                final int index = ArrayUtils.indexOf(outPs.getSplitNames(), splitName);
+                final int[] splitRevisionCodes = outPs.getSplitRevisionCodes();
+                splitRevisionCodes[index] = splitRevision;
+                outPs.setSplitRevisionCodes(splitRevisionCodes);
+            } else {
+                outPs.setSplitRevisionCodes(ArrayUtils.appendInt(
+                        outPs.getSplitRevisionCodes(), splitRevision, /* allowDuplicates= */ true));
+            }
         }
 
         XmlUtils.skipCurrentTag(parser);

@@ -21,7 +21,7 @@ import com.android.systemui.biometrics.data.repository.FingerprintPropertyReposi
 import com.android.systemui.bouncer.data.repository.KeyguardBouncerRepository
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
-import com.android.systemui.deviceentry.domain.interactor.DeviceEntryFingerprintAuthInteractor
+import com.android.systemui.deviceentry.domain.interactor.DeviceEntryBiometricsAllowedInteractor
 import com.android.systemui.deviceentry.shared.DeviceEntryUdfpsRefactor
 import com.android.systemui.keyguard.data.repository.BiometricSettingsRepository
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
@@ -60,7 +60,8 @@ constructor(
     private val biometricSettingsRepository: BiometricSettingsRepository,
     private val systemClock: SystemClock,
     private val keyguardUpdateMonitor: KeyguardUpdateMonitor,
-    private val deviceEntryFingerprintAuthInteractor: Lazy<DeviceEntryFingerprintAuthInteractor>,
+    private val deviceEntryBiometricsAllowedInteractor:
+        Lazy<DeviceEntryBiometricsAllowedInteractor>,
     private val keyguardInteractor: Lazy<KeyguardInteractor>,
     keyguardTransitionInteractor: Lazy<KeyguardTransitionInteractor>,
     sceneInteractor: Lazy<SceneInteractor>,
@@ -114,7 +115,7 @@ constructor(
                                 flowOf(false)
                             } else {
                                 combine(
-                                    deviceEntryFingerprintAuthInteractor
+                                    deviceEntryBiometricsAllowedInteractor
                                         .get()
                                         .isFingerprintAuthCurrentlyAllowed,
                                     keyguardInteractor.get().isKeyguardDismissible,

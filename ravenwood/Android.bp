@@ -181,13 +181,13 @@ java_library {
     visibility: ["//visibility:public"],
 }
 
-// Carefully compiles against only test_current to support tests that
+// Carefully compiles against only module_current to support tests that
 // want to verify they're unbundled.  The "impl" library above is what
 // ships inside the Ravenwood environment to actually drive any API
 // access to implementation details.
-// This library needs to be statically linked to mainline tests as well,
-// which need to be able to run on multiple API levels, so we can't use
-// test APIs in this module.
+// We can't use test_current here because this library needs to be statically
+// linked to mainline tests as well, which can't use test APIs because they
+// need to be able to run on multiple API levels.
 java_library {
     name: "ravenwood-junit",
     srcs: [

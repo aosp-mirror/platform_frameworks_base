@@ -3005,7 +3005,7 @@ public final class ProcessList {
         return freezePackageCgroup(packageUID, false);
     }
 
-    private static void freezeBinderAndPackageCgroup(List<Pair<ProcessRecord, Boolean>> procs,
+    private void freezeBinderAndPackageCgroup(List<Pair<ProcessRecord, Boolean>> procs,
                                                      int packageUID) {
         // Freeze all binder processes under the target UID (whose cgroup is about to be frozen).
         // Since we're going to kill these, we don't need to unfreze them later.
@@ -3019,7 +3019,7 @@ public final class ProcessList {
                 try {
                     int rc;
                     do {
-                        rc = CachedAppOptimizer.freezeBinder(pid, true, 10 /* timeout_ms */);
+                        rc = mService.getFreezer().freezeBinder(pid, true, 10 /* timeout_ms */);
                     } while (rc == -EAGAIN && nRetries++ < 1);
                     if (rc != 0) Slog.e(TAG, "Unable to freeze binder for " + pid + ": " + rc);
                 } catch (RuntimeException e) {

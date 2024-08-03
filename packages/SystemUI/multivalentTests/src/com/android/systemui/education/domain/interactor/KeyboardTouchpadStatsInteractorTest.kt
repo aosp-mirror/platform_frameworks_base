@@ -20,10 +20,10 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
+import com.android.systemui.contextualeducation.GestureType.BACK
 import com.android.systemui.education.data.repository.contextualEducationRepository
 import com.android.systemui.education.data.repository.fakeEduClock
 import com.android.systemui.kosmos.testScope
-import com.android.systemui.shared.education.GestureType.BACK_GESTURE
 import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.test.runTest
@@ -41,11 +41,9 @@ class KeyboardTouchpadStatsInteractorTest : SysuiTestCase() {
     fun dataUpdatedOnIncrementSignalCount() =
         testScope.runTest {
             val model by
-                collectLastValue(
-                    kosmos.contextualEducationRepository.readGestureEduModelFlow(BACK_GESTURE)
-                )
+                collectLastValue(kosmos.contextualEducationRepository.readGestureEduModelFlow(BACK))
             val originalValue = model!!.signalCount
-            underTest.incrementSignalCount(BACK_GESTURE)
+            underTest.incrementSignalCount(BACK)
             assertThat(model?.signalCount).isEqualTo(originalValue + 1)
         }
 
@@ -53,11 +51,9 @@ class KeyboardTouchpadStatsInteractorTest : SysuiTestCase() {
     fun dataAddedOnUpdateShortcutTriggerTime() =
         testScope.runTest {
             val model by
-                collectLastValue(
-                    kosmos.contextualEducationRepository.readGestureEduModelFlow(BACK_GESTURE)
-                )
+                collectLastValue(kosmos.contextualEducationRepository.readGestureEduModelFlow(BACK))
             assertThat(model?.lastShortcutTriggeredTime).isNull()
-            underTest.updateShortcutTriggerTime(BACK_GESTURE)
+            underTest.updateShortcutTriggerTime(BACK)
             assertThat(model?.lastShortcutTriggeredTime).isEqualTo(kosmos.fakeEduClock.instant())
         }
 }

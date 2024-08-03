@@ -3296,8 +3296,8 @@
              usually TVs.
              <p>Requires permission {@code android.permission.DISABLE_SYSTEM_SOUND_EFFECTS}. -->
         <attr name="playHomeTransitionSound" format="boolean"/>
-        <!-- Indicates whether the activity can be displayed on a remote device which may or
-             may not be running Android. -->
+        <!-- Indicates whether the activity can be displayed on a display that may belong to a
+             remote device which may or may not be running Android. -->
         <attr name="canDisplayOnRemoteDevices" format="boolean"/>
         <attr name="allowUntrustedActivityEmbedding" />
         <attr name="knownActivityEmbeddingCerts" />

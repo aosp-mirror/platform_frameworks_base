@@ -63,6 +63,11 @@ public class ResourceFlaggingTest {
         assertThat(getBoolean("res2")).isTrue();
     }
 
+    @Test
+    public void testFlagEnabledDifferentCompilationUnit() {
+        assertThat(getBoolean("res3")).isTrue();
+    }
+
     private boolean getBoolean(String name) {
         int resId = mResources.getIdentifier(name, "bool", "com.android.intenal.flaggedresources");
         assertThat(resId).isNotEqualTo(0);

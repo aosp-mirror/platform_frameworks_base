@@ -50,8 +50,6 @@ import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.wm.utils.OptPropFactory;
 
-import java.util.function.Function;
-
 /**
  * Encapsulates app compat configurations and overrides related to aspect ratio.
  */
@@ -76,20 +74,20 @@ class AppCompatAspectRatioOverrides {
     @NonNull
     private final OptPropFactory.OptProp mAllowOrientationOverrideOptProp;
     @NonNull
-    private final Function<Boolean, Boolean> mIsDisplayFullScreenAndInPostureProvider;
+    private final AppCompatDeviceStateQuery mAppCompatDeviceStateQuery;
     @NonNull
-    private final Function<Configuration, Float> mGetHorizontalPositionMultiplierProvider;
+    private final AppCompatReachabilityOverrides mAppCompatReachabilityOverrides;
 
     AppCompatAspectRatioOverrides(@NonNull ActivityRecord activityRecord,
             @NonNull AppCompatConfiguration appCompatConfiguration,
             @NonNull OptPropFactory optPropBuilder,
-            @NonNull Function<Boolean, Boolean> isDisplayFullScreenAndInPostureProvider,
-            @NonNull Function<Configuration, Float> getHorizontalPositionMultiplierProvider) {
+            @NonNull AppCompatDeviceStateQuery appCompatDeviceStateQuery,
+            @NonNull AppCompatReachabilityOverrides appCompatReachabilityOverrides) {
         mActivityRecord = activityRecord;
         mAppCompatConfiguration = appCompatConfiguration;
+        mAppCompatDeviceStateQuery = appCompatDeviceStateQuery;
         mUserAspectRatioState = new UserAspectRatioState();
-        mIsDisplayFullScreenAndInPostureProvider = isDisplayFullScreenAndInPostureProvider;
-        mGetHorizontalPositionMultiplierProvider = getHorizontalPositionMultiplierProvider;
+        mAppCompatReachabilityOverrides = appCompatReachabilityOverrides;
         mAllowMinAspectRatioOverrideOptProp = optPropBuilder.create(
                 PROPERTY_COMPAT_ALLOW_MIN_ASPECT_RATIO_OVERRIDE);
         mAllowUserAspectRatioOverrideOptProp = optPropBuilder.create(
@@ -245,12 +243,13 @@ class AppCompatAspectRatioOverrides {
     }
 
     private boolean shouldUseSplitScreenAspectRatio(@NonNull Configuration parentConfiguration) {
-        final boolean isBookMode = mIsDisplayFullScreenAndInPostureProvider
-                .apply(/* isTabletop */false);
-        final boolean isNotCenteredHorizontally = mGetHorizontalPositionMultiplierProvider.apply(
-                parentConfiguration) != LETTERBOX_POSITION_MULTIPLIER_CENTER;
-        final boolean isTabletopMode = mIsDisplayFullScreenAndInPostureProvider
-                .apply(/* isTabletop */ true);
+        final boolean isBookMode = mAppCompatDeviceStateQuery
+                .isDisplayFullScreenAndInPosture(/* isTabletop */false);
+        final boolean isNotCenteredHorizontally =
+                mAppCompatReachabilityOverrides.getHorizontalPositionMultiplier(parentConfiguration)
+                        != LETTERBOX_POSITION_MULTIPLIER_CENTER;
+        final boolean isTabletopMode = mAppCompatDeviceStateQuery
+                .isDisplayFullScreenAndInPosture(/* isTabletop */ true);
         final boolean isLandscape = isFixedOrientationLandscape(
                 mActivityRecord.getOverrideOrientation());
         final AppCompatCameraOverrides cameraOverrides =

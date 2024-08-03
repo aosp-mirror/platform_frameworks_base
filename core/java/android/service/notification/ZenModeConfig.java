@@ -211,6 +211,9 @@ public class ZenModeConfig implements Parcelable {
             SUPPRESSED_EFFECT_SCREEN_OFF | SUPPRESSED_EFFECT_FULL_SCREEN_INTENT
                     | SUPPRESSED_EFFECT_LIGHTS | SUPPRESSED_EFFECT_PEEK | SUPPRESSED_EFFECT_AMBIENT;
 
+    private static final int LEGACY_SUPPRESSED_EFFECTS =
+            Policy.SUPPRESSED_EFFECT_SCREEN_ON | Policy.SUPPRESSED_EFFECT_SCREEN_OFF;
+
     // ZenModeConfig XML versions distinguishing key changes.
     public static final int XML_VERSION_ZEN_UPGRADE = 8;
     public static final int XML_VERSION_MODES_API = 11;
@@ -284,6 +287,7 @@ public class ZenModeConfig implements Parcelable {
     private static final String RULE_ATT_TRIGGER_DESC = "triggerDesc";
     private static final String RULE_ATT_DELETION_INSTANT = "deletionInstant";
     private static final String RULE_ATT_DISABLED_ORIGIN = "disabledOrigin";
+    private static final String RULE_ATT_LEGACY_SUPPRESSED_EFFECTS = "legacySuppressedEffects";
 
     private static final String DEVICE_EFFECT_DISPLAY_GRAYSCALE = "zdeDisplayGrayscale";
     private static final String DEVICE_EFFECT_SUPPRESS_AMBIENT_DISPLAY =
@@ -1171,6 +1175,8 @@ public class ZenModeConfig implements Parcelable {
             if (Flags.modesUi()) {
                 rt.disabledOrigin = safeInt(parser, RULE_ATT_DISABLED_ORIGIN,
                         UPDATE_ORIGIN_UNKNOWN);
+                rt.legacySuppressedEffects = safeInt(parser,
+                        RULE_ATT_LEGACY_SUPPRESSED_EFFECTS, 0);
             }
         }
         return rt;
@@ -1228,6 +1234,8 @@ public class ZenModeConfig implements Parcelable {
             }
             if (Flags.modesUi()) {
                 out.attributeInt(null, RULE_ATT_DISABLED_ORIGIN, rule.disabledOrigin);
+                out.attributeInt(null, RULE_ATT_LEGACY_SUPPRESSED_EFFECTS,
+                        rule.legacySuppressedEffects);
             }
         }
     }
@@ -1903,6 +1911,13 @@ public class ZenModeConfig implements Parcelable {
                             ZenPolicy.VISUAL_EFFECT_NOTIFICATION_LIST))) {
                 suppressedVisualEffects |= Policy.SUPPRESSED_EFFECT_NOTIFICATION_LIST;
             }
+
+            // Restore legacy suppressed effects (obsolete fields which are not in ZenPolicy).
+            // These are deprecated and have no effect on behavior, however apps should get them
+            // back if provided to setNotificationPolicy() earlier.
+            suppressedVisualEffects &= ~LEGACY_SUPPRESSED_EFFECTS;
+            suppressedVisualEffects |=
+                    (LEGACY_SUPPRESSED_EFFECTS & manualRule.legacySuppressedEffects);
         } else {
             if (isAllowConversations()) {
                 priorityCategories |= Policy.PRIORITY_CATEGORY_CONVERSATIONS;
@@ -1996,6 +2011,8 @@ public class ZenModeConfig implements Parcelable {
         if (policy == null) return;
         if (Flags.modesUi()) {
             manualRule.zenPolicy = ZenAdapters.notificationPolicyToZenPolicy(policy);
+            manualRule.legacySuppressedEffects =
+                    LEGACY_SUPPRESSED_EFFECTS & policy.suppressedVisualEffects;
         } else {
             setAllowAlarms((policy.priorityCategories & Policy.PRIORITY_CATEGORY_ALARMS) != 0);
             allowMedia = (policy.priorityCategories & Policy.PRIORITY_CATEGORY_MEDIA) != 0;
@@ -2521,6 +2538,10 @@ public class ZenModeConfig implements Parcelable {
         @Nullable public Instant deletionInstant; // Only set on deleted rules.
         @FlaggedApi(Flags.FLAG_MODES_UI)
         @ConfigChangeOrigin public int disabledOrigin = UPDATE_ORIGIN_UNKNOWN;
+        // The obsolete suppressed effects in NM.Policy (SCREEN_ON, SCREEN_OFF) cannot be put in a
+        // ZenPolicy, so we store them here, only for the manual rule.
+        @FlaggedApi(Flags.FLAG_MODES_UI)
+        int legacySuppressedEffects;
 
         public ZenRule() { }
 
@@ -2561,6 +2582,7 @@ public class ZenModeConfig implements Parcelable {
                 }
                 if (Flags.modesUi()) {
                     disabledOrigin = source.readInt();
+                    legacySuppressedEffects = source.readInt();
                 }
             }
         }
@@ -2638,6 +2660,7 @@ public class ZenModeConfig implements Parcelable {
                 }
                 if (Flags.modesUi()) {
                     dest.writeInt(disabledOrigin);
+                    dest.writeInt(legacySuppressedEffects);
                 }
             }
         }
@@ -2686,6 +2709,7 @@ public class ZenModeConfig implements Parcelable {
                 }
                 if (Flags.modesUi()) {
                     sb.append(",disabledOrigin=").append(disabledOrigin);
+                    sb.append(",legacySuppressedEffects=").append(legacySuppressedEffects);
                 }
             }
 
@@ -2754,7 +2778,8 @@ public class ZenModeConfig implements Parcelable {
 
                 if (Flags.modesUi()) {
                     finalEquals = finalEquals
-                            && other.disabledOrigin == disabledOrigin;
+                            && other.disabledOrigin == disabledOrigin
+                            && other.legacySuppressedEffects == legacySuppressedEffects;
                 }
             }
 
@@ -2769,15 +2794,15 @@ public class ZenModeConfig implements Parcelable {
                             component, configurationActivity, pkg, id, enabler, zenPolicy,
                             zenDeviceEffects, modified, allowManualInvocation, iconResName,
                             triggerDescription, type, userModifiedFields,
-                            zenPolicyUserModifiedFields,
-                            zenDeviceEffectsUserModifiedFields, deletionInstant, disabledOrigin);
+                            zenPolicyUserModifiedFields, zenDeviceEffectsUserModifiedFields,
+                            deletionInstant, disabledOrigin, legacySuppressedEffects);
                 } else {
                     return Objects.hash(enabled, snoozing, name, zenMode, conditionId, condition,
                             component, configurationActivity, pkg, id, enabler, zenPolicy,
                             zenDeviceEffects, modified, allowManualInvocation, iconResName,
                             triggerDescription, type, userModifiedFields,
-                            zenPolicyUserModifiedFields,
-                            zenDeviceEffectsUserModifiedFields, deletionInstant);
+                            zenPolicyUserModifiedFields, zenDeviceEffectsUserModifiedFields,
+                            deletionInstant);
                 }
             }
             return Objects.hash(enabled, snoozing, name, zenMode, conditionId, condition,

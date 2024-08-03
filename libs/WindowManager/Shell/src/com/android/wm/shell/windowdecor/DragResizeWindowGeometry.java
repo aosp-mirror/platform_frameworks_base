@@ -18,7 +18,7 @@ package com.android.wm.shell.windowdecor;
 
 import static android.view.InputDevice.SOURCE_TOUCHSCREEN;
 
-import static com.android.window.flags.Flags.enableWindowingEdgeDragResize;
+import static com.android.wm.shell.shared.desktopmode.DesktopModeFlags.EDGE_DRAG_RESIZE;
 import static com.android.wm.shell.windowdecor.DragPositioningCallback.CTRL_TYPE_BOTTOM;
 import static com.android.wm.shell.windowdecor.DragPositioningCallback.CTRL_TYPE_LEFT;
 import static com.android.wm.shell.windowdecor.DragPositioningCallback.CTRL_TYPE_RIGHT;
@@ -26,6 +26,7 @@ import static com.android.wm.shell.windowdecor.DragPositioningCallback.CTRL_TYPE
 import static com.android.wm.shell.windowdecor.DragPositioningCallback.CTRL_TYPE_UNDEFINED;
 
 import android.annotation.NonNull;
+import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Point;
 import android.graphics.Rect;
@@ -69,8 +70,8 @@ final class DragResizeWindowGeometry {
     /**
      * Returns the resource value to use for the resize handle on the edge of the window.
      */
-    static int getResizeEdgeHandleSize(@NonNull Resources res) {
-        return enableWindowingEdgeDragResize()
+    static int getResizeEdgeHandleSize(@NonNull Context context, @NonNull Resources res) {
+        return EDGE_DRAG_RESIZE.isEnabled(context)
                 ? res.getDimensionPixelSize(R.dimen.desktop_mode_edge_handle)
                 : res.getDimensionPixelSize(R.dimen.freeform_resize_handle);
     }
@@ -103,11 +104,11 @@ final class DragResizeWindowGeometry {
      * Returns the union of all regions that can be touched for drag resizing; the corners window
      * and window edges.
      */
-    void union(@NonNull Region region) {
+    void union(@NonNull Context context, @NonNull Region region) {
         // Apply the edge resize regions.
         mTaskEdges.union(region);
 
-        if (enableWindowingEdgeDragResize()) {
+        if (EDGE_DRAG_RESIZE.isEnabled(context)) {
             // Apply the corners as well for the larger corners, to ensure we capture all possible
             // touches.
             mLargeTaskCorners.union(region);
@@ -120,11 +121,12 @@ final class DragResizeWindowGeometry {
     /**
      * Returns if this MotionEvent should be handled, based on its source and position.
      */
-    boolean shouldHandleEvent(@NonNull MotionEvent e, @NonNull Point offset) {
+    boolean shouldHandleEvent(@NonNull Context context, @NonNull MotionEvent e,
+            @NonNull Point offset) {
         final float x = e.getX(0) + offset.x;
         final float y = e.getY(0) + offset.y;
 
-        if (enableWindowingEdgeDragResize()) {
+        if (EDGE_DRAG_RESIZE.isEnabled(context)) {
             // First check if touch falls within a corner.
             // Large corner bounds are used for course input like touch, otherwise fine bounds.
             boolean result = isEventFromTouchscreen(e)
@@ -132,7 +134,7 @@ final class DragResizeWindowGeometry {
                     : isInCornerBounds(mFineTaskCorners, x, y);
             // Check if touch falls within the edge resize handle. Limit edge resizing to stylus and
             // mouse input.
-            if (!result && isEdgeResizePermitted(e)) {
+            if (!result && isEdgeResizePermitted(context, e)) {
                 result = isInEdgeResizeBounds(x, y);
             }
             return result;
@@ -148,8 +150,8 @@ final class DragResizeWindowGeometry {
         return (e.getSource() & SOURCE_TOUCHSCREEN) == SOURCE_TOUCHSCREEN;
     }
 
-    static boolean isEdgeResizePermitted(@NonNull MotionEvent e) {
-        if (enableWindowingEdgeDragResize()) {
+    static boolean isEdgeResizePermitted(@NonNull Context context, @NonNull MotionEvent e) {
+        if (EDGE_DRAG_RESIZE.isEnabled(context)) {
             return e.getToolType(0) == MotionEvent.TOOL_TYPE_STYLUS
                     || e.getToolType(0) == MotionEvent.TOOL_TYPE_MOUSE;
         } else {
@@ -174,8 +176,9 @@ final class DragResizeWindowGeometry {
      *                              resize region.
      */
     @DragPositioningCallback.CtrlType
-    int calculateCtrlType(boolean isTouchscreen, boolean isEdgeResizePermitted, float x, float y) {
-        if (enableWindowingEdgeDragResize()) {
+    int calculateCtrlType(@NonNull Context context, boolean isTouchscreen,
+            boolean isEdgeResizePermitted, float x, float y) {
+        if (EDGE_DRAG_RESIZE.isEnabled(context)) {
             // First check if touch falls within a corner.
             // Large corner bounds are used for course input like touch, otherwise fine bounds.
             int ctrlType = isTouchscreen
