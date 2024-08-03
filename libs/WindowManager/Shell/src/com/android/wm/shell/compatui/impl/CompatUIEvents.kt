@@ -27,9 +27,9 @@ internal const val SIZE_COMPAT_RESTART_BUTTON_CLICKED = 1
 sealed class CompatUIEvents(override val eventId: Int) : CompatUIEvent {
     /** Sent when the size compat restart button appears. */
     data class SizeCompatRestartButtonAppeared(val taskId: Int) :
-            CompatUIEvents(SIZE_COMPAT_RESTART_BUTTON_APPEARED)
+        CompatUIEvents(SIZE_COMPAT_RESTART_BUTTON_APPEARED)
 
     /** Sent when the size compat restart button is clicked. */
     data class SizeCompatRestartButtonClicked(val taskId: Int) :
-            CompatUIEvents(SIZE_COMPAT_RESTART_BUTTON_CLICKED)
+        CompatUIEvents(SIZE_COMPAT_RESTART_BUTTON_CLICKED)
 }

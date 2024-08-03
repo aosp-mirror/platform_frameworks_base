@@ -1064,13 +1064,17 @@ class WallpaperController {
 
     /**
      * Mirrors the visible wallpaper if it's available.
+     * <p>
+     * We mirror at the WallpaperWindowToken level because scale and translation is applied at
+     * the WindowState level and mirroring the WindowState's SurfaceControl will remove any local
+     * scale and translation.
      *
      * @return A SurfaceControl for the parent of the mirrored wallpaper.
      */
     SurfaceControl mirrorWallpaperSurface() {
         final WindowState wallpaperWindowState = getTopVisibleWallpaper();
         return wallpaperWindowState != null
-                ? SurfaceControl.mirrorSurface(wallpaperWindowState.getSurfaceControl())
+                ? SurfaceControl.mirrorSurface(wallpaperWindowState.mToken.getSurfaceControl())
                 : null;
     }
 
