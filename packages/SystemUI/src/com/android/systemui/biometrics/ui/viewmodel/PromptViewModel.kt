@@ -409,12 +409,7 @@ constructor(
             .distinctUntilChanged()
 
     val iconViewModel: PromptIconViewModel =
-        PromptIconViewModel(
-            this,
-            displayStateInteractor,
-            promptSelectorInteractor,
-            udfpsOverlayInteractor
-        )
+        PromptIconViewModel(this, displayStateInteractor, promptSelectorInteractor)
 
     private val _isIconViewLoaded = MutableStateFlow(false)
 
@@ -903,8 +898,8 @@ constructor(
     ): Boolean {
         if (
             modalities.first().hasUdfps &&
-            touchExplorationEnabled &&
-            !isAuthenticated.first().isAuthenticated
+                touchExplorationEnabled &&
+                !isAuthenticated.first().isAuthenticated
         ) {
             // TODO(b/315184924): Remove uses of UdfpsUtils
             val scaledTouch =

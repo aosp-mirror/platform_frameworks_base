@@ -129,7 +129,6 @@ object BiometricViewBinder {
         subtitleView.isSelected =
             !accessibilityManager.isEnabled || !accessibilityManager.isTouchExplorationEnabled
 
-        val iconOverlayView = view.requireViewById<LottieAnimationView>(R.id.biometric_icon_overlay)
         val iconView = view.requireViewById<LottieAnimationView>(R.id.biometric_icon)
 
         val iconSizeOverride =
@@ -185,15 +184,23 @@ object BiometricViewBinder {
             // these do not change and need to be set before any size transitions
             val modalities = viewModel.modalities.first()
 
-            if (modalities.hasFingerprint) {
-                /**
-                 * Load the given [rawResources] immediately so they are cached for use in the
-                 * [context].
-                 */
-                val rawResources = viewModel.iconViewModel.getRawAssets(modalities.hasSfps)
-                for (res in rawResources) {
-                    LottieCompositionFactory.fromRawRes(view.context, res)
+            /**
+             * Load the given [rawResources] immediately so they are cached for use in the
+             * [context].
+             */
+            val rawResources =
+                if (modalities.hasFaceAndFingerprint) {
+                    viewModel.iconViewModel.getCoexAssetsList(modalities.hasSfps)
+                } else if (modalities.hasFingerprintOnly) {
+                    viewModel.iconViewModel.getFingerprintAssetsList(modalities.hasSfps)
+                } else if (modalities.hasFaceOnly) {
+                    viewModel.iconViewModel.getFaceAssetsList()
+                } else {
+                    listOf()
                 }
+
+            for (res in rawResources) {
+                LottieCompositionFactory.fromRawRes(view.context, res)
             }
 
             val logoInfo = viewModel.logoInfo.first()
@@ -268,7 +275,6 @@ object BiometricViewBinder {
                     if (!showWithoutIcon) {
                         PromptIconViewBinder.bind(
                             iconView,
-                            iconOverlayView,
                             iconSizeOverride,
                             viewModel,
                         )
@@ -392,10 +398,7 @@ object BiometricViewBinder {
                                 else -> null
                             }
                         }
-                        .collect { onTouch ->
-                            iconOverlayView.setOnTouchListener(onTouch)
-                            iconView.setOnTouchListener(onTouch)
-                        }
+                        .collect { onTouch -> iconView.setOnTouchListener(onTouch) }
                 }
 
                 // dismiss prompt when authenticated and confirmed
@@ -416,9 +419,6 @@ object BiometricViewBinder {
                                 accessibilityManager.isTouchExplorationEnabled &&
                                     modalities.hasUdfps
                             ) {
-                                iconOverlayView.setOnClickListener {
-                                    viewModel.confirmAuthenticated()
-                                }
                                 iconView.setOnClickListener { viewModel.confirmAuthenticated() }
                             }
                         }
