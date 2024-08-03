@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-@file:OptIn(ExperimentalCoroutinesApi::class)
-
 package com.android.systemui.shade.ui.viewmodel
 
 import androidx.lifecycle.LifecycleOwner
@@ -24,8 +22,8 @@ import com.android.compose.animation.scene.Swipe
 import com.android.compose.animation.scene.SwipeDirection
 import com.android.compose.animation.scene.UserAction
 import com.android.compose.animation.scene.UserActionResult
-import com.android.systemui.activatable.Activatable
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.lifecycle.Activatable
 import com.android.systemui.media.controls.domain.pipeline.interactor.MediaCarouselInteractor
 import com.android.systemui.qs.FooterActionsController
 import com.android.systemui.qs.footer.ui.viewmodel.FooterActionsViewModel
@@ -41,7 +39,6 @@ import com.android.systemui.unfold.domain.interactor.UnfoldTransitionInteractor
 import com.android.systemui.utils.coroutines.flow.flatMapLatestConflated
 import java.util.concurrent.atomic.AtomicBoolean
 import javax.inject.Inject
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow

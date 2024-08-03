@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Copyright (C) 2024 The Android Open Source Project
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~      http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+
+<!-- Default configuration for Headless System User Mode (HSUM) builds. -->
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+
+  <!-- Whether multiple admins are allowed on the device. If set to true, new users can be created
+       with admin privileges and admin privileges can be granted/revoked from existing users. -->
+  <bool name="config_enableMultipleAdmins">true</bool>
+
+  <!-- Whether the device will automatically (at first boot) have a designated main user and treat
+       it as a permanent admin.
+       Since the main user is a permanent admin user it can't be deleted or downgraded to
+       non-admin status.
+       This is generally only relevant on headless system user mode (HSUM) devices; on other
+       devices, the main user is the system user which is always a permanent admin anyway.
+       Note that HSUM devices without this enabled will not automatically have a main user. -->
+  <bool name="config_isMainUserPermanentAdmin">true</bool>
+
+  <!-- Maximum number of users we allow to be running at a time.
+       Note that this includes the headless system user. -->
+  <integer name="config_multiuserMaxRunningUsers">4</integer>
+
+</resources>
