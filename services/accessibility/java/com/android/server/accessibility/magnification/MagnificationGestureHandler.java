@@ -16,6 +16,8 @@
 
 package com.android.server.accessibility.magnification;
 
+import static android.view.InputDevice.SOURCE_MOUSE;
+import static android.view.InputDevice.SOURCE_STYLUS;
 import static android.view.InputDevice.SOURCE_TOUCHSCREEN;
 import static android.view.MotionEvent.ACTION_CANCEL;
 import static android.view.MotionEvent.ACTION_UP;
@@ -139,12 +141,35 @@ public abstract class MagnificationGestureHandler extends BaseEventStreamTransfo
         }
     }
 
+    /**
+     * Some touchscreen, mouse and stylus events may modify magnifier state. Checks for whether the
+     * event should not be dispatched to the magnifier.
+     *
+     * @param event The event to check.
+     * @return `true` if the event should be sent through the normal event flow or `false` if it
+     *     should be observed by magnifier.
+     */
     private boolean shouldDispatchTransformedEvent(MotionEvent event) {
-        if ((!mDetectSingleFingerTripleTap && !mDetectTwoFingerTripleTap && !mDetectShortcutTrigger)
-                || !event.isFromSource(SOURCE_TOUCHSCREEN)) {
-            return true;
+        if (event.getSource() == SOURCE_TOUCHSCREEN) {
+            if (mDetectSingleFingerTripleTap
+                    || mDetectTwoFingerTripleTap
+                    || mDetectShortcutTrigger) {
+                // Observe touchscreen events while magnification activation is detected.
+                return false;
+            }
         }
-        return false;
+        if (Flags.enableMagnificationFollowsMouse()) {
+            if (event.isFromSource(SOURCE_MOUSE) || event.isFromSource(SOURCE_STYLUS)) {
+                // Note that mouse events include other mouse-like pointing devices
+                // such as touchpads and pointing sticks.
+                // Observe any mouse or stylus movement.
+                // We observe all movement to ensure that events continue to come in order,
+                // even though only some movement types actually move the viewport.
+                return false;
+            }
+        }
+        // Magnification dispatches (ignores) all other events
+        return true;
     }
 
     final void dispatchTransformedEvent(MotionEvent event, MotionEvent rawEvent, int policyFlags) {

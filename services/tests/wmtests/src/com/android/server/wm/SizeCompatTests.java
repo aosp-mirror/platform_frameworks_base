@@ -281,7 +281,8 @@ public class SizeCompatTests extends WindowTestsBase {
         if (horizontalReachability) {
             final Consumer<Integer> doubleClick =
                     (Integer x) -> {
-                        mActivity.mLetterboxUiController.handleHorizontalDoubleTap(x);
+                        mActivity.mAppCompatController.getAppCompatReachabilityPolicy()
+                                .handleDoubleTap(x, displayHeight / 2);
                         mActivity.mRootWindowContainer.performSurfacePlacement();
                     };
 
@@ -310,7 +311,8 @@ public class SizeCompatTests extends WindowTestsBase {
         } else {
             final Consumer<Integer> doubleClick =
                     (Integer y) -> {
-                        mActivity.mLetterboxUiController.handleVerticalDoubleTap(y);
+                        mActivity.mAppCompatController.getAppCompatReachabilityPolicy()
+                                .handleDoubleTap(displayWidth / 2, y);
                         mActivity.mRootWindowContainer.performSurfacePlacement();
                     };
 
@@ -373,7 +375,8 @@ public class SizeCompatTests extends WindowTestsBase {
 
         final Consumer<Integer> doubleClick =
                 (Integer y) -> {
-                    activity.mLetterboxUiController.handleVerticalDoubleTap(y);
+                    activity.mAppCompatController.getAppCompatReachabilityPolicy()
+                            .handleDoubleTap(dw / 2, y);
                     activity.mRootWindowContainer.performSurfacePlacement();
                 };
 
@@ -4317,15 +4320,17 @@ public class SizeCompatTests extends WindowTestsBase {
         resizeDisplay(mTask.mDisplayContent, 1400, 2800);
 
         // Make sure app doesn't jump to top (default tabletop position) when unfolding.
-        assertEquals(1.0f, mActivity.mLetterboxUiController.getVerticalPositionMultiplier(
-                mActivity.getParent().getConfiguration()), 0);
+        assertEquals(1.0f, mActivity.mAppCompatController
+                .getAppCompatReachabilityOverrides().getVerticalPositionMultiplier(mActivity
+                        .getParent().getConfiguration()), 0);
 
         // Simulate display fully open after unfolding.
         setFoldablePosture(false /* isHalfFolded */, false /* isTabletop */);
         doReturn(false).when(mActivity.mDisplayContent).inTransition();
 
-        assertEquals(1.0f, mActivity.mLetterboxUiController.getVerticalPositionMultiplier(
-                mActivity.getParent().getConfiguration()), 0);
+        assertEquals(1.0f, mActivity.mAppCompatController
+                .getAppCompatReachabilityOverrides().getVerticalPositionMultiplier(mActivity
+                        .getParent().getConfiguration()), 0);
     }
 
     @Test

@@ -663,7 +663,7 @@ class SecurityLogMonitor implements Runnable {
             }
         }
         if (DEBUG) {
-            Slogf.d(TAG, "Adding audit %d events to % already present in the buffer",
+            Slogf.d(TAG, "Adding audit %d events to %d already present in the buffer",
                     events.size(), mAuditLogEventBuffer.size());
         }
         mAuditLogEventBuffer.addAll(events);

@@ -376,4 +376,8 @@ public class PowerStatsExporter {
         }
         return true;
     }
+
+    void setPowerComponentEnabled(int powerComponentId, boolean enabled) {
+        mPowerStatsAggregator.setPowerComponentEnabled(powerComponentId, enabled);
+    }
 }

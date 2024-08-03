@@ -678,22 +678,18 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
                 }
                 // sender userId can be a real user ID or USER_ALL.
                 final int senderUserId = pendingResult.getSendingUserId();
-                if (senderUserId != UserHandle.USER_ALL) {
-                    synchronized (ImfLock.class) {
-                        if (senderUserId != mCurrentUserId) {
-                            // A background user is trying to hide the dialog. Ignore.
-                            return;
-                        }
+                synchronized (ImfLock.class) {
+                    if (senderUserId != UserHandle.USER_ALL && senderUserId != mCurrentUserId) {
+                        // A background user is trying to hide the dialog. Ignore.
+                        return;
                     }
-                }
-                if (mNewInputMethodSwitcherMenuEnabled) {
-                    synchronized (ImfLock.class) {
-                        final var bindingController = getInputMethodBindingController(senderUserId);
-                        mMenuControllerNew.hide(bindingController.getCurTokenDisplayId(),
-                                senderUserId);
+                    final int userId = mCurrentUserId;
+                    if (mNewInputMethodSwitcherMenuEnabled) {
+                        final var bindingController = getInputMethodBindingController(userId);
+                        mMenuControllerNew.hide(bindingController.getCurTokenDisplayId(), userId);
+                    } else {
+                        mMenuController.hideInputMethodMenuLocked(userId);
                     }
-                } else {
-                    mMenuController.hideInputMethodMenu(senderUserId);
                 }
             } else {
                 Slog.w(TAG, "Unexpected intent " + intent);
@@ -1001,6 +997,8 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
                     Process.THREAD_PRIORITY_FOREGROUND, true /* allowIo */);
             ioThread.start();
 
+            SecureSettingsWrapper.setContentResolver(context.getContentResolver());
+
             return new InputMethodManagerService(context,
                     shouldEnableConcurrentMultiUserMode(context), thread.getLooper(),
                     Handler.createAsync(ioThread.getLooper()),
@@ -1059,6 +1057,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
         public void onUserRemoved(UserInfo user) {
             // Called directly from UserManagerService. Do not block the calling thread.
             final int userId = user.id;
+            SecureSettingsWrapper.onUserRemoved(userId);
             AdditionalSubtypeMapRepository.remove(userId);
             InputMethodSettingsRepository.remove(userId);
             mService.mUserDataRepository.remove(userId);
@@ -1185,7 +1184,6 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
             mConcurrentMultiUserModeEnabled = concurrentMultiUserModeEnabled;
             mContext = context;
             mRes = context.getResources();
-            SecureSettingsWrapper.onStart(mContext);
 
             mHandler = Handler.createAsync(uiLooper, this);
             mIoHandler = ioHandler;
@@ -4356,7 +4354,6 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
             }
 
             final var additionalSubtypeMap = AdditionalSubtypeMapRepository.get(userId);
-            final boolean isCurrentUser = (mCurrentUserId == userId);
             final InputMethodSettings settings = InputMethodSettingsRepository.get(userId);
             final var newAdditionalSubtypeMap = settings.getNewAdditionalSubtypeMap(
                     imiId, toBeAdded, additionalSubtypeMap, mPackageManagerInternal, callingUid);
@@ -4370,10 +4367,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
                             mUserManagerInternal.isUserUnlockingOrUnlocked(userId));
                     final var newSettings = InputMethodSettings.create(methodMap, userId);
                     InputMethodSettingsRepository.put(userId, newSettings);
-                    if (isCurrentUser) {
-                        postInputMethodSettingUpdatedLocked(false /* resetDefaultEnabledIme */,
-                                userId);
-                    }
+                    postInputMethodSettingUpdatedLocked(false /* resetDefaultEnabledIme */, userId);
                 } finally {
                     Binder.restoreCallingIdentity(ident);
                 }
@@ -4401,17 +4395,14 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
         final long ident = Binder.clearCallingIdentity();
         try {
             synchronized (ImfLock.class) {
-                final boolean currentUser = (mCurrentUserId == userId);
                 final InputMethodSettings settings = InputMethodSettingsRepository.get(userId);
                 if (!settings.setEnabledInputMethodSubtypes(imeId, subtypeHashCodes)) {
                     return;
                 }
-                if (currentUser) {
-                    // To avoid unnecessary "updateInputMethodsFromSettingsLocked" from happening.
-                    final var userData = getUserData(userId);
-                    userData.mLastEnabledInputMethodsStr = settings.getEnabledInputMethodsStr();
-                    updateInputMethodsFromSettingsLocked(false /* enabledChanged */, userId);
-                }
+                // To avoid unnecessary "updateInputMethodsFromSettingsLocked" from happening.
+                final var userData = getUserData(userId);
+                userData.mLastEnabledInputMethodsStr = settings.getEnabledInputMethodsStr();
+                updateInputMethodsFromSettingsLocked(false /* enabledChanged */, userId);
             }
         } finally {
             Binder.restoreCallingIdentity(ident);
