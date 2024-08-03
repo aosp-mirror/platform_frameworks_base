@@ -1268,10 +1268,10 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
         return R.id.desktop_mode_caption;
     }
 
-    void setAnimatingTaskResize(boolean animatingTaskResize) {
+    void setAnimatingTaskResizeOrReposition(boolean animatingTaskResizeOrReposition) {
         if (mRelayoutParams.mLayoutResId == R.layout.desktop_mode_app_handle) return;
         ((AppHeaderViewHolder) mWindowDecorViewHolder)
-                .setAnimatingTaskResize(animatingTaskResize);
+                .setAnimatingTaskResizeOrReposition(animatingTaskResizeOrReposition);
     }
 
     /**

@@ -17,6 +17,7 @@ package com.android.wm.shell.bubbles.bar;
 
 import android.annotation.ColorInt;
 import android.content.Context;
+import android.content.res.TypedArray;
 import android.graphics.Color;
 import android.graphics.drawable.Icon;
 import android.util.AttributeSet;
@@ -64,6 +65,14 @@ public class BubbleBarMenuView extends LinearLayout {
         mActionsSectionView = findViewById(R.id.bubble_bar_manage_menu_actions_section);
         mBubbleIconView = findViewById(R.id.bubble_bar_manage_menu_bubble_icon);
         mBubbleTitleView = findViewById(R.id.bubble_bar_manage_menu_bubble_title);
+        updateActionsBackgroundColor();
+    }
+
+    private void updateActionsBackgroundColor() {
+        try (TypedArray ta = mContext.obtainStyledAttributes(new int[]{
+                com.android.internal.R.attr.materialColorSurfaceBright})) {
+            mActionsSectionView.getBackground().setTint(ta.getColor(0, Color.WHITE));
+        }
     }
 
     /** Update menu details with bubble info */

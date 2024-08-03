@@ -325,6 +325,8 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
                 new DesktopModeOnInsetsChangedListener());
         mDesktopTasksController.setOnTaskResizeAnimationListener(
                 new DesktopModeOnTaskResizeAnimationListener());
+        mDesktopTasksController.setOnTaskRepositionAnimationListener(
+                new DesktopModeOnTaskRepositionAnimationListener());
         mDisplayController.addDisplayChangingController(mOnDisplayChangingListener);
         try {
             mWindowManager.registerSystemGestureExclusionListener(mGestureExclusionListener,
@@ -464,9 +466,16 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
         if (decoration == null) {
             return;
         }
-        mDesktopTasksController.snapToHalfScreen(decoration.mTaskInfo,
-                decoration.mTaskInfo.configuration.windowConfiguration.getBounds(),
-                left ? SnapPosition.LEFT : SnapPosition.RIGHT);
+
+        if (!decoration.mTaskInfo.isResizeable
+                && DesktopModeFlags.DISABLE_SNAP_RESIZE.isEnabled(mContext)) {
+            //TODO(b/354658237) - show toast with relevant string
+        } else {
+            mDesktopTasksController.snapToHalfScreen(decoration.mTaskInfo,
+                    decoration.mTaskInfo.configuration.windowConfiguration.getBounds(),
+                    left ? SnapPosition.LEFT : SnapPosition.RIGHT);
+        }
+
         decoration.closeHandleMenu();
         decoration.closeMaximizeMenu();
     }
@@ -549,6 +558,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
         private final DragDetector mDragDetector;
         private final GestureDetector mGestureDetector;
         private final int mDisplayId;
+        private final Rect mOnDragStartInitialBounds = new Rect();
 
         /**
          * Whether to pilfer the next motion event to send cancellations to the windows below.
@@ -752,10 +762,11 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
             switch (e.getActionMasked()) {
                 case MotionEvent.ACTION_DOWN: {
                     mDragPointerId = e.getPointerId(0);
-                    mDragPositioningCallback.onDragPositioningStart(
+                    final Rect initialBounds = mDragPositioningCallback.onDragPositioningStart(
                             0 /* ctrlType */, e.getRawX(0),
                             e.getRawY(0));
                     updateDragStatus(e.getActionMasked());
+                    mOnDragStartInitialBounds.set(initialBounds);
                     mHasLongClicked = false;
                     // Do not consume input event if a button is touched, otherwise it would
                     // prevent the button's ripple effect from showing.
@@ -799,9 +810,11 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
                     // Tasks bounds haven't actually been updated (only its leash), so pass to
                     // DesktopTasksController to allow secondary transformations (i.e. snap resizing
                     // or transforming to fullscreen) before setting new task bounds.
-                    mDesktopTasksController.onDragPositioningEnd(taskInfo, position,
+                    mDesktopTasksController.onDragPositioningEnd(
+                            taskInfo, decoration.mTaskSurface, position,
                             new PointF(e.getRawX(dragPointerIdx), e.getRawY(dragPointerIdx)),
-                            newTaskBounds, decoration.calculateValidDragArea());
+                            newTaskBounds, decoration.calculateValidDragArea(),
+                            new Rect(mOnDragStartInitialBounds));
                     if (touchingButton && !mHasLongClicked) {
                         // We need the input event to not be consumed here to end the ripple
                         // effect on the touched button. We will reset drag state in the ensuing
@@ -1299,6 +1312,25 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
         pw.println(innerPrefix + "mWindowDecorByTaskId=" + mWindowDecorByTaskId);
     }
 
+    private class DesktopModeOnTaskRepositionAnimationListener
+            implements OnTaskRepositionAnimationListener {
+        @Override
+        public void onAnimationStart(int taskId) {
+            final DesktopModeWindowDecoration decoration = mWindowDecorByTaskId.get(taskId);
+            if (decoration != null) {
+                decoration.setAnimatingTaskResizeOrReposition(true);
+            }
+        }
+
+        @Override
+        public void onAnimationEnd(int taskId) {
+            final DesktopModeWindowDecoration decoration = mWindowDecorByTaskId.get(taskId);
+            if (decoration != null) {
+                decoration.setAnimatingTaskResizeOrReposition(false);
+            }
+        }
+    }
+
     private class DesktopModeOnTaskResizeAnimationListener
             implements OnTaskResizeAnimationListener {
         @Override
@@ -1309,7 +1341,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
                 return;
             }
             decoration.showResizeVeil(t, bounds);
-            decoration.setAnimatingTaskResize(true);
+            decoration.setAnimatingTaskResizeOrReposition(true);
         }
 
         @Override
@@ -1324,7 +1356,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
             final DesktopModeWindowDecoration decoration = mWindowDecorByTaskId.get(taskId);
             if (decoration == null) return;
             decoration.hideResizeVeil();
-            decoration.setAnimatingTaskResize(false);
+            decoration.setAnimatingTaskResizeOrReposition(false);
         }
     }
 

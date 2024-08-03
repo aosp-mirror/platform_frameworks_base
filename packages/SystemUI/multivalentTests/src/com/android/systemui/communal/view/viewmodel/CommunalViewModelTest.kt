@@ -99,7 +99,9 @@ import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
+import org.mockito.kotlin.never
 import org.mockito.kotlin.spy
+import org.mockito.kotlin.times
 import org.mockito.kotlin.whenever
 import platform.test.runner.parameterized.ParameterizedAndroidJunit4
 import platform.test.runner.parameterized.Parameters
@@ -738,6 +740,18 @@ class CommunalViewModelTest(flags: FlagsParameterization) : SysuiTestCase() {
                 .isInstanceOf(CommunalContentModel.WidgetContent::class.java)
             assertThat(communalContent?.get(3))
                 .isInstanceOf(CommunalContentModel.CtaTileInViewMode::class.java)
+        }
+
+    @Test
+    fun communalContent_readTriggersUmoVisibilityUpdate() =
+        testScope.runTest {
+            verify(mediaHost, never()).updateViewVisibility()
+
+            val communalContent by collectLastValue(underTest.communalContent)
+
+            // updateViewVisibility is called when the flow is collected.
+            assertThat(communalContent).isNotNull()
+            verify(mediaHost).updateViewVisibility()
         }
 
     @Test

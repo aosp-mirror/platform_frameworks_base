@@ -3651,6 +3651,8 @@
          hasn't typed in anything in the search box yet. The helper is a  component that shows the
          user which keyboard shortcuts they can use. [CHAR LIMIT=NONE] -->
     <string name="shortcut_helper_search_placeholder">Search shortcuts</string>
+    <!-- Text shown when a search query didn't produce any results. [CHAR LIMIT=NONE] -->
+    <string name="shortcut_helper_no_search_results">No search results</string>
     <!-- Content description of the icon that allows to collapse a keyboard shortcut helper category
          panel. The helper is a  component that shows the  user which keyboard shortcuts they can
          use. The helper shows shortcuts in categories, which can be collapsed or expanded.

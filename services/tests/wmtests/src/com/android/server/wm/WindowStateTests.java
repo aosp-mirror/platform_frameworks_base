@@ -1351,6 +1351,7 @@ public class WindowStateTests extends WindowTestsBase {
         assertThat(listener.mImeTargetToken).isEqualTo(imeTarget.mClient.asBinder());
         assertThat(listener.mIsRemoved).isFalse();
         assertThat(listener.mIsVisibleForImeInputTarget).isTrue();
+        assertThat(listener.mDisplayId).isEqualTo(mDisplayContent.getDisplayId());
 
         imeTarget.mActivityRecord.setVisibleRequested(false);
         waitHandlerIdle(mWm.mH);
@@ -1358,11 +1359,13 @@ public class WindowStateTests extends WindowTestsBase {
         assertThat(listener.mImeTargetToken).isEqualTo(imeTarget.mClient.asBinder());
         assertThat(listener.mIsRemoved).isFalse();
         assertThat(listener.mIsVisibleForImeInputTarget).isFalse();
+        assertThat(listener.mDisplayId).isEqualTo(mDisplayContent.getDisplayId());
 
         imeTarget.removeImmediately();
         assertThat(listener.mImeTargetToken).isEqualTo(imeTarget.mClient.asBinder());
         assertThat(listener.mIsRemoved).isTrue();
         assertThat(listener.mIsVisibleForImeInputTarget).isFalse();
+        assertThat(listener.mDisplayId).isEqualTo(mDisplayContent.getDisplayId());
     }
 
     @SetupWindows(addWindows = {W_INPUT_METHOD})
@@ -1402,6 +1405,7 @@ public class WindowStateTests extends WindowTestsBase {
         assertThat(listener.mImeTargetToken).isEqualTo(client.asBinder());
         assertThat(listener.mIsRemoved).isFalse();
         assertThat(listener.mIsVisibleForImeTargetOverlay).isTrue();
+        assertThat(listener.mDisplayId).isEqualTo(mDisplayContent.getDisplayId());
 
         // Scenario 2: test relayoutWindow to let the Ime layering target overlay window invisible.
         mWm.relayoutWindow(session, client, params, 100, 200, View.GONE, 0, 0, 0,
@@ -1412,6 +1416,7 @@ public class WindowStateTests extends WindowTestsBase {
         assertThat(listener.mImeTargetToken).isEqualTo(client.asBinder());
         assertThat(listener.mIsRemoved).isFalse();
         assertThat(listener.mIsVisibleForImeTargetOverlay).isFalse();
+        assertThat(listener.mDisplayId).isEqualTo(mDisplayContent.getDisplayId());
 
         // Scenario 3: test removeWindow to remove the Ime layering target overlay window.
         mWm.removeClientToken(session, client.asBinder());
@@ -1420,6 +1425,7 @@ public class WindowStateTests extends WindowTestsBase {
         assertThat(listener.mImeTargetToken).isEqualTo(client.asBinder());
         assertThat(listener.mIsRemoved).isTrue();
         assertThat(listener.mIsVisibleForImeTargetOverlay).isFalse();
+        assertThat(listener.mDisplayId).isEqualTo(mDisplayContent.getDisplayId());
     }
 
     @Test
@@ -1468,22 +1474,25 @@ public class WindowStateTests extends WindowTestsBase {
         private boolean mIsRemoved;
         private boolean mIsVisibleForImeTargetOverlay;
         private boolean mIsVisibleForImeInputTarget;
+        private int mDisplayId;
 
         @Override
         public void onImeTargetOverlayVisibilityChanged(IBinder overlayWindowToken,
                 @WindowManager.LayoutParams.WindowType int windowType, boolean visible,
-                boolean removed) {
+                boolean removed, int displayId) {
             mImeTargetToken = overlayWindowToken;
             mIsVisibleForImeTargetOverlay = visible;
             mIsRemoved = removed;
+            mDisplayId = displayId;
         }
 
         @Override
         public void onImeInputTargetVisibilityChanged(IBinder imeInputTarget,
-                boolean visibleRequested, boolean removed) {
+                boolean visibleRequested, boolean removed, int displayId) {
             mImeTargetToken = imeInputTarget;
             mIsVisibleForImeInputTarget = visibleRequested;
             mIsRemoved = removed;
+            mDisplayId = displayId;
         }
     }
 }

@@ -302,12 +302,14 @@ public class ImeVisibilityStateComputerTest extends InputMethodManagerServiceTes
             final IBinder testImeInputTarget = new Binder();
 
             // Simulate a test IME input target was visible.
-            mListener.onImeInputTargetVisibilityChanged(testImeInputTarget, true, false);
+            mListener.onImeInputTargetVisibilityChanged(testImeInputTarget, true, false,
+                    DEFAULT_DISPLAY);
 
             // Simulate a test IME layering target overlay fully occluded the IME input target.
             mListener.onImeTargetOverlayVisibilityChanged(testImeTargetOverlay,
-                    TYPE_APPLICATION_OVERLAY, true, false);
-            mListener.onImeInputTargetVisibilityChanged(testImeInputTarget, false, false);
+                    TYPE_APPLICATION_OVERLAY, true, false, DEFAULT_DISPLAY);
+            mListener.onImeInputTargetVisibilityChanged(testImeInputTarget, false, false,
+                    DEFAULT_DISPLAY);
             final ArgumentCaptor<IBinder> targetCaptor = ArgumentCaptor.forClass(IBinder.class);
             final ArgumentCaptor<ImeVisibilityResult> resultCaptor = ArgumentCaptor.forClass(
                     ImeVisibilityResult.class);

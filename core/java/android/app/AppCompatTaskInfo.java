@@ -16,6 +16,8 @@
 
 package android.app;
 
+import static android.app.TaskInfo.PROPERTY_VALUE_UNSET;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.os.Parcel;
@@ -76,25 +78,37 @@ public class AppCompatTaskInfo implements Parcelable {
      * If {@link #isLetterboxDoubleTapEnabled} it contains the current letterbox vertical position
      * or {@link TaskInfo#PROPERTY_VALUE_UNSET} otherwise.
      */
-    public int topActivityLetterboxVerticalPosition;
+    public int topActivityLetterboxVerticalPosition = PROPERTY_VALUE_UNSET;
 
     /**
      * If {@link #isLetterboxDoubleTapEnabled} it contains the current letterbox vertical position
      * or {@link TaskInfo#PROPERTY_VALUE_UNSET} otherwise.
      */
-    public int topActivityLetterboxHorizontalPosition;
+    public int topActivityLetterboxHorizontalPosition = PROPERTY_VALUE_UNSET;
 
     /**
      * If {@link #isLetterboxDoubleTapEnabled} it contains the current width of the letterboxed
      * activity or {@link TaskInfo#PROPERTY_VALUE_UNSET} otherwise.
      */
-    public int topActivityLetterboxWidth;
+    public int topActivityLetterboxWidth = PROPERTY_VALUE_UNSET;
 
     /**
      * If {@link #isLetterboxDoubleTapEnabled} it contains the current height of the letterboxed
      * activity or {@link TaskInfo#PROPERTY_VALUE_UNSET} otherwise.
      */
-    public int topActivityLetterboxHeight;
+    public int topActivityLetterboxHeight = PROPERTY_VALUE_UNSET;
+
+    /**
+     * Contains the current app height of the letterboxed activity if available or
+     * {@link TaskInfo#PROPERTY_VALUE_UNSET} otherwise.
+     */
+    public int topActivityLetterboxAppHeight = PROPERTY_VALUE_UNSET;
+
+    /**
+     * Contains the current app  width of the letterboxed activity if available or
+     * {@link TaskInfo#PROPERTY_VALUE_UNSET} otherwise.
+     */
+    public int topActivityLetterboxAppWidth = PROPERTY_VALUE_UNSET;
 
     /**
      * Stores camera-related app compat information about a particular Task.
@@ -162,6 +176,8 @@ public class AppCompatTaskInfo implements Parcelable {
                 && topActivityLetterboxVerticalPosition == that.topActivityLetterboxVerticalPosition
                 && topActivityLetterboxWidth == that.topActivityLetterboxWidth
                 && topActivityLetterboxHeight == that.topActivityLetterboxHeight
+                && topActivityLetterboxAppWidth == that.topActivityLetterboxAppWidth
+                && topActivityLetterboxAppHeight == that.topActivityLetterboxAppHeight
                 && topActivityLetterboxHorizontalPosition
                     == that.topActivityLetterboxHorizontalPosition
                 && isUserFullscreenOverrideEnabled == that.isUserFullscreenOverrideEnabled
@@ -188,6 +204,8 @@ public class AppCompatTaskInfo implements Parcelable {
                     == that.topActivityLetterboxHorizontalPosition
                 && topActivityLetterboxWidth == that.topActivityLetterboxWidth
                 && topActivityLetterboxHeight == that.topActivityLetterboxHeight
+                && topActivityLetterboxAppWidth == that.topActivityLetterboxAppWidth
+                && topActivityLetterboxAppHeight == that.topActivityLetterboxAppHeight
                 && isUserFullscreenOverrideEnabled == that.isUserFullscreenOverrideEnabled
                 && isSystemFullscreenOverrideEnabled == that.isSystemFullscreenOverrideEnabled
                 && cameraCompatTaskInfo.equalsForCompatUi(that.cameraCompatTaskInfo);
@@ -208,6 +226,8 @@ public class AppCompatTaskInfo implements Parcelable {
         topActivityLetterboxHorizontalPosition = source.readInt();
         topActivityLetterboxWidth = source.readInt();
         topActivityLetterboxHeight = source.readInt();
+        topActivityLetterboxAppWidth = source.readInt();
+        topActivityLetterboxAppHeight = source.readInt();
         isUserFullscreenOverrideEnabled = source.readBoolean();
         isSystemFullscreenOverrideEnabled = source.readBoolean();
         cameraCompatTaskInfo = source.readTypedObject(CameraCompatTaskInfo.CREATOR);
@@ -229,6 +249,8 @@ public class AppCompatTaskInfo implements Parcelable {
         dest.writeInt(topActivityLetterboxHorizontalPosition);
         dest.writeInt(topActivityLetterboxWidth);
         dest.writeInt(topActivityLetterboxHeight);
+        dest.writeInt(topActivityLetterboxAppWidth);
+        dest.writeInt(topActivityLetterboxAppHeight);
         dest.writeBoolean(isUserFullscreenOverrideEnabled);
         dest.writeBoolean(isSystemFullscreenOverrideEnabled);
         dest.writeTypedObject(cameraCompatTaskInfo, flags);
@@ -250,6 +272,8 @@ public class AppCompatTaskInfo implements Parcelable {
                 + topActivityLetterboxHorizontalPosition
                 + " topActivityLetterboxWidth=" + topActivityLetterboxWidth
                 + " topActivityLetterboxHeight=" + topActivityLetterboxHeight
+                + " topActivityLetterboxAppWidth=" + topActivityLetterboxAppWidth
+                + " topActivityLetterboxAppHeight=" + topActivityLetterboxAppHeight
                 + " isUserFullscreenOverrideEnabled=" + isUserFullscreenOverrideEnabled
                 + " isSystemFullscreenOverrideEnabled=" + isSystemFullscreenOverrideEnabled
                 + " cameraCompatTaskInfo=" + cameraCompatTaskInfo.toString()
