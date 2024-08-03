@@ -234,12 +234,13 @@ public final class DesktopModeBoundsCalculator {
         float desiredAspectRatio = 0;
         if (taskInfo.isRunning) {
             final AppCompatTaskInfo appCompatTaskInfo =  taskInfo.appCompatTaskInfo;
+            final int appLetterboxWidth =
+                    taskInfo.appCompatTaskInfo.topActivityLetterboxAppWidth;
+            final int appLetterboxHeight =
+                    taskInfo.appCompatTaskInfo.topActivityLetterboxAppHeight;
             if (appCompatTaskInfo.topActivityBoundsLetterboxed) {
-                desiredAspectRatio = (float) Math.max(
-                        appCompatTaskInfo.topActivityLetterboxWidth,
-                        appCompatTaskInfo.topActivityLetterboxHeight)
-                        / Math.min(appCompatTaskInfo.topActivityLetterboxWidth,
-                        appCompatTaskInfo.topActivityLetterboxHeight);
+                desiredAspectRatio = (float) Math.max(appLetterboxWidth, appLetterboxHeight)
+                        / Math.min(appLetterboxWidth, appLetterboxHeight);
             } else {
                 desiredAspectRatio = Math.max(fullscreenHeight, fullscreenWidth)
                         / Math.min(fullscreenHeight, fullscreenWidth);

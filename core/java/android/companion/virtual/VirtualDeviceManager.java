@@ -837,8 +837,15 @@ public final class VirtualDeviceManager {
          * components.</p>
          * <p>Any change to the exemptions will only be applied for new activity launches.</p>
          *
+         * @param componentName the component name to be exempt from the activity launch policy.
+         * @param displayId the ID of the display, for which to apply the exemption. The display
+         *   must belong to the virtual device.
+         * @throws IllegalArgumentException if the specified display does not belong to the virtual
+         *   device.
+         *
          * @see #removeActivityPolicyExemption
          * @see #setDevicePolicy
+         * @see Display#getDisplayId
          */
         @FlaggedApi(android.companion.virtualdevice.flags.Flags.FLAG_ACTIVITY_CONTROL_API)
         @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
@@ -861,8 +868,15 @@ public final class VirtualDeviceManager {
          * <p>Note that changing the activity launch policy will clear current set of exempt
          * components.</p>
          *
+         * @param componentName the component name to be removed from the exemption list.
+         * @param displayId the ID of the display, for which to apply the exemption. The display
+         *   must belong to the virtual device.
+         * @throws IllegalArgumentException if the specified display does not belong to the virtual
+         *   device.
+         *
          * @see #addActivityPolicyExemption
          * @see #setDevicePolicy
+         * @see Display#getDisplayId
          */
         @FlaggedApi(android.companion.virtualdevice.flags.Flags.FLAG_ACTIVITY_CONTROL_API)
         @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)

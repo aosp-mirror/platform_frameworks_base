@@ -20,10 +20,7 @@ import android.annotation.AnyThread;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
-import android.app.ActivityManagerInternal;
 import android.content.ContentResolver;
-import android.content.Context;
-import android.content.pm.UserInfo;
 import android.provider.Settings;
 import android.util.ArrayMap;
 import android.util.ArraySet;
@@ -321,30 +318,13 @@ final class SecureSettingsWrapper {
     }
 
     /**
-     * Called when {@link InputMethodManagerService} is starting.
+     * Called when the system is starting.
      *
-     * @param context the {@link Context} to be used.
+     * @param contentResolver the {@link ContentResolver} to be used
      */
     @AnyThread
-    static void onStart(@NonNull Context context) {
-        sContentResolver = context.getContentResolver();
-
-        final int userId = LocalServices.getService(ActivityManagerInternal.class)
-                .getCurrentUserId();
-        final UserManagerInternal userManagerInternal =
-                LocalServices.getService(UserManagerInternal.class);
-        putOrGet(userId, createImpl(userManagerInternal, userId));
-
-        userManagerInternal.addUserLifecycleListener(
-                new UserManagerInternal.UserLifecycleListener() {
-                    @Override
-                    public void onUserRemoved(UserInfo user) {
-                        synchronized (sMutationLock) {
-                            sUserMap = sUserMap.cloneWithRemoveOrSelf(user.id);
-                        }
-                    }
-                }
-        );
+    static void setContentResolver(@NonNull ContentResolver contentResolver) {
+        sContentResolver = contentResolver;
     }
 
     /**
@@ -390,6 +370,18 @@ final class SecureSettingsWrapper {
                 return;
             }
             sUserMap = sUserMap.cloneWithPutOrSelf(userId, lockedUserImpl);
+        }
+    }
+
+    /**
+     * Called when a user is being removed.
+     *
+     * @param userId the ID of the user whose storage is being removed
+     */
+    @AnyThread
+    static void onUserRemoved(@UserIdInt int userId) {
+        synchronized (sMutationLock) {
+            sUserMap = sUserMap.cloneWithRemoveOrSelf(userId);
         }
     }
 
