@@ -14,7 +14,11 @@
  * limitations under the License.
  */
 
-package com.android.systemui.activatable
+package com.android.systemui.lifecycle
+
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
 
 /** Defines interface for classes that can be activated to do coroutine work. */
 interface Activatable {
@@ -54,4 +58,21 @@ interface Activatable {
      * ```
      */
     suspend fun activate()
+}
+
+/**
+ * Returns a remembered [Activatable] of the type [T] that's automatically kept active until this
+ * composable leaves the composition.
+ *
+ * If the [key] changes, the old [Activatable] is deactivated and a new one will be instantiated,
+ * activated, and returned.
+ */
+@Composable
+fun <T : Activatable> rememberActivated(
+    key: Any = Unit,
+    factory: () -> T,
+): T {
+    val instance = remember(key) { factory() }
+    LaunchedEffect(instance) { instance.activate() }
+    return instance
 }

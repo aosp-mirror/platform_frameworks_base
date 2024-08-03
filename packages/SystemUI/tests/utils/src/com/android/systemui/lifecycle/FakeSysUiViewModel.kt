@@ -14,12 +14,25 @@
  * limitations under the License.
  */
 
-package com.android.systemui.activatable
+package com.android.systemui.lifecycle
 
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.test.TestScope
+import kotlinx.coroutines.awaitCancellation
 
-/** Activates [activatable] for the duration of the test. */
-fun Activatable.activateIn(testScope: TestScope) {
-    testScope.backgroundScope.launch { activate() }
+class FakeSysUiViewModel(
+    private val onActivation: () -> Unit = {},
+    private val onDeactivation: () -> Unit = {},
+) : SysUiViewModel() {
+    var activationCount = 0
+    var cancellationCount = 0
+
+    override suspend fun onActivated() {
+        activationCount++
+        onActivation()
+        try {
+            awaitCancellation()
+        } finally {
+            cancellationCount++
+            onDeactivation()
+        }
+    }
 }
