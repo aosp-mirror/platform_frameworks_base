@@ -7175,25 +7175,6 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         }
 
         /**
-         * Checks if the given user is a visible background user, which is a full, background user
-         * assigned to secondary displays on the devices that have
-         * {@link UserManager#isVisibleBackgroundUsersEnabled()
-         * config_multiuserVisibleBackgroundUsers enabled} (for example, passenger users on
-         * automotive builds, using the display associated with their seats).
-         *
-         * @see UserManager#isUserVisible()
-         */
-        private boolean isVisibleBackgroundUser(int userId) {
-            if (!UserManager.isVisibleBackgroundUsersEnabled()) {
-                return false;
-            }
-            boolean isForeground = getCurrentUserId() == userId;
-            boolean isProfile = getUserManager().isProfile(userId);
-            boolean isVisible = mWindowManager.mUmInternal.isUserVisible(userId);
-            return isVisible && !isForeground && !isProfile;
-        }
-
-        /**
          * In a car environment, {@link ActivityTaskManagerService#mShowDialogs} is always set to
          * {@code false} from {@link ActivityTaskManagerService#updateShouldShowDialogsLocked}
          * because its UI mode is {@link Configuration#UI_MODE_TYPE_CAR}. Thus, error dialogs are
@@ -7208,7 +7189,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
          * @see ActivityTaskManagerService#updateShouldShowDialogsLocked
          */
         private boolean shouldShowDialogsForVisibleBackgroundUserLocked(int userId) {
-            if (!isVisibleBackgroundUser(userId)) {
+            if (!mWindowManager.mUmInternal.isVisibleBackgroundFullUser(userId)) {
                 return false;
             }
             final int displayId = mWindowManager.mUmInternal.getMainDisplayAssignedToUser(userId);

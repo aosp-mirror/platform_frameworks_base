@@ -28,7 +28,6 @@ import static android.view.WindowManager.LayoutParams.SOFT_INPUT_IS_FORWARD_NAVI
 import static android.view.WindowManager.LayoutParams.SOFT_INPUT_MASK_STATE;
 import static android.view.WindowManager.LayoutParams.SOFT_INPUT_STATE_UNSPECIFIED;
 import static android.view.WindowManager.LayoutParams.SoftInputModeFlags;
-import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_STARTING;
 
 import static com.android.internal.inputmethod.InputMethodDebug.softInputModeToString;
 import static com.android.internal.inputmethod.SoftInputShowHideReason.REMOVE_IME_SCREENSHOT_FROM_IMMS;
@@ -59,7 +58,6 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.inputmethod.SoftInputShowHideReason;
 import com.android.server.LocalServices;
-import com.android.server.wm.ImeTargetChangeListener;
 import com.android.server.wm.WindowManagerInternal;
 
 import java.io.PrintWriter;
@@ -75,6 +73,9 @@ public final class ImeVisibilityStateComputer {
     private static final String TAG = "ImeVisibilityStateComputer";
 
     private static final boolean DEBUG = InputMethodManagerService.DEBUG;
+
+    @UserIdInt
+    private final int mUserId;
 
     private final InputMethodManagerService mService;
     private final WindowManagerInternal mWindowManagerInternal;
@@ -121,9 +122,9 @@ public final class ImeVisibilityStateComputer {
     @GuardedBy("ImfLock.class")
     private boolean mRequestedImeScreenshot;
 
-    /** The window token of the current visible IME layering target overlay. */
+    /** Whether there is a visible IME layering target overlay. */
     @GuardedBy("ImfLock.class")
-    private IBinder mCurVisibleImeLayeringOverlay;
+    private boolean mHasVisibleImeLayeringOverlay;
 
     /** The window token of the current visible IME input target. */
     @GuardedBy("ImfLock.class")
@@ -184,70 +185,64 @@ public final class ImeVisibilityStateComputer {
      */
     private final ImeVisibilityPolicy mPolicy;
 
-    public ImeVisibilityStateComputer(@NonNull InputMethodManagerService service) {
+    public ImeVisibilityStateComputer(@NonNull InputMethodManagerService service,
+            @UserIdInt int userId) {
         this(service,
                 LocalServices.getService(WindowManagerInternal.class),
                 LocalServices.getService(WindowManagerInternal.class)::getDisplayImePolicy,
-                new ImeVisibilityPolicy());
+                new ImeVisibilityPolicy(), userId);
     }
 
     @VisibleForTesting
     public ImeVisibilityStateComputer(@NonNull InputMethodManagerService service,
             @NonNull Injector injector) {
         this(service, injector.getWmService(), injector.getImeValidator(),
-                new ImeVisibilityPolicy());
+                new ImeVisibilityPolicy(), injector.getUserId());
     }
 
     interface Injector {
-        default WindowManagerInternal getWmService() {
-            return null;
-        }
+        @NonNull
+        WindowManagerInternal getWmService();
 
-        default InputMethodManagerService.ImeDisplayValidator getImeValidator() {
-            return null;
-        }
+        @NonNull
+        InputMethodManagerService.ImeDisplayValidator getImeValidator();
+
+        @UserIdInt
+        int getUserId();
     }
 
     private ImeVisibilityStateComputer(InputMethodManagerService service,
             WindowManagerInternal wmService,
             InputMethodManagerService.ImeDisplayValidator imeDisplayValidator,
-            ImeVisibilityPolicy imePolicy) {
+            ImeVisibilityPolicy imePolicy, @UserIdInt int userId) {
+        mUserId = userId;
         mService = service;
         mWindowManagerInternal = wmService;
         mImeDisplayValidator = imeDisplayValidator;
         mPolicy = imePolicy;
-        mWindowManagerInternal.setInputMethodTargetChangeListener(new ImeTargetChangeListener() {
-            @Override
-            public void onImeTargetOverlayVisibilityChanged(IBinder overlayWindowToken,
-                    @WindowManager.LayoutParams.WindowType int windowType, boolean visible,
-                    boolean removed) {
-                // Ignoring the starting window since it's ok to cover the IME target
-                // window in temporary without affecting the IME visibility.
-                final var overlay = (visible && !removed && windowType != TYPE_APPLICATION_STARTING)
-                                ? overlayWindowToken : null;
-                synchronized (ImfLock.class) {
-                    mCurVisibleImeLayeringOverlay = overlay;
-                }
-            }
+    }
 
-            @Override
-            public void onImeInputTargetVisibilityChanged(IBinder imeInputTarget,
-                    boolean visibleRequested, boolean removed) {
-                synchronized (ImfLock.class) {
-                    if (mCurVisibleImeInputTarget == imeInputTarget && (!visibleRequested
-                            || removed)
-                            && mCurVisibleImeLayeringOverlay != null) {
-                        final int reason = SoftInputShowHideReason.HIDE_WHEN_INPUT_TARGET_INVISIBLE;
-                        final var statsToken = ImeTracker.forLogging().onStart(ImeTracker.TYPE_HIDE,
-                                ImeTracker.ORIGIN_SERVER, reason, false /* fromUser */);
-                        mService.onApplyImeVisibilityFromComputerLocked(imeInputTarget, statsToken,
-                                new ImeVisibilityResult(STATE_HIDE_IME_EXPLICIT, reason));
-                    }
-                    mCurVisibleImeInputTarget =
-                            (visibleRequested && !removed) ? imeInputTarget : null;
-                }
-            }
-        });
+    @GuardedBy("ImfLock.class")
+    void setHasVisibleImeLayeringOverlay(boolean hasVisibleOverlay) {
+        mHasVisibleImeLayeringOverlay = hasVisibleOverlay;
+    }
+
+    @GuardedBy("ImfLock.class")
+    void onImeInputTargetVisibilityChanged(@NonNull IBinder imeInputTarget,
+            boolean visibleAndNotRemoved) {
+        if (visibleAndNotRemoved) {
+            mCurVisibleImeInputTarget = imeInputTarget;
+            return;
+        }
+        if (mHasVisibleImeLayeringOverlay
+                && mCurVisibleImeInputTarget == imeInputTarget) {
+            final int reason = SoftInputShowHideReason.HIDE_WHEN_INPUT_TARGET_INVISIBLE;
+            final var statsToken = ImeTracker.forLogging().onStart(ImeTracker.TYPE_HIDE,
+                    ImeTracker.ORIGIN_SERVER, reason, false /* fromUser */);
+            mService.onApplyImeVisibilityFromComputerLocked(imeInputTarget, statsToken,
+                    new ImeVisibilityResult(STATE_HIDE_IME_EXPLICIT, reason), mUserId);
+        }
+        mCurVisibleImeInputTarget = null;
     }
 
     /**
@@ -626,6 +621,12 @@ public final class ImeVisibilityStateComputer {
                 }
         }
         return mWindowManagerInternal.shouldRestoreImeVisibility(getWindowTokenFrom(state));
+    }
+
+    @UserIdInt
+    @VisibleForTesting
+    int getUserId() {
+        return mUserId;
     }
 
     @GuardedBy("ImfLock.class")

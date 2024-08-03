@@ -252,7 +252,9 @@ final class ZeroJankProxy implements IInputMethodManagerImpl.Callback {
         offload(() -> mInner.showInputMethodPickerFromClient(client, auxiliarySubtypeMode));
     }
 
-    @IInputMethodManagerImpl.PermissionVerified(Manifest.permission.WRITE_SECURE_SETTINGS)
+    @IInputMethodManagerImpl.PermissionVerified(allOf = {
+            Manifest.permission.INTERACT_ACROSS_USERS_FULL,
+            Manifest.permission.WRITE_SECURE_SETTINGS})
     @Override
     public void showInputMethodPickerFromSystem(int auxiliarySubtypeMode, int displayId) {
         mInner.showInputMethodPickerFromSystem(auxiliarySubtypeMode, displayId);
@@ -264,7 +266,9 @@ final class ZeroJankProxy implements IInputMethodManagerImpl.Callback {
         return mInner.isInputMethodPickerShownForTest();
     }
 
-    @IInputMethodManagerImpl.PermissionVerified(Manifest.permission.WRITE_SECURE_SETTINGS)
+    @IInputMethodManagerImpl.PermissionVerified(allOf = {
+            Manifest.permission.INTERACT_ACROSS_USERS_FULL,
+            Manifest.permission.WRITE_SECURE_SETTINGS})
     @Override
     public void onImeSwitchButtonClickFromSystem(int displayId) {
         mInner.onImeSwitchButtonClickFromSystem(displayId);
@@ -298,7 +302,9 @@ final class ZeroJankProxy implements IInputMethodManagerImpl.Callback {
         mInner.reportPerceptibleAsync(windowToken, perceptible);
     }
 
-    @IInputMethodManagerImpl.PermissionVerified(Manifest.permission.INTERNAL_SYSTEM_WINDOW)
+    @IInputMethodManagerImpl.PermissionVerified(allOf = {
+            Manifest.permission.INTERACT_ACROSS_USERS_FULL,
+            Manifest.permission.INTERNAL_SYSTEM_WINDOW})
     @Override
     public void removeImeSurface(int displayId) {
         mInner.removeImeSurface(displayId);

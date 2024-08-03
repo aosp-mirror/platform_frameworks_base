@@ -1399,6 +1399,10 @@
          Settings.System.RING_VIBRATION_INTENSITY more details on the constant values and
          meanings. -->
     <integer name="config_defaultRingVibrationIntensity">2</integer>
+    <!-- The default intensity level for keyboard vibrations. Note that this will only be applied
+         on devices where config_keyboardVibrationSettingsSupported is true, otherwise the
+         keyboard vibration will follow config_defaultHapticFeedbackIntensity -->
+    <integer name="config_defaultKeyboardVibrationIntensity">2</integer>
 
     <!-- Whether to use the strict phone number matcher by default. -->
     <bool name="config_use_strict_phone_number_comparation">false</bool>
@@ -3957,6 +3961,9 @@
          flag does not exist -->
     <bool name="config_magnification_always_on_enabled">true</bool>
 
+    <!-- Whether to keep fullscreen magnification zoom level when context changes. -->
+    <bool name="config_magnification_keep_zoom_level_when_context_changed">false</bool>
+
     <!-- If true, the display will be shifted around in ambient mode. -->
     <bool name="config_enableBurnInProtection">false</bool>
 
@@ -6153,10 +6160,6 @@
     <!-- Whether should use split screen aspect ratio for the activity when camera compat treatment
         is enabled and activity is connected to the camera in fullscreen. -->
     <bool name="config_isWindowManagerCameraCompatSplitScreenAspectRatioEnabled">false</bool>
-
-    <!-- Whether a camera compat controller is enabled to allow the user to apply or revert
-         treatment for stretched issues in camera viewfinder. -->
-    <bool name="config_isCameraCompatControlForStretchedIssuesEnabled">false</bool>
 
     <!-- Docking is a uiMode configuration change and will cause activities to relaunch if it's not
          handled. If true, the configuration change will be sent but activities will not be

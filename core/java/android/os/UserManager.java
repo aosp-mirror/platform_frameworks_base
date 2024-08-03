@@ -6442,7 +6442,11 @@ public class UserManager {
      */
     @UnsupportedAppUsage
     public int getUserSerialNumber(@UserIdInt int userId) {
-        if (android.multiuser.Flags.cacheUserSerialNumber()) {
+        // Read only flag should is to fix early access to this API
+        // cacheUserSerialNumber to be removed after the
+        // cacheUserSerialNumberReadOnly is fully rolled out
+        if (android.multiuser.Flags.cacheUserSerialNumberReadOnly()
+                || android.multiuser.Flags.cacheUserSerialNumber()) {
             // System user serial number is always 0, and it always exists.
             // There is no need to call binder for that.
             if (userId == UserHandle.USER_SYSTEM) {

@@ -24,12 +24,14 @@ import static android.view.WindowManager.DISPLAY_IME_POLICY_LOCAL;
 
 import static androidx.test.platform.app.InstrumentationRegistry.getInstrumentation;
 
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
+
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assume.assumeTrue;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.testng.Assert.assertFalse;
 
 import android.annotation.Nullable;
@@ -58,6 +60,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 import java.util.function.Consumer;
 
 /**
@@ -352,20 +355,54 @@ public class DisplayWindowSettingsProviderTests extends WindowTestsBase {
     }
 
     @Test
-    public void testRemovesStaleDisplaySettings() {
-        assumeTrue(com.android.window.flags.Flags.perUserDisplayWindowSettings());
-
-        final DisplayWindowSettingsProvider provider =
-                new DisplayWindowSettingsProvider(mDefaultVendorSettingsStorage,
-                        mOverrideSettingsStorage);
-        final DisplayInfo displayInfo = mSecondaryDisplay.getDisplayInfo();
-        updateOverrideSettings(provider, displayInfo, settings -> settings.mForcedDensity = 356);
+    public void testRemovesStaleDisplaySettings_defaultDisplay_removesStaleDisplaySettings() {
+        // Write density setting for second display then remove it.
+        final DisplayWindowSettingsProvider provider = new DisplayWindowSettingsProvider(
+                mDefaultVendorSettingsStorage, mOverrideSettingsStorage);
+        final DisplayInfo secDisplayInfo = mSecondaryDisplay.getDisplayInfo();
+        updateOverrideSettings(provider, secDisplayInfo, setting -> setting.mForcedDensity = 356);
         mRootWindowContainer.removeChild(mSecondaryDisplay);
 
-        provider.removeStaleDisplaySettings(mRootWindowContainer);
+        // Write density setting for inner and outer default display.
+        final DisplayInfo innerDisplayInfo = mPrimaryDisplay.getDisplayInfo();
+        final DisplayInfo outerDisplayInfo = new DisplayInfo(secDisplayInfo);
+        outerDisplayInfo.displayId = mPrimaryDisplay.mDisplayId;
+        outerDisplayInfo.uniqueId = "TEST_OUTER_DISPLAY_" + System.currentTimeMillis();
+        updateOverrideSettings(provider, innerDisplayInfo, setting -> setting.mForcedDensity = 490);
+        updateOverrideSettings(provider, outerDisplayInfo, setting -> setting.mForcedDensity = 420);
+        final List<DisplayInfo> possibleDisplayInfos = List.of(innerDisplayInfo, outerDisplayInfo);
+        doReturn(possibleDisplayInfos)
+                .when(mWm).getPossibleDisplayInfoLocked(eq(innerDisplayInfo.displayId));
+
+        provider.removeStaleDisplaySettingsLocked(mWm, mRootWindowContainer);
 
         assertThat(mOverrideSettingsStorage.wasWriteSuccessful()).isTrue();
-        assertThat(provider.getOverrideSettingsSize()).isEqualTo(0);
+        assertThat(provider.getOverrideSettingsSize()).isEqualTo(2);
+        assertThat(provider.getOverrideSettings(innerDisplayInfo).mForcedDensity).isEqualTo(490);
+        assertThat(provider.getOverrideSettings(outerDisplayInfo).mForcedDensity).isEqualTo(420);
+    }
+
+    @Test
+    public void testRemovesStaleDisplaySettings_displayNotInLayout_keepsDisplaySettings() {
+        // Write density setting for primary display.
+        final DisplayWindowSettingsProvider provider = new DisplayWindowSettingsProvider(
+                mDefaultVendorSettingsStorage, mOverrideSettingsStorage);
+        final DisplayInfo primDisplayInfo = mPrimaryDisplay.getDisplayInfo();
+        updateOverrideSettings(provider, primDisplayInfo, setting -> setting.mForcedDensity = 420);
+
+        // Add a virtual display and write density setting for it.
+        final DisplayInfo virtDisplayInfo = new DisplayInfo(primDisplayInfo);
+        virtDisplayInfo.uniqueId = "TEST_VIRTUAL_DISPLAY_" + System.currentTimeMillis();
+        createNewDisplay(virtDisplayInfo);
+        waitUntilHandlersIdle();  // Wait until unfrozen after a display is added.
+        updateOverrideSettings(provider, virtDisplayInfo, setting -> setting.mForcedDensity = 490);
+
+        provider.removeStaleDisplaySettingsLocked(mWm, mRootWindowContainer);
+
+        assertThat(mOverrideSettingsStorage.wasWriteSuccessful()).isTrue();
+        assertThat(provider.getOverrideSettingsSize()).isEqualTo(2);
+        assertThat(provider.getOverrideSettings(primDisplayInfo).mForcedDensity).isEqualTo(420);
+        assertThat(provider.getOverrideSettings(virtDisplayInfo).mForcedDensity).isEqualTo(490);
     }
 
     /**

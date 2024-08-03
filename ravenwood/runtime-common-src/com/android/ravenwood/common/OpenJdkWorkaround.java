@@ -16,6 +16,8 @@
 package com.android.ravenwood.common;
 
 import java.io.FileDescriptor;
+import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 
 class OpenJdkWorkaround extends JvmWorkaround {
     @Override
@@ -38,6 +40,21 @@ class OpenJdkWorkaround extends JvmWorkaround {
                     "getJavaIOFileDescriptorAccess").invoke(null);
             return (int) Class.forName("jdk.internal.access.JavaIOFileDescriptorAccess").getMethod(
                     "get", FileDescriptor.class).invoke(obj, fd);
+        } catch (ReflectiveOperationException e) {
+            throw new RuntimeException("Failed to interact with raw FileDescriptor internals;"
+                    + " perhaps JRE has changed?", e);
+        }
+    }
+
+    @Override
+    public void closeFd(FileDescriptor fd) throws IOException {
+        try {
+            final Object obj = Class.forName("jdk.internal.access.SharedSecrets").getMethod(
+                    "getJavaIOFileDescriptorAccess").invoke(null);
+            Class.forName("jdk.internal.access.JavaIOFileDescriptorAccess").getMethod(
+                    "close", FileDescriptor.class).invoke(obj, fd);
+        } catch (InvocationTargetException e) {
+            SneakyThrow.sneakyThrow(e.getTargetException());
         } catch (ReflectiveOperationException e) {
             throw new RuntimeException("Failed to interact with raw FileDescriptor internals;"
                     + " perhaps JRE has changed?", e);

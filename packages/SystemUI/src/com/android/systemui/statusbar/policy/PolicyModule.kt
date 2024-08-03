@@ -289,6 +289,7 @@ interface PolicyModule {
                         labelRes = R.string.quick_settings_work_mode_label,
                     ),
                 instanceId = uiEventLogger.getNewInstanceId(),
+                autoRemoveOnUnavailable = false,
             )
 
         /** Inject work mode into tileViewModelMap in QSModule */

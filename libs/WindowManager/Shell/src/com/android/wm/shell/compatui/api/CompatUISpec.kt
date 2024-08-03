@@ -17,10 +17,31 @@
 package com.android.wm.shell.compatui.api
 
 /**
+ * Defines the predicates to invoke for understanding if a component can be created or destroyed.
+ */
+class CompatUILifecyclePredicates(
+    // Predicate evaluating to true if the component needs to be created
+    val creationPredicate: (CompatUIInfo, CompatUISharedState) -> Boolean,
+    // Predicate evaluating to true if the component needs to be destroyed
+    val removalPredicate: (
+        CompatUIInfo,
+        CompatUISharedState,
+        CompatUIComponentState?
+    ) -> Boolean,
+    // Builder for the initial state of the component
+    val stateBuilder: (
+        CompatUIInfo,
+        CompatUISharedState
+    ) -> CompatUIComponentState? = { _, _ -> null }
+)
+
+/**
  * Describes each compat ui component to the framework.
  */
-data class CompatUISpec(
+class CompatUISpec(
     // Unique name for the component. It's used for debug and for generating the
     // unique component identifier in the system.
-    val name: String
+    val name: String,
+    // The lifecycle definition
+    val lifecycle: CompatUILifecyclePredicates
 )

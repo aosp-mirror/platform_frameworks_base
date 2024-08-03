@@ -97,8 +97,10 @@ constructor(
     private val metricsLogger: CommunalMetricsLogger,
 ) : BaseCommunalViewModel(communalSceneInteractor, communalInteractor, mediaHost) {
 
+    private val logger = Logger(logBuffer, "CommunalViewModel")
+
     private val _isMediaHostVisible =
-        conflatedCallbackFlow<Boolean> {
+        conflatedCallbackFlow {
                 val callback = { visible: Boolean ->
                     trySend(visible)
                     Unit
@@ -106,10 +108,17 @@ constructor(
                 mediaHost.addVisibilityChangeListener(callback)
                 awaitClose { mediaHost.removeVisibilityChangeListener(callback) }
             }
-            .onStart { emit(mediaHost.visible) }
+            .onStart {
+                // Ensure the visibility state is correct when the hub is opened and this flow is
+                // started so that the UMO is shown when needed. The visibility state in MediaHost
+                // is not updated once its view has been detached, aka the hub is closed, which can
+                // result in this getting stuck as False and never being updated as the UMO is not
+                // shown.
+                mediaHost.updateViewVisibility()
+                emit(mediaHost.visible)
+            }
+            .onEach { logger.d({ "_isMediaHostVisible: $bool1" }) { bool1 = it } }
             .flowOn(mainDispatcher)
-
-    private val logger = Logger(logBuffer, "CommunalViewModel")
 
     /** Communal content saved from the previous emission when the flow is active (not "frozen"). */
     private var frozenCommunalContent: List<CommunalContentModel>? = null

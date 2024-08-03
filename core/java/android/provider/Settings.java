@@ -5912,6 +5912,14 @@ public final class Settings {
         public static final String SHOW_KEY_PRESSES = "show_key_presses";
 
         /**
+         * Show touchpad input visualization on screen.
+         * 0 = no
+         * 1 = yes
+         * @hide
+         */
+        public static final String TOUCHPAD_VISUALIZER = "touchpad_visualizer";
+
+        /**
          * Show rotary input dispatched to focused windows on the screen.
          * 0 = no
          * 1 = yes
@@ -15820,7 +15828,7 @@ public final class Settings {
          * The following keys are supported:
          *
          * <pre>
-         * screen_brightness_array         (int[])
+         * screen_brightness_array         (int[], values in range [1, 255])
          * dimming_scrim_array             (int[])
          * prox_screen_off_delay           (long)
          * prox_cooldown_trigger           (long)

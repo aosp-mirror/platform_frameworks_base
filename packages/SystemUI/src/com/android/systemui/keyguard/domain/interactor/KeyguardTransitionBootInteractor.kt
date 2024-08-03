@@ -30,6 +30,7 @@ import com.android.systemui.statusbar.policy.domain.interactor.DeviceProvisionin
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
@@ -52,11 +53,12 @@ constructor(
      * then we'll seed the repository with a transition from OFF -> GONE.
      */
     @OptIn(ExperimentalCoroutinesApi::class)
-    private val showLockscreenOnBoot =
+    private val showLockscreenOnBoot: Flow<Boolean> by lazy {
         deviceProvisioningInteractor.isDeviceProvisioned.map { provisioned ->
             (provisioned || deviceEntryInteractor.isAuthenticationRequired()) &&
                 deviceEntryInteractor.isLockscreenEnabled()
         }
+    }
 
     override fun start() {
         scope.launch {

@@ -146,8 +146,8 @@ public class PipResizeGestureHandler implements
         mUpdateResizeBoundsCallback = (rect) -> {
             mUserResizeBounds.set(rect);
             // mMotionHelper.synchronizePinnedStackBounds();
-            mUpdateMovementBoundsRunnable.run();
             mPipBoundsState.setBounds(rect);
+            mUpdateMovementBoundsRunnable.run();
             resetState();
         };
     }

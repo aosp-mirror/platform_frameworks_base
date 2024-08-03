@@ -17,6 +17,7 @@
 
 package com.android.systemui.biometrics.ui.binder
 
+import android.content.res.Resources
 import android.util.Log
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
@@ -29,8 +30,8 @@ import com.android.systemui.biometrics.ui.viewmodel.PromptIconViewModel.AuthType
 import com.android.systemui.biometrics.ui.viewmodel.PromptViewModel
 import com.android.systemui.lifecycle.repeatWhenAttached
 import com.android.systemui.res.R
-import com.android.systemui.util.kotlin.Utils.Companion.toQuad
-import com.android.systemui.util.kotlin.Utils.Companion.toTriple
+import com.android.systemui.util.kotlin.Quad
+import com.android.systemui.util.kotlin.Utils.Companion.toQuint
 import com.android.systemui.util.kotlin.sample
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
@@ -39,14 +40,10 @@ private const val TAG = "PromptIconViewBinder"
 
 /** Sub-binder for [BiometricPromptLayout.iconView]. */
 object PromptIconViewBinder {
-    /**
-     * Binds [BiometricPromptLayout.iconView] and [BiometricPromptLayout.biometric_icon_overlay] to
-     * [PromptIconViewModel].
-     */
+    /** Binds [BiometricPromptLayout.iconView] to [PromptIconViewModel]. */
     @JvmStatic
     fun bind(
         iconView: LottieAnimationView,
-        iconOverlayView: LottieAnimationView,
         iconViewLayoutParamSizeOverride: Pair<Int, Int>?,
         promptViewModel: PromptViewModel
     ) {
@@ -57,9 +54,6 @@ object PromptIconViewBinder {
                 if (iconViewLayoutParamSizeOverride != null) {
                     iconView.layoutParams.width = iconViewLayoutParamSizeOverride.first
                     iconView.layoutParams.height = iconViewLayoutParamSizeOverride.second
-
-                    iconOverlayView.layoutParams.width = iconViewLayoutParamSizeOverride.first
-                    iconOverlayView.layoutParams.height = iconViewLayoutParamSizeOverride.second
                 }
 
                 if (!constraintBp()) {
@@ -95,9 +89,6 @@ object PromptIconViewBinder {
                             if (iconViewLayoutParamSizeOverride == null) {
                                 iconView.layoutParams.width = iconSize.first
                                 iconView.layoutParams.height = iconSize.second
-
-                                iconOverlayView.layoutParams.width = iconSize.first
-                                iconOverlayView.layoutParams.height = iconSize.second
                             }
                         }
                     }
@@ -109,18 +100,25 @@ object PromptIconViewBinder {
                             combine(
                                 viewModel.activeAuthType,
                                 viewModel.shouldAnimateIconView,
+                                viewModel.shouldLoopIconView,
                                 viewModel.showingError,
-                                ::Triple
+                                ::Quad
                             ),
-                            ::toQuad
+                            ::toQuint
                         )
-                        .collect { (iconAsset, activeAuthType, shouldAnimateIconView, showingError)
-                            ->
+                        .collect {
+                            (
+                                iconAsset,
+                                activeAuthType,
+                                shouldAnimateIconView,
+                                shouldLoopIconView,
+                                showingError) ->
                             if (iconAsset != -1) {
                                 iconView.updateAsset(
                                     "iconAsset",
                                     iconAsset,
                                     shouldAnimateIconView,
+                                    shouldLoopIconView,
                                     activeAuthType
                                 )
                                 viewModel.setPreviousIconWasError(showingError)
@@ -129,34 +127,7 @@ object PromptIconViewBinder {
                 }
 
                 launch {
-                    viewModel.iconOverlayAsset
-                        .sample(
-                            combine(
-                                viewModel.shouldAnimateIconOverlay,
-                                viewModel.showingError,
-                                ::Pair
-                            ),
-                            ::toTriple
-                        )
-                        .collect { (iconOverlayAsset, shouldAnimateIconOverlay, showingError) ->
-                            if (iconOverlayAsset != -1) {
-                                iconOverlayView.updateAsset(
-                                    "iconOverlayAsset",
-                                    iconOverlayAsset,
-                                    shouldAnimateIconOverlay,
-                                    AuthType.Fingerprint
-                                )
-                                viewModel.setPreviousIconOverlayWasError(showingError)
-                            }
-                        }
-                }
-
-                launch {
-                    viewModel.shouldFlipIconView.collect { shouldFlipIconView ->
-                        if (shouldFlipIconView) {
-                            iconView.rotation = 180f
-                        }
-                    }
+                    viewModel.iconViewRotation.collect { rotation -> iconView.rotation = rotation }
                 }
 
                 launch {
@@ -171,97 +142,83 @@ object PromptIconViewBinder {
     }
 }
 
-private val assetIdToString: Map<Int, String> =
-    mapOf(
-        // UDFPS assets
-        R.raw.fingerprint_dialogue_error_to_fingerprint_lottie to
-            "fingerprint_dialogue_error_to_fingerprint_lottie",
-        R.raw.fingerprint_dialogue_error_to_success_lottie to
-            "fingerprint_dialogue_error_to_success_lottie",
-        R.raw.fingerprint_dialogue_fingerprint_to_error_lottie to
-            "fingerprint_dialogue_fingerprint_to_error_lottie",
-        R.raw.fingerprint_dialogue_fingerprint_to_success_lottie to
-            "fingerprint_dialogue_fingerprint_to_success_lottie",
-        // SFPS assets
-        R.raw.biometricprompt_fingerprint_to_error_landscape to
-            "biometricprompt_fingerprint_to_error_landscape",
-        R.raw.biometricprompt_folded_base_bottomright to "biometricprompt_folded_base_bottomright",
-        R.raw.biometricprompt_folded_base_default to "biometricprompt_folded_base_default",
-        R.raw.biometricprompt_folded_base_topleft to "biometricprompt_folded_base_topleft",
-        R.raw.biometricprompt_landscape_base to "biometricprompt_landscape_base",
-        R.raw.biometricprompt_portrait_base_bottomright to
-            "biometricprompt_portrait_base_bottomright",
-        R.raw.biometricprompt_portrait_base_topleft to "biometricprompt_portrait_base_topleft",
-        R.raw.biometricprompt_symbol_error_to_fingerprint_landscape to
-            "biometricprompt_symbol_error_to_fingerprint_landscape",
-        R.raw.biometricprompt_symbol_error_to_fingerprint_portrait_bottomright to
-            "biometricprompt_symbol_error_to_fingerprint_portrait_bottomright",
-        R.raw.biometricprompt_symbol_error_to_fingerprint_portrait_topleft to
-            "biometricprompt_symbol_error_to_fingerprint_portrait_topleft",
-        R.raw.biometricprompt_symbol_error_to_success_landscape to
-            "biometricprompt_symbol_error_to_success_landscape",
-        R.raw.biometricprompt_symbol_error_to_success_portrait_bottomright to
-            "biometricprompt_symbol_error_to_success_portrait_bottomright",
-        R.raw.biometricprompt_symbol_error_to_success_portrait_topleft to
-            "biometricprompt_symbol_error_to_success_portrait_topleft",
-        R.raw.biometricprompt_symbol_fingerprint_to_error_portrait_bottomright to
-            "biometricprompt_symbol_fingerprint_to_error_portrait_bottomright",
-        R.raw.biometricprompt_symbol_fingerprint_to_error_portrait_topleft to
-            "biometricprompt_symbol_fingerprint_to_error_portrait_topleft",
-        R.raw.biometricprompt_symbol_fingerprint_to_success_landscape to
-            "biometricprompt_symbol_fingerprint_to_success_landscape",
-        R.raw.biometricprompt_symbol_fingerprint_to_success_portrait_bottomright to
-            "biometricprompt_symbol_fingerprint_to_success_portrait_bottomright",
-        R.raw.biometricprompt_symbol_fingerprint_to_success_portrait_topleft to
-            "biometricprompt_symbol_fingerprint_to_success_portrait_topleft",
-        // Face assets
-        R.raw.face_dialog_wink_from_dark to "face_dialog_wink_from_dark",
-        R.raw.face_dialog_dark_to_checkmark to "face_dialog_dark_to_checkmark",
-        R.raw.face_dialog_dark_to_error to "face_dialog_dark_to_error",
-        R.raw.face_dialog_error_to_idle to "face_dialog_error_to_idle",
-        R.raw.face_dialog_idle_static to "face_dialog_idle_static",
-        R.raw.face_dialog_authenticating to "face_dialog_authenticating",
-        // Co-ex assets
-        R.raw.fingerprint_dialogue_unlocked_to_checkmark_success_lottie to
-            "fingerprint_dialogue_unlocked_to_checkmark_success_lottie",
-        R.raw.fingerprint_dialogue_error_to_unlock_lottie to
-            "fingerprint_dialogue_error_to_unlock_lottie",
-        R.raw.fingerprint_dialogue_fingerprint_to_unlock_lottie to
-            "fingerprint_dialogue_fingerprint_to_unlock_lottie",
-    )
-
-private fun getAssetNameFromId(id: Int): String {
-    return assetIdToString.getOrDefault(id, "Asset $id not found")
-}
-
 fun LottieAnimationView.updateAsset(
     type: String,
     asset: Int,
     shouldAnimateIconView: Boolean,
+    shouldLoopIconView: Boolean,
     activeAuthType: AuthType
 ) {
     setFailureListener(type, asset, activeAuthType)
+    pauseAnimation()
     setAnimation(asset)
-    frame = 0
+    if (animatingFromSfpsAuthenticating(asset)) {
+        // Skipping to error / success / unlock segment of animation
+        setMinFrame(151)
+    } else {
+        frame = 0
+    }
     if (shouldAnimateIconView) {
-        if (asset == R.raw.face_dialog_authenticating) {
-            loop(true)
-        } else {
-            loop(false)
-        }
+        loop(shouldLoopIconView)
         playAnimation()
     }
     LottieColorUtils.applyDynamicColors(context, this)
 }
 
+private fun animatingFromSfpsAuthenticating(asset: Int): Boolean =
+    asset in sfpsFpToErrorAssets || asset in sfpsFpToUnlockAssets || asset in sfpsFpToSuccessAssets
+
+private val sfpsFpToErrorAssets: List<Int> =
+    listOf(
+        R.raw.biometricprompt_sfps_fingerprint_to_error,
+        R.raw.biometricprompt_sfps_fingerprint_to_error_90,
+        R.raw.biometricprompt_sfps_fingerprint_to_error_180,
+        R.raw.biometricprompt_sfps_fingerprint_to_error_270,
+        R.raw.biometricprompt_sfps_rear_display_fingerprint_to_error,
+        R.raw.biometricprompt_sfps_rear_display_fingerprint_to_error_90,
+        R.raw.biometricprompt_sfps_rear_display_fingerprint_to_error_180,
+        R.raw.biometricprompt_sfps_rear_display_fingerprint_to_error_270,
+    )
+
+private val sfpsFpToUnlockAssets: List<Int> =
+    listOf(
+        R.raw.biometricprompt_sfps_fingerprint_to_unlock,
+        R.raw.biometricprompt_sfps_fingerprint_to_unlock_90,
+        R.raw.biometricprompt_sfps_fingerprint_to_unlock_180,
+        R.raw.biometricprompt_sfps_fingerprint_to_unlock_270,
+        R.raw.biometricprompt_sfps_rear_display_fingerprint_to_unlock,
+        R.raw.biometricprompt_sfps_rear_display_fingerprint_to_unlock_90,
+        R.raw.biometricprompt_sfps_rear_display_fingerprint_to_unlock_180,
+        R.raw.biometricprompt_sfps_rear_display_fingerprint_to_unlock_270,
+    )
+
+private val sfpsFpToSuccessAssets: List<Int> =
+    listOf(
+        R.raw.biometricprompt_sfps_fingerprint_to_success,
+        R.raw.biometricprompt_sfps_fingerprint_to_success_90,
+        R.raw.biometricprompt_sfps_fingerprint_to_success_180,
+        R.raw.biometricprompt_sfps_fingerprint_to_success_270,
+        R.raw.biometricprompt_sfps_rear_display_fingerprint_to_success,
+        R.raw.biometricprompt_sfps_rear_display_fingerprint_to_success_90,
+        R.raw.biometricprompt_sfps_rear_display_fingerprint_to_success_180,
+        R.raw.biometricprompt_sfps_rear_display_fingerprint_to_success_270,
+    )
+
 private fun LottieAnimationView.setFailureListener(type: String, asset: Int, authType: AuthType) {
+    val assetName =
+        try {
+            context.resources.getResourceEntryName(asset)
+        } catch (e: Resources.NotFoundException) {
+            "Asset $asset not found"
+        }
+
     setFailureListener { result: Throwable? ->
         Log.d(
             TAG,
             "Collecting $type | " +
                 "activeAuthType = $authType | " +
                 "Invalid resource id: $asset, " +
-                "name ${getAssetNameFromId(asset)}",
+                "name $assetName",
             result
         )
     }

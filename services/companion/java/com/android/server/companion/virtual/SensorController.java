@@ -145,11 +145,9 @@ public class SensorController {
             mSensorDescriptors.put(sensorToken, sensorDescriptor);
             mVirtualSensors.put(handle, sensor);
         }
-        if (android.companion.virtualdevice.flags.Flags.metricsCollection()) {
-            Counter.logIncrementWithUid(
-                    "virtual_devices.value_virtual_sensors_created_count",
-                    mAttributionSource.getUid());
-        }
+        Counter.logIncrementWithUid(
+                "virtual_devices.value_virtual_sensors_created_count",
+                mAttributionSource.getUid());
     }
 
     boolean sendSensorEvent(@NonNull IBinder token, @NonNull VirtualSensorEvent event) {

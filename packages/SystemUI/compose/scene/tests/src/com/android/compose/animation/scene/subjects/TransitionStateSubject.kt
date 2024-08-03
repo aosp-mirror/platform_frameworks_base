@@ -18,7 +18,8 @@ package com.android.compose.animation.scene.subjects
 
 import com.android.compose.animation.scene.OverscrollSpec
 import com.android.compose.animation.scene.SceneKey
-import com.android.compose.animation.scene.TransitionState
+import com.android.compose.animation.scene.content.state.ContentState
+import com.android.compose.animation.scene.content.state.TransitionState
 import com.google.common.truth.Fact.simpleFact
 import com.google.common.truth.FailureMetadata
 import com.google.common.truth.Subject
@@ -132,12 +133,12 @@ private constructor(
     }
 
     fun hasBouncingScene(scene: SceneKey) {
-        if (actual !is TransitionState.HasOverscrollProperties) {
-            failWithActual(simpleFact("expected to be TransitionState.HasOverscrollProperties"))
+        if (actual !is ContentState.HasOverscrollProperties) {
+            failWithActual(simpleFact("expected to be ContentState.HasOverscrollProperties"))
         }
 
-        check("bouncingScene")
-            .that((actual as TransitionState.HasOverscrollProperties).bouncingScene)
+        check("bouncingContent")
+            .that((actual as ContentState.HasOverscrollProperties).bouncingContent)
             .isEqualTo(scene)
     }
 
