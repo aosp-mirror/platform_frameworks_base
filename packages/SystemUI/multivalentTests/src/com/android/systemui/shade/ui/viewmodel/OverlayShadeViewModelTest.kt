@@ -29,6 +29,7 @@ import com.android.systemui.flags.EnableSceneContainer
 import com.android.systemui.keyguard.data.repository.fakeDeviceEntryFingerprintAuthRepository
 import com.android.systemui.keyguard.shared.model.SuccessFingerprintAuthenticationStatus
 import com.android.systemui.kosmos.testScope
+import com.android.systemui.lifecycle.activateIn
 import com.android.systemui.scene.domain.interactor.sceneInteractor
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.testKosmos
@@ -37,6 +38,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
+import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 
@@ -53,6 +55,11 @@ class OverlayShadeViewModelTest : SysuiTestCase() {
     private val deviceUnlockedInteractor by lazy { kosmos.deviceUnlockedInteractor }
 
     private val underTest = kosmos.overlayShadeViewModel
+
+    @Before
+    fun setUp() {
+        underTest.activateIn(testScope)
+    }
 
     @Test
     fun backgroundScene_deviceLocked_lockscreen() =
