@@ -256,6 +256,7 @@ import com.android.server.stats.bootstrap.StatsBootstrapAtomService;
 import com.android.server.stats.pull.StatsPullAtomService;
 import com.android.server.statusbar.StatusBarManagerService;
 import com.android.server.storage.DeviceStorageMonitorService;
+import com.android.server.supervision.SupervisionService;
 import com.android.server.systemcaptions.SystemCaptionsManagerService;
 import com.android.server.telecom.TelecomLoaderService;
 import com.android.server.testharness.TestHarnessModeService;
@@ -1596,6 +1597,12 @@ public final class SystemServer implements Dumpable {
                     new RoleServicePlatformHelperImpl(mSystemContext));
             mSystemServiceManager.startService(ROLE_SERVICE_CLASS);
             t.traceEnd();
+
+            if (android.app.supervision.flags.Flags.supervisionApi()) {
+                t.traceBegin("StartSupervisionService");
+                mSystemServiceManager.startService(SupervisionService.Lifecycle.class);
+                t.traceEnd();
+            }
 
             if (!isTv) {
                 t.traceBegin("StartVibratorManagerService");

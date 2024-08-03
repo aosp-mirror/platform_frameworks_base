@@ -6698,6 +6698,16 @@ public abstract class Context {
     public static final String PROTOLOG_SERVICE = "protolog";
 
     /**
+     * Use with {@link #getSystemService(String)} to retrieve a
+     * {@link android.app.supervision.SupervisionManager}.
+     *
+     * @see #getSystemService(String)
+     * @see android.app.supervision.SupervisionManager
+     * @hide
+     */
+    public static final String SUPERVISION_SERVICE = "supervision";
+
+    /**
      * Determine whether the given permission is allowed for a particular
      * process and user ID running in the system.
      *
