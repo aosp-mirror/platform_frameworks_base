@@ -417,9 +417,9 @@ class SplitScreenTransitions {
         ProtoLog.d(WM_SHELL_SPLIT_SCREEN, "setResizeTransition: hasPendingResize=%b",
                 mPendingResize != null);
         if (mPendingResize != null) {
+            mPendingResize.cancel(null);
             mainDecor.cancelRunningAnimations();
             sideDecor.cancelRunningAnimations();
-            mPendingResize.cancel(null);
             mAnimations.clear();
             onFinish(null /* wct */);
         }
