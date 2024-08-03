@@ -64,8 +64,8 @@ static JNINativeMethod gMethods[] = {
 };
 
 int register_libcore_util_NativeAllocationRegistry(JNIEnv* env) {
-    return jniRegisterNativeMethods(env, "libcore/util/NativeAllocationRegistry", gMethods,
-                                    NELEM(gMethods));
+    return android::RegisterMethodsOrDie(env, "libcore/util/NativeAllocationRegistry", gMethods,
+                                         NELEM(gMethods));
 }
 
 namespace android {
