@@ -186,11 +186,11 @@ class SnapshotController {
         }
         mActivitySnapshotController.handleTransitionFinish(windows);
         mActivitySnapshotController.endSnapshotProcess();
-        // Remove task snapshot if it is visible at the end of transition.
+        // Remove task snapshot if it is visible at the end of transition, except for PiP.
         for (int i = changeInfos.size() - 1; i >= 0; --i) {
             final WindowContainer wc = changeInfos.get(i).mContainer;
             final Task task = wc.asTask();
-            if (task != null && wc.isVisibleRequested()) {
+            if (task != null && wc.isVisibleRequested() && !task.inPinnedWindowingMode()) {
                 final TaskSnapshot snapshot = mTaskSnapshotController.getSnapshot(task.mTaskId,
                         task.mUserId, false /* restoreFromDisk */, false /* isLowResolution */);
                 if (snapshot != null) {

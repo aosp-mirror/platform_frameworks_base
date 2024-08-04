@@ -171,6 +171,16 @@ flag {
 }
 
 flag {
+    name: "fix_disabling_of_mu_toggle_when_restriction_applied"
+    namespace: "multiuser"
+    description: "When no_user_switch is set but no EnforcedAdmin is present, the toggle has to be disabled"
+    bug: "356387759"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+  }
+}
+
+flag {
     name: "cache_quiet_mode_state"
     namespace: "multiuser"
     description: "Optimise quiet mode state retrieval"

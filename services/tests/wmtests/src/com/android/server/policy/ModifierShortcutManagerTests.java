@@ -35,6 +35,7 @@ import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
 import android.content.res.Resources;
 import android.content.res.XmlResourceParser;
 import android.os.Handler;
@@ -89,9 +90,12 @@ public class ModifierShortcutManagerTests {
             testActivityInfo.applicationInfo = new ApplicationInfo();
             testActivityInfo.packageName =
                     testActivityInfo.applicationInfo.packageName = "com.test";
+            ResolveInfo testResolveInfo = new ResolveInfo();
+            testResolveInfo.activityInfo = testActivityInfo;
 
             doReturn(testActivityInfo).when(mPackageManager).getActivityInfo(
                     eq(new ComponentName("com.test", "com.test.BookmarkTest")), anyInt());
+            doReturn(testResolveInfo).when(mPackageManager).resolveActivity(anyObject(), anyInt());
             doThrow(new PackageManager.NameNotFoundException("com.test3")).when(mPackageManager)
                     .getActivityInfo(eq(new ComponentName("com.test3", "com.test.BookmarkTest")),
                         anyInt());

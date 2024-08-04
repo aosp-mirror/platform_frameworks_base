@@ -19,11 +19,13 @@
 
 package com.android.systemui.keyguard.ui.viewmodel
 
+import android.platform.test.annotations.EnableFlags
 import android.platform.test.flag.junit.FlagsParameterization
 import android.view.View
 import androidx.test.filters.SmallTest
 import com.android.compose.animation.scene.ObservableTransitionState
-import com.android.systemui.Flags as AConfigFlags
+import com.android.systemui.Flags.FLAG_KEYGUARD_BOTTOM_AREA_REFACTOR
+import com.android.systemui.Flags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT
 import com.android.systemui.Flags.FLAG_NEW_AOD_TRANSITION
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.communal.data.repository.communalSceneRepository
@@ -68,6 +70,11 @@ import platform.test.runner.parameterized.Parameters
 
 @SmallTest
 @RunWith(ParameterizedAndroidJunit4::class)
+@EnableFlags(
+    FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT,
+    FLAG_NEW_AOD_TRANSITION,
+    FLAG_KEYGUARD_BOTTOM_AREA_REFACTOR
+)
 class KeyguardRootViewModelTest(flags: FlagsParameterization) : SysuiTestCase() {
     private val kosmos = testKosmos()
     private val testScope = kosmos.testScope
@@ -102,13 +109,6 @@ class KeyguardRootViewModelTest(flags: FlagsParameterization) : SysuiTestCase() 
 
     @Before
     fun setUp() {
-        mSetFlagsRule.enableFlags(FLAG_NEW_AOD_TRANSITION)
-        if (!SceneContainerFlag.isEnabled) {
-            mSetFlagsRule.enableFlags(AConfigFlags.FLAG_KEYGUARD_BOTTOM_AREA_REFACTOR)
-            mSetFlagsRule.disableFlags(
-                AConfigFlags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT,
-            )
-        }
         kosmos.sceneContainerRepository.setTransitionState(transitionState)
     }
 
@@ -212,6 +212,11 @@ class KeyguardRootViewModelTest(flags: FlagsParameterization) : SysuiTestCase() 
         testScope.runTest {
             val isVisible by collectLastValue(underTest.isNotifIconContainerVisible)
             runCurrent()
+            keyguardTransitionRepository.sendTransitionSteps(
+                from = KeyguardState.LOCKSCREEN,
+                to = KeyguardState.DOZING,
+                testScope,
+            )
             notificationsKeyguardInteractor.setPulseExpanding(false)
             deviceEntryRepository.setBypassEnabled(false)
             whenever(dozeParameters.alwaysOn).thenReturn(false)
@@ -227,6 +232,11 @@ class KeyguardRootViewModelTest(flags: FlagsParameterization) : SysuiTestCase() 
         testScope.runTest {
             val isVisible by collectLastValue(underTest.isNotifIconContainerVisible)
             runCurrent()
+            keyguardTransitionRepository.sendTransitionSteps(
+                from = KeyguardState.LOCKSCREEN,
+                to = KeyguardState.DOZING,
+                testScope,
+            )
             notificationsKeyguardInteractor.setPulseExpanding(false)
             deviceEntryRepository.setBypassEnabled(false)
             whenever(dozeParameters.alwaysOn).thenReturn(true)
@@ -243,6 +253,11 @@ class KeyguardRootViewModelTest(flags: FlagsParameterization) : SysuiTestCase() 
         testScope.runTest {
             val isVisible by collectLastValue(underTest.isNotifIconContainerVisible)
             runCurrent()
+            keyguardTransitionRepository.sendTransitionSteps(
+                from = KeyguardState.LOCKSCREEN,
+                to = KeyguardState.DOZING,
+                testScope,
+            )
             notificationsKeyguardInteractor.setPulseExpanding(false)
             deviceEntryRepository.setBypassEnabled(false)
             whenever(dozeParameters.alwaysOn).thenReturn(true)
@@ -251,6 +266,27 @@ class KeyguardRootViewModelTest(flags: FlagsParameterization) : SysuiTestCase() 
             runCurrent()
 
             assertThat(isVisible?.value).isTrue()
+            assertThat(isVisible?.isAnimating).isTrue()
+        }
+
+    @Test
+    fun iconContainer_isNotVisible_bypassDisabled_onLockscreen() =
+        testScope.runTest {
+            val isVisible by collectLastValue(underTest.isNotifIconContainerVisible)
+            runCurrent()
+            keyguardTransitionRepository.sendTransitionSteps(
+                from = KeyguardState.AOD,
+                to = KeyguardState.LOCKSCREEN,
+                testScope,
+            )
+            notificationsKeyguardInteractor.setPulseExpanding(false)
+            deviceEntryRepository.setBypassEnabled(false)
+            whenever(dozeParameters.alwaysOn).thenReturn(true)
+            whenever(dozeParameters.displayNeedsBlanking).thenReturn(false)
+            notificationsKeyguardInteractor.setNotificationsFullyHidden(true)
+            runCurrent()
+
+            assertThat(isVisible?.value).isFalse()
             assertThat(isVisible?.isAnimating).isTrue()
         }
 

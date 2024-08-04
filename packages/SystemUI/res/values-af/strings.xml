@@ -388,6 +388,9 @@
     <string name="performance" msgid="6552785217174378320">"Werkverrigting"</string>
     <string name="user_interface" msgid="3712869377953950887">"Gebruikerkoppelvlak"</string>
     <string name="thermal" msgid="6758074791325414831">"Termies"</string>
+    <string name="custom" msgid="3337456985275158299">"Gepasmaak"</string>
+    <string name="custom_trace_settings_dialog_title" msgid="2608570500144830554">"Gepasmaakte Nasporinginstellings"</string>
+    <string name="restore_default" msgid="5259420807486239755">"Stel verstek terug"</string>
     <string name="quick_settings_onehanded_label" msgid="2416537930246274991">"Eenhandmodus"</string>
     <string name="quick_settings_hearing_devices_label" msgid="7277170419679404129">"Gehoortoestelle"</string>
     <string name="quick_settings_hearing_devices_connected" msgid="6519069502397037781">"Aktief"</string>
@@ -429,9 +432,13 @@
     <string name="zen_modes_dialog_title" msgid="4159138230418567383">"Prioriteitmodusse"</string>
     <string name="zen_modes_dialog_done" msgid="6654130880256438950">"Klaar"</string>
     <string name="zen_modes_dialog_settings" msgid="2310248023728936697">"Instellings"</string>
-    <!-- no translation found for zen_mode_on (9085304934016242591) -->
+    <string name="zen_mode_on" msgid="9085304934016242591">"Aan"</string>
+    <string name="zen_mode_off" msgid="1736604456618147306">"Af"</string>
+    <!-- no translation found for zen_mode_set_up (7457957033034460064) -->
     <skip />
-    <!-- no translation found for zen_mode_off (1736604456618147306) -->
+    <!-- no translation found for zen_mode_no_manual_invocation (1769975741344633672) -->
+    <skip />
+    <!-- no translation found for zen_mode_active_modes (1625850411578488856) -->
     <skip />
     <string name="zen_priority_introduction" msgid="3159291973383796646">"Jy sal nie deur geluide en vibrasies gepla word nie, behalwe deur wekkers, herinneringe, geleenthede en bellers wat jy spesifiseer. Jy sal steeds enigiets hoor wat jy kies om te speel, insluitend musiek, video\'s en speletjies."</string>
     <string name="zen_alarms_introduction" msgid="3987266042682300470">"Jy sal nie deur geluide en vibrasies gepla word nie, behalwe deur wekkers. Jy sal steeds enigiets hoor wat jy kies om te speel, insluitend musiek, video\'s en speletjies."</string>
@@ -471,6 +478,8 @@
     <string name="keyguard_indication_charging_time_slowly" msgid="301936949731705417">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Laai tans stadig • Vol oor <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>"</string>
     <string name="keyguard_indication_charging_time_dock" msgid="3149328898931741271">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Laai tans • Vol oor <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>"</string>
     <string name="accessibility_action_open_communal_hub" msgid="3081702792413787849">"Legstukke op sluitskerm"</string>
+    <!-- no translation found for accessibility_announcement_communal_widget_added (6911593106099328271) -->
+    <skip />
     <string name="communal_tutorial_indicator_text" msgid="4503010353591430123">"Swiep links om die gemeenskaplike tutoriaal te begin"</string>
     <string name="cta_tile_button_to_open_widget_editor" msgid="3871562362382963878">"Pasmaak"</string>
     <string name="cta_tile_button_to_dismiss" msgid="3377597875997861754">"Maak toe"</string>
@@ -499,8 +508,7 @@
     <string name="accessibility_action_label_place_widget" msgid="1914197458644168978">"plaas gekose legstuk"</string>
     <string name="communal_widget_picker_title" msgid="1953369090475731663">"Sluitskermlegstukke"</string>
     <string name="communal_widget_picker_description" msgid="490515450110487871">"Enigiemand kan legstukke op jou sluitskerm sien, selfs al is jou tablet gesluit."</string>
-    <!-- no translation found for accessibility_action_label_unselect_widget (1041811747619468698) -->
-    <skip />
+    <string name="accessibility_action_label_unselect_widget" msgid="1041811747619468698">"ontkies legstuk"</string>
     <string name="communal_widgets_disclaimer_title" msgid="1150954395585308868">"Sluitskermlegstukke"</string>
     <string name="communal_widgets_disclaimer_text" msgid="1423545475160506349">"Om ’n app met ’n legstuk oop te maak, sal jy moet verifieer dat dit jy is. Hou ook in gedagte dat enigeen dit kan bekyk, selfs wanneer jou tablet gesluit is. Sommige legstukke is moontlik nie vir jou sluitskerm bedoel nie en dit kan onveilig wees om dit hier by te voeg."</string>
     <string name="communal_widgets_disclaimer_button" msgid="4423059765740780753">"Het dit"</string>
@@ -557,10 +565,8 @@
     <string name="media_projection_action_text" msgid="3634906766918186440">"Begin nou"</string>
     <string name="empty_shade_text" msgid="8935967157319717412">"Geen kennisgewings nie"</string>
     <string name="no_unseen_notif_text" msgid="395512586119868682">"Geen nuwe kennisgewings nie"</string>
-    <!-- no translation found for adaptive_notification_edu_hun_title (7790738150177329960) -->
-    <skip />
-    <!-- no translation found for adaptive_notification_edu_hun_text (7743367744129536610) -->
-    <skip />
+    <string name="adaptive_notification_edu_hun_title" msgid="7790738150177329960">"Kennisgewingdemping is aan"</string>
+    <string name="adaptive_notification_edu_hun_text" msgid="7743367744129536610">"Jou toestelvolume en -waarskuwings word outomaties vir tot 2 minute lank verminder wanneer jy te veel kennisgewings op een slag kry."</string>
     <string name="go_to_adaptive_notification_settings" msgid="2423690125178298479">"Skakel af"</string>
     <string name="unlock_to_see_notif_text" msgid="7439033907167561227">"Ontsluit om ouer kennisgewings te sien"</string>
     <string name="quick_settings_disclosure_parental_controls" msgid="2114102871438223600">"Hierdie toestel word deur jou ouer bestuur"</string>
@@ -1226,7 +1232,6 @@
     <string name="accessibility_fingerprint_bouncer" msgid="7189102492498735519">"Stawing word vereis. Raak die vingerafdruksensor om te staaf."</string>
     <string name="ongoing_phone_call_content_description" msgid="5332334388483099947">"Oproep aan die gang"</string>
     <string name="mobile_data_settings_title" msgid="3955246641380064901">"Mobiele data"</string>
-    <string name="preference_summary_default_combination" msgid="8453246369903749670">"<xliff:g id="STATE">%1$s</xliff:g>/<xliff:g id="NETWORKMODE">%2$s</xliff:g>"</string>
     <string name="mobile_data_connection_active" msgid="944490013299018227">"Gekoppel"</string>
     <string name="mobile_data_temp_connection_active" msgid="4590222725908806824">"Tydelik gekoppel"</string>
     <string name="mobile_data_poor_connection" msgid="819617772268371434">"Swak verbinding"</string>
@@ -1380,7 +1385,10 @@
     <string name="touchpad_tutorial_done_button" msgid="176168488821755503">"Klaar"</string>
     <string name="touchpad_tutorial_gesture_done" msgid="4784438360736821255">"Uitstekende werk!"</string>
     <string name="touchpad_back_gesture_action_title" msgid="7199067250654332735">"Gaan terug"</string>
-    <string name="touchpad_back_gesture_guidance" msgid="4222430588599527272">"Swiep enige plek op die raakpaneel links of regs met drie vingers om terug te gaan."</string>
+    <!-- no translation found for touchpad_back_gesture_guidance (6263750214998421587) -->
+    <skip />
+    <!-- no translation found for touchpad_back_gesture_finished (5353616006999726249) -->
+    <skip />
     <string name="touchpad_back_gesture_animation_content_description" msgid="2646107450922379918">"Raakpaneel wat drie vingers wat regs en links beweeg wys"</string>
     <string name="touchpad_back_gesture_screen_animation_content_description" msgid="4036267494237748710">"Toestelskerm wat animasie vir teruggebaar wys"</string>
     <string name="keyboard_backlight_dialog_title" msgid="8273102932345564724">"Sleutelbordlig"</string>
@@ -1388,28 +1396,16 @@
     <string name="home_controls_dream_label" msgid="6567105701292324257">"Huiskontroles"</string>
     <string name="home_controls_dream_description" msgid="4644150952104035789">"Kry vinnig toegang tot jou huiskontroles as ’n sluimerskerm"</string>
     <string name="volume_undo_action" msgid="5815519725211877114">"Ontdoen"</string>
-    <!-- no translation found for back_edu_toast_content (4530314597378982956) -->
-    <skip />
-    <!-- no translation found for home_edu_toast_content (3381071147871955415) -->
-    <skip />
-    <!-- no translation found for overview_edu_toast_content (5797030644017804518) -->
-    <skip />
-    <!-- no translation found for all_apps_edu_toast_content (8807496014667211562) -->
-    <skip />
-    <!-- no translation found for back_edu_notification_title (5624780717751357278) -->
-    <skip />
-    <!-- no translation found for back_edu_notification_content (2497557451540954068) -->
-    <skip />
-    <!-- no translation found for home_edu_notification_title (6097902076909654045) -->
-    <skip />
-    <!-- no translation found for home_edu_notification_content (6631697734535766588) -->
-    <skip />
-    <!-- no translation found for overview_edu_notification_title (1265824157319562406) -->
-    <skip />
-    <!-- no translation found for overview_edu_notification_content (3578204677648432500) -->
-    <skip />
-    <!-- no translation found for all_apps_edu_notification_title (372262997265569063) -->
-    <skip />
-    <!-- no translation found for all_apps_edu_notification_content (3255070575694025585) -->
-    <skip />
+    <string name="back_edu_toast_content" msgid="4530314597378982956">"Swiep links of regs met drie vingers op die raakpaneel om terug te gaan"</string>
+    <string name="home_edu_toast_content" msgid="3381071147871955415">"Swiep op met drie vingers op die raakpaneel om terug na die tuisskerm te gaan"</string>
+    <string name="overview_edu_toast_content" msgid="5797030644017804518">"Swiep op en hou met drie vingers op die raakpaneel om onlangse apps te bekyk"</string>
+    <string name="all_apps_edu_toast_content" msgid="8807496014667211562">"Druk die handelingsleutel op jou sleutelbord om al jou apps te bekyk"</string>
+    <string name="back_edu_notification_title" msgid="5624780717751357278">"Gebruik jou raakpaneel om terug te gaan"</string>
+    <string name="back_edu_notification_content" msgid="2497557451540954068">"Swiep links of regs met drie vingers. Tik om meer gebare te leer."</string>
+    <string name="home_edu_notification_title" msgid="6097902076909654045">"Gebruik jou raakpaneel om na die tuisskerm toe te gaan"</string>
+    <string name="home_edu_notification_content" msgid="6631697734535766588">"Swiep op met drie vingers. Tik om meer gebare te leer."</string>
+    <string name="overview_edu_notification_title" msgid="1265824157319562406">"Gebruik jou raakpaneel om onlangse apps te bekyk"</string>
+    <string name="overview_edu_notification_content" msgid="3578204677648432500">"Swiep op en hou met drie vingers. Tik om meer gebare te leer."</string>
+    <string name="all_apps_edu_notification_title" msgid="372262997265569063">"Gebruik jou sleutelbord om alle apps te bekyk"</string>
+    <string name="all_apps_edu_notification_content" msgid="3255070575694025585">"Druk enige tyd die handelingsleutel. Tik om meer gebare te leer."</string>
 </resources>

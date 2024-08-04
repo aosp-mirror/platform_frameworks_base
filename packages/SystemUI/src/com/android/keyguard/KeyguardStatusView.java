@@ -33,7 +33,6 @@ import com.android.systemui.res.R;
 import com.android.systemui.shade.TouchLogger;
 import com.android.systemui.statusbar.CrossFadeHelper;
 
-import java.io.PrintWriter;
 import java.util.Set;
 
 /**
@@ -115,18 +114,6 @@ public class KeyguardStatusView extends GridLayout {
     @Override
     public boolean dispatchTouchEvent(MotionEvent ev) {
         return TouchLogger.logDispatchTouch(TAG, ev, super.dispatchTouchEvent(ev));
-    }
-
-    public void dump(PrintWriter pw, String[] args) {
-        pw.println("KeyguardStatusView:");
-        pw.println("  mDarkAmount: " + mDarkAmount);
-        pw.println("  visibility: " + getVisibility());
-        if (mClockView != null) {
-            mClockView.dump(pw, args);
-        }
-        if (mKeyguardSlice != null) {
-            mKeyguardSlice.dump(pw, args);
-        }
     }
 
     @Override

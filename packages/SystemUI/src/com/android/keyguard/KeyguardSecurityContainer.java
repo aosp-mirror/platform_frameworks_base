@@ -647,7 +647,12 @@ public class KeyguardSecurityContainer extends ConstraintLayout {
     @Override
     public void onFinishInflate() {
         super.onFinishInflate();
+        updateSecurityViewFlipper();
+    }
+
+    protected void updateSecurityViewFlipper() {
         mSecurityViewFlipper = findViewById(R.id.view_flipper);
+        setupViewMode();
     }
 
     @Override
@@ -1004,10 +1009,10 @@ public class KeyguardSecurityContainer extends ConstraintLayout {
 
             if (mUserSwitcherViewGroup == null) {
                 inflateUserSwitcher();
+                setupUserSwitcher();
+                mUserSwitcherController.addUserSwitchCallback(mUserSwitchCallback);
             }
             updateSecurityViewLocation();
-            setupUserSwitcher();
-            mUserSwitcherController.addUserSwitchCallback(mUserSwitchCallback);
         }
 
         @Override

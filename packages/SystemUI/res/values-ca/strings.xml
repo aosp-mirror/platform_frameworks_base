@@ -388,6 +388,9 @@
     <string name="performance" msgid="6552785217174378320">"Rendiment"</string>
     <string name="user_interface" msgid="3712869377953950887">"Interfície d\'usuari"</string>
     <string name="thermal" msgid="6758074791325414831">"Tèrmic"</string>
+    <string name="custom" msgid="3337456985275158299">"Personalitzat"</string>
+    <string name="custom_trace_settings_dialog_title" msgid="2608570500144830554">"Configuració de traça personalitzada"</string>
+    <string name="restore_default" msgid="5259420807486239755">"Restaura la configuració predeterminada"</string>
     <string name="quick_settings_onehanded_label" msgid="2416537930246274991">"Mode d\'una mà"</string>
     <string name="quick_settings_hearing_devices_label" msgid="7277170419679404129">"Audiòfons"</string>
     <string name="quick_settings_hearing_devices_connected" msgid="6519069502397037781">"Actiu"</string>
@@ -429,9 +432,13 @@
     <string name="zen_modes_dialog_title" msgid="4159138230418567383">"Modes prioritaris"</string>
     <string name="zen_modes_dialog_done" msgid="6654130880256438950">"Fet"</string>
     <string name="zen_modes_dialog_settings" msgid="2310248023728936697">"Configuració"</string>
-    <!-- no translation found for zen_mode_on (9085304934016242591) -->
+    <string name="zen_mode_on" msgid="9085304934016242591">"Activat"</string>
+    <string name="zen_mode_off" msgid="1736604456618147306">"Desactivat"</string>
+    <!-- no translation found for zen_mode_set_up (7457957033034460064) -->
     <skip />
-    <!-- no translation found for zen_mode_off (1736604456618147306) -->
+    <!-- no translation found for zen_mode_no_manual_invocation (1769975741344633672) -->
+    <skip />
+    <!-- no translation found for zen_mode_active_modes (1625850411578488856) -->
     <skip />
     <string name="zen_priority_introduction" msgid="3159291973383796646">"No t\'interromprà cap so ni cap vibració, tret dels de les alarmes, recordatoris, esdeveniments i trucades de les persones que especifiquis. Continuaràs sentint tot allò que decideixis reproduir, com ara música, vídeos i jocs."</string>
     <string name="zen_alarms_introduction" msgid="3987266042682300470">"No t\'interromprà cap so ni cap vibració, tret dels de les alarmes. Continuaràs sentint tot allò que decideixis reproduir, com ara música, vídeos i jocs."</string>
@@ -471,6 +478,8 @@
     <string name="keyguard_indication_charging_time_slowly" msgid="301936949731705417">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Carregant lentament • Es completarà d\'aquí a <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>"</string>
     <string name="keyguard_indication_charging_time_dock" msgid="3149328898931741271">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • S\'està carregant • Es completarà d\'aquí a <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>"</string>
     <string name="accessibility_action_open_communal_hub" msgid="3081702792413787849">"Widgets a la pantalla de bloqueig"</string>
+    <!-- no translation found for accessibility_announcement_communal_widget_added (6911593106099328271) -->
+    <skip />
     <string name="communal_tutorial_indicator_text" msgid="4503010353591430123">"Llisca cap a l\'esquerra per iniciar el tutorial de la comunitat"</string>
     <string name="cta_tile_button_to_open_widget_editor" msgid="3871562362382963878">"Personalitza"</string>
     <string name="cta_tile_button_to_dismiss" msgid="3377597875997861754">"Ignora"</string>
@@ -499,8 +508,7 @@
     <string name="accessibility_action_label_place_widget" msgid="1914197458644168978">"col·loca el widget seleccionat"</string>
     <string name="communal_widget_picker_title" msgid="1953369090475731663">"Widgets de la pantalla de bloqueig"</string>
     <string name="communal_widget_picker_description" msgid="490515450110487871">"Tothom pot veure widgets a la pantalla de bloqueig, fins i tot amb la tauleta bloquejada."</string>
-    <!-- no translation found for accessibility_action_label_unselect_widget (1041811747619468698) -->
-    <skip />
+    <string name="accessibility_action_label_unselect_widget" msgid="1041811747619468698">"desselecciona el widget"</string>
     <string name="communal_widgets_disclaimer_title" msgid="1150954395585308868">"Widgets de la pantalla de bloqueig"</string>
     <string name="communal_widgets_disclaimer_text" msgid="1423545475160506349">"Per obrir una aplicació utilitzant un widget, necessitaràs verificar la teva identitat. També has de tenir en compte que qualsevol persona pot veure els widgets, fins i tot quan la tauleta està bloquejada. És possible que alguns widgets no estiguin pensats per a la pantalla de bloqueig i que no sigui segur afegir-los-hi."</string>
     <string name="communal_widgets_disclaimer_button" msgid="4423059765740780753">"Entesos"</string>
@@ -557,10 +565,8 @@
     <string name="media_projection_action_text" msgid="3634906766918186440">"Comença ara"</string>
     <string name="empty_shade_text" msgid="8935967157319717412">"No hi ha cap notificació"</string>
     <string name="no_unseen_notif_text" msgid="395512586119868682">"No hi ha cap notificació nova"</string>
-    <!-- no translation found for adaptive_notification_edu_hun_title (7790738150177329960) -->
-    <skip />
-    <!-- no translation found for adaptive_notification_edu_hun_text (7743367744129536610) -->
-    <skip />
+    <string name="adaptive_notification_edu_hun_title" msgid="7790738150177329960">"La moderació de notificacions està activada"</string>
+    <string name="adaptive_notification_edu_hun_text" msgid="7743367744129536610">"El volum i les alertes del dispositiu es redueixen automàticament durant 2 minuts quan reps massa notificacions alhora."</string>
     <string name="go_to_adaptive_notification_settings" msgid="2423690125178298479">"Desactiva"</string>
     <string name="unlock_to_see_notif_text" msgid="7439033907167561227">"Desbloqueja per veure notif. anteriors"</string>
     <string name="quick_settings_disclosure_parental_controls" msgid="2114102871438223600">"Els teus pares gestionen aquest dispositiu"</string>
@@ -1226,7 +1232,6 @@
     <string name="accessibility_fingerprint_bouncer" msgid="7189102492498735519">"Autenticació necessària. Toca el sensor d\'empremtes digitals per autenticar-te."</string>
     <string name="ongoing_phone_call_content_description" msgid="5332334388483099947">"Trucada en curs"</string>
     <string name="mobile_data_settings_title" msgid="3955246641380064901">"Dades mòbils"</string>
-    <string name="preference_summary_default_combination" msgid="8453246369903749670">"<xliff:g id="STATE">%1$s</xliff:g>/<xliff:g id="NETWORKMODE">%2$s</xliff:g>"</string>
     <string name="mobile_data_connection_active" msgid="944490013299018227">"Connectat"</string>
     <string name="mobile_data_temp_connection_active" msgid="4590222725908806824">"Connexió temporal"</string>
     <string name="mobile_data_poor_connection" msgid="819617772268371434">"Connexió feble"</string>
@@ -1380,7 +1385,10 @@
     <string name="touchpad_tutorial_done_button" msgid="176168488821755503">"Fet"</string>
     <string name="touchpad_tutorial_gesture_done" msgid="4784438360736821255">"Ben fet!"</string>
     <string name="touchpad_back_gesture_action_title" msgid="7199067250654332735">"Torna"</string>
-    <string name="touchpad_back_gesture_guidance" msgid="4222430588599527272">"Per tornar enrere, llisca cap a l\'esquerra o cap a la dreta amb tres dits en qualsevol lloc del ratolí tàctil."</string>
+    <!-- no translation found for touchpad_back_gesture_guidance (6263750214998421587) -->
+    <skip />
+    <!-- no translation found for touchpad_back_gesture_finished (5353616006999726249) -->
+    <skip />
     <string name="touchpad_back_gesture_animation_content_description" msgid="2646107450922379918">"Ratolí tàctil que mostra tres dits que es mouen cap a la dreta i cap a l\'esquerra"</string>
     <string name="touchpad_back_gesture_screen_animation_content_description" msgid="4036267494237748710">"Pantalla del dispositiu que mostra l\'animació del gest per anar enrere"</string>
     <string name="keyboard_backlight_dialog_title" msgid="8273102932345564724">"Retroil·luminació del teclat"</string>
@@ -1388,28 +1396,16 @@
     <string name="home_controls_dream_label" msgid="6567105701292324257">"Controls de la llar"</string>
     <string name="home_controls_dream_description" msgid="4644150952104035789">"Utilitza controls de la llar com a estalvi de pantalla"</string>
     <string name="volume_undo_action" msgid="5815519725211877114">"Desfés"</string>
-    <!-- no translation found for back_edu_toast_content (4530314597378982956) -->
-    <skip />
-    <!-- no translation found for home_edu_toast_content (3381071147871955415) -->
-    <skip />
-    <!-- no translation found for overview_edu_toast_content (5797030644017804518) -->
-    <skip />
-    <!-- no translation found for all_apps_edu_toast_content (8807496014667211562) -->
-    <skip />
-    <!-- no translation found for back_edu_notification_title (5624780717751357278) -->
-    <skip />
-    <!-- no translation found for back_edu_notification_content (2497557451540954068) -->
-    <skip />
-    <!-- no translation found for home_edu_notification_title (6097902076909654045) -->
-    <skip />
-    <!-- no translation found for home_edu_notification_content (6631697734535766588) -->
-    <skip />
-    <!-- no translation found for overview_edu_notification_title (1265824157319562406) -->
-    <skip />
-    <!-- no translation found for overview_edu_notification_content (3578204677648432500) -->
-    <skip />
-    <!-- no translation found for all_apps_edu_notification_title (372262997265569063) -->
-    <skip />
-    <!-- no translation found for all_apps_edu_notification_content (3255070575694025585) -->
-    <skip />
+    <string name="back_edu_toast_content" msgid="4530314597378982956">"Per tornar enrere, llisca tres dits cap a l\'esquerra o cap a la dreta al ratolí tàctil"</string>
+    <string name="home_edu_toast_content" msgid="3381071147871955415">"Per anar a la pantalla d\'inici, llisca tres dits cap amunt al ratolí tàctil"</string>
+    <string name="overview_edu_toast_content" msgid="5797030644017804518">"Per veure les aplicacions recents, llisca cap amunt amb tres dits i mantén premut al ratolí tàctil"</string>
+    <string name="all_apps_edu_toast_content" msgid="8807496014667211562">"Per veure totes les aplicacions, prem la tecla d\'acció al teclat"</string>
+    <string name="back_edu_notification_title" msgid="5624780717751357278">"Utilitza el ratolí tàctil per tornar enrere"</string>
+    <string name="back_edu_notification_content" msgid="2497557451540954068">"Fes lliscar tres dits cap a l\'esquerra o cap a la dreta. Toca per aprendre més gestos."</string>
+    <string name="home_edu_notification_title" msgid="6097902076909654045">"Utilitza el ratolí tàctil per anar a la pantalla d\'inici"</string>
+    <string name="home_edu_notification_content" msgid="6631697734535766588">"Llisca tres dits cap amunt. Toca per aprendre més gestos."</string>
+    <string name="overview_edu_notification_title" msgid="1265824157319562406">"Utilitza el ratolí tàctil per veure les aplicacions recents"</string>
+    <string name="overview_edu_notification_content" msgid="3578204677648432500">"Llisca cap amunt amb tres dits i mantén premut. Toca per aprendre més gestos."</string>
+    <string name="all_apps_edu_notification_title" msgid="372262997265569063">"Utilitza el teclat per veure totes les aplicacions"</string>
+    <string name="all_apps_edu_notification_content" msgid="3255070575694025585">"Prem la tecla d\'acció en qualsevol moment. Toca per aprendre més gestos."</string>
 </resources>

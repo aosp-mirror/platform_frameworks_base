@@ -19,10 +19,11 @@ import androidx.wear.compose.material.MaterialTheme as WearMaterialTheme
 import androidx.compose.foundation.layout.Row
 import androidx.compose.material3.Icon
 import android.graphics.drawable.Drawable
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Lock
 import androidx.compose.material.icons.outlined.LockOpen
@@ -62,7 +63,7 @@ fun CredentialsScreenChip(
                         WearButtonText(
                             text = label,
                             textAlign = textAlign,
-                            maxLines = if (secondaryLabel != null) 1 else 2
+                            maxLines = 2
                         )
                     },
                     secondaryLabel,
@@ -88,7 +89,13 @@ fun CredentialsScreenChip(
     ) {
     val labelParam: (@Composable RowScope.() -> Unit) =
         {
-            text()
+            var horizontalArrangement = Arrangement.Start
+            if (icon == null) {
+                horizontalArrangement = Arrangement.Center
+            }
+            Row(horizontalArrangement = horizontalArrangement, modifier = modifier.fillMaxWidth()) {
+                text()
+            }
         }
 
     val secondaryLabelParam: (@Composable RowScope.() -> Unit)? =
@@ -97,6 +104,7 @@ fun CredentialsScreenChip(
                 Row {
                     WearSecondaryLabel(
                         text = secondaryLabel,
+                        color = WearMaterialTheme.colors.onSurfaceVariant
                     )
 
                     if (isAuthenticationEntryLocked != null) {
@@ -178,6 +186,7 @@ fun ContinueChip(onClick: () -> Unit) {
             WearButtonText(
                 text = stringResource(R.string.dialog_continue_button),
                 textAlign = TextAlign.Center,
+                color = WearMaterialTheme.colors.surface,
             )
         },
         colors = ChipDefaults.primaryChipColors(),

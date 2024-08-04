@@ -178,7 +178,7 @@ public class FingerprintInternalCleanupClientTest {
     }
 
     @Test
-    @RequiresFlagsEnabled(Flags.FLAG_NOTIFY_FINGERPRINT_LOE)
+    @RequiresFlagsEnabled(Flags.FLAG_NOTIFY_FINGERPRINTS_LOE)
     public void invalidBiometricUserState() throws Exception {
         mClient =  createClient();
 

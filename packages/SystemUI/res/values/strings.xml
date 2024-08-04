@@ -432,8 +432,6 @@
 
     <!-- Content description for the app logo icon on biometric prompt. [CHAR LIMIT=NONE] -->
     <string name="biometric_dialog_logo">App logo</string>
-    <!-- List of packages for which we want to show overridden logo. For example, an app overrides its launcher logo, if it's in this array, biometric dialog shows the overridden logo; otherwise biometric dialog still shows the default application info icon. [CHAR LIMIT=NONE] -->
-    <string-array name="biometric_dialog_package_names_for_logo_with_overrides" />
     <!-- Message shown when a biometric is authenticated, asking the user to confirm authentication [CHAR LIMIT=30] -->
     <string name="biometric_dialog_confirm">Confirm</string>
     <!-- Button name on BiometricPrompt shown when a biometric is detected but not authenticated. Tapping the button resumes authentication [CHAR LIMIT=30] -->
@@ -1381,11 +1379,15 @@
 
     <!-- Casting that launched by SysUI (i.e. when there is no app name) -->
     <!-- System casting media projection permission dialog title. [CHAR LIMIT=100] -->
-    <string name="media_projection_entry_cast_permission_dialog_title">Start casting?</string>
+    <string name="media_projection_entry_cast_permission_dialog_title">Cast your screen?</string>
+    <!-- System casting media projection permission option for capturing just a single app [CHAR LIMIT=50] -->
+    <string name="media_projection_entry_cast_permission_dialog_option_text_single_app">Cast one app</string>
+    <!-- System casting media projection permission option for capturing the whole screen [CHAR LIMIT=50] -->
+    <string name="media_projection_entry_cast_permission_dialog_option_text_entire_screen">Cast entire screen</string>
     <!-- System casting media projection permission warning for capturing the whole screen when SysUI casting requests it. [CHAR LIMIT=350] -->
-    <string name="media_projection_entry_cast_permission_dialog_warning_entire_screen">When you’re casting, Android has access to anything visible on your screen or played on your device. So be careful with things like passwords, payment details, messages, photos, and audio and video.</string>
+    <string name="media_projection_entry_cast_permission_dialog_warning_entire_screen">When you’re casting your entire screen, anything on your screen is visible. So be careful with things like passwords, payment details, messages, photos, and audio and video.</string>
     <!-- System casting media projection permission warning for capturing a single app when SysUI casting requests it. [CHAR LIMIT=350] -->
-    <string name="media_projection_entry_cast_permission_dialog_warning_single_app">When you’re casting an app, Android has access to anything shown or played on that app. So be careful with things like passwords, payment details, messages, photos, and audio and video.</string>
+    <string name="media_projection_entry_cast_permission_dialog_warning_single_app">When you’re casting an app, anything shown or played in that app is visible. So be careful with things like passwords, payment details, messages, photos, and audio and video.</string>
     <!-- System casting media projection permission button to continue for SysUI casting. [CHAR LIMIT=60] -->
     <string name="media_projection_entry_cast_permission_dialog_continue">Start casting</string>
 
@@ -3649,6 +3651,8 @@
          hasn't typed in anything in the search box yet. The helper is a  component that shows the
          user which keyboard shortcuts they can use. [CHAR LIMIT=NONE] -->
     <string name="shortcut_helper_search_placeholder">Search shortcuts</string>
+    <!-- Text shown when a search query didn't produce any results. [CHAR LIMIT=NONE] -->
+    <string name="shortcut_helper_no_search_results">No search results</string>
     <!-- Content description of the icon that allows to collapse a keyboard shortcut helper category
          panel. The helper is a  component that shows the  user which keyboard shortcuts they can
          use. The helper shows shortcuts in categories, which can be collapsed or expanded.
@@ -3725,4 +3729,16 @@ Action + ESC for this.</string>
     <string name="all_apps_edu_notification_title">Use your keyboard to view all apps</string>
     <!-- Education notification text for All Apps [CHAR_LIMIT=100] -->
     <string name="all_apps_edu_notification_content">Press the action key at any time. Tap to learn more gestures.</string>
+
+    <!-- Title for Extra Dim dialog [CHAR LIMIT=NONE] -->
+    <string name="accessibility_deprecate_extra_dim_dialog_title">Extra dim is now part of the brightness bar</string>
+    <!-- Content description for Extra Dim dialog. This helps users understand that we could make screen much dimmer by lowering the brightness through the brightness bar in a dark environment. [CHAR LIMIT=NONE] -->
+    <string name="accessibility_deprecate_extra_dim_dialog_description">
+        You can now make the screen extra dim by lowering the brightness level even further from the top of your screen.\n\nThis works best when you\'re in a dark environment.
+    </string>
+    <!-- Label for button removing Extra Dim shortcuts [CHAR LIMIT=NONE] -->
+    <string name="accessibility_deprecate_extra_dim_dialog_button">Remove extra dim shortcut</string>
+    <!-- Toast message for notifying users to use regular brightness bar to lower the brightness. [CHAR LIMIT=NONE] -->
+    <string name="accessibility_deprecate_extra_dim_dialog_toast">
+        Extra dim shortcut removed. To lower your brightness, use the regular brightness bar.</string>
 </resources>

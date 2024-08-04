@@ -272,6 +272,7 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
                 mShadeWindowLogger,
                 () -> mSelectedUserInteractor,
                 mUserTracker,
+                mKosmos.getNotificationShadeWindowModel(),
                 mKosmos::getCommunalInteractor);
         mFeatureFlags = new FakeFeatureFlags();
         mSetFlagsRule.enableFlags(FLAG_REFACTOR_GET_CURRENT_USER);

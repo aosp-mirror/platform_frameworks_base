@@ -108,7 +108,7 @@ public abstract class InternalCleanupClient<S extends BiometricAuthenticator.Ide
             }
 
             if (mBiometricUtils.hasValidBiometricUserState(getContext(), getTargetUserId())
-                    && Flags.notifyFingerprintLoe()) {
+                    && Flags.notifyFingerprintsLoe()) {
                 handleInvalidBiometricState();
             }
         }

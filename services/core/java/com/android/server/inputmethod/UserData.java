@@ -30,6 +30,7 @@ import com.android.internal.inputmethod.IRemoteInputConnection;
 
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 
 /** Placeholder for all IMMS user specific fields */
 final class UserData {
@@ -43,6 +44,17 @@ final class UserData {
     @NonNull
     final CountDownLatch mBackgroundLoadLatch = new CountDownLatch(1);
 
+    /**
+     * Contains non-null {@link RawInputMethodMap}, which represents the latest collections of
+     * {@link android.view.inputmethod.InputMethodInfo} for both direct-boot aware and unaware IMEs
+     * before taking {@link AdditionalSubtypeMap} into account.
+     *
+     * <p>See {@link RawInputMethodMap} for details on when to use this.</p>
+     */
+    @NonNull
+    final AtomicReference<RawInputMethodMap> mRawInputMethodMap =
+            new AtomicReference<>(RawInputMethodMap.emptyMap());
+
     @NonNull
     final InputMethodBindingController mBindingController;
 
@@ -53,6 +65,9 @@ final class UserData {
     @NonNull
     final HardwareKeyboardShortcutController mHardwareKeyboardShortcutController =
             new HardwareKeyboardShortcutController();
+
+    @NonNull
+    final ImeVisibilityStateComputer mVisibilityStateComputer;
 
     /**
      * Have we called mCurMethod.bindInput()?
@@ -143,9 +158,11 @@ final class UserData {
      * Intended to be instantiated only from this file.
      */
     UserData(@UserIdInt int userId,
-            @NonNull InputMethodBindingController bindingController) {
+            @NonNull InputMethodBindingController bindingController,
+            @NonNull ImeVisibilityStateComputer stateComputer) {
         mUserId = userId;
         mBindingController = bindingController;
+        mVisibilityStateComputer = stateComputer;
     }
 
     @Override

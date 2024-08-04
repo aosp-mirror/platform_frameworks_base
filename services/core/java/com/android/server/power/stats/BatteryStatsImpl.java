@@ -16393,6 +16393,10 @@ public class BatteryStatsImpl extends BatteryStats {
      * Callers will need to wait for the collection to complete on the handler thread.
      */
     public void schedulePowerStatsSampleCollection() {
+        if (!mSystemReady) {
+            return;
+        }
+
         mCpuPowerStatsCollector.forceSchedule();
         mScreenPowerStatsCollector.forceSchedule();
         mMobileRadioPowerStatsCollector.forceSchedule();
@@ -16400,6 +16404,7 @@ public class BatteryStatsImpl extends BatteryStats {
         mBluetoothPowerStatsCollector.forceSchedule();
         mCameraPowerStatsCollector.forceSchedule();
         mGnssPowerStatsCollector.forceSchedule();
+        mCustomEnergyConsumerPowerStatsCollector.forceSchedule();
     }
 
     /**

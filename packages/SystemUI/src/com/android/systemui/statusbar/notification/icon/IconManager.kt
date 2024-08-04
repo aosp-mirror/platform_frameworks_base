@@ -123,6 +123,13 @@ constructor(
             // Construct the status bar icon view.
             val sbIcon = iconBuilder.createIconView(entry)
             sbIcon.scaleType = ImageView.ScaleType.CENTER_INSIDE
+            val sbChipIcon: StatusBarIconView?
+            if (Flags.statusBarCallChipNotificationIcon()) {
+                sbChipIcon = iconBuilder.createIconView(entry)
+                sbChipIcon.scaleType = ImageView.ScaleType.CENTER_INSIDE
+            } else {
+                sbChipIcon = null
+            }
 
             // Construct the shelf icon view.
             val shelfIcon = iconBuilder.createIconView(entry)
@@ -139,9 +146,19 @@ constructor(
 
             try {
                 setIcon(entry, normalIconDescriptor, sbIcon)
+                if (Flags.statusBarCallChipNotificationIcon() && sbChipIcon != null) {
+                    setIcon(entry, normalIconDescriptor, sbChipIcon)
+                }
                 setIcon(entry, sensitiveIconDescriptor, shelfIcon)
                 setIcon(entry, sensitiveIconDescriptor, aodIcon)
-                entry.icons = IconPack.buildPack(sbIcon, shelfIcon, aodIcon, entry.icons)
+                entry.icons =
+                    IconPack.buildPack(
+                        sbIcon,
+                        sbChipIcon,
+                        shelfIcon,
+                        aodIcon,
+                        entry.icons,
+                    )
             } catch (e: InflationException) {
                 entry.icons = IconPack.buildEmptyPack(entry.icons)
                 throw e
@@ -178,6 +195,11 @@ constructor(
                 entry.sbn.notification?.let { iconBuilder.getIconContentDescription(it) }
 
             entry.icons.statusBarIcon?.let {
+                it.setNotification(entry.sbn, notificationContentDescription)
+                setIcon(entry, normalIconDescriptor, it)
+            }
+
+            entry.icons.statusBarChipIcon?.let {
                 it.setNotification(entry.sbn, notificationContentDescription)
                 setIcon(entry, normalIconDescriptor, it)
             }

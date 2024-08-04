@@ -27,9 +27,9 @@ import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.preferencesDataStoreFile
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
+import com.android.systemui.contextualeducation.GestureType
 import com.android.systemui.education.dagger.ContextualEducationModule.EduDataStoreScope
 import com.android.systemui.education.data.model.GestureEduModel
-import com.android.systemui.shared.education.GestureType
 import java.time.Instant
 import javax.inject.Inject
 import javax.inject.Provider

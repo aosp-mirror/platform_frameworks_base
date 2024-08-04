@@ -16,43 +16,21 @@
 
 package com.android.server.wm;
 
-import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.view.WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_STARTING;
 import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
 
-import static com.android.internal.util.FrameworkStatsLog.APP_COMPAT_STATE_CHANGED__LETTERBOX_POSITION__BOTTOM;
-import static com.android.internal.util.FrameworkStatsLog.APP_COMPAT_STATE_CHANGED__LETTERBOX_POSITION__CENTER;
-import static com.android.internal.util.FrameworkStatsLog.APP_COMPAT_STATE_CHANGED__LETTERBOX_POSITION__LEFT;
-import static com.android.internal.util.FrameworkStatsLog.APP_COMPAT_STATE_CHANGED__LETTERBOX_POSITION__RIGHT;
-import static com.android.internal.util.FrameworkStatsLog.APP_COMPAT_STATE_CHANGED__LETTERBOX_POSITION__TOP;
-import static com.android.internal.util.FrameworkStatsLog.APP_COMPAT_STATE_CHANGED__LETTERBOX_POSITION__UNKNOWN_POSITION;
-import static com.android.internal.util.FrameworkStatsLog.LETTERBOX_POSITION_CHANGED__POSITION_CHANGE__BOTTOM_TO_CENTER;
-import static com.android.internal.util.FrameworkStatsLog.LETTERBOX_POSITION_CHANGED__POSITION_CHANGE__CENTER_TO_BOTTOM;
-import static com.android.internal.util.FrameworkStatsLog.LETTERBOX_POSITION_CHANGED__POSITION_CHANGE__CENTER_TO_LEFT;
-import static com.android.internal.util.FrameworkStatsLog.LETTERBOX_POSITION_CHANGED__POSITION_CHANGE__CENTER_TO_RIGHT;
-import static com.android.internal.util.FrameworkStatsLog.LETTERBOX_POSITION_CHANGED__POSITION_CHANGE__CENTER_TO_TOP;
-import static com.android.internal.util.FrameworkStatsLog.LETTERBOX_POSITION_CHANGED__POSITION_CHANGE__LEFT_TO_CENTER;
-import static com.android.internal.util.FrameworkStatsLog.LETTERBOX_POSITION_CHANGED__POSITION_CHANGE__RIGHT_TO_CENTER;
-import static com.android.internal.util.FrameworkStatsLog.LETTERBOX_POSITION_CHANGED__POSITION_CHANGE__TOP_TO_CENTER;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_ATM;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.AppCompatConfiguration.LETTERBOX_BACKGROUND_APP_COLOR_BACKGROUND;
 import static com.android.server.wm.AppCompatConfiguration.LETTERBOX_BACKGROUND_APP_COLOR_BACKGROUND_FLOATING;
 import static com.android.server.wm.AppCompatConfiguration.LETTERBOX_BACKGROUND_SOLID_COLOR;
 import static com.android.server.wm.AppCompatConfiguration.LETTERBOX_BACKGROUND_WALLPAPER;
-import static com.android.server.wm.AppCompatConfiguration.LETTERBOX_HORIZONTAL_REACHABILITY_POSITION_CENTER;
-import static com.android.server.wm.AppCompatConfiguration.LETTERBOX_HORIZONTAL_REACHABILITY_POSITION_LEFT;
-import static com.android.server.wm.AppCompatConfiguration.LETTERBOX_HORIZONTAL_REACHABILITY_POSITION_RIGHT;
-import static com.android.server.wm.AppCompatConfiguration.LETTERBOX_VERTICAL_REACHABILITY_POSITION_BOTTOM;
-import static com.android.server.wm.AppCompatConfiguration.LETTERBOX_VERTICAL_REACHABILITY_POSITION_CENTER;
-import static com.android.server.wm.AppCompatConfiguration.LETTERBOX_VERTICAL_REACHABILITY_POSITION_TOP;
 import static com.android.server.wm.AppCompatConfiguration.letterboxBackgroundTypeToString;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityManager.TaskDescription;
-import android.content.res.Configuration;
 import android.graphics.Color;
 import android.graphics.Point;
 import android.graphics.Rect;
@@ -68,7 +46,6 @@ import android.view.WindowManager;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.statusbar.LetterboxDetails;
 import com.android.server.wm.AppCompatConfiguration.LetterboxBackgroundType;
-import com.android.window.flags.Flags;
 
 import java.io.PrintWriter;
 
@@ -85,6 +62,16 @@ final class LetterboxUiController {
 
     private final ActivityRecord mActivityRecord;
 
+    // TODO(b/356385137): Remove these we added to make dependencies temporarily explicit.
+    @NonNull
+    private final AppCompatReachabilityOverrides mAppCompatReachabilityOverrides;
+    @NonNull
+    private final AppCompatReachabilityPolicy mAppCompatReachabilityPolicy;
+    @NonNull
+    private final TransparentPolicy mTransparentPolicy;
+    @NonNull
+    private final AppCompatOrientationOverrides mAppCompatOrientationOverrides;
+
     private boolean mShowWallpaperForLetterboxBackground;
 
     @Nullable
@@ -92,14 +79,21 @@ final class LetterboxUiController {
 
     private boolean mLastShouldShowLetterboxUi;
 
-    private boolean mDoubleTapEvent;
-
     LetterboxUiController(WindowManagerService wmService, ActivityRecord activityRecord) {
         mAppCompatConfiguration = wmService.mAppCompatConfiguration;
         // Given activityRecord may not be fully constructed since LetterboxUiController
         // is created in its constructor. It shouldn't be used in this constructor but it's safe
         // to use it after since controller is only used in ActivityRecord.
         mActivityRecord = activityRecord;
+        // TODO(b/356385137): Remove these we added to make dependencies temporarily explicit.
+        mAppCompatReachabilityOverrides = mActivityRecord.mAppCompatController
+                .getAppCompatReachabilityOverrides();
+        mAppCompatReachabilityPolicy = mActivityRecord.mAppCompatController
+                .getAppCompatReachabilityPolicy();
+        mTransparentPolicy = mActivityRecord.mAppCompatController.getTransparentPolicy();
+        mAppCompatOrientationOverrides = mActivityRecord.mAppCompatController
+                .getAppCompatOrientationOverrides();
+
     }
 
     /** Cleans up {@link Letterbox} if it exists.*/
@@ -107,6 +101,8 @@ final class LetterboxUiController {
         if (mLetterbox != null) {
             mLetterbox.destroy();
             mLetterbox = null;
+            // TODO Remove after Letterbox refactoring.
+            mAppCompatReachabilityPolicy.setLetterboxInnerBoundsSupplier(null);
         }
     }
 
@@ -190,8 +186,7 @@ final class LetterboxUiController {
                         this::hasWallpaperBackgroundForLetterbox,
                         this::getLetterboxWallpaperBlurRadiusPx,
                         this::getLetterboxWallpaperDarkScrimAlpha,
-                        this::handleHorizontalDoubleTap,
-                        this::handleVerticalDoubleTap,
+                        mAppCompatReachabilityPolicy,
                         this::getLetterboxParentSurface);
                 mLetterbox.attachInput(w);
             }
@@ -227,23 +222,16 @@ final class LetterboxUiController {
             // For this reason we use ActivityRecord#getBounds() that the translucent activity
             // inherits from the first opaque activity beneath and also takes care of the scaling
             // in case of activities in size compat mode.
-            final Rect innerFrame = mActivityRecord.mAppCompatController
-                    .getTransparentPolicy().isRunning()
-                    ? mActivityRecord.getBounds() : w.getFrame();
+            final Rect innerFrame =
+                    mTransparentPolicy.isRunning() ? mActivityRecord.getBounds() : w.getFrame();
             mLetterbox.layout(spaceToFill, innerFrame, mTmpPoint);
-            if (mDoubleTapEvent) {
+            if (mAppCompatReachabilityOverrides.isDoubleTapEvent()) {
                 // We need to notify Shell that letterbox position has changed.
                 mActivityRecord.getTask().dispatchTaskInfoChangedIfNeeded(true /* force */);
             }
         } else if (mLetterbox != null) {
             mLetterbox.hide();
         }
-    }
-
-    boolean isFromDoubleTap() {
-        final boolean isFromDoubleTap = mDoubleTapEvent;
-        mDoubleTapEvent = false;
-        return isFromDoubleTap;
     }
 
     SurfaceControl getLetterboxParentSurface() {
@@ -272,310 +260,13 @@ final class LetterboxUiController {
                 && mActivityRecord.fillsParent();
     }
 
-    // Check if we are in the given pose and in fullscreen mode.
-    // Note that we check the task rather than the parent as with ActivityEmbedding the parent might
-    // be a TaskFragment, and its windowing mode is always MULTI_WINDOW, even if the task is
-    // actually fullscreen. If display is still in transition e.g. unfolding, don't return true
-    // for HALF_FOLDED state or app will flicker.
-    boolean isDisplayFullScreenAndInPosture(boolean isTabletop) {
-        Task task = mActivityRecord.getTask();
-        return mActivityRecord.mDisplayContent != null && task != null
-                && mActivityRecord.mDisplayContent.getDisplayRotation().isDeviceInPosture(
-                        DeviceStateController.DeviceState.HALF_FOLDED, isTabletop)
-                && !mActivityRecord.mDisplayContent.inTransition()
-                && task.getWindowingMode() == WINDOWING_MODE_FULLSCREEN;
-    }
-
-    // Note that we check the task rather than the parent as with ActivityEmbedding the parent might
-    // be a TaskFragment, and its windowing mode is always MULTI_WINDOW, even if the task is
-    // actually fullscreen.
-    private boolean isDisplayFullScreenAndSeparatingHinge() {
-        Task task = mActivityRecord.getTask();
-        return mActivityRecord.mDisplayContent != null
-                && mActivityRecord.mDisplayContent.getDisplayRotation().isDisplaySeparatingHinge()
-                && task != null
-                && task.getWindowingMode() == WINDOWING_MODE_FULLSCREEN;
-    }
-
-
-    float getHorizontalPositionMultiplier(Configuration parentConfiguration) {
-        // Don't check resolved configuration because it may not be updated yet during
-        // configuration change.
-        boolean bookModeEnabled = isFullScreenAndBookModeEnabled();
-        return isHorizontalReachabilityEnabled(parentConfiguration)
-                // Using the last global dynamic position to avoid "jumps" when moving
-                // between apps or activities.
-                ? mAppCompatConfiguration.getHorizontalMultiplierForReachability(bookModeEnabled)
-                : mAppCompatConfiguration.getLetterboxHorizontalPositionMultiplier(bookModeEnabled);
-    }
-
-    private boolean isFullScreenAndBookModeEnabled() {
-        return isDisplayFullScreenAndInPosture(/* isTabletop */ false)
-                && mAppCompatConfiguration.getIsAutomaticReachabilityInBookModeEnabled();
-    }
-
-    float getVerticalPositionMultiplier(Configuration parentConfiguration) {
-        // Don't check resolved configuration because it may not be updated yet during
-        // configuration change.
-        boolean tabletopMode = isDisplayFullScreenAndInPosture(/* isTabletop */ true);
-        return isVerticalReachabilityEnabled(parentConfiguration)
-                // Using the last global dynamic position to avoid "jumps" when moving
-                // between apps or activities.
-                ? mAppCompatConfiguration.getVerticalMultiplierForReachability(tabletopMode)
-                : mAppCompatConfiguration.getLetterboxVerticalPositionMultiplier(tabletopMode);
-    }
-
     boolean isLetterboxEducationEnabled() {
         return mAppCompatConfiguration.getIsEducationEnabled();
     }
 
-    /**
-     * @return {@value true} if the resulting app is letterboxed in a way defined as thin.
-     */
-    boolean isVerticalThinLetterboxed() {
-        final int thinHeight = mAppCompatConfiguration.getThinLetterboxHeightPx();
-        if (thinHeight < 0) {
-            return false;
-        }
-        final Task task = mActivityRecord.getTask();
-        if (task == null) {
-            return false;
-        }
-        final int padding = Math.abs(
-                task.getBounds().height() - mActivityRecord.getBounds().height()) / 2;
-        return padding <= thinHeight;
-    }
-
-    /**
-     * @return {@value true} if the resulting app is pillarboxed in a way defined as thin.
-     */
-    boolean isHorizontalThinLetterboxed() {
-        final int thinWidth = mAppCompatConfiguration.getThinLetterboxWidthPx();
-        if (thinWidth < 0) {
-            return false;
-        }
-        final Task task = mActivityRecord.getTask();
-        if (task == null) {
-            return false;
-        }
-        final int padding = Math.abs(
-                task.getBounds().width() - mActivityRecord.getBounds().width()) / 2;
-        return padding <= thinWidth;
-    }
-
-
-    /**
-     * @return {@value true} if the vertical reachability should be allowed in case of
-     * thin letteboxing
-     */
-    boolean allowVerticalReachabilityForThinLetterbox() {
-        if (!Flags.disableThinLetterboxingPolicy()) {
-            return true;
-        }
-        // When the flag is enabled we allow vertical reachability only if the
-        // app is not thin letterboxed vertically.
-        return !isVerticalThinLetterboxed();
-    }
-
-    /**
-     * @return {@value true} if the vertical reachability should be enabled in case of
-     * thin letteboxing
-     */
-    boolean allowHorizontalReachabilityForThinLetterbox() {
-        if (!Flags.disableThinLetterboxingPolicy()) {
-            return true;
-        }
-        // When the flag is enabled we allow horizontal reachability only if the
-        // app is not thin pillarboxed.
-        return !isHorizontalThinLetterboxed();
-    }
-
-    boolean shouldOverrideMinAspectRatio() {
-        return mActivityRecord.mAppCompatController.getAppCompatAspectRatioOverrides()
-                .shouldOverrideMinAspectRatio();
-    }
-
-    @AppCompatConfiguration.LetterboxVerticalReachabilityPosition
-    int getLetterboxPositionForVerticalReachability() {
-        final boolean isInFullScreenTabletopMode = isDisplayFullScreenAndSeparatingHinge();
-        return mAppCompatConfiguration.getLetterboxPositionForVerticalReachability(
-                isInFullScreenTabletopMode);
-    }
-
-    @AppCompatConfiguration.LetterboxHorizontalReachabilityPosition
-    int getLetterboxPositionForHorizontalReachability() {
-        final boolean isInFullScreenBookMode = isFullScreenAndBookModeEnabled();
-        return mAppCompatConfiguration.getLetterboxPositionForHorizontalReachability(
-                isInFullScreenBookMode);
-    }
-
-    @VisibleForTesting
-    void handleHorizontalDoubleTap(int x) {
-        if (!isHorizontalReachabilityEnabled() || mActivityRecord.isInTransition()) {
-            return;
-        }
-
-        if (mLetterbox.getInnerFrame().left <= x && mLetterbox.getInnerFrame().right >= x) {
-            // Only react to clicks at the sides of the letterboxed app window.
-            return;
-        }
-
-        boolean isInFullScreenBookMode = isDisplayFullScreenAndSeparatingHinge()
-                && mAppCompatConfiguration.getIsAutomaticReachabilityInBookModeEnabled();
-        int letterboxPositionForHorizontalReachability = mAppCompatConfiguration
-                .getLetterboxPositionForHorizontalReachability(isInFullScreenBookMode);
-        if (mLetterbox.getInnerFrame().left > x) {
-            // Moving to the next stop on the left side of the app window: right > center > left.
-            mAppCompatConfiguration.movePositionForHorizontalReachabilityToNextLeftStop(
-                    isInFullScreenBookMode);
-            int changeToLog =
-                    letterboxPositionForHorizontalReachability
-                            == LETTERBOX_HORIZONTAL_REACHABILITY_POSITION_CENTER
-                                ? LETTERBOX_POSITION_CHANGED__POSITION_CHANGE__CENTER_TO_LEFT
-                                : LETTERBOX_POSITION_CHANGED__POSITION_CHANGE__RIGHT_TO_CENTER;
-            logLetterboxPositionChange(changeToLog);
-            mDoubleTapEvent = true;
-        } else if (mLetterbox.getInnerFrame().right < x) {
-            // Moving to the next stop on the right side of the app window: left > center > right.
-            mAppCompatConfiguration.movePositionForHorizontalReachabilityToNextRightStop(
-                    isInFullScreenBookMode);
-            int changeToLog =
-                    letterboxPositionForHorizontalReachability
-                            == LETTERBOX_HORIZONTAL_REACHABILITY_POSITION_CENTER
-                                ? LETTERBOX_POSITION_CHANGED__POSITION_CHANGE__CENTER_TO_RIGHT
-                                : LETTERBOX_POSITION_CHANGED__POSITION_CHANGE__LEFT_TO_CENTER;
-            logLetterboxPositionChange(changeToLog);
-            mDoubleTapEvent = true;
-        }
-        // TODO(197549949): Add animation for transition.
-        mActivityRecord.recomputeConfiguration();
-    }
-
-    @VisibleForTesting
-    void handleVerticalDoubleTap(int y) {
-        if (!isVerticalReachabilityEnabled() || mActivityRecord.isInTransition()) {
-            return;
-        }
-
-        if (mLetterbox.getInnerFrame().top <= y && mLetterbox.getInnerFrame().bottom >= y) {
-            // Only react to clicks at the top and bottom of the letterboxed app window.
-            return;
-        }
-        boolean isInFullScreenTabletopMode = isDisplayFullScreenAndSeparatingHinge();
-        int letterboxPositionForVerticalReachability = mAppCompatConfiguration
-                .getLetterboxPositionForVerticalReachability(isInFullScreenTabletopMode);
-        if (mLetterbox.getInnerFrame().top > y) {
-            // Moving to the next stop on the top side of the app window: bottom > center > top.
-            mAppCompatConfiguration.movePositionForVerticalReachabilityToNextTopStop(
-                    isInFullScreenTabletopMode);
-            int changeToLog =
-                    letterboxPositionForVerticalReachability
-                            == LETTERBOX_VERTICAL_REACHABILITY_POSITION_CENTER
-                                ? LETTERBOX_POSITION_CHANGED__POSITION_CHANGE__CENTER_TO_TOP
-                                : LETTERBOX_POSITION_CHANGED__POSITION_CHANGE__BOTTOM_TO_CENTER;
-            logLetterboxPositionChange(changeToLog);
-            mDoubleTapEvent = true;
-        } else if (mLetterbox.getInnerFrame().bottom < y) {
-            // Moving to the next stop on the bottom side of the app window: top > center > bottom.
-            mAppCompatConfiguration.movePositionForVerticalReachabilityToNextBottomStop(
-                    isInFullScreenTabletopMode);
-            int changeToLog =
-                    letterboxPositionForVerticalReachability
-                            == LETTERBOX_VERTICAL_REACHABILITY_POSITION_CENTER
-                                ? LETTERBOX_POSITION_CHANGED__POSITION_CHANGE__CENTER_TO_BOTTOM
-                                : LETTERBOX_POSITION_CHANGED__POSITION_CHANGE__TOP_TO_CENTER;
-            logLetterboxPositionChange(changeToLog);
-            mDoubleTapEvent = true;
-        }
-        // TODO(197549949): Add animation for transition.
-        mActivityRecord.recomputeConfiguration();
-    }
-
-    /**
-     * Whether horizontal reachability is enabled for an activity in the current configuration.
-     *
-     * <p>Conditions that needs to be met:
-     * <ul>
-     *   <li>Windowing mode is fullscreen.
-     *   <li>Horizontal Reachability is enabled.
-     *   <li>First top opaque activity fills parent vertically, but not horizontally.
-     * </ul>
-     */
-    private boolean isHorizontalReachabilityEnabled(Configuration parentConfiguration) {
-        if (!allowHorizontalReachabilityForThinLetterbox()) {
-            return false;
-        }
-        final Rect parentAppBoundsOverride = mActivityRecord.getParentAppBoundsOverride();
-        final Rect parentAppBounds = parentAppBoundsOverride != null
-                ? parentAppBoundsOverride : parentConfiguration.windowConfiguration.getAppBounds();
-        // Use screen resolved bounds which uses resolved bounds or size compat bounds
-        // as activity bounds can sometimes be empty
-        final Rect opaqueActivityBounds = mActivityRecord.mAppCompatController
-                .getTransparentPolicy().getFirstOpaqueActivity()
-                .map(ActivityRecord::getScreenResolvedBounds)
-                .orElse(mActivityRecord.getScreenResolvedBounds());
-        return mAppCompatConfiguration.getIsHorizontalReachabilityEnabled()
-                && parentConfiguration.windowConfiguration.getWindowingMode()
-                        == WINDOWING_MODE_FULLSCREEN
-                // Check whether the activity fills the parent vertically.
-                && parentAppBounds.height() <= opaqueActivityBounds.height()
-                && parentAppBounds.width() > opaqueActivityBounds.width();
-    }
-
-    @VisibleForTesting
-    boolean isHorizontalReachabilityEnabled() {
-        return isHorizontalReachabilityEnabled(mActivityRecord.getParent().getConfiguration());
-    }
-
-    boolean isLetterboxDoubleTapEducationEnabled() {
-        return isHorizontalReachabilityEnabled() || isVerticalReachabilityEnabled();
-    }
-
-    // TODO(b/346264992): Remove after AppCompatController refactoring
-    private AppCompatOverrides getAppCompatOverrides() {
-        return mActivityRecord.mAppCompatController.getAppCompatOverrides();
-    }
-
-    /**
-     * Whether vertical reachability is enabled for an activity in the current configuration.
-     *
-     * <p>Conditions that needs to be met:
-     * <ul>
-     *   <li>Windowing mode is fullscreen.
-     *   <li>Vertical Reachability is enabled.
-     *   <li>First top opaque activity fills parent horizontally but not vertically.
-     * </ul>
-     */
-    private boolean isVerticalReachabilityEnabled(Configuration parentConfiguration) {
-        if (!allowVerticalReachabilityForThinLetterbox()) {
-            return false;
-        }
-        final Rect parentAppBoundsOverride = mActivityRecord.getParentAppBoundsOverride();
-        final Rect parentAppBounds = parentAppBoundsOverride != null
-                ? parentAppBoundsOverride : parentConfiguration.windowConfiguration.getAppBounds();
-        // Use screen resolved bounds which uses resolved bounds or size compat bounds
-        // as activity bounds can sometimes be empty.
-        final Rect opaqueActivityBounds = mActivityRecord.mAppCompatController
-                .getTransparentPolicy().getFirstOpaqueActivity()
-                .map(ActivityRecord::getScreenResolvedBounds)
-                .orElse(mActivityRecord.getScreenResolvedBounds());
-        return mAppCompatConfiguration.getIsVerticalReachabilityEnabled()
-                && parentConfiguration.windowConfiguration.getWindowingMode()
-                        == WINDOWING_MODE_FULLSCREEN
-                // Check whether the activity fills the parent horizontally.
-                && parentAppBounds.width() <= opaqueActivityBounds.width()
-                && parentAppBounds.height() > opaqueActivityBounds.height();
-    }
-
-    @VisibleForTesting
-    boolean isVerticalReachabilityEnabled() {
-        return isVerticalReachabilityEnabled(mActivityRecord.getParent().getConfiguration());
-    }
-
     @VisibleForTesting
     boolean shouldShowLetterboxUi(WindowState mainWindow) {
-        if (getAppCompatOverrides().getAppCompatOrientationOverrides()
-                .getIsRelaunchingAfterRequestedOrientationChanged()) {
+        if (mAppCompatOrientationOverrides.getIsRelaunchingAfterRequestedOrientationChanged()) {
             return mLastShouldShowLetterboxUi;
         }
 
@@ -664,8 +355,7 @@ final class LetterboxUiController {
         // corners because we assume the specific layout would. This is the case when the layout
         // of the translucent activity uses only a part of all the bounds because of the use of
         // LayoutParams.WRAP_CONTENT.
-        if (mActivityRecord.mAppCompatController.getTransparentPolicy().isRunning()
-                && (cropBounds.width() != mainWindow.mRequestedWidth
+        if (mTransparentPolicy.isRunning() && (cropBounds.width() != mainWindow.mRequestedWidth
                 || cropBounds.height() != mainWindow.mRequestedHeight)) {
             return null;
         }
@@ -808,7 +498,8 @@ final class LetterboxUiController {
             return;
         }
 
-        pw.println(prefix + "  letterboxReason=" + getLetterboxReasonString(mainWin));
+        pw.println(prefix + "  letterboxReason="
+                + AppCompatUtils.getLetterboxReasonString(mActivityRecord, mainWin));
         pw.println(prefix + "  activityAspectRatio="
                 + AppCompatUtils.computeAspectRatio(mActivityRecord.getBounds()));
 
@@ -818,8 +509,10 @@ final class LetterboxUiController {
         if (!shouldShowLetterboxUi) {
             return;
         }
-        pw.println(prefix + "  isVerticalThinLetterboxed=" + isVerticalThinLetterboxed());
-        pw.println(prefix + "  isHorizontalThinLetterboxed=" + isHorizontalThinLetterboxed());
+        pw.println(prefix + "  isVerticalThinLetterboxed="
+                + mAppCompatReachabilityOverrides.isVerticalThinLetterboxed());
+        pw.println(prefix + "  isHorizontalThinLetterboxed="
+                + mAppCompatReachabilityOverrides.isHorizontalThinLetterboxed());
         pw.println(prefix + "  letterboxBackgroundColor=" + Integer.toHexString(
                 getLetterboxBackgroundColor().toArgb()));
         pw.println(prefix + "  letterboxBackgroundType="
@@ -836,14 +529,18 @@ final class LetterboxUiController {
             pw.println(prefix + "  letterboxBackgroundWallpaperBlurRadius="
                     + getLetterboxWallpaperBlurRadiusPx());
         }
-
+        final AppCompatReachabilityOverrides reachabilityOverrides = mActivityRecord
+                .mAppCompatController.getAppCompatReachabilityOverrides();
         pw.println(prefix + "  isHorizontalReachabilityEnabled="
-                + isHorizontalReachabilityEnabled());
-        pw.println(prefix + "  isVerticalReachabilityEnabled=" + isVerticalReachabilityEnabled());
+                + reachabilityOverrides.isHorizontalReachabilityEnabled());
+        pw.println(prefix + "  isVerticalReachabilityEnabled="
+                + reachabilityOverrides.isVerticalReachabilityEnabled());
         pw.println(prefix + "  letterboxHorizontalPositionMultiplier="
-                + getHorizontalPositionMultiplier(mActivityRecord.getParent().getConfiguration()));
+                + mAppCompatReachabilityOverrides.getHorizontalPositionMultiplier(mActivityRecord
+                    .getParent().getConfiguration()));
         pw.println(prefix + "  letterboxVerticalPositionMultiplier="
-                + getVerticalPositionMultiplier(mActivityRecord.getParent().getConfiguration()));
+                + mAppCompatReachabilityOverrides.getVerticalPositionMultiplier(mActivityRecord
+                    .getParent().getConfiguration()));
         pw.println(prefix + "  letterboxPositionForHorizontalReachability="
                 + AppCompatConfiguration.letterboxHorizontalReachabilityPositionToString(
                 mAppCompatConfiguration.getLetterboxPositionForHorizontalReachability(false)));
@@ -859,86 +556,6 @@ final class LetterboxUiController {
         pw.println(prefix + "  isDisplayAspectRatioEnabledForFixedOrientationLetterbox="
                 + mAppCompatConfiguration
                 .getIsDisplayAspectRatioEnabledForFixedOrientationLetterbox());
-    }
-
-    /**
-     * Returns a string representing the reason for letterboxing. This method assumes the activity
-     * is letterboxed.
-     */
-    private String getLetterboxReasonString(WindowState mainWin) {
-        if (mActivityRecord.inSizeCompatMode()) {
-            return "SIZE_COMPAT_MODE";
-        }
-        if (mActivityRecord.mAppCompatController.getAppCompatAspectRatioPolicy()
-                .isLetterboxedForFixedOrientationAndAspectRatio()) {
-            return "FIXED_ORIENTATION";
-        }
-        if (mainWin.isLetterboxedForDisplayCutout()) {
-            return "DISPLAY_CUTOUT";
-        }
-        if (mActivityRecord.mAppCompatController.getAppCompatAspectRatioPolicy()
-                .isLetterboxedForAspectRatioOnly()) {
-            return "ASPECT_RATIO";
-        }
-        return "UNKNOWN_REASON";
-    }
-
-    private int letterboxHorizontalReachabilityPositionToLetterboxPosition(
-            @AppCompatConfiguration.LetterboxHorizontalReachabilityPosition int position) {
-        switch (position) {
-            case LETTERBOX_HORIZONTAL_REACHABILITY_POSITION_LEFT:
-                return APP_COMPAT_STATE_CHANGED__LETTERBOX_POSITION__LEFT;
-            case LETTERBOX_HORIZONTAL_REACHABILITY_POSITION_CENTER:
-                return APP_COMPAT_STATE_CHANGED__LETTERBOX_POSITION__CENTER;
-            case LETTERBOX_HORIZONTAL_REACHABILITY_POSITION_RIGHT:
-                return APP_COMPAT_STATE_CHANGED__LETTERBOX_POSITION__RIGHT;
-            default:
-                throw new AssertionError(
-                        "Unexpected letterbox horizontal reachability position type: "
-                                + position);
-        }
-    }
-
-    private int letterboxVerticalReachabilityPositionToLetterboxPosition(
-            @AppCompatConfiguration.LetterboxVerticalReachabilityPosition int position) {
-        switch (position) {
-            case LETTERBOX_VERTICAL_REACHABILITY_POSITION_TOP:
-                return APP_COMPAT_STATE_CHANGED__LETTERBOX_POSITION__TOP;
-            case LETTERBOX_VERTICAL_REACHABILITY_POSITION_CENTER:
-                return APP_COMPAT_STATE_CHANGED__LETTERBOX_POSITION__CENTER;
-            case LETTERBOX_VERTICAL_REACHABILITY_POSITION_BOTTOM:
-                return APP_COMPAT_STATE_CHANGED__LETTERBOX_POSITION__BOTTOM;
-            default:
-                throw new AssertionError(
-                        "Unexpected letterbox vertical reachability position type: "
-                                + position);
-        }
-    }
-
-    int getLetterboxPositionForLogging() {
-        int positionToLog = APP_COMPAT_STATE_CHANGED__LETTERBOX_POSITION__UNKNOWN_POSITION;
-        if (isHorizontalReachabilityEnabled()) {
-            int letterboxPositionForHorizontalReachability = mAppCompatConfiguration
-                    .getLetterboxPositionForHorizontalReachability(
-                            isDisplayFullScreenAndInPosture(/* isTabletop */ false));
-            positionToLog = letterboxHorizontalReachabilityPositionToLetterboxPosition(
-                    letterboxPositionForHorizontalReachability);
-        } else if (isVerticalReachabilityEnabled()) {
-            int letterboxPositionForVerticalReachability = mAppCompatConfiguration
-                    .getLetterboxPositionForVerticalReachability(
-                            isDisplayFullScreenAndInPosture(/* isTabletop */ true));
-            positionToLog = letterboxVerticalReachabilityPositionToLetterboxPosition(
-                    letterboxPositionForVerticalReachability);
-        }
-        return positionToLog;
-    }
-
-    /**
-     * Logs letterbox position changes via {@link ActivityMetricsLogger#logLetterboxPositionChange}.
-     */
-    private void logLetterboxPositionChange(int letterboxPositionChange) {
-        mActivityRecord.mTaskSupervisor.getActivityMetricsLogger()
-                .logLetterboxPositionChange(mActivityRecord, letterboxPositionChange);
     }
 
     @Nullable

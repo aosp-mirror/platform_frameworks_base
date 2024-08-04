@@ -120,7 +120,7 @@ constructor(
             )
         }
 
-        MovableElement(key = largeClockElementKey, modifier = modifier) {
+        Element(key = largeClockElementKey, modifier = modifier) {
             content {
                 AndroidView(
                     factory = { context ->

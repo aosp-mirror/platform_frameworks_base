@@ -16,8 +16,6 @@
 
 package com.android.settingslib.bluetooth;
 
-import static com.android.settingslib.flags.Flags.enableCachedBluetoothDeviceDedup;
-
 import android.bluetooth.BluetoothA2dp;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothCsipSetCoordinator;
@@ -403,7 +401,7 @@ public class BluetoothEventManager {
                 cachedDevice = mDeviceManager.addDevice(device);
             }
 
-            if (enableCachedBluetoothDeviceDedup() && bondState == BluetoothDevice.BOND_BONDED) {
+            if (bondState == BluetoothDevice.BOND_BONDED) {
                 mDeviceManager.removeDuplicateInstanceForIdentityAddress(device);
             }
 

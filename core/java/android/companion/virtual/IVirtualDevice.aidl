@@ -112,6 +112,24 @@ interface IVirtualDevice {
     void removeActivityPolicyExemption(in ComponentName exemption);
 
     /**
+     * Specifies a policy for this virtual device on the given display.
+     */
+    @EnforcePermission("CREATE_VIRTUAL_DEVICE")
+    void setDevicePolicyForDisplay(int displayId, int policyType, int devicePolicy);
+
+    /**
+     * Adds an exemption to the default activity launch policy on the given display.
+     */
+    @EnforcePermission("CREATE_VIRTUAL_DEVICE")
+    void addActivityPolicyExemptionForDisplay(int displayId, in ComponentName exemption);
+
+    /**
+     * Removes an exemption to the default activity launch policy on the given display.
+     */
+    @EnforcePermission("CREATE_VIRTUAL_DEVICE")
+    void removeActivityPolicyExemptionForDisplay(int displayId, in ComponentName exemption);
+
+    /**
      * Notifies that an audio session being started.
      */
     @EnforcePermission("CREATE_VIRTUAL_DEVICE")

@@ -39,6 +39,7 @@ import com.android.systemui.statusbar.phone.StatusBarBoundsProvider
 import com.android.systemui.statusbar.phone.fragment.dagger.StatusBarFragmentComponent
 import com.android.systemui.statusbar.phone.ongoingcall.data.repository.ongoingCallRepository
 import com.android.systemui.statusbar.phone.ongoingcall.shared.model.OngoingCallModel
+import com.android.systemui.statusbar.phone.ongoingcall.shared.model.inCallModel
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.argumentCaptor
 import com.android.systemui.util.mockito.capture
@@ -396,9 +397,7 @@ class StatusBarModeRepositoryImplTest : SysuiTestCase() {
         testScope.runTest {
             val latest by collectLastValue(underTest.statusBarAppearance)
 
-            ongoingCallRepository.setOngoingCallState(
-                OngoingCallModel.InCall(startTimeMs = 34, intent = null)
-            )
+            ongoingCallRepository.setOngoingCallState(inCallModel(startTimeMs = 34))
             onSystemBarAttributesChanged(
                 requestedVisibleTypes = WindowInsets.Type.navigationBars(),
             )
@@ -411,9 +410,8 @@ class StatusBarModeRepositoryImplTest : SysuiTestCase() {
         testScope.runTest {
             val latest by collectLastValue(underTest.statusBarAppearance)
 
-            ongoingCallRepository.setOngoingCallState(
-                OngoingCallModel.InCall(startTimeMs = 789, intent = null)
-            )
+            ongoingCallRepository.setOngoingCallState(inCallModel(startTimeMs = 789))
+
             onSystemBarAttributesChanged(
                 requestedVisibleTypes = WindowInsets.Type.statusBars(),
                 appearance = APPEARANCE_OPAQUE_STATUS_BARS,

@@ -17,6 +17,8 @@
 package com.android.compose.animation.scene
 
 import androidx.compose.foundation.gestures.Orientation
+import com.android.compose.animation.scene.content.state.ContentState
+import com.android.compose.animation.scene.content.state.TransitionState
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
@@ -37,14 +39,14 @@ fun transition(
     isInitiatedByUserInput: Boolean = false,
     isUserInputOngoing: Boolean = false,
     isUpOrLeft: Boolean = false,
-    bouncingScene: SceneKey? = null,
+    bouncingContent: ContentKey? = null,
     orientation: Orientation = Orientation.Horizontal,
     onFinish: ((TransitionState.Transition) -> Job)? = null,
     replacedTransition: TransitionState.Transition? = null,
 ): TransitionState.Transition {
     return object :
         TransitionState.Transition(from, to, replacedTransition),
-        TransitionState.HasOverscrollProperties {
+        ContentState.HasOverscrollProperties {
         override val currentScene: SceneKey
             get() = current()
 
@@ -66,7 +68,7 @@ fun transition(
         override val isInitiatedByUserInput: Boolean = isInitiatedByUserInput
         override val isUserInputOngoing: Boolean = isUserInputOngoing
         override val isUpOrLeft: Boolean = isUpOrLeft
-        override val bouncingScene: SceneKey? = bouncingScene
+        override val bouncingContent: ContentKey? = bouncingContent
         override val orientation: Orientation = orientation
         override val overscrollScope: OverscrollScope =
             object : OverscrollScope {
