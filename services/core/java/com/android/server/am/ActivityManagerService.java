@@ -18444,6 +18444,23 @@ public class ActivityManagerService extends IActivityManager.Stub
             implements ActivityManagerLocal {
 
         @Override
+        public void addFrozenProcessListener(int pid, @NonNull Executor executor,
+                @NonNull FrozenProcessListener listener) {
+            Objects.requireNonNull(executor);
+            Objects.requireNonNull(listener);
+            synchronized (mProcLock) {
+                final ProcessRecord app;
+                synchronized (mPidsSelfLocked) {
+                    app = mPidsSelfLocked.get(pid);
+                }
+                if (app != null) {
+                    mOomAdjuster.mCachedAppOptimizer.addFrozenProcessListener(app, executor,
+                            listener);
+                }
+            }
+        }
+
+        @Override
         public List<PendingIntentStats> getPendingIntentStats() {
             return mPendingIntentController.dumpPendingIntentStatsForStatsd();
         }

@@ -20,7 +20,6 @@ import android.annotation.IntDef;
 import android.hardware.display.DisplayManagerInternal;
 import android.util.Slog;
 
-import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.display.utils.DebugUtils;
 
@@ -38,8 +37,7 @@ public final class WakelockController {
     public static final int WAKE_LOCK_PROXIMITY_NEGATIVE = 2;
     public static final int WAKE_LOCK_PROXIMITY_DEBOUNCE = 3;
     public static final int WAKE_LOCK_STATE_CHANGED = 4;
-    public static final int WAKE_LOCK_OVERRIDE_DOZE_SCREEN_STATE = 5;
-    public static final int WAKE_LOCK_UNFINISHED_BUSINESS = 6;
+    public static final int WAKE_LOCK_UNFINISHED_BUSINESS = 5;
 
     @VisibleForTesting
     static final int WAKE_LOCK_MAX = WAKE_LOCK_UNFINISHED_BUSINESS;
@@ -55,14 +53,11 @@ public final class WakelockController {
             WAKE_LOCK_PROXIMITY_NEGATIVE,
             WAKE_LOCK_PROXIMITY_DEBOUNCE,
             WAKE_LOCK_STATE_CHANGED,
-            WAKE_LOCK_OVERRIDE_DOZE_SCREEN_STATE,
             WAKE_LOCK_UNFINISHED_BUSINESS
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface WAKE_LOCK_TYPE {
     }
-
-    private final Object mLock = new Object();
 
     // Asynchronous callbacks into the power manager service.
     // Only invoked from the handler thread while no locks are held.
@@ -70,8 +65,6 @@ public final class WakelockController {
 
     // Identifiers for suspend blocker acquisition requests
     private final String mSuspendBlockerIdUnfinishedBusiness;
-    @GuardedBy("mLock")
-    private final String mSuspendBlockerOverrideDozeScreenState;
     private final String mSuspendBlockerIdOnStateChanged;
     private final String mSuspendBlockerIdProxPositive;
     private final String mSuspendBlockerIdProxNegative;
@@ -79,10 +72,6 @@ public final class WakelockController {
 
     // True if we have unfinished business and are holding a suspend-blocker.
     private boolean mUnfinishedBusiness;
-
-    // True if we have are holding a suspend-blocker to override the doze screen state.
-    @GuardedBy("mLock")
-    private boolean mIsOverrideDozeScreenStateAcquired;
 
     // True if we have have debounced the proximity change impact and are holding a suspend-blocker.
     private boolean mHasProximityDebounced;
@@ -119,7 +108,6 @@ public final class WakelockController {
         mTag = TAG + "[" + mDisplayId + "]";
         mDisplayPowerCallbacks = callbacks;
         mSuspendBlockerIdUnfinishedBusiness = "[" + displayId + "]unfinished business";
-        mSuspendBlockerOverrideDozeScreenState =  "[" + displayId + "]override doze screen state";
         mSuspendBlockerIdOnStateChanged = "[" + displayId + "]on state changed";
         mSuspendBlockerIdProxPositive = "[" + displayId + "]prox positive";
         mSuspendBlockerIdProxNegative = "[" + displayId + "]prox negative";
@@ -166,10 +154,6 @@ public final class WakelockController {
                 return acquireProxDebounceSuspendBlocker();
             case WAKE_LOCK_STATE_CHANGED:
                 return acquireStateChangedSuspendBlocker();
-            case WAKE_LOCK_OVERRIDE_DOZE_SCREEN_STATE:
-                synchronized (mLock) {
-                    return acquireOverrideDozeScreenStateSuspendBlockerLocked();
-                }
             case WAKE_LOCK_UNFINISHED_BUSINESS:
                 return acquireUnfinishedBusinessSuspendBlocker();
             default:
@@ -187,10 +171,6 @@ public final class WakelockController {
                 return releaseProxDebounceSuspendBlocker();
             case WAKE_LOCK_STATE_CHANGED:
                 return releaseStateChangedSuspendBlocker();
-            case WAKE_LOCK_OVERRIDE_DOZE_SCREEN_STATE:
-                synchronized (mLock) {
-                    return releaseOverrideDozeScreenStateSuspendBlockerLocked();
-                }
             case WAKE_LOCK_UNFINISHED_BUSINESS:
                 return releaseUnfinishedBusinessSuspendBlocker();
             default:
@@ -234,42 +214,6 @@ public final class WakelockController {
         if (mOnStateChangedPending) {
             mDisplayPowerCallbacks.releaseSuspendBlocker(mSuspendBlockerIdOnStateChanged);
             mOnStateChangedPending = false;
-            return true;
-        }
-        return false;
-    }
-
-    /**
-     * Acquires the suspend blocker to override the doze screen state and notifies the
-     * PowerManagerService about the changes. Note that this utility is syncronized because a
-     * request to override the doze screen state can come from a non-power thread.
-     */
-    @GuardedBy("mLock")
-    private boolean acquireOverrideDozeScreenStateSuspendBlockerLocked() {
-        // Grab a wake lock if we have unfinished business.
-        if (!mIsOverrideDozeScreenStateAcquired) {
-            if (DEBUG) {
-                Slog.d(mTag, "Acquiring suspend blocker to override the doze screen state...");
-            }
-            mDisplayPowerCallbacks.acquireSuspendBlocker(mSuspendBlockerOverrideDozeScreenState);
-            mIsOverrideDozeScreenStateAcquired = true;
-            return true;
-        }
-        return false;
-    }
-
-    /**
-     * Releases the override doze screen state suspend blocker and notifies the PowerManagerService
-     * about the changes.
-     */
-    @GuardedBy("mLock")
-    private boolean releaseOverrideDozeScreenStateSuspendBlockerLocked() {
-        if (mIsOverrideDozeScreenStateAcquired) {
-            if (DEBUG) {
-                Slog.d(mTag, "Finished overriding doze screen state...");
-            }
-            mDisplayPowerCallbacks.releaseSuspendBlocker(mSuspendBlockerOverrideDozeScreenState);
-            mIsOverrideDozeScreenStateAcquired = false;
             return true;
         }
         return false;
@@ -422,7 +366,6 @@ public final class WakelockController {
         pw.println("  mOnStateChangePending=" + isOnStateChangedPending());
         pw.println("  mOnProximityPositiveMessages=" + isProximityPositiveAcquired());
         pw.println("  mOnProximityNegativeMessages=" + isProximityNegativeAcquired());
-        pw.println("  mIsOverrideDozeScreenStateAcquired=" + isOverrideDozeScreenStateAcquired());
     }
 
     @VisibleForTesting
@@ -451,13 +394,6 @@ public final class WakelockController {
     }
 
     @VisibleForTesting
-    String getSuspendBlockerOverrideDozeScreenState() {
-        synchronized (mLock) {
-            return mSuspendBlockerOverrideDozeScreenState;
-        }
-    }
-
-    @VisibleForTesting
     boolean hasUnfinishedBusiness() {
         return mUnfinishedBusiness;
     }
@@ -480,12 +416,5 @@ public final class WakelockController {
     @VisibleForTesting
     boolean hasProximitySensorDebounced() {
         return mHasProximityDebounced;
-    }
-
-    @VisibleForTesting
-    boolean isOverrideDozeScreenStateAcquired() {
-        synchronized (mLock) {
-            return mIsOverrideDozeScreenStateAcquired;
-        }
     }
 }

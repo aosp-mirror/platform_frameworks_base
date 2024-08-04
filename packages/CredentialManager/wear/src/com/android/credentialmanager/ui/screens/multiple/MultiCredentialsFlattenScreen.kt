@@ -79,7 +79,7 @@ fun MultiCredentialsFlattenScreen(
                 Row {
                     Spacer(Modifier.weight(0.0624f)) // 6.24% side margin
                     WearSecondaryLabel(
-                        text = userNameEntries.userName,
+                        text = userNameEntries.name,
                         modifier = Modifier.padding(
                             top = 12.dp,
                             bottom = 4.dp,

@@ -31,6 +31,13 @@ flag {
 }
 
 flag {
+    name: "disable_non_resizable_app_snap_resizing"
+    namespace: "lse_desktop_experience"
+    description: "Stops non-resizable app desktop windows from being snap resized"
+    bug: "325240072"
+}
+
+flag {
     name: "enable_desktop_windowing_task_limit"
     namespace: "lse_desktop_experience"
     description: "Enables a limit on the number of Tasks shown in Desktop Mode"

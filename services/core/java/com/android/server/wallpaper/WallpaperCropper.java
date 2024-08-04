@@ -601,8 +601,8 @@ public class WallpaperCropper {
                             .getDefaultDisplaySizes().get(orientation);
                     if (displayForThisOrientation == null) continue;
                     float sampleSizeForThisOrientation = Math.max(1f, Math.min(
-                            (float) crop.width() / displayForThisOrientation.x,
-                            (float) crop.height() / displayForThisOrientation.y));
+                            crop.width() / displayForThisOrientation.x,
+                            crop.height() / displayForThisOrientation.y));
                     sampleSize = Math.min(sampleSize, sampleSizeForThisOrientation);
                 }
                 // If the total crop has more width or height than either the max texture size

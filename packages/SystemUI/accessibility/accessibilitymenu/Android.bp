@@ -37,6 +37,7 @@ android_app {
         "androidx.core_core",
         "androidx.preference_preference",
         "androidx.viewpager_viewpager",
+        "com_android_systemui_flags_lib",
         "SettingsLibDisplayUtils",
         "SettingsLibSettingsTheme",
         "com_android_a11y_menu_flags_lib",
