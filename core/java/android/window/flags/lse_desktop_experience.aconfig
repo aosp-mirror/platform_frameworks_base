@@ -31,6 +31,13 @@ flag {
 }
 
 flag {
+    name: "disable_non_resizable_app_snap_resizing"
+    namespace: "lse_desktop_experience"
+    description: "Stops non-resizable app desktop windows from being snap resized"
+    bug: "325240072"
+}
+
+flag {
     name: "enable_desktop_windowing_task_limit"
     namespace: "lse_desktop_experience"
     description: "Enables a limit on the number of Tasks shown in Desktop Mode"
@@ -192,8 +199,22 @@ flag {
 }
 
 flag {
+    name: "enable_desktop_windowing_transitions"
+    namespace: "lse_desktop_experience"
+    description: "Enables desktop windowing transition & motion polish changes"
+    bug: "356570693"
+}
+
+flag {
     name: "enable_compat_ui_visibility_status"
     namespace: "lse_desktop_experience"
     description: "Enables the tracking of the status for compat ui elements."
     bug: "350953004"
+}
+
+flag {
+    name: "enable_desktop_windowing_app_to_web_education"
+    namespace: "lse_desktop_experience"
+    description: "Enables desktop windowing app-to-web education"
+    bug: "348205896"
 }

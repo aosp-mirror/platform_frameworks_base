@@ -2540,9 +2540,7 @@ class ActivityStarter {
                 if (!mOptions.canTaskOverlayResume()) {
                     final Task task = mRootWindowContainer.anyTaskForId(
                             mOptions.getLaunchTaskId());
-                    final ActivityRecord top = task != null
-                            ? task.getTopNonFinishingActivity() : null;
-                    if (top != null && !top.isState(RESUMED)) {
+                    if (task != null && !task.canBeResumed(r)) {
 
                         // The caller specifies that we'd like to be avoided to be moved to the
                         // front, so be it!

@@ -96,6 +96,8 @@ constructor(
                 when (toState) {
                     KeyguardState.LOCKSCREEN -> TO_LOCKSCREEN_DURATION
                     KeyguardState.OCCLUDED -> TO_OCCLUDED_DURATION
+                    KeyguardState.ALTERNATE_BOUNCER -> TO_BOUNCER_DURATION
+                    KeyguardState.PRIMARY_BOUNCER -> TO_BOUNCER_DURATION
                     else -> DEFAULT_DURATION
                 }.inWholeMilliseconds
         }
@@ -269,8 +271,16 @@ constructor(
 
     companion object {
         const val TAG = "FromGlanceableHubTransitionInteractor"
-        val DEFAULT_DURATION = 1.seconds
-        val TO_LOCKSCREEN_DURATION = DEFAULT_DURATION
+
+        /**
+         * DEFAULT_DURATION controls the timing for all animations other than those with overrides
+         * in [getDefaultAnimatorForTransitionsToState].
+         *
+         * Set at 400ms for parity with [FromLockscreenTransitionInteractor]
+         */
+        val DEFAULT_DURATION = 400.milliseconds
+        val TO_LOCKSCREEN_DURATION = 1.seconds
+        val TO_BOUNCER_DURATION = 400.milliseconds
         val TO_OCCLUDED_DURATION = 450.milliseconds
     }
 }

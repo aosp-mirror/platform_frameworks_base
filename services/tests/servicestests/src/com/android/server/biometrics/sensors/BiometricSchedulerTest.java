@@ -1296,6 +1296,11 @@ public class BiometricSchedulerTest {
             mFingerprints.add((Fingerprint) identifier);
         }
 
+        @Override
+        protected int getModality() {
+            return 0;
+        }
+
         public List<Fingerprint> getFingerprints() {
             return mFingerprints;
         }

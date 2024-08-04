@@ -145,7 +145,6 @@ import android.annotation.Size;
 import android.annotation.UiContext;
 import android.app.ActivityManager;
 import android.app.ActivityThread;
-import android.app.ICompatCameraControlCallback;
 import android.app.ResourcesManager;
 import android.app.WindowConfiguration;
 import android.app.compat.CompatChanges;
@@ -516,17 +515,6 @@ public final class ViewRootImpl implements ViewParent,
                 int newDisplayId, @Nullable ActivityWindowInfo activityWindowInfo) {
             onConfigurationChanged(overrideConfig, newDisplayId);
         }
-
-        /**
-         * Notify the corresponding activity about the request to show or hide a camera compat
-         * control for stretched issues in the viewfinder.
-         *
-         * @param showControl Whether the control should be shown or hidden.
-         * @param transformationApplied Whether the treatment is already applied.
-         * @param callback The callback executed when the user clicks on a control.
-         */
-        void requestCompatCameraControl(boolean showControl, boolean transformationApplied,
-                ICompatCameraControlCallback callback);
     }
 
     /**
@@ -12501,20 +12489,6 @@ public final class ViewRootImpl implements ViewParent,
             OnBufferTransformHintChangedListener listener = listeners.get(i);
             listener.onBufferTransformHintChanged(hint);
         }
-    }
-
-    /**
-     * Shows or hides a Camera app compat toggle for stretched issues with the requested state
-     * for the corresponding activity.
-     *
-     * @param showControl Whether the control should be shown or hidden.
-     * @param transformationApplied Whether the treatment is already applied.
-     * @param callback The callback executed when the user clicks on a control.
-    */
-    public void requestCompatCameraControl(boolean showControl, boolean transformationApplied,
-                ICompatCameraControlCallback callback) {
-        mActivityConfigCallback.requestCompatCameraControl(
-                showControl, transformationApplied, callback);
     }
 
     boolean wasRelayoutRequested() {

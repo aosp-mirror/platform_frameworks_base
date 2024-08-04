@@ -99,11 +99,10 @@ public class FreeformTaskListener implements ShellTaskOrganizer.TaskListener,
         if (DesktopModeStatus.canEnterDesktopMode(mContext)) {
             mDesktopModeTaskRepository.ifPresent(repository -> {
                 repository.addOrMoveFreeformTaskToTop(taskInfo.displayId, taskInfo.taskId);
-                repository.unminimizeTask(taskInfo.displayId, taskInfo.taskId);
                 if (taskInfo.isVisible) {
                     repository.addActiveTask(taskInfo.displayId, taskInfo.taskId);
-                    repository.updateVisibleFreeformTasks(taskInfo.displayId, taskInfo.taskId,
-                        true);
+                    repository.updateTaskVisibility(taskInfo.displayId, taskInfo.taskId,
+                        /* visible= */ true);
                 }
             });
         }
@@ -118,9 +117,6 @@ public class FreeformTaskListener implements ShellTaskOrganizer.TaskListener,
         if (DesktopModeStatus.canEnterDesktopMode(mContext)) {
             mDesktopModeTaskRepository.ifPresent(repository -> {
                 repository.removeFreeformTask(taskInfo.displayId, taskInfo.taskId);
-                repository.unminimizeTask(taskInfo.displayId, taskInfo.taskId);
-                repository.removeActiveTask(taskInfo.taskId, /* excludedDisplayId= */ null);
-                repository.updateVisibleFreeformTasks(taskInfo.displayId, taskInfo.taskId, false);
             });
         }
         mWindowDecorationViewModel.onTaskVanished(taskInfo);
@@ -144,7 +140,7 @@ public class FreeformTaskListener implements ShellTaskOrganizer.TaskListener,
                 } else if (repository.isClosingTask(taskInfo.taskId)) {
                     repository.removeClosingTask(taskInfo.taskId);
                 }
-                repository.updateVisibleFreeformTasks(taskInfo.displayId, taskInfo.taskId,
+                repository.updateTaskVisibility(taskInfo.displayId, taskInfo.taskId,
                         taskInfo.isVisible);
             });
         }
@@ -161,7 +157,6 @@ public class FreeformTaskListener implements ShellTaskOrganizer.TaskListener,
         if (DesktopModeStatus.canEnterDesktopMode(mContext) && taskInfo.isFocused) {
             mDesktopModeTaskRepository.ifPresent(repository -> {
                 repository.addOrMoveFreeformTaskToTop(taskInfo.displayId, taskInfo.taskId);
-                repository.unminimizeTask(taskInfo.displayId, taskInfo.taskId);
             });
         }
     }

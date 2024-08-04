@@ -18,7 +18,7 @@ package com.android.systemui.education.domain.interactor
 
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
-import com.android.systemui.shared.education.GestureType
+import com.android.systemui.contextualeducation.GestureType
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch

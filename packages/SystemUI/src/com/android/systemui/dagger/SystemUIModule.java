@@ -103,6 +103,7 @@ import com.android.systemui.screenrecord.ScreenRecordModule;
 import com.android.systemui.screenshot.dagger.ScreenshotModule;
 import com.android.systemui.security.data.repository.SecurityRepositoryModule;
 import com.android.systemui.settings.DisplayTracker;
+import com.android.systemui.settings.UserTracker;
 import com.android.systemui.shade.ShadeController;
 import com.android.systemui.shade.transition.LargeScreenShadeInterpolator;
 import com.android.systemui.shade.transition.LargeScreenShadeInterpolatorImpl;
@@ -144,6 +145,7 @@ import com.android.systemui.statusbar.ui.binder.StatusBarViewBinderModule;
 import com.android.systemui.statusbar.window.StatusBarWindowModule;
 import com.android.systemui.telephony.data.repository.TelephonyRepositoryModule;
 import com.android.systemui.temporarydisplay.dagger.TemporaryDisplayModule;
+import com.android.systemui.touchpad.TouchpadModule;
 import com.android.systemui.tuner.dagger.TunerModule;
 import com.android.systemui.user.UserModule;
 import com.android.systemui.user.domain.UserDomainLayerModule;
@@ -153,6 +155,7 @@ import com.android.systemui.util.dagger.UtilModule;
 import com.android.systemui.util.kotlin.SysUICoroutinesModule;
 import com.android.systemui.util.reference.ReferenceModule;
 import com.android.systemui.util.sensors.SensorModule;
+import com.android.systemui.util.settings.SettingsProxy;
 import com.android.systemui.util.settings.SettingsUtilModule;
 import com.android.systemui.util.time.SystemClock;
 import com.android.systemui.util.time.SystemClockImpl;
@@ -259,6 +262,7 @@ import javax.inject.Named;
         CommonSystemUIUnfoldModule.class,
         TelephonyRepositoryModule.class,
         TemporaryDisplayModule.class,
+        TouchpadModule.class,
         TunerModule.class,
         UserDomainLayerModule.class,
         UserModule.class,
@@ -266,15 +270,15 @@ import javax.inject.Named;
         NoteTaskModule.class,
         WalletModule.class,
         ContextualEducationModule.class
-        },
+},
         subcomponents = {
-            ComplicationComponent.class,
-            DozeComponent.class,
-            ExpandableNotificationRowComponent.class,
-            KeyguardBouncerComponent.class,
-            NavigationBarComponent.class,
-            NotificationRowComponent.class,
-            WindowRootViewComponent.class,
+                ComplicationComponent.class,
+                DozeComponent.class,
+                ExpandableNotificationRowComponent.class,
+                KeyguardBouncerComponent.class,
+                NavigationBarComponent.class,
+                NotificationRowComponent.class,
+                WindowRootViewComponent.class,
         })
 public abstract class SystemUIModule {
 
@@ -441,4 +445,9 @@ public abstract class SystemUIModule {
 
     @Binds
     abstract SceneDataSource bindSceneDataSource(SceneDataSourceDelegator delegator);
+
+    @Provides
+    static SettingsProxy.CurrentUserIdProvider provideCurrentUserId(UserTracker userTracker) {
+        return userTracker::getUserId;
+    }
 }

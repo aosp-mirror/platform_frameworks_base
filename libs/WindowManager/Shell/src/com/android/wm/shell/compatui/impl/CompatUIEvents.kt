@@ -16,13 +16,10 @@
 
 package com.android.wm.shell.compatui.impl
 
-import android.app.AppCompatTaskInfo
-import android.app.CameraCompatTaskInfo
 import com.android.wm.shell.compatui.api.CompatUIEvent
 
 internal const val SIZE_COMPAT_RESTART_BUTTON_APPEARED = 0
 internal const val SIZE_COMPAT_RESTART_BUTTON_CLICKED = 1
-internal const val CAMERA_CONTROL_STATE_UPDATE = 2
 
 /**
  * All the {@link CompatUIEvent} the Compat UI Framework can handle
@@ -30,15 +27,9 @@ internal const val CAMERA_CONTROL_STATE_UPDATE = 2
 sealed class CompatUIEvents(override val eventId: Int) : CompatUIEvent {
     /** Sent when the size compat restart button appears. */
     data class SizeCompatRestartButtonAppeared(val taskId: Int) :
-            CompatUIEvents(SIZE_COMPAT_RESTART_BUTTON_APPEARED)
+        CompatUIEvents(SIZE_COMPAT_RESTART_BUTTON_APPEARED)
 
     /** Sent when the size compat restart button is clicked. */
     data class SizeCompatRestartButtonClicked(val taskId: Int) :
-            CompatUIEvents(SIZE_COMPAT_RESTART_BUTTON_CLICKED)
-
-    /** Sent when the camera compat control state is updated. */
-    data class CameraControlStateUpdated(
-            val taskId: Int,
-            @CameraCompatTaskInfo.CameraCompatControlState val state: Int
-    ) : CompatUIEvents(CAMERA_CONTROL_STATE_UPDATE)
+        CompatUIEvents(SIZE_COMPAT_RESTART_BUTTON_CLICKED)
 }

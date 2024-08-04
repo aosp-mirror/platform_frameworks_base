@@ -21,6 +21,7 @@ import android.app.WindowConfiguration
 import android.content.ComponentName
 import android.testing.AndroidTestingRunner
 import android.view.Display
+import android.view.InsetsState
 import android.view.WindowInsetsController
 import androidx.test.filters.SmallTest
 import com.android.wm.shell.ShellTestCase
@@ -45,7 +46,8 @@ class CaptionWindowDecorationTests : ShellTestCase() {
             relayoutParams,
             taskInfo,
             true,
-            false
+            false,
+            InsetsState()
         )
 
         Truth.assertThat(relayoutParams.hasInputFeatureSpy()).isTrue()
@@ -63,7 +65,8 @@ class CaptionWindowDecorationTests : ShellTestCase() {
             relayoutParams,
             taskInfo,
             true,
-            false
+            false,
+            InsetsState()
         )
 
         Truth.assertThat(relayoutParams.hasInputFeatureSpy()).isFalse()
@@ -77,7 +80,8 @@ class CaptionWindowDecorationTests : ShellTestCase() {
             relayoutParams,
             taskInfo,
             true,
-            false
+            false,
+            InsetsState()
         )
         Truth.assertThat(relayoutParams.mOccludingCaptionElements.size).isEqualTo(2)
         Truth.assertThat(relayoutParams.mOccludingCaptionElements[0].mAlignment).isEqualTo(

@@ -171,6 +171,16 @@ flag {
 }
 
 flag {
+    name: "fix_disabling_of_mu_toggle_when_restriction_applied"
+    namespace: "multiuser"
+    description: "When no_user_switch is set but no EnforcedAdmin is present, the toggle has to be disabled"
+    bug: "356387759"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+  }
+}
+
+flag {
     name: "cache_quiet_mode_state"
     namespace: "multiuser"
     description: "Optimise quiet mode state retrieval"
@@ -355,6 +365,16 @@ flag {
   namespace: "profile_experiences"
   description: "Check config to show/hide the private space search illustration and search tile content in Hide Private Space settings page"
   bug: "346612477"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}
+
+flag {
+  name: "show_different_creation_error_for_unsupported_devices"
+  namespace: "profile_experiences"
+  description: "On private space create error due to child account added/fully managed user show message with link to the Help Center to find out more."
+  bug: "340130375"
   metadata {
     purpose: PURPOSE_BUGFIX
   }

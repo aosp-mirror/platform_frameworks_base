@@ -1452,6 +1452,13 @@ public class PackageManagerServiceUtils {
             }
 
             if (!ArrayUtils.isEmpty(after.splitNames)) {
+                if (beforeSplitNames.length != beforeSplitRevisionCodes.length) {
+                    throw new PackageManagerException(INSTALL_FAILED_VERSION_DOWNGRADE,
+                            "Current split names and the split revision codes are not 1:1 mapping."
+                                    + "This indicates that the package info data has been"
+                                    + " corrupted.");
+                }
+
                 for (int i = 0; i < after.splitNames.length; i++) {
                     final String splitName = after.splitNames[i];
                     final int j = ArrayUtils.indexOf(beforeSplitNames, splitName);

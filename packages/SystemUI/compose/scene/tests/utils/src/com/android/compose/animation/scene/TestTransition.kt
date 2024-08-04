@@ -18,9 +18,7 @@ package com.android.compose.animation.scene
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.SemanticsNode
 import androidx.compose.ui.test.SemanticsNodeInteraction
@@ -87,8 +85,8 @@ interface TransitionTestAssertionScope {
  * @sample com.android.compose.animation.scene.transformation.TranslateTest
  */
 fun ComposeContentTestRule.testTransition(
-    fromSceneContent: @Composable SceneScope.() -> Unit,
-    toSceneContent: @Composable SceneScope.() -> Unit,
+    fromSceneContent: @Composable ContentScope.() -> Unit,
+    toSceneContent: @Composable ContentScope.() -> Unit,
     transition: TransitionBuilder.() -> Unit,
     layoutModifier: Modifier = Modifier,
     fromScene: SceneKey = TestScenes.SceneA,
@@ -134,8 +132,8 @@ fun TimeSeriesCaptureScope<SemanticsNodeInteractionsProvider>.featureOfElement(
 
 /** Records the transition between two scenes of [transitionLayout][SceneTransitionLayout]. */
 fun MotionTestRule<ComposeToolkit>.recordTransition(
-    fromSceneContent: @Composable SceneScope.() -> Unit,
-    toSceneContent: @Composable SceneScope.() -> Unit,
+    fromSceneContent: @Composable ContentScope.() -> Unit,
+    toSceneContent: @Composable ContentScope.() -> Unit,
     transition: TransitionBuilder.() -> Unit,
     recordingSpec: TransitionRecordingSpec,
     layoutModifier: Modifier = Modifier,

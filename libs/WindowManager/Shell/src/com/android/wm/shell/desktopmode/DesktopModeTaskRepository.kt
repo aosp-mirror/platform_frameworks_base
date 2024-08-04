@@ -213,7 +213,7 @@ class DesktopModeTaskRepository {
      * If task was visible on a different display with a different [displayId], removes from
      * the set of visible tasks on that display and notifies listeners.
      */
-    fun updateVisibleFreeformTasks(displayId: Int, taskId: Int, visible: Boolean) {
+    fun updateTaskVisibility(displayId: Int, taskId: Int, visible: Boolean) {
         if (visible) {
             // If task is visible, remove it from any other display besides [displayId].
             removeVisibleTask(taskId, excludedDisplayId = displayId)
@@ -250,11 +250,17 @@ class DesktopModeTaskRepository {
             logD("getVisibleTaskCount=$it")
         }
 
-    /** Adds task (or moves if it already exists) to the top of the ordered list. */
+    /**
+     * Adds task (or moves if it already exists) to the top of the ordered list.
+     *
+     * Unminimizes the task if it is minimized.
+     */
     fun addOrMoveFreeformTaskToTop(displayId: Int, taskId: Int) {
         logD("Add or move task to top: display=%d taskId=%d", taskId, displayId)
         desktopTaskDataByDisplayId[displayId]?.freeformTasksInZOrder?.remove(taskId)
         desktopTaskDataByDisplayId.getOrCreate(displayId).freeformTasksInZOrder.add(0, taskId)
+        // Unminimize the task if it is minimized.
+        unminimizeTask(displayId, taskId)
     }
 
     /** Minimizes the task for [taskId] and [displayId] */
@@ -270,13 +276,41 @@ class DesktopModeTaskRepository {
             logW("Unminimize Task: display=%d, task=%d, no task data", displayId, taskId)
     }
 
-    /** Removes task from the ordered list. */
+    private fun getDisplayIdForTask(taskId: Int): Int? {
+        desktopTaskDataByDisplayId.forEach { displayId, data ->
+            if (taskId in data.freeformTasksInZOrder) {
+                return displayId
+            }
+        }
+        logW("No display id found for task: taskId=%d", taskId)
+        return null
+    }
+
+    /**
+     * Removes [taskId] from the respective display. If [INVALID_DISPLAY], the original display id
+     * will be looked up from the task id.
+     */
     fun removeFreeformTask(displayId: Int, taskId: Int) {
         logD("Removes freeform task: taskId=%d", taskId)
+        if (displayId == INVALID_DISPLAY) {
+            // Removes the original display id of the task.
+            getDisplayIdForTask(taskId)?.let { removeTaskFromDisplay(it, taskId) }
+        } else {
+            removeTaskFromDisplay(displayId, taskId)
+        }
+    }
+
+    /** Removes given task from a valid [displayId] and updates the repository state. */
+    private fun removeTaskFromDisplay(displayId: Int, taskId: Int) {
+        logD("Removes freeform task: taskId=%d, displayId=%d", taskId, displayId)
         desktopTaskDataByDisplayId[displayId]?.freeformTasksInZOrder?.remove(taskId)
         boundsBeforeMaximizeByTaskId.remove(taskId)
-        logD("Remaining freeform tasks: %d",
-            desktopTaskDataByDisplayId[displayId]?.freeformTasksInZOrder?.toDumpString() ?: "")
+        logD("Remaining freeform tasks: %s",
+            desktopTaskDataByDisplayId[displayId]?.freeformTasksInZOrder?.toDumpString())
+        // Remove task from unminimized task if it is minimized.
+        unminimizeTask(displayId, taskId)
+        removeActiveTask(taskId)
+        updateTaskVisibility(displayId, taskId, visible = false);
     }
 
     /**
@@ -358,3 +392,4 @@ class DesktopModeTaskRepository {
 
 private fun <T> Iterable<T>.toDumpString(): String =
     joinToString(separator = ", ", prefix = "[", postfix = "]")
+

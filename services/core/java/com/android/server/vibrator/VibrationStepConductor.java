@@ -21,7 +21,6 @@ import android.annotation.Nullable;
 import android.os.Build;
 import android.os.CombinedVibration;
 import android.os.IBinder;
-import android.os.VibrationAttributes;
 import android.os.VibrationEffect;
 import android.os.vibrator.Flags;
 import android.os.vibrator.PrebakedSegment;
@@ -177,16 +176,11 @@ final class VibrationStepConductor implements IBinder.DeathRecipient {
             expectIsVibrationThread(true);
         }
 
-        if (!mVibration.callerInfo.attrs.isFlagSet(
-                VibrationAttributes.FLAG_BYPASS_USER_VIBRATION_INTENSITY_SCALE)) {
-            if (Flags.adaptiveHapticsEnabled()) {
-                waitForVibrationParamsIfRequired();
-            }
-            // Scale resolves the default amplitudes from the effect before scaling them.
-            mVibration.scaleEffects(mVibrationScaler);
-        } else {
-            mVibration.resolveEffects(mVibrationScaler.getDefaultVibrationAmplitude());
+        if (Flags.adaptiveHapticsEnabled()) {
+            waitForVibrationParamsIfRequired();
         }
+        // Scale resolves the default amplitudes from the effect before scaling them.
+        mVibration.scaleEffects(mVibrationScaler);
 
         mVibration.adaptToDevice(mDeviceAdapter);
         CombinedVibration.Sequential sequentialEffect = toSequential(mVibration.getEffectToPlay());

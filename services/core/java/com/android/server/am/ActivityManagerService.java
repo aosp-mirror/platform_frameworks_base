@@ -1716,6 +1716,12 @@ public class ActivityManagerService extends IActivityManager.Stub
      */
     @Nullable volatile ContentCaptureManagerInternal mContentCaptureService;
 
+    /**
+     * The interface to the freezer.
+     */
+    @NonNull
+    private final Freezer mFreezer;
+
     /*
      * The default duration for the binder heavy hitter auto sampler
      */
@@ -2506,6 +2512,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             @Nullable UserController userController) {
         mInjector = injector;
         mContext = mInjector.getContext();
+        mFreezer = injector.getFreezer();
         mUiContext = null;
         mAppErrors = injector.getAppErrors();
         mPackageWatchdog = null;
@@ -2555,6 +2562,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         LockGuard.installLock(this, LockGuard.INDEX_ACTIVITY);
         mInjector = new Injector(systemContext);
         mContext = systemContext;
+        mFreezer = mInjector.getFreezer();
 
         mFactoryTest = FactoryTest.getMode();
         mSystemThread = ActivityThread.currentActivityThread();
@@ -18436,6 +18444,23 @@ public class ActivityManagerService extends IActivityManager.Stub
             implements ActivityManagerLocal {
 
         @Override
+        public void addFrozenProcessListener(int pid, @NonNull Executor executor,
+                @NonNull FrozenProcessListener listener) {
+            Objects.requireNonNull(executor);
+            Objects.requireNonNull(listener);
+            synchronized (mProcLock) {
+                final ProcessRecord app;
+                synchronized (mPidsSelfLocked) {
+                    app = mPidsSelfLocked.get(pid);
+                }
+                if (app != null) {
+                    mOomAdjuster.mCachedAppOptimizer.addFrozenProcessListener(app, executor,
+                            listener);
+                }
+            }
+        }
+
+        @Override
         public List<PendingIntentStats> getPendingIntentStats() {
             return mPendingIntentController.dumpPendingIntentStatsForStatsd();
         }
@@ -20919,6 +20944,11 @@ public class ActivityManagerService extends IActivityManager.Stub
         public IntentFirewall getIntentFirewall() {
             return null;
         }
+
+        /** @return the default Freezer. */
+        public Freezer getFreezer() {
+            return new Freezer();
+        }
     }
 
     @Override
@@ -21022,7 +21052,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         final long token = Binder.clearCallingIdentity();
 
         try {
-            return CachedAppOptimizer.isFreezerSupported();
+            return mFreezer.isFreezerSupported();
         } finally {
             Binder.restoreCallingIdentity(token);
         }
@@ -21176,5 +21206,10 @@ public class ActivityManagerService extends IActivityManager.Stub
     @GuardedBy("this")
     void clearPendingTopAppLocked() {
         mPendingStartActivityUids.clear();
+    }
+
+    @NonNull
+    Freezer getFreezer() {
+        return mFreezer;
     }
 }

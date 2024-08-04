@@ -45,9 +45,11 @@ import android.view.accessibility.AccessibilityEvent;
 
 import com.android.server.LocalServices;
 import com.android.server.accessibility.gestures.TouchExplorer;
+import com.android.server.accessibility.magnification.FullScreenMagnificationController;
 import com.android.server.accessibility.magnification.FullScreenMagnificationGestureHandler;
 import com.android.server.accessibility.magnification.FullScreenMagnificationVibrationHelper;
 import com.android.server.accessibility.magnification.MagnificationGestureHandler;
+import com.android.server.accessibility.magnification.MouseEventHandler;
 import com.android.server.accessibility.magnification.WindowMagnificationGestureHandler;
 import com.android.server.accessibility.magnification.WindowMagnificationPromptController;
 import com.android.server.policy.WindowManagerPolicy;
@@ -864,15 +866,21 @@ class AccessibilityInputFilter extends InputFilter implements EventStreamTransfo
                     TYPE_MAGNIFICATION_OVERLAY, null /* options */);
             FullScreenMagnificationVibrationHelper fullScreenMagnificationVibrationHelper =
                     new FullScreenMagnificationVibrationHelper(uiContext);
-            magnificationGestureHandler = new FullScreenMagnificationGestureHandler(uiContext,
-                    mAms.getMagnificationController().getFullScreenMagnificationController(),
-                    mAms.getTraceManager(),
-                    mAms.getMagnificationController(),
-                    detectControlGestures,
-                    detectTwoFingerTripleTap,
-                    triggerable,
-                    new WindowMagnificationPromptController(displayContext, mUserId), displayId,
-                    fullScreenMagnificationVibrationHelper);
+            FullScreenMagnificationController controller =
+                    mAms.getMagnificationController().getFullScreenMagnificationController();
+            magnificationGestureHandler =
+                    new FullScreenMagnificationGestureHandler(
+                            uiContext,
+                            controller,
+                            mAms.getTraceManager(),
+                            mAms.getMagnificationController(),
+                            detectControlGestures,
+                            detectTwoFingerTripleTap,
+                            triggerable,
+                            new WindowMagnificationPromptController(displayContext, mUserId),
+                            displayId,
+                            fullScreenMagnificationVibrationHelper,
+                            new MouseEventHandler(controller));
         }
         return magnificationGestureHandler;
     }

@@ -76,6 +76,7 @@ import static android.view.WindowManagerGlobal.ADD_PERMISSION_DENIED;
 import static android.view.contentprotection.flags.Flags.createAccessibilityOverlayAppOpEnabled;
 
 import static com.android.hardware.input.Flags.emojiAndScreenshotKeycodesAvailable;
+import static com.android.hardware.input.Flags.modifierShortcutDump;
 import static com.android.server.flags.Flags.modifierShortcutManagerMultiuser;
 import static com.android.server.flags.Flags.newBugreportKeyboardShortcut;
 import static com.android.internal.config.sysui.SystemUiDeviceConfigFlags.SCREENSHOT_KEYCHORD_DELAY;
@@ -1158,8 +1159,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     break;
                 case SHORT_PRESS_POWER_CLOSE_IME_OR_GO_HOME: {
                     if (mDismissImeOnBackKeyPressed) {
-                        // TODO(b/308479256): Check if hiding "all" IMEs is OK or not.
-                        InputMethodManagerInternal.get().hideAllInputMethods(
+                        InputMethodManagerInternal.get().hideInputMethod(
                                 SoftInputShowHideReason.HIDE_POWER_BUTTON_GO_HOME, displayId);
                     } else {
                         shortPressPowerGoHome();
@@ -2725,11 +2725,16 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
         @Override
         void onLongPress(long eventTime) {
-            // Long-press should be triggered only if app doesn't handle it.
-            mDeferredKeyActionExecutor.queueKeyAction(
-                    KeyEvent.KEYCODE_STEM_PRIMARY,
-                    eventTime,
-                    () -> stemPrimaryLongPress(eventTime));
+            if (mLongPressOnStemPrimaryBehavior == LONG_PRESS_PRIMARY_LAUNCH_VOICE_ASSISTANT) {
+                // Long-press to assistant gesture is not overridable by apps.
+                stemPrimaryLongPress(eventTime);
+            } else {
+                // Other long-press actions should be triggered only if app doesn't handle it.
+                mDeferredKeyActionExecutor.queueKeyAction(
+                        KeyEvent.KEYCODE_STEM_PRIMARY,
+                        eventTime,
+                        () -> stemPrimaryLongPress(eventTime));
+            }
         }
 
         @Override
@@ -6664,6 +6669,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
         pw.print(prefix); pw.println("Looper state:");
         mHandler.getLooper().dump(new PrintWriterPrinter(pw), prefix + "  ");
+        if (modifierShortcutDump()) {
+            mModifierShortcutManager.dump(prefix, pw);
+        }
     }
 
     private static String endcallBehaviorToString(int behavior) {

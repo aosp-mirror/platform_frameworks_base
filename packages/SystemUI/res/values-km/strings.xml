@@ -388,6 +388,9 @@
     <string name="performance" msgid="6552785217174378320">"ប្រតិបត្តិការ"</string>
     <string name="user_interface" msgid="3712869377953950887">"ផ្ទៃប៉ះ"</string>
     <string name="thermal" msgid="6758074791325414831">"កម្ដៅ"</string>
+    <string name="custom" msgid="3337456985275158299">"ផ្ទាល់ខ្លួន"</string>
+    <string name="custom_trace_settings_dialog_title" msgid="2608570500144830554">"ការកំណត់ដានផ្ទាល់ខ្លួន"</string>
+    <string name="restore_default" msgid="5259420807486239755">"ស្ដារទៅលំនាំដើម"</string>
     <string name="quick_settings_onehanded_label" msgid="2416537930246274991">"មុខងារប្រើដៃម្ខាង"</string>
     <string name="quick_settings_hearing_devices_label" msgid="7277170419679404129">"ឧបករណ៍ជំនួយការស្ដាប់"</string>
     <string name="quick_settings_hearing_devices_connected" msgid="6519069502397037781">"សកម្ម"</string>
@@ -429,9 +432,13 @@
     <string name="zen_modes_dialog_title" msgid="4159138230418567383">"មុខងារអាទិភាព"</string>
     <string name="zen_modes_dialog_done" msgid="6654130880256438950">"រួចរាល់"</string>
     <string name="zen_modes_dialog_settings" msgid="2310248023728936697">"ការកំណត់"</string>
-    <!-- no translation found for zen_mode_on (9085304934016242591) -->
+    <string name="zen_mode_on" msgid="9085304934016242591">"បើក"</string>
+    <string name="zen_mode_off" msgid="1736604456618147306">"បិទ"</string>
+    <!-- no translation found for zen_mode_set_up (7457957033034460064) -->
     <skip />
-    <!-- no translation found for zen_mode_off (1736604456618147306) -->
+    <!-- no translation found for zen_mode_no_manual_invocation (1769975741344633672) -->
+    <skip />
+    <!-- no translation found for zen_mode_active_modes (1625850411578488856) -->
     <skip />
     <string name="zen_priority_introduction" msgid="3159291973383796646">"សំឡេង និងរំញ័រនឹងមិន​រំខានដល់អ្នកឡើយ លើកលែងតែម៉ោងរោទ៍ ការរំលឹក ព្រឹត្តិការណ៍ និងអ្នកហៅទូរសព្ទដែលអ្នកបញ្ជាក់ប៉ុណ្ណោះ។ អ្នកនឹងនៅតែឮសំឡេងសកម្មភាពគ្រប់យ៉ាងដែលអ្នកលេងដដែល រួមទាំងតន្រ្តី វីដេអូ និងហ្គេម។"</string>
     <string name="zen_alarms_introduction" msgid="3987266042682300470">"សំឡេង និងរំញ័រនឹងមិន​រំខានដល់អ្នកឡើយ លើកលែងតែម៉ោងរោទ៍ប៉ុណ្ណោះ។ អ្នកនឹងនៅតែឮសំឡេងសកម្មភាពគ្រប់យ៉ាងដែលអ្នកលេងដដែល រួមទាំងតន្រ្តី វីដេអូ និងហ្គេម។"</string>
@@ -471,6 +478,8 @@
     <string name="keyguard_indication_charging_time_slowly" msgid="301936949731705417">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • កំពុង​សាកថ្ម​យឺត • ពេញក្នុងរយៈពេល <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>"</string>
     <string name="keyguard_indication_charging_time_dock" msgid="3149328898931741271">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • កំពុងសាកថ្ម • ពេញក្នុងរយៈពេល <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>"</string>
     <string name="accessibility_action_open_communal_hub" msgid="3081702792413787849">"ធាតុ​ក្រាហ្វិកនៅលើអេក្រង់ចាក់សោ"</string>
+    <!-- no translation found for accessibility_announcement_communal_widget_added (6911593106099328271) -->
+    <skip />
     <string name="communal_tutorial_indicator_text" msgid="4503010353591430123">"អូសទៅឆ្វេង ដើម្បីចាប់ផ្ដើមមេរៀនសហគមន៍"</string>
     <string name="cta_tile_button_to_open_widget_editor" msgid="3871562362382963878">"ប្ដូរតាមបំណង"</string>
     <string name="cta_tile_button_to_dismiss" msgid="3377597875997861754">"ច្រានចោល"</string>
@@ -499,8 +508,7 @@
     <string name="accessibility_action_label_place_widget" msgid="1914197458644168978">"ដាក់ធាតុ​ក្រាហ្វិកដែលបានជ្រើសរើស"</string>
     <string name="communal_widget_picker_title" msgid="1953369090475731663">"ធាតុ​ក្រាហ្វិកអេក្រង់ចាក់សោ"</string>
     <string name="communal_widget_picker_description" msgid="490515450110487871">"អ្នកគ្រប់គ្នាអាចមើលធាតុក្រាហ្វិកលើអេក្រង់ចាក់សោរបស់អ្នក ទោះបីជាថេប្លេតរបស់អ្នកត្រូវបានចាក់សោក៏ដោយ។"</string>
-    <!-- no translation found for accessibility_action_label_unselect_widget (1041811747619468698) -->
-    <skip />
+    <string name="accessibility_action_label_unselect_widget" msgid="1041811747619468698">"ដក​ការ​ជ្រើសរើសធាតុ​ក្រាហ្វិក"</string>
     <string name="communal_widgets_disclaimer_title" msgid="1150954395585308868">"ធាតុ​ក្រាហ្វិកលើអេក្រង់ចាក់សោ"</string>
     <string name="communal_widgets_disclaimer_text" msgid="1423545475160506349">"ដើម្បីបើកកម្មវិធីដោយប្រើធាតុ​ក្រាហ្វិក អ្នកនឹងត្រូវផ្ទៀងផ្ទាត់ថាជាអ្នក។ ទន្ទឹមនឹងនេះ សូមចងចាំថា នរណាក៏អាចមើលធាតុក្រាហ្វិកបាន សូម្បីពេលថេប្លេតរបស់អ្នកជាប់សោក៏ដោយ។ ធាតុ​ក្រាហ្វិកមួយចំនួនប្រហែលមិនត្រូវបានរចនាឡើងសម្រាប់អេក្រង់ចាក់សោរបស់អ្នកទេ និងមិនមានសុវត្ថិភាពឡើយ បើបញ្ចូលទៅទីនេះ។"</string>
     <string name="communal_widgets_disclaimer_button" msgid="4423059765740780753">"យល់ហើយ"</string>
@@ -557,10 +565,8 @@
     <string name="media_projection_action_text" msgid="3634906766918186440">"ចាប់ផ្ដើម​ឥឡូវ"</string>
     <string name="empty_shade_text" msgid="8935967157319717412">"គ្មាន​ការ​ជូនដំណឹង"</string>
     <string name="no_unseen_notif_text" msgid="395512586119868682">"គ្មាន​ការ​ជូន​ដំណឹង​​ថ្មីៗទេ"</string>
-    <!-- no translation found for adaptive_notification_edu_hun_title (7790738150177329960) -->
-    <skip />
-    <!-- no translation found for adaptive_notification_edu_hun_text (7743367744129536610) -->
-    <skip />
+    <string name="adaptive_notification_edu_hun_title" msgid="7790738150177329960">"ការបន្ថយសំឡេងការជូនដំណឹងត្រូវបានបើក"</string>
+    <string name="adaptive_notification_edu_hun_text" msgid="7743367744129536610">"កម្រិតសំឡេង និងការជូនដំណឹងនៅលើឧបករណ៍របស់អ្នកត្រូវបានកាត់បន្ថយដោយស្វ័យប្រវត្តិរហូតដល់ 2 នាទី នៅពេលអ្នកទទួលបានការជូនដំណឹងច្រើនពេកក្នុងពេលតែមួយ។"</string>
     <string name="go_to_adaptive_notification_settings" msgid="2423690125178298479">"បិទ"</string>
     <string name="unlock_to_see_notif_text" msgid="7439033907167561227">"ដោះសោដើម្បីមើលការជូនដំណឹងចាស់ៗ"</string>
     <string name="quick_settings_disclosure_parental_controls" msgid="2114102871438223600">"ឧបករណ៍​នេះ​ស្ថិត​ក្រោម​ការ​គ្រប់គ្រង​របស់មាតាបិតាអ្នក"</string>
@@ -1226,7 +1232,6 @@
     <string name="accessibility_fingerprint_bouncer" msgid="7189102492498735519">"តម្រូវឱ្យ​មាន​ការផ្ទៀងផ្ទាត់។ សូមចុច​ឧបករណ៍​ចាប់ស្នាមម្រាមដៃ ដើម្បី​ផ្ទៀងផ្ទាត់​។"</string>
     <string name="ongoing_phone_call_content_description" msgid="5332334388483099947">"ការហៅទូរសព្ទ​ដែលកំពុង​ដំណើរការ"</string>
     <string name="mobile_data_settings_title" msgid="3955246641380064901">"ទិន្នន័យ​ទូរសព្ទចល័ត"</string>
-    <string name="preference_summary_default_combination" msgid="8453246369903749670">"<xliff:g id="STATE">%1$s</xliff:g> / <xliff:g id="NETWORKMODE">%2$s</xliff:g>"</string>
     <string name="mobile_data_connection_active" msgid="944490013299018227">"បានភ្ជាប់"</string>
     <string name="mobile_data_temp_connection_active" msgid="4590222725908806824">"បានភ្ជាប់ជាបណ្ដោះអាសន្ន"</string>
     <string name="mobile_data_poor_connection" msgid="819617772268371434">"ការតភ្ជាប់​ខ្សោយ"</string>
@@ -1380,7 +1385,10 @@
     <string name="touchpad_tutorial_done_button" msgid="176168488821755503">"រួចរាល់"</string>
     <string name="touchpad_tutorial_gesture_done" msgid="4784438360736821255">"ធ្វើបានល្អ!"</string>
     <string name="touchpad_back_gesture_action_title" msgid="7199067250654332735">"ថយ​ក្រោយ"</string>
-    <string name="touchpad_back_gesture_guidance" msgid="4222430588599527272">"ដើម្បីថយក្រោយ សូមអូសទៅឆ្វេង ឬស្ដាំដោយប្រើម្រាមដៃបីនៅកន្លែងណាមួយនៅលើផ្ទាំងប៉ះ។"</string>
+    <!-- no translation found for touchpad_back_gesture_guidance (6263750214998421587) -->
+    <skip />
+    <!-- no translation found for touchpad_back_gesture_finished (5353616006999726249) -->
+    <skip />
     <string name="touchpad_back_gesture_animation_content_description" msgid="2646107450922379918">"ផ្ទាំងប៉ះដែលបង្ហាញម្រាមដៃបីដែលផ្លាស់ទីទៅស្ដាំ និងឆ្វេង"</string>
     <string name="touchpad_back_gesture_screen_animation_content_description" msgid="4036267494237748710">"អេក្រង់ឧបករណ៍ដែលបង្ហាញរូបមានចលនាសម្រាប់ចលនាថយក្រោយ"</string>
     <string name="keyboard_backlight_dialog_title" msgid="8273102932345564724">"ពន្លឺក្រោយក្ដារចុច"</string>
@@ -1388,28 +1396,16 @@
     <string name="home_controls_dream_label" msgid="6567105701292324257">"ការគ្រប់គ្រង​ផ្ទះ"</string>
     <string name="home_controls_dream_description" msgid="4644150952104035789">"ចូលប្រើការគ្រប់គ្រងផ្ទះអ្នកបានលឿនជាធាតុរក្សាអេក្រង់"</string>
     <string name="volume_undo_action" msgid="5815519725211877114">"ត្រឡប់វិញ"</string>
-    <!-- no translation found for back_edu_toast_content (4530314597378982956) -->
-    <skip />
-    <!-- no translation found for home_edu_toast_content (3381071147871955415) -->
-    <skip />
-    <!-- no translation found for overview_edu_toast_content (5797030644017804518) -->
-    <skip />
-    <!-- no translation found for all_apps_edu_toast_content (8807496014667211562) -->
-    <skip />
-    <!-- no translation found for back_edu_notification_title (5624780717751357278) -->
-    <skip />
-    <!-- no translation found for back_edu_notification_content (2497557451540954068) -->
-    <skip />
-    <!-- no translation found for home_edu_notification_title (6097902076909654045) -->
-    <skip />
-    <!-- no translation found for home_edu_notification_content (6631697734535766588) -->
-    <skip />
-    <!-- no translation found for overview_edu_notification_title (1265824157319562406) -->
-    <skip />
-    <!-- no translation found for overview_edu_notification_content (3578204677648432500) -->
-    <skip />
-    <!-- no translation found for all_apps_edu_notification_title (372262997265569063) -->
-    <skip />
-    <!-- no translation found for all_apps_edu_notification_content (3255070575694025585) -->
-    <skip />
+    <string name="back_edu_toast_content" msgid="4530314597378982956">"ដើម្បីថយក្រោយ សូមអូសទៅឆ្វេង ឬស្ដាំដោយប្រើ​ម្រាមដៃបីនៅលើផ្ទាំងប៉ះ"</string>
+    <string name="home_edu_toast_content" msgid="3381071147871955415">"ដើម្បីចូលទៅទំព័រដើម សូមអូសឡើងលើដោយប្រើម្រាមដៃបីនៅលើផ្ទាំងប៉ះ"</string>
+    <string name="overview_edu_toast_content" msgid="5797030644017804518">"ដើម្បីមើលកម្មវិធីថ្មីៗ សូមអូសឡើងលើ ហើយសង្កត់ឱ្យជាប់ដោយប្រើម្រាមដៃបីនៅលើផ្ទាំងប៉ះ"</string>
+    <string name="all_apps_edu_toast_content" msgid="8807496014667211562">"ដើម្បីមើលកម្មវិធីទាំងអស់របស់អ្នក សូមចុចគ្រាប់ចុចសកម្មភាពនៅលើក្ដារចុចរបស់អ្នក"</string>
+    <string name="back_edu_notification_title" msgid="5624780717751357278">"ប្រើផ្ទាំងប៉ះរបស់អ្នក ដើម្បីថយក្រោយ"</string>
+    <string name="back_edu_notification_content" msgid="2497557451540954068">"អូសទៅឆ្វេង ឬស្ដាំដោយប្រើ​ម្រាមដៃបី។ ចុច ដើម្បីស្វែងយល់បន្ថែមអំពីចលនា។"</string>
+    <string name="home_edu_notification_title" msgid="6097902076909654045">"ប្រើផ្ទាំងប៉ះរបស់អ្នក ដើម្បីចូលទៅទំព័រដើម"</string>
+    <string name="home_edu_notification_content" msgid="6631697734535766588">"អូសឡើងលើដោយប្រើម្រាមដៃបី។ ចុច ដើម្បីស្វែងយល់បន្ថែមអំពីចលនា។"</string>
+    <string name="overview_edu_notification_title" msgid="1265824157319562406">"ប្រើផ្ទាំងប៉ះរបស់អ្នក ដើម្បីមើលកម្មវិធីថ្មីៗ"</string>
+    <string name="overview_edu_notification_content" msgid="3578204677648432500">"អូសឡើងលើ ហើយសង្កត់ឱ្យជាប់ដោយប្រើម្រាមដៃបី។ ចុច ដើម្បីស្វែងយល់បន្ថែមអំពីចលនា។"</string>
+    <string name="all_apps_edu_notification_title" msgid="372262997265569063">"ប្រើក្ដារចុចរបស់អ្នក ដើម្បីមើលកម្មវិធីទាំងអស់"</string>
+    <string name="all_apps_edu_notification_content" msgid="3255070575694025585">"ចុចគ្រាប់ចុចសកម្មភាពនៅពេលណាក៏បាន។ ចុច ដើម្បីស្វែងយល់បន្ថែមអំពីចលនា។"</string>
 </resources>

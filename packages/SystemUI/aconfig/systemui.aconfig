@@ -227,17 +227,6 @@ flag {
 }
 
 flag {
-    name: "notification_group_hun_removal_animation_fix"
-    namespace: "systemui"
-    description: "Fix the lack of hun removal animation for group notifications"
-        "(not GROUP_ALERT_SUMMARY)"
-    bug: "343475993"
-    metadata {
-        purpose: PURPOSE_BUGFIX
-    }
-}
-
-flag {
     name: "scene_container"
     namespace: "systemui"
     description: "Enables the scene container framework go/flexiglass."
@@ -389,6 +378,24 @@ flag {
     description: "Show chips on the left side of the status bar when a user is screen sharing, "
         "recording, or casting"
     bug: "332662551"
+}
+
+flag {
+    name: "status_bar_use_repos_for_call_chip"
+    namespace: "systemui"
+    description: "Use repositories as the source of truth for call notifications shown as a chip in"
+        "the status bar"
+    bug: "328584859"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
+    name: "status_bar_call_chip_notification_icon"
+    namespace: "systemui"
+    description: "Use the small icon set on the notification for the status bar call chip"
+    bug: "354930838"
 }
 
 flag {
@@ -565,16 +572,6 @@ flag {
     namespace: "systemui"
     description: "Mitigate crash on invalid computed range in CropView"
     bug: "232633995"
-    metadata {
-        purpose: PURPOSE_BUGFIX
-    }
-}
-
-flag {
-    name: "screenshot_private_profile_accessibility_announcement_fix"
-    namespace: "systemui"
-    description: "Modified a11y announcement for private space screenshots"
-    bug: "326941376"
     metadata {
         purpose: PURPOSE_BUGFIX
     }
@@ -1263,6 +1260,16 @@ flag {
 }
 
 flag {
+   name: "use_transitions_for_keyguard_occluded"
+   namespace: "systemui"
+   description: "Use Keyguard Transitions to set Notification Shade occlusion state"
+   bug: "344716537"
+   metadata {
+        purpose: PURPOSE_BUGFIX
+   }
+}
+
+flag {
    name: "lockscreen_preview_renderer_create_on_main_thread"
    namespace: "systemui"
    description: "Force preview renderer to be created on the main thread"
@@ -1279,4 +1286,11 @@ flag {
    metadata {
         purpose: PURPOSE_BUGFIX
    }
+}
+
+flag {
+   name: "compose_haptic_sliders"
+   namespace: "systemui"
+   description: "Adding haptic component infrastructure to sliders in Compose."
+   bug: "341968766"
 }

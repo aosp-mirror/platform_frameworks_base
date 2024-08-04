@@ -108,10 +108,6 @@ public class PipTransition extends PipTransitionController implements
     //
 
     @Nullable
-    private WindowContainerToken mPipTaskToken;
-    @Nullable
-    private SurfaceControl mPipLeash;
-    @Nullable
     private Transitions.TransitionFinishCallback mFinishCallback;
 
     public PipTransition(
@@ -402,7 +398,6 @@ public class PipTransition extends PipTransitionController implements
         finishWct.setBoundsChangeTransaction(pipTaskToken, tx);
 
         animator.setAnimationEndCallback(() -> {
-            mPipTransitionState.setState(PipTransitionState.ENTERED_PIP);
             finishCallback.onTransitionFinished(finishWct.isEmpty() ? null : finishWct);
         });
 
@@ -444,15 +439,16 @@ public class PipTransition extends PipTransitionController implements
             @NonNull SurfaceControl.Transaction startTransaction,
             @NonNull SurfaceControl.Transaction finishTransaction,
             @NonNull Transitions.TransitionFinishCallback finishCallback) {
-        TransitionInfo.Change pipChange = getPipChange(info);
+        WindowContainerToken pipToken = mPipTransitionState.mPipTaskToken;
+
+        TransitionInfo.Change pipChange = getChangeByToken(info, pipToken);
         if (pipChange == null) {
             return false;
         }
 
         Rect startBounds = pipChange.getStartAbsBounds();
         Rect endBounds = pipChange.getEndAbsBounds();
-        SurfaceControl pipLeash = mPipTransitionState.mPinnedTaskLeash;
-        Preconditions.checkNotNull(pipLeash, "Leash is null for bounds transition.");
+        SurfaceControl pipLeash = pipChange.getLeash();
 
         PipEnterExitAnimator animator = new PipEnterExitAnimator(mContext, pipLeash,
                 startTransaction, startBounds, startBounds, endBounds,
@@ -485,6 +481,18 @@ public class PipTransition extends PipTransitionController implements
         for (TransitionInfo.Change change : info.getChanges()) {
             if (change.getTaskInfo() != null
                     && change.getTaskInfo().getWindowingMode() == WINDOWING_MODE_PINNED) {
+                return change;
+            }
+        }
+        return null;
+    }
+
+    @Nullable
+    private TransitionInfo.Change getChangeByToken(TransitionInfo info,
+            WindowContainerToken token) {
+        for (TransitionInfo.Change change : info.getChanges()) {
+            if (change.getTaskInfo() != null
+                    && change.getTaskInfo().getToken().equals(token)) {
                 return change;
             }
         }

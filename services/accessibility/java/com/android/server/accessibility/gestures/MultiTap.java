@@ -43,12 +43,18 @@ public class MultiTap extends GestureMatcher {
 
     public MultiTap(Context context, int taps, int gesture,
             GestureMatcher.StateChangeListener listener) {
+        this(context, taps, gesture,
+                ViewConfiguration.getDoubleTapTimeout(), listener);
+    }
+
+    public MultiTap(Context context, int taps, int gesture, int multiTapTimeout,
+            GestureMatcher.StateChangeListener listener) {
         super(gesture, new Handler(context.getMainLooper()), listener);
         mTargetTaps = taps;
+        mDoubleTapTimeout = multiTapTimeout;
         mDoubleTapSlop = ViewConfiguration.get(context).getScaledDoubleTapSlop();
         mTouchSlop = ViewConfiguration.get(context).getScaledTouchSlop();
         mTapTimeout = ViewConfiguration.getTapTimeout();
-        mDoubleTapTimeout = ViewConfiguration.getDoubleTapTimeout();
         clear();
     }
 

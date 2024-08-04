@@ -23,7 +23,6 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.app.WindowConfiguration;
-import android.companion.virtualdevice.flags.Flags;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
@@ -67,9 +66,7 @@ public abstract class DisplayWindowPolicyController {
     public DisplayWindowPolicyController() {
         synchronized (mSupportedWindowingModes) {
             mSupportedWindowingModes.add(WindowConfiguration.WINDOWING_MODE_FULLSCREEN);
-            if (Flags.virtualDisplayMultiWindowModeSupport()) {
-                mSupportedWindowingModes.add(WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW);
-            }
+            mSupportedWindowingModes.add(WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW);
         }
     }
 

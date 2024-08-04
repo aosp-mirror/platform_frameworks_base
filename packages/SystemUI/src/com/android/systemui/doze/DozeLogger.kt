@@ -309,7 +309,15 @@ class DozeLogger @Inject constructor(
         buffer.log(TAG, INFO, {
             int1 = brightness
         }, {
-            "Doze screen brightness set, brightness=$int1"
+            "Doze screen brightness set (int), brightness=$int1"
+        })
+    }
+
+    fun logDozeScreenBrightnessFloat(brightness: Float) {
+        buffer.log(TAG, INFO, {
+            double1 = brightness.toDouble()
+        }, {
+            "Doze screen brightness set (float), brightness=$double1"
         })
     }
 

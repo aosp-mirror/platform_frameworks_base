@@ -2359,11 +2359,11 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         }
         super.removeImmediately();
 
+        final DisplayContent dc = getDisplayContent();
         if (isImeOverlayLayeringTarget()) {
             mWmService.dispatchImeTargetOverlayVisibilityChanged(mClient.asBinder(), mAttrs.type,
-                    false /* visible */, true /* removed */);
+                    false /* visible */, true /* removed */, dc.getDisplayId());
         }
-        final DisplayContent dc = getDisplayContent();
         if (isImeLayeringTarget()) {
             // Remove the attached IME screenshot surface.
             dc.removeImeSurfaceByTarget(this);
@@ -2374,7 +2374,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         }
         if (dc.getImeInputTarget() == this && !inRelaunchingActivity()) {
             mWmService.dispatchImeInputTargetVisibilityChanged(mClient.asBinder(),
-                    false /* visible */, true /* removed */);
+                    false /* visible */, true /* removed */, dc.getDisplayId());
             dc.updateImeInputAndControlTarget(null);
         }
 

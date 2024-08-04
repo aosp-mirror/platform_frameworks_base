@@ -1550,8 +1550,7 @@ public class VirtualDeviceManagerServiceTest {
     }
 
     @Test
-    public void openPermissionControllerOnVirtualDisplay_displayOnRemoteDevices_startsWhenFlagIsEnabled() {
-        mSetFlagsRule.enableFlags(Flags.FLAG_STREAM_PERMISSIONS);
+    public void openPermissionControllerOnVirtualDisplay_displayOnRemoteDevices_starts() {
         addVirtualDisplay(mDeviceImpl, DISPLAY_ID_1);
         GenericWindowPolicyController gwpc = mDeviceImpl.getDisplayWindowPolicyControllerForTest(
                 DISPLAY_ID_1);
@@ -1572,8 +1571,7 @@ public class VirtualDeviceManagerServiceTest {
     }
 
     @Test
-    public void openPermissionControllerOnVirtualDisplay_dontDisplayOnRemoteDevices_startsWhenFlagIsEnabled() {
-        mSetFlagsRule.enableFlags(Flags.FLAG_STREAM_PERMISSIONS);
+    public void openPermissionControllerOnVirtualDisplay_dontDisplayOnRemoteDevices_starts() {
         addVirtualDisplay(mDeviceImpl, DISPLAY_ID_1);
         GenericWindowPolicyController gwpc = mDeviceImpl.getDisplayWindowPolicyControllerForTest(
                 DISPLAY_ID_1);
@@ -1755,35 +1753,7 @@ public class VirtualDeviceManagerServiceTest {
     }
 
     @Test
-    public void canActivityBeLaunched_permissionDialog_flagDisabled_isBlocked() {
-        mSetFlagsRule.disableFlags(Flags.FLAG_STREAM_PERMISSIONS);
-        VirtualDeviceParams params = new VirtualDeviceParams.Builder().build();
-        mDeviceImpl.close();
-        mDeviceImpl = createVirtualDevice(VIRTUAL_DEVICE_ID_1, DEVICE_OWNER_UID_1, params);
-        doNothing().when(mContext).startActivityAsUser(any(), any(), any());
-
-        addVirtualDisplay(mDeviceImpl, DISPLAY_ID_1);
-        GenericWindowPolicyController gwpc = mDeviceImpl.getDisplayWindowPolicyControllerForTest(
-                DISPLAY_ID_1);
-        ComponentName permissionComponent = getPermissionDialogComponent();
-        ActivityInfo activityInfo = getActivityInfo(
-                permissionComponent.getPackageName(),
-                permissionComponent.getClassName(),
-                /* displayOnRemoteDevices */ true,
-                /* targetDisplayCategory */ null);
-        assertThat(gwpc.canActivityBeLaunched(activityInfo, null,
-                WindowConfiguration.WINDOWING_MODE_FULLSCREEN, DISPLAY_ID_1, /*isNewTask=*/false))
-                .isFalse();
-
-        Intent blockedAppIntent = BlockedAppStreamingActivity.createIntent(
-                activityInfo, mAssociationInfo.getDisplayName());
-        verify(mContext).startActivityAsUser(argThat(intent ->
-                intent.filterEquals(blockedAppIntent)), any(), any());
-    }
-
-    @Test
-    public void canActivityBeLaunched_permissionDialog_flagEnabled_isStreamed() {
-        mSetFlagsRule.enableFlags(Flags.FLAG_STREAM_PERMISSIONS);
+    public void canActivityBeLaunched_permissionDialog_isStreamed() {
         VirtualDeviceParams params = new VirtualDeviceParams.Builder().build();
         mDeviceImpl.close();
         mDeviceImpl = createVirtualDevice(VIRTUAL_DEVICE_ID_1, DEVICE_OWNER_UID_1, params);

@@ -40,7 +40,6 @@ import com.android.server.UiThread;
 
 import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
-import java.util.function.IntConsumer;
 import java.util.function.IntSupplier;
 import java.util.function.Supplier;
 
@@ -76,9 +75,8 @@ public class Letterbox {
     // for overlaping an app window and letterbox surfaces.
     private final LetterboxSurface mFullWindowSurface = new LetterboxSurface("fullWindow");
     private final LetterboxSurface[] mSurfaces = { mLeft, mTop, mRight, mBottom };
-    // Reachability gestures.
-    private final IntConsumer mDoubleTapCallbackX;
-    private final IntConsumer mDoubleTapCallbackY;
+    @NonNull
+    private final AppCompatReachabilityPolicy mAppCompatReachabilityPolicy;
 
     /**
      * Constructs a Letterbox.
@@ -92,8 +90,7 @@ public class Letterbox {
             BooleanSupplier hasWallpaperBackgroundSupplier,
             IntSupplier blurRadiusSupplier,
             DoubleSupplier darkScrimAlphaSupplier,
-            IntConsumer doubleTapCallbackX,
-            IntConsumer doubleTapCallbackY,
+            @NonNull AppCompatReachabilityPolicy appCompatReachabilityPolicy,
             Supplier<SurfaceControl> parentSurface) {
         mSurfaceControlFactory = surfaceControlFactory;
         mTransactionFactory = transactionFactory;
@@ -102,9 +99,10 @@ public class Letterbox {
         mHasWallpaperBackgroundSupplier = hasWallpaperBackgroundSupplier;
         mBlurRadiusSupplier = blurRadiusSupplier;
         mDarkScrimAlphaSupplier = darkScrimAlphaSupplier;
-        mDoubleTapCallbackX = doubleTapCallbackX;
-        mDoubleTapCallbackY = doubleTapCallbackY;
+        mAppCompatReachabilityPolicy = appCompatReachabilityPolicy;
         mParentSurfaceSupplier = parentSurface;
+        // TODO Remove after Letterbox refactoring.
+        mAppCompatReachabilityPolicy.setLetterboxInnerBoundsSupplier(this::getInnerFrame);
     }
 
     /**
@@ -290,8 +288,8 @@ public class Letterbox {
                 // This check prevents late events to be handled in case the Letterbox has been
                 // already destroyed and so mOuter.isEmpty() is true.
                 if (!mOuter.isEmpty() && e.getAction() == MotionEvent.ACTION_UP) {
-                    mDoubleTapCallbackX.accept((int) e.getRawX());
-                    mDoubleTapCallbackY.accept((int) e.getRawY());
+                    mAppCompatReachabilityPolicy.handleDoubleTap((int) e.getRawX(),
+                            (int) e.getRawY());
                     return true;
                 }
                 return false;

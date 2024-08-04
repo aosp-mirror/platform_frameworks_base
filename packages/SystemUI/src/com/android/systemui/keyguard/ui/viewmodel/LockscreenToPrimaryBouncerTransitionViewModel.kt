@@ -65,6 +65,7 @@ constructor(
                 transitionAnimation.sharedFlow(
                     duration = 250.milliseconds,
                     onStep = { 1f - it },
+                    onCancel = { 0f },
                     onFinish = { 0f }
                 ),
             flowWhenShadeIsExpanded = transitionAnimation.immediatelyTransitionTo(0f)
