@@ -44,7 +44,6 @@ import com.android.internal.util.XmlUtils;
 import com.android.modules.utils.TypedXmlPullParser;
 import com.android.modules.utils.TypedXmlSerializer;
 import com.android.server.wm.DisplayWindowSettings.SettingsProvider;
-import com.android.window.flags.Flags;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -55,8 +54,10 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Consumer;
 
 /**
  * Implementation of {@link SettingsProvider} that reads the base settings provided in a display
@@ -143,28 +144,38 @@ class DisplayWindowSettingsProvider implements SettingsProvider {
      * @see #DATA_DISPLAY_SETTINGS_FILE_PATH
      */
     void setOverrideSettingsForUser(@UserIdInt int userId) {
-        if (!Flags.perUserDisplayWindowSettings()) {
-            return;
-        }
         final AtomicFile settingsFile = getOverrideSettingsFileForUser(userId);
         setOverrideSettingsStorage(new AtomicFileStorage(settingsFile));
     }
 
     /**
      * Removes display override settings that are no longer associated with active displays.
-     * This is necessary because displays can be dynamically added or removed during
-     * the system's lifecycle (e.g., user switch, system server restart).
+     * <p>
+     * This cleanup process is essential due to the dynamic nature of displays, which can
+     * be added or removed during various system events such as user switching or
+     * system server restarts.
      *
-     * @param root The root window container used to obtain the currently active displays.
+     * @param wms  the WindowManagerService instance for retrieving all possible {@link DisplayInfo}
+     *             for the given logical display.
+     * @param root the root window container used to obtain the currently active displays.
      */
-    void removeStaleDisplaySettings(@NonNull RootWindowContainer root) {
-        if (!Flags.perUserDisplayWindowSettings()) {
-            return;
-        }
+    void removeStaleDisplaySettingsLocked(@NonNull WindowManagerService wms,
+            @NonNull RootWindowContainer root) {
         final Set<String> displayIdentifiers = new ArraySet<>();
+        final Consumer<DisplayInfo> addDisplayIdentifier =
+                displayInfo -> displayIdentifiers.add(mOverrideSettings.getIdentifier(displayInfo));
         root.forAllDisplays(dc -> {
-            final String identifier = mOverrideSettings.getIdentifier(dc.getDisplayInfo());
-            displayIdentifiers.add(identifier);
+            // Begin with the current display's information. Note that the display layout of the
+            // current device state might not include this display (e.g., external or virtual
+            // displays), resulting in empty possible display info.
+            addDisplayIdentifier.accept(dc.getDisplayInfo());
+
+            // Then, add all possible display information for this display if available.
+            final List<DisplayInfo> displayInfos = wms.getPossibleDisplayInfoLocked(dc.mDisplayId);
+            final int size = displayInfos.size();
+            for (int i = 0; i < size; i++) {
+                addDisplayIdentifier.accept(displayInfos.get(i));
+            }
         });
         mOverrideSettings.removeStaleDisplaySettings(displayIdentifiers);
     }
@@ -385,12 +396,9 @@ class DisplayWindowSettingsProvider implements SettingsProvider {
 
     @NonNull
     private static AtomicFile getOverrideSettingsFileForUser(@UserIdInt int userId) {
-        final File directory;
-        if (userId == USER_SYSTEM || !Flags.perUserDisplayWindowSettings()) {
-            directory = Environment.getDataDirectory();
-        } else {
-            directory = Environment.getDataSystemCeDirectory(userId);
-        }
+        final File directory = (userId == USER_SYSTEM)
+                ? Environment.getDataDirectory()
+                : Environment.getDataSystemCeDirectory(userId);
         final File overrideSettingsFile = new File(directory, DATA_DISPLAY_SETTINGS_FILE_PATH);
         return new AtomicFile(overrideSettingsFile, WM_DISPLAY_COMMIT_TAG);
     }

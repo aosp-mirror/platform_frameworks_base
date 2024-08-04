@@ -66,7 +66,7 @@ public class LetterboxTest {
         mLetterbox = new Letterbox(mSurfaces, StubTransaction::new,
                 () -> mAreCornersRounded, () -> Color.valueOf(mColor),
                 () -> mHasWallpaperBackground, () -> mBlurRadius, () -> mDarkScrimAlpha,
-                /* doubleTapCallbackX= */ x -> {}, /* doubleTapCallbackY= */ y -> {},
+                mock(AppCompatReachabilityPolicy.class),
                 () -> mParentSurface);
         mTransaction = spy(StubTransaction.class);
     }

@@ -67,7 +67,4 @@ interface ITaskOrganizerController {
      * Restarts the top activity in the given task by killing its process if it is visible.
      */
     void restartTaskTopActivityProcessIfVisible(in WindowContainerToken task);
-
-    /** Updates a state of camera compat control for stretched issues in the viewfinder. */
-    void updateCameraCompatControlState(in WindowContainerToken task, int state);
 }

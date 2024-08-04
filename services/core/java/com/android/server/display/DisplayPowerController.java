@@ -17,6 +17,7 @@
 package com.android.server.display;
 
 import static android.hardware.display.DisplayManagerInternal.DisplayPowerRequest.POLICY_DOZE;
+import static android.hardware.display.DisplayManagerInternal.DisplayPowerRequest.POLICY_OFF;
 
 import static com.android.server.display.AutomaticBrightnessController.AUTO_BRIGHTNESS_MODE_DEFAULT;
 import static com.android.server.display.AutomaticBrightnessController.AUTO_BRIGHTNESS_MODE_DOZE;
@@ -702,6 +703,17 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
     private void handleOnSwitchUser(@UserIdInt int newUserId, int userSerial, float newBrightness) {
         Slog.i(mTag, "Switching user newUserId=" + newUserId + " userSerial=" + userSerial
                 + " newBrightness=" + newBrightness);
+
+        if (mAutomaticBrightnessController != null) {
+            int autoBrightnessPreset = Settings.System.getIntForUser(mContext.getContentResolver(),
+                    Settings.System.SCREEN_BRIGHTNESS_FOR_ALS,
+                    Settings.System.SCREEN_BRIGHTNESS_AUTOMATIC_NORMAL,
+                    UserHandle.USER_CURRENT);
+            if (autoBrightnessPreset != mAutomaticBrightnessController.getPreset()) {
+                setUpAutoBrightness(mContext, mHandler);
+            }
+        }
+
         handleBrightnessModeChange();
         if (mBrightnessTracker != null) {
             mBrightnessTracker.onSwitchUser(newUserId);
@@ -714,6 +726,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         if (mAutomaticBrightnessController != null) {
             mAutomaticBrightnessController.resetShortTermModel();
         }
+        mBrightnessClamperController.onUserSwitch();
         sendUpdatePowerState();
     }
 
@@ -1009,7 +1022,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         if (mFlags.areAutoBrightnessModesEnabled()) {
             mContext.getContentResolver().registerContentObserver(
                     Settings.System.getUriFor(Settings.System.SCREEN_BRIGHTNESS_FOR_ALS),
-                    /* notifyForDescendants= */ false, mSettingsObserver, UserHandle.USER_CURRENT);
+                    /* notifyForDescendants= */ false, mSettingsObserver, UserHandle.USER_ALL);
         }
         handleBrightnessModeChange();
     }
@@ -1381,8 +1394,8 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
             if (mScreenOffBrightnessSensorController != null) {
                 mScreenOffBrightnessSensorController
                         .setLightSensorEnabled(displayBrightnessState.getShouldUseAutoBrightness()
-                        && mIsEnabled && (state == Display.STATE_OFF
-                        || (state == Display.STATE_DOZE && !allowAutoBrightnessWhileDozing))
+                        && mIsEnabled && (mPowerRequest.policy == POLICY_OFF
+                        || (mPowerRequest.policy == POLICY_DOZE && !allowAutoBrightnessWhileDozing))
                         && mLeadDisplayId == Layout.NO_LEAD_DISPLAY);
             }
         }

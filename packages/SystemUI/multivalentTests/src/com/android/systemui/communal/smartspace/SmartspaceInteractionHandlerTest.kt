@@ -31,6 +31,7 @@ import com.android.systemui.communal.widgets.CommunalTransitionAnimatorControlle
 import com.android.systemui.communal.widgets.SmartspaceAppWidgetHostView
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.kosmos.testScope
+import com.android.systemui.log.logcatLogBuffer
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.testKosmos
 import kotlinx.coroutines.test.runTest
@@ -55,7 +56,7 @@ class SmartspaceInteractionHandlerTest : SysuiTestCase() {
     private val testIntent =
         PendingIntent.getActivity(
             context,
-            /* requestCode = */ 0,
+            /* requestCode= */ 0,
             Intent("action"),
             PendingIntent.FLAG_IMMUTABLE
         )
@@ -66,7 +67,12 @@ class SmartspaceInteractionHandlerTest : SysuiTestCase() {
     @Before
     fun setUp() {
         with(kosmos) {
-            underTest = SmartspaceInteractionHandler(activityStarter, communalSceneInteractor)
+            underTest =
+                SmartspaceInteractionHandler(
+                    activityStarter = activityStarter,
+                    communalSceneInteractor = communalSceneInteractor,
+                    logBuffer = logcatLogBuffer(),
+                )
         }
     }
 

@@ -158,6 +158,11 @@ public class ZenMode implements Parcelable {
         mIsManualDnd = isManualDnd;
     }
 
+    /** Creates a deep copy of this object. */
+    public ZenMode copy() {
+        return new ZenMode(mId, new AutomaticZenRule.Builder(mRule).build(), mStatus, mIsManualDnd);
+    }
+
     @NonNull
     public String getId() {
         return mId;

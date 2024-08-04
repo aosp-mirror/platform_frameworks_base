@@ -28,9 +28,6 @@ import android.util.Pair;
 import androidx.annotation.NonNull;
 import androidx.annotation.VisibleForTesting;
 
-import com.android.systemui.settings.FakeUserTracker;
-import com.android.systemui.settings.UserTracker;
-
 import kotlinx.coroutines.CoroutineDispatcher;
 
 import java.util.ArrayList;
@@ -44,11 +41,12 @@ public class FakeSettings implements SecureSettings, SystemSettings {
             new HashMap<>();
     private final Map<String, List<ContentObserver>> mContentObserversAllUsers = new HashMap<>();
     private final CoroutineDispatcher mDispatcher;
-    private final UserTracker mUserTracker;
 
     public static final Uri CONTENT_URI = Uri.parse("content://settings/fake");
     @UserIdInt
     private int mUserId = UserHandle.USER_CURRENT;
+
+    private final CurrentUserIdProvider mCurrentUserProvider;
 
     /**
      * @deprecated Please use FakeSettings(testDispatcher) to provide the same dispatcher used
@@ -57,17 +55,17 @@ public class FakeSettings implements SecureSettings, SystemSettings {
     @Deprecated
     public FakeSettings() {
         mDispatcher = StandardTestDispatcher(/* scheduler = */ null, /* name = */ null);
-        mUserTracker = new FakeUserTracker();
+        mCurrentUserProvider = () -> mUserId;
     }
 
     public FakeSettings(CoroutineDispatcher dispatcher) {
         mDispatcher = dispatcher;
-        mUserTracker = new FakeUserTracker();
+        mCurrentUserProvider = () -> mUserId;
     }
 
-    public FakeSettings(CoroutineDispatcher dispatcher, UserTracker userTracker) {
+    public FakeSettings(CoroutineDispatcher dispatcher, CurrentUserIdProvider currentUserProvider) {
         mDispatcher = dispatcher;
-        mUserTracker = userTracker;
+        mCurrentUserProvider = currentUserProvider;
     }
 
     @VisibleForTesting
@@ -93,8 +91,8 @@ public class FakeSettings implements SecureSettings, SystemSettings {
 
     @NonNull
     @Override
-    public UserTracker getUserTracker() {
-        return mUserTracker;
+    public CurrentUserIdProvider getCurrentUserProvider() {
+        return mCurrentUserProvider;
     }
 
     @NonNull

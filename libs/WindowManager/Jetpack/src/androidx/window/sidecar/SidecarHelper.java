@@ -26,7 +26,7 @@ import android.app.ActivityThread;
 import android.graphics.Rect;
 import android.os.IBinder;
 
-import androidx.window.common.CommonFoldingFeature;
+import androidx.window.common.layout.CommonFoldingFeature;
 
 import java.util.ArrayList;
 import java.util.Collections;

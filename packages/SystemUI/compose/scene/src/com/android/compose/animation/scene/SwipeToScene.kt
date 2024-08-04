@@ -31,6 +31,7 @@ import androidx.compose.ui.node.PointerInputModifierNode
 import androidx.compose.ui.node.TraversableNode
 import androidx.compose.ui.node.findNearestAncestor
 import androidx.compose.ui.unit.IntSize
+import com.android.compose.animation.scene.content.Scene
 
 /**
  * Configures the swipeable behavior of a [SceneTransitionLayout] depending on the current state.

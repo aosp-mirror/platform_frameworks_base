@@ -722,6 +722,7 @@ public final class DisplayManagerService extends SystemService {
             if (userSwitching) {
                 mCurrentUserId = newUserId;
             }
+            mDisplayModeDirector.onSwitchUser();
             mLogicalDisplayMapper.forEachLocked(logicalDisplay -> {
                 if (logicalDisplay.getDisplayInfoLocked().type != Display.TYPE_INTERNAL) {
                     return;

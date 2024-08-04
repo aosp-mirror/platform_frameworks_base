@@ -104,6 +104,7 @@ public abstract class Pip2Module {
             TaskStackListenerImpl taskStackListener,
             ShellTaskOrganizer shellTaskOrganizer,
             PipTransitionState pipTransitionState,
+            PipTouchHandler pipTouchHandler,
             @ShellMainThread ShellExecutor mainExecutor) {
         if (!PipUtils.isPip2ExperimentEnabled()) {
             return Optional.empty();
@@ -112,7 +113,7 @@ public abstract class Pip2Module {
                     context, shellInit, shellCommandHandler, shellController, displayController,
                     displayInsetsController, pipBoundsState, pipBoundsAlgorithm,
                     pipDisplayLayoutState, pipScheduler, taskStackListener, shellTaskOrganizer,
-                    pipTransitionState, mainExecutor));
+                    pipTransitionState, pipTouchHandler, mainExecutor));
         }
     }
 

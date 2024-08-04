@@ -40,6 +40,8 @@ class FakeZenModeRepository : ZenModeRepository {
     override val modes: Flow<List<ZenMode>>
         get() = mutableModesFlow.asStateFlow()
 
+    private val activeModesDurations = mutableMapOf<String, Duration?>()
+
     init {
         updateNotificationPolicy()
     }
@@ -64,8 +66,22 @@ class FakeZenModeRepository : ZenModeRepository {
         mutableModesFlow.value = mutableModesFlow.value.filter { it.id != id }
     }
 
+    fun getMode(id: String): ZenMode? {
+        return mutableModesFlow.value.find { it.id == id }
+    }
+
     override fun activateMode(zenMode: ZenMode, duration: Duration?) {
         activateMode(zenMode.id)
+        activeModesDurations[zenMode.id] = duration
+    }
+
+    fun getModeActiveDuration(id: String): Duration? {
+        if (!activeModesDurations.containsKey(id)) {
+            throw IllegalArgumentException(
+                "mode $id not manually activated, you need to call activateMode"
+            )
+        }
+        return activeModesDurations[id]
     }
 
     override fun deactivateMode(zenMode: ZenMode) {
@@ -78,6 +94,7 @@ class FakeZenModeRepository : ZenModeRepository {
 
     fun deactivateMode(id: String) {
         updateModeActiveState(id = id, isActive = false)
+        activeModesDurations.remove(id)
     }
 
     // Update the active state while maintaining the mode's position in the list

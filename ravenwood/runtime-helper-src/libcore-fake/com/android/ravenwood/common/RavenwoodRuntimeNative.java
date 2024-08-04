@@ -48,6 +48,8 @@ public class RavenwoodRuntimeNative {
 
     public static native StructStat stat(String path) throws ErrnoException;
 
+    private static native int nOpen(String path, int flags, int mode) throws ErrnoException;
+
     public static long lseek(FileDescriptor fd, long offset, int whence) throws ErrnoException {
         return nLseek(JvmWorkaround.getInstance().getFdInt(fd), offset, whence);
     }
@@ -67,7 +69,7 @@ public class RavenwoodRuntimeNative {
     public static FileDescriptor dup(FileDescriptor fd) throws ErrnoException {
         var fdInt = nDup(JvmWorkaround.getInstance().getFdInt(fd));
 
-        var retFd = new java.io.FileDescriptor();
+        var retFd = new FileDescriptor();
         JvmWorkaround.getInstance().setFdInt(retFd, fdInt);
         return retFd;
     }
@@ -82,5 +84,13 @@ public class RavenwoodRuntimeNative {
         var fdInt = JvmWorkaround.getInstance().getFdInt(fd);
 
         return nFstat(fdInt);
+    }
+
+    public static FileDescriptor open(String path, int flags, int mode) throws ErrnoException {
+        int fd = nOpen(path, flags, mode);
+        if (fd < 0) return null;
+        var retFd = new FileDescriptor();
+        JvmWorkaround.getInstance().setFdInt(retFd, fd);
+        return retFd;
     }
 }

@@ -34,6 +34,7 @@ import android.os.Handler;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.text.TextUtils;
+import android.util.IndentingPrintWriter;
 import android.util.Log;
 import android.util.LongSparseArray;
 import android.util.Slog;
@@ -55,6 +56,7 @@ import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -705,4 +707,61 @@ public class ModifierShortcutManager {
         }
         return context.getString(resid);
     };
+
+    void dump(String prefix, PrintWriter pw) {
+        IndentingPrintWriter ipw = new IndentingPrintWriter(pw,  "  ", prefix);
+        ipw.println("ModifierShortcutManager shortcuts:");
+
+        ipw.increaseIndent();
+        ipw.println("Roles");
+        ipw.increaseIndent();
+        for (int i = 0; i <  mRoleShortcuts.size(); i++) {
+            String role = mRoleShortcuts.valueAt(i);
+            char shortcutChar = (char) mRoleShortcuts.keyAt(i);
+            Intent intent = getRoleLaunchIntent(role);
+            ipw.println(shortcutChar + " " + role + " " + intent);
+        }
+
+        for (int i = 0; i <  mShiftRoleShortcuts.size(); i++) {
+            String role = mShiftRoleShortcuts.valueAt(i);
+            char shortcutChar = (char) mShiftRoleShortcuts.keyAt(i);
+            Intent intent = getRoleLaunchIntent(role);
+            ipw.println("SHIFT+" + shortcutChar + " " + role + " " + intent);
+        }
+
+        ipw.decreaseIndent();
+        ipw.println("Selectors");
+        ipw.increaseIndent();
+        for (int i = 0; i <  mIntentShortcuts.size(); i++) {
+            char shortcutChar = (char) mIntentShortcuts.keyAt(i);
+            Intent intent = mIntentShortcuts.valueAt(i);
+            ipw.println(shortcutChar + " " + intent);
+        }
+
+        for (int i = 0; i <  mShiftShortcuts.size(); i++) {
+            char shortcutChar = (char) mShiftShortcuts.keyAt(i);
+            Intent intent = mShiftShortcuts.valueAt(i);
+            ipw.println("SHIFT+" + shortcutChar + " " + intent);
+
+        }
+
+        if (modifierShortcutManagerMultiuser()) {
+            ipw.decreaseIndent();
+            ipw.println("ComponentNames");
+            ipw.increaseIndent();
+            for (int i = 0; i < mComponentShortcuts.size(); i++) {
+                char shortcutChar = (char) mComponentShortcuts.keyAt(i);
+                ComponentName component = mComponentShortcuts.valueAt(i);
+                Intent intent = resolveComponentNameIntent(component);
+                ipw.println(shortcutChar + " " + component + " " + intent);
+            }
+
+            for (int i = 0; i < mShiftComponentShortcuts.size(); i++) {
+                char shortcutChar = (char) mShiftComponentShortcuts.keyAt(i);
+                ComponentName component = mShiftComponentShortcuts.valueAt(i);
+                Intent intent = resolveComponentNameIntent(component);
+                ipw.println("SHIFT+" + shortcutChar + " " + component + " " + intent);
+            }
+        }
+    }
 }

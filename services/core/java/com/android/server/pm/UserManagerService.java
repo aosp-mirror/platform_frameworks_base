@@ -7927,6 +7927,17 @@ public class UserManagerService extends IUserManager.Stub {
         }
 
         @Override
+        public boolean isVisibleBackgroundFullUser(@UserIdInt int userId) {
+            if (!UserManager.isVisibleBackgroundUsersEnabled()) {
+                return false;
+            }
+            boolean isForeground = userId == getCurrentUserId();
+            boolean isProfile = isProfileUnchecked(userId);
+            boolean isVisible = isUserVisible(userId);
+            return isVisible && !isForeground && !isProfile;
+        }
+
+        @Override
         public int getMainDisplayAssignedToUser(@UserIdInt int userId) {
             return mUserVisibilityMediator.getMainDisplayAssignedToUser(userId);
         }

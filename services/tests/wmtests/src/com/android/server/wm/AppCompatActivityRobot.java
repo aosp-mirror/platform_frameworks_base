@@ -178,6 +178,10 @@ class AppCompatActivityRobot {
         doReturn(enabled).when(mActivityStack.top()).shouldCreateCompatDisplayInsets();
     }
 
+    void setTopActivityInSizeCompatMode(boolean inScm) {
+        doReturn(inScm).when(mActivityStack.top()).inSizeCompatMode();
+    }
+
     void setShouldApplyUserFullscreenOverride(boolean enabled) {
         doReturn(enabled).when(mActivityStack.top().mAppCompatController
                 .getAppCompatAspectRatioOverrides()).shouldApplyUserFullscreenOverride();

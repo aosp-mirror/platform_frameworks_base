@@ -30,7 +30,10 @@ final class UserDataRepository {
     @NonNull
     private volatile ImmutableSparseArray<UserData> mUserData = ImmutableSparseArray.empty();
 
+    @NonNull
     private final IntFunction<InputMethodBindingController> mBindingControllerFactory;
+    @NonNull
+    private final IntFunction<ImeVisibilityStateComputer> mVisibilityStateComputerFactory;
 
     @AnyThread
     @NonNull
@@ -42,7 +45,8 @@ final class UserDataRepository {
         }
         // Note that the below line can be called concurrently. Here we assume that
         // instantiating UserData for the same user multiple times would have no side effect.
-        final var newUserData = new UserData(userId, mBindingControllerFactory.apply(userId));
+        final var newUserData = new UserData(userId, mBindingControllerFactory.apply(userId),
+                mVisibilityStateComputerFactory.apply(userId));
         synchronized (mMutationLock) {
             mUserData = mUserData.cloneWithPutOrSelf(userId, newUserData);
             return newUserData;
@@ -54,9 +58,10 @@ final class UserDataRepository {
         mUserData.forEach(consumer);
     }
 
-    UserDataRepository(
-            @NonNull IntFunction<InputMethodBindingController> bindingControllerFactory) {
+    UserDataRepository(@NonNull IntFunction<InputMethodBindingController> bindingControllerFactory,
+            @NonNull IntFunction<ImeVisibilityStateComputer> visibilityStateComputerFactory) {
         mBindingControllerFactory = bindingControllerFactory;
+        mVisibilityStateComputerFactory = visibilityStateComputerFactory;
     }
 
     @AnyThread

@@ -33,12 +33,7 @@ import static android.app.ActivityOptions.ANIM_UNDEFINED;
 import static android.app.ActivityTaskManager.INVALID_TASK_ID;
 import static android.app.AppOpsManager.MODE_ALLOWED;
 import static android.app.AppOpsManager.OP_PICTURE_IN_PICTURE;
-import static android.app.CameraCompatTaskInfo.CAMERA_COMPAT_CONTROL_DISMISSED;
-import static android.app.CameraCompatTaskInfo.CAMERA_COMPAT_CONTROL_HIDDEN;
-import static android.app.CameraCompatTaskInfo.CAMERA_COMPAT_CONTROL_TREATMENT_APPLIED;
-import static android.app.CameraCompatTaskInfo.CAMERA_COMPAT_CONTROL_TREATMENT_SUGGESTED;
 import static android.app.CameraCompatTaskInfo.CAMERA_COMPAT_FREEFORM_NONE;
-import static android.app.CameraCompatTaskInfo.cameraCompatControlStateToString;
 import static android.app.WaitResult.INVALID_DELAY;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_ASSISTANT;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_DREAM;
@@ -271,8 +266,6 @@ import android.annotation.Size;
 import android.app.Activity;
 import android.app.ActivityManager.TaskDescription;
 import android.app.ActivityOptions;
-import android.app.CameraCompatTaskInfo.CameraCompatControlState;
-import android.app.ICompatCameraControlCallback;
 import android.app.IScreenCaptureObserver;
 import android.app.PendingIntent;
 import android.app.PictureInPictureParams;
@@ -371,6 +364,7 @@ import android.window.WindowOnBackInvokedDispatcher;
 
 import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.annotations.KeepForWeakReference;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.ResolverActivity;
 import com.android.internal.content.ReferrerIntent;
@@ -824,19 +818,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     // and therefore #isLetterboxedForFixedOrientationAndAspectRatio returns false.
     private boolean mIsEligibleForFixedOrientationLetterbox;
 
-    // State of the Camera app compat control which is used to correct stretched viewfinder
-    // in apps that don't handle all possible configurations and changes between them correctly.
-    @CameraCompatControlState
-    private int mCameraCompatControlState = CAMERA_COMPAT_CONTROL_HIDDEN;
-
-    // The callback that allows to ask the calling View to apply the treatment for stretched
-    // issues affecting camera viewfinders when the user clicks on the camera compat control.
-    @Nullable
-    private ICompatCameraControlCallback mCompatCameraControlCallback;
-
-    private final boolean mCameraCompatControlEnabled;
-    private boolean mCameraCompatControlClickedByUser;
-
     // activity is not displayed?
     // TODO: rename to mNoDisplay
     @VisibleForTesting
@@ -941,6 +922,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
     private RemoteCallbackList<IScreenCaptureObserver> mCaptureCallbacks;
 
+    // Ensure the field is kept during optimization to preserve downstream weak refs.
+    @KeepForWeakReference
     private final ColorDisplayService.ColorTransformController mColorTransformController =
             (matrix, translation) -> mWmService.mH.post(() -> {
                 synchronized (mWmService.mGlobalLock) {
@@ -1342,10 +1325,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         }
 
         mLetterboxUiController.dump(pw, prefix);
-
-        pw.println(prefix + "mCameraCompatControlState="
-                + cameraCompatControlStateToString(mCameraCompatControlState));
-        pw.println(prefix + "mCameraCompatControlEnabled=" + mCameraCompatControlEnabled);
     }
 
     static boolean dumpActivity(FileDescriptor fd, PrintWriter pw, int index, ActivityRecord r,
@@ -1884,100 +1863,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         mLetterboxUiController.getLetterboxInnerBounds(outBounds);
     }
 
-    void updateCameraCompatState(boolean showControl, boolean transformationApplied,
-            ICompatCameraControlCallback callback) {
-        if (!isCameraCompatControlEnabled()) {
-            // Feature is disabled by config_isCameraCompatControlForStretchedIssuesEnabled.
-            return;
-        }
-        if (mCameraCompatControlClickedByUser && (showControl
-                || mCameraCompatControlState == CAMERA_COMPAT_CONTROL_DISMISSED)) {
-            // The user already applied treatment on this activity or dismissed control.
-            // Respecting their choice.
-            return;
-        }
-        mCompatCameraControlCallback = callback;
-        int newCameraCompatControlState = !showControl
-                ? CAMERA_COMPAT_CONTROL_HIDDEN
-                : transformationApplied
-                        ? CAMERA_COMPAT_CONTROL_TREATMENT_APPLIED
-                        : CAMERA_COMPAT_CONTROL_TREATMENT_SUGGESTED;
-        boolean changed = setCameraCompatControlState(newCameraCompatControlState);
-        if (!changed) {
-            return;
-        }
-        mTaskSupervisor.getActivityMetricsLogger().logCameraCompatControlAppearedEventReported(
-                newCameraCompatControlState, info.applicationInfo.uid);
-        if (newCameraCompatControlState == CAMERA_COMPAT_CONTROL_HIDDEN) {
-            mCameraCompatControlClickedByUser = false;
-            mCompatCameraControlCallback = null;
-        }
-        // Trigger TaskInfoChanged to update the camera compat UI.
-        getTask().dispatchTaskInfoChangedIfNeeded(true /* force */);
-        // TaskOrganizerController#onTaskInfoChanged adds pending task events to the queue waiting
-        // for the surface placement to be ready. So need to trigger surface placement to dispatch
-        // events to avoid stale state for the camera compat control.
-        getDisplayContent().setLayoutNeeded();
-        mWmService.mWindowPlacerLocked.performSurfacePlacement();
-    }
-
-    void updateCameraCompatStateFromUser(@CameraCompatControlState int state) {
-        if (!isCameraCompatControlEnabled()) {
-            // Feature is disabled by config_isCameraCompatControlForStretchedIssuesEnabled.
-            return;
-        }
-        if (state == CAMERA_COMPAT_CONTROL_HIDDEN) {
-            Slog.w(TAG, "Unexpected hidden state in updateCameraCompatState");
-            return;
-        }
-        boolean changed = setCameraCompatControlState(state);
-        mCameraCompatControlClickedByUser = true;
-        if (!changed) {
-            return;
-        }
-        mTaskSupervisor.getActivityMetricsLogger().logCameraCompatControlClickedEventReported(
-                state, info.applicationInfo.uid);
-        if (state == CAMERA_COMPAT_CONTROL_DISMISSED) {
-            mCompatCameraControlCallback = null;
-            return;
-        }
-        if (mCompatCameraControlCallback == null) {
-            Slog.w(TAG, "Callback for a camera compat control is null");
-            return;
-        }
-        try {
-            if (state == CAMERA_COMPAT_CONTROL_TREATMENT_APPLIED) {
-                mCompatCameraControlCallback.applyCameraCompatTreatment();
-            } else {
-                mCompatCameraControlCallback.revertCameraCompatTreatment();
-            }
-        } catch (RemoteException e) {
-            Slog.e(TAG, "Unable to apply or revert camera compat treatment", e);
-        }
-    }
-
-    private boolean setCameraCompatControlState(@CameraCompatControlState int state) {
-        if (!isCameraCompatControlEnabled()) {
-            // Feature is disabled by config_isCameraCompatControlForStretchedIssuesEnabled.
-            return false;
-        }
-        if (mCameraCompatControlState != state) {
-            mCameraCompatControlState = state;
-            return true;
-        }
-        return false;
-    }
-
-    @CameraCompatControlState
-    int getCameraCompatControlState() {
-        return mCameraCompatControlState;
-    }
-
-    @VisibleForTesting
-    boolean isCameraCompatControlEnabled() {
-        return mCameraCompatControlEnabled;
-    }
-
     /**
      * @return {@code true} if bar shown within a given rectangle is allowed to be fully transparent
      *     when the current activity is displayed.
@@ -2103,10 +1988,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         // Don't move below setOrientation(info.screenOrientation) since it triggers
         // getOverrideOrientation that requires having mLetterboxUiController
         // initialised.
-        mLetterboxUiController = new LetterboxUiController(mWmService, this);
         mAppCompatController = new AppCompatController(mWmService, this);
-        mCameraCompatControlEnabled = mWmService.mContext.getResources()
-                .getBoolean(R.bool.config_isCameraCompatControlForStretchedIssuesEnabled);
+        mLetterboxUiController = new LetterboxUiController(mWmService, this);
         mResolveConfigHint = new TaskFragment.ConfigOverrideHint();
         if (mWmService.mFlags.mInsetsDecoupledConfiguration) {
             // When the stable configuration is the default behavior, override for the legacy apps
@@ -8750,8 +8633,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     /**
      * Adjusts position of resolved bounds if they don't fill the parent using gravity
      * requested in the config or via an ADB command. For more context see {@link
-     * LetterboxUiController#getHorizontalPositionMultiplier(Configuration)} and
-     * {@link LetterboxUiController#getVerticalPositionMultiplier(Configuration)}
+     * AppCompatReachabilityOverrides#getHorizontalPositionMultiplier(Configuration)} and
+     * {@link AppCompatReachabilityOverrides#getVerticalPositionMultiplier(Configuration)}
      * <p>
      * Note that this is the final step that can change the resolved bounds. After this method
      * is called, the position of the bounds will be moved to app space as sandboxing if the
@@ -8780,11 +8663,13 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         } else {
             navBarInsets = Insets.NONE;
         }
+        final AppCompatReachabilityOverrides reachabilityOverrides =
+                mAppCompatController.getAppCompatReachabilityOverrides();
         // Horizontal position
         int offsetX = 0;
         if (parentBounds.width() != screenResolvedBoundsWidth) {
             if (screenResolvedBoundsWidth <= parentAppBoundsWidth) {
-                float positionMultiplier = mLetterboxUiController.getHorizontalPositionMultiplier(
+                float positionMultiplier = reachabilityOverrides.getHorizontalPositionMultiplier(
                         newParentConfiguration);
                 // If in immersive mode, always align to right and overlap right insets (task bar)
                 // as they are transient and hidden. This removes awkward right spacing.
@@ -8805,7 +8690,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         int offsetY = 0;
         if (parentBoundsHeight != screenResolvedBoundsHeight) {
             if (screenResolvedBoundsHeight <= parentAppBoundsHeight) {
-                float positionMultiplier = mLetterboxUiController.getVerticalPositionMultiplier(
+                float positionMultiplier = reachabilityOverrides.getVerticalPositionMultiplier(
                         newParentConfiguration);
                 // If in immersive mode, always align to bottom and overlap bottom insets (nav bar,
                 // task bar) as they are transient and hidden. This removes awkward bottom spacing.
@@ -10802,6 +10687,9 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 // The sync is ready if a drawn starting window covered the task.
                 return true;
             }
+        }
+        if (mAtmService.mBackNavigationController.isStartingSurfaceShown(this)) {
+            return true;
         }
         if (!super.isSyncFinished(group)) return false;
         if (mDisplayContent != null && mDisplayContent.mUnknownAppVisibilityController

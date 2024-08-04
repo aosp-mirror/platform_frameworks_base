@@ -390,7 +390,10 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
 
     private static boolean hasActivityLaunch(@NonNull WindowContainerTransaction wct) {
         for (int i = 0; i < wct.getHierarchyOps().size(); ++i) {
-            if (wct.getHierarchyOps().get(i).getType() == HIERARCHY_OP_TYPE_LAUNCH_TASK) {
+            final WindowContainerTransaction.HierarchyOp op = wct.getHierarchyOps().get(i);
+            if (op.getType() == HIERARCHY_OP_TYPE_LAUNCH_TASK
+                    || (op.getType() == HIERARCHY_OP_TYPE_PENDING_INTENT
+                            && op.getPendingIntent().isActivity())) {
                 return true;
             }
         }

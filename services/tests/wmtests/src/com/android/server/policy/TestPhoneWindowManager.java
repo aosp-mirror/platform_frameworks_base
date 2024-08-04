@@ -50,7 +50,6 @@ import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.CALLS_REAL_METHODS;
 import static org.mockito.Mockito.after;
-import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mockingDetails;
 import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.withSettings;
@@ -311,13 +310,6 @@ class TestPhoneWindowManager {
                 eq(AccessibilityManager.class));
         doReturn(false).when(mAccessibilityManager).isEnabled();
         doReturn(false).when(mPackageManager).hasSystemFeature(any());
-        try {
-            doThrow(new PackageManager.NameNotFoundException("test")).when(mPackageManager)
-                    .getActivityInfo(any(), anyInt());
-            doReturn(new String[] { "testPackage" }).when(mPackageManager)
-                    .canonicalToCurrentPackageNames(any());
-        } catch (PackageManager.NameNotFoundException ignored) { }
-
         doReturn(false).when(mTelecomManager).isInCall();
         doReturn(false).when(mTelecomManager).isRinging();
         doReturn(mTelecomManager).when(mPhoneWindowManager).getTelecommService();
@@ -739,7 +731,6 @@ class TestPhoneWindowManager {
         // Reset verifier for next call.
         Mockito.clearInvocations(mContext);
     }
-
 
     void assertShowRecentApps() {
         mTestLooper.dispatchAll();
