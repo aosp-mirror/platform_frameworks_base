@@ -367,6 +367,7 @@ import android.window.WindowOnBackInvokedDispatcher;
 
 import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.annotations.KeepForWeakReference;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.ResolverActivity;
 import com.android.internal.content.ReferrerIntent;
@@ -938,6 +939,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
     private RemoteCallbackList<IScreenCaptureObserver> mCaptureCallbacks;
 
+    // Ensure the field is kept during optimization to preserve downstream weak refs.
+    @KeepForWeakReference
     private final ColorDisplayService.ColorTransformController mColorTransformController =
             (matrix, translation) -> mWmService.mH.post(() -> {
                 synchronized (mWmService.mGlobalLock) {

@@ -9,3 +9,10 @@ java_aconfig_library {
     name: "net_flags_lib",
     aconfig_declarations: "net_flags",
 }
+
+java_aconfig_library {
+    name: "net_flags_host_lib",
+    aconfig_declarations: "net_flags",
+    host_supported: true,
+    mode: "test",
+}
