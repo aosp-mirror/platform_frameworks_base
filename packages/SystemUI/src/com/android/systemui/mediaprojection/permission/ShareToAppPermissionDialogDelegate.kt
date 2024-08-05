@@ -48,6 +48,7 @@ class ShareToAppPermissionDialogDelegate(
         appName,
         hostUid,
         mediaProjectionMetricsLogger,
+        dialogIconDrawable = R.drawable.ic_present_to_all,
     ) {
     override fun onCreate(dialog: AlertDialog, savedInstanceState: Bundle?) {
         super.onCreate(dialog, savedInstanceState)
@@ -83,22 +84,28 @@ class ShareToAppPermissionDialogDelegate(
                 listOf(
                     ScreenShareOption(
                         mode = SINGLE_APP,
-                        spinnerText = R.string.screen_share_permission_dialog_option_single_app,
+                        spinnerText =
+                            R.string
+                                .media_projection_entry_app_permission_dialog_option_text_single_app,
                         warningText =
                             R.string
                                 .media_projection_entry_app_permission_dialog_warning_single_app,
                         startButtonText =
-                            R.string.media_projection_entry_app_permission_dialog_continue,
+                            R.string
+                                .media_projection_entry_generic_permission_dialog_continue_single_app,
                         spinnerDisabledText = singleAppDisabledText,
                     ),
                     ScreenShareOption(
                         mode = ENTIRE_SCREEN,
-                        spinnerText = R.string.screen_share_permission_dialog_option_entire_screen,
+                        spinnerText =
+                            R.string
+                                .media_projection_entry_app_permission_dialog_option_text_entire_screen,
                         warningText =
                             R.string
                                 .media_projection_entry_app_permission_dialog_warning_entire_screen,
                         startButtonText =
-                            R.string.media_projection_entry_app_permission_dialog_continue,
+                            R.string
+                                .media_projection_entry_app_permission_dialog_continue_entire_screen,
                     )
                 )
             return if (singleAppDisabledText != null) {
