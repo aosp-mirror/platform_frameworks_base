@@ -797,63 +797,70 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
             final int userId = getChangingUserId();
             final var userData = getUserData(userId);
 
-            // Instantiating InputMethodInfo requires disk I/O.
-            // Do them before acquiring the lock to minimize the chances of ANR (b/340221861).
             userData.mRawInputMethodMap.set(queryRawInputMethodServiceMap(mContext, userId));
 
+            final InputMethodSettings settings = InputMethodSettingsRepository.get(userId);
+
+            InputMethodInfo curIm = null;
+            String curInputMethodId = settings.getSelectedInputMethod();
+            final List<InputMethodInfo> methodList = settings.getMethodList();
+
+            final ArrayList<String> imesToClearAdditionalSubtypes = new ArrayList<>();
+            final ArrayList<String> imesToBeDisabled = new ArrayList<>();
+            final int numImes = methodList.size();
+            for (int i = 0; i < numImes; i++) {
+                InputMethodInfo imi = methodList.get(i);
+                final String imiId = imi.getId();
+                if (imiId.equals(curInputMethodId)) {
+                    curIm = imi;
+                }
+                if (mDataClearedPackages.contains(imi.getPackageName())) {
+                    imesToClearAdditionalSubtypes.add(imiId);
+                }
+                int change = isPackageDisappearing(imi.getPackageName());
+                if (change == PACKAGE_PERMANENT_CHANGE) {
+                    Slog.i(TAG, "Input method uninstalled, disabling: " + imi.getComponent());
+                    imesToBeDisabled.add(imi.getId());
+                } else if (change == PACKAGE_UPDATING) {
+                    Slog.i(TAG, "Input method reinstalling, clearing additional subtypes: "
+                            + imi.getComponent());
+                    imesToClearAdditionalSubtypes.add(imiId);
+                }
+            }
+
+            // Clear additional subtypes as a batch operation.
+            final var additionalSubtypeMap = AdditionalSubtypeMapRepository.get(userId);
+            final AdditionalSubtypeMap newAdditionalSubtypeMap =
+                    additionalSubtypeMap.cloneWithRemoveOrSelf(imesToClearAdditionalSubtypes);
+            final boolean additionalSubtypeChanged =
+                    (newAdditionalSubtypeMap != additionalSubtypeMap);
+            if (additionalSubtypeChanged) {
+                AdditionalSubtypeMapRepository.putAndSave(userId, newAdditionalSubtypeMap,
+                        settings.getMethodMap());
+            }
+
+            final var newMethodMap = userData.mRawInputMethodMap.get().toInputMethodMap(
+                    newAdditionalSubtypeMap,
+                    DirectBootAwareness.AUTO,
+                    mUserManagerInternal.isUserUnlockingOrUnlocked(userId));
+
+            final boolean noUpdate = InputMethodMap.areSame(settings.getMethodMap(), newMethodMap);
+            if (noUpdate && imesToBeDisabled.isEmpty()) {
+                return;
+            }
+
+            // Here we start remaining tasks that need to be done with the lock (b/340221861).
             synchronized (ImfLock.class) {
-                final InputMethodSettings settings = InputMethodSettingsRepository.get(userId);
-
-                InputMethodInfo curIm = null;
-                String curInputMethodId = settings.getSelectedInputMethod();
-                final List<InputMethodInfo> methodList = settings.getMethodList();
-
-                final ArrayList<String> imesToClearAdditionalSubtypes = new ArrayList<>();
-                final int numImes = methodList.size();
-                for (int i = 0; i < numImes; i++) {
-                    InputMethodInfo imi = methodList.get(i);
-                    final String imiId = imi.getId();
-                    if (imiId.equals(curInputMethodId)) {
-                        curIm = imi;
-                    }
-                    if (mDataClearedPackages.contains(imi.getPackageName())) {
-                        imesToClearAdditionalSubtypes.add(imiId);
-                    }
-                    int change = isPackageDisappearing(imi.getPackageName());
-                    if (change == PACKAGE_PERMANENT_CHANGE) {
-                        Slog.i(TAG, "Input method uninstalled, disabling: " + imi.getComponent());
-                        setInputMethodEnabledLocked(imi.getId(), false, userId);
-                    } else if (change == PACKAGE_UPDATING) {
-                        Slog.i(TAG, "Input method reinstalling, clearing additional subtypes: "
-                                + imi.getComponent());
-                        imesToClearAdditionalSubtypes.add(imiId);
-                    }
+                final int numImesToBeDisabled = imesToBeDisabled.size();
+                for (int i = 0; i < numImesToBeDisabled; ++i) {
+                    setInputMethodEnabledLocked(imesToBeDisabled.get(i), false /* enabled */,
+                            userId);
                 }
-
-                // Clear additional subtypes as a batch operation.
-                final var additionalSubtypeMap = AdditionalSubtypeMapRepository.get(userId);
-                final AdditionalSubtypeMap newAdditionalSubtypeMap =
-                        additionalSubtypeMap.cloneWithRemoveOrSelf(imesToClearAdditionalSubtypes);
-                final boolean additionalSubtypeChanged =
-                        (newAdditionalSubtypeMap != additionalSubtypeMap);
-                if (additionalSubtypeChanged) {
-                    AdditionalSubtypeMapRepository.putAndSave(userId, newAdditionalSubtypeMap,
-                            settings.getMethodMap());
-                }
-
-                final var newMethodMap = userData.mRawInputMethodMap.get().toInputMethodMap(
-                        newAdditionalSubtypeMap,
-                        DirectBootAwareness.AUTO,
-                        mUserManagerInternal.isUserUnlockingOrUnlocked(userId));
-
-                if (InputMethodMap.areSame(settings.getMethodMap(), newMethodMap)) {
-                    // No update in the actual IME map.
+                if (noUpdate) {
                     return;
                 }
-
-                final InputMethodSettings newSettings =
-                        InputMethodSettings.create(newMethodMap, userId);
-                InputMethodSettingsRepository.put(userId, newSettings);
+                InputMethodSettingsRepository.put(userId,
+                        InputMethodSettings.create(newMethodMap, userId));
                 postInputMethodSettingUpdatedLocked(false /* resetDefaultEnabledIme */, userId);
 
                 boolean changed = false;
