@@ -33,6 +33,7 @@ import android.compat.annotation.EnabledSince;
 import android.content.AttributionSource;
 import android.content.ComponentName;
 import android.content.Intent;
+import android.content.IntentSender;
 import android.content.pm.ActivityInfo;
 import android.os.Build;
 import android.os.Handler;
@@ -51,6 +52,7 @@ import com.android.modules.expresslog.Counter;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Supplier;
 
 /**
  * A controller to control the policies of the windows that can be displayed on the virtual display.
@@ -73,7 +75,7 @@ public class GenericWindowPolicyController extends DisplayWindowPolicyController
      */
     public interface ActivityBlockedCallback {
         /** Called when an activity is blocked.*/
-        void onActivityBlocked(int displayId, ActivityInfo activityInfo);
+        void onActivityBlocked(int displayId, ActivityInfo activityInfo, IntentSender intentSender);
     }
     private static final ComponentName BLOCKED_APP_STREAMING_COMPONENT =
             new ComponentName("android", BlockedAppStreamingActivity.class.getName());
@@ -282,7 +284,8 @@ public class GenericWindowPolicyController extends DisplayWindowPolicyController
     @Override
     public boolean canActivityBeLaunched(@NonNull ActivityInfo activityInfo,
             @Nullable Intent intent, @WindowConfiguration.WindowingMode int windowingMode,
-            int launchingFromDisplayId, boolean isNewTask) {
+            int launchingFromDisplayId, boolean isNewTask, boolean isResultExpected,
+            @Nullable Supplier<IntentSender> intentSender) {
         if (mIntentListenerCallback != null && intent != null
                 && mIntentListenerCallback.shouldInterceptIntent(intent)) {
             logActivityLaunchBlocked("Virtual device intercepting intent");
@@ -290,7 +293,10 @@ public class GenericWindowPolicyController extends DisplayWindowPolicyController
         }
         if (!canContainActivity(activityInfo, windowingMode, launchingFromDisplayId,
                 isNewTask)) {
-            notifyActivityBlocked(activityInfo);
+            // If the sender of the original intent expects a result to be reported, do not pass the
+            // intent sender to the client callback. As the launch is blocked, the caller already
+            // received that activity result.
+            notifyActivityBlocked(activityInfo, isResultExpected ? null : intentSender);
             return false;
         }
         return true;
@@ -381,7 +387,7 @@ public class GenericWindowPolicyController extends DisplayWindowPolicyController
             // TODO(b/201712607): Add checks for the apps that use SurfaceView#setSecure.
             if ((windowFlags & FLAG_SECURE) != 0
                     || (systemWindowFlags & SYSTEM_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS) != 0) {
-                notifyActivityBlocked(activityInfo);
+                notifyActivityBlocked(activityInfo, /* intentSender= */ null);
                 return false;
             }
         }
@@ -454,13 +460,15 @@ public class GenericWindowPolicyController extends DisplayWindowPolicyController
                     && mDisplayCategories.contains(activityInfo.requiredDisplayCategory);
     }
 
-    private void notifyActivityBlocked(ActivityInfo activityInfo) {
+    private void notifyActivityBlocked(
+            ActivityInfo activityInfo, Supplier<IntentSender> intentSender) {
         int displayId = waitAndGetDisplayId();
         // Don't trigger activity blocked callback for mirror displays, because we can't show
         // any activity or presentation on it anyway.
         if (!waitAndGetIsMirrorDisplay() && mActivityBlockedCallback != null
                 && displayId != INVALID_DISPLAY) {
-            mActivityBlockedCallback.onActivityBlocked(displayId, activityInfo);
+            mActivityBlockedCallback.onActivityBlocked(displayId, activityInfo,
+                    intentSender == null ? null : intentSender.get());
         }
         Counter.logIncrementWithUid(
                 "virtual_devices.value_activity_blocked_count",
