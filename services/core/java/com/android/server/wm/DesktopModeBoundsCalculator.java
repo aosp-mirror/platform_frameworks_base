@@ -238,7 +238,7 @@ public final class DesktopModeBoundsCalculator {
                     taskInfo.appCompatTaskInfo.topActivityLetterboxAppWidth;
             final int appLetterboxHeight =
                     taskInfo.appCompatTaskInfo.topActivityLetterboxAppHeight;
-            if (appCompatTaskInfo.topActivityBoundsLetterboxed) {
+            if (appCompatTaskInfo.isTopActivityLetterboxed()) {
                 desiredAspectRatio = (float) Math.max(appLetterboxWidth, appLetterboxHeight)
                         / Math.min(appLetterboxWidth, appLetterboxHeight);
             } else {

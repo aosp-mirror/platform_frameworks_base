@@ -499,7 +499,7 @@ public class LetterboxEduWindowManagerTest extends ShellTestCase {
         ActivityManager.RunningTaskInfo taskInfo = new ActivityManager.RunningTaskInfo();
         taskInfo.userId = userId;
         taskInfo.taskId = TASK_ID;
-        taskInfo.appCompatTaskInfo.topActivityEligibleForLetterboxEducation = eligible;
+        taskInfo.appCompatTaskInfo.setEligibleForLetterboxEducation(eligible);
         taskInfo.configuration.windowConfiguration.setBounds(bounds);
         return taskInfo;
     }

@@ -635,27 +635,27 @@ public class TaskTests extends WindowTestsBase {
 
         // The button should be eligible to be displayed
         assertTrue(task.getTaskInfo()
-                .appCompatTaskInfo.topActivityEligibleForUserAspectRatioButton);
+                .appCompatTaskInfo.eligibleForUserAspectRatioButton());
 
         // When shouldApplyUserMinAspectRatioOverride is disable the button is not enabled
         doReturn(false).when(
                 root.mAppCompatController.getAppCompatAspectRatioOverrides())
                     .shouldEnableUserAspectRatioSettings();
         assertFalse(task.getTaskInfo()
-                .appCompatTaskInfo.topActivityEligibleForUserAspectRatioButton);
+                .appCompatTaskInfo.eligibleForUserAspectRatioButton());
         doReturn(true).when(root.mAppCompatController
                 .getAppCompatAspectRatioOverrides()).shouldEnableUserAspectRatioSettings();
 
         // When in size compat mode the button is not enabled
         doReturn(true).when(root).inSizeCompatMode();
         assertFalse(task.getTaskInfo()
-                .appCompatTaskInfo.topActivityEligibleForUserAspectRatioButton);
+                .appCompatTaskInfo.eligibleForUserAspectRatioButton());
         doReturn(false).when(root).inSizeCompatMode();
 
         // When the top activity is transparent, the button is not enabled
         doReturn(false).when(root).fillsParent();
         assertFalse(task.getTaskInfo()
-                .appCompatTaskInfo.topActivityEligibleForUserAspectRatioButton);
+                .appCompatTaskInfo.eligibleForUserAspectRatioButton());
         doReturn(true).when(root).fillsParent();
     }
 

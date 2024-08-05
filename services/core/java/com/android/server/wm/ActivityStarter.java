@@ -28,6 +28,8 @@ import static android.app.ActivityManager.START_RETURN_LOCK_TASK_MODE_VIOLATION;
 import static android.app.ActivityManager.START_SUCCESS;
 import static android.app.ActivityManager.START_TASK_TO_FRONT;
 import static android.app.ActivityTaskManager.INVALID_TASK_ID;
+import static android.app.PendingIntent.FLAG_CANCEL_CURRENT;
+import static android.app.PendingIntent.FLAG_ONE_SHOT;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import static android.content.Intent.FLAG_ACTIVITY_CLEAR_TASK;
@@ -146,6 +148,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.text.DateFormat;
 import java.util.Date;
+import java.util.function.Supplier;
 
 /**
  * Controller for interpreting how and then launching an activity.
@@ -1618,8 +1621,10 @@ class ActivityStarter {
                     currentTop, currentTop.mDisplayContent, false /* deferResume */);
         }
 
-        if (!avoidMoveToFront() && mDoResume && mRootWindowContainer
-                .hasVisibleWindowAboveButDoesNotOwnNotificationShade(started.launchedFromUid)) {
+        if (!avoidMoveToFront() && mDoResume
+                && !mService.getUserManagerInternal().isVisibleBackgroundFullUser(started.mUserId)
+                && mRootWindowContainer.hasVisibleWindowAboveButDoesNotOwnNotificationShade(
+                started.launchedFromUid)) {
             // If the UID launching the activity has a visible window on top of the notification
             // shade and it's launching an activity that's going to be at the front, we should move
             // the shade out of the way so the user can see it. We want to avoid the case where the
@@ -2079,9 +2084,23 @@ class ActivityStarter {
                         ? targetTask.getWindowingMode() : displayContent.getWindowingMode();
                 final int launchingFromDisplayId =
                         mSourceRecord != null ? mSourceRecord.getDisplayId() : DEFAULT_DISPLAY;
+                final boolean isResultExpected = r.resultTo != null;
+                Supplier<IntentSender> intentSender = null;
+                if (android.companion.virtualdevice.flags.Flags.activityControlApi()) {
+                    intentSender = () -> {
+                        IIntentSender target = mService.getIntentSenderLocked(
+                                ActivityManager.INTENT_SENDER_ACTIVITY, mRequest.callingPackage,
+                                mRequest.callingFeatureId, mCallingUid, r.mUserId,
+                                /* token= */ null, /* resultCode= */ null, /* requestCode= */ 0,
+                                new Intent[]{ mIntent }, new String[]{ r.resolvedType },
+                                FLAG_CANCEL_CURRENT | FLAG_ONE_SHOT,
+                                mOptions == null ? null : mOptions.toBundle());
+                        return new IntentSender(target);
+                    };
+                }
                 if (!displayContent.mDwpcHelper
                         .canActivityBeLaunched(r.info, r.intent, targetWindowingMode,
-                          launchingFromDisplayId, newTask)) {
+                                launchingFromDisplayId, newTask, isResultExpected, intentSender)) {
                     Slog.w(TAG, "Abort to launch " + r.info.getComponentName()
                             + " on display area " + mPreferredTaskDisplayArea);
                     return START_ABORTED;

@@ -170,7 +170,7 @@ abstract class CrossActivityBackAnimation(
         initialTouchPos.set(backMotionEvent.touchX, backMotionEvent.touchY)
 
         transaction.setAnimationTransaction()
-        isLetterboxed = closingTarget!!.taskInfo.appCompatTaskInfo.topActivityBoundsLetterboxed
+        isLetterboxed = closingTarget!!.taskInfo.appCompatTaskInfo.isTopActivityLetterboxed
         enteringHasSameLetterbox =
             isLetterboxed && closingTarget!!.localBounds.equals(enteringTarget!!.localBounds)
 

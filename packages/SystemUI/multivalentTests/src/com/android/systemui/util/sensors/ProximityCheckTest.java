@@ -74,6 +74,26 @@ public class ProximityCheckTest extends SysuiTestCase {
     }
 
     @Test
+    public void testRecursiveCheck() {
+        mProximityCheck.check(100, event-> mProximityCheck.check(100, mTestableCallback));
+
+        assertThat(mTestableCallback.mNumCalls).isEqualTo(0);
+        assertThat(mTestableCallback.mLastResult).isNull();
+
+        mFakeExecutor.advanceClockToNext();
+        mFakeExecutor.runAllReady();
+
+        assertThat(mTestableCallback.mNumCalls).isEqualTo(0);
+        assertThat(mTestableCallback.mLastResult).isNull();
+
+        mFakeProximitySensor.setLastEvent(new ThresholdSensorEvent(true, 0));
+        mFakeProximitySensor.alertListeners();
+
+        assertThat(mTestableCallback.mNumCalls).isEqualTo(1);
+        assertThat(mTestableCallback.mLastResult).isTrue();
+    }
+
+    @Test
     public void testTimeout() {
         mProximityCheck.check(100, mTestableCallback);
 
