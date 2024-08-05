@@ -576,6 +576,10 @@ public class InfoMediaManager extends MediaManager {
             case TYPE_HEARING_AID:
             case TYPE_BLUETOOTH_A2DP:
             case TYPE_BLE_HEADSET:
+                if (route.getAddress() == null) {
+                    Log.e(TAG, "Ignoring bluetooth route with no set address: " + route);
+                    break;
+                }
                 final BluetoothDevice device =
                         BluetoothAdapter.getDefaultAdapter().getRemoteDevice(route.getAddress());
                 final CachedBluetoothDevice cachedDevice =
