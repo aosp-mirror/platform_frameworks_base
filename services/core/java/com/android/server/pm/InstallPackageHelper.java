@@ -1801,26 +1801,37 @@ final class InstallPackageHelper {
                                 oldPackageState.getRestrictUpdateHash());
                     }
 
-                    if (oldPackage != null) {
-                        // APK should not change its sharedUserId declarations
-                        final var oldSharedUid = oldPackage.getSharedUserId() != null
-                                ? oldPackage.getSharedUserId() : "<nothing>";
-                        final var newSharedUid = parsedPackage.getSharedUserId() != null
-                                ? parsedPackage.getSharedUserId() : "<nothing>";
-                        if (!oldSharedUid.equals(newSharedUid)) {
-                            throw new PrepareFailure(INSTALL_FAILED_UID_CHANGED,
-                                    "Package " + parsedPackage.getPackageName()
-                                            + " shared user changed from "
-                                            + oldSharedUid + " to " + newSharedUid);
+                    // APK should not change its sharedUserId declarations
+                    final String oldSharedUid;
+                    if (mPm.mSettings.getSharedUserSettingLPr(oldPackageState) != null) {
+                        oldSharedUid = mPm.mSettings.getSharedUserSettingLPr(oldPackageState).name;
+                    } else {
+                        oldSharedUid = "<nothing>";
+                    }
+                    String newSharedUid = parsedPackage.getSharedUserId() != null
+                            ? parsedPackage.getSharedUserId() : "<nothing>";
+                    // If the previously installed app version doesn't have sharedUserSetting,
+                    // check that the new apk either doesn't have sharedUserId or it is leaving one.
+                    // If it contains sharedUserId but it is also leaving it, it's ok to proceed.
+                    if (oldSharedUid.equals("<nothing>")) {
+                        if (parsedPackage.isLeavingSharedUser()) {
+                            newSharedUid = "<nothing>";
                         }
+                    }
 
-                        // APK should not re-join shared UID
-                        if (oldPackage.isLeavingSharedUser()
-                                && !parsedPackage.isLeavingSharedUser()) {
-                            throw new PrepareFailure(INSTALL_FAILED_UID_CHANGED,
-                                    "Package " + parsedPackage.getPackageName()
-                                            + " attempting to rejoin " + newSharedUid);
-                        }
+                    if (!oldSharedUid.equals(newSharedUid)) {
+                        throw new PrepareFailure(INSTALL_FAILED_UID_CHANGED,
+                                "Package " + parsedPackage.getPackageName()
+                                        + " shared user changed from "
+                                        + oldSharedUid + " to " + newSharedUid);
+                    }
+
+                    // APK should not re-join shared UID
+                    if (oldPackageState.isLeavingSharedUser()
+                            && !parsedPackage.isLeavingSharedUser()) {
+                        throw new PrepareFailure(INSTALL_FAILED_UID_CHANGED,
+                                "Package " + parsedPackage.getPackageName()
+                                        + " attempting to rejoin " + newSharedUid);
                     }
 
                     // In case of rollback, remember per-user/profile install state
