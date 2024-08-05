@@ -19,7 +19,6 @@ package com.android.systemui.util.settings
 
 import android.annotation.UserIdInt
 import android.database.ContentObserver
-import com.android.systemui.Flags
 import com.android.systemui.common.coroutine.ConflatedCallbackFlow.conflatedCallbackFlow
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
@@ -40,21 +39,9 @@ object SettingsProxyExt {
                     }
                 }
 
-            names.forEach { name ->
-                if (Flags.settingsExtRegisterContentObserverOnBgThread()) {
-                    registerContentObserverForUser(name, observer, userId)
-                } else {
-                    registerContentObserverForUserSync(name, observer, userId)
-                }
-            }
+            names.forEach { name -> registerContentObserverForUserSync(name, observer, userId) }
 
-            awaitClose {
-                if (Flags.settingsExtRegisterContentObserverOnBgThread()) {
-                    unregisterContentObserverAsync(observer)
-                } else {
-                    unregisterContentObserverSync(observer)
-                }
-            }
+            awaitClose { unregisterContentObserverSync(observer) }
         }
     }
 
@@ -70,21 +57,9 @@ object SettingsProxyExt {
                     }
                 }
 
-            names.forEach { name ->
-                if (Flags.settingsExtRegisterContentObserverOnBgThread()) {
-                    registerContentObserver(name, observer)
-                } else {
-                    registerContentObserverSync(name, observer)
-                }
-            }
+            names.forEach { name -> registerContentObserverSync(name, observer) }
 
-            awaitClose {
-                if (Flags.settingsExtRegisterContentObserverOnBgThread()) {
-                    unregisterContentObserverAsync(observer)
-                } else {
-                    unregisterContentObserverSync(observer)
-                }
-            }
+            awaitClose { unregisterContentObserverSync(observer) }
         }
     }
 }
