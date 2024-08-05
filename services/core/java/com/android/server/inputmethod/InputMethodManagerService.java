@@ -1070,13 +1070,15 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
         public void onUserUnlocking(@NonNull TargetUser user) {
             // Called on ActivityManager thread. Do not block the calling thread.
             final int userId = user.getUserIdentifier();
+            final var userData = mService.getUserData(userId);
+            final boolean userUnlocked = true;
             SecureSettingsWrapper.onUserUnlocking(userId);
+            final var methodMap = userData.mRawInputMethodMap.get().toInputMethodMap(
+                    AdditionalSubtypeMapRepository.get(userId), DirectBootAwareness.AUTO,
+                    userUnlocked);
+            final var newSettings = InputMethodSettings.create(methodMap, userId);
+            InputMethodSettingsRepository.put(userId, newSettings);
             mService.mIoHandler.post(() -> {
-                final var userData = mService.getUserData(userId);
-                final var methodMap = userData.mRawInputMethodMap.get().toInputMethodMap(
-                        AdditionalSubtypeMapRepository.get(userId), DirectBootAwareness.AUTO, true);
-                final var newSettings = InputMethodSettings.create(methodMap, userId);
-                InputMethodSettingsRepository.put(userId, newSettings);
                 synchronized (ImfLock.class) {
                     if (!mService.mSystemReady) {
                         return;
@@ -1142,16 +1144,18 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
         public void onUserStopped(@NonNull TargetUser user) {
             final int userId = user.getUserIdentifier();
             // Called on ActivityManager thread.
+
+            // Following operations should be trivial and fast enough, so do not dispatch them to
+            // the IO thread.
             SecureSettingsWrapper.onUserStopped(userId);
-            mService.mIoHandler.post(() -> {
-                final var userData = mService.getUserData(userId);
-                final var additionalSubtypeMap = AdditionalSubtypeMapRepository.get(userId);
-                final var rawMethodMap = userData.mRawInputMethodMap.get();
-                final var methodMap = rawMethodMap.toInputMethodMap(additionalSubtypeMap,
-                        DirectBootAwareness.AUTO, false /* userUnlocked */);
-                InputMethodSettingsRepository.put(userId,
-                        InputMethodSettings.create(methodMap, userId));
-            });
+            final var userData = mService.getUserData(userId);
+            final var additionalSubtypeMap = AdditionalSubtypeMapRepository.get(userId);
+            final var rawMethodMap = userData.mRawInputMethodMap.get();
+            final boolean userUnlocked = false;  // Stopping a user also locks their storage.
+            final var methodMap = rawMethodMap.toInputMethodMap(additionalSubtypeMap,
+                    DirectBootAwareness.AUTO, userUnlocked);
+            InputMethodSettingsRepository.put(userId,
+                    InputMethodSettings.create(methodMap, userId));
         }
     }
 
