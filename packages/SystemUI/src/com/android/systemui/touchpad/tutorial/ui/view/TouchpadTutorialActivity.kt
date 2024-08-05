@@ -28,6 +28,7 @@ import androidx.lifecycle.Lifecycle.State.STARTED
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.android.compose.theme.PlatformTheme
 import com.android.systemui.touchpad.tutorial.ui.composable.BackGestureTutorialScreen
+import com.android.systemui.touchpad.tutorial.ui.composable.HomeGestureTutorialScreen
 import com.android.systemui.touchpad.tutorial.ui.composable.TutorialSelectionScreen
 import com.android.systemui.touchpad.tutorial.ui.viewmodel.Screen.BACK_GESTURE
 import com.android.systemui.touchpad.tutorial.ui.viewmodel.Screen.HOME_GESTURE
@@ -78,6 +79,10 @@ fun TouchpadTutorialScreen(vm: TouchpadTutorialViewModel, closeTutorial: () -> U
                 onDoneButtonClicked = { vm.goTo(TUTORIAL_SELECTION) },
                 onBack = { vm.goTo(TUTORIAL_SELECTION) },
             )
-        HOME_GESTURE -> {}
+        HOME_GESTURE ->
+            HomeGestureTutorialScreen(
+                onDoneButtonClicked = { vm.goTo(TUTORIAL_SELECTION) },
+                onBack = { vm.goTo(TUTORIAL_SELECTION) },
+            )
     }
 }
