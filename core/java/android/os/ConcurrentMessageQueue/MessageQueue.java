@@ -20,6 +20,7 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.TestApi;
 import android.os.Handler;
+import android.os.Looper;
 import android.os.Trace;
 import android.util.Log;
 import android.util.Printer;
@@ -535,6 +536,7 @@ public final class MessageQueue {
     /* This is only read/written from the Looper thread */
     private int mNextPollTimeoutMillis;
     private static final AtomicLong mMessagesDelivered = new AtomicLong();
+    private boolean mMessageDirectlyQueued;
 
     private Message nextMessage() {
         int i = 0;
@@ -729,6 +731,7 @@ public final class MessageQueue {
                 Binder.flushPendingCommands();
             }
 
+            mMessageDirectlyQueued = false;
             nativePollOnce(ptr, mNextPollTimeoutMillis);
 
             Message msg = nextMessage();
@@ -839,6 +842,22 @@ public final class MessageQueue {
             Log.d(TAG, "Insert message what: " + msg.what + " when: " + msg.when + " seq: "
                     + node.mInsertSeq + " barrier: " + node.isBarrier() + " async: "
                     + node.isAsync() + " now: " + SystemClock.uptimeMillis());
+        }
+
+        final Looper myLooper = Looper.myLooper();
+        /* If we are running on the looper thread we can add directly to the priority queue */
+        if (myLooper != null && myLooper.getQueue() == this) {
+            node.removeFromStack();
+            insertIntoPriorityQueue(node);
+            /*
+             * We still need to do this even though we are the current thread,
+             * otherwise next() may sleep indefinitely.
+             */
+            if (!mMessageDirectlyQueued) {
+                mMessageDirectlyQueued = true;
+                nativeWake(mPtr);
+            }
+            return true;
         }
 
         while (true) {

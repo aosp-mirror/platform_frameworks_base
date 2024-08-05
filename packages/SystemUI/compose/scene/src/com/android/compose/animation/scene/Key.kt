@@ -107,6 +107,7 @@ class MovableElementKey(
      * The [StaticElementContentPicker] to use when deciding in which scene we should draw shared
      * Elements or compose MovableElements.
      *
+     * @see DefaultElementContentPicker
      * @see MovableElementContentPicker
      */
     override val contentPicker: StaticElementContentPicker,

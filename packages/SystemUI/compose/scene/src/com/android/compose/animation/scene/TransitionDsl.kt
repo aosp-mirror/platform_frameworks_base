@@ -305,6 +305,11 @@ interface ElementContentPicker {
  * An element picker on which we can query the set of contents (scenes or overlays) that contain the
  * element. This is needed by [MovableElement], that needs to know at composition time on which of
  * the candidate contents an element should be composed.
+ *
+ * @see DefaultElementContentPicker(contents)
+ * @see HighestZIndexContentPicker(contents)
+ * @see LowestZIndexContentPicker(contents)
+ * @see MovableElementContentPicker
  */
 interface StaticElementContentPicker : ElementContentPicker {
     /** The exhaustive lists of contents that contain this element. */
@@ -433,6 +438,11 @@ class MovableElementContentPicker(
 
 /** The default [ElementContentPicker]. */
 val DefaultElementContentPicker = HighestZIndexContentPicker
+
+/** The [DefaultElementContentPicker] that can be used for [MovableElement]s. */
+fun DefaultElementContentPicker(contents: Set<ContentKey>): StaticElementContentPicker {
+    return HighestZIndexContentPicker(contents)
+}
 
 @TransitionDsl
 interface PropertyTransformationBuilder {
