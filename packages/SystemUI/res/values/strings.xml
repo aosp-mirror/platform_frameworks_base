@@ -3713,6 +3713,11 @@ Action + ESC for this.</string>
     <!-- Education toast text for All Apps [CHAR_LIMIT=100] -->
     <string name="all_apps_edu_toast_content">To view all your apps, press the action key on your keyboard</string>
 
+    <!-- Title of the one line view of a redacted notification -->
+    <string name="redacted_notification_single_line_title">Redacted</string>
+    <!-- Main text of the one line view of a redacted notification -->
+    <string name="redacted_notification_single_line_text">Unlock to view</string>
+
     <!-- Education notification title for Back [CHAR_LIMIT=100] -->
     <string name="back_edu_notification_title">Use your touchpad to go back</string>
     <!-- Education notification text for Back [CHAR_LIMIT=100] -->

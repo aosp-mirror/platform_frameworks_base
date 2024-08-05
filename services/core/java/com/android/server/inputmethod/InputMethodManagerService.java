@@ -1443,7 +1443,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
                 final int currentUserId = mCurrentUserId;
                 mStatusBarManagerInternal =
                         LocalServices.getService(StatusBarManagerInternal.class);
-                hideStatusBarIconLocked();
+                hideStatusBarIconLocked(currentUserId);
                 final var bindingController = getInputMethodBindingController(currentUserId);
                 updateSystemUiLocked(bindingController.getImeWindowVis(),
                         bindingController.getBackDisposition(), currentUserId);
@@ -2586,7 +2586,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
             userData.mEnabledAccessibilitySessions.clear();
             scheduleNotifyImeUidToAudioService(Process.INVALID_UID);
         }
-        hideStatusBarIconLocked();
+        hideStatusBarIconLocked(userId);
         getUserData(userId).mInFullscreenMode = false;
         mWindowManagerInternal.setDismissImeOnBackKeyPressed(false);
         scheduleResetStylusHandwriting();
@@ -2597,6 +2597,11 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
             @DrawableRes int iconId, @NonNull UserData userData) {
         final int userId = userData.mUserId;
         synchronized (ImfLock.class) {
+            // To minimize app compat risk, ignore background users' request for single-user mode.
+            // TODO(b/357178609): generalize the logic and remove this special rule.
+            if (!mConcurrentMultiUserModeEnabled && userId != mCurrentUserId) {
+                return;
+            }
             if (!calledWithValidTokenLocked(token, userData)) {
                 return;
             }
@@ -2604,7 +2609,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
             try {
                 if (iconId == 0) {
                     if (DEBUG) Slog.d(TAG, "hide the small icon for the input method");
-                    hideStatusBarIconLocked();
+                    hideStatusBarIconLocked(userId);
                 } else if (packageName != null) {
                     if (DEBUG) Slog.d(TAG, "show a small icon for the input method");
                     final PackageManager userAwarePackageManager =
@@ -2632,7 +2637,12 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
     }
 
     @GuardedBy("ImfLock.class")
-    private void hideStatusBarIconLocked() {
+    private void hideStatusBarIconLocked(@UserIdInt int userId) {
+        // To minimize app compat risk, ignore background users' request for single-user mode.
+        // TODO(b/357178609): generalize the logic and remove this special rule.
+        if (!mConcurrentMultiUserModeEnabled && userId != mCurrentUserId) {
+            return;
+        }
         if (mStatusBarManagerInternal != null) {
             mStatusBarManagerInternal.setIconVisibility(mSlotIme, false);
         }
@@ -2839,6 +2849,11 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
 
     @GuardedBy("ImfLock.class")
     private void updateSystemUiLocked(int vis, int backDisposition, @UserIdInt int userId) {
+        // To minimize app compat risk, ignore background users' request for single-user mode.
+        // TODO(b/357178609): generalize the logic and remove this special rule.
+        if (!mConcurrentMultiUserModeEnabled && userId != mCurrentUserId) {
+            return;
+        }
         final var userData = getUserData(userId);
         final var bindingController = userData.mBindingController;
         final var curToken = bindingController.getCurToken();
