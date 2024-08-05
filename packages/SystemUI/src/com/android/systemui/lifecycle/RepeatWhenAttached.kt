@@ -227,13 +227,33 @@ private fun inferTraceSectionName(): String {
 }
 
 /**
+ * Runs the given [block] in a new coroutine when `this` [View]'s Window's [WindowLifecycleState] is
+ * at least at [state] (or immediately after calling this function if the window is already at least
+ * at [state]), automatically canceling the work when the window is no longer at least at that
+ * state.
+ *
+ * [block] may be run multiple times, running once per every time this` [View]'s Window's
+ * [WindowLifecycleState] becomes at least at [state].
+ */
+suspend fun View.repeatOnWindowLifecycle(
+    state: WindowLifecycleState,
+    block: suspend CoroutineScope.() -> Unit,
+): Nothing {
+    when (state) {
+        WindowLifecycleState.ATTACHED -> repeatWhenAttachedToWindow(block)
+        WindowLifecycleState.VISIBLE -> repeatWhenWindowIsVisible(block)
+        WindowLifecycleState.FOCUSED -> repeatWhenWindowHasFocus(block)
+    }
+}
+
+/**
  * Runs the given [block] every time the [View] becomes attached (or immediately after calling this
  * function, if the view was already attached), automatically canceling the work when the view
  * becomes detached.
  *
  * Only use from the main thread.
  *
- * The [block] may be run multiple times, running once per every time the view is attached.
+ * [block] may be run multiple times, running once per every time the view is attached.
  */
 @MainThread
 suspend fun View.repeatWhenAttachedToWindow(block: suspend CoroutineScope.() -> Unit): Nothing {
@@ -249,7 +269,7 @@ suspend fun View.repeatWhenAttachedToWindow(block: suspend CoroutineScope.() -> 
  *
  * Only use from the main thread.
  *
- * The [block] may be run multiple times, running once per every time the window becomes visible.
+ * [block] may be run multiple times, running once per every time the window becomes visible.
  */
 @MainThread
 suspend fun View.repeatWhenWindowIsVisible(block: suspend CoroutineScope.() -> Unit): Nothing {
@@ -265,13 +285,28 @@ suspend fun View.repeatWhenWindowIsVisible(block: suspend CoroutineScope.() -> U
  *
  * Only use from the main thread.
  *
- * The [block] may be run multiple times, running once per every time the window is focused.
+ * [block] may be run multiple times, running once per every time the window is focused.
  */
 @MainThread
 suspend fun View.repeatWhenWindowHasFocus(block: suspend CoroutineScope.() -> Unit): Nothing {
     Assert.isMainThread()
     isWindowFocused.collectLatest { if (it) coroutineScope { block() } }
     awaitCancellation() // satisfies return type of Nothing
+}
+
+/** Lifecycle states for a [View]'s interaction with a [android.view.Window]. */
+enum class WindowLifecycleState {
+    /** Indicates that the [View] is attached to a [android.view.Window]. */
+    ATTACHED,
+    /**
+     * Indicates that the [View] is attached to a [android.view.Window], and the window is visible.
+     */
+    VISIBLE,
+    /**
+     * Indicates that the [View] is attached to a [android.view.Window], and the window is visible
+     * and focused.
+     */
+    FOCUSED
 }
 
 private val View.isAttached

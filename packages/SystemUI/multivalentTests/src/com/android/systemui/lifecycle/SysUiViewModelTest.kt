@@ -16,16 +16,27 @@
 
 package com.android.systemui.lifecycle
 
+import android.view.View
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.util.Assert
 import com.google.common.truth.Truth.assertThat
+import kotlinx.coroutines.awaitCancellation
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.test.runCurrent
+import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.kotlin.argumentCaptor
+import org.mockito.kotlin.doReturn
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.stub
+import org.mockito.kotlin.verify
 
 @SmallTest
 @RunWith(AndroidJUnit4::class)
@@ -109,5 +120,46 @@ class SysUiViewModelTest : SysuiTestCase() {
         composeRule.waitForIdle()
 
         assertThat(isActive).isFalse()
+    }
+
+    @Test
+    fun viewModel_viewBinder() = runTest {
+        Assert.setTestThread(Thread.currentThread())
+
+        val view: View = mock { on { isAttachedToWindow } doReturn false }
+        val viewModel = FakeViewModel()
+        backgroundScope.launch {
+            view.viewModel(
+                minWindowLifecycleState = WindowLifecycleState.ATTACHED,
+                factory = { viewModel },
+            ) {
+                awaitCancellation()
+            }
+        }
+        runCurrent()
+
+        assertThat(viewModel.isActivated).isFalse()
+
+        view.stub { on { isAttachedToWindow } doReturn true }
+        argumentCaptor<View.OnAttachStateChangeListener>()
+            .apply { verify(view).addOnAttachStateChangeListener(capture()) }
+            .allValues
+            .forEach { it.onViewAttachedToWindow(view) }
+        runCurrent()
+
+        assertThat(viewModel.isActivated).isTrue()
+    }
+}
+
+private class FakeViewModel : SysUiViewModel() {
+    var isActivated = false
+
+    override suspend fun onActivated() {
+        isActivated = true
+        try {
+            awaitCancellation()
+        } finally {
+            isActivated = false
+        }
     }
 }
