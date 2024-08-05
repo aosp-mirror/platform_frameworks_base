@@ -340,7 +340,7 @@ private fun SceneScope.QuickSettingsScene(
                                         fadeOut(tween(customizingAnimationDuration)),
                             ) {
                                 ExpandedShadeHeader(
-                                    viewModel = viewModel.shadeHeaderViewModel,
+                                    viewModelFactory = viewModel.shadeHeaderViewModelFactory,
                                     createTintedIconManager = createTintedIconManager,
                                     createBatteryMeterViewController =
                                         createBatteryMeterViewController,
@@ -350,7 +350,7 @@ private fun SceneScope.QuickSettingsScene(
                             }
                         else ->
                             CollapsedShadeHeader(
-                                viewModel = viewModel.shadeHeaderViewModel,
+                                viewModelFactory = viewModel.shadeHeaderViewModelFactory,
                                 createTintedIconManager = createTintedIconManager,
                                 createBatteryMeterViewController = createBatteryMeterViewController,
                                 statusBarIconController = statusBarIconController,

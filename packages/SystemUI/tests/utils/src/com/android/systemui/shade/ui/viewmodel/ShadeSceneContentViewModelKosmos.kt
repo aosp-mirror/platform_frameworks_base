@@ -30,7 +30,7 @@ import com.android.systemui.unfold.domain.interactor.unfoldTransitionInteractor
 
 val Kosmos.shadeSceneContentViewModel: ShadeSceneContentViewModel by Fixture {
     ShadeSceneContentViewModel(
-        shadeHeaderViewModel = shadeHeaderViewModel,
+        shadeHeaderViewModelFactory = shadeHeaderViewModelFactory,
         qsSceneAdapter = qsSceneAdapter,
         brightnessMirrorViewModelFactory = brightnessMirrorViewModelFactory,
         mediaCarouselInteractor = mediaCarouselInteractor,

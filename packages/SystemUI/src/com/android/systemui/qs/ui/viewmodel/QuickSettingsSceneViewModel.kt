@@ -49,7 +49,7 @@ class QuickSettingsSceneViewModel
 @Inject
 constructor(
     val brightnessMirrorViewModelFactory: BrightnessMirrorViewModel.Factory,
-    val shadeHeaderViewModel: ShadeHeaderViewModel,
+    val shadeHeaderViewModelFactory: ShadeHeaderViewModel.Factory,
     val qsSceneAdapter: QSSceneAdapter,
     val notifications: NotificationsPlaceholderViewModel,
     private val footerActionsViewModelFactory: FooterActionsViewModel.Factory,

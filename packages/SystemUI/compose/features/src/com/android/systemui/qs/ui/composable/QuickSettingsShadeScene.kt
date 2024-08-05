@@ -71,7 +71,7 @@ constructor(
     private val actionsViewModelFactory: QuickSettingsShadeSceneActionsViewModel.Factory,
     private val contentViewModelFactory: QuickSettingsShadeSceneContentViewModel.Factory,
     private val lockscreenContent: Lazy<Optional<LockscreenContent>>,
-    private val shadeHeaderViewModel: ShadeHeaderViewModel,
+    private val shadeHeaderViewModelFactory: ShadeHeaderViewModel.Factory,
     private val tintedIconManagerFactory: TintedIconManager.Factory,
     private val batteryMeterViewControllerFactory: BatteryMeterViewController.Factory,
     private val statusBarIconController: StatusBarIconController,
@@ -98,7 +98,7 @@ constructor(
         ) {
             Column {
                 ExpandedShadeHeader(
-                    viewModel = shadeHeaderViewModel,
+                    viewModelFactory = shadeHeaderViewModelFactory,
                     createTintedIconManager = tintedIconManagerFactory::create,
                     createBatteryMeterViewController = batteryMeterViewControllerFactory::create,
                     statusBarIconController = statusBarIconController,

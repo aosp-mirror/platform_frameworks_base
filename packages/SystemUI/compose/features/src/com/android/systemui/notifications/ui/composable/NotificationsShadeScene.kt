@@ -57,7 +57,7 @@ constructor(
     private val contentViewModelFactory: NotificationsShadeSceneContentViewModel.Factory,
     private val actionsViewModelFactory: NotificationsShadeSceneActionsViewModel.Factory,
     private val overlayShadeViewModelFactory: OverlayShadeViewModel.Factory,
-    private val shadeHeaderViewModel: ShadeHeaderViewModel,
+    private val shadeHeaderViewModelFactory: ShadeHeaderViewModel.Factory,
     private val notificationsPlaceholderViewModel: NotificationsPlaceholderViewModel,
     private val tintedIconManagerFactory: TintedIconManager.Factory,
     private val batteryMeterViewControllerFactory: BatteryMeterViewController.Factory,
@@ -94,7 +94,7 @@ constructor(
         ) {
             Column {
                 ExpandedShadeHeader(
-                    viewModel = shadeHeaderViewModel,
+                    viewModelFactory = shadeHeaderViewModelFactory,
                     createTintedIconManager = tintedIconManagerFactory::create,
                     createBatteryMeterViewController = batteryMeterViewControllerFactory::create,
                     statusBarIconController = statusBarIconController,

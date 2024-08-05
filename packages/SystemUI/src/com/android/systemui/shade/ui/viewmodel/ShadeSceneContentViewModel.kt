@@ -46,7 +46,7 @@ class ShadeSceneContentViewModel
 @AssistedInject
 constructor(
     val qsSceneAdapter: QSSceneAdapter,
-    val shadeHeaderViewModel: ShadeHeaderViewModel,
+    val shadeHeaderViewModelFactory: ShadeHeaderViewModel.Factory,
     val brightnessMirrorViewModelFactory: BrightnessMirrorViewModel.Factory,
     val mediaCarouselInteractor: MediaCarouselInteractor,
     shadeInteractor: ShadeInteractor,

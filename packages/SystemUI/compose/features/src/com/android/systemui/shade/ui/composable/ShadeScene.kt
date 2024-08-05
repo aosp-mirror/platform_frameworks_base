@@ -316,7 +316,7 @@ private fun SceneScope.SingleShade(
                                     },
                         ) {
                             CollapsedShadeHeader(
-                                viewModel = viewModel.shadeHeaderViewModel,
+                                viewModelFactory = viewModel.shadeHeaderViewModelFactory,
                                 createTintedIconManager = createTintedIconManager,
                                 createBatteryMeterViewController = createBatteryMeterViewController,
                                 statusBarIconController = statusBarIconController,
@@ -515,7 +515,7 @@ private fun SceneScope.SplitShade(
             modifier = Modifier.fillMaxSize(),
         ) {
             CollapsedShadeHeader(
-                viewModel = viewModel.shadeHeaderViewModel,
+                viewModelFactory = viewModel.shadeHeaderViewModelFactory,
                 createTintedIconManager = createTintedIconManager,
                 createBatteryMeterViewController = createBatteryMeterViewController,
                 statusBarIconController = statusBarIconController,
