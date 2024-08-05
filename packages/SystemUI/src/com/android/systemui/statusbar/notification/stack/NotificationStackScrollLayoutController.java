@@ -1423,6 +1423,7 @@ public class NotificationStackScrollLayoutController implements Dumpable {
     }
 
     public void setHeadsUpBoundaries(int height, int bottomBarHeight) {
+        SceneContainerFlag.assertInLegacyMode();
         mView.setHeadsUpBoundaries(height, bottomBarHeight);
     }
 
