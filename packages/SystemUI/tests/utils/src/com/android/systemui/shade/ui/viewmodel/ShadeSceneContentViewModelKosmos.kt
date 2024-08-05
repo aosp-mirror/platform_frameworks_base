@@ -24,7 +24,7 @@ import com.android.systemui.qs.footerActionsController
 import com.android.systemui.qs.footerActionsViewModelFactory
 import com.android.systemui.qs.ui.adapter.qsSceneAdapter
 import com.android.systemui.scene.domain.interactor.sceneInteractor
-import com.android.systemui.settings.brightness.ui.viewmodel.brightnessMirrorViewModel
+import com.android.systemui.settings.brightness.ui.viewmodel.brightnessMirrorViewModelFactory
 import com.android.systemui.shade.domain.interactor.shadeInteractor
 import com.android.systemui.unfold.domain.interactor.unfoldTransitionInteractor
 
@@ -32,7 +32,7 @@ val Kosmos.shadeSceneContentViewModel: ShadeSceneContentViewModel by Fixture {
     ShadeSceneContentViewModel(
         shadeHeaderViewModel = shadeHeaderViewModel,
         qsSceneAdapter = qsSceneAdapter,
-        brightnessMirrorViewModel = brightnessMirrorViewModel,
+        brightnessMirrorViewModelFactory = brightnessMirrorViewModelFactory,
         mediaCarouselInteractor = mediaCarouselInteractor,
         shadeInteractor = shadeInteractor,
         footerActionsViewModelFactory = footerActionsViewModelFactory,

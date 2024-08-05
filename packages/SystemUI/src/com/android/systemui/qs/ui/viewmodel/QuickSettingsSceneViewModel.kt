@@ -48,7 +48,7 @@ import kotlinx.coroutines.flow.map
 class QuickSettingsSceneViewModel
 @Inject
 constructor(
-    val brightnessMirrorViewModel: BrightnessMirrorViewModel,
+    val brightnessMirrorViewModelFactory: BrightnessMirrorViewModel.Factory,
     val shadeHeaderViewModel: ShadeHeaderViewModel,
     val qsSceneAdapter: QSSceneAdapter,
     val notifications: NotificationsPlaceholderViewModel,

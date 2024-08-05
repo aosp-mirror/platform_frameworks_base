@@ -49,7 +49,7 @@ import com.android.systemui.scene.domain.resolver.homeSceneFamilyResolver
 import com.android.systemui.scene.domain.startable.sceneContainerStartable
 import com.android.systemui.scene.shared.model.SceneFamilies
 import com.android.systemui.scene.shared.model.Scenes
-import com.android.systemui.settings.brightness.ui.viewmodel.brightnessMirrorViewModel
+import com.android.systemui.settings.brightness.ui.viewmodel.brightnessMirrorViewModelFactory
 import com.android.systemui.shade.ui.viewmodel.shadeHeaderViewModel
 import com.android.systemui.statusbar.notification.stack.ui.viewmodel.notificationsPlaceholderViewModel
 import com.android.systemui.testKosmos
@@ -93,7 +93,7 @@ class QuickSettingsSceneViewModelTest : SysuiTestCase() {
         sceneContainerStartable.start()
         underTest =
             QuickSettingsSceneViewModel(
-                brightnessMirrorViewModel = kosmos.brightnessMirrorViewModel,
+                brightnessMirrorViewModelFactory = kosmos.brightnessMirrorViewModelFactory,
                 shadeHeaderViewModel = kosmos.shadeHeaderViewModel,
                 qsSceneAdapter = qsFlexiglassAdapter,
                 notifications = kosmos.notificationsPlaceholderViewModel,

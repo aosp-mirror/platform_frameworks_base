@@ -477,8 +477,10 @@ private fun SceneScope.SplitShade(
         }
     }
 
-    val brightnessMirrorShowing by
-        viewModel.brightnessMirrorViewModel.isShowing.collectAsStateWithLifecycle()
+    val brightnessMirrorViewModel = rememberViewModel {
+        viewModel.brightnessMirrorViewModelFactory.create()
+    }
+    val brightnessMirrorShowing by brightnessMirrorViewModel.isShowing.collectAsStateWithLifecycle()
     val contentAlpha by
         animateFloatAsState(
             targetValue = if (brightnessMirrorShowing) 0f else 1f,
@@ -532,7 +534,7 @@ private fun SceneScope.SplitShade(
                             .graphicsLayer { translationX = unfoldTranslationXForStartSide },
                 ) {
                     BrightnessMirror(
-                        viewModel = viewModel.brightnessMirrorViewModel,
+                        viewModel = brightnessMirrorViewModel,
                         qsSceneAdapter = viewModel.qsSceneAdapter,
                         // Need to use the offset measured from the container as the header
                         // has to be accounted for

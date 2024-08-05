@@ -47,7 +47,7 @@ class ShadeSceneContentViewModel
 constructor(
     val qsSceneAdapter: QSSceneAdapter,
     val shadeHeaderViewModel: ShadeHeaderViewModel,
-    val brightnessMirrorViewModel: BrightnessMirrorViewModel,
+    val brightnessMirrorViewModelFactory: BrightnessMirrorViewModel.Factory,
     val mediaCarouselInteractor: MediaCarouselInteractor,
     shadeInteractor: ShadeInteractor,
     private val footerActionsViewModelFactory: FooterActionsViewModel.Factory,
