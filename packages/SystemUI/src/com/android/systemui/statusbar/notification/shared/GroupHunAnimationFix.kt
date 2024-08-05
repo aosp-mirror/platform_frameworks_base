@@ -20,10 +20,13 @@ import com.android.systemui.Flags
 import com.android.systemui.flags.FlagToken
 import com.android.systemui.flags.RefactorFlagUtils
 
-/** Helper for com.android.systemui.Flags.FLAG_NOTIFICATION_GROUP_HUN_REMOVAL_ANIMATION_FIX */
+/**
+ * Helper for com.android.systemui.Flags.FLAG_NOTIFICATION_GROUP_HUN_REMOVAL_ANIMATION_FIX, which
+ * now uses FLAG_NOTIFICATION_AVALANCHE_THROTTLE_HUN
+ */
 @Suppress("NOTHING_TO_INLINE")
 object GroupHunAnimationFix {
-    const val FLAG_NAME = Flags.FLAG_NOTIFICATION_GROUP_HUN_REMOVAL_ANIMATION_FIX
+    const val FLAG_NAME = Flags.FLAG_NOTIFICATION_AVALANCHE_THROTTLE_HUN
 
     /** A token used for dependency declaration */
     val token: FlagToken
@@ -32,7 +35,7 @@ object GroupHunAnimationFix {
     /** Return whether the fix is enabled */
     @JvmStatic
     inline val isEnabled
-        get() = Flags.notificationGroupHunRemovalAnimationFix()
+        get() = Flags.notificationAvalancheThrottleHun()
 
     /**
      * Called to ensure code is only run when the flag is enabled. This protects users from the
