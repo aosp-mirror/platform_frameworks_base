@@ -66,6 +66,9 @@ final class UserData {
     final HardwareKeyboardShortcutController mHardwareKeyboardShortcutController =
             new HardwareKeyboardShortcutController();
 
+    @NonNull
+    final ImeVisibilityStateComputer mVisibilityStateComputer;
+
     /**
      * Have we called mCurMethod.bindInput()?
      */
@@ -155,9 +158,11 @@ final class UserData {
      * Intended to be instantiated only from this file.
      */
     UserData(@UserIdInt int userId,
-            @NonNull InputMethodBindingController bindingController) {
+            @NonNull InputMethodBindingController bindingController,
+            @NonNull ImeVisibilityStateComputer stateComputer) {
         mUserId = userId;
         mBindingController = bindingController;
+        mVisibilityStateComputer = stateComputer;
     }
 
     @Override
