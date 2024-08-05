@@ -428,6 +428,35 @@ public final class HapticScrollFeedbackProviderTest {
         assertFeedbackCount(mView, HapticFeedbackConstants.SCROLL_LIMIT, 1);
     }
 
+    @Test
+    public void testNonRotaryInputFeedbackNotBlockedByRotaryUnavailability() {
+        when(mMockViewConfig.isViewBasedRotaryEncoderHapticScrollFeedbackEnabled())
+                .thenReturn(true);
+        setHapticScrollFeedbackEnabled(true);
+        setHapticScrollTickInterval(5);
+        mProvider = new HapticScrollFeedbackProvider(mView, mMockViewConfig,
+                /* disabledIfViewPlaysScrollHaptics= */ true);
+
+        // Expect one feedback here. Touch input should provide feedback since scroll feedback has
+        // been enabled via `setHapticScrollFeedbackEnabled(true)`.
+        mProvider.onScrollProgress(
+                INPUT_DEVICE_1, InputDevice.SOURCE_TOUCHSCREEN, MotionEvent.AXIS_Y,
+                /* deltaInPixels= */ 10);
+        // Because `isViewBasedRotaryEncoderHapticScrollFeedbackEnabled()` is false and
+        // `disabledIfViewPlaysScrollHaptics` is true, the scroll progress from rotary encoders will
+        // produce no feedback.
+        mProvider.onScrollProgress(
+                INPUT_DEVICE_2, InputDevice.SOURCE_ROTARY_ENCODER, MotionEvent.AXIS_SCROLL,
+                /* deltaInPixels= */ 20);
+        // This event from the touch screen should produce feedback. The rotary encoder event's
+        // inability to not play scroll feedback should not impact this touch input.
+        mProvider.onScrollProgress(
+                INPUT_DEVICE_1, InputDevice.SOURCE_TOUCHSCREEN, MotionEvent.AXIS_Y,
+                /* deltaInPixels= */ 30);
+
+        assertFeedbackCount(mView, HapticFeedbackConstants.SCROLL_TICK, 2);
+    }
+
 
     private void assertNoFeedback(TestView view) {
         for (int feedback : new int[] {SCROLL_ITEM_FOCUS, SCROLL_LIMIT, SCROLL_TICK}) {
