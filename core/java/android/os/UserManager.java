@@ -4824,6 +4824,7 @@ public class UserManager {
      * <p>Note that this does not alter the user's pre-existing user restrictions.
      *
      * @param userId the id of the user to become admin
+     * @throws SecurityException if changing ADMIN status of the user is not allowed
      * @hide
      */
     @RequiresPermission(allOf = {
@@ -4844,6 +4845,7 @@ public class UserManager {
      * <p>Note that this does not alter the user's pre-existing user restrictions.
      *
      * @param userId the id of the user to revoke admin rights from
+     * @throws SecurityException if changing ADMIN status of the user is not allowed
      * @hide
      */
     @RequiresPermission(allOf = {
