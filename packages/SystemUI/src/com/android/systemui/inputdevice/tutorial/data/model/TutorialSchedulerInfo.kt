@@ -16,11 +16,6 @@
 
 package com.android.systemui.inputdevice.tutorial.data.model
 
-data class TutorialSchedulerInfo(
-    val keyboard: DeviceSchedulerInfo = DeviceSchedulerInfo(),
-    val touchpad: DeviceSchedulerInfo = DeviceSchedulerInfo()
-)
-
 data class DeviceSchedulerInfo(var isLaunched: Boolean = false, var connectTime: Long? = null) {
     val wasEverConnected: Boolean
         get() = connectTime != null
