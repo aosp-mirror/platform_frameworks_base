@@ -2734,18 +2734,16 @@ class DesktopTasksControllerTest : ShellTestCase() {
         if (deviceOrientation == ORIENTATION_LANDSCAPE &&
             screenOrientation == SCREEN_ORIENTATION_PORTRAIT) {
           // Letterbox to portrait size
-          appCompatTaskInfo.topActivityBoundsLetterboxed = true
+          appCompatTaskInfo.setTopActivityLetterboxed(true)
           appCompatTaskInfo.topActivityLetterboxAppWidth = 1200
           appCompatTaskInfo.topActivityLetterboxAppHeight = 1600
         } else if (deviceOrientation == ORIENTATION_PORTRAIT &&
             screenOrientation == SCREEN_ORIENTATION_LANDSCAPE) {
           // Letterbox to landscape size
-          appCompatTaskInfo.topActivityBoundsLetterboxed = true
+          appCompatTaskInfo.setTopActivityLetterboxed(true)
           appCompatTaskInfo.topActivityLetterboxAppWidth = 1600
           appCompatTaskInfo.topActivityLetterboxAppHeight = 1200
         }
-      } else {
-        appCompatTaskInfo.topActivityBoundsLetterboxed = false
       }
 
       if (deviceOrientation == ORIENTATION_LANDSCAPE) {

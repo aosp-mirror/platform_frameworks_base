@@ -1708,7 +1708,7 @@ public class WindowOrganizerTests extends WindowTestsBase {
         verify(organizer).onTaskInfoChanged(infoCaptor.capture());
         RunningTaskInfo info = infoCaptor.getValue();
         assertEquals(rootTask.mTaskId, info.taskId);
-        assertTrue(info.appCompatTaskInfo.topActivityInSizeCompat);
+        assertTrue(info.appCompatTaskInfo.isTopActivityInSizeCompat());
 
         // Ensure task info show top activity that is not visible as not in size compat.
         clearInvocations(organizer);
@@ -1718,7 +1718,7 @@ public class WindowOrganizerTests extends WindowTestsBase {
         verify(organizer).onTaskInfoChanged(infoCaptor.capture());
         info = infoCaptor.getValue();
         assertEquals(rootTask.mTaskId, info.taskId);
-        assertFalse(info.appCompatTaskInfo.topActivityInSizeCompat);
+        assertFalse(info.appCompatTaskInfo.isTopActivityInSizeCompat());
 
         // Ensure task info show non size compat top activity as not in size compat.
         clearInvocations(organizer);
@@ -1729,7 +1729,7 @@ public class WindowOrganizerTests extends WindowTestsBase {
         verify(organizer).onTaskInfoChanged(infoCaptor.capture());
         info = infoCaptor.getValue();
         assertEquals(rootTask.mTaskId, info.taskId);
-        assertFalse(info.appCompatTaskInfo.topActivityInSizeCompat);
+        assertFalse(info.appCompatTaskInfo.isTopActivityInSizeCompat());
     }
 
     @Test
