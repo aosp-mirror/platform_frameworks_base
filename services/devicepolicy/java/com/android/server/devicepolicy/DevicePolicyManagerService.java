@@ -23457,6 +23457,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 MANAGE_DEVICE_POLICY_ACROSS_USERS);
         CROSS_USER_PERMISSIONS.put(MANAGE_DEVICE_POLICY_WIPE_DATA,
                 MANAGE_DEVICE_POLICY_ACROSS_USERS);
+        CROSS_USER_PERMISSIONS.put(MANAGE_DEVICE_POLICY_CONTENT_PROTECTION,
+                MANAGE_DEVICE_POLICY_ACROSS_USERS);
 
         // These permissions may grant access to user data and therefore must be protected with
         // MANAGE_DEVICE_POLICY_ACROSS_USERS_FULL for cross-user calls.
@@ -24092,15 +24094,13 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
     @Override
     public @ContentProtectionPolicy int getContentProtectionPolicy(
-            ComponentName who, String callerPackageName) {
+            ComponentName who, String callerPackageName, int userId) {
         if (!android.view.contentprotection.flags.Flags.manageDevicePolicyEnabled()) {
             return CONTENT_PROTECTION_DISABLED;
         }
 
         CallerIdentity caller = getCallerIdentity(who, callerPackageName);
-        int userId = caller.getUserId();
         enforceCanQuery(MANAGE_DEVICE_POLICY_CONTENT_PROTECTION, callerPackageName, userId);
-
         Integer policy =
                 mDevicePolicyEngine.getResolvedPolicy(PolicyDefinition.CONTENT_PROTECTION, userId);
         if (policy == null) {

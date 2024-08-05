@@ -4334,11 +4334,13 @@ public class DevicePolicyManager {
      */
     @RequiresPermission(value = MANAGE_DEVICE_POLICY_CONTENT_PROTECTION, conditional = true)
     @FlaggedApi(android.view.contentprotection.flags.Flags.FLAG_MANAGE_DEVICE_POLICY_ENABLED)
+    @UserHandleAware
     public @ContentProtectionPolicy int getContentProtectionPolicy(@Nullable ComponentName admin) {
         throwIfParentInstance("getContentProtectionPolicy");
         if (mService != null) {
             try {
-                return mService.getContentProtectionPolicy(admin, mContext.getPackageName());
+                return mService.getContentProtectionPolicy(admin, mContext.getPackageName(),
+                        myUserId());
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
