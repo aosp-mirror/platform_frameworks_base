@@ -238,7 +238,7 @@ public class CompatUIController implements OnDisplaysChangedListener,
     public void onCompatInfoChanged(@NonNull CompatUIInfo compatUIInfo) {
         final TaskInfo taskInfo = compatUIInfo.getTaskInfo();
         final ShellTaskOrganizer.TaskListener taskListener = compatUIInfo.getListener();
-        if (taskInfo != null && !taskInfo.appCompatTaskInfo.topActivityInSizeCompat) {
+        if (taskInfo != null && !taskInfo.appCompatTaskInfo.isTopActivityInSizeCompat()) {
             mSetOfTaskIdsShowingRestartDialog.remove(taskInfo.taskId);
         }
 
@@ -256,16 +256,16 @@ public class CompatUIController implements OnDisplaysChangedListener,
         // basically cancel all the onboarding flow. We don't have to ignore events in case
         // the app is in size compat mode.
         if (mIsFirstReachabilityEducationRunning) {
-            if (!taskInfo.appCompatTaskInfo.isFromLetterboxDoubleTap
-                    && !taskInfo.appCompatTaskInfo.topActivityInSizeCompat) {
+            if (!taskInfo.appCompatTaskInfo.isFromLetterboxDoubleTap()
+                    && !taskInfo.appCompatTaskInfo.isTopActivityInSizeCompat()) {
                 return;
             }
             mIsFirstReachabilityEducationRunning = false;
         }
-        if (taskInfo.appCompatTaskInfo.topActivityBoundsLetterboxed) {
-            if (taskInfo.appCompatTaskInfo.isLetterboxEducationEnabled) {
+        if (taskInfo.appCompatTaskInfo.isTopActivityLetterboxed()) {
+            if (taskInfo.appCompatTaskInfo.isLetterboxEducationEnabled()) {
                 createOrUpdateLetterboxEduLayout(taskInfo, taskListener);
-            } else if (!taskInfo.appCompatTaskInfo.isFromLetterboxDoubleTap) {
+            } else if (!taskInfo.appCompatTaskInfo.isFromLetterboxDoubleTap()) {
                 // In this case the app is letterboxed and the letterbox education
                 // is disabled. In this case we need to understand if it's the first
                 // time we show the reachability education. When this is happening
@@ -282,7 +282,7 @@ public class CompatUIController implements OnDisplaysChangedListener,
                     // We activate the first reachability education if the double-tap is enabled.
                     // If the double tap is not enabled (e.g. thin letterbox) we just set the value
                     // of the education being seen.
-                    if (taskInfo.appCompatTaskInfo.isLetterboxDoubleTapEnabled) {
+                    if (taskInfo.appCompatTaskInfo.isLetterboxDoubleTapEnabled()) {
                         mIsFirstReachabilityEducationRunning = true;
                         createOrUpdateReachabilityEduLayout(taskInfo, taskListener);
                         return;
@@ -293,7 +293,7 @@ public class CompatUIController implements OnDisplaysChangedListener,
         createOrUpdateCompatLayout(taskInfo, taskListener);
         createOrUpdateRestartDialogLayout(taskInfo, taskListener);
         if (mCompatUIConfiguration.getHasSeenLetterboxEducation(taskInfo.userId)) {
-            if (taskInfo.appCompatTaskInfo.isLetterboxDoubleTapEnabled) {
+            if (taskInfo.appCompatTaskInfo.isLetterboxDoubleTapEnabled()) {
                 createOrUpdateReachabilityEduLayout(taskInfo, taskListener);
             }
             // The user aspect ratio button should not be handled when a new TaskInfo is
@@ -305,7 +305,7 @@ public class CompatUIController implements OnDisplaysChangedListener,
                 }
                 return;
             }
-            if (!taskInfo.appCompatTaskInfo.isFromLetterboxDoubleTap) {
+            if (!taskInfo.appCompatTaskInfo.isFromLetterboxDoubleTap()) {
                 createOrUpdateUserAspectRatioSettingsLayout(taskInfo, taskListener);
             }
         }

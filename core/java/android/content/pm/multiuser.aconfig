@@ -379,3 +379,10 @@ flag {
     purpose: PURPOSE_BUGFIX
   }
 }
+
+flag {
+  name: "unicorn_mode_refactoring_for_hsum"
+  namespace: "multiuser"
+  description: "Refactorings related to unicorn mode to work on HSUM mode"
+  bug: "339201286"
+}

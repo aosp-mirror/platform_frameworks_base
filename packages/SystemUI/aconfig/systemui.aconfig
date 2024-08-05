@@ -352,17 +352,6 @@ flag {
 }
 
 flag {
-    name: "truncated_status_bar_icons_fix"
-    namespace: "systemui"
-    description: "Fixes the status bar icons being trunacted due to the status bar window height "
-        "not being updated after certain rotations"
-    bug: "323299264"
-    metadata {
-        purpose: PURPOSE_BUGFIX
-    }
-}
-
-flag {
     name: "status_bar_monochrome_icons_fix"
     namespace: "systemui"
     description: "Fixes the status bar icon size when drawing InsetDrawables (ie. monochrome icons)"
@@ -1059,16 +1048,6 @@ flag {
 }
 
 flag {
-  namespace: "systemui"
-  name: "privacy_dot_unfold_wrong_corner_fix"
-  description: "Fixes an issue where the privacy dot is at the wrong corner after unfolding/folding."
-  bug: "339335643"
-  metadata {
-    purpose: PURPOSE_BUGFIX
-  }
-}
-
-flag {
   name: "validate_keyboard_shortcut_helper_icon_uri"
   namespace: "systemui"
   description: "Adds a check that the caller can access the content URI of an icon in the shortcut helper."
@@ -1293,4 +1272,14 @@ flag {
    namespace: "systemui"
    description: "Adding haptic component infrastructure to sliders in Compose."
    bug: "341968766"
+}
+
+flag {
+  namespace: "systemui"
+  name: "settings_ext_register_content_observer_on_bg_thread"
+  description: "Register content observer in callback flow APIs on background thread in SettingsProxyExt."
+  bug: "355389014"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
 }

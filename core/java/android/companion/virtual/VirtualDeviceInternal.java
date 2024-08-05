@@ -38,6 +38,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.IntentSender;
 import android.hardware.display.DisplayManagerGlobal;
 import android.hardware.display.IVirtualDisplayCallback;
 import android.hardware.display.VirtualDisplay;
@@ -135,13 +136,14 @@ public class VirtualDeviceInternal {
 
                 @Override
                 public void onActivityLaunchBlocked(int displayId, ComponentName componentName,
-                        @UserIdInt int userId) {
+                        @UserIdInt int userId, IntentSender intentSender) {
                     final long token = Binder.clearCallingIdentity();
                     try {
                         synchronized (mActivityListenersLock) {
                             for (int i = 0; i < mActivityListeners.size(); i++) {
                                 mActivityListeners.valueAt(i)
-                                        .onActivityLaunchBlocked(displayId, componentName, userId);
+                                        .onActivityLaunchBlocked(
+                                                displayId, componentName, userId, intentSender);
                             }
                         }
                     } finally {
@@ -593,9 +595,10 @@ public class VirtualDeviceInternal {
         }
 
         public void onActivityLaunchBlocked(int displayId, ComponentName componentName,
-                @UserIdInt int userId) {
+                @UserIdInt int userId, IntentSender intentSender) {
             mExecutor.execute(() ->
-                    mActivityListener.onActivityLaunchBlocked(displayId, componentName, userId));
+                    mActivityListener.onActivityLaunchBlocked(
+                            displayId, componentName, userId, intentSender));
         }
     }
 

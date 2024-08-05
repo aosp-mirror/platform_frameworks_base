@@ -55,6 +55,7 @@ class ViewerConfigProtoBuilder : ProtoLogTool.ProtologViewerConfigBuilder {
                         .setLevel(
                             ProtoLogLevel.forNumber(log.logLevel.ordinal + 1))
                         .setGroupId(groupId)
+                        .setLocation(log.position)
             )
         }
 

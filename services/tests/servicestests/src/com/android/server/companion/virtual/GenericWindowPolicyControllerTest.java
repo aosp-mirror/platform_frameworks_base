@@ -42,9 +42,11 @@ import android.content.AttributionSource;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentSender;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.net.Uri;
+import android.os.Binder;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.platform.test.annotations.Presubmit;
@@ -592,13 +594,15 @@ public class GenericWindowPolicyControllerTest {
         // register interceptor and intercept intent
         when(mIntentListenerCallback.shouldInterceptIntent(any(Intent.class))).thenReturn(true);
         assertThat(gwpc.canActivityBeLaunched(activityInfo, intent,
-                WindowConfiguration.WINDOWING_MODE_FULLSCREEN, DISPLAY_ID, /*isNewTask=*/false))
+                WindowConfiguration.WINDOWING_MODE_FULLSCREEN, DISPLAY_ID, /* isNewTask= */false,
+                /* isResultExpected = */ false, /* intentSender= */ null))
                 .isFalse();
 
         // unregister interceptor and launch activity
         when(mIntentListenerCallback.shouldInterceptIntent(any(Intent.class))).thenReturn(false);
         assertThat(gwpc.canActivityBeLaunched(activityInfo, intent,
-                WindowConfiguration.WINDOWING_MODE_FULLSCREEN, DISPLAY_ID, /*isNewTask=*/false))
+                WindowConfiguration.WINDOWING_MODE_FULLSCREEN, DISPLAY_ID, /* isNewTask= */false,
+                /* isResultExpected = */ false, /* intentSender= */ null))
                 .isTrue();
     }
 
@@ -617,10 +621,33 @@ public class GenericWindowPolicyControllerTest {
         // register interceptor with different filter
         when(mIntentListenerCallback.shouldInterceptIntent(any(Intent.class))).thenReturn(false);
         assertThat(gwpc.canActivityBeLaunched(activityInfo, intent,
-                WindowConfiguration.WINDOWING_MODE_FULLSCREEN, DISPLAY_ID, /*isNewTask=*/false))
+                WindowConfiguration.WINDOWING_MODE_FULLSCREEN, DISPLAY_ID, /* isNewTask= */false,
+                /* isResultExpected = */ false, /* intentSender= */ null))
                 .isTrue();
         verify(mIntentListenerCallback, timeout(TIMEOUT_MILLIS))
                 .shouldInterceptIntent(any(Intent.class));
+    }
+
+    @Test
+    public void canActivityBeLaunched_resultExpected_noIntentSenderInCallback() {
+        Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("testing"));
+
+        GenericWindowPolicyController gwpc = createGwpc();
+        gwpc.setDisplayId(DISPLAY_ID, /* isMirrorDisplay= */ false);
+        ActivityInfo activityInfo = getActivityInfo(
+                NONBLOCKED_APP_PACKAGE_NAME,
+                NONBLOCKED_APP_PACKAGE_NAME,
+                /* displayOnRemoteDevices */ false,
+                /* targetDisplayCategory */ null);
+
+        IntentSender intentSender = new IntentSender(new Binder());
+        assertThat(gwpc.canActivityBeLaunched(activityInfo, intent,
+                WindowConfiguration.WINDOWING_MODE_FULLSCREEN, DISPLAY_ID, /* isNewTask= */false,
+                /* isResultExpected = */ true, /* intentSender= */ () -> intentSender))
+                .isFalse();
+
+        verify(mActivityBlockedCallback, timeout(TIMEOUT_MILLIS))
+                .onActivityBlocked(DISPLAY_ID, activityInfo, /* intentSender= */ null);
     }
 
     @Test
@@ -659,7 +686,8 @@ public class GenericWindowPolicyControllerTest {
 
         verify(mSecureWindowCallback, after(TIMEOUT_MILLIS).never())
                 .onSecureWindowShown(DISPLAY_ID, activityInfo.applicationInfo.uid);
-        verify(mActivityBlockedCallback, never()).onActivityBlocked(DISPLAY_ID, activityInfo);
+        verify(mActivityBlockedCallback, never())
+                .onActivityBlocked(eq(DISPLAY_ID), eq(activityInfo), any());
     }
 
     @Test
@@ -678,7 +706,7 @@ public class GenericWindowPolicyControllerTest {
         verify(mSecureWindowCallback, timeout(TIMEOUT_MILLIS)).onSecureWindowShown(DISPLAY_ID,
                 activityInfo.applicationInfo.uid);
         verify(mActivityBlockedCallback, after(TIMEOUT_MILLIS).never())
-                .onActivityBlocked(DISPLAY_ID, activityInfo);
+                .onActivityBlocked(eq(DISPLAY_ID), eq(activityInfo), any());
     }
 
     @Test
@@ -697,7 +725,8 @@ public class GenericWindowPolicyControllerTest {
 
         verify(mSecureWindowCallback, after(TIMEOUT_MILLIS).never())
                 .onSecureWindowShown(DISPLAY_ID, activityInfo.applicationInfo.uid);
-        verify(mActivityBlockedCallback, never()).onActivityBlocked(DISPLAY_ID, activityInfo);
+        verify(mActivityBlockedCallback, never())
+                .onActivityBlocked(eq(DISPLAY_ID), eq(activityInfo), any());
     }
 
     @Test
@@ -911,11 +940,12 @@ public class GenericWindowPolicyControllerTest {
 
     private void assertActivityCanBeLaunched(GenericWindowPolicyController gwpc, int fromDisplay,
             boolean isNewTask, int windowingMode, ActivityInfo activityInfo) {
+        IntentSender intentSender = new IntentSender(new Binder());
         assertThat(gwpc.canActivityBeLaunched(activityInfo, null, windowingMode, fromDisplay,
-                isNewTask)).isTrue();
+                isNewTask, /* isResultExpected= */ false, () -> intentSender)).isTrue();
 
         verify(mActivityBlockedCallback, after(TIMEOUT_MILLIS).never())
-                .onActivityBlocked(fromDisplay, activityInfo);
+                .onActivityBlocked(fromDisplay, activityInfo, intentSender);
         verify(mIntentListenerCallback, never()).shouldInterceptIntent(any(Intent.class));
     }
 
@@ -927,23 +957,26 @@ public class GenericWindowPolicyControllerTest {
 
     private void assertActivityIsBlocked(GenericWindowPolicyController gwpc, int fromDisplay,
             boolean isNewTask, int windowingMode, ActivityInfo activityInfo) {
+        IntentSender intentSender = new IntentSender(new Binder());
         assertThat(gwpc.canActivityBeLaunched(activityInfo, null, windowingMode, fromDisplay,
-                isNewTask)).isFalse();
+                isNewTask, /* isResultExpected= */ false, () -> intentSender)).isFalse();
 
         verify(mActivityBlockedCallback, timeout(TIMEOUT_MILLIS))
-                .onActivityBlocked(fromDisplay, activityInfo);
+                .onActivityBlocked(fromDisplay, activityInfo, intentSender);
         verify(mIntentListenerCallback, after(TIMEOUT_MILLIS).never())
                 .shouldInterceptIntent(any(Intent.class));
     }
 
     private void assertNoActivityLaunched(GenericWindowPolicyController gwpc, int fromDisplay,
             ActivityInfo activityInfo) {
+        IntentSender intentSender = new IntentSender(new Binder());
         assertThat(gwpc.canActivityBeLaunched(activityInfo, null,
-                WindowConfiguration.WINDOWING_MODE_FULLSCREEN, DISPLAY_ID, true))
+                WindowConfiguration.WINDOWING_MODE_FULLSCREEN, DISPLAY_ID, /* isNewTask= */false,
+                /* isResultExpected= */ false, () -> intentSender))
                 .isFalse();
 
         verify(mActivityBlockedCallback, after(TIMEOUT_MILLIS).never())
-                .onActivityBlocked(fromDisplay, activityInfo);
+                .onActivityBlocked(eq(fromDisplay), eq(activityInfo), any());
         verify(mIntentListenerCallback, never()).shouldInterceptIntent(any(Intent.class));
     }
 }
