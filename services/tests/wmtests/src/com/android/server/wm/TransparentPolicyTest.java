@@ -22,6 +22,8 @@ import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
 import static android.view.Surface.ROTATION_0;
 import static android.view.Surface.ROTATION_90;
 
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
+
 import static org.mockito.Mockito.clearInvocations;
 
 import android.platform.test.annotations.Presubmit;
@@ -341,6 +343,12 @@ public class TransparentPolicyTest extends WindowTestsBase {
             mTransparentActivityRobot = new AppCompatTransparentActivityRobot(activity());
             // We always create at least an opaque activity in a Task
             activity().createNewTaskWithBaseActivity();
+        }
+
+        @Override
+        void onPostActivityCreation(@NonNull ActivityRecord activity) {
+            super.onPostActivityCreation(activity);
+            spyOn(activity.mAppCompatController.getTransparentPolicy());
         }
 
         void transparentActivity(@NonNull Consumer<AppCompatTransparentActivityRobot> consumer) {
