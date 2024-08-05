@@ -3285,9 +3285,11 @@ public class Editor {
                 .setEnabled(mTextView.canShare())
                 .setIcon(a.getDrawable(6))
                 .setOnMenuItemClickListener(mOnContextMenuItemClickListener);
+        final String selected = mTextView.getSelectedText();
         menu.add(CONTEXT_MENU_GROUP_MISC, TextView.ID_AUTOFILL, menuItemOrderAutofill,
                 android.R.string.autofill)
-                .setEnabled(mTextView.canRequestAutofill())
+                .setEnabled(mTextView.canRequestAutofill()
+                        && (selected == null || selected.isEmpty()))
                 .setOnMenuItemClickListener(mOnContextMenuItemClickListener);
 
         mPreserveSelection = true;
