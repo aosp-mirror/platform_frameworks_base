@@ -1367,18 +1367,13 @@
 
     <!-- Media projection that launched from 1P/3P apps -->
     <!-- 1P/3P app media projection permission dialog title. [CHAR LIMIT=NONE] -->
-    <string name="media_projection_entry_app_permission_dialog_title">Share your screen with <xliff:g id="app_seeking_permission" example="Meet">%s</xliff:g>?</string>
-
-    <!-- 1P/3P app media projection permission option for capturing just a single app [CHAR LIMIT=50] -->
-    <string name="media_projection_entry_app_permission_dialog_option_text_single_app">Share one app</string>
-    <!-- 1P/3P app media projection permission option for capturing the whole screen [CHAR LIMIT=50] -->
-    <string name="media_projection_entry_app_permission_dialog_option_text_entire_screen">Share entire screen</string>
+    <string name="media_projection_entry_app_permission_dialog_title">Start recording or casting with <xliff:g id="app_seeking_permission" example="Meet">%s</xliff:g>?</string>
     <!-- 1P/3P app media projection permission warning for capturing the whole screen. [CHAR LIMIT=350] -->
-    <string name="media_projection_entry_app_permission_dialog_warning_entire_screen">When you’re sharing your entire screen, anything on your screen is visible to <xliff:g id="app_seeking_permission" example="Meet">%s</xliff:g>. So be careful with things like passwords, payment details, messages, photos, and audio and video.</string>
+    <string name="media_projection_entry_app_permission_dialog_warning_entire_screen">When you’re sharing, recording, or casting, <xliff:g id="app_seeking_permission" example="Meet">%s</xliff:g> has access to anything visible on your screen or played on your device. So be careful with things like passwords, payment details, messages, photos, and audio and video.</string>
     <!-- 1P/3P app media projection permission warning for capturing an app. [CHAR LIMIT=350] -->
-    <string name="media_projection_entry_app_permission_dialog_warning_single_app">When you’re sharing an app, anything shown or played in that app is visible to <xliff:g id="app_seeking_permission" example="Meet">%s</xliff:g>. So be careful with things like passwords, payment details, messages, photos, and audio and video.</string>
+    <string name="media_projection_entry_app_permission_dialog_warning_single_app">When you’re sharing, recording, or casting an app, <xliff:g id="app_seeking_permission" example="Meet">%s</xliff:g> has access to anything shown or played on that app. So be careful with things like passwords, payment details, messages, photos, and audio and video.</string>
     <!-- 1P/3P apps media projection permission button to continue with app selection or recording [CHAR LIMIT=60] -->
-    <string name="media_projection_entry_app_permission_dialog_continue_entire_screen">Share screen</string>
+    <string name="media_projection_entry_app_permission_dialog_continue">Start</string>
     <!-- 1P/3P apps disabled the single app projection option. [CHAR LIMIT=NONE] -->
     <string name="media_projection_entry_app_permission_dialog_single_app_disabled"><xliff:g id="app_name" example="Meet">%1$s</xliff:g> has disabled this option</string>
 
