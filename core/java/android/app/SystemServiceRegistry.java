@@ -16,6 +16,8 @@
 
 package android.app;
 
+import static android.app.appfunctions.flags.Flags.enableAppFunctionManager;
+
 import android.accounts.AccountManager;
 import android.accounts.IAccountManager;
 import android.adservices.AdServicesFrameworkInitializer;
@@ -28,6 +30,8 @@ import android.app.admin.DevicePolicyManager;
 import android.app.admin.IDevicePolicyManager;
 import android.app.ambientcontext.AmbientContextManager;
 import android.app.ambientcontext.IAmbientContextManager;
+import android.app.appfunctions.AppFunctionManager;
+import android.app.appfunctions.IAppFunctionManager;
 import android.app.appsearch.AppSearchManagerFrameworkInitializer;
 import android.app.blob.BlobStoreManagerFrameworkInitializer;
 import android.app.contentsuggestions.ContentSuggestionsManager;
@@ -924,6 +928,21 @@ public final class SystemServiceRegistry {
                 }
                 return new CompanionDeviceManager(service, ctx.getOuterContext());
             }});
+
+        if (enableAppFunctionManager()) {
+            registerService(Context.APP_FUNCTION_SERVICE, AppFunctionManager.class,
+                    new CachedServiceFetcher<>() {
+                        @Override
+                        public AppFunctionManager createService(ContextImpl ctx)
+                                throws ServiceNotFoundException {
+                            IAppFunctionManager service;
+                            //TODO(b/357551503): If the feature not present avoid look up every time
+                            service = IAppFunctionManager.Stub.asInterface(
+                                    ServiceManager.getServiceOrThrow(Context.APP_FUNCTION_SERVICE));
+                            return new AppFunctionManager(service, ctx.getOuterContext());
+                        }
+                    });
+        }
 
         registerService(Context.VIRTUAL_DEVICE_SERVICE, VirtualDeviceManager.class,
                 new CachedServiceFetcher<VirtualDeviceManager>() {
