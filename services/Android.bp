@@ -108,6 +108,8 @@ filegroup {
 filegroup {
     name: "services-non-updatable-sources",
     srcs: [
+        ":incremental_aidl",
+        ":services.core-aidl-sources",
         ":services.core-sources",
         ":services.core-sources-am-wm",
         "core/java/com/android/server/am/package.html",
@@ -356,4 +358,8 @@ non_updatable_exportable_droidstubs {
         },
     },
     api_surface: "system-server",
+    sdk_version: "module_current",
+    libs: [
+        "framework-annotations-lib",
+    ],
 }
