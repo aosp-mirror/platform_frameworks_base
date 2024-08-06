@@ -2075,4 +2075,32 @@ public class HdmiCecLocalDeviceTvTest {
         // NewDeviceAction did not start and <Give OSD Name> was not sent.
         assertThat(mNativeWrapper.getResultMessages()).doesNotContain(giveOsdName);
     }
+
+    @Test
+    public void onOneTouchPlay_wakeUp_addCecDevice() {
+        assertThat(mHdmiControlService.getHdmiCecNetwork().getDeviceInfoList(false))
+                .isEmpty();
+        mHdmiCecLocalDeviceTv.mService.getHdmiCecConfig().setIntValue(
+                HdmiControlManager.CEC_SETTING_NAME_TV_WAKE_ON_ONE_TOUCH_PLAY,
+                HdmiControlManager.TV_WAKE_ON_ONE_TOUCH_PLAY_ENABLED);
+        mPowerManager.setInteractive(false);
+        mTestLooper.dispatchAll();
+
+        HdmiCecMessage textViewOn = HdmiCecMessageBuilder.buildTextViewOn(ADDR_PLAYBACK_1,
+                mTvLogicalAddress);
+        HdmiCecMessage activeSource = HdmiCecMessageBuilder.buildActiveSource(ADDR_PLAYBACK_1,
+                0x1000);
+        assertThat(mHdmiCecLocalDeviceTv.dispatchMessage(textViewOn)).isEqualTo(Constants.HANDLED);
+        assertThat(mHdmiCecLocalDeviceTv.dispatchMessage(activeSource)).isEqualTo(
+                Constants.HANDLED);
+        mTestLooper.dispatchAll();
+        assertThat(mPowerManager.isInteractive()).isTrue();
+
+        // FakePowerManagerWrapper#wakeUp() doesn't broadcast Intent.ACTION_SCREEN_ON so we have to
+        // manually call this method.
+        mHdmiControlService.onWakeUp(WAKE_UP_SCREEN_ON);
+        mTestLooper.dispatchAll();
+        assertThat(mHdmiControlService.getHdmiCecNetwork().getDeviceInfoList(false))
+                .hasSize(1);
+    }
 }
