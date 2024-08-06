@@ -1355,6 +1355,17 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
         }
         updateFromSettingsLocked(true, newUserId);
 
+        // Special workaround for b/356879517.
+        // KeyboardLayoutManager still expects onInputMethodSubtypeChangedForKeyboardLayoutMapping
+        // to be called back upon IME user switching, while we are actively deprecating the concept
+        // of "current IME user" at b/350386877.
+        // TODO(b/356879517): Come up with a way to avoid this special handling.
+        if (newUserData.mSubtypeForKeyboardLayoutMapping != null) {
+            final var subtypeHandleAndSubtype = newUserData.mSubtypeForKeyboardLayoutMapping;
+            mInputManagerInternal.onInputMethodSubtypeChangedForKeyboardLayoutMapping(
+                    newUserId, subtypeHandleAndSubtype.first, subtypeHandleAndSubtype.second);
+        }
+
         if (initialUserSwitch) {
             InputMethodUtils.setNonSelectedSystemImesDisabledUntilUsed(
                     getPackageManagerForUser(mContext, newUserId),
@@ -2938,6 +2949,17 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
                         ? subtype : null;
         final InputMethodSubtypeHandle newSubtypeHandle = normalizedSubtype != null
                 ? InputMethodSubtypeHandle.of(imi, normalizedSubtype) : null;
+
+        final var userData = getUserData(userId);
+
+        // A workaround for b/356879517. KeyboardLayoutManager has relied on an implementation
+        // detail that IMMS triggers this callback only for the current IME user.
+        // TODO(b/357663774): Figure out how to better handle this scenario.
+        userData.mSubtypeForKeyboardLayoutMapping =
+                Pair.create(newSubtypeHandle, normalizedSubtype);
+        if (userId != mCurrentUserId) {
+            return;
+        }
         mInputManagerInternal.onInputMethodSubtypeChangedForKeyboardLayoutMapping(
                 userId, newSubtypeHandle, normalizedSubtype);
     }
