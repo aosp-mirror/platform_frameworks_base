@@ -23,13 +23,13 @@ import com.android.systemui.qs.dagger.QSFlagsModule.RBC_AVAILABLE
 import com.android.systemui.qs.tiles.base.interactor.DataUpdateTrigger
 import com.android.systemui.qs.tiles.base.interactor.QSTileDataInteractor
 import com.android.systemui.qs.tiles.impl.reducebrightness.domain.model.ReduceBrightColorsTileModel
-import com.android.systemui.util.kotlin.isAvailable
 import com.android.systemui.util.kotlin.isEnabled
 import javax.inject.Inject
 import javax.inject.Named
 import kotlin.coroutines.CoroutineContext
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 
@@ -44,7 +44,7 @@ constructor(
 
     override fun tileData(
         user: UserHandle,
-        triggers: Flow<DataUpdateTrigger>
+        triggers: Flow<DataUpdateTrigger>,
     ): Flow<ReduceBrightColorsTileModel> {
         return reduceBrightColorsController
             .isEnabled()
@@ -53,6 +53,5 @@ constructor(
             .flowOn(bgCoroutineContext)
     }
 
-    override fun availability(user: UserHandle): Flow<Boolean> =
-        reduceBrightColorsController.isAvailable()
+    override fun availability(user: UserHandle): Flow<Boolean> = flowOf(isAvailable)
 }
