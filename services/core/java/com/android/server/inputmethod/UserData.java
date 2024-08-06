@@ -154,6 +154,15 @@ final class UserData {
     @NonNull
     final AtomicBoolean mImeDrawsNavBar = new AtomicBoolean();
 
+
+    /**
+     * {@code true} if the user storage is considered to be unlocked.
+     *
+     * @see com.android.server.pm.UserManagerInternal#isUserUnlockingOrUnlocked(int)
+     */
+    @NonNull
+    final AtomicBoolean mIsUnlockingOrUnlocked = new AtomicBoolean(false);
+
     /**
      * Intended to be instantiated only from this file.
      */
