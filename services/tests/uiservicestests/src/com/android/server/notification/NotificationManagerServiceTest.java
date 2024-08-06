@@ -10064,7 +10064,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
         // verify that zen mode helper gets passed in a package name of "android"
         verify(mockZenModeHelper).addAutomaticZenRule(eq("android"), eq(rule),
-                eq(ZenModeConfig.UPDATE_ORIGIN_SYSTEM_OR_SYSTEMUI), anyString(), anyInt());
+                eq(ZenModeConfig.ORIGIN_SYSTEM), anyString(), anyInt());
     }
 
     @Test
@@ -10086,7 +10086,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
         // verify that zen mode helper gets passed in a package name of "android"
         verify(mockZenModeHelper).addAutomaticZenRule(eq("android"), eq(rule),
-                eq(ZenModeConfig.UPDATE_ORIGIN_SYSTEM_OR_SYSTEMUI), anyString(), anyInt());
+                eq(ZenModeConfig.ORIGIN_SYSTEM), anyString(), anyInt());
     }
 
     @Test
@@ -10106,7 +10106,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
         // verify that zen mode helper gets passed in the package name from the arg, not the owner
         verify(mockZenModeHelper).addAutomaticZenRule(
-                eq("another.package"), eq(rule), eq(ZenModeConfig.UPDATE_ORIGIN_APP),
+                eq("another.package"), eq(rule), eq(ZenModeConfig.ORIGIN_APP),
                 anyString(), anyInt());  // doesn't count as a system/systemui call
     }
 
@@ -10221,7 +10221,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         mBinderService.addAutomaticZenRule(SOME_ZEN_RULE, "pkg", /* fromUser= */ true);
 
         verify(zenModeHelper).addAutomaticZenRule(eq("pkg"), eq(SOME_ZEN_RULE),
-                eq(ZenModeConfig.UPDATE_ORIGIN_USER), anyString(), anyInt());
+                eq(ZenModeConfig.ORIGIN_USER_IN_SYSTEMUI), anyString(), anyInt());
     }
 
     @Test
@@ -10233,7 +10233,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         mBinderService.addAutomaticZenRule(SOME_ZEN_RULE, "pkg", /* fromUser= */ false);
 
         verify(zenModeHelper).addAutomaticZenRule(eq("pkg"), eq(SOME_ZEN_RULE),
-                eq(ZenModeConfig.UPDATE_ORIGIN_SYSTEM_OR_SYSTEMUI), anyString(), anyInt());
+                eq(ZenModeConfig.ORIGIN_SYSTEM), anyString(), anyInt());
     }
 
     @Test
@@ -10245,7 +10245,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         mBinderService.addAutomaticZenRule(SOME_ZEN_RULE, "pkg", /* fromUser= */ false);
 
         verify(zenModeHelper).addAutomaticZenRule(eq("pkg"), eq(SOME_ZEN_RULE),
-                eq(ZenModeConfig.UPDATE_ORIGIN_APP), anyString(), anyInt());
+                eq(ZenModeConfig.ORIGIN_APP), anyString(), anyInt());
     }
 
     @Test
@@ -10267,7 +10267,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         mBinderService.updateAutomaticZenRule("id", SOME_ZEN_RULE, /* fromUser= */ true);
 
         verify(zenModeHelper).updateAutomaticZenRule(eq("id"), eq(SOME_ZEN_RULE),
-                eq(ZenModeConfig.UPDATE_ORIGIN_USER), anyString(), anyInt());
+                eq(ZenModeConfig.ORIGIN_USER_IN_SYSTEMUI), anyString(), anyInt());
     }
 
     @Test
@@ -10289,7 +10289,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         mBinderService.removeAutomaticZenRule("id", /* fromUser= */ true);
 
         verify(zenModeHelper).removeAutomaticZenRule(eq("id"),
-                eq(ZenModeConfig.UPDATE_ORIGIN_USER), anyString(), anyInt());
+                eq(ZenModeConfig.ORIGIN_USER_IN_SYSTEMUI), anyString(), anyInt());
     }
 
     @Test
@@ -10304,7 +10304,8 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
     @Test
     @EnableFlags(android.app.Flags.FLAG_MODES_API)
-    public void setAutomaticZenRuleState_conditionFromUser_mappedToOriginUser() throws Exception {
+    public void setAutomaticZenRuleState_fromAppWithConditionFromUser_originUserInApp()
+            throws Exception {
         ZenModeHelper zenModeHelper = setUpMockZenTest();
         mService.setCallerIsNormalPackage();
 
@@ -10313,12 +10314,12 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         mBinderService.setAutomaticZenRuleState("id", withSourceUser);
 
         verify(zenModeHelper).setAutomaticZenRuleState(eq("id"), eq(withSourceUser),
-                eq(ZenModeConfig.UPDATE_ORIGIN_USER), anyInt());
+                eq(ZenModeConfig.ORIGIN_USER_IN_APP), anyInt());
     }
 
     @Test
     @EnableFlags(android.app.Flags.FLAG_MODES_API)
-    public void setAutomaticZenRuleState_fromAppWithConditionNotFromUser_mappedToOriginApp()
+    public void setAutomaticZenRuleState_fromAppWithConditionNotFromUser_originApp()
             throws Exception {
         ZenModeHelper zenModeHelper = setUpMockZenTest();
         mService.setCallerIsNormalPackage();
@@ -10328,12 +10329,26 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         mBinderService.setAutomaticZenRuleState("id", withSourceContext);
 
         verify(zenModeHelper).setAutomaticZenRuleState(eq("id"), eq(withSourceContext),
-                eq(ZenModeConfig.UPDATE_ORIGIN_APP), anyInt());
+                eq(ZenModeConfig.ORIGIN_APP), anyInt());
     }
 
     @Test
     @EnableFlags(android.app.Flags.FLAG_MODES_API)
-    public void setAutomaticZenRuleState_fromSystemWithConditionNotFromUser_mappedToOriginSystem()
+    public void setAutomaticZenRuleState_fromSystemWithConditionFromUser_originUserInSystemUi()
+            throws Exception {
+        ZenModeHelper zenModeHelper = setUpMockZenTest();
+        mService.isSystemUid = true;
+
+        Condition withSourceContext = new Condition(Uri.parse("uri"), "summary", STATE_TRUE,
+                SOURCE_USER_ACTION);
+        mBinderService.setAutomaticZenRuleState("id", withSourceContext);
+
+        verify(zenModeHelper).setAutomaticZenRuleState(eq("id"), eq(withSourceContext),
+                eq(ZenModeConfig.ORIGIN_USER_IN_SYSTEMUI), anyInt());
+    }
+    @Test
+    @EnableFlags(android.app.Flags.FLAG_MODES_API)
+    public void setAutomaticZenRuleState_fromSystemWithConditionNotFromUser_originSystem()
             throws Exception {
         ZenModeHelper zenModeHelper = setUpMockZenTest();
         mService.isSystemUid = true;
@@ -10343,7 +10358,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         mBinderService.setAutomaticZenRuleState("id", withSourceContext);
 
         verify(zenModeHelper).setAutomaticZenRuleState(eq("id"), eq(withSourceContext),
-                eq(ZenModeConfig.UPDATE_ORIGIN_SYSTEM_OR_SYSTEMUI), anyInt());
+                eq(ZenModeConfig.ORIGIN_SYSTEM), anyInt());
     }
 
     /** Prepares for a zen-related test that uses a mocked {@link ZenModeHelper}. */
@@ -15508,7 +15523,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         mBinderService.setInterruptionFilter("package", INTERRUPTION_FILTER_PRIORITY, false);
 
         verify(zenModeHelper).setManualZenMode(eq(ZEN_MODE_IMPORTANT_INTERRUPTIONS), eq(null),
-                eq(ZenModeConfig.UPDATE_ORIGIN_SYSTEM_OR_SYSTEMUI), anyString(), eq("package"),
+                eq(ZenModeConfig.ORIGIN_SYSTEM), anyString(), eq("package"),
                 anyInt());
     }
 
@@ -15554,7 +15569,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
         if (canSetGlobalPolicy) {
             verify(zenModeHelper).setManualZenMode(eq(ZEN_MODE_IMPORTANT_INTERRUPTIONS), eq(null),
-                    eq(ZenModeConfig.UPDATE_ORIGIN_APP), anyString(), eq("package"), anyInt());
+                    eq(ZenModeConfig.ORIGIN_APP), anyString(), eq("package"), anyInt());
         } else {
             verify(zenModeHelper).applyGlobalZenModeAsImplicitZenRule(anyString(), anyInt(),
                     eq(ZEN_MODE_IMPORTANT_INTERRUPTIONS));
@@ -15594,7 +15609,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                 INTERRUPTION_FILTER_PRIORITY);
 
         verify(mService.mZenModeHelper).setManualZenMode(eq(ZEN_MODE_IMPORTANT_INTERRUPTIONS),
-                eq(null), eq(ZenModeConfig.UPDATE_ORIGIN_SYSTEM_OR_SYSTEMUI), anyString(),
+                eq(null), eq(ZenModeConfig.ORIGIN_SYSTEM), anyString(),
                 eq("pkg"), eq(mUid));
     }
 

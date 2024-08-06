@@ -22,7 +22,6 @@ import android.os.VibrationAttributes;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
 import android.os.VibratorInfo;
-import android.os.vibrator.Flags;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.view.HapticFeedbackConstants;
@@ -348,7 +347,7 @@ public final class HapticFeedbackVibrationProvider {
                 predefinedEffectId = VibrationEffect.EFFECT_CLICK;
                 predefinedEffectFallback = true;
         }
-        if (Flags.keyboardCategoryEnabled() && mKeyboardVibrationFixedAmplitude > 0) {
+        if (mKeyboardVibrationFixedAmplitude > 0) {
             if (mVibratorInfo.isPrimitiveSupported(primitiveId)) {
                 return VibrationEffect.startComposition()
                         .addPrimitive(primitiveId, mKeyboardVibrationFixedAmplitude)
@@ -361,10 +360,6 @@ public final class HapticFeedbackVibrationProvider {
 
     private VibrationAttributes createKeyboardVibrationAttributes(
             @HapticFeedbackConstants.PrivateFlags int privFlags) {
-        // Use touch attribute when the keyboard category is disable.
-        if (!Flags.keyboardCategoryEnabled()) {
-            return TOUCH_VIBRATION_ATTRIBUTES;
-        }
         // Use touch attribute when the haptic is not apply to IME.
         if ((privFlags & HapticFeedbackConstants.PRIVATE_FLAG_APPLY_INPUT_METHOD_SETTINGS) == 0) {
             return TOUCH_VIBRATION_ATTRIBUTES;
