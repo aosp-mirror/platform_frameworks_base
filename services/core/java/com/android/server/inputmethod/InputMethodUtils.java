@@ -59,7 +59,7 @@ import java.util.function.Consumer;
  */
 final class InputMethodUtils {
     public static final boolean DEBUG = false;
-    static final int NOT_A_SUBTYPE_ID = -1;
+    static final int NOT_A_SUBTYPE_INDEX = -1;
     private static final String TAG = "InputMethodUtils";
 
     // The string for enabled input method is saved as follows:
