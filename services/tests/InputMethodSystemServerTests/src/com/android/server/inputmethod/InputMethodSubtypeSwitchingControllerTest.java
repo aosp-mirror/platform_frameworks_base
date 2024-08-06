@@ -20,6 +20,7 @@ import static com.android.server.inputmethod.InputMethodSubtypeSwitchingControll
 import static com.android.server.inputmethod.InputMethodSubtypeSwitchingController.MODE_RECENT;
 import static com.android.server.inputmethod.InputMethodSubtypeSwitchingController.MODE_STATIC;
 import static com.android.server.inputmethod.InputMethodSubtypeSwitchingController.SwitchMode;
+import static com.android.server.inputmethod.InputMethodUtils.NOT_A_SUBTYPE_INDEX;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -61,7 +62,6 @@ public final class InputMethodSubtypeSwitchingControllerTest {
     private static final boolean TEST_IS_VR_IME = false;
     private static final int TEST_IS_DEFAULT_RES_ID = 0;
     private static final String SYSTEM_LOCALE = "en_US";
-    private static final int NOT_A_SUBTYPE_ID = InputMethodUtils.NOT_A_SUBTYPE_ID;
 
     @Rule
     public final CheckFlagsRule mCheckFlagsRule = DeviceFlagsValueProvider.createCheckFlagsRule();
@@ -103,7 +103,7 @@ public final class InputMethodSubtypeSwitchingControllerTest {
                 TEST_FORCE_DEFAULT, supportsSwitchingToNextInputMethod, TEST_IS_VR_IME);
         if (subtypes == null) {
             items.add(new ImeSubtypeListItem(imeName, null /* variableName */, imi,
-                    NOT_A_SUBTYPE_ID, null, SYSTEM_LOCALE));
+                    NOT_A_SUBTYPE_INDEX, null, SYSTEM_LOCALE));
         } else {
             for (int i = 0; i < subtypes.size(); ++i) {
                 final String subtypeLocale = subtypeLocales.get(i);

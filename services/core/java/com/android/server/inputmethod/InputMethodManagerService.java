@@ -49,10 +49,12 @@ import static android.view.inputmethod.ConnectionlessHandwritingCallback.CONNECT
 
 import static com.android.server.inputmethod.ImeVisibilityStateComputer.ImeTargetWindowState;
 import static com.android.server.inputmethod.ImeVisibilityStateComputer.ImeVisibilityResult;
-import static com.android.server.inputmethod.ImeVisibilityStateComputer.STATE_SHOW_IME;
 import static com.android.server.inputmethod.ImeVisibilityStateComputer.STATE_HIDE_IME;
+import static com.android.server.inputmethod.ImeVisibilityStateComputer.STATE_SHOW_IME;
 import static com.android.server.inputmethod.InputMethodBindingController.TIME_TO_RECONNECT;
+import static com.android.server.inputmethod.InputMethodSettings.INVALID_SUBTYPE_HASHCODE;
 import static com.android.server.inputmethod.InputMethodSubtypeSwitchingController.MODE_AUTO;
+import static com.android.server.inputmethod.InputMethodUtils.NOT_A_SUBTYPE_INDEX;
 import static com.android.server.inputmethod.InputMethodUtils.isSoftInputModeStateVisibleAllowed;
 
 import static java.lang.annotation.RetentionPolicy.SOURCE;
@@ -272,11 +274,6 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
     private static final int MSG_DISPATCH_ON_INPUT_METHOD_LIST_UPDATED = 5010;
 
     private static final int MSG_NOTIFY_IME_UID_TO_AUDIO_SERVICE = 7000;
-
-    private static final int NOT_A_SUBTYPE_ID = InputMethodUtils.NOT_A_SUBTYPE_ID;
-
-    private static final int INVALID_SUBTYPE_HASHCODE =
-            InputMethodSettings.INVALID_SUBTYPE_HASHCODE;
 
     private static final String TAG_TRY_SUPPRESSING_IME_SWITCHER = "TrySuppressingImeSwitcher";
     private static final String HANDLER_THREAD_NAME = "android.imms";
@@ -1289,7 +1286,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
         if (DEBUG) {
             Slog.i(TAG, "Default found, using " + defIm.getId());
         }
-        setSelectedInputMethodAndSubtypeLocked(defIm, NOT_A_SUBTYPE_ID, false, userId);
+        setSelectedInputMethodAndSubtypeLocked(defIm, NOT_A_SUBTYPE_INDEX, false, userId);
     }
 
     @NonNull
@@ -2018,7 +2015,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
         if (deviceMethodId == null) {
             visibilityStateComputer.getImePolicy().setImeHiddenByDisplayPolicy(true);
         } else if (!Objects.equals(deviceMethodId, selectedMethodId)) {
-            setInputMethodLocked(deviceMethodId, NOT_A_SUBTYPE_ID,
+            setInputMethodLocked(deviceMethodId, NOT_A_SUBTYPE_INDEX,
                     bindingController.getDeviceIdToShowIme(), userId);
             selectedMethodId = deviceMethodId;
         }
@@ -2915,7 +2912,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
         }
         if (!TextUtils.isEmpty(id)) {
             try {
-                setInputMethodLocked(id, settings.getSelectedInputMethodSubtypeId(id), userId);
+                setInputMethodLocked(id, settings.getSelectedInputMethodSubtypeIndex(id), userId);
             } catch (IllegalArgumentException e) {
                 Slog.w(TAG, "Unknown input method from prefs: " + id, e);
                 resetCurrentMethodAndClientLocked(UnbindReason.SWITCH_IME_FAILED, userId);
@@ -2943,12 +2940,12 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
     }
 
     @GuardedBy("ImfLock.class")
-    void setInputMethodLocked(String id, int subtypeId, @UserIdInt int userId) {
-        setInputMethodLocked(id, subtypeId, DEVICE_ID_DEFAULT, userId);
+    void setInputMethodLocked(String id, int subtypeIndex, @UserIdInt int userId) {
+        setInputMethodLocked(id, subtypeIndex, DEVICE_ID_DEFAULT, userId);
     }
 
     @GuardedBy("ImfLock.class")
-    void setInputMethodLocked(String id, int subtypeId, int deviceId, @UserIdInt int userId) {
+    void setInputMethodLocked(String id, int subtypeIndex, int deviceId, @UserIdInt int userId) {
         final InputMethodSettings settings = InputMethodSettingsRepository.get(userId);
         InputMethodInfo info = settings.getMethodMap().get(id);
         if (info == null) {
@@ -2965,25 +2962,25 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
             }
             final InputMethodSubtype oldSubtype = bindingController.getCurrentSubtype();
             final InputMethodSubtype newSubtype;
-            if (subtypeId >= 0 && subtypeId < subtypeCount) {
-                newSubtype = info.getSubtypeAt(subtypeId);
+            if (subtypeIndex >= 0 && subtypeIndex < subtypeCount) {
+                newSubtype = info.getSubtypeAt(subtypeIndex);
             } else {
                 // If subtype is null, try to find the most applicable one from
                 // getCurrentInputMethodSubtype.
-                subtypeId = NOT_A_SUBTYPE_ID;
+                subtypeIndex = NOT_A_SUBTYPE_INDEX;
                 // TODO(b/347083680): The method below has questionable behaviors.
                 newSubtype = bindingController.getCurrentInputMethodSubtype();
                 if (newSubtype != null) {
                     for (int i = 0; i < subtypeCount; ++i) {
                         if (Objects.equals(newSubtype, info.getSubtypeAt(i))) {
-                            subtypeId = i;
+                            subtypeIndex = i;
                             break;
                         }
                     }
                 }
             }
             if (!Objects.equals(newSubtype, oldSubtype)) {
-                setSelectedInputMethodAndSubtypeLocked(info, subtypeId, true, userId);
+                setSelectedInputMethodAndSubtypeLocked(info, subtypeIndex, true, userId);
                 IInputMethodInvoker curMethod = bindingController.getCurMethod();
                 if (curMethod != null) {
                     updateSystemUiLocked(bindingController.getImeWindowVis(),
@@ -3010,9 +3007,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
         }
         final long ident = Binder.clearCallingIdentity();
         try {
-            // Set a subtype to this input method.
-            // subtypeId the name of a subtype which will be set.
-            setSelectedInputMethodAndSubtypeLocked(info, subtypeId, false, userId);
+            setSelectedInputMethodAndSubtypeLocked(info, subtypeIndex, false, userId);
             // mCurMethodId should be updated after setSelectedInputMethodAndSubtypeLocked()
             // because mCurMethodId is stored as a history in
             // setSelectedInputMethodAndSubtypeLocked().
@@ -4025,11 +4020,12 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
     /**
      * Gets the list of Input Method Switcher Menu items and the index of the selected item.
      *
-     * @param items             the list of input method and subtype items.
-     * @param selectedImeId     the ID of the selected input method.
-     * @param selectedSubtypeId the ID of the selected input method subtype,
-     *                          or {@link #NOT_A_SUBTYPE_ID} if no subtype is selected.
-     * @param userId            the ID of the user for which to get the menu items.
+     * @param items                the list of input method and subtype items.
+     * @param selectedImeId        the ID of the selected input method.
+     * @param selectedSubtypeIndex the index of the selected subtype in the input method's array of
+     *                             subtypes, or {@link InputMethodUtils#NOT_A_SUBTYPE_INDEX} if no
+     *                             subtype is selected.
+     * @param userId               the ID of the user for which to get the menu items.
      * @return the list of menu items, and the index of the selected item,
      * or {@code -1} if no item is selected.
      */
@@ -4037,17 +4033,17 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
     @NonNull
     private Pair<List<MenuItem>, Integer> getInputMethodPickerItems(
             @NonNull List<ImeSubtypeListItem> items, @Nullable String selectedImeId,
-            int selectedSubtypeId, @UserIdInt int userId) {
+            int selectedSubtypeIndex, @UserIdInt int userId) {
         final var bindingController = getInputMethodBindingController(userId);
         final var settings = InputMethodSettingsRepository.get(userId);
 
-        if (selectedSubtypeId == NOT_A_SUBTYPE_ID) {
+        if (selectedSubtypeIndex == NOT_A_SUBTYPE_INDEX) {
             // TODO(b/351124299): Check if this fallback logic is still necessary.
             final var curSubtype = bindingController.getCurrentInputMethodSubtype();
             if (curSubtype != null) {
                 final var curMethodId = bindingController.getSelectedMethodId();
                 final var curImi = settings.getMethodMap().get(curMethodId);
-                selectedSubtypeId = SubtypeUtils.getSubtypeIdFromHashCode(
+                selectedSubtypeIndex = SubtypeUtils.getSubtypeIndexFromHashCode(
                         curImi, curSubtype.hashCode());
             }
         }
@@ -4062,19 +4058,19 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
             final var item = items.get(i);
             final var imeId = item.mImi.getId();
             if (imeId.equals(selectedImeId)) {
-                final int subtypeId = item.mSubtypeId;
+                final int subtypeIndex = item.mSubtypeIndex;
                 // Check if this is the selected IME-subtype pair.
-                if ((subtypeId == 0 && selectedSubtypeId == NOT_A_SUBTYPE_ID)
-                        || subtypeId == NOT_A_SUBTYPE_ID
-                        || subtypeId == selectedSubtypeId) {
+                if ((subtypeIndex == 0 && selectedSubtypeIndex == NOT_A_SUBTYPE_INDEX)
+                        || subtypeIndex == NOT_A_SUBTYPE_INDEX
+                        || subtypeIndex == selectedSubtypeIndex) {
                     selectedIndex = i;
                 }
             }
             final boolean hasHeader = !imeId.equals(prevImeId);
             final boolean hasDivider = hasHeader && prevImeId != null;
             prevImeId = imeId;
-            menuItems.add(new MenuItem(item.mImeName, item.mSubtypeName, item.mImi, item.mSubtypeId,
-                    hasHeader, hasDivider));
+            menuItems.add(new MenuItem(item.mImeName, item.mSubtypeName, item.mImi,
+                    item.mSubtypeIndex, hasHeader, hasDivider));
         }
 
         return new Pair<>(menuItems, selectedIndex);
@@ -4131,10 +4127,10 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
                 imi.getPackageName(), callingUid, userId, settings)) {
             throw getExceptionForUnknownImeId(id);
         }
-        final int subtypeId = subtype != null
-                ? SubtypeUtils.getSubtypeIdFromHashCode(imi, subtype.hashCode())
-                : NOT_A_SUBTYPE_ID;
-        setInputMethodWithSubtypeIdLocked(id, subtypeId, userId);
+        final int subtypeIndex = subtype != null
+                ? SubtypeUtils.getSubtypeIndexFromHashCode(imi, subtype.hashCode())
+                : NOT_A_SUBTYPE_INDEX;
+        setInputMethodWithSubtypeIndexLocked(id, subtypeIndex, userId);
     }
 
     @BinderThread
@@ -4152,18 +4148,18 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
         }
         final var currentSubtype = bindingController.getCurrentSubtype();
         String targetLastImiId = null;
-        int subtypeId = NOT_A_SUBTYPE_ID;
+        int subtypeIndex = NOT_A_SUBTYPE_INDEX;
         if (lastIme != null && lastImi != null) {
             final boolean imiIdIsSame = lastImi.getId().equals(
                     bindingController.getSelectedMethodId());
             final int lastSubtypeHash = Integer.parseInt(lastIme.second);
-            final int currentSubtypeHash = currentSubtype == null ? NOT_A_SUBTYPE_ID
+            final int currentSubtypeHash = currentSubtype == null ? NOT_A_SUBTYPE_INDEX
                     : currentSubtype.hashCode();
             // If the last IME is the same as the current IME and the last subtype is not
             // defined, there is no need to switch to the last IME.
             if (!imiIdIsSame || lastSubtypeHash != currentSubtypeHash) {
                 targetLastImiId = lastIme.first;
-                subtypeId = SubtypeUtils.getSubtypeIdFromHashCode(lastImi, lastSubtypeHash);
+                subtypeIndex = SubtypeUtils.getSubtypeIndexFromHashCode(lastImi, lastSubtypeHash);
             }
         }
 
@@ -4191,7 +4187,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
                                         SubtypeUtils.SUBTYPE_MODE_KEYBOARD, locale, true);
                         if (keyboardSubtype != null) {
                             targetLastImiId = imi.getId();
-                            subtypeId = SubtypeUtils.getSubtypeIdFromHashCode(imi,
+                            subtypeIndex = SubtypeUtils.getSubtypeIndexFromHashCode(imi,
                                     keyboardSubtype.hashCode());
                             if (keyboardSubtype.getLocale().equals(locale)) {
                                 break;
@@ -4206,9 +4202,9 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
             if (DEBUG) {
                 Slog.d(TAG, "Switch to: " + lastImi.getId() + ", " + lastIme.second
                         + ", from: " + bindingController.getSelectedMethodId() + ", "
-                        + subtypeId);
+                        + subtypeIndex);
             }
-            setInputMethodWithSubtypeIdLocked(targetLastImiId, subtypeId, userId);
+            setInputMethodWithSubtypeIndexLocked(targetLastImiId, subtypeIndex, userId);
             return true;
         } else {
             return false;
@@ -4228,7 +4224,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
         if (nextSubtype == null) {
             return false;
         }
-        setInputMethodWithSubtypeIdLocked(nextSubtype.mImi.getId(), nextSubtype.mSubtypeId,
+        setInputMethodWithSubtypeIndexLocked(nextSubtype.mImi.getId(), nextSubtype.mSubtypeIndex,
                 userData.mUserId);
         return true;
     }
@@ -4715,7 +4711,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
     }
 
     @GuardedBy("ImfLock.class")
-    private void setInputMethodWithSubtypeIdLocked(String id, int subtypeId,
+    private void setInputMethodWithSubtypeIndexLocked(String id, int subtypeIndex,
             @UserIdInt int userId) {
         final InputMethodSettings settings = InputMethodSettingsRepository.get(userId);
         if (settings.getMethodMap().get(id) != null
@@ -4725,7 +4721,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
         }
         final long ident = Binder.clearCallingIdentity();
         try {
-            setInputMethodLocked(id, subtypeId, userId);
+            setInputMethodLocked(id, subtypeIndex, userId);
         } finally {
             Binder.restoreCallingIdentity(ident);
         }
@@ -4886,7 +4882,8 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
         final boolean isScreenLocked = mWindowManagerInternal.isKeyguardLocked()
                 && mWindowManagerInternal.isKeyguardSecure(userId);
         final String lastInputMethodId = settings.getSelectedInputMethod();
-        int lastInputMethodSubtypeId = settings.getSelectedInputMethodSubtypeId(lastInputMethodId);
+        final int lastInputMethodSubtypeIndex =
+                settings.getSelectedInputMethodSubtypeIndex(lastInputMethodId);
 
         final List<ImeSubtypeListItem> imList = InputMethodSubtypeSwitchingController
                 .getSortedInputMethodAndSubtypeList(
@@ -4906,24 +4903,24 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
                         + " showAuxSubtypes=" + showAuxSubtypes
                         + " displayId=" + displayId
                         + " preferredInputMethodId=" + lastInputMethodId
-                        + " preferredInputMethodSubtypeId=" + lastInputMethodSubtypeId);
+                        + " preferredInputMethodSubtypeIndex=" + lastInputMethodSubtypeIndex);
             }
 
             final var itemsAndIndex = getInputMethodPickerItems(imList,
-                    lastInputMethodId, lastInputMethodSubtypeId, userId);
+                    lastInputMethodId, lastInputMethodSubtypeIndex, userId);
             final var menuItems = itemsAndIndex.first;
             final int selectedIndex = itemsAndIndex.second;
 
             if (selectedIndex == -1) {
                 Slog.w(TAG, "Switching menu shown with no item selected"
                         + ", IME id: " + lastInputMethodId
-                        + ", subtype index: " + lastInputMethodSubtypeId);
+                        + ", subtype index: " + lastInputMethodSubtypeIndex);
             }
 
             mMenuControllerNew.show(menuItems, selectedIndex, displayId, userId);
         } else {
             mMenuController.showInputMethodMenuLocked(showAuxSubtypes, displayId,
-                    lastInputMethodId, lastInputMethodSubtypeId, imList, userId);
+                    lastInputMethodId, lastInputMethodSubtypeIndex, imList, userId);
         }
     }
 
@@ -5442,7 +5439,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
     }
 
     @GuardedBy("ImfLock.class")
-    private void setSelectedInputMethodAndSubtypeLocked(InputMethodInfo imi, int subtypeId,
+    private void setSelectedInputMethodAndSubtypeLocked(InputMethodInfo imi, int subtypeIndex,
             boolean setSubtypeOnly, @UserIdInt int userId) {
         final InputMethodSettings settings = InputMethodSettingsRepository.get(userId);
         final var bindingController = getInputMethodBindingController(userId);
@@ -5452,12 +5449,12 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
         // Set Subtype here
         final int newSubtypeHashcode;
         final InputMethodSubtype newSubtype;
-        if (imi == null || subtypeId < 0) {
+        if (imi == null || subtypeIndex < 0) {
             newSubtypeHashcode = INVALID_SUBTYPE_HASHCODE;
             newSubtype = null;
         } else {
-            if (subtypeId < imi.getSubtypeCount()) {
-                InputMethodSubtype subtype = imi.getSubtypeAt(subtypeId);
+            if (subtypeIndex < imi.getSubtypeCount()) {
+                InputMethodSubtype subtype = imi.getSubtypeAt(subtypeIndex);
                 newSubtypeHashcode = subtype.hashCode();
                 newSubtype = subtype;
             } else {
@@ -5493,20 +5490,20 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
         settings.putSelectedDefaultDeviceInputMethod(null);
 
         InputMethodInfo imi = settings.getMethodMap().get(newDefaultIme);
-        int lastSubtypeId = NOT_A_SUBTYPE_ID;
+        int lastSubtypeIndex = NOT_A_SUBTYPE_INDEX;
         // newDefaultIme is empty when there is no candidate for the selected IME.
         if (imi != null && !TextUtils.isEmpty(newDefaultIme)) {
             String subtypeHashCode = settings.getLastSubtypeForInputMethod(newDefaultIme);
             if (subtypeHashCode != null) {
                 try {
-                    lastSubtypeId = SubtypeUtils.getSubtypeIdFromHashCode(imi,
+                    lastSubtypeIndex = SubtypeUtils.getSubtypeIndexFromHashCode(imi,
                             Integer.parseInt(subtypeHashCode));
                 } catch (NumberFormatException e) {
                     Slog.w(TAG, "HashCode for subtype looks broken: " + subtypeHashCode, e);
                 }
             }
         }
-        setSelectedInputMethodAndSubtypeLocked(imi, lastSubtypeId, false, userId);
+        setSelectedInputMethodAndSubtypeLocked(imi, lastSubtypeIndex, false, userId);
     }
 
     /**
@@ -5530,14 +5527,14 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
     }
 
     @GuardedBy("ImfLock.class")
-    private boolean switchToInputMethodLocked(@NonNull String imeId, int subtypeId,
+    private boolean switchToInputMethodLocked(@NonNull String imeId, int subtypeIndex,
             @UserIdInt int userId) {
         final var settings = InputMethodSettingsRepository.get(userId);
         final var enabledImes = settings.getEnabledInputMethodList();
         if (!CollectionUtils.any(enabledImes, imi -> imi.getId().equals(imeId))) {
             return false; // IME is not found or not enabled.
         }
-        setInputMethodLocked(imeId, subtypeId, userId);
+        setInputMethodLocked(imeId, subtypeIndex, userId);
         return true;
     }
 
@@ -5593,8 +5590,8 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
                 return;
             }
 
-            final var nextSubtype = nextItem.mSubtypeId > NOT_A_SUBTYPE_ID
-                    ? nextItem.mImi.getSubtypeAt(nextItem.mSubtypeId) : null;
+            final var nextSubtype = nextItem.mSubtypeIndex > NOT_A_SUBTYPE_INDEX
+                    ? nextItem.mImi.getSubtypeAt(nextItem.mSubtypeIndex) : null;
             nextSubtypeHandle = InputMethodSubtypeHandle.of(nextItem.mImi, nextSubtype);
         } else {
             final InputMethodSubtypeHandle currentSubtypeHandle =
@@ -5613,7 +5610,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
         final int subtypeCount = nextImi.getSubtypeCount();
         if (subtypeCount == 0) {
             if (nextSubtypeHandle.equals(InputMethodSubtypeHandle.of(nextImi, null))) {
-                setInputMethodLocked(nextImi.getId(), NOT_A_SUBTYPE_ID, userId);
+                setInputMethodLocked(nextImi.getId(), NOT_A_SUBTYPE_INDEX, userId);
             }
             return;
         }
@@ -5691,10 +5688,10 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
         }
 
         @Override
-        public boolean switchToInputMethod(@NonNull String imeId, int subtypeId,
+        public boolean switchToInputMethod(@NonNull String imeId, int subtypeIndex,
                 @UserIdInt int userId) {
             synchronized (ImfLock.class) {
-                return switchToInputMethodLocked(imeId, subtypeId, userId);
+                return switchToInputMethodLocked(imeId, subtypeIndex, userId);
             }
         }
 
@@ -6563,7 +6560,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
                         continue;
                     }
                     boolean failedToSelectUnknownIme = !switchToInputMethodLocked(imeId,
-                            NOT_A_SUBTYPE_ID, userId);
+                            NOT_A_SUBTYPE_INDEX, userId);
                     if (failedToSelectUnknownIme) {
                         error.print("Unknown input method ");
                         error.print(imeId);

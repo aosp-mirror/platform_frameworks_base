@@ -16,6 +16,8 @@
 
 package com.android.server.inputmethod;
 
+import static com.android.server.inputmethod.InputMethodUtils.NOT_A_SUBTYPE_INDEX;
+
 import android.annotation.IntDef;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
@@ -48,7 +50,6 @@ import java.util.Objects;
 final class InputMethodSubtypeSwitchingController {
     private static final String TAG = InputMethodSubtypeSwitchingController.class.getSimpleName();
     private static final boolean DEBUG = false;
-    private static final int NOT_A_SUBTYPE_ID = InputMethodUtils.NOT_A_SUBTYPE_ID;
 
     @IntDef(prefix = {"MODE_"}, value = {
             MODE_STATIC,
@@ -86,17 +87,21 @@ final class InputMethodSubtypeSwitchingController {
         public final CharSequence mSubtypeName;
         @NonNull
         public final InputMethodInfo mImi;
-        public final int mSubtypeId;
+        /**
+         * The index of the subtype in the input method's array of subtypes,
+         * or {@link InputMethodUtils#NOT_A_SUBTYPE_INDEX} if this item doesn't have a subtype.
+         */
+        public final int mSubtypeIndex;
         public final boolean mIsSystemLocale;
         public final boolean mIsSystemLanguage;
 
         ImeSubtypeListItem(@NonNull CharSequence imeName, @Nullable CharSequence subtypeName,
-                @NonNull InputMethodInfo imi, int subtypeId, @Nullable String subtypeLocale,
+                @NonNull InputMethodInfo imi, int subtypeIndex, @Nullable String subtypeLocale,
                 @NonNull String systemLocale) {
             mImeName = imeName;
             mSubtypeName = subtypeName;
             mImi = imi;
-            mSubtypeId = subtypeId;
+            mSubtypeIndex = subtypeIndex;
             if (TextUtils.isEmpty(subtypeLocale)) {
                 mIsSystemLocale = false;
                 mIsSystemLanguage = false;
@@ -137,7 +142,7 @@ final class InputMethodSubtypeSwitchingController {
          *   <li>{@link #mImi} with {@link InputMethodInfo#getId()}</li>
          * </ol>
          * Note: this class has a natural ordering that is inconsistent with
-         * {@link #equals(Object)}. This method doesn't compare {@link #mSubtypeId} but
+         * {@link #equals(Object)}. This method doesn't compare {@link #mSubtypeIndex} but
          * {@link #equals(Object)} does.
          *
          * @param other the object to be compared.
@@ -177,7 +182,7 @@ final class InputMethodSubtypeSwitchingController {
             return "ImeSubtypeListItem{"
                     + "mImeName=" + mImeName
                     + " mSubtypeName=" + mSubtypeName
-                    + " mSubtypeId=" + mSubtypeId
+                    + " mSubtypeIndex=" + mSubtypeIndex
                     + " mIsSystemLocale=" + mIsSystemLocale
                     + " mIsSystemLanguage=" + mIsSystemLanguage
                     + "}";
@@ -190,7 +195,8 @@ final class InputMethodSubtypeSwitchingController {
             }
             if (o instanceof ImeSubtypeListItem) {
                 final ImeSubtypeListItem that = (ImeSubtypeListItem) o;
-                return Objects.equals(this.mImi, that.mImi) && this.mSubtypeId == that.mSubtypeId;
+                return Objects.equals(this.mImi, that.mImi)
+                        && this.mSubtypeIndex == that.mSubtypeIndex;
             }
             return false;
         }
@@ -256,7 +262,7 @@ final class InputMethodSubtypeSwitchingController {
                     }
                 }
             } else {
-                imList.add(new ImeSubtypeListItem(imeLabel, null, imi, NOT_A_SUBTYPE_ID, null,
+                imList.add(new ImeSubtypeListItem(imeLabel, null, imi, NOT_A_SUBTYPE_INDEX, null,
                         mSystemLocaleStr));
             }
         }
@@ -310,17 +316,17 @@ final class InputMethodSubtypeSwitchingController {
                     }
                 }
             } else {
-                imList.add(new ImeSubtypeListItem(imeLabel, null, imi, NOT_A_SUBTYPE_ID, null,
+                imList.add(new ImeSubtypeListItem(imeLabel, null, imi, NOT_A_SUBTYPE_INDEX, null,
                         mSystemLocaleStr));
             }
         }
         return imList;
     }
 
-    private static int calculateSubtypeId(@NonNull InputMethodInfo imi,
+    private static int calculateSubtypeIndex(@NonNull InputMethodInfo imi,
             @Nullable InputMethodSubtype subtype) {
-        return subtype != null ? SubtypeUtils.getSubtypeIdFromHashCode(imi, subtype.hashCode())
-                : NOT_A_SUBTYPE_ID;
+        return subtype != null ? SubtypeUtils.getSubtypeIndexFromHashCode(imi, subtype.hashCode())
+                : NOT_A_SUBTYPE_INDEX;
     }
 
     private static class StaticRotationList {
@@ -341,12 +347,12 @@ final class InputMethodSubtypeSwitchingController {
          * @return The index in the given list. -1 if not found.
          */
         private int getIndex(@NonNull InputMethodInfo imi, @Nullable InputMethodSubtype subtype) {
-            final int currentSubtypeId = calculateSubtypeId(imi, subtype);
+            final int currentSubtypeIndex = calculateSubtypeIndex(imi, subtype);
             final int numSubtypes = mImeSubtypeList.size();
             for (int i = 0; i < numSubtypes; ++i) {
                 final ImeSubtypeListItem item = mImeSubtypeList.get(i);
                 // Skip until the current IME/subtype is found.
-                if (imi.equals(item.mImi) && item.mSubtypeId == currentSubtypeId) {
+                if (imi.equals(item.mImi) && item.mSubtypeIndex == currentSubtypeIndex) {
                     return i;
                 }
             }
@@ -414,14 +420,14 @@ final class InputMethodSubtypeSwitchingController {
          */
         private int getUsageRank(@NonNull InputMethodInfo imi,
                 @Nullable InputMethodSubtype subtype) {
-            final int currentSubtypeId = calculateSubtypeId(imi, subtype);
+            final int currentSubtypeIndex = calculateSubtypeIndex(imi, subtype);
             final int numItems = mUsageHistoryOfSubtypeListItemIndex.length;
             for (int usageRank = 0; usageRank < numItems; usageRank++) {
                 final int subtypeListItemIndex = mUsageHistoryOfSubtypeListItemIndex[usageRank];
                 final ImeSubtypeListItem subtypeListItem =
                         mImeSubtypeList.get(subtypeListItemIndex);
                 if (subtypeListItem.mImi.equals(imi)
-                        && subtypeListItem.mSubtypeId == currentSubtypeId) {
+                        && subtypeListItem.mSubtypeIndex == currentSubtypeIndex) {
                     return usageRank;
                 }
             }
@@ -575,11 +581,11 @@ final class InputMethodSubtypeSwitchingController {
         @IntRange(from = -1)
         private int getIndex(@NonNull InputMethodInfo imi, @Nullable InputMethodSubtype subtype,
                 boolean useRecency) {
-            final int subtypeIndex = calculateSubtypeId(imi, subtype);
+            final int subtypeIndex = calculateSubtypeIndex(imi, subtype);
             for (int i = 0; i < mItems.size(); i++) {
                 final int mappedIndex = useRecency ? mRecencyMap[i] : i;
                 final var item = mItems.get(mappedIndex);
-                if (item.mImi.equals(imi) && item.mSubtypeId == subtypeIndex) {
+                if (item.mImi.equals(imi) && item.mSubtypeIndex == subtypeIndex) {
                     return i;
                 }
             }

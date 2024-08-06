@@ -17,7 +17,7 @@
 package com.android.server.inputmethod;
 
 import static com.android.server.inputmethod.InputMethodManagerService.DEBUG;
-import static com.android.server.inputmethod.InputMethodUtils.NOT_A_SUBTYPE_ID;
+import static com.android.server.inputmethod.InputMethodUtils.NOT_A_SUBTYPE_INDEX;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -62,7 +62,7 @@ final class InputMethodMenuController {
     private View mSwitchingDialogTitleView;
     private List<ImeSubtypeListItem> mImList;
     private InputMethodInfo[] mIms;
-    private int[] mSubtypeIds;
+    private int[] mSubtypeIndices;
 
     private boolean mShowImeWithHardKeyboard;
 
@@ -77,7 +77,7 @@ final class InputMethodMenuController {
 
     @GuardedBy("ImfLock.class")
     void showInputMethodMenuLocked(boolean showAuxSubtypes, int displayId,
-            String preferredInputMethodId, int preferredInputMethodSubtypeId,
+            String preferredInputMethodId, int preferredInputMethodSubtypeIndex,
             @NonNull List<ImeSubtypeListItem> imList, @UserIdInt int userId) {
         if (DEBUG) Slog.v(TAG, "Show switching menu. showAuxSubtypes=" + showAuxSubtypes);
 
@@ -85,14 +85,14 @@ final class InputMethodMenuController {
 
         hideInputMethodMenuLocked(userId);
 
-        if (preferredInputMethodSubtypeId == NOT_A_SUBTYPE_ID) {
+        if (preferredInputMethodSubtypeIndex == NOT_A_SUBTYPE_INDEX) {
             final InputMethodSubtype currentSubtype =
                     bindingController.getCurrentInputMethodSubtype();
             if (currentSubtype != null) {
                 final String curMethodId = bindingController.getSelectedMethodId();
                 final InputMethodInfo currentImi =
                         InputMethodSettingsRepository.get(userId).getMethodMap().get(curMethodId);
-                preferredInputMethodSubtypeId = SubtypeUtils.getSubtypeIdFromHashCode(
+                preferredInputMethodSubtypeIndex = SubtypeUtils.getSubtypeIndexFromHashCode(
                         currentImi, currentSubtype.hashCode());
             }
         }
@@ -101,7 +101,7 @@ final class InputMethodMenuController {
         final int size = imList.size();
         mImList = imList;
         mIms = new InputMethodInfo[size];
-        mSubtypeIds = new int[size];
+        mSubtypeIndices = new int[size];
         // No items are checked by default. When we have a list of explicitly enabled subtypes,
         // the implicit subtype is no longer listed, but if it is still the selected one,
         // no items will be shown as checked.
@@ -109,12 +109,13 @@ final class InputMethodMenuController {
         for (int i = 0; i < size; ++i) {
             final ImeSubtypeListItem item = imList.get(i);
             mIms[i] = item.mImi;
-            mSubtypeIds[i] = item.mSubtypeId;
+            mSubtypeIndices[i] = item.mSubtypeIndex;
             if (mIms[i].getId().equals(preferredInputMethodId)) {
-                int subtypeId = mSubtypeIds[i];
-                if ((subtypeId == NOT_A_SUBTYPE_ID)
-                        || (preferredInputMethodSubtypeId == NOT_A_SUBTYPE_ID && subtypeId == 0)
-                        || (subtypeId == preferredInputMethodSubtypeId)) {
+                int subtypeIndex = mSubtypeIndices[i];
+                if ((subtypeIndex == NOT_A_SUBTYPE_INDEX)
+                        || (preferredInputMethodSubtypeIndex == NOT_A_SUBTYPE_INDEX
+                        && subtypeIndex == 0)
+                        || (subtypeIndex == preferredInputMethodSubtypeIndex)) {
                     checkedItem = i;
                 }
             }
@@ -123,7 +124,7 @@ final class InputMethodMenuController {
         if (checkedItem == -1) {
             Slog.w(TAG, "Switching menu shown with no item selected"
                     + ", IME id: " + preferredInputMethodId
-                    + ", subtype index: " + preferredInputMethodSubtypeId);
+                    + ", subtype index: " + preferredInputMethodSubtypeIndex);
         }
 
         if (mDialogWindowContext == null) {
@@ -171,19 +172,19 @@ final class InputMethodMenuController {
                 com.android.internal.R.layout.input_method_switch_item, imList, checkedItem);
         final DialogInterface.OnClickListener choiceListener = (dialog, which) -> {
             synchronized (ImfLock.class) {
-                if (mIms == null || mIms.length <= which || mSubtypeIds == null
-                        || mSubtypeIds.length <= which) {
+                if (mIms == null || mIms.length <= which || mSubtypeIndices == null
+                        || mSubtypeIndices.length <= which) {
                     return;
                 }
                 final InputMethodInfo im = mIms[which];
-                int subtypeId = mSubtypeIds[which];
+                int subtypeIndex = mSubtypeIndices[which];
                 adapter.mCheckedItem = which;
                 adapter.notifyDataSetChanged();
                 if (im != null) {
-                    if (subtypeId < 0 || subtypeId >= im.getSubtypeCount()) {
-                        subtypeId = NOT_A_SUBTYPE_ID;
+                    if (subtypeIndex < 0 || subtypeIndex >= im.getSubtypeCount()) {
+                        subtypeIndex = NOT_A_SUBTYPE_INDEX;
                     }
-                    mService.setInputMethodLocked(im.getId(), subtypeId, userId);
+                    mService.setInputMethodLocked(im.getId(), subtypeIndex, userId);
                 }
                 hideInputMethodMenuLocked(userId);
             }
@@ -251,7 +252,7 @@ final class InputMethodMenuController {
             mDialogBuilder = null;
             mImList = null;
             mIms = null;
-            mSubtypeIds = null;
+            mSubtypeIndices = null;
         }
     }
 

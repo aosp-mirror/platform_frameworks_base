@@ -16,7 +16,7 @@
 
 package com.android.server.inputmethod;
 
-import static com.android.server.inputmethod.InputMethodUtils.NOT_A_SUBTYPE_ID;
+import static com.android.server.inputmethod.InputMethodUtils.NOT_A_SUBTYPE_INDEX;
 
 import static java.lang.annotation.RetentionPolicy.SOURCE;
 
@@ -140,23 +140,26 @@ public abstract class InputMethodManagerInternal {
      * to be switched.
      */
     public boolean switchToInputMethod(@NonNull String imeId, @UserIdInt int userId) {
-        return switchToInputMethod(imeId, NOT_A_SUBTYPE_ID, userId);
+        return switchToInputMethod(imeId, NOT_A_SUBTYPE_INDEX, userId);
     }
 
     /**
      * Force switch to the enabled input method by {@code imeId} for the current user. If the input
-     * method with {@code imeId} is not enabled or not installed, do nothing. If {@code subtypeId}
-     * is also supplied (not {@link InputMethodUtils#NOT_A_SUBTYPE_ID}) and valid, also switches to
-     * it, otherwise the system decides the most sensible default subtype to use.
+     * method with {@code imeId} is not enabled or not installed, do nothing. If
+     * {@code subtypeIndex} is also supplied (not {@link InputMethodUtils#NOT_A_SUBTYPE_INDEX}) and
+     * valid, also switches to it, otherwise the system decides the most sensible default subtype to
+     * use.
      *
-     * @param imeId the input method ID to be switched to
-     * @param subtypeId the input method subtype ID to be switched to
-     * @param userId the user ID to be queried
+     * @param imeId        the input method ID to be switched to
+     * @param subtypeIndex the subtype to be switched to, as an index in the input method's array of
+     *                     subtypes, or {@link InputMethodUtils#NOT_A_SUBTYPE_INDEX} if the system
+     *                     should decide the most sensible subtype
+     * @param userId       the user ID to be queried
      * @return {@code true} if the current input method was successfully switched to the input
      * method by {@code imeId}; {@code false} the input method with {@code imeId} is not available
      * to be switched.
      */
-    public abstract boolean switchToInputMethod(@NonNull String imeId, int subtypeId,
+    public abstract boolean switchToInputMethod(@NonNull String imeId, int subtypeIndex,
             @UserIdInt int userId);
 
     /**
@@ -376,7 +379,7 @@ public abstract class InputMethodManagerInternal {
                 }
 
                 @Override
-                public boolean switchToInputMethod(@NonNull String imeId, int subtypeId,
+                public boolean switchToInputMethod(@NonNull String imeId, int subtypeIndex,
                         @UserIdInt int userId) {
                     return false;
                 }
