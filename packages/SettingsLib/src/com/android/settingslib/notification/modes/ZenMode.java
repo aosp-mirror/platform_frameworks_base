@@ -66,7 +66,7 @@ public class ZenMode implements Parcelable {
 
     private static final String TAG = "ZenMode";
 
-    static final String MANUAL_DND_MODE_ID = "manual_dnd";
+    static final String MANUAL_DND_MODE_ID = ZenModeConfig.MANUAL_RULE_ID;
     static final String TEMP_NEW_MODE_ID = "temp_new_mode";
 
     // Must match com.android.server.notification.ZenModeHelper#applyCustomPolicy.
@@ -119,7 +119,7 @@ public class ZenMode implements Parcelable {
                 return Status.ENABLED;
             }
         } else {
-            if (zenRuleExtraData.disabledOrigin == ZenModeConfig.UPDATE_ORIGIN_USER) {
+            if (zenRuleExtraData.disabledOrigin == ZenModeConfig.ORIGIN_USER_IN_SYSTEMUI) {
                 return Status.DISABLED_BY_USER;
             } else {
                 return Status.DISABLED_BY_OTHER; // by APP, SYSTEM, UNKNOWN.

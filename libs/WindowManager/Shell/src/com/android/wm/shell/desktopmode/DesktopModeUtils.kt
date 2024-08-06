@@ -146,7 +146,7 @@ fun maximizeSizeGivenAspectRatio(
 fun calculateAspectRatio(taskInfo: RunningTaskInfo): Float {
     val appLetterboxWidth = taskInfo.appCompatTaskInfo.topActivityLetterboxAppWidth
     val appLetterboxHeight = taskInfo.appCompatTaskInfo.topActivityLetterboxAppHeight
-    if (taskInfo.appCompatTaskInfo.topActivityBoundsLetterboxed) {
+    if (taskInfo.appCompatTaskInfo.isTopActivityLetterboxed) {
         return maxOf(appLetterboxWidth, appLetterboxHeight) /
             minOf(appLetterboxWidth, appLetterboxHeight).toFloat()
     }
@@ -200,7 +200,7 @@ fun TaskInfo.hasPortraitTopActivity(): Boolean {
         }
 
         // Then check if the activity is portrait when letterboxed
-        appCompatTaskInfo.topActivityBoundsLetterboxed -> appCompatTaskInfo.isTopActivityPillarboxed
+        appCompatTaskInfo.isTopActivityLetterboxed -> appCompatTaskInfo.isTopActivityPillarboxed
 
         // Then check if the activity is portrait
         appBounds != null -> appBounds.height() > appBounds.width()

@@ -1,2 +1,1 @@
-# To avoid VerifyError on nano proto files (b/324063814)
-rule com.**.nano.**   devicenano.@0
+# Applying jarjar on framework-minux-apex is too slow, so we don't use jarjar for now. b/313930116

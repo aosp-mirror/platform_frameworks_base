@@ -16,8 +16,8 @@
 
 package com.android.settingslib.notification.modes;
 
-import static android.service.notification.ZenModeConfig.UPDATE_ORIGIN_UNKNOWN;
-import static android.service.notification.ZenModeConfig.UPDATE_ORIGIN_USER;
+import static android.service.notification.ZenModeConfig.ORIGIN_UNKNOWN;
+import static android.service.notification.ZenModeConfig.ORIGIN_USER_IN_SYSTEMUI;
 
 import android.app.AutomaticZenRule;
 import android.app.NotificationManager;
@@ -154,7 +154,7 @@ public class TestModeBuilder {
         mRule.setEnabled(enabled);
         mConfigZenRule.enabled = enabled;
         if (!enabled) {
-            mConfigZenRule.disabledOrigin = byUser ? UPDATE_ORIGIN_USER : UPDATE_ORIGIN_UNKNOWN;
+            mConfigZenRule.disabledOrigin = byUser ? ORIGIN_USER_IN_SYSTEMUI : ORIGIN_UNKNOWN;
         }
         return this;
     }

@@ -9,6 +9,11 @@ class :feature_flags keepclass
 # Keep all sysprops generated code implementations
 class :sysprops keepclass
 
+# To avoid VerifyError on nano proto files (b/324063814), we rename nano proto classes.
+# Note: The "rename" directive must use shashes (/) as a package name separator.
+rename com/.*/nano/   devicenano/
+rename android/.*/nano/   devicenano/
+
 # Exported to Mainline modules; cannot use annotations
 class com.android.internal.util.FastXmlSerializer keepclass
 class com.android.internal.util.FileRotator keepclass

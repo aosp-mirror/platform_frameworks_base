@@ -218,16 +218,6 @@ public class DragDropControllerTests extends WindowTestsBase {
     }
 
     @Test
-    public void testPerformDrag_NullDataToOtherUser() {
-        final WindowState otherUsersWindow =
-                createDropTargetWindow("Other user's window", 1 * UserHandle.PER_USER_RANGE);
-        doReturn(otherUsersWindow).when(mDisplayContent).getTouchableWinAtPointLocked(10, 10);
-
-        doDragAndDrop(View.DRAG_FLAG_GLOBAL | View.DRAG_FLAG_GLOBAL_URI_READ, null, 10, 10);
-        mToken = otherUsersWindow.mClient.asBinder();
-    }
-
-    @Test
     public void testPrivateInterceptGlobalDragDropFlagChecksPermission() {
         DisplayPolicy policy = mDisplayContent.getDisplayPolicy();
         WindowManager.LayoutParams attrs = new WindowManager.LayoutParams();

@@ -17,6 +17,7 @@
 package com.android.wm.shell.startingsurface;
 
 import static android.content.Context.CONTEXT_RESTRICTED;
+import static android.content.res.Configuration.UI_MODE_NIGHT_MASK;
 import static android.os.Process.THREAD_PRIORITY_TOP_APP_BOOST;
 import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
 import static android.view.Display.DEFAULT_DISPLAY;
@@ -191,31 +192,15 @@ public class SplashscreenContentDrawer {
         }
 
         final Configuration taskConfig = taskInfo.getConfiguration();
-        if (taskConfig.diffPublicOnly(context.getResources().getConfiguration()) != 0) {
+        final Configuration contextConfig = context.getResources().getConfiguration();
+        if ((taskConfig.uiMode & UI_MODE_NIGHT_MASK)
+                != (contextConfig.uiMode & UI_MODE_NIGHT_MASK)) {
             ProtoLog.v(ShellProtoLogGroup.WM_SHELL_STARTING_WINDOW,
                     "addSplashScreen: creating context based on task Configuration %s",
                     taskConfig);
             final Context overrideContext = context.createConfigurationContext(taskConfig);
             overrideContext.setTheme(theme);
-            final TypedArray typedArray = overrideContext.obtainStyledAttributes(
-                    com.android.internal.R.styleable.Window);
-            final int resId = typedArray.getResourceId(R.styleable.Window_windowBackground, 0);
-            try {
-                if (resId != 0 && overrideContext.getDrawable(resId) != null) {
-                    // We want to use the windowBackground for the override context if it is
-                    // available, otherwise we use the default one to make sure a themed starting
-                    // window is displayed for the app.
-                    ProtoLog.v(ShellProtoLogGroup.WM_SHELL_STARTING_WINDOW,
-                            "addSplashScreen: apply overrideConfig %s",
-                            taskConfig);
-                    context = overrideContext;
-                }
-            } catch (Resources.NotFoundException e) {
-                Slog.w(TAG, "failed creating starting window for overrideConfig at taskId: "
-                        + taskId, e);
-                return null;
-            }
-            typedArray.recycle();
+            context = overrideContext;
         }
         return context;
     }

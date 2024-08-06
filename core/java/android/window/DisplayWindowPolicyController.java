@@ -25,12 +25,14 @@ import android.annotation.UserIdInt;
 import android.app.WindowConfiguration;
 import android.content.ComponentName;
 import android.content.Intent;
+import android.content.IntentSender;
 import android.content.pm.ActivityInfo;
 import android.util.ArraySet;
 
 import java.io.PrintWriter;
 import java.util.List;
 import java.util.Set;
+import java.util.function.Supplier;
 
 /**
  * Abstract class to control the policies of the windows that can be displayed on the virtual
@@ -136,10 +138,14 @@ public abstract class DisplayWindowPolicyController {
      * Returns {@code true} if the given activity can be launched on this virtual display in the
      * configuration defined by the rest of the arguments. If the given intent would be intercepted
      * by the display owner then this means that the activity cannot be launched.
+     *
+     * The intentSender argument can provide an IntentSender for the original intent to be passed
+     * to any activity listeners, in case the activity cannot be launched.
      */
     public abstract boolean canActivityBeLaunched(@NonNull ActivityInfo activityInfo,
             @Nullable Intent intent, @WindowConfiguration.WindowingMode int windowingMode,
-            int launchingFromDisplayId, boolean isNewTask);
+            int launchingFromDisplayId, boolean isNewTask, boolean isResultExpected,
+            @Nullable Supplier<IntentSender> intentSender);
 
     /**
      * Returns {@code true} if the given activity can be launched on this virtual display in the

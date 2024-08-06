@@ -379,3 +379,11 @@ flag {
     purpose: PURPOSE_BUGFIX
   }
 }
+
+flag {
+  name: "unicorn_mode_refactoring_for_hsum_read_only"
+  namespace: "multiuser"
+  description: "Refactorings related to unicorn mode to work on HSUM mode (Read only flag)"
+  bug: "339201286"
+  is_fixed_read_only: true
+}

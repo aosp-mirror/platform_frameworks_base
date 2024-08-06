@@ -1082,7 +1082,12 @@ constructor(
 
     inner class StateChangeRunnable(private val state: QSTile.State) : Runnable {
         override fun run() {
-            traceSection("QSTileViewImpl#handleStateChanged") { handleStateChanged(state) }
+            var traceTag = "QSTileViewImpl#handleStateChanged"
+            if (!state.spec.isNullOrEmpty()) {
+                traceTag += ":"
+                traceTag += state.spec
+            }
+            traceSection(traceTag.take(Trace.MAX_SECTION_NAME_LEN)) { handleStateChanged(state) }
         }
 
         // We want all instances of this runnable to be equal to each other, so they can be used to

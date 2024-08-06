@@ -29,6 +29,7 @@ import static android.os.UserManager.DEV_CREATE_OVERRIDE_PROPERTY;
 import static android.os.UserManager.DISALLOW_USER_SWITCH;
 import static android.os.UserManager.SYSTEM_USER_MODE_EMULATION_PROPERTY;
 import static android.os.UserManager.USER_OPERATION_ERROR_UNKNOWN;
+import static android.os.UserManager.USER_OPERATION_ERROR_USER_RESTRICTED;
 import static android.os.UserManager.USER_TYPE_PROFILE_PRIVATE;
 
 import static com.android.internal.app.SetScreenLockDialogActivity.EXTRA_ORIGIN_USER_ID;
@@ -8039,8 +8040,13 @@ public class UserManagerService extends IUserManager.Stub {
             String errorMessage = (message != null ? (message + ": ") : "")
                     + restriction + " is enabled.";
             Slog.w(LOG_TAG, errorMessage);
-            throw new UserManager.CheckedUserOperationException(errorMessage,
+            if (android.multiuser.Flags.showDifferentCreationErrorForUnsupportedDevices()) {
+                throw new UserManager.CheckedUserOperationException(errorMessage,
+                    USER_OPERATION_ERROR_USER_RESTRICTED);
+            } else {
+                throw new UserManager.CheckedUserOperationException(errorMessage,
                     USER_OPERATION_ERROR_UNKNOWN);
+            }
         }
     }
 
