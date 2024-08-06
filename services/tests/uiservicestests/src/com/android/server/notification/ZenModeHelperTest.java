@@ -1495,6 +1495,30 @@ public class ZenModeHelperTest extends UiServiceTestCase {
     }
 
     @Test
+    public void testReadXmlRestore_doesNotEnableManualRule() throws Exception {
+        setupZenConfig();
+
+        // Turn on manual zen mode
+        mZenModeHelper.setManualZenMode(ZEN_MODE_IMPORTANT_INTERRUPTIONS, null,
+                ORIGIN_USER_IN_SYSTEMUI, "", "someCaller", SYSTEM_UID);
+        ZenModeConfig original = mZenModeHelper.mConfig.copy();
+        assertThat(original.isManualActive()).isTrue();
+
+        ByteArrayOutputStream baos = writeXmlAndPurge(null);
+        TypedXmlPullParser parser = getParserForByteStream(baos);
+        mZenModeHelper.readXml(parser, true, UserHandle.USER_ALL);
+
+        ZenModeConfig result = mZenModeHelper.getConfig();
+        assertThat(result.isManualActive()).isFalse();
+
+        // confirm that we do still keep policy information, modes_ui only; prior to modes_ui the
+        // entire rule is intentionally cleared
+        if (Flags.modesUi()) {
+            assertThat(result.manualRule.zenPolicy).isNotNull();
+        }
+    }
+
+    @Test
     public void testWriteXmlWithZenPolicy() throws Exception {
         final String ruleId = "customRule";
         setupZenConfig();
