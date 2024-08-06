@@ -467,6 +467,14 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
                 this, flags, privFlags);
     }
 
+    @Override // Binder call
+    public void performHapticFeedbackForInputDevice(int uid, int deviceId, String opPkg,
+            int constant, int inputDeviceId, int inputSource, String reason, int flags,
+            int privFlags) {
+        performHapticFeedbackForInputDeviceInternal(uid, deviceId, opPkg, constant, inputDeviceId,
+                inputSource, reason, /* token= */ this, flags, privFlags);
+    }
+
     /**
      * An internal-only version of performHapticFeedback that allows the caller access to the
      * {@link HalVibration}.
@@ -498,6 +506,24 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
         reason = "performHapticFeedback(constant=" + constant + "): " + reason;
         VibratorFrameworkStatsLogger.logPerformHapticsFeedbackIfKeyboard(uid, constant);
         return vibrateWithoutPermissionCheck(uid, deviceId, opPkg, vib, attrs, reason, token);
+    }
+
+    /**
+     * An internal-only version of performHapticFeedback that allows the caller access to the
+     * {@link HalVibration}.
+     * The Vibration is only returned if it is ongoing after this method returns.
+     */
+    @VisibleForTesting
+    @Nullable
+    HalVibration performHapticFeedbackForInputDeviceInternal(
+            int uid, int deviceId, String opPkg, int constant, int inputDeviceId, int inputSource,
+            String reason, IBinder token, int flags, int privFlags) {
+        // TODO(b/355543835): implement input device specific logic.
+        if (DEBUG) {
+            Slog.d(TAG, "performHapticFeedbackForInput: input device specific not implemented.");
+        }
+        return performHapticFeedbackInternal(uid, deviceId, opPkg, constant, reason, /* token= */
+                this, flags, privFlags);
     }
 
     /**

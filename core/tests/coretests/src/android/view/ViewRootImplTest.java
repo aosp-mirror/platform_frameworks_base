@@ -18,6 +18,7 @@ package android.view;
 
 import static android.util.SequenceUtils.getInitSeq;
 import static android.view.HapticFeedbackConstants.FLAG_IGNORE_GLOBAL_SETTING;
+import static android.view.InputDevice.SOURCE_ROTARY_ENCODER;
 import static android.view.Surface.FRAME_RATE_CATEGORY_DEFAULT;
 import static android.view.Surface.FRAME_RATE_CATEGORY_HIGH;
 import static android.view.Surface.FRAME_RATE_CATEGORY_HIGH_HINT;
@@ -499,6 +500,20 @@ public class ViewRootImplTest {
                 FLAG_IGNORE_GLOBAL_SETTING, 0 /* privFlags */);
 
         assertThat(result).isFalse();
+    }
+
+    @UiThreadTest
+    @Test
+    public void performHapticFeedbackForInputDevice_touchFeedbackDisabled_doNothing() {
+        DisplayInfo displayInfo = new DisplayInfo();
+        displayInfo.flags = Display.FLAG_TOUCH_FEEDBACK_DISABLED;
+        Display display = new Display(DisplayManagerGlobal.getInstance(), /* displayId= */
+                0, displayInfo, new DisplayAdjustments());
+        ViewRootImpl viewRootImpl = new ViewRootImpl(sContext, display);
+
+        viewRootImpl.performHapticFeedbackForInputDevice(HapticFeedbackConstants.CONTEXT_CLICK,
+                1 /* inputDeviceId */,  SOURCE_ROTARY_ENCODER /* inputSource */,
+                FLAG_IGNORE_GLOBAL_SETTING, 0 /* privFlags */);
     }
 
     /**
