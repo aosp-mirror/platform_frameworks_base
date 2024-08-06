@@ -154,6 +154,13 @@ constructor(
                 // edit mode
                 communalViewModel.currentScene.first { it == CommunalScenes.Blank }
                 communalViewModel.setEditModeState(EditModeState.SHOWING)
+
+                // Show the widget picker, if necessary, after the edit activity has animated in.
+                // Waiting until after the activity has appeared avoids transitions issues.
+                if (shouldOpenWidgetPickerOnStart) {
+                    onOpenWidgetPicker()
+                    shouldOpenWidgetPickerOnStart = false
+                }
             }
         }
     }
@@ -197,11 +204,6 @@ constructor(
         super.onStart()
 
         communalViewModel.setEditActivityShowing(true)
-
-        if (shouldOpenWidgetPickerOnStart) {
-            onOpenWidgetPicker()
-            shouldOpenWidgetPickerOnStart = false
-        }
 
         logger.i("Starting the communal widget editor activity")
         uiEventLogger.log(CommunalUiEvent.COMMUNAL_HUB_EDIT_MODE_SHOWN)
