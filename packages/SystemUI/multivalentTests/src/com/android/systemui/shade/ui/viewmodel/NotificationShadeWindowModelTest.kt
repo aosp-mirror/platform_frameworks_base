@@ -43,7 +43,7 @@ class NotificationShadeWindowModelTest : SysuiTestCase() {
     }
 
     @Test
-    fun transitionToOccluded() =
+    fun transitionToOccludedByOCCLUDEDTransition() =
         testScope.runTest {
             val isKeyguardOccluded by collectLastValue(underTest.isKeyguardOccluded)
             assertThat(isKeyguardOccluded).isFalse()
@@ -58,6 +58,27 @@ class NotificationShadeWindowModelTest : SysuiTestCase() {
             keyguardTransitionRepository.sendTransitionSteps(
                 from = KeyguardState.OCCLUDED,
                 to = KeyguardState.GONE,
+                testScope,
+            )
+            assertThat(isKeyguardOccluded).isFalse()
+        }
+
+    @Test
+    fun transitionToOccludedByDREAMINGTransition() =
+        testScope.runTest {
+            val isKeyguardOccluded by collectLastValue(underTest.isKeyguardOccluded)
+            assertThat(isKeyguardOccluded).isFalse()
+
+            keyguardTransitionRepository.sendTransitionSteps(
+                from = KeyguardState.LOCKSCREEN,
+                to = KeyguardState.DREAMING,
+                testScope,
+            )
+            assertThat(isKeyguardOccluded).isTrue()
+
+            keyguardTransitionRepository.sendTransitionSteps(
+                from = KeyguardState.DREAMING,
+                to = KeyguardState.AOD,
                 testScope,
             )
             assertThat(isKeyguardOccluded).isFalse()
