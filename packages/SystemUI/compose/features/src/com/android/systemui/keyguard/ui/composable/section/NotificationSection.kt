@@ -23,19 +23,16 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.android.compose.animation.scene.SceneScope
 import com.android.compose.modifiers.thenIf
-import com.android.systemui.Flags
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.keyguard.MigrateClocksToBlueprint
 import com.android.systemui.keyguard.ui.composable.modifier.burnInAware
 import com.android.systemui.keyguard.ui.viewmodel.AodBurnInViewModel
 import com.android.systemui.keyguard.ui.viewmodel.BurnInParameters
 import com.android.systemui.notifications.ui.composable.ConstrainedNotificationStack
-import com.android.systemui.res.R
 import com.android.systemui.shade.LargeScreenHeaderHelper
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout
 import com.android.systemui.statusbar.notification.stack.ui.view.NotificationScrollView
@@ -97,11 +94,7 @@ constructor(
         }
 
         val splitShadeTopMargin: Dp =
-            if (Flags.centralizedStatusBarHeightFix()) {
-                LargeScreenHeaderHelper.getLargeScreenHeaderHeight(LocalContext.current).dp
-            } else {
-                dimensionResource(id = R.dimen.large_screen_shade_header_height)
-            }
+            LargeScreenHeaderHelper.getLargeScreenHeaderHeight(LocalContext.current).dp
 
         ConstrainedNotificationStack(
             stackScrollView = stackScrollView.get(),
