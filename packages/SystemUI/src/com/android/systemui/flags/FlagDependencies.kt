@@ -39,14 +39,11 @@ import com.android.systemui.qs.flags.QSComposeFragment
 import com.android.systemui.scene.shared.flag.SceneContainerFlag
 import com.android.systemui.shade.shared.flag.DualShade
 import com.android.systemui.statusbar.notification.collection.SortBySectionTimeFlag
-import com.android.systemui.statusbar.notification.footer.shared.FooterViewRefactor
 import com.android.systemui.statusbar.notification.interruption.VisualInterruptionRefactor
 import com.android.systemui.statusbar.notification.shared.NotificationAvalancheSuppression
-import com.android.systemui.statusbar.notification.shared.NotificationIconContainerRefactor
 import com.android.systemui.statusbar.notification.shared.NotificationMinimalismPrototype
 import com.android.systemui.statusbar.notification.shared.NotificationThrottleHun
 import com.android.systemui.statusbar.notification.shared.NotificationsHeadsUpRefactor
-import com.android.systemui.statusbar.notification.shared.NotificationsLiveDataStoreRefactor
 import com.android.systemui.statusbar.notification.shared.PriorityPeopleSection
 import javax.inject.Inject
 
@@ -61,8 +58,6 @@ class FlagDependencies @Inject constructor(featureFlags: FeatureFlagsClassic, ha
         modesUi dependsOn modesApi
 
         // Internal notification frontend dependencies
-        NotificationsLiveDataStoreRefactor.token dependsOn NotificationIconContainerRefactor.token
-        FooterViewRefactor.token dependsOn NotificationIconContainerRefactor.token
         NotificationAvalancheSuppression.token dependsOn VisualInterruptionRefactor.token
         PriorityPeopleSection.token dependsOn SortBySectionTimeFlag.token
         NotificationMinimalismPrototype.token dependsOn NotificationsHeadsUpRefactor.token
