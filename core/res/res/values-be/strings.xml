@@ -420,7 +420,7 @@
     <string name="permlab_runInBackground" msgid="541863968571682785">"працаваць у фоне"</string>
     <string name="permdesc_runInBackground" msgid="4344539472115495141">"Гэта праграма можа працаваць у фоне. Гэта можа прывесці да хутчэйшага спажывання зараду акумулятара."</string>
     <string name="permlab_useDataInBackground" msgid="783415807623038947">"выкарыстоўваць даныя ў фоне"</string>
-    <string name="permdesc_useDataInBackground" msgid="1230753883865891987">"Гэта праграма можа выкарыстоўваць даныя ў фоне. Гэта можа прывесці да павелічэння аб\'ёму трафіка."</string>
+    <string name="permdesc_useDataInBackground" msgid="1230753883865891987">"Гэта праграма можа выкарыстоўваць даныя ў фоне. Гэта можа прывесці да павелічэння аб’ёму трафіка."</string>
     <string name="permlab_schedule_exact_alarm" msgid="6683283918033029730">"Наладжванне выканання дзеянняў у дакладны час"</string>
     <string name="permdesc_schedule_exact_alarm" msgid="8198009212013211497">"Гэта праграма зможа наладжваць выкананне задач у патрэбны час у будучыні і будзе працаваць, нават калі вы не выкарыстоўваеце прыладу."</string>
     <string name="permlab_use_exact_alarm" msgid="348045139777131552">"Уключэнне будзільніка ці паказ напамінаў пра падзею"</string>
@@ -505,7 +505,7 @@
     <string name="permdesc_accessCoarseLocation" msgid="778521847873199160">"Падчас выкарыстання гэта праграма можа атрымліваць ад службаў геалакацыі звесткі пра ваша прыблізнае месцазнаходжанне. Каб праграма мела такія звесткі, на вашай прыладзе павінны быць уключаны службы геалакацыі."</string>
     <string name="permlab_accessBackgroundLocation" msgid="1721164702777366138">"доступ да вызначэння месцазнаходжання ў фонавым рэжыме"</string>
     <string name="permdesc_accessBackgroundLocation" msgid="8264885066095638105">"Гэта праграма можа мець доступ да даных пра месцазнаходжанне ў любы час, нават калі яна не выкарыстоўваецца."</string>
-    <string name="permlab_modifyAudioSettings" msgid="6129039778010031815">"змяняць налады аудыё"</string>
+    <string name="permlab_modifyAudioSettings" msgid="6129039778010031815">"змяняць налады аўдыя"</string>
     <string name="permdesc_modifyAudioSettings" msgid="8687227609663124921">"Дазваляе прыкладанням змяняць глабальныя налады гуку, такія як моц і тое, што дынамік выкарыстоўваецца для выхаду."</string>
     <string name="permlab_recordAudio" msgid="1208457423054219147">"запіс аўдыя"</string>
     <string name="permdesc_recordAudio" msgid="5857246765327514062">"Гэта праграма падчас яе выкарыстання можа запісваць аўдыя з дапамогай мікрафона."</string>
@@ -1726,7 +1726,7 @@
     <string name="accessibility_shortcut_multiple_service_warning" msgid="3740723309483706911">"Утрымліванне націснутымі абедзвюх клавіш гучнасці на працягу некалькіх секунд уключае спецыяльныя магчымасці. У выніку ваша прылада можа пачаць працаваць па-іншаму.\n\nБягучыя функцыі:\n<xliff:g id="SERVICE">%1$s</xliff:g>\nВыбраныя функцыі можна змяніць у меню \"Налады &gt; Спецыяльныя магчымасці\"."</string>
     <string name="accessibility_shortcut_multiple_service_list" msgid="2128323171922023762">" • <xliff:g id="SERVICE">%1$s</xliff:g>\n"</string>
     <string name="accessibility_shortcut_single_service_warning_title" msgid="1909518473488345266">"Уключыць хуткі доступ да сэрвісу \"<xliff:g id="SERVICE">%1$s</xliff:g>\"?"</string>
-    <string name="accessibility_shortcut_single_service_warning" msgid="6363127705112844257">"Утрымліванне націснутымі абедзвюх клавіш гучнасці на працягу некалькіх секунд уключае службу \"<xliff:g id="SERVICE">%1$s</xliff:g>\", якая з\'яўляецца спецыяльнай магчымасцю. У выніку ваша прылада можа пачаць працаваць па-іншаму.\n\nВы можаце задаць гэта спалучэнне клавіш для іншай функцыі ў меню \"Налады &gt; Спецыяльныя магчымасці\"."</string>
+    <string name="accessibility_shortcut_single_service_warning" msgid="6363127705112844257">"Утрымліванне націснутымі абедзвюх клавіш гучнасці на працягу некалькіх секунд уключае службу \"<xliff:g id="SERVICE">%1$s</xliff:g>\", якая з’яўляецца спецыяльнай магчымасцю. У выніку ваша прылада можа пачаць працаваць па-іншаму.\n\nВы можаце задаць гэта спалучэнне клавіш для іншай функцыі ў меню \"Налады &gt; Спецыяльныя магчымасці\"."</string>
     <string name="accessibility_shortcut_on" msgid="5463618449556111344">"Уключыць"</string>
     <string name="accessibility_shortcut_off" msgid="3651336255403648739">"Не ўключаць"</string>
     <string name="accessibility_shortcut_menu_item_status_on" msgid="6608392117189732543">"УКЛЮЧАНА"</string>
@@ -1885,8 +1885,7 @@
     <string name="restr_pin_error_too_short" msgid="1547007808237941065">"PIN-код занадта кароткі. Павінен змяшчаць не менш за 4 лічбы."</string>
     <string name="restr_pin_try_later" msgid="5897719962541636727">"Паўтарыце спробу пазней"</string>
     <string name="immersive_cling_title" msgid="2307034298721541791">"Прагляд у поўнаэкранным рэжыме"</string>
-    <!-- no translation found for immersive_cling_description (2896205051090870978) -->
-    <skip />
+    <string name="immersive_cling_description" msgid="2896205051090870978">"Каб выйсці, правядзіце пальцам уніз ад верхняга краю экрана"</string>
     <string name="immersive_cling_positive" msgid="7047498036346489883">"Зразумела"</string>
     <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"Павярнуць для лепшага прагляду"</string>
     <string name="display_rotation_camera_compat_toast_in_multi_window" msgid="2473122980393502775">"Для больш зручнага прагляду адкрыйце праграму \"<xliff:g id="NAME">%s</xliff:g>\", выкарыстоўваючы поўнаэкранны рэжым"</string>
@@ -2194,6 +2193,8 @@
     <string name="accessibility_system_action_on_screen_a11y_shortcut_chooser_label" msgid="1057878690209817886">"Налада хуткага доступу да спецыяльных магчымасцей на экране"</string>
     <string name="accessibility_system_action_hardware_a11y_shortcut_label" msgid="5764644187715255107">"Хуткі доступ"</string>
     <string name="accessibility_system_action_dismiss_notification_shade" msgid="8931637495533770352">"Закрыць шчыток апавяшчэнняў"</string>
+    <string name="accessibility_system_action_menu_label" msgid="3385283204496447040">"Меню"</string>
+    <string name="accessibility_system_action_media_play_pause_label" msgid="1905647491347119748">"Прайграць або прыпыніць медыяфайл"</string>
     <string name="accessibility_system_action_dpad_up_label" msgid="1029042950229333782">"Уверх на панэлі кіравання"</string>
     <string name="accessibility_system_action_dpad_down_label" msgid="3441918448624921461">"Уніз на панэлі кіравання"</string>
     <string name="accessibility_system_action_dpad_left_label" msgid="6557647179116479152">"Улева на панэлі кіравання"</string>

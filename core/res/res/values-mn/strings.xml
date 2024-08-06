@@ -312,7 +312,7 @@
     <string name="foreground_service_tap_for_details" msgid="9078123626015586751">"Батарей, дата ашиглалтын талаар дэлгэрэнгүйг харахын тулд товшино уу"</string>
     <string name="foreground_service_multiple_separator" msgid="5002287361849863168">"<xliff:g id="LEFT_SIDE">%1$s</xliff:g>, <xliff:g id="RIGHT_SIDE">%2$s</xliff:g>"</string>
     <string name="safeMode" msgid="8974401416068943888">"Аюулгүй горим"</string>
-    <string name="android_system_label" msgid="5974767339591067210">"Андройд систем"</string>
+    <string name="android_system_label" msgid="5974767339591067210">"Android систем"</string>
     <string name="user_owner_label" msgid="8628726904184471211">"Хувийн профайл руу сэлгэх"</string>
     <string name="managed_profile_label" msgid="7316778766973512382">"Ажлын профайл руу сэлгэх"</string>
     <string name="user_owner_app_label" msgid="1553595155465750298">"Хувийн <xliff:g id="APP_NAME">%1$s</xliff:g> руу сэлгэх"</string>
@@ -1883,8 +1883,7 @@
     <string name="restr_pin_error_too_short" msgid="1547007808237941065">"ПИН хэт богино байна. Хамгийн багадаа 4 цифртэй байх ёстой."</string>
     <string name="restr_pin_try_later" msgid="5897719962541636727">"Дараа дахин оролдоно уу"</string>
     <string name="immersive_cling_title" msgid="2307034298721541791">"Бүтэн дэлгэцээр үзэж байна"</string>
-    <!-- no translation found for immersive_cling_description (2896205051090870978) -->
-    <skip />
+    <string name="immersive_cling_description" msgid="2896205051090870978">"Гарахын тулд дэлгэцийнхээ дээд талаас доош шударна уу"</string>
     <string name="immersive_cling_positive" msgid="7047498036346489883">"Ойлголоо"</string>
     <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"Харагдах байдлыг сайжруулах бол эргүүлнэ үү"</string>
     <string name="display_rotation_camera_compat_toast_in_multi_window" msgid="2473122980393502775">"Харагдах байдлыг сайжруулах бол <xliff:g id="NAME">%s</xliff:g>-г бүтэн дэлгэцээр нээнэ үү"</string>
@@ -2192,6 +2191,8 @@
     <string name="accessibility_system_action_on_screen_a11y_shortcut_chooser_label" msgid="1057878690209817886">"Дэлгэц дээрх хандалтын товчлол сонгогч"</string>
     <string name="accessibility_system_action_hardware_a11y_shortcut_label" msgid="5764644187715255107">"Хандалтын товчлол"</string>
     <string name="accessibility_system_action_dismiss_notification_shade" msgid="8931637495533770352">"Мэдэгдлийн хураангуй самбарыг хаах"</string>
+    <string name="accessibility_system_action_menu_label" msgid="3385283204496447040">"Цэс"</string>
+    <string name="accessibility_system_action_media_play_pause_label" msgid="1905647491347119748">"Медиаг тоглуулах/түр зогсоох"</string>
     <string name="accessibility_system_action_dpad_up_label" msgid="1029042950229333782">"Dpad дээш"</string>
     <string name="accessibility_system_action_dpad_down_label" msgid="3441918448624921461">"Dpad доош"</string>
     <string name="accessibility_system_action_dpad_left_label" msgid="6557647179116479152">"Dpad зүүн"</string>
@@ -2411,7 +2412,7 @@
     <string name="private_space_biometric_prompt_title" msgid="5777592909271728154">"Хаалттай орон зай"</string>
     <string name="redacted_notification_message" msgid="1520587845842228816">"Эмзэг мэдэгдлийн контентыг нуусан"</string>
     <string name="redacted_notification_action_title" msgid="6942924973335920935"></string>
-    <string name="screen_not_shared_sensitive_content" msgid="7058419185079565001">"Аюулгүй байдлын улмаас аппын контентыг дэлгэц хуваалцахаас нуусан"</string>
+    <string name="screen_not_shared_sensitive_content" msgid="7058419185079565001">"Аюулгүй байдлын үүднээс аппын контентыг дэлгэц хуваалцахаас нуусан"</string>
     <string name="satellite_notification_title" msgid="4026338973463121526">"Хиймэл дагуулд автоматаар холбогдсон"</string>
     <string name="satellite_notification_summary" msgid="5207364139430767162">"Та мобайл эсвэл Wi-Fi сүлжээгүйгээр мессеж илгээх болон хүлээн авах боломжтой"</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Мессежийг нээх"</string>

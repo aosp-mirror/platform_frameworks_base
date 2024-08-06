@@ -1883,8 +1883,7 @@
     <string name="restr_pin_error_too_short" msgid="1547007808237941065">"Pincode is te kort. Moet ten minste vier cijfers lang zijn."</string>
     <string name="restr_pin_try_later" msgid="5897719962541636727">"Probeer het later opnieuw"</string>
     <string name="immersive_cling_title" msgid="2307034298721541791">"Volledig scherm wordt getoond"</string>
-    <!-- no translation found for immersive_cling_description (2896205051090870978) -->
-    <skip />
+    <string name="immersive_cling_description" msgid="2896205051090870978">"Swipe omlaag vanaf de bovenkant van het scherm om af te sluiten"</string>
     <string name="immersive_cling_positive" msgid="7047498036346489883">"Ik snap het"</string>
     <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"Draai voor een betere weergave"</string>
     <string name="display_rotation_camera_compat_toast_in_multi_window" msgid="2473122980393502775">"Open <xliff:g id="NAME">%s</xliff:g> op volledig scherm voor een betere weergave"</string>
@@ -2192,6 +2191,8 @@
     <string name="accessibility_system_action_on_screen_a11y_shortcut_chooser_label" msgid="1057878690209817886">"Kiezer voor snelkoppeling voor toegankelijkheid op scherm"</string>
     <string name="accessibility_system_action_hardware_a11y_shortcut_label" msgid="5764644187715255107">"Snelkoppeling voor toegankelijkheid"</string>
     <string name="accessibility_system_action_dismiss_notification_shade" msgid="8931637495533770352">"Meldingenpaneel sluiten"</string>
+    <string name="accessibility_system_action_menu_label" msgid="3385283204496447040">"Menu"</string>
+    <string name="accessibility_system_action_media_play_pause_label" msgid="1905647491347119748">"Media afspelen/onderbreken"</string>
     <string name="accessibility_system_action_dpad_up_label" msgid="1029042950229333782">"D-pad omhoog"</string>
     <string name="accessibility_system_action_dpad_down_label" msgid="3441918448624921461">"D-pad omlaag"</string>
     <string name="accessibility_system_action_dpad_left_label" msgid="6557647179116479152">"D-pad links"</string>
@@ -2411,7 +2412,7 @@
     <string name="private_space_biometric_prompt_title" msgid="5777592909271728154">"Privégedeelte"</string>
     <string name="redacted_notification_message" msgid="1520587845842228816">"Content van gevoelige meldingen verborgen"</string>
     <string name="redacted_notification_action_title" msgid="6942924973335920935"></string>
-    <string name="screen_not_shared_sensitive_content" msgid="7058419185079565001">"App-content verborgen voor scherm delen vanwege beveiligingsrisico\'s"</string>
+    <string name="screen_not_shared_sensitive_content" msgid="7058419185079565001">"Vanwege beveiligingsrisico\'s is app-content verborgen voor scherm delen"</string>
     <string name="satellite_notification_title" msgid="4026338973463121526">"Automatisch verbonden met satelliet"</string>
     <string name="satellite_notification_summary" msgid="5207364139430767162">"Je kunt berichten sturen en krijgen zonder een mobiel of wifi-netwerk"</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Berichten openen"</string>

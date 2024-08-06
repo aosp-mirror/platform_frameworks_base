@@ -1883,8 +1883,7 @@
     <string name="restr_pin_error_too_short" msgid="1547007808237941065">"PIN ძალიან მოკლეა. უნდა შედგებოდეს სულ ცოტა 4 ციფრისგან."</string>
     <string name="restr_pin_try_later" msgid="5897719962541636727">"სცადეთ მოგვიანებით"</string>
     <string name="immersive_cling_title" msgid="2307034298721541791">"სრულ ეკრანზე ნახვა"</string>
-    <!-- no translation found for immersive_cling_description (2896205051090870978) -->
-    <skip />
+    <string name="immersive_cling_description" msgid="2896205051090870978">"თქვენი ეკრანის ზემოდან გადაფურცლეთ ქვემოთ, რათა გამოხვიდეთ"</string>
     <string name="immersive_cling_positive" msgid="7047498036346489883">"გასაგებია"</string>
     <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"შეატრიალეთ უკეთესი ხედისთვის"</string>
     <string name="display_rotation_camera_compat_toast_in_multi_window" msgid="2473122980393502775">"გახსენით <xliff:g id="NAME">%s</xliff:g> სრულ ეკრანზე უკეთესი ხედისთვის"</string>
@@ -2192,6 +2191,8 @@
     <string name="accessibility_system_action_on_screen_a11y_shortcut_chooser_label" msgid="1057878690209817886">"მისაწვდომობის ეკრანული მალსახმობის ამომრჩევი"</string>
     <string name="accessibility_system_action_hardware_a11y_shortcut_label" msgid="5764644187715255107">"მისაწვდომობის მალსახმობი"</string>
     <string name="accessibility_system_action_dismiss_notification_shade" msgid="8931637495533770352">"შეტყობინებების ფარდის დახურვა"</string>
+    <string name="accessibility_system_action_menu_label" msgid="3385283204496447040">"მენიუ"</string>
+    <string name="accessibility_system_action_media_play_pause_label" msgid="1905647491347119748">"მედიის დაკვრა/დაპაუზება"</string>
     <string name="accessibility_system_action_dpad_up_label" msgid="1029042950229333782">"Dpad ზევით"</string>
     <string name="accessibility_system_action_dpad_down_label" msgid="3441918448624921461">"Dpad ქვევით"</string>
     <string name="accessibility_system_action_dpad_left_label" msgid="6557647179116479152">"Dpad მარცხნივ"</string>
@@ -2411,7 +2412,7 @@
     <string name="private_space_biometric_prompt_title" msgid="5777592909271728154">"კერძო სივრცე"</string>
     <string name="redacted_notification_message" msgid="1520587845842228816">"სენსიტიური შეტყობინების კონტენტი დამალულია"</string>
     <string name="redacted_notification_action_title" msgid="6942924973335920935"></string>
-    <string name="screen_not_shared_sensitive_content" msgid="7058419185079565001">"ეკრანის გაზიარებიდან აპის კონტენტი დამალულია უსაფრთხოების მიზნით"</string>
+    <string name="screen_not_shared_sensitive_content" msgid="7058419185079565001">"ეკრანის გაზიარებისას აპის კონტენტი დამალულია უსაფრთხოების მიზნით"</string>
     <string name="satellite_notification_title" msgid="4026338973463121526">"სატელიტთან ავტომატურად დაკავშირებულია"</string>
     <string name="satellite_notification_summary" msgid="5207364139430767162">"შეგიძლიათ გაგზავნოთ და მიიღოთ შეტყობინებები მობილური ან Wi-Fi ქსელის გარეშე"</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Messages-ის გახსნა"</string>
