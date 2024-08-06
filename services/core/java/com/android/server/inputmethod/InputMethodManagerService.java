@@ -6718,17 +6718,6 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
                         out.print(imeId);
                         out.print(" selected for user #");
                         out.println(userId);
-
-                        // Workaround for b/354782333.
-                        final var settingsValue = SecureSettingsWrapper.getString(
-                                Settings.Secure.DEFAULT_INPUT_METHOD, "", userId);
-                        if (!TextUtils.equals(settingsValue, imeId)) {
-                            Slog.w(TAG, "DEFAULT_INPUT_METHOD=" + settingsValue
-                                    + " is not updated. Fixing it up to " + imeId
-                                    + " See b/354782333.");
-                            SecureSettingsWrapper.putString(
-                                    Settings.Secure.DEFAULT_INPUT_METHOD, imeId, userId);
-                        }
                     }
                     hasFailed |= failedToSelectUnknownIme;
                 }
