@@ -1389,7 +1389,7 @@
     <!-- System casting media projection permission warning for capturing a single app when SysUI casting requests it. [CHAR LIMIT=350] -->
     <string name="media_projection_entry_cast_permission_dialog_warning_single_app">When you’re casting an app, anything shown or played in that app is visible. So be careful with things like passwords, payment details, messages, photos, and audio and video.</string>
     <!-- System casting media projection permission button to continue for SysUI casting. [CHAR LIMIT=60] -->
-    <string name="media_projection_entry_cast_permission_dialog_continue">Start casting</string>
+    <string name="media_projection_entry_cast_permission_dialog_continue_entire_screen">Cast screen</string>
 
     <!-- Other sharing (not recording nor casting) that launched by SysUI (currently not in use) -->
     <!-- System sharing media projection permission dialog title. [CHAR LIMIT=100] -->
@@ -1400,6 +1400,8 @@
     <string name="media_projection_entry_generic_permission_dialog_warning_single_app">When you’re sharing, recording, or casting an app, Android has access to anything shown or played on that app. So be careful with things like passwords, payment details, messages, photos, and audio and video.</string>
     <!-- System sharing media projection permission button to continue. [CHAR LIMIT=60] -->
     <string name="media_projection_entry_generic_permission_dialog_continue">Start</string>
+    <!-- System sharing media projection permission button to continue to the next step. [CHAR LIMIT=60] -->
+    <string name="media_projection_entry_generic_permission_dialog_continue_single_app">Next</string>
 
     <!-- Task switcher notification -->
     <!-- Task switcher notification text. [CHAR LIMIT=100] -->

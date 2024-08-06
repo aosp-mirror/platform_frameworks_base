@@ -446,7 +446,7 @@ public class CompatUIWindowManagerTest extends ShellTestCase {
     private static TaskInfo createTaskInfo(boolean hasSizeCompat) {
         ActivityManager.RunningTaskInfo taskInfo = new ActivityManager.RunningTaskInfo();
         taskInfo.taskId = TASK_ID;
-        taskInfo.appCompatTaskInfo.topActivityInSizeCompat = hasSizeCompat;
+        taskInfo.appCompatTaskInfo.setTopActivityInSizeCompat(hasSizeCompat);
         taskInfo.configuration.uiMode &= ~Configuration.UI_MODE_TYPE_DESK;
         // Letterboxed activity that takes half the screen should show size compat restart button
         taskInfo.appCompatTaskInfo.topActivityLetterboxHeight = 1000;

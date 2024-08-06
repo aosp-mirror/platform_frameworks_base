@@ -54,7 +54,6 @@ import kotlin.math.roundToInt
 class ShortcutsBesideUdfpsBlueprint
 @Inject
 constructor(
-    private val viewModel: LockscreenContentViewModel,
     private val statusBarSection: StatusBarSection,
     private val lockSection: LockSection,
     private val ambientIndicationSectionOptional: Optional<AmbientIndicationSection>,
@@ -67,10 +66,17 @@ constructor(
     override val id: String = "shortcuts-besides-udfps"
 
     @Composable
-    override fun SceneScope.Content(modifier: Modifier) {
+    override fun SceneScope.Content(
+        viewModel: LockscreenContentViewModel,
+        modifier: Modifier,
+    ) {
         val isUdfpsVisible = viewModel.isUdfpsVisible
         val isShadeLayoutWide by viewModel.isShadeLayoutWide.collectAsStateWithLifecycle()
         val unfoldTranslations by viewModel.unfoldTranslations.collectAsStateWithLifecycle()
+        val areNotificationsVisible by
+            viewModel
+                .areNotificationsVisible(contentKey)
+                .collectAsStateWithLifecycle(initialValue = false)
 
         LockscreenLongPress(
             viewModel = viewModel.touchHandling,
@@ -95,6 +101,7 @@ constructor(
                         Box {
                             with(topAreaSection) {
                                 DefaultClockLayout(
+                                    smartSpacePaddingTop = viewModel::getSmartSpacePaddingTop,
                                     modifier =
                                         Modifier.graphicsLayer {
                                             translationX = unfoldTranslations.start
@@ -104,6 +111,8 @@ constructor(
                             if (isShadeLayoutWide) {
                                 with(notificationSection) {
                                     Notifications(
+                                        areNotificationsVisible = areNotificationsVisible,
+                                        isShadeLayoutWide = isShadeLayoutWide,
                                         burnInParams = null,
                                         modifier =
                                             Modifier.fillMaxWidth(0.5f)
@@ -116,6 +125,8 @@ constructor(
                         if (!isShadeLayoutWide) {
                             with(notificationSection) {
                                 Notifications(
+                                    areNotificationsVisible = areNotificationsVisible,
+                                    isShadeLayoutWide = isShadeLayoutWide,
                                     burnInParams = null,
                                     modifier = Modifier.weight(weight = 1f)
                                 )

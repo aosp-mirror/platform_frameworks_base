@@ -146,7 +146,7 @@ public class CompatUILayoutTest extends ShellTestCase {
     private static TaskInfo createTaskInfo(boolean hasSizeCompat) {
         ActivityManager.RunningTaskInfo taskInfo = new ActivityManager.RunningTaskInfo();
         taskInfo.taskId = TASK_ID;
-        taskInfo.appCompatTaskInfo.topActivityInSizeCompat = hasSizeCompat;
+        taskInfo.appCompatTaskInfo.setTopActivityInSizeCompat(hasSizeCompat);
         taskInfo.appCompatTaskInfo.topActivityLetterboxHeight = 1000;
         taskInfo.appCompatTaskInfo.topActivityLetterboxWidth = 1000;
         taskInfo.configuration.windowConfiguration.setBounds(new Rect(0, 0, 2000, 2000));

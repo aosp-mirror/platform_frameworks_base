@@ -17,6 +17,7 @@
 package android.companion.virtual;
 
 import android.content.ComponentName;
+import android.content.IntentSender;
 
 /**
  * Interface to listen for activity changes in a virtual device.
@@ -48,6 +49,8 @@ oneway interface IVirtualDeviceActivityListener {
      * @param displayId The display ID on which the activity tried to launch.
      * @param componentName The component name of the blocked activity.
      * @param userId The user ID associated with the blocked activity.
+     * @param intentSender The original sender of the intent.
      */
-    void onActivityLaunchBlocked(int displayId, in ComponentName componentName, int userId);
+    void onActivityLaunchBlocked(int displayId, in ComponentName componentName, int userId,
+            in IntentSender intentSender);
 }

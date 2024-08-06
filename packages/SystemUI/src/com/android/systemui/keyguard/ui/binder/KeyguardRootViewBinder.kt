@@ -70,7 +70,6 @@ import com.android.systemui.res.R
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import com.android.systemui.statusbar.CrossFadeHelper
 import com.android.systemui.statusbar.VibratorHelper
-import com.android.systemui.statusbar.notification.shared.NotificationIconContainerRefactor
 import com.android.systemui.statusbar.phone.ScreenOffAnimationController
 import com.android.systemui.temporarydisplay.ViewPriority
 import com.android.systemui.temporarydisplay.chipbar.ChipbarCoordinator
@@ -292,20 +291,18 @@ object KeyguardRootViewBinder {
                             }
                         }
 
-                        if (NotificationIconContainerRefactor.isEnabled) {
-                            launch {
-                                val iconsAppearTranslationPx =
-                                    configuration
-                                        .getDimensionPixelSize(R.dimen.shelf_appear_translation)
-                                        .stateIn(this)
-                                viewModel.isNotifIconContainerVisible.collect { isVisible ->
-                                    childViews[aodNotificationIconContainerId]
-                                        ?.setAodNotifIconContainerIsVisible(
-                                            isVisible,
-                                            iconsAppearTranslationPx.value,
-                                            screenOffAnimationController,
-                                        )
-                                }
+                        launch {
+                            val iconsAppearTranslationPx =
+                                configuration
+                                    .getDimensionPixelSize(R.dimen.shelf_appear_translation)
+                                    .stateIn(this)
+                            viewModel.isNotifIconContainerVisible.collect { isVisible ->
+                                childViews[aodNotificationIconContainerId]
+                                    ?.setAodNotifIconContainerIsVisible(
+                                        isVisible,
+                                        iconsAppearTranslationPx.value,
+                                        screenOffAnimationController,
+                                    )
                             }
                         }
 
@@ -519,7 +516,6 @@ object KeyguardRootViewBinder {
         if (MigrateClocksToBlueprint.isEnabled) {
             throw IllegalStateException("should only be called in legacy code paths")
         }
-        if (NotificationIconContainerRefactor.isUnexpectedlyInLegacyMode()) return
         coroutineScope {
             val iconAppearTranslationPx =
                 configuration.getDimensionPixelSize(R.dimen.shelf_appear_translation).stateIn(this)

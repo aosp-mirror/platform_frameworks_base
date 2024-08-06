@@ -13,11 +13,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package com.android.hoststubgen.test.tinyframework;
 
-package com.android.systemui.statusbar.phone
+import android.hosttest.annotation.HostSideTestWholeClassStub;
 
-import com.android.systemui.kosmos.Kosmos
-import com.android.systemui.kosmos.Kosmos.Fixture
-import com.android.systemui.util.mockito.mock
+/**
+ * This class will be renamed by the "rename" directive in the policy file.
+ */
+@HostSideTestWholeClassStub
+public class TinyFrameworkToBeRenamed {
+    private final int mValue;
 
-var Kosmos.notificationIconAreaController by Fixture { mock<NotificationIconAreaController>() }
+    public TinyFrameworkToBeRenamed(int value) {
+        mValue = value;
+    }
+
+    public int getValue() {
+        return mValue;
+    }
+}

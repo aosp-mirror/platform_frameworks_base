@@ -23,9 +23,9 @@ import android.provider.Settings.ACTION_AUTOMATIC_ZEN_RULE_SETTINGS
 import android.provider.Settings.EXTRA_AUTOMATIC_ZEN_RULE_ID
 import com.android.settingslib.notification.modes.EnableZenModeDialog
 import com.android.settingslib.notification.modes.ZenMode
-import com.android.settingslib.notification.modes.ZenModeDialogMetricsLogger
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
+import com.android.systemui.qs.tiles.dialog.QSZenModeDialogMetricsLogger
 import com.android.systemui.res.R
 import com.android.systemui.statusbar.phone.SystemUIDialog
 import com.android.systemui.statusbar.policy.domain.interactor.ZenModeInteractor
@@ -50,7 +50,7 @@ constructor(
     @Background val bgDispatcher: CoroutineDispatcher,
     private val dialogDelegate: ModesDialogDelegate,
 ) {
-    private val zenDialogMetricsLogger = ZenModeDialogMetricsLogger(context)
+    private val zenDialogMetricsLogger = QSZenModeDialogMetricsLogger(context)
 
     // Modes that should be displayed in the dialog
     private val visibleModes: Flow<List<ZenMode>> =

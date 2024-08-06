@@ -22,8 +22,9 @@ import android.content.pm.PackageInfo
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsNotDisplayed
 import androidx.compose.ui.test.assertIsNotEnabled
-import androidx.compose.ui.test.assertIsOff
-import androidx.compose.ui.test.assertIsOn
+import androidx.compose.ui.test.hasText
+import androidx.compose.ui.test.isOff
+import androidx.compose.ui.test.isOn
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.onRoot
@@ -31,6 +32,7 @@ import androidx.compose.ui.test.performClick
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.android.settingslib.spa.testutils.FakeNavControllerWrapper
+import com.android.settingslib.spa.testutils.waitUntilExists
 import com.android.settingslib.spaprivileged.R
 import com.android.settingslib.spaprivileged.model.app.IPackageManagers
 import com.android.settingslib.spaprivileged.model.enterprise.NoRestricted
@@ -99,8 +101,8 @@ class TogglePermissionAppInfoPageTest {
 
         setEntryItem(listModel)
 
-        composeTestRule.onNodeWithText(context.getString(R.string.app_permission_summary_allowed))
-            .assertIsDisplayed()
+        composeTestRule.waitUntilExists(
+            hasText(context.getString(R.string.app_permission_summary_allowed)))
     }
 
     @Test
@@ -141,8 +143,8 @@ class TogglePermissionAppInfoPageTest {
 
         setTogglePermissionAppInfoPage(listModel)
 
-        composeTestRule.onNodeWithText(context.getString(listModel.switchTitleResId))
-            .assertIsOn()
+        composeTestRule.waitUntilExists(
+            hasText(context.getString(listModel.switchTitleResId)) and isOn())
     }
 
     @Test
@@ -151,8 +153,8 @@ class TogglePermissionAppInfoPageTest {
 
         setTogglePermissionAppInfoPage(listModel)
 
-        composeTestRule.onNodeWithText(context.getString(listModel.switchTitleResId))
-            .assertIsOff()
+        composeTestRule.waitUntilExists(
+            hasText(context.getString(listModel.switchTitleResId)) and isOff())
     }
 
     @Test
@@ -160,11 +162,10 @@ class TogglePermissionAppInfoPageTest {
         val listModel = TestTogglePermissionAppListModel(isAllowed = false, isChangeable = true)
 
         setTogglePermissionAppInfoPage(listModel)
-        composeTestRule.onNodeWithText(context.getString(listModel.switchTitleResId))
-            .performClick()
+        composeTestRule.onNodeWithText(context.getString(listModel.switchTitleResId)).performClick()
 
-        composeTestRule.onNodeWithText(context.getString(listModel.switchTitleResId))
-            .assertIsOn()
+        composeTestRule.waitUntilExists(
+            hasText(context.getString(listModel.switchTitleResId)) and isOn())
     }
 
     @Test
@@ -172,11 +173,10 @@ class TogglePermissionAppInfoPageTest {
         val listModel = TestTogglePermissionAppListModel(isAllowed = false, isChangeable = false)
 
         setTogglePermissionAppInfoPage(listModel)
-        composeTestRule.onNodeWithText(context.getString(listModel.switchTitleResId))
-            .performClick()
+        composeTestRule.onNodeWithText(context.getString(listModel.switchTitleResId)).performClick()
 
-        composeTestRule.onNodeWithText(context.getString(listModel.switchTitleResId))
-            .assertIsOff()
+        composeTestRule.waitUntilExists(
+            hasText(context.getString(listModel.switchTitleResId)) and isOff())
     }
 
     @Test
