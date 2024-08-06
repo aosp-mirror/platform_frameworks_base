@@ -34,7 +34,6 @@ import com.android.systemui.plugins.qs.QSContainerController
 import com.android.systemui.qs.QSContainerImpl
 import com.android.systemui.qs.QSImpl
 import com.android.systemui.qs.dagger.QSSceneComponent
-import com.android.systemui.qs.tiles.viewmodel.StubQSTileViewModel.state
 import com.android.systemui.res.R
 import com.android.systemui.settings.brightness.MirrorController
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
@@ -126,11 +125,17 @@ interface QSSceneAdapter {
     /** The current height of QQS in the current [qsView], or 0 if there's no view. */
     val qqsHeight: Int
 
+    /** @return height with the squishiness fraction applied. */
+    val squishedQqsHeight: Int
+
     /**
      * The current height of QS in the current [qsView], or 0 if there's no view. If customizing, it
      * will return the height allocated to the customizer.
      */
     val qsHeight: Int
+
+    /** @return height with the squishiness fraction applied. */
+    val squishedQsHeight: Int
 
     /** Compatibility for use by LockscreenShadeTransitionController. Matches default from [QS] */
     val isQsFullyCollapsed: Boolean
@@ -273,8 +278,14 @@ constructor(
     override val qqsHeight: Int
         get() = qsImpl.value?.qqsHeight ?: 0
 
+    override val squishedQqsHeight: Int
+        get() = qsImpl.value?.squishedQqsHeight ?: 0
+
     override val qsHeight: Int
         get() = qsImpl.value?.qsHeight ?: 0
+
+    override val squishedQsHeight: Int
+        get() = qsImpl.value?.squishedQsHeight ?: 0
 
     // If value is null, there's no QS and therefore it's fully collapsed.
     override val isQsFullyCollapsed: Boolean

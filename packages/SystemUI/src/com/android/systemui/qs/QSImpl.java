@@ -992,8 +992,22 @@ public class QSImpl implements QS, CommandQueue.Callbacks, StatusBarStateControl
         return mContainer.getQqsHeight();
     }
 
+    /**
+     * @return height with the squishiness fraction applied.
+     */
+    public int getSquishedQqsHeight() {
+        return mContainer.getSquishedQqsHeight();
+    }
+
     public int getQSHeight() {
         return mContainer.getQsHeight();
+    }
+
+    /**
+     * @return height with the squishiness fraction applied.
+     */
+    public int getSquishedQsHeight() {
+        return mContainer.getSquishedQsHeight();
     }
 
     /**

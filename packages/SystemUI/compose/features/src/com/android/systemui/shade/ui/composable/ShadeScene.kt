@@ -116,7 +116,6 @@ import kotlinx.coroutines.flow.Flow
 
 object Shade {
     object Elements {
-        val MediaCarousel = ElementKey("ShadeMediaCarousel")
         val BackgroundScrim =
             ElementKey("ShadeBackgroundScrim", contentPicker = LowestZIndexContentPicker)
         val SplitShadeStartColumn = ElementKey("SplitShadeStartColumn")
@@ -276,6 +275,13 @@ private fun SceneScope.SingleShade(
 
     val navBarHeight = WindowInsets.systemBars.asPaddingValues().calculateBottomPadding()
 
+    val mediaOffsetProvider = remember {
+        ShadeMediaOffsetProvider.Qqs(
+            { @Suppress("UNUSED_EXPRESSION") tileSquishiness },
+            viewModel.qsSceneAdapter,
+        )
+    }
+
     Box(
         modifier =
             modifier.thenIf(shouldPunchHoleBehindScrim) {
@@ -328,12 +334,12 @@ private fun SceneScope.SingleShade(
                                     )
                                 }
 
-                                MediaCarousel(
+                                ShadeMediaCarousel(
                                     isVisible = isMediaVisible,
                                     mediaHost = mediaHost,
+                                    mediaOffsetProvider = mediaOffsetProvider,
                                     modifier =
-                                        Modifier.fillMaxWidth()
-                                            .layoutId(QSMediaMeasurePolicy.LayoutId.Media),
+                                        Modifier.layoutId(QSMediaMeasurePolicy.LayoutId.Media),
                                     carouselController = mediaCarouselController,
                                 )
                             }
@@ -485,6 +491,13 @@ private fun SceneScope.SplitShade(
 
     val brightnessMirrorShowingModifier = Modifier.graphicsLayer { alpha = contentAlpha }
 
+    val mediaOffsetProvider = remember {
+        ShadeMediaOffsetProvider.Qs(
+            { @Suppress("UNUSED_EXPRESSION") tileSquishiness },
+            viewModel.qsSceneAdapter,
+        )
+    }
+
     Box {
         Box(
             modifier =
@@ -558,11 +571,13 @@ private fun SceneScope.SplitShade(
                                     squishiness = { tileSquishiness },
                                 )
                             }
-                            MediaCarousel(
+
+                            ShadeMediaCarousel(
                                 isVisible = isMediaVisible,
                                 mediaHost = mediaHost,
+                                mediaOffsetProvider = mediaOffsetProvider,
                                 modifier =
-                                    Modifier.fillMaxWidth().thenIf(
+                                    Modifier.thenIf(
                                         MediaContentPicker.shouldElevateMedia(layoutState)
                                     ) {
                                         Modifier.zIndex(1f)
@@ -605,4 +620,26 @@ private fun SceneScope.SplitShade(
             modifier = Modifier.align(Alignment.BottomCenter).navigationBarsPadding()
         )
     }
+}
+
+@Composable
+private fun SceneScope.ShadeMediaCarousel(
+    isVisible: Boolean,
+    mediaHost: MediaHost,
+    carouselController: MediaCarouselController,
+    mediaOffsetProvider: ShadeMediaOffsetProvider,
+    modifier: Modifier = Modifier,
+) {
+    MediaCarousel(
+        modifier = modifier.fillMaxWidth(),
+        isVisible = isVisible,
+        mediaHost = mediaHost,
+        carouselController = carouselController,
+        offsetProvider =
+            if (MediaContentPicker.shouldElevateMedia(layoutState)) {
+                null
+            } else {
+                { mediaOffsetProvider.offset }
+            }
+    )
 }
