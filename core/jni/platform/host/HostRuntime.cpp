@@ -20,6 +20,7 @@
 #include <android_runtime/AndroidRuntime.h>
 #include <jni_wrappers.h>
 #include <nativehelper/JNIHelp.h>
+#include <nativehelper/ScopedUtfChars.h>
 #include <nativehelper/jni_macros.h>
 #include <unicode/putil.h>
 #include <unicode/udata.h>
@@ -259,35 +260,49 @@ static void* mmapFile(const char* dataFilePath) {
 #endif
 }
 
-// Loads the ICU data file from the location specified in the system property ro.icu.data.path
-static void loadIcuData() {
-    string icuPath = base::GetProperty("ro.icu.data.path", "");
-    if (!icuPath.empty()) {
-        // Set the location of ICU data
-        void* addr = mmapFile(icuPath.c_str());
-        UErrorCode err = U_ZERO_ERROR;
-        udata_setCommonData(addr, &err);
-        if (err != U_ZERO_ERROR) {
-            ALOGE("Unable to load ICU data\n");
-        }
-    }
-}
-
-static int register_android_core_classes(JNIEnv* env) {
+// returns result from java.lang.System.getProperty
+static string getJavaProperty(JNIEnv* env, const char* property_name) {
     jclass system = FindClassOrDie(env, "java/lang/System");
     jmethodID getPropertyMethod =
             GetStaticMethodIDOrDie(env, system, "getProperty",
                                    "(Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;");
 
-    // Get the names of classes that need to register their native methods
-    auto nativesClassesJString =
-            (jstring)env->CallStaticObjectMethod(system, getPropertyMethod,
-                                                 env->NewStringUTF("core_native_classes"),
-                                                 env->NewStringUTF(""));
-    const char* nativesClassesArray = env->GetStringUTFChars(nativesClassesJString, nullptr);
-    string nativesClassesString(nativesClassesArray);
+    auto jString = (jstring)env->CallStaticObjectMethod(system, getPropertyMethod,
+                                                        env->NewStringUTF(property_name),
+                                                        env->NewStringUTF(""));
+    ScopedUtfChars chars(env, jString);
+    return string(chars.c_str());
+}
+
+static void loadIcuData(string icuPath) {
+    void* addr = mmapFile(icuPath.c_str());
+    UErrorCode err = U_ZERO_ERROR;
+    udata_setCommonData(addr, &err);
+    if (err != U_ZERO_ERROR) {
+        ALOGE("Unable to load ICU data\n");
+    }
+}
+
+// Loads the ICU data file from the location specified in properties.
+// First try specified in the system property ro.icu.data.path,
+// then fallback to java property icu.data.path
+static void loadIcuData() {
+    string icuPath = base::GetProperty("ro.icu.data.path", "");
+    if (!icuPath.empty()) {
+        loadIcuData(icuPath);
+    } else {
+        // fallback to read from java.lang.System.getProperty
+        JNIEnv* env = AndroidRuntime::getJNIEnv();
+        string icuPathFromJava = getJavaProperty(env, "icu.data.path");
+        if (!icuPathFromJava.empty()) {
+            loadIcuData(icuPathFromJava);
+        }
+    }
+}
+
+static int register_android_core_classes(JNIEnv* env) {
+    string nativesClassesString = getJavaProperty(env, "core_native_classes");
     vector<string> classesToRegister = parseCsv(nativesClassesString);
-    env->ReleaseStringUTFChars(nativesClassesJString, nativesClassesArray);
 
     if (register_jni_procs(gRegJNIMap, classesToRegister, env) < 0) {
         return JNI_ERR;
@@ -360,18 +375,7 @@ void AndroidRuntime::onStarted() {
 void AndroidRuntime::start(const char* className, const Vector<String8>& options, bool zygote) {
     JNIEnv* env = AndroidRuntime::getJNIEnv();
 
-    jclass system = FindClassOrDie(env, "java/lang/System");
-    jmethodID getPropertyMethod =
-            GetStaticMethodIDOrDie(env, system, "getProperty",
-                                   "(Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;");
-
-    auto methodBindingJString =
-            (jstring)env->CallStaticObjectMethod(system, getPropertyMethod,
-                                                 env->NewStringUTF("method_binding_format"),
-                                                 env->NewStringUTF(""));
-    const char* methodBindingChars = env->GetStringUTFChars(methodBindingJString, 0);
-    auto method_binding_format = string(methodBindingChars);
-    env->ReleaseStringUTFChars(methodBindingJString, methodBindingChars);
+    auto method_binding_format = getJavaProperty(env, "method_binding_format");
 
     setJniMethodFormat(method_binding_format);
 
