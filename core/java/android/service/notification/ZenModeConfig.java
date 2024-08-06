@@ -112,68 +112,83 @@ public class ZenModeConfig implements Parcelable {
     private static final String TAG = "ZenModeConfig";
 
     /**
-     * The {@link ZenModeConfig} is being updated because of an unknown reason.
+     * The {@link ZenModeConfig} is updated because of an unknown reason.
      */
-    public static final int UPDATE_ORIGIN_UNKNOWN = 0;
+    public static final int ORIGIN_UNKNOWN = 0;
 
     /**
-     * The {@link ZenModeConfig} is being updated because of system initialization (i.e. load from
+     * The {@link ZenModeConfig} is updated because of system initialization (i.e. load from
      * storage, on device boot).
      */
-    public static final int UPDATE_ORIGIN_INIT = 1;
+    public static final int ORIGIN_INIT = 1;
 
-    /** The {@link ZenModeConfig} is being updated (replaced) because of a user switch or unlock. */
-    public static final int UPDATE_ORIGIN_INIT_USER = 2;
+    /** The {@link ZenModeConfig} is updated (replaced) because of a user switch or unlock. */
+    public static final int ORIGIN_INIT_USER = 2;
 
-    /** The {@link ZenModeConfig} is being updated because of a user action, for example:
+    /**
+     * The {@link ZenModeConfig} is updated because of a <em>user action</em> performed from a
+     * system surface, such as:
      * <ul>
-     *     <li>{@link NotificationManager#setAutomaticZenRuleState} with a
-     *     {@link Condition#source} equal to {@link Condition#SOURCE_USER_ACTION}.</li>
-     *     <li>Adding, updating, or removing a rule from Settings.</li>
-     *     <li>Directly activating or deactivating/snoozing a rule through some UI affordance (e.g.
-     *     Quick Settings).</li>
+     *     <li>Adding, updating, or removing a rule from Settings.
+     *     <li>Activating or deactivating a rule through the System (e.g. from Settings/Modes).
+     *     <li>Activating or deactivating a rule through SystemUi (e.g. with Quick Settings).
      * </ul>
+     *
+     * <p>This does <em>not</em> include user actions from apps ({@link #ORIGIN_USER_IN_APP} nor
+     * non-user actions from the system ({@link #ORIGIN_SYSTEM}).
      */
-    public static final int UPDATE_ORIGIN_USER = 3;
+    public static final int ORIGIN_USER_IN_SYSTEMUI = 3;
 
     /**
-     * The {@link ZenModeConfig} is being "independently" updated by an app, and not as a result of
-     * a user's action inside that app (for example, activating an {@link AutomaticZenRule} based on
-     * a previously set schedule).
+     * The {@link ZenModeConfig} is updated by an app, but (probably) not as a result of a user
+     * action (for example, activating an {@link AutomaticZenRule} based on a previously set
+     * schedule).
+     *
+     * <p>Note that {@code ORIGIN_APP} is the only option for all public APIs except
+     * {@link NotificationManager#setAutomaticZenRuleState} -- apps cannot claim to be adding or
+     * updating a rule on behalf of the user.
      */
-    public static final int UPDATE_ORIGIN_APP = 4;
+    public static final int ORIGIN_APP = 4;
 
     /**
-     * The {@link ZenModeConfig} is being updated by the System or SystemUI. Note that this only
-     * includes cases where the call is coming from the System/SystemUI but the change is not due to
-     * a user action (e.g. automatically activating a schedule-based rule). If the change is a
-     * result of a user action (e.g. activating a rule by tapping on its QS tile) then
-     * {@link #UPDATE_ORIGIN_USER} is used instead.
+     * The {@link ZenModeConfig} is updated by the System (or SystemUI). This only includes cases
+     * where the call is coming from the System/SystemUI but the change is not due to a user action
+     * (e.g. automatically activating a schedule-based rule, or some service toggling Do Not
+     * Disturb). See {@link #ORIGIN_USER_IN_SYSTEMUI}.
      */
-    public static final int UPDATE_ORIGIN_SYSTEM_OR_SYSTEMUI = 5;
+    public static final int ORIGIN_SYSTEM = 5;
 
     /**
      * The {@link ZenModeConfig} is being updated (replaced) because the user's DND configuration
      * is being restored from a backup.
      */
-    public static final int UPDATE_ORIGIN_RESTORE_BACKUP = 6;
+    public static final int ORIGIN_RESTORE_BACKUP = 6;
 
-    @IntDef(prefix = { "UPDATE_ORIGIN_" }, value = {
-            UPDATE_ORIGIN_UNKNOWN,
-            UPDATE_ORIGIN_INIT,
-            UPDATE_ORIGIN_INIT_USER,
-            UPDATE_ORIGIN_USER,
-            UPDATE_ORIGIN_APP,
-            UPDATE_ORIGIN_SYSTEM_OR_SYSTEMUI,
-            UPDATE_ORIGIN_RESTORE_BACKUP
+    /**
+     * The {@link ZenModeConfig} is updated from an app, and the app reports it's the result
+     * of a user action (e.g. tapping a button in the Wellbeing App to start Bedtime Mode).
+     * Corresponds to {@link NotificationManager#setAutomaticZenRuleState} with a
+     * {@link Condition#source} equal to {@link Condition#SOURCE_USER_ACTION}.</li>
+     */
+    public static final int ORIGIN_USER_IN_APP = 7;
+
+    @IntDef(prefix = { "ORIGIN_" }, value = {
+            ORIGIN_UNKNOWN,
+            ORIGIN_INIT,
+            ORIGIN_INIT_USER,
+            ORIGIN_USER_IN_SYSTEMUI,
+            ORIGIN_APP,
+            ORIGIN_SYSTEM,
+            ORIGIN_RESTORE_BACKUP,
+            ORIGIN_USER_IN_APP
     })
     @Retention(RetentionPolicy.SOURCE)
-    public @interface ConfigChangeOrigin {}
+    public @interface ConfigOrigin {}
 
     public static final int SOURCE_ANYONE = Policy.PRIORITY_SENDERS_ANY;
     public static final int SOURCE_CONTACT = Policy.PRIORITY_SENDERS_CONTACTS;
     public static final int SOURCE_STAR = Policy.PRIORITY_SENDERS_STARRED;
-    public static final int MAX_SOURCE = SOURCE_STAR;
+    private static final int MAX_SOURCE = SOURCE_STAR;
     private static final int DEFAULT_SOURCE = SOURCE_STAR;
     private static final int DEFAULT_CALLS_SOURCE = SOURCE_STAR;
 
@@ -1174,7 +1189,7 @@ public class ZenModeConfig implements Parcelable {
             }
             if (Flags.modesUi()) {
                 rt.disabledOrigin = safeInt(parser, RULE_ATT_DISABLED_ORIGIN,
-                        UPDATE_ORIGIN_UNKNOWN);
+                        ORIGIN_UNKNOWN);
                 rt.legacySuppressedEffects = safeInt(parser,
                         RULE_ATT_LEGACY_SUPPRESSED_EFFECTS, 0);
             }
@@ -2537,7 +2552,8 @@ public class ZenModeConfig implements Parcelable {
         @ZenDeviceEffects.ModifiableField public int zenDeviceEffectsUserModifiedFields;
         @Nullable public Instant deletionInstant; // Only set on deleted rules.
         @FlaggedApi(Flags.FLAG_MODES_UI)
-        @ConfigChangeOrigin public int disabledOrigin = UPDATE_ORIGIN_UNKNOWN;
+        @ConfigOrigin
+        public int disabledOrigin = ORIGIN_UNKNOWN;
         // The obsolete suppressed effects in NM.Policy (SCREEN_ON, SCREEN_OFF) cannot be put in a
         // ZenPolicy, so we store them here, only for the manual rule.
         @FlaggedApi(Flags.FLAG_MODES_UI)
