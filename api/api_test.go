@@ -52,12 +52,6 @@ func gatherRequiredDepsForTest() string {
 		"core.current.stubs",
 		"ext",
 		"framework",
-		"android_stubs_current",
-		"android_system_stubs_current",
-		"android_test_stubs_current",
-		"android_test_frameworks_core_stubs_current",
-		"android_module_lib_stubs_current",
-		"android_system_server_stubs_current",
 		"android_stubs_current.from-text",
 		"android_system_stubs_current.from-text",
 		"android_test_stubs_current.from-text",
@@ -196,60 +190,61 @@ func TestCombinedApisDefaults(t *testing.T) {
 			}
 		}),
 	).RunTestWithBp(t, `
-	java_sdk_library {
-		name: "framework-foo",
-		srcs: ["a.java"],
-		public: {
-			enabled: true,
-		},
-		system: {
-			enabled: true,
-		},
-		test: {
-			enabled: true,
-		},
-		module_lib: {
-			enabled: true,
-		},
-		api_packages: [
-			"foo",
-		],
-		sdk_version: "core_current",
-		annotations_enabled: true,
-	}
-	java_sdk_library {
-		name: "framework-bar",
-		srcs: ["a.java"],
-		public: {
-			enabled: true,
-		},
-		system: {
-			enabled: true,
-		},
-		test: {
-			enabled: true,
-		},
-		module_lib: {
-			enabled: true,
-		},
-		api_packages: [
-			"foo",
-		],
-		sdk_version: "core_current",
-		annotations_enabled: true,
-	}
-
-	combined_apis {
-		name: "foo",
-		bootclasspath: [
-			"framework-bar",
-		] + select(boolean_var_for_testing(), {
-			true: [
-				"framework-foo",
+		java_sdk_library {
+			name: "framework-foo",
+			srcs: ["a.java"],
+			public: {
+				enabled: true,
+			},
+			system: {
+				enabled: true,
+			},
+			test: {
+				enabled: true,
+			},
+			module_lib: {
+				enabled: true,
+			},
+			api_packages: [
+				"foo",
 			],
-			default: [],
-		}),
-	}
+			sdk_version: "core_current",
+			annotations_enabled: true,
+		}
+
+		java_sdk_library {
+			name: "framework-bar",
+			srcs: ["a.java"],
+			public: {
+				enabled: true,
+			},
+			system: {
+				enabled: true,
+			},
+			test: {
+				enabled: true,
+			},
+			module_lib: {
+				enabled: true,
+			},
+			api_packages: [
+				"foo",
+			],
+			sdk_version: "core_current",
+			annotations_enabled: true,
+		}
+
+		combined_apis {
+			name: "foo",
+			bootclasspath: [
+				"framework-bar",
+			] + select(boolean_var_for_testing(), {
+				true: [
+					"framework-foo",
+				],
+				default: [],
+			}),
+		}
 	`)
 
 	subModuleDependsOnSelectAppendedModule := java.CheckModuleHasDependency(t,
