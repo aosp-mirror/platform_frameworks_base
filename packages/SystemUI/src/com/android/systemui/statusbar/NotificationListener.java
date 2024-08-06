@@ -35,7 +35,6 @@ import com.android.systemui.statusbar.domain.interactor.SilentNotificationStatus
 import com.android.systemui.statusbar.notification.collection.NotifCollection;
 import com.android.systemui.statusbar.notification.collection.PipelineDumpable;
 import com.android.systemui.statusbar.notification.collection.PipelineDumper;
-import com.android.systemui.statusbar.notification.shared.NotificationIconContainerRefactor;
 import com.android.systemui.statusbar.phone.CentralSurfaces;
 import com.android.systemui.statusbar.phone.NotificationListenerWithPlugins;
 import com.android.systemui.util.time.SystemClock;
@@ -66,7 +65,6 @@ public class NotificationListener extends NotificationListenerWithPlugins implem
     private final SystemClock mSystemClock;
     private final Executor mMainExecutor;
     private final List<NotificationHandler> mNotificationHandlers = new ArrayList<>();
-    private final ArrayList<NotificationSettingsListener> mSettingsListeners = new ArrayList<>();
 
     private final Deque<RankingMap> mRankingMapQueue = new ConcurrentLinkedDeque<>();
     private final Runnable mDispatchRankingUpdateRunnable = this::dispatchRankingUpdate;
@@ -97,13 +95,6 @@ public class NotificationListener extends NotificationListenerWithPlugins implem
             throw new IllegalArgumentException("Listener is already added");
         }
         mNotificationHandlers.add(handler);
-    }
-
-    /** Registers a listener that's notified when any notification-related settings change. */
-    @Deprecated
-    public void addNotificationSettingsListener(NotificationSettingsListener listener) {
-        NotificationIconContainerRefactor.assertInLegacyMode();
-        mSettingsListeners.add(listener);
     }
 
     @Override
@@ -237,13 +228,7 @@ public class NotificationListener extends NotificationListenerWithPlugins implem
 
     @Override
     public void onSilentStatusBarIconsVisibilityChanged(boolean hideSilentStatusIcons) {
-        if (NotificationIconContainerRefactor.isEnabled()) {
-            mStatusIconInteractor.setHideSilentStatusIcons(hideSilentStatusIcons);
-        } else {
-            for (NotificationSettingsListener listener : mSettingsListeners) {
-                listener.onStatusBarIconsBehaviorChanged(hideSilentStatusIcons);
-            }
-        }
+        mStatusIconInteractor.setHideSilentStatusIcons(hideSilentStatusIcons);
     }
 
     public final void unsnoozeNotification(@NonNull String key) {

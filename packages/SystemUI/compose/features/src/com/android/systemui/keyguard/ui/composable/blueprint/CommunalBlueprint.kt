@@ -32,16 +32,15 @@ import dagger.multibindings.IntoSet
 import javax.inject.Inject
 
 /** Renders the lockscreen scene when showing the communal glanceable hub. */
-class CommunalBlueprint
-@Inject
-constructor(
-    private val viewModel: LockscreenContentViewModel,
-) : ComposableLockscreenSceneBlueprint {
+class CommunalBlueprint @Inject constructor() : ComposableLockscreenSceneBlueprint {
 
     override val id: String = "communal"
 
     @Composable
-    override fun SceneScope.Content(modifier: Modifier) {
+    override fun SceneScope.Content(
+        viewModel: LockscreenContentViewModel,
+        modifier: Modifier,
+    ) {
         LockscreenLongPress(
             viewModel = viewModel.touchHandling,
             modifier = modifier,

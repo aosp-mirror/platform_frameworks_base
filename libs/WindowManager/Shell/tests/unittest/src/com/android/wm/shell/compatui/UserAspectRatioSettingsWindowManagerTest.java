@@ -317,7 +317,7 @@ public class UserAspectRatioSettingsWindowManagerTest extends ShellTestCase {
         // layout should be inflated
         taskInfo.appCompatTaskInfo.topActivityLetterboxHeight = stableBounds.height();
         taskInfo.appCompatTaskInfo.topActivityLetterboxWidth = stableBounds.width();
-        taskInfo.appCompatTaskInfo.isUserFullscreenOverrideEnabled = true;
+        taskInfo.appCompatTaskInfo.setUserFullscreenOverrideEnabled(true);
 
         mWindowManager.updateCompatInfo(taskInfo, mTaskListener, /* canShow= */ true);
 
@@ -482,9 +482,9 @@ public class UserAspectRatioSettingsWindowManagerTest extends ShellTestCase {
             boolean topActivityBoundsLetterboxed, String action, String category) {
         ActivityManager.RunningTaskInfo taskInfo = new ActivityManager.RunningTaskInfo();
         taskInfo.taskId = TASK_ID;
-        taskInfo.appCompatTaskInfo.topActivityEligibleForUserAspectRatioButton =
-                eligibleForUserAspectRatioButton;
-        taskInfo.appCompatTaskInfo.topActivityBoundsLetterboxed = topActivityBoundsLetterboxed;
+        taskInfo.appCompatTaskInfo.setEligibleForUserAspectRatioButton(
+                eligibleForUserAspectRatioButton);
+        taskInfo.appCompatTaskInfo.setTopActivityLetterboxed(topActivityBoundsLetterboxed);
         taskInfo.configuration.uiMode &= ~Configuration.UI_MODE_TYPE_DESK;
         taskInfo.realActivity = new ComponentName("com.mypackage.test", "TestActivity");
         taskInfo.baseIntent = new Intent(action).addCategory(category);

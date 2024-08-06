@@ -681,7 +681,7 @@ public class CompatUIControllerTest extends ShellTestCase {
     @Test
     public void testLetterboxEduLayout_notCreatedWhenLetterboxEducationIsDisabled() {
         TaskInfo taskInfo = createTaskInfo(DISPLAY_ID, TASK_ID, /* hasSizeCompat= */ true);
-        taskInfo.appCompatTaskInfo.isLetterboxEducationEnabled = false;
+        taskInfo.appCompatTaskInfo.setLetterboxEducationEnabled(false);
 
         mController.onCompatInfoChanged(new CompatUIInfo(taskInfo, mMockTaskListener));
 
@@ -705,12 +705,12 @@ public class CompatUIControllerTest extends ShellTestCase {
         RunningTaskInfo taskInfo = new RunningTaskInfo();
         taskInfo.taskId = taskId;
         taskInfo.displayId = displayId;
-        taskInfo.appCompatTaskInfo.topActivityInSizeCompat = hasSizeCompat;
+        taskInfo.appCompatTaskInfo.setTopActivityInSizeCompat(hasSizeCompat);
         taskInfo.isVisible = isVisible;
         taskInfo.isFocused = isFocused;
         taskInfo.isTopActivityTransparent = isTopActivityTransparent;
-        taskInfo.appCompatTaskInfo.isLetterboxEducationEnabled = true;
-        taskInfo.appCompatTaskInfo.topActivityBoundsLetterboxed = true;
+        taskInfo.appCompatTaskInfo.setLetterboxEducationEnabled(true);
+        taskInfo.appCompatTaskInfo.setTopActivityLetterboxed(true);
         return taskInfo;
     }
 }

@@ -295,7 +295,6 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
     @Mock private Bubbles mBubbles;
     @Mock private NoteTaskController mNoteTaskController;
     @Mock private NotificationShadeWindowController mNotificationShadeWindowController;
-    @Mock private NotificationIconAreaController mNotificationIconAreaController;
     @Mock private NotificationShadeWindowViewController mNotificationShadeWindowViewController;
     @Mock private Lazy<NotificationShadeWindowViewController>
             mNotificationShadeWindowViewControllerLazy;
@@ -580,7 +579,6 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
                 mDemoModeController,
                 mNotificationShadeDepthControllerLazy,
                 mStatusBarTouchableRegionManager,
-                mNotificationIconAreaController,
                 mBrightnessSliderFactory,
                 mScreenOffAnimationController,
                 mWallpaperController,
@@ -1157,19 +1155,10 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
     }
 
     @Test
-    @EnableFlags(com.android.systemui.Flags.FLAG_TRUNCATED_STATUS_BAR_ICONS_FIX)
-    public void updateResources_flagEnabled_doesNotUpdateStatusBarWindowHeight() {
+    public void updateResources_doesNotUpdateStatusBarWindowHeight() {
         mCentralSurfaces.updateResources();
 
         verify(mStatusBarWindowController, never()).refreshStatusBarHeight();
-    }
-
-    @Test
-    @DisableFlags(com.android.systemui.Flags.FLAG_TRUNCATED_STATUS_BAR_ICONS_FIX)
-    public void updateResources_flagDisabled_updatesStatusBarWindowHeight() {
-        mCentralSurfaces.updateResources();
-
-        verify(mStatusBarWindowController).refreshStatusBarHeight();
     }
 
     @Test
