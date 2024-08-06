@@ -2822,6 +2822,12 @@ public final class ViewRootImpl implements ViewParent,
         if (mAttachInfo.mThreadedRenderer != null) {
             mAttachInfo.mThreadedRenderer.setSurfaceControl(null, null);
         }
+
+        // Also reset the VRR relevant values.
+        mPreferredFrameRateCategory = FRAME_RATE_CATEGORY_DEFAULT;
+        mLastPreferredFrameRateCategory = FRAME_RATE_CATEGORY_DEFAULT;
+        mPreferredFrameRate = 0;
+        mLastPreferredFrameRate = 0;
     }
 
     /**
