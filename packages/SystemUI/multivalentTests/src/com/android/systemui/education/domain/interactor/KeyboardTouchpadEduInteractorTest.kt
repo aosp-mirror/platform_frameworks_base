@@ -19,10 +19,9 @@ package com.android.systemui.education.domain.interactor
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.contextualeducation.GestureType
 import com.android.systemui.contextualeducation.GestureType.BACK
-import com.android.systemui.education.data.repository.contextualEducationRepository
+import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
@@ -36,7 +35,7 @@ import org.junit.runner.RunWith
 class KeyboardTouchpadEduInteractorTest : SysuiTestCase() {
     private val kosmos = testKosmos()
     private val testScope = kosmos.testScope
-    private val repository = kosmos.contextualEducationRepository
+    private val contextualEduInteractor = kosmos.contextualEducationInteractor
     private val underTest: KeyboardTouchpadEduInteractor = kosmos.keyboardTouchpadEduInteractor
 
     @Before
@@ -55,7 +54,7 @@ class KeyboardTouchpadEduInteractorTest : SysuiTestCase() {
     @Test
     fun noEducationInfoBeforeMaxSignalCountReached() =
         testScope.runTest {
-            repository.incrementSignalCount(BACK)
+            contextualEduInteractor.incrementSignalCount(BACK)
             val model by collectLastValue(underTest.educationTriggered)
             assertThat(model).isNull()
         }
@@ -64,7 +63,7 @@ class KeyboardTouchpadEduInteractorTest : SysuiTestCase() {
     fun noEducationInfoWhenShortcutTriggeredPreviously() =
         testScope.runTest {
             val model by collectLastValue(underTest.educationTriggered)
-            repository.updateShortcutTriggerTime(BACK)
+            contextualEduInteractor.updateShortcutTriggerTime(BACK)
             tryTriggeringEducation(BACK)
             assertThat(model).isNull()
         }
@@ -72,7 +71,7 @@ class KeyboardTouchpadEduInteractorTest : SysuiTestCase() {
     private suspend fun tryTriggeringEducation(gestureType: GestureType) {
         // Increment max number of signal to try triggering education
         for (i in 1..KeyboardTouchpadEduInteractor.MAX_SIGNAL_COUNT) {
-            repository.incrementSignalCount(gestureType)
+            contextualEduInteractor.incrementSignalCount(gestureType)
         }
     }
 }

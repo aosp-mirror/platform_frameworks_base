@@ -21,15 +21,14 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.SysuiTestableContext
-import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.contextualeducation.GestureType.BACK
+import com.android.systemui.coroutines.collectLastValue
+import com.android.systemui.education.data.model.GestureEduModel
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.testDispatcher
 import com.android.systemui.kosmos.testScope
 import com.google.common.truth.Truth.assertThat
 import java.io.File
-import java.time.Clock
-import java.time.Instant
 import javax.inject.Provider
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.test.TestScope
@@ -44,13 +43,13 @@ import org.junit.runner.RunWith
 @RunWith(AndroidJUnit4::class)
 class ContextualEducationRepositoryTest : SysuiTestCase() {
 
-    private lateinit var underTest: ContextualEducationRepository
+    private lateinit var underTest: UserContextualEducationRepository
     private val kosmos = Kosmos()
     private val testScope = kosmos.testScope
     private val dsScopeProvider: Provider<CoroutineScope> = Provider {
         TestScope(kosmos.testDispatcher).backgroundScope
     }
-    private val clock: Clock = FakeEduClock(Instant.ofEpochMilli(1000))
+
     private val testUserId = 1111
 
     // For deleting any test files created after the test
@@ -61,8 +60,7 @@ class ContextualEducationRepositoryTest : SysuiTestCase() {
         // Create TestContext here because TemporaryFolder.create() is called in @Before. It is
         // needed before calling TemporaryFolder.newFolder().
         val testContext = TestContext(context, tmpFolder.newFolder())
-        val userRepository = UserContextualEducationRepository(testContext, dsScopeProvider)
-        underTest = ContextualEducationRepositoryImpl(clock, userRepository)
+        underTest = UserContextualEducationRepository(testContext, dsScopeProvider)
         underTest.setUser(testUserId)
     }
 
@@ -70,7 +68,7 @@ class ContextualEducationRepositoryTest : SysuiTestCase() {
     fun changeRetrievedValueForNewUser() =
         testScope.runTest {
             // Update data for old user.
-            underTest.incrementSignalCount(BACK)
+            underTest.updateGestureEduModel(BACK) { it.copy(signalCount = 1) }
             val model by collectLastValue(underTest.readGestureEduModelFlow(BACK))
             assertThat(model?.signalCount).isEqualTo(1)
 
@@ -81,20 +79,17 @@ class ContextualEducationRepositoryTest : SysuiTestCase() {
         }
 
     @Test
-    fun incrementSignalCount() =
+    fun dataChangedOnUpdate() =
         testScope.runTest {
-            underTest.incrementSignalCount(BACK)
+            val newModel =
+                GestureEduModel(
+                    signalCount = 2,
+                    educationShownCount = 1,
+                    lastShortcutTriggeredTime = kosmos.fakeEduClock.instant()
+                )
+            underTest.updateGestureEduModel(BACK) { newModel }
             val model by collectLastValue(underTest.readGestureEduModelFlow(BACK))
-            assertThat(model?.signalCount).isEqualTo(1)
-        }
-
-    @Test
-    fun dataAddedOnUpdateShortcutTriggerTime() =
-        testScope.runTest {
-            val model by collectLastValue(underTest.readGestureEduModelFlow(BACK))
-            assertThat(model?.lastShortcutTriggeredTime).isNull()
-            underTest.updateShortcutTriggerTime(BACK)
-            assertThat(model?.lastShortcutTriggeredTime).isEqualTo(clock.instant())
+            assertThat(model).isEqualTo(newModel)
         }
 
     /** Test context which allows overriding getFilesDir path */
