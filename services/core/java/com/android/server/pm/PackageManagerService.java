@@ -3323,9 +3323,17 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
     }
 
     public void deletePackageVersioned(VersionedPackage versionedPackage,
+            final IPackageDeleteObserver2 observer, final int userId, final int deleteFlags,
+            final int callingUid) {
+        mDeletePackageHelper.deletePackageVersionedInternal(
+                versionedPackage, observer, userId, deleteFlags, callingUid,
+                /* allowSilentUninstall= */ false);
+    }
+
+    public void deletePackageVersioned(VersionedPackage versionedPackage,
             final IPackageDeleteObserver2 observer, final int userId, final int deleteFlags) {
         mDeletePackageHelper.deletePackageVersionedInternal(
-                versionedPackage, observer, userId, deleteFlags, false);
+                versionedPackage, observer, userId, deleteFlags, /* allowSilentUninstall= */ false);
     }
 
     boolean isCallerVerifier(@NonNull Computer snapshot, int callingUid) {
