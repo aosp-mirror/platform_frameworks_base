@@ -45,6 +45,7 @@ import android.testing.TestableResources;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
+import com.android.app.viewcapture.ViewCapture;
 import com.android.settingslib.fuelgauge.Estimate;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.broadcast.BroadcastDispatcher;
@@ -53,6 +54,8 @@ import com.android.systemui.power.PowerUI.WarningsUI;
 import com.android.systemui.res.R;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.statusbar.CommandQueue;
+
+import dagger.Lazy;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -94,6 +97,7 @@ public class PowerUITest extends SysuiTestCase {
     @Mock private BroadcastDispatcher mBroadcastDispatcher;
     @Mock private CommandQueue mCommandQueue;
     @Mock private IVrManager mVrManager;
+    @Mock private Lazy<ViewCapture> mLazyViewCapture;
 
     @Before
     public void setup() {
@@ -705,7 +709,8 @@ public class PowerUITest extends SysuiTestCase {
                 mEnhancedEstimates,
                 mWakefulnessLifecycle,
                 mPowerManager,
-                mUserTracker);
+                mUserTracker,
+                mLazyViewCapture);
         mPowerUI.mThermalService = mThermalServiceMock;
     }
 

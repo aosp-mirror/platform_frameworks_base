@@ -74,7 +74,8 @@ constructor(
     }
 
     /** Whether or not the notification scrim should be clickable. */
-    val isClickable: StateFlow<Boolean> = shadeSceneViewModel.isClickable
+    val isClickable: StateFlow<Boolean>
+        get() = shadeSceneViewModel.isClickable
 
     /** True when a HUN is pinned or animating away. */
     val isHeadsUpOrAnimatingAway: Flow<Boolean> =

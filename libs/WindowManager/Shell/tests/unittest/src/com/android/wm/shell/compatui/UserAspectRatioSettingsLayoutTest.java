@@ -155,7 +155,7 @@ public class UserAspectRatioSettingsLayoutTest extends ShellTestCase {
     private static TaskInfo createTaskInfo(boolean hasSizeCompat) {
         ActivityManager.RunningTaskInfo taskInfo = new ActivityManager.RunningTaskInfo();
         taskInfo.taskId = TASK_ID;
-        taskInfo.appCompatTaskInfo.topActivityInSizeCompat = hasSizeCompat;
+        taskInfo.appCompatTaskInfo.setTopActivityInSizeCompat(hasSizeCompat);
         taskInfo.realActivity = new ComponentName("com.mypackage.test", "TestActivity");
         return taskInfo;
     }

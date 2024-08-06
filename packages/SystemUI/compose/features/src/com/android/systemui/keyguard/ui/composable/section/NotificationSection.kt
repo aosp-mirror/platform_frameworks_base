@@ -26,7 +26,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.android.compose.animation.scene.SceneScope
 import com.android.compose.modifiers.thenIf
 import com.android.systemui.Flags
@@ -35,7 +34,6 @@ import com.android.systemui.keyguard.MigrateClocksToBlueprint
 import com.android.systemui.keyguard.ui.composable.modifier.burnInAware
 import com.android.systemui.keyguard.ui.viewmodel.AodBurnInViewModel
 import com.android.systemui.keyguard.ui.viewmodel.BurnInParameters
-import com.android.systemui.keyguard.ui.viewmodel.LockscreenContentViewModel
 import com.android.systemui.notifications.ui.composable.ConstrainedNotificationStack
 import com.android.systemui.res.R
 import com.android.systemui.shade.LargeScreenHeaderHelper
@@ -59,7 +57,6 @@ constructor(
     sharedNotificationContainerViewModel: SharedNotificationContainerViewModel,
     stackScrollLayout: NotificationStackScrollLayout,
     sharedNotificationContainerBinder: SharedNotificationContainerBinder,
-    private val lockscreenContentViewModel: LockscreenContentViewModel,
 ) {
 
     init {
@@ -89,17 +86,16 @@ constructor(
      *   adjustment
      */
     @Composable
-    fun SceneScope.Notifications(burnInParams: BurnInParameters?, modifier: Modifier = Modifier) {
-        val areNotificationsVisible by
-            lockscreenContentViewModel
-                .areNotificationsVisible(contentKey)
-                .collectAsStateWithLifecycle(initialValue = false)
+    fun SceneScope.Notifications(
+        areNotificationsVisible: Boolean,
+        isShadeLayoutWide: Boolean,
+        burnInParams: BurnInParameters?,
+        modifier: Modifier = Modifier
+    ) {
         if (!areNotificationsVisible) {
             return
         }
 
-        val isShadeLayoutWide by
-            lockscreenContentViewModel.isShadeLayoutWide.collectAsStateWithLifecycle()
         val splitShadeTopMargin: Dp =
             if (Flags.centralizedStatusBarHeightFix()) {
                 LargeScreenHeaderHelper.getLargeScreenHeaderHeight(LocalContext.current).dp

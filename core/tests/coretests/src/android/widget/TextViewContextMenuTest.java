@@ -240,4 +240,45 @@ public class TextViewContextMenuTest {
         verify(mockNoIconMenu, times(0)).setIcon(any());
         verify(mockNoIconMenu2, times(0)).setIcon(any());
     }
+
+    @UiThreadTest
+    @Test
+    public void testAutofillMenuItemEnabledWhenNoTextSelected() {
+        ContextMenu menu = mock(ContextMenu.class);
+        MenuItem mockMenuItem = newMockMenuItem();
+        when(menu.add(anyInt(), anyInt(), anyInt(), anyInt())).thenReturn(mockMenuItem);
+        MenuItem mockAutofillMenuItem = newMockMenuItem();
+        when(menu.add(anyInt(), eq(TextView.ID_AUTOFILL), anyInt(), anyInt()))
+                .thenReturn(mockAutofillMenuItem);
+
+        EditText et = mActivity.findViewById(R.id.editText);
+        et.setText("Test");
+
+        Editor editor = et.getEditorForTesting();
+        editor.onCreateContextMenu(menu);
+
+        verify(menu).add(anyInt(), eq(TextView.ID_AUTOFILL), anyInt(), anyInt());
+        verify(mockAutofillMenuItem).setEnabled(true);
+    }
+
+    @UiThreadTest
+    @Test
+    public void testAutofillMenuItemNotEnabledWhenTextSelected() {
+        ContextMenu menu = mock(ContextMenu.class);
+        MenuItem mockMenuItem = newMockMenuItem();
+        when(menu.add(anyInt(), anyInt(), anyInt(), anyInt())).thenReturn(mockMenuItem);
+        MenuItem mockAutofillMenuItem = newMockMenuItem();
+        when(menu.add(anyInt(), eq(TextView.ID_AUTOFILL), anyInt(), anyInt()))
+                .thenReturn(mockAutofillMenuItem);
+
+        EditText et = mActivity.findViewById(R.id.editText);
+        et.setText("Test");
+        et.selectAll();
+        Editor editor = et.getEditorForTesting();
+        editor.onCreateContextMenu(menu);
+
+        verify(menu).add(anyInt(), eq(TextView.ID_AUTOFILL), anyInt(), anyInt());
+        verify(mockAutofillMenuItem).setEnabled(false);
+    }
+
 }
