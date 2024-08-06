@@ -591,13 +591,13 @@ final class InputMethodSubtypeSwitchingController {
             pw.println(prefix + "Static order:");
             for (int i = 0; i < mItems.size(); ++i) {
                 final var item = mItems.get(i);
-                pw.println(prefix + "i=" + i + " item=" + item);
+                pw.println(prefix + "  i=" + i + " item=" + item);
             }
             pw.println(prefix + "Recency order:");
             for (int i = 0; i < mRecencyMap.length; ++i) {
                 final int index = mRecencyMap[i];
                 final var item = mItems.get(index);
-                pw.println(prefix + "i=" + i + " item=" + item);
+                pw.println(prefix + "  i=" + i + " item=" + item);
             }
         }
     }
@@ -800,7 +800,7 @@ final class InputMethodSubtypeSwitchingController {
                     pw.println(prefix + "mHardwareRotationList:");
                     mHardwareRotationList.dump(pw, prefix + "  ");
                 }
-                pw.println("User action since last switch: " + mUserActionSinceSwitch);
+                pw.println(prefix + "User action since last switch: " + mUserActionSinceSwitch);
             }
         }
     }
