@@ -43,6 +43,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.IntentSender;
 import android.graphics.Point;
 import android.hardware.display.DisplayManager;
 import android.hardware.display.DisplayManager.VirtualDisplayFlag;
@@ -1264,13 +1265,18 @@ public final class VirtualDeviceManager {
          * @param displayId The display ID on which the activity tried to launch.
          * @param componentName The component name of the blocked activity.
          * @param userId The user ID associated with the blocked activity.
+         * @param intentSender The original sender of the intent. May be {@code null} if the sender
+         *   expects an activity result to be reported. In that case
+         *   {@link android.app.Activity#RESULT_CANCELED} was already reported back because the
+         *   launch was blocked. This {@link IntentSender} can be used to relaunch the blocked
+         *   activity to a different display.
          *
          * @see VirtualDeviceParams#POLICY_TYPE_ACTIVITY
          * @see VirtualDevice#addActivityPolicyExemption(ComponentName)
          */
         @FlaggedApi(android.companion.virtualdevice.flags.Flags.FLAG_ACTIVITY_CONTROL_API)
         default void onActivityLaunchBlocked(int displayId, @NonNull ComponentName componentName,
-                @UserIdInt int userId) {}
+                @UserIdInt int userId, @Nullable IntentSender intentSender) {}
     }
 
     /**

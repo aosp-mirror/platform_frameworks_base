@@ -24,6 +24,7 @@ import android.app.WindowConfiguration;
 import android.companion.virtualdevice.flags.Flags;
 import android.content.ComponentName;
 import android.content.Intent;
+import android.content.IntentSender;
 import android.content.pm.ActivityInfo;
 import android.os.Process;
 import android.os.UserHandle;
@@ -34,6 +35,7 @@ import android.window.DisplayWindowPolicyController;
 
 import java.io.PrintWriter;
 import java.util.List;
+import java.util.function.Supplier;
 
 class DisplayWindowPolicyControllerHelper {
     private static final String TAG = "DisplayWindowPolicyControllerHelper";
@@ -98,7 +100,8 @@ class DisplayWindowPolicyControllerHelper {
      */
     public boolean canActivityBeLaunched(ActivityInfo activityInfo,
             Intent intent, @WindowConfiguration.WindowingMode int windowingMode,
-            int launchingFromDisplayId, boolean isNewTask) {
+            int launchingFromDisplayId, boolean isNewTask, boolean isResultExpected,
+            Supplier<IntentSender> intentSender) {
         if (mDisplayWindowPolicyController == null) {
             // Missing controller means that this display has no categories for activity launch
             // restriction.
@@ -111,7 +114,7 @@ class DisplayWindowPolicyControllerHelper {
             return true;
         }
         return mDisplayWindowPolicyController.canActivityBeLaunched(activityInfo, intent,
-            windowingMode, launchingFromDisplayId, isNewTask);
+            windowingMode, launchingFromDisplayId, isNewTask, isResultExpected, intentSender);
     }
 
     private boolean hasDisplayCategory(ActivityInfo aInfo) {

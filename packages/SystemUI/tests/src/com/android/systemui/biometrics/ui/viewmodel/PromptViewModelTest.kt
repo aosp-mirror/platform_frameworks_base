@@ -503,11 +503,13 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
                     collectLastValue(kosmos.promptViewModel.iconViewModel.contentDescriptionId)
                 val shouldAnimateIconView by
                     collectLastValue(kosmos.promptViewModel.iconViewModel.shouldAnimateIconView)
+                val message by collectLastValue(kosmos.promptViewModel.message)
                 verifyIconSize()
 
                 kosmos.promptViewModel.showAuthenticated(
                     modality = testCase.authenticatedModality,
-                    dismissAfterDelay = DELAY
+                    dismissAfterDelay = DELAY,
+                    "TEST"
                 )
 
                 if (testCase.isFingerprintOnly) {
@@ -531,6 +533,7 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
                     assertThat(iconContentDescriptionId)
                         .isEqualTo(R.string.biometric_dialog_face_icon_description_authenticated)
                     assertThat(shouldAnimateIconView).isEqualTo(true)
+                    assertThat(message).isEqualTo(PromptMessage.Empty)
                 }
             }
         }

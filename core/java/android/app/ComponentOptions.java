@@ -105,17 +105,10 @@ public class ComponentOptions {
     public @NonNull ComponentOptions setPendingIntentBackgroundActivityStartMode(
             @BackgroundActivityStartMode int state) {
         switch (state) {
-            case MODE_BACKGROUND_ACTIVITY_START_ALLOWED:
-                if (mPendingIntentBalAllowed != MODE_BACKGROUND_ACTIVITY_START_ALLOW_ALWAYS) {
-                    // do not overwrite ALWAYS with ALLOWED for backwards compatibility,
-                    // if setPendingIntentBackgroundActivityLaunchAllowedByPermission is used
-                    // before this method.
-                    mPendingIntentBalAllowed = state;
-                }
-                break;
             case MODE_BACKGROUND_ACTIVITY_START_SYSTEM_DEFINED:
             case MODE_BACKGROUND_ACTIVITY_START_DENIED:
             case MODE_BACKGROUND_ACTIVITY_START_COMPAT:
+            case MODE_BACKGROUND_ACTIVITY_START_ALLOWED:
             case MODE_BACKGROUND_ACTIVITY_START_ALLOW_ALWAYS:
             case MODE_BACKGROUND_ACTIVITY_START_ALLOW_IF_VISIBLE:
                 mPendingIntentBalAllowed = state;
@@ -137,35 +130,6 @@ public class ComponentOptions {
      */
     public @BackgroundActivityStartMode int getPendingIntentBackgroundActivityStartMode() {
         return mPendingIntentBalAllowed;
-    }
-
-    /**
-     * Get PendingIntent activity is allowed to be started in the background if the caller
-     * has BAL permission.
-     * @hide
-     * @deprecated check for #MODE_BACKGROUND_ACTIVITY_START_ALLOW_ALWAYS
-     */
-    @Deprecated
-    public boolean isPendingIntentBackgroundActivityLaunchAllowedByPermission() {
-        return mPendingIntentBalAllowed == MODE_BACKGROUND_ACTIVITY_START_ALLOW_ALWAYS;
-    }
-
-    /**
-     * Set PendingIntent activity can be launched from background if caller has BAL permission.
-     * @hide
-     * @deprecated use #MODE_BACKGROUND_ACTIVITY_START_ALLOW_ALWAYS
-     */
-    @Deprecated
-    public void setPendingIntentBackgroundActivityLaunchAllowedByPermission(boolean allowed) {
-        if (allowed) {
-            setPendingIntentBackgroundActivityStartMode(
-                    MODE_BACKGROUND_ACTIVITY_START_ALLOW_ALWAYS);
-        } else {
-            if (getPendingIntentBackgroundActivityStartMode()
-                    == MODE_BACKGROUND_ACTIVITY_START_ALLOW_ALWAYS) {
-                setPendingIntentBackgroundActivityStartMode(MODE_BACKGROUND_ACTIVITY_START_ALLOWED);
-            }
-        }
     }
 
     /** @hide */

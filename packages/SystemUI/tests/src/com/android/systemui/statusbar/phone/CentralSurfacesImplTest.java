@@ -1157,19 +1157,10 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
     }
 
     @Test
-    @EnableFlags(com.android.systemui.Flags.FLAG_TRUNCATED_STATUS_BAR_ICONS_FIX)
-    public void updateResources_flagEnabled_doesNotUpdateStatusBarWindowHeight() {
+    public void updateResources_doesNotUpdateStatusBarWindowHeight() {
         mCentralSurfaces.updateResources();
 
         verify(mStatusBarWindowController, never()).refreshStatusBarHeight();
-    }
-
-    @Test
-    @DisableFlags(com.android.systemui.Flags.FLAG_TRUNCATED_STATUS_BAR_ICONS_FIX)
-    public void updateResources_flagDisabled_updatesStatusBarWindowHeight() {
-        mCentralSurfaces.updateResources();
-
-        verify(mStatusBarWindowController).refreshStatusBarHeight();
     }
 
     @Test

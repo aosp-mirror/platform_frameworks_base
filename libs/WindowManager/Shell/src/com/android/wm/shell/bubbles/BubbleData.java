@@ -174,6 +174,7 @@ public class BubbleData {
         BubbleBarUpdate getInitialState() {
             BubbleBarUpdate bubbleBarUpdate = BubbleBarUpdate.createInitialState();
             bubbleBarUpdate.shouldShowEducation = shouldShowEducation;
+            bubbleBarUpdate.showOverflow = !overflowBubbles.isEmpty();
             for (int i = 0; i < bubbles.size(); i++) {
                 bubbleBarUpdate.currentBubbleList.add(bubbles.get(i).asBubbleBarBubble());
             }

@@ -57,6 +57,7 @@ import org.mockito.ArgumentMatchers.any
 import org.mockito.ArgumentMatchers.eq
 import org.mockito.Captor
 import org.mockito.Mock
+import org.mockito.Mockito.never
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.`when`
 import org.mockito.Spy
@@ -145,8 +146,11 @@ class AudioSharingRepositoryTest {
     }
 
     @Test
-    fun audioSharingStateChange_emitValues() {
+    fun audioSharingStateChange_profileReady_emitValues() {
         testScope.runTest {
+            `when`(broadcast.isProfileReady).thenReturn(true)
+            `when`(assistant.isProfileReady).thenReturn(true)
+            `when`(volumeControl.isProfileReady).thenReturn(true)
             val states = mutableListOf<Boolean?>()
             underTest.inAudioSharing.onEach { states.add(it) }.launchIn(backgroundScope)
             runCurrent()
@@ -155,7 +159,19 @@ class AudioSharingRepositoryTest {
             triggerAudioSharingStateChange(TriggerType.BROADCAST_START, broadcastStarted)
             runCurrent()
 
-            Truth.assertThat(states).containsExactly(true, false, true)
+            Truth.assertThat(states).containsExactly(false, true, false, true)
+        }
+    }
+
+    @Test
+    fun audioSharingStateChange_profileNotReady_broadcastCallbackNotRegistered() {
+        testScope.runTest {
+            val states = mutableListOf<Boolean?>()
+            underTest.inAudioSharing.onEach { states.add(it) }.launchIn(backgroundScope)
+            runCurrent()
+            verify(broadcast, never()).registerServiceCallBack(any(), any())
+
+            Truth.assertThat(states).containsExactly(false)
         }
     }
 
@@ -176,8 +192,21 @@ class AudioSharingRepositoryTest {
     }
 
     @Test
-    fun secondaryGroupIdChange_emitValues() {
+    fun secondaryGroupIdChange_profileNotReady_assistantCallbackNotRegistered() {
         testScope.runTest {
+            val groupIds = mutableListOf<Int?>()
+            underTest.secondaryGroupId.onEach { groupIds.add(it) }.launchIn(backgroundScope)
+            runCurrent()
+            verify(assistant, never()).registerServiceCallBack(any(), any())
+        }
+    }
+
+    @Test
+    fun secondaryGroupIdChange_profileReady_emitValues() {
+        testScope.runTest {
+            `when`(broadcast.isProfileReady).thenReturn(true)
+            `when`(assistant.isProfileReady).thenReturn(true)
+            `when`(volumeControl.isProfileReady).thenReturn(true)
             val groupIds = mutableListOf<Int?>()
             underTest.secondaryGroupId.onEach { groupIds.add(it) }.launchIn(backgroundScope)
             runCurrent()
@@ -211,8 +240,11 @@ class AudioSharingRepositoryTest {
     }
 
     @Test
-    fun volumeMapChange_emitValues() {
+    fun volumeMapChange_profileReady_emitValues() {
         testScope.runTest {
+            `when`(broadcast.isProfileReady).thenReturn(true)
+            `when`(assistant.isProfileReady).thenReturn(true)
+            `when`(volumeControl.isProfileReady).thenReturn(true)
             val volumeMaps = mutableListOf<GroupIdToVolumes?>()
             underTest.volumeMap.onEach { volumeMaps.add(it) }.launchIn(backgroundScope)
             runCurrent()
@@ -230,6 +262,16 @@ class AudioSharingRepositoryTest {
                     emptyMap<Int, Int>(),
                     mapOf(TEST_GROUP_ID1 to TEST_VOLUME1),
                     mapOf(TEST_GROUP_ID1 to TEST_VOLUME2))
+        }
+    }
+
+    @Test
+    fun volumeMapChange_profileNotReady_volumeControlCallbackNotRegistered() {
+        testScope.runTest {
+            val volumeMaps = mutableListOf<GroupIdToVolumes?>()
+            underTest.volumeMap.onEach { volumeMaps.add(it) }.launchIn(backgroundScope)
+            runCurrent()
+            verify(volumeControl, never()).registerCallback(any(), any())
         }
     }
 
@@ -258,6 +300,7 @@ class AudioSharingRepositoryTest {
                 `when`(broadcast.isEnabled(null)).thenReturn(true)
                 broadcastCallbackCaptor.value.broadcastAction()
             }
+
             TriggerType.BROADCAST_STOP -> {
                 `when`(broadcast.isEnabled(null)).thenReturn(false)
                 broadcastCallbackCaptor.value.broadcastAction()
