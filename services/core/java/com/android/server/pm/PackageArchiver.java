@@ -936,13 +936,9 @@ public class PackageArchiver {
      * <p> In the rare case the app had multiple launcher activities, only one of the icons is
      * returned arbitrarily.
      *
-     * <p> By default, the icon will be overlay'd with a cloud icon on top. A launcher app can
+     * <p> By default, the icon will be overlay'd with a cloud icon on top. An app can
      * disable the cloud overlay via the
      * {@link LauncherApps.ArchiveCompatibilityParams#setEnableIconOverlay(boolean)} API.
-     * The default launcher's cloud overlay mode determines the cloud overlay status returned by
-     * any other callers. That is, if the current launcher has the cloud overlay disabled, any other
-     * app that fetches the app icon will also get an icon that has the cloud overlay disabled.
-     * This is to prevent style mismatch caused by icons that are fetched by different callers.
      */
     @Nullable
     public Bitmap getArchivedAppIcon(@NonNull String packageName, @NonNull UserHandle user,
