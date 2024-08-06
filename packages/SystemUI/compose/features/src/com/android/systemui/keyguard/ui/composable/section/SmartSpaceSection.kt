@@ -16,6 +16,7 @@
 
 package com.android.systemui.keyguard.ui.composable.section
 
+import android.content.res.Resources
 import android.widget.FrameLayout
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
@@ -43,7 +44,6 @@ import com.android.systemui.keyguard.ui.composable.modifier.onTopPlacementChange
 import com.android.systemui.keyguard.ui.viewmodel.AodBurnInViewModel
 import com.android.systemui.keyguard.ui.viewmodel.BurnInParameters
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardSmartspaceViewModel
-import com.android.systemui.keyguard.ui.viewmodel.LockscreenContentViewModel
 import com.android.systemui.res.R
 import com.android.systemui.statusbar.lockscreen.LockscreenSmartspaceController
 import javax.inject.Inject
@@ -55,12 +55,12 @@ constructor(
     private val keyguardUnlockAnimationController: KeyguardUnlockAnimationController,
     private val keyguardSmartspaceViewModel: KeyguardSmartspaceViewModel,
     private val aodBurnInViewModel: AodBurnInViewModel,
-    private val lockscreenContentViewModel: LockscreenContentViewModel,
 ) {
     @Composable
     fun SceneScope.SmartSpace(
         burnInParams: BurnInParameters,
         onTopChanged: (top: Float?) -> Unit,
+        smartSpacePaddingTop: (Resources) -> Int,
         modifier: Modifier = Modifier,
     ) {
         val resources = LocalContext.current.resources
@@ -72,9 +72,7 @@ constructor(
                         modifier
                             .onTopPlacementChanged(onTopChanged)
                             .padding(
-                                top = {
-                                    lockscreenContentViewModel.getSmartSpacePaddingTop(resources)
-                                },
+                                top = { smartSpacePaddingTop(resources) },
                                 bottom = {
                                     resources.getDimensionPixelSize(
                                         R.dimen.keyguard_status_view_bottom_margin

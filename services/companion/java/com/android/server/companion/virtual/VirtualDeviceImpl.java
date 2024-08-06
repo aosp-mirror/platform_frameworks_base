@@ -60,6 +60,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.IntentSender;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.graphics.PointF;
@@ -241,9 +242,11 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
 
             @Override
             public void onActivityLaunchBlocked(int displayId,
-                    @NonNull ComponentName componentName, @UserIdInt int userId) {
+                    @NonNull ComponentName componentName, @UserIdInt int userId,
+                    @Nullable IntentSender intentSender) {
                 try {
-                    mActivityListener.onActivityLaunchBlocked(displayId, componentName, userId);
+                    mActivityListener.onActivityLaunchBlocked(
+                            displayId, componentName, userId, intentSender);
                 } catch (RemoteException e) {
                     Slog.w(TAG, "Unable to call mActivityListener for display: " + displayId, e);
                 }
@@ -1364,7 +1367,8 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
     }
 
     @RequiresPermission(android.Manifest.permission.INTERACT_ACROSS_USERS)
-    private void onActivityBlocked(int displayId, ActivityInfo activityInfo) {
+    private void onActivityBlocked(int displayId, ActivityInfo activityInfo,
+            IntentSender intentSender) {
         Intent intent = BlockedAppStreamingActivity.createIntent(activityInfo, getDisplayName());
         if (shouldShowBlockedActivityDialog(
                 activityInfo.getComponentName(), intent.getComponent())) {
@@ -1380,7 +1384,8 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
                     displayId,
                     activityInfo.getComponentName(),
                     UserHandle.getUserHandleForUid(
-                            activityInfo.applicationInfo.uid).getIdentifier());
+                            activityInfo.applicationInfo.uid).getIdentifier(),
+                    intentSender);
         }
     }
 

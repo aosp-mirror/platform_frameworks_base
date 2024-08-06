@@ -53,7 +53,6 @@ class ShareToAppPermissionDialogDelegate(
         super.onCreate(dialog, savedInstanceState)
         // TODO(b/270018943): Handle the case of System sharing (not recording nor casting)
         setDialogTitle(R.string.media_projection_entry_app_permission_dialog_title)
-        setStartButtonText(R.string.media_projection_entry_app_permission_dialog_continue)
         setStartButtonOnClickListener {
             // Note that it is important to run this callback before dismissing, so that the
             // callback can disable the dialog exit animation if it wants to.
@@ -88,6 +87,8 @@ class ShareToAppPermissionDialogDelegate(
                         warningText =
                             R.string
                                 .media_projection_entry_app_permission_dialog_warning_single_app,
+                        startButtonText =
+                            R.string.media_projection_entry_app_permission_dialog_continue,
                         spinnerDisabledText = singleAppDisabledText,
                     ),
                     ScreenShareOption(
@@ -96,6 +97,8 @@ class ShareToAppPermissionDialogDelegate(
                         warningText =
                             R.string
                                 .media_projection_entry_app_permission_dialog_warning_entire_screen,
+                        startButtonText =
+                            R.string.media_projection_entry_app_permission_dialog_continue,
                     )
                 )
             return if (singleAppDisabledText != null) {

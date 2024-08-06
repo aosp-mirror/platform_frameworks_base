@@ -2004,6 +2004,7 @@ public class BubbleStackView extends FrameLayout
             // and then remove our views (removing the icon view triggers the removal of the
             // bubble window so do that at the end of the animation so we see the scrim animate).
             BadgedImageView iconView = bubble.getIconView();
+            final BubbleViewProvider expandedBubbleBeforeScrim = mExpandedBubble;
             showScrim(false, () -> {
                 mRemovingLastBubbleWhileExpanded = false;
                 bubble.cleanupExpandedView();
@@ -2012,7 +2013,17 @@ public class BubbleStackView extends FrameLayout
                 }
                 bubble.cleanupViews(); // cleans up the icon view
                 updateExpandedView(); // resets state for no expanded bubble
-                mExpandedBubble = null;
+                // Bubble keys may not have changed if we receive an update to the same bubble.
+                // Compare bubble object instances to see if the expanded bubble has changed.
+                if (expandedBubbleBeforeScrim == mExpandedBubble) {
+                    // Only clear expanded bubble if it has not changed since the scrim animation
+                    // started.
+                    // Scrim animation can take some time run and it is possible for a new bubble
+                    // to be added while the animation is running. This causes the expanded
+                    // bubble to change. Make sure we only clear the expanded bubble if it did
+                    // not change between when the scrim animation started and completed.
+                    mExpandedBubble = null;
+                }
             });
             logBubbleEvent(bubble, FrameworkStatsLog.BUBBLE_UICHANGED__ACTION__DISMISSED);
             return;
