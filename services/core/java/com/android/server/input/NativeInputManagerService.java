@@ -214,6 +214,9 @@ interface NativeInputManagerService {
 
     InputSensorInfo[] getSensorList(int deviceId);
 
+    @Nullable
+    TouchpadHardwareProperties getTouchpadHardwareProperties(int deviceId);
+
     boolean flushSensor(int deviceId, int sensorType);
 
     boolean enableSensor(int deviceId, int sensorType, int samplingPeriodUs,
@@ -505,6 +508,9 @@ interface NativeInputManagerService {
 
         @Override
         public native InputSensorInfo[] getSensorList(int deviceId);
+
+        @Override
+        public native TouchpadHardwareProperties getTouchpadHardwareProperties(int deviceId);
 
         @Override
         public native boolean flushSensor(int deviceId, int sensorType);
