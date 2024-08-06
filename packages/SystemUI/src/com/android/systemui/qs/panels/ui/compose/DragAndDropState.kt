@@ -29,13 +29,14 @@ import androidx.compose.ui.draganddrop.DragAndDropEvent
 import androidx.compose.ui.draganddrop.DragAndDropTarget
 import androidx.compose.ui.draganddrop.DragAndDropTransferData
 import androidx.compose.ui.draganddrop.mimeTypes
+import com.android.systemui.qs.panels.shared.model.SizedTile
 import com.android.systemui.qs.panels.ui.viewmodel.EditTileViewModel
 import com.android.systemui.qs.pipeline.shared.TileSpec
 
 @Composable
 fun rememberDragAndDropState(listState: EditTileListState): DragAndDropState {
-    val sourceSpec: MutableState<EditTileViewModel?> = remember { mutableStateOf(null) }
-    return remember(listState) { DragAndDropState(sourceSpec, listState) }
+    val draggedCell: MutableState<SizedTile<EditTileViewModel>?> = remember { mutableStateOf(null) }
+    return remember(listState) { DragAndDropState(draggedCell, listState) }
 }
 
 /**
@@ -43,37 +44,37 @@ fun rememberDragAndDropState(listState: EditTileListState): DragAndDropState {
  * drop events.
  */
 class DragAndDropState(
-    val sourceSpec: MutableState<EditTileViewModel?>,
-    private val listState: EditTileListState
+    val draggedCell: MutableState<SizedTile<EditTileViewModel>?>,
+    private val listState: EditTileListState,
 ) {
     val dragInProgress: Boolean
-        get() = sourceSpec.value != null
+        get() = draggedCell.value != null
 
     /** Returns index of the dragged tile if it's present in the list. Returns -1 if not. */
     fun currentPosition(): Int {
-        return sourceSpec.value?.let { listState.indexOf(it.tileSpec) } ?: -1
+        return draggedCell.value?.let { listState.indexOf(it.tile.tileSpec) } ?: -1
     }
 
     fun isMoving(tileSpec: TileSpec): Boolean {
-        return sourceSpec.value?.let { it.tileSpec == tileSpec } ?: false
+        return draggedCell.value?.let { it.tile.tileSpec == tileSpec } ?: false
     }
 
-    fun onStarted(tile: EditTileViewModel) {
-        sourceSpec.value = tile
+    fun onStarted(cell: SizedTile<EditTileViewModel>) {
+        draggedCell.value = cell
     }
 
     fun onMoved(targetSpec: TileSpec) {
-        sourceSpec.value?.let { listState.move(it, targetSpec) }
+        draggedCell.value?.let { listState.move(it, targetSpec) }
     }
 
     fun movedOutOfBounds() {
         // Removing the tiles from the current tile grid if it moves out of bounds. This clears
         // the spacer and makes it apparent that dropping the tile at that point would remove it.
-        sourceSpec.value?.let { listState.remove(it.tileSpec) }
+        draggedCell.value?.let { listState.remove(it.tile.tileSpec) }
     }
 
     fun onDrop() {
-        sourceSpec.value = null
+        draggedCell.value = null
     }
 }
 
@@ -97,8 +98,8 @@ fun Modifier.dragAndDropTile(
         remember(dragAndDropState) {
             object : DragAndDropTarget {
                 override fun onDrop(event: DragAndDropEvent): Boolean {
-                    return dragAndDropState.sourceSpec.value?.let {
-                        onDrop(it.tileSpec, dragAndDropState.currentPosition())
+                    return dragAndDropState.draggedCell.value?.let {
+                        onDrop(it.tile.tileSpec, dragAndDropState.currentPosition())
                         dragAndDropState.onDrop()
                         true
                     } ?: false
@@ -112,7 +113,7 @@ fun Modifier.dragAndDropTile(
     return dragAndDropTarget(
         shouldStartDragAndDrop = { event ->
             event.mimeTypes().contains(QsDragAndDrop.TILESPEC_MIME_TYPE) &&
-                dragAndDropState.sourceSpec.value?.let { acceptDrops(it.tileSpec) } ?: false
+                dragAndDropState.draggedCell.value?.let { acceptDrops(it.tile.tileSpec) } ?: false
         },
         target = target,
     )
@@ -134,8 +135,8 @@ fun Modifier.dragAndDropRemoveZone(
         remember(dragAndDropState) {
             object : DragAndDropTarget {
                 override fun onDrop(event: DragAndDropEvent): Boolean {
-                    return dragAndDropState.sourceSpec.value?.let {
-                        onDrop(it.tileSpec)
+                    return dragAndDropState.draggedCell.value?.let {
+                        onDrop(it.tile.tileSpec)
                         dragAndDropState.onDrop()
                         true
                     } ?: false
@@ -176,8 +177,8 @@ fun Modifier.dragAndDropTileList(
                 }
 
                 override fun onDrop(event: DragAndDropEvent): Boolean {
-                    return dragAndDropState.sourceSpec.value?.let {
-                        onDrop(it.tileSpec, dragAndDropState.currentPosition())
+                    return dragAndDropState.draggedCell.value?.let {
+                        onDrop(it.tile.tileSpec, dragAndDropState.currentPosition())
                         dragAndDropState.onDrop()
                         true
                     } ?: false
@@ -188,23 +189,23 @@ fun Modifier.dragAndDropTileList(
         target = target,
         shouldStartDragAndDrop = { event ->
             event.mimeTypes().contains(QsDragAndDrop.TILESPEC_MIME_TYPE) &&
-                dragAndDropState.sourceSpec.value?.let { acceptDrops(it.tileSpec) } ?: false
+                dragAndDropState.draggedCell.value?.let { acceptDrops(it.tile.tileSpec) } ?: false
         },
     )
 }
 
 fun Modifier.dragAndDropTileSource(
-    tile: EditTileViewModel,
+    sizedTile: SizedTile<EditTileViewModel>,
     onTap: (TileSpec) -> Unit,
     onDoubleTap: (TileSpec) -> Unit,
     dragAndDropState: DragAndDropState
 ): Modifier {
     return dragAndDropSource {
         detectTapGestures(
-            onTap = { onTap(tile.tileSpec) },
-            onDoubleTap = { onDoubleTap(tile.tileSpec) },
+            onTap = { onTap(sizedTile.tile.tileSpec) },
+            onDoubleTap = { onDoubleTap(sizedTile.tile.tileSpec) },
             onLongPress = {
-                dragAndDropState.onStarted(tile)
+                dragAndDropState.onStarted(sizedTile)
 
                 // The tilespec from the ClipData transferred isn't actually needed as we're moving
                 // a tile within the same application. We're using a custom MIME type to limit the
@@ -214,7 +215,7 @@ fun Modifier.dragAndDropTileSource(
                         ClipData(
                             QsDragAndDrop.CLIPDATA_LABEL,
                             arrayOf(QsDragAndDrop.TILESPEC_MIME_TYPE),
-                            ClipData.Item(tile.tileSpec.spec)
+                            ClipData.Item(sizedTile.tile.tileSpec.spec)
                         )
                     )
                 )

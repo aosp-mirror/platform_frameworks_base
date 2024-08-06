@@ -67,19 +67,25 @@ class IconTilesInteractorTest : SysuiTestCase() {
             }
         }
 
+    @OptIn(ExperimentalCoroutinesApi::class)
     @Test
     fun resize_updatesSharedPreferences() =
         with(kosmos) {
             testScope.runTest {
+                qsPreferencesRepository.setLargeTilesSpecs(setOf())
+                runCurrent()
+
                 val latest by collectLastValue(qsPreferencesRepository.largeTilesSpecs)
                 val spec = TileSpec.create("large")
 
                 // Assert that the tile is added to the large tiles after resizing
-                underTest.resize(spec, toIcon = false)
+                underTest.resize(spec)
+                runCurrent()
                 assertThat(latest).contains(spec)
 
                 // Assert that the tile is removed from the large tiles after resizing
-                underTest.resize(spec, toIcon = true)
+                underTest.resize(spec)
+                runCurrent()
                 assertThat(latest).doesNotContain(spec)
             }
         }
