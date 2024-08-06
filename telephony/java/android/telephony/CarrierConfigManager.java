@@ -9992,6 +9992,16 @@ public class CarrierConfigManager {
     @FlaggedApi(Flags.FLAG_CARRIER_ROAMING_NB_IOT_NTN)
     public static final String KEY_SATELLITE_ESOS_SUPPORTED_BOOL = "satellite_esos_supported_bool";
 
+    /**
+     * Defines the NIDD (Non-IP Data Delivery) APN to be used for carrier roaming to satellite
+     * attachment. For more on NIDD, see 3GPP TS 29.542.
+     * Note this config is the only source of truth regarding the definition of the APN.
+     *
+     * @hide
+     */
+    public static final String KEY_SATELLITE_NIDD_APN_NAME_STRING =
+            "satellite_nidd_apn_name_string";
+
     /** @hide */
     @IntDef({
             CARRIER_ROAMING_NTN_CONNECT_AUTOMATIC,
@@ -11224,6 +11234,7 @@ public class CarrierConfigManager {
         sDefaults.putInt(KEY_EMERGENCY_CALL_TO_SATELLITE_T911_HANDOVER_TIMEOUT_MILLIS_INT,
                 (int) TimeUnit.SECONDS.toMillis(30));
         sDefaults.putBoolean(KEY_SATELLITE_ESOS_SUPPORTED_BOOL, false);
+        sDefaults.putString(KEY_SATELLITE_NIDD_APN_NAME_STRING, "");
         sDefaults.putInt(KEY_CARRIER_ROAMING_NTN_CONNECT_TYPE_INT, 0);
         sDefaults.putInt(KEY_CARRIER_ROAMING_NTN_EMERGENCY_CALL_TO_SATELLITE_HANDOVER_TYPE_INT,
                 SatelliteManager.EMERGENCY_CALL_TO_SATELLITE_HANDOVER_TYPE_T911);
