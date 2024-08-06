@@ -14,23 +14,24 @@
  * limitations under the License.
  */
 
-package com.android.systemui.inputdevice.oobe
+package com.android.systemui.inputdevice.tutorial
 
 import com.android.systemui.CoreStartable
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.inputdevice.oobe.domain.interactor.OobeSchedulerInteractor
+import com.android.systemui.inputdevice.tutorial.domain.interactor.TutorialSchedulerInteractor
 import com.android.systemui.shared.Flags.newTouchpadGesturesTutorial
 import dagger.Lazy
 import javax.inject.Inject
 
-/** A [CoreStartable] to launch a scheduler for keyboard and touchpad OOBE education */
+/** A [CoreStartable] to launch a scheduler for keyboard and touchpad education */
 @SysUISingleton
-class KeyboardTouchpadOobeTutorialCoreStartable
+class KeyboardTouchpadTutorialCoreStartable
 @Inject
-constructor(private val oobeSchedulerInteractor: Lazy<OobeSchedulerInteractor>) : CoreStartable {
+constructor(private val tutorialSchedulerInteractor: Lazy<TutorialSchedulerInteractor>) :
+    CoreStartable {
     override fun start() {
         if (newTouchpadGesturesTutorial()) {
-            oobeSchedulerInteractor.get().start()
+            tutorialSchedulerInteractor.get().start()
         }
     }
 }

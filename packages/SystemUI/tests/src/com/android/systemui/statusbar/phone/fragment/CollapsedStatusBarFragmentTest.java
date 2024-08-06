@@ -39,7 +39,6 @@ import android.platform.test.annotations.EnableFlags;
 import android.provider.Settings;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper.RunWithLooper;
-import android.view.LayoutInflater;
 import android.view.View;
 
 import androidx.test.filters.SmallTest;
@@ -64,7 +63,6 @@ import com.android.systemui.statusbar.disableflags.DisableFlagsLogger;
 import com.android.systemui.statusbar.events.SystemStatusAnimationScheduler;
 import com.android.systemui.statusbar.notification.icon.ui.viewbinder.NotificationIconContainerStatusBarViewBinder;
 import com.android.systemui.statusbar.phone.HeadsUpAppearanceController;
-import com.android.systemui.statusbar.phone.NotificationIconAreaController;
 import com.android.systemui.statusbar.phone.StatusBarHideIconsForBouncerManager;
 import com.android.systemui.statusbar.phone.StatusBarLocationPublisher;
 import com.android.systemui.statusbar.phone.fragment.dagger.StatusBarFragmentComponent;
@@ -95,7 +93,6 @@ import java.util.List;
 @RunWithLooper(setAsMainLooper = true)
 @SmallTest
 public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
-    private NotificationIconAreaController mMockNotificationAreaController;
     private ShadeExpansionStateManager mShadeExpansionStateManager;
     private OngoingCallController mOngoingCallController;
     private SystemStatusAnimationScheduler mAnimationScheduler;
@@ -931,13 +928,11 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
         mCollapsedStatusBarViewModel = new FakeCollapsedStatusBarViewModel();
         mCollapsedStatusBarViewBinder = new FakeCollapsedStatusBarViewBinder();
 
-        setUpNotificationIconAreaController();
         return new CollapsedStatusBarFragment(
                 mStatusBarFragmentComponentFactory,
                 mOngoingCallController,
                 mAnimationScheduler,
                 mLocationPublisher,
-                mMockNotificationAreaController,
                 mShadeExpansionStateManager,
                 mStatusBarIconController,
                 mIconManagerFactory,
@@ -968,14 +963,6 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
                 .thenReturn(mStatusBarFragmentComponent);
         when(mStatusBarFragmentComponent.getHeadsUpAppearanceController())
                 .thenReturn(mHeadsUpAppearanceController);
-    }
-
-    private void setUpNotificationIconAreaController() {
-        mMockNotificationAreaController = mock(NotificationIconAreaController.class);
-        View notificationAreaInner =
-                LayoutInflater.from(mContext).inflate(R.layout.notification_icon_area, null);
-        when(mMockNotificationAreaController.getNotificationInnerAreaView())
-                .thenReturn(notificationAreaInner);
     }
 
     /**

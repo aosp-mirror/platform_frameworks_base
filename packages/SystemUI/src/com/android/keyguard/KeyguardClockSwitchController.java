@@ -60,9 +60,7 @@ import com.android.systemui.statusbar.lockscreen.LockscreenSmartspaceController;
 import com.android.systemui.statusbar.notification.AnimatableProperty;
 import com.android.systemui.statusbar.notification.PropertyAnimator;
 import com.android.systemui.statusbar.notification.icon.ui.viewbinder.NotificationIconContainerAlwaysOnDisplayViewBinder;
-import com.android.systemui.statusbar.notification.shared.NotificationIconContainerRefactor;
 import com.android.systemui.statusbar.notification.stack.AnimationProperties;
-import com.android.systemui.statusbar.phone.NotificationIconAreaController;
 import com.android.systemui.statusbar.phone.NotificationIconContainer;
 import com.android.systemui.util.ViewController;
 import com.android.systemui.util.concurrency.DelayableExecutor;
@@ -87,7 +85,6 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
     private final StatusBarStateController mStatusBarStateController;
     private final ClockRegistry mClockRegistry;
     private final KeyguardSliceViewController mKeyguardSliceViewController;
-    private final NotificationIconAreaController mNotificationIconAreaController;
     private final LockscreenSmartspaceController mSmartspaceController;
     private final SecureSettings mSecureSettings;
     private final DumpManager mDumpManager;
@@ -165,7 +162,6 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
             StatusBarStateController statusBarStateController,
             ClockRegistry clockRegistry,
             KeyguardSliceViewController keyguardSliceViewController,
-            NotificationIconAreaController notificationIconAreaController,
             LockscreenSmartspaceController smartspaceController,
             NotificationIconContainerAlwaysOnDisplayViewBinder nicViewBinder,
             KeyguardUnlockAnimationController keyguardUnlockAnimationController,
@@ -183,7 +179,6 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
         mStatusBarStateController = statusBarStateController;
         mClockRegistry = clockRegistry;
         mKeyguardSliceViewController = keyguardSliceViewController;
-        mNotificationIconAreaController = notificationIconAreaController;
         mSmartspaceController = smartspaceController;
         mNicViewBinder = nicViewBinder;
         mSecureSettings = secureSettings;
@@ -351,10 +346,8 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
     int getNotificationIconAreaHeight() {
         if (MigrateClocksToBlueprint.isEnabled()) {
             return 0;
-        } else if (NotificationIconContainerRefactor.isEnabled()) {
-            return mAodIconContainer != null ? mAodIconContainer.getHeight() : 0;
         } else {
-            return mNotificationIconAreaController.getHeight();
+            return mAodIconContainer != null ? mAodIconContainer.getHeight() : 0;
         }
     }
 
@@ -603,16 +596,11 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
             NotificationIconContainer nic = (NotificationIconContainer)
                     mView.findViewById(
                             com.android.systemui.res.R.id.left_aligned_notification_icon_container);
-            if (NotificationIconContainerRefactor.isEnabled()) {
-                if (mAodIconsBindHandle != null) {
-                    mAodIconsBindHandle.dispose();
-                }
-                if (nic != null) {
-                    mAodIconsBindHandle = mNicViewBinder.bindWhileAttached(nic);
-                    mAodIconContainer = nic;
-                }
-            } else {
-                mNotificationIconAreaController.setupAodIcons(nic);
+            if (mAodIconsBindHandle != null) {
+                mAodIconsBindHandle.dispose();
+            }
+            if (nic != null) {
+                mAodIconsBindHandle = mNicViewBinder.bindWhileAttached(nic);
                 mAodIconContainer = nic;
             }
         }
