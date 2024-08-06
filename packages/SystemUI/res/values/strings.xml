@@ -3682,17 +3682,25 @@
     <string name="touchpad_tutorial_action_key_button">Action key</string>
     <!-- Label for button finishing touchpad tutorial [CHAR LIMIT=NONE] -->
     <string name="touchpad_tutorial_done_button">Done</string>
-    <!-- Screen title after gesture was done successfully [CHAR LIMIT=NONE] -->
-    <string name="touchpad_tutorial_gesture_done">Great job!</string>
+    <!-- BACK GESTURE -->
     <!-- Touchpad back gesture action name in tutorial [CHAR LIMIT=NONE] -->
     <string name="touchpad_back_gesture_action_title">Go back</string>
     <!-- Touchpad back gesture guidance in gestures tutorial [CHAR LIMIT=NONE] -->
     <string name="touchpad_back_gesture_guidance">To go back, swipe left or right using three fingers anywhere on the touchpad.\n\nYou can also use the keyboard shortcut
 Action + ESC for this.</string>
+    <!-- Screen title after gesture was done successfully [CHAR LIMIT=NONE] -->
+    <string name="touchpad_tutorial_gesture_done">Great job!</string>
     <!-- Text shown to the user after they complete back gesture tutorial [CHAR LIMIT=NONE] -->
     <string name="touchpad_back_gesture_finished">You completed the go back gesture.</string>
-    <string name="touchpad_back_gesture_animation_content_description">Touchpad showing three fingers moving right and left</string>
-    <string name="touchpad_back_gesture_screen_animation_content_description">Device screen showing animation for back gesture</string>
+    <!-- HOME GESTURE -->
+    <!-- Touchpad home gesture action name in tutorial [CHAR LIMIT=NONE] -->
+    <string name="touchpad_home_gesture_action_title">Go home</string>
+    <!-- Touchpad home gesture guidance in gestures tutorial [CHAR LIMIT=NONE] -->
+    <string name="touchpad_home_gesture_guidance">To go to your home screen at any time, swipe up with three fingers from the bottom of your screen.</string>
+    <!-- Screen title after home gesture was done successfully [CHAR LIMIT=NONE] -->
+    <string name="touchpad_home_gesture_done">Nice!</string>
+    <!-- Text shown to the user after they complete home gesture tutorial [CHAR LIMIT=NONE] -->
+    <string name="touchpad_home_gesture_finished">You completed the go home gesture.</string>
 
     <!-- Content description for keyboard backlight brightness dialog [CHAR LIMIT=NONE] -->
     <string name="keyboard_backlight_dialog_title">Keyboard backlight</string>
