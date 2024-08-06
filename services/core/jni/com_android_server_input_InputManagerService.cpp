@@ -106,6 +106,7 @@ static const char* VELOCITYTRACKER_STRATEGY = "velocitytracker_strategy";
 static struct {
     jclass clazz;
     jmethodID notifyInputDevicesChanged;
+    jmethodID notifyTouchpadHardwareState;
     jmethodID notifySwitch;
     jmethodID notifyInputChannelBroken;
     jmethodID notifyNoFocusedWindowAnr;
@@ -142,6 +143,34 @@ static struct {
     jmethodID notifyDropWindow;
     jmethodID getParentSurfaceForPointers;
 } gServiceClassInfo;
+
+static struct {
+    jclass clazz;
+    // fields
+    jfieldID timestamp;
+    jfieldID buttonsDown;
+    jfieldID fingerCount;
+    jfieldID touchCount;
+    jfieldID fingerStates;
+    // methods
+    jmethodID init;
+} gTouchpadHardwareStateClassInfo;
+
+static struct {
+    jclass clazz;
+    // fields
+    jfieldID touchMajor;
+    jfieldID touchMinor;
+    jfieldID widthMajor;
+    jfieldID widthMinor;
+    jfieldID pressure;
+    jfieldID orientation;
+    jfieldID positionX;
+    jfieldID positionY;
+    jfieldID trackingId;
+    // methods
+    jmethodID init;
+} gTouchpadFingerStateClassInfo;
 
 static struct {
     jclass clazz;
@@ -332,6 +361,8 @@ public:
 
     void getReaderConfiguration(InputReaderConfiguration* outConfig) override;
     void notifyInputDevicesChanged(const std::vector<InputDeviceInfo>& inputDevices) override;
+    void notifyTouchpadHardwareState(const SelfContainedHardwareState& schs,
+                                     int32_t deviceId) override;
     std::shared_ptr<KeyCharacterMap> getKeyboardLayoutOverlay(
             const InputDeviceIdentifier& identifier,
             const std::optional<KeyboardLayoutInfo> keyboardLayoutInfo) override;
@@ -882,6 +913,87 @@ void NativeInputManager::notifyInputDevicesChanged(const std::vector<InputDevice
     }
 
     checkAndClearExceptionFromCallback(env, "notifyInputDevicesChanged");
+}
+
+static ScopedLocalRef<jobject> createTouchpadHardwareStateObj(
+        JNIEnv* env, const SelfContainedHardwareState& schs) {
+    ScopedLocalRef<jobject>
+            touchpadHardwareStateObj(env,
+                                     env->NewObject(gTouchpadHardwareStateClassInfo.clazz,
+                                                    gTouchpadHardwareStateClassInfo.init, ""));
+
+    if (!touchpadHardwareStateObj.get()) {
+        return ScopedLocalRef<jobject>(env);
+    }
+
+    env->SetFloatField(touchpadHardwareStateObj.get(), gTouchpadHardwareStateClassInfo.timestamp,
+                       static_cast<jfloat>(schs.state.timestamp));
+    env->SetIntField(touchpadHardwareStateObj.get(), gTouchpadHardwareStateClassInfo.buttonsDown,
+                     static_cast<jint>(schs.state.buttons_down));
+    env->SetIntField(touchpadHardwareStateObj.get(), gTouchpadHardwareStateClassInfo.fingerCount,
+                     static_cast<jint>(schs.state.finger_cnt));
+    env->SetIntField(touchpadHardwareStateObj.get(), gTouchpadHardwareStateClassInfo.touchCount,
+                     static_cast<jint>(schs.state.touch_cnt));
+
+    size_t count = schs.fingers.size();
+    ScopedLocalRef<jobjectArray>
+            fingerStateObjArray(env,
+                                env->NewObjectArray(count, gTouchpadFingerStateClassInfo.clazz,
+                                                    nullptr));
+
+    if (!fingerStateObjArray.get()) {
+        return ScopedLocalRef<jobject>(env);
+    }
+
+    for (size_t i = 0; i < count; i++) {
+        ScopedLocalRef<jobject> fingerStateObj(env,
+                                               env->NewObject(gTouchpadFingerStateClassInfo.clazz,
+                                                              gTouchpadFingerStateClassInfo.init,
+                                                              ""));
+        if (!fingerStateObj.get()) {
+            return ScopedLocalRef<jobject>(env);
+        }
+        env->SetFloatField(fingerStateObj.get(), gTouchpadFingerStateClassInfo.touchMajor,
+                           static_cast<jfloat>(schs.fingers[i].touch_major));
+        env->SetFloatField(fingerStateObj.get(), gTouchpadFingerStateClassInfo.touchMinor,
+                           static_cast<jfloat>(schs.fingers[i].touch_minor));
+        env->SetFloatField(fingerStateObj.get(), gTouchpadFingerStateClassInfo.widthMajor,
+                           static_cast<jfloat>(schs.fingers[i].width_major));
+        env->SetFloatField(fingerStateObj.get(), gTouchpadFingerStateClassInfo.widthMinor,
+                           static_cast<jfloat>(schs.fingers[i].width_minor));
+        env->SetFloatField(fingerStateObj.get(), gTouchpadFingerStateClassInfo.pressure,
+                           static_cast<jfloat>(schs.fingers[i].pressure));
+        env->SetFloatField(fingerStateObj.get(), gTouchpadFingerStateClassInfo.orientation,
+                           static_cast<jfloat>(schs.fingers[i].orientation));
+        env->SetFloatField(fingerStateObj.get(), gTouchpadFingerStateClassInfo.positionX,
+                           static_cast<jfloat>(schs.fingers[i].position_x));
+        env->SetFloatField(fingerStateObj.get(), gTouchpadFingerStateClassInfo.positionY,
+                           static_cast<jfloat>(schs.fingers[i].position_y));
+        env->SetIntField(fingerStateObj.get(), gTouchpadFingerStateClassInfo.trackingId,
+                         static_cast<jint>(schs.fingers[i].tracking_id));
+
+        env->SetObjectArrayElement(fingerStateObjArray.get(), i, fingerStateObj.get());
+    }
+
+    env->SetObjectField(touchpadHardwareStateObj.get(),
+                        gTouchpadHardwareStateClassInfo.fingerStates, fingerStateObjArray.get());
+
+    return touchpadHardwareStateObj;
+}
+
+void NativeInputManager::notifyTouchpadHardwareState(const SelfContainedHardwareState& schs,
+                                                     int32_t deviceId) {
+    ATRACE_CALL();
+    JNIEnv* env = jniEnv();
+
+    ScopedLocalRef<jobject> hardwareStateObj = createTouchpadHardwareStateObj(env, schs);
+
+    if (hardwareStateObj.get()) {
+        env->CallVoidMethod(mServiceObj, gServiceClassInfo.notifyTouchpadHardwareState,
+                            hardwareStateObj.get(), deviceId);
+    }
+
+    checkAndClearExceptionFromCallback(env, "notifyTouchpadHardwareState");
 }
 
 std::shared_ptr<KeyCharacterMap> NativeInputManager::getKeyboardLayoutOverlay(
@@ -2952,6 +3064,10 @@ int register_android_server_InputManager(JNIEnv* env) {
     GET_METHOD_ID(gServiceClassInfo.notifyInputDevicesChanged, clazz,
             "notifyInputDevicesChanged", "([Landroid/view/InputDevice;)V");
 
+    GET_METHOD_ID(gServiceClassInfo.notifyTouchpadHardwareState, clazz,
+                  "notifyTouchpadHardwareState",
+                  "(Lcom/android/server/input/TouchpadHardwareState;I)V")
+
     GET_METHOD_ID(gServiceClassInfo.notifySwitch, clazz,
             "notifySwitch", "(JII)V");
 
@@ -3149,6 +3265,56 @@ int register_android_server_InputManager(JNIEnv* env) {
     GET_FIELD_ID(gInputSensorInfo.id, gInputSensorInfo.clazz, "mId", "I");
 
     GET_METHOD_ID(gInputSensorInfo.init, gInputSensorInfo.clazz, "<init>", "()V");
+
+    // TouchpadHardwareState
+
+    FIND_CLASS(gTouchpadHardwareStateClassInfo.clazz,
+               "com/android/server/input/TouchpadHardwareState");
+    gTouchpadHardwareStateClassInfo.clazz =
+            reinterpret_cast<jclass>(env->NewGlobalRef(gTouchpadHardwareStateClassInfo.clazz));
+
+    GET_FIELD_ID(gTouchpadHardwareStateClassInfo.touchCount, gTouchpadHardwareStateClassInfo.clazz,
+                 "mTouchCount", "I");
+    GET_FIELD_ID(gTouchpadHardwareStateClassInfo.fingerCount, gTouchpadHardwareStateClassInfo.clazz,
+                 "mFingerCount", "I");
+    GET_FIELD_ID(gTouchpadHardwareStateClassInfo.buttonsDown, gTouchpadHardwareStateClassInfo.clazz,
+                 "mButtonsDown", "I");
+    GET_FIELD_ID(gTouchpadHardwareStateClassInfo.timestamp, gTouchpadHardwareStateClassInfo.clazz,
+                 "mTimestamp", "F");
+    GET_FIELD_ID(gTouchpadHardwareStateClassInfo.fingerStates,
+                 gTouchpadHardwareStateClassInfo.clazz, "mFingerStates",
+                 "[Lcom/android/server/input/TouchpadFingerState;");
+
+    GET_METHOD_ID(gTouchpadHardwareStateClassInfo.init, gTouchpadHardwareStateClassInfo.clazz,
+                  "<init>", "()V");
+
+    // TouchpadFingerState
+
+    FIND_CLASS(gTouchpadFingerStateClassInfo.clazz, "com/android/server/input/TouchpadFingerState");
+    gTouchpadFingerStateClassInfo.clazz =
+            reinterpret_cast<jclass>(env->NewGlobalRef(gTouchpadFingerStateClassInfo.clazz));
+
+    GET_FIELD_ID(gTouchpadFingerStateClassInfo.touchMajor, gTouchpadFingerStateClassInfo.clazz,
+                 "mTouchMajor", "F");
+    GET_FIELD_ID(gTouchpadFingerStateClassInfo.touchMinor, gTouchpadFingerStateClassInfo.clazz,
+                 "mTouchMinor", "F");
+    GET_FIELD_ID(gTouchpadFingerStateClassInfo.widthMajor, gTouchpadFingerStateClassInfo.clazz,
+                 "mWidthMajor", "F");
+    GET_FIELD_ID(gTouchpadFingerStateClassInfo.widthMinor, gTouchpadFingerStateClassInfo.clazz,
+                 "mWidthMinor", "F");
+    GET_FIELD_ID(gTouchpadFingerStateClassInfo.pressure, gTouchpadFingerStateClassInfo.clazz,
+                 "mPressure", "F");
+    GET_FIELD_ID(gTouchpadFingerStateClassInfo.orientation, gTouchpadFingerStateClassInfo.clazz,
+                 "mOrientation", "F")
+    GET_FIELD_ID(gTouchpadFingerStateClassInfo.positionX, gTouchpadFingerStateClassInfo.clazz,
+                 "mPositionX", "F");
+    GET_FIELD_ID(gTouchpadFingerStateClassInfo.positionY, gTouchpadFingerStateClassInfo.clazz,
+                 "mPositionY", "F");
+    GET_FIELD_ID(gTouchpadFingerStateClassInfo.trackingId, gTouchpadFingerStateClassInfo.clazz,
+                 "mTrackingId", "I");
+
+    GET_METHOD_ID(gTouchpadFingerStateClassInfo.init, gTouchpadFingerStateClassInfo.clazz, "<init>",
+                  "()V");
 
     // TouchpadHardawreProperties
     FIND_CLASS(gTouchpadHardwarePropertiesOffsets.clazz,
