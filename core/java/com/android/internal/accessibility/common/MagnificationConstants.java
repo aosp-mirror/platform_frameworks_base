@@ -33,7 +33,7 @@ public final class MagnificationConstants {
     /** Minimum supported value for magnification scale. */
     public static final float SCALE_MIN_VALUE = 1.0f;
 
-    /** Maximum supported value for magnification scale. Default of 8.0. */
+    /** Maximum supported value for magnification scale. Default of 20.0. */
     public static final float SCALE_MAX_VALUE =
-            Float.parseFloat(SystemProperties.get("ro.config.max_magnification_scale", "8.0"));
+            Float.parseFloat(SystemProperties.get("ro.config.max_magnification_scale", "20.0"));
 }
