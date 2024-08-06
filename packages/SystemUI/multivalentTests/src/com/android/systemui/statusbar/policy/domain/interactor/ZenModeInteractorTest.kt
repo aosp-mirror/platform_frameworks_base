@@ -172,7 +172,7 @@ class ZenModeInteractorTest : SysuiTestCase() {
     @Test
     fun shouldAskForZenDuration_changesWithSetting() =
         testScope.runTest {
-            val manualDnd = TestModeBuilder.MANUAL_DND
+            val manualDnd = TestModeBuilder.MANUAL_DND_ACTIVE
 
             settingsRepository.setInt(ZEN_DURATION, ZEN_DURATION_FOREVER)
             runCurrent()
@@ -201,7 +201,7 @@ class ZenModeInteractorTest : SysuiTestCase() {
     @Test
     fun activateMode_usesCorrectDuration() =
         testScope.runTest {
-            val manualDnd = TestModeBuilder.MANUAL_DND
+            val manualDnd = TestModeBuilder.MANUAL_DND_ACTIVE
             zenModeRepository.addModes(listOf(manualDnd))
             settingsRepository.setInt(ZEN_DURATION, ZEN_DURATION_FOREVER)
             runCurrent()
