@@ -3802,16 +3802,16 @@ Action + ESC for this.</string>
     <string name="all_apps_edu_notification_content">Press the action key at any time. Tap to learn more gestures.</string>
 
     <!-- Title for Extra Dim dialog [CHAR LIMIT=NONE] -->
-    <string name="accessibility_deprecate_extra_dim_dialog_title">Extra dim is now part of the brightness bar</string>
+    <string name="accessibility_deprecate_extra_dim_dialog_title">Extra dim is now part of the brightness slider</string>
     <!-- Content description for Extra Dim dialog. This helps users understand that we could make screen much dimmer by lowering the brightness through the brightness bar in a dark environment. [CHAR LIMIT=NONE] -->
     <string name="accessibility_deprecate_extra_dim_dialog_description">
-        You can now make the screen extra dim by lowering the brightness level even further from the top of your screen.\n\nThis works best when you\'re in a dark environment.
+        You can now make the screen extra dim by lowering the brightness level even further.\n\nSince this feature is now part of the brightness slider, extra dim shortcuts are being removed.
     </string>
     <!-- Label for button removing Extra Dim shortcuts [CHAR LIMIT=NONE] -->
-    <string name="accessibility_deprecate_extra_dim_dialog_button">Remove extra dim shortcut</string>
+    <string name="accessibility_deprecate_extra_dim_dialog_button">Remove extra dim shortcuts</string>
     <!-- Toast message for notifying users to use regular brightness bar to lower the brightness. [CHAR LIMIT=NONE] -->
     <string name="accessibility_deprecate_extra_dim_dialog_toast">
-        Extra dim shortcut removed. To lower your brightness, use the regular brightness bar.</string>
+        Extra dim shortcuts removed</string>
 
     <!-- Label for category in QS Edit mode list of tiles, for tiles that are related to connectivity, e.g. Internet. [CHAR LIMIT=NONE] -->
     <string name="qs_edit_mode_category_connectivity">
