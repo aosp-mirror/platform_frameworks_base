@@ -193,7 +193,11 @@ public final class DozeServiceHost implements DozeHost {
     void fireNotificationPulse(NotificationEntry entry) {
         Runnable pulseSuppressedListener = () -> {
             mHeadsUpManager.removeNotification(
-                    entry.getKey(), /* releaseImmediately= */ true, /* animate= */ false);
+                    entry.getKey(),
+                    /* releaseImmediately= */ true,
+                    /* animate= */ false,
+                    "fireNotificationPulse"
+            );
         };
         Assert.isMainThread();
         for (Callback callback : mCallbacks) {

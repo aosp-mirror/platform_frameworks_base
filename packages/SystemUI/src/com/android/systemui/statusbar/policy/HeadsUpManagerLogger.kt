@@ -181,14 +181,28 @@ class HeadsUpManagerLogger @Inject constructor(
         })
     }
 
-    fun logRemoveNotification(key: String, releaseImmediately: Boolean, isWaiting: Boolean) {
+    fun logRemoveNotification(key: String, releaseImmediately: Boolean, isWaiting: Boolean,
+                              reason: String) {
         buffer.log(TAG, INFO, {
             str1 = logKey(key)
             bool1 = releaseImmediately
             bool2 = isWaiting
+            str2 = reason
         }, {
-            "remove notification $str1 releaseImmediately: $bool1 isWaiting: $bool2"
+            "remove notification $str1 releaseImmediately: $bool1 isWaiting: $bool2 reason: $str2"
         })
+    }
+
+    fun logNullEntry(key: String, reason: String) {
+        buffer.log(
+            TAG,
+            INFO,
+            {
+                str1 = logKey(key)
+                str2 = reason
+            },
+            { "remove notification $str1 when headsUpEntry is null, reason: $str2" }
+        )
     }
 
     fun logNotificationActuallyRemoved(entry: NotificationEntry) {

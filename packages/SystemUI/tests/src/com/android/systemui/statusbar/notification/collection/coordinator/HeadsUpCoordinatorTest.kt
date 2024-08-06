@@ -187,8 +187,8 @@ class HeadsUpCoordinatorTest : SysuiTestCase() {
         assertTrue(notifLifetimeExtender.maybeExtendLifetime(entry, 0))
         executor.advanceClockToLast()
         executor.runAllReady()
-        verify(headsUpManager, times(0)).removeNotification(anyString(), eq(false))
-        verify(headsUpManager, times(1)).removeNotification(anyString(), eq(true))
+        verify(headsUpManager, times(0)).removeNotification(anyString(), eq(false), anyString())
+        verify(headsUpManager, times(1)).removeNotification(anyString(), eq(true), anyString())
     }
 
     @Test
@@ -203,8 +203,8 @@ class HeadsUpCoordinatorTest : SysuiTestCase() {
         executor.advanceClockToLast()
         executor.runAllReady()
         assertTrue(notifLifetimeExtender.maybeExtendLifetime(entry, 0))
-        verify(headsUpManager, times(0)).removeNotification(anyString(), eq(false))
-        verify(headsUpManager, times(0)).removeNotification(anyString(), eq(true))
+        verify(headsUpManager, times(0)).removeNotification(anyString(), eq(false), anyString())
+        verify(headsUpManager, times(0)).removeNotification(anyString(), eq(true), anyString())
     }
 
     @Test
@@ -217,7 +217,7 @@ class HeadsUpCoordinatorTest : SysuiTestCase() {
         notifLifetimeExtender.cancelLifetimeExtension(entry)
         executor.advanceClockToLast()
         executor.runAllReady()
-        verify(headsUpManager, times(0)).removeNotification(anyString(), any())
+        verify(headsUpManager, never()).removeNotification(anyString(), any(), anyString())
     }
 
     @Test
@@ -234,7 +234,7 @@ class HeadsUpCoordinatorTest : SysuiTestCase() {
         verify(endLifetimeExtension, times(1)).onEndLifetimeExtension(notifLifetimeExtender, entry)
 
         collectionListener.onEntryRemoved(entry, /* reason = */ 0)
-        verify(headsUpManager, times(1)).removeNotification(eq(entry.key), any())
+        verify(headsUpManager, times(1)).removeNotification(eq(entry.key), any(), anyString())
     }
 
     @Test
@@ -249,7 +249,7 @@ class HeadsUpCoordinatorTest : SysuiTestCase() {
         assertFalse(notifLifetimeExtender.maybeExtendLifetime(entry, 0))
 
         collectionListener.onEntryRemoved(entry, /* reason = */ 0)
-        verify(headsUpManager, times(1)).removeNotification(eq(entry.key), any())
+        verify(headsUpManager, times(1)).removeNotification(eq(entry.key), any(), anyString())
     }
 
     @Test
@@ -261,8 +261,8 @@ class HeadsUpCoordinatorTest : SysuiTestCase() {
         addHUN(entry)
         executor.advanceClockToLast()
         executor.runAllReady()
-        verify(headsUpManager, times(0)).removeNotification(anyString(), eq(false))
-        verify(headsUpManager, times(0)).removeNotification(anyString(), eq(true))
+        verify(headsUpManager, never()).removeNotification(anyString(), eq(false), anyString())
+        verify(headsUpManager, never()).removeNotification(anyString(), eq(true), anyString())
     }
 
     @Test
@@ -273,8 +273,8 @@ class HeadsUpCoordinatorTest : SysuiTestCase() {
         assertTrue(notifLifetimeExtender.maybeExtendLifetime(entry, 0))
         executor.advanceClockToLast()
         executor.runAllReady()
-        verify(headsUpManager, times(1)).removeNotification(anyString(), eq(false))
-        verify(headsUpManager, times(0)).removeNotification(anyString(), eq(true))
+        verify(headsUpManager, times(1)).removeNotification(anyString(), eq(false), anyString())
+        verify(headsUpManager, never()).removeNotification(anyString(), eq(true), anyString())
     }
 
     @Test
@@ -430,7 +430,7 @@ class HeadsUpCoordinatorTest : SysuiTestCase() {
         whenever(remoteInputManager.isSpinning(any())).thenReturn(false)
 
         // THEN heads up manager should remove the entry
-        verify(headsUpManager).removeNotification(entry.key, false)
+        verify(headsUpManager).removeNotification(eq(entry.key), eq(false), anyString())
     }
 
     private fun addHUN(entry: NotificationEntry) {
