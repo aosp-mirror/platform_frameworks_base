@@ -70,9 +70,7 @@ import android.os.VibrationAttributes;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
 import android.os.test.TestLooper;
-import android.os.vibrator.Flags;
 import android.os.vibrator.VibrationConfig;
-import android.platform.test.annotations.RequiresFlagsEnabled;
 import android.platform.test.flag.junit.CheckFlagsRule;
 import android.platform.test.flag.junit.DeviceFlagsValueProvider;
 import android.provider.Settings;
@@ -602,7 +600,6 @@ public class VibrationSettingsTest {
     }
 
     @Test
-    @RequiresFlagsEnabled(Flags.FLAG_KEYBOARD_CATEGORY_ENABLED)
     public void shouldIgnoreVibration_withKeyboardSettingsOff_shouldIgnoreKeyboardVibration() {
         setUserSetting(Settings.System.HAPTIC_FEEDBACK_INTENSITY, VIBRATION_INTENSITY_MEDIUM);
         setUserSetting(Settings.System.KEYBOARD_VIBRATION_ENABLED, 0 /* OFF*/);
@@ -627,7 +624,6 @@ public class VibrationSettingsTest {
     }
 
     @Test
-    @RequiresFlagsEnabled(Flags.FLAG_KEYBOARD_CATEGORY_ENABLED)
     public void shouldIgnoreVibration_withKeyboardSettingsOn_shouldNotIgnoreKeyboardVibration() {
         setUserSetting(Settings.System.HAPTIC_FEEDBACK_INTENSITY, VIBRATION_INTENSITY_OFF);
         setUserSetting(Settings.System.KEYBOARD_VIBRATION_ENABLED, 1 /* ON */);
@@ -645,7 +641,6 @@ public class VibrationSettingsTest {
     }
 
     @Test
-    @RequiresFlagsEnabled(Flags.FLAG_KEYBOARD_CATEGORY_ENABLED)
     public void shouldIgnoreVibration_notSupportKeyboardVibration_ignoresKeyboardTouchVibration() {
         setUserSetting(Settings.System.HAPTIC_FEEDBACK_INTENSITY, VIBRATION_INTENSITY_OFF);
         setUserSetting(Settings.System.KEYBOARD_VIBRATION_ENABLED, 1 /* ON */);

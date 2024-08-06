@@ -34,10 +34,8 @@ import com.android.systemui.statusbar.notification.collection.render.NotifStats
 import com.android.systemui.statusbar.notification.domain.interactor.ActiveNotificationsInteractor
 import com.android.systemui.statusbar.notification.domain.interactor.RenderNotificationListInteractor
 import com.android.systemui.statusbar.notification.footer.shared.FooterViewRefactor
-import com.android.systemui.statusbar.notification.shared.NotificationIconContainerRefactor
 import com.android.systemui.statusbar.notification.stack.BUCKET_ALERTING
 import com.android.systemui.statusbar.notification.stack.BUCKET_SILENT
-import com.android.systemui.statusbar.phone.NotificationIconAreaController
 import com.android.systemui.statusbar.policy.SensitiveNotificationProtectionController
 import com.android.systemui.util.mockito.eq
 import com.android.systemui.util.mockito.withArgCaptor
@@ -47,8 +45,8 @@ import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.verifyZeroInteractions
-import org.mockito.MockitoAnnotations.initMocks
 import org.mockito.Mockito.`when` as whenever
+import org.mockito.MockitoAnnotations.initMocks
 
 @SmallTest
 @RunWith(AndroidJUnit4::class)
@@ -61,10 +59,10 @@ class StackCoordinatorTest : SysuiTestCase() {
 
     @Mock private lateinit var pipeline: NotifPipeline
     @Mock private lateinit var groupExpansionManagerImpl: GroupExpansionManagerImpl
-    @Mock private lateinit var notificationIconAreaController: NotificationIconAreaController
     @Mock private lateinit var renderListInteractor: RenderNotificationListInteractor
     @Mock private lateinit var activeNotificationsInteractor: ActiveNotificationsInteractor
-    @Mock private lateinit var sensitiveNotificationProtectionController:
+    @Mock
+    private lateinit var sensitiveNotificationProtectionController:
         SensitiveNotificationProtectionController
     @Mock private lateinit var stackController: NotifStackController
     @Mock private lateinit var section: NotifSection
@@ -73,14 +71,12 @@ class StackCoordinatorTest : SysuiTestCase() {
     fun setUp() {
         initMocks(this)
 
-        whenever(sensitiveNotificationProtectionController.isSensitiveStateActive)
-            .thenReturn(false)
+        whenever(sensitiveNotificationProtectionController.isSensitiveStateActive).thenReturn(false)
 
         entry = NotificationEntryBuilder().setSection(section).build()
         coordinator =
             StackCoordinator(
                 groupExpansionManagerImpl,
-                notificationIconAreaController,
                 renderListInteractor,
                 activeNotificationsInteractor,
                 sensitiveNotificationProtectionController,
@@ -92,15 +88,7 @@ class StackCoordinatorTest : SysuiTestCase() {
     }
 
     @Test
-    @DisableFlags(NotificationIconContainerRefactor.FLAG_NAME)
-    fun testUpdateNotificationIcons() {
-        afterRenderListListener.onAfterRenderList(listOf(entry), stackController)
-        verify(notificationIconAreaController).updateNotificationIcons(eq(listOf(entry)))
-    }
-
-    @Test
-    @EnableFlags(NotificationIconContainerRefactor.FLAG_NAME)
-    fun testSetRenderedListOnInteractor_iconContainerFlagOn() {
+    fun testSetRenderedListOnInteractor() {
         afterRenderListListener.onAfterRenderList(listOf(entry), stackController)
         verify(renderListInteractor).setRenderedList(eq(listOf(entry)))
     }

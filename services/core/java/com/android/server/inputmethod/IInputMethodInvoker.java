@@ -112,7 +112,8 @@ final class IInputMethodInvoker {
     }
 
     @AnyThread
-    void initializeInternal(IBinder token, IInputMethodPrivilegedOperations privilegedOperations,
+    void initializeInternal(@NonNull IBinder token,
+            @NonNull IInputMethodPrivilegedOperations privilegedOperations,
             @InputMethodNavButtonFlags int navigationBarFlags) {
         final IInputMethod.InitParams params = new IInputMethod.InitParams();
         params.token = token;

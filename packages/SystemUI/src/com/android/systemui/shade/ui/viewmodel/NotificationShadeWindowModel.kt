@@ -17,8 +17,11 @@
 package com.android.systemui.shade.ui.viewmodel
 
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
+import com.android.systemui.keyguard.shared.model.KeyguardState.DREAMING
 import com.android.systemui.keyguard.shared.model.KeyguardState.OCCLUDED
+import com.android.systemui.util.kotlin.BooleanFlowOperators.anyOf
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
@@ -29,7 +32,11 @@ class NotificationShadeWindowModel
 @Inject
 constructor(
     keyguardTransitionInteractor: KeyguardTransitionInteractor,
+    keyguardInteractor: KeyguardInteractor,
 ) {
     val isKeyguardOccluded: Flow<Boolean> =
-        keyguardTransitionInteractor.transitionValue(OCCLUDED).map { it == 1f }
+        anyOf(
+            keyguardTransitionInteractor.transitionValue(OCCLUDED).map { it == 1f },
+            keyguardTransitionInteractor.transitionValue(DREAMING).map { it == 1f },
+        )
 }

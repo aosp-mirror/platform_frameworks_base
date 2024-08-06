@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 The Android Open Source Project
+ * Copyright (C) 2024 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,10 +14,14 @@
  * limitations under the License.
  */
 
-package com.android.systemui.statusbar.phone
+package com.android.systemui.inputdevice.tutorial.data.model
 
-import com.android.systemui.kosmos.Kosmos
-import com.android.systemui.kosmos.Kosmos.Fixture
-import com.android.systemui.util.mockito.mock
+data class TutorialSchedulerInfo(
+    val keyboard: DeviceSchedulerInfo = DeviceSchedulerInfo(),
+    val touchpad: DeviceSchedulerInfo = DeviceSchedulerInfo()
+)
 
-var Kosmos.notificationIconAreaController by Fixture { mock<NotificationIconAreaController>() }
+data class DeviceSchedulerInfo(var isLaunched: Boolean = false, var connectTime: Long? = null) {
+    val wasEverConnected: Boolean
+        get() = connectTime != null
+}

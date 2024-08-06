@@ -55,7 +55,6 @@ import android.os.VibrationAttributes;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
 import android.os.Vibrator.VibrationIntensity;
-import android.os.vibrator.Flags;
 import android.os.vibrator.VibrationConfig;
 import android.provider.Settings;
 import android.util.IndentingPrintWriter;
@@ -533,8 +532,7 @@ final class VibrationSettings {
             return false;
         }
 
-        if (Flags.keyboardCategoryEnabled()
-                && mVibrationConfig.isKeyboardVibrationSettingsSupported()) {
+        if (mVibrationConfig.isKeyboardVibrationSettingsSupported()) {
             int category = callerInfo.attrs.getCategory();
             if (usage == USAGE_TOUCH && category == CATEGORY_KEYBOARD) {
                 // Keyboard touch has a different user setting.

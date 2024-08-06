@@ -5771,16 +5771,20 @@ public class NotificationManagerService extends SystemService {
                     Binder.getCallingUid());
         }
 
-        @ZenModeConfig.ConfigChangeOrigin
+        @ZenModeConfig.ConfigOrigin
         private int computeZenOrigin(boolean fromUser) {
             // "fromUser" is introduced with MODES_API, so only consider it in that case.
-            // (Non-MODES_API behavior should also not depend at all on UPDATE_ORIGIN_USER).
+            // (Non-MODES_API behavior should also not depend at all on ORIGIN_USER_IN_X).
             if (android.app.Flags.modesApi() && fromUser) {
-                return ZenModeConfig.UPDATE_ORIGIN_USER;
+                if (isCallerSystemOrSystemUi()) {
+                    return ZenModeConfig.ORIGIN_USER_IN_SYSTEMUI;
+                } else {
+                    return ZenModeConfig.ORIGIN_USER_IN_APP;
+                }
             } else if (isCallerSystemOrSystemUi()) {
-                return ZenModeConfig.UPDATE_ORIGIN_SYSTEM_OR_SYSTEMUI;
+                return ZenModeConfig.ORIGIN_SYSTEM;
             } else {
-                return ZenModeConfig.UPDATE_ORIGIN_APP;
+                return ZenModeConfig.ORIGIN_APP;
             }
         }
 
@@ -6137,7 +6141,7 @@ public class NotificationManagerService extends SystemService {
             enforcePolicyAccess(pkg, "setNotificationPolicy");
             enforceUserOriginOnlyFromSystem(fromUser, "setNotificationPolicy");
             int callingUid = Binder.getCallingUid();
-            @ZenModeConfig.ConfigChangeOrigin int origin = computeZenOrigin(fromUser);
+            @ZenModeConfig.ConfigOrigin int origin = computeZenOrigin(fromUser);
 
             boolean shouldApplyAsImplicitRule = android.app.Flags.modesApi()
                     && !canManageGlobalZenPolicy(pkg, callingUid);

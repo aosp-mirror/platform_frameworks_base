@@ -535,7 +535,7 @@ public class ZenModeConfigTest extends UiServiceTestCase {
         rule.triggerDescription = TRIGGER_DESC;
         rule.deletionInstant = Instant.ofEpochMilli(1701790147000L);
         if (Flags.modesUi()) {
-            rule.disabledOrigin = ZenModeConfig.UPDATE_ORIGIN_USER;
+            rule.disabledOrigin = ZenModeConfig.ORIGIN_USER_IN_SYSTEMUI;
         }
 
         Parcel parcel = Parcel.obtain();
@@ -650,7 +650,7 @@ public class ZenModeConfigTest extends UiServiceTestCase {
         rule.triggerDescription = TRIGGER_DESC;
         rule.deletionInstant = Instant.ofEpochMilli(1701790147000L);
         if (Flags.modesUi()) {
-            rule.disabledOrigin = ZenModeConfig.UPDATE_ORIGIN_APP;
+            rule.disabledOrigin = ZenModeConfig.ORIGIN_APP;
         }
 
         ByteArrayOutputStream baos = new ByteArrayOutputStream();

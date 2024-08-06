@@ -31,7 +31,7 @@ import android.os.PowerManager;
 import android.service.notification.DeviceEffectsApplier;
 import android.service.notification.ZenDeviceEffects;
 import android.service.notification.ZenModeConfig;
-import android.service.notification.ZenModeConfig.ConfigChangeOrigin;
+import android.service.notification.ZenModeConfig.ConfigOrigin;
 import android.util.Slog;
 
 import com.android.internal.annotations.GuardedBy;
@@ -72,7 +72,7 @@ class DefaultDeviceEffectsApplier implements DeviceEffectsApplier {
     }
 
     @Override
-    public void apply(ZenDeviceEffects effects, @ConfigChangeOrigin int origin) {
+    public void apply(ZenDeviceEffects effects, @ConfigOrigin int origin) {
         Binder.withCleanCallingIdentity(() -> {
             if (mLastAppliedEffects.shouldSuppressAmbientDisplay()
                     != effects.shouldSuppressAmbientDisplay()) {
@@ -120,15 +120,16 @@ class DefaultDeviceEffectsApplier implements DeviceEffectsApplier {
         mLastAppliedEffects = effects;
     }
 
-    private void updateOrScheduleNightMode(boolean useNightMode, @ConfigChangeOrigin int origin) {
+    private void updateOrScheduleNightMode(boolean useNightMode, @ConfigOrigin int origin) {
         mPendingNightMode = useNightMode;
 
         // Changing the theme can be disruptive for the user (Activities are likely recreated, may
         // lose some state). Therefore we only apply the change immediately if the rule was
         // activated manually, or we are initializing, or the screen is currently off/dreaming.
-        if (origin == ZenModeConfig.UPDATE_ORIGIN_INIT
-                || origin == ZenModeConfig.UPDATE_ORIGIN_INIT_USER
-                || origin == ZenModeConfig.UPDATE_ORIGIN_USER
+        if (origin == ZenModeConfig.ORIGIN_INIT
+                || origin == ZenModeConfig.ORIGIN_INIT_USER
+                || origin == ZenModeConfig.ORIGIN_USER_IN_SYSTEMUI
+                || origin == ZenModeConfig.ORIGIN_USER_IN_APP
                 || !mPowerManager.isInteractive()) {
             unregisterScreenOffReceiver();
             updateNightModeImmediately(useNightMode);

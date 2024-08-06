@@ -40,7 +40,7 @@ public:
     static const int JET_NUMQUEUEDSEGMENT_UPDATE = 3;
     static const int JET_PAUSE_UPDATE            = 4;
 
-    JetPlayer(void *javaJetPlayer,
+    explicit JetPlayer(void *javaJetPlayer,
             int maxTracks = 32,
             int trackBufferSize = 1200);
     ~JetPlayer();
@@ -69,7 +69,6 @@ private:
     void                fireUpdateOnStatusChange();
     void                fireEventsFromJetQueue();
 
-    JetPlayer() {} // no default constructor
     void dump();
     void dumpJetStatus(S_JET_STATUS* pJetStatus);
 
@@ -96,7 +95,7 @@ private:
 
     class JetPlayerThread : public Thread {
     public:
-        JetPlayerThread(JetPlayer *player) : mPlayer(player) {
+        explicit JetPlayerThread(JetPlayer *player) : mPlayer(player) {
         }
 
     protected:
@@ -106,8 +105,7 @@ private:
         JetPlayer *mPlayer;
 
         bool threadLoop() {
-            int result;
-            result = mPlayer->render();
+            mPlayer->render();
             return false;
         }
 
