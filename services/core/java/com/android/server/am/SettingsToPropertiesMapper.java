@@ -51,6 +51,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.List;
 import java.util.ArrayList;
+import static java.util.concurrent.Executors.newSingleThreadScheduledExecutor;
 
 /**
  * Maps system settings to system properties.
@@ -345,7 +346,7 @@ public class SettingsToPropertiesMapper {
         // add sys prop sync callback for staged flag values
         DeviceConfig.addOnPropertiesChangedListener(
             NAMESPACE_REBOOT_STAGING,
-            AsyncTask.THREAD_POOL_EXECUTOR,
+            newSingleThreadScheduledExecutor(),
             (DeviceConfig.Properties properties) -> {
 
               for (String flagName : properties.getKeyset()) {
