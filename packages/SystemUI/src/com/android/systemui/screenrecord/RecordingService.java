@@ -78,6 +78,7 @@ public class RecordingService extends Service implements ScreenMediaRecorderList
             "com.android.systemui.screenrecord.STOP_FROM_NOTIF";
     protected static final String ACTION_SHARE = "com.android.systemui.screenrecord.SHARE";
     private static final String PERMISSION_SELF = "com.android.systemui.permission.SELF";
+    protected static final String EXTRA_NOTIFICATION_ID = "notification_id";
 
     private final RecordingController mController;
     protected final KeyguardDismissUtil mKeyguardDismissUtil;
@@ -514,7 +515,8 @@ public class RecordingService extends Service implements ScreenMediaRecorderList
 
     private Intent getShareIntent(Context context, Uri path) {
         return new Intent(context, this.getClass()).setAction(ACTION_SHARE)
-                .putExtra(EXTRA_PATH, path);
+                .putExtra(EXTRA_PATH, path)
+                .putExtra(EXTRA_NOTIFICATION_ID, mNotificationId);
     }
 
     @Override
