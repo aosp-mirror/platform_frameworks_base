@@ -622,16 +622,6 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
 
     @GuardedBy("mUidRulesFirstLock")
     final SparseIntArray mUidFirewallStandbyRules = new SparseIntArray();
-    @GuardedBy("mUidRulesFirstLock")
-    final SparseIntArray mUidFirewallDozableRules = new SparseIntArray();
-    @GuardedBy("mUidRulesFirstLock")
-    final SparseIntArray mUidFirewallPowerSaveRules = new SparseIntArray();
-    @GuardedBy("mUidRulesFirstLock")
-    final SparseIntArray mUidFirewallBackgroundRules = new SparseIntArray();
-    @GuardedBy("mUidRulesFirstLock")
-    final SparseIntArray mUidFirewallRestrictedModeRules = new SparseIntArray();
-    @GuardedBy("mUidRulesFirstLock")
-    final SparseIntArray mUidFirewallLowPowerStandbyModeRules = new SparseIntArray();
 
     /** Set of states for the child firewall chains. True if the chain is active. */
     @GuardedBy("mUidRulesFirstLock")
@@ -4589,7 +4579,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     @VisibleForTesting
     @GuardedBy("mUidRulesFirstLock")
     void updateRestrictedModeAllowlistUL() {
-        mUidFirewallRestrictedModeRules.clear();
+        final SparseIntArray uidRules = new SparseIntArray();
         forEachUid("updateRestrictedModeAllowlist", uid -> {
             synchronized (mUidRulesFirstLock) {
                 final int effectiveBlockedReasons = updateBlockedReasonsForRestrictedModeUL(
@@ -4599,13 +4589,13 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                 // setUidFirewallRulesUL will allowlist all uids that are passed to it, so only add
                 // non-default rules.
                 if (newFirewallRule != FIREWALL_RULE_DEFAULT) {
-                    mUidFirewallRestrictedModeRules.append(uid, newFirewallRule);
+                    uidRules.append(uid, newFirewallRule);
                 }
             }
         });
         if (mRestrictedNetworkingMode) {
             // firewall rules only need to be set when this mode is being enabled.
-            setUidFirewallRulesUL(FIREWALL_CHAIN_RESTRICTED, mUidFirewallRestrictedModeRules);
+            setUidFirewallRulesUL(FIREWALL_CHAIN_RESTRICTED, uidRules);
         }
         enableFirewallChainUL(FIREWALL_CHAIN_RESTRICTED, mRestrictedNetworkingMode);
     }
@@ -4689,8 +4679,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     void updateRulesForPowerSaveUL() {
         Trace.traceBegin(Trace.TRACE_TAG_NETWORK, "updateRulesForPowerSaveUL");
         try {
-            updateRulesForAllowlistedPowerSaveUL(mRestrictPower, FIREWALL_CHAIN_POWERSAVE,
-                    mUidFirewallPowerSaveRules);
+            updateRulesForAllowlistedPowerSaveUL(mRestrictPower, FIREWALL_CHAIN_POWERSAVE);
         } finally {
             Trace.traceEnd(Trace.TRACE_TAG_NETWORK);
         }
@@ -4705,8 +4694,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     void updateRulesForDeviceIdleUL() {
         Trace.traceBegin(Trace.TRACE_TAG_NETWORK, "updateRulesForDeviceIdleUL");
         try {
-            updateRulesForAllowlistedPowerSaveUL(mDeviceIdleMode, FIREWALL_CHAIN_DOZABLE,
-                    mUidFirewallDozableRules);
+            updateRulesForAllowlistedPowerSaveUL(mDeviceIdleMode, FIREWALL_CHAIN_DOZABLE);
         } finally {
             Trace.traceEnd(Trace.TRACE_TAG_NETWORK);
         }
@@ -4720,13 +4708,11 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     // NOTE: since both fw_dozable and fw_powersave uses the same map
     // (mPowerSaveTempWhitelistAppIds) for allowlisting, we can reuse their logic in this method.
     @GuardedBy("mUidRulesFirstLock")
-    private void updateRulesForAllowlistedPowerSaveUL(boolean enabled, int chain,
-            SparseIntArray rules) {
+    private void updateRulesForAllowlistedPowerSaveUL(boolean enabled, int chain) {
         if (enabled) {
             // Sync the allowlists before enabling the chain.  We don't care about the rules if
             // we are disabling the chain.
-            final SparseIntArray uidRules = rules;
-            uidRules.clear();
+            final SparseIntArray uidRules = new SparseIntArray();
             final List<UserInfo> users = mUserManager.getUsers();
             for (int ui = users.size() - 1; ui >= 0; ui--) {
                 UserInfo user = users.get(ui);
@@ -4755,9 +4741,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     private void updateRulesForBackgroundChainUL() {
         Trace.traceBegin(Trace.TRACE_TAG_NETWORK, "updateRulesForBackgroundChainUL");
         try {
-            final SparseIntArray uidRules = mUidFirewallBackgroundRules;
-            uidRules.clear();
-
+            final SparseIntArray uidRules = new SparseIntArray();
             final List<UserInfo> users = mUserManager.getUsers();
             for (int ui = users.size() - 1; ui >= 0; ui--) {
                 final UserInfo user = users.get(ui);
@@ -4794,17 +4778,17 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         Trace.traceBegin(Trace.TRACE_TAG_NETWORK, "updateRulesForLowPowerStandbyUL");
         try {
             if (mLowPowerStandbyActive) {
-                mUidFirewallLowPowerStandbyModeRules.clear();
+                final SparseIntArray uidRules = new SparseIntArray();
                 for (int i = mUidState.size() - 1; i >= 0; i--) {
                     final int uid = mUidState.keyAt(i);
                     final int effectiveBlockedReasons = getEffectiveBlockedReasons(uid);
                     if (hasInternetPermissionUL(uid) && (effectiveBlockedReasons
                                     & BLOCKED_REASON_LOW_POWER_STANDBY) == 0) {
-                        mUidFirewallLowPowerStandbyModeRules.put(uid, FIREWALL_RULE_ALLOW);
+                        uidRules.put(uid, FIREWALL_RULE_ALLOW);
                     }
                 }
                 setUidFirewallRulesUL(FIREWALL_CHAIN_LOW_POWER_STANDBY,
-                        mUidFirewallLowPowerStandbyModeRules, CHAIN_TOGGLE_ENABLE);
+                        uidRules, CHAIN_TOGGLE_ENABLE);
             } else {
                 setUidFirewallRulesUL(FIREWALL_CHAIN_LOW_POWER_STANDBY, null, CHAIN_TOGGLE_DISABLE);
             }
@@ -4822,10 +4806,8 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         final int effectiveBlockedReasons = getEffectiveBlockedReasons(uid);
         if (mUidState.contains(uid)
                 && (effectiveBlockedReasons & BLOCKED_REASON_LOW_POWER_STANDBY) == 0) {
-            mUidFirewallLowPowerStandbyModeRules.put(uid, FIREWALL_RULE_ALLOW);
             setUidFirewallRuleUL(FIREWALL_CHAIN_LOW_POWER_STANDBY, uid, FIREWALL_RULE_ALLOW);
         } else {
-            mUidFirewallLowPowerStandbyModeRules.delete(uid);
             setUidFirewallRuleUL(FIREWALL_CHAIN_LOW_POWER_STANDBY, uid, FIREWALL_RULE_DEFAULT);
         }
     }
@@ -5313,16 +5295,11 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         mActivityManagerInternal.onUidBlockedReasonsChanged(uid, BLOCKED_REASON_NONE);
         mUidPolicy.delete(uid);
         mUidFirewallStandbyRules.delete(uid);
-        mUidFirewallDozableRules.delete(uid);
-        mUidFirewallPowerSaveRules.delete(uid);
-        mUidFirewallBackgroundRules.delete(uid);
         mBackgroundTransitioningUids.delete(uid);
         mPowerSaveWhitelistExceptIdleAppIds.delete(uid);
         mPowerSaveWhitelistAppIds.delete(uid);
         mPowerSaveTempWhitelistAppIds.delete(uid);
         mAppIdleTempWhitelistAppIds.delete(uid);
-        mUidFirewallRestrictedModeRules.delete(uid);
-        mUidFirewallLowPowerStandbyModeRules.delete(uid);
         synchronized (mUidStateCallbackInfos) {
             mUidStateCallbackInfos.remove(uid);
         }
@@ -6269,18 +6246,8 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                     "setUidFirewallRuleUL: " + chain + "/" + uid + "/" + rule);
         }
         try {
-            if (chain == FIREWALL_CHAIN_DOZABLE) {
-                mUidFirewallDozableRules.put(uid, rule);
-            } else if (chain == FIREWALL_CHAIN_STANDBY) {
+            if (chain == FIREWALL_CHAIN_STANDBY) {
                 mUidFirewallStandbyRules.put(uid, rule);
-            } else if (chain == FIREWALL_CHAIN_POWERSAVE) {
-                mUidFirewallPowerSaveRules.put(uid, rule);
-            } else if (chain == FIREWALL_CHAIN_RESTRICTED) {
-                mUidFirewallRestrictedModeRules.put(uid, rule);
-            } else if (chain == FIREWALL_CHAIN_LOW_POWER_STANDBY) {
-                mUidFirewallLowPowerStandbyModeRules.put(uid, rule);
-            } else if (chain == FIREWALL_CHAIN_BACKGROUND) {
-                mUidFirewallBackgroundRules.put(uid, rule);
             }
             // Note that we do not need keep a separate cache of uid rules for chains that we do
             // not call #setUidFirewallRulesUL for.
