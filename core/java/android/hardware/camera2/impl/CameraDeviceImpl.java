@@ -918,7 +918,7 @@ public class CameraDeviceImpl extends CameraDevice
             checkIfCameraClosedOrInError();
 
             for (String physicalId : physicalCameraIdSet) {
-                if (physicalId == getId()) {
+                if (Objects.equals(physicalId, getId())) {
                     throw new IllegalStateException("Physical id matches the logical id!");
                 }
             }

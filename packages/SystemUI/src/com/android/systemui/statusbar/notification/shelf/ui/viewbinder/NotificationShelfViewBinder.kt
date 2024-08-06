@@ -21,9 +21,7 @@ import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.statusbar.NotificationShelf
 import com.android.systemui.statusbar.notification.icon.ui.viewbinder.NotificationIconContainerShelfViewBinder
 import com.android.systemui.statusbar.notification.row.ui.viewbinder.ActivatableNotificationViewBinder
-import com.android.systemui.statusbar.notification.shared.NotificationIconContainerRefactor
 import com.android.systemui.statusbar.notification.shelf.ui.viewmodel.NotificationShelfViewModel
-import com.android.systemui.statusbar.phone.NotificationIconAreaController
 import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
@@ -35,17 +33,10 @@ object NotificationShelfViewBinder {
         viewModel: NotificationShelfViewModel,
         falsingManager: FalsingManager,
         nicBinder: NotificationIconContainerShelfViewBinder,
-        notificationIconAreaController: NotificationIconAreaController,
     ): Unit = coroutineScope {
         ActivatableNotificationViewBinder.bind(viewModel, shelf, falsingManager)
         shelf.apply {
-            traceSection("NotifShelf#bindShelfIcons") {
-                if (NotificationIconContainerRefactor.isEnabled) {
-                    launch { nicBinder.bind(shelfIcons) }
-                } else {
-                    notificationIconAreaController.setShelfIcons(shelfIcons)
-                }
-            }
+            traceSection("NotifShelf#bindShelfIcons") { launch { nicBinder.bind(shelfIcons) } }
             launch {
                 viewModel.canModifyColorOfNotifications.collect(::setCanModifyColorOfNotifications)
             }

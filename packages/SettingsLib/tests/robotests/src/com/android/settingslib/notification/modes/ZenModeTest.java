@@ -93,7 +93,7 @@ public class ZenModeTest {
     public void constructor_disabledRuleByUser_statusDisabledByUser() {
         AutomaticZenRule azr = new AutomaticZenRule.Builder(ZEN_RULE).setEnabled(false).build();
         ZenModeConfig.ZenRule configZenRule = zenConfigRuleFor(azr, false);
-        configZenRule.disabledOrigin = ZenModeConfig.UPDATE_ORIGIN_USER;
+        configZenRule.disabledOrigin = ZenModeConfig.ORIGIN_USER_IN_SYSTEMUI;
 
         ZenMode mode = new ZenMode("id", azr, configZenRule);
         assertThat(mode.getStatus()).isEqualTo(ZenMode.Status.DISABLED_BY_USER);
@@ -103,7 +103,7 @@ public class ZenModeTest {
     public void constructor_disabledRuleByOther_statusDisabledByOther() {
         AutomaticZenRule azr = new AutomaticZenRule.Builder(ZEN_RULE).setEnabled(false).build();
         ZenModeConfig.ZenRule configZenRule = zenConfigRuleFor(azr, false);
-        configZenRule.disabledOrigin = ZenModeConfig.UPDATE_ORIGIN_APP;
+        configZenRule.disabledOrigin = ZenModeConfig.ORIGIN_APP;
 
         ZenMode mode = new ZenMode("id", azr, configZenRule);
         assertThat(mode.getStatus()).isEqualTo(ZenMode.Status.DISABLED_BY_OTHER);

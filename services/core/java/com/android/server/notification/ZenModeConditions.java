@@ -116,8 +116,8 @@ public class ZenModeConditions implements ConditionProviders.Callback {
         if (DEBUG) Log.d(TAG, "onServiceAdded " + component);
         final int callingUid = Binder.getCallingUid();
         mHelper.setConfig(mHelper.getConfig(), component,
-                callingUid == Process.SYSTEM_UID ? ZenModeConfig.UPDATE_ORIGIN_SYSTEM_OR_SYSTEMUI
-                        : ZenModeConfig.UPDATE_ORIGIN_APP,
+                callingUid == Process.SYSTEM_UID ? ZenModeConfig.ORIGIN_SYSTEM
+                        : ZenModeConfig.ORIGIN_APP,
                 "zmc.onServiceAdded:" + component, callingUid);
     }
 
@@ -128,8 +128,8 @@ public class ZenModeConditions implements ConditionProviders.Callback {
         if (config == null) return;
         final int callingUid = Binder.getCallingUid();
         mHelper.setAutomaticZenRuleState(id, condition,
-                callingUid == Process.SYSTEM_UID ? ZenModeConfig.UPDATE_ORIGIN_SYSTEM_OR_SYSTEMUI
-                        : ZenModeConfig.UPDATE_ORIGIN_APP,
+                callingUid == Process.SYSTEM_UID ? ZenModeConfig.ORIGIN_SYSTEM
+                        : ZenModeConfig.ORIGIN_APP,
                 callingUid);
     }
 
