@@ -280,17 +280,13 @@
 
     <!-- For updated Screen Recording permission dialog (i.e. with PSS)-->
     <!-- Title for the screen prompting the user to begin recording their screen [CHAR LIMIT=NONE]-->
-    <string name="screenrecord_permission_dialog_title">Record your screen?</string>
-    <!-- Screen recording permission option for recording just a single app [CHAR LIMIT=50] -->
-    <string name="screenrecord_permission_dialog_option_text_single_app">Record one app</string>
-    <!-- Screen recording permission option for recording the whole screen [CHAR LIMIT=50] -->
-    <string name="screenrecord_permission_dialog_option_text_entire_screen">Record entire screen</string>
+    <string name="screenrecord_permission_dialog_title">Start Recording?</string>
     <!-- Message reminding the user that sensitive information may be captured during a full screen recording for the updated dialog that includes partial screen sharing option [CHAR_LIMIT=350]-->
-    <string name="screenrecord_permission_dialog_warning_entire_screen">When you’re recording your entire screen, anything shown on your screen is recorded. So be careful with things like passwords, payment details, messages, photos, and audio and video.</string>
+    <string name="screenrecord_permission_dialog_warning_entire_screen">While you’re recording, Android has access to anything visible on your screen or played on your device. So be careful with things like passwords, payment details, messages, photos, and audio and video.</string>
     <!-- Message reminding the user that sensitive information may be captured during a single app screen recording for the updated dialog that includes partial screen sharing option [CHAR_LIMIT=350]-->
-    <string name="screenrecord_permission_dialog_warning_single_app">When you’re recording an app, anything shown or played in that app is recorded. So be careful with things like passwords, payment details, messages, photos, and audio and video.</string>
-    <!-- Button to start a screen recording of the entire screen in the updated screen record dialog that allows to select an app to record [CHAR LIMIT=50]-->
-    <string name="screenrecord_permission_dialog_continue_entire_screen">Record screen</string>
+    <string name="screenrecord_permission_dialog_warning_single_app">While you’re recording an app, Android has access to anything shown or played on that app. So be careful with things like passwords, payment details, messages, photos, and audio and video.</string>
+    <!-- Button to start a screen recording in the updated screen record dialog that allows to select an app to record [CHAR LIMIT=50]-->
+    <string name="screenrecord_permission_dialog_continue">Start recording</string>
 
     <!-- Label for a switch to enable recording audio [CHAR LIMIT=NONE]-->
     <string name="screenrecord_audio_label">Record audio</string>
@@ -1362,6 +1358,10 @@
     <!-- Media projection permission dialog warning text for system services. [CHAR LIMIT=NONE] -->
     <string name="media_projection_sys_service_dialog_warning">The service providing this function will have access to all of the information that is visible on your screen or played from your device while recording or casting. This includes information such as passwords, payment details, photos, messages, and audio that you play.</string>
 
+    <!-- Permission dropdown option for sharing or recording the whole screen. [CHAR LIMIT=30] -->
+    <string name="screen_share_permission_dialog_option_entire_screen">Entire screen</string>
+    <!-- Permission dropdown option for sharing or recording single app. [CHAR LIMIT=30] -->
+    <string name="screen_share_permission_dialog_option_single_app">A single app</string>
     <!-- Title of the dialog that allows to select an app to share or record [CHAR LIMIT=NONE] -->
     <string name="screen_share_permission_app_selector_title">Share or record an app</string>
 
