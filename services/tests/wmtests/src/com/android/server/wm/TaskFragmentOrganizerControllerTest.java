@@ -2121,8 +2121,8 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
     private static void setupMockParent(TaskFragment taskFragment, Task mockParent) {
         doReturn(mockParent).when(taskFragment).getTask();
         doReturn(new TaskFragmentParentInfo(
-                new Configuration(), DEFAULT_DISPLAY, true, true, null /* decorSurface */))
-                .when(mockParent).getTaskFragmentParentInfo();
+                new Configuration(), DEFAULT_DISPLAY, mockParent.mTaskId, true, true,
+                null /* decorSurface */)).when(mockParent).getTaskFragmentParentInfo();
 
         // Task needs to be visible
         mockParent.lastActiveTime = 100;
