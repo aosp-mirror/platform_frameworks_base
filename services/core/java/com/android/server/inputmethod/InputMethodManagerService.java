@@ -695,7 +695,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
                     userData.mRawInputMethodMap.set(rawMethodMap);
                     final var methodMap = rawMethodMap.toInputMethodMap(additionalSubtypeMap,
                             DirectBootAwareness.AUTO,
-                            mUserManagerInternal.isUserUnlockingOrUnlocked(userId));
+                            userData.mIsUnlockingOrUnlocked.get());
                     final var settings = InputMethodSettings.create(methodMap, userId);
                     InputMethodSettingsRepository.put(userId, settings);
                 }
@@ -819,7 +819,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
             final var newMethodMap = userData.mRawInputMethodMap.get().toInputMethodMap(
                     newAdditionalSubtypeMap,
                     DirectBootAwareness.AUTO,
-                    mUserManagerInternal.isUserUnlockingOrUnlocked(userId));
+                    userData.mIsUnlockingOrUnlocked.get());
 
             final boolean noUpdate = InputMethodMap.areSame(settings.getMethodMap(), newMethodMap);
             if (noUpdate && imesToBeDisabled.isEmpty()) {
@@ -1049,6 +1049,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
             final int userId = user.getUserIdentifier();
             final var userData = mService.getUserData(userId);
             final boolean userUnlocked = true;
+            userData.mIsUnlockingOrUnlocked.set(userUnlocked);
             SecureSettingsWrapper.onUserUnlocking(userId);
             final var methodMap = userData.mRawInputMethodMap.get().toInputMethodMap(
                     AdditionalSubtypeMapRepository.get(userId), DirectBootAwareness.AUTO,
@@ -1099,9 +1100,12 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
                     final var additionalSubtypeMap = AdditionalSubtypeMapRepository.get(userId);
                     final var rawMethodMap = queryRawInputMethodServiceMap(context, userId);
                     userData.mRawInputMethodMap.set(rawMethodMap);
+
+                    final boolean unlocked = userManagerInternal.isUserUnlockingOrUnlocked(userId);
+                    userData.mIsUnlockingOrUnlocked.set(unlocked);
                     final var methodMap = rawMethodMap.toInputMethodMap(additionalSubtypeMap,
-                            DirectBootAwareness.AUTO,
-                            userManagerInternal.isUserUnlockingOrUnlocked(userId));
+                            DirectBootAwareness.AUTO, unlocked);
+
                     final var settings = InputMethodSettings.create(methodMap, userId);
                     InputMethodSettingsRepository.put(userId, settings);
 
@@ -1129,6 +1133,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
             final var additionalSubtypeMap = AdditionalSubtypeMapRepository.get(userId);
             final var rawMethodMap = userData.mRawInputMethodMap.get();
             final boolean userUnlocked = false;  // Stopping a user also locks their storage.
+            userData.mIsUnlockingOrUnlocked.set(userUnlocked);
             final var methodMap = rawMethodMap.toInputMethodMap(additionalSubtypeMap,
                     DirectBootAwareness.AUTO, userUnlocked);
             InputMethodSettingsRepository.put(userId,
@@ -1622,7 +1627,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
         final var userData = getUserData(userId);
         final var methodMap = userData.mRawInputMethodMap.get().toInputMethodMap(
                 AdditionalSubtypeMapRepository.get(userId), directBootAwareness,
-                mUserManagerInternal.isUserUnlockingOrUnlocked(userId));
+                userData.mIsUnlockingOrUnlocked.get());
         final var settings = InputMethodSettings.create(methodMap, userId);
         // Create a copy.
         final ArrayList<InputMethodInfo> methodList = new ArrayList<>(settings.getMethodList());
@@ -4291,7 +4296,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
                 try {
                     final var methodMap = userData.mRawInputMethodMap.get().toInputMethodMap(
                             AdditionalSubtypeMapRepository.get(userId), DirectBootAwareness.AUTO,
-                            mUserManagerInternal.isUserUnlockingOrUnlocked(userId));
+                            userData.mIsUnlockingOrUnlocked.get());
                     final var newSettings = InputMethodSettings.create(methodMap, userId);
                     InputMethodSettingsRepository.put(userId, newSettings);
                     postInputMethodSettingUpdatedLocked(false /* resetDefaultEnabledIme */, userId);
@@ -6108,6 +6113,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
             @SuppressWarnings("GuardedBy") Consumer<UserData> userDataDump =
                     u -> {
                         p.println("    mUserId=" + u.mUserId);
+                        p.println("      unlocked=" + u.mIsUnlockingOrUnlocked.get());
                         p.println("      hasMainConnection="
                                 + u.mBindingController.hasMainConnection());
                         p.println("      isVisibleBound=" + u.mBindingController.isVisibleBound());
