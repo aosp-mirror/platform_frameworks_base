@@ -496,6 +496,16 @@ flag {
 }
 
 flag {
+    name: "status_bar_switch_to_spn_from_data_spn"
+    namespace: "systemui"
+    description: "Fix usage of the SPN broadcast extras"
+    bug: "350812372"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
     name: "haptic_volume_slider"
     namespace: "systemui"
     description: "Adds haptic feedback to the volume slider."
