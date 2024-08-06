@@ -486,6 +486,7 @@ public class HdmiCecMessageValidator {
      * @return true if the hour is valid
      */
     private static boolean isValidHour(int value) {
+        value = bcdToDecimal(value);
         return isWithinRange(value, 0, 23);
     }
 
@@ -497,6 +498,7 @@ public class HdmiCecMessageValidator {
      * @return true if the minute is valid
      */
     private static boolean isValidMinute(int value) {
+        value = bcdToDecimal(value);
         return isWithinRange(value, 0, 59);
     }
 
@@ -508,7 +510,21 @@ public class HdmiCecMessageValidator {
      * @return true if the duration hours is valid
      */
     private static boolean isValidDurationHours(int value) {
+        value = bcdToDecimal(value);
         return isWithinRange(value, 0, 99);
+    }
+
+    /**
+     * Convert BCD value to decimal value.
+     *
+     * @param value BCD value
+     * @return decimal value
+     */
+    private static int bcdToDecimal(int value) {
+        int tens = (value & 0xF0) >> 4;
+        int ones = (value & 0x0F);
+
+        return tens * 10 + ones;
     }
 
     /**
