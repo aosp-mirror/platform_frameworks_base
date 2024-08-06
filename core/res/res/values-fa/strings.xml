@@ -612,8 +612,8 @@
     <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"به برنامه اجازه داده می‌شود موقعیت نسبی بین دستگاه‌های «فراپهن‌باند» اطراف را مشخص کند"</string>
     <string name="permlab_nearby_wifi_devices" msgid="392774237063608500">"‏برقراری تعامل با دستگاه‌های Wi-Fi اطراف"</string>
     <string name="permdesc_nearby_wifi_devices" msgid="3054307728646332906">"‏به برنامه اجازه می‌دهد در دستگاه‌های Wi-Fi اطراف تبلیغ کند، به آن‌ها متصل شود، و موقعیت نسبی آن‌ها را تشخیص دهد"</string>
-    <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"‏اطلاعات ترجیحی سرویس پولی NFC"</string>
-    <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"‏به برنامه اجازه می‌دهد اطلاعات ترجیحی سرویس پولی NFC، مانند کمک‌های ثبت‌شده و مقصد مسیر را دریافت کند."</string>
+    <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"‏اطلاعات ترجیحی سرویس پرداخت NFC"</string>
+    <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"‏به برنامه اجازه می‌دهد اطلاعات ترجیحی سرویس پرداخت NFC، مانند کمک‌های ثبت‌شده و مقصد مسیر را دریافت کند."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"کنترل ارتباط راه نزدیک"</string>
     <string name="permdesc_nfc" msgid="8352737680695296741">"‏به برنامه اجازه می‎دهد تا با تگ‌های NFC، کارت‌ها و فایل‌خوان ارتباط برقرار کند."</string>
     <string name="permlab_nfcTransactionEvent" msgid="5868209446710407679">"‏رویداد تراکنش Secure Element"</string>
@@ -1883,8 +1883,7 @@
     <string name="restr_pin_error_too_short" msgid="1547007808237941065">"پین بیش از حد کوتاه است. باید حداقل ۴ رقم باشد."</string>
     <string name="restr_pin_try_later" msgid="5897719962541636727">"بعداً دوباره امتحان کنید"</string>
     <string name="immersive_cling_title" msgid="2307034298721541791">"مشاهده در حالت تمام صفحه"</string>
-    <!-- no translation found for immersive_cling_description (2896205051090870978) -->
-    <skip />
+    <string name="immersive_cling_description" msgid="2896205051090870978">"برای خروج، از بالای صفحه تند به پایین بکشید"</string>
     <string name="immersive_cling_positive" msgid="7047498036346489883">"متوجه شدم"</string>
     <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"برای دید بهتر، دستگاه را بچرخانید"</string>
     <string name="display_rotation_camera_compat_toast_in_multi_window" msgid="2473122980393502775">"برای دید بهتر، <xliff:g id="NAME">%s</xliff:g> را به‌صورت تمام‌صفحه باز کنید"</string>
@@ -2418,12 +2417,12 @@
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"روش کار"</string>
     <string name="unarchival_session_app_label" msgid="6811856981546348205">"درحال تعلیق…"</string>
     <string name="fingerprint_dangling_notification_title" msgid="7362075195588639989">"راه‌اندازی مجدد «قفل‌گشایی با اثر انگشت»"</string>
-    <string name="fingerprint_dangling_notification_msg_1" msgid="8517140433796229725">"‫<xliff:g id="FINGERPRINT">%s</xliff:g> خوب کار نمی‌کرد و حذف شد"</string>
-    <string name="fingerprint_dangling_notification_msg_2" msgid="7578829498452127613">"‫<xliff:g id="FINGERPRINT_0">%1$s</xliff:g> و <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> خوب کار نمی‌کردند و حذف شدند"</string>
-    <string name="fingerprint_dangling_notification_msg_all_deleted_1" msgid="2927018569542316055">"<xliff:g id="FINGERPRINT">%s</xliff:g> خوب کار نمی‌کرد و حذف شد. برای باز کردن قفل تلفن با اثر انگشت، آن را دوباره راه‌اندازی کنید."</string>
-    <string name="fingerprint_dangling_notification_msg_all_deleted_2" msgid="6897989352716156176">"‫<xliff:g id="FINGERPRINT_0">%1$s</xliff:g> و <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> خوب کار نمی‌کرد و حذف شد. برای باز کردن قفل تلفن با اثر انگشت، آن‌ها را دوباره راه‌اندازی کنید."</string>
+    <string name="fingerprint_dangling_notification_msg_1" msgid="5851784577768803510">"‫<xliff:g id="FINGERPRINT">%s</xliff:g> دیگر قابل‌شناسایی نیست."</string>
+    <string name="fingerprint_dangling_notification_msg_2" msgid="7925203589860744456">"‫<xliff:g id="FINGERPRINT_0">%1$s</xliff:g> و <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> دیگر قابل‌شناسایی نیستند."</string>
+    <string name="fingerprint_dangling_notification_msg_all_deleted_1" msgid="1824812666549916586">"‫<xliff:g id="FINGERPRINT">%s</xliff:g> دیگر قابل‌شناسایی نیست. «قفل‌گشایی با اثر انگشت» را دوباره راه‌اندازی کنید."</string>
+    <string name="fingerprint_dangling_notification_msg_all_deleted_2" msgid="5974657382960155099">"‫<xliff:g id="FINGERPRINT_0">%1$s</xliff:g> و <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> دیگر قابل‌شناسایی نیستند. «قفل‌گشایی با اثر انگشت» را دوباره راه‌اندازی کنید."</string>
     <string name="face_dangling_notification_title" msgid="947852541060975473">"راه‌اندازی مجدد «قفل‌گشایی با چهره»"</string>
-    <string name="face_dangling_notification_msg" msgid="8806849376915541655">"مدل چهره شما خوب کار نمی‌کرد و حذف شد. برای باز کردن قفل تلفن با چهره، دوباره آن را راه‌اندازی کنید."</string>
+    <string name="face_dangling_notification_msg" msgid="746235263598985384">"مدل چهره‌تان دیگر قابل‌شناسایی نیست. «قفل‌گشایی با چهره» را دوباره راه‌اندازی کنید."</string>
     <string name="biometric_dangling_notification_action_set_up" msgid="8246885009807817961">"راه‌اندازی"</string>
     <string name="biometric_dangling_notification_action_not_now" msgid="8095249216864443491">"حالا نه"</string>
 </resources>
