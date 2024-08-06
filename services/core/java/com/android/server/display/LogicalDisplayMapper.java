@@ -427,6 +427,7 @@ class LogicalDisplayMapper implements DisplayDeviceRepository.Listener {
 
     public void dumpLocked(PrintWriter pw) {
         pw.println("LogicalDisplayMapper:");
+        pw.println("---------------------");
         IndentingPrintWriter ipw = new IndentingPrintWriter(pw, "  ");
         ipw.increaseIndent();
 
