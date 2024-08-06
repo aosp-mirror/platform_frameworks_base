@@ -76,6 +76,18 @@
         android:layout_height="40dp"
         android:layout_weight="1"/>
 
+    <ImageButton
+        android:id="@+id/minimize_window"
+        android:layout_width="44dp"
+        android:layout_height="40dp"
+        android:paddingHorizontal="10dp"
+        android:paddingVertical="8dp"
+        android:layout_marginEnd="8dp"
+        android:contentDescription="@string/minimize_button_text"
+        android:src="@drawable/desktop_mode_header_ic_minimize"
+        android:scaleType="centerCrop"
+        android:gravity="end"/>
+
     <com.android.wm.shell.windowdecor.MaximizeButtonView
         android:id="@+id/maximize_button_view"
         android:layout_width="44dp"
