@@ -2636,8 +2636,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
                 && mWindowManagerInternal.isKeyguardSecure(userId)) {
             return false;
         }
-        if ((visibility & InputMethodService.IME_ACTIVE) == 0
-                || (visibility & InputMethodService.IME_INVISIBLE) != 0) {
+        if ((visibility & InputMethodService.IME_ACTIVE) == 0) {
             return false;
         }
         if (mWindowManagerInternal.isHardKeyboardAvailable()
@@ -2803,7 +2802,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
         if (DEBUG) {
             Slog.d(TAG, "IME window vis: " + vis
                     + " active: " + (vis & InputMethodService.IME_ACTIVE)
-                    + " inv: " + (vis & InputMethodService.IME_INVISIBLE)
+                    + " visible: " + (vis & InputMethodService.IME_VISIBLE)
                     + " displayId: " + curTokenDisplayId);
         }
         final IBinder focusedWindowToken = userData.mImeBindingState != null
