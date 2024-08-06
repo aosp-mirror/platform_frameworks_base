@@ -833,7 +833,7 @@ constructor(
         messageJob?.cancel()
         messageJob = null
 
-        if (helpMessage.isNotBlank()) {
+        if (helpMessage.isNotBlank() && needsUserConfirmation) {
             showHelp(helpMessage)
         }
     }

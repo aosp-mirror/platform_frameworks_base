@@ -295,7 +295,6 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
     @Mock private Bubbles mBubbles;
     @Mock private NoteTaskController mNoteTaskController;
     @Mock private NotificationShadeWindowController mNotificationShadeWindowController;
-    @Mock private NotificationIconAreaController mNotificationIconAreaController;
     @Mock private NotificationShadeWindowViewController mNotificationShadeWindowViewController;
     @Mock private Lazy<NotificationShadeWindowViewController>
             mNotificationShadeWindowViewControllerLazy;
@@ -580,7 +579,6 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
                 mDemoModeController,
                 mNotificationShadeDepthControllerLazy,
                 mStatusBarTouchableRegionManager,
-                mNotificationIconAreaController,
                 mBrightnessSliderFactory,
                 mScreenOffAnimationController,
                 mWallpaperController,

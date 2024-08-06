@@ -283,6 +283,7 @@ import com.android.server.am.PendingIntentRecord;
 import com.android.server.am.UserState;
 import com.android.server.firewall.IntentFirewall;
 import com.android.server.grammaticalinflection.GrammaticalInflectionManagerInternal;
+import com.android.server.pm.UserManagerInternal;
 import com.android.server.pm.UserManagerService;
 import com.android.server.policy.PermissionPolicyInternal;
 import com.android.server.sdksandbox.SdkSandboxManagerLocal;
@@ -382,6 +383,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     private PermissionPolicyInternal mPermissionPolicyInternal;
     private StatusBarManagerInternal mStatusBarManagerInternal;
     private WallpaperManagerInternal mWallpaperManagerInternal;
+    private UserManagerInternal mUserManagerInternal;
     @VisibleForTesting
     final ActivityTaskManagerInternal mInternal;
     private PowerManagerInternal mPowerManagerInternal;
@@ -5462,6 +5464,13 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             mWallpaperManagerInternal = LocalServices.getService(WallpaperManagerInternal.class);
         }
         return mWallpaperManagerInternal;
+    }
+
+    UserManagerInternal getUserManagerInternal() {
+        if (mUserManagerInternal == null) {
+            mUserManagerInternal = LocalServices.getService(UserManagerInternal.class);
+        }
+        return mUserManagerInternal;
     }
 
     AppWarnings getAppWarningsLocked() {

@@ -53,6 +53,7 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.Callable;
 
 /**
  * @hide
@@ -659,32 +660,40 @@ public abstract class IContextHubWrapper {
 
         @ContextHubTransaction.Result
         public int sendMessageToContextHub(short hostEndpointId, int contextHubId,
-                NanoAppMessage message) throws RemoteException {
+                NanoAppMessage message) {
             android.hardware.contexthub.IContextHub hub = getHub();
             if (hub == null) {
                 return ContextHubTransaction.RESULT_FAILED_BAD_PARAMS;
             }
 
-            try {
-                var msg = ContextHubServiceUtil.createAidlContextHubMessage(
-                        hostEndpointId, message);
-
-                // Only process the message normally if not using test mode manager or if
-                // the test mode manager call returned false as this indicates it did not
-                // process the message.
-                boolean useTestModeManager = Flags.reliableMessageImplementation()
-                        && Flags.reliableMessageTestModeBehavior()
-                        && mIsTestModeEnabled.get();
-                if (!useTestModeManager || !mTestModeManager.sendMessageToContextHub(message)) {
+            Callable<Integer> sendMessage = () -> {
+                try {
+                    var msg = ContextHubServiceUtil.createAidlContextHubMessage(
+                            hostEndpointId, message);
                     hub.sendMessageToHub(contextHubId, msg);
+                    return ContextHubTransaction.RESULT_SUCCESS;
+                } catch (RemoteException | ServiceSpecificException e) {
+                    return ContextHubTransaction.RESULT_FAILED_UNKNOWN;
+                } catch (IllegalArgumentException e) {
+                    return ContextHubTransaction.RESULT_FAILED_BAD_PARAMS;
                 }
+            };
 
-                return ContextHubTransaction.RESULT_SUCCESS;
-            } catch (RemoteException | ServiceSpecificException e) {
-                return ContextHubTransaction.RESULT_FAILED_UNKNOWN;
-            } catch (IllegalArgumentException e) {
-                return ContextHubTransaction.RESULT_FAILED_BAD_PARAMS;
+            // Only process the message normally if not using test mode manager or if
+            // the test mode manager call returned false as this indicates it did not
+            // process the message.
+            boolean useTestModeManager = Flags.reliableMessageImplementation()
+                    && Flags.reliableMessageTestModeBehavior()
+                    && mIsTestModeEnabled.get();
+            if (!useTestModeManager || !mTestModeManager.sendMessageToContextHub(
+                    sendMessage, message)) {
+                try {
+                    return sendMessage.call();
+                } catch (Exception e) {
+                    return ContextHubTransaction.RESULT_FAILED_UNKNOWN;
+                }
             }
+            return ContextHubTransaction.RESULT_SUCCESS;
         }
 
         @ContextHubTransaction.Result

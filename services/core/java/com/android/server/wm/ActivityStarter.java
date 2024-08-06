@@ -1621,8 +1621,10 @@ class ActivityStarter {
                     currentTop, currentTop.mDisplayContent, false /* deferResume */);
         }
 
-        if (!avoidMoveToFront() && mDoResume && mRootWindowContainer
-                .hasVisibleWindowAboveButDoesNotOwnNotificationShade(started.launchedFromUid)) {
+        if (!avoidMoveToFront() && mDoResume
+                && !mService.getUserManagerInternal().isVisibleBackgroundFullUser(started.mUserId)
+                && mRootWindowContainer.hasVisibleWindowAboveButDoesNotOwnNotificationShade(
+                started.launchedFromUid)) {
             // If the UID launching the activity has a visible window on top of the notification
             // shade and it's launching an activity that's going to be at the front, we should move
             // the shade out of the way so the user can see it. We want to avoid the case where the

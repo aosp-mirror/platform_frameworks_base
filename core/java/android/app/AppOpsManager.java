@@ -11013,7 +11013,8 @@ public class AppOpsManager {
 
                 if (access != null) {
                     NoteOpEvent existingAccess = accessEvents.get(key);
-                    if (existingAccess == null || existingAccess.getDuration() == -1) {
+                    if (existingAccess == null || existingAccess.getDuration() == -1
+                            || existingAccess.getDuration() < access.getDuration()) {
                         accessEvents.append(key, access);
                     } else if (existingAccess.mProxy == null && access.mProxy != null ) {
                         existingAccess.mProxy = access.mProxy;
