@@ -57,7 +57,7 @@
     <string name="accessibility_action_start_one_handed" msgid="5070337354072861426">"Запусціць рэжым кіравання адной рукой"</string>
     <string name="accessibility_action_stop_one_handed" msgid="1369940261782179442">"Выйсці з рэжыму кіравання адной рукой"</string>
     <string name="bubbles_settings_button_description" msgid="1301286017420516912">"Налады ўсплывальных чатаў у праграме \"<xliff:g id="APP_NAME">%1$s</xliff:g>\""</string>
-    <string name="bubble_overflow_button_content_description" msgid="8160974472718594382">"Дадатковае меню"</string>
+    <string name="bubble_overflow_button_content_description" msgid="8160974472718594382">"Меню з пашырэннем"</string>
     <string name="bubble_accessibility_action_add_back" msgid="1830101076853540953">"Зноў дадаць у стос"</string>
     <string name="bubble_content_description_single" msgid="8495748092720065813">"<xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g> ад праграмы \"<xliff:g id="APP_NAME">%2$s</xliff:g>\""</string>
     <string name="bubble_content_description_stack" msgid="8071515017164630429">"<xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g> ад праграмы \"<xliff:g id="APP_NAME">%2$s</xliff:g>\" і яшчэ <xliff:g id="BUBBLE_COUNT">%3$d</xliff:g>"</string>
@@ -84,6 +84,8 @@
     <string name="notification_bubble_title" msgid="6082910224488253378">"Усплывальнае апавяшчэнне"</string>
     <string name="manage_bubbles_text" msgid="7730624269650594419">"Кіраваць"</string>
     <string name="accessibility_bubble_dismissed" msgid="8367471990421247357">"Усплывальнае апавяшчэнне адхілена."</string>
+    <string name="bubble_shortcut_label" msgid="666269077944378311">"Успл. чаты"</string>
+    <string name="bubble_shortcut_long_label" msgid="6088437544312894043">"Паказ усплывальных чатаў"</string>
     <string name="restart_button_description" msgid="4564728020654658478">"Націсніце, каб перазапусціць гэту праграму для зручнейшага прагляду"</string>
     <string name="user_aspect_ratio_settings_button_hint" msgid="734835849600713016">"Змяніць суадносіны бакоў для гэтай праграмы ў наладах"</string>
     <string name="user_aspect_ratio_settings_button_description" msgid="4315566801697411684">"Змяніць суадносіны бакоў"</string>
