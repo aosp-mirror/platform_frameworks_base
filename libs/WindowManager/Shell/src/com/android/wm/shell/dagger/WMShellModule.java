@@ -301,6 +301,7 @@ public abstract class WMShellModule {
             ShellInit shellInit,
             ShellTaskOrganizer shellTaskOrganizer,
             Optional<DesktopModeTaskRepository> desktopModeTaskRepository,
+            LaunchAdjacentController launchAdjacentController,
             WindowDecorViewModel windowDecorViewModel) {
         // TODO(b/238217847): Temporarily add this check here until we can remove the dynamic
         //                    override for this controller from the base module
@@ -308,7 +309,7 @@ public abstract class WMShellModule {
                 ? shellInit
                 : null;
         return new FreeformTaskListener(context, init, shellTaskOrganizer,
-                desktopModeTaskRepository, windowDecorViewModel);
+                desktopModeTaskRepository, launchAdjacentController, windowDecorViewModel);
     }
 
     @WMSingleton
