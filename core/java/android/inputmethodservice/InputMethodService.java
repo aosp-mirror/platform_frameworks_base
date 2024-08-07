@@ -524,19 +524,12 @@ public class InputMethodService extends AbstractInputMethodService {
 
     /**
      * @hide
-     * The IME is active and ready with views but set invisible.
-     * This flag cannot be combined with {@link #IME_VISIBLE}.
-     */
-    public static final int IME_INVISIBLE = 0x4;
-
-    /**
-     * @hide
      * The IME is visible, but not yet perceptible to the user (e.g. fading in)
      * by {@link android.view.WindowInsetsController}.
      *
      * @see InputMethodManager#reportPerceptible
      */
-    public static final int IME_VISIBLE_IMPERCEPTIBLE = 0x8;
+    public static final int IME_VISIBLE_IMPERCEPTIBLE = 0x4;
 
     // Min and max values for back disposition.
     private static final int BACK_DISPOSITION_MIN = BACK_DISPOSITION_DEFAULT;
@@ -3125,7 +3118,7 @@ public class InputMethodService extends AbstractInputMethodService {
         mInShowWindow = true;
         final int previousImeWindowStatus =
                 (mDecorViewVisible ? IME_ACTIVE : 0) | (isInputViewShown()
-                        ? (!mWindowVisible ? IME_INVISIBLE : IME_VISIBLE) : 0);
+                        ? (!mWindowVisible ? -1 : IME_VISIBLE) : 0);
         startViews(prepareWindow(showInput));
         final int nextImeWindowStatus = mapToImeWindowStatus();
         if (previousImeWindowStatus != nextImeWindowStatus) {
