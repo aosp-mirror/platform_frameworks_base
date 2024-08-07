@@ -157,7 +157,7 @@
     <string name="scCellularNetworkSecurityTitle" msgid="7752521808690294384">"Seguretat de xarxes mòbils"</string>
     <string name="scCellularNetworkSecuritySummary" msgid="7042036754550545005">"Encriptació, notificacions de xarxes sense encriptació"</string>
     <string name="scIdentifierDisclosureIssueTitle" msgid="2898888825129970328">"S\'ha accedit a l\'identificador de dispositiu"</string>
-    <string name="scIdentifierDisclosureIssueSummaryNotification" msgid="3699930821270580416">"A les <xliff:g id="DISCLOSURE_TIME">%1$s</xliff:g>, una xarxa propera ha registrat l\'identificador únic del teu dispositiu (IMSI or IMEI) mentre s\'utilitzava la SIM de <xliff:g id="DISCLOSURE_NETWORK">%2$s</xliff:g>"</string>
+    <string name="scIdentifierDisclosureIssueSummaryNotification" msgid="3699930821270580416">"A les <xliff:g id="DISCLOSURE_TIME">%1$s</xliff:g>, una xarxa propera ha registrat l\'ID únic del dispositiu (IMSI or IMEI) amb la SIM de <xliff:g id="DISCLOSURE_NETWORK">%2$s</xliff:g>"</string>
     <string name="scIdentifierDisclosureIssueSummary" msgid="7283387338827749276">"A les <xliff:g id="DISCLOSURE_TIME">%1$s</xliff:g>, una xarxa propera ha registrat l\'identificador únic del teu dispositiu (IMSI or IMEI) mentre s\'utilitzava la SIM de <xliff:g id="DISCLOSURE_NETWORK">%2$s</xliff:g>.\n\nAixò vol dir que s\'han registrat la teva ubicació, activitat o identitat. Tot i ser una pràctica habitual, pot suposar un problema per a aquelles persones preocupades per la privadesa."</string>
     <string name="scNullCipherIssueEncryptedTitle" msgid="234717016411824969">"T\'has connectat a la xarxa encriptada <xliff:g id="NETWORK_NAME">%1$s</xliff:g>"</string>
     <string name="scNullCipherIssueEncryptedSummary" msgid="8577510708842150475">"La connexió SIM de <xliff:g id="NETWORK_NAME">%1$s</xliff:g> ara és més segura"</string>
@@ -1884,8 +1884,7 @@
     <string name="restr_pin_error_too_short" msgid="1547007808237941065">"El PIN és massa curt. Ha de tenir quatre dígits com a mínim."</string>
     <string name="restr_pin_try_later" msgid="5897719962541636727">"Torna-ho a provar més tard"</string>
     <string name="immersive_cling_title" msgid="2307034298721541791">"Mode de pantalla completa"</string>
-    <!-- no translation found for immersive_cling_description (2896205051090870978) -->
-    <skip />
+    <string name="immersive_cling_description" msgid="2896205051090870978">"Per sortir, llisca cap avall des de la part superior de la pantalla"</string>
     <string name="immersive_cling_positive" msgid="7047498036346489883">"Entesos"</string>
     <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"Gira per a una millor visualització"</string>
     <string name="display_rotation_camera_compat_toast_in_multi_window" msgid="2473122980393502775">"Obre <xliff:g id="NAME">%s</xliff:g> en pantalla completa per a una millor visualització"</string>
@@ -2193,6 +2192,8 @@
     <string name="accessibility_system_action_on_screen_a11y_shortcut_chooser_label" msgid="1057878690209817886">"Selector de dreceres d\'accessibilitat en pantalla"</string>
     <string name="accessibility_system_action_hardware_a11y_shortcut_label" msgid="5764644187715255107">"Drecera d\'accessibilitat"</string>
     <string name="accessibility_system_action_dismiss_notification_shade" msgid="8931637495533770352">"Ignora l\'àrea de notificacions"</string>
+    <string name="accessibility_system_action_menu_label" msgid="3385283204496447040">"Menú"</string>
+    <string name="accessibility_system_action_media_play_pause_label" msgid="1905647491347119748">"Reprodueix o posa en pausa el contingut multimèdia"</string>
     <string name="accessibility_system_action_dpad_up_label" msgid="1029042950229333782">"Creu direccional: amunt"</string>
     <string name="accessibility_system_action_dpad_down_label" msgid="3441918448624921461">"Creu direccional: avall"</string>
     <string name="accessibility_system_action_dpad_left_label" msgid="6557647179116479152">"Creu direccional: esquerra"</string>
@@ -2412,7 +2413,7 @@
     <string name="private_space_biometric_prompt_title" msgid="5777592909271728154">"Espai privat"</string>
     <string name="redacted_notification_message" msgid="1520587845842228816">"S\'ha amagat contingut sensible de les notificacions"</string>
     <string name="redacted_notification_action_title" msgid="6942924973335920935"></string>
-    <string name="screen_not_shared_sensitive_content" msgid="7058419185079565001">"Contingut de l\'aplicació amagat de la compartició de pantalla per motius de seguretat"</string>
+    <string name="screen_not_shared_sensitive_content" msgid="7058419185079565001">"Contingut de l\'aplicació amagat de la compartició de pantalla per seguretat"</string>
     <string name="satellite_notification_title" msgid="4026338973463121526">"S\'ha connectat automàticament a un satèl·lit"</string>
     <string name="satellite_notification_summary" msgid="5207364139430767162">"Pots enviar i rebre missatges sense una xarxa mòbil o Wi‑Fi"</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Obre Missatges"</string>

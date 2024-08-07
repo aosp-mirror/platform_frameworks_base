@@ -642,7 +642,7 @@
     <string name="permdesc_mediaLocation" msgid="597912899423578138">"Membenarkan apl membaca lokasi daripada koleksi media anda."</string>
     <string name="biometric_app_setting_name" msgid="3339209978734534457">"Gunakan biometrik"</string>
     <string name="biometric_or_screen_lock_app_setting_name" msgid="5348462421758257752">"Gunakan biometrik atau kunci skrin"</string>
-    <string name="biometric_dialog_default_title" msgid="55026799173208210">"Sahkan itu anda"</string>
+    <string name="biometric_dialog_default_title" msgid="55026799173208210">"Sahkan diri anda"</string>
     <string name="biometric_dialog_default_subtitle" msgid="8457232339298571992">"Gunakan biometrik anda untuk meneruskan"</string>
     <string name="biometric_or_screen_lock_dialog_default_subtitle" msgid="159539678371552009">"Gunakan biometrik atau kunci skrin anda untuk meneruskan pengesahan"</string>
     <string name="biometric_error_hw_unavailable" msgid="2494077380540615216">"Perkakasan biometrik tidak tersedia"</string>
@@ -1436,7 +1436,7 @@
     <string name="alert_windows_notification_channel_group_name" msgid="6063891141815714246">"Paparkan di atas apl lain"</string>
     <string name="alert_windows_notification_channel_name" msgid="3437528564303192620">"<xliff:g id="NAME">%s</xliff:g> dipaparkan di atas apl lain"</string>
     <string name="alert_windows_notification_title" msgid="6331662751095228536">"<xliff:g id="NAME">%s</xliff:g> dipaparkan di atas apl lain"</string>
-    <string name="alert_windows_notification_message" msgid="6538171456970725333">"Jika anda tidak mahu <xliff:g id="NAME">%s</xliff:g> menggunakan ciri ini, ketik untuk membuka tetapan dan matikannya."</string>
+    <string name="alert_windows_notification_message" msgid="6538171456970725333">"Jika anda tidak mahu <xliff:g id="NAME">%s</xliff:g> menggunakan ciri ini, ketik untuk membuka tetapan dan matikan ciri tersebut."</string>
     <string name="alert_windows_notification_turn_off_action" msgid="7805857234839123780">"Matikan"</string>
     <string name="ext_media_checking_notification_title" msgid="8299199995416510094">"Menyemak <xliff:g id="NAME">%s</xliff:g>…"</string>
     <string name="ext_media_checking_notification_message" msgid="2231566971425375542">"Menyemak kandungan semasa"</string>
@@ -1883,8 +1883,7 @@
     <string name="restr_pin_error_too_short" msgid="1547007808237941065">"PIN terlalu pendek. Mesti sekurang-kurangnya 4 angka."</string>
     <string name="restr_pin_try_later" msgid="5897719962541636727">"Cuba sebentar lagi"</string>
     <string name="immersive_cling_title" msgid="2307034298721541791">"Melihat skrin penuh"</string>
-    <!-- no translation found for immersive_cling_description (2896205051090870978) -->
-    <skip />
+    <string name="immersive_cling_description" msgid="2896205051090870978">"Untuk keluar, leret ke bawah daripada bahagian atas skrin anda"</string>
     <string name="immersive_cling_positive" msgid="7047498036346489883">"Faham"</string>
     <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"Putar untuk mendapatkan paparan yang lebih baik"</string>
     <string name="display_rotation_camera_compat_toast_in_multi_window" msgid="2473122980393502775">"Buka <xliff:g id="NAME">%s</xliff:g> dalam skrin penuh untuk mendapatkan paparan yang lebih baik"</string>
@@ -2192,6 +2191,8 @@
     <string name="accessibility_system_action_on_screen_a11y_shortcut_chooser_label" msgid="1057878690209817886">"Pemilih Pintasan Kebolehaksesan Pada Skrin"</string>
     <string name="accessibility_system_action_hardware_a11y_shortcut_label" msgid="5764644187715255107">"Pintasan Kebolehaksesan"</string>
     <string name="accessibility_system_action_dismiss_notification_shade" msgid="8931637495533770352">"Ketepikan Bidai Pemberitahuan"</string>
+    <string name="accessibility_system_action_menu_label" msgid="3385283204496447040">"Menu"</string>
+    <string name="accessibility_system_action_media_play_pause_label" msgid="1905647491347119748">"Mainkan/Jeda Media"</string>
     <string name="accessibility_system_action_dpad_up_label" msgid="1029042950229333782">"Dpad Atas"</string>
     <string name="accessibility_system_action_dpad_down_label" msgid="3441918448624921461">"Dpad Bawah"</string>
     <string name="accessibility_system_action_dpad_left_label" msgid="6557647179116479152">"Dpad Kiri"</string>
@@ -2227,7 +2228,7 @@
     <string name="miniresolver_private_space_messages_information" msgid="111285656327622118">"Anda hanya boleh menghantar mesej SMS daripada apl Messages peribadi anda."</string>
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"Gunakan penyemak imbas peribadi"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"Gunakan penyemak imbas kerja"</string>
-    <string name="miniresolver_call" msgid="6386870060423480765">"Panggil"</string>
+    <string name="miniresolver_call" msgid="6386870060423480765">"Telefon"</string>
     <string name="miniresolver_switch" msgid="8011924662117617451">"Beralih"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"PIN buka kunci rangkaian SIM"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_ENTRY" msgid="7164399703751688214">"PIN buka kunci subset rangkaian SIM"</string>

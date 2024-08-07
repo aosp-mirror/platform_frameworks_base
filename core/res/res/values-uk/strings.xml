@@ -158,7 +158,7 @@
     <string name="scCellularNetworkSecurityTitle" msgid="7752521808690294384">"Безпека мобільної мережі"</string>
     <string name="scCellularNetworkSecuritySummary" msgid="7042036754550545005">"Шифрування, сповіщення для незашифрованих мереж"</string>
     <string name="scIdentifierDisclosureIssueTitle" msgid="2898888825129970328">"Отримано доступ до ідентифікатора пристрою"</string>
-    <string name="scIdentifierDisclosureIssueSummaryNotification" msgid="3699930821270580416">"О <xliff:g id="DISCLOSURE_TIME">%1$s</xliff:g> у мережі поблизу зафіксовано унікальний ідентифікатор вашого пристрою (IMSI або IMEI) під час використання вашої SIM-карти <xliff:g id="DISCLOSURE_NETWORK">%2$s</xliff:g>"</string>
+    <string name="scIdentifierDisclosureIssueSummaryNotification" msgid="3699930821270580416">"О <xliff:g id="DISCLOSURE_TIME">%1$s</xliff:g>, коли ви використали SIM-карту <xliff:g id="DISCLOSURE_NETWORK">%2$s</xliff:g>, мережа поблизу зафіксувала унікальний ідентифікатор вашого пристрою (IMSI або IMEI)"</string>
     <string name="scIdentifierDisclosureIssueSummary" msgid="7283387338827749276">"О <xliff:g id="DISCLOSURE_TIME">%1$s</xliff:g> у мережі поблизу зафіксовано унікальний ідентифікатор вашого пристрою (IMSI або IMEI) під час використання вашої SIM-карти <xliff:g id="DISCLOSURE_NETWORK">%2$s</xliff:g>.\n\nЦе означає, що було зареєстровано ваше місцезнаходження, дії чи особу. Це звичайна практика, але може виявитися проблемою для людей, для яких важлива конфіденційність."</string>
     <string name="scNullCipherIssueEncryptedTitle" msgid="234717016411824969">"Підключено до зашифрованої мережі <xliff:g id="NETWORK_NAME">%1$s</xliff:g>"</string>
     <string name="scNullCipherIssueEncryptedSummary" msgid="8577510708842150475">"Тепер з’єднання SIM-карти <xliff:g id="NETWORK_NAME">%1$s</xliff:g> краще захищене"</string>
@@ -1885,8 +1885,7 @@
     <string name="restr_pin_error_too_short" msgid="1547007808237941065">"PIN-код закороткий. Має бути принаймні 4 цифри."</string>
     <string name="restr_pin_try_later" msgid="5897719962541636727">"Спробуйте пізніше"</string>
     <string name="immersive_cling_title" msgid="2307034298721541791">"Перегляд на весь екран"</string>
-    <!-- no translation found for immersive_cling_description (2896205051090870978) -->
-    <skip />
+    <string name="immersive_cling_description" msgid="2896205051090870978">"Щоб вийти, проведіть пальцем униз від верхнього краю екрана"</string>
     <string name="immersive_cling_positive" msgid="7047498036346489883">"OK"</string>
     <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"Оберніть для кращого огляду"</string>
     <string name="display_rotation_camera_compat_toast_in_multi_window" msgid="2473122980393502775">"Для кращого огляду відкрийте додаток <xliff:g id="NAME">%s</xliff:g> на весь екран"</string>
@@ -2194,6 +2193,8 @@
     <string name="accessibility_system_action_on_screen_a11y_shortcut_chooser_label" msgid="1057878690209817886">"Вибір екранного засобу спеціальних можливостей"</string>
     <string name="accessibility_system_action_hardware_a11y_shortcut_label" msgid="5764644187715255107">"Засіб спеціальних можливостей"</string>
     <string name="accessibility_system_action_dismiss_notification_shade" msgid="8931637495533770352">"Закрити панель сповіщень"</string>
+    <string name="accessibility_system_action_menu_label" msgid="3385283204496447040">"Меню"</string>
+    <string name="accessibility_system_action_media_play_pause_label" msgid="1905647491347119748">"Відтворити/призупинити медіаконтент"</string>
     <string name="accessibility_system_action_dpad_up_label" msgid="1029042950229333782">"Кнопка \"вгору\" панелі керування"</string>
     <string name="accessibility_system_action_dpad_down_label" msgid="3441918448624921461">"Кнопка \"вниз\" панелі керування"</string>
     <string name="accessibility_system_action_dpad_left_label" msgid="6557647179116479152">"Кнопка \"вліво\" панелі керування"</string>

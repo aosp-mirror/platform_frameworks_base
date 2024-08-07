@@ -1144,7 +1144,7 @@
     <string name="weeks" msgid="3516247214269821391">"ವಾರಗಳು"</string>
     <string name="year" msgid="5182610307741238982">"ವರ್ಷ"</string>
     <string name="years" msgid="5797714729103773425">"ವರ್ಷಗಳು"</string>
-    <string name="now_string_shortest" msgid="3684914126941650330">"ಇದೀಗ"</string>
+    <string name="now_string_shortest" msgid="3684914126941650330">"ಈಗ"</string>
     <string name="duration_minutes_shortest" msgid="5744379079540806690">"<xliff:g id="COUNT">%d</xliff:g>ನಿ"</string>
     <string name="duration_hours_shortest" msgid="1477752094141971675">"<xliff:g id="COUNT">%d</xliff:g>ಗಂ"</string>
     <string name="duration_days_shortest" msgid="4083124701676227233">"<xliff:g id="COUNT">%d</xliff:g>ದಿ"</string>
@@ -1883,8 +1883,7 @@
     <string name="restr_pin_error_too_short" msgid="1547007808237941065">"ಪಿನ್‌ ತುಂಬಾ ಚಿಕ್ಕದಾಗಿದೆ. ಕನಿಷ್ಠ ಪಕ್ಷ 4 ಅಂಕಿಗಳಾಗಿರಬೇಕು."</string>
     <string name="restr_pin_try_later" msgid="5897719962541636727">"ನಂತರ ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ"</string>
     <string name="immersive_cling_title" msgid="2307034298721541791">"ಪೂರ್ಣ ಪರದೆಯನ್ನು ವೀಕ್ಷಿಸಲಾಗುತ್ತಿದೆ"</string>
-    <!-- no translation found for immersive_cling_description (2896205051090870978) -->
-    <skip />
+    <string name="immersive_cling_description" msgid="2896205051090870978">"ನಿರ್ಗಮಿಸಲು, ನಿಮ್ಮ ಸ್ಕ್ರೀನ್‌ನ ಮೇಲಿನಿಂದ ಕೆಳಕ್ಕೆ ಸ್ವೈಪ್ ಮಾಡಿ"</string>
     <string name="immersive_cling_positive" msgid="7047498036346489883">"ತಿಳಿಯಿತು"</string>
     <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"ಅತ್ಯುತ್ತಮ ವೀಕ್ಷಣೆಗಾಗಿ ತಿರುಗಿಸಿ"</string>
     <string name="display_rotation_camera_compat_toast_in_multi_window" msgid="2473122980393502775">"ಅತ್ಯುತ್ತಮ ವೀಕ್ಷಣೆಗಾಗಿ <xliff:g id="NAME">%s</xliff:g> ಅನ್ನು ಪೂರ್ಣ ಸ್ಕ್ರೀನ್‌ನಲ್ಲಿ ತೆರೆಯಿರಿ"</string>
@@ -2065,7 +2064,7 @@
     <string name="time_picker_text_input_mode_description" msgid="4761160667516611576">"ಸಮಯವನ್ನು ನಮೂದಿಸಲು ಪಠ್ಯದ ನಮೂನೆಗೆ ಬದಲಿಸಿ."</string>
     <string name="time_picker_radial_mode_description" msgid="1222342577115016953">"ಸಮಯವನ್ನು ನಮೂದಿಸಲು ಗಡಿಯಾರದ ನಮೂನೆಗೆ ಬದಲಿಸಿ."</string>
     <string name="autofill_picker_accessibility_title" msgid="4425806874792196599">"ಸ್ವಯಂತುಂಬುವಿಕೆ ಆಯ್ಕೆಗಳು"</string>
-    <string name="autofill_save_accessibility_title" msgid="1523225776218450005">"ಸ್ವಯಂ ಭರ್ತಿಗಾಗಿ ಉಳಿಸಿ"</string>
+    <string name="autofill_save_accessibility_title" msgid="1523225776218450005">"ಸ್ವಯಂ ಭರ್ತಿಗಾಗಿ ಸೇವ್ ಮಾಡಿ"</string>
     <string name="autofill_error_cannot_autofill" msgid="6528827648643138596">"ವಿಷಯಗಳು ಸ್ವಯಂಚಾಲಿತವಾಗಿ ಭರ್ತಿಯಾಗಲು ಸಾಧ್ಯವಿಲ್ಲ"</string>
     <string name="autofill_picker_no_suggestions" msgid="1076022650427481509">"ಸ್ವಯಂಭರ್ತಿ ಸಲಹೆಗಳಿಲ್ಲ"</string>
     <string name="autofill_picker_some_suggestions" msgid="5560549696296202701">"{count,plural, =1{ಒಂದು ಸ್ವಯಂ ಭರ್ತಿ ಸಲಹೆಯಿದೆ}one{# ಸ್ವಯಂ ಭರ್ತಿ ಸಲಹೆಗಳಿವೆ}other{# ಸ್ವಯಂ ಭರ್ತಿ ಸಲಹೆಗಳಿವೆ}}"</string>
@@ -2192,6 +2191,8 @@
     <string name="accessibility_system_action_on_screen_a11y_shortcut_chooser_label" msgid="1057878690209817886">"ಸ್ಕ್ರೀನ್‌ನಲ್ಲಿನ ಆ್ಯಕ್ಸೆಸಿಬಿಲಿಟಿ ಶಾರ್ಟ್‌ಕಟ್ ಆಯ್ಕೆ"</string>
     <string name="accessibility_system_action_hardware_a11y_shortcut_label" msgid="5764644187715255107">"ಆ್ಯಕ್ಸೆಸಿಬಿಲಿಟಿ ಶಾರ್ಟ್‌ಕಟ್"</string>
     <string name="accessibility_system_action_dismiss_notification_shade" msgid="8931637495533770352">"ಅಧಿಸೂಚನೆಯ ಪರದೆಯನ್ನು ವಜಾಗೊಳಿಸಿ"</string>
+    <string name="accessibility_system_action_menu_label" msgid="3385283204496447040">"ಮೆನು"</string>
+    <string name="accessibility_system_action_media_play_pause_label" msgid="1905647491347119748">"ಮೀಡಿಯಾವನ್ನು ಪ್ಲೇ ಮಾಡಿ/ವಿರಾಮಗೊಳಿಸಿ"</string>
     <string name="accessibility_system_action_dpad_up_label" msgid="1029042950229333782">"Dpad ನ ಮೇಲಿನ ಬಟನ್"</string>
     <string name="accessibility_system_action_dpad_down_label" msgid="3441918448624921461">"Dpad ನ ಕೆಳಗಿನ ಬಟನ್"</string>
     <string name="accessibility_system_action_dpad_left_label" msgid="6557647179116479152">"Dpad ನ ಎಡಭಾಗದ ಬಟನ್"</string>

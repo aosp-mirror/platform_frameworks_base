@@ -1523,7 +1523,7 @@
     <string name="forward_intent_to_work" msgid="3620262405636021151">"பணிக் கணக்கில் பயன்பாட்டைப் பயன்படுத்துகிறீர்கள்"</string>
     <string name="input_method_binding_label" msgid="1166731601721983656">"உள்ளீட்டு முறை"</string>
     <string name="sync_binding_label" msgid="469249309424662147">"ஒத்திசை"</string>
-    <string name="accessibility_binding_label" msgid="1974602776545801715">"அணுகல்தன்மை"</string>
+    <string name="accessibility_binding_label" msgid="1974602776545801715">"மாற்றுத்திறன் வசதி"</string>
     <string name="wallpaper_binding_label" msgid="1197440498000786738">"வால்பேப்பர்"</string>
     <string name="chooser_wallpaper" msgid="3082405680079923708">"வால்பேப்பரை மாற்று"</string>
     <string name="notification_listener_binding_label" msgid="2702165274471499713">"அறிவிப்புகளைக் கண்காணிக்கும் சேவை"</string>
@@ -1883,8 +1883,7 @@
     <string name="restr_pin_error_too_short" msgid="1547007808237941065">"பின் மிகவும் சிறியதாக உள்ளது. குறைந்தது 4 இலக்கங்கள் இருக்க வேண்டும்."</string>
     <string name="restr_pin_try_later" msgid="5897719962541636727">"மீண்டும் முயற்சிக்கவும்"</string>
     <string name="immersive_cling_title" msgid="2307034298721541791">"முழுத் திரையில் காட்டுகிறது"</string>
-    <!-- no translation found for immersive_cling_description (2896205051090870978) -->
-    <skip />
+    <string name="immersive_cling_description" msgid="2896205051090870978">"வெளியேற, உங்கள் திரையின் மேலிருந்து கீழ்நோக்கி ஸ்வைப் செய்யவும்"</string>
     <string name="immersive_cling_positive" msgid="7047498036346489883">"புரிந்தது"</string>
     <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"சிறந்த காட்சிக்கு சுழற்றுங்கள்"</string>
     <string name="display_rotation_camera_compat_toast_in_multi_window" msgid="2473122980393502775">"சிறந்த காட்சிக்கு, <xliff:g id="NAME">%s</xliff:g> ஆப்ஸை முழுத்திரைப் பயன்முறையில் திறக்கவும்"</string>
@@ -2054,7 +2053,7 @@
     <string name="app_category_news" msgid="1172762719574964544">"செய்திகளும் பத்திரிகைகளும்"</string>
     <string name="app_category_maps" msgid="6395725487922533156">"வரைபடங்களும் வழிசெலுத்தலும்"</string>
     <string name="app_category_productivity" msgid="1844422703029557883">"உற்பத்தித்திறன்"</string>
-    <string name="app_category_accessibility" msgid="6643521607848547683">"அணுகல்தன்மை"</string>
+    <string name="app_category_accessibility" msgid="6643521607848547683">"மாற்றுத்திறன் வசதி"</string>
     <string name="device_storage_monitor_notification_channel" msgid="5164244565844470758">"சாதனச் சேமிப்பகம்"</string>
     <string name="adb_debugging_notification_channel_tv" msgid="4764046459631031496">"USB பிழைதிருத்தம்"</string>
     <string name="time_picker_hour_label" msgid="4208590187662336864">"மணி"</string>
@@ -2192,6 +2191,8 @@
     <string name="accessibility_system_action_on_screen_a11y_shortcut_chooser_label" msgid="1057878690209817886">"திரையிலுள்ள அணுகல்தன்மை ஷார்ட்கட்டிற்கான தேர்வி"</string>
     <string name="accessibility_system_action_hardware_a11y_shortcut_label" msgid="5764644187715255107">"அணுகல்தன்மை ஷார்ட்கட்"</string>
     <string name="accessibility_system_action_dismiss_notification_shade" msgid="8931637495533770352">"அறிவிப்பு விவரத்தை நிராகரி"</string>
+    <string name="accessibility_system_action_menu_label" msgid="3385283204496447040">"மெனு"</string>
+    <string name="accessibility_system_action_media_play_pause_label" msgid="1905647491347119748">"மீடியாவை இயக்குதல்/இடைநிறுத்துதல்"</string>
     <string name="accessibility_system_action_dpad_up_label" msgid="1029042950229333782">"மேல் திசை காட்டும் பட்டன்"</string>
     <string name="accessibility_system_action_dpad_down_label" msgid="3441918448624921461">"கீழ் திசை காட்டும் பட்டன்"</string>
     <string name="accessibility_system_action_dpad_left_label" msgid="6557647179116479152">"இடது திசை காட்டும் பட்டன்"</string>

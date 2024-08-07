@@ -700,11 +700,11 @@
     <string name="alternative_unlock_setup_notification_title" msgid="6241508547901933544">"כדאי לנסות דרך אחרת לביטול הנעילה"</string>
     <string name="alternative_face_setup_notification_content" msgid="3384959224091897331">"אפשר להשתמש בפתיחה ע\"י זיהוי הפנים כשטביעת האצבע שלך לא מזוהה, למשל כשהאצבעות שלך רטובות"</string>
     <string name="alternative_fp_setup_notification_content" msgid="7454096947415721639">"אפשר להשתמש בביטול הנעילה בטביעת אצבע כשהפנים שלך לא מזוהות, למשל כשאין מספיק אור"</string>
-    <string name="face_recalibrate_notification_name" msgid="7311163114750748686">"פתיחה ע\"י זיהוי הפנים"</string>
+    <string name="face_recalibrate_notification_name" msgid="7311163114750748686">"פתיחה בזיהוי פנים"</string>
     <string name="face_recalibrate_notification_title" msgid="2524791952735579082">"בעיה בפתיחה ע\"י זיהוי הפנים"</string>
     <string name="face_recalibrate_notification_content" msgid="3064513770251355594">"יש להקיש כדי למחוק את התבנית לזיהוי הפנים, ואז להוסיף תבנית חדשה לזיהוי הפנים"</string>
     <string name="face_sensor_privacy_enabled" msgid="7407126963510598508">"‏כדי להשתמש בתכונה \'פתיחה ע\"י זיהוי הפנים\', יש להפעיל את ה"<b>"גישה למצלמה"</b>" בהגדרות &gt; פרטיות"</string>
-    <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"ביטול הנעילה בטביעת אצבע"</string>
+    <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"פתיחה בטביעת אצבע"</string>
     <string name="fingerprint_recalibrate_notification_title" msgid="2406561052064558497">"לא ניתן להשתמש בחיישן טביעות האצבע"</string>
     <string name="fingerprint_recalibrate_notification_content" msgid="8519935717822194943">"צריך ליצור קשר עם ספק תיקונים."</string>
     <string name="face_acquired_insufficient" msgid="6889245852748492218">"לא ניתן ליצור את התבנית לזיהוי הפנים. יש לנסות שוב."</string>
@@ -1074,7 +1074,7 @@
     <string name="keyguard_accessibility_expand_lock_area" msgid="4215280881346033434">"הרחבה של אזור ביטול הנעילה."</string>
     <string name="keyguard_accessibility_slide_unlock" msgid="2968195219692413046">"ביטול נעילה באמצעות הסטה."</string>
     <string name="keyguard_accessibility_pattern_unlock" msgid="8669128146589233293">"ביטול נעילה על ידי שרטוט קו."</string>
-    <string name="keyguard_accessibility_face_unlock" msgid="4533832120787386728">"פתיחה ע\"י זיהוי הפנים."</string>
+    <string name="keyguard_accessibility_face_unlock" msgid="4533832120787386728">"פתיחה בזיהוי פנים"</string>
     <string name="keyguard_accessibility_pin_unlock" msgid="4020864007967340068">"ביטול נעילה באמצעות קוד אימות."</string>
     <string name="keyguard_accessibility_sim_pin_unlock" msgid="4895939120871890557">"‏ביטול הנעילה של קוד האימות ל-SIM."</string>
     <string name="keyguard_accessibility_sim_puk_unlock" msgid="3459003464041899101">"‏ביטול נעילה של PUK ל-SIM."</string>
@@ -1275,7 +1275,7 @@
     <string name="unsupported_display_size_show" msgid="980129850974919375">"להציג תמיד"</string>
     <string name="unsupported_compile_sdk_message" msgid="7326293500707890537">"‏<xliff:g id="APP_NAME">%1$s</xliff:g> נבנתה לגרסה לא תואמת של מערכת ההפעלה של Android ועלולה להתנהג באופן לא צפוי. ייתכן שקיימת גרסה מעודכנת של האפליקציה."</string>
     <string name="unsupported_compile_sdk_show" msgid="1601210057960312248">"להציג תמיד"</string>
-    <string name="unsupported_compile_sdk_check_update" msgid="1103639989147664456">"האם יש עדכון חדש?"</string>
+    <string name="unsupported_compile_sdk_check_update" msgid="1103639989147664456">"יש עדכון חדש?"</string>
     <string name="smv_application" msgid="3775183542777792638">"‏האפליקציה <xliff:g id="APPLICATION">%1$s</xliff:g> (תהליך <xliff:g id="PROCESS">%2$s</xliff:g>) הפרה את מדיניות StrictMode באכיפה עצמית שלה."</string>
     <string name="smv_process" msgid="1398801497130695446">"‏התהליך <xliff:g id="PROCESS">%1$s</xliff:g> הפר את מדיניות StrictMode באכיפה עצמית."</string>
     <string name="android_upgrading_title" product="default" msgid="7279077384220829683">"הטלפון מתעדכן…"</string>
@@ -1884,8 +1884,7 @@
     <string name="restr_pin_error_too_short" msgid="1547007808237941065">"קוד הגישה קצר מדי. חייב להיות באורך 4 ספרות לפחות."</string>
     <string name="restr_pin_try_later" msgid="5897719962541636727">"יש לנסות שוב מאוחר יותר"</string>
     <string name="immersive_cling_title" msgid="2307034298721541791">"צפייה במסך מלא"</string>
-    <!-- no translation found for immersive_cling_description (2896205051090870978) -->
-    <skip />
+    <string name="immersive_cling_description" msgid="2896205051090870978">"כדי לצאת, מחליקים למטה מהחלק העליון של המסך"</string>
     <string name="immersive_cling_positive" msgid="7047498036346489883">"הבנתי"</string>
     <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"מסובבים כדי לראות טוב יותר"</string>
     <string name="display_rotation_camera_compat_toast_in_multi_window" msgid="2473122980393502775">"צריך לפתוח את <xliff:g id="NAME">%s</xliff:g> במסך מלא כדי לראות טוב יותר"</string>
@@ -2193,6 +2192,8 @@
     <string name="accessibility_system_action_on_screen_a11y_shortcut_chooser_label" msgid="1057878690209817886">"בורר קיצורי דרך לנגישות במסך"</string>
     <string name="accessibility_system_action_hardware_a11y_shortcut_label" msgid="5764644187715255107">"קיצור דרך לנגישות"</string>
     <string name="accessibility_system_action_dismiss_notification_shade" msgid="8931637495533770352">"סגירת לוח ההתראות"</string>
+    <string name="accessibility_system_action_menu_label" msgid="3385283204496447040">"תפריט"</string>
+    <string name="accessibility_system_action_media_play_pause_label" msgid="1905647491347119748">"הפעלה/השהיה של המדיה"</string>
     <string name="accessibility_system_action_dpad_up_label" msgid="1029042950229333782">"‏לחצן עליון ב-Dpad"</string>
     <string name="accessibility_system_action_dpad_down_label" msgid="3441918448624921461">"‏לחצן תחתון ב-Dpad"</string>
     <string name="accessibility_system_action_dpad_left_label" msgid="6557647179116479152">"‏לחצן שמאלי ב-Dpad"</string>
