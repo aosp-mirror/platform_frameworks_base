@@ -15,7 +15,7 @@
   -->
 
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.android.internal.overlay.hsumconfig"
+    package="com.android.internal.overlay.hsum.defaultconfig"
     android:versionCode="1"
     android:versionName="1.0">
     <overlay android:targetPackage="android" android:priority="2" android:isStatic="true" />
