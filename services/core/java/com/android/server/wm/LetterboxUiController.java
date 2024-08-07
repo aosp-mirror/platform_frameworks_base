@@ -108,7 +108,7 @@ final class LetterboxUiController {
     }
 
     void layoutLetterboxIfNeeded(WindowState w) {
-        mAppCompatLetterboxPolicy.layoutLetterboxIfNeeded(w);
+        mAppCompatLetterboxPolicy.start(w);
     }
 
     boolean isLetterboxEducationEnabled() {
