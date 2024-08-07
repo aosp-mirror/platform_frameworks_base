@@ -456,5 +456,10 @@ public class GlobalSettingsValidators {
         VALIDATORS.put(Global.ADD_USERS_WHEN_LOCKED, BOOLEAN_VALIDATOR);
         VALIDATORS.put(Global.REMOVE_GUEST_ON_EXIT, BOOLEAN_VALIDATOR);
         VALIDATORS.put(Global.USER_SWITCHER_ENABLED, BOOLEAN_VALIDATOR);
+        VALIDATORS.put(Global.Wearable.PHONE_SWITCHING_REQUEST_SOURCE,
+            new InclusiveIntegerRangeValidator(
+                Global.Wearable.PHONE_SWITCHING_REQUEST_SOURCE_NONE,
+                Global.Wearable.PHONE_SWITCHING_REQUEST_SOURCE_COMPANION
+        ));
     }
 }
