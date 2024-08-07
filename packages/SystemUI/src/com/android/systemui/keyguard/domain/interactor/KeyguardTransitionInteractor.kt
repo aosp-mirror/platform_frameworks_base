@@ -75,6 +75,7 @@ constructor(
     private val fromAlternateBouncerTransitionInteractor:
         dagger.Lazy<FromAlternateBouncerTransitionInteractor>,
     private val fromDozingTransitionInteractor: dagger.Lazy<FromDozingTransitionInteractor>,
+    private val fromOccludedTransitionInteractor: dagger.Lazy<FromOccludedTransitionInteractor>,
     private val sceneInteractor: SceneInteractor,
 ) {
     private val transitionMap = mutableMapOf<Edge.StateToState, MutableSharedFlow<TransitionStep>>()
@@ -418,6 +419,7 @@ constructor(
                 fromAlternateBouncerTransitionInteractor.get().dismissAlternateBouncer()
             AOD -> fromAodTransitionInteractor.get().dismissAod()
             DOZING -> fromDozingTransitionInteractor.get().dismissFromDozing()
+            KeyguardState.OCCLUDED -> fromOccludedTransitionInteractor.get().dismissFromOccluded()
             KeyguardState.GONE ->
                 Log.i(
                     TAG,
