@@ -21,6 +21,8 @@ import static android.text.Layout.HYPHENATION_FREQUENCY_NORMAL_FAST;
 import android.app.ActionBar;
 import android.app.Activity;
 import android.content.res.Configuration;
+import android.content.res.TypedArray;
+import android.graphics.drawable.Drawable;
 import android.graphics.text.LineBreakConfig;
 import android.os.Build;
 import android.util.Log;
@@ -80,8 +82,12 @@ public class CollapsingToolbarDelegate {
     @NonNull
     private final HostCallback mHostCallback;
 
-    public CollapsingToolbarDelegate(@NonNull HostCallback hostCallback) {
+    private boolean mUseCollapsingToolbar;
+
+    public CollapsingToolbarDelegate(@NonNull HostCallback hostCallback,
+            boolean useCollapsingToolbar) {
         mHostCallback = hostCallback;
+        mUseCollapsingToolbar = useCollapsingToolbar;
     }
 
     /** Method to call that creates the root view of the collapsing toolbar. */
@@ -94,13 +100,32 @@ public class CollapsingToolbarDelegate {
     @SuppressWarnings("RestrictTo")
     View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
             Activity activity) {
-        final View view =
-                inflater.inflate(R.layout.collapsing_toolbar_base_layout, container, false);
+        int layoutId;
+        boolean useCollapsingToolbar =
+                mUseCollapsingToolbar || Build.VERSION.SDK_INT < Build.VERSION_CODES.S;
+        if (useCollapsingToolbar) {
+            layoutId = R.layout.collapsing_toolbar_base_layout;
+        } else {
+            layoutId = R.layout.non_collapsing_toolbar_base_layout;
+        }
+        final View view = inflater.inflate(layoutId, container, false);
         if (view instanceof CoordinatorLayout) {
             mCoordinatorLayout = (CoordinatorLayout) view;
         }
         mCollapsingToolbarLayout = view.findViewById(R.id.collapsing_toolbar);
         mAppBarLayout = view.findViewById(R.id.app_bar);
+
+        if (!useCollapsingToolbar) {
+            // In the non-collapsing toolbar layout, we need to set the background of the app bar to
+            // the same as the activity background so that it covers the items extending above the
+            // bounds of the list for edge-to-edge.
+            TypedArray ta = container.getContext().obtainStyledAttributes(new int[] {
+                    android.R.attr.windowBackground});
+            Drawable background = ta.getDrawable(0);
+            ta.recycle();
+            mAppBarLayout.setBackground(background);
+        }
+
         if (mCollapsingToolbarLayout != null && Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             mCollapsingToolbarLayout.setLineSpacingMultiplier(TOOLBAR_LINE_SPACING_MULTIPLIER);
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
