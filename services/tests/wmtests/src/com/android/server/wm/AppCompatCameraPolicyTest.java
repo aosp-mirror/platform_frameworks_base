@@ -150,6 +150,12 @@ public class AppCompatCameraPolicyTest extends WindowTestsBase {
             super(wm, atm, supervisor);
         }
 
+        @Override
+        void onPostDisplayContentCreation(@NonNull DisplayContent displayContent) {
+            super.onPostDisplayContentCreation(displayContent);
+            spyOn(displayContent.mAppCompatCameraPolicy);
+        }
+
         void checkTopActivityHasDisplayRotationCompatPolicy(boolean exists) {
             Assert.assertEquals(exists, activity().top().mDisplayContent
                     .mAppCompatCameraPolicy.hasDisplayRotationCompatPolicy());
