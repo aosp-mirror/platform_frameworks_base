@@ -33,6 +33,8 @@ import android.annotation.Nullable;
 import android.annotation.SystemService;
 import android.content.Context;
 import android.os.RemoteException;
+import android.os.ResultReceiver;
+import android.os.ShellCallback;
 import android.os.SystemClock;
 import android.tracing.perfetto.DataSourceParams;
 import android.tracing.perfetto.InitArguments;
@@ -43,6 +45,7 @@ import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.annotations.VisibleForTesting;
 
+import java.io.FileDescriptor;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -222,6 +225,14 @@ public final class ProtoLogService extends IProtoLogService.Stub {
         }
 
         registerGroups(client, args.getGroups(), args.getGroupsDefaultLogcatStatus());
+    }
+
+    @Override
+    public void onShellCommand(@Nullable FileDescriptor in, @Nullable FileDescriptor out,
+            @Nullable FileDescriptor err, @NonNull String[] args, @Nullable ShellCallback callback,
+            @NonNull ResultReceiver resultReceiver) throws RemoteException {
+        new ProtoLogCommandHandler(this)
+                .exec(this, in, out, err, args, callback, resultReceiver);
     }
 
     /**
