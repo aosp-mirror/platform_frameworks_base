@@ -131,7 +131,7 @@ constructor(
 
         val on = context.resources.getString(R.string.zen_mode_on)
         val off = context.resources.getString(R.string.zen_mode_off)
-        return mode.rule.triggerDescription ?: if (mode.isActive) on else off
+        return mode.getDynamicDescription(context) ?: if (mode.isActive) on else off
     }
 
     private fun makeZenModeDialog(): Dialog {

@@ -40,18 +40,17 @@ public class TestModeBuilder {
     private ZenModeConfig.ZenRule mConfigZenRule;
 
     public static final ZenMode EXAMPLE = new TestModeBuilder().build();
-    public static final ZenMode MANUAL_DND_ACTIVE = ZenMode.manualDndMode(
-            new AutomaticZenRule.Builder("Do Not Disturb", Uri.parse("rule://dnd"))
-                    .setInterruptionFilter(NotificationManager.INTERRUPTION_FILTER_PRIORITY)
-                    .setZenPolicy(new ZenPolicy.Builder().disallowAllSounds().build())
-                    .build(),
-            /* isActive= */ true);
-    public static final ZenMode MANUAL_DND_INACTIVE = ZenMode.manualDndMode(
-            new AutomaticZenRule.Builder("Do Not Disturb", Uri.parse("rule://dnd"))
-                    .setInterruptionFilter(NotificationManager.INTERRUPTION_FILTER_PRIORITY)
-                    .setZenPolicy(new ZenPolicy.Builder().disallowAllSounds().build())
-                    .build(),
-            /* isActive= */ false);
+    public static final ZenMode MANUAL_DND_ACTIVE = manualDnd(Uri.EMPTY, true);
+    public static final ZenMode MANUAL_DND_INACTIVE = manualDnd(Uri.EMPTY, false);
+
+    public static ZenMode manualDnd(Uri conditionId, boolean isActive) {
+        return ZenMode.manualDndMode(
+                new AutomaticZenRule.Builder("Do Not Disturb", conditionId)
+                        .setInterruptionFilter(NotificationManager.INTERRUPTION_FILTER_PRIORITY)
+                        .setZenPolicy(new ZenPolicy.Builder().disallowAllSounds().build())
+                        .build(),
+                isActive);
+    }
 
     public TestModeBuilder() {
         // Reasonable defaults
