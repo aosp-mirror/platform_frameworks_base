@@ -18,10 +18,10 @@ package com.android.systemui.education.dagger
 
 import com.android.systemui.CoreStartable
 import com.android.systemui.Flags
-import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.contextualeducation.GestureType
+import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.education.data.repository.ContextualEducationRepository
-import com.android.systemui.education.data.repository.ContextualEducationRepositoryImpl
+import com.android.systemui.education.data.repository.UserContextualEducationRepository
 import com.android.systemui.education.domain.interactor.ContextualEducationInteractor
 import com.android.systemui.education.domain.interactor.KeyboardTouchpadEduInteractor
 import com.android.systemui.education.domain.interactor.KeyboardTouchpadEduStatsInteractor
@@ -42,7 +42,7 @@ import kotlinx.coroutines.SupervisorJob
 interface ContextualEducationModule {
     @Binds
     fun bindContextualEducationRepository(
-        impl: ContextualEducationRepositoryImpl
+        impl: UserContextualEducationRepository
     ): ContextualEducationRepository
 
     @Qualifier annotation class EduDataStoreScope

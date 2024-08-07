@@ -25,9 +25,9 @@ import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.preferencesDataStoreFile
+import com.android.systemui.contextualeducation.GestureType
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
-import com.android.systemui.contextualeducation.GestureType
 import com.android.systemui.education.dagger.ContextualEducationModule.EduDataStoreScope
 import com.android.systemui.education.data.model.GestureEduModel
 import java.time.Instant
@@ -43,10 +43,24 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 
 /**
- * A contextual education repository to:
- * 1) store education data per user
- * 2) provide methods to read and update data on model-level
- * 3) provide method to enable changing datastore when user is changed
+ * Allows to:
+ * 1) read and update data on model-level
+ * 2) change data store when user is changed
+ */
+interface ContextualEducationRepository {
+    fun setUser(userId: Int)
+
+    fun readGestureEduModelFlow(gestureType: GestureType): Flow<GestureEduModel>
+
+    suspend fun updateGestureEduModel(
+        gestureType: GestureType,
+        transform: (GestureEduModel) -> GestureEduModel
+    )
+}
+
+/**
+ * Implementation of [ContextualEducationRepository] that uses [androidx.datastore.preferences.core]
+ * for storage. Data is stored per user.
  */
 @SysUISingleton
 class UserContextualEducationRepository
@@ -54,7 +68,7 @@ class UserContextualEducationRepository
 constructor(
     @Application private val applicationContext: Context,
     @EduDataStoreScope private val dataStoreScopeProvider: Provider<CoroutineScope>
-) {
+) : ContextualEducationRepository {
     companion object {
         const val SIGNAL_COUNT_SUFFIX = "_SIGNAL_COUNT"
         const val NUMBER_OF_EDU_SHOWN_SUFFIX = "_NUMBER_OF_EDU_SHOWN"
@@ -70,7 +84,7 @@ constructor(
     @OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
     private val prefData: Flow<Preferences> = datastore.filterNotNull().flatMapLatest { it.data }
 
-    internal fun setUser(userId: Int) {
+    override fun setUser(userId: Int) {
         dataStoreScope?.cancel()
         val newDsScope = dataStoreScopeProvider.get()
         datastore.value =
@@ -85,7 +99,7 @@ constructor(
         dataStoreScope = newDsScope
     }
 
-    internal fun readGestureEduModelFlow(gestureType: GestureType): Flow<GestureEduModel> =
+    override fun readGestureEduModelFlow(gestureType: GestureType): Flow<GestureEduModel> =
         prefData.map { preferences -> getGestureEduModel(gestureType, preferences) }
 
     private fun getGestureEduModel(
@@ -97,12 +111,12 @@ constructor(
             educationShownCount = preferences[getEducationShownCountKey(gestureType)] ?: 0,
             lastShortcutTriggeredTime =
                 preferences[getLastShortcutTriggeredTimeKey(gestureType)]?.let {
-                    Instant.ofEpochMilli(it)
+                    Instant.ofEpochSecond(it)
                 },
         )
     }
 
-    internal suspend fun updateGestureEduModel(
+    override suspend fun updateGestureEduModel(
         gestureType: GestureType,
         transform: (GestureEduModel) -> GestureEduModel
     ) {
@@ -134,7 +148,10 @@ constructor(
         key: Preferences.Key<Long>
     ) {
         if (instant != null) {
-            preferences[key] = instant.toEpochMilli()
+            // Use epochSecond because an instant is defined as a signed long (64bit number) of
+            // seconds. Using toEpochMilli() on Instant.MIN or Instant.MAX will throw exception
+            // when converting to a long. So we use second instead of milliseconds for storage.
+            preferences[key] = instant.epochSecond
         } else {
             preferences.remove(key)
         }

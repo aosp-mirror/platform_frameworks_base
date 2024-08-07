@@ -40,15 +40,15 @@ constructor(
     @Application private val applicationScope: CoroutineScope
 ) {
 
-    private val largeTilesSpecs =
+    val largeTilesSpecs =
         preferencesInteractor.largeTilesSpecs
             .onEach { logChange(it) }
             .stateIn(applicationScope, SharingStarted.Eagerly, repo.defaultLargeTiles)
 
     fun isIconTile(spec: TileSpec): Boolean = !largeTilesSpecs.value.contains(spec)
 
-    fun resize(spec: TileSpec, toIcon: Boolean) {
-        if (toIcon) {
+    fun resize(spec: TileSpec) {
+        if (largeTilesSpecs.value.contains(spec)) {
             preferencesInteractor.setLargeTilesSpecs(largeTilesSpecs.value - spec)
         } else {
             preferencesInteractor.setLargeTilesSpecs(largeTilesSpecs.value + spec)

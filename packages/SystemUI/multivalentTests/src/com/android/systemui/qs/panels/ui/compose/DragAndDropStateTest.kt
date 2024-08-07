@@ -22,6 +22,8 @@ import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.common.shared.model.Text
+import com.android.systemui.qs.panels.shared.model.SizedTile
+import com.android.systemui.qs.panels.shared.model.SizedTileImpl
 import com.android.systemui.qs.panels.ui.viewmodel.EditTileViewModel
 import com.android.systemui.qs.pipeline.shared.TileSpec
 import com.google.common.truth.Truth.assertThat
@@ -37,15 +39,15 @@ class DragAndDropStateTest : SysuiTestCase() {
     @Test
     fun isMoving_returnsCorrectValue() {
         // Asserts no tiles is moving
-        TestEditTiles.forEach { assertThat(underTest.isMoving(it.tileSpec)).isFalse() }
+        TestEditTiles.forEach { assertThat(underTest.isMoving(it.tile.tileSpec)).isFalse() }
 
         // Start the drag movement
         underTest.onStarted(TestEditTiles[0])
 
         // Assert that the correct tile is marked as moving
         TestEditTiles.forEach {
-            assertThat(underTest.isMoving(it.tileSpec))
-                .isEqualTo(TestEditTiles[0].tileSpec == it.tileSpec)
+            assertThat(underTest.isMoving(it.tile.tileSpec))
+                .isEqualTo(TestEditTiles[0].tile.tileSpec == it.tile.tileSpec)
         }
     }
 
@@ -55,11 +57,11 @@ class DragAndDropStateTest : SysuiTestCase() {
         underTest.onStarted(TestEditTiles[0])
 
         // Move the tile to the end of the list
-        underTest.onMoved(listState.tiles[5].tileSpec)
+        underTest.onMoved(listState.tiles[5].tile.tileSpec)
         assertThat(underTest.currentPosition()).isEqualTo(5)
 
         // Move the tile to the middle of the list
-        underTest.onMoved(listState.tiles[2].tileSpec)
+        underTest.onMoved(listState.tiles[2].tile.tileSpec)
         assertThat(underTest.currentPosition()).isEqualTo(2)
     }
 
@@ -69,13 +71,13 @@ class DragAndDropStateTest : SysuiTestCase() {
         underTest.onStarted(TestEditTiles[0])
 
         // Move the tile to the end of the list
-        underTest.onMoved(listState.tiles[5].tileSpec)
+        underTest.onMoved(listState.tiles[5].tile.tileSpec)
 
         // Drop the tile
         underTest.onDrop()
 
         // Asserts no tiles is moving
-        TestEditTiles.forEach { assertThat(underTest.isMoving(it.tileSpec)).isFalse() }
+        TestEditTiles.forEach { assertThat(underTest.isMoving(it.tile.tileSpec)).isFalse() }
     }
 
     @Test
@@ -87,19 +89,24 @@ class DragAndDropStateTest : SysuiTestCase() {
         underTest.movedOutOfBounds()
 
         // Asserts the moving tile is not current
-        assertThat(listState.tiles.firstOrNull { it.tileSpec == TestEditTiles[0].tileSpec })
+        assertThat(
+                listState.tiles.firstOrNull { it.tile.tileSpec == TestEditTiles[0].tile.tileSpec }
+            )
             .isNull()
     }
 
     companion object {
-        private fun createEditTile(tileSpec: String): EditTileViewModel {
-            return EditTileViewModel(
-                tileSpec = TileSpec.create(tileSpec),
-                icon = Icon.Resource(0, null),
-                label = Text.Loaded("unused"),
-                appName = null,
-                isCurrent = true,
-                availableEditActions = emptySet(),
+        private fun createEditTile(tileSpec: String): SizedTile<EditTileViewModel> {
+            return SizedTileImpl(
+                EditTileViewModel(
+                    tileSpec = TileSpec.create(tileSpec),
+                    icon = Icon.Resource(0, null),
+                    label = Text.Loaded("unused"),
+                    appName = null,
+                    isCurrent = true,
+                    availableEditActions = emptySet(),
+                ),
+                1,
             )
         }
 

@@ -1320,6 +1320,16 @@ public class FullScreenMagnificationGestureHandlerTest {
     }
 
     @Test
+    public void testSetScaleTo2() {
+        testSetScaleAndZoom(2.0f);
+    }
+
+    @Test
+    public void testSetScaleTo20() {
+        testSetScaleAndZoom(20.0f);
+    }
+
+    @Test
     public void testTransitToPanningState_scaleDifferenceOverThreshold_startDetecting() {
         final float scale = 2.0f;
         final float threshold = FullScreenMagnificationGestureHandler.PanningScalingState
@@ -1696,6 +1706,18 @@ public class FullScreenMagnificationGestureHandlerTest {
         expectedActions.add(Integer.valueOf(ACTION_HOVER_MOVE));
         expectedActions.add(Integer.valueOf(ACTION_HOVER_MOVE));
         assertActionsInOrder(eventCaptor.mEvents, expectedActions);
+    }
+
+    private void testSetScaleAndZoom(float scale) {
+        Settings.Secure.putFloatForUser(mContext.getContentResolver(),
+                Settings.Secure.ACCESSIBILITY_DISPLAY_MAGNIFICATION_SCALE, scale,
+                UserHandle.USER_SYSTEM);
+
+        goFromStateIdleTo(STATE_ACTIVATED_2TAPS);
+
+        check(mMgh.mCurrentState == mMgh.mDetectingState, STATE_IDLE);
+        assertThat(mMgh.mFullScreenMagnificationController.getScale(DISPLAY_0))
+                .isEqualTo(scale);
     }
 
     private void enableOneFingerPanning(boolean enable) {

@@ -28,6 +28,13 @@ flag {
 }
 
 flag {
+    name: "use_new_storage_value"
+    namespace: "core_experiments_team_internal"
+    description: "When enabled, read the new storage value in aconfig codegen, and actually use it."
+    bug: "312235596"
+}
+
+flag {
     name: "load_apex_aconfig_protobufs"
     namespace: "core_experiments_team_internal"
     description: "When enabled, loads aconfig default values in apex flag protobufs into DeviceConfig on boot."

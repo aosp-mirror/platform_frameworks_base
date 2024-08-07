@@ -52,7 +52,8 @@
             android:layout_weight="1"
             android:layout_gravity="fill_vertical"
             android:gravity="start"
-            android:textAppearance="@style/TextAppearance.Dialog.Body.Message" />
+            android:textAppearance="@style/TextAppearance.Dialog.Body.Message"
+            android:importantForAccessibility="no" />
 
         <Switch
             android:id="@+id/attach_to_bugreport_switch"
@@ -80,7 +81,8 @@
             android:layout_weight="1"
             android:layout_gravity="fill_vertical"
             android:gravity="start"
-            android:textAppearance="@style/TextAppearance.Dialog.Body.Message"/>
+            android:textAppearance="@style/TextAppearance.Dialog.Body.Message"
+            android:importantForAccessibility="no" />
 
         <Switch
             android:id="@+id/winscope_switch"
@@ -108,7 +110,8 @@
             android:layout_weight="1"
             android:layout_gravity="fill_vertical"
             android:gravity="start"
-            android:textAppearance="@style/TextAppearance.Dialog.Body.Message" />
+            android:textAppearance="@style/TextAppearance.Dialog.Body.Message"
+            android:importantForAccessibility="no" />
 
         <Switch
             android:id="@+id/trace_debuggable_apps_switch"
@@ -136,7 +139,8 @@
             android:layout_weight="1"
             android:layout_gravity="fill_vertical"
             android:gravity="start"
-            android:textAppearance="@style/TextAppearance.Dialog.Body.Message" />
+            android:textAppearance="@style/TextAppearance.Dialog.Body.Message"
+            android:importantForAccessibility="no" />
 
         <Switch
             android:id="@+id/long_traces_switch"

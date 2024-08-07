@@ -19,7 +19,7 @@ package com.android.systemui.qs.panels.ui.compose
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.qs.panels.shared.model.SizedTile
+import com.android.systemui.qs.panels.shared.model.SizedTileImpl
 import com.android.systemui.qs.panels.ui.viewmodel.MockTileViewModel
 import com.android.systemui.qs.pipeline.shared.TileSpec
 import com.google.common.truth.Truth.assertThat
@@ -72,10 +72,10 @@ class PaginatableGridLayoutTest : SysuiTestCase() {
     }
 
     companion object {
-        fun extraLargeTile() = SizedTile(MockTileViewModel(TileSpec.create("XLarge")), 3)
+        fun extraLargeTile() = SizedTileImpl(MockTileViewModel(TileSpec.create("XLarge")), 3)
 
-        fun largeTile() = SizedTile(MockTileViewModel(TileSpec.create("large")), 2)
+        fun largeTile() = SizedTileImpl(MockTileViewModel(TileSpec.create("large")), 2)
 
-        fun smallTile() = SizedTile(MockTileViewModel(TileSpec.create("small")), 1)
+        fun smallTile() = SizedTileImpl(MockTileViewModel(TileSpec.create("small")), 1)
     }
 }

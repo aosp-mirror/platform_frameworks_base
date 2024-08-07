@@ -17,13 +17,15 @@
 package com.android.systemui.education.domain.interactor
 
 import com.android.systemui.CoreStartable
-import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.contextualeducation.GestureType
 import com.android.systemui.contextualeducation.GestureType.BACK
+import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.dagger.qualifiers.Background
+import com.android.systemui.education.dagger.ContextualEducationModule.EduClock
 import com.android.systemui.education.data.model.GestureEduModel
 import com.android.systemui.education.data.repository.ContextualEducationRepository
 import com.android.systemui.user.domain.interactor.SelectedUserInteractor
+import java.time.Clock
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
@@ -43,6 +45,7 @@ class ContextualEducationInteractor
 constructor(
     @Background private val backgroundScope: CoroutineScope,
     @Background private val backgroundDispatcher: CoroutineDispatcher,
+    @EduClock private val clock: Clock,
     private val selectedUserInteractor: SelectedUserInteractor,
     private val repository: ContextualEducationRepository,
 ) : CoreStartable {
@@ -64,9 +67,13 @@ constructor(
             .flowOn(backgroundDispatcher)
     }
 
-    suspend fun incrementSignalCount(gestureType: GestureType) =
-        repository.incrementSignalCount(gestureType)
+    suspend fun incrementSignalCount(gestureType: GestureType) {
+        repository.updateGestureEduModel(gestureType) { it.copy(signalCount = it.signalCount + 1) }
+    }
 
-    suspend fun updateShortcutTriggerTime(gestureType: GestureType) =
-        repository.updateShortcutTriggerTime(gestureType)
+    suspend fun updateShortcutTriggerTime(gestureType: GestureType) {
+        repository.updateGestureEduModel(gestureType) {
+            it.copy(lastShortcutTriggeredTime = clock.instant())
+        }
+    }
 }
