@@ -58,7 +58,7 @@
     <string name="wifi_cant_connect_to_ap" msgid="3099667989279700135">"\"<xliff:g id="AP_NAME">%1$s</xliff:g>\" қолданбасына қосылу мүмкін емес"</string>
     <string name="wifi_check_password_try_again" msgid="8817789642851605628">"Құпия сөзді тексеріп, әрекетті қайталаңыз"</string>
     <string name="wifi_not_in_range" msgid="1541760821805777772">"Аумақта жоқ"</string>
-    <string name="wifi_no_internet_no_reconnect" msgid="821591791066497347">"Автоматты қосылмайды"</string>
+    <string name="wifi_no_internet_no_reconnect" msgid="821591791066497347">"Автоматты түрде қосылмайды"</string>
     <string name="wifi_no_internet" msgid="1774198889176926299">"Интернетпен байланыс жоқ"</string>
     <string name="saved_network" msgid="7143698034077223645">"<xliff:g id="NAME">%1$s</xliff:g> сақтаған"</string>
     <string name="connected_via_network_scorer" msgid="7665725527352893558">"%1$s арқылы автоматты қосылды"</string>
