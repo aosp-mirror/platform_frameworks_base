@@ -16,7 +16,6 @@
 
 package com.android.systemui.statusbar.phone;
 
-import static com.android.systemui.Flags.centralizedStatusBarHeightFix;
 import static com.android.systemui.doze.util.BurnInHelperKt.getBurnInOffset;
 import static com.android.systemui.doze.util.BurnInHelperKt.getBurnInScale;
 import static com.android.systemui.statusbar.notification.NotificationUtils.interpolate;
@@ -169,9 +168,7 @@ public class KeyguardClockPositionAlgorithm {
         mStatusViewBottomMargin =
                 res.getDimensionPixelSize(R.dimen.keyguard_status_view_bottom_margin);
         mSplitShadeTopNotificationsMargin =
-                centralizedStatusBarHeightFix()
-                        ? LargeScreenHeaderHelper.getLargeScreenHeaderHeight(context)
-                        : res.getDimensionPixelSize(R.dimen.large_screen_shade_header_height);
+                LargeScreenHeaderHelper.getLargeScreenHeaderHeight(context);
         mSplitShadeTargetTopMargin =
                 res.getDimensionPixelSize(R.dimen.keyguard_split_shade_top_margin);
 

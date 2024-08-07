@@ -181,7 +181,7 @@ public class RecordingService extends Service implements ScreenMediaRecorderList
                     mUiEventLogger.log(Events.ScreenRecordEvent.SCREEN_RECORD_START);
                 } else {
                     updateState(false);
-                    createErrorNotification();
+                    createErrorStartingNotification();
                     stopForeground(STOP_FOREGROUND_DETACH);
                     stopSelf();
                     return Service.START_NOT_STICKY;
@@ -272,17 +272,30 @@ public class RecordingService extends Service implements ScreenMediaRecorderList
     }
 
     /**
-     * Simple error notification, needed since startForeground must be called to avoid errors
+     * Simple "error starting" notification, needed since startForeground must be called to avoid
+     * errors.
      */
     @VisibleForTesting
-    protected void createErrorNotification() {
+    protected void createErrorStartingNotification() {
+        createErrorNotification(strings().getStartError());
+    }
+
+    /**
+     * Simple "error saving" notification, needed since startForeground must be called to avoid
+     * errors.
+     */
+    @VisibleForTesting
+    protected void createErrorSavingNotification() {
+        createErrorNotification(strings().getSaveError());
+    }
+
+    private void createErrorNotification(String notificationContentTitle) {
         Bundle extras = new Bundle();
         extras.putString(Notification.EXTRA_SUBSTITUTE_APP_NAME, strings().getTitle());
-        String notificationTitle = strings().getStartError();
 
         Notification.Builder builder = new Notification.Builder(this, getChannelId())
                 .setSmallIcon(R.drawable.ic_screenrecord)
-                .setContentTitle(notificationTitle)
+                .setContentTitle(notificationContentTitle)
                 .addExtras(extras);
         startForeground(mNotificationId, builder.build());
     }
@@ -427,11 +440,11 @@ public class RecordingService extends Service implements ScreenMediaRecorderList
                 // let's release the recorder and delete all temporary files in this case
                 getRecorder().release();
             }
-            showErrorToast(R.string.screenrecord_start_error);
+            showErrorToast(R.string.screenrecord_save_error);
             Log.e(getTag(), "stopRecording called, but there was an error when ending"
                     + "recording");
             exception.printStackTrace();
-            createErrorNotification();
+            createErrorSavingNotification();
         } catch (Throwable throwable) {
             if (getRecorder() != null) {
                 // Something unexpected happen, SystemUI will crash but let's delete

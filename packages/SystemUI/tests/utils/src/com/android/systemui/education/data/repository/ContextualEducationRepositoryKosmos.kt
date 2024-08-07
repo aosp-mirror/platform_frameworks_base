@@ -21,6 +21,6 @@ import java.time.Clock
 import java.time.Instant
 
 var Kosmos.contextualEducationRepository: ContextualEducationRepository by
-    Kosmos.Fixture { FakeContextualEducationRepository(fakeEduClock) }
+    Kosmos.Fixture { FakeContextualEducationRepository() }
 
 var Kosmos.fakeEduClock: Clock by Kosmos.Fixture { FakeEduClock(Instant.MIN) }

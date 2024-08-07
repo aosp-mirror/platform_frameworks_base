@@ -172,7 +172,7 @@ class SharedNotificationContainerViewModelTest(flags: FlagsParameterization) : S
         }
 
     @Test
-    fun validatePaddingTopInSplitShade_refactorFlagOn_usesLargeHeaderHelper() =
+    fun validatePaddingTopInSplitShade_usesLargeHeaderHelper() =
         testScope.runTest {
             whenever(largeScreenHeaderHelper.getLargeScreenHeaderHeight()).thenReturn(5)
             overrideResource(R.bool.config_use_split_notification_shade, true)

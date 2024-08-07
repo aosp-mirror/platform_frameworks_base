@@ -1676,7 +1676,11 @@ public class ZenModeHelper {
         if (config != null) {
             if (forRestore) {
                 config.user = userId;
-                if (!Flags.modesUi()) {
+                if (Flags.modesUi()) {
+                    if (config.manualRule != null) {
+                        config.manualRule.condition = null; // don't restore transient state
+                    }
+                } else {
                     config.manualRule = null;  // don't restore the manual rule
                 }
             }

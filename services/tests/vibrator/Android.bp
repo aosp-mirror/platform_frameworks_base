@@ -32,6 +32,7 @@ android_test {
         "frameworks-base-testutils",
         "frameworks-services-vibrator-testutils",
         "junit",
+        "junit-params",
         "mockito-target-inline-minus-junit4",
         "platform-test-annotations",
         "service-permission.stubs.system_server",
