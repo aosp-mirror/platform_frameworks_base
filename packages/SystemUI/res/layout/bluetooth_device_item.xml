@@ -41,6 +41,7 @@
         android:textDirection="locale"
         android:textAlignment="gravity"
         android:paddingStart="20dp"
+        android:paddingEnd="10dp"
         android:paddingTop="15dp"
         android:maxLines="1"
         android:ellipsize="end"
@@ -56,6 +57,7 @@
         android:id="@+id/bluetooth_device_summary"
         style="@style/BluetoothTileDialog.DeviceSummary"
         android:paddingStart="20dp"
+        android:paddingEnd="10dp"
         android:paddingBottom="15dp"
         android:maxLines="1"
         android:ellipsize="end"
@@ -73,11 +75,20 @@
         android:orientation="vertical"/>
 
     <View
+        android:id="@+id/divider"
+        android:layout_width="1dp"
+        android:layout_height="38dp"
+        app:layout_constraintStart_toEndOf="@+id/guideline"
+        app:layout_constraintEnd_toStartOf="@+id/gear_icon"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent" />
+
+    <View
         android:id="@+id/gear_icon"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:contentDescription="@string/accessibility_bluetooth_device_settings_gear"
-        app:layout_constraintStart_toEndOf="@+id/guideline"
+        app:layout_constraintStart_toEndOf="@+id/divider"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toBottomOf="parent" />
