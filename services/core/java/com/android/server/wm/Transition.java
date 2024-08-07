@@ -3350,6 +3350,15 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
         return chg.hasChanged();
     }
 
+    boolean hasChanges() {
+        for (int i = 0; i < mParticipants.size(); ++i) {
+            if (mChanges.get(mParticipants.valueAt(i)).hasChanged()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     @VisibleForTesting
     static class ChangeInfo {
         private static final int FLAG_NONE = 0;
