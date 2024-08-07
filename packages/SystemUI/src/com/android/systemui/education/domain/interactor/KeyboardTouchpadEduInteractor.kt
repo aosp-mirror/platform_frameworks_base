@@ -56,7 +56,7 @@ constructor(
                 if (isUsageSessionExpired(it)) {
                     contextualEducationInteractor.startNewUsageSession(BACK)
                 } else if (isEducationNeeded(it)) {
-                    _educationTriggered.value = EducationInfo(BACK, getEduType(it))
+                    _educationTriggered.value = EducationInfo(BACK, getEduType(it), it.userId)
                     contextualEducationInteractor.updateOnEduTriggered(BACK)
                 }
             }
