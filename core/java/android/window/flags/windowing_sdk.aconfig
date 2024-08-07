@@ -68,16 +68,6 @@ flag {
 
 flag {
     namespace: "windowing_sdk"
-    name: "fix_pip_restore_to_overlay"
-    description: "Restore exit-pip activity back to ActivityEmbedding overlay"
-    bug: "297887697"
-    metadata {
-        purpose: PURPOSE_BUGFIX
-    }
-}
-
-flag {
-    namespace: "windowing_sdk"
     name: "activity_embedding_animation_customization_flag"
     description: "Whether the animation customization feature for AE is enabled"
     bug: "293658614"

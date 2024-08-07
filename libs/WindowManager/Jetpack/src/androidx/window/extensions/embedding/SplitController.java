@@ -695,12 +695,8 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
                         break;
                     case TYPE_ACTIVITY_REPARENTED_TO_TASK:
                         final IBinder candidateAssociatedActToken, lastOverlayToken;
-                        if (Flags.fixPipRestoreToOverlay()) {
-                            candidateAssociatedActToken = change.getOtherActivityToken();
-                            lastOverlayToken = change.getTaskFragmentToken();
-                        } else {
-                            candidateAssociatedActToken = lastOverlayToken = null;
-                        }
+                        candidateAssociatedActToken = change.getOtherActivityToken();
+                        lastOverlayToken = change.getTaskFragmentToken();
                         onActivityReparentedToTask(
                                 wct,
                                 taskId,
@@ -1023,10 +1019,6 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
     @Nullable
     OverlayContainerRestoreParams getOverlayContainerRestoreParams(
             @Nullable IBinder associatedActivityToken, @Nullable IBinder overlayToken) {
-        if (!Flags.fixPipRestoreToOverlay()) {
-            return null;
-        }
-
         if (associatedActivityToken == null || overlayToken == null) {
             return null;
         }
