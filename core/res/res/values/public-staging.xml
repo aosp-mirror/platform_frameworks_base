@@ -125,6 +125,8 @@
     <public name="supplementalDescription"/>
     <!-- @FlaggedApi("android.security.enable_intent_matching_flags") -->
     <public name="intentMatchingFlags"/>
+    <!-- @FlaggedApi(android.view.inputmethod.Flags.FLAG_IME_SWITCHER_REVAMP_API) -->
+    <public name="layoutLabel"/>
   </staging-public-group>
 
   <staging-public-group type="id" first-id="0x01b60000">
