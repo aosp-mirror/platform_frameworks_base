@@ -4962,9 +4962,14 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                 if (android.permission.flags.Flags.enhancedConfirmationModeApisEnabled()
                         && android.security.Flags.extendEcmToAllSettings()) {
                     try {
-                        return !mContext.getSystemService(EnhancedConfirmationManager.class)
-                                .isRestricted(packageName,
-                                        AppOpsManager.OPSTR_BIND_ACCESSIBILITY_SERVICE);
+                        final EnhancedConfirmationManager userContextEcm =
+                                mContext.createContextAsUser(UserHandle.of(userId), /* flags = */ 0)
+                                        .getSystemService(EnhancedConfirmationManager.class);
+                        if (userContextEcm != null) {
+                            return !userContextEcm.isRestricted(packageName,
+                                    AppOpsManager.OPSTR_BIND_ACCESSIBILITY_SERVICE);
+                        }
+                        return false;
                     } catch (PackageManager.NameNotFoundException e) {
                         Log.e(LOG_TAG, "Exception when retrieving package:" + packageName, e);
                         return false;
