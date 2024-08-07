@@ -1068,6 +1068,11 @@ class DesktopTasksController(
                 // In some launches home task is moved behind new task being launched. Make sure
                 // that's not the case for launches in desktop.
                 moveHomeTask(wct, toTop = false)
+                // Move existing minimized tasks behind Home
+                taskRepository.getFreeformTasksInZOrder(task.displayId)
+                    .filter { taskId -> taskRepository.isMinimizedTask(taskId) }
+                    .mapNotNull { taskId -> shellTaskOrganizer.getRunningTaskInfo(taskId) }
+                    .forEach { taskInfo -> wct.reorder(taskInfo.token, /* onTop= */ false) }
                 // Desktop Mode is already showing and we're launching a new Task - we might need to
                 // minimize another Task.
                 val taskToMinimize = addAndGetMinimizeChangesIfNeeded(task.displayId, wct, task)
