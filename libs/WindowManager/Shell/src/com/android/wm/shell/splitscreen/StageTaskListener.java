@@ -69,7 +69,7 @@ import java.util.function.Predicate;
  *
  * @see StageCoordinator
  */
-class StageTaskListener implements ShellTaskOrganizer.TaskListener {
+public class StageTaskListener implements ShellTaskOrganizer.TaskListener {
     private static final String TAG = StageTaskListener.class.getSimpleName();
 
     /** Callback interface for listening to changes in a split-screen stage. */
@@ -160,6 +160,18 @@ class StageTaskListener implements ShellTaskOrganizer.TaskListener {
         }
 
         return getChildTaskInfo(predicate) != null;
+    }
+
+    public SurfaceControl getRootLeash() {
+        return mRootLeash;
+    }
+
+    public ActivityManager.RunningTaskInfo getRunningTaskInfo() {
+        return mRootTaskInfo;
+    }
+
+    public SplitDecorManager getDecorManager() {
+        return mSplitDecorManager;
     }
 
     @Nullable
@@ -335,7 +347,7 @@ class StageTaskListener implements ShellTaskOrganizer.TaskListener {
 
     void fadeOutDecor(Runnable finishedCallback) {
         if (mSplitDecorManager != null) {
-            mSplitDecorManager.fadeOutDecor(finishedCallback);
+            mSplitDecorManager.fadeOutDecor(finishedCallback, false /* addDelay */);
         } else {
             finishedCallback.run();
         }

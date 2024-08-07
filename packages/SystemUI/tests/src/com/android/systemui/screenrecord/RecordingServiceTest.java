@@ -126,7 +126,8 @@ public class RecordingServiceTest extends SysuiTestCase {
         doNothing().when(mRecordingService).createRecordingNotification();
         doReturn(mNotification).when(mRecordingService).createProcessingNotification();
         doReturn(mNotification).when(mRecordingService).createSaveNotification(any());
-        doNothing().when(mRecordingService).createErrorNotification();
+        doNothing().when(mRecordingService).createErrorStartingNotification();
+        doNothing().when(mRecordingService).createErrorSavingNotification();
         doNothing().when(mRecordingService).showErrorToast(anyInt());
         doNothing().when(mRecordingService).stopForeground(anyInt());
 
@@ -234,7 +235,7 @@ public class RecordingServiceTest extends SysuiTestCase {
 
         mRecordingService.onStopped();
 
-        verify(mRecordingService).createErrorNotification();
+        verify(mRecordingService).createErrorSavingNotification();
     }
 
     @Test

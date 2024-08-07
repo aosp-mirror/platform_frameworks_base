@@ -28667,21 +28667,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @param flags Additional flags as per {@link HapticFeedbackConstants}.
      */
     public boolean performHapticFeedback(int feedbackConstant, int flags) {
-        if (feedbackConstant == HapticFeedbackConstants.NO_HAPTICS
-                || mAttachInfo == null) {
-            return false;
-        }
-        //noinspection SimplifiableIfStatement
-        if ((flags & HapticFeedbackConstants.FLAG_IGNORE_VIEW_SETTING) == 0
-                && !isHapticFeedbackEnabled()) {
+        if (isPerformHapticFeedbackSuppressed(feedbackConstant, flags)) {
             return false;
         }
 
-        int privFlags = 0;
-        if (mAttachInfo.mViewRootImpl != null
-                && mAttachInfo.mViewRootImpl.mWindowAttributes.type == TYPE_INPUT_METHOD) {
-            privFlags = HapticFeedbackConstants.PRIVATE_FLAG_APPLY_INPUT_METHOD_SETTINGS;
-        }
+        int privFlags = computeHapticFeedbackPrivateFlags();
         if (Flags.useVibratorHapticFeedback()) {
             if (!mAttachInfo.canPerformHapticFeedback()) {
                 return false;
@@ -28693,11 +28683,61 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         return mAttachInfo.mRootCallbacks.performHapticFeedback(feedbackConstant, flags, privFlags);
     }
 
+    /**
+     * <p>Provide haptic feedback to the user for this view.
+     *
+     * <p>Call this method (vs {@link #performHapticFeedback(int)}) to specify more details about
+     * the {@link InputDevice} that caused this haptic feedback. The framework will choose and
+     * provide a haptic feedback based on these details.
+     *
+     * <p>The feedback will only be performed if {@link #isHapticFeedbackEnabled()} is {@code true}.
+     *
+     * @param feedbackConstant One of the constants defined in {@link HapticFeedbackConstants}.
+     * @param inputDeviceId The ID of the {@link InputDevice} that generated the event which
+     *          triggered this haptic feedback request.
+     * @param inputSource The input source of the event which triggered this haptic feedback
+     *          request, defined as {@code InputDevice#SOURCE_*}.
+     *
+     * @hide
+     */
+    public void performHapticFeedbackForInputDevice(int feedbackConstant, int inputDeviceId,
+            int inputSource, int flags) {
+        if (isPerformHapticFeedbackSuppressed(feedbackConstant, flags)) {
+            return;
+        }
+
+        int privFlags = computeHapticFeedbackPrivateFlags();
+        mAttachInfo.mRootCallbacks.performHapticFeedbackForInputDevice(
+                feedbackConstant, inputDeviceId, inputSource, flags, privFlags);
+    }
+
     private Vibrator getSystemVibrator() {
         if (mVibrator != null) {
             return mVibrator;
         }
         return mVibrator = mContext.getSystemService(Vibrator.class);
+    }
+
+    private boolean isPerformHapticFeedbackSuppressed(int feedbackConstant, int flags) {
+        if (feedbackConstant == HapticFeedbackConstants.NO_HAPTICS
+                || mAttachInfo == null) {
+            return true;
+        }
+        //noinspection SimplifiableIfStatement
+        if ((flags & HapticFeedbackConstants.FLAG_IGNORE_VIEW_SETTING) == 0
+                && !isHapticFeedbackEnabled()) {
+            return true;
+        }
+        return false;
+    }
+
+    private int computeHapticFeedbackPrivateFlags() {
+        int privFlags = 0;
+        if (mAttachInfo.mViewRootImpl != null
+                && mAttachInfo.mViewRootImpl.mWindowAttributes.type == TYPE_INPUT_METHOD) {
+            privFlags = HapticFeedbackConstants.PRIVATE_FLAG_APPLY_INPUT_METHOD_SETTINGS;
+        }
+        return privFlags;
     }
 
     /**
@@ -31729,6 +31769,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             void playSoundEffect(int effectId);
 
             boolean performHapticFeedback(int effectId,
+                    @HapticFeedbackConstants.Flags int flags,
+                    @HapticFeedbackConstants.PrivateFlags int privFlags);
+
+            void performHapticFeedbackForInputDevice(int effectId,
+                    int inputDeviceId, int inputSource,
                     @HapticFeedbackConstants.Flags int flags,
                     @HapticFeedbackConstants.PrivateFlags int privFlags);
         }

@@ -49,10 +49,12 @@ import static android.view.inputmethod.ConnectionlessHandwritingCallback.CONNECT
 
 import static com.android.server.inputmethod.ImeVisibilityStateComputer.ImeTargetWindowState;
 import static com.android.server.inputmethod.ImeVisibilityStateComputer.ImeVisibilityResult;
-import static com.android.server.inputmethod.ImeVisibilityStateComputer.STATE_SHOW_IME;
 import static com.android.server.inputmethod.ImeVisibilityStateComputer.STATE_HIDE_IME;
+import static com.android.server.inputmethod.ImeVisibilityStateComputer.STATE_SHOW_IME;
 import static com.android.server.inputmethod.InputMethodBindingController.TIME_TO_RECONNECT;
+import static com.android.server.inputmethod.InputMethodSettings.INVALID_SUBTYPE_HASHCODE;
 import static com.android.server.inputmethod.InputMethodSubtypeSwitchingController.MODE_AUTO;
+import static com.android.server.inputmethod.InputMethodUtils.NOT_A_SUBTYPE_INDEX;
 import static com.android.server.inputmethod.InputMethodUtils.isSoftInputModeStateVisibleAllowed;
 
 import static java.lang.annotation.RetentionPolicy.SOURCE;
@@ -81,7 +83,6 @@ import android.content.pm.PackageManagerInternal;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
 import android.content.pm.UserInfo;
-import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.hardware.input.InputManager;
 import android.inputmethodservice.InputMethodService;
@@ -273,11 +274,6 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
 
     private static final int MSG_NOTIFY_IME_UID_TO_AUDIO_SERVICE = 7000;
 
-    private static final int NOT_A_SUBTYPE_ID = InputMethodUtils.NOT_A_SUBTYPE_ID;
-
-    private static final int INVALID_SUBTYPE_HASHCODE =
-            InputMethodSettings.INVALID_SUBTYPE_HASHCODE;
-
     private static final String TAG_TRY_SUPPRESSING_IME_SWITCHER = "TrySuppressingImeSwitcher";
     private static final String HANDLER_THREAD_NAME = "android.imms";
     private static final String PACKAGE_MONITOR_THREAD_NAME = "android.imms2";
@@ -301,28 +297,6 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
     @SharedByAllUsersField
     @NonNull
     private final String[] mNonPreemptibleInputMethods;
-
-    /**
-     * Whether the new Input Method Switcher menu is enabled.
-     *
-     * @see #shouldEnableNewInputMethodSwitcherMenu
-     */
-    @SharedByAllUsersField
-    private final boolean mNewInputMethodSwitcherMenuEnabled;
-
-    /**
-     * Returns {@code true} if the new Input Method Switcher menu is enabled. This will be
-     * {@code false} for watches and small screen devices.
-     *
-     * @param context the context to check the device configuration for.
-     */
-    private static boolean shouldEnableNewInputMethodSwitcherMenu(@NonNull Context context) {
-        final boolean isWatch = context.getPackageManager()
-                .hasSystemFeature(PackageManager.FEATURE_WATCH);
-        final boolean isSmallScreen = (context.getResources().getConfiguration().screenLayout
-                & Configuration.SCREENLAYOUT_SIZE_MASK) == Configuration.SCREENLAYOUT_SIZE_SMALL;
-        return Flags.imeSwitcherRevamp() && !isWatch && !isSmallScreen;
-    }
 
     /**
      * See {@link #shouldEnableConcurrentMultiUserMode(Context)} about when set to be {@code true}.
@@ -612,7 +586,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
     private void onSecureSettingsChangedLocked(@NonNull String key, @UserIdInt int userId) {
         switch (key) {
             case Settings.Secure.SHOW_IME_WITH_HARD_KEYBOARD: {
-                if (!mNewInputMethodSwitcherMenuEnabled) {
+                if (!Flags.imeSwitcherRevamp()) {
                     if (userId == mCurrentUserId) {
                         mMenuController.updateKeyboardFromSettingsLocked(userId);
                     }
@@ -680,7 +654,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
                         return;
                     }
                     final int userId = mCurrentUserId;
-                    if (mNewInputMethodSwitcherMenuEnabled) {
+                    if (Flags.imeSwitcherRevamp()) {
                         final var bindingController = getInputMethodBindingController(userId);
                         mMenuControllerNew.hide(bindingController.getCurTokenDisplayId(), userId);
                     } else {
@@ -718,7 +692,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
                     userData.mRawInputMethodMap.set(rawMethodMap);
                     final var methodMap = rawMethodMap.toInputMethodMap(additionalSubtypeMap,
                             DirectBootAwareness.AUTO,
-                            mUserManagerInternal.isUserUnlockingOrUnlocked(userId));
+                            userData.mIsUnlockingOrUnlocked.get());
                     final var settings = InputMethodSettings.create(methodMap, userId);
                     InputMethodSettingsRepository.put(userId, settings);
                 }
@@ -842,7 +816,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
             final var newMethodMap = userData.mRawInputMethodMap.get().toInputMethodMap(
                     newAdditionalSubtypeMap,
                     DirectBootAwareness.AUTO,
-                    mUserManagerInternal.isUserUnlockingOrUnlocked(userId));
+                    userData.mIsUnlockingOrUnlocked.get());
 
             final boolean noUpdate = InputMethodMap.areSame(settings.getMethodMap(), newMethodMap);
             if (noUpdate && imesToBeDisabled.isEmpty()) {
@@ -1072,6 +1046,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
             final int userId = user.getUserIdentifier();
             final var userData = mService.getUserData(userId);
             final boolean userUnlocked = true;
+            userData.mIsUnlockingOrUnlocked.set(userUnlocked);
             SecureSettingsWrapper.onUserUnlocking(userId);
             final var methodMap = userData.mRawInputMethodMap.get().toInputMethodMap(
                     AdditionalSubtypeMapRepository.get(userId), DirectBootAwareness.AUTO,
@@ -1122,9 +1097,12 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
                     final var additionalSubtypeMap = AdditionalSubtypeMapRepository.get(userId);
                     final var rawMethodMap = queryRawInputMethodServiceMap(context, userId);
                     userData.mRawInputMethodMap.set(rawMethodMap);
+
+                    final boolean unlocked = userManagerInternal.isUserUnlockingOrUnlocked(userId);
+                    userData.mIsUnlockingOrUnlocked.set(unlocked);
                     final var methodMap = rawMethodMap.toInputMethodMap(additionalSubtypeMap,
-                            DirectBootAwareness.AUTO,
-                            userManagerInternal.isUserUnlockingOrUnlocked(userId));
+                            DirectBootAwareness.AUTO, unlocked);
+
                     final var settings = InputMethodSettings.create(methodMap, userId);
                     InputMethodSettingsRepository.put(userId, settings);
 
@@ -1152,6 +1130,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
             final var additionalSubtypeMap = AdditionalSubtypeMapRepository.get(userId);
             final var rawMethodMap = userData.mRawInputMethodMap.get();
             final boolean userUnlocked = false;  // Stopping a user also locks their storage.
+            userData.mIsUnlockingOrUnlocked.set(userUnlocked);
             final var methodMap = rawMethodMap.toInputMethodMap(additionalSubtypeMap,
                     DirectBootAwareness.AUTO, userUnlocked);
             InputMethodSettingsRepository.put(userId,
@@ -1205,7 +1184,6 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
             mUserManagerInternal = LocalServices.getService(UserManagerInternal.class);
 
             mSlotIme = mContext.getString(com.android.internal.R.string.status_bar_ime);
-            mNewInputMethodSwitcherMenuEnabled = shouldEnableNewInputMethodSwitcherMenu(mContext);
 
             mShowOngoingImeSwitcherForPhones = false;
 
@@ -1221,7 +1199,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
                             : bindingControllerFactory, visibilityStateComputerFactory);
 
             mMenuController = new InputMethodMenuController(this);
-            mMenuControllerNew = mNewInputMethodSwitcherMenuEnabled
+            mMenuControllerNew = Flags.imeSwitcherRevamp()
                     ? new InputMethodMenuControllerNew() : null;
             mVisibilityApplier = new DefaultImeVisibilityApplier(this);
 
@@ -1289,7 +1267,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
         if (DEBUG) {
             Slog.i(TAG, "Default found, using " + defIm.getId());
         }
-        setSelectedInputMethodAndSubtypeLocked(defIm, NOT_A_SUBTYPE_ID, false, userId);
+        setSelectedInputMethodAndSubtypeLocked(defIm, NOT_A_SUBTYPE_INDEX, false, userId);
     }
 
     @NonNull
@@ -1354,6 +1332,17 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
             resetDefaultImeLocked(mContext, newUserId);
         }
         updateFromSettingsLocked(true, newUserId);
+
+        // Special workaround for b/356879517.
+        // KeyboardLayoutManager still expects onInputMethodSubtypeChangedForKeyboardLayoutMapping
+        // to be called back upon IME user switching, while we are actively deprecating the concept
+        // of "current IME user" at b/350386877.
+        // TODO(b/356879517): Come up with a way to avoid this special handling.
+        if (newUserData.mSubtypeForKeyboardLayoutMapping != null) {
+            final var subtypeHandleAndSubtype = newUserData.mSubtypeForKeyboardLayoutMapping;
+            mInputManagerInternal.onInputMethodSubtypeChangedForKeyboardLayoutMapping(
+                    newUserId, subtypeHandleAndSubtype.first, subtypeHandleAndSubtype.second);
+        }
 
         if (initialUserSwitch) {
             InputMethodUtils.setNonSelectedSystemImesDisabledUntilUsed(
@@ -1635,7 +1624,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
         final var userData = getUserData(userId);
         final var methodMap = userData.mRawInputMethodMap.get().toInputMethodMap(
                 AdditionalSubtypeMapRepository.get(userId), directBootAwareness,
-                mUserManagerInternal.isUserUnlockingOrUnlocked(userId));
+                userData.mIsUnlockingOrUnlocked.get());
         final var settings = InputMethodSettings.create(methodMap, userId);
         // Create a copy.
         final ArrayList<InputMethodInfo> methodList = new ArrayList<>(settings.getMethodList());
@@ -1810,7 +1799,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
                     ImeTracker.PHASE_SERVER_WAIT_IME);
             userData.mCurStatsToken = null;
             // TODO: Make mMenuController multi-user aware
-            if (mNewInputMethodSwitcherMenuEnabled) {
+            if (Flags.imeSwitcherRevamp()) {
                 mMenuControllerNew.hide(bindingController.getCurTokenDisplayId(), userId);
             } else {
                 mMenuController.hideInputMethodMenuLocked(userId);
@@ -2018,7 +2007,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
         if (deviceMethodId == null) {
             visibilityStateComputer.getImePolicy().setImeHiddenByDisplayPolicy(true);
         } else if (!Objects.equals(deviceMethodId, selectedMethodId)) {
-            setInputMethodLocked(deviceMethodId, NOT_A_SUBTYPE_ID,
+            setInputMethodLocked(deviceMethodId, NOT_A_SUBTYPE_INDEX,
                     bindingController.getDeviceIdToShowIme(), userId);
             selectedMethodId = deviceMethodId;
         }
@@ -2620,7 +2609,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
         if (!mShowOngoingImeSwitcherForPhones) return false;
         // When the IME switcher dialog is shown, the IME switcher button should be hidden.
         // TODO(b/305849394): Make mMenuController multi-user aware.
-        final boolean switcherMenuShowing = mNewInputMethodSwitcherMenuEnabled
+        final boolean switcherMenuShowing = Flags.imeSwitcherRevamp()
                 ? mMenuControllerNew.isShowing()
                 : mMenuController.getSwitchingDialogLocked() != null;
         if (switcherMenuShowing) {
@@ -2640,8 +2629,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
                 || (visibility & InputMethodService.IME_INVISIBLE) != 0) {
             return false;
         }
-        if (mWindowManagerInternal.isHardKeyboardAvailable()
-                && !mNewInputMethodSwitcherMenuEnabled) {
+        if (mWindowManagerInternal.isHardKeyboardAvailable() && !Flags.imeSwitcherRevamp()) {
             // When physical keyboard is attached, we show the ime switcher (or notification if
             // NavBar is not available) because SHOW_IME_WITH_HARD_KEYBOARD settings currently
             // exists in the IME switcher dialog.  Might be OK to remove this condition once
@@ -2652,7 +2640,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
         }
 
         final InputMethodSettings settings = InputMethodSettingsRepository.get(userId);
-        if (mNewInputMethodSwitcherMenuEnabled) {
+        if (Flags.imeSwitcherRevamp()) {
             // The IME switcher button should be shown when the current IME specified a
             // language settings activity.
             final var curImi = settings.getMethodMap().get(settings.getSelectedInputMethod());
@@ -2825,7 +2813,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
             }
             final var curId = bindingController.getCurId();
             // TODO(b/305849394): Make mMenuController multi-user aware.
-            final boolean switcherMenuShowing = mNewInputMethodSwitcherMenuEnabled
+            final boolean switcherMenuShowing = Flags.imeSwitcherRevamp()
                     ? mMenuControllerNew.isShowing()
                     : mMenuController.getSwitchingDialogLocked() != null;
             if (switcherMenuShowing
@@ -2847,7 +2835,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
     @GuardedBy("ImfLock.class")
     void updateFromSettingsLocked(boolean enabledMayChange, @UserIdInt int userId) {
         updateInputMethodsFromSettingsLocked(enabledMayChange, userId);
-        if (!mNewInputMethodSwitcherMenuEnabled) {
+        if (!Flags.imeSwitcherRevamp()) {
             mMenuController.updateKeyboardFromSettingsLocked(userId);
         }
     }
@@ -2915,7 +2903,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
         }
         if (!TextUtils.isEmpty(id)) {
             try {
-                setInputMethodLocked(id, settings.getSelectedInputMethodSubtypeId(id), userId);
+                setInputMethodLocked(id, settings.getSelectedInputMethodSubtypeIndex(id), userId);
             } catch (IllegalArgumentException e) {
                 Slog.w(TAG, "Unknown input method from prefs: " + id, e);
                 resetCurrentMethodAndClientLocked(UnbindReason.SWITCH_IME_FAILED, userId);
@@ -2938,17 +2926,28 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
                         ? subtype : null;
         final InputMethodSubtypeHandle newSubtypeHandle = normalizedSubtype != null
                 ? InputMethodSubtypeHandle.of(imi, normalizedSubtype) : null;
+
+        final var userData = getUserData(userId);
+
+        // A workaround for b/356879517. KeyboardLayoutManager has relied on an implementation
+        // detail that IMMS triggers this callback only for the current IME user.
+        // TODO(b/357663774): Figure out how to better handle this scenario.
+        userData.mSubtypeForKeyboardLayoutMapping =
+                Pair.create(newSubtypeHandle, normalizedSubtype);
+        if (userId != mCurrentUserId) {
+            return;
+        }
         mInputManagerInternal.onInputMethodSubtypeChangedForKeyboardLayoutMapping(
                 userId, newSubtypeHandle, normalizedSubtype);
     }
 
     @GuardedBy("ImfLock.class")
-    void setInputMethodLocked(String id, int subtypeId, @UserIdInt int userId) {
-        setInputMethodLocked(id, subtypeId, DEVICE_ID_DEFAULT, userId);
+    void setInputMethodLocked(String id, int subtypeIndex, @UserIdInt int userId) {
+        setInputMethodLocked(id, subtypeIndex, DEVICE_ID_DEFAULT, userId);
     }
 
     @GuardedBy("ImfLock.class")
-    void setInputMethodLocked(String id, int subtypeId, int deviceId, @UserIdInt int userId) {
+    void setInputMethodLocked(String id, int subtypeIndex, int deviceId, @UserIdInt int userId) {
         final InputMethodSettings settings = InputMethodSettingsRepository.get(userId);
         InputMethodInfo info = settings.getMethodMap().get(id);
         if (info == null) {
@@ -2965,25 +2964,25 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
             }
             final InputMethodSubtype oldSubtype = bindingController.getCurrentSubtype();
             final InputMethodSubtype newSubtype;
-            if (subtypeId >= 0 && subtypeId < subtypeCount) {
-                newSubtype = info.getSubtypeAt(subtypeId);
+            if (subtypeIndex >= 0 && subtypeIndex < subtypeCount) {
+                newSubtype = info.getSubtypeAt(subtypeIndex);
             } else {
                 // If subtype is null, try to find the most applicable one from
                 // getCurrentInputMethodSubtype.
-                subtypeId = NOT_A_SUBTYPE_ID;
+                subtypeIndex = NOT_A_SUBTYPE_INDEX;
                 // TODO(b/347083680): The method below has questionable behaviors.
                 newSubtype = bindingController.getCurrentInputMethodSubtype();
                 if (newSubtype != null) {
                     for (int i = 0; i < subtypeCount; ++i) {
                         if (Objects.equals(newSubtype, info.getSubtypeAt(i))) {
-                            subtypeId = i;
+                            subtypeIndex = i;
                             break;
                         }
                     }
                 }
             }
             if (!Objects.equals(newSubtype, oldSubtype)) {
-                setSelectedInputMethodAndSubtypeLocked(info, subtypeId, true, userId);
+                setSelectedInputMethodAndSubtypeLocked(info, subtypeIndex, true, userId);
                 IInputMethodInvoker curMethod = bindingController.getCurMethod();
                 if (curMethod != null) {
                     updateSystemUiLocked(bindingController.getImeWindowVis(),
@@ -3010,9 +3009,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
         }
         final long ident = Binder.clearCallingIdentity();
         try {
-            // Set a subtype to this input method.
-            // subtypeId the name of a subtype which will be set.
-            setSelectedInputMethodAndSubtypeLocked(info, subtypeId, false, userId);
+            setSelectedInputMethodAndSubtypeLocked(info, subtypeIndex, false, userId);
             // mCurMethodId should be updated after setSelectedInputMethodAndSubtypeLocked()
             // because mCurMethodId is stored as a history in
             // setSelectedInputMethodAndSubtypeLocked().
@@ -4016,7 +4013,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
     @IInputMethodManagerImpl.PermissionVerified(Manifest.permission.TEST_INPUT_METHOD)
     public boolean isInputMethodPickerShownForTest() {
         synchronized (ImfLock.class) {
-            return mNewInputMethodSwitcherMenuEnabled
+            return Flags.imeSwitcherRevamp()
                     ? mMenuControllerNew.isShowing()
                     : mMenuController.isisInputMethodPickerShownForTestLocked();
         }
@@ -4025,11 +4022,12 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
     /**
      * Gets the list of Input Method Switcher Menu items and the index of the selected item.
      *
-     * @param items             the list of input method and subtype items.
-     * @param selectedImeId     the ID of the selected input method.
-     * @param selectedSubtypeId the ID of the selected input method subtype,
-     *                          or {@link #NOT_A_SUBTYPE_ID} if no subtype is selected.
-     * @param userId            the ID of the user for which to get the menu items.
+     * @param items                the list of input method and subtype items.
+     * @param selectedImeId        the ID of the selected input method.
+     * @param selectedSubtypeIndex the index of the selected subtype in the input method's array of
+     *                             subtypes, or {@link InputMethodUtils#NOT_A_SUBTYPE_INDEX} if no
+     *                             subtype is selected.
+     * @param userId               the ID of the user for which to get the menu items.
      * @return the list of menu items, and the index of the selected item,
      * or {@code -1} if no item is selected.
      */
@@ -4037,17 +4035,17 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
     @NonNull
     private Pair<List<MenuItem>, Integer> getInputMethodPickerItems(
             @NonNull List<ImeSubtypeListItem> items, @Nullable String selectedImeId,
-            int selectedSubtypeId, @UserIdInt int userId) {
+            int selectedSubtypeIndex, @UserIdInt int userId) {
         final var bindingController = getInputMethodBindingController(userId);
         final var settings = InputMethodSettingsRepository.get(userId);
 
-        if (selectedSubtypeId == NOT_A_SUBTYPE_ID) {
+        if (selectedSubtypeIndex == NOT_A_SUBTYPE_INDEX) {
             // TODO(b/351124299): Check if this fallback logic is still necessary.
             final var curSubtype = bindingController.getCurrentInputMethodSubtype();
             if (curSubtype != null) {
                 final var curMethodId = bindingController.getSelectedMethodId();
                 final var curImi = settings.getMethodMap().get(curMethodId);
-                selectedSubtypeId = SubtypeUtils.getSubtypeIdFromHashCode(
+                selectedSubtypeIndex = SubtypeUtils.getSubtypeIndexFromHashCode(
                         curImi, curSubtype.hashCode());
             }
         }
@@ -4062,19 +4060,19 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
             final var item = items.get(i);
             final var imeId = item.mImi.getId();
             if (imeId.equals(selectedImeId)) {
-                final int subtypeId = item.mSubtypeId;
+                final int subtypeIndex = item.mSubtypeIndex;
                 // Check if this is the selected IME-subtype pair.
-                if ((subtypeId == 0 && selectedSubtypeId == NOT_A_SUBTYPE_ID)
-                        || subtypeId == NOT_A_SUBTYPE_ID
-                        || subtypeId == selectedSubtypeId) {
+                if ((subtypeIndex == 0 && selectedSubtypeIndex == NOT_A_SUBTYPE_INDEX)
+                        || subtypeIndex == NOT_A_SUBTYPE_INDEX
+                        || subtypeIndex == selectedSubtypeIndex) {
                     selectedIndex = i;
                 }
             }
             final boolean hasHeader = !imeId.equals(prevImeId);
             final boolean hasDivider = hasHeader && prevImeId != null;
             prevImeId = imeId;
-            menuItems.add(new MenuItem(item.mImeName, item.mSubtypeName, item.mImi, item.mSubtypeId,
-                    hasHeader, hasDivider));
+            menuItems.add(new MenuItem(item.mImeName, item.mSubtypeName, item.mImi,
+                    item.mSubtypeIndex, hasHeader, hasDivider));
         }
 
         return new Pair<>(menuItems, selectedIndex);
@@ -4131,10 +4129,10 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
                 imi.getPackageName(), callingUid, userId, settings)) {
             throw getExceptionForUnknownImeId(id);
         }
-        final int subtypeId = subtype != null
-                ? SubtypeUtils.getSubtypeIdFromHashCode(imi, subtype.hashCode())
-                : NOT_A_SUBTYPE_ID;
-        setInputMethodWithSubtypeIdLocked(id, subtypeId, userId);
+        final int subtypeIndex = subtype != null
+                ? SubtypeUtils.getSubtypeIndexFromHashCode(imi, subtype.hashCode())
+                : NOT_A_SUBTYPE_INDEX;
+        setInputMethodWithSubtypeIndexLocked(id, subtypeIndex, userId);
     }
 
     @BinderThread
@@ -4152,18 +4150,18 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
         }
         final var currentSubtype = bindingController.getCurrentSubtype();
         String targetLastImiId = null;
-        int subtypeId = NOT_A_SUBTYPE_ID;
+        int subtypeIndex = NOT_A_SUBTYPE_INDEX;
         if (lastIme != null && lastImi != null) {
             final boolean imiIdIsSame = lastImi.getId().equals(
                     bindingController.getSelectedMethodId());
             final int lastSubtypeHash = Integer.parseInt(lastIme.second);
-            final int currentSubtypeHash = currentSubtype == null ? NOT_A_SUBTYPE_ID
+            final int currentSubtypeHash = currentSubtype == null ? NOT_A_SUBTYPE_INDEX
                     : currentSubtype.hashCode();
             // If the last IME is the same as the current IME and the last subtype is not
             // defined, there is no need to switch to the last IME.
             if (!imiIdIsSame || lastSubtypeHash != currentSubtypeHash) {
                 targetLastImiId = lastIme.first;
-                subtypeId = SubtypeUtils.getSubtypeIdFromHashCode(lastImi, lastSubtypeHash);
+                subtypeIndex = SubtypeUtils.getSubtypeIndexFromHashCode(lastImi, lastSubtypeHash);
             }
         }
 
@@ -4191,7 +4189,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
                                         SubtypeUtils.SUBTYPE_MODE_KEYBOARD, locale, true);
                         if (keyboardSubtype != null) {
                             targetLastImiId = imi.getId();
-                            subtypeId = SubtypeUtils.getSubtypeIdFromHashCode(imi,
+                            subtypeIndex = SubtypeUtils.getSubtypeIndexFromHashCode(imi,
                                     keyboardSubtype.hashCode());
                             if (keyboardSubtype.getLocale().equals(locale)) {
                                 break;
@@ -4206,9 +4204,9 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
             if (DEBUG) {
                 Slog.d(TAG, "Switch to: " + lastImi.getId() + ", " + lastIme.second
                         + ", from: " + bindingController.getSelectedMethodId() + ", "
-                        + subtypeId);
+                        + subtypeIndex);
             }
-            setInputMethodWithSubtypeIdLocked(targetLastImiId, subtypeId, userId);
+            setInputMethodWithSubtypeIndexLocked(targetLastImiId, subtypeIndex, userId);
             return true;
         } else {
             return false;
@@ -4228,7 +4226,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
         if (nextSubtype == null) {
             return false;
         }
-        setInputMethodWithSubtypeIdLocked(nextSubtype.mImi.getId(), nextSubtype.mSubtypeId,
+        setInputMethodWithSubtypeIndexLocked(nextSubtype.mImi.getId(), nextSubtype.mSubtypeIndex,
                 userData.mUserId);
         return true;
     }
@@ -4294,7 +4292,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
                 try {
                     final var methodMap = userData.mRawInputMethodMap.get().toInputMethodMap(
                             AdditionalSubtypeMapRepository.get(userId), DirectBootAwareness.AUTO,
-                            mUserManagerInternal.isUserUnlockingOrUnlocked(userId));
+                            userData.mIsUnlockingOrUnlocked.get());
                     final var newSettings = InputMethodSettings.create(methodMap, userId);
                     InputMethodSettingsRepository.put(userId, newSettings);
                     postInputMethodSettingUpdatedLocked(false /* resetDefaultEnabledIme */, userId);
@@ -4661,7 +4659,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
             proto.write(IS_INTERACTIVE, mIsInteractive);
             proto.write(BACK_DISPOSITION, bindingController.getBackDisposition());
             proto.write(IME_WINDOW_VISIBILITY, bindingController.getImeWindowVis());
-            if (!mNewInputMethodSwitcherMenuEnabled) {
+            if (!Flags.imeSwitcherRevamp()) {
                 proto.write(SHOW_IME_WITH_HARD_KEYBOARD,
                         mMenuController.getShowImeWithHardKeyboard());
             }
@@ -4715,7 +4713,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
     }
 
     @GuardedBy("ImfLock.class")
-    private void setInputMethodWithSubtypeIdLocked(String id, int subtypeId,
+    private void setInputMethodWithSubtypeIndexLocked(String id, int subtypeIndex,
             @UserIdInt int userId) {
         final InputMethodSettings settings = InputMethodSettingsRepository.get(userId);
         if (settings.getMethodMap().get(id) != null
@@ -4725,7 +4723,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
         }
         final long ident = Binder.clearCallingIdentity();
         try {
-            setInputMethodLocked(id, subtypeId, userId);
+            setInputMethodLocked(id, subtypeIndex, userId);
         } finally {
             Binder.restoreCallingIdentity(ident);
         }
@@ -4886,7 +4884,8 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
         final boolean isScreenLocked = mWindowManagerInternal.isKeyguardLocked()
                 && mWindowManagerInternal.isKeyguardSecure(userId);
         final String lastInputMethodId = settings.getSelectedInputMethod();
-        int lastInputMethodSubtypeId = settings.getSelectedInputMethodSubtypeId(lastInputMethodId);
+        final int lastInputMethodSubtypeIndex =
+                settings.getSelectedInputMethodSubtypeIndex(lastInputMethodId);
 
         final List<ImeSubtypeListItem> imList = InputMethodSubtypeSwitchingController
                 .getSortedInputMethodAndSubtypeList(
@@ -4900,30 +4899,30 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
             return;
         }
 
-        if (mNewInputMethodSwitcherMenuEnabled) {
+        if (Flags.imeSwitcherRevamp()) {
             if (DEBUG) {
                 Slog.v(TAG, "Show IME switcher menu,"
                         + " showAuxSubtypes=" + showAuxSubtypes
                         + " displayId=" + displayId
                         + " preferredInputMethodId=" + lastInputMethodId
-                        + " preferredInputMethodSubtypeId=" + lastInputMethodSubtypeId);
+                        + " preferredInputMethodSubtypeIndex=" + lastInputMethodSubtypeIndex);
             }
 
             final var itemsAndIndex = getInputMethodPickerItems(imList,
-                    lastInputMethodId, lastInputMethodSubtypeId, userId);
+                    lastInputMethodId, lastInputMethodSubtypeIndex, userId);
             final var menuItems = itemsAndIndex.first;
             final int selectedIndex = itemsAndIndex.second;
 
             if (selectedIndex == -1) {
                 Slog.w(TAG, "Switching menu shown with no item selected"
                         + ", IME id: " + lastInputMethodId
-                        + ", subtype index: " + lastInputMethodSubtypeId);
+                        + ", subtype index: " + lastInputMethodSubtypeIndex);
             }
 
             mMenuControllerNew.show(menuItems, selectedIndex, displayId, userId);
         } else {
             mMenuController.showInputMethodMenuLocked(showAuxSubtypes, displayId,
-                    lastInputMethodId, lastInputMethodSubtypeId, imList, userId);
+                    lastInputMethodId, lastInputMethodSubtypeIndex, imList, userId);
         }
     }
 
@@ -4990,7 +4989,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
 
             // --------------------------------------------------------------
             case MSG_HARD_KEYBOARD_SWITCH_CHANGED:
-                if (!mNewInputMethodSwitcherMenuEnabled) {
+                if (!Flags.imeSwitcherRevamp()) {
                     mMenuController.handleHardKeyboardStatusChange(msg.arg1 == 1);
                 }
                 synchronized (ImfLock.class) {
@@ -5442,7 +5441,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
     }
 
     @GuardedBy("ImfLock.class")
-    private void setSelectedInputMethodAndSubtypeLocked(InputMethodInfo imi, int subtypeId,
+    private void setSelectedInputMethodAndSubtypeLocked(InputMethodInfo imi, int subtypeIndex,
             boolean setSubtypeOnly, @UserIdInt int userId) {
         final InputMethodSettings settings = InputMethodSettingsRepository.get(userId);
         final var bindingController = getInputMethodBindingController(userId);
@@ -5452,12 +5451,12 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
         // Set Subtype here
         final int newSubtypeHashcode;
         final InputMethodSubtype newSubtype;
-        if (imi == null || subtypeId < 0) {
+        if (imi == null || subtypeIndex < 0) {
             newSubtypeHashcode = INVALID_SUBTYPE_HASHCODE;
             newSubtype = null;
         } else {
-            if (subtypeId < imi.getSubtypeCount()) {
-                InputMethodSubtype subtype = imi.getSubtypeAt(subtypeId);
+            if (subtypeIndex < imi.getSubtypeCount()) {
+                InputMethodSubtype subtype = imi.getSubtypeAt(subtypeIndex);
                 newSubtypeHashcode = subtype.hashCode();
                 newSubtype = subtype;
             } else {
@@ -5493,20 +5492,20 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
         settings.putSelectedDefaultDeviceInputMethod(null);
 
         InputMethodInfo imi = settings.getMethodMap().get(newDefaultIme);
-        int lastSubtypeId = NOT_A_SUBTYPE_ID;
+        int lastSubtypeIndex = NOT_A_SUBTYPE_INDEX;
         // newDefaultIme is empty when there is no candidate for the selected IME.
         if (imi != null && !TextUtils.isEmpty(newDefaultIme)) {
             String subtypeHashCode = settings.getLastSubtypeForInputMethod(newDefaultIme);
             if (subtypeHashCode != null) {
                 try {
-                    lastSubtypeId = SubtypeUtils.getSubtypeIdFromHashCode(imi,
+                    lastSubtypeIndex = SubtypeUtils.getSubtypeIndexFromHashCode(imi,
                             Integer.parseInt(subtypeHashCode));
                 } catch (NumberFormatException e) {
                     Slog.w(TAG, "HashCode for subtype looks broken: " + subtypeHashCode, e);
                 }
             }
         }
-        setSelectedInputMethodAndSubtypeLocked(imi, lastSubtypeId, false, userId);
+        setSelectedInputMethodAndSubtypeLocked(imi, lastSubtypeIndex, false, userId);
     }
 
     /**
@@ -5530,14 +5529,14 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
     }
 
     @GuardedBy("ImfLock.class")
-    private boolean switchToInputMethodLocked(@NonNull String imeId, int subtypeId,
+    private boolean switchToInputMethodLocked(@NonNull String imeId, int subtypeIndex,
             @UserIdInt int userId) {
         final var settings = InputMethodSettingsRepository.get(userId);
         final var enabledImes = settings.getEnabledInputMethodList();
         if (!CollectionUtils.any(enabledImes, imi -> imi.getId().equals(imeId))) {
             return false; // IME is not found or not enabled.
         }
-        setInputMethodLocked(imeId, subtypeId, userId);
+        setInputMethodLocked(imeId, subtypeIndex, userId);
         return true;
     }
 
@@ -5593,8 +5592,8 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
                 return;
             }
 
-            final var nextSubtype = nextItem.mSubtypeId > NOT_A_SUBTYPE_ID
-                    ? nextItem.mImi.getSubtypeAt(nextItem.mSubtypeId) : null;
+            final var nextSubtype = nextItem.mSubtypeIndex > NOT_A_SUBTYPE_INDEX
+                    ? nextItem.mImi.getSubtypeAt(nextItem.mSubtypeIndex) : null;
             nextSubtypeHandle = InputMethodSubtypeHandle.of(nextItem.mImi, nextSubtype);
         } else {
             final InputMethodSubtypeHandle currentSubtypeHandle =
@@ -5613,7 +5612,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
         final int subtypeCount = nextImi.getSubtypeCount();
         if (subtypeCount == 0) {
             if (nextSubtypeHandle.equals(InputMethodSubtypeHandle.of(nextImi, null))) {
-                setInputMethodLocked(nextImi.getId(), NOT_A_SUBTYPE_ID, userId);
+                setInputMethodLocked(nextImi.getId(), NOT_A_SUBTYPE_INDEX, userId);
             }
             return;
         }
@@ -5691,10 +5690,10 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
         }
 
         @Override
-        public boolean switchToInputMethod(@NonNull String imeId, int subtypeId,
+        public boolean switchToInputMethod(@NonNull String imeId, int subtypeIndex,
                 @UserIdInt int userId) {
             synchronized (ImfLock.class) {
-                return switchToInputMethodLocked(imeId, subtypeId, userId);
+                return switchToInputMethodLocked(imeId, subtypeIndex, userId);
             }
         }
 
@@ -5776,7 +5775,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
                 final var visibilityStateComputer = userData.mVisibilityStateComputer;
                 if (visibilityStateComputer.getLastImeTargetWindow()
                         != userData.mImeBindingState.mFocusedWindow) {
-                    if (mNewInputMethodSwitcherMenuEnabled) {
+                    if (Flags.imeSwitcherRevamp()) {
                         final var bindingController = getInputMethodBindingController(userId);
                         mMenuControllerNew.hide(bindingController.getCurTokenDisplayId(), userId);
                     } else {
@@ -6111,6 +6110,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
             @SuppressWarnings("GuardedBy") Consumer<UserData> userDataDump =
                     u -> {
                         p.println("    mUserId=" + u.mUserId);
+                        p.println("      unlocked=" + u.mIsUnlockingOrUnlocked.get());
                         p.println("      hasMainConnection="
                                 + u.mBindingController.hasMainConnection());
                         p.println("      isVisibleBound=" + u.mBindingController.isVisibleBound());
@@ -6134,7 +6134,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
                     };
             mUserDataRepository.forAllUserData(userDataDump);
 
-            if (mNewInputMethodSwitcherMenuEnabled) {
+            if (Flags.imeSwitcherRevamp()) {
                 p.println("  menuControllerNew:");
                 mMenuControllerNew.dump(p, "  ");
             } else {
@@ -6563,7 +6563,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
                         continue;
                     }
                     boolean failedToSelectUnknownIme = !switchToInputMethodLocked(imeId,
-                            NOT_A_SUBTYPE_ID, userId);
+                            NOT_A_SUBTYPE_INDEX, userId);
                     if (failedToSelectUnknownIme) {
                         error.print("Unknown input method ");
                         error.print(imeId);
@@ -6577,17 +6577,6 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
                         out.print(imeId);
                         out.print(" selected for user #");
                         out.println(userId);
-
-                        // Workaround for b/354782333.
-                        final var settingsValue = SecureSettingsWrapper.getString(
-                                Settings.Secure.DEFAULT_INPUT_METHOD, "", userId);
-                        if (!TextUtils.equals(settingsValue, imeId)) {
-                            Slog.w(TAG, "DEFAULT_INPUT_METHOD=" + settingsValue
-                                    + " is not updated. Fixing it up to " + imeId
-                                    + " See b/354782333.");
-                            SecureSettingsWrapper.putString(
-                                    Settings.Secure.DEFAULT_INPUT_METHOD, imeId, userId);
-                        }
                     }
                     hasFailed |= failedToSelectUnknownIme;
                 }

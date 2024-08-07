@@ -52,7 +52,7 @@ fun QuickQuickSettings(
         ) { index ->
             Tile(
                 tile = tiles[index],
-                iconOnly = sizedTiles[index].width == 1,
+                iconOnly = sizedTiles[index].isIcon,
                 modifier = Modifier.height(dimensionResource(id = R.dimen.qs_tile_height))
             )
         }

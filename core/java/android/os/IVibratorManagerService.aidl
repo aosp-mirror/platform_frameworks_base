@@ -42,4 +42,12 @@ interface IVibratorManagerService {
     // vibrate/isVibrating/cancel.
     oneway void performHapticFeedback(int uid, int deviceId, String opPkg, int constant,
             String reason, int flags, int privFlags);
+
+    // Similar to performHapticFeedback but the effect is customized to the input device. The
+    // customization for each constant is defined on a device basis, and the behavior will be the
+    // same as performHapticFeedback when no customization is provided for a given constant and
+    // device.
+    oneway void performHapticFeedbackForInputDevice(int uid, int deviceId, String opPkg,
+            int constant, int inputDeviceId, int inputSource, String reason, int flags,
+            int privFlags);
 }
