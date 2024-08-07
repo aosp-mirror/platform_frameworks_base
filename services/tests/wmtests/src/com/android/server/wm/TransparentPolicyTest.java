@@ -24,6 +24,7 @@ import static android.view.Surface.ROTATION_90;
 
 import static org.mockito.Mockito.clearInvocations;
 
+import android.platform.test.annotations.EnableFlags;
 import android.platform.test.annotations.Presubmit;
 
 import androidx.annotation.NonNull;
@@ -205,6 +206,25 @@ public class TransparentPolicyTest extends WindowTestsBase {
                 ta.checkTopActivityTransparentPolicyStateIsRunning(/* running */ false);
             });
         });
+    }
+
+    @EnableFlags(com.android.window.flags.Flags.FLAG_RESPECT_NON_TOP_VISIBLE_FIXED_ORIENTATION)
+    @Test
+    public void testNotRunStrategyToTranslucentActivitiesIfRespectOrientation() {
+        runTestScenario(robot -> robot.transparentActivity(ta -> ta.applyOnActivity((a) -> {
+            a.configureTopActivityIgnoreOrientationRequest(false);
+            // The translucent activity is SCREEN_ORIENTATION_PORTRAIT.
+            ta.launchTransparentActivityInTask();
+            // Though TransparentPolicyState will be started, it won't be considered as running.
+            ta.checkTopActivityTransparentPolicyStateIsRunning(/* running */ false);
+
+            // If the display changes to ignore orientation request, e.g. unfold, the policy should
+            // take effect.
+            a.configureTopActivityIgnoreOrientationRequest(true);
+            ta.checkTopActivityTransparentPolicyStateIsRunning(/* running */ true);
+            ta.setDisplayContentBounds(0, 0, 900, 1800);
+            ta.checkTopActivityHasInheritedBoundsFrom(/* fromTop */ 1);
+        })), /* displayWidth */ 500,  /* displayHeight */ 1000);
     }
 
     @Test
