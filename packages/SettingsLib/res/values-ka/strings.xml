@@ -94,9 +94,7 @@
     <string name="bluetooth_connected_no_headset_battery_level" msgid="2661863370509206428">"დაკავშირებულია (ტელეფონი არ არის). ბატარეის დონე: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g><xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
     <string name="bluetooth_connected_no_a2dp_battery_level" msgid="6499078454894324287">"დაკავშირებულია (მედია არ არის). ბატარეა: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g><xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
     <string name="bluetooth_connected_no_headset_no_a2dp_battery_level" msgid="8477440576953067242">"დაკავშირებულია (ტელეფონი ან მედია არ არის). ბატარეის დონე: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g><xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
-    <!-- String.format failed for translation -->
-    <!-- no translation found for bluetooth_active_battery_level (2685517576209066008) -->
-    <skip />
+    <string name="bluetooth_active_battery_level" msgid="2685517576209066008">"აქტიური. <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>%% ბატარეა."</string>
     <string name="bluetooth_active_battery_level_untethered" msgid="4961338936672922617">"აქტიური. მარცხენა: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g>, მარჯვენა: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> ბატარეა."</string>
     <string name="bluetooth_active_battery_level_untethered_left" msgid="2895644748625343977">"აქტიური. მარცხენა ბატარეის დონე: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>."</string>
     <string name="bluetooth_active_battery_level_untethered_right" msgid="7407517998880370179">"აქტიური. მარჯვენა ბატარეის დონე: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>."</string>
@@ -112,9 +110,7 @@
     <string name="bluetooth_hearing_aid_left_active" msgid="8330226430756799572">"აქტიური (მხოლოდ მარცხენა)"</string>
     <string name="bluetooth_hearing_aid_right_active" msgid="2244728507170385397">"აქტიური (მხოლოდ მარჯვენა)"</string>
     <string name="bluetooth_hearing_aid_left_and_right_active" msgid="4294571497939983181">"აქტიური (მარცხენა და მარჯვენა)"</string>
-    <!-- String.format failed for translation -->
-    <!-- no translation found for bluetooth_active_media_only_battery_level (7772517511061834073) -->
-    <skip />
+    <string name="bluetooth_active_media_only_battery_level" msgid="7772517511061834073">"აქტიური (მხოლოდ მედია). <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>%% ბატარეა."</string>
     <string name="bluetooth_active_media_only_battery_level_untethered" msgid="7444753133664620926">"აქტიური (მხოლოდ მედია), მარცხენა: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g>, მარჯვენა:<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> ბატარეა."</string>
     <string name="bluetooth_battery_level_lea_support" msgid="5968584103507988820">"დაკავშირებული (აუდიოს გაზიარება მხარდაჭერილია). ბატარეა <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>."</string>
     <string name="bluetooth_battery_level_untethered_lea_support" msgid="803110681688633362">"დაკავშირებული (აუდიოს გაზიარება მხარდაჭერილია). მარცხენა: ბატარეა <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g>, მარჯვენა: ბატარეა <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g>"</string>
