@@ -27,6 +27,9 @@ import static android.app.StatusBarManager.NavBarMode;
 import static android.app.StatusBarManager.SessionFlags;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.inputmethodservice.InputMethodService.BACK_DISPOSITION_DEFAULT;
+import static android.os.UserHandle.USER_SYSTEM;
+import static android.os.UserHandle.getCallingUserId;
+import static android.os.UserManager.isVisibleBackgroundUsersEnabled;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.ViewRootImpl.CLIENT_TRANSIENT;
 import static android.view.WindowManagerPolicyConstants.NAV_BAR_MODE_3BUTTON_OVERLAY;
@@ -116,6 +119,7 @@ import com.android.server.LocalServices;
 import com.android.server.UiThread;
 import com.android.server.inputmethod.InputMethodManagerInternal;
 import com.android.server.notification.NotificationDelegate;
+import com.android.server.pm.UserManagerService;
 import com.android.server.policy.GlobalActionsProvider;
 import com.android.server.power.ShutdownCheckPoints;
 import com.android.server.power.ShutdownThread;
@@ -148,9 +152,9 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
 
     /**
      * In apps targeting {@link android.os.Build.VERSION_CODES#TIRAMISU} or higher, calling
-     * {@link android.service.quicksettings.TileService#requestListeningState} will check that the 
-     * calling package (uid) and the package of the target {@link android.content.ComponentName} 
-     * match. It'll also make sure that the context used can take actions on behalf of the current 
+     * {@link android.service.quicksettings.TileService#requestListeningState} will check that the
+     * calling package (uid) and the package of the target {@link android.content.ComponentName}
+     * match. It'll also make sure that the context used can take actions on behalf of the current
      * user.
      */
     @ChangeId
@@ -199,6 +203,9 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
     private static final long REQUEST_TIME_OUT = TimeUnit.MINUTES.toNanos(5);
 
     private IOverlayManager mOverlayManager;
+
+    private final boolean mVisibleBackgroundUsersEnabled;
+    private final UserManagerService mUserManager;
 
     private class DeathRecipient implements IBinder.DeathRecipient {
         public void binderDied() {
@@ -300,6 +307,9 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
 
         mTileRequestTracker = new TileRequestTracker(mContext);
         mSessionMonitor = new SessionMonitor(mContext);
+
+        mVisibleBackgroundUsersEnabled = isVisibleBackgroundUsersEnabled();
+        mUserManager = UserManagerService.getInstance();
     }
 
     /**
@@ -914,6 +924,7 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
     @Override
     public void expandNotificationsPanel() {
         enforceExpandStatusBar();
+        enforceValidCallingUser();
 
         if (isDisable2FlagSet(DISABLE2_NOTIFICATION_SHADE)) {
             return;
@@ -929,6 +940,8 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
 
     @Override
     public void collapsePanels() {
+        enforceValidCallingUser();
+
         if (!checkCanCollapseStatusBar("collapsePanels")) {
             return;
         }
@@ -943,6 +956,8 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
 
     @Override
     public void togglePanel() {
+        enforceValidCallingUser();
+
         if (!checkCanCollapseStatusBar("togglePanel")) {
             return;
         }
@@ -962,6 +977,7 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
     @Override
     public void expandSettingsPanel(String subPanel) {
         enforceExpandStatusBar();
+        enforceValidCallingUser();
 
         if (mBar != null) {
             try {
@@ -976,6 +992,7 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
             addQsTileToFrontOrEnd(component, false);
         } else {
             enforceStatusBarOrShell();
+            enforceValidCallingUser();
 
             if (mBar != null) {
                 try {
@@ -988,6 +1005,7 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
 
     private void addQsTileToFrontOrEnd(ComponentName tile, boolean end) {
         enforceStatusBarOrShell();
+        enforceValidCallingUser();
 
         if (mBar != null) {
             try {
@@ -999,6 +1017,7 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
 
     public void remTile(ComponentName component) {
         enforceStatusBarOrShell();
+        enforceValidCallingUser();
 
         if (mBar != null) {
             try {
@@ -1021,6 +1040,7 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
 
     public void clickTile(ComponentName component) {
         enforceStatusBarOrShell();
+        enforceValidCallingUser();
 
         if (mBar != null) {
             try {
@@ -1032,6 +1052,8 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
 
     @Override
     public void handleSystemKey(KeyEvent key) throws RemoteException {
+        enforceValidCallingUser();
+
         if (!checkCanCollapseStatusBar("handleSystemKey")) {
             return;
         }
@@ -1056,6 +1078,8 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
 
     @Override
     public void showPinningEnterExitToast(boolean entering) throws RemoteException {
+        enforceValidCallingUser();
+
         if (mBar != null) {
             try {
                 mBar.showPinningEnterExitToast(entering);
@@ -1066,6 +1090,8 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
 
     @Override
     public void showPinningEscapeToast() throws RemoteException {
+        enforceValidCallingUser();
+
         if (mBar != null) {
             try {
                 mBar.showPinningEscapeToast();
@@ -1079,6 +1105,8 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
             int[] sensorIds, boolean credentialAllowed, boolean requireConfirmation,
             int userId, long operationId, String opPackageName, long requestId) {
         enforceBiometricDialog();
+        enforceValidCallingUser();
+
         if (mBar != null) {
             try {
                 mBar.showAuthenticationDialog(promptInfo, receiver, sensorIds, credentialAllowed,
@@ -1091,6 +1119,8 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
     @Override
     public void onBiometricAuthenticated(@Modality int modality) {
         enforceBiometricDialog();
+        enforceValidCallingUser();
+
         if (mBar != null) {
             try {
                 mBar.onBiometricAuthenticated(modality);
@@ -1102,6 +1132,8 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
     @Override
     public void onBiometricHelp(@Modality int modality, String message) {
         enforceBiometricDialog();
+        enforceValidCallingUser();
+
         if (mBar != null) {
             try {
                 mBar.onBiometricHelp(modality, message);
@@ -1113,6 +1145,8 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
     @Override
     public void onBiometricError(int modality, int error, int vendorCode) {
         enforceBiometricDialog();
+        enforceValidCallingUser();
+
         if (mBar != null) {
             try {
                 mBar.onBiometricError(modality, error, vendorCode);
@@ -1124,6 +1158,8 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
     @Override
     public void hideAuthenticationDialog(long requestId) {
         enforceBiometricDialog();
+        enforceValidCallingUser();
+
         if (mBar != null) {
             try {
                 mBar.hideAuthenticationDialog(requestId);
@@ -1135,6 +1171,8 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
     @Override
     public void setBiometicContextListener(IBiometricContextListener listener) {
         enforceStatusBarService();
+        enforceValidCallingUser();
+
         synchronized (mLock) {
             mBiometricContextListener = listener;
         }
@@ -1149,6 +1187,8 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
     @Override
     public void setUdfpsRefreshRateCallback(IUdfpsRefreshRateRequestCallback callback) {
         enforceStatusBarService();
+        enforceValidCallingUser();
+
         if (mBar != null) {
             try {
                 mBar.setUdfpsRefreshRateCallback(callback);
@@ -1159,6 +1199,8 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
 
     @Override
     public void startTracing() {
+        enforceValidCallingUser();
+
         if (mBar != null) {
             try {
                 mBar.startTracing();
@@ -1170,6 +1212,8 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
 
     @Override
     public void stopTracing() {
+        enforceValidCallingUser();
+
         if (mBar != null) {
             try {
                 mTracingEnabled = false;
@@ -1193,6 +1237,7 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
     @Override
     public void disableForUser(int what, IBinder token, String pkg, int userId) {
         enforceStatusBar();
+        enforceValidCallingUser();
 
         synchronized (mLock) {
             disableLocked(DEFAULT_DISPLAY, userId, what, token, pkg, 1);
@@ -1296,6 +1341,7 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
     public void setIcon(String slot, String iconPackage, int iconId, int iconLevel,
             String contentDescription) {
         enforceStatusBar();
+        enforceValidCallingUser();
 
         synchronized (mIcons) {
             StatusBarIcon icon = new StatusBarIcon(iconPackage, UserHandle.SYSTEM, iconId,
@@ -1316,6 +1362,7 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
     @Override
     public void setIconVisibility(String slot, boolean visibility) {
         enforceStatusBar();
+        enforceValidCallingUser();
 
         synchronized (mIcons) {
             StatusBarIcon icon = mIcons.get(slot);
@@ -1339,6 +1386,7 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
     @Override
     public void removeIcon(String slot) {
         enforceStatusBar();
+        enforceValidCallingUser();
 
         synchronized (mIcons) {
             mIcons.remove(slot);
@@ -1357,6 +1405,7 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
     public void setImeWindowStatus(int displayId, @ImeWindowVisibility final int vis,
             @BackDispositionMode final int backDisposition, final boolean showImeSwitcher) {
         enforceStatusBar();
+        enforceValidCallingUser();
 
         if (SPEW) {
             Slog.d(TAG, "setImeWindowStatus vis=" + vis + " backDisposition=" + backDisposition);
@@ -1550,6 +1599,7 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
     @Override
     public RegisterStatusBarResult registerStatusBar(IStatusBar bar) {
         enforceStatusBarService();
+        enforceValidCallingUser();
 
         Slog.i(TAG, "registerStatusBar bar=" + bar);
         mBar = bar;
@@ -1600,6 +1650,8 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
     @Override
     public void onPanelRevealed(boolean clearNotificationEffects, int numItems) {
         enforceStatusBarService();
+        enforceValidCallingUser();
+
         final long identity = Binder.clearCallingIdentity();
         try {
             mNotificationDelegate.onPanelRevealed(clearNotificationEffects, numItems);
@@ -1611,6 +1663,8 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
     @Override
     public void clearNotificationEffects() throws RemoteException {
         enforceStatusBarService();
+        enforceValidCallingUser();
+
         final long identity = Binder.clearCallingIdentity();
         try {
             mNotificationDelegate.clearEffects();
@@ -1622,6 +1676,8 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
     @Override
     public void onPanelHidden() throws RemoteException {
         enforceStatusBarService();
+        enforceValidCallingUser();
+
         final long identity = Binder.clearCallingIdentity();
         try {
             mNotificationDelegate.onPanelHidden();
@@ -1636,6 +1692,8 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
     @Override
     public void shutdown() {
         enforceStatusBarService();
+        enforceValidCallingUser();
+
         String reason = PowerManager.SHUTDOWN_USER_REQUESTED;
         ShutdownCheckPoints.recordCheckPoint(Binder.getCallingPid(), reason);
         final long identity = Binder.clearCallingIdentity();
@@ -1655,6 +1713,8 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
     @Override
     public void reboot(boolean safeMode) {
         enforceStatusBarService();
+        enforceValidCallingUser();
+
         String reason = safeMode
                 ? PowerManager.REBOOT_SAFE_MODE
                 : PowerManager.SHUTDOWN_USER_REQUESTED;
@@ -1681,6 +1741,8 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
     @Override
     public void restart() {
         enforceStatusBarService();
+        enforceValidCallingUser();
+
         final long identity = Binder.clearCallingIdentity();
         try {
             mHandler.post(() -> {
@@ -1694,6 +1756,8 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
     @Override
     public void onGlobalActionsShown() {
         enforceStatusBarService();
+        enforceValidCallingUser();
+
         final long identity = Binder.clearCallingIdentity();
         try {
             if (mGlobalActionListener == null) return;
@@ -1706,6 +1770,8 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
     @Override
     public void onGlobalActionsHidden() {
         enforceStatusBarService();
+        enforceValidCallingUser();
+
         final long identity = Binder.clearCallingIdentity();
         try {
             if (mGlobalActionListener == null) return;
@@ -1717,6 +1783,8 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
 
     @Override
     public void onNotificationClick(String key, NotificationVisibility nv) {
+        // enforceValidCallingUser is not required here as the NotificationManagerService
+        // will handle multi-user scenarios
         enforceStatusBarService();
         final int callingUid = Binder.getCallingUid();
         final int callingPid = Binder.getCallingPid();
@@ -1732,6 +1800,8 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
     public void onNotificationActionClick(
             String key, int actionIndex, Notification.Action action, NotificationVisibility nv,
             boolean generatedByAssistant) {
+        // enforceValidCallingUser is not required here as the NotificationManagerService
+        // will handle multi-user scenarios
         enforceStatusBarService();
         final int callingUid = Binder.getCallingUid();
         final int callingPid = Binder.getCallingPid();
@@ -1747,6 +1817,8 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
     @Override
     public void onNotificationError(String pkg, String tag, int id,
             int uid, int initialPid, String message, int userId) {
+        // enforceValidCallingUser is not required here as the NotificationManagerService
+        // will handle multi-user scenarios
         enforceStatusBarService();
         final int callingUid = Binder.getCallingUid();
         final int callingPid = Binder.getCallingPid();
@@ -1765,6 +1837,8 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
             @NotificationStats.DismissalSurface int dismissalSurface,
             @NotificationStats.DismissalSentiment int dismissalSentiment,
             NotificationVisibility nv) {
+        // enforceValidCallingUser is not required here as the NotificationManagerService
+        // will handle multi-user scenarios
         enforceStatusBarService();
         final int callingUid = Binder.getCallingUid();
         final int callingPid = Binder.getCallingPid();
@@ -1782,6 +1856,8 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
             NotificationVisibility[] newlyVisibleKeys, NotificationVisibility[] noLongerVisibleKeys)
             throws RemoteException {
         enforceStatusBarService();
+        enforceValidCallingUser();
+
         final long identity = Binder.clearCallingIdentity();
         try {
             mNotificationDelegate.onNotificationVisibilityChanged(
@@ -1795,6 +1871,8 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
     public void onNotificationExpansionChanged(String key, boolean userAction, boolean expanded,
             int location) throws RemoteException {
         enforceStatusBarService();
+        enforceValidCallingUser();
+
         final long identity = Binder.clearCallingIdentity();
         try {
             mNotificationDelegate.onNotificationExpansionChanged(
@@ -1807,6 +1885,8 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
     @Override
     public void onNotificationDirectReplied(String key) throws RemoteException {
         enforceStatusBarService();
+        enforceValidCallingUser();
+
         final long identity = Binder.clearCallingIdentity();
         try {
             mNotificationDelegate.onNotificationDirectReplied(key);
@@ -1819,6 +1899,8 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
     public void onNotificationSmartSuggestionsAdded(String key, int smartReplyCount,
             int smartActionCount, boolean generatedByAssistant, boolean editBeforeSending) {
         enforceStatusBarService();
+        enforceValidCallingUser();
+
         final long identity = Binder.clearCallingIdentity();
         try {
             mNotificationDelegate.onNotificationSmartSuggestionsAdded(key, smartReplyCount,
@@ -1833,6 +1915,8 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
             String key, int replyIndex, CharSequence reply, int notificationLocation,
             boolean modifiedBeforeSending) throws RemoteException {
         enforceStatusBarService();
+        enforceValidCallingUser();
+
         final long identity = Binder.clearCallingIdentity();
         try {
             mNotificationDelegate.onNotificationSmartReplySent(key, replyIndex, reply,
@@ -1845,6 +1929,8 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
     @Override
     public void onNotificationSettingsViewed(String key) throws RemoteException {
         enforceStatusBarService();
+        enforceValidCallingUser();
+
         final long identity = Binder.clearCallingIdentity();
         try {
             mNotificationDelegate.onNotificationSettingsViewed(key);
@@ -1869,6 +1955,8 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
     @Override
     public void onNotificationBubbleChanged(String key, boolean isBubble, int flags) {
         enforceStatusBarService();
+        enforceValidCallingUser();
+
         final long identity = Binder.clearCallingIdentity();
         try {
             mNotificationDelegate.onNotificationBubbleChanged(key, isBubble, flags);
@@ -1880,6 +1968,8 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
     @Override
     public void onBubbleMetadataFlagChanged(String key, int flags) {
         enforceStatusBarService();
+        enforceValidCallingUser();
+
         final long identity = Binder.clearCallingIdentity();
         try {
             mNotificationDelegate.onBubbleMetadataFlagChanged(key, flags);
@@ -1891,6 +1981,8 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
     @Override
     public void hideCurrentInputMethodForBubbles(int displayId) {
         enforceStatusBarService();
+        enforceValidCallingUser();
+
         final long token = Binder.clearCallingIdentity();
         try {
             InputMethodManagerInternal.get().hideInputMethod(
@@ -1929,6 +2021,8 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
     @Override
     public void onNotificationFeedbackReceived(String key, Bundle feedback) {
         enforceStatusBarService();
+        enforceValidCallingUser();
+
         final long identity = Binder.clearCallingIdentity();
         try {
             mNotificationDelegate.onNotificationFeedbackReceived(key, feedback);
@@ -1948,6 +2042,8 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
     @Override
     public void showInattentiveSleepWarning() {
         enforceStatusBarService();
+        enforceValidCallingUser();
+
         IStatusBar bar = mBar;
         if (bar != null) {
             try {
@@ -1960,6 +2056,8 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
     @Override
     public void dismissInattentiveSleepWarning(boolean animated) {
         enforceStatusBarService();
+        enforceValidCallingUser();
+
         IStatusBar bar = mBar;
         if (bar != null) {
             try {
@@ -1972,6 +2070,8 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
     @Override
     public void suppressAmbientDisplay(boolean suppress) {
         enforceStatusBarService();
+        enforceValidCallingUser();
+
         IStatusBar bar = mBar;
         if (bar != null) {
             try {
@@ -2185,6 +2285,8 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
     @Override
     public void cancelRequestAddTile(@NonNull String packageName) {
         enforceStatusBar();
+        enforceValidCallingUser();
+
         cancelRequestAddTileInternal(packageName);
     }
 
@@ -2208,23 +2310,31 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
 
     @Override
     public void onSessionStarted(@SessionFlags int sessionType, InstanceId instance) {
+        enforceValidCallingUser();
+
         mSessionMonitor.onSessionStarted(sessionType, instance);
     }
 
     @Override
     public void onSessionEnded(@SessionFlags int sessionType, InstanceId instance) {
+        enforceValidCallingUser();
+
         mSessionMonitor.onSessionEnded(sessionType, instance);
     }
 
     @Override
     public void registerSessionListener(@SessionFlags int sessionFlags,
             ISessionListener listener) {
+        enforceValidCallingUser();
+
         mSessionMonitor.registerSessionListener(sessionFlags, listener);
     }
 
     @Override
     public void unregisterSessionListener(@SessionFlags int sessionFlags,
             ISessionListener listener) {
+        enforceValidCallingUser();
+
         mSessionMonitor.unregisterSessionListener(sessionFlags, listener);
     }
 
@@ -2239,6 +2349,8 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
      */
     public void setNavBarMode(@NavBarMode int navBarMode) {
         enforceStatusBar();
+        enforceValidCallingUser();
+
         if (navBarMode != NAV_BAR_MODE_DEFAULT && navBarMode != NAV_BAR_MODE_KIDS) {
             throw new IllegalArgumentException("Supplied navBarMode not supported: " + navBarMode);
         }
@@ -2249,6 +2361,7 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
             throw new SecurityException("Calling user id: " + callingUserId
                     + ", cannot call on behalf of current user id: " + mCurrentUserId + ".");
         }
+
         final long userIdentity = Binder.clearCallingIdentity();
         try {
             Settings.Secure.putIntForUser(mContext.getContentResolver(),
@@ -2322,6 +2435,8 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
             @Nullable IUndoMediaTransferCallback undoCallback
     ) {
         enforceMediaContentControl();
+        enforceValidCallingUser();
+
         IStatusBar bar = mBar;
         if (bar != null) {
             try {
@@ -2346,6 +2461,8 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
             @Nullable Icon appIcon,
             @Nullable CharSequence appName) {
         enforceMediaContentControl();
+        enforceValidCallingUser();
+
         IStatusBar bar = mBar;
         if (bar != null) {
             try {
@@ -2373,6 +2490,8 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
             @NonNull INearbyMediaDevicesProvider provider
     ) {
         enforceMediaContentControl();
+        enforceValidCallingUser();
+
         IStatusBar bar = mBar;
         if (bar != null) {
             try {
@@ -2399,6 +2518,8 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
             @NonNull INearbyMediaDevicesProvider provider
     ) {
         enforceMediaContentControl();
+        enforceValidCallingUser();
+
         IStatusBar bar = mBar;
         if (bar != null) {
             try {
@@ -2413,6 +2534,8 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
     @Override
     public void showRearDisplayDialog(int currentState) {
         enforceControlDeviceStatePermission();
+        enforceValidCallingUser();
+
         IStatusBar bar = mBar;
         if (bar != null) {
             try {
@@ -2584,5 +2707,33 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
 
     private static final Context getUiContext() {
         return ActivityThread.currentActivityThread().getSystemUiContext();
+    }
+
+    /**
+     * This method validates whether the calling user is allowed to control the status bar
+     * on a device that enables visible background users.
+     * Only system or current user or the user that belongs to the same profile group as the
+     * current user is permitted to control the status bar.
+     */
+    private void enforceValidCallingUser() {
+        if (!mVisibleBackgroundUsersEnabled) {
+            return;
+        }
+
+        int callingUserId = getCallingUserId();
+        if (callingUserId == USER_SYSTEM || callingUserId == mCurrentUserId) {
+            return;
+        }
+        final long ident = Binder.clearCallingIdentity();
+        try {
+            if (mUserManager.isSameProfileGroup(callingUserId, mCurrentUserId)) {
+                return;
+            }
+        } finally {
+            Binder.restoreCallingIdentity(ident);
+        }
+
+        throw new SecurityException("User " + callingUserId
+                + " is not permitted to use this method");
     }
 }
