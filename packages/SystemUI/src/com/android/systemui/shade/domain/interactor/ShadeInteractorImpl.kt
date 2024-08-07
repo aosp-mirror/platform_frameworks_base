@@ -55,7 +55,7 @@ constructor(
     keyguardRepository: KeyguardRepository,
     keyguardTransitionInteractor: KeyguardTransitionInteractor,
     powerInteractor: PowerInteractor,
-    shadeRepository: ShadeRepository,
+    private val shadeRepository: ShadeRepository,
     userSetupRepository: UserSetupRepository,
     userSwitcherInteractor: UserSwitcherInteractor,
     private val baseShadeInteractor: BaseShadeInteractor,
@@ -114,11 +114,13 @@ constructor(
                 initialValue = determineShadeMode(isShadeLayoutWide.value)
             )
 
-    override val shadeAlignment: ShadeAlignment =
-        if (shadeRepository.isDualShadeAlignedToBottom) {
-            ShadeAlignment.Bottom
-        } else {
-            ShadeAlignment.Top
+    override val shadeAlignment: ShadeAlignment
+        get() {
+            return if (shadeRepository.isDualShadeAlignedToBottom) {
+                ShadeAlignment.Bottom
+            } else {
+                ShadeAlignment.Top
+            }
         }
 
     override val isExpandToQsEnabled: Flow<Boolean> =

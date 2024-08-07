@@ -14,25 +14,21 @@
  * limitations under the License.
  */
 
+@file:OptIn(ExperimentalCoroutinesApi::class)
+
 package com.android.systemui.shade.ui.viewmodel
 
+import com.android.systemui.deviceentry.domain.interactor.deviceEntryInteractor
 import com.android.systemui.kosmos.Kosmos
+import com.android.systemui.kosmos.Kosmos.Fixture
+import com.android.systemui.notifications.ui.viewmodel.NotificationsShadeSceneContentViewModel
 import com.android.systemui.scene.domain.interactor.sceneInteractor
-import com.android.systemui.shade.domain.interactor.shadeInteractor
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 
-val Kosmos.overlayShadeViewModel: OverlayShadeViewModel by
-    Kosmos.Fixture {
-        OverlayShadeViewModel(
-            sceneInteractor = sceneInteractor,
-            shadeInteractor = shadeInteractor,
-        )
-    }
-
-val Kosmos.overlayShadeViewModelFactory: OverlayShadeViewModel.Factory by
-    Kosmos.Fixture {
-        object : OverlayShadeViewModel.Factory {
-            override fun create(): OverlayShadeViewModel {
-                return overlayShadeViewModel
-            }
-        }
-    }
+val Kosmos.notificationsShadeSceneContentViewModel:
+    NotificationsShadeSceneContentViewModel by Fixture {
+    NotificationsShadeSceneContentViewModel(
+        deviceEntryInteractor = deviceEntryInteractor,
+        sceneInteractor = sceneInteractor,
+    )
+}

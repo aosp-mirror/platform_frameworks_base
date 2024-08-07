@@ -14,25 +14,15 @@
  * limitations under the License.
  */
 
-package com.android.systemui.shade.ui.viewmodel
+package com.android.systemui.qs.ui.viewmodel
 
 import com.android.systemui.kosmos.Kosmos
-import com.android.systemui.scene.domain.interactor.sceneInteractor
 import com.android.systemui.shade.domain.interactor.shadeInteractor
 
-val Kosmos.overlayShadeViewModel: OverlayShadeViewModel by
+val Kosmos.quickSettingsShadeSceneActionsViewModel: QuickSettingsShadeSceneActionsViewModel by
     Kosmos.Fixture {
-        OverlayShadeViewModel(
-            sceneInteractor = sceneInteractor,
+        QuickSettingsShadeSceneActionsViewModel(
             shadeInteractor = shadeInteractor,
+            quickSettingsContainerViewModel = quickSettingsContainerViewModel,
         )
-    }
-
-val Kosmos.overlayShadeViewModelFactory: OverlayShadeViewModel.Factory by
-    Kosmos.Fixture {
-        object : OverlayShadeViewModel.Factory {
-            override fun create(): OverlayShadeViewModel {
-                return overlayShadeViewModel
-            }
-        }
     }
