@@ -148,7 +148,7 @@ constructor(
     private val notificationStackScrollView: Lazy<NotificationScrollView>,
     private val actionsViewModelFactory: ShadeSceneActionsViewModel.Factory,
     private val contentViewModelFactory: ShadeSceneContentViewModel.Factory,
-    private val notificationsPlaceholderViewModel: NotificationsPlaceholderViewModel,
+    private val notificationsPlaceholderViewModelFactory: NotificationsPlaceholderViewModel.Factory,
     private val tintedIconManagerFactory: TintedIconManager.Factory,
     private val batteryMeterViewControllerFactory: BatteryMeterViewController.Factory,
     private val statusBarIconController: StatusBarIconController,
@@ -177,7 +177,8 @@ constructor(
         ShadeScene(
             notificationStackScrollView.get(),
             viewModel = rememberViewModel { contentViewModelFactory.create() },
-            notificationsPlaceholderViewModel = notificationsPlaceholderViewModel,
+            notificationsPlaceholderViewModel =
+                rememberViewModel { notificationsPlaceholderViewModelFactory.create() },
             createTintedIconManager = tintedIconManagerFactory::create,
             createBatteryMeterViewController = batteryMeterViewControllerFactory::create,
             statusBarIconController = statusBarIconController,
