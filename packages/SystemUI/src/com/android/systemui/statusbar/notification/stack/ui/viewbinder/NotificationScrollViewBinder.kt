@@ -17,14 +17,14 @@
 package com.android.systemui.statusbar.notification.stack.ui.viewbinder
 
 import android.util.Log
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.repeatOnLifecycle
 import com.android.systemui.common.ui.ConfigurationState
 import com.android.systemui.common.ui.view.onLayoutChanged
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.dump.DumpManager
-import com.android.systemui.lifecycle.WindowLifecycleState
 import com.android.systemui.lifecycle.repeatWhenAttached
-import com.android.systemui.lifecycle.viewModel
 import com.android.systemui.res.R
 import com.android.systemui.statusbar.notification.stack.ui.view.NotificationScrollView
 import com.android.systemui.statusbar.notification.stack.ui.viewmodel.NotificationScrollViewModel
@@ -33,6 +33,7 @@ import com.android.systemui.util.kotlin.launchAndDispose
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.DisposableHandle
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
@@ -45,7 +46,7 @@ constructor(
     dumpManager: DumpManager,
     @Main private val mainImmediateDispatcher: CoroutineDispatcher,
     private val view: NotificationScrollView,
-    private val viewModelFactory: NotificationScrollViewModel.Factory,
+    private val viewModel: NotificationScrollViewModel,
     private val configuration: ConfigurationState,
 ) : FlowDumperImpl(dumpManager) {
 
@@ -60,42 +61,38 @@ constructor(
     }
 
     fun bindWhileAttached(): DisposableHandle {
-        return view.asView().repeatWhenAttached(mainImmediateDispatcher) { bind() }
+        return view.asView().repeatWhenAttached(mainImmediateDispatcher) {
+            repeatOnLifecycle(Lifecycle.State.CREATED) { bind() }
+        }
     }
 
-    suspend fun bind(): Nothing =
-        view.asView().viewModel(
-            minWindowLifecycleState = WindowLifecycleState.ATTACHED,
-            factory = viewModelFactory::create,
-        ) { viewModel ->
-            launchAndDispose {
-                updateViewPosition()
-                view.asView().onLayoutChanged { updateViewPosition() }
-            }
+    suspend fun bind() = coroutineScope {
+        launchAndDispose {
+            updateViewPosition()
+            view.asView().onLayoutChanged { updateViewPosition() }
+        }
 
-            launch {
-                viewModel
-                    .shadeScrimShape(cornerRadius = scrimRadius, viewLeftOffset = viewLeftOffset)
-                    .collect { view.setScrimClippingShape(it) }
-            }
+        launch {
+            viewModel
+                .shadeScrimShape(cornerRadius = scrimRadius, viewLeftOffset = viewLeftOffset)
+                .collect { view.setScrimClippingShape(it) }
+        }
 
-            launch { viewModel.maxAlpha.collect { view.setMaxAlpha(it) } }
-            launch { viewModel.scrolledToTop.collect { view.setScrolledToTop(it) } }
-            launch {
-                viewModel.expandFraction.collect { view.setExpandFraction(it.coerceIn(0f, 1f)) }
-            }
-            launch { viewModel.isScrollable.collect { view.setScrollingEnabled(it) } }
-            launch { viewModel.isDozing.collect { isDozing -> view.setDozing(isDozing) } }
+        launch { viewModel.maxAlpha.collect { view.setMaxAlpha(it) } }
+        launch { viewModel.scrolledToTop.collect { view.setScrolledToTop(it) } }
+        launch { viewModel.expandFraction.collect { view.setExpandFraction(it.coerceIn(0f, 1f)) } }
+        launch { viewModel.isScrollable.collect { view.setScrollingEnabled(it) } }
+        launch { viewModel.isDozing.collect { isDozing -> view.setDozing(isDozing) } }
 
-            launchAndDispose {
-                view.setSyntheticScrollConsumer(viewModel.syntheticScrollConsumer)
-                view.setCurrentGestureOverscrollConsumer(viewModel.currentGestureOverscrollConsumer)
-                DisposableHandle {
-                    view.setSyntheticScrollConsumer(null)
-                    view.setCurrentGestureOverscrollConsumer(null)
-                }
+        launchAndDispose {
+            view.setSyntheticScrollConsumer(viewModel.syntheticScrollConsumer)
+            view.setCurrentGestureOverscrollConsumer(viewModel.currentGestureOverscrollConsumer)
+            DisposableHandle {
+                view.setSyntheticScrollConsumer(null)
+                view.setCurrentGestureOverscrollConsumer(null)
             }
         }
+    }
 
     /** flow of the scrim clipping radius */
     private val scrimRadius: Flow<Int>
