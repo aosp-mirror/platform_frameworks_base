@@ -19,8 +19,10 @@ package com.android.server.wm;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
 import static android.view.WindowManager.TRANSIT_CLOSE;
+import static android.view.WindowManager.TRANSIT_CLOSE_PREPARE_BACK_NAVIGATION;
 import static android.view.WindowManager.TRANSIT_FIRST_CUSTOM;
 import static android.view.WindowManager.TRANSIT_OPEN;
+import static android.view.WindowManager.TRANSIT_PREPARE_BACK_NAVIGATION;
 import static android.view.WindowManager.TRANSIT_TO_BACK;
 import static android.view.WindowManager.TRANSIT_TO_FRONT;
 
@@ -202,10 +204,12 @@ class SnapshotController {
     }
 
     private static boolean isTransitionOpen(int type) {
-        return type == TRANSIT_OPEN || type == TRANSIT_TO_FRONT;
+        return type == TRANSIT_OPEN || type == TRANSIT_TO_FRONT
+                || type == TRANSIT_PREPARE_BACK_NAVIGATION;
     }
     private static boolean isTransitionClose(int type) {
-        return type == TRANSIT_CLOSE || type == TRANSIT_TO_BACK;
+        return type == TRANSIT_CLOSE || type == TRANSIT_TO_BACK
+                || type == TRANSIT_CLOSE_PREPARE_BACK_NAVIGATION;
     }
 
     void dump(PrintWriter pw, String prefix) {

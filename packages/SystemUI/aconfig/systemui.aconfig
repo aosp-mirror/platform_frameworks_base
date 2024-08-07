@@ -1261,3 +1261,13 @@ flag {
    description: "Adding haptic component infrastructure to sliders in Compose."
    bug: "341968766"
 }
+
+flag {
+  namespace: "systemui"
+  name: "settings_ext_register_content_observer_on_bg_thread"
+  description: "Register content observer in callback flow APIs on background thread in SettingsProxyExt."
+  bug: "355389014"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}

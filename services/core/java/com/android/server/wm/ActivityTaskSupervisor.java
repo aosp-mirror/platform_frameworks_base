@@ -2846,6 +2846,11 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
         } finally {
             SaferIntentUtils.DISABLE_ENFORCE_INTENTS_TO_MATCH_INTENT_FILTERS.set(false);
             synchronized (mService.mGlobalLock) {
+                // Remove the empty task in case the activity was failed to be launched on the
+                // task that was restored from Recents.
+                if (!task.hasChild() && task.shouldRemoveSelfOnLastChildRemoval()) {
+                    task.removeIfPossible("start-from-recents");
+                }
                 mService.continueWindowLayout();
             }
         }

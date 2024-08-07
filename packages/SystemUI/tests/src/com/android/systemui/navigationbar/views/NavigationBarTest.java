@@ -20,7 +20,6 @@ import static android.app.StatusBarManager.NAVIGATION_HINT_BACK_ALT;
 import static android.app.StatusBarManager.NAVIGATION_HINT_IME_SHOWN;
 import static android.app.StatusBarManager.NAVIGATION_HINT_IME_SWITCHER_SHOWN;
 import static android.inputmethodservice.InputMethodService.BACK_DISPOSITION_DEFAULT;
-import static android.inputmethodservice.InputMethodService.IME_INVISIBLE;
 import static android.inputmethodservice.InputMethodService.IME_VISIBLE;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.DisplayAdjustments.DEFAULT_DISPLAY_ADJUSTMENTS;
@@ -512,7 +511,7 @@ public class NavigationBarTest extends SysuiTestCase {
 
         externalNavBar.setImeWindowStatus(EXTERNAL_DISPLAY_ID, IME_VISIBLE,
                 BACK_DISPOSITION_DEFAULT, true);
-        defaultNavBar.setImeWindowStatus(DEFAULT_DISPLAY, IME_INVISIBLE,
+        defaultNavBar.setImeWindowStatus(DEFAULT_DISPLAY, 0 /* vis */,
                 BACK_DISPOSITION_DEFAULT, false);
         // Verify IME window state will be updated in external NavBar & default NavBar state reset.
         assertEquals(NAVIGATION_HINT_BACK_ALT | NAVIGATION_HINT_IME_SHOWN

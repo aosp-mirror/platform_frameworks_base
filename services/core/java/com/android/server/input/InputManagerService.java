@@ -47,6 +47,7 @@ import android.hardware.input.IInputDevicesChangedListener;
 import android.hardware.input.IInputManager;
 import android.hardware.input.IInputSensorEventListener;
 import android.hardware.input.IKeyboardBacklightListener;
+import android.hardware.input.IKeyboardSystemShortcutListener;
 import android.hardware.input.IStickyModifierStateListener;
 import android.hardware.input.ITabletModeChangedListener;
 import android.hardware.input.InputDeviceIdentifier;
@@ -56,6 +57,7 @@ import android.hardware.input.InputSettings;
 import android.hardware.input.KeyGlyphMap;
 import android.hardware.input.KeyboardLayout;
 import android.hardware.input.KeyboardLayoutSelectionResult;
+import android.hardware.input.KeyboardSystemShortcut;
 import android.hardware.input.TouchCalibration;
 import android.hardware.lights.Light;
 import android.hardware.lights.LightState;
@@ -157,6 +159,7 @@ public class InputManagerService extends IInputManager.Stub
     private static final int MSG_DELIVER_INPUT_DEVICES_CHANGED = 1;
     private static final int MSG_RELOAD_DEVICE_ALIASES = 2;
     private static final int MSG_DELIVER_TABLET_MODE_CHANGED = 3;
+    private static final int MSG_KEYBOARD_SYSTEM_SHORTCUT_TRIGGERED = 4;
 
     private static final int DEFAULT_VIBRATION_MAGNITUDE = 192;
     private static final AdditionalDisplayInputProperties
@@ -305,6 +308,9 @@ public class InputManagerService extends IInputManager.Stub
 
     // Manages Sticky modifier state
     private final StickyModifierStateController mStickyModifierStateController;
+
+    // Manages keyboard system shortcut callbacks
+    private final KeyboardShortcutCallbackHandler mKeyboardShortcutCallbackHandler;
 
     // Manages Keyboard microphone mute led
     private final KeyboardLedController mKeyboardLedController;
@@ -461,6 +467,7 @@ public class InputManagerService extends IInputManager.Stub
                         injector.getLooper(), injector.getUEventManager())
                 : new KeyboardBacklightControllerInterface() {};
         mStickyModifierStateController = new StickyModifierStateController();
+        mKeyboardShortcutCallbackHandler = new KeyboardShortcutCallbackHandler();
         mKeyboardLedController = new KeyboardLedController(mContext, injector.getLooper(),
                 mNative);
         mKeyRemapper = new KeyRemapper(mContext, mNative, mDataStore, injector.getLooper());
@@ -2703,6 +2710,36 @@ public class InputManagerService extends IInputManager.Stub
                 lockedModifierState);
     }
 
+    @Override
+    @EnforcePermission(Manifest.permission.MONITOR_KEYBOARD_SYSTEM_SHORTCUTS)
+    public void registerKeyboardSystemShortcutListener(
+            @NonNull IKeyboardSystemShortcutListener listener) {
+        super.registerKeyboardSystemShortcutListener_enforcePermission();
+        Objects.requireNonNull(listener);
+        mKeyboardShortcutCallbackHandler.registerKeyboardSystemShortcutListener(listener,
+                Binder.getCallingPid());
+    }
+
+    @Override
+    @EnforcePermission(Manifest.permission.MONITOR_KEYBOARD_SYSTEM_SHORTCUTS)
+    public void unregisterKeyboardSystemShortcutListener(
+            @NonNull IKeyboardSystemShortcutListener listener) {
+        super.unregisterKeyboardSystemShortcutListener_enforcePermission();
+        Objects.requireNonNull(listener);
+        mKeyboardShortcutCallbackHandler.unregisterKeyboardSystemShortcutListener(listener,
+                Binder.getCallingPid());
+    }
+
+    private void handleKeyboardSystemShortcutTriggered(int deviceId,
+            KeyboardSystemShortcut shortcut) {
+        InputDevice device = getInputDevice(deviceId);
+        if (device == null || device.isVirtual() || !device.isFullKeyboard()) {
+            return;
+        }
+        KeyboardMetricsCollector.logKeyboardSystemsEventReportedAtom(device, shortcut);
+        mKeyboardShortcutCallbackHandler.onKeyboardSystemShortcutTriggered(deviceId, shortcut);
+    }
+
     /**
      * Callback interface implemented by the Window Manager.
      */
@@ -2871,6 +2908,10 @@ public class InputManagerService extends IInputManager.Stub
                     boolean inTabletMode = (boolean) args.arg1;
                     deliverTabletModeChanged(whenNanos, inTabletMode);
                     break;
+                case MSG_KEYBOARD_SYSTEM_SHORTCUT_TRIGGERED:
+                    int deviceId = msg.arg1;
+                    KeyboardSystemShortcut shortcut = (KeyboardSystemShortcut) msg.obj;
+                    handleKeyboardSystemShortcutTriggered(deviceId, shortcut);
             }
         }
     }
@@ -3195,6 +3236,13 @@ public class InputManagerService extends IInputManager.Stub
         @Override
         public int getLastUsedInputDeviceId() {
             return mNative.getLastUsedInputDeviceId();
+        }
+
+        @Override
+        public void notifyKeyboardShortcutTriggered(int deviceId, int[] keycodes, int modifierState,
+                @KeyboardSystemShortcut.SystemShortcut int shortcut) {
+            mHandler.obtainMessage(MSG_KEYBOARD_SYSTEM_SHORTCUT_TRIGGERED, deviceId, 0,
+                    new KeyboardSystemShortcut(keycodes, modifierState, shortcut)).sendToTarget();
         }
     }
 

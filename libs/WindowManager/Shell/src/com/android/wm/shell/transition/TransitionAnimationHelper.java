@@ -19,7 +19,9 @@ package com.android.wm.shell.transition;
 import static android.app.ActivityOptions.ANIM_FROM_STYLE;
 import static android.app.ActivityOptions.ANIM_NONE;
 import static android.view.WindowManager.TRANSIT_CLOSE;
+import static android.view.WindowManager.TRANSIT_CLOSE_PREPARE_BACK_NAVIGATION;
 import static android.view.WindowManager.TRANSIT_OPEN;
+import static android.view.WindowManager.TRANSIT_PREPARE_BACK_NAVIGATION;
 import static android.view.WindowManager.TRANSIT_TO_BACK;
 import static android.view.WindowManager.TRANSIT_TO_FRONT;
 import static android.view.WindowManager.transitTypeToString;
@@ -221,6 +223,15 @@ public class TransitionAnimationHelper {
      */
     public static int getTransitionTypeFromInfo(@NonNull TransitionInfo info) {
         final int type = info.getType();
+        // This back navigation is canceled, check whether the transition should be open or close
+        if (type == TRANSIT_PREPARE_BACK_NAVIGATION
+                || type == TRANSIT_CLOSE_PREPARE_BACK_NAVIGATION) {
+            if (!info.getChanges().isEmpty()) {
+                final TransitionInfo.Change change = info.getChanges().get(0);
+                return TransitionUtil.isOpeningMode(change.getMode())
+                        ? TRANSIT_OPEN : TRANSIT_CLOSE;
+            }
+        }
         // If the info transition type is opening transition, iterate its changes to see if it
         // has any opening change, if none, returns TRANSIT_CLOSE type for closing animation.
         if (type == TRANSIT_OPEN) {

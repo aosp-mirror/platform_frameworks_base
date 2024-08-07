@@ -132,6 +132,7 @@ import android.window.InputTransferToken;
 import android.window.TaskFpsCallback;
 import android.window.TrustedPresentationThresholds;
 
+import com.android.internal.R;
 import com.android.window.flags.Flags;
 
 import java.lang.annotation.ElementType;
@@ -482,6 +483,11 @@ public interface WindowManager extends ViewManager {
      * @hide
      */
     int TRANSIT_PREPARE_BACK_NAVIGATION = 13;
+    /**
+     * An Activity was going to be invisible from back navigation.
+     * @hide
+     */
+    int TRANSIT_CLOSE_PREPARE_BACK_NAVIGATION = 14;
 
     /**
      * The first slot for custom transition types. Callers (like Shell) can make use of custom
@@ -512,6 +518,7 @@ public interface WindowManager extends ViewManager {
             TRANSIT_WAKE,
             TRANSIT_SLEEP,
             TRANSIT_PREPARE_BACK_NAVIGATION,
+            TRANSIT_CLOSE_PREPARE_BACK_NAVIGATION,
             TRANSIT_FIRST_CUSTOM
     })
     @Retention(RetentionPolicy.SOURCE)
@@ -1926,6 +1933,7 @@ public interface WindowManager extends ViewManager {
             case TRANSIT_WAKE: return "WAKE";
             case TRANSIT_SLEEP: return "SLEEP";
             case TRANSIT_PREPARE_BACK_NAVIGATION: return "PREDICTIVE_BACK";
+            case TRANSIT_CLOSE_PREPARE_BACK_NAVIGATION: return "CLOSE_PREDICTIVE_BACK";
             case TRANSIT_FIRST_CUSTOM: return "FIRST_CUSTOM";
             default:
                 if (type > TRANSIT_FIRST_CUSTOM) {
@@ -3468,6 +3476,13 @@ public interface WindowManager extends ViewManager {
         public static final int PRIVATE_FLAG_CONSUME_IME_INSETS = 1 << 25;
 
         /**
+         * Flag to indicate that the window has the
+         * {@link R.styleable.Window_windowOptOutEdgeToEdgeEnforcement} flag set.
+         * @hide
+         */
+        public static final int PRIVATE_FLAG_OPT_OUT_EDGE_TO_EDGE = 1 << 26;
+
+        /**
          * Flag to indicate that the window is controlling how it fits window insets on its own.
          * So we don't need to adjust its attributes for fitting window insets.
          * @hide
@@ -3540,6 +3555,7 @@ public interface WindowManager extends ViewManager {
                 PRIVATE_FLAG_NOT_MAGNIFIABLE,
                 PRIVATE_FLAG_COLOR_SPACE_AGNOSTIC,
                 PRIVATE_FLAG_CONSUME_IME_INSETS,
+                PRIVATE_FLAG_OPT_OUT_EDGE_TO_EDGE,
                 PRIVATE_FLAG_FIT_INSETS_CONTROLLED,
                 PRIVATE_FLAG_TRUSTED_OVERLAY,
                 PRIVATE_FLAG_INSET_PARENT_FRAME_BY_IME,
@@ -3643,6 +3659,10 @@ public interface WindowManager extends ViewManager {
                         mask = PRIVATE_FLAG_CONSUME_IME_INSETS,
                         equals = PRIVATE_FLAG_CONSUME_IME_INSETS,
                         name = "CONSUME_IME_INSETS"),
+                @ViewDebug.FlagToString(
+                        mask = PRIVATE_FLAG_OPT_OUT_EDGE_TO_EDGE,
+                        equals = PRIVATE_FLAG_OPT_OUT_EDGE_TO_EDGE,
+                        name = "OPTOUT_EDGE_TO_EDGE"),
                 @ViewDebug.FlagToString(
                         mask = PRIVATE_FLAG_FIT_INSETS_CONTROLLED,
                         equals = PRIVATE_FLAG_FIT_INSETS_CONTROLLED,

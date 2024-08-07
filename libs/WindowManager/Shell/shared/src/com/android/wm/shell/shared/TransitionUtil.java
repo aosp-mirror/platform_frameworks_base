@@ -25,6 +25,7 @@ import static android.view.WindowManager.LayoutParams.TYPE_DOCK_DIVIDER;
 import static android.view.WindowManager.TRANSIT_CHANGE;
 import static android.view.WindowManager.TRANSIT_CLOSE;
 import static android.view.WindowManager.TRANSIT_KEYGUARD_GOING_AWAY;
+import static android.view.WindowManager.TRANSIT_PREPARE_BACK_NAVIGATION;
 import static android.view.WindowManager.TRANSIT_OPEN;
 import static android.view.WindowManager.TRANSIT_TO_BACK;
 import static android.view.WindowManager.TRANSIT_TO_FRONT;
@@ -59,7 +60,8 @@ public class TransitionUtil {
     public static boolean isOpeningType(@WindowManager.TransitionType int type) {
         return type == TRANSIT_OPEN
                 || type == TRANSIT_TO_FRONT
-                || type == TRANSIT_KEYGUARD_GOING_AWAY;
+                || type == TRANSIT_KEYGUARD_GOING_AWAY
+                || type == TRANSIT_PREPARE_BACK_NAVIGATION;
     }
 
     /** @return true if the transition was triggered by closing something vs opening something */

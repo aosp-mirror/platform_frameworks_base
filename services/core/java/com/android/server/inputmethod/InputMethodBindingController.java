@@ -109,10 +109,6 @@ final class InputMethodBindingController {
      * <dd>
      *   If this bit is ON, some of IME view, e.g. software input, candidate view, is visible.
      * </dd>
-     * <dt>{@link InputMethodService#IME_INVISIBLE}</dt>
-     * <dd> If this bit is ON, IME is ready with views from last EditorInfo but is
-     *    currently invisible.
-     * </dd>
      * </dl>
      * <em>Do not update this value outside of {@link #setImeWindowStatus(IBinder, int, int)} and
      * {@link InputMethodBindingController#unbindCurrentMethod()}.</em>

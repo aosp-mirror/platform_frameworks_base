@@ -17,6 +17,8 @@
 package android.view;
 
 import static android.view.Display.INVALID_DISPLAY;
+import static android.view.WindowManager.LayoutParams.LAST_APPLICATION_WINDOW;
+import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_OPT_OUT_EDGE_TO_EDGE;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
 
 import android.animation.ValueAnimator;
@@ -26,6 +28,7 @@ import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.res.Configuration;
+import android.content.res.TypedArray;
 import android.graphics.HardwareRenderer;
 import android.os.Binder;
 import android.os.Build;
@@ -45,6 +48,7 @@ import android.window.ITrustedPresentationListener;
 import android.window.InputTransferToken;
 import android.window.TrustedPresentationThresholds;
 
+import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.FastPrintWriter;
 
@@ -356,17 +360,25 @@ public final class WindowManagerGlobal {
         }
 
         final WindowManager.LayoutParams wparams = (WindowManager.LayoutParams) params;
+        final Context context = view.getContext();
         if (parentWindow != null) {
             parentWindow.adjustLayoutParamsForSubWindow(wparams);
         } else {
             // If there's no parent, then hardware acceleration for this view is
             // set from the application's hardware acceleration setting.
-            final Context context = view.getContext();
             if (context != null
                     && (context.getApplicationInfo().flags
                     & ApplicationInfo.FLAG_HARDWARE_ACCELERATED) != 0) {
                 wparams.flags |= WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED;
             }
+        }
+
+        if (context != null && wparams.type > LAST_APPLICATION_WINDOW) {
+            final TypedArray styles = context.obtainStyledAttributes(R.styleable.Window);
+            if (styles.getBoolean(R.styleable.Window_windowOptOutEdgeToEdgeEnforcement, false)) {
+                wparams.privateFlags |= PRIVATE_FLAG_OPT_OUT_EDGE_TO_EDGE;
+            }
+            styles.recycle();
         }
 
         ViewRootImpl root;
