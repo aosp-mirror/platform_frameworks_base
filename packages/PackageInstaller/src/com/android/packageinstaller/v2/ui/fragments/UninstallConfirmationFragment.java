@@ -60,7 +60,7 @@ public class UninstallConfirmationFragment extends DialogFragment {
         Log.i(LOG_TAG, "Creating " + LOG_TAG + "\n" + mDialogData);
         AlertDialog.Builder builder = new AlertDialog.Builder(requireContext())
             .setTitle(mDialogData.getTitle())
-            .setPositiveButton(R.string.ok,
+            .setPositiveButton(mDialogData.isArchive() ? R.string.archive : R.string.ok,
                 (dialogInt, which) -> mUninstallActionListener.onPositiveResponse(
                     mKeepData != null && mKeepData.isChecked()))
             .setNegativeButton(R.string.cancel,
