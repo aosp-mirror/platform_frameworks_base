@@ -31,6 +31,7 @@ import androidx.compose.ui.layout.ApproachMeasureScope
 import androidx.compose.ui.layout.LookaheadScope
 import androidx.compose.ui.layout.Measurable
 import androidx.compose.ui.layout.MeasureResult
+import androidx.compose.ui.node.LayoutAwareModifierNode
 import androidx.compose.ui.node.ModifierNodeElement
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.Density
@@ -131,6 +132,8 @@ internal class SceneTransitionLayoutImpl(
      */
     internal lateinit var lookaheadScope: LookaheadScope
         private set
+
+    internal var lastSize: IntSize = IntSize.Zero
 
     init {
         updateContents(builder, layoutDirection)
@@ -286,8 +289,13 @@ internal class SceneTransitionLayoutImpl(
 
     @Composable
     private fun BackHandler() {
+        val result = scene(state.transitionState.currentScene).userActions[Back.Resolved]
         val targetSceneForBack =
-            scene(state.transitionState.currentScene).userActions[Back.Resolved]?.toScene
+            when (result) {
+                null -> null
+                is UserActionResult.ChangeScene -> result.toScene
+            }
+
         PredictiveBackHandler(state, coroutineScope, targetSceneForBack)
     }
 
@@ -379,7 +387,8 @@ internal class SceneTransitionLayoutImpl(
             .sortedBy { it.zIndex }
     }
 
-    internal fun setScenesTargetSizeForTest(size: IntSize) {
+    internal fun setScenesAndLayoutTargetSizeForTest(size: IntSize) {
+        lastSize = size
         scenes.values.forEach { it.targetSize = size }
     }
 
@@ -396,7 +405,11 @@ private data class LayoutElement(private val layoutImpl: SceneTransitionLayoutIm
 }
 
 private class LayoutNode(var layoutImpl: SceneTransitionLayoutImpl) :
-    Modifier.Node(), ApproachLayoutModifierNode {
+    Modifier.Node(), ApproachLayoutModifierNode, LayoutAwareModifierNode {
+    override fun onRemeasured(size: IntSize) {
+        layoutImpl.lastSize = size
+    }
+
     override fun isMeasurementApproachInProgress(lookaheadSize: IntSize): Boolean {
         return layoutImpl.state.isTransitioning()
     }

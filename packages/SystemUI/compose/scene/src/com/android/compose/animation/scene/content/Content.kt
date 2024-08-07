@@ -78,11 +78,15 @@ internal sealed class Content(
         userActions: Map<UserAction.Resolved, UserActionResult>
     ): Map<UserAction.Resolved, UserActionResult> {
         userActions.forEach { (action, result) ->
-            if (key == result.toScene) {
-                error(
-                    "Transition to the same content (scene/overlay) is not supported. Content " +
-                        "$key, action $action, result $result"
-                )
+            when (result) {
+                is UserActionResult.ChangeScene -> {
+                    if (key == result.toScene) {
+                        error(
+                            "Transition to the same content (scene/overlay) is not supported. " +
+                                "Content $key, action $action, result $result"
+                        )
+                    }
+                }
             }
         }
         return userActions

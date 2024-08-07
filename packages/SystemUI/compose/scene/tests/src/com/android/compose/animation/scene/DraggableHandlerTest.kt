@@ -117,7 +117,7 @@ class DraggableHandlerTest {
                     builder = scenesBuilder,
                     coroutineScope = testScope,
                 )
-                .apply { setScenesTargetSizeForTest(LAYOUT_SIZE) }
+                .apply { setScenesAndLayoutTargetSizeForTest(LAYOUT_SIZE) }
 
         val draggableHandler = layoutImpl.draggableHandler(Orientation.Vertical)
         val horizontalDraggableHandler = layoutImpl.draggableHandler(Orientation.Horizontal)
@@ -459,13 +459,14 @@ class DraggableHandlerTest {
     private fun TestGestureScope.navigateToSceneC() {
         assertIdle(currentScene = SceneA)
         val dragController = onDragStarted(overSlop = down(fractionOfScreen = 1f))
+        assertTransition(currentScene = SceneA, fromScene = SceneA, toScene = SceneC)
         dragController.onDragStopped(velocity = 0f)
         advanceUntilIdle()
         assertIdle(currentScene = SceneC)
     }
 
     @Test
-    fun onAccelaratedScroll_scrollToThirdScene() = runGestureTest {
+    fun onAcceleratedScroll_scrollToThirdScene() = runGestureTest {
         // Drag A -> B with progress 0.2
         val dragController1 = onDragStarted(overSlop = up(fractionOfScreen = 0.2f))
         assertTransition(
@@ -500,7 +501,7 @@ class DraggableHandlerTest {
     }
 
     @Test
-    fun onAccelaratedScrollBothTargetsBecomeNull_settlesToIdle() = runGestureTest {
+    fun onAcceleratedScrollBothTargetsBecomeNull_settlesToIdle() = runGestureTest {
         val dragController1 = onDragStarted(overSlop = up(fractionOfScreen = 0.2f))
         dragController1.onDragDelta(pixels = up(fractionOfScreen = 0.2f))
         dragController1.onDragStopped(velocity = -velocityThreshold)

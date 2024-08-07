@@ -479,20 +479,47 @@ interface SwipeSourceDetector {
 }
 
 /** The result of performing a [UserAction]. */
-data class UserActionResult(
-    /** The scene we should be transitioning to during the [UserAction]. */
-    val toScene: SceneKey,
-
+sealed class UserActionResult(
     /** The key of the transition that should be used. */
-    val transitionKey: TransitionKey? = null,
+    open val transitionKey: TransitionKey? = null,
 
     /**
      * If `true`, the swipe will be committed and we will settle to [toScene] if only if the user
      * swiped at least the swipe distance, i.e. the transition progress was already equal to or
      * bigger than 100% when the user released their finger. `
      */
-    val requiresFullDistanceSwipe: Boolean = false,
-)
+    open val requiresFullDistanceSwipe: Boolean,
+) {
+    internal abstract fun toContent(currentScene: SceneKey): ContentKey
+
+    data class ChangeScene
+    internal constructor(
+        /** The scene we should be transitioning to during the [UserAction]. */
+        val toScene: SceneKey,
+        override val transitionKey: TransitionKey? = null,
+        override val requiresFullDistanceSwipe: Boolean = false,
+    ) : UserActionResult(transitionKey, requiresFullDistanceSwipe) {
+        override fun toContent(currentScene: SceneKey): ContentKey = toScene
+    }
+
+    companion object {
+        /** A [UserActionResult] that changes the current scene to [toScene]. */
+        operator fun invoke(
+            /** The scene we should be transitioning to during the [UserAction]. */
+            toScene: SceneKey,
+
+            /** The key of the transition that should be used. */
+            transitionKey: TransitionKey? = null,
+
+            /**
+             * If `true`, the swipe will be committed if only if the user swiped at least the swipe
+             * distance, i.e. the transition progress was already equal to or bigger than 100% when
+             * the user released their finger.
+             */
+            requiresFullDistanceSwipe: Boolean = false,
+        ): UserActionResult = ChangeScene(toScene, transitionKey, requiresFullDistanceSwipe)
+    }
+}
 
 fun interface UserActionDistance {
     /**
