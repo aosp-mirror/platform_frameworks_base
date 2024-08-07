@@ -154,7 +154,7 @@ fun LottieAnimationView.updateAsset(
     setAnimation(asset)
     if (animatingFromSfpsAuthenticating(asset)) {
         // Skipping to error / success / unlock segment of animation
-        setMinFrame(151)
+        setMinFrame(158)
     } else {
         frame = 0
     }
