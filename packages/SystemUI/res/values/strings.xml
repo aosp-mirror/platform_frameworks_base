@@ -3668,6 +3668,7 @@
           -->
     <string name="shortcut_helper_key_combinations_or_separator">or</string>
 
+    <!-- TOUCHPAD TUTORIAL-->
     <!-- Label for button opening tutorial for back gesture on touchpad [CHAR LIMIT=NONE] -->
     <string name="touchpad_tutorial_back_gesture_button">Back gesture</string>
     <!-- Label for button opening tutorial for back gesture on touchpad [CHAR LIMIT=NONE] -->
@@ -3682,19 +3683,29 @@
     <!-- Touchpad back gesture guidance in gestures tutorial [CHAR LIMIT=NONE] -->
     <string name="touchpad_back_gesture_guidance">To go back, swipe left or right using three fingers anywhere on the touchpad.\n\nYou can also use the keyboard shortcut
 Action + ESC for this.</string>
-    <!-- Screen title after gesture was done successfully [CHAR LIMIT=NONE] -->
-    <string name="touchpad_tutorial_gesture_done">Great job!</string>
+    <!-- Screen title after back gesture was done successfully [CHAR LIMIT=NONE] -->
+    <string name="touchpad_back_gesture_success_title">Great job!</string>
     <!-- Text shown to the user after they complete back gesture tutorial [CHAR LIMIT=NONE] -->
-    <string name="touchpad_back_gesture_finished">You completed the go back gesture.</string>
+    <string name="touchpad_back_gesture_success_body">You completed the go back gesture.</string>
     <!-- HOME GESTURE -->
     <!-- Touchpad home gesture action name in tutorial [CHAR LIMIT=NONE] -->
     <string name="touchpad_home_gesture_action_title">Go home</string>
     <!-- Touchpad home gesture guidance in gestures tutorial [CHAR LIMIT=NONE] -->
     <string name="touchpad_home_gesture_guidance">To go to your home screen at any time, swipe up with three fingers from the bottom of your screen.</string>
     <!-- Screen title after home gesture was done successfully [CHAR LIMIT=NONE] -->
-    <string name="touchpad_home_gesture_done">Nice!</string>
+    <string name="touchpad_home_gesture_success_title">Nice!</string>
     <!-- Text shown to the user after they complete home gesture tutorial [CHAR LIMIT=NONE] -->
-    <string name="touchpad_home_gesture_finished">You completed the go home gesture.</string>
+    <string name="touchpad_home_gesture_success_body">You completed the go home gesture.</string>
+
+    <!-- KEYBOARD TUTORIAL-->
+    <!-- Action key tutorial title [CHAR LIMIT=NONE] -->
+    <string name="tutorial_action_key_title">Action key</string>
+    <!-- Action key tutorial guidance[CHAR LIMIT=NONE] -->
+    <string name="tutorial_action_key_guidance">To access your apps, press the action key on your keyboard.</string>
+    <!-- Screen title after action key pressed successfully [CHAR LIMIT=NONE] -->
+    <string name="tutorial_action_key_success_title">Congratulations!</string>
+    <!-- Text shown to the user after they complete action key tutorial [CHAR LIMIT=NONE] -->
+    <string name="tutorial_action_key_success_body">You completed the action key gesture.\n\nAction + / shows all the shortcuts you have available.</string>
 
     <!-- Content description for keyboard backlight brightness dialog [CHAR LIMIT=NONE] -->
     <string name="keyboard_backlight_dialog_title">Keyboard backlight</string>
