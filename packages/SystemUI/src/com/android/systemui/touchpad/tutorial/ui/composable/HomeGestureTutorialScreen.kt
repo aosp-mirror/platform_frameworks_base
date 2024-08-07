@@ -38,8 +38,8 @@ fun HomeGestureTutorialScreen(
                 TutorialScreenConfig.Strings(
                     titleResId = R.string.touchpad_home_gesture_action_title,
                     bodyResId = R.string.touchpad_home_gesture_guidance,
-                    titleSuccessResId = R.string.touchpad_home_gesture_done,
-                    bodySuccessResId = R.string.touchpad_home_gesture_finished
+                    titleSuccessResId = R.string.touchpad_home_gesture_success_title,
+                    bodySuccessResId = R.string.touchpad_home_gesture_success_body
                 ),
             animations =
                 TutorialScreenConfig.Animations(
