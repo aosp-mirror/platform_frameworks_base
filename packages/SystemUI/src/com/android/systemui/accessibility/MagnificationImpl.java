@@ -46,6 +46,7 @@ import android.window.InputTransferToken;
 
 import androidx.annotation.NonNull;
 
+import com.android.app.viewcapture.ViewCaptureAwareWindowManager;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.graphics.SfVsyncFrameCallbackProvider;
 import com.android.systemui.Flags;
@@ -193,15 +194,18 @@ public class MagnificationImpl implements Magnification, CommandQueue.Callbacks 
         private final Context mContext;
         private final MagnificationSettingsController.Callback mSettingsControllerCallback;
         private final SecureSettings mSecureSettings;
+        private final ViewCaptureAwareWindowManager mViewCaptureAwareWindowManager;
 
         SettingsSupplier(Context context,
                 MagnificationSettingsController.Callback settingsControllerCallback,
                 DisplayManager displayManager,
-                SecureSettings secureSettings) {
+                SecureSettings secureSettings,
+                ViewCaptureAwareWindowManager viewCaptureAwareWindowManager) {
             super(displayManager);
             mContext = context;
             mSettingsControllerCallback = settingsControllerCallback;
             mSecureSettings = secureSettings;
+            mViewCaptureAwareWindowManager = viewCaptureAwareWindowManager;
         }
 
         @Override
@@ -213,7 +217,8 @@ public class MagnificationImpl implements Magnification, CommandQueue.Callbacks 
                     windowContext,
                     new SfVsyncFrameCallbackProvider(),
                     mSettingsControllerCallback,
-                    mSecureSettings);
+                    mSecureSettings,
+                    mViewCaptureAwareWindowManager);
         }
     }
 
@@ -227,10 +232,12 @@ public class MagnificationImpl implements Magnification, CommandQueue.Callbacks 
             SysUiState sysUiState, OverviewProxyService overviewProxyService,
             SecureSettings secureSettings, DisplayTracker displayTracker,
             DisplayManager displayManager, AccessibilityLogger a11yLogger,
-            IWindowManager iWindowManager, AccessibilityManager accessibilityManager) {
+            IWindowManager iWindowManager, AccessibilityManager accessibilityManager,
+            ViewCaptureAwareWindowManager viewCaptureAwareWindowManager) {
         this(context, mainHandler.getLooper(), executor, commandQueue,
                 modeSwitchesController, sysUiState, overviewProxyService, secureSettings,
-                displayTracker, displayManager, a11yLogger, iWindowManager, accessibilityManager);
+                displayTracker, displayManager, a11yLogger, iWindowManager, accessibilityManager,
+                viewCaptureAwareWindowManager);
     }
 
     @VisibleForTesting
@@ -240,7 +247,8 @@ public class MagnificationImpl implements Magnification, CommandQueue.Callbacks 
             SecureSettings secureSettings, DisplayTracker displayTracker,
             DisplayManager displayManager, AccessibilityLogger a11yLogger,
             IWindowManager iWindowManager,
-            AccessibilityManager accessibilityManager) {
+            AccessibilityManager accessibilityManager,
+            ViewCaptureAwareWindowManager viewCaptureAwareWindowManager) {
         mHandler = new Handler(looper) {
             @Override
             public void handleMessage(@NonNull Message msg) {
@@ -263,7 +271,8 @@ public class MagnificationImpl implements Magnification, CommandQueue.Callbacks 
         mFullscreenMagnificationControllerSupplier = new FullscreenMagnificationControllerSupplier(
                 context, displayManager, mHandler, mExecutor, iWindowManager);
         mMagnificationSettingsSupplier = new SettingsSupplier(context,
-                mMagnificationSettingsControllerCallback, displayManager, secureSettings);
+                mMagnificationSettingsControllerCallback, displayManager, secureSettings,
+                viewCaptureAwareWindowManager);
 
         mModeSwitchesController.setClickListenerDelegate(
                 displayId -> mHandler.post(() -> {
