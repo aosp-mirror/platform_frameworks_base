@@ -43,8 +43,8 @@ abstract class AppCompatRobotBase {
             @NonNull ActivityTaskSupervisor supervisor,
             int displayWidth, int displayHeight) {
         mActivityRobot = new AppCompatActivityRobot(wm, atm, supervisor,
-                displayWidth, displayHeight);
-        mActivityRobot.setOnPostActivityCreation(this::onPostActivityCreation);
+                displayWidth, displayHeight, this::onPostActivityCreation,
+                this::onPostDisplayContentCreation);
         mConfigurationRobot =
                 new AppCompatConfigurationRobot(wm.mAppCompatConfiguration);
         mOptPropRobot = new AppCompatComponentPropRobot(wm);
@@ -64,6 +64,16 @@ abstract class AppCompatRobotBase {
      */
     @CallSuper
     void onPostActivityCreation(@NonNull ActivityRecord activity) {
+    }
+
+    /**
+     * Specific Robots can override this method to add operation to run on a newly created
+     * {@link DisplayContent}. Common case is to invoke spyOn().
+     *
+     * @param displayContent THe newly created {@link DisplayContent}.
+     */
+    @CallSuper
+    void onPostDisplayContentCreation(@NonNull DisplayContent displayContent) {
     }
 
     @NonNull
