@@ -1194,9 +1194,9 @@ public final class NotificationAttentionHelper {
         }
 
         boolean shouldIgnoreNotification(final NotificationRecord record) {
-            // Ignore group summaries
-            return (record.getSbn().isGroup() && record.getSbn().getNotification()
-                    .isGroupSummary());
+            // Ignore auto-group summaries => don't count them as app-posted notifications
+            // for the cooldown budget
+            return (record.getSbn().isGroup() && GroupHelper.isAggregatedGroup(record));
         }
 
         /**
