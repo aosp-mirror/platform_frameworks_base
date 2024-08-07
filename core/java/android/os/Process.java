@@ -589,6 +589,12 @@ public class Process {
      **/
     public static final int THREAD_GROUP_RESTRICTED = 7;
 
+    /**
+     * Thread group for foreground apps in multi-window mode
+     * @hide
+     **/
+    public static final int THREAD_GROUP_FOREGROUND_WINDOW = 8;
+
     /** @hide */
     public static final int SIGNAL_DEFAULT = 0;
     public static final int SIGNAL_QUIT = 3;
