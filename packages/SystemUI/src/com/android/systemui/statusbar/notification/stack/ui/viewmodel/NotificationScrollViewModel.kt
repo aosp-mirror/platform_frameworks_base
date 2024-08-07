@@ -19,9 +19,9 @@ package com.android.systemui.statusbar.notification.stack.ui.viewmodel
 
 import com.android.compose.animation.scene.ObservableTransitionState
 import com.android.compose.animation.scene.SceneKey
-import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
+import com.android.systemui.lifecycle.SysUiViewModel
 import com.android.systemui.scene.domain.interactor.SceneInteractor
 import com.android.systemui.scene.shared.flag.SceneContainerFlag
 import com.android.systemui.scene.shared.model.SceneFamilies
@@ -33,9 +33,11 @@ import com.android.systemui.statusbar.notification.stack.shared.model.ShadeScrim
 import com.android.systemui.statusbar.notification.stack.shared.model.ShadeScrimShape
 import com.android.systemui.statusbar.notification.stack.ui.viewmodel.NotificationTransitionThresholds.EXPANSION_FOR_DELAYED_STACK_FADE_IN
 import com.android.systemui.statusbar.notification.stack.ui.viewmodel.NotificationTransitionThresholds.EXPANSION_FOR_MAX_SCRIM_ALPHA
+import com.android.systemui.util.kotlin.FlowDumper
 import com.android.systemui.util.kotlin.FlowDumperImpl
 import dagger.Lazy
-import javax.inject.Inject
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -43,9 +45,8 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 
 /** ViewModel which represents the state of the NSSL/Controller in the world of flexiglass */
-@SysUISingleton
 class NotificationScrollViewModel
-@Inject
+@AssistedInject
 constructor(
     dumpManager: DumpManager,
     stackAppearanceInteractor: NotificationStackAppearanceInteractor,
@@ -54,7 +55,9 @@ constructor(
     // TODO(b/336364825) Remove Lazy when SceneContainerFlag is released -
     // while the flag is off, creating this object too early results in a crash
     keyguardInteractor: Lazy<KeyguardInteractor>,
-) : FlowDumperImpl(dumpManager) {
+) : FlowDumper by FlowDumperImpl(dumpManager, "NotificationScrollViewModel"),
+    SysUiViewModel() {
+
     /**
      * The expansion fraction of the notification stack. It should go from 0 to 1 when transitioning
      * from Gone to Shade scenes, and remain at 1 when in Lockscreen or Shade scenes and while
@@ -185,5 +188,10 @@ constructor(
         } else {
             keyguardInteractor.get().isDozing.dumpWhileCollecting("isDozing")
         }
+    }
+
+    @AssistedFactory
+    interface Factory {
+        fun create(): NotificationScrollViewModel
     }
 }

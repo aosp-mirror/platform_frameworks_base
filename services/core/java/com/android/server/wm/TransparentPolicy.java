@@ -92,6 +92,7 @@ class TransparentPolicy {
         if (parent == null) {
             return;
         }
+        final boolean wasStarted = mTransparentPolicyState.isRunning();
         mTransparentPolicyState.reset();
         // In case mActivityRecord.hasCompatDisplayInsetsWithoutOverride() we don't apply the
         // opaque activity constraints because we're expecting the activity is already letterboxed.
@@ -102,6 +103,9 @@ class TransparentPolicy {
         // We check if we need for some reason to skip the policy gievn the specific first
         // opaque activity
         if (shouldSkipTransparentPolicy(firstOpaqueActivity)) {
+            if (wasStarted) {
+                mActivityRecord.recomputeConfiguration();
+            }
             return;
         }
         mTransparentPolicyState.start(firstOpaqueActivity);
@@ -190,7 +194,6 @@ class TransparentPolicy {
             // We skip letterboxing if the translucent activity doesn't have any
             // opaque activities beneath or the activity below is embedded which
             // never has letterbox.
-            mActivityRecord.recomputeConfiguration();
             return true;
         }
         if (mActivityRecord.getTask() == null || mActivityRecord.fillsParent()
@@ -260,6 +263,10 @@ class TransparentPolicy {
             mLetterboxConfigListener = WindowContainer.overrideConfigurationPropagation(
                     mActivityRecord, mFirstOpaqueActivity,
                     (opaqueConfig, transparentOverrideConfig) -> {
+                        if (!isPolicyEnabled()) {
+                            transparentOverrideConfig.unset();
+                            return transparentOverrideConfig;
+                        }
                         resetTranslucentOverrideConfig(transparentOverrideConfig);
                         final Rect parentBounds = parent.getWindowConfiguration().getBounds();
                         final Rect bounds = transparentOverrideConfig
@@ -313,7 +320,17 @@ class TransparentPolicy {
         }
 
         private boolean isRunning() {
-            return mLetterboxConfigListener != null;
+            return mLetterboxConfigListener != null && isPolicyEnabled();
+        }
+
+        private boolean isPolicyEnabled() {
+            if (!mActivityRecord.mWmService.mFlags.mRespectNonTopVisibleFixedOrientation) {
+                return true;
+            }
+            // Do not enable the policy if the activity can affect display orientation.
+            final int orientation = mActivityRecord.getOverrideOrientation();
+            return orientation == SCREEN_ORIENTATION_UNSPECIFIED
+                    || !mActivityRecord.handlesOrientationChangeFromDescendant(orientation);
         }
 
         private void clearInheritedCompatDisplayInsets() {

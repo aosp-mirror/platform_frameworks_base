@@ -25,6 +25,8 @@ import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_LIGHTS;
 import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_PEEK;
 import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_SCREEN_OFF;
 import static android.provider.Settings.Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS;
+import static android.service.notification.Condition.STATE_TRUE;
+import static android.service.notification.SystemZenRules.PACKAGE_ANDROID;
 import static android.service.notification.ZenAdapters.peopleTypeToPrioritySenders;
 import static android.service.notification.ZenAdapters.prioritySendersToPeopleType;
 import static android.service.notification.ZenAdapters.zenPolicyConversationSendersToNotificationPolicy;
@@ -454,7 +456,7 @@ public class ZenModeConfig implements Parcelable {
             newRule.conditionId = Uri.EMPTY;
             newRule.allowManualInvocation = true;
             newRule.zenPolicy = getDefaultZenPolicy();
-            newRule.pkg = "android";
+            newRule.pkg = PACKAGE_ANDROID;
             manualRule = newRule;
         }
     }
@@ -957,15 +959,9 @@ public class ZenModeConfig implements Parcelable {
         rt.user = safeInt(parser, ZEN_ATT_USER, rt.user);
         boolean readSuppressedEffects = false;
         boolean readManualRule = false;
+        boolean readManualRuleWithoutPolicy = false;
         while ((type = parser.next()) != XmlPullParser.END_DOCUMENT) {
             tag = parser.getName();
-            if (type == XmlPullParser.END_TAG && ZEN_TAG.equals(tag)) {
-                if (Flags.modesUi() && !readManualRule) {
-                    // migrate from fields on config into manual rule
-                    rt.manualRule.zenPolicy = rt.toZenPolicy();
-                }
-                return rt;
-            }
             if (type == XmlPullParser.START_TAG) {
                 if (ALLOW_TAG.equals(tag)) {
                     rt.allowCalls = safeBoolean(parser, ALLOW_ATT_CALLS,
@@ -1034,9 +1030,17 @@ public class ZenModeConfig implements Parcelable {
                     rt.suppressedVisualEffects = safeInt(parser, DISALLOW_ATT_VISUAL_EFFECTS,
                             DEFAULT_SUPPRESSED_VISUAL_EFFECTS);
                 } else if (MANUAL_TAG.equals(tag)) {
-                    rt.manualRule = readRuleXml(parser);
-                    if (rt.manualRule != null) {
+                    ZenRule manualRule = readRuleXml(parser);
+                    if (manualRule != null) {
+                        rt.manualRule = manualRule;
+
+                        // Manual rule may be present prior to modes_ui if it were on, but in that
+                        // case it would not have a set policy, so make note of the need to set
+                        // it up later.
                         readManualRule = true;
+                        if (rt.manualRule.zenPolicy == null) {
+                            readManualRuleWithoutPolicy = true;
+                        }
                     }
                 } else if (AUTOMATIC_TAG.equals(tag)
                         || (Flags.modesApi() && AUTOMATIC_DELETED_TAG.equals(tag))) {
@@ -1057,6 +1061,23 @@ public class ZenModeConfig implements Parcelable {
                     rt.areChannelsBypassingDnd = safeBoolean(parser,
                             STATE_ATT_CHANNELS_BYPASSING_DND, DEFAULT_CHANNELS_BYPASSING_DND);
                 }
+            }
+            if (type == XmlPullParser.END_TAG && ZEN_TAG.equals(tag)) {
+                if (Flags.modesUi() && (!readManualRule || readManualRuleWithoutPolicy)) {
+                    // migrate from fields on config into manual rule
+                    rt.manualRule.zenPolicy = rt.toZenPolicy();
+                    if (readManualRuleWithoutPolicy) {
+                        // indicates that the xml represents a pre-modes_ui XML with an enabled
+                        // manual rule; set rule active, and fill in other fields as would be done
+                        // in ensureManualZenRule() and setManualZenMode().
+                        rt.manualRule.pkg = PACKAGE_ANDROID;
+                        rt.manualRule.type = AutomaticZenRule.TYPE_OTHER;
+                        rt.manualRule.condition = new Condition(
+                                rt.manualRule.conditionId != null ? rt.manualRule.conditionId
+                                        : Uri.EMPTY, "", STATE_TRUE);
+                    }
+                }
+                return rt;
             }
         }
         throw new IllegalStateException("Failed to reach END_DOCUMENT");

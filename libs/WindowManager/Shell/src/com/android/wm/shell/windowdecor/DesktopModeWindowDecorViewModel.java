@@ -69,7 +69,6 @@ import android.view.InputChannel;
 import android.view.InputEvent;
 import android.view.InputEventReceiver;
 import android.view.InputMonitor;
-import android.view.InsetsSource;
 import android.view.InsetsState;
 import android.view.MotionEvent;
 import android.view.SurfaceControl;
@@ -115,6 +114,7 @@ import com.android.wm.shell.sysui.ShellController;
 import com.android.wm.shell.sysui.ShellInit;
 import com.android.wm.shell.transition.Transitions;
 import com.android.wm.shell.windowdecor.DesktopModeWindowDecoration.ExclusionRegionListener;
+import com.android.wm.shell.windowdecor.extension.InsetsStateKt;
 import com.android.wm.shell.windowdecor.extension.TaskInfoKt;
 import com.android.wm.shell.windowdecor.viewholder.AppHeaderViewHolder;
 
@@ -321,7 +321,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
     private void onInit() {
         mShellController.addKeyguardChangeListener(mDesktopModeKeyguardChangeListener);
         mShellCommandHandler.addDumpCallback(this::dump, this);
-        mDisplayInsetsController.addInsetsChangedListener(mContext.getDisplayId(),
+        mDisplayInsetsController.addGlobalInsetsChangedListener(
                 new DesktopModeOnInsetsChangedListener());
         mDesktopTasksController.setOnTaskResizeAnimationListener(
                 new DesktopModeOnTaskResizeAnimationListener());
@@ -1196,10 +1196,6 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
                 && mSplitScreenController.isTaskRootOrStageRoot(taskInfo.taskId)) {
             return false;
         }
-        if (mDesktopModeKeyguardChangeListener.isKeyguardVisibleAndOccluded()
-                && taskInfo.isFocused) {
-            return false;
-        }
         if (DesktopModeFlags.MODALS_POLICY.isEnabled(mContext)
                 && isTopActivityExemptFromDesktopWindowing(mContext, taskInfo)) {
             return false;
@@ -1397,19 +1393,17 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
         }
     }
 
-    static class DesktopModeKeyguardChangeListener implements KeyguardChangeListener {
-        private boolean mIsKeyguardVisible;
-        private boolean mIsKeyguardOccluded;
-
+    class DesktopModeKeyguardChangeListener implements KeyguardChangeListener {
         @Override
         public void onKeyguardVisibilityChanged(boolean visible, boolean occluded,
                 boolean animatingDismiss) {
-            mIsKeyguardVisible = visible;
-            mIsKeyguardOccluded = occluded;
-        }
-
-        public boolean isKeyguardVisibleAndOccluded() {
-            return mIsKeyguardVisible && mIsKeyguardOccluded;
+            final int size = mWindowDecorByTaskId.size();
+            for (int i = size - 1; i >= 0; i--) {
+                final DesktopModeWindowDecoration decor = mWindowDecorByTaskId.valueAt(i);
+                if (decor != null) {
+                    decor.onKeyguardStateChanged(visible, occluded);
+                }
+            }
         }
     }
 
@@ -1417,28 +1411,26 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
     class DesktopModeOnInsetsChangedListener implements
             DisplayInsetsController.OnInsetsChangedListener {
         @Override
-        public void insetsChanged(InsetsState insetsState) {
-            for (int i = 0; i < insetsState.sourceSize(); i++) {
-                final InsetsSource source = insetsState.sourceAt(i);
-                if (source.getType() != statusBars()) {
+        public void insetsChanged(int displayId, @NonNull InsetsState insetsState) {
+            final int size = mWindowDecorByTaskId.size();
+            for (int i = size - 1; i >= 0; i--) {
+                final DesktopModeWindowDecoration decor = mWindowDecorByTaskId.valueAt(i);
+                if (decor == null) {
                     continue;
                 }
-
-                final DesktopModeWindowDecoration decor = getFocusedDecor();
-                if (decor == null) {
-                    return;
+                if (decor.mTaskInfo.displayId == displayId
+                        && Flags.enableDesktopWindowingImmersiveHandleHiding()) {
+                    decor.onInsetsStateChanged(insetsState);
                 }
-                // If status bar inset is visible, top task is not in immersive mode
-                final boolean inImmersiveMode = !source.isVisible();
-                // Calls WindowDecoration#relayout if decoration visibility needs to be updated
-                if (inImmersiveMode != mInImmersiveMode) {
-                    if (Flags.enableDesktopWindowingImmersiveHandleHiding()) {
-                        decor.relayout(decor.mTaskInfo);
-                    }
-                    mInImmersiveMode = inImmersiveMode;
+                if (!Flags.enableAdditionalWindowsAboveStatusBar()) {
+                    // If status bar inset is visible, top task is not in immersive mode.
+                    // This value is only needed when the App Handle input is being handled
+                    // through the global input monitor (hence the flag check) to ignore gestures
+                    // when the app is in immersive mode. When disabled, the view itself handles
+                    // input, and since it's removed when in immersive there's no need to track
+                    // this here.
+                    mInImmersiveMode = !InsetsStateKt.isVisible(insetsState, statusBars());
                 }
-
-                return;
             }
         }
     }

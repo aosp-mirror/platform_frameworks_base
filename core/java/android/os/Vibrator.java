@@ -553,6 +553,31 @@ public abstract class Vibrator {
     }
 
     /**
+     * Performs a haptic feedback. Similar to {@link #performHapticFeedback} but also take into the
+     * consideration the {@link InputDevice} that triggered the haptic
+     *
+     * <p>A haptic feedback is a short vibration feedback. The type of feedback is identified via
+     * the {@code constant}, which should be one of the effect constants provided in
+     * {@link HapticFeedbackConstants}. The haptic feedback provided for a given effect ID is
+     * consistent across all usages on the same device.
+     *
+     * @param constant      the ID for the haptic feedback. This should be one of the constants
+     *                      defined in {@link HapticFeedbackConstants}.
+     * @param inputDeviceId the integer id of the input device that triggered the haptic feedback.
+     * @param inputSource   the {@link InputDevice.Source} that triggered the haptic feedback.
+     * @param reason        the reason for this haptic feedback.
+     * @param flags         Additional flags as per {@link HapticFeedbackConstants}.
+     * @param privFlags     Additional private flags as per {@link HapticFeedbackConstants}.
+     * @hide
+     */
+    public void performHapticFeedbackForInputDevice(
+            int constant, int inputDeviceId, int inputSource, String reason,
+            @HapticFeedbackConstants.Flags int flags,
+            @HapticFeedbackConstants.PrivateFlags int privFlags) {
+        Log.w(TAG, "performHapticFeedbackForInputDevice is not supported");
+    }
+
+    /**
      * Query whether the vibrator natively supports the given effects.
      *
      * <p>If an effect is not supported, the system may still automatically fall back to playing

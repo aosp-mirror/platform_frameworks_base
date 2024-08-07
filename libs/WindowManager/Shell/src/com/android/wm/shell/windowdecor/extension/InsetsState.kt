@@ -13,15 +13,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package com.android.wm.shell.windowdecor.extension
 
-package com.android.systemui.inputdevice.oobe.data.model
+import android.view.InsetsState
+import android.view.WindowInsets
 
-data class OobeSchedulerInfo(
-    val keyboard: DeviceSchedulerInfo = DeviceSchedulerInfo(),
-    val touchpad: DeviceSchedulerInfo = DeviceSchedulerInfo()
-)
-
-data class DeviceSchedulerInfo(var isLaunched: Boolean = false, var connectionTime: Long? = null) {
-    val wasEverConnected: Boolean
-        get() = connectionTime != null
+/**
+ * Whether the source of the given [type] is visible or false if there is no source of that type.
+ */
+fun InsetsState.isVisible(@WindowInsets.Type.InsetsType type: Int): Boolean {
+    for (i in 0 until sourceSize()) {
+        val source = sourceAt(i)
+        if (source.type != type) {
+            continue
+        }
+        return source.isVisible
+    }
+    return false
 }

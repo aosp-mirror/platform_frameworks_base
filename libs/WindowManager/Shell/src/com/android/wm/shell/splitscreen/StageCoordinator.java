@@ -123,10 +123,10 @@ import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.DisplayImeController;
 import com.android.wm.shell.common.DisplayInsetsController;
 import com.android.wm.shell.common.LaunchAdjacentController;
-import com.android.wm.shell.common.ScreenshotUtils;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.common.TransactionPool;
+import com.android.wm.shell.common.split.SplitDecorManager;
 import com.android.wm.shell.common.split.SplitLayout;
 import com.android.wm.shell.common.split.SplitScreenConstants.PersistentSnapPosition;
 import com.android.wm.shell.common.split.SplitScreenConstants.SplitPosition;
@@ -1010,40 +1010,41 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         mTempRect1.setEmpty();
         final StageTaskListener topLeftStage =
                 mSideStagePosition == SPLIT_POSITION_TOP_OR_LEFT ? mSideStage : mMainStage;
-        final SurfaceControl topLeftScreenshot = ScreenshotUtils.takeScreenshot(t,
-                topLeftStage.mRootLeash, mTempRect1, Integer.MAX_VALUE - 1);
         final StageTaskListener bottomRightStage =
                 mSideStagePosition == SPLIT_POSITION_TOP_OR_LEFT ? mMainStage : mSideStage;
-        final SurfaceControl bottomRightScreenshot = ScreenshotUtils.takeScreenshot(t,
-                bottomRightStage.mRootLeash, mTempRect1, Integer.MAX_VALUE - 1);
-        mSplitLayout.splitSwitching(t, topLeftStage.mRootLeash, bottomRightStage.mRootLeash,
+
+        // Don't allow windows or divider to be focused during animation (mRootTaskInfo is the
+        // parent of all 3 leaves). We don't want the user to be able to tap and focus a window
+        // while it is moving across the screen, because granting focus also recalculates the
+        // layering order, which is in delicate balance during this animation.
+        WindowContainerTransaction noFocus = new WindowContainerTransaction();
+        noFocus.setFocusable(mRootTaskInfo.token, false);
+        mSyncQueue.queue(noFocus);
+
+        mSplitLayout.playSwapAnimation(t, topLeftStage, bottomRightStage,
                 insets -> {
+                    // Runs at the end of the swap animation
+                    SplitDecorManager decorManager1 = topLeftStage.getDecorManager();
+                    SplitDecorManager decorManager2 = bottomRightStage.getDecorManager();
+
                     WindowContainerTransaction wct = new WindowContainerTransaction();
+
+                    // Restore focus-ability to the windows and divider
+                    wct.setFocusable(mRootTaskInfo.token, true);
+
                     setSideStagePosition(reverseSplitPosition(mSideStagePosition), wct);
                     mSyncQueue.queue(wct);
                     mSyncQueue.runInSync(st -> {
                         updateSurfaceBounds(mSplitLayout, st, false /* applyResizingOffset */);
-                        st.setPosition(topLeftScreenshot, -insets.left, -insets.top);
-                        st.setPosition(bottomRightScreenshot, insets.left, insets.top);
 
-                        final ValueAnimator va = ValueAnimator.ofFloat(1, 0);
-                        va.addUpdateListener(valueAnimator-> {
-                            final float progress = (float) valueAnimator.getAnimatedValue();
-                            t.setAlpha(topLeftScreenshot, progress);
-                            t.setAlpha(bottomRightScreenshot, progress);
-                            t.apply();
-                        });
-                        va.addListener(new AnimatorListenerAdapter() {
-                            @Override
-                            public void onAnimationEnd(
-                                    @androidx.annotation.NonNull Animator animation) {
-                                t.remove(topLeftScreenshot);
-                                t.remove(bottomRightScreenshot);
-                                t.apply();
-                                mTransactionPool.release(t);
-                            }
-                        });
-                        va.start();
+                        // updateSurfaceBounds(), above, officially puts the two apps in their new
+                        // stages. Starting on the next frame, all calculations are made using the
+                        // new layouts/insets. So any follow-up animations on the same leashes below
+                        // should contain some cleanup/repositioning to prevent jank.
+
+                        // Play follow-up animations if needed
+                        decorManager1.fadeOutVeilAndCleanUp(st);
+                        decorManager2.fadeOutVeilAndCleanUp(st);
                     });
                 });
 
