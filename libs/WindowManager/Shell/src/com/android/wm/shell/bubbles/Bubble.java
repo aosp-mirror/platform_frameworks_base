@@ -349,7 +349,8 @@ public class Bubble implements BubbleViewProvider {
                 getPackageName(),
                 getTitle(),
                 getAppName(),
-                isImportantConversation());
+                isImportantConversation(),
+                !isAppLaunchIntent());
     }
 
     @Override

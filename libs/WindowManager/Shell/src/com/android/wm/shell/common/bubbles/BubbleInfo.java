@@ -48,10 +48,11 @@ public class BubbleInfo implements Parcelable {
     @Nullable
     private String mAppName;
     private boolean mIsImportantConversation;
+    private boolean mShowAppBadge;
 
     public BubbleInfo(String key, int flags, @Nullable String shortcutId, @Nullable Icon icon,
             int userId, String packageName, @Nullable String title, @Nullable String appName,
-            boolean isImportantConversation) {
+            boolean isImportantConversation, boolean showAppBadge) {
         mKey = key;
         mFlags = flags;
         mShortcutId = shortcutId;
@@ -61,6 +62,7 @@ public class BubbleInfo implements Parcelable {
         mTitle = title;
         mAppName = appName;
         mIsImportantConversation = isImportantConversation;
+        mShowAppBadge = showAppBadge;
     }
 
     private BubbleInfo(Parcel source) {
@@ -73,6 +75,7 @@ public class BubbleInfo implements Parcelable {
         mTitle = source.readString();
         mAppName = source.readString();
         mIsImportantConversation = source.readBoolean();
+        mShowAppBadge = source.readBoolean();
     }
 
     public String getKey() {
@@ -113,6 +116,10 @@ public class BubbleInfo implements Parcelable {
 
     public boolean isImportantConversation() {
         return mIsImportantConversation;
+    }
+
+    public boolean showAppBadge() {
+        return mShowAppBadge;
     }
 
     /**
@@ -172,6 +179,7 @@ public class BubbleInfo implements Parcelable {
         parcel.writeString(mTitle);
         parcel.writeString(mAppName);
         parcel.writeBoolean(mIsImportantConversation);
+        parcel.writeBoolean(mShowAppBadge);
     }
 
     @NonNull
