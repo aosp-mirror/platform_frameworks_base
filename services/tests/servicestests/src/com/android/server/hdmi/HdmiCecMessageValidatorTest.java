@@ -239,6 +239,9 @@ public class HdmiCecMessageValidatorTest {
     public void isValid_setAnalogueTimer_clearAnalogueTimer() {
         assertMessageValidity("04:33:0C:08:10:1E:04:30:08:00:13:AD:06").isEqualTo(OK);
         assertMessageValidity("04:34:04:0C:16:0F:08:37:00:02:EA:60:03:34").isEqualTo(OK);
+        // Allow [Recording Sequence] set multiple days of the week.
+        // e.g. Monday (0x02) | Tuesday (0x04) -> Monday or Tuesday (0x06)
+        assertMessageValidity("04:34:04:0C:16:0F:08:37:06:02:EA:60:03:34").isEqualTo(OK);
 
         assertMessageValidity("0F:33:0C:08:10:1E:04:30:08:00:13:AD:06")
                 .isEqualTo(ERROR_DESTINATION);
@@ -307,7 +310,7 @@ public class HdmiCecMessageValidatorTest {
         // Invalid Recording Sequence
         assertMessageValidity("04:99:12:06:0C:2D:5A:19:90:91:04:00:B1").isEqualTo(ERROR_PARAMETER);
         // Invalid Recording Sequence
-        assertMessageValidity("04:97:0C:08:15:05:04:1E:21:00:C4:C2:11:D8:75:30")
+        assertMessageValidity("04:97:0C:08:15:05:04:1E:A1:00:C4:C2:11:D8:75:30")
                 .isEqualTo(ERROR_PARAMETER);
 
         // Invalid Digital Broadcast System
@@ -353,7 +356,7 @@ public class HdmiCecMessageValidatorTest {
         // Invalid Recording Sequence
         assertMessageValidity("40:A2:14:09:12:28:4B:19:84:05:10:00").isEqualTo(ERROR_PARAMETER);
         // Invalid Recording Sequence
-        assertMessageValidity("40:A1:0C:08:15:05:04:1E:14:04:20").isEqualTo(ERROR_PARAMETER);
+        assertMessageValidity("40:A1:0C:08:15:05:04:1E:94:04:20").isEqualTo(ERROR_PARAMETER);
         // Invalid external source specifier
         assertMessageValidity("40:A2:14:09:12:28:4B:19:10:08:10:00").isEqualTo(ERROR_PARAMETER);
         // Invalid External PLug

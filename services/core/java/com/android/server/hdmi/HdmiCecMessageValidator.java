@@ -524,8 +524,7 @@ public class HdmiCecMessageValidator {
         if ((value & 0x80) != 0x00) {
             return false;
         }
-        // Validate than not more than one bit is set
-        return (Integer.bitCount(value) <= 1);
+        return true;
     }
 
     /**
