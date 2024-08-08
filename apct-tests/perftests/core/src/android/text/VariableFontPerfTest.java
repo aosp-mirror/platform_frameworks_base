@@ -19,7 +19,6 @@ package android.text;
 import android.graphics.Paint;
 import android.graphics.RecordingCanvas;
 import android.graphics.RenderNode;
-import android.graphics.Typeface;
 import android.perftests.utils.BenchmarkState;
 import android.perftests.utils.PerfStatusReporter;
 
@@ -121,34 +120,13 @@ public class VariableFontPerfTest {
     public void testSetFontVariationSettings() {
         final BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         final Paint paint = new Paint(PAINT);
+        final Random random = new Random(0);
         while (state.keepRunning()) {
             state.pauseTiming();
-            paint.setTypeface(null);
-            paint.setFontVariationSettings(null);
-            Typeface.clearTypefaceCachesForTestingPurpose();
+            int weight = random.nextInt(1000);
             state.resumeTiming();
 
-            paint.setFontVariationSettings("'wght' 450");
+            paint.setFontVariationSettings("'wght' " + weight);
         }
-        Typeface.clearTypefaceCachesForTestingPurpose();
     }
-
-    @Test
-    public void testSetFontVariationSettings_Cached() {
-        final BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
-        final Paint paint = new Paint(PAINT);
-        Typeface.clearTypefaceCachesForTestingPurpose();
-
-        while (state.keepRunning()) {
-            state.pauseTiming();
-            paint.setTypeface(null);
-            paint.setFontVariationSettings(null);
-            state.resumeTiming();
-
-            paint.setFontVariationSettings("'wght' 450");
-        }
-
-        Typeface.clearTypefaceCachesForTestingPurpose();
-    }
-
 }

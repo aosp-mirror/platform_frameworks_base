@@ -277,13 +277,3 @@ flag {
     purpose: PURPOSE_BUGFIX
   }
 }
-
-flag {
-  name: "typeface_cache_for_var_settings"
-  namespace: "text"
-  description: "Cache Typeface instance for font variation settings."
-  bug: "355462362"
-  metadata {
-    purpose: PURPOSE_BUGFIX
-  }
-}
