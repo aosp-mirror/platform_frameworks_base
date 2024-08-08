@@ -54,6 +54,7 @@ constructor(
                         Intent(Settings.ACTION_DARK_THEME_SETTINGS)
                     )
                 }
+                is QSTileUserAction.ToggleClick -> {}
             }
         }
 }

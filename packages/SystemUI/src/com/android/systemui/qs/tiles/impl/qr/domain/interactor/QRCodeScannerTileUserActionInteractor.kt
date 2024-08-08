@@ -45,6 +45,7 @@ constructor(
                     }
                 }
                 is QSTileUserAction.LongClick -> {} // no-op
+                is QSTileUserAction.ToggleClick -> {}
             }
         }
 }
