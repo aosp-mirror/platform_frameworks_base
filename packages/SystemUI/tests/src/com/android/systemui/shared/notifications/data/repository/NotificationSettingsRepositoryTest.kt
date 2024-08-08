@@ -56,7 +56,7 @@ class NotificationSettingsRepositoryTest : SysuiTestCase() {
     @Test
     fun testGetIsShowNotificationsOnLockscreenEnabled() =
         testScope.runTest {
-            val showNotifs by collectLastValue(underTest.isShowNotificationsOnLockScreenEnabled)
+            val showNotifs by collectLastValue(underTest.isShowNotificationsOnLockScreenEnabled())
 
             secureSettingsRepository.setInt(
                 name = Settings.Secure.LOCK_SCREEN_SHOW_NOTIFICATIONS,
@@ -74,7 +74,7 @@ class NotificationSettingsRepositoryTest : SysuiTestCase() {
     @Test
     fun testSetIsShowNotificationsOnLockscreenEnabled() =
         testScope.runTest {
-            val showNotifs by collectLastValue(underTest.isShowNotificationsOnLockScreenEnabled)
+            val showNotifs by collectLastValue(underTest.isShowNotificationsOnLockScreenEnabled())
 
             underTest.setShowNotificationsOnLockscreenEnabled(true)
             assertThat(showNotifs).isEqualTo(true)

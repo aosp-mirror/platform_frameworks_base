@@ -68,7 +68,7 @@ public final class StatusBarTouchableRegionManager implements Dumpable {
     private final UnlockedScreenOffAnimationController mUnlockedScreenOffAnimationController;
 
     private boolean mIsStatusBarExpanded = false;
-    private boolean mIsIdleOnGone = false;
+    private boolean mIsIdleOnGone = true;
     private boolean mShouldAdjustInsets = false;
     private View mNotificationShadeWindowView;
     private View mNotificationPanelView;
@@ -282,7 +282,7 @@ public final class StatusBarTouchableRegionManager implements Dumpable {
         // since we don't want stray touches to go through the light reveal scrim to whatever is
         // underneath.
         return mIsStatusBarExpanded
-                || !mIsIdleOnGone
+                || (SceneContainerFlag.isEnabled() && !mIsIdleOnGone)
                 || mPrimaryBouncerInteractor.isShowing().getValue()
                 || mAlternateBouncerInteractor.isVisibleState()
                 || mUnlockedScreenOffAnimationController.isAnimationPlaying();

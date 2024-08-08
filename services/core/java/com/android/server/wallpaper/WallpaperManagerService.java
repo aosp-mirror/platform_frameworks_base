@@ -17,6 +17,7 @@
 package com.android.server.wallpaper;
 
 import static android.Manifest.permission.INTERACT_ACROSS_USERS_FULL;
+import static android.Manifest.permission.MANAGE_EXTERNAL_STORAGE;
 import static android.Manifest.permission.READ_WALLPAPER_INTERNAL;
 import static android.app.ActivityManager.RunningAppProcessInfo.IMPORTANCE_FOREGROUND;
 import static android.app.WallpaperManager.COMMAND_REAPPLY;
@@ -2209,7 +2210,8 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
     public ParcelFileDescriptor getWallpaperWithFeature(String callingPkg, String callingFeatureId,
             IWallpaperManagerCallback cb, final int which, Bundle outParams, int wallpaperUserId,
             boolean getCropped) {
-        final boolean hasPrivilege = hasPermission(READ_WALLPAPER_INTERNAL);
+        final boolean hasPrivilege = hasPermission(READ_WALLPAPER_INTERNAL)
+                || hasPermission(MANAGE_EXTERNAL_STORAGE);
         if (!hasPrivilege) {
             mContext.getSystemService(StorageManager.class).checkPermissionReadImages(true,
                     Binder.getCallingPid(), Binder.getCallingUid(), callingPkg, callingFeatureId);

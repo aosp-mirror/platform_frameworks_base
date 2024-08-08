@@ -1770,8 +1770,9 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
         // the small clock here
         // With migrateClocksToBlueprint, weather clock will have behaviors similar to other clocks
         if (!MigrateClocksToBlueprint.isEnabled()) {
+            boolean bypassEnabled = mKeyguardBypassController.getBypassEnabled();
             if (mKeyguardStatusViewController.isLargeClockBlockingNotificationShelf()
-                    && hasVisibleNotifications() && isOnAod()) {
+                    && hasVisibleNotifications() && (isOnAod() || bypassEnabled)) {
                 return SMALL;
             }
         }
@@ -3046,7 +3047,7 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
 
                     if (mDeviceEntryFaceAuthInteractor.canFaceAuthRun()) {
                         mUpdateMonitor.requestActiveUnlock(
-                                ActiveUnlockConfig.ActiveUnlockRequestOrigin.UNLOCK_INTENT,
+                                ActiveUnlockConfig.ActiveUnlockRequestOrigin.UNLOCK_INTENT_LEGACY,
                                 "lockScreenEmptySpaceTap");
                     } else {
                         mLockscreenGestureLogger.write(MetricsEvent.ACTION_LS_HINT,

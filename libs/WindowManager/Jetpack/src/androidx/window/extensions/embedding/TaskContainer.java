@@ -108,6 +108,12 @@ class TaskContainer {
     private boolean mPlaceholderRuleSuppressed;
 
     /**
+     * {@code true} if the TaskFragments in this Task needs to be updated next time the Task
+     * becomes visible. See {@link #shouldUpdateContainer(TaskFragmentParentInfo)}
+     */
+    boolean mTaskFragmentContainersNeedsUpdate;
+
+    /**
      * The {@link TaskContainer} constructor
      *
      * @param taskId         The ID of the Task, which must match {@link Activity#getTaskId()} with
@@ -185,7 +191,8 @@ class TaskContainer {
 
         // If the task properties equals regardless of starting position, don't
         // need to update the container.
-        return mInfo.getConfiguration().diffPublicOnly(configuration) != 0
+        return mTaskFragmentContainersNeedsUpdate
+                || mInfo.getConfiguration().diffPublicOnly(configuration) != 0
                 || mInfo.getDisplayId() != info.getDisplayId();
     }
 
