@@ -51,11 +51,13 @@ public final class WindowTracingDataSource extends DataSource<WindowTracingDataS
 
     public static class Config {
         public final @WindowTraceLogLevel int mLogLevel;
-        public final boolean mLogOnFrame;
+        public final @WindowTraceLogFrequency int mLogFrequency;
 
-        private Config(@WindowTraceLogLevel int logLevel, boolean logOnFrame) {
+        private Config(
+                @WindowTraceLogLevel int logLevel,
+                @WindowTraceLogFrequency int logFrequency) {
             mLogLevel = logLevel;
-            mLogOnFrame = logOnFrame;
+            mLogFrequency = logFrequency;
         }
     }
 
@@ -68,7 +70,8 @@ public final class WindowTracingDataSource extends DataSource<WindowTracingDataS
         }
     }
 
-    private static final Config CONFIG_DEFAULT = new Config(WindowTraceLogLevel.TRIM, true);
+    private static final Config CONFIG_DEFAULT =
+            new Config(WindowTraceLogLevel.TRIM, WindowTraceLogFrequency.FRAME);
     private static final int CONFIG_VALUE_UNSPECIFIED = 0;
     private static final String TAG = "WindowTracingDataSource";
 
@@ -181,24 +184,27 @@ public final class WindowTracingDataSource extends DataSource<WindowTracingDataS
                 break;
         }
 
-        boolean logOnFrame;
+        @WindowTraceLogFrequency int logFrequency;
         switch(parsedLogFrequency) {
             case CONFIG_VALUE_UNSPECIFIED:
-                Log.w(TAG, "Unspecified log frequency. Defaulting to 'log on frame'");
-                logOnFrame = true;
+                Log.w(TAG, "Unspecified log frequency. Defaulting to 'frame'");
+                logFrequency = WindowTraceLogFrequency.FRAME;
                 break;
             case WindowManagerConfig.LOG_FREQUENCY_FRAME:
-                logOnFrame = true;
+                logFrequency = WindowTraceLogFrequency.FRAME;
                 break;
             case WindowManagerConfig.LOG_FREQUENCY_TRANSACTION:
-                logOnFrame = false;
+                logFrequency = WindowTraceLogFrequency.TRANSACTION;
+                break;
+            case WindowManagerConfig.LOG_FREQUENCY_SINGLE_DUMP:
+                logFrequency = WindowTraceLogFrequency.SINGLE_DUMP;
                 break;
             default:
-                Log.w(TAG, "Unrecognized log frequency. Defaulting to 'log on frame'");
-                logOnFrame = true;
+                Log.w(TAG, "Unrecognized log frequency. Defaulting to 'frame'");
+                logFrequency = WindowTraceLogFrequency.FRAME;
                 break;
         }
 
-        return new Config(logLevel, logOnFrame);
+        return new Config(logLevel, logFrequency);
     }
 }
