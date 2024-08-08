@@ -69,7 +69,7 @@ class ModesDialogViewModelTest : SysuiTestCase() {
                         .setName("Disabled by other")
                         .setEnabled(false, /* byUser= */ false)
                         .build(),
-                    TestModeBuilder.MANUAL_DND,
+                    TestModeBuilder.MANUAL_DND_ACTIVE,
                     TestModeBuilder()
                         .setName("Enabled")
                         .setEnabled(true)
@@ -91,7 +91,7 @@ class ModesDialogViewModelTest : SysuiTestCase() {
                 assertThat(this.enabled).isEqualTo(false)
             }
             with(tiles?.elementAt(1)!!) {
-                assertThat(this.text).isEqualTo("Manual DND")
+                assertThat(this.text).isEqualTo("Do Not Disturb")
                 assertThat(this.subtext).isEqualTo("On")
                 assertThat(this.enabled).isEqualTo(true)
             }

@@ -216,6 +216,9 @@ class FakeKeyguardRepository @Inject constructor() : KeyguardRepository {
 
     override fun setDreaming(isDreaming: Boolean) {
         _isDreaming.value = isDreaming
+        // Intentionally set both for testing, to avoid races with merge() in the interactor that
+        // would make testing difficult
+        _isDreamingWithOverlay.value = isDreaming
     }
 
     fun setDreamingWithOverlay(isDreaming: Boolean) {

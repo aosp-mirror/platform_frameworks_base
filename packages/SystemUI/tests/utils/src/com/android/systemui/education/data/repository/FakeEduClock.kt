@@ -19,8 +19,9 @@ package com.android.systemui.education.data.repository
 import java.time.Clock
 import java.time.Instant
 import java.time.ZoneId
+import kotlin.time.Duration
 
-class FakeEduClock(private val base: Instant) : Clock() {
+class FakeEduClock(private var base: Instant) : Clock() {
     private val zone: ZoneId = ZoneId.of("UTC")
 
     override fun instant(): Instant {
@@ -33,5 +34,9 @@ class FakeEduClock(private val base: Instant) : Clock() {
 
     override fun getZone(): ZoneId {
         return zone
+    }
+
+    fun offset(duration: Duration) {
+        base = base.plusSeconds(duration.inWholeSeconds)
     }
 }

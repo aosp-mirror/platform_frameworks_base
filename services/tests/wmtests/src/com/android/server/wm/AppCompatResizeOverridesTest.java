@@ -39,7 +39,7 @@ import java.util.function.Consumer;
 
 /**
  * Test class for {@link AppCompatResizeOverrides}.
- * <p>
+ * <p/>
  * Build/Install/Run:
  * atest WmTests:AppCompatResizeOverridesTest
  */

@@ -22,6 +22,7 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.ServiceConnection
+import android.graphics.Bitmap
 import com.android.settingslib.bluetooth.CachedBluetoothDevice
 import com.android.settingslib.bluetooth.devicesettings.ActionSwitchPreference
 import com.android.settingslib.bluetooth.devicesettings.ActionSwitchPreferenceState
@@ -34,6 +35,14 @@ import com.android.settingslib.bluetooth.devicesettings.DeviceSettingsConfig
 import com.android.settingslib.bluetooth.devicesettings.IDeviceSettingsConfigProviderService
 import com.android.settingslib.bluetooth.devicesettings.IDeviceSettingsListener
 import com.android.settingslib.bluetooth.devicesettings.IDeviceSettingsProviderService
+import com.android.settingslib.bluetooth.devicesettings.MultiTogglePreference
+import com.android.settingslib.bluetooth.devicesettings.MultiTogglePreferenceState
+import com.android.settingslib.bluetooth.devicesettings.ToggleInfo
+import com.android.settingslib.bluetooth.devicesettings.shared.model.DeviceSettingConfigItemModel
+import com.android.settingslib.bluetooth.devicesettings.shared.model.DeviceSettingConfigModel
+import com.android.settingslib.bluetooth.devicesettings.shared.model.DeviceSettingModel
+import com.android.settingslib.bluetooth.devicesettings.shared.model.DeviceSettingStateModel
+import com.android.settingslib.bluetooth.devicesettings.shared.model.ToggleModel
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.delay
@@ -148,7 +157,7 @@ class DeviceSettingRepositoryTest {
 
             val config = underTest.getDeviceSettingsConfig(cachedDevice)
 
-            assertThat(config).isSameInstanceAs(DEVICE_SETTING_CONFIG)
+            assertConfig(config!!, DEVICE_SETTING_CONFIG)
         }
     }
 
@@ -163,7 +172,7 @@ class DeviceSettingRepositoryTest {
                 )
                 .thenReturn("".toByteArray())
 
-            var config: DeviceSettingsConfig? = null
+            var config: DeviceSettingConfigModel? = null
             val job = launch { config = underTest.getDeviceSettingsConfig(cachedDevice) }
             delay(1000)
             verify(bluetoothAdapter)
@@ -185,7 +194,7 @@ class DeviceSettingRepositoryTest {
                 .thenReturn(BLUETOOTH_DEVICE_METADATA.toByteArray())
 
             job.join()
-            assertThat(config).isSameInstanceAs(DEVICE_SETTING_CONFIG)
+            assertConfig(config!!, DEVICE_SETTING_CONFIG)
         }
     }
 
@@ -202,7 +211,7 @@ class DeviceSettingRepositoryTest {
     }
 
     @Test
-    fun getDeviceSettingList_success() {
+    fun getDeviceSetting_actionSwitchPreference_success() {
         testScope.runTest {
             `when`(configService.getDeviceSettingsConfig(any())).thenReturn(DEVICE_SETTING_CONFIG)
             `when`(settingProviderService1.registerDeviceSettingsListener(any(), any())).then {
@@ -211,73 +220,7 @@ class DeviceSettingRepositoryTest {
                     .getArgument<IDeviceSettingsListener>(1)
                     .onDeviceSettingsChanged(listOf(DEVICE_SETTING_1))
             }
-            `when`(settingProviderService2.registerDeviceSettingsListener(any(), any())).then {
-                input ->
-                input
-                    .getArgument<IDeviceSettingsListener>(1)
-                    .onDeviceSettingsChanged(listOf(DEVICE_SETTING_2))
-            }
-            var settings: List<DeviceSetting>? = null
-
-            underTest
-                .getDeviceSettingList(cachedDevice)
-                .onEach { settings = it }
-                .launchIn(backgroundScope)
-            runCurrent()
-
-            assertThat(settings?.map { it.settingId })
-                .containsExactly(
-                    DeviceSettingId.DEVICE_SETTING_ID_HEADER,
-                    DeviceSettingId.DEVICE_SETTING_ID_ANC
-                )
-            assertThat(settings?.map { (it.preference as ActionSwitchPreference).title })
-                .containsExactly(
-                    "title1",
-                    "title2",
-                )
-        }
-    }
-
-    @Test
-    fun getDeviceSetting_oneServiceFailed_returnPartialResult() {
-        testScope.runTest {
-            `when`(configService.getDeviceSettingsConfig(any())).thenReturn(DEVICE_SETTING_CONFIG)
-            `when`(settingProviderService1.registerDeviceSettingsListener(any(), any())).then {
-                input ->
-                input
-                    .getArgument<IDeviceSettingsListener>(1)
-                    .onDeviceSettingsChanged(listOf(DEVICE_SETTING_1))
-            }
-            var settings: List<DeviceSetting>? = null
-
-            underTest
-                .getDeviceSettingList(cachedDevice)
-                .onEach { settings = it }
-                .launchIn(backgroundScope)
-            runCurrent()
-
-            assertThat(settings?.map { it.settingId })
-                .containsExactly(
-                    DeviceSettingId.DEVICE_SETTING_ID_HEADER,
-                )
-            assertThat(settings?.map { (it.preference as ActionSwitchPreference).title })
-                .containsExactly(
-                    "title1",
-                )
-        }
-    }
-
-    @Test
-    fun getDeviceSetting_success() {
-        testScope.runTest {
-            `when`(configService.getDeviceSettingsConfig(any())).thenReturn(DEVICE_SETTING_CONFIG)
-            `when`(settingProviderService1.registerDeviceSettingsListener(any(), any())).then {
-                input ->
-                input
-                    .getArgument<IDeviceSettingsListener>(1)
-                    .onDeviceSettingsChanged(listOf(DEVICE_SETTING_1))
-            }
-            var setting: DeviceSetting? = null
+            var setting: DeviceSettingModel? = null
 
             underTest
                 .getDeviceSetting(cachedDevice, DeviceSettingId.DEVICE_SETTING_ID_HEADER)
@@ -285,13 +228,55 @@ class DeviceSettingRepositoryTest {
                 .launchIn(backgroundScope)
             runCurrent()
 
-            assertThat(setting?.settingId).isEqualTo(DeviceSettingId.DEVICE_SETTING_ID_HEADER)
-            assertThat((setting?.preference as ActionSwitchPreference).title).isEqualTo("title1")
+            assertDeviceSetting(setting!!, DEVICE_SETTING_1)
         }
     }
 
     @Test
-    fun updateDeviceSetting_success() {
+    fun getDeviceSetting_multiTogglePreference_success() {
+        testScope.runTest {
+            `when`(configService.getDeviceSettingsConfig(any())).thenReturn(DEVICE_SETTING_CONFIG)
+            `when`(settingProviderService2.registerDeviceSettingsListener(any(), any())).then {
+                input ->
+                input
+                    .getArgument<IDeviceSettingsListener>(1)
+                    .onDeviceSettingsChanged(listOf(DEVICE_SETTING_2))
+            }
+            var setting: DeviceSettingModel? = null
+
+            underTest
+                .getDeviceSetting(cachedDevice, DeviceSettingId.DEVICE_SETTING_ID_ANC)
+                .onEach { setting = it }
+                .launchIn(backgroundScope)
+            runCurrent()
+
+            assertDeviceSetting(setting!!, DEVICE_SETTING_2)
+        }
+    }
+
+    @Test
+    fun getDeviceSetting_noConfig_returnNull() {
+        testScope.runTest {
+            `when`(settingProviderService1.registerDeviceSettingsListener(any(), any())).then {
+                input ->
+                input
+                    .getArgument<IDeviceSettingsListener>(1)
+                    .onDeviceSettingsChanged(listOf(DEVICE_SETTING_1))
+            }
+            var setting: DeviceSettingModel? = null
+
+            underTest
+                .getDeviceSetting(cachedDevice, DeviceSettingId.DEVICE_SETTING_ID_HEADER)
+                .onEach { setting = it }
+                .launchIn(backgroundScope)
+            runCurrent()
+
+            assertThat(setting).isNull()
+        }
+    }
+
+    @Test
+    fun updateDeviceSettingState_switchState_success() {
         testScope.runTest {
             `when`(configService.getDeviceSettingsConfig(any())).thenReturn(DEVICE_SETTING_CONFIG)
             `when`(settingProviderService1.registerDeviceSettingsListener(any(), any())).then {
@@ -300,12 +285,15 @@ class DeviceSettingRepositoryTest {
                     .getArgument<IDeviceSettingsListener>(1)
                     .onDeviceSettingsChanged(listOf(DEVICE_SETTING_1))
             }
+            var setting: DeviceSettingModel? = null
 
-            underTest.updateDeviceSettingState(
-                cachedDevice,
-                DeviceSettingId.DEVICE_SETTING_ID_HEADER,
-                ActionSwitchPreferenceState.Builder().build()
-            )
+            underTest
+                .getDeviceSetting(cachedDevice, DeviceSettingId.DEVICE_SETTING_ID_HEADER)
+                .onEach { setting = it }
+                .launchIn(backgroundScope)
+            runCurrent()
+            val updateFunc = (setting as DeviceSettingModel.ActionSwitchPreference).updateState!!
+            updateFunc(DeviceSettingStateModel.ActionSwitchPreferenceState(false))
             runCurrent()
 
             verify(settingProviderService1)
@@ -313,10 +301,105 @@ class DeviceSettingRepositoryTest {
                     DEVICE_INFO,
                     DeviceSettingState.Builder()
                         .setSettingId(DeviceSettingId.DEVICE_SETTING_ID_HEADER)
-                        .setPreferenceState(ActionSwitchPreferenceState.Builder().build())
+                        .setPreferenceState(
+                            ActionSwitchPreferenceState.Builder().setChecked(false).build()
+                        )
                         .build()
                 )
         }
+    }
+
+    @Test
+    fun updateDeviceSettingState_multiToggleState_success() {
+        testScope.runTest {
+            `when`(configService.getDeviceSettingsConfig(any())).thenReturn(DEVICE_SETTING_CONFIG)
+            `when`(settingProviderService2.registerDeviceSettingsListener(any(), any())).then {
+                input ->
+                input
+                    .getArgument<IDeviceSettingsListener>(1)
+                    .onDeviceSettingsChanged(listOf(DEVICE_SETTING_2))
+            }
+            var setting: DeviceSettingModel? = null
+
+            underTest
+                .getDeviceSetting(cachedDevice, DeviceSettingId.DEVICE_SETTING_ID_ANC)
+                .onEach { setting = it }
+                .launchIn(backgroundScope)
+            runCurrent()
+            val updateFunc = (setting as DeviceSettingModel.MultiTogglePreference).updateState
+            updateFunc(DeviceSettingStateModel.MultiTogglePreferenceState(2))
+            runCurrent()
+
+            verify(settingProviderService2)
+                .updateDeviceSettings(
+                    DEVICE_INFO,
+                    DeviceSettingState.Builder()
+                        .setSettingId(DeviceSettingId.DEVICE_SETTING_ID_ANC)
+                        .setPreferenceState(
+                            MultiTogglePreferenceState.Builder().setState(2).build()
+                        )
+                        .build()
+                )
+        }
+    }
+
+    private fun assertDeviceSetting(actual: DeviceSettingModel, serviceResponse: DeviceSetting) {
+        assertThat(actual.id).isEqualTo(serviceResponse.settingId)
+        when (actual) {
+            is DeviceSettingModel.ActionSwitchPreference -> {
+                assertThat(serviceResponse.preference)
+                    .isInstanceOf(ActionSwitchPreference::class.java)
+                val pref = serviceResponse.preference as ActionSwitchPreference
+                assertThat(actual.title).isEqualTo(pref.title)
+                assertThat(actual.summary).isEqualTo(pref.summary)
+                assertThat(actual.icon).isEqualTo(pref.icon)
+                assertThat(actual.isAllowedChangingState).isEqualTo(pref.isAllowedChangingState)
+                if (pref.hasSwitch()) {
+                    assertThat(actual.switchState!!.checked).isEqualTo(pref.checked)
+                } else {
+                    assertThat(actual.switchState).isNull()
+                }
+            }
+            is DeviceSettingModel.MultiTogglePreference -> {
+                assertThat(serviceResponse.preference)
+                    .isInstanceOf(MultiTogglePreference::class.java)
+                val pref = serviceResponse.preference as MultiTogglePreference
+                assertThat(actual.title).isEqualTo(pref.title)
+                assertThat(actual.isAllowedChangingState).isEqualTo(pref.isAllowedChangingState)
+                assertThat(actual.toggles.size).isEqualTo(pref.toggleInfos.size)
+                for (i in 0..<actual.toggles.size) {
+                    assertToggle(actual.toggles[i], pref.toggleInfos[i])
+                }
+            }
+            else -> {}
+        }
+    }
+
+    private fun assertToggle(actual: ToggleModel, serviceResponse: ToggleInfo) {
+        assertThat(actual.label).isEqualTo(serviceResponse.label)
+        assertThat(actual.icon).isEqualTo(serviceResponse.icon)
+    }
+
+    private fun assertConfig(
+        actual: DeviceSettingConfigModel,
+        serviceResponse: DeviceSettingsConfig
+    ) {
+        assertThat(actual.mainItems.size).isEqualTo(serviceResponse.mainContentItems.size)
+        for (i in 0..<actual.mainItems.size) {
+            assertConfigItem(actual.mainItems[i], serviceResponse.mainContentItems[i])
+        }
+        assertThat(actual.moreSettingsItems.size).isEqualTo(serviceResponse.moreSettingsItems.size)
+        for (i in 0..<actual.moreSettingsItems.size) {
+            assertConfigItem(actual.moreSettingsItems[i], serviceResponse.moreSettingsItems[i])
+        }
+        assertThat(actual.moreSettingsPageFooter).isEqualTo(serviceResponse.moreSettingsFooter)
+    }
+
+    private fun assertConfigItem(
+        actual: DeviceSettingConfigItemModel,
+        serviceResponse: DeviceSettingItem
+    ) {
+        assertThat(actual.settingId).isEqualTo(serviceResponse.settingId)
     }
 
     private companion object {
@@ -377,10 +460,21 @@ class DeviceSettingRepositoryTest {
             DeviceSetting.Builder()
                 .setSettingId(DeviceSettingId.DEVICE_SETTING_ID_ANC)
                 .setPreference(
-                    ActionSwitchPreference.Builder()
-                        .setTitle("title2")
-                        .setHasSwitch(true)
-                        .setAllowedChangingState(true)
+                    MultiTogglePreference.Builder()
+                        .setTitle("title1")
+                        .setAllowChangingState(true)
+                        .addToggleInfo(
+                            ToggleInfo.Builder()
+                                .setLabel("label1")
+                                .setIcon(Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888))
+                                .build()
+                        )
+                        .addToggleInfo(
+                            ToggleInfo.Builder()
+                                .setLabel("label2")
+                                .setIcon(Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888))
+                                .build()
+                        )
                         .build()
                 )
                 .build()

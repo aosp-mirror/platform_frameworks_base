@@ -22,6 +22,7 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import static android.app.WindowConfiguration.WINDOW_CONFIG_BOUNDS;
 import static android.view.Display.DEFAULT_DISPLAY;
+import static android.view.WindowManager.TRANSIT_CLOSE_PREPARE_BACK_NAVIGATION;
 import static android.window.TaskFragmentOperation.OP_TYPE_CLEAR_ADJACENT_TASK_FRAGMENTS;
 import static android.window.TaskFragmentOperation.OP_TYPE_CREATE_OR_MOVE_TASK_FRAGMENT_DECOR_SURFACE;
 import static android.window.TaskFragmentOperation.OP_TYPE_CREATE_TASK_FRAGMENT;
@@ -59,6 +60,7 @@ import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP
 import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_REMOVE_TASK;
 import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_REORDER;
 import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_REPARENT;
+import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_RESTORE_BACK_NAVIGATION;
 import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_RESTORE_TRANSIENT_ORDER;
 import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_SET_ADJACENT_ROOTS;
 import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_SET_ALWAYS_ON_TOP;
@@ -434,6 +436,11 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
             // in its own transition.
             // TODO(b/232042367): explicitly ensure the #startActivity and this transaction are in
             // the same transition instead of relying on this possible racing condition.
+            return;
+        }
+        if (transition.mType == TRANSIT_CLOSE_PREPARE_BACK_NAVIGATION
+                && mService.mBackNavigationController.restoreBackNavigationSetTransitionReady(
+                        transition)) {
             return;
         }
 
@@ -1384,6 +1391,12 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                     break;
                 }
                 task.setTrimmableFromRecents(hop.isTrimmableFromRecents());
+                break;
+            }
+            case HIERARCHY_OP_TYPE_RESTORE_BACK_NAVIGATION: {
+                if (mService.mBackNavigationController.restoreBackNavigation()) {
+                    effects |= TRANSACT_EFFECTS_LIFECYCLE;
+                }
                 break;
             }
         }

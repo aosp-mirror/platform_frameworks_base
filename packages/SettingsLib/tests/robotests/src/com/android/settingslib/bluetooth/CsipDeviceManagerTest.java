@@ -145,18 +145,18 @@ public class CsipDeviceManagerTest {
         profiles.add(mHfpProfile);
         profiles.add(mA2dpProfile);
         profiles.add(mLeAudioProfile);
-        when(mCachedDevice1.getConnectableProfiles()).thenReturn(profiles);
+        when(mCachedDevice1.getUiAccessibleProfiles()).thenReturn(profiles);
         when(mCachedDevice1.isConnected()).thenReturn(true);
 
         profiles.clear();
         profiles.add(mLeAudioProfile);
-        when(mCachedDevice2.getConnectableProfiles()).thenReturn(profiles);
+        when(mCachedDevice2.getUiAccessibleProfiles()).thenReturn(profiles);
         when(mCachedDevice2.isConnected()).thenReturn(true);
 
         profiles.clear();
         profiles.add(mHfpProfile);
         profiles.add(mA2dpProfile);
-        when(mCachedDevice3.getConnectableProfiles()).thenReturn(profiles);
+        when(mCachedDevice3.getUiAccessibleProfiles()).thenReturn(profiles);
         when(mCachedDevice3.isConnected()).thenReturn(true);
     }
 
@@ -253,7 +253,7 @@ public class CsipDeviceManagerTest {
         when(mDevice2.isConnected()).thenReturn(false);
         List<LocalBluetoothProfile> profiles = new ArrayList<LocalBluetoothProfile>();
         profiles.add(mLeAudioProfile);
-        when(mCachedDevice1.getConnectableProfiles()).thenReturn(profiles);
+        when(mCachedDevice1.getUiAccessibleProfiles()).thenReturn(profiles);
         CachedBluetoothDevice expectedDevice = mCachedDevice1;
 
         assertThat(

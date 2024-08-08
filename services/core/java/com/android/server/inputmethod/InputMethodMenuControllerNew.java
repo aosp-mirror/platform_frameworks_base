@@ -21,7 +21,7 @@ import static android.Manifest.permission.HIDE_OVERLAY_WINDOWS;
 import static android.Manifest.permission.INTERACT_ACROSS_USERS;
 
 import static com.android.server.inputmethod.InputMethodManagerService.DEBUG;
-import static com.android.server.inputmethod.InputMethodUtils.NOT_A_SUBTYPE_ID;
+import static com.android.server.inputmethod.InputMethodUtils.NOT_A_SUBTYPE_INDEX;
 
 import android.annotation.IntRange;
 import android.annotation.NonNull;
@@ -107,7 +107,7 @@ final class InputMethodMenuControllerNew {
             if (which != selectedIndex) {
                 final var item = items.get(which);
                 InputMethodManagerInternal.get()
-                        .switchToInputMethod(item.mImi.getId(), item.mSubtypeId, userId);
+                        .switchToInputMethod(item.mImi.getId(), item.mSubtypeIndex, userId);
             }
             hide(displayId, userId);
         };
@@ -225,10 +225,10 @@ final class InputMethodMenuControllerNew {
 
         /**
          * The index of the subtype in the input method's array of subtypes,
-         * or {@link InputMethodUtils#NOT_A_SUBTYPE_ID} if this item doesn't have a subtype.
+         * or {@link InputMethodUtils#NOT_A_SUBTYPE_INDEX} if this item doesn't have a subtype.
          */
-        @IntRange(from = NOT_A_SUBTYPE_ID)
-        private final int mSubtypeId;
+        @IntRange(from = NOT_A_SUBTYPE_INDEX)
+        private final int mSubtypeIndex;
 
         /** Whether this item has a group header (only the first item of each input method). */
         private final boolean mHasHeader;
@@ -240,12 +240,13 @@ final class InputMethodMenuControllerNew {
         private final boolean mHasDivider;
 
         MenuItem(@NonNull CharSequence imeName, @Nullable CharSequence subtypeName,
-                @NonNull InputMethodInfo imi, @IntRange(from = NOT_A_SUBTYPE_ID) int subtypeId,
-                boolean hasHeader, boolean hasDivider) {
+                @NonNull InputMethodInfo imi,
+                @IntRange(from = NOT_A_SUBTYPE_INDEX) int subtypeIndex, boolean hasHeader,
+                boolean hasDivider) {
             mImeName = imeName;
             mSubtypeName = subtypeName;
             mImi = imi;
-            mSubtypeId = subtypeId;
+            mSubtypeIndex = subtypeIndex;
             mHasHeader = hasHeader;
             mHasDivider = hasDivider;
         }
@@ -255,7 +256,7 @@ final class InputMethodMenuControllerNew {
             return "MenuItem{"
                     + "mImeName=" + mImeName
                     + " mSubtypeName=" + mSubtypeName
-                    + " mSubtypeId=" + mSubtypeId
+                    + " mSubtypeIndex=" + mSubtypeIndex
                     + " mHasHeader=" + mHasHeader
                     + " mHasDivider=" + mHasDivider
                     + "}";

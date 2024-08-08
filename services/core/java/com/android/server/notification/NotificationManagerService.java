@@ -2963,8 +2963,9 @@ public class NotificationManagerService extends SystemService {
                     };
                     cancelGroupChildrenLocked(userId, pkg, Binder.getCallingUid(),
                             Binder.getCallingPid(), null,
-                            false, childrenFlagChecker, groupKey,
-                            REASON_APP_CANCEL, SystemClock.elapsedRealtime());
+                            false, childrenFlagChecker,
+                            NotificationManagerService::wasChildOfForceRegroupedGroupChecker,
+                            groupKey, REASON_APP_CANCEL, SystemClock.elapsedRealtime());
                 }
             }
         });
@@ -8667,8 +8668,8 @@ public class NotificationManagerService extends SystemService {
                     if (r.getNotification().isGroupSummary()) {
                         cancelGroupChildrenLocked(mUserId, mPkg, mCallingUid, mCallingPid,
                                 listenerName, mSendDelete, childrenFlagChecker,
-                                r.getNotification().getGroup(), mReason,
-                                mCancellationElapsedTimeMs);
+                                NotificationManagerService::isChildOfCurrentGroupChecker,
+                                r.getGroupKey(), mReason, mCancellationElapsedTimeMs);
                     }
                     mAttentionHelper.updateLightsLocked();
                     if (mShortcutHelper != null) {
@@ -9390,8 +9391,8 @@ public class NotificationManagerService extends SystemService {
         if (oldIsSummary && (!isSummary || !oldGroup.equals(group))) {
             cancelGroupChildrenLocked(old.getUserId(), old.getSbn().getPackageName(), callingUid,
                     callingPid, null, false /* sendDelete */, childrenFlagChecker,
-                    old.getNotification().getGroup(), REASON_APP_CANCEL,
-                    SystemClock.elapsedRealtime());
+                    NotificationManagerService::isChildOfCurrentGroupChecker, old.getGroupKey(),
+                    REASON_APP_CANCEL, SystemClock.elapsedRealtime());
         }
     }
 
@@ -10372,13 +10373,45 @@ public class NotificationManagerService extends SystemService {
         public boolean apply(int flags);
     }
 
-    private static boolean isChildOfGroup(final NotificationRecord childRecord, int userId,
+    @FunctionalInterface
+    private interface GroupChildChecker {
+        // Returns true if the childRecord is a child of the group defined
+        // by the rest of the parameters
+        boolean apply(NotificationRecord childRecord, int userId, String pkg, String groupKey);
+    }
+
+    /**
+     * Checks that the notification is currently a child of the group
+     * @param childRecord the notification to check
+     * @param userId userId of the group
+     * @param pkg package name of the group
+     * @param groupKey group key for a current group
+     * @return true if the childRecord is currently a child of the group
+     */
+    private static boolean isChildOfCurrentGroupChecker(NotificationRecord childRecord, int userId,
             String pkg, String groupKey) {
         return (childRecord.getUser().getIdentifier() == userId
             && childRecord.getSbn().getPackageName().equals(pkg)
             && childRecord.getSbn().isGroup()
             && !childRecord.getNotification().isGroupSummary()
-            && TextUtils.equals(groupKey, childRecord.getNotification().getGroup()));
+            && TextUtils.equals(groupKey, childRecord.getGroupKey()));
+    }
+
+    /**
+     * Checks that the notification was originally a child of the group
+     * @param childRecord the notification to check
+     * @param userId userId of the group
+     * @param pkg package name of the group
+     * @param groupKey original/initial group key for a group that was force grouped
+     * @return true if the childRecord was originally a child of the group
+     */
+    private static boolean wasChildOfForceRegroupedGroupChecker(NotificationRecord childRecord,
+            int userId, String pkg, String groupKey) {
+        return (childRecord.getUser().getIdentifier() == userId
+            && childRecord.getSbn().getPackageName().equals(pkg)
+            && childRecord.getSbn().isGroup()
+            && !childRecord.getNotification().isGroupSummary()
+            && TextUtils.equals(groupKey, childRecord.getOriginalGroupKey()));
     }
 
     @GuardedBy("mNotificationLock")
@@ -10539,18 +10572,19 @@ public class NotificationManagerService extends SystemService {
     // Warning: The caller is responsible for invoking updateLightsLocked().
     @GuardedBy("mNotificationLock")
     private void cancelGroupChildrenLocked(int userId, String pkg, int callingUid, int callingPid,
-            String listenerName, boolean sendDelete, FlagChecker flagChecker, String groupKey,
-            int reason, @ElapsedRealtimeLong long cancellationElapsedTimeMs) {
+            String listenerName, boolean sendDelete, FlagChecker flagChecker,
+            GroupChildChecker groupChildChecker, String groupKey, int reason,
+            @ElapsedRealtimeLong long cancellationElapsedTimeMs) {
         if (pkg == null) {
             if (DBG) Slog.e(TAG, "No package for group summary");
             return;
         }
 
         cancelGroupChildrenByListLocked(mNotificationList, userId, pkg, callingUid, callingPid,
-                listenerName, sendDelete, true, flagChecker, groupKey,
+                listenerName, sendDelete, true, flagChecker, groupChildChecker, groupKey,
                 reason, cancellationElapsedTimeMs);
         cancelGroupChildrenByListLocked(mEnqueuedNotifications, userId, pkg, callingUid, callingPid,
-                listenerName, sendDelete, false, flagChecker, groupKey,
+                listenerName, sendDelete, false, flagChecker, groupChildChecker, groupKey,
                 reason, cancellationElapsedTimeMs);
     }
 
@@ -10558,12 +10592,13 @@ public class NotificationManagerService extends SystemService {
     private void cancelGroupChildrenByListLocked(ArrayList<NotificationRecord> notificationList,
             int userId, String pkg, int callingUid, int callingPid,
             String listenerName, boolean sendDelete, boolean wasPosted, FlagChecker flagChecker,
-            String groupKey, int reason, @ElapsedRealtimeLong long cancellationElapsedTimeMs) {
+            GroupChildChecker grouChildChecker, String groupKey, int reason,
+            @ElapsedRealtimeLong long cancellationElapsedTimeMs) {
         final int childReason = REASON_GROUP_SUMMARY_CANCELED;
         for (int i = notificationList.size() - 1; i >= 0; i--) {
             final NotificationRecord childR = notificationList.get(i);
             final StatusBarNotification childSbn = childR.getSbn();
-            if (isChildOfGroup(childR, userId, pkg, groupKey)
+            if (grouChildChecker.apply(childR, userId, pkg, groupKey)
                 && (flagChecker == null || flagChecker.apply(childR.getFlags()))
                 && (!childR.getChannel().isImportantConversation() || reason != REASON_CANCEL)) {
                 EventLogTags.writeNotificationCancel(callingUid, callingPid, pkg, childSbn.getId(),

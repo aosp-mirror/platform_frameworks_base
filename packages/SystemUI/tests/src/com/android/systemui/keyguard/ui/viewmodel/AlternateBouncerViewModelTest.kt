@@ -102,34 +102,6 @@ class AlternateBouncerViewModelTest : SysuiTestCase() {
         }
 
     @Test
-    fun forcePluginOpen() =
-        testScope.runTest {
-            val forcePluginOpen by collectLastValue(underTest.forcePluginOpen)
-
-            transitionRepository.sendTransitionSteps(
-                listOf(
-                    stepToAlternateBouncer(0f, TransitionState.STARTED),
-                    stepToAlternateBouncer(.4f),
-                    stepToAlternateBouncer(.6f),
-                    stepToAlternateBouncer(1f),
-                ),
-                testScope,
-            )
-            assertThat(forcePluginOpen).isTrue()
-
-            transitionRepository.sendTransitionSteps(
-                listOf(
-                    stepFromAlternateBouncer(0f, TransitionState.STARTED),
-                    stepFromAlternateBouncer(.3f),
-                    stepFromAlternateBouncer(.6f),
-                    stepFromAlternateBouncer(1f),
-                ),
-                testScope,
-            )
-            assertThat(forcePluginOpen).isFalse()
-        }
-
-    @Test
     fun registerForDismissGestures() =
         testScope.runTest {
             val registerForDismissGestures by collectLastValue(underTest.registerForDismissGestures)

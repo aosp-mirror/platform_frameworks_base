@@ -72,6 +72,7 @@ public class TaskSnapshot implements Parcelable {
     int mAppearance;
     private final boolean mIsTranslucent;
     private final boolean mHasImeSurface;
+    private final int mUiMode;
     // Must be one of the named color spaces, otherwise, always use SRGB color space.
     private final ColorSpace mColorSpace;
     private int mInternalReferences;
@@ -96,7 +97,7 @@ public class TaskSnapshot implements Parcelable {
             Rect contentInsets, Rect letterboxInsets, boolean isLowResolution,
             boolean isRealSnapshot, int windowingMode,
             @WindowInsetsController.Appearance int appearance, boolean isTranslucent,
-            boolean hasImeSurface) {
+            boolean hasImeSurface, int uiMode) {
         mId = id;
         mCaptureTime = captureTime;
         mTopActivityComponent = topActivityComponent;
@@ -114,6 +115,7 @@ public class TaskSnapshot implements Parcelable {
         mAppearance = appearance;
         mIsTranslucent = isTranslucent;
         mHasImeSurface = hasImeSurface;
+        mUiMode = uiMode;
     }
 
     private TaskSnapshot(Parcel source) {
@@ -136,6 +138,7 @@ public class TaskSnapshot implements Parcelable {
         mAppearance = source.readInt();
         mIsTranslucent = source.readBoolean();
         mHasImeSurface = source.readBoolean();
+        mUiMode = source.readInt();
     }
 
     /**
@@ -273,6 +276,13 @@ public class TaskSnapshot implements Parcelable {
         return mAppearance;
     }
 
+    /**
+     * @return The uiMode the screenshot was taken in.
+     */
+    public int getUiMode() {
+        return mUiMode;
+    }
+
     @Override
     public int describeContents() {
         return 0;
@@ -295,6 +305,7 @@ public class TaskSnapshot implements Parcelable {
         dest.writeInt(mAppearance);
         dest.writeBoolean(mIsTranslucent);
         dest.writeBoolean(mHasImeSurface);
+        dest.writeInt(mUiMode);
     }
 
     @Override
@@ -318,7 +329,8 @@ public class TaskSnapshot implements Parcelable {
                 + " mAppearance=" + mAppearance
                 + " mIsTranslucent=" + mIsTranslucent
                 + " mHasImeSurface=" + mHasImeSurface
-                + " mInternalReferences=" + mInternalReferences;
+                + " mInternalReferences=" + mInternalReferences
+                + " mUiMode=" + Integer.toHexString(mUiMode);
     }
 
     /**
@@ -370,6 +382,7 @@ public class TaskSnapshot implements Parcelable {
         private boolean mIsTranslucent;
         private boolean mHasImeSurface;
         private int mPixelFormat;
+        private int mUiMode;
 
         public Builder setId(long id) {
             mId = id;
@@ -452,6 +465,14 @@ public class TaskSnapshot implements Parcelable {
             return this;
         }
 
+        /**
+         * Sets the original uiMode while capture
+         */
+        public Builder setUiMode(int uiMode) {
+            mUiMode = uiMode;
+            return this;
+        }
+
         public int getPixelFormat() {
             return mPixelFormat;
         }
@@ -481,7 +502,8 @@ public class TaskSnapshot implements Parcelable {
                     mWindowingMode,
                     mAppearance,
                     mIsTranslucent,
-                    mHasImeSurface);
+                    mHasImeSurface,
+                    mUiMode);
 
         }
     }

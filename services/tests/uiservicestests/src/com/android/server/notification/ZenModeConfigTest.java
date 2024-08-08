@@ -31,6 +31,8 @@ import static android.service.notification.Condition.SOURCE_USER_ACTION;
 import static android.service.notification.Condition.STATE_FALSE;
 import static android.service.notification.Condition.STATE_TRUE;
 import static android.service.notification.NotificationListenerService.SUPPRESSED_EFFECT_SCREEN_ON;
+import static android.service.notification.ZenModeConfig.XML_VERSION_MODES_API;
+import static android.service.notification.ZenModeConfig.ZEN_TAG;
 import static android.service.notification.ZenPolicy.CONVERSATION_SENDERS_IMPORTANT;
 import static android.service.notification.ZenPolicy.CONVERSATION_SENDERS_NONE;
 import static android.service.notification.ZenPolicy.PEOPLE_TYPE_ANYONE;
@@ -283,8 +285,8 @@ public class ZenModeConfigTest extends UiServiceTestCase {
         // the default value from the zen mode config.
         Policy policy = config.toNotificationPolicy(zenPolicy);
         assertEquals(Flags.modesUi()
-                ? config.manualRule.zenPolicy.getPriorityChannelsAllowed() == STATE_ALLOW
-                : config.isAllowPriorityChannels(),
+                        ? config.manualRule.zenPolicy.getPriorityChannelsAllowed() == STATE_ALLOW
+                        : config.isAllowPriorityChannels(),
                 policy.allowPriorityChannels());
     }
 
@@ -991,6 +993,58 @@ public class ZenModeConfigTest extends UiServiceTestCase {
     }
 
     @Test
+    @EnableFlags(Flags.FLAG_MODES_UI)
+    public void testConfigXml_manualRule_upgradeWhenExisting() throws Exception {
+        // prior to modes_ui, it's possible to have a non-null manual rule that doesn't have much
+        // data on it because it's meant to indicate that the manual rule is on by merely existing.
+        ZenModeConfig config = new ZenModeConfig();
+        config.manualRule = new ZenModeConfig.ZenRule();
+        config.manualRule.enabled = true;
+        config.manualRule.pkg = "android";
+        config.manualRule.zenMode = ZEN_MODE_IMPORTANT_INTERRUPTIONS;
+        config.manualRule.conditionId = ZenModeConfig.toTimeCondition(mContext, 200, mUserId).id;
+        config.manualRule.enabler = "test";
+
+        // write out entire config xml
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        writeConfigXml(config, XML_VERSION_MODES_API, /* forBackup= */ false, baos);
+        ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
+        ZenModeConfig fromXml = readConfigXml(bais);
+
+        // The result should have a manual rule; it should have a non-null ZenPolicy and a condition
+        // whose state is true. The conditionId and enabler data should also be preserved.
+        assertThat(fromXml.manualRule).isNotNull();
+        assertThat(fromXml.manualRule.zenPolicy).isNotNull();
+        assertThat(fromXml.manualRule.condition).isNotNull();
+        assertThat(fromXml.manualRule.condition.state).isEqualTo(STATE_TRUE);
+        assertThat(fromXml.manualRule.conditionId).isEqualTo(config.manualRule.conditionId);
+        assertThat(fromXml.manualRule.enabler).isEqualTo("test");
+        assertThat(fromXml.isManualActive()).isTrue();
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_MODES_UI)
+    public void testConfigXml_manualRule_doesNotTurnOnIfNotUpgrade() throws Exception {
+        // confirm that if the manual rule is already properly set up for modes_ui, it does not get
+        // turned on (set to condition with STATE_TRUE) when reading xml.
+
+        // getMutedAllConfig sets up the manual rule with a policy muting everything
+        ZenModeConfig config = getMutedAllConfig();
+        config.manualRule.condition = new Condition(Uri.EMPTY, "", STATE_FALSE, SOURCE_USER_ACTION);
+        assertThat(config.isManualActive()).isFalse();
+
+        // write out entire config xml
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        writeConfigXml(config, XML_VERSION_MODES_API, /* forBackup= */ false, baos);
+        ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
+        ZenModeConfig fromXml = readConfigXml(bais);
+
+        // The result should have a manual rule; it should not be changed from the previous rule.
+        assertThat(fromXml.manualRule).isEqualTo(config.manualRule);
+        assertThat(fromXml.isManualActive()).isFalse();
+    }
+
+    @Test
     public void testGetDescription_off() {
         ZenModeConfig config = new ZenModeConfig();
         if (!modesUi()) {
@@ -1237,5 +1291,26 @@ public class ZenModeConfigTest extends UiServiceTestCase {
         parser.setInput(new BufferedInputStream(is), null);
         parser.nextTag();
         return ZenModeConfig.readZenPolicyXml(parser);
+    }
+
+    private void writeConfigXml(ZenModeConfig config, Integer version, boolean forBackup,
+            ByteArrayOutputStream os) throws IOException {
+        String tag = ZEN_TAG;
+
+        TypedXmlSerializer out = Xml.newFastSerializer();
+        out.setOutput(new BufferedOutputStream(os), "utf-8");
+        out.startDocument(null, true);
+        out.startTag(null, tag);
+        config.writeXml(out, version, forBackup);
+        out.endTag(null, tag);
+        out.endDocument();
+    }
+
+    private ZenModeConfig readConfigXml(ByteArrayInputStream is)
+            throws XmlPullParserException, IOException {
+        TypedXmlPullParser parser = Xml.newFastPullParser();
+        parser.setInput(new BufferedInputStream(is), null);
+        parser.nextTag();
+        return ZenModeConfig.readXml(parser);
     }
 }

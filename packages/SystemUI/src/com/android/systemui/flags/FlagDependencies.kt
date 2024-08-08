@@ -34,8 +34,6 @@ import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.keyguard.KeyguardBottomAreaRefactor
 import com.android.systemui.keyguard.MigrateClocksToBlueprint
 import com.android.systemui.keyguard.shared.ComposeLockscreen
-import com.android.systemui.qs.flags.NewQsUI
-import com.android.systemui.qs.flags.QSComposeFragment
 import com.android.systemui.scene.shared.flag.SceneContainerFlag
 import com.android.systemui.shade.shared.flag.DualShade
 import com.android.systemui.statusbar.notification.collection.SortBySectionTimeFlag
@@ -60,7 +58,7 @@ class FlagDependencies @Inject constructor(featureFlags: FeatureFlagsClassic, ha
         // Internal notification frontend dependencies
         NotificationAvalancheSuppression.token dependsOn VisualInterruptionRefactor.token
         PriorityPeopleSection.token dependsOn SortBySectionTimeFlag.token
-        NotificationMinimalismPrototype.token dependsOn NotificationsHeadsUpRefactor.token
+        NotificationMinimalismPrototype.token dependsOn NotificationThrottleHun.token
         NotificationsHeadsUpRefactor.token dependsOn NotificationThrottleHun.token
 
         // SceneContainer dependencies
@@ -75,9 +73,6 @@ class FlagDependencies @Inject constructor(featureFlags: FeatureFlagsClassic, ha
 
         // DualShade dependencies
         DualShade.token dependsOn SceneContainerFlag.getMainAconfigFlag()
-
-        // QS Fragment using Compose dependencies
-        QSComposeFragment.token dependsOn NewQsUI.token
 
         // Status bar chip dependencies
         statusBarCallChipNotificationIconToken dependsOn statusBarUseReposForCallChipToken
