@@ -291,7 +291,8 @@ class DesktopModeLoggerTransitionObserver(
         postTransitionVisibleFreeformTasks: SparseArray<TaskInfo>
     ) {
         postTransitionVisibleFreeformTasks.forEach { taskId, taskInfo ->
-            val currentTaskUpdate = buildTaskUpdateForTask(taskInfo)
+            val currentTaskUpdate = buildTaskUpdateForTask(taskInfo,
+                postTransitionVisibleFreeformTasks.size())
             val previousTaskInfo = preTransitionVisibleFreeformTasks[taskId]
             when {
                 // new tasks added
@@ -305,15 +306,17 @@ class DesktopModeLoggerTransitionObserver(
                 }
                 // old tasks that were resized or repositioned
                 // TODO(b/347935387): Log changes only once they are stable.
-                buildTaskUpdateForTask(previousTaskInfo) != currentTaskUpdate ->
-                    desktopModeEventLogger.logTaskInfoChanged(sessionId, currentTaskUpdate)
+                buildTaskUpdateForTask(previousTaskInfo, postTransitionVisibleFreeformTasks.size())
+                        != currentTaskUpdate ->
+                            desktopModeEventLogger.logTaskInfoChanged(sessionId, currentTaskUpdate)
             }
         }
 
         // find old tasks that were removed
         preTransitionVisibleFreeformTasks.forEach { taskId, taskInfo ->
             if (!postTransitionVisibleFreeformTasks.containsKey(taskId)) {
-                desktopModeEventLogger.logTaskRemoved(sessionId, buildTaskUpdateForTask(taskInfo))
+                desktopModeEventLogger.logTaskRemoved(sessionId,
+                    buildTaskUpdateForTask(taskInfo, postTransitionVisibleFreeformTasks.size()))
                 Trace.setCounter(
                     Trace.TRACE_TAG_WINDOW_MANAGER,
                     VISIBLE_TASKS_COUNTER_NAME,
@@ -323,7 +326,7 @@ class DesktopModeLoggerTransitionObserver(
         }
     }
 
-    private fun buildTaskUpdateForTask(taskInfo: TaskInfo): TaskUpdate {
+    private fun buildTaskUpdateForTask(taskInfo: TaskInfo, visibleTasks: Int): TaskUpdate {
         val screenBounds = taskInfo.configuration.windowConfiguration.bounds
         val positionInParent = taskInfo.positionInParent
         return TaskUpdate(
@@ -333,6 +336,7 @@ class DesktopModeLoggerTransitionObserver(
             taskWidth = screenBounds.width(),
             taskX = positionInParent.x,
             taskY = positionInParent.y,
+            visibleTaskCount = visibleTasks,
         )
     }
 
