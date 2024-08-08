@@ -24,6 +24,7 @@ import android.content.res.Resources
 import android.net.Uri
 import android.os.Handler
 import android.os.UserHandle
+import android.util.Log
 import com.android.internal.logging.UiEventLogger
 import com.android.systemui.animation.DialogTransitionAnimator
 import com.android.systemui.dagger.qualifiers.LongRunning
@@ -71,6 +72,7 @@ constructor(
     override fun provideRecordingServiceStrings(): RecordingServiceStrings = IrsStrings(resources)
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        Log.d(getTag(), "handling action: ${intent?.action}")
         when (intent?.action) {
             ACTION_START -> {
                 bgExecutor.execute {
@@ -95,7 +97,7 @@ constructor(
                 bgExecutor.execute {
                     mNotificationManager.cancelAsUser(
                         null,
-                        mNotificationId,
+                        intent.getIntExtra(EXTRA_NOTIFICATION_ID, mNotificationId),
                         UserHandle(mUserContextTracker.userContext.userId)
                     )
 
