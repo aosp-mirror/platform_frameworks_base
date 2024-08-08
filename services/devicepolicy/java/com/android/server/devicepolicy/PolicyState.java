@@ -19,6 +19,7 @@ package com.android.server.devicepolicy;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.admin.PolicyValue;
+import android.app.admin.flags.Flags;
 import android.util.IndentingPrintWriter;
 
 import com.android.internal.util.XmlUtils;
@@ -254,11 +255,9 @@ final class PolicyState<V> {
     }
 
     @Nullable
-    static <V> PolicyState<V> readFromXml(TypedXmlPullParser parser)
+    static <V> PolicyState<V> readFromXml(
+            PolicyDefinition<V> policyDefinition, TypedXmlPullParser parser)
             throws IOException, XmlPullParserException {
-
-        PolicyDefinition<V> policyDefinition = null;
-
         PolicyValue<V> currentResolvedPolicy = null;
 
         LinkedHashMap<EnforcingAdmin, PolicyValue<V>> policiesSetByAdmins = new LinkedHashMap<>();
@@ -300,10 +299,15 @@ final class PolicyState<V> {
                     }
                     break;
                 case TAG_POLICY_DEFINITION_ENTRY:
-                    policyDefinition = PolicyDefinition.readFromXml(parser);
-                    if (policyDefinition == null) {
-                        Slogf.wtf(TAG, "Error Parsing TAG_POLICY_DEFINITION_ENTRY, "
-                                + "PolicyDefinition is null");
+                    if (Flags.dontReadPolicyDefinition()) {
+                        // Should be passed by the caller.
+                        Objects.requireNonNull(policyDefinition);
+                    } else {
+                        policyDefinition = PolicyDefinition.readFromXml(parser);
+                        if (policyDefinition == null) {
+                            Slogf.wtf(TAG, "Error Parsing TAG_POLICY_DEFINITION_ENTRY, "
+                                    + "PolicyDefinition is null");
+                        }
                     }
                     break;
 
