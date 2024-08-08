@@ -348,7 +348,17 @@ public class A11yMenuOverlayLayout {
 
     /** Toggles a11y menu layout visibility. */
     public void toggleVisibility() {
-        mLayout.setVisibility((mLayout.getVisibility() == View.VISIBLE) ? View.GONE : View.VISIBLE);
+        if (mLayout.getVisibility() == View.VISIBLE) {
+            mLayout.setVisibility(View.GONE);
+        } else {
+            if (Flags.hideRestrictedActions()) {
+                // Reconfigure the shortcut list in case the set of restricted actions has changed.
+                mA11yMenuViewPager.configureViewPagerAndFooter(
+                        mLayout, createShortcutList(), getPageIndex());
+                updateViewLayout();
+            }
+            mLayout.setVisibility(View.VISIBLE);
+        }
     }
 
     /** Shows hint text on a minimal Snackbar-like text view. */
