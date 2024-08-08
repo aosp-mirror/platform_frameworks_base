@@ -300,7 +300,9 @@ constructor(
                 swipeToDismissInteractor.dismissFling
                     .filterNotNull()
                     .filterRelevantKeyguardState()
-                    .collect { _ -> startTransitionTo(KeyguardState.GONE) }
+                    .collect { _ ->
+                        startTransitionTo(KeyguardState.GONE, ownerReason = "dismissFling != null")
+                    }
             }
         }
     }
