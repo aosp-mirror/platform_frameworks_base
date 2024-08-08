@@ -293,7 +293,7 @@ constructor(
                     )
 
                 containerView.systemGestureExclusionRects =
-                    if (Flags.hubmodeFullscreenVerticalSwipe()) {
+                    if (Flags.hubmodeFullscreenVerticalSwipeFix()) {
                         listOf(
                             // Disable back gestures on the left side of the screen, to avoid
                             // conflicting with scene transitions.

@@ -38,8 +38,8 @@ fun BackGestureTutorialScreen(
                 TutorialScreenConfig.Strings(
                     titleResId = R.string.touchpad_back_gesture_action_title,
                     bodyResId = R.string.touchpad_back_gesture_guidance,
-                    titleSuccessResId = R.string.touchpad_tutorial_gesture_done,
-                    bodySuccessResId = R.string.touchpad_back_gesture_finished
+                    titleSuccessResId = R.string.touchpad_back_gesture_success_title,
+                    bodySuccessResId = R.string.touchpad_back_gesture_success_body
                 ),
             animations =
                 TutorialScreenConfig.Animations(

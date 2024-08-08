@@ -68,12 +68,36 @@ constructor(
     }
 
     suspend fun incrementSignalCount(gestureType: GestureType) {
-        repository.updateGestureEduModel(gestureType) { it.copy(signalCount = it.signalCount + 1) }
+        repository.updateGestureEduModel(gestureType) {
+            it.copy(
+                signalCount = it.signalCount + 1,
+                usageSessionStartTime =
+                    if (it.signalCount == 0) clock.instant() else it.usageSessionStartTime
+            )
+        }
     }
 
     suspend fun updateShortcutTriggerTime(gestureType: GestureType) {
         repository.updateGestureEduModel(gestureType) {
             it.copy(lastShortcutTriggeredTime = clock.instant())
+        }
+    }
+
+    suspend fun updateOnEduTriggered(gestureType: GestureType) {
+        repository.updateGestureEduModel(gestureType) {
+            it.copy(
+                // Reset signal counter and usageSessionStartTime after edu triggered
+                signalCount = 0,
+                lastEducationTime = clock.instant(),
+                educationShownCount = it.educationShownCount + 1,
+                usageSessionStartTime = null
+            )
+        }
+    }
+
+    suspend fun startNewUsageSession(gestureType: GestureType) {
+        repository.updateGestureEduModel(gestureType) {
+            it.copy(usageSessionStartTime = clock.instant(), signalCount = 1)
         }
     }
 }

@@ -80,7 +80,6 @@ import android.os.RemoteException;
 import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
 import android.view.Display;
-import android.view.HapticFeedbackConstants;
 import android.view.IDisplayFoldListener;
 import android.view.KeyEvent;
 import android.view.KeyboardShortcutGroup;
@@ -1075,13 +1074,6 @@ public interface WindowManagerPolicy extends WindowManagerPolicyConstants {
      * this point the display is active.
      */
     public void enableScreenAfterBoot();
-
-    /**
-     * Call from application to perform haptic feedback on its window.
-     */
-    public boolean performHapticFeedback(int uid, String packageName, int effectId,
-            String reason, @HapticFeedbackConstants.Flags int flags,
-            @HapticFeedbackConstants.PrivateFlags int privFlags);
 
     /**
      * Called when we have started keeping the screen on because a window

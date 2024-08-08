@@ -276,6 +276,7 @@ fun SceneScope.NotificationScrollingStack(
     shouldReserveSpaceForNavBar: Boolean = true,
     shouldIncludeHeadsUpSpace: Boolean = true,
     shadeMode: ShadeMode,
+    onEmptySpaceClick: (() -> Unit)? = null,
     modifier: Modifier = Modifier,
 ) {
     val coroutineScope = rememberCoroutineScope()
@@ -327,8 +328,6 @@ fun SceneScope.NotificationScrollingStack(
 
     // The height of the scrim visible on screen when it is in its resting (collapsed) state.
     val minVisibleScrimHeight: () -> Float = { screenHeight - maxScrimTop() }
-
-    val isClickable by viewModel.isClickable.collectAsStateWithLifecycle()
 
     // we are not scrolled to the top unless the scrim is at its maximum offset.
     LaunchedEffect(viewModel, scrimOffset) {
@@ -437,8 +436,8 @@ fun SceneScope.NotificationScrollingStack(
                         )
                     )
                 }
-                .thenIf(isClickable) {
-                    Modifier.clickable(onClick = { viewModel.onEmptySpaceClicked() })
+                .thenIf(onEmptySpaceClick != null) {
+                    Modifier.clickable(onClick = { onEmptySpaceClick?.invoke() })
                 }
     ) {
         // Creates a cutout in the background scrim in the shape of the notifications scrim.

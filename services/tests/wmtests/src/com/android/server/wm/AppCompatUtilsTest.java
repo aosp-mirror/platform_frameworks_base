@@ -16,6 +16,8 @@
 
 package com.android.server.wm;
 
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
+
 import static org.mockito.Mockito.when;
 
 import android.platform.test.annotations.Presubmit;
@@ -42,7 +44,10 @@ public class AppCompatUtilsTest extends WindowTestsBase {
     @Test
     public void getLetterboxReasonString_inSizeCompatMode() {
         runTestScenario((robot) -> {
-            robot.activity().setTopActivityInSizeCompatMode(/* inScm */ true);
+            robot.applyOnActivity((a) -> {
+                a.createActivityWithComponent();
+                a.setTopActivityInSizeCompatMode(/* inScm */ true);
+            });
 
             robot.checkTopActivityLetterboxReason(/* expected */ "SIZE_COMPAT_MODE");
         });
@@ -51,7 +56,10 @@ public class AppCompatUtilsTest extends WindowTestsBase {
     @Test
     public void getLetterboxReasonString_fixedOrientation() {
         runTestScenario((robot) -> {
-            robot.activity().checkTopActivityInSizeCompatMode(/* inScm */ false);
+            robot.applyOnActivity((a) -> {
+                a.createActivityWithComponent();
+                a.checkTopActivityInSizeCompatMode(/* inScm */ false);
+            });
             robot.setIsLetterboxedForFixedOrientationAndAspectRatio(
                     /* forFixedOrientationAndAspectRatio */ true);
 
@@ -62,7 +70,10 @@ public class AppCompatUtilsTest extends WindowTestsBase {
     @Test
     public void getLetterboxReasonString_isLetterboxedForDisplayCutout() {
         runTestScenario((robot) -> {
-            robot.activity().checkTopActivityInSizeCompatMode(/* inScm */ false);
+            robot.applyOnActivity((a) -> {
+                a.createActivityWithComponent();
+                a.checkTopActivityInSizeCompatMode(/* inScm */ false);
+            });
             robot.setIsLetterboxedForFixedOrientationAndAspectRatio(
                     /* forFixedOrientationAndAspectRatio */ false);
             robot.setIsLetterboxedForDisplayCutout(/* displayCutout */ true);
@@ -74,7 +85,10 @@ public class AppCompatUtilsTest extends WindowTestsBase {
     @Test
     public void getLetterboxReasonString_aspectRatio() {
         runTestScenario((robot) -> {
-            robot.activity().checkTopActivityInSizeCompatMode(/* inScm */ false);
+            robot.applyOnActivity((a) -> {
+                a.createActivityWithComponent();
+                a.checkTopActivityInSizeCompatMode(/* inScm */ false);
+            });
             robot.setIsLetterboxedForFixedOrientationAndAspectRatio(
                     /* forFixedOrientationAndAspectRatio */ false);
             robot.setIsLetterboxedForDisplayCutout(/* displayCutout */ false);
@@ -87,7 +101,10 @@ public class AppCompatUtilsTest extends WindowTestsBase {
     @Test
     public void getLetterboxReasonString_unknownReason() {
         runTestScenario((robot) -> {
-            robot.activity().checkTopActivityInSizeCompatMode(/* inScm */ false);
+            robot.applyOnActivity((a) -> {
+                a.createActivityWithComponent();
+                a.checkTopActivityInSizeCompatMode(/* inScm */ false);
+            });
             robot.setIsLetterboxedForFixedOrientationAndAspectRatio(
                     /* forFixedOrientationAndAspectRatio */ false);
             robot.setIsLetterboxedForDisplayCutout(/* displayCutout */ false);
@@ -96,7 +113,6 @@ public class AppCompatUtilsTest extends WindowTestsBase {
             robot.checkTopActivityLetterboxReason(/* expected */ "UNKNOWN_REASON");
         });
     }
-
 
     /**
      * Runs a test scenario providing a Robot.
@@ -114,8 +130,13 @@ public class AppCompatUtilsTest extends WindowTestsBase {
                 @NonNull ActivityTaskManagerService atm,
                 @NonNull ActivityTaskSupervisor supervisor) {
             super(wm, atm, supervisor);
-            activity().createActivityWithComponent();
             mWindowState = Mockito.mock(WindowState.class);
+        }
+
+        @Override
+        void onPostActivityCreation(@NonNull ActivityRecord activity) {
+            super.onPostActivityCreation(activity);
+            spyOn(activity.mAppCompatController.getAppCompatAspectRatioPolicy());
         }
 
         void setIsLetterboxedForFixedOrientationAndAspectRatio(

@@ -73,6 +73,8 @@ constructor(
         const val SIGNAL_COUNT_SUFFIX = "_SIGNAL_COUNT"
         const val NUMBER_OF_EDU_SHOWN_SUFFIX = "_NUMBER_OF_EDU_SHOWN"
         const val LAST_SHORTCUT_TRIGGERED_TIME_SUFFIX = "_LAST_SHORTCUT_TRIGGERED_TIME"
+        const val USAGE_SESSION_START_TIME_SUFFIX = "_USAGE_SESSION_START_TIME"
+        const val LAST_EDUCATION_TIME_SUFFIX = "_LAST_EDUCATION_TIME"
 
         const val DATASTORE_DIR = "education/USER%s_ContextualEducation"
     }
@@ -113,6 +115,14 @@ constructor(
                 preferences[getLastShortcutTriggeredTimeKey(gestureType)]?.let {
                     Instant.ofEpochSecond(it)
                 },
+            usageSessionStartTime =
+                preferences[getUsageSessionStartTimeKey(gestureType)]?.let {
+                    Instant.ofEpochSecond(it)
+                },
+            lastEducationTime =
+                preferences[getLastEducationTimeKey(gestureType)]?.let {
+                    Instant.ofEpochSecond(it)
+                },
         )
     }
 
@@ -125,10 +135,20 @@ constructor(
             val updatedModel = transform(currentModel)
             preferences[getSignalCountKey(gestureType)] = updatedModel.signalCount
             preferences[getEducationShownCountKey(gestureType)] = updatedModel.educationShownCount
-            updateTimeByInstant(
+            setInstant(
                 preferences,
                 updatedModel.lastShortcutTriggeredTime,
                 getLastShortcutTriggeredTimeKey(gestureType)
+            )
+            setInstant(
+                preferences,
+                updatedModel.usageSessionStartTime,
+                getUsageSessionStartTimeKey(gestureType)
+            )
+            setInstant(
+                preferences,
+                updatedModel.lastEducationTime,
+                getLastEducationTimeKey(gestureType)
             )
         }
     }
@@ -142,7 +162,13 @@ constructor(
     private fun getLastShortcutTriggeredTimeKey(gestureType: GestureType): Preferences.Key<Long> =
         longPreferencesKey(gestureType.name + LAST_SHORTCUT_TRIGGERED_TIME_SUFFIX)
 
-    private fun updateTimeByInstant(
+    private fun getUsageSessionStartTimeKey(gestureType: GestureType): Preferences.Key<Long> =
+        longPreferencesKey(gestureType.name + USAGE_SESSION_START_TIME_SUFFIX)
+
+    private fun getLastEducationTimeKey(gestureType: GestureType): Preferences.Key<Long> =
+        longPreferencesKey(gestureType.name + LAST_EDUCATION_TIME_SUFFIX)
+
+    private fun setInstant(
         preferences: MutablePreferences,
         instant: Instant?,
         key: Preferences.Key<Long>

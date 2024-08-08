@@ -261,9 +261,9 @@ public class CsipDeviceManager {
         }
 
         CachedBluetoothDevice dualModeDevice = groupDevicesList.stream()
-                .filter(cachedDevice -> cachedDevice.getConnectableProfiles().stream()
+                .filter(cachedDevice -> cachedDevice.getUiAccessibleProfiles().stream()
                         .anyMatch(profile -> profile instanceof LeAudioProfile))
-                .filter(cachedDevice -> cachedDevice.getConnectableProfiles().stream()
+                .filter(cachedDevice -> cachedDevice.getUiAccessibleProfiles().stream()
                         .anyMatch(profile -> profile instanceof A2dpProfile
                                 || profile instanceof HeadsetProfile))
                 .findFirst().orElse(null);

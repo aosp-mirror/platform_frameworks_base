@@ -1367,13 +1367,18 @@
 
     <!-- Media projection that launched from 1P/3P apps -->
     <!-- 1P/3P app media projection permission dialog title. [CHAR LIMIT=NONE] -->
-    <string name="media_projection_entry_app_permission_dialog_title">Start recording or casting with <xliff:g id="app_seeking_permission" example="Meet">%s</xliff:g>?</string>
+    <string name="media_projection_entry_app_permission_dialog_title">Share your screen with <xliff:g id="app_seeking_permission" example="Meet">%s</xliff:g>?</string>
+
+    <!-- 1P/3P app media projection permission option for capturing just a single app [CHAR LIMIT=50] -->
+    <string name="media_projection_entry_app_permission_dialog_option_text_single_app">Share one app</string>
+    <!-- 1P/3P app media projection permission option for capturing the whole screen [CHAR LIMIT=50] -->
+    <string name="media_projection_entry_app_permission_dialog_option_text_entire_screen">Share entire screen</string>
     <!-- 1P/3P app media projection permission warning for capturing the whole screen. [CHAR LIMIT=350] -->
-    <string name="media_projection_entry_app_permission_dialog_warning_entire_screen">When you’re sharing, recording, or casting, <xliff:g id="app_seeking_permission" example="Meet">%s</xliff:g> has access to anything visible on your screen or played on your device. So be careful with things like passwords, payment details, messages, photos, and audio and video.</string>
+    <string name="media_projection_entry_app_permission_dialog_warning_entire_screen">When you’re sharing your entire screen, anything on your screen is visible to <xliff:g id="app_seeking_permission" example="Meet">%s</xliff:g>. So be careful with things like passwords, payment details, messages, photos, and audio and video.</string>
     <!-- 1P/3P app media projection permission warning for capturing an app. [CHAR LIMIT=350] -->
-    <string name="media_projection_entry_app_permission_dialog_warning_single_app">When you’re sharing, recording, or casting an app, <xliff:g id="app_seeking_permission" example="Meet">%s</xliff:g> has access to anything shown or played on that app. So be careful with things like passwords, payment details, messages, photos, and audio and video.</string>
+    <string name="media_projection_entry_app_permission_dialog_warning_single_app">When you’re sharing an app, anything shown or played in that app is visible to <xliff:g id="app_seeking_permission" example="Meet">%s</xliff:g>. So be careful with things like passwords, payment details, messages, photos, and audio and video.</string>
     <!-- 1P/3P apps media projection permission button to continue with app selection or recording [CHAR LIMIT=60] -->
-    <string name="media_projection_entry_app_permission_dialog_continue">Start</string>
+    <string name="media_projection_entry_app_permission_dialog_continue_entire_screen">Share screen</string>
     <!-- 1P/3P apps disabled the single app projection option. [CHAR LIMIT=NONE] -->
     <string name="media_projection_entry_app_permission_dialog_single_app_disabled"><xliff:g id="app_name" example="Meet">%1$s</xliff:g> has disabled this option</string>
 
@@ -3674,6 +3679,7 @@
           -->
     <string name="shortcut_helper_key_combinations_or_separator">or</string>
 
+    <!-- TOUCHPAD TUTORIAL-->
     <!-- Label for button opening tutorial for back gesture on touchpad [CHAR LIMIT=NONE] -->
     <string name="touchpad_tutorial_back_gesture_button">Back gesture</string>
     <!-- Label for button opening tutorial for back gesture on touchpad [CHAR LIMIT=NONE] -->
@@ -3682,17 +3688,35 @@
     <string name="touchpad_tutorial_action_key_button">Action key</string>
     <!-- Label for button finishing touchpad tutorial [CHAR LIMIT=NONE] -->
     <string name="touchpad_tutorial_done_button">Done</string>
-    <!-- Screen title after gesture was done successfully [CHAR LIMIT=NONE] -->
-    <string name="touchpad_tutorial_gesture_done">Great job!</string>
+    <!-- BACK GESTURE -->
     <!-- Touchpad back gesture action name in tutorial [CHAR LIMIT=NONE] -->
     <string name="touchpad_back_gesture_action_title">Go back</string>
     <!-- Touchpad back gesture guidance in gestures tutorial [CHAR LIMIT=NONE] -->
     <string name="touchpad_back_gesture_guidance">To go back, swipe left or right using three fingers anywhere on the touchpad.\n\nYou can also use the keyboard shortcut
 Action + ESC for this.</string>
+    <!-- Screen title after back gesture was done successfully [CHAR LIMIT=NONE] -->
+    <string name="touchpad_back_gesture_success_title">Great job!</string>
     <!-- Text shown to the user after they complete back gesture tutorial [CHAR LIMIT=NONE] -->
-    <string name="touchpad_back_gesture_finished">You completed the go back gesture.</string>
-    <string name="touchpad_back_gesture_animation_content_description">Touchpad showing three fingers moving right and left</string>
-    <string name="touchpad_back_gesture_screen_animation_content_description">Device screen showing animation for back gesture</string>
+    <string name="touchpad_back_gesture_success_body">You completed the go back gesture.</string>
+    <!-- HOME GESTURE -->
+    <!-- Touchpad home gesture action name in tutorial [CHAR LIMIT=NONE] -->
+    <string name="touchpad_home_gesture_action_title">Go home</string>
+    <!-- Touchpad home gesture guidance in gestures tutorial [CHAR LIMIT=NONE] -->
+    <string name="touchpad_home_gesture_guidance">To go to your home screen at any time, swipe up with three fingers from the bottom of your screen.</string>
+    <!-- Screen title after home gesture was done successfully [CHAR LIMIT=NONE] -->
+    <string name="touchpad_home_gesture_success_title">Nice!</string>
+    <!-- Text shown to the user after they complete home gesture tutorial [CHAR LIMIT=NONE] -->
+    <string name="touchpad_home_gesture_success_body">You completed the go home gesture.</string>
+
+    <!-- KEYBOARD TUTORIAL-->
+    <!-- Action key tutorial title [CHAR LIMIT=NONE] -->
+    <string name="tutorial_action_key_title">Action key</string>
+    <!-- Action key tutorial guidance[CHAR LIMIT=NONE] -->
+    <string name="tutorial_action_key_guidance">To access your apps, press the action key on your keyboard.</string>
+    <!-- Screen title after action key pressed successfully [CHAR LIMIT=NONE] -->
+    <string name="tutorial_action_key_success_title">Congratulations!</string>
+    <!-- Text shown to the user after they complete action key tutorial [CHAR LIMIT=NONE] -->
+    <string name="tutorial_action_key_success_body">You completed the action key gesture.\n\nAction + / shows all the shortcuts you have available.</string>
 
     <!-- Content description for keyboard backlight brightness dialog [CHAR LIMIT=NONE] -->
     <string name="keyboard_backlight_dialog_title">Keyboard backlight</string>

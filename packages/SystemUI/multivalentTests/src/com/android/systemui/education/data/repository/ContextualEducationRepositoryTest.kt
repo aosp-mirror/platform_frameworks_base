@@ -85,7 +85,9 @@ class ContextualEducationRepositoryTest : SysuiTestCase() {
                 GestureEduModel(
                     signalCount = 2,
                     educationShownCount = 1,
-                    lastShortcutTriggeredTime = kosmos.fakeEduClock.instant()
+                    lastShortcutTriggeredTime = kosmos.fakeEduClock.instant(),
+                    lastEducationTime = kosmos.fakeEduClock.instant(),
+                    usageSessionStartTime = kosmos.fakeEduClock.instant(),
                 )
             underTest.updateGestureEduModel(BACK) { newModel }
             val model by collectLastValue(underTest.readGestureEduModelFlow(BACK))

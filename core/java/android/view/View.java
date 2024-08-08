@@ -142,7 +142,6 @@ import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.Trace;
 import android.os.Vibrator;
-import android.os.vibrator.Flags;
 import android.service.credentials.CredentialProviderService;
 import android.sysprop.DisplayProperties;
 import android.text.InputType;
@@ -5711,9 +5710,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * The pointer icon when the mouse hovers on this view. The default is null.
      */
     private PointerIcon mMousePointerIcon;
-
-    /** Vibrator for haptic feedback. */
-    private Vibrator mVibrator;
 
     /**
      * @hide
@@ -28672,14 +28668,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         }
 
         int privFlags = computeHapticFeedbackPrivateFlags();
-        if (Flags.useVibratorHapticFeedback()) {
-            if (!mAttachInfo.canPerformHapticFeedback()) {
-                return false;
-            }
-            getSystemVibrator().performHapticFeedback(feedbackConstant,
-                    "View#performHapticFeedback", flags, privFlags);
-            return true;
-        }
         return mAttachInfo.mRootCallbacks.performHapticFeedback(feedbackConstant, flags, privFlags);
     }
 
@@ -28711,16 +28699,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                 feedbackConstant, inputDeviceId, inputSource, flags, privFlags);
     }
 
-    private Vibrator getSystemVibrator() {
-        if (mVibrator != null) {
-            return mVibrator;
-        }
-        return mVibrator = mContext.getSystemService(Vibrator.class);
-    }
-
     private boolean isPerformHapticFeedbackSuppressed(int feedbackConstant, int flags) {
         if (feedbackConstant == HapticFeedbackConstants.NO_HAPTICS
-                || mAttachInfo == null) {
+                || mAttachInfo == null
+                || mAttachInfo.mSession == null) {
             return true;
         }
         //noinspection SimplifiableIfStatement
@@ -32340,11 +32322,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             }
 
             return events;
-        }
-
-        private boolean canPerformHapticFeedback() {
-            return mSession != null
-                    && (mDisplay.getFlags() & Display.FLAG_TOUCH_FEEDBACK_DISABLED) == 0;
         }
 
         @Nullable

@@ -19,7 +19,6 @@ package com.android.systemui.statusbar;
 import static android.app.StatusBarManager.DISABLE2_NONE;
 import static android.app.StatusBarManager.DISABLE_NONE;
 import static android.inputmethodservice.InputMethodService.BACK_DISPOSITION_DEFAULT;
-import static android.inputmethodservice.InputMethodService.IME_INVISIBLE;
 import static android.view.Display.INVALID_DISPLAY;
 
 import android.annotation.Nullable;
@@ -1219,7 +1218,7 @@ public class CommandQueue extends IStatusBar.Stub implements
                 && mLastUpdatedImeDisplayId != INVALID_DISPLAY) {
             // Set previous NavBar's IME window status as invisible when IME
             // window switched to another display for single-session IME case.
-            sendImeInvisibleStatusForPrevNavBar();
+            sendImeNotVisibleStatusForPrevNavBar();
         }
         for (int i = 0; i < mCallbacks.size(); i++) {
             mCallbacks.get(i).setImeWindowStatus(displayId, vis, backDisposition, showImeSwitcher);
@@ -1227,9 +1226,9 @@ public class CommandQueue extends IStatusBar.Stub implements
         mLastUpdatedImeDisplayId = displayId;
     }
 
-    private void sendImeInvisibleStatusForPrevNavBar() {
+    private void sendImeNotVisibleStatusForPrevNavBar() {
         for (int i = 0; i < mCallbacks.size(); i++) {
-            mCallbacks.get(i).setImeWindowStatus(mLastUpdatedImeDisplayId, IME_INVISIBLE,
+            mCallbacks.get(i).setImeWindowStatus(mLastUpdatedImeDisplayId, 0 /* vis */,
                     BACK_DISPOSITION_DEFAULT, false /* showImeSwitcher */);
         }
     }

@@ -1378,6 +1378,36 @@ public final class InputManager {
     }
 
     /**
+     * Registers a keyboard system shortcut listener for {@link KeyboardSystemShortcut} being
+     * triggered.
+     *
+     * @param executor an executor on which the callback will be called
+     * @param listener the {@link KeyboardSystemShortcutListener}
+     * @throws IllegalArgumentException if {@code listener} has already been registered previously.
+     * @throws NullPointerException     if {@code listener} or {@code executor} is null.
+     * @hide
+     * @see #unregisterKeyboardSystemShortcutListener(KeyboardSystemShortcutListener)
+     */
+    @RequiresPermission(Manifest.permission.MONITOR_KEYBOARD_SYSTEM_SHORTCUTS)
+    public void registerKeyboardSystemShortcutListener(@NonNull Executor executor,
+            @NonNull KeyboardSystemShortcutListener listener) throws IllegalArgumentException {
+        mGlobal.registerKeyboardSystemShortcutListener(executor, listener);
+    }
+
+    /**
+     * Unregisters a previously added keyboard system shortcut listener.
+     *
+     * @param listener the {@link KeyboardSystemShortcutListener}
+     * @hide
+     * @see #registerKeyboardSystemShortcutListener(Executor, KeyboardSystemShortcutListener)
+     */
+    @RequiresPermission(Manifest.permission.MONITOR_KEYBOARD_SYSTEM_SHORTCUTS)
+    public void unregisterKeyboardSystemShortcutListener(
+            @NonNull KeyboardSystemShortcutListener listener) {
+        mGlobal.unregisterKeyboardSystemShortcutListener(listener);
+    }
+
+    /**
      * A callback used to be notified about battery state changes for an input device. The
      * {@link #onBatteryStateChanged(int, long, BatteryState)} method will be called once after the
      * listener is successfully registered to provide the initial battery state of the device.
@@ -1477,5 +1507,22 @@ public final class InputManager {
          * @param state the new sticky modifier state, never null.
          */
         void onStickyModifierStateChanged(@NonNull StickyModifierState state);
+    }
+
+    /**
+     * A callback used to be notified about keyboard system shortcuts being triggered.
+     *
+     * @see #registerKeyboardSystemShortcutListener(Executor, KeyboardSystemShortcutListener)
+     * @see #unregisterKeyboardSystemShortcutListener(KeyboardSystemShortcutListener)
+     * @hide
+     */
+    public interface KeyboardSystemShortcutListener {
+        /**
+         * Called when a keyboard system shortcut is triggered.
+         *
+         * @param systemShortcut the shortcut info about the shortcut that was triggered.
+         */
+        void onKeyboardSystemShortcutTriggered(int deviceId,
+                @NonNull KeyboardSystemShortcut systemShortcut);
     }
 }

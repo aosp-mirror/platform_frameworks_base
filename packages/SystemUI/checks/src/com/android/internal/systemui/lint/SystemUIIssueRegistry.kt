@@ -46,10 +46,12 @@ class SystemUIIssueRegistry : IssueRegistry() {
                 DemotingTestWithoutBugDetector.ISSUE,
                 TestFunctionNameViolationDetector.ISSUE,
                 MissingApacheLicenseDetector.ISSUE,
+                RegisterContentObserverSyncViaSettingsProxyDetector.SYNC_WARNING
             )
 
     override val api: Int
         get() = CURRENT_API
+
     override val minApi: Int
         get() = 8
 
