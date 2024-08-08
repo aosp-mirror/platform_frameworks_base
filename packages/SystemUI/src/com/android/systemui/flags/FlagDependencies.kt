@@ -58,7 +58,7 @@ class FlagDependencies @Inject constructor(featureFlags: FeatureFlagsClassic, ha
         // Internal notification frontend dependencies
         NotificationAvalancheSuppression.token dependsOn VisualInterruptionRefactor.token
         PriorityPeopleSection.token dependsOn SortBySectionTimeFlag.token
-        NotificationMinimalismPrototype.token dependsOn NotificationsHeadsUpRefactor.token
+        NotificationMinimalismPrototype.token dependsOn NotificationThrottleHun.token
         NotificationsHeadsUpRefactor.token dependsOn NotificationThrottleHun.token
 
         // SceneContainer dependencies

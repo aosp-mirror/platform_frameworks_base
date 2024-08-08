@@ -107,7 +107,11 @@ constructor(
     fun handleActionDown() {
         logEvent(qsTile?.tileSpec, state, "action down received")
         when (state) {
-            State.IDLE -> {
+            State.IDLE,
+            // ACTION_DOWN typically only happens in State.IDLE but including CLICKED and
+            // LONG_CLICKED just to be safe`b
+            State.CLICKED,
+            State.LONG_CLICKED -> {
                 setState(State.TIMEOUT_WAIT)
             }
             State.RUNNING_BACKWARDS_FROM_UP,

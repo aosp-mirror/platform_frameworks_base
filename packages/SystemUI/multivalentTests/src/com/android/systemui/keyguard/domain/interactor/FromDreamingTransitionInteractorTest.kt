@@ -14,24 +14,10 @@
  * limitations under the License.
  */
 
-/*
- * Copyright (C) 2024 The Android Open Source Project
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 package com.android.systemui.keyguard.domain.interactor
 
+import com.android.systemui.keyguard.shared.model.DozeStateModel.Companion.isDozeOff
+import com.android.systemui.coroutines.collectLastValue
 import android.platform.test.annotations.EnableFlags
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
@@ -42,24 +28,28 @@ import com.android.systemui.keyguard.data.repository.FakeKeyguardTransitionRepos
 import com.android.systemui.keyguard.data.repository.fakeKeyguardRepository
 import com.android.systemui.keyguard.data.repository.fakeKeyguardTransitionRepository
 import com.android.systemui.keyguard.data.repository.keyguardOcclusionRepository
+import com.android.systemui.keyguard.domain.interactor.keyguardInteractor
 import com.android.systemui.keyguard.shared.model.BiometricUnlockMode
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.util.KeyguardTransitionRepositorySpySubject.Companion.assertThat
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.power.domain.interactor.PowerInteractor.Companion.setAsleepForTest
+import com.android.systemui.power.domain.interactor.PowerInteractor.Companion.setAwakeForTest
 import com.android.systemui.power.domain.interactor.powerInteractor
 import com.android.systemui.statusbar.domain.interactor.keyguardOcclusionInteractor
 import com.android.systemui.testKosmos
-import kotlin.test.Test
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Ignore
+import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mockito.reset
 import org.mockito.Mockito.spy
+import com.google.common.truth.Truth.assertThat
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
@@ -79,21 +69,6 @@ class FromDreamingTransitionInteractorTest : SysuiTestCase() {
     @Before
     fun setup() {
         underTest.start()
-
-        kosmos.fakeKeyguardRepository.setDreaming(true)
-        kosmos.keyguardOcclusionInteractor.setWmNotifiedShowWhenLockedActivityOnTop(true)
-
-        // Transition to DOZING and set the power interactor asleep.
-        powerInteractor.setAsleepForTest()
-        runBlocking {
-            transitionRepository.sendTransitionSteps(
-                from = KeyguardState.LOCKSCREEN,
-                to = KeyguardState.DREAMING,
-                testScope
-            )
-            kosmos.fakeKeyguardRepository.setBiometricUnlockState(BiometricUnlockMode.NONE)
-            reset(transitionRepository)
-        }
     }
 
     @Test
@@ -146,20 +121,27 @@ class FromDreamingTransitionInteractorTest : SysuiTestCase() {
     @EnableFlags(Flags.FLAG_KEYGUARD_WM_STATE_REFACTOR)
     fun testTransitionsToLockscreen_whenOccludingActivityEnds() =
         testScope.runTest {
+            runCurrent()
+
             kosmos.fakeKeyguardRepository.setDreaming(true)
-            kosmos.keyguardOcclusionRepository.setShowWhenLockedActivityInfo(onTop = true)
+            kosmos.keyguardOcclusionInteractor.setWmNotifiedShowWhenLockedActivityOnTop(true)
+            // Transition to DREAMING and set the power interactor awake
+            powerInteractor.setAwakeForTest()
+
             transitionRepository.sendTransitionSteps(
                 from = KeyguardState.LOCKSCREEN,
                 to = KeyguardState.DREAMING,
-                testScope,
+                testScope
             )
-            runCurrent()
+            kosmos.fakeKeyguardRepository.setBiometricUnlockState(BiometricUnlockMode.NONE)
 
+            // Get past initial setup
+            advanceTimeBy(600L)
             reset(transitionRepository)
 
             kosmos.keyguardOcclusionRepository.setShowWhenLockedActivityInfo(onTop = false)
             kosmos.fakeKeyguardRepository.setDreaming(false)
-            runCurrent()
+            advanceTimeBy(60L)
 
             assertThat(transitionRepository)
                 .startedTransition(
@@ -171,6 +153,13 @@ class FromDreamingTransitionInteractorTest : SysuiTestCase() {
     @Test
     fun testTransitionToAlternateBouncer() =
         testScope.runTest {
+            transitionRepository.sendTransitionSteps(
+                from = KeyguardState.LOCKSCREEN,
+                to = KeyguardState.DREAMING,
+                testScope,
+            )
+            reset(transitionRepository)
+
             kosmos.fakeKeyguardBouncerRepository.setAlternateVisible(true)
             runCurrent()
 

@@ -7485,7 +7485,7 @@ public class Intent implements Parcelable, Cloneable {
 
     /**
      * This flag is only used for split-screen multi-window mode. The new activity will be displayed
-     * adjacent to the one launching it. This can only be used in conjunction with
+     * adjacent to the one launching it if possible. This can only be used in conjunction with
      * {@link #FLAG_ACTIVITY_NEW_TASK}. Also, setting {@link #FLAG_ACTIVITY_MULTIPLE_TASK} is
      * required if you want a new instance of an existing activity to be created.
      */

@@ -10768,8 +10768,13 @@ public class AppOpsManager {
                 final long key = makeKey(uidState, flag);
 
                 NoteOpEvent event = events.get(key);
-                if (lastEvent == null
-                        || event != null && event.getNoteTime() > lastEvent.getNoteTime()) {
+                if (event == null) {
+                    continue;
+                }
+
+                if (lastEvent == null || event.getNoteTime() > lastEvent.getNoteTime()
+                        || (event.getNoteTime() == lastEvent.getNoteTime()
+                                && event.getDuration() > lastEvent.getDuration())) {
                     lastEvent = event;
                 }
             }

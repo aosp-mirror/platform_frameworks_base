@@ -629,11 +629,11 @@ public class SettingsBackupTest {
                     Settings.Global.Wearable.CUSTOM_COLOR_BACKGROUND,
                     Settings.Global.Wearable.PHONE_SWITCHING_STATUS,
                     Settings.Global.Wearable.TETHER_CONFIG_STATE,
-                    Settings.Global.Wearable.PHONE_SWITCHING_SUPPORTED,
                     Settings.Global.Wearable.WEAR_MEDIA_CONTROLS_PACKAGE,
                     Settings.Global.Wearable.WEAR_MEDIA_SESSIONS_PACKAGE,
                     Settings.Global.Wearable.WEAR_POWER_ANOMALY_SERVICE_ENABLED,
-                    Settings.Global.Wearable.CONNECTIVITY_KEEP_DATA_ON);
+                    Settings.Global.Wearable.CONNECTIVITY_KEEP_DATA_ON,
+                    Settings.Global.Wearable.PHONE_SWITCHING_REQUEST_SOURCE);
 
     private static final Set<String> BACKUP_DENY_LIST_SECURE_SETTINGS =
              newHashSet(

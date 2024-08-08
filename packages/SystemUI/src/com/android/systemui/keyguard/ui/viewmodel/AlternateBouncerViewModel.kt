@@ -42,9 +42,6 @@ constructor(
     val transitionToAlternateBouncerProgress =
         keyguardTransitionInteractor.transitionValue(ALTERNATE_BOUNCER)
 
-    val forcePluginOpen: Flow<Boolean> =
-        transitionToAlternateBouncerProgress.map { it > 0f }.distinctUntilChanged()
-
     /** An observable for the scrim alpha. */
     val scrimAlpha = transitionToAlternateBouncerProgress.map { it * alternateBouncerScrimAlpha }
 
