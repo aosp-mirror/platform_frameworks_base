@@ -79,6 +79,7 @@ import com.android.systemui.SystemUIApplication;
 import com.android.systemui.dagger.qualifiers.Application;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.flags.FeatureFlags;
+import com.android.systemui.keyguard.domain.interactor.KeyguardDismissInteractor;
 import com.android.systemui.keyguard.domain.interactor.KeyguardEnabledInteractor;
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor;
 import com.android.systemui.keyguard.domain.interactor.KeyguardWakeDirectlyToGoneInteractor;
@@ -319,6 +320,7 @@ public class KeyguardService extends Service {
     private final WindowManagerOcclusionManager mWmOcclusionManager;
     private final KeyguardEnabledInteractor mKeyguardEnabledInteractor;
     private final KeyguardWakeDirectlyToGoneInteractor mKeyguardWakeDirectlyToGoneInteractor;
+    private final KeyguardDismissInteractor mKeyguardDismissInteractor;
     private final Lazy<FoldGracePeriodProvider> mFoldGracePeriodProvider = new Lazy<>() {
         @Override
         public FoldGracePeriodProvider get() {
@@ -346,7 +348,8 @@ public class KeyguardService extends Service {
             KeyguardInteractor keyguardInteractor,
             KeyguardEnabledInteractor keyguardEnabledInteractor,
             Lazy<KeyguardStateCallbackStartable> keyguardStateCallbackStartableLazy,
-            KeyguardWakeDirectlyToGoneInteractor keyguardWakeDirectlyToGoneInteractor) {
+            KeyguardWakeDirectlyToGoneInteractor keyguardWakeDirectlyToGoneInteractor,
+            KeyguardDismissInteractor keyguardDismissInteractor) {
         super();
         mKeyguardViewMediator = keyguardViewMediator;
         mKeyguardLifecyclesDispatcher = keyguardLifecyclesDispatcher;
@@ -375,6 +378,7 @@ public class KeyguardService extends Service {
         mWmOcclusionManager = windowManagerOcclusionManager;
         mKeyguardEnabledInteractor = keyguardEnabledInteractor;
         mKeyguardWakeDirectlyToGoneInteractor = keyguardWakeDirectlyToGoneInteractor;
+        mKeyguardDismissInteractor = keyguardDismissInteractor;
     }
 
     @Override
@@ -482,7 +486,11 @@ public class KeyguardService extends Service {
         public void dismiss(IKeyguardDismissCallback callback, CharSequence message) {
             trace("dismiss message=" + message);
             checkPermission();
-            mKeyguardViewMediator.dismiss(callback, message);
+            if (KeyguardWmStateRefactor.isEnabled()) {
+                mKeyguardDismissInteractor.dismissKeyguardWithCallback(callback);
+            } else {
+                mKeyguardViewMediator.dismiss(callback, message);
+            }
         }
 
         @Override // Binder interface
