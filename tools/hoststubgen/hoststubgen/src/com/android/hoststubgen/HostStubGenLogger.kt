@@ -185,6 +185,16 @@ class HostStubGenLogger {
         println(LogLevel.Debug, format, *args)
     }
 
+    inline fun <T> iTime(message: String, block: () -> T): T {
+        val start = System.currentTimeMillis()
+        val ret = block()
+        val end = System.currentTimeMillis()
+
+        log.i("%s: took %.1f second(s).", message, (end - start) / 1000.0)
+
+        return ret
+    }
+
     inline fun forVerbose(block: () -> Unit) {
         if (isEnabled(LogLevel.Verbose)) {
             block()
