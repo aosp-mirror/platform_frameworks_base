@@ -89,6 +89,7 @@ constructor(
                     .filter { it.callType == CallType.Ongoing }
                     .minByOrNull { it.whenTime }
             }
+            .distinctUntilChanged()
             .flowOn(backgroundDispatcher)
 
     /** Are any notifications being actively presented in the notification stack? */
