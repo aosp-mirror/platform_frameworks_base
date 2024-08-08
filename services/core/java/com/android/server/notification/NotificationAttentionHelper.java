@@ -1519,7 +1519,14 @@ public final class NotificationAttentionHelper {
         @Override
         public void setLastNotificationUpdateTimeMs(NotificationRecord record,
                 long timestampMillis) {
-            super.setLastNotificationUpdateTimeMs(record, timestampMillis);
+            if (Flags.politeNotificationsAttnUpdate()) {
+                // Set last update per package/channel only for exempt notifications
+                if (isAvalancheExempted(record)) {
+                    super.setLastNotificationUpdateTimeMs(record, timestampMillis);
+                }
+            } else {
+                super.setLastNotificationUpdateTimeMs(record, timestampMillis);
+            }
             mLastNotificationTimestamp = timestampMillis;
             mAppStrategy.setLastNotificationUpdateTimeMs(record, timestampMillis);
         }
