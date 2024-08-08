@@ -499,7 +499,8 @@ public class HearingDevicesDialogDelegate implements SystemUIDialog.Delegate,
         final List<ResolveInfo> resolved = packageManager.queryIntentActivities(LIVE_CAPTION_INTENT,
                 /* flags= */ 0);
         if (!resolved.isEmpty()) {
-            return new ToolItem(context.getString(R.string.live_caption_title),
+            return new ToolItem(
+                    context.getString(R.string.quick_settings_hearing_devices_live_caption_title),
                     context.getDrawable(R.drawable.ic_volume_odi_captions),
                     LIVE_CAPTION_INTENT);
         }
