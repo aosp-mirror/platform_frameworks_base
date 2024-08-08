@@ -2399,6 +2399,16 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
      */
     private void handleDismiss(IKeyguardDismissCallback callback, CharSequence message) {
         if (mShowing) {
+            if (KeyguardWmStateRefactor.isEnabled()) {
+                Log.d(TAG, "Dismissing keyguard with keyguard_wm_refactor_enabled: "
+                        + "cancelDoKeyguardLaterLocked");
+
+                // This won't get canceled in onKeyguardExitFinished() if the refactor is enabled,
+                // which can lead to the keyguard re-showing. Cancel here for now; this can be
+                // removed once we migrate the logic that posts doKeyguardLater in the first place.
+                cancelDoKeyguardLaterLocked();
+            }
+
             if (callback != null) {
                 mDismissCallbackRegistry.addCallback(callback);
             }
