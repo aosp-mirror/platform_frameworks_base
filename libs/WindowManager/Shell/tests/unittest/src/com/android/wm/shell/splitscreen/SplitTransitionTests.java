@@ -219,7 +219,7 @@ public class SplitTransitionTests extends ShellTestCase {
 
     @Test
     @UiThreadTest
-    public void testRemoteTransitionConsumed() {
+    public void testRemoteTransitionConsumedForStartAnimation() {
         // Omit side child change
         TransitionInfo info = new TransitionInfoBuilder(TRANSIT_OPEN, 0)
                 .addChange(TRANSIT_OPEN, mMainChild)
@@ -238,7 +238,30 @@ public class SplitTransitionTests extends ShellTestCase {
         assertTrue(accepted);
 
         assertTrue(testRemote.isConsumed());
+    }
 
+    @Test
+    @UiThreadTest
+    public void testRemoteTransitionConsumed() {
+        // Omit side child change
+        TransitionInfo info = new TransitionInfoBuilder(TRANSIT_OPEN, 0)
+                .addChange(TRANSIT_OPEN, mMainChild)
+                .build();
+        TestRemoteTransition testRemote = new TestRemoteTransition();
+
+        IBinder transition = mSplitScreenTransitions.startEnterTransition(
+                TRANSIT_OPEN, new WindowContainerTransaction(),
+                new RemoteTransition(testRemote, "Test"), mStageCoordinator,
+                TRANSIT_SPLIT_SCREEN_PAIR_OPEN, false);
+        mMainStage.onTaskAppeared(mMainChild, createMockSurface());
+        mStageCoordinator.startAnimation(transition, info,
+                mock(SurfaceControl.Transaction.class),
+                mock(SurfaceControl.Transaction.class),
+                mock(Transitions.TransitionFinishCallback.class));
+        mStageCoordinator.onTransitionConsumed(transition, false /*aborted*/,
+                mock(SurfaceControl.Transaction.class));
+
+        assertTrue(testRemote.isConsumed());
     }
 
     @Test
