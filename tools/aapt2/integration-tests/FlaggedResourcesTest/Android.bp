@@ -47,8 +47,24 @@ genrule {
         "AndroidManifest.xml",
         ":resource-flagging-test-app-compile",
     ],
-    out: ["resapp.apk"],
+    out: [
+        "resapp.apk",
+    ],
     cmd: "$(location aapt2) link -o $(out) --manifest $(in)",
+}
+
+genrule {
+    name: "resource-flagging-test-app-r-java",
+    tools: ["aapt2"],
+    // The first input file in the list must be the manifest
+    srcs: [
+        "AndroidManifest.xml",
+        ":resource-flagging-test-app-compile",
+    ],
+    out: [
+        "resource-flagging-java/com/android/intenal/flaggedresources/R.java",
+    ],
+    cmd: "$(location aapt2) link -o $(genDir)/resapp.apk --java $(genDir)/resource-flagging-java --manifest $(in)",
 }
 
 java_genrule {

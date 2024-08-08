@@ -68,11 +68,6 @@ public class ResourceFlaggingTest {
         assertThat(getBoolean("res3")).isTrue();
     }
 
-    @Test
-    public void testFlagDisabledNoValue() {
-        assertThat(getString("str1")).isEqualTo("");
-    }
-
     private boolean getBoolean(String name) {
         int resId = mResources.getIdentifier(
                 name,

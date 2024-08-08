@@ -40,7 +40,25 @@ void DumpStringPoolToString(LoadedApk* loaded_apk, std::string* output) {
   output_stream.Flush();
 }
 
-TEST_F(FlaggedResourcesTest, DisabledStringRemoved) {
+void DumpResourceTableToString(LoadedApk* loaded_apk, std::string* output) {
+  StringOutputStream output_stream(output);
+  Printer printer(&output_stream);
+
+  DumpTableCommand command(&printer, &noop_diag);
+  ASSERT_EQ(command.Dump(loaded_apk), 0);
+  output_stream.Flush();
+}
+
+void DumpChunksToString(LoadedApk* loaded_apk, std::string* output) {
+  StringOutputStream output_stream(output);
+  Printer printer(&output_stream);
+
+  DumpChunks command(&printer, &noop_diag);
+  ASSERT_EQ(command.Dump(loaded_apk), 0);
+  output_stream.Flush();
+}
+
+TEST_F(FlaggedResourcesTest, DisabledStringRemovedFromPool) {
   auto apk_path = file::BuildPath({android::base::GetExecutableDirectory(), "resapp.apk"});
   auto loaded_apk = LoadedApk::LoadApkFromPath(apk_path, &noop_diag);
 
@@ -49,6 +67,35 @@ TEST_F(FlaggedResourcesTest, DisabledStringRemoved) {
 
   std::string excluded = "DONTFIND";
   ASSERT_EQ(output.find(excluded), std::string::npos);
+}
+
+TEST_F(FlaggedResourcesTest, DisabledResourcesRemovedFromTable) {
+  auto apk_path = file::BuildPath({android::base::GetExecutableDirectory(), "resapp.apk"});
+  auto loaded_apk = LoadedApk::LoadApkFromPath(apk_path, &noop_diag);
+
+  std::string output;
+  DumpResourceTableToString(loaded_apk.get(), &output);
+}
+
+TEST_F(FlaggedResourcesTest, DisabledResourcesRemovedFromTableChunks) {
+  auto apk_path = file::BuildPath({android::base::GetExecutableDirectory(), "resapp.apk"});
+  auto loaded_apk = LoadedApk::LoadApkFromPath(apk_path, &noop_diag);
+
+  std::string output;
+  DumpChunksToString(loaded_apk.get(), &output);
+
+  ASSERT_EQ(output.find("res4"), std::string::npos);
+  ASSERT_EQ(output.find("str1"), std::string::npos);
+}
+
+TEST_F(FlaggedResourcesTest, DisabledResourcesInRJava) {
+  auto r_path = file::BuildPath({android::base::GetExecutableDirectory(), "resource-flagging-java",
+                                 "com", "android", "intenal", "flaggedresources", "R.java"});
+  std::string r_contents;
+  ::android::base::ReadFileToString(r_path, &r_contents);
+
+  ASSERT_NE(r_contents.find("public static final int res4"), std::string::npos);
+  ASSERT_NE(r_contents.find("public static final int str1"), std::string::npos);
 }
 
 }  // namespace aapt

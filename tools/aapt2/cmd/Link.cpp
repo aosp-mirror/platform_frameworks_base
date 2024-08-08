@@ -57,6 +57,7 @@
 #include "java/ManifestClassGenerator.h"
 #include "java/ProguardRules.h"
 #include "link/FeatureFlagsFilter.h"
+#include "link/FlagDisabledResourceRemover.h"
 #include "link/Linkers.h"
 #include "link/ManifestFixer.h"
 #include "link/NoDefaultResourceRemover.h"
@@ -1885,6 +1886,12 @@ class Linker {
       }
     }
 
+    if (!FlagDisabledResourceRemover{}.Consume(context_, table)) {
+      context_->GetDiagnostics()->Error(android::DiagMessage()
+                                        << "failed removing resources behind disabled flags");
+      return 1;
+    }
+
     const bool keep_raw_values = (context_->GetPackageType() == PackageType::kStaticLib)
                                  || options_.keep_raw_values;
     bool result = FlattenXml(context_, *manifest, kAndroidManifestPath, keep_raw_values,
@@ -2371,18 +2378,18 @@ class Linker {
       return 1;
     };
 
+    if (options_.generate_java_class_path || options_.generate_text_symbols_path) {
+      if (!GenerateJavaClasses()) {
+        return 1;
+      }
+    }
+
     if (!WriteApk(archive_writer.get(), &proguard_keep_set, manifest_xml.get(), &final_table_)) {
       return 1;
     }
 
     if (!CopyAssetsDirsToApk(archive_writer.get())) {
       return 1;
-    }
-
-    if (options_.generate_java_class_path || options_.generate_text_symbols_path) {
-      if (!GenerateJavaClasses()) {
-        return 1;
-      }
     }
 
     if (!WriteProguardFile(options_.generate_proguard_rules_path, proguard_keep_set)) {
