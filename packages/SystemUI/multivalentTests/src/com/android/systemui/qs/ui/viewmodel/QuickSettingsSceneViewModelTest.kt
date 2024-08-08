@@ -51,7 +51,6 @@ import com.android.systemui.scene.shared.model.SceneFamilies
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.settings.brightness.ui.viewmodel.brightnessMirrorViewModelFactory
 import com.android.systemui.shade.ui.viewmodel.shadeHeaderViewModelFactory
-import com.android.systemui.statusbar.notification.stack.ui.viewmodel.notificationsPlaceholderViewModel
 import com.android.systemui.testKosmos
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.mock
@@ -96,7 +95,6 @@ class QuickSettingsSceneViewModelTest : SysuiTestCase() {
                 brightnessMirrorViewModelFactory = kosmos.brightnessMirrorViewModelFactory,
                 shadeHeaderViewModelFactory = kosmos.shadeHeaderViewModelFactory,
                 qsSceneAdapter = qsFlexiglassAdapter,
-                notifications = kosmos.notificationsPlaceholderViewModel,
                 footerActionsViewModelFactory = footerActionsViewModelFactory,
                 footerActionsController = footerActionsController,
                 sceneBackInteractor = sceneBackInteractor,
