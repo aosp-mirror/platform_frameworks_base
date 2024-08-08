@@ -171,6 +171,17 @@
                     "include-filter": "android.content.pm.cts.PackageManagerShellCommandMultiUserTest"
                 }
             ]
+        },
+        {
+            "name":"CtsPackageInstallerCUJTestCases",
+            "options":[
+                {
+                    "exclude-annotation":"androidx.test.filters.FlakyTest"
+                },
+                {
+                    "exclude-annotation":"org.junit.Ignore"
+                }
+            ]
         }
     ]
 }
