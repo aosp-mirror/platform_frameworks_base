@@ -317,7 +317,11 @@ public class PerfettoProtoLogImpl extends IProtoLogClient.Stub implements IProto
         }
 
         if (mViewerConfigReader != null) {
-            mViewerConfigReader.loadViewerConfig(groupsLoggingToLogcat.toArray(new String[0]));
+            // Load in background to avoid delay in boot process.
+            // The caveat is that any log message that is also logged to logcat will not be
+            // successfully decoded until this completes.
+            mBackgroundLoggingService.execute(() -> mViewerConfigReader
+                    .loadViewerConfig(groupsLoggingToLogcat.toArray(new String[0])));
         }
     }
 
