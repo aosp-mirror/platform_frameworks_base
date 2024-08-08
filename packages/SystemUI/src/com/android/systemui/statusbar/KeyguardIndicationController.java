@@ -785,7 +785,8 @@ public class KeyguardIndicationController {
 
     private void updateLockScreenAdaptiveAuthMsg(int userId) {
         final boolean deviceLocked = mKeyguardUpdateMonitor.isDeviceLockedByAdaptiveAuth(userId);
-        if (deviceLocked) {
+        final boolean canSkipBouncer = mKeyguardUpdateMonitor.getUserCanSkipBouncer(userId);
+        if (deviceLocked && !canSkipBouncer) {
             mRotateTextViewController.updateIndication(
                     INDICATION_TYPE_ADAPTIVE_AUTH,
                     new KeyguardIndication.Builder()

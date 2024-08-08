@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2024 The Android Open Source Project
+ * Copyright (C) 2023 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,17 +14,16 @@
  * limitations under the License.
  */
 
-package com.android.systemui.qs.ui.viewmodel
+package com.android.systemui.shade.ui.viewmodel
 
 import com.android.systemui.kosmos.Kosmos
+import com.android.systemui.kosmos.Kosmos.Fixture
+import com.android.systemui.qs.ui.adapter.qsSceneAdapter
 import com.android.systemui.shade.domain.interactor.shadeInteractor
-import com.android.systemui.shade.ui.viewmodel.overlayShadeViewModel
 
-val Kosmos.quickSettingsShadeSceneViewModel: QuickSettingsShadeSceneViewModel by
-    Kosmos.Fixture {
-        QuickSettingsShadeSceneViewModel(
-            shadeInteractor = shadeInteractor,
-            overlayShadeViewModel = overlayShadeViewModel,
-            quickSettingsContainerViewModel = quickSettingsContainerViewModel,
-        )
-    }
+val Kosmos.shadeSceneActionsViewModel: ShadeSceneActionsViewModel by Fixture {
+    ShadeSceneActionsViewModel(
+        qsSceneAdapter = qsSceneAdapter,
+        shadeInteractor = shadeInteractor,
+    )
+}

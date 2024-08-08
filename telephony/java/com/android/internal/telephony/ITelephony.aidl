@@ -3007,16 +3007,18 @@ interface ITelephony {
      */
     @JavaPassthrough(annotation="@android.annotation.RequiresPermission("
             + "android.Manifest.permission.SATELLITE_COMMUNICATION)")
-    void setDeviceAlignedWithSatellite(int subId, in boolean isAligned);
+    void setDeviceAlignedWithSatellite(int subId, boolean isAligned);
 
     /**
      * This API can be used by only CTS to update satellite vendor service package name.
      *
      * @param servicePackageName The package name of the satellite vendor service.
+     * @param provisioned Whether satellite should be provisioned or not.
+     *
      * @return {@code true} if the satellite vendor service is set successfully,
      * {@code false} otherwise.
      */
-    boolean setSatelliteServicePackageName(in String servicePackageName);
+    boolean setSatelliteServicePackageName(in String servicePackageName, in String provisioned);
 
     /**
      * This API can be used by only CTS to update satellite gateway service package name.

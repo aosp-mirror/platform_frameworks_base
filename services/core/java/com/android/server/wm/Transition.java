@@ -358,8 +358,12 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
         return mToken;
     }
 
-    void addFlag(int flag) {
-        mFlags |= flag;
+    void addFlag(@TransitionFlags int flags) {
+        mFlags |= flags;
+    }
+
+    void removeFlag(@TransitionFlags int flags) {
+        mFlags &= ~flags;
     }
 
     void calcParallelCollectType(WindowContainerTransaction wct) {

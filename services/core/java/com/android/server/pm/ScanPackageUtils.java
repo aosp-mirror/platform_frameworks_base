@@ -482,6 +482,7 @@ final class ScanPackageUtils {
                             + " to " + volumeUuid);
             pkgSetting.setVolumeUuid(volumeUuid);
         }
+        pkgSetting.setLeavingSharedUser(parsedPackage.isLeavingSharedUser());
 
         SharedLibraryInfo sdkLibraryInfo = null;
         if (!TextUtils.isEmpty(parsedPackage.getSdkLibraryName())) {

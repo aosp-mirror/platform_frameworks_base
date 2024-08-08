@@ -250,6 +250,12 @@ public class AppCompatOrientationOverridesTest extends WindowTestsBase {
             mTestCurrentTimeMillisSupplier = new CurrentTimeMillisSupplierFake();
         }
 
+        @Override
+        void onPostActivityCreation(@NonNull ActivityRecord activity) {
+            super.onPostActivityCreation(activity);
+            spyOn(activity.mAppCompatController.getAppCompatAspectRatioPolicy());
+        }
+
         // Useful to reduce timeout during tests
         void prepareMockedTime() {
             getTopOrientationOverrides().mOrientationOverridesState.mCurrentTimeMillisSupplier =

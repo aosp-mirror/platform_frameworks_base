@@ -213,10 +213,14 @@ fun TutorialAnimation(
             transitionSpec = {
                 if (initialState == NOT_STARTED && targetState == IN_PROGRESS) {
                     val transitionDurationMillis = 150
-                    fadeIn(
-                        animationSpec = tween(transitionDurationMillis, easing = LinearEasing)
-                    ) togetherWith
-                        fadeOut(animationSpec = snap(delayMillis = transitionDurationMillis))
+                    fadeIn(animationSpec = tween(transitionDurationMillis, easing = LinearEasing))
+                        .togetherWith(
+                            fadeOut(animationSpec = snap(delayMillis = transitionDurationMillis))
+                        )
+                        // we explicitly don't want size transform because when targetState
+                        // animation is loaded for the first time, AnimatedContent thinks target
+                        // size is smaller and tries to shrink initial state animation
+                        .using(sizeTransform = null)
                 } else {
                     // empty transition works because all remaining transitions are from IN_PROGRESS
                     // state which shares initial animation frame with both FINISHED and NOT_STARTED

@@ -218,3 +218,10 @@ flag {
     description: "Enables desktop windowing app-to-web education"
     bug: "348205896"
 }
+
+flag {
+    name: "enable_minimize_button"
+    namespace: "lse_desktop_experience"
+    description: "Adds a minimize button the the caption bar"
+    bug: "356843241"
+}

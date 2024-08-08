@@ -492,6 +492,9 @@ final class LetterboxUiController {
             return;
         }
 
+        pw.println(prefix + "isTransparentPolicyRunning="
+                + mActivityRecord.mAppCompatController.getTransparentPolicy().isRunning());
+
         boolean areBoundsLetterboxed = mainWin.areAppWindowBoundsLetterboxed();
         pw.println(prefix + "areBoundsLetterboxed=" + areBoundsLetterboxed);
         if (!areBoundsLetterboxed) {

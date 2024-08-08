@@ -45,6 +45,7 @@ message TaskSnapshotProto {
   int32 letterbox_inset_top = 18;
   int32 letterbox_inset_right = 19;
   int32 letterbox_inset_bottom = 20;
+  int32 ui_mode = 21;
 }
 
 // Persistent letterboxing configurations

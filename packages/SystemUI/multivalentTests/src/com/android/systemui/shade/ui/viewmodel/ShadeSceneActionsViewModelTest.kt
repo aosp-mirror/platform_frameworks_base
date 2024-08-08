@@ -27,7 +27,6 @@ import com.android.compose.animation.scene.SwipeDirection
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.authentication.data.repository.fakeAuthenticationRepository
 import com.android.systemui.authentication.shared.model.AuthenticationMethodModel
-import com.android.systemui.common.ui.data.repository.fakeConfigurationRepository
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.deviceentry.data.repository.fakeDeviceEntryRepository
 import com.android.systemui.deviceentry.domain.interactor.deviceEntryInteractor
@@ -37,8 +36,6 @@ import com.android.systemui.keyguard.domain.interactor.keyguardEnabledInteractor
 import com.android.systemui.keyguard.shared.model.SuccessFingerprintAuthenticationStatus
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.lifecycle.activateIn
-import com.android.systemui.media.controls.data.repository.mediaFilterRepository
-import com.android.systemui.media.controls.shared.model.MediaData
 import com.android.systemui.qs.ui.adapter.fakeQSSceneAdapter
 import com.android.systemui.res.R
 import com.android.systemui.scene.domain.interactor.sceneInteractor
@@ -49,14 +46,10 @@ import com.android.systemui.scene.shared.model.TransitionKeys.ToSplitShade
 import com.android.systemui.shade.data.repository.shadeRepository
 import com.android.systemui.shade.domain.startable.shadeStartable
 import com.android.systemui.shade.shared.flag.DualShade
-import com.android.systemui.shade.shared.model.ShadeMode
 import com.android.systemui.testKosmos
-import com.android.systemui.unfold.fakeUnfoldTransitionProgressProvider
 import com.google.common.truth.Truth.assertThat
-import java.util.Locale
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
@@ -70,7 +63,7 @@ import org.junit.runner.RunWith
 @TestableLooper.RunWithLooper
 @EnableSceneContainer
 @DisableFlags(DualShade.FLAG_NAME)
-class ShadeSceneViewModelTest : SysuiTestCase() {
+class ShadeSceneActionsViewModelTest : SysuiTestCase() {
 
     private val kosmos = testKosmos()
     private val testScope = kosmos.testScope
@@ -78,7 +71,7 @@ class ShadeSceneViewModelTest : SysuiTestCase() {
     private val shadeRepository by lazy { kosmos.shadeRepository }
     private val qsSceneAdapter by lazy { kosmos.fakeQSSceneAdapter }
 
-    private val underTest: ShadeSceneViewModel by lazy { kosmos.shadeSceneViewModel }
+    private val underTest: ShadeSceneActionsViewModel by lazy { kosmos.shadeSceneActionsViewModel }
 
     @Before
     fun setUp() {
@@ -88,13 +81,13 @@ class ShadeSceneViewModelTest : SysuiTestCase() {
     @Test
     fun upTransitionSceneKey_deviceLocked_lockScreen() =
         testScope.runTest {
-            val destinationScenes by collectLastValue(underTest.destinationScenes)
+            val actions by collectLastValue(underTest.actions)
             val homeScene by collectLastValue(kosmos.homeSceneFamilyResolver.resolvedScene)
             kosmos.fakeAuthenticationRepository.setAuthenticationMethod(
                 AuthenticationMethodModel.Pin
             )
 
-            assertThat(destinationScenes?.get(Swipe(SwipeDirection.Up))?.toScene)
+            assertThat(actions?.get(Swipe(SwipeDirection.Up))?.toScene)
                 .isEqualTo(SceneFamilies.Home)
             assertThat(homeScene).isEqualTo(Scenes.Lockscreen)
         }
@@ -102,14 +95,14 @@ class ShadeSceneViewModelTest : SysuiTestCase() {
     @Test
     fun upTransitionSceneKey_deviceUnlocked_gone() =
         testScope.runTest {
-            val destinationScenes by collectLastValue(underTest.destinationScenes)
+            val actions by collectLastValue(underTest.actions)
             val homeScene by collectLastValue(kosmos.homeSceneFamilyResolver.resolvedScene)
             kosmos.fakeAuthenticationRepository.setAuthenticationMethod(
                 AuthenticationMethodModel.Pin
             )
             setDeviceEntered(true)
 
-            assertThat(destinationScenes?.get(Swipe(SwipeDirection.Up))?.toScene)
+            assertThat(actions?.get(Swipe(SwipeDirection.Up))?.toScene)
                 .isEqualTo(SceneFamilies.Home)
             assertThat(homeScene).isEqualTo(Scenes.Gone)
         }
@@ -117,14 +110,14 @@ class ShadeSceneViewModelTest : SysuiTestCase() {
     @Test
     fun upTransitionSceneKey_keyguardDisabled_gone() =
         testScope.runTest {
-            val destinationScenes by collectLastValue(underTest.destinationScenes)
+            val actions by collectLastValue(underTest.actions)
             val homeScene by collectLastValue(kosmos.homeSceneFamilyResolver.resolvedScene)
             kosmos.fakeAuthenticationRepository.setAuthenticationMethod(
                 AuthenticationMethodModel.Pin
             )
             kosmos.keyguardEnabledInteractor.notifyKeyguardEnabled(false)
 
-            assertThat(destinationScenes?.get(Swipe(SwipeDirection.Up))?.toScene)
+            assertThat(actions?.get(Swipe(SwipeDirection.Up))?.toScene)
                 .isEqualTo(SceneFamilies.Home)
             assertThat(homeScene).isEqualTo(Scenes.Gone)
         }
@@ -132,7 +125,7 @@ class ShadeSceneViewModelTest : SysuiTestCase() {
     @Test
     fun upTransitionSceneKey_authMethodSwipe_lockscreenNotDismissed_goesToLockscreen() =
         testScope.runTest {
-            val destinationScenes by collectLastValue(underTest.destinationScenes)
+            val actions by collectLastValue(underTest.actions)
             val homeScene by collectLastValue(kosmos.homeSceneFamilyResolver.resolvedScene)
             kosmos.fakeDeviceEntryRepository.setLockscreenEnabled(true)
             kosmos.fakeAuthenticationRepository.setAuthenticationMethod(
@@ -140,7 +133,7 @@ class ShadeSceneViewModelTest : SysuiTestCase() {
             )
             sceneInteractor.changeScene(Scenes.Lockscreen, "reason")
 
-            assertThat(destinationScenes?.get(Swipe(SwipeDirection.Up))?.toScene)
+            assertThat(actions?.get(Swipe(SwipeDirection.Up))?.toScene)
                 .isEqualTo(SceneFamilies.Home)
             assertThat(homeScene).isEqualTo(Scenes.Lockscreen)
         }
@@ -148,7 +141,7 @@ class ShadeSceneViewModelTest : SysuiTestCase() {
     @Test
     fun upTransitionSceneKey_authMethodSwipe_lockscreenDismissed_goesToGone() =
         testScope.runTest {
-            val destinationScenes by collectLastValue(underTest.destinationScenes)
+            val actions by collectLastValue(underTest.actions)
             val homeScene by collectLastValue(kosmos.homeSceneFamilyResolver.resolvedScene)
             kosmos.fakeDeviceEntryRepository.setLockscreenEnabled(true)
             kosmos.fakeAuthenticationRepository.setAuthenticationMethod(
@@ -157,7 +150,7 @@ class ShadeSceneViewModelTest : SysuiTestCase() {
             runCurrent()
             sceneInteractor.changeScene(Scenes.Gone, "reason")
 
-            assertThat(destinationScenes?.get(Swipe(SwipeDirection.Up))?.toScene)
+            assertThat(actions?.get(Swipe(SwipeDirection.Up))?.toScene)
                 .isEqualTo(SceneFamilies.Home)
             assertThat(homeScene).isEqualTo(Scenes.Gone)
         }
@@ -165,78 +158,22 @@ class ShadeSceneViewModelTest : SysuiTestCase() {
     @Test
     fun upTransitionKey_splitShadeEnabled_isGoneToSplitShade() =
         testScope.runTest {
-            val destinationScenes by collectLastValue(underTest.destinationScenes)
+            val actions by collectLastValue(underTest.actions)
             shadeRepository.setShadeLayoutWide(true)
             runCurrent()
 
-            assertThat(destinationScenes?.get(Swipe(SwipeDirection.Up))?.transitionKey)
+            assertThat(actions?.get(Swipe(SwipeDirection.Up))?.transitionKey)
                 .isEqualTo(ToSplitShade)
         }
 
     @Test
     fun upTransitionKey_splitShadeDisable_isNull() =
         testScope.runTest {
-            val destinationScenes by collectLastValue(underTest.destinationScenes)
+            val actions by collectLastValue(underTest.actions)
             shadeRepository.setShadeLayoutWide(false)
             runCurrent()
 
-            assertThat(destinationScenes?.get(Swipe(SwipeDirection.Up))?.transitionKey).isNull()
-        }
-
-    @Test
-    fun isClickable_deviceUnlocked_false() =
-        testScope.runTest {
-            val isClickable by collectLastValue(underTest.isClickable)
-            kosmos.fakeAuthenticationRepository.setAuthenticationMethod(
-                AuthenticationMethodModel.Pin
-            )
-            setDeviceEntered(true)
-            runCurrent()
-
-            assertThat(isClickable).isFalse()
-        }
-
-    @Test
-    fun isClickable_deviceLockedSecurely_true() =
-        testScope.runTest {
-            val isClickable by collectLastValue(underTest.isClickable)
-            kosmos.fakeAuthenticationRepository.setAuthenticationMethod(
-                AuthenticationMethodModel.Pin
-            )
-            runCurrent()
-
-            assertThat(isClickable).isTrue()
-        }
-
-    @Test
-    fun onContentClicked_deviceLockedSecurely_switchesToLockscreen() =
-        testScope.runTest {
-            val currentScene by collectLastValue(sceneInteractor.currentScene)
-            kosmos.fakeAuthenticationRepository.setAuthenticationMethod(
-                AuthenticationMethodModel.Pin
-            )
-            runCurrent()
-
-            underTest.onContentClicked()
-
-            assertThat(currentScene).isEqualTo(Scenes.Lockscreen)
-        }
-
-    @Test
-    fun addAndRemoveMedia_mediaVisibilityisUpdated() =
-        testScope.runTest {
-            val isMediaVisible by collectLastValue(underTest.isMediaVisible)
-            val userMedia = MediaData(active = true)
-
-            assertThat(isMediaVisible).isFalse()
-
-            kosmos.mediaFilterRepository.addSelectedUserMediaEntry(userMedia)
-
-            assertThat(isMediaVisible).isTrue()
-
-            kosmos.mediaFilterRepository.removeSelectedUserMediaEntry(userMedia.instanceId)
-
-            assertThat(isMediaVisible).isFalse()
+            assertThat(actions?.get(Swipe(SwipeDirection.Up))?.transitionKey).isNull()
         }
 
     @Test
@@ -244,8 +181,8 @@ class ShadeSceneViewModelTest : SysuiTestCase() {
         testScope.runTest {
             overrideResource(R.bool.config_use_split_notification_shade, true)
             kosmos.shadeStartable.start()
-            val destinationScenes by collectLastValue(underTest.destinationScenes)
-            assertThat(destinationScenes?.get(Swipe(SwipeDirection.Down))?.toScene).isNull()
+            val actions by collectLastValue(underTest.actions)
+            assertThat(actions?.get(Swipe(SwipeDirection.Down))?.toScene).isNull()
         }
 
     @Test
@@ -253,89 +190,24 @@ class ShadeSceneViewModelTest : SysuiTestCase() {
         testScope.runTest {
             overrideResource(R.bool.config_use_split_notification_shade, false)
             kosmos.shadeStartable.start()
-            val destinationScenes by collectLastValue(underTest.destinationScenes)
-            assertThat(destinationScenes?.get(Swipe(SwipeDirection.Down))?.toScene)
+            val actions by collectLastValue(underTest.actions)
+            assertThat(actions?.get(Swipe(SwipeDirection.Down))?.toScene)
                 .isEqualTo(Scenes.QuickSettings)
         }
 
     @Test
     fun upTransitionSceneKey_customizing_noTransition() =
         testScope.runTest {
-            val destinationScenes by collectLastValue(underTest.destinationScenes)
+            val actions by collectLastValue(underTest.actions)
 
             qsSceneAdapter.setCustomizing(true)
             assertThat(
-                    destinationScenes!!.keys.filterIsInstance<Swipe>().filter {
+                    actions!!.keys.filterIsInstance<Swipe>().filter {
                         it.direction == SwipeDirection.Up
                     }
                 )
                 .isEmpty()
         }
-
-    @Test
-    fun shadeMode() =
-        testScope.runTest {
-            val shadeMode by collectLastValue(underTest.shadeMode)
-
-            shadeRepository.setShadeLayoutWide(true)
-            assertThat(shadeMode).isEqualTo(ShadeMode.Split)
-
-            shadeRepository.setShadeLayoutWide(false)
-            assertThat(shadeMode).isEqualTo(ShadeMode.Single)
-
-            shadeRepository.setShadeLayoutWide(true)
-            assertThat(shadeMode).isEqualTo(ShadeMode.Split)
-        }
-
-    @Test
-    fun unfoldTransitionProgress() =
-        testScope.runTest {
-            val maxTranslation = prepareConfiguration()
-            val translations by
-                collectLastValue(
-                    combine(
-                        underTest.unfoldTranslationX(isOnStartSide = true),
-                        underTest.unfoldTranslationX(isOnStartSide = false),
-                    ) { start, end ->
-                        Translations(
-                            start = start,
-                            end = end,
-                        )
-                    }
-                )
-
-            val unfoldProvider = kosmos.fakeUnfoldTransitionProgressProvider
-            unfoldProvider.onTransitionStarted()
-            assertThat(translations?.start).isEqualTo(0f)
-            assertThat(translations?.end).isEqualTo(-0f)
-
-            repeat(10) { repetition ->
-                val transitionProgress = 0.1f * (repetition + 1)
-                unfoldProvider.onTransitionProgress(transitionProgress)
-                assertThat(translations?.start).isEqualTo((1 - transitionProgress) * maxTranslation)
-                assertThat(translations?.end).isEqualTo(-(1 - transitionProgress) * maxTranslation)
-            }
-
-            unfoldProvider.onTransitionFinishing()
-            assertThat(translations?.start).isEqualTo(0f)
-            assertThat(translations?.end).isEqualTo(-0f)
-
-            unfoldProvider.onTransitionFinished()
-            assertThat(translations?.start).isEqualTo(0f)
-            assertThat(translations?.end).isEqualTo(-0f)
-        }
-
-    private fun prepareConfiguration(): Int {
-        val configuration = context.resources.configuration
-        configuration.setLayoutDirection(Locale.US)
-        kosmos.fakeConfigurationRepository.onConfigurationChange(configuration)
-        val maxTranslation = 10
-        kosmos.fakeConfigurationRepository.setDimensionPixelSize(
-            R.dimen.notification_side_paddings,
-            maxTranslation
-        )
-        return maxTranslation
-    }
 
     private fun TestScope.setDeviceEntered(isEntered: Boolean) {
         if (isEntered) {
@@ -362,9 +234,4 @@ class ShadeSceneViewModelTest : SysuiTestCase() {
         )
         runCurrent()
     }
-
-    private data class Translations(
-        val start: Float,
-        val end: Float,
-    )
 }

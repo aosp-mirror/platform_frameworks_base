@@ -1,0 +1,56 @@
+/*
+ * Copyright (C) 2024 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+@file:OptIn(ExperimentalCoroutinesApi::class)
+
+package com.android.systemui.shade.ui.viewmodel
+
+import com.android.systemui.deviceentry.domain.interactor.DeviceEntryInteractor
+import com.android.systemui.lifecycle.SysUiViewModel
+import com.android.systemui.scene.domain.interactor.SceneInteractor
+import com.android.systemui.scene.shared.model.Scenes
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collectLatest
+
+/** Base class for classes that model UI state of the content of shade scenes. */
+abstract class BaseShadeSceneViewModel(
+    private val deviceEntryInteractor: DeviceEntryInteractor,
+    private val sceneInteractor: SceneInteractor,
+) : SysUiViewModel() {
+
+    private val _isEmptySpaceClickable =
+        MutableStateFlow(!deviceEntryInteractor.isDeviceEntered.value)
+    /** Whether clicking on the empty area of the shade does something */
+    val isEmptySpaceClickable: StateFlow<Boolean> = _isEmptySpaceClickable.asStateFlow()
+
+    override suspend fun onActivated() {
+        deviceEntryInteractor.isDeviceEntered.collectLatest { isDeviceEntered ->
+            _isEmptySpaceClickable.value = !isDeviceEntered
+        }
+    }
+
+    /** Notifies that the empty space in the shade has been clicked. */
+    fun onEmptySpaceClicked() {
+        if (!isEmptySpaceClickable.value) {
+            return
+        }
+
+        sceneInteractor.changeScene(Scenes.Lockscreen, "Shade empty space clicked.")
+    }
+}
