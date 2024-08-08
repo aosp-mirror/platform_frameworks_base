@@ -386,4 +386,7 @@ flag {
   description: "Refactorings related to unicorn mode to work on HSUM mode (Read only flag)"
   bug: "339201286"
   is_fixed_read_only: true
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
 }
