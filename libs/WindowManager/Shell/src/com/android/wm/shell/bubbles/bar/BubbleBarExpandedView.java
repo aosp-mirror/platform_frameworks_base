@@ -194,6 +194,13 @@ public class BubbleBarExpandedView extends FrameLayout implements BubbleTaskView
             @Override
             public void onMenuVisibilityChanged(boolean visible) {
                 setObscured(visible);
+                if (visible) {
+                    mHandleView.setFocusable(false);
+                    mHandleView.setImportantForAccessibility(IMPORTANT_FOR_ACCESSIBILITY_NO);
+                } else {
+                    mHandleView.setFocusable(true);
+                    mHandleView.setImportantForAccessibility(IMPORTANT_FOR_ACCESSIBILITY_AUTO);
+                }
             }
 
             @Override
