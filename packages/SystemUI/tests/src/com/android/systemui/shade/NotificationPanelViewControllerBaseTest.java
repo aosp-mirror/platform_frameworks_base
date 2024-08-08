@@ -192,6 +192,7 @@ import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.statusbar.policy.KeyguardUserSwitcherController;
 import com.android.systemui.statusbar.policy.KeyguardUserSwitcherView;
 import com.android.systemui.statusbar.policy.ResourcesSplitShadeStateController;
+import com.android.systemui.statusbar.policy.SplitShadeStateController;
 import com.android.systemui.statusbar.policy.data.repository.FakeUserSetupRepository;
 import com.android.systemui.statusbar.window.StatusBarWindowStateController;
 import com.android.systemui.unfold.SysUIUnfoldComponent;
@@ -428,6 +429,9 @@ public class NotificationPanelViewControllerBaseTest extends SysuiTestCase {
                 mock(DeviceEntryUdfpsInteractor.class);
         when(deviceEntryUdfpsInteractor.isUdfpsSupported()).thenReturn(MutableStateFlow(false));
 
+        final SplitShadeStateController splitShadeStateController =
+                new ResourcesSplitShadeStateController();
+
         mShadeInteractor = new ShadeInteractorImpl(
                 mTestScope.getBackgroundScope(),
                 mKosmos.getDeviceProvisioningInteractor(),
@@ -445,7 +449,8 @@ public class NotificationPanelViewControllerBaseTest extends SysuiTestCase {
                         new SharedNotificationContainerInteractor(
                                 new FakeConfigurationRepository(),
                                 mContext,
-                                new ResourcesSplitShadeStateController(),
+                                () -> splitShadeStateController,
+                                () -> mShadeInteractor,
                                 mKeyguardInteractor,
                                 deviceEntryUdfpsInteractor,
                                 () -> mLargeScreenHeaderHelper
