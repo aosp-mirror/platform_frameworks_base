@@ -27,3 +27,13 @@ flag {
       purpose: PURPOSE_BUGFIX
     }
 }
+
+flag {
+    name: "never_apply_rules_to_core_uids"
+    namespace: "backstage_power"
+    description: "Removes all rule bookkeeping and evaluation logic for core uids and uids without the internet permission"
+    bug: "356956588"
+    metadata {
+      purpose: PURPOSE_BUGFIX
+    }
+}
