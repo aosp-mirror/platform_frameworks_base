@@ -1840,11 +1840,51 @@ class Linker {
     return validate(attr->value);
   }
 
+  class FlagDisabledStringVisitor : public DescendingValueVisitor {
+   public:
+    using DescendingValueVisitor::Visit;
+
+    explicit FlagDisabledStringVisitor(android::StringPool& string_pool)
+        : string_pool_(string_pool) {
+    }
+
+    void Visit(RawString* value) override {
+      value->value = string_pool_.MakeRef("");
+    }
+
+    void Visit(String* value) override {
+      value->value = string_pool_.MakeRef("");
+    }
+
+    void Visit(StyledString* value) override {
+      value->value = string_pool_.MakeRef(android::StyleString{{""}, {}});
+    }
+
+   private:
+    DISALLOW_COPY_AND_ASSIGN(FlagDisabledStringVisitor);
+    android::StringPool& string_pool_;
+  };
+
   // Writes the AndroidManifest, ResourceTable, and all XML files referenced by the ResourceTable
   // to the IArchiveWriter.
   bool WriteApk(IArchiveWriter* writer, proguard::KeepSet* keep_set, xml::XmlResource* manifest,
                 ResourceTable* table) {
     TRACE_CALL();
+
+    FlagDisabledStringVisitor visitor(table->string_pool);
+
+    for (auto& package : table->packages) {
+      for (auto& type : package->types) {
+        for (auto& entry : type->entries) {
+          for (auto& config_value : entry->values) {
+            if (config_value->flag_status == FlagStatus::Disabled) {
+              config_value->value->Accept(&visitor);
+            }
+          }
+        }
+      }
+    }
+
     const bool keep_raw_values = (context_->GetPackageType() == PackageType::kStaticLib)
                                  || options_.keep_raw_values;
     bool result = FlattenXml(context_, *manifest, kAndroidManifestPath, keep_raw_values,
