@@ -1081,7 +1081,7 @@ public class PipTouchHandler implements PipTransitionState.PipTransitionStateCha
      * Updates the current movement bounds based on whether the menu is currently visible and
      * resized.
      */
-    private void updateMovementBounds() {
+    void updateMovementBounds() {
         Rect insetBounds = new Rect();
         mPipBoundsAlgorithm.getInsetBounds(insetBounds);
         mPipBoundsAlgorithm.getMovementBounds(mPipBoundsState.getBounds(),
