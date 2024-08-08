@@ -30,6 +30,7 @@ import android.util.Log;
 import android.util.proto.ProtoOutputStream;
 import android.view.Choreographer;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.TraceBuffer;
 
 import java.io.File;
@@ -66,6 +67,7 @@ class WindowTracingLegacy extends WindowTracing {
                 service.mGlobalLock, BUFFER_CAPACITY_TRIM);
     }
 
+    @VisibleForTesting
     WindowTracingLegacy(File traceFile, WindowManagerService service, Choreographer choreographer,
             WindowManagerGlobalLock globalLock, int bufferSize) {
         super(service, choreographer, globalLock);

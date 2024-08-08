@@ -25,6 +25,8 @@ import android.util.Log;
 import android.util.proto.ProtoOutputStream;
 import android.view.Choreographer;
 
+import com.android.internal.annotations.VisibleForTesting;
+
 import java.io.PrintWriter;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -37,7 +39,13 @@ class WindowTracingPerfetto extends WindowTracing {
             this::onStart, this::onStop);
 
     WindowTracingPerfetto(WindowManagerService service, Choreographer choreographer) {
-        super(service, choreographer, service.mGlobalLock);
+        this(service, choreographer, service.mGlobalLock);
+    }
+
+    @VisibleForTesting
+    WindowTracingPerfetto(WindowManagerService service, Choreographer choreographer,
+            WindowManagerGlobalLock globalLock) {
+        super(service, choreographer, globalLock);
     }
 
     @Override
