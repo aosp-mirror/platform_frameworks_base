@@ -22,9 +22,15 @@ import com.android.systemui.SysuiTestCase
 import com.android.systemui.contextualeducation.GestureType
 import com.android.systemui.contextualeducation.GestureType.BACK
 import com.android.systemui.coroutines.collectLastValue
+import com.android.systemui.education.data.model.GestureEduModel
+import com.android.systemui.education.data.repository.contextualEducationRepository
+import com.android.systemui.education.data.repository.fakeEduClock
+import com.android.systemui.education.shared.model.EducationUiType
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
+import kotlin.time.Duration.Companion.seconds
+import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
@@ -37,6 +43,7 @@ class KeyboardTouchpadEduInteractorTest : SysuiTestCase() {
     private val testScope = kosmos.testScope
     private val contextualEduInteractor = kosmos.contextualEducationInteractor
     private val underTest: KeyboardTouchpadEduInteractor = kosmos.keyboardTouchpadEduInteractor
+    private val eduClock = kosmos.fakeEduClock
 
     @Before
     fun setup() {
@@ -46,9 +53,29 @@ class KeyboardTouchpadEduInteractorTest : SysuiTestCase() {
     @Test
     fun newEducationInfoOnMaxSignalCountReached() =
         testScope.runTest {
-            tryTriggeringEducation(BACK)
+            triggerMaxEducationSignals(BACK)
             val model by collectLastValue(underTest.educationTriggered)
             assertThat(model?.gestureType).isEqualTo(BACK)
+        }
+
+    @Test
+    fun newEducationToastOn1stEducation() =
+        testScope.runTest {
+            val model by collectLastValue(underTest.educationTriggered)
+            triggerMaxEducationSignals(BACK)
+            assertThat(model?.educationUiType).isEqualTo(EducationUiType.Toast)
+        }
+
+    @Test
+    @kotlinx.coroutines.ExperimentalCoroutinesApi
+    fun newEducationNotificationOn2ndEducation() =
+        testScope.runTest {
+            val model by collectLastValue(underTest.educationTriggered)
+            triggerMaxEducationSignals(BACK)
+            // runCurrent() to trigger 1st education
+            runCurrent()
+            triggerMaxEducationSignals(BACK)
+            assertThat(model?.educationUiType).isEqualTo(EducationUiType.Notification)
         }
 
     @Test
@@ -64,11 +91,30 @@ class KeyboardTouchpadEduInteractorTest : SysuiTestCase() {
         testScope.runTest {
             val model by collectLastValue(underTest.educationTriggered)
             contextualEduInteractor.updateShortcutTriggerTime(BACK)
-            tryTriggeringEducation(BACK)
+            triggerMaxEducationSignals(BACK)
             assertThat(model).isNull()
         }
 
-    private suspend fun tryTriggeringEducation(gestureType: GestureType) {
+    @Test
+    fun startNewUsageSessionWhen2ndSignalReceivedAfterSessionDeadline() =
+        testScope.runTest {
+            val model by
+                collectLastValue(kosmos.contextualEducationRepository.readGestureEduModelFlow(BACK))
+            contextualEduInteractor.incrementSignalCount(BACK)
+            eduClock.offset(KeyboardTouchpadEduInteractor.usageSessionDuration.plus(1.seconds))
+            val secondSignalReceivedTime = eduClock.instant()
+            contextualEduInteractor.incrementSignalCount(BACK)
+
+            assertThat(model)
+                .isEqualTo(
+                    GestureEduModel(
+                        signalCount = 1,
+                        usageSessionStartTime = secondSignalReceivedTime
+                    )
+                )
+        }
+
+    private suspend fun triggerMaxEducationSignals(gestureType: GestureType) {
         // Increment max number of signal to try triggering education
         for (i in 1..KeyboardTouchpadEduInteractor.MAX_SIGNAL_COUNT) {
             contextualEduInteractor.incrementSignalCount(gestureType)

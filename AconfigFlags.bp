@@ -1108,6 +1108,7 @@ cc_aconfig_library {
 // Chooser / "Sharesheet"
 aconfig_declarations {
     name: "android.service.chooser.flags-aconfig",
+    exportable: true,
     package: "android.service.chooser",
     container: "system",
     srcs: ["core/java/android/service/chooser/flags.aconfig"],

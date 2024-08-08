@@ -33,11 +33,15 @@ import com.android.systemui.keyguard.data.repository.fakeCommandQueue
 import com.android.systemui.keyguard.data.repository.fakeKeyguardRepository
 import com.android.systemui.keyguard.data.repository.fakeKeyguardTransitionRepository
 import com.android.systemui.keyguard.shared.model.CameraLaunchType
+import com.android.systemui.keyguard.shared.model.DozeStateModel
+import com.android.systemui.keyguard.shared.model.DozeTransitionModel
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.StatusBarState
 import com.android.systemui.keyguard.shared.model.TransitionState
 import com.android.systemui.keyguard.shared.model.TransitionStep
 import com.android.systemui.kosmos.testScope
+import com.android.systemui.power.domain.interactor.PowerInteractor.Companion.setAwakeForTest
+import com.android.systemui.power.domain.interactor.powerInteractor
 import com.android.systemui.res.R
 import com.android.systemui.scene.domain.interactor.sceneInteractor
 import com.android.systemui.scene.shared.model.Scenes
@@ -47,6 +51,7 @@ import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
@@ -67,6 +72,7 @@ class KeyguardInteractorTest : SysuiTestCase() {
     private val configRepository by lazy { kosmos.fakeConfigurationRepository }
     private val bouncerRepository by lazy { kosmos.keyguardBouncerRepository }
     private val shadeRepository by lazy { kosmos.shadeRepository }
+    private val powerInteractor by lazy { kosmos.powerInteractor }
     private val keyguardTransitionRepository by lazy { kosmos.fakeKeyguardTransitionRepository }
 
     private val transitionState: MutableStateFlow<ObservableTransitionState> =
@@ -347,6 +353,59 @@ class KeyguardInteractorTest : SysuiTestCase() {
             )
 
             assertThat(keyguardTranslationY).isGreaterThan(0f)
+        }
+
+    @Test
+    fun isAbleToDream_falseWhenDozing() =
+        testScope.runTest {
+            val isAbleToDream by collectLastValue(underTest.isAbleToDream)
+
+            repository.setDozeTransitionModel(
+                DozeTransitionModel(from = DozeStateModel.INITIALIZED, to = DozeStateModel.DOZE_AOD)
+            )
+
+            assertThat(isAbleToDream).isEqualTo(false)
+        }
+
+    @Test
+    fun isAbleToDream_falseWhenNotDozingAndNotDreaming() =
+        testScope.runTest {
+            val isAbleToDream by collectLastValue(underTest.isAbleToDream)
+
+            repository.setDozeTransitionModel(
+                DozeTransitionModel(from = DozeStateModel.DOZE, to = DozeStateModel.FINISH)
+            )
+            powerInteractor.setAwakeForTest()
+            advanceTimeBy(1000L)
+
+            assertThat(isAbleToDream).isEqualTo(false)
+        }
+
+    @Test
+    fun isAbleToDream_trueWhenNotDozingAndIsDreaming_afterDelay() =
+        testScope.runTest {
+            val isAbleToDream by collectLastValue(underTest.isAbleToDream)
+            runCurrent()
+
+            repository.setDreaming(true)
+            repository.setDozeTransitionModel(
+                DozeTransitionModel(from = DozeStateModel.DOZE, to = DozeStateModel.FINISH)
+            )
+            powerInteractor.setAwakeForTest()
+            runCurrent()
+
+            // After some delay, still false
+            advanceTimeBy(300L)
+            assertThat(isAbleToDream).isEqualTo(false)
+
+            // After more delay, is true
+            advanceTimeBy(300L)
+            assertThat(isAbleToDream).isEqualTo(true)
+
+            // Also changes back after the minimal debounce
+            repository.setDreaming(false)
+            advanceTimeBy(55L)
+            assertThat(isAbleToDream).isEqualTo(false)
         }
 
     @Test

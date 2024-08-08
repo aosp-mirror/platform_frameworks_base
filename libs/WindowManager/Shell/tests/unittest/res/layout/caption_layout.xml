@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
 <!--
   ~ Copyright (C) 2024 The Android Open Source Project
   ~
@@ -13,10 +14,10 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
   -->
-
-<manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.android.internal.overlay.hsumconfig"
-    android:versionCode="1"
-    android:versionName="1.0">
-    <overlay android:targetPackage="android" android:priority="2" android:isStatic="true" />
-</manifest>
+<com.android.wm.shell.windowdecor.WindowDecorLinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/caption"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:gravity="end"
+    android:background="@drawable/caption_decor_title"/>

@@ -2243,6 +2243,7 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         final @WindowManager.TransitionType int type = request.getType();
         final boolean isOpening = isOpeningType(type);
         final boolean inFullscreen = triggerTask.getWindowingMode() == WINDOWING_MODE_FULLSCREEN;
+        final StageTaskListener stage = getStageOfTask(triggerTask);
 
         if (isOpening && inFullscreen) {
             // One task is opening into fullscreen mode, remove the corresponding split record.
@@ -2258,7 +2259,6 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
                             + " sideChildren=%d", triggerTask.taskId, transitTypeToString(type),
                     mMainStage.getChildCount(), mSideStage.getChildCount());
             out = new WindowContainerTransaction();
-            final StageTaskListener stage = getStageOfTask(triggerTask);
             if (stage != null) {
                 if (isClosingType(type) && stage.getChildCount() == 1) {
                     // Dismiss split if the last task in one of the stages is going away
@@ -2331,16 +2331,8 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
             // Don't intercept the transition if we are not handling it as a part of one of the
             // cases above and it is not already visible
             return null;
-        } else {
-            if (triggerTask.parentTaskId == mMainStage.mRootTaskInfo.taskId
-                    || triggerTask.parentTaskId == mSideStage.mRootTaskInfo.taskId) {
-                ProtoLog.d(WM_SHELL_SPLIT_SCREEN, "handleRequest: transition=%d "
-                                + "restoring to split", request.getDebugId());
-                out = new WindowContainerTransaction();
-                mSplitTransitions.setEnterTransition(transition, request.getRemoteTransition(),
-                        TRANSIT_SPLIT_SCREEN_OPEN_TO_SIDE, false /* resizeAnim */);
-            }
-            if (isOpening && getStageOfTask(triggerTask) != null) {
+        } else if (stage != null) {
+            if (isOpening) {
                 ProtoLog.d(WM_SHELL_SPLIT_SCREEN, "handleRequest: transition=%d enter split",
                         request.getDebugId());
                 // One task is appearing into split, prepare to enter split screen.
@@ -2348,9 +2340,15 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
                 prepareEnterSplitScreen(out);
                 mSplitTransitions.setEnterTransition(transition, request.getRemoteTransition(),
                         TRANSIT_SPLIT_SCREEN_PAIR_OPEN, !mIsDropEntering);
+                return out;
             }
-            return out;
+            ProtoLog.d(WM_SHELL_SPLIT_SCREEN, "handleRequest: transition=%d "
+                    + "restoring to split", request.getDebugId());
+            out = new WindowContainerTransaction();
+            mSplitTransitions.setEnterTransition(transition, request.getRemoteTransition(),
+                    TRANSIT_SPLIT_SCREEN_OPEN_TO_SIDE, false /* resizeAnim */);
         }
+        return out;
     }
 
     /**

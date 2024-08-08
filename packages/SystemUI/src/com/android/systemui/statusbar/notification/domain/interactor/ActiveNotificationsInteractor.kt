@@ -81,11 +81,15 @@ constructor(
      * [CallType.Ongoing].
      */
     val ongoingCallNotification: Flow<ActiveNotificationModel?> =
-        allRepresentativeNotifications.map { notifMap ->
-            // Once a call has started, its `whenTime` should stay the same, so we can use it as a
-            // stable sort value.
-            notifMap.values.filter { it.callType == CallType.Ongoing }.minByOrNull { it.whenTime }
-        }
+        allRepresentativeNotifications
+            .map { notifMap ->
+                // Once a call has started, its `whenTime` should stay the same, so we can use it as
+                // a stable sort value.
+                notifMap.values
+                    .filter { it.callType == CallType.Ongoing }
+                    .minByOrNull { it.whenTime }
+            }
+            .flowOn(backgroundDispatcher)
 
     /** Are any notifications being actively presented in the notification stack? */
     val areAnyNotificationsPresent: Flow<Boolean> =

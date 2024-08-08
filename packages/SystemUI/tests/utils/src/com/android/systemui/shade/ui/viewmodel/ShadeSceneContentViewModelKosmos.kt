@@ -16,27 +16,29 @@
 
 package com.android.systemui.shade.ui.viewmodel
 
+import com.android.systemui.deviceentry.domain.interactor.deviceEntryInteractor
 import com.android.systemui.kosmos.Kosmos
+import com.android.systemui.kosmos.Kosmos.Fixture
 import com.android.systemui.media.controls.domain.pipeline.interactor.mediaCarouselInteractor
 import com.android.systemui.qs.footerActionsController
 import com.android.systemui.qs.footerActionsViewModelFactory
 import com.android.systemui.qs.ui.adapter.qsSceneAdapter
 import com.android.systemui.scene.domain.interactor.sceneInteractor
-import com.android.systemui.settings.brightness.ui.viewmodel.brightnessMirrorViewModel
+import com.android.systemui.settings.brightness.ui.viewmodel.brightnessMirrorViewModelFactory
 import com.android.systemui.shade.domain.interactor.shadeInteractor
 import com.android.systemui.unfold.domain.interactor.unfoldTransitionInteractor
 
-val Kosmos.shadeSceneViewModel: ShadeSceneViewModel by
-    Kosmos.Fixture {
-        ShadeSceneViewModel(
-            shadeHeaderViewModel = shadeHeaderViewModel,
-            qsSceneAdapter = qsSceneAdapter,
-            brightnessMirrorViewModel = brightnessMirrorViewModel,
-            mediaCarouselInteractor = mediaCarouselInteractor,
-            shadeInteractor = shadeInteractor,
-            footerActionsViewModelFactory = footerActionsViewModelFactory,
-            footerActionsController = footerActionsController,
-            sceneInteractor = sceneInteractor,
-            unfoldTransitionInteractor = unfoldTransitionInteractor,
-        )
-    }
+val Kosmos.shadeSceneContentViewModel: ShadeSceneContentViewModel by Fixture {
+    ShadeSceneContentViewModel(
+        shadeHeaderViewModelFactory = shadeHeaderViewModelFactory,
+        qsSceneAdapter = qsSceneAdapter,
+        brightnessMirrorViewModelFactory = brightnessMirrorViewModelFactory,
+        mediaCarouselInteractor = mediaCarouselInteractor,
+        shadeInteractor = shadeInteractor,
+        footerActionsViewModelFactory = footerActionsViewModelFactory,
+        footerActionsController = footerActionsController,
+        unfoldTransitionInteractor = unfoldTransitionInteractor,
+        deviceEntryInteractor = deviceEntryInteractor,
+        sceneInteractor = sceneInteractor,
+    )
+}

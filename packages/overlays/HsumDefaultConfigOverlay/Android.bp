@@ -8,7 +8,7 @@ package {
 }
 
 runtime_resource_overlay {
-    name: "HsumConfigOverlay",
+    name: "HsumDefaultConfigOverlay",
     certificate: "platform",
 
     product_specific: true,

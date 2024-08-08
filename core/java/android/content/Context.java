@@ -6676,6 +6676,16 @@ public abstract class Context {
     public static final String BLOCKED_NUMBERS_SERVICE = "blocked_numbers";
 
     /**
+     * Use with {@link #getSystemService(String)} to retrieve the
+     * {@link com.android.internal.protolog.ProtoLogService} for registering ProtoLog clients.
+     *
+     * @see #getSystemService(String)
+     * @see com.android.internal.protolog.ProtoLogService
+     * @hide
+     */
+    public static final String PROTOLOG_SERVICE = "protolog";
+
+    /**
      * Determine whether the given permission is allowed for a particular
      * process and user ID running in the system.
      *

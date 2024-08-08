@@ -116,7 +116,6 @@ public class ZenModesBackend {
 
     private ZenMode getManualDndMode(ZenModeConfig config) {
         ZenModeConfig.ZenRule manualRule = config.manualRule;
-        // TODO: b/333682392 - Replace with final strings for name & trigger description
         AutomaticZenRule manualDndRule = new AutomaticZenRule.Builder(
                 mContext.getString(R.string.zen_mode_settings_title), manualRule.conditionId)
                 .setType(manualRule.type)
@@ -127,7 +126,7 @@ public class ZenModesBackend {
                 .setInterruptionFilter(NotificationManager.INTERRUPTION_FILTER_PRIORITY)
                 .build();
 
-        return ZenMode.manualDndMode(manualDndRule, config != null && config.isManualActive());
+        return ZenMode.manualDndMode(manualDndRule, config.isManualActive());
     }
 
     public void updateMode(ZenMode mode) {

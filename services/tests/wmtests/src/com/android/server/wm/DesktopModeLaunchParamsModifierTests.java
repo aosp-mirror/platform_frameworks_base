@@ -31,6 +31,7 @@ import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
 import static android.util.DisplayMetrics.DENSITY_DEFAULT;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 import static com.android.server.wm.DesktopModeBoundsCalculator.DESKTOP_MODE_INITIAL_BOUNDS_SCALE;
 import static com.android.server.wm.DesktopModeBoundsCalculator.DESKTOP_MODE_LANDSCAPE_APP_PADDING;
 import static com.android.server.wm.DesktopModeBoundsCalculator.calculateAspectRatio;
@@ -231,6 +232,56 @@ public class DesktopModeLaunchParamsModifierTests extends
     }
 
     @Test
+    @EnableFlags({Flags.FLAG_ENABLE_DESKTOP_WINDOWING_MODE,
+            Flags.FLAG_ENABLE_WINDOWING_DYNAMIC_INITIAL_BOUNDS})
+    public void testDefaultLandscapeBounds_landscapeDevice_userFullscreenOverride() {
+        setupDesktopModeLaunchParamsModifier();
+
+        final TestDisplayContent display = createDisplayContent(ORIENTATION_LANDSCAPE,
+                LANDSCAPE_DISPLAY_BOUNDS);
+        final Task task = createTask(display, SCREEN_ORIENTATION_LANDSCAPE, true);
+
+        spyOn(mActivity.mAppCompatController.getAppCompatAspectRatioOverrides());
+        doReturn(true).when(
+                        mActivity.mAppCompatController.getAppCompatAspectRatioOverrides())
+                .isUserFullscreenOverrideEnabled();
+
+        final int desiredWidth =
+                (int) (LANDSCAPE_DISPLAY_BOUNDS.width() * DESKTOP_MODE_INITIAL_BOUNDS_SCALE);
+        final int desiredHeight =
+                (int) (LANDSCAPE_DISPLAY_BOUNDS.height() * DESKTOP_MODE_INITIAL_BOUNDS_SCALE);
+
+        assertEquals(RESULT_CONTINUE, new CalculateRequestBuilder().setTask(task).calculate());
+        assertEquals(desiredWidth, mResult.mBounds.width());
+        assertEquals(desiredHeight, mResult.mBounds.height());
+    }
+
+    @Test
+    @EnableFlags({Flags.FLAG_ENABLE_DESKTOP_WINDOWING_MODE,
+            Flags.FLAG_ENABLE_WINDOWING_DYNAMIC_INITIAL_BOUNDS})
+    public void testDefaultLandscapeBounds_landscapeDevice_systemFullscreenOverride() {
+        setupDesktopModeLaunchParamsModifier();
+
+        final TestDisplayContent display = createDisplayContent(ORIENTATION_LANDSCAPE,
+                LANDSCAPE_DISPLAY_BOUNDS);
+        final Task task = createTask(display, SCREEN_ORIENTATION_LANDSCAPE, true);
+
+        spyOn(mActivity.mAppCompatController.getAppCompatAspectRatioOverrides());
+        doReturn(true).when(
+                        mActivity.mAppCompatController.getAppCompatAspectRatioOverrides())
+                .isSystemOverrideToFullscreenEnabled();
+
+        final int desiredWidth =
+                (int) (LANDSCAPE_DISPLAY_BOUNDS.width() * DESKTOP_MODE_INITIAL_BOUNDS_SCALE);
+        final int desiredHeight =
+                (int) (LANDSCAPE_DISPLAY_BOUNDS.height() * DESKTOP_MODE_INITIAL_BOUNDS_SCALE);
+
+        assertEquals(RESULT_CONTINUE, new CalculateRequestBuilder().setTask(task).calculate());
+        assertEquals(desiredWidth, mResult.mBounds.width());
+        assertEquals(desiredHeight, mResult.mBounds.height());
+    }
+
+    @Test
     @EnableFlags(Flags.FLAG_ENABLE_WINDOWING_DYNAMIC_INITIAL_BOUNDS)
     public void testResizablePortraitBounds_landscapeDevice_resizable_portraitOrientation() {
         setupDesktopModeLaunchParamsModifier();
@@ -320,6 +371,56 @@ public class DesktopModeLaunchParamsModifierTests extends
         final TestDisplayContent display = createDisplayContent(ORIENTATION_PORTRAIT,
                 PORTRAIT_DISPLAY_BOUNDS);
         final Task task = createTask(display, SCREEN_ORIENTATION_PORTRAIT, true);
+
+        final int desiredWidth =
+                (int) (PORTRAIT_DISPLAY_BOUNDS.width() * DESKTOP_MODE_INITIAL_BOUNDS_SCALE);
+        final int desiredHeight =
+                (int) (PORTRAIT_DISPLAY_BOUNDS.height() * DESKTOP_MODE_INITIAL_BOUNDS_SCALE);
+
+        assertEquals(RESULT_CONTINUE, new CalculateRequestBuilder().setTask(task).calculate());
+        assertEquals(desiredWidth, mResult.mBounds.width());
+        assertEquals(desiredHeight, mResult.mBounds.height());
+    }
+
+    @Test
+    @EnableFlags({Flags.FLAG_ENABLE_DESKTOP_WINDOWING_MODE,
+            Flags.FLAG_ENABLE_WINDOWING_DYNAMIC_INITIAL_BOUNDS})
+    public void testDefaultPortraitBounds_portraitDevice_userFullscreenOverride() {
+        setupDesktopModeLaunchParamsModifier();
+
+        final TestDisplayContent display = createDisplayContent(ORIENTATION_PORTRAIT,
+                PORTRAIT_DISPLAY_BOUNDS);
+        final Task task = createTask(display, SCREEN_ORIENTATION_PORTRAIT, true);
+
+        spyOn(mActivity.mAppCompatController.getAppCompatAspectRatioOverrides());
+        doReturn(true).when(
+                        mActivity.mAppCompatController.getAppCompatAspectRatioOverrides())
+                .isUserFullscreenOverrideEnabled();
+
+        final int desiredWidth =
+                (int) (PORTRAIT_DISPLAY_BOUNDS.width() * DESKTOP_MODE_INITIAL_BOUNDS_SCALE);
+        final int desiredHeight =
+                (int) (PORTRAIT_DISPLAY_BOUNDS.height() * DESKTOP_MODE_INITIAL_BOUNDS_SCALE);
+
+        assertEquals(RESULT_CONTINUE, new CalculateRequestBuilder().setTask(task).calculate());
+        assertEquals(desiredWidth, mResult.mBounds.width());
+        assertEquals(desiredHeight, mResult.mBounds.height());
+    }
+
+    @Test
+    @EnableFlags({Flags.FLAG_ENABLE_DESKTOP_WINDOWING_MODE,
+            Flags.FLAG_ENABLE_WINDOWING_DYNAMIC_INITIAL_BOUNDS})
+    public void testDefaultPortraitBounds_portraitDevice_systemFullscreenOverride() {
+        setupDesktopModeLaunchParamsModifier();
+
+        final TestDisplayContent display = createDisplayContent(ORIENTATION_PORTRAIT,
+                PORTRAIT_DISPLAY_BOUNDS);
+        final Task task = createTask(display, SCREEN_ORIENTATION_PORTRAIT, true);
+
+        spyOn(mActivity.mAppCompatController.getAppCompatAspectRatioOverrides());
+        doReturn(true).when(
+                        mActivity.mAppCompatController.getAppCompatAspectRatioOverrides())
+                .isSystemOverrideToFullscreenEnabled();
 
         final int desiredWidth =
                 (int) (PORTRAIT_DISPLAY_BOUNDS.width() * DESKTOP_MODE_INITIAL_BOUNDS_SCALE);

@@ -20,15 +20,19 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.android.compose.animation.scene.SceneScope
 import com.android.compose.animation.scene.UserAction
 import com.android.compose.animation.scene.UserActionResult
 import com.android.systemui.battery.BatteryMeterViewController
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.keyguard.ui.composable.LockscreenContent
-import com.android.systemui.notifications.ui.viewmodel.NotificationsShadeSceneViewModel
+import com.android.systemui.lifecycle.rememberViewModel
+import com.android.systemui.notifications.ui.viewmodel.NotificationsShadeSceneActionsViewModel
+import com.android.systemui.notifications.ui.viewmodel.NotificationsShadeSceneContentViewModel
 import com.android.systemui.scene.session.ui.composable.SaveableSession
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.scene.ui.composable.ComposableScene
@@ -50,9 +54,10 @@ import kotlinx.coroutines.flow.Flow
 class NotificationsShadeScene
 @Inject
 constructor(
-    sceneViewModel: NotificationsShadeSceneViewModel,
-    private val overlayShadeViewModel: OverlayShadeViewModel,
-    private val shadeHeaderViewModel: ShadeHeaderViewModel,
+    private val contentViewModelFactory: NotificationsShadeSceneContentViewModel.Factory,
+    private val actionsViewModelFactory: NotificationsShadeSceneActionsViewModel.Factory,
+    private val overlayShadeViewModelFactory: OverlayShadeViewModel.Factory,
+    private val shadeHeaderViewModelFactory: ShadeHeaderViewModel.Factory,
     private val notificationsPlaceholderViewModel: NotificationsPlaceholderViewModel,
     private val tintedIconManagerFactory: TintedIconManager.Factory,
     private val batteryMeterViewControllerFactory: BatteryMeterViewController.Factory,
@@ -64,21 +69,32 @@ constructor(
 
     override val key = Scenes.NotificationsShade
 
+    private val actionsViewModel: NotificationsShadeSceneActionsViewModel by lazy {
+        actionsViewModelFactory.create()
+    }
+
     override val destinationScenes: Flow<Map<UserAction, UserActionResult>> =
-        sceneViewModel.destinationScenes
+        actionsViewModel.actions
+
+    override suspend fun activate() {
+        actionsViewModel.activate()
+    }
 
     @Composable
     override fun SceneScope.Content(
         modifier: Modifier,
     ) {
+        val viewModel = rememberViewModel { contentViewModelFactory.create() }
+        val isEmptySpaceClickable by viewModel.isEmptySpaceClickable.collectAsStateWithLifecycle()
+
         OverlayShade(
             modifier = modifier,
-            viewModel = overlayShadeViewModel,
+            viewModelFactory = overlayShadeViewModelFactory,
             lockscreenContent = lockscreenContent,
         ) {
             Column {
                 ExpandedShadeHeader(
-                    viewModel = shadeHeaderViewModel,
+                    viewModelFactory = shadeHeaderViewModelFactory,
                     createTintedIconManager = tintedIconManagerFactory::create,
                     createBatteryMeterViewController = batteryMeterViewControllerFactory::create,
                     statusBarIconController = statusBarIconController,
@@ -94,6 +110,8 @@ constructor(
                     shouldFillMaxSize = false,
                     shouldReserveSpaceForNavBar = false,
                     shadeMode = ShadeMode.Dual,
+                    onEmptySpaceClick =
+                        viewModel::onEmptySpaceClicked.takeIf { isEmptySpaceClickable },
                     modifier = Modifier.fillMaxWidth(),
                 )
 
