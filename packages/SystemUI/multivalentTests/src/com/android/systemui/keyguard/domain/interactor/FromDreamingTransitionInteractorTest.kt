@@ -16,8 +16,6 @@
 
 package com.android.systemui.keyguard.domain.interactor
 
-import com.android.systemui.keyguard.shared.model.DozeStateModel.Companion.isDozeOff
-import com.android.systemui.coroutines.collectLastValue
 import android.platform.test.annotations.EnableFlags
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
@@ -28,18 +26,16 @@ import com.android.systemui.keyguard.data.repository.FakeKeyguardTransitionRepos
 import com.android.systemui.keyguard.data.repository.fakeKeyguardRepository
 import com.android.systemui.keyguard.data.repository.fakeKeyguardTransitionRepository
 import com.android.systemui.keyguard.data.repository.keyguardOcclusionRepository
-import com.android.systemui.keyguard.domain.interactor.keyguardInteractor
 import com.android.systemui.keyguard.shared.model.BiometricUnlockMode
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.util.KeyguardTransitionRepositorySpySubject.Companion.assertThat
 import com.android.systemui.kosmos.testScope
-import com.android.systemui.power.domain.interactor.PowerInteractor.Companion.setAsleepForTest
 import com.android.systemui.power.domain.interactor.PowerInteractor.Companion.setAwakeForTest
 import com.android.systemui.power.domain.interactor.powerInteractor
 import com.android.systemui.statusbar.domain.interactor.keyguardOcclusionInteractor
 import com.android.systemui.testKosmos
+import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
@@ -49,7 +45,6 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mockito.reset
 import org.mockito.Mockito.spy
-import com.google.common.truth.Truth.assertThat
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest

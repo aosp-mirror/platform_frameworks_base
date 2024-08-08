@@ -74,6 +74,8 @@ class FakeKeyguardRepository @Inject constructor() : KeyguardRepository {
     private val _dozeTimeTick = MutableStateFlow<Long>(0L)
     override val dozeTimeTick = _dozeTimeTick
 
+    override val showDismissibleKeyguard = MutableStateFlow<Long>(0L)
+
     private val _lastDozeTapToWakePosition = MutableStateFlow<Point?>(null)
     override val lastDozeTapToWakePosition = _lastDozeTapToWakePosition.asStateFlow()
 
@@ -204,6 +206,10 @@ class FakeKeyguardRepository @Inject constructor() : KeyguardRepository {
 
     fun dozeTimeTick(millis: Long) {
         _dozeTimeTick.value = millis
+    }
+
+    override fun showDismissibleKeyguard() {
+        showDismissibleKeyguard.value = showDismissibleKeyguard.value + 1
     }
 
     override fun setLastDozeTapToWakePosition(position: Point) {
