@@ -38,6 +38,7 @@ import android.content.Context;
 import android.content.res.Configuration;
 import android.database.ContentObserver;
 import android.inputmethodservice.InputMethodService;
+import android.inputmethodservice.InputMethodService.ImeWindowVisibility;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -516,7 +517,7 @@ public final class NavBarHelper implements
      * @return Whether the IME is shown on top of the screen given the {@code vis} flag of
      * {@link InputMethodService} and the keyguard states.
      */
-    public boolean isImeShown(int vis) {
+    public boolean isImeShown(@ImeWindowVisibility int vis) {
         View shadeWindowView =  mNotificationShadeWindowController.getWindowRootView();
         boolean isKeyguardShowing = mKeyguardStateController.isShowing();
         boolean imeVisibleOnShade = shadeWindowView != null && shadeWindowView.isAttachedToWindow()
