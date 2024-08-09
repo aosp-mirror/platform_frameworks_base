@@ -2353,7 +2353,11 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
                     && !mStatusBarKeyguardViewManager.primaryBouncerIsOrWillBeShowing()
                     && mStatusBarKeyguardViewManager.isSecure()) {
                 Log.d(TAG, "showBouncerOrLockScreenIfKeyguard, showingBouncer");
-                mStatusBarKeyguardViewManager.showBouncer(true /* scrimmed */);
+                if (SceneContainerFlag.isEnabled()) {
+                    mStatusBarKeyguardViewManager.showPrimaryBouncer(true /* scrimmed */);
+                } else {
+                    mStatusBarKeyguardViewManager.showBouncer(true /* scrimmed */);
+                }
             }
         }
     }

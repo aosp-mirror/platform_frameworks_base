@@ -18,6 +18,7 @@ package com.android.systemui.scene.domain.startable
 
 import com.android.internal.logging.uiEventLogger
 import com.android.systemui.authentication.domain.interactor.authenticationInteractor
+import com.android.systemui.bouncer.domain.interactor.alternateBouncerInteractor
 import com.android.systemui.bouncer.domain.interactor.bouncerInteractor
 import com.android.systemui.bouncer.domain.interactor.simBouncerInteractor
 import com.android.systemui.classifier.falsingCollector
@@ -80,5 +81,6 @@ val Kosmos.sceneContainerStartable by Fixture {
         keyguardEnabledInteractor = keyguardEnabledInteractor,
         dismissCallbackRegistry = dismissCallbackRegistry,
         statusBarStateController = sysuiStatusBarStateController,
+        alternateBouncerInteractor = alternateBouncerInteractor,
     )
 }
