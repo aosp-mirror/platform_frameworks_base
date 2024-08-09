@@ -26,7 +26,7 @@ import com.android.internal.telephony.flags.Flags;
 import java.util.Objects;
 
 /**
- * ProvisionSubscriberId
+ * SatelliteSubscriberInfo
  *
  * Satellite Gateway client will use these subscriber ids to register with satellite gateway service
  * which identify user subscription with unique subscriber ids. These subscriber ids can be any
@@ -35,7 +35,7 @@ import java.util.Objects;
  * @hide
  */
 @FlaggedApi(Flags.FLAG_CARRIER_ROAMING_NB_IOT_NTN)
-public final class ProvisionSubscriberId implements Parcelable {
+public final class SatelliteSubscriberInfo implements Parcelable {
     /** provision subscriberId */
     @NonNull
     private String mSubscriberId;
@@ -49,14 +49,14 @@ public final class ProvisionSubscriberId implements Parcelable {
     /**
      * @hide
      */
-    public ProvisionSubscriberId(@NonNull String subscriberId, @NonNull int carrierId,
+    public SatelliteSubscriberInfo(@NonNull String subscriberId, @NonNull int carrierId,
             @NonNull String niddApn) {
         this.mCarrierId = carrierId;
         this.mSubscriberId = subscriberId;
         this.mNiddApn = niddApn;
     }
 
-    private ProvisionSubscriberId(Parcel in) {
+    private SatelliteSubscriberInfo(Parcel in) {
         readFromParcel(in);
     }
 
@@ -72,16 +72,16 @@ public final class ProvisionSubscriberId implements Parcelable {
     }
 
     @FlaggedApi(Flags.FLAG_CARRIER_ROAMING_NB_IOT_NTN)
-    public static final @android.annotation.NonNull Creator<ProvisionSubscriberId> CREATOR =
-            new Creator<ProvisionSubscriberId>() {
+    public static final @android.annotation.NonNull Creator<SatelliteSubscriberInfo> CREATOR =
+            new Creator<SatelliteSubscriberInfo>() {
                 @Override
-                public ProvisionSubscriberId createFromParcel(Parcel in) {
-                    return new ProvisionSubscriberId(in);
+                public SatelliteSubscriberInfo createFromParcel(Parcel in) {
+                    return new SatelliteSubscriberInfo(in);
                 }
 
                 @Override
-                public ProvisionSubscriberId[] newArray(int size) {
-                    return new ProvisionSubscriberId[size];
+                public SatelliteSubscriberInfo[] newArray(int size) {
+                    return new SatelliteSubscriberInfo[size];
                 }
             };
 
@@ -148,7 +148,7 @@ public final class ProvisionSubscriberId implements Parcelable {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        ProvisionSubscriberId that = (ProvisionSubscriberId) o;
+        SatelliteSubscriberInfo that = (SatelliteSubscriberInfo) o;
         return mSubscriberId.equals(that.mSubscriberId) && mCarrierId
                 == that.mCarrierId && mNiddApn.equals(that.mNiddApn);
     }

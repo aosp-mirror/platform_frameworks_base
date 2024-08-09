@@ -178,7 +178,7 @@ public class CsipDeviceManager {
         }
         log("updateRelationshipOfGroupDevices: mCachedDevices list =" + mCachedDevices.toString());
 
-        // Get the preferred main device by getPreferredMainDeviceWithoutConectionState
+        // Get the preferred main device by getPreferredMainDeviceWithoutConnectionState
         List<CachedBluetoothDevice> groupDevicesList = getGroupDevicesFromAllOfDevicesList(groupId);
         CachedBluetoothDevice preferredMainDevice =
                 getPreferredMainDevice(groupId, groupDevicesList);
@@ -373,6 +373,7 @@ public class CsipDeviceManager {
                 preferredMainDevice.addMemberDevice(deviceItem);
                 mCachedDevices.remove(deviceItem);
                 mBtManager.getEventManager().dispatchDeviceRemoved(deviceItem);
+                preferredMainDevice.refresh();
                 hasChanged = true;
             }
         }

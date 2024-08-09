@@ -228,7 +228,7 @@ public class HearingDevicesDialogDelegate implements SystemUIDialog.Delegate,
         mHearingDeviceItemList = getHearingDevicesList();
         if (mPresetsController != null) {
             activeHearingDevice = getActiveHearingDevice(mHearingDeviceItemList);
-            mPresetsController.setActiveHearingDevice(activeHearingDevice);
+            mPresetsController.setHearingDeviceIfSupportHap(activeHearingDevice);
         } else {
             activeHearingDevice = null;
         }
@@ -336,7 +336,7 @@ public class HearingDevicesDialogDelegate implements SystemUIDialog.Delegate,
         }
         final CachedBluetoothDevice activeHearingDevice = getActiveHearingDevice(
                 mHearingDeviceItemList);
-        mPresetsController.setActiveHearingDevice(activeHearingDevice);
+        mPresetsController.setHearingDeviceIfSupportHap(activeHearingDevice);
 
         mPresetInfoAdapter = new ArrayAdapter<>(dialog.getContext(),
                 R.layout.hearing_devices_preset_spinner_selected,
