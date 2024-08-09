@@ -1020,10 +1020,22 @@ int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv, bool zygote, bool p
     parseCompilerOption("dalvik.vm.image-dex2oat-filter", dex2oatImageCompilerFilterBuf,
                         "--compiler-filter=", "-Ximage-compiler-option");
 
-    // If there is a dirty-image-objects file, push it.
-    if (hasFile("/system/etc/dirty-image-objects")) {
-        addOption("-Ximage-compiler-option");
-        addOption("--dirty-image-objects=/system/etc/dirty-image-objects");
+    // If there are dirty-image-objects files, push them.
+    const char* dirty_image_objects_options[] = {
+            // Currently, there are two dirty-image-objects files: one for
+            // ART module, one for framework.
+            "--dirty-image-objects=/system/etc/dirty-image-objects.txt",
+            "--dirty-image-objects=/apex/com.android.art/etc/dirty-image-objects.txt",
+            // Allow old filename (without .txt) for backward compatibility.
+            "--dirty-image-objects=/system/etc/dirty-image-objects",
+    };
+    for (const char* option : dirty_image_objects_options) {
+        // Get the file path by finding the first '/' and check if
+        // this file exists.
+        if (hasFile(strchr(option, '/'))) {
+            addOption("-Ximage-compiler-option");
+            addOption(option);
+        }
     }
 
     parseCompilerOption("dalvik.vm.image-dex2oat-threads", dex2oatThreadsImageBuf, "-j",
