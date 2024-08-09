@@ -1066,6 +1066,13 @@ flag {
 }
 
 flag {
+  name: "media_controls_drawables_reuse"
+  namespace: "systemui"
+  description: "Re-use created media drawables for media controls"
+  bug: "358402034"
+}
+
+flag {
   namespace: "systemui"
   name: "enable_view_capture_tracing"
   description: "Enables view capture tracing in System UI."
