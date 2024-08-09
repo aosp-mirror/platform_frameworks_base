@@ -961,6 +961,17 @@ public abstract class ActivityManagerInternal {
             @Nullable VoiceInteractionManagerProvider provider);
 
     /**
+     * Get whether or not the previous user's packages will be killed before the user is
+     * stopped during a user switch.
+     *
+     * <p> The primary use case of this method is for {@link com.android.server.SystemService}
+     * classes to call this API in their
+     * {@link com.android.server.SystemService#onUserSwitching} method implementation to prevent
+     * restarting any of the previous user's processes that will be killed during the user switch.
+     */
+    public abstract boolean isEarlyPackageKillEnabledForUserSwitch(int fromUserId, int toUserId);
+
+    /**
      * Sets whether the current foreground user (and its profiles) should be stopped after switched
      * out.
      */

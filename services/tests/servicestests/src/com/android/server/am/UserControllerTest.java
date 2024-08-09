@@ -19,6 +19,8 @@ package com.android.server.am;
 import static android.Manifest.permission.INTERACT_ACROSS_PROFILES;
 import static android.Manifest.permission.INTERACT_ACROSS_USERS;
 import static android.Manifest.permission.INTERACT_ACROSS_USERS_FULL;
+import static android.app.ActivityManager.STOP_USER_ON_SWITCH_TRUE;
+import static android.app.ActivityManager.STOP_USER_ON_SWITCH_FALSE;
 import static android.app.ActivityManagerInternal.ALLOW_FULL_ONLY;
 import static android.app.ActivityManagerInternal.ALLOW_NON_FULL;
 import static android.app.ActivityManagerInternal.ALLOW_NON_FULL_IN_PROFILE;
@@ -201,7 +203,8 @@ public class UserControllerTest {
             doNothing().when(mInjector).systemServiceManagerOnUserStopped(anyInt());
             doNothing().when(mInjector).systemServiceManagerOnUserCompletedEvent(
                     anyInt(), anyInt());
-            doNothing().when(mInjector).activityManagerForceStopPackage(anyInt(), anyString());
+            doNothing().when(mInjector).activityManagerForceStopUserPackages(anyInt(),
+                    anyString(), anyBoolean());
             doNothing().when(mInjector).activityManagerOnUserStopped(anyInt());
             doNothing().when(mInjector).clearBroadcastQueueForUser(anyInt());
             doNothing().when(mInjector).taskSupervisorRemoveUser(anyInt());
@@ -935,6 +938,61 @@ public class UserControllerTest {
                 SYSTEM_USER_ID, PROFILE1_ID, PROFILE2_ID, FG_USER_ID, PARENT_ID),
                 new HashSet<>(mUserController.getRunningUsersLU()));
     }
+
+    @Test
+    public void testEarlyPackageKillEnabledForUserSwitch_enabled() {
+        mUserController.setInitialConfig(/* userSwitchUiEnabled= */ true,
+                /* maxRunningUsers= */ 4, /* delayUserDataLocking= */ true,
+                /* backgroundUserScheduledStopTimeSecs= */ -1);
+
+        assertTrue(mUserController
+                .isEarlyPackageKillEnabledForUserSwitch(TEST_USER_ID, TEST_USER_ID1));
+    }
+
+    @Test
+    public void testEarlyPackageKillEnabledForUserSwitch_withoutDelayUserDataLocking() {
+        mUserController.setInitialConfig(/* userSwitchUiEnabled= */ true,
+                /* maxRunningUsers= */ 4, /* delayUserDataLocking= */ false,
+                /* backgroundUserScheduledStopTimeSecs= */ -1);
+
+        assertFalse(mUserController
+                .isEarlyPackageKillEnabledForUserSwitch(TEST_USER_ID, TEST_USER_ID1));
+    }
+
+    @Test
+    public void testEarlyPackageKillEnabledForUserSwitch_withPrevSystemUser() {
+        mUserController.setInitialConfig(/* userSwitchUiEnabled= */ true,
+                /* maxRunningUsers= */ 4, /* delayUserDataLocking= */ true,
+                /* backgroundUserScheduledStopTimeSecs= */ -1);
+
+        assertFalse(mUserController
+                .isEarlyPackageKillEnabledForUserSwitch(SYSTEM_USER_ID, TEST_USER_ID1));
+    }
+
+    @Test
+    public void testEarlyPackageKillEnabledForUserSwitch_stopUserOnSwitchModeOn() {
+        mUserController.setInitialConfig(/* userSwitchUiEnabled= */ true,
+                /* maxRunningUsers= */ 4, /* delayUserDataLocking= */ false,
+                /* backgroundUserScheduledStopTimeSecs= */ -1);
+
+        mUserController.setStopUserOnSwitch(STOP_USER_ON_SWITCH_TRUE);
+
+        assertTrue(mUserController
+                .isEarlyPackageKillEnabledForUserSwitch(TEST_USER_ID, TEST_USER_ID1));
+    }
+
+    @Test
+    public void testEarlyPackageKillEnabledForUserSwitch_stopUserOnSwitchModeOff() {
+        mUserController.setInitialConfig(/* userSwitchUiEnabled= */ true,
+                /* maxRunningUsers= */ 4, /* delayUserDataLocking= */ true,
+                /* backgroundUserScheduledStopTimeSecs= */ -1);
+
+        mUserController.setStopUserOnSwitch(STOP_USER_ON_SWITCH_FALSE);
+
+        assertFalse(mUserController
+                .isEarlyPackageKillEnabledForUserSwitch(TEST_USER_ID, TEST_USER_ID1));
+    }
+
 
     /**
      * Test that, in getRunningUsersLU, parents come after their profile, even if the profile was
