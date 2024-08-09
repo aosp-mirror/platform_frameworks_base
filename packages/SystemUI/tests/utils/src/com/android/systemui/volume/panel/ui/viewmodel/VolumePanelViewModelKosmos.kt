@@ -18,17 +18,19 @@ package com.android.systemui.volume.panel.ui.viewmodel
 
 import android.content.applicationContext
 import com.android.systemui.broadcast.broadcastDispatcher
+import com.android.systemui.dump.dumpManager
 import com.android.systemui.kosmos.Kosmos
-import com.android.systemui.kosmos.testScope
+import com.android.systemui.kosmos.applicationCoroutineScope
 import com.android.systemui.statusbar.policy.configurationController
 import com.android.systemui.volume.panel.dagger.factory.volumePanelComponentFactory
 import com.android.systemui.volume.panel.domain.VolumePanelStartable
 import com.android.systemui.volume.panel.domain.interactor.volumePanelGlobalStateInteractor
+import com.android.systemui.volume.shared.volumePanelLogger
 
 var Kosmos.volumePanelStartables: Set<VolumePanelStartable> by Kosmos.Fixture { emptySet() }
 
 var Kosmos.volumePanelViewModel: VolumePanelViewModel by
-    Kosmos.Fixture { volumePanelViewModelFactory.create(testScope.backgroundScope) }
+    Kosmos.Fixture { volumePanelViewModelFactory.create(applicationCoroutineScope) }
 
 val Kosmos.volumePanelViewModelFactory: VolumePanelViewModel.Factory by
     Kosmos.Fixture {
@@ -37,6 +39,8 @@ val Kosmos.volumePanelViewModelFactory: VolumePanelViewModel.Factory by
             volumePanelComponentFactory,
             configurationController,
             broadcastDispatcher,
+            dumpManager,
+            volumePanelLogger,
             volumePanelGlobalStateInteractor,
         )
     }

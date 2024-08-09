@@ -43,6 +43,6 @@ filegroup {
 
 prebuilt_etc {
     name: "dirty-image-objects",
-    src: "dirty-image-objects",
-    filename: "dirty-image-objects",
+    src: "dirty-image-objects.txt",
+    filename: "dirty-image-objects.txt",
 }

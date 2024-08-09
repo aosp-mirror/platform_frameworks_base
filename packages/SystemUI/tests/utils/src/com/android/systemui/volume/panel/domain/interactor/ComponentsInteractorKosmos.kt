@@ -28,6 +28,7 @@ import com.android.systemui.volume.panel.domain.ComponentAvailabilityCriteria
 import com.android.systemui.volume.panel.domain.defaultCriteria
 import com.android.systemui.volume.panel.shared.model.VolumePanelComponentKey
 import com.android.systemui.volume.panel.ui.composable.enabledComponents
+import com.android.systemui.volume.shared.volumePanelLogger
 import javax.inject.Provider
 
 var Kosmos.criteriaByKey: Map<VolumePanelComponentKey, Provider<ComponentAvailabilityCriteria>> by
@@ -50,6 +51,7 @@ var Kosmos.componentsInteractor: ComponentsInteractor by
             enabledComponents,
             { defaultCriteria },
             testScope.backgroundScope,
+            volumePanelLogger,
             criteriaByKey,
         )
     }

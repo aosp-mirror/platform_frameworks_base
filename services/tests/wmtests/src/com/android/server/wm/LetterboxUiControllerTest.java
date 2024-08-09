@@ -123,7 +123,7 @@ public class LetterboxUiControllerTest extends WindowTestsBase {
 
         // Do not apply crop if taskbar is collapsed
         taskbar.setFrame(TASKBAR_COLLAPSED_BOUNDS);
-        assertNull(mController.getExpandedTaskbarOrNull(mainWindow));
+        assertNull(AppCompatUtils.getExpandedTaskbarOrNull(mainWindow));
 
         mLetterboxedPortraitTaskBounds.set(SCREEN_WIDTH / 4, SCREEN_HEIGHT / 4,
                 SCREEN_WIDTH - SCREEN_WIDTH / 4, SCREEN_HEIGHT - SCREEN_HEIGHT / 4);
@@ -145,7 +145,7 @@ public class LetterboxUiControllerTest extends WindowTestsBase {
 
         // Apply crop if taskbar is expanded
         taskbar.setFrame(TASKBAR_EXPANDED_BOUNDS);
-        assertNotNull(mController.getExpandedTaskbarOrNull(mainWindow));
+        assertNotNull(AppCompatUtils.getExpandedTaskbarOrNull(mainWindow));
 
         mLetterboxedPortraitTaskBounds.set(SCREEN_WIDTH / 4, 0, SCREEN_WIDTH - SCREEN_WIDTH / 4,
                 SCREEN_HEIGHT);
@@ -169,7 +169,7 @@ public class LetterboxUiControllerTest extends WindowTestsBase {
 
         // Apply crop if taskbar is expanded
         taskbar.setFrame(TASKBAR_EXPANDED_BOUNDS);
-        assertNotNull(mController.getExpandedTaskbarOrNull(mainWindow));
+        assertNotNull(AppCompatUtils.getExpandedTaskbarOrNull(mainWindow));
         // With SizeCompat scaling
         doReturn(true).when(mActivity).inSizeCompatMode();
         mainWindow.mInvGlobalScale = scaling;

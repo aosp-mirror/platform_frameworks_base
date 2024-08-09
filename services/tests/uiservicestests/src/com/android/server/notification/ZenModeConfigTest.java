@@ -33,6 +33,8 @@ import static android.service.notification.Condition.STATE_TRUE;
 import static android.service.notification.NotificationListenerService.SUPPRESSED_EFFECT_SCREEN_ON;
 import static android.service.notification.ZenModeConfig.XML_VERSION_MODES_API;
 import static android.service.notification.ZenModeConfig.ZEN_TAG;
+import static android.service.notification.ZenModeConfig.ZenRule.OVERRIDE_DEACTIVATE;
+import static android.service.notification.ZenModeConfig.ZenRule.OVERRIDE_NONE;
 import static android.service.notification.ZenPolicy.CONVERSATION_SENDERS_IMPORTANT;
 import static android.service.notification.ZenPolicy.CONVERSATION_SENDERS_NONE;
 import static android.service.notification.ZenPolicy.PEOPLE_TYPE_ANYONE;
@@ -524,7 +526,7 @@ public class ZenModeConfigTest extends UiServiceTestCase {
         rule.zenMode = INTERRUPTION_FILTER;
         rule.modified = true;
         rule.name = NAME;
-        rule.snoozing = true;
+        rule.setConditionOverride(OVERRIDE_DEACTIVATE);
         rule.pkg = OWNER.getPackageName();
         rule.zenPolicy = POLICY;
 
@@ -546,7 +548,7 @@ public class ZenModeConfigTest extends UiServiceTestCase {
         ZenModeConfig.ZenRule parceled = new ZenModeConfig.ZenRule(parcel);
 
         assertEquals(rule.pkg, parceled.pkg);
-        assertEquals(rule.snoozing, parceled.snoozing);
+        assertEquals(rule.getConditionOverride(), parceled.getConditionOverride());
         assertEquals(rule.enabler, parceled.enabler);
         assertEquals(rule.component, parceled.component);
         assertEquals(rule.configurationActivity, parceled.configurationActivity);
@@ -625,7 +627,7 @@ public class ZenModeConfigTest extends UiServiceTestCase {
         rule.zenMode = INTERRUPTION_FILTER;
         rule.modified = true;
         rule.name = NAME;
-        rule.snoozing = true;
+        rule.setConditionOverride(OVERRIDE_DEACTIVATE);
         rule.pkg = OWNER.getPackageName();
         rule.zenPolicy = POLICY;
         rule.zenDeviceEffects = new ZenDeviceEffects.Builder()
@@ -662,7 +664,7 @@ public class ZenModeConfigTest extends UiServiceTestCase {
 
         assertEquals(rule.pkg, fromXml.pkg);
         // always resets on reboot
-        assertFalse(fromXml.snoozing);
+        assertEquals(OVERRIDE_NONE, fromXml.getConditionOverride());
         //should all match original
         assertEquals(rule.component, fromXml.component);
         assertEquals(rule.configurationActivity, fromXml.configurationActivity);
@@ -1115,7 +1117,6 @@ public class ZenModeConfigTest extends UiServiceTestCase {
         rule.zenMode = ZEN_MODE_IMPORTANT_INTERRUPTIONS;
         rule.modified = true;
         rule.name = "name";
-        rule.snoozing = false;
         rule.pkg = "b";
         config.automaticRules.put("key", rule);
 

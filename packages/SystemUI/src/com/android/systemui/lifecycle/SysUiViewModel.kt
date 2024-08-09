@@ -16,9 +16,10 @@
 
 package com.android.systemui.lifecycle
 
+import android.view.View
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.remember
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
 
 /** Base class for all System UI view-models. */
 abstract class SysUiViewModel : SafeActivatable() {
@@ -37,8 +38,20 @@ abstract class SysUiViewModel : SafeActivatable() {
 fun <T : SysUiViewModel> rememberViewModel(
     key: Any = Unit,
     factory: () -> T,
-): T {
-    val instance = remember(key) { factory() }
-    LaunchedEffect(instance) { instance.activate() }
-    return instance
-}
+): T = rememberActivated(key, factory)
+
+/**
+ * Invokes [block] in a new coroutine with a new [SysUiViewModel] that is automatically activated
+ * whenever `this` [View]'s Window's [WindowLifecycleState] is at least at
+ * [minWindowLifecycleState], and is automatically canceled once that is no longer the case.
+ */
+suspend fun <T : SysUiViewModel> View.viewModel(
+    minWindowLifecycleState: WindowLifecycleState,
+    factory: () -> T,
+    block: suspend CoroutineScope.(T) -> Unit,
+): Nothing =
+    repeatOnWindowLifecycle(minWindowLifecycleState) {
+        val instance = factory()
+        launch { instance.activate() }
+        block(instance)
+    }
