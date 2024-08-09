@@ -40,6 +40,8 @@ class AppCompatController {
     private final AppCompatOverrides mAppCompatOverrides;
     @NonNull
     private final AppCompatDeviceStateQuery mAppCompatDeviceStateQuery;
+    @NonNull
+    private final AppCompatLetterboxPolicy mAppCompatLetterboxPolicy;
 
     AppCompatController(@NonNull WindowManagerService wmService,
                         @NonNull ActivityRecord activityRecord) {
@@ -57,6 +59,8 @@ class AppCompatController {
                 mTransparentPolicy, mAppCompatOverrides);
         mAppCompatReachabilityPolicy = new AppCompatReachabilityPolicy(mActivityRecord,
                 wmService.mAppCompatConfiguration);
+        mAppCompatLetterboxPolicy = new AppCompatLetterboxPolicy(mActivityRecord,
+                mTransparentPolicy);
     }
 
     @NonNull
@@ -113,6 +117,11 @@ class AppCompatController {
     }
 
     @NonNull
+    AppCompatLetterboxPolicy getAppCompatLetterboxPolicy() {
+        return mAppCompatLetterboxPolicy;
+    }
+
+    @NonNull
     AppCompatFocusOverrides getAppCompatFocusOverrides() {
         return mAppCompatOverrides.getAppCompatFocusOverrides();
     }
@@ -125,6 +134,11 @@ class AppCompatController {
     @NonNull
     AppCompatDeviceStateQuery getAppCompatDeviceStateQuery() {
         return mAppCompatDeviceStateQuery;
+    }
+
+    @NonNull
+    AppCompatLetterboxOverrides getAppCompatLetterboxOverrides() {
+        return mAppCompatOverrides.getAppCompatLetterboxOverrides();
     }
 
 }
