@@ -18,6 +18,7 @@ package com.android.settingslib.bluetooth.devicesettings.data.repository
 
 import android.bluetooth.BluetoothAdapter
 import android.content.Context
+import android.text.TextUtils
 import com.android.settingslib.bluetooth.CachedBluetoothDevice
 import com.android.settingslib.bluetooth.devicesettings.ActionSwitchPreference
 import com.android.settingslib.bluetooth.devicesettings.DeviceSetting
@@ -76,8 +77,7 @@ class DeviceSettingRepositoryImpl(
                             coroutineScope,
                             backgroundCoroutineContext,
                         )
-                }
-            )
+                })
 
     override suspend fun getDeviceSettingsConfig(
         cachedDevice: CachedBluetoothDevice
@@ -96,11 +96,15 @@ class DeviceSettingRepositoryImpl(
         DeviceSettingConfigModel(
             mainItems = mainContentItems.map { it.toModel() },
             moreSettingsItems = moreSettingsItems.map { it.toModel() },
-            moreSettingsPageFooter = moreSettingsFooter
-        )
+            moreSettingsPageFooter = moreSettingsFooter)
 
-    private fun DeviceSettingItem.toModel(): DeviceSettingConfigItemModel =
-        DeviceSettingConfigItemModel(settingId)
+    private fun DeviceSettingItem.toModel(): DeviceSettingConfigItemModel {
+        return if (!TextUtils.isEmpty(preferenceKey)) {
+            DeviceSettingConfigItemModel.BuiltinItem(settingId, preferenceKey!!)
+        } else {
+            DeviceSettingConfigItemModel.AppProvidedItem(settingId)
+        }
+    }
 
     private fun DeviceSetting.toModel(
         cachedDevice: CachedBluetoothDevice,
