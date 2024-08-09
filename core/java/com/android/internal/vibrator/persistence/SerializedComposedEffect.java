@@ -29,24 +29,24 @@ import java.io.IOException;
 import java.util.Arrays;
 
 /**
- * Serialized representation of a {@link VibrationEffect}.
+ * Serialized representation of a {@link VibrationEffect.Composed}.
  *
  * <p>The vibration is represented by a list of serialized segments that can be added to a
  * {@link VibrationEffect.Composition} during the {@link #deserialize()} procedure.
  *
  * @hide
  */
-final class SerializedVibrationEffect implements XmlSerializedVibration<VibrationEffect> {
+final class SerializedComposedEffect implements XmlSerializedVibration<VibrationEffect.Composed> {
 
     @NonNull
     private final SerializedSegment[] mSegments;
 
-    SerializedVibrationEffect(@NonNull SerializedSegment segment) {
+    SerializedComposedEffect(@NonNull SerializedSegment segment) {
         requireNonNull(segment);
         mSegments = new SerializedSegment[]{ segment };
     }
 
-    SerializedVibrationEffect(@NonNull SerializedSegment[] segments) {
+    SerializedComposedEffect(@NonNull SerializedSegment[] segments) {
         requireNonNull(segments);
         checkArgument(segments.length > 0, "Unsupported empty vibration");
         mSegments = segments;
@@ -54,12 +54,12 @@ final class SerializedVibrationEffect implements XmlSerializedVibration<Vibratio
 
     @NonNull
     @Override
-    public VibrationEffect deserialize() {
+    public VibrationEffect.Composed deserialize() {
         VibrationEffect.Composition composition = VibrationEffect.startComposition();
         for (SerializedSegment segment : mSegments) {
             segment.deserializeIntoComposition(composition);
         }
-        return composition.compose();
+        return (VibrationEffect.Composed) composition.compose();
     }
 
     @Override
@@ -79,7 +79,7 @@ final class SerializedVibrationEffect implements XmlSerializedVibration<Vibratio
 
     @Override
     public String toString() {
-        return "SerializedVibrationEffect{"
+        return "SerializedComposedEffect{"
                 + "segments=" + Arrays.toString(mSegments)
                 + '}';
     }

@@ -37,7 +37,6 @@ flag {
   }
 }
 
-
 flag {
   name: "onboarding_bugreport_v2_enabled"
   is_exported: true
@@ -399,6 +398,16 @@ flag {
     namespace: "enterprise"
     description: "Add provisioningContext to store metadata about when the admin was set"
     bug: "326525847"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
+    name: "dont_read_policy_definition"
+    namespace: "enterprise"
+    description: "Rely on <policy-key-entry> to determine policy definition and ignore <policy-definition-entry>"
+    bug: "335663055"
     metadata {
         purpose: PURPOSE_BUGFIX
     }

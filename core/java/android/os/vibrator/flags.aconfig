@@ -103,3 +103,13 @@ flag {
         purpose: PURPOSE_FEATURE
     }
 }
+
+flag {
+    namespace: "haptics"
+    name: "haptics_scale_v2_enabled"
+    description: "Enables new haptics scaling function across all usages"
+    bug: "345186129"
+    metadata {
+        purpose: PURPOSE_FEATURE
+    }
+}

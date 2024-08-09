@@ -43,29 +43,14 @@ genrule_defaults {
     ],
     out: [
         "ravenwood.jar",
-
-        // Following files are created just as FYI.
-        "hoststubgen_framework-minus-apex_keep_all.txt",
-        "hoststubgen_framework-minus-apex_dump.txt",
-
         "hoststubgen_framework-minus-apex.log",
-        "hoststubgen_framework-minus-apex_stats.csv",
-        "hoststubgen_framework-minus-apex_apis.csv",
     ],
 }
 
 framework_minus_apex_cmd = "$(location hoststubgen) " +
     "@$(location :ravenwood-standard-options) " +
-
     "--debug-log $(location hoststubgen_framework-minus-apex.log) " +
-    "--stats-file $(location hoststubgen_framework-minus-apex_stats.csv) " +
-    "--supported-api-list-file $(location hoststubgen_framework-minus-apex_apis.csv) " +
-
     "--out-impl-jar $(location ravenwood.jar) " +
-
-    "--gen-keep-all-file $(location hoststubgen_framework-minus-apex_keep_all.txt) " +
-    "--gen-input-dump-file $(location hoststubgen_framework-minus-apex_dump.txt) " +
-
     "--in-jar $(location :framework-minus-apex-for-hoststubgen) " +
     "--policy-override-file $(location :ravenwood-framework-policies) " +
     "--annotation-allowed-classes-file $(location :ravenwood-annotation-allowed-classes) "
@@ -133,13 +118,26 @@ java_genrule {
 // Build framework-minus-apex.ravenwood-base without sharding.
 // We extract the various dump files from this one, rather than the sharded ones, because
 // some dumps use the output from other classes (e.g. base classes) which may not be in the
-// same shard.
+// same shard. Also some of the dump files ("apis") may be slow even when sharded, because
+// the output contains the information from all the input classes, rather than the output classes.
 // Not using sharding is fine for this module because it's only used for collecting the
 // dump / stats files, which don't have to happen regularly.
 java_genrule {
     name: "framework-minus-apex.ravenwood-base_all",
     defaults: ["framework-minus-apex.ravenwood-base_defaults"],
-    cmd: framework_minus_apex_cmd,
+    cmd: framework_minus_apex_cmd +
+        "--stats-file $(location hoststubgen_framework-minus-apex_stats.csv) " +
+        "--supported-api-list-file $(location hoststubgen_framework-minus-apex_apis.csv) " +
+
+        "--gen-keep-all-file $(location hoststubgen_framework-minus-apex_keep_all.txt) " +
+        "--gen-input-dump-file $(location hoststubgen_framework-minus-apex_dump.txt) ",
+
+    out: [
+        "hoststubgen_framework-minus-apex_keep_all.txt",
+        "hoststubgen_framework-minus-apex_dump.txt",
+        "hoststubgen_framework-minus-apex_stats.csv",
+        "hoststubgen_framework-minus-apex_apis.csv",
+    ],
 }
 
 // Marge all the sharded jars

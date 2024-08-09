@@ -27,6 +27,7 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.android.settingslib.Utils;
 import com.android.systemui.bluetooth.qsdialog.DeviceItem;
 import com.android.systemui.res.R;
 
@@ -105,6 +106,7 @@ public class HearingDevicesListAdapter extends RecyclerView.Adapter<RecyclerView
         private final TextView mNameView;
         private final TextView mSummaryView;
         private final ImageView mIconView;
+        private final ImageView mGearIcon;
         private final View mGearView;
 
         DeviceItemViewHolder(@NonNull View itemView, Context context) {
@@ -114,6 +116,7 @@ public class HearingDevicesListAdapter extends RecyclerView.Adapter<RecyclerView
             mNameView = itemView.requireViewById(R.id.bluetooth_device_name);
             mSummaryView = itemView.requireViewById(R.id.bluetooth_device_summary);
             mIconView = itemView.requireViewById(R.id.bluetooth_device_icon);
+            mGearIcon = itemView.requireViewById(R.id.gear_icon_image);
             mGearView = itemView.requireViewById(R.id.gear_icon);
         }
 
@@ -124,13 +127,31 @@ public class HearingDevicesListAdapter extends RecyclerView.Adapter<RecyclerView
             if (backgroundResId != null) {
                 mContainer.setBackground(mContext.getDrawable(item.getBackground()));
             }
-            mNameView.setText(item.getDeviceName());
-            mSummaryView.setText(item.getConnectionSummary());
+
+            // tint different color in different state for bad color contrast problem
+            int tintColor = item.isActive() ? Utils.getColorAttr(mContext,
+                    com.android.internal.R.attr.materialColorOnPrimaryContainer).getDefaultColor()
+                    : Utils.getColorAttr(mContext,
+                            com.android.internal.R.attr.materialColorOnSurface).getDefaultColor();
+
             Pair<Drawable, String> iconPair = item.getIconWithDescription();
             if (iconPair != null) {
-                mIconView.setImageDrawable(iconPair.getFirst());
+                Drawable drawable = iconPair.getFirst().mutate();
+                drawable.setTint(tintColor);
+                mIconView.setImageDrawable(drawable);
                 mIconView.setContentDescription(iconPair.getSecond());
             }
+
+            mNameView.setTextAppearance(
+                    item.isActive() ? R.style.BluetoothTileDialog_DeviceName_Active
+                            : R.style.BluetoothTileDialog_DeviceName);
+            mNameView.setText(item.getDeviceName());
+            mSummaryView.setTextAppearance(
+                    item.isActive() ? R.style.BluetoothTileDialog_DeviceSummary_Active
+                            : R.style.BluetoothTileDialog_DeviceSummary);
+            mSummaryView.setText(item.getConnectionSummary());
+
+            mGearIcon.getDrawable().mutate().setTint(tintColor);
             mGearView.setOnClickListener(view -> callback.onDeviceItemGearClicked(item, view));
         }
     }
