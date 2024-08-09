@@ -2985,7 +2985,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
                 @Override
                 public void onFalse() {
                     // Hides quick settings, bouncer, and quick-quick settings.
-                    mStatusBarKeyguardViewManager.reset(true);
+                    mStatusBarKeyguardViewManager.reset(true, /* isFalsingReset= */true);
                 }
             };
 

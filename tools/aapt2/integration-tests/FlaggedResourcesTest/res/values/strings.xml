@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:android="http://schemas.android.com/apk/res/android">
+    <string name="str">plain string</string>
+
+    <string name="str1" android:featureFlag="test.package.falseFlag">DONTFIND</string>
+</resources>

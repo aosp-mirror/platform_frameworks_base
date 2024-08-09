@@ -151,6 +151,16 @@ flag {
 }
 
 flag {
+    name: "fix_avatar_cross_user_leak"
+    namespace: "multiuser"
+    description: "Fix cross-user picture uri leak for avatar picker apps."
+    bug: "341688848"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+  }
+}
+
+flag {
     name: "fix_get_user_property_cache"
     namespace: "multiuser"
     description: "Cache is not optimised for getUserProperty for values below 0, eg. UserHandler.USER_NULL or UserHandle.USER_ALL"
@@ -386,4 +396,7 @@ flag {
   description: "Refactorings related to unicorn mode to work on HSUM mode (Read only flag)"
   bug: "339201286"
   is_fixed_read_only: true
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
 }
