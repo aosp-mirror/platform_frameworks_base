@@ -80,6 +80,7 @@ public class LocalBluetoothLeBroadcast implements LocalBluetoothProfile {
             "com.android.settings.action.BLUETOOTH_LE_AUDIO_SHARING_STATE_CHANGE";
     public static final String EXTRA_LE_AUDIO_SHARING_STATE = "BLUETOOTH_LE_AUDIO_SHARING_STATE";
     public static final String EXTRA_BLUETOOTH_DEVICE = "BLUETOOTH_DEVICE";
+    public static final String EXTRA_START_LE_AUDIO_SHARING = "START_LE_AUDIO_SHARING";
     public static final int BROADCAST_STATE_UNKNOWN = 0;
     public static final int BROADCAST_STATE_ON = 1;
     public static final int BROADCAST_STATE_OFF = 2;
