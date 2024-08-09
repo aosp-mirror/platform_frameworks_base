@@ -59,8 +59,7 @@ class AppCompatController {
                 mTransparentPolicy, mAppCompatOverrides);
         mAppCompatReachabilityPolicy = new AppCompatReachabilityPolicy(mActivityRecord,
                 wmService.mAppCompatConfiguration);
-        mAppCompatLetterboxPolicy = new AppCompatLetterboxPolicy(mActivityRecord,
-                mTransparentPolicy);
+        mAppCompatLetterboxPolicy = new AppCompatLetterboxPolicy(mActivityRecord);
     }
 
     @NonNull
