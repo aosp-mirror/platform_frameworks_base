@@ -266,3 +266,14 @@ flag {
     description: "This fixed read-only flag is used to enable replacing permission BODY_SENSORS (and BODY_SENSORS_BACKGROUND) with granular health permission READ_HEART_RATE (and READ_HEALTH_DATA_IN_BACKGROUND)"
     bug: "364638912"
 }
+
+flag {
+    name: "delay_uid_state_changes_from_capability_updates"
+    is_fixed_read_only: true
+    namespace: "permissions"
+    description: "If proc state is decreasing over the restriction threshold and capability is changed, delay if no new capabilities are added"
+    bug: "308573169"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
