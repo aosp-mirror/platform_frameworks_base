@@ -27,9 +27,11 @@ import androidx.compose.runtime.getValue
 import androidx.lifecycle.Lifecycle.State.STARTED
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.android.compose.theme.PlatformTheme
+import com.android.systemui.touchpad.tutorial.ui.composable.ActionKeyTutorialScreen
 import com.android.systemui.touchpad.tutorial.ui.composable.BackGestureTutorialScreen
 import com.android.systemui.touchpad.tutorial.ui.composable.HomeGestureTutorialScreen
 import com.android.systemui.touchpad.tutorial.ui.composable.TutorialSelectionScreen
+import com.android.systemui.touchpad.tutorial.ui.viewmodel.Screen.ACTION_KEY
 import com.android.systemui.touchpad.tutorial.ui.viewmodel.Screen.BACK_GESTURE
 import com.android.systemui.touchpad.tutorial.ui.viewmodel.Screen.HOME_GESTURE
 import com.android.systemui.touchpad.tutorial.ui.viewmodel.Screen.TUTORIAL_SELECTION
@@ -71,7 +73,7 @@ fun TouchpadTutorialScreen(vm: TouchpadTutorialViewModel, closeTutorial: () -> U
             TutorialSelectionScreen(
                 onBackTutorialClicked = { vm.goTo(BACK_GESTURE) },
                 onHomeTutorialClicked = { vm.goTo(HOME_GESTURE) },
-                onActionKeyTutorialClicked = {},
+                onActionKeyTutorialClicked = { vm.goTo(ACTION_KEY) },
                 onDoneButtonClicked = closeTutorial
             )
         BACK_GESTURE ->
@@ -81,6 +83,11 @@ fun TouchpadTutorialScreen(vm: TouchpadTutorialViewModel, closeTutorial: () -> U
             )
         HOME_GESTURE ->
             HomeGestureTutorialScreen(
+                onDoneButtonClicked = { vm.goTo(TUTORIAL_SELECTION) },
+                onBack = { vm.goTo(TUTORIAL_SELECTION) },
+            )
+        ACTION_KEY -> // TODO(b/358105049) move action key tutorial to OOBE flow
+        ActionKeyTutorialScreen(
                 onDoneButtonClicked = { vm.goTo(TUTORIAL_SELECTION) },
                 onBack = { vm.goTo(TUTORIAL_SELECTION) },
             )

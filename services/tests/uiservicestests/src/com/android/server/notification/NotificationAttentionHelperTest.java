@@ -2458,6 +2458,74 @@ public class NotificationAttentionHelperTest extends UiServiceTestCase {
     }
 
     @Test
+    public void testBeepVolume_politeNotif_AvalancheStrategy_mixedNotif() throws Exception {
+        mSetFlagsRule.enableFlags(Flags.FLAG_POLITE_NOTIFICATIONS);
+        mSetFlagsRule.enableFlags(Flags.FLAG_CROSS_APP_POLITE_NOTIFICATIONS);
+        mSetFlagsRule.enableFlags(Flags.FLAG_POLITE_NOTIFICATIONS_ATTN_UPDATE);
+        TestableFlagResolver flagResolver = new TestableFlagResolver();
+        flagResolver.setFlagOverride(NotificationFlags.NOTIF_VOLUME1, 50);
+        flagResolver.setFlagOverride(NotificationFlags.NOTIF_VOLUME2, 0);
+        initAttentionHelper(flagResolver);
+
+        // Trigger avalanche trigger intent
+        final Intent intent = new Intent(Intent.ACTION_AIRPLANE_MODE_CHANGED);
+        intent.putExtra("state", false);
+        mAvalancheBroadcastReceiver.onReceive(getContext(), intent);
+
+        // Regular notification: should beep at 0% volume
+        NotificationRecord r = getBeepyNotification();
+        mAttentionHelper.buzzBeepBlinkLocked(r, DEFAULT_SIGNALS);
+        verifyBeepVolume(0.0f);
+        assertEquals(-1, r.getLastAudiblyAlertedMs());
+        Mockito.reset(mRingtonePlayer);
+
+        // Conversation notification
+        mChannel = new NotificationChannel("test2", "test2", IMPORTANCE_DEFAULT);
+        NotificationRecord r2 = getConversationNotificationRecord(mId, false /* insistent */,
+                false /* once */, true /* noisy */, false /* buzzy*/, false /* lights */, true,
+                true, false, null, Notification.GROUP_ALERT_ALL, false, mUser, mPkg,
+                "shortcut");
+
+        // Should beep at 100% volume
+        mAttentionHelper.buzzBeepBlinkLocked(r2, DEFAULT_SIGNALS);
+        assertNotEquals(-1, r2.getLastAudiblyAlertedMs());
+        verifyBeepVolume(1.0f);
+
+        // Conversation notification on a different channel
+        mChannel = new NotificationChannel("test3", "test3", IMPORTANCE_DEFAULT);
+        NotificationRecord r3 = getConversationNotificationRecord(mId, false /* insistent */,
+                false /* once */, true /* noisy */, false /* buzzy*/, false /* lights */, true,
+                true, false, null, Notification.GROUP_ALERT_ALL, false, mUser, mPkg,
+                "shortcut");
+
+        // Should beep at 50% volume
+        Mockito.reset(mRingtonePlayer);
+        mAttentionHelper.buzzBeepBlinkLocked(r3, DEFAULT_SIGNALS);
+        assertNotEquals(-1, r3.getLastAudiblyAlertedMs());
+        verifyBeepVolume(0.5f);
+
+        // 2nd update should beep at 0% volume
+        Mockito.reset(mRingtonePlayer);
+        mAttentionHelper.buzzBeepBlinkLocked(r3, DEFAULT_SIGNALS);
+        verifyBeepVolume(0.0f);
+
+        // Set important conversation
+        mChannel.setImportantConversation(true);
+        r3 = getConversationNotificationRecord(mId, false /* insistent */,
+            false /* once */, true /* noisy */, false /* buzzy*/, false /* lights */, true,
+            true, false, null, Notification.GROUP_ALERT_ALL, false, mUser, mPkg,
+            "shortcut");
+
+        // important conversation should beep at 100% volume
+        Mockito.reset(mRingtonePlayer);
+        mAttentionHelper.buzzBeepBlinkLocked(r3, DEFAULT_SIGNALS);
+        verifyBeepVolume(1.0f);
+
+        verify(mAccessibilityService, times(5)).sendAccessibilityEvent(any(), anyInt());
+        assertNotEquals(-1, r3.getLastAudiblyAlertedMs());
+    }
+
+    @Test
     public void testBeepVolume_politeNotif_Avalanche_exemptEmergency() throws Exception {
         mSetFlagsRule.enableFlags(Flags.FLAG_POLITE_NOTIFICATIONS);
         mSetFlagsRule.enableFlags(Flags.FLAG_CROSS_APP_POLITE_NOTIFICATIONS);

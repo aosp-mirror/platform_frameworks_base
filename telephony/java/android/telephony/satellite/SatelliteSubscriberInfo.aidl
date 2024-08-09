@@ -16,4 +16,4 @@
 
 package android.telephony.satellite;
 
-parcelable ProvisionSubscriberId;
+parcelable SatelliteSubscriberInfo;

@@ -16,7 +16,6 @@
 
 package com.android.server.vibrator;
 
-import static android.os.VibrationAttributes.CATEGORY_KEYBOARD;
 import static android.os.VibrationAttributes.USAGE_ACCESSIBILITY;
 import static android.os.VibrationAttributes.USAGE_ALARM;
 import static android.os.VibrationAttributes.USAGE_COMMUNICATION_REQUEST;
@@ -190,8 +189,6 @@ final class VibrationSettings {
     private boolean mBatterySaverMode;
     @GuardedBy("mLock")
     private boolean mVibrateOn;
-    @GuardedBy("mLock")
-    private boolean mKeyboardVibrationOn;
     @GuardedBy("mLock")
     private int mRingerMode;
     @GuardedBy("mLock")
@@ -532,14 +529,6 @@ final class VibrationSettings {
             return false;
         }
 
-        if (mVibrationConfig.isKeyboardVibrationSettingsSupported()) {
-            int category = callerInfo.attrs.getCategory();
-            if (usage == USAGE_TOUCH && category == CATEGORY_KEYBOARD) {
-                // Keyboard touch has a different user setting.
-                return mKeyboardVibrationOn;
-            }
-        }
-
         // Apply individual user setting based on usage.
         return getCurrentIntensity(usage) != Vibrator.VIBRATION_INTENSITY_OFF;
     }
@@ -556,10 +545,11 @@ final class VibrationSettings {
             mVibrateInputDevices =
                     loadSystemSetting(Settings.System.VIBRATE_INPUT_DEVICES, 0, userHandle) > 0;
             mVibrateOn = loadSystemSetting(Settings.System.VIBRATE_ON, 1, userHandle) > 0;
-            mKeyboardVibrationOn = loadSystemSetting(
-                    Settings.System.KEYBOARD_VIBRATION_ENABLED, 1, userHandle) > 0;
 
-            int keyboardIntensity = getDefaultIntensity(USAGE_IME_FEEDBACK);
+            boolean isKeyboardVibrationOn = loadSystemSetting(
+                    Settings.System.KEYBOARD_VIBRATION_ENABLED, 1, userHandle) > 0;
+            int keyboardIntensity = toIntensity(isKeyboardVibrationOn,
+                    getDefaultIntensity(USAGE_IME_FEEDBACK));
             int alarmIntensity = toIntensity(
                     loadSystemSetting(Settings.System.ALARM_VIBRATION_INTENSITY, -1, userHandle),
                     getDefaultIntensity(USAGE_ALARM));
@@ -654,7 +644,6 @@ final class VibrationSettings {
             return "VibrationSettings{"
                     + "mVibratorConfig=" + mVibrationConfig
                     + ", mVibrateOn=" + mVibrateOn
-                    + ", mKeyboardVibrationOn=" + mKeyboardVibrationOn
                     + ", mVibrateInputDevices=" + mVibrateInputDevices
                     + ", mBatterySaverMode=" + mBatterySaverMode
                     + ", mRingerMode=" + ringerModeToString(mRingerMode)
@@ -671,7 +660,6 @@ final class VibrationSettings {
             pw.println("VibrationSettings:");
             pw.increaseIndent();
             pw.println("vibrateOn = " + mVibrateOn);
-            pw.println("keyboardVibrationOn = " + mKeyboardVibrationOn);
             pw.println("vibrateInputDevices = " + mVibrateInputDevices);
             pw.println("batterySaverMode = " + mBatterySaverMode);
             pw.println("ringerMode = " + ringerModeToString(mRingerMode));
@@ -698,8 +686,6 @@ final class VibrationSettings {
     void dump(ProtoOutputStream proto) {
         synchronized (mLock) {
             proto.write(VibratorManagerServiceDumpProto.VIBRATE_ON, mVibrateOn);
-            proto.write(VibratorManagerServiceDumpProto.KEYBOARD_VIBRATION_ON,
-                    mKeyboardVibrationOn);
             proto.write(VibratorManagerServiceDumpProto.LOW_POWER_MODE, mBatterySaverMode);
             proto.write(VibratorManagerServiceDumpProto.ALARM_INTENSITY,
                     getCurrentIntensity(USAGE_ALARM));
@@ -772,6 +758,11 @@ final class VibrationSettings {
             return defaultValue;
         }
         return value;
+    }
+
+    @VibrationIntensity
+    private int toIntensity(boolean enabled, @VibrationIntensity int defaultValue) {
+        return enabled ? defaultValue : Vibrator.VIBRATION_INTENSITY_OFF;
     }
 
     private boolean loadBooleanSetting(String settingKey, int userHandle) {

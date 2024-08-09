@@ -25,21 +25,32 @@ import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
+import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.inputdevice.tutorial.data.model.DeviceSchedulerInfo
-import com.android.systemui.inputdevice.tutorial.data.model.TutorialSchedulerInfo
 import javax.inject.Inject
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 
 @SysUISingleton
 class TutorialSchedulerRepository
 @Inject
-constructor(@Application private val applicationContext: Context) {
+constructor(
+    @Application private val applicationContext: Context,
+    @Background private val backgroundScope: CoroutineScope
+) {
 
     private val Context.dataStore: DataStore<Preferences> by
-        preferencesDataStore(name = DATASTORE_NAME)
+        preferencesDataStore(name = DATASTORE_NAME, scope = backgroundScope)
 
-    suspend fun loadData(): TutorialSchedulerInfo {
+    suspend fun isLaunched(deviceType: DeviceType): Boolean = loadData()[deviceType]!!.isLaunched
+
+    suspend fun wasEverConnected(deviceType: DeviceType): Boolean =
+        loadData()[deviceType]!!.wasEverConnected
+
+    suspend fun connectTime(deviceType: DeviceType): Long = loadData()[deviceType]!!.connectTime!!
+
+    private suspend fun loadData(): Map<DeviceType, DeviceSchedulerInfo> {
         return applicationContext.dataStore.data.map { pref -> getSchedulerInfo(pref) }.first()
     }
 
@@ -51,10 +62,10 @@ constructor(@Application private val applicationContext: Context) {
         applicationContext.dataStore.edit { pref -> pref[getLaunchedKey(device)] = true }
     }
 
-    private fun getSchedulerInfo(pref: Preferences): TutorialSchedulerInfo {
-        return TutorialSchedulerInfo(
-            keyboard = getDeviceSchedulerInfo(pref, DeviceType.KEYBOARD),
-            touchpad = getDeviceSchedulerInfo(pref, DeviceType.TOUCHPAD)
+    private fun getSchedulerInfo(pref: Preferences): Map<DeviceType, DeviceSchedulerInfo> {
+        return mapOf(
+            DeviceType.KEYBOARD to getDeviceSchedulerInfo(pref, DeviceType.KEYBOARD),
+            DeviceType.TOUCHPAD to getDeviceSchedulerInfo(pref, DeviceType.TOUCHPAD)
         )
     }
 

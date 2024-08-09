@@ -37,6 +37,8 @@ import com.android.internal.policy.ScreenDecorationsUtils
 import com.android.systemui.common.ui.compose.windowinsets.CutoutLocation
 import com.android.systemui.common.ui.compose.windowinsets.DisplayCutout
 import com.android.systemui.common.ui.compose.windowinsets.ScreenDecorProvider
+import com.android.systemui.keyguard.ui.composable.AlternateBouncer
+import com.android.systemui.keyguard.ui.viewmodel.AlternateBouncerDependencies
 import com.android.systemui.lifecycle.repeatWhenAttached
 import com.android.systemui.res.R
 import com.android.systemui.scene.shared.flag.SceneContainerFlag
@@ -48,12 +50,14 @@ import com.android.systemui.scene.ui.composable.SceneContainer
 import com.android.systemui.scene.ui.viewmodel.SceneContainerViewModel
 import com.android.systemui.statusbar.notification.stack.ui.view.SharedNotificationContainer
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
+@ExperimentalCoroutinesApi
 object SceneWindowRootViewBinder {
 
     /** Binds between the view and view-model pertaining to a specific scene container. */
@@ -66,6 +70,7 @@ object SceneWindowRootViewBinder {
         scenes: Set<Scene>,
         onVisibilityChangedInternal: (isVisible: Boolean) -> Unit,
         dataSourceDelegator: SceneDataSourceDelegator,
+        alternateBouncerDependencies: AlternateBouncerDependencies,
     ) {
         val unsortedSceneByKey: Map<SceneKey, Scene> = scenes.associateBy { scene -> scene.key }
         val sortedSceneByKey: Map<SceneKey, Scene> = buildMap {
@@ -120,6 +125,14 @@ object SceneWindowRootViewBinder {
                             sharedNotificationContainer
                         )
                         view.addView(sharedNotificationContainer)
+
+                        // TODO (b/358354906): use an overlay for the alternate bouncer
+                        view.addView(
+                            createAlternateBouncerView(
+                                context = view.context,
+                                alternateBouncerDependencies = alternateBouncerDependencies,
+                            )
+                        )
                     }
 
                     launch {
@@ -160,6 +173,19 @@ object SceneWindowRootViewBinder {
                         )
                     }
                 }
+            }
+        }
+    }
+
+    private fun createAlternateBouncerView(
+        context: Context,
+        alternateBouncerDependencies: AlternateBouncerDependencies,
+    ): ComposeView {
+        return ComposeView(context).apply {
+            setContent {
+                AlternateBouncer(
+                    alternateBouncerDependencies = alternateBouncerDependencies,
+                )
             }
         }
     }

@@ -512,6 +512,9 @@ final class InputMethodSubtypeSwitchingController {
         /**
          * Gets the next input method and subtype from the given ones.
          *
+         * <p>If the given input method and subtype are not found, this returns the most recent
+         * input method and subtype.</p>
+         *
          * @param imi            the input method to find the next value from.
          * @param subtype        the input method subtype to find the next value from, if any.
          * @param onlyCurrentIme whether to consider only subtypes of the current input method.
@@ -523,17 +526,20 @@ final class InputMethodSubtypeSwitchingController {
         public ImeSubtypeListItem next(@NonNull InputMethodInfo imi,
                 @Nullable InputMethodSubtype subtype, boolean onlyCurrentIme,
                 boolean useRecency, boolean forward) {
-            final int size = mItems.size();
-            if (size <= 1) {
+            if (mItems.isEmpty()) {
                 return null;
             }
             final int index = getIndex(imi, subtype, useRecency);
             if (index < 0) {
-                return null;
+                Slog.w(TAG, "Trying to switch away from input method: " + imi
+                        + " and subtype " + subtype + " which are not in the list,"
+                        + " falling back to most recent item in list.");
+                return mItems.get(mRecencyMap[0]);
             }
 
             final int incrementSign = (forward ? 1 : -1);
 
+            final int size = mItems.size();
             for (int i = 1; i < size; i++) {
                 final int nextIndex = (index + i * incrementSign + size) % size;
                 final int mappedIndex = useRecency ? mRecencyMap[nextIndex] : nextIndex;
@@ -554,7 +560,7 @@ final class InputMethodSubtypeSwitchingController {
          */
         public boolean setMostRecent(@NonNull InputMethodInfo imi,
                 @Nullable InputMethodSubtype subtype) {
-            if (mItems.size() <= 1) {
+            if (mItems.isEmpty()) {
                 return false;
             }
 
@@ -849,6 +855,9 @@ final class InputMethodSubtypeSwitchingController {
     /**
      * Gets the next input method and subtype, starting from the given ones, in the given direction.
      *
+     * <p>If the given input method and subtype are not found, this returns the most recent
+     * input method and subtype.</p>
+     *
      * @param onlyCurrentIme whether to consider only subtypes of the current input method.
      * @param imi            the input method to find the next value from.
      * @param subtype        the input method subtype to find the next value from, if any.
@@ -866,6 +875,9 @@ final class InputMethodSubtypeSwitchingController {
     /**
      * Gets the next input method and subtype suitable for hardware keyboards, starting from the
      * given ones, in the given direction.
+     *
+     * <p>If the given input method and subtype are not found, this returns the most recent
+     * input method and subtype.</p>
      *
      * @param onlyCurrentIme whether to consider only subtypes of the current input method.
      * @param imi            the input method to find the next value from.

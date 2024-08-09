@@ -913,52 +913,100 @@ public final class InputMethodSubtypeSwitchingControllerTest {
         final var controller = ControllerImpl.createFrom(null /* currentInstance */, List.of(),
                 List.of());
 
-        assertNoAction(controller, false /* forHardware */, items);
-        assertNoAction(controller, true /* forHardware */, hardwareItems);
+        assertNextItemNoAction(controller, false /* forHardware */, items,
+                null /* expectedNext */);
+        assertNextItemNoAction(controller, true /* forHardware */, hardwareItems,
+                null /* expectedNext */);
     }
 
-    /** Verifies that a controller with a single item can't take any actions. */
+    /**
+     * Verifies that a controller with a single item can't update the recency, and cannot switch
+     * away from the item, but allows switching from unknown items to the single item.
+     */
     @RequiresFlagsEnabled(Flags.FLAG_IME_SWITCHER_REVAMP)
     @Test
     public void testSingleItemList() {
         final var items = new ArrayList<ImeSubtypeListItem>();
         addTestImeSubtypeListItems(items, "LatinIme", "LatinIme",
-                List.of("en", "fr"), true /* supportsSwitchingToNextInputMethod */);
+                null, true /* supportsSwitchingToNextInputMethod */);
+        final var unknownItems = new ArrayList<ImeSubtypeListItem>();
+        addTestImeSubtypeListItems(unknownItems, "UnknownIme", "UnknownIme",
+                List.of("en", "fr", "it"), true /* supportsSwitchingToNextInputMethod */);
 
         final var hardwareItems = new ArrayList<ImeSubtypeListItem>();
         addTestImeSubtypeListItems(hardwareItems, "HardwareIme", "HardwareIme",
-                List.of("en", "fr"), true /* supportsSwitchingToNextInputMethod */);
+                null, true /* supportsSwitchingToNextInputMethod */);
+        final var unknownHardwareItems = new ArrayList<ImeSubtypeListItem>();
+        addTestImeSubtypeListItems(unknownHardwareItems, "HardwareUnknownIme", "HardwareUnknownIme",
+                List.of("en", "fr", "it"), true /* supportsSwitchingToNextInputMethod */);
 
         final var controller = ControllerImpl.createFrom(null /* currentInstance */,
-                List.of(items.get(0)), List.of(hardwareItems.get(0)));
+                items, hardwareItems);
 
-        assertNoAction(controller, false /* forHardware */, items);
-        assertNoAction(controller, true /* forHardware */, hardwareItems);
+        assertNextItemNoAction(controller, false /* forHardware */, items,
+                null /* expectedNext */);
+        assertNextItemNoAction(controller, false /* forHardware */, unknownItems,
+                items.get(0));
+        assertNextItemNoAction(controller, true /* forHardware */, hardwareItems,
+                null /* expectedNext */);
+        assertNextItemNoAction(controller, true /* forHardware */, unknownHardwareItems,
+                hardwareItems.get(0));
     }
 
-    /** Verifies that a controller can't take any actions for unknown items. */
+    /**
+     * Verifies that the recency cannot be updated for unknown items, but switching from unknown
+     * items reaches the most recent known item.
+     */
     @RequiresFlagsEnabled(Flags.FLAG_IME_SWITCHER_REVAMP)
     @Test
     public void testUnknownItems() {
         final var items = new ArrayList<ImeSubtypeListItem>();
         addTestImeSubtypeListItems(items, "LatinIme", "LatinIme",
-                List.of("en", "fr"), true /* supportsSwitchingToNextInputMethod */);
+                List.of("en", "fr", "it"), true /* supportsSwitchingToNextInputMethod */);
+
+        final var english = items.get(0);
+        final var french = items.get(1);
+        final var italian = items.get(2);
+
         final var unknownItems = new ArrayList<ImeSubtypeListItem>();
         addTestImeSubtypeListItems(unknownItems, "UnknownIme", "UnknownIme",
-                List.of("en", "fr"), true /* supportsSwitchingToNextInputMethod */);
+                List.of("en", "fr", "it"), true /* supportsSwitchingToNextInputMethod */);
 
         final var hardwareItems = new ArrayList<ImeSubtypeListItem>();
         addTestImeSubtypeListItems(hardwareItems, "HardwareIme", "HardwareIme",
-                List.of("en", "fr"), true /* supportsSwitchingToNextInputMethod */);
+                List.of("en", "fr", "it"), true /* supportsSwitchingToNextInputMethod */);
         final var unknownHardwareItems = new ArrayList<ImeSubtypeListItem>();
         addTestImeSubtypeListItems(unknownHardwareItems, "HardwareUnknownIme", "HardwareUnknownIme",
-                List.of("en", "fr"), true /* supportsSwitchingToNextInputMethod */);
+                List.of("en", "fr", "it"), true /* supportsSwitchingToNextInputMethod */);
 
         final var controller = ControllerImpl.createFrom(null /* currentInstance */, items,
                 hardwareItems);
 
-        assertNoAction(controller, false /* forHardware */, unknownItems);
-        assertNoAction(controller, true /* forHardware */, unknownHardwareItems);
+        assertTrue("Recency updated for french IME", onUserAction(controller, french));
+
+        final var recencyItems = List.of(french, english, italian);
+
+        assertNextItemNoAction(controller, false /* forHardware */, unknownItems,
+                french);
+        assertNextItemNoAction(controller, true /* forHardware */, unknownHardwareItems,
+                hardwareItems.get(0));
+
+        // Known items must not be able to switch to unknown items.
+        assertNextOrder(controller, false /* forHardware */, MODE_STATIC, items,
+                List.of(items));
+        assertNextOrder(controller, false /* forHardware */, MODE_RECENT, recencyItems,
+                List.of(recencyItems));
+        assertNextOrder(controller, false /* forHardware */, MODE_AUTO, true /* forward */,
+                recencyItems, List.of(recencyItems));
+        assertNextOrder(controller, false /* forHardware */, MODE_AUTO, false /* forward */,
+                items.reversed(), List.of(items.reversed()));
+
+        assertNextOrder(controller, true /* forHardware */, MODE_STATIC, hardwareItems,
+                List.of(hardwareItems));
+        assertNextOrder(controller, true /* forHardware */, MODE_RECENT, hardwareItems,
+                List.of(hardwareItems));
+        assertNextOrder(controller, true /* forHardware */, MODE_AUTO, hardwareItems,
+                List.of(hardwareItems));
     }
 
     /** Verifies that the IME name does influence the comparison order. */
@@ -1199,25 +1247,26 @@ public final class InputMethodSubtypeSwitchingControllerTest {
     }
 
     /**
-     * Verifies that no next items can be found, and the recency cannot be updated for the
+     * Verifies that the expected next item is returned, and the recency cannot be updated for the
      * given items.
      *
-     * @param controller  the controller to verify the items on.
-     * @param forHardware whether to try finding the next hardware item, or software item.
-     * @param items       the list of items to verify.
+     * @param controller   the controller to verify the items on.
+     * @param forHardware  whether to try finding the next hardware item, or software item.
+     * @param items        the list of items to verify.
+     * @param expectedNext the expected next item.
      */
-    private void assertNoAction(@NonNull ControllerImpl controller, boolean forHardware,
-            @NonNull List<ImeSubtypeListItem> items) {
+    private void assertNextItemNoAction(@NonNull ControllerImpl controller, boolean forHardware,
+            @NonNull List<ImeSubtypeListItem> items, @Nullable ImeSubtypeListItem expectedNext) {
         for (var item : items) {
             for (int mode = MODE_STATIC; mode <= MODE_AUTO; mode++) {
                 assertNextItem(controller, forHardware, false /* onlyCurrentIme */, mode,
-                        false /* forward */, item, null /* expectedNext */);
+                        false /* forward */, item, expectedNext);
                 assertNextItem(controller, forHardware, false /* onlyCurrentIme */, mode,
-                        true /* forward */, item, null /* expectedNext */);
+                        true /* forward */, item, expectedNext);
                 assertNextItem(controller, forHardware, true /* onlyCurrentIme */, mode,
-                        false /* forward */, item, null /* expectedNext */);
+                        false /* forward */, item, expectedNext);
                 assertNextItem(controller, forHardware, true /* onlyCurrentIme */, mode,
-                        true /* forward */, item, null /* expectedNext */);
+                        true /* forward */, item, expectedNext);
             }
 
             assertFalse("User action shouldn't have updated the recency.",

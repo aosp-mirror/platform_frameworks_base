@@ -32,6 +32,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewOutlineProvider;
+import android.view.accessibility.AccessibilityNodeInfo;
 import android.widget.FrameLayout;
 
 import com.android.wm.shell.R;
@@ -188,6 +189,17 @@ public class BubbleBarExpandedView extends FrameLayout implements BubbleTaskView
 
             // Handle view needs to draw on top of task view.
             bringChildToFront(mHandleView);
+
+            mHandleView.setAccessibilityDelegate(new AccessibilityDelegate() {
+                @Override
+                public void onInitializeAccessibilityNodeInfo(View host,
+                        AccessibilityNodeInfo info) {
+                    super.onInitializeAccessibilityNodeInfo(host, info);
+                    info.addAction(new AccessibilityNodeInfo.AccessibilityAction(
+                            AccessibilityNodeInfo.ACTION_CLICK, getResources().getString(
+                            R.string.bubble_accessibility_action_expand_menu)));
+                }
+            });
         }
         mMenuViewController = new BubbleBarMenuViewController(mContext, this);
         mMenuViewController.setListener(new BubbleBarMenuViewController.Listener() {
