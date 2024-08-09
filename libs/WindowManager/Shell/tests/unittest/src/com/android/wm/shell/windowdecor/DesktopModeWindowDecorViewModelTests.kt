@@ -57,6 +57,7 @@ import android.view.SurfaceView
 import android.view.View
 import android.view.WindowInsets.Type.statusBars
 import android.window.WindowContainerTransaction
+import android.window.WindowContainerTransaction.HierarchyOp
 import androidx.test.filters.SmallTest
 import com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn
 import com.android.dx.mockito.inline.extended.ExtendedMockito.mockitoSession
@@ -353,6 +354,36 @@ class DesktopModeWindowDecorViewModelTests : ShellTestCase() {
 
         assertEquals(secondaryDisplayId, eventCaptor.firstValue.displayId)
         assertEquals(secondaryDisplayId, eventCaptor.secondValue.displayId)
+    }
+
+    @Test
+    fun testCloseButtonInFreeform() {
+        val task = createTask(windowingMode = WINDOWING_MODE_FREEFORM)
+        val windowDecor = setUpMockDecorationForTask(task)
+
+        onTaskOpening(task)
+        val onClickListenerCaptor = argumentCaptor<View.OnClickListener>()
+        verify(windowDecor).setCaptionListeners(
+            onClickListenerCaptor.capture(), any(), any(), any())
+
+        val onClickListener = onClickListenerCaptor.firstValue
+        val view = mock(View::class.java)
+        whenever(view.id).thenReturn(R.id.close_window)
+
+        val freeformTaskTransitionStarter = mock(FreeformTaskTransitionStarter::class.java)
+        desktopModeWindowDecorViewModel
+            .setFreeformTaskTransitionStarter(freeformTaskTransitionStarter)
+
+        onClickListener.onClick(view)
+
+        val transactionCaptor = argumentCaptor<WindowContainerTransaction>()
+        verify(freeformTaskTransitionStarter).startRemoveTransition(transactionCaptor.capture())
+        val wct = transactionCaptor.firstValue
+
+        assertEquals(1, wct.getHierarchyOps().size)
+        assertEquals(HierarchyOp.HIERARCHY_OP_TYPE_REMOVE_TASK,
+                     wct.getHierarchyOps().get(0).getType())
+        assertEquals(task.token.asBinder(), wct.getHierarchyOps().get(0).getContainer())
     }
 
     @Test

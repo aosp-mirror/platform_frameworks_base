@@ -761,7 +761,7 @@ class BackNavigationController {
             if (isMonitorForRemote()) {
                 mObserver.sendResult(null /* result */);
             }
-            if (isMonitorAnimationOrTransition()) {
+            if (isMonitorAnimationOrTransition() && canCancelAnimations()) {
                 clearBackAnimations(true /* cancel */);
             }
             cancelPendingAnimation();
@@ -2046,11 +2046,22 @@ class BackNavigationController {
         }
     }
 
+    /** If the open transition is playing, wait for transition to clear the animation */
+    private boolean canCancelAnimations() {
+        if (!Flags.migratePredictiveBackTransition()) {
+            return true;
+        }
+        return mAnimationHandler.mOpenAnimAdaptor == null
+                || mAnimationHandler.mOpenAnimAdaptor.mPreparedOpenTransition == null;
+    }
+
     void startAnimation() {
         if (!mBackAnimationInProgress) {
             // gesture is already finished, do not start animation
             if (mPendingAnimation != null) {
-                clearBackAnimations(true /* cancel */);
+                if (canCancelAnimations()) {
+                    clearBackAnimations(true /* cancel */);
+                }
                 mPendingAnimation = null;
             }
             return;

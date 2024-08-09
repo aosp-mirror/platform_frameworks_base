@@ -51,6 +51,7 @@ import static com.android.server.wm.KeyguardControllerProto.KEYGUARD_SHOWING;
 import android.annotation.Nullable;
 import android.os.IBinder;
 import android.os.RemoteException;
+import android.os.SystemClock;
 import android.os.Trace;
 import android.util.Slog;
 import android.util.SparseArray;
@@ -619,7 +620,8 @@ class KeyguardController {
             }
             state.mKeyguardGoingAway = false;
             state.writeEventLog("goingAwayTimeout");
-            mWindowManager.mPolicy.startKeyguardExitAnimation(0);
+            mWindowManager.mPolicy.startKeyguardExitAnimation(
+                    SystemClock.uptimeMillis() - GOING_AWAY_TIMEOUT_MS);
         }
     };
 

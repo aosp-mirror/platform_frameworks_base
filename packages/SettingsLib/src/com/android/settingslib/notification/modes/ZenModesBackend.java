@@ -174,7 +174,6 @@ public class ZenModesBackend {
             mNotificationManager.setZenMode(Settings.Global.ZEN_MODE_OFF, null, TAG,
                     /* fromUser= */ true);
         } else {
-            // TODO: b/333527800 - This should (potentially) snooze the rule if it was active.
             mNotificationManager.setAutomaticZenRuleState(mode.getId(),
                     new Condition(mode.getRule().getConditionId(), "", Condition.STATE_FALSE,
                             Condition.SOURCE_USER_ACTION));

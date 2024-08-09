@@ -46,7 +46,8 @@ class SystemUIIssueRegistry : IssueRegistry() {
                 DemotingTestWithoutBugDetector.ISSUE,
                 TestFunctionNameViolationDetector.ISSUE,
                 MissingApacheLicenseDetector.ISSUE,
-                RegisterContentObserverSyncViaSettingsProxyDetector.SYNC_WARNING
+                RegisterContentObserverSyncViaSettingsProxyDetector.SYNC_WARNING,
+                RegisterContentObserverViaContentResolverDetector.CONTENT_RESOLVER_ERROR
             )
 
     override val api: Int

@@ -5,15 +5,18 @@ import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.View
 import android.view.WindowInsets
+import com.android.systemui.keyguard.ui.viewmodel.AlternateBouncerDependencies
 import com.android.systemui.scene.shared.model.Scene
 import com.android.systemui.scene.shared.model.SceneContainerConfig
 import com.android.systemui.scene.shared.model.SceneDataSourceDelegator
 import com.android.systemui.scene.ui.viewmodel.SceneContainerViewModel
 import com.android.systemui.shade.TouchLogger
 import com.android.systemui.statusbar.notification.stack.ui.view.SharedNotificationContainer
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 
 /** A root view of the main SysUI window that supports scenes. */
+@ExperimentalCoroutinesApi
 class SceneWindowRootView(
     context: Context,
     attrs: AttributeSet?,
@@ -35,6 +38,7 @@ class SceneWindowRootView(
         scenes: Set<Scene>,
         layoutInsetController: LayoutInsetsController,
         sceneDataSourceDelegator: SceneDataSourceDelegator,
+        alternateBouncerDependencies: AlternateBouncerDependencies,
     ) {
         this.viewModel = viewModel
         setLayoutInsetsController(layoutInsetController)
@@ -49,6 +53,7 @@ class SceneWindowRootView(
                 super.setVisibility(if (isVisible) View.VISIBLE else View.INVISIBLE)
             },
             dataSourceDelegator = sceneDataSourceDelegator,
+            alternateBouncerDependencies = alternateBouncerDependencies,
         )
     }
 

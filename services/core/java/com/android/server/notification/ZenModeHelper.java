@@ -37,6 +37,8 @@ import static android.service.notification.ZenModeConfig.ORIGIN_SYSTEM;
 import static android.service.notification.ZenModeConfig.ORIGIN_UNKNOWN;
 import static android.service.notification.ZenModeConfig.ORIGIN_USER_IN_APP;
 import static android.service.notification.ZenModeConfig.ORIGIN_USER_IN_SYSTEMUI;
+import static android.service.notification.ZenModeConfig.ZenRule.OVERRIDE_ACTIVATE;
+import static android.service.notification.ZenModeConfig.ZenRule.OVERRIDE_DEACTIVATE;
 
 import static com.android.internal.util.FrameworkStatsLog.DND_MODE_RULE;
 import static com.android.internal.util.Preconditions.checkArgument;
@@ -643,10 +645,10 @@ public class ZenModeHelper {
                 if ((rule.userModifiedFields & AutomaticZenRule.FIELD_INTERRUPTION_FILTER) == 0) {
                     rule.zenMode = zenMode;
                 }
-                rule.snoozing = false;
                 rule.condition = new Condition(rule.conditionId,
                         mContext.getString(R.string.zen_mode_implicit_activated),
                         STATE_TRUE);
+                rule.resetConditionOverride();
 
                 setConfigLocked(newConfig, /* triggeringComponent= */ null, ORIGIN_APP,
                         "applyGlobalZenModeAsImplicitZenRule", callingUid);
@@ -867,8 +869,8 @@ public class ZenModeHelper {
                 ZenRule deletedRule = ruleToRemove.copy();
                 deletedRule.deletionInstant = Instant.now(mClock);
                 // If the rule is restored it shouldn't be active (or snoozed).
-                deletedRule.snoozing = false;
                 deletedRule.condition = null;
+                deletedRule.resetConditionOverride();
                 // Overwrites a previously-deleted rule with the same conditionId, but that's okay.
                 config.deletedRules.put(deletedKey, deletedRule);
             }
@@ -885,7 +887,12 @@ public class ZenModeHelper {
             if (rule == null || !canManageAutomaticZenRule(rule)) {
                 return Condition.STATE_UNKNOWN;
             }
-            return rule.condition != null ? rule.condition.state : STATE_FALSE;
+            if (Flags.modesApi() && Flags.modesUi()) {
+                return rule.isAutomaticActive() ? STATE_TRUE : STATE_FALSE;
+            } else {
+                // Buggy, does not consider snoozing!
+                return rule.condition != null ? rule.condition.state : STATE_FALSE;
+            }
         }
     }
 
@@ -943,9 +950,37 @@ public class ZenModeHelper {
         }
 
         for (ZenRule rule : rules) {
-            rule.condition = condition;
-            updateSnoozing(rule);
+            applyConditionAndReconsiderOverride(rule, condition, origin);
             setConfigLocked(config, rule.component, origin, "conditionChanged", callingUid);
+        }
+    }
+
+    private static void applyConditionAndReconsiderOverride(ZenRule rule, Condition condition,
+            int origin) {
+        if (Flags.modesApi() && Flags.modesUi()) {
+            if (origin == ORIGIN_USER_IN_SYSTEMUI && condition != null
+                    && condition.source == SOURCE_USER_ACTION) {
+                // Apply as override, instead of actual condition.
+                if (condition.state == STATE_TRUE) {
+                    // Manually turn on a rule -> Apply override.
+                    rule.setConditionOverride(OVERRIDE_ACTIVATE);
+                } else if (condition.state == STATE_FALSE) {
+                    // Manually turn off a rule. If the rule was manually activated before, reset
+                    // override -- but only if this will not result in the rule turning on
+                    // immediately because of a previously snoozed condition! In that case, apply
+                    // deactivate-override.
+                    rule.resetConditionOverride();
+                    if (rule.isAutomaticActive()) {
+                        rule.setConditionOverride(OVERRIDE_DEACTIVATE);
+                    }
+                }
+            } else {
+                rule.condition = condition;
+                rule.reconsiderConditionOverride();
+            }
+        } else {
+            rule.condition = condition;
+            rule.reconsiderConditionOverride();
         }
     }
 
@@ -969,15 +1004,6 @@ public class ZenModeHelper {
         if (!rule.conditionId.equals(id)) return false;
         if (Objects.equals(condition, rule.condition)) return false;
         return true;
-    }
-
-    private boolean updateSnoozing(ZenRule rule) {
-        if (rule != null && rule.snoozing && !rule.isTrueOrUnknown()) {
-            rule.snoozing = false;
-            if (DEBUG) Log.d(TAG, "Snoozing reset for " + rule.conditionId);
-            return true;
-        }
-        return false;
     }
 
     public int getCurrentInstanceCount(ComponentName cn) {
@@ -1181,7 +1207,7 @@ public class ZenModeHelper {
 
             if (rule.enabled != azr.isEnabled()) {
                 rule.enabled = azr.isEnabled();
-                rule.snoozing = false;
+                rule.resetConditionOverride();
                 modified = true;
             }
             if (!Objects.equals(rule.configurationActivity, azr.getConfigurationActivity())) {
@@ -1271,7 +1297,7 @@ public class ZenModeHelper {
             return modified;
         } else {
             if (rule.enabled != azr.isEnabled()) {
-                rule.snoozing = false;
+                rule.resetConditionOverride();
             }
             rule.name = azr.getName();
             rule.condition = null;
@@ -1573,18 +1599,16 @@ public class ZenModeHelper {
                     // For API calls (different origin) keep old behavior of snoozing all rules.
                     for (ZenRule automaticRule : newConfig.automaticRules.values()) {
                         if (automaticRule.isAutomaticActive()) {
-                            automaticRule.snoozing = true;
+                            automaticRule.setConditionOverride(OVERRIDE_DEACTIVATE);
                         }
                     }
                 }
             } else {
                 if (zenMode == Global.ZEN_MODE_OFF) {
                     newConfig.manualRule = null;
-                    // User deactivation of DND means just turning off the manual DND rule.
-                    // For API calls (different origin) keep old behavior of snoozing all rules.
                     for (ZenRule automaticRule : newConfig.automaticRules.values()) {
                         if (automaticRule.isAutomaticActive()) {
-                            automaticRule.snoozing = true;
+                            automaticRule.setConditionOverride(OVERRIDE_DEACTIVATE);
                         }
                     }
 
@@ -1626,13 +1650,11 @@ public class ZenModeHelper {
     void dump(ProtoOutputStream proto) {
         proto.write(ZenModeProto.ZEN_MODE, mZenMode);
         synchronized (mConfigLock) {
-            if (mConfig.manualRule != null) {
+            if (mConfig.isManualActive()) {
                 mConfig.manualRule.dumpDebug(proto, ZenModeProto.ENABLED_ACTIVE_CONDITIONS);
             }
             for (ZenRule rule : mConfig.automaticRules.values()) {
-                if (rule.enabled && rule.condition != null
-                        && rule.condition.state == STATE_TRUE
-                        && !rule.snoozing) {
+                if (rule.isAutomaticActive()) {
                     rule.dumpDebug(proto, ZenModeProto.ENABLED_ACTIVE_CONDITIONS);
                 }
             }
@@ -1695,8 +1717,8 @@ public class ZenModeHelper {
                 for (ZenRule automaticRule : config.automaticRules.values()) {
                     if (forRestore) {
                         // don't restore transient state from restored automatic rules
-                        automaticRule.snoozing = false;
                         automaticRule.condition = null;
+                        automaticRule.resetConditionOverride();
                         automaticRule.creationTime = time;
                     }
 
