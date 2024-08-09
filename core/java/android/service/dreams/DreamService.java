@@ -262,9 +262,9 @@ public class DreamService extends Service implements Window.Callback {
     private boolean mDozing;
     private boolean mWindowless;
     private boolean mPreviewMode;
-    private volatile int mDozeScreenState = Display.STATE_UNKNOWN;
-    private volatile @Display.StateReason int mDozeScreenStateReason = Display.STATE_REASON_UNKNOWN;
-    private volatile int mDozeScreenBrightness = PowerManager.BRIGHTNESS_DEFAULT;
+    private int mDozeScreenState = Display.STATE_UNKNOWN;
+    private @Display.StateReason int mDozeScreenStateReason = Display.STATE_REASON_UNKNOWN;
+    private int mDozeScreenBrightness = PowerManager.BRIGHTNESS_DEFAULT;
 
     private boolean mDebug = false;
 
@@ -906,13 +906,15 @@ public class DreamService extends Service implements Window.Callback {
      */
     @UnsupportedAppUsage
     public void startDozing() {
-        if (mCanDoze && !mDozing) {
-            mDozing = true;
-            updateDoze();
+        synchronized (this) {
+            if (mCanDoze && !mDozing) {
+                mDozing = true;
+                updateDoze();
+            }
         }
     }
 
-    private void updateDoze() {
+    private synchronized void updateDoze() {
         if (mDreamToken == null) {
             Slog.w(mTag, "Updating doze without a dream token.");
             return;
@@ -920,6 +922,8 @@ public class DreamService extends Service implements Window.Callback {
 
         if (mDozing) {
             try {
+                Slog.v(mTag, "UpdateDoze mDozeScreenState=" + mDozeScreenState
+                        + " mDozeScreenBrightness=" + mDozeScreenBrightness);
                 mDreamManager.startDozing(
                         mDreamToken, mDozeScreenState, mDozeScreenStateReason,
                         mDozeScreenBrightness);
@@ -1034,10 +1038,12 @@ public class DreamService extends Service implements Window.Callback {
      */
     @UnsupportedAppUsage
     public void setDozeScreenState(int state, @Display.StateReason int reason) {
-        if (mDozeScreenState != state) {
-            mDozeScreenState = state;
-            mDozeScreenStateReason = reason;
-            updateDoze();
+        synchronized (this) {
+            if (mDozeScreenState != state) {
+                mDozeScreenState = state;
+                mDozeScreenStateReason = reason;
+                updateDoze();
+            }
         }
     }
 
@@ -1089,9 +1095,11 @@ public class DreamService extends Service implements Window.Callback {
         if (brightness != PowerManager.BRIGHTNESS_DEFAULT) {
             brightness = clampAbsoluteBrightness(brightness);
         }
-        if (mDozeScreenBrightness != brightness) {
-            mDozeScreenBrightness = brightness;
-            updateDoze();
+        synchronized (this) {
+            if (mDozeScreenBrightness != brightness) {
+                mDozeScreenBrightness = brightness;
+                updateDoze();
+            }
         }
     }
 
