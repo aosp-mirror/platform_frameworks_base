@@ -263,6 +263,13 @@ class AppCompatAspectRatioOverrides {
                     && cameraPolicy.isTreatmentEnabledForActivity(mActivityRecord));
     }
 
+    /**
+     * Returns the value of the user aspect ratio override property. If unset, return {@code true}.
+     */
+    boolean getAllowUserAspectRatioOverridePropertyValue() {
+        return !mAllowUserAspectRatioOverrideOptProp.isFalse();
+    }
+
     @VisibleForTesting
     int getUserMinAspectRatioOverrideCode() {
         try {

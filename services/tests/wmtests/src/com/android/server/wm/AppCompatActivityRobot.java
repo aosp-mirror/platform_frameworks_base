@@ -31,10 +31,10 @@ import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 
-import android.app.WindowConfiguration;
+import android.app.WindowConfiguration.WindowingMode;
 import android.content.ComponentName;
 import android.content.pm.ActivityInfo;
-import android.content.pm.PackageManager;
+import android.content.pm.PackageManager.UserMinAspectRatio;
 import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.view.Surface;
@@ -176,8 +176,12 @@ class AppCompatActivityRobot {
         return mActivityStack.getFromTop(fromTop);
     }
 
-    void setTaskWindowingMode(@WindowConfiguration.WindowingMode int windowingMode) {
+    void setTaskWindowingMode(@WindowingMode int windowingMode) {
         mTaskStack.top().setWindowingMode(windowingMode);
+    }
+
+    void setTaskDisplayAreaWindowingMode(@WindowingMode int windowingMode) {
+        mTaskStack.top().getDisplayArea().setWindowingMode(windowingMode);
     }
 
     void setLetterboxedForFixedOrientationAndAspectRatio(boolean enabled) {
@@ -222,10 +226,14 @@ class AppCompatActivityRobot {
                 .getAppCompatAspectRatioOverrides()).shouldApplyUserFullscreenOverride();
     }
 
-    void setGetUserMinAspectRatioOverrideCode(@PackageManager.UserMinAspectRatio int orientation) {
-        doReturn(orientation).when(mActivityStack.top()
-                .mAppCompatController.getAppCompatAspectRatioOverrides())
-                .getUserMinAspectRatioOverrideCode();
+    void setGetUserMinAspectRatioOverrideCode(@UserMinAspectRatio int overrideCode) {
+        doReturn(overrideCode).when(mActivityStack.top().mAppCompatController
+                .getAppCompatAspectRatioOverrides()).getUserMinAspectRatioOverrideCode();
+    }
+
+    void setGetUserMinAspectRatioOverrideValue(float overrideValue) {
+        doReturn(overrideValue).when(mActivityStack.top().mAppCompatController
+                .getAppCompatAspectRatioOverrides()).getUserMinAspectRatio();
     }
 
     void setIgnoreOrientationRequest(boolean enabled) {
@@ -233,8 +241,7 @@ class AppCompatActivityRobot {
     }
 
     void setTopTaskInMultiWindowMode(boolean inMultiWindowMode) {
-        doReturn(inMultiWindowMode).when(mTaskStack.top())
-                .inMultiWindowMode();
+        doReturn(inMultiWindowMode).when(mTaskStack.top()).inMultiWindowMode();
     }
 
     void setTopActivityAsEmbedded(boolean embedded) {
