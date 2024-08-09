@@ -70,6 +70,7 @@ class BubbleViewInfoTest : ShellTestCase() {
     private lateinit var bubble: Bubble
     private lateinit var bubbleController: BubbleController
     private lateinit var mainExecutor: ShellExecutor
+    private lateinit var bgExecutor: ShellExecutor
     private lateinit var bubbleStackView: BubbleStackView
     private lateinit var bubbleBarLayerView: BubbleBarLayerView
     private lateinit var bubblePositioner: BubblePositioner
@@ -92,6 +93,7 @@ class BubbleViewInfoTest : ShellTestCase() {
             )
 
         mainExecutor = TestShellExecutor()
+        bgExecutor = TestShellExecutor()
         val windowManager = context.getSystemService(WindowManager::class.java)
         val shellInit = ShellInit(mainExecutor)
         val shellCommandHandler = ShellCommandHandler()
@@ -104,7 +106,8 @@ class BubbleViewInfoTest : ShellTestCase() {
                 mock<BubbleLogger>(),
                 bubblePositioner,
                 BubbleEducationController(context),
-                mainExecutor
+                mainExecutor,
+                bgExecutor
             )
         val surfaceSynchronizer = { obj: Runnable -> obj.run() }
 
@@ -132,7 +135,7 @@ class BubbleViewInfoTest : ShellTestCase() {
                 null,
                 mainExecutor,
                 mock<Handler>(),
-                mock<ShellExecutor>(),
+                bgExecutor,
                 mock<TaskViewTransitions>(),
                 mock<Transitions>(),
                 mock<SyncTransactionQueue>(),
@@ -256,7 +259,7 @@ class BubbleViewInfoTest : ShellTestCase() {
             "mockLocus",
             true /* isDismissible */,
             mainExecutor,
-            metadataFlagListener
-        )
+            bgExecutor,
+            metadataFlagListener)
     }
 }

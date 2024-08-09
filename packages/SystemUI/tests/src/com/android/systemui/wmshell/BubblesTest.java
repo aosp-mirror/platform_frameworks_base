@@ -459,7 +459,7 @@ public class BubblesTest extends SysuiTestCase {
                 mContext.getSystemService(WindowManager.class));
         mPositioner.setMaxBubbles(5);
         mBubbleData = new BubbleData(mContext, mBubbleLogger, mPositioner, mEducationController,
-                syncExecutor);
+                syncExecutor, syncExecutor);
 
         when(mUserManager.getProfiles(ActivityManager.getCurrentUser())).thenReturn(
                 Collections.singletonList(mock(UserInfo.class)));
@@ -2465,9 +2465,10 @@ public class BubblesTest extends SysuiTestCase {
         workEntry.setBubbleMetadata(getMetadata());
         workEntry.setFlagBubble(true);
 
+        SyncExecutor executor = new SyncExecutor();
         return new Bubble(mBubblesManager.notifToBubbleEntry(workEntry),
                 null,
-                mock(Bubbles.PendingIntentCanceledListener.class), new SyncExecutor());
+                mock(Bubbles.PendingIntentCanceledListener.class), executor, executor);
     }
 
     private BubbleEntry createBubbleEntry(boolean isConversation) {

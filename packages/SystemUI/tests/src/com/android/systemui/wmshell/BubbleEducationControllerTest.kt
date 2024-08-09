@@ -123,11 +123,12 @@ class BubbleEducationControllerTest : SysUiStateTest() {
                 /* taskId= */ 0,
                 "locus",
                 /* isDismissable= */ true,
+                directExecutor(),
                 directExecutor()
             ) {}
         } else {
             val intent = Intent(Intent.ACTION_VIEW).setPackage(mContext.packageName)
-            Bubble.createAppBubble(intent, UserHandle(1), null, directExecutor())
+            Bubble.createAppBubble(intent, UserHandle(1), null, directExecutor(), directExecutor())
         }
     }
 }
