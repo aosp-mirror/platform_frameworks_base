@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.touchpad.tutorial.ui.composable
+package com.android.systemui.inputdevice.tutorial.ui.composable
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Box
@@ -34,9 +34,9 @@ import androidx.compose.ui.input.key.onKeyEvent
 import androidx.compose.ui.input.key.type
 import com.airbnb.lottie.compose.rememberLottieDynamicProperties
 import com.android.compose.theme.LocalAndroidColorScheme
+import com.android.systemui.inputdevice.tutorial.ui.composable.TutorialActionState.FINISHED
+import com.android.systemui.inputdevice.tutorial.ui.composable.TutorialActionState.NOT_STARTED
 import com.android.systemui.res.R
-import com.android.systemui.touchpad.tutorial.ui.composable.TutorialActionState.FINISHED
-import com.android.systemui.touchpad.tutorial.ui.composable.TutorialActionState.NOT_STARTED
 
 @Composable
 fun ActionKeyTutorialScreen(

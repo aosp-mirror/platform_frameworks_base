@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.touchpad.tutorial.ui.composable
+package com.android.systemui.inputdevice.tutorial.ui.composable
 
 import androidx.annotation.RawRes
 import androidx.annotation.StringRes

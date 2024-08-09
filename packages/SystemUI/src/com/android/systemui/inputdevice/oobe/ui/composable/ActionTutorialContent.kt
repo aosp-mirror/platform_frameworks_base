@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.touchpad.tutorial.ui.composable
+package com.android.systemui.inputdevice.tutorial.ui.composable
 
 import android.graphics.ColorFilter
 import android.graphics.PorterDuff
@@ -60,9 +60,9 @@ import com.airbnb.lottie.compose.LottieDynamicProperty
 import com.airbnb.lottie.compose.animateLottieCompositionAsState
 import com.airbnb.lottie.compose.rememberLottieComposition
 import com.airbnb.lottie.compose.rememberLottieDynamicProperty
-import com.android.systemui.touchpad.tutorial.ui.composable.TutorialActionState.FINISHED
-import com.android.systemui.touchpad.tutorial.ui.composable.TutorialActionState.IN_PROGRESS
-import com.android.systemui.touchpad.tutorial.ui.composable.TutorialActionState.NOT_STARTED
+import com.android.systemui.inputdevice.tutorial.ui.composable.TutorialActionState.FINISHED
+import com.android.systemui.inputdevice.tutorial.ui.composable.TutorialActionState.IN_PROGRESS
+import com.android.systemui.inputdevice.tutorial.ui.composable.TutorialActionState.NOT_STARTED
 
 enum class TutorialActionState {
     NOT_STARTED,
