@@ -52,6 +52,7 @@ int register_android_graphics_HardwareRendererObserver(JNIEnv* env);
 int register_android_graphics_Matrix(JNIEnv* env);
 int register_android_graphics_Paint(JNIEnv* env);
 int register_android_graphics_Path(JNIEnv* env);
+int register_android_graphics_PathIterator(JNIEnv* env);
 int register_android_graphics_PathMeasure(JNIEnv* env);
 int register_android_graphics_Picture(JNIEnv* env);
 int register_android_graphics_Region(JNIEnv* env);
@@ -95,6 +96,7 @@ static const RegJNIRec graphicsJNI[] = {
         REG_JNI(register_android_graphics_Paint),
         REG_JNI(register_android_graphics_Path),
         REG_JNI(register_android_graphics_PathEffect),
+        REG_JNI(register_android_graphics_PathIterator),
         REG_JNI(register_android_graphics_PathMeasure),
         REG_JNI(register_android_graphics_Picture),
         REG_JNI(register_android_graphics_Region),
