@@ -2,6 +2,14 @@ package: "android.nfc"
 container: "system"
 
 flag {
+    name: "nfc_event_listener"
+    is_exported: true
+    namespace: "nfc"
+    description: "Enable NFC Event listener APIs"
+    bug: "356447790"
+}
+
+flag {
     name: "enable_nfc_mainline"
     is_exported: true
     namespace: "nfc"
