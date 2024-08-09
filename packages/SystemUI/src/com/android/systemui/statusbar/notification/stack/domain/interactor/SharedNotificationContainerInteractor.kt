@@ -23,7 +23,9 @@ import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.deviceentry.domain.interactor.DeviceEntryUdfpsInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
 import com.android.systemui.res.R
+import com.android.systemui.scene.shared.flag.SceneContainerFlag
 import com.android.systemui.shade.LargeScreenHeaderHelper
+import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import com.android.systemui.statusbar.policy.SplitShadeStateController
 import dagger.Lazy
 import javax.inject.Inject
@@ -43,7 +45,8 @@ class SharedNotificationContainerInteractor
 constructor(
     configurationRepository: ConfigurationRepository,
     private val context: Context,
-    private val splitShadeStateController: SplitShadeStateController,
+    private val splitShadeStateController: Lazy<SplitShadeStateController>,
+    private val shadeInteractor: Lazy<ShadeInteractor>,
     keyguardInteractor: KeyguardInteractor,
     deviceEntryUdfpsInteractor: DeviceEntryUdfpsInteractor,
     largeScreenHeaderHelperLazy: Lazy<LargeScreenHeaderHelper>,
@@ -56,16 +59,33 @@ constructor(
     /** An internal modification was made to notifications */
     val notificationStackChanged = _notificationStackChanged.debounce(20L)
 
+    private val configurationChangeEvents =
+        configurationRepository.onAnyConfigurationChange.onStart { emit(Unit) }
+
+    /* Warning: Even though the value it emits only contains the split shade status, this flow must
+     * emit a value whenever the configuration *or* the split shade status changes. Adding a
+     * distinctUntilChanged() to this would cause configurationBasedDimensions to miss configuration
+     * updates that affect other resources, like margins or the large screen header flag.
+     */
+    private val dimensionsUpdateEventsWithShouldUseSplitShade: Flow<Boolean> =
+        if (SceneContainerFlag.isEnabled) {
+            combine(configurationChangeEvents, shadeInteractor.get().isShadeLayoutWide) {
+                _,
+                isShadeLayoutWide ->
+                isShadeLayoutWide
+            }
+        } else {
+            configurationChangeEvents.map {
+                splitShadeStateController.get().shouldUseSplitNotificationShade(context.resources)
+            }
+        }
+
     val configurationBasedDimensions: Flow<ConfigurationBasedDimensions> =
-        configurationRepository.onAnyConfigurationChange
-            .onStart { emit(Unit) }
-            .map { _ ->
+        dimensionsUpdateEventsWithShouldUseSplitShade
+            .map { shouldUseSplitShade ->
                 with(context.resources) {
                     ConfigurationBasedDimensions(
-                        useSplitShade =
-                            splitShadeStateController.shouldUseSplitNotificationShade(
-                                context.resources
-                            ),
+                        useSplitShade = shouldUseSplitShade,
                         useLargeScreenHeader =
                             getBoolean(R.bool.config_use_large_screen_shade_header),
                         marginHorizontal =

@@ -645,6 +645,9 @@ public class KeyguardService extends Service {
         public void showDismissibleKeyguard() {
             trace("showDismissibleKeyguard");
             checkPermission();
+            if (mFoldGracePeriodProvider.get().isEnabled()) {
+                mKeyguardInteractor.showDismissibleKeyguard();
+            }
             mKeyguardViewMediator.showDismissibleKeyguard();
 
             if (SceneContainerFlag.isEnabled() && mFoldGracePeriodProvider.get().isEnabled()) {

@@ -23,7 +23,9 @@ import android.graphics.Color;
 import android.graphics.drawable.Icon;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
+import android.view.View;
 import android.view.ViewGroup;
+import android.view.accessibility.AccessibilityNodeInfo;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -71,6 +73,16 @@ public class BubbleBarMenuView extends LinearLayout {
         mBubbleTitleView = findViewById(R.id.bubble_bar_manage_menu_bubble_title);
         mBubbleDismissIconView = findViewById(R.id.bubble_bar_manage_menu_dismiss_icon);
         updateThemeColors();
+
+        mBubbleSectionView.setAccessibilityDelegate(new AccessibilityDelegate() {
+            @Override
+            public void onInitializeAccessibilityNodeInfo(View host, AccessibilityNodeInfo info) {
+                super.onInitializeAccessibilityNodeInfo(host, info);
+                info.addAction(new AccessibilityNodeInfo.AccessibilityAction(
+                        AccessibilityNodeInfo.ACTION_CLICK, getResources().getString(
+                        R.string.bubble_accessibility_action_collapse_menu)));
+            }
+        });
     }
 
     private void updateThemeColors() {

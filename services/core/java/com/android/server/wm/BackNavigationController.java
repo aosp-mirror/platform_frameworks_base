@@ -1935,8 +1935,7 @@ class BackNavigationController {
             for (int i = penActivities.length - 1; i >= 0; --i) {
                 ActivityRecord resetActivity = penActivities[i];
                 if (transition.isInTransition(resetActivity)) {
-                    resetActivity.mTransitionController.setReady(
-                            resetActivity.getDisplayContent(), true);
+                    transition.setReady(resetActivity.getDisplayContent(), true);
                     return true;
                 }
             }
@@ -1991,18 +1990,12 @@ class BackNavigationController {
                 activity.makeVisibleIfNeeded(null /* starting */, true /* notifyToClient */);
             }
         }
-        boolean needTransition = false;
-        final DisplayContent dc = affects.get(0).getDisplayContent();
-        for (int i = affects.size() - 1; i >= 0; --i) {
-            final ActivityRecord activity = affects.get(i);
-            needTransition |= tc.isCollecting(activity);
-        }
         if (prepareOpen != null) {
-            if (needTransition) {
+            if (prepareOpen.hasChanges()) {
                 tc.requestStartTransition(prepareOpen,
                         null /*startTask */, null /* remoteTransition */,
                         null /* displayChange */);
-                tc.setReady(dc);
+                prepareOpen.setReady(affects.get(0), true);
                 return prepareOpen;
             } else {
                 prepareOpen.abort();

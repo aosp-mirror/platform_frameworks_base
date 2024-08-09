@@ -177,8 +177,10 @@ private fun SceneScope.QuickSettingsScene(
             label = "alphaAnimationBrightnessMirrorContentHiding",
         )
 
-    viewModel.notifications.setAlphaForBrightnessMirror(contentAlpha)
-    DisposableEffect(Unit) { onDispose { viewModel.notifications.setAlphaForBrightnessMirror(1f) } }
+    notificationsPlaceholderViewModel.setAlphaForBrightnessMirror(contentAlpha)
+    DisposableEffect(Unit) {
+        onDispose { notificationsPlaceholderViewModel.setAlphaForBrightnessMirror(1f) }
+    }
 
     BrightnessMirror(
         viewModel = brightnessMirrorViewModel,
@@ -420,7 +422,7 @@ private fun SceneScope.QuickSettingsScene(
         )
         NotificationStackCutoffGuideline(
             stackScrollView = notificationStackScrollView,
-            viewModel = viewModel.notifications,
+            viewModel = notificationsPlaceholderViewModel,
             modifier =
                 Modifier.align(Alignment.BottomCenter).navigationBarsPadding().offset {
                     IntOffset(x = 0, y = screenHeight.roundToInt())

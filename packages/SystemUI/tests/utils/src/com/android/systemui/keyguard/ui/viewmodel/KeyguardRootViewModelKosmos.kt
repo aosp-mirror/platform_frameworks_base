@@ -39,6 +39,7 @@ val Kosmos.keyguardRootViewModel by Fixture {
         communalInteractor = communalInteractor,
         keyguardTransitionInteractor = keyguardTransitionInteractor,
         notificationsKeyguardInteractor = notificationsKeyguardInteractor,
+        alternateBouncerToAodTransitionViewModel = alternateBouncerToAodTransitionViewModel,
         alternateBouncerToGoneTransitionViewModel = alternateBouncerToGoneTransitionViewModel,
         alternateBouncerToLockscreenTransitionViewModel =
             alternateBouncerToLockscreenTransitionViewModel,

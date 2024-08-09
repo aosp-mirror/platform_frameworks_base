@@ -78,6 +78,8 @@ class KeyguardController {
 
     private static final int DEFER_WAKE_TRANSITION_TIMEOUT_MS = 5000;
 
+    private static final int GOING_AWAY_TIMEOUT_MS = 10500;
+
     private final ActivityTaskSupervisor mTaskSupervisor;
     private WindowManagerService mWindowManager;
 
@@ -233,6 +235,7 @@ class KeyguardController {
                 dc.mWallpaperController.adjustWallpaperWindows();
                 dc.executeAppTransition();
             }
+            scheduleGoingAwayTimeout(displayId);
         }
 
         // Update the sleep token first such that ensureActivitiesVisible has correct sleep token
@@ -287,6 +290,8 @@ class KeyguardController {
             mRootWindowContainer.ensureActivitiesVisible();
             mRootWindowContainer.addStartingWindowsForVisibleActivities();
             mWindowManager.executeAppTransition();
+
+            scheduleGoingAwayTimeout(displayId);
         } finally {
             mService.continueWindowLayout();
             Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
@@ -602,6 +607,34 @@ class KeyguardController {
         }
     }
 
+    /**
+     * Called when the default display's mKeyguardGoingAway has been left as {@code true} for too
+     * long. Send an explicit message to the KeyguardService asking it to wrap up.
+     */
+    private final Runnable mGoingAwayTimeout = () -> {
+        synchronized (mWindowManager.mGlobalLock) {
+            KeyguardDisplayState state = getDisplayState(DEFAULT_DISPLAY);
+            if (!state.mKeyguardGoingAway) {
+                return;
+            }
+            state.mKeyguardGoingAway = false;
+            state.writeEventLog("goingAwayTimeout");
+            mWindowManager.mPolicy.startKeyguardExitAnimation(0);
+        }
+    };
+
+    private void scheduleGoingAwayTimeout(int displayId) {
+        if (displayId != DEFAULT_DISPLAY) {
+            return;
+        }
+        if (getDisplayState(displayId).mKeyguardGoingAway) {
+            if (!mWindowManager.mH.hasCallbacks(mGoingAwayTimeout)) {
+                mWindowManager.mH.postDelayed(mGoingAwayTimeout, GOING_AWAY_TIMEOUT_MS);
+            }
+        } else {
+            mWindowManager.mH.removeCallbacks(mGoingAwayTimeout);
+        }
+    }
 
     /** Represents Keyguard state per individual display. */
     private static class KeyguardDisplayState {
@@ -721,6 +754,7 @@ class KeyguardController {
             if (!lastKeyguardGoingAway && mKeyguardGoingAway) {
                 writeEventLog("dismissIfInsecure");
                 controller.handleDismissInsecureKeyguard(display);
+                controller.scheduleGoingAwayTimeout(mDisplayId);
                 hasChange = true;
             } else if (lastOccluded != mOccluded) {
                 controller.handleOccludedChanged(mDisplayId, mTopOccludesActivity);
