@@ -281,8 +281,8 @@ public class VibrationScalerTest {
 
     @Test
     @EnableFlags(android.os.vibrator.Flags.FLAG_VENDOR_VIBRATION_EFFECTS)
-    public void scale_withVendorEffect_setsEffectStrengthBasedOnSettings() {
-        setDefaultIntensity(USAGE_NOTIFICATION, VIBRATION_INTENSITY_LOW);
+    public void scale_withVendorEffect_setsEffectStrengthAndScaleBasedOnSettings() {
+        setDefaultIntensity(USAGE_NOTIFICATION, VIBRATION_INTENSITY_MEDIUM);
         setUserSetting(Settings.System.NOTIFICATION_VIBRATION_INTENSITY, VIBRATION_INTENSITY_HIGH);
         PersistableBundle vendorData = new PersistableBundle();
         vendorData.putString("key", "value");
@@ -291,20 +291,27 @@ public class VibrationScalerTest {
         VibrationEffect.VendorEffect scaled =
                 (VibrationEffect.VendorEffect) mVibrationScaler.scale(effect, USAGE_NOTIFICATION);
         assertEquals(scaled.getEffectStrength(), VibrationEffect.EFFECT_STRENGTH_STRONG);
+        // Notification scales up.
+        assertTrue(scaled.getScale() > 1);
 
         setUserSetting(Settings.System.NOTIFICATION_VIBRATION_INTENSITY,
                 VIBRATION_INTENSITY_MEDIUM);
         scaled = (VibrationEffect.VendorEffect) mVibrationScaler.scale(effect, USAGE_NOTIFICATION);
         assertEquals(scaled.getEffectStrength(), VibrationEffect.EFFECT_STRENGTH_MEDIUM);
+        // Notification does not scale.
+        assertEquals(1, scaled.getScale(), TOLERANCE);
 
         setUserSetting(Settings.System.NOTIFICATION_VIBRATION_INTENSITY, VIBRATION_INTENSITY_LOW);
         scaled = (VibrationEffect.VendorEffect) mVibrationScaler.scale(effect, USAGE_NOTIFICATION);
         assertEquals(scaled.getEffectStrength(), VibrationEffect.EFFECT_STRENGTH_LIGHT);
+        // Notification scales down.
+        assertTrue(scaled.getScale() < 1);
 
         setUserSetting(Settings.System.NOTIFICATION_VIBRATION_INTENSITY, VIBRATION_INTENSITY_OFF);
         scaled = (VibrationEffect.VendorEffect) mVibrationScaler.scale(effect, USAGE_NOTIFICATION);
         // Vibration setting being bypassed will use default setting.
-        assertEquals(scaled.getEffectStrength(), VibrationEffect.EFFECT_STRENGTH_LIGHT);
+        assertEquals(scaled.getEffectStrength(), VibrationEffect.EFFECT_STRENGTH_MEDIUM);
+        assertEquals(1, scaled.getScale(), TOLERANCE);
     }
 
     @Test
@@ -348,7 +355,7 @@ public class VibrationScalerTest {
         scaled = getFirstSegment(mVibrationScaler.scale(VibrationEffect.createOneShot(128, 128),
                 USAGE_TOUCH));
         // Haptic feedback does not scale.
-        assertEquals(128f / 255, scaled.getAmplitude(), 1e-5);
+        assertEquals(128f / 255, scaled.getAmplitude(), TOLERANCE);
     }
 
     @Test
@@ -373,7 +380,7 @@ public class VibrationScalerTest {
 
         scaled = getFirstSegment(mVibrationScaler.scale(composed, USAGE_TOUCH));
         // Haptic feedback does not scale.
-        assertEquals(0.5, scaled.getScale(), 1e-5);
+        assertEquals(0.5, scaled.getScale(), TOLERANCE);
     }
 
     @Test
@@ -446,7 +453,7 @@ public class VibrationScalerTest {
             android.os.vibrator.Flags.FLAG_ADAPTIVE_HAPTICS_ENABLED,
             android.os.vibrator.Flags.FLAG_VENDOR_VIBRATION_EFFECTS,
     })
-    public void scale_adaptiveHapticsOnVendorEffect_setsLinearScaleParameter() {
+    public void scale_adaptiveHapticsOnVendorEffect_setsAdaptiveScaleParameter() {
         setDefaultIntensity(USAGE_RINGTONE, VIBRATION_INTENSITY_HIGH);
 
         mVibrationScaler.updateAdaptiveHapticsScale(USAGE_RINGTONE, 0.5f);
@@ -457,12 +464,12 @@ public class VibrationScalerTest {
 
         VibrationEffect.VendorEffect scaled =
                 (VibrationEffect.VendorEffect) mVibrationScaler.scale(effect, USAGE_RINGTONE);
-        assertEquals(scaled.getLinearScale(), 0.5f);
+        assertEquals(scaled.getAdaptiveScale(), 0.5f);
 
         mVibrationScaler.removeAdaptiveHapticsScale(USAGE_RINGTONE);
 
         scaled = (VibrationEffect.VendorEffect) mVibrationScaler.scale(effect, USAGE_RINGTONE);
-        assertEquals(scaled.getLinearScale(), 1.0f);
+        assertEquals(scaled.getAdaptiveScale(), 1.0f);
     }
 
     private void setDefaultIntensity(@VibrationAttributes.Usage int usage,
