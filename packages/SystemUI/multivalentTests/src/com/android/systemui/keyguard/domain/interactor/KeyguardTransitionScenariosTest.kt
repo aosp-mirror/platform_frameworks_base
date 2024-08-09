@@ -757,6 +757,30 @@ class KeyguardTransitionScenariosTest(flags: FlagsParameterization?) : SysuiTest
         }
 
     @Test
+    @BrokenWithSceneContainer(339465026)
+    fun goneToOccluded() =
+        testScope.runTest {
+            // GIVEN a prior transition has run to GONE
+            runTransitionAndSetWakefulness(KeyguardState.LOCKSCREEN, KeyguardState.GONE)
+
+            // WHEN an occluding app is running and showDismissibleKeyguard is called
+            keyguardRepository.setKeyguardOccluded(true)
+            keyguardRepository.showDismissibleKeyguard()
+            runCurrent()
+
+            assertThat(transitionRepository)
+                .startedTransition(
+                    from = KeyguardState.GONE,
+                    to = KeyguardState.OCCLUDED,
+                    ownerName =
+                        "FromGoneTransitionInteractor" + "(Dismissible keyguard with occlusion)",
+                    animatorAssertion = { it.isNotNull() }
+                )
+
+            coroutineContext.cancelChildren()
+        }
+
+    @Test
     @DisableSceneContainer
     fun goneToDreaming() =
         testScope.runTest {

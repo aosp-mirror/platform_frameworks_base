@@ -2252,8 +2252,11 @@ public class QuickSettingsControllerImpl implements QuickSettingsController, Dum
             // panel, mQs will not need to be null cause it will be tied to the same lifecycle.
             if (fragment == mQs) {
                 // Clear it to remove bindings to mQs from the provider.
-                mNotificationStackScrollLayoutController.setQsHeaderBoundsProvider(null);
-                mNotificationStackScrollLayoutController.setQsHeader(null);
+                if (QSComposeFragment.isEnabled()) {
+                    mNotificationStackScrollLayoutController.setQsHeaderBoundsProvider(null);
+                } else {
+                    mNotificationStackScrollLayoutController.setQsHeader(null);
+                }
                 mQs = null;
             }
         }

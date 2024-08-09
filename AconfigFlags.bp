@@ -172,6 +172,7 @@ cc_aconfig_library {
 // Window
 aconfig_declarations {
     name: "com.android.window.flags.window-aconfig",
+    exportable: true,
     package: "com.android.window.flags",
     container: "system",
     srcs: ["core/java/android/window/flags/*.aconfig"],

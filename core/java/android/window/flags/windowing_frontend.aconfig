@@ -65,6 +65,14 @@ flag {
 }
 
 flag {
+  name: "keyguard_going_away_timeout"
+  namespace: "windowing_frontend"
+  description: "Allow a maximum of 10 seconds with keyguardGoingAway=true before force-resetting"
+  bug: "343598832"
+  is_fixed_read_only: true
+}
+
+flag {
   name: "close_to_square_config_includes_status_bar"
   namespace: "windowing_frontend"
   description: "On close to square display, when necessary, configuration includes status bar"

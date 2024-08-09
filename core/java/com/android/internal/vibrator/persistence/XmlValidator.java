@@ -18,7 +18,7 @@ package com.android.internal.vibrator.persistence;
 
 import static java.util.Objects.requireNonNull;
 
-import android.annotation.NonNull;
+import android.os.VibrationEffect;
 import android.text.TextUtils;
 
 import com.android.internal.util.ArrayUtils;
@@ -82,11 +82,11 @@ public final class XmlValidator {
      * Check given {@link XmlSerializedVibration} represents the expected {@code vibration} object
      * when it's deserialized.
      */
-    @NonNull
-    public static <T> void checkSerializedVibration(
-            XmlSerializedVibration<T> serializedVibration, T expectedVibration)
+    public static void checkSerializedVibration(
+            XmlSerializedVibration<? extends VibrationEffect> serializedVibration,
+            VibrationEffect expectedVibration)
             throws XmlSerializerException {
-        T deserializedVibration = requireNonNull(serializedVibration.deserialize());
+        VibrationEffect deserializedVibration = requireNonNull(serializedVibration.deserialize());
         checkSerializerCondition(Objects.equals(expectedVibration, deserializedVibration),
                 "Unexpected serialized vibration %s: found deserialization %s, expected %s",
                 serializedVibration, deserializedVibration, expectedVibration);

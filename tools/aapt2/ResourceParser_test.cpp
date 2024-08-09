@@ -69,13 +69,8 @@ class ResourceParserTest : public ::testing::Test {
     return TestParse(str, ConfigDescription{});
   }
 
-  ::testing::AssertionResult TestParse(StringPiece str, ResourceParserOptions parserOptions) {
-    return TestParse(str, ConfigDescription{}, parserOptions);
-  }
-
-  ::testing::AssertionResult TestParse(
-      StringPiece str, const ConfigDescription& config,
-      ResourceParserOptions parserOptions = ResourceParserOptions()) {
+  ::testing::AssertionResult TestParse(StringPiece str, const ConfigDescription& config) {
+    ResourceParserOptions parserOptions;
     ResourceParser parser(context_->GetDiagnostics(), &table_, android::Source{"test"}, config,
                           parserOptions);
 
@@ -245,19 +240,6 @@ TEST_F(ResourceParserTest, ParseStringTranslatableAttribute) {
 
   // Invalid value for the translate attribute, should be boolean ('true' or 'false')
   EXPECT_FALSE(TestParse(R"(<string name="foo4" translatable="yes">Translate</string>)"));
-}
-
-TEST_F(ResourceParserTest, ParseStringBehindDisabledFlag) {
-  FeatureFlagProperties flag_properties(true, false);
-  ResourceParserOptions options;
-  options.feature_flag_values = {{"falseFlag", flag_properties}};
-  ASSERT_TRUE(TestParse(
-      R"(<string name="foo" android:featureFlag="falseFlag"
-              xmlns:android="http://schemas.android.com/apk/res/android">foo</string>)",
-      options));
-
-  String* str = test::GetValue<String>(&table_, "string/foo");
-  ASSERT_THAT(str, IsNull());
 }
 
 TEST_F(ResourceParserTest, IgnoreXliffTagsOtherThanG) {
