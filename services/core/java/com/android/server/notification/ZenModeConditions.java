@@ -82,7 +82,7 @@ public class ZenModeConditions implements ConditionProviders.Callback {
         for (ZenRule automaticRule : config.automaticRules.values()) {
             if (automaticRule.component != null) {
                 evaluateRule(automaticRule, current, trigger, processSubscriptions, false);
-                updateSnoozing(automaticRule);
+                automaticRule.reconsiderConditionOverride();
             }
         }
 
@@ -186,14 +186,5 @@ public class ZenModeConditions implements ConditionProviders.Callback {
             if (rule.condition != null && DEBUG) Log.d(TAG, "Found existing condition for: "
                     + rule.conditionId);
         }
-    }
-
-    private boolean updateSnoozing(ZenRule rule) {
-        if (rule != null && rule.snoozing && !rule.isTrueOrUnknown()) {
-            rule.snoozing = false;
-            if (DEBUG) Log.d(TAG, "Snoozing reset for " + rule.conditionId);
-            return true;
-        }
-        return false;
     }
 }
