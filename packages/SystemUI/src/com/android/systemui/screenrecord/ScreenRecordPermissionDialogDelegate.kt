@@ -270,15 +270,18 @@ class ScreenRecordPermissionDialogDelegate(
             return listOf(
                 ScreenShareOption(
                     SINGLE_APP,
-                    R.string.screen_share_permission_dialog_option_single_app,
+                    R.string.screenrecord_permission_dialog_option_text_single_app,
                     R.string.screenrecord_permission_dialog_warning_single_app,
-                    startButtonText = R.string.screenrecord_permission_dialog_continue,
+                    startButtonText =
+                        R.string
+                            .media_projection_entry_generic_permission_dialog_continue_single_app,
                 ),
                 ScreenShareOption(
                     ENTIRE_SCREEN,
-                    R.string.screen_share_permission_dialog_option_entire_screen,
+                    R.string.screenrecord_permission_dialog_option_text_entire_screen,
                     R.string.screenrecord_permission_dialog_warning_entire_screen,
-                    startButtonText = R.string.screenrecord_permission_dialog_continue,
+                    startButtonText =
+                        R.string.screenrecord_permission_dialog_continue_entire_screen,
                 )
             )
         }
