@@ -27,6 +27,9 @@ import android.hardware.biometrics.BiometricSourceType
  * authentication.
  */
 sealed interface AuthenticationState {
+    /** Indicates [BiometricSourceType] of authentication state update, null in idle auth state. */
+    val biometricSourceType: BiometricSourceType?
+
     /**
      * Indicates [AuthenticationReason] from [BiometricRequestConstants.RequestReason] for
      * requesting auth
@@ -43,7 +46,7 @@ sealed interface AuthenticationState {
      *   message.
      */
     data class Acquired(
-        val biometricSourceType: BiometricSourceType,
+        override val biometricSourceType: BiometricSourceType,
         override val requestReason: AuthenticationReason,
         val acquiredInfo: Int
     ) : AuthenticationState
@@ -59,7 +62,7 @@ sealed interface AuthenticationState {
      * @param requestReason reason from [BiometricRequestConstants.RequestReason] for authentication
      */
     data class Error(
-        val biometricSourceType: BiometricSourceType,
+        override val biometricSourceType: BiometricSourceType,
         val errString: String?,
         val errCode: Int,
         override val requestReason: AuthenticationReason,
@@ -73,7 +76,7 @@ sealed interface AuthenticationState {
      * @param userId The user id for the requested authentication
      */
     data class Failed(
-        val biometricSourceType: BiometricSourceType,
+        override val biometricSourceType: BiometricSourceType,
         override val requestReason: AuthenticationReason,
         val userId: Int
     ) : AuthenticationState
@@ -87,7 +90,7 @@ sealed interface AuthenticationState {
      * @param requestReason reason from [BiometricRequestConstants.RequestReason] for authentication
      */
     data class Help(
-        val biometricSourceType: BiometricSourceType,
+        override val biometricSourceType: BiometricSourceType,
         val helpString: String?,
         val helpCode: Int,
         override val requestReason: AuthenticationReason,
@@ -96,9 +99,13 @@ sealed interface AuthenticationState {
     /**
      * Authentication state when no auth is running
      *
+     * @param biometricSourceType null
      * @param requestReason [AuthenticationReason.NotRunning]
      */
-    data class Idle(override val requestReason: AuthenticationReason) : AuthenticationState
+    data class Idle(
+        override val biometricSourceType: BiometricSourceType? = null,
+        override val requestReason: AuthenticationReason
+    ) : AuthenticationState
 
     /**
      * AuthenticationState when auth is started
@@ -107,7 +114,7 @@ sealed interface AuthenticationState {
      * @param requestReason reason from [BiometricRequestConstants.RequestReason] for authentication
      */
     data class Started(
-        val biometricSourceType: BiometricSourceType,
+        override val biometricSourceType: BiometricSourceType,
         override val requestReason: AuthenticationReason
     ) : AuthenticationState
 
@@ -118,7 +125,7 @@ sealed interface AuthenticationState {
      * @param requestReason [AuthenticationReason.NotRunning]
      */
     data class Stopped(
-        val biometricSourceType: BiometricSourceType,
+        override val biometricSourceType: BiometricSourceType,
         override val requestReason: AuthenticationReason
     ) : AuthenticationState
 
@@ -131,7 +138,7 @@ sealed interface AuthenticationState {
      * @param userId The user id for the requested authentication
      */
     data class Succeeded(
-        val biometricSourceType: BiometricSourceType,
+        override val biometricSourceType: BiometricSourceType,
         val isStrongBiometric: Boolean,
         override val requestReason: AuthenticationReason,
         val userId: Int
