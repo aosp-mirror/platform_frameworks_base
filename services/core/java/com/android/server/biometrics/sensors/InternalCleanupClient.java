@@ -143,7 +143,8 @@ public abstract class InternalCleanupClient<S extends BiometricAuthenticator.Ide
             @NonNull BiometricUtils<S> utils,
             @NonNull Map<Integer, Long> authenticatorIds) {
         super(context, lazyDaemon, null /* token */, null /* ClientMonitorCallbackConverter */,
-                userId, owner, 0 /* cookie */, sensorId, logger, biometricContext);
+                userId, owner, 0 /* cookie */, sensorId, logger, biometricContext,
+                false /* isMandatoryBiometrics */);
         mBiometricUtils = utils;
         mAuthenticatorIds = authenticatorIds;
         mHasEnrollmentsBeforeStarting = !utils.getBiometricsForUser(context, userId).isEmpty();
