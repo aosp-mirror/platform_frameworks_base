@@ -53,6 +53,7 @@ import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin;
 import com.android.systemui.res.R;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
+import com.android.systemui.statusbar.notification.shared.NotificationContentAlphaOptimization;
 import com.android.wm.shell.animation.FlingAnimationUtils;
 import com.android.wm.shell.shared.animation.PhysicsAnimator;
 import com.android.wm.shell.shared.animation.PhysicsAnimator.SpringConfig;
@@ -242,7 +243,10 @@ public class SwipeHelper implements Gefingerpoken, Dumpable {
             float translation) {
         float swipeProgress = getSwipeProgressForOffset(animView, translation);
         if (!mCallback.updateSwipeProgress(animView, dismissable, swipeProgress)) {
-            if (dismissable) {
+            if (dismissable
+                    || (NotificationContentAlphaOptimization.isEnabled() && translation == 0)) {
+                // We need to reset the content alpha even when the view is not dismissible (eg.
+                //  when Guts is visible)
                 if (swipeProgress != 0f && swipeProgress != 1f) {
                     animView.setLayerType(View.LAYER_TYPE_HARDWARE, null);
                 } else {
@@ -808,7 +812,12 @@ public class SwipeHelper implements Gefingerpoken, Dumpable {
     }
 
     public void forceResetSwipeState(@NonNull View view) {
-        if (view.getTranslationX() == 0) return;
+        if (view.getTranslationX() == 0
+                && (!NotificationContentAlphaOptimization.isEnabled() || view.getAlpha() == 1f)
+        ) {
+            // Don't do anything when translation is 0 and alpha is 1
+            return;
+        }
         setTranslation(view, 0);
         updateSwipeProgressFromOffset(
                 view,
