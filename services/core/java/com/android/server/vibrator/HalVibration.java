@@ -170,9 +170,11 @@ final class HalVibration extends Vibration {
 
     /** Return {@link VibrationStats.StatsInfo} with read-only metrics about this vibration. */
     public VibrationStats.StatsInfo getStatsInfo(long completionUptimeMillis) {
-        int vibrationType = isRepeating()
-                ? FrameworkStatsLog.VIBRATION_REPORTED__VIBRATION_TYPE__REPEATED
-                : FrameworkStatsLog.VIBRATION_REPORTED__VIBRATION_TYPE__SINGLE;
+        int vibrationType = mEffectToPlay.hasVendorEffects()
+                ? FrameworkStatsLog.VIBRATION_REPORTED__VIBRATION_TYPE__VENDOR
+                : isRepeating()
+                        ? FrameworkStatsLog.VIBRATION_REPORTED__VIBRATION_TYPE__REPEATED
+                        : FrameworkStatsLog.VIBRATION_REPORTED__VIBRATION_TYPE__SINGLE;
         return new VibrationStats.StatsInfo(
                 callerInfo.uid, vibrationType, callerInfo.attrs.getUsage(), mStatus,
                 stats, completionUptimeMillis);

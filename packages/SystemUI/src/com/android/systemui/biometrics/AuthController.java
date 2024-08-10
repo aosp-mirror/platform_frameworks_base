@@ -173,7 +173,6 @@ public class AuthController implements
     @NonNull private final SparseBooleanArray mSfpsEnrolledForUser;
     @NonNull private final SensorPrivacyManager mSensorPrivacyManager;
     private final WakefulnessLifecycle mWakefulnessLifecycle;
-    private final AuthDialogPanelInteractionDetector mPanelInteractionDetector;
     private boolean mAllFingerprintAuthenticatorsRegistered;
     @NonNull private final UserManager mUserManager;
     @NonNull private final LockPatternUtils mLockPatternUtils;
@@ -728,7 +727,6 @@ public class AuthController implements
             Provider<UdfpsController> udfpsControllerFactory,
             @NonNull DisplayManager displayManager,
             @NonNull WakefulnessLifecycle wakefulnessLifecycle,
-            @NonNull AuthDialogPanelInteractionDetector panelInteractionDetector,
             @NonNull UserManager userManager,
             @NonNull LockPatternUtils lockPatternUtils,
             @NonNull Lazy<UdfpsLogger> udfpsLogger,
@@ -779,7 +777,6 @@ public class AuthController implements
                 });
 
         mWakefulnessLifecycle = wakefulnessLifecycle;
-        mPanelInteractionDetector = panelInteractionDetector;
 
         mFaceProps = mFaceManager != null ? mFaceManager.getSensorPropertiesInternal() : null;
 
@@ -1229,7 +1226,6 @@ public class AuthController implements
                 operationId,
                 requestId,
                 mWakefulnessLifecycle,
-                mPanelInteractionDetector,
                 mUserManager,
                 mLockPatternUtils,
                 viewModel);
@@ -1306,7 +1302,6 @@ public class AuthController implements
             PromptInfo promptInfo, boolean requireConfirmation, int userId, int[] sensorIds,
             String opPackageName, boolean skipIntro, long operationId, long requestId,
             @NonNull WakefulnessLifecycle wakefulnessLifecycle,
-            @NonNull AuthDialogPanelInteractionDetector panelInteractionDetector,
             @NonNull UserManager userManager,
             @NonNull LockPatternUtils lockPatternUtils,
             @NonNull PromptViewModel viewModel) {
@@ -1323,7 +1318,7 @@ public class AuthController implements
         config.mSensorIds = sensorIds;
         config.mScaleProvider = this::getScaleFactor;
         return new AuthContainerView(config, mApplicationCoroutineScope, mFpProps, mFaceProps,
-                wakefulnessLifecycle, panelInteractionDetector, userManager, lockPatternUtils,
+                wakefulnessLifecycle, userManager, lockPatternUtils,
                 mInteractionJankMonitor, mPromptSelectorInteractor, viewModel,
                 mCredentialViewModelProvider, bgExecutor, mVibratorHelper);
     }

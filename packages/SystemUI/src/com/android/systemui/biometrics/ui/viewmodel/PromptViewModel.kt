@@ -36,7 +36,6 @@ import android.util.RotationUtils
 import android.view.HapticFeedbackConstants
 import android.view.MotionEvent
 import com.android.launcher3.icons.IconProvider
-import com.android.systemui.Flags.constraintBp
 import com.android.systemui.biometrics.UdfpsUtils
 import com.android.systemui.biometrics.Utils
 import com.android.systemui.biometrics.Utils.isSystem
@@ -470,7 +469,7 @@ constructor(
         promptSelectorInteractor.prompt
             .map {
                 when {
-                    !(customBiometricPrompt() && constraintBp()) || it == null -> Pair(null, "")
+                    !(customBiometricPrompt()) || it == null -> Pair(null, "")
                     else -> context.getUserBadgedLogoInfo(it, iconProvider, activityTaskManager)
                 }
             }
@@ -487,7 +486,7 @@ constructor(
     /** Custom content view for the prompt. */
     val contentView: Flow<PromptContentView?> =
         promptSelectorInteractor.prompt
-            .map { if (customBiometricPrompt() && constraintBp()) it?.contentView else null }
+            .map { if (customBiometricPrompt()) it?.contentView else null }
             .distinctUntilChanged()
 
     private val originalDescription =
