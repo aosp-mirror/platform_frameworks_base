@@ -1194,7 +1194,13 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                         }
                     }
                 }
-                effects |= sanitizeAndApplyHierarchyOp(wc, hop);
+                if (wc.asTask() != null) {
+                    effects |= sanitizeAndApplyHierarchyOpForTask(wc.asTask(), hop);
+                } else if (wc.asDisplayArea() != null) {
+                    effects |= sanitizeAndApplyHierarchyOpForDisplayArea(wc.asDisplayArea(), hop);
+                } else {
+                    throw new IllegalArgumentException("Invalid container in hierarchy op");
+                }
                 break;
             }
             case HIERARCHY_OP_TYPE_ADD_TASK_FRAGMENT_OPERATION: {
@@ -1850,12 +1856,22 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
         return starterResult[0];
     }
 
-    private int sanitizeAndApplyHierarchyOp(WindowContainer container,
-            WindowContainerTransaction.HierarchyOp hop) {
-        final Task task = container.asTask();
-        if (task == null) {
-            throw new IllegalArgumentException("Invalid container in hierarchy op");
+    private int sanitizeAndApplyHierarchyOpForDisplayArea(@NonNull DisplayArea displayArea,
+            @NonNull WindowContainerTransaction.HierarchyOp hop) {
+        if (hop.getType() != HIERARCHY_OP_TYPE_REORDER) {
+            throw new UnsupportedOperationException("DisplayArea only supports reordering");
         }
+        if (displayArea.getParent() == null) {
+            return TRANSACT_EFFECTS_NONE;
+        }
+        displayArea.getParent().positionChildAt(
+                hop.getToTop() ? POSITION_TOP : POSITION_BOTTOM,
+                displayArea, hop.includingParents());
+        return TRANSACT_EFFECTS_LIFECYCLE;
+    }
+
+    private int sanitizeAndApplyHierarchyOpForTask(@NonNull Task task,
+            @NonNull WindowContainerTransaction.HierarchyOp hop) {
         final DisplayContent dc = task.getDisplayContent();
         if (dc == null) {
             Slog.w(TAG, "Container is no longer attached: " + task);

@@ -102,6 +102,7 @@ import android.view.inputmethod.InputMethodManager;
 import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
 
+import com.android.app.viewcapture.ViewCaptureAwareWindowManager;
 import com.android.internal.accessibility.dialog.AccessibilityButtonChooserActivity;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.UiEvent;
@@ -196,6 +197,7 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
     private final Context mContext;
     private final Bundle mSavedState;
     private final WindowManager mWindowManager;
+    private final ViewCaptureAwareWindowManager mViewCaptureAwareWindowManager;
     private final AccessibilityManager mAccessibilityManager;
     private final DeviceProvisionedController mDeviceProvisionedController;
     private final StatusBarStateController mStatusBarStateController;
@@ -556,6 +558,7 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
             @Nullable Bundle savedState,
             @DisplayId Context context,
             @DisplayId WindowManager windowManager,
+            @DisplayId ViewCaptureAwareWindowManager viewCaptureAwareWindowManager,
             Lazy<AssistManager> assistManagerLazy,
             AccessibilityManager accessibilityManager,
             DeviceProvisionedController deviceProvisionedController,
@@ -601,6 +604,7 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
         mContext = context;
         mSavedState = savedState;
         mWindowManager = windowManager;
+        mViewCaptureAwareWindowManager = viewCaptureAwareWindowManager;
         mAccessibilityManager = accessibilityManager;
         mDeviceProvisionedController = deviceProvisionedController;
         mStatusBarStateController = statusBarStateController;
@@ -721,7 +725,7 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
 
         if (DEBUG) Log.v(TAG, "addNavigationBar: about to add " + mView);
 
-        mWindowManager.addView(mFrame,
+        mViewCaptureAwareWindowManager.addView(mFrame,
                 getBarLayoutParams(mContext.getResources().getConfiguration().windowConfiguration
                         .getRotation()));
         mDisplayId = mContext.getDisplayId();
@@ -764,7 +768,7 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
             mCommandQueue.removeCallback(this);
             Trace.beginSection("NavigationBar#removeViewImmediate");
             try {
-                mWindowManager.removeViewImmediate(mView.getRootView());
+                mViewCaptureAwareWindowManager.removeViewImmediate(mView.getRootView());
             } finally {
                 Trace.endSection();
             }
@@ -866,7 +870,7 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
         if (mOrientationHandle != null) {
             resetSecondaryHandle();
             getBarTransitions().removeDarkIntensityListener(mOrientationHandleIntensityListener);
-            mWindowManager.removeView(mOrientationHandle);
+            mViewCaptureAwareWindowManager.removeView(mOrientationHandle);
             mOrientationHandle.getViewTreeObserver().removeOnGlobalLayoutListener(
                     mOrientationHandleGlobalLayoutListener);
         }
@@ -937,7 +941,7 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
         mOrientationParams.setTitle("SecondaryHomeHandle" + mContext.getDisplayId());
         mOrientationParams.privateFlags |= PRIVATE_FLAG_NO_MOVE_ANIMATION
                 | WindowManager.LayoutParams.PRIVATE_FLAG_LAYOUT_SIZE_EXTENDED_BY_CUTOUT;
-        mWindowManager.addView(mOrientationHandle, mOrientationParams);
+        mViewCaptureAwareWindowManager.addView(mOrientationHandle, mOrientationParams);
         mOrientationHandle.setVisibility(View.GONE);
 
         logNavbarOrientation("initSecondaryHomeHandleForRotation");

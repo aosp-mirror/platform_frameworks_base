@@ -288,6 +288,13 @@ flag {
 }
 
 flag {
+    name: "stop_previous_user_apps"
+    namespace: "multiuser"
+    description: "Stop the previous user apps early in a user switch"
+    bug: "323200731"
+}
+
+flag {
     name: "disable_private_space_items_on_home"
     namespace: "profile_experiences"
     description: "Disables adding items belonging to Private Space on Home Screen manually as well as automatically"

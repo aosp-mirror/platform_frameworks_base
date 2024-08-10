@@ -512,6 +512,9 @@ public final class AlarmManagerServiceTest {
         when(mPermissionManagerInternal.getAppOpPermissionPackages(
                 SCHEDULE_EXACT_ALARM)).thenReturn(EmptyArray.STRING);
 
+        // Initialize timestamps with arbitrary values of time
+        mNowElapsedTest = 12;
+        mNowRtcTest = 345;
         mInjector = new Injector(mMockContext);
         mService = new AlarmManagerService(mMockContext, mInjector);
         spyOn(mService);
@@ -771,6 +774,61 @@ public final class AlarmManagerServiceTest {
         final long triggerElapsed2 = mTestTimer.getElapsed();
         assertEquals("Invalid movement of triggerElapsed following time change", triggerElapsed2,
                 triggerElapsed1 - timeDelta);
+    }
+
+    @Test
+    public void timeChangeBroadcastForward() throws Exception {
+        final long timeDelta = 12345;
+        // AlarmManagerService sends the broadcast if real time clock proceeds 1000ms more than boot
+        // time clock.
+        mNowRtcTest += timeDelta + 1001;
+        mNowElapsedTest += timeDelta;
+        mTestTimer.expire(TIME_CHANGED_MASK);
+
+        verify(mMockContext)
+                .sendBroadcastAsUser(
+                        argThat((intent) -> intent.getAction() == Intent.ACTION_TIME_CHANGED),
+                        eq(UserHandle.ALL),
+                        isNull(),
+                        any());
+    }
+
+    @Test
+    public void timeChangeBroadcastBackward() throws Exception {
+        final long timeDelta = 12345;
+        // AlarmManagerService sends the broadcast if real time clock proceeds 1000ms less than boot
+        // time clock.
+        mNowRtcTest += timeDelta - 1001;
+        mNowElapsedTest += timeDelta;
+        mTestTimer.expire(TIME_CHANGED_MASK);
+
+        verify(mMockContext)
+                .sendBroadcastAsUser(
+                        argThat((intent) -> intent.getAction() == Intent.ACTION_TIME_CHANGED),
+                        eq(UserHandle.ALL),
+                        isNull(),
+                        any());
+    }
+
+    @Test
+    public void timeChangeFilterMinorAdjustment() throws Exception {
+        final long timeDelta = 12345;
+        // AlarmManagerService does not send the broadcast if real time clock proceeds within 1000ms
+        // than boot time clock.
+        mNowRtcTest += timeDelta + 1000;
+        mNowElapsedTest += timeDelta;
+        mTestTimer.expire(TIME_CHANGED_MASK);
+
+        mNowRtcTest += timeDelta - 1000;
+        mNowElapsedTest += timeDelta;
+        mTestTimer.expire(TIME_CHANGED_MASK);
+
+        verify(mMockContext, never())
+                .sendBroadcastAsUser(
+                        argThat((intent) -> intent.getAction() == Intent.ACTION_TIME_CHANGED),
+                        any(),
+                        any(),
+                        any());
     }
 
     @Test

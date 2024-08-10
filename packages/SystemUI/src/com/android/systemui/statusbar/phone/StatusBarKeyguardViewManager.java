@@ -972,7 +972,11 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
             if (isOccluded && !mDozing) {
                 mCentralSurfaces.hideKeyguard();
                 if (hideBouncerWhenShowing || needsFullscreenBouncer()) {
-                    hideBouncer(false /* destroyView */);
+                    // We're removing "reset" in the refactor - bouncer will be hidden by the root
+                    // cause of the "reset" calls.
+                    if (!KeyguardWmStateRefactor.isEnabled()) {
+                        hideBouncer(false /* destroyView */);
+                    }
                 }
             } else {
                 showBouncerOrKeyguard(hideBouncerWhenShowing, isFalsingReset);

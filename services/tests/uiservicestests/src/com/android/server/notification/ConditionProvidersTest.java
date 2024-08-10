@@ -16,7 +16,6 @@
 
 package com.android.server.notification;
 
-import static android.service.notification.Condition.SOURCE_USER_ACTION;
 import static android.service.notification.Condition.STATE_FALSE;
 import static android.service.notification.Condition.STATE_TRUE;
 
@@ -31,13 +30,11 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
-import android.app.Flags;
 import android.content.ComponentName;
 import android.content.ServiceConnection;
 import android.content.pm.IPackageManager;
 import android.net.Uri;
 import android.os.IInterface;
-import android.platform.test.annotations.EnableFlags;
 import android.platform.test.flag.junit.SetFlagsRule;
 import android.service.notification.Condition;
 
@@ -146,57 +143,6 @@ public class ConditionProvidersTest extends UiServiceTestCase {
 
         verify(mCallback).onConditionChanged(eq(Uri.parse("a")), eq(conditionsToNotify[0]));
         verify(mCallback).onConditionChanged(eq(Uri.parse("b")), eq(conditionsToNotify[3]));
-        verifyNoMoreInteractions(mCallback);
-    }
-
-    @Test
-    @EnableFlags(Flags.FLAG_MODES_UI)
-    public void notifyConditions_appCannotUndoUserEnablement() {
-        ManagedServices.ManagedServiceInfo msi = mProviders.new ManagedServiceInfo(
-                mock(IInterface.class), new ComponentName("package", "cls"), 0, false,
-                mock(ServiceConnection.class), 33, 100);
-        // First, user enabled mode
-        Condition[] userConditions = new Condition[] {
-                new Condition(Uri.parse("a"), "summary", STATE_TRUE, SOURCE_USER_ACTION)
-        };
-        mProviders.notifyConditions("package", msi, userConditions);
-        verify(mCallback).onConditionChanged(eq(Uri.parse("a")), eq(userConditions[0]));
-
-        // Second, app tries to disable it, but cannot
-        Condition[] appConditions = new Condition[] {
-                new Condition(Uri.parse("a"), "summary", STATE_FALSE)
-        };
-        mProviders.notifyConditions("package", msi, appConditions);
-        verify(mCallback).onConditionChanged(eq(Uri.parse("a")), eq(userConditions[0]));
-    }
-
-    @Test
-    @EnableFlags(Flags.FLAG_MODES_UI)
-    public void notifyConditions_appCanTakeoverUserEnablement() {
-        ManagedServices.ManagedServiceInfo msi = mProviders.new ManagedServiceInfo(
-                mock(IInterface.class), new ComponentName("package", "cls"), 0, false,
-                mock(ServiceConnection.class), 33, 100);
-        // First, user enabled mode
-        Condition[] userConditions = new Condition[] {
-                new Condition(Uri.parse("a"), "summary", STATE_TRUE, SOURCE_USER_ACTION)
-        };
-        mProviders.notifyConditions("package", msi, userConditions);
-        verify(mCallback).onConditionChanged(eq(Uri.parse("a")), eq(userConditions[0]));
-
-        // Second, app now thinks the rule should be on due it its intelligence
-        Condition[] appConditions = new Condition[] {
-                new Condition(Uri.parse("a"), "summary", STATE_TRUE)
-        };
-        mProviders.notifyConditions("package", msi, appConditions);
-        verify(mCallback).onConditionChanged(eq(Uri.parse("a")), eq(appConditions[0]));
-
-        // Lastly, app can turn rule off when its intelligence think it should be off
-        appConditions = new Condition[] {
-                new Condition(Uri.parse("a"), "summary", STATE_FALSE)
-        };
-        mProviders.notifyConditions("package", msi, appConditions);
-        verify(mCallback).onConditionChanged(eq(Uri.parse("a")), eq(appConditions[0]));
-
         verifyNoMoreInteractions(mCallback);
     }
 

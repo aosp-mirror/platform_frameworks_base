@@ -18,6 +18,7 @@ package com.android.systemui.volume.panel.data.repository
 
 import com.android.systemui.dump.dumpManager
 import com.android.systemui.kosmos.Kosmos
+import com.android.systemui.volume.shared.volumePanelLogger
 
 val Kosmos.volumePanelGlobalStateRepository by
-    Kosmos.Fixture { VolumePanelGlobalStateRepository(dumpManager) }
+    Kosmos.Fixture { VolumePanelGlobalStateRepository(dumpManager, volumePanelLogger) }

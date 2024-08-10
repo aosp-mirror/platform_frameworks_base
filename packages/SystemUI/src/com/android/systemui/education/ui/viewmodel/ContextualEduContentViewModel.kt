@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2024 The Android Open Source Project
+ * Copyright 2024 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,18 +14,8 @@
  * limitations under the License.
  */
 
-package android.telephony.satellite.stub;
+package com.android.systemui.education.ui.viewmodel
 
-/**
- * {@hide}
- */
-parcelable ProvisionSubscriberId {
-    /** provision subscriberId */
-    String subscriberId;
+import com.android.systemui.education.shared.model.EducationUiType
 
-    /** carrier id */
-    int mCarrierId;
-
-    /** apn */
-    String mNiddApn;
-}
+data class ContextualEduContentViewModel(val message: String, val type: EducationUiType)

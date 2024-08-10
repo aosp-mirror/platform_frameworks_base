@@ -123,7 +123,6 @@ public class ZenModesBackendTest {
         zenRule.id = id;
         zenRule.pkg = "package";
         zenRule.enabled = azr.isEnabled();
-        zenRule.snoozing = false;
         zenRule.conditionId = azr.getConditionId();
         zenRule.condition = new Condition(azr.getConditionId(), "",
                 active ? Condition.STATE_TRUE : Condition.STATE_FALSE,
