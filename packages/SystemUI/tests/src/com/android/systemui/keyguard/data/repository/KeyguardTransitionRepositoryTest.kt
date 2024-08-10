@@ -17,9 +17,6 @@
 package com.android.systemui.keyguard.data.repository
 
 import android.animation.ValueAnimator
-import android.util.Log
-import android.util.Log.TerribleFailure
-import android.util.Log.TerribleFailureHandler
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.FlakyTest
 import androidx.test.filters.SmallTest
@@ -53,7 +50,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
-import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -67,21 +63,12 @@ class KeyguardTransitionRepositoryTest : SysuiTestCase() {
     private val testScope = kosmos.testScope
 
     private lateinit var underTest: KeyguardTransitionRepository
-    private lateinit var oldWtfHandler: TerribleFailureHandler
-    private lateinit var wtfHandler: WtfHandler
     private lateinit var runner: KeyguardTransitionRunner
 
     @Before
     fun setUp() {
         underTest = KeyguardTransitionRepositoryImpl(Dispatchers.Main)
-        wtfHandler = WtfHandler()
-        oldWtfHandler = Log.setWtfHandler(wtfHandler)
         runner = KeyguardTransitionRunner(underTest)
-    }
-
-    @After
-    fun tearDown() {
-        oldWtfHandler?.let { Log.setWtfHandler(it) }
     }
 
     @Test
@@ -333,15 +320,17 @@ class KeyguardTransitionRepositoryTest : SysuiTestCase() {
         }
 
     @Test
-    fun attemptTomanuallyUpdateTransitionWithInvalidUUIDthrowsException() =
+    fun attemptTomanuallyUpdateTransitionWithInvalidUUIDEmitsNothing() =
         testScope.runTest {
+            val steps by collectValues(underTest.transitions.dropWhile { step -> step.from == OFF })
             underTest.updateTransition(UUID.randomUUID(), 0f, TransitionState.RUNNING)
-            assertThat(wtfHandler.failed).isTrue()
+            assertThat(steps.size).isEqualTo(0)
         }
 
     @Test
-    fun attemptToManuallyUpdateTransitionAfterFINISHEDstateThrowsException() =
+    fun attemptToManuallyUpdateTransitionAfterFINISHEDstateEmitsNothing() =
         testScope.runTest {
+            val steps by collectValues(underTest.transitions.dropWhile { step -> step.from == OFF })
             val uuid =
                 underTest.startTransition(
                     TransitionInfo(
@@ -356,12 +345,19 @@ class KeyguardTransitionRepositoryTest : SysuiTestCase() {
                 underTest.updateTransition(it, 1f, TransitionState.FINISHED)
                 underTest.updateTransition(it, 0.5f, TransitionState.RUNNING)
             }
-            assertThat(wtfHandler.failed).isTrue()
+            assertThat(steps.size).isEqualTo(2)
+            assertThat(steps[0])
+                .isEqualTo(TransitionStep(AOD, LOCKSCREEN, 0f, TransitionState.STARTED, OWNER_NAME))
+            assertThat(steps[1])
+                .isEqualTo(
+                    TransitionStep(AOD, LOCKSCREEN, 1f, TransitionState.FINISHED, OWNER_NAME)
+                )
         }
 
     @Test
-    fun attemptToManuallyUpdateTransitionAfterCANCELEDstateThrowsException() =
+    fun attemptToManuallyUpdateTransitionAfterCANCELEDstateEmitsNothing() =
         testScope.runTest {
+            val steps by collectValues(underTest.transitions.dropWhile { step -> step.from == OFF })
             val uuid =
                 underTest.startTransition(
                     TransitionInfo(
@@ -376,7 +372,13 @@ class KeyguardTransitionRepositoryTest : SysuiTestCase() {
                 underTest.updateTransition(it, 0.2f, TransitionState.CANCELED)
                 underTest.updateTransition(it, 0.5f, TransitionState.RUNNING)
             }
-            assertThat(wtfHandler.failed).isTrue()
+            assertThat(steps.size).isEqualTo(2)
+            assertThat(steps[0])
+                .isEqualTo(TransitionStep(AOD, LOCKSCREEN, 0f, TransitionState.STARTED, OWNER_NAME))
+            assertThat(steps[1])
+                .isEqualTo(
+                    TransitionStep(AOD, LOCKSCREEN, 0.2f, TransitionState.CANCELED, OWNER_NAME)
+                )
         }
 
     @Test
@@ -530,22 +532,12 @@ class KeyguardTransitionRepositoryTest : SysuiTestCase() {
             }
         assertThat(steps[steps.size - 1])
             .isEqualTo(TransitionStep(from, to, lastValue, status, OWNER_NAME))
-
-        assertThat(wtfHandler.failed).isFalse()
     }
 
     private fun getAnimator(): ValueAnimator {
         return ValueAnimator().apply {
             setInterpolator(Interpolators.LINEAR)
             setDuration(10)
-        }
-    }
-
-    private class WtfHandler : TerribleFailureHandler {
-        var failed = false
-
-        override fun onTerribleFailure(tag: String, what: TerribleFailure, system: Boolean) {
-            failed = true
         }
     }
 

@@ -32,7 +32,6 @@ import androidx.test.filters.SmallTest
 import com.airbnb.lottie.model.KeyPath
 import com.android.keyguard.keyguardUpdateMonitor
 import com.android.settingslib.Utils
-import com.android.systemui.Flags.FLAG_CONSTRAINT_BP
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.biometrics.FingerprintInteractiveToAuthProvider
 import com.android.systemui.biometrics.data.repository.biometricStatusRepository
@@ -199,7 +198,6 @@ class SideFpsOverlayViewModelTest : SysuiTestCase() {
     @Test
     fun updatesOverlayViewParams_onDisplayRotationChange_xAlignedSensor() {
         kosmos.testScope.runTest {
-            mSetFlagsRule.disableFlags(FLAG_CONSTRAINT_BP)
             setupTestConfiguration(
                 DeviceConfig.X_ALIGNED,
                 rotation = DisplayRotation.ROTATION_0,
@@ -230,11 +228,11 @@ class SideFpsOverlayViewModelTest : SysuiTestCase() {
                 .isEqualTo(
                     displayWidth - sensorLocation.sensorLocationX - sensorLocation.sensorRadius * 2
                 )
-            assertThat(overlayViewParams!!.y).isEqualTo(displayHeight - boundsHeight)
+            assertThat(overlayViewParams!!.y).isEqualTo(displayHeight)
 
             kosmos.displayStateRepository.setCurrentRotation(DisplayRotation.ROTATION_270)
             assertThat(overlayViewParams).isNotNull()
-            assertThat(overlayViewParams!!.x).isEqualTo(displayWidth - boundsWidth)
+            assertThat(overlayViewParams!!.x).isEqualTo(displayWidth)
             assertThat(overlayViewParams!!.y).isEqualTo(sensorLocation.sensorLocationX)
         }
     }
@@ -242,7 +240,6 @@ class SideFpsOverlayViewModelTest : SysuiTestCase() {
     @Test
     fun updatesOverlayViewParams_onDisplayRotationChange_yAlignedSensor() {
         kosmos.testScope.runTest {
-            mSetFlagsRule.disableFlags(FLAG_CONSTRAINT_BP)
             setupTestConfiguration(
                 DeviceConfig.Y_ALIGNED,
                 rotation = DisplayRotation.ROTATION_0,
@@ -256,7 +253,7 @@ class SideFpsOverlayViewModelTest : SysuiTestCase() {
             runCurrent()
 
             assertThat(overlayViewParams).isNotNull()
-            assertThat(overlayViewParams!!.x).isEqualTo(displayWidth - boundsWidth)
+            assertThat(overlayViewParams!!.x).isEqualTo(displayWidth)
             assertThat(overlayViewParams!!.y).isEqualTo(sensorLocation.sensorLocationY)
 
             kosmos.displayStateRepository.setCurrentRotation(DisplayRotation.ROTATION_90)
@@ -278,7 +275,7 @@ class SideFpsOverlayViewModelTest : SysuiTestCase() {
                 .isEqualTo(
                     displayWidth - sensorLocation.sensorLocationY - sensorLocation.sensorRadius * 2
                 )
-            assertThat(overlayViewParams!!.y).isEqualTo(displayHeight - boundsHeight)
+            assertThat(overlayViewParams!!.y).isEqualTo(displayHeight)
         }
     }
 
