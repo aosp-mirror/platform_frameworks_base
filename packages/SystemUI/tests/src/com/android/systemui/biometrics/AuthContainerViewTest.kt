@@ -29,7 +29,6 @@ import android.hardware.biometrics.PromptVerticalListContentView
 import android.hardware.face.FaceSensorPropertiesInternal
 import android.hardware.fingerprint.FingerprintManager
 import android.hardware.fingerprint.FingerprintSensorPropertiesInternal
-import android.os.Handler
 import android.os.IBinder
 import android.os.UserManager
 import android.testing.TestableLooper
@@ -45,7 +44,6 @@ import androidx.test.filters.SmallTest
 import com.android.internal.jank.InteractionJankMonitor
 import com.android.internal.widget.LockPatternUtils
 import com.android.launcher3.icons.IconProvider
-import com.android.systemui.Flags.FLAG_CONSTRAINT_BP
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.biometrics.data.repository.FakeBiometricStatusRepository
 import com.android.systemui.biometrics.data.repository.FakeDisplayStateRepository
@@ -105,7 +103,6 @@ open class AuthContainerViewTest : SysuiTestCase() {
     @Mock lateinit var fingerprintManager: FingerprintManager
     @Mock lateinit var lockPatternUtils: LockPatternUtils
     @Mock lateinit var wakefulnessLifecycle: WakefulnessLifecycle
-    @Mock lateinit var panelInteractionDetector: AuthDialogPanelInteractionDetector
     @Mock lateinit var windowToken: IBinder
     @Mock lateinit var interactionJankMonitor: InteractionJankMonitor
     @Mock lateinit var vibrator: VibratorHelper
@@ -265,14 +262,6 @@ open class AuthContainerViewTest : SysuiTestCase() {
     }
 
     @Test
-    fun testActionCancel_panelInteractionDetectorDisable() {
-        val container = initializeFingerprintContainer()
-        container.mBiometricCallback.onUserCanceled()
-        waitForIdleSync()
-        verify(panelInteractionDetector).disable()
-    }
-
-    @Test
     fun testActionAuthenticated_sendsDismissedAuthenticated() {
         val container = initializeFingerprintContainer()
         container.mBiometricCallback.onAuthenticated()
@@ -416,19 +405,7 @@ open class AuthContainerViewTest : SysuiTestCase() {
     }
 
     @Test
-    fun testShowBiometricUI() {
-        mSetFlagsRule.disableFlags(FLAG_CONSTRAINT_BP)
-        val container = initializeFingerprintContainer()
-
-        waitForIdleSync()
-
-        assertThat(container.hasCredentialView()).isFalse()
-        assertThat(container.hasBiometricPrompt()).isTrue()
-    }
-
-    @Test
     fun testShowBiometricUI_ContentViewWithMoreOptionsButton() {
-        mSetFlagsRule.enableFlags(FLAG_CONSTRAINT_BP)
         mSetFlagsRule.enableFlags(FLAG_CUSTOM_BIOMETRIC_PROMPT)
         var isButtonClicked = false
         val contentView =
@@ -466,7 +443,6 @@ open class AuthContainerViewTest : SysuiTestCase() {
 
     @Test
     fun testShowCredentialUI_withVerticalListContentView() {
-        mSetFlagsRule.enableFlags(FLAG_CONSTRAINT_BP)
         mSetFlagsRule.enableFlags(FLAG_CUSTOM_BIOMETRIC_PROMPT)
         val container =
             initializeFingerprintContainer(
@@ -488,7 +464,6 @@ open class AuthContainerViewTest : SysuiTestCase() {
 
     @Test
     fun testShowCredentialUI_withContentViewWithMoreOptionsButton() {
-        mSetFlagsRule.enableFlags(FLAG_CONSTRAINT_BP)
         mSetFlagsRule.enableFlags(FLAG_CUSTOM_BIOMETRIC_PROMPT)
         val contentView =
             PromptContentViewWithMoreOptionsButton.Builder()
@@ -674,7 +649,6 @@ open class AuthContainerViewTest : SysuiTestCase() {
             fingerprintProps,
             faceProps,
             wakefulnessLifecycle,
-            panelInteractionDetector,
             userManager,
             lockPatternUtils,
             interactionJankMonitor,
@@ -690,7 +664,6 @@ open class AuthContainerViewTest : SysuiTestCase() {
                 activityTaskManager
             ),
             { credentialViewModel },
-            Handler(TestableLooper.get(this).looper),
             fakeExecutor,
             vibrator
         ) {

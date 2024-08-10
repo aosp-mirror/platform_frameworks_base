@@ -16,6 +16,7 @@
 
 package com.android.systemui.education.domain.interactor
 
+import com.android.systemui.education.data.repository.fakeEduClock
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.testScope
 
@@ -23,7 +24,8 @@ var Kosmos.keyboardTouchpadEduInteractor by
     Kosmos.Fixture {
         KeyboardTouchpadEduInteractor(
             backgroundScope = testScope.backgroundScope,
-            contextualEducationInteractor = contextualEducationInteractor
+            contextualEducationInteractor = contextualEducationInteractor,
+            clock = fakeEduClock
         )
     }
 

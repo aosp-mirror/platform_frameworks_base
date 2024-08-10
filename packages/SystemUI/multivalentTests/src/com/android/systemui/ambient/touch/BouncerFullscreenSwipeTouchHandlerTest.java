@@ -62,7 +62,7 @@ import java.util.Optional;
 
 @SmallTest
 @RunWith(AndroidJUnit4.class)
-@EnableFlags(Flags.FLAG_HUBMODE_FULLSCREEN_VERTICAL_SWIPE)
+@EnableFlags(Flags.FLAG_HUBMODE_FULLSCREEN_VERTICAL_SWIPE_FIX)
 @DisableFlags(Flags.FLAG_COMMUNAL_BOUNCER_DO_NOT_MODIFY_PLUGIN_OPEN)
 public class BouncerFullscreenSwipeTouchHandlerTest extends SysuiTestCase {
     private KosmosJavaAdapter mKosmos;

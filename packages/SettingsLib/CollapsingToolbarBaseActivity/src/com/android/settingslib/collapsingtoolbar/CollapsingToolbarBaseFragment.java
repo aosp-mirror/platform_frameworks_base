@@ -57,7 +57,8 @@ public abstract class CollapsingToolbarBaseFragment extends Fragment {
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
-        mToolbardelegate = new CollapsingToolbarDelegate(new DelegateCallback());
+        mToolbardelegate =
+                new CollapsingToolbarDelegate(new DelegateCallback(), useCollapsingToolbar());
     }
 
     @Nullable
@@ -97,5 +98,9 @@ public abstract class CollapsingToolbarBaseFragment extends Fragment {
     @NonNull
     public FrameLayout getContentFrameLayout() {
         return mToolbardelegate.getContentFrameLayout();
+    }
+
+    protected boolean useCollapsingToolbar() {
+        return true;
     }
 }

@@ -22,13 +22,13 @@ import com.android.compose.animation.scene.ObservableTransitionState
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.common.ui.data.repository.fakeConfigurationRepository
 import com.android.systemui.coroutines.collectLastValue
+import com.android.systemui.flags.EnableSceneContainer
 import com.android.systemui.keyguard.data.repository.fakeKeyguardRepository
 import com.android.systemui.keyguard.shared.model.StatusBarState
 import com.android.systemui.kosmos.testScope
-import com.android.systemui.res.R
 import com.android.systemui.scene.domain.interactor.sceneInteractor
 import com.android.systemui.scene.shared.model.Scenes
-import com.android.systemui.shade.data.repository.shadeRepository
+import com.android.systemui.shade.shadeTestUtil
 import com.android.systemui.testKosmos
 import com.google.common.truth.Truth
 import com.google.common.truth.Truth.assertThat
@@ -43,6 +43,7 @@ import org.junit.runner.RunWith
 @OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
 @RunWith(AndroidJUnit4::class)
+@EnableSceneContainer
 class ShadeInteractorSceneContainerImplTest : SysuiTestCase() {
 
     private val kosmos = testKosmos()
@@ -50,7 +51,7 @@ class ShadeInteractorSceneContainerImplTest : SysuiTestCase() {
     private val configurationRepository = kosmos.fakeConfigurationRepository
     private val keyguardRepository = kosmos.fakeKeyguardRepository
     private val sceneInteractor = kosmos.sceneInteractor
-    private val shadeRepository = kosmos.shadeRepository
+    private val shadeTestUtil = kosmos.shadeTestUtil
 
     private val underTest = kosmos.shadeInteractorSceneContainerImpl
 
@@ -60,7 +61,7 @@ class ShadeInteractorSceneContainerImplTest : SysuiTestCase() {
             val actual by collectLastValue(underTest.qsExpansion)
 
             // WHEN split shade is enabled and QS is expanded
-            overrideResource(R.bool.config_use_split_notification_shade, true)
+            shadeTestUtil.setSplitShade(true)
             configurationRepository.onAnyConfigurationChange()
             runCurrent()
             val transitionState =
@@ -89,7 +90,7 @@ class ShadeInteractorSceneContainerImplTest : SysuiTestCase() {
 
             // WHEN split shade is not enabled and QS is expanded
             keyguardRepository.setStatusBarState(StatusBarState.SHADE)
-            overrideResource(R.bool.config_use_split_notification_shade, false)
+            shadeTestUtil.setSplitShade(false)
             configurationRepository.onAnyConfigurationChange()
             runCurrent()
             val progress = MutableStateFlow(.3f)

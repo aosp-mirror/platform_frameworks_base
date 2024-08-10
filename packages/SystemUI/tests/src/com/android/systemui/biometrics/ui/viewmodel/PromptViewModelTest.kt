@@ -43,7 +43,6 @@ import android.view.MotionEvent
 import android.view.Surface
 import androidx.test.filters.SmallTest
 import com.android.app.activityTaskManager
-import com.android.systemui.Flags.FLAG_CONSTRAINT_BP
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.biometrics.AuthController
 import com.android.systemui.biometrics.Utils.toBitmap
@@ -503,11 +502,13 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
                     collectLastValue(kosmos.promptViewModel.iconViewModel.contentDescriptionId)
                 val shouldAnimateIconView by
                     collectLastValue(kosmos.promptViewModel.iconViewModel.shouldAnimateIconView)
+                val message by collectLastValue(kosmos.promptViewModel.message)
                 verifyIconSize()
 
                 kosmos.promptViewModel.showAuthenticated(
                     modality = testCase.authenticatedModality,
-                    dismissAfterDelay = DELAY
+                    dismissAfterDelay = DELAY,
+                    "TEST"
                 )
 
                 if (testCase.isFingerprintOnly) {
@@ -531,6 +532,7 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
                     assertThat(iconContentDescriptionId)
                         .isEqualTo(R.string.biometric_dialog_face_icon_description_authenticated)
                     assertThat(shouldAnimateIconView).isEqualTo(true)
+                    assertThat(message).isEqualTo(PromptMessage.Empty)
                 }
             }
         }
@@ -1382,7 +1384,7 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
     }
 
     @Test
-    @EnableFlags(FLAG_CUSTOM_BIOMETRIC_PROMPT, FLAG_CONSTRAINT_BP)
+    @EnableFlags(FLAG_CUSTOM_BIOMETRIC_PROMPT)
     fun descriptionOverriddenByVerticalListContentView() =
         runGenericTest(description = "test description", contentView = promptContentView) {
             val contentView by collectLastValue(kosmos.promptViewModel.contentView)
@@ -1393,7 +1395,7 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
         }
 
     @Test
-    @EnableFlags(FLAG_CUSTOM_BIOMETRIC_PROMPT, FLAG_CONSTRAINT_BP)
+    @EnableFlags(FLAG_CUSTOM_BIOMETRIC_PROMPT)
     fun descriptionOverriddenByContentViewWithMoreOptionsButton() =
         runGenericTest(
             description = "test description",
@@ -1407,7 +1409,7 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
         }
 
     @Test
-    @EnableFlags(FLAG_CUSTOM_BIOMETRIC_PROMPT, FLAG_CONSTRAINT_BP)
+    @EnableFlags(FLAG_CUSTOM_BIOMETRIC_PROMPT)
     fun descriptionWithoutContentView() =
         runGenericTest(description = "test description") {
             val contentView by collectLastValue(kosmos.promptViewModel.contentView)
@@ -1418,7 +1420,7 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
         }
 
     @Test
-    @EnableFlags(FLAG_CUSTOM_BIOMETRIC_PROMPT, FLAG_CONSTRAINT_BP)
+    @EnableFlags(FLAG_CUSTOM_BIOMETRIC_PROMPT)
     fun logo_nullIfPkgNameNotFound() =
         runGenericTest(packageName = OP_PACKAGE_NAME_CAN_NOT_BE_FOUND) {
             val logoInfo by collectLastValue(kosmos.promptViewModel.logoInfo)
@@ -1427,7 +1429,7 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
         }
 
     @Test
-    @EnableFlags(FLAG_CUSTOM_BIOMETRIC_PROMPT, FLAG_CONSTRAINT_BP)
+    @EnableFlags(FLAG_CUSTOM_BIOMETRIC_PROMPT)
     fun logo_defaultFromActivityInfo() =
         runGenericTest(packageName = OP_PACKAGE_NAME_WITH_ACTIVITY_LOGO) {
             val logoInfo by collectLastValue(kosmos.promptViewModel.logoInfo)
@@ -1442,7 +1444,7 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
         }
 
     @Test
-    @EnableFlags(FLAG_CUSTOM_BIOMETRIC_PROMPT, FLAG_CONSTRAINT_BP)
+    @EnableFlags(FLAG_CUSTOM_BIOMETRIC_PROMPT)
     fun logo_defaultIsNull() =
         runGenericTest(packageName = OP_PACKAGE_NAME_NO_ICON) {
             val logoInfo by collectLastValue(kosmos.promptViewModel.logoInfo)
@@ -1451,7 +1453,7 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
         }
 
     @Test
-    @EnableFlags(FLAG_CUSTOM_BIOMETRIC_PROMPT, FLAG_CONSTRAINT_BP)
+    @EnableFlags(FLAG_CUSTOM_BIOMETRIC_PROMPT)
     fun logo_default() = runGenericTest {
         val logoInfo by collectLastValue(kosmos.promptViewModel.logoInfo)
         assertThat(logoInfo).isNotNull()
@@ -1459,7 +1461,7 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
     }
 
     @Test
-    @EnableFlags(FLAG_CUSTOM_BIOMETRIC_PROMPT, FLAG_CONSTRAINT_BP)
+    @EnableFlags(FLAG_CUSTOM_BIOMETRIC_PROMPT)
     fun logo_resSetByApp() =
         runGenericTest(logoRes = logoResFromApp) {
             val expectedBitmap = context.getDrawable(logoResFromApp).toBitmap()
@@ -1469,7 +1471,7 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
         }
 
     @Test
-    @EnableFlags(FLAG_CUSTOM_BIOMETRIC_PROMPT, FLAG_CONSTRAINT_BP)
+    @EnableFlags(FLAG_CUSTOM_BIOMETRIC_PROMPT)
     fun logo_bitmapSetByApp() =
         runGenericTest(logoBitmap = logoBitmapFromApp) {
             val logoInfo by collectLastValue(kosmos.promptViewModel.logoInfo)
@@ -1477,7 +1479,7 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
         }
 
     @Test
-    @EnableFlags(FLAG_CUSTOM_BIOMETRIC_PROMPT, FLAG_CONSTRAINT_BP)
+    @EnableFlags(FLAG_CUSTOM_BIOMETRIC_PROMPT)
     fun logoDescription_emptyIfPkgNameNotFound() =
         runGenericTest(packageName = OP_PACKAGE_NAME_CAN_NOT_BE_FOUND) {
             val logoInfo by collectLastValue(kosmos.promptViewModel.logoInfo)
@@ -1485,7 +1487,7 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
         }
 
     @Test
-    @EnableFlags(FLAG_CUSTOM_BIOMETRIC_PROMPT, FLAG_CONSTRAINT_BP)
+    @EnableFlags(FLAG_CUSTOM_BIOMETRIC_PROMPT)
     fun logoDescription_defaultFromActivityInfo() =
         runGenericTest(packageName = OP_PACKAGE_NAME_WITH_ACTIVITY_LOGO) {
             val logoInfo by collectLastValue(kosmos.promptViewModel.logoInfo)
@@ -1497,7 +1499,7 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
         }
 
     @Test
-    @EnableFlags(FLAG_CUSTOM_BIOMETRIC_PROMPT, FLAG_CONSTRAINT_BP)
+    @EnableFlags(FLAG_CUSTOM_BIOMETRIC_PROMPT)
     fun logoDescription_defaultIsEmpty() =
         runGenericTest(packageName = OP_PACKAGE_NAME_NO_ICON) {
             val logoInfo by collectLastValue(kosmos.promptViewModel.logoInfo)
@@ -1505,14 +1507,14 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
         }
 
     @Test
-    @EnableFlags(FLAG_CUSTOM_BIOMETRIC_PROMPT, FLAG_CONSTRAINT_BP)
+    @EnableFlags(FLAG_CUSTOM_BIOMETRIC_PROMPT)
     fun logoDescription_default() = runGenericTest {
         val logoInfo by collectLastValue(kosmos.promptViewModel.logoInfo)
         assertThat(logoInfo!!.second).isEqualTo(defaultLogoDescriptionFromAppInfo)
     }
 
     @Test
-    @EnableFlags(FLAG_CUSTOM_BIOMETRIC_PROMPT, FLAG_CONSTRAINT_BP)
+    @EnableFlags(FLAG_CUSTOM_BIOMETRIC_PROMPT)
     fun logoDescription_setByApp() =
         runGenericTest(logoDescription = logoDescriptionFromApp) {
             val logoInfo by collectLastValue(kosmos.promptViewModel.logoInfo)
@@ -1520,7 +1522,6 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
         }
 
     @Test
-    @EnableFlags(FLAG_CONSTRAINT_BP)
     fun position_bottom_rotation0() = runGenericTest {
         kosmos.displayStateRepository.setCurrentRotation(DisplayRotation.ROTATION_0)
         val position by collectLastValue(kosmos.promptViewModel.position)
@@ -1528,7 +1529,6 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
     } // TODO(b/335278136): Add test for no sensor landscape
 
     @Test
-    @EnableFlags(FLAG_CONSTRAINT_BP)
     fun position_bottom_forceLarge() = runGenericTest {
         kosmos.displayStateRepository.setCurrentRotation(DisplayRotation.ROTATION_270)
         kosmos.promptViewModel.onSwitchToCredential()
@@ -1537,7 +1537,6 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
     }
 
     @Test
-    @EnableFlags(FLAG_CONSTRAINT_BP)
     fun position_bottom_largeScreen() = runGenericTest {
         kosmos.displayStateRepository.setCurrentRotation(DisplayRotation.ROTATION_270)
         kosmos.displayStateRepository.setIsLargeScreen(true)
@@ -1546,7 +1545,6 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
     }
 
     @Test
-    @EnableFlags(FLAG_CONSTRAINT_BP)
     fun position_right_rotation90() = runGenericTest {
         kosmos.displayStateRepository.setCurrentRotation(DisplayRotation.ROTATION_90)
         val position by collectLastValue(kosmos.promptViewModel.position)
@@ -1554,7 +1552,6 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
     }
 
     @Test
-    @EnableFlags(FLAG_CONSTRAINT_BP)
     fun position_left_rotation270() = runGenericTest {
         kosmos.displayStateRepository.setCurrentRotation(DisplayRotation.ROTATION_270)
         val position by collectLastValue(kosmos.promptViewModel.position)
@@ -1562,7 +1559,6 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
     }
 
     @Test
-    @EnableFlags(FLAG_CONSTRAINT_BP)
     fun position_top_rotation180() = runGenericTest {
         kosmos.displayStateRepository.setCurrentRotation(DisplayRotation.ROTATION_180)
         val position by collectLastValue(kosmos.promptViewModel.position)
@@ -1574,7 +1570,6 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
     }
 
     @Test
-    @EnableFlags(FLAG_CONSTRAINT_BP)
     fun guideline_bottom() = runGenericTest {
         kosmos.displayStateRepository.setCurrentRotation(DisplayRotation.ROTATION_0)
         val guidelineBounds by collectLastValue(kosmos.promptViewModel.guidelineBounds)
@@ -1582,7 +1577,6 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
     } // TODO(b/335278136): Add test for no sensor landscape
 
     @Test
-    @EnableFlags(FLAG_CONSTRAINT_BP)
     fun guideline_right() = runGenericTest {
         kosmos.displayStateRepository.setCurrentRotation(DisplayRotation.ROTATION_90)
 
@@ -1599,7 +1593,6 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
     }
 
     @Test
-    @EnableFlags(FLAG_CONSTRAINT_BP)
     fun guideline_right_onlyShortTitle() =
         runGenericTest(subtitle = "") {
             kosmos.displayStateRepository.setCurrentRotation(DisplayRotation.ROTATION_90)
@@ -1614,7 +1607,6 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
         }
 
     @Test
-    @EnableFlags(FLAG_CONSTRAINT_BP)
     fun guideline_left() = runGenericTest {
         kosmos.displayStateRepository.setCurrentRotation(DisplayRotation.ROTATION_270)
 
@@ -1631,7 +1623,6 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
     }
 
     @Test
-    @EnableFlags(FLAG_CONSTRAINT_BP)
     fun guideline_left_onlyShortTitle() =
         runGenericTest(subtitle = "") {
             kosmos.displayStateRepository.setCurrentRotation(DisplayRotation.ROTATION_270)
@@ -1646,7 +1637,6 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
         }
 
     @Test
-    @EnableFlags(FLAG_CONSTRAINT_BP)
     fun guideline_top() = runGenericTest {
         kosmos.displayStateRepository.setCurrentRotation(DisplayRotation.ROTATION_180)
         val guidelineBounds by collectLastValue(kosmos.promptViewModel.guidelineBounds)

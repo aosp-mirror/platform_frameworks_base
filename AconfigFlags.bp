@@ -172,6 +172,7 @@ cc_aconfig_library {
 // Window
 aconfig_declarations {
     name: "com.android.window.flags.window-aconfig",
+    exportable: true,
     package: "com.android.window.flags",
     container: "system",
     srcs: ["core/java/android/window/flags/*.aconfig"],
@@ -476,6 +477,13 @@ java_aconfig_library {
     name: "android.os.vibrator.flags-aconfig-java",
     aconfig_declarations: "android.os.vibrator.flags-aconfig",
     defaults: ["framework-minus-apex-aconfig-java-defaults"],
+}
+
+cc_aconfig_library {
+    name: "android.os.vibrator.flags-aconfig-cc",
+    aconfig_declarations: "android.os.vibrator.flags-aconfig",
+    host_supported: true,
+    vendor_available: true,
 }
 
 // View
@@ -1101,6 +1109,7 @@ cc_aconfig_library {
 // Chooser / "Sharesheet"
 aconfig_declarations {
     name: "android.service.chooser.flags-aconfig",
+    exportable: true,
     package: "android.service.chooser",
     container: "system",
     srcs: ["core/java/android/service/chooser/flags.aconfig"],

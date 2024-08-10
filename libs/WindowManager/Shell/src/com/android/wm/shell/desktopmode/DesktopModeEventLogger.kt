@@ -73,25 +73,9 @@ class DesktopModeEventLogger {
             sessionId,
             taskUpdate.instanceId
         )
-        FrameworkStatsLog.write(
-            DESKTOP_MODE_TASK_UPDATE_ATOM_ID,
-            /* task_event */
+        logTaskUpdate(
             FrameworkStatsLog.DESKTOP_MODE_SESSION_TASK_UPDATE__TASK_EVENT__TASK_ADDED,
-            /* instance_id */
-            taskUpdate.instanceId,
-            /* uid */
-            taskUpdate.uid,
-            /* task_height */
-            taskUpdate.taskHeight,
-            /* task_width */
-            taskUpdate.taskWidth,
-            /* task_x */
-            taskUpdate.taskX,
-            /* task_y */
-            taskUpdate.taskY,
-            /* session_id */
-            sessionId
-        )
+            sessionId, taskUpdate)
     }
 
     /**
@@ -105,25 +89,9 @@ class DesktopModeEventLogger {
             sessionId,
             taskUpdate.instanceId
         )
-        FrameworkStatsLog.write(
-            DESKTOP_MODE_TASK_UPDATE_ATOM_ID,
-            /* task_event */
+        logTaskUpdate(
             FrameworkStatsLog.DESKTOP_MODE_SESSION_TASK_UPDATE__TASK_EVENT__TASK_REMOVED,
-            /* instance_id */
-            taskUpdate.instanceId,
-            /* uid */
-            taskUpdate.uid,
-            /* task_height */
-            taskUpdate.taskHeight,
-            /* task_width */
-            taskUpdate.taskWidth,
-            /* task_x */
-            taskUpdate.taskX,
-            /* task_y */
-            taskUpdate.taskY,
-            /* session_id */
-            sessionId
-        )
+            sessionId, taskUpdate)
     }
 
     /**
@@ -137,10 +105,16 @@ class DesktopModeEventLogger {
             sessionId,
             taskUpdate.instanceId
         )
+        logTaskUpdate(
+            FrameworkStatsLog.DESKTOP_MODE_SESSION_TASK_UPDATE__TASK_EVENT__TASK_INFO_CHANGED,
+            sessionId, taskUpdate)
+    }
+
+    private fun logTaskUpdate(taskEvent: Int, sessionId: Int, taskUpdate: TaskUpdate) {
         FrameworkStatsLog.write(
             DESKTOP_MODE_TASK_UPDATE_ATOM_ID,
             /* task_event */
-            FrameworkStatsLog.DESKTOP_MODE_SESSION_TASK_UPDATE__TASK_EVENT__TASK_INFO_CHANGED,
+            taskEvent,
             /* instance_id */
             taskUpdate.instanceId,
             /* uid */

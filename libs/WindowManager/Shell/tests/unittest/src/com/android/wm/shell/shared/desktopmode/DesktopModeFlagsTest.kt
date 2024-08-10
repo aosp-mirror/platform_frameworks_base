@@ -33,7 +33,7 @@ import com.android.wm.shell.shared.desktopmode.DesktopModeFlags.ToggleOverride.O
 import com.android.wm.shell.shared.desktopmode.DesktopModeFlags.ToggleOverride.OVERRIDE_UNSET
 import com.android.wm.shell.shared.desktopmode.DesktopModeFlags.WALLPAPER_ACTIVITY
 import com.google.common.truth.Truth.assertThat
-import org.junit.Before
+import org.junit.After
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -49,9 +49,9 @@ class DesktopModeFlagsTest : ShellTestCase() {
 
   @JvmField @Rule val setFlagsRule = SetFlagsRule()
 
-  @Before
-  fun setUp() {
-    resetCache()
+  @After
+  fun tearDown() {
+    resetToggleOverrideCache()
   }
 
   // TODO(b/348193756): Add tests
@@ -338,7 +338,7 @@ class DesktopModeFlagsTest : ShellTestCase() {
     }
   }
 
-  private fun resetCache() {
+  private fun resetToggleOverrideCache() {
     val cachedToggleOverride =
       DesktopModeFlags::class.java.getDeclaredField("cachedToggleOverride")
     cachedToggleOverride.isAccessible = true

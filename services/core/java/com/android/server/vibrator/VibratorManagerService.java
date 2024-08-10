@@ -57,6 +57,7 @@ import android.os.VibrationEffect;
 import android.os.VibratorInfo;
 import android.os.vibrator.Flags;
 import android.os.vibrator.PrebakedSegment;
+import android.os.vibrator.VibrationConfig;
 import android.os.vibrator.VibrationEffectSegment;
 import android.os.vibrator.VibratorInfoFactory;
 import android.os.vibrator.persistence.ParsedVibration;
@@ -251,8 +252,9 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
         mHandler = injector.createHandler(Looper.myLooper());
         mFrameworkStatsLogger = injector.getFrameworkStatsLogger(mHandler);
 
-        mVibrationSettings = new VibrationSettings(mContext, mHandler);
-        mVibrationScaler = new VibrationScaler(mContext, mVibrationSettings);
+        VibrationConfig vibrationConfig = new VibrationConfig(context.getResources());
+        mVibrationSettings = new VibrationSettings(mContext, mHandler, vibrationConfig);
+        mVibrationScaler = new VibrationScaler(vibrationConfig, mVibrationSettings);
         mVibratorControlService = new VibratorControlService(mContext,
                 injector.createVibratorControllerHolder(), mVibrationScaler, mVibrationSettings,
                 mFrameworkStatsLogger, mLock);
@@ -467,6 +469,14 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
                 this, flags, privFlags);
     }
 
+    @Override // Binder call
+    public void performHapticFeedbackForInputDevice(int uid, int deviceId, String opPkg,
+            int constant, int inputDeviceId, int inputSource, String reason, int flags,
+            int privFlags) {
+        performHapticFeedbackForInputDeviceInternal(uid, deviceId, opPkg, constant, inputDeviceId,
+                inputSource, reason, /* token= */ this, flags, privFlags);
+    }
+
     /**
      * An internal-only version of performHapticFeedback that allows the caller access to the
      * {@link HalVibration}.
@@ -498,6 +508,24 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
         reason = "performHapticFeedback(constant=" + constant + "): " + reason;
         VibratorFrameworkStatsLogger.logPerformHapticsFeedbackIfKeyboard(uid, constant);
         return vibrateWithoutPermissionCheck(uid, deviceId, opPkg, vib, attrs, reason, token);
+    }
+
+    /**
+     * An internal-only version of performHapticFeedback that allows the caller access to the
+     * {@link HalVibration}.
+     * The Vibration is only returned if it is ongoing after this method returns.
+     */
+    @VisibleForTesting
+    @Nullable
+    HalVibration performHapticFeedbackForInputDeviceInternal(
+            int uid, int deviceId, String opPkg, int constant, int inputDeviceId, int inputSource,
+            String reason, IBinder token, int flags, int privFlags) {
+        // TODO(b/355543835): implement input device specific logic.
+        if (DEBUG) {
+            Slog.d(TAG, "performHapticFeedbackForInput: input device specific not implemented.");
+        }
+        return performHapticFeedbackInternal(uid, deviceId, opPkg, constant, reason, /* token= */
+                this, flags, privFlags);
     }
 
     /**
@@ -1672,7 +1700,7 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
             IBinder.DeathRecipient {
 
         public final ExternalVibration externalVibration;
-        public ExternalVibrationScale scale = new ExternalVibrationScale();
+        public final ExternalVibrationScale scale = new ExternalVibrationScale();
 
         private Vibration.Status mStatus;
 
@@ -1686,8 +1714,18 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
             mStatus = Vibration.Status.RUNNING;
         }
 
+        public void muteScale() {
+            scale.scaleLevel = ExternalVibrationScale.ScaleLevel.SCALE_MUTE;
+            if (Flags.hapticsScaleV2Enabled()) {
+                scale.scaleFactor = 0;
+            }
+        }
+
         public void scale(VibrationScaler scaler, int usage) {
             scale.scaleLevel = scaler.getScaleLevel(usage);
+            if (Flags.hapticsScaleV2Enabled()) {
+                scale.scaleFactor = scaler.getScaleFactor(usage);
+            }
             scale.adaptiveHapticsScale = scaler.getAdaptiveHapticsScale(usage);
             stats.reportAdaptiveScale(scale.adaptiveHapticsScale);
         }
@@ -2021,7 +2059,7 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
             // Create Vibration.Stats as close to the received request as possible, for tracking.
             ExternalVibrationHolder vibHolder = new ExternalVibrationHolder(vib);
             // Mute the request until we run all the checks and accept the vibration.
-            vibHolder.scale.scaleLevel = ExternalVibrationScale.ScaleLevel.SCALE_MUTE;
+            vibHolder.muteScale();
             boolean alreadyUnderExternalControl = false;
             boolean waitForCompletion = false;
 
@@ -2120,7 +2158,7 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
                                 new Vibration.EndInfo(Vibration.Status.IGNORED_ERROR_CANCELLING),
                                 /* continueExternalControl= */ false);
                         // Mute the request, vibration will be ignored.
-                        vibHolder.scale.scaleLevel = ExternalVibrationScale.ScaleLevel.SCALE_MUTE;
+                        vibHolder.muteScale();
                     }
                     return vibHolder.scale;
                 }

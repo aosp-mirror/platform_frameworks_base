@@ -35,7 +35,6 @@ import org.junit.runner.RunWith
 @OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
 @RunWith(AndroidJUnit4::class)
-@android.platform.test.annotations.EnabledOnRavenwood
 class OneHandedModeRepositoryImplTest : SysuiTestCase() {
 
     private val testUser1 = UserHandle.of(1)!!

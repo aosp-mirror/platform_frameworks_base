@@ -55,4 +55,5 @@ enum class Screen {
     TUTORIAL_SELECTION,
     BACK_GESTURE,
     HOME_GESTURE,
+    ACTION_KEY,
 }

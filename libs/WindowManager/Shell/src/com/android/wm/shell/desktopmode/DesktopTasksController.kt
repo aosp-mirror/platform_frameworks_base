@@ -163,8 +163,10 @@ class DesktopTasksController(
             }
 
             private fun removeVisualIndicator(tx: SurfaceControl.Transaction) {
-                visualIndicator?.releaseVisualIndicator(tx)
-                visualIndicator = null
+                visualIndicator?.fadeOutIndicator {
+                    visualIndicator?.releaseVisualIndicator(tx)
+                    visualIndicator = null
+                }
             }
         }
 
@@ -193,7 +195,7 @@ class DesktopTasksController(
         )
         transitions.addHandler(this)
         taskRepository.addVisibleTasksListener(taskVisibilityListener, mainExecutor)
-        dragToDesktopTransitionHandler.setDragToDesktopStateListener(dragToDesktopStateListener)
+        dragToDesktopTransitionHandler.dragToDesktopStateListener = dragToDesktopStateListener
         recentsTransitionHandler.addTransitionStateListener(
             object : RecentsTransitionStateListener {
                 override fun onAnimationStateChanged(running: Boolean) {
@@ -213,7 +215,7 @@ class DesktopTasksController(
     fun setOnTaskResizeAnimationListener(listener: OnTaskResizeAnimationListener) {
         toggleResizeDesktopTaskTransitionHandler.setOnTaskResizeAnimationListener(listener)
         enterDesktopTaskTransitionHandler.setOnTaskResizeAnimationListener(listener)
-        dragToDesktopTransitionHandler.setOnTaskResizeAnimatorListener(listener)
+        dragToDesktopTransitionHandler.onTaskResizeAnimationListener = listener
     }
 
     fun setOnTaskRepositionAnimationListener(listener: OnTaskRepositionAnimationListener) {
@@ -1068,6 +1070,11 @@ class DesktopTasksController(
                 // In some launches home task is moved behind new task being launched. Make sure
                 // that's not the case for launches in desktop.
                 moveHomeTask(wct, toTop = false)
+                // Move existing minimized tasks behind Home
+                taskRepository.getFreeformTasksInZOrder(task.displayId)
+                    .filter { taskId -> taskRepository.isMinimizedTask(taskId) }
+                    .mapNotNull { taskId -> shellTaskOrganizer.getRunningTaskInfo(taskId) }
+                    .forEach { taskInfo -> wct.reorder(taskInfo.token, /* onTop= */ false) }
                 // Desktop Mode is already showing and we're launching a new Task - we might need to
                 // minimize another Task.
                 val taskToMinimize = addAndGetMinimizeChangesIfNeeded(task.displayId, wct, task)

@@ -254,7 +254,6 @@ public final class SatelliteManager {
      */
     public static final String KEY_PROVISION_SATELLITE_TOKENS = "provision_satellite";
 
-
     /**
      * The request was successfully processed.
      */
@@ -412,6 +411,14 @@ public final class SatelliteManager {
     @FlaggedApi(Flags.FLAG_OEM_ENABLED_SATELLITE_FLAG)
     public static final int SATELLITE_RESULT_LOCATION_NOT_AVAILABLE = 26;
 
+    /**
+     * Emergency call is in progress.
+     *
+     * @hide
+     */
+    @FlaggedApi(Flags.FLAG_OEM_ENABLED_SATELLITE_FLAG)
+    public static final int SATELLITE_RESULT_EMERGENCY_CALL_IN_PROGRESS = 27;
+
     /** @hide */
     @IntDef(prefix = {"SATELLITE_RESULT_"}, value = {
             SATELLITE_RESULT_SUCCESS,
@@ -440,7 +447,8 @@ public final class SatelliteManager {
             SATELLITE_RESULT_ILLEGAL_STATE,
             SATELLITE_RESULT_MODEM_TIMEOUT,
             SATELLITE_RESULT_LOCATION_DISABLED,
-            SATELLITE_RESULT_LOCATION_NOT_AVAILABLE
+            SATELLITE_RESULT_LOCATION_NOT_AVAILABLE,
+            SATELLITE_RESULT_EMERGENCY_CALL_IN_PROGRESS
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface SatelliteResult {}
@@ -2634,7 +2642,7 @@ public final class SatelliteManager {
     @RequiresPermission(Manifest.permission.SATELLITE_COMMUNICATION)
     @FlaggedApi(Flags.FLAG_CARRIER_ROAMING_NB_IOT_NTN)
     public void requestProvisionSubscriberIds(@NonNull @CallbackExecutor Executor executor,
-            @NonNull OutcomeReceiver<List<ProvisionSubscriberId>, SatelliteException> callback) {
+            @NonNull OutcomeReceiver<List<SatelliteSubscriberInfo>, SatelliteException> callback) {
         Objects.requireNonNull(executor);
         Objects.requireNonNull(callback);
 
@@ -2646,10 +2654,10 @@ public final class SatelliteManager {
                     protected void onReceiveResult(int resultCode, Bundle resultData) {
                         if (resultCode == SATELLITE_RESULT_SUCCESS) {
                             if (resultData.containsKey(KEY_REQUEST_PROVISION_SUBSCRIBER_ID_TOKEN)) {
-                                List<ProvisionSubscriberId> list =
+                                List<SatelliteSubscriberInfo> list =
                                         resultData.getParcelableArrayList(
                                                 KEY_REQUEST_PROVISION_SUBSCRIBER_ID_TOKEN,
-                                                ProvisionSubscriberId.class);
+                                                SatelliteSubscriberInfo.class);
                                 executor.execute(() -> Binder.withCleanCallingIdentity(() ->
                                         callback.onResult(list)));
                             } else {
@@ -2734,9 +2742,9 @@ public final class SatelliteManager {
     }
 
     /**
-     * Deliver the list of provisioned satellite subscriber ids.
+     * Deliver the list of provisioned satellite subscriber infos.
      *
-     * @param list List of ProvisionSubscriberId.
+     * @param list The list of provisioned satellite subscriber infos.
      * @param executor The executor on which the callback will be called.
      * @param callback The callback object to which the result will be delivered.
      *
@@ -2745,7 +2753,7 @@ public final class SatelliteManager {
      */
     @RequiresPermission(Manifest.permission.SATELLITE_COMMUNICATION)
     @FlaggedApi(Flags.FLAG_CARRIER_ROAMING_NB_IOT_NTN)
-    public void provisionSatellite(@NonNull List<ProvisionSubscriberId> list,
+    public void provisionSatellite(@NonNull List<SatelliteSubscriberInfo> list,
             @NonNull @CallbackExecutor Executor executor,
             @NonNull OutcomeReceiver<Boolean, SatelliteException> callback) {
         Objects.requireNonNull(executor);

@@ -4377,6 +4377,16 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     @GuardedBy("this")
+    final boolean forceStopUserPackagesLocked(int userId, String reasonString,
+            boolean evenImportantServices) {
+        int minOomAdj = evenImportantServices ? ProcessList.INVALID_ADJ
+                : ProcessList.FOREGROUND_APP_ADJ;
+        return forceStopPackageInternalLocked(null, -1, false, false,
+                true, false, false, false, userId, reasonString,
+                ApplicationExitInfo.REASON_USER_STOPPED, minOomAdj);
+    }
+
+    @GuardedBy("this")
     final boolean forceStopPackageLocked(String packageName, int appId,
             boolean callerWillRestart, boolean purgeCache, boolean doit,
             boolean evenPersistent, boolean uninstalling, boolean packageStateStopped,
@@ -4385,7 +4395,6 @@ public class ActivityManagerService extends IActivityManager.Stub
                 : ApplicationExitInfo.REASON_USER_REQUESTED;
         return forceStopPackageLocked(packageName, appId, callerWillRestart, purgeCache, doit,
                 evenPersistent, uninstalling, packageStateStopped, userId, reasonString, reason);
-
     }
 
     @GuardedBy("this")
@@ -4393,6 +4402,16 @@ public class ActivityManagerService extends IActivityManager.Stub
             boolean callerWillRestart, boolean purgeCache, boolean doit,
             boolean evenPersistent, boolean uninstalling, boolean packageStateStopped,
             int userId, String reasonString, int reason) {
+        return forceStopPackageInternalLocked(packageName, appId, callerWillRestart, purgeCache,
+                doit, evenPersistent, uninstalling, packageStateStopped, userId, reasonString,
+                reason, ProcessList.INVALID_ADJ);
+    }
+
+    @GuardedBy("this")
+    private boolean forceStopPackageInternalLocked(String packageName, int appId,
+            boolean callerWillRestart, boolean purgeCache, boolean doit,
+            boolean evenPersistent, boolean uninstalling, boolean packageStateStopped,
+            int userId, String reasonString, int reason, int minOomAdj) {
         int i;
 
         if (userId == UserHandle.USER_ALL && packageName == null) {
@@ -4431,7 +4450,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
 
             didSomething |= mProcessList.killPackageProcessesLSP(packageName, appId, userId,
-                    ProcessList.INVALID_ADJ, callerWillRestart, false /* allowRestart */, doit,
+                    minOomAdj, callerWillRestart, false /* allowRestart */, doit,
                     evenPersistent, true /* setRemoved */, uninstalling,
                     reason,
                     subReason,
@@ -4440,7 +4459,8 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
 
         if (mServices.bringDownDisabledPackageServicesLocked(
-                packageName, null /* filterByClasses */, userId, evenPersistent, true, doit)) {
+                packageName, null /* filterByClasses */, userId, evenPersistent,
+                true, doit, minOomAdj)) {
             if (!doit) {
                 return true;
             }
@@ -19869,6 +19889,11 @@ public class ActivityManagerService extends IActivityManager.Stub
         public void setVoiceInteractionManagerProvider(
                 @Nullable ActivityManagerInternal.VoiceInteractionManagerProvider provider) {
             ActivityManagerService.this.setVoiceInteractionManagerProvider(provider);
+        }
+
+        @Override
+        public boolean isEarlyPackageKillEnabledForUserSwitch(int fromUserId, int toUserId) {
+            return mUserController.isEarlyPackageKillEnabledForUserSwitch(fromUserId, toUserId);
         }
 
         @Override

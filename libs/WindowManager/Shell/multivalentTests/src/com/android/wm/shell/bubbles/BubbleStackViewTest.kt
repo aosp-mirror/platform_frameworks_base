@@ -53,6 +53,7 @@ import org.junit.runner.RunWith
 import org.mockito.kotlin.mock
 import android.platform.test.annotations.DisableFlags
 import android.platform.test.annotations.EnableFlags
+import com.android.wm.shell.common.bubbles.BubbleBarLocation
 import java.util.concurrent.Semaphore
 import java.util.concurrent.TimeUnit
 import java.util.function.Consumer
@@ -458,5 +459,7 @@ class BubbleStackViewTest {
         override fun isShowingAsBubbleBar(): Boolean = false
 
         override fun hideCurrentInputMethod() {}
+
+        override fun updateBubbleBarLocation(location: BubbleBarLocation) {}
     }
 }

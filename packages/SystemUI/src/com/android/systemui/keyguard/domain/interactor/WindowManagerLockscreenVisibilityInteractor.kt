@@ -93,6 +93,14 @@ constructor(
                     KeyguardState.ALTERNATE_BOUNCER -> {
                         fromAlternateBouncerInteractor.surfaceBehindVisibility
                     }
+                    KeyguardState.OCCLUDED -> {
+                        // OCCLUDED -> GONE occurs when an app is on top of the keyguard, and then
+                        // requests manual dismissal of the keyguard in the background. The app will
+                        // remain visible on top of the stack throughout this transition, so we
+                        // should not trigger the keyguard going away animation by returning
+                        // surfaceBehindVisibility = true.
+                        flowOf(false)
+                    }
                     else -> flowOf(null)
                 }
             }
@@ -252,6 +260,18 @@ constructor(
                             deviceEntryInteractor.get().isUnlocked.value
                     ) {
                         // Dreams dismiss keyguard and return to GONE if they can.
+                        false
+                    } else if (
+                        startedWithPrev.newValue.from == KeyguardState.OCCLUDED &&
+                            startedWithPrev.newValue.to == KeyguardState.GONE
+                    ) {
+                        // OCCLUDED -> GONE directly, without transiting a *_BOUNCER state, occurs
+                        // when an app uses intent flags to launch over an insecure keyguard without
+                        // dismissing it, and then manually requests keyguard dismissal while
+                        // OCCLUDED. This transition is not user-visible; the device unlocks in the
+                        // background and the app remains on top, while we're now GONE. In this case
+                        // we should simply tell WM that the lockscreen is no longer visible, and
+                        // *not* play the going away animation or related animations.
                         false
                     } else {
                         // Otherwise, use the visibility of the current state.

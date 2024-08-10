@@ -488,4 +488,10 @@ public interface PackageState {
      * @hide
      */
     boolean isScannedAsStoppedSystemApp();
+
+    /**
+     * see AndroidPackage#isLeavingSharedUser()
+     * @hide
+     */
+    boolean isLeavingSharedUser();
 }

@@ -29,6 +29,7 @@ import static android.os.UserManager.DEV_CREATE_OVERRIDE_PROPERTY;
 import static android.os.UserManager.DISALLOW_USER_SWITCH;
 import static android.os.UserManager.SYSTEM_USER_MODE_EMULATION_PROPERTY;
 import static android.os.UserManager.USER_OPERATION_ERROR_UNKNOWN;
+import static android.os.UserManager.USER_OPERATION_ERROR_USER_RESTRICTED;
 import static android.os.UserManager.USER_TYPE_PROFILE_PRIVATE;
 
 import static com.android.internal.app.SetScreenLockDialogActivity.EXTRA_ORIGIN_USER_ID;
@@ -2104,6 +2105,10 @@ public class UserManagerService extends IUserManager.Stub {
     @Override
     public void setUserAdmin(@UserIdInt int userId) {
         checkManageUserAndAcrossUsersFullPermission("set user admin");
+        if (Flags.unicornModeRefactoringForHsumReadOnly()) {
+            checkAdminStatusChangeAllowed(userId);
+        }
+
         mUserJourneyLogger.logUserJourneyBegin(userId, USER_JOURNEY_GRANT_ADMIN);
         UserData user;
         synchronized (mPackagesLock) {
@@ -2132,6 +2137,10 @@ public class UserManagerService extends IUserManager.Stub {
     @Override
     public void revokeUserAdmin(@UserIdInt int userId) {
         checkManageUserAndAcrossUsersFullPermission("revoke admin privileges");
+        if (Flags.unicornModeRefactoringForHsumReadOnly()) {
+            checkAdminStatusChangeAllowed(userId);
+        }
+
         mUserJourneyLogger.logUserJourneyBegin(userId, USER_JOURNEY_REVOKE_ADMIN);
         UserData user;
         synchronized (mPackagesLock) {
@@ -4064,6 +4073,26 @@ public class UserManagerService extends IUserManager.Stub {
         }
     }
 
+    /**
+     * Checks if changing the admin status of a target user is restricted
+     * due to the DISALLOW_GRANT_ADMIN restriction. If either the calling
+     * user or the target user has this restriction, a SecurityException
+     * is thrown.
+     *
+     * @param targetUser The user ID of the user whose admin status is being
+     * considered for change.
+     * @throws SecurityException if the admin status change is restricted due
+     * to the DISALLOW_GRANT_ADMIN restriction.
+     */
+    private void checkAdminStatusChangeAllowed(int targetUser) {
+        if (hasUserRestriction(UserManager.DISALLOW_GRANT_ADMIN, UserHandle.getCallingUserId())
+                || hasUserRestriction(UserManager.DISALLOW_GRANT_ADMIN, targetUser)) {
+            throw new SecurityException(
+                    "Admin status change is restricted. The DISALLOW_GRANT_ADMIN "
+                            + "restriction is applied either on the current or the target user.");
+        }
+    }
+
     @GuardedBy({"mPackagesLock"})
     private void writeBitmapLP(UserInfo info, Bitmap bitmap) {
         try {
@@ -5442,6 +5471,13 @@ public class UserManagerService extends IUserManager.Stub {
 
         enforceUserRestriction(restriction, UserHandle.getCallingUserId(),
                 "Cannot add user");
+        if (Flags.unicornModeRefactoringForHsumReadOnly()) {
+            if ((flags & UserInfo.FLAG_ADMIN) != 0) {
+                enforceUserRestriction(UserManager.DISALLOW_GRANT_ADMIN,
+                        UserHandle.getCallingUserId(), "Cannot create ADMIN user");
+            }
+        }
+
         return createUserInternalUnchecked(name, userType, flags, parentId,
                 /* preCreate= */ false, disallowedPackages, /* token= */ null);
     }
@@ -8039,8 +8075,13 @@ public class UserManagerService extends IUserManager.Stub {
             String errorMessage = (message != null ? (message + ": ") : "")
                     + restriction + " is enabled.";
             Slog.w(LOG_TAG, errorMessage);
-            throw new UserManager.CheckedUserOperationException(errorMessage,
+            if (android.multiuser.Flags.showDifferentCreationErrorForUnsupportedDevices()) {
+                throw new UserManager.CheckedUserOperationException(errorMessage,
+                    USER_OPERATION_ERROR_USER_RESTRICTED);
+            } else {
+                throw new UserManager.CheckedUserOperationException(errorMessage,
                     USER_OPERATION_ERROR_UNKNOWN);
+            }
         }
     }
 

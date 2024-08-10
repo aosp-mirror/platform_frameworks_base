@@ -157,6 +157,13 @@ constructor(
         }
     }
 
+    /** Starts a transition to dismiss the keyguard from the OCCLUDED state. */
+    fun dismissFromOccluded() {
+        scope.launch {
+            startTransitionTo(KeyguardState.GONE, ownerReason = "Dismiss from occluded")
+        }
+    }
+
     private fun listenForOccludedToGone() {
         if (KeyguardWmStateRefactor.isEnabled) {
             // We don't think OCCLUDED to GONE is possible. You should always have to go via a

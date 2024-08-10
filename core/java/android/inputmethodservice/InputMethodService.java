@@ -524,19 +524,12 @@ public class InputMethodService extends AbstractInputMethodService {
 
     /**
      * @hide
-     * The IME is active and ready with views but set invisible.
-     * This flag cannot be combined with {@link #IME_VISIBLE}.
-     */
-    public static final int IME_INVISIBLE = 0x4;
-
-    /**
-     * @hide
      * The IME is visible, but not yet perceptible to the user (e.g. fading in)
      * by {@link android.view.WindowInsetsController}.
      *
      * @see InputMethodManager#reportPerceptible
      */
-    public static final int IME_VISIBLE_IMPERCEPTIBLE = 0x8;
+    public static final int IME_VISIBLE_IMPERCEPTIBLE = 0x4;
 
     // Min and max values for back disposition.
     private static final int BACK_DISPOSITION_MIN = BACK_DISPOSITION_DEFAULT;
@@ -2796,6 +2789,9 @@ public class InputMethodService extends AbstractInputMethodService {
      * <p>This dismisses the {@link #getStylusHandwritingWindow ink window} and stops intercepting
      * stylus {@code MotionEvent}s.
      *
+     * <p>Connectionless handwriting sessions should be finished using {@link
+     * #finishConnectionlessStylusHandwriting(CharSequence)}.
+     *
      * <p>Note for IME developers: Call this method at any time to finish the current handwriting
      * session. Generally, this should be invoked after a short timeout, giving the user enough time
      * to start the next stylus stroke, if any. By default, system will time-out after few seconds.
@@ -2803,9 +2799,6 @@ public class InputMethodService extends AbstractInputMethodService {
      *
      * <p>Handwriting session will be finished by framework on next {@link #onFinishInput()}.
      */
-    // TODO(b/300979854): Once connectionless APIs are finalised, update documentation to add:
-    // <p>Connectionless handwriting sessions should be finished using {@link
-    // #finishConnectionlessStylusHandwriting(CharSequence)}.
     public final void finishStylusHandwriting() {
         if (DEBUG) Log.v(TAG, "finishStylusHandwriting()");
         if (mInkWindow == null) {
@@ -3125,7 +3118,7 @@ public class InputMethodService extends AbstractInputMethodService {
         mInShowWindow = true;
         final int previousImeWindowStatus =
                 (mDecorViewVisible ? IME_ACTIVE : 0) | (isInputViewShown()
-                        ? (!mWindowVisible ? IME_INVISIBLE : IME_VISIBLE) : 0);
+                        ? (!mWindowVisible ? -1 : IME_VISIBLE) : 0);
         startViews(prepareWindow(showInput));
         final int nextImeWindowStatus = mapToImeWindowStatus();
         if (previousImeWindowStatus != nextImeWindowStatus) {

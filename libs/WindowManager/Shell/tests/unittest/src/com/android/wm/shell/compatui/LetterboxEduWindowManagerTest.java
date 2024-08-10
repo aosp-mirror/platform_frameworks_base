@@ -20,8 +20,12 @@ import static android.content.res.Configuration.UI_MODE_NIGHT_YES;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 import static com.android.window.flags.Flags.FLAG_APP_COMPAT_UI_FRAMEWORK;
+import static com.android.wm.shell.compatui.CompatUIStatusManager.COMPAT_UI_EDUCATION_HIDDEN;
+import static com.android.wm.shell.compatui.CompatUIStatusManager.COMPAT_UI_EDUCATION_VISIBLE;
 
 import static com.google.common.truth.Truth.assertThat;
+
+import static junit.framework.Assert.assertEquals;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -38,6 +42,7 @@ import android.app.ActivityManager;
 import android.app.TaskInfo;
 import android.graphics.Insets;
 import android.graphics.Rect;
+import android.platform.test.annotations.EnableFlags;
 import android.platform.test.annotations.RequiresFlagsDisabled;
 import android.platform.test.flag.junit.CheckFlagsRule;
 import android.platform.test.flag.junit.DeviceFlagsValueProvider;
@@ -54,6 +59,7 @@ import android.view.accessibility.AccessibilityEvent;
 
 import androidx.test.filters.SmallTest;
 
+import com.android.window.flags.Flags;
 import com.android.wm.shell.R;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.ShellTestCase;
@@ -61,6 +67,7 @@ import com.android.wm.shell.TestShellExecutor;
 import com.android.wm.shell.common.DisplayLayout;
 import com.android.wm.shell.common.DockStateReader;
 import com.android.wm.shell.common.SyncTransactionQueue;
+import com.android.wm.shell.compatui.CompatUIStatusManagerTest.FakeCompatUIStatusManagerTest;
 import com.android.wm.shell.transition.Transitions;
 
 import org.junit.After;
@@ -120,6 +127,8 @@ public class LetterboxEduWindowManagerTest extends ShellTestCase {
 
     private CompatUIConfiguration mCompatUIConfiguration;
     private TestShellExecutor mExecutor;
+    private FakeCompatUIStatusManagerTest mCompatUIStatus;
+    private CompatUIStatusManager mCompatUIStatusManager;
 
     @Rule
     public final CheckFlagsRule mCheckFlagsRule =
@@ -129,6 +138,9 @@ public class LetterboxEduWindowManagerTest extends ShellTestCase {
     public void setUp() {
         MockitoAnnotations.initMocks(this);
         mExecutor = new TestShellExecutor();
+        mCompatUIStatus = new FakeCompatUIStatusManagerTest();
+        mCompatUIStatusManager = new CompatUIStatusManager(mCompatUIStatus.mWriter,
+                mCompatUIStatus.mReader);
         mCompatUIConfiguration = new CompatUIConfiguration(mContext, mExecutor) {
 
             final Set<Integer> mHasSeenSet = new HashSet<>();
@@ -414,6 +426,21 @@ public class LetterboxEduWindowManagerTest extends ShellTestCase {
         assertFalse(windowManager.needsToBeRecreated(newTaskInfo, mTaskListener));
     }
 
+    @Test
+    @EnableFlags(Flags.FLAG_ENABLE_COMPAT_UI_VISIBILITY_STATUS)
+    public void testCompatUIStatus_dialogIsShown() {
+        // We display the dialog
+        LetterboxEduWindowManager windowManager = createWindowManager(/* eligible= */ true,
+                USER_ID_1, /* isTaskbarEduShowing= */ false);
+        assertTrue(windowManager.createLayout(/* canShow= */ true));
+        assertNotNull(windowManager.mLayout);
+        assertEquals(/* expected= */ COMPAT_UI_EDUCATION_VISIBLE, mCompatUIStatus.mCurrentStatus);
+
+        // We dismiss
+        windowManager.release();
+        assertEquals(/* expected= */ COMPAT_UI_EDUCATION_HIDDEN, mCompatUIStatus.mCurrentStatus);
+    }
+
     private void verifyLayout(LetterboxEduDialogLayout layout, ViewGroup.LayoutParams params,
             int expectedWidth, int expectedHeight, int expectedExtraTopMargin,
             int expectedExtraBottomMargin) {
@@ -464,7 +491,7 @@ public class LetterboxEduWindowManagerTest extends ShellTestCase {
                 windowManager = new LetterboxEduWindowManager(mContext,
                 createTaskInfo(eligible, userId), mSyncTransactionQueue, mTaskListener,
                 createDisplayLayout(), mTransitions, mOnDismissCallback, mAnimationController,
-                mDockStateReader, mCompatUIConfiguration);
+                mDockStateReader, mCompatUIConfiguration, mCompatUIStatusManager);
         spyOn(windowManager);
         doReturn(mViewHost).when(windowManager).createSurfaceViewHost();
         doReturn(isTaskbarEduShowing).when(windowManager).isTaskbarEduShowing();
@@ -499,7 +526,7 @@ public class LetterboxEduWindowManagerTest extends ShellTestCase {
         ActivityManager.RunningTaskInfo taskInfo = new ActivityManager.RunningTaskInfo();
         taskInfo.userId = userId;
         taskInfo.taskId = TASK_ID;
-        taskInfo.appCompatTaskInfo.topActivityEligibleForLetterboxEducation = eligible;
+        taskInfo.appCompatTaskInfo.setEligibleForLetterboxEducation(eligible);
         taskInfo.configuration.windowConfiguration.setBounds(bounds);
         return taskInfo;
     }

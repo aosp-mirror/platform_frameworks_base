@@ -358,8 +358,12 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
         return mToken;
     }
 
-    void addFlag(int flag) {
-        mFlags |= flag;
+    void addFlag(@TransitionFlags int flags) {
+        mFlags |= flags;
+    }
+
+    void removeFlag(@TransitionFlags int flags) {
+        mFlags &= ~flags;
     }
 
     void calcParallelCollectType(WindowContainerTransaction wct) {
@@ -3348,6 +3352,15 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
         final ChangeInfo chg = mChanges.get(wc);
         if (chg == null) return false;
         return chg.hasChanged();
+    }
+
+    boolean hasChanges() {
+        for (int i = 0; i < mParticipants.size(); ++i) {
+            if (mChanges.get(mParticipants.valueAt(i)).hasChanged()) {
+                return true;
+            }
+        }
+        return false;
     }
 
     @VisibleForTesting

@@ -238,14 +238,14 @@ class UserAspectRatioSettingsWindowManager extends CompatUIWindowManagerAbstract
         // App is not visibly letterboxed if it covers status bar/bottom insets or matches the
         // stable bounds, so don't show the button
         if (stableBounds.height() <= letterboxHeight && stableBounds.width() <= letterboxWidth
-                && !taskInfo.isUserFullscreenOverrideEnabled) {
+                && !taskInfo.isUserFullscreenOverrideEnabled()) {
             return false;
         }
 
-        return taskInfo.topActivityEligibleForUserAspectRatioButton
-                && (taskInfo.topActivityBoundsLetterboxed
-                    || taskInfo.isUserFullscreenOverrideEnabled)
-                && !taskInfo.isSystemFullscreenOverrideEnabled
+        return taskInfo.eligibleForUserAspectRatioButton()
+                && (taskInfo.isTopActivityLetterboxed()
+                    || taskInfo.isUserFullscreenOverrideEnabled())
+                && !taskInfo.isSystemFullscreenOverrideEnabled()
                 && Intent.ACTION_MAIN.equals(intent.getAction())
                 && intent.hasCategory(Intent.CATEGORY_LAUNCHER)
                 && (!mUserAspectRatioButtonShownChecker.get() || isShowingButton());
