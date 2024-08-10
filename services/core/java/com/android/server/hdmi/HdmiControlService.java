@@ -1638,6 +1638,10 @@ public class HdmiControlService extends SystemService {
         mHandler.post(new WorkSourceUidPreservingRunnable(runnable));
     }
 
+    void runOnServiceThreadDelayed(Runnable runnable, long delay) {
+        mHandler.postDelayed(new WorkSourceUidPreservingRunnable(runnable), delay);
+    }
+
     private void assertRunOnServiceThread() {
         if (Looper.myLooper() != mHandler.getLooper()) {
             throw new IllegalStateException("Should run on service thread.");
