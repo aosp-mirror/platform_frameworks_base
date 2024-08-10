@@ -63,13 +63,6 @@ import java.util.function.Consumer;
 public class SwipeHelper implements Gefingerpoken, Dumpable {
     static final String TAG = "com.android.systemui.SwipeHelper";
     private static final boolean DEBUG_INVALIDATE = false;
-    private static final boolean CONSTRAIN_SWIPE = true;
-    private static final boolean FADE_OUT_DURING_SWIPE = true;
-    private static final boolean DISMISS_IF_SWIPED_FAR_ENOUGH = true;
-
-    public static final int X = 0;
-    public static final int Y = 1;
-
     private static final float SWIPE_ESCAPE_VELOCITY = 500f; // dp/sec
     private static final int DEFAULT_ESCAPE_ANIMATION_DURATION = 200; // ms
     private static final int MAX_ESCAPE_ANIMATION_DURATION = 400; // ms
@@ -171,10 +164,6 @@ public class SwipeHelper implements Gefingerpoken, Dumpable {
         mPagingTouchSlop = pagingTouchSlop;
     }
 
-    public void setDisableHardwareLayers(boolean disableHwLayers) {
-        mDisableHwLayers = disableHwLayers;
-    }
-
     private float getPos(MotionEvent ev) {
         return ev.getX();
     }
@@ -253,13 +242,11 @@ public class SwipeHelper implements Gefingerpoken, Dumpable {
             float translation) {
         float swipeProgress = getSwipeProgressForOffset(animView, translation);
         if (!mCallback.updateSwipeProgress(animView, dismissable, swipeProgress)) {
-            if (FADE_OUT_DURING_SWIPE && dismissable) {
-                if (!mDisableHwLayers) {
-                    if (swipeProgress != 0f && swipeProgress != 1f) {
-                        animView.setLayerType(View.LAYER_TYPE_HARDWARE, null);
-                    } else {
-                        animView.setLayerType(View.LAYER_TYPE_NONE, null);
-                    }
+            if (dismissable) {
+                if (swipeProgress != 0f && swipeProgress != 1f) {
+                    animView.setLayerType(View.LAYER_TYPE_HARDWARE, null);
+                } else {
+                    animView.setLayerType(View.LAYER_TYPE_NONE, null);
                 }
                 updateSwipeProgressAlpha(animView, getSwipeAlpha(swipeProgress));
             }
@@ -436,9 +423,7 @@ public class SwipeHelper implements Gefingerpoken, Dumpable {
             duration = fixedDuration;
         }
 
-        if (!mDisableHwLayers) {
-            animView.setLayerType(View.LAYER_TYPE_HARDWARE, null);
-        }
+        animView.setLayerType(View.LAYER_TYPE_HARDWARE, null);
         AnimatorUpdateListener updateListener = new AnimatorUpdateListener() {
             @Override
             public void onAnimationUpdate(ValueAnimator animation) {
@@ -493,9 +478,7 @@ public class SwipeHelper implements Gefingerpoken, Dumpable {
                 if (endAction != null) {
                     endAction.accept(mCancelled);
                 }
-                if (!mDisableHwLayers) {
-                    animView.setLayerType(View.LAYER_TYPE_NONE, null);
-                }
+                animView.setLayerType(View.LAYER_TYPE_NONE, null);
                 onDismissChildWithAnimationFinished();
             }
         });
@@ -612,7 +595,11 @@ public class SwipeHelper implements Gefingerpoken, Dumpable {
      * view is being animated to dismiss or snap.
      */
     public void onTranslationUpdate(View animView, float value, boolean canBeDismissed) {
-        updateSwipeProgressFromOffset(animView, canBeDismissed, value);
+        updateSwipeProgressFromOffset(
+                animView,
+                /* dismissable= */ canBeDismissed,
+                /* translation= */ value
+        );
     }
 
     private void snapChildInstantly(final View view) {
@@ -689,7 +676,7 @@ public class SwipeHelper implements Gefingerpoken, Dumpable {
                     } else {
                         // don't let items that can't be dismissed be dragged more than
                         // maxScrollDistance
-                        if (CONSTRAIN_SWIPE && !mCallback.canChildBeDismissedInDirection(
+                        if (!mCallback.canChildBeDismissedInDirection(
                                 mTouchedView,
                                 delta > 0)) {
                             float size = getSize(mTouchedView);
@@ -761,8 +748,7 @@ public class SwipeHelper implements Gefingerpoken, Dumpable {
 
     protected boolean swipedFarEnough() {
         float translation = getTranslation(mTouchedView);
-        return DISMISS_IF_SWIPED_FAR_ENOUGH
-                && Math.abs(translation) > SWIPED_FAR_ENOUGH_SIZE_FRACTION * getSize(
+        return Math.abs(translation) > SWIPED_FAR_ENOUGH_SIZE_FRACTION * getSize(
                 mTouchedView);
     }
 
@@ -824,7 +810,11 @@ public class SwipeHelper implements Gefingerpoken, Dumpable {
     public void forceResetSwipeState(@NonNull View view) {
         if (view.getTranslationX() == 0) return;
         setTranslation(view, 0);
-        updateSwipeProgressFromOffset(view, /* dismissable= */ true, 0);
+        updateSwipeProgressFromOffset(
+                view,
+                /* dismissable= */ true,
+                /* translation= */ 0
+        );
     }
 
     /** This method resets the swipe state, and if `resetAll` is true, also resets the snap state */
@@ -893,7 +883,6 @@ public class SwipeHelper implements Gefingerpoken, Dumpable {
         pw.append("mTranslation=").println(mTranslation);
         pw.append("mCanCurrViewBeDimissed=").println(mCanCurrViewBeDimissed);
         pw.append("mMenuRowIntercepting=").println(mMenuRowIntercepting);
-        pw.append("mDisableHwLayers=").println(mDisableHwLayers);
         pw.append("mDismissPendingMap: ").println(mDismissPendingMap.size());
         if (!mDismissPendingMap.isEmpty()) {
             mDismissPendingMap.forEach((view, animator) -> {
