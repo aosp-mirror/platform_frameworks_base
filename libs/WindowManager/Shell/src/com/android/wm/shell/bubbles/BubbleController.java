@@ -1335,6 +1335,40 @@ public class BubbleController implements ConfigurationChangeListener,
     }
 
     /**
+     * Expands and selects a bubble created or found via the provided shortcut info.
+     *
+     * @param info the shortcut info for the bubble.
+     */
+    public void expandStackAndSelectBubble(ShortcutInfo info) {
+        if (!Flags.enableBubbleAnything()) return;
+        Bubble b = mBubbleData.getOrCreateBubble(info); // Removes from overflow
+        ProtoLog.v(WM_SHELL_BUBBLES, "expandStackAndSelectBubble - shortcut=%s", info);
+        if (b.isInflated()) {
+            mBubbleData.setSelectedBubbleAndExpandStack(b);
+        } else {
+            b.enable(Notification.BubbleMetadata.FLAG_AUTO_EXPAND_BUBBLE);
+            inflateAndAdd(b, /* suppressFlyout= */ true, /* showInShade= */ false);
+        }
+    }
+
+    /**
+     * Expands and selects a bubble created or found for this app.
+     *
+     * @param intent the intent for the bubble.
+     */
+    public void expandStackAndSelectBubble(Intent intent) {
+        if (!Flags.enableBubbleAnything()) return;
+        Bubble b = mBubbleData.getOrCreateBubble(intent); // Removes from overflow
+        ProtoLog.v(WM_SHELL_BUBBLES, "expandStackAndSelectBubble - intent=%s", intent);
+        if (b.isInflated()) {
+            mBubbleData.setSelectedBubbleAndExpandStack(b);
+        } else {
+            b.enable(Notification.BubbleMetadata.FLAG_AUTO_EXPAND_BUBBLE);
+            inflateAndAdd(b, /* suppressFlyout= */ true, /* showInShade= */ false);
+        }
+    }
+
+    /**
      * Expands and selects a bubble based on the provided {@link BubbleEntry}. If no bubble
      * exists for this entry, and it is able to bubble, a new bubble will be created.
      *
@@ -2323,6 +2357,7 @@ public class BubbleController implements ConfigurationChangeListener,
      * @param entry   the entry to bubble.
      */
     static boolean canLaunchInTaskView(Context context, BubbleEntry entry) {
+        if (Flags.enableBubbleAnything()) return true;
         PendingIntent intent = entry.getBubbleMetadata() != null
                 ? entry.getBubbleMetadata().getIntent()
                 : null;
@@ -2436,6 +2471,16 @@ public class BubbleController implements ConfigurationChangeListener,
         @Override
         public void unregisterBubbleListener(IBubblesListener listener) {
             mMainExecutor.execute(mListener::unregister);
+        }
+
+        @Override
+        public void showShortcutBubble(ShortcutInfo info) {
+            mMainExecutor.execute(() -> mController.expandStackAndSelectBubble(info));
+        }
+
+        @Override
+        public void showAppBubble(Intent intent) {
+            mMainExecutor.execute(() -> mController.expandStackAndSelectBubble(intent));
         }
 
         @Override
@@ -2630,6 +2675,13 @@ public class BubbleController implements ConfigurationChangeListener,
         public void expandStackAndSelectBubble(BubbleEntry entry) {
             mMainExecutor.execute(() -> {
                 BubbleController.this.expandStackAndSelectBubble(entry);
+            });
+        }
+
+        @Override
+        public void expandStackAndSelectBubble(ShortcutInfo info) {
+            mMainExecutor.execute(() -> {
+                BubbleController.this.expandStackAndSelectBubble(info);
             });
         }
 

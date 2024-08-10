@@ -227,6 +227,15 @@ constructor(
                 callNotificationInfo
                     // This shouldn't happen, but protect against it in case
                     ?: return OngoingCallModel.NoCall
+            logger.log(
+                TAG,
+                LogLevel.DEBUG,
+                {
+                    bool1 = Flags.statusBarCallChipNotificationIcon()
+                    bool2 = currentInfo.notificationIconView != null
+                },
+                { "Creating OngoingCallModel.InCall. notifIconFlag=$bool1 hasIcon=$bool2" }
+            )
             val icon =
                 if (Flags.statusBarCallChipNotificationIcon()) {
                     currentInfo.notificationIconView
@@ -257,6 +266,7 @@ constructor(
 
     private fun updateInfoFromNotifModel(notifModel: ActiveNotificationModel?) {
         if (notifModel == null) {
+            logger.log(TAG, LogLevel.DEBUG, {}, { "NotifInteractorCallModel: null" })
             removeChip()
         } else if (notifModel.callType != CallType.Ongoing) {
             logger.log(
@@ -267,6 +277,18 @@ constructor(
             )
             removeChip()
         } else {
+            logger.log(
+                TAG,
+                LogLevel.DEBUG,
+                {
+                    str1 = notifModel.key
+                    long1 = notifModel.whenTime
+                    str1 = notifModel.callType.name
+                    bool1 = notifModel.statusBarChipIconView != null
+                },
+                { "NotifInteractorCallModel: key=$str1 when=$long1 callType=$str2 hasIcon=$bool1" }
+            )
+
             val newOngoingCallInfo =
                 CallNotificationInfo(
                     notifModel.key,
