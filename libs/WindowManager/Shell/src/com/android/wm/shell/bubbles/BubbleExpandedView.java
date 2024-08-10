@@ -232,6 +232,9 @@ public class BubbleExpandedView extends LinearLayout {
                     fillInIntent.addFlags(FLAG_ACTIVITY_NEW_DOCUMENT);
                     fillInIntent.addFlags(FLAG_ACTIVITY_MULTIPLE_TASK);
 
+                    final boolean isShortcutBubble = (mBubble.hasMetadataShortcutId()
+                            || (mBubble.getShortcutInfo() != null && Flags.enableBubbleAnything()));
+
                     if (mBubble.isAppBubble()) {
                         Context context =
                                 mContext.createContextAsUser(
@@ -246,7 +249,8 @@ public class BubbleExpandedView extends LinearLayout {
                                 /* options= */ null);
                         mTaskView.startActivity(pi, /* fillInIntent= */ null, options,
                                 launchBounds);
-                    } else if (!mIsOverflow && mBubble.hasMetadataShortcutId()) {
+                    } else if (!mIsOverflow && isShortcutBubble) {
+                        ProtoLog.v(WM_SHELL_BUBBLES, "startingShortcutBubble=%s", getBubbleKey());
                         options.setApplyActivityFlagsForBubbles(true);
                         mTaskView.startShortcutActivity(mBubble.getShortcutInfo(),
                                 options, launchBounds);

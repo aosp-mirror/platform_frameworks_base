@@ -44,6 +44,8 @@ android_test {
         "androidx.test.runner",
         "androidx.test.rules",
         "androidx.test.ext.junit",
+        "androidx.datastore_datastore",
+        "kotlinx_coroutines_test",
         "androidx.dynamicanimation_dynamicanimation",
         "dagger2",
         "frameworks-base-testutils",

@@ -16,6 +16,7 @@
 package com.android.systemui.statusbar.notification.row
 
 import android.app.Notification
+import android.app.Person
 import android.content.Context
 import android.os.AsyncTask
 import android.os.Build
@@ -39,9 +40,11 @@ import com.android.systemui.statusbar.notification.row.NotificationRowContentBin
 import com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.FLAG_CONTENT_VIEW_CONTRACTED
 import com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.FLAG_CONTENT_VIEW_EXPANDED
 import com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.FLAG_CONTENT_VIEW_HEADS_UP
+import com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.FLAG_CONTENT_VIEW_PUBLIC_SINGLE_LINE
 import com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.InflationCallback
 import com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.InflationFlag
 import com.android.systemui.statusbar.notification.row.shared.HeadsUpStatusBarModel
+import com.android.systemui.statusbar.notification.row.shared.LockscreenOtpRedaction
 import com.android.systemui.statusbar.notification.row.shared.NewRemoteViews
 import com.android.systemui.statusbar.notification.row.shared.NotificationContentModel
 import com.android.systemui.statusbar.notification.row.shared.NotificationRowContentBinderRefactor
@@ -76,7 +79,7 @@ import org.mockito.kotlin.whenever
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 @RunWithLooper
-@EnableFlags(NotificationRowContentBinderRefactor.FLAG_NAME)
+@EnableFlags(NotificationRowContentBinderRefactor.FLAG_NAME, LockscreenOtpRedaction.FLAG_NAME)
 class NotificationRowContentBinderImplTest : SysuiTestCase() {
     private lateinit var notificationInflater: NotificationRowContentBinderImpl
     private lateinit var builder: Notification.Builder
@@ -559,6 +562,40 @@ class NotificationRowContentBinderImplTest : SysuiTestCase() {
         inflateAndWait(true, notificationInflater, FLAG_CONTENT_VIEW_ALL, row)
         Assert.assertEquals(0, row.privateLayout.childCount.toLong())
         verify(row, times(0)).onNotificationUpdated()
+    }
+
+    // TODO b/356709333: Add screenshot tests for these views
+    @Test
+    fun testInflatePublicSingleLineView() {
+        row.publicLayout.removeAllViews()
+        inflateAndWait(false, notificationInflater, FLAG_CONTENT_VIEW_PUBLIC_SINGLE_LINE, row)
+        Assert.assertNotNull(row.publicLayout.mSingleLineView)
+        Assert.assertTrue(row.publicLayout.mSingleLineView is HybridNotificationView)
+    }
+
+    @Test
+    fun testInflatePublicSingleLineConversationView() {
+        val testPerson = Person.Builder().setName("Person").build()
+        val messagingBuilder =
+            Notification.Builder(mContext, "no-id")
+                .setSmallIcon(R.drawable.ic_person)
+                .setContentTitle("Title")
+                .setContentText("Text")
+                .setStyle(Notification.MessagingStyle(testPerson))
+
+        val messagingRow = spy(testHelper.createRow(messagingBuilder.build()))
+        messagingRow.publicLayout.removeAllViews()
+        inflateAndWait(
+            false,
+            notificationInflater,
+            FLAG_CONTENT_VIEW_PUBLIC_SINGLE_LINE,
+            messagingRow
+        )
+        Assert.assertNotNull(messagingRow.publicLayout.mSingleLineView)
+        // assert this is the conversation layout
+        Assert.assertTrue(
+            messagingRow.publicLayout.mSingleLineView is HybridConversationNotificationView
+        )
     }
 
     private class ExceptionHolder {

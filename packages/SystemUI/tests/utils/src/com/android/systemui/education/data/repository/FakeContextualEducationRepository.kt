@@ -18,12 +18,11 @@ package com.android.systemui.education.data.repository
 
 import com.android.systemui.contextualeducation.GestureType
 import com.android.systemui.education.data.model.GestureEduModel
-import java.time.Clock
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
-class FakeContextualEducationRepository(private val clock: Clock) : ContextualEducationRepository {
+class FakeContextualEducationRepository : ContextualEducationRepository {
 
     private val userGestureMap = mutableMapOf<Int, GestureEduModel>()
     private val _gestureEduModels = MutableStateFlow(GestureEduModel())
@@ -44,16 +43,11 @@ class FakeContextualEducationRepository(private val clock: Clock) : ContextualEd
         return gestureEduModelsFlow
     }
 
-    override suspend fun incrementSignalCount(gestureType: GestureType) {
-        val originalModel = _gestureEduModels.value
-        _gestureEduModels.value =
-            originalModel.copy(
-                signalCount = _gestureEduModels.value.signalCount + 1,
-            )
-    }
-
-    override suspend fun updateShortcutTriggerTime(gestureType: GestureType) {
-        val originalModel = _gestureEduModels.value
-        _gestureEduModels.value = originalModel.copy(lastShortcutTriggeredTime = clock.instant())
+    override suspend fun updateGestureEduModel(
+        gestureType: GestureType,
+        transform: (GestureEduModel) -> GestureEduModel
+    ) {
+        val currentModel = _gestureEduModels.value
+        _gestureEduModels.value = transform(currentModel)
     }
 }

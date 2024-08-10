@@ -36,6 +36,7 @@ import android.view.View;
 
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.Preconditions;
+import com.android.text.flags.Flags;
 
 import java.lang.reflect.Array;
 
@@ -171,9 +172,15 @@ public class InsertModeTransformationMethod implements TransformationMethod, Tex
                 // The text change is before the highlight start, move the highlight start.
                 mStart += diff;
             } else {
-                // The text change covers the highlight start. Extend the highlight start to the
-                // change start. This should be a rare case.
-                mStart = start;
+                if (Flags.insertModeHighlightRange()) {
+                    // The text change covers the highlight start. Don't change the start except
+                    // when it's out of range.
+                    mStart = Math.min(mStart, s.length());
+                } else {
+                    // The text change covers the highlight start. Extend the highlight start to the
+                    // change start. This should be a rare case.
+                    mStart = start;
+                }
             }
         }
 
@@ -181,9 +188,15 @@ public class InsertModeTransformationMethod implements TransformationMethod, Tex
             // The text change is before the highlight end, move the highlight end.
             mEnd += diff;
         } else if (start < mEnd) {
-            // The text change covers the highlight end. Extend the highlight end to the
-            // change end. This should be a rare case.
-            mEnd = start + count;
+            if (Flags.insertModeHighlightRange()) {
+                // The text change covers the highlight end. Don't change the end except when it's
+                // out of range.
+                mEnd = Math.min(mEnd, s.length());
+            } else {
+                // The text change covers the highlight end. Extend the highlight end to the
+                // change end. This should be a rare case.
+                mEnd = start + count;
+            }
         }
     }
 

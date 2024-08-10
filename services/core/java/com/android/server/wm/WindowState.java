@@ -55,6 +55,7 @@ import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_M
 import static android.view.WindowManager.LayoutParams.MATCH_PARENT;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_NOT_MAGNIFIABLE;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_NO_MOVE_ANIMATION;
+import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_OPT_OUT_EDGE_TO_EDGE;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_SYSTEM_APPLICATION_OVERLAY;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_TRUSTED_OVERLAY;
 import static android.view.WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE;
@@ -2989,6 +2990,25 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         return (mAttrs.flags & FLAG_SHOW_WHEN_LOCKED) != 0;
     }
 
+    @Override
+    void resolveOverrideConfiguration(Configuration newParentConfig) {
+        super.resolveOverrideConfiguration(newParentConfig);
+        if (mActivityRecord != null) {
+            // Let the activity decide whether to apply the size override.
+            return;
+        }
+        final Configuration resolvedConfig = getResolvedOverrideConfiguration();
+        resolvedConfig.seq = newParentConfig.seq;
+        applySizeOverrideIfNeeded(
+                getDisplayContent(),
+                mSession.mProcess.mInfo,
+                newParentConfig,
+                resolvedConfig,
+                (mAttrs.privateFlags & PRIVATE_FLAG_OPT_OUT_EDGE_TO_EDGE) != 0,
+                false /* hasFixedRotationTransform */,
+                false /* hasCompatDisplayInsets */);
+    }
+
     /**
      * @return {@code true} if this window can receive touches based on among other things,
      * windowing state and recents animation state.
@@ -4415,6 +4435,11 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         for (int i = mChildren.size() - 1; i >= 0; i--) {
             committed |= mChildren.get(i).commitFinishDrawing(t);
         }
+        // In case commitFinishDrawingLocked starts a window level animation, make sure the surface
+        // operation (reparent to leash) is synced with the visibility by transition.
+        if (getAnimationLeash() != null) {
+            t.merge(getSyncTransaction());
+        }
         return committed;
     }
 
@@ -5028,7 +5053,9 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                 new WindowAnimationSpec(anim, position, false /* canSkipFirstFrame */,
                         0 /* windowCornerRadius */),
                 mWmService.mSurfaceAnimationRunner);
-        startAnimation(getPendingTransaction(), adapter);
+        final Transaction t = mActivityRecord != null
+                ? getSyncTransaction() : getPendingTransaction();
+        startAnimation(t, adapter);
         commitPendingTransaction();
     }
 

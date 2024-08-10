@@ -228,7 +228,7 @@ public class HearingDevicesDialogDelegate implements SystemUIDialog.Delegate,
         mHearingDeviceItemList = getHearingDevicesList();
         if (mPresetsController != null) {
             activeHearingDevice = getActiveHearingDevice(mHearingDeviceItemList);
-            mPresetsController.setActiveHearingDevice(activeHearingDevice);
+            mPresetsController.setHearingDeviceIfSupportHap(activeHearingDevice);
         } else {
             activeHearingDevice = null;
         }
@@ -336,7 +336,7 @@ public class HearingDevicesDialogDelegate implements SystemUIDialog.Delegate,
         }
         final CachedBluetoothDevice activeHearingDevice = getActiveHearingDevice(
                 mHearingDeviceItemList);
-        mPresetsController.setActiveHearingDevice(activeHearingDevice);
+        mPresetsController.setHearingDeviceIfSupportHap(activeHearingDevice);
 
         mPresetInfoAdapter = new ArrayAdapter<>(dialog.getContext(),
                 R.layout.hearing_devices_preset_spinner_selected,
@@ -499,7 +499,8 @@ public class HearingDevicesDialogDelegate implements SystemUIDialog.Delegate,
         final List<ResolveInfo> resolved = packageManager.queryIntentActivities(LIVE_CAPTION_INTENT,
                 /* flags= */ 0);
         if (!resolved.isEmpty()) {
-            return new ToolItem(context.getString(R.string.live_caption_title),
+            return new ToolItem(
+                    context.getString(R.string.quick_settings_hearing_devices_live_caption_title),
                     context.getDrawable(R.drawable.ic_volume_odi_captions),
                     LIVE_CAPTION_INTENT);
         }

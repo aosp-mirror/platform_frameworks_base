@@ -17,7 +17,6 @@
 package com.android.systemui.statusbar.phone;
 
 
-import static com.android.systemui.Flags.truncatedStatusBarIconsFix;
 
 import android.annotation.Nullable;
 import android.content.Context;
@@ -108,9 +107,7 @@ public class PhoneStatusBarView extends FrameLayout {
         Dependency.get(DarkIconDispatcher.class).addDarkReceiver(mClock);
         if (updateDisplayParameters()) {
             updateLayoutForCutout();
-            if (truncatedStatusBarIconsFix()) {
-                updateWindowHeight();
-            }
+            updateWindowHeight();
         }
     }
 
@@ -135,9 +132,7 @@ public class PhoneStatusBarView extends FrameLayout {
             updateLayoutForCutout();
             requestLayout();
         }
-        if (truncatedStatusBarIconsFix()) {
-            updateWindowHeight();
-        }
+        updateWindowHeight();
     }
 
     void onDensityOrFontScaleChanged() {

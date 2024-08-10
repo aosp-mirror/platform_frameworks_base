@@ -123,6 +123,8 @@ import java.util.concurrent.TimeUnit;
  * <p> An app can check whether wallpapers are supported for the current user, by calling
  * {@link #isWallpaperSupported()}, and whether setting of wallpapers is allowed, by calling
  * {@link #isSetWallpaperAllowed()}.
+ * Any public APIs added to WallpaperManager should have a corresponding stub in
+ * {@link DisabledWallpaperManager}.
  */
 @SystemService(Context.WALLPAPER_SERVICE)
 public class WallpaperManager {

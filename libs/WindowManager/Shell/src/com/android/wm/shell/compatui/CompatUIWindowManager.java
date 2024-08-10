@@ -82,7 +82,7 @@ class CompatUIWindowManager extends CompatUIWindowManagerAbstract {
                                   onRestartButtonClicked) {
         super(context, taskInfo, syncQueue, taskListener, displayLayout);
         mCallback = callback;
-        mHasSizeCompat = taskInfo.appCompatTaskInfo.topActivityInSizeCompat;
+        mHasSizeCompat = taskInfo.appCompatTaskInfo.isTopActivityInSizeCompat();
         if (DESKTOP_WINDOWING_MODE.isEnabled(mContext)
                 && DesktopModeFlags.DYNAMIC_INITIAL_BOUNDS.isEnabled(context)) {
             // Don't show the SCM button for freeform tasks
@@ -138,7 +138,7 @@ class CompatUIWindowManager extends CompatUIWindowManagerAbstract {
     public boolean updateCompatInfo(TaskInfo taskInfo, ShellTaskOrganizer.TaskListener taskListener,
             boolean canShow) {
         final boolean prevHasSizeCompat = mHasSizeCompat;
-        mHasSizeCompat = taskInfo.appCompatTaskInfo.topActivityInSizeCompat;
+        mHasSizeCompat = taskInfo.appCompatTaskInfo.isTopActivityInSizeCompat();
         if (DESKTOP_WINDOWING_MODE.isEnabled(mContext)
                 && DesktopModeFlags.DYNAMIC_INITIAL_BOUNDS.isEnabled(mContext)) {
             // Don't show the SCM button for freeform tasks

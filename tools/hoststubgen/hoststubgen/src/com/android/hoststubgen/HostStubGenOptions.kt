@@ -112,6 +112,9 @@ class HostStubGenOptions(
         var statsFile: SetOnce<String?> = SetOnce(null),
 
         var apiListFile: SetOnce<String?> = SetOnce(null),
+
+        var numShards: SetOnce<Int> = SetOnce(1),
+        var shard: SetOnce<Int> = SetOnce(0),
 ) {
     companion object {
 
@@ -162,6 +165,13 @@ class HostStubGenOptions(
                 fun SetOnce<String?>.setNextStringArg(): String = nextArg().also { this.set(it) }
                 fun MutableSet<String>.addUniqueAnnotationArg(): String =
                         nextArg().also { this += ensureUniqueAnnotation(it) }
+                fun SetOnce<Int>.setNextIntArg(): String = nextArg().also {
+                    try {
+                        this.set(it.toInt())
+                    } catch (e: NumberFormatException) {
+                        throw ArgumentsException("Invalid integer for $arg: $it")
+                    }
+                }
 
                 try {
                     when (arg) {
@@ -258,6 +268,9 @@ class HostStubGenOptions(
 
                         "--stats-file" -> ret.statsFile.setNextStringArg()
                         "--supported-api-list-file" -> ret.apiListFile.setNextStringArg()
+
+                        "--num-shards" -> ret.numShards.setNextIntArg()
+                        "--shard-index" -> ret.shard.setNextIntArg()
 
                         else -> throw ArgumentsException("Unknown option: $arg")
                     }
@@ -396,6 +409,8 @@ class HostStubGenOptions(
               enableNonStubMethodCallDetection=$enableNonStubMethodCallDetection,
               statsFile=$statsFile,
               apiListFile=$apiListFile,
+              numShards=$numShards,
+              shard=$shard,
             }
             """.trimIndent()
     }

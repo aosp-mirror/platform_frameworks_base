@@ -16,7 +16,6 @@
 package com.android.systemui.statusbar;
 
 import static android.app.Flags.keyguardPrivateNotifications;
-import static android.app.Flags.redactSensitiveContentNotificationsOnLockscreen;
 import static android.app.StatusBarManager.ACTION_KEYGUARD_PRIVATE_NOTIFICATIONS_CHANGED;
 import static android.app.StatusBarManager.EXTRA_KM_PRIVATE_NOTIFS_ALLOWED;
 import static android.app.admin.DevicePolicyManager.ACTION_DEVICE_POLICY_MANAGER_STATE_CHANGED;
@@ -72,6 +71,7 @@ import com.android.systemui.settings.UserTracker;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.notifcollection.CommonNotifCollection;
 import com.android.systemui.statusbar.notification.collection.render.NotificationVisibilityProvider;
+import com.android.systemui.statusbar.notification.row.shared.LockscreenOtpRedaction;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.util.ListenerSet;
@@ -655,7 +655,7 @@ public class NotificationLockscreenUserManagerImpl implements
                 !userAllowsPrivateNotificationsInPublic(mCurrentUserId);
         boolean isNotifForManagedProfile = mCurrentManagedProfiles.contains(userId);
         boolean isNotifUserRedacted = !userAllowsPrivateNotificationsInPublic(userId);
-        boolean isNotifSensitive = redactSensitiveContentNotificationsOnLockscreen()
+        boolean isNotifSensitive = LockscreenOtpRedaction.isEnabled()
                 && ent.getRanking() != null && ent.getRanking().hasSensitiveContent();
 
         // redact notifications if the current user is redacting notifications or the notification

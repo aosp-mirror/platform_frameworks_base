@@ -19,7 +19,9 @@ package com.android.settingslib.bluetooth;
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.bluetooth.BluetoothClass;
@@ -145,18 +147,18 @@ public class CsipDeviceManagerTest {
         profiles.add(mHfpProfile);
         profiles.add(mA2dpProfile);
         profiles.add(mLeAudioProfile);
-        when(mCachedDevice1.getConnectableProfiles()).thenReturn(profiles);
+        when(mCachedDevice1.getUiAccessibleProfiles()).thenReturn(profiles);
         when(mCachedDevice1.isConnected()).thenReturn(true);
 
         profiles.clear();
         profiles.add(mLeAudioProfile);
-        when(mCachedDevice2.getConnectableProfiles()).thenReturn(profiles);
+        when(mCachedDevice2.getUiAccessibleProfiles()).thenReturn(profiles);
         when(mCachedDevice2.isConnected()).thenReturn(true);
 
         profiles.clear();
         profiles.add(mHfpProfile);
         profiles.add(mA2dpProfile);
-        when(mCachedDevice3.getConnectableProfiles()).thenReturn(profiles);
+        when(mCachedDevice3.getUiAccessibleProfiles()).thenReturn(profiles);
         when(mCachedDevice3.isConnected()).thenReturn(true);
     }
 
@@ -253,7 +255,7 @@ public class CsipDeviceManagerTest {
         when(mDevice2.isConnected()).thenReturn(false);
         List<LocalBluetoothProfile> profiles = new ArrayList<LocalBluetoothProfile>();
         profiles.add(mLeAudioProfile);
-        when(mCachedDevice1.getConnectableProfiles()).thenReturn(profiles);
+        when(mCachedDevice1.getUiAccessibleProfiles()).thenReturn(profiles);
         CachedBluetoothDevice expectedDevice = mCachedDevice1;
 
         assertThat(
@@ -351,5 +353,35 @@ public class CsipDeviceManagerTest {
         assertThat(mCachedDevice1.getMemberDevice()).contains(mCachedDevice3);
         assertThat(mCachedDevice1.getMemberDevice()).contains(mCachedDevice3);
         assertThat(mCachedDevice1.getDevice()).isEqualTo(expectedMainBluetoothDevice);
+    }
+
+    @Test
+    public void onProfileConnectionStateChangedIfProcessed_addMemberDevice_refreshUI() {
+        mCachedDevice3.setGroupId(GROUP1);
+
+        mCsipDeviceManager.onProfileConnectionStateChangedIfProcessed(mCachedDevice3,
+                BluetoothProfile.STATE_CONNECTED);
+
+        verify(mCachedDevice1).refresh();
+    }
+
+    @Test
+    public void onProfileConnectionStateChangedIfProcessed_switchMainDevice_refreshUI() {
+        when(mDevice3.isConnected()).thenReturn(true);
+        when(mDevice2.isConnected()).thenReturn(false);
+        when(mDevice1.isConnected()).thenReturn(false);
+        mCachedDevice3.setGroupId(GROUP1);
+        mCsipDeviceManager.onProfileConnectionStateChangedIfProcessed(mCachedDevice3,
+                BluetoothProfile.STATE_CONNECTED);
+
+        when(mDevice3.isConnected()).thenReturn(false);
+        mCsipDeviceManager.onProfileConnectionStateChangedIfProcessed(mCachedDevice3,
+                BluetoothProfile.STATE_DISCONNECTED);
+        when(mDevice1.isConnected()).thenReturn(true);
+        mCsipDeviceManager.onProfileConnectionStateChangedIfProcessed(mCachedDevice1,
+                BluetoothProfile.STATE_CONNECTED);
+
+        verify(mCachedDevice3).switchMemberDeviceContent(mCachedDevice1);
+        verify(mCachedDevice3, atLeastOnce()).refresh();
     }
 }

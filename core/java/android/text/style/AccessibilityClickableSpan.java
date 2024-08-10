@@ -156,4 +156,12 @@ public class AccessibilityClickableSpan extends ClickableSpan
                     return new AccessibilityClickableSpan[size];
                 }
             };
+
+    /**
+     * @return the ID of the original clickable span that this is applied to.
+     * @hide
+     */
+    public int getOriginalClickableSpanId() {
+        return mOriginalClickableSpanId;
+    }
 }

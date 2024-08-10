@@ -26,6 +26,7 @@ import android.hardware.SensorManager;
 import android.hardware.input.InputManager.InputDeviceBatteryListener;
 import android.hardware.input.InputManager.InputDeviceListener;
 import android.hardware.input.InputManager.KeyboardBacklightListener;
+import android.hardware.input.InputManager.KeyboardSystemShortcutListener;
 import android.hardware.input.InputManager.OnTabletModeChangedListener;
 import android.hardware.input.InputManager.StickyModifierStateListener;
 import android.hardware.lights.Light;
@@ -109,6 +110,14 @@ public final class InputManagerGlobal {
     @GuardedBy("mStickyModifierStateListenerLock")
     @Nullable
     private IStickyModifierStateListener mStickyModifierStateListener;
+
+    private final Object mKeyboardSystemShortcutListenerLock = new Object();
+    @GuardedBy("mKeyboardSystemShortcutListenerLock")
+    @Nullable
+    private ArrayList<KeyboardSystemShortcutListenerDelegate> mKeyboardSystemShortcutListeners;
+    @GuardedBy("mKeyboardSystemShortcutListenerLock")
+    @Nullable
+    private IKeyboardSystemShortcutListener mKeyboardSystemShortcutListener;
 
     // InputDeviceSensorManager gets notified synchronously from the binder thread when input
     // devices change, so it must be synchronized with the input device listeners.
@@ -1051,6 +1060,98 @@ public final class InputManagerGlobal {
                 }
                 mStickyModifierStateListeners = null;
                 mStickyModifierStateListener = null;
+            }
+        }
+    }
+
+    private static final class KeyboardSystemShortcutListenerDelegate {
+        final KeyboardSystemShortcutListener mListener;
+        final Executor mExecutor;
+
+        KeyboardSystemShortcutListenerDelegate(KeyboardSystemShortcutListener listener,
+                Executor executor) {
+            mListener = listener;
+            mExecutor = executor;
+        }
+
+        void onKeyboardSystemShortcutTriggered(int deviceId,
+                KeyboardSystemShortcut systemShortcut) {
+            mExecutor.execute(() ->
+                    mListener.onKeyboardSystemShortcutTriggered(deviceId, systemShortcut));
+        }
+    }
+
+    private class LocalKeyboardSystemShortcutListener extends IKeyboardSystemShortcutListener.Stub {
+
+        @Override
+        public void onKeyboardSystemShortcutTriggered(int deviceId, int[] keycodes,
+                int modifierState, int shortcut) {
+            synchronized (mKeyboardSystemShortcutListenerLock) {
+                if (mKeyboardSystemShortcutListeners == null) return;
+                final int numListeners = mKeyboardSystemShortcutListeners.size();
+                for (int i = 0; i < numListeners; i++) {
+                    mKeyboardSystemShortcutListeners.get(i)
+                            .onKeyboardSystemShortcutTriggered(deviceId,
+                                    new KeyboardSystemShortcut(keycodes, modifierState, shortcut));
+                }
+            }
+        }
+    }
+
+    /**
+     * @see InputManager#registerKeyboardSystemShortcutListener(Executor,
+     * KeyboardSystemShortcutListener)
+     */
+    @RequiresPermission(Manifest.permission.MONITOR_KEYBOARD_SYSTEM_SHORTCUTS)
+    void registerKeyboardSystemShortcutListener(@NonNull Executor executor,
+            @NonNull KeyboardSystemShortcutListener listener) throws IllegalArgumentException {
+        Objects.requireNonNull(executor, "executor should not be null");
+        Objects.requireNonNull(listener, "listener should not be null");
+
+        synchronized (mKeyboardSystemShortcutListenerLock) {
+            if (mKeyboardSystemShortcutListener == null) {
+                mKeyboardSystemShortcutListeners = new ArrayList<>();
+                mKeyboardSystemShortcutListener = new LocalKeyboardSystemShortcutListener();
+
+                try {
+                    mIm.registerKeyboardSystemShortcutListener(mKeyboardSystemShortcutListener);
+                } catch (RemoteException e) {
+                    throw e.rethrowFromSystemServer();
+                }
+            }
+            final int numListeners = mKeyboardSystemShortcutListeners.size();
+            for (int i = 0; i < numListeners; i++) {
+                if (mKeyboardSystemShortcutListeners.get(i).mListener == listener) {
+                    throw new IllegalArgumentException("Listener has already been registered!");
+                }
+            }
+            KeyboardSystemShortcutListenerDelegate delegate =
+                    new KeyboardSystemShortcutListenerDelegate(listener, executor);
+            mKeyboardSystemShortcutListeners.add(delegate);
+        }
+    }
+
+    /**
+     * @see InputManager#unregisterKeyboardSystemShortcutListener(KeyboardSystemShortcutListener)
+     */
+    @RequiresPermission(Manifest.permission.MONITOR_KEYBOARD_SYSTEM_SHORTCUTS)
+    void unregisterKeyboardSystemShortcutListener(
+            @NonNull KeyboardSystemShortcutListener listener) {
+        Objects.requireNonNull(listener, "listener should not be null");
+
+        synchronized (mKeyboardSystemShortcutListenerLock) {
+            if (mKeyboardSystemShortcutListeners == null) {
+                return;
+            }
+            mKeyboardSystemShortcutListeners.removeIf((delegate) -> delegate.mListener == listener);
+            if (mKeyboardSystemShortcutListeners.isEmpty()) {
+                try {
+                    mIm.unregisterKeyboardSystemShortcutListener(mKeyboardSystemShortcutListener);
+                } catch (RemoteException e) {
+                    throw e.rethrowFromSystemServer();
+                }
+                mKeyboardSystemShortcutListeners = null;
+                mKeyboardSystemShortcutListener = null;
             }
         }
     }

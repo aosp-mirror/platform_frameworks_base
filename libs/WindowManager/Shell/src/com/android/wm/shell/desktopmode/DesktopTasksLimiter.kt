@@ -70,11 +70,11 @@ class DesktopTasksLimiter (
 
     // TODO(b/333018485): replace this observer when implementing the minimize-animation
     private inner class MinimizeTransitionObserver : TransitionObserver {
-        private val mPendingTransitionTokensAndTasks = mutableMapOf<IBinder, TaskDetails>()
-        private val mActiveTransitionTokensAndTasks = mutableMapOf<IBinder, TaskDetails>()
+        private val pendingTransitionTokensAndTasks = mutableMapOf<IBinder, TaskDetails>()
+        private val activeTransitionTokensAndTasks = mutableMapOf<IBinder, TaskDetails>()
 
         fun addPendingTransitionToken(transition: IBinder, taskDetails: TaskDetails) {
-            mPendingTransitionTokensAndTasks[transition] = taskDetails
+            pendingTransitionTokensAndTasks[transition] = taskDetails
         }
 
         override fun onTransitionReady(
@@ -83,9 +83,7 @@ class DesktopTasksLimiter (
             startTransaction: SurfaceControl.Transaction,
             finishTransaction: SurfaceControl.Transaction
         ) {
-            val taskToMinimize = mPendingTransitionTokensAndTasks.remove(transition) ?: return
-            taskToMinimize.transitionInfo = info
-            mActiveTransitionTokensAndTasks[transition] = taskToMinimize
+            val taskToMinimize = pendingTransitionTokensAndTasks.remove(transition) ?: return
 
             if (!taskRepository.isActiveTask(taskToMinimize.taskId)) return
 
@@ -97,6 +95,8 @@ class DesktopTasksLimiter (
                 return
             }
 
+            taskToMinimize.transitionInfo = info
+            activeTransitionTokensAndTasks[transition] = taskToMinimize
             this@DesktopTasksLimiter.markTaskMinimized(
                     taskToMinimize.displayId, taskToMinimize.taskId)
         }
@@ -121,7 +121,7 @@ class DesktopTasksLimiter (
         }
 
         override fun onTransitionStarting(transition: IBinder) {
-            val mActiveTaskDetails = mActiveTransitionTokensAndTasks[transition]
+            val mActiveTaskDetails = activeTransitionTokensAndTasks[transition]
             if (mActiveTaskDetails != null && mActiveTaskDetails.transitionInfo != null) {
                 // Begin minimize window CUJ instrumentation.
                 interactionJankMonitor.begin(
@@ -132,11 +132,11 @@ class DesktopTasksLimiter (
         }
 
         override fun onTransitionMerged(merged: IBinder, playing: IBinder) {
-            if (mActiveTransitionTokensAndTasks.remove(merged) != null) {
+            if (activeTransitionTokensAndTasks.remove(merged) != null) {
                 interactionJankMonitor.end(CUJ_DESKTOP_MODE_MINIMIZE_WINDOW)
             }
-            mPendingTransitionTokensAndTasks.remove(merged)?.let { taskToTransfer ->
-                mPendingTransitionTokensAndTasks[playing] = taskToTransfer
+            pendingTransitionTokensAndTasks.remove(merged)?.let { taskToTransfer ->
+                pendingTransitionTokensAndTasks[playing] = taskToTransfer
             }
         }
 
@@ -144,14 +144,14 @@ class DesktopTasksLimiter (
             ProtoLog.v(
                     ShellProtoLogGroup.WM_SHELL_DESKTOP_MODE,
                     "DesktopTasksLimiter: transition %s finished", transition)
-            if (mActiveTransitionTokensAndTasks.remove(transition) != null) {
+            if (activeTransitionTokensAndTasks.remove(transition) != null) {
                 if (aborted) {
                     interactionJankMonitor.cancel(CUJ_DESKTOP_MODE_MINIMIZE_WINDOW)
                 } else {
                     interactionJankMonitor.end(CUJ_DESKTOP_MODE_MINIMIZE_WINDOW)
                 }
             }
-            mPendingTransitionTokensAndTasks.remove(transition)
+            pendingTransitionTokensAndTasks.remove(transition)
         }
     }
 

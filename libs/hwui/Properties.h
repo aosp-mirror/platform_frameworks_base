@@ -342,6 +342,7 @@ public:
 
     static bool clipSurfaceViews;
     static bool hdr10bitPlus;
+    static bool resampleGainmapRegions;
 
     static int timeoutMultiplier;
 

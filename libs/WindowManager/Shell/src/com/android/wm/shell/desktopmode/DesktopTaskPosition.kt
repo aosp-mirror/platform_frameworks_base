@@ -116,10 +116,10 @@ fun canChangeTaskPosition(taskInfo: TaskInfo): Boolean {
 @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
 fun Rect.getDesktopTaskPosition(bounds: Rect): DesktopTaskPosition {
     return when {
-        top == bounds.top && left == bounds.left -> TopLeft
-        top == bounds.top && right == bounds.right -> TopRight
-        bottom == bounds.bottom && left == bounds.left -> BottomLeft
-        bottom == bounds.bottom && right == bounds.right -> BottomRight
+        top == bounds.top && left == bounds.left && bottom != bounds.bottom -> TopLeft
+        top == bounds.top && right == bounds.right && bottom != bounds.bottom -> TopRight
+        bottom == bounds.bottom && left == bounds.left && top != bounds.top -> BottomLeft
+        bottom == bounds.bottom && right == bounds.right && top != bounds.top -> BottomRight
         else -> Center
     }
 }

@@ -36,7 +36,6 @@ import android.net.Uri
 import android.os.Handler
 import android.platform.test.annotations.DisableFlags
 import android.platform.test.annotations.EnableFlags
-import android.platform.test.annotations.RequiresFlagsEnabled
 import android.platform.test.flag.junit.CheckFlagsRule
 import android.platform.test.flag.junit.DeviceFlagsValueProvider
 import android.platform.test.flag.junit.SetFlagsRule
@@ -56,9 +55,9 @@ import android.view.Surface
 import android.view.SurfaceControl
 import android.view.SurfaceView
 import android.view.View
-import android.view.WindowInsets.Type.navigationBars
 import android.view.WindowInsets.Type.statusBars
 import android.window.WindowContainerTransaction
+import android.window.WindowContainerTransaction.HierarchyOp
 import androidx.test.filters.SmallTest
 import com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn
 import com.android.dx.mockito.inline.extended.ExtendedMockito.mockitoSession
@@ -85,11 +84,11 @@ import com.android.wm.shell.desktopmode.DesktopTasksController.SnapPosition
 import com.android.wm.shell.freeform.FreeformTaskTransitionStarter
 import com.android.wm.shell.shared.desktopmode.DesktopModeStatus
 import com.android.wm.shell.splitscreen.SplitScreenController
-import com.android.wm.shell.sysui.KeyguardChangeListener
 import com.android.wm.shell.sysui.ShellCommandHandler
 import com.android.wm.shell.sysui.ShellController
 import com.android.wm.shell.sysui.ShellInit
 import com.android.wm.shell.transition.Transitions
+import com.android.wm.shell.windowdecor.DesktopModeWindowDecorViewModel.DesktopModeKeyguardChangeListener
 import com.android.wm.shell.windowdecor.DesktopModeWindowDecorViewModel.DesktopModeOnInsetsChangedListener
 import java.util.Optional
 import java.util.function.Consumer
@@ -172,6 +171,7 @@ class DesktopModeWindowDecorViewModelTests : ShellTestCase() {
     private lateinit var shellInit: ShellInit
     private lateinit var desktopModeOnInsetsChangedListener: DesktopModeOnInsetsChangedListener
     private lateinit var displayChangingListener: DisplayChangeController.OnDisplayChangingListener
+    private lateinit var desktopModeOnKeyguardChangedListener: DesktopModeKeyguardChangeListener
     private lateinit var desktopModeWindowDecorViewModel: DesktopModeWindowDecorViewModel
 
     @Before
@@ -225,17 +225,20 @@ class DesktopModeWindowDecorViewModelTests : ShellTestCase() {
 
         shellInit.init()
 
-        val insetListenerCaptor =
-            argumentCaptor<DesktopModeWindowDecorViewModel.DesktopModeOnInsetsChangedListener>()
-        verify(displayInsetsController)
-            .addInsetsChangedListener(anyInt(), insetListenerCaptor.capture())
-        desktopModeOnInsetsChangedListener = insetListenerCaptor.firstValue
-
         val displayChangingListenerCaptor =
             argumentCaptor<DisplayChangeController.OnDisplayChangingListener>()
         verify(mockDisplayController)
             .addDisplayChangingController(displayChangingListenerCaptor.capture())
         displayChangingListener = displayChangingListenerCaptor.firstValue
+        val insetsChangedCaptor =
+                argumentCaptor<DesktopModeWindowDecorViewModel.DesktopModeOnInsetsChangedListener>()
+        verify(displayInsetsController)
+            .addGlobalInsetsChangedListener(insetsChangedCaptor.capture())
+        desktopModeOnInsetsChangedListener = insetsChangedCaptor.firstValue
+        val keyguardChangedCaptor =
+            argumentCaptor<DesktopModeKeyguardChangeListener>()
+        verify(mockShellController).addKeyguardChangeListener(keyguardChangedCaptor.capture())
+        desktopModeOnKeyguardChangedListener = keyguardChangedCaptor.firstValue
     }
 
     @After
@@ -354,23 +357,33 @@ class DesktopModeWindowDecorViewModelTests : ShellTestCase() {
     }
 
     @Test
-    fun testCaptionIsNotCreatedWhenKeyguardIsVisible() {
-        val task = createTask(windowingMode = WINDOWING_MODE_FULLSCREEN, focused = true)
-        val keyguardListenerCaptor = argumentCaptor<KeyguardChangeListener>()
-        verify(mockShellController).addKeyguardChangeListener(keyguardListenerCaptor.capture())
+    fun testCloseButtonInFreeform() {
+        val task = createTask(windowingMode = WINDOWING_MODE_FREEFORM)
+        val windowDecor = setUpMockDecorationForTask(task)
 
-        keyguardListenerCaptor.firstValue.onKeyguardVisibilityChanged(
-                true /* visible */,
-                true /* occluded */,
-                false /* animatingDismiss */
-        )
         onTaskOpening(task)
+        val onClickListenerCaptor = argumentCaptor<View.OnClickListener>()
+        verify(windowDecor).setCaptionListeners(
+            onClickListenerCaptor.capture(), any(), any(), any())
 
-        task.setWindowingMode(WINDOWING_MODE_UNDEFINED)
-        task.setWindowingMode(ACTIVITY_TYPE_UNDEFINED)
-        onTaskChanging(task)
+        val onClickListener = onClickListenerCaptor.firstValue
+        val view = mock(View::class.java)
+        whenever(view.id).thenReturn(R.id.close_window)
 
-        assertFalse(windowDecorByTaskIdSpy.contains(task.taskId))
+        val freeformTaskTransitionStarter = mock(FreeformTaskTransitionStarter::class.java)
+        desktopModeWindowDecorViewModel
+            .setFreeformTaskTransitionStarter(freeformTaskTransitionStarter)
+
+        onClickListener.onClick(view)
+
+        val transactionCaptor = argumentCaptor<WindowContainerTransaction>()
+        verify(freeformTaskTransitionStarter).startRemoveTransition(transactionCaptor.capture())
+        val wct = transactionCaptor.firstValue
+
+        assertEquals(1, wct.getHierarchyOps().size)
+        assertEquals(HierarchyOp.HIERARCHY_OP_TYPE_REMOVE_TASK,
+                     wct.getHierarchyOps().get(0).getType())
+        assertEquals(task.token.asBinder(), wct.getHierarchyOps().get(0).getContainer())
     }
 
     @Test
@@ -418,67 +431,50 @@ class DesktopModeWindowDecorViewModelTests : ShellTestCase() {
     }
 
     @Test
-    @RequiresFlagsEnabled(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_IMMERSIVE_HANDLE_HIDING)
-    fun testRelayoutRunsWhenStatusBarsInsetsSourceVisibilityChanges() {
-        val task = createTask(windowingMode = WINDOWING_MODE_FREEFORM, focused = true)
-        val decoration = setUpMockDecorationForTask(task)
-
-        onTaskOpening(task)
+    @EnableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_IMMERSIVE_HANDLE_HIDING)
+    fun testInsetsStateChanged_notifiesAllDecorsInDisplay() {
+        val task1 = createTask(windowingMode = WINDOWING_MODE_FREEFORM, displayId = 1)
+        val decoration1 = setUpMockDecorationForTask(task1)
+        onTaskOpening(task1)
+        val task2 = createTask(windowingMode = WINDOWING_MODE_FREEFORM, displayId = 2)
+        val decoration2 = setUpMockDecorationForTask(task2)
+        onTaskOpening(task2)
+        val task3 = createTask(windowingMode = WINDOWING_MODE_FREEFORM, displayId = 2)
+        val decoration3 = setUpMockDecorationForTask(task3)
+        onTaskOpening(task3)
 
         // Add status bar insets source
-        val insetsState = InsetsState()
-        val statusBarInsetsSourceId = 0
-        val statusBarInsetsSource = InsetsSource(statusBarInsetsSourceId, statusBars())
-        statusBarInsetsSource.isVisible = false
-        insetsState.addSource(statusBarInsetsSource)
+        val insetsState = InsetsState().apply {
+            addSource(InsetsSource(0 /* id */, statusBars()).apply {
+                isVisible = false
+            })
+        }
+        desktopModeOnInsetsChangedListener.insetsChanged(2 /* displayId */, insetsState)
 
-        desktopModeOnInsetsChangedListener.insetsChanged(insetsState)
-
-        // Verify relayout occurs when status bar inset visibility changes
-        verify(decoration, times(1)).relayout(task)
+        verify(decoration1, never()).onInsetsStateChanged(insetsState)
+        verify(decoration2).onInsetsStateChanged(insetsState)
+        verify(decoration3).onInsetsStateChanged(insetsState)
     }
 
     @Test
-    @RequiresFlagsEnabled(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_IMMERSIVE_HANDLE_HIDING)
-    fun testRelayoutDoesNotRunWhenNonStatusBarsInsetsSourceVisibilityChanges() {
-        val task = createTask(windowingMode = WINDOWING_MODE_FREEFORM, focused = true)
-        val decoration = setUpMockDecorationForTask(task)
+    fun testKeyguardState_notifiesAllDecors() {
+        val task1 = createTask(windowingMode = WINDOWING_MODE_FREEFORM)
+        val decoration1 = setUpMockDecorationForTask(task1)
+        onTaskOpening(task1)
+        val task2 = createTask(windowingMode = WINDOWING_MODE_FREEFORM)
+        val decoration2 = setUpMockDecorationForTask(task2)
+        onTaskOpening(task2)
+        val task3 = createTask(windowingMode = WINDOWING_MODE_FREEFORM)
+        val decoration3 = setUpMockDecorationForTask(task3)
+        onTaskOpening(task3)
 
-        onTaskOpening(task)
+        desktopModeOnKeyguardChangedListener
+            .onKeyguardVisibilityChanged(true /* visible */, true /* occluded */,
+                false /* animatingDismiss */)
 
-        // Add navigation bar insets source
-        val insetsState = InsetsState()
-        val navigationBarInsetsSourceId = 1
-        val navigationBarInsetsSource = InsetsSource(navigationBarInsetsSourceId, navigationBars())
-        navigationBarInsetsSource.isVisible = false
-        insetsState.addSource(navigationBarInsetsSource)
-
-        desktopModeOnInsetsChangedListener.insetsChanged(insetsState)
-
-        // Verify relayout does not occur when non-status bar inset changes visibility
-        verify(decoration, never()).relayout(task)
-    }
-
-    @Test
-    @RequiresFlagsEnabled(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_IMMERSIVE_HANDLE_HIDING)
-    fun testRelayoutDoesNotRunWhenNonStatusBarsInsetSourceVisibilityDoesNotChange() {
-        val task = createTask(windowingMode = WINDOWING_MODE_FREEFORM, focused = true)
-        val decoration = setUpMockDecorationForTask(task)
-
-        onTaskOpening(task)
-
-        // Add status bar insets source
-        val insetsState = InsetsState()
-        val statusBarInsetsSourceId = 0
-        val statusBarInsetsSource = InsetsSource(statusBarInsetsSourceId, statusBars())
-        statusBarInsetsSource.isVisible = false
-        insetsState.addSource(statusBarInsetsSource)
-
-        desktopModeOnInsetsChangedListener.insetsChanged(insetsState)
-        desktopModeOnInsetsChangedListener.insetsChanged(insetsState)
-
-        // Verify relayout runs only once when status bar inset visibility changes.
-        verify(decoration, times(1)).relayout(task)
+        verify(decoration1).onKeyguardStateChanged(true /* visible */, true /* occluded */)
+        verify(decoration2).onKeyguardStateChanged(true /* visible */, true /* occluded */)
+        verify(decoration3).onKeyguardStateChanged(true /* visible */, true /* occluded */)
     }
 
     @Test

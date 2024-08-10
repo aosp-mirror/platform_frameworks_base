@@ -1,0 +1,16 @@
+package {
+    // See: http://go/android-license-faq
+    // A large-scale-change added 'default_applicable_licenses' to import
+    // all of the 'license_kinds' from "frameworks_base_license"
+    // to get the below license kinds:
+    //   SPDX-license-identifier-Apache-2.0
+    default_applicable_licenses: ["frameworks_base_license"],
+}
+
+runtime_resource_overlay {
+    name: "HsumDefaultConfigOverlay",
+    certificate: "platform",
+
+    product_specific: true,
+    sdk_version: "current",
+}

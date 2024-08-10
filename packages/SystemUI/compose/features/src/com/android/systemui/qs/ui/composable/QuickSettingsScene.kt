@@ -81,6 +81,7 @@ import com.android.systemui.common.ui.compose.windowinsets.LocalDisplayCutout
 import com.android.systemui.common.ui.compose.windowinsets.LocalRawScreenHeight
 import com.android.systemui.compose.modifiers.sysuiResTag
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.lifecycle.rememberViewModel
 import com.android.systemui.media.controls.ui.composable.MediaCarousel
 import com.android.systemui.media.controls.ui.controller.MediaCarouselController
 import com.android.systemui.media.controls.ui.view.MediaHost
@@ -166,19 +167,23 @@ private fun SceneScope.QuickSettingsScene(
 ) {
     val cutoutLocation = LocalDisplayCutout.current.location
 
-    val brightnessMirrorShowing by
-        viewModel.brightnessMirrorViewModel.isShowing.collectAsStateWithLifecycle()
+    val brightnessMirrorViewModel = rememberViewModel {
+        viewModel.brightnessMirrorViewModelFactory.create()
+    }
+    val brightnessMirrorShowing by brightnessMirrorViewModel.isShowing.collectAsStateWithLifecycle()
     val contentAlpha by
         animateFloatAsState(
             targetValue = if (brightnessMirrorShowing) 0f else 1f,
             label = "alphaAnimationBrightnessMirrorContentHiding",
         )
 
-    viewModel.notifications.setAlphaForBrightnessMirror(contentAlpha)
-    DisposableEffect(Unit) { onDispose { viewModel.notifications.setAlphaForBrightnessMirror(1f) } }
+    notificationsPlaceholderViewModel.setAlphaForBrightnessMirror(contentAlpha)
+    DisposableEffect(Unit) {
+        onDispose { notificationsPlaceholderViewModel.setAlphaForBrightnessMirror(1f) }
+    }
 
     BrightnessMirror(
-        viewModel = viewModel.brightnessMirrorViewModel,
+        viewModel = brightnessMirrorViewModel,
         qsSceneAdapter = viewModel.qsSceneAdapter,
         modifier =
             Modifier.thenIf(cutoutLocation != CutoutLocation.CENTER) {
@@ -337,7 +342,7 @@ private fun SceneScope.QuickSettingsScene(
                                         fadeOut(tween(customizingAnimationDuration)),
                             ) {
                                 ExpandedShadeHeader(
-                                    viewModel = viewModel.shadeHeaderViewModel,
+                                    viewModelFactory = viewModel.shadeHeaderViewModelFactory,
                                     createTintedIconManager = createTintedIconManager,
                                     createBatteryMeterViewController =
                                         createBatteryMeterViewController,
@@ -347,7 +352,7 @@ private fun SceneScope.QuickSettingsScene(
                             }
                         else ->
                             CollapsedShadeHeader(
-                                viewModel = viewModel.shadeHeaderViewModel,
+                                viewModelFactory = viewModel.shadeHeaderViewModelFactory,
                                 createTintedIconManager = createTintedIconManager,
                                 createBatteryMeterViewController = createBatteryMeterViewController,
                                 statusBarIconController = statusBarIconController,
@@ -417,7 +422,7 @@ private fun SceneScope.QuickSettingsScene(
         )
         NotificationStackCutoffGuideline(
             stackScrollView = notificationStackScrollView,
-            viewModel = viewModel.notifications,
+            viewModel = notificationsPlaceholderViewModel,
             modifier =
                 Modifier.align(Alignment.BottomCenter).navigationBarsPadding().offset {
                     IntOffset(x = 0, y = screenHeight.roundToInt())

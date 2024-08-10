@@ -16,6 +16,9 @@
 
 package com.android.wm.shell.compatui.api
 
+import com.android.internal.protolog.ProtoLog
+import com.android.wm.shell.protolog.ShellProtoLogGroup
+
 /**
  * Defines the predicates to invoke for understanding if a component can be created or destroyed.
  */
@@ -39,6 +42,7 @@ class CompatUILifecyclePredicates(
  * Describes each compat ui component to the framework.
  */
 class CompatUISpec(
+    val log: (String) -> Unit = { str -> ProtoLog.v(ShellProtoLogGroup.WM_SHELL_COMPAT_UI, str) },
     // Unique name for the component. It's used for debug and for generating the
     // unique component identifier in the system.
     val name: String,

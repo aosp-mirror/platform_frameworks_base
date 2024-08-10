@@ -160,6 +160,7 @@ import com.android.compose.modifiers.thenIf
 import com.android.compose.theme.LocalAndroidColorScheme
 import com.android.compose.ui.graphics.painter.rememberDrawablePainter
 import com.android.internal.R.dimen.system_app_widget_background_radius
+import com.android.systemui.Flags
 import com.android.systemui.Flags.communalTimerFlickerFix
 import com.android.systemui.communal.domain.model.CommunalContentModel
 import com.android.systemui.communal.shared.model.CommunalContentSize
@@ -269,7 +270,7 @@ fun CommunalHub(
                     }
                 }
                 // Nested scroll for full screen swipe to get to shade and bouncer
-                .thenIf(!viewModel.isEditMode) {
+                .thenIf(!viewModel.isEditMode && Flags.hubmodeFullscreenVerticalSwipeFix()) {
                     Modifier.nestedScroll(nestedScrollConnection).pointerInput(viewModel) {
                         awaitPointerEventScope {
                             while (true) {

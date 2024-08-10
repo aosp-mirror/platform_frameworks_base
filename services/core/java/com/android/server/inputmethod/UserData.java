@@ -19,14 +19,17 @@ package com.android.server.inputmethod;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
+import android.util.Pair;
 import android.util.SparseArray;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.ImeTracker;
+import android.view.inputmethod.InputMethodSubtype;
 import android.window.ImeOnBackInvokedDispatcher;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.inputmethod.IRemoteAccessibilityInputConnection;
 import com.android.internal.inputmethod.IRemoteInputConnection;
+import com.android.internal.inputmethod.InputMethodSubtypeHandle;
 
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -149,10 +152,29 @@ final class UserData {
     String mLastEnabledInputMethodsStr = "";
 
     /**
+     * A temporary solution to Bug 356879517, where we need to emulate the previous single-user mode
+     * behavior for KeyboardLayoutManager.
+     *
+     * <p>TODO(b/357663774): Remove this workaround</p>
+     */
+    @GuardedBy("ImfLock.class")
+    @Nullable
+    Pair<InputMethodSubtypeHandle, InputMethodSubtype> mSubtypeForKeyboardLayoutMapping;
+
+    /**
      * {@code true} when the IME is responsible for drawing the navigation bar and its buttons.
      */
     @NonNull
     final AtomicBoolean mImeDrawsNavBar = new AtomicBoolean();
+
+
+    /**
+     * {@code true} if the user storage is considered to be unlocked.
+     *
+     * @see com.android.server.pm.UserManagerInternal#isUserUnlockingOrUnlocked(int)
+     */
+    @NonNull
+    final AtomicBoolean mIsUnlockingOrUnlocked = new AtomicBoolean(false);
 
     /**
      * Intended to be instantiated only from this file.

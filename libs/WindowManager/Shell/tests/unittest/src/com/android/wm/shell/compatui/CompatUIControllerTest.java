@@ -43,6 +43,7 @@ import android.view.InsetsSource;
 import android.view.InsetsState;
 import android.view.accessibility.AccessibilityManager;
 
+import androidx.annotation.NonNull;
 import androidx.test.filters.SmallTest;
 
 import com.android.window.flags.Flags;
@@ -128,6 +129,9 @@ public class CompatUIControllerTest extends ShellTestCase {
     @Captor
     ArgumentCaptor<OnInsetsChangedListener> mOnInsetsChangedListenerCaptor;
 
+    @NonNull
+    private CompatUIStatusManager mCompatUIStatusManager;
+
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
@@ -147,11 +151,13 @@ public class CompatUIControllerTest extends ShellTestCase {
         doReturn(true).when(mMockRestartDialogLayout).createLayout(anyBoolean());
         doReturn(true).when(mMockRestartDialogLayout).updateCompatInfo(any(), any(), anyBoolean());
 
+        mCompatUIStatusManager = new CompatUIStatusManager();
         mShellInit = spy(new ShellInit(mMockExecutor));
         mController = new CompatUIController(mContext, mShellInit, mMockShellController,
                 mMockDisplayController, mMockDisplayInsetsController, mMockImeController,
                 mMockSyncQueue, mMockExecutor, mMockTransitionsLazy, mDockStateReader,
-                mCompatUIConfiguration, mCompatUIShellCommandHandler, mAccessibilityManager) {
+                mCompatUIConfiguration, mCompatUIShellCommandHandler, mAccessibilityManager,
+                mCompatUIStatusManager) {
             @Override
             CompatUIWindowManager createCompatUiWindowManager(Context context, TaskInfo taskInfo,
                     ShellTaskOrganizer.TaskListener taskListener) {
@@ -681,7 +687,7 @@ public class CompatUIControllerTest extends ShellTestCase {
     @Test
     public void testLetterboxEduLayout_notCreatedWhenLetterboxEducationIsDisabled() {
         TaskInfo taskInfo = createTaskInfo(DISPLAY_ID, TASK_ID, /* hasSizeCompat= */ true);
-        taskInfo.appCompatTaskInfo.isLetterboxEducationEnabled = false;
+        taskInfo.appCompatTaskInfo.setLetterboxEducationEnabled(false);
 
         mController.onCompatInfoChanged(new CompatUIInfo(taskInfo, mMockTaskListener));
 
@@ -705,12 +711,12 @@ public class CompatUIControllerTest extends ShellTestCase {
         RunningTaskInfo taskInfo = new RunningTaskInfo();
         taskInfo.taskId = taskId;
         taskInfo.displayId = displayId;
-        taskInfo.appCompatTaskInfo.topActivityInSizeCompat = hasSizeCompat;
+        taskInfo.appCompatTaskInfo.setTopActivityInSizeCompat(hasSizeCompat);
         taskInfo.isVisible = isVisible;
         taskInfo.isFocused = isFocused;
         taskInfo.isTopActivityTransparent = isTopActivityTransparent;
-        taskInfo.appCompatTaskInfo.isLetterboxEducationEnabled = true;
-        taskInfo.appCompatTaskInfo.topActivityBoundsLetterboxed = true;
+        taskInfo.appCompatTaskInfo.setLetterboxEducationEnabled(true);
+        taskInfo.appCompatTaskInfo.setTopActivityLetterboxed(true);
         return taskInfo;
     }
 }

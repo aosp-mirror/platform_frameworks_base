@@ -31,6 +31,8 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.graphics.Rect;
 
+import com.android.internal.annotations.VisibleForTesting;
+
 import java.util.function.Supplier;
 
 /**
@@ -43,7 +45,8 @@ class AppCompatReachabilityPolicy {
     @NonNull
     private final AppCompatConfiguration mAppCompatConfiguration;
     @Nullable
-    private Supplier<Rect> mLetterboxInnerBoundsSupplier;
+    @VisibleForTesting
+    Supplier<Rect> mLetterboxInnerBoundsSupplier;
 
     AppCompatReachabilityPolicy(@NonNull ActivityRecord activityRecord,
             @NonNull AppCompatConfiguration appCompatConfiguration) {

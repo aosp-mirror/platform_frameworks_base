@@ -18,6 +18,7 @@ package com.android.internal.graphics.cam;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.ravenwood.annotation.RavenwoodKeepWholeClass;
 
 import com.android.internal.graphics.ColorUtils;
 
@@ -25,6 +26,7 @@ import com.android.internal.graphics.ColorUtils;
  * A color appearance model, based on CAM16, extended to use L* as the lightness dimension, and
  * coupled to a gamut mapping algorithm. Creates a color system, enables a digital design system.
  */
+@RavenwoodKeepWholeClass
 public class Cam {
     // The maximum difference between the requested L* and the L* returned.
     private static final float DL_MAX = 0.2f;

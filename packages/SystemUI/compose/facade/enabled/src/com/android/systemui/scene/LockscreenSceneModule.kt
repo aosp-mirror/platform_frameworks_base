@@ -66,11 +66,11 @@ interface LockscreenSceneModule {
 
         @Provides
         fun providesLockscreenContent(
-            viewModel: LockscreenContentViewModel,
+            viewModelFactory: LockscreenContentViewModel.Factory,
             blueprints: Set<@JvmSuppressWildcards ComposableLockscreenSceneBlueprint>,
             clockInteractor: KeyguardClockInteractor,
         ): LockscreenContent {
-            return LockscreenContent(viewModel, blueprints, clockInteractor)
+            return LockscreenContent(viewModelFactory, blueprints, clockInteractor)
         }
     }
 }
