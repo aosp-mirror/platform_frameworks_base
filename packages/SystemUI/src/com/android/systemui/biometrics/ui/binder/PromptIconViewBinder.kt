@@ -22,9 +22,7 @@ import android.util.Log
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
 import com.airbnb.lottie.LottieAnimationView
-import com.airbnb.lottie.LottieOnCompositionLoadedListener
 import com.android.settingslib.widget.LottieColorUtils
-import com.android.systemui.Flags.constraintBp
 import com.android.systemui.biometrics.ui.viewmodel.PromptIconViewModel
 import com.android.systemui.biometrics.ui.viewmodel.PromptIconViewModel.AuthType
 import com.android.systemui.biometrics.ui.viewmodel.PromptViewModel
@@ -44,55 +42,12 @@ object PromptIconViewBinder {
     @JvmStatic
     fun bind(
         iconView: LottieAnimationView,
-        iconViewLayoutParamSizeOverride: Pair<Int, Int>?,
         promptViewModel: PromptViewModel
     ) {
         val viewModel = promptViewModel.iconViewModel
         iconView.repeatWhenAttached {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.onConfigurationChanged(iconView.context.resources.configuration)
-                if (iconViewLayoutParamSizeOverride != null) {
-                    iconView.layoutParams.width = iconViewLayoutParamSizeOverride.first
-                    iconView.layoutParams.height = iconViewLayoutParamSizeOverride.second
-                }
-
-                if (!constraintBp()) {
-                    launch {
-                        var lottieOnCompositionLoadedListener: LottieOnCompositionLoadedListener? =
-                            null
-
-                        viewModel.iconSize.collect { iconSize ->
-                            /**
-                             * When we bind the BiometricPrompt View and ViewModel in
-                             * [BiometricViewBinder], the view is set invisible and
-                             * [isIconViewLoaded] is set to false. We configure the iconView with a
-                             * LottieOnCompositionLoadedListener that sets [isIconViewLoaded] to
-                             * true, in order to wait for the iconView to load before determining
-                             * the prompt size, and prevent any prompt resizing from being visible
-                             * to the user.
-                             *
-                             * TODO(b/288175072): May be able to remove this once constraint layout
-                             *   is unflagged
-                             */
-                            if (lottieOnCompositionLoadedListener != null) {
-                                iconView.removeLottieOnCompositionLoadedListener(
-                                    lottieOnCompositionLoadedListener!!
-                                )
-                            }
-                            lottieOnCompositionLoadedListener = LottieOnCompositionLoadedListener {
-                                promptViewModel.setIsIconViewLoaded(true)
-                            }
-                            iconView.addLottieOnCompositionLoadedListener(
-                                lottieOnCompositionLoadedListener!!
-                            )
-
-                            if (iconViewLayoutParamSizeOverride == null) {
-                                iconView.layoutParams.width = iconSize.first
-                                iconView.layoutParams.height = iconSize.second
-                            }
-                        }
-                    }
-                }
 
                 launch {
                     viewModel.iconAsset
@@ -154,7 +109,7 @@ fun LottieAnimationView.updateAsset(
     setAnimation(asset)
     if (animatingFromSfpsAuthenticating(asset)) {
         // Skipping to error / success / unlock segment of animation
-        setMinFrame(151)
+        setMinFrame(158)
     } else {
         frame = 0
     }

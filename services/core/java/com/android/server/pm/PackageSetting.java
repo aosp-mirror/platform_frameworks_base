@@ -98,6 +98,7 @@ public class PackageSetting extends SettingBase implements PackageStateInternal 
                 SCANNED_AS_STOPPED_SYSTEM_APP,
                 PENDING_RESTORE,
                 DEBUGGABLE,
+                IS_LEAVING_SHARED_USER,
         })
         public @interface Flags {
         }
@@ -107,6 +108,7 @@ public class PackageSetting extends SettingBase implements PackageStateInternal 
         private static final int SCANNED_AS_STOPPED_SYSTEM_APP = 1 << 3;
         private static final int PENDING_RESTORE = 1 << 4;
         private static final int DEBUGGABLE = 1 << 5;
+        private static final int IS_LEAVING_SHARED_USER = 1 << 6;
     }
     private int mBooleans;
 
@@ -592,6 +594,20 @@ public class PackageSetting extends SettingBase implements PackageStateInternal 
     @Override
     public boolean isDebuggable() {
         return getBoolean(Booleans.DEBUGGABLE);
+    }
+
+    /**
+     * @see PackageState#isLeavingSharedUser
+     */
+    public PackageSetting setLeavingSharedUser(boolean value) {
+        setBoolean(Booleans.IS_LEAVING_SHARED_USER, value);
+        onChanged();
+        return this;
+    }
+
+    @Override
+    public boolean isLeavingSharedUser() {
+        return getBoolean(Booleans.IS_LEAVING_SHARED_USER);
     }
 
     /**

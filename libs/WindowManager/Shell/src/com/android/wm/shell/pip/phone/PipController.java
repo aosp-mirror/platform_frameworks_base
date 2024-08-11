@@ -632,6 +632,12 @@ public class PipController implements PipTransitionController.PipTransitionCallb
                     public void insetsChanged(InsetsState insetsState) {
                         DisplayLayout pendingLayout = mDisplayController
                                 .getDisplayLayout(mPipDisplayLayoutState.getDisplayId());
+                        if (pendingLayout == null) {
+                            ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
+                                    "insetsChanged: no display layout for displayId=%d",
+                                    mPipDisplayLayoutState.getDisplayId());
+                            return;
+                        }
                         if (mIsInFixedRotation
                                 || mIsKeyguardShowingOrAnimating
                                 || pendingLayout.rotation()

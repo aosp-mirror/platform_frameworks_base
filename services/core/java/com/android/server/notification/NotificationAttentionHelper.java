@@ -1194,9 +1194,9 @@ public final class NotificationAttentionHelper {
         }
 
         boolean shouldIgnoreNotification(final NotificationRecord record) {
-            // Ignore group summaries
-            return (record.getSbn().isGroup() && record.getSbn().getNotification()
-                    .isGroupSummary());
+            // Ignore auto-group summaries => don't count them as app-posted notifications
+            // for the cooldown budget
+            return (record.getSbn().isGroup() && GroupHelper.isAggregatedGroup(record));
         }
 
         /**
@@ -1519,7 +1519,14 @@ public final class NotificationAttentionHelper {
         @Override
         public void setLastNotificationUpdateTimeMs(NotificationRecord record,
                 long timestampMillis) {
-            super.setLastNotificationUpdateTimeMs(record, timestampMillis);
+            if (Flags.politeNotificationsAttnUpdate()) {
+                // Set last update per package/channel only for exempt notifications
+                if (isAvalancheExempted(record)) {
+                    super.setLastNotificationUpdateTimeMs(record, timestampMillis);
+                }
+            } else {
+                super.setLastNotificationUpdateTimeMs(record, timestampMillis);
+            }
             mLastNotificationTimestamp = timestampMillis;
             mAppStrategy.setLastNotificationUpdateTimeMs(record, timestampMillis);
         }

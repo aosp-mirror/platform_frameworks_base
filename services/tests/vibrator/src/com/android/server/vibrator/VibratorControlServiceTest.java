@@ -37,6 +37,7 @@ import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 
 import android.content.ComponentName;
+import android.content.Context;
 import android.content.pm.PackageManagerInternal;
 import android.frameworks.vibrator.ScaleParam;
 import android.frameworks.vibrator.VibrationParam;
@@ -46,6 +47,7 @@ import android.os.IBinder;
 import android.os.Process;
 import android.os.test.TestLooper;
 import android.os.vibrator.Flags;
+import android.os.vibrator.VibrationConfig;
 import android.platform.test.annotations.RequiresFlagsDisabled;
 import android.platform.test.annotations.RequiresFlagsEnabled;
 import android.platform.test.flag.junit.CheckFlagsRule;
@@ -97,8 +99,9 @@ public class VibratorControlServiceTest {
         LocalServices.addService(PackageManagerInternal.class, mPackageManagerInternalMock);
 
         TestLooper testLooper = new TestLooper();
-        mVibrationSettings = new VibrationSettings(
-                ApplicationProvider.getApplicationContext(), new Handler(testLooper.getLooper()));
+        Context context = ApplicationProvider.getApplicationContext();
+        mVibrationSettings = new VibrationSettings(context, new Handler(testLooper.getLooper()),
+                new VibrationConfig(context.getResources()));
 
         mFakeVibratorController = new FakeVibratorController(mTestLooper.getLooper());
         mVibratorControlService = new VibratorControlService(

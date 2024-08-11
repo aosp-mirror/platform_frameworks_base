@@ -35,7 +35,6 @@ import android.annotation.NonNull;
 import android.content.res.Configuration;
 import android.graphics.Rect;
 
-import com.android.internal.annotations.VisibleForTesting;
 import com.android.window.flags.Flags;
 
 /**
@@ -112,12 +111,10 @@ class AppCompatReachabilityOverrides {
                 : mAppCompatConfiguration.getLetterboxVerticalPositionMultiplier(tabletopMode);
     }
 
-    @VisibleForTesting
     boolean isHorizontalReachabilityEnabled() {
         return isHorizontalReachabilityEnabled(mActivityRecord.getParent().getConfiguration());
     }
 
-    @VisibleForTesting
     boolean isVerticalReachabilityEnabled() {
         return isVerticalReachabilityEnabled(mActivityRecord.getParent().getConfiguration());
     }

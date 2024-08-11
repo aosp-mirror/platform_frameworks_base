@@ -2269,7 +2269,10 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         // applying the dimming effect twice.
         mUiBgExecutor.execute(() -> {
             float dimAmount = 0f;
-            if (mWallpaperManager.lockScreenWallpaperExists()) {
+            // Note that access to WallpaperManager APIs should be guarded by a check into
+            // WallpaperManager#isWallpaperSupported. Form factors that do not use wallpaper
+            // may crash SysUI during improper access. ref: b/355307617
+            if (!mWallpaperSupported || mWallpaperManager.lockScreenWallpaperExists()) {
                 dimAmount = mWallpaperManager.getWallpaperDimAmount();
             }
             final float scrimDimAmount = dimAmount;
@@ -2350,7 +2353,11 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
                     && !mStatusBarKeyguardViewManager.primaryBouncerIsOrWillBeShowing()
                     && mStatusBarKeyguardViewManager.isSecure()) {
                 Log.d(TAG, "showBouncerOrLockScreenIfKeyguard, showingBouncer");
-                mStatusBarKeyguardViewManager.showBouncer(true /* scrimmed */);
+                if (SceneContainerFlag.isEnabled()) {
+                    mStatusBarKeyguardViewManager.showPrimaryBouncer(true /* scrimmed */);
+                } else {
+                    mStatusBarKeyguardViewManager.showBouncer(true /* scrimmed */);
+                }
             }
         }
     }
@@ -2982,7 +2989,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
                 @Override
                 public void onFalse() {
                     // Hides quick settings, bouncer, and quick-quick settings.
-                    mStatusBarKeyguardViewManager.reset(true);
+                    mStatusBarKeyguardViewManager.reset(true, /* isFalsingReset= */true);
                 }
             };
 

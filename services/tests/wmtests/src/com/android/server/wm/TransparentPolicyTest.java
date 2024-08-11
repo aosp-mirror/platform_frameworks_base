@@ -22,8 +22,11 @@ import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
 import static android.view.Surface.ROTATION_0;
 import static android.view.Surface.ROTATION_90;
 
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
+
 import static org.mockito.Mockito.clearInvocations;
 
+import android.platform.test.annotations.EnableFlags;
 import android.platform.test.annotations.Presubmit;
 
 import androidx.annotation.NonNull;
@@ -207,6 +210,25 @@ public class TransparentPolicyTest extends WindowTestsBase {
         });
     }
 
+    @EnableFlags(com.android.window.flags.Flags.FLAG_RESPECT_NON_TOP_VISIBLE_FIXED_ORIENTATION)
+    @Test
+    public void testNotRunStrategyToTranslucentActivitiesIfRespectOrientation() {
+        runTestScenario(robot -> robot.transparentActivity(ta -> ta.applyOnActivity((a) -> {
+            a.configureTopActivityIgnoreOrientationRequest(false);
+            // The translucent activity is SCREEN_ORIENTATION_PORTRAIT.
+            ta.launchTransparentActivityInTask();
+            // Though TransparentPolicyState will be started, it won't be considered as running.
+            ta.checkTopActivityTransparentPolicyStateIsRunning(/* running */ false);
+
+            // If the display changes to ignore orientation request, e.g. unfold, the policy should
+            // take effect.
+            a.configureTopActivityIgnoreOrientationRequest(true);
+            ta.checkTopActivityTransparentPolicyStateIsRunning(/* running */ true);
+            ta.setDisplayContentBounds(0, 0, 900, 1800);
+            ta.checkTopActivityHasInheritedBoundsFrom(/* fromTop */ 1);
+        })), /* displayWidth */ 500,  /* displayHeight */ 1000);
+    }
+
     @Test
     public void testTranslucentActivitiesDontGoInSizeCompatMode() {
         runTestScenario((robot) -> {
@@ -341,6 +363,12 @@ public class TransparentPolicyTest extends WindowTestsBase {
             mTransparentActivityRobot = new AppCompatTransparentActivityRobot(activity());
             // We always create at least an opaque activity in a Task
             activity().createNewTaskWithBaseActivity();
+        }
+
+        @Override
+        void onPostActivityCreation(@NonNull ActivityRecord activity) {
+            super.onPostActivityCreation(activity);
+            spyOn(activity.mAppCompatController.getTransparentPolicy());
         }
 
         void transparentActivity(@NonNull Consumer<AppCompatTransparentActivityRobot> consumer) {

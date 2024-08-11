@@ -1,20 +1,18 @@
 /*
- *  Copyright (C) 2022 The Android Open Source Project
+ * Copyright (C) 2022 The Android Open Source Project
  *
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
- *  You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- *       http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
- *  Unless required by applicable law or agreed to in writing, software
- *  distributed under the License is distributed on an "AS IS" BASIS,
- *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  See the License for the specific language governing permissions and
- *  limitations under the License.
- *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
-
 @file:OptIn(ExperimentalCoroutinesApi::class)
 
 package com.android.systemui.keyguard.domain.interactor
@@ -156,14 +154,23 @@ constructor(
 
     val isPulsing: Flow<Boolean> = dozeTransitionModel.map { it.to == DozeStateModel.DOZE_PULSING }
 
-    /**
-     * Whether the system is dreaming. [isDreaming] will be always be true when [isDozing] is true,
-     * but not vice-versa.
-     */
-    val isDreaming: StateFlow<Boolean> = repository.isDreaming
-
     /** Whether the system is dreaming with an overlay active */
     val isDreamingWithOverlay: Flow<Boolean> = repository.isDreamingWithOverlay
+
+    /**
+     * Whether the system is dreaming. [isDreaming] will be always be true when [isDozing] is true,
+     * but not vice-versa. Also accounts for [isDreamingWithOverlay]
+     */
+    val isDreaming: StateFlow<Boolean> =
+        merge(
+                repository.isDreaming,
+                repository.isDreamingWithOverlay,
+            )
+            .stateIn(
+                scope = applicationScope,
+                started = SharingStarted.Eagerly,
+                initialValue = false,
+            )
 
     /** Whether the system is dreaming and the active dream is hosted in lockscreen */
     val isActiveDreamLockscreenHosted: StateFlow<Boolean> = repository.isActiveDreamLockscreenHosted
@@ -172,6 +179,9 @@ constructor(
     val onCameraLaunchDetected: Flow<CameraLaunchSourceModel> =
         repository.onCameraLaunchDetected.filter { it.type != CameraLaunchType.IGNORE }
 
+    /** Event for when an unlocked keyguard has been requested, such as on device fold */
+    val showDismissibleKeyguard: Flow<Long> = repository.showDismissibleKeyguard.asStateFlow()
+
     /**
      * Dozing and dreaming have overlapping events. If the doze state remains in FINISH, it means
      * that doze mode is not running and DREAMING is ok to commence.
@@ -179,12 +189,25 @@ constructor(
      * Allow a brief moment to prevent rapidly oscillating between true/false signals.
      */
     val isAbleToDream: Flow<Boolean> =
-        merge(isDreaming, isDreamingWithOverlay)
-            .combine(dozeTransitionModel) { isDreaming, dozeTransitionModel ->
-                isDreaming && isDozeOff(dozeTransitionModel.to)
+        dozeTransitionModel
+            .flatMapLatest { dozeTransitionModel ->
+                if (isDozeOff(dozeTransitionModel.to)) {
+                    // When dozing stops, it is a very early signal that the device is exiting the
+                    // dream state. DreamManagerService eventually notifies window manager, which
+                    // invokes SystemUI through KeyguardService. Because of this substantial delay,
+                    // do not immediately process any dreaming information when exiting AOD. It
+                    // should actually be quite strange to leave AOD and then go straight to
+                    // DREAMING so this should be fine.
+                    delay(500L)
+                    isDreaming
+                        .sample(powerInteractor.isAwake) { isDreaming, isAwake ->
+                            isDreaming && isAwake
+                        }
+                        .debounce(50L)
+                } else {
+                    flowOf(false)
+                }
             }
-            .sample(powerInteractor.isAwake) { isAbleToDream, isAwake -> isAbleToDream && isAwake }
-            .debounce(50L)
             .stateIn(
                 scope = applicationScope,
                 started = SharingStarted.WhileSubscribed(),
@@ -467,6 +490,10 @@ constructor(
     fun onCameraLaunchDetected(source: Int) {
         repository.onCameraLaunchDetected.value =
             CameraLaunchSourceModel(type = cameraLaunchSourceIntToType(source))
+    }
+
+    fun showDismissibleKeyguard() {
+        repository.showDismissibleKeyguard()
     }
 
     companion object {

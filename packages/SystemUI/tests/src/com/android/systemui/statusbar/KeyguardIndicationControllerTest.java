@@ -25,6 +25,7 @@ import static android.hardware.biometrics.BiometricFaceConstants.FACE_ERROR_TIME
 import static com.android.keyguard.KeyguardUpdateMonitor.BIOMETRIC_HELP_FACE_NOT_AVAILABLE;
 import static com.android.keyguard.KeyguardUpdateMonitor.BIOMETRIC_HELP_FACE_NOT_RECOGNIZED;
 import static com.android.keyguard.KeyguardUpdateMonitor.BIOMETRIC_HELP_FINGERPRINT_NOT_RECOGNIZED;
+import static com.android.systemui.keyguard.KeyguardIndicationRotateTextViewController.INDICATION_TYPE_ADAPTIVE_AUTH;
 import static com.android.systemui.keyguard.KeyguardIndicationRotateTextViewController.INDICATION_TYPE_ALIGNMENT;
 import static com.android.systemui.keyguard.KeyguardIndicationRotateTextViewController.INDICATION_TYPE_BATTERY;
 import static com.android.systemui.keyguard.KeyguardIndicationRotateTextViewController.INDICATION_TYPE_BIOMETRIC_MESSAGE;
@@ -1533,6 +1534,48 @@ public class KeyguardIndicationControllerTest extends KeyguardIndicationControll
         verifyIndicationMessage(
                 INDICATION_TYPE_TRUST,
                 trustGrantedMsg);
+    }
+
+    @Test
+    public void updateAdaptiveAuthMessage_whenNotLockedByAdaptiveAuth_doesNotShowMsg() {
+        // When the device is not locked by adaptive auth
+        when(mKeyguardUpdateMonitor.isDeviceLockedByAdaptiveAuth(getCurrentUser()))
+                .thenReturn(false);
+        createController();
+        mController.setVisible(true);
+
+        // Verify that the adaptive auth message does not show
+        verifyNoMessage(INDICATION_TYPE_ADAPTIVE_AUTH);
+    }
+
+    @Test
+    public void updateAdaptiveAuthMessage_whenLockedByAdaptiveAuth_cannotSkipBouncer_showsMsg() {
+        // When the device is locked by adaptive auth, and the user cannot skip bouncer
+        when(mKeyguardUpdateMonitor.isDeviceLockedByAdaptiveAuth(getCurrentUser()))
+                .thenReturn(true);
+        when(mKeyguardUpdateMonitor.getUserCanSkipBouncer(getCurrentUser())).thenReturn(false);
+        createController();
+        mController.setVisible(true);
+
+        // Verify that the adaptive auth message shows
+        String message = mContext.getString(R.string.keyguard_indication_after_adaptive_auth_lock);
+        verifyIndicationMessage(INDICATION_TYPE_ADAPTIVE_AUTH, message);
+    }
+
+    @Test
+    public void updateAdaptiveAuthMessage_whenLockedByAdaptiveAuth_canSkipBouncer_doesNotShowMsg() {
+        createController();
+        mController.setVisible(true);
+
+        // When the device is locked by adaptive auth, but the device unlocked state changes and the
+        // user can skip bouncer
+        when(mKeyguardUpdateMonitor.isDeviceLockedByAdaptiveAuth(getCurrentUser()))
+                .thenReturn(true);
+        when(mKeyguardUpdateMonitor.getUserCanSkipBouncer(getCurrentUser())).thenReturn(true);
+        mKeyguardStateControllerCallback.onUnlockedChanged();
+
+        // Verify that the adaptive auth message does not show
+        verifyNoMessage(INDICATION_TYPE_ADAPTIVE_AUTH);
     }
 
     private void screenIsTurningOn() {

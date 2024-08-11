@@ -112,6 +112,26 @@ class QSLongPressEffectTest : SysuiTestCase() {
     }
 
     @Test
+    fun onActionDown_whileClicked_startsWait() =
+        testWhileInState(QSLongPressEffect.State.CLICKED) {
+            // GIVEN an action down event occurs
+            longPressEffect.handleActionDown()
+
+            // THEN the effect moves to the TIMEOUT_WAIT state
+            assertThat(longPressEffect.state).isEqualTo(QSLongPressEffect.State.TIMEOUT_WAIT)
+        }
+
+    @Test
+    fun onActionDown_whileLongClicked_startsWait() =
+        testWhileInState(QSLongPressEffect.State.LONG_CLICKED) {
+            // GIVEN an action down event occurs
+            longPressEffect.handleActionDown()
+
+            // THEN the effect moves to the TIMEOUT_WAIT state
+            assertThat(longPressEffect.state).isEqualTo(QSLongPressEffect.State.TIMEOUT_WAIT)
+        }
+
+    @Test
     fun onActionCancel_whileWaiting_goesIdle() =
         testWhileInState(QSLongPressEffect.State.TIMEOUT_WAIT) {
             // GIVEN an action cancel occurs

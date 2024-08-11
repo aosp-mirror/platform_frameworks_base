@@ -225,7 +225,8 @@ public class QuickSettingsControllerImplBaseTest extends SysuiTestCase {
                         new SharedNotificationContainerInteractor(
                                 configurationRepository,
                                 mContext,
-                                splitShadeStateController,
+                                () -> splitShadeStateController,
+                                () -> mShadeInteractor,
                                 keyguardInteractor,
                                 deviceEntryUdfpsInteractor,
                                 () -> mLargeScreenHeaderHelper),
@@ -266,6 +267,7 @@ public class QuickSettingsControllerImplBaseTest extends SysuiTestCase {
 
         when(mPanelView.getParent()).thenReturn(mPanelViewParent);
         when(mQs.getHeader()).thenReturn(mQsHeader);
+        when(mQSFragment.getHeader()).thenReturn(mQsHeader);
 
         doAnswer(invocation -> {
             mLockscreenShadeTransitionCallback = invocation.getArgument(0);

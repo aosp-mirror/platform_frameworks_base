@@ -186,6 +186,9 @@ public class CompatUIController implements OnDisplaysChangedListener,
      */
     private boolean mIsFirstReachabilityEducationRunning;
 
+    @NonNull
+    private final CompatUIStatusManager mCompatUIStatusManager;
+
     public CompatUIController(@NonNull Context context,
             @NonNull ShellInit shellInit,
             @NonNull ShellController shellController,
@@ -198,7 +201,8 @@ public class CompatUIController implements OnDisplaysChangedListener,
             @NonNull DockStateReader dockStateReader,
             @NonNull CompatUIConfiguration compatUIConfiguration,
             @NonNull CompatUIShellCommandHandler compatUIShellCommandHandler,
-            @NonNull AccessibilityManager accessibilityManager) {
+            @NonNull AccessibilityManager accessibilityManager,
+            @NonNull CompatUIStatusManager compatUIStatusManager) {
         mContext = context;
         mShellController = shellController;
         mDisplayController = displayController;
@@ -213,6 +217,7 @@ public class CompatUIController implements OnDisplaysChangedListener,
         mCompatUIShellCommandHandler = compatUIShellCommandHandler;
         mDisappearTimeSupplier = flags -> accessibilityManager.getRecommendedTimeoutMillis(
                 DISAPPEAR_DELAY_MS, flags);
+        mCompatUIStatusManager = compatUIStatusManager;
         shellInit.addInitCallback(this::onInit, this);
     }
 
@@ -520,7 +525,7 @@ public class CompatUIController implements OnDisplaysChangedListener,
                 mSyncQueue, taskListener, mDisplayController.getDisplayLayout(taskInfo.displayId),
                 mTransitionsLazy.get(),
                 stateInfo -> createOrUpdateReachabilityEduLayout(stateInfo.first, stateInfo.second),
-                mDockStateReader, mCompatUIConfiguration);
+                mDockStateReader, mCompatUIConfiguration, mCompatUIStatusManager);
     }
 
     private void createOrUpdateRestartDialogLayout(@NonNull TaskInfo taskInfo,

@@ -80,6 +80,7 @@ import com.android.systemui.common.ui.compose.windowinsets.LocalDisplayCutout
 import com.android.systemui.common.ui.compose.windowinsets.LocalScreenCornerRadius
 import com.android.systemui.compose.modifiers.sysuiResTag
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.lifecycle.rememberViewModel
 import com.android.systemui.media.controls.ui.composable.MediaCarousel
 import com.android.systemui.media.controls.ui.composable.MediaContentPicker
 import com.android.systemui.media.controls.ui.composable.shouldElevateMedia
@@ -102,7 +103,8 @@ import com.android.systemui.scene.session.ui.composable.SaveableSession
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.scene.ui.composable.ComposableScene
 import com.android.systemui.shade.shared.model.ShadeMode
-import com.android.systemui.shade.ui.viewmodel.ShadeSceneViewModel
+import com.android.systemui.shade.ui.viewmodel.ShadeSceneActionsViewModel
+import com.android.systemui.shade.ui.viewmodel.ShadeSceneContentViewModel
 import com.android.systemui.statusbar.notification.stack.ui.view.NotificationScrollView
 import com.android.systemui.statusbar.notification.stack.ui.viewmodel.NotificationsPlaceholderViewModel
 import com.android.systemui.statusbar.phone.StatusBarLocation
@@ -145,7 +147,8 @@ class ShadeScene
 constructor(
     private val shadeSession: SaveableSession,
     private val notificationStackScrollView: Lazy<NotificationScrollView>,
-    private val viewModel: ShadeSceneViewModel,
+    private val actionsViewModelFactory: ShadeSceneActionsViewModel.Factory,
+    private val contentViewModelFactory: ShadeSceneContentViewModel.Factory,
     private val notificationsPlaceholderViewModel: NotificationsPlaceholderViewModel,
     private val tintedIconManagerFactory: TintedIconManager.Factory,
     private val batteryMeterViewControllerFactory: BatteryMeterViewController.Factory,
@@ -157,12 +160,16 @@ constructor(
 
     override val key = Scenes.Shade
 
+    private val actionsViewModel: ShadeSceneActionsViewModel by lazy {
+        actionsViewModelFactory.create()
+    }
+
     override suspend fun activate() {
-        viewModel.activate()
+        actionsViewModel.activate()
     }
 
     override val destinationScenes: Flow<Map<UserAction, UserActionResult>> =
-        viewModel.destinationScenes
+        actionsViewModel.actions
 
     @Composable
     override fun SceneScope.Content(
@@ -170,7 +177,7 @@ constructor(
     ) =
         ShadeScene(
             notificationStackScrollView.get(),
-            viewModel = viewModel,
+            viewModel = rememberViewModel { contentViewModelFactory.create() },
             notificationsPlaceholderViewModel = notificationsPlaceholderViewModel,
             createTintedIconManager = tintedIconManagerFactory::create,
             createBatteryMeterViewController = batteryMeterViewControllerFactory::create,
@@ -196,7 +203,7 @@ constructor(
 @Composable
 private fun SceneScope.ShadeScene(
     notificationStackScrollView: NotificationScrollView,
-    viewModel: ShadeSceneViewModel,
+    viewModel: ShadeSceneContentViewModel,
     notificationsPlaceholderViewModel: NotificationsPlaceholderViewModel,
     createTintedIconManager: (ViewGroup, StatusBarLocation) -> TintedIconManager,
     createBatteryMeterViewController: (ViewGroup, StatusBarLocation) -> BatteryMeterViewController,
@@ -242,7 +249,7 @@ private fun SceneScope.ShadeScene(
 @Composable
 private fun SceneScope.SingleShade(
     notificationStackScrollView: NotificationScrollView,
-    viewModel: ShadeSceneViewModel,
+    viewModel: ShadeSceneContentViewModel,
     notificationsPlaceholderViewModel: NotificationsPlaceholderViewModel,
     createTintedIconManager: (ViewGroup, StatusBarLocation) -> TintedIconManager,
     createBatteryMeterViewController: (ViewGroup, StatusBarLocation) -> BatteryMeterViewController,
@@ -261,7 +268,7 @@ private fun SceneScope.SingleShade(
             key = QuickSettings.SharedValues.TilesSquishiness,
             canOverflow = false
         )
-    val isClickable by viewModel.isClickable.collectAsStateWithLifecycle()
+    val isEmptySpaceClickable by viewModel.isEmptySpaceClickable.collectAsStateWithLifecycle()
     val isMediaVisible by viewModel.isMediaVisible.collectAsStateWithLifecycle()
 
     val shouldPunchHoleBehindScrim =
@@ -299,9 +306,9 @@ private fun SceneScope.SingleShade(
                             horizontalAlignment = Alignment.CenterHorizontally,
                             modifier =
                                 Modifier.fillMaxWidth()
-                                    .thenIf(isClickable) {
+                                    .thenIf(isEmptySpaceClickable) {
                                         Modifier.clickable(
-                                            onClick = { viewModel.onContentClicked() }
+                                            onClick = { viewModel.onEmptySpaceClicked() }
                                         )
                                     }
                                     .thenIf(cutoutLocation != CutoutLocation.CENTER) {
@@ -309,7 +316,7 @@ private fun SceneScope.SingleShade(
                                     },
                         ) {
                             CollapsedShadeHeader(
-                                viewModel = viewModel.shadeHeaderViewModel,
+                                viewModelFactory = viewModel.shadeHeaderViewModelFactory,
                                 createTintedIconManager = createTintedIconManager,
                                 createBatteryMeterViewController = createBatteryMeterViewController,
                                 statusBarIconController = statusBarIconController,
@@ -361,6 +368,8 @@ private fun SceneScope.SingleShade(
                             maxScrimTop = { maxNotifScrimTop.value },
                             shadeMode = ShadeMode.Single,
                             shouldPunchHoleBehindScrim = shouldPunchHoleBehindScrim,
+                            onEmptySpaceClick =
+                                viewModel::onEmptySpaceClicked.takeIf { isEmptySpaceClickable },
                         )
                     },
                 )
@@ -407,7 +416,7 @@ private fun SceneScope.SingleShade(
 @Composable
 private fun SceneScope.SplitShade(
     notificationStackScrollView: NotificationScrollView,
-    viewModel: ShadeSceneViewModel,
+    viewModel: ShadeSceneContentViewModel,
     notificationsPlaceholderViewModel: NotificationsPlaceholderViewModel,
     createTintedIconManager: (ViewGroup, StatusBarLocation) -> TintedIconManager,
     createBatteryMeterViewController: (ViewGroup, StatusBarLocation) -> BatteryMeterViewController,
@@ -468,8 +477,10 @@ private fun SceneScope.SplitShade(
         }
     }
 
-    val brightnessMirrorShowing by
-        viewModel.brightnessMirrorViewModel.isShowing.collectAsStateWithLifecycle()
+    val brightnessMirrorViewModel = rememberViewModel {
+        viewModel.brightnessMirrorViewModelFactory.create()
+    }
+    val brightnessMirrorShowing by brightnessMirrorViewModel.isShowing.collectAsStateWithLifecycle()
     val contentAlpha by
         animateFloatAsState(
             targetValue = if (brightnessMirrorShowing) 0f else 1f,
@@ -481,6 +492,7 @@ private fun SceneScope.SplitShade(
         onDispose { notificationsPlaceholderViewModel.setAlphaForBrightnessMirror(1f) }
     }
 
+    val isEmptySpaceClickable by viewModel.isEmptySpaceClickable.collectAsStateWithLifecycle()
     val isMediaVisible by viewModel.isMediaVisible.collectAsStateWithLifecycle()
 
     val brightnessMirrorShowingModifier = Modifier.graphicsLayer { alpha = contentAlpha }
@@ -503,7 +515,7 @@ private fun SceneScope.SplitShade(
             modifier = Modifier.fillMaxSize(),
         ) {
             CollapsedShadeHeader(
-                viewModel = viewModel.shadeHeaderViewModel,
+                viewModelFactory = viewModel.shadeHeaderViewModelFactory,
                 createTintedIconManager = createTintedIconManager,
                 createBatteryMeterViewController = createBatteryMeterViewController,
                 statusBarIconController = statusBarIconController,
@@ -522,7 +534,7 @@ private fun SceneScope.SplitShade(
                             .graphicsLayer { translationX = unfoldTranslationXForStartSide },
                 ) {
                     BrightnessMirror(
-                        viewModel = viewModel.brightnessMirrorViewModel,
+                        viewModel = brightnessMirrorViewModel,
                         qsSceneAdapter = viewModel.qsSceneAdapter,
                         // Need to use the offset measured from the container as the header
                         // has to be accounted for
@@ -591,6 +603,8 @@ private fun SceneScope.SplitShade(
                     shouldPunchHoleBehindScrim = false,
                     shouldReserveSpaceForNavBar = false,
                     shadeMode = ShadeMode.Split,
+                    onEmptySpaceClick =
+                        viewModel::onEmptySpaceClicked.takeIf { isEmptySpaceClickable },
                     modifier =
                         Modifier.weight(1f)
                             .fillMaxHeight()

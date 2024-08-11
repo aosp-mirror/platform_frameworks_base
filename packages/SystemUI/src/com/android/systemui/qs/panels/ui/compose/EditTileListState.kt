@@ -20,22 +20,23 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.runtime.toMutableStateList
+import com.android.systemui.qs.panels.shared.model.SizedTile
 import com.android.systemui.qs.panels.ui.viewmodel.EditTileViewModel
 import com.android.systemui.qs.pipeline.shared.TileSpec
 
 @Composable
 fun rememberEditListState(
-    tiles: List<EditTileViewModel>,
+    tiles: List<SizedTile<EditTileViewModel>>,
 ): EditTileListState {
     return remember(tiles) { EditTileListState(tiles) }
 }
 
 /** Holds the temporary state of the tile list during a drag movement where we move tiles around. */
-class EditTileListState(tiles: List<EditTileViewModel>) {
-    val tiles: SnapshotStateList<EditTileViewModel> = tiles.toMutableStateList()
+class EditTileListState(tiles: List<SizedTile<EditTileViewModel>>) {
+    val tiles: SnapshotStateList<SizedTile<EditTileViewModel>> = tiles.toMutableStateList()
 
-    fun move(tile: EditTileViewModel, target: TileSpec) {
-        val fromIndex = indexOf(tile.tileSpec)
+    fun move(sizedTile: SizedTile<EditTileViewModel>, target: TileSpec) {
+        val fromIndex = indexOf(sizedTile.tile.tileSpec)
         val toIndex = indexOf(target)
 
         if (toIndex == -1 || fromIndex == toIndex) {
@@ -44,7 +45,7 @@ class EditTileListState(tiles: List<EditTileViewModel>) {
 
         if (fromIndex == -1) {
             // If tile isn't in the list, simply insert it
-            tiles.add(toIndex, tile)
+            tiles.add(toIndex, sizedTile)
         } else {
             // If tile is present in the list, move it
             tiles.apply { add(toIndex, removeAt(fromIndex)) }
@@ -52,10 +53,10 @@ class EditTileListState(tiles: List<EditTileViewModel>) {
     }
 
     fun remove(tileSpec: TileSpec) {
-        tiles.removeIf { it.tileSpec == tileSpec }
+        tiles.removeIf { it.tile.tileSpec == tileSpec }
     }
 
     fun indexOf(tileSpec: TileSpec): Int {
-        return tiles.indexOfFirst { it.tileSpec == tileSpec }
+        return tiles.indexOfFirst { it.tile.tileSpec == tileSpec }
     }
 }

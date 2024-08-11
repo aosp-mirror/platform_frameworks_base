@@ -16,7 +16,9 @@
 
 package com.android.packageinstaller.v2.ui
 
-import android.app.Activity
+import android.app.Activity.RESULT_CANCELED
+import android.app.Activity.RESULT_FIRST_USER
+import android.app.Activity.RESULT_OK
 import android.app.AppOpsManager
 import android.content.ActivityNotFoundException
 import android.content.Intent
@@ -135,7 +137,7 @@ class InstallLaunch : FragmentActivity(), InstallActionListener {
                     }
 
                     InstallAborted.ABORT_REASON_POLICY -> showPolicyRestrictionDialog(aborted)
-                    else -> setResult(Activity.RESULT_CANCELED, null, true)
+                    else -> setResult(RESULT_CANCELED, null, true)
                 }
             }
 
@@ -169,7 +171,7 @@ class InstallLaunch : FragmentActivity(), InstallActionListener {
                 val success = installStage as InstallSuccess
                 if (success.shouldReturnResult) {
                     val successIntent = success.resultIntent
-                    setResult(Activity.RESULT_OK, successIntent, true)
+                    setResult(RESULT_OK, successIntent, true)
                 } else {
                     val successDialog = InstallSuccessFragment(success)
                     showDialogInner(successDialog)
@@ -180,7 +182,7 @@ class InstallLaunch : FragmentActivity(), InstallActionListener {
                 val failed = installStage as InstallFailed
                 if (failed.shouldReturnResult) {
                     val failureIntent = failed.resultIntent
-                    setResult(Activity.RESULT_FIRST_USER, failureIntent, true)
+                    setResult(RESULT_FIRST_USER, failureIntent, true)
                 } else {
                     val failureDialog = InstallFailedFragment(failed)
                     showDialogInner(failureDialog)
@@ -219,7 +221,7 @@ class InstallLaunch : FragmentActivity(), InstallActionListener {
             shouldFinish = blockedByPolicyDialog == null
             showDialogInner(blockedByPolicyDialog)
         }
-        setResult(Activity.RESULT_CANCELED, null, shouldFinish)
+        setResult(RESULT_CANCELED, null, shouldFinish)
     }
 
     /**
@@ -257,6 +259,10 @@ class InstallLaunch : FragmentActivity(), InstallActionListener {
 
     fun setResult(resultCode: Int, data: Intent?, shouldFinish: Boolean) {
         super.setResult(resultCode, data)
+        if (resultCode != RESULT_OK) {
+            // Let callers know that the install was cancelled
+            installViewModel!!.cleanupInstall()
+        }
         if (shouldFinish) {
             finish()
         }
@@ -282,7 +288,7 @@ class InstallLaunch : FragmentActivity(), InstallActionListener {
         if (stageCode == InstallStage.STAGE_USER_ACTION_REQUIRED) {
             installViewModel!!.cleanupInstall()
         }
-        setResult(Activity.RESULT_CANCELED, null, true)
+        setResult(RESULT_CANCELED, null, true)
     }
 
     override fun onNegativeResponse(resultCode: Int, data: Intent?) {
@@ -318,7 +324,7 @@ class InstallLaunch : FragmentActivity(), InstallActionListener {
         if (localLogv) {
             Log.d(LOG_TAG, "Opening $intent")
         }
-        setResult(Activity.RESULT_OK, intent, true)
+        setResult(RESULT_OK, intent, true)
         if (intent != null && intent.hasCategory(Intent.CATEGORY_LAUNCHER)) {
             startActivity(intent)
         }

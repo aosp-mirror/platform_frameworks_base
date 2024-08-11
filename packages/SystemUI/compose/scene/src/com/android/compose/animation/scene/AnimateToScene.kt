@@ -16,15 +16,10 @@
 
 package com.android.compose.animation.scene
 
-import androidx.compose.animation.core.Animatable
-import androidx.compose.animation.core.AnimationVector1D
-import androidx.compose.animation.core.SpringSpec
 import com.android.compose.animation.scene.content.state.TransitionState
 import kotlin.math.absoluteValue
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.launch
 
 /**
  * Transition to [target] using a canned animation. This function will try to be smart and take over
@@ -50,7 +45,7 @@ internal fun CoroutineScope.animateToScene(
 
     return when (transitionState) {
         is TransitionState.Idle -> {
-            animate(
+            animateToScene(
                 layoutState,
                 target,
                 transitionKey,
@@ -80,13 +75,11 @@ internal fun CoroutineScope.animateToScene(
                 } else {
                     // The transition is in progress: start the canned animation at the same
                     // progress as it was in.
-                    animate(
+                    animateToScene(
                         layoutState,
                         target,
                         transitionKey,
                         isInitiatedByUserInput,
-                        initialProgress = progress,
-                        initialVelocity = transitionState.progressVelocity,
                         replacedTransition = transitionState,
                     )
                 }
@@ -102,13 +95,11 @@ internal fun CoroutineScope.animateToScene(
                     layoutState.finishTransition(transitionState, target)
                     null
                 } else {
-                    animate(
+                    animateToScene(
                         layoutState,
                         target,
                         transitionKey,
                         isInitiatedByUserInput,
-                        initialProgress = progress,
-                        initialVelocity = transitionState.progressVelocity,
                         reversed = true,
                         replacedTransition = transitionState,
                     )
@@ -140,7 +131,7 @@ internal fun CoroutineScope.animateToScene(
                     animateToScene(layoutState, animateFrom, transitionKey = null)
                 }
 
-                animate(
+                animateToScene(
                     layoutState,
                     target,
                     transitionKey,
@@ -154,103 +145,68 @@ internal fun CoroutineScope.animateToScene(
     }
 }
 
-private fun CoroutineScope.animate(
+private fun CoroutineScope.animateToScene(
     layoutState: MutableSceneTransitionLayoutStateImpl,
     targetScene: SceneKey,
     transitionKey: TransitionKey?,
     isInitiatedByUserInput: Boolean,
     replacedTransition: TransitionState.Transition?,
-    initialProgress: Float = 0f,
-    initialVelocity: Float = 0f,
     reversed: Boolean = false,
     fromScene: SceneKey = layoutState.transitionState.currentScene,
     chain: Boolean = true,
 ): TransitionState.Transition {
+    val oneOffAnimation = OneOffAnimation()
     val targetProgress = if (reversed) 0f else 1f
     val transition =
         if (reversed) {
-            OneOffTransition(
+            OneOffSceneTransition(
                 key = transitionKey,
                 fromScene = targetScene,
                 toScene = fromScene,
                 currentScene = targetScene,
                 isInitiatedByUserInput = isInitiatedByUserInput,
-                isUserInputOngoing = false,
                 replacedTransition = replacedTransition,
+                oneOffAnimation = oneOffAnimation,
             )
         } else {
-            OneOffTransition(
+            OneOffSceneTransition(
                 key = transitionKey,
                 fromScene = fromScene,
                 toScene = targetScene,
                 currentScene = targetScene,
                 isInitiatedByUserInput = isInitiatedByUserInput,
-                isUserInputOngoing = false,
                 replacedTransition = replacedTransition,
+                oneOffAnimation = oneOffAnimation,
             )
         }
 
-    // Change the current layout state to start this new transition. This will compute the
-    // TransformationSpec associated to this transition, which we need to initialize the Animatable
-    // that will actually animate it.
-    layoutState.startTransition(transition, chain)
-
-    // The transition now contains the transformation spec that we should use to instantiate the
-    // Animatable.
-    val animationSpec = transition.transformationSpec.progressSpec
-    val visibilityThreshold =
-        (animationSpec as? SpringSpec)?.visibilityThreshold ?: ProgressVisibilityThreshold
-    val animatable =
-        Animatable(initialProgress, visibilityThreshold = visibilityThreshold).also {
-            transition.animatable = it
-        }
-
-    // Animate the progress to its target value.
-    // Important: We start atomically to make sure that we start the coroutine even if it is
-    // cancelled right after it is launched, so that finishTransition() is correctly called.
-    // Otherwise, this transition will never be stopped and we will never settle to Idle.
-    transition.job =
-        launch(start = CoroutineStart.ATOMIC) {
-            try {
-                animatable.animateTo(targetProgress, animationSpec, initialVelocity)
-            } finally {
-                layoutState.finishTransition(transition, targetScene)
-            }
-        }
+    animateContent(
+        transition = transition,
+        oneOffAnimation = oneOffAnimation,
+        targetProgress = targetProgress,
+        startTransition = { layoutState.startTransition(transition, chain) },
+        finishTransition = { layoutState.finishTransition(transition, targetScene) },
+    )
 
     return transition
 }
 
-private class OneOffTransition(
+private class OneOffSceneTransition(
     override val key: TransitionKey?,
     fromScene: SceneKey,
     toScene: SceneKey,
     override val currentScene: SceneKey,
     override val isInitiatedByUserInput: Boolean,
-    override val isUserInputOngoing: Boolean,
     replacedTransition: TransitionState.Transition?,
+    private val oneOffAnimation: OneOffAnimation,
 ) : TransitionState.Transition(fromScene, toScene, replacedTransition) {
-    /**
-     * The animatable used to animate this transition.
-     *
-     * Note: This is lateinit because we need to first create this Transition object so that
-     * [SceneTransitionLayoutState] can compute the transformations and animation spec associated to
-     * it, which is need to initialize this Animatable.
-     */
-    lateinit var animatable: Animatable<Float, AnimationVector1D>
-
-    /** The job that is animating [animatable]. */
-    lateinit var job: Job
-
     override val progress: Float
-        get() = animatable.value
+        get() = oneOffAnimation.progress
 
     override val progressVelocity: Float
-        get() = animatable.velocity
+        get() = oneOffAnimation.progressVelocity
 
-    override fun finish(): Job = job
+    override val isUserInputOngoing: Boolean = false
+
+    override fun finish(): Job = oneOffAnimation.finish()
 }
-
-// TODO(b/290184746): Compute a good default visibility threshold that depends on the layout size
-// and screen density.
-internal const val ProgressVisibilityThreshold = 1e-3f

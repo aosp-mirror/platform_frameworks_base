@@ -33,7 +33,7 @@ object QSComposeFragment {
     /** Is the refactor enabled */
     @JvmStatic
     inline val isEnabled
-        get() = Flags.qsUiRefactorComposeFragment() && NewQsUI.isEnabled
+        get() = Flags.qsUiRefactorComposeFragment()
 
     /**
      * Called to ensure code is only run when the flag is enabled. This protects users from the

@@ -16,6 +16,9 @@
 
 package com.android.wm.shell.dagger;
 
+import static android.provider.Settings.Secure.COMPAT_UI_EDUCATION_SHOWING;
+
+import static com.android.wm.shell.compatui.CompatUIStatusManager.COMPAT_UI_EDUCATION_HIDDEN;
 import static com.android.wm.shell.onehanded.OneHandedController.SUPPORT_ONE_HANDED_MODE;
 
 import android.annotation.NonNull;
@@ -24,6 +27,7 @@ import android.content.Context;
 import android.content.pm.PackageManager;
 import android.os.Handler;
 import android.os.SystemProperties;
+import android.provider.Settings;
 import android.view.IWindowManager;
 import android.view.accessibility.AccessibilityManager;
 import android.window.SystemPerformanceHinter;
@@ -72,6 +76,7 @@ import com.android.wm.shell.common.pip.SizeSpecSource;
 import com.android.wm.shell.compatui.CompatUIConfiguration;
 import com.android.wm.shell.compatui.CompatUIController;
 import com.android.wm.shell.compatui.CompatUIShellCommandHandler;
+import com.android.wm.shell.compatui.CompatUIStatusManager;
 import com.android.wm.shell.compatui.api.CompatUIComponentIdGenerator;
 import com.android.wm.shell.compatui.api.CompatUIHandler;
 import com.android.wm.shell.compatui.api.CompatUIRepository;
@@ -254,7 +259,8 @@ public abstract class WMShellBaseModule {
             Lazy<AccessibilityManager> accessibilityManager,
             CompatUIRepository compatUIRepository,
             @NonNull CompatUIState compatUIState,
-            @NonNull CompatUIComponentIdGenerator componentIdGenerator) {
+            @NonNull CompatUIComponentIdGenerator componentIdGenerator,
+            CompatUIStatusManager compatUIStatusManager) {
         if (!context.getResources().getBoolean(R.bool.config_enableCompatUIController)) {
             return Optional.empty();
         }
@@ -276,7 +282,22 @@ public abstract class WMShellBaseModule {
                         dockStateReader.get(),
                         compatUIConfiguration.get(),
                         compatUIShellCommandHandler.get(),
-                        accessibilityManager.get()));
+                        accessibilityManager.get(),
+                        compatUIStatusManager));
+    }
+
+    @WMSingleton
+    @Provides
+    static CompatUIStatusManager provideCompatUIStatusManager(@NonNull Context context) {
+        if (Flags.enableCompatUiVisibilityStatus()) {
+            return new CompatUIStatusManager(
+                    newState -> Settings.Secure.putInt(context.getContentResolver(),
+                            COMPAT_UI_EDUCATION_SHOWING, newState),
+                    () -> Settings.Secure.getInt(context.getContentResolver(),
+                            COMPAT_UI_EDUCATION_SHOWING, COMPAT_UI_EDUCATION_HIDDEN));
+        } else {
+            return new CompatUIStatusManager();
+        }
     }
 
     @WMSingleton

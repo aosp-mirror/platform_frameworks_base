@@ -32,7 +32,6 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.res.ResourcesCompat
 import com.android.compose.animation.scene.ElementKey
 import com.android.compose.animation.scene.SceneScope
-import com.android.keyguard.logging.KeyguardQuickAffordancesLogger
 import com.android.systemui.animation.view.LaunchableImageView
 import com.android.systemui.keyguard.ui.binder.KeyguardIndicationAreaBinder
 import com.android.systemui.keyguard.ui.binder.KeyguardQuickAffordanceViewBinder
@@ -40,10 +39,8 @@ import com.android.systemui.keyguard.ui.view.KeyguardIndicationArea
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardIndicationAreaViewModel
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardQuickAffordanceViewModel
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardQuickAffordancesCombinedViewModel
-import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.res.R
 import com.android.systemui.statusbar.KeyguardIndicationController
-import com.android.systemui.statusbar.VibratorHelper
 import javax.inject.Inject
 import kotlinx.coroutines.DisposableHandle
 import kotlinx.coroutines.flow.Flow
@@ -52,11 +49,9 @@ class BottomAreaSection
 @Inject
 constructor(
     private val viewModel: KeyguardQuickAffordancesCombinedViewModel,
-    private val falsingManager: FalsingManager,
-    private val vibratorHelper: VibratorHelper,
     private val indicationController: KeyguardIndicationController,
     private val indicationAreaViewModel: KeyguardIndicationAreaViewModel,
-    private val shortcutsLogger: KeyguardQuickAffordancesLogger,
+    private val keyguardQuickAffordanceViewBinder: KeyguardQuickAffordanceViewBinder,
 ) {
     /**
      * Renders a single lockscreen shortcut.
@@ -80,9 +75,8 @@ constructor(
                     viewId = if (isStart) R.id.start_button else R.id.end_button,
                     viewModel = if (isStart) viewModel.startButton else viewModel.endButton,
                     transitionAlpha = viewModel.transitionAlpha,
-                    falsingManager = falsingManager,
-                    vibratorHelper = vibratorHelper,
                     indicationController = indicationController,
+                    binder = keyguardQuickAffordanceViewBinder,
                     modifier =
                         if (applyPadding) {
                             Modifier.shortcutPadding()
@@ -124,9 +118,8 @@ constructor(
         @IdRes viewId: Int,
         viewModel: Flow<KeyguardQuickAffordanceViewModel>,
         transitionAlpha: Flow<Float>,
-        falsingManager: FalsingManager,
-        vibratorHelper: VibratorHelper,
         indicationController: KeyguardIndicationController,
+        binder: KeyguardQuickAffordanceViewBinder,
         modifier: Modifier = Modifier,
     ) {
         val (binding, setBinding) = mutableStateOf<KeyguardQuickAffordanceViewBinder.Binding?>(null)
@@ -158,13 +151,10 @@ constructor(
                     }
 
                 setBinding(
-                    KeyguardQuickAffordanceViewBinder.bind(
+                    binder.bind(
                         view,
                         viewModel,
                         transitionAlpha,
-                        falsingManager,
-                        vibratorHelper,
-                        shortcutsLogger,
                     ) {
                         indicationController.showTransientIndication(it)
                     }

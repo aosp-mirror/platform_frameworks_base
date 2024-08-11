@@ -3507,7 +3507,7 @@ class Task extends TaskFragment {
                         | StartingWindowInfo.TYPE_PARAMETER_WINDOWLESS);
         if ((info.startingWindowTypeParameter
                 & StartingWindowInfo.TYPE_PARAMETER_ACTIVITY_CREATED) != 0) {
-            final WindowState topMainWin = getWindow(w -> w.mAttrs.type == TYPE_BASE_APPLICATION);
+            final WindowState topMainWin = getTopFullscreenMainWindow();
             if (topMainWin != null) {
                 info.mainWindowLayoutParams = topMainWin.getAttrs();
                 info.requestedVisibleTypes = topMainWin.getRequestedVisibleTypes();

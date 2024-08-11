@@ -2334,6 +2334,12 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
                     Log.e(TAG, "doKeyguard: we're still showing, but going away. Re-show the "
                             + "keyguard rather than short-circuiting and resetting.");
                 } else {
+                    // We're removing "reset" in the refactor - "resetting" the views will happen
+                    // as a reaction to the root cause of the "reset" signal.
+                    if (KeyguardWmStateRefactor.isEnabled()) {
+                        return;
+                    }
+
                     // It's already showing, and we're not trying to show it while the screen is
                     // off. We can simply reset all of the views, but don't hide the bouncer in case
                     // the user is currently interacting with it.
@@ -2399,6 +2405,16 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
      */
     private void handleDismiss(IKeyguardDismissCallback callback, CharSequence message) {
         if (mShowing) {
+            if (KeyguardWmStateRefactor.isEnabled()) {
+                Log.d(TAG, "Dismissing keyguard with keyguard_wm_refactor_enabled: "
+                        + "cancelDoKeyguardLaterLocked");
+
+                // This won't get canceled in onKeyguardExitFinished() if the refactor is enabled,
+                // which can lead to the keyguard re-showing. Cancel here for now; this can be
+                // removed once we migrate the logic that posts doKeyguardLater in the first place.
+                cancelDoKeyguardLaterLocked();
+            }
+
             if (callback != null) {
                 mDismissCallbackRegistry.addCallback(callback);
             }

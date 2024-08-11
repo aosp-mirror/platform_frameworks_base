@@ -208,8 +208,8 @@ class DeviceItemActionInteractorTest : SysuiTestCase() {
         with(kosmos) {
             testScope.runTest {
                 whenever(cachedBluetoothDevice.address).thenReturn(DEVICE_ADDRESS)
-                whenever(cachedBluetoothDevice.connectableProfiles)
-                        .thenReturn(listOf(leAudioProfile))
+                whenever(cachedBluetoothDevice.uiAccessibleProfiles)
+                    .thenReturn(listOf(leAudioProfile))
 
                 whenever(BluetoothUtils.isAudioSharingEnabled()).thenReturn(true)
                 whenever(localBluetoothManager.profileManager).thenReturn(profileManager)
@@ -243,8 +243,8 @@ class DeviceItemActionInteractorTest : SysuiTestCase() {
             testScope.runTest {
                 whenever(cachedBluetoothDevice.address).thenReturn(DEVICE_ADDRESS)
                 whenever(cachedBluetoothDevice.device).thenReturn(bluetoothDevice)
-                whenever(cachedBluetoothDevice.connectableProfiles)
-                        .thenReturn(listOf(leAudioProfile))
+                whenever(cachedBluetoothDevice.uiAccessibleProfiles)
+                    .thenReturn(listOf(leAudioProfile))
 
                 whenever(BluetoothUtils.isAudioSharingEnabled()).thenReturn(true)
                 whenever(localBluetoothManager.profileManager).thenReturn(profileManager)
@@ -254,12 +254,12 @@ class DeviceItemActionInteractorTest : SysuiTestCase() {
 
                 whenever(BluetoothUtils.isBroadcasting(ArgumentMatchers.any())).thenReturn(true)
                 whenever(
-                    BluetoothUtils.hasConnectedBroadcastSource(
-                        ArgumentMatchers.any(),
-                        ArgumentMatchers.any()
+                        BluetoothUtils.hasConnectedBroadcastSource(
+                            ArgumentMatchers.any(),
+                            ArgumentMatchers.any()
+                        )
                     )
-                )
-                        .thenReturn(false)
+                    .thenReturn(false)
 
                 actionInteractorImpl.onClick(connectedMediaDeviceItem, dialog)
                 verify(activityStarter)

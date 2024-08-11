@@ -97,3 +97,13 @@ flag {
   description: "Initialize GL even when HWUI is set to use Vulkan. This improves app startup time for apps using GL."
   bug: "335172671"
 }
+
+flag {
+  name: "resample_gainmap_regions"
+  namespace: "core_graphics"
+  description: "Resample gainmaps when decoding regions, to improve visual quality"
+  bug: "352847821"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}

@@ -51,14 +51,14 @@ class AlternateBouncerViewModelTest : SysuiTestCase() {
     @Test
     fun showPrimaryBouncer() =
         testScope.runTest {
-            underTest.showPrimaryBouncer()
+            underTest.onTapped()
             verify(statusBarKeyguardViewManager).showPrimaryBouncer(any())
         }
 
     @Test
     fun hideAlternateBouncer() =
         testScope.runTest {
-            underTest.hideAlternateBouncer()
+            underTest.onRemovedFromWindow()
             verify(statusBarKeyguardViewManager).hideAlternateBouncer(any())
         }
 
@@ -99,34 +99,6 @@ class AlternateBouncerViewModelTest : SysuiTestCase() {
             )
             assertThat(scrimAlphas.size).isEqualTo(5)
             scrimAlphas.forEach { assertThat(it).isIn(Range.closed(0f, 1f)) }
-        }
-
-    @Test
-    fun forcePluginOpen() =
-        testScope.runTest {
-            val forcePluginOpen by collectLastValue(underTest.forcePluginOpen)
-
-            transitionRepository.sendTransitionSteps(
-                listOf(
-                    stepToAlternateBouncer(0f, TransitionState.STARTED),
-                    stepToAlternateBouncer(.4f),
-                    stepToAlternateBouncer(.6f),
-                    stepToAlternateBouncer(1f),
-                ),
-                testScope,
-            )
-            assertThat(forcePluginOpen).isTrue()
-
-            transitionRepository.sendTransitionSteps(
-                listOf(
-                    stepFromAlternateBouncer(0f, TransitionState.STARTED),
-                    stepFromAlternateBouncer(.3f),
-                    stepFromAlternateBouncer(.6f),
-                    stepFromAlternateBouncer(1f),
-                ),
-                testScope,
-            )
-            assertThat(forcePluginOpen).isFalse()
         }
 
     @Test
