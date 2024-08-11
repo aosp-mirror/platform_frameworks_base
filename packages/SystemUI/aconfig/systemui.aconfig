@@ -156,17 +156,6 @@ flag {
 }
 
 flag {
-   name: "pss_app_selector_abrupt_exit_fix"
-   namespace: "systemui"
-   description: "Fixes the app selector abruptly disappearing without an animation, when the"
-        "selected task is the foreground task."
-   bug: "314385883"
-   metadata {
-        purpose: PURPOSE_BUGFIX
-   }
-}
-
-flag {
    name: "pss_app_selector_recents_split_screen"
    namespace: "systemui"
    description: "Allows recent apps selected for partial screenshare to be launched in split screen mode"
@@ -1271,6 +1260,13 @@ flag {
    namespace: "systemui"
    description: "Adding haptic component infrastructure to sliders in Compose."
    bug: "341968766"
+}
+
+flag {
+    name: "new_picker_ui"
+    namespace: "systemui"
+    description: "Enables the BC25 design of the customization picker UI."
+    bug: "339081035"
 }
 
 flag {

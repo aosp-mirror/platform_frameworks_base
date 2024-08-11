@@ -83,6 +83,7 @@ constructor(
     private val communalInteractor: CommunalInteractor,
     private val keyguardTransitionInteractor: KeyguardTransitionInteractor,
     private val notificationsKeyguardInteractor: NotificationsKeyguardInteractor,
+    private val alternateBouncerToAodTransitionViewModel: AlternateBouncerToAodTransitionViewModel,
     private val alternateBouncerToGoneTransitionViewModel:
         AlternateBouncerToGoneTransitionViewModel,
     private val alternateBouncerToLockscreenTransitionViewModel:
@@ -239,6 +240,7 @@ constructor(
                 merge(
                         alphaOnShadeExpansion,
                         keyguardInteractor.dismissAlpha,
+                        alternateBouncerToAodTransitionViewModel.lockscreenAlpha(viewState),
                         alternateBouncerToGoneTransitionViewModel.lockscreenAlpha(viewState),
                         alternateBouncerToLockscreenTransitionViewModel.lockscreenAlpha(viewState),
                         aodToGoneTransitionViewModel.lockscreenAlpha(viewState),

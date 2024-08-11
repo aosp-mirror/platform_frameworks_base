@@ -115,6 +115,17 @@ public class DisplayWindowSettingsTests extends WindowTestsBase {
     }
 
     @Test
+    public void testPrimaryDisplayUnchanged_whenWindowingModeAlreadySet_NoFreeformSupport() {
+        mPrimaryDisplay.getDefaultTaskDisplayArea().setWindowingMode(
+                WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW);
+
+        mDisplayWindowSettings.applySettingsToDisplayLocked(mPrimaryDisplay);
+
+        assertEquals(WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW,
+                mPrimaryDisplay.getDefaultTaskDisplayArea().getWindowingMode());
+    }
+
+    @Test
     public void testPrimaryDisplayDefaultToFullscreen_HasFreeformSupport_NonPc_NoDesktopMode() {
         mWm.mAtmService.mSupportsFreeformWindowManagement = true;
 

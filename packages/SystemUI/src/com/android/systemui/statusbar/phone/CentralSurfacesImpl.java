@@ -2353,7 +2353,11 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
                     && !mStatusBarKeyguardViewManager.primaryBouncerIsOrWillBeShowing()
                     && mStatusBarKeyguardViewManager.isSecure()) {
                 Log.d(TAG, "showBouncerOrLockScreenIfKeyguard, showingBouncer");
-                mStatusBarKeyguardViewManager.showBouncer(true /* scrimmed */);
+                if (SceneContainerFlag.isEnabled()) {
+                    mStatusBarKeyguardViewManager.showPrimaryBouncer(true /* scrimmed */);
+                } else {
+                    mStatusBarKeyguardViewManager.showBouncer(true /* scrimmed */);
+                }
             }
         }
     }
@@ -2985,7 +2989,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
                 @Override
                 public void onFalse() {
                     // Hides quick settings, bouncer, and quick-quick settings.
-                    mStatusBarKeyguardViewManager.reset(true);
+                    mStatusBarKeyguardViewManager.reset(true, /* isFalsingReset= */true);
                 }
             };
 

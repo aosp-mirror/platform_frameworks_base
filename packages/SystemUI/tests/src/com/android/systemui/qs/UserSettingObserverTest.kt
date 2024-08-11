@@ -17,25 +17,34 @@
 package com.android.systemui.qs
 
 import android.os.Handler
+import android.platform.test.flag.junit.FlagsParameterization
 import android.testing.TestableLooper
-import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
+import com.android.systemui.Flags
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.util.settings.FakeSettings
+import com.android.systemui.kosmos.Kosmos
+import com.android.systemui.kosmos.testScope
 import com.android.systemui.util.settings.SecureSettings
+import com.android.systemui.util.settings.fakeSettings
 import com.google.common.truth.Truth.assertThat
 import junit.framework.Assert.fail
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.runCurrent
+import kotlinx.coroutines.test.runTest
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import platform.test.runner.parameterized.ParameterizedAndroidJunit4
+import platform.test.runner.parameterized.Parameters
 
 private typealias Callback = (Int, Boolean) -> Unit
 
+@OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
-@RunWith(AndroidJUnit4::class)
+@RunWith(ParameterizedAndroidJunit4::class)
 @TestableLooper.RunWithLooper
-class UserSettingObserverTest : SysuiTestCase() {
+class UserSettingObserverTest(flags: FlagsParameterization) : SysuiTestCase() {
 
     companion object {
         private const val TEST_SETTING = "setting"
@@ -43,7 +52,22 @@ class UserSettingObserverTest : SysuiTestCase() {
         private const val OTHER_USER = 1
         private const val DEFAULT_VALUE = 1
         private val FAIL_CALLBACK: Callback = { _, _ -> fail("Callback should not be called") }
+
+        @JvmStatic
+        @Parameters(name = "{0}")
+        fun getParams(): List<FlagsParameterization> {
+            return FlagsParameterization.allCombinationsOf(
+                Flags.FLAG_QS_REGISTER_SETTING_OBSERVER_ON_BG_THREAD
+            )
+        }
     }
+
+    init {
+        mSetFlagsRule.setFlagsParameterization(flags)
+    }
+
+    private val kosmos = Kosmos()
+    private val testScope = kosmos.testScope
 
     private lateinit var testableLooper: TestableLooper
     private lateinit var setting: UserSettingObserver
@@ -54,7 +78,7 @@ class UserSettingObserverTest : SysuiTestCase() {
     @Before
     fun setUp() {
         testableLooper = TestableLooper.get(this)
-        secureSettings = FakeSettings()
+        secureSettings = kosmos.fakeSettings
 
         setting =
             object :
@@ -76,92 +100,107 @@ class UserSettingObserverTest : SysuiTestCase() {
 
     @After
     fun tearDown() {
-        setting.isListening = false
+        setListening(false)
     }
 
     @Test
-    fun testNotListeningByDefault() {
-        callback = FAIL_CALLBACK
+    fun testNotListeningByDefault() =
+        testScope.runTest {
+            callback = FAIL_CALLBACK
 
-        assertThat(setting.isListening).isFalse()
-        secureSettings.putIntForUser(TEST_SETTING, 2, USER)
-        testableLooper.processAllMessages()
-    }
-
-    @Test
-    fun testChangedWhenListeningCallsCallback() {
-        var changed = false
-        callback = { _, _ -> changed = true }
-
-        setting.isListening = true
-        secureSettings.putIntForUser(TEST_SETTING, 2, USER)
-        testableLooper.processAllMessages()
-
-        assertThat(changed).isTrue()
-    }
+            assertThat(setting.isListening).isFalse()
+            secureSettings.putIntForUser(TEST_SETTING, 2, USER)
+            testableLooper.processAllMessages()
+        }
 
     @Test
-    fun testListensToCorrectSetting() {
-        callback = FAIL_CALLBACK
+    fun testChangedWhenListeningCallsCallback() =
+        testScope.runTest {
+            var changed = false
+            callback = { _, _ -> changed = true }
 
-        setting.isListening = true
-        secureSettings.putIntForUser("other", 2, USER)
-        testableLooper.processAllMessages()
-    }
+            setListening(true)
+            secureSettings.putIntForUser(TEST_SETTING, 2, USER)
+            testableLooper.processAllMessages()
 
-    @Test
-    fun testGetCorrectValue() {
-        secureSettings.putIntForUser(TEST_SETTING, 2, USER)
-        assertThat(setting.value).isEqualTo(2)
-
-        secureSettings.putIntForUser(TEST_SETTING, 4, USER)
-        assertThat(setting.value).isEqualTo(4)
-    }
+            assertThat(changed).isTrue()
+        }
 
     @Test
-    fun testSetValue() {
-        setting.value = 5
-        assertThat(secureSettings.getIntForUser(TEST_SETTING, USER)).isEqualTo(5)
-    }
+    fun testListensToCorrectSetting() =
+        testScope.runTest {
+            callback = FAIL_CALLBACK
+
+            setListening(true)
+            secureSettings.putIntForUser("other", 2, USER)
+            testableLooper.processAllMessages()
+        }
 
     @Test
-    fun testChangeUser() {
-        setting.isListening = true
-        setting.setUserId(OTHER_USER)
+    fun testGetCorrectValue() =
+        testScope.runTest {
+            secureSettings.putIntForUser(TEST_SETTING, 2, USER)
+            assertThat(setting.value).isEqualTo(2)
 
-        setting.isListening = true
-        assertThat(setting.currentUser).isEqualTo(OTHER_USER)
-    }
-
-    @Test
-    fun testDoesntListenInOtherUsers() {
-        callback = FAIL_CALLBACK
-        setting.isListening = true
-
-        secureSettings.putIntForUser(TEST_SETTING, 3, OTHER_USER)
-        testableLooper.processAllMessages()
-    }
+            secureSettings.putIntForUser(TEST_SETTING, 4, USER)
+            assertThat(setting.value).isEqualTo(4)
+        }
 
     @Test
-    fun testListensToCorrectUserAfterChange() {
-        var changed = false
-        callback = { _, _ -> changed = true }
-
-        setting.isListening = true
-        setting.setUserId(OTHER_USER)
-        secureSettings.putIntForUser(TEST_SETTING, 2, OTHER_USER)
-        testableLooper.processAllMessages()
-
-        assertThat(changed).isTrue()
-    }
+    fun testSetValue() =
+        testScope.runTest {
+            setting.value = 5
+            assertThat(secureSettings.getIntForUser(TEST_SETTING, USER)).isEqualTo(5)
+        }
 
     @Test
-    fun testDefaultValue() {
-        // Check default value before listening
-        assertThat(setting.value).isEqualTo(DEFAULT_VALUE)
+    fun testChangeUser() =
+        testScope.runTest {
+            setListening(true)
+            setting.setUserId(OTHER_USER)
 
-        // Check default value if setting is not set
-        setting.isListening = true
-        assertThat(setting.value).isEqualTo(DEFAULT_VALUE)
+            setListening(true)
+            assertThat(setting.currentUser).isEqualTo(OTHER_USER)
+        }
+
+    @Test
+    fun testDoesntListenInOtherUsers() =
+        testScope.runTest {
+            callback = FAIL_CALLBACK
+            setListening(true)
+
+            secureSettings.putIntForUser(TEST_SETTING, 3, OTHER_USER)
+            testableLooper.processAllMessages()
+        }
+
+    @Test
+    fun testListensToCorrectUserAfterChange() =
+        testScope.runTest {
+            var changed = false
+            callback = { _, _ -> changed = true }
+
+            setListening(true)
+            setting.setUserId(OTHER_USER)
+            testScope.runCurrent()
+            secureSettings.putIntForUser(TEST_SETTING, 2, OTHER_USER)
+            testableLooper.processAllMessages()
+
+            assertThat(changed).isTrue()
+        }
+
+    @Test
+    fun testDefaultValue() =
+        testScope.runTest {
+            // Check default value before listening
+            assertThat(setting.value).isEqualTo(DEFAULT_VALUE)
+
+            // Check default value if setting is not set
+            setListening(true)
+            assertThat(setting.value).isEqualTo(DEFAULT_VALUE)
+        }
+
+    fun setListening(listening: Boolean) {
+        setting.isListening = listening
+        testScope.runCurrent()
     }
 }

@@ -50,6 +50,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.logging.InstanceId;
 import com.android.internal.protolog.ProtoLog;
 import com.android.launcher3.icons.BubbleIconFactory;
+import com.android.wm.shell.Flags;
 import com.android.wm.shell.bubbles.bar.BubbleBarExpandedView;
 import com.android.wm.shell.bubbles.bar.BubbleBarLayerView;
 import com.android.wm.shell.common.bubbles.BubbleInfo;
@@ -246,7 +247,23 @@ public class Bubble implements BubbleViewProvider {
         mAppIntent = intent;
         mDesiredHeight = Integer.MAX_VALUE;
         mPackageName = intent.getPackage();
+    }
 
+    private Bubble(ShortcutInfo info, Executor mainExecutor) {
+        mGroupKey = null;
+        mLocusId = null;
+        mFlags = 0;
+        mUser = info.getUserHandle();
+        mIcon = info.getIcon();
+        mIsAppBubble = false;
+        mKey = getBubbleKeyForShortcut(info);
+        mShowBubbleUpdateDot = false;
+        mMainExecutor = mainExecutor;
+        mTaskId = INVALID_TASK_ID;
+        mAppIntent = null;
+        mDesiredHeight = Integer.MAX_VALUE;
+        mPackageName = info.getPackage();
+        mShortcutInfo = info;
     }
 
     /** Creates an app bubble. */
@@ -263,6 +280,13 @@ public class Bubble implements BubbleViewProvider {
                 mainExecutor);
     }
 
+    /** Creates a shortcut bubble. */
+    public static Bubble createShortcutBubble(
+            ShortcutInfo info,
+            Executor mainExecutor) {
+        return new Bubble(info, mainExecutor);
+    }
+
     /**
      * Returns the key for an app bubble from an app with package name, {@code packageName} on an
      * Android user, {@code user}.
@@ -271,6 +295,14 @@ public class Bubble implements BubbleViewProvider {
         Objects.requireNonNull(packageName);
         Objects.requireNonNull(user);
         return KEY_APP_BUBBLE + ":" + user.getIdentifier()  + ":" + packageName;
+    }
+
+    /**
+     * Returns the key for a shortcut bubble using {@code packageName}, {@code user}, and the
+     * {@code shortcutInfo} id.
+     */
+    public static String getBubbleKeyForShortcut(ShortcutInfo info) {
+        return info.getPackage() + ":" + info.getUserId() + ":" + info.getId();
     }
 
     @VisibleForTesting(visibility = PRIVATE)
@@ -886,6 +918,17 @@ public class Bubble implements BubbleViewProvider {
     @Nullable
     PendingIntent getBubbleIntent() {
         return mIntent;
+    }
+
+    /**
+     * Whether this bubble represents the full app, i.e. the intent used is the launch
+     * intent for an app. In this case we don't show a badge on the icon.
+     */
+    public boolean isAppLaunchIntent() {
+        if (Flags.enableBubbleAnything() && mAppIntent != null) {
+            return mAppIntent.hasCategory("android.intent.category.LAUNCHER");
+        }
+        return false;
     }
 
     @Nullable

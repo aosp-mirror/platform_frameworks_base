@@ -51,14 +51,14 @@ class AlternateBouncerViewModelTest : SysuiTestCase() {
     @Test
     fun showPrimaryBouncer() =
         testScope.runTest {
-            underTest.showPrimaryBouncer()
+            underTest.onTapped()
             verify(statusBarKeyguardViewManager).showPrimaryBouncer(any())
         }
 
     @Test
     fun hideAlternateBouncer() =
         testScope.runTest {
-            underTest.hideAlternateBouncer()
+            underTest.onRemovedFromWindow()
             verify(statusBarKeyguardViewManager).hideAlternateBouncer(any())
         }
 

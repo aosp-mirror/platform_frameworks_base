@@ -561,7 +561,7 @@ class UserSettingsProxyTest : SysuiTestCase() {
     ) : UserSettingsProxy {
 
         private val mContentResolver = mock(ContentResolver::class.java)
-        private val userIdToSettingsValueMap: MutableMap<Int, MutableMap<String, String>> =
+        private val userIdToSettingsValueMap: MutableMap<Int, MutableMap<String, String?>> =
             mutableMapOf()
 
         override fun getContentResolver() = mContentResolver
@@ -577,7 +577,7 @@ class UserSettingsProxyTest : SysuiTestCase() {
 
         override fun putString(
             name: String,
-            value: String,
+            value: String?,
             overrideableByRestore: Boolean
         ): Boolean {
             userIdToSettingsValueMap[DEFAULT_USER_ID]?.put(name, value)
@@ -586,22 +586,22 @@ class UserSettingsProxyTest : SysuiTestCase() {
 
         override fun putString(
             name: String,
-            value: String,
-            tag: String,
+            value: String?,
+            tag: String?,
             makeDefault: Boolean
         ): Boolean {
             putStringForUser(name, value, DEFAULT_USER_ID)
             return true
         }
 
-        override fun putStringForUser(name: String, value: String, userHandle: Int): Boolean {
+        override fun putStringForUser(name: String, value: String?, userHandle: Int): Boolean {
             userIdToSettingsValueMap[userHandle] = mutableMapOf(Pair(name, value))
             return true
         }
 
         override fun putStringForUser(
             name: String,
-            value: String,
+            value: String?,
             tag: String?,
             makeDefault: Boolean,
             userHandle: Int,

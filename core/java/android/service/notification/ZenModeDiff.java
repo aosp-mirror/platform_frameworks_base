@@ -454,6 +454,8 @@ public class ZenModeDiff {
      */
     public static class RuleDiff extends BaseDiff {
         public static final String FIELD_ENABLED = "enabled";
+        public static final String FIELD_CONDITION_OVERRIDE = "conditionOverride";
+        @Deprecated
         public static final String FIELD_SNOOZING = "snoozing";
         public static final String FIELD_NAME = "name";
         public static final String FIELD_ZEN_MODE = "zenMode";
@@ -507,8 +509,15 @@ public class ZenModeDiff {
             if (from.enabled != to.enabled) {
                 addField(FIELD_ENABLED, new FieldDiff<>(from.enabled, to.enabled));
             }
-            if (from.snoozing != to.snoozing) {
-                addField(FIELD_SNOOZING, new FieldDiff<>(from.snoozing, to.snoozing));
+            if (Flags.modesApi() && Flags.modesUi()) {
+                if (from.conditionOverride != to.conditionOverride) {
+                    addField(FIELD_CONDITION_OVERRIDE,
+                            new FieldDiff<>(from.conditionOverride, to.conditionOverride));
+                }
+            } else {
+                if (from.snoozing != to.snoozing) {
+                    addField(FIELD_SNOOZING, new FieldDiff<>(from.snoozing, to.snoozing));
+                }
             }
             if (!Objects.equals(from.name, to.name)) {
                 addField(FIELD_NAME, new FieldDiff<>(from.name, to.name));

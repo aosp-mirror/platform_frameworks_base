@@ -1413,11 +1413,11 @@ final class DiscreteRegistry {
             pw.print("-");
             pw.print(flagsToString(mOpFlag));
             pw.print("] at ");
-            date.setTime(discretizeTimeStamp(mNoteTime));
+            date.setTime(mNoteTime);
             pw.print(sdf.format(date));
             if (mNoteDuration != -1) {
                 pw.print(" for ");
-                pw.print(discretizeDuration(mNoteDuration));
+                pw.print(mNoteDuration);
                 pw.print(" milliseconds ");
             }
             if (mAttributionFlags != AppOpsManager.ATTRIBUTION_FLAGS_NONE) {
