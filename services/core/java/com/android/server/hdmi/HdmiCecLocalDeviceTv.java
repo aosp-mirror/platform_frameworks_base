@@ -205,7 +205,9 @@ public final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
         resetSelectRequestBuffer();
         launchDeviceDiscovery();
         startQueuedActions();
-        if (!mDelayedMessageBuffer.isBuffered(Constants.MESSAGE_ACTIVE_SOURCE)) {
+        List<HdmiCecMessage> bufferedActiveSource = mDelayedMessageBuffer
+                .getBufferedMessagesWithOpcode(Constants.MESSAGE_ACTIVE_SOURCE);
+        if (bufferedActiveSource.isEmpty()) {
             addAndStartAction(new RequestActiveSourceAction(this, new IHdmiControlCallback.Stub() {
                 @Override
                 public void onComplete(int result) {
@@ -220,7 +222,31 @@ public final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
                     }
                 }
             }));
+        } else {
+            addCecDeviceForBufferedActiveSource(bufferedActiveSource.get(0));
         }
+    }
+
+    // Add a new CEC device with known information from the buffered <Active Source> message. This
+    // helps TvInputCallback#onInputAdded to be called such that the message can be processed and
+    // the TV to switch to the new active input.
+    @ServiceThreadOnly
+    private void addCecDeviceForBufferedActiveSource(HdmiCecMessage bufferedActiveSource) {
+        assertRunOnServiceThread();
+        if (bufferedActiveSource == null) {
+            return;
+        }
+        int source = bufferedActiveSource.getSource();
+        int physicalAddress = HdmiUtils.twoBytesToInt(bufferedActiveSource.getParams());
+        List<Integer> deviceTypes = HdmiUtils.getTypeFromAddress(source);
+        HdmiDeviceInfo newDevice = HdmiDeviceInfo.cecDeviceBuilder()
+                .setLogicalAddress(source)
+                .setPhysicalAddress(physicalAddress)
+                .setDisplayName(HdmiUtils.getDefaultDeviceName(source))
+                .setDeviceType(deviceTypes.get(0))
+                .setVendorId(Constants.VENDOR_ID_UNKNOWN)
+                .build();
+        mService.getHdmiCecNetwork().addCecDevice(newDevice);
     }
 
     @ServiceThreadOnly
