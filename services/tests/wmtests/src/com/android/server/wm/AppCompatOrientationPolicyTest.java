@@ -536,6 +536,25 @@ public class AppCompatOrientationPolicyTest extends WindowTestsBase {
             }
         }
 
+        @Override
+        void onPostActivityCreation(@NonNull ActivityRecord activity) {
+            super.onPostActivityCreation(activity);
+            spyOn(activity.mAppCompatController.getAppCompatAspectRatioOverrides());
+            spyOn(activity.mAppCompatController.getAppCompatAspectRatioPolicy());
+        }
+
+        @Override
+        void onPostDisplayContentCreation(@NonNull DisplayContent displayContent) {
+            super.onPostDisplayContentCreation(displayContent);
+            spyOn(displayContent.mAppCompatCameraPolicy);
+            if (displayContent.mAppCompatCameraPolicy.hasDisplayRotationCompatPolicy()) {
+                spyOn(displayContent.mAppCompatCameraPolicy.mDisplayRotationCompatPolicy);
+            }
+            if (displayContent.mAppCompatCameraPolicy.hasCameraCompatFreeformPolicy()) {
+                spyOn(displayContent.mAppCompatCameraPolicy.mCameraCompatFreeformPolicy);
+            }
+        }
+
         void prepareRelaunchingAfterRequestedOrientationChanged(boolean enabled) {
             getTopOrientationOverrides().setRelaunchingAfterRequestedOrientationChanged(enabled);
         }

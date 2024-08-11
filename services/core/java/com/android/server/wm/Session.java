@@ -324,22 +324,6 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
         Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
     }
 
-    @Override
-    public boolean performHapticFeedback(int effectId, int flags, int privFlags) {
-        final long ident = Binder.clearCallingIdentity();
-        try {
-            return mService.mPolicy.performHapticFeedback(mUid, mPackageName, effectId, null, flags,
-                    privFlags);
-        } finally {
-            Binder.restoreCallingIdentity(ident);
-        }
-    }
-
-    @Override
-    public void performHapticFeedbackAsync(int effectId, int flags, int privFlags) {
-        performHapticFeedback(effectId, flags, privFlags);
-    }
-
     /* Drag/drop */
 
     @Override

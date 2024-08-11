@@ -711,6 +711,16 @@ public class TouchMonitorTest extends SysuiTestCase {
     }
 
     @Test
+    public void testDestroy_cleansUpHandler() {
+        final TouchHandler touchHandler = createTouchHandler();
+
+        final Environment environment = new Environment(Stream.of(touchHandler)
+                .collect(Collectors.toCollection(HashSet::new)), mKosmos);
+        environment.destroyMonitor();
+        verify(touchHandler).onDestroy();
+    }
+
+    @Test
     public void testLastSessionPop_createsNewInputSession() {
         final TouchHandler touchHandler = createTouchHandler();
 

@@ -346,7 +346,7 @@ interface SettingsProxy {
      * @param value to associate with the name
      * @return true if the value was set, false on database errors
      */
-    fun putString(name: String, value: String): Boolean
+    fun putString(name: String, value: String?): Boolean
 
     /**
      * Store a name/value pair into the database.
@@ -377,7 +377,7 @@ interface SettingsProxy {
      * @return true if the value was set, false on database errors.
      * @see .resetToDefaults
      */
-    fun putString(name: String, value: String, tag: String, makeDefault: Boolean): Boolean
+    fun putString(name: String, value: String?, tag: String?, makeDefault: Boolean): Boolean
 
     /**
      * Convenience function for retrieving a single secure settings value as an integer. Note that

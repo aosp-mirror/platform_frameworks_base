@@ -542,8 +542,6 @@ public class AccessibilityMenuServiceTest {
         final Context context = sInstrumentation.getTargetContext();
         final UserManager userManager = context.getSystemService(UserManager.class);
         userManager.setUserRestriction(restriction, isRestricted);
-        // Re-enable the service for the restriction to take effect.
-        enableA11yMenuService(context);
     }
 
     private static void unlockSignal() throws IOException {

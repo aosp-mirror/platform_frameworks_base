@@ -23,8 +23,10 @@ import static com.android.wm.shell.protolog.ShellProtoLogGroup.WM_SHELL_BUBBLES;
 import android.annotation.NonNull;
 import android.app.PendingIntent;
 import android.content.Context;
+import android.content.Intent;
 import android.content.LocusId;
 import android.content.pm.ShortcutInfo;
+import android.os.UserHandle;
 import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
@@ -421,23 +423,19 @@ public class BubbleData {
         Bubble bubbleToReturn = getBubbleInStackWithKey(key);
 
         if (bubbleToReturn == null) {
-            bubbleToReturn = getOverflowBubbleWithKey(key);
-            if (bubbleToReturn != null) {
-                // Promoting from overflow
-                mOverflowBubbles.remove(bubbleToReturn);
-                if (mOverflowBubbles.isEmpty()) {
-                    mStateChange.showOverflowChanged = true;
+            // Check if it's in the overflow
+            bubbleToReturn = findAndRemoveBubbleFromOverflow(key);
+            if (bubbleToReturn == null) {
+                if (entry != null) {
+                    // Not in the overflow, have an entry, so it's a new bubble
+                    bubbleToReturn = new Bubble(entry,
+                            mBubbleMetadataFlagListener,
+                            mCancelledListener,
+                            mMainExecutor);
+                } else {
+                    // If there's no entry it must be a persisted bubble
+                    bubbleToReturn = persistedBubble;
                 }
-            } else if (mPendingBubbles.containsKey(key)) {
-                // Update while it was pending
-                bubbleToReturn = mPendingBubbles.get(key);
-            } else if (entry != null) {
-                // New bubble
-                bubbleToReturn = new Bubble(entry, mBubbleMetadataFlagListener, mCancelledListener,
-                        mMainExecutor);
-            } else {
-                // Persisted bubble being promoted
-                bubbleToReturn = persistedBubble;
             }
         }
 
@@ -445,6 +443,46 @@ public class BubbleData {
             bubbleToReturn.setEntry(entry);
         }
         mPendingBubbles.put(key, bubbleToReturn);
+        return bubbleToReturn;
+    }
+
+    Bubble getOrCreateBubble(ShortcutInfo info) {
+        String bubbleKey = Bubble.getBubbleKeyForShortcut(info);
+        Bubble bubbleToReturn = findAndRemoveBubbleFromOverflow(bubbleKey);
+        if (bubbleToReturn == null) {
+            bubbleToReturn = Bubble.createShortcutBubble(info, mMainExecutor);
+        }
+        return bubbleToReturn;
+    }
+
+    Bubble getOrCreateBubble(Intent intent) {
+        UserHandle user = UserHandle.of(mCurrentUserId);
+        String bubbleKey = Bubble.getAppBubbleKeyForApp(intent.getPackage(),
+                user);
+        Bubble bubbleToReturn = findAndRemoveBubbleFromOverflow(bubbleKey);
+        if (bubbleToReturn == null) {
+            bubbleToReturn = Bubble.createAppBubble(intent, user, null, mMainExecutor);
+        }
+        return bubbleToReturn;
+    }
+
+    @Nullable
+    private Bubble findAndRemoveBubbleFromOverflow(String key) {
+        Bubble bubbleToReturn = getBubbleInStackWithKey(key);
+        if (bubbleToReturn != null) {
+            return bubbleToReturn;
+        }
+        bubbleToReturn = getOverflowBubbleWithKey(key);
+        if (bubbleToReturn != null) {
+            mOverflowBubbles.remove(bubbleToReturn);
+            // Promoting from overflow
+            mOverflowBubbles.remove(bubbleToReturn);
+            if (mOverflowBubbles.isEmpty()) {
+                mStateChange.showOverflowChanged = true;
+            }
+        } else if (mPendingBubbles.containsKey(key)) {
+            bubbleToReturn = mPendingBubbles.get(key);
+        }
         return bubbleToReturn;
     }
 

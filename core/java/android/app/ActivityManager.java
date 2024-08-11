@@ -16,6 +16,7 @@
 
 package android.app;
 
+import static android.app.Instrumentation.DEBUG_FINISH_ACTIVITY;
 import static android.app.WindowConfiguration.activityTypeToString;
 import static android.app.WindowConfiguration.windowingModeToString;
 import static android.content.Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS;
@@ -80,6 +81,7 @@ import android.os.WorkSource;
 import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.util.Singleton;
 import android.util.Size;
 import android.view.WindowInsetsController.Appearance;
@@ -6011,6 +6013,10 @@ public class ActivityManager {
          * Finishes all activities in this task and removes it from the recent tasks list.
          */
         public void finishAndRemoveTask() {
+            if (DEBUG_FINISH_ACTIVITY) {
+                Log.d(Instrumentation.TAG, "AppTask#finishAndRemoveTask: task="
+                        + getTaskInfo(), new Throwable());
+            }
             try {
                 mAppTaskImpl.finishAndRemoveTask();
             } catch (RemoteException e) {

@@ -533,6 +533,8 @@ class CommunalViewModelTest(flags: FlagsParameterization) : SysuiTestCase() {
             keyguardRepository.setDozeTransitionModel(
                 DozeTransitionModel(from = DozeStateModel.DOZE, to = DozeStateModel.FINISH)
             )
+            advanceTimeBy(600L)
+
             keyguardRepository.setDreaming(true)
             keyguardRepository.setDreamingWithOverlay(true)
             advanceTimeBy(60L)
@@ -641,6 +643,7 @@ class CommunalViewModelTest(flags: FlagsParameterization) : SysuiTestCase() {
             keyguardRepository.setDozeTransitionModel(
                 DozeTransitionModel(from = DozeStateModel.DOZE, to = DozeStateModel.FINISH)
             )
+            advanceTimeBy(600L)
             keyguardRepository.setDreaming(true)
             keyguardRepository.setDreamingWithOverlay(true)
             advanceTimeBy(60L)
@@ -699,6 +702,7 @@ class CommunalViewModelTest(flags: FlagsParameterization) : SysuiTestCase() {
             keyguardRepository.setDozeTransitionModel(
                 DozeTransitionModel(from = DozeStateModel.DOZE, to = DozeStateModel.FINISH)
             )
+            advanceTimeBy(600L)
             keyguardRepository.setDreaming(true)
             keyguardRepository.setDreamingWithOverlay(true)
             advanceTimeBy(60L)

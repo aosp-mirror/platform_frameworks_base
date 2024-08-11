@@ -232,6 +232,9 @@ interface KeyguardRepository {
     /** Receive an event for doze time tick */
     val dozeTimeTick: Flow<Long>
 
+    /** Receive an event lockscreen being shown in a dismissible state */
+    val showDismissibleKeyguard: MutableStateFlow<Long>
+
     /** Observable for DismissAction */
     val dismissAction: StateFlow<DismissAction>
 
@@ -304,6 +307,8 @@ interface KeyguardRepository {
     fun setIsActiveDreamLockscreenHosted(isLockscreenHosted: Boolean)
 
     fun dozeTimeTick()
+
+    fun showDismissibleKeyguard()
 
     fun setDismissAction(dismissAction: DismissAction)
 
@@ -437,6 +442,12 @@ constructor(
 
     override fun dozeTimeTick() {
         _dozeTimeTick.value = systemClock.uptimeMillis()
+    }
+
+    override val showDismissibleKeyguard = MutableStateFlow<Long>(0L)
+
+    override fun showDismissibleKeyguard() {
+        showDismissibleKeyguard.value = systemClock.uptimeMillis()
     }
 
     private val _lastDozeTapToWakePosition = MutableStateFlow<Point?>(null)

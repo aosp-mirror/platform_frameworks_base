@@ -36,9 +36,12 @@ import android.content.ComponentName;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
+import android.graphics.Rect;
 import android.view.Surface;
 
+import androidx.annotation.CallSuper;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import com.android.server.wm.utils.TestComponentStack;
 
@@ -74,16 +77,33 @@ class AppCompatActivityRobot {
     private final int mDisplayHeight;
     private DisplayContent mDisplayContent;
 
+    @Nullable
+    private Consumer<ActivityRecord> mOnPostActivityCreation;
+
+    @Nullable
+    private Consumer<DisplayContent> mOnPostDisplayContentCreation;
+
     AppCompatActivityRobot(@NonNull WindowManagerService wm,
             @NonNull ActivityTaskManagerService atm, @NonNull ActivityTaskSupervisor supervisor,
-            int displayWidth, int displayHeight) {
+            int displayWidth, int displayHeight,
+            @Nullable Consumer<ActivityRecord> onPostActivityCreation,
+            @Nullable Consumer<DisplayContent> onPostDisplayContentCreation) {
         mAtm = atm;
         mSupervisor = supervisor;
         mDisplayWidth = displayWidth;
         mDisplayHeight = displayHeight;
         mActivityStack = new TestComponentStack<>();
         mTaskStack = new TestComponentStack<>();
+        mOnPostActivityCreation = onPostActivityCreation;
+        mOnPostDisplayContentCreation = onPostDisplayContentCreation;
         createNewDisplay();
+    }
+
+    AppCompatActivityRobot(@NonNull WindowManagerService wm,
+            @NonNull ActivityTaskManagerService atm, @NonNull ActivityTaskSupervisor supervisor,
+            int displayWidth, int displayHeight) {
+        this(wm, atm, supervisor, displayWidth, displayHeight, /* onPostActivityCreation */ null,
+                /* onPostDisplayContentCreation */ null);
     }
 
     AppCompatActivityRobot(@NonNull WindowManagerService wm,
@@ -96,6 +116,10 @@ class AppCompatActivityRobot {
                 /* inNewDisplay */ false);
     }
 
+    void createActivityWithComponentWithoutTask() {
+        createActivityWithComponentInNewTask(/* inNewTask */ false, /* inNewDisplay */ false);
+    }
+
     void createActivityWithComponentInNewTask() {
         createActivityWithComponentInNewTask(/* inNewTask */ true, /* inNewDisplay */ false);
     }
@@ -103,7 +127,6 @@ class AppCompatActivityRobot {
     void createActivityWithComponentInNewTaskAndDisplay() {
         createActivityWithComponentInNewTask(/* inNewTask */ true, /* inNewDisplay */ true);
     }
-
 
     void configureTopActivity(float minAspect, float maxAspect, int screenOrientation,
             boolean isUnresizable) {
@@ -128,6 +151,14 @@ class AppCompatActivityRobot {
 
     void setDisplayNaturalOrientation(@Configuration.Orientation int naturalOrientation) {
         doReturn(naturalOrientation).when(mDisplayContent).getNaturalOrientation();
+    }
+
+    void configureTaskBounds(@NonNull Rect taskBounds) {
+        doReturn(taskBounds).when(mTaskStack.top()).getBounds();
+    }
+
+    void configureTopActivityBounds(@NonNull Rect activityBounds) {
+        doReturn(activityBounds).when(mActivityStack.top()).getBounds();
     }
 
     @NonNull
@@ -167,6 +198,10 @@ class AppCompatActivityRobot {
     void setTopActivityEligibleForOrientationOverride(boolean enabled) {
         doReturn(enabled).when(getTopDisplayRotationCompatPolicy())
                 .isActivityEligibleForOrientationOverride(eq(mActivityStack.top()));
+    }
+
+    void setTopActivityInTransition(boolean inTransition) {
+        doReturn(inTransition).when(mActivityStack.top()).isInTransition();
     }
 
     void setShouldApplyUserMinAspectRatioOverride(boolean enabled) {
@@ -238,21 +273,20 @@ class AppCompatActivityRobot {
     void createNewDisplay() {
         mDisplayContent = new TestDisplayContent.Builder(mAtm, mDisplayWidth, mDisplayHeight)
                 .build();
-        spyOn(mDisplayContent);
-        spyOnAppCompatCameraPolicy();
+        onPostDisplayContentCreation(mDisplayContent);
     }
 
     void createNewTask() {
         final Task newTask = new WindowTestsBase.TaskBuilder(mSupervisor)
                 .setDisplay(mDisplayContent).build();
-        pushTask(newTask);
+        mTaskStack.push(newTask);
     }
 
     void createNewTaskWithBaseActivity() {
         final Task newTask = new WindowTestsBase.TaskBuilder(mSupervisor)
                 .setCreateActivity(true)
                 .setDisplay(mDisplayContent).build();
-        pushTask(newTask);
+        mTaskStack.push(newTask);
         pushActivity(newTask.getTopNonFinishingActivity());
     }
 
@@ -378,6 +412,34 @@ class AppCompatActivityRobot {
         pushActivity(newActivity);
     }
 
+    /**
+     * Specific Robots can override this method to add operation to run on a newly created
+     * {@link ActivityRecord}. Common case is to invoke spyOn().
+     *
+     * @param activity The newly created {@link ActivityRecord}.
+     */
+    @CallSuper
+    void onPostActivityCreation(@NonNull ActivityRecord activity) {
+        spyOn(activity.mLetterboxUiController);
+        if (mOnPostActivityCreation != null) {
+            mOnPostActivityCreation.accept(activity);
+        }
+    }
+
+    /**
+     * Specific Robots can override this method to add operation to run on a newly created
+     * {@link DisplayContent}. Common case is to invoke spyOn().
+     *
+     * @param displayContent The newly created {@link DisplayContent}.
+     */
+    @CallSuper
+    void onPostDisplayContentCreation(@NonNull DisplayContent displayContent) {
+        spyOn(mDisplayContent);
+        if (mOnPostDisplayContentCreation != null) {
+            mOnPostDisplayContentCreation.accept(mDisplayContent);
+        }
+    }
+
     private void createActivityWithComponentInNewTask(boolean inNewTask, boolean inNewDisplay) {
         if (inNewDisplay) {
             createNewDisplay();
@@ -385,14 +447,16 @@ class AppCompatActivityRobot {
         if (inNewTask) {
             createNewTask();
         }
-        final ActivityRecord activity = new WindowTestsBase.ActivityBuilder(mAtm)
-                .setOnTop(true)
-                .setTask(mTaskStack.top())
+        final WindowTestsBase.ActivityBuilder activityBuilder =
+                new WindowTestsBase.ActivityBuilder(mAtm).setOnTop(true)
                 // Set the component to be that of the test class in order
                 // to enable compat changes
-                .setComponent(ComponentName.createRelative(mAtm.mContext, TEST_COMPONENT_NAME))
-                .build();
-        pushActivity(activity);
+                .setComponent(ComponentName.createRelative(mAtm.mContext, TEST_COMPONENT_NAME));
+        if (!mTaskStack.isEmpty()) {
+            // We put the Activity in the current task if any.
+            activityBuilder.setTask(mTaskStack.top());
+        }
+        pushActivity(activityBuilder.build());
     }
 
     /**
@@ -438,28 +502,6 @@ class AppCompatActivityRobot {
     // We add the activity to the stack and spyOn() on its properties.
     private void pushActivity(@NonNull ActivityRecord activity) {
         mActivityStack.push(activity);
-        spyOn(activity);
-        // TODO (b/351763164): Use these spyOn calls only when necessary.
-        spyOn(activity.mAppCompatController.getTransparentPolicy());
-        spyOn(activity.mAppCompatController.getAppCompatAspectRatioOverrides());
-        spyOn(activity.mAppCompatController.getAppCompatAspectRatioPolicy());
-        spyOn(activity.mAppCompatController.getAppCompatFocusOverrides());
-        spyOn(activity.mAppCompatController.getAppCompatResizeOverrides());
-        spyOn(activity.mLetterboxUiController);
-    }
-
-    private void pushTask(@NonNull Task task) {
-        spyOn(task);
-        mTaskStack.push(task);
-    }
-
-    private void spyOnAppCompatCameraPolicy() {
-        spyOn(mDisplayContent.mAppCompatCameraPolicy);
-        if (mDisplayContent.mAppCompatCameraPolicy.hasDisplayRotationCompatPolicy()) {
-            spyOn(mDisplayContent.mAppCompatCameraPolicy.mDisplayRotationCompatPolicy);
-        }
-        if (mDisplayContent.mAppCompatCameraPolicy.hasCameraCompatFreeformPolicy()) {
-            spyOn(mDisplayContent.mAppCompatCameraPolicy.mCameraCompatFreeformPolicy);
-        }
+        onPostActivityCreation(activity);
     }
 }

@@ -44,12 +44,14 @@ import com.android.systemui.battery.BatteryMeterViewController
 import com.android.systemui.brightness.ui.compose.BrightnessSliderContainer
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.keyguard.ui.composable.LockscreenContent
+import com.android.systemui.lifecycle.rememberViewModel
 import com.android.systemui.qs.panels.ui.compose.EditMode
 import com.android.systemui.qs.panels.ui.compose.TileGrid
 import com.android.systemui.qs.ui.composable.QuickSettingsShade.Transitions.QuickSettingsLayoutEnter
 import com.android.systemui.qs.ui.composable.QuickSettingsShade.Transitions.QuickSettingsLayoutExit
 import com.android.systemui.qs.ui.viewmodel.QuickSettingsContainerViewModel
-import com.android.systemui.qs.ui.viewmodel.QuickSettingsShadeSceneViewModel
+import com.android.systemui.qs.ui.viewmodel.QuickSettingsShadeSceneActionsViewModel
+import com.android.systemui.qs.ui.viewmodel.QuickSettingsShadeSceneContentViewModel
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.scene.ui.composable.ComposableScene
 import com.android.systemui.shade.ui.composable.ExpandedShadeHeader
@@ -66,9 +68,10 @@ import kotlinx.coroutines.flow.Flow
 class QuickSettingsShadeScene
 @Inject
 constructor(
-    private val viewModel: QuickSettingsShadeSceneViewModel,
+    private val actionsViewModelFactory: QuickSettingsShadeSceneActionsViewModel.Factory,
+    private val contentViewModelFactory: QuickSettingsShadeSceneContentViewModel.Factory,
     private val lockscreenContent: Lazy<Optional<LockscreenContent>>,
-    private val shadeHeaderViewModel: ShadeHeaderViewModel,
+    private val shadeHeaderViewModelFactory: ShadeHeaderViewModel.Factory,
     private val tintedIconManagerFactory: TintedIconManager.Factory,
     private val batteryMeterViewControllerFactory: BatteryMeterViewController.Factory,
     private val statusBarIconController: StatusBarIconController,
@@ -76,21 +79,26 @@ constructor(
 
     override val key = Scenes.QuickSettingsShade
 
+    private val actionsViewModel: QuickSettingsShadeSceneActionsViewModel by lazy {
+        actionsViewModelFactory.create()
+    }
+
     override val destinationScenes: Flow<Map<UserAction, UserActionResult>> =
-        viewModel.destinationScenes
+        actionsViewModel.actions
 
     @Composable
     override fun SceneScope.Content(
         modifier: Modifier,
     ) {
+        val viewModel = rememberViewModel { contentViewModelFactory.create() }
         OverlayShade(
-            viewModel = viewModel.overlayShadeViewModel,
+            viewModelFactory = viewModel.overlayShadeViewModelFactory,
             lockscreenContent = lockscreenContent,
             modifier = modifier,
         ) {
             Column {
                 ExpandedShadeHeader(
-                    viewModel = shadeHeaderViewModel,
+                    viewModelFactory = shadeHeaderViewModelFactory,
                     createTintedIconManager = tintedIconManagerFactory::create,
                     createBatteryMeterViewController = batteryMeterViewControllerFactory::create,
                     statusBarIconController = statusBarIconController,

@@ -23,6 +23,7 @@ import static java.lang.annotation.RetentionPolicy.SOURCE;
 
 import android.app.NotificationChannel;
 import android.content.Intent;
+import android.content.pm.ShortcutInfo;
 import android.content.pm.UserInfo;
 import android.graphics.drawable.Icon;
 import android.hardware.HardwareBuffer;
@@ -115,6 +116,14 @@ public interface Bubbles {
      * @param entry the notification for the bubble to be selected
      */
     void expandStackAndSelectBubble(BubbleEntry entry);
+
+    /**
+     * Request the stack expand if needed, then select the specified Bubble as current.
+     * If no bubble exists for this entry, one is created.
+     *
+     * @param info the shortcut info to use to create the bubble.
+     */
+    void expandStackAndSelectBubble(ShortcutInfo info);
 
     /**
      * Request the stack expand if needed, then select the specified Bubble as current.

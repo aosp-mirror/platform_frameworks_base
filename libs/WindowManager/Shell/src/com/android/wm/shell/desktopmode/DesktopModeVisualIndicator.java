@@ -27,6 +27,7 @@ import android.animation.AnimatorListenerAdapter;
 import android.animation.RectEvaluator;
 import android.animation.ValueAnimator;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.WindowConfiguration;
 import android.content.Context;
@@ -262,12 +263,22 @@ public class DesktopModeVisualIndicator {
 
     /**
      * Fade out indicator without fully releasing it. Animator fades it out while shrinking bounds.
+     *
+     * @param finishCallback called when animation ends or gets cancelled
      */
-    private void fadeOutIndicator() {
+    void fadeOutIndicator(@Nullable Runnable finishCallback) {
         final VisualIndicatorAnimator animator = VisualIndicatorAnimator
                 .fadeBoundsOut(mView, mCurrentType,
                         mDisplayController.getDisplayLayout(mTaskInfo.displayId));
         animator.start();
+        if (finishCallback != null) {
+            animator.addListener(new AnimatorListenerAdapter() {
+                @Override
+                public void onAnimationEnd(Animator animation) {
+                    finishCallback.run();
+                }
+            });
+        }
         mCurrentType = IndicatorType.NO_INDICATOR;
     }
 
@@ -282,7 +293,7 @@ public class DesktopModeVisualIndicator {
         if (mCurrentType == IndicatorType.NO_INDICATOR) {
             fadeInIndicator(newType);
         } else if (newType == IndicatorType.NO_INDICATOR) {
-            fadeOutIndicator();
+            fadeOutIndicator(null /* finishCallback */);
         } else {
             final VisualIndicatorAnimator animator = VisualIndicatorAnimator.animateIndicatorType(
                     mView, mDisplayController.getDisplayLayout(mTaskInfo.displayId), mCurrentType,

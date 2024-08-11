@@ -22,7 +22,6 @@ import com.android.systemui.flags.FeatureFlagsClassic
 import com.android.systemui.flags.Flags
 import com.android.systemui.scene.shared.flag.SceneContainerFlag
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
-import com.android.systemui.shade.ui.viewmodel.ShadeSceneViewModel
 import com.android.systemui.statusbar.notification.domain.interactor.HeadsUpNotificationInteractor
 import com.android.systemui.statusbar.notification.stack.domain.interactor.NotificationStackAppearanceInteractor
 import com.android.systemui.statusbar.notification.stack.shared.model.ShadeScrimBounds
@@ -30,7 +29,6 @@ import com.android.systemui.statusbar.notification.stack.shared.model.ShadeScrim
 import com.android.systemui.util.kotlin.FlowDumperImpl
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.StateFlow
 
 /**
  * ViewModel used by the Notification placeholders inside the scene container to update the
@@ -43,7 +41,6 @@ constructor(
     dumpManager: DumpManager,
     private val interactor: NotificationStackAppearanceInteractor,
     shadeInteractor: ShadeInteractor,
-    private val shadeSceneViewModel: ShadeSceneViewModel,
     private val headsUpNotificationInteractor: HeadsUpNotificationInteractor,
     featureFlags: FeatureFlagsClassic,
 ) : FlowDumperImpl(dumpManager) {
@@ -63,19 +60,10 @@ constructor(
         interactor.setConstrainedAvailableSpace(height)
     }
 
-    /** Notifies that empty space on the notification scrim has been clicked. */
-    fun onEmptySpaceClicked() {
-        shadeSceneViewModel.onContentClicked()
-    }
-
     /** Sets the content alpha for the current state of the brightness mirror */
     fun setAlphaForBrightnessMirror(alpha: Float) {
         interactor.setAlphaForBrightnessMirror(alpha)
     }
-
-    /** Whether or not the notification scrim should be clickable. */
-    val isClickable: StateFlow<Boolean>
-        get() = shadeSceneViewModel.isClickable
 
     /** True when a HUN is pinned or animating away. */
     val isHeadsUpOrAnimatingAway: Flow<Boolean> =

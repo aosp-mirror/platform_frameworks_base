@@ -685,9 +685,6 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
      */
     private @InsetsType int mCancelledForNewAnimationTypes;
 
-    private final Runnable mInvokeControllableInsetsChangedListeners =
-            this::invokeControllableInsetsChangedListeners;
-
     private final InsetsState.OnTraverseCallbacks mRemoveGoneSources =
             new InsetsState.OnTraverseCallbacks() {
 
@@ -2206,7 +2203,6 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
      * @return The types that are now animating due to a listener invoking control/show/hide
      */
     private @InsetsType int invokeControllableInsetsChangedListeners() {
-        mHandler.removeCallbacks(mInvokeControllableInsetsChangedListeners);
         mLastStartedAnimTypes = 0;
         @InsetsType int types = calculateControllableTypes();
         int size = mControllableInsetsChangedListeners.size();

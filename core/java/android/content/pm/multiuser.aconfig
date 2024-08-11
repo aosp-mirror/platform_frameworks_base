@@ -151,6 +151,16 @@ flag {
 }
 
 flag {
+    name: "fix_avatar_cross_user_leak"
+    namespace: "multiuser"
+    description: "Fix cross-user picture uri leak for avatar picker apps."
+    bug: "341688848"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+  }
+}
+
+flag {
     name: "fix_get_user_property_cache"
     namespace: "multiuser"
     description: "Cache is not optimised for getUserProperty for values below 0, eg. UserHandler.USER_NULL or UserHandle.USER_ALL"
@@ -278,6 +288,13 @@ flag {
 }
 
 flag {
+    name: "stop_previous_user_apps"
+    namespace: "multiuser"
+    description: "Stop the previous user apps early in a user switch"
+    bug: "323200731"
+}
+
+flag {
     name: "disable_private_space_items_on_home"
     namespace: "profile_experiences"
     description: "Disables adding items belonging to Private Space on Home Screen manually as well as automatically"
@@ -381,8 +398,12 @@ flag {
 }
 
 flag {
-  name: "unicorn_mode_refactoring_for_hsum"
+  name: "unicorn_mode_refactoring_for_hsum_read_only"
   namespace: "multiuser"
-  description: "Refactorings related to unicorn mode to work on HSUM mode"
+  description: "Refactorings related to unicorn mode to work on HSUM mode (Read only flag)"
   bug: "339201286"
+  is_fixed_read_only: true
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
 }

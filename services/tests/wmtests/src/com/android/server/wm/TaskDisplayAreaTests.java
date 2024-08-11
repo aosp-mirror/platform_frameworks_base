@@ -131,6 +131,7 @@ public class TaskDisplayAreaTests extends WindowTestsBase {
         final Task adjacentRootTask = createTask(
                 mDisplayContent, WINDOWING_MODE_MULTI_WINDOW, ACTIVITY_TYPE_STANDARD);
         adjacentRootTask.mCreatedByOrganizer = true;
+        createActivityRecord(adjacentRootTask);
         final TaskDisplayArea taskDisplayArea = rootTask.getDisplayArea();
         adjacentRootTask.setAdjacentTaskFragment(rootTask);
 

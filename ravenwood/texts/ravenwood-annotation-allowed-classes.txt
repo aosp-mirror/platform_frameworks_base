@@ -281,6 +281,12 @@ android.os.connectivity.WifiBatteryStats
 
 com.android.server.LocalServices
 
+com.android.internal.graphics.cam.Cam
+com.android.internal.graphics.cam.CamUtils
+com.android.internal.graphics.cam.Frame
+com.android.internal.graphics.cam.HctSolver
+com.android.internal.graphics.ColorUtils
+
 com.android.internal.util.BitUtils
 com.android.internal.util.BitwiseInputStream
 com.android.internal.util.BitwiseOutputStream

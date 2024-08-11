@@ -116,7 +116,6 @@ public class ZenModesBackend {
 
     private ZenMode getManualDndMode(ZenModeConfig config) {
         ZenModeConfig.ZenRule manualRule = config.manualRule;
-        // TODO: b/333682392 - Replace with final strings for name & trigger description
         AutomaticZenRule manualDndRule = new AutomaticZenRule.Builder(
                 mContext.getString(R.string.zen_mode_settings_title), manualRule.conditionId)
                 .setType(manualRule.type)
@@ -127,7 +126,7 @@ public class ZenModesBackend {
                 .setInterruptionFilter(NotificationManager.INTERRUPTION_FILTER_PRIORITY)
                 .build();
 
-        return ZenMode.manualDndMode(manualDndRule, config != null && config.isManualActive());
+        return ZenMode.manualDndMode(manualDndRule, config.isManualActive());
     }
 
     public void updateMode(ZenMode mode) {
@@ -175,7 +174,6 @@ public class ZenModesBackend {
             mNotificationManager.setZenMode(Settings.Global.ZEN_MODE_OFF, null, TAG,
                     /* fromUser= */ true);
         } else {
-            // TODO: b/333527800 - This should (potentially) snooze the rule if it was active.
             mNotificationManager.setAutomaticZenRuleState(mode.getId(),
                     new Condition(mode.getRule().getConditionId(), "", Condition.STATE_FALSE,
                             Condition.SOURCE_USER_ACTION));

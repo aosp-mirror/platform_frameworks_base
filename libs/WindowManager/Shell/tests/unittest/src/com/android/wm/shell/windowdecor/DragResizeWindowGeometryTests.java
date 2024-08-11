@@ -56,7 +56,7 @@ import org.junit.runner.RunWith;
 public class DragResizeWindowGeometryTests extends ShellTestCase {
     private static final Size TASK_SIZE = new Size(500, 1000);
     private static final int TASK_CORNER_RADIUS = 10;
-    private static final int EDGE_RESIZE_THICKNESS = 15;
+    private static final int EDGE_RESIZE_THICKNESS = 12;
     private static final int FINE_CORNER_SIZE = EDGE_RESIZE_THICKNESS * 2 + 10;
     private static final int LARGE_CORNER_SIZE = FINE_CORNER_SIZE + 10;
     private static final DragResizeWindowGeometry GEOMETRY = new DragResizeWindowGeometry(
