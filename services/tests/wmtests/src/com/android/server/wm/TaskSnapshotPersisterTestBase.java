@@ -227,7 +227,7 @@ class TaskSnapshotPersisterTestBase extends WindowTestsBase {
                     // disk.
                     false /* isLowResolution */,
                     mIsRealSnapshot, mWindowingMode, mSystemUiVisibility, mIsTranslucent,
-                    false /* hasImeSurface */);
+                    false /* hasImeSurface */, 0 /* uiMode */);
         }
     }
 }

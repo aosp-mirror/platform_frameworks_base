@@ -387,6 +387,12 @@ public class AppCompatCameraOverridesTest extends WindowTestsBase {
             super(wm, atm, supervisor);
         }
 
+        @Override
+        void onPostDisplayContentCreation(@NonNull DisplayContent displayContent) {
+            super.onPostDisplayContentCreation(displayContent);
+            spyOn(displayContent.mAppCompatCameraPolicy);
+        }
+
         void checkShouldRefreshActivityForCameraCompat(boolean expected) {
             Assert.assertEquals(getAppCompatCameraOverrides()
                     .shouldRefreshActivityForCameraCompat(), expected);

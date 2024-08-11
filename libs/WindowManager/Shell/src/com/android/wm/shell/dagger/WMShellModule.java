@@ -32,6 +32,7 @@ import com.android.internal.jank.InteractionJankMonitor;
 import com.android.internal.logging.UiEventLogger;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.launcher3.icons.IconProvider;
+import com.android.window.flags.Flags;
 import com.android.wm.shell.RootTaskDisplayAreaOrganizer;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.WindowManagerShellWrapper;
@@ -58,6 +59,7 @@ import com.android.wm.shell.common.TaskStackListenerImpl;
 import com.android.wm.shell.common.TransactionPool;
 import com.android.wm.shell.dagger.back.ShellBackAnimationModule;
 import com.android.wm.shell.dagger.pip.PipModule;
+import com.android.wm.shell.desktopmode.DefaultDragToDesktopTransitionHandler;
 import com.android.wm.shell.desktopmode.DesktopModeEventLogger;
 import com.android.wm.shell.desktopmode.DesktopModeLoggerTransitionObserver;
 import com.android.wm.shell.desktopmode.DesktopModeTaskRepository;
@@ -68,7 +70,9 @@ import com.android.wm.shell.desktopmode.DragToDesktopTransitionHandler;
 import com.android.wm.shell.desktopmode.EnterDesktopTaskTransitionHandler;
 import com.android.wm.shell.desktopmode.ExitDesktopTaskTransitionHandler;
 import com.android.wm.shell.desktopmode.ReturnToDragStartAnimator;
+import com.android.wm.shell.desktopmode.SpringDragToDesktopTransitionHandler;
 import com.android.wm.shell.desktopmode.ToggleResizeDesktopTaskTransitionHandler;
+import com.android.wm.shell.desktopmode.education.data.AppHandleEducationDatastoreRepository;
 import com.android.wm.shell.draganddrop.DragAndDropController;
 import com.android.wm.shell.draganddrop.GlobalDragListener;
 import com.android.wm.shell.freeform.FreeformComponents;
@@ -603,10 +607,12 @@ public abstract class WMShellModule {
             Context context,
             Transitions transitions,
             RootTaskDisplayAreaOrganizer rootTaskDisplayAreaOrganizer,
-            Optional<DesktopTasksLimiter> desktopTasksLimiter,
             InteractionJankMonitor interactionJankMonitor) {
-        return new DragToDesktopTransitionHandler(context, transitions,
-                rootTaskDisplayAreaOrganizer, interactionJankMonitor);
+        return Flags.enableDesktopWindowingTransitions()
+                ? new SpringDragToDesktopTransitionHandler(context, transitions,
+                        rootTaskDisplayAreaOrganizer, interactionJankMonitor)
+                : new DefaultDragToDesktopTransitionHandler(context, transitions,
+                        rootTaskDisplayAreaOrganizer, interactionJankMonitor);
     }
 
     @WMSingleton
@@ -672,6 +678,13 @@ public abstract class WMShellModule {
     @Provides
     static DesktopModeEventLogger provideDesktopModeEventLogger() {
         return new DesktopModeEventLogger();
+    }
+
+    @WMSingleton
+    @Provides
+    static AppHandleEducationDatastoreRepository provideAppHandleEducationDatastoreRepository(
+            Context context) {
+        return new AppHandleEducationDatastoreRepository(context);
     }
 
     //

@@ -74,11 +74,33 @@ constructor(
         listenForGoneToAodOrDozing()
         listenForGoneToDreaming()
         listenForGoneToLockscreenOrHub()
+        listenForGoneToOccluded()
         listenForGoneToDreamingLockscreenHosted()
     }
 
     fun showKeyguard() {
         scope.launch("$TAG#showKeyguard") { startTransitionTo(KeyguardState.LOCKSCREEN) }
+    }
+
+    /**
+     * A special case supported on foldables, where folding the device may put the device on an
+     * unlocked lockscreen, but if an occluding app is already showing (like a active phone call),
+     * then go directly to OCCLUDED.
+     */
+    private fun listenForGoneToOccluded() {
+        scope.launch("$TAG#listenForGoneToOccluded") {
+            keyguardInteractor.showDismissibleKeyguard
+                .filterRelevantKeyguardState()
+                .sample(keyguardInteractor.isKeyguardOccluded, ::Pair)
+                .collect { (_, isKeyguardOccluded) ->
+                    if (isKeyguardOccluded) {
+                        startTransitionTo(
+                            KeyguardState.OCCLUDED,
+                            ownerReason = "Dismissible keyguard with occlusion"
+                        )
+                    }
+                }
+        }
     }
 
     // Primarily for when the user chooses to lock down the device
@@ -166,11 +188,12 @@ constructor(
             interpolator = Interpolators.LINEAR
             duration =
                 when (toState) {
-                    KeyguardState.DREAMING -> TO_DREAMING_DURATION
                     KeyguardState.AOD -> TO_AOD_DURATION
                     KeyguardState.DOZING -> TO_DOZING_DURATION
+                    KeyguardState.DREAMING -> TO_DREAMING_DURATION
                     KeyguardState.LOCKSCREEN -> TO_LOCKSCREEN_DURATION
                     KeyguardState.GLANCEABLE_HUB -> TO_GLANCEABLE_HUB_DURATION
+                    KeyguardState.OCCLUDED -> TO_OCCLUDED_DURATION
                     else -> DEFAULT_DURATION
                 }.inWholeMilliseconds
         }
@@ -179,10 +202,11 @@ constructor(
     companion object {
         private const val TAG = "FromGoneTransitionInteractor"
         private val DEFAULT_DURATION = 500.milliseconds
-        val TO_DREAMING_DURATION = 933.milliseconds
         val TO_AOD_DURATION = 1300.milliseconds
         val TO_DOZING_DURATION = 933.milliseconds
+        val TO_DREAMING_DURATION = 933.milliseconds
         val TO_LOCKSCREEN_DURATION = DEFAULT_DURATION
         val TO_GLANCEABLE_HUB_DURATION = DEFAULT_DURATION
+        val TO_OCCLUDED_DURATION = 100.milliseconds
     }
 }

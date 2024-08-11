@@ -50,7 +50,7 @@ fun VolumePanelRoot(
 ) {
     val accessibilityTitle = stringResource(R.string.accessibility_volume_settings)
     val state: VolumePanelState by viewModel.volumePanelState.collectAsStateWithLifecycle()
-    val components by viewModel.componentsLayout.collectAsStateWithLifecycle(null)
+    val components by viewModel.componentsLayout.collectAsStateWithLifecycle()
 
     with(VolumePanelComposeScope(state)) {
         components?.let { componentsState ->

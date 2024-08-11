@@ -1488,7 +1488,7 @@ public class WindowOrganizerTests extends WindowTestsBase {
     @Test
     public void testReorderWithParents() {
         /*
-                  root
+                  default TDA
                ____|______
                |         |
            firstTda    secondTda
@@ -1496,10 +1496,12 @@ public class WindowOrganizerTests extends WindowTestsBase {
          firstRootTask    secondRootTask
 
          */
-        final TaskDisplayArea firstTaskDisplayArea = mDisplayContent.getDefaultTaskDisplayArea();
-        final TaskDisplayArea secondTaskDisplayArea = createTaskDisplayArea(
-                mDisplayContent, mRootWindowContainer.mWmService, "TestTaskDisplayArea",
+        final TaskDisplayArea firstTaskDisplayArea = createTaskDisplayArea(
+                mDisplayContent, mRootWindowContainer.mWmService, "FirstTaskDisplayArea",
                 FEATURE_VENDOR_FIRST);
+        final TaskDisplayArea secondTaskDisplayArea = createTaskDisplayArea(
+                mDisplayContent, mRootWindowContainer.mWmService, "SecondTaskDisplayArea",
+                FEATURE_VENDOR_FIRST + 1);
         final Task firstRootTask = firstTaskDisplayArea.createRootTask(
                 WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, false /* onTop */);
         final Task secondRootTask = secondTaskDisplayArea.createRootTask(
@@ -1508,9 +1510,6 @@ public class WindowOrganizerTests extends WindowTestsBase {
                 .setTask(firstRootTask).build();
         final ActivityRecord secondActivity = new ActivityBuilder(mAtm)
                 .setTask(secondRootTask).build();
-        // This assertion is just a defense to ensure that firstRootTask is not the top most
-        // by default
-        assertThat(mDisplayContent.getTopRootTask()).isEqualTo(secondRootTask);
         WindowContainerTransaction wct = new WindowContainerTransaction();
 
         // Reorder to top
@@ -1530,6 +1529,67 @@ public class WindowOrganizerTests extends WindowTestsBase {
         // firstRootTask can only be on the bottom if its TDA was also reordered to the bottom
         // which in-turn ensures that the reorder happened including the parents.
         assertThat(mDisplayContent.getBottomMostTask()).isEqualTo(firstRootTask);
+    }
+
+    @Test
+    public void testReorderDisplayArea() {
+        /*
+                  defaultTda
+               ____|______
+               |         |
+           firstTda    secondTda
+               |             |
+         firstRootTask    secondRootTask
+
+         */
+        final TaskDisplayArea firstTaskDisplayArea = createTaskDisplayArea(
+                mDisplayContent, mRootWindowContainer.mWmService, "FirstTaskDisplayArea",
+                FEATURE_VENDOR_FIRST);
+        final TaskDisplayArea secondTaskDisplayArea = createTaskDisplayArea(
+                mDisplayContent, mRootWindowContainer.mWmService, "SecondTaskDisplayArea",
+                FEATURE_VENDOR_FIRST + 1);
+        final Task firstRootTask = firstTaskDisplayArea.createRootTask(
+                WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, false /* onTop */);
+        final Task secondRootTask = secondTaskDisplayArea.createRootTask(
+                WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, false /* onTop */);
+        final ActivityRecord firstActivity = new ActivityBuilder(mAtm)
+                .setTask(firstRootTask).build();
+        final ActivityRecord secondActivity = new ActivityBuilder(mAtm)
+                .setTask(secondRootTask).build();
+
+        WindowContainerTransaction wct = new WindowContainerTransaction();
+
+        // Reorder to top
+        wct.reorder(firstTaskDisplayArea.mRemoteToken.toWindowContainerToken(), true /* onTop */,
+                true /* includingParents */);
+        mWm.mAtmService.mWindowOrganizerController.applyTransaction(wct);
+        assertThat(mDisplayContent.getTopRootTask()).isEqualTo(firstRootTask);
+
+        // Reorder to bottom
+        wct.reorder(firstTaskDisplayArea.mRemoteToken.toWindowContainerToken(), false /* onTop */,
+                true /* includingParents */);
+        mWm.mAtmService.mWindowOrganizerController.applyTransaction(wct);
+        assertThat(mDisplayContent.getBottomMostTask()).isEqualTo(firstRootTask);
+    }
+
+    @Test
+    public void testReparentDisplayAreaUnsupported() {
+        final TaskDisplayArea firstTaskDisplayArea = createTaskDisplayArea(
+                mDisplayContent, mRootWindowContainer.mWmService, "FirstTaskDisplayArea",
+                FEATURE_VENDOR_FIRST);
+        final TaskDisplayArea secondTaskDisplayArea = createTaskDisplayArea(
+                mDisplayContent, mRootWindowContainer.mWmService, "SecondTaskDisplayArea",
+                FEATURE_VENDOR_FIRST + 1);
+
+        WindowContainerTransaction wct = new WindowContainerTransaction();
+        wct.reparent(firstTaskDisplayArea.mRemoteToken.toWindowContainerToken(),
+                secondTaskDisplayArea.mRemoteToken.toWindowContainerToken(),
+                true /* onTop */
+        );
+
+        assertThrows(UnsupportedOperationException.class, () ->
+                mWm.mAtmService.mWindowOrganizerController.applyTransaction(wct)
+        );
     }
 
     @Test

@@ -297,7 +297,7 @@ constructor(
 
         val DeviceItem.isMediaDevice: Boolean
             get() =
-                cachedBluetoothDevice.connectableProfiles.any {
+                cachedBluetoothDevice.uiAccessibleProfiles.any {
                     it is A2dpProfile ||
                         it is HearingAidProfile ||
                         it is LeAudioProfile ||

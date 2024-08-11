@@ -700,6 +700,18 @@ public final class WindowContainerTransaction implements Parcelable {
     }
 
     /**
+     * Restore the back navigation target from visible to invisible for canceling gesture animation.
+     * @hide
+     */
+    @NonNull
+    public WindowContainerTransaction restoreBackNavi() {
+        final HierarchyOp hierarchyOp =
+                new HierarchyOp.Builder(HierarchyOp.HIERARCHY_OP_TYPE_RESTORE_BACK_NAVIGATION)
+                        .build();
+        mHierarchyOps.add(hierarchyOp);
+        return this;
+    }
+    /**
      * Adds a given {@code Rect} as an insets source frame on the {@code receiver}.
      *
      * @param receiver The window container that the insets source is added to.
@@ -1436,6 +1448,7 @@ public final class WindowContainerTransaction implements Parcelable {
         public static final int HIERARCHY_OP_TYPE_ADD_TASK_FRAGMENT_OPERATION = 17;
         public static final int HIERARCHY_OP_TYPE_MOVE_PIP_ACTIVITY_TO_PINNED_TASK = 18;
         public static final int HIERARCHY_OP_TYPE_SET_IS_TRIMMABLE = 19;
+        public static final int HIERARCHY_OP_TYPE_RESTORE_BACK_NAVIGATION = 20;
 
         // The following key(s) are for use with mLaunchOptions:
         // When launching a task (eg. from recents), this is the taskId to be launched.

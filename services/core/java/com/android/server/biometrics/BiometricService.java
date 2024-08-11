@@ -385,9 +385,9 @@ public class BiometricService extends SystemService {
                         DEFAULT_APP_ENABLED ? 1 : 0 /* default */,
                         userId) != 0);
             } else if (MANDATORY_BIOMETRICS_ENABLED.equals(uri)) {
-                updateMandatoryBiometricsForAllProfiles();
+                updateMandatoryBiometricsForAllProfiles(userId);
             } else if (MANDATORY_BIOMETRICS_REQUIREMENTS_SATISFIED.equals(uri)) {
-                updateMandatoryBiometricsRequirementsForAllProfiles();
+                updateMandatoryBiometricsRequirementsForAllProfiles(userId);
             }
         }
 
@@ -431,16 +431,15 @@ public class BiometricService extends SystemService {
 
         public boolean getMandatoryBiometricsEnabledAndRequirementsSatisfiedForUser(int userId) {
             if (!mMandatoryBiometricsEnabled.containsKey(userId)) {
-                updateMandatoryBiometricsForAllProfiles();
+                updateMandatoryBiometricsForAllProfiles(userId);
             }
             if (!mMandatoryBiometricsRequirementsSatisfied.containsKey(userId)) {
-                updateMandatoryBiometricsRequirementsForAllProfiles();
+                updateMandatoryBiometricsRequirementsForAllProfiles(userId);
             }
             return mMandatoryBiometricsEnabled.getOrDefault(userId,
                     DEFAULT_MANDATORY_BIOMETRICS_STATUS)
                     && mMandatoryBiometricsRequirementsSatisfied.getOrDefault(userId,
                     DEFAULT_MANDATORY_BIOMETRICS_REQUIREMENTS_SATISFIED_STATUS)
-                    && mBiometricEnabledForApps.getOrDefault(userId, DEFAULT_APP_ENABLED)
                     && getEnabledForApps(userId)
                     && (mFingerprintEnrolledForUser.getOrDefault(userId, false /* default */)
                     || mFaceEnrolledForUser.getOrDefault(userId, false /* default */));
@@ -455,25 +454,31 @@ public class BiometricService extends SystemService {
             }
         }
 
-        private void updateMandatoryBiometricsForAllProfiles() {
-            final int mainUserId = mUserManager.getMainUser().getIdentifier();
-            for (UserHandle userHandle: mUserManager.getUserProfiles()) {
-                mMandatoryBiometricsEnabled.put(userHandle.getIdentifier(),
+        private void updateMandatoryBiometricsForAllProfiles(int userId) {
+            int effectiveUserId = userId;
+            if (mUserManager.getMainUser() != null) {
+                effectiveUserId = mUserManager.getMainUser().getIdentifier();
+            }
+            for (int profileUserId: mUserManager.getEnabledProfileIds(effectiveUserId)) {
+                mMandatoryBiometricsEnabled.put(profileUserId,
                         Settings.Secure.getIntForUser(
                                 mContentResolver, Settings.Secure.MANDATORY_BIOMETRICS,
                                 DEFAULT_MANDATORY_BIOMETRICS_STATUS ? 1 : 0,
-                                mainUserId) != 0);
+                                effectiveUserId) != 0);
             }
         }
 
-        private void updateMandatoryBiometricsRequirementsForAllProfiles() {
-            final int mainUserId = mUserManager.getMainUser().getIdentifier();
-            for (UserHandle userHandle: mUserManager.getUserProfiles()) {
-                mMandatoryBiometricsRequirementsSatisfied.put(userHandle.getIdentifier(),
+        private void updateMandatoryBiometricsRequirementsForAllProfiles(int userId) {
+            int effectiveUserId = userId;
+            if (mUserManager.getMainUser() != null) {
+                effectiveUserId = mUserManager.getMainUser().getIdentifier();
+            }
+            for (int profileUserId: mUserManager.getEnabledProfileIds(effectiveUserId)) {
+                mMandatoryBiometricsRequirementsSatisfied.put(profileUserId,
                         Settings.Secure.getIntForUser(mContentResolver,
                                 Settings.Secure.MANDATORY_BIOMETRICS_REQUIREMENTS_SATISFIED,
                                 DEFAULT_MANDATORY_BIOMETRICS_REQUIREMENTS_SATISFIED_STATUS ? 1 : 0,
-                                mainUserId) != 0);
+                                effectiveUserId) != 0);
             }
         }
 

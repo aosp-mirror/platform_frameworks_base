@@ -188,7 +188,6 @@ constructor(
         val hasCredentialViewShown = promptKind.value.isCredential()
         val showBpForCredential =
             Flags.customBiometricPrompt() &&
-                com.android.systemui.Flags.constraintBp() &&
                 !Utils.isBiometricAllowed(promptInfo) &&
                 isDeviceCredentialAllowed(promptInfo) &&
                 promptInfo.contentView != null &&

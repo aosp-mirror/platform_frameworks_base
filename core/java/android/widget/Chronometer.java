@@ -328,7 +328,7 @@ public class Chronometer extends TextView {
             if (running) {
                 updateText(SystemClock.elapsedRealtime());
                 dispatchChronometerTick();
-                postDelayed(mTickRunnable, 1000);
+                postTickOnNextSecond();
             } else {
                 removeCallbacks(mTickRunnable);
             }
@@ -342,10 +342,16 @@ public class Chronometer extends TextView {
             if (mRunning) {
                 updateText(SystemClock.elapsedRealtime());
                 dispatchChronometerTick();
-                postDelayed(mTickRunnable, 1000);
+                postTickOnNextSecond();
             }
         }
     };
+
+    private void postTickOnNextSecond() {
+        long nowMillis = SystemClock.elapsedRealtime();
+        int millis = (int) ((nowMillis - mBase) % 1000);
+        postDelayed(mTickRunnable, 1000 - millis);
+    }
 
     void dispatchChronometerTick() {
         if (mOnChronometerTickListener != null) {

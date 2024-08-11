@@ -41,16 +41,25 @@ constructor(
 ) : QSTileDataToStateMapper<CustomTileDataModel> {
 
     override fun map(config: QSTileConfig, data: CustomTileDataModel): QSTileState {
-        val userContext = context.createContextAsUser(UserHandle(data.user.identifier), 0)
+        val userContext =
+            try {
+                context.createContextAsUser(UserHandle(data.user.identifier), 0)
+            } catch (exception: IllegalStateException) {
+                null
+            }
 
         val iconResult =
-            getIconProvider(
-                userContext = userContext,
-                icon = data.tile.icon,
-                callingAppUid = data.callingAppUid,
-                packageName = data.componentName.packageName,
-                defaultIcon = data.defaultTileIcon,
-            )
+            if (userContext != null) {
+                getIconProvider(
+                    userContext = userContext,
+                    icon = data.tile.icon,
+                    callingAppUid = data.callingAppUid,
+                    packageName = data.componentName.packageName,
+                    defaultIcon = data.defaultTileIcon,
+                )
+            } else {
+                IconResult({ null }, true)
+            }
 
         return QSTileState.build(iconResult.iconProvider, data.tile.label) {
             var tileState: Int = data.tile.state
@@ -61,7 +70,7 @@ constructor(
             icon = iconResult.iconProvider
             activationState =
                 if (iconResult.failedToLoad) {
-                    QSTileState.ActivationState.INACTIVE
+                    QSTileState.ActivationState.UNAVAILABLE
                 } else {
                     QSTileState.ActivationState.valueOf(tileState)
                 }

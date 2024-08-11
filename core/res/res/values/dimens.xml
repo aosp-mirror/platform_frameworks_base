@@ -1065,4 +1065,7 @@
     <!-- The non-linear progress interval when the screen is wider than the
         navigation_edge_action_progress_threshold. -->
     <item name="back_progress_non_linear_factor" format="float" type="dimen">0.2</item>
+
+    <!-- The maximum width for a context menu icon -->
+    <dimen name="list_menu_item_icon_max_width">24dp</dimen>
 </resources>

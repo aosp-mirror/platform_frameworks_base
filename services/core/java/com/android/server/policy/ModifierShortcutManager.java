@@ -30,6 +30,7 @@ import android.content.pm.PackageManager;
 import android.content.res.XmlResourceParser;
 import android.graphics.drawable.Icon;
 import android.hardware.input.InputManager;
+import android.hardware.input.KeyboardSystemShortcut;
 import android.os.Handler;
 import android.os.RemoteException;
 import android.os.UserHandle;
@@ -39,7 +40,6 @@ import android.util.Log;
 import android.util.LongSparseArray;
 import android.util.Slog;
 import android.util.SparseArray;
-import android.view.InputDevice;
 import android.view.KeyCharacterMap;
 import android.view.KeyEvent;
 import android.view.KeyboardShortcutGroup;
@@ -49,8 +49,8 @@ import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.policy.IShortcutService;
 import com.android.internal.util.XmlUtils;
-import com.android.server.input.KeyboardMetricsCollector;
-import com.android.server.input.KeyboardMetricsCollector.KeyboardLogEvent;
+import com.android.server.LocalServices;
+import com.android.server.input.InputManagerInternal;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -61,6 +61,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Manages quick launch shortcuts by:
@@ -123,6 +124,7 @@ public class ModifierShortcutManager {
 
     private final Context mContext;
     private final Handler mHandler;
+    private final InputManagerInternal mInputManagerInternal;
     private boolean mSearchKeyShortcutPending = false;
     private boolean mConsumeSearchKeyUp = true;
     private UserHandle mCurrentUser;
@@ -136,6 +138,7 @@ public class ModifierShortcutManager {
                     mRoleIntents.remove(roleName);
                 }, UserHandle.ALL);
         mCurrentUser = currentUser;
+        mInputManagerInternal = LocalServices.getService(InputManagerInternal.class);
         loadShortcuts();
     }
 
@@ -473,7 +476,7 @@ public class ModifierShortcutManager {
                             + "keyCode=" + KeyEvent.keyCodeToString(keyCode) + ","
                             + " category=" + category + " role=" + role);
                 }
-                logKeyboardShortcut(keyEvent, KeyboardLogEvent.getLogEventFromIntent(intent));
+                notifyKeyboardShortcutTriggered(keyEvent, getSystemShortcutFromIntent(intent));
                 return true;
             } else {
                 return false;
@@ -494,22 +497,19 @@ public class ModifierShortcutManager {
                         + "the activity to which it is registered was not found: "
                         + "META+ or SEARCH" + KeyEvent.keyCodeToString(keyCode));
             }
-            logKeyboardShortcut(keyEvent, KeyboardLogEvent.getLogEventFromIntent(shortcutIntent));
+            notifyKeyboardShortcutTriggered(keyEvent, getSystemShortcutFromIntent(shortcutIntent));
             return true;
         }
         return false;
     }
 
-    private void logKeyboardShortcut(KeyEvent event, KeyboardLogEvent logEvent) {
-        mHandler.post(() -> handleKeyboardLogging(event, logEvent));
-    }
-
-    private void handleKeyboardLogging(KeyEvent event, KeyboardLogEvent logEvent) {
-        final InputManager inputManager = mContext.getSystemService(InputManager.class);
-        final InputDevice inputDevice = inputManager != null
-                ? inputManager.getInputDevice(event.getDeviceId()) : null;
-        KeyboardMetricsCollector.logKeyboardSystemsEventReportedAtom(inputDevice,
-                logEvent, event.getMetaState(), event.getKeyCode());
+    private void notifyKeyboardShortcutTriggered(KeyEvent event,
+            @KeyboardSystemShortcut.SystemShortcut int systemShortcut) {
+        if (systemShortcut == KeyboardSystemShortcut.SYSTEM_SHORTCUT_UNSPECIFIED) {
+            return;
+        }
+        mInputManagerInternal.notifyKeyboardShortcutTriggered(event.getDeviceId(),
+                new int[]{event.getKeyCode()}, event.getMetaState(), systemShortcut);
     }
 
     /**
@@ -707,6 +707,97 @@ public class ModifierShortcutManager {
         }
         return context.getString(resid);
     };
+
+
+    /**
+     * Find Keyboard shortcut event corresponding to intent filter category. Returns
+     * {@code SYSTEM_SHORTCUT_UNSPECIFIED if no matching event found}
+     */
+    @KeyboardSystemShortcut.SystemShortcut
+    private static int getSystemShortcutFromIntent(Intent intent) {
+        Intent selectorIntent = intent.getSelector();
+        if (selectorIntent != null) {
+            Set<String> selectorCategories = selectorIntent.getCategories();
+            if (selectorCategories != null && !selectorCategories.isEmpty()) {
+                for (String intentCategory : selectorCategories) {
+                    int systemShortcut = getEventFromSelectorCategory(intentCategory);
+                    if (systemShortcut == KeyboardSystemShortcut.SYSTEM_SHORTCUT_UNSPECIFIED) {
+                        continue;
+                    }
+                    return systemShortcut;
+                }
+            }
+        }
+
+        // The shortcut may be targeting a system role rather than using an intent selector,
+        // so check for that.
+        String role = intent.getStringExtra(ModifierShortcutManager.EXTRA_ROLE);
+        if (!TextUtils.isEmpty(role)) {
+            return getLogEventFromRole(role);
+        }
+
+        Set<String> intentCategories = intent.getCategories();
+        if (intentCategories == null || intentCategories.isEmpty()
+                || !intentCategories.contains(Intent.CATEGORY_LAUNCHER)) {
+            return KeyboardSystemShortcut.SYSTEM_SHORTCUT_UNSPECIFIED;
+        }
+        if (intent.getComponent() == null) {
+            return KeyboardSystemShortcut.SYSTEM_SHORTCUT_UNSPECIFIED;
+        }
+
+        // TODO(b/280423320): Add new field package name associated in the
+        //  KeyboardShortcutEvent atom and log it accordingly.
+        return KeyboardSystemShortcut.SYSTEM_SHORTCUT_LAUNCH_APPLICATION_BY_PACKAGE_NAME;
+    }
+
+    @KeyboardSystemShortcut.SystemShortcut
+    private static int getEventFromSelectorCategory(String category) {
+        switch (category) {
+            case Intent.CATEGORY_APP_BROWSER:
+                return KeyboardSystemShortcut.SYSTEM_SHORTCUT_LAUNCH_DEFAULT_BROWSER;
+            case Intent.CATEGORY_APP_EMAIL:
+                return KeyboardSystemShortcut.SYSTEM_SHORTCUT_LAUNCH_DEFAULT_EMAIL;
+            case Intent.CATEGORY_APP_CONTACTS:
+                return KeyboardSystemShortcut.SYSTEM_SHORTCUT_LAUNCH_DEFAULT_CONTACTS;
+            case Intent.CATEGORY_APP_CALENDAR:
+                return KeyboardSystemShortcut.SYSTEM_SHORTCUT_LAUNCH_DEFAULT_CALENDAR;
+            case Intent.CATEGORY_APP_CALCULATOR:
+                return KeyboardSystemShortcut.SYSTEM_SHORTCUT_LAUNCH_DEFAULT_CALCULATOR;
+            case Intent.CATEGORY_APP_MUSIC:
+                return KeyboardSystemShortcut.SYSTEM_SHORTCUT_LAUNCH_DEFAULT_MUSIC;
+            case Intent.CATEGORY_APP_MAPS:
+                return KeyboardSystemShortcut.SYSTEM_SHORTCUT_LAUNCH_DEFAULT_MAPS;
+            case Intent.CATEGORY_APP_MESSAGING:
+                return KeyboardSystemShortcut.SYSTEM_SHORTCUT_LAUNCH_DEFAULT_MESSAGING;
+            case Intent.CATEGORY_APP_GALLERY:
+                return KeyboardSystemShortcut.SYSTEM_SHORTCUT_LAUNCH_DEFAULT_GALLERY;
+            case Intent.CATEGORY_APP_FILES:
+                return KeyboardSystemShortcut.SYSTEM_SHORTCUT_LAUNCH_DEFAULT_FILES;
+            case Intent.CATEGORY_APP_WEATHER:
+                return KeyboardSystemShortcut.SYSTEM_SHORTCUT_LAUNCH_DEFAULT_WEATHER;
+            case Intent.CATEGORY_APP_FITNESS:
+                return KeyboardSystemShortcut.SYSTEM_SHORTCUT_LAUNCH_DEFAULT_FITNESS;
+            default:
+                return KeyboardSystemShortcut.SYSTEM_SHORTCUT_UNSPECIFIED;
+        }
+    }
+
+    /**
+     * Find KeyboardLogEvent corresponding to the provide system role name.
+     * Returns {@code null} if no matching event found.
+     */
+    @KeyboardSystemShortcut.SystemShortcut
+    private static int getLogEventFromRole(String role) {
+        if (RoleManager.ROLE_BROWSER.equals(role)) {
+            return KeyboardSystemShortcut.SYSTEM_SHORTCUT_LAUNCH_DEFAULT_BROWSER;
+        } else if (RoleManager.ROLE_SMS.equals(role)) {
+            return KeyboardSystemShortcut.SYSTEM_SHORTCUT_LAUNCH_DEFAULT_MESSAGING;
+        } else {
+            Log.w(TAG, "Keyboard shortcut to launch "
+                    + role + " not supported for logging");
+            return KeyboardSystemShortcut.SYSTEM_SHORTCUT_UNSPECIFIED;
+        }
+    }
 
     void dump(String prefix, PrintWriter pw) {
         IndentingPrintWriter ipw = new IndentingPrintWriter(pw,  "  ", prefix);

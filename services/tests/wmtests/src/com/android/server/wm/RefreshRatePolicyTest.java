@@ -66,7 +66,6 @@ public class RefreshRatePolicyTest extends WindowTestsBase {
 
     private RefreshRatePolicy mPolicy;
     private HighRefreshRateDenylist mDenylist = mock(HighRefreshRateDenylist.class);
-    private FrameRateVote mTempFrameRateVote = new FrameRateVote();
 
     private static final FrameRateVote FRAME_RATE_VOTE_NONE = new FrameRateVote();
     private static final FrameRateVote FRAME_RATE_VOTE_DENY_LIST =
@@ -98,18 +97,14 @@ public class RefreshRatePolicyTest extends WindowTestsBase {
     @Before
     public void setUp() {
         Mode defaultMode = mDisplayInfo.getDefaultMode();
-        mDisplayInfo.supportedModes = new Mode[] {
-                new Mode(HI_MODE_ID,
-                        defaultMode.getPhysicalWidth(), defaultMode.getPhysicalHeight(),
-                        HI_REFRESH_RATE),
-                new Mode(MID_MODE_ID,
-                        defaultMode.getPhysicalWidth(), defaultMode.getPhysicalHeight(),
-                        MID_REFRESH_RATE),
-                new Mode(LOW_MODE_ID,
-                        defaultMode.getPhysicalWidth(), defaultMode.getPhysicalHeight(),
-                        LOW_REFRESH_RATE),
-        };
-        mDisplayInfo.appsSupportedModes = mDisplayInfo.supportedModes;
+        Mode hiMode = new Mode(HI_MODE_ID,
+                defaultMode.getPhysicalWidth(), defaultMode.getPhysicalHeight(), HI_REFRESH_RATE);
+        Mode midMode = new Mode(MID_MODE_ID,
+                defaultMode.getPhysicalWidth(), defaultMode.getPhysicalHeight(), MID_REFRESH_RATE);
+        Mode lowMode = new Mode(LOW_MODE_ID,
+                defaultMode.getPhysicalWidth(), defaultMode.getPhysicalHeight(), LOW_REFRESH_RATE);
+        mDisplayInfo.supportedModes = new Mode[] { hiMode, midMode };
+        mDisplayInfo.appsSupportedModes = new Mode[] { hiMode, midMode, lowMode };
         mDisplayInfo.defaultModeId = HI_MODE_ID;
         mPolicy = new RefreshRatePolicy(mWm, mDisplayInfo, mDenylist);
     }

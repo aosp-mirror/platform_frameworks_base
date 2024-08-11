@@ -21,6 +21,7 @@ import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.graphics.PointF;
 import android.hardware.display.DisplayViewport;
+import android.hardware.input.KeyboardSystemShortcut;
 import android.os.IBinder;
 import android.view.InputChannel;
 import android.view.inputmethod.InputMethodSubtype;
@@ -227,4 +228,20 @@ public abstract class InputManagerInternal {
      *     since boot.
      */
     public abstract int getLastUsedInputDeviceId();
+
+    /**
+     * Notify Keyboard system shortcut was triggered by the user and handled by the framework.
+     *
+     * NOTE: This is just to notify that a system shortcut was triggered. No further action is
+     * required to execute the said shortcut. This callback is meant for purposes of providing user
+     * hints or logging, etc.
+     *
+     * @param deviceId the device ID of the keyboard using which the shortcut was triggered
+     * @param keycodes the keys pressed for triggering the shortcut
+     * @param modifierState the modifier state of the key event that triggered the shortcut
+     * @param shortcut the shortcut that was triggered
+     *
+     */
+    public abstract void notifyKeyboardShortcutTriggered(int deviceId, int[] keycodes,
+            int modifierState, @KeyboardSystemShortcut.SystemShortcut int shortcut);
 }

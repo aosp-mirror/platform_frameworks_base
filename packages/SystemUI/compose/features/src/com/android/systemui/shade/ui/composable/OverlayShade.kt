@@ -53,6 +53,7 @@ import com.android.compose.animation.scene.LowestZIndexContentPicker
 import com.android.compose.animation.scene.SceneScope
 import com.android.compose.windowsizeclass.LocalWindowSizeClass
 import com.android.systemui.keyguard.ui.composable.LockscreenContent
+import com.android.systemui.lifecycle.rememberViewModel
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.shade.shared.model.ShadeAlignment
 import com.android.systemui.shade.ui.viewmodel.OverlayShadeViewModel
@@ -63,11 +64,12 @@ import java.util.Optional
 /** The overlay shade renders a lightweight shade UI container on top of a background scene. */
 @Composable
 fun SceneScope.OverlayShade(
-    viewModel: OverlayShadeViewModel,
+    viewModelFactory: OverlayShadeViewModel.Factory,
     lockscreenContent: Lazy<Optional<LockscreenContent>>,
     modifier: Modifier = Modifier,
     content: @Composable () -> Unit,
 ) {
+    val viewModel = rememberViewModel { viewModelFactory.create() }
     val backgroundScene by viewModel.backgroundScene.collectAsStateWithLifecycle()
 
     Box(modifier) {

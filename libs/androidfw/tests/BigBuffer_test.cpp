@@ -98,4 +98,20 @@ TEST(BigBufferTest, PadAndAlignProperly) {
   ASSERT_EQ(8u, buffer.size());
 }
 
+TEST(BigBufferTest, BackUpZeroed) {
+  BigBuffer buffer(16);
+
+  auto block = buffer.NextBlock<char>(2);
+  ASSERT_TRUE(block != nullptr);
+  ASSERT_EQ(2u, buffer.size());
+  block[0] = 0x01;
+  block[1] = 0x02;
+  buffer.BackUp(1);
+  ASSERT_EQ(1u, buffer.size());
+  auto new_block = buffer.NextBlock<char>(1);
+  ASSERT_TRUE(new_block != nullptr);
+  ASSERT_EQ(2u, buffer.size());
+  ASSERT_EQ(0, *new_block);
+}
+
 }  // namespace android

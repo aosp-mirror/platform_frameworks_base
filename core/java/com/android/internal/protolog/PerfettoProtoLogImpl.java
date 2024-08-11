@@ -332,6 +332,8 @@ public class PerfettoProtoLogImpl extends IProtoLogClient.Stub implements IProto
     }
 
     private void onTracingFlush() {
+        Log.d(LOG_TAG, "Executing onTracingFlush");
+
         final ExecutorService loggingService;
         try {
             mBackgroundServiceLock.lock();
@@ -352,14 +354,18 @@ public class PerfettoProtoLogImpl extends IProtoLogClient.Stub implements IProto
             Log.e(LOG_TAG, "Failed to wait for tracing to finish", e);
         }
 
-        dumpTransitionTraceConfig();
+        dumpViewerConfig();
+
+        Log.d(LOG_TAG, "Finished onTracingFlush");
     }
 
-    private void dumpTransitionTraceConfig() {
+    private void dumpViewerConfig() {
         if (mViewerConfigInputStreamProvider == null) {
             // No viewer config available
             return;
         }
+
+        Log.d(LOG_TAG, "Dumping viewer config to trace");
 
         ProtoInputStream pis = mViewerConfigInputStreamProvider.getInputStream();
 
@@ -390,6 +396,8 @@ public class PerfettoProtoLogImpl extends IProtoLogClient.Stub implements IProto
                 Log.e(LOG_TAG, "Failed to read ProtoLog viewer config to dump on tracing end", e);
             }
         });
+
+        Log.d(LOG_TAG, "Dumped viewer config to trace");
     }
 
     private static void writeViewerConfigGroup(
@@ -770,6 +778,8 @@ public class PerfettoProtoLogImpl extends IProtoLogClient.Stub implements IProto
 
     private synchronized void onTracingInstanceStart(
             int instanceIdx, ProtoLogDataSource.ProtoLogConfig config) {
+        Log.d(LOG_TAG, "Executing onTracingInstanceStart");
+
         final LogLevel defaultLogFrom = config.getDefaultGroupConfig().logFrom;
         for (int i = defaultLogFrom.ordinal(); i < LogLevel.values().length; i++) {
             mDefaultLogLevelCounts[i]++;
@@ -800,10 +810,13 @@ public class PerfettoProtoLogImpl extends IProtoLogClient.Stub implements IProto
         mCacheUpdater.run();
 
         this.mTracingInstances.incrementAndGet();
+
+        Log.d(LOG_TAG, "Finished onTracingInstanceStart");
     }
 
     private synchronized void onTracingInstanceStop(
             int instanceIdx, ProtoLogDataSource.ProtoLogConfig config) {
+        Log.d(LOG_TAG, "Executing onTracingInstanceStop");
         this.mTracingInstances.decrementAndGet();
 
         final LogLevel defaultLogFrom = config.getDefaultGroupConfig().logFrom;
@@ -835,6 +848,7 @@ public class PerfettoProtoLogImpl extends IProtoLogClient.Stub implements IProto
         }
 
         mCacheUpdater.run();
+        Log.d(LOG_TAG, "Finished onTracingInstanceStop");
     }
 
     private static void logAndPrintln(@Nullable PrintWriter pw, String msg) {

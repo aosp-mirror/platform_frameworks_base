@@ -28,6 +28,9 @@ import android.app.CameraCompatTaskInfo;
 import android.app.TaskInfo;
 import android.content.res.Configuration;
 import android.graphics.Rect;
+import android.view.InsetsSource;
+import android.view.InsetsState;
+import android.view.WindowInsets;
 
 import java.util.function.BooleanSupplier;
 
@@ -210,6 +213,23 @@ class AppCompatUtils {
             return "ASPECT_RATIO";
         }
         return "UNKNOWN_REASON";
+    }
+
+    /**
+     * Returns the taskbar in case it is visible and expanded in height, otherwise returns null.
+     */
+    @Nullable
+    static InsetsSource getExpandedTaskbarOrNull(@NonNull final WindowState mainWindow) {
+        final InsetsState state = mainWindow.getInsetsState();
+        for (int i = state.sourceSize() - 1; i >= 0; i--) {
+            final InsetsSource source = state.sourceAt(i);
+            if (source.getType() == WindowInsets.Type.navigationBars()
+                    && source.hasFlags(InsetsSource.FLAG_INSETS_ROUNDED_CORNER)
+                    && source.isVisible()) {
+                return source;
+            }
+        }
+        return null;
     }
 
     private static void clearAppCompatTaskInfo(@NonNull AppCompatTaskInfo info) {

@@ -69,9 +69,21 @@ public class ResourceFlaggingTest {
     }
 
     private boolean getBoolean(String name) {
-        int resId = mResources.getIdentifier(name, "bool", "com.android.intenal.flaggedresources");
+        int resId = mResources.getIdentifier(
+                name,
+                "bool",
+                "com.android.intenal.flaggedresources");
         assertThat(resId).isNotEqualTo(0);
         return mResources.getBoolean(resId);
+    }
+
+    private String getString(String name) {
+        int resId = mResources.getIdentifier(
+                name,
+                "string",
+                "com.android.intenal.flaggedresources");
+        assertThat(resId).isNotEqualTo(0);
+        return mResources.getString(resId);
     }
 
     private String extractApkAndGetPath(int id) throws Exception {

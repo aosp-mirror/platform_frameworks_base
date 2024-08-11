@@ -40,6 +40,7 @@ public final class XmlConstants {
 
     public static final String TAG_PREDEFINED_EFFECT = "predefined-effect";
     public static final String TAG_PRIMITIVE_EFFECT = "primitive-effect";
+    public static final String TAG_VENDOR_EFFECT = "vendor-effect";
     public static final String TAG_WAVEFORM_EFFECT = "waveform-effect";
     public static final String TAG_WAVEFORM_ENTRY = "waveform-entry";
     public static final String TAG_REPEATING = "repeating";
