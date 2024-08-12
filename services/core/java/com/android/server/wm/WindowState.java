@@ -3975,7 +3975,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
      * Returns {@code true} if activity bounds are letterboxed or letterboxed for display cutout.
      *
      * <p>Note that letterbox UI may not be shown even when this returns {@code true}. See {@link
-     * LetterboxUiController#shouldShowLetterboxUi} for more context.
+     * AppCompatLetterboxOverrides#shouldShowLetterboxUi} for more context.
      */
     boolean areAppWindowBoundsLetterboxed() {
         return mActivityRecord != null && !isStartingWindowAssociatedToTask()

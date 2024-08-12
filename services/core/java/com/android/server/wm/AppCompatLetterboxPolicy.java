@@ -55,8 +55,8 @@ class AppCompatLetterboxPolicy {
     }
 
     /** Cleans up {@link Letterbox} if it exists.*/
-    void destroy() {
-        mLetterboxPolicyState.destroy();
+    void stop() {
+        mLetterboxPolicyState.stop();
     }
 
     /** @return {@value true} if the letterbox policy is running and the activity letterboxed. */
@@ -271,7 +271,7 @@ class AppCompatLetterboxPolicy {
         }
 
         /** Cleans up {@link Letterbox} if it exists.*/
-        void destroy() {
+        void stop() {
             if (isRunning()) {
                 mLetterbox.destroy();
                 mLetterbox = null;
