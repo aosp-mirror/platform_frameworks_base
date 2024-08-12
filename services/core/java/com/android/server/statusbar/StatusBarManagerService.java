@@ -26,6 +26,7 @@ import static android.app.StatusBarManager.NAV_BAR_MODE_KIDS;
 import static android.app.StatusBarManager.NavBarMode;
 import static android.app.StatusBarManager.SessionFlags;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
+import static android.inputmethodservice.InputMethodService.BACK_DISPOSITION_DEFAULT;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.ViewRootImpl.CLIENT_TRANSIENT;
 import static android.view.WindowManagerPolicyConstants.NAV_BAR_MODE_3BUTTON_OVERLAY;
@@ -60,6 +61,8 @@ import android.hardware.biometrics.PromptInfo;
 import android.hardware.display.DisplayManager;
 import android.hardware.display.DisplayManager.DisplayListener;
 import android.hardware.fingerprint.IUdfpsRefreshRateRequestCallback;
+import android.inputmethodservice.InputMethodService.BackDispositionMode;
+import android.inputmethodservice.InputMethodService.ImeWindowVisibility;
 import android.media.INearbyMediaDevicesProvider;
 import android.media.MediaRoute2Info;
 import android.net.Uri;
@@ -534,8 +537,8 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
         }
 
         @Override
-        public void setImeWindowStatus(int displayId, int vis, int backDisposition,
-                boolean showImeSwitcher) {
+        public void setImeWindowStatus(int displayId, @ImeWindowVisibility int vis,
+                @BackDispositionMode int backDisposition, boolean showImeSwitcher) {
             StatusBarManagerService.this.setImeWindowStatus(displayId, vis, backDisposition,
                     showImeSwitcher);
         }
@@ -1351,8 +1354,8 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
     }
 
     @Override
-    public void setImeWindowStatus(int displayId, final int vis, final int backDisposition,
-            final boolean showImeSwitcher) {
+    public void setImeWindowStatus(int displayId, @ImeWindowVisibility final int vis,
+            @BackDispositionMode final int backDisposition, final boolean showImeSwitcher) {
         enforceStatusBar();
 
         if (SPEW) {
@@ -1418,8 +1421,10 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
         private String mPackageName = "none";
         private int mDisabled1 = 0;
         private int mDisabled2 = 0;
+        @ImeWindowVisibility
         private int mImeWindowVis = 0;
-        private int mImeBackDisposition = 0;
+        @BackDispositionMode
+        private int mImeBackDisposition = BACK_DISPOSITION_DEFAULT;
         private boolean mShowImeSwitcher = false;
         private LetterboxDetails[] mLetterboxDetails = new LetterboxDetails[0];
 
@@ -1462,7 +1467,8 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
             return mDisabled1 == disabled1 && mDisabled2 == disabled2;
         }
 
-        private void setImeWindowState(final int vis, final int backDisposition,
+        private void setImeWindowState(@ImeWindowVisibility final int vis,
+                @BackDispositionMode final int backDisposition,
                 final boolean showImeSwitcher) {
             mImeWindowVis = vis;
             mImeBackDisposition = backDisposition;
