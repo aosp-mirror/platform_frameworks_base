@@ -893,19 +893,14 @@ public class Tuner implements AutoCloseable  {
         try {
             if (mFrontendCiCamHandle != null) {
                 if (DEBUG) {
-                    Log.d(TAG, "unlinking CiCam : " + mFrontendCiCamHandle + " for " +  mClientId);
+                    Log.d(TAG, "releasing CiCam : " + mFrontendCiCamHandle + " for " +  mClientId);
                 }
-                int result = nativeUnlinkCiCam(mFrontendCiCamId);
-                if (result == RESULT_SUCCESS) {
-                    mTunerResourceManager.releaseCiCam(mFrontendCiCamHandle, mClientId);
-                    replicateCiCamSettings(null);
-                } else {
-                    Log.e(TAG, "nativeUnlinkCiCam(" + mFrontendCiCamHandle + ") for mClientId:"
-                            + mClientId + "failed with result:" + result);
-                }
+                nativeUnlinkCiCam(mFrontendCiCamId);
+                mTunerResourceManager.releaseCiCam(mFrontendCiCamHandle, mClientId);
+                replicateCiCamSettings(null);
             } else {
                 if (DEBUG) {
-                    Log.d(TAG, "NOT unlinking CiCam : " + mClientId);
+                    Log.d(TAG, "NOT releasing CiCam : " + mClientId);
                 }
             }
         } finally {
@@ -1670,11 +1665,9 @@ public class Tuner implements AutoCloseable  {
                 if (mFrontendCiCamHandle != null && mFrontendCiCamId != null
                         && mFrontendCiCamId == ciCamId) {
                     int result = nativeUnlinkCiCam(ciCamId);
-                    if (result == RESULT_SUCCESS) {
-                        mTunerResourceManager.releaseCiCam(mFrontendCiCamHandle, mClientId);
-                        mFrontendCiCamId = null;
-                        mFrontendCiCamHandle = null;
-                    }
+                    mTunerResourceManager.releaseCiCam(mFrontendCiCamHandle, mClientId);
+                    mFrontendCiCamId = null;
+                    mFrontendCiCamHandle = null;
                     return result;
                 }
             }
