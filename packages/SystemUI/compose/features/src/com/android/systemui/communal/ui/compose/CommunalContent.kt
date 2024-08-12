@@ -28,6 +28,7 @@ import com.android.compose.theme.LocalAndroidColorScheme
 import com.android.systemui.communal.smartspace.SmartspaceInteractionHandler
 import com.android.systemui.communal.ui.compose.section.AmbientStatusBarSection
 import com.android.systemui.communal.ui.compose.section.CommunalPopupSection
+import com.android.systemui.communal.ui.view.layout.sections.CommunalAppWidgetSection
 import com.android.systemui.communal.ui.viewmodel.CommunalViewModel
 import com.android.systemui.keyguard.ui.composable.blueprint.BlueprintAlignmentLines
 import com.android.systemui.keyguard.ui.composable.section.BottomAreaSection
@@ -46,6 +47,7 @@ constructor(
     private val bottomAreaSection: BottomAreaSection,
     private val ambientStatusBarSection: AmbientStatusBarSection,
     private val communalPopupSection: CommunalPopupSection,
+    private val widgetSection: CommunalAppWidgetSection,
 ) {
 
     @Composable
@@ -63,6 +65,7 @@ constructor(
                             viewModel = viewModel,
                             interactionHandler = interactionHandler,
                             dialogFactory = dialogFactory,
+                            widgetSection = widgetSection,
                             modifier = Modifier.element(Communal.Elements.Grid)
                         )
                     }

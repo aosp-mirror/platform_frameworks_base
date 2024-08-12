@@ -42,6 +42,7 @@ import com.android.systemui.communal.shared.model.CommunalScenes
 import com.android.systemui.communal.shared.model.CommunalTransitionKeys
 import com.android.systemui.communal.shared.model.EditModeState
 import com.android.systemui.communal.ui.compose.CommunalHub
+import com.android.systemui.communal.ui.view.layout.sections.CommunalAppWidgetSection
 import com.android.systemui.communal.ui.viewmodel.CommunalEditModeViewModel
 import com.android.systemui.communal.util.WidgetPickerIntentUtils.getWidgetExtraFromIntent
 import com.android.systemui.keyguard.shared.model.KeyguardState
@@ -60,6 +61,7 @@ constructor(
     private var windowManagerService: IWindowManager? = null,
     private val uiEventLogger: UiEventLogger,
     private val widgetConfiguratorFactory: WidgetConfigurationController.Factory,
+    private val widgetSection: CommunalAppWidgetSection,
     @CommunalLog logBuffer: LogBuffer,
 ) : ComponentActivity() {
     companion object {
@@ -204,6 +206,7 @@ constructor(
                         onOpenWidgetPicker = ::onOpenWidgetPicker,
                         widgetConfigurator = widgetConfigurator,
                         onEditDone = ::onEditDone,
+                        widgetSection = widgetSection,
                     )
                 }
             }

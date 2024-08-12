@@ -19,10 +19,7 @@ package com.android.systemui.communal.ui.compose
 import android.content.Context
 import android.content.res.Configuration
 import android.graphics.drawable.Icon
-import android.os.Bundle
 import android.util.SizeF
-import android.view.View.IMPORTANT_FOR_ACCESSIBILITY_AUTO
-import android.view.View.IMPORTANT_FOR_ACCESSIBILITY_NO_HIDE_DESCENDANTS
 import android.widget.FrameLayout
 import android.widget.RemoteViews
 import androidx.annotation.VisibleForTesting
@@ -105,7 +102,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.CornerRadius
@@ -168,6 +164,7 @@ import com.android.systemui.communal.ui.compose.extensions.allowGestures
 import com.android.systemui.communal.ui.compose.extensions.detectLongPressGesture
 import com.android.systemui.communal.ui.compose.extensions.firstItemAtOffset
 import com.android.systemui.communal.ui.compose.extensions.observeTaps
+import com.android.systemui.communal.ui.view.layout.sections.CommunalAppWidgetSection
 import com.android.systemui.communal.ui.viewmodel.BaseCommunalViewModel
 import com.android.systemui.communal.ui.viewmodel.CommunalEditModeViewModel
 import com.android.systemui.communal.ui.viewmodel.CommunalViewModel
@@ -179,11 +176,12 @@ import com.android.systemui.res.R
 import com.android.systemui.statusbar.phone.SystemUIDialogFactory
 import kotlinx.coroutines.launch
 
-@OptIn(ExperimentalComposeUiApi::class, ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CommunalHub(
     modifier: Modifier = Modifier,
     viewModel: BaseCommunalViewModel,
+    widgetSection: CommunalAppWidgetSection,
     interactionHandler: RemoteViews.InteractionHandler? = null,
     dialogFactory: SystemUIDialogFactory? = null,
     widgetConfigurator: WidgetConfigurator? = null,
@@ -382,6 +380,7 @@ fun CommunalHub(
                             selectedKey = selectedKey,
                             widgetConfigurator = widgetConfigurator,
                             interactionHandler = interactionHandler,
+                            widgetSection = widgetSection,
                         )
                     }
                 }
@@ -631,6 +630,7 @@ private fun BoxScope.CommunalHubLazyGrid(
     updateDragPositionForRemove: (offset: Offset) -> Boolean,
     widgetConfigurator: WidgetConfigurator?,
     interactionHandler: RemoteViews.InteractionHandler?,
+    widgetSection: CommunalAppWidgetSection,
 ) {
     var gridModifier =
         Modifier.align(Alignment.TopStart).onGloballyPositioned { setGridCoordinates(it) }
@@ -718,18 +718,20 @@ private fun BoxScope.CommunalHubLazyGrid(
                         index = index,
                         contentListState = contentListState,
                         interactionHandler = interactionHandler,
+                        widgetSection = widgetSection,
                     )
                 }
             } else {
                 CommunalContent(
-                    modifier = cardModifier.animateItem(),
                     model = list[index],
                     viewModel = viewModel,
                     size = size,
                     selected = false,
+                    modifier = cardModifier.animateItem(),
                     index = index,
                     contentListState = contentListState,
                     interactionHandler = interactionHandler,
+                    widgetSection = widgetSection,
                 )
             }
         }
@@ -971,6 +973,7 @@ private fun CommunalContent(
     index: Int,
     contentListState: ContentListState,
     interactionHandler: RemoteViews.InteractionHandler?,
+    widgetSection: CommunalAppWidgetSection,
 ) {
     when (model) {
         is CommunalContentModel.WidgetContent.Widget ->
@@ -982,7 +985,8 @@ private fun CommunalContent(
                 widgetConfigurator,
                 modifier,
                 index,
-                contentListState
+                contentListState,
+                widgetSection,
             )
         is CommunalContentModel.WidgetPlaceholder -> HighlightedItem(modifier)
         is CommunalContentModel.WidgetContent.DisabledWidget ->
@@ -1115,9 +1119,9 @@ private fun WidgetContent(
     modifier: Modifier = Modifier,
     index: Int,
     contentListState: ContentListState,
+    widgetSection: CommunalAppWidgetSection,
 ) {
     val context = LocalContext.current
-    val isFocusable by viewModel.isFocusable.collectAsStateWithLifecycle(initialValue = false)
     val accessibilityLabel =
         remember(model, context) {
             model.providerInfo.loadLabel(context.packageManager).toString().trim()
@@ -1204,36 +1208,14 @@ private fun WidgetContent(
                     }
                 }
     ) {
-        AndroidView(
-            modifier = Modifier.fillMaxSize().allowGestures(allowed = !viewModel.isEditMode),
-            factory = { context ->
-                model.appWidgetHost
-                    .createViewForCommunal(context, model.appWidgetId, model.providerInfo)
-                    .apply {
-                        updateAppWidgetSize(
-                            /* newOptions = */ Bundle(),
-                            /* minWidth = */ size.width.toInt(),
-                            /* minHeight = */ size.height.toInt(),
-                            /* maxWidth = */ size.width.toInt(),
-                            /* maxHeight = */ size.height.toInt(),
-                            /* ignorePadding = */ true
-                        )
-                        accessibilityDelegate = viewModel.widgetAccessibilityDelegate
-                    }
-            },
-            update = {
-                it.apply {
-                    importantForAccessibility =
-                        if (isFocusable) {
-                            IMPORTANT_FOR_ACCESSIBILITY_AUTO
-                        } else {
-                            IMPORTANT_FOR_ACCESSIBILITY_NO_HIDE_DESCENDANTS
-                        }
-                }
-            },
-            // For reusing composition in lazy lists.
-            onReset = {},
-        )
+        with(widgetSection) {
+            Widget(
+                viewModel = viewModel,
+                model = model,
+                size = size,
+                modifier = Modifier.fillMaxSize().allowGestures(allowed = !viewModel.isEditMode),
+            )
+        }
         if (
             viewModel is CommunalEditModeViewModel &&
                 model.reconfigurable &&
