@@ -25,7 +25,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.layout
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.viewinterop.AndroidView
 import com.android.compose.animation.scene.MovableElementKey
@@ -56,15 +55,7 @@ fun SceneScope.MediaCarousel(
         return
     }
 
-    val density = LocalDensity.current
     val mediaHeight = dimensionResource(R.dimen.qs_media_session_height_expanded)
-
-    val layoutWidth = 0
-    val layoutHeight = with(density) { mediaHeight.toPx() }.toInt()
-
-    // Notify controller to size the carousel for the current space
-    mediaHost.measurementInput = MeasurementInput(layoutWidth, layoutHeight)
-    carouselController.setSceneContainerSize(layoutWidth, layoutHeight)
 
     MovableElement(
         key = MediaCarousel.Elements.Content,
