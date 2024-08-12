@@ -23,9 +23,10 @@ import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.view.ViewTreeObserver
+import com.android.systemui.Flags
 import com.android.systemui.Gefingerpoken
 import com.android.systemui.flags.FeatureFlags
-import com.android.systemui.flags.Flags
+import com.android.systemui.flags.Flags.ENABLE_UNFOLD_STATUS_BAR_ANIMATIONS
 import com.android.systemui.res.R
 import com.android.systemui.scene.shared.flag.SceneContainerFlag
 import com.android.systemui.scene.ui.view.WindowRootView
@@ -83,22 +84,25 @@ private constructor(
         statusContainer.setOnHoverListener(
             statusOverlayHoverListenerFactory.createDarkAwareListener(statusContainer)
         )
-        statusContainer.setOnTouchListener(object : View.OnTouchListener {
-            override fun onTouch(v: View, event: MotionEvent): Boolean {
-                // We want to handle only mouse events here to avoid stealing finger touches from
-                // status bar which expands shade when swiped down on. We're using onTouchListener
-                // instead of onClickListener as the later will lead to isClickable being set to
-                // true and hence ALL touches always being intercepted. See [View.OnTouchEvent]
-                if (event.source == InputDevice.SOURCE_MOUSE) {
-                    if (event.action == MotionEvent.ACTION_UP) {
-                        v.performClick()
-                        shadeController.animateExpandShade()
+        statusContainer.setOnTouchListener(
+            object : View.OnTouchListener {
+                override fun onTouch(v: View, event: MotionEvent): Boolean {
+                    // We want to handle only mouse events here to avoid stealing finger touches
+                    // from status bar which expands shade when swiped down on. See b/326097469.
+                    // We're using onTouchListener instead of onClickListener as the later will lead
+                    // to isClickable being set to true and hence ALL touches always being
+                    // intercepted. See [View.OnTouchEvent]
+                    if (event.source == InputDevice.SOURCE_MOUSE) {
+                        if (event.action == MotionEvent.ACTION_UP) {
+                            v.performClick()
+                            shadeController.animateExpandShade()
+                        }
+                        return true
                     }
-                    return true
+                    return false
                 }
-                return false
             }
-        })
+        )
 
         progressProvider?.setReadyToHandleTransition(true)
         configurationController.addCallback(configurationListener)
@@ -180,8 +184,12 @@ private constructor(
 
     inner class PhoneStatusBarViewTouchHandler : Gefingerpoken {
         override fun onInterceptTouchEvent(event: MotionEvent): Boolean {
-            onTouch(event)
-            return false
+            return if (Flags.statusBarSwipeOverChip()) {
+                shadeViewController.handleExternalInterceptTouch(event)
+            } else {
+                onTouch(event)
+                false
+            }
         }
 
         override fun onTouchEvent(event: MotionEvent): Boolean {
@@ -280,7 +288,7 @@ private constructor(
     ) {
         fun create(view: PhoneStatusBarView): PhoneStatusBarViewController {
             val statusBarMoveFromCenterAnimationController =
-                if (featureFlags.isEnabled(Flags.ENABLE_UNFOLD_STATUS_BAR_ANIMATIONS)) {
+                if (featureFlags.isEnabled(ENABLE_UNFOLD_STATUS_BAR_ANIMATIONS)) {
                     unfoldComponent.getOrNull()?.getStatusBarMoveFromCenterAnimationController()
                 } else {
                     null

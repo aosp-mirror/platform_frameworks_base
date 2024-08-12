@@ -20,6 +20,8 @@ import android.app.StatusBarManager.WINDOW_STATE_HIDDEN
 import android.app.StatusBarManager.WINDOW_STATE_HIDING
 import android.app.StatusBarManager.WINDOW_STATE_SHOWING
 import android.app.StatusBarManager.WINDOW_STATUS_BAR
+import android.platform.test.annotations.DisableFlags
+import android.platform.test.annotations.EnableFlags
 import android.view.InputDevice
 import android.view.LayoutInflater
 import android.view.MotionEvent
@@ -104,7 +106,7 @@ class PhoneStatusBarViewControllerTest : SysuiTestCase() {
             val parent = FrameLayout(mContext) // add parent to keep layout params
             view =
                 LayoutInflater.from(mContext).inflate(R.layout.status_bar, parent, false)
-                        as PhoneStatusBarView
+                    as PhoneStatusBarView
             controller = createAndInitController(view)
         }
     }
@@ -112,8 +114,8 @@ class PhoneStatusBarViewControllerTest : SysuiTestCase() {
     @Test
     fun onViewAttachedAndDrawn_startListeningConfigurationControllerCallback() {
         val view = createViewMock()
-        val argumentCaptor = ArgumentCaptor.forClass(
-                ConfigurationController.ConfigurationListener::class.java)
+        val argumentCaptor =
+            ArgumentCaptor.forClass(ConfigurationController.ConfigurationListener::class.java)
         InstrumentationRegistry.getInstrumentation().runOnMainSync {
             controller = createAndInitController(view)
         }
@@ -159,7 +161,7 @@ class PhoneStatusBarViewControllerTest : SysuiTestCase() {
     fun handleTouchEventFromStatusBar_panelsNotEnabled_returnsFalseAndNoViewEvent() {
         `when`(centralSurfacesImpl.commandQueuePanelsEnabled).thenReturn(false)
         val returnVal =
-            view.onTouchEvent(MotionEvent.obtain(0L, 0L, MotionEvent.ACTION_DOWN, 0f, 0f, 0))
+            view.onTouchEvent(MotionEvent.obtain(0L, 0L, MotionEvent.ACTION_DOWN, 0f, 2f, 0))
         assertThat(returnVal).isFalse()
         verify(shadeViewController, never()).handleExternalTouch(any())
     }
@@ -169,7 +171,7 @@ class PhoneStatusBarViewControllerTest : SysuiTestCase() {
         `when`(centralSurfacesImpl.commandQueuePanelsEnabled).thenReturn(true)
         `when`(shadeViewController.isViewEnabled).thenReturn(false)
         val returnVal =
-            view.onTouchEvent(MotionEvent.obtain(0L, 0L, MotionEvent.ACTION_DOWN, 0f, 0f, 0))
+            view.onTouchEvent(MotionEvent.obtain(0L, 0L, MotionEvent.ACTION_DOWN, 0f, 2f, 0))
         assertThat(returnVal).isTrue()
         verify(shadeViewController, never()).handleExternalTouch(any())
     }
@@ -178,7 +180,7 @@ class PhoneStatusBarViewControllerTest : SysuiTestCase() {
     fun handleTouchEventFromStatusBar_viewNotEnabledButIsMoveEvent_viewReceivesEvent() {
         `when`(centralSurfacesImpl.commandQueuePanelsEnabled).thenReturn(true)
         `when`(shadeViewController.isViewEnabled).thenReturn(false)
-        val event = MotionEvent.obtain(0L, 0L, MotionEvent.ACTION_MOVE, 0f, 0f, 0)
+        val event = MotionEvent.obtain(0L, 0L, MotionEvent.ACTION_MOVE, 0f, 2f, 0)
 
         view.onTouchEvent(event)
 
@@ -205,6 +207,50 @@ class PhoneStatusBarViewControllerTest : SysuiTestCase() {
         view.onTouchEvent(event)
 
         verify(shadeViewController, never()).handleExternalTouch(any())
+    }
+
+    @Test
+    @DisableFlags(com.android.systemui.Flags.FLAG_STATUS_BAR_SWIPE_OVER_CHIP)
+    fun handleInterceptTouchEventFromStatusBar_shadeReturnsFalse_flagOff_viewReturnsFalse() {
+        `when`(shadeViewController.handleExternalInterceptTouch(any())).thenReturn(false)
+        val event = MotionEvent.obtain(0L, 0L, MotionEvent.ACTION_DOWN, 0f, 2f, 0)
+
+        val returnVal = view.onInterceptTouchEvent(event)
+
+        assertThat(returnVal).isFalse()
+    }
+
+    @Test
+    @EnableFlags(com.android.systemui.Flags.FLAG_STATUS_BAR_SWIPE_OVER_CHIP)
+    fun handleInterceptTouchEventFromStatusBar_shadeReturnsFalse_flagOn_viewReturnsFalse() {
+        `when`(shadeViewController.handleExternalInterceptTouch(any())).thenReturn(false)
+        val event = MotionEvent.obtain(0L, 0L, MotionEvent.ACTION_DOWN, 0f, 2f, 0)
+
+        val returnVal = view.onInterceptTouchEvent(event)
+
+        assertThat(returnVal).isFalse()
+    }
+
+    @Test
+    @DisableFlags(com.android.systemui.Flags.FLAG_STATUS_BAR_SWIPE_OVER_CHIP)
+    fun handleInterceptTouchEventFromStatusBar_shadeReturnsTrue_flagOff_viewReturnsFalse() {
+        `when`(shadeViewController.handleExternalInterceptTouch(any())).thenReturn(true)
+        val event = MotionEvent.obtain(0L, 0L, MotionEvent.ACTION_DOWN, 0f, 2f, 0)
+
+        val returnVal = view.onInterceptTouchEvent(event)
+
+        assertThat(returnVal).isFalse()
+    }
+
+    @Test
+    @EnableFlags(com.android.systemui.Flags.FLAG_STATUS_BAR_SWIPE_OVER_CHIP)
+    fun handleInterceptTouchEventFromStatusBar_shadeReturnsTrue_flagOn_viewReturnsTrue() {
+        `when`(shadeViewController.handleExternalInterceptTouch(any())).thenReturn(true)
+        val event = MotionEvent.obtain(0L, 0L, MotionEvent.ACTION_DOWN, 0f, 2f, 0)
+
+        val returnVal = view.onInterceptTouchEvent(event)
+
+        assertThat(returnVal).isTrue()
     }
 
     @Test
@@ -244,9 +290,7 @@ class PhoneStatusBarViewControllerTest : SysuiTestCase() {
             controller = createAndInitController(view)
         }
         val statusContainer = view.requireViewById<View>(R.id.system_icons)
-        statusContainer.dispatchTouchEvent(
-            getActionUpEventFromSource(InputDevice.SOURCE_MOUSE)
-        )
+        statusContainer.dispatchTouchEvent(getActionUpEventFromSource(InputDevice.SOURCE_MOUSE))
         verify(shadeControllerImpl).animateExpandShade()
     }
 
@@ -257,9 +301,10 @@ class PhoneStatusBarViewControllerTest : SysuiTestCase() {
             controller = createAndInitController(view)
         }
         val statusContainer = view.requireViewById<View>(R.id.system_icons)
-        val handled = statusContainer.dispatchTouchEvent(
-            getActionUpEventFromSource(InputDevice.SOURCE_TOUCHSCREEN)
-        )
+        val handled =
+            statusContainer.dispatchTouchEvent(
+                getActionUpEventFromSource(InputDevice.SOURCE_TOUCHSCREEN)
+            )
         assertThat(handled).isFalse()
     }
 
@@ -295,21 +340,21 @@ class PhoneStatusBarViewControllerTest : SysuiTestCase() {
 
     private fun createAndInitController(view: PhoneStatusBarView): PhoneStatusBarViewController {
         return PhoneStatusBarViewController.Factory(
-            Optional.of(sysuiUnfoldComponent),
-            Optional.of(progressProvider),
-            featureFlags,
-            userChipViewModel,
-            centralSurfacesImpl,
-            statusBarWindowStateController,
-            shadeControllerImpl,
-            shadeViewController,
-            panelExpansionInteractor,
-            windowRootView,
-            shadeLogger,
-            viewUtil,
-            configurationController,
-            mStatusOverlayHoverListenerFactory
-        )
+                Optional.of(sysuiUnfoldComponent),
+                Optional.of(progressProvider),
+                featureFlags,
+                userChipViewModel,
+                centralSurfacesImpl,
+                statusBarWindowStateController,
+                shadeControllerImpl,
+                shadeViewController,
+                panelExpansionInteractor,
+                windowRootView,
+                shadeLogger,
+                viewUtil,
+                configurationController,
+                mStatusOverlayHoverListenerFactory
+            )
             .create(view)
             .also { it.init() }
     }
