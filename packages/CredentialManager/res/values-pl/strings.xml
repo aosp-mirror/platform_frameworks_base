@@ -52,7 +52,7 @@
     <string name="create_passkey_in_other_device_title" msgid="2360053098931886245">"Utworzyć klucz dostępu na innym urządzeniu?"</string>
     <string name="save_password_on_other_device_title" msgid="5829084591948321207">"Zapisać hasło na innym urządzeniu?"</string>
     <string name="save_sign_in_on_other_device_title" msgid="2827990118560134692">"Zapisać sposób logowania się na innym urządzeniu?"</string>
-    <string name="use_provider_for_all_title" msgid="4201020195058980757">"Używać usługi <xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g> w przypadku wszystkich danych logowania?"</string>
+    <string name="use_provider_for_all_title" msgid="4201020195058980757">"Używać usługi <xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g> do wszystkich danych logowania?"</string>
     <string name="use_provider_for_all_description" msgid="1998772715863958997">"Menedżer haseł na koncie <xliff:g id="USERNAME">%1$s</xliff:g> będzie zapisywał Twoje hasła i klucze dostępu, aby ułatwić Ci logowanie"</string>
     <string name="set_as_default" msgid="4415328591568654603">"Ustaw jako domyślną"</string>
     <string name="settings" msgid="6536394145760913145">"Ustawienia"</string>

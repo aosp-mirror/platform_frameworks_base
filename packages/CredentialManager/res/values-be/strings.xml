@@ -52,7 +52,7 @@
     <string name="create_passkey_in_other_device_title" msgid="2360053098931886245">"Стварыць ключ доступу на іншай прыладзе?"</string>
     <string name="save_password_on_other_device_title" msgid="5829084591948321207">"Захаваць пароль на іншай прыладзе?"</string>
     <string name="save_sign_in_on_other_device_title" msgid="2827990118560134692">"Захаваць спосаб уваходу на іншай прыладзе?"</string>
-    <string name="use_provider_for_all_title" msgid="4201020195058980757">"Выкарыстоўваць папку \"<xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g>\" для ўсіх спосабаў уваходу?"</string>
+    <string name="use_provider_for_all_title" msgid="4201020195058980757">"Выкарыстоўваць <xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g> для ўсіх спосабаў уваходу?"</string>
     <string name="use_provider_for_all_description" msgid="1998772715863958997">"Каб вам было прасцей уваходзіць у сістэму, вашы паролі і ключы доступу будуць захоўвацца ў менеджары пароляў для <xliff:g id="USERNAME">%1$s</xliff:g>."</string>
     <string name="set_as_default" msgid="4415328591568654603">"Выкарыстоўваць стандартна"</string>
     <string name="settings" msgid="6536394145760913145">"Налады"</string>
