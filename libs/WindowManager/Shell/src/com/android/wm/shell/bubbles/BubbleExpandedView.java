@@ -1152,5 +1152,7 @@ public class BubbleExpandedView extends LinearLayout {
         pw.print(prefix); pw.println("BubbleExpandedView:");
         pw.print(prefix); pw.print("  taskId: "); pw.println(mTaskId);
         pw.print(prefix); pw.print("  stackView: "); pw.println(mStackView);
+        pw.print(prefix); pw.print("  contentVisibility: "); pw.println(mIsContentVisible);
+        pw.print(prefix); pw.print("  isAnimating: "); pw.println(mIsAnimating);
     }
 }
