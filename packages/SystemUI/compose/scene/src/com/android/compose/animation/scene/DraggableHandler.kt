@@ -459,38 +459,11 @@ private class DragControllerImpl(
 
             animateTo(targetScene = targetScene, targetOffset = targetOffset)
         } else {
-            // We are doing an overscroll animation between scenes. In this case, we can also start
-            // from the idle position.
-
-            val startFromIdlePosition = swipeTransition.dragOffset == 0f
-
-            if (startFromIdlePosition) {
-                // If there is a target scene, we start the overscroll animation.
-                val result = swipes.findUserActionResultStrict(velocity)
-                if (result == null) {
-                    // We will not animate
-                    swipeTransition.snapToScene(fromScene.key)
-                    return 0f
-                }
-
-                val newSwipeTransition =
-                    SwipeTransition(
-                            layoutState = layoutState,
-                            coroutineScope = draggableHandler.coroutineScope,
-                            fromScene = fromScene,
-                            result = result,
-                            swipes = swipes,
-                            layoutImpl = draggableHandler.layoutImpl,
-                            orientation = draggableHandler.orientation,
-                        )
-                        .apply { _currentScene = swipeTransition._currentScene }
-
-                updateTransition(newSwipeTransition)
-                animateTo(targetScene = fromScene, targetOffset = 0f)
-            } else {
-                // We were between two scenes: animate to the initial scene.
-                animateTo(targetScene = fromScene, targetOffset = 0f)
+            // We are doing an overscroll preview animation between scenes.
+            check(fromScene == swipeTransition._currentScene) {
+                "canChangeScene is false but currentScene != fromScene"
             }
+            animateTo(targetScene = fromScene, targetOffset = 0f)
         }
 
         // The onStop animation consumes any remaining velocity.
