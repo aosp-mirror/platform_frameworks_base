@@ -797,7 +797,7 @@ public final class SensorPrivacyManager {
     public void setSensorPrivacy(@Sensors.Sensor int sensor,
             boolean enable) {
         setSensorPrivacy(resolveSourceFromCurrentContext(), sensor, enable,
-                UserHandle.USER_CURRENT);
+                mContext.getUserId());
     }
 
     private @Sources.Source int resolveSourceFromCurrentContext() {
@@ -837,6 +837,8 @@ public final class SensorPrivacyManager {
     @RequiresPermission(Manifest.permission.MANAGE_SENSOR_PRIVACY)
     public void setSensorPrivacy(@Sources.Source int source, @Sensors.Sensor int sensor,
             boolean enable) {
+        // TODO(b/348510106): Replace USER_CURRENT with Context user and fix any tests that may be
+        // affected.
         setSensorPrivacy(source, sensor, enable, UserHandle.USER_CURRENT);
     }
 
@@ -894,7 +896,7 @@ public final class SensorPrivacyManager {
     @RequiresPermission(Manifest.permission.MANAGE_SENSOR_PRIVACY)
     public void setSensorPrivacyForProfileGroup(@Sources.Source int source,
             @Sensors.Sensor int sensor, boolean enable) {
-        setSensorPrivacyForProfileGroup(source , sensor, enable, UserHandle.USER_CURRENT);
+        setSensorPrivacyForProfileGroup(source , sensor, enable, mContext.getUserId());
     }
 
     /**
@@ -950,7 +952,7 @@ public final class SensorPrivacyManager {
     @RequiresPermission(Manifest.permission.MANAGE_SENSOR_PRIVACY)
     public void suppressSensorPrivacyReminders(int sensor,
             boolean suppress) {
-        suppressSensorPrivacyReminders(sensor, suppress, UserHandle.USER_CURRENT);
+        suppressSensorPrivacyReminders(sensor, suppress, mContext.getUserId());
     }
 
     /**
