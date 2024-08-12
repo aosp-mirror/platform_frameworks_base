@@ -1044,7 +1044,7 @@ private fun BiometricPromptRequest.Biometric.getApplicationInfo(
     val packageName =
         when {
             componentNameForLogo != null -> componentNameForLogo.packageName
-            // TODO(b/339532378): We should check whether |allowBackgroundAuthentication| should be
+            // TODO(b/353597496): We should check whether |allowBackgroundAuthentication| should be
             // removed.
             // This is being consistent with the check in [AuthController.showDialog()].
             allowBackgroundAuthentication || isSystem(context, opPackageName) -> opPackageName
