@@ -288,6 +288,7 @@ public class Tuner implements AutoCloseable  {
     private static int sTunerVersion = TunerVersionChecker.TUNER_VERSION_UNKNOWN;
     private DemuxInfo mDesiredDemuxInfo = new DemuxInfo(Filter.TYPE_UNDEFINED);
 
+    private boolean mClosed = false;
     private Frontend mFrontend;
     private EventHandler mHandler;
     @Nullable
@@ -813,6 +814,9 @@ public class Tuner implements AutoCloseable  {
      */
     @Override
     public void close() {
+        if (mClosed) {
+            return;
+        }
         acquireTRMSLock("close()");
         try {
             releaseAll();
@@ -820,6 +824,7 @@ public class Tuner implements AutoCloseable  {
             TunerUtils.throwExceptionForResult(nativeClose(), "failed to close tuner");
         } finally {
             releaseTRMSLock();
+            mClosed = true;
         }
     }
 
