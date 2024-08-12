@@ -186,17 +186,17 @@
     <string name="biometric_re_enroll_dialog_cancel" msgid="93760939407091417">"לא עכשיו"</string>
     <string name="biometric_re_enroll_notification_content" msgid="8685925877186288180">"הפעולה הזו נדרשת כדי לשפר את האבטחה והביצועים"</string>
     <string name="fingerprint_re_enroll_notification_title" msgid="4539432429683916604">"הגדרה חוזרת של \'ביטול הנעילה בטביעת אצבע\'"</string>
-    <string name="fingerprint_re_enroll_notification_name" msgid="630798657797645704">"ביטול הנעילה בטביעת אצבע"</string>
+    <string name="fingerprint_re_enroll_notification_name" msgid="630798657797645704">"פתיחה בטביעת אצבע"</string>
     <string name="fingerprint_re_enroll_dialog_title" msgid="3526033128113925780">"הגדרת \'ביטול הנעילה בטביעת אצבע\'"</string>
     <string name="fingerprint_re_enroll_dialog_content" msgid="4866561176695984879">"כדי להגדיר שוב את התכונה \'ביטול הנעילה בטביעת אצבע\', עליך למחוק את התבניות והמודלים הנוכחיים של טביעת האצבע.\n\nאחרי המחיקה יהיה צורך להגדיר שוב את \'ביטול הנעילה בטביעת אצבע\' כדי להשתמש בטביעת האצבע לביטול הנעילה של הטלפון ולאמת את זהותך."</string>
     <string name="fingerprint_re_enroll_dialog_content_singular" msgid="3083663339787381218">"כדי להגדיר שוב את התכונה \'ביטול הנעילה בטביעת אצבע\', עליך למחוק את התבניות והמודל הנוכחיים של טביעת האצבע.\n\nאחרי המחיקה יהיה צורך להגדיר שוב את \'ביטול הנעילה בטביעת אצבע\' כדי להשתמש בטביעת האצבע לביטול הנעילה של הטלפון ולאמת את זהותך."</string>
     <string name="fingerprint_reenroll_failure_dialog_content" msgid="4733768492747300666">"לא ניתן להגדיר ביטול נעילה בטביעת אצבע. יש לעבור להגדרות כדי לנסות שוב."</string>
     <string name="face_re_enroll_notification_title" msgid="1850838867718410520">"הגדרה חוזרת של \'פתיחה ע\"י זיהוי הפנים\'"</string>
-    <string name="face_re_enroll_notification_name" msgid="7384545252206120659">"פתיחה ע\"י זיהוי הפנים"</string>
+    <string name="face_re_enroll_notification_name" msgid="7384545252206120659">"פתיחה בזיהוי פנים"</string>
     <string name="face_re_enroll_dialog_title" msgid="6392173708176069994">"להגדרת התכונה \'פתיחה ע\"י זיהוי הפנים\'"</string>
     <string name="face_re_enroll_dialog_content" msgid="7353502359464038511">"כדי להגדיר שוב את התכונה \'פתיחה ע\"י זיהוי הפנים\', עליך למחוק את התבנית הנוכחית לזיהוי הפנים.\n\nיהיה צורך להגדיר את התכונה הזו שוב כדי להשתמש בזיהוי הפנים לביטול הנעילה של הטלפון."</string>
     <string name="face_reenroll_failure_dialog_content" msgid="7073947334397236935">"לא ניתן להגדיר פתיחה ע\"י זיהוי הפנים. צריך לעבור להגדרות כדי לנסות שוב."</string>
-    <string name="fingerprint_dialog_touch_sensor" msgid="2817887108047658975">"יש לגעת בחיישן טביעות האצבע"</string>
+    <string name="fingerprint_dialog_touch_sensor" msgid="2817887108047658975">"צריך לגעת בחיישן טביעות האצבע"</string>
     <string name="fingerprint_dialog_authenticated_confirmation" msgid="1603899612957562862">"להמשך יש ללחוץ על סמל ביטול הנעילה"</string>
     <string name="fingerprint_dialog_use_fingerprint_instead" msgid="5542430577183894219">"הפנים לא זוהו. צריך להשתמש בטביעת אצבע במקום."</string>
     <!-- no translation found for keyguard_face_failed_use_fp (7140293906176164263) -->

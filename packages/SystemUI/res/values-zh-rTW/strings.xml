@@ -270,7 +270,7 @@
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_disconnect" msgid="415980329093277342">"取消連結"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_activate" msgid="3724301751036877403">"啟用"</string>
     <string name="turn_on_bluetooth_auto_tomorrow" msgid="414836329962473906">"明天自動重新開啟"</string>
-    <string name="turn_on_bluetooth_auto_info" msgid="8831410009251539988">"快速分享、尋找我的裝置和裝置位置資訊等功能都會使用藍牙"</string>
+    <string name="turn_on_bluetooth_auto_info" msgid="8831410009251539988">"「快速分享」和「尋找我的裝置」等功能都會使用藍牙技術。"</string>
     <string name="quick_settings_bluetooth_secondary_label_battery_level" msgid="4182034939479344093">"電量：<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%s</xliff:g>"</string>
     <string name="quick_settings_bluetooth_secondary_label_audio" msgid="780333390310051161">"音訊"</string>
     <string name="quick_settings_bluetooth_secondary_label_headset" msgid="2332093067553000852">"耳機"</string>
