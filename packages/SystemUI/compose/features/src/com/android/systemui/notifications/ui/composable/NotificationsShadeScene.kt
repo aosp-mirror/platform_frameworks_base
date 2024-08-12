@@ -28,6 +28,7 @@ import com.android.compose.animation.scene.UserActionResult
 import com.android.systemui.battery.BatteryMeterViewController
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.keyguard.ui.composable.LockscreenContent
+import com.android.systemui.lifecycle.rememberViewModel
 import com.android.systemui.notifications.ui.viewmodel.NotificationsShadeSceneActionsViewModel
 import com.android.systemui.scene.session.ui.composable.SaveableSession
 import com.android.systemui.scene.shared.model.Scenes
@@ -53,7 +54,7 @@ constructor(
     private val actionsViewModelFactory: NotificationsShadeSceneActionsViewModel.Factory,
     private val overlayShadeViewModelFactory: OverlayShadeViewModel.Factory,
     private val shadeHeaderViewModelFactory: ShadeHeaderViewModel.Factory,
-    private val notificationsPlaceholderViewModel: NotificationsPlaceholderViewModel,
+    private val notificationsPlaceholderViewModelFactory: NotificationsPlaceholderViewModel.Factory,
     private val tintedIconManagerFactory: TintedIconManager.Factory,
     private val batteryMeterViewControllerFactory: BatteryMeterViewController.Factory,
     private val statusBarIconController: StatusBarIconController,
@@ -79,6 +80,10 @@ constructor(
     override fun SceneScope.Content(
         modifier: Modifier,
     ) {
+        val notificationsPlaceholderViewModel = rememberViewModel {
+            notificationsPlaceholderViewModelFactory.create()
+        }
+
         OverlayShade(
             modifier = modifier,
             viewModelFactory = overlayShadeViewModelFactory,
