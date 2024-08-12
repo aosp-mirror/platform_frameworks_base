@@ -99,6 +99,13 @@ flag {
 }
 
 flag {
+  name: "skip_eglmanager_telemetry"
+  namespace: "core_graphics"
+  description: "Skip telemetry in EglManager's calls to eglCreateContext to avoid polluting telemetry"
+  bug: "347911216"
+}
+
+flag {
   name: "resample_gainmap_regions"
   namespace: "core_graphics"
   description: "Resample gainmaps when decoding regions, to improve visual quality"

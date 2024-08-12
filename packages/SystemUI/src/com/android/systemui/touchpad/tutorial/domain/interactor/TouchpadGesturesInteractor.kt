@@ -16,22 +16,16 @@
 
 package com.android.systemui.touchpad.tutorial.domain.interactor
 
-import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.model.SysUiState
 import com.android.systemui.settings.DisplayTracker
 import com.android.systemui.shared.system.QuickStepContract
-import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
-@SysUISingleton
-class TouchpadGesturesInteractor
-@Inject
-constructor(
+class TouchpadGesturesInteractor(
     private val sysUiState: SysUiState,
     private val displayTracker: DisplayTracker,
-    @Background private val backgroundScope: CoroutineScope
+    private val backgroundScope: CoroutineScope
 ) {
     fun disableGestures() {
         setGesturesState(disabled = true)

@@ -493,6 +493,16 @@ flag {
 }
 
 flag {
+    name: "status_bar_switch_to_spn_from_data_spn"
+    namespace: "systemui"
+    description: "Fix usage of the SPN broadcast extras"
+    bug: "350812372"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
     name: "haptic_volume_slider"
     namespace: "systemui"
     description: "Adds haptic feedback to the volume slider."
@@ -1231,6 +1241,16 @@ flag {
    namespace: "systemui"
    description: "Use Keyguard Transitions to set Notification Shade occlusion state"
    bug: "344716537"
+   metadata {
+        purpose: PURPOSE_BUGFIX
+   }
+}
+
+flag {
+   name: "relock_with_power_button_immediately"
+   namespace: "systemui"
+   description: "UDFPS unlock followed by immediate power button push should relock"
+   bug: "343327511"
    metadata {
         purpose: PURPOSE_BUGFIX
    }
