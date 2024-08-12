@@ -1043,6 +1043,17 @@ class DesktopTasksController(
             wct.reorder(task.token, true)
             return wct
         }
+        // If task is already visible, it must have been handled already and added to desktop mode.
+        // Cascade task only if it's not visible yet.
+        if (DesktopModeFlags.CASCADING_WINDOWS.isEnabled(context)
+                && !taskRepository.isVisibleTask(task.taskId)) {
+            val displayLayout = displayController.getDisplayLayout(task.displayId)
+            if (displayLayout != null) {
+                val initialBounds = Rect(task.configuration.windowConfiguration.bounds)
+                cascadeWindow(task, initialBounds, displayLayout)
+                wct.setBounds(task.token, initialBounds)
+            }
+        }
         if (useDesktopOverrideDensity()) {
             wct.setDensityDpi(task.token, DESKTOP_DENSITY_OVERRIDE)
         }
@@ -1127,18 +1138,9 @@ class DesktopTasksController(
         }
 
         if (DesktopModeFlags.CASCADING_WINDOWS.isEnabled(context)) {
-            val stableBounds = Rect()
-            displayLayout.getStableBoundsForDesktopMode(stableBounds)
-
-            val activeTasks = taskRepository
-                .getActiveNonMinimizedOrderedTasks(taskInfo.displayId)
-            activeTasks.firstOrNull()?.let { activeTask ->
-                shellTaskOrganizer.getRunningTaskInfo(activeTask)?.let {
-                    cascadeWindow(context.resources, stableBounds,
-                        it.configuration.windowConfiguration.bounds, initialBounds)
-                }
-            }
+            cascadeWindow(taskInfo, initialBounds, displayLayout)
         }
+
         if (canChangeTaskPosition(taskInfo)) {
             wct.setBounds(taskInfo.token, initialBounds)
         }
@@ -1170,6 +1172,19 @@ class DesktopTasksController(
         if (taskRepository.isOnlyVisibleNonClosingTask(taskInfo.taskId)) {
             // Remove wallpaper activity when leaving desktop mode
             removeWallpaperActivity(wct)
+        }
+    }
+
+    private fun cascadeWindow(task: TaskInfo, bounds: Rect, displayLayout: DisplayLayout) {
+        val stableBounds = Rect()
+        displayLayout.getStableBoundsForDesktopMode(stableBounds)
+
+        val activeTasks = taskRepository.getActiveNonMinimizedOrderedTasks(task.displayId)
+        activeTasks.firstOrNull()?.let { activeTask ->
+            shellTaskOrganizer.getRunningTaskInfo(activeTask)?.let {
+                cascadeWindow(context.resources, stableBounds,
+                    it.configuration.windowConfiguration.bounds, bounds)
+            }
         }
     }
 
