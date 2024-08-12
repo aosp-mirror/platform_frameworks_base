@@ -14,27 +14,14 @@
  * limitations under the License.
  */
 
-package com.android.settingslib.volume.data.repository
+package com.android.settingslib.volume.shared
 
-import com.android.settingslib.volume.shared.AudioLogger
 import com.android.settingslib.volume.shared.model.AudioStream
 import com.android.settingslib.volume.shared.model.AudioStreamModel
 
-class FakeAudioRepositoryLogger : AudioLogger {
+/** A log interface for audio streams volume events. */
+interface AudioLogger {
+    fun onSetVolumeRequested(audioStream: AudioStream, volume: Int)
 
-    private val mutableLogs: MutableList<String> = mutableListOf()
-    val logs: List<String>
-        get() = mutableLogs
-
-    override fun onSetVolumeRequested(audioStream: AudioStream, volume: Int) {
-        synchronized(mutableLogs) {
-            mutableLogs.add("onSetVolumeRequested audioStream=$audioStream")
-        }
-    }
-
-    override fun onVolumeUpdateReceived(audioStream: AudioStream, model: AudioStreamModel) {
-        synchronized(mutableLogs) {
-            mutableLogs.add("onVolumeUpdateReceived audioStream=$audioStream")
-        }
-    }
+    fun onVolumeUpdateReceived(audioStream: AudioStream, model: AudioStreamModel)
 }
