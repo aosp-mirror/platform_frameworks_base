@@ -580,17 +580,22 @@ class Spaghetti(
         }
     }
 
-    private suspend fun getHelpForSuccessfulAuthentication(
+    private fun getHelpForSuccessfulAuthentication(
         authenticatedModality: BiometricModality,
-    ): Int? =
-        when {
-            // for coex, show a message when face succeeds after fingerprint has also started
-            modalities.hasFaceAndFingerprint &&
-                (viewModel.fingerprintStartMode.first() != FingerprintStartMode.Pending) &&
-                (authenticatedModality == BiometricModality.Face) ->
-                R.string.biometric_dialog_tap_confirm_with_face_alt_1
-            else -> null
+    ): Int? {
+        // for coex, show a message when face succeeds after fingerprint has also started
+        if (authenticatedModality != BiometricModality.Face) {
+            return null
         }
+
+        if (modalities.hasUdfps) {
+            return R.string.biometric_dialog_tap_confirm_with_face_alt_1
+        }
+        if (modalities.hasSfps) {
+            return R.string.biometric_dialog_tap_confirm_with_face_sfps
+        }
+        return null
+    }
 
     fun onAuthenticationFailed(
         @BiometricAuthenticator.Modality modality: Int,

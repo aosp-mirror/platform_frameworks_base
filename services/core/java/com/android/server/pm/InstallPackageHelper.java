@@ -2504,13 +2504,13 @@ final class InstallPackageHelper {
         Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
     }
 
-    private void enableRestrictedSettings(String pkgName, int appId, int userId) {
+    private void setAccessRestrictedSettingsMode(String pkgName, int appId, int userId, int mode) {
         final AppOpsManager appOpsManager = mPm.mContext.getSystemService(AppOpsManager.class);
         final int uid = UserHandle.getUid(userId, appId);
         appOpsManager.setMode(AppOpsManager.OP_ACCESS_RESTRICTED_SETTINGS,
                 uid,
                 pkgName,
-                AppOpsManager.MODE_ERRORED);
+                mode);
     }
 
     /**
@@ -2888,8 +2888,21 @@ final class InstallPackageHelper {
                 mPm.notifyPackageChanged(packageName, request.getAppId());
             }
 
-            if (!android.permission.flags.Flags.enhancedConfirmationModeApisEnabled()
-                    || !android.security.Flags.extendEcmToAllSettings()) {
+            // Set the OP_ACCESS_RESTRICTED_SETTINGS op, which is used by ECM (see {@link
+            // EnhancedConfirmationManager}) as a persistent state denoting whether an app is
+            // currently guarded by ECM, not guarded by ECM, or (in Android V+) that this should
+            // be decided later.
+            if (android.permission.flags.Flags.enhancedConfirmationModeApisEnabled()
+                    && android.security.Flags.extendEcmToAllSettings()) {
+                final int appId = request.getAppId();
+                mPm.mHandler.post(() -> {
+                    for (int userId : firstUserIds) {
+                        // MODE_DEFAULT means that the app's guardedness will be decided lazily
+                        setAccessRestrictedSettingsMode(packageName, appId, userId,
+                                AppOpsManager.MODE_DEFAULT);
+                    }
+                });
+            } else {
                 // Apply restricted settings on potentially dangerous packages. Needs to happen
                 // after appOpsManager is notified of the new package
                 if (request.getPackageSource() == PackageInstaller.PACKAGE_SOURCE_LOCAL_FILE
@@ -2898,7 +2911,9 @@ final class InstallPackageHelper {
                     final int appId = request.getAppId();
                     mPm.mHandler.post(() -> {
                         for (int userId : firstUserIds) {
-                            enableRestrictedSettings(packageName, appId, userId);
+                            // MODE_ERRORED means that the app is explicitly guarded
+                            setAccessRestrictedSettingsMode(packageName, appId, userId,
+                                    AppOpsManager.MODE_ERRORED);
                         }
                     });
                 }

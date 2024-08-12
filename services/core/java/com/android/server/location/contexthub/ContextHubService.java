@@ -242,10 +242,14 @@ public class ContextHubService extends IContextHubService.Stub {
 
         @Override
         public void handleServiceRestart() {
-            Log.i(TAG, "Starting Context Hub Service restart");
+            Log.i(TAG, "Recovering from Context Hub HAL restart...");
             initExistingCallbacks();
             resetSettings();
-            Log.i(TAG, "Finished Context Hub Service restart");
+            if (Flags.reconnectHostEndpointsAfterHalRestart()) {
+                mClientManager.forEachClientOfHub(mContextHubId,
+                        ContextHubClientBroker::sendHostEndpointConnectedEvent);
+            }
+            Log.i(TAG, "Finished recovering from Context Hub HAL restart");
         }
 
         @Override
@@ -536,6 +540,7 @@ public class ContextHubService extends IContextHubService.Stub {
         for (int contextHubId : mContextHubIdToInfoMap.keySet()) {
             try {
                 mContextHubWrapper.registerExistingCallback(contextHubId);
+                Log.i(TAG, "Re-registered callback to context hub " + contextHubId);
             } catch (RemoteException e) {
                 Log.e(TAG, "RemoteException while registering existing service callback for hub "
                         + "(ID = " + contextHubId + ")", e);

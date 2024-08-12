@@ -139,6 +139,11 @@ constructor(
         overlayView!!.visibility = View.INVISIBLE
         Log.d(TAG, "show(): adding overlayView $overlayView")
         windowManager.get().addView(overlayView, overlayViewModel.defaultOverlayViewParams)
+        overlayView!!.announceForAccessibility(
+            applicationContext.resources.getString(
+                R.string.accessibility_side_fingerprint_indicator_label
+            )
+        )
     }
 
     /** Hide the side fingerprint sensor indicator */

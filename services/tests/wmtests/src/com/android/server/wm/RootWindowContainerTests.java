@@ -392,6 +392,8 @@ public class RootWindowContainerTests extends WindowTestsBase {
         assertEquals(newPipTask, mDisplayContent.getDefaultTaskDisplayArea().getRootPinnedTask());
         assertNotEquals(newPipTask, activity1.getTask());
         assertFalse("Created PiP task must not be in recents", newPipTask.inRecents);
+        assertThat(newPipTask.autoRemoveRecents).isTrue();
+        assertThat(activity1.getTask().autoRemoveRecents).isFalse();
     }
 
     /**
@@ -427,6 +429,7 @@ public class RootWindowContainerTests extends WindowTestsBase {
         bounds.scale(0.5f);
         task.setBounds(bounds);
         assertFalse(activity.isLetterboxedForFixedOrientationAndAspectRatio());
+        assertThat(task.autoRemoveRecents).isFalse();
     }
 
     /**
@@ -451,6 +454,7 @@ public class RootWindowContainerTests extends WindowTestsBase {
         // Ensure a task has moved over.
         ensureTaskPlacement(task, activity);
         assertTrue(task.inPinnedWindowingMode());
+        assertThat(task.autoRemoveRecents).isFalse();
     }
 
     /**
@@ -480,6 +484,8 @@ public class RootWindowContainerTests extends WindowTestsBase {
         ensureTaskPlacement(fullscreenTask, secondActivity);
         assertTrue(pinnedRootTask.inPinnedWindowingMode());
         assertEquals(WINDOWING_MODE_FULLSCREEN, fullscreenTask.getWindowingMode());
+        assertThat(pinnedRootTask.autoRemoveRecents).isTrue();
+        assertThat(secondActivity.getTask().autoRemoveRecents).isFalse();
     }
 
     @Test

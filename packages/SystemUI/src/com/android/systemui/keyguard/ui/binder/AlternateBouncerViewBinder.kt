@@ -86,7 +86,10 @@ constructor(
                     privateFlags =
                         WindowManager.LayoutParams.PRIVATE_FLAG_TRUSTED_OVERLAY or
                             WindowManager.LayoutParams.PRIVATE_FLAG_NO_MOVE_ANIMATION
+                    // Avoid announcing window title.
+                    accessibilityTitle = " "
                 }
+
     private var alternateBouncerView: ConstraintLayout? = null
 
     override fun start() {
@@ -304,6 +307,7 @@ constructor(
             }
         }
     }
+
     companion object {
         private const val TAG = "AlternateBouncerViewBinder"
         private const val swipeTag = "AlternateBouncer-SWIPE"

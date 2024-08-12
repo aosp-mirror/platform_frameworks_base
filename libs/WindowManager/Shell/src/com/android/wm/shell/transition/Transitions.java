@@ -28,12 +28,16 @@ import static android.view.WindowManager.TRANSIT_SLEEP;
 import static android.view.WindowManager.TRANSIT_TO_BACK;
 import static android.view.WindowManager.TRANSIT_TO_FRONT;
 import static android.view.WindowManager.fixScale;
+import static android.window.TransitionInfo.FLAGS_IS_NON_APP_WINDOW;
 import static android.window.TransitionInfo.FLAG_BACK_GESTURE_ANIMATED;
+import static android.window.TransitionInfo.FLAG_IN_TASK_WITH_EMBEDDED_ACTIVITY;
 import static android.window.TransitionInfo.FLAG_IS_BEHIND_STARTING_WINDOW;
 import static android.window.TransitionInfo.FLAG_IS_OCCLUDED;
+import static android.window.TransitionInfo.FLAG_IS_WALLPAPER;
 import static android.window.TransitionInfo.FLAG_NO_ANIMATION;
 import static android.window.TransitionInfo.FLAG_STARTING_WINDOW_TRANSFER_RECIPIENT;
 
+import static com.android.window.flags.Flags.ensureWallpaperInTransitions;
 import static com.android.systemui.shared.Flags.returnAnimationFrameworkLibrary;
 import static com.android.wm.shell.shared.TransitionUtil.isClosingType;
 import static com.android.wm.shell.shared.TransitionUtil.isOpeningType;
@@ -73,6 +77,7 @@ import androidx.annotation.BinderThread;
 import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.protolog.common.ProtoLog;
+import com.android.window.flags.Flags;
 import com.android.wm.shell.RootTaskDisplayAreaOrganizer;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.common.DisplayController;
@@ -183,6 +188,9 @@ public class Transitions implements RemoteCallable<Transitions>,
     public static final int TRANSIT_TASK_FRAGMENT_DRAG_RESIZE =
             // TRANSIT_FIRST_CUSTOM + 17
             TaskFragmentOrganizer.TASK_FRAGMENT_TRANSIT_DRAG_RESIZE;
+
+    /** Remote Transition that split accepts but ultimately needs to be animated by the remote. */
+    public static final int TRANSIT_SPLIT_PASSTHROUGH = TRANSIT_FIRST_CUSTOM + 18;
 
     /** Transition type for desktop mode transitions. */
     public static final int TRANSIT_DESKTOP_MODE_TYPES =
@@ -512,12 +520,17 @@ public class Transitions implements RemoteCallable<Transitions>,
         boolean isOpening = isOpeningType(info.getType());
         for (int i = info.getChanges().size() - 1; i >= 0; --i) {
             final TransitionInfo.Change change = info.getChanges().get(i);
-            if (change.hasFlags(TransitionInfo.FLAGS_IS_NON_APP_WINDOW)) {
+            if (change.hasFlags(FLAGS_IS_NON_APP_WINDOW & ~FLAG_IS_WALLPAPER)) {
                 // Currently system windows are controlled by WindowState, so don't change their
                 // surfaces. Otherwise their surfaces could be hidden or cropped unexpectedly.
-                // This includes Wallpaper (always z-ordered at bottom) and IME (associated with
-                // app), because there may not be a transition associated with their visibility
-                // changes, and currently they don't need transition animation.
+                // This includes IME (associated with app), because there may not be a transition
+                // associated with their visibility changes, and currently they don't need a
+                // transition animation.
+                continue;
+            }
+            if (change.hasFlags(FLAG_IS_WALLPAPER) && !ensureWallpaperInTransitions()) {
+                // Wallpaper is always z-ordered at bottom, and historically is not animated by
+                // transition handlers.
                 continue;
             }
             final SurfaceControl leash = change.getLeash();
@@ -570,6 +583,14 @@ public class Transitions implements RemoteCallable<Transitions>,
         final boolean isOpening = isOpeningType(transitType);
         final boolean isClosing = isClosingType(transitType);
         final int mode = change.getMode();
+        // Ensure wallpapers stay in the back
+        if (change.hasFlags(FLAG_IS_WALLPAPER) && Flags.ensureWallpaperInTransitions()) {
+            if (mode == TRANSIT_OPEN || mode == TRANSIT_TO_FRONT) {
+                return -zSplitLine + numChanges - i;
+            } else {
+                return -zSplitLine - i;
+            }
+        }
         // Put all the OPEN/SHOW on top
         if (mode == TRANSIT_OPEN || mode == TRANSIT_TO_FRONT) {
             if (isOpening) {
@@ -788,14 +809,16 @@ public class Transitions implements RemoteCallable<Transitions>,
         final int changeSize = info.getChanges().size();
         boolean taskChange = false;
         boolean transferStartingWindow = false;
-        int noAnimationBehindStartingWindow = 0;
+        int animBehindStartingWindow = 0;
         boolean allOccluded = changeSize > 0;
         for (int i = changeSize - 1; i >= 0; --i) {
             final TransitionInfo.Change change = info.getChanges().get(i);
             taskChange |= change.getTaskInfo() != null;
             transferStartingWindow |= change.hasFlags(FLAG_STARTING_WINDOW_TRANSFER_RECIPIENT);
-            if (change.hasAllFlags(FLAG_IS_BEHIND_STARTING_WINDOW | FLAG_NO_ANIMATION)) {
-                noAnimationBehindStartingWindow++;
+            if (change.hasAllFlags(FLAG_IS_BEHIND_STARTING_WINDOW | FLAG_NO_ANIMATION)
+                    || change.hasAllFlags(
+                            FLAG_IS_BEHIND_STARTING_WINDOW | FLAG_IN_TASK_WITH_EMBEDDED_ACTIVITY)) {
+                animBehindStartingWindow++;
             }
             if (!change.hasFlags(FLAG_IS_OCCLUDED)) {
                 allOccluded = false;
@@ -813,11 +836,11 @@ public class Transitions implements RemoteCallable<Transitions>,
         // There does not need animation when:
         // A. Transfer starting window. Apply transfer starting window directly if there is no other
         // task change. Since this is an activity->activity situation, we can detect it by selecting
-        // transitions with only 2 changes where
-        // 1. neither are tasks, and
+        // transitions with changes where
+        // 1. none are tasks, and
         // 2. one is a starting-window recipient, or all change is behind starting window.
-        if (!taskChange && (transferStartingWindow || noAnimationBehindStartingWindow == changeSize)
-                && changeSize == 2
+        if (!taskChange && (transferStartingWindow || animBehindStartingWindow == changeSize)
+                && changeSize >= 1
                 // B. It's visibility change if the TRANSIT_TO_BACK/TO_FRONT happened when all
                 // changes are underneath another change.
                 || ((info.getType() == TRANSIT_TO_BACK || info.getType() == TRANSIT_TO_FRONT)

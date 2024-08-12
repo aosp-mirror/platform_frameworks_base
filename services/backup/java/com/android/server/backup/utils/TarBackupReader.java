@@ -792,10 +792,11 @@ public class TarBackupReader {
     }
 
     private String getVToUAllowlist(Context context, int userId) {
-        return Settings.Secure.getStringForUser(
+         String allowlist = Settings.Secure.getStringForUser(
                 context.getContentResolver(),
                 Settings.Secure.V_TO_U_RESTORE_ALLOWLIST,
                 userId);
+         return (allowlist == null) ? "" : allowlist;
     }
 
     private static long extractRadix(byte[] data, int offset, int maxChars, int radix)

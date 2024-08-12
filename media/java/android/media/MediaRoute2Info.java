@@ -26,6 +26,7 @@ import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.SuppressLint;
 import android.annotation.TestApi;
 import android.net.Uri;
 import android.os.Bundle;
@@ -811,6 +812,34 @@ public final class MediaRoute2Info implements Parcelable {
     public boolean isVisibleTo(String packageName) {
         return !mIsVisibilityRestricted || getPackageName().equals(packageName)
                 || mAllowedPackages.contains(packageName);
+    }
+
+    /**
+     * Returns whether this route's type can only be published by the system route provider.
+     *
+     * @see #isSystemRoute()
+     * @hide
+     */
+    // The default case catches all other types.
+    @SuppressLint("SwitchIntDef")
+    public boolean isSystemRouteType() {
+        return switch (mType) {
+            case TYPE_BUILTIN_SPEAKER,
+                            TYPE_BLUETOOTH_A2DP,
+                            TYPE_DOCK,
+                            TYPE_BLE_HEADSET,
+                            TYPE_HEARING_AID,
+                            TYPE_HDMI,
+                            TYPE_HDMI_ARC,
+                            TYPE_HDMI_EARC,
+                            TYPE_USB_ACCESSORY,
+                            TYPE_USB_DEVICE,
+                            TYPE_USB_HEADSET,
+                            TYPE_WIRED_HEADPHONES,
+                            TYPE_WIRED_HEADSET ->
+                    true;
+            default -> false;
+        };
     }
 
     /** Returns the route suitability status. */

@@ -441,6 +441,8 @@
     <string name="biometric_dialog_tap_confirm_with_face_alt_2">Face recognized. Press to continue.</string>
     <!-- Message shown when a biometric has authenticated with a user's face and is waiting for the user to confirm authentication [CHAR LIMIT=60]-->
     <string name="biometric_dialog_tap_confirm_with_face_alt_3">Face recognized. Press the unlock icon to continue.</string>
+    <!-- Message shown when a biometric has authenticated with a user's face and is waiting for the user to confirm authentication with SFPS [CHAR LIMIT=60]-->
+    <string name="biometric_dialog_tap_confirm_with_face_sfps">Unlocked by face. Tap to continue.</string>
     <!-- Talkback string when a biometric is authenticated [CHAR LIMIT=NONE] -->
     <string name="biometric_dialog_authenticated">Authenticated</string>
     <!-- Talkback string when a canceling authentication [CHAR LIMIT=NONE] -->
