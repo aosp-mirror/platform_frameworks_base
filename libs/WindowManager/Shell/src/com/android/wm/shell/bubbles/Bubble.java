@@ -568,6 +568,7 @@ public class Bubble implements BubbleViewProvider {
             @Nullable BubbleBarLayerView layerView,
             BubbleIconFactory iconFactory,
             boolean skipInflation) {
+        ProtoLog.v(WM_SHELL_BUBBLES, "Inflate bubble key=%s", getKey());
         if (Flags.bubbleViewInfoExecutors()) {
             if (mInflationTask != null && !mInflationTask.isFinished()) {
                 mInflationTask.cancel();

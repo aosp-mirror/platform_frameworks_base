@@ -20,6 +20,7 @@ import static com.android.wm.shell.bubbles.BadgedImageView.DEFAULT_PATH_SIZE;
 import static com.android.wm.shell.bubbles.BadgedImageView.WHITE_SCRIM_ALPHA;
 import static com.android.wm.shell.bubbles.BubbleDebugConfig.TAG_BUBBLES;
 import static com.android.wm.shell.bubbles.BubbleDebugConfig.TAG_WITH_CLASS_NAME;
+import static com.android.wm.shell.protolog.ShellProtoLogGroup.WM_SHELL_BUBBLES;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -40,6 +41,7 @@ import android.view.LayoutInflater;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.graphics.ColorUtils;
+import com.android.internal.protolog.ProtoLog;
 import com.android.launcher3.icons.BitmapInfo;
 import com.android.launcher3.icons.BubbleIconFactory;
 import com.android.wm.shell.R;
@@ -195,14 +197,13 @@ public class BubbleViewInfoTask {
             // If we're in an inconsistent state, then switched modes and should just bail now.
             return null;
         }
+        ProtoLog.v(WM_SHELL_BUBBLES, "Task loading bubble view info key=%s", mBubble.getKey());
         if (mLayerView.get() != null) {
-            return BubbleViewInfo.populateForBubbleBar(mContext.get(), mExpandedViewManager.get(),
-                    mTaskViewFactory.get(), mPositioner.get(), mLayerView.get(), mIconFactory,
-                    mBubble, mSkipInflation);
+            return BubbleViewInfo.populateForBubbleBar(mContext.get(), mTaskViewFactory.get(),
+                    mLayerView.get(), mIconFactory, mBubble, mSkipInflation);
         } else {
-            return BubbleViewInfo.populate(mContext.get(), mExpandedViewManager.get(),
-                    mTaskViewFactory.get(), mPositioner.get(), mStackView.get(), mIconFactory,
-                    mBubble, mSkipInflation);
+            return BubbleViewInfo.populate(mContext.get(), mTaskViewFactory.get(),
+                    mPositioner.get(), mStackView.get(), mIconFactory, mBubble, mSkipInflation);
         }
     }
 
@@ -210,6 +211,21 @@ public class BubbleViewInfoTask {
         if (viewInfo == null || !verifyState()) {
             return;
         }
+        ProtoLog.v(WM_SHELL_BUBBLES, "Task updating bubble view info key=%s", mBubble.getKey());
+        if (!mBubble.isInflated()) {
+            if (viewInfo.expandedView != null) {
+                ProtoLog.v(WM_SHELL_BUBBLES, "Task initializing expanded view key=%s",
+                        mBubble.getKey());
+                viewInfo.expandedView.initialize(mExpandedViewManager.get(), mStackView.get(),
+                        mPositioner.get(), false /* isOverflow */, viewInfo.taskView);
+            } else if (viewInfo.bubbleBarExpandedView != null) {
+                ProtoLog.v(WM_SHELL_BUBBLES, "Task initializing bubble bar expanded view key=%s",
+                        mBubble.getKey());
+                viewInfo.bubbleBarExpandedView.initialize(mExpandedViewManager.get(),
+                        mPositioner.get(), false /* isOverflow */, viewInfo.taskView);
+            }
+        }
+
         mBubble.setViewInfo(viewInfo);
         if (mCallback != null) {
             mCallback.onBubbleViewsReady(mBubble);
@@ -231,6 +247,9 @@ public class BubbleViewInfoTask {
     public static class BubbleViewInfo {
         // TODO(b/273312602): for foldables it might make sense to populate all of the views
 
+        // Only set if views where inflated as part of the task
+        @Nullable BubbleTaskView taskView;
+
         // Always populated
         ShortcutInfo shortcutInfo;
         String appName;
@@ -250,9 +269,7 @@ public class BubbleViewInfoTask {
 
         @Nullable
         public static BubbleViewInfo populateForBubbleBar(Context c,
-                BubbleExpandedViewManager expandedViewManager,
                 BubbleTaskViewFactory taskViewFactory,
-                BubblePositioner positioner,
                 BubbleBarLayerView layerView,
                 BubbleIconFactory iconFactory,
                 Bubble b,
@@ -260,12 +277,11 @@ public class BubbleViewInfoTask {
             BubbleViewInfo info = new BubbleViewInfo();
 
             if (!skipInflation && !b.isInflated()) {
-                BubbleTaskView bubbleTaskView = b.getOrCreateBubbleTaskView(taskViewFactory);
+                ProtoLog.v(WM_SHELL_BUBBLES, "Task inflating bubble bar views key=%s", b.getKey());
+                info.taskView = b.getOrCreateBubbleTaskView(taskViewFactory);
                 LayoutInflater inflater = LayoutInflater.from(c);
                 info.bubbleBarExpandedView = (BubbleBarExpandedView) inflater.inflate(
                         R.layout.bubble_bar_expanded_view, layerView, false /* attachToRoot */);
-                info.bubbleBarExpandedView.initialize(
-                        expandedViewManager, positioner, false /* isOverflow */, bubbleTaskView);
             }
 
             if (!populateCommonInfo(info, c, b, iconFactory)) {
@@ -279,7 +295,6 @@ public class BubbleViewInfoTask {
         @VisibleForTesting
         @Nullable
         public static BubbleViewInfo populate(Context c,
-                BubbleExpandedViewManager expandedViewManager,
                 BubbleTaskViewFactory taskViewFactory,
                 BubblePositioner positioner,
                 BubbleStackView stackView,
@@ -290,17 +305,15 @@ public class BubbleViewInfoTask {
 
             // View inflation: only should do this once per bubble
             if (!skipInflation && !b.isInflated()) {
+                ProtoLog.v(WM_SHELL_BUBBLES, "Task inflating bubble views key=%s", b.getKey());
                 LayoutInflater inflater = LayoutInflater.from(c);
                 info.imageView = (BadgedImageView) inflater.inflate(
                         R.layout.bubble_view, stackView, false /* attachToRoot */);
                 info.imageView.initialize(positioner);
 
-                BubbleTaskView bubbleTaskView = b.getOrCreateBubbleTaskView(taskViewFactory);
+                info.taskView = b.getOrCreateBubbleTaskView(taskViewFactory);
                 info.expandedView = (BubbleExpandedView) inflater.inflate(
                         R.layout.bubble_expanded_view, stackView, false /* attachToRoot */);
-                info.expandedView.initialize(
-                        expandedViewManager, stackView, positioner, false /* isOverflow */,
-                        bubbleTaskView);
             }
 
             if (!populateCommonInfo(info, c, b, iconFactory)) {
