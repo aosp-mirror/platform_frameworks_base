@@ -191,6 +191,11 @@ public class PipTransition extends PipTransitionController {
     }
 
     @Override
+    protected boolean isInSwipePipToHomeTransition() {
+        return mPipTransitionState.getInSwipePipToHomeTransition();
+    }
+
+    @Override
     public void startExitTransition(int type, WindowContainerTransaction out,
             @Nullable Rect destinationBounds) {
         if (destinationBounds != null) {
