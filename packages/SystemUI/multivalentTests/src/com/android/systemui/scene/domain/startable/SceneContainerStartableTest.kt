@@ -230,6 +230,32 @@ class SceneContainerStartableTest : SysuiTestCase() {
         }
 
     @Test
+    fun hydrateVisibility_basedOnAlternateBouncer() =
+        testScope.runTest {
+            val isVisible by collectLastValue(sceneInteractor.isVisible)
+            prepareState(
+                isDeviceUnlocked = false,
+                initialSceneKey = Scenes.Lockscreen,
+            )
+
+            underTest.start()
+            assertThat(isVisible).isTrue()
+
+            // WHEN the device is occluded,
+            kosmos.keyguardOcclusionInteractor.setWmNotifiedShowWhenLockedActivityOnTop(
+                true,
+                mock()
+            )
+            // THEN scenes are not visible
+            assertThat(isVisible).isFalse()
+
+            // WHEN the alternate bouncer is visible
+            kosmos.fakeKeyguardBouncerRepository.setAlternateVisible(true)
+            // THEN scenes visible
+            assertThat(isVisible).isTrue()
+        }
+
+    @Test
     fun startsInLockscreenScene() =
         testScope.runTest {
             val currentSceneKey by collectLastValue(sceneInteractor.currentScene)
