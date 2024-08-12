@@ -961,14 +961,17 @@ public class ZenModeHelper {
             if (origin == ORIGIN_USER_IN_SYSTEMUI && condition != null
                     && condition.source == SOURCE_USER_ACTION) {
                 // Apply as override, instead of actual condition.
+                // If the new override is the reverse of a previous (still active) override, try
+                // removing the previous override, as long as the resulting state, based on the
+                // previous owner-provided condition, is the desired one (active or inactive).
+                // This allows the rule owner to resume controlling the rule after
+                // snoozing-unsnoozing or activating-stopping.
                 if (condition.state == STATE_TRUE) {
-                    // Manually turn on a rule -> Apply override.
-                    rule.setConditionOverride(OVERRIDE_ACTIVATE);
+                    rule.resetConditionOverride();
+                    if (!rule.isAutomaticActive()) {
+                        rule.setConditionOverride(OVERRIDE_ACTIVATE);
+                    }
                 } else if (condition.state == STATE_FALSE) {
-                    // Manually turn off a rule. If the rule was manually activated before, reset
-                    // override -- but only if this will not result in the rule turning on
-                    // immediately because of a previously snoozed condition! In that case, apply
-                    // deactivate-override.
                     rule.resetConditionOverride();
                     if (rule.isAutomaticActive()) {
                         rule.setConditionOverride(OVERRIDE_DEACTIVATE);
