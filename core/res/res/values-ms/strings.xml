@@ -614,7 +614,7 @@
     <string name="permdesc_mediaLocation" msgid="597912899423578138">"Membenarkan apl membaca lokasi daripada koleksi media anda."</string>
     <string name="biometric_app_setting_name" msgid="3339209978734534457">"Gunakan biometrik"</string>
     <string name="biometric_or_screen_lock_app_setting_name" msgid="5348462421758257752">"Gunakan biometrik atau kunci skrin"</string>
-    <string name="biometric_dialog_default_title" msgid="55026799173208210">"Sahkan itu anda"</string>
+    <string name="biometric_dialog_default_title" msgid="55026799173208210">"Sahkan diri anda"</string>
     <string name="biometric_dialog_default_subtitle" msgid="8457232339298571992">"Gunakan biometrik anda untuk meneruskan"</string>
     <string name="biometric_or_screen_lock_dialog_default_subtitle" msgid="159539678371552009">"Gunakan biometrik atau kunci skrin anda untuk meneruskan pengesahan"</string>
     <string name="biometric_error_hw_unavailable" msgid="2494077380540615216">"Perkakasan biometrik tidak tersedia"</string>
@@ -2172,7 +2172,7 @@
     <string name="miniresolver_sms_information" msgid="4311292661329483088">"Organisasi anda hanya membenarkan anda menghantar mesej daripada apl kerja"</string>
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"Gunakan penyemak imbas peribadi"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"Gunakan penyemak imbas kerja"</string>
-    <string name="miniresolver_call" msgid="6386870060423480765">"Panggil"</string>
+    <string name="miniresolver_call" msgid="6386870060423480765">"Telefon"</string>
     <string name="miniresolver_switch" msgid="8011924662117617451">"Beralih"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"PIN buka kunci rangkaian SIM"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_ENTRY" msgid="7164399703751688214">"PIN buka kunci subset rangkaian SIM"</string>
