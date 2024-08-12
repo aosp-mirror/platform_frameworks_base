@@ -184,7 +184,11 @@ constructor(
         keyguardTransitionInteractor.startedKeyguardTransitionStep
             .filter { step -> step.to == KeyguardState.OCCLUDED }
             .combine(isCommunalAvailable, ::Pair)
-            .map { (step, available) -> available && step.from == KeyguardState.GLANCEABLE_HUB }
+            .map { (step, available) ->
+                available &&
+                    (step.from == KeyguardState.GLANCEABLE_HUB ||
+                        step.from == KeyguardState.DREAMING)
+            }
             .flowOn(bgDispatcher)
             .stateIn(
                 scope = applicationScope,
