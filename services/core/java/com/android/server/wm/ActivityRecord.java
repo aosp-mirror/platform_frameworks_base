@@ -789,8 +789,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
      */
     private boolean mWillCloseOrEnterPip;
 
-    final LetterboxUiController mLetterboxUiController;
-
     /**
      * App Compat Facade
      */
@@ -1324,7 +1322,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             pw.print(prefix); pw.println("mWaitForEnteringPinnedMode=true");
         }
 
-        mLetterboxUiController.dump(pw, prefix);
+        mAppCompatController.dump(pw, prefix);
     }
 
     static boolean dumpActivity(FileDescriptor fd, PrintWriter pw, int index, ActivityRecord r,
@@ -1988,12 +1986,10 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         }
 
         // Don't move below setActivityType since it triggers onConfigurationChange ->
-        // resolveOverrideConfiguration that requires having mLetterboxUiController initialised.
+        // resolveOverrideConfiguration that requires having mAppCompatController initialised.
         // Don't move below setOrientation(info.screenOrientation) since it triggers
-        // getOverrideOrientation that requires having mLetterboxUiController
-        // initialised.
+        // getOverrideOrientation that requires having mAppCompatController initialised.
         mAppCompatController = new AppCompatController(mWmService, this);
-        mLetterboxUiController = new LetterboxUiController(mWmService, this);
         mResolveConfigHint = new TaskFragment.ConfigOverrideHint();
         if (mWmService.mFlags.mInsetsDecoupledConfiguration) {
             // When the stable configuration is the default behavior, override for the legacy apps

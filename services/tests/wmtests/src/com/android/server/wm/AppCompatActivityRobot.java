@@ -420,7 +420,6 @@ class AppCompatActivityRobot {
      */
     @CallSuper
     void onPostActivityCreation(@NonNull ActivityRecord activity) {
-        spyOn(activity.mLetterboxUiController);
         if (mOnPostActivityCreation != null) {
             mOnPostActivityCreation.accept(activity);
         }
