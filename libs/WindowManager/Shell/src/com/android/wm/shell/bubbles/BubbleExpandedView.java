@@ -921,7 +921,11 @@ public class BubbleExpandedView extends LinearLayout {
             return;
         }
         boolean isNew = mBubble == null || didBackingContentChange(bubble);
-        if (isNew || bubble.getKey().equals(mBubble.getKey())) {
+        boolean isUpdate = bubble != null && mBubble != null
+                && bubble.getKey().equals(mBubble.getKey());
+        ProtoLog.d(WM_SHELL_BUBBLES, "BubbleExpandedView - update bubble=%s; isNew=%b; isUpdate=%b",
+                bubble.getKey(), isNew, isUpdate);
+        if (isNew || isUpdate) {
             mBubble = bubble;
             mManageButton.setContentDescription(getResources().getString(
                     R.string.bubbles_settings_button_description, bubble.getAppName()));
