@@ -151,7 +151,7 @@ open class OpenAppFromNotificationWarmTest(flicker: LegacyFlickerTest) :
     @Presubmit
     @Test
     open fun taskBarWindowIsVisibleAtEnd() {
-        Assume.assumeTrue(flicker.scenario.isTablet)
+        Assume.assumeTrue(usesTaskbar)
         flicker.taskBarWindowIsVisibleAtEnd()
     }
 
@@ -163,7 +163,7 @@ open class OpenAppFromNotificationWarmTest(flicker: LegacyFlickerTest) :
     @Presubmit
     @Test
     open fun taskBarLayerIsVisibleAtEnd() {
-        Assume.assumeTrue(flicker.scenario.isTablet)
+        Assume.assumeTrue(usesTaskbar)
         flicker.taskBarLayerIsVisibleAtEnd()
     }
 
@@ -171,7 +171,7 @@ open class OpenAppFromNotificationWarmTest(flicker: LegacyFlickerTest) :
     @Presubmit
     @Test
     open fun navBarLayerPositionAtEnd() {
-        Assume.assumeFalse(flicker.scenario.isTablet)
+        Assume.assumeFalse(usesTaskbar)
         flicker.navBarLayerPositionAtEnd()
     }
 
@@ -179,14 +179,14 @@ open class OpenAppFromNotificationWarmTest(flicker: LegacyFlickerTest) :
     @Presubmit
     @Test
     open fun navBarLayerIsVisibleAtEnd() {
-        Assume.assumeFalse(flicker.scenario.isTablet)
+        Assume.assumeFalse(usesTaskbar)
         flicker.navBarLayerIsVisibleAtEnd()
     }
 
     @Presubmit
     @Test
     open fun navBarWindowIsVisibleAtEnd() {
-        Assume.assumeFalse(flicker.scenario.isTablet)
+        Assume.assumeFalse(usesTaskbar)
         flicker.navBarWindowIsVisibleAtEnd()
     }
 
