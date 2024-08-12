@@ -34,7 +34,6 @@ import android.graphics.Matrix;
 import android.graphics.Path;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.Icon;
-import android.os.AsyncTask;
 import android.util.Log;
 import android.util.PathParser;
 import android.view.LayoutInflater;
@@ -50,14 +49,13 @@ import com.android.wm.shell.bubbles.bar.BubbleBarLayerView;
 import java.lang.ref.WeakReference;
 import java.util.Objects;
 import java.util.concurrent.Executor;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * Simple task to inflate views & load necessary info to display a bubble.
  */
-// TODO(b/353894869): switch to executors
-public class BubbleViewInfoTask extends AsyncTask<Void, Void, BubbleViewInfoTask.BubbleViewInfo> {
+public class BubbleViewInfoTask {
     private static final String TAG = TAG_WITH_CLASS_NAME ? "BubbleViewInfoTask" : TAG_BUBBLES;
-
 
     /**
      * Callback to find out when the bubble has been inflated & necessary data loaded.
@@ -69,17 +67,22 @@ public class BubbleViewInfoTask extends AsyncTask<Void, Void, BubbleViewInfoTask
         void onBubbleViewsReady(Bubble bubble);
     }
 
-    private Bubble mBubble;
-    private WeakReference<Context> mContext;
-    private WeakReference<BubbleExpandedViewManager> mExpandedViewManager;
-    private WeakReference<BubbleTaskViewFactory> mTaskViewFactory;
-    private WeakReference<BubblePositioner> mPositioner;
-    private WeakReference<BubbleStackView> mStackView;
-    private WeakReference<BubbleBarLayerView> mLayerView;
-    private BubbleIconFactory mIconFactory;
-    private boolean mSkipInflation;
-    private Callback mCallback;
-    private Executor mMainExecutor;
+    private final Bubble mBubble;
+    private final WeakReference<Context> mContext;
+    private final WeakReference<BubbleExpandedViewManager> mExpandedViewManager;
+    private final WeakReference<BubbleTaskViewFactory> mTaskViewFactory;
+    private final WeakReference<BubblePositioner> mPositioner;
+    private final WeakReference<BubbleStackView> mStackView;
+    private final WeakReference<BubbleBarLayerView> mLayerView;
+    private final BubbleIconFactory mIconFactory;
+    private final boolean mSkipInflation;
+    private final Callback mCallback;
+    private final Executor mMainExecutor;
+    private final Executor mBgExecutor;
+
+    private final AtomicBoolean mStarted = new AtomicBoolean();
+    private final AtomicBoolean mCancelled = new AtomicBoolean();
+    private final AtomicBoolean mFinished = new AtomicBoolean();
 
     /**
      * Creates a task to load information for the provided {@link Bubble}. Once all info
@@ -95,7 +98,8 @@ public class BubbleViewInfoTask extends AsyncTask<Void, Void, BubbleViewInfoTask
             BubbleIconFactory factory,
             boolean skipInflation,
             Callback c,
-            Executor mainExecutor) {
+            Executor mainExecutor,
+            Executor bgExecutor) {
         mBubble = b;
         mContext = new WeakReference<>(context);
         mExpandedViewManager = new WeakReference<>(expandedViewManager);
@@ -107,10 +111,86 @@ public class BubbleViewInfoTask extends AsyncTask<Void, Void, BubbleViewInfoTask
         mSkipInflation = skipInflation;
         mCallback = c;
         mMainExecutor = mainExecutor;
+        mBgExecutor = bgExecutor;
     }
 
-    @Override
-    protected BubbleViewInfo doInBackground(Void... voids) {
+    /**
+     * Load bubble view info in background using {@code bgExecutor} specified in constructor.
+     * <br>
+     * Use {@link #cancel()} to stop the task.
+     *
+     * @throws IllegalStateException if the task is already started
+     */
+    public void start() {
+        verifyCanStart();
+        if (mCancelled.get()) {
+            // We got cancelled even before start was called. Exit early
+            mFinished.set(true);
+            return;
+        }
+        mBgExecutor.execute(() -> {
+            if (mCancelled.get()) {
+                // We got cancelled while background executor was busy and this was waiting
+                mFinished.set(true);
+                return;
+            }
+            BubbleViewInfo viewInfo = loadViewInfo();
+            if (mCancelled.get()) {
+                // Do not schedule anything on main executor if we got cancelled.
+                // Loading view info involves inflating views and it is possible we get cancelled
+                // during it.
+                mFinished.set(true);
+                return;
+            }
+            mMainExecutor.execute(() -> {
+                // Before updating view info check that we did not get cancelled while waiting
+                // main executor to pick up the work
+                if (!mCancelled.get()) {
+                    updateViewInfo(viewInfo);
+                }
+                mFinished.set(true);
+            });
+        });
+    }
+
+    private void verifyCanStart() {
+        if (mStarted.getAndSet(true)) {
+            throw new IllegalStateException("Task already started");
+        }
+    }
+
+    /**
+     * Load bubble view info synchronously.
+     *
+     * @throws IllegalStateException if the task is already started
+     */
+    public void startSync() {
+        verifyCanStart();
+        if (mCancelled.get()) {
+            mFinished.set(true);
+            return;
+        }
+        updateViewInfo(loadViewInfo());
+        mFinished.set(true);
+    }
+
+    /**
+     * Cancel the task. Stops the task from running if called before {@link #start()} or
+     * {@link #startSync()}
+     */
+    public void cancel() {
+        mCancelled.set(true);
+    }
+
+    /**
+     * Return {@code true} when the task has completed loading the view info.
+     */
+    public boolean isFinished() {
+        return mFinished.get();
+    }
+
+    @Nullable
+    private BubbleViewInfo loadViewInfo() {
         if (!verifyState()) {
             // If we're in an inconsistent state, then switched modes and should just bail now.
             return null;
@@ -126,21 +206,14 @@ public class BubbleViewInfoTask extends AsyncTask<Void, Void, BubbleViewInfoTask
         }
     }
 
-    @Override
-    protected void onPostExecute(BubbleViewInfo viewInfo) {
-        if (isCancelled() || viewInfo == null) {
+    private void updateViewInfo(@Nullable BubbleViewInfo viewInfo) {
+        if (viewInfo == null || !verifyState()) {
             return;
         }
-
-        mMainExecutor.execute(() -> {
-            if (!verifyState()) {
-                return;
-            }
-            mBubble.setViewInfo(viewInfo);
-            if (mCallback != null) {
-                mCallback.onBubbleViewsReady(mBubble);
-            }
-        });
+        mBubble.setViewInfo(viewInfo);
+        if (mCallback != null) {
+            mCallback.onBubbleViewsReady(mBubble);
+        }
     }
 
     private boolean verifyState() {
