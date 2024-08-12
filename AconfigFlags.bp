@@ -21,6 +21,7 @@ aconfig_declarations_group {
         // !!! KEEP THIS LIST ALPHABETICAL !!!
         "aconfig_mediacodec_flags_java_lib",
         "android.adaptiveauth.flags-aconfig-java",
+        "android.app.appfunctions.flags-aconfig-java",
         "android.app.contextualsearch.flags-aconfig-java",
         "android.app.flags-aconfig-java",
         "android.app.ondeviceintelligence-aconfig-java",
@@ -1380,6 +1381,21 @@ aconfig_declarations {
 java_aconfig_library {
     name: "android.content.flags-aconfig-java",
     aconfig_declarations: "android.content.flags-aconfig",
+    defaults: ["framework-minus-apex-aconfig-java-defaults"],
+}
+
+// AppFunctions
+aconfig_declarations {
+    name: "android.app.appfunctions.flags-aconfig",
+    exportable: true,
+    package: "android.app.appfunctions.flags",
+    container: "system",
+    srcs: ["core/java/android/app/appfunctions/flags/flags.aconfig"],
+}
+
+java_aconfig_library {
+    name: "android.app.appfunctions.flags-aconfig-java",
+    aconfig_declarations: "android.app.appfunctions.flags-aconfig",
     defaults: ["framework-minus-apex-aconfig-java-defaults"],
 }
 
