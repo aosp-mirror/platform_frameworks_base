@@ -2,6 +2,13 @@ package: "com.android.graphics.hwui.flags"
 container: "system"
 
 flag {
+  name: "runtime_color_filters_blenders"
+  namespace: "core_graphics"
+  description: "API for AGSL authored runtime color filters and blenders"
+  bug: "358126864"
+}
+
+flag {
   name: "clip_shader"
   is_exported: true
   namespace: "core_graphics"
