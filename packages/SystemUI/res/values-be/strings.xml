@@ -48,8 +48,8 @@
     <string name="always_use_device" msgid="210535878779644679">"Заўсёды адкрываць <xliff:g id="APPLICATION">%1$s</xliff:g>, калі падключана прылада <xliff:g id="USB_DEVICE">%2$s</xliff:g>"</string>
     <string name="always_use_accessory" msgid="1977225429341838444">"Заўсёды адкрываць <xliff:g id="APPLICATION">%1$s</xliff:g>, калі падключаны аксесуар <xliff:g id="USB_ACCESSORY">%2$s</xliff:g>"</string>
     <string name="usb_debugging_title" msgid="8274884945238642726">"Дазволіць адладку па USB?"</string>
-    <string name="usb_debugging_message" msgid="5794616114463921773">"Адбiтак ключа RSA на гэтым камп\'ютары:\n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
-    <string name="usb_debugging_always" msgid="4003121804294739548">"Заўсёды дазваляць з гэтага камп\'ютара"</string>
+    <string name="usb_debugging_message" msgid="5794616114463921773">"Адбiтак ключа RSA на гэтым камп’ютары:\n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
+    <string name="usb_debugging_always" msgid="4003121804294739548">"Заўсёды дазваляць з гэтага камп’ютара"</string>
     <string name="usb_debugging_allow" msgid="1722643858015321328">"Дазволіць"</string>
     <string name="usb_debugging_secondary_user_title" msgid="7843050591380107998">"Адладка па USB забаронена"</string>
     <string name="usb_debugging_secondary_user_message" msgid="1888835696965417845">"Карыстальнік, які зараз увайшоў у гэтую прыладу, не можа ўключыць адладку цераз USB. Каб выкарыстоўваць гэтую функцыю, пераключыцеся на адміністратара."</string>
@@ -574,10 +574,10 @@
     <string name="notification_channel_summary_automatic_silenced" msgid="7403004439649872047">"&lt;b&gt;Стан:&lt;/b&gt; Пераведзена ў рэжым \"Без гуку\""</string>
     <string name="notification_channel_summary_automatic_promoted" msgid="1301710305149590426">"&lt;b&gt;Стан:&lt;/b&gt; Ацэнена як важнае"</string>
     <string name="notification_channel_summary_automatic_demoted" msgid="1831303964660807700">"&lt;b&gt;Стан:&lt;/b&gt; Ацэнена як няважнае"</string>
-    <string name="notification_channel_summary_priority_baseline" msgid="46674690072551234">"З\'яўляецца ўверсе раздзела размоў і паказвае на экране блакіроўкі відарыс профілю"</string>
-    <string name="notification_channel_summary_priority_bubble" msgid="1275413109619074576">"З\'яўляецца ўверсе раздзела размоў як усплывальнае апавяшчэнне, якое паказвае на экране блакіроўкі відарыс профілю"</string>
-    <string name="notification_channel_summary_priority_dnd" msgid="6665395023264154361">"З\'яўляецца ўверсе раздзела размоў, перарывае рэжым \"Не турбаваць\" і паказвае на экране блакіроўкі відарыс профілю"</string>
-    <string name="notification_channel_summary_priority_all" msgid="7151752959650048285">"З\'яўляецца ўверсе раздзела размоў як усплывальнае апавяшчэнне, якое перарывае рэжым \"Не турбаваць\" і паказвае на экране блакіроўкі відарыс профілю"</string>
+    <string name="notification_channel_summary_priority_baseline" msgid="46674690072551234">"З’яўляецца ўверсе раздзела размоў і паказвае на экране блакіроўкі відарыс профілю"</string>
+    <string name="notification_channel_summary_priority_bubble" msgid="1275413109619074576">"З’яўляецца ўверсе раздзела размоў як усплывальнае апавяшчэнне, якое паказвае на экране блакіроўкі відарыс профілю"</string>
+    <string name="notification_channel_summary_priority_dnd" msgid="6665395023264154361">"З’яўляецца ўверсе раздзела размоў, перарывае рэжым \"Не турбаваць\" і паказвае на экране блакіроўкі відарыс профілю"</string>
+    <string name="notification_channel_summary_priority_all" msgid="7151752959650048285">"З’яўляецца ўверсе раздзела размоў як усплывальнае апавяшчэнне, якое перарывае рэжым \"Не турбаваць\" і паказвае на экране блакіроўкі відарыс профілю"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Прыярытэт"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> не падтрымлівае функцыі размовы"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"Гэтыя апавяшчэнні нельга змяніць."</string>
@@ -1026,7 +1026,7 @@
     <string name="game_status" msgid="1340694320630973259">"Ідзе гульня"</string>
     <string name="empty_user_name" msgid="3389155775773578300">"Сябры"</string>
     <string name="empty_status" msgid="5938893404951307749">"Паразмаўляем у чаце!"</string>
-    <string name="status_before_loading" msgid="1500477307859631381">"Неўзабаве з\'явіцца змесціва"</string>
+    <string name="status_before_loading" msgid="1500477307859631381">"Неўзабаве з’явіцца змесціва"</string>
     <string name="missed_call" msgid="4228016077700161689">"Прапушчаны выклік"</string>
     <string name="messages_count_overflow_indicator" msgid="7850934067082006043">"<xliff:g id="NUMBER">%d</xliff:g>+"</string>
     <string name="people_tile_description" msgid="8154966188085545556">"Глядзець нядаўнія паведамленні, прапушчаныя выклікі і абнаўленні стану"</string>

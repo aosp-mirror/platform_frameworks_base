@@ -179,7 +179,7 @@
     <string name="face_re_enroll_dialog_title" msgid="6392173708176069994">"Configura lo Sblocco con il Volto"</string>
     <string name="face_re_enroll_dialog_content" msgid="7353502359464038511">"Per riconfigurare lo Sblocco con il Volto, l\'attuale modello del volto verrà eliminato.\n\nDovrai riconfigurare questa funzionalità per usare il volto per sbloccare lo smartphone."</string>
     <string name="face_reenroll_failure_dialog_content" msgid="7073947334397236935">"Impossibile configurare lo Sblocco con il Volto. Vai alle Impostazioni e riprova."</string>
-    <string name="fingerprint_dialog_touch_sensor" msgid="2817887108047658975">"Tocca il sensore di impronte"</string>
+    <string name="fingerprint_dialog_touch_sensor" msgid="2817887108047658975">"Tocca il sensore di impronte digitali"</string>
     <string name="fingerprint_dialog_use_fingerprint_instead" msgid="6178228876763024452">"Impossibile riconoscere il volto. Usa l\'impronta."</string>
     <!-- no translation found for keyguard_face_failed_use_fp (7140293906176164263) -->
     <skip />
@@ -197,9 +197,7 @@
     <string name="accessibility_vpn_on" msgid="8037549696057288731">"VPN attiva."</string>
     <string name="accessibility_battery_level" msgid="5143715405241138822">"Batteria: <xliff:g id="NUMBER">%d</xliff:g> percento."</string>
     <string name="accessibility_battery_level_with_estimate" msgid="6548654589315074529">"Batteria rimanente: <xliff:g id="PERCENTAGE">%1$d</xliff:g> per cento, <xliff:g id="TIME">%2$s</xliff:g>"</string>
-    <!-- String.format failed for translation -->
-    <!-- no translation found for accessibility_battery_level_charging (8892191177774027364) -->
-    <skip />
+    <string name="accessibility_battery_level_charging" msgid="8892191177774027364">"Batteria in carica, <xliff:g id="BATTERY_PERCENTAGE">%d</xliff:g>%%."</string>
     <string name="accessibility_battery_level_charging_paused" msgid="3560711496775146763">"Batteria a <xliff:g id="PERCENTAGE">%d</xliff:g> per cento; ricarica in pausa per proteggere la batteria."</string>
     <string name="accessibility_battery_level_charging_paused_with_estimate" msgid="2223541217743647858">"Batteria a <xliff:g id="PERCENTAGE">%1$d</xliff:g> per cento, <xliff:g id="TIME">%2$s</xliff:g>; ricarica in pausa per proteggere la batteria."</string>
     <string name="accessibility_overflow_action" msgid="8555835828182509104">"Visualizza tutte le notifiche"</string>
