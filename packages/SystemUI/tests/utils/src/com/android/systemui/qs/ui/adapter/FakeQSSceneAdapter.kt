@@ -27,7 +27,9 @@ import kotlinx.coroutines.flow.filterNotNull
 class FakeQSSceneAdapter(
     private val inflateDelegate: suspend (Context) -> View,
     override val qqsHeight: Int = 0,
+    override val squishedQqsHeight: Int = 0,
     override val qsHeight: Int = 0,
+    override val squishedQsHeight: Int = 0,
 ) : QSSceneAdapter {
     private val _customizerState = MutableStateFlow<CustomizerState>(CustomizerState.Hidden)
 
