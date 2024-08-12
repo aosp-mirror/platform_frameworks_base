@@ -30,6 +30,7 @@ import static com.android.systemui.Dependency.TIME_TICK_HANDLER_NAME;
 import static com.android.systemui.Flags.keyboardShortcutHelperRewrite;
 import static com.android.systemui.Flags.lightRevealMigration;
 import static com.android.systemui.Flags.newAodTransition;
+import static com.android.systemui.Flags.relockWithPowerButtonImmediately;
 import static com.android.systemui.charging.WirelessChargingAnimation.UNKNOWN_BATTERY_LEVEL;
 import static com.android.systemui.flags.Flags.SHORTCUT_LIST_SEARCH_LAYOUT;
 import static com.android.systemui.statusbar.NotificationLockscreenUserManager.PERMISSION_SELF;
@@ -2352,11 +2353,13 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
             } else if (mState == StatusBarState.KEYGUARD
                     && !mStatusBarKeyguardViewManager.primaryBouncerIsOrWillBeShowing()
                     && mStatusBarKeyguardViewManager.isSecure()) {
-                Log.d(TAG, "showBouncerOrLockScreenIfKeyguard, showingBouncer");
-                if (SceneContainerFlag.isEnabled()) {
-                    mStatusBarKeyguardViewManager.showPrimaryBouncer(true /* scrimmed */);
-                } else {
-                    mStatusBarKeyguardViewManager.showBouncer(true /* scrimmed */);
+                if (!relockWithPowerButtonImmediately()) {
+                    Log.d(TAG, "showBouncerOrLockScreenIfKeyguard, showingBouncer");
+                    if (SceneContainerFlag.isEnabled()) {
+                        mStatusBarKeyguardViewManager.showPrimaryBouncer(true /* scrimmed */);
+                    } else {
+                        mStatusBarKeyguardViewManager.showBouncer(true /* scrimmed */);
+                    }
                 }
             }
         }

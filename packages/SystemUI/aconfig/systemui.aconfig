@@ -1237,6 +1237,16 @@ flag {
 }
 
 flag {
+   name: "relock_with_power_button_immediately"
+   namespace: "systemui"
+   description: "UDFPS unlock followed by immediate power button push should relock"
+   bug: "343327511"
+   metadata {
+        purpose: PURPOSE_BUGFIX
+   }
+}
+
+flag {
    name: "lockscreen_preview_renderer_create_on_main_thread"
    namespace: "systemui"
    description: "Force preview renderer to be created on the main thread"
