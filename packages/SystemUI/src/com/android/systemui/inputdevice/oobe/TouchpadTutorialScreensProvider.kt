@@ -14,20 +14,13 @@
  * limitations under the License.
  */
 
-package com.android.systemui.touchpad.tutorial
+package com.android.systemui.inputdevice.tutorial
 
-import android.app.Activity
-import com.android.systemui.touchpad.tutorial.ui.view.TouchpadTutorialActivity
-import dagger.Binds
-import dagger.Module
-import dagger.multibindings.ClassKey
-import dagger.multibindings.IntoMap
+import androidx.compose.runtime.Composable
 
-@Module
-interface TouchpadKeyboardTutorialModule {
+interface TouchpadTutorialScreensProvider {
 
-    @Binds
-    @IntoMap
-    @ClassKey(TouchpadTutorialActivity::class)
-    fun activity(impl: TouchpadTutorialActivity): Activity
+    @Composable fun BackGesture(onDoneButtonClicked: () -> Unit, onBack: () -> Unit)
+
+    @Composable fun HomeGesture(onDoneButtonClicked: () -> Unit, onBack: () -> Unit)
 }
