@@ -36,7 +36,7 @@ abstract class RotationTransition(flicker: LegacyFlickerTest) : ActivityEmbeddin
         teardown { testApp.exit(wmHelper) }
         transitions {
             this.setRotation(flicker.scenario.endRotation)
-            if (!flicker.scenario.isTablet) {
+            if (!usesTaskbar) {
                 wmHelper.StateSyncBuilder()
                     .add(navBarInPosition(flicker.scenario.isGesturalNavigation))
                     .waitForAndVerify()

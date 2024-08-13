@@ -36,6 +36,7 @@ import android.widget.LinearLayout;
 
 import com.android.internal.policy.SystemBarUtils;
 import com.android.systemui.Dependency;
+import com.android.systemui.Flags;
 import com.android.systemui.Gefingerpoken;
 import com.android.systemui.plugins.DarkIconDispatcher;
 import com.android.systemui.plugins.DarkIconDispatcher.DarkReceiver;
@@ -217,8 +218,12 @@ public class PhoneStatusBarView extends FrameLayout {
 
     @Override
     public boolean onInterceptTouchEvent(MotionEvent event) {
-        mTouchEventHandler.onInterceptTouchEvent(event);
-        return super.onInterceptTouchEvent(event);
+        if (Flags.statusBarSwipeOverChip()) {
+            return mTouchEventHandler.onInterceptTouchEvent(event);
+        } else {
+            mTouchEventHandler.onInterceptTouchEvent(event);
+            return super.onInterceptTouchEvent(event);
+        }
     }
 
     public void updateResources() {

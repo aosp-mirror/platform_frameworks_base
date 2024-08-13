@@ -1601,6 +1601,11 @@ public class BubbleStackView extends FrameLayout
                 getResources().getColor(android.R.color.system_neutral1_1000)));
         mManageMenuScrim.setBackgroundDrawable(new ColorDrawable(
                 getResources().getColor(android.R.color.system_neutral1_1000)));
+        if (mShowingManage) {
+            // the manage menu location depends on the manage button location which may need a
+            // layout pass, so post this to the looper
+            post(() -> showManageMenu(true));
+        }
     }
 
     /**

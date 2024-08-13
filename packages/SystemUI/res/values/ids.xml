@@ -278,4 +278,7 @@
     <!-- Id for the udfps accessibility overlay -->
     <item type="id" name="udfps_accessibility_overlay" />
     <item type="id" name="udfps_accessibility_overlay_top_guideline" />
+
+    <!-- Ids for communal hub widgets -->
+    <item type="id" name="communal_widget_disposable_tag"/>
 </resources>

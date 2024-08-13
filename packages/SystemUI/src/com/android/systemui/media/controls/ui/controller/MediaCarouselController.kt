@@ -888,8 +888,6 @@ constructor(
         heightInSceneContainerPx = height
         mediaCarouselScrollHandler.playerWidthPlusPadding =
             width + context.resources.getDimensionPixelSize(R.dimen.qs_media_padding)
-        mediaContent.minimumWidth = widthInSceneContainerPx
-        mediaContent.minimumHeight = heightInSceneContainerPx
         updatePlayers(recreateMedia = true)
     }
 

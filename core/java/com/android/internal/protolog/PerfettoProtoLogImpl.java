@@ -33,6 +33,7 @@ import static android.internal.perfetto.protos.Protolog.ProtoLogViewerConfig.Gro
 import static android.internal.perfetto.protos.Protolog.ProtoLogViewerConfig.MESSAGES;
 import static android.internal.perfetto.protos.Protolog.ProtoLogViewerConfig.MessageData.GROUP_ID;
 import static android.internal.perfetto.protos.Protolog.ProtoLogViewerConfig.MessageData.LEVEL;
+import static android.internal.perfetto.protos.Protolog.ProtoLogViewerConfig.MessageData.LOCATION;
 import static android.internal.perfetto.protos.Protolog.ProtoLogViewerConfig.MessageData.MESSAGE;
 import static android.internal.perfetto.protos.TracePacketOuterClass.TracePacket.INTERNED_DATA;
 import static android.internal.perfetto.protos.TracePacketOuterClass.TracePacket.PROTOLOG_MESSAGE;
@@ -449,6 +450,8 @@ public class PerfettoProtoLogImpl extends IProtoLogClient.Stub implements IProto
                 case (int) GROUP_ID:
                     os.write(GROUP_ID, pis.readInt(GROUP_ID));
                     break;
+                case (int) LOCATION:
+                    os.write(LOCATION, pis.readInt(LOCATION));
                 default:
                     throw new RuntimeException(
                             "Unexpected field id " + pis.getFieldNumber());

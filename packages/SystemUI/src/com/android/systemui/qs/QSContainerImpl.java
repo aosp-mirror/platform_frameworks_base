@@ -259,12 +259,26 @@ public class QSContainerImpl extends FrameLayout implements Dumpable {
     }
 
     /**
+     * @return height with the squishiness fraction applied.
+     */
+    int getSquishedQqsHeight() {
+        return mHeader.getSquishedHeight();
+    }
+
+    /**
      * Returns the size of QS (or the QSCustomizer), regardless of the measured size of this view
      * @return size in pixels of QS (or QSCustomizer)
      */
     public int getQsHeight() {
         return mQSCustomizer.isCustomizing() ? mQSCustomizer.getMeasuredHeight()
                 : mQSPanel.getMeasuredHeight();
+    }
+
+    /**
+     * @return height with the squishiness fraction applied.
+     */
+    int getSquishedQsHeight() {
+        return mQSPanel.getSquishedHeight();
     }
 
     public void setExpansion(float expansion) {

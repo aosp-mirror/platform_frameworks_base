@@ -18,6 +18,7 @@ package com.android.systemui.media.controls.ui.controller
 
 import android.content.Context
 import android.content.res.Configuration
+import android.graphics.Rect
 import android.view.View
 import android.view.ViewGroup
 import androidx.annotation.VisibleForTesting
@@ -125,6 +126,7 @@ constructor(
     /** single pane media container placed at the top of the notifications list */
     var singlePaneContainer: MediaContainerView? = null
         private set
+
     private var splitShadeContainer: ViewGroup? = null
 
     /**
@@ -183,6 +185,13 @@ constructor(
             mediaHost.hostView.parent?.let { (it as? ViewGroup)?.removeView(mediaHost.hostView) }
             activeContainer.addView(mediaHost.hostView)
         }
+    }
+
+    fun isWithinMediaViewBounds(x: Int, y: Int): Boolean {
+        val bounds = Rect()
+        mediaHost.hostView.getBoundsOnScreen(bounds)
+
+        return bounds.contains(x, y)
     }
 
     fun refreshMediaPosition(reason: String) {

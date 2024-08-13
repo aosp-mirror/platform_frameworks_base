@@ -28,6 +28,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.pointerInteropFilter
 import androidx.compose.ui.platform.LocalContext
+import com.android.systemui.inputdevice.tutorial.ui.composable.ActionTutorialContent
+import com.android.systemui.inputdevice.tutorial.ui.composable.TutorialActionState
+import com.android.systemui.inputdevice.tutorial.ui.composable.TutorialScreenConfig
 import com.android.systemui.touchpad.tutorial.ui.gesture.GestureState
 import com.android.systemui.touchpad.tutorial.ui.gesture.GestureState.FINISHED
 import com.android.systemui.touchpad.tutorial.ui.gesture.GestureState.IN_PROGRESS

@@ -27,7 +27,7 @@ import androidx.compose.runtime.getValue
 import androidx.lifecycle.Lifecycle.State.STARTED
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.android.compose.theme.PlatformTheme
-import com.android.systemui.touchpad.tutorial.ui.composable.ActionKeyTutorialScreen
+import com.android.systemui.inputdevice.tutorial.ui.composable.ActionKeyTutorialScreen
 import com.android.systemui.touchpad.tutorial.ui.composable.BackGestureTutorialScreen
 import com.android.systemui.touchpad.tutorial.ui.composable.HomeGestureTutorialScreen
 import com.android.systemui.touchpad.tutorial.ui.composable.TutorialSelectionScreen

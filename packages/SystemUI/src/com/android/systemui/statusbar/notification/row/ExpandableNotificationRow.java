@@ -1804,6 +1804,20 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
                 NotificationEntry childEntry,
                 NotificationEntry containerEntry
         );
+
+        /**
+         * Called when resetting the alpha value for content views
+         */
+        void logResetAllContentAlphas(
+                NotificationEntry entry
+        );
+
+        /**
+         * Called when resetting the alpha value for content views is skipped
+         */
+        void logSkipResetAllContentAlphas(
+                NotificationEntry entry
+        );
     }
 
     /**
@@ -3001,6 +3015,8 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
                     mChildrenContainer.animate().cancel();
                 }
                 resetAllContentAlphas();
+            } else {
+                mLogger.logSkipResetAllContentAlphas(getEntry());
             }
             mPublicLayout.setVisibility(mShowingPublic ? View.VISIBLE : View.INVISIBLE);
             updateChildrenVisibility();
@@ -3186,6 +3202,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
 
     @Override
     protected void resetAllContentAlphas() {
+        mLogger.logResetAllContentAlphas(getEntry());
         mPrivateLayout.setAlpha(1f);
         mPrivateLayout.setLayerType(LAYER_TYPE_NONE, null);
         mPublicLayout.setAlpha(1f);

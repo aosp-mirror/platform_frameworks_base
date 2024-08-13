@@ -94,6 +94,7 @@ import com.android.systemui.settings.UserTracker;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.notifcollection.CommonNotifCollection;
 import com.android.systemui.statusbar.phone.SystemUIDialog;
+import com.android.systemui.volume.panel.domain.interactor.VolumePanelGlobalStateInteractor;
 
 import dagger.assisted.Assisted;
 import dagger.assisted.AssistedFactory;
@@ -173,6 +174,7 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback,
     private float mActiveRadius;
     private FeatureFlags mFeatureFlags;
     private UserTracker mUserTracker;
+    private VolumePanelGlobalStateInteractor mVolumePanelGlobalStateInteractor;
 
     public enum BroadcastNotifyDialog {
         ACTION_FIRST_LAUNCH,
@@ -195,6 +197,7 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback,
             PowerExemptionManager powerExemptionManager,
             KeyguardManager keyGuardManager,
             FeatureFlags featureFlags,
+            VolumePanelGlobalStateInteractor volumePanelGlobalStateInteractor,
             UserTracker userTracker) {
         mContext = context;
         mPackageName = packageName;
@@ -209,6 +212,7 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback,
         mFeatureFlags = featureFlags;
         mUserTracker = userTracker;
         mToken = token;
+        mVolumePanelGlobalStateInteractor = volumePanelGlobalStateInteractor;
         InfoMediaManager imm =
                 InfoMediaManager.createInstance(mContext, packageName, userHandle, lbm, token);
         mLocalMediaManager = new LocalMediaManager(mContext, lbm, imm, packageName);
@@ -436,7 +440,7 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback,
             launchIntent.putExtra(EXTRA_ROUTE_ID, routeId);
             launchIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             mCallback.dismissDialog();
-            mActivityStarter.startActivity(launchIntent, true, controller);
+            startActivity(launchIntent, controller);
         }
     }
 
@@ -447,7 +451,7 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback,
         if (launchIntent != null) {
             launchIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             mCallback.dismissDialog();
-            mActivityStarter.startActivity(launchIntent, true, controller);
+            startActivity(launchIntent, controller);
         }
     }
 
@@ -951,10 +955,10 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback,
             deepLinkIntent.putExtra(
                     Settings.EXTRA_SETTINGS_EMBEDDED_DEEP_LINK_HIGHLIGHT_MENU_KEY,
                     PAGE_CONNECTED_DEVICES_KEY);
-            mActivityStarter.startActivity(deepLinkIntent, true, controller);
+            startActivity(deepLinkIntent, controller);
             return;
         }
-        mActivityStarter.startActivity(launchIntent, true, controller);
+        startActivity(launchIntent, controller);
     }
 
     void launchLeBroadcastNotifyDialog(View mediaOutputDialog, BroadcastSender broadcastSender,
@@ -998,6 +1002,7 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback,
                         mPowerExemptionManager,
                         mKeyGuardManager,
                         mFeatureFlags,
+                        mVolumePanelGlobalStateInteractor,
                         mUserTracker);
         MediaOutputBroadcastDialog dialog = new MediaOutputBroadcastDialog(mContext, true,
                 broadcastSender, controller);
@@ -1242,6 +1247,13 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback,
 
     boolean isVolumeControlEnabled(@NonNull MediaDevice device) {
         return !device.isVolumeFixed();
+    }
+
+    private void startActivity(Intent intent, ActivityTransitionAnimator.Controller controller) {
+        // Media Output dialog can be shown from the volume panel. This makes sure the panel is
+        // closed when navigating to another activity, so it doesn't stays on top of it
+        mVolumePanelGlobalStateInteractor.setVisible(false);
+        mActivityStarter.startActivity(intent, true, controller);
     }
 
     @Override

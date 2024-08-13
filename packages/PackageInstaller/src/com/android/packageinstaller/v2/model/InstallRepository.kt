@@ -736,7 +736,8 @@ class InstallRepository(private val context: Context) {
             val appInfo = packageManager.getApplicationInfo(
                 pkgName, PackageManager.MATCH_UNINSTALLED_PACKAGES
             )
-            if (appInfo.flags and ApplicationInfo.FLAG_INSTALLED == 0) {
+            // If the package is archived, treat it as an update case.
+            if (!appInfo.isArchived && appInfo.flags and ApplicationInfo.FLAG_INSTALLED == 0) {
                 return false
             }
         } catch (e: PackageManager.NameNotFoundException) {
