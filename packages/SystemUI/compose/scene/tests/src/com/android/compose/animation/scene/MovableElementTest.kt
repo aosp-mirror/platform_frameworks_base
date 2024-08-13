@@ -45,7 +45,6 @@ import androidx.compose.ui.unit.dp
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.android.compose.animation.scene.TestScenes.SceneA
 import com.android.compose.animation.scene.TestScenes.SceneB
-import com.android.compose.animation.scene.content.state.ContentState
 import com.android.compose.animation.scene.content.state.TransitionState
 import com.android.compose.animation.scene.subjects.assertThat
 import com.android.compose.test.assertSizeIsEqualTo
@@ -160,11 +159,11 @@ class MovableElementTest {
 
                         override fun contentDuringTransition(
                             element: ElementKey,
-                            transition: ContentState.Transition<*>,
+                            transition: TransitionState.Transition,
                             fromContentZIndex: Float,
                             toContentZIndex: Float
                         ): ContentKey {
-                            transition as TransitionState.Transition
+                            transition as TransitionState.Transition.ChangeCurrentScene
                             assertThat(transition).hasFromScene(SceneA)
                             assertThat(transition).hasToScene(SceneB)
                             assertThat(fromContentZIndex).isEqualTo(0)

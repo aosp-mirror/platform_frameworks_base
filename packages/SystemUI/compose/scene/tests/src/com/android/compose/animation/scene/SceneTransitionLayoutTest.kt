@@ -179,7 +179,7 @@ class SceneTransitionLayoutTest {
 
         // Change the current scene.
         currentScene = SceneB
-        val transition = assertThat(layoutState.transitionState).isTransition()
+        val transition = assertThat(layoutState.transitionState).isSceneTransition()
         assertThat(transition).hasFromScene(SceneA)
         assertThat(transition).hasToScene(SceneB)
         assertThat(transition).hasProgress(0f)
@@ -241,7 +241,7 @@ class SceneTransitionLayoutTest {
         // 100.dp. We pause at the middle of the transition, so it should now be 75.dp given that we
         // use a linear interpolator. Foo was at (x = layoutSize - 50dp, y = 0) in SceneA and is
         // going to (x = 0, y = 0), so the offset should now be half what it was.
-        var transition = assertThat(layoutState.transitionState).isTransition()
+        var transition = assertThat(layoutState.transitionState).isSceneTransition()
         assertThat(transition).hasProgress(0.5f)
         sharedFoo.assertWidthIsEqualTo(75.dp)
         sharedFoo.assertHeightIsEqualTo(75.dp)
@@ -269,7 +269,7 @@ class SceneTransitionLayoutTest {
         val expectedSize = 100.dp + (150.dp - 100.dp) * interpolatedProgress
 
         sharedFoo = rule.onNode(isElement(TestElements.Foo, SceneC))
-        transition = assertThat(layoutState.transitionState).isTransition()
+        transition = assertThat(layoutState.transitionState).isSceneTransition()
         assertThat(transition).hasProgress(interpolatedProgress)
         sharedFoo.assertWidthIsEqualTo(expectedSize)
         sharedFoo.assertHeightIsEqualTo(expectedSize)
@@ -399,7 +399,7 @@ class SceneTransitionLayoutTest {
         rule.mainClock.advanceTimeBy(duration / 2)
         rule.waitForIdle()
 
-        var transition = assertThat(state.transitionState).isTransition()
+        var transition = assertThat(state.transitionState).isSceneTransition()
         assertThat(transition).hasProgress(0.5f)
 
         // A and B are composed.
@@ -412,7 +412,7 @@ class SceneTransitionLayoutTest {
         rule.mainClock.advanceTimeByFrame()
         rule.waitForIdle()
 
-        transition = assertThat(state.transitionState).isTransition()
+        transition = assertThat(state.transitionState).isSceneTransition()
         assertThat(transition).hasProgress(0f)
 
         // A, B and C are composed.

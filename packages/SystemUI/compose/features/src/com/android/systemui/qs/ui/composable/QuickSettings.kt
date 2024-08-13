@@ -98,7 +98,7 @@ private fun SceneScope.stateForQuickSettingsContent(
                 else -> QSSceneAdapter.State.CLOSED
             }
         }
-        is TransitionState.Transition ->
+        is TransitionState.Transition.ChangeCurrentScene ->
             with(transitionState) {
                 when {
                     isSplitShade -> UnsquishingQS(squishiness)
@@ -108,16 +108,16 @@ private fun SceneScope.stateForQuickSettingsContent(
                     fromScene == Scenes.QuickSettings && toScene == Scenes.Shade -> {
                         Collapsing { progress }
                     }
-                    fromScene == Scenes.Shade || toScene == Scenes.Shade -> {
+                    fromContent == Scenes.Shade || toContent == Scenes.Shade -> {
                         UnsquishingQQS(squishiness)
                     }
-                    fromScene == Scenes.QuickSettings || toScene == Scenes.QuickSettings -> {
+                    fromContent == Scenes.QuickSettings || toContent == Scenes.QuickSettings -> {
                         QSSceneAdapter.State.QS
                     }
                     else ->
                         error(
-                            "Bad transition for QuickSettings: fromScene=$fromScene," +
-                                " toScene=$toScene"
+                            "Bad transition for QuickSettings: fromContent=$fromContent," +
+                                " toScene=$toContent"
                         )
                 }
             }

@@ -28,7 +28,7 @@ internal fun CoroutineScope.animateToScene(
     layoutState: MutableSceneTransitionLayoutStateImpl,
     target: SceneKey,
     transitionKey: TransitionKey?,
-): TransitionState.Transition? {
+): TransitionState.Transition.ChangeCurrentScene? {
     val transitionState = layoutState.transitionState
     if (transitionState.currentScene == target) {
         // This can happen in 3 different situations, for which there isn't anything else to do:
@@ -52,7 +52,7 @@ internal fun CoroutineScope.animateToScene(
                 replacedTransition = null,
             )
         }
-        is TransitionState.Transition -> {
+        is TransitionState.Transition.ChangeCurrentScene -> {
             val isInitiatedByUserInput = transitionState.isInitiatedByUserInput
 
             // A transition is currently running: first check whether `transition.toScene` or
@@ -136,7 +136,7 @@ private fun CoroutineScope.animateToScene(
     reversed: Boolean = false,
     fromScene: SceneKey = layoutState.transitionState.currentScene,
     chain: Boolean = true,
-): TransitionState.Transition {
+): TransitionState.Transition.ChangeCurrentScene {
     val oneOffAnimation = OneOffAnimation()
     val targetProgress = if (reversed) 0f else 1f
     val transition =
@@ -181,7 +181,7 @@ private class OneOffSceneTransition(
     override val isInitiatedByUserInput: Boolean,
     replacedTransition: TransitionState.Transition?,
     private val oneOffAnimation: OneOffAnimation,
-) : TransitionState.Transition(fromScene, toScene, replacedTransition) {
+) : TransitionState.Transition.ChangeCurrentScene(fromScene, toScene, replacedTransition) {
     override val progress: Float
         get() = oneOffAnimation.progress
 

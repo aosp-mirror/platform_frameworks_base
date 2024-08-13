@@ -185,7 +185,7 @@ private fun shouldComposeMovableElement(
     val contents = element.contentPicker.contents
     val transition =
         transitions.fastLastOrNull { transition ->
-            transition.fromScene in contents || transition.toScene in contents
+            transition.fromContent in contents || transition.toContent in contents
         } ?: return false
 
     // Always compose movable elements in the scene picked by their scene picker.
@@ -215,7 +215,8 @@ private fun placeholderContentSize(
 
     // This code is only run during transitions (otherwise the content would be composed and the
     // placeholder would not), so it's ok to cast the state into a Transition directly.
-    val transition = layoutImpl.state.transitionState as TransitionState.Transition
+    val transition =
+        layoutImpl.state.transitionState as TransitionState.Transition.ChangeCurrentScene
 
     // If the content was already composed in the other scene, we use that target size assuming it
     // doesn't change between scenes.

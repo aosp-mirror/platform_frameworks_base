@@ -38,6 +38,7 @@ import androidx.compose.ui.util.fastForEach
 import androidx.compose.ui.util.fastForEachReversed
 import com.android.compose.animation.scene.content.Content
 import com.android.compose.animation.scene.content.Scene
+import com.android.compose.animation.scene.content.state.TransitionState
 import com.android.compose.ui.util.lerp
 import kotlinx.coroutines.CoroutineScope
 
@@ -247,8 +248,12 @@ internal class SceneTransitionLayoutImpl(
 
                 // Compose the new scene we are going to first.
                 transitions.fastForEachReversed { transition ->
-                    maybeAdd(transition.toScene)
-                    maybeAdd(transition.fromScene)
+                    when (transition) {
+                        is TransitionState.Transition.ChangeCurrentScene -> {
+                            maybeAdd(transition.toScene)
+                            maybeAdd(transition.fromScene)
+                        }
+                    }
                 }
             }
         }
@@ -284,7 +289,8 @@ private class LayoutNode(var layoutImpl: SceneTransitionLayoutImpl) :
 
         val width: Int
         val height: Int
-        val transition = layoutImpl.state.currentTransition
+        val transition =
+            layoutImpl.state.currentTransition as? TransitionState.Transition.ChangeCurrentScene
         if (transition == null) {
             width = placeable.width
             height = placeable.height

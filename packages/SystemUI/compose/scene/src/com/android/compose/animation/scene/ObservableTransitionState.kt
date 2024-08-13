@@ -111,7 +111,7 @@ fun SceneTransitionLayoutState.observableTransitionState(): Flow<ObservableTrans
     return snapshotFlow {
             when (val state = transitionState) {
                 is TransitionState.Idle -> ObservableTransitionState.Idle(state.currentScene)
-                is TransitionState.Transition -> {
+                is TransitionState.Transition.ChangeCurrentScene -> {
                     ObservableTransitionState.Transition(
                         fromScene = state.fromScene,
                         toScene = state.toScene,
