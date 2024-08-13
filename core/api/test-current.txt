@@ -4425,8 +4425,13 @@ package android.window {
 
   public class WindowInfosListenerForTest {
     ctor public WindowInfosListenerForTest();
-    method @RequiresPermission(android.Manifest.permission.ACCESS_SURFACE_FLINGER) public void addWindowInfosListener(@NonNull java.util.function.Consumer<java.util.List<android.window.WindowInfosListenerForTest.WindowInfo>>);
-    method public void removeWindowInfosListener(@NonNull java.util.function.Consumer<java.util.List<android.window.WindowInfosListenerForTest.WindowInfo>>);
+    method @RequiresPermission(android.Manifest.permission.ACCESS_SURFACE_FLINGER) public void addWindowInfosListener(@NonNull java.util.function.BiConsumer<java.util.List<android.window.WindowInfosListenerForTest.WindowInfo>,java.util.List<android.window.WindowInfosListenerForTest.DisplayInfo>>);
+    method public void removeWindowInfosListener(@NonNull java.util.function.BiConsumer<java.util.List<android.window.WindowInfosListenerForTest.WindowInfo>,java.util.List<android.window.WindowInfosListenerForTest.DisplayInfo>>);
+  }
+
+  public static class WindowInfosListenerForTest.DisplayInfo {
+    field public final int displayId;
+    field @NonNull public final android.graphics.Matrix transform;
   }
 
   public static class WindowInfosListenerForTest.WindowInfo {
