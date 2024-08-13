@@ -37,7 +37,7 @@
     <string name="wifi_security_wep" msgid="1413627788581122366">"WEP"</string>
     <string name="wifi_security_wpa" msgid="1072450904799930636">"WPA-persoonlik"</string>
     <string name="wifi_security_wpa2" msgid="4038267581230425543">"WPA2-persoonlik"</string>
-    <string name="wifi_security_wpa_wpa2" msgid="946853615482465986">"WPA/WPA2-Personal"</string>
+    <string name="wifi_security_wpa_wpa2" msgid="946853615482465986">"WPA/WPA2-persoonlik"</string>
     <string name="wifi_security_eap" msgid="6179633834446852269">"WPA/WPA2/WPA3-onderneming"</string>
     <string name="wifi_security_eap_wpa" msgid="6189023812330549957">"WPA-onderneming"</string>
     <string name="wifi_security_eap_wpa_wpa2" msgid="1089879674896108216">"WPA/WPA2-onderneming"</string>

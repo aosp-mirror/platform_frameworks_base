@@ -696,7 +696,7 @@
     <string name="accessibility_no_calling" msgid="3540827068323895748">"કોઈ કૉલિંગ નહીં."</string>
     <string name="avatar_picker_title" msgid="8492884172713170652">"પ્રોફાઇલ ફોટો પસંદ કરો"</string>
     <string name="default_user_icon_description" msgid="6554047177298972638">"ડિફૉલ્ટ વપરાશકર્તાનું આઇકન"</string>
-    <string name="physical_keyboard_title" msgid="4811935435315835220">"ભૌતિક કીબોર્ડ"</string>
+    <string name="physical_keyboard_title" msgid="4811935435315835220">"વાસ્તવિક કીબોર્ડ"</string>
     <string name="keyboard_layout_dialog_title" msgid="3927180147005616290">"કીબોર્ડ લેઆઉટ પસંદ કરો"</string>
     <string name="keyboard_layout_default_label" msgid="1997292217218546957">"ડિફૉલ્ટ"</string>
     <string name="turn_screen_on_title" msgid="3266937298097573424">"સ્ક્રીન ચાલુ કરો"</string>
