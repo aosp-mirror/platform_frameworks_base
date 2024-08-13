@@ -78,11 +78,7 @@
     },
     {
       "file_patterns": ["Battery[^/]*\\.java", "MeasuredEnergy[^/]*\\.java"],
-      "name": "FrameworksCoreTests",
-      "options": [
-        { "include-filter": "com.android.internal.os.BatteryStatsTests" },
-        { "exclude-annotation": "com.android.internal.os.SkipPresubmit" }
-      ]
+      "name": "FrameworksCoreTests_battery_stats"
     },
     {
       "file_patterns": ["Battery[^/]*\\.java", "MeasuredEnergy[^/]*\\.java"],
