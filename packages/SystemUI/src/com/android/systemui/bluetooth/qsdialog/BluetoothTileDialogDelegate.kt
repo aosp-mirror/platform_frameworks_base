@@ -372,6 +372,7 @@ internal constructor(
             private val iconView = view.requireViewById<ImageView>(R.id.bluetooth_device_icon)
             private val iconGear = view.requireViewById<ImageView>(R.id.gear_icon_image)
             private val gearView = view.requireViewById<View>(R.id.gear_icon)
+            private val divider = view.requireViewById<View>(R.id.divider)
 
             internal fun bind(
                 item: DeviceItem,
@@ -403,6 +404,8 @@ internal constructor(
                     }
 
                     iconGear.apply { drawable?.let { it.mutate()?.setTint(tintColor) } }
+
+                    divider.setBackgroundColor(tintColor)
 
                     // update text styles
                     nameView.setTextAppearance(
