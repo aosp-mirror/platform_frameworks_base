@@ -312,7 +312,7 @@
     <string name="quick_settings_hotspot_secondary_label_transient" msgid="7585604088079160564">"正在開啟…"</string>
     <string name="quick_settings_hotspot_secondary_label_data_saver_enabled" msgid="1280433136266439372">"數據節省模式已開啟"</string>
     <string name="quick_settings_hotspot_secondary_label_num_devices" msgid="7536823087501239457">"{count,plural, =1{# 部裝置}other{# 部裝置}}"</string>
-    <string name="quick_settings_flashlight_label" msgid="4904634272006284185">"電筒"</string>
+    <string name="quick_settings_flashlight_label" msgid="4904634272006284185">"手電筒"</string>
     <string name="quick_settings_flashlight_camera_in_use" msgid="4820591564526512571">"相機使用中"</string>
     <string name="quick_settings_cellular_detail_title" msgid="792977203299358893">"流動數據"</string>
     <string name="quick_settings_cellular_detail_data_usage" msgid="6105969068871138427">"數據用量"</string>
