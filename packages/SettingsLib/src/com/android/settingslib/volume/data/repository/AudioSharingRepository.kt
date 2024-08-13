@@ -63,7 +63,7 @@ typealias GroupIdToVolumes = Map<Int, Int>
 /** Provides audio sharing functionality. */
 interface AudioSharingRepository {
     /** Whether the device is in audio sharing. */
-    val inAudioSharing: Flow<Boolean>
+    val inAudioSharing: StateFlow<Boolean>
 
     /** The primary headset groupId in audio sharing. */
     val primaryGroupId: StateFlow<Int>
@@ -101,7 +101,7 @@ class AudioSharingRepositoryImpl(
             .flowOn(backgroundCoroutineContext)
             .stateIn(coroutineScope, SharingStarted.WhileSubscribed(), false)
 
-    override val inAudioSharing: Flow<Boolean> =
+    override val inAudioSharing: StateFlow<Boolean> =
         isAudioSharingProfilesReady.flatMapLatest { ready ->
             if (ready) {
                 btManager.profileManager.leAudioBroadcastProfile.onBroadcastStartedOrStopped
@@ -113,6 +113,7 @@ class AudioSharingRepositoryImpl(
                 flowOf(false)
             }
         }
+            .stateIn(coroutineScope, SharingStarted.WhileSubscribed(), false)
 
     private val primaryChange: Flow<Unit> = callbackFlow {
         val callback =
@@ -254,7 +255,7 @@ class AudioSharingRepositoryImpl(
 }
 
 class AudioSharingRepositoryEmptyImpl : AudioSharingRepository {
-    override val inAudioSharing: Flow<Boolean> = flowOf(false)
+    override val inAudioSharing: StateFlow<Boolean> = MutableStateFlow(false)
     override val primaryGroupId: StateFlow<Int> =
         MutableStateFlow(BluetoothCsipSetCoordinator.GROUP_ID_INVALID)
     override val secondaryGroupId: StateFlow<Int> =
