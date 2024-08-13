@@ -212,11 +212,13 @@ internal constructor(
     internal fun onAudioSharingButtonUpdated(
         dialog: SystemUIDialog,
         visibility: Int,
-        label: String?
+        label: String?,
+        isActive: Boolean
     ) {
         getAudioSharingButtonView(dialog).apply {
             this.visibility = visibility
             label?.let { text = it }
+            this.isActivated = isActive
         }
     }
 
