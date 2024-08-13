@@ -172,5 +172,10 @@ interface ISystemUiProxy {
      */
     oneway void onImeSwitcherLongPress() = 57;
 
-    // Next id = 58
+    /**
+     * Updates contextual education stats when target gesture type is triggered.
+     */
+    oneway void updateContextualEduStats(boolean isTrackpadGesture, String gestureType) = 58;
+
+    // Next id = 59
 }
