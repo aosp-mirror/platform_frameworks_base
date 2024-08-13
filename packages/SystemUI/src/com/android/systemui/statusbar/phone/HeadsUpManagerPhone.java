@@ -35,6 +35,7 @@ import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.plugins.statusbar.StatusBarStateController.StateListener;
 import com.android.systemui.res.R;
+import com.android.systemui.scene.shared.flag.SceneContainerFlag;
 import com.android.systemui.shade.domain.interactor.ShadeInteractor;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
@@ -249,6 +250,12 @@ public class HeadsUpManagerPhone extends BaseHeadsUpManager implements
     public boolean shouldSwallowClick(@NonNull String key) {
         BaseHeadsUpManager.HeadsUpEntry entry = getHeadsUpEntry(key);
         return entry != null && mSystemClock.elapsedRealtime() < entry.mPostTime;
+    }
+
+    @Override
+    public void releaseAfterExpansion() {
+        if (SceneContainerFlag.isUnexpectedlyInLegacyMode()) return;
+        onExpandingFinished();
     }
 
     public void onExpandingFinished() {
