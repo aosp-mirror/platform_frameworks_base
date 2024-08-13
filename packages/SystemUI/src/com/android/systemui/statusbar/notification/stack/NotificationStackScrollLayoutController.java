@@ -1328,6 +1328,7 @@ public class NotificationStackScrollLayoutController implements Dumpable {
     }
 
     public int getTopPadding() {
+        SceneContainerFlag.assertInLegacyMode();
         return mView.getTopPadding();
     }
 
