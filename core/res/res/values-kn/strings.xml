@@ -2013,7 +2013,7 @@
     <string name="time_picker_text_input_mode_description" msgid="4761160667516611576">"ಸಮಯವನ್ನು ನಮೂದಿಸಲು ಪಠ್ಯದ ನಮೂನೆಗೆ ಬದಲಿಸಿ."</string>
     <string name="time_picker_radial_mode_description" msgid="1222342577115016953">"ಸಮಯವನ್ನು ನಮೂದಿಸಲು ಗಡಿಯಾರದ ನಮೂನೆಗೆ ಬದಲಿಸಿ."</string>
     <string name="autofill_picker_accessibility_title" msgid="4425806874792196599">"ಸ್ವಯಂತುಂಬುವಿಕೆ ಆಯ್ಕೆಗಳು"</string>
-    <string name="autofill_save_accessibility_title" msgid="1523225776218450005">"ಸ್ವಯಂ ಭರ್ತಿಗಾಗಿ ಉಳಿಸಿ"</string>
+    <string name="autofill_save_accessibility_title" msgid="1523225776218450005">"ಸ್ವಯಂ ಭರ್ತಿಗಾಗಿ ಸೇವ್ ಮಾಡಿ"</string>
     <string name="autofill_error_cannot_autofill" msgid="6528827648643138596">"ವಿಷಯಗಳು ಸ್ವಯಂಚಾಲಿತವಾಗಿ ಭರ್ತಿಯಾಗಲು ಸಾಧ್ಯವಿಲ್ಲ"</string>
     <string name="autofill_picker_no_suggestions" msgid="1076022650427481509">"ಸ್ವಯಂಭರ್ತಿ ಸಲಹೆಗಳಿಲ್ಲ"</string>
     <string name="autofill_picker_some_suggestions" msgid="5560549696296202701">"{count,plural, =1{ಒಂದು ಸ್ವಯಂ ಭರ್ತಿ ಸಲಹೆಯಿದೆ}one{# ಸ್ವಯಂ ಭರ್ತಿ ಸಲಹೆಗಳಿವೆ}other{# ಸ್ವಯಂ ಭರ್ತಿ ಸಲಹೆಗಳಿವೆ}}"</string>
