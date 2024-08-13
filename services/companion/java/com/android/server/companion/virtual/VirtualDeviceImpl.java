@@ -207,6 +207,9 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
     @GuardedBy("mVirtualDeviceLock")
     @NonNull
     private final Set<ComponentName> mActivityPolicyExemptions;
+    @GuardedBy("mVirtualDeviceLock")
+    @NonNull
+    private final Set<String> mActivityPolicyPackageExemptions = new ArraySet<>();
 
     private ActivityListener createListenerAdapter() {
         return new ActivityListener() {
@@ -555,6 +558,40 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
 
     @Override // Binder call
     @EnforcePermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
+    public void addActivityPolicyPackageExemption(@NonNull String packageName) {
+        super.addActivityPolicyPackageExemption_enforcePermission();
+        if (!android.companion.virtualdevice.flags.Flags.activityControlApi()) {
+            return;
+        }
+        synchronized (mVirtualDeviceLock) {
+            if (mActivityPolicyPackageExemptions.add(packageName)) {
+                for (int i = 0; i < mVirtualDisplays.size(); i++) {
+                    mVirtualDisplays.valueAt(i).getWindowPolicyController()
+                            .addActivityPolicyExemption(packageName);
+                }
+            }
+        }
+    }
+
+    @Override // Binder call
+    @EnforcePermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
+    public void removeActivityPolicyPackageExemption(@NonNull String packageName) {
+        super.removeActivityPolicyPackageExemption_enforcePermission();
+        if (!android.companion.virtualdevice.flags.Flags.activityControlApi()) {
+            return;
+        }
+        synchronized (mVirtualDeviceLock) {
+            if (mActivityPolicyPackageExemptions.remove(packageName)) {
+                for (int i = 0; i < mVirtualDisplays.size(); i++) {
+                    mVirtualDisplays.valueAt(i).getWindowPolicyController()
+                            .removeActivityPolicyExemption(packageName);
+                }
+            }
+        }
+    }
+
+    @Override // Binder call
+    @EnforcePermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
     public void addActivityPolicyExemptionForDisplay(
             int displayId, @NonNull ComponentName componentName) {
         super.addActivityPolicyExemptionForDisplay_enforcePermission();
@@ -580,6 +617,36 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
             checkDisplayOwnedByVirtualDeviceLocked(displayId);
             mVirtualDisplays.get(displayId).getWindowPolicyController()
                     .removeActivityPolicyExemption(componentName);
+        }
+    }
+
+    @Override // Binder call
+    @EnforcePermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
+    public void addActivityPolicyPackageExemptionForDisplay(
+            int displayId, @NonNull String packageName) {
+        super.addActivityPolicyPackageExemptionForDisplay_enforcePermission();
+        if (!android.companion.virtualdevice.flags.Flags.activityControlApi()) {
+            return;
+        }
+        synchronized (mVirtualDeviceLock) {
+            checkDisplayOwnedByVirtualDeviceLocked(displayId);
+            mVirtualDisplays.get(displayId).getWindowPolicyController()
+                    .addActivityPolicyExemption(packageName);
+        }
+    }
+
+    @Override // Binder call
+    @EnforcePermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
+    public void removeActivityPolicyPackageExemptionForDisplay(
+            int displayId, @NonNull String packageName) {
+        super.removeActivityPolicyPackageExemptionForDisplay_enforcePermission();
+        if (!android.companion.virtualdevice.flags.Flags.activityControlApi()) {
+            return;
+        }
+        synchronized (mVirtualDeviceLock) {
+            checkDisplayOwnedByVirtualDeviceLocked(displayId);
+            mVirtualDisplays.get(displayId).getWindowPolicyController()
+                    .removeActivityPolicyExemption(packageName);
         }
     }
 
@@ -728,6 +795,7 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
                 synchronized (mVirtualDeviceLock) {
                     if (getDevicePolicy(policyType) != devicePolicy) {
                         mActivityPolicyExemptions.clear();
+                        mActivityPolicyPackageExemptions.clear();
                     }
                     mDevicePolicies.put(policyType, devicePolicy);
                     for (int i = 0; i < mVirtualDisplays.size(); i++) {
@@ -1289,6 +1357,7 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
                 getAllowedUserHandles(),
                 activityLaunchAllowedByDefault,
                 mActivityPolicyExemptions,
+                mActivityPolicyPackageExemptions,
                 crossTaskNavigationAllowedByDefault,
                 /* crossTaskNavigationExemptions= */crossTaskNavigationAllowedByDefault
                         ? mParams.getBlockedCrossTaskNavigations()
