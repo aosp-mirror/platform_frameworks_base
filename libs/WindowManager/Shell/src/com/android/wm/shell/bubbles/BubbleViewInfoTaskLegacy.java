@@ -53,10 +53,15 @@ import java.util.concurrent.Executor;
 
 /**
  * Simple task to inflate views & load necessary info to display a bubble.
+ *
+ * @deprecated Deprecated since this is using an AsyncTask. Use {@link BubbleViewInfoTask} instead.
  */
-// TODO(b/353894869): switch to executors
-public class BubbleViewInfoTask extends AsyncTask<Void, Void, BubbleViewInfoTask.BubbleViewInfo> {
-    private static final String TAG = TAG_WITH_CLASS_NAME ? "BubbleViewInfoTask" : TAG_BUBBLES;
+@Deprecated
+// TODO(b/353894869): remove once flag for loading view info with executors rolls out
+public class BubbleViewInfoTaskLegacy extends
+        AsyncTask<Void, Void, BubbleViewInfoTaskLegacy.BubbleViewInfo> {
+    private static final String TAG =
+            TAG_WITH_CLASS_NAME ? "BubbleViewInfoTaskLegacy" : TAG_BUBBLES;
 
 
     /**
@@ -85,7 +90,7 @@ public class BubbleViewInfoTask extends AsyncTask<Void, Void, BubbleViewInfoTask
      * Creates a task to load information for the provided {@link Bubble}. Once all info
      * is loaded, {@link Callback} is notified.
      */
-    BubbleViewInfoTask(Bubble b,
+    BubbleViewInfoTaskLegacy(Bubble b,
             Context context,
             BubbleExpandedViewManager expandedViewManager,
             BubbleTaskViewFactory taskViewFactory,
@@ -136,7 +141,7 @@ public class BubbleViewInfoTask extends AsyncTask<Void, Void, BubbleViewInfoTask
             if (!verifyState()) {
                 return;
             }
-            mBubble.setViewInfo(viewInfo);
+            mBubble.setViewInfoLegacy(viewInfo);
             if (mCallback != null) {
                 mCallback.onBubbleViewsReady(mBubble);
             }
