@@ -489,6 +489,7 @@ public final class NotificationAttentionHelper {
 
                 } else if ((record.getFlags() & Notification.FLAG_INSISTENT) != 0) {
                     hasValidSound = false;
+                    hasValidVibrate = false;
                 }
             }
         }
@@ -753,6 +754,13 @@ public final class NotificationAttentionHelper {
         // notifying app does not have the VIBRATE permission.
         final long identity = Binder.clearCallingIdentity();
         try {
+            // Need to explicitly cancel a previously playing vibration
+            // Otherwise a looping vibration will not be stopped when starting a new one.
+            if (mVibrateNotificationKey != null
+                    && !mVibrateNotificationKey.equals(record.getKey())) {
+                mVibrateNotificationKey = null;
+                mVibratorHelper.cancelVibration();
+            }
             final float scale = getVibrationIntensity(record);
             final VibrationEffect scaledEffect = Float.compare(scale, DEFAULT_VOLUME) != 0
                     ? mVibratorHelper.scale(effect, scale) : effect;
