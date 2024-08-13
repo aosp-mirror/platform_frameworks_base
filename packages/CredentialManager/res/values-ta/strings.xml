@@ -53,7 +53,7 @@
     <string name="save_password_on_other_device_title" msgid="5829084591948321207">"வேறொரு சாதனத்தில் கடவுச்சொல்லைச் சேமிக்கவா?"</string>
     <string name="save_sign_in_on_other_device_title" msgid="2827990118560134692">"வேறொரு சாதனத்தில் உள்நுழைவைச் சேமிக்கவா?"</string>
     <string name="use_provider_for_all_title" msgid="4201020195058980757">"உங்கள் அனைத்து உள்நுழைவுகளுக்கும் <xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g>ஐப் பயன்படுத்தவா?"</string>
-    <string name="use_provider_for_all_description" msgid="1998772715863958997">"<xliff:g id="USERNAME">%1$s</xliff:g> என்ற மின்னஞ்சல் முகவரிக்கான இந்தக் கடவுச்சொல் நிர்வாகி உங்கள் கடவுச்சொற்களையும் கடவுச்சாவிகளையும் சேமித்து நீங்கள் எளிதாக உள்நுழைய உதவும்"</string>
+    <string name="use_provider_for_all_description" msgid="1998772715863958997">"<xliff:g id="USERNAME">%1$s</xliff:g> என்ற கணக்குக்கான இந்தக் கடவுச்சொல் நிர்வாகி உங்கள் கடவுச்சொற்களையும் கடவுச்சாவிகளையும் சேமித்து நீங்கள் எளிதாக உள்நுழைய உதவும்"</string>
     <string name="set_as_default" msgid="4415328591568654603">"இயல்பானதாக அமை"</string>
     <string name="settings" msgid="6536394145760913145">"அமைப்புகள்"</string>
     <string name="use_once" msgid="9027366575315399714">"ஒருமுறை பயன்படுத்தவும்"</string>

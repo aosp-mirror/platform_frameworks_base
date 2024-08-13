@@ -52,7 +52,7 @@
     <string name="create_passkey_in_other_device_title" msgid="2360053098931886245">"Створити ключ доступу на іншому пристрої?"</string>
     <string name="save_password_on_other_device_title" msgid="5829084591948321207">"Зберегти пароль на іншому пристрої?"</string>
     <string name="save_sign_in_on_other_device_title" msgid="2827990118560134692">"Зберегти дані для входу на іншому пристрої?"</string>
-    <string name="use_provider_for_all_title" msgid="4201020195058980757">"Використовувати сервіс <xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g> в усіх випадках входу?"</string>
+    <string name="use_provider_for_all_title" msgid="4201020195058980757">"Завжди використовувати <xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g> для входу?"</string>
     <string name="use_provider_for_all_description" msgid="1998772715863958997">"Цей менеджер паролів для користувача <xliff:g id="USERNAME">%1$s</xliff:g> зберігатиме ваші паролі й ключі доступу, щоб ви могли легко входити в облікові записи"</string>
     <string name="set_as_default" msgid="4415328591568654603">"Вибрати за умовчанням"</string>
     <string name="settings" msgid="6536394145760913145">"Налаштування"</string>
