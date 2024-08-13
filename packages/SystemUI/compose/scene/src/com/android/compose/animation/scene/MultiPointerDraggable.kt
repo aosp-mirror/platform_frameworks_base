@@ -36,13 +36,11 @@ import androidx.compose.ui.input.pointer.positionChangeIgnoreConsumed
 import androidx.compose.ui.input.pointer.util.VelocityTracker
 import androidx.compose.ui.input.pointer.util.addPointerInputChange
 import androidx.compose.ui.node.CompositionLocalConsumerModifierNode
-import androidx.compose.ui.node.DelegatableNode
 import androidx.compose.ui.node.DelegatingNode
 import androidx.compose.ui.node.ModifierNodeElement
 import androidx.compose.ui.node.ObserverModifierNode
 import androidx.compose.ui.node.PointerInputModifierNode
 import androidx.compose.ui.node.currentValueOf
-import androidx.compose.ui.node.findNearestAncestor
 import androidx.compose.ui.node.observeReads
 import androidx.compose.ui.platform.LocalViewConfiguration
 import androidx.compose.ui.unit.IntSize
@@ -77,6 +75,7 @@ internal fun Modifier.multiPointerDraggable(
     enabled: () -> Boolean,
     startDragImmediately: (startedPosition: Offset) -> Boolean,
     onDragStarted: (startedPosition: Offset, overSlop: Float, pointersDown: Int) -> DragController,
+    onFirstPointerDown: () -> Unit = {},
     swipeDetector: SwipeDetector = DefaultSwipeDetector,
 ): Modifier =
     this.then(
@@ -85,6 +84,7 @@ internal fun Modifier.multiPointerDraggable(
             enabled,
             startDragImmediately,
             onDragStarted,
+            onFirstPointerDown,
             swipeDetector,
         )
     )
@@ -95,6 +95,7 @@ private data class MultiPointerDraggableElement(
     private val startDragImmediately: (startedPosition: Offset) -> Boolean,
     private val onDragStarted:
         (startedPosition: Offset, overSlop: Float, pointersDown: Int) -> DragController,
+    private val onFirstPointerDown: () -> Unit,
     private val swipeDetector: SwipeDetector,
 ) : ModifierNodeElement<MultiPointerDraggableNode>() {
     override fun create(): MultiPointerDraggableNode =
@@ -103,6 +104,7 @@ private data class MultiPointerDraggableElement(
             enabled = enabled,
             startDragImmediately = startDragImmediately,
             onDragStarted = onDragStarted,
+            onFirstPointerDown = onFirstPointerDown,
             swipeDetector = swipeDetector,
         )
 
@@ -111,6 +113,7 @@ private data class MultiPointerDraggableElement(
         node.enabled = enabled
         node.startDragImmediately = startDragImmediately
         node.onDragStarted = onDragStarted
+        node.onFirstPointerDown = onFirstPointerDown
         node.swipeDetector = swipeDetector
     }
 }
@@ -121,6 +124,7 @@ internal class MultiPointerDraggableNode(
     var startDragImmediately: (startedPosition: Offset) -> Boolean,
     var onDragStarted:
         (startedPosition: Offset, overSlop: Float, pointersDown: Int) -> DragController,
+    var onFirstPointerDown: () -> Unit,
     var swipeDetector: SwipeDetector = DefaultSwipeDetector,
 ) :
     DelegatingNode(),
@@ -219,6 +223,7 @@ internal class MultiPointerDraggableNode(
                             startedPosition = null
                         } else if (startedPosition == null) {
                             startedPosition = pointers.first().position
+                            onFirstPointerDown()
                         }
                     }
                 }

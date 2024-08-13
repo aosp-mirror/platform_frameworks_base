@@ -129,7 +129,11 @@ class PriorityNestedScrollConnection(
         return onPriorityStop(available)
     }
 
-    /** Method to call before destroying the object or to reset the initial state. */
+    /**
+     * Method to call before destroying the object or to reset the initial state.
+     *
+     * TODO(b/303224944) This method should be removed.
+     */
     fun reset() {
         // Step 3c: To ensure that an onStop is always called for every onStart.
         onPriorityStop(velocity = Velocity.Zero)

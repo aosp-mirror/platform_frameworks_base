@@ -64,6 +64,7 @@ private class SwipeToSceneNode(
                 enabled = ::enabled,
                 startDragImmediately = ::startDragImmediately,
                 onDragStarted = draggableHandler::onDragStarted,
+                onFirstPointerDown = ::onFirstPointerDown,
                 swipeDetector = swipeDetector,
             )
         )
@@ -95,6 +96,15 @@ private class SwipeToSceneNode(
     init {
         delegate(nestedScrollModifierNode(nestedScrollHandlerImpl.connection, dispatcher = null))
         delegate(ScrollBehaviorOwnerNode(draggableHandler.nestedScrollKey, nestedScrollHandlerImpl))
+    }
+
+    private fun onFirstPointerDown() {
+        // When we drag our finger across the screen, the NestedScrollConnection keeps track of all
+        // the scroll events until we lift our finger. However, in some cases, the connection might
+        // not receive the "up" event. This can lead to an incorrect initial state for the gesture.
+        // To prevent this issue, we can call the reset() method when the first finger touches the
+        // screen. This ensures that the NestedScrollConnection starts from a correct state.
+        nestedScrollHandlerImpl.connection.reset()
     }
 
     override fun onDetach() {
