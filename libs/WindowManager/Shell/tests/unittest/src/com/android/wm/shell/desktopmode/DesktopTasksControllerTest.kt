@@ -93,6 +93,8 @@ import com.android.wm.shell.desktopmode.DesktopTestHelpers.Companion.createFreef
 import com.android.wm.shell.desktopmode.DesktopTestHelpers.Companion.createFullscreenTask
 import com.android.wm.shell.desktopmode.DesktopTestHelpers.Companion.createHomeTask
 import com.android.wm.shell.desktopmode.DesktopTestHelpers.Companion.createSplitScreenTask
+import com.android.wm.shell.desktopmode.persistence.Desktop
+import com.android.wm.shell.desktopmode.persistence.DesktopPersistentRepository
 import com.android.wm.shell.draganddrop.DragAndDropController
 import com.android.wm.shell.recents.RecentTasksController
 import com.android.wm.shell.recents.RecentsTransitionHandler
@@ -117,6 +119,14 @@ import junit.framework.Assert.assertFalse
 import junit.framework.Assert.assertTrue
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.test.setMain
 import org.junit.After
 import org.junit.Assume.assumeTrue
 import org.junit.Before
@@ -148,6 +158,7 @@ import org.mockito.quality.Strictness
  */
 @SmallTest
 @RunWith(AndroidTestingRunner::class)
+@ExperimentalCoroutinesApi
 @EnableFlags(FLAG_ENABLE_DESKTOP_WINDOWING_MODE)
 class DesktopTasksControllerTest : ShellTestCase() {
 
@@ -183,6 +194,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
   @Mock private lateinit var mockSurface: SurfaceControl
   @Mock private lateinit var taskbarDesktopTaskListener: TaskbarDesktopTaskListener
   @Mock private lateinit var mockHandler: Handler
+  @Mock lateinit var persistentRepository: DesktopPersistentRepository
 
   private lateinit var mockitoSession: StaticMockitoSession
   private lateinit var controller: DesktopTasksController
@@ -190,6 +202,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
   private lateinit var taskRepository: DesktopModeTaskRepository
   private lateinit var desktopTasksLimiter: DesktopTasksLimiter
   private lateinit var recentsTransitionStateListener: RecentsTransitionStateListener
+  private lateinit var testScope: CoroutineScope
 
   private val shellExecutor = TestShellExecutor()
 
@@ -207,6 +220,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
 
   @Before
   fun setUp() {
+    Dispatchers.setMain(StandardTestDispatcher())
     mockitoSession =
         mockitoSession()
             .strictness(Strictness.LENIENT)
@@ -214,8 +228,9 @@ class DesktopTasksControllerTest : ShellTestCase() {
             .startMocking()
     doReturn(true).`when` { DesktopModeStatus.isDesktopModeSupported(any()) }
 
+    testScope = CoroutineScope(Dispatchers.Unconfined + SupervisorJob())
     shellInit = spy(ShellInit(testExecutor))
-    taskRepository = DesktopModeTaskRepository()
+    taskRepository = DesktopModeTaskRepository(context, shellInit, persistentRepository, testScope)
     desktopTasksLimiter =
         DesktopTasksLimiter(
             transitions,
@@ -233,6 +248,9 @@ class DesktopTasksControllerTest : ShellTestCase() {
     whenever(displayLayout.getStableBounds(any())).thenAnswer { i ->
       (i.arguments.first() as Rect).set(STABLE_BOUNDS)
     }
+    whenever(runBlocking { persistentRepository.readDesktop(any(), any()) }).thenReturn(
+      Desktop.getDefaultInstance()
+    )
 
     val tda = DisplayAreaInfo(MockToken().token(), DEFAULT_DISPLAY, 0)
     tda.configuration.windowConfiguration.windowingMode = WINDOWING_MODE_FULLSCREEN
@@ -287,6 +305,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
     mockitoSession.finishMocking()
 
     runningTasks.clear()
+    testScope.cancel()
   }
 
   @Test
