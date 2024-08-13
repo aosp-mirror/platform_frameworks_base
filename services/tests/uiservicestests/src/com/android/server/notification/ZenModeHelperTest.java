@@ -4972,7 +4972,7 @@ public class ZenModeHelperTest extends UiServiceTestCase {
 
         mZenModeHelper.setAutomaticZenRuleState(createdId,
                 new Condition(zenRule.getConditionId(), "", STATE_FALSE),
-                ORIGIN_APP, SYSTEM_UID);
+                ORIGIN_APP, CUSTOM_PKG_UID);
 
         assertTrue(latch.await(500, TimeUnit.MILLISECONDS));
         if (CompatChanges.isChangeEnabled(ZenModeHelper.SEND_ACTIVATION_AZR_STATUSES)) {
@@ -6491,6 +6491,8 @@ public class ZenModeHelperTest extends UiServiceTestCase {
                 .build();
         String ruleId = mZenModeHelper.addAutomaticZenRule(mPkg, rule, ORIGIN_APP, "adding",
                 CUSTOM_PKG_UID);
+        Condition autoOn = new Condition(rule.getConditionId(), "auto-on", STATE_TRUE,
+                SOURCE_CONTEXT);
         ZenRule zenRule;
 
         mZenModeHelper.setAutomaticZenRuleState(ruleId,
@@ -6508,6 +6510,57 @@ public class ZenModeHelperTest extends UiServiceTestCase {
         assertThat(zenRule.isAutomaticActive()).isFalse();
         assertThat(zenRule.getConditionOverride()).isEqualTo(OVERRIDE_NONE);
         assertThat(zenRule.condition).isNull();
+
+        // Bonus check: app has resumed control over the rule and can now turn it on.
+        mZenModeHelper.setAutomaticZenRuleState(ruleId, autoOn,  ORIGIN_APP, CUSTOM_PKG_UID);
+        zenRule = mZenModeHelper.mConfig.automaticRules.get(ruleId);
+        assertThat(zenRule.isAutomaticActive()).isTrue();
+        assertThat(zenRule.getConditionOverride()).isEqualTo(OVERRIDE_NONE);
+        assertThat(zenRule.condition).isEqualTo(autoOn);
+    }
+
+    @Test
+    @EnableFlags({FLAG_MODES_API, FLAG_MODES_UI})
+    public void setAutomaticZenRuleState_manualDeactivationAndThenReactivation_removesOverride() {
+        AutomaticZenRule rule = new AutomaticZenRule.Builder("Rule", Uri.parse("cond"))
+                .setPackage(mPkg)
+                .build();
+        String ruleId = mZenModeHelper.addAutomaticZenRule(mPkg, rule, ORIGIN_APP, "adding",
+                CUSTOM_PKG_UID);
+        Condition autoOn = new Condition(rule.getConditionId(), "auto-on", STATE_TRUE,
+                SOURCE_CONTEXT);
+        Condition autoOff = new Condition(rule.getConditionId(), "auto-off", STATE_FALSE,
+                SOURCE_CONTEXT);
+        ZenRule zenRule;
+
+        mZenModeHelper.setAutomaticZenRuleState(ruleId, autoOn,  ORIGIN_APP, CUSTOM_PKG_UID);
+        zenRule = mZenModeHelper.mConfig.automaticRules.get(ruleId);
+        assertThat(zenRule.isAutomaticActive()).isTrue();
+        assertThat(zenRule.getConditionOverride()).isEqualTo(OVERRIDE_NONE);
+        assertThat(zenRule.condition).isEqualTo(autoOn);
+
+        mZenModeHelper.setAutomaticZenRuleState(ruleId,
+                new Condition(rule.getConditionId(), "manual-off", STATE_FALSE, SOURCE_USER_ACTION),
+                ORIGIN_USER_IN_SYSTEMUI, SYSTEM_UID);
+        zenRule = mZenModeHelper.mConfig.automaticRules.get(ruleId);
+        assertThat(zenRule.isAutomaticActive()).isFalse();
+        assertThat(zenRule.getConditionOverride()).isEqualTo(OVERRIDE_DEACTIVATE);
+        assertThat(zenRule.condition).isEqualTo(autoOn);
+
+        mZenModeHelper.setAutomaticZenRuleState(ruleId,
+                new Condition(rule.getConditionId(), "manual-on", STATE_TRUE, SOURCE_USER_ACTION),
+                ORIGIN_USER_IN_SYSTEMUI, SYSTEM_UID);
+        zenRule = mZenModeHelper.mConfig.automaticRules.get(ruleId);
+        assertThat(zenRule.isAutomaticActive()).isTrue();
+        assertThat(zenRule.getConditionOverride()).isEqualTo(OVERRIDE_NONE);
+        assertThat(zenRule.condition).isEqualTo(autoOn);
+
+        // Bonus check: app has resumed control over the rule and can now turn it off.
+        mZenModeHelper.setAutomaticZenRuleState(ruleId, autoOff,  ORIGIN_APP, CUSTOM_PKG_UID);
+        zenRule = mZenModeHelper.mConfig.automaticRules.get(ruleId);
+        assertThat(zenRule.isAutomaticActive()).isFalse();
+        assertThat(zenRule.getConditionOverride()).isEqualTo(OVERRIDE_NONE);
+        assertThat(zenRule.condition).isEqualTo(autoOff);
     }
 
     @Test
@@ -6521,7 +6574,7 @@ public class ZenModeHelperTest extends UiServiceTestCase {
 
         mZenModeHelper.setAutomaticZenRuleState(ruleId,
                 new Condition(rule.getConditionId(), "auto-on", STATE_TRUE, SOURCE_CONTEXT),
-                ORIGIN_APP, SYSTEM_UID);
+                ORIGIN_APP, CUSTOM_PKG_UID);
         ZenRule zenRuleOn = mZenModeHelper.mConfig.automaticRules.get(ruleId);
         assertThat(zenRuleOn.isAutomaticActive()).isTrue();
         assertThat(zenRuleOn.getConditionOverride()).isEqualTo(OVERRIDE_NONE);

@@ -48,6 +48,7 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
+import org.junit.After
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -101,7 +102,7 @@ class AudioSharingRepositoryTest {
 
     @Captor
     private lateinit var assistantCallbackCaptor:
-        ArgumentCaptor<BluetoothLeBroadcastAssistant.Callback>
+            ArgumentCaptor<BluetoothLeBroadcastAssistant.Callback>
 
     @Captor private lateinit var btCallbackCaptor: ArgumentCaptor<BluetoothCallback>
 
@@ -110,6 +111,7 @@ class AudioSharingRepositoryTest {
     @Captor
     private lateinit var volumeCallbackCaptor: ArgumentCaptor<BluetoothVolumeControl.Callback>
 
+    private val logger = FakeAudioSharingRepositoryLogger()
     private val testScope = TestScope()
     private val context: Context = ApplicationProvider.getApplicationContext()
     @Spy private val contentResolver: ContentResolver = context.contentResolver
@@ -135,14 +137,21 @@ class AudioSharingRepositoryTest {
         Settings.Secure.putInt(
             contentResolver,
             BluetoothUtils.getPrimaryGroupIdUriForBroadcast(),
-            TEST_GROUP_ID_INVALID)
+            TEST_GROUP_ID_INVALID
+        )
         underTest =
             AudioSharingRepositoryImpl(
                 contentResolver,
                 btManager,
                 testScope.backgroundScope,
                 testScope.testScheduler,
+                logger
             )
+    }
+
+    @After
+    fun tearDown() {
+        logger.reset()
     }
 
     @Test
@@ -160,6 +169,13 @@ class AudioSharingRepositoryTest {
             runCurrent()
 
             Truth.assertThat(states).containsExactly(false, true, false, true)
+            Truth.assertThat(logger.logs)
+                .containsAtLeastElementsIn(
+                    listOf(
+                        "onAudioSharingStateChanged state=true",
+                        "onAudioSharingStateChanged state=false",
+                    )
+                ).inOrder()
         }
     }
 
@@ -187,7 +203,8 @@ class AudioSharingRepositoryTest {
             Truth.assertThat(groupIds)
                 .containsExactly(
                     TEST_GROUP_ID_INVALID,
-                    TEST_GROUP_ID2)
+                    TEST_GROUP_ID2
+                )
         }
     }
 
@@ -219,13 +236,16 @@ class AudioSharingRepositoryTest {
             triggerSourceAdded()
             runCurrent()
             triggerProfileConnectionChange(
-                BluetoothAdapter.STATE_CONNECTING, BluetoothProfile.LE_AUDIO_BROADCAST_ASSISTANT)
+                BluetoothAdapter.STATE_CONNECTING, BluetoothProfile.LE_AUDIO_BROADCAST_ASSISTANT
+            )
             runCurrent()
             triggerProfileConnectionChange(
-                BluetoothAdapter.STATE_DISCONNECTED, BluetoothProfile.LE_AUDIO)
+                BluetoothAdapter.STATE_DISCONNECTED, BluetoothProfile.LE_AUDIO
+            )
             runCurrent()
             triggerProfileConnectionChange(
-                BluetoothAdapter.STATE_DISCONNECTED, BluetoothProfile.LE_AUDIO_BROADCAST_ASSISTANT)
+                BluetoothAdapter.STATE_DISCONNECTED, BluetoothProfile.LE_AUDIO_BROADCAST_ASSISTANT
+            )
             runCurrent()
 
             Truth.assertThat(groupIds)
@@ -235,7 +255,16 @@ class AudioSharingRepositoryTest {
                     TEST_GROUP_ID1,
                     TEST_GROUP_ID_INVALID,
                     TEST_GROUP_ID2,
-                    TEST_GROUP_ID_INVALID)
+                    TEST_GROUP_ID_INVALID
+                )
+            Truth.assertThat(logger.logs)
+                .containsAtLeastElementsIn(
+                    listOf(
+                        "onSecondaryGroupIdChanged groupId=$TEST_GROUP_ID_INVALID",
+                        "onSecondaryGroupIdChanged groupId=$TEST_GROUP_ID2",
+                        "onSecondaryGroupIdChanged groupId=$TEST_GROUP_ID1",
+                    )
+                ).inOrder()
         }
     }
 
@@ -257,11 +286,22 @@ class AudioSharingRepositoryTest {
             verify(volumeControl).unregisterCallback(any())
             runCurrent()
 
+            val expectedMap1 = mapOf(TEST_GROUP_ID1 to TEST_VOLUME1)
+            val expectedMap2 = mapOf(TEST_GROUP_ID1 to TEST_VOLUME2)
             Truth.assertThat(volumeMaps)
                 .containsExactly(
                     emptyMap<Int, Int>(),
-                    mapOf(TEST_GROUP_ID1 to TEST_VOLUME1),
-                    mapOf(TEST_GROUP_ID1 to TEST_VOLUME2))
+                    expectedMap1,
+                    expectedMap2
+                )
+            Truth.assertThat(logger.logs)
+                .containsAtLeastElementsIn(
+                    listOf(
+                        "onVolumeMapChanged map={}",
+                        "onVolumeMapChanged map=$expectedMap1",
+                        "onVolumeMapChanged map=$expectedMap2",
+                    )
+                ).inOrder()
         }
     }
 
@@ -281,12 +321,19 @@ class AudioSharingRepositoryTest {
             Settings.Secure.putInt(
                 contentResolver,
                 BluetoothUtils.getPrimaryGroupIdUriForBroadcast(),
-                TEST_GROUP_ID2)
+                TEST_GROUP_ID2
+            )
             `when`(assistant.allConnectedDevices).thenReturn(listOf(device1, device2))
             underTest.setSecondaryVolume(TEST_VOLUME1)
 
             runCurrent()
             verify(volumeControl).setDeviceVolume(device1, TEST_VOLUME1, true)
+            Truth.assertThat(logger.logs)
+                .isEqualTo(
+                    listOf(
+                        "onSetVolumeRequested volume=$TEST_VOLUME1",
+                    )
+                )
         }
     }
 
@@ -313,7 +360,8 @@ class AudioSharingRepositoryTest {
         Settings.Secure.putInt(
             contentResolver,
             BluetoothUtils.getPrimaryGroupIdUriForBroadcast(),
-            TEST_GROUP_ID1)
+            TEST_GROUP_ID1
+        )
         `when`(assistant.allConnectedDevices).thenReturn(listOf(device1, device2))
         assistantCallbackCaptor.value.sourceAdded(device1, receiveState)
     }
@@ -324,7 +372,8 @@ class AudioSharingRepositoryTest {
         Settings.Secure.putInt(
             contentResolver,
             BluetoothUtils.getPrimaryGroupIdUriForBroadcast(),
-            TEST_GROUP_ID1)
+            TEST_GROUP_ID1
+        )
         assistantCallbackCaptor.value.sourceRemoved(device2)
     }
 
@@ -334,7 +383,8 @@ class AudioSharingRepositoryTest {
         Settings.Secure.putInt(
             contentResolver,
             BluetoothUtils.getPrimaryGroupIdUriForBroadcast(),
-            TEST_GROUP_ID1)
+            TEST_GROUP_ID1
+        )
         btCallbackCaptor.value.onProfileConnectionStateChanged(cachedDevice2, state, profile)
     }
 
@@ -343,12 +393,14 @@ class AudioSharingRepositoryTest {
             .registerContentObserver(
                 eq(Settings.Secure.getUriFor(BluetoothUtils.getPrimaryGroupIdUriForBroadcast())),
                 eq(false),
-                contentObserverCaptor.capture())
+                contentObserverCaptor.capture()
+            )
         `when`(assistant.allConnectedDevices).thenReturn(listOf(device1, device2))
         Settings.Secure.putInt(
             contentResolver,
             BluetoothUtils.getPrimaryGroupIdUriForBroadcast(),
-            TEST_GROUP_ID2)
+            TEST_GROUP_ID2
+        )
         contentObserverCaptor.value.primaryChanged()
     }
 
@@ -380,8 +432,9 @@ class AudioSharingRepositoryTest {
             onBroadcastStopped(TEST_REASON, TEST_BROADCAST_ID)
         }
         val sourceAdded:
-            BluetoothLeBroadcastAssistant.Callback.(
-                sink: BluetoothDevice, state: BluetoothLeBroadcastReceiveState) -> Unit =
+                BluetoothLeBroadcastAssistant.Callback.(
+                    sink: BluetoothDevice, state: BluetoothLeBroadcastReceiveState
+                ) -> Unit =
             { sink, state ->
                 onReceiveStateChanged(sink, TEST_SOURCE_ID, state)
             }

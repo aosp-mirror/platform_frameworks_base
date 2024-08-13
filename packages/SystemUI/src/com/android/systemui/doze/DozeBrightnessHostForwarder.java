@@ -16,8 +16,6 @@
 
 package com.android.systemui.doze;
 
-import java.util.concurrent.Executor;
-
 /**
  * Forwards the currently used brightness to {@link DozeHost}.
  */
@@ -25,9 +23,8 @@ public class DozeBrightnessHostForwarder extends DozeMachine.Service.Delegate {
 
     private final DozeHost mHost;
 
-    public DozeBrightnessHostForwarder(DozeMachine.Service wrappedService, DozeHost host,
-            Executor bgExecutor) {
-        super(wrappedService, bgExecutor);
+    public DozeBrightnessHostForwarder(DozeMachine.Service wrappedService, DozeHost host) {
+        super(wrappedService);
         mHost = host;
     }
 

@@ -1039,6 +1039,22 @@ class CommunalInteractorTest : SysuiTestCase() {
             assertThat(showCommunalFromOccluded).isTrue()
         }
 
+    @Test
+    fun showCommunalFromOccluded_enteredOccludedFromDreaming() =
+        testScope.runTest {
+            kosmos.setCommunalAvailable(true)
+            val showCommunalFromOccluded by collectLastValue(underTest.showCommunalFromOccluded)
+            assertThat(showCommunalFromOccluded).isFalse()
+
+            kosmos.fakeKeyguardTransitionRepository.sendTransitionSteps(
+                from = KeyguardState.DREAMING,
+                to = KeyguardState.OCCLUDED,
+                testScope
+            )
+
+            assertThat(showCommunalFromOccluded).isTrue()
+        }
+
     private fun smartspaceTimer(id: String, timestamp: Long = 0L): CommunalSmartspaceTimer {
         return CommunalSmartspaceTimer(
             smartspaceTargetId = id,

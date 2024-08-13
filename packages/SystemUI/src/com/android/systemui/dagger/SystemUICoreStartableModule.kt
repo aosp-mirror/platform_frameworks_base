@@ -258,13 +258,6 @@ abstract class SystemUICoreStartableModule {
 
     @Binds
     @IntoMap
-    @ClassKey(KeyboardTouchpadTutorialCoreStartable::class)
-    abstract fun bindKeyboardTouchpadTutorialCoreStartable(
-        listener: KeyboardTouchpadTutorialCoreStartable
-    ): CoreStartable
-
-    @Binds
-    @IntoMap
     @ClassKey(PhysicalKeyboardCoreStartable::class)
     abstract fun bindKeyboardCoreStartable(listener: PhysicalKeyboardCoreStartable): CoreStartable
 

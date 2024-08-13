@@ -424,14 +424,12 @@ public final class DozeServiceHost implements DozeHost {
 
     @Override
     public void setDozeScreenBrightness(int brightness) {
-        mDozeLog.traceDozeScreenBrightness(brightness);
         mNotificationShadeWindowController.setDozeScreenBrightness(brightness);
     }
 
 
     @Override
     public void setDozeScreenBrightnessFloat(float brightness) {
-        mDozeLog.traceDozeScreenBrightnessFloat(brightness);
         mNotificationShadeWindowController.setDozeScreenBrightnessFloat(brightness);
     }
 

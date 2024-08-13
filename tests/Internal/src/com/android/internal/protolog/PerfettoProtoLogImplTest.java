@@ -126,30 +126,35 @@ public class PerfettoProtoLogImplTest {
                                 .setMessage("My Test Debug Log Message %b")
                                 .setLevel(ProtologCommon.ProtoLogLevel.PROTOLOG_LEVEL_DEBUG)
                                 .setGroupId(1)
+                                .setLocation("com/test/MyTestClass.java:123")
                 ).addMessages(
                         Protolog.ProtoLogViewerConfig.MessageData.newBuilder()
                                 .setMessageId(2)
                                 .setMessage("My Test Verbose Log Message %b")
                                 .setLevel(ProtologCommon.ProtoLogLevel.PROTOLOG_LEVEL_VERBOSE)
                                 .setGroupId(1)
+                                .setLocation("com/test/MyTestClass.java:342")
                 ).addMessages(
                         Protolog.ProtoLogViewerConfig.MessageData.newBuilder()
                                 .setMessageId(3)
                                 .setMessage("My Test Warn Log Message %b")
                                 .setLevel(ProtologCommon.ProtoLogLevel.PROTOLOG_LEVEL_WARN)
                                 .setGroupId(1)
+                                .setLocation("com/test/MyTestClass.java:563")
                 ).addMessages(
                         Protolog.ProtoLogViewerConfig.MessageData.newBuilder()
                                 .setMessageId(4)
                                 .setMessage("My Test Error Log Message %b")
                                 .setLevel(ProtologCommon.ProtoLogLevel.PROTOLOG_LEVEL_ERROR)
                                 .setGroupId(1)
+                                .setLocation("com/test/MyTestClass.java:156")
                 ).addMessages(
                         Protolog.ProtoLogViewerConfig.MessageData.newBuilder()
                                 .setMessageId(5)
                                 .setMessage("My Test WTF Log Message %b")
                                 .setLevel(ProtologCommon.ProtoLogLevel.PROTOLOG_LEVEL_WTF)
                                 .setGroupId(1)
+                                .setLocation("com/test/MyTestClass.java:192")
                 );
 
         ViewerConfigInputStreamProvider viewerConfigInputStreamProvider = Mockito.mock(
@@ -463,6 +468,26 @@ public class PerfettoProtoLogImplTest {
                 .isAtMost(after);
         Truth.assertThat(protolog.messages.getFirst().getMessage())
                 .isEqualTo("My test message :: test, 2, 4, 6, 0.400000, true");
+    }
+
+    @Test
+    public  void supportsLocationInformation() throws IOException {
+        PerfettoTraceMonitor traceMonitor =
+                PerfettoTraceMonitor.newBuilder().enableProtoLog(true).build();
+        try {
+            traceMonitor.start();
+            mProtoLog.log(LogLevel.DEBUG, TestProtoLogGroup.TEST_GROUP, 1,
+                    LogDataType.BOOLEAN, new Object[]{true});
+        } finally {
+            traceMonitor.stop(mWriter);
+        }
+
+        final ResultReader reader = new ResultReader(mWriter.write(), mTraceConfig);
+        final ProtoLogTrace protolog = reader.readProtoLogTrace();
+
+        Truth.assertThat(protolog.messages).hasSize(1);
+        Truth.assertThat(protolog.messages.get(0).getLocation())
+                .isEqualTo("com/test/MyTestClass.java:123");
     }
 
     private long addMessageToConfig(ProtologCommon.ProtoLogLevel logLevel, String message) {

@@ -407,8 +407,7 @@ public class TaskFragmentOrganizerController extends ITaskFragmentOrganizerContr
                 change.setTaskFragmentToken(lastParentTfToken);
             }
             // Only pass the activity token to the client if it belongs to the same process.
-            if (Flags.fixPipRestoreToOverlay() && nextFillTaskActivity != null
-                    && nextFillTaskActivity.getPid() == mOrganizerPid) {
+            if (nextFillTaskActivity != null && nextFillTaskActivity.getPid() == mOrganizerPid) {
                 change.setOtherActivityToken(nextFillTaskActivity.token);
             }
             return change;

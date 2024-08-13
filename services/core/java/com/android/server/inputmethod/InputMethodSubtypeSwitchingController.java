@@ -614,242 +614,61 @@ final class InputMethodSubtypeSwitchingController {
         }
     }
 
-    @VisibleForTesting
-    public static class ControllerImpl {
-
-        @NonNull
-        private final DynamicRotationList mSwitchingAwareRotationList;
-        @NonNull
-        private final StaticRotationList mSwitchingUnawareRotationList;
-        /** List of input methods and subtypes. */
-        @Nullable
-        private final RotationList mRotationList;
-        /** List of input methods and subtypes suitable for hardware keyboards. */
-        @Nullable
-        private final RotationList mHardwareRotationList;
-
-        /**
-         * Whether there was a user action since the last input method and subtype switch.
-         * Used to determine the switching behaviour for {@link #MODE_AUTO}.
-         */
-        private boolean mUserActionSinceSwitch;
-
-        @NonNull
-        public static ControllerImpl createFrom(@Nullable ControllerImpl currentInstance,
-                @NonNull List<ImeSubtypeListItem> sortedEnabledItems,
-                @NonNull List<ImeSubtypeListItem> hardwareKeyboardItems) {
-            final var switchingAwareImeSubtypes = filterImeSubtypeList(sortedEnabledItems,
-                    true /* supportsSwitchingToNextInputMethod */);
-            final var switchingUnawareImeSubtypes = filterImeSubtypeList(sortedEnabledItems,
-                    false /* supportsSwitchingToNextInputMethod */);
-
-            final DynamicRotationList switchingAwareRotationList;
-            if (currentInstance != null && Objects.equals(
-                    currentInstance.mSwitchingAwareRotationList.mImeSubtypeList,
-                    switchingAwareImeSubtypes)) {
-                // Can reuse the current instance.
-                switchingAwareRotationList = currentInstance.mSwitchingAwareRotationList;
-            } else {
-                switchingAwareRotationList = new DynamicRotationList(switchingAwareImeSubtypes);
-            }
-
-            final StaticRotationList switchingUnawareRotationList;
-            if (currentInstance != null && Objects.equals(
-                    currentInstance.mSwitchingUnawareRotationList.mImeSubtypeList,
-                    switchingUnawareImeSubtypes)) {
-                // Can reuse the current instance.
-                switchingUnawareRotationList = currentInstance.mSwitchingUnawareRotationList;
-            } else {
-                switchingUnawareRotationList = new StaticRotationList(switchingUnawareImeSubtypes);
-            }
-
-            final RotationList rotationList;
-            if (!Flags.imeSwitcherRevamp()) {
-                rotationList = null;
-            } else if (currentInstance != null && currentInstance.mRotationList != null
-                    && Objects.equals(
-                            currentInstance.mRotationList.mItems, sortedEnabledItems)) {
-                // Can reuse the current instance.
-                rotationList = currentInstance.mRotationList;
-            } else {
-                rotationList = new RotationList(sortedEnabledItems);
-            }
-
-            final RotationList hardwareRotationList;
-            if (!Flags.imeSwitcherRevamp()) {
-                hardwareRotationList = null;
-            } else if (currentInstance != null && currentInstance.mHardwareRotationList != null
-                    && Objects.equals(
-                            currentInstance.mHardwareRotationList.mItems, hardwareKeyboardItems)) {
-                // Can reuse the current instance.
-                hardwareRotationList = currentInstance.mHardwareRotationList;
-            } else {
-                hardwareRotationList = new RotationList(hardwareKeyboardItems);
-            }
-
-            return new ControllerImpl(switchingAwareRotationList, switchingUnawareRotationList,
-                    rotationList, hardwareRotationList);
-        }
-
-        private ControllerImpl(@NonNull DynamicRotationList switchingAwareRotationList,
-                @NonNull StaticRotationList switchingUnawareRotationList,
-                @Nullable RotationList rotationList,
-                @Nullable RotationList hardwareRotationList) {
-            mSwitchingAwareRotationList = switchingAwareRotationList;
-            mSwitchingUnawareRotationList = switchingUnawareRotationList;
-            mRotationList = rotationList;
-            mHardwareRotationList = hardwareRotationList;
-        }
-
-        @Nullable
-        public ImeSubtypeListItem getNextInputMethod(boolean onlyCurrentIme,
-                @Nullable InputMethodInfo imi, @Nullable InputMethodSubtype subtype,
-                @SwitchMode int mode, boolean forward) {
-            if (imi == null) {
-                return null;
-            }
-            if (Flags.imeSwitcherRevamp() && mRotationList != null) {
-                return mRotationList.next(imi, subtype, onlyCurrentIme,
-                        isRecency(mode, forward), forward);
-            } else if (imi.supportsSwitchingToNextInputMethod()) {
-                return mSwitchingAwareRotationList.getNextInputMethodLocked(onlyCurrentIme, imi,
-                        subtype);
-            } else {
-                return mSwitchingUnawareRotationList.getNextInputMethodLocked(onlyCurrentIme, imi,
-                        subtype);
-            }
-        }
-
-        @Nullable
-        public ImeSubtypeListItem getNextInputMethodForHardware(boolean onlyCurrentIme,
-                @NonNull InputMethodInfo imi, @Nullable InputMethodSubtype subtype,
-                @SwitchMode int mode, boolean forward) {
-            if (Flags.imeSwitcherRevamp() && mHardwareRotationList != null) {
-                return mHardwareRotationList.next(imi, subtype, onlyCurrentIme,
-                        isRecency(mode, forward), forward);
-            }
-            return null;
-        }
-
-        /**
-         * Called when the user took an action that should update the recency of the current
-         * input method and subtype in the switching list.
-         *
-         * @param imi     the currently selected input method.
-         * @param subtype the currently selected input method subtype, if any.
-         * @return {@code true} if the recency was updated, otherwise {@code false}.
-         * @see android.inputmethodservice.InputMethodServiceInternal#notifyUserActionIfNecessary()
-         */
-        public boolean onUserActionLocked(@NonNull InputMethodInfo imi,
-                @Nullable InputMethodSubtype subtype) {
-            boolean recencyUpdated = false;
-            if (Flags.imeSwitcherRevamp()) {
-                if (mRotationList != null) {
-                    recencyUpdated |= mRotationList.setMostRecent(imi, subtype);
-                }
-                if (mHardwareRotationList != null) {
-                    recencyUpdated |= mHardwareRotationList.setMostRecent(imi, subtype);
-                }
-                if (recencyUpdated) {
-                    mUserActionSinceSwitch = true;
-                }
-            } else if (imi.supportsSwitchingToNextInputMethod()) {
-                mSwitchingAwareRotationList.onUserAction(imi, subtype);
-            }
-            return recencyUpdated;
-        }
-
-        /** Called when the input method and subtype was changed. */
-        public void onInputMethodSubtypeChanged() {
-            mUserActionSinceSwitch = false;
-        }
-
-        /**
-         * Whether the given mode and direction result in recency or static order.
-         *
-         * <p>{@link #MODE_AUTO} resolves to the recency order for the first forwards switch
-         * after an {@link #onUserActionLocked user action}, and otherwise to the static order.</p>
-         *
-         * @param mode    the switching mode.
-         * @param forward the switching direction.
-         * @return {@code true} for the recency order, otherwise {@code false}.
-         */
-        private boolean isRecency(@SwitchMode int mode, boolean forward) {
-            if (mode == MODE_AUTO && mUserActionSinceSwitch && forward) {
-                return true;
-            } else {
-                return mode == MODE_RECENT;
-            }
-        }
-
-        @NonNull
-        private static List<ImeSubtypeListItem> filterImeSubtypeList(
-                @NonNull List<ImeSubtypeListItem> items,
-                boolean supportsSwitchingToNextInputMethod) {
-            final ArrayList<ImeSubtypeListItem> result = new ArrayList<>();
-            final int numItems = items.size();
-            for (int i = 0; i < numItems; i++) {
-                final ImeSubtypeListItem item = items.get(i);
-                if (item.mImi.supportsSwitchingToNextInputMethod()
-                        == supportsSwitchingToNextInputMethod) {
-                    result.add(item);
-                }
-            }
-            return result;
-        }
-
-        protected void dump(@NonNull Printer pw, @NonNull String prefix) {
-            pw.println(prefix + "mSwitchingAwareRotationList:");
-            mSwitchingAwareRotationList.dump(pw, prefix + "  ");
-            pw.println(prefix + "mSwitchingUnawareRotationList:");
-            mSwitchingUnawareRotationList.dump(pw, prefix + "  ");
-            if (Flags.imeSwitcherRevamp()) {
-                if (mRotationList != null) {
-                    pw.println(prefix + "mRotationList:");
-                    mRotationList.dump(pw, prefix + "  ");
-                }
-                if (mHardwareRotationList != null) {
-                    pw.println(prefix + "mHardwareRotationList:");
-                    mHardwareRotationList.dump(pw, prefix + "  ");
-                }
-                pw.println(prefix + "User action since last switch: " + mUserActionSinceSwitch);
-            }
-        }
-    }
-
     @NonNull
-    private ControllerImpl mController;
-
-    InputMethodSubtypeSwitchingController() {
-        mController = ControllerImpl.createFrom(null, Collections.emptyList(),
-                Collections.emptyList());
-    }
+    private DynamicRotationList mSwitchingAwareRotationList =
+            new DynamicRotationList(Collections.emptyList());
+    @NonNull
+    private StaticRotationList mSwitchingUnawareRotationList =
+            new StaticRotationList(Collections.emptyList());
+    /** List of input methods and subtypes. */
+    @NonNull
+    private RotationList mRotationList = new RotationList(Collections.emptyList());
+    /** List of input methods and subtypes suitable for hardware keyboards. */
+    @NonNull
+    private RotationList mHardwareRotationList = new RotationList(Collections.emptyList());
 
     /**
-     * Called when the user took an action that should update the recency of the current
-     * input method and subtype in the switching list.
-     *
-     * @param imi     the currently selected input method.
-     * @param subtype the currently selected input method subtype, if any.
-     * @see android.inputmethodservice.InputMethodServiceInternal#notifyUserActionIfNecessary()
+     * Whether there was a user action since the last input method and subtype switch.
+     * Used to determine the switching behaviour for {@link #MODE_AUTO}.
      */
-    public void onUserActionLocked(@NonNull InputMethodInfo imi,
-            @Nullable InputMethodSubtype subtype) {
-        mController.onUserActionLocked(imi, subtype);
-    }
+    private boolean mUserActionSinceSwitch;
 
-    /** Called when the input method and subtype was changed. */
-    public void onInputMethodSubtypeChanged() {
-        mController.onInputMethodSubtypeChanged();
-    }
+    /**
+     * Updates the list of input methods and subtypes used for switching. If the given items are
+     * equal to the existing ones (regardless of recency order), the update is skipped and the
+     * current recency order is kept. Otherwise, the recency order is reset.
+     *
+     * @param sortedEnabledItems    the sorted list of enabled input methods and subtypes.
+     * @param hardwareKeyboardItems the unsorted list of enabled input method and subtypes
+     *                              suitable for hardware keyboards.
+     */
+    @VisibleForTesting
+    void update(@NonNull List<ImeSubtypeListItem> sortedEnabledItems,
+            @NonNull List<ImeSubtypeListItem> hardwareKeyboardItems) {
+        final var switchingAwareImeSubtypes = filterImeSubtypeList(sortedEnabledItems,
+                true /* supportsSwitchingToNextInputMethod */);
+        final var switchingUnawareImeSubtypes = filterImeSubtypeList(sortedEnabledItems,
+                false /* supportsSwitchingToNextInputMethod */);
 
-    public void resetCircularListLocked(@NonNull Context context,
-            @NonNull InputMethodSettings settings) {
-        mController = ControllerImpl.createFrom(mController,
-                getSortedInputMethodAndSubtypeList(
-                        false /* includeAuxiliarySubtypes */, false /* isScreenLocked */,
-                        false /* forImeMenu */, context, settings),
-                getInputMethodAndSubtypeListForHardwareKeyboard(context, settings));
+        if (!Objects.equals(mSwitchingAwareRotationList.mImeSubtypeList,
+                switchingAwareImeSubtypes)) {
+            mSwitchingAwareRotationList = new DynamicRotationList(switchingAwareImeSubtypes);
+        }
+
+        if (!Objects.equals(mSwitchingUnawareRotationList.mImeSubtypeList,
+                switchingUnawareImeSubtypes)) {
+            mSwitchingUnawareRotationList = new StaticRotationList(switchingUnawareImeSubtypes);
+        }
+
+        if (Flags.imeSwitcherRevamp()
+                && !Objects.equals(mRotationList.mItems, sortedEnabledItems)) {
+            mRotationList = new RotationList(sortedEnabledItems);
+        }
+
+        if (Flags.imeSwitcherRevamp()
+                && !Objects.equals(mHardwareRotationList.mItems, hardwareKeyboardItems)) {
+            mHardwareRotationList = new RotationList(hardwareKeyboardItems);
+        }
     }
 
     /**
@@ -869,7 +688,19 @@ final class InputMethodSubtypeSwitchingController {
     public ImeSubtypeListItem getNextInputMethodLocked(boolean onlyCurrentIme,
             @Nullable InputMethodInfo imi, @Nullable InputMethodSubtype subtype,
             @SwitchMode int mode, boolean forward) {
-        return mController.getNextInputMethod(onlyCurrentIme, imi, subtype, mode, forward);
+        if (imi == null) {
+            return null;
+        }
+        if (Flags.imeSwitcherRevamp()) {
+            return mRotationList.next(imi, subtype, onlyCurrentIme,
+                    isRecency(mode, forward), forward);
+        } else if (imi.supportsSwitchingToNextInputMethod()) {
+            return mSwitchingAwareRotationList.getNextInputMethodLocked(onlyCurrentIme, imi,
+                    subtype);
+        } else {
+            return mSwitchingUnawareRotationList.getNextInputMethodLocked(onlyCurrentIme, imi,
+                    subtype);
+        }
     }
 
     /**
@@ -890,11 +721,98 @@ final class InputMethodSubtypeSwitchingController {
     public ImeSubtypeListItem getNextInputMethodForHardware(boolean onlyCurrentIme,
             @NonNull InputMethodInfo imi, @Nullable InputMethodSubtype subtype,
             @SwitchMode int mode, boolean forward) {
-        return mController.getNextInputMethodForHardware(onlyCurrentIme, imi, subtype, mode,
-                forward);
+        if (Flags.imeSwitcherRevamp()) {
+            return mHardwareRotationList.next(imi, subtype, onlyCurrentIme,
+                    isRecency(mode, forward), forward);
+        }
+        return null;
     }
 
-    public void dump(@NonNull Printer pw, @NonNull String prefix) {
-        mController.dump(pw, prefix);
+    /**
+     * Called when the user took an action that should update the recency of the current
+     * input method and subtype in the switching list.
+     *
+     * @param imi     the currently selected input method.
+     * @param subtype the currently selected input method subtype, if any.
+     * @return {@code true} if the recency was updated, otherwise {@code false}.
+     * @see android.inputmethodservice.InputMethodServiceInternal#notifyUserActionIfNecessary()
+     */
+    public boolean onUserActionLocked(@NonNull InputMethodInfo imi,
+            @Nullable InputMethodSubtype subtype) {
+        boolean recencyUpdated = false;
+        if (Flags.imeSwitcherRevamp()) {
+            recencyUpdated |= mRotationList.setMostRecent(imi, subtype);
+            recencyUpdated |= mHardwareRotationList.setMostRecent(imi, subtype);
+            if (recencyUpdated) {
+                mUserActionSinceSwitch = true;
+            }
+        } else if (imi.supportsSwitchingToNextInputMethod()) {
+            mSwitchingAwareRotationList.onUserAction(imi, subtype);
+        }
+        return recencyUpdated;
+    }
+
+    /** Called when the input method and subtype was changed. */
+    public void onInputMethodSubtypeChanged() {
+        mUserActionSinceSwitch = false;
+    }
+
+    /**
+     * Whether the given mode and direction result in recency or static order.
+     *
+     * <p>{@link #MODE_AUTO} resolves to the recency order for the first forwards switch
+     * after an {@link #onUserActionLocked user action}, and otherwise to the static order.</p>
+     *
+     * @param mode    the switching mode.
+     * @param forward the switching direction.
+     * @return {@code true} for the recency order, otherwise {@code false}.
+     */
+    private boolean isRecency(@SwitchMode int mode, boolean forward) {
+        if (mode == MODE_AUTO && mUserActionSinceSwitch && forward) {
+            return true;
+        } else {
+            return mode == MODE_RECENT;
+        }
+    }
+
+    @NonNull
+    private static List<ImeSubtypeListItem> filterImeSubtypeList(
+            @NonNull List<ImeSubtypeListItem> items,
+            boolean supportsSwitchingToNextInputMethod) {
+        final ArrayList<ImeSubtypeListItem> result = new ArrayList<>();
+        final int numItems = items.size();
+        for (int i = 0; i < numItems; i++) {
+            final ImeSubtypeListItem item = items.get(i);
+            if (item.mImi.supportsSwitchingToNextInputMethod()
+                    == supportsSwitchingToNextInputMethod) {
+                result.add(item);
+            }
+        }
+        return result;
+    }
+
+    void dump(@NonNull Printer pw, @NonNull String prefix) {
+        pw.println(prefix + "mSwitchingAwareRotationList:");
+        mSwitchingAwareRotationList.dump(pw, prefix + "  ");
+        pw.println(prefix + "mSwitchingUnawareRotationList:");
+        mSwitchingUnawareRotationList.dump(pw, prefix + "  ");
+        if (Flags.imeSwitcherRevamp()) {
+            pw.println(prefix + "mRotationList:");
+            mRotationList.dump(pw, prefix + "  ");
+            pw.println(prefix + "mHardwareRotationList:");
+            mHardwareRotationList.dump(pw, prefix + "  ");
+            pw.println(prefix + "User action since last switch: " + mUserActionSinceSwitch);
+        }
+    }
+
+    InputMethodSubtypeSwitchingController() {
+    }
+
+    public void resetCircularListLocked(@NonNull Context context,
+            @NonNull InputMethodSettings settings) {
+        update(getSortedInputMethodAndSubtypeList(
+                        false /* includeAuxiliarySubtypes */, false /* isScreenLocked */,
+                        false /* forImeMenu */, context, settings),
+                getInputMethodAndSubtypeListForHardwareKeyboard(context, settings));
     }
 }
