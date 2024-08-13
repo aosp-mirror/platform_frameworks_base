@@ -2374,6 +2374,8 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             mWmService.mDisplayManagerInternal.onPresentation(dc.getDisplay().getDisplayId(),
                     /*isShown=*/ false);
         }
+        // Check if window provides non decor insets before clearing its provided insets.
+        final boolean windowProvidesDisplayDecorInsets = providesDisplayDecorInsets();
 
         dc.getDisplayPolicy().removeWindowLw(this);
 
@@ -2384,6 +2386,18 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         mWmService.postWindowRemoveCleanupLocked(this);
 
         consumeInsetsChange();
+
+        // Update the orientation when removing a window affecting the display orientation.
+        // Also recompute configuration if it provides screen decor insets.
+        boolean needToSendNewConfiguration = dc.getLastOrientationSource() == this
+                && dc.updateOrientation();
+        if (windowProvidesDisplayDecorInsets) {
+            needToSendNewConfiguration |= dc.getDisplayPolicy().updateDecorInsetsInfo();
+        }
+
+        if (needToSendNewConfiguration) {
+            dc.sendNewConfiguration();
+        }
     }
 
     @Override
@@ -2436,16 +2450,10 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                     mActivityRecord != null && mActivityRecord.isAnimating(PARENTS | TRANSITION),
                     mWmService.mDisplayFrozen, Debug.getCallers(6));
 
-            // Visibility of the removed window. Will be used later to update orientation later on.
-            boolean wasVisible = false;
-
             // First, see if we need to run an animation. If we do, we have to hold off on removing the
             // window until the animation is done. If the display is frozen, just remove immediately,
             // since the animation wouldn't be seen.
             if (mHasSurface && mToken.okToAnimate()) {
-                // If we are not currently running the exit animation, we need to see about starting one
-                wasVisible = isVisible();
-
                 // Remove immediately if there is display transition because the animation is
                 // usually unnoticeable (e.g. covered by rotation animation) and the animation
                 // bounds could be inconsistent, such as depending on when the window applies
@@ -2455,7 +2463,9 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                         // look weird if its orientation is changed.
                         && !inRelaunchingActivity();
 
-                if (wasVisible && isDisplayed()) {
+                // If we are not currently running the exit animation,
+                // we need to see about starting one
+                if (isVisible() && isDisplayed()) {
                     final int transit = (!startingWindow) ? TRANSIT_EXIT : TRANSIT_PREVIEW_DONE;
 
                     // Try starting an animation.
@@ -2504,21 +2514,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                 }
             }
 
-            // Check if window provides non decor insets before clearing its provided insets.
-            final boolean windowProvidesDisplayDecorInsets = providesDisplayDecorInsets();
-
             removeImmediately();
-            // Removing a visible window may affect the display orientation so just update it if
-            // needed. Also recompute configuration if it provides screen decor insets.
-            boolean needToSendNewConfiguration = wasVisible && displayContent.updateOrientation();
-            if (windowProvidesDisplayDecorInsets) {
-                needToSendNewConfiguration |=
-                        displayContent.getDisplayPolicy().updateDecorInsetsInfo();
-            }
-
-            if (needToSendNewConfiguration) {
-                displayContent.sendNewConfiguration();
-            }
             mWmService.updateFocusedWindowLocked(isFocused()
                             ? UPDATE_FOCUS_REMOVING_FOCUS
                             : UPDATE_FOCUS_NORMAL,
