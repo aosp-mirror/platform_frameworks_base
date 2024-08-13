@@ -3144,9 +3144,23 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 null, PENDING_ASSIST_EXTRAS_LONG_TIMEOUT, 0) != null;
     }
 
+    /**
+     * Requests assist data for a particular Task.
+     *
+     * <p>This is used by the system components to request assist data for a Task.
+     *
+     * @param receiver The receiver to send the assist data to.
+     * @param taskId The Task to request assist data for.
+     * @param callingPackageName The package name of the caller.
+     * @param callingAttributionTag The attribution tag of the caller.
+     * @param fetchStructure Whether to fetch the assist structure. Note that this is slow and
+     *     should be avoided if possible.
+     * @return Whether the request was successful.
+     */
     @Override
     public boolean requestAssistDataForTask(IAssistDataReceiver receiver, int taskId,
-            String callingPackageName, @Nullable String callingAttributionTag) {
+            String callingPackageName, @Nullable String callingAttributionTag,
+            boolean fetchStructure) {
         mAmInternal.enforceCallingPermission(android.Manifest.permission.GET_TOP_ACTIVITY_INFO,
                 "requestAssistDataForTask()");
         final long callingId = Binder.clearCallingIdentity();
@@ -3171,7 +3185,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         List<IBinder> topActivityToken = new ArrayList<>();
         topActivityToken.add(tokens.getActivityToken());
         requester.requestAssistData(topActivityToken, true /* fetchData */,
-                false /* fetchScreenshot */, false /* fetchStructure */, true /* allowFetchData */,
+                false /* fetchScreenshot */, fetchStructure, true /* allowFetchData */,
                 false /* allowFetchScreenshot*/, true /* ignoreFocusCheck */,
                 Binder.getCallingUid(), callingPackageName, callingAttributionTag);
 
