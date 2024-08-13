@@ -25,13 +25,13 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.paneTitle
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.android.compose.theme.PlatformTheme
 import com.android.systemui.compose.modifiers.sysuiResTag
 import com.android.systemui.res.R
 import com.android.systemui.volume.panel.ui.layout.ComponentsLayout
@@ -43,7 +43,6 @@ private const val VolumePanelTestTag = "VolumePanel"
 private val padding = 24.dp
 
 @Composable
-@OptIn(ExperimentalComposeUiApi::class)
 fun VolumePanelRoot(
     viewModel: VolumePanelViewModel,
     modifier: Modifier = Modifier,
@@ -54,18 +53,20 @@ fun VolumePanelRoot(
 
     with(VolumePanelComposeScope(state)) {
         components?.let { componentsState ->
-            Components(
-                componentsState,
-                modifier
-                    .sysuiResTag(VolumePanelTestTag)
-                    .semantics { paneTitle = accessibilityTitle }
-                    .padding(
-                        start = padding,
-                        top = padding,
-                        end = padding,
-                        bottom = 20.dp,
-                    )
-            )
+            PlatformTheme {
+                Components(
+                    componentsState,
+                    modifier
+                        .sysuiResTag(VolumePanelTestTag)
+                        .semantics { paneTitle = accessibilityTitle }
+                        .padding(
+                            start = padding,
+                            top = padding,
+                            end = padding,
+                            bottom = 20.dp,
+                        )
+                )
+            }
         }
     }
 }

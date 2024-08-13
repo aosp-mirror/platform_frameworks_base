@@ -179,9 +179,7 @@ constructor(
         return MediaDeviceSession(
             packageName = packageName,
             sessionToken = sessionToken,
-            canAdjustVolume =
-                playbackInfo != null &&
-                    playbackInfo?.volumeControl != VolumeProvider.VOLUME_CONTROL_FIXED,
+            canAdjustVolume = playbackInfo.volumeControl != VolumeProvider.VOLUME_CONTROL_FIXED,
             appLabel = getApplicationLabel(packageName) ?: return null
         )
     }

@@ -92,7 +92,12 @@ constructor(
                         true
                     }
                 },
-            color = MaterialTheme.colorScheme.surface,
+            color =
+                if (enabled) {
+                    MaterialTheme.colorScheme.surface
+                } else {
+                    MaterialTheme.colorScheme.surfaceContainerHighest
+                },
             shape = RoundedCornerShape(28.dp),
             onClick =
                 if (enabled) {
@@ -119,7 +124,7 @@ constructor(
                 modifier = Modifier.basicMarquee(),
                 text = connectedDeviceViewModel.label.toString(),
                 style = MaterialTheme.typography.labelMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                color = connectedDeviceViewModel.labelColor.toColor(),
                 maxLines = 1,
             )
             connectedDeviceViewModel.deviceName?.let {
@@ -127,7 +132,7 @@ constructor(
                     modifier = Modifier.basicMarquee(),
                     text = it.toString(),
                     style = MaterialTheme.typography.titleMedium,
-                    color = MaterialTheme.colorScheme.onSurface,
+                    color = connectedDeviceViewModel.deviceNameColor.toColor(),
                     maxLines = 1,
                 )
             }
