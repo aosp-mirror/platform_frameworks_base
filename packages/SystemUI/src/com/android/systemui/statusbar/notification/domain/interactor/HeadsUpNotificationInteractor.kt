@@ -148,6 +148,11 @@ constructor(
     fun snooze() {
         headsUpRepository.snooze()
     }
+
+    /** Unpin all currently pinned HUNs. */
+    fun unpinAll(userUnPinned: Boolean) {
+        headsUpRepository.unpinAll(userUnPinned)
+    }
 }
 
 class HeadsUpRowInteractor(repository: HeadsUpRowRepository)

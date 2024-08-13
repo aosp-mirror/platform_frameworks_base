@@ -60,6 +60,11 @@ import com.android.systemui.util.kotlin.JavaAdapter;
 import com.android.systemui.util.settings.GlobalSettings;
 import com.android.systemui.util.time.SystemClock;
 
+import kotlinx.coroutines.flow.Flow;
+import kotlinx.coroutines.flow.MutableStateFlow;
+import kotlinx.coroutines.flow.StateFlow;
+import kotlinx.coroutines.flow.StateFlowKt;
+
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -69,11 +74,6 @@ import java.util.Set;
 import java.util.Stack;
 
 import javax.inject.Inject;
-
-import kotlinx.coroutines.flow.Flow;
-import kotlinx.coroutines.flow.MutableStateFlow;
-import kotlinx.coroutines.flow.StateFlow;
-import kotlinx.coroutines.flow.StateFlowKt;
 
 /** A implementation of HeadsUpManager for phone. */
 @SysUISingleton
@@ -295,6 +295,11 @@ public class HeadsUpManagerPhone extends BaseHeadsUpManager implements
             }
             mHeadsUpAnimatingAway.setValue(headsUpAnimatingAway);
         }
+    }
+
+    @Override
+    public void unpinAll(boolean userUnPinned) {
+        super.unpinAll(userUnPinned);
     }
 
     /**

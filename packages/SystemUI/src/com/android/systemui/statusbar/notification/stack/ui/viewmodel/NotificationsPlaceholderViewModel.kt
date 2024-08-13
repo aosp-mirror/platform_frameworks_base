@@ -30,7 +30,10 @@ import com.android.systemui.util.kotlin.ActivatableFlowDumper
 import com.android.systemui.util.kotlin.ActivatableFlowDumperImpl
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.launch
 
 /**
  * ViewModel used by the Notification placeholders inside the scene container to update the
@@ -40,7 +43,7 @@ class NotificationsPlaceholderViewModel
 @AssistedInject
 constructor(
     private val interactor: NotificationStackAppearanceInteractor,
-    shadeInteractor: ShadeInteractor,
+    private val shadeInteractor: ShadeInteractor,
     private val headsUpNotificationInteractor: HeadsUpNotificationInteractor,
     featureFlags: FeatureFlagsClassic,
     dumpManager: DumpManager,
@@ -58,6 +61,13 @@ constructor(
     val isDebugLoggingEnabled: Boolean = SceneContainerFlag.isEnabled
 
     override suspend fun onActivated(): Nothing {
+        coroutineScope {
+            launch {
+                shadeInteractor.isAnyExpanded
+                    .filter { it }
+                    .collect { headsUpNotificationInteractor.unpinAll(true) }
+            }
+        }
         activateFlowDumper()
     }
 

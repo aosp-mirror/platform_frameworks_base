@@ -44,6 +44,10 @@ class FakeHeadsUpNotificationRepository : HeadsUpRepository {
         // do nothing
     }
 
+    override fun unpinAll(userUnPinned: Boolean) {
+        // do nothing
+    }
+
     fun setNotifications(notifications: List<HeadsUpRowRepository>) {
         this.orderedHeadsUpRows.value = notifications.toList()
     }

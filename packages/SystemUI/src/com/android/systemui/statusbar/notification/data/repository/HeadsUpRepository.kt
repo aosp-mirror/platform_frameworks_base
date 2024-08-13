@@ -44,4 +44,7 @@ interface HeadsUpRepository {
 
     /** Snooze the currently pinned HUN. */
     fun snooze()
+
+    /** Unpin all currently pinned HUNs. */
+    fun unpinAll(userUnPinned: Boolean)
 }
