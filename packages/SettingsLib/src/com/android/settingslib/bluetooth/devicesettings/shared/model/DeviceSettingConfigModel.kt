@@ -35,7 +35,7 @@ sealed interface DeviceSettingConfigItemModel {
     /** A built-in item in Settings. */
     data class BuiltinItem(
         @DeviceSettingId override val settingId: Int,
-        val preferenceKey: String
+        val preferenceKey: String?
     ) : DeviceSettingConfigItemModel
 
     /** A remote item provided by other apps. */
