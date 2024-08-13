@@ -26,6 +26,7 @@ import android.annotation.MainThread;
 import android.annotation.NonNull;
 import android.content.Context;
 import android.graphics.Region;
+import android.hardware.input.InputManager;
 import android.os.Looper;
 import android.os.PowerManager;
 import android.os.SystemClock;
@@ -57,6 +58,7 @@ import com.android.server.policy.WindowManagerPolicy;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Objects;
 import java.util.StringJoiner;
 
 /**
@@ -748,6 +750,7 @@ class AccessibilityInputFilter extends InputFilter implements EventStreamTransfo
 
         if ((mEnabledFeatures & FLAG_FEATURE_MOUSE_KEYS) != 0) {
             mMouseKeysInterceptor = new MouseKeysInterceptor(mAms,
+                    Objects.requireNonNull(mContext.getSystemService(InputManager.class)),
                     Looper.myLooper(),
                     Display.DEFAULT_DISPLAY);
             addFirstEventHandler(Display.DEFAULT_DISPLAY, mMouseKeysInterceptor);
