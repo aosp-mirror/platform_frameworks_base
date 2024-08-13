@@ -380,6 +380,8 @@
     <string name="show_touches_summary" msgid="3692861665994502193">"တို့ခြင်းများအတွက် အမြင်ဖြင့် တုံ့ပြန်မှုပြသည်"</string>
     <string name="show_key_presses" msgid="6360141722735900214">"ကီးနှိပ်မှုများ ပြပါ"</string>
     <string name="show_key_presses_summary" msgid="725387457373015024">"ပကတိကီးနှိပ်မှုများအတွက် ရုပ်မြင်အကြံပြုချက် ပြပါ"</string>
+    <string name="touchpad_visualizer" msgid="3707916068870825115">"တာ့ချ်ပက် ထည့်သွင်းချက် ပြပါ"</string>
+    <string name="touchpad_visualizer_summary" msgid="4056080018119847449">"ဖန်သားပြင်တွင် ထပ်ဆင့်ပြသခြင်းသည် တာ့ချ်ပက်တွင် ထည့်သွင်းသော ဒေတာနှင့် သိရှိသော လက်ဟန်များကို ပြထားသည်"</string>
     <string name="show_screen_updates" msgid="2078782895825535494">"မျက်နှာပြင်အပ်ဒိတ်ပြရန်"</string>
     <string name="show_screen_updates_summary" msgid="2126932969682087406">"အပ်ဒိတ်လုပ်စဉ် ဝင်းဒိုးမျက်နှာပြင်တွင် အချက်ပြရန်"</string>
     <string name="show_hw_screen_updates" msgid="2021286231267747506">"မြင်ကွင်းအပ်ဒိတ်များ ပြခြင်း"</string>
@@ -495,8 +497,7 @@
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_remaining_charging_duration_only" msgid="8085099012811384899">"အားပြည့်ရန် <xliff:g id="TIME">%1$s</xliff:g> လိုသည်"</string>
     <string name="power_charging_duration" msgid="6127154952524919719">"<xliff:g id="LEVEL">%1$s</xliff:g> - အားပြည့်ရန် <xliff:g id="TIME">%2$s</xliff:g> လိုသည်"</string>
-    <!-- no translation found for power_charging_limited (4144004473976005214) -->
-    <skip />
+    <string name="power_charging_limited" msgid="4144004473976005214">"<xliff:g id="LEVEL">%1$s</xliff:g> - ဘက်ထရီကာကွယ်ရန် အားသွင်းခြင်းကို ခဏရပ်ထားသည်"</string>
     <string name="power_charging_future_paused" msgid="1809543660923642799">"<xliff:g id="LEVEL">%1$s</xliff:g> - အားသွင်းနေသည်"</string>
     <string name="power_fast_charging_duration_v2" msgid="3797735998640359490">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATUS">%2$s</xliff:g> - <xliff:g id="TIME">%3$s</xliff:g> တွင် အားပြည့်မည်"</string>
     <string name="power_charging_duration_v2" msgid="2938998284074003248">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> တွင် အားပြည့်မည်"</string>

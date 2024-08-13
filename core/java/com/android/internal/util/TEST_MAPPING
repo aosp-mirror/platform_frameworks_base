@@ -5,30 +5,11 @@
       "file_patterns": ["ScreenshotHelper"]
     },
     {
-      "name": "FrameworksCoreTests",
-      "options": [
-        {
-          "include-filter": "android.util.XmlTest"
-        },
-        {
-          "include-filter": "android.util.BinaryXmlTest"
-        }
-      ],
+      "name": "FrameworksCoreTests_xml",
       "file_patterns": ["Xml"]
     },
     {
-      "name": "FrameworksCoreTests",
-      "options": [
-        {
-          "include-filter": "com.android.internal.util.LatencyTrackerTest"
-        },
-        {
-          "exclude-annotation": "androidx.test.filters.FlakyTest"
-        },
-        {
-          "exclude-annotation": "org.junit.Ignore"
-        }
-      ],
+      "name": "FrameworksCoreTests_internal_util_latency_tracker",
       "file_patterns": ["LatencyTracker.java"]
     }
   ]

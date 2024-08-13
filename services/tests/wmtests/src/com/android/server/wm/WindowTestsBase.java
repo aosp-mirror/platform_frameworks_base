@@ -924,7 +924,8 @@ public class WindowTestsBase extends SystemServiceTestsBase {
             mSystemServicesTestRule.addProcess("pkgName", "procName",
                     WindowManagerService.MY_PID, WindowManagerService.MY_UID);
         }
-        mAtm.mTaskFragmentOrganizerController.registerOrganizer(organizer, isSystemOrganizer);
+        mAtm.mTaskFragmentOrganizerController.registerOrganizer(organizer, isSystemOrganizer,
+                new Bundle());
     }
 
     /** Creates a {@link DisplayContent} that supports IME and adds it to the system. */

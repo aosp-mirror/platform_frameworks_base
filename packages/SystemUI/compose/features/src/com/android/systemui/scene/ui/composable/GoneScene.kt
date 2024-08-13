@@ -26,6 +26,7 @@ import com.android.compose.animation.scene.UserActionResult
 import com.android.compose.animation.scene.animateSceneDpAsState
 import com.android.compose.animation.scene.animateSceneFloatAsState
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.lifecycle.rememberViewModel
 import com.android.systemui.notifications.ui.composable.SnoozeableHeadsUpNotificationSpace
 import com.android.systemui.qs.ui.composable.QuickSettings
 import com.android.systemui.qs.ui.composable.QuickSettings.SharedValues.MediaLandscapeTopOffset
@@ -47,7 +48,7 @@ class GoneScene
 @Inject
 constructor(
     private val notificationStackScrolLView: Lazy<NotificationScrollView>,
-    private val notificationsPlaceholderViewModel: NotificationsPlaceholderViewModel,
+    private val notificationsPlaceholderViewModelFactory: NotificationsPlaceholderViewModel.Factory,
     private val viewModelFactory: GoneSceneActionsViewModel.Factory,
 ) : ComposableScene {
     override val key = Scenes.Gone
@@ -73,7 +74,7 @@ constructor(
         Spacer(modifier.fillMaxSize())
         SnoozeableHeadsUpNotificationSpace(
             stackScrollView = notificationStackScrolLView.get(),
-            viewModel = notificationsPlaceholderViewModel
+            viewModel = rememberViewModel { notificationsPlaceholderViewModelFactory.create() },
         )
     }
 }

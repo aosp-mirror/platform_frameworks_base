@@ -135,7 +135,7 @@ constructor(
         }
     }
 
-    private suspend fun FromOccludedTransitionInteractor.startTransitionToLockscreenOrHub(
+    private suspend fun startTransitionToLockscreenOrHub(
         isIdleOnCommunal: Boolean,
         showCommunalFromOccluded: Boolean,
         dreamFromOccluded: Boolean,

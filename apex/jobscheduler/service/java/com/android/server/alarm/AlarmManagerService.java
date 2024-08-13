@@ -319,7 +319,7 @@ public class AlarmManagerService extends SystemService {
      */
     int mSystemUiUid;
 
-    static boolean isTimeTickAlarm(Alarm a) {
+    private static boolean isTimeTickAlarm(Alarm a) {
         return a.uid == Process.SYSTEM_UID && TIME_TICK_TAG.equals(a.listenerTag);
     }
 
@@ -3954,6 +3954,9 @@ public class AlarmManagerService extends SystemService {
             }
             if (!RemovedAlarm.isLoggable(reason)) {
                 continue;
+            }
+            if (isTimeTickAlarm(removed)) {
+                Slog.wtf(TAG, "Removed TIME_TICK alarm");
             }
             RingBuffer<RemovedAlarm> bufferForUid = mRemovalHistory.get(removed.uid);
             if (bufferForUid == null) {

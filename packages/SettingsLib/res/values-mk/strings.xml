@@ -380,6 +380,8 @@
     <string name="show_touches_summary" msgid="3692861665994502193">"Прикажувај визуелни повратни информации за допири"</string>
     <string name="show_key_presses" msgid="6360141722735900214">"Прикаж. притисн. копчиња"</string>
     <string name="show_key_presses_summary" msgid="725387457373015024">"Визуелно го прикажува притискањето на копчињата"</string>
+    <string name="touchpad_visualizer" msgid="3707916068870825115">"Прикажи влезен податок од допирната подлога"</string>
+    <string name="touchpad_visualizer_summary" msgid="4056080018119847449">"Преклопување на екранот што прикажува влезни податоци од допирната подлога и познати движења"</string>
     <string name="show_screen_updates" msgid="2078782895825535494">"Прикажи ажурир. површина"</string>
     <string name="show_screen_updates_summary" msgid="2126932969682087406">"Осветли површ. на прозорци при нивно ажурирање"</string>
     <string name="show_hw_screen_updates" msgid="2021286231267747506">"Покажувај ажурирања на приказот"</string>
@@ -495,8 +497,7 @@
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_remaining_charging_duration_only" msgid="8085099012811384899">"<xliff:g id="TIME">%1$s</xliff:g> до полна батерија"</string>
     <string name="power_charging_duration" msgid="6127154952524919719">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="TIME">%2$s</xliff:g> до полна батерија"</string>
-    <!-- no translation found for power_charging_limited (4144004473976005214) -->
-    <skip />
+    <string name="power_charging_limited" msgid="4144004473976005214">"<xliff:g id="LEVEL">%1$s</xliff:g> – полнењето е паузирано за да се заштити батеријата"</string>
     <string name="power_charging_future_paused" msgid="1809543660923642799">"<xliff:g id="LEVEL">%1$s</xliff:g> – се полни"</string>
     <string name="power_fast_charging_duration_v2" msgid="3797735998640359490">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="STATUS">%2$s</xliff:g> – Ќе се наполни целосно до <xliff:g id="TIME">%3$s</xliff:g>"</string>
     <string name="power_charging_duration_v2" msgid="2938998284074003248">"<xliff:g id="LEVEL">%1$s</xliff:g> – Ќе се наполни целосно до <xliff:g id="TIME">%2$s</xliff:g>"</string>
@@ -604,7 +605,7 @@
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"Проблем со поврзување. Исклучете го уредот и повторно вклучете го"</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"Жичен аудиоуред"</string>
     <string name="help_label" msgid="3528360748637781274">"Помош и повратни информации"</string>
-    <string name="storage_category" msgid="2287342585424631813">"Капацитет"</string>
+    <string name="storage_category" msgid="2287342585424631813">"Простор"</string>
     <string name="shared_data_title" msgid="1017034836800864953">"Споделени податоци"</string>
     <string name="shared_data_summary" msgid="5516326713822885652">"Прегледајте и изменете ги споделените податоци"</string>
     <string name="shared_data_no_blobs_text" msgid="3108114670341737434">"Нема споделени податоци за корисников."</string>

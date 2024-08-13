@@ -203,7 +203,8 @@ final class EnforcingAdmin {
         // Only system authorities use this constructor.
         mIsSystemAuthority = true;
         mIsRoleAuthority = false;
-        mPackageName = null;
+        // Package name is not used for a system enforcing admin, so an empty string is fine.
+        mPackageName = "";
         mSystemEntity = systemEntity;
         mUserId = UserHandle.USER_SYSTEM;
         mComponentName = null;

@@ -11,3 +11,14 @@ flag {
         purpose: PURPOSE_BUGFIX
     }
 }
+
+flag {
+    name: "verify_non_null_arguments"
+    namespace: "backstage_power"
+    description: "Verify arguments passed are non-null"
+    bug: "356731520"
+    is_fixed_read_only: true
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}

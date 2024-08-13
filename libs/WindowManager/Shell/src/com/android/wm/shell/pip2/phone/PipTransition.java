@@ -137,6 +137,11 @@ public class PipTransition extends PipTransitionController implements
         }
     }
 
+    @Override
+    protected boolean isInSwipePipToHomeTransition() {
+        return mPipTransitionState.isInSwipePipToHomeTransition();
+    }
+
     //
     // Transition collection stage lifecycle hooks
     //

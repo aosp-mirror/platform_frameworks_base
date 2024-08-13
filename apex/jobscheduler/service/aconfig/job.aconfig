@@ -48,3 +48,13 @@ flag {
        purpose: PURPOSE_BUGFIX
    }
 }
+
+flag {
+   name: "create_work_chain_by_default"
+   namespace: "backstage_power"
+   description: "Create a workchain by default when acquiring a wakelock"
+   bug: "352676818"
+   metadata {
+       purpose: PURPOSE_BUGFIX
+   }
+}
