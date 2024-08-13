@@ -1513,6 +1513,7 @@ class DesktopTasksController(
     private fun dump(pw: PrintWriter, prefix: String) {
         val innerPrefix = "$prefix  "
         pw.println("${prefix}DesktopTasksController")
+        DesktopModeStatus.dump(pw, innerPrefix, context)
         taskRepository.dump(pw, innerPrefix)
     }
 
