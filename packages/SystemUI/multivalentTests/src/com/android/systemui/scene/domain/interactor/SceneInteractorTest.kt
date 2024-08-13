@@ -35,6 +35,7 @@ import com.android.systemui.scene.data.repository.Transition
 import com.android.systemui.scene.data.repository.sceneContainerRepository
 import com.android.systemui.scene.data.repository.setSceneTransition
 import com.android.systemui.scene.domain.resolver.homeSceneFamilyResolver
+import com.android.systemui.scene.overlayKeys
 import com.android.systemui.scene.sceneContainerConfig
 import com.android.systemui.scene.sceneKeys
 import com.android.systemui.scene.shared.model.SceneFamilies
@@ -72,9 +73,11 @@ class SceneInteractorTest : SysuiTestCase() {
         kosmos.keyguardEnabledInteractor
     }
 
+    // TODO(b/356596436): Add tests for showing, hiding, and replacing overlays after we've defined
+    //  them.
     @Test
-    fun allSceneKeys() {
-        assertThat(underTest.allSceneKeys()).isEqualTo(kosmos.sceneKeys)
+    fun allContentKeys() {
+        assertThat(underTest.allContentKeys).isEqualTo(kosmos.sceneKeys + kosmos.overlayKeys)
     }
 
     @Test

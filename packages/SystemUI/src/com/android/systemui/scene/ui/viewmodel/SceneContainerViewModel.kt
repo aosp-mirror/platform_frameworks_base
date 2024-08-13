@@ -48,14 +48,6 @@ constructor(
     private val logger: SceneLogger,
     @Assisted private val motionEventHandlerReceiver: (MotionEventHandler?) -> Unit,
 ) : SysUiViewModel, ExclusiveActivatable() {
-    /**
-     * Keys of all scenes in the container.
-     *
-     * The scenes will be sorted in z-order such that the last one is the one that should be
-     * rendered on top of all previous ones.
-     */
-    val allSceneKeys: List<SceneKey> = sceneInteractor.allSceneKeys()
-
     /** The scene that should be rendered. */
     val currentScene: StateFlow<SceneKey> = sceneInteractor.currentScene
 
