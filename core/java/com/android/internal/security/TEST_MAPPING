@@ -1,15 +1,7 @@
 {
   "presubmit": [
     {
-      "name": "FrameworksCoreTests",
-      "options": [
-        {
-          "include-filter": "com.android.internal.security."
-        },
-        {
-          "include-annotation": "android.platform.test.annotations.Presubmit"
-        }
-      ]
+      "name": "FrameworksCoreTests_internal_security"
     },
     {
       "name": "UpdatableSystemFontTest",
