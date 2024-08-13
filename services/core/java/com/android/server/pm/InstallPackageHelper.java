@@ -501,9 +501,9 @@ final class InstallPackageHelper {
             mPm.setUpCustomResolverActivity(pkg, pkgSetting);
         }
 
-        // When upgrading a package, pkgSetting is copied from oldPkgSetting. Clear the app
-        // metadata file path for the new package.
-        if (oldPkgSetting != null) {
+        // When upgrading a package, clear the app metadata file path for the new package.
+        if (oldPkgSetting != null
+                && oldPkgSetting.getLastUpdateTime() < pkgSetting.getLastUpdateTime()) {
             pkgSetting.setAppMetadataFilePath(null);
             pkgSetting.setAppMetadataSource(APP_METADATA_SOURCE_UNKNOWN);
         }

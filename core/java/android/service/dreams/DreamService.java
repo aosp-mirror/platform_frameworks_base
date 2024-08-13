@@ -262,9 +262,9 @@ public class DreamService extends Service implements Window.Callback {
     private boolean mDozing;
     private boolean mWindowless;
     private boolean mPreviewMode;
-    private int mDozeScreenState = Display.STATE_UNKNOWN;
-    private @Display.StateReason int mDozeScreenStateReason = Display.STATE_REASON_UNKNOWN;
-    private int mDozeScreenBrightness = PowerManager.BRIGHTNESS_DEFAULT;
+    private volatile int mDozeScreenState = Display.STATE_UNKNOWN;
+    private volatile @Display.StateReason int mDozeScreenStateReason = Display.STATE_REASON_UNKNOWN;
+    private volatile int mDozeScreenBrightness = PowerManager.BRIGHTNESS_DEFAULT;
 
     private boolean mDebug = false;
 
