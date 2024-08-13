@@ -998,6 +998,16 @@ flag {
 }
 
 flag {
+  name: "communal_widget_trampoline_fix"
+  namespace: "systemui"
+  description: "fixes activity starts caused by non-activity trampolines from widgets."
+  bug: "350468769"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}
+
+flag {
   name: "app_clips_backlinks"
   namespace: "systemui"
   description: "Enables Backlinks improvement feature in App Clips"
