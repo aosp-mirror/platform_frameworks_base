@@ -3754,7 +3754,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         // If the activity is scheduled to relaunch, skip sending the resized to ViewRootImpl now
         // since it will be destroyed anyway. This also prevents the client from receiving
         // windowing mode change before it is destroyed.
-        if (inRelaunchingActivity()) {
+        if (inRelaunchingActivity() && mAttrs.type != TYPE_APPLICATION_STARTING) {
             return;
         }
         // If this is an activity or wallpaper and is invisible or going invisible, don't report
