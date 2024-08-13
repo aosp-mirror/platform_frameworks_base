@@ -61,7 +61,6 @@ import com.android.server.statusbar.StatusBarManagerInternal;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
 import java.util.concurrent.Executor;
@@ -264,8 +263,8 @@ public class NotifierTest {
                 BatteryStats.WAKE_TYPE_PARTIAL, false);
 
         verifyNoMoreInteractions(mWakeLockLog, mBatteryStats);
-        WorkSource worksourceOld = Mockito.mock(WorkSource.class);
-        WorkSource worksourceNew = Mockito.mock(WorkSource.class);
+        WorkSource worksourceOld = new WorkSource(/*uid=*/ 1);
+        WorkSource worksourceNew = new WorkSource(/*uid=*/ 2);
 
         mNotifier.onWakeLockChanging(PowerManager.PARTIAL_WAKE_LOCK, "wakelockTag",
                 "my.package.name", uid, pid, worksourceOld, /* historyTag= */ null,
@@ -307,6 +306,40 @@ public class NotifierTest {
                 "my.package.name", uid, pid, /* workSource= */ null, /* historyTag= */ null,
                 exceptingCallback);
         verify(mWakeLockLog).onWakeLockReleased("wakelockTag", uid, -1);
+    }
+
+    @Test
+    public void
+            test_notifierProcessesWorkSourceDeepCopy_OnWakelockChanging() throws RemoteException {
+        when(mPowerManagerFlags.improveWakelockLatency()).thenReturn(true);
+        createNotifier();
+        clearInvocations(mWakeLockLog, mBatteryStats, mAppOpsManager);
+        IWakeLockCallback exceptingCallback = new IWakeLockCallback.Stub() {
+            @Override public void onStateChanged(boolean enabled) throws RemoteException {
+                throw new RemoteException("Just testing");
+            }
+        };
+
+        final int uid = 1234;
+        final int pid = 5678;
+        mTestLooper.dispatchAll();
+        WorkSource worksourceOld = new WorkSource(/*uid=*/ 1);
+        WorkSource worksourceNew =  new WorkSource(/*uid=*/ 2);
+
+        mNotifier.onWakeLockChanging(PowerManager.PARTIAL_WAKE_LOCK, "wakelockTag",
+                "my.package.name", uid, pid, worksourceOld, /* historyTag= */ null,
+                exceptingCallback,
+                PowerManager.SCREEN_BRIGHT_WAKE_LOCK, "wakelockTag",
+                "my.package.name", uid, pid, worksourceNew, /* newHistoryTag= */ null,
+                exceptingCallback);
+        // The newWorksource is modified before notifier could process it.
+        worksourceNew.set(/*uid=*/ 3);
+
+        mTestLooper.dispatchAll();
+        verify(mBatteryStats).noteChangeWakelockFromSource(worksourceOld, pid,
+                "wakelockTag", null, BatteryStats.WAKE_TYPE_PARTIAL,
+                new WorkSource(/*uid=*/ 2), pid, "wakelockTag", null,
+                BatteryStats.WAKE_TYPE_FULL, false);
     }
 
 

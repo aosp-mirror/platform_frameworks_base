@@ -57,9 +57,11 @@ import com.android.systemui.keyguard.shared.model.TransitionStep
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.testDispatcher
 import com.android.systemui.kosmos.testScope
+import com.android.systemui.media.controls.controller.keyguardMediaController
 import com.android.systemui.res.R
 import com.android.systemui.scene.shared.model.sceneDataSourceDelegator
 import com.android.systemui.shade.domain.interactor.shadeInteractor
+import com.android.systemui.statusbar.lockscreen.lockscreenSmartspaceController
 import com.android.systemui.statusbar.notification.stack.notificationStackScrollLayoutController
 import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
@@ -134,7 +136,9 @@ class GlanceableHubContainerControllerTest : SysuiTestCase() {
                     ambientTouchComponentFactory,
                     communalContent,
                     kosmos.sceneDataSourceDelegator,
-                    kosmos.notificationStackScrollLayoutController
+                    kosmos.notificationStackScrollLayoutController,
+                    kosmos.keyguardMediaController,
+                    kosmos.lockscreenSmartspaceController
                 )
         }
         testableLooper = TestableLooper.get(this)
@@ -178,7 +182,9 @@ class GlanceableHubContainerControllerTest : SysuiTestCase() {
                         ambientTouchComponentFactory,
                         communalContent,
                         kosmos.sceneDataSourceDelegator,
-                        kosmos.notificationStackScrollLayoutController
+                        kosmos.notificationStackScrollLayoutController,
+                        kosmos.keyguardMediaController,
+                        kosmos.lockscreenSmartspaceController
                     )
 
                 // First call succeeds.
@@ -205,6 +211,8 @@ class GlanceableHubContainerControllerTest : SysuiTestCase() {
                     communalContent,
                     kosmos.sceneDataSourceDelegator,
                     kosmos.notificationStackScrollLayoutController,
+                    kosmos.keyguardMediaController,
+                    kosmos.lockscreenSmartspaceController
                 )
 
             assertThat(underTest.lifecycle.currentState).isEqualTo(Lifecycle.State.INITIALIZED)
@@ -226,6 +234,8 @@ class GlanceableHubContainerControllerTest : SysuiTestCase() {
                     communalContent,
                     kosmos.sceneDataSourceDelegator,
                     kosmos.notificationStackScrollLayoutController,
+                    kosmos.keyguardMediaController,
+                    kosmos.lockscreenSmartspaceController
                 )
 
             // Only initView without attaching a view as we don't want the flows to start collecting
@@ -594,6 +604,30 @@ class GlanceableHubContainerControllerTest : SysuiTestCase() {
                         )
                     )
                     .thenReturn(false)
+                assertThat(underTest.onTouchEvent(DOWN_EVENT)).isFalse()
+            }
+        }
+
+    @Test
+    fun fullScreenSwipeGesture_doNotProcessTouchesInUmo() =
+        with(kosmos) {
+            testScope.runTest {
+                // Communal is closed.
+                goToScene(CommunalScenes.Blank)
+                whenever(keyguardMediaController.isWithinMediaViewBounds(any(), any()))
+                    .thenReturn(true)
+                assertThat(underTest.onTouchEvent(DOWN_EVENT)).isFalse()
+            }
+        }
+
+    @Test
+    fun fullScreenSwipeGesture_doNotProcessTouchesInSmartspace() =
+        with(kosmos) {
+            testScope.runTest {
+                // Communal is closed.
+                goToScene(CommunalScenes.Blank)
+                whenever(lockscreenSmartspaceController.isWithinSmartspaceBounds(any(), any()))
+                    .thenReturn(true)
                 assertThat(underTest.onTouchEvent(DOWN_EVENT)).isFalse()
             }
         }

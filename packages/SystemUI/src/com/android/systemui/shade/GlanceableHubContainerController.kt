@@ -55,10 +55,12 @@ import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInterac
 import com.android.systemui.keyguard.shared.model.Edge
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.lifecycle.repeatWhenAttached
+import com.android.systemui.media.controls.ui.controller.KeyguardMediaController
 import com.android.systemui.res.R
 import com.android.systemui.scene.shared.flag.SceneContainerFlag
 import com.android.systemui.scene.shared.model.SceneDataSourceDelegator
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
+import com.android.systemui.statusbar.lockscreen.LockscreenSmartspaceController
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController
 import com.android.systemui.util.kotlin.BooleanFlowOperators.anyOf
 import com.android.systemui.util.kotlin.collectFlow
@@ -88,6 +90,8 @@ constructor(
     private val communalContent: CommunalContent,
     @Communal private val dataSourceDelegator: SceneDataSourceDelegator,
     private val notificationStackScrollLayoutController: NotificationStackScrollLayoutController,
+    private val keyguardMediaController: KeyguardMediaController,
+    private val lockscreenSmartspaceController: LockscreenSmartspaceController
 ) : LifecycleOwner {
 
     private class CommunalWrapper(context: Context) : FrameLayout(context) {
@@ -445,7 +449,12 @@ constructor(
         // the touch.
         if (
             !hubShowing &&
-                !notificationStackScrollLayoutController.isBelowLastNotification(ev.x, ev.y)
+                (!notificationStackScrollLayoutController.isBelowLastNotification(ev.x, ev.y) ||
+                    keyguardMediaController.isWithinMediaViewBounds(ev.x.toInt(), ev.y.toInt()) ||
+                    lockscreenSmartspaceController.isWithinSmartspaceBounds(
+                        ev.x.toInt(),
+                        ev.y.toInt()
+                    ))
         ) {
             return false
         }

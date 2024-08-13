@@ -5084,11 +5084,17 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         // Try to get the custom Icon, if one was passed through FillResponse
         int iconResourceId = response.getIconResourceId();
         if (iconResourceId != 0) {
-            serviceIcon = mService.getMaster().getContext().getPackageManager()
-                .getDrawable(
-                    mService.getServicePackageName(),
-                    iconResourceId,
-                    null);
+            long token = Binder.clearCallingIdentity();
+            try {
+                serviceIcon =
+                        mService.getMaster()
+                                .getContext()
+                                .getPackageManager()
+                                .getDrawable(
+                                        mService.getServicePackageName(), iconResourceId, null);
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
         }
 
         // Custom icon wasn't fetched, use the default package icon instead
@@ -5114,11 +5120,19 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         // Try to get the custom Service name, if one was passed through FillResponse
         int customServiceNameId = response.getServiceDisplayNameResourceId();
         if (customServiceNameId != 0) {
-            serviceLabel = mService.getMaster().getContext().getPackageManager()
-                .getText(
-                    mService.getServicePackageName(),
-                    customServiceNameId,
-                    null);
+            long token = Binder.clearCallingIdentity();
+            try {
+                serviceLabel =
+                        mService.getMaster()
+                                .getContext()
+                                .getPackageManager()
+                                .getText(
+                                        mService.getServicePackageName(),
+                                        customServiceNameId,
+                                        null);
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
         }
 
         // Custom label wasn't fetched, use the default package name instead

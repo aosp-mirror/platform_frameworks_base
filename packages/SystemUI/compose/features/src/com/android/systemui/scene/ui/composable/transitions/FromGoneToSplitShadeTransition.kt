@@ -25,7 +25,6 @@ import com.android.compose.animation.scene.TransitionBuilder
 import com.android.compose.animation.scene.UserActionDistance
 import com.android.compose.animation.scene.UserActionDistanceScope
 import com.android.systemui.media.controls.ui.composable.MediaCarousel
-import com.android.systemui.media.controls.ui.composable.MediaContentPicker
 import com.android.systemui.notifications.ui.composable.Notifications
 import com.android.systemui.qs.ui.composable.QuickSettings
 import com.android.systemui.shade.ui.composable.Shade
@@ -54,13 +53,7 @@ fun TransitionBuilder.goneToSplitShadeTransition(
     fractionRange(end = .33f) { fade(Shade.Elements.BackgroundScrim) }
 
     fractionRange(start = .33f) {
-        val qsTranslation =
-            ShadeHeader.Dimensions.CollapsedHeight * MediaContentPicker.SHADE_FRACTION
-        val qsExpansionDiff =
-            ShadeHeader.Dimensions.ExpandedHeight - ShadeHeader.Dimensions.CollapsedHeight
-        translate(MediaCarousel.Elements.Content, y = -(qsExpansionDiff + qsTranslation))
         fade(MediaCarousel.Elements.Content)
-
         fade(ShadeHeader.Elements.Clock)
         fade(ShadeHeader.Elements.CollapsedContentStart)
         fade(ShadeHeader.Elements.CollapsedContentEnd)

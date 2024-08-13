@@ -210,8 +210,16 @@ public class Cuj {
      */
     public static final int CUJ_DESKTOP_MODE_ENTER_APP_HANDLE_DRAG_RELEASE = 116;
 
+    /**
+     * Track interaction of exiting desktop mode on closing the last window.
+     *
+     * <p>Tracking starts when the last window is closed and finishes when the animation to exit
+     * desktop mode ends.
+     */
+    public static final int CUJ_DESKTOP_MODE_EXIT_MODE_ON_LAST_WINDOW_CLOSE = 117;
+
     // When adding a CUJ, update this and make sure to also update CUJ_TO_STATSD_INTERACTION_TYPE.
-    @VisibleForTesting static final int LAST_CUJ = CUJ_DESKTOP_MODE_ENTER_APP_HANDLE_DRAG_RELEASE;
+    @VisibleForTesting static final int LAST_CUJ = CUJ_DESKTOP_MODE_EXIT_MODE_ON_LAST_WINDOW_CLOSE;
 
     /** @hide */
     @IntDef({
@@ -319,7 +327,8 @@ public class Cuj {
             CUJ_LAUNCHER_KEYBOARD_QUICK_SWITCH_OPEN,
             CUJ_LAUNCHER_KEYBOARD_QUICK_SWITCH_CLOSE,
             CUJ_LAUNCHER_KEYBOARD_QUICK_SWITCH_APP_LAUNCH,
-            CUJ_DESKTOP_MODE_ENTER_APP_HANDLE_DRAG_RELEASE
+            CUJ_DESKTOP_MODE_ENTER_APP_HANDLE_DRAG_RELEASE,
+            CUJ_DESKTOP_MODE_EXIT_MODE_ON_LAST_WINDOW_CLOSE
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface CujType {}
@@ -438,6 +447,7 @@ public class Cuj {
         CUJ_TO_STATSD_INTERACTION_TYPE[CUJ_LAUNCHER_KEYBOARD_QUICK_SWITCH_CLOSE] = FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__LAUNCHER_KEYBOARD_QUICK_SWITCH_CLOSE;
         CUJ_TO_STATSD_INTERACTION_TYPE[CUJ_LAUNCHER_KEYBOARD_QUICK_SWITCH_APP_LAUNCH] = FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__LAUNCHER_KEYBOARD_QUICK_SWITCH_APP_LAUNCH;
         CUJ_TO_STATSD_INTERACTION_TYPE[CUJ_DESKTOP_MODE_ENTER_APP_HANDLE_DRAG_RELEASE] = FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__DESKTOP_MODE_ENTER_APP_HANDLE_DRAG_RELEASE;
+        CUJ_TO_STATSD_INTERACTION_TYPE[CUJ_DESKTOP_MODE_EXIT_MODE_ON_LAST_WINDOW_CLOSE] = FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__DESKTOP_MODE_EXIT_MODE_ON_LAST_WINDOW_CLOSE;
     }
 
     private Cuj() {
@@ -666,6 +676,8 @@ public class Cuj {
                 return "LAUNCHER_KEYBOARD_QUICK_SWITCH_APP_LAUNCH";
             case CUJ_DESKTOP_MODE_ENTER_APP_HANDLE_DRAG_RELEASE:
                 return "DESKTOP_MODE_ENTER_APP_HANDLE_DRAG_RELEASE";
+            case CUJ_DESKTOP_MODE_EXIT_MODE_ON_LAST_WINDOW_CLOSE:
+                return "DESKTOP_MODE_EXIT_MODE_ON_LAST_WINDOW_CLOSE";
         }
         return "UNKNOWN";
     }

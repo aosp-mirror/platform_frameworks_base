@@ -377,6 +377,16 @@ flag {
 }
 
 flag {
+    name: "status_bar_swipe_over_chip"
+    namespace: "systemui"
+    description: "Allow users to swipe over the status bar chip to open the shade"
+    bug: "185897191"
+    metadata {
+      purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
     name: "compose_bouncer"
     namespace: "systemui"
     description: "Use the new compose bouncer in SystemUI"
@@ -490,6 +500,16 @@ flag {
     description: "(Upstream request) Always show the network activity inout indicators and "
         "prefer using alpha to distinguish network activity."
     bug: "310715220"
+}
+
+flag {
+    name: "status_bar_switch_to_spn_from_data_spn"
+    namespace: "systemui"
+    description: "Fix usage of the SPN broadcast extras"
+    bug: "350812372"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
 }
 
 flag {
@@ -1231,6 +1251,16 @@ flag {
    namespace: "systemui"
    description: "Use Keyguard Transitions to set Notification Shade occlusion state"
    bug: "344716537"
+   metadata {
+        purpose: PURPOSE_BUGFIX
+   }
+}
+
+flag {
+   name: "relock_with_power_button_immediately"
+   namespace: "systemui"
+   description: "UDFPS unlock followed by immediate power button push should relock"
+   bug: "343327511"
    metadata {
         purpose: PURPOSE_BUGFIX
    }

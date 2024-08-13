@@ -109,10 +109,10 @@ final class CameraCompatFreeformPolicy implements CameraStateMonitor.CameraCompa
     }
 
     @Override
-    public boolean onCameraOpened(@NonNull ActivityRecord cameraActivity,
+    public void onCameraOpened(@NonNull ActivityRecord cameraActivity,
             @NonNull String cameraId) {
         if (!isTreatmentEnabledForActivity(cameraActivity)) {
-            return false;
+            return;
         }
         final int existingCameraCompatMode = cameraActivity.mAppCompatController
                 .getAppCompatCameraOverrides()
@@ -124,11 +124,9 @@ final class CameraCompatFreeformPolicy implements CameraStateMonitor.CameraCompa
             cameraActivity.mAppCompatController.getAppCompatCameraOverrides()
                     .setFreeformCameraCompatMode(newCameraCompatMode);
             forceUpdateActivityAndTask(cameraActivity);
-            return true;
         } else {
             mIsCameraCompatTreatmentPending = false;
         }
-        return false;
     }
 
     @Override

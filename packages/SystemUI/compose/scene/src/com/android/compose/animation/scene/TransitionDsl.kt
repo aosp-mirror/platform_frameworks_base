@@ -17,6 +17,8 @@
 package com.android.compose.animation.scene
 
 import androidx.compose.animation.core.AnimationSpec
+import androidx.compose.animation.core.Easing
+import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.SpringSpec
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.ui.geometry.Offset
@@ -140,6 +142,7 @@ interface BaseTransitionBuilder : PropertyTransformationBuilder {
     fun fractionRange(
         start: Float? = null,
         end: Float? = null,
+        easing: Easing = LinearEasing,
         builder: PropertyTransformationBuilder.() -> Unit,
     )
 }
@@ -182,6 +185,7 @@ interface TransitionBuilder : BaseTransitionBuilder {
     fun timestampRange(
         startMillis: Int? = null,
         endMillis: Int? = null,
+        easing: Easing = LinearEasing,
         builder: PropertyTransformationBuilder.() -> Unit,
     )
 

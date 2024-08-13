@@ -105,6 +105,7 @@ import android.view.Display;
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.widget.LockPatternUtils;
+import com.android.server.AlarmManagerInternal;
 import com.android.server.FgThread;
 import com.android.server.SystemService;
 import com.android.server.am.UserState.KeyEvictedCallback;
@@ -124,6 +125,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -728,6 +730,39 @@ public class UserControllerTest {
         assertAndProcessScheduledStopBackgroundUser(false, TEST_USER_ID2);
         assertEquals(Arrays.asList(SYSTEM_USER_ID, TEST_USER_ID2),
                 mUserController.getRunningUsersLU());
+    }
+
+    /** Test scheduling stopping of background users - reschedule if user with a scheduled alarm. */
+    @Test
+    public void testScheduleStopOfBackgroundUser_rescheduleIfAlarm() throws Exception {
+        mSetFlagsRule.enableFlags(android.multiuser.Flags.FLAG_SCHEDULE_STOP_OF_BACKGROUND_USER);
+
+        mUserController.setInitialConfig(/* userSwitchUiEnabled= */ true,
+                /* maxRunningUsers= */ 10, /* delayUserDataLocking= */ false,
+                /* backgroundUserScheduledStopTimeSecs= */ 2);
+
+        setUpAndStartUserInBackground(TEST_USER_ID);
+        assertEquals(newHashSet(SYSTEM_USER_ID, TEST_USER_ID),
+                new HashSet<>(mUserController.getRunningUsersLU()));
+
+        // Initially, the background user has an alarm that will fire soon. So don't stop the user.
+        when(mInjector.mAlarmManagerInternal.getNextAlarmTriggerTimeForUser(eq(TEST_USER_ID)))
+                .thenReturn(System.currentTimeMillis() + Duration.ofMinutes(2).toMillis());
+        assertAndProcessScheduledStopBackgroundUser(true, TEST_USER_ID);
+        assertEquals(newHashSet(SYSTEM_USER_ID, TEST_USER_ID),
+                new HashSet<>(mUserController.getRunningUsersLU()));
+
+        // Now, that alarm is gone and the next alarm isn't for a long time. Do stop the user.
+        when(mInjector.mAlarmManagerInternal.getNextAlarmTriggerTimeForUser(eq(TEST_USER_ID)))
+                .thenReturn(System.currentTimeMillis() + Duration.ofDays(1).toMillis());
+        assertAndProcessScheduledStopBackgroundUser(true, TEST_USER_ID);
+        assertEquals(newHashSet(SYSTEM_USER_ID),
+                new HashSet<>(mUserController.getRunningUsersLU()));
+
+        // No-one is scheduled to stop anymore.
+        assertAndProcessScheduledStopBackgroundUser(false, null);
+        verify(mInjector.mAlarmManagerInternal, never())
+                .getNextAlarmTriggerTimeForUser(eq(SYSTEM_USER_ID));
     }
 
     /**
@@ -1747,6 +1782,7 @@ public class UserControllerTest {
         private final WindowManagerService mWindowManagerMock;
         private final ActivityTaskManagerInternal mActivityTaskManagerInternal;
         private final PowerManagerInternal mPowerManagerInternal;
+        private final AlarmManagerInternal mAlarmManagerInternal;
         private final KeyguardManager mKeyguardManagerMock;
         private final LockPatternUtils mLockPatternUtilsMock;
 
@@ -1769,6 +1805,7 @@ public class UserControllerTest {
             mActivityTaskManagerInternal = mock(ActivityTaskManagerInternal.class);
             mStorageManagerMock = mock(IStorageManager.class);
             mPowerManagerInternal = mock(PowerManagerInternal.class);
+            mAlarmManagerInternal = mock(AlarmManagerInternal.class);
             mKeyguardManagerMock = mock(KeyguardManager.class);
             when(mKeyguardManagerMock.isDeviceSecure(anyInt())).thenReturn(true);
             mLockPatternUtilsMock = mock(LockPatternUtils.class);
@@ -1836,6 +1873,11 @@ public class UserControllerTest {
         @Override
         PowerManagerInternal getPowerManagerInternal() {
             return mPowerManagerInternal;
+        }
+
+        @Override
+        AlarmManagerInternal getAlarmManagerInternal() {
+            return mAlarmManagerInternal;
         }
 
         @Override
