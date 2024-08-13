@@ -976,6 +976,21 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
         return null;
     }
 
+    SharedUserSetting addOemSharedUserLPw(String name, int uid, int pkgFlags, int pkgPrivateFlags) {
+        if (!name.startsWith("android.uid")) {
+            PackageManagerService.reportSettingsProblem(Log.ERROR,
+                    "Failed to add oem defined shared user because of invalid name: " + name);
+            return null;
+        }
+        // OEM defined uids must be in the OEM reserved range
+        if (uid < 2900 || uid > 2999) {
+            PackageManagerService.reportSettingsProblem(Log.ERROR,
+                    "Failed to add oem defined shared user because of invalid uid: " + uid);
+            return null;
+        }
+        return addSharedUserLPw(name, uid, pkgFlags, pkgPrivateFlags);
+    }
+
     SharedUserSetting addSharedUserLPw(String name, int uid, int pkgFlags, int pkgPrivateFlags) {
         SharedUserSetting s = mSharedUsers.get(name);
         if (s != null) {
