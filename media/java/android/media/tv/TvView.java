@@ -91,7 +91,7 @@ public class TvView extends ViewGroup {
     private static final Object sMainTvViewLock = new Object();
     private static WeakReference<TvView> sMainTvView = NULL_TV_VIEW;
 
-    private final Handler mHandler = new Handler();
+    private Handler mHandler = new Handler();
     private Session mSession;
     private SurfaceView mSurfaceView;
     private Surface mSurface;
@@ -205,6 +205,17 @@ public class TvView extends ViewGroup {
      */
     public void setCallback(@Nullable TvInputCallback callback) {
         mCallback = callback;
+    }
+
+    /**
+     * Sets the handler to be invoked when an event is dispatched to this TvView.
+     * If handler is not set by this function, TvView will use its default handler.
+     *
+     * @param handler The handler to handle events.
+     * @hide
+     */
+    public void setHandler(@NonNull Handler handler) {
+        mHandler = handler;
     }
 
     /** @hide */
