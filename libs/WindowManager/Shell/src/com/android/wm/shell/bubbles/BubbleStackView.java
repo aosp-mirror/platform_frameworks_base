@@ -339,6 +339,7 @@ public class BubbleStackView extends FrameLayout
         pw.println(mExpandedViewContainer.getAnimationMatrix());
         pw.print("  stack visibility :       "); pw.println(getVisibility());
         pw.print("  temporarilyInvisible:    "); pw.println(mTemporarilyInvisible);
+        pw.print("  expandedViewTemporarilyHidden: "); pw.println(mExpandedViewTemporarilyHidden);
         mStackAnimationController.dump(pw);
         mExpandedAnimationController.dump(pw);
 
