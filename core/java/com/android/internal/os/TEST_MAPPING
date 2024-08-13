@@ -6,11 +6,7 @@
         "Kernel[^/]*\\.java",
         "[^/]*Power[^/]*\\.java"
       ],
-      "name": "FrameworksCoreTests",
-      "options": [
-        { "include-filter": "com.android.internal.os.BatteryStatsTests" },
-        { "exclude-annotation": "com.android.internal.os.SkipPresubmit" }
-      ]
+      "name": "FrameworksCoreTests_battery_stats"
     },
     {
       "file_patterns": [
@@ -24,11 +20,7 @@
       "file_patterns": [
         "BinderDeathDispatcher\\.java"
       ],
-      "name": "FrameworksCoreTests",
-      "options": [
-        { "include-filter": "com.android.internal.os.BinderDeathDispatcherTest" },
-        { "exclude-annotation": "com.android.internal.os.SkipPresubmit" }
-      ]
+      "name": "FrameworksCoreTests_internal_os_binder"
     },
     {
       "file_patterns": [
@@ -50,25 +42,7 @@
       "name": "PowerStatsTests"
     },
     {
-      "name": "FrameworksCoreTests",
-      "options": [
-        {
-          "include-filter": "com.android.internal.os.KernelCpuUidFreqTimeReaderTest"
-        },
-        {
-          "include-filter": "com.android.internal.os.KernelCpuUidActiveTimeReaderTest"
-        },
-        {
-          "include-filter": "com.android.internal.os.KernelCpuUidClusterTimeReaderTest"
-        },
-        {
-          "include-filter": "com.android.internal.os.KernelSingleUidTimeReaderTest"
-        },
-        {
-          "include-filter": "com.android.internal.os.KernelCpuUidBpfMapReaderTest"
-        }
-
-      ],
+      "name": "FrameworksCoreTests_internal_os_kernel",
       "file_patterns": [
         "KernelCpuUidTimeReader\\.java",
         "KernelCpuUidBpfMapReader\\.java",
