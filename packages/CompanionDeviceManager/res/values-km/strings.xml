@@ -21,26 +21,21 @@
     <string name="profile_name_watch" msgid="576290739483672360">"នាឡិកា"</string>
     <string name="chooser_title_non_profile" msgid="6035023914517087400">"ជ្រើសរើសឧបករណ៍ ដើម្បីដាក់ក្រោម​ការគ្រប់គ្រងរបស់ &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt;"</string>
     <string name="chooser_title" msgid="2235819929238267637">"ជ្រើសរើស <xliff:g id="PROFILE_NAME">%1$s</xliff:g> ដើម្បីរៀបចំ"</string>
-    <string name="summary_watch" msgid="7962014927042971830">"កម្មវិធីនេះនឹងត្រូវបានអនុញ្ញាតឱ្យធ្វើសមកាលកម្មព័ត៌មាន ដូចជាឈ្មោះមនុស្សដែលហៅទូរសព្ទជាដើម និងចូលប្រើប្រាស់ការអនុញ្ញាតទាំងនេះនៅលើ <xliff:g id="DEVICE_NAME">%1$s</xliff:g> របស់អ្នក"</string>
+    <string name="summary_watch" msgid="8134580124808507407">"កម្មវិធីនេះនឹងត្រូវបានអនុញ្ញាតឱ្យធ្វើសមកាលកម្មព័ត៌មាន ដូចជាឈ្មោះមនុស្សដែលហៅទូរសព្ទជាដើម និងចូលប្រើការអនុញ្ញាតទាំងនេះនៅលើ <xliff:g id="DEVICE_TYPE">%1$s</xliff:g> របស់អ្នក"</string>
     <string name="confirmation_title_glasses" msgid="8288346850537727333">"អនុញ្ញាតឱ្យ &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; គ្រប់គ្រង &lt;strong&gt;<xliff:g id="DEVICE_NAME">%2$s</xliff:g>&lt;/strong&gt; ឬ?"</string>
     <string name="profile_name_glasses" msgid="3506504967216601277">"ឧបករណ៍"</string>
-    <string name="summary_glasses" msgid="2872254734959842579">"កម្មវិធីនេះ​នឹងត្រូវបានអនុញ្ញាតឱ្យ​ចូលប្រើប្រាស់ការអនុញ្ញាតទាំងនេះ​នៅលើ <xliff:g id="DEVICE_NAME">%1$s</xliff:g> របស់អ្នក"</string>
-    <string name="title_app_streaming" msgid="2270331024626446950">"អនុញ្ញាតឱ្យ &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; ចូលប្រើព័ត៌មាននេះពីទូរសព្ទរបស់អ្នក"</string>
-    <string name="title_app_streaming_with_mirroring" msgid="3364582597581570658">"អនុញ្ញាតឱ្យ &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; ផ្សាយកម្មវិធីលើទូរសព្ទរបស់អ្នកឬ?"</string>
-    <string name="summary_app_streaming" msgid="295548145144086753">"%1$s នឹងមានសិទ្ធិចូលប្រើអ្វីៗដែលអាចមើលឃើញ ឬត្រូវបានចាក់នៅលើទូរសព្ទ រួមទាំងសំឡេង រូបថត ពាក្យសម្ងាត់ និងសារ។&lt;br/&gt;&lt;br/&gt;%1$s នឹងអាចផ្សាយកម្មវិធី រហូតទាល់តែអ្នកដកសិទ្ធិចូលប្រើការអនុញ្ញាតនេះចេញ។"</string>
-    <string name="helper_title_app_streaming" msgid="4151687003439969765">"សេវាកម្មឆ្លងកាត់ឧបករណ៍"</string>
-    <string name="helper_summary_app_streaming" msgid="2396773196949578425">"<xliff:g id="APP_NAME">%1$s</xliff:g> កំពុងស្នើសុំការអនុញ្ញាតជំនួសឱ្យ <xliff:g id="DISPLAY_NAME">%2$s</xliff:g> របស់អ្នក ដើម្បីបញ្ចាំងកម្មវិធីរវាងឧបករណ៍របស់អ្នក"</string>
-    <string name="helper_summary_app_streaming_with_mirroring" msgid="6138581029144467467">"<xliff:g id="APP_NAME">%1$s</xliff:g> កំពុងស្នើសុំការអនុញ្ញាតជំនួសឱ្យ <xliff:g id="DISPLAY_NAME">%2$s</xliff:g> របស់អ្នក ដើម្បីបង្ហាញ និងផ្សាយកម្មវិធីរវាងឧបករណ៍នានារបស់អ្នក"</string>
+    <string name="summary_glasses" msgid="5469208629679579157">"កម្មវិធីនេះ​នឹងត្រូវបានអនុញ្ញាតឱ្យ​ចូលប្រើការអនុញ្ញាតទាំងនេះ​នៅលើ <xliff:g id="DEVICE_TYPE">%1$s</xliff:g> របស់អ្នក"</string>
+    <string name="title_app_streaming" msgid="6845373585257287200">"អនុញ្ញាតឱ្យ &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; ផ្សាយកម្មវិធីលើ <xliff:g id="DEVICE_TYPE">%2$s</xliff:g> របស់អ្នកទៅ &lt;strong&gt;<xliff:g id="DEVICE_NAME">%3$s</xliff:g>&lt;/strong&gt; ឬ?"</string>
+    <string name="summary_app_streaming" msgid="1274464413649731829">"<xliff:g id="APP_NAME_0">%1$s</xliff:g> នឹងមានសិទ្ធិចូលប្រើអ្វីៗដែលអាចមើលឃើញ ឬត្រូវបានចាក់នៅលើ <xliff:g id="DEVICE_TYPE">%2$s</xliff:g> រួមទាំងសំឡេង រូបថត ពាក្យសម្ងាត់ និងសារ។&lt;br/&gt;&lt;br/&gt;<xliff:g id="APP_NAME_1">%1$s</xliff:g> នឹងអាចផ្សាយកម្មវិធី <xliff:g id="DEVICE_NAME">%3$s</xliff:g> រហូតទាល់តែអ្នកដកសិទ្ធិចូលប្រើការអនុញ្ញាតនេះចេញ។"</string>
+    <string name="helper_summary_app_streaming" msgid="1944832605534698562">"<xliff:g id="APP_NAME">%1$s</xliff:g> កំពុងស្នើសុំការអនុញ្ញាតជំនួសឱ្យ <xliff:g id="DEVICE_NAME">%2$s</xliff:g> របស់អ្នក ដើម្បីបង្ហាញ និងផ្សាយកម្មវិធីរវាងឧបករណ៍នានារបស់អ្នក"</string>
     <string name="title_automotive_projection" msgid="3296005598978412847"></string>
     <string name="summary_automotive_projection" msgid="8683801274662496164"></string>
-    <string name="title_computer" msgid="4693714143506569253">"អនុញ្ញាតឱ្យ &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; ចូលមើលព័ត៌មាននេះពីទូរសព្ទរបស់អ្នក"</string>
+    <string name="title_computer" msgid="4782923323932440751">"អនុញ្ញាតឱ្យ &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; ចូលប្រើព័ត៌មាននេះពី <xliff:g id="DEVICE_TYPE">%2$s</xliff:g> របស់អ្នក"</string>
     <string name="summary_computer" msgid="3798467601598297062"></string>
-    <string name="helper_title_computer" msgid="4671071173916176037">"សេវាកម្ម Google Play"</string>
-    <string name="helper_summary_computer" msgid="8774832742608187072">"<xliff:g id="APP_NAME">%1$s</xliff:g> កំពុងស្នើសុំការអនុញ្ញាតជំនួសឱ្យ <xliff:g id="DISPLAY_NAME">%2$s</xliff:g> របស់អ្នក ដើម្បីចូលប្រើរូបថត មេឌៀ និងការជូនដំណឹងរបស់ទូរសព្ទអ្នក"</string>
-    <string name="title_nearby_device_streaming" msgid="7269956847378799794">"អនុញ្ញាតឱ្យ &lt;strong&gt;<xliff:g id="DEVICE_NAME">%1$s</xliff:g>&lt;/strong&gt; ធ្វើសកម្មភាពនេះឬ?"</string>
-    <string name="title_nearby_device_streaming_with_mirroring" msgid="242855799919611657">"អនុញ្ញាតឱ្យ &lt;strong&gt;<xliff:g id="DEVICE_NAME">%1$s</xliff:g>&lt;/strong&gt; ផ្សាយមុខងារប្រព័ន្ធ និងកម្មវិធីលើទូរសព្ទរបស់អ្នកឬ?"</string>
-    <string name="summary_nearby_device_streaming" msgid="4039565463149145573">"%1$s នឹងមានសិទ្ធិចូលប្រើអ្វីៗដែលអាចមើលឃើញ ឬត្រូវបានចាក់នៅលើទូរសព្ទរបស់អ្នក រួមទាំងសំឡេង រូបថត ព័ត៌មាននៃការទូទាត់ប្រាក់ ពាក្យសម្ងាត់ និងសារ។&lt;br/&gt;&lt;br/&gt;%1$s នឹងអាចផ្សាយកម្មវិធី និងមុខងារប្រព័ន្ធ រហូតទាល់តែអ្នកដកសិទ្ធិចូលប្រើការអនុញ្ញាតនេះចេញ។"</string>
-    <string name="helper_summary_nearby_device_streaming" msgid="2063965070936844876">"<xliff:g id="APP_NAME">%1$s</xliff:g> កំពុងស្នើសុំ​ការអនុញ្ញាតជំនួសឱ្យ <xliff:g id="DEVICE_NAME">%2$s</xliff:g> របស់អ្នក ដើម្បីចាក់ផ្សាយកម្មវិធី និងមុខងារប្រព័ន្ធផ្សេងទៀត​ទៅកាន់​ឧបករណ៍នៅជិត"</string>
+    <string name="helper_summary_computer" msgid="2298803016482139668">"<xliff:g id="APP_NAME">%1$s</xliff:g> កំពុងស្នើសុំការអនុញ្ញាតជំនួសឱ្យ <xliff:g id="DEVICE_NAME">%2$s</xliff:g> របស់អ្នក ដើម្បីចូលប្រើរូបថត មេឌៀ និងការជូនដំណឹងរបស់ <xliff:g id="DEVICE_TYPE">%3$s</xliff:g> អ្នក"</string>
+    <string name="title_nearby_device_streaming" msgid="4295322493408411976">"អនុញ្ញាតឱ្យ &lt;strong&gt;<xliff:g id="DEVICE_NAME_0">%1$s</xliff:g>&lt;/strong&gt; ផ្សាយមុខងារប្រព័ន្ធ និងកម្មវិធីលើ <xliff:g id="DEVICE_TYPE">%2$s</xliff:g> របស់អ្នកទៅ &lt;strong&gt;<xliff:g id="DEVICE_NAME_1">%3$s</xliff:g>&lt;/strong&gt; ឬ?"</string>
+    <string name="summary_nearby_device_streaming" msgid="962267343109051648">"<xliff:g id="APP_NAME_0">%1$s</xliff:g> នឹងមានសិទ្ធិចូលប្រើអ្វីៗដែលអាចមើលឃើញ ឬត្រូវបានចាក់នៅលើ <xliff:g id="DEVICE_TYPE">%2$s</xliff:g> របស់អ្នក រួមទាំងសំឡេង រូបថត ព័ត៌មាននៃការទូទាត់ប្រាក់ ពាក្យសម្ងាត់ និងសារ។&lt;br/&gt;&lt;br/&gt;<xliff:g id="APP_NAME_1">%1$s</xliff:g> នឹងអាចផ្សាយកម្មវិធី និងមុខងារប្រព័ន្ធទៅ <xliff:g id="DEVICE_NAME">%3$s</xliff:g> រហូតទាល់តែអ្នកដកសិទ្ធិចូលប្រើការអនុញ្ញាតនេះចេញ។"</string>
+    <string name="helper_summary_nearby_device_streaming" msgid="8509848562931818793">"<xliff:g id="APP_NAME">%1$s</xliff:g> កំពុងស្នើសុំ​ការអនុញ្ញាតជំនួសឱ្យ <xliff:g id="DEVICE_NAME">%2$s</xliff:g> របស់អ្នក ដើម្បីផ្សាយកម្មវិធី និងមុខងារប្រព័ន្ធផ្សេងទៀតរវាងឧបករណ៍របស់អ្នក"</string>
     <string name="profile_name_generic" msgid="6851028682723034988">"ឧបករណ៍"</string>
     <string name="summary_generic" msgid="1761976003668044801">"កម្មវិធីនេះនឹងអាច​ធ្វើសមកាលកម្មព័ត៌មាន ដូចជាឈ្មោះមនុស្សដែលហៅទូរសព្ទជាដើម​ រវាងឧបករណ៍ដែលបានជ្រើសរើស និងទូរសព្ទរបស់អ្នក"</string>
     <string name="consent_yes" msgid="8344487259618762872">"អនុញ្ញាត"</string>
@@ -62,8 +57,6 @@
     <string name="permission_media_routing_control" msgid="5498639511586715253">"ប្ដូរឧបករណ៍មេឌៀ"</string>
     <string name="permission_storage" msgid="6831099350839392343">"រូបថត និងមេឌៀ"</string>
     <string name="permission_notifications" msgid="4099418516590632909">"ការ​ជូនដំណឹង"</string>
-    <string name="permission_app_streaming" msgid="6009695219091526422">"កម្មវិធី"</string>
-    <string name="permission_nearby_device_streaming" msgid="1023325519477349499">"ការផ្សាយ"</string>
     <string name="permission_phone_summary" msgid="8246321093970051702">"ហៅទូរសព្ទ និងគ្រប់គ្រងការហៅទូរសព្ទ"</string>
     <string name="permission_call_logs_summary" msgid="7545243592757693321">"អាន និងសរសេរ​កំណត់ហេតុហៅទូរសព្ទ"</string>
     <string name="permission_sms_summary" msgid="8499509535410068616">"ផ្ញើ និងមើលសារ SMS"</string>
@@ -73,10 +66,10 @@
     <string name="permission_nearby_devices_summary" msgid="1306752848196464817">"ស្វែងរក ភ្ជាប់ និងកំណត់​ទីតាំងដែលពាក់ព័ន្ធ​របស់ឧបករណ៍​នៅជិត"</string>
     <string name="permission_notification_listener_access_summary" msgid="7856071768185367749">"អាន​ការជូនដំណឹង​ទាំងអស់ រួមទាំង​ព័ត៌មាន​ដូចជា ទំនាក់ទំនង សារ និងរូបថតជាដើម"</string>
     <string name="permission_notifications_summary" msgid="2272810466047367030">"• អានការជូនដំណឹងទាំងអស់ រួមទាំងព័ត៌មានដូចជា ទំនាក់ទំនង សារ និងរូបថតជាដើម&lt;br/&gt;• ផ្ញើការជូនដំណឹង&lt;br/&gt;&lt;br/&gt;អ្នកអាចគ្រប់គ្រងលទ្ធភាពរបស់កម្មវិធីនេះក្នុងការអាន និងផ្ញើការជូនដំណឹងបានគ្រប់ពេលនៅក្នុងការកំណត់ &gt; ការជូនដំណឹង។"</string>
-    <string name="permission_app_streaming_summary" msgid="606923325679670624">"ផ្សាយកម្មវិធីរបស់ទូរសព្ទអ្នក"</string>
     <string name="permission_storage_summary" msgid="3918240895519506417"></string>
-    <string name="permission_nearby_device_streaming_summary" msgid="8280824871197081246">"ចាក់ផ្សាយ​កម្មវិធី និងមុខងារប្រព័ន្ធ​ផ្សេងទៀត​ពីទូរសព្ទ​របស់អ្នក"</string>
     <string name="permission_media_routing_control_summary" msgid="2714631092321412250">"ចូលប្រើប្រាស់បញ្ជីឧបករណ៍ដែលអាចប្រើបាន និងគ្រប់គ្រងថាតើឧបករណ៍ណាចាក់ ឬបញ្ជូនសំឡេង ឬវីដេអូពីកម្មវិធីផ្សេងទៀត"</string>
     <string name="device_type" product="default" msgid="8268703872070046263">"ទូរសព្ទ"</string>
     <string name="device_type" product="tablet" msgid="5038791954983067774">"ថេប្លេត"</string>
+    <string name="device_type" product="tv" msgid="5355611506659405636">"ទូរទស្សន៍"</string>
+    <string name="device_type" product="device" msgid="1526125965802507189">"ឧបករណ៍"</string>
 </resources>
