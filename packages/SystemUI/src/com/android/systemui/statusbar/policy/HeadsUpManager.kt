@@ -112,10 +112,11 @@ interface HeadsUpManager : Dumpable {
      * @return true if notification is removed, false otherwise
      */
     fun removeNotification(
-            key: String,
-            releaseImmediately: Boolean,
-            animate: Boolean,
-            reason: String): Boolean
+        key: String,
+        releaseImmediately: Boolean,
+        animate: Boolean,
+        reason: String
+    ): Boolean
 
     /** Clears all managed notifications. */
     fun releaseAllImmediately()
@@ -253,13 +254,13 @@ class HeadsUpManagerEmptyImpl @Inject constructor() : HeadsUpManager {
     override fun removeListener(listener: OnHeadsUpChangedListener) {}
 
     override fun removeNotification(key: String, releaseImmediately: Boolean, reason: String) =
-            false
+        false
 
     override fun removeNotification(
-            key: String,
-            releaseImmediately: Boolean,
-            animate: Boolean,
-            reason: String
+        key: String,
+        releaseImmediately: Boolean,
+        animate: Boolean,
+        reason: String
     ) = false
 
     override fun setAnimationStateHandler(handler: AnimationStateHandler) {}
@@ -293,7 +294,5 @@ class HeadsUpManagerEmptyImpl @Inject constructor() : HeadsUpManager {
 
 @Module
 interface HeadsUpEmptyImplModule {
-    @Binds
-    @SysUISingleton
-    fun bindsHeadsUpManager(noOpHum: HeadsUpManagerEmptyImpl): HeadsUpManager
+    @Binds @SysUISingleton fun bindsHeadsUpManager(noOpHum: HeadsUpManagerEmptyImpl): HeadsUpManager
 }

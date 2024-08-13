@@ -173,7 +173,12 @@ class NotificationTransitionAnimatorController(
         // TODO: b/297247841 - Call on the row we're removing, which may differ from notification.
         HeadsUpUtil.setNeedsHeadsUpDisappearAnimationAfterClick(notification, animate)
 
-        headsUpManager.removeNotification(row.entry.key, true /* releaseImmediately */, animate, reason)
+        headsUpManager.removeNotification(
+            row.entry.key,
+            true /* releaseImmediately */,
+            animate,
+            reason
+        )
     }
 
     override fun onTransitionAnimationCancelled(newKeyguardOccludedState: Boolean?) {

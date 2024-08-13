@@ -497,9 +497,9 @@ constructor(
                     if (posted.isHeadsUpEntry) {
                         // We don't want this to be interrupting anymore, let's remove it
                         mHeadsUpManager.removeNotification(
-                                posted.key,
-                                /* removeImmediately= */ false,
-                                "onEntryUpdated"
+                            posted.key,
+                            /* removeImmediately= */ false,
+                            "onEntryUpdated"
                         )
                     } else if (posted.isBinding) {
                         // Don't let the bind finish
@@ -524,7 +524,11 @@ constructor(
                     val removeImmediatelyForRemoteInput =
                         (mRemoteInputManager.isSpinning(entryKey) &&
                             !NotificationRemoteInputManager.FORCE_REMOTE_INPUT_HISTORY)
-                    mHeadsUpManager.removeNotification(entry.key, removeImmediatelyForRemoteInput, "onEntryRemoved, reason: $reason")
+                    mHeadsUpManager.removeNotification(
+                        entry.key,
+                        removeImmediatelyForRemoteInput,
+                        "onEntryRemoved, reason: $reason"
+                    )
                 }
             }
 

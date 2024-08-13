@@ -231,7 +231,7 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
             mBubblesManagerOptional.ifPresent(bubblesManager ->
                     bubblesManager.onUserChangedBubble(entry, !entry.isBubble()));
             mHeadsUpManager.removeNotification(entry.getKey(), /* releaseImmediately= */ true,
-                    "onNotificationBubbleIconClicked");
+                    /* reason= */ "onNotificationBubbleIconClicked");
         };
         if (entry.isBubble()) {
             // entry is being un-bubbled, no need to unlock
