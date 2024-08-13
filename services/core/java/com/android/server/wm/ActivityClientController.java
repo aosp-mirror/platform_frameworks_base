@@ -1156,7 +1156,7 @@ class ActivityClientController extends IActivityClientController.Stub {
                 }
 
                 if (rootTask.inFreeformWindowingMode()) {
-                    rootTask.setWindowingMode(WINDOWING_MODE_FULLSCREEN);
+                    rootTask.setRootTaskWindowingMode(WINDOWING_MODE_FULLSCREEN);
                     rootTask.setBounds(null);
                 } else if (!r.supportsFreeform()) {
                     throw new IllegalStateException(
@@ -1165,9 +1165,9 @@ class ActivityClientController extends IActivityClientController.Stub {
                     // If the window is on a freeform display, set it to undefined. It will be
                     // resolved to freeform and it can adjust windowing mode when the display mode
                     // changes in runtime.
-                    rootTask.setWindowingMode(WINDOWING_MODE_UNDEFINED);
+                    rootTask.setRootTaskWindowingMode(WINDOWING_MODE_UNDEFINED);
                 } else {
-                    rootTask.setWindowingMode(WINDOWING_MODE_FREEFORM);
+                    rootTask.setRootTaskWindowingMode(WINDOWING_MODE_FREEFORM);
                 }
             }
         } finally {
@@ -1278,7 +1278,7 @@ class ActivityClientController extends IActivityClientController.Stub {
         if (fullscreenRequest == FULLSCREEN_MODE_REQUEST_ENTER) {
             final int restoreWindowingMode = requester.getRequestedOverrideWindowingMode();
             targetWindowingMode = WINDOWING_MODE_FULLSCREEN;
-            requester.setWindowingMode(targetWindowingMode);
+            requester.setRootTaskWindowingMode(targetWindowingMode);
             // The restore windowing mode must be set after the windowing mode is set since
             // Task#setWindowingMode resets the restore windowing mode to WINDOWING_MODE_INVALID.
             requester.mMultiWindowRestoreWindowingMode = restoreWindowingMode;
@@ -1297,9 +1297,8 @@ class ActivityClientController extends IActivityClientController.Stub {
     public void startLockTaskModeByToken(IBinder token) {
         synchronized (mGlobalLock) {
             final ActivityRecord r = ActivityRecord.forTokenLocked(token);
-            if (r != null) {
-                mService.startLockTaskMode(r.getTask(), false /* isSystemCaller */);
-            }
+            if (r == null) return;
+            mService.startLockTaskMode(r.getTask(), false /* isSystemCaller */);
         }
     }
 
