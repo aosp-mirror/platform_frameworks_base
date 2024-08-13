@@ -509,7 +509,7 @@ constructor(
                 )
 
                 // Add UMO
-                if (mediaHostVisible && media.hasActiveMediaOrRecommendation) {
+                if (mediaHostVisible && media.hasAnyMediaOrRecommendation) {
                     ongoingContent.add(
                         CommunalContentModel.Umo(
                             createdTimestampMillis = media.createdTimestampMillis,
