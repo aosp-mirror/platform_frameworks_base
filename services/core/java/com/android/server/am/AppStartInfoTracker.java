@@ -280,7 +280,11 @@ public final class AppStartInfoTracker {
         mTemporaryInProgressIndexes.clear();
     }
 
-    void onIntentStarted(@NonNull Intent intent, long timestampNanos) {
+    /**
+     * Should only be called for Activity launch sequences from an instance of
+     * {@link ActivityMetricsLaunchObserver}.
+     */
+    void onActivityIntentStarted(@NonNull Intent intent, long timestampNanos) {
         synchronized (mLock) {
             if (!mEnabled) {
                 return;
@@ -290,6 +294,10 @@ public final class AppStartInfoTracker {
             start.setIntent(intent);
             start.setStartType(ApplicationStartInfo.START_TYPE_UNSET);
             start.addStartupTimestamp(ApplicationStartInfo.START_TIMESTAMP_LAUNCH, timestampNanos);
+
+            if (android.app.Flags.appStartInfoComponent()) {
+                start.setStartComponent(ApplicationStartInfo.START_COMPONENT_ACTIVITY);
+            }
 
             // TODO: handle possible alarm activity start.
             if (intent != null && intent.getCategories() != null
@@ -303,7 +311,11 @@ public final class AppStartInfoTracker {
         }
     }
 
-    void onIntentFailed(long id) {
+    /**
+     * Should only be called for Activity launch sequences from an instance of
+     * {@link ActivityMetricsLaunchObserver}.
+     */
+    void onActivityIntentFailed(long id) {
         synchronized (mLock) {
             if (!mEnabled) {
                 return;
@@ -322,6 +334,10 @@ public final class AppStartInfoTracker {
         }
     }
 
+    /**
+     * Should only be called for Activity launch sequences from an instance of
+     * {@link ActivityMetricsLaunchObserver}.
+     */
     void onActivityLaunched(long id, ComponentName name, long temperature, ProcessRecord app) {
         synchronized (mLock) {
             if (!mEnabled) {
@@ -349,6 +365,10 @@ public final class AppStartInfoTracker {
         }
     }
 
+    /**
+     * Should only be called for Activity launch sequences from an instance of
+     * {@link ActivityMetricsLaunchObserver}.
+     */
     void onActivityLaunchCancelled(long id) {
         synchronized (mLock) {
             if (!mEnabled) {
@@ -368,6 +388,10 @@ public final class AppStartInfoTracker {
         }
     }
 
+    /**
+     * Should only be called for Activity launch sequences from an instance of
+     * {@link ActivityMetricsLaunchObserver}.
+     */
     void onActivityLaunchFinished(long id, ComponentName name, long timestampNanos,
             int launchMode) {
         synchronized (mLock) {
@@ -391,7 +415,11 @@ public final class AppStartInfoTracker {
         }
     }
 
-    void onReportFullyDrawn(long id, long timestampNanos) {
+    /**
+     * Should only be called for Activity launch sequences from an instance of
+     * {@link ActivityMetricsLaunchObserver}.
+     */
+    void onActivityReportFullyDrawn(long id, long timestampNanos) {
         synchronized (mLock) {
             if (!mEnabled) {
                 return;
@@ -424,6 +452,10 @@ public final class AppStartInfoTracker {
                     ApplicationStartInfo.START_TIMESTAMP_LAUNCH, startTimeNs);
             start.setStartType(ApplicationStartInfo.START_TYPE_COLD);
 
+            if (android.app.Flags.appStartInfoComponent()) {
+                start.setStartComponent(ApplicationStartInfo.START_COMPONENT_SERVICE);
+            }
+
             // TODO: handle possible alarm service start.
             start.setReason(serviceRecord.permission != null
                     && serviceRecord.permission.contains("android.permission.BIND_JOB_SERVICE")
@@ -455,6 +487,11 @@ public final class AppStartInfoTracker {
                 start.setReason(ApplicationStartInfo.START_REASON_BROADCAST);
             }
             start.setIntent(intent);
+
+            if (android.app.Flags.appStartInfoComponent()) {
+                start.setStartComponent(ApplicationStartInfo.START_COMPONENT_BROADCAST);
+            }
+
             addStartInfoLocked(start);
         }
     }
@@ -472,6 +509,11 @@ public final class AppStartInfoTracker {
                     ApplicationStartInfo.START_TIMESTAMP_LAUNCH, startTimeNs);
             start.setStartType(ApplicationStartInfo.START_TYPE_COLD);
             start.setReason(ApplicationStartInfo.START_REASON_CONTENT_PROVIDER);
+
+            if (android.app.Flags.appStartInfoComponent()) {
+                start.setStartComponent(ApplicationStartInfo.START_COMPONENT_CONTENT_PROVIDER);
+            }
+
             addStartInfoLocked(start);
         }
     }
@@ -490,6 +532,11 @@ public final class AppStartInfoTracker {
             start.setStartType(cold ? ApplicationStartInfo.START_TYPE_COLD
                     : ApplicationStartInfo.START_TYPE_WARM);
             start.setReason(ApplicationStartInfo.START_REASON_BACKUP);
+
+            if (android.app.Flags.appStartInfoComponent()) {
+                start.setStartComponent(ApplicationStartInfo.START_COMPONENT_OTHER);
+            }
+
             addStartInfoLocked(start);
         }
     }

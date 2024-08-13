@@ -1038,13 +1038,14 @@ public class ActivityManagerService extends IActivityManager.Stub
         @Override
         public void onIntentStarted(@NonNull Intent intent, long timestampNanos) {
             synchronized (this) {
-                mProcessList.getAppStartInfoTracker().onIntentStarted(intent, timestampNanos);
+                mProcessList.getAppStartInfoTracker()
+                        .onActivityIntentStarted(intent, timestampNanos);
             }
         }
 
         @Override
         public void onIntentFailed(long id) {
-            mProcessList.getAppStartInfoTracker().onIntentFailed(id);
+            mProcessList.getAppStartInfoTracker().onActivityIntentFailed(id);
         }
 
         @Override
@@ -1078,7 +1079,7 @@ public class ActivityManagerService extends IActivityManager.Stub
 
         @Override
         public void onReportFullyDrawn(long id, long timestampNanos) {
-            mProcessList.getAppStartInfoTracker().onReportFullyDrawn(id, timestampNanos);
+            mProcessList.getAppStartInfoTracker().onActivityReportFullyDrawn(id, timestampNanos);
         }
     };
 
