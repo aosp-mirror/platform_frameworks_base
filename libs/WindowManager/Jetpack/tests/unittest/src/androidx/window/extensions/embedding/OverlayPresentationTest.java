@@ -874,8 +874,6 @@ public class OverlayPresentationTest {
 
     @Test
     public void testOnActivityReparentedToTask_overlayRestoration() {
-        mSetFlagRule.enableFlags(Flags.FLAG_FIX_PIP_RESTORE_TO_OVERLAY);
-
         // Prepares and mock the data necessary for the test.
         final IBinder activityToken = mActivity.getActivityToken();
         final Intent intent = new Intent();

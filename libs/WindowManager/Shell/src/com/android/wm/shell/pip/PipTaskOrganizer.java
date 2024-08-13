@@ -496,7 +496,9 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
         ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
                 "startSwipePipToHome: %s, state=%s", componentName, mPipTransitionState);
         mPipTransitionState.setInSwipePipToHomeTransition(true);
-        if (!ENABLE_SHELL_TRANSITIONS) {
+        if (ENABLE_SHELL_TRANSITIONS) {
+            mPipTransitionController.onStartSwipePipToHome();
+        } else {
             sendOnPipTransitionStarted(TRANSITION_DIRECTION_TO_PIP);
         }
         setBoundsStateForEntry(componentName, pictureInPictureParams, activityInfo);

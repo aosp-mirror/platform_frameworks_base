@@ -58,8 +58,6 @@ import static android.view.inputmethod.Flags.FLAG_CONNECTIONLESS_HANDWRITING;
 import static android.view.inputmethod.Flags.ctrlShiftShortcut;
 import static android.view.inputmethod.Flags.predictiveBackIme;
 
-import static java.lang.annotation.RetentionPolicy.SOURCE;
-
 import android.annotation.AnyThread;
 import android.annotation.CallSuper;
 import android.annotation.DrawableRes;
@@ -500,36 +498,53 @@ public class InputMethodService extends AbstractInputMethodService {
     public static final int BACK_DISPOSITION_ADJUST_NOTHING = 3;
 
     /**
-     * Enum flag to be used for {@link #setBackDisposition(int)}.
+     * The disposition mode that indicates the expected affordance for the back button.
      *
      * @hide
      */
-    @Retention(SOURCE)
-    @IntDef(value = {BACK_DISPOSITION_DEFAULT, BACK_DISPOSITION_WILL_NOT_DISMISS,
-            BACK_DISPOSITION_WILL_DISMISS, BACK_DISPOSITION_ADJUST_NOTHING},
-            prefix = "BACK_DISPOSITION_")
+    @IntDef(prefix = { "BACK_DISPOSITION_" }, value = {
+            BACK_DISPOSITION_DEFAULT,
+            BACK_DISPOSITION_WILL_NOT_DISMISS,
+            BACK_DISPOSITION_WILL_DISMISS,
+            BACK_DISPOSITION_ADJUST_NOTHING,
+    })
+    @Retention(RetentionPolicy.SOURCE)
     public @interface BackDispositionMode {}
 
     /**
+     * The IME is active, and ready to accept touch/key events. It may or may not be visible.
+     *
      * @hide
-     * The IME is active.  It may or may not be visible.
      */
-    public static final int IME_ACTIVE = 0x1;
+    public static final int IME_ACTIVE = 1 << 0;
 
     /**
-     * @hide
      * The IME is perceptibly visible to the user.
+     *
+     * @hide
      */
-    public static final int IME_VISIBLE = 0x2;
+    public static final int IME_VISIBLE = 1 << 1;
 
     /**
-     * @hide
      * The IME is visible, but not yet perceptible to the user (e.g. fading in)
      * by {@link android.view.WindowInsetsController}.
      *
      * @see InputMethodManager#reportPerceptible
+     * @hide
      */
-    public static final int IME_VISIBLE_IMPERCEPTIBLE = 0x4;
+    public static final int IME_VISIBLE_IMPERCEPTIBLE = 1 << 2;
+
+    /**
+     * The IME window visibility state.
+     *
+     * @hide
+     */
+    @IntDef(flag = true, prefix = { "IME_" }, value = {
+            IME_ACTIVE,
+            IME_VISIBLE,
+            IME_VISIBLE_IMPERCEPTIBLE,
+    })
+    public @interface ImeWindowVisibility {}
 
     // Min and max values for back disposition.
     private static final int BACK_DISPOSITION_MIN = BACK_DISPOSITION_DEFAULT;
@@ -1342,7 +1357,8 @@ public class InputMethodService extends AbstractInputMethodService {
         mImeSurfaceRemoverRunnable = null;
     }
 
-    private void setImeWindowStatus(int visibilityFlags, int backDisposition) {
+    private void setImeWindowStatus(@ImeWindowVisibility int visibilityFlags,
+            @BackDispositionMode int backDisposition) {
         mPrivOps.setImeWindowStatusAsync(visibilityFlags, backDisposition);
     }
 
@@ -3301,7 +3317,7 @@ public class InputMethodService extends AbstractInputMethodService {
         ImeTracker.forLogging().onProgress(statsToken, ImeTracker.PHASE_IME_HIDE_WINDOW);
         ImeTracing.getInstance().triggerServiceDump("InputMethodService#hideWindow", mDumper,
                 null /* icProto */);
-        setImeWindowStatus(0, mBackDisposition);
+        setImeWindowStatus(0 /* visibilityFlags */, mBackDisposition);
         if (android.view.inputmethod.Flags.refactorInsetsController()) {
             // The ImeInsetsSourceProvider need the statsToken when dispatching the control. We
             // send the token here, so that another request in the provider can be cancelled.
@@ -4476,6 +4492,7 @@ public class InputMethodService extends AbstractInputMethodService {
         };
     }
 
+    @ImeWindowVisibility
     private int mapToImeWindowStatus() {
         return IME_ACTIVE
                 | (isInputViewShown() ? IME_VISIBLE : 0);

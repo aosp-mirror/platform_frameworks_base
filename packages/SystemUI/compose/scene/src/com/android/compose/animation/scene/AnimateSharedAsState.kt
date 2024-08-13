@@ -120,7 +120,7 @@ fun ContentScope.animateContentFloatAsState(
 }
 
 @Deprecated(
-    "Use animateSceneFloatAsState() instead",
+    "Use animateContentFloatAsState() instead",
     replaceWith = ReplaceWith("animateContentFloatAsState(value, key, canOverflow)")
 )
 @Composable
@@ -171,7 +171,7 @@ fun ContentScope.animateContentDpAsState(
 }
 
 @Deprecated(
-    "Use animateSceneDpAsState() instead",
+    "Use animateContentDpAsState() instead",
     replaceWith = ReplaceWith("animateContentDpAsState(value, key, canOverflow)")
 )
 @Composable

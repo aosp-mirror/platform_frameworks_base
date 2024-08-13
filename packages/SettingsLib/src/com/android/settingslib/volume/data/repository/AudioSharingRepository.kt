@@ -34,6 +34,7 @@ import com.android.settingslib.bluetooth.onServiceStateChanged
 import com.android.settingslib.bluetooth.onSourceConnectedOrRemoved
 import com.android.settingslib.volume.data.repository.AudioSharingRepository.Companion.AUDIO_SHARING_VOLUME_MAX
 import com.android.settingslib.volume.data.repository.AudioSharingRepository.Companion.AUDIO_SHARING_VOLUME_MIN
+import com.android.settingslib.volume.shared.AudioSharingLogger
 import kotlin.coroutines.CoroutineContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -50,6 +51,7 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.merge
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.runningFold
 import kotlinx.coroutines.flow.stateIn
@@ -90,6 +92,7 @@ class AudioSharingRepositoryImpl(
     private val btManager: LocalBluetoothManager,
     private val coroutineScope: CoroutineScope,
     private val backgroundCoroutineContext: CoroutineContext,
+    private val logger: AudioSharingLogger
 ) : AudioSharingRepository {
     private val isAudioSharingProfilesReady: StateFlow<Boolean> =
         btManager.profileManager.onServiceStateChanged
@@ -104,6 +107,7 @@ class AudioSharingRepositoryImpl(
                 btManager.profileManager.leAudioBroadcastProfile.onBroadcastStartedOrStopped
                     .map { isBroadcasting() }
                     .onStart { emit(isBroadcasting()) }
+                    .onEach { logger.onAudioSharingStateChanged(it) }
                     .flowOn(backgroundCoroutineContext)
             } else {
                 flowOf(false)
@@ -156,6 +160,7 @@ class AudioSharingRepositoryImpl(
                 .map { getSecondaryGroupId() },
             primaryGroupId.map { getSecondaryGroupId() })
             .onStart { emit(getSecondaryGroupId()) }
+            .onEach { logger.onSecondaryGroupIdChanged(it) }
             .flowOn(backgroundCoroutineContext)
             .stateIn(
                 coroutineScope,
@@ -202,6 +207,7 @@ class AudioSharingRepositoryImpl(
                             acc
                         }
                     }
+                    .onEach { logger.onVolumeMapChanged(it) }
                     .flowOn(backgroundCoroutineContext)
             } else {
                 emptyFlow()
@@ -220,6 +226,7 @@ class AudioSharingRepositoryImpl(
                     BluetoothUtils.getSecondaryDeviceForBroadcast(contentResolver, btManager)
                 if (cachedDevice != null) {
                     it.setDeviceVolume(cachedDevice.device, volume, /* isGroupOp= */ true)
+                    logger.onSetDeviceVolumeRequested(volume)
                 }
             }
         }

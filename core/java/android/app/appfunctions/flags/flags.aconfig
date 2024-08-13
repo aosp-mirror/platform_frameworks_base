@@ -1,0 +1,11 @@
+package: "android.app.appfunctions.flags"
+container: "system"
+
+flag {
+    name: "enable_app_function_manager"
+    is_exported: true
+    is_fixed_read_only: true
+    namespace: "machine_learning"
+    description: "This flag the new App Function manager system service."
+    bug: "357551503"
+}

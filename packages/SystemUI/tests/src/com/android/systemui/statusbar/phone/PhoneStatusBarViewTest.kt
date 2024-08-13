@@ -19,6 +19,8 @@ package com.android.systemui.statusbar.phone
 import android.content.res.Configuration
 import android.graphics.Insets
 import android.graphics.Rect
+import android.platform.test.annotations.DisableFlags
+import android.platform.test.annotations.EnableFlags
 import android.testing.TestableLooper.RunWithLooper
 import android.view.DisplayCutout
 import android.view.DisplayShape
@@ -30,6 +32,7 @@ import android.view.View
 import android.view.WindowInsets
 import android.widget.FrameLayout
 import androidx.test.filters.SmallTest
+import com.android.systemui.Flags.FLAG_STATUS_BAR_SWIPE_OVER_CHIP
 import com.android.systemui.Gefingerpoken
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.plugins.DarkIconDispatcher
@@ -82,7 +85,8 @@ class PhoneStatusBarViewTest : SysuiTestCase() {
     }
 
     @Test
-    fun onInterceptTouchEvent_listenerNotified() {
+    @DisableFlags(FLAG_STATUS_BAR_SWIPE_OVER_CHIP)
+    fun onInterceptTouchEvent_flagOff_listenerNotified() {
         val handler = TestTouchEventHandler()
         view.setTouchEventHandler(handler)
 
@@ -90,6 +94,66 @@ class PhoneStatusBarViewTest : SysuiTestCase() {
         view.onInterceptTouchEvent(event)
 
         assertThat(handler.lastInterceptEvent).isEqualTo(event)
+    }
+
+    @Test
+    @EnableFlags(FLAG_STATUS_BAR_SWIPE_OVER_CHIP)
+    fun onInterceptTouchEvent_flagOn_listenerNotified() {
+        val handler = TestTouchEventHandler()
+        view.setTouchEventHandler(handler)
+
+        val event = MotionEvent.obtain(0L, 0L, MotionEvent.ACTION_DOWN, 0f, 0f, 0)
+        view.onInterceptTouchEvent(event)
+
+        assertThat(handler.lastInterceptEvent).isEqualTo(event)
+    }
+
+    @Test
+    @DisableFlags(FLAG_STATUS_BAR_SWIPE_OVER_CHIP)
+    fun onInterceptTouchEvent_listenerReturnsFalse_flagOff_viewReturnsFalse() {
+        val handler = TestTouchEventHandler()
+        view.setTouchEventHandler(handler)
+        val event = MotionEvent.obtain(0L, 0L, MotionEvent.ACTION_DOWN, 0f, 0f, 0)
+
+        handler.handleTouchReturnValue = false
+
+        assertThat(view.onInterceptTouchEvent(event)).isFalse()
+    }
+
+    @Test
+    @EnableFlags(FLAG_STATUS_BAR_SWIPE_OVER_CHIP)
+    fun onInterceptTouchEvent_listenerReturnsFalse_flagOn_viewReturnsFalse() {
+        val handler = TestTouchEventHandler()
+        view.setTouchEventHandler(handler)
+        val event = MotionEvent.obtain(0L, 0L, MotionEvent.ACTION_DOWN, 0f, 0f, 0)
+
+        handler.handleTouchReturnValue = false
+
+        assertThat(view.onInterceptTouchEvent(event)).isFalse()
+    }
+
+    @Test
+    @DisableFlags(FLAG_STATUS_BAR_SWIPE_OVER_CHIP)
+    fun onInterceptTouchEvent_listenerReturnsTrue_flagOff_viewReturnsFalse() {
+        val handler = TestTouchEventHandler()
+        view.setTouchEventHandler(handler)
+        val event = MotionEvent.obtain(0L, 0L, MotionEvent.ACTION_DOWN, 0f, 0f, 0)
+
+        handler.handleTouchReturnValue = true
+
+        assertThat(view.onInterceptTouchEvent(event)).isFalse()
+    }
+
+    @Test
+    @EnableFlags(FLAG_STATUS_BAR_SWIPE_OVER_CHIP)
+    fun onInterceptTouchEvent_listenerReturnsTrue_flagOn_viewReturnsTrue() {
+        val handler = TestTouchEventHandler()
+        view.setTouchEventHandler(handler)
+        val event = MotionEvent.obtain(0L, 0L, MotionEvent.ACTION_DOWN, 0f, 0f, 0)
+
+        handler.handleTouchReturnValue = true
+
+        assertThat(view.onInterceptTouchEvent(event)).isTrue()
     }
 
     @Test

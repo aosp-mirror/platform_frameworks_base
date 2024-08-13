@@ -27,7 +27,6 @@ import com.android.systemui.scene.shared.model.Scenes
 /** [ElementContentPicker] implementation for the media carousel object. */
 object MediaContentPicker : StaticElementContentPicker {
 
-    const val SHADE_FRACTION = 0.66f
     override val contents =
         setOf(
             Scenes.Lockscreen,

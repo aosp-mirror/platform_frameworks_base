@@ -32,6 +32,7 @@ import com.android.systemui.authentication.data.repository.FakeAuthenticationRep
 import com.android.systemui.authentication.data.repository.fakeAuthenticationRepository
 import com.android.systemui.authentication.domain.interactor.authenticationInteractor
 import com.android.systemui.authentication.shared.model.AuthenticationMethodModel
+import com.android.systemui.bouncer.data.repository.fakeKeyguardBouncerRepository
 import com.android.systemui.bouncer.domain.interactor.bouncerInteractor
 import com.android.systemui.bouncer.shared.logging.BouncerUiEvent
 import com.android.systemui.classifier.FalsingCollector
@@ -109,6 +110,7 @@ class SceneContainerStartableTest : SysuiTestCase() {
     private val sceneInteractor by lazy { kosmos.sceneInteractor }
     private val bouncerInteractor by lazy { kosmos.bouncerInteractor }
     private val faceAuthRepository by lazy { kosmos.fakeDeviceEntryFaceAuthRepository }
+    private val bouncerRepository by lazy { kosmos.fakeKeyguardBouncerRepository }
     private val sysUiState = kosmos.sysUiState
     private val falsingCollector = mock<FalsingCollector>().also { kosmos.falsingCollector = it }
     private val fakeSceneDataSource = kosmos.fakeSceneDataSource
@@ -272,6 +274,66 @@ class SceneContainerStartableTest : SysuiTestCase() {
             )
 
             assertThat(currentSceneKey).isEqualTo(Scenes.Gone)
+        }
+
+    @Test
+    fun switchFromLockscreenToGoneAndHideAltBouncerWhenDeviceUnlocked() =
+        testScope.runTest {
+            val alternateBouncerVisible by
+                collectLastValue(bouncerRepository.alternateBouncerVisible)
+            val currentSceneKey by collectLastValue(sceneInteractor.currentScene)
+
+            bouncerRepository.setAlternateVisible(true)
+            assertThat(alternateBouncerVisible).isTrue()
+
+            prepareState(
+                authenticationMethod = AuthenticationMethodModel.Pin,
+                isDeviceUnlocked = false,
+                initialSceneKey = Scenes.Lockscreen,
+            )
+            assertThat(currentSceneKey).isEqualTo(Scenes.Lockscreen)
+            underTest.start()
+
+            kosmos.fakeDeviceEntryFingerprintAuthRepository.setAuthenticationStatus(
+                SuccessFingerprintAuthenticationStatus(0, true)
+            )
+
+            assertThat(currentSceneKey).isEqualTo(Scenes.Gone)
+            assertThat(alternateBouncerVisible).isFalse()
+        }
+
+    @Test
+    fun stayOnCurrentSceneAndHideAltBouncerWhenDeviceUnlocked_whenLeaveOpenShade() =
+        testScope.runTest {
+            val alternateBouncerVisible by
+                collectLastValue(bouncerRepository.alternateBouncerVisible)
+            val currentSceneKey by collectLastValue(sceneInteractor.currentScene)
+
+            kosmos.sysuiStatusBarStateController.leaveOpen = true // leave shade open
+            bouncerRepository.setAlternateVisible(true)
+            assertThat(alternateBouncerVisible).isTrue()
+
+            val transitionState =
+                prepareState(
+                    authenticationMethod = AuthenticationMethodModel.Pin,
+                    isDeviceUnlocked = false,
+                    initialSceneKey = Scenes.Lockscreen,
+                )
+            assertThat(currentSceneKey).isEqualTo(Scenes.Lockscreen)
+            underTest.start()
+            runCurrent()
+
+            sceneInteractor.changeScene(Scenes.QuickSettings, "switching to qs for test")
+            transitionState.value = ObservableTransitionState.Idle(Scenes.QuickSettings)
+            runCurrent()
+            assertThat(currentSceneKey).isEqualTo(Scenes.QuickSettings)
+
+            kosmos.fakeDeviceEntryFingerprintAuthRepository.setAuthenticationStatus(
+                SuccessFingerprintAuthenticationStatus(0, true)
+            )
+
+            assertThat(currentSceneKey).isEqualTo(Scenes.QuickSettings)
+            assertThat(alternateBouncerVisible).isFalse()
         }
 
     @Test
