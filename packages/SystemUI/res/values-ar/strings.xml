@@ -194,7 +194,7 @@
     <string name="data_connection_roaming" msgid="375650836665414797">"التجوال"</string>
     <string name="cell_data_off" msgid="4886198950247099526">"غير مفعّلة"</string>
     <string name="accessibility_airplane_mode" msgid="1899529214045998505">"وضع الطيران."</string>
-    <string name="accessibility_vpn_on" msgid="8037549696057288731">"‏الشبكة الافتراضية الخاصة (VPN) قيد التفعيل."</string>
+    <string name="accessibility_vpn_on" msgid="8037549696057288731">"‏شبكة VPN قيد التفعيل."</string>
     <string name="accessibility_battery_level" msgid="5143715405241138822">"مستوى البطارية <xliff:g id="NUMBER">%d</xliff:g> في المائة."</string>
     <string name="accessibility_battery_level_with_estimate" msgid="6548654589315074529">"نسبة شحن البطارية <xliff:g id="PERCENTAGE">%1$d</xliff:g> في المئة، <xliff:g id="TIME">%2$s</xliff:g>."</string>
     <string name="accessibility_battery_level_charging" msgid="8892191177774027364">"جارٍ شحن البطارية، <xliff:g id="BATTERY_PERCENTAGE">%d</xliff:g>%%."</string>
@@ -435,19 +435,19 @@
     <string name="quick_settings_disclosure_named_management_named_vpn" msgid="2169227918166358741">"ينتمي هذا الجهاز إلى <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>، ويتّصل بالإنترنت من خلال <xliff:g id="VPN_APP">%2$s</xliff:g>."</string>
     <string name="quick_settings_disclosure_management" msgid="5515296598440684962">"هذا الجهاز يخص مؤسستك."</string>
     <string name="quick_settings_disclosure_named_management" msgid="3476472755775165827">"هذا الجهاز يخص <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>."</string>
-    <string name="quick_settings_disclosure_management_vpns" msgid="929181757984262902">"‏ينتمي هذا الجهاز إلى مؤسستك، ويتّصل بالإنترنت من خلال خدمات الشبكة الافتراضية الخاصة (VPN)."</string>
-    <string name="quick_settings_disclosure_named_management_vpns" msgid="3312645578322079185">"‏ينتمي هذا الجهاز إلى <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>، ويتّصل بالإنترنت من خلال خدمات الشبكة الافتراضية الخاصة (VPN)."</string>
+    <string name="quick_settings_disclosure_management_vpns" msgid="929181757984262902">"‏ينتمي هذا الجهاز إلى مؤسستك، ويتّصل بالإنترنت من خلال خدمات شبكة VPN."</string>
+    <string name="quick_settings_disclosure_named_management_vpns" msgid="3312645578322079185">"‏ينتمي هذا الجهاز إلى <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>، ويتّصل بالإنترنت من خلال خدمات شبكة VPN."</string>
     <string name="quick_settings_disclosure_managed_profile_monitoring" msgid="1423899084754272514">"يمكن لمؤسستك مراقبة حركة بيانات الشبكة في ملف العمل"</string>
     <string name="quick_settings_disclosure_named_managed_profile_monitoring" msgid="8321469176706219860">"يمكن لـ <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> مراقبة حركة بيانات الشبكة في ملف العمل الخاص بك"</string>
     <string name="quick_settings_disclosure_managed_profile_network_activity" msgid="2636594621387832827">"تكون أنشطة شبكة ملف العمل مرئية لمشرف تكنولوجيا المعلومات."</string>
     <string name="quick_settings_disclosure_monitoring" msgid="8548019955631378680">"قد تكون الشبكة خاضعة للمراقبة"</string>
-    <string name="quick_settings_disclosure_vpns" msgid="3586175303518266301">"‏هذا الجهاز متّصل بالإنترنت من خلال خدمات الشبكات الافتراضية الخاصة (VPN)."</string>
+    <string name="quick_settings_disclosure_vpns" msgid="3586175303518266301">"‏هذا الجهاز متّصل بالإنترنت من خلال خدمات شبكات VPN."</string>
     <string name="quick_settings_disclosure_managed_profile_named_vpn" msgid="153393105176944100">"تطبيقات العمل الخاصة بك متّصلة بالإنترنت من خلال <xliff:g id="VPN_APP">%1$s</xliff:g>."</string>
     <string name="quick_settings_disclosure_personal_profile_named_vpn" msgid="451254750289172191">"تطبيقاتك الشخصية متّصلة بالإنترنت من خلال <xliff:g id="VPN_APP">%1$s</xliff:g>."</string>
     <string name="quick_settings_disclosure_named_vpn" msgid="6191822916936028208">"هذا الجهاز متّصل بالإنترنت من خلال <xliff:g id="VPN_APP">%1$s</xliff:g>."</string>
     <string name="monitoring_title_financed_device" msgid="3659962357973919387">"توفر مؤسسة \"<xliff:g id="ORGANIZATION_NAME">%s</xliff:g>\" هذا الجهاز"</string>
     <string name="monitoring_title_device_owned" msgid="7029691083837606324">"إدارة الأجهزة"</string>
-    <string name="monitoring_subtitle_vpn" msgid="800485258004629079">"‏شبكة افتراضية خاصة (VPN)"</string>
+    <string name="monitoring_subtitle_vpn" msgid="800485258004629079">"‏شبكة VPN"</string>
     <string name="monitoring_subtitle_network_logging" msgid="2444199331891219596">"تسجيل بيانات الشبكة"</string>
     <string name="monitoring_subtitle_ca_certificate" msgid="8588092029755175800">"‏شهادات CA"</string>
     <string name="monitoring_button_view_policies" msgid="3869724835853502410">"عرض السياسات"</string>
@@ -463,12 +463,12 @@
     <string name="monitoring_description_named_vpn" msgid="8220190039787149671">"‏هذا الجهاز متّصل بالإنترنت من خلال \"<xliff:g id="VPN_APP">%1$s</xliff:g>\". ويمكن لمقدِّم شبكة VPN الاطّلاع على أنشطة الشبكة، بما في ذلك الرسائل الإلكترونية وبيانات التصفّح."</string>
     <string name="monitoring_description_managed_device_named_vpn" msgid="7693648349547785255">"هذا الجهاز متّصل بالإنترنت من خلال \"<xliff:g id="VPN_APP">%1$s</xliff:g>\". تجدر الإشارة إلى أنّ أنشطة الشبكة، بما في ذلك الرسائل الإلكترونية وبيانات التصفُّح، مرئية لمشرف تكنولوجيا المعلومات في مؤسستك."</string>
     <string name="monitoring_description_two_named_vpns" msgid="6726394451199620634">"هذا الجهاز متّصل بالإنترنت من خلال <xliff:g id="VPN_APP_0">%1$s</xliff:g> و<xliff:g id="VPN_APP_1">%2$s</xliff:g>. يمكن لمشرف تكنولوجيا المعلومات رؤية أنشطة الشبكة، بما في ذلك الرسائل الإلكترونية وبيانات التصفُّح."</string>
-    <string name="monitoring_description_managed_profile_named_vpn" msgid="7254359257263069766">"‏تطبيقات العمل الخاصة بك متّصلة بالإنترنت من خلال <xliff:g id="VPN_APP">%1$s</xliff:g>. يمكن لمشرف تكنولوجيا المعلومات ومزوّد خدمة الشبكة الافتراضية الخاصة (VPN) رؤية أنشطة الشبكة في تطبيقات العمل، بما في ذلك الرسائل الإلكترونية وبيانات التصفُّح."</string>
-    <string name="monitoring_description_personal_profile_named_vpn" msgid="5083909710727365452">"‏تطبيقاتك الشخصية متّصلة بالإنترنت من خلال <xliff:g id="VPN_APP">%1$s</xliff:g>. تظهر أنشطة الشبكة، بما في ذلك الرسائل الإلكترونية وبيانات التصفُّح، لمزوّد خدمة الشبكة الافتراضية الخاصة (VPN)."</string>
+    <string name="monitoring_description_managed_profile_named_vpn" msgid="7254359257263069766">"‏تطبيقات العمل الخاصة بك متّصلة بالإنترنت من خلال <xliff:g id="VPN_APP">%1$s</xliff:g>. يمكن لمشرف تكنولوجيا المعلومات ومزوّد خدمة شبكة VPN رؤية أنشطة الشبكة في تطبيقات العمل، بما في ذلك الرسائل الإلكترونية وبيانات التصفُّح."</string>
+    <string name="monitoring_description_personal_profile_named_vpn" msgid="5083909710727365452">"‏تطبيقاتك الشخصية متّصلة بالإنترنت من خلال <xliff:g id="VPN_APP">%1$s</xliff:g>. تظهر أنشطة الشبكة، بما في ذلك الرسائل الإلكترونية وبيانات التصفُّح، لمزوّد خدمة شبكة VPN."</string>
     <string name="monitoring_description_vpn_settings_separator" msgid="8292589617720435430">" "</string>
     <string name="monitoring_description_vpn_settings" msgid="5264167033247632071">"‏فتح إعدادات شبكة VPN"</string>
     <string name="monitoring_description_parental_controls" msgid="8184693528917051626">"يتولّى أحد الوالدين إدارة هذا الجهاز. يمكن للوالدين عرض وإدارة معلوماتك، مثلاً التطبيقات التي تستخدمها وموقعك الجغرافي ووقت النظر إلى الشاشة."</string>
-    <string name="legacy_vpn_name" msgid="4174223520162559145">"شبكة افتراضية خاصة"</string>
+    <string name="legacy_vpn_name" msgid="4174223520162559145">"‏شبكة VPN"</string>
     <string name="keyguard_indication_trust_unlocked" msgid="7395154975733744547">"‏فتح القفل باستمرار بواسطة TrustAgent"</string>
     <string name="zen_mode_and_condition" msgid="5043165189511223718">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>. <xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>
     <string name="accessibility_volume_settings" msgid="1458961116951564784">"إعدادات الصوت"</string>
