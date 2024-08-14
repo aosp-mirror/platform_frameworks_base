@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.keyguard.gesture.data
+package com.android.systemui.navigationbar.gestural.data
 
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.testDispatcher
