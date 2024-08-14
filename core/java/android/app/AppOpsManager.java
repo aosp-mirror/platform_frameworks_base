@@ -10119,6 +10119,9 @@ public class AppOpsManager {
         }
 
         p.writeInt(Parcel.EX_HAS_NOTED_APPOPS_REPLY_HEADER);
+        final int sizePosition = p.dataPosition();
+        // Write size placeholder. With this size we can easily skip it in native.
+        p.writeInt(0);
 
         int numAttributionWithNotesAppOps = notedAppOps.size();
         p.writeInt(numAttributionWithNotesAppOps);
@@ -10135,6 +10138,12 @@ public class AppOpsManager {
                 }
             }
         }
+
+        final int payloadPosition = p.dataPosition();
+        p.setDataPosition(sizePosition);
+        // Total header size including 4 bytes size itself.
+        p.writeInt(payloadPosition - sizePosition);
+        p.setDataPosition(payloadPosition);
     }
 
     /**
@@ -10148,6 +10157,8 @@ public class AppOpsManager {
      * @hide
      */
     public static void readAndLogNotedAppops(@NonNull Parcel p) {
+        // Skip size.
+        p.readInt();
         int numAttributionsWithNotedAppOps = p.readInt();
 
         for (int i = 0; i < numAttributionsWithNotedAppOps; i++) {
