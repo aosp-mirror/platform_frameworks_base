@@ -124,8 +124,6 @@ import static com.android.server.wm.ActivityTaskSupervisor.ON_TOP;
 import static com.android.server.wm.ActivityTaskSupervisor.REMOVE_FROM_RECENTS;
 import static com.android.server.wm.BackgroundActivityStartController.BalVerdict;
 import static com.android.server.wm.LockTaskController.LOCK_TASK_AUTH_DONT_LOCK;
-import static com.android.server.wm.RecentsAnimationController.REORDER_KEEP_IN_PLACE;
-import static com.android.server.wm.RecentsAnimationController.REORDER_MOVE_TO_ORIGINAL_POSITION;
 import static com.android.server.wm.RootWindowContainer.MATCH_ATTACHED_TASK_ONLY;
 import static com.android.server.wm.RootWindowContainer.MATCH_ATTACHED_TASK_OR_RECENT_TASKS;
 import static com.android.server.wm.Task.REPARENT_KEEP_ROOT_TASK_AT_FRONT;
@@ -241,7 +239,6 @@ import android.util.SparseArray;
 import android.util.TimeUtils;
 import android.util.proto.ProtoOutputStream;
 import android.view.Display;
-import android.view.IRecentsAnimationRunner;
 import android.view.RemoteAnimationAdapter;
 import android.view.RemoteAnimationDefinition;
 import android.view.WindowManager;
@@ -1773,16 +1770,13 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     }
 
     /**
-     * Start the recents activity to perform the recents animation.
+     * Preload the recents activity.
      *
-     * @param intent                 The intent to start the recents activity.
-     * @param eventTime              When the (touch) event is triggered to start recents activity.
-     * @param recentsAnimationRunner Pass {@code null} to only preload the activity.
+     * @param intent The intent to preload the recents activity.
      */
     @Override
-    public void startRecentsActivity(Intent intent, long eventTime,
-            @Nullable IRecentsAnimationRunner recentsAnimationRunner) {
-        enforceTaskPermission("startRecentsActivity()");
+    public void preloadRecentsActivity(Intent intent) {
+        enforceTaskPermission("preloadRecentsActivity()");
         final int callingPid = Binder.getCallingPid();
         final int callingUid = Binder.getCallingUid();
         final long origId = Binder.clearCallingIdentity();
@@ -1793,15 +1787,10 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 final int recentsUid = mRecentTasks.getRecentsComponentUid();
                 final WindowProcessController caller = getProcessController(callingPid, callingUid);
 
-                // Start a new recents animation
                 final RecentsAnimation anim = new RecentsAnimation(this, mTaskSupervisor,
                         getActivityStartController(), mWindowManager, intent, recentsComponent,
                         recentsFeatureId, recentsUid, caller);
-                if (recentsAnimationRunner == null) {
-                    anim.preloadRecentsActivity();
-                } else {
-                    anim.startRecentsActivity(recentsAnimationRunner, eventTime);
-                }
+                anim.preloadRecentsActivity();
             }
         } finally {
             Binder.restoreCallingIdentity(origId);
@@ -2562,23 +2551,6 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             }
         } finally {
             Binder.restoreCallingIdentity(ident);
-        }
-    }
-
-    @Override
-    public void cancelRecentsAnimation(boolean restoreHomeRootTaskPosition) {
-        enforceTaskPermission("cancelRecentsAnimation()");
-        final long callingUid = Binder.getCallingUid();
-        final long origId = Binder.clearCallingIdentity();
-        try {
-            synchronized (mGlobalLock) {
-                // Cancel the recents animation synchronously (do not hold the WM lock)
-                mWindowManager.cancelRecentsAnimation(restoreHomeRootTaskPosition
-                        ? REORDER_MOVE_TO_ORIGINAL_POSITION
-                        : REORDER_KEEP_IN_PLACE, "cancelRecentsAnimation/uid=" + callingUid);
-            }
-        } finally {
-            Binder.restoreCallingIdentity(origId);
         }
     }
 
