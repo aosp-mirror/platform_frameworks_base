@@ -7656,7 +7656,7 @@ public class WindowManagerService extends IWindowManager.Stub
                         displayId);
                 return REMOVE_CONTENT_MODE_UNDEFINED;
             }
-            return mDisplayWindowSettings.getRemoveContentModeLocked(displayContent);
+            return displayContent.getRemoveContentMode();
         }
     }
 
