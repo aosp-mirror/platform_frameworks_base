@@ -53,6 +53,4 @@ interface IBubbles {
     oneway void showShortcutBubble(in ShortcutInfo info) = 12;
 
     oneway void showAppBubble(in Intent intent) = 13;
-
-    oneway void showExpandedView() = 14;
 }
