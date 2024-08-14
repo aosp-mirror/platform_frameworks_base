@@ -220,6 +220,16 @@ public class ZenMode implements Parcelable {
         return getTriggerDescription();
     }
 
+    /**
+     * Returns an icon "key" that is guaranteed to be different if the icon is different. Note that
+     * the inverse is not true, i.e. two keys can be different and the icon still be visually the
+     * same.
+     */
+    @NonNull
+    public String getIconKey() {
+        return mRule.getType() + ":" + mRule.getPackageName() + ":" + mRule.getIconResId();
+    }
+
     @NonNull
     public ListenableFuture<Drawable> getIcon(@NonNull Context context,
             @NonNull ZenIconLoader iconLoader) {

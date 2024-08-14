@@ -17,7 +17,6 @@
 package com.android.compose.animation.scene
 
 import com.android.compose.animation.scene.content.state.TransitionState
-import kotlin.math.absoluteValue
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 
@@ -63,47 +62,30 @@ internal fun CoroutineScope.animateToScene(
             if (transitionState.toScene == target) {
                 // The user is currently swiping to [target] but didn't release their pointer yet:
                 // animate the progress to `1`.
-
                 check(transitionState.fromScene == transitionState.currentScene)
-                val progress = transitionState.progress
-                if ((1f - progress).absoluteValue < ProgressVisibilityThreshold) {
-                    // The transition is already finished (progress ~= 1): no need to animate. We
-                    // finish the current transition early to make sure that the current state
-                    // change is committed.
-                    layoutState.finishTransition(transitionState, target)
-                    null
-                } else {
-                    // The transition is in progress: start the canned animation at the same
-                    // progress as it was in.
-                    animateToScene(
-                        layoutState,
-                        target,
-                        transitionKey,
-                        isInitiatedByUserInput,
-                        replacedTransition = transitionState,
-                    )
-                }
+
+                // The transition is in progress: start the canned animation at the same
+                // progress as it was in.
+                animateToScene(
+                    layoutState,
+                    target,
+                    transitionKey,
+                    isInitiatedByUserInput,
+                    replacedTransition = transitionState,
+                )
             } else if (transitionState.fromScene == target) {
                 // There is a transition from [target] to another scene: simply animate the same
                 // transition progress to `0`.
                 check(transitionState.toScene == transitionState.currentScene)
 
-                val progress = transitionState.progress
-                if (progress.absoluteValue < ProgressVisibilityThreshold) {
-                    // The transition is at progress ~= 0: no need to animate.We finish the current
-                    // transition early to make sure that the current state change is committed.
-                    layoutState.finishTransition(transitionState, target)
-                    null
-                } else {
-                    animateToScene(
-                        layoutState,
-                        target,
-                        transitionKey,
-                        isInitiatedByUserInput,
-                        reversed = true,
-                        replacedTransition = transitionState,
-                    )
-                }
+                animateToScene(
+                    layoutState,
+                    target,
+                    transitionKey,
+                    isInitiatedByUserInput,
+                    reversed = true,
+                    replacedTransition = transitionState,
+                )
             } else {
                 // Generic interruption; the current transition is neither from or to [target].
                 val interruptionResult =
@@ -185,7 +167,7 @@ private fun CoroutineScope.animateToScene(
         oneOffAnimation = oneOffAnimation,
         targetProgress = targetProgress,
         startTransition = { layoutState.startTransition(transition, chain) },
-        finishTransition = { layoutState.finishTransition(transition, targetScene) },
+        finishTransition = { layoutState.finishTransition(transition) },
     )
 
     return transition

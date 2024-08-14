@@ -76,6 +76,11 @@ final class DisplayRotationCompatPolicy implements CameraStateMonitor.CameraComp
     @ScreenOrientation
     private int mLastReportedOrientation = SCREEN_ORIENTATION_UNSET;
 
+    /**
+     * Value toggled on {@link #start()} to {@code true} and on {@link #dispose()} to {@code false}.
+     */
+    private boolean mIsRunning;
+
     DisplayRotationCompatPolicy(@NonNull DisplayContent displayContent,
             @NonNull CameraStateMonitor cameraStateMonitor,
             @NonNull ActivityRefresher activityRefresher) {
@@ -90,12 +95,19 @@ final class DisplayRotationCompatPolicy implements CameraStateMonitor.CameraComp
     void start() {
         mCameraStateMonitor.addCameraStateListener(this);
         mActivityRefresher.addEvaluator(this);
+        mIsRunning = true;
     }
 
     /** Releases camera state listener. */
     void dispose() {
         mCameraStateMonitor.removeCameraStateListener(this);
         mActivityRefresher.removeEvaluator(this);
+        mIsRunning = false;
+    }
+
+    @VisibleForTesting
+    boolean isRunning() {
+        return mIsRunning;
     }
 
     /**

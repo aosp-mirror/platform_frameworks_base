@@ -133,6 +133,7 @@ import static com.android.window.flags.Flags.enableCaptionCompatInsetForceConsum
 import static com.android.window.flags.Flags.insetsControlChangedItem;
 import static com.android.window.flags.Flags.insetsControlSeq;
 import static com.android.window.flags.Flags.setScPropertiesInClient;
+import static com.android.window.flags.Flags.systemUiImmersiveConfirmationDialog;
 
 import android.Manifest;
 import android.accessibilityservice.AccessibilityService;
@@ -378,7 +379,7 @@ public final class ViewRootImpl implements ViewParent,
      * @hide
      */
     public static final boolean CLIENT_IMMERSIVE_CONFIRMATION =
-            SystemProperties.getBoolean("persist.wm.debug.client_immersive_confirmation", false);
+            systemUiImmersiveConfirmationDialog();
 
     /**
      * Set this system property to true to force the view hierarchy to render

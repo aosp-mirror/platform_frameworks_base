@@ -1,3 +1,4 @@
-# Bug component: 544200
+# Bug component: 1040349
 
-include /core/java/android/view/contentcapture/OWNERS
+include /core/java/android/view/contentprotection/OWNERS
+

@@ -923,7 +923,7 @@ final class TaskDisplayArea extends DisplayArea<WindowContainer> {
             if (windowingMode != WINDOWING_MODE_UNDEFINED && candidateTask.isRootTask()
                     && candidateTask.getWindowingMode() != windowingMode) {
                 candidateTask.mTransitionController.collect(candidateTask);
-                candidateTask.setWindowingMode(windowingMode);
+                candidateTask.setRootTaskWindowingMode(windowingMode);
             }
             return candidateTask.getRootTask();
         }

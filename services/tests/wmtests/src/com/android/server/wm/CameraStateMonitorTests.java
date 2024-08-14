@@ -189,7 +189,6 @@ public final class CameraStateMonitorTests extends WindowTestsBase {
                 .build();
 
         spyOn(mActivity.mAtmService.getLifecycleManager());
-        spyOn(mActivity.mLetterboxUiController);
 
         doReturn(mActivity).when(mDisplayContent).topRunningActivity(anyBoolean());
     }

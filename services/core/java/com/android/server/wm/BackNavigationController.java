@@ -367,7 +367,7 @@ class BackNavigationController {
                         // client process to prevent the unexpected relayout when handling the back
                         // animation.
                         for (int i = prevActivities.size() - 1; i >= 0; --i) {
-                            prevActivities.get(i).setDeferHidingClient(true);
+                            prevActivities.get(i).setDeferHidingClient();
                         }
                     } else {
                         scheduleAnimation(builder);
