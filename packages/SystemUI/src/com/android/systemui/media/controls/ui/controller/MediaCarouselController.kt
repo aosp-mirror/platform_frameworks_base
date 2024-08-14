@@ -1635,6 +1635,7 @@ constructor(
                     "only active ${desiredHostState?.showsOnlyActiveMedia}"
             )
             println("isSwipedAway: ${MediaPlayerData.isSwipedAway}")
+            println("allowMediaPlayerOnLockScreen: $allowMediaPlayerOnLockScreen")
         }
     }
 }

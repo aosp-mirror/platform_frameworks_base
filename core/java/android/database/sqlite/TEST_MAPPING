@@ -1,18 +1,7 @@
 {
     "presubmit": [
         {
-            "name": "FrameworksCoreTests",
-            "options": [
-                {
-                    "exclude-annotation": "androidx.test.filters.FlakyTest"
-                },
-                {
-                    "exclude-annotation": "org.junit.Ignore"
-                },
-                {
-                    "include-filter": "android.database.sqlite.SQLiteRawStatementTest"
-                }
-            ],
+            "name": "FrameworksCoreTests_sqlite",
             "file_patterns": [
                 "(/|^)SQLiteRawStatement.java",
                 "(/|^)SQLiteDatabase.java",

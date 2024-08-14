@@ -145,8 +145,7 @@ class PatternBouncerViewModel(
                                 )
                         }
                     }
-                }
-                    ?: emptyList()
+                } ?: emptyList()
 
             _selectedDots.value =
                 linkedSetOf<PatternDotViewModel>().apply {

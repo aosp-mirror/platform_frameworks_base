@@ -380,6 +380,8 @@
     <string name="show_touches_summary" msgid="3692861665994502193">"টিপিলে দৃশ্যায়িত ফীডবেক দিয়ক"</string>
     <string name="show_key_presses" msgid="6360141722735900214">"কী টিপা দেখুৱাওক"</string>
     <string name="show_key_presses_summary" msgid="725387457373015024">"ভৌতিক কী টিপাৰ ভিজুৱেল প্ৰতিক্ৰিয়া দেখুৱাওক"</string>
+    <string name="touchpad_visualizer" msgid="3707916068870825115">"টাচ্চপেডৰ ইনপুট দেখুৱাওক"</string>
+    <string name="touchpad_visualizer_summary" msgid="4056080018119847449">"টাচ্চপেডৰ ইনপুট ডেটা প্ৰদৰ্শন কৰা স্ক্ৰীনৰ অ’ভাৰলে’ আৰু চিনাক্ত কৰা নিৰ্দেশনা"</string>
     <string name="show_screen_updates" msgid="2078782895825535494">"পৃষ্ঠভাগৰ আপডে’ট দেখুৱাওক"</string>
     <string name="show_screen_updates_summary" msgid="2126932969682087406">"আপডে’ট হওতে গোটেই ৱিণ্ড পৃষ্ঠসমূহ ফ্লাশ্ব কৰক"</string>
     <string name="show_hw_screen_updates" msgid="2021286231267747506">"ভিউৰ আপডে’ট দেখুৱাওক"</string>
@@ -495,8 +497,7 @@
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_remaining_charging_duration_only" msgid="8085099012811384899">"সম্পূৰ্ণ হ’বলৈ <xliff:g id="TIME">%1$s</xliff:g> বাকী আছে"</string>
     <string name="power_charging_duration" msgid="6127154952524919719">"সম্পূৰ্ণ হ’বলৈ <xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> বাকী আছে"</string>
-    <!-- no translation found for power_charging_limited (4144004473976005214) -->
-    <skip />
+    <string name="power_charging_limited" msgid="4144004473976005214">"<xliff:g id="LEVEL">%1$s</xliff:g> - বেটাৰী সুৰক্ষিত কৰিবলৈ চাৰ্জিং স্থগিত ৰখা হৈছে"</string>
     <string name="power_charging_future_paused" msgid="1809543660923642799">"<xliff:g id="LEVEL">%1$s</xliff:g> ‑ চাৰ্জ হৈ আছে"</string>
     <string name="power_fast_charging_duration_v2" msgid="3797735998640359490">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATUS">%2$s</xliff:g> - <xliff:g id="TIME">%3$s</xliff:g>ৰ ভিতৰত সম্পূৰ্ণ হ’ব"</string>
     <string name="power_charging_duration_v2" msgid="2938998284074003248">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g>ৰ ভিতৰত সম্পূৰ্ণৰূপে চাৰ্জ হ’ব"</string>

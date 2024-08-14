@@ -478,6 +478,10 @@ class TaskFragment extends WindowContainer<WindowContainer> {
         mTaskFragmentOrganizerProcessName = processName;
     }
 
+    void onTaskFragmentOrganizerRestarted(@NonNull ITaskFragmentOrganizer organizer) {
+        mTaskFragmentOrganizer = organizer;
+    }
+
     void onTaskFragmentOrganizerRemoved() {
         mTaskFragmentOrganizer = null;
     }
@@ -2960,7 +2964,13 @@ class TaskFragment extends WindowContainer<WindowContainer> {
     }
 
     boolean shouldRemoveSelfOnLastChildRemoval() {
-        return !mCreatedByOrganizer || mIsRemovalRequested;
+        if (!mCreatedByOrganizer || mIsRemovalRequested) {
+            return true;
+        }
+        // The TaskFragmentOrganizer may be killed while the embedded TaskFragments remains in WM
+        // core. The embedded TaskFragment should still be removed when the child activities are
+        // all gone (like package force-stopped).
+        return mIsEmbedded && mTaskFragmentOrganizer == null;
     }
 
     /**

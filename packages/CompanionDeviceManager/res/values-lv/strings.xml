@@ -21,26 +21,21 @@
     <string name="profile_name_watch" msgid="576290739483672360">"pulkstenis"</string>
     <string name="chooser_title_non_profile" msgid="6035023914517087400">"Izvēlieties ierīci, ko pārvaldīt lietotnē &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt;"</string>
     <string name="chooser_title" msgid="2235819929238267637">"Jāizvēlas <xliff:g id="PROFILE_NAME">%1$s</xliff:g> iestatīšanai"</string>
-    <string name="summary_watch" msgid="7962014927042971830">"Šī lietotne drīkstēs sinhronizēt informāciju, piemēram, zvanītāja vārdu, un piekļūt norādītajām atļaujām jūsu ierīcē (<xliff:g id="DEVICE_NAME">%1$s</xliff:g>)."</string>
+    <string name="summary_watch" msgid="8134580124808507407">"Šī lietotne drīkstēs sinhronizēt informāciju, piemēram, zvanītāja vārdu, un piekļūt šīm <xliff:g id="DEVICE_TYPE">%1$s</xliff:g> atļaujām."</string>
     <string name="confirmation_title_glasses" msgid="8288346850537727333">"Vai atļaut lietotnei &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; piekļūt ierīcei &lt;strong&gt;<xliff:g id="DEVICE_NAME">%2$s</xliff:g>&lt;/strong&gt;?"</string>
     <string name="profile_name_glasses" msgid="3506504967216601277">"ierīce"</string>
-    <string name="summary_glasses" msgid="2872254734959842579">"Šai lietotnei tiks sniegta piekļuve norādītajām atļaujām jūsu ierīcē (<xliff:g id="DEVICE_NAME">%1$s</xliff:g>)."</string>
-    <string name="title_app_streaming" msgid="2270331024626446950">"Atļaut lietotnei &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; piekļūt šai informācijai no jūsu tālruņa"</string>
-    <string name="title_app_streaming_with_mirroring" msgid="3364582597581570658">"Vai atļaut lietotnei &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; straumēt jūsu tālruņa lietotnes?"</string>
-    <string name="summary_app_streaming" msgid="295548145144086753">"%1$s varēs piekļūt visam saturam, kas ir redzams vai tiek atskaņots jūsu tālrunī, tostarp audio, fotoattēliem, parolēm un ziņojumiem.&lt;br/&gt;&lt;br/&gt;%1$s varēs straumēt lietotnes, līdz noņemsiet tās piekļuvi šai atļaujai."</string>
-    <string name="helper_title_app_streaming" msgid="4151687003439969765">"Vairāku ierīču pakalpojumi"</string>
-    <string name="helper_summary_app_streaming" msgid="2396773196949578425">"Lietotne <xliff:g id="APP_NAME">%1$s</xliff:g> pieprasa atļauju straumēt lietotnes starp jūsu ierīcēm šīs ierīces vārdā: <xliff:g id="DISPLAY_NAME">%2$s</xliff:g>."</string>
-    <string name="helper_summary_app_streaming_with_mirroring" msgid="6138581029144467467">"Lietotne <xliff:g id="APP_NAME">%1$s</xliff:g> pieprasa atļauju rādīt un straumēt lietotnes starp jūsu ierīcēm šīs ierīces vārdā: <xliff:g id="DISPLAY_NAME">%2$s</xliff:g>"</string>
+    <string name="summary_glasses" msgid="5469208629679579157">"Šī lietotne drīkstēs piekļūt norādītajām <xliff:g id="DEVICE_TYPE">%1$s</xliff:g> atļaujām."</string>
+    <string name="title_app_streaming" msgid="6845373585257287200">"Vai atļaut lietotnei &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; straumēt <xliff:g id="DEVICE_TYPE">%2$s</xliff:g> lietotnes ierīcē &lt;strong&gt;<xliff:g id="DEVICE_NAME">%3$s</xliff:g>&lt;/strong&gt;?"</string>
+    <string name="summary_app_streaming" msgid="1274464413649731829">"<xliff:g id="APP_NAME_0">%1$s</xliff:g> varēs piekļūt visam <xliff:g id="DEVICE_TYPE">%2$s</xliff:g> ekrānā parādītajam vai atskaņotajam saturam, tostarp audio, fotoattēliem, parolēm un ziņojumiem.&lt;br/&gt;&lt;br/&gt;<xliff:g id="APP_NAME_1">%1$s</xliff:g> varēs straumēt lietotnes ierīcē <xliff:g id="DEVICE_NAME">%3$s</xliff:g>, līdz noņemsiet piekļuvi šai atļaujai."</string>
+    <string name="helper_summary_app_streaming" msgid="1944832605534698562">"Lietotne <xliff:g id="APP_NAME">%1$s</xliff:g> pieprasa atļauju attēlot un straumēt lietotnes starp jūsu ierīcēm šīs ierīces vārdā: <xliff:g id="DEVICE_NAME">%2$s</xliff:g>"</string>
     <string name="title_automotive_projection" msgid="3296005598978412847"></string>
     <string name="summary_automotive_projection" msgid="8683801274662496164"></string>
-    <string name="title_computer" msgid="4693714143506569253">"Atļaut lietotnei &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; piekļūt šai informācijai no jūsu tālruņa"</string>
+    <string name="title_computer" msgid="4782923323932440751">"Vai atļaut lietotnei &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; piekļūt šai informācijai no jūsu <xliff:g id="DEVICE_TYPE">%2$s</xliff:g>?"</string>
     <string name="summary_computer" msgid="3798467601598297062"></string>
-    <string name="helper_title_computer" msgid="4671071173916176037">"Google Play pakalpojumi"</string>
-    <string name="helper_summary_computer" msgid="8774832742608187072">"Lietotne <xliff:g id="APP_NAME">%1$s</xliff:g> pieprasa atļauju piekļūt jūsu tālruņa fotoattēliem, multivides saturam un paziņojumiem šīs ierīces vārdā: <xliff:g id="DISPLAY_NAME">%2$s</xliff:g>."</string>
-    <string name="title_nearby_device_streaming" msgid="7269956847378799794">"Vai atļaut ierīcei &lt;strong&gt;<xliff:g id="DEVICE_NAME">%1$s</xliff:g>&lt;/strong&gt; veikt šo darbību?"</string>
-    <string name="title_nearby_device_streaming_with_mirroring" msgid="242855799919611657">"Vai atļaut ierīcei &lt;strong&gt;<xliff:g id="DEVICE_NAME">%1$s</xliff:g>&lt;/strong&gt; straumēt jūsu tālruņa lietotnes un sistēmas funkcijas?"</string>
-    <string name="summary_nearby_device_streaming" msgid="4039565463149145573">"%1$s varēs piekļūt visam saturam, kas ir redzams vai tiek atskaņots jūsu tālrunī, tostarp audio, fotoattēliem, maksājumu informācijai, parolēm un ziņojumiem.&lt;br/&gt;&lt;br/&gt;%1$s varēs straumēt lietotnes un sistēmas funkcijas, līdz noņemsiet tās piekļuvi šai atļaujai."</string>
-    <string name="helper_summary_nearby_device_streaming" msgid="2063965070936844876">"<xliff:g id="APP_NAME">%1$s</xliff:g> pieprasa atļauju tuvumā esošās ierīcēs straumēt lietotnes un citas sistēmas funkcijas šīs ierīces vārdā: <xliff:g id="DEVICE_NAME">%2$s</xliff:g>"</string>
+    <string name="helper_summary_computer" msgid="2298803016482139668">"Lietotne <xliff:g id="APP_NAME">%1$s</xliff:g> pieprasa atļauju piekļūt jūsu <xliff:g id="DEVICE_TYPE">%3$s</xliff:g> fotoattēliem, multivides saturam un paziņojumiem šīs ierīces vārdā: <xliff:g id="DEVICE_NAME">%2$s</xliff:g>."</string>
+    <string name="title_nearby_device_streaming" msgid="4295322493408411976">"Vai atļaut lietotnei &lt;strong&gt;<xliff:g id="DEVICE_NAME_0">%1$s</xliff:g>&lt;/strong&gt; straumēt <xliff:g id="DEVICE_TYPE">%2$s</xliff:g> lietotnes un sistēmas funkcijas ierīcē &lt;strong&gt;<xliff:g id="DEVICE_NAME_1">%3$s</xliff:g>&lt;/strong&gt;?"</string>
+    <string name="summary_nearby_device_streaming" msgid="962267343109051648">"<xliff:g id="APP_NAME_0">%1$s</xliff:g> varēs piekļūt visam <xliff:g id="DEVICE_TYPE">%2$s</xliff:g> ekrānā parādītajam vai atskaņotajam saturam, tostarp audio, fotoattēliem, maksājumu informācijai, parolēm un ziņojumiem.&lt;br/&gt;&lt;br/&gt;<xliff:g id="APP_NAME_1">%1$s</xliff:g> varēs straumēt lietotnes un sistēmas funkcijas ierīcē <xliff:g id="DEVICE_NAME">%3$s</xliff:g>, līdz noņemsiet piekļuvi šai atļaujai."</string>
+    <string name="helper_summary_nearby_device_streaming" msgid="8509848562931818793">"Lietotne <xliff:g id="APP_NAME">%1$s</xliff:g> pieprasa atļauju straumēt lietotnes un citas sistēmas funkcijas starp jūsu ierīcēm šīs ierīces vārdā: <xliff:g id="DEVICE_NAME">%2$s</xliff:g>."</string>
     <string name="profile_name_generic" msgid="6851028682723034988">"ierīce"</string>
     <string name="summary_generic" msgid="1761976003668044801">"Šī lietotne varēs sinhronizēt informāciju (piemēram, zvanītāja vārdu) starp jūsu tālruni un izvēlēto ierīci"</string>
     <string name="consent_yes" msgid="8344487259618762872">"Atļaut"</string>
@@ -62,8 +57,6 @@
     <string name="permission_media_routing_control" msgid="5498639511586715253">"Mainīt multivides izvadi"</string>
     <string name="permission_storage" msgid="6831099350839392343">"Fotoattēli un multivides faili"</string>
     <string name="permission_notifications" msgid="4099418516590632909">"Paziņojumi"</string>
-    <string name="permission_app_streaming" msgid="6009695219091526422">"Lietotnes"</string>
-    <string name="permission_nearby_device_streaming" msgid="1023325519477349499">"Straumēšana"</string>
     <string name="permission_phone_summary" msgid="8246321093970051702">"Veikt un pārvaldīt tālruņa zvanus"</string>
     <string name="permission_call_logs_summary" msgid="7545243592757693321">"Lasīt un rakstīt tālruņa zvanu žurnālu"</string>
     <string name="permission_sms_summary" msgid="8499509535410068616">"Sūtīt un skatīt īsziņas"</string>
@@ -73,10 +66,10 @@
     <string name="permission_nearby_devices_summary" msgid="1306752848196464817">"Atrast tuvumā esošas ierīces, izveidot ar tām savienojumu un noteikt to relatīvo atrašanās vietu"</string>
     <string name="permission_notification_listener_access_summary" msgid="7856071768185367749">"Lasīt visus paziņojumus, tostarp tādu informāciju kā kontaktpersonas, ziņojumi un fotoattēli"</string>
     <string name="permission_notifications_summary" msgid="2272810466047367030">"• Lasīt visus paziņojumus, tostarp tādu informāciju kā kontaktpersonas, ziņojumi un fotoattēli&lt;br/&gt;• Sūtīt paziņojumus&lt;br/&gt;&lt;br/&gt;Jebkurā brīdī sadaļā “Iestatījumi un paziņojumi” varat pārvaldīt šīs lietotnes atļauju lasīt un sūtīt paziņojumus."</string>
-    <string name="permission_app_streaming_summary" msgid="606923325679670624">"Straumēt jūsu tālruņa lietotnes"</string>
     <string name="permission_storage_summary" msgid="3918240895519506417"></string>
-    <string name="permission_nearby_device_streaming_summary" msgid="8280824871197081246">"No sava tālruņa straumējiet lietotnes un citas sistēmas funkcijas"</string>
     <string name="permission_media_routing_control_summary" msgid="2714631092321412250">"Piekļuve pieejamo ierīču sarakstam un iespēja kontrolēt, kura ierīce straumē vai apraida audio vai video no citām lietotnēm"</string>
     <string name="device_type" product="default" msgid="8268703872070046263">"tālrunī"</string>
     <string name="device_type" product="tablet" msgid="5038791954983067774">"planšetdatorā"</string>
+    <string name="device_type" product="tv" msgid="5355611506659405636">"televizora"</string>
+    <string name="device_type" product="device" msgid="1526125965802507189">"ierīces"</string>
 </resources>

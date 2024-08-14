@@ -320,9 +320,19 @@ public abstract class WMShellModule {
             WindowDecorViewModel windowDecorViewModel,
             DisplayController displayController,
             @ShellMainThread ShellExecutor mainExecutor,
-            @ShellAnimationThread ShellExecutor animExecutor) {
-        return new FreeformTaskTransitionHandler(shellInit, transitions, context,
-                windowDecorViewModel, displayController, mainExecutor, animExecutor);
+            @ShellAnimationThread ShellExecutor animExecutor,
+            @DynamicOverride DesktopModeTaskRepository desktopModeTaskRepository,
+            InteractionJankMonitor interactionJankMonitor) {
+        return new FreeformTaskTransitionHandler(
+                shellInit,
+                transitions,
+                context,
+                windowDecorViewModel,
+                displayController,
+                mainExecutor,
+                animExecutor,
+                desktopModeTaskRepository,
+                interactionJankMonitor);
     }
 
     @WMSingleton

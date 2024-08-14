@@ -91,12 +91,13 @@
     <!-- Divider handle size for legacy split screen -->
     <dimen name="docked_divider_handle_width">16dp</dimen>
     <dimen name="docked_divider_handle_height">2dp</dimen>
-    <!-- Divider handle size for split screen -->
+
     <dimen name="split_divider_handle_region_width">96dp</dimen>
     <dimen name="split_divider_handle_region_height">48dp</dimen>
 
-    <dimen name="split_divider_handle_width">72dp</dimen>
-    <dimen name="split_divider_handle_height">3dp</dimen>
+    <!-- Divider handle size for split screen -->
+    <dimen name="split_divider_handle_width">40dp</dimen>
+    <dimen name="split_divider_handle_height">4dp</dimen>
 
     <dimen name="split_divider_bar_width">10dp</dimen>
     <dimen name="split_divider_corner_size">42dp</dimen>

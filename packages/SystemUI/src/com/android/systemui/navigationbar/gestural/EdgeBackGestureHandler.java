@@ -1058,8 +1058,6 @@ public class EdgeBackGestureHandler implements PluginListener<NavigationEdgeBack
                 mEdgeBackPlugin.setIsLeftPanel(mIsOnLeftEdge);
                 mEdgeBackPlugin.onMotionEvent(ev);
                 dispatchToBackAnimation(ev);
-                mOverviewProxyService.updateContextualEduStats(mIsTrackpadThreeFingerSwipe,
-                        GestureType.BACK);
             }
             if (mLogGesture || mIsTrackpadThreeFingerSwipe) {
                 mDownPoint.set(ev.getX(), ev.getY());
@@ -1136,6 +1134,8 @@ public class EdgeBackGestureHandler implements PluginListener<NavigationEdgeBack
                         if (mAllowGesture) {
                             if (mBackAnimation != null) {
                                 mBackAnimation.onThresholdCrossed();
+                                mOverviewProxyService.updateContextualEduStats(
+                                        mIsTrackpadThreeFingerSwipe, GestureType.BACK);
                             } else {
                                 pilferPointers();
                             }
