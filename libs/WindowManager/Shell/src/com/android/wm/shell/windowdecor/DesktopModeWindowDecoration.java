@@ -31,6 +31,7 @@ import static com.android.wm.shell.common.split.SplitScreenConstants.SPLIT_POSIT
 import static com.android.wm.shell.windowdecor.DragResizeWindowGeometry.getFineResizeCornerSize;
 import static com.android.wm.shell.windowdecor.DragResizeWindowGeometry.getLargeResizeCornerSize;
 import static com.android.wm.shell.windowdecor.DragResizeWindowGeometry.getResizeEdgeHandleSize;
+import static com.android.wm.shell.windowdecor.DragResizeWindowGeometry.getResizeHandleEdgeInset;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -515,8 +516,8 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
         if (mDragResizeListener.setGeometry(
                 new DragResizeWindowGeometry(mRelayoutParams.mCornerRadius,
                         new Size(mResult.mWidth, mResult.mHeight),
-                        getResizeEdgeHandleSize(mContext, res), getFineResizeCornerSize(res),
-                        getLargeResizeCornerSize(res)), touchSlop)
+                        getResizeEdgeHandleSize(mContext, res), getResizeHandleEdgeInset(res),
+                        getFineResizeCornerSize(res), getLargeResizeCornerSize(res)), touchSlop)
                 || !mTaskInfo.positionInParent.equals(mPositionInParent)) {
             updateExclusionRegion();
         }

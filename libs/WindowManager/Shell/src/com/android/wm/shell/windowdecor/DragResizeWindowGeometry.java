@@ -44,27 +44,32 @@ import java.util.Objects;
 final class DragResizeWindowGeometry {
     private final int mTaskCornerRadius;
     private final Size mTaskSize;
-    // The size of the handle applied to the edges of the window, for the user to drag resize.
-    private final int mResizeHandleThickness;
+    // The size of the handle outside the task window applied to the edges of the window, for the
+    // user to drag resize.
+    private final int mResizeHandleEdgeOutset;
+    // The size of the handle inside the task window applied to the edges of the window, for the
+    // user to drag resize.
+    private final int mResizeHandleEdgeInset;
     // The task corners to permit drag resizing with a course input, such as touch.
-
     private final @NonNull TaskCorners mLargeTaskCorners;
     // The task corners to permit drag resizing with a fine input, such as stylus or cursor.
     private final @NonNull TaskCorners mFineTaskCorners;
     // The bounds for each edge drag region, which can resize the task in one direction.
-    private final @NonNull TaskEdges mTaskEdges;
+    final @NonNull TaskEdges mTaskEdges;
 
     DragResizeWindowGeometry(int taskCornerRadius, @NonNull Size taskSize,
-            int resizeHandleThickness, int fineCornerSize, int largeCornerSize) {
+            int resizeHandleEdgeOutset, int resizeHandleEdgeInset, int fineCornerSize,
+            int largeCornerSize) {
         mTaskCornerRadius = taskCornerRadius;
         mTaskSize = taskSize;
-        mResizeHandleThickness = resizeHandleThickness;
+        mResizeHandleEdgeOutset = resizeHandleEdgeOutset;
+        mResizeHandleEdgeInset = resizeHandleEdgeInset;
 
         mLargeTaskCorners = new TaskCorners(mTaskSize, largeCornerSize);
         mFineTaskCorners = new TaskCorners(mTaskSize, fineCornerSize);
 
         // Save touch areas for each edge.
-        mTaskEdges = new TaskEdges(mTaskSize, mResizeHandleThickness);
+        mTaskEdges = new TaskEdges(mTaskSize, mResizeHandleEdgeOutset, mResizeHandleEdgeInset);
     }
 
     /**
@@ -72,8 +77,15 @@ final class DragResizeWindowGeometry {
      */
     static int getResizeEdgeHandleSize(@NonNull Context context, @NonNull Resources res) {
         return EDGE_DRAG_RESIZE.isEnabled(context)
-                ? res.getDimensionPixelSize(R.dimen.desktop_mode_edge_handle)
+                ? res.getDimensionPixelSize(R.dimen.freeform_edge_handle_outset)
                 : res.getDimensionPixelSize(R.dimen.freeform_resize_handle);
+    }
+
+    /**
+     * Returns the resource value to use for the edge resize handle inside the task bounds.
+     */
+    static int getResizeHandleEdgeInset(@NonNull Resources res) {
+        return res.getDimensionPixelSize(R.dimen.freeform_edge_handle_inset);
     }
 
     /**
@@ -95,7 +107,8 @@ final class DragResizeWindowGeometry {
     /**
      * Returns the size of the task this geometry is calculated for.
      */
-    @NonNull Size getTaskSize() {
+    @NonNull
+    Size getTaskSize() {
         // Safe to return directly since size is immutable.
         return mTaskSize;
     }
@@ -217,13 +230,15 @@ final class DragResizeWindowGeometry {
             ctrlType |= CTRL_TYPE_BOTTOM;
         }
         // If the touch is within one of the four corners, check if it is within the bounds of the
-        // // handle.
+        // handle.
         if ((ctrlType & (CTRL_TYPE_LEFT | CTRL_TYPE_RIGHT)) != 0
                 && (ctrlType & (CTRL_TYPE_TOP | CTRL_TYPE_BOTTOM)) != 0) {
             return checkDistanceFromCenter(ctrlType, x, y);
         }
-        // Otherwise, we should make sure we don't resize tasks inside task bounds.
-        return (x < 0 || y < 0 || x >= mTaskSize.getWidth() || y >= mTaskSize.getHeight())
+        // Allow a small resize handle inside the task bounds defined by the edge inset.
+        return (x <= mResizeHandleEdgeInset || y <= mResizeHandleEdgeInset
+                || x >= mTaskSize.getWidth() - mResizeHandleEdgeInset
+                || y >= mTaskSize.getHeight() - mResizeHandleEdgeInset)
                 ? ctrlType : CTRL_TYPE_UNDEFINED;
     }
 
@@ -237,7 +252,7 @@ final class DragResizeWindowGeometry {
         final Point cornerRadiusCenter = calculateCenterForCornerRadius(ctrlType);
         double distanceFromCenter = Math.hypot(x - cornerRadiusCenter.x, y - cornerRadiusCenter.y);
 
-        if (distanceFromCenter < mTaskCornerRadius + mResizeHandleThickness
+        if (distanceFromCenter < mTaskCornerRadius + mResizeHandleEdgeOutset
                 && distanceFromCenter >= mTaskCornerRadius) {
             return ctrlType;
         }
@@ -288,7 +303,8 @@ final class DragResizeWindowGeometry {
 
         return this.mTaskCornerRadius == other.mTaskCornerRadius
                 && this.mTaskSize.equals(other.mTaskSize)
-                && this.mResizeHandleThickness == other.mResizeHandleThickness
+                && this.mResizeHandleEdgeOutset == other.mResizeHandleEdgeOutset
+                && this.mResizeHandleEdgeInset == other.mResizeHandleEdgeInset
                 && this.mFineTaskCorners.equals(other.mFineTaskCorners)
                 && this.mLargeTaskCorners.equals(other.mLargeTaskCorners)
                 && this.mTaskEdges.equals(other.mTaskEdges);
@@ -299,7 +315,8 @@ final class DragResizeWindowGeometry {
         return Objects.hash(
                 mTaskCornerRadius,
                 mTaskSize,
-                mResizeHandleThickness,
+                mResizeHandleEdgeOutset,
+                mResizeHandleEdgeInset,
                 mFineTaskCorners,
                 mLargeTaskCorners,
                 mTaskEdges);
@@ -421,26 +438,27 @@ final class DragResizeWindowGeometry {
         private final @NonNull Rect mBottomEdgeBounds;
         private final @NonNull Region mRegion;
 
-        private TaskEdges(@NonNull Size taskSize, int resizeHandleThickness) {
+        private TaskEdges(@NonNull Size taskSize, int resizeHandleThickness,
+                int resizeHandleEdgeInset) {
             // Save touch areas for each edge.
             mTopEdgeBounds = new Rect(
                     -resizeHandleThickness,
                     -resizeHandleThickness,
                     taskSize.getWidth() + resizeHandleThickness,
-                    0);
+                    resizeHandleThickness);
             mLeftEdgeBounds = new Rect(
                     -resizeHandleThickness,
                     0,
-                    0,
+                    resizeHandleEdgeInset,
                     taskSize.getHeight());
             mRightEdgeBounds = new Rect(
-                    taskSize.getWidth(),
+                    taskSize.getWidth() - resizeHandleEdgeInset,
                     0,
                     taskSize.getWidth() + resizeHandleThickness,
                     taskSize.getHeight());
             mBottomEdgeBounds = new Rect(
                     -resizeHandleThickness,
-                    taskSize.getHeight(),
+                    taskSize.getHeight() - resizeHandleEdgeInset,
                     taskSize.getWidth() + resizeHandleThickness,
                     taskSize.getHeight() + resizeHandleThickness);
 
