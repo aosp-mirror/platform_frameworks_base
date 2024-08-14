@@ -21,7 +21,11 @@ import androidx.constraintlayout.widget.ConstraintSet
 import com.android.internal.annotations.Keep
 import com.android.systemui.log.core.MessageBuffer
 import com.android.systemui.plugins.Plugin
+import com.android.systemui.plugins.annotations.GeneratedImport
+import com.android.systemui.plugins.annotations.ProtectedInterface
+import com.android.systemui.plugins.annotations.ProtectedReturn
 import com.android.systemui.plugins.annotations.ProvidesInterface
+import com.android.systemui.plugins.annotations.SimpleProperty
 import java.io.PrintWriter
 import java.util.Locale
 import java.util.TimeZone
@@ -31,6 +35,7 @@ import org.json.JSONObject
 typealias ClockId = String
 
 /** A Plugin which exposes the ClockProvider interface */
+@ProtectedInterface
 @ProvidesInterface(action = ClockProviderPlugin.ACTION, version = ClockProviderPlugin.VERSION)
 interface ClockProviderPlugin : Plugin, ClockProvider {
     companion object {
@@ -40,31 +45,42 @@ interface ClockProviderPlugin : Plugin, ClockProvider {
 }
 
 /** Interface for building clocks and providing information about those clocks */
+@ProtectedInterface
+@GeneratedImport("java.util.List")
+@GeneratedImport("java.util.ArrayList")
 interface ClockProvider {
     /** Initializes the clock provider with debug log buffers */
     fun initialize(buffers: ClockMessageBuffers?)
 
+    @ProtectedReturn("return new ArrayList<ClockMetadata>();")
     /** Returns metadata for all clocks this provider knows about */
     fun getClocks(): List<ClockMetadata>
 
+    @ProtectedReturn("return null;")
     /** Initializes and returns the target clock design */
-    fun createClock(settings: ClockSettings): ClockController
+    fun createClock(settings: ClockSettings): ClockController?
 
+    @ProtectedReturn("return new ClockPickerConfig(\"\", \"\", \"\", null);")
     /** Settings configuration parameters for the clock */
     fun getClockPickerConfig(id: ClockId): ClockPickerConfig
 }
 
 /** Interface for controlling an active clock */
+@ProtectedInterface
 interface ClockController {
+    @get:SimpleProperty
     /** A small version of the clock, appropriate for smaller viewports */
     val smallClock: ClockFaceController
 
+    @get:SimpleProperty
     /** A large version of the clock, appropriate when a bigger viewport is available */
     val largeClock: ClockFaceController
 
+    @get:SimpleProperty
     /** Determines the way the hosting app should behave when rendering either clock face */
     val config: ClockConfig
 
+    @get:SimpleProperty
     /** Events that clocks may need to respond to */
     val events: ClockEvents
 
@@ -76,19 +92,26 @@ interface ClockController {
 }
 
 /** Interface for a specific clock face version rendered by the clock */
+@ProtectedInterface
 interface ClockFaceController {
+    @get:SimpleProperty
+    @Deprecated("Prefer use of layout")
     /** View that renders the clock face */
     val view: View
 
+    @get:SimpleProperty
     /** Layout specification for this clock */
     val layout: ClockFaceLayout
 
+    @get:SimpleProperty
     /** Determines the way the hosting app should behave when rendering this clock face */
     val config: ClockFaceConfig
 
+    @get:SimpleProperty
     /** Events specific to this clock face */
     val events: ClockFaceEvents
 
+    @get:SimpleProperty
     /** Triggers for various animations */
     val animations: ClockAnimations
 }
@@ -107,14 +130,21 @@ data class ClockMessageBuffers(
 
 data class AodClockBurnInModel(val scale: Float, val translationX: Float, val translationY: Float)
 
-/** Specifies layout information for the */
+/** Specifies layout information for the clock face */
+@ProtectedInterface
+@GeneratedImport("java.util.ArrayList")
+@GeneratedImport("android.view.View")
 interface ClockFaceLayout {
+    @get:ProtectedReturn("return new ArrayList<View>();")
     /** All clock views to add to the root constraint layout before applying constraints. */
     val views: List<View>
 
+    @ProtectedReturn("return constraints;")
     /** Custom constraints to apply to Lockscreen ConstraintLayout. */
     fun applyConstraints(constraints: ConstraintSet): ConstraintSet
 
+    @ProtectedReturn("return constraints;")
+    /** Custom constraints to apply to preview ConstraintLayout. */
     fun applyPreviewConstraints(constraints: ConstraintSet): ConstraintSet
 
     fun applyAodBurnIn(aodBurnInModel: AodClockBurnInModel)
@@ -145,7 +175,9 @@ class DefaultClockFaceLayout(val view: View) : ClockFaceLayout {
 }
 
 /** Events that should call when various rendering parameters change */
+@ProtectedInterface
 interface ClockEvents {
+    @get:ProtectedReturn("return false;")
     /** Set to enable or disable swipe interaction */
     var isReactiveTouchInteractionEnabled: Boolean
 
@@ -187,6 +219,7 @@ data class ClockReactiveSetting(
 )
 
 /** Methods which trigger various clock animations */
+@ProtectedInterface
 interface ClockAnimations {
     /** Runs an enter animation (if any) */
     fun enter()
@@ -230,6 +263,7 @@ interface ClockAnimations {
 }
 
 /** Events that have specific data about the related face */
+@ProtectedInterface
 interface ClockFaceEvents {
     /** Call every time tick */
     fun onTimeTick()
@@ -270,7 +304,9 @@ enum class ClockTickRate(val value: Int) {
 /** Some data about a clock design */
 data class ClockMetadata(val clockId: ClockId)
 
-data class ClockPickerConfig(
+data class ClockPickerConfig
+@JvmOverloads
+constructor(
     val id: String,
 
     /** Localized name of the clock */
@@ -338,7 +374,7 @@ data class ClockConfig(
     /** Transition to AOD should move smartspace like large clock instead of small clock */
     val useAlternateSmartspaceAODTransition: Boolean = false,
 
-    /** Use ClockPickerConfig.isReactiveToTone instead */
+    /** Deprecated version of isReactiveToTone; moved to ClockPickerConfig */
     @Deprecated("TODO(b/352049256): Remove in favor of ClockPickerConfig.isReactiveToTone")
     val isReactiveToTone: Boolean = true,
 
