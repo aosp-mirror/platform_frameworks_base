@@ -1401,7 +1401,7 @@
     <string name="fast_scroll_numeric_alphabet" msgid="2529539945421557329">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="alert_windows_notification_channel_group_name" msgid="6063891141815714246">"Εμφάνιση πάνω σε άλλες εφαρμογές"</string>
     <string name="alert_windows_notification_channel_name" msgid="3437528564303192620">"Η εφαρμογή <xliff:g id="NAME">%s</xliff:g> προβάλλεται πάνω από άλλες εφαρμογές"</string>
-    <string name="alert_windows_notification_title" msgid="6331662751095228536">"Η εφαρμογή <xliff:g id="NAME">%s</xliff:g> επικαλύπτει άλλες"</string>
+    <string name="alert_windows_notification_title" msgid="6331662751095228536">"Η εφαρ. <xliff:g id="NAME">%s</xliff:g> επικαλύπτει άλλες"</string>
     <string name="alert_windows_notification_message" msgid="6538171456970725333">"Εάν δεν θέλετε να χρησιμοποιείται αυτή η λειτουργία από την εφαρμογή <xliff:g id="NAME">%s</xliff:g>, πατήστε για να ανοίξετε τις ρυθμίσεις και απενεργοποιήστε την."</string>
     <string name="alert_windows_notification_turn_off_action" msgid="7805857234839123780">"Απενεργοποίηση"</string>
     <string name="ext_media_checking_notification_title" msgid="8299199995416510094">"Έλεγχος <xliff:g id="NAME">%s</xliff:g>…"</string>
@@ -2056,7 +2056,7 @@
     <string name="popup_window_default_title" msgid="6907717596694826919">"Αναδυόμενο παράθυρο"</string>
     <string name="slice_more_content" msgid="3377367737876888459">"+ <xliff:g id="NUMBER">%1$d</xliff:g>"</string>
     <string name="shortcut_restored_on_lower_version" msgid="9206301954024286063">"Η έκδοση εφαρμογής υποβαθμίστηκε ή δεν είναι συμβατή με αυτήν τη συντόμευση"</string>
-    <string name="shortcut_restore_not_supported" msgid="4763198938588468400">"Δεν ήταν δυνατή η επαναφορά της συντόμευσης, επειδή η εφαρμογή δεν υποστηρίζει τη δημιουργία αντιγράφων ασφαλείας και την επαναφορά"</string>
+    <string name="shortcut_restore_not_supported" msgid="4763198938588468400">"Δεν ήταν δυνατή η επαναφορά της συντόμευσης, επειδή η εφαρμογή δεν υποστηρίζει τη δημιουργία αντιγράφου ασφαλείας και την επαναφορά"</string>
     <string name="shortcut_restore_signature_mismatch" msgid="579345304221605479">"Δεν ήταν δυνατή η επαναφορά της συντόμευσης, λόγω αναντιστοιχίας της υπογραφής εφαρμογής"</string>
     <string name="shortcut_restore_unknown_issue" msgid="2478146134395982154">"Δεν ήταν δυνατή η επαναφορά της συντόμευσης"</string>
     <string name="shortcut_disabled_reason_unknown" msgid="753074793553599166">"Η συντόμευση είναι απενεργοποιημένη"</string>

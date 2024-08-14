@@ -265,7 +265,7 @@
     <string name="confirm_enable_oem_unlock_title" msgid="8249318129774367535">"OEM desblokeoa onartu nahi duzu?"</string>
     <string name="confirm_enable_oem_unlock_text" msgid="854131050791011970">"ABISUA: ezarpen hau aktibatuta dagoen bitartean, gailua babesteko eginbideek ez dute gailu honetan funtzionatuko."</string>
     <string name="mock_location_app" msgid="6269380172542248304">"Hautatu asmatutako kokapenen aplikazioa"</string>
-    <string name="mock_location_app_not_set" msgid="6972032787262831155">"Ez da ezarri kokapen faltsuen aplikaziorik"</string>
+    <string name="mock_location_app_not_set" msgid="6972032787262831155">"Ez da ezarri asmatutako kokapenen aplikaziorik"</string>
     <string name="mock_location_app_set" msgid="4706722469342913843">"Asmatutako kokapenen aplikazioa: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="debug_networking_category" msgid="6829757985772659599">"Sareak"</string>
     <string name="wifi_display_certification" msgid="1805579519992520381">"Hari gabe bistaratzeko ziurtagiria"</string>
@@ -314,8 +314,8 @@
     <string name="select_logpersist_dialog_title" msgid="7745193591195485594">"Hautatu gailuan gordeta utzi nahi dituzun erregistroen bufferrak"</string>
     <string name="select_usb_configuration_title" msgid="6339801314922294586">"Hautatu USB konfigurazioa"</string>
     <string name="select_usb_configuration_dialog_title" msgid="3579567144722589237">"Hautatu USB konfigurazioa"</string>
-    <string name="allow_mock_location" msgid="2102650981552527884">"Onartu kokapen faltsuak"</string>
-    <string name="allow_mock_location_summary" msgid="179780881081354579">"Onartu kokapen faltsuak"</string>
+    <string name="allow_mock_location" msgid="2102650981552527884">"Baimendu asmatutako kokapenak"</string>
+    <string name="allow_mock_location_summary" msgid="179780881081354579">"Baimendu asmatutako kokapenak"</string>
     <string name="debug_view_attributes" msgid="3539609843984208216">"Gaitu ikuspegiaren atributuak ikuskatzeko aukera"</string>
     <string name="mobile_data_always_on_summary" msgid="1112156365594371019">"Mantendu datu-konexioa beti aktibo, baita wifi-konexioa aktibo dagoenean ere (sare batetik bestera bizkor aldatu ahal izateko)."</string>
     <string name="tethering_hardware_offload_summary" msgid="7801345335142803029">"Erabilgarri badago, erabili konexioa partekatzeko hardwarearen bizkortzea"</string>

@@ -255,7 +255,7 @@
     <string name="bugreport_option_interactive_title" msgid="7968287837902871289">"Txosten dinamikoa"</string>
     <string name="bugreport_option_interactive_summary" msgid="8493795476325339542">"Aukera hau erabili beharko zenuke ia beti. Txostenaren jarraipena egin ahal izango duzu eta arazoari buruzko xehetasunak eman ahal izango dituzu. Baliteke gutxitan erabili behar izaten diren atalak ez agertzea, denbora aurrezteko."</string>
     <string name="bugreport_option_full_title" msgid="7681035745950045690">"Txosten osoa"</string>
-    <string name="bugreport_option_full_summary" msgid="1975130009258435885">"Erabili aukera hau sisteman ahalik eta traba gutxien eragiteko gailuak erantzuten ez duenean, mantsoegi dabilenean edo txosteneko atal guztiak behar dituzunean. Ez dizu uzten xehetasun gehiago idazten, ezta beste pantaila-argazkirik ateratzen ere."</string>
+    <string name="bugreport_option_full_summary" msgid="1975130009258435885">"Erabili aukera hau sistemaren interferentzia ahalik eta txikiena izateko gailuak erantzuten ez duenean, mantsoegi dabilenean edo txosteneko atal guztiak behar dituzunean. Ez dizu uzten xehetasun gehiago idazten, ezta beste pantaila-argazkirik ateratzen ere."</string>
     <string name="bugreport_countdown" msgid="6418620521782120755">"{count,plural, =1{Akatsen txostenerako argazkia aterako da # segundo barru.}other{Akatsen txostenerako argazkia aterako da # segundo barru.}}"</string>
     <string name="bugreport_screenshot_success_toast" msgid="7986095104151473745">"Pantaila-argazkia egin da akatsen txostenarekin"</string>
     <string name="bugreport_screenshot_failure_toast" msgid="6736320861311294294">"Ezin izan da egin pantaila-argazkia akatsen txostenarekin"</string>

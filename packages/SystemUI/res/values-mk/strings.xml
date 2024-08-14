@@ -783,7 +783,7 @@
     <string name="notification_channel_screenshot" msgid="7665814998932211997">"Слики од екранот"</string>
     <string name="notification_channel_instant" msgid="7556135423486752680">"Инстант апликации"</string>
     <string name="notification_channel_setup" msgid="7660580986090760350">"Поставување"</string>
-    <string name="notification_channel_storage" msgid="2720725707628094977">"Капацитет"</string>
+    <string name="notification_channel_storage" msgid="2720725707628094977">"Простор"</string>
     <string name="notification_channel_hints" msgid="7703783206000346876">"Совети"</string>
     <string name="instant_apps" msgid="8337185853050247304">"Инстант апликации"</string>
     <string name="instant_apps_title" msgid="8942706782103036910">"Се извршува <xliff:g id="APP">%1$s</xliff:g>"</string>

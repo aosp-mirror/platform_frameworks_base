@@ -31,11 +31,14 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.app.Activity;
+import android.content.ContentProvider;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
+import android.os.UserHandle;
 import android.provider.MediaStore;
 
 import androidx.test.InstrumentationRegistry;
@@ -252,6 +255,23 @@ public class AvatarPhotoControllerTest {
         Bitmap bitmap = BitmapFactory.decodeStream(imageStream);
         assertThat(bitmap.getWidth()).isEqualTo(PHOTO_SIZE);
         assertThat(bitmap.getHeight()).isEqualTo(PHOTO_SIZE);
+    }
+
+    @Test
+    public void onlyOwnerCanAccessUri() throws IOException {
+        final Uri fileUri = Uri.parse(
+                "content://12@com.android.settingslib.test/my_cache/multi_user/11/file.txt");
+        // making sure onActivityResult is not returning false because of wrong Scheme
+        assertThat(ContentResolver.SCHEME_CONTENT).isEqualTo(fileUri.getScheme());
+        // making sure uri user is correct and different form executing user id
+        assertThat(ContentProvider.getUserIdFromUri(fileUri)).isEqualTo(12);
+        assertThat(UserHandle.myUserId()).isNotEqualTo(12);
+
+        Intent intent = new Intent();
+        intent.setData(fileUri);
+        boolean result = mController.onActivityResult(
+                REQUEST_CODE_TAKE_PHOTO, Activity.RESULT_OK, intent);
+        assertThat(result).isFalse();
     }
 
     private Intent verifyStartActivityForResult(String action, int resultCode) {

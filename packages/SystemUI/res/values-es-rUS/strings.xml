@@ -230,7 +230,7 @@
     <string name="accessibility_sensors_off_active" msgid="2619725434618911551">"Sensores desactivados sí"</string>
     <string name="accessibility_clear_all" msgid="970525598287244592">"Eliminar todas las notificaciones"</string>
     <string name="notification_group_overflow_indicator" msgid="7605120293801012648">"<xliff:g id="NUMBER">%s</xliff:g> más"</string>
-    <string name="notification_group_overflow_description" msgid="7176322877233433278">"{count,plural, =1{# notificación más en el grupo.}many{# notificaciones más en el grupo.}other{# notificaciones más en el grupo.}}"</string>
+    <string name="notification_group_overflow_description" msgid="7176322877233433278">"{count,plural, =1{# notificación más en el grupo.}many{# de notificaciones más en el grupo.}other{# notificaciones más en el grupo.}}"</string>
     <string name="accessibility_rotation_lock_on_landscape" msgid="936972553861524360">"La pantalla está bloqueada en modo horizontal."</string>
     <string name="accessibility_rotation_lock_on_portrait" msgid="2356633398683813837">"La pantalla está bloqueada en modo vertical."</string>
     <string name="dessert_case" msgid="9104973640704357717">"Caja para postres"</string>
@@ -389,7 +389,7 @@
     <string name="guest_notification_session_active" msgid="5567273684713471450">"Estás en el modo de invitado"</string>
     <string name="user_add_user_message_guest_remove" msgid="5589286604543355007">\n\n"Si agregas un usuario nuevo, se desactivará el modo de invitado y se borrarán todas las apps y los datos de la sesión de invitado actual."</string>
     <string name="user_limit_reached_title" msgid="2429229448830346057">"Alcanzaste el límite de usuarios"</string>
-    <string name="user_limit_reached_message" msgid="1070703858915935796">"{count,plural, =1{Solo se puede crear un usuario.}many{Puedes agregar hasta # usuarios.}other{Puedes agregar hasta # usuarios.}}"</string>
+    <string name="user_limit_reached_message" msgid="1070703858915935796">"{count,plural, =1{Solo se puede crear un usuario.}many{Puedes agregar hasta # de usuarios.}other{Puedes agregar hasta # usuarios.}}"</string>
     <string name="user_remove_user_title" msgid="9124124694835811874">"¿Confirmas que quieres quitar el usuario?"</string>
     <string name="user_remove_user_message" msgid="6702834122128031833">"Se borrarán todas las aplicaciones y los datos de este usuario."</string>
     <string name="user_remove_user_remove" msgid="8387386066949061256">"Quitar"</string>
@@ -546,7 +546,7 @@
     <string name="alarm_template_far" msgid="3561752195856839456">"el <xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="accessibility_status_bar_hotspot" msgid="2888479317489131669">"Hotspot"</string>
     <string name="accessibility_managed_profile" msgid="4703836746209377356">"Perfil de trabajo"</string>
-    <string name="tuner_warning_title" msgid="7721976098452135267">"Diversión para algunos, pero no para todos"</string>
+    <string name="tuner_warning_title" msgid="7721976098452135267">"Diversión solo para algunas personas"</string>
     <string name="tuner_warning" msgid="1861736288458481650">"El sintonizador de IU del sistema te brinda más formas para editar y personalizar la interfaz de usuario de Android. Estas funciones experimentales pueden cambiar, dejar de funcionar o no incluirse en futuras versiones. Procede con precaución."</string>
     <string name="tuner_persistent_warning" msgid="230466285569307806">"Estas funciones experimentales pueden cambiar, dejar de funcionar o no incluirse en futuras versiones. Procede con precaución."</string>
     <string name="got_it" msgid="477119182261892069">"Entendido"</string>
@@ -603,8 +603,8 @@
     <string name="notification_menu_snooze_action" msgid="5415729610393475019">"Recuérdame"</string>
     <string name="snooze_undo" msgid="2738844148845992103">"Deshacer"</string>
     <string name="snoozed_for_time" msgid="7586689374860469469">"Posponer <xliff:g id="TIME_AMOUNT">%1$s</xliff:g>"</string>
-    <string name="snoozeHourOptions" msgid="2332819756222425558">"{count,plural, =1{# hora}=2{# horas}many{# horas}other{# horas}}"</string>
-    <string name="snoozeMinuteOptions" msgid="2222082405822030979">"{count,plural, =1{# minuto}many{# minutos}other{# minutos}}"</string>
+    <string name="snoozeHourOptions" msgid="2332819756222425558">"{count,plural, =1{# hora}=2{# horas}many{# de horas}other{# horas}}"</string>
+    <string name="snoozeMinuteOptions" msgid="2222082405822030979">"{count,plural, =1{# minuto}many{# de minutos}other{# minutos}}"</string>
     <string name="battery_detail_switch_title" msgid="6940976502957380405">"Ahorro de batería"</string>
     <string name="keyboard_key_button_template" msgid="8005673627272051429">"Botón <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="keyboard_key_home" msgid="3734400625170020657">"Inicio"</string>
@@ -1099,7 +1099,7 @@
     <string name="dream_overlay_status_bar_mic_off" msgid="8366534415013819396">"El micrófono está desactivado"</string>
     <string name="dream_overlay_status_bar_camera_mic_off" msgid="3199425257833773569">"La cámara y el micrófono están apagados"</string>
     <string name="dream_overlay_status_bar_assistant_attention_indicator" msgid="4712565923771372690">"Asistente está escuchando"</string>
-    <string name="dream_overlay_status_bar_notification_indicator" msgid="8091389255691081711">"{count,plural, =1{# notificación}many{# notificaciones}other{# notificaciones}}"</string>
+    <string name="dream_overlay_status_bar_notification_indicator" msgid="8091389255691081711">"{count,plural, =1{# notificación}many{# de notificaciones}other{# notificaciones}}"</string>
     <string name="dream_overlay_weather_complication_desc" msgid="824503662089783824">"<xliff:g id="WEATHER_CONDITION">%1$s</xliff:g>, <xliff:g id="TEMPERATURE">%2$s</xliff:g>"</string>
     <string name="note_task_button_label" msgid="8718616095800343136">"Tomar notas"</string>
     <string name="broadcasting_description_is_broadcasting" msgid="765627502786404290">"Transmitiendo"</string>

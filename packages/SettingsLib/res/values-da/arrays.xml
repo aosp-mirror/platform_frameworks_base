@@ -156,13 +156,13 @@
     <item msgid="1241278021345116816">"Optimeret til lydkvalitet (990 kbps/909 kbps)"</item>
     <item msgid="3523665555859696539">"Afbalancer lyd- og forbindelseskvalitet (660 kbps/606 kbps)"</item>
     <item msgid="886408010459747589">"Optimeret til forbindelseskvalitet (330 kbps/303 kbps)"</item>
-    <item msgid="3808414041654351577">"Bedste resultat (tilpasset bithastighed)"</item>
+    <item msgid="3808414041654351577">"Bedste resultat (adaptiv bithastighed)"</item>
   </string-array>
   <string-array name="bluetooth_a2dp_codec_ldac_playback_quality_summaries">
     <item msgid="804499336721569838">"Optimeret til lydkvalitet"</item>
     <item msgid="7451422070435297462">"Afbalancer lyd- og forbindelseskvalitet"</item>
     <item msgid="6173114545795428901">"Optimeret til forbindelseskvalitet"</item>
-    <item msgid="4349908264188040530">"Bedste resultat (tilpasset bithastighed)"</item>
+    <item msgid="4349908264188040530">"Bedste resultat (adaptiv bithastighed)"</item>
   </string-array>
   <string-array name="bluetooth_audio_active_device_summaries">
     <item msgid="8019740759207729126"></item>

@@ -47,7 +47,7 @@
     <string name="wifi_security_sae" msgid="3644520541721422843">"WPA3-वैयक्तिक"</string>
     <string name="wifi_security_psk_sae" msgid="8135104122179904684">"WPA2/WPA3-वैयक्तिक"</string>
     <string name="wifi_security_none_owe" msgid="5241745828327404101">"कोणतीही नाही/एन्हान्स्ड ओपन"</string>
-    <string name="wifi_security_owe" msgid="3343421403561657809">"एन्हान्स्ड ओपन"</string>
+    <string name="wifi_security_owe" msgid="3343421403561657809">"Enhanced Open"</string>
     <string name="wifi_security_eap_suiteb" msgid="415842785991698142">"WPA3-एंटरप्राइझ 192-बिट"</string>
     <string name="wifi_remembered" msgid="3266709779723179188">"सेव्ह केले"</string>
     <string name="wifi_disconnected" msgid="7054450256284661757">"डिस्कनेक्ट केले"</string>
@@ -469,7 +469,7 @@
     <string name="power_remaining_duration_shutdown_imminent" product="device" msgid="4374784375644214578">"डिव्हाइस लवकरच बंद होऊ शकते (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_remaining_charging_duration_only" msgid="8085099012811384899">"पूर्ण चार्ज होण्यासाठी <xliff:g id="TIME">%1$s</xliff:g> शिल्लक आहेत"</string>
-    <string name="power_charging_duration" msgid="6127154952524919719">"<xliff:g id="LEVEL">%1$s</xliff:g> - पूर्ण चार्ज होण्यासाठी <xliff:g id="TIME">%2$s</xliff:g> शिल्लक आहे"</string>
+    <string name="power_charging_duration" msgid="6127154952524919719">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> या वेळेत बॅटरी पूर्ण चार्ज होईल"</string>
     <string name="power_charging_limited" msgid="8202147604844938236">"<xliff:g id="LEVEL">%1$s</xliff:g> - चार्जिंग ऑप्टिमाइझ केले"</string>
     <string name="power_charging_future_paused" msgid="4730177778538118032">"<xliff:g id="LEVEL">%1$s</xliff:g> - चार्जिंग ऑप्टिमाइझ केले"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"अज्ञात"</string>
