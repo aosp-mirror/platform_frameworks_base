@@ -29,7 +29,10 @@ import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.KeyguardState.ALTERNATE_BOUNCER
 import com.android.systemui.keyguard.shared.model.KeyguardState.AOD
 import com.android.systemui.keyguard.shared.model.KeyguardState.DOZING
+import com.android.systemui.keyguard.shared.model.KeyguardState.GONE
 import com.android.systemui.keyguard.shared.model.KeyguardState.LOCKSCREEN
+import com.android.systemui.keyguard.shared.model.KeyguardState.OCCLUDED
+import com.android.systemui.keyguard.shared.model.KeyguardState.OFF
 import com.android.systemui.keyguard.shared.model.KeyguardState.PRIMARY_BOUNCER
 import com.android.systemui.keyguard.shared.model.KeyguardState.UNDEFINED
 import com.android.systemui.keyguard.shared.model.TransitionState
@@ -126,8 +129,10 @@ constructor(
             repository.transitions
                 .filter { it.transitionState != TransitionState.CANCELED }
                 .collect { step ->
-                    getTransitionValueFlow(step.from).emit(1f - step.value)
-                    getTransitionValueFlow(step.to).emit(step.value)
+                    val value =
+                        if (step.transitionState == TransitionState.FINISHED) 1f else step.value
+                    getTransitionValueFlow(step.from).emit(1f - value)
+                    getTransitionValueFlow(step.to).emit(value)
                 }
         }
 
@@ -183,8 +188,14 @@ constructor(
         }
     }
 
-    fun transition(edge: Edge, edgeWithoutSceneContainer: Edge): Flow<TransitionStep> {
-        return transition(if (SceneContainerFlag.isEnabled) edge else edgeWithoutSceneContainer)
+    fun transition(edge: Edge, edgeWithoutSceneContainer: Edge? = null): Flow<TransitionStep> {
+        return transition(
+            if (SceneContainerFlag.isEnabled || edgeWithoutSceneContainer == null) {
+                edge
+            } else {
+                edgeWithoutSceneContainer
+            }
+        )
     }
 
     /** Given an [edge], return a Flow to collect only relevant [TransitionStep]s. */
@@ -250,10 +261,10 @@ constructor(
     }
 
     fun transitionValue(
-        scene: SceneKey,
+        scene: SceneKey? = null,
         stateWithoutSceneContainer: KeyguardState,
     ): Flow<Float> {
-        return if (SceneContainerFlag.isEnabled) {
+        return if (SceneContainerFlag.isEnabled && scene != null) {
             sceneInteractor.transitionProgress(scene)
         } else {
             transitionValue(stateWithoutSceneContainer)
@@ -410,7 +421,7 @@ constructor(
                 }
             }
             .distinctUntilChanged()
-            .stateIn(scope, SharingStarted.Eagerly, KeyguardState.OFF)
+            .stateIn(scope, SharingStarted.Eagerly, OFF)
 
     val isInTransition =
         combine(
@@ -438,8 +449,8 @@ constructor(
                 fromAlternateBouncerTransitionInteractor.get().dismissAlternateBouncer()
             AOD -> fromAodTransitionInteractor.get().dismissAod()
             DOZING -> fromDozingTransitionInteractor.get().dismissFromDozing()
-            KeyguardState.OCCLUDED -> fromOccludedTransitionInteractor.get().dismissFromOccluded()
-            KeyguardState.GONE ->
+            OCCLUDED -> fromOccludedTransitionInteractor.get().dismissFromOccluded()
+            GONE ->
                 Log.i(
                     TAG,
                     "Already transitioning to GONE; ignoring startDismissKeyguardTransition."

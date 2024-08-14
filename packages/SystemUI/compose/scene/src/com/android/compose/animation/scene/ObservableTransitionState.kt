@@ -190,7 +190,7 @@ sealed interface ObservableTransitionState {
         }
     }
 
-    fun isIdle(scene: SceneKey?): Boolean {
+    fun isIdle(scene: SceneKey? = null): Boolean {
         return this is Idle && (scene == null || this.currentScene == scene)
     }
 
