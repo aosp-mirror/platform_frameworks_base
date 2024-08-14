@@ -17,6 +17,7 @@
 package com.android.systemui.statusbar.notification.stack.ui.viewbinder
 
 import android.util.Log
+import com.android.app.tracing.coroutines.flow.filter
 import com.android.systemui.common.ui.ConfigurationState
 import com.android.systemui.common.ui.view.onLayoutChanged
 import com.android.systemui.dagger.SysUISingleton
@@ -86,6 +87,7 @@ constructor(
             }
             launch { viewModel.isScrollable.collect { view.setScrollingEnabled(it) } }
             launch { viewModel.isDozing.collect { isDozing -> view.setDozing(isDozing) } }
+            launch { viewModel.shouldResetStackTop.filter { it }.collect { view.setStackTop(0f) } }
 
             launchAndDispose {
                 view.setSyntheticScrollConsumer(viewModel.syntheticScrollConsumer)
