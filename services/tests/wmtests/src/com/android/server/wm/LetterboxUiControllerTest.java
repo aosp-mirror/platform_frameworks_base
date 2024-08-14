@@ -107,12 +107,14 @@ public class LetterboxUiControllerTest extends WindowTestsBase {
         // Makes requested sizes different
         mainWindow.mRequestedWidth = opaqueBounds.width() - 1;
         mainWindow.mRequestedHeight = opaqueBounds.height() - 1;
-        assertNull(mActivity.mLetterboxUiController.getCropBoundsIfNeeded(mainWindow));
+        final AppCompatLetterboxPolicy letterboxPolicy =
+                mActivity.mAppCompatController.getAppCompatLetterboxPolicy();
+        assertNull(letterboxPolicy.getCropBoundsIfNeeded(mainWindow));
 
         // Makes requested sizes equals
         mainWindow.mRequestedWidth = opaqueBounds.width();
         mainWindow.mRequestedHeight = opaqueBounds.height();
-        assertNotNull(mActivity.mLetterboxUiController.getCropBoundsIfNeeded(mainWindow));
+        assertNotNull(letterboxPolicy.getCropBoundsIfNeeded(mainWindow));
     }
 
     @Test
@@ -128,7 +130,10 @@ public class LetterboxUiControllerTest extends WindowTestsBase {
         mLetterboxedPortraitTaskBounds.set(SCREEN_WIDTH / 4, SCREEN_HEIGHT / 4,
                 SCREEN_WIDTH - SCREEN_WIDTH / 4, SCREEN_HEIGHT - SCREEN_HEIGHT / 4);
 
-        final Rect noCrop = mController.getCropBoundsIfNeeded(mainWindow);
+        final AppCompatLetterboxPolicy letterboxPolicy =
+                mActivity.mAppCompatController.getAppCompatLetterboxPolicy();
+
+        final Rect noCrop = letterboxPolicy.getCropBoundsIfNeeded(mainWindow);
         assertNotEquals(null, noCrop);
         assertEquals(0, noCrop.left);
         assertEquals(0, noCrop.top);
@@ -150,7 +155,9 @@ public class LetterboxUiControllerTest extends WindowTestsBase {
         mLetterboxedPortraitTaskBounds.set(SCREEN_WIDTH / 4, 0, SCREEN_WIDTH - SCREEN_WIDTH / 4,
                 SCREEN_HEIGHT);
 
-        final Rect crop = mController.getCropBoundsIfNeeded(mainWindow);
+        final AppCompatLetterboxPolicy letterboxPolicy =
+                mActivity.mAppCompatController.getAppCompatLetterboxPolicy();
+        final Rect crop = letterboxPolicy.getCropBoundsIfNeeded(mainWindow);
         assertNotEquals(null, crop);
         assertEquals(0, crop.left);
         assertEquals(0, crop.top);
@@ -180,7 +187,9 @@ public class LetterboxUiControllerTest extends WindowTestsBase {
         final int appWidth = mLetterboxedPortraitTaskBounds.width();
         final int appHeight = mLetterboxedPortraitTaskBounds.height();
 
-        final Rect crop = mController.getCropBoundsIfNeeded(mainWindow);
+        final AppCompatLetterboxPolicy letterboxPolicy =
+                mActivity.mAppCompatController.getAppCompatLetterboxPolicy();
+        final Rect crop = letterboxPolicy.getCropBoundsIfNeeded(mainWindow);
         assertNotEquals(null, crop);
         assertEquals(0, crop.left);
         assertEquals(0, crop.top);
@@ -210,7 +219,8 @@ public class LetterboxUiControllerTest extends WindowTestsBase {
         insets.setRoundedCorners(roundedCorners);
         mAppCompatConfiguration.setLetterboxActivityCornersRadius(-1);
 
-        assertEquals(expectedRadius, mController.getRoundedCornersRadius(mainWindow));
+        assertEquals(expectedRadius, mActivity.mAppCompatController.getAppCompatLetterboxPolicy()
+                .getRoundedCornersRadius(mainWindow));
     }
 
     @Test
@@ -223,18 +233,21 @@ public class LetterboxUiControllerTest extends WindowTestsBase {
         mainWindow.mInvGlobalScale = invGlobalScale;
         mAppCompatConfiguration.setLetterboxActivityCornersRadius(configurationRadius);
 
+        final AppCompatLetterboxPolicy letterboxPolicy =
+                mActivity.mAppCompatController.getAppCompatLetterboxPolicy();
+
         doReturn(true).when(mActivity).isInLetterboxAnimation();
-        assertEquals(expectedRadius, mController.getRoundedCornersRadius(mainWindow));
+        assertEquals(expectedRadius, letterboxPolicy.getRoundedCornersRadius(mainWindow));
 
         doReturn(false).when(mActivity).isInLetterboxAnimation();
-        assertEquals(expectedRadius, mController.getRoundedCornersRadius(mainWindow));
+        assertEquals(expectedRadius, letterboxPolicy.getRoundedCornersRadius(mainWindow));
 
         doReturn(false).when(mActivity).isVisibleRequested();
         doReturn(false).when(mActivity).isVisible();
-        assertEquals(0, mController.getRoundedCornersRadius(mainWindow));
+        assertEquals(0, letterboxPolicy.getRoundedCornersRadius(mainWindow));
 
         doReturn(true).when(mActivity).isInLetterboxAnimation();
-        assertEquals(expectedRadius, mController.getRoundedCornersRadius(mainWindow));
+        assertEquals(expectedRadius, letterboxPolicy.getRoundedCornersRadius(mainWindow));
     }
 
     @Test
@@ -244,14 +257,17 @@ public class LetterboxUiControllerTest extends WindowTestsBase {
         final WindowState mainWindow = mockForGetCropBoundsAndRoundedCorners(/*taskbar=*/ null);
         mAppCompatConfiguration.setLetterboxActivityCornersRadius(configurationRadius);
 
+        final AppCompatLetterboxPolicy letterboxPolicy =
+                mActivity.mAppCompatController.getAppCompatLetterboxPolicy();
+
         mainWindow.mInvGlobalScale = -1f;
-        assertEquals(configurationRadius, mController.getRoundedCornersRadius(mainWindow));
+        assertEquals(configurationRadius, letterboxPolicy.getRoundedCornersRadius(mainWindow));
 
         mainWindow.mInvGlobalScale = 0f;
-        assertEquals(configurationRadius, mController.getRoundedCornersRadius(mainWindow));
+        assertEquals(configurationRadius, letterboxPolicy.getRoundedCornersRadius(mainWindow));
 
         mainWindow.mInvGlobalScale = 1f;
-        assertEquals(configurationRadius, mController.getRoundedCornersRadius(mainWindow));
+        assertEquals(configurationRadius, letterboxPolicy.getRoundedCornersRadius(mainWindow));
     }
 
     private WindowState mockForGetCropBoundsAndRoundedCorners(@Nullable InsetsSource taskbar) {
@@ -292,7 +308,8 @@ public class LetterboxUiControllerTest extends WindowTestsBase {
 
     @Test
     public void testIsLetterboxEducationEnabled() {
-        mController.isLetterboxEducationEnabled();
+        mActivity.mAppCompatController.getAppCompatLetterboxOverrides()
+                .isLetterboxEducationEnabled();
         verify(mAppCompatConfiguration).getIsEducationEnabled();
     }
 

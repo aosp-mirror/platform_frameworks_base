@@ -33,6 +33,8 @@ import android.view.MotionEvent;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.window.WindowInfosListenerForTest;
+import android.window.WindowInfosListenerForTest.DisplayInfo;
+import android.window.WindowInfosListenerForTest.WindowInfo;
 
 import androidx.test.ext.junit.rules.ActivityScenarioRule;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
@@ -50,7 +52,7 @@ import org.junit.runner.RunWith;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
-import java.util.function.Consumer;
+import java.util.function.BiConsumer;
 
 /**
  * Internal variant of {@link android.server.wm.window.ActivityRecordInputSinkTests}.
@@ -154,14 +156,15 @@ public class ActivityRecordInputSinkTests {
     private void waitForOverlayApp() throws InterruptedException {
         final var listenerHost = new WindowInfosListenerForTest();
         final var latch = new CountDownLatch(1);
-        final Consumer<List<WindowInfosListenerForTest.WindowInfo>> listener = windowInfos -> {
-            final boolean inputSinkReady = windowInfos.stream().anyMatch(info ->
-                    info.isVisible
-                            && info.name.contains("ActivityRecordInputSink " + OVERLAY_ACTIVITY));
-            if (inputSinkReady) {
-                latch.countDown();
-            }
-        };
+        final BiConsumer<List<WindowInfo>, List<DisplayInfo>> listener =
+            (windowInfos, displayInfos) -> {
+                final boolean inputSinkReady = windowInfos.stream().anyMatch(
+                    info -> info.isVisible
+                        && info.name.contains("ActivityRecordInputSink " + OVERLAY_ACTIVITY));
+                if (inputSinkReady) {
+                    latch.countDown();
+                }
+            };
 
         listenerHost.addWindowInfosListener(listener);
         try {

@@ -16,19 +16,10 @@
 
 package com.android.server.wm;
 
-import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_ATM;
-import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.AppCompatConfiguration.LETTERBOX_BACKGROUND_WALLPAPER;
 import static com.android.server.wm.AppCompatConfiguration.letterboxBackgroundTypeToString;
 
 import android.annotation.NonNull;
-import android.annotation.Nullable;
-import android.graphics.Color;
-import android.graphics.Rect;
-import android.view.SurfaceControl.Transaction;
-
-import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.statusbar.LetterboxDetails;
 
 import java.io.PrintWriter;
 
@@ -36,8 +27,6 @@ import java.io.PrintWriter;
 // TODO(b/185262487): Improve test coverage of this class. Parts of it are tested in
 // SizeCompatTests and LetterboxTests but not all.
 final class LetterboxUiController {
-
-    private static final String TAG = TAG_WITH_CLASS_NAME ? "LetterboxUiController" : TAG_ATM;
 
     private final AppCompatConfiguration mAppCompatConfiguration;
 
@@ -64,84 +53,6 @@ final class LetterboxUiController {
                 .getAppCompatLetterboxPolicy();
         mAppCompatLetterboxOverrides = mActivityRecord.mAppCompatController
                 .getAppCompatLetterboxOverrides();
-
-    }
-
-    /** Cleans up {@link Letterbox} if it exists.*/
-    void destroy() {
-        mAppCompatLetterboxPolicy.destroy();
-    }
-
-    void onMovedToDisplay(int displayId) {
-        mAppCompatLetterboxPolicy.onMovedToDisplay(displayId);
-    }
-
-    boolean hasWallpaperBackgroundForLetterbox() {
-        return mAppCompatLetterboxOverrides.hasWallpaperBackgroundForLetterbox();
-    }
-
-    /** Gets the letterbox insets. The insets will be empty if there is no letterbox. */
-    Rect getLetterboxInsets() {
-        return mAppCompatLetterboxPolicy.getLetterboxInsets();
-    }
-
-    /** Gets the inner bounds of letterbox. The bounds will be empty if there is no letterbox. */
-    void getLetterboxInnerBounds(Rect outBounds) {
-        mAppCompatLetterboxPolicy.getLetterboxInnerBounds(outBounds);
-    }
-
-    /**
-     * @return {@code true} if bar shown within a given rectangle is allowed to be fully transparent
-     *     when the current activity is displayed.
-     */
-    boolean isFullyTransparentBarAllowed(Rect rect) {
-        return mAppCompatLetterboxPolicy.isFullyTransparentBarAllowed(rect);
-    }
-
-    void updateLetterboxSurfaceIfNeeded(WindowState winHint) {
-        mAppCompatLetterboxPolicy.updateLetterboxSurfaceIfNeeded(winHint);
-    }
-
-    void updateLetterboxSurfaceIfNeeded(WindowState winHint, @NonNull Transaction t,
-            @NonNull Transaction inputT) {
-        mAppCompatLetterboxPolicy.updateLetterboxSurfaceIfNeeded(winHint, t, inputT);
-    }
-
-    void layoutLetterboxIfNeeded(WindowState w) {
-        mAppCompatLetterboxPolicy.start(w);
-    }
-
-    boolean isLetterboxEducationEnabled() {
-        return mAppCompatLetterboxOverrides.isLetterboxEducationEnabled();
-    }
-
-    @VisibleForTesting
-    boolean shouldShowLetterboxUi(WindowState mainWindow) {
-        return mAppCompatLetterboxPolicy.shouldShowLetterboxUi(mainWindow);
-    }
-
-    Color getLetterboxBackgroundColor() {
-        return mAppCompatLetterboxOverrides.getLetterboxBackgroundColor();
-    }
-
-    @VisibleForTesting
-    @Nullable
-    Rect getCropBoundsIfNeeded(final WindowState mainWindow) {
-        return mAppCompatLetterboxPolicy.getCropBoundsIfNeeded(mainWindow);
-    }
-
-    // Returns rounded corners radius the letterboxed activity should have based on override in
-    // R.integer.config_letterboxActivityCornersRadius or min device bottom corner radii.
-    // Device corners can be different on the right and left sides, but we use the same radius
-    // for all corners for consistency and pick a minimal bottom one for consistency with a
-    // taskbar rounded corners.
-    int getRoundedCornersRadius(final WindowState mainWindow) {
-        return mAppCompatLetterboxPolicy.getRoundedCornersRadius(mainWindow);
-    }
-
-    @Nullable
-    LetterboxDetails getLetterboxDetails() {
-        return mAppCompatLetterboxPolicy.getLetterboxDetails();
     }
 
     void dump(PrintWriter pw, String prefix) {
@@ -164,7 +75,7 @@ final class LetterboxUiController {
         pw.println(prefix + "  activityAspectRatio="
                 + AppCompatUtils.computeAspectRatio(mActivityRecord.getBounds()));
 
-        boolean shouldShowLetterboxUi = shouldShowLetterboxUi(mainWin);
+        boolean shouldShowLetterboxUi = mAppCompatLetterboxPolicy.shouldShowLetterboxUi(mainWin);
         pw.println(prefix + "shouldShowLetterboxUi=" + shouldShowLetterboxUi);
 
         if (!shouldShowLetterboxUi) {
@@ -175,12 +86,12 @@ final class LetterboxUiController {
         pw.println(prefix + "  isHorizontalThinLetterboxed="
                 + mAppCompatReachabilityOverrides.isHorizontalThinLetterboxed());
         pw.println(prefix + "  letterboxBackgroundColor=" + Integer.toHexString(
-                getLetterboxBackgroundColor().toArgb()));
+                mAppCompatLetterboxOverrides.getLetterboxBackgroundColor().toArgb()));
         pw.println(prefix + "  letterboxBackgroundType="
                 + letterboxBackgroundTypeToString(
                         mAppCompatConfiguration.getLetterboxBackgroundType()));
         pw.println(prefix + "  letterboxCornerRadius="
-                + getRoundedCornersRadius(mainWin));
+                + mAppCompatLetterboxPolicy.getRoundedCornersRadius(mainWin));
         if (mAppCompatConfiguration.getLetterboxBackgroundType()
                 == LETTERBOX_BACKGROUND_WALLPAPER) {
             pw.println(prefix + "  isLetterboxWallpaperBlurSupported="

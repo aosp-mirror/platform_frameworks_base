@@ -19,6 +19,7 @@ package com.android.server.powerstats;
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
@@ -37,6 +38,8 @@ import android.os.IPowerStatsService;
 import android.os.Looper;
 import android.os.PowerMonitor;
 import android.os.ResultReceiver;
+import android.platform.test.annotations.EnableFlags;
+import android.platform.test.flag.junit.SetFlagsRule;
 import android.provider.DeviceConfig;
 import android.provider.DeviceConfigInterface;
 
@@ -58,6 +61,7 @@ import com.android.server.powerstats.nano.StateResidencyResultProto;
 import com.android.server.testutils.FakeDeviceConfigInterface;
 
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 
 import java.io.ByteArrayOutputStream;
@@ -100,6 +104,8 @@ public class PowerStatsServiceTest {
     private static final int STATE_INFO_COUNT = 5;
     private static final int STATE_RESIDENCY_COUNT = 4;
     private static final int APP_UID = 10042;
+
+    @Rule public final SetFlagsRule mSetFlagsRule = new SetFlagsRule();
 
     private final Context mContext = InstrumentationRegistry.getInstrumentation().getContext();
     private PowerStatsService mService;
@@ -1197,5 +1203,23 @@ public class PowerStatsServiceTest {
         mService.getSupportedPowerMonitorsImpl(supportedPowerMonitorsResult);
         assertThat(Arrays.stream(supportedPowerMonitorsResult.powerMonitors)
                 .map(PowerMonitor::getName).toList()).contains("ENERGYCONSUMER0");
+    }
+
+    @EnableFlags(Flags.FLAG_VERIFY_NON_NULL_ARGUMENTS)
+    @Test
+    public void testGetSupportedPowerMonitors_withNullArguments() {
+        IPowerStatsService iPowerStatsService = mService.getIPowerStatsServiceForTest();
+        assertThrows(NullPointerException.class,
+                () -> iPowerStatsService.getSupportedPowerMonitors(null));
+    }
+
+    @EnableFlags(Flags.FLAG_VERIFY_NON_NULL_ARGUMENTS)
+    @Test
+    public void testGetPowerMonitorReadings_withNullArguments() {
+        IPowerStatsService iPowerStatsService = mService.getIPowerStatsServiceForTest();
+        assertThrows(NullPointerException.class, () -> iPowerStatsService.getPowerMonitorReadings(
+                null, new GetPowerMonitorsResult()));
+        assertThrows(NullPointerException.class, () -> iPowerStatsService.getPowerMonitorReadings(
+                new int[] {0}, null));
     }
 }

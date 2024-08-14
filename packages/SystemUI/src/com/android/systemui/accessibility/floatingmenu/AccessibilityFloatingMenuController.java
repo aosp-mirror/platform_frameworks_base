@@ -29,6 +29,7 @@ import android.view.accessibility.AccessibilityManager;
 
 import androidx.annotation.MainThread;
 
+import com.android.app.viewcapture.ViewCaptureAwareWindowManager;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.KeyguardUpdateMonitorCallback;
@@ -54,6 +55,7 @@ public class AccessibilityFloatingMenuController implements
 
     private Context mContext;
     private final WindowManager mWindowManager;
+    private final ViewCaptureAwareWindowManager mViewCaptureAwareWindowManager;
     private final DisplayManager mDisplayManager;
     private final AccessibilityManager mAccessibilityManager;
 
@@ -97,6 +99,7 @@ public class AccessibilityFloatingMenuController implements
     @Inject
     public AccessibilityFloatingMenuController(Context context,
             WindowManager windowManager,
+            ViewCaptureAwareWindowManager viewCaptureAwareWindowManager,
             DisplayManager displayManager,
             AccessibilityManager accessibilityManager,
             AccessibilityButtonTargetsObserver accessibilityButtonTargetsObserver,
@@ -106,6 +109,7 @@ public class AccessibilityFloatingMenuController implements
             DisplayTracker displayTracker) {
         mContext = context;
         mWindowManager = windowManager;
+        mViewCaptureAwareWindowManager = viewCaptureAwareWindowManager;
         mDisplayManager = displayManager;
         mAccessibilityManager = accessibilityManager;
         mAccessibilityButtonTargetsObserver = accessibilityButtonTargetsObserver;
@@ -187,7 +191,7 @@ public class AccessibilityFloatingMenuController implements
             final Context windowContext = mContext.createWindowContext(defaultDisplay,
                     TYPE_NAVIGATION_BAR_PANEL, /* options= */ null);
             mFloatingMenu = new MenuViewLayerController(windowContext, mWindowManager,
-                    mAccessibilityManager, mSecureSettings);
+                    mViewCaptureAwareWindowManager, mAccessibilityManager, mSecureSettings);
         }
 
         mFloatingMenu.show();

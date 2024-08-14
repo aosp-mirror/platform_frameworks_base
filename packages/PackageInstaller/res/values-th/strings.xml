@@ -111,7 +111,7 @@
     <string name="notification_installation_success_status" msgid="3172502643504323321">"ติดตั้ง “<xliff:g id="APPNAME">%1$s</xliff:g>” สำเร็จแล้ว"</string>
     <string name="unarchive_application_title" msgid="7958278328280721421">"กู้คืน <xliff:g id="APPNAME">%1$s</xliff:g> จาก <xliff:g id="INSTALLERNAME">%2$s</xliff:g> ใช่ไหม"</string>
     <string name="unarchive_body_text" msgid="8244155079861708964">"แอปนี้จะเริ่มดาวน์โหลดในเบื้องหลัง"</string>
-    <string name="restore" msgid="8460854736328970444">"กู้คืน"</string>
+    <string name="restore" msgid="8460854736328970444">"คืนค่า"</string>
     <string name="unarchive_error_offline_title" msgid="4021785324565678605">"คุณออฟไลน์อยู่"</string>
     <string name="unarchive_error_offline_body" msgid="2256042209364094099">"หากต้องการกู้คืนแอปนี้ ให้ตรวจสอบการเชื่อมต่ออินเทอร์เน็ตแล้วลองอีกครั้ง"</string>
     <string name="unarchive_error_generic_title" msgid="7123457671482449992">"เกิดข้อผิดพลาด"</string>

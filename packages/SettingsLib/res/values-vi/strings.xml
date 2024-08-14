@@ -239,7 +239,7 @@
     <string name="category_work" msgid="4014193632325996115">"Công việc"</string>
     <string name="category_private" msgid="4244892185452788977">"Riêng tư"</string>
     <string name="category_clone" msgid="1554511758987195974">"Nhân bản"</string>
-    <string name="development_settings_title" msgid="140296922921597393">"Tùy chọn cho nhà phát triển"</string>
+    <string name="development_settings_title" msgid="140296922921597393">"Tuỳ chọn cho nhà phát triển"</string>
     <string name="development_settings_enable" msgid="4285094651288242183">"Bật tùy chọn nhà phát triển"</string>
     <string name="development_settings_summary" msgid="8718917813868735095">"Đặt tùy chọn cho phát triển ứng dụng"</string>
     <string name="development_settings_not_available" msgid="355070198089140951">"Tùy chọn dành cho nhà phát triển không khả dụng cho người dùng này"</string>
@@ -380,6 +380,8 @@
     <string name="show_touches_summary" msgid="3692861665994502193">"Hiển thị phản hồi trực quan cho các lần nhấn"</string>
     <string name="show_key_presses" msgid="6360141722735900214">"Hiện thao tác nhấn phím"</string>
     <string name="show_key_presses_summary" msgid="725387457373015024">"Hiện phản hồi trực quan cho thao tác nhấn phím vật lý"</string>
+    <string name="touchpad_visualizer" msgid="3707916068870825115">"Hiện phương thức nhập bằng bàn di chuột"</string>
+    <string name="touchpad_visualizer_summary" msgid="4056080018119847449">"Lớp phủ màn hình hiển thị dữ liệu nhập bằng bàn di chuột và các cử chỉ được nhận dạng"</string>
     <string name="show_screen_updates" msgid="2078782895825535494">"Hiện bản cập nhật giao diện"</string>
     <string name="show_screen_updates_summary" msgid="2126932969682087406">"Chuyển nhanh toàn bộ các giao diện cửa sổ khi các giao diện này cập nhật"</string>
     <string name="show_hw_screen_updates" msgid="2021286231267747506">"Hiện bản cập nhật chế độ xem"</string>
@@ -495,8 +497,7 @@
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_remaining_charging_duration_only" msgid="8085099012811384899">"<xliff:g id="TIME">%1$s</xliff:g> nữa là pin đầy"</string>
     <string name="power_charging_duration" msgid="6127154952524919719">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="TIME">%2$s</xliff:g> nữa là pin đầy"</string>
-    <!-- no translation found for power_charging_limited (4144004473976005214) -->
-    <skip />
+    <string name="power_charging_limited" msgid="4144004473976005214">"<xliff:g id="LEVEL">%1$s</xliff:g> – Đang tạm ngưng sạc để bảo vệ pin"</string>
     <string name="power_charging_future_paused" msgid="1809543660923642799">"<xliff:g id="LEVEL">%1$s</xliff:g> – Đang sạc"</string>
     <string name="power_fast_charging_duration_v2" msgid="3797735998640359490">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="STATUS">%2$s</xliff:g> – Đến <xliff:g id="TIME">%3$s</xliff:g> pin sẽ đầy"</string>
     <string name="power_charging_duration_v2" msgid="2938998284074003248">"<xliff:g id="LEVEL">%1$s</xliff:g> – Đến <xliff:g id="TIME">%2$s</xliff:g> pin sẽ đầy"</string>

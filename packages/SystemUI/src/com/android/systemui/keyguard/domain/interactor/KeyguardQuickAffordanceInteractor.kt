@@ -433,10 +433,6 @@ constructor(
                 value = featureFlags.isEnabled(Flags.WALLPAPER_PICKER_UI_FOR_AIWP)
             ),
             KeyguardPickerFlag(
-                name = Contract.FlagsTable.FLAG_NAME_TRANSIT_CLOCK,
-                value = featureFlags.isEnabled(Flags.TRANSIT_CLOCK)
-            ),
-            KeyguardPickerFlag(
                 name = Contract.FlagsTable.FLAG_NAME_PAGE_TRANSITIONS,
                 value = featureFlags.isEnabled(Flags.WALLPAPER_PICKER_PAGE_TRANSITIONS)
             ),

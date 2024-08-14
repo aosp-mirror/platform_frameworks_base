@@ -62,6 +62,7 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 
@@ -207,19 +208,28 @@ public class PowerStatsService extends SystemService {
     private final IBinder mService = new IPowerStatsService.Stub() {
 
         @Override
-        public void getSupportedPowerMonitors(ResultReceiver resultReceiver) {
+        public void getSupportedPowerMonitors(@NonNull ResultReceiver resultReceiver) {
+            if (Flags.verifyNonNullArguments()) {
+                Objects.requireNonNull(resultReceiver);
+            }
             getHandler().post(() -> getSupportedPowerMonitorsImpl(resultReceiver));
         }
 
         @Override
-        public void getPowerMonitorReadings(int[] powerMonitorIds, ResultReceiver resultReceiver) {
+        public void getPowerMonitorReadings(@NonNull int[] powerMonitorIds,
+                @NonNull ResultReceiver resultReceiver) {
+            if (Flags.verifyNonNullArguments()) {
+                Objects.requireNonNull(powerMonitorIds);
+                Objects.requireNonNull(resultReceiver);
+            }
             int callingUid = Binder.getCallingUid();
             getHandler().post(() ->
                     getPowerMonitorReadingsImpl(powerMonitorIds, resultReceiver, callingUid));
         }
 
         @Override
-        protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+        protected void dump(@NonNull FileDescriptor fd, @NonNull PrintWriter pw,
+                @Nullable String[] args) {
             if (!DumpUtils.checkDumpPermission(mContext, TAG, pw)) return;
 
             if (mPowerStatsLogger == null) {
@@ -262,6 +272,11 @@ public class PowerStatsService extends SystemService {
             }
         }
     };
+
+    @VisibleForTesting
+    IPowerStatsService getIPowerStatsServiceForTest() {
+        return (IPowerStatsService) mService;
+    }
 
     private class DeviceConfigListener implements DeviceConfig.OnPropertiesChangedListener {
         public Executor mExecutor = new HandlerExecutor(getHandler());
