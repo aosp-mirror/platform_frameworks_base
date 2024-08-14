@@ -80,6 +80,7 @@ import com.android.server.art.model.DexoptResult;
 import com.android.server.pm.PackageDexOptimizer.DexOptResult;
 import com.android.server.pm.dex.DexManager;
 import com.android.server.pm.dex.DexoptOptions;
+import com.android.server.pm.local.PackageManagerLocalImpl;
 import com.android.server.pm.pkg.AndroidPackage;
 import com.android.server.pm.pkg.PackageState;
 import com.android.server.pm.pkg.PackageStateInternal;
@@ -819,10 +820,16 @@ public final class DexOptHelper {
         final PackageSetting ps = installRequest.getScannedPackageSetting();
         final String packageName = ps.getPackageName();
 
+        PackageSetting uncommittedPs = null;
+        if (Flags.improveInstallFreeze()) {
+            uncommittedPs = ps;
+        }
+
         PackageManagerLocal packageManagerLocal =
                 LocalManagerRegistry.getManager(PackageManagerLocal.class);
         try (PackageManagerLocal.FilteredSnapshot snapshot =
-                     packageManagerLocal.withFilteredSnapshot()) {
+                     PackageManagerLocalImpl.withFilteredSnapshot(packageManagerLocal,
+                uncommittedPs)) {
             boolean ignoreDexoptProfile =
                     (installRequest.getInstallFlags()
                             & PackageManager.INSTALL_IGNORE_DEXOPT_PROFILE)

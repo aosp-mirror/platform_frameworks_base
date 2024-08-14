@@ -148,6 +148,7 @@ import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.EventLog;
 import android.util.ExceptionUtils;
+import android.util.IntArray;
 import android.util.Log;
 import android.util.Pair;
 import android.util.Slog;
@@ -1014,13 +1015,17 @@ final class InstallPackageHelper {
         final Map<String, Settings.VersionInfo> versionInfos = new ArrayMap<>(requests.size());
         try {
             CriticalEventLog.getInstance().logInstallPackagesStarted();
-
             if (prepareInstallPackages(requests)
                     && scanInstallPackages(requests, createdAppId, versionInfos)) {
                 List<ReconciledPackage> reconciledPackages =
                         reconcileInstallPackages(requests, versionInfos);
-                if (reconciledPackages != null
-                        && renameAndUpdatePaths(requests)
+                if (reconciledPackages == null) {
+                    return;
+                }
+                if (Flags.improveInstallFreeze()) {
+                    prepPerformDexoptIfNeeded(reconciledPackages);
+                }
+                if (renameAndUpdatePaths(requests)
                         && commitInstallPackages(reconciledPackages)) {
                     success = true;
                 }
@@ -1028,6 +1033,75 @@ final class InstallPackageHelper {
         } finally {
             completeInstallProcess(requests, createdAppId, success);
             Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
+        }
+    }
+
+    private int[] getNewUsers(InstallRequest installRequest, int[] allUsers)
+            throws PackageManagerException {
+        final int userId = installRequest.getUserId();
+        if (userId != UserHandle.USER_ALL && userId != UserHandle.USER_CURRENT
+                && !mPm.mUserManager.exists(userId)) {
+            throw new PackageManagerException(PackageManagerException.INTERNAL_ERROR_MISSING_USER,
+                    "User " + userId + " doesn't exist or has been removed");
+        }
+
+        final IntArray newUserIds = new IntArray();
+        if (userId != UserHandle.USER_ALL) {
+            newUserIds.add(userId);
+        } else if (allUsers != null) {
+            final int[] installedForUsers = installRequest.getOriginUsers();
+            for (int currentUserId : allUsers) {
+                final boolean installedForCurrentUser = ArrayUtils.contains(
+                        installedForUsers, currentUserId);
+                final boolean restrictedByPolicy =
+                        mPm.isUserRestricted(currentUserId,
+                                UserManager.DISALLOW_INSTALL_APPS)
+                                || mPm.isUserRestricted(currentUserId,
+                                UserManager.DISALLOW_DEBUGGING_FEATURES);
+                if (installedForCurrentUser || !restrictedByPolicy) {
+                    newUserIds.add(currentUserId);
+                }
+            }
+        }
+
+        if (newUserIds.size() == 0) {
+            throw new PackageManagerException(PackageManagerException.INTERNAL_ERROR_MISSING_USER,
+                    "User " + userId + " doesn't exist or has been removed");
+        } else {
+            return newUserIds.toArray();
+        }
+    }
+
+    private void prepPerformDexoptIfNeeded(List<ReconciledPackage> reconciledPackages) {
+        for (ReconciledPackage reconciledPkg : reconciledPackages) {
+            final InstallRequest request = reconciledPkg.mInstallRequest;
+            // prepare profiles
+            final PackageSetting ps = request.getScannedPackageSetting();
+            final PackageSetting oldPkgSetting = request.getScanRequestOldPackageSetting();
+            final int[] allUsers = mPm.mUserManager.getUserIds();
+            if (reconciledPkg.mCollectedSharedLibraryInfos != null
+                    || (oldPkgSetting != null
+                    && !oldPkgSetting.getSharedLibraryDependencies().isEmpty())) {
+                // Reconcile if the new package or the old package uses shared libraries.
+                // It is possible that the old package uses shared libraries but the new
+                // one doesn't.
+                mSharedLibraries.executeSharedLibrariesUpdate(request.getParsedPackage(), ps,
+                        null, null, reconciledPkg.mCollectedSharedLibraryInfos, allUsers);
+            }
+            try (PackageManagerTracedLock installLock = mPm.mInstallLock.acquireLock()) {
+                final int[] newUsers = getNewUsers(request, allUsers);
+                // Hardcode previousAppId to 0 to disable any data migration (http://b/221088088)
+                mAppDataHelper.prepareAppDataPostCommitLIF(ps, 0, newUsers);
+                if (request.isClearCodeCache()) {
+                    mAppDataHelper.clearAppDataLIF(ps.getPkg(), UserHandle.USER_ALL,
+                            FLAG_STORAGE_DE | FLAG_STORAGE_CE | FLAG_STORAGE_EXTERNAL
+                                    | Installer.FLAG_CLEAR_CODE_CACHE_ONLY);
+                }
+            } catch (PackageManagerException e) {
+                request.setError(e.error, e.getMessage());
+                return;
+            }
+            DexOptHelper.performDexoptIfNeeded(request, mDexManager, mContext, null);
         }
     }
 
@@ -2655,20 +2729,22 @@ final class InstallPackageHelper {
                 incrementalStorages.add(storage);
             }
 
-            // Hardcode previousAppId to 0 to disable any data migration (http://b/221088088)
-            mAppDataHelper.prepareAppDataPostCommitLIF(ps, 0, installRequest.getNewUsers());
-            if (installRequest.isClearCodeCache()) {
-                mAppDataHelper.clearAppDataLIF(ps.getPkg(), UserHandle.USER_ALL,
-                        FLAG_STORAGE_DE | FLAG_STORAGE_CE | FLAG_STORAGE_EXTERNAL
-                                | Installer.FLAG_CLEAR_CODE_CACHE_ONLY);
-            }
             if (installRequest.isInstallReplace() && pkg != null) {
                 mDexManager.notifyPackageUpdated(packageName,
                         pkg.getBaseApkPath(), pkg.getSplitCodePaths());
             }
+            if (!Flags.improveInstallFreeze()) {
+                // Hardcode previousAppId to 0 to disable any data migration (http://b/221088088)
+                mAppDataHelper.prepareAppDataPostCommitLIF(ps, 0, installRequest.getNewUsers());
+                if (installRequest.isClearCodeCache()) {
+                    mAppDataHelper.clearAppDataLIF(ps.getPkg(), UserHandle.USER_ALL,
+                            FLAG_STORAGE_DE | FLAG_STORAGE_CE | FLAG_STORAGE_EXTERNAL
+                                    | Installer.FLAG_CLEAR_CODE_CACHE_ONLY);
+                }
 
-            DexOptHelper.performDexoptIfNeeded(installRequest, mDexManager, mContext,
-                    mPm.mInstallLock.getRawLock());
+                DexOptHelper.performDexoptIfNeeded(installRequest, mDexManager, mContext,
+                        mPm.mInstallLock.getRawLock());
+            }
         }
         PackageManagerServiceUtils.waitForNativeBinariesExtractionForIncremental(
                 incrementalStorages);

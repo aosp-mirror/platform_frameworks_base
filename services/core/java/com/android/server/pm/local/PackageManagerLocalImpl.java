@@ -31,6 +31,7 @@ import com.android.server.pm.Computer;
 import com.android.server.pm.PackageManagerLocal;
 import com.android.server.pm.PackageManagerService;
 import com.android.server.pm.pkg.PackageState;
+import com.android.server.pm.pkg.PackageStateInternal;
 import com.android.server.pm.pkg.SharedUserApi;
 import com.android.server.pm.snapshot.PackageDataSnapshot;
 
@@ -71,8 +72,26 @@ public class PackageManagerLocalImpl implements PackageManagerLocal {
     @NonNull
     @Override
     public FilteredSnapshotImpl withFilteredSnapshot(int callingUid, @NonNull UserHandle user) {
+        return withFilteredSnapshot(callingUid, user, /* uncommittedPs= */ null);
+    }
+
+    /**
+     * Creates a {@link FilteredSnapshot} with a uncommitted {@link PackageState} that is used for
+     * dexopt in the art service to get the correct package state before the package is committed.
+     */
+    @NonNull
+    public static FilteredSnapshotImpl withFilteredSnapshot(PackageManagerLocal pm,
+            @NonNull PackageState uncommittedPs) {
+        return ((PackageManagerLocalImpl) pm).withFilteredSnapshot(Binder.getCallingUid(),
+                Binder.getCallingUserHandle(), uncommittedPs);
+    }
+
+    @NonNull
+    private FilteredSnapshotImpl withFilteredSnapshot(int callingUid, @NonNull UserHandle user,
+            @Nullable PackageState uncommittedPs) {
         return new FilteredSnapshotImpl(callingUid, user,
-                mService.snapshotComputer(false /*allowLiveComputer*/), null);
+                mService.snapshotComputer(/* allowLiveComputer= */ false),
+                /* parentSnapshot= */ null, uncommittedPs);
     }
 
     @Override
@@ -145,7 +164,8 @@ public class PackageManagerLocalImpl implements PackageManagerLocal {
 
         @Override
         public FilteredSnapshot filtered(int callingUid, @NonNull UserHandle user) {
-            return new FilteredSnapshotImpl(callingUid, user, mSnapshot, this);
+            return new FilteredSnapshotImpl(callingUid, user, mSnapshot, this,
+                    /* uncommittedPs= */ null);
         }
 
         @SuppressWarnings("RedundantSuppression")
@@ -209,13 +229,18 @@ public class PackageManagerLocalImpl implements PackageManagerLocal {
         @Nullable
         private final UnfilteredSnapshotImpl mParentSnapshot;
 
+        @Nullable
+        private final PackageState mUncommitPackageState;
+
         private FilteredSnapshotImpl(int callingUid, @NonNull UserHandle user,
                 @NonNull PackageDataSnapshot snapshot,
-                @Nullable UnfilteredSnapshotImpl parentSnapshot) {
+                @Nullable UnfilteredSnapshotImpl parentSnapshot,
+                @Nullable PackageState uncommittedPs) {
             super(snapshot);
             mCallingUid = callingUid;
             mUserId = user.getIdentifier();
             mParentSnapshot = parentSnapshot;
+            mUncommitPackageState = uncommittedPs;
         }
 
         @Override
@@ -237,6 +262,10 @@ public class PackageManagerLocalImpl implements PackageManagerLocal {
         @Override
         public PackageState getPackageState(@NonNull String packageName) {
             checkClosed();
+            if (mUncommitPackageState != null
+                    && packageName.equals(mUncommitPackageState.getPackageName())) {
+                return mUncommitPackageState;
+            }
             return mSnapshot.getPackageStateFiltered(packageName, mCallingUid, mUserId);
         }
 
@@ -250,6 +279,11 @@ public class PackageManagerLocalImpl implements PackageManagerLocal {
                 var filteredPackageStates = new ArrayMap<String, PackageState>();
                 for (int index = 0, size = packageStates.size(); index < size; index++) {
                     var packageState = packageStates.valueAt(index);
+                    if (mUncommitPackageState != null
+                            && packageState.getPackageName().equals(
+                            mUncommitPackageState.getPackageName())) {
+                        packageState = (PackageStateInternal) mUncommitPackageState;
+                    }
                     if (!mSnapshot.shouldFilterApplication(packageState, mCallingUid, mUserId)) {
                         filteredPackageStates.put(packageStates.keyAt(index), packageState);
                     }
