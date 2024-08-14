@@ -61,7 +61,6 @@ import static android.window.DisplayAreaOrganizer.FEATURE_UNDEFINED;
 
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_ADD_REMOVE;
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_LOCKTASK;
-import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_RECENTS_ANIMATIONS;
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_STATES;
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_TASKS;
 import static com.android.server.wm.ActivityRecord.State.PAUSED;
@@ -168,7 +167,6 @@ import android.view.InsetsState;
 import android.view.RemoteAnimationAdapter;
 import android.view.SurfaceControl;
 import android.view.WindowManager;
-import android.view.WindowManager.TransitionOldType;
 import android.window.ITaskOrganizer;
 import android.window.PictureInPictureSurfaceTransaction;
 import android.window.StartingWindowInfo;
@@ -2950,14 +2948,6 @@ class Task extends TaskFragment {
         if (isOrganized()) {
             return false;
         }
-        // Don't animate while the task runs recents animation but only if we are in the mode
-        // where we cancel with deferred screenshot, which means that the controller has
-        // transformed the task.
-        final RecentsAnimationController controller = mWmService.getRecentsAnimationController();
-        if (controller != null && controller.isAnimatingTask(this)
-                && controller.shouldDeferCancelUntilNextTransition()) {
-            return false;
-        }
         return true;
     }
 
@@ -3272,30 +3262,6 @@ class Task extends TaskFragment {
             mOverlayHost.setVisibility(t, visible);
         }
         mLastSurfaceShowing = show;
-    }
-
-    @Override
-    protected void applyAnimationUnchecked(WindowManager.LayoutParams lp, boolean enter,
-            @TransitionOldType int transit, boolean isVoiceInteraction,
-            @Nullable ArrayList<WindowContainer> sources) {
-        final RecentsAnimationController control = mWmService.getRecentsAnimationController();
-        if (control != null) {
-            // We let the transition to be controlled by RecentsAnimation, and callback task's
-            // RemoteAnimationTarget for remote runner to animate.
-            if (enter && !isActivityTypeHomeOrRecents()) {
-                ProtoLog.d(WM_DEBUG_RECENTS_ANIMATIONS,
-                        "applyAnimationUnchecked, control: %s, task: %s, transit: %s",
-                        control, asTask(), AppTransition.appTransitionOldToString(transit));
-                final int size = sources != null ? sources.size() : 0;
-                control.addTaskToTargets(this, (type, anim) -> {
-                    for (int i = 0; i < size; ++i) {
-                        sources.get(i).onAnimationFinished(type, anim);
-                    }
-                });
-            }
-        } else {
-            super.applyAnimationUnchecked(lp, enter, transit, isVoiceInteraction, sources);
-        }
     }
 
     @Override

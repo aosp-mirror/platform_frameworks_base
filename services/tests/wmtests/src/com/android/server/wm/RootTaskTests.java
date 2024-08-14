@@ -1280,51 +1280,6 @@ public class RootTaskTests extends WindowTestsBase {
     }
 
     @Test
-    public void testRootTaskOrderChangedOnRemoveRootTask() {
-        final Task task = new TaskBuilder(mSupervisor).build();
-        RootTaskOrderChangedListener listener = new RootTaskOrderChangedListener();
-        mDefaultTaskDisplayArea.registerRootTaskOrderChangedListener(listener);
-        try {
-            mDefaultTaskDisplayArea.removeRootTask(task);
-        } finally {
-            mDefaultTaskDisplayArea.unregisterRootTaskOrderChangedListener(listener);
-        }
-        assertTrue(listener.mChanged);
-    }
-
-    @Test
-    public void testRootTaskOrderChangedOnAddPositionRootTask() {
-        final Task task = new TaskBuilder(mSupervisor).build();
-        mDefaultTaskDisplayArea.removeRootTask(task);
-
-        RootTaskOrderChangedListener listener = new RootTaskOrderChangedListener();
-        mDefaultTaskDisplayArea.registerRootTaskOrderChangedListener(listener);
-        try {
-            task.mReparenting = true;
-            mDefaultTaskDisplayArea.addChild(task, 0);
-        } finally {
-            mDefaultTaskDisplayArea.unregisterRootTaskOrderChangedListener(listener);
-        }
-        assertTrue(listener.mChanged);
-    }
-
-    @Test
-    public void testRootTaskOrderChangedOnPositionRootTask() {
-        RootTaskOrderChangedListener listener = new RootTaskOrderChangedListener();
-        try {
-            final Task fullscreenRootTask1 = createTaskForShouldBeVisibleTest(
-                    mDefaultTaskDisplayArea, WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD,
-                    true /* onTop */);
-            mDefaultTaskDisplayArea.registerRootTaskOrderChangedListener(listener);
-            mDefaultTaskDisplayArea.positionChildAt(POSITION_BOTTOM, fullscreenRootTask1,
-                    false /*includingParents*/);
-        } finally {
-            mDefaultTaskDisplayArea.unregisterRootTaskOrderChangedListener(listener);
-        }
-        assertTrue(listener.mChanged);
-    }
-
-    @Test
     public void testNavigateUpTo() {
         final ActivityStartController controller = mock(ActivityStartController.class);
         final ActivityStarter starter = new ActivityStarter(controller,
@@ -1451,11 +1406,6 @@ public class RootTaskTests extends WindowTestsBase {
                 anyBoolean());
     }
 
-    private boolean isAssistantOnTop() {
-        return mContext.getResources().getBoolean(
-                com.android.internal.R.bool.config_assistantOnTopOfDream);
-    }
-
     private void verifyShouldSleepActivities(boolean focusedRootTask,
             boolean keyguardGoingAway, boolean displaySleeping, boolean isDefaultDisplay,
             boolean expected) {
@@ -1470,15 +1420,5 @@ public class RootTaskTests extends WindowTestsBase {
         doReturn(focusedRootTask).when(task).isFocusedRootTaskOnDisplay();
 
         assertEquals(expected, task.shouldSleepActivities());
-    }
-
-    private static class RootTaskOrderChangedListener
-            implements TaskDisplayArea.OnRootTaskOrderChangedListener {
-        public boolean mChanged = false;
-
-        @Override
-        public void onRootTaskOrderChanged(Task rootTask) {
-            mChanged = true;
-        }
     }
 }
