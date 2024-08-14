@@ -48,18 +48,18 @@ import android.hardware.input.IInputDeviceBatteryState;
 import android.hardware.input.IInputDevicesChangedListener;
 import android.hardware.input.IInputManager;
 import android.hardware.input.IInputSensorEventListener;
+import android.hardware.input.IKeyGestureEventListener;
 import android.hardware.input.IKeyboardBacklightListener;
-import android.hardware.input.IKeyboardSystemShortcutListener;
 import android.hardware.input.IStickyModifierStateListener;
 import android.hardware.input.ITabletModeChangedListener;
 import android.hardware.input.InputDeviceIdentifier;
 import android.hardware.input.InputManager;
 import android.hardware.input.InputSensorInfo;
 import android.hardware.input.InputSettings;
+import android.hardware.input.KeyGestureEvent;
 import android.hardware.input.KeyGlyphMap;
 import android.hardware.input.KeyboardLayout;
 import android.hardware.input.KeyboardLayoutSelectionResult;
-import android.hardware.input.KeyboardSystemShortcut;
 import android.hardware.input.TouchCalibration;
 import android.hardware.lights.Light;
 import android.hardware.lights.LightState;
@@ -162,7 +162,7 @@ public class InputManagerService extends IInputManager.Stub
     private static final int MSG_DELIVER_INPUT_DEVICES_CHANGED = 1;
     private static final int MSG_RELOAD_DEVICE_ALIASES = 2;
     private static final int MSG_DELIVER_TABLET_MODE_CHANGED = 3;
-    private static final int MSG_KEYBOARD_SYSTEM_SHORTCUT_TRIGGERED = 4;
+    private static final int MSG_KEY_GESTURE_COMPLETED = 4;
 
     private static final int DEFAULT_VIBRATION_MAGNITUDE = 192;
     private static final AdditionalDisplayInputProperties
@@ -314,9 +314,7 @@ public class InputManagerService extends IInputManager.Stub
 
     // Manages Sticky modifier state
     private final StickyModifierStateController mStickyModifierStateController;
-
-    // Manages keyboard system shortcut callbacks
-    private final KeyboardShortcutCallbackHandler mKeyboardShortcutCallbackHandler;
+    private final KeyGestureController mKeyGestureController;
 
     // Manages Keyboard microphone mute led
     private final KeyboardLedController mKeyboardLedController;
@@ -476,7 +474,7 @@ public class InputManagerService extends IInputManager.Stub
                         injector.getLooper(), injector.getUEventManager())
                 : new KeyboardBacklightControllerInterface() {};
         mStickyModifierStateController = new StickyModifierStateController();
-        mKeyboardShortcutCallbackHandler = new KeyboardShortcutCallbackHandler();
+        mKeyGestureController = new KeyGestureController();
         mKeyboardLedController = new KeyboardLedController(mContext, injector.getLooper(),
                 mNative);
         mKeyRemapper = new KeyRemapper(mContext, mNative, mDataStore, injector.getLooper());
@@ -2723,33 +2721,32 @@ public class InputManagerService extends IInputManager.Stub
     }
 
     @Override
-    @EnforcePermission(Manifest.permission.MONITOR_KEYBOARD_SYSTEM_SHORTCUTS)
-    public void registerKeyboardSystemShortcutListener(
-            @NonNull IKeyboardSystemShortcutListener listener) {
-        super.registerKeyboardSystemShortcutListener_enforcePermission();
+    @EnforcePermission(Manifest.permission.MANAGE_KEY_GESTURES)
+    public void registerKeyGestureEventListener(
+            @NonNull IKeyGestureEventListener listener) {
+        super.registerKeyGestureEventListener_enforcePermission();
         Objects.requireNonNull(listener);
-        mKeyboardShortcutCallbackHandler.registerKeyboardSystemShortcutListener(listener,
+        mKeyGestureController.registerKeyGestureEventListener(listener,
                 Binder.getCallingPid());
     }
 
     @Override
-    @EnforcePermission(Manifest.permission.MONITOR_KEYBOARD_SYSTEM_SHORTCUTS)
-    public void unregisterKeyboardSystemShortcutListener(
-            @NonNull IKeyboardSystemShortcutListener listener) {
-        super.unregisterKeyboardSystemShortcutListener_enforcePermission();
+    @EnforcePermission(Manifest.permission.MANAGE_KEY_GESTURES)
+    public void unregisterKeyGestureEventListener(
+            @NonNull IKeyGestureEventListener listener) {
+        super.unregisterKeyGestureEventListener_enforcePermission();
         Objects.requireNonNull(listener);
-        mKeyboardShortcutCallbackHandler.unregisterKeyboardSystemShortcutListener(listener,
+        mKeyGestureController.unregisterKeyGestureEventListener(listener,
                 Binder.getCallingPid());
     }
 
-    private void handleKeyboardSystemShortcutTriggered(int deviceId,
-            KeyboardSystemShortcut shortcut) {
-        InputDevice device = getInputDevice(deviceId);
-        if (device == null || device.isVirtual() || !device.isFullKeyboard()) {
+    private void handleKeyGestureCompleted(KeyGestureEvent event) {
+        InputDevice device = getInputDevice(event.getDeviceId());
+        if (device == null || device.isVirtual()) {
             return;
         }
-        KeyboardMetricsCollector.logKeyboardSystemsEventReportedAtom(device, shortcut);
-        mKeyboardShortcutCallbackHandler.onKeyboardSystemShortcutTriggered(deviceId, shortcut);
+        KeyboardMetricsCollector.logKeyboardSystemsEventReportedAtom(device, event);
+        mKeyGestureController.onKeyGestureEvent(event);
     }
 
     /**
@@ -2920,10 +2917,9 @@ public class InputManagerService extends IInputManager.Stub
                     boolean inTabletMode = (boolean) args.arg1;
                     deliverTabletModeChanged(whenNanos, inTabletMode);
                     break;
-                case MSG_KEYBOARD_SYSTEM_SHORTCUT_TRIGGERED:
-                    int deviceId = msg.arg1;
-                    KeyboardSystemShortcut shortcut = (KeyboardSystemShortcut) msg.obj;
-                    handleKeyboardSystemShortcutTriggered(deviceId, shortcut);
+                case MSG_KEY_GESTURE_COMPLETED:
+                    KeyGestureEvent event = (KeyGestureEvent) msg.obj;
+                    handleKeyGestureCompleted(event);
             }
         }
     }
@@ -3251,10 +3247,11 @@ public class InputManagerService extends IInputManager.Stub
         }
 
         @Override
-        public void notifyKeyboardShortcutTriggered(int deviceId, int[] keycodes, int modifierState,
-                @KeyboardSystemShortcut.SystemShortcut int shortcut) {
-            mHandler.obtainMessage(MSG_KEYBOARD_SYSTEM_SHORTCUT_TRIGGERED, deviceId, 0,
-                    new KeyboardSystemShortcut(keycodes, modifierState, shortcut)).sendToTarget();
+        public void notifyKeyGestureCompleted(int deviceId, int[] keycodes, int modifierState,
+                @KeyGestureEvent.KeyGestureType int gestureType) {
+            mHandler.obtainMessage(MSG_KEY_GESTURE_COMPLETED,
+                    new KeyGestureEvent(deviceId, keycodes, modifierState,
+                            gestureType)).sendToTarget();
         }
     }
 

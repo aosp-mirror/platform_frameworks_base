@@ -29,7 +29,7 @@ import kotlinx.coroutines.test.TestScope
 fun transition(
     from: SceneKey,
     to: SceneKey,
-    current: () -> SceneKey = { from },
+    current: () -> SceneKey = { to },
     progress: () -> Float = { 0f },
     progressVelocity: () -> Float = { 0f },
     previewProgress: () -> Float = { 0f },

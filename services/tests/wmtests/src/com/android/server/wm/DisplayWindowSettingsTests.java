@@ -309,6 +309,16 @@ public class DisplayWindowSettingsTests extends WindowTestsBase {
     public void testPublicDisplayDefaultToMoveToPrimary() {
         assertEquals(REMOVE_CONTENT_MODE_MOVE_TO_PRIMARY,
                 mDisplayWindowSettings.getRemoveContentModeLocked(mSecondaryDisplay));
+
+        // Sets the remove-content-mode and make sure the mode is updated.
+        mDisplayWindowSettings.setRemoveContentModeLocked(mSecondaryDisplay,
+                REMOVE_CONTENT_MODE_DESTROY);
+        final int removeContentMode = mDisplayWindowSettings.getRemoveContentModeLocked(
+                mSecondaryDisplay);
+        assertEquals(REMOVE_CONTENT_MODE_DESTROY, removeContentMode);
+
+        doReturn(removeContentMode).when(mSecondaryDisplay).getRemoveContentMode();
+        assertTrue(mSecondaryDisplay.shouldDestroyContentOnRemove());
     }
 
     @Test

@@ -19,6 +19,7 @@ package com.android.systemui.communal.util
 import android.app.ActivityOptions
 import android.app.PendingIntent
 import android.content.Intent
+import android.util.Pair as UtilPair
 import android.view.View
 import android.widget.RemoteViews
 import androidx.core.util.component1
@@ -36,14 +37,28 @@ class InteractionHandlerDelegate(
     private val logger: Logger,
 ) : RemoteViews.InteractionHandler {
 
-    /** Responsible for starting the pending intent for launching activities. */
-    fun interface IntentStarter {
-        fun startPendingIntent(
+    interface IntentStarter {
+        /** Responsible for starting the pending intent for launching activities. */
+        fun startActivity(
             intent: PendingIntent,
             fillInIntent: Intent,
             activityOptions: ActivityOptions,
             controller: ActivityTransitionAnimator.Controller?,
         ): Boolean
+
+        /** Responsible for starting the pending intent for non-activity launches. */
+        fun startPendingIntent(
+            view: View,
+            pendingIntent: PendingIntent,
+            fillInIntent: Intent,
+            activityOptions: ActivityOptions,
+        ): Boolean {
+            return RemoteViews.startPendingIntent(
+                view,
+                pendingIntent,
+                UtilPair(fillInIntent, activityOptions),
+            )
+        }
     }
 
     override fun onInteraction(
@@ -55,7 +70,7 @@ class InteractionHandlerDelegate(
             str1 = pendingIntent.toLoggingString()
             str2 = pendingIntent.creatorPackage
         }
-        val launchOptions = response.getLaunchOptions(view)
+        val (fillInIntent, activityOptions) = response.getLaunchOptions(view)
         return when {
             pendingIntent.isActivity -> {
                 // Forward the fill-in intent and activity options retrieved from the response
@@ -67,15 +82,15 @@ class InteractionHandlerDelegate(
                         communalSceneInteractor.setIsLaunchingWidget(true)
                         CommunalTransitionAnimatorController(it, communalSceneInteractor)
                     }
-                val (fillInIntent, activityOptions) = launchOptions
-                intentStarter.startPendingIntent(
+                intentStarter.startActivity(
                     pendingIntent,
                     fillInIntent,
                     activityOptions,
                     animationController
                 )
             }
-            else -> RemoteViews.startPendingIntent(view, pendingIntent, launchOptions)
+            else ->
+                intentStarter.startPendingIntent(view, pendingIntent, fillInIntent, activityOptions)
         }
     }
 

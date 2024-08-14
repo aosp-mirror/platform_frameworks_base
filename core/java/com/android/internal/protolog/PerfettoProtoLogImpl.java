@@ -16,6 +16,7 @@
 
 package com.android.internal.protolog;
 
+import static android.content.Context.PROTOLOG_SERVICE;
 import static android.internal.perfetto.protos.InternedDataOuterClass.InternedData.PROTOLOG_STACKTRACE;
 import static android.internal.perfetto.protos.InternedDataOuterClass.InternedData.PROTOLOG_STRING_ARGS;
 import static android.internal.perfetto.protos.ProfileCommon.InternedString.IID;
@@ -46,6 +47,8 @@ import static android.internal.perfetto.protos.TracePacketOuterClass.TracePacket
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.internal.perfetto.protos.Protolog.ProtoLogViewerConfig.MessageData;
+import android.os.RemoteException;
+import android.os.ServiceManager;
 import android.os.ShellCommand;
 import android.os.SystemClock;
 import android.text.TextUtils;
@@ -76,6 +79,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.UUID;
@@ -103,36 +107,45 @@ public class PerfettoProtoLogImpl extends IProtoLogClient.Stub implements IProto
     private final ProtoLogViewerConfigReader mViewerConfigReader;
     @Nullable
     private final ViewerConfigInputStreamProvider mViewerConfigInputStreamProvider;
+    @NonNull
     private final TreeMap<String, IProtoLogGroup> mLogGroups = new TreeMap<>();
+    @NonNull
     private final Runnable mCacheUpdater;
 
+    @Nullable // null when the flag android.tracing.client_side_proto_logging is not flipped
+    private final IProtoLogService mProtoLogService;
+
+    @NonNull
     private final int[] mDefaultLogLevelCounts = new int[LogLevel.values().length];
+    @NonNull
     private final Map<String, int[]> mLogLevelCounts = new ArrayMap<>();
+    @NonNull
     private final Map<String, Integer> mCollectStackTraceGroupCounts = new ArrayMap<>();
 
     private final Lock mBackgroundServiceLock = new ReentrantLock();
     private ExecutorService mBackgroundLoggingService = Executors.newSingleThreadExecutor();
 
-    public PerfettoProtoLogImpl(@NonNull String viewerConfigFilePath, Runnable cacheUpdater) {
-        this(() -> {
-            try {
-                return new ProtoInputStream(new FileInputStream(viewerConfigFilePath));
-            } catch (FileNotFoundException e) {
-                throw new RuntimeException("Failed to load viewer config file " + viewerConfigFilePath, e);
-            }
-        }, cacheUpdater);
+    public PerfettoProtoLogImpl() {
+        this(null, null, null, () -> {});
     }
 
-    public PerfettoProtoLogImpl() {
-        this(null, null, () -> {});
+    public PerfettoProtoLogImpl(@NonNull Runnable cacheUpdater) {
+        this(null, null, null, cacheUpdater);
     }
 
     public PerfettoProtoLogImpl(
-            @NonNull ViewerConfigInputStreamProvider viewerConfigInputStreamProvider,
-            Runnable cacheUpdater
-    ) {
-        this(viewerConfigInputStreamProvider,
-                new ProtoLogViewerConfigReader(viewerConfigInputStreamProvider),
+            @NonNull String viewerConfigFilePath,
+            @NonNull Runnable cacheUpdater) {
+        this(viewerConfigFilePath,
+                null,
+                new ProtoLogViewerConfigReader(() -> {
+                    try {
+                        return new ProtoInputStream(new FileInputStream(viewerConfigFilePath));
+                    } catch (FileNotFoundException e) {
+                        throw new RuntimeException(
+                                "Failed to load viewer config file " + viewerConfigFilePath, e);
+                    }
+                }),
                 cacheUpdater);
     }
 
@@ -140,8 +153,18 @@ public class PerfettoProtoLogImpl extends IProtoLogClient.Stub implements IProto
     public PerfettoProtoLogImpl(
             @Nullable ViewerConfigInputStreamProvider viewerConfigInputStreamProvider,
             @Nullable ProtoLogViewerConfigReader viewerConfigReader,
-            Runnable cacheUpdater
-    ) {
+            @NonNull Runnable cacheUpdater) {
+        this(null, viewerConfigInputStreamProvider, viewerConfigReader, cacheUpdater);
+    }
+
+    private PerfettoProtoLogImpl(
+            @Nullable String viewerConfigFilePath,
+            @Nullable ViewerConfigInputStreamProvider viewerConfigInputStreamProvider,
+            @Nullable ProtoLogViewerConfigReader viewerConfigReader,
+            @NonNull Runnable cacheUpdater) {
+        assert (viewerConfigFilePath == null || viewerConfigInputStreamProvider == null) :
+                "Only one of viewerConfigFilePath and viewerConfigInputStreamProvider can be set";
+
         Producer.init(InitArguments.DEFAULTS);
         DataSourceParams params =
                 new DataSourceParams.Builder()
@@ -153,6 +176,27 @@ public class PerfettoProtoLogImpl extends IProtoLogClient.Stub implements IProto
         this.mViewerConfigInputStreamProvider = viewerConfigInputStreamProvider;
         this.mViewerConfigReader = viewerConfigReader;
         this.mCacheUpdater = cacheUpdater;
+
+        if (android.tracing.Flags.clientSideProtoLogging()) {
+            mProtoLogService =
+                    IProtoLogService.Stub.asInterface(ServiceManager.getService(PROTOLOG_SERVICE));
+            Objects.requireNonNull(mProtoLogService,
+                    "ServiceManager returned a null ProtoLog service");
+
+            try {
+                var args = new ProtoLogService.RegisterClientArgs();
+
+                if (viewerConfigFilePath != null) {
+                    args.setViewerConfigFile(viewerConfigFilePath);
+                }
+
+                mProtoLogService.registerClient(this, args);
+            } catch (RemoteException e) {
+                throw new RuntimeException("Failed to register ProtoLog client");
+            }
+        } else {
+            mProtoLogService = null;
+        }
     }
 
     /**

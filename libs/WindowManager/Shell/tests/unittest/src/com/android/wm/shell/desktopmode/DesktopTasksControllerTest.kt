@@ -641,6 +641,41 @@ class DesktopTasksControllerTest : ShellTestCase() {
 
   @Test
   @EnableFlags(Flags.FLAG_ENABLE_CASCADING_WINDOWS)
+  fun handleRequest_newFreeformTaskLaunch_cascadeApplied() {
+    assumeTrue(ENABLE_SHELL_TRANSITIONS)
+    setUpLandscapeDisplay()
+    val stableBounds = Rect()
+    displayLayout.getStableBoundsForDesktopMode(stableBounds)
+
+    setUpFreeformTask(bounds = DEFAULT_LANDSCAPE_BOUNDS)
+    val freeformTask = setUpFreeformTask(bounds = DEFAULT_LANDSCAPE_BOUNDS, active = false)
+
+    val wct = controller.handleRequest(Binder(), createTransition(freeformTask))
+
+    assertNotNull(wct, "should handle request")
+    val finalBounds = findBoundsChange(wct, freeformTask)
+    assertThat(stableBounds.getDesktopTaskPosition(finalBounds!!))
+      .isEqualTo(DesktopTaskPosition.BottomRight)
+  }
+
+  @Test
+  @EnableFlags(Flags.FLAG_ENABLE_CASCADING_WINDOWS)
+  fun handleRequest_freeformTaskAlreadyExistsInDesktopMode_cascadeNotApplied() {
+    assumeTrue(ENABLE_SHELL_TRANSITIONS)
+    setUpLandscapeDisplay()
+    val stableBounds = Rect()
+    displayLayout.getStableBoundsForDesktopMode(stableBounds)
+
+    setUpFreeformTask(bounds = DEFAULT_LANDSCAPE_BOUNDS)
+    val freeformTask = setUpFreeformTask(bounds = DEFAULT_LANDSCAPE_BOUNDS)
+
+    val wct = controller.handleRequest(Binder(), createTransition(freeformTask))
+
+    assertNull(wct, "should not handle request")
+  }
+
+  @Test
+  @EnableFlags(Flags.FLAG_ENABLE_CASCADING_WINDOWS)
   fun addMoveToDesktopChanges_positionBottomRight() {
     setUpLandscapeDisplay()
     val stableBounds = Rect()
@@ -1784,6 +1819,19 @@ class DesktopTasksControllerTest : ShellTestCase() {
   }
 
   @Test
+  @EnableFlags(
+    Flags.FLAG_ENABLE_DESKTOP_WINDOWING_WALLPAPER_ACTIVITY,
+  )
+  fun handleRequest_backTransition_singleTaskNoToken_withWallpaper_notInDesktop_doesNotHandle() {
+    val task = setUpFreeformTask()
+    markTaskHidden(task)
+
+    val result = controller.handleRequest(Binder(), createTransition(task, type = TRANSIT_TO_BACK))
+
+    assertNull(result, "Should not handle request")
+  }
+
+  @Test
   @EnableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_WALLPAPER_ACTIVITY)
   @DisableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_BACK_NAVIGATION)
   fun handleRequest_backTransition_singleTaskNoToken_noBackNav_doesNotHandle() {
@@ -2816,14 +2864,17 @@ class DesktopTasksControllerTest : ShellTestCase() {
 
   private fun setUpFreeformTask(
       displayId: Int = DEFAULT_DISPLAY,
-      bounds: Rect? = null
+      bounds: Rect? = null,
+      active: Boolean = true
   ): RunningTaskInfo {
     val task = createFreeformTask(displayId, bounds)
     val activityInfo = ActivityInfo()
     task.topActivityInfo = activityInfo
     whenever(shellTaskOrganizer.getRunningTaskInfo(task.taskId)).thenReturn(task)
-    taskRepository.addActiveTask(displayId, task.taskId)
-    taskRepository.updateTaskVisibility(displayId, task.taskId, visible = true)
+    if (active) {
+      taskRepository.addActiveTask(displayId, task.taskId)
+      taskRepository.updateTaskVisibility(displayId, task.taskId, visible = true)
+    }
     taskRepository.addOrMoveFreeformTaskToTop(displayId, task.taskId)
     runningTasks.add(task)
     return task

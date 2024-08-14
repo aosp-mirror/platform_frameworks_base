@@ -1404,6 +1404,16 @@ public final class SatelliteManager {
                                         () -> callback.onSatelliteProvisionStateChanged(
                                                 provisioned)));
                             }
+
+                            @FlaggedApi(Flags.FLAG_CARRIER_ROAMING_NB_IOT_NTN)
+                            @Override
+                            public void onSatelliteSubscriptionProvisionStateChanged(
+                                    @NonNull List<SatelliteSubscriberProvisionStatus>
+                                            satelliteSubscriberProvisionStatus) {
+                                executor.execute(() -> Binder.withCleanCallingIdentity(() ->
+                                        callback.onSatelliteSubscriptionProvisionStateChanged(
+                                                satelliteSubscriberProvisionStatus)));
+                            }
                         };
                 sSatelliteProvisionStateCallbackMap.put(callback, internalCallback);
                 return telephony.registerForSatelliteProvisionStateChanged(

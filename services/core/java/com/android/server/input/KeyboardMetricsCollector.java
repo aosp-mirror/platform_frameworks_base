@@ -24,9 +24,9 @@ import static android.hardware.input.KeyboardLayoutSelectionResult.layoutSelecti
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.hardware.input.KeyGestureEvent;
 import android.hardware.input.KeyboardLayout;
 import android.hardware.input.KeyboardLayoutSelectionResult.LayoutSelectionCriteria;
-import android.hardware.input.KeyboardSystemShortcut;
 import android.icu.util.ULocale;
 import android.text.TextUtils;
 import android.util.Log;
@@ -66,14 +66,17 @@ public final class KeyboardMetricsCollector {
      * defined in "stats/atoms/input/input_extension_atoms.proto"
      */
     public static void logKeyboardSystemsEventReportedAtom(@NonNull InputDevice inputDevice,
-            @NonNull KeyboardSystemShortcut keyboardSystemShortcut) {
+            @NonNull KeyGestureEvent keyGestureEvent) {
+        if (inputDevice.isVirtual() || !inputDevice.isFullKeyboard()) {
+            return;
+        }
         FrameworkStatsLog.write(FrameworkStatsLog.KEYBOARD_SYSTEMS_EVENT_REPORTED,
                 inputDevice.getVendorId(), inputDevice.getProductId(),
-                keyboardSystemShortcut.getSystemShortcut(), keyboardSystemShortcut.getKeycodes(),
-                keyboardSystemShortcut.getModifierState(), inputDevice.getDeviceBus());
+                keyGestureEvent.getKeyGestureType(), keyGestureEvent.getKeycodes(),
+                keyGestureEvent.getModifierState(), inputDevice.getDeviceBus());
 
         if (DEBUG) {
-            Slog.d(TAG, "Logging Keyboard system event: " + keyboardSystemShortcut);
+            Slog.d(TAG, "Logging Keyboard system event: " + keyGestureEvent);
         }
     }
 

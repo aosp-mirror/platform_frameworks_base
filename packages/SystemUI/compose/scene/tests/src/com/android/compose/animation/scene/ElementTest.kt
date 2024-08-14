@@ -1380,8 +1380,8 @@ class ElementTest {
 
         // Manually finish the transition.
         rule.runOnUiThread {
-            state.finishTransition(aToB, SceneB)
-            state.finishTransition(bToC, SceneC)
+            state.finishTransition(aToB)
+            state.finishTransition(bToC)
         }
         rule.waitForIdle()
         assertThat(state.transitionState).isIdle()
@@ -1482,7 +1482,7 @@ class ElementTest {
 
         // Manually finish A => B so only B => C is remaining.
         bToCInterruptionProgress = 0f
-        rule.runOnUiThread { state.finishTransition(aToB, SceneB) }
+        rule.runOnUiThread { state.finishTransition(aToB) }
         rule
             .onNode(isElement(TestElements.Foo, SceneB))
             .assertPositionInRootIsEqualTo(offsetInB.x, offsetInB.y)
@@ -2002,6 +2002,7 @@ class ElementTest {
             transition(
                 from = SceneB,
                 to = SceneC,
+                current = { SceneB },
                 progress = { 0f },
                 interruptionProgress = { interruptionProgress },
                 onFinish = neverFinish(),
@@ -2018,8 +2019,8 @@ class ElementTest {
         // 100%. We should be at (20dp, 20dp), unless the interruption deltas have not been
         // correctly cleaned.
         rule.runOnUiThread {
-            state.finishTransition(aToB, idleScene = SceneB)
-            state.finishTransition(bToC, idleScene = SceneB)
+            state.finishTransition(aToB)
+            state.finishTransition(bToC)
             state.startTransition(
                 transition(
                     from = SceneB,

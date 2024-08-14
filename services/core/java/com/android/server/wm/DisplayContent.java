@@ -45,7 +45,6 @@ import static android.view.Display.FLAG_CAN_SHOW_WITH_INSECURE_KEYGUARD;
 import static android.view.Display.FLAG_PRIVATE;
 import static android.view.Display.FLAG_SHOULD_SHOW_SYSTEM_DECORATIONS;
 import static android.view.Display.INVALID_DISPLAY;
-import static android.view.Display.REMOVE_MODE_DESTROY_CONTENT;
 import static android.view.Display.STATE_UNKNOWN;
 import static android.view.Display.isSuspendedState;
 import static android.view.InsetsSource.ID_IME;
@@ -80,6 +79,7 @@ import static android.view.WindowManager.LayoutParams.TYPE_SYSTEM_DIALOG;
 import static android.view.WindowManager.LayoutParams.TYPE_SYSTEM_ERROR;
 import static android.view.WindowManager.LayoutParams.TYPE_TOAST;
 import static android.view.WindowManager.LayoutParams.TYPE_WALLPAPER;
+import static android.view.WindowManager.REMOVE_CONTENT_MODE_DESTROY;
 import static android.view.WindowManager.TRANSIT_CHANGE;
 import static android.view.WindowManager.TRANSIT_NONE;
 import static android.view.WindowManager.TRANSIT_OPEN;
@@ -6556,7 +6556,12 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
 
     @VisibleForTesting
     boolean shouldDestroyContentOnRemove() {
-        return mDisplay.getRemoveMode() == REMOVE_MODE_DESTROY_CONTENT;
+        return getRemoveContentMode() == REMOVE_CONTENT_MODE_DESTROY;
+    }
+
+    @WindowManager.RemoveContentMode
+    int getRemoveContentMode() {
+        return mWmService.mDisplayWindowSettings.getRemoveContentModeLocked(this);
     }
 
     boolean shouldSleep() {
