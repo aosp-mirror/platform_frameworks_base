@@ -260,6 +260,8 @@ public class CaptionWindowDecoration extends WindowDecoration<WindowDecorLinearL
             setupRootView();
         }
 
+        bindData(mResult.mRootView, taskInfo);
+
         if (!isDragResizeable) {
             closeDragResizeListener();
             return;
@@ -303,6 +305,14 @@ public class CaptionWindowDecoration extends WindowDecoration<WindowDecorLinearL
         minimize.setOnClickListener(mOnCaptionButtonClickListener);
         final View maximize = caption.findViewById(R.id.maximize_window);
         maximize.setOnClickListener(mOnCaptionButtonClickListener);
+    }
+
+    private void bindData(View rootView, RunningTaskInfo taskInfo) {
+        final boolean isFullscreen =
+                taskInfo.getWindowingMode() == WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
+        rootView.findViewById(R.id.maximize_window)
+                .setBackgroundResource(isFullscreen ? R.drawable.decor_restore_button_dark
+                        : R.drawable.decor_maximize_button_dark);
     }
 
     void setCaptionColor(int captionColor) {

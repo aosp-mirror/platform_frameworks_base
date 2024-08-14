@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-  ~ Copyright (C) 2022 The Android Open Source Project
+  ~ Copyright (C) 2024 The Android Open Source Project
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -26,8 +26,6 @@
         <path
             android:fillColor="@android:color/black"
             android:fillType="evenOdd"
-            android:pathData="M23.0,1.0v22.0H1V1h22zm-3,19H4V4h16v16z"/>
+            android:pathData="M23,16H8V1h15v15zm-12,-3V4h9v9h-9zM4,8H1v15h15v-3H4V8z"/>
     </group>
 </vector>
-
-
