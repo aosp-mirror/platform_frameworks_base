@@ -167,8 +167,6 @@ internal class MutableSceneTransitionLayoutStateImpl(
     override val transitionState: TransitionState
         get() = transitionStates.last()
 
-    private val activeTransitionLinks = mutableMapOf<StateLink, LinkedTransition>()
-
     override val currentTransitions: List<TransitionState.Transition>
         get() {
             if (transitionStates.last() is TransitionState.Idle) {
@@ -180,12 +178,8 @@ internal class MutableSceneTransitionLayoutStateImpl(
             }
         }
 
-    /**
-     * The mapping of transitions that are finished, i.e. for which [finishTransition] was called,
-     * to their idle scene.
-     */
-    @VisibleForTesting
-    internal val finishedTransitions = mutableMapOf<TransitionState.Transition, SceneKey>()
+    /** The transitions that are finished, i.e. for which [finishTransition] was called. */
+    @VisibleForTesting internal val finishedTransitions = mutableSetOf<TransitionState.Transition>()
 
     internal fun checkThread() {
         val current = Thread.currentThread()
@@ -261,7 +255,7 @@ internal class MutableSceneTransitionLayoutStateImpl(
         }
 
         // Handle transition links.
-        cancelActiveTransitionLinks()
+        currentTransition?.let { cancelActiveTransitionLinks(it) }
         setupTransitionLinks(transition)
 
         if (!enableInterruptions) {
@@ -289,8 +283,7 @@ internal class MutableSceneTransitionLayoutStateImpl(
 
                     // Force finish all transitions.
                     while (currentTransitions.isNotEmpty()) {
-                        val transition = transitionStates[0] as TransitionState.Transition
-                        finishTransition(transition, transition.currentScene)
+                        finishTransition(transitionStates[0] as TransitionState.Transition)
                     }
 
                     // We finished all transitions, so we are now idle. We remove this state so that
@@ -328,18 +321,17 @@ internal class MutableSceneTransitionLayoutStateImpl(
         )
     }
 
-    private fun cancelActiveTransitionLinks() {
-        for ((link, linkedTransition) in activeTransitionLinks) {
-            link.target.finishTransition(linkedTransition, linkedTransition.currentScene)
+    private fun cancelActiveTransitionLinks(transition: TransitionState.Transition) {
+        transition.activeTransitionLinks.forEach { (link, linkedTransition) ->
+            link.target.finishTransition(linkedTransition)
         }
-        activeTransitionLinks.clear()
+        transition.activeTransitionLinks.clear()
     }
 
-    private fun setupTransitionLinks(transitionState: TransitionState) {
-        if (transitionState !is TransitionState.Transition) return
+    private fun setupTransitionLinks(transition: TransitionState.Transition) {
         stateLinks.fastForEach { stateLink ->
             val matchingLinks =
-                stateLink.transitionLinks.fastFilter { it.isMatchingLink(transitionState) }
+                stateLink.transitionLinks.fastFilter { it.isMatchingLink(transition) }
             if (matchingLinks.isEmpty()) return@fastForEach
             if (matchingLinks.size > 1) error("More than one link matched.")
 
@@ -350,31 +342,27 @@ internal class MutableSceneTransitionLayoutStateImpl(
 
             val linkedTransition =
                 LinkedTransition(
-                    originalTransition = transitionState,
+                    originalTransition = transition,
                     fromScene = targetCurrentScene,
                     toScene = matchingLink.targetTo,
                     key = matchingLink.targetTransitionKey,
                 )
 
             stateLink.target.startTransition(linkedTransition)
-            activeTransitionLinks[stateLink] = linkedTransition
+            transition.activeTransitionLinks[stateLink] = linkedTransition
         }
     }
 
     /**
-     * Notify that [transition] was finished and that we should settle to [idleScene]. This will do
-     * nothing if [transition] was interrupted since it was started.
+     * Notify that [transition] was finished and that it settled to its
+     * [currentScene][TransitionState.currentScene]. This will do nothing if [transition] was
+     * interrupted since it was started.
      */
-    internal fun finishTransition(transition: TransitionState.Transition, idleScene: SceneKey) {
+    internal fun finishTransition(transition: TransitionState.Transition) {
         checkThread()
 
-        val existingIdleScene = finishedTransitions[transition]
-        if (existingIdleScene != null) {
+        if (finishedTransitions.contains(transition)) {
             // This transition was already finished.
-            check(idleScene == existingIdleScene) {
-                "Transition $transition was finished multiple times with different " +
-                    "idleScene ($existingIdleScene != $idleScene)"
-            }
             return
         }
 
@@ -386,15 +374,15 @@ internal class MutableSceneTransitionLayoutStateImpl(
 
         check(transitionStates.fastAll { it is TransitionState.Transition })
 
-        // Mark this transition as finished and save the scene it is settling at.
-        finishedTransitions[transition] = idleScene
+        // Mark this transition as finished.
+        finishedTransitions.add(transition)
 
         // Finish all linked transitions.
-        finishActiveTransitionLinks(idleScene)
+        finishActiveTransitionLinks(transition)
 
-        // Keep a reference to the idle scene of the last removed transition, in case we remove all
-        // transitions and should settle to Idle.
-        var lastRemovedIdleScene: SceneKey? = null
+        // Keep a reference to the last transition, in case we remove all transitions and should
+        // settle to Idle.
+        val lastTransition = transitionStates.last()
 
         // Remove all first n finished transitions.
         var i = 0
@@ -407,14 +395,14 @@ internal class MutableSceneTransitionLayoutStateImpl(
             }
 
             // Remove the transition from the set of finished transitions.
-            lastRemovedIdleScene = finishedTransitions.remove(t)
+            finishedTransitions.remove(t)
             i++
         }
 
         // If all transitions are finished, we are idle.
         if (i == nStates) {
             check(finishedTransitions.isEmpty())
-            this.transitionStates = listOf(TransitionState.Idle(checkNotNull(lastRemovedIdleScene)))
+            this.transitionStates = listOf(TransitionState.Idle(lastTransition.currentScene))
         } else if (i > 0) {
             this.transitionStates = transitionStates.subList(fromIndex = i, toIndex = nStates)
         }
@@ -426,28 +414,18 @@ internal class MutableSceneTransitionLayoutStateImpl(
         // Force finish all transitions.
         while (currentTransitions.isNotEmpty()) {
             val transition = transitionStates[0] as TransitionState.Transition
-            finishTransition(transition, transition.currentScene)
+            finishTransition(transition)
         }
 
         check(transitionStates.size == 1)
         transitionStates = listOf(TransitionState.Idle(scene))
     }
 
-    private fun finishActiveTransitionLinks(idleScene: SceneKey) {
-        val previousTransition = this.transitionState as? TransitionState.Transition ?: return
-        for ((link, linkedTransition) in activeTransitionLinks) {
-            if (previousTransition.fromScene == idleScene) {
-                // The transition ended by arriving at the fromScene, move link to Idle(fromScene).
-                link.target.finishTransition(linkedTransition, linkedTransition.fromScene)
-            } else if (previousTransition.toScene == idleScene) {
-                // The transition ended by arriving at the toScene, move link to Idle(toScene).
-                link.target.finishTransition(linkedTransition, linkedTransition.toScene)
-            } else {
-                // The transition was interrupted by something else, we reset to initial state.
-                link.target.finishTransition(linkedTransition, linkedTransition.fromScene)
-            }
+    private fun finishActiveTransitionLinks(transition: TransitionState.Transition) {
+        for ((link, linkedTransition) in transition.activeTransitionLinks) {
+            link.target.finishTransition(linkedTransition)
         }
-        activeTransitionLinks.clear()
+        transition.activeTransitionLinks.clear()
     }
 
     /**
@@ -465,31 +443,21 @@ internal class MutableSceneTransitionLayoutStateImpl(
 
         fun isProgressCloseTo(value: Float) = (progress - value).absoluteValue <= threshold
 
-        fun finishAllTransitions(lastTransitionIdleScene: SceneKey) {
+        fun finishAllTransitions() {
             // Force finish all transitions.
             while (currentTransitions.isNotEmpty()) {
-                val transition = transitionStates[0] as TransitionState.Transition
-                val idleScene =
-                    if (transitionStates.size == 1) {
-                        lastTransitionIdleScene
-                    } else {
-                        transition.currentScene
-                    }
-
-                finishTransition(transition, idleScene)
+                finishTransition(transitionStates[0] as TransitionState.Transition)
             }
         }
 
-        return when {
-            isProgressCloseTo(0f) -> {
-                finishAllTransitions(transition.fromScene)
-                true
-            }
-            isProgressCloseTo(1f) -> {
-                finishAllTransitions(transition.toScene)
-                true
-            }
-            else -> false
+        val shouldSnap =
+            (isProgressCloseTo(0f) && transition.currentScene == transition.fromScene) ||
+                (isProgressCloseTo(1f) && transition.currentScene == transition.toScene)
+        return if (shouldSnap) {
+            finishAllTransitions()
+            true
+        } else {
+            false
         }
     }
 }

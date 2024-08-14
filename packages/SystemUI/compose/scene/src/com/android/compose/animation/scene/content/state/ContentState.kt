@@ -29,6 +29,8 @@ import com.android.compose.animation.scene.SceneTransitionLayoutImpl
 import com.android.compose.animation.scene.TransformationSpec
 import com.android.compose.animation.scene.TransformationSpecImpl
 import com.android.compose.animation.scene.TransitionKey
+import com.android.compose.animation.scene.transition.link.LinkedTransition
+import com.android.compose.animation.scene.transition.link.StateLink
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 
@@ -110,6 +112,9 @@ sealed interface ContentState<out T : ContentKey> {
          */
         private var interruptionDecay: Animatable<Float, AnimationVector1D>? = null
 
+        /** The map of active links that connects this transition to other transitions. */
+        internal val activeTransitionLinks = mutableMapOf<StateLink, LinkedTransition>()
+
         init {
             check(fromContent != toContent)
             check(
@@ -131,7 +136,7 @@ sealed interface ContentState<out T : ContentKey> {
          *   animation is complete or cancel it to snap the animation. Calling [finish] multiple
          *   times will return the same [Job].
          */
-        abstract fun finish(): Job
+        internal abstract fun finish(): Job
 
         /**
          * Whether we are transitioning. If [from] or [to] is empty, we will also check that they

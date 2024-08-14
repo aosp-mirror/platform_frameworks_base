@@ -129,7 +129,7 @@ private class PredictiveBackTransition(
                 try {
                     animatable.animateTo(targetProgress)
                 } finally {
-                    state.finishTransition(this@PredictiveBackTransition, scene)
+                    state.finishTransition(this@PredictiveBackTransition)
                 }
             }
             .also { animationJob = it }
