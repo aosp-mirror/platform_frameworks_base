@@ -57,7 +57,7 @@ interface Activatable {
      * }
      * ```
      */
-    suspend fun activate()
+    suspend fun activate(): Nothing
 }
 
 /**

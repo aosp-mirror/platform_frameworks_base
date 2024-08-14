@@ -163,7 +163,7 @@ constructor(
         actionsViewModelFactory.create()
     }
 
-    override suspend fun activate() {
+    override suspend fun activate(): Nothing {
         actionsViewModel.activate()
     }
 

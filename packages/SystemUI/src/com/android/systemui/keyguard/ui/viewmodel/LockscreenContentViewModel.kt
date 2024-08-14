@@ -32,6 +32,7 @@ import com.android.systemui.unfold.domain.interactor.UnfoldTransitionInteractor
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -72,7 +73,7 @@ constructor(
     /** Whether the content of the scene UI should be shown. */
     val isContentVisible: StateFlow<Boolean> = _isContentVisible.asStateFlow()
 
-    override suspend fun onActivated() {
+    override suspend fun onActivated(): Nothing {
         coroutineScope {
             launch {
                 combine(
@@ -92,6 +93,8 @@ constructor(
                     .map { !it }
                     .collectLatest { _isContentVisible.value = it }
             }
+
+            awaitCancellation()
         }
     }
 

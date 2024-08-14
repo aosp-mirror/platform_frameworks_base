@@ -29,6 +29,7 @@ import kotlin.math.max
 import kotlin.math.min
 import kotlin.math.pow
 import kotlin.math.sqrt
+import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -80,7 +81,7 @@ constructor(
 
     override val lockoutMessageId = R.string.kg_too_many_failed_pattern_attempts_dialog_message
 
-    override suspend fun onActivated() {
+    override suspend fun onActivated(): Nothing {
         coroutineScope {
             launch { super.onActivated() }
             launch {
@@ -88,6 +89,7 @@ constructor(
                     .map { it.toList() }
                     .collectLatest { selectedDotList.value = it.toList() }
             }
+            awaitCancellation()
         }
     }
 

@@ -37,6 +37,7 @@ import com.android.systemui.lifecycle.SysUiViewModel
 import com.android.systemui.user.ui.viewmodel.UserSwitcherViewModel
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
+import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -137,7 +138,7 @@ constructor(
         MutableStateFlow(authenticationInteractor.lockoutEndTimestamp == null)
     private val isInputEnabled: StateFlow<Boolean> = _isInputEnabled.asStateFlow()
 
-    override suspend fun onActivated() {
+    override suspend fun onActivated(): Nothing {
         coroutineScope {
             launch { message.activate() }
             launch {
@@ -214,6 +215,8 @@ constructor(
                     .map { lockoutMessagePresent -> !lockoutMessagePresent }
                     .collectLatest { _isInputEnabled.value = it }
             }
+
+            awaitCancellation()
         }
     }
 
