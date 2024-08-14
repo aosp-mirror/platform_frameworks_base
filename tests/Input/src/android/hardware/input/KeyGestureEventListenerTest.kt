@@ -42,21 +42,22 @@ import kotlin.test.assertNull
 import kotlin.test.fail
 
 /**
- * Tests for [InputManager.KeyboardSystemShortcutListener].
+ * Tests for [InputManager.KeyGestureEventListener].
  *
  * Build/Install/Run:
- * atest InputTests:KeyboardSystemShortcutListenerTest
+ * atest InputTests:KeyGestureEventListenerTest
  */
 @Presubmit
 @RunWith(MockitoJUnitRunner::class)
-class KeyboardSystemShortcutListenerTest {
+class KeyGestureEventListenerTest {
 
     companion object {
         const val DEVICE_ID = 1
-        val HOME_SHORTCUT = KeyboardSystemShortcut(
+        val HOME_GESTURE_EVENT = KeyGestureEvent(
+            DEVICE_ID,
             intArrayOf(KeyEvent.KEYCODE_H),
             KeyEvent.META_META_ON or KeyEvent.META_META_LEFT_ON,
-            KeyboardSystemShortcut.SYSTEM_SHORTCUT_HOME
+            KeyGestureEvent.KEY_GESTURE_TYPE_HOME
         )
     }
 
@@ -65,7 +66,7 @@ class KeyboardSystemShortcutListenerTest {
 
     private val testLooper = TestLooper()
     private val executor = HandlerExecutor(Handler(testLooper.looper))
-    private var registeredListener: IKeyboardSystemShortcutListener? = null
+    private var registeredListener: IKeyGestureEventListener? = null
     private lateinit var context: Context
     private lateinit var inputManager: InputManager
     private lateinit var inputManagerGlobalSession: InputManagerGlobal.TestSession
@@ -81,28 +82,28 @@ class KeyboardSystemShortcutListenerTest {
         `when`(context.getSystemService(Mockito.eq(Context.INPUT_SERVICE)))
                 .thenReturn(inputManager)
 
-        // Handle keyboard system shortcut listener registration.
+        // Handle key gesture event listener registration.
         doAnswer {
-            val listener = it.getArgument(0) as IKeyboardSystemShortcutListener
+            val listener = it.getArgument(0) as IKeyGestureEventListener
             if (registeredListener != null &&
                     registeredListener!!.asBinder() != listener.asBinder()) {
-                // There can only be one registered keyboard system shortcut listener per process.
+                // There can only be one registered key gesture event listener per process.
                 fail("Trying to register a new listener when one already exists")
             }
             registeredListener = listener
             null
-        }.`when`(iInputManagerMock).registerKeyboardSystemShortcutListener(any())
+        }.`when`(iInputManagerMock).registerKeyGestureEventListener(any())
 
-        // Handle keyboard system shortcut listener being unregistered.
+        // Handle key gesture event listener being unregistered.
         doAnswer {
-            val listener = it.getArgument(0) as IKeyboardSystemShortcutListener
+            val listener = it.getArgument(0) as IKeyGestureEventListener
             if (registeredListener == null ||
                     registeredListener!!.asBinder() != listener.asBinder()) {
                 fail("Trying to unregister a listener that is not registered")
             }
             registeredListener = null
             null
-        }.`when`(iInputManagerMock).unregisterKeyboardSystemShortcutListener(any())
+        }.`when`(iInputManagerMock).unregisterKeyGestureEventListener(any())
     }
 
     @After
@@ -112,29 +113,28 @@ class KeyboardSystemShortcutListenerTest {
         }
     }
 
-    private fun notifyKeyboardSystemShortcutTriggered(id: Int, shortcut: KeyboardSystemShortcut) {
-        registeredListener!!.onKeyboardSystemShortcutTriggered(
-            id,
-            shortcut.keycodes,
-            shortcut.modifierState,
-            shortcut.systemShortcut
+    private fun notifyKeyGestureEvent(event: KeyGestureEvent) {
+        registeredListener!!.onKeyGestureEvent(
+            event.deviceId,
+            event.keycodes,
+            event.modifierState,
+            event.keyGestureType
         )
     }
 
     @Test
-    fun testListenerHasCorrectSystemShortcutNotified() {
+    fun testListenerHasCorrectGestureNotified() {
         var callbackCount = 0
 
-        // Add a keyboard system shortcut listener
-        inputManager.registerKeyboardSystemShortcutListener(executor) {
-            deviceId: Int, systemShortcut: KeyboardSystemShortcut ->
-            assertEquals(DEVICE_ID, deviceId)
-            assertEquals(HOME_SHORTCUT, systemShortcut)
+        // Add a key gesture event listener
+        inputManager.registerKeyGestureEventListener(executor) {
+            event: KeyGestureEvent ->
+            assertEquals(HOME_GESTURE_EVENT, event)
             callbackCount++
         }
 
-        // Notifying keyboard system shortcut triggered will notify the listener.
-        notifyKeyboardSystemShortcutTriggered(DEVICE_ID, HOME_SHORTCUT)
+        // Notifying key gesture event will notify the listener.
+        notifyKeyGestureEvent(HOME_GESTURE_EVENT)
         testLooper.dispatchNext()
         assertEquals(1, callbackCount)
     }
@@ -142,34 +142,34 @@ class KeyboardSystemShortcutListenerTest {
     @Test
     fun testAddingListenersRegistersInternalCallbackListener() {
         // Set up two callbacks.
-        val callback1 = InputManager.KeyboardSystemShortcutListener {_, _ -> }
-        val callback2 = InputManager.KeyboardSystemShortcutListener {_, _ -> }
+        val callback1 = InputManager.KeyGestureEventListener { _ -> }
+        val callback2 = InputManager.KeyGestureEventListener { _ -> }
 
         assertNull(registeredListener)
 
         // Adding the listener should register the callback with InputManagerService.
-        inputManager.registerKeyboardSystemShortcutListener(executor, callback1)
+        inputManager.registerKeyGestureEventListener(executor, callback1)
         assertNotNull(registeredListener)
 
         // Adding another listener should not register new internal listener.
         val currListener = registeredListener
-        inputManager.registerKeyboardSystemShortcutListener(executor, callback2)
+        inputManager.registerKeyGestureEventListener(executor, callback2)
         assertEquals(currListener, registeredListener)
     }
 
     @Test
     fun testRemovingListenersUnregistersInternalCallbackListener() {
         // Set up two callbacks.
-        val callback1 = InputManager.KeyboardSystemShortcutListener {_, _ -> }
-        val callback2 = InputManager.KeyboardSystemShortcutListener {_, _ -> }
+        val callback1 = InputManager.KeyGestureEventListener { _ -> }
+        val callback2 = InputManager.KeyGestureEventListener { _ -> }
 
-        inputManager.registerKeyboardSystemShortcutListener(executor, callback1)
-        inputManager.registerKeyboardSystemShortcutListener(executor, callback2)
+        inputManager.registerKeyGestureEventListener(executor, callback1)
+        inputManager.registerKeyGestureEventListener(executor, callback2)
 
         // Only removing all listeners should remove the internal callback
-        inputManager.unregisterKeyboardSystemShortcutListener(callback1)
+        inputManager.unregisterKeyGestureEventListener(callback1)
         assertNotNull(registeredListener)
-        inputManager.unregisterKeyboardSystemShortcutListener(callback2)
+        inputManager.unregisterKeyGestureEventListener(callback2)
         assertNull(registeredListener)
     }
 
@@ -178,23 +178,23 @@ class KeyboardSystemShortcutListenerTest {
         // Set up two callbacks.
         var callbackCount1 = 0
         var callbackCount2 = 0
-        val callback1 = InputManager.KeyboardSystemShortcutListener { _, _ -> callbackCount1++ }
-        val callback2 = InputManager.KeyboardSystemShortcutListener { _, _ -> callbackCount2++ }
+        val callback1 = InputManager.KeyGestureEventListener { _ -> callbackCount1++ }
+        val callback2 = InputManager.KeyGestureEventListener { _ -> callbackCount2++ }
 
-        // Add both keyboard system shortcut listeners
-        inputManager.registerKeyboardSystemShortcutListener(executor, callback1)
-        inputManager.registerKeyboardSystemShortcutListener(executor, callback2)
+        // Add both key gesture event listeners
+        inputManager.registerKeyGestureEventListener(executor, callback1)
+        inputManager.registerKeyGestureEventListener(executor, callback2)
 
-        // Notifying keyboard system shortcut triggered, should notify both the callbacks.
-        notifyKeyboardSystemShortcutTriggered(DEVICE_ID, HOME_SHORTCUT)
+        // Notifying key gesture event, should notify both the callbacks.
+        notifyKeyGestureEvent(HOME_GESTURE_EVENT)
         testLooper.dispatchAll()
         assertEquals(1, callbackCount1)
         assertEquals(1, callbackCount2)
 
-        inputManager.unregisterKeyboardSystemShortcutListener(callback2)
-        // Notifying keyboard system shortcut triggered, should still trigger callback1 but not
+        inputManager.unregisterKeyGestureEventListener(callback2)
+        // Notifying key gesture event, should still trigger callback1 but not
         // callback2.
-        notifyKeyboardSystemShortcutTriggered(DEVICE_ID, HOME_SHORTCUT)
+        notifyKeyGestureEvent(HOME_GESTURE_EVENT)
         testLooper.dispatchAll()
         assertEquals(2, callbackCount1)
         assertEquals(1, callbackCount2)
