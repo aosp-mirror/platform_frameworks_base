@@ -3771,6 +3771,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             // Shell calls back into Core with the entry bounds to be applied with startWCT.
             final Transition enterPipTransition = new Transition(TRANSIT_PIP,
                     0 /* flags */, getTransitionController(), mWindowManager.mSyncEngine);
+            r.setPictureInPictureParams(params);
             enterPipTransition.setPipActivity(r);
             r.mAutoEnteringPip = isAutoEnter;
             getTransitionController().startCollectOrQueue(enterPipTransition, (deferred) -> {
