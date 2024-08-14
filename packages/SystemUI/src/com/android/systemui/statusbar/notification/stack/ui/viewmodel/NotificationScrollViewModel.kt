@@ -118,6 +118,9 @@ constructor(
             .distinctUntilChanged()
             .dumpWhileCollecting("expandFraction")
 
+    val qsExpandFraction: Flow<Float> =
+        shadeInteractor.qsExpansion.dumpWhileCollecting("qsExpandFraction")
+
     val shouldResetStackTop: Flow<Boolean> =
         sceneInteractor.transitionState
             .mapNotNull { state ->

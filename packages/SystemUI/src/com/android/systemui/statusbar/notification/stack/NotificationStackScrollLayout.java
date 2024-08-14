@@ -1556,6 +1556,12 @@ public class NotificationStackScrollLayout
         }
     }
 
+    @Override
+    public void setQsExpandFraction(float expandFraction) {
+        if (SceneContainerFlag.isUnexpectedlyInLegacyMode()) return;
+        mAmbientState.setQsExpansionFraction(expandFraction);
+    }
+
     /**
      * Update the height of the panel.
      *
