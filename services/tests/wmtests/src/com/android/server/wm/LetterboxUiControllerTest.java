@@ -77,7 +77,6 @@ public class LetterboxUiControllerTest extends WindowTestsBase {
     private ActivityRecord mActivity;
     private Task mTask;
     private DisplayContent mDisplayContent;
-    private LetterboxUiController mController;
     private AppCompatConfiguration mAppCompatConfiguration;
     private final Rect mLetterboxedPortraitTaskBounds = new Rect();
 
@@ -87,8 +86,6 @@ public class LetterboxUiControllerTest extends WindowTestsBase {
 
         mAppCompatConfiguration = mWm.mAppCompatConfiguration;
         spyOn(mAppCompatConfiguration);
-
-        mController = new LetterboxUiController(mWm, mActivity);
     }
 
     @Test
@@ -276,10 +273,13 @@ public class LetterboxUiControllerTest extends WindowTestsBase {
         final Resources resources = mWm.mContext.getResources();
         final WindowManager.LayoutParams attrs = new WindowManager.LayoutParams();
 
+        final AppCompatAspectRatioPolicy aspectRatioPolicy = mActivity.mAppCompatController
+                .getAppCompatAspectRatioPolicy();
+
         mainWindow.mInvGlobalScale = 1f;
         spyOn(resources);
         spyOn(mActivity);
-        spyOn(mActivity.mAppCompatController.getAppCompatAspectRatioPolicy());
+        spyOn(aspectRatioPolicy);
 
         if (taskbar != null) {
             taskbar.setVisible(true);
@@ -288,8 +288,8 @@ public class LetterboxUiControllerTest extends WindowTestsBase {
         doReturn(mLetterboxedPortraitTaskBounds).when(mActivity).getBounds();
         doReturn(false).when(mActivity).isInLetterboxAnimation();
         doReturn(true).when(mActivity).isVisible();
-        doReturn(true).when(mActivity.mAppCompatController
-                .getAppCompatAspectRatioPolicy()).isLetterboxedForFixedOrientationAndAspectRatio();
+        doReturn(true).when(aspectRatioPolicy)
+                .isLetterboxedForFixedOrientationAndAspectRatio();
         doReturn(insets).when(mainWindow).getInsetsState();
         doReturn(attrs).when(mainWindow).getAttrs();
         doReturn(true).when(mainWindow).isDrawn();
@@ -299,9 +299,6 @@ public class LetterboxUiControllerTest extends WindowTestsBase {
         doReturn(true).when(mAppCompatConfiguration).isLetterboxActivityCornersRounded();
         doReturn(TASKBAR_EXPANDED_HEIGHT).when(resources).getDimensionPixelSize(
                 R.dimen.taskbar_frame_height);
-
-        // Need to reinitialise due to the change in resources getDimensionPixelSize output.
-        mController = new LetterboxUiController(mWm, mActivity);
 
         return mainWindow;
     }

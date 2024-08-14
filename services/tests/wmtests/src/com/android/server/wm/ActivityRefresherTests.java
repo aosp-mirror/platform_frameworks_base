@@ -212,7 +212,6 @@ public class ActivityRefresherTests extends WindowTestsBase {
                 .build()
                 .getTopMostActivity();
 
-        spyOn(mActivity.mLetterboxUiController);
         spyOn(mActivity.mAppCompatController.getAppCompatCameraOverrides());
         doReturn(true).when(mActivity).inFreeformWindowingMode();
         doReturn(true).when(mActivity.mAppCompatController

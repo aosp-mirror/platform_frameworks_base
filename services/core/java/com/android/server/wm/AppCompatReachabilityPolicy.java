@@ -33,6 +33,7 @@ import android.graphics.Rect;
 
 import com.android.internal.annotations.VisibleForTesting;
 
+import java.io.PrintWriter;
 import java.util.function.Supplier;
 
 /**
@@ -72,6 +73,25 @@ class AppCompatReachabilityPolicy {
     void handleDoubleTap(int x, int y) {
         handleHorizontalDoubleTap(x);
         handleVerticalDoubleTap(y);
+    }
+
+    void dump(@NonNull PrintWriter pw, @NonNull String prefix) {
+        final AppCompatReachabilityOverrides reachabilityOverrides =
+                mActivityRecord.mAppCompatController.getAppCompatReachabilityOverrides();
+        pw.println(prefix + "  isVerticalThinLetterboxed=" + reachabilityOverrides
+                .isVerticalThinLetterboxed());
+        pw.println(prefix + "  isHorizontalThinLetterboxed=" + reachabilityOverrides
+                .isHorizontalThinLetterboxed());
+        pw.println(prefix + "  isHorizontalReachabilityEnabled="
+                + reachabilityOverrides.isHorizontalReachabilityEnabled());
+        pw.println(prefix + "  isVerticalReachabilityEnabled="
+                + reachabilityOverrides.isVerticalReachabilityEnabled());
+        pw.println(prefix + "  letterboxHorizontalPositionMultiplier="
+                + reachabilityOverrides.getHorizontalPositionMultiplier(
+                mActivityRecord.getParent().getConfiguration()));
+        pw.println(prefix + "  letterboxVerticalPositionMultiplier="
+                + reachabilityOverrides.getVerticalPositionMultiplier(
+                mActivityRecord.getParent().getConfiguration()));
     }
 
     private void handleHorizontalDoubleTap(int x) {
