@@ -329,8 +329,11 @@ constructor(
     @Deprecated(
         "Use com.android.systemui.communal.domain.interactor.CommunalSceneInteractor instead"
     )
-    fun changeScene(newScene: SceneKey, transitionKey: TransitionKey? = null) =
-        communalSceneInteractor.changeScene(newScene, transitionKey)
+    fun changeScene(
+        newScene: SceneKey,
+        loggingReason: String,
+        transitionKey: TransitionKey? = null
+    ) = communalSceneInteractor.changeScene(newScene, loggingReason, transitionKey)
 
     fun setEditModeOpen(isOpen: Boolean) {
         _editModeOpen.value = isOpen

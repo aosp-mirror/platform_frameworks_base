@@ -42,6 +42,7 @@ class CommunalTransitionAnimatorController(
         // TODO(b/330672236): move this to onTransitionAnimationEnd() without the delay.
         communalSceneInteractor.snapToScene(
             CommunalScenes.Blank,
+            "CommunalTransitionAnimatorController",
             ActivityTransitionAnimator.TIMINGS.totalDuration
         )
     }
