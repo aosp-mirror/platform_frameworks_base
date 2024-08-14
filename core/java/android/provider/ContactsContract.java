@@ -17,6 +17,8 @@
 package android.provider;
 
 import android.accounts.Account;
+import android.annotation.FlaggedApi;
+import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
@@ -65,6 +67,8 @@ import com.google.android.collect.Sets;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -3012,6 +3016,173 @@ public final class ContactsContract {
             //  platform/frameworks/base/core/res/res/values/config.xml
             return TextUtils.nullIfEmpty(context.getString(
                     com.android.internal.R.string.config_rawContactsLocalAccountType));
+        }
+
+        /**
+         * Represents the state of the default account, and the actual {@link Account} if it's
+         * a cloud account.
+         * If the default account is set to {@link #DEFAULT_ACCOUNT_STATE_LOCAL} or
+         * {@link #DEFAULT_ACCOUNT_STATE_CLOUD}, new raw contacts requested for insertion
+         * without a
+         * specified {@link Account} will be saved in the default account.
+         * The default account can have one of the following four states:
+         * <ul>
+         * <li> {@link #DEFAULT_ACCOUNT_STATE_INVALID}: An invalid state that should not
+         * occur on the device. </li>
+         * <li> {@link #DEFAULT_ACCOUNT_STATE_NOT_SET}: The default account has not
+         * been set by the user. </li>
+         * <li> {@link #DEFAULT_ACCOUNT_STATE_LOCAL}: The default account is set to
+         * the local device storage. New raw contacts requested for insertion without a
+         * specified
+         * {@link Account} will be saved in a null or custom local account. </li>
+         * <li> {@link #DEFAULT_ACCOUNT_STATE_CLOUD}: The default account is set to a
+         * cloud-synced account. New raw contacts requested for insertion without a specified
+         * {@link Account} will be saved in {@link mCloudAccount}. </li>
+         * </ul>
+         */
+        @FlaggedApi(Flags.FLAG_NEW_DEFAULT_ACCOUNT_API_ENABLED)
+        public static final class DefaultAccountAndState {
+            // The state of the default account.
+            /** A state that is invalid. */
+            public static final int DEFAULT_ACCOUNT_STATE_INVALID = 0;
+
+            /** A state indicating that default account is not set. */
+            public static final int DEFAULT_ACCOUNT_STATE_NOT_SET = 1;
+
+            /** A state indicating that default account is set to local device storage. */
+            public static final int DEFAULT_ACCOUNT_STATE_LOCAL = 2;
+
+            /**
+             * A state indicating that the default account is set as an account that is synced
+             * to the cloud.
+             */
+            public static final int DEFAULT_ACCOUNT_STATE_CLOUD = 3;
+
+            /**
+             * The state of the default account. One of
+             * {@link #DEFAULT_ACCOUNT_STATE_NOT_SET},
+             * {@link #DEFAULT_ACCOUNT_STATE_LOCAL} or
+             * {@link #DEFAULT_ACCOUNT_STATE_CLOUD}.
+             */
+            @DefaultAccountState
+            private final int mState;
+
+            /**
+             * The account of the default account, when {@link mState} is {
+             *
+             * @link #STATE_SET_TO_CLOUD}, or null otherwise.
+             */
+            private final Account mCloudAccount;
+
+            /**
+             * Constructs a new `DefaultAccountAndState` instance with the specified state and
+             * cloud
+             * account.
+             *
+             * @param state        The state of the default account.
+             * @param cloudAccount The cloud account associated with the default account,
+             *                     or null if the state is not
+             *                     {@link #DEFAULT_ACCOUNT_STATE_CLOUD}.
+             */
+            public DefaultAccountAndState(@DefaultAccountState int state,
+                    @Nullable Account cloudAccount) {
+                if (state == DEFAULT_ACCOUNT_STATE_INVALID) {
+                    throw new IllegalArgumentException("Invalid default account state.");
+                }
+                if ((state == DEFAULT_ACCOUNT_STATE_CLOUD) != (cloudAccount != null)) {
+                    throw new IllegalArgumentException(
+                            "Default account can be set to cloud if and only if the cloud "
+                                    + "account is provided.");
+                }
+                this.mState = state;
+                this.mCloudAccount =
+                        (mState == DEFAULT_ACCOUNT_STATE_CLOUD) ? cloudAccount : null;
+            }
+
+            /**
+             * Creates a `DefaultAccountAndState` instance representing a default account
+             * that is set to the cloud and associated with the specified cloud account.
+             *
+             * @param cloudAccount The non-null cloud account associated with the default
+             *                     contacts
+             *                     account.
+             * @return A new `DefaultAccountAndState` instance with state
+             * {@link #DEFAULT_ACCOUNT_STATE_CLOUD}.
+             */
+            public static @NonNull DefaultAccountAndState ofCloud(
+                    @NonNull Account cloudAccount) {
+                return new DefaultAccountAndState(DEFAULT_ACCOUNT_STATE_CLOUD, cloudAccount);
+            }
+
+            /**
+             * Creates a `DefaultAccountAndState` instance representing a default account
+             * that is set to the local device storage.
+             *
+             * @return A new `DefaultAccountAndState` instance with state
+             * {@link #DEFAULT_ACCOUNT_STATE_LOCAL}.
+             */
+            public static @NonNull DefaultAccountAndState ofLocal() {
+                return new DefaultAccountAndState(DEFAULT_ACCOUNT_STATE_LOCAL, null);
+            }
+
+            /**
+             * Creates a `DefaultAccountAndState` instance representing a default account
+             * that is not set.
+             *
+             * @return A new `DefaultAccountAndState` instance with state
+             * {@link #DEFAULT_ACCOUNT_STATE_NOT_SET}.
+             */
+            public static @NonNull DefaultAccountAndState ofNotSet() {
+                return new DefaultAccountAndState(DEFAULT_ACCOUNT_STATE_NOT_SET, null);
+            }
+
+            /**
+             * @return the state of the default account.
+             */
+            @DefaultAccountState
+            public int getState() {
+                return mState;
+            }
+
+            /**
+             * @return the cloud account associated with the default account, or null if the
+             * state is not {@link #DEFAULT_ACCOUNT_STATE_CLOUD}.
+             */
+            public @Nullable Account getCloudAccount() {
+                return mCloudAccount;
+            }
+
+            @Override
+            public int hashCode() {
+                return Objects.hash(mState, mCloudAccount);
+            }
+
+            @Override
+            public boolean equals(Object obj) {
+                if (this == obj) {
+                    return true;
+                }
+                if (!(obj instanceof DefaultAccountAndState that)) {
+                    return false;
+                }
+
+                return mState == that.mState && Objects.equals(mCloudAccount,
+                        that.mCloudAccount);
+            }
+
+            /**
+             * Annotation for all default account states.
+             *
+             * @hide
+             */
+            @Retention(RetentionPolicy.SOURCE)
+            @IntDef(
+                    prefix = {"DEFAULT_ACCOUNT_STATE_"},
+                    value = {DEFAULT_ACCOUNT_STATE_INVALID,
+                            DEFAULT_ACCOUNT_STATE_NOT_SET,
+                            DEFAULT_ACCOUNT_STATE_LOCAL, DEFAULT_ACCOUNT_STATE_CLOUD})
+            public @interface DefaultAccountState {
+            }
         }
 
         /**
@@ -8326,7 +8497,6 @@ public final class ContactsContract {
         public static final String RAW_CONTACT_ID2 = "raw_contact_id2";
     }
 
-
     /**
      * Class containing utility methods around determine what accounts in the ContactsProvider are
      * related to the SIM cards in the device.
@@ -8838,6 +9008,30 @@ public final class ContactsContract {
          * @hide
          */
         public static final String KEY_DEFAULT_ACCOUNT = "key_default_account";
+
+        /**
+         * Key in the Bundle for the default account state.
+         *
+         * @hide
+         */
+        public static final String KEY_DEFAULT_ACCOUNT_STATE =
+                "key_default_contacts_account_state";
+
+        /**
+         * The method to invoke in order to set the default account.
+         *
+         * @hide
+         */
+        public static final String SET_DEFAULT_ACCOUNT_FOR_NEW_CONTACTS_METHOD =
+                "setDefaultAccountForNewContacts";
+
+        /**
+         * The method to invoke in order to query the default account.
+         *
+         * @hide
+         */
+        public static final String QUERY_DEFAULT_ACCOUNT_FOR_NEW_CONTACTS_METHOD =
+                "queryDefaultAccountForNewContacts";
 
         /**
          * Get the account that is set as the default account for new contacts, which should be
