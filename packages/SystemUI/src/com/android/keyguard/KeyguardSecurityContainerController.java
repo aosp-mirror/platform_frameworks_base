@@ -81,7 +81,7 @@ import com.android.systemui.deviceentry.domain.interactor.DeviceEntryFaceAuthInt
 import com.android.systemui.deviceentry.domain.interactor.DeviceEntryInteractor;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.keyguard.KeyguardWmStateRefactor;
-import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor;
+import com.android.systemui.keyguard.domain.interactor.KeyguardDismissTransitionInteractor;
 import com.android.systemui.log.SessionTracker;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.FalsingManager;
@@ -134,7 +134,7 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
     private final DeviceEntryFaceAuthInteractor mDeviceEntryFaceAuthInteractor;
     private final BouncerMessageInteractor mBouncerMessageInteractor;
     private int mTranslationY;
-    private final KeyguardTransitionInteractor mKeyguardTransitionInteractor;
+    private final KeyguardDismissTransitionInteractor mKeyguardDismissTransitionInteractor;
     private final DevicePolicyManager mDevicePolicyManager;
     // Whether the volume keys should be handled by keyguard. If true, then
     // they will be handled here for specific media types such as music, otherwise
@@ -321,7 +321,7 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
             }
 
             if (KeyguardWmStateRefactor.isEnabled()) {
-                mKeyguardTransitionInteractor.startDismissKeyguardTransition(
+                mKeyguardDismissTransitionInteractor.startDismissKeyguardTransition(
                         "KeyguardSecurityContainerController#finish");
             }
         }
@@ -458,7 +458,7 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
             DeviceProvisionedController deviceProvisionedController,
             FaceAuthAccessibilityDelegate faceAuthAccessibilityDelegate,
             DevicePolicyManager devicePolicyManager,
-            KeyguardTransitionInteractor keyguardTransitionInteractor,
+            KeyguardDismissTransitionInteractor keyguardDismissTransitionInteractor,
             Lazy<PrimaryBouncerInteractor> primaryBouncerInteractor,
             Provider<DeviceEntryInteractor> deviceEntryInteractor
     ) {
@@ -490,7 +490,7 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
         mSelectedUserInteractor = selectedUserInteractor;
         mDeviceEntryInteractor = deviceEntryInteractor;
         mJavaAdapter = javaAdapter;
-        mKeyguardTransitionInteractor = keyguardTransitionInteractor;
+        mKeyguardDismissTransitionInteractor = keyguardDismissTransitionInteractor;
         mDeviceProvisionedController = deviceProvisionedController;
         mPrimaryBouncerInteractor = primaryBouncerInteractor;
         mDevicePolicyManager = devicePolicyManager;

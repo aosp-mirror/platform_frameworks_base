@@ -25,14 +25,7 @@ import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.keyguard.data.repository.KeyguardTransitionRepository
 import com.android.systemui.keyguard.shared.model.Edge
 import com.android.systemui.keyguard.shared.model.KeyguardState
-import com.android.systemui.keyguard.shared.model.KeyguardState.ALTERNATE_BOUNCER
-import com.android.systemui.keyguard.shared.model.KeyguardState.AOD
-import com.android.systemui.keyguard.shared.model.KeyguardState.DOZING
-import com.android.systemui.keyguard.shared.model.KeyguardState.GONE
-import com.android.systemui.keyguard.shared.model.KeyguardState.LOCKSCREEN
-import com.android.systemui.keyguard.shared.model.KeyguardState.OCCLUDED
 import com.android.systemui.keyguard.shared.model.KeyguardState.OFF
-import com.android.systemui.keyguard.shared.model.KeyguardState.PRIMARY_BOUNCER
 import com.android.systemui.keyguard.shared.model.KeyguardState.UNDEFINED
 import com.android.systemui.keyguard.shared.model.TransitionState
 import com.android.systemui.keyguard.shared.model.TransitionStep
@@ -67,14 +60,6 @@ class KeyguardTransitionInteractor
 constructor(
     @Application val scope: CoroutineScope,
     private val repository: KeyguardTransitionRepository,
-    private val fromLockscreenTransitionInteractor: dagger.Lazy<FromLockscreenTransitionInteractor>,
-    private val fromPrimaryBouncerTransitionInteractor:
-        dagger.Lazy<FromPrimaryBouncerTransitionInteractor>,
-    private val fromAodTransitionInteractor: dagger.Lazy<FromAodTransitionInteractor>,
-    private val fromAlternateBouncerTransitionInteractor:
-        dagger.Lazy<FromAlternateBouncerTransitionInteractor>,
-    private val fromDozingTransitionInteractor: dagger.Lazy<FromDozingTransitionInteractor>,
-    private val fromOccludedTransitionInteractor: dagger.Lazy<FromOccludedTransitionInteractor>,
     private val sceneInteractor: SceneInteractor,
 ) {
     private val transitionMap = mutableMapOf<Edge.StateToState, MutableSharedFlow<TransitionStep>>()
@@ -363,33 +348,6 @@ constructor(
             isKeyguardTransitioning ||
                 (SceneContainerFlag.isEnabled && sceneTransitionState.isTransitioning())
         }
-
-    /**
-     * Called to start a transition that will ultimately dismiss the keyguard from the current
-     * state.
-     *
-     * This is called exclusively by sources that can authoritatively say we should be unlocked,
-     * including KeyguardSecurityContainerController and WindowManager.
-     */
-    fun startDismissKeyguardTransition(reason: String = "") {
-        if (SceneContainerFlag.isEnabled) return
-        Log.d(TAG, "#startDismissKeyguardTransition(reason=$reason)")
-        when (val startedState = repository.currentTransitionInfoInternal.value.to) {
-            LOCKSCREEN -> fromLockscreenTransitionInteractor.get().dismissKeyguard()
-            PRIMARY_BOUNCER -> fromPrimaryBouncerTransitionInteractor.get().dismissPrimaryBouncer()
-            ALTERNATE_BOUNCER ->
-                fromAlternateBouncerTransitionInteractor.get().dismissAlternateBouncer()
-            AOD -> fromAodTransitionInteractor.get().dismissAod()
-            DOZING -> fromDozingTransitionInteractor.get().dismissFromDozing()
-            OCCLUDED -> fromOccludedTransitionInteractor.get().dismissFromOccluded()
-            GONE ->
-                Log.i(
-                    TAG,
-                    "Already transitioning to GONE; ignoring startDismissKeyguardTransition."
-                )
-            else -> Log.e(TAG, "We don't know how to dismiss keyguard from state $startedState.")
-        }
-    }
 
     /**
      * Whether we're in a transition to and from the given [KeyguardState]s, but haven't yet

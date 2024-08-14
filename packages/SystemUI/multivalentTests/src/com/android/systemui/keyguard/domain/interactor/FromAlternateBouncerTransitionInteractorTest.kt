@@ -116,7 +116,7 @@ class FromAlternateBouncerTransitionInteractorTest : SysuiTestCase() {
             reset(transitionRepository)
 
             // Authentication results in calling startDismissKeyguardTransition.
-            kosmos.keyguardTransitionInteractor.startDismissKeyguardTransition()
+            kosmos.keyguardDismissTransitionInteractor.startDismissKeyguardTransition()
             runCurrent()
 
             assertThat(transitionRepository)
