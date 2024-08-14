@@ -87,7 +87,7 @@ public final class AccessibilityCheckerManager {
     public Set<AndroidAccessibilityCheckerResult> maybeRunA11yChecker(
             List<AccessibilityNodeInfo> nodes, @Nullable String sourceEventClassName,
             ComponentName a11yServiceComponentName, @UserIdInt int userId) {
-        if (!shouldRunA11yChecker()) {
+        if (!shouldRunA11yChecker() || nodes.isEmpty()) {
             return Set.of();
         }
 
@@ -95,24 +95,33 @@ public final class AccessibilityCheckerManager {
         String defaultBrowserName = mPackageManager.getDefaultBrowserPackageNameAsUser(userId);
 
         try {
+            AndroidAccessibilityCheckerResult.Builder commonResultBuilder =
+                    AccessibilityCheckerUtils.getCommonResultBuilder(nodes.getFirst(),
+                            sourceEventClassName, mPackageManager, a11yServiceComponentName);
+            if (commonResultBuilder == null) {
+                return Set.of();
+            }
             for (AccessibilityNodeInfo nodeInfo : nodes) {
-                // Skip browser results because they are mostly related to web content and not the
-                // browser app itself.
+                // Skip browser results because they are mostly related to web content and
+                // not the browser app itself.
                 if (nodeInfo.getPackageName() == null
                         || nodeInfo.getPackageName().toString().equals(defaultBrowserName)) {
                     continue;
                 }
-                List<AccessibilityHierarchyCheckResult> checkResults = runChecksOnNode(nodeInfo);
+                List<AccessibilityHierarchyCheckResult> checkResults = runChecksOnNode(
+                        nodeInfo);
                 Set<AndroidAccessibilityCheckerResult> filteredResults =
                         AccessibilityCheckerUtils.processResults(nodeInfo, checkResults,
-                                sourceEventClassName, mPackageManager, a11yServiceComponentName);
+                                commonResultBuilder);
                 allResults.addAll(filteredResults);
             }
             mCachedResults.addAll(allResults);
+            return allResults;
+
         } catch (RuntimeException e) {
             Slog.e(LOG_TAG, "An unknown error occurred while running a11y checker.", e);
+            return Set.of();
         }
-        return allResults;
     }
 
     private List<AccessibilityHierarchyCheckResult> runChecksOnNode(

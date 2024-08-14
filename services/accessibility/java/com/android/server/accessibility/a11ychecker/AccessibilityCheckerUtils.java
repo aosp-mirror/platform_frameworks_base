@@ -91,45 +91,55 @@ public class AccessibilityCheckerUtils {
                             AccessibilityCheckClass.TRAVERSAL_ORDER_CHECK));
     // LINT.ThenChange(/services/accessibility/java/com/android/server/accessibility/a11ychecker/proto/a11ychecker.proto)
 
-    static Set<AndroidAccessibilityCheckerResult> processResults(
+
+    /**
+     * Returns AccessibilityCheckResultReported.Builder with the common fields for all nodes
+     * belonging in the same cache pre-filled.
+     */
+    static @Nullable AndroidAccessibilityCheckerResult.Builder getCommonResultBuilder(
             AccessibilityNodeInfo nodeInfo,
-            List<AccessibilityHierarchyCheckResult> checkResults,
             @Nullable String activityClassName,
             PackageManager packageManager,
             ComponentName a11yServiceComponentName) {
-        String appPackageName = nodeInfo.getPackageName().toString();
-        String nodePath = AccessibilityNodePathBuilder.createNodePath(nodeInfo);
-        if (nodePath == null) {
-            return Set.of();
+        if (nodeInfo.getPackageName() == null) {
+            return null;
         }
-        AndroidAccessibilityCheckerResult.Builder commonBuilder;
+        String appPackageName = nodeInfo.getPackageName().toString();
         try {
-            commonBuilder = AndroidAccessibilityCheckerResult.newBuilder()
+            return AndroidAccessibilityCheckerResult.newBuilder()
                     .setPackageName(appPackageName)
                     .setAppVersionCode(getAppVersionCode(packageManager, appPackageName))
-                    .setUiElementPath(nodePath)
                     .setActivityName(
                             getActivityName(packageManager, appPackageName, activityClassName))
                     .setWindowTitle(getWindowTitle(nodeInfo))
                     .setSourceComponentName(a11yServiceComponentName)
-                    .setSourceVersionCode(
-                            getAppVersionCode(packageManager,
-                                    a11yServiceComponentName.getPackageName()));
+                    .setSourceVersionCode(getAppVersionCode(packageManager,
+                            a11yServiceComponentName.getPackageName()));
         } catch (PackageManager.NameNotFoundException e) {
             Slog.e(LOG_TAG, "Unknown package name", e);
+            return null;
+        }
+    }
+
+    static Set<AndroidAccessibilityCheckerResult> processResults(
+            AccessibilityNodeInfo nodeInfo,
+            List<AccessibilityHierarchyCheckResult> checkResults,
+            AndroidAccessibilityCheckerResult.Builder resultBuilder) {
+        String nodePath = AccessibilityNodePathBuilder.createNodePath(nodeInfo);
+        if (resultBuilder == null || nodePath == null) {
             return Set.of();
         }
-
         return checkResults.stream()
                 .filter(checkResult -> checkResult.getType()
                         == AccessibilityCheckResult.AccessibilityCheckResultType.ERROR
                         || checkResult.getType()
                         == AccessibilityCheckResult.AccessibilityCheckResultType.WARNING)
-                .map(checkResult -> new AndroidAccessibilityCheckerResult.Builder(
-                        commonBuilder).setResultCheckClass(
-                        getCheckClass(checkResult)).setResultType(
-                        getCheckResultType(checkResult)).setResultId(
-                        checkResult.getResultId()).build())
+                .map(checkResult -> new AndroidAccessibilityCheckerResult.Builder(resultBuilder)
+                        .setUiElementPath(nodePath)
+                        .setResultCheckClass(getCheckClass(checkResult))
+                        .setResultType(getCheckResultType(checkResult))
+                        .setResultId(checkResult.getResultId())
+                        .build())
                 .collect(Collectors.toUnmodifiableSet());
     }
 
