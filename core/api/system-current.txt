@@ -11950,6 +11950,10 @@ package android.provider {
     field @Deprecated public static final String STATE = "state";
   }
 
+  @FlaggedApi("android.provider.new_default_account_api_enabled") public static final class ContactsContract.RawContacts.DefaultAccount {
+    method @FlaggedApi("android.provider.new_default_account_api_enabled") @RequiresPermission(android.Manifest.permission.SET_DEFAULT_ACCOUNT_FOR_CONTACTS) public static void setDefaultAccountForNewContacts(@NonNull android.content.ContentResolver, @NonNull android.provider.ContactsContract.RawContacts.DefaultAccount.DefaultAccountAndState);
+  }
+
   public static final class ContactsContract.Settings implements android.provider.ContactsContract.SettingsColumns {
     method @RequiresPermission(android.Manifest.permission.SET_DEFAULT_ACCOUNT_FOR_CONTACTS) public static void setDefaultAccount(@NonNull android.content.ContentResolver, @Nullable android.accounts.Account);
   }
