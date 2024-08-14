@@ -56,6 +56,7 @@ import android.view.SurfaceControl
 import android.view.SurfaceView
 import android.view.View
 import android.view.WindowInsets.Type.statusBars
+import android.widget.Toast
 import android.window.WindowContainerTransaction
 import android.window.WindowContainerTransaction.HierarchyOp
 import androidx.test.filters.SmallTest
@@ -93,6 +94,8 @@ import com.android.wm.shell.windowdecor.DesktopModeWindowDecorViewModel.DesktopM
 import java.util.Optional
 import java.util.function.Consumer
 import java.util.function.Supplier
+import junit.framework.Assert.assertFalse
+import junit.framework.Assert.assertTrue
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Before
@@ -117,8 +120,7 @@ import org.mockito.kotlin.mock
 import org.mockito.kotlin.spy
 import org.mockito.kotlin.whenever
 import org.mockito.quality.Strictness
-import junit.framework.Assert.assertFalse
-import junit.framework.Assert.assertTrue
+
 
 /**
  * Tests of [DesktopModeWindowDecorViewModel]
@@ -158,6 +160,7 @@ class DesktopModeWindowDecorViewModelTests : ShellTestCase() {
     @Mock private lateinit var mockWindowManager: IWindowManager
     @Mock private lateinit var mockInteractionJankMonitor: InteractionJankMonitor
     @Mock private lateinit var mockGenericLinksParser: AppToWebGenericLinksParser
+    @Mock private lateinit var mockToast: Toast
     private val bgExecutor = TestShellExecutor()
     @Mock private lateinit var mockMultiInstanceHelper: MultiInstanceHelper
     private lateinit var spyContext: TestableContext
@@ -181,6 +184,7 @@ class DesktopModeWindowDecorViewModelTests : ShellTestCase() {
                 .strictness(Strictness.LENIENT)
                 .spyStatic(DesktopModeStatus::class.java)
                 .spyStatic(DragPositioningCallbackUtility::class.java)
+                .spyStatic(Toast::class.java)
                 .startMocking()
         doReturn(true).`when` { DesktopModeStatus.isDesktopModeSupported(Mockito.any()) }
 
@@ -217,6 +221,8 @@ class DesktopModeWindowDecorViewModelTests : ShellTestCase() {
         whenever(mockDisplayController.getDisplayLayout(any())).thenReturn(mockDisplayLayout)
         whenever(mockDisplayLayout.stableInsets()).thenReturn(STABLE_INSETS)
         whenever(mockInputMonitorFactory.create(any(), any())).thenReturn(mockInputMonitor)
+
+        doReturn(mockToast).`when` { Toast.makeText(any(), anyInt(), anyInt()) }
 
         // InputChannel cannot be mocked because it passes to InputEventReceiver.
         val inputChannels = InputChannel.openInputChannelPair(TAG)
@@ -614,6 +620,7 @@ class DesktopModeWindowDecorViewModelTests : ShellTestCase() {
 
         verify(mockDesktopTasksController, never())
             .snapToHalfScreen(decor.mTaskInfo, currentBounds, SnapPosition.LEFT)
+        verify(mockToast).show()
     }
 
     @Test
@@ -679,6 +686,7 @@ class DesktopModeWindowDecorViewModelTests : ShellTestCase() {
 
         verify(mockDesktopTasksController, never())
             .snapToHalfScreen(decor.mTaskInfo, currentBounds, SnapPosition.RIGHT)
+        verify(mockToast).show()
     }
 
     @Test
