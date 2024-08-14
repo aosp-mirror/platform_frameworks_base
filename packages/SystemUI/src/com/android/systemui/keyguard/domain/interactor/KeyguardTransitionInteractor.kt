@@ -464,6 +464,17 @@ constructor(
         return finishedKeyguardState.map { it == state }.distinctUntilChanged()
     }
 
+    fun isCurrentlyIn(scene: SceneKey, stateWithoutSceneContainer: KeyguardState): Flow<Boolean> {
+        return if (SceneContainerFlag.isEnabled) {
+                // In STL there is no difference between finished/currentState
+                isFinishedIn(scene, stateWithoutSceneContainer)
+            } else {
+                stateWithoutSceneContainer.checkValidState()
+                currentKeyguardState.map { it == stateWithoutSceneContainer }
+            }
+            .distinctUntilChanged()
+    }
+
     fun getCurrentState(): KeyguardState {
         return currentKeyguardState.replayCache.last()
     }
