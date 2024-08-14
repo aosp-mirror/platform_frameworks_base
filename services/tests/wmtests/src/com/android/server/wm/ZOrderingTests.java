@@ -40,14 +40,12 @@ import static android.view.WindowManager.LayoutParams.TYPE_SYSTEM_OVERLAY;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
-import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_RECENTS;
 import static com.android.server.wm.WindowStateAnimator.PRESERVED_SURFACE_LAYER;
 
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
 
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
@@ -402,30 +400,6 @@ public class ZOrderingTests extends WindowTestsBase {
         assertWindowHigher(navBarPanel, mNavBarWindow);
         assertWindowHigher(statusBarPanel, mStatusBarWindow);
         assertWindowHigher(statusBarSubPanel, statusBarPanel);
-    }
-
-    @Test
-    public void testAssignWindowLayers_ForImeOnAppWithRecentsAnimating() {
-        final WindowState imeAppTarget = createWindow(null, TYPE_APPLICATION,
-                mAppWindow.mActivityRecord, "imeAppTarget");
-        mDisplayContent.setImeInputTarget(imeAppTarget);
-        mDisplayContent.setImeLayeringTarget(imeAppTarget);
-        mDisplayContent.setImeControlTarget(imeAppTarget);
-        mDisplayContent.updateImeParent();
-
-        // Simulate the ime layering target task is animating with recents animation.
-        final Task imeAppTargetTask = imeAppTarget.getTask();
-        final SurfaceAnimator imeTargetTaskAnimator = imeAppTargetTask.mSurfaceAnimator;
-        spyOn(imeTargetTaskAnimator);
-        doReturn(ANIMATION_TYPE_RECENTS).when(imeTargetTaskAnimator).getAnimationType();
-        doReturn(true).when(imeTargetTaskAnimator).isAnimating();
-
-        mDisplayContent.assignChildLayers(mTransaction);
-
-        // Ime should on top of the application window when in recents animation and keep
-        // attached on app.
-        assertTrue(mDisplayContent.shouldImeAttachedToApp());
-        assertWindowHigher(mImeWindow, imeAppTarget);
     }
 
     @Test
