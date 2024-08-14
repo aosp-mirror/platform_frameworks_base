@@ -32,12 +32,17 @@ static bool KeepResourceEntry(const std::unique_ptr<ResourceEntry>& entry) {
   const auto remove_iter =
       std::stable_partition(entry->values.begin(), end_iter,
                             [](const std::unique_ptr<ResourceConfigValue>& value) -> bool {
-                              return value->flag_status != FlagStatus::Disabled;
+                              return value->value->GetFlagStatus() != FlagStatus::Disabled;
                             });
 
   bool keep = remove_iter != entry->values.begin();
 
   entry->values.erase(remove_iter, end_iter);
+
+  for (auto& value : entry->values) {
+    value->value->RemoveFlagDisabledElements();
+  }
+
   return keep;
 }
 
