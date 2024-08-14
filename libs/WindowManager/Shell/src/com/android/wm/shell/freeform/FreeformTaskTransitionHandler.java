@@ -18,6 +18,7 @@ package com.android.wm.shell.freeform;
 
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
+import static com.android.internal.jank.Cuj.CUJ_DESKTOP_MODE_EXIT_MODE_ON_LAST_WINDOW_CLOSE;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
@@ -37,8 +38,10 @@ import android.window.WindowContainerTransaction;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import com.android.internal.jank.InteractionJankMonitor;
 import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.ShellExecutor;
+import com.android.wm.shell.desktopmode.DesktopModeTaskRepository;
 import com.android.wm.shell.sysui.ShellInit;
 import com.android.wm.shell.transition.Transitions;
 import com.android.wm.shell.windowdecor.WindowDecorViewModel;
@@ -56,7 +59,9 @@ public class FreeformTaskTransitionHandler
     private final Context mContext;
     private final Transitions mTransitions;
     private final WindowDecorViewModel mWindowDecorViewModel;
+    private final DesktopModeTaskRepository mDesktopModeTaskRepository;
     private final DisplayController mDisplayController;
+    private final InteractionJankMonitor mInteractionJankMonitor;
     private final ShellExecutor mMainExecutor;
     private final ShellExecutor mAnimExecutor;
 
@@ -71,11 +76,15 @@ public class FreeformTaskTransitionHandler
             WindowDecorViewModel windowDecorViewModel,
             DisplayController displayController,
             ShellExecutor mainExecutor,
-            ShellExecutor animExecutor) {
+            ShellExecutor animExecutor,
+            DesktopModeTaskRepository desktopModeTaskRepository,
+            InteractionJankMonitor interactionJankMonitor) {
         mTransitions = transitions;
         mContext = context;
         mWindowDecorViewModel = windowDecorViewModel;
+        mDesktopModeTaskRepository = desktopModeTaskRepository;
         mDisplayController = displayController;
+        mInteractionJankMonitor = interactionJankMonitor;
         mMainExecutor = mainExecutor;
         mAnimExecutor = animExecutor;
         if (Transitions.ENABLE_SHELL_TRANSITIONS) {
@@ -238,13 +247,22 @@ public class FreeformTaskTransitionHandler
                     startBounds.top + (animation.getAnimatedFraction() * screenHeight));
             t.apply();
         });
-        animator.addListener(new AnimatorListenerAdapter() {
-            @Override
-            public void onAnimationEnd(Animator animation) {
-                animations.remove(animator);
-                onAnimFinish.run();
-            }
-        });
+        if (mDesktopModeTaskRepository.getActiveNonMinimizedTaskCount(
+                        change.getTaskInfo().displayId) == 1) {
+            // Starting the jank trace if closing the last window in desktop mode.
+            mInteractionJankMonitor.begin(
+                    sc, mContext, CUJ_DESKTOP_MODE_EXIT_MODE_ON_LAST_WINDOW_CLOSE);
+        }
+        animator.addListener(
+                new AnimatorListenerAdapter() {
+                    @Override
+                    public void onAnimationEnd(Animator animation) {
+                        animations.remove(animator);
+                        onAnimFinish.run();
+                        mInteractionJankMonitor.end(
+                                CUJ_DESKTOP_MODE_EXIT_MODE_ON_LAST_WINDOW_CLOSE);
+                    }
+                });
         animations.add(animator);
         return true;
     }

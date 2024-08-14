@@ -21,26 +21,21 @@
     <string name="profile_name_watch" msgid="576290739483672360">"घडी"</string>
     <string name="chooser_title_non_profile" msgid="6035023914517087400">"आफूले &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; प्रयोग गरी व्यवस्थापन गर्न चाहेको डिभाइस चयन गर्नुहोस्"</string>
     <string name="chooser_title" msgid="2235819929238267637">"सेट अप गर्नका लागि <xliff:g id="PROFILE_NAME">%1$s</xliff:g> छनौट गर्नुहोस्"</string>
-    <string name="summary_watch" msgid="7962014927042971830">"तपाईंको <xliff:g id="DEVICE_NAME">%1$s</xliff:g> मा यो एपलाई कल गर्ने व्यक्तिको नाम जस्ता जानकारी सिंक गर्ने र यी कुराहरू गर्ने अनुमति दिइने छ"</string>
+    <string name="summary_watch" msgid="8134580124808507407">"तपाईंको <xliff:g id="DEVICE_TYPE">%1$s</xliff:g> मा यो एपलाई कल गर्ने व्यक्तिको नाम जस्ता जानकारी सिंक गर्ने र यी कुराहरू गर्ने अनुमति दिइने छ"</string>
     <string name="confirmation_title_glasses" msgid="8288346850537727333">"&lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; लाई &lt;strong&gt;<xliff:g id="DEVICE_NAME">%2$s</xliff:g>&lt;/strong&gt; व्यवस्थापन गर्ने अनुमति दिने हो?"</string>
     <string name="profile_name_glasses" msgid="3506504967216601277">"डिभाइस"</string>
-    <string name="summary_glasses" msgid="2872254734959842579">"तपाईंको <xliff:g id="DEVICE_NAME">%1$s</xliff:g> मा यो एपलाई निम्न अनुमति दिइने छ:"</string>
-    <string name="title_app_streaming" msgid="2270331024626446950">"&lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; लाई तपाईंको फोनमा भएको यो जानकारी हेर्ने तथा प्रयोग गर्ने अनुमति दिनुहोस्"</string>
-    <string name="title_app_streaming_with_mirroring" msgid="3364582597581570658">"&lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; लाई तपाईंको फोनमा भएका एपहरू स्ट्रिम गर्न दिने हो?"</string>
-    <string name="summary_app_streaming" msgid="295548145144086753">"%1$s ले तपाईंको फोनमा देखिने वा प्ले गरिने अडियो, फोटो, पासवर्ड र म्यासेजलगायतका सबै कुरा प्रयोग गर्न सक्ने छ।&lt;br/&gt;&lt;br/&gt;तपाईंले यो अनुमति रद्द नगरेसम्म %1$s ले एपहरू स्ट्रिम गर्न पाइराख्ने छ।"</string>
-    <string name="helper_title_app_streaming" msgid="4151687003439969765">"क्रस-डिभाइस सेवाहरू"</string>
-    <string name="helper_summary_app_streaming" msgid="2396773196949578425">"<xliff:g id="APP_NAME">%1$s</xliff:g> तपाईंको डिभाइस <xliff:g id="DISPLAY_NAME">%2$s</xliff:g> को तर्फबाट तपाईंका कुनै एउटा डिभाइसबाट अर्को डिभाइसमा एप स्ट्रिम गर्ने अनुमति माग्दै छ"</string>
-    <string name="helper_summary_app_streaming_with_mirroring" msgid="6138581029144467467">"<xliff:g id="APP_NAME">%1$s</xliff:g> तपाईंको डिभाइस <xliff:g id="DISPLAY_NAME">%2$s</xliff:g> को तर्फबाट तपाईंका कुनै एउटा डिभाइसबाट अर्को डिभाइसमा एप देखाउने तथा स्ट्रिम गर्ने अनुमति माग्दै छ"</string>
+    <string name="summary_glasses" msgid="5469208629679579157">"तपाईंको <xliff:g id="DEVICE_TYPE">%1$s</xliff:g> मा यो एपलाई निम्न अनुमति दिइने छ:"</string>
+    <string name="title_app_streaming" msgid="6845373585257287200">"Allow &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; लाई तपाईंको <xliff:g id="DEVICE_TYPE">%2$s</xliff:g> मा भएका एपहरू &lt;strong&gt;<xliff:g id="DEVICE_NAME">%3$s</xliff:g>&lt;/strong&gt; मा स्ट्रिम गर्न दिने हो?"</string>
+    <string name="summary_app_streaming" msgid="1274464413649731829">"<xliff:g id="APP_NAME_0">%1$s</xliff:g> ले तपाईंको <xliff:g id="DEVICE_TYPE">%2$s</xliff:g> मा देखिने वा प्ले गरिने अडियो, फोटो, पासवर्ड र म्यासेजलगायतका सबै कुरा एक्सेस गर्न सक्ने छ।&lt;br/&gt;&lt;br/&gt;तपाईंले यो अनुमति रद्द नगरेसम्म <xliff:g id="APP_NAME_1">%1$s</xliff:g> ले एपहरू <xliff:g id="DEVICE_NAME">%3$s</xliff:g> मा स्ट्रिम गर्न पाइराख्ने छ।"</string>
+    <string name="helper_summary_app_streaming" msgid="1944832605534698562">"<xliff:g id="APP_NAME">%1$s</xliff:g> तपाईंको डिभाइस <xliff:g id="DEVICE_NAME">%2$s</xliff:g> को तर्फबाट तपाईंका कुनै एउटा डिभाइसबाट अर्को डिभाइसमा एप देखाउने तथा स्ट्रिम गर्ने अनुमति माग्दै छ"</string>
     <string name="title_automotive_projection" msgid="3296005598978412847"></string>
     <string name="summary_automotive_projection" msgid="8683801274662496164"></string>
-    <string name="title_computer" msgid="4693714143506569253">"&lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; लाई तपाईंको फोनमा भएको यो जानकारी हेर्ने तथा प्रयोग गर्ने अनुमति दिनुहोस्"</string>
+    <string name="title_computer" msgid="4782923323932440751">"&lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; लाई तपाईंको <xliff:g id="DEVICE_TYPE">%2$s</xliff:g> मा भएको यो जानकारी एक्सेस गर्ने अनुमति दिनुहोस्"</string>
     <string name="summary_computer" msgid="3798467601598297062"></string>
-    <string name="helper_title_computer" msgid="4671071173916176037">"Google Play services"</string>
-    <string name="helper_summary_computer" msgid="8774832742608187072">"<xliff:g id="APP_NAME">%1$s</xliff:g> तपाईंको डिभाइस <xliff:g id="DISPLAY_NAME">%2$s</xliff:g> को तर्फबाट तपाईंको फोनमा भएका फोटो, मिडिया र सूचनाहरू हेर्ने तथा प्रयोग गर्ने अनुमति माग्दै छ"</string>
-    <string name="title_nearby_device_streaming" msgid="7269956847378799794">"&lt;strong&gt;<xliff:g id="DEVICE_NAME">%1$s</xliff:g>&lt;/strong&gt; लाई यो कार्य गर्ने अनुमति दिने हो?"</string>
-    <string name="title_nearby_device_streaming_with_mirroring" msgid="242855799919611657">"&lt;strong&gt;<xliff:g id="DEVICE_NAME">%1$s</xliff:g>&lt;/strong&gt; लाई तपाईंको फोनमा भएका एप तथा सिस्टमका सुविधाहरू स्ट्रिम गर्न दिने हो?"</string>
-    <string name="summary_nearby_device_streaming" msgid="4039565463149145573">"%1$s ले तपाईंको फोनमा देखिने वा प्ले गरिने अडियो, फोटो, भुक्तानीसम्बन्धी जानकारी, पासवर्ड र म्यासेजलगायतका सबै कुरा प्रयोग गर्न सक्ने छ।&lt;br/&gt;&lt;br/&gt;तपाईंले यो अनुमति रद्द नगरेसम्म %1$s ले एप तथा सिस्टमका सुविधाहरू स्ट्रिम गर्न पाइराख्ने छ।"</string>
-    <string name="helper_summary_nearby_device_streaming" msgid="2063965070936844876">"<xliff:g id="APP_NAME">%1$s</xliff:g> तपाईंको डिभाइस <xliff:g id="DEVICE_NAME">%2$s</xliff:g> को तर्फबाट नजिकैका डिभाइसहरूमा एप र सिस्टमका अन्य सुविधाहरू स्ट्रिम गर्ने अनुमति माग्दै छ"</string>
+    <string name="helper_summary_computer" msgid="2298803016482139668">"<xliff:g id="APP_NAME">%1$s</xliff:g> तपाईंको डिभाइस <xliff:g id="DEVICE_NAME">%2$s</xliff:g> को तर्फबाट तपाईंको <xliff:g id="DEVICE_TYPE">%3$s</xliff:g> मा भएका फोटो, मिडिया र सूचनाहरू एक्सेस गर्ने अनुमति माग्दै छ"</string>
+    <string name="title_nearby_device_streaming" msgid="4295322493408411976">"&lt;strong&gt;<xliff:g id="DEVICE_NAME_0">%1$s</xliff:g>&lt;/strong&gt; लाई तपाईंको <xliff:g id="DEVICE_TYPE">%2$s</xliff:g> मा भएका एप तथा सिस्टमका सुविधाहरू &lt;strong&gt;<xliff:g id="DEVICE_NAME_1">%3$s</xliff:g>&lt;/strong&gt; मा स्ट्रिम गर्न दिने हो?"</string>
+    <string name="summary_nearby_device_streaming" msgid="962267343109051648">"<xliff:g id="APP_NAME_0">%1$s</xliff:g> ले तपाईंको <xliff:g id="DEVICE_TYPE">%2$s</xliff:g> मा देखिने वा प्ले गरिने अडियो, फोटो, भुक्तानीसम्बन्धी जानकारी, पासवर्ड र म्यासेजलगायतका सबै कुरा एक्सेस गर्न सक्ने छ।&lt;br/&gt;&lt;br/&gt;तपाईंले यो अनुमति रद्द नगरेसम्म <xliff:g id="APP_NAME_1">%1$s</xliff:g> ले एप तथा सिस्टमका सुविधाहरू <xliff:g id="DEVICE_NAME">%3$s</xliff:g> मा स्ट्रिम गर्न पाइराख्ने छ।"</string>
+    <string name="helper_summary_nearby_device_streaming" msgid="8509848562931818793">"<xliff:g id="APP_NAME">%1$s</xliff:g> तपाईंको डिभाइस <xliff:g id="DEVICE_NAME">%2$s</xliff:g> को तर्फबाट तपाईंका कुनै एउटा डिभाइसबाट अर्को डिभाइसमा एप र सिस्टमका अन्य सुविधाहरूमा स्ट्रिम गर्ने अनुमति माग्दै छ"</string>
     <string name="profile_name_generic" msgid="6851028682723034988">"यन्त्र"</string>
     <string name="summary_generic" msgid="1761976003668044801">"यो एपले तपाईंको फोन र तपाईंले छनौट गर्ने डिभाइसका बिचमा कल गर्ने व्यक्तिको नाम जस्ता जानकारी सिंक गर्न सक्ने छ।"</string>
     <string name="consent_yes" msgid="8344487259618762872">"अनुमति दिनुहोस्"</string>
@@ -62,8 +57,6 @@
     <string name="permission_media_routing_control" msgid="5498639511586715253">"मिडिया आउटपुट बदल्नुहोस्"</string>
     <string name="permission_storage" msgid="6831099350839392343">"फोटो र मिडिया"</string>
     <string name="permission_notifications" msgid="4099418516590632909">"सूचनाहरू"</string>
-    <string name="permission_app_streaming" msgid="6009695219091526422">"एपहरू"</string>
-    <string name="permission_nearby_device_streaming" msgid="1023325519477349499">"स्ट्रिमिङ"</string>
     <string name="permission_phone_summary" msgid="8246321093970051702">"फोन कल गर्ने र व्यवस्थापन गर्ने"</string>
     <string name="permission_call_logs_summary" msgid="7545243592757693321">"फोन कलको लग रिड र राइट गर्ने"</string>
     <string name="permission_sms_summary" msgid="8499509535410068616">"SMS म्यासेज पठाउने र हेर्ने"</string>
@@ -73,10 +66,10 @@
     <string name="permission_nearby_devices_summary" msgid="1306752848196464817">"नजिकैका डिभाइसहरू भेट्टाउने, ती डिभाइससँग कनेक्ट गर्ने र तिनको सापेक्ष स्थिति निर्धारण गर्ने"</string>
     <string name="permission_notification_listener_access_summary" msgid="7856071768185367749">"कन्ट्याक्ट, म्यासेज र फोटो जस्ता जानकारीलगायतका सबै सूचनाहरू रिड गर्ने"</string>
     <string name="permission_notifications_summary" msgid="2272810466047367030">"• कन्ट्याक्ट, म्यासेज र फोटो जस्ता जानकारीलगायतका सबै सूचनाहरू रिड गर्ने&lt;br/&gt;• सूचनाहरू पठाउने&lt;br/&gt;&lt;br/&gt;तपाईं जुनसुकै बेला सेटिङ &gt; सूचनाहरू खण्डमा गई यो एपलाई सूचनाहरू रिड गर्न र पठाउन दिने कि नदिने भन्ने कुरा व्यवस्थापन गर्न सक्नुहुन्छ।"</string>
-    <string name="permission_app_streaming_summary" msgid="606923325679670624">"आफ्नो फोनका एपहरू प्रयोग गर्नुहोस्"</string>
     <string name="permission_storage_summary" msgid="3918240895519506417"></string>
-    <string name="permission_nearby_device_streaming_summary" msgid="8280824871197081246">"आफ्नो फोनबाट एप र सिस्टमका अन्य सुविधाहरू स्ट्रिम गर्नुहोस्"</string>
     <string name="permission_media_routing_control_summary" msgid="2714631092321412250">"उपलब्ध डिभाइसहरूको सूची एक्सेस गर्नुहोस् र अन्य एपका अडियो वा भिडियो कुन डिभाइसबाट कास्ट गर्ने भन्ने कुरा नियन्त्रण गर्नुहोस्"</string>
     <string name="device_type" product="default" msgid="8268703872070046263">"फोन"</string>
     <string name="device_type" product="tablet" msgid="5038791954983067774">"ट्याब्लेट"</string>
+    <string name="device_type" product="tv" msgid="5355611506659405636">"टिभी"</string>
+    <string name="device_type" product="device" msgid="1526125965802507189">"डिभाइस"</string>
 </resources>

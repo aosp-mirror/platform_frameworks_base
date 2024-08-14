@@ -371,6 +371,10 @@ public class SystemConfig {
     // exempt from ECM (i.e., they will never be considered "restricted").
     private final ArraySet<SignedPackage> mEnhancedConfirmationTrustedInstallers = new ArraySet<>();
 
+    // A map of UIDs defined by OEMs, mapping from name to value. The UIDs will be registered at the
+    // start of the system which allows OEMs to create and register their system services.
+    @NonNull private final ArrayMap<String, Integer> mOemDefinedUids = new ArrayMap<>();
+
     /**
      * Map of system pre-defined, uniquely named actors; keys are namespace,
      * value maps actor name to package name.
@@ -594,6 +598,10 @@ public class SystemConfig {
         return mEnhancedConfirmationTrustedInstallers;
     }
 
+    @NonNull
+    public ArrayMap<String, Integer> getOemDefinedUids() {
+        return mOemDefinedUids;
+    }
     /**
      * Only use for testing. Do NOT use in production code.
      * @param readPermissions false to create an empty SystemConfig; true to read the permissions.
@@ -1625,6 +1633,26 @@ public class SystemConfig {
                                         + " at " + parser.getPositionDescription());
                             } else {
                                 mPreinstallPackagesWithStrictSignatureCheck.add(packageName);
+                            }
+                        }
+                    } break;
+                    case "oem-defined-uid": {
+                        final String uidName = parser.getAttributeValue(null, "name");
+                        final String uidValue = parser.getAttributeValue(null, "uid");
+                        if (TextUtils.isEmpty(uidName)) {
+                            Slog.w(TAG, "<" + name + "> without valid uid name in " + permFile
+                                    + " at " + parser.getPositionDescription());
+                        } else if (TextUtils.isEmpty(uidValue)) {
+                            Slog.w(TAG, "<" + name + "> without valid uid value in " + permFile
+                                    + " at " + parser.getPositionDescription());
+                        } else {
+                            try {
+                                final int oemDefinedUid = Integer.parseInt(uidValue);
+                                mOemDefinedUids.put(uidName, oemDefinedUid);
+                            } catch (NumberFormatException e) {
+                                Slog.w(TAG, "<" + name + "> with invalid uid value: "
+                                        + uidValue + " in " + permFile
+                                        + " at " + parser.getPositionDescription());
                             }
                         }
                     } break;

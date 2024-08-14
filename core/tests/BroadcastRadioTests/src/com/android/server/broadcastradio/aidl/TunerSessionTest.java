@@ -73,6 +73,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.verification.VerificationWithTimeout;
 
 import java.util.ArrayList;
@@ -210,6 +211,18 @@ public final class TunerSessionTest extends ExtendedRadioMockitoTestCase {
             expect.withMessage("Session of index %s close state", index)
                     .that(mTunerSessions[index].isClosed()).isFalse();
         }
+    }
+
+    @Test
+    public void openSession_whenHalThrowsRemoteException() throws Exception {
+        android.hardware.radio.ITunerCallback tunerCallbackMock =
+                mock(android.hardware.radio.ITunerCallback.class);
+        Mockito.doThrow(new RemoteException("HAL service died")).when(mBroadcastRadioMock)
+                .setTunerCallback(any());
+
+        expect.withMessage("Null tuner session with HAL throwing remote exception")
+                .that(mRadioModule.openSession(tunerCallbackMock)).isNull();
+
     }
 
     @Test

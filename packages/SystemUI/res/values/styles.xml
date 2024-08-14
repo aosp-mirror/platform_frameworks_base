@@ -1455,6 +1455,12 @@
         <item name="android:textColor">?androidprv:attr/materialColorOnPrimaryContainer</item>
     </style>
 
+    <style name="BluetoothTileDialog.AudioSharingButton" parent="Widget.Dialog.Button">
+        <item name="android:background">@drawable/audio_sharing_btn_background</item>
+        <item name="android:textColor">@color/audio_sharing_btn_text_color</item>
+        <item name="android:drawableTint">@color/audio_sharing_btn_text_color</item>
+    </style>
+
     <style name="BroadcastDialog">
         <item name="android:layout_width">wrap_content</item>
         <item name="android:layout_height">wrap_content</item>

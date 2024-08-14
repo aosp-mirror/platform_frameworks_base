@@ -152,9 +152,6 @@ object Flags {
     // TODO(b/286563884): Tracking bug
     @JvmField val KEYGUARD_TALKBACK_FIX = unreleasedFlag("keyguard_talkback_fix")
 
-    // TODO(b/287268101): Tracking bug.
-    @JvmField val TRANSIT_CLOCK = releasedFlag("lockscreen_custom_transit_clock")
-
     /** Enables preview loading animation in the wallpaper picker. */
     // TODO(b/274443705): Tracking Bug
     @JvmField
