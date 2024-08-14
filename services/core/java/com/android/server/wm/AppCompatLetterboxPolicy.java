@@ -21,6 +21,7 @@ import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_STARTING;
 import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
 
 import static com.android.server.wm.AppCompatConfiguration.LETTERBOX_BACKGROUND_WALLPAPER;
+import static com.android.server.wm.AppCompatConfiguration.letterboxBackgroundTypeToString;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -31,6 +32,8 @@ import android.view.SurfaceControl;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.statusbar.LetterboxDetails;
 import com.android.server.wm.AppCompatConfiguration.LetterboxBackgroundType;
+
+import java.io.PrintWriter;
 
 /**
  * Encapsulates the logic for the Letterboxing policy.
@@ -43,15 +46,19 @@ class AppCompatLetterboxPolicy {
     private final LetterboxPolicyState mLetterboxPolicyState;
     @NonNull
     private final AppCompatRoundedCorners mAppCompatRoundedCorners;
+    @NonNull
+    private final AppCompatConfiguration mAppCompatConfiguration;
 
     private boolean mLastShouldShowLetterboxUi;
 
-    AppCompatLetterboxPolicy(@NonNull ActivityRecord  activityRecord) {
+    AppCompatLetterboxPolicy(@NonNull ActivityRecord  activityRecord,
+            @NonNull AppCompatConfiguration appCompatConfiguration) {
         mActivityRecord = activityRecord;
         mLetterboxPolicyState = new LetterboxPolicyState();
         // TODO (b/358334569) Improve cutout logic dependency on app compat.
         mAppCompatRoundedCorners = new AppCompatRoundedCorners(mActivityRecord,
                 this::isLetterboxedNotForDisplayCutout);
+        mAppCompatConfiguration = appCompatConfiguration;
     }
 
     /** Cleans up {@link Letterbox} if it exists.*/
@@ -154,6 +161,38 @@ class AppCompatLetterboxPolicy {
      */
     int getRoundedCornersRadius(@NonNull final WindowState mainWindow) {
         return mAppCompatRoundedCorners.getRoundedCornersRadius(mainWindow);
+    }
+
+    void dump(@NonNull PrintWriter pw, @NonNull String prefix) {
+        final WindowState mainWin = mActivityRecord.findMainWindow();
+        if (mainWin == null) {
+            return;
+        }
+        boolean areBoundsLetterboxed = mainWin.areAppWindowBoundsLetterboxed();
+        pw.println(prefix + "areBoundsLetterboxed=" + areBoundsLetterboxed);
+        pw.println(prefix + "isLetterboxRunning=" + isRunning());
+        if (!areBoundsLetterboxed) {
+            return;
+        }
+        pw.println(prefix + "  letterboxReason="
+                + AppCompatUtils.getLetterboxReasonString(mActivityRecord, mainWin));
+        mActivityRecord.mAppCompatController.getAppCompatReachabilityPolicy().dump(pw, prefix);
+        final AppCompatLetterboxOverrides letterboxOverride = mActivityRecord.mAppCompatController
+                .getAppCompatLetterboxOverrides();
+        pw.println(prefix + "  letterboxBackgroundColor=" + Integer.toHexString(
+                letterboxOverride.getLetterboxBackgroundColor().toArgb()));
+        pw.println(prefix + "  letterboxBackgroundType="
+                + letterboxBackgroundTypeToString(letterboxOverride.getLetterboxBackgroundType()));
+        pw.println(prefix + "  letterboxCornerRadius=" + getRoundedCornersRadius(mainWin));
+        if (letterboxOverride.getLetterboxBackgroundType() == LETTERBOX_BACKGROUND_WALLPAPER) {
+            pw.println(prefix + "  isLetterboxWallpaperBlurSupported="
+                    + letterboxOverride.isLetterboxWallpaperBlurSupported());
+            pw.println(prefix + "  letterboxBackgroundWallpaperDarkScrimAlpha="
+                    + letterboxOverride.getLetterboxWallpaperDarkScrimAlpha());
+            pw.println(prefix + "  letterboxBackgroundWallpaperBlurRadius="
+                    + letterboxOverride.getLetterboxWallpaperBlurRadiusPx());
+        }
+        mAppCompatConfiguration.dump(pw, prefix);
     }
 
     private void updateWallpaperForLetterbox(@NonNull WindowState mainWindow) {

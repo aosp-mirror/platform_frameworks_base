@@ -1419,7 +1419,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
 
             mAutomaticBrightnessStrategy.setAutoBrightnessState(state,
                     allowAutoBrightnessWhileDozing, mBrightnessReasonTemp.getReason(),
-                    mPowerRequest.policy,
+                    mPowerRequest.policy, mPowerRequest.useNormalBrightnessForDoze,
                     mDisplayBrightnessController.getLastUserSetScreenBrightness(),
                     userSetBrightnessChanged);
 
@@ -1485,7 +1485,9 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
             brightnessState = clampScreenBrightness(brightnessState);
         }
 
-        if (Display.isDozeState(state)) {
+        if (mFlags.isNormalBrightnessForDozeParameterEnabled()
+                ? !mPowerRequest.useNormalBrightnessForDoze && mPowerRequest.policy == POLICY_DOZE
+                : Display.isDozeState(state)) {
             // TODO(b/329676661): Introduce a config property to choose between this brightness
             //  strategy and DOZE_DEFAULT
             // On some devices, when auto-brightness is disabled and the device is dozing, we use
@@ -1506,7 +1508,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
             }
 
             // Use default brightness when dozing unless overridden.
-            if (Float.isNaN(brightnessState) && Display.isDozeState(state)
+            if (Float.isNaN(brightnessState)
                     && !mDisplayBrightnessController.isAllowAutoBrightnessWhileDozingConfig()) {
                 rawBrightnessState = mScreenBrightnessDozeConfig;
                 brightnessState = clampScreenBrightness(rawBrightnessState);

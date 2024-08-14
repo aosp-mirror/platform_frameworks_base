@@ -36,10 +36,10 @@ import com.android.systemui.authentication.domain.interactor.authenticationInter
 import com.android.systemui.authentication.shared.model.AuthenticationMethodModel
 import com.android.systemui.bouncer.domain.interactor.BouncerActionButtonInteractor
 import com.android.systemui.bouncer.domain.interactor.bouncerActionButtonInteractor
-import com.android.systemui.bouncer.ui.viewmodel.BouncerViewModel
+import com.android.systemui.bouncer.ui.viewmodel.BouncerSceneContentViewModel
 import com.android.systemui.bouncer.ui.viewmodel.PasswordBouncerViewModel
 import com.android.systemui.bouncer.ui.viewmodel.PinBouncerViewModel
-import com.android.systemui.bouncer.ui.viewmodel.bouncerViewModel
+import com.android.systemui.bouncer.ui.viewmodel.bouncerSceneContentViewModel
 import com.android.systemui.classifier.domain.interactor.falsingInteractor
 import com.android.systemui.communal.domain.interactor.communalInteractor
 import com.android.systemui.coroutines.collectLastValue
@@ -139,7 +139,7 @@ class SceneFrameworkIntegrationTest : SysuiTestCase() {
 
     private lateinit var mobileConnectionsRepository: FakeMobileConnectionsRepository
     private lateinit var bouncerActionButtonInteractor: BouncerActionButtonInteractor
-    private lateinit var bouncerViewModel: BouncerViewModel
+    private lateinit var bouncerSceneContentViewModel: BouncerSceneContentViewModel
 
     private val lockscreenSceneActionsViewModel by lazy {
         LockscreenSceneActionsViewModel(
@@ -187,7 +187,7 @@ class SceneFrameworkIntegrationTest : SysuiTestCase() {
         }
 
         bouncerActionButtonInteractor = kosmos.bouncerActionButtonInteractor
-        bouncerViewModel = kosmos.bouncerViewModel
+        bouncerSceneContentViewModel = kosmos.bouncerSceneContentViewModel
 
         shadeSceneContentViewModel = kosmos.shadeSceneContentViewModel
         shadeSceneActionsViewModel = kosmos.shadeSceneActionsViewModel
@@ -198,6 +198,7 @@ class SceneFrameworkIntegrationTest : SysuiTestCase() {
         lockscreenSceneActionsViewModel.activateIn(testScope)
         shadeSceneContentViewModel.activateIn(testScope)
         shadeSceneActionsViewModel.activateIn(testScope)
+        bouncerSceneContentViewModel.activateIn(testScope)
 
         assertWithMessage("Initial scene key mismatch!")
             .that(sceneContainerViewModel.currentScene.value)
@@ -397,7 +398,7 @@ class SceneFrameworkIntegrationTest : SysuiTestCase() {
             assertThat(upDestinationSceneKey).isEqualTo(Scenes.Bouncer)
             emulateUserDrivenTransition(to = upDestinationSceneKey)
 
-            val bouncerActionButton by collectLastValue(bouncerViewModel.actionButton)
+            val bouncerActionButton by collectLastValue(bouncerSceneContentViewModel.actionButton)
             assertWithMessage("Bouncer action button not visible")
                 .that(bouncerActionButton)
                 .isNotNull()
@@ -417,7 +418,7 @@ class SceneFrameworkIntegrationTest : SysuiTestCase() {
             assertThat(upDestinationSceneKey).isEqualTo(Scenes.Bouncer)
             emulateUserDrivenTransition(to = upDestinationSceneKey)
 
-            val bouncerActionButton by collectLastValue(bouncerViewModel.actionButton)
+            val bouncerActionButton by collectLastValue(bouncerSceneContentViewModel.actionButton)
             assertWithMessage("Bouncer action button not visible during call")
                 .that(bouncerActionButton)
                 .isNotNull()
@@ -568,7 +569,7 @@ class SceneFrameworkIntegrationTest : SysuiTestCase() {
         bouncerSceneJob =
             if (to == Scenes.Bouncer) {
                 testScope.backgroundScope.launch {
-                    bouncerViewModel.authMethodViewModel.collect {
+                    bouncerSceneContentViewModel.authMethodViewModel.collect {
                         // Do nothing. Need this to turn this otherwise cold flow, hot.
                     }
                 }
@@ -644,7 +645,8 @@ class SceneFrameworkIntegrationTest : SysuiTestCase() {
         assertWithMessage("Cannot enter PIN when not on the Bouncer scene!")
             .that(getCurrentSceneInUi())
             .isEqualTo(Scenes.Bouncer)
-        val authMethodViewModel by collectLastValue(bouncerViewModel.authMethodViewModel)
+        val authMethodViewModel by
+            collectLastValue(bouncerSceneContentViewModel.authMethodViewModel)
         assertWithMessage("Cannot enter PIN when not using a PIN authentication method!")
             .that(authMethodViewModel)
             .isInstanceOf(PinBouncerViewModel::class.java)
@@ -672,7 +674,8 @@ class SceneFrameworkIntegrationTest : SysuiTestCase() {
         assertWithMessage("Cannot enter PIN when not on the Bouncer scene!")
             .that(getCurrentSceneInUi())
             .isEqualTo(Scenes.Bouncer)
-        val authMethodViewModel by collectLastValue(bouncerViewModel.authMethodViewModel)
+        val authMethodViewModel by
+            collectLastValue(bouncerSceneContentViewModel.authMethodViewModel)
         assertWithMessage("Cannot enter PIN when not using a PIN authentication method!")
             .that(authMethodViewModel)
             .isInstanceOf(PinBouncerViewModel::class.java)
@@ -719,7 +722,7 @@ class SceneFrameworkIntegrationTest : SysuiTestCase() {
 
     /** Emulates the dismissal of the IME (soft keyboard). */
     private fun TestScope.dismissIme() {
-        (bouncerViewModel.authMethodViewModel.value as? PasswordBouncerViewModel)?.let {
+        (bouncerSceneContentViewModel.authMethodViewModel.value as? PasswordBouncerViewModel)?.let {
             it.onImeDismissed()
             runCurrent()
         }

@@ -146,7 +146,8 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
     private final Handler mBgHandler;
     private final WindowManager mWindowManager;
     private final Transitions mTransitions;
-    private final BackTransitionHandler mBackTransitionHandler;
+    @VisibleForTesting
+    final BackTransitionHandler mBackTransitionHandler;
     @VisibleForTesting
     final Rect mTouchableArea = new Rect();
 
@@ -174,7 +175,8 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
     @Nullable
     private IOnBackInvokedCallback mActiveCallback;
     @Nullable
-    private RemoteAnimationTarget[] mApps;
+    @VisibleForTesting
+    RemoteAnimationTarget[] mApps;
 
     @VisibleForTesting
     final RemoteCallback mNavigationObserver = new RemoteCallback(
@@ -1448,7 +1450,8 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
          * Check whether this transition is prepare for predictive back animation, which could
          * happen when core make an activity become visible.
          */
-        private boolean handlePrepareTransition(
+        @VisibleForTesting
+        boolean handlePrepareTransition(
                 @NonNull TransitionInfo info,
                 @NonNull SurfaceControl.Transaction st,
                 @NonNull SurfaceControl.Transaction ft,
@@ -1491,7 +1494,8 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
          * Check whether this transition is triggered from back gesture commitment.
          * Reparent the transition targets to animation leashes, so the animation won't be broken.
          */
-        private boolean handleCloseTransition(@NonNull TransitionInfo info,
+        @VisibleForTesting
+        boolean handleCloseTransition(@NonNull TransitionInfo info,
                 @NonNull SurfaceControl.Transaction st,
                 @NonNull SurfaceControl.Transaction ft,
                 @NonNull Transitions.TransitionFinishCallback finishCallback) {

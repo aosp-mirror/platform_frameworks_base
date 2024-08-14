@@ -17,71 +17,34 @@
 package com.android.systemui.qs.ui.viewmodel
 
 import androidx.lifecycle.LifecycleOwner
-import com.android.compose.animation.scene.Back
-import com.android.compose.animation.scene.Edge
-import com.android.compose.animation.scene.SceneKey
-import com.android.compose.animation.scene.Swipe
-import com.android.compose.animation.scene.SwipeDirection
-import com.android.compose.animation.scene.UserAction
-import com.android.compose.animation.scene.UserActionResult
-import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.lifecycle.SysUiViewModel
 import com.android.systemui.media.controls.domain.pipeline.interactor.MediaCarouselInteractor
 import com.android.systemui.qs.FooterActionsController
 import com.android.systemui.qs.footer.ui.viewmodel.FooterActionsViewModel
 import com.android.systemui.qs.ui.adapter.QSSceneAdapter
-import com.android.systemui.scene.domain.interactor.SceneBackInteractor
-import com.android.systemui.scene.shared.model.SceneFamilies
-import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.settings.brightness.ui.viewModel.BrightnessMirrorViewModel
 import com.android.systemui.shade.ui.viewmodel.ShadeHeaderViewModel
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
 import java.util.concurrent.atomic.AtomicBoolean
-import javax.inject.Inject
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.filter
-import kotlinx.coroutines.flow.map
 
-/** Models UI state and handles user input for the quick settings scene. */
-@SysUISingleton
-class QuickSettingsSceneViewModel
-@Inject
+/**
+ * Models UI state needed for rendering the content of the quick settings scene.
+ *
+ * Different from [QuickSettingsSceneActionsViewModel] that models the UI state needed to figure out
+ * which user actions can trigger navigation to other scenes.
+ */
+class QuickSettingsSceneContentViewModel
+@AssistedInject
 constructor(
     val brightnessMirrorViewModelFactory: BrightnessMirrorViewModel.Factory,
     val shadeHeaderViewModelFactory: ShadeHeaderViewModel.Factory,
     val qsSceneAdapter: QSSceneAdapter,
     private val footerActionsViewModelFactory: FooterActionsViewModel.Factory,
     private val footerActionsController: FooterActionsController,
-    sceneBackInteractor: SceneBackInteractor,
     val mediaCarouselInteractor: MediaCarouselInteractor,
-) {
-    private val backScene: Flow<SceneKey> =
-        sceneBackInteractor.backScene
-            .filter { it != Scenes.QuickSettings }
-            .map { it ?: Scenes.Shade }
-
-    val destinationScenes: Flow<Map<UserAction, UserActionResult>> =
-        combine(
-            qsSceneAdapter.isCustomizerShowing,
-            backScene,
-        ) { isCustomizing, backScene ->
-            buildMap<UserAction, UserActionResult> {
-                if (isCustomizing) {
-                    // TODO(b/332749288) Empty map so there are no back handlers and back can close
-                    // customizer
-
-                    // TODO(b/330200163) Add an Up from Bottom to be able to collapse the shade
-                    // while customizing
-                } else {
-                    put(Back, UserActionResult(backScene))
-                    put(Swipe(SwipeDirection.Up), UserActionResult(backScene))
-                    put(
-                        Swipe(fromSource = Edge.Bottom, direction = SwipeDirection.Up),
-                        UserActionResult(SceneFamilies.Home),
-                    )
-                }
-            }
-        }
+) : SysUiViewModel() {
 
     val isMediaVisible: StateFlow<Boolean> = mediaCarouselInteractor.hasAnyMediaOrRecommendation
 
@@ -92,5 +55,10 @@ constructor(
             footerActionsController.init()
         }
         return footerActionsViewModelFactory.create(lifecycleOwner)
+    }
+
+    @AssistedFactory
+    interface Factory {
+        fun create(): QuickSettingsSceneContentViewModel
     }
 }

@@ -164,7 +164,6 @@ public class AppCompatReachabilityOverridesTest extends WindowTestsBase {
      * Runs a test scenario providing a Robot.
      */
     void runTestScenario(@NonNull Consumer<ReachabilityOverridesRobotTest> consumer) {
-        spyOn(mWm.mAppCompatConfiguration);
         final ReachabilityOverridesRobotTest robot =
                 new ReachabilityOverridesRobotTest(mWm, mAtm, mSupervisor);
         consumer.accept(robot);

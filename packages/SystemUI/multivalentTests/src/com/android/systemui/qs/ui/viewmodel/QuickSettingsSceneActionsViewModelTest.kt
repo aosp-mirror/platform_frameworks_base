@@ -36,11 +36,7 @@ import com.android.systemui.keyguard.data.repository.fakeDeviceEntryFingerprintA
 import com.android.systemui.keyguard.domain.interactor.keyguardEnabledInteractor
 import com.android.systemui.keyguard.shared.model.SuccessFingerprintAuthenticationStatus
 import com.android.systemui.kosmos.testScope
-import com.android.systemui.media.controls.data.repository.mediaFilterRepository
-import com.android.systemui.media.controls.domain.pipeline.interactor.mediaCarouselInteractor
-import com.android.systemui.media.controls.shared.model.MediaData
-import com.android.systemui.qs.FooterActionsController
-import com.android.systemui.qs.footer.ui.viewmodel.FooterActionsViewModel
+import com.android.systemui.lifecycle.activateIn
 import com.android.systemui.qs.ui.adapter.FakeQSSceneAdapter
 import com.android.systemui.res.R
 import com.android.systemui.scene.domain.interactor.sceneBackInteractor
@@ -49,41 +45,29 @@ import com.android.systemui.scene.domain.resolver.homeSceneFamilyResolver
 import com.android.systemui.scene.domain.startable.sceneContainerStartable
 import com.android.systemui.scene.shared.model.SceneFamilies
 import com.android.systemui.scene.shared.model.Scenes
-import com.android.systemui.settings.brightness.ui.viewmodel.brightnessMirrorViewModelFactory
-import com.android.systemui.shade.ui.viewmodel.shadeHeaderViewModelFactory
 import com.android.systemui.testKosmos
-import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.mock
-import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.Mockito.times
-import org.mockito.Mockito.verify
 
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 @RunWithLooper
 @EnableSceneContainer
-class QuickSettingsSceneViewModelTest : SysuiTestCase() {
+class QuickSettingsSceneActionsViewModelTest : SysuiTestCase() {
 
     private val kosmos = testKosmos()
     private val testScope = kosmos.testScope
     private val qsFlexiglassAdapter = FakeQSSceneAdapter({ mock() })
-    private val footerActionsViewModel = mock<FooterActionsViewModel>()
-    private val footerActionsViewModelFactory =
-        mock<FooterActionsViewModel.Factory> {
-            whenever(create(any())).thenReturn(footerActionsViewModel)
-        }
-    private val footerActionsController = mock<FooterActionsController>()
 
     private val sceneInteractor = kosmos.sceneInteractor
     private val sceneBackInteractor = kosmos.sceneBackInteractor
     private val sceneContainerStartable = kosmos.sceneContainerStartable
 
-    private lateinit var underTest: QuickSettingsSceneViewModel
+    private lateinit var underTest: QuickSettingsSceneActionsViewModel
 
     @Before
     fun setUp() {
@@ -91,22 +75,18 @@ class QuickSettingsSceneViewModelTest : SysuiTestCase() {
 
         sceneContainerStartable.start()
         underTest =
-            QuickSettingsSceneViewModel(
-                brightnessMirrorViewModelFactory = kosmos.brightnessMirrorViewModelFactory,
-                shadeHeaderViewModelFactory = kosmos.shadeHeaderViewModelFactory,
+            QuickSettingsSceneActionsViewModel(
                 qsSceneAdapter = qsFlexiglassAdapter,
-                footerActionsViewModelFactory = footerActionsViewModelFactory,
-                footerActionsController = footerActionsController,
                 sceneBackInteractor = sceneBackInteractor,
-                mediaCarouselInteractor = kosmos.mediaCarouselInteractor,
             )
+        underTest.activateIn(testScope)
     }
 
     @Test
     fun destinations_whenNotCustomizing_unlocked() =
         testScope.runTest {
             overrideResource(R.bool.config_use_split_notification_shade, false)
-            val destinations by collectLastValue(underTest.destinationScenes)
+            val actions by collectLastValue(underTest.actions)
             val homeScene by collectLastValue(kosmos.homeSceneFamilyResolver.resolvedScene)
             qsFlexiglassAdapter.setCustomizing(false)
             kosmos.fakeAuthenticationRepository.setAuthenticationMethod(
@@ -116,7 +96,7 @@ class QuickSettingsSceneViewModelTest : SysuiTestCase() {
                 SuccessFingerprintAuthenticationStatus(0, true)
             )
 
-            assertThat(destinations)
+            assertThat(actions)
                 .isEqualTo(
                     mapOf(
                         Back to UserActionResult(Scenes.Shade),
@@ -135,7 +115,7 @@ class QuickSettingsSceneViewModelTest : SysuiTestCase() {
         testScope.runTest {
             overrideResource(R.bool.config_use_split_notification_shade, false)
             qsFlexiglassAdapter.setCustomizing(false)
-            val destinations by collectLastValue(underTest.destinationScenes)
+            val actions by collectLastValue(underTest.actions)
 
             val currentScene by collectLastValue(sceneInteractor.currentScene)
             val backScene by collectLastValue(sceneBackInteractor.backScene)
@@ -145,7 +125,7 @@ class QuickSettingsSceneViewModelTest : SysuiTestCase() {
             assertThat(currentScene).isEqualTo(Scenes.QuickSettings)
             assertThat(backScene).isEqualTo(Scenes.Lockscreen)
 
-            assertThat(destinations)
+            assertThat(actions)
                 .isEqualTo(
                     mapOf(
                         Back to UserActionResult(Scenes.Lockscreen),
@@ -164,7 +144,7 @@ class QuickSettingsSceneViewModelTest : SysuiTestCase() {
         testScope.runTest {
             overrideResource(R.bool.config_use_split_notification_shade, false)
             qsFlexiglassAdapter.setCustomizing(false)
-            val destinations by collectLastValue(underTest.destinationScenes)
+            val actions by collectLastValue(underTest.actions)
 
             val currentScene by collectLastValue(sceneInteractor.currentScene)
             val backScene by collectLastValue(sceneBackInteractor.backScene)
@@ -176,7 +156,7 @@ class QuickSettingsSceneViewModelTest : SysuiTestCase() {
 
             assertThat(currentScene).isEqualTo(Scenes.Gone)
             assertThat(backScene).isNull()
-            assertThat(destinations)
+            assertThat(actions)
                 .isEqualTo(
                     mapOf(
                         Back to UserActionResult(Scenes.Shade),
@@ -194,7 +174,7 @@ class QuickSettingsSceneViewModelTest : SysuiTestCase() {
     fun destinations_whenNotCustomizing_authMethodSwipe_lockscreenNotDismissed() =
         testScope.runTest {
             overrideResource(R.bool.config_use_split_notification_shade, false)
-            val destinations by collectLastValue(underTest.destinationScenes)
+            val actions by collectLastValue(underTest.actions)
             val homeScene by collectLastValue(kosmos.homeSceneFamilyResolver.resolvedScene)
             qsFlexiglassAdapter.setCustomizing(false)
             kosmos.fakeDeviceEntryRepository.setLockscreenEnabled(true)
@@ -202,7 +182,7 @@ class QuickSettingsSceneViewModelTest : SysuiTestCase() {
                 AuthenticationMethodModel.None
             )
 
-            assertThat(destinations)
+            assertThat(actions)
                 .isEqualTo(
                     mapOf(
                         Back to UserActionResult(Scenes.Shade),
@@ -220,17 +200,17 @@ class QuickSettingsSceneViewModelTest : SysuiTestCase() {
     fun destinations_whenCustomizing_noDestinations() =
         testScope.runTest {
             overrideResource(R.bool.config_use_split_notification_shade, false)
-            val destinations by collectLastValue(underTest.destinationScenes)
+            val actions by collectLastValue(underTest.actions)
             qsFlexiglassAdapter.setCustomizing(true)
 
-            assertThat(destinations).isEmpty()
+            assertThat(actions).isEmpty()
         }
 
     @Test
     fun destinations_whenNotCustomizing_inSplitShade_unlocked() =
         testScope.runTest {
             overrideResource(R.bool.config_use_split_notification_shade, true)
-            val destinations by collectLastValue(underTest.destinationScenes)
+            val actions by collectLastValue(underTest.actions)
             val homeScene by collectLastValue(kosmos.homeSceneFamilyResolver.resolvedScene)
             qsFlexiglassAdapter.setCustomizing(false)
             kosmos.fakeAuthenticationRepository.setAuthenticationMethod(
@@ -240,7 +220,7 @@ class QuickSettingsSceneViewModelTest : SysuiTestCase() {
                 SuccessFingerprintAuthenticationStatus(0, true)
             )
 
-            assertThat(destinations)
+            assertThat(actions)
                 .isEqualTo(
                     mapOf(
                         Back to UserActionResult(Scenes.Shade),
@@ -258,49 +238,9 @@ class QuickSettingsSceneViewModelTest : SysuiTestCase() {
     fun destinations_whenCustomizing_inSplitShade_noDestinations() =
         testScope.runTest {
             overrideResource(R.bool.config_use_split_notification_shade, true)
-            val destinations by collectLastValue(underTest.destinationScenes)
+            val actions by collectLastValue(underTest.actions)
             qsFlexiglassAdapter.setCustomizing(true)
 
-            assertThat(destinations).isEmpty()
-        }
-
-    @Test
-    fun gettingViewModelInitializesControllerOnlyOnce() {
-        underTest.getFooterActionsViewModel(mock())
-        underTest.getFooterActionsViewModel(mock())
-
-        verify(footerActionsController, times(1)).init()
-    }
-
-    @Test
-    fun addAndRemoveMedia_mediaVisibilityIsUpdated() =
-        testScope.runTest {
-            kosmos.fakeFeatureFlagsClassic.set(Flags.MEDIA_RETAIN_RECOMMENDATIONS, false)
-            val isMediaVisible by collectLastValue(underTest.isMediaVisible)
-            val userMedia = MediaData(active = true)
-
-            assertThat(isMediaVisible).isFalse()
-
-            kosmos.mediaFilterRepository.addSelectedUserMediaEntry(userMedia)
-
-            assertThat(isMediaVisible).isTrue()
-
-            kosmos.mediaFilterRepository.removeSelectedUserMediaEntry(userMedia.instanceId)
-
-            assertThat(isMediaVisible).isFalse()
-        }
-
-    @Test
-    fun addInactiveMedia_mediaVisibilityIsUpdated() =
-        testScope.runTest {
-            kosmos.fakeFeatureFlagsClassic.set(Flags.MEDIA_RETAIN_RECOMMENDATIONS, false)
-            val isMediaVisible by collectLastValue(underTest.isMediaVisible)
-            val userMedia = MediaData(active = false)
-
-            assertThat(isMediaVisible).isFalse()
-
-            kosmos.mediaFilterRepository.addSelectedUserMediaEntry(userMedia)
-
-            assertThat(isMediaVisible).isTrue()
+            assertThat(actions).isEmpty()
         }
 }

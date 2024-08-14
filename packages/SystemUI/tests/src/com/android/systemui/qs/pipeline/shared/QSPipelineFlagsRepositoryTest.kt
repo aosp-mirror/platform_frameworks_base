@@ -15,20 +15,6 @@ class QSPipelineFlagsRepositoryTest : SysuiTestCase() {
     private val underTest = QSPipelineFlagsRepository()
 
     @Test
-    fun pipelineFlagDisabled() {
-        mSetFlagsRule.disableFlags(Flags.FLAG_QS_NEW_PIPELINE)
-
-        assertThat(underTest.pipelineEnabled).isFalse()
-    }
-
-    @Test
-    fun pipelineFlagEnabled() {
-        mSetFlagsRule.enableFlags(Flags.FLAG_QS_NEW_PIPELINE)
-
-        assertThat(underTest.pipelineEnabled).isTrue()
-    }
-
-    @Test
     fun tilesFlagDisabled() {
         mSetFlagsRule.disableFlags(Flags.FLAG_QS_NEW_TILES)
 

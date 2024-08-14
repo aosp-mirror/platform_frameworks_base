@@ -662,6 +662,7 @@ public final class PowerManagerService extends SystemService
      */
     private float mDozeScreenBrightnessOverrideFromDreamManagerFloat =
             PowerManager.BRIGHTNESS_INVALID_FLOAT;
+    private boolean mUseNormalBrightnessForDoze;
 
     // Keep display state when dozing.
     private boolean mDrawWakeLockOverrideFromSidekick;
@@ -3656,6 +3657,7 @@ public final class PowerManagerService extends SystemService
                         mDozeScreenStateOverrideFromDreamManager,
                         mDozeScreenStateOverrideReasonFromDreamManager,
                         mDozeScreenBrightnessOverrideFromDreamManagerFloat,
+                        mUseNormalBrightnessForDoze,
                         mDrawWakeLockOverrideFromSidekick,
                         mBatterySaverSupported
                                 ?
@@ -4470,13 +4472,13 @@ public final class PowerManagerService extends SystemService
 
     private void setDozeOverrideFromDreamManagerInternal(
             int screenState, @Display.StateReason int reason, float screenBrightnessFloat,
-            int screenBrightnessInt) {
+            int screenBrightnessInt, boolean useNormalBrightnessForDoze) {
         synchronized (mLock) {
             if (mDozeScreenStateOverrideFromDreamManager != screenState
                     || mDozeScreenBrightnessOverrideFromDreamManager != screenBrightnessInt
                     || !BrightnessSynchronizer.floatEquals(
-                    mDozeScreenBrightnessOverrideFromDreamManagerFloat,
-                    screenBrightnessFloat)) {
+                    mDozeScreenBrightnessOverrideFromDreamManagerFloat, screenBrightnessFloat)
+                    || mUseNormalBrightnessForDoze != useNormalBrightnessForDoze) {
                 mDozeScreenStateOverrideFromDreamManager = screenState;
                 mDozeScreenStateOverrideReasonFromDreamManager = reason;
                 mDozeScreenBrightnessOverrideFromDreamManager = screenBrightnessInt;
@@ -4484,6 +4486,7 @@ public final class PowerManagerService extends SystemService
                         isValidBrightnessValue(screenBrightnessFloat)
                                 ? screenBrightnessFloat
                                 : BrightnessSynchronizer.brightnessIntToFloat(screenBrightnessInt);
+                mUseNormalBrightnessForDoze = useNormalBrightnessForDoze;
                 mDirty |= DIRTY_SETTINGS;
                 updatePowerStateLocked();
             }
@@ -4798,6 +4801,7 @@ public final class PowerManagerService extends SystemService
             pw.println("  mDrawWakeLockOverrideFromSidekick=" + mDrawWakeLockOverrideFromSidekick);
             pw.println("  mDozeScreenBrightnessOverrideFromDreamManager="
                     + mDozeScreenBrightnessOverrideFromDreamManager);
+            pw.println("  mUseNormalBrightnessForDoze=" + mUseNormalBrightnessForDoze);
             pw.println("  mScreenBrightnessMinimum=" + mScreenBrightnessMinimum);
             pw.println("  mScreenBrightnessMaximum=" + mScreenBrightnessMaximum);
             pw.println("  mScreenBrightnessDefault=" + mScreenBrightnessDefault);
@@ -7115,7 +7119,8 @@ public final class PowerManagerService extends SystemService
 
         @Override
         public void setDozeOverrideFromDreamManager(
-                int screenState, int reason, float screenBrightnessFloat, int screenBrightnessInt) {
+                int screenState, int reason, float screenBrightnessFloat, int screenBrightnessInt,
+                boolean useNormalBrightnessForDoze) {
             switch (screenState) {
                 case Display.STATE_UNKNOWN:
                 case Display.STATE_OFF:
@@ -7138,7 +7143,7 @@ public final class PowerManagerService extends SystemService
                 screenBrightnessFloat = PowerManager.BRIGHTNESS_INVALID_FLOAT;
             }
             setDozeOverrideFromDreamManagerInternal(screenState, reason, screenBrightnessFloat,
-                    screenBrightnessInt);
+                    screenBrightnessInt, useNormalBrightnessForDoze);
         }
 
         @Override

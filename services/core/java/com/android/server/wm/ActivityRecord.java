@@ -789,8 +789,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
      */
     private boolean mWillCloseOrEnterPip;
 
-    final LetterboxUiController mLetterboxUiController;
-
     /**
      * App Compat Facade
      */
@@ -1324,7 +1322,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             pw.print(prefix); pw.println("mWaitForEnteringPinnedMode=true");
         }
 
-        mLetterboxUiController.dump(pw, prefix);
+        mAppCompatController.dump(pw, prefix);
     }
 
     static boolean dumpActivity(FileDescriptor fd, PrintWriter pw, int index, ActivityRecord r,
@@ -1988,12 +1986,10 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         }
 
         // Don't move below setActivityType since it triggers onConfigurationChange ->
-        // resolveOverrideConfiguration that requires having mLetterboxUiController initialised.
+        // resolveOverrideConfiguration that requires having mAppCompatController initialised.
         // Don't move below setOrientation(info.screenOrientation) since it triggers
-        // getOverrideOrientation that requires having mLetterboxUiController
-        // initialised.
+        // getOverrideOrientation that requires having mAppCompatController initialised.
         mAppCompatController = new AppCompatController(mWmService, this);
-        mLetterboxUiController = new LetterboxUiController(mWmService, this);
         mResolveConfigHint = new TaskFragment.ConfigOverrideHint();
         if (mWmService.mFlags.mInsetsDecoupledConfiguration) {
             // When the stable configuration is the default behavior, override for the legacy apps
@@ -2016,7 +2012,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         mIsUserAlwaysVisible =  properties != null && properties.getAlwaysVisible();
 
         mShowForAllUsers = (info.flags & FLAG_SHOW_FOR_ALL_USERS) != 0 || mIsUserAlwaysVisible;
-        setOrientation(info.screenOrientation);
+        setOverrideOrientation(info.screenOrientation);
         mRotationAnimationHint = info.rotationAnimation;
 
         mShowWhenLocked = (aInfo.flags & ActivityInfo.FLAG_SHOW_WHEN_LOCKED) != 0;
@@ -3626,10 +3622,10 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             final WindowContainer<?> trigger = endTask ? task : this;
             final Transition newTransition =
                     mTransitionController.requestCloseTransitionIfNeeded(trigger);
-            if (newTransition != null) {
-                newTransition.collectClose(trigger);
-            } else if (mTransitionController.isCollecting()) {
-                mTransitionController.getCollectingTransition().collectClose(trigger);
+            final Transition transition = newTransition != null
+                    ? newTransition : mTransitionController.getCollectingTransition();
+            if (transition != null) {
+                transition.collectClose(trigger);
             }
             if (isState(RESUMED)) {
                 if (endTask) {
@@ -4302,9 +4298,9 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         // closing the task.
         final WindowContainer trigger = remove && task != null && task.getChildCount() == 1
                 ? task : this;
-        final Transition newTransit = mTransitionController.requestCloseTransitionIfNeeded(trigger);
-        if (newTransit != null) {
-            newTransit.collectClose(trigger);
+        final Transition tr = mTransitionController.requestCloseTransitionIfNeeded(trigger);
+        if (tr != null) {
+            tr.collectClose(trigger);
         } else if (mTransitionController.isCollecting()) {
             mTransitionController.getCollectingTransition().collectClose(trigger);
         }
@@ -5320,12 +5316,14 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         task.lastDescription = description;
     }
 
-    void setDeferHidingClient(boolean deferHidingClient) {
-        if (mDeferHidingClient == deferHidingClient) {
-            return;
-        }
-        mDeferHidingClient = deferHidingClient;
-        if (!mDeferHidingClient && !mVisibleRequested) {
+    void setDeferHidingClient() {
+        mDeferHidingClient = true;
+    }
+
+    void clearDeferHidingClient() {
+        if (!mDeferHidingClient) return;
+        mDeferHidingClient = false;
+        if (!mVisibleRequested) {
             // Hiding the client is no longer deferred and the app isn't visible still, go ahead and
             // update the visibility.
             setVisibility(false);
@@ -5449,8 +5447,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         boolean isCollecting = false;
         boolean inFinishingTransition = false;
         if (mTransitionController.isShellTransitionsEnabled()) {
-            isCollecting = mTransitionController.isCollecting();
-            if (isCollecting) {
+            if (mTransitionController.isCollecting()) {
+                isCollecting = true;
                 mTransitionController.collect(this);
             } else {
                 // Failsafe to make sure that we show any activities that were incorrectly hidden
@@ -6195,7 +6193,11 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             // stopped or stopping. This gives it a chance to enter Pip in onPause().
             final boolean deferHidingClient = canEnterPictureInPicture
                     && !isState(STARTED, STOPPING, STOPPED, PAUSED);
-            setDeferHidingClient(deferHidingClient);
+            if (deferHidingClient) {
+                setDeferHidingClient();
+            } else {
+                clearDeferHidingClient();
+            }
             setVisibility(false);
 
             switch (getState()) {
@@ -6234,7 +6236,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 Slog.v(TAG_VISIBILITY, "Resume visible activity, " + this);
             }
             return getRootTask().resumeTopActivityUncheckedLocked(activeActivity /* prev */,
-                    null /* options */);
+                    null /* options */, false /* skipPause */);
         } else if (shouldPauseActivity(activeActivity)) {
             if (DEBUG_VISIBILITY) {
                 Slog.v(TAG_VISIBILITY, "Pause visible activity, " + this);
@@ -6524,9 +6526,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     void stopIfPossible() {
         if (DEBUG_SWITCH) Slog.d(TAG_SWITCH, "Stopping: " + this);
         if (finishing) {
-            Slog.e(TAG, "Request to stop a finishing activity: " + this);
-            destroyIfPossible("stopIfPossible-finishing");
-            return;
+            throw new IllegalStateException("Request to stop a finishing activity: " + this);
         }
         if (isNoHistory()) {
             if (!task.shouldSleepActivities()) {
