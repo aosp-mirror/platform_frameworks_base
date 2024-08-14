@@ -39,6 +39,7 @@ import android.widget.Space
 import android.widget.TextView
 import com.android.settingslib.Utils
 import com.android.systemui.biometrics.ui.BiometricPromptLayout
+import com.android.systemui.biometrics.Utils.ellipsize
 import com.android.systemui.lifecycle.repeatWhenAttached
 import com.android.systemui.res.R
 import kotlin.math.ceil
@@ -47,6 +48,8 @@ private const val TAG = "BiometricCustomizedViewBinder"
 
 /** Sub-binder for [BiometricPromptLayout.customized_view_container]. */
 object BiometricCustomizedViewBinder {
+    const val MAX_DESCRIPTION_CHARACTER_NUMBER = 225
+
     fun bind(
         customizedViewContainer: LinearLayout,
         contentView: PromptContentView?,
@@ -91,7 +94,8 @@ private fun LayoutInflater.inflateContentView(id: Int, description: String?): Li
 
     val descriptionView = contentView.requireViewById<TextView>(R.id.customized_view_description)
     if (!description.isNullOrEmpty()) {
-        descriptionView.text = description
+        descriptionView.text =
+            description.ellipsize(BiometricCustomizedViewBinder.MAX_DESCRIPTION_CHARACTER_NUMBER)
     } else {
         descriptionView.visibility = View.GONE
     }
@@ -219,13 +223,14 @@ private fun PromptContentItem.toView(
         inflater.inflate(R.layout.biometric_prompt_content_row_item_text_view, null) as TextView
     val lp = LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.MATCH_PARENT, 1f)
     textView.layoutParams = lp
+    val maxCharNumber = PromptVerticalListContentView.getMaxEachItemCharacterNumber()
 
     when (this) {
         is PromptContentItemPlainText -> {
-            textView.text = text
+            textView.text = text.ellipsize(maxCharNumber)
         }
         is PromptContentItemBulletedText -> {
-            val bulletedText = SpannableString(text)
+            val bulletedText = SpannableString(text.ellipsize(maxCharNumber))
             val span =
                 BulletSpan(
                     getListItemBulletGapWidth(resources),

@@ -16,8 +16,6 @@
 
 package android.hardware.biometrics;
 
-import static android.hardware.biometrics.PromptContentViewWithMoreOptionsButton.MAX_DESCRIPTION_CHARACTER_NUMBER;
-import static android.hardware.biometrics.PromptVerticalListContentView.MAX_EACH_ITEM_CHARACTER_NUMBER;
 import static android.hardware.biometrics.PromptVerticalListContentView.MAX_ITEM_NUMBER;
 
 import static com.google.common.truth.Truth.assertThat;
@@ -119,17 +117,6 @@ public class BiometricPromptTest {
     }
 
     @Test
-    public void testMoreOptionsButton_descriptionCharLimit() {
-        IllegalArgumentException e = assertThrows(IllegalArgumentException.class,
-                () -> new PromptContentViewWithMoreOptionsButton.Builder().setDescription(
-                        generateRandomString(MAX_DESCRIPTION_CHARACTER_NUMBER + 1))
-        );
-
-        assertThat(e).hasMessageThat().contains(
-                "The character number of description exceeds ");
-    }
-
-    @Test
     public void testMoreOptionsButton_ExecutorNull() {
         PromptContentViewWithMoreOptionsButton.Builder builder =
                 new PromptContentViewWithMoreOptionsButton.Builder().setMoreOptionsButtonListener(
@@ -154,29 +141,6 @@ public class BiometricPromptTest {
 
         assertThat(e).hasMessageThat().contains(
                 "The listener of more options button on prompt content must be set");
-    }
-
-    @Test
-    public void testVerticalList_descriptionCharLimit() {
-        IllegalArgumentException e = assertThrows(IllegalArgumentException.class,
-                () -> new PromptVerticalListContentView.Builder().setDescription(
-                        generateRandomString(MAX_DESCRIPTION_CHARACTER_NUMBER + 1))
-        );
-
-        assertThat(e).hasMessageThat().contains(
-                "The character number of description exceeds ");
-    }
-
-    @Test
-    public void testVerticalList_itemCharLimit() {
-        IllegalArgumentException e = assertThrows(IllegalArgumentException.class,
-                () -> new PromptVerticalListContentView.Builder().addListItem(
-                        new PromptContentItemBulletedText(
-                                generateRandomString(MAX_EACH_ITEM_CHARACTER_NUMBER + 1)))
-        );
-
-        assertThat(e).hasMessageThat().contains(
-                "The character number of list item exceeds ");
     }
 
     @Test
