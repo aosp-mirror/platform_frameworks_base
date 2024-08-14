@@ -322,11 +322,11 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                     // This is a direct call from shell, so the entire transition lifecycle is
                     // contained in the provided transaction if provided. Thus, we can setReady
                     // immediately after apply.
-                    final Transition.ReadyCondition wctApplied =
-                            new Transition.ReadyCondition("start WCT applied");
                     final boolean needsSetReady = t != null;
                     final Transition nextTransition = new Transition(type, 0 /* flags */,
                             mTransitionController, mService.mWindowManager.mSyncEngine);
+                    final Transition.ReadyCondition wctApplied =
+                            new Transition.ReadyCondition("start WCT applied");
                     nextTransition.mReadyTracker.add(wctApplied);
                     nextTransition.calcParallelCollectType(wct);
                     mTransitionController.startCollectOrQueue(nextTransition,
@@ -342,6 +342,15 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                             });
                     return nextTransition.getToken();
                 }
+                // The transition already started collecting before sending a request to shell,
+                // so just start here.
+                if (!transition.isCollecting() && !transition.isForcePlaying()) {
+                    Slog.e(TAG, "Trying to start a transition that isn't collecting. This probably"
+                            + " means Shell took too long to respond to a request. WM State may be"
+                            + " incorrect now, please file a bug");
+                    applyTransaction(wct, -1 /*syncId*/, null /*transition*/, caller);
+                    return transition.getToken();
+                }
                 // Currently, application of wct can span multiple looper loops (ie.
                 // waitAsyncStart), so add a condition to ensure that it finishes applying.
                 final Transition.ReadyCondition wctApplied;
@@ -350,18 +359,6 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                     transition.mReadyTracker.add(wctApplied);
                 } else {
                     wctApplied = null;
-                }
-                // The transition already started collecting before sending a request to shell,
-                // so just start here.
-                if (!transition.isCollecting() && !transition.isForcePlaying()) {
-                    Slog.e(TAG, "Trying to start a transition that isn't collecting. This probably"
-                            + " means Shell took too long to respond to a request. WM State may be"
-                            + " incorrect now, please file a bug");
-                    applyTransaction(wct, -1 /*syncId*/, null /*transition*/, caller);
-                    if (wctApplied != null) {
-                        wctApplied.meet();
-                    }
-                    return transition.getToken();
                 }
                 transition.mLogger.mStartWCT = wct;
                 if (transition.shouldApplyOnDisplayThread()) {
@@ -851,7 +848,11 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
             }
 
             final int prevMode = container.getRequestedOverrideWindowingMode();
-            container.setWindowingMode(windowingMode);
+            if (container.asTask() != null && container.asTask().isRootTask()) {
+                container.asTask().setRootTaskWindowingMode(windowingMode);
+            } else {
+                container.setWindowingMode(windowingMode);
+            }
             if (prevMode != container.getWindowingMode()) {
                 // The activity in the container may become focusable or non-focusable due to
                 // windowing modes changes (such as entering or leaving pinned windowing mode),

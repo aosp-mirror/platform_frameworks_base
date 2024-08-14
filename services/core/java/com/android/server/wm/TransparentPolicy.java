@@ -31,6 +31,7 @@ import android.annotation.Nullable;
 import android.content.res.Configuration;
 import android.graphics.Rect;
 
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -186,6 +187,10 @@ class TransparentPolicy {
      */
     Optional<ActivityRecord> findOpaqueNotFinishingActivityBelow() {
         return mTransparentPolicyState.findOpaqueNotFinishingActivityBelow();
+    }
+
+    void dump(@NonNull PrintWriter pw, @NonNull String prefix) {
+        pw.println(prefix + "isTransparentPolicyRunning=" + isRunning());
     }
 
     // We evaluate the case when the policy should not be applied.

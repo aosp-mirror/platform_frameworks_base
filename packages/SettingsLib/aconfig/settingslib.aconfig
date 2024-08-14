@@ -119,3 +119,13 @@ flag {
     purpose: PURPOSE_BUGFIX
   }
 }
+
+flag {
+    name: "audio_sharing_hysteresis_mode_fix"
+    namespace: "cross_device_experiences"
+    description: "Gates whether to enable fix for hysteresis mode"
+    bug: "355222285"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}

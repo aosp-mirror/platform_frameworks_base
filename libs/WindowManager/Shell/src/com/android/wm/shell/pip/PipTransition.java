@@ -290,6 +290,20 @@ public class PipTransition extends PipTransitionController {
 
         // Entering PIP.
         if (isEnteringPip(info)) {
+            if (!mPipTransitionState.isInPip() && TransitionUtil.hasDisplayChange(info)) {
+                final TransitionInfo.Change pipChange = getPipChange(info);
+                if (pipChange != null) {
+                    // Clear old crop.
+                    updatePipForUnhandledTransition(pipChange, startTransaction, finishTransaction);
+                }
+                ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
+                        "%s: ignore exited PiP with display change", TAG);
+                // This should be an exited pip. E.g. a display change transition happens when
+                // the exiting pip is animating, then mergeAnimation -> end -> onFinishResize ->
+                // onExitPipFinished was called, i.e. pip state is UNDEFINED. So do not handle
+                // the incoming transition as entering pip.
+                return false;
+            }
             if (handleEnteringPipWithDisplayChange(transition, info, startTransaction,
                     finishTransaction, finishCallback)) {
                 // The destination position is applied directly and let default transition handler

@@ -777,7 +777,8 @@ private class SwipeTransition(
 
     fun snapToScene(scene: SceneKey) {
         cancelOffsetAnimation()
-        layoutState.finishTransition(this, idleScene = scene)
+        check(currentScene == scene)
+        layoutState.finishTransition(this)
     }
 
     override fun finish(): Job {

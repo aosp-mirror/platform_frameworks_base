@@ -111,7 +111,7 @@ public class ProtoLogImpl {
                     // TODO(b/353530422): Remove - temporary fix to unblock b/352290057
                     // In so tests the viewer config file might not exist in which we don't
                     // want to provide config path to the user
-                    sServiceInstance = new PerfettoProtoLogImpl(null, null, sCacheUpdater);
+                    sServiceInstance = new PerfettoProtoLogImpl(sCacheUpdater);
                 } else {
                     sServiceInstance = new PerfettoProtoLogImpl(sViewerConfigPath, sCacheUpdater);
                 }

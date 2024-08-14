@@ -1355,9 +1355,21 @@ class ActivityStarter {
             mService.resumeAppSwitches();
         }
 
+        // Only do the create here since startActivityInner can abort. If it doesn't abort,
+        // the requestStart will be sent in handleStartRequest.
+        final Transition newTransition = r.mTransitionController.isShellTransitionsEnabled()
+                ? r.mTransitionController.createAndStartCollecting(TRANSIT_OPEN) : null;
+        // Because startActivity must run immediately, it can get combined with another
+        // transition meaning it is no-longer independent. This is NOT desirable, but is the
+        // only option for the time being.
+        final boolean isIndependent = newTransition != null;
+        final Transition transition = isIndependent ? newTransition
+                : mService.getTransitionController().getCollectingTransition();
+
         mLastStartActivityResult = startActivityUnchecked(r, sourceRecord, voiceSession,
                 request.voiceInteractor, startFlags, checkedOptions,
-                inTask, inTaskFragment, balVerdict, intentGrants, realCallingUid);
+                inTask, inTaskFragment, balVerdict, intentGrants, realCallingUid, transition,
+                isIndependent);
 
         if (request.outActivity != null) {
             request.outActivity[0] = mLastStartActivityRecord;
@@ -1509,33 +1521,27 @@ class ActivityStarter {
             int startFlags, ActivityOptions options, Task inTask,
             TaskFragment inTaskFragment,
             BalVerdict balVerdict,
-            NeededUriGrants intentGrants, int realCallingUid) {
+            NeededUriGrants intentGrants, int realCallingUid, Transition transition,
+            boolean isIndependentLaunch) {
         int result = START_CANCELED;
         final Task startedActivityRootTask;
 
-        // Create a transition now to record the original intent of actions taken within
-        // startActivityInner. Otherwise, logic in startActivityInner could start a different
-        // transition based on a sub-action.
-        // Only do the create here (and defer requestStart) since startActivityInner might abort.
-        final TransitionController transitionController = r.mTransitionController;
-        Transition newTransition = transitionController.isShellTransitionsEnabled()
-                ? transitionController.createAndStartCollecting(TRANSIT_OPEN) : null;
         RemoteTransition remoteTransition = r.takeRemoteTransition();
         // Create a display snapshot as soon as possible.
-        if (newTransition != null && mRequest.freezeScreen) {
+        if (isIndependentLaunch && mRequest.freezeScreen) {
             final TaskDisplayArea tda = mLaunchParams.hasPreferredTaskDisplayArea()
                     ? mLaunchParams.mPreferredTaskDisplayArea
                     : mRootWindowContainer.getDefaultTaskDisplayArea();
             final DisplayContent dc = mRootWindowContainer.getDisplayContentOrCreate(
                     tda.getDisplayId());
             if (dc != null) {
-                transitionController.collect(dc);
-                transitionController.collectVisibleChange(dc);
+                transition.collect(dc);
+                transition.collectVisibleChange(dc);
             }
         }
         try {
             mService.deferWindowLayout();
-            transitionController.collect(r);
+            r.mTransitionController.collect(r);
             try {
                 Trace.traceBegin(Trace.TRACE_TAG_WINDOW_MANAGER, "startActivityInner");
                 result = startActivityInner(r, sourceRecord, voiceSession, voiceInteractor,
@@ -1545,8 +1551,8 @@ class ActivityStarter {
                 Slog.e(TAG, "Exception on startActivityInner", ex);
             } finally {
                 Trace.traceEnd(Trace.TRACE_TAG_WINDOW_MANAGER);
-                startedActivityRootTask = handleStartResult(r, options, result, newTransition,
-                        remoteTransition);
+                startedActivityRootTask = handleStartResult(r, options, result, isIndependentLaunch,
+                        remoteTransition, transition);
             }
         } finally {
             mService.continueWindowLayout();
@@ -1571,8 +1577,8 @@ class ActivityStarter {
      * @return the root task where the successful started activity resides.
      */
     private @Nullable Task handleStartResult(@NonNull ActivityRecord started,
-            ActivityOptions options, int result, Transition newTransition,
-            RemoteTransition remoteTransition) {
+            ActivityOptions options, int result, boolean isIndependentLaunch,
+            RemoteTransition remoteTransition, @NonNull Transition transition) {
         final boolean userLeaving = mSupervisor.mUserLeaving;
         mSupervisor.mUserLeaving = false;
         final Task currentRootTask = started.getRootTask();
@@ -1596,8 +1602,9 @@ class ActivityStarter {
                     && !startedActivityRootTask.mCreatedByOrganizer) {
                 startedActivityRootTask.removeIfPossible("handleStartResult");
             }
-            if (newTransition != null) {
-                newTransition.abort();
+            if (isIndependentLaunch
+                    && mService.getTransitionController().isShellTransitionsEnabled()) {
+                transition.abort();
             }
             return null;
         }
@@ -1649,44 +1656,46 @@ class ActivityStarter {
             // The activity is started new rather than just brought forward, so record it as an
             // existence change.
             transitionController.collectExistenceChange(started);
-        } else if (result == START_DELIVERED_TO_TOP && newTransition != null
+        } else if (result == START_DELIVERED_TO_TOP && isIndependentLaunch
                 // An activity has changed order/visibility or the task is occluded by a transient
                 // activity, so this isn't just deliver-to-top
                 && mMovedToTopActivity == null
                 && !transitionController.hasOrderChanges()
                 && !transitionController.isTransientHide(startedActivityRootTask)
-                && !newTransition.hasChanged(mLastStartActivityRecord)) {
+                && !transition.hasChanged(mLastStartActivityRecord)) {
             // We just delivered to top, so there isn't an actual transition here.
             if (!forceTransientTransition) {
-                newTransition.abort();
-                newTransition = null;
+                transition.abort();
+                transition = null;
             }
         }
-        if (forceTransientTransition) {
-            transitionController.collect(mLastStartActivityRecord);
-            transitionController.collect(mPriorAboveTask);
+        if (forceTransientTransition && transition != null) {
+            transition.collect(mLastStartActivityRecord);
+            transition.collect(mPriorAboveTask);
             // If keyguard is active and occluded, the transient target won't be moved to front
             // to be collected, so set transient again after it is collected.
-            transitionController.setTransientLaunch(mLastStartActivityRecord, mPriorAboveTask);
+            transition.setTransientLaunch(mLastStartActivityRecord, mPriorAboveTask);
             final DisplayContent dc = mLastStartActivityRecord.getDisplayContent();
             // update wallpaper target to TransientHide
             dc.mWallpaperController.adjustWallpaperWindows();
             // execute transition because there is no change
-            transitionController.setReady(dc, true /* ready */);
+            transition.setReady(dc, true /* ready */);
         }
-        if (!userLeaving) {
+        if (!userLeaving && transition != null) {
             // no-user-leaving implies not entering PiP.
-            transitionController.setCanPipOnFinish(false /* canPipOnFinish */);
+            transition.setCanPipOnFinish(false /* canPipOnFinish */);
         }
-        if (newTransition != null) {
-            transitionController.requestStartTransition(newTransition,
+        if (isIndependentLaunch && transition != null) {
+            transitionController.requestStartTransition(transition,
                     mTargetTask == null ? started.getTask() : mTargetTask,
                     remoteTransition, null /* displayChange */);
         } else if (result == START_SUCCESS && mStartActivity.isState(RESUMED)) {
             // Do nothing if the activity is started and is resumed directly.
         } else if (isStarted) {
             // Make the collecting transition wait until this request is ready.
-            transitionController.setReady(started, false);
+            if (transition != null) {
+                transition.setReady(started, false);
+            }
         }
         return startedActivityRootTask;
     }

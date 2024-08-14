@@ -24,6 +24,8 @@ import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.window.flags.Flags;
 
+import java.io.PrintWriter;
+
 /**
  * Constants for desktop mode feature
  */
@@ -202,5 +204,20 @@ public class DesktopModeStatus {
      */
     private static boolean isDeviceEligibleForDesktopMode(@NonNull Context context) {
         return !enforceDeviceRestrictions() || isDesktopModeSupported(context);
+    }
+
+    /** Dumps DesktopModeStatus flags and configs. */
+    public static void dump(PrintWriter pw, String prefix, Context context) {
+        String innerPrefix = prefix + "  ";
+        pw.print(prefix); pw.println(TAG);
+        pw.print(innerPrefix); pw.print("maxTaskLimit="); pw.println(getMaxTaskLimit(context));
+
+        pw.print(innerPrefix); pw.print("maxTaskLimit config override=");
+        pw.println(context.getResources().getInteger(
+                R.integer.config_maxDesktopWindowingActiveTasks));
+
+        SystemProperties.Handle maxTaskLimitHandle = SystemProperties.find(MAX_TASK_LIMIT_SYS_PROP);
+        pw.print(innerPrefix); pw.print("maxTaskLimit sysprop=");
+        pw.println(maxTaskLimitHandle == null ? "null" : maxTaskLimitHandle.getInt(/* def= */ -1));
     }
 }

@@ -504,6 +504,9 @@ public abstract class DisplayManagerInternal {
         public float dozeScreenBrightness;
         public int dozeScreenStateReason;
 
+        // Override that makes display use normal brightness while dozing.
+        public boolean useNormalBrightnessForDoze;
+
         public DisplayPowerRequest() {
             policy = POLICY_BRIGHT;
             useProximitySensor = false;
@@ -537,6 +540,7 @@ public abstract class DisplayManagerInternal {
             dozeScreenBrightness = other.dozeScreenBrightness;
             dozeScreenState = other.dozeScreenState;
             dozeScreenStateReason = other.dozeScreenStateReason;
+            useNormalBrightnessForDoze = other.useNormalBrightnessForDoze;
         }
 
         @Override
@@ -561,7 +565,8 @@ public abstract class DisplayManagerInternal {
                     && boostScreenBrightness == other.boostScreenBrightness
                     && floatEquals(dozeScreenBrightness, other.dozeScreenBrightness)
                     && dozeScreenState == other.dozeScreenState
-                    && dozeScreenStateReason == other.dozeScreenStateReason;
+                    && dozeScreenStateReason == other.dozeScreenStateReason
+                    && useNormalBrightnessForDoze == other.useNormalBrightnessForDoze;
         }
 
         private boolean floatEquals(float f1, float f2) {
@@ -587,7 +592,8 @@ public abstract class DisplayManagerInternal {
                     + ", dozeScreenBrightness=" + dozeScreenBrightness
                     + ", dozeScreenState=" + Display.stateToString(dozeScreenState)
                     + ", dozeScreenStateReason="
-                            + Display.stateReasonToString(dozeScreenStateReason);
+                            + Display.stateReasonToString(dozeScreenStateReason)
+                    + ", useNormalBrightnessForDoze=" + useNormalBrightnessForDoze;
         }
 
         public static String policyToString(int policy) {

@@ -4540,7 +4540,8 @@ class Task extends TaskFragment {
             reparent(parent, MAX_VALUE);
         }
 
-        setWindowingMode(mMultiWindowRestoreWindowingMode);
+        // mMultiWindowRestoreWindowingMode is INVALID for non-root tasks
+        setRootTaskWindowingMode(mMultiWindowRestoreWindowingMode);
     }
 
     @Override
@@ -4553,18 +4554,30 @@ class Task extends TaskFragment {
             return;
         }
 
-        setWindowingMode(windowingMode, false /* creating */);
+        setWindowingModeInner(windowingMode, false /* creating */);
     }
 
     /**
-     * Specialization of {@link #setWindowingMode(int)} for this subclass.
+     * Version of {@link #setWindowingMode(int)} for root tasks.
      *
      * @param preferredWindowingMode the preferred windowing mode. This may not be honored depending
      *         on the state of things. For example, WINDOWING_MODE_UNDEFINED will resolve to the
      *         previous non-transient mode if this root task is currently in a transient mode.
+     */
+    public void setRootTaskWindowingMode(int preferredWindowingMode) {
+        if (!isRootTask()) {
+            Slog.wtf(TAG, "Trying to set root-task windowing-mode on a non-root-task: " + this,
+                    new Throwable());
+            super.setWindowingMode(preferredWindowingMode);
+            return;
+        }
+        setWindowingModeInner(preferredWindowingMode, false /* creating */);
+    }
+
+    /**
      * @param creating {@code true} if this is being run during task construction.
      */
-    void setWindowingMode(int preferredWindowingMode, boolean creating) {
+    private void setWindowingModeInner(int preferredWindowingMode, boolean creating) {
         final TaskDisplayArea taskDisplayArea = getDisplayArea();
         if (taskDisplayArea == null) {
             Slog.d(TAG, "taskDisplayArea is null, bail early");
@@ -4657,6 +4670,9 @@ class Task extends TaskFragment {
                     mTransitionController.collect(topActivity);
 
                     final Task lastParentBeforePip = topActivity.getLastParentBeforePip();
+                    // Reset the activity windowing mode to match the parent.
+                    topActivity.getRequestedOverrideConfiguration()
+                            .windowConfiguration.setWindowingMode(WINDOWING_MODE_UNDEFINED);
                     topActivity.reparent(lastParentBeforePip,
                             lastParentBeforePip.getChildCount() /* top */,
                             "movePinnedActivityToOriginalTask");
@@ -4740,7 +4756,7 @@ class Task extends TaskFragment {
             }
         }
         if (isAttached()) {
-            setWindowingMode(WINDOWING_MODE_UNDEFINED);
+            setRootTaskWindowingMode(WINDOWING_MODE_UNDEFINED);
             moveTaskToBackInner(this, null /* transition */);
         }
         if (top.isAttached()) {
@@ -5086,10 +5102,10 @@ class Task extends TaskFragment {
         return someActivityResumed;
     }
 
-    /** @see #resumeTopActivityUncheckedLocked(ActivityRecord, ActivityOptions, boolean) */
     @GuardedBy("mService")
-    boolean resumeTopActivityUncheckedLocked(ActivityRecord prev, ActivityOptions options) {
-        return resumeTopActivityUncheckedLocked(prev, options, false /* skipPause */);
+    boolean resumeTopActivityUncheckedLocked() {
+        return resumeTopActivityUncheckedLocked(null /* prev */, null /* options */,
+                false /* skipPause */);
     }
 
     @GuardedBy("mService")
@@ -5138,8 +5154,7 @@ class Task extends TaskFragment {
                 // Try to move focus to the next visible root task with a running activity if this
                 // root task is not covering the entire screen or is on a secondary display with
                 // no home root task.
-                return mRootWindowContainer.resumeFocusedTasksTopActivities(nextFocusedTask,
-                        prev, null /* targetOptions */);
+                return mRootWindowContainer.resumeFocusedTasksTopActivities(nextFocusedTask, prev);
             }
         }
 
@@ -5661,8 +5676,10 @@ class Task extends TaskFragment {
             if (noAnimation) {
                 mDisplayContent.prepareAppTransition(TRANSIT_NONE);
                 mTaskSupervisor.mNoAnimActivities.add(top);
-                mTransitionController.collect(top);
-                mTransitionController.setNoAnimation(top);
+                if (mTransitionController.isShellTransitionsEnabled()) {
+                    mTransitionController.collect(top);
+                    mTransitionController.setNoAnimation(top);
+                }
                 ActivityOptions.abort(options);
             } else {
                 updateTransitLocked(TRANSIT_TO_FRONT, options);
@@ -6002,7 +6019,7 @@ class Task extends TaskFragment {
         }
 
         final Task task = getBottomMostTask();
-        setWindowingMode(WINDOWING_MODE_UNDEFINED);
+        setRootTaskWindowingMode(WINDOWING_MODE_UNDEFINED);
 
         // Task could have been removed from the hierarchy due to windowing mode change
         // where its only child is reparented back to their original parent task.
@@ -6674,7 +6691,7 @@ class Task extends TaskFragment {
 
             // Set windowing mode after attached to display area or it abort silently.
             if (mWindowingMode != WINDOWING_MODE_UNDEFINED) {
-                task.setWindowingMode(mWindowingMode, true /* creating */);
+                task.setWindowingModeInner(mWindowingMode, true /* creating */);
             }
             return task;
         }

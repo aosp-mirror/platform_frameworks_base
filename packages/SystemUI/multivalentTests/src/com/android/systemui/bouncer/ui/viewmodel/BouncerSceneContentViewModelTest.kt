@@ -18,10 +18,6 @@ package com.android.systemui.bouncer.ui.viewmodel
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
-import com.android.compose.animation.scene.Back
-import com.android.compose.animation.scene.Swipe
-import com.android.compose.animation.scene.SwipeDirection
-import com.android.compose.animation.scene.UserActionResult
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.authentication.data.repository.FakeAuthenticationRepository
 import com.android.systemui.authentication.data.repository.fakeAuthenticationRepository
@@ -38,11 +34,9 @@ import com.android.systemui.flags.EnableSceneContainer
 import com.android.systemui.flags.Flags
 import com.android.systemui.flags.fakeFeatureFlagsClassic
 import com.android.systemui.kosmos.testScope
+import com.android.systemui.lifecycle.activateIn
 import com.android.systemui.scene.domain.startable.sceneContainerStartable
-import com.android.systemui.scene.shared.model.Scenes
-import com.android.systemui.scene.shared.model.fakeSceneDataSource
 import com.android.systemui.testKosmos
-import com.android.systemui.truth.containsEntriesExactly
 import com.google.common.truth.Truth.assertThat
 import com.google.common.truth.Truth.assertWithMessage
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -62,17 +56,18 @@ import org.junit.runner.RunWith
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 @EnableSceneContainer
-class BouncerViewModelTest : SysuiTestCase() {
+class BouncerSceneContentViewModelTest : SysuiTestCase() {
 
     private val kosmos = testKosmos()
     private val testScope = kosmos.testScope
 
-    private lateinit var underTest: BouncerViewModel
+    private lateinit var underTest: BouncerSceneContentViewModel
 
     @Before
     fun setUp() {
         kosmos.sceneContainerStartable.start()
-        underTest = kosmos.bouncerViewModel
+        underTest = kosmos.bouncerSceneContentViewModel
+        underTest.activateIn(testScope)
     }
 
     @Test
@@ -199,23 +194,6 @@ class BouncerViewModelTest : SysuiTestCase() {
 
             kosmos.fakeAuthenticationRepository.setAuthenticationMethod(Pattern)
             assertThat(isFoldSplitRequired).isTrue()
-        }
-
-    @Test
-    fun destinationScenes() =
-        testScope.runTest {
-            val destinationScenes by collectLastValue(underTest.destinationScenes)
-            kosmos.fakeSceneDataSource.changeScene(Scenes.QuickSettings)
-            runCurrent()
-
-            kosmos.fakeSceneDataSource.changeScene(Scenes.Bouncer)
-            runCurrent()
-
-            assertThat(destinationScenes)
-                .containsEntriesExactly(
-                    Back to UserActionResult(Scenes.QuickSettings),
-                    Swipe(SwipeDirection.Down) to UserActionResult(Scenes.QuickSettings),
-                )
         }
 
     private fun authMethodsToTest(): List<AuthenticationMethodModel> {

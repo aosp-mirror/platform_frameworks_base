@@ -26,9 +26,9 @@ import com.android.systemui.authentication.data.repository.fakeAuthenticationRep
 import com.android.systemui.authentication.domain.interactor.authenticationInteractor
 import com.android.systemui.authentication.shared.model.AuthenticationMethodModel
 import com.android.systemui.authentication.shared.model.AuthenticationPatternCoordinate as Point
-import com.android.systemui.bouncer.domain.interactor.bouncerInteractor
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.kosmos.testScope
+import com.android.systemui.lifecycle.activateIn
 import com.android.systemui.res.R
 import com.android.systemui.scene.domain.interactor.sceneInteractor
 import com.android.systemui.scene.shared.model.Scenes
@@ -54,17 +54,12 @@ class PatternBouncerViewModelTest : SysuiTestCase() {
     private val testScope = kosmos.testScope
     private val authenticationInteractor by lazy { kosmos.authenticationInteractor }
     private val sceneInteractor by lazy { kosmos.sceneInteractor }
-    private val bouncerInteractor by lazy { kosmos.bouncerInteractor }
-    private val bouncerViewModel by lazy { kosmos.bouncerViewModel }
-    private val underTest by lazy {
-        PatternBouncerViewModel(
-            applicationContext = context,
-            viewModelScope = testScope.backgroundScope,
-            interactor = bouncerInteractor,
+    private val bouncerViewModel by lazy { kosmos.bouncerSceneContentViewModel }
+    private val underTest =
+        kosmos.patternBouncerViewModelFactory.create(
             isInputEnabled = MutableStateFlow(true).asStateFlow(),
             onIntentionalUserInput = {},
         )
-    }
 
     private val containerSize = 90 // px
     private val dotSize = 30 // px
@@ -73,6 +68,7 @@ class PatternBouncerViewModelTest : SysuiTestCase() {
     fun setUp() {
         overrideResource(R.string.keyguard_enter_your_pattern, ENTER_YOUR_PATTERN)
         overrideResource(R.string.kg_wrong_pattern, WRONG_PATTERN)
+        underTest.activateIn(testScope)
     }
 
     @Test
