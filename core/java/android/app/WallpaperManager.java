@@ -1571,9 +1571,26 @@ public class WallpaperManager {
      */
     @Nullable
     public Rect peekBitmapDimensions(@SetWallpaperFlags int which, boolean returnDefault) {
+        if (multiCrop()) {
+            return peekBitmapDimensionsAsUser(which, returnDefault, mContext.getUserId());
+        }
         checkExactlyOneWallpaperFlagSet(which);
         return sGlobals.peekWallpaperDimensions(mContext, returnDefault, which,
                 mContext.getUserId());
+    }
+
+    /**
+     * Overload of {@link #peekBitmapDimensions(int, boolean)} with a userId argument.
+     * TODO(b/360120606): remove the SuppressWarnings
+     * @hide
+     */
+    @SuppressWarnings("AndroidFrameworkContextUserId")
+    @FlaggedApi(FLAG_MULTI_CROP)
+    @Nullable
+    public Rect peekBitmapDimensionsAsUser(@SetWallpaperFlags int which, boolean returnDefault,
+            int userId) {
+        checkExactlyOneWallpaperFlagSet(which);
+        return sGlobals.peekWallpaperDimensions(mContext, returnDefault, which, userId);
     }
 
     /**
