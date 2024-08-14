@@ -36,8 +36,6 @@ import javax.inject.Inject
 import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.debounce
 
 @SysUISingleton
@@ -73,15 +71,11 @@ constructor(
         listenForTransitionToCamera(scope, keyguardInteractor)
     }
 
-    private val canDismissLockscreen: Flow<Boolean> =
-        combine(
-            keyguardInteractor.isKeyguardShowing,
-            keyguardInteractor.isKeyguardDismissible,
-            keyguardInteractor.biometricUnlockState,
-        ) { isKeyguardShowing, isKeyguardDismissible, biometricUnlockState ->
-            (isWakeAndUnlock(biometricUnlockState.mode) ||
-                (!isKeyguardShowing && isKeyguardDismissible))
-        }
+    private fun canDismissLockscreen(): Boolean {
+        return isWakeAndUnlock(keyguardInteractor.biometricUnlockState.value.mode) ||
+            (!keyguardInteractor.isKeyguardShowing.value &&
+                keyguardInteractor.isKeyguardDismissible.value)
+    }
 
     /**
      * Listen for the signal that we're waking up and figure what state we need to transition to.
@@ -96,22 +90,18 @@ constructor(
                 .debounce(50L)
                 .sample(
                     startedKeyguardTransitionStep,
-                    keyguardInteractor.biometricUnlockState,
-                    keyguardInteractor.primaryBouncerShowing,
-                    keyguardInteractor.isKeyguardOccluded,
-                    canDismissLockscreen,
                     wakeToGoneInteractor.canWakeDirectlyToGone,
                 )
                 .collect {
                     (
                         _,
                         startedStep,
-                        biometricUnlockState,
-                        primaryBouncerShowing,
-                        isKeyguardOccludedLegacy,
-                        canDismissLockscreen,
                         canWakeDirectlyToGone,
                     ) ->
+                    val isKeyguardOccludedLegacy = keyguardInteractor.isKeyguardOccluded.value
+                    val biometricUnlockMode = keyguardInteractor.biometricUnlockState.value.mode
+                    val primaryBouncerShowing = keyguardInteractor.primaryBouncerShowing.value
+
                     if (!maybeHandleInsecurePowerGesture()) {
                         val shouldTransitionToLockscreen =
                             if (KeyguardWmStateRefactor.isEnabled) {
@@ -121,12 +111,10 @@ constructor(
                                 // completes.
                                 !maybeStartTransitionToOccludedOrInsecureCamera { state, reason ->
                                     startTransitionTo(state, ownerReason = reason)
-                                } &&
-                                    !isWakeAndUnlock(biometricUnlockState.mode) &&
-                                    !primaryBouncerShowing
+                                } && !isWakeAndUnlock(biometricUnlockMode) && !primaryBouncerShowing
                             } else {
                                 !isKeyguardOccludedLegacy &&
-                                    !isWakeAndUnlock(biometricUnlockState.mode) &&
+                                    !isWakeAndUnlock(biometricUnlockMode) &&
                                     !primaryBouncerShowing
                             }
 
@@ -136,7 +124,7 @@ constructor(
                             !KeyguardWmStateRefactor.isEnabled && isKeyguardOccludedLegacy
 
                         val shouldTransitionToGone =
-                            (!KeyguardWmStateRefactor.isEnabled && canDismissLockscreen) ||
+                            (!KeyguardWmStateRefactor.isEnabled && canDismissLockscreen()) ||
                                 (KeyguardWmStateRefactor.isEnabled && canWakeDirectlyToGone)
 
                         if (shouldTransitionToGone) {

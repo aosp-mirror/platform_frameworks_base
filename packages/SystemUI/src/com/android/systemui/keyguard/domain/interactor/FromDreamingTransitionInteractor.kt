@@ -32,7 +32,6 @@ import com.android.systemui.keyguard.shared.model.DozeStateModel
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.power.domain.interactor.PowerInteractor
 import com.android.systemui.scene.shared.flag.SceneContainerFlag
-import com.android.systemui.util.kotlin.Utils.Companion.sample as sampleCombine
 import com.android.systemui.util.kotlin.sample
 import javax.inject.Inject
 import kotlin.time.Duration.Companion.milliseconds
@@ -208,15 +207,15 @@ constructor(
 
         scope.launch {
             keyguardInteractor.isAbleToDream
-                .sampleCombine(
-                    keyguardInteractor.isKeyguardShowing,
-                    keyguardInteractor.isKeyguardDismissible,
-                )
-                .filterRelevantKeyguardStateAnd {
-                    (isDreaming, isKeyguardShowing, isKeyguardDismissible) ->
-                    !isDreaming && isKeyguardDismissible && !isKeyguardShowing
+                .filterRelevantKeyguardStateAnd { isDreaming -> !isDreaming }
+                .collect {
+                    if (
+                        keyguardInteractor.isKeyguardDismissible.value &&
+                            !keyguardInteractor.isKeyguardShowing.value
+                    ) {
+                        startTransitionTo(KeyguardState.GONE)
+                    }
                 }
-                .collect { startTransitionTo(KeyguardState.GONE) }
         }
     }
 
