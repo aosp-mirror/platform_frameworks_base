@@ -152,6 +152,62 @@ object KeyguardRootViewBinder {
                             }
                         }
                     }
+
+                    if (
+                        KeyguardBottomAreaRefactor.isEnabled || DeviceEntryUdfpsRefactor.isEnabled
+                    ) {
+                        launch("$TAG#alpha") {
+                            viewModel.alpha(viewState).collect { alpha ->
+                                view.alpha = alpha
+                                if (KeyguardBottomAreaRefactor.isEnabled) {
+                                    childViews[statusViewId]?.alpha = alpha
+                                    childViews[burnInLayerId]?.alpha = alpha
+                                }
+                            }
+                        }
+                    }
+
+                    if (MigrateClocksToBlueprint.isEnabled) {
+                        launch("$TAG#translationY") {
+                            // When translation happens in burnInLayer, it won't be weather clock
+                            // large clock isn't added to burnInLayer due to its scale transition
+                            // so we also need to add translation to it here
+                            // same as translationX
+                            viewModel.translationY.collect { y ->
+                                childViews[burnInLayerId]?.translationY = y
+                                childViews[largeClockId]?.translationY = y
+                                childViews[aodNotificationIconContainerId]?.translationY = y
+                            }
+                        }
+
+                        launch("$TAG#translationX") {
+                            viewModel.translationX.collect { state ->
+                                val px = state.value ?: return@collect
+                                when {
+                                    state.isToOrFrom(KeyguardState.AOD) -> {
+                                        // Large Clock is not translated in the x direction
+                                        childViews[burnInLayerId]?.translationX = px
+                                        childViews[aodNotificationIconContainerId]?.translationX =
+                                            px
+                                    }
+                                    state.isToOrFrom(KeyguardState.GLANCEABLE_HUB) -> {
+                                        for ((key, childView) in childViews.entries) {
+                                            when (key) {
+                                                indicationArea,
+                                                startButton,
+                                                endButton,
+                                                lockIcon,
+                                                deviceEntryIcon -> {
+                                                    // Do not move these views
+                                                }
+                                                else -> childView.translationX = px
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
                 }
             }
         disposables +=
@@ -188,20 +244,6 @@ object KeyguardRootViewBinder {
                         }
                     }
 
-                    if (
-                        KeyguardBottomAreaRefactor.isEnabled || DeviceEntryUdfpsRefactor.isEnabled
-                    ) {
-                        launch {
-                            viewModel.alpha(viewState).collect { alpha ->
-                                view.alpha = alpha
-                                if (KeyguardBottomAreaRefactor.isEnabled) {
-                                    childViews[statusViewId]?.alpha = alpha
-                                    childViews[burnInLayerId]?.alpha = alpha
-                                }
-                            }
-                        }
-                    }
-
                     if (MigrateClocksToBlueprint.isEnabled) {
                         launch {
                             viewModel.burnInLayerVisibility.collect { visibility ->
@@ -218,46 +260,6 @@ object KeyguardRootViewBinder {
                         launch {
                             viewModel.lockscreenStateAlpha(viewState).collect { alpha ->
                                 childViews[statusViewId]?.alpha = alpha
-                            }
-                        }
-
-                        launch {
-                            // When translation happens in burnInLayer, it won't be weather clock
-                            // large clock isn't added to burnInLayer due to its scale transition
-                            // so we also need to add translation to it here
-                            // same as translationX
-                            viewModel.translationY.collect { y ->
-                                childViews[burnInLayerId]?.translationY = y
-                                childViews[largeClockId]?.translationY = y
-                                childViews[aodNotificationIconContainerId]?.translationY = y
-                            }
-                        }
-
-                        launch {
-                            viewModel.translationX.collect { state ->
-                                val px = state.value ?: return@collect
-                                when {
-                                    state.isToOrFrom(KeyguardState.AOD) -> {
-                                        // Large Clock is not translated in the x direction
-                                        childViews[burnInLayerId]?.translationX = px
-                                        childViews[aodNotificationIconContainerId]?.translationX =
-                                            px
-                                    }
-                                    state.isToOrFrom(KeyguardState.GLANCEABLE_HUB) -> {
-                                        for ((key, childView) in childViews.entries) {
-                                            when (key) {
-                                                indicationArea,
-                                                startButton,
-                                                endButton,
-                                                lockIcon,
-                                                deviceEntryIcon -> {
-                                                    // Do not move these views
-                                                }
-                                                else -> childView.translationX = px
-                                            }
-                                        }
-                                    }
-                                }
                             }
                         }
 
