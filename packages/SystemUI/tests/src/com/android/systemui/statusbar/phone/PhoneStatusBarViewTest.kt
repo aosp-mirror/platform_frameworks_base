@@ -35,7 +35,6 @@ import androidx.test.filters.SmallTest
 import com.android.systemui.Flags.FLAG_STATUS_BAR_SWIPE_OVER_CHIP
 import com.android.systemui.Gefingerpoken
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.plugins.DarkIconDispatcher
 import com.android.systemui.res.R
 import com.android.systemui.statusbar.window.StatusBarWindowController
 import com.android.systemui.util.mockito.mock
@@ -64,7 +63,6 @@ class PhoneStatusBarViewTest : SysuiTestCase() {
             StatusBarContentInsetsProvider::class.java,
             contentInsetsProvider
         )
-        mDependency.injectTestDependency(DarkIconDispatcher::class.java, mock<DarkIconDispatcher>())
         mDependency.injectTestDependency(StatusBarWindowController::class.java, windowController)
         context.ensureTestableResources()
         view = spy(createStatusBarView())
