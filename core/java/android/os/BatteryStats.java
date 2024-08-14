@@ -1994,8 +1994,7 @@ public abstract class BatteryStats {
 
         // STATES2 bits that are used for Power Stats tracking
         public static final int IMPORTANT_FOR_POWER_STATS_STATES2 =
-                STATE2_VIDEO_ON_FLAG | STATE2_FLASHLIGHT_FLAG | STATE2_CAMERA_FLAG
-                | STATE2_GPS_SIGNAL_QUALITY_MASK;
+                STATE2_VIDEO_ON_FLAG | STATE2_FLASHLIGHT_FLAG | STATE2_CAMERA_FLAG;
 
         @UnsupportedAppUsage
         public int states2;
