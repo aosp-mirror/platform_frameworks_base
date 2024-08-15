@@ -105,6 +105,7 @@ final class ImeInsetsSourceProvider extends InsetsSourceProvider {
                 ImeTracker.forLogging().onProgress(mStatsToken,
                         ImeTracker.PHASE_WM_POST_LAYOUT_NOTIFY_CONTROLS_CHANGED);
                 mStateController.notifyControlChanged(mControlTarget);
+                setImeShowing(true);
             } else if (wasServerVisible && mServerVisible && mGivenInsetsReady
                     && givenInsetsPending) {
                 // If the server visibility didn't change (still visible), and mGivenInsetsReady
@@ -113,6 +114,8 @@ final class ImeInsetsSourceProvider extends InsetsSourceProvider {
                 ImeTracker.forLogging().onCancelled(mStatsToken,
                         ImeTracker.PHASE_WM_POST_LAYOUT_NOTIFY_CONTROLS_CHANGED);
                 mStatsToken = null;
+            } else if (wasServerVisible && !mServerVisible) {
+                setImeShowing(false);
             }
         }
     }

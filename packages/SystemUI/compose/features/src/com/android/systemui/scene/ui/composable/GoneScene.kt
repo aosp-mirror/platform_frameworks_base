@@ -26,12 +26,13 @@ import com.android.compose.animation.scene.UserActionResult
 import com.android.compose.animation.scene.animateSceneDpAsState
 import com.android.compose.animation.scene.animateSceneFloatAsState
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.lifecycle.rememberViewModel
 import com.android.systemui.notifications.ui.composable.SnoozeableHeadsUpNotificationSpace
 import com.android.systemui.qs.ui.composable.QuickSettings
 import com.android.systemui.qs.ui.composable.QuickSettings.SharedValues.MediaLandscapeTopOffset
 import com.android.systemui.qs.ui.composable.QuickSettings.SharedValues.MediaOffset.Default
 import com.android.systemui.scene.shared.model.Scenes
-import com.android.systemui.scene.ui.viewmodel.GoneSceneViewModel
+import com.android.systemui.scene.ui.viewmodel.GoneSceneActionsViewModel
 import com.android.systemui.statusbar.notification.stack.ui.view.NotificationScrollView
 import com.android.systemui.statusbar.notification.stack.ui.viewmodel.NotificationsPlaceholderViewModel
 import dagger.Lazy
@@ -47,13 +48,19 @@ class GoneScene
 @Inject
 constructor(
     private val notificationStackScrolLView: Lazy<NotificationScrollView>,
-    private val notificationsPlaceholderViewModel: NotificationsPlaceholderViewModel,
-    private val viewModel: GoneSceneViewModel,
+    private val notificationsPlaceholderViewModelFactory: NotificationsPlaceholderViewModel.Factory,
+    private val viewModelFactory: GoneSceneActionsViewModel.Factory,
 ) : ComposableScene {
     override val key = Scenes.Gone
 
+    private val actionsViewModel: GoneSceneActionsViewModel by lazy { viewModelFactory.create() }
+
     override val destinationScenes: Flow<Map<UserAction, UserActionResult>> =
-        viewModel.destinationScenes
+        actionsViewModel.actions
+
+    override suspend fun activate() {
+        actionsViewModel.activate()
+    }
 
     @Composable
     override fun SceneScope.Content(
@@ -67,7 +74,7 @@ constructor(
         Spacer(modifier.fillMaxSize())
         SnoozeableHeadsUpNotificationSpace(
             stackScrollView = notificationStackScrolLView.get(),
-            viewModel = notificationsPlaceholderViewModel
+            viewModel = rememberViewModel { notificationsPlaceholderViewModelFactory.create() },
         )
     }
 }

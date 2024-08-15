@@ -124,8 +124,8 @@ public final class BatteryUsageStats implements Parcelable, Closeable {
     static final String XML_ATTR_TIME_IN_BACKGROUND = "time_in_background";
     static final String XML_ATTR_TIME_IN_FOREGROUND_SERVICE = "time_in_foreground_service";
 
-    // We need about 700 bytes per UID
-    private static final long BATTERY_CONSUMER_CURSOR_WINDOW_SIZE = 5_000 * 700;
+    // Max window size. CursorWindow uses only as much memory as needed.
+    private static final long BATTERY_CONSUMER_CURSOR_WINDOW_SIZE = 20_000_000; // bytes
 
     private static final int STATSD_PULL_ATOM_MAX_BYTES = 45000;
 

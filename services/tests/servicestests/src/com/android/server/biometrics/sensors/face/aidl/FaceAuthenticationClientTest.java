@@ -479,6 +479,15 @@ public class FaceAuthenticationClientTest {
                 eq(mContext.getOpPackageName()), anyInt(), anyInt(), any());
     }
 
+    @Test
+    public void testCancelAuth_whenClientWaitingForCookie() throws RemoteException {
+        final FaceAuthenticationClient client = createClient(true);
+        client.waitForCookie(mCallback);
+        client.cancel();
+
+        verify(mCallback).onClientFinished(client, false);
+    }
+
     private FaceAuthenticationClient createClient() throws RemoteException {
         return createClient(2 /* version */, mClientMonitorCallbackConverter,
                 false /* allowBackgroundAuthentication */, true /* isBiometricPrompt */,

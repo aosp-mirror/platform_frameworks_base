@@ -165,6 +165,7 @@ import com.android.server.SystemService;
 import com.android.server.SystemServiceManager;
 import com.android.server.SystemTimeZone;
 import com.android.server.SystemTimeZone.TimeZoneConfidence;
+import com.android.server.pm.UserManagerInternal;
 import com.android.server.pm.permission.PermissionManagerService;
 import com.android.server.pm.permission.PermissionManagerServiceInternal;
 import com.android.server.pm.pkg.AndroidPackage;
@@ -318,7 +319,7 @@ public class AlarmManagerService extends SystemService {
      */
     int mSystemUiUid;
 
-    static boolean isTimeTickAlarm(Alarm a) {
+    private static boolean isTimeTickAlarm(Alarm a) {
         return a.uid == Process.SYSTEM_UID && TIME_TICK_TAG.equals(a.listenerTag);
     }
 
@@ -356,6 +357,7 @@ public class AlarmManagerService extends SystemService {
     }
 
     // TODO(b/172085676): Move inside alarm store.
+    @GuardedBy("mLock")
     private final SparseArray<AlarmManager.AlarmClockInfo> mNextAlarmClockForUser =
             new SparseArray<>();
     private final SparseArray<AlarmManager.AlarmClockInfo> mTmpSparseAlarmClockArray =
@@ -2615,6 +2617,13 @@ public class AlarmManagerService extends SystemService {
                 mInFlightListeners.add(callback);
             }
         }
+
+        /** @see AlarmManagerInternal#getNextAlarmTriggerTimeForUser(int) */
+        @Override
+        public long getNextAlarmTriggerTimeForUser(@UserIdInt int userId) {
+            final AlarmManager.AlarmClockInfo nextAlarm = getNextAlarmClockImpl(userId);
+            return nextAlarm != null ? nextAlarm.getTriggerTime() : 0;
+        }
     }
 
     boolean hasUseExactAlarmInternal(String packageName, int uid) {
@@ -3763,8 +3772,10 @@ public class AlarmManagerService extends SystemService {
             }
             mNextAlarmClockForUser.put(userId, alarmClock);
             if (mStartUserBeforeScheduledAlarms) {
-                mUserWakeupStore.addUserWakeup(userId, convertToElapsed(
-                        mNextAlarmClockForUser.get(userId).getTriggerTime(), RTC));
+                if (shouldAddWakeupForUser(userId)) {
+                    mUserWakeupStore.addUserWakeup(userId, convertToElapsed(
+                            mNextAlarmClockForUser.get(userId).getTriggerTime(), RTC));
+                }
             }
         } else {
             if (DEBUG_ALARM_CLOCK) {
@@ -3781,6 +3792,23 @@ public class AlarmManagerService extends SystemService {
         mPendingSendNextAlarmClockChangedForUser.put(userId, true);
         mHandler.removeMessages(AlarmHandler.SEND_NEXT_ALARM_CLOCK_CHANGED);
         mHandler.sendEmptyMessage(AlarmHandler.SEND_NEXT_ALARM_CLOCK_CHANGED);
+    }
+
+    /**
+     * Checks whether the user is of type that needs to be started before the alarm.
+     */
+    @VisibleForTesting
+    boolean shouldAddWakeupForUser(@UserIdInt int userId) {
+        final UserManagerInternal umInternal = LocalServices.getService(UserManagerInternal.class);
+        if (umInternal.getUserInfo(userId) == null || umInternal.getUserInfo(userId).isGuest()) {
+            // Guest user should not be started in the background.
+            return false;
+        } else {
+            // SYSTEM user is always running, so no need to schedule wakeup for it.
+            // Profiles are excluded from the wakeup list because users can explicitly stop them and
+            // so starting them in the background would go against the user's intent.
+            return userId != UserHandle.USER_SYSTEM && umInternal.getUserInfo(userId).isFull();
+        }
     }
 
     /**
@@ -3926,6 +3954,9 @@ public class AlarmManagerService extends SystemService {
             }
             if (!RemovedAlarm.isLoggable(reason)) {
                 continue;
+            }
+            if (isTimeTickAlarm(removed)) {
+                Slog.wtf(TAG, "Removed TIME_TICK alarm");
             }
             RingBuffer<RemovedAlarm> bufferForUid = mRemovalHistory.get(removed.uid);
             if (bufferForUid == null) {
@@ -4421,6 +4452,11 @@ public class AlarmManagerService extends SystemService {
         public void run() {
             ArrayList<Alarm> triggerList = new ArrayList<Alarm>();
 
+            synchronized (mLock) {
+                mLastTimeChangeClockTime = mInjector.getCurrentTimeMillis();
+                mLastTimeChangeRealtime = mInjector.getElapsedRealtimeMillis();
+            }
+
             while (true) {
                 int result = mInjector.waitForAlarm();
                 final long nowRTC = mInjector.getCurrentTimeMillis();
@@ -4444,10 +4480,9 @@ public class AlarmManagerService extends SystemService {
                         expectedClockTime = lastTimeChangeClockTime
                                 + (nowELAPSED - mLastTimeChangeRealtime);
                     }
-                    if (lastTimeChangeClockTime == 0 || nowRTC < (expectedClockTime - 1000)
+                    if (nowRTC < (expectedClockTime - 1000)
                             || nowRTC > (expectedClockTime + 1000)) {
-                        // The change is by at least +/- 1000 ms (or this is the first change),
-                        // let's do it!
+                        // The change is by at least +/- 1000 ms, let's do it!
                         if (DEBUG_BATCH) {
                             Slog.v(TAG, "Time changed notification from kernel; rebatching");
                         }

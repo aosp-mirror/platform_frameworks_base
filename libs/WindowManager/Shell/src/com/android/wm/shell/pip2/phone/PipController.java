@@ -31,6 +31,8 @@ import android.graphics.Rect;
 import android.os.Bundle;
 import android.view.InsetsState;
 import android.view.SurfaceControl;
+import android.window.DisplayAreaInfo;
+import android.window.WindowContainerTransaction;
 
 import androidx.annotation.BinderThread;
 import androidx.annotation.Nullable;
@@ -40,6 +42,7 @@ import com.android.internal.protolog.ProtoLog;
 import com.android.internal.util.Preconditions;
 import com.android.wm.shell.R;
 import com.android.wm.shell.ShellTaskOrganizer;
+import com.android.wm.shell.common.DisplayChangeController;
 import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.DisplayInsetsController;
 import com.android.wm.shell.common.DisplayLayout;
@@ -71,7 +74,8 @@ import java.util.function.Consumer;
  */
 public class PipController implements ConfigurationChangeListener,
         PipTransitionState.PipTransitionStateChangedListener,
-        DisplayController.OnDisplaysChangedListener, RemoteCallable<PipController> {
+        DisplayController.OnDisplaysChangedListener,
+        DisplayChangeController.OnDisplayChangingListener, RemoteCallable<PipController> {
     private static final String TAG = PipController.class.getSimpleName();
     private static final String SWIPE_TO_PIP_APP_BOUNDS = "pip_app_bounds";
     private static final String SWIPE_TO_PIP_OVERLAY = "swipe_to_pip_overlay";
@@ -197,11 +201,12 @@ public class PipController implements ConfigurationChangeListener,
         mPipDisplayLayoutState.setDisplayLayout(layout);
 
         mDisplayController.addDisplayWindowListener(this);
+        mDisplayController.addDisplayChangingController(this);
         mDisplayInsetsController.addInsetsChangedListener(mPipDisplayLayoutState.getDisplayId(),
                 new DisplayInsetsController.OnInsetsChangedListener() {
                     @Override
                     public void insetsChanged(InsetsState insetsState) {
-                        onDisplayChanged(mDisplayController
+                        setDisplayLayout(mDisplayController
                                         .getDisplayLayout(mPipDisplayLayoutState.getDisplayId()));
                     }
                 });
@@ -264,11 +269,12 @@ public class PipController implements ConfigurationChangeListener,
 
     @Override
     public void onThemeChanged() {
-        onDisplayChanged(new DisplayLayout(mContext, mContext.getDisplay()));
+        setDisplayLayout(new DisplayLayout(mContext, mContext.getDisplay()));
     }
 
     //
-    // DisplayController.OnDisplaysChangedListener implementations
+    // DisplayController.OnDisplaysChangedListener and
+    // DisplayChangeController.OnDisplayChangingListener implementations
     //
 
     @Override
@@ -276,7 +282,7 @@ public class PipController implements ConfigurationChangeListener,
         if (displayId != mPipDisplayLayoutState.getDisplayId()) {
             return;
         }
-        onDisplayChanged(mDisplayController.getDisplayLayout(displayId));
+        setDisplayLayout(mDisplayController.getDisplayLayout(displayId));
     }
 
     @Override
@@ -284,10 +290,35 @@ public class PipController implements ConfigurationChangeListener,
         if (displayId != mPipDisplayLayoutState.getDisplayId()) {
             return;
         }
-        onDisplayChanged(mDisplayController.getDisplayLayout(displayId));
+        setDisplayLayout(mDisplayController.getDisplayLayout(displayId));
     }
 
-    private void onDisplayChanged(DisplayLayout layout) {
+    /**
+     * A callback for any observed transition that contains a display change in its
+     * {@link android.window.TransitionRequestInfo} with a non-zero rotation delta.
+     */
+    @Override
+    public void onDisplayChange(int displayId, int fromRotation, int toRotation,
+            @Nullable DisplayAreaInfo newDisplayAreaInfo, WindowContainerTransaction t) {
+        if (!mPipTransitionState.isInPip()) {
+            return;
+        }
+
+        // Calculate the snap fraction pre-rotation.
+        float snapFraction = mPipBoundsAlgorithm.getSnapFraction(mPipBoundsState.getBounds());
+
+        // Update the caches to reflect the new display layout and movement bounds.
+        mPipDisplayLayoutState.rotateTo(toRotation);
+        mPipTouchHandler.updateMovementBounds();
+
+        // The policy is to keep PiP width, height and snap fraction invariant.
+        Rect toBounds = mPipBoundsState.getBounds();
+        mPipBoundsAlgorithm.applySnapFraction(toBounds, snapFraction);
+        mPipBoundsState.setBounds(toBounds);
+        t.setBounds(mPipTransitionState.mPipTaskToken, toBounds);
+    }
+
+    private void setDisplayLayout(DisplayLayout layout) {
         mPipDisplayLayoutState.setDisplayLayout(layout);
     }
 
@@ -300,6 +331,10 @@ public class PipController implements ConfigurationChangeListener,
             int launcherRotation, Rect hotseatKeepClearArea) {
         ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
                 "getSwipePipToHomeBounds: %s", componentName);
+        // preemptively add the keep clear area for Hotseat, so that it is taken into account
+        // when calculating the entry destination bounds of PiP window
+        mPipBoundsState.setNamedUnrestrictedKeepClearArea(
+                PipBoundsState.NAMED_KCA_LAUNCHER_SHELF, hotseatKeepClearArea);
         mPipBoundsState.setBoundsStateForEntry(componentName, activityInfo, pictureInPictureParams,
                 mPipBoundsAlgorithm);
         return mPipBoundsAlgorithm.getEntryDestinationBounds();
@@ -328,6 +363,23 @@ public class PipController implements ConfigurationChangeListener,
         mPipRecentsAnimationListener.onPipAnimationStarted();
     }
 
+    private void setLauncherKeepClearAreaHeight(boolean visible, int height) {
+        ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
+                "setLauncherKeepClearAreaHeight: visible=%b, height=%d", visible, height);
+        if (visible) {
+            Rect rect = new Rect(
+                    0, mPipDisplayLayoutState.getDisplayBounds().bottom - height,
+                    mPipDisplayLayoutState.getDisplayBounds().right,
+                    mPipDisplayLayoutState.getDisplayBounds().bottom);
+            mPipBoundsState.setNamedUnrestrictedKeepClearArea(
+                    PipBoundsState.NAMED_KCA_LAUNCHER_SHELF, rect);
+        } else {
+            mPipBoundsState.setNamedUnrestrictedKeepClearArea(
+                    PipBoundsState.NAMED_KCA_LAUNCHER_SHELF, null);
+        }
+        mPipTouchHandler.onShelfVisibilityChanged(visible, height);
+    }
+
     @Override
     public void onPipTransitionStateChanged(@PipTransitionState.TransitionState int oldState,
             @PipTransitionState.TransitionState int newState, @Nullable Bundle extra) {
@@ -349,10 +401,14 @@ public class PipController implements ConfigurationChangeListener,
                 if (mPipTransitionState.isInSwipePipToHomeTransition()) {
                     mPipTransitionState.resetSwipePipToHomeState();
                 }
-                mOnIsInPipStateChangedListener.accept(true /* inPip */);
+                if (mOnIsInPipStateChangedListener != null) {
+                    mOnIsInPipStateChangedListener.accept(true /* inPip */);
+                }
                 break;
             case PipTransitionState.EXITED_PIP:
-                mOnIsInPipStateChangedListener.accept(false /* inPip */);
+                if (mOnIsInPipStateChangedListener != null) {
+                    mOnIsInPipStateChangedListener.accept(false /* inPip */);
+                }
                 break;
         }
     }
@@ -499,7 +555,10 @@ public class PipController implements ConfigurationChangeListener,
         public void setShelfHeight(boolean visible, int height) {}
 
         @Override
-        public void setLauncherKeepClearAreaHeight(boolean visible, int height) {}
+        public void setLauncherKeepClearAreaHeight(boolean visible, int height) {
+            executeRemoteCallWithTaskPermission(mController, "setLauncherKeepClearAreaHeight",
+                    (controller) -> controller.setLauncherKeepClearAreaHeight(visible, height));
+        }
 
         @Override
         public void setLauncherAppIconSize(int iconSizePx) {}

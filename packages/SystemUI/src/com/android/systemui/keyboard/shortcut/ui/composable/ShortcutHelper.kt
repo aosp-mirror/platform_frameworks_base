@@ -36,6 +36,7 @@ import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.FlowRowScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -208,9 +209,24 @@ private fun ShortcutHelperSinglePane(
         Spacer(modifier = Modifier.height(6.dp))
         ShortcutsSearchBar(onSearchQueryChanged)
         Spacer(modifier = Modifier.height(16.dp))
-        CategoriesPanelSinglePane(searchQuery, categories, selectedCategoryType, onCategorySelected)
-        Spacer(modifier = Modifier.weight(1f))
-        KeyboardSettings(onClick = onKeyboardSettingsClicked)
+        if (categories.isEmpty()) {
+            Box(modifier = Modifier.weight(1f)) {
+                NoSearchResultsText(horizontalPadding = 16.dp, fillHeight = true)
+            }
+        } else {
+            CategoriesPanelSinglePane(
+                searchQuery,
+                categories,
+                selectedCategoryType,
+                onCategorySelected
+            )
+            Spacer(modifier = Modifier.weight(1f))
+        }
+        KeyboardSettings(
+            horizontalPadding = 16.dp,
+            verticalPadding = 32.dp,
+            onClick = onKeyboardSettingsClicked
+        )
     }
 }
 
@@ -429,7 +445,7 @@ private fun ShortcutHelperTwoPane(
 @Composable
 private fun EndSidePanel(searchQuery: String, modifier: Modifier, category: ShortcutCategory?) {
     if (category == null) {
-        // TODO(b/353953351) - Show a "no results" UI?
+        NoSearchResultsText(horizontalPadding = 24.dp, fillHeight = false)
         return
     }
     LazyColumn(modifier.nestedScroll(rememberNestedScrollInteropConnection())) {
@@ -438,6 +454,24 @@ private fun EndSidePanel(searchQuery: String, modifier: Modifier, category: Shor
             Spacer(modifier = Modifier.height(8.dp))
         }
     }
+}
+
+@Composable
+private fun NoSearchResultsText(horizontalPadding: Dp, fillHeight: Boolean) {
+    var modifier = Modifier.fillMaxWidth()
+    if (fillHeight) {
+        modifier = modifier.fillMaxHeight()
+    }
+    Text(
+        stringResource(R.string.shortcut_helper_no_search_results),
+        style = MaterialTheme.typography.bodyMedium,
+        color = MaterialTheme.colorScheme.onSurface,
+        modifier =
+            modifier
+                .padding(vertical = 8.dp)
+                .background(MaterialTheme.colorScheme.surfaceBright, RoundedCornerShape(28.dp))
+                .padding(horizontal = horizontalPadding, vertical = 24.dp)
+    )
 }
 
 @Composable
@@ -659,7 +693,11 @@ private fun StartSidePanel(
         Spacer(modifier = Modifier.heightIn(8.dp))
         CategoriesPanelTwoPane(categories, selectedCategory, onCategoryClicked)
         Spacer(modifier = Modifier.weight(1f))
-        KeyboardSettings(onKeyboardSettingsClicked)
+        KeyboardSettings(
+            horizontalPadding = 24.dp,
+            verticalPadding = 24.dp,
+            onKeyboardSettingsClicked
+        )
     }
 }
 
@@ -805,15 +843,27 @@ private fun ShortcutsSearchBar(onQueryChange: (String) -> Unit) {
 }
 
 @Composable
-private fun KeyboardSettings(onClick: () -> Unit) {
+private fun KeyboardSettings(horizontalPadding: Dp, verticalPadding: Dp, onClick: () -> Unit) {
+    val interactionSource = remember { MutableInteractionSource() }
+    val isFocused by interactionSource.collectIsFocusedAsState()
     Surface(
         onClick = onClick,
         shape = RoundedCornerShape(24.dp),
         color = Color.Transparent,
-        modifier = Modifier.semantics { role = Role.Button }.fillMaxWidth()
+        modifier =
+            Modifier.semantics { role = Role.Button }
+                .fillMaxWidth()
+                .focusable(interactionSource = interactionSource)
     ) {
         Row(
-            modifier = Modifier.padding(horizontal = 24.dp, vertical = 16.dp),
+            modifier =
+                Modifier.padding(horizontal = 12.dp, vertical = 16.dp)
+                    .outlineFocusModifier(
+                        isFocused = isFocused,
+                        focusColor = MaterialTheme.colorScheme.secondary,
+                        padding = 8.dp,
+                        cornerRadius = 28.dp
+                    ),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
@@ -821,11 +871,12 @@ private fun KeyboardSettings(onClick: () -> Unit) {
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 fontSize = 16.sp
             )
-            Spacer(modifier = Modifier.width(8.dp))
+            Spacer(modifier = Modifier.weight(1f))
             Icon(
                 imageVector = Icons.AutoMirrored.Default.OpenInNew,
                 contentDescription = null,
-                tint = MaterialTheme.colorScheme.onSurfaceVariant
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.size(24.dp)
             )
         }
     }

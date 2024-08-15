@@ -283,6 +283,7 @@ import com.android.server.am.PendingIntentRecord;
 import com.android.server.am.UserState;
 import com.android.server.firewall.IntentFirewall;
 import com.android.server.grammaticalinflection.GrammaticalInflectionManagerInternal;
+import com.android.server.pm.UserManagerInternal;
 import com.android.server.pm.UserManagerService;
 import com.android.server.policy.PermissionPolicyInternal;
 import com.android.server.sdksandbox.SdkSandboxManagerLocal;
@@ -382,6 +383,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     private PermissionPolicyInternal mPermissionPolicyInternal;
     private StatusBarManagerInternal mStatusBarManagerInternal;
     private WallpaperManagerInternal mWallpaperManagerInternal;
+    private UserManagerInternal mUserManagerInternal;
     @VisibleForTesting
     final ActivityTaskManagerInternal mInternal;
     private PowerManagerInternal mPowerManagerInternal;
@@ -2114,16 +2116,19 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                     Slog.w(TAG, "removeTask: No task remove with id=" + taskId);
                     return false;
                 }
-
-                if (task.isLeafTask()) {
-                    mTaskSupervisor.removeTask(task, true, REMOVE_FROM_RECENTS, "remove-task");
-                } else {
-                    mTaskSupervisor.removeRootTask(task);
-                }
+                removeTask(task);
                 return true;
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }
+        }
+    }
+
+    void removeTask(@NonNull Task task) {
+        if (task.isLeafTask()) {
+            mTaskSupervisor.removeTask(task, true, REMOVE_FROM_RECENTS, "remove-task");
+        } else {
+            mTaskSupervisor.removeRootTask(task);
         }
     }
 
@@ -2936,7 +2941,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                             }
                             getTransitionController().requestStartTransition(transition, task,
                                     null /* remoteTransition */, null /* displayChange */);
-                            getTransitionController().collect(task);
+                            transition.collect(task);
                             task.resize(bounds, resizeMode, preserveWindow);
                             transition.setReady(task, true);
                         });
@@ -3142,9 +3147,23 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 null, PENDING_ASSIST_EXTRAS_LONG_TIMEOUT, 0) != null;
     }
 
+    /**
+     * Requests assist data for a particular Task.
+     *
+     * <p>This is used by the system components to request assist data for a Task.
+     *
+     * @param receiver The receiver to send the assist data to.
+     * @param taskId The Task to request assist data for.
+     * @param callingPackageName The package name of the caller.
+     * @param callingAttributionTag The attribution tag of the caller.
+     * @param fetchStructure Whether to fetch the assist structure. Note that this is slow and
+     *     should be avoided if possible.
+     * @return Whether the request was successful.
+     */
     @Override
     public boolean requestAssistDataForTask(IAssistDataReceiver receiver, int taskId,
-            String callingPackageName, @Nullable String callingAttributionTag) {
+            String callingPackageName, @Nullable String callingAttributionTag,
+            boolean fetchStructure) {
         mAmInternal.enforceCallingPermission(android.Manifest.permission.GET_TOP_ACTIVITY_INFO,
                 "requestAssistDataForTask()");
         final long callingId = Binder.clearCallingIdentity();
@@ -3169,7 +3188,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         List<IBinder> topActivityToken = new ArrayList<>();
         topActivityToken.add(tokens.getActivityToken());
         requester.requestAssistData(topActivityToken, true /* fetchData */,
-                false /* fetchScreenshot */, false /* fetchStructure */, true /* allowFetchData */,
+                false /* fetchScreenshot */, fetchStructure, true /* allowFetchData */,
                 false /* allowFetchScreenshot*/, true /* ignoreFocusCheck */,
                 Binder.getCallingUid(), callingPackageName, callingAttributionTag);
 
@@ -3752,6 +3771,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             // Shell calls back into Core with the entry bounds to be applied with startWCT.
             final Transition enterPipTransition = new Transition(TRANSIT_PIP,
                     0 /* flags */, getTransitionController(), mWindowManager.mSyncEngine);
+            r.setPictureInPictureParams(params);
             enterPipTransition.setPipActivity(r);
             r.mAutoEnteringPip = isAutoEnter;
             getTransitionController().startCollectOrQueue(enterPipTransition, (deferred) -> {
@@ -5462,6 +5482,13 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             mWallpaperManagerInternal = LocalServices.getService(WallpaperManagerInternal.class);
         }
         return mWallpaperManagerInternal;
+    }
+
+    UserManagerInternal getUserManagerInternal() {
+        if (mUserManagerInternal == null) {
+            mUserManagerInternal = LocalServices.getService(UserManagerInternal.class);
+        }
+        return mUserManagerInternal;
     }
 
     AppWarnings getAppWarningsLocked() {
@@ -7175,25 +7202,6 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         }
 
         /**
-         * Checks if the given user is a visible background user, which is a full, background user
-         * assigned to secondary displays on the devices that have
-         * {@link UserManager#isVisibleBackgroundUsersEnabled()
-         * config_multiuserVisibleBackgroundUsers enabled} (for example, passenger users on
-         * automotive builds, using the display associated with their seats).
-         *
-         * @see UserManager#isUserVisible()
-         */
-        private boolean isVisibleBackgroundUser(int userId) {
-            if (!UserManager.isVisibleBackgroundUsersEnabled()) {
-                return false;
-            }
-            boolean isForeground = getCurrentUserId() == userId;
-            boolean isProfile = getUserManager().isProfile(userId);
-            boolean isVisible = mWindowManager.mUmInternal.isUserVisible(userId);
-            return isVisible && !isForeground && !isProfile;
-        }
-
-        /**
          * In a car environment, {@link ActivityTaskManagerService#mShowDialogs} is always set to
          * {@code false} from {@link ActivityTaskManagerService#updateShouldShowDialogsLocked}
          * because its UI mode is {@link Configuration#UI_MODE_TYPE_CAR}. Thus, error dialogs are
@@ -7208,7 +7216,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
          * @see ActivityTaskManagerService#updateShouldShowDialogsLocked
          */
         private boolean shouldShowDialogsForVisibleBackgroundUserLocked(int userId) {
-            if (!isVisibleBackgroundUser(userId)) {
+            if (!mWindowManager.mUmInternal.isVisibleBackgroundFullUser(userId)) {
                 return false;
             }
             final int displayId = mWindowManager.mUmInternal.getMainDisplayAssignedToUser(userId);

@@ -30,7 +30,7 @@ import com.android.credentialmanager.model.CredentialType
 import com.google.common.truth.Truth.assertThat
 import com.android.credentialmanager.ui.mappers.toGet
 import com.android.credentialmanager.model.get.ProviderInfo
-import com.android.credentialmanager.CredentialSelectorUiState.Get.MultipleEntry.PerUserNameEntries
+import com.android.credentialmanager.CredentialSelectorUiState.Get.MultipleEntry.PerNameEntries
 
 /** Unit tests for [CredentialSelectorUiStateGetMapper]. */
 @SmallTest
@@ -108,7 +108,7 @@ class CredentialSelectorUiStateGetMapperTest {
     }
 
     @Test
-    fun `On primary screen, multiple accounts returns SingleEntryPerAccount`() {
+    fun `On primary screen, multiple accounts returns MultipleEntryPrimaryScreen`() {
         val getCredentialUiState = Request.Get(
             token = null,
             resultReceiver = null,
@@ -135,7 +135,7 @@ class CredentialSelectorUiStateGetMapperTest {
 
         assertThat(getCredentialUiState).isEqualTo(
             CredentialSelectorUiState.Get.MultipleEntry(
-                listOf(PerUserNameEntries("userName", listOf(
+                listOf(PerNameEntries("userName", listOf(
                     passkeyCredentialEntryInfo,
                     passwordCredentialEntryInfo))
                 ),
@@ -155,7 +155,7 @@ class CredentialSelectorUiStateGetMapperTest {
         assertThat(getCredentialUiState).isEqualTo(
             CredentialSelectorUiState.Get.MultipleEntry(
                 listOf(
-                    PerUserNameEntries("userName",
+                    PerNameEntries("userName",
                         listOf(
                             recentlyUsedPasskeyCredential, // from provider 2
                             passkeyCredentialEntryInfo, // from provider 1 or 2
@@ -164,7 +164,7 @@ class CredentialSelectorUiStateGetMapperTest {
                             passwordCredentialEntryInfo, // from provider 1 or 2
                             passwordCredentialEntryInfo, // from provider 1 or 2
                         )),
-                    PerUserNameEntries("userName2", listOf(unknownCredentialEntryInfo)),
+                    PerNameEntries("userName2", listOf(unknownCredentialEntryInfo)),
                 ),
                 listOf(actionEntryInfo, actionEntryInfo),
                 listOf(authenticationEntryInfo, authenticationEntryInfo)
@@ -172,8 +172,44 @@ class CredentialSelectorUiStateGetMapperTest {
         )
     }
 
+    @Test
+    fun `Returned multiple entry is grouped by display name if present`() {
+        val testCred1 = createCredentialEntryInfo(displayName = "testDisplayName",
+            userName = "testUserName", credentialType = CredentialType.PASSWORD)
+        val testCred2 = createCredentialEntryInfo(displayName = "testDisplayName",
+            userName = "testUserName", credentialType = CredentialType.PASSKEY)
+        val getCredentialUiState = Request.Get(
+            token = null,
+            resultReceiver = null,
+            providerInfos = listOf(createProviderInfo(credentialList1),
+                createProviderInfo(credentialList2),
+                createProviderInfo(listOf(testCred1, testCred2))))
+            .toGet(isPrimary = false)
+
+        assertThat(getCredentialUiState).isEqualTo(
+            CredentialSelectorUiState.Get.MultipleEntry(
+                listOf(
+                    PerNameEntries("userName",
+                        listOf(
+                            recentlyUsedPasskeyCredential, // from provider 2
+                            passkeyCredentialEntryInfo, // from provider 1 or 2
+                            passkeyCredentialEntryInfo, // from provider 1 or 2
+                            recentlyUsedPasswordCredential, // from provider 2
+                            passwordCredentialEntryInfo, // from provider 1 or 2
+                            passwordCredentialEntryInfo, // from provider 1 or 2
+                        )),
+                    PerNameEntries("userName2", listOf(unknownCredentialEntryInfo)),
+                    PerNameEntries("testDisplayName", listOf(testCred2, testCred1)),
+                ),
+                listOf(actionEntryInfo, actionEntryInfo, actionEntryInfo),
+                listOf(authenticationEntryInfo, authenticationEntryInfo, authenticationEntryInfo)
+            )
+        )
+    }
+
     fun createCredentialEntryInfo(
         userName: String,
+        displayName: String? = null,
         credentialType: CredentialType = CredentialType.PASSKEY,
         lastUsedTimeMillis: Long = 0L
     ): CredentialEntryInfo =
@@ -188,7 +224,7 @@ class CredentialSelectorUiStateGetMapperTest {
             credentialTypeDisplayName = "",
             providerDisplayName = "",
             userName = userName,
-            displayName = "",
+            displayName = displayName,
             icon = mDrawable,
             shouldTintIcon = false,
             lastUsedTimeMillis = Instant.ofEpochMilli(lastUsedTimeMillis),

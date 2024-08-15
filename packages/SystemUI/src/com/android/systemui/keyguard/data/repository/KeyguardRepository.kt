@@ -91,11 +91,11 @@ interface KeyguardRepository {
      * the z-order (which is not really above the system UI window, but rather - the lock-screen
      * becomes invisible to reveal the "occluding activity").
      */
-    val isKeyguardShowing: Flow<Boolean>
+    val isKeyguardShowing: StateFlow<Boolean>
 
     /** Is an activity showing over the keyguard? */
     @Deprecated("Use KeyguardTransitionInteractor + KeyguardState.OCCLUDED")
-    val isKeyguardOccluded: Flow<Boolean>
+    val isKeyguardOccluded: StateFlow<Boolean>
 
     /**
      * Whether the device is locked or unlocked right now. This is true when keyguard has been
@@ -232,6 +232,9 @@ interface KeyguardRepository {
     /** Receive an event for doze time tick */
     val dozeTimeTick: Flow<Long>
 
+    /** Receive an event lockscreen being shown in a dismissible state */
+    val showDismissibleKeyguard: MutableStateFlow<Long>
+
     /** Observable for DismissAction */
     val dismissAction: StateFlow<DismissAction>
 
@@ -304,6 +307,8 @@ interface KeyguardRepository {
     fun setIsActiveDreamLockscreenHosted(isLockscreenHosted: Boolean)
 
     fun dozeTimeTick()
+
+    fun showDismissibleKeyguard()
 
     fun setDismissAction(dismissAction: DismissAction)
 
@@ -437,6 +442,12 @@ constructor(
 
     override fun dozeTimeTick() {
         _dozeTimeTick.value = systemClock.uptimeMillis()
+    }
+
+    override val showDismissibleKeyguard = MutableStateFlow<Long>(0L)
+
+    override fun showDismissibleKeyguard() {
+        showDismissibleKeyguard.value = systemClock.uptimeMillis()
     }
 
     private val _lastDozeTapToWakePosition = MutableStateFlow<Point?>(null)

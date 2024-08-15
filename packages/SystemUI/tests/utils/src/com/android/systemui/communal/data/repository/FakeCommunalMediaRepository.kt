@@ -28,7 +28,7 @@ class FakeCommunalMediaRepository : CommunalMediaRepository {
     fun mediaActive(timestamp: Long = 0L) {
         _mediaModel.value =
             CommunalMediaModel(
-                hasActiveMediaOrRecommendation = true,
+                hasAnyMediaOrRecommendation = true,
                 createdTimestampMillis = timestamp,
             )
     }

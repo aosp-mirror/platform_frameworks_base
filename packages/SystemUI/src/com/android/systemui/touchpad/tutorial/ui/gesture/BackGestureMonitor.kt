@@ -16,55 +16,26 @@
 
 package com.android.systemui.touchpad.tutorial.ui.gesture
 
-import android.view.MotionEvent
-import com.android.systemui.touchpad.tutorial.ui.gesture.GestureState.FINISHED
-import com.android.systemui.touchpad.tutorial.ui.gesture.GestureState.IN_PROGRESS
-import com.android.systemui.touchpad.tutorial.ui.gesture.GestureState.NOT_STARTED
 import kotlin.math.abs
 
-/**
- * Monitor for touchpad gestures that calls [gestureStateChangedCallback] when [GestureState]
- * changes. All tracked motion events should be passed to [processTouchpadEvent]
- */
-interface TouchpadGestureMonitor {
-
-    val gestureDistanceThresholdPx: Int
-    val gestureStateChangedCallback: (GestureState) -> Unit
-
-    fun processTouchpadEvent(event: MotionEvent)
-}
-
+/** Monitors for touchpad back gesture, that is three fingers swiping left or right */
 class BackGestureMonitor(
     override val gestureDistanceThresholdPx: Int,
     override val gestureStateChangedCallback: (GestureState) -> Unit
-) : TouchpadGestureMonitor {
-
-    private var xStart = 0f
-
-    override fun processTouchpadEvent(event: MotionEvent) {
-        val action = event.actionMasked
-        when (action) {
-            MotionEvent.ACTION_DOWN -> {
-                if (isThreeFingerTouchpadSwipe(event)) {
-                    xStart = event.x
-                    gestureStateChangedCallback(IN_PROGRESS)
+) :
+    TouchpadGestureMonitor by ThreeFingerGestureMonitor(
+        gestureDistanceThresholdPx = gestureDistanceThresholdPx,
+        gestureStateChangedCallback = gestureStateChangedCallback,
+        donePredicate =
+            object : GestureDonePredicate {
+                override fun wasGestureDone(
+                    startX: Float,
+                    startY: Float,
+                    endX: Float,
+                    endY: Float
+                ): Boolean {
+                    val distance = abs(endX - startX)
+                    return distance >= gestureDistanceThresholdPx
                 }
             }
-            MotionEvent.ACTION_UP -> {
-                if (isThreeFingerTouchpadSwipe(event)) {
-                    val distance = abs(event.x - xStart)
-                    if (distance >= gestureDistanceThresholdPx) {
-                        gestureStateChangedCallback(FINISHED)
-                    } else {
-                        gestureStateChangedCallback(NOT_STARTED)
-                    }
-                }
-            }
-        }
-    }
-
-    private fun isThreeFingerTouchpadSwipe(event: MotionEvent): Boolean {
-        return event.classification == MotionEvent.CLASSIFICATION_MULTI_FINGER_SWIPE &&
-            event.getAxisValue(MotionEvent.AXIS_GESTURE_SWIPE_FINGER_COUNT) == 3f
-    }
-}
+    )

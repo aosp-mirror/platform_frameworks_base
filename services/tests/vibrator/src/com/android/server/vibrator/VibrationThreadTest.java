@@ -102,6 +102,8 @@ public class VibrationThreadTest {
     private static final String PACKAGE_NAME = "package";
     private static final VibrationAttributes ATTRS = new VibrationAttributes.Builder().build();
     private static final int TEST_RAMP_STEP_DURATION = 5;
+    private static final int TEST_DEFAULT_AMPLITUDE = 255;
+    private static final float TEST_DEFAULT_SCALE_LEVEL_GAIN = 1.4f;
 
     @Rule public MockitoRule mMockitoRule = MockitoJUnit.rule();
     @Rule
@@ -133,6 +135,10 @@ public class VibrationThreadTest {
         when(mVibrationConfigMock.getDefaultVibrationIntensity(anyInt()))
                 .thenReturn(Vibrator.VIBRATION_INTENSITY_MEDIUM);
         when(mVibrationConfigMock.getRampStepDurationMs()).thenReturn(TEST_RAMP_STEP_DURATION);
+        when(mVibrationConfigMock.getDefaultVibrationAmplitude())
+                .thenReturn(TEST_DEFAULT_AMPLITUDE);
+        when(mVibrationConfigMock.getDefaultVibrationScaleLevelGain())
+                .thenReturn(TEST_DEFAULT_SCALE_LEVEL_GAIN);
         when(mPackageManagerInternalMock.getSystemUiServiceComponent())
                 .thenReturn(new ComponentName("", ""));
         doAnswer(answer -> {
@@ -146,7 +152,7 @@ public class VibrationThreadTest {
         Context context = InstrumentationRegistry.getContext();
         mVibrationSettings = new VibrationSettings(context, new Handler(mTestLooper.getLooper()),
                 mVibrationConfigMock);
-        mVibrationScaler = new VibrationScaler(context, mVibrationSettings);
+        mVibrationScaler = new VibrationScaler(mVibrationConfigMock, mVibrationSettings);
 
         mockVibrators(VIBRATOR_ID);
 

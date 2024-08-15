@@ -18,6 +18,7 @@ package com.android.server.inputmethod;
 
 import static android.app.ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_DENIED;
 import static android.content.Context.DEVICE_ID_DEFAULT;
+import static android.inputmethodservice.InputMethodService.BACK_DISPOSITION_DEFAULT;
 import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
 import static android.view.Display.INVALID_DISPLAY;
 
@@ -32,6 +33,8 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.pm.PackageManagerInternal;
 import android.inputmethodservice.InputMethodService;
+import android.inputmethodservice.InputMethodService.BackDispositionMode;
+import android.inputmethodservice.InputMethodService.ImeWindowVisibility;
 import android.os.Binder;
 import android.os.IBinder;
 import android.os.Process;
@@ -99,28 +102,16 @@ final class InputMethodBindingController {
     /**
      * A set of status bits regarding the active IME.
      *
-     * <p>This value is a combination of following two bits:</p>
-     * <dl>
-     * <dt>{@link InputMethodService#IME_ACTIVE}</dt>
-     * <dd>
-     *   If this bit is ON, connected IME is ready to accept touch/key events.
-     * </dd>
-     * <dt>{@link InputMethodService#IME_VISIBLE}</dt>
-     * <dd>
-     *   If this bit is ON, some of IME view, e.g. software input, candidate view, is visible.
-     * </dd>
-     * <dt>{@link InputMethodService#IME_INVISIBLE}</dt>
-     * <dd> If this bit is ON, IME is ready with views from last EditorInfo but is
-     *    currently invisible.
-     * </dd>
-     * </dl>
-     * <em>Do not update this value outside of {@link #setImeWindowStatus(IBinder, int, int)} and
-     * {@link InputMethodBindingController#unbindCurrentMethod()}.</em>
+     * <em>Do not update this value outside of {@link #setImeWindowVis} and
+     * {@link InputMethodBindingController#unbindCurrentMethod}.</em>
      */
-    @GuardedBy("ImfLock.class") private int mImeWindowVis;
-
+    @ImeWindowVisibility
     @GuardedBy("ImfLock.class")
-    private int mBackDisposition = InputMethodService.BACK_DISPOSITION_DEFAULT;
+    private int mImeWindowVis;
+
+    @BackDispositionMode
+    @GuardedBy("ImfLock.class")
+    private int mBackDisposition = BACK_DISPOSITION_DEFAULT;
 
     @Nullable private CountDownLatch mLatchForTesting;
 
@@ -463,7 +454,8 @@ final class InputMethodBindingController {
                     // should now try to restart the service for us.
                     mLastBindTime = SystemClock.uptimeMillis();
                     clearCurMethodAndSessions();
-                    mService.mVisibilityStateComputer.setInputShown(false);
+                    final var userData = mService.getUserData(mUserId);
+                    userData.mVisibilityStateComputer.setInputShown(false);
                     mService.unbindCurrentClientLocked(UnbindReason.DISCONNECT_IME, mUserId);
                 }
             }
@@ -721,22 +713,24 @@ final class InputMethodBindingController {
     }
 
     @GuardedBy("ImfLock.class")
-    void setImeWindowVis(int imeWindowVis) {
+    void setImeWindowVis(@ImeWindowVisibility int imeWindowVis) {
         mImeWindowVis = imeWindowVis;
     }
 
+    @ImeWindowVisibility
     @GuardedBy("ImfLock.class")
     int getImeWindowVis() {
         return mImeWindowVis;
     }
 
+    @BackDispositionMode
     @GuardedBy("ImfLock.class")
     int getBackDisposition() {
         return mBackDisposition;
     }
 
     @GuardedBy("ImfLock.class")
-    void setBackDisposition(int backDisposition) {
+    void setBackDisposition(@BackDispositionMode int backDisposition) {
         mBackDisposition = backDisposition;
     }
 }

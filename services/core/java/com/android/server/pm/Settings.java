@@ -977,6 +977,21 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
         return null;
     }
 
+    SharedUserSetting addOemSharedUserLPw(String name, int uid, int pkgFlags, int pkgPrivateFlags) {
+        if (!name.startsWith("android.uid")) {
+            PackageManagerService.reportSettingsProblem(Log.ERROR,
+                    "Failed to add oem defined shared user because of invalid name: " + name);
+            return null;
+        }
+        // OEM defined uids must be in the OEM reserved range
+        if (uid < 2900 || uid > 2999) {
+            PackageManagerService.reportSettingsProblem(Log.ERROR,
+                    "Failed to add oem defined shared user because of invalid uid: " + uid);
+            return null;
+        }
+        return addSharedUserLPw(name, uid, pkgFlags, pkgPrivateFlags);
+    }
+
     SharedUserSetting addSharedUserLPw(String name, int uid, int pkgFlags, int pkgPrivateFlags) {
         SharedUserSetting s = mSharedUsers.get(name);
         if (s != null) {
@@ -2585,12 +2600,31 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
         boolean optional = parser.getAttributeBoolean(null, ATTR_OPTIONAL, true);
 
         if (libName != null && libVersion >= 0) {
+            final int beforeUsesSdkLibrariesLength = outPs.getUsesSdkLibraries().length;
+            // If the lib already exists in the outPs#getUsesSdkLibraries, don't add it
+            // into the array and update its information below
             outPs.setUsesSdkLibraries(ArrayUtils.appendElement(String.class,
                     outPs.getUsesSdkLibraries(), libName));
-            outPs.setUsesSdkLibrariesVersionsMajor(ArrayUtils.appendLong(
-                    outPs.getUsesSdkLibrariesVersionsMajor(), libVersion));
-            outPs.setUsesSdkLibrariesOptional(ArrayUtils.appendBoolean(
-                    outPs.getUsesSdkLibrariesOptional(), optional));
+
+            // If the lib has already been added before, update the other information
+            final int afterUsesSdkLibrariesLength = outPs.getUsesSdkLibraries().length;
+            if (beforeUsesSdkLibrariesLength == afterUsesSdkLibrariesLength) {
+                final int index = ArrayUtils.indexOf(outPs.getUsesSdkLibraries(), libName);
+                final long[] usesSdkLibrariesVersionsMajor =
+                        outPs.getUsesSdkLibrariesVersionsMajor();
+                usesSdkLibrariesVersionsMajor[index] = libVersion;
+                outPs.setUsesSdkLibrariesVersionsMajor(usesSdkLibrariesVersionsMajor);
+
+                final boolean[] usesSdkLibrariesOptional = outPs.getUsesSdkLibrariesOptional();
+                usesSdkLibrariesOptional[index] = optional;
+                outPs.setUsesSdkLibrariesOptional(usesSdkLibrariesOptional);
+            } else {
+                outPs.setUsesSdkLibrariesVersionsMajor(ArrayUtils.appendLong(
+                        outPs.getUsesSdkLibrariesVersionsMajor(), libVersion,
+                        /* allowDuplicates= */ true));
+                outPs.setUsesSdkLibrariesOptional(ArrayUtils.appendBooleanDuplicatesAllowed(
+                        outPs.getUsesSdkLibrariesOptional(), optional));
+            }
         }
 
         XmlUtils.skipCurrentTag(parser);
@@ -2602,10 +2636,24 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
         long libVersion = parser.getAttributeLong(null, ATTR_VERSION, -1);
 
         if (libName != null && libVersion >= 0) {
+            final int beforeUsesStaticLibrariesLength = outPs.getUsesStaticLibraries().length;
+            // If the lib already exists in the outPs#getUsesStaticLibraries, don't add it
+            // into the array and update its information below
             outPs.setUsesStaticLibraries(ArrayUtils.appendElement(String.class,
                     outPs.getUsesStaticLibraries(), libName));
-            outPs.setUsesStaticLibrariesVersions(ArrayUtils.appendLong(
-                    outPs.getUsesStaticLibrariesVersions(), libVersion));
+
+            // If the lib has already been added before, update the version
+            final int afterUsesStaticLibrariesLength = outPs.getUsesStaticLibraries().length;
+            if (beforeUsesStaticLibrariesLength == afterUsesStaticLibrariesLength) {
+                final int index = ArrayUtils.indexOf(outPs.getUsesStaticLibraries(), libName);
+                final long[] usesStaticLibrariesVersions = outPs.getUsesStaticLibrariesVersions();
+                usesStaticLibrariesVersions[index] = libVersion;
+                outPs.setUsesStaticLibrariesVersions(usesStaticLibrariesVersions);
+            } else {
+                outPs.setUsesStaticLibrariesVersions(ArrayUtils.appendLong(
+                        outPs.getUsesStaticLibrariesVersions(), libVersion,
+                        /* allowDuplicates= */ true));
+            }
         }
 
         XmlUtils.skipCurrentTag(parser);

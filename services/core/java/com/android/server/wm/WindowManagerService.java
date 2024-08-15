@@ -789,7 +789,6 @@ public class WindowManagerService extends IWindowManager.Stub
     boolean mHardKeyboardAvailable;
     WindowManagerInternal.OnHardKeyboardStatusChangeListener mHardKeyboardStatusChangeListener;
     WindowManagerInternal.OnImeRequestedChangedListener mOnImeRequestedChangedListener;
-    @Nullable ImeTargetChangeListener mImeTargetChangeListener;
 
     SettingsObserver mSettingsObserver;
     final EmbeddedWindowController mEmbeddedWindowController;
@@ -1897,7 +1896,8 @@ public class WindowManagerService extends IWindowManager.Stub
                 displayContent.computeImeTarget(true /* updateImeTarget */);
                 if (win.isImeOverlayLayeringTarget()) {
                     dispatchImeTargetOverlayVisibilityChanged(client.asBinder(), win.mAttrs.type,
-                            win.isVisibleRequestedOrAdding(), false /* removed */);
+                            win.isVisibleRequestedOrAdding(), false /* removed */,
+                            displayContent.getDisplayId());
                 }
             }
 
@@ -2661,13 +2661,13 @@ public class WindowManagerService extends IWindowManager.Stub
             final boolean winVisibleChanged = win.isVisible() != wasVisible;
             if (win.isImeOverlayLayeringTarget() && winVisibleChanged) {
                 dispatchImeTargetOverlayVisibilityChanged(client.asBinder(), win.mAttrs.type,
-                        win.isVisible(), false /* removed */);
+                        win.isVisible(), false /* removed */, win.getDisplayId());
             }
             // Notify listeners about IME input target window visibility change.
             final boolean isImeInputTarget = win.getDisplayContent().getImeInputTarget() == win;
             if (isImeInputTarget && winVisibleChanged) {
                 dispatchImeInputTargetVisibilityChanged(win.mClient.asBinder(),
-                        win.isVisible() /* visible */, false /* removed */);
+                        win.isVisible() /* visible */, false /* removed */, win.getDisplayId());
             }
 
             if (outRelayoutResult != null) {
@@ -3515,28 +3515,29 @@ public class WindowManagerService extends IWindowManager.Stub
 
     void dispatchImeTargetOverlayVisibilityChanged(@NonNull IBinder token,
             @WindowManager.LayoutParams.WindowType int windowType, boolean visible,
-            boolean removed) {
-        if (mImeTargetChangeListener != null) {
-            if (DEBUG_INPUT_METHOD) {
-                Slog.d(TAG, "onImeTargetOverlayVisibilityChanged, win=" + mWindowMap.get(token)
-                        + ", type=" + ViewDebug.intToString(WindowManager.LayoutParams.class,
-                        "type", windowType) + "visible=" + visible + ", removed=" + removed);
-            }
-            mH.post(() -> mImeTargetChangeListener.onImeTargetOverlayVisibilityChanged(token,
-                    windowType, visible, removed));
+            boolean removed, int displayId) {
+        if (DEBUG_INPUT_METHOD) {
+            Slog.d(TAG, "onImeTargetOverlayVisibilityChanged, win=" + mWindowMap.get(token)
+                    + ", type=" + ViewDebug.intToString(WindowManager.LayoutParams.class,
+                    "type", windowType) + "visible=" + visible + ", removed=" + removed
+                    + ", displayId=" + displayId);
         }
+        // Ignoring the starting window since it's ok to cover the IME target
+        // window in temporary without affecting the IME visibility.
+        final boolean hasOverlay = visible && !removed && windowType != TYPE_APPLICATION_STARTING;
+        mH.post(() -> InputMethodManagerInternal.get().setHasVisibleImeLayeringOverlay(hasOverlay,
+                displayId));
     }
 
     void dispatchImeInputTargetVisibilityChanged(@NonNull IBinder token, boolean visible,
-            boolean removed) {
-        if (mImeTargetChangeListener != null) {
-            if (DEBUG_INPUT_METHOD) {
-                Slog.d(TAG, "onImeInputTargetVisibilityChanged, win=" + mWindowMap.get(token)
-                        + "visible=" + visible + ", removed=" + removed);
-            }
-            mH.post(() -> mImeTargetChangeListener.onImeInputTargetVisibilityChanged(token,
-                    visible, removed));
+            boolean removed, int displayId) {
+        if (DEBUG_INPUT_METHOD) {
+            Slog.d(TAG, "onImeInputTargetVisibilityChanged, win=" + mWindowMap.get(token)
+                    + "visible=" + visible + ", removed=" + removed + ", displayId=" + displayId);
         }
+        final boolean visibleAndNotRemoved = visible && !removed;
+        mH.post(() -> InputMethodManagerInternal.get().onImeInputTargetVisibilityChanged(token,
+                visibleAndNotRemoved, displayId));
     }
 
     @Override
@@ -7655,7 +7656,7 @@ public class WindowManagerService extends IWindowManager.Stub
                         displayId);
                 return REMOVE_CONTENT_MODE_UNDEFINED;
             }
-            return mDisplayWindowSettings.getRemoveContentModeLocked(displayContent);
+            return displayContent.getRemoveContentMode();
         }
     }
 
@@ -8094,11 +8095,10 @@ public class WindowManagerService extends IWindowManager.Stub
         }
 
         @Override
-        public void updateInputMethodTargetWindow(@NonNull IBinder imeToken,
-                @NonNull IBinder imeTargetWindowToken) {
+        public void updateInputMethodTargetWindow(@NonNull IBinder imeTargetWindowToken) {
             // TODO (b/34628091): Use this method to address the window animation issue.
             if (DEBUG_INPUT_METHOD) {
-                Slog.w(TAG_WM, "updateInputMethodTargetWindow: imeToken=" + imeToken
+                Slog.w(TAG_WM, "updateInputMethodTargetWindow:"
                         + " imeTargetWindowToken=" + imeTargetWindowToken);
             }
             synchronized (mGlobalLock) {
@@ -8673,13 +8673,6 @@ public class WindowManagerService extends IWindowManager.Stub
         }
 
         @Override
-        public void setInputMethodTargetChangeListener(@NonNull ImeTargetChangeListener listener) {
-            synchronized (mGlobalLock) {
-                mImeTargetChangeListener = listener;
-            }
-        }
-
-        @Override
         public void setOrientationRequestPolicy(boolean respected,
                 int[] fromOrientations, int[] toOrientations) {
             synchronized (mGlobalLock) {
@@ -9036,7 +9029,8 @@ public class WindowManagerService extends IWindowManager.Stub
         // Otherwise, handle the touch-outside event directly.
         final WindowState w = t.getWindowState();
         final ActivityRecord activity = w != null ? w.getActivityRecord() : null;
-        if (activity != null && activity.isEmbedded()
+        if (mFocusedInputTarget != t && mFocusedInputTarget != null
+                && activity != null && activity.isEmbedded()
                 && activity.getTaskFragment().getAdjacentTaskFragment() != null) {
             mPointerDownOutsideFocusRunnable = () -> handlePointerDownOutsideFocus(t);
             mH.postDelayed(mPointerDownOutsideFocusRunnable, POINTER_DOWN_OUTSIDE_FOCUS_TIMEOUT_MS);

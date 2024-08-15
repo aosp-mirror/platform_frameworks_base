@@ -36,7 +36,6 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.window.flags.Flags;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -257,7 +256,7 @@ class TaskFragmentContainer {
         mPendingAppearedIntent = pendingAppearedIntent;
 
         // Save the information necessary for restoring the overlay when needed.
-        if (Flags.fixPipRestoreToOverlay() && overlayTag != null && pendingAppearedIntent != null
+        if (overlayTag != null && pendingAppearedIntent != null
                 && associatedActivity != null && !associatedActivity.isFinishing()) {
             final IBinder associatedActivityToken = associatedActivity.getActivityToken();
             final OverlayContainerRestoreParams params = new OverlayContainerRestoreParams(mToken,

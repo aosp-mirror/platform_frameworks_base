@@ -96,6 +96,8 @@ constructor(
                 when (toState) {
                     KeyguardState.LOCKSCREEN -> TO_LOCKSCREEN_DURATION
                     KeyguardState.OCCLUDED -> TO_OCCLUDED_DURATION
+                    KeyguardState.ALTERNATE_BOUNCER -> TO_BOUNCER_DURATION
+                    KeyguardState.PRIMARY_BOUNCER -> TO_BOUNCER_DURATION
                     else -> DEFAULT_DURATION
                 }.inWholeMilliseconds
         }
@@ -157,6 +159,7 @@ constructor(
                     if (communalSceneKtfRefactor()) {
                         communalSceneInteractor.changeScene(
                             newScene = CommunalScenes.Blank,
+                            loggingReason = "hub to dozing",
                             transitionKey = CommunalTransitionKeys.Immediately,
                             keyguardState = KeyguardState.DOZING,
                         )
@@ -180,6 +183,7 @@ constructor(
                             if (communalSceneKtfRefactor()) {
                                 communalSceneInteractor.changeScene(
                                     newScene = CommunalScenes.Blank,
+                                    loggingReason = "hub to occluded (KeyguardWmStateRefactor)",
                                     transitionKey = CommunalTransitionKeys.SimpleFade,
                                     keyguardState = state,
                                 )
@@ -209,6 +213,7 @@ constructor(
                     .collect { _ ->
                         communalSceneInteractor.changeScene(
                             newScene = CommunalScenes.Blank,
+                            loggingReason = "hub to occluded",
                             transitionKey = CommunalTransitionKeys.SimpleFade,
                             keyguardState = KeyguardState.OCCLUDED,
                         )
@@ -252,6 +257,7 @@ constructor(
                         } else {
                             communalSceneInteractor.changeScene(
                                 newScene = CommunalScenes.Blank,
+                                loggingReason = "hub to gone",
                                 transitionKey = CommunalTransitionKeys.SimpleFade,
                                 keyguardState = KeyguardState.GONE
                             )
@@ -269,8 +275,16 @@ constructor(
 
     companion object {
         const val TAG = "FromGlanceableHubTransitionInteractor"
-        val DEFAULT_DURATION = 1.seconds
-        val TO_LOCKSCREEN_DURATION = DEFAULT_DURATION
+
+        /**
+         * DEFAULT_DURATION controls the timing for all animations other than those with overrides
+         * in [getDefaultAnimatorForTransitionsToState].
+         *
+         * Set at 400ms for parity with [FromLockscreenTransitionInteractor]
+         */
+        val DEFAULT_DURATION = 400.milliseconds
+        val TO_LOCKSCREEN_DURATION = 1.seconds
+        val TO_BOUNCER_DURATION = 400.milliseconds
         val TO_OCCLUDED_DURATION = 450.milliseconds
     }
 }

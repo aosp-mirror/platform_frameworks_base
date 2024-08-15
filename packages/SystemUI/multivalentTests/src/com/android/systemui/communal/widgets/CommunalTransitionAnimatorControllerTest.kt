@@ -76,7 +76,7 @@ class CommunalTransitionAnimatorControllerTest : SysuiTestCase() {
                 val launching by collectLastValue(communalSceneInteractor.isLaunchingWidget)
                 val scene by collectLastValue(communalSceneInteractor.currentScene)
 
-                communalSceneInteractor.changeScene(CommunalScenes.Communal)
+                communalSceneInteractor.changeScene(CommunalScenes.Communal, "test")
                 Truth.assertThat(scene).isEqualTo(CommunalScenes.Communal)
                 communalSceneInteractor.setIsLaunchingWidget(true)
                 assertTrue(launching!!)
@@ -103,7 +103,7 @@ class CommunalTransitionAnimatorControllerTest : SysuiTestCase() {
                 val launching by collectLastValue(communalSceneInteractor.isLaunchingWidget)
                 val scene by collectLastValue(communalSceneInteractor.currentScene)
 
-                communalSceneInteractor.changeScene(CommunalScenes.Communal)
+                communalSceneInteractor.changeScene(CommunalScenes.Communal, "test")
                 Truth.assertThat(scene).isEqualTo(CommunalScenes.Communal)
                 communalSceneInteractor.setIsLaunchingWidget(true)
                 assertTrue(launching!!)

@@ -20,3 +20,11 @@ flag {
         purpose: PURPOSE_BUGFIX
     }
 }
+
+flag {
+    name: "debug_store_enabled"
+    namespace: "stability"
+    description: "If the debug store is enabled."
+    bug: "314735374"
+    is_fixed_read_only: true
+}

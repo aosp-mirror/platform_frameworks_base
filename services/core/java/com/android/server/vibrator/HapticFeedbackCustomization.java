@@ -18,6 +18,7 @@ package com.android.server.vibrator;
 
 import android.annotation.Nullable;
 import android.content.res.Resources;
+import android.content.res.XmlResourceParser;
 import android.os.VibrationEffect;
 import android.os.VibratorInfo;
 import android.os.vibrator.Flags;
@@ -28,6 +29,7 @@ import android.util.Slog;
 import android.util.SparseArray;
 import android.util.Xml;
 
+import com.android.internal.util.XmlUtils;
 import com.android.internal.vibrator.persistence.XmlParserException;
 import com.android.internal.vibrator.persistence.XmlReader;
 import com.android.internal.vibrator.persistence.XmlValidator;
@@ -39,6 +41,7 @@ import org.xmlpull.v1.XmlPullParserException;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.Reader;
 
 /**
  * Class that loads custom {@link VibrationEffect} to be performed for each
@@ -127,27 +130,19 @@ final class HapticFeedbackCustomization {
             Slog.d(TAG, "Haptic feedback customization feature is not enabled.");
             return null;
         }
-        String customizationFile =
-                res.getString(
-                        com.android.internal.R.string.config_hapticFeedbackCustomizationFile);
-        if (TextUtils.isEmpty(customizationFile)) {
-            Slog.d(TAG, "Customization file not configured.");
+
+        // Old loading path that reads customization from file at dir defined by config.
+        TypedXmlPullParser parser = readCustomizationFile(res);
+        if (parser == null) {
+            // When old loading path doesn't succeed, try loading customization from resources.
+            parser = readCustomizationResources(res);
+        }
+        if (parser == null) {
+            Slog.d(TAG, "No loadable haptic feedback customization.");
             return null;
         }
 
-        FileReader fileReader;
-        try {
-            fileReader = new FileReader(customizationFile);
-        } catch (FileNotFoundException e) {
-            Slog.d(TAG, "Specified customization file not found.");
-            return  null;
-        }
-
-        TypedXmlPullParser parser = Xml.newFastPullParser();
-        parser.setFeature(XmlPullParser.FEATURE_PROCESS_NAMESPACES, true);
-        parser.setInput(fileReader);
-
-        XmlReader.readDocumentStartTag(parser, TAG_CONSTANTS);
+        XmlUtils.beginDocument(parser, TAG_CONSTANTS);
         XmlValidator.checkTagHasNoUnexpectedAttributes(parser);
         int rootDepth = parser.getDepth();
 
@@ -189,6 +184,46 @@ final class HapticFeedbackCustomization {
         XmlReader.readDocumentEndTag(parser);
 
         return mapping;
+    }
+
+    // TODO(b/356412421): deprecate old path related files.
+    private static TypedXmlPullParser readCustomizationFile(Resources res)
+            throws XmlPullParserException {
+        String customizationFile = res.getString(
+                com.android.internal.R.string.config_hapticFeedbackCustomizationFile);
+        if (TextUtils.isEmpty(customizationFile)) {
+            return null;
+        }
+
+        final Reader customizationReader;
+        try {
+            customizationReader = new FileReader(customizationFile);
+        } catch (FileNotFoundException e) {
+            Slog.e(TAG, "Specified customization file not found.", e);
+            return null;
+        }
+
+        final TypedXmlPullParser parser;
+        parser = Xml.newFastPullParser();
+        parser.setFeature(XmlPullParser.FEATURE_PROCESS_NAMESPACES, true);
+        parser.setInput(customizationReader);
+        Slog.d(TAG, "Successfully opened customization file.");
+        return parser;
+    }
+
+    private static TypedXmlPullParser readCustomizationResources(Resources res) {
+        if (!Flags.loadHapticFeedbackVibrationCustomizationFromResources()) {
+            return null;
+        }
+        final XmlResourceParser resParser;
+        try {
+            resParser = res.getXml(com.android.internal.R.xml.haptic_feedback_customization);
+        } catch (Resources.NotFoundException e) {
+            Slog.e(TAG, "Haptic customization resource not found.", e);
+            return null;
+        }
+        Slog.d(TAG, "Successfully opened customization resource.");
+        return XmlUtils.makeTyped(resParser);
     }
 
     /**

@@ -428,5 +428,6 @@ public class BatteryUsageStatsProvider {
      */
     public void setPowerStatsExporterEnabled(int powerComponentId, boolean enabled) {
         mPowerStatsExporterEnabled.put(powerComponentId, enabled);
+        mPowerStatsExporter.setPowerComponentEnabled(powerComponentId, enabled);
     }
 }

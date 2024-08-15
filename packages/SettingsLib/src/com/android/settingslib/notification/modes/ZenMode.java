@@ -22,6 +22,8 @@ import static android.app.NotificationManager.INTERRUPTION_FILTER_ALL;
 import static android.app.NotificationManager.INTERRUPTION_FILTER_PRIORITY;
 import static android.service.notification.SystemZenRules.getTriggerDescriptionForScheduleEvent;
 import static android.service.notification.SystemZenRules.getTriggerDescriptionForScheduleTime;
+import static android.service.notification.SystemZenRules.PACKAGE_ANDROID;
+import static android.service.notification.ZenModeConfig.tryParseCountdownConditionId;
 import static android.service.notification.ZenModeConfig.tryParseEventConditionId;
 import static android.service.notification.ZenModeConfig.tryParseScheduleConditionId;
 
@@ -66,7 +68,7 @@ public class ZenMode implements Parcelable {
 
     private static final String TAG = "ZenMode";
 
-    static final String MANUAL_DND_MODE_ID = "manual_dnd";
+    static final String MANUAL_DND_MODE_ID = ZenModeConfig.MANUAL_RULE_ID;
     static final String TEMP_NEW_MODE_ID = "temp_new_mode";
 
     // Must match com.android.server.notification.ZenModeHelper#applyCustomPolicy.
@@ -119,7 +121,7 @@ public class ZenMode implements Parcelable {
                 return Status.ENABLED;
             }
         } else {
-            if (zenRuleExtraData.disabledOrigin == ZenModeConfig.UPDATE_ORIGIN_USER) {
+            if (zenRuleExtraData.disabledOrigin == ZenModeConfig.ORIGIN_USER_IN_SYSTEMUI) {
                 return Status.DISABLED_BY_USER;
             } else {
                 return Status.DISABLED_BY_OTHER; // by APP, SYSTEM, UNKNOWN.
@@ -128,7 +130,11 @@ public class ZenMode implements Parcelable {
     }
 
     public static ZenMode manualDndMode(AutomaticZenRule manualRule, boolean isActive) {
-        return new ZenMode(MANUAL_DND_MODE_ID, manualRule,
+        // Manual rule is owned by the system, so we set it here
+        AutomaticZenRule manualRuleWithPkg = new AutomaticZenRule.Builder(manualRule)
+                .setPackage(PACKAGE_ANDROID)
+                .build();
+        return new ZenMode(MANUAL_DND_MODE_ID, manualRuleWithPkg,
                 isActive ? Status.ENABLED_AND_ACTIVE : Status.ENABLED, true);
     }
 
@@ -188,9 +194,45 @@ public class ZenMode implements Parcelable {
         return mRule.getType();
     }
 
+    /** Returns the trigger description of the mode. */
     @Nullable
     public String getTriggerDescription() {
         return mRule.getTriggerDescription();
+    }
+
+    /**
+     * Returns a "dynamic" trigger description. For some modes (such as manual Do Not Disturb)
+     * when activated, we know when (and if) the mode is expected to end on its own; this dynamic
+     * description reflects that. In other cases, returns {@link #getTriggerDescription}.
+     */
+    @Nullable
+    public String getDynamicDescription(Context context) {
+        if (isManualDnd() && isActive()) {
+            long countdownEndTime = tryParseCountdownConditionId(mRule.getConditionId());
+            if (countdownEndTime > 0) {
+                CharSequence formattedTime = ZenModeConfig.getFormattedTime(context,
+                        countdownEndTime, ZenModeConfig.isToday(countdownEndTime),
+                        context.getUserId());
+                return context.getString(com.android.internal.R.string.zen_mode_until,
+                        formattedTime);
+            }
+        }
+        // TODO: b/333527800 - For TYPE_SCHEDULE_TIME rules we could do the same; however
+        //   according to the snoozing discussions the mode may or may not end at the scheduled
+        //   time if manually activated. When we resolve that point, we could calculate end time
+        //   for these modes as well.
+
+        return getTriggerDescription();
+    }
+
+    /**
+     * Returns an icon "key" that is guaranteed to be different if the icon is different. Note that
+     * the inverse is not true, i.e. two keys can be different and the icon still be visually the
+     * same.
+     */
+    @NonNull
+    public String getIconKey() {
+        return mRule.getType() + ":" + mRule.getPackageName() + ":" + mRule.getIconResId();
     }
 
     @NonNull

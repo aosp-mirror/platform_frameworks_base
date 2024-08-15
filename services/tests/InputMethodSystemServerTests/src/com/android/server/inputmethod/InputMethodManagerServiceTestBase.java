@@ -53,6 +53,7 @@ import android.os.ServiceManager;
 import android.util.ArraySet;
 import android.view.InputChannel;
 import android.view.inputmethod.EditorInfo;
+import android.view.inputmethod.ImeTracker;
 import android.window.ImeOnBackInvokedDispatcher;
 
 import androidx.test.platform.app.InstrumentationRegistry;
@@ -260,6 +261,11 @@ public class InputMethodManagerServiceTestBase {
                 unusedUserId -> mMockInputMethodBindingController);
         spyOn(mInputMethodManagerService);
 
+        synchronized (ImfLock.class) {
+            doReturn(true).when(mInputMethodManagerService).setImeVisibilityOnFocusedWindowClient(
+                    anyBoolean(), any(UserData.class), any(ImeTracker.Token.class));
+        }
+
         // Start a InputMethodManagerService.Lifecycle to publish and manage the lifecycle of
         // InputMethodManagerService, which is closer to the real situation.
         InputMethodManagerService.Lifecycle lifecycle =
@@ -269,15 +275,21 @@ public class InputMethodManagerServiceTestBase {
         LocalServices.removeServiceForTest(InputMethodManagerInternal.class);
         lifecycle.onStart();
 
+        final var userData = mInputMethodManagerService.getUserData(mUserId);
+
         // Certain tests rely on TEST_IME_ID that is installed with AndroidTest.xml.
         // TODO(b/352615651): Consider just synthesizing test InputMethodInfo then injecting it.
         AdditionalSubtypeMapRepository.initializeIfNecessary(mUserId);
-        final var settings = InputMethodManagerService.queryInputMethodServicesInternal(mContext,
-                mUserId, AdditionalSubtypeMapRepository.get(mUserId), DirectBootAwareness.AUTO);
+        final var rawMethodMap = InputMethodManagerService.queryRawInputMethodServiceMap(mContext,
+                mUserId);
+        userData.mRawInputMethodMap.set(rawMethodMap);
+        final var settings = InputMethodSettings.create(rawMethodMap.toInputMethodMap(
+                AdditionalSubtypeMap.EMPTY_MAP, DirectBootAwareness.AUTO, true /* userUnlocked */),
+                mUserId);
         InputMethodSettingsRepository.put(mUserId, settings);
 
         // Emulate that the user initialization is done.
-        mInputMethodManagerService.getUserData(mUserId).mBackgroundLoadLatch.countDown();
+        userData.mBackgroundLoadLatch.countDown();
 
         // After this boot phase, services can broadcast Intents.
         lifecycle.onBootPhase(SystemService.PHASE_ACTIVITY_MANAGER_READY);
@@ -339,6 +351,14 @@ public class InputMethodManagerServiceTestBase {
         verify(mMockInputMethod, times(hideSoftInput ? 1 : 0))
                 .hideSoftInput(any() /* hideInputToken */, notNull() /* statsToken */,
                         anyInt() /* flags */, any() /* resultReceiver */);
+    }
+
+    protected void verifySetImeVisibility(boolean setVisible, boolean invoked) {
+        synchronized (ImfLock.class) {
+            verify(mInputMethodManagerService,
+                    times(invoked ? 1 : 0)).setImeVisibilityOnFocusedWindowClient(eq(setVisible),
+                    any(UserData.class), any(ImeTracker.Token.class));
+        }
     }
 
     protected void createSessionForClient(IInputMethodClient client) {

@@ -439,9 +439,9 @@ class SplitScreenTransitions {
         ProtoLog.d(WM_SHELL_SPLIT_SCREEN, "setResizeTransition: hasPendingResize=%b",
                 mPendingResize != null);
         if (mPendingResize != null) {
+            mPendingResize.cancel(null);
             mainDecor.cancelRunningAnimations();
             sideDecor.cancelRunningAnimations();
-            mPendingResize.cancel(null);
             mAnimations.clear();
             onFinish(null /* wct */);
         }
@@ -504,7 +504,9 @@ class SplitScreenTransitions {
             ProtoLog.d(WM_SHELL_SPLIT_SCREEN, "onTransitionConsumed for passThrough transition");
         }
 
-        // TODO: handle transition consumed for active remote handler
+        if (mActiveRemoteHandler != null) {
+            mActiveRemoteHandler.onTransitionConsumed(transition, aborted, finishT);
+        }
     }
 
     void onFinish(WindowContainerTransaction wct) {

@@ -478,6 +478,10 @@ class TaskFragment extends WindowContainer<WindowContainer> {
         mTaskFragmentOrganizerProcessName = processName;
     }
 
+    void onTaskFragmentOrganizerRestarted(@NonNull ITaskFragmentOrganizer organizer) {
+        mTaskFragmentOrganizer = organizer;
+    }
+
     void onTaskFragmentOrganizerRemoved() {
         mTaskFragmentOrganizer = null;
     }
@@ -1776,11 +1780,6 @@ class TaskFragment extends WindowContainer<WindowContainer> {
         if (resuming != null) {
             // We do not want to trigger auto-PiP upon launch of a translucent activity.
             final boolean resumingOccludesParent = resuming.occludesParent();
-            // Resuming the new resume activity only if the previous activity can't go into Pip
-            // since we want to give Pip activities a chance to enter Pip before resuming the
-            // next activity.
-            final boolean lastResumedCanPip = prev.checkEnterPictureInPictureState(
-                    "shouldAutoPipWhilePausing", userLeaving);
 
             if (ActivityTaskManagerService.isPip2ExperimentEnabled()) {
                 // If a new task is being launched, then mark the existing top activity as
@@ -1790,6 +1789,12 @@ class TaskFragment extends WindowContainer<WindowContainer> {
                 Task.enableEnterPipOnTaskSwitch(prev, resuming.getTask(),
                         resuming, resuming.getOptions());
             }
+
+            // Resuming the new resume activity only if the previous activity can't go into Pip
+            // since we want to give Pip activities a chance to enter Pip before resuming the
+            // next activity.
+            final boolean lastResumedCanPip = prev.checkEnterPictureInPictureState(
+                    "shouldAutoPipWhilePausing", userLeaving);
             if (prev.supportsEnterPipOnTaskSwitch && userLeaving
                     && resumingOccludesParent && lastResumedCanPip
                     && prev.pictureInPictureArgs.isAutoEnterEnabled()) {
@@ -1923,7 +1928,7 @@ class TaskFragment extends WindowContainer<WindowContainer> {
                     prev.setState(STOPPING, "completePausedLocked");
                 } else if (!prev.isVisibleRequested() || shouldSleepOrShutDownActivities()) {
                     // Clear out any deferred client hide we might currently have.
-                    prev.setDeferHidingClient(false);
+                    prev.clearDeferHidingClient();
                     // If we were visible then resumeTopActivities will release resources before
                     // stopping.
                     prev.addToStopping(true /* scheduleIdle */, false /* idleDelayed */,
@@ -1944,8 +1949,7 @@ class TaskFragment extends WindowContainer<WindowContainer> {
         if (resumeNext) {
             final Task topRootTask = mRootWindowContainer.getTopDisplayFocusedRootTask();
             if (topRootTask != null && !topRootTask.shouldSleepOrShutDownActivities()) {
-                mRootWindowContainer.resumeFocusedTasksTopActivities(topRootTask, prev,
-                        null /* targetOptions */);
+                mRootWindowContainer.resumeFocusedTasksTopActivities(topRootTask, prev);
             } else {
                 // checkReadyForSleep();
                 final ActivityRecord top =
@@ -2960,7 +2964,13 @@ class TaskFragment extends WindowContainer<WindowContainer> {
     }
 
     boolean shouldRemoveSelfOnLastChildRemoval() {
-        return !mCreatedByOrganizer || mIsRemovalRequested;
+        if (!mCreatedByOrganizer || mIsRemovalRequested) {
+            return true;
+        }
+        // The TaskFragmentOrganizer may be killed while the embedded TaskFragments remains in WM
+        // core. The embedded TaskFragment should still be removed when the child activities are
+        // all gone (like package force-stopped).
+        return mIsEmbedded && mTaskFragmentOrganizer == null;
     }
 
     /**

@@ -232,6 +232,8 @@ package android.nfc.cardemulation {
     method public final void notifyUnhandled();
     method public final android.os.IBinder onBind(android.content.Intent);
     method public abstract void onDeactivated(int);
+    method @FlaggedApi("android.nfc.nfc_event_listener") public void onObserveModeStateChanged(boolean);
+    method @FlaggedApi("android.nfc.nfc_event_listener") public void onPreferredServiceChanged(boolean);
     method public abstract byte[] processCommandApdu(byte[], android.os.Bundle);
     method @FlaggedApi("android.nfc.nfc_read_polling_loop") public void processPollingFrames(@NonNull java.util.List<android.nfc.cardemulation.PollingFrame>);
     method public final void sendResponseApdu(byte[]);

@@ -89,9 +89,9 @@ import android.window.WindowContainerTransaction;
 import androidx.annotation.GuardedBy;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.window.common.CommonFoldingFeature;
 import androidx.window.common.DeviceStateManagerFoldingFeatureProducer;
 import androidx.window.common.EmptyLifecycleCallbacksAdapter;
+import androidx.window.common.layout.CommonFoldingFeature;
 import androidx.window.extensions.WindowExtensions;
 import androidx.window.extensions.core.util.function.Consumer;
 import androidx.window.extensions.core.util.function.Function;
@@ -695,12 +695,8 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
                         break;
                     case TYPE_ACTIVITY_REPARENTED_TO_TASK:
                         final IBinder candidateAssociatedActToken, lastOverlayToken;
-                        if (Flags.fixPipRestoreToOverlay()) {
-                            candidateAssociatedActToken = change.getOtherActivityToken();
-                            lastOverlayToken = change.getTaskFragmentToken();
-                        } else {
-                            candidateAssociatedActToken = lastOverlayToken = null;
-                        }
+                        candidateAssociatedActToken = change.getOtherActivityToken();
+                        lastOverlayToken = change.getTaskFragmentToken();
                         onActivityReparentedToTask(
                                 wct,
                                 taskId,
@@ -1023,10 +1019,6 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
     @Nullable
     OverlayContainerRestoreParams getOverlayContainerRestoreParams(
             @Nullable IBinder associatedActivityToken, @Nullable IBinder overlayToken) {
-        if (!Flags.fixPipRestoreToOverlay()) {
-            return null;
-        }
-
         if (associatedActivityToken == null || overlayToken == null) {
             return null;
         }
@@ -1334,13 +1326,24 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
         if (shouldContainerBeExpanded(container)) {
             // Make sure that the existing container is expanded.
             mPresenter.expandTaskFragment(wct, container);
-        } else {
-            // Put activity into a new expanded container.
-            final TaskFragmentContainer newContainer =
-                    new TaskFragmentContainer.Builder(this, getTaskId(activity), activity)
-                            .setPendingAppearedActivity(activity).build();
-            mPresenter.expandActivity(wct, newContainer.getTaskFragmentToken(), activity);
+            return;
         }
+
+        final SplitContainer splitContainer = getActiveSplitForContainer(container);
+        if (splitContainer instanceof SplitPinContainer
+                && !container.isPinned() && container.getRunningActivityCount() == 1) {
+            // This is already the expected state when the pinned container is shown with an
+            // expanded activity in a standalone container on the side. Moving the activity into
+            // another new expanded container again is not necessary and could result in
+            // recursively creating new TaskFragmentContainers if the activity somehow relaunched.
+            return;
+        }
+
+        // Put activity into a new expanded container.
+        final TaskFragmentContainer newContainer =
+                new TaskFragmentContainer.Builder(this, getTaskId(activity), activity)
+                        .setPendingAppearedActivity(activity).build();
+        mPresenter.expandActivity(wct, newContainer.getTaskFragmentToken(), activity);
     }
 
     /**
@@ -2714,15 +2717,19 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
     TaskFragmentContainer createOrUpdateOverlayTaskFragmentIfNeeded(
             @NonNull WindowContainerTransaction wct, @NonNull Bundle options,
             @NonNull Intent intent, @NonNull Activity launchActivity) {
+        final String overlayTag = Objects.requireNonNull(options.getString(KEY_OVERLAY_TAG));
         if (isActivityFromSplit(launchActivity)) {
             // We restrict to launch the overlay from split. Fallback to treat it as normal
             // launch.
+            Log.w(TAG, "It's not allowed to launch overlay container with tag=" + overlayTag
+                    + " from activity in Activity Embedding split."
+                    + " Launching activity=" + launchActivity
+                    + " Fallback to launch the activity as normal launch.");
             return null;
         }
 
         final List<TaskFragmentContainer> overlayContainers =
                 getAllNonFinishingOverlayContainers();
-        final String overlayTag = Objects.requireNonNull(options.getString(KEY_OVERLAY_TAG));
         final boolean associateLaunchingActivity = options
                 .getBoolean(KEY_OVERLAY_ASSOCIATE_WITH_LAUNCHING_ACTIVITY, true);
 

@@ -35,22 +35,29 @@ public class AppCompatOverrides {
     private final AppCompatFocusOverrides mAppCompatFocusOverrides;
     @NonNull
     private final AppCompatResizeOverrides mAppCompatResizeOverrides;
+    @NonNull
+    private final AppCompatReachabilityOverrides mAppCompatReachabilityOverrides;
+    @NonNull
+    private final AppCompatLetterboxOverrides mAppCompatLetterboxOverrides;
 
     AppCompatOverrides(@NonNull ActivityRecord activityRecord,
             @NonNull AppCompatConfiguration appCompatConfiguration,
-            @NonNull OptPropFactory optPropBuilder) {
+            @NonNull OptPropFactory optPropBuilder,
+            @NonNull AppCompatDeviceStateQuery appCompatDeviceStateQuery) {
         mAppCompatCameraOverrides = new AppCompatCameraOverrides(activityRecord,
                 appCompatConfiguration, optPropBuilder);
         mAppCompatOrientationOverrides = new AppCompatOrientationOverrides(activityRecord,
                 appCompatConfiguration, optPropBuilder, mAppCompatCameraOverrides);
-        // TODO(b/341903757) Remove BooleanSuppliers after fixing dependency with reachability.
+        mAppCompatReachabilityOverrides = new AppCompatReachabilityOverrides(activityRecord,
+                appCompatConfiguration, appCompatDeviceStateQuery);
         mAppCompatAspectRatioOverrides = new AppCompatAspectRatioOverrides(activityRecord,
-                appCompatConfiguration, optPropBuilder,
-                activityRecord.mLetterboxUiController::isDisplayFullScreenAndInPosture,
-                activityRecord.mLetterboxUiController::getHorizontalPositionMultiplier);
+                appCompatConfiguration, optPropBuilder, appCompatDeviceStateQuery,
+                mAppCompatReachabilityOverrides);
         mAppCompatFocusOverrides = new AppCompatFocusOverrides(activityRecord,
                 appCompatConfiguration, optPropBuilder);
         mAppCompatResizeOverrides = new AppCompatResizeOverrides(activityRecord, optPropBuilder);
+        mAppCompatLetterboxOverrides = new AppCompatLetterboxOverrides(activityRecord,
+                appCompatConfiguration);
     }
 
     @NonNull
@@ -76,5 +83,15 @@ public class AppCompatOverrides {
     @NonNull
     AppCompatResizeOverrides getAppCompatResizeOverrides() {
         return mAppCompatResizeOverrides;
+    }
+
+    @NonNull
+    AppCompatReachabilityOverrides getAppCompatReachabilityOverrides() {
+        return mAppCompatReachabilityOverrides;
+    }
+
+    @NonNull
+    AppCompatLetterboxOverrides getAppCompatLetterboxOverrides() {
+        return mAppCompatLetterboxOverrides;
     }
 }

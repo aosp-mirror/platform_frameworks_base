@@ -32,6 +32,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.fastCoerceIn
 import androidx.compose.ui.util.fastLastOrNull
+import com.android.compose.animation.scene.content.state.TransitionState
 import kotlin.math.roundToInt
 
 /**
@@ -119,7 +120,7 @@ fun ContentScope.animateContentFloatAsState(
 }
 
 @Deprecated(
-    "Use animateSceneFloatAsState() instead",
+    "Use animateContentFloatAsState() instead",
     replaceWith = ReplaceWith("animateContentFloatAsState(value, key, canOverflow)")
 )
 @Composable
@@ -170,7 +171,7 @@ fun ContentScope.animateContentDpAsState(
 }
 
 @Deprecated(
-    "Use animateSceneDpAsState() instead",
+    "Use animateContentDpAsState() instead",
     replaceWith = ReplaceWith("animateContentDpAsState(value, key, canOverflow)")
 )
 @Composable

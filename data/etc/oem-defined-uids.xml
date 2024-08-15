@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Copyright (C) 2024 The Android Open Source Project
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~      http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+ -->
+
+<!--
+This XML defines a list of UIDs for OEMs to register as shared UIDs. They will be registered at the
+start of the system, which allows OEMs to create services with these UIDs. The range of these UIDs
+must be in the OEM reserved range.
+
+OEM must provide a preloaded app that is installed at boot time to retain the newly registered UID
+by adding a android:sharedUserId tag in the manifest of the preloaded app, with the value of the tag
+set to the name of the UID defined in this config file. Otherwise, the uid will be cleared at the
+end of the boot and this config file will take no effect.
+
+- The "name" XML attribute refers to the name of the shared UID. It must start with "android.uid.".
+- The "uid" XML attribute refers to the value of the shared UID. It must be in range [2900, 2999].
+
+Example usage
+    <oem-defined-uid name="android.uid.vendordata" uid="2918"/>
+    Indicates that a shared UID named "android.uid.vendordata" will be added to the system with the
+    UID of 2918.
+-->
+
+<config>
+</config>

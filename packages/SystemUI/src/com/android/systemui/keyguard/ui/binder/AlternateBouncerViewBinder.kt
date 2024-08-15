@@ -37,13 +37,13 @@ import com.android.systemui.deviceentry.shared.DeviceEntryUdfpsRefactor
 import com.android.systemui.deviceentry.ui.binder.UdfpsAccessibilityOverlayBinder
 import com.android.systemui.deviceentry.ui.view.UdfpsAccessibilityOverlay
 import com.android.systemui.deviceentry.ui.viewmodel.AlternateBouncerUdfpsAccessibilityOverlayViewModel
-import com.android.systemui.keyguard.DismissCallbackRegistry
 import com.android.systemui.keyguard.ui.view.DeviceEntryIconView
 import com.android.systemui.keyguard.ui.viewmodel.AlternateBouncerDependencies
 import com.android.systemui.keyguard.ui.viewmodel.AlternateBouncerUdfpsIconViewModel
 import com.android.systemui.keyguard.ui.viewmodel.AlternateBouncerWindowViewModel
 import com.android.systemui.lifecycle.repeatWhenAttached
 import com.android.systemui.res.R
+import com.android.systemui.scene.shared.flag.SceneContainerFlag
 import com.android.systemui.scrim.ScrimView
 import dagger.Lazy
 import javax.inject.Inject
@@ -67,7 +67,6 @@ constructor(
     private val alternateBouncerDependencies: Lazy<AlternateBouncerDependencies>,
     private val windowManager: Lazy<WindowManager>,
     private val layoutInflater: Lazy<LayoutInflater>,
-    private val dismissCallbackRegistry: DismissCallbackRegistry,
 ) : CoreStartable {
     private val layoutParams: WindowManager.LayoutParams
         get() =
@@ -95,9 +94,10 @@ constructor(
     private var alternateBouncerView: ConstraintLayout? = null
 
     override fun start() {
-        if (!DeviceEntryUdfpsRefactor.isEnabled) {
+        if (!DeviceEntryUdfpsRefactor.isEnabled || SceneContainerFlag.isEnabled) {
             return
         }
+
         applicationScope.launch("$TAG#alternateBouncerWindowViewModel") {
             alternateBouncerWindowViewModel.get().alternateBouncerWindowRequired.collect {
                 addAlternateBouncerWindowView ->
@@ -110,7 +110,7 @@ constructor(
                     bind(alternateBouncerView!!, alternateBouncerDependencies.get())
                 } else {
                     removeViewFromWindowManager()
-                    alternateBouncerDependencies.get().viewModel.hideAlternateBouncer()
+                    alternateBouncerDependencies.get().viewModel.onRemovedFromWindow()
                 }
             }
         }
@@ -144,7 +144,7 @@ constructor(
     private val onAttachAddBackGestureHandler =
         object : View.OnAttachStateChangeListener {
             private val onBackInvokedCallback: OnBackInvokedCallback = OnBackInvokedCallback {
-                onBackRequested()
+                alternateBouncerDependencies.get().viewModel.onBackRequested()
             }
 
             override fun onViewAttachedToWindow(view: View) {
@@ -161,14 +161,12 @@ constructor(
                     .findOnBackInvokedDispatcher()
                     ?.unregisterOnBackInvokedCallback(onBackInvokedCallback)
             }
-
-            fun onBackRequested() {
-                alternateBouncerDependencies.get().viewModel.hideAlternateBouncer()
-                dismissCallbackRegistry.notifyDismissCancelled()
-            }
         }
 
     private fun addViewToWindowManager() {
+        if (SceneContainerFlag.isEnabled) {
+            return
+        }
         if (alternateBouncerView != null) {
             return
         }
@@ -190,6 +188,7 @@ constructor(
         if (DeviceEntryUdfpsRefactor.isUnexpectedlyInLegacyMode()) {
             return
         }
+
         optionallyAddUdfpsViews(
             view = view,
             udfpsIconViewModel = alternateBouncerDependencies.udfpsIconViewModel,
@@ -202,12 +201,13 @@ constructor(
             viewModel = alternateBouncerDependencies.messageAreaViewModel,
         )
 
-        val scrim = view.requireViewById(R.id.alternate_bouncer_scrim) as ScrimView
+        val scrim: ScrimView = view.requireViewById(R.id.alternate_bouncer_scrim)
         val viewModel = alternateBouncerDependencies.viewModel
         val swipeUpAnywhereGestureHandler =
             alternateBouncerDependencies.swipeUpAnywhereGestureHandler
         val tapGestureDetector = alternateBouncerDependencies.tapGestureDetector
-        view.repeatWhenAttached { alternateBouncerViewContainer ->
+
+        view.repeatWhenAttached {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 launch("$TAG#viewModel.registerForDismissGestures") {
                         viewModel.registerForDismissGestures.collect { registerForDismissGestures ->
@@ -216,11 +216,11 @@ constructor(
                                     swipeTag
                                 ) { _ ->
                                     alternateBouncerDependencies.powerInteractor.onUserTouch()
-                                    viewModel.showPrimaryBouncer()
+                                    viewModel.onTapped()
                                 }
                                 tapGestureDetector.addOnGestureDetectedCallback(tapTag) { _ ->
                                     alternateBouncerDependencies.powerInteractor.onUserTouch()
-                                    viewModel.showPrimaryBouncer()
+                                    viewModel.onTapped()
                                 }
                             } else {
                                 swipeUpAnywhereGestureHandler.removeOnGestureDetectedCallback(

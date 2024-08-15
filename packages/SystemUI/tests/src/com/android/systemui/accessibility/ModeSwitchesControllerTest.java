@@ -28,6 +28,7 @@ import android.view.View;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
+import com.android.app.viewcapture.ViewCaptureAwareWindowManager;
 import com.android.systemui.SysuiTestCase;
 
 import org.junit.After;
@@ -50,6 +51,8 @@ public class ModeSwitchesControllerTest extends SysuiTestCase {
     private View mSpyView;
     @Mock
     private MagnificationModeSwitch.ClickListener mListener;
+    @Mock
+    private ViewCaptureAwareWindowManager mViewCaptureAwareWindowManager;
 
 
     @Before
@@ -58,7 +61,8 @@ public class ModeSwitchesControllerTest extends SysuiTestCase {
         mSupplier = new FakeSwitchSupplier(mContext.getSystemService(DisplayManager.class));
         mModeSwitchesController = new ModeSwitchesController(mSupplier);
         mModeSwitchesController.setClickListenerDelegate(mListener);
-        mModeSwitch = Mockito.spy(new MagnificationModeSwitch(mContext, mModeSwitchesController));
+        mModeSwitch = Mockito.spy(new MagnificationModeSwitch(mContext, mModeSwitchesController,
+                mViewCaptureAwareWindowManager));
         mSpyView = Mockito.spy(new View(mContext));
     }
 

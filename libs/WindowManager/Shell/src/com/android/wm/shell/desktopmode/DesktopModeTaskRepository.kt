@@ -194,6 +194,11 @@ class DesktopModeTaskRepository {
     fun getActiveNonMinimizedOrderedTasks(displayId: Int): List<Int> =
         getFreeformTasksInZOrder(displayId).filter { !isMinimizedTask(it) }
 
+    /** Returns the count of active non-minimized tasks for [displayId]. */
+    fun getActiveNonMinimizedTaskCount(displayId: Int): Int {
+        return getActiveTasks(displayId).count { !isMinimizedTask(it) }
+    }
+
     /** Returns a list of freeform tasks, ordered from top-bottom (top at index 0). */
     fun getFreeformTasksInZOrder(displayId: Int): ArrayList<Int> =
         ArrayList(desktopTaskDataByDisplayId[displayId]?.freeformTasksInZOrder ?: emptyList())
@@ -300,13 +305,17 @@ class DesktopModeTaskRepository {
         }
     }
 
-    /** Removes given task from a valid [displayId]. */
+    /** Removes given task from a valid [displayId] and updates the repository state. */
     private fun removeTaskFromDisplay(displayId: Int, taskId: Int) {
         logD("Removes freeform task: taskId=%d, displayId=%d", taskId, displayId)
         desktopTaskDataByDisplayId[displayId]?.freeformTasksInZOrder?.remove(taskId)
         boundsBeforeMaximizeByTaskId.remove(taskId)
         logD("Remaining freeform tasks: %s",
             desktopTaskDataByDisplayId[displayId]?.freeformTasksInZOrder?.toDumpString())
+        // Remove task from unminimized task if it is minimized.
+        unminimizeTask(displayId, taskId)
+        removeActiveTask(taskId)
+        updateTaskVisibility(displayId, taskId, visible = false);
     }
 
     /**

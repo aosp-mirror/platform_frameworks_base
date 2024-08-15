@@ -70,9 +70,7 @@ import android.os.VibrationAttributes;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
 import android.os.test.TestLooper;
-import android.os.vibrator.Flags;
 import android.os.vibrator.VibrationConfig;
-import android.platform.test.annotations.RequiresFlagsEnabled;
 import android.platform.test.flag.junit.CheckFlagsRule;
 import android.platform.test.flag.junit.DeviceFlagsValueProvider;
 import android.provider.Settings;
@@ -121,6 +119,7 @@ public class VibrationSettingsTest {
             USAGE_PHYSICAL_EMULATION,
             USAGE_RINGTONE,
             USAGE_TOUCH,
+            USAGE_IME_FEEDBACK
     };
 
     @Rule public MockitoRule mMockitoRule = MockitoJUnit.rule();
@@ -527,7 +526,7 @@ public class VibrationSettingsTest {
         setUserSetting(Settings.System.HAPTIC_FEEDBACK_INTENSITY, VIBRATION_INTENSITY_OFF);
 
         for (int usage : ALL_USAGES) {
-            if (usage == USAGE_TOUCH) {
+            if (usage == USAGE_TOUCH || usage == USAGE_IME_FEEDBACK) {
                 assertVibrationIgnoredForUsage(usage, Vibration.Status.IGNORED_FOR_SETTINGS);
             } else {
                 assertVibrationNotIgnoredForUsage(usage);
@@ -602,17 +601,15 @@ public class VibrationSettingsTest {
     }
 
     @Test
-    @RequiresFlagsEnabled(Flags.FLAG_KEYBOARD_CATEGORY_ENABLED)
     public void shouldIgnoreVibration_withKeyboardSettingsOff_shouldIgnoreKeyboardVibration() {
+        setKeyboardVibrationSettingsSupported(true);
         setUserSetting(Settings.System.HAPTIC_FEEDBACK_INTENSITY, VIBRATION_INTENSITY_MEDIUM);
         setUserSetting(Settings.System.KEYBOARD_VIBRATION_ENABLED, 0 /* OFF*/);
-        setKeyboardVibrationSettingsSupported(true);
 
         // Keyboard touch ignored.
         assertVibrationIgnoredForAttributes(
                 new VibrationAttributes.Builder()
-                        .setUsage(USAGE_TOUCH)
-                        .setCategory(VibrationAttributes.CATEGORY_KEYBOARD)
+                        .setUsage(USAGE_IME_FEEDBACK)
                         .build(),
                 Vibration.Status.IGNORED_FOR_SETTINGS);
 
@@ -620,18 +617,16 @@ public class VibrationSettingsTest {
         assertVibrationNotIgnoredForUsage(USAGE_TOUCH);
         assertVibrationNotIgnoredForAttributes(
                 new VibrationAttributes.Builder()
-                        .setUsage(USAGE_TOUCH)
-                        .setCategory(VibrationAttributes.CATEGORY_KEYBOARD)
+                        .setUsage(USAGE_IME_FEEDBACK)
                         .setFlags(VibrationAttributes.FLAG_BYPASS_USER_VIBRATION_INTENSITY_OFF)
                         .build());
     }
 
     @Test
-    @RequiresFlagsEnabled(Flags.FLAG_KEYBOARD_CATEGORY_ENABLED)
     public void shouldIgnoreVibration_withKeyboardSettingsOn_shouldNotIgnoreKeyboardVibration() {
+        setKeyboardVibrationSettingsSupported(true);
         setUserSetting(Settings.System.HAPTIC_FEEDBACK_INTENSITY, VIBRATION_INTENSITY_OFF);
         setUserSetting(Settings.System.KEYBOARD_VIBRATION_ENABLED, 1 /* ON */);
-        setKeyboardVibrationSettingsSupported(true);
 
         // General touch ignored.
         assertVibrationIgnoredForUsage(USAGE_TOUCH, Vibration.Status.IGNORED_FOR_SETTINGS);
@@ -639,17 +634,15 @@ public class VibrationSettingsTest {
         // Keyboard touch not ignored.
         assertVibrationNotIgnoredForAttributes(
                 new VibrationAttributes.Builder()
-                        .setUsage(USAGE_TOUCH)
-                        .setCategory(VibrationAttributes.CATEGORY_KEYBOARD)
+                        .setUsage(USAGE_IME_FEEDBACK)
                         .build());
     }
 
     @Test
-    @RequiresFlagsEnabled(Flags.FLAG_KEYBOARD_CATEGORY_ENABLED)
-    public void shouldIgnoreVibration_notSupportKeyboardVibration_ignoresKeyboardTouchVibration() {
+    public void shouldIgnoreVibration_notSupportKeyboardVibration_followsTouchFeedbackSettings() {
+        setKeyboardVibrationSettingsSupported(false);
         setUserSetting(Settings.System.HAPTIC_FEEDBACK_INTENSITY, VIBRATION_INTENSITY_OFF);
         setUserSetting(Settings.System.KEYBOARD_VIBRATION_ENABLED, 1 /* ON */);
-        setKeyboardVibrationSettingsSupported(false);
 
         // General touch ignored.
         assertVibrationIgnoredForUsage(USAGE_TOUCH, Vibration.Status.IGNORED_FOR_SETTINGS);
@@ -657,8 +650,7 @@ public class VibrationSettingsTest {
         // Keyboard touch ignored.
         assertVibrationIgnoredForAttributes(
                 new VibrationAttributes.Builder()
-                        .setUsage(USAGE_TOUCH)
-                        .setCategory(VibrationAttributes.CATEGORY_KEYBOARD)
+                        .setUsage(USAGE_IME_FEEDBACK)
                         .build(),
                 Vibration.Status.IGNORED_FOR_SETTINGS);
     }

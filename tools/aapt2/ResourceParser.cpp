@@ -107,7 +107,7 @@ struct ParsedResource {
   Visibility::Level visibility_level = Visibility::Level::kUndefined;
   bool staged_api = false;
   bool allow_new = false;
-  FlagStatus flag_status;
+  FlagStatus flag_status = FlagStatus::NoFlag;
   std::optional<OverlayableItem> overlayable_item;
   std::optional<StagedId> staged_alias;
 
@@ -690,9 +690,7 @@ bool ResourceParser::ParseResource(xml::XmlPullParser* parser,
         resource_format = item_iter->second.format;
       }
 
-      // Don't bother parsing the item if it is behind a disabled flag
-      if (out_resource->flag_status != FlagStatus::Disabled &&
-          !ParseItem(parser, out_resource, resource_format)) {
+      if (!ParseItem(parser, out_resource, resource_format)) {
         return false;
       }
       return true;

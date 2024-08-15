@@ -663,6 +663,15 @@ public abstract class VibrationEffect implements Parcelable {
      * @hide
      */
     public static float scale(float intensity, float scaleFactor) {
+        if (Flags.hapticsScaleV2Enabled()) {
+            if (Float.compare(scaleFactor, 1) <= 0 || Float.compare(intensity, 0) == 0) {
+                // Scaling down or scaling zero intensity is straightforward.
+                return scaleFactor * intensity;
+            }
+            // Using S * x / (1 + (S - 1) * x^2) as the scale up function to converge to 1.0.
+            return (scaleFactor * intensity) / (1 + (scaleFactor - 1) * intensity * intensity);
+        }
+
         // Applying gamma correction to the scale factor, which is the same as encoding the input
         // value, scaling it, then decoding the scaled value.
         float scale = MathUtils.pow(scaleFactor, 1f / SCALE_GAMMA);
@@ -1024,6 +1033,7 @@ public abstract class VibrationEffect implements Parcelable {
                 new Creator<Composed>() {
                     @Override
                     public Composed createFromParcel(Parcel in) {
+                        in.readInt(); // Skip the parcel type token
                         return new Composed(in);
                     }
 
@@ -1298,6 +1308,7 @@ public abstract class VibrationEffect implements Parcelable {
                 new Creator<VendorEffect>() {
                     @Override
                     public VendorEffect createFromParcel(Parcel in) {
+                        in.readInt(); // Skip the parcel type token
                         return new VendorEffect(in);
                     }
 

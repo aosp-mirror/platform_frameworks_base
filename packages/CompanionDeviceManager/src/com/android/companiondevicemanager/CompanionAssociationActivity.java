@@ -440,12 +440,13 @@ public class CompanionAssociationActivity extends FragmentActivity implements
             return;
         }
 
-        title = getHtmlFromResources(this, PROFILE_TITLES.get(deviceProfile), deviceName);
+        title = getHtmlFromResources(this, PROFILE_TITLES.get(deviceProfile), mAppLabel,
+                getString(R.string.device_type), deviceName);
 
         if (PROFILE_SUMMARIES.containsKey(deviceProfile)) {
             final int summaryResourceId = PROFILE_SUMMARIES.get(deviceProfile);
             final Spanned summary = getHtmlFromResources(this, summaryResourceId,
-                    deviceName);
+                    mAppLabel, getString(R.string.device_type), deviceName);
             mSummary.setText(summary);
         } else {
             mSummary.setVisibility(View.GONE);
@@ -646,6 +647,11 @@ public class CompanionAssociationActivity extends FragmentActivity implements
     // and when mPermissionListRecyclerView is fully populated.
     // Lastly, disable the Allow and Don't allow buttons.
     private void setupPermissionList(String deviceProfile) {
+        if (!PROFILE_PERMISSIONS.containsKey(deviceProfile)) {
+            // Nothing to do if there are no permission types.
+            return;
+        }
+
         final List<Integer> permissionTypes = new ArrayList<>(
                 PROFILE_PERMISSIONS.get(deviceProfile));
         if (permissionTypes.isEmpty()) {

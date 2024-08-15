@@ -17,8 +17,6 @@ package com.android.systemui.qs;
 import static android.app.StatusBarManager.DISABLE2_QUICK_SETTINGS;
 import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
 
-import static com.android.systemui.Flags.centralizedStatusBarHeightFix;
-
 import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.Resources;
@@ -100,10 +98,7 @@ public class QuickStatusBarHeader extends FrameLayout {
             qqsLP.topMargin = mContext.getResources()
                     .getDimensionPixelSize(R.dimen.qqs_layout_margin_top);
         } else {
-            qqsLP.topMargin = centralizedStatusBarHeightFix()
-                    ? LargeScreenHeaderHelper.getLargeScreenHeaderHeight(mContext)
-                    : mContext.getResources()
-                    .getDimensionPixelSize(R.dimen.large_screen_shade_header_min_height);
+            qqsLP.topMargin = LargeScreenHeaderHelper.getLargeScreenHeaderHeight(mContext);
         }
         mHeaderQsPanel.setLayoutParams(qqsLP);
     }
@@ -127,5 +122,12 @@ public class QuickStatusBarHeader extends FrameLayout {
         lp.setMarginStart(marginStart);
         lp.setMarginEnd(marginEnd);
         view.setLayoutParams(lp);
+    }
+
+    /**
+     * @return height with the squishiness fraction applied.
+     */
+    public int getSquishedHeight() {
+        return mHeaderQsPanel.getSquishedHeight();
     }
 }

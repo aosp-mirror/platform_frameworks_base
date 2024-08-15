@@ -15,6 +15,8 @@
 
 package com.android.systemui.statusbar.notification.domain.interactor
 
+import android.app.Notification
+import android.os.Bundle
 import android.service.notification.StatusBarNotification
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
@@ -139,9 +141,10 @@ private fun mockGroupEntry(
 }
 
 private fun mockNotificationEntry(key: String, rank: Int = 0): NotificationEntry {
+    val mockNotification = mock<Notification> { this.extras = Bundle() }
     val mockSbn =
         mock<StatusBarNotification>() {
-            whenever(notification).thenReturn(mock())
+            whenever(notification).thenReturn(mockNotification)
             whenever(packageName).thenReturn("com.android")
         }
     return mock<NotificationEntry> {

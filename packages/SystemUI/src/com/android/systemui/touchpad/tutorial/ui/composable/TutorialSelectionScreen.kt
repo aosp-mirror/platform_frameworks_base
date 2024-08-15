@@ -34,6 +34,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.android.systemui.inputdevice.tutorial.ui.composable.DoneButton
 import com.android.systemui.res.R
 
 @Composable

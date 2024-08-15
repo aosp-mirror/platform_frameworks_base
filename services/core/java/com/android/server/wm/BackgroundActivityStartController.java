@@ -1506,10 +1506,13 @@ public class BackgroundActivityStartController {
         PackageManager pm = mService.mContext.getPackageManager();
         ApplicationInfo applicationInfo;
 
+        final int sourceUserId = UserHandle.getUserId(sourceUid);
         try {
-            applicationInfo = pm.getApplicationInfo(packageName, 0);
+            applicationInfo = pm.getApplicationInfoAsUser(packageName, /* flags= */ 0,
+                    sourceUserId);
         } catch (PackageManager.NameNotFoundException e) {
-            Slog.wtf(TAG, "Package name: " + packageName + " not found.");
+            Slog.wtf(TAG, "Package name: " + packageName + " not found for user "
+                    + sourceUserId);
             return bas.optedIn(ar);
         }
 

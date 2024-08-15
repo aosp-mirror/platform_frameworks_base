@@ -83,6 +83,11 @@ final class ScreenTimeoutOverridePolicy {
     public static final int RELEASE_REASON_USER_ACTIVITY_ACCESSIBILITY = 7;
 
     /**
+     * Release reason code: Release because wakelock dies.
+     */
+    public static final int RELEASE_REASON_WAKE_LOCK_DEATH = 8;
+
+    /**
      * @hide
      */
     @IntDef(prefix = { "RELEASE_REASON_" }, value = {
@@ -93,7 +98,8 @@ final class ScreenTimeoutOverridePolicy {
             RELEASE_REASON_USER_ACTIVITY_OTHER,
             RELEASE_REASON_USER_ACTIVITY_BUTTON,
             RELEASE_REASON_USER_ACTIVITY_TOUCH,
-            RELEASE_REASON_USER_ACTIVITY_ACCESSIBILITY
+            RELEASE_REASON_USER_ACTIVITY_ACCESSIBILITY,
+            RELEASE_REASON_WAKE_LOCK_DEATH
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface ReleaseReason{}

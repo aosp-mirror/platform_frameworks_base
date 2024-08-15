@@ -70,8 +70,12 @@ import com.android.systemui.shade.ShadeExpansionChangeEvent;
 import com.android.systemui.touch.TouchInsetManager;
 import com.android.systemui.util.concurrency.DelayableExecutor;
 
+import kotlinx.coroutines.Job;
+
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.concurrent.CancellationException;
 import java.util.function.Consumer;
 
 import javax.inject.Inject;
@@ -139,6 +143,8 @@ public class DreamOverlayService extends android.service.dreams.DreamOverlayServ
     private final DreamOverlayComponent mDreamOverlayComponent;
 
     private ComponentName mCurrentBlockedGestureDreamActivityComponent;
+
+    private final ArrayList<Job> mFlows = new ArrayList<>();
 
     /**
      * This {@link LifecycleRegistry} controls when dream overlay functionality, like touch
@@ -309,12 +315,12 @@ public class DreamOverlayService extends android.service.dreams.DreamOverlayServ
 
         mExecutor.execute(() -> setLifecycleStateLocked(Lifecycle.State.CREATED));
 
-        collectFlow(getLifecycle(), mCommunalInteractor.isCommunalAvailable(),
-                mIsCommunalAvailableCallback);
-        collectFlow(getLifecycle(), communalInteractor.isCommunalVisible(),
-                mCommunalVisibleConsumer);
-        collectFlow(getLifecycle(), keyguardInteractor.primaryBouncerShowing,
-                mBouncerShowingConsumer);
+        mFlows.add(collectFlow(getLifecycle(), mCommunalInteractor.isCommunalAvailable(),
+                mIsCommunalAvailableCallback));
+        mFlows.add(collectFlow(getLifecycle(), communalInteractor.isCommunalVisible(),
+                mCommunalVisibleConsumer));
+        mFlows.add(collectFlow(getLifecycle(), keyguardInteractor.primaryBouncerShowing,
+                mBouncerShowingConsumer));
     }
 
     @NonNull
@@ -338,6 +344,11 @@ public class DreamOverlayService extends android.service.dreams.DreamOverlayServ
     @Override
     public void onDestroy() {
         mKeyguardUpdateMonitor.removeCallback(mKeyguardCallback);
+
+        for (Job job : mFlows) {
+            job.cancel(new CancellationException());
+        }
+        mFlows.clear();
 
         mExecutor.execute(() -> {
             setLifecycleStateLocked(Lifecycle.State.DESTROYED);
@@ -431,7 +442,9 @@ public class DreamOverlayService extends android.service.dreams.DreamOverlayServ
     @Override
     public void onWakeRequested() {
         mUiEventLogger.log(CommunalUiEvent.DREAM_TO_COMMUNAL_HUB_DREAM_AWAKE_START);
-        mCommunalInteractor.changeScene(CommunalScenes.Communal, null);
+        mCommunalInteractor.changeScene(CommunalScenes.Communal,
+                "dream wake requested",
+                null);
     }
 
     private Lifecycle.State getLifecycleStateLocked() {
@@ -482,7 +495,7 @@ public class DreamOverlayService extends android.service.dreams.DreamOverlayServ
         mSystemDialogsCloser.closeSystemDialogs();
 
         // Hide glanceable hub (this is a nop if glanceable hub is not open).
-        mCommunalInteractor.changeScene(CommunalScenes.Blank, null);
+        mCommunalInteractor.changeScene(CommunalScenes.Blank, "dream come to front", null);
     }
 
     /**
@@ -559,6 +572,7 @@ public class DreamOverlayService extends android.service.dreams.DreamOverlayServ
 
         if (mStarted && mWindow != null) {
             try {
+                mWindow.clearContentView();
                 mWindowManager.removeView(mWindow.getDecorView());
             } catch (IllegalArgumentException e) {
                 Log.e(TAG, "Error removing decor view when resetting overlay", e);
@@ -569,7 +583,10 @@ public class DreamOverlayService extends android.service.dreams.DreamOverlayServ
         mStateController.setLowLightActive(false);
         mStateController.setEntryAnimationsFinished(false);
 
-        mDreamOverlayContainerViewController = null;
+        if (mDreamOverlayContainerViewController != null) {
+            mDreamOverlayContainerViewController.destroy();
+            mDreamOverlayContainerViewController = null;
+        }
 
         if (mTouchMonitor != null) {
             mTouchMonitor.destroy();

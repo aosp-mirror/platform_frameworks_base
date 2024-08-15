@@ -22,6 +22,7 @@ import android.telephony.TelephonyManager.EXTRA_PLMN
 import android.telephony.TelephonyManager.EXTRA_SHOW_PLMN
 import android.telephony.TelephonyManager.EXTRA_SHOW_SPN
 import android.telephony.TelephonyManager.EXTRA_SPN
+import com.android.systemui.Flags.statusBarSwitchToSpnFromDataSpn
 import com.android.systemui.log.table.Diffable
 import com.android.systemui.log.table.TableRowLogger
 
@@ -97,8 +98,13 @@ sealed interface NetworkNameModel : Diffable<NetworkNameModel> {
 
 fun Intent.toNetworkNameModel(separator: String): NetworkNameModel? {
     val showSpn = getBooleanExtra(EXTRA_SHOW_SPN, false)
-    val spn = getStringExtra(EXTRA_SPN)
-    val dataSpn = getStringExtra(EXTRA_DATA_SPN)
+    val spn =
+        if (statusBarSwitchToSpnFromDataSpn()) {
+            getStringExtra(EXTRA_SPN)
+        } else {
+            getStringExtra(EXTRA_DATA_SPN)
+        }
+
     val showPlmn = getBooleanExtra(EXTRA_SHOW_PLMN, false)
     val plmn = getStringExtra(EXTRA_PLMN)
 
@@ -113,12 +119,6 @@ fun Intent.toNetworkNameModel(separator: String): NetworkNameModel? {
             str.append(separator)
         }
         str.append(spn)
-    }
-    if (showSpn && dataSpn != null) {
-        if (str.isNotEmpty()) {
-            str.append(separator)
-        }
-        str.append(dataSpn)
     }
 
     return if (str.isNotEmpty()) NetworkNameModel.IntentDerived(str.toString()) else null

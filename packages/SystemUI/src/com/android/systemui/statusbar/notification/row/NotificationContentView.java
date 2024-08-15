@@ -113,7 +113,8 @@ public class NotificationContentView extends FrameLayout implements Notification
     private View mContractedChild;
     private View mExpandedChild;
     private View mHeadsUpChild;
-    private HybridNotificationView mSingleLineView;
+    @VisibleForTesting
+    protected HybridNotificationView mSingleLineView;
 
     @Nullable public DisposableHandle mContractedBinderHandle;
 

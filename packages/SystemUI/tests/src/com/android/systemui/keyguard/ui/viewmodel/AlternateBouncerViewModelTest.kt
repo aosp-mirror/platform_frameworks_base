@@ -19,10 +19,13 @@ package com.android.systemui.keyguard.ui.viewmodel
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
+import com.android.internal.policy.IKeyguardDismissCallback
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.concurrency.fakeExecutor
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.coroutines.collectValues
 import com.android.systemui.keyguard.data.repository.fakeKeyguardTransitionRepository
+import com.android.systemui.keyguard.dismissCallbackRegistry
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.TransitionState
 import com.android.systemui.keyguard.shared.model.TransitionStep
@@ -36,6 +39,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.Mockito.mock
 import org.mockito.Mockito.verify
 
 @ExperimentalCoroutinesApi
@@ -49,17 +53,29 @@ class AlternateBouncerViewModelTest : SysuiTestCase() {
     private val underTest = kosmos.alternateBouncerViewModel
 
     @Test
-    fun showPrimaryBouncer() =
+    fun onTapped() =
         testScope.runTest {
-            underTest.showPrimaryBouncer()
+            underTest.onTapped()
             verify(statusBarKeyguardViewManager).showPrimaryBouncer(any())
         }
 
     @Test
-    fun hideAlternateBouncer() =
+    fun onRemovedFromWindow() =
         testScope.runTest {
-            underTest.hideAlternateBouncer()
+            underTest.onRemovedFromWindow()
             verify(statusBarKeyguardViewManager).hideAlternateBouncer(any())
+        }
+
+    @Test
+    fun onBackRequested() =
+        testScope.runTest {
+            val dismissCallback = mock(IKeyguardDismissCallback::class.java)
+            kosmos.dismissCallbackRegistry.addCallback(dismissCallback)
+
+            underTest.onBackRequested()
+            kosmos.fakeExecutor.runAllReady()
+            verify(statusBarKeyguardViewManager).hideAlternateBouncer(any())
+            verify(dismissCallback).onDismissCancelled()
         }
 
     @Test
@@ -99,34 +115,6 @@ class AlternateBouncerViewModelTest : SysuiTestCase() {
             )
             assertThat(scrimAlphas.size).isEqualTo(5)
             scrimAlphas.forEach { assertThat(it).isIn(Range.closed(0f, 1f)) }
-        }
-
-    @Test
-    fun forcePluginOpen() =
-        testScope.runTest {
-            val forcePluginOpen by collectLastValue(underTest.forcePluginOpen)
-
-            transitionRepository.sendTransitionSteps(
-                listOf(
-                    stepToAlternateBouncer(0f, TransitionState.STARTED),
-                    stepToAlternateBouncer(.4f),
-                    stepToAlternateBouncer(.6f),
-                    stepToAlternateBouncer(1f),
-                ),
-                testScope,
-            )
-            assertThat(forcePluginOpen).isTrue()
-
-            transitionRepository.sendTransitionSteps(
-                listOf(
-                    stepFromAlternateBouncer(0f, TransitionState.STARTED),
-                    stepFromAlternateBouncer(.3f),
-                    stepFromAlternateBouncer(.6f),
-                    stepFromAlternateBouncer(1f),
-                ),
-                testScope,
-            )
-            assertThat(forcePluginOpen).isFalse()
         }
 
     @Test

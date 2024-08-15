@@ -42,8 +42,6 @@ import javax.inject.Inject
 import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.launch
 
@@ -83,13 +81,10 @@ constructor(
         listenForTransitionToCamera(scope, keyguardInteractor)
     }
 
-    private val canTransitionToGoneOnWake: Flow<Boolean> =
-        combine(
-            keyguardInteractor.isKeyguardShowing,
-            keyguardInteractor.isKeyguardDismissible,
-        ) { isKeyguardShowing, isKeyguardDismissible ->
-            isKeyguardDismissible && !isKeyguardShowing
-        }
+    private fun canDismissLockscreen(): Boolean {
+        return !keyguardInteractor.isKeyguardShowing.value &&
+            keyguardInteractor.isKeyguardDismissible.value
+    }
 
     private fun listenForDozingToGoneViaBiometrics() {
         if (KeyguardWmStateRefactor.isEnabled) {
@@ -135,27 +130,20 @@ constructor(
                 .debounce(50L)
                 .filterRelevantKeyguardStateAnd { isAwake -> isAwake }
                 .sample(
-                    keyguardInteractor.isKeyguardOccluded,
                     communalInteractor.isCommunalAvailable,
                     communalSceneInteractor.isIdleOnCommunal,
-                    canTransitionToGoneOnWake,
-                    keyguardInteractor.primaryBouncerShowing,
                 )
-                .collect {
-                    (
-                        _,
-                        occluded,
-                        isCommunalAvailable,
-                        isIdleOnCommunal,
-                        canTransitionToGoneOnWake,
-                        primaryBouncerShowing) ->
+                .collect { (_, isCommunalAvailable, isIdleOnCommunal) ->
+                    val isKeyguardOccludedLegacy = keyguardInteractor.isKeyguardOccluded.value
+                    val primaryBouncerShowing = keyguardInteractor.primaryBouncerShowing.value
+
                     if (!deviceEntryInteractor.isLockscreenEnabled()) {
                         if (SceneContainerFlag.isEnabled) {
                             // TODO(b/336576536): Check if adaptation for scene framework is needed
                         } else {
                             startTransitionTo(KeyguardState.GONE)
                         }
-                    } else if (canTransitionToGoneOnWake) {
+                    } else if (canDismissLockscreen()) {
                         if (SceneContainerFlag.isEnabled) {
                             // TODO(b/336576536): Check if adaptation for scene framework is needed
                         } else {
@@ -167,7 +155,7 @@ constructor(
                         } else {
                             startTransitionTo(KeyguardState.PRIMARY_BOUNCER)
                         }
-                    } else if (occluded) {
+                    } else if (isKeyguardOccludedLegacy) {
                         startTransitionTo(KeyguardState.OCCLUDED)
                     } else if (isIdleOnCommunal && !communalSceneKtfRefactor()) {
                         if (SceneContainerFlag.isEnabled) {
@@ -285,9 +273,10 @@ constructor(
     private suspend fun transitionToGlanceableHub() {
         if (communalSceneKtfRefactor()) {
             communalSceneInteractor.changeScene(
-                CommunalScenes.Communal,
+                newScene = CommunalScenes.Communal,
+                loggingReason = "from dozing to hub",
                 // Immediately show the hub when transitioning from dozing to hub.
-                CommunalTransitionKeys.Immediately,
+                transitionKey = CommunalTransitionKeys.Immediately,
             )
         } else {
             startTransitionTo(KeyguardState.GLANCEABLE_HUB)

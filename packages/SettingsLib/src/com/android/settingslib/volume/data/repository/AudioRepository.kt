@@ -25,6 +25,7 @@ import android.media.AudioManager.OnCommunicationDeviceChangedListener
 import android.provider.Settings
 import androidx.concurrent.futures.DirectExecutor
 import com.android.internal.util.ConcurrentUtils
+import com.android.settingslib.volume.shared.AudioLogger
 import com.android.settingslib.volume.shared.AudioManagerEventsReceiver
 import com.android.settingslib.volume.shared.model.AudioManagerEvent
 import com.android.settingslib.volume.shared.model.AudioStream
@@ -99,7 +100,7 @@ class AudioRepositoryImpl(
     private val contentResolver: ContentResolver,
     private val backgroundCoroutineContext: CoroutineContext,
     private val coroutineScope: CoroutineScope,
-    private val logger: Logger,
+    private val logger: AudioLogger,
 ) : AudioRepository {
 
     private val streamSettingNames: Map<AudioStream, String> =
@@ -117,10 +118,10 @@ class AudioRepositoryImpl(
 
     override val mode: StateFlow<Int> =
         callbackFlow {
-                val listener = AudioManager.OnModeChangedListener { newMode -> trySend(newMode) }
-                audioManager.addOnModeChangedListener(ConcurrentUtils.DIRECT_EXECUTOR, listener)
-                awaitClose { audioManager.removeOnModeChangedListener(listener) }
-            }
+            val listener = AudioManager.OnModeChangedListener { newMode -> trySend(newMode) }
+            audioManager.addOnModeChangedListener(ConcurrentUtils.DIRECT_EXECUTOR, listener)
+            awaitClose { audioManager.removeOnModeChangedListener(listener) }
+        }
             .onStart { emit(audioManager.mode) }
             .flowOn(backgroundCoroutineContext)
             .stateIn(coroutineScope, SharingStarted.WhileSubscribed(), audioManager.mode)
@@ -140,14 +141,14 @@ class AudioRepositoryImpl(
     override val communicationDevice: StateFlow<AudioDeviceInfo?>
         get() =
             callbackFlow {
-                    val listener = OnCommunicationDeviceChangedListener { trySend(Unit) }
-                    audioManager.addOnCommunicationDeviceChangedListener(
-                        ConcurrentUtils.DIRECT_EXECUTOR,
-                        listener,
-                    )
+                val listener = OnCommunicationDeviceChangedListener { trySend(Unit) }
+                audioManager.addOnCommunicationDeviceChangedListener(
+                    ConcurrentUtils.DIRECT_EXECUTOR,
+                    listener,
+                )
 
-                    awaitClose { audioManager.removeOnCommunicationDeviceChangedListener(listener) }
-                }
+                awaitClose { audioManager.removeOnCommunicationDeviceChangedListener(listener) }
+            }
                 .filterNotNull()
                 .map { audioManager.communicationDevice }
                 .onStart { emit(audioManager.communicationDevice) }
@@ -160,15 +161,15 @@ class AudioRepositoryImpl(
 
     override fun getAudioStream(audioStream: AudioStream): Flow<AudioStreamModel> {
         return merge(
-                audioManagerEventsReceiver.events.filter {
-                    if (it is StreamAudioManagerEvent) {
-                        it.audioStream == audioStream
-                    } else {
-                        true
-                    }
-                },
-                volumeSettingChanges(audioStream),
-            )
+            audioManagerEventsReceiver.events.filter {
+                if (it is StreamAudioManagerEvent) {
+                    it.audioStream == audioStream
+                } else {
+                    true
+                }
+            },
+            volumeSettingChanges(audioStream),
+        )
             .conflate()
             .map { getCurrentAudioStream(audioStream) }
             .onStart { emit(getCurrentAudioStream(audioStream)) }
@@ -250,12 +251,5 @@ class AudioRepositoryImpl(
             contentResolver.registerContentObserver(uri, false, observer)
             awaitClose { contentResolver.unregisterContentObserver(observer) }
         }
-    }
-
-    interface Logger {
-
-        fun onSetVolumeRequested(audioStream: AudioStream, volume: Int)
-
-        fun onVolumeUpdateReceived(audioStream: AudioStream, model: AudioStreamModel)
     }
 }

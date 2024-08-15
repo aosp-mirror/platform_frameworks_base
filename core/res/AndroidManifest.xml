@@ -5609,7 +5609,8 @@
          @hide
     -->
     <permission android:name="android.permission.ALWAYS_BOUND_TV_INPUT"
-        android:protectionLevel="signature|privileged|vendorPrivileged" />
+        android:protectionLevel="signature|privileged|vendorPrivileged"
+        android:featureFlag="android.media.tv.flags.tis_always_bound_permission"/>
 
     <!-- Must be required by a {@link android.media.tv.interactive.TvInteractiveAppService}
          to ensure that only the system can bind to it.
@@ -6107,9 +6108,8 @@
                 android:description="@string/permdesc_deliverCompanionMessages"
                 android:protectionLevel="normal" />
 
-    <!-- @hide @FlaggedApi("android.companion.flags.companion_transport_apis")
-         Allows an application to send and receive messages via CDM transports.
-    -->
+    <!-- Allows an application to send and receive messages via CDM transports.
+         @hide -->
     <permission android:name="android.permission.USE_COMPANION_TRANSPORTS"
         android:protectionLevel="signature" />
 
@@ -8130,6 +8130,12 @@
          <p>Not for use by third-party applications.
          @hide -->
     <permission android:name="android.permission.MONITOR_STICKY_MODIFIER_STATE"
+                android:protectionLevel="signature" />
+
+    <!-- Allows low-level access to manage key gestures.
+         <p>Not for use by third-party applications.
+         @hide -->
+    <permission android:name="android.permission.MANAGE_KEY_GESTURES"
                 android:protectionLevel="signature" />
 
     <uses-permission android:name="android.permission.HANDLE_QUERY_PACKAGE_RESTART" />

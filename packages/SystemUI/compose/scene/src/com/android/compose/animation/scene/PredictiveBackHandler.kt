@@ -25,6 +25,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import com.android.compose.animation.scene.content.state.TransitionState
 import kotlin.coroutines.cancellation.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.CoroutineStart
@@ -128,7 +129,7 @@ private class PredictiveBackTransition(
                 try {
                     animatable.animateTo(targetProgress)
                 } finally {
-                    state.finishTransition(this@PredictiveBackTransition, scene)
+                    state.finishTransition(this@PredictiveBackTransition)
                 }
             }
             .also { animationJob = it }

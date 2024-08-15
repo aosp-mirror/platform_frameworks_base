@@ -20,6 +20,8 @@ import static android.provider.DeviceConfig.NAMESPACE_INPUT_NATIVE_BOOT;
 import static android.view.KeyEvent.KEYCODE_UNKNOWN;
 import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
 
+import static com.android.hardware.input.Flags.touchpadVisualizer;
+
 import android.Manifest;
 import android.annotation.EnforcePermission;
 import android.annotation.NonNull;
@@ -46,6 +48,7 @@ import android.hardware.input.IInputDeviceBatteryState;
 import android.hardware.input.IInputDevicesChangedListener;
 import android.hardware.input.IInputManager;
 import android.hardware.input.IInputSensorEventListener;
+import android.hardware.input.IKeyGestureEventListener;
 import android.hardware.input.IKeyboardBacklightListener;
 import android.hardware.input.IStickyModifierStateListener;
 import android.hardware.input.ITabletModeChangedListener;
@@ -53,6 +56,7 @@ import android.hardware.input.InputDeviceIdentifier;
 import android.hardware.input.InputManager;
 import android.hardware.input.InputSensorInfo;
 import android.hardware.input.InputSettings;
+import android.hardware.input.KeyGestureEvent;
 import android.hardware.input.KeyGlyphMap;
 import android.hardware.input.KeyboardLayout;
 import android.hardware.input.KeyboardLayoutSelectionResult;
@@ -119,6 +123,7 @@ import com.android.server.LocalServices;
 import com.android.server.Watchdog;
 import com.android.server.input.InputManagerInternal.LidSwitchCallback;
 import com.android.server.input.debug.FocusEventDebugView;
+import com.android.server.input.debug.TouchpadDebugViewController;
 import com.android.server.inputmethod.InputMethodManagerInternal;
 import com.android.server.policy.WindowManagerPolicy;
 
@@ -157,6 +162,7 @@ public class InputManagerService extends IInputManager.Stub
     private static final int MSG_DELIVER_INPUT_DEVICES_CHANGED = 1;
     private static final int MSG_RELOAD_DEVICE_ALIASES = 2;
     private static final int MSG_DELIVER_TABLET_MODE_CHANGED = 3;
+    private static final int MSG_KEY_GESTURE_COMPLETED = 4;
 
     private static final int DEFAULT_VIBRATION_MAGNITUDE = 192;
     private static final AdditionalDisplayInputProperties
@@ -300,11 +306,15 @@ public class InputManagerService extends IInputManager.Stub
     // Manages battery state for input devices.
     private final BatteryController mBatteryController;
 
+    @Nullable
+    private final TouchpadDebugViewController mTouchpadDebugViewController;
+
     // Manages Keyboard backlight
     private final KeyboardBacklightControllerInterface mKeyboardBacklightController;
 
     // Manages Sticky modifier state
     private final StickyModifierStateController mStickyModifierStateController;
+    private final KeyGestureController mKeyGestureController;
 
     // Manages Keyboard microphone mute led
     private final KeyboardLedController mKeyboardLedController;
@@ -454,6 +464,9 @@ public class InputManagerService extends IInputManager.Stub
         mSettingsObserver = new InputSettingsObserver(mContext, mHandler, this, mNative);
         mKeyboardLayoutManager = new KeyboardLayoutManager(mContext, mNative, mDataStore,
                 injector.getLooper());
+        mTouchpadDebugViewController =
+                touchpadVisualizer() ? new TouchpadDebugViewController(mContext,
+                        injector.getLooper()) : null;
         mBatteryController = new BatteryController(mContext, mNative, injector.getLooper(),
                 injector.getUEventManager());
         mKeyboardBacklightController = InputFeatureFlagProvider.isKeyboardBacklightControlEnabled()
@@ -461,6 +474,7 @@ public class InputManagerService extends IInputManager.Stub
                         injector.getLooper(), injector.getUEventManager())
                 : new KeyboardBacklightControllerInterface() {};
         mStickyModifierStateController = new StickyModifierStateController();
+        mKeyGestureController = new KeyGestureController();
         mKeyboardLedController = new KeyboardLedController(mContext, injector.getLooper(),
                 mNative);
         mKeyRemapper = new KeyRemapper(mContext, mNative, mDataStore, injector.getLooper());
@@ -582,6 +596,9 @@ public class InputManagerService extends IInputManager.Stub
         mKeyRemapper.systemRunning();
         mPointerIconCache.systemRunning();
         mKeyboardGlyphManager.systemRunning();
+        if (mTouchpadDebugViewController != null) {
+            mTouchpadDebugViewController.systemRunning();
+        }
     }
 
     private void reloadDeviceAliases() {
@@ -2703,6 +2720,35 @@ public class InputManagerService extends IInputManager.Stub
                 lockedModifierState);
     }
 
+    @Override
+    @EnforcePermission(Manifest.permission.MANAGE_KEY_GESTURES)
+    public void registerKeyGestureEventListener(
+            @NonNull IKeyGestureEventListener listener) {
+        super.registerKeyGestureEventListener_enforcePermission();
+        Objects.requireNonNull(listener);
+        mKeyGestureController.registerKeyGestureEventListener(listener,
+                Binder.getCallingPid());
+    }
+
+    @Override
+    @EnforcePermission(Manifest.permission.MANAGE_KEY_GESTURES)
+    public void unregisterKeyGestureEventListener(
+            @NonNull IKeyGestureEventListener listener) {
+        super.unregisterKeyGestureEventListener_enforcePermission();
+        Objects.requireNonNull(listener);
+        mKeyGestureController.unregisterKeyGestureEventListener(listener,
+                Binder.getCallingPid());
+    }
+
+    private void handleKeyGestureCompleted(KeyGestureEvent event) {
+        InputDevice device = getInputDevice(event.getDeviceId());
+        if (device == null || device.isVirtual()) {
+            return;
+        }
+        KeyboardMetricsCollector.logKeyboardSystemsEventReportedAtom(device, event);
+        mKeyGestureController.onKeyGestureEvent(event);
+    }
+
     /**
      * Callback interface implemented by the Window Manager.
      */
@@ -2871,6 +2917,9 @@ public class InputManagerService extends IInputManager.Stub
                     boolean inTabletMode = (boolean) args.arg1;
                     deliverTabletModeChanged(whenNanos, inTabletMode);
                     break;
+                case MSG_KEY_GESTURE_COMPLETED:
+                    KeyGestureEvent event = (KeyGestureEvent) msg.obj;
+                    handleKeyGestureCompleted(event);
             }
         }
     }
@@ -3195,6 +3244,14 @@ public class InputManagerService extends IInputManager.Stub
         @Override
         public int getLastUsedInputDeviceId() {
             return mNative.getLastUsedInputDeviceId();
+        }
+
+        @Override
+        public void notifyKeyGestureCompleted(int deviceId, int[] keycodes, int modifierState,
+                @KeyGestureEvent.KeyGestureType int gestureType) {
+            mHandler.obtainMessage(MSG_KEY_GESTURE_COMPLETED,
+                    new KeyGestureEvent(deviceId, keycodes, modifierState,
+                            gestureType)).sendToTarget();
         }
     }
 

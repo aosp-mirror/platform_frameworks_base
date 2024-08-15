@@ -233,7 +233,8 @@ public class BackgroundUserSoundNotifier {
         final Notification.Action switchUser = new Notification.Action.Builder(null,
                 fgContext.getString(R.string.bg_user_sound_notification_button_switch_user),
                 switchIntent).build();
-        return new Notification.Builder(mSystemUserContext, BUSN_CHANNEL_ID)
+        Notification.Builder notificationBuilder = new Notification.Builder(mSystemUserContext,
+                BUSN_CHANNEL_ID)
                 .setSmallIcon(icon)
                 .setTicker(title)
                 .setCategory(Notification.CATEGORY_REMINDER)
@@ -243,10 +244,14 @@ public class BackgroundUserSoundNotifier {
                 .setContentTitle(title)
                 .setContentIntent(muteIntent)
                 .setAutoCancel(true)
-                .setActions(mute, switchUser)
-                .setContentText(fgContext.getString(R.string.bg_user_sound_notification_message))
-                .setVisibility(Notification.VISIBILITY_PUBLIC)
-                .build();
+                .setVisibility(Notification.VISIBILITY_PUBLIC);
+        if (mUserManager.isUserSwitcherEnabled() && (mUserManager.getUserSwitchability(
+                UserHandle.of(fgContext.getUserId())) == UserManager.SWITCHABILITY_STATUS_OK)) {
+            notificationBuilder.setActions(mute, switchUser);
+        } else {
+            notificationBuilder.setActions(mute);
+        }
+        return notificationBuilder.build();
     }
 }
 

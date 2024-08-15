@@ -64,7 +64,6 @@ import com.android.systemui.res.R;
 import com.android.systemui.statusbar.notification.NotificationContentDescription;
 import com.android.systemui.statusbar.notification.NotificationDozeHelper;
 import com.android.systemui.statusbar.notification.NotificationUtils;
-import com.android.systemui.statusbar.notification.shared.NotificationIconContainerRefactor;
 import com.android.systemui.util.drawable.DrawableSize;
 
 import java.lang.annotation.Retention;
@@ -906,12 +905,7 @@ public class StatusBarIconView extends AnimatedImageView implements StatusIconDi
         return mDotAppearAmount;
     }
 
-    public void setDozing(boolean dozing, boolean animate, long delay) {
-        setDozing(dozing, animate, delay, /* onChildCompleted= */ null);
-    }
-
     public void setTintAlpha(float tintAlpha) {
-        if (NotificationIconContainerRefactor.isUnexpectedlyInLegacyMode()) return;
         setDozeAmount(tintAlpha);
     }
 
@@ -919,15 +913,6 @@ public class StatusBarIconView extends AnimatedImageView implements StatusIconDi
         mDozeAmount = dozeAmount;
         updateDecorColor();
         updateIconColor();
-    }
-
-    public void setDozing(boolean dozing, boolean animate, long delay,
-            @Nullable Runnable endRunnable) {
-        NotificationIconContainerRefactor.assertInLegacyMode();
-        mDozer.setDozing(f -> {
-            setDozeAmount(f);
-            updateAllowAnimation();
-        }, dozing, animate, delay, this, endRunnable);
     }
 
     private void updateAllowAnimation() {

@@ -18,6 +18,7 @@ package com.android.wm.shell.activityembedding;
 
 import static android.graphics.Matrix.MTRANS_X;
 import static android.graphics.Matrix.MTRANS_Y;
+import static android.window.TransitionInfo.FLAG_TRANSLUCENT;
 
 import android.annotation.CallSuper;
 import android.graphics.Point;
@@ -147,7 +148,10 @@ class ActivityEmbeddingAnimationAdapter {
     void onAnimationUpdateInner(@NonNull SurfaceControl.Transaction t) {
         // Update the surface position and alpha.
         if (com.android.graphics.libgui.flags.Flags.edgeExtensionShader()
-                && mAnimation.getExtensionEdges() != 0) {
+                && mAnimation.getExtensionEdges() != 0x0
+                && !(mChange.hasFlags(FLAG_TRANSLUCENT)
+                        && mChange.getActivityComponent() != null)) {
+            // Extend non-translucent activities
             t.setEdgeExtensionEffect(mLeash, mAnimation.getExtensionEdges());
         }
 
@@ -185,7 +189,10 @@ class ActivityEmbeddingAnimationAdapter {
     @CallSuper
     void onAnimationEnd(@NonNull SurfaceControl.Transaction t) {
         onAnimationUpdate(t, mAnimation.getDuration());
-        t.setEdgeExtensionEffect(mLeash, /* edge */ 0);
+        if (com.android.graphics.libgui.flags.Flags.edgeExtensionShader()
+                && mAnimation.getExtensionEdges() != 0x0) {
+            t.setEdgeExtensionEffect(mLeash, /* edge */ 0);
+        }
     }
 
     final long getDurationHint() {

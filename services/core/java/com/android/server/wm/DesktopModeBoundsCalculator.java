@@ -109,6 +109,13 @@ public final class DesktopModeBoundsCalculator {
         if (!DesktopModeFlagsUtil.DYNAMIC_INITIAL_BOUNDS.isEnabled(activity.mWmService.mContext)) {
             return centerInScreen(idealSize, screenBounds);
         }
+        if (activity.mAppCompatController.getAppCompatAspectRatioOverrides()
+                .hasFullscreenOverride()) {
+            // If the activity has a fullscreen override applied, it should be treated as
+            // resizeable and match the device orientation. Thus the ideal size can be
+            // applied.
+            return centerInScreen(idealSize, screenBounds);
+        }
         // TODO(b/353457301): Replace with app compat aspect ratio method when refactoring complete.
         float appAspectRatio = calculateAspectRatio(task, activity);
         final float tdaWidth = stableBounds.width();
@@ -234,12 +241,13 @@ public final class DesktopModeBoundsCalculator {
         float desiredAspectRatio = 0;
         if (taskInfo.isRunning) {
             final AppCompatTaskInfo appCompatTaskInfo =  taskInfo.appCompatTaskInfo;
-            if (appCompatTaskInfo.topActivityBoundsLetterboxed) {
-                desiredAspectRatio = (float) Math.max(
-                        appCompatTaskInfo.topActivityLetterboxWidth,
-                        appCompatTaskInfo.topActivityLetterboxHeight)
-                        / Math.min(appCompatTaskInfo.topActivityLetterboxWidth,
-                        appCompatTaskInfo.topActivityLetterboxHeight);
+            final int appLetterboxWidth =
+                    taskInfo.appCompatTaskInfo.topActivityLetterboxAppWidth;
+            final int appLetterboxHeight =
+                    taskInfo.appCompatTaskInfo.topActivityLetterboxAppHeight;
+            if (appCompatTaskInfo.isTopActivityLetterboxed()) {
+                desiredAspectRatio = (float) Math.max(appLetterboxWidth, appLetterboxHeight)
+                        / Math.min(appLetterboxWidth, appLetterboxHeight);
             } else {
                 desiredAspectRatio = Math.max(fullscreenHeight, fullscreenWidth)
                         / Math.min(fullscreenHeight, fullscreenWidth);

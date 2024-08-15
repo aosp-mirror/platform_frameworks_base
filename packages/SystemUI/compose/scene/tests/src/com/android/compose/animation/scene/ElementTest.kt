@@ -1380,8 +1380,8 @@ class ElementTest {
 
         // Manually finish the transition.
         rule.runOnUiThread {
-            state.finishTransition(aToB, SceneB)
-            state.finishTransition(bToC, SceneC)
+            state.finishTransition(aToB)
+            state.finishTransition(bToC)
         }
         rule.waitForIdle()
         assertThat(state.transitionState).isIdle()
@@ -1482,7 +1482,7 @@ class ElementTest {
 
         // Manually finish A => B so only B => C is remaining.
         bToCInterruptionProgress = 0f
-        rule.runOnUiThread { state.finishTransition(aToB, SceneB) }
+        rule.runOnUiThread { state.finishTransition(aToB) }
         rule
             .onNode(isElement(TestElements.Foo, SceneB))
             .assertPositionInRootIsEqualTo(offsetInB.x, offsetInB.y)
@@ -1513,7 +1513,7 @@ class ElementTest {
             rule.runOnUiThread {
                 MutableSceneTransitionLayoutStateImpl(
                         SceneA,
-                        transitions { overscroll(SceneA, Orientation.Horizontal) {} }
+                        transitions { overscrollDisabled(SceneA, Orientation.Horizontal) }
                     )
                     .apply {
                         startTransition(
@@ -1666,8 +1666,8 @@ class ElementTest {
                 MutableSceneTransitionLayoutStateImpl(
                     SceneA,
                     transitions {
-                        overscroll(SceneA, Orientation.Horizontal)
-                        overscroll(SceneB, Orientation.Horizontal)
+                        overscrollDisabled(SceneA, Orientation.Horizontal)
+                        overscrollDisabled(SceneB, Orientation.Horizontal)
                     }
                 )
             }
@@ -1714,8 +1714,8 @@ class ElementTest {
                 MutableSceneTransitionLayoutStateImpl(
                     SceneA,
                     transitions {
-                        overscroll(SceneA, Orientation.Horizontal)
-                        overscroll(SceneB, Orientation.Horizontal)
+                        overscrollDisabled(SceneA, Orientation.Horizontal)
+                        overscrollDisabled(SceneB, Orientation.Horizontal)
                     }
                 )
             }
@@ -1723,9 +1723,11 @@ class ElementTest {
         val fooInA = "fooInA"
         val fooInB = "fooInB"
 
+        val key = MovableElementKey("Foo", contents = setOf(SceneA, SceneB))
+
         @Composable
         fun ContentScope.MovableFoo(text: String, modifier: Modifier = Modifier) {
-            MovableElement(TestElements.Foo, modifier) { content { Text(text) } }
+            MovableElement(key, modifier) { content { Text(text) } }
         }
 
         rule.setContent {
@@ -2000,6 +2002,7 @@ class ElementTest {
             transition(
                 from = SceneB,
                 to = SceneC,
+                current = { SceneB },
                 progress = { 0f },
                 interruptionProgress = { interruptionProgress },
                 onFinish = neverFinish(),
@@ -2016,8 +2019,8 @@ class ElementTest {
         // 100%. We should be at (20dp, 20dp), unless the interruption deltas have not been
         // correctly cleaned.
         rule.runOnUiThread {
-            state.finishTransition(aToB, idleScene = SceneB)
-            state.finishTransition(bToC, idleScene = SceneB)
+            state.finishTransition(aToB)
+            state.finishTransition(bToC)
             state.startTransition(
                 transition(
                     from = SceneB,
@@ -2036,7 +2039,7 @@ class ElementTest {
             rule.runOnIdle {
                 MutableSceneTransitionLayoutStateImpl(
                     SceneA,
-                    transitions { overscroll(SceneA, Orientation.Horizontal) }
+                    transitions { overscrollDisabled(SceneA, Orientation.Horizontal) }
                 )
             }
 
