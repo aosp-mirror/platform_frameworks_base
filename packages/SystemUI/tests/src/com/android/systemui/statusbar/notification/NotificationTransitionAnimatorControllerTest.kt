@@ -91,7 +91,12 @@ class NotificationTransitionAnimatorControllerTest : SysuiTestCase() {
         assertFalse(isExpandAnimationRunning!!)
 
         verify(headsUpManager)
-            .removeNotification(notificationKey, true /* releaseImmediately */, true /* animate */)
+            .removeNotification(
+                notificationKey,
+                /* releaseImmediately= */ true,
+                /* animate= */ true,
+                /* reason= */ "onIntentStarted(willAnimate=false)"
+            )
         verify(onFinishAnimationCallback).run()
     }
 
@@ -109,7 +114,12 @@ class NotificationTransitionAnimatorControllerTest : SysuiTestCase() {
         assertFalse(isExpandAnimationRunning!!)
 
         verify(headsUpManager)
-            .removeNotification(notificationKey, true /* releaseImmediately */, true /* animate */)
+            .removeNotification(
+                notificationKey,
+                /* releaseImmediately= */ true,
+                /* animate= */ true,
+                /* reason= */ "onLaunchAnimationCancelled()"
+            )
         verify(onFinishAnimationCallback).run()
     }
 
@@ -127,7 +137,12 @@ class NotificationTransitionAnimatorControllerTest : SysuiTestCase() {
         assertFalse(isExpandAnimationRunning!!)
 
         verify(headsUpManager)
-            .removeNotification(notificationKey, true /* releaseImmediately */, false /* animate */)
+            .removeNotification(
+                notificationKey,
+                /* releaseImmediately= */ true,
+                /* animate= */ false,
+                /* reason= */ "onLaunchAnimationEnd()"
+            )
         verify(onFinishAnimationCallback).run()
     }
 
@@ -161,12 +176,18 @@ class NotificationTransitionAnimatorControllerTest : SysuiTestCase() {
         controller.onTransitionAnimationEnd(isExpandingFullyAbove = true)
 
         verify(headsUpManager)
-            .removeNotification(summary.key, true /* releaseImmediately */, false /* animate */)
+            .removeNotification(
+                summary.key,
+                /* releaseImmediately= */ true,
+                /* animate= */ false,
+                /* reason= */ "onLaunchAnimationEnd()"
+            )
         verify(headsUpManager, never())
             .removeNotification(
                 notification.entry.key,
-                true /* releaseImmediately */,
-                false /* animate */
+                /* releaseImmediately= */ true,
+                /* animate= */ false,
+                /* reason= */ "onLaunchAnimationEnd()"
             )
     }
 
