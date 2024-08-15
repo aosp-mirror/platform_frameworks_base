@@ -52,4 +52,5 @@ data class DeviceItem(
     val background: Int? = null,
     var isEnabled: Boolean = true,
     var actionAccessibilityLabel: String = "",
+    var isActive: Boolean = false
 )
