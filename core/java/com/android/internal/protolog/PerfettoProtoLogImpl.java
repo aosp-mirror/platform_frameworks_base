@@ -162,8 +162,10 @@ public class PerfettoProtoLogImpl extends IProtoLogClient.Stub implements IProto
             @Nullable ViewerConfigInputStreamProvider viewerConfigInputStreamProvider,
             @Nullable ProtoLogViewerConfigReader viewerConfigReader,
             @NonNull Runnable cacheUpdater) {
-        assert (viewerConfigFilePath == null || viewerConfigInputStreamProvider == null) :
-                "Only one of viewerConfigFilePath and viewerConfigInputStreamProvider can be set";
+        if (viewerConfigFilePath != null && viewerConfigInputStreamProvider != null) {
+            throw new RuntimeException("Only one of viewerConfigFilePath and "
+                    + "viewerConfigInputStreamProvider can be set");
+        }
 
         Producer.init(InitArguments.DEFAULTS);
         DataSourceParams params =
