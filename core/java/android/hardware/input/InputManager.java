@@ -1378,33 +1378,31 @@ public final class InputManager {
     }
 
     /**
-     * Registers a keyboard system shortcut listener for {@link KeyboardSystemShortcut} being
-     * triggered.
+     * Registers a key gesture event listener for {@link KeyGestureEvent} being triggered.
      *
      * @param executor an executor on which the callback will be called
-     * @param listener the {@link KeyboardSystemShortcutListener}
+     * @param listener the {@link KeyGestureEventListener}
      * @throws IllegalArgumentException if {@code listener} has already been registered previously.
      * @throws NullPointerException     if {@code listener} or {@code executor} is null.
      * @hide
-     * @see #unregisterKeyboardSystemShortcutListener(KeyboardSystemShortcutListener)
+     * @see #unregisterKeyGestureEventListener(KeyGestureEventListener)
      */
-    @RequiresPermission(Manifest.permission.MONITOR_KEYBOARD_SYSTEM_SHORTCUTS)
-    public void registerKeyboardSystemShortcutListener(@NonNull Executor executor,
-            @NonNull KeyboardSystemShortcutListener listener) throws IllegalArgumentException {
-        mGlobal.registerKeyboardSystemShortcutListener(executor, listener);
+    @RequiresPermission(Manifest.permission.MANAGE_KEY_GESTURES)
+    public void registerKeyGestureEventListener(@NonNull Executor executor,
+            @NonNull KeyGestureEventListener listener) throws IllegalArgumentException {
+        mGlobal.registerKeyGestureEventListener(executor, listener);
     }
 
     /**
-     * Unregisters a previously added keyboard system shortcut listener.
+     * Unregisters a previously added key gesture event listener.
      *
-     * @param listener the {@link KeyboardSystemShortcutListener}
+     * @param listener the {@link KeyGestureEventListener}
      * @hide
-     * @see #registerKeyboardSystemShortcutListener(Executor, KeyboardSystemShortcutListener)
+     * @see #registerKeyGestureEventListener(Executor, KeyGestureEventListener)
      */
-    @RequiresPermission(Manifest.permission.MONITOR_KEYBOARD_SYSTEM_SHORTCUTS)
-    public void unregisterKeyboardSystemShortcutListener(
-            @NonNull KeyboardSystemShortcutListener listener) {
-        mGlobal.unregisterKeyboardSystemShortcutListener(listener);
+    @RequiresPermission(Manifest.permission.MANAGE_KEY_GESTURES)
+    public void unregisterKeyGestureEventListener(@NonNull KeyGestureEventListener listener) {
+        mGlobal.unregisterKeyGestureEventListener(listener);
     }
 
     /**
@@ -1510,19 +1508,18 @@ public final class InputManager {
     }
 
     /**
-     * A callback used to be notified about keyboard system shortcuts being triggered.
+     * A callback used to notify about key gesture event on completion.
      *
-     * @see #registerKeyboardSystemShortcutListener(Executor, KeyboardSystemShortcutListener)
-     * @see #unregisterKeyboardSystemShortcutListener(KeyboardSystemShortcutListener)
+     * @see #registerKeyGestureEventListener(Executor, KeyGestureEventListener)
+     * @see #unregisterKeyGestureEventListener(KeyGestureEventListener)
      * @hide
      */
-    public interface KeyboardSystemShortcutListener {
+    public interface KeyGestureEventListener {
         /**
-         * Called when a keyboard system shortcut is triggered.
+         * Called when a key gesture event occurs.
          *
-         * @param systemShortcut the shortcut info about the shortcut that was triggered.
+         * @param event the gesture event that occurred.
          */
-        void onKeyboardSystemShortcutTriggered(int deviceId,
-                @NonNull KeyboardSystemShortcut systemShortcut);
+        void onKeyGestureEvent(@NonNull KeyGestureEvent event);
     }
 }

@@ -17,6 +17,7 @@
 package com.android.systemui.inputdevice.tutorial.data.repository
 
 import android.content.Context
+import androidx.annotation.VisibleForTesting
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
@@ -33,15 +34,19 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 
 @SysUISingleton
-class TutorialSchedulerRepository
-@Inject
-constructor(
-    @Application private val applicationContext: Context,
-    @Background private val backgroundScope: CoroutineScope
+class TutorialSchedulerRepository(
+    private val applicationContext: Context,
+    backgroundScope: CoroutineScope,
+    dataStoreName: String
 ) {
+    @Inject
+    constructor(
+        @Application applicationContext: Context,
+        @Background backgroundScope: CoroutineScope
+    ) : this(applicationContext, backgroundScope, dataStoreName = "TutorialScheduler")
 
     private val Context.dataStore: DataStore<Preferences> by
-        preferencesDataStore(name = DATASTORE_NAME, scope = backgroundScope)
+        preferencesDataStore(name = dataStoreName, scope = backgroundScope)
 
     suspend fun isLaunched(deviceType: DeviceType): Boolean = loadData()[deviceType]!!.isLaunched
 
@@ -81,8 +86,12 @@ constructor(
     private fun getConnectKey(device: DeviceType) =
         longPreferencesKey(device.name + CONNECT_TIME_SUFFIX)
 
+    @VisibleForTesting
+    suspend fun clearDataStore() {
+        applicationContext.dataStore.edit { it.clear() }
+    }
+
     companion object {
-        const val DATASTORE_NAME = "TutorialScheduler"
         const val IS_LAUNCHED_SUFFIX = "_IS_LAUNCHED"
         const val CONNECT_TIME_SUFFIX = "_CONNECTED_TIME"
     }

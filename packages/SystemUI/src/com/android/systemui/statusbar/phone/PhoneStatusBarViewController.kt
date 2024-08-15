@@ -23,10 +23,13 @@ import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.view.ViewTreeObserver
+import androidx.annotation.VisibleForTesting
 import com.android.systemui.Flags
 import com.android.systemui.Gefingerpoken
+import com.android.systemui.battery.BatteryMeterView
 import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.flags.Flags.ENABLE_UNFOLD_STATUS_BAR_ANIMATIONS
+import com.android.systemui.plugins.DarkIconDispatcher
 import com.android.systemui.res.R
 import com.android.systemui.scene.shared.flag.SceneContainerFlag
 import com.android.systemui.scene.ui.view.WindowRootView
@@ -35,6 +38,7 @@ import com.android.systemui.shade.ShadeLogger
 import com.android.systemui.shade.ShadeViewController
 import com.android.systemui.shade.domain.interactor.PanelExpansionInteractor
 import com.android.systemui.shared.animation.UnfoldMoveFromCenterAnimator
+import com.android.systemui.statusbar.policy.Clock
 import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.statusbar.window.StatusBarWindowStateController
 import com.android.systemui.unfold.SysUIUnfoldComponent
@@ -68,19 +72,27 @@ private constructor(
     private val viewUtil: ViewUtil,
     private val configurationController: ConfigurationController,
     private val statusOverlayHoverListenerFactory: StatusOverlayHoverListenerFactory,
+    private val darkIconDispatcher: DarkIconDispatcher,
 ) : ViewController<PhoneStatusBarView>(view) {
 
+    private lateinit var battery: BatteryMeterView
+    private lateinit var clock: Clock
     private lateinit var statusContainer: View
 
     private val configurationListener =
         object : ConfigurationController.ConfigurationListener {
             override fun onDensityOrFontScaleChanged() {
-                mView.onDensityOrFontScaleChanged()
+                clock.onDensityOrFontScaleChanged()
             }
         }
 
     override fun onViewAttached() {
         statusContainer = mView.requireViewById(R.id.system_icons)
+        clock = mView.requireViewById(R.id.clock)
+        battery = mView.requireViewById(R.id.battery)
+
+        addDarkReceivers()
+
         statusContainer.setOnHoverListener(
             statusOverlayHoverListenerFactory.createDarkAwareListener(statusContainer)
         )
@@ -133,7 +145,9 @@ private constructor(
         }
     }
 
-    override fun onViewDetached() {
+    @VisibleForTesting
+    public override fun onViewDetached() {
+        removeDarkReceivers()
         statusContainer.setOnHoverListener(null)
         progressProvider?.setReadyToHandleTransition(false)
         moveFromCenterAnimationController?.onViewDetached()
@@ -180,6 +194,16 @@ private constructor(
                 !upOrCancel || shadeController.isExpandedVisible
             )
         }
+    }
+
+    private fun addDarkReceivers() {
+        darkIconDispatcher.addDarkReceiver(battery)
+        darkIconDispatcher.addDarkReceiver(clock)
+    }
+
+    private fun removeDarkReceivers() {
+        darkIconDispatcher.removeDarkReceiver(battery)
+        darkIconDispatcher.removeDarkReceiver(clock)
     }
 
     inner class PhoneStatusBarViewTouchHandler : Gefingerpoken {
@@ -285,6 +309,7 @@ private constructor(
         private val viewUtil: ViewUtil,
         private val configurationController: ConfigurationController,
         private val statusOverlayHoverListenerFactory: StatusOverlayHoverListenerFactory,
+        private val darkIconDispatcher: DarkIconDispatcher,
     ) {
         fun create(view: PhoneStatusBarView): PhoneStatusBarViewController {
             val statusBarMoveFromCenterAnimationController =
@@ -309,6 +334,7 @@ private constructor(
                 viewUtil,
                 configurationController,
                 statusOverlayHoverListenerFactory,
+                darkIconDispatcher,
             )
         }
     }

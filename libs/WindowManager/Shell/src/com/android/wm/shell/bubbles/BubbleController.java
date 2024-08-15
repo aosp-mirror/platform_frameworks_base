@@ -1997,10 +1997,15 @@ public class BubbleController implements ConfigurationChangeListener,
 
         @Override
         public void expansionChanged(boolean isExpanded) {
-            // in bubble bar mode, let the request to show the expanded view come from launcher.
-            // only collapse here if we're collapsing.
-            if (mLayerView != null && !isExpanded) {
-                mLayerView.collapse();
+            if (mLayerView != null) {
+                if (!isExpanded) {
+                    mLayerView.collapse();
+                } else {
+                    BubbleViewProvider selectedBubble = mBubbleData.getSelectedBubble();
+                    if (selectedBubble != null) {
+                        mLayerView.showExpandedView(selectedBubble);
+                    }
+                }
             }
         }
 
@@ -2145,13 +2150,6 @@ public class BubbleController implements ConfigurationChangeListener,
             }
         }
     };
-
-    private void showExpandedViewForBubbleBar() {
-        BubbleViewProvider selectedBubble = mBubbleData.getSelectedBubble();
-        if (selectedBubble != null) {
-            mLayerView.showExpandedView(selectedBubble);
-        }
-    }
 
     private void updateOverflowButtonDot() {
         BubbleOverflow overflow = mBubbleData.getOverflow();
@@ -2533,15 +2531,6 @@ public class BubbleController implements ConfigurationChangeListener,
             mMainExecutor.execute(() -> {
                 mBubblePositioner.setBubbleBarTopOnScreen(topOnScreen);
                 if (mLayerView != null) mLayerView.updateExpandedView();
-            });
-        }
-
-        @Override
-        public void showExpandedView() {
-            mMainExecutor.execute(() -> {
-                if (mLayerView != null) {
-                    showExpandedViewForBubbleBar();
-                }
             });
         }
     }
