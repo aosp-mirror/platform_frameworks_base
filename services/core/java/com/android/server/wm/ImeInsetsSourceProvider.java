@@ -268,7 +268,7 @@ final class ImeInsetsSourceProvider extends InsetsSourceProvider {
 
     // TODO(b/353463205) change statsToken to be NonNull, after the flag is permanently enabled
     @Override
-    protected boolean updateClientVisibility(InsetsControlTarget caller,
+    protected boolean updateClientVisibility(InsetsTarget caller,
             @Nullable ImeTracker.Token statsToken) {
         InsetsControlTarget controlTarget = getControlTarget();
         if (caller != controlTarget) {
@@ -283,12 +283,13 @@ final class ImeInsetsSourceProvider extends InsetsSourceProvider {
                         ImeTracker.forLogging().onProgress(statsToken,
                                 ImeTracker.PHASE_WM_SET_REMOTE_TARGET_IME_VISIBILITY);
                         controlTarget.setImeInputTargetRequestedVisibility(imeVisible);
-                    } else {
+                    } else if (caller instanceof InsetsControlTarget) {
                         // In case of a virtual display that cannot show the IME, the
                         // controlTarget will be null here, as no controlTarget was set yet. In
                         // that case, proceed similar to the multi window mode (fallback =
                         // RemoteInsetsControlTarget of the default display)
-                        controlTarget = mDisplayContent.getImeHostOrFallback(caller.getWindow());
+                        controlTarget = mDisplayContent.getImeHostOrFallback(
+                                ((InsetsControlTarget) caller).getWindow());
 
                         if (controlTarget != caller) {
                             ImeTracker.forLogging().onProgress(statsToken,
@@ -300,8 +301,7 @@ final class ImeInsetsSourceProvider extends InsetsSourceProvider {
                         }
                     }
 
-                    WindowState windowState = caller.getWindow();
-                    invokeOnImeRequestedChangedListener(windowState, statsToken);
+                    invokeOnImeRequestedChangedListener(caller, statsToken);
                 } else {
                     // TODO(b/353463205) add ImeTracker?
                 }
@@ -309,20 +309,16 @@ final class ImeInsetsSourceProvider extends InsetsSourceProvider {
             return false;
         }
         boolean changed = super.updateClientVisibility(caller, statsToken);
-        if (!Flags.refactorInsetsController()) {
+        if (!Flags.refactorInsetsController() && caller instanceof InsetsControlTarget) {
             if (changed && caller.isRequestedVisible(mSource.getType())) {
-                reportImeDrawnForOrganizerIfNeeded(caller);
+                reportImeDrawnForOrganizerIfNeeded((InsetsControlTarget) caller);
             }
         }
         changed |= mDisplayContent.onImeInsetsClientVisibilityUpdate();
         if (Flags.refactorInsetsController()) {
             if (changed) {
-                // RemoteInsetsControlTarget does not have a window. In this case, we use the
-                // windowState from the imeInputTarget
-                WindowState windowState = caller.getWindow() != null ? caller.getWindow()
-                        : ((mDisplayContent.getImeInputTarget() != null)
-                                ? mDisplayContent.getImeInputTarget().getWindowState() : null);
-                invokeOnImeRequestedChangedListener(windowState, statsToken);
+                invokeOnImeRequestedChangedListener(mDisplayContent.getImeInputTarget(),
+                        statsToken);
             } else {
                 // TODO(b/329229469) change phase and check cancelled / failed
                 ImeTracker.forLogging().onCancelled(statsToken,
@@ -334,32 +330,31 @@ final class ImeInsetsSourceProvider extends InsetsSourceProvider {
 
     void onInputTargetChanged(InputTarget target) {
         if (Flags.refactorInsetsController() && target != null) {
-            WindowState targetWin = target.getWindowState();
             InsetsControlTarget imeControlTarget = getControlTarget();
-            if (target != imeControlTarget && targetWin != null) {
+            if (target != imeControlTarget) {
                 // If the targetWin is not the imeControlTarget (=RemoteInsetsControlTarget) let it
                 // know about the new requestedVisibleTypes for the IME.
                 if (imeControlTarget != null) {
                     imeControlTarget.setImeInputTargetRequestedVisibility(
-                            (targetWin.getRequestedVisibleTypes() & WindowInsets.Type.ime()) != 0);
+                            (target.getRequestedVisibleTypes() & WindowInsets.Type.ime()) != 0);
                 }
             }
         }
     }
 
     // TODO(b/353463205) check callers to see if we can make statsToken @NonNull
-    private void invokeOnImeRequestedChangedListener(WindowState windowState,
+    private void invokeOnImeRequestedChangedListener(InsetsTarget insetsTarget,
             @Nullable ImeTracker.Token statsToken) {
         final var imeListener = mDisplayContent.mWmService.mOnImeRequestedChangedListener;
         if (imeListener != null) {
-            if (windowState != null) {
+            if (insetsTarget != null) {
                 ImeTracker.forLogging().onProgress(statsToken,
                         ImeTracker.PHASE_WM_POSTING_CHANGED_IME_VISIBILITY);
                 mDisplayContent.mWmService.mH.post(() -> {
                     ImeTracker.forLogging().onProgress(statsToken,
                             ImeTracker.PHASE_WM_INVOKING_IME_REQUESTED_LISTENER);
-                    imeListener.onImeRequestedChanged(windowState.mClient.asBinder(),
-                            windowState.isRequestedVisible(WindowInsets.Type.ime()), statsToken);
+                    imeListener.onImeRequestedChanged(insetsTarget.getWindowToken(),
+                            insetsTarget.isRequestedVisible(WindowInsets.Type.ime()), statsToken);
                 });
             } else {
                 ImeTracker.forLogging().onFailed(statsToken,
@@ -676,7 +671,7 @@ final class ImeInsetsSourceProvider extends InsetsSourceProvider {
         return target == mDisplayContent.getImeFallback();
     }
 
-    private boolean isImeInputTarget(@NonNull InsetsControlTarget target) {
+    private boolean isImeInputTarget(@NonNull InsetsTarget target) {
         return target == mDisplayContent.getImeInputTarget();
     }
 

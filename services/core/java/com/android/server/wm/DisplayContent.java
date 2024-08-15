@@ -710,6 +710,8 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
     @Retention(RetentionPolicy.SOURCE)
     @interface InputMethodTarget {}
 
+    /** The surface parent window of the IME container. */
+    private WindowContainer mInputMethodSurfaceParentWindow;
     /** The surface parent of the IME container. */
     @VisibleForTesting
     SurfaceControl mInputMethodSurfaceParent;
@@ -1533,6 +1535,10 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
     @ScreenOrientation
     int getLastOrientation() {
         return mDisplayRotation.getLastOrientation();
+    }
+
+    WindowContainer getImeParentWindow() {
+        return mInputMethodSurfaceParentWindow;
     }
 
     void registerRemoteAnimations(RemoteAnimationDefinition definition) {
@@ -4739,13 +4745,17 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
                 Slog.i(TAG_WM, "ImeContainer is organized. Skip updateImeParent.");
             }
             // Leave the ImeContainer where the DisplayAreaPolicy placed it.
-            // FEATURE_IME is organized by vendor so they are responible for placing the surface.
+            // FEATURE_IME is organized by vendor so they are responsible for placing the surface.
+            mInputMethodSurfaceParentWindow = null;
             mInputMethodSurfaceParent = null;
             return;
         }
 
-        final SurfaceControl newParent = computeImeParent();
+        final var newParentWindow = computeImeParent();
+        final SurfaceControl newParent =
+                newParentWindow != null ? newParentWindow.getSurfaceControl() : null;
         if (newParent != null && newParent != mInputMethodSurfaceParent) {
+            mInputMethodSurfaceParentWindow = newParentWindow;
             mInputMethodSurfaceParent = newParent;
             getSyncTransaction().reparent(mImeWindowsContainer.mSurfaceControl, newParent);
             if (DEBUG_IME_VISIBILITY) {
@@ -4806,7 +4816,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
      * Computes the window the IME should be attached to.
      */
     @VisibleForTesting
-    SurfaceControl computeImeParent() {
+    WindowContainer computeImeParent() {
         if (!ImeTargetVisibilityPolicy.canComputeImeParent(mImeLayeringTarget, mImeInputTarget)) {
             return null;
         }
@@ -4814,11 +4824,10 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         // screen. If it's not covering the entire screen the IME might extend beyond the apps
         // bounds.
         if (shouldImeAttachedToApp()) {
-            return mImeLayeringTarget.mActivityRecord.getSurfaceControl();
+            return mImeLayeringTarget.mActivityRecord;
         }
         // Otherwise, we just attach it to where the display area policy put it.
-        return mImeWindowsContainer.getParent() != null
-                ? mImeWindowsContainer.getParent().getSurfaceControl() : null;
+        return mImeWindowsContainer.getParent();
     }
 
     void setLayoutNeeded() {

@@ -587,7 +587,14 @@ public class WindowlessWindowManager implements IWindowSession {
 
     @Override
     public void updateRequestedVisibleTypes(IWindow window,
-            @InsetsType int requestedVisibleTypes, @Nullable ImeTracker.Token imeStatsToken)  {
+            @InsetsType int requestedVisibleTypes, @Nullable ImeTracker.Token imeStatsToken)
+            throws RemoteException {
+        if (android.view.inputmethod.Flags.refactorInsetsController()) {
+            // Embedded windows do not control insets (except for IME). The host window is
+            // responsible for controlling the insets.
+            mRealWm.updateRequestedVisibleTypes(window,
+                    requestedVisibleTypes & WindowInsets.Type.ime(), imeStatsToken);
+        }
     }
 
     @Override

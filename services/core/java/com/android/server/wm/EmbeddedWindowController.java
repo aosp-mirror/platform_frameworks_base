@@ -33,6 +33,7 @@ import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
 import android.view.InputApplicationHandle;
 import android.view.InputChannel;
+import android.view.WindowInsets;
 import android.window.InputTransferToken;
 
 import com.android.internal.protolog.ProtoLog;
@@ -222,6 +223,10 @@ class EmbeddedWindowController {
 
         private boolean mIsFocusable;
 
+        // The EmbeddedWindow can only request the IME. All other insets types are requested by
+        // the host window.
+        private @WindowInsets.Type.InsetsType int mRequestedVisibleTypes = 0;
+
         /**
          * @param session  calling session to check ownership of the window
          * @param clientToken client token used to clean up the map if the embedding process dies
@@ -311,6 +316,27 @@ class EmbeddedWindowController {
         }
 
         @Override
+        public boolean isRequestedVisible(@WindowInsets.Type.InsetsType int types) {
+            return (mRequestedVisibleTypes & types) != 0;
+        }
+
+        @Override
+        public @WindowInsets.Type.InsetsType int getRequestedVisibleTypes() {
+            return mRequestedVisibleTypes;
+        }
+
+        /**
+         * Only the IME can be requested from the EmbeddedWindow.
+         * @param requestedVisibleTypes other types than {@link WindowInsets.Type.IME} are
+         *                              not sent to system server via WindowlessWindowManager.
+         */
+        void setRequestedVisibleTypes(@WindowInsets.Type.InsetsType int requestedVisibleTypes) {
+            if (mRequestedVisibleTypes != requestedVisibleTypes) {
+                mRequestedVisibleTypes = requestedVisibleTypes;
+            }
+        }
+
+        @Override
         public int getPid() {
             return mOwnerPid;
         }
@@ -375,6 +401,11 @@ class EmbeddedWindowController {
 
         @Override
         public boolean shouldControlIme() {
+            if (android.view.inputmethod.Flags.refactorInsetsController()) {
+                // EmbeddedWindow should never be able to control the IME directly, but only the
+                // RemoteInsetsControlTarget.
+                return false;
+            }
             return mHostWindowState != null;
         }
 

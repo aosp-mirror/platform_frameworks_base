@@ -708,8 +708,25 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
                 win.getDisplayContent().getInsetsPolicy().onRequestedVisibleTypesChanged(win,
                         imeStatsToken);
             } else {
-                ImeTracker.forLogging().onFailed(imeStatsToken,
-                        ImeTracker.PHASE_WM_UPDATE_REQUESTED_VISIBLE_TYPES);
+                EmbeddedWindowController.EmbeddedWindow embeddedWindow = null;
+                if (android.view.inputmethod.Flags.refactorInsetsController()) {
+                    embeddedWindow = mService.mEmbeddedWindowController.getByWindowToken(
+                            window.asBinder());
+                }
+                if (embeddedWindow != null) {
+                    // If there is no WindowState for the IWindow, it could be still an
+                    // EmbeddedWindow. Therefore, check the EmbeddedWindowController as well
+                    // TODO(b/329229469) Use different phase here
+                    ImeTracker.forLogging().onProgress(imeStatsToken,
+                            ImeTracker.PHASE_WM_UPDATE_REQUESTED_VISIBLE_TYPES);
+                    embeddedWindow.setRequestedVisibleTypes(
+                            requestedVisibleTypes & WindowInsets.Type.ime());
+                    embeddedWindow.getDisplayContent().getInsetsPolicy()
+                            .onRequestedVisibleTypesChanged(embeddedWindow, imeStatsToken);
+                } else {
+                    ImeTracker.forLogging().onFailed(imeStatsToken,
+                            ImeTracker.PHASE_WM_UPDATE_REQUESTED_VISIBLE_TYPES);
+                }
             }
         }
     }

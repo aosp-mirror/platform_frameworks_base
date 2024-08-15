@@ -434,7 +434,7 @@ class InsetsPolicy {
         return originalState;
     }
 
-    void onRequestedVisibleTypesChanged(InsetsControlTarget caller,
+    void onRequestedVisibleTypesChanged(InsetsTarget caller,
             @Nullable ImeTracker.Token statsToken) {
         mStateController.onRequestedVisibleTypesChanged(caller, statsToken);
         checkAbortTransient(caller);
@@ -449,7 +449,7 @@ class InsetsPolicy {
      *
      * @param caller who changed the insets state.
      */
-    private void checkAbortTransient(InsetsControlTarget caller) {
+    private void checkAbortTransient(InsetsTarget caller) {
         if (mShowingTransientTypes == 0) {
             return;
         }

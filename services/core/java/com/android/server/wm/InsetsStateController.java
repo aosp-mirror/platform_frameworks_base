@@ -217,7 +217,7 @@ class InsetsStateController {
         }
     }
 
-    void onRequestedVisibleTypesChanged(InsetsControlTarget caller,
+    void onRequestedVisibleTypesChanged(InsetsTarget caller,
             @Nullable ImeTracker.Token statsToken) {
         boolean changed = false;
         for (int i = mProviders.size() - 1; i >= 0; i--) {
@@ -236,7 +236,7 @@ class InsetsStateController {
         }
     }
 
-    @InsetsType int getFakeControllingTypes(InsetsControlTarget target) {
+    @InsetsType int getFakeControllingTypes(InsetsTarget target) {
         @InsetsType int types = 0;
         for (int i = mProviders.size() - 1; i >= 0; i--) {
             final InsetsSourceProvider provider = mProviders.valueAt(i);
