@@ -89,4 +89,12 @@ abstract class OutputFilter {
             List<String> {
         return emptyList()
     }
+
+    /**
+     * Take a class (internal) name. If the class needs to be renamed, return the new name.
+     * This is used by [FilterRemapper].
+     */
+    open fun remapType(className: String): String? {
+        return null
+    }
 }

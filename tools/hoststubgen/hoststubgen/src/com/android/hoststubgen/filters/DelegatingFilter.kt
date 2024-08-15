@@ -87,4 +87,8 @@ abstract class DelegatingFilter(
     ): List<String> {
         return fallback.getMethodCallHooks(className, methodName, descriptor)
     }
+
+    override fun remapType(className: String): String? {
+        return fallback.remapType(className)
+    }
 }

@@ -22,7 +22,6 @@ import com.android.hoststubgen.log
 import com.android.hoststubgen.normalizeTextLine
 import com.android.hoststubgen.whitespaceRegex
 import org.objectweb.asm.Opcodes
-import org.objectweb.asm.commons.Remapper
 import org.objectweb.asm.tree.ClassNode
 import java.io.BufferedReader
 import java.io.FileReader
@@ -62,7 +61,7 @@ fun createFilterFromTextPolicyFile(
         filename: String,
         classes: ClassNodes,
         fallback: OutputFilter,
-        ): Pair<OutputFilter, Remapper?> {
+        ): OutputFilter {
     log.i("Loading offloaded annotations from $filename ...")
     log.withIndent {
         val subclassFilter = SubclassFilter(classes, fallback)
@@ -75,7 +74,7 @@ fun createFilterFromTextPolicyFile(
         var featureFlagsPolicy: FilterPolicyWithReason? = null
         var syspropsPolicy: FilterPolicyWithReason? = null
         var rFilePolicy: FilterPolicyWithReason? = null
-        val typeRenameSpec = mutableListOf<TextFilePolicyRemapper.TypeRenameSpec>()
+        val typeRenameSpec = mutableListOf<TextFilePolicyRemapperFilter.TypeRenameSpec>()
 
         try {
             BufferedReader(FileReader(filename)).use { reader ->
@@ -267,7 +266,7 @@ fun createFilterFromTextPolicyFile(
                             // applied. (Which is needed for services.jar)
                             val prefix = fields[2].trimStart('/')
 
-                            typeRenameSpec += TextFilePolicyRemapper.TypeRenameSpec(
+                            typeRenameSpec += TextFilePolicyRemapperFilter.TypeRenameSpec(
                                 pattern, prefix)
                         }
 
@@ -281,16 +280,15 @@ fun createFilterFromTextPolicyFile(
             throw e.withSourceInfo(filename, lineNo)
         }
 
-        var remapper: TextFilePolicyRemapper? = null
+        var ret: OutputFilter = imf
         if (typeRenameSpec.isNotEmpty()) {
-            remapper = TextFilePolicyRemapper(typeRenameSpec)
+            ret = TextFilePolicyRemapperFilter(typeRenameSpec, ret)
         }
 
         // Wrap the in-memory-filter with AHF.
-        return Pair(
-            AndroidHeuristicsFilter(
-                classes, aidlPolicy, featureFlagsPolicy, syspropsPolicy, rFilePolicy, imf),
-            remapper)
+        ret = AndroidHeuristicsFilter(
+                classes, aidlPolicy, featureFlagsPolicy, syspropsPolicy, rFilePolicy, ret)
+        return ret
     }
 }
 

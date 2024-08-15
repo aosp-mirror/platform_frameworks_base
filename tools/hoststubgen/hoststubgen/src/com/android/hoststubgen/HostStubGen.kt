@@ -22,6 +22,7 @@ import com.android.hoststubgen.filters.ClassWidePolicyPropagatingFilter
 import com.android.hoststubgen.filters.ConstantFilter
 import com.android.hoststubgen.filters.DefaultHookInjectingFilter
 import com.android.hoststubgen.filters.FilterPolicy
+import com.android.hoststubgen.filters.FilterRemapper
 import com.android.hoststubgen.filters.ImplicitOutputFilter
 import com.android.hoststubgen.filters.OutputFilter
 import com.android.hoststubgen.filters.StubIntersectingFilter
@@ -75,7 +76,9 @@ class HostStubGen(val options: HostStubGenOptions) {
         }
 
         // Build the filters.
-        val (filter, policyFileRemapper) = buildFilter(errors, allClasses, options)
+        val filter = buildFilter(errors, allClasses, options)
+
+        val filterRemapper = FilterRemapper(filter)
 
         // Transform the jar.
         convert(
@@ -87,7 +90,7 @@ class HostStubGen(val options: HostStubGenOptions) {
                 allClasses,
                 errors,
                 stats,
-                policyFileRemapper,
+                filterRemapper,
                 options.numShards.get,
                 options.shard.get,
         )
@@ -117,7 +120,7 @@ class HostStubGen(val options: HostStubGenOptions) {
             errors: HostStubGenErrors,
             allClasses: ClassNodes,
             options: HostStubGenOptions,
-            ): Pair<OutputFilter, Remapper?> {
+            ): OutputFilter {
         // We build a "chain" of multiple filters here.
         //
         // The filters are build in from "inside", meaning the first filter created here is
@@ -170,14 +173,10 @@ class HostStubGen(val options: HostStubGenOptions) {
             filter,
         )
 
-        var policyFileRemapper: Remapper? = null
-
         // Next, "text based" filter, which allows to override polices without touching
         // the target code.
         options.policyOverrideFile.ifSet {
-            val (f, p) = createFilterFromTextPolicyFile(it, allClasses, filter)
-            filter = f
-            policyFileRemapper = p
+            filter = createFilterFromTextPolicyFile(it, allClasses, filter)
         }
 
         // If `--intersect-stub-jar` is provided, load from these jar files too.
@@ -192,7 +191,7 @@ class HostStubGen(val options: HostStubGenOptions) {
         // Apply the implicit filter.
         filter = ImplicitOutputFilter(errors, allClasses, filter)
 
-        return Pair(filter, policyFileRemapper)
+        return filter
     }
 
     /**

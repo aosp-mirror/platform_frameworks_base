@@ -16,15 +16,15 @@
 package com.android.hoststubgen.filters
 
 import com.android.hoststubgen.log
-import org.objectweb.asm.commons.Remapper
 import java.util.regex.Pattern
 
 /**
- * A [Remapper] that provides a simple "jarjar" functionality.
+ * A filter that provides a simple "jarjar" functionality via [mapType]
  */
-class TextFilePolicyRemapper(
-    val typeRenameSpecs: List<TypeRenameSpec>
-) : Remapper() {
+class TextFilePolicyRemapperFilter(
+    val typeRenameSpecs: List<TypeRenameSpec>,
+    fallback: OutputFilter,
+) : DelegatingFilter(fallback) {
     /**
      * When a package name matches [typeInternalNamePattern], we prepend [typeInternalNamePrefix]
      * to it.
@@ -36,24 +36,15 @@ class TextFilePolicyRemapper(
 
     private val cache = mutableMapOf<String, String>()
 
-    override fun mapType(typeInternalName: String): String {
-//        if (typeInternalName == null) {
-//            return null // do we need it??
-//        }
-        cache[typeInternalName]?.let {
-            return it
-        }
-
-        var mapped: String = typeInternalName
+    override fun remapType(className: String): String? {
+        var mapped: String = className
         typeRenameSpecs.forEach {
-            if (it.typeInternalNamePattern.matcher(typeInternalName).matches()) {
-                mapped = it.typeInternalNamePrefix + typeInternalName
-                log.d("Renaming type $typeInternalName to $mapped")
+            if (it.typeInternalNamePattern.matcher(className).matches()) {
+                mapped = it.typeInternalNamePrefix + className
+                log.d("Renaming type $className to $mapped")
             }
         }
-        cache[typeInternalName] = mapped
+        cache[className] = mapped
         return mapped
     }
-
-    // TODO Do we need to implement mapPackage(), etc too?
 }
