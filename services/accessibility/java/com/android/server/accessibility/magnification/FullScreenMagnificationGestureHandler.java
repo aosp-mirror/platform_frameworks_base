@@ -16,8 +16,6 @@
 
 package com.android.server.accessibility.magnification;
 
-import static android.view.InputDevice.SOURCE_MOUSE;
-import static android.view.InputDevice.SOURCE_STYLUS;
 import static android.view.InputDevice.SOURCE_TOUCHSCREEN;
 import static android.view.MotionEvent.ACTION_CANCEL;
 import static android.view.MotionEvent.ACTION_DOWN;
@@ -342,8 +340,12 @@ public class FullScreenMagnificationGestureHandler extends MagnificationGestureH
                 cancelFling();
             }
             handleTouchEventWith(mCurrentState, event, rawEvent, policyFlags);
-        } else if (Flags.enableMagnificationFollowsMouse()
-                && (event.getSource() == SOURCE_MOUSE || event.getSource() == SOURCE_STYLUS)) {
+        }
+    }
+
+    @Override
+    void handleMouseOrStylusEvent(MotionEvent event, MotionEvent rawEvent, int policyFlags) {
+        if (Flags.enableMagnificationFollowsMouse()) {
             if (mFullScreenMagnificationController.isActivated(mDisplayId)) {
                 // TODO(b/354696546): Allow mouse/stylus to activate whichever display they are
                 // over, rather than only interacting with the current display.
@@ -351,8 +353,6 @@ public class FullScreenMagnificationGestureHandler extends MagnificationGestureH
                 // Send through the mouse/stylus event handler.
                 mMouseEventHandler.onEvent(event, mDisplayId);
             }
-            // Dispatch to normal event handling flow.
-            dispatchTransformedEvent(event, rawEvent, policyFlags);
         }
     }
 
