@@ -114,6 +114,7 @@ import android.text.TextUtils;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
+import com.android.compose.animation.scene.ObservableTransitionState;
 import com.android.dx.mockito.inline.extended.ExtendedMockito;
 import com.android.internal.foldables.FoldGracePeriodProvider;
 import com.android.internal.jank.InteractionJankMonitor;
@@ -129,6 +130,7 @@ import com.android.settingslib.fuelgauge.BatteryStatus;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.biometrics.AuthController;
 import com.android.systemui.biometrics.FingerprintInteractiveToAuthProvider;
+import com.android.systemui.bouncer.domain.interactor.AlternateBouncerInteractor;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.deviceentry.data.repository.FaceWakeUpTriggersConfig;
 import com.android.systemui.deviceentry.data.repository.FaceWakeUpTriggersConfigImpl;
@@ -141,6 +143,9 @@ import com.android.systemui.dump.DumpManager;
 import com.android.systemui.kosmos.KosmosJavaAdapter;
 import com.android.systemui.log.SessionTracker;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
+import com.android.systemui.scene.domain.interactor.SceneInteractor;
+import com.android.systemui.scene.shared.flag.SceneContainerFlag;
+import com.android.systemui.scene.shared.model.Scenes;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.shared.system.TaskStackChangeListener;
 import com.android.systemui.shared.system.TaskStackChangeListeners;
@@ -149,6 +154,7 @@ import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.policy.DevicePostureController;
 import com.android.systemui.telephony.TelephonyListenerManager;
 import com.android.systemui.user.domain.interactor.SelectedUserInteractor;
+import com.android.systemui.util.kotlin.JavaAdapter;
 import com.android.systemui.util.settings.GlobalSettings;
 
 import org.junit.After;
@@ -277,6 +283,12 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
     private SelectedUserInteractor mSelectedUserInteractor;
     @Mock
     private DeviceEntryFaceAuthInteractor mFaceAuthInteractor;
+    @Mock
+    private AlternateBouncerInteractor mAlternateBouncerInteractor;
+    @Mock
+    private JavaAdapter mJavaAdapter;
+    @Mock
+    private SceneInteractor mSceneInteractor;
     @Captor
     private ArgumentCaptor<FaceAuthenticationListener> mFaceAuthenticationListener;
 
@@ -993,7 +1005,7 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
         verifyFingerprintAuthenticateNeverCalled();
         // WHEN alternate bouncer is shown
         mKeyguardUpdateMonitor.setKeyguardShowing(true, true);
-        mKeyguardUpdateMonitor.setAlternateBouncerShowing(true);
+        mKeyguardUpdateMonitor.setAlternateBouncerVisibility(true);
 
         // THEN make sure FP listening begins
         verifyFingerprintAuthenticateCall();
@@ -1489,7 +1501,7 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
     @Test
     public void testShouldNotListenForUdfps_whenInLockDown() {
         // GIVEN a "we should listen for udfps" state
-        setKeyguardBouncerVisibility(false /* isVisible */);
+        mKeyguardUpdateMonitor.setPrimaryBouncerVisibility(false /* isVisible */);
         mStatusBarStateListener.onStateChanged(StatusBarState.KEYGUARD);
         when(mStrongAuthTracker.hasUserAuthenticatedSinceBoot()).thenReturn(true);
 
@@ -2124,7 +2136,7 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
         verifyFingerprintAuthenticateNeverCalled();
 
         mKeyguardUpdateMonitor.setKeyguardShowing(true, true);
-        mKeyguardUpdateMonitor.setAlternateBouncerShowing(true);
+        mKeyguardUpdateMonitor.setAlternateBouncerVisibility(true);
 
         verifyFingerprintAuthenticateCall();
     }
@@ -2323,12 +2335,7 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
     }
 
     private void bouncerFullyVisible() {
-        setKeyguardBouncerVisibility(true);
-    }
-
-    private void setKeyguardBouncerVisibility(boolean isVisible) {
-        mKeyguardUpdateMonitor.sendPrimaryBouncerChanged(isVisible, isVisible);
-        mTestableLooper.processAllMessages();
+        mKeyguardUpdateMonitor.setPrimaryBouncerVisibility(true);
     }
 
     private void setBroadcastReceiverPendingResult(BroadcastReceiver receiver) {
@@ -2434,7 +2441,12 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
                     mPackageManager, mFingerprintManager, mBiometricManager,
                     mFaceWakeUpTriggersConfig, mDevicePostureController,
                     Optional.of(mInteractiveToAuthProvider),
-                    mTaskStackChangeListeners, mSelectedUserInteractor, mActivityTaskManager);
+                    mTaskStackChangeListeners, mSelectedUserInteractor, mActivityTaskManager,
+                    () -> mAlternateBouncerInteractor,
+                    () -> mJavaAdapter,
+                    () -> mSceneInteractor);
+            setAlternateBouncerVisibility(false);
+            setPrimaryBouncerVisibility(false);
             setStrongAuthTracker(KeyguardUpdateMonitorTest.this.mStrongAuthTracker);
             start();
         }
@@ -2457,6 +2469,26 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
         @Override
         protected int getBiometricLockoutDelay() {
             return 0;
+        }
+
+        private void setPrimaryBouncerVisibility(boolean isVisible) {
+            if (SceneContainerFlag.isEnabled()) {
+                when(mSceneInteractor.getCurrentScene()).thenReturn(
+                        isVisible
+                                ? MutableStateFlow(Scenes.Bouncer)
+                                : MutableStateFlow(Scenes.Lockscreen));
+                onTransitionStateChanged(new ObservableTransitionState.Idle(Scenes.Bouncer));
+            } else {
+                sendPrimaryBouncerChanged(isVisible, isVisible);
+                mTestableLooper.processAllMessages();
+            }
+        }
+
+        private void setAlternateBouncerVisibility(boolean isVisible) {
+            if (SceneContainerFlag.isEnabled()) {
+                when(mAlternateBouncerInteractor.isVisibleState()).thenReturn(isVisible);
+            }
+            onAlternateBouncerVisibilityChange(isVisible);
         }
     }
 }
