@@ -33,8 +33,11 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import androidx.test.platform.app.InstrumentationRegistry
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.battery.BatteryMeterView
 import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.flags.Flags
+import com.android.systemui.kosmos.Kosmos
+import com.android.systemui.plugins.fakeDarkIconDispatcher
 import com.android.systemui.res.R
 import com.android.systemui.scene.ui.view.WindowRootView
 import com.android.systemui.shade.ShadeControllerImpl
@@ -42,6 +45,7 @@ import com.android.systemui.shade.ShadeLogger
 import com.android.systemui.shade.ShadeViewController
 import com.android.systemui.shade.domain.interactor.PanelExpansionInteractor
 import com.android.systemui.statusbar.CommandQueue
+import com.android.systemui.statusbar.policy.Clock
 import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.statusbar.window.StatusBarWindowStateController
 import com.android.systemui.unfold.SysUIUnfoldComponent
@@ -70,7 +74,9 @@ import org.mockito.MockitoAnnotations
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 class PhoneStatusBarViewControllerTest : SysuiTestCase() {
+    private val kosmos = Kosmos()
 
+    private val fakeDarkIconDispatcher = kosmos.fakeDarkIconDispatcher
     @Mock private lateinit var shadeViewController: ShadeViewController
     @Mock private lateinit var panelExpansionInteractor: PanelExpansionInteractor
     @Mock private lateinit var featureFlags: FeatureFlags
@@ -90,6 +96,12 @@ class PhoneStatusBarViewControllerTest : SysuiTestCase() {
 
     private lateinit var view: PhoneStatusBarView
     private lateinit var controller: PhoneStatusBarViewController
+
+    private val clockView: Clock
+        get() = view.requireViewById(R.id.clock)
+
+    private val batteryView: BatteryMeterView
+        get() = view.requireViewById(R.id.battery)
 
     private val unfoldConfig = UnfoldConfig()
 
@@ -114,16 +126,25 @@ class PhoneStatusBarViewControllerTest : SysuiTestCase() {
     @Test
     fun onViewAttachedAndDrawn_startListeningConfigurationControllerCallback() {
         val view = createViewMock()
-        val argumentCaptor =
-            ArgumentCaptor.forClass(ConfigurationController.ConfigurationListener::class.java)
+
         InstrumentationRegistry.getInstrumentation().runOnMainSync {
             controller = createAndInitController(view)
         }
 
-        verify(configurationController).addCallback(argumentCaptor.capture())
-        argumentCaptor.value.onDensityOrFontScaleChanged()
+        verify(configurationController).addCallback(any())
+    }
 
-        verify(view).onDensityOrFontScaleChanged()
+    @Test
+    fun onViewAttachedAndDrawn_darkReceiversRegistered() {
+        val view = createViewMock()
+
+        InstrumentationRegistry.getInstrumentation().runOnMainSync {
+            controller = createAndInitController(view)
+        }
+
+        assertThat(fakeDarkIconDispatcher.receivers.size).isEqualTo(2)
+        assertThat(fakeDarkIconDispatcher.receivers).contains(clockView)
+        assertThat(fakeDarkIconDispatcher.receivers).contains(batteryView)
     }
 
     @Test
@@ -155,6 +176,21 @@ class PhoneStatusBarViewControllerTest : SysuiTestCase() {
         }
 
         verify(moveFromCenterAnimation, never()).onViewsReady(any())
+    }
+
+    @Test
+    fun onViewDetached_darkReceiversUnregistered() {
+        val view = createViewMock()
+
+        InstrumentationRegistry.getInstrumentation().runOnMainSync {
+            controller = createAndInitController(view)
+        }
+
+        assertThat(fakeDarkIconDispatcher.receivers).isNotEmpty()
+
+        controller.onViewDetached()
+
+        assertThat(fakeDarkIconDispatcher.receivers).isEmpty()
     }
 
     @Test
@@ -353,7 +389,8 @@ class PhoneStatusBarViewControllerTest : SysuiTestCase() {
                 shadeLogger,
                 viewUtil,
                 configurationController,
-                mStatusOverlayHoverListenerFactory
+                mStatusOverlayHoverListenerFactory,
+                fakeDarkIconDispatcher,
             )
             .create(view)
             .also { it.init() }

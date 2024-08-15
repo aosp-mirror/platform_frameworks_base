@@ -27,7 +27,9 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.communal.domain.interactor.communalSceneInteractor
+import com.android.systemui.communal.domain.interactor.widgetTrampolineInteractor
 import com.android.systemui.coroutines.collectLastValue
+import com.android.systemui.kosmos.applicationCoroutineScope
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.log.logcatLogBuffer
 import com.android.systemui.plugins.ActivityStarter
@@ -67,9 +69,11 @@ class WidgetInteractionHandlerTest : SysuiTestCase() {
         with(kosmos) {
             underTest =
                 WidgetInteractionHandler(
+                    applicationScope = applicationCoroutineScope,
                     activityStarter = activityStarter,
                     communalSceneInteractor = communalSceneInteractor,
                     logBuffer = logcatLogBuffer(),
+                    widgetTrampolineInteractor = widgetTrampolineInteractor,
                 )
         }
     }

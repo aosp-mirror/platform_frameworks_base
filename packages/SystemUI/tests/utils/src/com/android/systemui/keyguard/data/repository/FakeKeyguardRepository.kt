@@ -60,13 +60,13 @@ class FakeKeyguardRepository @Inject constructor() : KeyguardRepository {
     override val bottomAreaAlpha: StateFlow<Float> = _bottomAreaAlpha
 
     private val _isKeyguardShowing = MutableStateFlow(false)
-    override val isKeyguardShowing: Flow<Boolean> = _isKeyguardShowing
+    override val isKeyguardShowing: StateFlow<Boolean> = _isKeyguardShowing
 
     private val _isKeyguardUnlocked = MutableStateFlow(false)
     override val isKeyguardDismissible: StateFlow<Boolean> = _isKeyguardUnlocked.asStateFlow()
 
     private val _isKeyguardOccluded = MutableStateFlow(false)
-    override val isKeyguardOccluded: Flow<Boolean> = _isKeyguardOccluded
+    override val isKeyguardOccluded: StateFlow<Boolean> = _isKeyguardOccluded
 
     private val _isDozing = MutableStateFlow(false)
     override val isDozing: StateFlow<Boolean> = _isDozing

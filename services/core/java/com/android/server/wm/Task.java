@@ -4705,6 +4705,15 @@ class Task extends TaskFragment {
                 // it does not follow the ActivityStarter path.
                 if (topActivity.shouldBeVisible()) {
                     mAtmService.resumeAppSwitches();
+                    // In pip1, when expanding pip to full-screen, the "behind" task is not
+                    // actually becoming invisible since task windowing mode is pinned.
+                    if (!isPip2ExperimentEnabled) {
+                        final ActivityRecord ar = mAtmService.mLastResumedActivity;
+                        if (ar != null && ar.getTask() != null) {
+                            mAtmService.takeTaskSnapshot(ar.getTask().mTaskId,
+                                    true /* updateCache */);
+                        }
+                    }
                 }
             } else if (isPip2ExperimentEnabled) {
                 super.setWindowingMode(windowingMode);

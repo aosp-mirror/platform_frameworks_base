@@ -21,10 +21,13 @@ import android.util.SizeF
 import android.view.View
 import android.view.ViewGroup
 import android.widget.FrameLayout
+import androidx.core.view.doOnLayout
 import com.android.app.tracing.coroutines.launch
 import com.android.systemui.communal.domain.model.CommunalContentModel
 import com.android.systemui.communal.util.WidgetViewFactory
 import com.android.systemui.util.kotlin.DisposableHandles
+import kotlin.coroutines.resume
+import kotlin.coroutines.suspendCoroutine
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.DisposableHandle
 
@@ -44,19 +47,18 @@ object CommunalAppWidgetHostViewBinder {
         val loadingJob =
             applicationScope.launch("$TAG#createWidgetView") {
                 val widget = factory.createWidget(context, model, size)
-                // TODO(b/358662507): Remove this workaround
-                (container.parent as? ViewGroup)?.let { parent ->
-                    val index = parent.indexOfChild(container)
-                    parent.removeView(container)
-                    parent.addView(container, index)
-                }
-                container.setView(widget)
+                waitForLayout(container)
+                container.post { container.setView(widget) }
             }
 
         disposables += DisposableHandle { loadingJob.cancel() }
         disposables += DisposableHandle { container.removeAllViews() }
 
         return disposables
+    }
+
+    private suspend fun waitForLayout(container: FrameLayout) = suspendCoroutine { cont ->
+        container.doOnLayout { cont.resume(Unit) }
     }
 }
 

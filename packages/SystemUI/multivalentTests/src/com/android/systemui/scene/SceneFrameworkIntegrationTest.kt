@@ -133,6 +133,7 @@ class SceneFrameworkIntegrationTest : SysuiTestCase() {
                 sceneInteractor = sceneInteractor,
                 falsingInteractor = kosmos.falsingInteractor,
                 powerInteractor = kosmos.powerInteractor,
+                motionEventHandlerReceiver = {},
             )
             .apply { setTransitionState(transitionState) }
     }
@@ -199,6 +200,7 @@ class SceneFrameworkIntegrationTest : SysuiTestCase() {
         shadeSceneContentViewModel.activateIn(testScope)
         shadeSceneActionsViewModel.activateIn(testScope)
         bouncerSceneContentViewModel.activateIn(testScope)
+        sceneContainerViewModel.activateIn(testScope)
 
         assertWithMessage("Initial scene key mismatch!")
             .that(sceneContainerViewModel.currentScene.value)
