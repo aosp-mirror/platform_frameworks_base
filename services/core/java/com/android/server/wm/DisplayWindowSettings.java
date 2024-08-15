@@ -16,6 +16,7 @@
 
 package com.android.server.wm;
 
+import static android.view.Display.REMOVE_MODE_DESTROY_CONTENT;
 import static android.view.WindowManager.DISPLAY_IME_POLICY_FALLBACK_DISPLAY;
 import static android.view.WindowManager.DISPLAY_IME_POLICY_LOCAL;
 import static android.view.WindowManager.REMOVE_CONTENT_MODE_DESTROY;
@@ -183,7 +184,7 @@ class DisplayWindowSettings {
         final DisplayInfo displayInfo = dc.getDisplayInfo();
         final SettingsProvider.SettingsEntry settings = mSettingsProvider.getSettings(displayInfo);
         if (settings.mRemoveContentMode == REMOVE_CONTENT_MODE_UNDEFINED) {
-            if (dc.isPrivate()) {
+            if (dc.isPrivate() || dc.getDisplay().getRemoveMode() == REMOVE_MODE_DESTROY_CONTENT) {
                 // For private displays by default content is destroyed on removal.
                 return REMOVE_CONTENT_MODE_DESTROY;
             }
