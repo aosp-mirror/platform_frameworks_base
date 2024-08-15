@@ -83,6 +83,7 @@ import android.os.Parcelable;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.StrictMode;
+import android.os.Trace;
 import android.os.UserHandle;
 import android.system.Os;
 import android.text.TextUtils;
@@ -6251,6 +6252,18 @@ public class RemoteViews implements Parcelable, Filter {
 
     private View inflateView(Context context, RemoteViews rv, @Nullable ViewGroup parent,
             @StyleRes int applyThemeResId, @Nullable ColorResources colorResources) {
+        try {
+            Trace.beginSection(rv.hasDrawInstructions()
+                    ? "RemoteViews#inflateViewWithDrawInstructions"
+                    : "RemoteViews#inflateView");
+            return inflateViewInternal(context, rv, parent, applyThemeResId, colorResources);
+        } finally {
+            Trace.endSection();
+        }
+    }
+
+    private View inflateViewInternal(Context context, RemoteViews rv, @Nullable ViewGroup parent,
+            @StyleRes int applyThemeResId, @Nullable ColorResources colorResources) {
         // RemoteViews may be built by an application installed in another
         // user. So build a context that loads resources from that user but
         // still returns the current users userId so settings like data / time formats
@@ -6417,10 +6430,17 @@ public class RemoteViews implements Parcelable, Filter {
                 if (mRV.mActions != null) {
                     int count = mRV.mActions.size();
                     mActions = new Action[count];
-                    for (int i = 0; i < count && !isCancelled(); i++) {
-                        // TODO: check if isCancelled in nested views.
-                        mActions[i] = mRV.mActions.get(i)
-                                .initActionAsync(mTree, mParent, mApplyParams);
+                    try {
+                        Trace.beginSection(hasDrawInstructions()
+                                ? "RemoteViews#initActionAsyncWithDrawInstructions"
+                                : "RemoteViews#initActionAsync");
+                        for (int i = 0; i < count && !isCancelled(); i++) {
+                            // TODO: check if isCancelled in nested views.
+                            mActions[i] = mRV.mActions.get(i)
+                                    .initActionAsync(mTree, mParent, mApplyParams);
+                        }
+                    } finally {
+                        Trace.endSection();
                     }
                 } else {
                     mActions = null;
@@ -6442,13 +6462,19 @@ public class RemoteViews implements Parcelable, Filter {
 
                 try {
                     if (mActions != null) {
-
                         ActionApplyParams applyParams = mApplyParams.clone();
                         if (applyParams.handler == null) {
                             applyParams.handler = DEFAULT_INTERACTION_HANDLER;
                         }
-                        for (Action a : mActions) {
-                            a.apply(viewTree.mRoot, mParent, applyParams);
+                        try {
+                            Trace.beginSection(hasDrawInstructions()
+                                    ? "RemoteViews#applyActionsAsyncWithDrawInstructions"
+                                    : "RemoteViews#applyActionsAsync");
+                            for (Action a : mActions) {
+                                a.apply(viewTree.mRoot, mParent, applyParams);
+                            }
+                        } finally {
+                            Trace.endSection();
                         }
                     }
                     // If the parent of the view is has is a root, resolve the recycling.
@@ -6635,8 +6661,15 @@ public class RemoteViews implements Parcelable, Filter {
         }
         if (mActions != null) {
             final int count = mActions.size();
-            for (int i = 0; i < count; i++) {
-                mActions.get(i).apply(v, parent, params);
+            try {
+                Trace.beginSection(hasDrawInstructions()
+                        ? "RemoteViews#applyActionsWithDrawInstructions"
+                        : "RemoteViews#applyActions");
+                for (int i = 0; i < count; i++) {
+                    mActions.get(i).apply(v, parent, params);
+                }
+            } finally {
+                Trace.endSection();
             }
         }
     }
