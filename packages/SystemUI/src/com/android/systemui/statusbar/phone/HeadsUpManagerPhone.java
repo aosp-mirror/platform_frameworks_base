@@ -624,6 +624,7 @@ public class HeadsUpManagerPhone extends BaseHeadsUpManager implements
                             mOnReorderingAllowedListener);
                 } else if (mTrackingHeadsUp) {
                     mEntriesToRemoveAfterExpand.add(entry);
+                    mLogger.logRemoveEntryAfterExpand(entry);
                 } else if (mVisualStabilityProvider.isReorderingAllowed()
                         || entry.showingPulsing()) {
                     removeEntry(entry.getKey(), "createRemoveRunnable");
