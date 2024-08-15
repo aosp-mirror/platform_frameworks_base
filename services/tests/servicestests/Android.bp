@@ -270,6 +270,10 @@ java_genrule {
         "$(location soong_zip) -o $(out) -C $(genDir)/res -D $(genDir)/res",
 }
 
+FLAKY = [
+    "androidx.test.filters.FlakyTest",
+]
+
 FLAKY_AND_IGNORED = [
     "androidx.test.filters.FlakyTest",
     "org.junit.Ignore",
@@ -326,7 +330,7 @@ test_module_config {
     base: "FrameworksServicesTests",
     test_suites: ["device-tests"],
     include_filters: ["com.android.server.recoverysystem."],
-    exclude_annotations: ["androidx.test.filters.FlakyTest"],
+    exclude_annotations: FLAKY,
 }
 
 // server pm TEST_MAPPING
@@ -354,4 +358,320 @@ test_module_config {
     base: "FrameworksServicesTests",
     test_suites: ["device-tests"],
     include_filters: ["com.android.server.os."],
+}
+
+test_module_config {
+    name: "FrameworksServicesTests_presubmit",
+    base: "FrameworksServicesTests",
+    test_suites: ["device-tests"],
+    include_annotations: ["android.platform.test.annotations.Presubmit"],
+    exclude_annotations: FLAKY_AND_IGNORED,
+}
+
+test_module_config {
+    name: "FrameworksServicesTests_com_android_server_job_Presubmit",
+    base: "FrameworksServicesTests",
+    test_suites: ["device-tests"],
+    include_filters: ["com.android.server.job"],
+    exclude_annotations: [
+        "androidx.test.filters.LargeTest",
+        "androidx.test.filters.FlakyTest",
+    ],
+}
+
+test_module_config {
+    name: "FrameworksServicesTests_com_android_server_job",
+    base: "FrameworksServicesTests",
+    test_suites: ["device-tests"],
+    include_filters: ["com.android.server.job"],
+}
+
+test_module_config {
+    name: "FrameworksServicesTests_com_android_server_tare_Presubmit",
+    base: "FrameworksServicesTests",
+    test_suites: ["device-tests"],
+    include_filters: ["com.android.server.tare"],
+    exclude_annotations: FLAKY,
+}
+
+test_module_config {
+    name: "FrameworksServicesTests_com_android_server_tare",
+    base: "FrameworksServicesTests",
+    test_suites: ["device-tests"],
+    include_filters: ["com.android.server.tare"],
+}
+
+test_module_config {
+    name: "FrameworksServicesTests_com_android_server_usage_Presubmit",
+    base: "FrameworksServicesTests",
+    test_suites: ["device-tests"],
+    include_filters: ["com.android.server.usage"],
+    exclude_annotations: FLAKY,
+}
+
+test_module_config {
+    name: "FrameworksServicesTests_com_android_server_usage",
+    base: "FrameworksServicesTests",
+    test_suites: ["device-tests"],
+    include_filters: ["com.android.server.usage"],
+}
+
+test_module_config {
+    name: "FrameworksServicesTests_battery_stats",
+    base: "FrameworksServicesTests",
+    test_suites: ["device-tests"],
+    include_filters: ["com.android.server.am.BatteryStatsServiceTest"],
+}
+
+test_module_config {
+    name: "FrameworksServicesTests_accessibility_Presubmit",
+    base: "FrameworksServicesTests",
+    test_suites: ["device-tests"],
+    include_filters: ["com.android.server.accessibility"],
+    exclude_annotations: FLAKY,
+}
+
+test_module_config {
+    name: "FrameworksServicesTests_accessibility",
+    base: "FrameworksServicesTests",
+    test_suites: ["device-tests"],
+    include_filters: ["com.android.server.accessibility"],
+}
+
+test_module_config {
+    name: "FrameworksServicesTests_binary_transparency",
+    base: "FrameworksServicesTests",
+    test_suites: ["device-tests"],
+    include_filters: ["com.android.server.BinaryTransparencyServiceTest"],
+}
+
+test_module_config {
+    name: "FrameworksServicesTests_pinner_service",
+    base: "FrameworksServicesTests",
+    test_suites: ["device-tests"],
+    include_filters: ["com.android.server.PinnerServiceTest"],
+    exclude_annotations: ["org.junit.Ignore"],
+}
+
+test_module_config {
+    name: "FrameworksServicesTests_android_server_am_Presubmit",
+    base: "FrameworksServicesTests",
+    test_suites: ["device-tests"],
+    include_filters: ["com.android.server.am."],
+    include_annotations: ["android.platform.test.annotations.Presubmit"],
+    exclude_annotations: FLAKY,
+}
+
+test_module_config {
+    name: "FrameworksServicesTests_android_server_am",
+    base: "FrameworksServicesTests",
+    test_suites: ["device-tests"],
+    include_filters: ["com.android.server.am."],
+}
+
+test_module_config {
+    name: "FrameworksServicesTests_android_server_appop",
+    base: "FrameworksServicesTests",
+    test_suites: ["device-tests"],
+    include_filters: ["com.android.server.appop"],
+}
+
+test_module_config {
+    name: "FrameworksServicesTests_android_server_audio",
+    base: "FrameworksServicesTests",
+    test_suites: ["device-tests"],
+    include_filters: ["com.android.server.audio"],
+    include_annotations: ["android.platform.test.annotations.Presubmit"],
+    exclude_annotations: FLAKY_AND_IGNORED,
+}
+
+test_module_config {
+    name: "FrameworksServicesTests_android_server_compat",
+    base: "FrameworksServicesTests",
+    test_suites: ["device-tests"],
+    include_filters: ["com.android.server.compat"],
+}
+
+test_module_config {
+    name: "FrameworksServicesTests_android_server_hdmi_Presubmit",
+    base: "FrameworksServicesTests",
+    test_suites: ["device-tests"],
+    include_filters: ["com.android.server.hdmi"],
+    include_annotations: ["android.platform.test.annotations.Presubmit"],
+    exclude_annotations: FLAKY_AND_IGNORED,
+}
+
+test_module_config {
+    name: "FrameworksServicesTests_android_server_hdmi",
+    base: "FrameworksServicesTests",
+    test_suites: ["device-tests"],
+    include_filters: ["com.android.server.hdmi"],
+    exclude_annotations: ["org.junit.Ignore"],
+}
+
+test_module_config {
+    name: "FrameworksServicesTests_android_server_integrity",
+    base: "FrameworksServicesTests",
+    test_suites: ["device-tests"],
+    include_filters: ["com.android.server.integrity."],
+}
+
+test_module_config {
+    name: "FrameworksServicesTests_android_server_lights",
+    base: "FrameworksServicesTests",
+    test_suites: ["device-tests"],
+    include_filters: ["com.android.server.lights"],
+    exclude_annotations: FLAKY,
+}
+
+test_module_config {
+    name: "FrameworksServicesTests_android_server_locales",
+    base: "FrameworksServicesTests",
+    test_suites: ["device-tests"],
+    include_filters: ["com.android.server.locales."],
+}
+
+test_module_config {
+    name: "FrameworksServicesTests_android_server_location_contexthub_Presubmit",
+    base: "FrameworksServicesTests",
+    test_suites: ["device-tests"],
+    include_filters: ["com.android.server.location.contexthub."],
+    include_annotations: ["android.platform.test.annotations.Presubmit"],
+    exclude_annotations: FLAKY_AND_IGNORED,
+}
+
+test_module_config {
+    name: "FrameworksServicesTests_android_server_locksettings",
+    base: "FrameworksServicesTests",
+    test_suites: ["device-tests"],
+    include_filters: ["com.android.server.locksettings."],
+    exclude_annotations: FLAKY,
+}
+
+test_module_config {
+    name: "FrameworksServicesTests_android_server_logcat_Presubmit",
+    base: "FrameworksServicesTests",
+    test_suites: ["device-tests"],
+    include_filters: ["com.android.server.logcat"],
+    exclude_annotations: FLAKY,
+}
+
+test_module_config {
+    name: "FrameworksServicesTests_android_server_logcat",
+    base: "FrameworksServicesTests",
+    test_suites: ["device-tests"],
+    include_filters: ["com.android.server.logcat"],
+}
+
+test_module_config {
+    name: "FrameworksServicesTests_android_server_net_Presubmit",
+    base: "FrameworksServicesTests",
+    test_suites: ["device-tests"],
+    include_filters: ["com.android.server.net."],
+    include_annotations: ["android.platform.test.annotations.Presubmit"],
+    exclude_annotations: FLAKY,
+}
+
+test_module_config {
+    name: "FrameworksServicesTests_android_server_om",
+    base: "FrameworksServicesTests",
+    test_suites: ["device-tests"],
+    include_filters: ["com.android.server.om."],
+}
+
+test_module_config {
+    name: "FrameworksServicesTests_android_server_pdb",
+    base: "FrameworksServicesTests",
+    test_suites: ["device-tests"],
+    include_filters: ["com.android.server.pdb.PersistentDataBlockServiceTest"],
+}
+
+test_module_config {
+    name: "FrameworksServicesTests_android_server_pm_dex",
+    base: "FrameworksServicesTests",
+    test_suites: ["device-tests"],
+    include_filters: ["com.android.server.pm.dex"],
+}
+
+test_module_config {
+    name: "FrameworksServicesTests_android_server_policy_Presubmit",
+    base: "FrameworksServicesTests",
+    test_suites: ["device-tests"],
+    include_filters: ["com.android.server.policy."],
+    include_annotations: ["android.platform.test.annotations.Presubmit"],
+    exclude_annotations: FLAKY,
+}
+
+test_module_config {
+    name: "FrameworksServicesTests_android_server_policy",
+    base: "FrameworksServicesTests",
+    test_suites: ["device-tests"],
+    include_filters: ["com.android.server.policy."],
+}
+
+test_module_config {
+    name: "FrameworksServicesTests_android_server_power",
+    base: "FrameworksServicesTests",
+    test_suites: ["device-tests"],
+    include_filters: ["com.android.server.power"],
+}
+
+test_module_config {
+    name: "FrameworksServicesTests_android_server_power_hint",
+    base: "FrameworksServicesTests",
+    test_suites: ["device-tests"],
+    include_filters: ["com.android.server.power.hint"],
+    exclude_annotations: FLAKY,
+}
+
+test_module_config {
+    name: "FrameworksServicesTests_android_server_powerstats",
+    base: "FrameworksServicesTests",
+    test_suites: ["device-tests"],
+    include_filters: ["com.android.server.powerstats"],
+}
+
+test_module_config {
+    name: "FrameworksServicesTests_android_server_rollback",
+    base: "FrameworksServicesTests",
+    test_suites: ["device-tests"],
+    include_filters: ["com.android.server.rollback"],
+}
+
+test_module_config {
+    name: "FrameworksServicesTests_android_server_uri",
+    base: "FrameworksServicesTests",
+    test_suites: ["device-tests"],
+    include_filters: ["com.android.server.uri."],
+}
+
+test_module_config {
+    name: "FrameworksServicesTests_com_android_server_location_contexthub",
+    base: "FrameworksServicesTests",
+    test_suites: ["device-tests"],
+    include_filters: ["com.android.server.location.contexthub."],
+    include_annotations: ["android.platform.test.annotations.Postsubmit"],
+    exclude_annotations: FLAKY_AND_IGNORED,
+}
+
+test_module_config {
+    name: "FrameworksServicesTests_android_server_usage",
+    base: "FrameworksServicesTests",
+    test_suites: ["device-tests"],
+    include_filters: ["com.android.server.usage"],
+    exclude_filters: ["com.android.server.usage.StorageStatsServiceTest"],
+}
+
+test_module_config {
+    name: "FrameworksServicesTests_android_server_soundtrigger_middleware",
+    base: "FrameworksServicesTests",
+    test_suites: ["device-tests"],
+    include_filters: ["com.android.server.soundtrigger_middleware"],
+}
+
+test_module_config {
+    name: "FrameworksServicesTests_android_server_input",
+    base: "FrameworksServicesTests",
+    test_suites: ["device-tests"],
+    include_filters: ["com.android.server.input"],
 }

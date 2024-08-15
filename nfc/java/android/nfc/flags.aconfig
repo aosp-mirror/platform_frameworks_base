@@ -125,3 +125,10 @@ flag {
     bug: "321310044"
 }
 
+flag {
+    name: "nfc_action_manage_services_settings"
+    is_exported: true
+    namespace: "nfc"
+    description: "Add Settings.ACTION_MANAGE_OTHER_NFC_SERVICES_SETTINGS"
+    bug: "358129872"
+}
