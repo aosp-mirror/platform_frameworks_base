@@ -261,7 +261,6 @@ java_library {
         "devicepolicyprotosnano",
         "ImmutabilityAnnotation",
 
-        "com.android.sysprop.init",
         "com.android.sysprop.localization",
         "PlatformProperties",
     ],
