@@ -102,6 +102,7 @@ import android.os.PowerManager;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.os.UserManager;
+import android.platform.test.flag.junit.FlagsParameterization;
 import android.service.dreams.IDreamManager;
 import android.service.trust.TrustAgentService;
 import android.telephony.ServiceState;
@@ -111,7 +112,6 @@ import android.telephony.TelephonyManager;
 import android.testing.TestableLooper;
 import android.text.TextUtils;
 
-import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
 import com.android.compose.animation.scene.ObservableTransitionState;
@@ -140,6 +140,7 @@ import com.android.systemui.deviceentry.shared.model.ErrorFaceAuthenticationStat
 import com.android.systemui.deviceentry.shared.model.FaceDetectionStatus;
 import com.android.systemui.deviceentry.shared.model.FailedFaceAuthenticationStatus;
 import com.android.systemui.dump.DumpManager;
+import com.android.systemui.flags.SceneContainerFlagParameterizationKt;
 import com.android.systemui.kosmos.KosmosJavaAdapter;
 import com.android.systemui.log.SessionTracker;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
@@ -181,8 +182,11 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import platform.test.runner.parameterized.ParameterizedAndroidJunit4;
+import platform.test.runner.parameterized.Parameters;
+
 @SmallTest
-@RunWith(AndroidJUnit4.class)
+@RunWith(ParameterizedAndroidJunit4.class)
 @TestableLooper.RunWithLooper
 public class KeyguardUpdateMonitorTest extends SysuiTestCase {
     private static final String PKG_ALLOWING_FP_LISTEN_ON_OCCLUDING_ACTIVITY =
@@ -312,6 +316,16 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
     private IFingerprintAuthenticatorsRegisteredCallback
             mFingerprintAuthenticatorsRegisteredCallback;
     private final InstanceId mKeyguardInstanceId = InstanceId.fakeInstanceId(999);
+
+    @Parameters(name = "{0}")
+    public static List<FlagsParameterization> getParams() {
+        return SceneContainerFlagParameterizationKt.parameterizeSceneContainerFlag();
+    }
+
+    public KeyguardUpdateMonitorTest(FlagsParameterization flags) {
+        super();
+        mSetFlagsRule.setFlagsParameterization(flags);
+    }
 
     @Before
     public void setup() throws RemoteException {
@@ -2473,11 +2487,11 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
 
         private void setPrimaryBouncerVisibility(boolean isVisible) {
             if (SceneContainerFlag.isEnabled()) {
-                when(mSceneInteractor.getCurrentScene()).thenReturn(
-                        isVisible
-                                ? MutableStateFlow(Scenes.Bouncer)
-                                : MutableStateFlow(Scenes.Lockscreen));
-                onTransitionStateChanged(new ObservableTransitionState.Idle(Scenes.Bouncer));
+                ObservableTransitionState transitionState = new ObservableTransitionState.Idle(
+                        isVisible ? Scenes.Bouncer : Scenes.Lockscreen);
+                when(mSceneInteractor.getTransitionState()).thenReturn(
+                        MutableStateFlow(transitionState));
+                onTransitionStateChanged(transitionState);
             } else {
                 sendPrimaryBouncerChanged(isVisible, isVisible);
                 mTestableLooper.processAllMessages();
