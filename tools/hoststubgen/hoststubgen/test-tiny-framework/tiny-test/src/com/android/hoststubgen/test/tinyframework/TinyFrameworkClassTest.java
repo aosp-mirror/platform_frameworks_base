@@ -353,4 +353,16 @@ public class TinyFrameworkClassTest {
     public void testTypeRename() {
         assertThat(TinyFrameworkRenamedClassCaller.foo(1)).isEqualTo(1);
     }
+
+    @Test
+    public void testMethodCallReplaceNonStatic() throws Exception {
+        assertThat(TinyFrameworkMethodCallReplace.nonStaticMethodCallReplaceTester())
+                .isEqualTo(true);
+    }
+
+    @Test
+    public void testMethodCallReplaceStatic() throws Exception {
+        assertThat(TinyFrameworkMethodCallReplace.staticMethodCallReplaceTester())
+                .isEqualTo(3);
+    }
 }

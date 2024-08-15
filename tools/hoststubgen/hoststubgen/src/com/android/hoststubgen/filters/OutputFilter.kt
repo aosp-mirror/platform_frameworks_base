@@ -97,4 +97,27 @@ abstract class OutputFilter {
     open fun remapType(className: String): String? {
         return null
     }
+
+    data class MethodReplaceTarget(val className: String, val methodName: String)
+
+    /**
+     * Return if this filter may return non-null from [getMethodCallReplaceTo].
+     * (Used for a small optimization)
+     */
+    open fun hasAnyMethodCallReplace(): Boolean {
+        return false
+    }
+
+    /**
+     * If a method call should be forwarded to another method, return the target's class / method.
+     */
+    open fun getMethodCallReplaceTo(
+        callerClassName: String,
+        callerMethodName: String,
+        className: String,
+        methodName: String,
+        descriptor: String,
+    ): MethodReplaceTarget? {
+        return null
+    }
 }

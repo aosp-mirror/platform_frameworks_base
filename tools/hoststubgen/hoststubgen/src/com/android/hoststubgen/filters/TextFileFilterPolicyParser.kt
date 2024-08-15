@@ -17,7 +17,9 @@ package com.android.hoststubgen.filters
 
 import com.android.hoststubgen.ParseException
 import com.android.hoststubgen.asm.ClassNodes
+import com.android.hoststubgen.asm.splitWithLastPeriod
 import com.android.hoststubgen.asm.toHumanReadableClassName
+import com.android.hoststubgen.asm.toJvmClassName
 import com.android.hoststubgen.log
 import com.android.hoststubgen.normalizeTextLine
 import com.android.hoststubgen.whitespaceRegex
@@ -75,6 +77,8 @@ fun createFilterFromTextPolicyFile(
         var syspropsPolicy: FilterPolicyWithReason? = null
         var rFilePolicy: FilterPolicyWithReason? = null
         val typeRenameSpec = mutableListOf<TextFilePolicyRemapperFilter.TypeRenameSpec>()
+        val methodReplaceSpec =
+            mutableListOf<TextFilePolicyMethodReplaceFilter.MethodCallReplaceSpec>()
 
         try {
             BufferedReader(FileReader(filename)).use { reader ->
@@ -249,8 +253,24 @@ fun createFilterFromTextPolicyFile(
                                         policy.getSubstitutionBasePolicy()
                                                 .withReason(FILTER_REASON))
 
-                                // Keep "from" -> "to" mapping.
-                                imf.setRenameTo(className, fromName, signature, name)
+                                val classAndMethod = splitWithLastPeriod(fromName)
+                                if (classAndMethod != null) {
+                                    // If the substitution target contains a ".", then
+                                    // it's a method call redirect.
+                                    methodReplaceSpec.add(
+                                        TextFilePolicyMethodReplaceFilter.MethodCallReplaceSpec(
+                                            className.toJvmClassName(),
+                                            name,
+                                            signature,
+                                            classAndMethod.first.toJvmClassName(),
+                                            classAndMethod.second,
+                                        )
+                                    )
+                                } else {
+                                    // It's an in-class replace.
+                                    // ("@RavenwoodReplace" equivalent)
+                                    imf.setRenameTo(className, fromName, signature, name)
+                                }
                             }
                         }
                         "r", "rename" -> {
@@ -284,10 +304,14 @@ fun createFilterFromTextPolicyFile(
         if (typeRenameSpec.isNotEmpty()) {
             ret = TextFilePolicyRemapperFilter(typeRenameSpec, ret)
         }
+        if (methodReplaceSpec.isNotEmpty()) {
+            ret = TextFilePolicyMethodReplaceFilter(methodReplaceSpec, classes, ret)
+        }
 
         // Wrap the in-memory-filter with AHF.
         ret = AndroidHeuristicsFilter(
                 classes, aidlPolicy, featureFlagsPolicy, syspropsPolicy, rFilePolicy, ret)
+
         return ret
     }
 }
