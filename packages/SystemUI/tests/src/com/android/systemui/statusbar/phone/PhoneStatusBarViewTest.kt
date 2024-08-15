@@ -32,6 +32,7 @@ import android.view.View
 import android.view.WindowInsets
 import android.widget.FrameLayout
 import androidx.test.filters.SmallTest
+import com.android.systemui.Flags.FLAG_STATUS_BAR_STOP_UPDATING_WINDOW_HEIGHT
 import com.android.systemui.Flags.FLAG_STATUS_BAR_SWIPE_OVER_CHIP
 import com.android.systemui.Gefingerpoken
 import com.android.systemui.SysuiTestCase
@@ -42,6 +43,7 @@ import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
 import org.junit.Before
 import org.junit.Test
+import org.mockito.Mockito.never
 import org.mockito.Mockito.spy
 import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
@@ -176,27 +178,57 @@ class PhoneStatusBarViewTest : SysuiTestCase() {
     }
 
     @Test
-    fun onAttachedToWindow_updatesWindowHeight() {
+    @DisableFlags(FLAG_STATUS_BAR_STOP_UPDATING_WINDOW_HEIGHT)
+    fun onAttachedToWindow_flagOff_updatesWindowHeight() {
         view.onAttachedToWindow()
 
         verify(windowController).refreshStatusBarHeight()
     }
 
     @Test
-    fun onConfigurationChanged_updatesWindowHeight() {
+    @EnableFlags(FLAG_STATUS_BAR_STOP_UPDATING_WINDOW_HEIGHT)
+    fun onAttachedToWindow_flagOn_doesNotUpdateWindowHeight() {
+        view.onAttachedToWindow()
+
+        verify(windowController, never()).refreshStatusBarHeight()
+    }
+
+    @Test
+    @DisableFlags(FLAG_STATUS_BAR_STOP_UPDATING_WINDOW_HEIGHT)
+    fun onConfigurationChanged_flagOff_updatesWindowHeight() {
         view.onConfigurationChanged(Configuration())
 
         verify(windowController).refreshStatusBarHeight()
     }
 
     @Test
-    fun onConfigurationChanged_multipleCalls_updatesWindowHeightMultipleTimes() {
+    @EnableFlags(FLAG_STATUS_BAR_STOP_UPDATING_WINDOW_HEIGHT)
+    fun onConfigurationChanged_flagOn_doesNotUpdateWindowHeight() {
+        view.onConfigurationChanged(Configuration())
+
+        verify(windowController, never()).refreshStatusBarHeight()
+    }
+
+    @Test
+    @DisableFlags(FLAG_STATUS_BAR_STOP_UPDATING_WINDOW_HEIGHT)
+    fun onConfigurationChanged_multipleCalls_flagOff_updatesWindowHeightMultipleTimes() {
         view.onConfigurationChanged(Configuration())
         view.onConfigurationChanged(Configuration())
         view.onConfigurationChanged(Configuration())
         view.onConfigurationChanged(Configuration())
 
         verify(windowController, times(4)).refreshStatusBarHeight()
+    }
+
+    @Test
+    @EnableFlags(FLAG_STATUS_BAR_STOP_UPDATING_WINDOW_HEIGHT)
+    fun onConfigurationChanged_multipleCalls_flagOn_neverUpdatesWindowHeight() {
+        view.onConfigurationChanged(Configuration())
+        view.onConfigurationChanged(Configuration())
+        view.onConfigurationChanged(Configuration())
+        view.onConfigurationChanged(Configuration())
+
+        verify(windowController, never()).refreshStatusBarHeight()
     }
 
     @Test
