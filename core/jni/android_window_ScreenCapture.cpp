@@ -19,7 +19,7 @@
 
 #include <android/gui/BnScreenCaptureListener.h>
 #include <android_runtime/android_hardware_HardwareBuffer.h>
-#include <gui/AidlStatusUtil.h>
+#include <gui/AidlUtil.h>
 #include <gui/SurfaceComposerClient.h>
 #include <jni.h>
 #include <nativehelper/JNIHelp.h>
