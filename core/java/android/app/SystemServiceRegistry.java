@@ -235,6 +235,8 @@ import android.safetycenter.SafetyCenterFrameworkInitializer;
 import android.scheduling.SchedulingFrameworkInitializer;
 import android.security.FileIntegrityManager;
 import android.security.IFileIntegrityService;
+import android.security.advancedprotection.AdvancedProtectionManager;
+import android.security.advancedprotection.IAdvancedProtectionService;
 import android.security.attestationverification.AttestationVerificationManager;
 import android.security.attestationverification.IAttestationVerificationManagerService;
 import android.service.oemlock.IOemLockService;
@@ -1771,6 +1773,21 @@ public final class SystemServiceRegistry {
                         return new SupervisionManager(ctx, service);
                     }
                 });
+        if (android.security.Flags.aapmApi()) {
+            registerService(Context.ADVANCED_PROTECTION_SERVICE, AdvancedProtectionManager.class,
+                    new CachedServiceFetcher<>() {
+                        @Override
+                        public AdvancedProtectionManager createService(ContextImpl ctx)
+                                throws ServiceNotFoundException {
+                            IBinder iBinder = ServiceManager.getServiceOrThrow(
+                                    Context.ADVANCED_PROTECTION_SERVICE);
+                            IAdvancedProtectionService service =
+                                    IAdvancedProtectionService.Stub.asInterface(iBinder);
+                            return new AdvancedProtectionManager(service);
+                        }
+                    });
+        }
+
         // DO NOT do a flag check like this unless the flag is read-only.
         // (because this code is executed during preload in zygote.)
         // If the flag is mutable, the check should be inside CachedServiceFetcher.
