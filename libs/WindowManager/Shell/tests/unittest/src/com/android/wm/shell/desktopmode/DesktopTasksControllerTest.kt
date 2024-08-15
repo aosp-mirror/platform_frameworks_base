@@ -1819,6 +1819,19 @@ class DesktopTasksControllerTest : ShellTestCase() {
   }
 
   @Test
+  @EnableFlags(
+    Flags.FLAG_ENABLE_DESKTOP_WINDOWING_WALLPAPER_ACTIVITY,
+  )
+  fun handleRequest_backTransition_singleTaskNoToken_withWallpaper_notInDesktop_doesNotHandle() {
+    val task = setUpFreeformTask()
+    markTaskHidden(task)
+
+    val result = controller.handleRequest(Binder(), createTransition(task, type = TRANSIT_TO_BACK))
+
+    assertNull(result, "Should not handle request")
+  }
+
+  @Test
   @EnableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_WALLPAPER_ACTIVITY)
   @DisableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_BACK_NAVIGATION)
   fun handleRequest_backTransition_singleTaskNoToken_noBackNav_doesNotHandle() {

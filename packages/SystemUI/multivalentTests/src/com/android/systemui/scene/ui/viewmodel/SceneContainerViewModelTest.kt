@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+@file:OptIn(ExperimentalCoroutinesApi::class)
+
 package com.android.systemui.scene.ui.viewmodel
 
 import android.view.MotionEvent
@@ -25,6 +27,7 @@ import com.android.systemui.classifier.fakeFalsingManager
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.flags.EnableSceneContainer
 import com.android.systemui.kosmos.testScope
+import com.android.systemui.lifecycle.activateIn
 import com.android.systemui.power.data.repository.fakePowerRepository
 import com.android.systemui.power.domain.interactor.powerInteractor
 import com.android.systemui.scene.domain.interactor.sceneInteractor
@@ -37,6 +40,8 @@ import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
 import com.google.common.truth.Truth.assertWithMessage
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
@@ -57,6 +62,9 @@ class SceneContainerViewModelTest : SysuiTestCase() {
 
     private lateinit var underTest: SceneContainerViewModel
 
+    private lateinit var activationJob: Job
+    private var motionEventHandler: SceneContainerViewModel.MotionEventHandler? = null
+
     @Before
     fun setUp() {
         underTest =
@@ -64,8 +72,26 @@ class SceneContainerViewModelTest : SysuiTestCase() {
                 sceneInteractor = sceneInteractor,
                 falsingInteractor = kosmos.falsingInteractor,
                 powerInteractor = kosmos.powerInteractor,
+                motionEventHandlerReceiver = { motionEventHandler ->
+                    this@SceneContainerViewModelTest.motionEventHandler = motionEventHandler
+                },
             )
+        activationJob = Job()
+        underTest.activateIn(testScope, activationJob)
     }
+
+    @Test
+    fun activate_setsMotionEventHandler() =
+        testScope.runTest { assertThat(motionEventHandler).isNotNull() }
+
+    @Test
+    fun deactivate_clearsMotionEventHandler() =
+        testScope.runTest {
+            activationJob.cancel()
+            runCurrent()
+
+            assertThat(motionEventHandler).isNull()
+        }
 
     @Test
     fun isVisible() =

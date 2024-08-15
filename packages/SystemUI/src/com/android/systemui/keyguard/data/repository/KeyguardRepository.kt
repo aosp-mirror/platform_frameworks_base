@@ -91,11 +91,11 @@ interface KeyguardRepository {
      * the z-order (which is not really above the system UI window, but rather - the lock-screen
      * becomes invisible to reveal the "occluding activity").
      */
-    val isKeyguardShowing: Flow<Boolean>
+    val isKeyguardShowing: StateFlow<Boolean>
 
     /** Is an activity showing over the keyguard? */
     @Deprecated("Use KeyguardTransitionInteractor + KeyguardState.OCCLUDED")
-    val isKeyguardOccluded: Flow<Boolean>
+    val isKeyguardOccluded: StateFlow<Boolean>
 
     /**
      * Whether the device is locked or unlocked right now. This is true when keyguard has been

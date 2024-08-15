@@ -139,7 +139,7 @@ import android.hardware.hdmi.HdmiControlManager;
 import android.hardware.hdmi.HdmiPlaybackClient;
 import android.hardware.hdmi.HdmiPlaybackClient.OneTouchPlayCallback;
 import android.hardware.input.InputManager;
-import android.hardware.input.KeyboardSystemShortcut;
+import android.hardware.input.KeyGestureEvent;
 import android.media.AudioManager;
 import android.media.AudioManagerInternal;
 import android.media.AudioSystem;
@@ -1819,7 +1819,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     }
 
     private void handleShortPressOnHome(KeyEvent event) {
-        notifyKeyboardShortcutTriggered(event, KeyboardSystemShortcut.SYSTEM_SHORTCUT_HOME);
+        notifyKeyGestureCompleted(event, KeyGestureEvent.KEY_GESTURE_TYPE_HOME);
 
         // Turn on the connected TV and switch HDMI input if we're a HDMI playback device.
         final HdmiControl hdmiControl = getHdmiControl();
@@ -2053,8 +2053,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             }
             switch (mDoubleTapOnHomeBehavior) {
                 case DOUBLE_TAP_HOME_RECENT_SYSTEM_UI:
-                    notifyKeyboardShortcutTriggered(event,
-                            KeyboardSystemShortcut.SYSTEM_SHORTCUT_APP_SWITCH);
+                    notifyKeyGestureCompleted(event,
+                            KeyGestureEvent.KEY_GESTURE_TYPE_APP_SWITCH);
                     mHomeConsumed = true;
                     toggleRecentApps();
                     break;
@@ -2082,23 +2082,23 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 case LONG_PRESS_HOME_ALL_APPS:
                     if (mHasFeatureLeanback) {
                         launchAllAppsAction();
-                        notifyKeyboardShortcutTriggered(event,
-                                KeyboardSystemShortcut.SYSTEM_SHORTCUT_ALL_APPS);
+                        notifyKeyGestureCompleted(event,
+                                KeyGestureEvent.KEY_GESTURE_TYPE_ALL_APPS);
                     } else {
                         launchAllAppsViaA11y();
-                        notifyKeyboardShortcutTriggered(event,
-                                KeyboardSystemShortcut.SYSTEM_SHORTCUT_ACCESSIBILITY_ALL_APPS);
+                        notifyKeyGestureCompleted(event,
+                                KeyGestureEvent.KEY_GESTURE_TYPE_ACCESSIBILITY_ALL_APPS);
                     }
                     break;
                 case LONG_PRESS_HOME_ASSIST:
-                    notifyKeyboardShortcutTriggered(event,
-                            KeyboardSystemShortcut.SYSTEM_SHORTCUT_LAUNCH_ASSISTANT);
+                    notifyKeyGestureCompleted(event,
+                            KeyGestureEvent.KEY_GESTURE_TYPE_LAUNCH_ASSISTANT);
                     launchAssistAction(null, event.getDeviceId(), event.getEventTime(),
                             AssistUtils.INVOCATION_TYPE_HOME_BUTTON_LONG_PRESS);
                     break;
                 case LONG_PRESS_HOME_NOTIFICATION_PANEL:
-                    notifyKeyboardShortcutTriggered(event,
-                            KeyboardSystemShortcut.SYSTEM_SHORTCUT_TOGGLE_NOTIFICATION_PANEL);
+                    notifyKeyGestureCompleted(event,
+                            KeyGestureEvent.KEY_GESTURE_TYPE_TOGGLE_NOTIFICATION_PANEL);
                     toggleNotificationPanel();
                     break;
                 default:
@@ -3285,29 +3285,29 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             WindowManager.LayoutParams.TYPE_SYSTEM_ERROR,
         };
 
-    private void notifyKeyboardShortcutTriggeredOnActionUp(KeyEvent event,
-            @KeyboardSystemShortcut.SystemShortcut int systemShortcut) {
+    private void notifyKeyGestureCompletedOnActionUp(KeyEvent event,
+            @KeyGestureEvent.KeyGestureType int gestureType) {
         if (event.getAction() != KeyEvent.ACTION_UP) {
             return;
         }
-        notifyKeyboardShortcutTriggered(event, systemShortcut);
+        notifyKeyGestureCompleted(event, gestureType);
     }
 
-    private void notifyKeyboardShortcutTriggeredOnActionDown(KeyEvent event,
-            @KeyboardSystemShortcut.SystemShortcut int systemShortcut) {
+    private void notifyKeyGestureCompletedOnActionDown(KeyEvent event,
+            @KeyGestureEvent.KeyGestureType int gestureType) {
         if (event.getAction() != KeyEvent.ACTION_DOWN) {
             return;
         }
-        notifyKeyboardShortcutTriggered(event, systemShortcut);
+        notifyKeyGestureCompleted(event, gestureType);
     }
 
-    private void notifyKeyboardShortcutTriggered(KeyEvent event,
-            @KeyboardSystemShortcut.SystemShortcut int systemShortcut) {
-        if (systemShortcut == KeyboardSystemShortcut.SYSTEM_SHORTCUT_UNSPECIFIED) {
+    private void notifyKeyGestureCompleted(KeyEvent event,
+            @KeyGestureEvent.KeyGestureType int gestureType) {
+        if (gestureType == KeyGestureEvent.KEY_GESTURE_TYPE_UNSPECIFIED) {
             return;
         }
-        mInputManagerInternal.notifyKeyboardShortcutTriggered(event.getDeviceId(),
-                new int[]{event.getKeyCode()}, event.getMetaState(), systemShortcut);
+        mInputManagerInternal.notifyKeyGestureCompleted(event.getDeviceId(),
+                new int[]{event.getKeyCode()}, event.getMetaState(), gestureType);
     }
 
     @Override
@@ -3417,8 +3417,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             case KeyEvent.KEYCODE_RECENT_APPS:
                 if (firstDown) {
                     showRecentApps(false /* triggeredFromAltTab */);
-                    notifyKeyboardShortcutTriggered(event,
-                            KeyboardSystemShortcut.SYSTEM_SHORTCUT_RECENT_APPS);
+                    notifyKeyGestureCompleted(event,
+                            KeyGestureEvent.KEY_GESTURE_TYPE_RECENT_APPS);
                 }
                 return true;
             case KeyEvent.KEYCODE_APP_SWITCH:
@@ -3427,8 +3427,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                         preloadRecentApps();
                     } else if (!down) {
                         toggleRecentApps();
-                        notifyKeyboardShortcutTriggered(event,
-                                KeyboardSystemShortcut.SYSTEM_SHORTCUT_APP_SWITCH);
+                        notifyKeyGestureCompleted(event,
+                                KeyGestureEvent.KEY_GESTURE_TYPE_APP_SWITCH);
                     }
                 }
                 return true;
@@ -3437,8 +3437,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     launchAssistAction(Intent.EXTRA_ASSIST_INPUT_HINT_KEYBOARD,
                             deviceId, event.getEventTime(),
                             AssistUtils.INVOCATION_TYPE_UNKNOWN);
-                    notifyKeyboardShortcutTriggered(event,
-                            KeyboardSystemShortcut.SYSTEM_SHORTCUT_LAUNCH_ASSISTANT);
+                    notifyKeyGestureCompleted(event,
+                            KeyGestureEvent.KEY_GESTURE_TYPE_LAUNCH_ASSISTANT);
                     return true;
                 }
                 break;
@@ -3451,16 +3451,16 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             case KeyEvent.KEYCODE_I:
                 if (firstDown && event.isMetaPressed()) {
                     showSystemSettings();
-                    notifyKeyboardShortcutTriggered(event,
-                            KeyboardSystemShortcut.SYSTEM_SHORTCUT_LAUNCH_SYSTEM_SETTINGS);
+                    notifyKeyGestureCompleted(event,
+                            KeyGestureEvent.KEY_GESTURE_TYPE_LAUNCH_SYSTEM_SETTINGS);
                     return true;
                 }
                 break;
             case KeyEvent.KEYCODE_L:
                 if (firstDown && event.isMetaPressed()) {
                     lockNow(null /* options */);
-                    notifyKeyboardShortcutTriggered(event,
-                            KeyboardSystemShortcut.SYSTEM_SHORTCUT_LOCK_SCREEN);
+                    notifyKeyGestureCompleted(event,
+                            KeyGestureEvent.KEY_GESTURE_TYPE_LOCK_SCREEN);
                     return true;
                 }
                 break;
@@ -3468,12 +3468,12 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 if (firstDown && event.isMetaPressed()) {
                     if (event.isCtrlPressed()) {
                         sendSystemKeyToStatusBarAsync(event);
-                        notifyKeyboardShortcutTriggered(event,
-                                KeyboardSystemShortcut.SYSTEM_SHORTCUT_OPEN_NOTES);
+                        notifyKeyGestureCompleted(event,
+                                KeyGestureEvent.KEY_GESTURE_TYPE_OPEN_NOTES);
                     } else {
                         toggleNotificationPanel();
-                        notifyKeyboardShortcutTriggered(event,
-                                KeyboardSystemShortcut.SYSTEM_SHORTCUT_TOGGLE_NOTIFICATION_PANEL);
+                        notifyKeyGestureCompleted(event,
+                                KeyGestureEvent.KEY_GESTURE_TYPE_TOGGLE_NOTIFICATION_PANEL);
                     }
                     return true;
                 }
@@ -3481,8 +3481,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             case KeyEvent.KEYCODE_S:
                 if (firstDown && event.isMetaPressed() && event.isCtrlPressed()) {
                     interceptScreenshotChord(SCREENSHOT_KEY_OTHER, 0 /*pressDelay*/);
-                    notifyKeyboardShortcutTriggered(event,
-                            KeyboardSystemShortcut.SYSTEM_SHORTCUT_TAKE_SCREENSHOT);
+                    notifyKeyGestureCompleted(event,
+                            KeyGestureEvent.KEY_GESTURE_TYPE_TAKE_SCREENSHOT);
                     return true;
                 }
                 break;
@@ -3495,16 +3495,16 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                         } catch (RemoteException e) {
                             Slog.d(TAG, "Error taking bugreport", e);
                         }
-                        notifyKeyboardShortcutTriggered(event,
-                                KeyboardSystemShortcut.SYSTEM_SHORTCUT_TRIGGER_BUG_REPORT);
+                        notifyKeyGestureCompleted(event,
+                                KeyGestureEvent.KEY_GESTURE_TYPE_TRIGGER_BUG_REPORT);
                         return true;
                     }
                 }
                 // fall through
             case KeyEvent.KEYCODE_ESCAPE:
                 if (firstDown && event.isMetaPressed()) {
-                    notifyKeyboardShortcutTriggered(event,
-                            KeyboardSystemShortcut.SYSTEM_SHORTCUT_BACK);
+                    notifyKeyGestureCompleted(event,
+                            KeyGestureEvent.KEY_GESTURE_TYPE_BACK);
                     injectBackGesture(event.getDownTime());
                     return true;
                 }
@@ -3513,8 +3513,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     StatusBarManagerInternal statusbar = getStatusBarManagerInternal();
                     if (statusbar != null) {
                         statusbar.moveFocusedTaskToFullscreen(getTargetDisplayIdForKeyEvent(event));
-                        notifyKeyboardShortcutTriggered(event,
-                                KeyboardSystemShortcut.SYSTEM_SHORTCUT_MULTI_WINDOW_NAVIGATION);
+                        notifyKeyGestureCompleted(event,
+                                KeyGestureEvent.KEY_GESTURE_TYPE_MULTI_WINDOW_NAVIGATION);
                         return true;
                     }
                 }
@@ -3524,8 +3524,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     StatusBarManagerInternal statusbar = getStatusBarManagerInternal();
                     if (statusbar != null) {
                         statusbar.moveFocusedTaskToDesktop(getTargetDisplayIdForKeyEvent(event));
-                        notifyKeyboardShortcutTriggered(event,
-                                KeyboardSystemShortcut.SYSTEM_SHORTCUT_DESKTOP_MODE);
+                        notifyKeyGestureCompleted(event,
+                                KeyGestureEvent.KEY_GESTURE_TYPE_DESKTOP_MODE);
                         return true;
                     }
                 }
@@ -3535,15 +3535,15 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     if (event.isCtrlPressed()) {
                         moveFocusedTaskToStageSplit(getTargetDisplayIdForKeyEvent(event),
                                 true /* leftOrTop */);
-                        notifyKeyboardShortcutTriggered(event,
-                                KeyboardSystemShortcut.SYSTEM_SHORTCUT_SPLIT_SCREEN_NAVIGATION);
+                        notifyKeyGestureCompleted(event,
+                                KeyGestureEvent.KEY_GESTURE_TYPE_SPLIT_SCREEN_NAVIGATION);
                     } else if (event.isAltPressed()) {
                         setSplitscreenFocus(true /* leftOrTop */);
-                        notifyKeyboardShortcutTriggered(event,
-                                KeyboardSystemShortcut.SYSTEM_SHORTCUT_CHANGE_SPLITSCREEN_FOCUS);
+                        notifyKeyGestureCompleted(event,
+                                KeyGestureEvent.KEY_GESTURE_TYPE_CHANGE_SPLITSCREEN_FOCUS);
                     } else {
-                        notifyKeyboardShortcutTriggered(event,
-                                KeyboardSystemShortcut.SYSTEM_SHORTCUT_BACK);
+                        notifyKeyGestureCompleted(event,
+                                KeyGestureEvent.KEY_GESTURE_TYPE_BACK);
                         injectBackGesture(event.getDownTime());
                     }
                     return true;
@@ -3554,13 +3554,13 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     if (event.isCtrlPressed()) {
                         moveFocusedTaskToStageSplit(getTargetDisplayIdForKeyEvent(event),
                                 false /* leftOrTop */);
-                        notifyKeyboardShortcutTriggered(event,
-                                KeyboardSystemShortcut.SYSTEM_SHORTCUT_SPLIT_SCREEN_NAVIGATION);
+                        notifyKeyGestureCompleted(event,
+                                KeyGestureEvent.KEY_GESTURE_TYPE_SPLIT_SCREEN_NAVIGATION);
                         return true;
                     } else if (event.isAltPressed()) {
                         setSplitscreenFocus(false /* leftOrTop */);
-                        notifyKeyboardShortcutTriggered(event,
-                                KeyboardSystemShortcut.SYSTEM_SHORTCUT_CHANGE_SPLITSCREEN_FOCUS);
+                        notifyKeyGestureCompleted(event,
+                                KeyGestureEvent.KEY_GESTURE_TYPE_CHANGE_SPLITSCREEN_FOCUS);
                         return true;
                     }
                 }
@@ -3568,8 +3568,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             case KeyEvent.KEYCODE_SLASH:
                 if (firstDown && event.isMetaPressed() && !keyguardOn) {
                     toggleKeyboardShortcutsMenu(event.getDeviceId());
-                    notifyKeyboardShortcutTriggered(event,
-                            KeyboardSystemShortcut.SYSTEM_SHORTCUT_OPEN_SHORTCUT_HELPER);
+                    notifyKeyGestureCompleted(event,
+                            KeyGestureEvent.KEY_GESTURE_TYPE_OPEN_SHORTCUT_HELPER);
                     return true;
                 }
                 break;
@@ -3622,31 +3622,31 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     intent.putExtra(EXTRA_FROM_BRIGHTNESS_KEY, true);
                     startActivityAsUser(intent, UserHandle.CURRENT_OR_SELF);
 
-                    int systemShortcut = keyCode == KeyEvent.KEYCODE_BRIGHTNESS_DOWN
-                            ? KeyboardSystemShortcut.SYSTEM_SHORTCUT_BRIGHTNESS_DOWN
-                            : KeyboardSystemShortcut.SYSTEM_SHORTCUT_BRIGHTNESS_UP;
-                    notifyKeyboardShortcutTriggered(event, systemShortcut);
+                    int gestureType = keyCode == KeyEvent.KEYCODE_BRIGHTNESS_DOWN
+                            ? KeyGestureEvent.KEY_GESTURE_TYPE_BRIGHTNESS_DOWN
+                            : KeyGestureEvent.KEY_GESTURE_TYPE_BRIGHTNESS_UP;
+                    notifyKeyGestureCompleted(event, gestureType);
                 }
                 return true;
             case KeyEvent.KEYCODE_KEYBOARD_BACKLIGHT_DOWN:
                 if (down) {
                     mInputManagerInternal.decrementKeyboardBacklight(event.getDeviceId());
-                    notifyKeyboardShortcutTriggered(event,
-                            KeyboardSystemShortcut.SYSTEM_SHORTCUT_KEYBOARD_BACKLIGHT_DOWN);
+                    notifyKeyGestureCompleted(event,
+                            KeyGestureEvent.KEY_GESTURE_TYPE_KEYBOARD_BACKLIGHT_DOWN);
                 }
                 return true;
             case KeyEvent.KEYCODE_KEYBOARD_BACKLIGHT_UP:
                 if (down) {
                     mInputManagerInternal.incrementKeyboardBacklight(event.getDeviceId());
-                    notifyKeyboardShortcutTriggered(event,
-                            KeyboardSystemShortcut.SYSTEM_SHORTCUT_KEYBOARD_BACKLIGHT_UP);
+                    notifyKeyGestureCompleted(event,
+                            KeyGestureEvent.KEY_GESTURE_TYPE_KEYBOARD_BACKLIGHT_UP);
                 }
                 return true;
             case KeyEvent.KEYCODE_KEYBOARD_BACKLIGHT_TOGGLE:
                 // TODO: Add logic
                 if (!down) {
-                    notifyKeyboardShortcutTriggered(event,
-                            KeyboardSystemShortcut.SYSTEM_SHORTCUT_KEYBOARD_BACKLIGHT_TOGGLE);
+                    notifyKeyGestureCompleted(event,
+                            KeyGestureEvent.KEY_GESTURE_TYPE_KEYBOARD_BACKLIGHT_TOGGLE);
                 }
                 return true;
             case KeyEvent.KEYCODE_VOLUME_UP:
@@ -3673,8 +3673,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 if (firstDown && !keyguardOn && isUserSetupComplete()) {
                     if (event.isMetaPressed()) {
                         showRecentApps(false);
-                        notifyKeyboardShortcutTriggered(event,
-                                KeyboardSystemShortcut.SYSTEM_SHORTCUT_RECENT_APPS);
+                        notifyKeyGestureCompleted(event,
+                                KeyGestureEvent.KEY_GESTURE_TYPE_RECENT_APPS);
                         return true;
                     } else if (mRecentAppsHeldModifiers == 0) {
                         final int shiftlessModifiers =
@@ -3683,8 +3683,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                                 shiftlessModifiers, KeyEvent.META_ALT_ON)) {
                             mRecentAppsHeldModifiers = shiftlessModifiers;
                             showRecentApps(true);
-                            notifyKeyboardShortcutTriggered(event,
-                                    KeyboardSystemShortcut.SYSTEM_SHORTCUT_RECENT_APPS);
+                            notifyKeyGestureCompleted(event,
+                                    KeyGestureEvent.KEY_GESTURE_TYPE_RECENT_APPS);
                             return true;
                         }
                     }
@@ -3697,20 +3697,20 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                         Message msg = mHandler.obtainMessage(MSG_HANDLE_ALL_APPS);
                         msg.setAsynchronous(true);
                         msg.sendToTarget();
-                        notifyKeyboardShortcutTriggered(event,
-                                KeyboardSystemShortcut.SYSTEM_SHORTCUT_ALL_APPS);
+                        notifyKeyGestureCompleted(event,
+                                KeyGestureEvent.KEY_GESTURE_TYPE_ALL_APPS);
                     } else {
                         launchAllAppsViaA11y();
-                        notifyKeyboardShortcutTriggered(event,
-                                KeyboardSystemShortcut.SYSTEM_SHORTCUT_ACCESSIBILITY_ALL_APPS);
+                        notifyKeyGestureCompleted(event,
+                                KeyGestureEvent.KEY_GESTURE_TYPE_ACCESSIBILITY_ALL_APPS);
                     }
                 }
                 return true;
             case KeyEvent.KEYCODE_NOTIFICATION:
                 if (!down) {
                     toggleNotificationPanel();
-                    notifyKeyboardShortcutTriggered(event,
-                            KeyboardSystemShortcut.SYSTEM_SHORTCUT_TOGGLE_NOTIFICATION_PANEL);
+                    notifyKeyGestureCompleted(event,
+                            KeyGestureEvent.KEY_GESTURE_TYPE_TOGGLE_NOTIFICATION_PANEL);
                 }
                 return true;
             case KeyEvent.KEYCODE_SEARCH:
@@ -3718,8 +3718,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     switch (mSearchKeyBehavior) {
                         case SEARCH_KEY_BEHAVIOR_TARGET_ACTIVITY: {
                             launchTargetSearchActivity();
-                            notifyKeyboardShortcutTriggered(event,
-                                    KeyboardSystemShortcut.SYSTEM_SHORTCUT_LAUNCH_SEARCH);
+                            notifyKeyGestureCompleted(event,
+                                    KeyGestureEvent.KEY_GESTURE_TYPE_LAUNCH_SEARCH);
                             return true;
                         }
                         case SEARCH_KEY_BEHAVIOR_DEFAULT_SEARCH:
@@ -3732,8 +3732,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 if (firstDown) {
                     int direction = (metaState & KeyEvent.META_SHIFT_MASK) != 0 ? -1 : 1;
                     sendSwitchKeyboardLayout(event, focusedToken, direction);
-                    notifyKeyboardShortcutTriggered(event,
-                            KeyboardSystemShortcut.SYSTEM_SHORTCUT_LANGUAGE_SWITCH);
+                    notifyKeyGestureCompleted(event,
+                            KeyGestureEvent.KEY_GESTURE_TYPE_LANGUAGE_SWITCH);
                     return true;
                 }
                 break;
@@ -3752,13 +3752,13 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     if (mPendingCapsLockToggle) {
                         mInputManagerInternal.toggleCapsLock(event.getDeviceId());
                         mPendingCapsLockToggle = false;
-                        notifyKeyboardShortcutTriggered(event,
-                                KeyboardSystemShortcut.SYSTEM_SHORTCUT_TOGGLE_CAPS_LOCK);
+                        notifyKeyGestureCompleted(event,
+                                KeyGestureEvent.KEY_GESTURE_TYPE_TOGGLE_CAPS_LOCK);
                     } else if (mPendingMetaAction) {
                         if (!canceled) {
                             launchAllAppsViaA11y();
-                            notifyKeyboardShortcutTriggered(event,
-                                    KeyboardSystemShortcut.SYSTEM_SHORTCUT_ACCESSIBILITY_ALL_APPS);
+                            notifyKeyGestureCompleted(event,
+                                    KeyGestureEvent.KEY_GESTURE_TYPE_ACCESSIBILITY_ALL_APPS);
                         }
                         mPendingMetaAction = false;
                     }
@@ -3786,16 +3786,16 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     if (mPendingCapsLockToggle) {
                         mInputManagerInternal.toggleCapsLock(event.getDeviceId());
                         mPendingCapsLockToggle = false;
-                        notifyKeyboardShortcutTriggered(event,
-                                KeyboardSystemShortcut.SYSTEM_SHORTCUT_TOGGLE_CAPS_LOCK);
+                        notifyKeyGestureCompleted(event,
+                                KeyGestureEvent.KEY_GESTURE_TYPE_TOGGLE_CAPS_LOCK);
                         return true;
                     }
                 }
                 break;
             case KeyEvent.KEYCODE_CAPS_LOCK:
                 if (!down) {
-                    notifyKeyboardShortcutTriggered(event,
-                            KeyboardSystemShortcut.SYSTEM_SHORTCUT_TOGGLE_CAPS_LOCK);
+                    notifyKeyGestureCompleted(event,
+                            KeyGestureEvent.KEY_GESTURE_TYPE_TOGGLE_CAPS_LOCK);
                 }
                 break;
             case KeyEvent.KEYCODE_STYLUS_BUTTON_PRIMARY:
@@ -3809,12 +3809,12 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 if (firstDown) {
                     if (mSettingsKeyBehavior == SETTINGS_KEY_BEHAVIOR_NOTIFICATION_PANEL) {
                         toggleNotificationPanel();
-                        notifyKeyboardShortcutTriggered(event,
-                                KeyboardSystemShortcut.SYSTEM_SHORTCUT_TOGGLE_NOTIFICATION_PANEL);
+                        notifyKeyGestureCompleted(event,
+                                KeyGestureEvent.KEY_GESTURE_TYPE_TOGGLE_NOTIFICATION_PANEL);
                     } else if (mSettingsKeyBehavior == SETTINGS_KEY_BEHAVIOR_SETTINGS_ACTIVITY) {
                         showSystemSettings();
-                        notifyKeyboardShortcutTriggered(event,
-                                KeyboardSystemShortcut.SYSTEM_SHORTCUT_LAUNCH_SYSTEM_SETTINGS);
+                        notifyKeyGestureCompleted(event,
+                                KeyGestureEvent.KEY_GESTURE_TYPE_LAUNCH_SYSTEM_SETTINGS);
                     }
                 }
                 return true;
@@ -4760,8 +4760,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         // Handle special keys.
         switch (keyCode) {
             case KeyEvent.KEYCODE_BACK: {
-                notifyKeyboardShortcutTriggeredOnActionUp(event,
-                        KeyboardSystemShortcut.SYSTEM_SHORTCUT_BACK);
+                notifyKeyGestureCompletedOnActionUp(event,
+                        KeyGestureEvent.KEY_GESTURE_TYPE_BACK);
                 if (down) {
                     // There may have other embedded activities on the same Task. Try to move the
                     // focus before processing the back event.
@@ -4782,12 +4782,12 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             case KeyEvent.KEYCODE_VOLUME_DOWN:
             case KeyEvent.KEYCODE_VOLUME_UP:
             case KeyEvent.KEYCODE_VOLUME_MUTE: {
-                int systemShortcut = keyCode == KEYCODE_VOLUME_DOWN
-                        ? KeyboardSystemShortcut.SYSTEM_SHORTCUT_VOLUME_DOWN
+                int gestureType = keyCode == KEYCODE_VOLUME_DOWN
+                        ? KeyGestureEvent.KEY_GESTURE_TYPE_VOLUME_DOWN
                         : keyCode == KEYCODE_VOLUME_UP
-                                ? KeyboardSystemShortcut.SYSTEM_SHORTCUT_VOLUME_UP
-                                : KeyboardSystemShortcut.SYSTEM_SHORTCUT_VOLUME_MUTE;
-                notifyKeyboardShortcutTriggeredOnActionDown(event, systemShortcut);
+                                ? KeyGestureEvent.KEY_GESTURE_TYPE_VOLUME_UP
+                                : KeyGestureEvent.KEY_GESTURE_TYPE_VOLUME_MUTE;
+                notifyKeyGestureCompletedOnActionDown(event, gestureType);
                 if (down) {
                     sendSystemKeyToStatusBarAsync(event);
 
@@ -4888,8 +4888,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             }
 
             case KeyEvent.KEYCODE_TV_POWER: {
-                notifyKeyboardShortcutTriggeredOnActionUp(event,
-                        KeyboardSystemShortcut.SYSTEM_SHORTCUT_TOGGLE_POWER);
+                notifyKeyGestureCompletedOnActionUp(event,
+                        KeyGestureEvent.KEY_GESTURE_TYPE_TOGGLE_POWER);
                 result &= ~ACTION_PASS_TO_USER;
                 isWakeKey = false; // wake-up will be handled separately
                 if (down && hdmiControlManager != null) {
@@ -4899,8 +4899,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             }
 
             case KeyEvent.KEYCODE_POWER: {
-                notifyKeyboardShortcutTriggeredOnActionUp(event,
-                        KeyboardSystemShortcut.SYSTEM_SHORTCUT_TOGGLE_POWER);
+                notifyKeyGestureCompletedOnActionUp(event,
+                        KeyGestureEvent.KEY_GESTURE_TYPE_TOGGLE_POWER);
                 EventLogTags.writeInterceptPower(
                         KeyEvent.actionToString(event.getAction()),
                         mPowerKeyHandled ? 1 : 0,
@@ -4923,16 +4923,16 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             case KeyEvent.KEYCODE_SYSTEM_NAVIGATION_LEFT:
                 // fall through
             case KeyEvent.KEYCODE_SYSTEM_NAVIGATION_RIGHT: {
-                notifyKeyboardShortcutTriggeredOnActionUp(event,
-                        KeyboardSystemShortcut.SYSTEM_SHORTCUT_SYSTEM_NAVIGATION);
+                notifyKeyGestureCompletedOnActionUp(event,
+                        KeyGestureEvent.KEY_GESTURE_TYPE_SYSTEM_NAVIGATION);
                 result &= ~ACTION_PASS_TO_USER;
                 interceptSystemNavigationKey(event);
                 break;
             }
 
             case KeyEvent.KEYCODE_SLEEP: {
-                notifyKeyboardShortcutTriggeredOnActionUp(event,
-                        KeyboardSystemShortcut.SYSTEM_SHORTCUT_SLEEP);
+                notifyKeyGestureCompletedOnActionUp(event,
+                        KeyGestureEvent.KEY_GESTURE_TYPE_SLEEP);
                 result &= ~ACTION_PASS_TO_USER;
                 isWakeKey = false;
                 if (!mPowerManager.isInteractive()) {
@@ -4948,8 +4948,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             }
 
             case KeyEvent.KEYCODE_SOFT_SLEEP: {
-                notifyKeyboardShortcutTriggeredOnActionUp(event,
-                        KeyboardSystemShortcut.SYSTEM_SHORTCUT_SLEEP);
+                notifyKeyGestureCompletedOnActionUp(event,
+                        KeyGestureEvent.KEY_GESTURE_TYPE_SLEEP);
                 result &= ~ACTION_PASS_TO_USER;
                 isWakeKey = false;
                 if (!down) {
@@ -4960,8 +4960,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             }
 
             case KeyEvent.KEYCODE_WAKEUP: {
-                notifyKeyboardShortcutTriggeredOnActionUp(event,
-                        KeyboardSystemShortcut.SYSTEM_SHORTCUT_WAKEUP);
+                notifyKeyGestureCompletedOnActionUp(event,
+                        KeyGestureEvent.KEY_GESTURE_TYPE_WAKEUP);
                 result &= ~ACTION_PASS_TO_USER;
                 isWakeKey = true;
                 break;
@@ -4970,8 +4970,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             case KeyEvent.KEYCODE_MUTE:
                 result &= ~ACTION_PASS_TO_USER;
                 if (down && event.getRepeatCount() == 0) {
-                    notifyKeyboardShortcutTriggered(event,
-                            KeyboardSystemShortcut.SYSTEM_SHORTCUT_SYSTEM_MUTE);
+                    notifyKeyGestureCompleted(event,
+                            KeyGestureEvent.KEY_GESTURE_TYPE_SYSTEM_MUTE);
                     toggleMicrophoneMuteFromKey();
                 }
                 break;
@@ -4986,8 +4986,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             case KeyEvent.KEYCODE_MEDIA_RECORD:
             case KeyEvent.KEYCODE_MEDIA_FAST_FORWARD:
             case KeyEvent.KEYCODE_MEDIA_AUDIO_TRACK: {
-                notifyKeyboardShortcutTriggeredOnActionUp(event,
-                        KeyboardSystemShortcut.SYSTEM_SHORTCUT_MEDIA_KEY);
+                notifyKeyGestureCompletedOnActionUp(event,
+                        KeyGestureEvent.KEY_GESTURE_TYPE_MEDIA_KEY);
                 if (MediaSessionLegacyHelper.getHelper(mContext).isGlobalPriorityActive()) {
                     // If the global session is active pass all media keys to it
                     // instead of the active window.
@@ -5032,8 +5032,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                             0 /* unused */, event.getEventTime() /* eventTime */);
                     msg.setAsynchronous(true);
                     msg.sendToTarget();
-                    notifyKeyboardShortcutTriggered(event,
-                            KeyboardSystemShortcut.SYSTEM_SHORTCUT_LAUNCH_ASSISTANT);
+                    notifyKeyGestureCompleted(event,
+                            KeyGestureEvent.KEY_GESTURE_TYPE_LAUNCH_ASSISTANT);
                 }
                 result &= ~ACTION_PASS_TO_USER;
                 break;
@@ -5044,8 +5044,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     Message msg = mHandler.obtainMessage(MSG_LAUNCH_VOICE_ASSIST_WITH_WAKE_LOCK);
                     msg.setAsynchronous(true);
                     msg.sendToTarget();
-                    notifyKeyboardShortcutTriggered(event,
-                            KeyboardSystemShortcut.SYSTEM_SHORTCUT_LAUNCH_VOICE_ASSISTANT);
+                    notifyKeyGestureCompleted(event,
+                            KeyGestureEvent.KEY_GESTURE_TYPE_LAUNCH_VOICE_ASSISTANT);
                 }
                 result &= ~ACTION_PASS_TO_USER;
                 break;

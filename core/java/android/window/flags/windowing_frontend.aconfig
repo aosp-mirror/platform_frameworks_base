@@ -91,6 +91,14 @@ flag {
 }
 
 flag {
+  name: "transit_tracker_plumbing"
+  namespace: "windowing_frontend"
+  description: "Plumb and collect on transition tracking object instead of singleton"
+  bug: "325114242"
+  is_fixed_read_only: true
+}
+
+flag {
   name: "transit_ready_tracking"
   namespace: "windowing_frontend"
   description: "Enable accurate transition readiness tracking"

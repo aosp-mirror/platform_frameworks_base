@@ -17,11 +17,10 @@
 package android.hardware.input;
 
 /** @hide */
-oneway interface IKeyboardSystemShortcutListener {
+oneway interface IKeyGestureEventListener {
 
     /**
-     * Called when the keyboard system shortcut is triggered.
+     * Called when a key gesture event occurs.
      */
-    void onKeyboardSystemShortcutTriggered(int deviceId, in int[] keycodes, int modifierState,
-                                           int shortcut);
+    void onKeyGestureEvent(int deviceId, in int[] keycodes, int modifierState, int shortcut);
 }
