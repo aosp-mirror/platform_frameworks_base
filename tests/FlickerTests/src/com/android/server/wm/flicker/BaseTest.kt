@@ -137,8 +137,6 @@ constructor(
     /**
      * Checks that the [ComponentNameMatcher.TASK_BAR] window is visible at the start and end of the
      * transition
-     *
-     * Note: Large screen only
      */
     @Presubmit
     @Test
@@ -149,8 +147,6 @@ constructor(
 
     /**
      * Checks that the [ComponentNameMatcher.TASK_BAR] window is visible during the whole transition
-     *
-     * Note: Large screen only
      */
     @Presubmit
     @Test
