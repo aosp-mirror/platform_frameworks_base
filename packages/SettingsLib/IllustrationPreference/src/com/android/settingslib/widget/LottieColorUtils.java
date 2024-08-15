@@ -53,6 +53,12 @@ public class LottieColorUtils {
                 ".grey900",
                 R.color.settingslib_color_grey50);
         map.put(
+                ".red100",
+                R.color.settingslib_color_red500);
+        map.put(
+                ".red200",
+                R.color.settingslib_color_red500);
+        map.put(
                 ".red400",
                 R.color.settingslib_color_red600);
         map.put(
@@ -65,14 +71,14 @@ public class LottieColorUtils {
                 ".blue400",
                 R.color.settingslib_color_blue600);
         map.put(
-                ".green400",
-                R.color.settingslib_color_green600);
+                ".green100",
+                R.color.settingslib_color_green500);
         map.put(
                 ".green200",
                 R.color.settingslib_color_green500);
         map.put(
-                ".red200",
-                R.color.settingslib_color_red500);
+                ".green400",
+                R.color.settingslib_color_green600);
         map.put(
                 ".cream",
                 R.color.settingslib_color_charcoal);

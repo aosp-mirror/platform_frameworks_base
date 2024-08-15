@@ -31,6 +31,7 @@ import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.keyguard.ui.view.KeyguardRootView
+import com.android.systemui.keyguard.ui.viewmodel.AlternateBouncerDependencies
 import com.android.systemui.privacy.OngoingPrivacyChip
 import com.android.systemui.res.R
 import com.android.systemui.scene.shared.flag.SceneContainerFlag
@@ -78,24 +79,26 @@ abstract class ShadeViewProviderModule {
         @SysUISingleton
         fun providesWindowRootView(
             layoutInflater: LayoutInflater,
-            viewModelProvider: Provider<SceneContainerViewModel>,
+            viewModelFactory: SceneContainerViewModel.Factory,
             containerConfigProvider: Provider<SceneContainerConfig>,
             scenesProvider: Provider<Set<@JvmSuppressWildcards Scene>>,
             layoutInsetController: NotificationInsetsController,
             sceneDataSourceDelegator: Provider<SceneDataSourceDelegator>,
+            alternateBouncerDependencies: Provider<AlternateBouncerDependencies>,
         ): WindowRootView {
             return if (SceneContainerFlag.isEnabled) {
                 checkNoSceneDuplicates(scenesProvider.get())
                 val sceneWindowRootView =
                     layoutInflater.inflate(R.layout.scene_window_root, null) as SceneWindowRootView
                 sceneWindowRootView.init(
-                    viewModel = viewModelProvider.get(),
+                    viewModelFactory = viewModelFactory,
                     containerConfig = containerConfigProvider.get(),
                     sharedNotificationContainer =
                         sceneWindowRootView.requireViewById(R.id.shared_notification_container),
                     scenes = scenesProvider.get(),
                     layoutInsetController = layoutInsetController,
                     sceneDataSourceDelegator = sceneDataSourceDelegator.get(),
+                    alternateBouncerDependencies = alternateBouncerDependencies.get(),
                 )
                 sceneWindowRootView
             } else {

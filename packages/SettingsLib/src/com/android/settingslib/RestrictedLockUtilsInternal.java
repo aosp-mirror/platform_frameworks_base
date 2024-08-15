@@ -430,13 +430,21 @@ public class RestrictedLockUtilsInternal extends RestrictedLockUtils {
         return null;
     }
 
+    /**
+     * Retrieves the user ID of a managed profile associated with a specific user.
+     *
+     * <p>This method iterates over the users in the profile group associated with the given user ID
+     * and returns the ID of the user that is identified as a managed profile user.
+     * If no managed profile is found, it returns {@link UserHandle#USER_NULL}.
+     *
+     * @param context The context used to obtain the {@link UserManager} system service.
+     * @param userId  The ID of the user for whom to find the managed profile.
+     * @return The user ID of the managed profile, or {@link UserHandle#USER_NULL} if none exists.
+     */
     private static int getManagedProfileId(Context context, int userId) {
         UserManager um = (UserManager) context.getSystemService(Context.USER_SERVICE);
         List<UserInfo> userProfiles = um.getProfiles(userId);
         for (UserInfo uInfo : userProfiles) {
-            if (uInfo.id == userId) {
-                continue;
-            }
             if (uInfo.isManagedProfile()) {
                 return uInfo.id;
             }
@@ -821,11 +829,11 @@ public class RestrictedLockUtilsInternal extends RestrictedLockUtils {
         }
         EnforcedAdmin admin =
                 RestrictedLockUtils.getProfileOrDeviceOwner(
-                        context, UserHandle.of(UserHandle.USER_SYSTEM));
+                        context, context.getUser());
         if (admin != null) {
             return admin;
         }
-        int profileId = getManagedProfileId(context, UserHandle.USER_SYSTEM);
+        int profileId = getManagedProfileId(context, context.getUserId());
         return RestrictedLockUtils.getProfileOrDeviceOwner(context, UserHandle.of(profileId));
     }
 
@@ -848,7 +856,7 @@ public class RestrictedLockUtilsInternal extends RestrictedLockUtils {
         if (admin != null) {
             return admin;
         }
-        int profileId = getManagedProfileId(context, UserHandle.USER_SYSTEM);
+        int profileId = getManagedProfileId(context, context.getUserId());
         return RestrictedLockUtils.getProfileOrDeviceOwner(context, UserHandle.of(profileId));
     }
 

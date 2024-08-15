@@ -16,6 +16,7 @@
 
 package com.android.server.vibrator;
 
+import android.annotation.NonNull;
 import android.os.SystemClock;
 import android.os.Trace;
 import android.os.VibrationEffect;
@@ -32,7 +33,7 @@ import java.util.List;
  * <p>This step ignores vibration completion callbacks and control the vibrator on/off state
  * and amplitude to simulate waveforms represented by a sequence of {@link StepSegment}.
  */
-final class SetAmplitudeVibratorStep extends AbstractVibratorStep {
+final class SetAmplitudeVibratorStep extends AbstractComposedVibratorStep {
     /**
      * The repeating waveform keeps the vibrator ON all the time. Use a minimum duration to
      * prevent short patterns from turning the vibrator ON too frequently.
@@ -69,6 +70,7 @@ final class SetAmplitudeVibratorStep extends AbstractVibratorStep {
         return shouldAcceptCallback;
     }
 
+    @NonNull
     @Override
     public List<Step> play() {
         // TODO: consider separating the "on" steps at the start into a separate Step.

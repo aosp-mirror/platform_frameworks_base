@@ -81,6 +81,16 @@ public abstract class Pip2Module {
 
     @WMSingleton
     @Provides
+    static Optional<PipController.PipImpl> providePip2(Optional<PipController> pipController) {
+        if (pipController.isEmpty()) {
+            return Optional.empty();
+        } else {
+            return Optional.ofNullable(pipController.get().getPipImpl());
+        }
+    }
+
+    @WMSingleton
+    @Provides
     static Optional<PipController> providePipController(Context context,
             ShellInit shellInit,
             ShellCommandHandler shellCommandHandler,
@@ -94,6 +104,7 @@ public abstract class Pip2Module {
             TaskStackListenerImpl taskStackListener,
             ShellTaskOrganizer shellTaskOrganizer,
             PipTransitionState pipTransitionState,
+            PipTouchHandler pipTouchHandler,
             @ShellMainThread ShellExecutor mainExecutor) {
         if (!PipUtils.isPip2ExperimentEnabled()) {
             return Optional.empty();
@@ -102,7 +113,7 @@ public abstract class Pip2Module {
                     context, shellInit, shellCommandHandler, shellController, displayController,
                     displayInsetsController, pipBoundsState, pipBoundsAlgorithm,
                     pipDisplayLayoutState, pipScheduler, taskStackListener, shellTaskOrganizer,
-                    pipTransitionState, mainExecutor));
+                    pipTransitionState, pipTouchHandler, mainExecutor));
         }
     }
 

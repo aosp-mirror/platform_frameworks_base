@@ -20,10 +20,10 @@ import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.Mockito.mock;
 
-import android.testing.AndroidTestingRunner;
 import android.text.SpannableStringBuilder;
 import android.view.View;
 
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
@@ -37,7 +37,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 /** Tests for {@link AnnotationLinkSpan}. */
 @SmallTest
-@RunWith(AndroidTestingRunner.class)
+@RunWith(AndroidJUnit4.class)
 public class AnnotationLinkSpanTest extends SysuiTestCase {
 
     private AnnotationLinkSpan.LinkInfo mLinkInfo;

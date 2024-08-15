@@ -20,17 +20,29 @@ import com.android.internal.widget.remotecompose.core.Operation;
 import com.android.internal.widget.remotecompose.core.Operations;
 import com.android.internal.widget.remotecompose.core.PaintContext;
 import com.android.internal.widget.remotecompose.core.PaintOperation;
+import com.android.internal.widget.remotecompose.core.RemoteContext;
+import com.android.internal.widget.remotecompose.core.VariableSupport;
 import com.android.internal.widget.remotecompose.core.WireBuffer;
 import com.android.internal.widget.remotecompose.core.operations.paint.PaintBundle;
 
 import java.util.List;
 
-public class PaintData extends PaintOperation {
+public class PaintData extends PaintOperation implements VariableSupport {
     public PaintBundle mPaintData = new PaintBundle();
     public static final Companion COMPANION = new Companion();
     public static final int MAX_STRING_SIZE = 4000;
 
     public PaintData() {
+    }
+
+    @Override
+    public void updateVariables(RemoteContext context) {
+        mPaintData.updateVariables(context);
+    }
+
+    @Override
+    public void registerListening(RemoteContext context) {
+        mPaintData.registerVars(context, this);
     }
 
     @Override

@@ -30,6 +30,7 @@ android_test {
         "android.test.base",
     ],
     static_libs: [
+        "android.tracing.flags-aconfig-java",
         "androidx.test.rules",
         "androidx.test.uiautomator_uiautomator",
         "truth",

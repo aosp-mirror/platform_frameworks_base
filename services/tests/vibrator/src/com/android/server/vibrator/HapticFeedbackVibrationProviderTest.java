@@ -16,11 +16,9 @@
 
 package com.android.server.vibrator;
 
-import static android.os.VibrationAttributes.CATEGORY_KEYBOARD;
-import static android.os.VibrationAttributes.CATEGORY_UNKNOWN;
 import static android.os.VibrationAttributes.FLAG_BYPASS_INTERRUPTION_POLICY;
 import static android.os.VibrationAttributes.FLAG_BYPASS_USER_VIBRATION_INTENSITY_OFF;
-import static android.os.VibrationAttributes.FLAG_BYPASS_USER_VIBRATION_INTENSITY_SCALE;
+import static android.os.VibrationAttributes.USAGE_IME_FEEDBACK;
 import static android.os.VibrationAttributes.USAGE_TOUCH;
 import static android.os.VibrationEffect.Composition.PRIMITIVE_CLICK;
 import static android.os.VibrationEffect.Composition.PRIMITIVE_TICK;
@@ -50,10 +48,10 @@ import android.hardware.vibrator.IVibrator;
 import android.os.VibrationAttributes;
 import android.os.VibrationEffect;
 import android.os.VibratorInfo;
-import android.os.vibrator.Flags;
 import android.platform.test.flag.junit.SetFlagsRule;
 import android.util.AtomicFile;
 import android.util.SparseArray;
+import android.view.HapticFeedbackConstants;
 
 import androidx.test.InstrumentationRegistry;
 
@@ -255,22 +253,7 @@ public class HapticFeedbackVibrationProviderTest {
     }
 
     @Test
-    public void testKeyboardHaptic_fixAmplitude_keyboardCategoryOff_defaultVibrationReturned() {
-        mSetFlagsRule.disableFlags(Flags.FLAG_KEYBOARD_CATEGORY_ENABLED);
-        mockVibratorPrimitiveSupport(PRIMITIVE_CLICK, PRIMITIVE_TICK);
-        mockKeyboardVibrationFixedAmplitude(KEYBOARD_VIBRATION_FIXED_AMPLITUDE);
-
-        HapticFeedbackVibrationProvider hapticProvider = createProviderWithDefaultCustomizations();
-
-        assertThat(hapticProvider.getVibrationForHapticFeedback(KEYBOARD_TAP))
-                .isEqualTo(VibrationEffect.get(EFFECT_CLICK, true /* fallback */));
-        assertThat(hapticProvider.getVibrationForHapticFeedback(KEYBOARD_RELEASE))
-                .isEqualTo(VibrationEffect.get(EFFECT_TICK, false /* fallback */));
-    }
-
-    @Test
-    public void testKeyboardHaptic_fixAmplitude_keyboardCategoryOn_keyboardVibrationReturned() {
-        mSetFlagsRule.enableFlags(Flags.FLAG_KEYBOARD_CATEGORY_ENABLED);
+    public void testKeyboardHaptic_fixAmplitude_keyboardVibrationReturned() {
         mockVibratorPrimitiveSupport(PRIMITIVE_CLICK, PRIMITIVE_TICK);
         mockKeyboardVibrationFixedAmplitude(KEYBOARD_VIBRATION_FIXED_AMPLITUDE);
 
@@ -292,7 +275,7 @@ public class HapticFeedbackVibrationProviderTest {
 
         for (int effectId : BIOMETRIC_FEEDBACK_CONSTANTS) {
             VibrationAttributes attrs = hapticProvider.getVibrationAttributesForHapticFeedback(
-                    effectId, /* bypassVibrationIntensitySetting= */ false, /* fromIme= */ false);
+                    effectId, /* flags */ 0, /* privFlags */ 0);
             assertThat(attrs.getUsage()).isEqualTo(VibrationAttributes.USAGE_COMMUNICATION_REQUEST);
         }
     }
@@ -302,8 +285,7 @@ public class HapticFeedbackVibrationProviderTest {
         HapticFeedbackVibrationProvider hapticProvider = createProviderWithDefaultCustomizations();
 
         VibrationAttributes attrs = hapticProvider.getVibrationAttributesForHapticFeedback(
-                SAFE_MODE_ENABLED, /* bypassVibrationIntensitySetting= */ false,
-                false /* fromIme*/);
+                SAFE_MODE_ENABLED, /* flags */ 0, /* privFlags */ 0);
 
         assertThat(attrs.isFlagSet(FLAG_BYPASS_USER_VIBRATION_INTENSITY_OFF)).isFalse();
     }
@@ -313,7 +295,8 @@ public class HapticFeedbackVibrationProviderTest {
         HapticFeedbackVibrationProvider hapticProvider = createProviderWithDefaultCustomizations();
 
         VibrationAttributes attrs = hapticProvider.getVibrationAttributesForHapticFeedback(
-                SAFE_MODE_ENABLED, /* bypassVibrationIntensitySetting= */ true, false /* fromIme*/);
+                SAFE_MODE_ENABLED,
+                /* flags */ HapticFeedbackConstants.FLAG_IGNORE_GLOBAL_SETTING, /* privFlags */ 0);
 
         assertThat(attrs.isFlagSet(FLAG_BYPASS_USER_VIBRATION_INTENSITY_OFF)).isTrue();
     }
@@ -325,7 +308,7 @@ public class HapticFeedbackVibrationProviderTest {
 
         for (int effectId : SCROLL_FEEDBACK_CONSTANTS) {
             VibrationAttributes attrs = hapticProvider.getVibrationAttributesForHapticFeedback(
-                    effectId, /* bypassVibrationIntensitySetting= */ false, false /* fromIme*/);
+                    effectId, /* flags */ 0, /* privFlags */ 0);
             assertWithMessage("Expected FLAG_BYPASS_INTERRUPTION_POLICY for effect " + effectId)
                    .that(attrs.isFlagSet(FLAG_BYPASS_INTERRUPTION_POLICY)).isTrue();
         }
@@ -338,102 +321,34 @@ public class HapticFeedbackVibrationProviderTest {
 
         for (int effectId : SCROLL_FEEDBACK_CONSTANTS) {
             VibrationAttributes attrs = hapticProvider.getVibrationAttributesForHapticFeedback(
-                    effectId, /* bypassVibrationIntensitySetting= */ false, false /* fromIme*/);
+                    effectId, /* flags */ 0, /* privFlags */ 0);
             assertWithMessage("Expected no FLAG_BYPASS_INTERRUPTION_POLICY for effect " + effectId)
                    .that(attrs.isFlagSet(FLAG_BYPASS_INTERRUPTION_POLICY)).isFalse();
         }
     }
 
     @Test
-    public void testVibrationAttribute_keyboardCategoryOff_isIme_notUseKeyboardCategory() {
-        mSetFlagsRule.disableFlags(Flags.FLAG_KEYBOARD_CATEGORY_ENABLED);
+    public void testVibrationAttribute_notIme_useTouchUsage() {
         HapticFeedbackVibrationProvider hapticProvider = createProviderWithDefaultCustomizations();
 
         for (int effectId : KEYBOARD_FEEDBACK_CONSTANTS) {
             VibrationAttributes attrs = hapticProvider.getVibrationAttributesForHapticFeedback(
-                    effectId, /* bypassVibrationIntensitySetting= */ false, true /* fromIme*/);
+                    effectId, /* flags */ 0, /* privFlags */ 0);
             assertWithMessage("Expected USAGE_TOUCH for effect " + effectId)
                     .that(attrs.getUsage()).isEqualTo(USAGE_TOUCH);
-            assertWithMessage("Expected no CATEGORY_KEYBOARD for effect " + effectId)
-                    .that(attrs.getCategory()).isEqualTo(CATEGORY_UNKNOWN);
         }
     }
 
     @Test
-    public void testVibrationAttribute_keyboardCategoryOn_notIme_notUseKeyboardCategory() {
-        mSetFlagsRule.enableFlags(Flags.FLAG_KEYBOARD_CATEGORY_ENABLED);
+    public void testVibrationAttribute_isIme_useImeFeedbackUsage() {
         HapticFeedbackVibrationProvider hapticProvider = createProviderWithDefaultCustomizations();
 
         for (int effectId : KEYBOARD_FEEDBACK_CONSTANTS) {
             VibrationAttributes attrs = hapticProvider.getVibrationAttributesForHapticFeedback(
-                    effectId, /* bypassVibrationIntensitySetting= */ false, false /* fromIme*/);
-            assertWithMessage("Expected USAGE_TOUCH for effect " + effectId)
-                    .that(attrs.getUsage()).isEqualTo(USAGE_TOUCH);
-            assertWithMessage("Expected CATEGORY_KEYBOARD for effect " + effectId)
-                    .that(attrs.getCategory()).isEqualTo(CATEGORY_UNKNOWN);
-        }
-    }
-
-    @Test
-    public void testVibrationAttribute_keyboardCategoryOn_isIme_useKeyboardCategory() {
-        mSetFlagsRule.enableFlags(Flags.FLAG_KEYBOARD_CATEGORY_ENABLED);
-        HapticFeedbackVibrationProvider hapticProvider = createProviderWithDefaultCustomizations();
-
-        for (int effectId : KEYBOARD_FEEDBACK_CONSTANTS) {
-            VibrationAttributes attrs = hapticProvider.getVibrationAttributesForHapticFeedback(
-                    effectId, /* bypassVibrationIntensitySetting= */ false, true /* fromIme*/);
-            assertWithMessage("Expected USAGE_TOUCH for effect " + effectId)
-                    .that(attrs.getUsage()).isEqualTo(USAGE_TOUCH);
-            assertWithMessage("Expected CATEGORY_KEYBOARD for effect " + effectId)
-                    .that(attrs.getCategory()).isEqualTo(CATEGORY_KEYBOARD);
-        }
-    }
-
-    @Test
-    public void testVibrationAttribute_noFixAmplitude_notBypassIntensityScale() {
-        mSetFlagsRule.enableFlags(Flags.FLAG_KEYBOARD_CATEGORY_ENABLED);
-        mockVibratorPrimitiveSupport(PRIMITIVE_CLICK, PRIMITIVE_TICK);
-        mockKeyboardVibrationFixedAmplitude(-1);
-        HapticFeedbackVibrationProvider hapticProvider = createProviderWithDefaultCustomizations();
-
-        for (int effectId : KEYBOARD_FEEDBACK_CONSTANTS) {
-            VibrationAttributes attrs = hapticProvider.getVibrationAttributesForHapticFeedback(
-                    effectId, /* bypassVibrationIntensitySetting= */ false, true /* fromIme*/);
-            assertWithMessage("Expected no FLAG_BYPASS_USER_VIBRATION_INTENSITY_SCALE for effect "
-                    + effectId)
-                    .that(attrs.isFlagSet(FLAG_BYPASS_USER_VIBRATION_INTENSITY_SCALE)).isFalse();
-        }
-    }
-
-    @Test
-    public void testVibrationAttribute_notIme_notBypassIntensityScale() {
-        mSetFlagsRule.enableFlags(Flags.FLAG_KEYBOARD_CATEGORY_ENABLED);
-        mockVibratorPrimitiveSupport(PRIMITIVE_CLICK, PRIMITIVE_TICK);
-        mockKeyboardVibrationFixedAmplitude(KEYBOARD_VIBRATION_FIXED_AMPLITUDE);
-        HapticFeedbackVibrationProvider hapticProvider = createProviderWithDefaultCustomizations();
-
-        for (int effectId : KEYBOARD_FEEDBACK_CONSTANTS) {
-            VibrationAttributes attrs = hapticProvider.getVibrationAttributesForHapticFeedback(
-                    effectId, /* bypassVibrationIntensitySetting= */ false, false /* fromIme*/);
-            assertWithMessage("Expected no FLAG_BYPASS_USER_VIBRATION_INTENSITY_SCALE for effect "
-                    + effectId)
-                    .that(attrs.isFlagSet(FLAG_BYPASS_USER_VIBRATION_INTENSITY_SCALE)).isFalse();
-        }
-    }
-
-    @Test
-    public void testVibrationAttribute_fixAmplitude_isIme_bypassIntensityScale() {
-        mSetFlagsRule.enableFlags(Flags.FLAG_KEYBOARD_CATEGORY_ENABLED);
-        mockVibratorPrimitiveSupport(PRIMITIVE_CLICK, PRIMITIVE_TICK);
-        mockKeyboardVibrationFixedAmplitude(KEYBOARD_VIBRATION_FIXED_AMPLITUDE);
-        HapticFeedbackVibrationProvider hapticProvider = createProviderWithDefaultCustomizations();
-
-        for (int effectId : KEYBOARD_FEEDBACK_CONSTANTS) {
-            VibrationAttributes attrs = hapticProvider.getVibrationAttributesForHapticFeedback(
-                    effectId, /* bypassVibrationIntensitySetting= */ false, true /* fromIme*/);
-            assertWithMessage("Expected FLAG_BYPASS_USER_VIBRATION_INTENSITY_SCALE for effect "
-                    + effectId)
-                    .that(attrs.isFlagSet(FLAG_BYPASS_USER_VIBRATION_INTENSITY_SCALE)).isTrue();
+                    effectId, /* flags */ 0,
+                    HapticFeedbackConstants.PRIVATE_FLAG_APPLY_INPUT_METHOD_SETTINGS);
+            assertWithMessage("Expected USAGE_IME_FEEDBACK for effect " + effectId)
+                    .that(attrs.getUsage()).isEqualTo(USAGE_IME_FEEDBACK);
         }
     }
 

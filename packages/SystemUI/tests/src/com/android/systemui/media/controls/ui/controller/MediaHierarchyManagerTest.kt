@@ -25,6 +25,8 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.keyguard.KeyguardViewController
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.communal.data.repository.fakeCommunalSceneRepository
+import com.android.systemui.communal.shared.model.CommunalScenes
 import com.android.systemui.communal.ui.viewmodel.communalTransitionViewModel
 import com.android.systemui.controls.controller.ControlsControllerImplTest.Companion.eq
 import com.android.systemui.dreams.DreamOverlayStateController
@@ -498,6 +500,8 @@ class MediaHierarchyManagerTest : SysuiTestCase() {
                 to = KeyguardState.GLANCEABLE_HUB,
                 testScope = testScope,
             )
+            kosmos.fakeCommunalSceneRepository.changeScene(CommunalScenes.Communal)
+            runCurrent()
             mediaHierarchyManager.qsExpansion = 0f
             mediaHierarchyManager.setTransitionToFullShadeAmount(123f)
 
@@ -542,6 +546,8 @@ class MediaHierarchyManagerTest : SysuiTestCase() {
                 to = KeyguardState.GLANCEABLE_HUB,
                 testScope = testScope,
             )
+            kosmos.fakeCommunalSceneRepository.changeScene(CommunalScenes.Communal)
+            runCurrent()
             verify(mediaCarouselController)
                 .onDesiredLocationChanged(
                     eq(MediaHierarchyManager.LOCATION_COMMUNAL_HUB),
@@ -557,6 +563,8 @@ class MediaHierarchyManagerTest : SysuiTestCase() {
                 to = KeyguardState.LOCKSCREEN,
                 testScope = testScope,
             )
+            kosmos.fakeCommunalSceneRepository.changeScene(CommunalScenes.Blank)
+            runCurrent()
             verify(mediaCarouselController)
                 .onDesiredLocationChanged(
                     eq(MediaHierarchyManager.LOCATION_QQS),
@@ -579,6 +587,8 @@ class MediaHierarchyManagerTest : SysuiTestCase() {
                 to = KeyguardState.GLANCEABLE_HUB,
                 testScope = testScope,
             )
+            kosmos.fakeCommunalSceneRepository.changeScene(CommunalScenes.Communal)
+            runCurrent()
             verify(mediaCarouselController)
                 .onDesiredLocationChanged(
                     eq(MediaHierarchyManager.LOCATION_COMMUNAL_HUB),
@@ -600,6 +610,8 @@ class MediaHierarchyManagerTest : SysuiTestCase() {
                 to = KeyguardState.GLANCEABLE_HUB,
                 testScope = testScope,
             )
+            kosmos.fakeCommunalSceneRepository.changeScene(CommunalScenes.Communal)
+            runCurrent()
             verify(mediaCarouselController)
                 .onDesiredLocationChanged(
                     eq(MediaHierarchyManager.LOCATION_COMMUNAL_HUB),
@@ -635,6 +647,8 @@ class MediaHierarchyManagerTest : SysuiTestCase() {
                 to = KeyguardState.GLANCEABLE_HUB,
                 testScope = testScope,
             )
+            kosmos.fakeCommunalSceneRepository.changeScene(CommunalScenes.Communal)
+            runCurrent()
             // Mock the behavior for dreaming that pulling down shade will immediately set QS as
             // expanded
             expandQS()

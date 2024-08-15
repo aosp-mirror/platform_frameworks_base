@@ -21,8 +21,6 @@ import com.android.asllib.util.XmlUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-import java.util.List;
-
 public class AndroidSafetyLabel implements AslMarshallable {
 
     private final Long mVersion;
@@ -46,36 +44,34 @@ public class AndroidSafetyLabel implements AslMarshallable {
     }
 
     /** Creates an on-device DOM element from an {@link AndroidSafetyLabel} */
-    @Override
-    public List<Element> toOdDomElements(Document doc) {
+    public Element toOdDomElement(Document doc) {
         Element aslEle = doc.createElement(XmlUtils.OD_TAG_BUNDLE);
         aslEle.appendChild(XmlUtils.createOdLongEle(doc, XmlUtils.OD_NAME_VERSION, mVersion));
         if (mSafetyLabels != null) {
-            XmlUtils.appendChildren(aslEle, mSafetyLabels.toOdDomElements(doc));
+            aslEle.appendChild(mSafetyLabels.toOdDomElement(doc));
         }
         if (mSystemAppSafetyLabel != null) {
-            XmlUtils.appendChildren(aslEle, mSystemAppSafetyLabel.toOdDomElements(doc));
+            aslEle.appendChild(mSystemAppSafetyLabel.toOdDomElement(doc));
         }
         if (mTransparencyInfo != null) {
-            XmlUtils.appendChildren(aslEle, mTransparencyInfo.toOdDomElements(doc));
+            aslEle.appendChild(mTransparencyInfo.toOdDomElement(doc));
         }
-        return XmlUtils.listOf(aslEle);
+        return aslEle;
     }
 
     /** Creates the human-readable DOM elements from the AslMarshallable Java Object. */
-    @Override
-    public List<Element> toHrDomElements(Document doc) {
+    public Element toHrDomElement(Document doc) {
         Element aslEle = doc.createElement(XmlUtils.HR_TAG_APP_METADATA_BUNDLES);
         aslEle.setAttribute(XmlUtils.HR_ATTR_VERSION, String.valueOf(mVersion));
         if (mSafetyLabels != null) {
-            XmlUtils.appendChildren(aslEle, mSafetyLabels.toHrDomElements(doc));
+            aslEle.appendChild(mSafetyLabels.toHrDomElement(doc));
         }
         if (mSystemAppSafetyLabel != null) {
-            XmlUtils.appendChildren(aslEle, mSystemAppSafetyLabel.toHrDomElements(doc));
+            aslEle.appendChild(mSystemAppSafetyLabel.toHrDomElement(doc));
         }
         if (mTransparencyInfo != null) {
-            XmlUtils.appendChildren(aslEle, mTransparencyInfo.toHrDomElements(doc));
+            aslEle.appendChild(mTransparencyInfo.toHrDomElement(doc));
         }
-        return XmlUtils.listOf(aslEle);
+        return aslEle;
     }
 }

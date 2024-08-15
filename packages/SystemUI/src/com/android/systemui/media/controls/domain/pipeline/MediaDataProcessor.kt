@@ -86,6 +86,7 @@ import com.android.systemui.media.controls.util.MediaControllerFactory
 import com.android.systemui.media.controls.util.MediaDataUtils
 import com.android.systemui.media.controls.util.MediaFlags
 import com.android.systemui.media.controls.util.MediaUiEventLogger
+import com.android.systemui.media.controls.util.SmallHash
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.plugins.BcSmartspaceDataPlugin
 import com.android.systemui.res.R
@@ -721,6 +722,7 @@ class MediaDataProcessor(
                     appUid = appUid,
                     isExplicit = isExplicit,
                     resumeProgress = progress,
+                    smartspaceId = SmallHash.hash(appUid + systemClock.currentTimeMillis().toInt()),
                 )
             )
         }
@@ -902,6 +904,7 @@ class MediaDataProcessor(
                     instanceId = instanceId,
                     appUid = appUid,
                     isExplicit = isExplicit,
+                    smartspaceId = SmallHash.hash(appUid + systemClock.currentTimeMillis().toInt()),
                 )
             )
         }

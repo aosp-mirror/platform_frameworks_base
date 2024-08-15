@@ -17,9 +17,6 @@
 package android.trust.test
 
 import android.content.pm.PackageManager
-import android.platform.test.annotations.RequiresFlagsDisabled
-import android.platform.test.annotations.RequiresFlagsEnabled
-import android.platform.test.flag.junit.DeviceFlagsValueProvider
 import android.service.trust.GrantTrustResult
 import android.trust.BaseTrustAgentService
 import android.trust.TrustTestActivity
@@ -58,7 +55,6 @@ class GrantAndRevokeTrustTest {
         .around(ScreenLockRule())
         .around(lockStateTrackingRule)
         .around(trustAgentRule)
-        .around(DeviceFlagsValueProvider.createCheckFlagsRule())
 
     @Before
     fun manageTrust() {
@@ -93,7 +89,6 @@ class GrantAndRevokeTrustTest {
     }
 
     @Test
-    @RequiresFlagsEnabled(android.security.Flags.FLAG_FIX_UNLOCKED_DEVICE_REQUIRED_KEYS_V2)
     fun grantCannotActivelyUnlockDevice() {
         // On automotive, trust agents can actively unlock the device.
         assumeFalse(packageManager.hasSystemFeature(PackageManager.FEATURE_AUTOMOTIVE))
@@ -117,24 +112,6 @@ class GrantAndRevokeTrustTest {
         uiDevice.sleep()
         await()
         lockStateTrackingRule.assertLocked()
-    }
-
-    @Test
-    @RequiresFlagsDisabled(android.security.Flags.FLAG_FIX_UNLOCKED_DEVICE_REQUIRED_KEYS_V2)
-    fun grantCouldCauseWrongDeviceLockedStateDueToBug() {
-        // On automotive, trust agents can actively unlock the device.
-        assumeFalse(packageManager.hasSystemFeature(PackageManager.FEATURE_AUTOMOTIVE))
-
-        // Verify that b/296464083 exists.  That is, when the device is locked
-        // and a trust agent grants trust, the deviceLocked state incorrectly
-        // becomes false even though the device correctly remains locked.
-        uiDevice.sleep()
-        lockStateTrackingRule.assertLocked()
-        trustAgentRule.agent.grantTrust(GRANT_MESSAGE, 10000, 0) {}
-        uiDevice.wakeUp()
-        uiDevice.sleep()
-        await()
-        lockStateTrackingRule.assertUnlockedButNotReally()
     }
 
     @Test

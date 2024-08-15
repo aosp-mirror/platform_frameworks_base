@@ -142,14 +142,15 @@ class NotificationTransitionAnimatorController(
     }
 
     override fun onIntentStarted(willAnimate: Boolean) {
+        val reason = "onIntentStarted(willAnimate=$willAnimate)"
         if (ActivityTransitionAnimator.DEBUG_TRANSITION_ANIMATION) {
-            Log.d(TAG, "onIntentStarted(willAnimate=$willAnimate)")
+            Log.d(TAG, reason)
         }
         notificationLaunchAnimationInteractor.setIsLaunchAnimationRunning(willAnimate)
         notificationEntry.isExpandAnimationRunning = willAnimate
 
         if (!willAnimate) {
-            removeHun(animate = true)
+            removeHun(animate = true, reason)
             onFinishAnimationCallback?.run()
         }
     }
@@ -166,13 +167,18 @@ class NotificationTransitionAnimatorController(
             }
         }
 
-    private fun removeHun(animate: Boolean) {
+    private fun removeHun(animate: Boolean, reason: String) {
         val row = headsUpNotificationRow ?: return
 
         // TODO: b/297247841 - Call on the row we're removing, which may differ from notification.
         HeadsUpUtil.setNeedsHeadsUpDisappearAnimationAfterClick(notification, animate)
 
-        headsUpManager.removeNotification(row.entry.key, true /* releaseImmediately */, animate)
+        headsUpManager.removeNotification(
+            row.entry.key,
+            true /* releaseImmediately */,
+            animate,
+            reason
+        )
     }
 
     override fun onTransitionAnimationCancelled(newKeyguardOccludedState: Boolean?) {
@@ -184,7 +190,7 @@ class NotificationTransitionAnimatorController(
         // here?
         notificationLaunchAnimationInteractor.setIsLaunchAnimationRunning(false)
         notificationEntry.isExpandAnimationRunning = false
-        removeHun(animate = true)
+        removeHun(animate = true, "onLaunchAnimationCancelled()")
         onFinishAnimationCallback?.run()
     }
 
@@ -206,7 +212,7 @@ class NotificationTransitionAnimatorController(
         notificationEntry.isExpandAnimationRunning = false
         notificationListContainer.setExpandingNotification(null)
         applyParams(null)
-        removeHun(animate = false)
+        removeHun(animate = false, "onLaunchAnimationEnd()")
         onFinishAnimationCallback?.run()
     }
 

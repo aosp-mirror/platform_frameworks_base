@@ -22,13 +22,15 @@ import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.dimensionResource
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.qs.panels.shared.model.SizedTileImpl
 import com.android.systemui.qs.panels.ui.viewmodel.EditTileViewModel
+import com.android.systemui.qs.panels.ui.viewmodel.FixedColumnsSizeViewModel
 import com.android.systemui.qs.panels.ui.viewmodel.IconTilesViewModel
-import com.android.systemui.qs.panels.ui.viewmodel.InfiniteGridSizeViewModel
 import com.android.systemui.qs.panels.ui.viewmodel.TileViewModel
 import com.android.systemui.qs.pipeline.shared.TileSpec
 import com.android.systemui.res.R
@@ -39,13 +41,14 @@ class InfiniteGridLayout
 @Inject
 constructor(
     private val iconTilesViewModel: IconTilesViewModel,
-    private val gridSizeViewModel: InfiniteGridSizeViewModel,
-) : GridLayout {
+    private val gridSizeViewModel: FixedColumnsSizeViewModel,
+) : PaginatableGridLayout {
 
     @Composable
     override fun TileGrid(
         tiles: List<TileViewModel>,
         modifier: Modifier,
+        editModeStart: () -> Unit,
     ) {
         DisposableEffect(tiles) {
             val token = Any()
@@ -53,21 +56,14 @@ constructor(
             onDispose { tiles.forEach { it.stopListening(token) } }
         }
         val columns by gridSizeViewModel.columns.collectAsStateWithLifecycle()
+        val sizedTiles = tiles.map { SizedTileImpl(it, it.spec.width()) }
 
         TileLazyGrid(modifier = modifier, columns = GridCells.Fixed(columns)) {
-            items(
-                tiles.size,
-                span = { index ->
-                    if (iconTilesViewModel.isIconTile(tiles[index].spec)) {
-                        GridItemSpan(1)
-                    } else {
-                        GridItemSpan(2)
-                    }
-                }
-            ) { index ->
+            items(sizedTiles.size, span = { index -> GridItemSpan(sizedTiles[index].width) }) {
+                index ->
                 Tile(
-                    tile = tiles[index],
-                    iconOnly = iconTilesViewModel.isIconTile(tiles[index].spec),
+                    tile = sizedTiles[index].tile,
+                    iconOnly = iconTilesViewModel.isIconTile(sizedTiles[index].tile.spec),
                     modifier = Modifier.height(dimensionResource(id = R.dimen.qs_tile_height))
                 )
             }
@@ -82,14 +78,44 @@ constructor(
         onRemoveTile: (TileSpec) -> Unit,
     ) {
         val columns by gridSizeViewModel.columns.collectAsStateWithLifecycle()
+        val largeTiles by iconTilesViewModel.largeTiles.collectAsStateWithLifecycle()
+
+        // Non-current tiles should always be displayed as icon tiles.
+        val sizedTiles =
+            remember(tiles, largeTiles) {
+                tiles.map {
+                    SizedTileImpl(
+                        it,
+                        if (!it.isCurrent || !largeTiles.contains(it.tileSpec)) 1 else 2,
+                    )
+                }
+            }
 
         DefaultEditTileGrid(
-            tiles = tiles,
-            isIconOnly = iconTilesViewModel::isIconTile,
-            columns = GridCells.Fixed(columns),
+            sizedTiles = sizedTiles,
+            columns = columns,
             modifier = modifier,
             onAddTile = onAddTile,
             onRemoveTile = onRemoveTile,
+            onResize = iconTilesViewModel::resize,
         )
+    }
+
+    override fun splitIntoPages(
+        tiles: List<TileViewModel>,
+        rows: Int,
+        columns: Int,
+    ): List<List<TileViewModel>> {
+
+        return PaginatableGridLayout.splitInRows(
+                tiles.map { SizedTileImpl(it, it.spec.width()) },
+                columns,
+            )
+            .chunked(rows)
+            .map { it.flatten().map { it.tile } }
+    }
+
+    private fun TileSpec.width(): Int {
+        return if (iconTilesViewModel.isIconTile(this)) 1 else 2
     }
 }

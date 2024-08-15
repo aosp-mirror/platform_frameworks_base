@@ -23,11 +23,11 @@ import android.annotation.Nullable;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
-import android.os.Looper;
 import android.util.Log;
 import android.view.inputmethod.ImeTracker;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.infra.AndroidFuture;
 import com.android.internal.inputmethod.IImeTracker;
 import com.android.internal.inputmethod.InputMethodDebug;
 import com.android.internal.inputmethod.SoftInputShowHideReason;
@@ -69,8 +69,8 @@ public final class ImeTrackerService extends IImeTracker.Stub {
 
     private final Object mLock = new Object();
 
-    ImeTrackerService(@NonNull Looper looper) {
-        mHandler = new Handler(looper, null /* callback */, true /* async */);
+    ImeTrackerService(@NonNull Handler handler) {
+        mHandler = handler;
     }
 
     @NonNull
@@ -174,10 +174,18 @@ public final class ImeTrackerService extends IImeTracker.Stub {
 
     @EnforcePermission(Manifest.permission.TEST_INPUT_METHOD)
     @Override
-    public void finishTrackingPendingImeVisibilityRequests() {
+    public void finishTrackingPendingImeVisibilityRequests(
+            @NonNull AndroidFuture completionSignal /* T=Void */) {
         super.finishTrackingPendingImeVisibilityRequests_enforcePermission();
-        synchronized (mLock) {
-            mHistory.mLiveEntries.clear();
+        @SuppressWarnings("unchecked")
+        final AndroidFuture<Void> typedCompletionSignal = completionSignal;
+        try {
+            synchronized (mLock) {
+                mHistory.mLiveEntries.clear();
+            }
+            typedCompletionSignal.complete(null);
+        } catch (Throwable e) {
+            typedCompletionSignal.completeExceptionally(e);
         }
     }
 

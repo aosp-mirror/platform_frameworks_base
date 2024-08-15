@@ -23,7 +23,6 @@ import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.graphics.Rect;
 import android.os.Environment;
-import android.os.SystemProperties;
 import android.os.Trace;
 import android.util.ArraySet;
 import android.util.IntArray;
@@ -33,7 +32,6 @@ import android.window.TaskSnapshot;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.wm.BaseAppSnapshotPersister.PersistInfoProvider;
-import com.android.window.flags.Flags;
 
 import java.io.File;
 import java.io.PrintWriter;
@@ -109,7 +107,6 @@ class ActivitySnapshotController extends AbsAppSnapshotController<ActivityRecord
                 !service.mContext
                         .getResources()
                         .getBoolean(com.android.internal.R.bool.config_disableTaskSnapshots)
-                && isSnapshotEnabled()
                 && !ActivityManager.isLowRamDeviceStatic(); // Don't support Android Go
         setSnapshotEnabled(snapshotEnabled);
     }
@@ -119,12 +116,6 @@ class ActivitySnapshotController extends AbsAppSnapshotController<ActivityRecord
         final float config = mService.mContext.getResources().getFloat(
                 com.android.internal.R.dimen.config_resActivitySnapshotScale);
         return Math.max(Math.min(config, 1f), 0.1f);
-    }
-
-    // TODO remove when enabled
-    static boolean isSnapshotEnabled() {
-        return SystemProperties.getInt("persist.wm.debug.activity_screenshot", 0) != 0
-                || Flags.activitySnapshotByDefault();
     }
 
     static PersistInfoProvider createPersistInfoProvider(
@@ -588,12 +579,6 @@ class ActivitySnapshotController extends AbsAppSnapshotController<ActivityRecord
     @Override
     ActivityRecord getTopActivity(ActivityRecord activity) {
         return activity;
-    }
-
-    @Override
-    ActivityRecord getTopFullscreenActivity(ActivityRecord activity) {
-        final WindowState win = activity.findMainWindow();
-        return (win != null && win.mAttrs.isFullscreen()) ? activity : null;
     }
 
     @Override

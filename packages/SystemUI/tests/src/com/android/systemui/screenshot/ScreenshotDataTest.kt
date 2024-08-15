@@ -17,6 +17,7 @@
 package com.android.systemui.screenshot
 
 import android.content.ComponentName
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import android.graphics.Insets
 import android.graphics.Rect
 import android.os.UserHandle
@@ -25,7 +26,9 @@ import android.view.WindowManager
 import com.android.internal.util.ScreenshotRequest
 import com.google.common.truth.Truth.assertThat
 import org.junit.Test
+import org.junit.runner.RunWith
 
+@RunWith(AndroidJUnit4::class)
 class ScreenshotDataTest {
     private val type = WindowManager.TAKE_SCREENSHOT_FULLSCREEN
     private val source = WindowManager.ScreenshotSource.SCREENSHOT_KEY_OTHER

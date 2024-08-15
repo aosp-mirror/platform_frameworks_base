@@ -15,9 +15,11 @@
  */
 package android.system;
 
+import com.android.ravenwood.common.JvmWorkaround;
 import com.android.ravenwood.common.RavenwoodRuntimeNative;
 
 import java.io.FileDescriptor;
+import java.io.IOException;
 
 /**
  * OS class replacement used on Ravenwood. For now, we just implement APIs as we need them...
@@ -30,7 +32,6 @@ public final class Os {
         return RavenwoodRuntimeNative.lseek(fd, offset, whence);
     }
 
-
     public static FileDescriptor[] pipe2(int flags) throws ErrnoException {
         return RavenwoodRuntimeNative.pipe2(flags);
     }
@@ -41,5 +42,31 @@ public final class Os {
 
     public static int fcntlInt(FileDescriptor fd, int cmd, int arg) throws ErrnoException {
         return RavenwoodRuntimeNative.fcntlInt(fd, cmd, arg);
+    }
+
+    public static StructStat fstat(FileDescriptor fd) throws ErrnoException {
+        return RavenwoodRuntimeNative.fstat(fd);
+    }
+
+    public static StructStat lstat(String path) throws ErrnoException {
+        return RavenwoodRuntimeNative.lstat(path);
+    }
+
+    public static StructStat stat(String path) throws ErrnoException {
+        return RavenwoodRuntimeNative.stat(path);
+    }
+
+    /** Ravenwood version of the OS API. */
+    public static void close(FileDescriptor fd) throws ErrnoException {
+        try {
+            JvmWorkaround.getInstance().closeFd(fd);
+        } catch (IOException e) {
+            // The only valid error on Linux that can happen is EIO
+            throw new ErrnoException("close", OsConstants.EIO);
+        }
+    }
+
+    public static FileDescriptor open(String path, int flags, int mode) throws ErrnoException {
+        return RavenwoodRuntimeNative.open(path, flags, mode);
     }
 }

@@ -3,24 +3,26 @@ per-file RecyclerView.java = mount@google.com
 per-file ViewPager.java = mount@google.com
 
 # LockSettings related
-per-file *LockPattern* = file:/services/core/java/com/android/server/locksettings/OWNERS
+per-file LockPatternChecker.java = file:/services/core/java/com/android/server/locksettings/OWNERS
+per-file LockPatternUtils.java = file:/services/core/java/com/android/server/locksettings/OWNERS
+per-file LockPatternView.java = file:/packages/SystemUI/OWNERS
 per-file *LockScreen* = file:/services/core/java/com/android/server/locksettings/OWNERS
 per-file *Lockscreen* = file:/services/core/java/com/android/server/locksettings/OWNERS
 per-file *LockSettings* = file:/services/core/java/com/android/server/locksettings/OWNERS
 
 # Notification related
-per-file *Notification* = file:/services/core/java/com/android/server/notification/OWNERS
-per-file *Messaging* = file:/services/core/java/com/android/server/notification/OWNERS
-per-file *Message* = file:/services/core/java/com/android/server/notification/OWNERS
-per-file *Conversation* = file:/services/core/java/com/android/server/notification/OWNERS
-per-file *People* = file:/services/core/java/com/android/server/notification/OWNERS
-per-file *ImageResolver* = file:/services/core/java/com/android/server/notification/OWNERS
-per-file CallLayout.java = file:/services/core/java/com/android/server/notification/OWNERS
-per-file CachingIconView.java = file:/services/core/java/com/android/server/notification/OWNERS
-per-file ImageFloatingTextView.java = file:/services/core/java/com/android/server/notification/OWNERS
-per-file ObservableTextView.java = file:/services/core/java/com/android/server/notification/OWNERS
-per-file RemeasuringLinearLayout.java = file:/services/core/java/com/android/server/notification/OWNERS
-per-file ViewClippingUtil.java = file:/services/core/java/com/android/server/notification/OWNERS
+per-file *Notification* = file:/packages/SystemUI/src/com/android/systemui/statusbar/notification/OWNERS
+per-file *Messaging* = file:/packages/SystemUI/src/com/android/systemui/statusbar/notification/OWNERS
+per-file *Message* = file:/packages/SystemUI/src/com/android/systemui/statusbar/notification/OWNERS
+per-file *Conversation* = file:/packages/SystemUI/src/com/android/systemui/statusbar/notification/OWNERS
+per-file *People* = file:/packages/SystemUI/src/com/android/systemui/statusbar/notification/OWNERS
+per-file *ImageResolver* = file:/packages/SystemUI/src/com/android/systemui/statusbar/notification/OWNERS
+per-file CallLayout.java = file:/packages/SystemUI/src/com/android/systemui/statusbar/notification/OWNERS
+per-file CachingIconView.java = file:/packages/SystemUI/src/com/android/systemui/statusbar/notification/OWNERS
+per-file ImageFloatingTextView.java = file:/packages/SystemUI/src/com/android/systemui/statusbar/notification/OWNERS
+per-file ObservableTextView.java = file:/packages/SystemUI/src/com/android/systemui/statusbar/notification/OWNERS
+per-file RemeasuringLinearLayout.java = file:/packages/SystemUI/src/com/android/systemui/statusbar/notification/OWNERS
+per-file ViewClippingUtil.java = file:/packages/SystemUI/src/com/android/systemui/statusbar/notification/OWNERS
 
 # Appwidget related
 per-file *RemoteViews* = file:/services/appwidget/java/com/android/server/appwidget/OWNERS

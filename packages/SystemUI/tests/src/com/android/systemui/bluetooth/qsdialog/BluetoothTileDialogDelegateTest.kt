@@ -17,7 +17,6 @@
 package com.android.systemui.bluetooth.qsdialog
 
 import android.graphics.drawable.Drawable
-import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
 import android.view.LayoutInflater
 import android.view.View
@@ -27,6 +26,7 @@ import android.view.ViewGroup.LayoutParams.MATCH_PARENT
 import android.view.ViewGroup.LayoutParams.WRAP_CONTENT
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.internal.logging.UiEventLogger
 import com.android.settingslib.bluetooth.CachedBluetoothDevice
@@ -57,7 +57,7 @@ import org.mockito.junit.MockitoJUnit
 import org.mockito.junit.MockitoRule
 
 @SmallTest
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 @TestableLooper.RunWithLooper(setAsMainLooper = true)
 class BluetoothTileDialogDelegateTest : SysuiTestCase() {
     companion object {
@@ -325,6 +325,72 @@ class BluetoothTileDialogDelegateTest : SysuiTestCase() {
                     dialog.requireViewById<View>(R.id.bluetooth_auto_on_toggle_layout).visibility
                 )
                 .isEqualTo(GONE)
+            dialog.dismiss()
+        }
+    }
+
+    @Test
+    fun testOnAudioSharingButtonUpdated_visibleActive_activateButton() {
+        testScope.runTest {
+            val dialog = mBluetoothTileDialogDelegate.createDialog()
+            dialog.show()
+            fakeSystemClock.setElapsedRealtime(Long.MAX_VALUE)
+            mBluetoothTileDialogDelegate.onAudioSharingButtonUpdated(
+                dialog,
+                visibility = VISIBLE,
+                label = null,
+                isActive = true
+            )
+
+            val audioSharingButton = dialog.requireViewById<View>(R.id.audio_sharing_button)
+
+            assertThat(audioSharingButton).isNotNull()
+            assertThat(audioSharingButton.visibility).isEqualTo(VISIBLE)
+            assertThat(audioSharingButton.isActivated).isTrue()
+            dialog.dismiss()
+        }
+    }
+
+    @Test
+    fun testOnAudioSharingButtonUpdated_visibleNotActive_inactivateButton() {
+        testScope.runTest {
+            val dialog = mBluetoothTileDialogDelegate.createDialog()
+            dialog.show()
+            fakeSystemClock.setElapsedRealtime(Long.MAX_VALUE)
+            mBluetoothTileDialogDelegate.onAudioSharingButtonUpdated(
+                dialog,
+                visibility = VISIBLE,
+                label = null,
+                isActive = false
+            )
+
+            val audioSharingButton = dialog.requireViewById<View>(R.id.audio_sharing_button)
+
+            assertThat(audioSharingButton).isNotNull()
+            assertThat(audioSharingButton.visibility).isEqualTo(VISIBLE)
+            assertThat(audioSharingButton.isActivated).isFalse()
+            dialog.dismiss()
+        }
+    }
+
+    @Test
+    fun testOnAudioSharingButtonUpdated_gone_inactivateButton() {
+        testScope.runTest {
+            val dialog = mBluetoothTileDialogDelegate.createDialog()
+            dialog.show()
+            fakeSystemClock.setElapsedRealtime(Long.MAX_VALUE)
+            mBluetoothTileDialogDelegate.onAudioSharingButtonUpdated(
+                dialog,
+                visibility = GONE,
+                label = null,
+                isActive = false
+            )
+
+            val audioSharingButton = dialog.requireViewById<View>(R.id.audio_sharing_button)
+
+            assertThat(audioSharingButton).isNotNull()
+            assertThat(audioSharingButton.visibility).isEqualTo(GONE)
+            assertThat(audioSharingButton.isActivated).isFalse()
             dialog.dismiss()
         }
     }

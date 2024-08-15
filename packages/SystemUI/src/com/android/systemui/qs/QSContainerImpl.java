@@ -18,8 +18,6 @@ package com.android.systemui.qs;
 
 import static android.app.StatusBarManager.DISABLE2_QUICK_SETTINGS;
 
-import static com.android.systemui.Flags.centralizedStatusBarHeightFix;
-
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Path;
@@ -35,6 +33,7 @@ import androidx.annotation.Nullable;
 import com.android.systemui.Dumpable;
 import com.android.systemui.qs.customize.QSCustomizer;
 import com.android.systemui.res.R;
+import com.android.systemui.scene.shared.flag.SceneContainerFlag;
 import com.android.systemui.shade.LargeScreenHeaderHelper;
 import com.android.systemui.shade.TouchLogger;
 import com.android.systemui.util.LargeScreenUtils;
@@ -193,12 +192,7 @@ public class QSContainerImpl extends FrameLayout implements Dumpable {
             QuickStatusBarHeaderController quickStatusBarHeaderController) {
         int topPadding = QSUtils.getQsHeaderSystemIconsAreaHeight(mContext);
         if (!LargeScreenUtils.shouldUseLargeScreenShadeHeader(mContext.getResources())) {
-            topPadding =
-                    centralizedStatusBarHeightFix()
-                            ? LargeScreenHeaderHelper.getLargeScreenHeaderHeight(mContext)
-                            : mContext.getResources()
-                                    .getDimensionPixelSize(
-                                            R.dimen.large_screen_shade_header_height);
+            topPadding = LargeScreenHeaderHelper.getLargeScreenHeaderHeight(mContext);
         }
         if (mQSPanelContainer != null) {
             mQSPanelContainer.setPaddingRelative(
@@ -265,12 +259,26 @@ public class QSContainerImpl extends FrameLayout implements Dumpable {
     }
 
     /**
+     * @return height with the squishiness fraction applied.
+     */
+    int getSquishedQqsHeight() {
+        return mHeader.getSquishedHeight();
+    }
+
+    /**
      * Returns the size of QS (or the QSCustomizer), regardless of the measured size of this view
      * @return size in pixels of QS (or QSCustomizer)
      */
     public int getQsHeight() {
         return mQSCustomizer.isCustomizing() ? mQSCustomizer.getMeasuredHeight()
                 : mQSPanel.getMeasuredHeight();
+    }
+
+    /**
+     * @return height with the squishiness fraction applied.
+     */
+    int getSquishedQsHeight() {
+        return mQSPanel.getSquishedHeight();
     }
 
     public void setExpansion(float expansion) {
@@ -300,7 +308,7 @@ public class QSContainerImpl extends FrameLayout implements Dumpable {
                 // QS panel lays out some of its content full width
                 qsPanelController.setContentMargins(mContentHorizontalPadding,
                         mContentHorizontalPadding);
-                qsPanelController.setPageMargin(mTilesPageMargin);
+                setPageMargins(qsPanelController);
             } else if (view == mHeader) {
                 quickStatusBarHeaderController.setContentMargins(mContentHorizontalPadding,
                         mContentHorizontalPadding);
@@ -315,6 +323,18 @@ public class QSContainerImpl extends FrameLayout implements Dumpable {
                             view.getPaddingBottom());
                 }
             }
+        }
+    }
+
+    private void setPageMargins(QSPanelController qsPanelController) {
+        if (SceneContainerFlag.isEnabled()) {
+            if (mHorizontalMargins == mTilesPageMargin * 2 + 1) {
+                qsPanelController.setPageMargin(mTilesPageMargin, mTilesPageMargin + 1);
+            } else {
+                qsPanelController.setPageMargin(mTilesPageMargin, mTilesPageMargin);
+            }
+        } else {
+            qsPanelController.setPageMargin(mTilesPageMargin, mTilesPageMargin);
         }
     }
 

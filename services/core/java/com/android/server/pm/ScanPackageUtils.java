@@ -437,6 +437,10 @@ final class ScanPackageUtils {
             pkgSetting.setIsOrphaned(true);
         }
 
+        // update debuggable and BaseRevisionCode to packageSetting
+        pkgSetting.setDebuggable(parsedPackage.isDebuggable());
+        pkgSetting.setBaseRevisionCode(parsedPackage.getBaseRevisionCode());
+
         // Take care of first install / last update times.
         final long scanFileTime = getLastModifiedTime(parsedPackage);
         final long existingFirstInstallTime = userId == UserHandle.USER_ALL
@@ -478,6 +482,7 @@ final class ScanPackageUtils {
                             + " to " + volumeUuid);
             pkgSetting.setVolumeUuid(volumeUuid);
         }
+        pkgSetting.setLeavingSharedUser(parsedPackage.isLeavingSharedUser());
 
         SharedLibraryInfo sdkLibraryInfo = null;
         if (!TextUtils.isEmpty(parsedPackage.getSdkLibraryName())) {

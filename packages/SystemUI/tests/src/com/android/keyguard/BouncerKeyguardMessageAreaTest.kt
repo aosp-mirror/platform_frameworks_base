@@ -17,9 +17,9 @@
 package com.android.keyguard
 
 import android.content.Context
-import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper.RunWithLooper
 import android.util.AttributeSet
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.google.common.truth.Truth.assertThat
@@ -31,7 +31,7 @@ import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
 
 @SmallTest
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 @RunWithLooper
 class BouncerKeyguardMessageAreaTest : SysuiTestCase() {
     class FakeBouncerKeyguardMessageArea(context: Context, attrs: AttributeSet?) :

@@ -18,9 +18,11 @@ package android.app;
 
 import static android.app.ActivityOptions.BackgroundActivityStartMode;
 import static android.app.ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOWED;
+import static android.app.ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOW_ALWAYS;
 import static android.app.ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_COMPAT;
 import static android.app.ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_DENIED;
 import static android.app.ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_SYSTEM_DEFINED;
+import static android.app.ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOW_IF_VISIBLE;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -48,15 +50,7 @@ public class ComponentOptions {
     public static final String KEY_PENDING_INTENT_BACKGROUND_ACTIVITY_ALLOWED =
             "android.pendingIntent.backgroundActivityAllowed";
 
-    /**
-     * PendingIntent caller allows activity to be started if caller has BAL permission.
-     * @hide
-     */
-    public static final String KEY_PENDING_INTENT_BACKGROUND_ACTIVITY_ALLOWED_BY_PERMISSION =
-            "android.pendingIntent.backgroundActivityAllowedByPermission";
-
     private Integer mPendingIntentBalAllowed = MODE_BACKGROUND_ACTIVITY_START_SYSTEM_DEFINED;
-    private boolean mPendingIntentBalAllowedByPermission = false;
 
     ComponentOptions() {
     }
@@ -69,9 +63,6 @@ public class ComponentOptions {
         mPendingIntentBalAllowed =
                 opts.getInt(KEY_PENDING_INTENT_BACKGROUND_ACTIVITY_ALLOWED,
                         MODE_BACKGROUND_ACTIVITY_START_SYSTEM_DEFINED);
-        setPendingIntentBackgroundActivityLaunchAllowedByPermission(
-                opts.getBoolean(
-                        KEY_PENDING_INTENT_BACKGROUND_ACTIVITY_ALLOWED_BY_PERMISSION, false));
     }
 
     /**
@@ -118,6 +109,8 @@ public class ComponentOptions {
             case MODE_BACKGROUND_ACTIVITY_START_DENIED:
             case MODE_BACKGROUND_ACTIVITY_START_COMPAT:
             case MODE_BACKGROUND_ACTIVITY_START_ALLOWED:
+            case MODE_BACKGROUND_ACTIVITY_START_ALLOW_ALWAYS:
+            case MODE_BACKGROUND_ACTIVITY_START_ALLOW_IF_VISIBLE:
                 mPendingIntentBalAllowed = state;
                 break;
             default:
@@ -139,32 +132,11 @@ public class ComponentOptions {
         return mPendingIntentBalAllowed;
     }
 
-    /**
-     * Set PendingIntent activity can be launched from background if caller has BAL permission.
-     * @hide
-     */
-    public void setPendingIntentBackgroundActivityLaunchAllowedByPermission(boolean allowed) {
-        mPendingIntentBalAllowedByPermission = allowed;
-    }
-
-    /**
-     * Get PendingIntent activity is allowed to be started in the background if the caller
-     * has BAL permission.
-     * @hide
-     */
-    public boolean isPendingIntentBackgroundActivityLaunchAllowedByPermission() {
-        return mPendingIntentBalAllowedByPermission;
-    }
-
     /** @hide */
     public Bundle toBundle() {
         Bundle b = new Bundle();
         if (mPendingIntentBalAllowed != MODE_BACKGROUND_ACTIVITY_START_SYSTEM_DEFINED) {
             b.putInt(KEY_PENDING_INTENT_BACKGROUND_ACTIVITY_ALLOWED, mPendingIntentBalAllowed);
-        }
-        if (mPendingIntentBalAllowedByPermission) {
-            b.putBoolean(KEY_PENDING_INTENT_BACKGROUND_ACTIVITY_ALLOWED_BY_PERMISSION,
-                    mPendingIntentBalAllowedByPermission);
         }
         return b;
     }

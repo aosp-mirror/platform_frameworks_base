@@ -93,7 +93,7 @@ class ShowImeWhileEnteringOverviewTest(flicker: LegacyFlickerTest) : BaseTest(fl
     @Presubmit
     @Test
     fun navBarLayerIsVisibleAtStartAndEnd3Button() {
-        Assume.assumeFalse(flicker.scenario.isTablet)
+        Assume.assumeFalse(usesTaskbar)
         Assume.assumeFalse(flicker.scenario.isGesturalNavigation)
         flicker.navBarLayerIsVisibleAtStartAndEnd()
     }
@@ -105,7 +105,7 @@ class ShowImeWhileEnteringOverviewTest(flicker: LegacyFlickerTest) : BaseTest(fl
     @Presubmit
     @Test
     fun navBarLayerIsInvisibleInLandscapeGestural() {
-        Assume.assumeFalse(flicker.scenario.isTablet)
+        Assume.assumeFalse(usesTaskbar)
         Assume.assumeTrue(flicker.scenario.isLandscapeOrSeascapeAtStart)
         Assume.assumeTrue(flicker.scenario.isGesturalNavigation)
         flicker.assertLayersStart { this.isVisible(ComponentNameMatcher.NAV_BAR) }
@@ -121,7 +121,7 @@ class ShowImeWhileEnteringOverviewTest(flicker: LegacyFlickerTest) : BaseTest(fl
     fun statusBarLayerIsInvisibleInLandscapePhone() {
         Assume.assumeTrue(flicker.scenario.isLandscapeOrSeascapeAtStart)
         Assume.assumeTrue(flicker.scenario.isGesturalNavigation)
-        Assume.assumeFalse(flicker.scenario.isTablet)
+        Assume.assumeFalse(usesTaskbar)
         flicker.assertLayersStart { this.isVisible(ComponentNameMatcher.STATUS_BAR) }
         flicker.assertLayersEnd { this.isInvisible(ComponentNameMatcher.STATUS_BAR) }
     }
@@ -135,7 +135,7 @@ class ShowImeWhileEnteringOverviewTest(flicker: LegacyFlickerTest) : BaseTest(fl
     fun statusBarLayerIsInvisibleInLandscapeTablet() {
         Assume.assumeTrue(flicker.scenario.isLandscapeOrSeascapeAtStart)
         Assume.assumeTrue(flicker.scenario.isGesturalNavigation)
-        Assume.assumeTrue(flicker.scenario.isTablet)
+        Assume.assumeTrue(usesTaskbar)
         flicker.statusBarLayerIsVisibleAtStartAndEnd()
     }
 
@@ -174,7 +174,7 @@ class ShowImeWhileEnteringOverviewTest(flicker: LegacyFlickerTest) : BaseTest(fl
     @Test
     fun statusBarLayerIsInvisibleInLandscape() {
         Assume.assumeTrue(flicker.scenario.isLandscapeOrSeascapeAtStart)
-        Assume.assumeFalse(flicker.scenario.isTablet)
+        Assume.assumeFalse(usesTaskbar)
         flicker.assertLayersStart { this.isVisible(ComponentNameMatcher.STATUS_BAR) }
         flicker.assertLayersEnd { this.isInvisible(ComponentNameMatcher.STATUS_BAR) }
     }

@@ -16,11 +16,11 @@ package com.android.systemui
 
 import android.graphics.Point
 import android.hardware.display.DisplayManagerGlobal
-import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper.RunWithLooper
 import android.view.Display
 import android.view.DisplayAdjustments
 import android.view.DisplayInfo
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.internal.R
 import com.android.keyguard.KeyguardUpdateMonitor
@@ -42,7 +42,7 @@ import org.mockito.Mockito.mock
 import org.mockito.MockitoAnnotations
 
 @RunWithLooper
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 @SmallTest
 class FaceScanningProviderFactoryTest : SysuiTestCase() {
 

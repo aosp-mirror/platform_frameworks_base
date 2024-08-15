@@ -33,7 +33,6 @@ cc_library_shared {
         "com.android.apex.cts.shim.v1",
         "com.android.apex.cts.shim.v2",
         "com.android.apex.cts.shim.v2_apk_in_apex_upgrades",
-        "com.android.apex.cts.shim.v2_no_hashtree",
         "com.android.apex.cts.shim.v2_legacy",
         "com.android.apex.cts.shim.v2_sdk_target_p",
         "com.android.apex.cts.shim.v2_unsigned_payload",

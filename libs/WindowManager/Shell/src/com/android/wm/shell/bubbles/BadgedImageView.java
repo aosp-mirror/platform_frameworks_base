@@ -357,7 +357,9 @@ public class BadgedImageView extends ConstraintLayout {
 
     void showBadge() {
         Bitmap appBadgeBitmap = mBubble.getAppBadge();
-        if (appBadgeBitmap == null) {
+        final boolean isAppLaunchIntent = (mBubble instanceof Bubble)
+                && ((Bubble) mBubble).isAppLaunchIntent();
+        if (appBadgeBitmap == null || isAppLaunchIntent) {
             mAppIcon.setVisibility(GONE);
             return;
         }

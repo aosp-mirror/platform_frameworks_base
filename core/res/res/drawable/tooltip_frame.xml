@@ -17,5 +17,5 @@
 <shape xmlns:android="http://schemas.android.com/apk/res/android"
        android:shape="rectangle">
     <solid android:color="?attr/tooltipBackgroundColor" />
-    <corners android:radius="@dimen/tooltip_corner_radius" />
+    <corners android:radius="?attr/tooltipCornerRadius" />
 </shape>

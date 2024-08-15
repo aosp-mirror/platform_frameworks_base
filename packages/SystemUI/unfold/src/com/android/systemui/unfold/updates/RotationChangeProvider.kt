@@ -27,6 +27,10 @@ import com.android.systemui.unfold.util.CallbackController
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
+import java.util.concurrent.CopyOnWriteArrayList
+import java.util.concurrent.atomic.AtomicInteger
+
+private const val INVALID_ROTATION = -1
 
 /**
  * Allows to subscribe to rotation changes. Updates are provided for the display associated to
@@ -41,10 +45,10 @@ constructor(
     @Assisted private val callbackHandler: Handler,
 ) : CallbackController<RotationChangeProvider.RotationListener> {
 
-    private val listeners = mutableListOf<RotationListener>()
+    private val listeners = CopyOnWriteArrayList<RotationListener>()
 
     private val displayListener = RotationDisplayListener()
-    private var lastRotation: Int? = null
+    private val lastRotation = AtomicInteger(INVALID_ROTATION)
 
     override fun addCallback(listener: RotationListener) {
         bgHandler.post {
@@ -60,7 +64,7 @@ constructor(
             listeners -= listener
             if (listeners.isEmpty()) {
                 unsubscribeToRotation()
-                lastRotation = null
+                lastRotation.set(INVALID_ROTATION)
             }
         }
     }
@@ -99,9 +103,8 @@ constructor(
 
                 if (displayId == display.displayId) {
                     val currentRotation = display.rotation
-                    if (lastRotation == null || lastRotation != currentRotation) {
+                    if (lastRotation.compareAndSet(lastRotation.get(), currentRotation)) {
                         listeners.forEach { it.onRotationChanged(currentRotation) }
-                        lastRotation = currentRotation
                     }
                 }
             } finally {

@@ -54,6 +54,7 @@ import java.util.concurrent.Executor;
 /**
  * Simple task to inflate views & load necessary info to display a bubble.
  */
+// TODO(b/353894869): switch to executors
 public class BubbleViewInfoTask extends AsyncTask<Void, Void, BubbleViewInfoTask.BubbleViewInfo> {
     private static final String TAG = TAG_WITH_CLASS_NAME ? "BubbleViewInfoTask" : TAG_BUBBLES;
 

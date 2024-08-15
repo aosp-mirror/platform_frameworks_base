@@ -217,10 +217,13 @@ public class QSPanel extends LinearLayout implements Tunable {
     private void setBrightnessViewMargin() {
         if (mBrightnessView != null) {
             MarginLayoutParams lp = (MarginLayoutParams) mBrightnessView.getLayoutParams();
+            // For Brightness Slider to extend its boundary to draw focus background
+            int offset = getResources()
+                    .getDimensionPixelSize(R.dimen.rounded_slider_boundary_offset);
             lp.topMargin = mContext.getResources()
-                    .getDimensionPixelSize(R.dimen.qs_brightness_margin_top);
+                    .getDimensionPixelSize(R.dimen.qs_brightness_margin_top) - offset;
             lp.bottomMargin = mContext.getResources()
-                    .getDimensionPixelSize(R.dimen.qs_brightness_margin_bottom);
+                    .getDimensionPixelSize(R.dimen.qs_brightness_margin_bottom) - offset;
             mBrightnessView.setLayoutParams(lp);
         }
     }
@@ -635,9 +638,9 @@ public class QSPanel extends LinearLayout implements Tunable {
         return mListening;
     }
 
-    protected void setPageMargin(int pageMargin) {
+    protected void setPageMargin(int pageMarginStart, int pageMarginEnd) {
         if (mTileLayout instanceof PagedTileLayout) {
-            ((PagedTileLayout) mTileLayout).setPageMargin(pageMargin);
+            ((PagedTileLayout) mTileLayout).setPageMargin(pageMarginStart, pageMarginEnd);
         }
     }
 
@@ -728,6 +731,30 @@ public class QSPanel extends LinearLayout implements Tunable {
      */
     public void setCanCollapse(boolean canCollapse) {
         mCanCollapse = canCollapse;
+    }
+
+    /**
+     * @return height with the {@link QSPanel#setSquishinessFraction(float)} applied.
+     */
+    public int getSquishedHeight() {
+        if (mFooter != null) {
+            final ViewGroup.LayoutParams footerLayoutParams = mFooter.getLayoutParams();
+            final int footerBottomMargin;
+            if (footerLayoutParams instanceof MarginLayoutParams) {
+                footerBottomMargin = ((MarginLayoutParams) footerLayoutParams).bottomMargin;
+            } else {
+                footerBottomMargin = 0;
+            }
+            // This is the distance between the top of the QSPanel and the last view in the
+            // layout (which is the effective the bottom)
+            return mFooter.getBottom() + footerBottomMargin - getTop();
+        }
+        if (mTileLayout != null) {
+            // Footer absence means that the panel is in the QQS. In this case it's just height
+            // of the tiles + paddings.
+            return mTileLayout.getTilesHeight() + getPaddingBottom() + getPaddingTop();
+        }
+        return getHeight();
     }
 
     @Nullable

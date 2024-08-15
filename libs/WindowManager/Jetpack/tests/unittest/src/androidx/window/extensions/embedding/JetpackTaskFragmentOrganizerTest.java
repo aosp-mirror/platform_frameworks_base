@@ -23,8 +23,6 @@ import static androidx.window.extensions.embedding.EmbeddingTestUtils.createTest
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
 
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
@@ -86,24 +84,6 @@ public class JetpackTaskFragmentOrganizerTest {
     }
 
     @Test
-    public void testUnregisterOrganizer() {
-        mOrganizer.overrideSplitAnimation();
-        mOrganizer.unregisterOrganizer();
-
-        verify(mOrganizer).unregisterRemoteAnimations();
-    }
-
-    @Test
-    public void testOverrideSplitAnimation() {
-        assertNull(mOrganizer.mAnimationController);
-
-        mOrganizer.overrideSplitAnimation();
-
-        assertNotNull(mOrganizer.mAnimationController);
-        verify(mOrganizer).registerRemoteAnimations(mOrganizer.mAnimationController.mDefinition);
-    }
-
-    @Test
     public void testExpandTaskFragment() {
         final TaskContainer taskContainer = createTestTaskContainer();
         doReturn(taskContainer).when(mSplitController).getTaskContainer(anyInt());
@@ -134,6 +114,7 @@ public class JetpackTaskFragmentOrganizerTest {
                 mock(WindowContainerToken.class), new Configuration(), 0 /* runningActivityCount */,
                 false /* isVisible */, new ArrayList<>(), new ArrayList<>(), new Point(),
                 false /* isTaskClearedForReuse */, false /* isTaskFragmentClearedForPip */,
-                false /* isClearedForReorderActivityToFront */, new Point());
+                false /* isClearedForReorderActivityToFront */, new Point(),
+                false /* isTopChild */);
     }
 }

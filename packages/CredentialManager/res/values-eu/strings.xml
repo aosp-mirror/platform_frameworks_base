@@ -52,7 +52,7 @@
     <string name="create_passkey_in_other_device_title" msgid="2360053098931886245">"Beste gailu batean sarbide-gako bat sortu nahi duzu?"</string>
     <string name="save_password_on_other_device_title" msgid="5829084591948321207">"Beste gailu batean pasahitza gorde nahi duzu?"</string>
     <string name="save_sign_in_on_other_device_title" msgid="2827990118560134692">"Beste gailu batean saioa hasteko modua gorde nahi duzu?"</string>
-    <string name="use_provider_for_all_title" msgid="4201020195058980757">"<xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g> erabili nahi duzu kredentzial guztietarako?"</string>
+    <string name="use_provider_for_all_title" msgid="4201020195058980757">"<xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g> erabili nahi duzu beti saioa hasteko?"</string>
     <string name="use_provider_for_all_description" msgid="1998772715863958997">"<xliff:g id="USERNAME">%1$s</xliff:g> erabiltzailearen pasahitz-kudeatzaile honek pasahitzak eta sarbide-gakoak gordeko ditu saioa erraz has dezazun"</string>
     <string name="set_as_default" msgid="4415328591568654603">"Ezarri lehenetsi gisa"</string>
     <string name="settings" msgid="6536394145760913145">"Ezarpenak"</string>

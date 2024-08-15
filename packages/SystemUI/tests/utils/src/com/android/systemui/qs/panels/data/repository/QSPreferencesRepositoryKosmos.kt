@@ -22,4 +22,11 @@ import com.android.systemui.settings.userFileManager
 import com.android.systemui.user.data.repository.userRepository
 
 val Kosmos.qsPreferencesRepository by
-    Kosmos.Fixture { QSPreferencesRepository(userFileManager, userRepository, testDispatcher) }
+    Kosmos.Fixture {
+        QSPreferencesRepository(
+            userFileManager,
+            userRepository,
+            defaultLargeTilesRepository,
+            testDispatcher
+        )
+    }

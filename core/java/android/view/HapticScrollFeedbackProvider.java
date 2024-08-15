@@ -100,8 +100,12 @@ public class HapticScrollFeedbackProvider implements ScrollFeedbackProvider {
 
         if (Math.abs(mTotalScrollPixels) >= mTickIntervalPixels) {
             mTotalScrollPixels %= mTickIntervalPixels;
-            // TODO(b/239594271): create a new `performHapticFeedbackForDevice` and use that here.
-            mView.performHapticFeedback(HapticFeedbackConstants.SCROLL_TICK);
+            if (android.os.vibrator.Flags.hapticFeedbackInputSourceCustomizationEnabled()) {
+                mView.performHapticFeedbackForInputDevice(
+                        HapticFeedbackConstants.SCROLL_TICK, inputDeviceId, source, /* flags= */ 0);
+            } else {
+                mView.performHapticFeedback(HapticFeedbackConstants.SCROLL_TICK);
+            }
         }
     }
 
@@ -115,9 +119,12 @@ public class HapticScrollFeedbackProvider implements ScrollFeedbackProvider {
         if (!mCanPlayLimitFeedback) {
             return;
         }
-
-        // TODO(b/239594271): create a new `performHapticFeedbackForDevice` and use that here.
-        mView.performHapticFeedback(HapticFeedbackConstants.SCROLL_LIMIT);
+        if (android.os.vibrator.Flags.hapticFeedbackInputSourceCustomizationEnabled()) {
+            mView.performHapticFeedbackForInputDevice(
+                    HapticFeedbackConstants.SCROLL_LIMIT, inputDeviceId, source, /* flags= */ 0);
+        } else {
+            mView.performHapticFeedback(HapticFeedbackConstants.SCROLL_LIMIT);
+        }
 
         mCanPlayLimitFeedback = false;
     }
@@ -128,22 +135,28 @@ public class HapticScrollFeedbackProvider implements ScrollFeedbackProvider {
         if (!mHapticScrollFeedbackEnabled) {
             return;
         }
-        // TODO(b/239594271): create a new `performHapticFeedbackForDevice` and use that here.
-        mView.performHapticFeedback(HapticFeedbackConstants.SCROLL_ITEM_FOCUS);
+        if (android.os.vibrator.Flags.hapticFeedbackInputSourceCustomizationEnabled()) {
+            mView.performHapticFeedbackForInputDevice(
+                    HapticFeedbackConstants.SCROLL_ITEM_FOCUS, inputDeviceId, source,
+                    /* flags= */ 0);
+        } else {
+            mView.performHapticFeedback(HapticFeedbackConstants.SCROLL_ITEM_FOCUS);
+        }
         mCanPlayLimitFeedback = true;
     }
 
     private void maybeUpdateCurrentConfig(int deviceId, int source, int axis) {
         if (mAxis != axis || mSource != source || mDeviceId != deviceId) {
+            mSource = source;
+            mAxis = axis;
+            mDeviceId = deviceId;
+
             if (mDisabledIfViewPlaysScrollHaptics
                     && (source == InputDevice.SOURCE_ROTARY_ENCODER)
                     && mViewConfig.isViewBasedRotaryEncoderHapticScrollFeedbackEnabled()) {
                 mHapticScrollFeedbackEnabled = false;
                 return;
             }
-            mSource = source;
-            mAxis = axis;
-            mDeviceId = deviceId;
 
             mHapticScrollFeedbackEnabled =
                     mViewConfig.isHapticScrollFeedbackEnabled(deviceId, axis, source);

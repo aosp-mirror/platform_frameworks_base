@@ -96,12 +96,27 @@ constructor(
                 logDebug { "lockScreenState:isConfigSelected=$isConfigSelected" }
                 logDebug { "lockScreenState:isDefaultNotesAppSet=$isDefaultNotesAppSet" }
 
+                val isCustomLockScreenShortcutEnabled =
+                    context.resources.getBoolean(R.bool.custom_lockscreen_shortcuts_enabled)
+                val isShortcutSelectedOrDefaultEnabled =
+                    if (isCustomLockScreenShortcutEnabled) {
+                        isConfigSelected
+                    } else {
+                        isStylusEverUsed
+                    }
+                logDebug {
+                    "lockScreenState:isCustomLockScreenShortcutEnabled=" +
+                        isCustomLockScreenShortcutEnabled
+                }
+                logDebug {
+                    "lockScreenState:isShortcutSelectedOrDefaultEnabled=" +
+                        isShortcutSelectedOrDefaultEnabled
+                }
                 if (
                     isEnabled &&
                         isUserUnlocked &&
                         isDefaultNotesAppSet &&
-                        isConfigSelected &&
-                        isStylusEverUsed
+                        isShortcutSelectedOrDefaultEnabled
                 ) {
                     val contentDescription = ContentDescription.Resource(pickerNameResourceId)
                     val icon = Icon.Resource(pickerIconResourceId, contentDescription)

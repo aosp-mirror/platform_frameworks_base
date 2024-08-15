@@ -96,10 +96,23 @@ sealed class Edge {
     companion object {
         private const val TAG = "Edge"
 
+        @JvmStatic
+        @JvmOverloads
         fun create(from: KeyguardState? = null, to: KeyguardState? = null) = StateToState(from, to)
 
+        @JvmStatic
+        @JvmOverloads
         fun create(from: KeyguardState? = null, to: SceneKey) = StateToScene(from, to)
 
+        @JvmStatic
+        @JvmOverloads
         fun create(from: SceneKey, to: KeyguardState? = null) = SceneToState(from, to)
+
+        /**
+         * This edge is a placeholder for when an edge needs to be passed but there is no edge for
+         * this flag configuration available. Usually for Scene <-> Scene edges with scene container
+         * enabled where these edges are managed by STL separately.
+         */
+        val INVALID = StateToState(UNDEFINED, UNDEFINED)
     }
 }

@@ -14,6 +14,8 @@
 
 package com.android.systemui.statusbar.phone.fragment;
 
+import static com.android.systemui.statusbar.phone.fragment.StatusBarVisibilityModel.createHiddenModel;
+
 import android.annotation.Nullable;
 import android.annotation.SuppressLint;
 import android.app.Fragment;
@@ -46,6 +48,7 @@ import com.android.systemui.demomode.DemoModeController;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.res.R;
+import com.android.systemui.scene.shared.flag.SceneContainerFlag;
 import com.android.systemui.shade.ShadeExpansionStateManager;
 import com.android.systemui.shade.domain.interactor.PanelExpansionInteractor;
 import com.android.systemui.statusbar.CommandQueue;
@@ -56,8 +59,6 @@ import com.android.systemui.statusbar.disableflags.DisableFlagsLogger.DisableSta
 import com.android.systemui.statusbar.events.SystemStatusAnimationCallback;
 import com.android.systemui.statusbar.events.SystemStatusAnimationScheduler;
 import com.android.systemui.statusbar.notification.icon.ui.viewbinder.NotificationIconContainerStatusBarViewBinder;
-import com.android.systemui.statusbar.notification.shared.NotificationIconContainerRefactor;
-import com.android.systemui.statusbar.phone.NotificationIconAreaController;
 import com.android.systemui.statusbar.phone.NotificationIconContainer;
 import com.android.systemui.statusbar.phone.PhoneStatusBarView;
 import com.android.systemui.statusbar.phone.StatusBarHideIconsForBouncerManager;
@@ -137,7 +138,6 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
     private final OngoingCallController mOngoingCallController;
     private final SystemStatusAnimationScheduler mAnimationScheduler;
     private final StatusBarLocationPublisher mLocationPublisher;
-    private final NotificationIconAreaController mNotificationIconAreaController;
     private final ShadeExpansionStateManager mShadeExpansionStateManager;
     private final StatusBarIconController mStatusBarIconController;
     private final CarrierConfigTracker mCarrierConfigTracker;
@@ -205,6 +205,13 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
     private boolean mTransitionFromLockscreenToDreamStarted = false;
 
     /**
+     * True if the current scene allows the home status bar (aka this status bar) to be shown, and
+     * false if the current scene should never show the home status bar. Only used if the scene
+     * container is enabled.
+     */
+    private boolean mHomeStatusBarAllowedByScene = true;
+
+    /**
      * True if there's an active ongoing activity that should be showing a chip and false otherwise.
      */
     private boolean mHasOngoingActivity;
@@ -227,7 +234,6 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
             OngoingCallController ongoingCallController,
             SystemStatusAnimationScheduler animationScheduler,
             StatusBarLocationPublisher locationPublisher,
-            NotificationIconAreaController notificationIconAreaController,
             ShadeExpansionStateManager shadeExpansionStateManager,
             StatusBarIconController statusBarIconController,
             DarkIconManager.Factory darkIconManagerFactory,
@@ -252,7 +258,6 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
         mOngoingCallController = ongoingCallController;
         mAnimationScheduler = animationScheduler;
         mLocationPublisher = locationPublisher;
-        mNotificationIconAreaController = notificationIconAreaController;
         mShadeExpansionStateManager = shadeExpansionStateManager;
         mStatusBarIconController = statusBarIconController;
         mCollapsedStatusBarViewModel = collapsedStatusBarViewModel;
@@ -303,18 +308,14 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mStatusBarWindowStateController.addListener(mStatusBarWindowStateListener);
-        if (NotificationIconContainerRefactor.isEnabled()) {
-            mDemoModeController.addCallback(mDemoModeCallback);
-        }
+        mDemoModeController.addCallback(mDemoModeCallback);
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
         mStatusBarWindowStateController.removeListener(mStatusBarWindowStateListener);
-        if (NotificationIconContainerRefactor.isEnabled()) {
-            mDemoModeController.removeCallback(mDemoModeCallback);
-        }
+        mDemoModeController.removeCallback(mDemoModeCallback);
     }
 
     @Override
@@ -461,11 +462,9 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
             mStartableStates.put(startable, Startable.State.STOPPED);
         }
         mDumpManager.unregisterDumpable(getClass().getSimpleName());
-        if (NotificationIconContainerRefactor.isEnabled()) {
-            if (mNicBindingDisposable != null) {
-                mNicBindingDisposable.dispose();
-                mNicBindingDisposable = null;
-            }
+        if (mNicBindingDisposable != null) {
+            mNicBindingDisposable.dispose();
+            mNicBindingDisposable = null;
         }
     }
 
@@ -473,22 +472,12 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
     public void initNotificationIconArea() {
         Trace.beginSection("CollapsedStatusBarFragment#initNotifIconArea");
         ViewGroup notificationIconArea = mStatusBar.requireViewById(R.id.notification_icon_area);
-        if (NotificationIconContainerRefactor.isEnabled()) {
-            LayoutInflater.from(getContext())
-                    .inflate(R.layout.notification_icon_area, notificationIconArea, true);
-            NotificationIconContainer notificationIcons =
-                    notificationIconArea.requireViewById(R.id.notificationIcons);
-            mNotificationIconAreaInner = notificationIcons;
-            mNicBindingDisposable = mNicViewBinder.bindWhileAttached(notificationIcons);
-        } else {
-            mNotificationIconAreaInner =
-                    mNotificationIconAreaController.getNotificationInnerAreaView();
-            if (mNotificationIconAreaInner.getParent() != null) {
-                ((ViewGroup) mNotificationIconAreaInner.getParent())
-                        .removeView(mNotificationIconAreaInner);
-            }
-            notificationIconArea.addView(mNotificationIconAreaInner);
-        }
+        LayoutInflater.from(getContext())
+                .inflate(R.layout.notification_icon_area, notificationIconArea, true);
+        NotificationIconContainer notificationIcons =
+                notificationIconArea.requireViewById(R.id.notificationIcons);
+        mNotificationIconAreaInner = notificationIcons;
+        mNicBindingDisposable = mNicViewBinder.bindWhileAttached(notificationIcons);
 
         updateNotificationIconAreaAndOngoingActivityChip(/* animate= */ false);
         Trace.endSection();
@@ -518,8 +507,16 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
                 }
 
                 @Override
-                public void onOngoingActivityStatusChanged(boolean hasOngoingActivity) {
+                public void onOngoingActivityStatusChanged(
+                        boolean hasOngoingActivity, boolean shouldAnimate) {
                     mHasOngoingActivity = hasOngoingActivity;
+                    updateStatusBarVisibilities(shouldAnimate);
+                }
+
+                @Override
+                public void onIsHomeStatusBarAllowedBySceneChanged(
+                        boolean isHomeStatusBarAllowedByScene) {
+                    mHomeStatusBarAllowedByScene = isHomeStatusBarAllowedByScene;
                     updateStatusBarVisibilities(/* animate= */ true);
                 }
     };
@@ -580,17 +577,22 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
         boolean headsUpVisible =
                 mStatusBarFragmentComponent.getHeadsUpAppearanceController().shouldBeVisible();
 
-        if (!mKeyguardStateController.isLaunchTransitionFadingAway()
-                && !mKeyguardStateController.isKeyguardFadingAway()
-                && shouldHideStatusBar()
-                && !(mStatusBarStateController.getState() == StatusBarState.KEYGUARD
-                        && headsUpVisible)) {
-            // Hide everything
-            return new StatusBarVisibilityModel(
-                    /* showClock= */ false,
-                    /* showNotificationIcons= */ false,
-                    /* showOngoingActivityChip= */ false,
-                    /* showSystemInfo= */ false);
+        if (SceneContainerFlag.isEnabled()) {
+            // With the scene container, only use the value calculated by the view model to
+            // determine if the status bar needs hiding.
+            if (!mHomeStatusBarAllowedByScene) {
+                return createHiddenModel();
+            }
+        } else {
+            // Without the scene container, use our old, mildly-hacky logic to determine if the
+            // status bar needs hiding.
+            if (!mKeyguardStateController.isLaunchTransitionFadingAway()
+                    && !mKeyguardStateController.isKeyguardFadingAway()
+                    && shouldHideStatusBar()
+                    && !(mStatusBarStateController.getState() == StatusBarState.KEYGUARD
+                    && headsUpVisible)) {
+                return createHiddenModel();
+            }
         }
 
         boolean showClock = externalModel.getShowClock() && !headsUpVisible;
@@ -637,9 +639,6 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
             showOngoingActivityChip(animate);
         } else {
             hideOngoingActivityChip(animate);
-        }
-        if (!Flags.statusBarScreenSharingChips()) {
-            mOngoingCallController.notifyChipVisibilityChanged(showOngoingActivityChip);
         }
     }
 
@@ -698,7 +697,7 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
     }
 
     private void hideEndSideContent(boolean animate) {
-        if (!animate) {
+        if (!animate || !mAnimationsEnabled) {
             mEndSideAlphaController.setAlpha(/*alpha*/ 0f, SOURCE_OTHER);
         } else {
             mEndSideAlphaController.animateToAlpha(/*alpha*/ 0f, SOURCE_OTHER, FADE_OUT_DURATION,
@@ -707,7 +706,7 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
     }
 
     private void showEndSideContent(boolean animate) {
-        if (!animate) {
+        if (!animate || !mAnimationsEnabled) {
             mEndSideAlphaController.setAlpha(1f, SOURCE_OTHER);
             return;
         }

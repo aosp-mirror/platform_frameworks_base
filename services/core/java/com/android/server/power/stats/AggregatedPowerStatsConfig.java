@@ -17,12 +17,14 @@ package com.android.server.power.stats;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.os.BatteryConsumer;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Supplier;
 
 /**
  * Configuration that controls how power stats are aggregated.  It determines which state changes
@@ -140,7 +142,7 @@ public class AggregatedPowerStatsConfig {
         }
 
         @NonNull
-        public PowerStatsProcessor getProcessor() {
+        PowerStatsProcessor getProcessor() {
             return mProcessor;
         }
 
@@ -160,6 +162,8 @@ public class AggregatedPowerStatsConfig {
     }
 
     private final List<PowerComponent> mPowerComponents = new ArrayList<>();
+    private PowerComponent mCustomPowerComponent;
+    private Supplier<PowerStatsProcessor> mCustomPowerStatsProcessorFactory;
 
     /**
      * Creates a configuration for the specified power component, which may be one of the
@@ -199,8 +203,43 @@ public class AggregatedPowerStatsConfig {
         return powerComponent;
     }
 
+    /**
+     * Creates a configuration for custom power components, which are yet to be discovered
+     * dynamically through the integration with PowerStatsService.
+     */
+    public PowerComponent trackCustomPowerComponents(
+            Supplier<PowerStatsProcessor> processorFactory) {
+        mCustomPowerStatsProcessorFactory = processorFactory;
+        mCustomPowerComponent = new PowerComponent(BatteryConsumer.POWER_COMPONENT_ANY);
+        return mCustomPowerComponent;
+    }
+
+    /**
+     * Returns configurations for all registered or dynamically discovered power components.
+     */
     public List<PowerComponent> getPowerComponentsAggregatedStatsConfigs() {
         return mPowerComponents;
+    }
+
+    /**
+     * Creates a configuration for a custom power component discovered dynamically through the
+     * integration with PowerStatsService.
+     */
+    @Nullable
+    public PowerComponent createPowerComponent(int powerComponentId) {
+        if (mCustomPowerComponent == null) {
+            return null;
+        }
+
+        PowerComponent powerComponent = new PowerComponent(powerComponentId);
+        powerComponent.trackDeviceStates(mCustomPowerComponent.mTrackedDeviceStates);
+        powerComponent.trackUidStates(mCustomPowerComponent.mTrackedUidStates);
+
+        if (mCustomPowerStatsProcessorFactory != null) {
+            powerComponent.setProcessor(mCustomPowerStatsProcessorFactory.get());
+        }
+
+        return powerComponent;
     }
 
     private static final PowerStatsProcessor NO_OP_PROCESSOR = new PowerStatsProcessor() {

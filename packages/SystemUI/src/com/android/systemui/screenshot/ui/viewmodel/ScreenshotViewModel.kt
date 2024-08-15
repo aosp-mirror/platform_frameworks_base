@@ -31,8 +31,8 @@ class ScreenshotViewModel(private val accessibilityManager: AccessibilityManager
     val scrollingScrim: StateFlow<Bitmap?> = _scrollingScrim
     private val _badge = MutableStateFlow<Drawable?>(null)
     val badge: StateFlow<Drawable?> = _badge
-    private val _previewAction = MutableStateFlow<(() -> Unit)?>(null)
-    val previewAction: StateFlow<(() -> Unit)?> = _previewAction
+    private val _previewAction = MutableStateFlow<PreviewAction?>(null)
+    val previewAction: StateFlow<PreviewAction?> = _previewAction
     private val _actions = MutableStateFlow(emptyList<ActionButtonViewModel>())
     val actions: StateFlow<List<ActionButtonViewModel>> = _actions
     private val _animationState = MutableStateFlow(AnimationState.NOT_STARTED)
@@ -57,8 +57,8 @@ class ScreenshotViewModel(private val accessibilityManager: AccessibilityManager
         _badge.value = badge
     }
 
-    fun setPreviewAction(onClick: () -> Unit) {
-        _previewAction.value = onClick
+    fun setPreviewAction(previewAction: PreviewAction) {
+        _previewAction.value = previewAction
     }
 
     fun addAction(
@@ -148,6 +148,11 @@ class ScreenshotViewModel(private val accessibilityManager: AccessibilityManager
         const val TAG = "ScreenshotViewModel"
     }
 }
+
+data class PreviewAction(
+    val contentDescription: CharSequence,
+    val onClick: () -> Unit,
+)
 
 enum class AnimationState {
     NOT_STARTED,

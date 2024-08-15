@@ -16,6 +16,7 @@
 
 package android.content;
 
+import static android.app.appfunctions.flags.Flags.FLAG_ENABLE_APP_FUNCTION_MANAGER;
 import static android.content.flags.Flags.FLAG_ENABLE_BIND_PACKAGE_ISOLATED_PROCESS;
 
 import android.annotation.AttrRes;
@@ -51,6 +52,7 @@ import android.app.IApplicationThread;
 import android.app.IServiceConnection;
 import android.app.VrManager;
 import android.app.ambientcontext.AmbientContextManager;
+import android.app.appfunctions.AppFunctionManager;
 import android.app.people.PeopleManager;
 import android.app.time.TimeManager;
 import android.companion.virtual.VirtualDeviceManager;
@@ -2916,6 +2918,23 @@ public abstract class Context {
             @Nullable String initialData, @Nullable  Bundle initialExtras);
 
     /**
+     * Similar to above but takes array of names of permissions that a receiver must hold in order
+     * to receive your broadcast. If empty, no permissions are required.
+     *
+     * @see #sendOrderedBroadcastAsUser(Intent, UserHandle, String,
+     *       BroadcastReceiver, Handler, int, String, Bundle)
+     * @hide
+     */
+    @SuppressWarnings("HiddenAbstractMethod")
+    @RequiresPermission(android.Manifest.permission.INTERACT_ACROSS_USERS)
+    public void sendOrderedBroadcastAsUserMultiplePermissions(Intent intent,
+            UserHandle user, String[] receiverPermissions, int appOp, Bundle options,
+            BroadcastReceiver resultReceiver, Handler scheduler, int initialCode,
+            String initialData, Bundle initialExtras) {
+        throw new RuntimeException("Not implemented. Must override in a subclass.");
+    }
+
+    /**
      * Version of
      * {@link #sendOrderedBroadcast(Intent, String, BroadcastReceiver, Handler, int, String,
      * Bundle)} that allows you to specify the App Op to enforce restrictions on which receivers
@@ -2993,6 +3012,21 @@ public abstract class Context {
             @Nullable BroadcastReceiver resultReceiver, @Nullable Handler scheduler,
             @Nullable String initialData, @Nullable Bundle initialExtras,
             @Nullable Bundle options) {
+        throw new RuntimeException("Not implemented. Must override in a subclass.");
+    }
+
+    /**
+     * Like {@link #sendOrderedBroadcast(Intent, String, String, BroadcastReceiver, Handler, int,
+     * String, Bundle)}, but also allows specification of a list of multiple permissions.
+     * @hide
+     */
+    @FlaggedApi(Flags.FLAG_ORDERED_BROADCAST_MULTIPLE_PERMISSIONS)
+    @SystemApi
+    public void sendOrderedBroadcastMultiplePermissions(
+            @NonNull Intent intent, @NonNull String[] receiverPermissions,
+            @Nullable String receiverAppOp, @Nullable BroadcastReceiver resultReceiver,
+            @Nullable Handler scheduler, int initialCode, @Nullable String initialData,
+            @Nullable Bundle initialExtras, @Nullable Bundle options) {
         throw new RuntimeException("Not implemented. Must override in a subclass.");
     }
 
@@ -4451,7 +4485,8 @@ public abstract class Context {
      * @see #DISPLAY_HASH_SERVICE
      * @see android.view.displayhash.DisplayHashManager
      */
-    public abstract @Nullable Object getSystemService(@ServiceName @NonNull String name);
+    // TODO(b/347269120): Re-add @Nullable
+    public abstract Object getSystemService(@ServiceName @NonNull String name);
 
     /**
      * Return the handle to a system-level service by class.
@@ -4495,7 +4530,8 @@ public abstract class Context {
      * <b>never</b> throw a {@link RuntimeException} if the name is not supported.
      */
     @SuppressWarnings("unchecked")
-    public final @Nullable <T> T getSystemService(@NonNull Class<T> serviceClass) {
+    // TODO(b/347269120): Re-add @Nullable
+    public final <T> T getSystemService(@NonNull Class<T> serviceClass) {
         // Because subclasses may override getSystemService(String) we cannot
         // perform a lookup by class alone.  We must first map the class to its
         // service name then invoke the string-based method.
@@ -6276,6 +6312,16 @@ public abstract class Context {
 
     /**
      * Use with {@link #getSystemService(String)} to retrieve an
+     * {@link AppFunctionManager} for
+     * executing app functions.
+     *
+     * @see #getSystemService(String)
+     */
+    @FlaggedApi(FLAG_ENABLE_APP_FUNCTION_MANAGER)
+    public static final String APP_FUNCTION_SERVICE = "app_function";
+
+    /**
+     * Use with {@link #getSystemService(String)} to retrieve an
      * {@link android.content.integrity.AppIntegrityManager}.
      * @hide
      */
@@ -6640,6 +6686,16 @@ public abstract class Context {
             com.android.server.telecom.flags.Flags.FLAG_TELECOM_MAINLINE_BLOCKED_NUMBERS_MANAGER)
     @SystemApi
     public static final String BLOCKED_NUMBERS_SERVICE = "blocked_numbers";
+
+    /**
+     * Use with {@link #getSystemService(String)} to retrieve the
+     * {@link com.android.internal.protolog.ProtoLogService} for registering ProtoLog clients.
+     *
+     * @see #getSystemService(String)
+     * @see com.android.internal.protolog.ProtoLogService
+     * @hide
+     */
+    public static final String PROTOLOG_SERVICE = "protolog";
 
     /**
      * Determine whether the given permission is allowed for a particular

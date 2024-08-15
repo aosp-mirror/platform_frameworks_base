@@ -21,8 +21,6 @@ import com.android.asllib.util.XmlUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-import java.util.List;
-
 /** DeveloperInfo representation */
 public class DeveloperInfo implements AslMarshallable {
     public enum DeveloperRelationship {
@@ -97,8 +95,7 @@ public class DeveloperInfo implements AslMarshallable {
     }
 
     /** Creates an on-device DOM element from the {@link SafetyLabels}. */
-    @Override
-    public List<Element> toOdDomElements(Document doc) {
+    public Element toOdDomElement(Document doc) {
         Element developerInfoEle =
                 XmlUtils.createPbundleEleWithName(doc, XmlUtils.OD_NAME_DEVELOPER_INFO);
         if (mName != null) {
@@ -136,13 +133,11 @@ public class DeveloperInfo implements AslMarshallable {
                             XmlUtils.OD_NAME_APP_DEVELOPER_REGISTRY_ID,
                             mAppDeveloperRegistryId));
         }
-
-        return XmlUtils.listOf(developerInfoEle);
+        return developerInfoEle;
     }
 
     /** Creates the human-readable DOM elements from the AslMarshallable Java Object. */
-    @Override
-    public List<Element> toHrDomElements(Document doc) {
+    public Element toHrDomElement(Document doc) {
         Element developerInfoEle = doc.createElement(XmlUtils.HR_TAG_DEVELOPER_INFO);
         if (mName != null) {
             developerInfoEle.setAttribute(XmlUtils.HR_ATTR_NAME, mName);
@@ -167,7 +162,6 @@ public class DeveloperInfo implements AslMarshallable {
             developerInfoEle.setAttribute(
                     XmlUtils.HR_ATTR_APP_DEVELOPER_REGISTRY_ID, mAppDeveloperRegistryId);
         }
-
-        return XmlUtils.listOf(developerInfoEle);
+        return developerInfoEle;
     }
 }

@@ -88,10 +88,10 @@ import android.widget.espresso.CustomViewActions.RelativeCoordinatesProvider;
 
 import androidx.test.InstrumentationRegistry;
 import androidx.test.espresso.action.EspressoKey;
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.MediumTest;
 import androidx.test.filters.Suppress;
 import androidx.test.rule.ActivityTestRule;
-import androidx.test.runner.AndroidJUnit4;
 import androidx.test.uiautomator.By;
 import androidx.test.uiautomator.UiDevice;
 import androidx.test.uiautomator.Until;

@@ -27,7 +27,6 @@ import android.view.ViewGroup
 import android.window.RemoteTransition
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.android.systemui.Flags.pssAppSelectorAbruptExitFix
 import com.android.systemui.Flags.pssAppSelectorRecentsSplitScreen
 import com.android.systemui.display.naturalBounds
 import com.android.systemui.mediaprojection.appselector.MediaProjectionAppSelectorResultHandler
@@ -160,7 +159,7 @@ constructor(
 
 
     private fun createAnimation(task: RecentTask, view: View): ActivityOptions =
-        if (pssAppSelectorAbruptExitFix() && task.isForegroundTask) {
+        if (task.isForegroundTask) {
             // When the selected task is in the foreground, the scale up animation doesn't work.
             // We fallback to the default close animation.
             ActivityOptions.makeCustomTaskAnimation(

@@ -48,7 +48,8 @@ internal constructor(
 ) {
     private val transitionCache =
         mutableMapOf<
-            SceneKey, MutableMap<SceneKey, MutableMap<TransitionKey?, TransitionSpecImpl>>
+            SceneKey,
+            MutableMap<SceneKey, MutableMap<TransitionKey?, TransitionSpecImpl>>
         >()
 
     private val overscrollCache =
@@ -87,8 +88,7 @@ internal constructor(
         return transition(from, to, key) {
                 (it.from == to && it.to == null) || (it.to == from && it.from == null)
             }
-            ?.reversed()
-            ?: defaultTransition(from, to)
+            ?.reversed() ?: defaultTransition(from, to)
     }
 
     private fun transition(
@@ -110,7 +110,7 @@ internal constructor(
     }
 
     private fun defaultTransition(from: SceneKey, to: SceneKey) =
-        TransitionSpecImpl(key = null, from, to, TransformationSpec.EmptyProvider)
+        TransitionSpecImpl(key = null, from, to, null, null, TransformationSpec.EmptyProvider)
 
     internal fun overscrollSpec(scene: SceneKey, orientation: Orientation): OverscrollSpecImpl? =
         overscrollCache
@@ -157,16 +157,16 @@ interface TransitionSpec {
     val key: TransitionKey?
 
     /**
-     * The scene we are transitioning from. If `null`, this spec can be used to animate from any
-     * scene.
+     * The content we are transitioning from. If `null`, this spec can be used to animate from any
+     * content.
      */
-    val from: SceneKey?
+    val from: ContentKey?
 
     /**
-     * The scene we are transitioning to. If `null`, this spec can be used to animate from any
-     * scene.
+     * The content we are transitioning to. If `null`, this spec can be used to animate from any
+     * content.
      */
-    val to: SceneKey?
+    val to: ContentKey?
 
     /**
      * Return a reversed version of this [TransitionSpec] for a transition going from [to] to
@@ -177,10 +177,18 @@ interface TransitionSpec {
     /**
      * The [TransformationSpec] associated to this [TransitionSpec].
      *
-     * Note that this is called once every a transition associated to this [TransitionSpec] is
+     * Note that this is called once whenever a transition associated to this [TransitionSpec] is
      * started.
      */
     fun transformationSpec(): TransformationSpec
+
+    /**
+     * The preview [TransformationSpec] associated to this [TransitionSpec].
+     *
+     * Note that this is called once whenever a transition associated to this [TransitionSpec] is
+     * started.
+     */
+    fun previewTransformationSpec(): TransformationSpec?
 }
 
 interface TransformationSpec {
@@ -223,15 +231,19 @@ interface TransformationSpec {
 
 internal class TransitionSpecImpl(
     override val key: TransitionKey?,
-    override val from: SceneKey?,
-    override val to: SceneKey?,
-    private val transformationSpec: () -> TransformationSpecImpl,
+    override val from: ContentKey?,
+    override val to: ContentKey?,
+    private val previewTransformationSpec: (() -> TransformationSpecImpl)? = null,
+    private val reversePreviewTransformationSpec: (() -> TransformationSpecImpl)? = null,
+    private val transformationSpec: () -> TransformationSpecImpl
 ) : TransitionSpec {
     override fun reversed(): TransitionSpecImpl {
         return TransitionSpecImpl(
             key = key,
             from = to,
             to = from,
+            previewTransformationSpec = reversePreviewTransformationSpec,
+            reversePreviewTransformationSpec = previewTransformationSpec,
             transformationSpec = {
                 val reverse = transformationSpec.invoke()
                 TransformationSpecImpl(
@@ -245,6 +257,9 @@ internal class TransitionSpecImpl(
     }
 
     override fun transformationSpec(): TransformationSpecImpl = this.transformationSpec.invoke()
+
+    override fun previewTransformationSpec(): TransformationSpecImpl? =
+        previewTransformationSpec?.invoke()
 }
 
 /** The definition of the overscroll behavior of the [scene]. */
@@ -257,12 +272,24 @@ interface OverscrollSpec {
 
     /** The [TransformationSpec] associated to this [OverscrollSpec]. */
     val transformationSpec: TransformationSpec
+
+    /**
+     * Function that takes a linear overscroll progress value ranging from 0 to +/- infinity and
+     * outputs the desired **overscroll progress value**.
+     *
+     * When the progress value is:
+     * - 0, the user is not overscrolling.
+     * - 1, the user overscrolled by exactly the [OverscrollBuilder.distance].
+     * - Greater than 1, the user overscrolled more than the [OverscrollBuilder.distance].
+     */
+    val progressConverter: (Float) -> Float
 }
 
 internal class OverscrollSpecImpl(
     override val scene: SceneKey,
     override val orientation: Orientation,
     override val transformationSpec: TransformationSpecImpl,
+    override val progressConverter: (Float) -> Float,
 ) : OverscrollSpec
 
 /**
@@ -275,18 +302,18 @@ internal class TransformationSpecImpl(
     override val distance: UserActionDistance?,
     override val transformations: List<Transformation>,
 ) : TransformationSpec {
-    private val cache = mutableMapOf<ElementKey, MutableMap<SceneKey, ElementTransformations>>()
+    private val cache = mutableMapOf<ElementKey, MutableMap<ContentKey, ElementTransformations>>()
 
-    internal fun transformations(element: ElementKey, scene: SceneKey): ElementTransformations {
+    internal fun transformations(element: ElementKey, content: ContentKey): ElementTransformations {
         return cache
             .getOrPut(element) { mutableMapOf() }
-            .getOrPut(scene) { computeTransformations(element, scene) }
+            .getOrPut(content) { computeTransformations(element, content) }
     }
 
     /** Filter [transformations] to compute the [ElementTransformations] of [element]. */
     private fun computeTransformations(
         element: ElementKey,
-        scene: SceneKey,
+        content: ContentKey,
     ): ElementTransformations {
         var shared: SharedElementTransformation? = null
         var offset: PropertyTransformation<Offset>? = null
@@ -324,7 +351,7 @@ internal class TransformationSpecImpl(
         }
 
         transformations.fastForEach { transformation ->
-            if (!transformation.matcher.matches(element, scene)) {
+            if (!transformation.matcher.matches(element, content)) {
                 return@fastForEach
             }
 

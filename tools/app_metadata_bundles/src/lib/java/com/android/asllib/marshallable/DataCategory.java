@@ -23,6 +23,7 @@ import com.android.asllib.util.XmlUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -40,6 +41,11 @@ public class DataCategory implements AslMarshallable {
         this.mDataTypes = dataTypes;
     }
 
+    public DataCategory(String categoryName) {
+        this.mCategoryName = categoryName;
+        this.mDataTypes = new LinkedHashMap<String, DataType>();
+    }
+
     public String getCategoryName() {
         return mCategoryName;
     }
@@ -51,18 +57,16 @@ public class DataCategory implements AslMarshallable {
     }
 
     /** Creates on-device DOM element(s) from the {@link DataCategory}. */
-    @Override
-    public List<Element> toOdDomElements(Document doc) {
+    public Element toOdDomElement(Document doc) {
         Element dataCategoryEle = XmlUtils.createPbundleEleWithName(doc, this.getCategoryName());
         for (DataType dataType : mDataTypes.values()) {
-            XmlUtils.appendChildren(dataCategoryEle, dataType.toOdDomElements(doc));
+            dataCategoryEle.appendChild(dataType.toOdDomElement(doc));
         }
-        return XmlUtils.listOf(dataCategoryEle);
+        return dataCategoryEle;
     }
 
     /** Creates the human-readable DOM elements from the AslMarshallable Java Object. */
-    @Override
-    public List<Element> toHrDomElements(Document doc) {
+    public List<Element> toHrDomElement(Document doc) {
         throw new IllegalStateException(
                 "Turning DataCategory or DataType into human-readable DOM elements requires"
                         + " visibility into parent elements. The logic resides in DataLabels.");

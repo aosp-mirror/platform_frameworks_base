@@ -23,6 +23,7 @@ android_test {
     resource_dirs: ["res"],
     libs: ["android.test.runner"],
     static_libs: [
+        "androidx.core_core",
         "androidx.test.ext.junit",
         "androidx.test.rules",
         "compatibility-device-util-axt",

@@ -18,7 +18,6 @@ package com.android.systemui.media.controls.domain.pipeline.interactor
 
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.applicationCoroutineScope
-import com.android.systemui.media.controls.data.repository.mediaDataRepository
 import com.android.systemui.media.controls.data.repository.mediaFilterRepository
 import com.android.systemui.media.controls.domain.pipeline.mediaDataCombineLatest
 import com.android.systemui.media.controls.domain.pipeline.mediaDataFilter
@@ -33,7 +32,6 @@ val Kosmos.mediaCarouselInteractor by
     Kosmos.Fixture {
         MediaCarouselInteractor(
             applicationScope = applicationCoroutineScope,
-            mediaDataRepository = mediaDataRepository,
             mediaDataProcessor = mediaDataProcessor,
             mediaTimeoutListener = mediaTimeoutListener,
             mediaResumeListener = mediaResumeListener,

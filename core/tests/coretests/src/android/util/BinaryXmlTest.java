@@ -30,7 +30,7 @@ import static org.xmlpull.v1.XmlPullParser.START_TAG;
 
 import android.os.PersistableBundle;
 
-import androidx.test.runner.AndroidJUnit4;
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 
 import com.android.modules.utils.TypedXmlPullParser;
 import com.android.modules.utils.TypedXmlSerializer;

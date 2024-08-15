@@ -37,15 +37,19 @@ android_test {
     ],
 
     static_libs: [
+        "TestParameterInjector",
         "WindowManager-Shell",
         "junit",
         "flag-junit",
         "androidx.test.runner",
         "androidx.test.rules",
         "androidx.test.ext.junit",
+        "androidx.datastore_datastore",
+        "kotlinx_coroutines_test",
         "androidx.dynamicanimation_dynamicanimation",
         "dagger2",
         "frameworks-base-testutils",
+        "kotlin-test",
         "kotlinx-coroutines-android",
         "kotlinx-coroutines-core",
         "mockito-kotlin2",
@@ -58,6 +62,7 @@ android_test {
         "guava-android-testlib",
         "com.android.window.flags.window-aconfig-java",
         "platform-test-annotations",
+        "flag-junit",
     ],
 
     libs: [

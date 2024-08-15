@@ -535,7 +535,8 @@ public class TaskViewTaskController implements ShellTaskOrganizer.TaskListener {
         WindowContainerTransaction wct = new WindowContainerTransaction();
         if (mCaptionInsets != null) {
             wct.addInsetsSource(mTaskToken, mCaptionInsetsOwner, 0,
-                    WindowInsets.Type.captionBar(), mCaptionInsets, null /* boundingRects */);
+                    WindowInsets.Type.captionBar(), mCaptionInsets, null /* boundingRects */,
+                    0 /* flags */);
         } else {
             wct.removeInsetsSource(mTaskToken, mCaptionInsetsOwner, 0,
                     WindowInsets.Type.captionBar());

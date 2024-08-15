@@ -171,6 +171,7 @@ static bool CompileTable(IAaptContext* context, const CompileOptions& options,
     parser_options.error_on_positional_arguments = !options.legacy_mode;
     parser_options.preserve_visibility_of_styleables = options.preserve_visibility_of_styleables;
     parser_options.translatable = translatable_file;
+    parser_options.feature_flag_values = options.feature_flag_values;
 
     // If visibility was forced, we need to use it when creating a new resource and also error if
     // we try to parse the <public>, <public-group>, <java-symbol> or <symbol> tags.
@@ -834,6 +835,28 @@ int CompileCommand::Action(const std::vector<std::string>& args) {
 
   if (!archive_writer) {
     return 1;
+  }
+
+  // Parse the feature flag values. An argument that starts with '@' points to a file to read flag
+  // values from.
+  std::vector<std::string> all_feature_flags_args;
+  for (const std::string& arg : feature_flags_args_) {
+    if (util::StartsWith(arg, "@")) {
+      const std::string path = arg.substr(1, arg.size() - 1);
+      std::string error;
+      if (!file::AppendArgsFromFile(path, &all_feature_flags_args, &error)) {
+        context.GetDiagnostics()->Error(android::DiagMessage(path) << error);
+        return 1;
+      }
+    } else {
+      all_feature_flags_args.push_back(arg);
+    }
+  }
+
+  for (const std::string& arg : all_feature_flags_args) {
+    if (!ParseFeatureFlagsParameter(arg, context.GetDiagnostics(), &options_.feature_flag_values)) {
+      return 1;
+    }
   }
 
   return Compile(&context, file_collection.get(), archive_writer.get(), options_);

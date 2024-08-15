@@ -19,6 +19,8 @@ package com.android.server.am;
 import static android.Manifest.permission.INTERACT_ACROSS_PROFILES;
 import static android.Manifest.permission.INTERACT_ACROSS_USERS;
 import static android.Manifest.permission.INTERACT_ACROSS_USERS_FULL;
+import static android.app.ActivityManager.STOP_USER_ON_SWITCH_TRUE;
+import static android.app.ActivityManager.STOP_USER_ON_SWITCH_FALSE;
 import static android.app.ActivityManagerInternal.ALLOW_FULL_ONLY;
 import static android.app.ActivityManagerInternal.ALLOW_NON_FULL;
 import static android.app.ActivityManagerInternal.ALLOW_NON_FULL_IN_PROFILE;
@@ -103,6 +105,7 @@ import android.view.Display;
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.widget.LockPatternUtils;
+import com.android.server.AlarmManagerInternal;
 import com.android.server.FgThread;
 import com.android.server.SystemService;
 import com.android.server.am.UserState.KeyEvictedCallback;
@@ -122,6 +125,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -201,7 +205,8 @@ public class UserControllerTest {
             doNothing().when(mInjector).systemServiceManagerOnUserStopped(anyInt());
             doNothing().when(mInjector).systemServiceManagerOnUserCompletedEvent(
                     anyInt(), anyInt());
-            doNothing().when(mInjector).activityManagerForceStopPackage(anyInt(), anyString());
+            doNothing().when(mInjector).activityManagerForceStopUserPackages(anyInt(),
+                    anyString(), anyBoolean());
             doNothing().when(mInjector).activityManagerOnUserStopped(anyInt());
             doNothing().when(mInjector).clearBroadcastQueueForUser(anyInt());
             doNothing().when(mInjector).taskSupervisorRemoveUser(anyInt());
@@ -672,6 +677,94 @@ public class UserControllerTest {
                 new HashSet<>(mUserController.getRunningUsersLU()));
     }
 
+    /** Test scheduling stopping of background users - reschedule if current user is a guest. */
+    @Test
+    public void testScheduleStopOfBackgroundUser_rescheduleWhenGuest() throws Exception {
+        mSetFlagsRule.enableFlags(android.multiuser.Flags.FLAG_SCHEDULE_STOP_OF_BACKGROUND_USER);
+
+        mUserController.setInitialConfig(/* userSwitchUiEnabled= */ true,
+                /* maxRunningUsers= */ 10, /* delayUserDataLocking= */ false,
+                /* backgroundUserScheduledStopTimeSecs= */ 2);
+
+        final int TEST_USER_GUEST = 902;
+        setUpUser(TEST_USER_GUEST, UserInfo.FLAG_GUEST);
+
+        setUpUser(TEST_USER_ID2, NO_USERINFO_FLAGS);
+
+        // Switch to TEST_USER_ID from user 0
+        int numberOfUserSwitches = 0;
+        addForegroundUserAndContinueUserSwitch(TEST_USER_ID, UserHandle.USER_SYSTEM,
+                ++numberOfUserSwitches, false,
+                /* expectScheduleBackgroundUserStopping= */ false);
+        assertEquals(Arrays.asList(SYSTEM_USER_ID, TEST_USER_ID),
+                mUserController.getRunningUsersLU());
+
+        // Switch to TEST_USER_GUEST from TEST_USER_ID
+        addForegroundUserAndContinueUserSwitch(TEST_USER_GUEST, TEST_USER_ID,
+                ++numberOfUserSwitches, false,
+                /* expectScheduleBackgroundUserStopping= */ true);
+        assertEquals(Arrays.asList(SYSTEM_USER_ID, TEST_USER_ID, TEST_USER_GUEST),
+                mUserController.getRunningUsersLU());
+
+        // Allow the post-switch processing to complete.
+        // TEST_USER_ID may be scheduled for stopping, but it shouldn't actually stop since the
+        // current user is a Guest.
+        assertAndProcessScheduledStopBackgroundUser(true, TEST_USER_ID);
+        assertAndProcessScheduledStopBackgroundUser(false, TEST_USER_GUEST);
+        assertEquals(Arrays.asList(SYSTEM_USER_ID, TEST_USER_ID, TEST_USER_GUEST),
+                mUserController.getRunningUsersLU());
+
+        // Switch to TEST_USER_ID2 from TEST_USER_GUEST
+        // Guests are automatically stopped in the background, so it won't be scheduled.
+        addForegroundUserAndContinueUserSwitch(TEST_USER_ID2, TEST_USER_GUEST,
+                ++numberOfUserSwitches, true,
+                /* expectScheduleBackgroundUserStopping= */ false);
+        assertEquals(Arrays.asList(SYSTEM_USER_ID, TEST_USER_ID, TEST_USER_ID2),
+                mUserController.getRunningUsersLU());
+
+        // Allow the post-switch processing to complete.
+        // TEST_USER_ID should *still* be scheduled for stopping, since we skipped stopping it
+        // earlier.
+        assertAndProcessScheduledStopBackgroundUser(true, TEST_USER_ID);
+        assertAndProcessScheduledStopBackgroundUser(false, TEST_USER_GUEST);
+        assertAndProcessScheduledStopBackgroundUser(false, TEST_USER_ID2);
+        assertEquals(Arrays.asList(SYSTEM_USER_ID, TEST_USER_ID2),
+                mUserController.getRunningUsersLU());
+    }
+
+    /** Test scheduling stopping of background users - reschedule if user with a scheduled alarm. */
+    @Test
+    public void testScheduleStopOfBackgroundUser_rescheduleIfAlarm() throws Exception {
+        mSetFlagsRule.enableFlags(android.multiuser.Flags.FLAG_SCHEDULE_STOP_OF_BACKGROUND_USER);
+
+        mUserController.setInitialConfig(/* userSwitchUiEnabled= */ true,
+                /* maxRunningUsers= */ 10, /* delayUserDataLocking= */ false,
+                /* backgroundUserScheduledStopTimeSecs= */ 2);
+
+        setUpAndStartUserInBackground(TEST_USER_ID);
+        assertEquals(newHashSet(SYSTEM_USER_ID, TEST_USER_ID),
+                new HashSet<>(mUserController.getRunningUsersLU()));
+
+        // Initially, the background user has an alarm that will fire soon. So don't stop the user.
+        when(mInjector.mAlarmManagerInternal.getNextAlarmTriggerTimeForUser(eq(TEST_USER_ID)))
+                .thenReturn(System.currentTimeMillis() + Duration.ofMinutes(2).toMillis());
+        assertAndProcessScheduledStopBackgroundUser(true, TEST_USER_ID);
+        assertEquals(newHashSet(SYSTEM_USER_ID, TEST_USER_ID),
+                new HashSet<>(mUserController.getRunningUsersLU()));
+
+        // Now, that alarm is gone and the next alarm isn't for a long time. Do stop the user.
+        when(mInjector.mAlarmManagerInternal.getNextAlarmTriggerTimeForUser(eq(TEST_USER_ID)))
+                .thenReturn(System.currentTimeMillis() + Duration.ofDays(1).toMillis());
+        assertAndProcessScheduledStopBackgroundUser(true, TEST_USER_ID);
+        assertEquals(newHashSet(SYSTEM_USER_ID),
+                new HashSet<>(mUserController.getRunningUsersLU()));
+
+        // No-one is scheduled to stop anymore.
+        assertAndProcessScheduledStopBackgroundUser(false, null);
+        verify(mInjector.mAlarmManagerInternal, never())
+                .getNextAlarmTriggerTimeForUser(eq(SYSTEM_USER_ID));
+    }
+
     /**
      * Process queued SCHEDULED_STOP_BACKGROUND_USER_MSG message, if expected.
      * @param userId the user we are checking to see whether it is scheduled.
@@ -682,11 +775,11 @@ public class UserControllerTest {
             boolean expectScheduled, @Nullable Integer userId) {
         TestHandler handler = mInjector.mHandler;
         if (expectScheduled) {
-            assertTrue(handler.hasMessages(SCHEDULED_STOP_BACKGROUND_USER_MSG, userId));
+            assertTrue(handler.hasEqualMessages(SCHEDULED_STOP_BACKGROUND_USER_MSG, userId));
             handler.removeMessages(SCHEDULED_STOP_BACKGROUND_USER_MSG, userId);
             mUserController.processScheduledStopOfBackgroundUser(userId);
         } else {
-            assertFalse(handler.hasMessages(SCHEDULED_STOP_BACKGROUND_USER_MSG, userId));
+            assertFalse(handler.hasEqualMessages(SCHEDULED_STOP_BACKGROUND_USER_MSG, userId));
         }
     }
 
@@ -880,6 +973,61 @@ public class UserControllerTest {
                 SYSTEM_USER_ID, PROFILE1_ID, PROFILE2_ID, FG_USER_ID, PARENT_ID),
                 new HashSet<>(mUserController.getRunningUsersLU()));
     }
+
+    @Test
+    public void testEarlyPackageKillEnabledForUserSwitch_enabled() {
+        mUserController.setInitialConfig(/* userSwitchUiEnabled= */ true,
+                /* maxRunningUsers= */ 4, /* delayUserDataLocking= */ true,
+                /* backgroundUserScheduledStopTimeSecs= */ -1);
+
+        assertTrue(mUserController
+                .isEarlyPackageKillEnabledForUserSwitch(TEST_USER_ID, TEST_USER_ID1));
+    }
+
+    @Test
+    public void testEarlyPackageKillEnabledForUserSwitch_withoutDelayUserDataLocking() {
+        mUserController.setInitialConfig(/* userSwitchUiEnabled= */ true,
+                /* maxRunningUsers= */ 4, /* delayUserDataLocking= */ false,
+                /* backgroundUserScheduledStopTimeSecs= */ -1);
+
+        assertFalse(mUserController
+                .isEarlyPackageKillEnabledForUserSwitch(TEST_USER_ID, TEST_USER_ID1));
+    }
+
+    @Test
+    public void testEarlyPackageKillEnabledForUserSwitch_withPrevSystemUser() {
+        mUserController.setInitialConfig(/* userSwitchUiEnabled= */ true,
+                /* maxRunningUsers= */ 4, /* delayUserDataLocking= */ true,
+                /* backgroundUserScheduledStopTimeSecs= */ -1);
+
+        assertFalse(mUserController
+                .isEarlyPackageKillEnabledForUserSwitch(SYSTEM_USER_ID, TEST_USER_ID1));
+    }
+
+    @Test
+    public void testEarlyPackageKillEnabledForUserSwitch_stopUserOnSwitchModeOn() {
+        mUserController.setInitialConfig(/* userSwitchUiEnabled= */ true,
+                /* maxRunningUsers= */ 4, /* delayUserDataLocking= */ false,
+                /* backgroundUserScheduledStopTimeSecs= */ -1);
+
+        mUserController.setStopUserOnSwitch(STOP_USER_ON_SWITCH_TRUE);
+
+        assertTrue(mUserController
+                .isEarlyPackageKillEnabledForUserSwitch(TEST_USER_ID, TEST_USER_ID1));
+    }
+
+    @Test
+    public void testEarlyPackageKillEnabledForUserSwitch_stopUserOnSwitchModeOff() {
+        mUserController.setInitialConfig(/* userSwitchUiEnabled= */ true,
+                /* maxRunningUsers= */ 4, /* delayUserDataLocking= */ true,
+                /* backgroundUserScheduledStopTimeSecs= */ -1);
+
+        mUserController.setStopUserOnSwitch(STOP_USER_ON_SWITCH_FALSE);
+
+        assertFalse(mUserController
+                .isEarlyPackageKillEnabledForUserSwitch(TEST_USER_ID, TEST_USER_ID1));
+    }
+
 
     /**
      * Test that, in getRunningUsersLU, parents come after their profile, even if the profile was
@@ -1534,9 +1682,9 @@ public class UserControllerTest {
         mInjector.mHandler.clearAllRecordedMessages();
         // Verify that continueUserSwitch worked as expected
         continueAndCompleteUserSwitch(userState, oldUserId, newUserId);
-        assertEquals(mInjector.mHandler
-                        .hasMessages(SCHEDULED_STOP_BACKGROUND_USER_MSG, expectedOldUserId),
-                expectScheduleBackgroundUserStopping);
+        assertEquals(expectScheduleBackgroundUserStopping,
+                mInjector.mHandler
+                        .hasEqualMessages(SCHEDULED_STOP_BACKGROUND_USER_MSG, expectedOldUserId));
         verify(mInjector, times(expectedNumberOfCalls)).dismissUserSwitchingDialog(any());
         continueUserSwitchAssertions(oldUserId, newUserId, expectOldUserStopping,
                 expectScheduleBackgroundUserStopping);
@@ -1634,6 +1782,7 @@ public class UserControllerTest {
         private final WindowManagerService mWindowManagerMock;
         private final ActivityTaskManagerInternal mActivityTaskManagerInternal;
         private final PowerManagerInternal mPowerManagerInternal;
+        private final AlarmManagerInternal mAlarmManagerInternal;
         private final KeyguardManager mKeyguardManagerMock;
         private final LockPatternUtils mLockPatternUtilsMock;
 
@@ -1656,6 +1805,7 @@ public class UserControllerTest {
             mActivityTaskManagerInternal = mock(ActivityTaskManagerInternal.class);
             mStorageManagerMock = mock(IStorageManager.class);
             mPowerManagerInternal = mock(PowerManagerInternal.class);
+            mAlarmManagerInternal = mock(AlarmManagerInternal.class);
             mKeyguardManagerMock = mock(KeyguardManager.class);
             when(mKeyguardManagerMock.isDeviceSecure(anyInt())).thenReturn(true);
             mLockPatternUtilsMock = mock(LockPatternUtils.class);
@@ -1723,6 +1873,11 @@ public class UserControllerTest {
         @Override
         PowerManagerInternal getPowerManagerInternal() {
             return mPowerManagerInternal;
+        }
+
+        @Override
+        AlarmManagerInternal getAlarmManagerInternal() {
+            return mAlarmManagerInternal;
         }
 
         @Override
@@ -1810,6 +1965,13 @@ public class UserControllerTest {
     }
 
     private static class TestHandler extends Handler {
+        /**
+         * Keeps an accessible copy of messages that were queued for us to query.
+         *
+         * WARNING: queued messages get added to this, but processed/removed messages to NOT
+         * automatically get removed. This can lead to confusing bugs. Maybe one day someone will
+         * fix this, but in the meantime, this is your warning.
+         */
         private final List<Message> mMessages = new ArrayList<>();
 
         TestHandler(Looper looper) {

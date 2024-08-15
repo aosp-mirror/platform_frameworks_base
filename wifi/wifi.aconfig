@@ -17,3 +17,33 @@ flag {
     description: "Control the API that allows setting / reading the NetworkProviderInfo's battery charging status"
     bug: "305067231"
 }
+
+flag {
+    name: "legacy_keystore_to_wifi_blobstore_migration_read_only"
+    is_exported: true
+    namespace: "wifi"
+    description: "Add API to migrate all values from Legacy Keystore to the new Wifi Blobstore database"
+    bug: "332560152"
+    is_fixed_read_only: true
+}
+
+flag {
+    name: "hotspot_network_unknown_status_resets_connecting_state"
+    namespace: "wifi"
+    description: "Reset the connecting state flags when the hotspot network updates to unknown."
+    bug: "329670511"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
+    name: "hotspot_network_connecting_state_for_details_page"
+    namespace: "wifi"
+    description: "Update getConnectedState in HotspotNetworkEntry so that details page displays correctly."
+    bug: "321096462"
+    is_fixed_read_only: true
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}

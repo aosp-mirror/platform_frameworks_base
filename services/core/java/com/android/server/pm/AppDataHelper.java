@@ -127,7 +127,7 @@ public class AppDataHelper {
         }
 
         // TODO(b/211761016): should we still create the profile dirs?
-        if (ps.getPkg() != null && !shouldHaveAppStorage(ps.getPkg())) {
+        if (!shouldHaveAppStorage(ps)) {
             Slog.w(TAG, "Skipping preparing app data for " + ps.getPackageName());
             return;
         }
@@ -172,19 +172,19 @@ public class AppDataHelper {
     }
 
     private void prepareAppDataAndMigrate(@NonNull Installer.Batch batch,
-            @NonNull AndroidPackage pkg, @UserIdInt int userId,
+            @NonNull PackageStateInternal psi, @UserIdInt int userId,
             @StorageManager.StorageFlags int flags, boolean maybeMigrateAppData) {
-        if (pkg == null) {
+        if (psi == null || psi.getPkg() == null) {
             Slog.wtf(TAG, "Package was null!", new Throwable());
             return;
         }
-        if (!shouldHaveAppStorage(pkg)) {
-            Slog.w(TAG, "Skipping preparing app data for " + pkg.getPackageName());
+        if (!shouldHaveAppStorage(psi)) {
+            Slog.w(TAG, "Skipping preparing app data for " + psi.getPackageName());
             return;
         }
         final PackageSetting ps;
         synchronized (mPm.mLock) {
-            ps = mPm.mSettings.getPackageLPr(pkg.getPackageName());
+            ps = mPm.mSettings.getPackageLPr(psi.getPackageName());
         }
         prepareAppData(batch, ps, Process.INVALID_UID, userId, flags).thenRun(() -> {
             // Note: this code block is executed with the Installer lock
@@ -449,7 +449,7 @@ public class AppDataHelper {
             }
 
             if (ps.getUserStateOrDefault(userId).isInstalled()) {
-                prepareAppDataAndMigrate(batch, ps.getPkg(), userId, flags, migrateAppData);
+                prepareAppDataAndMigrate(batch, ps, userId, flags, migrateAppData);
                 preparedCount++;
             }
         }
@@ -484,8 +484,7 @@ public class AppDataHelper {
                             + " or was deleted without DELETE_KEEP_DATA",
                     PackageManagerException.INTERNAL_ERROR_STORAGE_INVALID_NOT_INSTALLED_FOR_USER);
         }
-        if (packageState.getPkg() != null
-                && !shouldHaveAppStorage(packageState.getPkg())) {
+        if (!shouldHaveAppStorage(packageState)) {
             throw PackageManagerException.ofInternalError(
                     "Package " + packageName + " shouldn't have storage",
                     PackageManagerException.INTERNAL_ERROR_STORAGE_INVALID_SHOULD_NOT_HAVE_STORAGE);
@@ -535,8 +534,7 @@ public class AppDataHelper {
                 if (packageStateInternal != null
                         && packageStateInternal.getUserStateOrDefault(
                                 UserHandle.USER_SYSTEM).isInstalled()) {
-                    AndroidPackage pkg = packageStateInternal.getPkg();
-                    prepareAppDataAndMigrate(batch, pkg,
+                    prepareAppDataAndMigrate(batch, packageStateInternal,
                             UserHandle.USER_SYSTEM, storageFlags, true /* maybeMigrateAppData */);
                     count++;
                 }
@@ -637,12 +635,16 @@ public class AppDataHelper {
     }
 
     /**
-     * Returns {@code true} if app's internal storage should be created for this {@code pkg}.
+     * Returns {@code true} if app's internal storage should be created for this {@code ps}.
      */
-    private boolean shouldHaveAppStorage(AndroidPackage pkg) {
+    private boolean shouldHaveAppStorage(PackageStateInternal ps) {
+        if (ps.getPkg() == null) {
+            // Keeps the legacy behavior
+            return true;
+        }
         PackageManager.Property noAppDataProp =
-                pkg.getProperties().get(PackageManager.PROPERTY_NO_APP_DATA_STORAGE);
-        return (noAppDataProp == null || !noAppDataProp.getBoolean()) && pkg.getUid() >= 0;
+                ps.getPkg().getProperties().get(PackageManager.PROPERTY_NO_APP_DATA_STORAGE);
+        return (noAppDataProp == null || !noAppDataProp.getBoolean()) && ps.getAppId() >= 0;
     }
 
     /**

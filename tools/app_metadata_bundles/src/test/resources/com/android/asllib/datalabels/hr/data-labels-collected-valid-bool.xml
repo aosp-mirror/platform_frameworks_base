@@ -1,7 +1,5 @@
 <data-labels>
-    <data-collected dataCategory="location"
-        dataType="approx_location"
-        ephemeral="false"
+    <data-collected dataType="location_data_type_approx_location"
         isCollectionOptional="false"
         purposes="app_functionality" />
 </data-labels>

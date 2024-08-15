@@ -57,11 +57,8 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
-/**
- * Maintains a connection to a particular {@link MediaRoute2ProviderService}.
- */
-final class MediaRoute2ProviderServiceProxy extends MediaRoute2Provider
-        implements ServiceConnection {
+/** Maintains a connection to a particular {@link MediaRoute2ProviderService}. */
+final class MediaRoute2ProviderServiceProxy extends MediaRoute2Provider {
     private static final String TAG = "MR2ProviderSvcProxy";
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
 
@@ -69,6 +66,7 @@ final class MediaRoute2ProviderServiceProxy extends MediaRoute2Provider
     private final int mUserId;
     private final Handler mHandler;
     private final boolean mIsSelfScanOnlyProvider;
+    private final ServiceConnection mServiceConnection = new ServiceConnectionImpl();
 
     // Connection state
     private boolean mRunning;
@@ -303,9 +301,12 @@ final class MediaRoute2ProviderServiceProxy extends MediaRoute2Provider
             Intent service = new Intent(MediaRoute2ProviderService.SERVICE_INTERFACE);
             service.setComponent(mComponentName);
             try {
-                mBound = mContext.bindServiceAsUser(service, this,
-                        Context.BIND_AUTO_CREATE | Context.BIND_FOREGROUND_SERVICE,
-                        new UserHandle(mUserId));
+                mBound =
+                        mContext.bindServiceAsUser(
+                                service,
+                                mServiceConnection,
+                                Context.BIND_AUTO_CREATE | Context.BIND_FOREGROUND_SERVICE,
+                                new UserHandle(mUserId));
                 if (!mBound && DEBUG) {
                     Slog.d(TAG, this + ": Bind failed");
                 }
@@ -325,12 +326,11 @@ final class MediaRoute2ProviderServiceProxy extends MediaRoute2Provider
 
             mBound = false;
             disconnect();
-            mContext.unbindService(this);
+            mContext.unbindService(mServiceConnection);
         }
     }
 
-    @Override
-    public void onServiceConnected(ComponentName name, IBinder service) {
+    private void onServiceConnectedInternal(IBinder service) {
         if (DEBUG) {
             Slog.d(TAG, this + ": Connected");
         }
@@ -354,16 +354,14 @@ final class MediaRoute2ProviderServiceProxy extends MediaRoute2Provider
         }
     }
 
-    @Override
-    public void onServiceDisconnected(ComponentName name) {
+    private void onServiceDisconnectedInternal() {
         if (DEBUG) {
             Slog.d(TAG, this + ": Service disconnected");
         }
         disconnect();
     }
 
-    @Override
-    public void onBindingDied(ComponentName name) {
+    private void onBindingDiedInternal(ComponentName name) {
         unbind();
         if (Flags.enablePreventionOfKeepAliveRouteProviders()) {
             Slog.w(
@@ -662,6 +660,37 @@ final class MediaRoute2ProviderServiceProxy extends MediaRoute2Provider
                 pendingTransferCount);
     }
 
+    // All methods in this class are called on the main thread.
+    private final class ServiceConnectionImpl implements ServiceConnection {
+
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder service) {
+            if (Flags.enableMr2ServiceNonMainBgThread()) {
+                mHandler.post(() -> onServiceConnectedInternal(service));
+            } else {
+                onServiceConnectedInternal(service);
+            }
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+            if (Flags.enableMr2ServiceNonMainBgThread()) {
+                mHandler.post(() -> onServiceDisconnectedInternal());
+            } else {
+                onServiceDisconnectedInternal();
+            }
+        }
+
+        @Override
+        public void onBindingDied(ComponentName name) {
+            if (Flags.enableMr2ServiceNonMainBgThread()) {
+                mHandler.post(() -> onBindingDiedInternal(name));
+            } else {
+                onBindingDiedInternal(name);
+            }
+        }
+    }
+
     private final class Connection implements DeathRecipient {
         private final IMediaRoute2ProviderService mService;
         private final ServiceCallbackStub mCallbackStub;
@@ -807,6 +836,13 @@ final class MediaRoute2ProviderServiceProxy extends MediaRoute2Provider
                         == MediaRoute2Info.SUITABILITY_STATUS_NOT_SUITABLE_FOR_TRANSFER) {
                     throw new SecurityException(
                             "Only the system is allowed to set not suitable for transfer status. "
+                                    + "Disallowed route: "
+                                    + route);
+                }
+
+                if (route.isSystemRouteType()) {
+                    throw new SecurityException(
+                            "Only the system is allowed to publish routes with system route types. "
                                     + "Disallowed route: "
                                     + route);
                 }

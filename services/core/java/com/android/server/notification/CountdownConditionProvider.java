@@ -19,13 +19,11 @@ package com.android.server.notification;
 import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.Uri;
 import android.service.notification.Condition;
-import android.service.notification.IConditionProvider;
 import android.service.notification.ZenModeConfig;
 import android.text.format.DateUtils;
 import android.util.Log;
@@ -40,9 +38,6 @@ import java.io.PrintWriter;
 public class CountdownConditionProvider extends SystemConditionProviderService {
     private static final String TAG = "ConditionProviders.CCP";
     private static final boolean DEBUG = Log.isLoggable("ConditionProviders", Log.DEBUG);
-
-    public static final ComponentName COMPONENT =
-            new ComponentName("android", CountdownConditionProvider.class.getName());
 
     private static final String ACTION = CountdownConditionProvider.class.getName();
     private static final int REQUEST_CODE = 100;
@@ -60,28 +55,13 @@ public class CountdownConditionProvider extends SystemConditionProviderService {
     }
 
     @Override
-    public ComponentName getComponent() {
-        return COMPONENT;
-    }
-
-    @Override
     public boolean isValidConditionId(Uri id) {
         return ZenModeConfig.isValidCountdownConditionId(id);
     }
 
     @Override
-    public void attachBase(Context base) {
-        attachBaseContext(base);
-    }
-
-    @Override
     public void onBootComplete() {
         // noop
-    }
-
-    @Override
-    public IConditionProvider asInterface() {
-        return (IConditionProvider) onBind(null);
     }
 
     @Override

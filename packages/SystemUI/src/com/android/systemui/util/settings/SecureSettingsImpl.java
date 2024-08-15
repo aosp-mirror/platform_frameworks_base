@@ -16,61 +16,76 @@
 
 package com.android.systemui.util.settings;
 
+import android.annotation.NonNull;
 import android.content.ContentResolver;
 import android.net.Uri;
 import android.provider.Settings;
 
-import androidx.annotation.NonNull;
+import com.android.systemui.util.kotlin.SettingsSingleThreadBackground;
 
-import com.android.systemui.settings.UserTracker;
+import kotlinx.coroutines.CoroutineDispatcher;
 
 import javax.inject.Inject;
 
 class SecureSettingsImpl implements SecureSettings {
     private final ContentResolver mContentResolver;
-    private final UserTracker mUserTracker;
+    private final CurrentUserIdProvider mCurrentUserProvider;
+    private final CoroutineDispatcher mBgDispatcher;
 
     @Inject
-    SecureSettingsImpl(ContentResolver contentResolver, UserTracker userTracker) {
+    SecureSettingsImpl(
+            ContentResolver contentResolver,
+            CurrentUserIdProvider currentUserProvider,
+            @SettingsSingleThreadBackground CoroutineDispatcher bgDispatcher) {
         mContentResolver = contentResolver;
-        mUserTracker = userTracker;
+        mCurrentUserProvider = currentUserProvider;
+        mBgDispatcher = bgDispatcher;
     }
 
+    @NonNull
     @Override
     public ContentResolver getContentResolver() {
         return mContentResolver;
     }
 
+    @NonNull
     @Override
-    public UserTracker getUserTracker() {
-        return mUserTracker;
+    public CurrentUserIdProvider getCurrentUserProvider() {
+        return mCurrentUserProvider;
     }
 
+    @NonNull
     @Override
-    public Uri getUriFor(String name) {
+    public Uri getUriFor(@NonNull String name) {
         return Settings.Secure.getUriFor(name);
     }
 
+    @NonNull
     @Override
-    public String getStringForUser(String name, int userHandle) {
+    public CoroutineDispatcher getBackgroundDispatcher() {
+        return mBgDispatcher;
+    }
+
+    @Override
+    public String getStringForUser(@NonNull String name, int userHandle) {
         return Settings.Secure.getStringForUser(mContentResolver, name,
                 getRealUserHandle(userHandle));
     }
 
     @Override
-    public boolean putString(String name, String value, boolean overrideableByRestore) {
+    public boolean putString(@NonNull String name, String value, boolean overrideableByRestore) {
         return Settings.Secure.putString(mContentResolver, name, value, overrideableByRestore);
     }
 
     @Override
-    public boolean putStringForUser(String name, String value, int userHandle) {
+    public boolean putStringForUser(@NonNull String name, String value, int userHandle) {
         return Settings.Secure.putStringForUser(mContentResolver, name, value,
                 getRealUserHandle(userHandle));
     }
 
     @Override
-    public boolean putStringForUser(String name, String value, String tag, boolean makeDefault,
-            int userHandle, boolean overrideableByRestore) {
+    public boolean putStringForUser(@NonNull String name, String value, String tag,
+            boolean makeDefault, int userHandle, boolean overrideableByRestore) {
         return Settings.Secure.putStringForUser(
                 mContentResolver, name, value, tag, makeDefault, getRealUserHandle(userHandle),
                 overrideableByRestore);

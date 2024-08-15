@@ -103,6 +103,7 @@ constructor(
     lateinit var sizeChangedListener: () -> Unit
     lateinit var configurationChangeListener: () -> Unit
     lateinit var recsConfigurationChangeListener: (MediaViewController, TransitionLayout) -> Unit
+    var locationChangeListener: (Int) -> Unit = {}
     private var firstRefresh: Boolean = true
     @VisibleForTesting private var transitionLayout: TransitionLayout? = null
     private val layoutController = TransitionLayoutController()
@@ -119,7 +120,15 @@ constructor(
      * The ending location of the view where it ends when all animations and transitions have
      * finished
      */
-    @MediaLocation var currentEndLocation: Int = -1
+    @MediaLocation
+    var currentEndLocation: Int = -1
+        set(value) {
+            if (field != value) {
+                field = value
+                if (!mediaFlags.isSceneContainerEnabled()) return
+                locationChangeListener(value)
+            }
+        }
 
     /** The starting location of the view where it starts for all animations and transitions */
     @MediaLocation private var currentStartLocation: Int = -1
@@ -187,8 +196,8 @@ constructor(
     private var isNextButtonAvailable = false
 
     /** View holders for controller */
-    lateinit var recommendationViewHolder: RecommendationViewHolder
-    lateinit var mediaViewHolder: MediaViewHolder
+    var recommendationViewHolder: RecommendationViewHolder? = null
+    var mediaViewHolder: MediaViewHolder? = null
 
     private lateinit var seekBarObserver: SeekBarObserver
     private lateinit var turbulenceNoiseController: TurbulenceNoiseController
@@ -743,16 +752,18 @@ constructor(
     private fun updateDisplayForScrubbingChange() {
         mainExecutor.execute {
             val isTimeVisible = canShowScrubbingTime && isScrubbing
-            MediaControlViewBinder.setVisibleAndAlpha(
-                expandedLayout,
-                mediaViewHolder.scrubbingTotalTimeView.id,
-                isTimeVisible
-            )
-            MediaControlViewBinder.setVisibleAndAlpha(
-                expandedLayout,
-                mediaViewHolder.scrubbingElapsedTimeView.id,
-                isTimeVisible
-            )
+            mediaViewHolder!!.let {
+                MediaControlViewBinder.setVisibleAndAlpha(
+                    expandedLayout,
+                    it.scrubbingTotalTimeView.id,
+                    isTimeVisible
+                )
+                MediaControlViewBinder.setVisibleAndAlpha(
+                    expandedLayout,
+                    it.scrubbingElapsedTimeView.id,
+                    isTimeVisible
+                )
+            }
 
             MediaControlViewModel.SEMANTIC_ACTIONS_HIDE_WHEN_SCRUBBING.forEach { id ->
                 val isButtonVisible: Boolean
@@ -771,14 +782,16 @@ constructor(
                         notVisibleValue = ConstraintSet.GONE
                     }
                 }
-                MediaControlViewBinder.setSemanticButtonVisibleAndAlpha(
-                    mediaViewHolder.getAction(id),
-                    expandedLayout,
-                    collapsedLayout,
-                    isButtonVisible,
-                    notVisibleValue,
-                    showInCollapsed = true
-                )
+                mediaViewHolder!!.let {
+                    MediaControlViewBinder.setSemanticButtonVisibleAndAlpha(
+                        it.getAction(id),
+                        expandedLayout,
+                        collapsedLayout,
+                        isButtonVisible,
+                        notVisibleValue,
+                        showInCollapsed = true
+                    )
+                }
             }
 
             if (!metadataAnimationHandler.isRunning) {
@@ -799,44 +812,46 @@ constructor(
     fun bindSeekBar(onSeek: () -> Unit, onBindSeekBar: (SeekBarViewModel) -> Unit) {
         if (!mediaFlags.isSceneContainerEnabled()) return
         seekBarViewModel.logSeek = onSeek
-        onBindSeekBar.invoke(seekBarViewModel)
+        onBindSeekBar(seekBarViewModel)
     }
 
     fun setUpTurbulenceNoise() {
         if (!mediaFlags.isSceneContainerEnabled()) return
-        if (!this::turbulenceNoiseAnimationConfig.isInitialized) {
-            turbulenceNoiseAnimationConfig =
-                createTurbulenceNoiseConfig(
-                    mediaViewHolder.loadingEffectView,
-                    mediaViewHolder.turbulenceNoiseView,
-                    colorSchemeTransition
-                )
-        }
-        if (Flags.shaderlibLoadingEffectRefactor()) {
-            if (!this::loadingEffect.isInitialized) {
-                loadingEffect =
-                    LoadingEffect(
-                        TurbulenceNoiseShader.Companion.Type.SIMPLEX_NOISE,
-                        turbulenceNoiseAnimationConfig,
-                        noiseDrawCallback,
-                        stateChangedCallback
+        mediaViewHolder!!.let {
+            if (!this::turbulenceNoiseAnimationConfig.isInitialized) {
+                turbulenceNoiseAnimationConfig =
+                    createTurbulenceNoiseConfig(
+                        it.loadingEffectView,
+                        it.turbulenceNoiseView,
+                        colorSchemeTransition
                     )
             }
-            colorSchemeTransition.loadingEffect = loadingEffect
-            loadingEffect.play()
-            mainExecutor.executeDelayed(
-                loadingEffect::finish,
-                MediaControlViewModel.TURBULENCE_NOISE_PLAY_MS_DURATION
-            )
-        } else {
-            turbulenceNoiseController.play(
-                TurbulenceNoiseShader.Companion.Type.SIMPLEX_NOISE,
-                turbulenceNoiseAnimationConfig
-            )
-            mainExecutor.executeDelayed(
-                turbulenceNoiseController::finish,
-                MediaControlViewModel.TURBULENCE_NOISE_PLAY_MS_DURATION
-            )
+            if (Flags.shaderlibLoadingEffectRefactor()) {
+                if (!this::loadingEffect.isInitialized) {
+                    loadingEffect =
+                        LoadingEffect(
+                            TurbulenceNoiseShader.Companion.Type.SIMPLEX_NOISE,
+                            turbulenceNoiseAnimationConfig,
+                            noiseDrawCallback,
+                            stateChangedCallback
+                        )
+                }
+                colorSchemeTransition.loadingEffect = loadingEffect
+                loadingEffect.play()
+                mainExecutor.executeDelayed(
+                    loadingEffect::finish,
+                    MediaControlViewModel.TURBULENCE_NOISE_PLAY_MS_DURATION
+                )
+            } else {
+                turbulenceNoiseController.play(
+                    TurbulenceNoiseShader.Companion.Type.SIMPLEX_NOISE,
+                    turbulenceNoiseAnimationConfig
+                )
+                mainExecutor.executeDelayed(
+                    turbulenceNoiseController::finish,
+                    MediaControlViewModel.TURBULENCE_NOISE_PLAY_MS_DURATION
+                )
+            }
         }
     }
 

@@ -63,12 +63,11 @@ class FlagsVisitor : public xml::Visitor {
         flag_name = flag_name.substr(1);
       }
 
-      if (auto it = feature_flag_values_.find(std::string(flag_name));
-          it != feature_flag_values_.end()) {
-        if (it->second.has_value()) {
+      if (auto it = feature_flag_values_.find(flag_name); it != feature_flag_values_.end()) {
+        if (it->second.enabled.has_value()) {
           if (options_.remove_disabled_elements) {
             // Remove if flag==true && attr=="!flag" (negated) OR flag==false && attr=="flag"
-            return *it->second == negated;
+            return *it->second.enabled == negated;
           }
         } else if (options_.flags_must_have_value) {
           diagnostics_->Error(android::DiagMessage(node->line_number)

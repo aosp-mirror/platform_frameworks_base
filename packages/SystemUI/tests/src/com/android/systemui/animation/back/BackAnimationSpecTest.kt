@@ -2,6 +2,7 @@ package com.android.systemui.animation.back
 
 import android.util.DisplayMetrics
 import android.window.BackEvent
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.util.dpToPx
@@ -9,12 +10,11 @@ import com.google.common.truth.Truth.assertThat
 import junit.framework.TestCase.assertEquals
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.junit.runners.JUnit4
 
 private data class BackInput(val progressX: Float, val progressY: Float, val edge: Int)
 
 @SmallTest
-@RunWith(JUnit4::class)
+@RunWith(AndroidJUnit4::class)
 class BackAnimationSpecTest : SysuiTestCase() {
     private var displayMetrics =
         DisplayMetrics().apply {

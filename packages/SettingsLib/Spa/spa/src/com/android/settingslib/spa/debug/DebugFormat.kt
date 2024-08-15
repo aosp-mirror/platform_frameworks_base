@@ -70,7 +70,6 @@ fun SettingsEntry.debugContent(entryRepository: SettingsEntryRepository): String
         "allowSearch = $isAllowSearch",
         "isSearchDynamic = $isSearchDataDynamic",
         "isSearchMutable = $hasMutableStatus",
-        "hasSlice = $hasSliceSupport",
         "------ SEARCH ------",
         "search_path = $entryPathWithTitle",
         searchData?.debugContent() ?: "no search data",

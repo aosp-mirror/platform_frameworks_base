@@ -18,11 +18,8 @@ package android.wm;
 
 import static androidx.test.platform.app.InstrumentationRegistry.getInstrumentation;
 
-import static com.android.window.flags.Flags.windowSessionRelayoutInfo;
-
 import android.app.Activity;
 import android.content.Context;
-import android.os.Bundle;
 import android.os.RemoteException;
 import android.perftests.utils.BenchmarkState;
 import android.perftests.utils.PerfStatusReporter;
@@ -131,7 +128,6 @@ public class RelayoutPerfTest extends WindowManagerPerfTestBase
         final MergedConfiguration mOutMergedConfiguration = new MergedConfiguration();
         final InsetsState mOutInsetsState = new InsetsState();
         final InsetsSourceControl.Array mOutControls = new InsetsSourceControl.Array();
-        final Bundle mOutBundle = windowSessionRelayoutInfo() ? null : new Bundle();
         final WindowRelayoutResult mOutRelayoutResult;
         final IWindow mWindow;
         final View mView;
@@ -152,26 +148,16 @@ public class RelayoutPerfTest extends WindowManagerPerfTestBase
             mHeight = mView.getMeasuredHeight();
             mOutSurfaceControl = mView.getViewRootImpl().getSurfaceControl();
             mViewVisibility = visibilitySupplier;
-            mOutRelayoutResult = windowSessionRelayoutInfo()
-                    ? new WindowRelayoutResult(mOutFrames, mOutMergedConfiguration,
-                            mOutSurfaceControl, mOutInsetsState, mOutControls)
-                    : null;
+            mOutRelayoutResult = new WindowRelayoutResult(mOutFrames, mOutMergedConfiguration,
+                            mOutSurfaceControl, mOutInsetsState, mOutControls);
         }
 
         void runBenchmark(BenchmarkState state) throws RemoteException {
             final IWindowSession session = WindowManagerGlobal.getWindowSession();
             while (state.keepRunning()) {
                 mRelayoutSeq++;
-                if (windowSessionRelayoutInfo()) {
-                    session.relayout(mWindow, mParams, mWidth, mHeight,
-                            mViewVisibility.getAsInt(), mFlags, mRelayoutSeq, 0 /* lastSyncSeqId */,
-                            mOutRelayoutResult);
-                } else {
-                    session.relayoutLegacy(mWindow, mParams, mWidth, mHeight,
-                            mViewVisibility.getAsInt(), mFlags, mRelayoutSeq, 0 /* lastSyncSeqId */,
-                            mOutFrames, mOutMergedConfiguration, mOutSurfaceControl,
-                            mOutInsetsState, mOutControls, mOutBundle);
-                }
+                session.relayout(mWindow, mParams, mWidth, mHeight, mViewVisibility.getAsInt(),
+                        mFlags, mRelayoutSeq, 0 /* lastSyncSeqId */, mOutRelayoutResult);
             }
         }
     }

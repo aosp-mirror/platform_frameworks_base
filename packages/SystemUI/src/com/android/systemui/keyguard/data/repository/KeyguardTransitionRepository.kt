@@ -20,6 +20,7 @@ import android.animation.AnimatorListenerAdapter
 import android.animation.ValueAnimator
 import android.animation.ValueAnimator.AnimatorUpdateListener
 import android.annotation.FloatRange
+import android.annotation.SuppressLint
 import android.os.Trace
 import android.util.Log
 import com.android.app.tracing.coroutines.withContext
@@ -104,7 +105,7 @@ interface KeyguardTransitionRepository {
      * When the transition is over, TransitionState.FINISHED must be passed into the [state]
      * parameter.
      */
-    fun updateTransition(
+    suspend fun updateTransition(
         transitionId: UUID,
         @FloatRange(from = 0.0, to = 1.0) value: Float,
         state: TransitionState
@@ -117,10 +118,11 @@ class KeyguardTransitionRepositoryImpl
 constructor(
     @Main val mainDispatcher: CoroutineDispatcher,
 ) : KeyguardTransitionRepository {
-    /*
-     * Each transition between [KeyguardState]s will have an associated Flow.
-     * In order to collect these events, clients should call [transition].
+    /**
+     * Each transition between [KeyguardState]s will have an associated Flow. In order to collect
+     * these events, clients should call [transition].
      */
+    @SuppressLint("SharedFlowCreation")
     private val _transitions =
         MutableSharedFlow<TransitionStep>(
             replay = 2,
@@ -171,9 +173,9 @@ constructor(
         Log.d(TAG, "(Internal) Setting current transition info: $info")
 
         // There is no fairness guarantee with 'withContext', which means that transitions could
-        // be processed out of order. Use a Mutex to guarantee ordering.
+        // be processed out of order. Use a Mutex to guarantee ordering. [updateTransition]
+        // requires the same lock
         _currentTransitionMutex.lock()
-
         // Only used in a test environment
         if (forceDelayForRaceConditionTest) {
             delay(50L)
@@ -182,7 +184,6 @@ constructor(
         // Animators must be started on the main thread.
         return withContext("$TAG#startTransition", mainDispatcher) {
             _currentTransitionMutex.unlock()
-
             if (lastStep.from == info.from && lastStep.to == info.to) {
                 Log.i(TAG, "Duplicate call to start the transition, rejecting: $info")
                 return@withContext null
@@ -204,7 +205,7 @@ constructor(
 
             // Cancel any existing manual transitions
             updateTransitionId?.let { uuid ->
-                updateTransition(uuid, lastStep.value, TransitionState.CANCELED)
+                updateTransitionInternal(uuid, lastStep.value, TransitionState.CANCELED)
             }
 
             info.animator?.let { animator ->
@@ -250,7 +251,10 @@ constructor(
                 return@withContext null
             }
                 ?: run {
-                    emitTransition(TransitionStep(info, startingValue, TransitionState.STARTED))
+                    emitTransition(
+                        nextStep = TransitionStep(info, startingValue, TransitionState.STARTED),
+                        isManual = true,
+                    )
 
                     // No animator, so it's manual. Provide a mechanism to callback
                     updateTransitionId = UUID.randomUUID()
@@ -259,13 +263,29 @@ constructor(
         }
     }
 
-    override fun updateTransition(
+    override suspend fun updateTransition(
+        transitionId: UUID,
+        @FloatRange(from = 0.0, to = 1.0) value: Float,
+        state: TransitionState
+    ) {
+        // There is no fairness guarantee with 'withContext', which means that transitions could
+        // be processed out of order. Use a Mutex to guarantee ordering. [startTransition]
+        // requires the same lock
+        _currentTransitionMutex.lock()
+        withContext("$TAG#updateTransition", mainDispatcher) {
+            _currentTransitionMutex.unlock()
+
+            updateTransitionInternal(transitionId, value, state)
+        }
+    }
+
+    private suspend fun updateTransitionInternal(
         transitionId: UUID,
         @FloatRange(from = 0.0, to = 1.0) value: Float,
         state: TransitionState
     ) {
         if (updateTransitionId != transitionId) {
-            Log.wtf(TAG, "Attempting to update with old/invalid transitionId: $transitionId")
+            Log.e(TAG, "Attempting to update with old/invalid transitionId: $transitionId")
             return
         }
 

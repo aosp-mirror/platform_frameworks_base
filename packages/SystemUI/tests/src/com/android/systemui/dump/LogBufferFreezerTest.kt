@@ -19,6 +19,7 @@ package com.android.systemui.dump
 import android.content.BroadcastReceiver
 import android.content.IntentFilter
 import android.os.UserHandle
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.broadcast.BroadcastDispatcher
@@ -30,6 +31,7 @@ import com.android.systemui.util.mockito.nullable
 import com.android.systemui.util.time.FakeSystemClock
 import org.junit.Before
 import org.junit.Test
+import org.junit.runner.RunWith
 import org.mockito.ArgumentCaptor
 import org.mockito.Captor
 import org.mockito.Mock
@@ -40,6 +42,7 @@ import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
 
 @SmallTest
+@RunWith(AndroidJUnit4::class)
 class LogBufferFreezerTest : SysuiTestCase() {
 
     lateinit var freezer: LogBufferFreezer

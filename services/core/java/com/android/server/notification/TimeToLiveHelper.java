@@ -54,13 +54,17 @@ public class TimeToLiveHelper {
     private final AlarmManager mAm;
 
     @VisibleForTesting
+    @GuardedBy("mLock")
     final TreeSet<Pair<Long, String>> mKeys;
+    final Object mLock = new Object();
 
     public TimeToLiveHelper(NotificationManagerPrivate nm, Context context) {
         mContext = context;
         mNm = nm;
         mAm = context.getSystemService(AlarmManager.class);
-        mKeys = new TreeSet<>((left, right) -> Long.compare(left.first, right.first));
+        synchronized (mLock) {
+            mKeys = new TreeSet<>((left, right) -> Long.compare(left.first, right.first));
+        }
 
         IntentFilter timeoutFilter = new IntentFilter(ACTION);
         timeoutFilter.addDataScheme(SCHEME_TIMEOUT);
@@ -73,7 +77,9 @@ public class TimeToLiveHelper {
     }
 
     void dump(PrintWriter pw, String indent) {
-        pw.println(indent + "mKeys " + mKeys);
+        synchronized (mLock) {
+            pw.println(indent + "mKeys " + mKeys);
+        }
     }
 
     private @NonNull PendingIntent getAlarmPendingIntent(String nextKey, int flags) {
@@ -93,30 +99,35 @@ public class TimeToLiveHelper {
 
     @VisibleForTesting
     void scheduleTimeoutLocked(NotificationRecord record, long currentTime) {
-        removeMatchingEntry(record.getKey());
+        synchronized (mLock) {
+            removeMatchingEntry(record.getKey());
 
-        final long timeoutAfter = currentTime + record.getNotification().getTimeoutAfter();
-        if (record.getNotification().getTimeoutAfter() > 0) {
-            final Long currentEarliestTime = mKeys.isEmpty() ? null : mKeys.first().first;
+            final long timeoutAfter = currentTime + record.getNotification().getTimeoutAfter();
+            if (record.getNotification().getTimeoutAfter() > 0) {
+                final Long currentEarliestTime = mKeys.isEmpty() ? null : mKeys.first().first;
 
-            // Maybe replace alarm with an earlier one
-            if (currentEarliestTime == null || timeoutAfter < currentEarliestTime) {
-                if (currentEarliestTime != null) {
-                    cancelFirstAlarm();
+                // Maybe replace alarm with an earlier one
+                if (currentEarliestTime == null || timeoutAfter < currentEarliestTime) {
+                    if (currentEarliestTime != null) {
+                        cancelFirstAlarm();
+                    }
+                    mKeys.add(Pair.create(timeoutAfter, record.getKey()));
+                    maybeScheduleFirstAlarm();
+                } else {
+                    mKeys.add(Pair.create(timeoutAfter, record.getKey()));
                 }
-                mKeys.add(Pair.create(timeoutAfter, record.getKey()));
-                maybeScheduleFirstAlarm();
-            } else {
-                mKeys.add(Pair.create(timeoutAfter, record.getKey()));
             }
         }
     }
 
     @VisibleForTesting
     void cancelScheduledTimeoutLocked(NotificationRecord record) {
-        removeMatchingEntry(record.getKey());
+        synchronized (mLock) {
+            removeMatchingEntry(record.getKey());
+        }
     }
 
+    @GuardedBy("mLock")
     private void removeMatchingEntry(String key) {
         if (!mKeys.isEmpty() && key.equals(mKeys.first().second)) {
             // cancel the first alarm, remove the first entry, maybe schedule the alarm for the new
@@ -139,11 +150,13 @@ public class TimeToLiveHelper {
         }
     }
 
+    @GuardedBy("mLock")
     private void cancelFirstAlarm() {
         final PendingIntent pi = getAlarmPendingIntent(mKeys.first().second, FLAG_CANCEL_CURRENT);
         mAm.cancel(pi);
     }
 
+    @GuardedBy("mLock")
     private void maybeScheduleFirstAlarm() {
         if (!mKeys.isEmpty()) {
             final PendingIntent piNewFirst = getAlarmPendingIntent(mKeys.first().second,
@@ -162,13 +175,20 @@ public class TimeToLiveHelper {
                 return;
             }
             if (ACTION.equals(action)) {
-                Pair<Long, String> earliest = mKeys.first();
-                String key = intent.getStringExtra(EXTRA_KEY);
-                if (!earliest.second.equals(key)) {
-                    Slog.wtf(TAG, "Alarm triggered but wasn't the earliest we were tracking");
+                String timeoutKey = null;
+                synchronized (mLock) {
+                    if (!mKeys.isEmpty()) {
+                        Pair<Long, String> earliest = mKeys.first();
+                        String key = intent.getStringExtra(EXTRA_KEY);
+                        if (!earliest.second.equals(key)) {
+                            Slog.wtf(TAG,
+                                    "Alarm triggered but wasn't the earliest we were tracking");
+                        }
+                        removeMatchingEntry(key);
+                        timeoutKey = earliest.second;
+                    }
                 }
-                removeMatchingEntry(key);
-                mNm.timeoutNotification(earliest.second);
+                mNm.timeoutNotification(timeoutKey);
             }
         }
     };

@@ -39,7 +39,6 @@ import android.platform.test.annotations.EnableFlags;
 import android.provider.Settings;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper.RunWithLooper;
-import android.view.LayoutInflater;
 import android.view.View;
 
 import androidx.test.filters.SmallTest;
@@ -49,6 +48,8 @@ import com.android.systemui.SysuiBaseFragmentTest;
 import com.android.systemui.animation.AnimatorTestRule;
 import com.android.systemui.demomode.DemoModeController;
 import com.android.systemui.dump.DumpManager;
+import com.android.systemui.flags.DisableSceneContainer;
+import com.android.systemui.flags.EnableSceneContainer;
 import com.android.systemui.log.LogBuffer;
 import com.android.systemui.log.LogcatEchoTracker;
 import com.android.systemui.plugins.DarkIconDispatcher;
@@ -62,7 +63,6 @@ import com.android.systemui.statusbar.disableflags.DisableFlagsLogger;
 import com.android.systemui.statusbar.events.SystemStatusAnimationScheduler;
 import com.android.systemui.statusbar.notification.icon.ui.viewbinder.NotificationIconContainerStatusBarViewBinder;
 import com.android.systemui.statusbar.phone.HeadsUpAppearanceController;
-import com.android.systemui.statusbar.phone.NotificationIconAreaController;
 import com.android.systemui.statusbar.phone.StatusBarHideIconsForBouncerManager;
 import com.android.systemui.statusbar.phone.StatusBarLocationPublisher;
 import com.android.systemui.statusbar.phone.fragment.dagger.StatusBarFragmentComponent;
@@ -93,7 +93,6 @@ import java.util.List;
 @RunWithLooper(setAsMainLooper = true)
 @SmallTest
 public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
-    private NotificationIconAreaController mMockNotificationAreaController;
     private ShadeExpansionStateManager mShadeExpansionStateManager;
     private OngoingCallController mOngoingCallController;
     private SystemStatusAnimationScheduler mAnimationScheduler;
@@ -302,6 +301,7 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
     }
 
     @Test
+    @DisableSceneContainer
     public void disable_shadeOpenAndShouldHide_everythingHidden() {
         CollapsedStatusBarFragment fragment = resumeAndGetFragment();
 
@@ -318,6 +318,7 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
     }
 
     @Test
+    @DisableSceneContainer
     public void disable_shadeOpenButNotShouldHide_everythingShown() {
         CollapsedStatusBarFragment fragment = resumeAndGetFragment();
 
@@ -335,6 +336,7 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
 
     /** Regression test for b/279790651. */
     @Test
+    @DisableSceneContainer
     public void disable_shadeOpenAndShouldHide_thenShadeNotOpenAndDozingUpdate_everythingShown() {
         CollapsedStatusBarFragment fragment = resumeAndGetFragment();
 
@@ -376,6 +378,7 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
     }
 
     @Test
+    @DisableSceneContainer
     public void disable_isTransitioningToOccluded_everythingHidden() {
         CollapsedStatusBarFragment fragment = resumeAndGetFragment();
 
@@ -390,6 +393,7 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
     }
 
     @Test
+    @DisableSceneContainer
     public void disable_wasTransitioningToOccluded_transitionFinished_everythingShown() {
         CollapsedStatusBarFragment fragment = resumeAndGetFragment();
 
@@ -529,7 +533,7 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
 
         // WHEN there's *no* ongoing activity via new callback
         mCollapsedStatusBarViewBinder.getListener().onOngoingActivityStatusChanged(
-                /* hasOngoingActivity= */ false);
+                /* hasOngoingActivity= */ false, /* shouldAnimate= */ false);
 
         // THEN the old callback value is used, so the view is shown
         assertEquals(View.VISIBLE,
@@ -541,7 +545,7 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
 
         // WHEN there *is* an ongoing activity via new callback
         mCollapsedStatusBarViewBinder.getListener().onOngoingActivityStatusChanged(
-                /* hasOngoingActivity= */ true);
+                /* hasOngoingActivity= */ true, /* shouldAnimate= */ false);
 
         // THEN the old callback value is used, so the view is hidden
         assertEquals(View.GONE,
@@ -558,7 +562,7 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
         // listener, but I'm unable to get the fragment to get attached so that the binder starts
         // listening to flows.
         mCollapsedStatusBarViewBinder.getListener().onOngoingActivityStatusChanged(
-                /* hasOngoingActivity= */ false);
+                /* hasOngoingActivity= */ false, /* shouldAnimate= */ false);
 
         assertEquals(View.GONE,
                 mFragment.getView().findViewById(R.id.ongoing_activity_chip).getVisibility());
@@ -570,7 +574,7 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
         resumeAndGetFragment();
 
         mCollapsedStatusBarViewBinder.getListener().onOngoingActivityStatusChanged(
-                /* hasOngoingActivity= */ true);
+                /* hasOngoingActivity= */ true, /* shouldAnimate= */ false);
 
         assertEquals(View.VISIBLE,
                 mFragment.getView().findViewById(R.id.ongoing_activity_chip).getVisibility());
@@ -583,7 +587,7 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
         CollapsedStatusBarFragment fragment = resumeAndGetFragment();
 
         mCollapsedStatusBarViewBinder.getListener().onOngoingActivityStatusChanged(
-                /* hasOngoingActivity= */ true);
+                /* hasOngoingActivity= */ true, /* shouldAnimate= */ false);
 
         fragment.disable(DEFAULT_DISPLAY,
                 StatusBarManager.DISABLE_NOTIFICATION_ICONS, 0, false);
@@ -598,7 +602,7 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
         CollapsedStatusBarFragment fragment = resumeAndGetFragment();
 
         mCollapsedStatusBarViewBinder.getListener().onOngoingActivityStatusChanged(
-                /* hasOngoingActivity= */ true);
+                /* hasOngoingActivity= */ true, /* shouldAnimate= */ false);
         when(mHeadsUpAppearanceController.shouldBeVisible()).thenReturn(true);
 
         fragment.disable(DEFAULT_DISPLAY, 0, 0, false);
@@ -614,14 +618,14 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
 
         // Ongoing activity started
         mCollapsedStatusBarViewBinder.getListener().onOngoingActivityStatusChanged(
-                /* hasOngoingActivity= */ true);
+                /* hasOngoingActivity= */ true, /* shouldAnimate= */ false);
 
         assertEquals(View.VISIBLE,
                 mFragment.getView().findViewById(R.id.ongoing_activity_chip).getVisibility());
 
         // Ongoing activity ended
         mCollapsedStatusBarViewBinder.getListener().onOngoingActivityStatusChanged(
-                /* hasOngoingActivity= */ false);
+                /* hasOngoingActivity= */ false, /* shouldAnimate= */ false);
 
         assertEquals(View.GONE,
                 mFragment.getView().findViewById(R.id.ongoing_activity_chip).getVisibility());
@@ -636,7 +640,7 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
 
         // Ongoing call started
         mCollapsedStatusBarViewBinder.getListener().onOngoingActivityStatusChanged(
-                /* hasOngoingActivity= */ true);
+                /* hasOngoingActivity= */ true, /* shouldAnimate= */ false);
 
         // Notification area is hidden without delay
         assertEquals(0f, getNotificationAreaView().getAlpha(), 0.01);
@@ -654,7 +658,7 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
 
         // WHEN there's *no* ongoing activity via new callback
         mCollapsedStatusBarViewBinder.getListener().onOngoingActivityStatusChanged(
-                /* hasOngoingActivity= */ false);
+                /* hasOngoingActivity= */ false, /* shouldAnimate= */ false);
 
         // THEN the new callback value is used, so the view is hidden
         assertEquals(View.GONE,
@@ -666,11 +670,85 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
 
         // WHEN there *is* an ongoing activity via new callback
         mCollapsedStatusBarViewBinder.getListener().onOngoingActivityStatusChanged(
-                /* hasOngoingActivity= */ true);
+                /* hasOngoingActivity= */ true, /* shouldAnimate= */ false);
 
         // THEN the new callback value is used, so the view is shown
         assertEquals(View.VISIBLE,
                 mFragment.getView().findViewById(R.id.ongoing_activity_chip).getVisibility());
+    }
+
+    @Test
+    @EnableSceneContainer
+    public void isHomeStatusBarAllowedByScene_false_everythingHidden() {
+        resumeAndGetFragment();
+
+        mCollapsedStatusBarViewBinder.getListener().onIsHomeStatusBarAllowedBySceneChanged(false);
+
+        // THEN all views are hidden
+        assertEquals(View.GONE, getClockView().getVisibility());
+        assertEquals(View.INVISIBLE, getNotificationAreaView().getVisibility());
+        assertEquals(View.INVISIBLE, getEndSideContentView().getVisibility());
+    }
+
+    @Test
+    @EnableSceneContainer
+    public void isHomeStatusBarAllowedByScene_true_everythingShown() {
+        resumeAndGetFragment();
+
+        mCollapsedStatusBarViewBinder.getListener().onIsHomeStatusBarAllowedBySceneChanged(true);
+
+        // THEN all views are shown
+        assertEquals(View.VISIBLE, getClockView().getVisibility());
+        assertEquals(View.VISIBLE, getNotificationAreaView().getVisibility());
+        assertEquals(View.VISIBLE, getEndSideContentView().getVisibility());
+    }
+
+    @Test
+    @EnableSceneContainer
+    public void disable_isHomeStatusBarAllowedBySceneFalse_disableValuesIgnored() {
+        CollapsedStatusBarFragment fragment = resumeAndGetFragment();
+
+        // WHEN the scene doesn't allow the status bar
+        mCollapsedStatusBarViewBinder.getListener().onIsHomeStatusBarAllowedBySceneChanged(false);
+
+        // BUT the disable flags want to show the status bar
+        fragment.disable(DEFAULT_DISPLAY, 0, 0, false);
+
+        // THEN all views are hidden (the disable flags aren't respected)
+        assertEquals(View.GONE, getClockView().getVisibility());
+        assertEquals(View.INVISIBLE, getNotificationAreaView().getVisibility());
+        assertEquals(View.INVISIBLE, getEndSideContentView().getVisibility());
+    }
+
+    @Test
+    @EnableSceneContainer
+    public void disable_isHomeStatusBarAllowedBySceneTrue_disableValuesUsed() {
+        CollapsedStatusBarFragment fragment = resumeAndGetFragment();
+
+        // WHEN the scene does allow the status bar
+        mCollapsedStatusBarViewBinder.getListener().onIsHomeStatusBarAllowedBySceneChanged(true);
+
+        // AND the disable flags want to hide the clock
+        fragment.disable(DEFAULT_DISPLAY, StatusBarManager.DISABLE_CLOCK, 0, false);
+
+        // THEN all views are shown except the clock (the disable flags are used)
+        assertEquals(View.GONE, getClockView().getVisibility());
+        assertEquals(View.VISIBLE, getNotificationAreaView().getVisibility());
+        assertEquals(View.VISIBLE, getEndSideContentView().getVisibility());
+    }
+
+    @Test
+    @DisableSceneContainer
+    public void isHomeStatusBarAllowedByScene_sceneContainerDisabled_valueNotUsed() {
+        resumeAndGetFragment();
+
+        // Even if the scene says to hide the home status bar
+        mCollapsedStatusBarViewBinder.getListener().onIsHomeStatusBarAllowedBySceneChanged(false);
+
+        // The value isn't used because the scene container flag is disabled, so all views are shown
+        assertEquals(View.VISIBLE, getClockView().getVisibility());
+        assertEquals(View.VISIBLE, getNotificationAreaView().getVisibility());
+        assertEquals(View.VISIBLE, getEndSideContentView().getVisibility());
     }
 
     @Test
@@ -758,6 +836,7 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
     }
 
     @Test
+    @DisableSceneContainer
     public void testStatusBarIcons_hiddenThroughoutCameraLaunch() {
         final CollapsedStatusBarFragment fragment = resumeAndGetFragment();
 
@@ -779,6 +858,7 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
     }
 
     @Test
+    @DisableSceneContainer
     public void testStatusBarIcons_hiddenThroughoutLockscreenToDreamTransition() {
         final CollapsedStatusBarFragment fragment = resumeAndGetFragment();
 
@@ -848,13 +928,11 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
         mCollapsedStatusBarViewModel = new FakeCollapsedStatusBarViewModel();
         mCollapsedStatusBarViewBinder = new FakeCollapsedStatusBarViewBinder();
 
-        setUpNotificationIconAreaController();
         return new CollapsedStatusBarFragment(
                 mStatusBarFragmentComponentFactory,
                 mOngoingCallController,
                 mAnimationScheduler,
                 mLocationPublisher,
-                mMockNotificationAreaController,
                 mShadeExpansionStateManager,
                 mStatusBarIconController,
                 mIconManagerFactory,
@@ -885,14 +963,6 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
                 .thenReturn(mStatusBarFragmentComponent);
         when(mStatusBarFragmentComponent.getHeadsUpAppearanceController())
                 .thenReturn(mHeadsUpAppearanceController);
-    }
-
-    private void setUpNotificationIconAreaController() {
-        mMockNotificationAreaController = mock(NotificationIconAreaController.class);
-        View notificationAreaInner =
-                LayoutInflater.from(mContext).inflate(R.layout.notification_icon_area, null);
-        when(mMockNotificationAreaController.getNotificationInnerAreaView())
-                .thenReturn(notificationAreaInner);
     }
 
     /**

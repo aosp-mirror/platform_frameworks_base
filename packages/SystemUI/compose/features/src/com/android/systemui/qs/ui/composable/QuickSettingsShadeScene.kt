@@ -16,21 +16,19 @@
 
 package com.android.systemui.qs.ui.composable
 
-import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Button
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -42,11 +40,17 @@ import com.android.compose.animation.scene.UserAction
 import com.android.compose.animation.scene.UserActionResult
 import com.android.systemui.battery.BatteryMeterViewController
 import com.android.systemui.brightness.ui.compose.BrightnessSliderContainer
+import com.android.systemui.compose.modifiers.sysuiResTag
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.keyguard.ui.composable.LockscreenContent
+import com.android.systemui.lifecycle.rememberViewModel
 import com.android.systemui.qs.panels.ui.compose.EditMode
 import com.android.systemui.qs.panels.ui.compose.TileGrid
-import com.android.systemui.qs.ui.viewmodel.QuickSettingsShadeSceneViewModel
+import com.android.systemui.qs.ui.composable.QuickSettingsShade.Transitions.QuickSettingsLayoutEnter
+import com.android.systemui.qs.ui.composable.QuickSettingsShade.Transitions.QuickSettingsLayoutExit
+import com.android.systemui.qs.ui.viewmodel.QuickSettingsContainerViewModel
+import com.android.systemui.qs.ui.viewmodel.QuickSettingsShadeSceneActionsViewModel
+import com.android.systemui.qs.ui.viewmodel.QuickSettingsShadeSceneContentViewModel
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.scene.ui.composable.ComposableScene
 import com.android.systemui.shade.ui.composable.ExpandedShadeHeader
@@ -57,15 +61,16 @@ import com.android.systemui.statusbar.phone.ui.TintedIconManager
 import dagger.Lazy
 import java.util.Optional
 import javax.inject.Inject
-import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.Flow
 
 @SysUISingleton
 class QuickSettingsShadeScene
 @Inject
 constructor(
-    private val viewModel: QuickSettingsShadeSceneViewModel,
+    private val actionsViewModelFactory: QuickSettingsShadeSceneActionsViewModel.Factory,
+    private val contentViewModelFactory: QuickSettingsShadeSceneContentViewModel.Factory,
     private val lockscreenContent: Lazy<Optional<LockscreenContent>>,
-    private val shadeHeaderViewModel: ShadeHeaderViewModel,
+    private val shadeHeaderViewModelFactory: ShadeHeaderViewModel.Factory,
     private val tintedIconManagerFactory: TintedIconManager.Factory,
     private val batteryMeterViewControllerFactory: BatteryMeterViewController.Factory,
     private val statusBarIconController: StatusBarIconController,
@@ -73,22 +78,26 @@ constructor(
 
     override val key = Scenes.QuickSettingsShade
 
-    override val destinationScenes: StateFlow<Map<UserAction, UserActionResult>> =
-        viewModel.destinationScenes
+    private val actionsViewModel: QuickSettingsShadeSceneActionsViewModel by lazy {
+        actionsViewModelFactory.create()
+    }
+
+    override val destinationScenes: Flow<Map<UserAction, UserActionResult>> =
+        actionsViewModel.actions
 
     @Composable
     override fun SceneScope.Content(
         modifier: Modifier,
     ) {
+        val viewModel = rememberViewModel { contentViewModelFactory.create() }
         OverlayShade(
-            viewModel = viewModel.overlayShadeViewModel,
-            panelAlignment = Alignment.TopEnd,
+            viewModelFactory = viewModel.overlayShadeViewModelFactory,
             lockscreenContent = lockscreenContent,
             modifier = modifier,
         ) {
             Column {
                 ExpandedShadeHeader(
-                    viewModel = shadeHeaderViewModel,
+                    viewModelFactory = shadeHeaderViewModelFactory,
                     createTintedIconManager = tintedIconManagerFactory::create,
                     createBatteryMeterViewController = batteryMeterViewControllerFactory::create,
                     statusBarIconController = statusBarIconController,
@@ -96,7 +105,7 @@ constructor(
                 )
 
                 ShadeBody(
-                    viewModel = viewModel,
+                    viewModel = viewModel.quickSettingsContainerViewModel,
                 )
             }
         }
@@ -104,32 +113,24 @@ constructor(
 }
 
 @Composable
-private fun ShadeBody(
-    viewModel: QuickSettingsShadeSceneViewModel,
+fun ShadeBody(
+    viewModel: QuickSettingsContainerViewModel,
 ) {
     val isEditing by viewModel.editModeViewModel.isEditing.collectAsStateWithLifecycle()
 
-    Box {
-        // The main Quick Settings grid layout.
-        AnimatedVisibility(
-            visible = !isEditing,
-            enter = QuickSettingsShade.Transitions.QuickSettingsLayoutEnter,
-            exit = QuickSettingsShade.Transitions.QuickSettingsLayoutExit,
-        ) {
-            QuickSettingsLayout(
-                viewModel = viewModel,
-            )
-        }
-
-        // The Quick Settings Editor layout.
-        AnimatedVisibility(
-            visible = isEditing,
-            enter = QuickSettingsShade.Transitions.QuickSettingsEditorEnter,
-            exit = QuickSettingsShade.Transitions.QuickSettingsEditorExit,
-        ) {
+    AnimatedContent(
+        targetState = isEditing,
+        transitionSpec = { QuickSettingsLayoutEnter togetherWith QuickSettingsLayoutExit }
+    ) { editing ->
+        if (editing) {
             EditMode(
                 viewModel = viewModel.editModeViewModel,
                 modifier = Modifier.fillMaxWidth().padding(QuickSettingsShade.Dimensions.Padding)
+            )
+        } else {
+            QuickSettingsLayout(
+                viewModel = viewModel,
+                modifier = Modifier.sysuiResTag("quick_settings_panel")
             )
         }
     }
@@ -137,7 +138,7 @@ private fun ShadeBody(
 
 @Composable
 private fun QuickSettingsLayout(
-    viewModel: QuickSettingsShadeSceneViewModel,
+    viewModel: QuickSettingsContainerViewModel,
     modifier: Modifier = Modifier,
 ) {
     Column(
@@ -155,12 +156,8 @@ private fun QuickSettingsLayout(
             viewModel = viewModel.tileGridViewModel,
             modifier =
                 Modifier.fillMaxWidth().heightIn(max = QuickSettingsShade.Dimensions.GridMaxHeight),
+            viewModel.editModeViewModel::startEditing,
         )
-        Button(
-            onClick = { viewModel.editModeViewModel.startEditing() },
-        ) {
-            Text("Edit mode")
-        }
     }
 }
 
@@ -169,7 +166,7 @@ object QuickSettingsShade {
     object Dimensions {
         val Padding = 16.dp
         val BrightnessSliderHeight = 64.dp
-        val GridMaxHeight = 400.dp
+        val GridMaxHeight = 800.dp
     }
 
     object Transitions {

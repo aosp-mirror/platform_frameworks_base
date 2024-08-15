@@ -16,6 +16,8 @@
 
 package com.android.internal.graphics.cam;
 
+import android.ravenwood.annotation.RavenwoodKeepWholeClass;
+
 /**
  * An efficient algorithm for determining the closest sRGB color to a set of HCT coordinates,
  * based on geometrical insights for finding intersections in linear RGB, CAM16, and L*a*b*.
@@ -24,6 +26,7 @@ package com.android.internal.graphics.cam;
  * Copied from //java/com/google/ux/material/libmonet/hct on May 22 2022.
  * ColorUtils/MathUtils functions that were required were added to CamUtils.
  */
+@RavenwoodKeepWholeClass
 public class HctSolver {
     private HctSolver() {}
 

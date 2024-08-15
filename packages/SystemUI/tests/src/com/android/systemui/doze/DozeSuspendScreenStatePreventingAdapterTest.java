@@ -24,30 +24,27 @@ import static org.mockito.Mockito.when;
 
 import android.view.Display;
 
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.statusbar.phone.DozeParameters;
-import com.android.systemui.util.concurrency.FakeExecutor;
-import com.android.systemui.util.time.FakeSystemClock;
 
 import org.junit.Before;
 import org.junit.Test;
-
-import java.util.concurrent.Executor;
+import org.junit.runner.RunWith;
 
 @SmallTest
+@RunWith(AndroidJUnit4.class)
 public class DozeSuspendScreenStatePreventingAdapterTest extends SysuiTestCase {
 
-    private Executor mExecutor;
     private DozeMachine.Service mInner;
     private DozeSuspendScreenStatePreventingAdapter mWrapper;
 
     @Before
     public void setup() throws Exception {
-        mExecutor = new FakeExecutor(new FakeSystemClock());
         mInner = mock(DozeMachine.Service.class);
-        mWrapper = new DozeSuspendScreenStatePreventingAdapter(mInner, mExecutor);
+        mWrapper = new DozeSuspendScreenStatePreventingAdapter(mInner);
     }
 
     @Test
@@ -98,7 +95,7 @@ public class DozeSuspendScreenStatePreventingAdapterTest extends SysuiTestCase {
         when(params.getDozeSuspendDisplayStateSupported()).thenReturn(false);
 
         assertEquals(DozeSuspendScreenStatePreventingAdapter.class,
-                DozeSuspendScreenStatePreventingAdapter.wrapIfNeeded(mInner, params, mExecutor)
+                DozeSuspendScreenStatePreventingAdapter.wrapIfNeeded(mInner, params)
                         .getClass());
     }
 
@@ -107,7 +104,6 @@ public class DozeSuspendScreenStatePreventingAdapterTest extends SysuiTestCase {
         DozeParameters params = mock(DozeParameters.class);
         when(params.getDozeSuspendDisplayStateSupported()).thenReturn(true);
 
-        assertSame(mInner, DozeSuspendScreenStatePreventingAdapter.wrapIfNeeded(mInner, params,
-                mExecutor));
+        assertSame(mInner, DozeSuspendScreenStatePreventingAdapter.wrapIfNeeded(mInner, params));
     }
 }

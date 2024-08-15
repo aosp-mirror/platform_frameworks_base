@@ -189,13 +189,16 @@ public class ProgramInfoCacheTest {
 
     @Test
     public void updateFromHalProgramListChunk_withInvalidChunk() {
-        RadioManager.ProgramInfo invalidDabInfo = AidlTestUtils.makeProgramInfo(TEST_DAB_SELECTOR,
-                TEST_DAB_DMB_SID_EXT_ID, TEST_DAB_ENSEMBLE_ID, TEST_SIGNAL_QUALITY);
+        ProgramInfo invalidHalDabInfo = AidlTestUtils.makeHalProgramInfo(
+                AidlTestUtils.makeHalSelector(
+                        ConversionUtils.identifierToHalProgramIdentifier(TEST_DAB_ENSEMBLE_ID),
+                        new ProgramIdentifier[]{}), /* logicallyTunedTo= */ null,
+                /* physicallyTunedTo= */ null, TEST_SIGNAL_QUALITY);
         ProgramInfoCache cache = new ProgramInfoCache(/* filter= */ null,
                 /* complete= */ false);
         ProgramListChunk chunk = AidlTestUtils.makeHalChunk(/* purge= */ false,
-                /* complete= */ true, new ProgramInfo[]{AidlTestUtils.programInfoToHalProgramInfo(
-                        invalidDabInfo)}, new ProgramIdentifier[]{});
+                /* complete= */ true, new ProgramInfo[]{invalidHalDabInfo},
+                new ProgramIdentifier[]{});
 
         cache.updateFromHalProgramListChunk(chunk);
 
@@ -438,6 +441,29 @@ public class ProgramInfoCacheTest {
         verifyChunkListRemoved(programListChunks, TEST_MAX_NUM_REMOVED_PER_CHUNK,
                 TEST_RDS_PI_UNIQUE_ID, TEST_AM_UNIQUE_ID, TEST_DAB_UNIQUE_ID,
                 TEST_DAB_UNIQUE_ID_ALTERNATIVE);
+    }
+
+    @Test
+    public void filterAndApplyChunkInternal_withInvalidProgramInfoAndIdentifiers()
+            throws RemoteException {
+        ProgramInfoCache cache = new ProgramInfoCache(/* filter= */ null,
+                /* complete= */ false, TEST_FM_INFO, TEST_RDS_INFO, TEST_DAB_INFO);
+        ProgramInfo[] halModified = new android.hardware.broadcastradio.ProgramInfo[1];
+        halModified[0] = AidlTestUtils.makeHalProgramInfo(
+                AidlTestUtils.makeHalSelector(
+                        ConversionUtils.identifierToHalProgramIdentifier(TEST_DAB_ENSEMBLE_ID),
+                        new ProgramIdentifier[]{}), /* logicallyTunedTo= */ null,
+                /* physicallyTunedTo= */ null, TEST_SIGNAL_QUALITY);
+        ProgramIdentifier[] halRemoved = new android.hardware.broadcastradio.ProgramIdentifier[1];
+        halRemoved[0] = new android.hardware.broadcastradio.ProgramIdentifier();
+        ProgramListChunk halChunk = AidlTestUtils.makeHalChunk(/* purge= */ false,
+                /* complete= */ true, halModified, halRemoved);
+
+        List<ProgramList.Chunk> programListChunks = cache.filterAndApplyChunkInternal(halChunk,
+                TEST_MAX_NUM_MODIFIED_PER_CHUNK, TEST_MAX_NUM_REMOVED_PER_CHUNK);
+
+        expect.withMessage("Program list chunk applied with invalid program and identifiers")
+                .that(programListChunks).isEmpty();
     }
 
     private void verifyChunkListPurge(List<ProgramList.Chunk> chunks, boolean purge) {

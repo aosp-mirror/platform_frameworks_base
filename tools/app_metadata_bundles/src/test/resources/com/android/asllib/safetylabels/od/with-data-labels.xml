@@ -1,5 +1,4 @@
 <pbundle_as_map name="safety_labels">
-    <long name="version" value="12345"/>
     <pbundle_as_map name="data_labels">
         <pbundle_as_map name="data_shared">
             <pbundle_as_map name="location">
@@ -8,7 +7,6 @@
                         <item value="1"/>
                     </int-array>
                     <boolean name="is_sharing_optional" value="false"/>
-                    <boolean name="ephemeral" value="false"/>
                 </pbundle_as_map>
             </pbundle_as_map>
         </pbundle_as_map>

@@ -68,9 +68,11 @@ import com.android.systemui.statusbar.notification.icon.IconPack;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRowController;
 import com.android.systemui.statusbar.notification.row.NotificationGuts;
+import com.android.systemui.statusbar.notification.row.data.repository.NotificationRowRepository;
 import com.android.systemui.statusbar.notification.row.shared.HeadsUpStatusBarModel;
 import com.android.systemui.statusbar.notification.row.shared.NotificationContentModel;
 import com.android.systemui.statusbar.notification.row.shared.NotificationRowContentBinderRefactor;
+import com.android.systemui.statusbar.notification.row.shared.RichOngoingContentModel;
 import com.android.systemui.statusbar.notification.stack.PriorityBucket;
 import com.android.systemui.util.ListenerSet;
 
@@ -97,7 +99,7 @@ import java.util.Objects;
  * At the moment, there are many things here that shouldn't be and vice-versa. Hopefully we can
  * clean this up in the future.
  */
-public final class NotificationEntry extends ListEntry {
+public final class NotificationEntry extends ListEntry implements NotificationRowRepository {
 
     private final String mKey;
     private StatusBarNotification mSbn;
@@ -158,6 +160,8 @@ public final class NotificationEntry extends ListEntry {
     private final MutableStateFlow<CharSequence> mHeadsUpStatusBarText =
             StateFlowKt.MutableStateFlow(null);
     private final MutableStateFlow<CharSequence> mHeadsUpStatusBarTextPublic =
+            StateFlowKt.MutableStateFlow(null);
+    private final MutableStateFlow<RichOngoingContentModel> mRichOngoingContentModel =
             StateFlowKt.MutableStateFlow(null);
 
     // indicates when this entry's view was first attached to a window
@@ -694,7 +698,7 @@ public final class NotificationEntry extends ListEntry {
     }
 
     public void setHeadsUpIsVisible() {
-        if (row != null) row.setHeadsUpIsVisible();
+        if (row != null) row.markHeadsUpSeen();
     }
 
     //TODO: i'm imagining a world where this isn't just the row, but I could be rwong
@@ -945,6 +949,7 @@ public final class NotificationEntry extends ListEntry {
     }
 
     /** @see #setHeadsUpStatusBarText(CharSequence) */
+    @NonNull
     public StateFlow<CharSequence> getHeadsUpStatusBarText() {
         return mHeadsUpStatusBarText;
     }
@@ -959,8 +964,15 @@ public final class NotificationEntry extends ListEntry {
     }
 
     /** @see #setHeadsUpStatusBarTextPublic(CharSequence) */
+    @NonNull
     public StateFlow<CharSequence> getHeadsUpStatusBarTextPublic() {
         return mHeadsUpStatusBarTextPublic;
+    }
+
+    /** Gets the current RON content model, which may be null */
+    @NonNull
+    public StateFlow<RichOngoingContentModel> getRichOngoingContentModel() {
+        return mRichOngoingContentModel;
     }
 
     /**
@@ -991,6 +1003,16 @@ public final class NotificationEntry extends ListEntry {
      */
     public void markForUserTriggeredMovement(boolean marked) {
         mIsMarkedForUserTriggeredMovement = marked;
+    }
+
+    private boolean mSeenInShade = false;
+
+    public void setSeenInShade(boolean seen) {
+        mSeenInShade = seen;
+    }
+
+    public boolean isSeenInShade() {
+        return mSeenInShade;
     }
 
     public void setIsHeadsUpEntry(boolean isHeadsUpEntry) {
@@ -1047,6 +1069,7 @@ public final class NotificationEntry extends ListEntry {
         HeadsUpStatusBarModel headsUpStatusBarModel = contentModel.getHeadsUpStatusBarModel();
         this.mHeadsUpStatusBarText.setValue(headsUpStatusBarModel.getPrivateText());
         this.mHeadsUpStatusBarTextPublic.setValue(headsUpStatusBarModel.getPublicText());
+        this.mRichOngoingContentModel.setValue(contentModel.getRichOngoingContentModel());
     }
 
     /** Information about a suggestion that is being edited. */

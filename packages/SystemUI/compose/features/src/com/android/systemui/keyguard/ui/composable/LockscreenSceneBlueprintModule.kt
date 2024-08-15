@@ -17,7 +17,6 @@
 package com.android.systemui.keyguard.ui.composable
 
 import com.android.systemui.keyguard.ui.composable.blueprint.CommunalBlueprintModule
-import com.android.systemui.keyguard.ui.composable.blueprint.ShortcutsBesideUdfpsBlueprintModule
 import com.android.systemui.keyguard.ui.composable.section.OptionalSectionModule
 import dagger.Module
 
@@ -26,7 +25,6 @@ import dagger.Module
         [
             CommunalBlueprintModule::class,
             OptionalSectionModule::class,
-            ShortcutsBesideUdfpsBlueprintModule::class,
         ],
 )
 interface LockscreenSceneBlueprintModule

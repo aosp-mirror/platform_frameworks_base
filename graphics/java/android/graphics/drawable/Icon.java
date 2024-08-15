@@ -494,30 +494,37 @@ public final class Icon implements Parcelable {
                         BitmapFactory.decodeByteArray(getDataBytes(), getDataOffset(),
                                 getDataLength())));
             case TYPE_URI:
-                InputStream is = getUriInputStream(context);
-                if (is != null) {
-                    final Bitmap bitmap = BitmapFactory.decodeStream(is);
-                    if (bitmap == null) {
-                        Log.w(TAG, "Unable to decode image from URI: " + getUriString());
-                        if (iconLoadDrawableReturnNullWhenUriDecodeFails()) {
-                            return null;
+                try (InputStream is = getUriInputStream(context)) {
+                    if (is != null) {
+                        final Bitmap bitmap = BitmapFactory.decodeStream(is);
+                        if (bitmap == null) {
+                            Log.w(TAG, "Unable to decode image from URI: " + getUriString());
+                            if (iconLoadDrawableReturnNullWhenUriDecodeFails()) {
+                                return null;
+                            }
                         }
+                        return new BitmapDrawable(context.getResources(), fixMaxBitmapSize(bitmap));
                     }
-                    return new BitmapDrawable(context.getResources(), fixMaxBitmapSize(bitmap));
+                } catch (IOException e) {
+                    throw new IllegalStateException(e);
                 }
                 break;
             case TYPE_URI_ADAPTIVE_BITMAP:
-                is = getUriInputStream(context);
-                if (is != null) {
-                    final Bitmap bitmap = BitmapFactory.decodeStream(is);
-                    if (bitmap == null) {
-                        Log.w(TAG, "Unable to decode image from URI: " + getUriString());
-                        if (iconLoadDrawableReturnNullWhenUriDecodeFails()) {
-                            return null;
+                try (InputStream is = getUriInputStream(context)) {
+                    if (is != null) {
+                        final Bitmap bitmap = BitmapFactory.decodeStream(is);
+                        if (bitmap == null) {
+                            Log.w(TAG, "Unable to decode image from URI: " + getUriString());
+                            if (iconLoadDrawableReturnNullWhenUriDecodeFails()) {
+                                return null;
+                            }
                         }
+                        return new AdaptiveIconDrawable(
+                                        null, new BitmapDrawable(context.getResources(),
+                                fixMaxBitmapSize(bitmap)));
                     }
-                    return new AdaptiveIconDrawable(null, new BitmapDrawable(context.getResources(),
-                            fixMaxBitmapSize(bitmap)));
+                } catch (IOException e) {
+                    throw new IllegalStateException(e);
                 }
                 break;
         }

@@ -19,7 +19,10 @@ package com.android.systemui.shade.ui.composable
 
 import android.view.ContextThemeWrapper
 import android.view.ViewGroup
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsHoveredAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -32,7 +35,9 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ColorScheme
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
@@ -40,6 +45,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.graphics.graphicsLayer
@@ -53,11 +59,12 @@ import androidx.compose.ui.unit.max
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.android.compose.animation.scene.ElementKey
-import com.android.compose.animation.scene.LowestZIndexScenePicker
+import com.android.compose.animation.scene.LowestZIndexContentPicker
 import com.android.compose.animation.scene.SceneScope
-import com.android.compose.animation.scene.TransitionState
 import com.android.compose.animation.scene.ValueKey
 import com.android.compose.animation.scene.animateElementFloatAsState
+import com.android.compose.animation.scene.content.state.TransitionState
+import com.android.compose.modifiers.thenIf
 import com.android.compose.windowsizeclass.LocalWindowSizeClass
 import com.android.settingslib.Utils
 import com.android.systemui.battery.BatteryMeterView
@@ -66,9 +73,11 @@ import com.android.systemui.common.ui.compose.windowinsets.CutoutLocation
 import com.android.systemui.common.ui.compose.windowinsets.LocalDisplayCutout
 import com.android.systemui.common.ui.compose.windowinsets.LocalScreenCornerRadius
 import com.android.systemui.compose.modifiers.sysuiResTag
+import com.android.systemui.lifecycle.rememberViewModel
 import com.android.systemui.privacy.OngoingPrivacyChip
 import com.android.systemui.res.R
 import com.android.systemui.scene.shared.model.Scenes
+import com.android.systemui.shade.ui.composable.ShadeHeader.Colors.onScrimDim
 import com.android.systemui.shade.ui.composable.ShadeHeader.Dimensions.CollapsedHeight
 import com.android.systemui.shade.ui.composable.ShadeHeader.Values.ClockScale
 import com.android.systemui.shade.ui.viewmodel.ShadeHeaderViewModel
@@ -79,15 +88,14 @@ import com.android.systemui.statusbar.phone.ui.TintedIconManager
 import com.android.systemui.statusbar.pipeline.mobile.ui.view.ModernShadeCarrierGroupMobileView
 import com.android.systemui.statusbar.pipeline.mobile.ui.viewmodel.ShadeCarrierGroupMobileIconViewModel
 import com.android.systemui.statusbar.policy.Clock
-import kotlin.math.max
 
 object ShadeHeader {
     object Elements {
         val ExpandedContent = ElementKey("ShadeHeaderExpandedContent")
         val CollapsedContentStart = ElementKey("ShadeHeaderCollapsedContentStart")
         val CollapsedContentEnd = ElementKey("ShadeHeaderCollapsedContentEnd")
-        val PrivacyChip = ElementKey("PrivacyChip", scenePicker = LowestZIndexScenePicker)
-        val Clock = ElementKey("ShadeHeaderClock", scenePicker = LowestZIndexScenePicker)
+        val PrivacyChip = ElementKey("PrivacyChip", contentPicker = LowestZIndexContentPicker)
+        val Clock = ElementKey("ShadeHeaderClock", contentPicker = LowestZIndexContentPicker)
         val ShadeCarrierGroup = ElementKey("ShadeCarrierGroup")
     }
 
@@ -103,6 +111,9 @@ object ShadeHeader {
     object Colors {
         val ColorScheme.shadeHeaderText: Color
             get() = Color.White
+
+        val ColorScheme.onScrimDim: Color
+            get() = Color.DarkGray
     }
 
     object TestTags {
@@ -112,12 +123,13 @@ object ShadeHeader {
 
 @Composable
 fun SceneScope.CollapsedShadeHeader(
-    viewModel: ShadeHeaderViewModel,
+    viewModelFactory: ShadeHeaderViewModel.Factory,
     createTintedIconManager: (ViewGroup, StatusBarLocation) -> TintedIconManager,
     createBatteryMeterViewController: (ViewGroup, StatusBarLocation) -> BatteryMeterViewController,
     statusBarIconController: StatusBarIconController,
     modifier: Modifier = Modifier,
 ) {
+    val viewModel = rememberViewModel { viewModelFactory.create() }
     val isDisabled by viewModel.isDisabled.collectAsStateWithLifecycle()
     if (isDisabled) {
         return
@@ -130,13 +142,17 @@ fun SceneScope.CollapsedShadeHeader(
     val horizontalPadding =
         max(LocalScreenCornerRadius.current / 2f, Shade.Dimensions.HorizontalPadding)
 
-    val useExpandedFormat by
+    val useExpandedTextFormat by
         remember(cutoutLocation) {
             derivedStateOf {
                 cutoutLocation != CutoutLocation.CENTER ||
                     shouldUseExpandedFormat(layoutState.transitionState)
             }
         }
+
+    val isLargeScreenLayout =
+        LocalWindowSizeClass.current.widthSizeClass == WindowWidthSizeClass.Medium ||
+            LocalWindowSizeClass.current.widthSizeClass == WindowWidthSizeClass.Expanded
 
     val isPrivacyChipVisible by viewModel.isPrivacyChipVisible.collectAsStateWithLifecycle()
 
@@ -182,22 +198,22 @@ fun SceneScope.CollapsedShadeHeader(
                                 Modifier.element(ShadeHeader.Elements.CollapsedContentEnd)
                                     .padding(horizontal = horizontalPadding)
                         ) {
+                            if (isLargeScreenLayout) {
+                                ShadeCarrierGroup(
+                                    viewModel = viewModel,
+                                    modifier = Modifier.align(Alignment.CenterVertically),
+                                )
+                            }
                             SystemIconContainer(
+                                viewModel = viewModel,
+                                isClickable = isLargeScreenLayout,
                                 modifier = Modifier.align(Alignment.CenterVertically)
                             ) {
-                                when (LocalWindowSizeClass.current.widthSizeClass) {
-                                    WindowWidthSizeClass.Medium,
-                                    WindowWidthSizeClass.Expanded ->
-                                        ShadeCarrierGroup(
-                                            viewModel = viewModel,
-                                            modifier = Modifier.align(Alignment.CenterVertically),
-                                        )
-                                }
                                 StatusIcons(
                                     viewModel = viewModel,
                                     createTintedIconManager = createTintedIconManager,
                                     statusBarIconController = statusBarIconController,
-                                    useExpandedFormat = useExpandedFormat,
+                                    useExpandedFormat = useExpandedTextFormat,
                                     modifier =
                                         Modifier.align(Alignment.CenterVertically)
                                             .padding(end = 6.dp)
@@ -206,7 +222,7 @@ fun SceneScope.CollapsedShadeHeader(
                                 BatteryIcon(
                                     createBatteryMeterViewController =
                                         createBatteryMeterViewController,
-                                    useExpandedFormat = useExpandedFormat,
+                                    useExpandedFormat = useExpandedTextFormat,
                                     modifier = Modifier.align(Alignment.CenterVertically),
                                 )
                             }
@@ -265,12 +281,13 @@ fun SceneScope.CollapsedShadeHeader(
 
 @Composable
 fun SceneScope.ExpandedShadeHeader(
-    viewModel: ShadeHeaderViewModel,
+    viewModelFactory: ShadeHeaderViewModel.Factory,
     createTintedIconManager: (ViewGroup, StatusBarLocation) -> TintedIconManager,
     createBatteryMeterViewController: (ViewGroup, StatusBarLocation) -> BatteryMeterViewController,
     statusBarIconController: StatusBarIconController,
     modifier: Modifier = Modifier,
 ) {
+    val viewModel = rememberViewModel { viewModelFactory.create() }
     val isDisabled by viewModel.isDisabled.collectAsStateWithLifecycle()
     if (isDisabled) {
         return
@@ -322,7 +339,7 @@ fun SceneScope.ExpandedShadeHeader(
                     modifier = Modifier.widthIn(max = 90.dp).align(Alignment.CenterVertically),
                 )
                 Spacer(modifier = Modifier.weight(1f))
-                SystemIconContainer {
+                SystemIconContainer(viewModel = viewModel, isClickable = false) {
                     StatusIcons(
                         viewModel = viewModel,
                         createTintedIconManager = createTintedIconManager,
@@ -531,12 +548,31 @@ private fun SceneScope.StatusIcons(
 
 @Composable
 private fun SystemIconContainer(
+    viewModel: ShadeHeaderViewModel,
+    isClickable: Boolean,
     modifier: Modifier = Modifier,
     content: @Composable RowScope.() -> Unit
 ) {
-    // TODO(b/298524053): add hover state for this container
+    val interactionSource = remember { MutableInteractionSource() }
+    val isHovered by interactionSource.collectIsHoveredAsState()
+
+    val hoverModifier =
+        Modifier.clip(RoundedCornerShape(CollapsedHeight / 4))
+            .background(MaterialTheme.colorScheme.onScrimDim)
+
     Row(
-        modifier = modifier.height(CollapsedHeight),
+        modifier =
+            modifier
+                .height(CollapsedHeight)
+                .padding(vertical = CollapsedHeight / 4)
+                .thenIf(isClickable) {
+                    Modifier.clickable(
+                        interactionSource = interactionSource,
+                        indication = null,
+                        onClick = { viewModel.onSystemIconContainerClicked() },
+                    )
+                }
+                .thenIf(isHovered) { hoverModifier },
         content = content,
     )
 }

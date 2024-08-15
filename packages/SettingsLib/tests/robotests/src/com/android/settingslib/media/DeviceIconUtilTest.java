@@ -18,6 +18,7 @@ package com.android.settingslib.media;
 
 import static com.google.common.truth.Truth.assertThat;
 
+import android.content.Context;
 import android.media.AudioDeviceInfo;
 import android.media.MediaRoute2Info;
 import android.platform.test.flag.junit.SetFlagsRule;
@@ -30,6 +31,8 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
+import org.robolectric.RuntimeEnvironment;
+import org.robolectric.shadows.ShadowSystemProperties;
 
 @RunWith(RobolectricTestRunner.class)
 public class DeviceIconUtilTest {
@@ -37,9 +40,12 @@ public class DeviceIconUtilTest {
     @Rule
     public final SetFlagsRule mSetFlagsRule = new SetFlagsRule();
 
+    private Context mContext;
+
     @Before
     public void setup() {
         mSetFlagsRule.enableFlags(Flags.FLAG_ENABLE_TV_MEDIA_OUTPUT_DIALOG);
+        mContext = RuntimeEnvironment.getApplication();
     }
 
     @Test
@@ -171,10 +177,26 @@ public class DeviceIconUtilTest {
     }
 
     @Test
+    public void getIconResIdFromMediaRouteType_onTablet_builtinSpeaker_isTablet() {
+        ShadowSystemProperties.override("ro.build.characteristics", "tablet");
+        assertThat(new DeviceIconUtil(mContext)
+                .getIconResIdFromMediaRouteType(MediaRoute2Info.TYPE_BUILTIN_SPEAKER))
+                .isEqualTo(R.drawable.ic_media_tablet);
+    }
+
+    @Test
     public void getIconResIdFromMediaRouteType_unsupportedType_isSmartphone() {
         assertThat(new DeviceIconUtil(/* isTv */ false)
                 .getIconResIdFromMediaRouteType(MediaRoute2Info.TYPE_UNKNOWN))
                 .isEqualTo(R.drawable.ic_smartphone);
+    }
+
+    @Test
+    public void getIconResIdFromMediaRouteType_onTablet_unsupportedType_isTablet() {
+        ShadowSystemProperties.override("ro.build.characteristics", "tablet");
+        assertThat(new DeviceIconUtil(mContext)
+                .getIconResIdFromMediaRouteType(MediaRoute2Info.TYPE_UNKNOWN))
+                .isEqualTo(R.drawable.ic_media_tablet);
     }
 
     @Test

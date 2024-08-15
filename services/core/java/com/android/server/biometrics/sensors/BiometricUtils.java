@@ -33,4 +33,14 @@ public interface BiometricUtils<T extends BiometricAuthenticator.Identifier> {
     CharSequence getUniqueName(Context context, int userId);
     void setInvalidationInProgress(Context context, int userId, boolean inProgress);
     boolean isInvalidationInProgress(Context context, int userId);
+
+    /**
+     * Return true if the biometric file is correctly read. Otherwise return false.
+     */
+    boolean hasValidBiometricUserState(Context context, int userId);
+
+    /**
+     * Delete the file of the biometric state.
+     */
+    void deleteStateForUser(int userId);
 }

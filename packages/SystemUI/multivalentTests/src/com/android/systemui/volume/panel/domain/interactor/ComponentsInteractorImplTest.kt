@@ -28,6 +28,7 @@ import com.android.systemui.volume.panel.domain.model.ComponentModel
 import com.android.systemui.volume.panel.domain.unavailableCriteria
 import com.android.systemui.volume.panel.shared.model.VolumePanelComponentKey
 import com.android.systemui.volume.panel.ui.composable.enabledComponents
+import com.android.systemui.volume.shared.volumePanelLogger
 import com.google.common.truth.Truth.assertThat
 import javax.inject.Provider
 import kotlinx.coroutines.test.runTest
@@ -49,6 +50,7 @@ class ComponentsInteractorImplTest : SysuiTestCase() {
                     enabledComponents,
                     { defaultCriteria },
                     testScope.backgroundScope,
+                    volumePanelLogger,
                     criteriaByKey,
                 )
             }

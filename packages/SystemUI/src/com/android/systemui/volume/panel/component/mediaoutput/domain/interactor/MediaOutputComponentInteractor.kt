@@ -18,6 +18,7 @@ package com.android.systemui.volume.panel.component.mediaoutput.domain.interacto
 
 import com.android.settingslib.volume.domain.interactor.AudioModeInteractor
 import com.android.systemui.volume.domain.interactor.AudioOutputInteractor
+import com.android.systemui.volume.domain.interactor.AudioSharingInteractor
 import com.android.systemui.volume.domain.model.AudioOutputDevice
 import com.android.systemui.volume.panel.component.mediaoutput.domain.model.MediaOutputComponentModel
 import com.android.systemui.volume.panel.component.mediaoutput.shared.model.SessionWithPlaybackState
@@ -49,11 +50,12 @@ constructor(
     private val mediaDeviceSessionInteractor: MediaDeviceSessionInteractor,
     audioOutputInteractor: AudioOutputInteractor,
     audioModeInteractor: AudioModeInteractor,
-    interactor: MediaOutputInteractor,
+    mediaOutputInteractor: MediaOutputInteractor,
+    audioSharingInteractor: AudioSharingInteractor,
 ) {
 
     private val sessionWithPlaybackState: StateFlow<Result<SessionWithPlaybackState?>> =
-        interactor.defaultActiveMediaSession
+        mediaOutputInteractor.defaultActiveMediaSession
             .filterData()
             .flatMapLatest { session ->
                 if (session == null) {
@@ -77,7 +79,7 @@ constructor(
     val mediaOutputModel: StateFlow<Result<MediaOutputComponentModel>> =
         audioModeInteractor.isOngoingCall
             .flatMapLatest { isOngoingCall ->
-                audioOutputInteractor.isInAudioSharing.flatMapLatest { isInAudioSharing ->
+                audioSharingInteractor.isInAudioSharing.flatMapLatest { isInAudioSharing ->
                     if (isOngoingCall) {
                         currentAudioDevice.map {
                             MediaOutputComponentModel.Calling(it, isInAudioSharing)

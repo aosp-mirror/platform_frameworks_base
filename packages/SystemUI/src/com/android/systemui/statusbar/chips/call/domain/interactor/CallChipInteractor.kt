@@ -17,16 +17,36 @@
 package com.android.systemui.statusbar.chips.call.domain.interactor
 
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.statusbar.chips.domain.interactor.OngoingActivityChipInteractor
-import com.android.systemui.statusbar.chips.domain.model.OngoingActivityChipModel
+import com.android.systemui.dagger.qualifiers.Application
+import com.android.systemui.log.LogBuffer
+import com.android.systemui.log.core.LogLevel
+import com.android.systemui.statusbar.chips.StatusBarChipsLog
+import com.android.systemui.statusbar.phone.ongoingcall.data.repository.OngoingCallRepository
+import com.android.systemui.statusbar.phone.ongoingcall.shared.model.OngoingCallModel
 import javax.inject.Inject
-import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.stateIn
 
 /** Interactor for the ongoing phone call chip shown in the status bar. */
 @SysUISingleton
-open class CallChipInteractor @Inject constructor() : OngoingActivityChipInteractor {
-    // TODO(b/332662551): Implement this flow.
-    override val chip: StateFlow<OngoingActivityChipModel> =
-        MutableStateFlow(OngoingActivityChipModel.Hidden)
+class CallChipInteractor
+@Inject
+constructor(
+    @Application private val scope: CoroutineScope,
+    repository: OngoingCallRepository,
+    @StatusBarChipsLog private val logger: LogBuffer,
+) {
+    val ongoingCallState: StateFlow<OngoingCallModel> =
+        repository.ongoingCallState
+            .onEach {
+                logger.log(TAG, LogLevel.INFO, { str1 = it::class.simpleName }, { "State: $str1" })
+            }
+            .stateIn(scope, SharingStarted.Lazily, OngoingCallModel.NoCall)
+
+    companion object {
+        private const val TAG = "OngoingCall"
+    }
 }

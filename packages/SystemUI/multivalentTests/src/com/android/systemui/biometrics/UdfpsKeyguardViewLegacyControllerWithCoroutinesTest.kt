@@ -235,6 +235,7 @@ class UdfpsKeyguardViewLegacyControllerWithCoroutinesTest :
 
             job.cancel()
         }
+
     @Test
     fun fadeFromDialogSuggestedAlpha() =
         testScope.runTest {
@@ -511,9 +512,10 @@ class UdfpsKeyguardViewLegacyControllerWithCoroutinesTest :
         testScope.runTest {
             // GIVEN view is attached
             mController.onViewAttached()
+            val job = mController.listenForLockscreenAodTransitions(this)
+            runCurrent()
             Mockito.reset(mView)
 
-            val job = mController.listenForLockscreenAodTransitions(this)
             // WHEN aod to lockscreen transition is cancelled
             transitionRepository.sendTransitionStep(
                 TransitionStep(
@@ -537,7 +539,7 @@ class UdfpsKeyguardViewLegacyControllerWithCoroutinesTest :
 
             // THEN doze amount is updated to zero
             verify(mView)
-                .onDozeAmountChanged(eq(0f), eq(0f), eq(UdfpsKeyguardViewLegacy.ANIMATION_NONE))
+                .onDozeAmountChanged(eq(0f), eq(0f), eq(ANIMATION_BETWEEN_AOD_AND_LOCKSCREEN))
             job.cancel()
         }
 
@@ -546,9 +548,10 @@ class UdfpsKeyguardViewLegacyControllerWithCoroutinesTest :
         testScope.runTest {
             // GIVEN view is attached
             mController.onViewAttached()
+            val job = mController.listenForLockscreenAodTransitions(this)
+            runCurrent()
             Mockito.reset(mView)
 
-            val job = mController.listenForLockscreenAodTransitions(this)
             // WHEN lockscreen to aod transition is cancelled
             transitionRepository.sendTransitionStep(
                 TransitionStep(

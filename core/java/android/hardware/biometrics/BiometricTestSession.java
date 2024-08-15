@@ -27,12 +27,15 @@ import android.os.RemoteException;
 import android.util.ArraySet;
 import android.util.Log;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
 /**
  * Common set of interfaces to test biometric-related APIs, including {@link BiometricPrompt} and
  * {@link android.hardware.fingerprint.FingerprintManager}.
+ *
  * @hide
  */
 @TestApi
@@ -48,21 +51,29 @@ public class BiometricTestSession implements AutoCloseable {
                 @NonNull ITestSessionCallback callback) throws RemoteException;
     }
 
-    private final Context mContext;
     private final int mSensorId;
-    private final ITestSession mTestSession;
+    private final List<ITestSession> mTestSessionsForAllSensors = new ArrayList<>();
+    private ITestSession mTestSession;
 
     // Keep track of users that were tested, which need to be cleaned up when finishing.
-    @NonNull private final ArraySet<Integer> mTestedUsers;
+    @NonNull
+    private final ArraySet<Integer> mTestedUsers;
 
     // Track the users currently cleaning up, and provide a latch that gets notified when all
     // users have finished cleaning up. This is an imperfect system, as there can technically be
     // multiple cleanups per user. Theoretically we should track the cleanup's BaseClientMonitor's
     // unique ID, but it's complicated to plumb it through. This should be fine for now.
-    @Nullable private CountDownLatch mCloseLatch;
-    @NonNull private final ArraySet<Integer> mUsersCleaningUp;
+    @Nullable
+    private CountDownLatch mCloseLatch;
+    @NonNull
+    private final ArraySet<Integer> mUsersCleaningUp;
 
-    private final ITestSessionCallback mCallback = new ITestSessionCallback.Stub() {
+    private class TestSessionCallbackIml extends ITestSessionCallback.Stub {
+        private final int mSensorId;
+        private TestSessionCallbackIml(int sensorId) {
+            mSensorId = sensorId;
+        }
+
         @Override
         public void onCleanupStarted(int userId) {
             Log.d(getTag(), "onCleanupStarted, sensor: " + mSensorId + ", userId: " + userId);
@@ -76,19 +87,30 @@ public class BiometricTestSession implements AutoCloseable {
             mUsersCleaningUp.remove(userId);
 
             if (mUsersCleaningUp.isEmpty() && mCloseLatch != null) {
+                Log.d(getTag(), "counting down");
                 mCloseLatch.countDown();
             }
         }
-    };
+    }
 
     /**
      * @hide
      */
-    public BiometricTestSession(@NonNull Context context, int sensorId,
-            @NonNull TestSessionProvider testSessionProvider) throws RemoteException {
-        mContext = context;
+    public BiometricTestSession(@NonNull Context context, List<SensorProperties> sensors,
+            int sensorId, @NonNull TestSessionProvider testSessionProvider) throws RemoteException {
         mSensorId = sensorId;
-        mTestSession = testSessionProvider.createTestSession(context, sensorId, mCallback);
+        // When any of the sensors should create the test session, all the other sensors should
+        // set test hal enabled too.
+        for (SensorProperties sensor : sensors) {
+            final int id = sensor.getSensorId();
+            final ITestSession session = testSessionProvider.createTestSession(context, id,
+                    new TestSessionCallbackIml(id));
+            mTestSessionsForAllSensors.add(session);
+            if (id == sensorId) {
+                mTestSession = session;
+            }
+        }
+
         mTestedUsers = new ArraySet<>();
         mUsersCleaningUp = new ArraySet<>();
         setTestHalEnabled(true);
@@ -107,8 +129,11 @@ public class BiometricTestSession implements AutoCloseable {
     @RequiresPermission(TEST_BIOMETRIC)
     private void setTestHalEnabled(boolean enabled) {
         try {
-            Log.w(getTag(), "setTestHalEnabled, sensor: " + mSensorId + " enabled: " + enabled);
-            mTestSession.setTestHalEnabled(enabled);
+            for (ITestSession session : mTestSessionsForAllSensors) {
+                Log.w(getTag(), "setTestHalEnabled, sensor: " + session.getSensorId() + " enabled: "
+                        + enabled);
+                session.setTestHalEnabled(enabled);
+            }
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -175,10 +200,12 @@ public class BiometricTestSession implements AutoCloseable {
     /**
      * Simulates an acquired message from the HAL.
      *
-     * @param userId User that this command applies to.
+     * @param userId      User that this command applies to.
      * @param acquireInfo See
-     * {@link BiometricPrompt.AuthenticationCallback#onAuthenticationAcquired(int)} and
-     * {@link FingerprintManager.AuthenticationCallback#onAuthenticationAcquired(int)}
+     *                    {@link
+     *                    BiometricPrompt.AuthenticationCallback#onAuthenticationAcquired(int)} and
+     *                    {@link
+     *                    FingerprintManager.AuthenticationCallback#onAuthenticationAcquired(int)}
      */
     @RequiresPermission(TEST_BIOMETRIC)
     public void notifyAcquired(int userId, int acquireInfo) {
@@ -192,10 +219,12 @@ public class BiometricTestSession implements AutoCloseable {
     /**
      * Simulates an error message from the HAL.
      *
-     * @param userId User that this command applies to.
+     * @param userId    User that this command applies to.
      * @param errorCode See
-     * {@link BiometricPrompt.AuthenticationCallback#onAuthenticationError(int, CharSequence)} and
-     * {@link FingerprintManager.AuthenticationCallback#onAuthenticationError(int, CharSequence)}
+     *                  {@link BiometricPrompt.AuthenticationCallback#onAuthenticationError(int,
+     *                  CharSequence)} and
+     *                  {@link FingerprintManager.AuthenticationCallback#onAuthenticationError(int,
+     *                  CharSequence)}
      */
     @RequiresPermission(TEST_BIOMETRIC)
     public void notifyError(int userId, int errorCode) {
@@ -220,8 +249,20 @@ public class BiometricTestSession implements AutoCloseable {
                 Log.w(getTag(), "Cleanup already in progress for user: " + userId);
             }
 
-            mUsersCleaningUp.add(userId);
-            mTestSession.cleanupInternalState(userId);
+            for (ITestSession session : mTestSessionsForAllSensors) {
+                mUsersCleaningUp.add(userId);
+                Log.d(getTag(), "cleanupInternalState for sensor: " + session.getSensorId());
+                mCloseLatch = new CountDownLatch(1);
+                session.cleanupInternalState(userId);
+
+                try {
+                    Log.d(getTag(), "Awaiting latch...");
+                    mCloseLatch.await(3, TimeUnit.SECONDS);
+                    Log.d(getTag(), "Finished awaiting");
+                } catch (InterruptedException e) {
+                    Log.e(getTag(), "Latch interrupted", e);
+                }
+            }
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -234,17 +275,8 @@ public class BiometricTestSession implements AutoCloseable {
         // Cleanup can be performed using the test HAL, since it always responds to enumerate with
         // zero enrollments.
         if (!mTestedUsers.isEmpty()) {
-            mCloseLatch = new CountDownLatch(1);
             for (int user : mTestedUsers) {
                 cleanupInternalState(user);
-            }
-
-            try {
-                Log.d(getTag(), "Awaiting latch...");
-                mCloseLatch.await(3, TimeUnit.SECONDS);
-                Log.d(getTag(), "Finished awaiting");
-            } catch (InterruptedException e) {
-                Log.e(getTag(), "Latch interrupted", e);
             }
         }
 

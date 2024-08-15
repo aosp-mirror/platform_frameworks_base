@@ -23,21 +23,17 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.android.compose.animation.scene.SceneScope
 import com.android.compose.modifiers.thenIf
-import com.android.systemui.Flags
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.keyguard.MigrateClocksToBlueprint
 import com.android.systemui.keyguard.ui.composable.modifier.burnInAware
 import com.android.systemui.keyguard.ui.viewmodel.AodBurnInViewModel
 import com.android.systemui.keyguard.ui.viewmodel.BurnInParameters
-import com.android.systemui.keyguard.ui.viewmodel.LockscreenContentViewModel
+import com.android.systemui.lifecycle.rememberViewModel
 import com.android.systemui.notifications.ui.composable.ConstrainedNotificationStack
-import com.android.systemui.res.R
 import com.android.systemui.shade.LargeScreenHeaderHelper
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout
 import com.android.systemui.statusbar.notification.stack.ui.view.NotificationScrollView
@@ -53,13 +49,12 @@ class NotificationSection
 @Inject
 constructor(
     private val stackScrollView: Lazy<NotificationScrollView>,
-    private val viewModel: NotificationsPlaceholderViewModel,
+    private val viewModelFactory: NotificationsPlaceholderViewModel.Factory,
     private val aodBurnInViewModel: AodBurnInViewModel,
     sharedNotificationContainer: SharedNotificationContainer,
     sharedNotificationContainerViewModel: SharedNotificationContainerViewModel,
     stackScrollLayout: NotificationStackScrollLayout,
     sharedNotificationContainerBinder: SharedNotificationContainerBinder,
-    private val lockscreenContentViewModel: LockscreenContentViewModel,
 ) {
 
     init {
@@ -89,31 +84,26 @@ constructor(
      *   adjustment
      */
     @Composable
-    fun SceneScope.Notifications(burnInParams: BurnInParameters?, modifier: Modifier = Modifier) {
-        val shouldUseSplitNotificationShade by
-            lockscreenContentViewModel.shouldUseSplitNotificationShade.collectAsStateWithLifecycle()
-        val areNotificationsVisible by
-            lockscreenContentViewModel.areNotificationsVisible.collectAsStateWithLifecycle()
-        val splitShadeTopMargin: Dp =
-            if (Flags.centralizedStatusBarHeightFix()) {
-                LargeScreenHeaderHelper.getLargeScreenHeaderHeight(LocalContext.current).dp
-            } else {
-                dimensionResource(id = R.dimen.large_screen_shade_header_height)
-            }
-
+    fun SceneScope.Notifications(
+        areNotificationsVisible: Boolean,
+        isShadeLayoutWide: Boolean,
+        burnInParams: BurnInParameters?,
+        modifier: Modifier = Modifier
+    ) {
         if (!areNotificationsVisible) {
             return
         }
 
+        val splitShadeTopMargin: Dp =
+            LargeScreenHeaderHelper.getLargeScreenHeaderHeight(LocalContext.current).dp
+
         ConstrainedNotificationStack(
             stackScrollView = stackScrollView.get(),
-            viewModel = viewModel,
+            viewModel = rememberViewModel { viewModelFactory.create() },
             modifier =
                 modifier
                     .fillMaxWidth()
-                    .thenIf(shouldUseSplitNotificationShade) {
-                        Modifier.padding(top = splitShadeTopMargin)
-                    }
+                    .thenIf(isShadeLayoutWide) { Modifier.padding(top = splitShadeTopMargin) }
                     .let {
                         if (burnInParams == null) {
                             it

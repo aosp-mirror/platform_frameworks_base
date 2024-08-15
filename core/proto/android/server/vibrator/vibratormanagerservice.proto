@@ -146,6 +146,8 @@ message VibrationProto {
         IGNORED_FROM_VIRTUAL_DEVICE = 26;
         IGNORED_ON_WIRELESS_CHARGER = 27;
         IGNORED_MISSING_PERMISSION = 28;
+        CANCELLED_BY_APP_OPS = 29;
+        CANCELLED_BY_FOREGROUND_USER = 30;
         reserved 17; // prev IGNORED_UNKNOWN_VIBRATION
     }
 }
@@ -161,7 +163,7 @@ message VibratorManagerServiceDumpProto {
     optional bool vibrator_under_external_control = 5;
     optional bool low_power_mode = 6;
     optional bool vibrate_on = 24;
-    optional bool keyboard_vibration_on = 25;
+    reserved 25; // prev keyboard_vibration_on
     optional int32 default_vibration_amplitude = 26;
     optional int32 alarm_intensity = 18;
     optional int32 alarm_default_intensity = 19;

@@ -17,21 +17,24 @@
 package com.android.systemui.shade.domain.interactor
 
 import com.android.keyguard.LockIconViewController
-import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Background
+import com.android.systemui.dagger.qualifiers.Main
+import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.scene.domain.interactor.SceneInteractor
+import com.android.systemui.scene.shared.model.SceneFamilies
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.shade.data.repository.ShadeRepository
-import com.android.systemui.shade.shared.model.ShadeMode
 import javax.inject.Inject
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class ShadeLockscreenInteractorImpl
 @Inject
 constructor(
-    @Application private val applicationScope: CoroutineScope,
+    @Main private val mainDispatcher: CoroutineDispatcher,
     @Background private val backgroundScope: CoroutineScope,
     private val shadeInteractor: ShadeInteractor,
     private val sceneInteractor: SceneInteractor,
@@ -69,10 +72,11 @@ constructor(
     override fun setPulsing(pulsing: Boolean) {
         // Now handled elsewhere. Do nothing.
     }
+
     override fun transitionToExpandedShade(delay: Long) {
         backgroundScope.launch {
             delay(delay)
-            changeToShadeScene()
+            withContext(mainDispatcher) { changeToShadeScene() }
         }
     }
 
@@ -93,17 +97,14 @@ constructor(
     }
 
     override fun showAodUi() {
-        sceneInteractor.changeScene(Scenes.Lockscreen, "showAodUi")
+        sceneInteractor.changeScene(Scenes.Lockscreen, "showAodUi", sceneState = KeyguardState.AOD)
         // TODO(b/330311871) implement transition to AOD
     }
 
     private fun changeToShadeScene() {
-        applicationScope.launch {
-            val shadeMode = shadeInteractor.shadeMode.value
-            sceneInteractor.changeScene(
-                if (shadeMode is ShadeMode.Dual) Scenes.NotificationsShade else Scenes.Shade,
-                "ShadeLockscreenInteractorImpl.expandToNotifications",
-            )
-        }
+        sceneInteractor.changeScene(
+            SceneFamilies.NotifShade,
+            "ShadeLockscreenInteractorImpl.expandToNotifications",
+        )
     }
 }

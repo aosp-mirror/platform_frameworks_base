@@ -53,6 +53,7 @@ import static java.util.Collections.emptySet;
 
 import android.app.ActivityManager;
 import android.app.IWallpaperManager;
+import android.app.NotificationManager;
 import android.app.WallpaperManager;
 import android.app.trust.TrustManager;
 import android.content.BroadcastReceiver;
@@ -112,6 +113,7 @@ import com.android.systemui.colorextraction.SysuiColorExtractor;
 import com.android.systemui.communal.shared.model.CommunalScenes;
 import com.android.systemui.demomode.DemoModeController;
 import com.android.systemui.dump.DumpManager;
+import com.android.systemui.emergency.EmergencyGestureModule.EmergencyGestureIntentFactory;
 import com.android.systemui.flags.DisableSceneContainer;
 import com.android.systemui.flags.EnableSceneContainer;
 import com.android.systemui.flags.FakeFeatureFlags;
@@ -148,6 +150,7 @@ import com.android.systemui.shade.ShadeController;
 import com.android.systemui.shade.ShadeControllerImpl;
 import com.android.systemui.shade.ShadeExpansionStateManager;
 import com.android.systemui.shade.ShadeLogger;
+import com.android.systemui.shared.notifications.domain.interactor.NotificationSettingsInteractor;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.KeyboardShortcutListSearch;
 import com.android.systemui.statusbar.KeyboardShortcuts;
@@ -292,7 +295,6 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
     @Mock private Bubbles mBubbles;
     @Mock private NoteTaskController mNoteTaskController;
     @Mock private NotificationShadeWindowController mNotificationShadeWindowController;
-    @Mock private NotificationIconAreaController mNotificationIconAreaController;
     @Mock private NotificationShadeWindowViewController mNotificationShadeWindowViewController;
     @Mock private Lazy<NotificationShadeWindowViewController>
             mNotificationShadeWindowViewControllerLazy;
@@ -338,8 +340,10 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
     @Mock private KeyboardShortcuts mKeyboardShortcuts;
     @Mock private KeyboardShortcutListSearch mKeyboardShortcutListSearch;
     @Mock private PackageManager mPackageManager;
+    @Mock private NotificationManager mNotificationManager;
     @Mock private GlanceableHubContainerController mGlanceableHubContainerController;
-
+    @Mock private EmergencyGestureIntentFactory mEmergencyGestureIntentFactory;
+    @Mock private NotificationSettingsInteractor mNotificationSettingsInteractor;
     private ShadeController mShadeController;
     private final FakeSystemClock mFakeSystemClock = new FakeSystemClock();
     private final FakeGlobalSettings mFakeGlobalSettings = new FakeGlobalSettings();
@@ -397,7 +401,10 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
                         mAvalancheProvider,
                         mSystemSettings,
                         mPackageManager,
-                        Optional.of(mBubbles));
+                        Optional.of(mBubbles),
+                        mContext,
+                        mNotificationManager,
+                        mNotificationSettingsInteractor);
         mVisualInterruptionDecisionProvider.start();
 
         mContext.addMockSystemService(TrustManager.class, mock(TrustManager.class));
@@ -572,7 +579,6 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
                 mDemoModeController,
                 mNotificationShadeDepthControllerLazy,
                 mStatusBarTouchableRegionManager,
-                mNotificationIconAreaController,
                 mBrightnessSliderFactory,
                 mScreenOffAnimationController,
                 mWallpaperController,
@@ -596,7 +602,8 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
                 () -> mFingerprintManager,
                 mActivityStarter,
                 mBrightnessMirrorShowingInteractor,
-                mGlanceableHubContainerController
+                mGlanceableHubContainerController,
+                mEmergencyGestureIntentFactory
         );
         mScreenLifecycle.addObserver(mCentralSurfaces.mScreenObserver);
         mCentralSurfaces.initShadeVisibilityListener();
@@ -1148,19 +1155,10 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
     }
 
     @Test
-    @EnableFlags(com.android.systemui.Flags.FLAG_TRUNCATED_STATUS_BAR_ICONS_FIX)
-    public void updateResources_flagEnabled_doesNotUpdateStatusBarWindowHeight() {
+    public void updateResources_doesNotUpdateStatusBarWindowHeight() {
         mCentralSurfaces.updateResources();
 
         verify(mStatusBarWindowController, never()).refreshStatusBarHeight();
-    }
-
-    @Test
-    @DisableFlags(com.android.systemui.Flags.FLAG_TRUNCATED_STATUS_BAR_ICONS_FIX)
-    public void updateResources_flagDisabled_updatesStatusBarWindowHeight() {
-        mCentralSurfaces.updateResources();
-
-        verify(mStatusBarWindowController).refreshStatusBarHeight();
     }
 
     @Test

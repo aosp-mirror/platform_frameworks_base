@@ -17,9 +17,9 @@
 package com.android.systemui.shared.animation
 
 import android.graphics.Paint
-import android.testing.AndroidTestingRunner
 import android.widget.FrameLayout
 import android.widget.TextView
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.google.common.truth.Truth.assertThat
@@ -28,7 +28,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 @SmallTest
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 class DisableSubpixelTextTransitionListenerTest : SysuiTestCase() {
 
     private lateinit var disableSubpixelTextTransitionListener:
