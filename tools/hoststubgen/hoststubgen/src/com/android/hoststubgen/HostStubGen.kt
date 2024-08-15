@@ -334,13 +334,14 @@ class HostStubGen(val options: HostStubGenOptions) {
             entry: ZipEntry,
             out: ZipOutputStream,
             ) {
-        BufferedInputStream(inZip.getInputStream(entry)).use { bis ->
+        // TODO: It seems like copying entries this way is _very_ slow,
+        // even with out.setLevel(0). Look for other ways to do it.
+
+        inZip.getInputStream(entry).use { ins ->
             // Copy unknown entries as is to the impl out. (but not to the stub out.)
             val outEntry = ZipEntry(entry.name)
             out.putNextEntry(outEntry)
-            while (bis.available() > 0) {
-                out.write(bis.read())
-            }
+            ins.transferTo(out)
             out.closeEntry()
         }
     }
