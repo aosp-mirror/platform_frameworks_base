@@ -15,6 +15,7 @@
  */
 package com.android.systemui.dreams
 
+import android.app.WindowConfiguration
 import android.content.ComponentName
 import android.content.Intent
 import android.os.RemoteException
@@ -65,6 +66,8 @@ import com.android.systemui.keyguard.domain.interactor.keyguardInteractor
 import com.android.systemui.keyguard.gesture.domain.gestureInteractor
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.navigationbar.gestural.domain.GestureInteractor
+import com.android.systemui.navigationbar.gestural.domain.TaskInfo
+import com.android.systemui.navigationbar.gestural.domain.TaskMatcher
 import com.android.systemui.testKosmos
 import com.android.systemui.touch.TouchInsetManager
 import com.android.systemui.util.concurrency.FakeExecutor
@@ -83,6 +86,7 @@ import org.mockito.Mock
 import org.mockito.Mockito
 import org.mockito.Mockito.clearInvocations
 import org.mockito.Mockito.isNull
+import org.mockito.Mockito.never
 import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
 import org.mockito.kotlin.any
@@ -1044,7 +1048,7 @@ class DreamOverlayServiceTest : SysuiTestCase() {
     }
 
     @Test
-    fun testDreamActivityGesturesBlockedOnStart() {
+    fun testDreamActivityGesturesBlockedWhenDreaming() {
         val client = client
 
         // Inform the overlay service of dream starting.
@@ -1056,34 +1060,38 @@ class DreamOverlayServiceTest : SysuiTestCase() {
             false /*shouldShowComplication*/
         )
         mMainExecutor.runAllReady()
-        val captor = argumentCaptor<ComponentName>()
+
+        val matcherCaptor = argumentCaptor<TaskMatcher>()
         verify(gestureInteractor)
-            .addGestureBlockedActivity(captor.capture(), eq(GestureInteractor.Scope.Global))
-        assertThat(captor.firstValue.packageName)
-            .isEqualTo(ComponentName.unflattenFromString(DREAM_COMPONENT)?.packageName)
-    }
+            .addGestureBlockedMatcher(matcherCaptor.capture(), eq(GestureInteractor.Scope.Global))
+        val matcher = matcherCaptor.firstValue
 
-    @Test
-    fun testDreamActivityGesturesUnblockedOnEnd() {
-        val client = client
-
-        // Inform the overlay service of dream starting.
-        client.startDream(
-            mWindowParams,
-            mDreamOverlayCallback,
-            DREAM_COMPONENT,
-            false /*isPreview*/,
-            false /*shouldShowComplication*/
-        )
-        mMainExecutor.runAllReady()
+        val dreamTaskInfo = TaskInfo(mock<ComponentName>(), WindowConfiguration.ACTIVITY_TYPE_DREAM)
+        assertThat(matcher.matches(dreamTaskInfo)).isTrue()
 
         client.endDream()
         mMainExecutor.runAllReady()
-        val captor = argumentCaptor<ComponentName>()
+
         verify(gestureInteractor)
-            .removeGestureBlockedActivity(captor.capture(), eq(GestureInteractor.Scope.Global))
-        assertThat(captor.firstValue.packageName)
-            .isEqualTo(ComponentName.unflattenFromString(DREAM_COMPONENT)?.packageName)
+            .removeGestureBlockedMatcher(eq(matcher), eq(GestureInteractor.Scope.Global))
+    }
+
+    @Test
+    fun testDreamActivityGesturesNotBlockedWhenPreview() {
+        val client = client
+
+        // Inform the overlay service of dream starting.
+        client.startDream(
+            mWindowParams,
+            mDreamOverlayCallback,
+            DREAM_COMPONENT,
+            true /*isPreview*/,
+            false /*shouldShowComplication*/
+        )
+        mMainExecutor.runAllReady()
+
+        verify(gestureInteractor, never())
+            .addGestureBlockedMatcher(any(), eq(GestureInteractor.Scope.Global))
     }
 
     @Test
