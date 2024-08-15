@@ -64,6 +64,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 
 private const val TAG = "BiometricViewBinder"
+private const val MAX_LOGO_DESCRIPTION_CHARACTER_NUMBER = 30
 
 /** Top-most view binder for BiometricPrompt views. */
 object BiometricViewBinder {
@@ -167,7 +168,10 @@ object BiometricViewBinder {
             }
 
             logoView.setImageDrawable(viewModel.logo.first())
-            logoDescriptionView.text = viewModel.logoDescription.first()
+            // The ellipsize effect on xml happens only when the TextView does not have any free
+            // space on the screen to show the text. So we need to manually truncate.
+            logoDescriptionView.text =
+                viewModel.logoDescription.first().ellipsize(MAX_LOGO_DESCRIPTION_CHARACTER_NUMBER)
             titleView.text = viewModel.title.first()
             subtitleView.text = viewModel.subtitle.first()
             descriptionView.text = viewModel.description.first()
@@ -683,6 +687,9 @@ private fun BiometricModalities.asDefaultHelpMessage(context: Context): String =
         hasFingerprint -> context.getString(R.string.fingerprint_dialog_touch_sensor)
         else -> ""
     }
+
+private fun String.ellipsize(cutOffLength: Int) =
+    if (length <= cutOffLength) this else replaceRange(cutOffLength, length, "...")
 
 private fun Boolean.asVisibleOrGone(): Int = if (this) View.VISIBLE else View.GONE
 
