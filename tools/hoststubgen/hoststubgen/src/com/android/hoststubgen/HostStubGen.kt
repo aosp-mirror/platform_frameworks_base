@@ -37,6 +37,7 @@ import org.objectweb.asm.commons.ClassRemapper
 import org.objectweb.asm.commons.Remapper
 import org.objectweb.asm.util.CheckClassAdapter
 import java.io.BufferedInputStream
+import java.io.BufferedOutputStream
 import java.io.FileOutputStream
 import java.io.InputStream
 import java.io.OutputStream
@@ -273,7 +274,7 @@ class HostStubGen(val options: HostStubGenOptions) {
         if (filename == null) {
             return block(null)
         }
-        return ZipOutputStream(FileOutputStream(filename)).use(block)
+        return ZipOutputStream(BufferedOutputStream(FileOutputStream(filename))).use(block)
     }
 
     /**
