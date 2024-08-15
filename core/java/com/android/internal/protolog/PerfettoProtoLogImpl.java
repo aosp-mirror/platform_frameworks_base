@@ -736,7 +736,7 @@ public class PerfettoProtoLogImpl extends IProtoLogClient.Stub implements IProto
         return UUID.nameUUIDFromBytes(fullStringIdentifier.getBytes()).getMostSignificantBits();
     }
 
-    private static final int STACK_SIZE_TO_PROTO_LOG_ENTRY_CALL = 12;
+    private static final int STACK_SIZE_TO_PROTO_LOG_ENTRY_CALL = 6;
 
     private String collectStackTrace() {
         StackTraceElement[] stackTrace =  Thread.currentThread().getStackTrace();
