@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.wm.shell.pip2;
+package com.android.wm.shell.pip2.phone;
 
 import android.os.Bundle;
 import android.os.Handler;
@@ -22,8 +22,6 @@ import android.os.Parcelable;
 import android.testing.AndroidTestingRunner;
 
 import com.android.wm.shell.ShellTestCase;
-import com.android.wm.shell.common.pip.PhoneSizeSpecSource;
-import com.android.wm.shell.pip2.phone.PipTransitionState;
 
 import junit.framework.Assert;
 
@@ -33,7 +31,7 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 
 /**
- * Unit test against {@link PhoneSizeSpecSource}.
+ * Unit test against {@link PipTransitionState}.
  *
  * This test mocks the PiP2 flag to be true.
  */
