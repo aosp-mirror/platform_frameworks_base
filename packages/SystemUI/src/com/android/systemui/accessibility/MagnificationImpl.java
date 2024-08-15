@@ -415,17 +415,13 @@ public class MagnificationImpl implements Magnification, CommandQueue.Callbacks 
     @Override
     @MainThread
     public void showMagnificationButton(int displayId, int magnificationMode) {
-        if (Flags.delayShowMagnificationButton()) {
-            if (mHandler.hasMessages(MSG_SHOW_MAGNIFICATION_BUTTON_INTERNAL)) {
-                return;
-            }
-            mHandler.sendMessageDelayed(
-                    mHandler.obtainMessage(
-                            MSG_SHOW_MAGNIFICATION_BUTTON_INTERNAL, displayId, magnificationMode),
-                    DELAY_SHOW_MAGNIFICATION_TIMEOUT_MS);
-        } else {
-            showMagnificationButtonInternal(displayId, magnificationMode);
+        if (mHandler.hasMessages(MSG_SHOW_MAGNIFICATION_BUTTON_INTERNAL)) {
+            return;
         }
+        mHandler.sendMessageDelayed(
+                mHandler.obtainMessage(
+                        MSG_SHOW_MAGNIFICATION_BUTTON_INTERNAL, displayId, magnificationMode),
+                DELAY_SHOW_MAGNIFICATION_TIMEOUT_MS);
     }
 
     @MainThread
@@ -441,9 +437,7 @@ public class MagnificationImpl implements Magnification, CommandQueue.Callbacks 
     @Override
     @MainThread
     public void removeMagnificationButton(int displayId) {
-        if (Flags.delayShowMagnificationButton()) {
-            mHandler.removeMessages(MSG_SHOW_MAGNIFICATION_BUTTON_INTERNAL);
-        }
+        mHandler.removeMessages(MSG_SHOW_MAGNIFICATION_BUTTON_INTERNAL);
         mModeSwitchesController.removeButton(displayId);
     }
 
