@@ -237,6 +237,13 @@
     <integer name="config_emergency_call_wait_for_connection_timeout_millis">20000</integer>
     <java-symbol type="integer" name="config_emergency_call_wait_for_connection_timeout_millis" />
 
+    <!-- The time duration in millis after which Telephony will stop waiting for the OFF state
+         from cellular modem, consider the request to power off cellular modem as failed, and thus
+         treat the cellular modem state as ON.
+     -->
+    <integer name="config_satellite_wait_for_cellular_modem_off_timeout_millis">120000</integer>
+    <java-symbol type="integer" name="config_satellite_wait_for_cellular_modem_off_timeout_millis" />
+
     <!-- Indicates the data limit in bytes that can be used for bootstrap sim until factory reset.
          -1 means unlimited. -->
     <integer name="config_esim_bootstrap_data_limit_bytes">-1</integer>
