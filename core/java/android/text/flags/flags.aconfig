@@ -277,3 +277,13 @@ flag {
     purpose: PURPOSE_BUGFIX
   }
 }
+
+flag {
+  name: "context_menu_hide_unavailable_items"
+  namespace: "text"
+  description: "Hide rather than disable unavailable Editor context menu items."
+  bug: "345709107"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}
