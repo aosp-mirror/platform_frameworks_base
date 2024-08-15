@@ -14,18 +14,10 @@
  * limitations under the License.
  */
 
-package com.android.systemui.communal.domain.interactor
+package com.android.systemui.communal.shared.log
 
-import com.android.systemui.communal.data.repository.communalSceneRepository
-import com.android.systemui.communal.shared.log.communalSceneLogger
 import com.android.systemui.kosmos.Kosmos
-import com.android.systemui.kosmos.applicationCoroutineScope
+import com.android.systemui.log.logcatLogBuffer
 
-val Kosmos.communalSceneInteractor: CommunalSceneInteractor by
-    Kosmos.Fixture {
-        CommunalSceneInteractor(
-            applicationScope = applicationCoroutineScope,
-            repository = communalSceneRepository,
-            logger = communalSceneLogger,
-        )
-    }
+val Kosmos.communalSceneLogger: CommunalSceneLogger by
+    Kosmos.Fixture { CommunalSceneLogger(logcatLogBuffer("CommunalSceneLogger")) }

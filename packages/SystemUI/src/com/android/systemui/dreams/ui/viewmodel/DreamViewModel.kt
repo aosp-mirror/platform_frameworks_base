@@ -62,7 +62,7 @@ constructor(
             communalInteractor.isCommunalEnabled.value &&
                 !keyguardUpdateMonitor.isEncryptedOrLockdown(userTracker.userId)
         if (showGlanceableHub && !glanceableHubAllowKeyguardWhenDreaming()) {
-            communalInteractor.changeScene(CommunalScenes.Communal)
+            communalInteractor.changeScene(CommunalScenes.Communal, "transition away from dream")
         } else {
             toLockscreenTransitionViewModel.startTransition()
         }

@@ -159,6 +159,7 @@ constructor(
                     if (communalSceneKtfRefactor()) {
                         communalSceneInteractor.changeScene(
                             newScene = CommunalScenes.Blank,
+                            loggingReason = "hub to dozing",
                             transitionKey = CommunalTransitionKeys.Immediately,
                             keyguardState = KeyguardState.DOZING,
                         )
@@ -182,6 +183,7 @@ constructor(
                             if (communalSceneKtfRefactor()) {
                                 communalSceneInteractor.changeScene(
                                     newScene = CommunalScenes.Blank,
+                                    loggingReason = "hub to occluded (KeyguardWmStateRefactor)",
                                     transitionKey = CommunalTransitionKeys.SimpleFade,
                                     keyguardState = state,
                                 )
@@ -211,6 +213,7 @@ constructor(
                     .collect { _ ->
                         communalSceneInteractor.changeScene(
                             newScene = CommunalScenes.Blank,
+                            loggingReason = "hub to occluded",
                             transitionKey = CommunalTransitionKeys.SimpleFade,
                             keyguardState = KeyguardState.OCCLUDED,
                         )
@@ -254,6 +257,7 @@ constructor(
                         } else {
                             communalSceneInteractor.changeScene(
                                 newScene = CommunalScenes.Blank,
+                                loggingReason = "hub to gone",
                                 transitionKey = CommunalTransitionKeys.SimpleFade,
                                 keyguardState = KeyguardState.GONE
                             )
