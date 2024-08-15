@@ -37,9 +37,9 @@ class DeviceSettingsConfigTest {
                             "package_name_1",
                             "class_name_1",
                             "intent_action_1",
-                            Bundle()
-                        )
-                    ),
+                            null,
+                            Bundle(),
+                        )),
                 moreSettingsItems =
                     listOf(
                         DeviceSettingItem(
@@ -47,9 +47,9 @@ class DeviceSettingsConfigTest {
                             "package_name_2",
                             "class_name_2",
                             "intent_action_2",
-                            Bundle()
-                        )
-                    ),
+                            null,
+                            Bundle(),
+                        )),
                 moreSettingsFooter = "footer",
                 extras = Bundle().apply { putString("key1", "value1") },
             )

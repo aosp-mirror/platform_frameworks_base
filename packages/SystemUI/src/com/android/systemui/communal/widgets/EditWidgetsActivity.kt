@@ -218,9 +218,10 @@ constructor(
         lifecycleScope.launch {
             communalViewModel.canShowEditMode.collect {
                 communalViewModel.changeScene(
-                    CommunalScenes.Blank,
-                    CommunalTransitionKeys.ToEditMode,
-                    KeyguardState.GONE,
+                    scene = CommunalScenes.Blank,
+                    loggingReason = "edit mode opening",
+                    transitionKey = CommunalTransitionKeys.ToEditMode,
+                    keyguardState = KeyguardState.GONE,
                 )
                 // wait till transitioned to Blank scene, then animate in communal content in
                 // edit mode
@@ -252,8 +253,9 @@ constructor(
             communalViewModel.cleanupEditModeState()
 
             communalViewModel.changeScene(
-                CommunalScenes.Communal,
-                CommunalTransitionKeys.FromEditMode
+                scene = CommunalScenes.Communal,
+                loggingReason = "edit mode closing",
+                transitionKey = CommunalTransitionKeys.FromEditMode
             )
 
             // Wait for the current scene to be idle on communal.

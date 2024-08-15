@@ -1413,6 +1413,22 @@ public class AppOpsService extends IAppOpsService.Stub {
     }
 
     public void uidRemoved(int uid) {
+        if (Flags.dontRemoveExistingUidStates()) {
+            // b/358365471 If apps sharing UID are installed on multiple users and only one of
+            // them is installed for a single user while keeping the others we observe this
+            // subroutine get invoked incorrectly since the UID still exists.
+            final long token = Binder.clearCallingIdentity();
+            try {
+                String uidName = getPackageManagerInternal().getNameForUid(uid);
+                if (uidName != null) {
+                    Slog.e(TAG, "Tried to remove existing UID. uid: " + uid + " name: " + uidName);
+                    return;
+                }
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
+        }
+
         synchronized (this) {
             if (mUidStates.indexOfKey(uid) >= 0) {
                 mUidStates.get(uid).clear();

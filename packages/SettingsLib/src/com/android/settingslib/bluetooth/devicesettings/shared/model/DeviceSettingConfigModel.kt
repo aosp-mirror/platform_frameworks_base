@@ -25,9 +25,20 @@ data class DeviceSettingConfigModel(
     /** Items need to be shown in device details more settings page. */
     val moreSettingsItems: List<DeviceSettingConfigItemModel>,
     /** Footer text in more settings page. */
-    val moreSettingsPageFooter: String)
+    val moreSettingsPageFooter: String
+)
 
 /** Models a device setting item in config. */
-data class DeviceSettingConfigItemModel(
-    @DeviceSettingId val settingId: Int,
-)
+sealed interface DeviceSettingConfigItemModel {
+    @DeviceSettingId val settingId: Int
+
+    /** A built-in item in Settings. */
+    data class BuiltinItem(
+        @DeviceSettingId override val settingId: Int,
+        val preferenceKey: String?
+    ) : DeviceSettingConfigItemModel
+
+    /** A remote item provided by other apps. */
+    data class AppProvidedItem(@DeviceSettingId override val settingId: Int) :
+        DeviceSettingConfigItemModel
+}

@@ -1007,7 +1007,9 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
             mKeyguardMessageAreaController.setIsVisible(isShowingAlternateBouncer);
             mKeyguardMessageAreaController.setMessage("");
         }
-        mKeyguardUpdateManager.setAlternateBouncerShowing(isShowingAlternateBouncer);
+        if (!SceneContainerFlag.isEnabled()) {
+            mKeyguardUpdateManager.setAlternateBouncerShowing(isShowingAlternateBouncer);
+        }
 
         if (updateScrim) {
             mCentralSurfaces.updateScrimController();
@@ -1449,10 +1451,13 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
             mNotificationShadeWindowController.setBouncerShowing(primaryBouncerShowing);
             mCentralSurfaces.setBouncerShowing(primaryBouncerShowing);
         }
-        if (primaryBouncerIsOrWillBeShowing != mLastPrimaryBouncerIsOrWillBeShowing || mFirstUpdate
-                || isPrimaryBouncerShowingChanged) {
-            mKeyguardUpdateManager.sendPrimaryBouncerChanged(primaryBouncerIsOrWillBeShowing,
-                    primaryBouncerShowing);
+        if (!SceneContainerFlag.isEnabled()) {
+            if (primaryBouncerIsOrWillBeShowing != mLastPrimaryBouncerIsOrWillBeShowing
+                    || mFirstUpdate
+                    || isPrimaryBouncerShowingChanged) {
+                mKeyguardUpdateManager.sendPrimaryBouncerChanged(primaryBouncerIsOrWillBeShowing,
+                        primaryBouncerShowing);
+            }
         }
 
         mFirstUpdate = false;

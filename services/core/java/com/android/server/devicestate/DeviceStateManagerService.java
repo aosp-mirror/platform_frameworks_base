@@ -1002,9 +1002,9 @@ public final class DeviceStateManagerService extends SystemService {
 
     /**
      * Checks if the process can cancel a device state request. If the calling process ID is not
-     * both the top app and foregrounded nor does the process ID and userID match the IDs that made
-     * the device state request, then check if this process holds the CONTROL_DEVICE_STATE
-     * permission.
+     * both the top app and foregrounded, verify that the calling process is in the foreground and
+     * that it matches the process ID and user ID that made the device state request. If neither are
+     * true, then check if this process holds the CONTROL_DEVICE_STATE permission.
      *
      * @param callingPid Process ID that is requesting this state change
      * @param callingUid UID that is requesting this state change
@@ -1018,8 +1018,8 @@ public final class DeviceStateManagerService extends SystemService {
         if (Flags.deviceStateRequesterCancelState()) {
             synchronized (mLock) {
                 isAllowedToControlState =
-                        isAllowedToControlState || doCallingIdsMatchOverrideRequestIdsLocked(
-                                callingPid, callingUid);
+                        isTopApp || (isForegroundApp && doCallingIdsMatchOverrideRequestIdsLocked(
+                                callingPid, callingUid));
             }
         }
 

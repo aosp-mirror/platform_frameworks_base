@@ -255,8 +255,18 @@ public abstract class ConfigurationContainer<E extends ConfigurationContainer> {
             inOutConfig.windowConfiguration.setAppBounds(
                     newParentConfiguration.windowConfiguration.getBounds());
             outAppBounds = inOutConfig.windowConfiguration.getAppBounds();
-            outAppBounds.inset(displayContent.getDisplayPolicy()
-                    .getDecorInsetsInfo(rotation, dw, dh).mOverrideNonDecorInsets);
+            if (inOutConfig.windowConfiguration.getWindowingMode() == WINDOWING_MODE_FULLSCREEN) {
+                final DisplayPolicy.DecorInsets.Info decor =
+                        displayContent.getDisplayPolicy().getDecorInsetsInfo(rotation, dw, dh);
+                if (outAppBounds.contains(decor.mOverrideNonDecorFrame)) {
+                    outAppBounds.intersect(decor.mOverrideNonDecorFrame);
+                }
+            } else {
+                // TODO(b/358509380): Handle other windowing mode like split screen and freeform
+                //  cases correctly.
+                outAppBounds.inset(displayContent.getDisplayPolicy()
+                        .getDecorInsetsInfo(rotation, dw, dh).mOverrideNonDecorInsets);
+            }
         }
         float density = inOutConfig.densityDpi;
         if (density == Configuration.DENSITY_DPI_UNDEFINED) {

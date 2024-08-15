@@ -273,9 +273,10 @@ constructor(
     private suspend fun transitionToGlanceableHub() {
         if (communalSceneKtfRefactor()) {
             communalSceneInteractor.changeScene(
-                CommunalScenes.Communal,
+                newScene = CommunalScenes.Communal,
+                loggingReason = "from dozing to hub",
                 // Immediately show the hub when transitioning from dozing to hub.
-                CommunalTransitionKeys.Immediately,
+                transitionKey = CommunalTransitionKeys.Immediately,
             )
         } else {
             startTransitionTo(KeyguardState.GLANCEABLE_HUB)

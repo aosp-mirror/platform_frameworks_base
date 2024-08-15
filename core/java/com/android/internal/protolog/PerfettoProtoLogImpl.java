@@ -162,8 +162,10 @@ public class PerfettoProtoLogImpl extends IProtoLogClient.Stub implements IProto
             @Nullable ViewerConfigInputStreamProvider viewerConfigInputStreamProvider,
             @Nullable ProtoLogViewerConfigReader viewerConfigReader,
             @NonNull Runnable cacheUpdater) {
-        assert (viewerConfigFilePath == null || viewerConfigInputStreamProvider == null) :
-                "Only one of viewerConfigFilePath and viewerConfigInputStreamProvider can be set";
+        if (viewerConfigFilePath != null && viewerConfigInputStreamProvider != null) {
+            throw new RuntimeException("Only one of viewerConfigFilePath and "
+                    + "viewerConfigInputStreamProvider can be set");
+        }
 
         Producer.init(InitArguments.DEFAULTS);
         DataSourceParams params =
@@ -734,7 +736,7 @@ public class PerfettoProtoLogImpl extends IProtoLogClient.Stub implements IProto
         return UUID.nameUUIDFromBytes(fullStringIdentifier.getBytes()).getMostSignificantBits();
     }
 
-    private static final int STACK_SIZE_TO_PROTO_LOG_ENTRY_CALL = 12;
+    private static final int STACK_SIZE_TO_PROTO_LOG_ENTRY_CALL = 6;
 
     private String collectStackTrace() {
         StackTraceElement[] stackTrace =  Thread.currentThread().getStackTrace();
