@@ -59,7 +59,7 @@ class WindowTracingLegacy extends WindowTracing {
     private boolean mEnabled;
     private volatile boolean mEnabledLockFree;
 
-    protected @WindowTraceLogLevel int mLogLevel = WindowTraceLogLevel.TRIM;
+    protected @WindowTracingLogLevel int mLogLevel = WindowTracingLogLevel.TRIM;
     protected boolean mLogOnFrame = false;
 
     WindowTracingLegacy(WindowManagerService service, Choreographer choreographer) {
@@ -76,20 +76,20 @@ class WindowTracingLegacy extends WindowTracing {
     }
 
     @Override
-    void setLogLevel(@WindowTraceLogLevel int logLevel, PrintWriter pw) {
+    void setLogLevel(@WindowTracingLogLevel int logLevel, PrintWriter pw) {
         logAndPrintln(pw, "Setting window tracing log level to " + logLevel);
         mLogLevel = logLevel;
 
         switch (logLevel) {
-            case WindowTraceLogLevel.ALL: {
+            case WindowTracingLogLevel.ALL: {
                 setBufferCapacity(BUFFER_CAPACITY_ALL, pw);
                 break;
             }
-            case WindowTraceLogLevel.TRIM: {
+            case WindowTracingLogLevel.TRIM: {
                 setBufferCapacity(BUFFER_CAPACITY_TRIM, pw);
                 break;
             }
-            case WindowTraceLogLevel.CRITICAL: {
+            case WindowTracingLogLevel.CRITICAL: {
                 setBufferCapacity(BUFFER_CAPACITY_CRITICAL, pw);
                 break;
             }
@@ -143,19 +143,19 @@ class WindowTracingLegacy extends WindowTracing {
                 String logLevelStr = shell.getNextArgRequired().toLowerCase();
                 switch (logLevelStr) {
                     case "all": {
-                        setLogLevel(WindowTraceLogLevel.ALL, pw);
+                        setLogLevel(WindowTracingLogLevel.ALL, pw);
                         break;
                     }
                     case "trim": {
-                        setLogLevel(WindowTraceLogLevel.TRIM, pw);
+                        setLogLevel(WindowTracingLogLevel.TRIM, pw);
                         break;
                     }
                     case "critical": {
-                        setLogLevel(WindowTraceLogLevel.CRITICAL, pw);
+                        setLogLevel(WindowTracingLogLevel.CRITICAL, pw);
                         break;
                     }
                     default: {
-                        setLogLevel(WindowTraceLogLevel.TRIM, pw);
+                        setLogLevel(WindowTracingLogLevel.TRIM, pw);
                         break;
                     }
                 }

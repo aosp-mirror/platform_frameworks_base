@@ -22,12 +22,12 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
 @IntDef({
-        WindowTraceLogFrequency.FRAME,
-        WindowTraceLogFrequency.TRANSACTION,
-        WindowTraceLogFrequency.SINGLE_DUMP,
+        WindowTracingLogFrequency.FRAME,
+        WindowTracingLogFrequency.TRANSACTION,
+        WindowTracingLogFrequency.SINGLE_DUMP,
 })
 @Retention(RetentionPolicy.SOURCE)
-@interface WindowTraceLogFrequency {
+@interface WindowTracingLogFrequency {
     /**
      * Trace state snapshots when a frame is committed.
      */

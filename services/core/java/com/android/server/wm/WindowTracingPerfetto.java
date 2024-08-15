@@ -49,7 +49,7 @@ class WindowTracingPerfetto extends WindowTracing {
     }
 
     @Override
-    void setLogLevel(@WindowTraceLogLevel int logLevel, PrintWriter pw) {
+    void setLogLevel(@WindowTracingLogLevel int logLevel, PrintWriter pw) {
         logAndPrintln(pw, "Log level must be configured through perfetto");
     }
 
@@ -120,12 +120,13 @@ class WindowTracingPerfetto extends WindowTracing {
                     }
                 } else if (isOnFrameLogEvent) {
                     boolean isDataSourceLoggingOnFrame =
-                            dataSourceConfig.mLogFrequency == WindowTraceLogFrequency.FRAME;
+                            dataSourceConfig.mLogFrequency == WindowTracingLogFrequency.FRAME;
                     if (!isDataSourceLoggingOnFrame) {
                         return;
                     }
-                } else if (dataSourceConfig.mLogFrequency == WindowTraceLogFrequency.SINGLE_DUMP) {
-                    // In it is a dump, write only the start log event and skip the following ones
+                } else if (dataSourceConfig.mLogFrequency
+                        == WindowTracingLogFrequency.SINGLE_DUMP) {
+                    // If it is a dump, write only the start log event and skip the following ones
                     return;
                 }
 
@@ -156,9 +157,9 @@ class WindowTracingPerfetto extends WindowTracing {
     }
 
     private void onStart(WindowTracingDataSource.Config config) {
-        if (config.mLogFrequency == WindowTraceLogFrequency.FRAME) {
+        if (config.mLogFrequency == WindowTracingLogFrequency.FRAME) {
             mCountSessionsOnFrame.incrementAndGet();
-        } else if (config.mLogFrequency == WindowTraceLogFrequency.TRANSACTION) {
+        } else if (config.mLogFrequency == WindowTracingLogFrequency.TRANSACTION) {
             mCountSessionsOnTransaction.incrementAndGet();
         }
 
@@ -168,9 +169,9 @@ class WindowTracingPerfetto extends WindowTracing {
     }
 
     private void onStop(WindowTracingDataSource.Config config) {
-        if (config.mLogFrequency == WindowTraceLogFrequency.FRAME) {
+        if (config.mLogFrequency == WindowTracingLogFrequency.FRAME) {
             mCountSessionsOnFrame.decrementAndGet();
-        } else if (config.mLogFrequency == WindowTraceLogFrequency.TRANSACTION) {
+        } else if (config.mLogFrequency == WindowTracingLogFrequency.TRANSACTION) {
             mCountSessionsOnTransaction.decrementAndGet();
         }
         Log.i(TAG, "Stopped");
