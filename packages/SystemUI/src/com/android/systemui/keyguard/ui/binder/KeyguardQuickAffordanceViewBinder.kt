@@ -92,8 +92,8 @@ constructor(
         val button = view as ImageView
         val configurationBasedDimensions = MutableStateFlow(loadFromResources(view))
         val disposableHandle =
-            view.repeatWhenAttached(mainImmediateDispatcher) {
-                repeatOnLifecycle(Lifecycle.State.STARTED) {
+            view.repeatWhenAttached {
+                repeatOnLifecycle(Lifecycle.State.CREATED) {
                     launch("$TAG#viewModel") {
                         viewModel.collect { buttonModel ->
                             updateButton(
